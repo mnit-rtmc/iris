@@ -263,6 +263,15 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return beacon;
 	}
 
+	/** Update external beacon */
+	private void updateBeacon() {
+		Beacon b = beacon;
+		if (b != null) {
+			boolean f = isOnline() && isMsgBeacon();
+			b.setFlashing(f);
+		}
+	}
+
 	/** Camera preset from which this can be seen */
 	private CameraPreset preset;
 
@@ -1113,15 +1122,16 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	 * @param o User associated with sign message
 	 */
 	public void setMessageCurrent(SignMessage sm, User o) {
-		if(isMessageCurrentEquivalent(sm))
-			return;
-		logMessage(sm, o);
-		setDeployTime();
-		messageCurrent = sm;
-		notifyAttribute("messageCurrent");
-		ownerCurrent = o;
-		notifyAttribute("ownerCurrent");
-		updateStyles();
+		if (!isMessageCurrentEquivalent(sm)) {
+			logMessage(sm, o);
+			setDeployTime();
+			messageCurrent = sm;
+			notifyAttribute("messageCurrent");
+			ownerCurrent = o;
+			notifyAttribute("ownerCurrent");
+			updateStyles();
+		}
+		updateBeacon();
 	}
 
 	/** Get the current messasge.
@@ -1617,6 +1627,11 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Test if the current message is "scheduled" */
 	private boolean isMsgScheduled() {
 		return getMessageCurrent().getScheduled();
+	}
+
+	/** Test if the current message has beacon enabled */
+	private boolean isMsgBeacon() {
+		return getMessageCurrent().getBeaconEnabled();
 	}
 
 	/** Test if the current message is a travel time */
