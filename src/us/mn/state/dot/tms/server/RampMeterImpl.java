@@ -715,7 +715,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Set the release rate (and notify clients) */
 	public void setRateNotify(Integer r) {
-		if(rateChanged(r)) {
+		if (rateChanged(r)) {
 			rate = r;
 			notifyAttribute("rate");
 			updateStyles();
@@ -724,8 +724,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Test if the release rate has changed */
-	protected boolean rateChanged(Integer r) {
-		if(r == null)
+	private boolean rateChanged(Integer r) {
+		if (r == null)
 			return rate != null;
 		else
 			return !r.equals(rate);
