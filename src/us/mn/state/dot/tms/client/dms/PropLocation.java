@@ -20,6 +20,7 @@ import java.awt.event.FocusEvent;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JTextArea;
+import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
@@ -41,6 +42,23 @@ public class PropLocation extends LocationPanel {
 
 	/** Notes text area */
 	private final JTextArea notes_txt = new JTextArea(3, 24);
+
+	/** External beacon action */
+	private final IAction beacon = new IAction("dms.beacon.ext") {
+		protected void doActionPerformed(ActionEvent e) {
+			Object o = beacon_cbx.getSelectedItem();
+			if (o instanceof Beacon)
+				dms.setBeacon((Beacon)o);
+			else
+				dms.setBeacon(null);
+		}
+	};
+
+	/** External beacon combo box */
+	private final JComboBox beacon_cbx = new JComboBox();
+
+	/** External beacon combo box model */
+	private final WrapperComboBoxModel beacon_mdl;
 
 	/** Camera preset action */
 	private final IAction preset = new IAction("camera.preset") {
@@ -82,6 +100,8 @@ public class PropLocation extends LocationPanel {
 	public PropLocation(Session s, DMS sign) {
 		super(s);
 		dms = sign;
+		beacon_mdl = new WrapperComboBoxModel(
+			state.getBeaconModel());
 		preset_mdl = new WrapperComboBoxModel(
 			state.getCamCache().getPresetModel());
 	}
@@ -90,10 +110,13 @@ public class PropLocation extends LocationPanel {
 	@Override
 	public void initialize() {
 		super.initialize();
+		beacon_cbx.setModel(beacon_mdl);
 		preset_cbx.setModel(preset_mdl);
 		preset_cbx.setRenderer(new PresetComboRenderer());
 		add("device.notes");
 		add(notes_txt, Stretch.FULL);
+		add("dms.beacon.ext");
+		add(beacon_cbx, Stretch.LAST);
 		add("camera.preset");
 		add(preset_cbx, Stretch.LAST);
 		add(new JButton(controller), Stretch.RIGHT);
@@ -119,6 +142,12 @@ public class PropLocation extends LocationPanel {
 		if(a == null || a.equals("notes")) {
 			notes_txt.setEnabled(canUpdate("notes"));
 			notes_txt.setText(dms.getNotes());
+		}
+		if (a == null || a.equals("beacon")) {
+			beacon_cbx.setAction(null);
+			beacon_mdl.setSelectedItem(dms.getBeacon());
+			beacon.setEnabled(canUpdate("beacon"));
+			beacon_cbx.setAction(beacon);
 		}
 		if (a == null || a.equals("preset")) {
 			preset_cbx.setAction(null);
