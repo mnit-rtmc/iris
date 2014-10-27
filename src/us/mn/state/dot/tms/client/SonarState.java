@@ -50,6 +50,7 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttribute;
+import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.camera.CamCache;
@@ -258,6 +259,15 @@ public class SonarState extends Client {
 	/** Get the weather sensor cache */
 	public TypeCache<WeatherSensor> getWeatherSensors() {
 		return weather_sensors;
+	}
+
+	/** Cache of tag readers */
+	private final TypeCache<TagReader> tag_readers =
+		new TypeCache<TagReader>(TagReader.class, this);
+
+	/** Get the tag reader cache */
+	public TypeCache<TagReader> getTagReaders() {
+		return tag_readers;
 	}
 
 	/** Cache of gate arm arrays */
@@ -504,6 +514,9 @@ public class SonarState extends Client {
 			weather_sensors.ignoreAttribute("operation");
 			weather_sensors.ignoreAttribute("stamp");
 		}
+		populateReadable(tag_readers);
+		if (canRead(TagReader.SONAR_TYPE))
+			tag_readers.ignoreAttribute("operation");
 		populateReadable(gate_arm_arrays);
 		if(canRead(GateArmArray.SONAR_TYPE))
 			gate_arm_arrays.ignoreAttribute("armState");
