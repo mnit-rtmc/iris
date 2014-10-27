@@ -185,6 +185,14 @@ public class SonarState extends Client {
 		return beacons;
 	}
 
+	/** Beacon proxy list model */
+	private final ProxyListModel<Beacon> beacon_model;
+
+	/** Get the beacon list model */
+	public ProxyListModel<Beacon> getBeaconModel() {
+		return beacon_model;
+	}
+
 	/** Cache of ramp meters */
 	private final TypeCache<RampMeter> ramp_meters =
 		new TypeCache<RampMeter>(RampMeter.class, this);
@@ -414,6 +422,8 @@ public class SonarState extends Client {
 		day_model.initialize();
 		phase_model = new ProxyListModel<PlanPhase>(plan_phases);
 		phase_model.initialize();
+		beacon_model = new ProxyListModel<Beacon>(beacons);
+		beacon_model.initialize();
 		// FIXME: this is an ugly hack
 		BaseHelper.namespace = getNamespace();
 	}

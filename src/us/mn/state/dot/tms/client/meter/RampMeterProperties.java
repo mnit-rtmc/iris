@@ -26,6 +26,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
@@ -128,6 +129,23 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Field for PM target rate */
 	private final JTextField pm_target_txt = new JTextField(6);
 
+	/** Beacon action */
+	private final IAction beacon = new IAction("ramp.meter.beacon") {
+		protected void doActionPerformed(ActionEvent e) {
+			Object o = beacon_cbx.getSelectedItem();
+			if (o instanceof Beacon)
+				proxy.setBeacon((Beacon)o);
+			else
+				proxy.setBeacon(null);
+		}
+	};
+
+	/** Advance warning beacon combo box */
+	private final JComboBox beacon_cbx = new JComboBox();
+
+	/** Advance warning beacon combo box model */
+	private final WrapperComboBoxModel beacon_mdl;
+
 	/** Release rate component */
 	private final JLabel release_lbl = new JLabel();
 
@@ -166,6 +184,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			isUpdatePermitted("mLock"));
 		preset_mdl = new WrapperComboBoxModel(
 			state.getCamCache().getPresetModel());
+		beacon_mdl = new WrapperComboBoxModel(
+			state.getBeaconModel());
 	}
 
 	/** Get the SONAR type cache */
@@ -242,6 +262,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create ramp meter setup panel */
 	private JPanel createSetupPanel() {
+		beacon_cbx.setModel(beacon_mdl);
 		IPanel p = new IPanel();
 		p.add("ramp.meter.type");
 		p.add(meter_type_cbx, Stretch.LAST);
@@ -255,6 +276,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		p.add(am_target_txt, Stretch.LAST);
 		p.add("ramp.meter.target.pm");
 		p.add(pm_target_txt, Stretch.LAST);
+		p.add("ramp.meter.beacon");
+		p.add(beacon_cbx, Stretch.LAST);
 		return p;
 	}
 
@@ -313,6 +336,12 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		if(a == null || a.equals("pmTarget")) {
 			pm_target_txt.setEnabled(canUpdate("pmTarget"));
 			pm_target_txt.setText("" + proxy.getPmTarget());
+		}
+		if (a == null || a.equals("beacon")) {
+			beacon_cbx.setAction(null);
+			beacon_mdl.setSelectedItem(proxy.getBeacon());
+			beacon.setEnabled(canUpdate("beacon"));
+			beacon_cbx.setAction(beacon);
 		}
 		if(a == null || a.equals("rate")) {
 			Integer rt = proxy.getRate();
