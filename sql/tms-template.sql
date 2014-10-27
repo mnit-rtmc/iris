@@ -1038,6 +1038,69 @@ CREATE TRIGGER weather_sensor_delete_trig
     INSTEAD OF DELETE ON iris.weather_sensor
     FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_delete();
 
+CREATE TABLE iris._tag_reader (
+	name VARCHAR(10) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+	notes VARCHAR(64) NOT NULL
+);
+
+ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.tag_reader AS SELECT
+	t.name, geo_loc, controller, pin, notes
+	FROM iris._tag_reader t JOIN iris._device_io d ON t.name = d.name;
+
+CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
+	$tag_reader_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._tag_reader (name, geo_loc, notes)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes);
+	RETURN NEW;
+END;
+$tag_reader_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tag_reader_insert_trig
+    INSTEAD OF INSERT ON iris.tag_reader
+    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_insert();
+
+CREATE FUNCTION iris.tag_reader_update() RETURNS TRIGGER AS
+	$tag_reader_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._tag_reader
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$tag_reader_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tag_reader_update_trig
+    INSTEAD OF UPDATE ON iris.tag_reader
+    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_update();
+
+CREATE FUNCTION iris.tag_reader_delete() RETURNS TRIGGER AS
+	$tag_reader_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$tag_reader_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tag_reader_delete_trig
+    INSTEAD OF DELETE ON iris.tag_reader
+    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_delete();
+
 CREATE TABLE iris.lcs_lock (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(16) NOT NULL
@@ -1726,6 +1789,16 @@ CREATE VIEW weather_sensor_view AS
 	LEFT JOIN iris.controller ctr ON w.controller = ctr.name;
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
+CREATE VIEW tag_reader_view AS
+	SELECT t.name, t.notes, t.geo_loc,
+	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	l.lat, l.lon,
+	t.controller, t.pin, ctr.comm_link, ctr.drop_id, ctr.active
+	FROM iris.tag_reader t
+	LEFT JOIN geo_loc_view l ON t.geo_loc = l.name
+	LEFT JOIN iris.controller ctr ON t.controller = ctr.name;
+GRANT SELECT ON tag_reader_view TO PUBLIC;
+
 CREATE VIEW gate_arm_array_view AS
 	SELECT ga.name, ga.notes, ga.geo_loc,
 	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
@@ -1856,6 +1929,7 @@ CREATE VIEW iris.device_geo_loc_view AS
 	SELECT name, geo_loc FROM iris._lane_marking UNION ALL
 	SELECT name, geo_loc FROM iris._beacon UNION ALL
 	SELECT name, geo_loc FROM iris._weather_sensor UNION ALL
+	SELECT name, geo_loc FROM iris._tag_reader UNION ALL
 	SELECT name, geo_loc FROM iris._camera UNION ALL
 	SELECT name, geo_loc FROM iris._dms UNION ALL
 	SELECT name, geo_loc FROM iris._ramp_meter UNION ALL
@@ -2383,6 +2457,8 @@ PRV_0116	device_admin	video_monitor/.*	f	t	t	t
 PRV_0117	device_admin	beacon/.*	f	t	t	t
 PRV_0118	device_admin	weather_sensor(/.*)?	t	f	f	f
 PRV_0119	device_admin	weather_sensor/.*	f	t	t	t
+PRV_011A	device_admin	tag_reader(/.*)?	t	f	f	f
+PRV_011B	device_admin	tag_reader/.*	f	t	t	t
 PRV_0133	device_admin	gate_arm/.*	f	t	t	t
 PRV_0135	device_admin	gate_arm_array/.*	f	t	t	t
 PRV_0120	system_admin	cabinet_style/.*	f	t	t	t
