@@ -65,6 +65,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		CameraPresetImpl.loadAll();
 		BeaconImpl.loadAll();
 		WeatherSensorImpl.loadAll();
+		TagReaderImpl.loadAll();
 		RampMeterImpl.loadAll();
 		SignMessageImpl.loadAll();
 		DMSImpl.loadAll();
