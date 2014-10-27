@@ -33,6 +33,7 @@ import javax.swing.table.TableColumnModel;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
+import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
@@ -44,7 +45,7 @@ import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
@@ -74,7 +75,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Device types which can be associated with controller IO */
 	protected enum DeviceType {
 		Alarm, Camera, Detector, DMS, Gate_Arm, Lane_Marking,
-		LCSIndication, Ramp_Meter, Beacon, Weather_Sensor
+		LCSIndication, Ramp_Meter, Beacon, Weather_Sensor, Tag_Reader
 	}
 
 	/** Types of IO devices */
@@ -92,6 +93,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.Ramp_Meter);
 		IO_TYPE.add(DeviceType.Beacon);
 		IO_TYPE.add(DeviceType.Weather_Sensor);
+		IO_TYPE.add(DeviceType.Tag_Reader);
 	}
 
 	/** Get the type of the specified ControllerIO device */
@@ -116,6 +118,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return DeviceType.Beacon;
 		else if(cio instanceof WeatherSensor)
 			return DeviceType.Weather_Sensor;
+		else if (cio instanceof TagReader)
+			return DeviceType.Tag_Reader;
 		else
 			return null;
 	}
@@ -173,6 +177,9 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller IO list for weather sensors */
 	private final ControllerIOList<WeatherSensor> wsensor_list;
 
+	/** Controller IO list for toll readers */
+	private final ControllerIOList<TagReader> tr_list;
+
 	/** Model for null device type */
 	private final ComboBoxModel no_model = new DefaultComboBoxModel();
 
@@ -206,6 +213,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			state.getBeacons());
 		wsensor_list = new ControllerIOList<WeatherSensor>(
 			state.getWeatherSensors());
+		tr_list = new ControllerIOList<TagReader>(
+			state.getTagReaders());
 	}
 
 	/** Controller IO list model */
@@ -242,6 +251,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		m_list.initialize();
 		b_list.initialize();
 		wsensor_list.initialize();
+		tr_list.initialize();
 	}
 
 	/** Dispose of the model */
@@ -256,6 +266,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		m_list.dispose();
 		b_list.dispose();
 		wsensor_list.dispose();
+		tr_list.dispose();
 	}
 
 	/** Get the count of columns in the table */
@@ -299,7 +310,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		       canUpdateIO(LCSIndication.SONAR_TYPE) &&
 		       canUpdateIO(RampMeter.SONAR_TYPE) &&
 		       canUpdateIO(Beacon.SONAR_TYPE) &&
-		       canUpdateIO(WeatherSensor.SONAR_TYPE);
+		       canUpdateIO(WeatherSensor.SONAR_TYPE) &&
+		       canUpdateIO(TagReader.SONAR_TYPE);
 	}
 
 	/** Check if the user can update one device IO */
@@ -400,6 +412,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return b_list.model;
 		case Weather_Sensor:
 			return wsensor_list.model;
+		case Tag_Reader:
+			return tr_list.model;
 		default:
 			return no_model;
 		}
