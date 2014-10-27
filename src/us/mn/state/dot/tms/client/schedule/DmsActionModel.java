@@ -68,7 +68,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	/** Create the columns in the model */
 	protected ArrayList<ProxyColumn<DmsAction>> createColumns() {
 		ArrayList<ProxyColumn<DmsAction>> cols =
-			new ArrayList<ProxyColumn<DmsAction>>(5);
+			new ArrayList<ProxyColumn<DmsAction>>(6);
 		cols.add(new ProxyColumn<DmsAction>("action.plan.dms.group",
 			120)
 		{
@@ -114,6 +114,20 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				String v = value.toString().trim();
 				da.setQuickMessage(
 					QuickMessageHelper.lookup(v));
+			}
+		});
+		cols.add(new ProxyColumn<DmsAction>("dms.beacon.enabled", 100,
+			Boolean.class)
+		{
+			public Object getValueAt(DmsAction da) {
+				return da.getBeaconEnabled();
+			}
+			public boolean isEditable(DmsAction da) {
+				return canUpdate(da);
+			}
+			public void setValueAt(DmsAction da, Object value) {
+				if (value instanceof Boolean)
+					da.setBeaconEnabled((Boolean)value);
 			}
 		});
 		cols.add(new ProxyColumn<DmsAction>("dms.priority.activation",
