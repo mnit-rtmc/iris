@@ -507,6 +507,17 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		updateStyles();
 	}
 
+	/** Set the ramp meter lock (notify clients) */
+	private void setMLockNotify(RampMeterLock l) {
+		try {
+			setMLock(l);
+			notifyAttribute("mLock");
+		}
+		catch(TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
 	/** Set the ramp meter lock status */
 	public void doSetMLock(Integer l) throws TMSException {
 		if(RampMeterLock.isControllerLock(l) || OFF_ORDINAL.equals(l))
@@ -529,51 +540,23 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Set the status of the police panel switch */
 	public void setPolicePanel(boolean p) {
-		try {
-			_setPolicePanel(p);
-		}
-		catch(TMSException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/** Set the status of the police panel switch */
-	protected void _setPolicePanel(boolean p) throws TMSException {
-		if(p) {
-			if(m_lock == null) {
-				setMLock(RampMeterLock.POLICE_PANEL);
-				notifyAttribute("mLock");
-			}
+		if (p) {
+			if (m_lock == null)
+				setMLockNotify(RampMeterLock.POLICE_PANEL);
 		} else {
-			if(m_lock == RampMeterLock.POLICE_PANEL) {
-				setMLock((RampMeterLock)null);
-				notifyAttribute("mLock");
-			}
+			if (m_lock == RampMeterLock.POLICE_PANEL)
+				setMLockNotify(null);
 		}
 	}
 
 	/** Set the status of manual metering */
 	public void setManual(boolean m) {
-		try {
-			_setManual(m);
-		}
-		catch(TMSException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/** Set the status of manual metering */
-	protected void _setManual(boolean m) throws TMSException {
-		if(m) {
-			if(m_lock == null) {
-				setMLock(RampMeterLock.MANUAL);
-				notifyAttribute("mLock");
-			}
+		if (m) {
+			if (m_lock == null)
+				setMLockNotify(RampMeterLock.MANUAL);
 		} else {
-			if(m_lock == RampMeterLock.MANUAL) {
-				setMLock((RampMeterLock)null);
-				notifyAttribute("mLock");
-			}
+			if (m_lock == RampMeterLock.MANUAL)
+				setMLockNotify(null);
 		}
 	}
 
