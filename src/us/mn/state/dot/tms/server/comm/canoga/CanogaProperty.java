@@ -211,7 +211,10 @@ abstract public class CanogaProperty extends ControllerProperty {
 	}
 
 	/** Decode a STORE response */
-	public void decodeStore(InputStream is, int drop) throws IOException {
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is)
+		throws IOException
+	{
 		doResponse(is, request);
 	}
 }

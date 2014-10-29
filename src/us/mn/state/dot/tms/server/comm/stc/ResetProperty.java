@@ -42,16 +42,14 @@ public class ResetProperty extends STCProperty {
 	}
 
 	/** Decode a STORE response */
-	@Override public void decodeStore(InputStream is, int drop)
-		throws IOException
-	{
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is) {
 		// No response to reset request
 	}
 
 	/** Parse a received message */
-	@Override protected void parseMessage(byte[] msg, int len)
-		throws IOException
-	{
+	@Override
+	protected void parseMessage(byte[] msg, int len) {
 		// No response messages to parse
 	}
 

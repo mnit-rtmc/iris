@@ -365,8 +365,11 @@ abstract public class SS125Property extends ControllerProperty {
 	}
 
 	/** Decode a STORE response */
-	public void decodeStore(InputStream is, int drop) throws IOException {
-		int n_body = decodeHead(is, drop);
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is)
+		throws IOException
+	{
+		int n_body = decodeHead(is, c.getDrop());
 		byte[] body = decodeBody(is, n_body, MessageType.WRITE);
 		parseResult(body);
 	}

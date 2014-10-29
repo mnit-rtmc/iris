@@ -68,7 +68,7 @@ abstract public class PelcoDProperty extends ControllerProperty {
 
 	/** Decode a STORE response */
 	@Override
-	public void decodeStore(InputStream is, int drop) {
+	public void decodeStore(ControllerImpl c, InputStream is) {
 		// do not expect any response
 	}
 }

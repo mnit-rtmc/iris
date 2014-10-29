@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.pelco;
 import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import static us.mn.state.dot.tms.server.comm.pelco.PelcoPoller.PELCO_LOG;
 
@@ -58,7 +59,10 @@ abstract public class PelcoProperty extends ControllerProperty {
 	}
 
 	/** Decode a STORE response */
-	public void decodeStore(InputStream is, int drop) throws IOException {
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is)
+		throws IOException
+	{
 		// FIXME: what to do if NAK is returned?
 		String resp = getResponse(is);
 		PELCO_LOG.log("decodeStore: " + resp);

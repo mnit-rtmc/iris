@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 import java.io.InputStream;
 import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * Flash Configuration Property.
@@ -42,9 +43,11 @@ public class FlashConfigProperty extends SS125Property {
 
 	/** Decode a STORE response */
 	@Override
-	public void decodeStore(InputStream is, int drop) throws IOException {
+	public void decodeStore(ControllerImpl c, InputStream is)
+		throws IOException
+	{
 		TimeSteward.sleep_well(FLASH_WRITE_MS);
-		super.decodeStore(is, drop);
+		super.decodeStore(c, is);
 	}
 
 	/** Get a string representation of the property */

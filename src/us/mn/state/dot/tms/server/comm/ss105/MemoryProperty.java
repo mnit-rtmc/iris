@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss105;
 import java.io.InputStream;
 import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 
 /**
@@ -67,9 +68,11 @@ abstract public class MemoryProperty extends SS105Property {
 
 	/** Decode a STORE response */
 	@Override
-	public void decodeStore(InputStream is, int drop) throws IOException {
+	public void decodeStore(ControllerImpl c, InputStream is)
+		throws IOException
+	{
 		TimeSteward.sleep_well(FLASH_WRITE_MS);
-		super.decodeStore(is, drop);
+		super.decodeStore(c, is);
 	}
 
 	/** Parse the response to a STORE */

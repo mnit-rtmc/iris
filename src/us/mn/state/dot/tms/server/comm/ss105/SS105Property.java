@@ -180,9 +180,12 @@ abstract public class SS105Property extends ControllerProperty {
 	}
 
 	/** Decode a STORE response */
-	public void decodeStore(InputStream is, int drop) throws IOException {
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is)
+		throws IOException
+	{
 		String line = getResponse(is);
-		String h = formatHeader(drop);
+		String h = formatHeader(c.getDrop());
 		String req = formatSetRequest();
 		parseStore(parseResponse(line, h, req));
 	}

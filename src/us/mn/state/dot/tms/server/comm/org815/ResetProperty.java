@@ -68,7 +68,10 @@ public class ResetProperty extends Org815Property {
 	}
 
 	/** Decode a STORE response */
-	public void decodeStore(InputStream is, int drop) throws IOException {
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is)
+		throws IOException
+	{
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		if(line != null)

@@ -77,10 +77,11 @@ public class RTCProperty extends G4Property {
 	}
 
 	/** Decode a STORE response */
-	@Override public void decodeStore(InputStream is, int drop)
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is)
 		throws IOException
 	{
-		parseFrame(is, drop);
+		parseFrame(is, c.getDrop());
 	}
 
 	/** Current time stamp */

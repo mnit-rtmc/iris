@@ -119,7 +119,9 @@ abstract public class ControllerProperty {
 	}
 
 	/** Decode a STORE response */
-	public void decodeStore(InputStream is, int drop) throws IOException {
+	public void decodeStore(ControllerImpl c, InputStream is)
+		throws IOException
+	{
 		throw new ProtocolException("STORE not supported");
 	}
 

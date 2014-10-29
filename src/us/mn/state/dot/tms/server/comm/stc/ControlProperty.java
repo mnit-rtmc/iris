@@ -61,14 +61,16 @@ public class ControlProperty extends STCProperty {
 	}
 
 	/** Decode a STORE response */
-	@Override public void decodeStore(InputStream is, int drop)
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is)
 		throws IOException
 	{
-		parseFrame(is, drop);
+		parseFrame(is, c.getDrop());
 	}
 
 	/** Parse a received message */
-	@Override protected void parseMessage(byte[] msg, int len)
+	@Override
+	protected void parseMessage(byte[] msg, int len)
 		throws IOException
 	{
 		if(msg[0] != 'C')
