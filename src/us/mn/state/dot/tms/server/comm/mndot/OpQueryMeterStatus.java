@@ -33,17 +33,6 @@ public class OpQueryMeterStatus extends Op170 {
 	/** Police panel bit from verify data from 170 */
 	static protected final int POLICE_PANEL_BIT = 1 << 4;
 
-	/** Get the controller memory address for a red time interval */
-	static protected int getRedAddress(int m, int rate) {
-		int a = Address.METER_1_TIMING_TABLE;
-		if(m == 2)
-			a = Address.METER_2_TIMING_TABLE;
-		if(MndotPoller.isAfternoon())
-			a += Address.OFF_PM_TIMING_TABLE;
-		a += Address.OFF_RED_TIME + (rate * 2);
-		return a;
-	}
-
 	/** Parse the red time from a BCD byte array */
 	static protected int parseRedTime(byte[] data) throws IOException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(data);
@@ -143,7 +132,7 @@ public class OpQueryMeterStatus extends Op170 {
 		checkMeterState(s, r);
 		boolean police = (p & POLICE_PANEL_BIT) != 0;
 		updateMeterStatus(meter, n, s, police, r);
-		meter.updateGreenCount(stamp,adjustGreenCount(meter,g));
+		meter.updateGreenCount(stamp, adjustGreenCount(meter, g));
 	}
 
 	/** Check meter status and rate for valid values.

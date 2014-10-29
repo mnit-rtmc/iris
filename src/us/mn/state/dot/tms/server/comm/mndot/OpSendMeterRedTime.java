@@ -41,14 +41,7 @@ public class OpSendMeterRedTime extends OpDevice {
 	public OpSendMeterRedTime(RampMeterImpl r, int m, int red) {
 		super(PriorityLevel.COMMAND, r);
 		meter = r;
-		int a = Address.METER_1_TIMING_TABLE;
-		if(m == 2)
-			a = Address.METER_2_TIMING_TABLE;
-		if(MndotPoller.isAfternoon())
-			a += Address.OFF_PM_TIMING_TABLE;
-		a += Address.OFF_RED_TIME;
-		a += MeterRate.CENTRAL * 2;
-		address = a;
+		address = Op170.getRedAddress(m, MeterRate.CENTRAL);
 		red_time = red;
 	}
 

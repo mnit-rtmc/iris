@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import java.util.Calendar;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
@@ -47,12 +45,6 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
 public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	MeterPoller, SamplePoller, BeaconPoller, LaneMarkingPoller
 {
-	/** Test if it is afternoon */
-	static protected boolean isAfternoon() {
-		return TimeSteward.getCalendarInstance().get(Calendar.AM_PM) ==
-		       Calendar.PM;
-	}
-
 	/** Get the meter number on the controller. This does not belong in the
 	 * RampMeterImpl class because it only applies to the Mndot protocol. */
 	static protected int getMeterNumber(RampMeterImpl meter) {
