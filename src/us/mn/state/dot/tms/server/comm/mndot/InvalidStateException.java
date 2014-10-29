@@ -17,21 +17,16 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Invalid metering status exception
+ * Invalid metering state exception
  *
  * @author Douglas Lau
  */
-public class InvalidStatusException extends ParsingException {
+public class InvalidStateException extends ParsingException {
 
-	/** Create a new invalid status exception */
-	public InvalidStatusException(int s) {
-		super("INVALID METERING STATUS: " + s);
-	}
-
-	/** Create a new invalid status exception.
+	/** Create a new invalid state exception.
 	 * @param s Meter status code.
 	 * @param r Meter rate index. */
-	public InvalidStatusException(int s, int r) {
+	public InvalidStateException(int s, int r) {
 		super("INVALID METERING STATE: " + s + ", " + r);
 	}
 }

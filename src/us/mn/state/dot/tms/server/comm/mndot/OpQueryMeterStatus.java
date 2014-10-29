@@ -129,38 +129,41 @@ public class OpQueryMeterStatus extends Op170 {
 			data[base + Address.OFF_POLICE_PANEL]);
 	}
 
-	/** Update meter with the most recent 30-second meter data
-	 * @param meter Ramp meter
-	 * @param n Meter number (1 or 2)
-	 * @param stamp Time stamp
-	 * @param s Meter status
-	 * @param r Metering rate
-	 * @param g 30-second green count
-	 * @param p Police-panel/verify status
-	 */
-	protected void updateMeterData(RampMeterImpl meter, int n, long stamp,
+	/** Update meter with the most recent 30-second meter data.
+	 * @param meter Ramp meter.
+	 * @param n Meter number (1 or 2).
+	 * @param stamp Time stamp.
+	 * @param s Meter status.
+	 * @param r Metering rate.
+	 * @param g 30-second green count.
+	 * @param p Police-panel/verify status. */
+	private void updateMeterData(RampMeterImpl meter, int n, long stamp,
 		int s, int r, int g, int p) throws IOException
 	{
-		if(!MeterRate.isValid(r))
-			throw new InvalidRateException(r);
-		if (MeterStatus.isValid(s)) {
-			boolean police = (p & POLICE_PANEL_BIT) != 0;
-			updateMeterStatus(meter, n, s, police, r);
-			meter.updateGreenCount(stamp,adjustGreenCount(meter,g));
-		} else
-			throw new InvalidStatusException(s);
+		checkMeterState(s, r);
+		boolean police = (p & POLICE_PANEL_BIT) != 0;
+		updateMeterStatus(meter, n, s, police, r);
+		meter.updateGreenCount(stamp,adjustGreenCount(meter,g));
+	}
+
+	/** Check meter status and rate for valid values.
+	 * @param s Meter status code.
+	 * @param r Meter rate index. */
+	private void checkMeterState(int s, int r) throws InvalidStateException{
+		if (!MeterStatus.isValid(s) ||
+		    !MeterRate.isValid(r) ||
+		    MeterStatus.isMetering(s) != MeterRate.isMetering(r))
+			throw new InvalidStateException(s, r);
 	}
 
 	/** Update the status of the ramp meter */
 	private void updateMeterStatus(RampMeterImpl meter, int n,
-		int s, boolean police, int rate) throws InvalidStatusException
+		int s, boolean police, int rate)
 	{
 		meter.setPolicePanel(police);
 		meter.setManual(MeterStatus.isManual(s));
 		if (MeterRate.isMetering(rate))
 			phases.add(new QueryRedTime(meter, n, rate));
-		else if (MeterStatus.isMetering(s))
-			throw new InvalidStatusException(s, rate);
 		else
 			meter.setRateNotify(null);
 	}
