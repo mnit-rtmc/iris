@@ -180,8 +180,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	/** Should we stop metering? */
 	protected boolean shouldStop(RampMeterImpl meter, Integer rate) {
 		// Workaround for errors in rx only (good tx)
-		return rate == null || rate == 0 ||
-		       meter.getFailMillis() > COMM_FAIL_THRESHOLD_MS;
+		return rate == null || rate == 0 || meter.isCommFailed();
 	}
 
 	/** Start metering */

@@ -907,12 +907,14 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return (n != null) ? n.findEntrance(geo_loc) : null;
 	}
 
+	/** Check if meter comm is failed. */
+	public boolean isCommFailed() {
+		return getFailMillis() > MeterPoller.COMM_FAIL_THRESHOLD_MS;
+	}
+
 	/** Get the number of milliseconds the meter has been failed */
-	public long getFailMillis() {
+	private long getFailMillis() {
 		ControllerImpl c = controller;	// Avoid race
-		if(c != null)
-			return c.getFailMillis();
-		else
-			return Long.MAX_VALUE;
+		return (c != null) ? c.getFailMillis() : Long.MAX_VALUE;
 	}
 }
