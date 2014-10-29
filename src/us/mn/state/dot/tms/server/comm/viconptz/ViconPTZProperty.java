@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.viconptz;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
@@ -63,8 +64,10 @@ abstract public class ViconPTZProperty extends ControllerProperty {
 
 	/** Encode a STORE request */
 	@Override
-	public void encodeStore(OutputStream os, int drop) throws IOException {
-		os.write(createPacket(drop));
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
+		os.write(createPacket(c.getDrop()));
 	}
 
 	/** Decode a STORE response */

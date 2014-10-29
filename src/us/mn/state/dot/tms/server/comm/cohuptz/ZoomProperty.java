@@ -12,11 +12,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * A property to zoom a camera
@@ -33,12 +33,11 @@ public class ZoomProperty extends CohuPTZProperty {
 		value = v;
 	}
 
-	/**
-	 * Encode a STORE request
-	 */
+	/** Encode a STORE request */
 	@Override
-	public void encodeStore(OutputStream os, int drop) throws IOException {
-
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
 		byte[] cmd = new byte[0];
 
 		if (Math.abs(value) < PTZ_THRESH) {
@@ -61,12 +60,11 @@ public class ZoomProperty extends CohuPTZProperty {
 
 		byte[] msg = new byte[3 + cmd.length];
 		msg[0] = (byte)0xf8;
-		msg[1] = (byte)drop;
-		int i=2;
-		for (byte b : cmd) msg[i++] = b;
-		msg[i] = calculateChecksum(msg, 1, cmd.length+1);
-
+		msg[1] = (byte)c.getDrop();
+		int i = 2;
+		for (byte b : cmd)
+			msg[i++] = b;
+		msg[i] = calculateChecksum(msg, 1, cmd.length + 1);
 		os.write(msg);
 	}
-
 }

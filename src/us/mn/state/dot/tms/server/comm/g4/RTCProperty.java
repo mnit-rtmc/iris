@@ -51,7 +51,8 @@ public class RTCProperty extends G4Property {
 	/** Parse the data from one frame.
 	 * @param qual Qualifier code.
 	 * @param data Data packet. */
-	@Override protected void parseData(QualCode qual, byte[] data)
+	@Override
+	protected void parseData(QualCode qual, byte[] data)
 		throws IOException
 	{
 		switch(qual) {
@@ -64,14 +65,15 @@ public class RTCProperty extends G4Property {
 	}
 
 	/** Encode a STORE request */
-	@Override public void encodeStore(OutputStream os, int drop)
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
 		byte[] data = new byte[14];
 		formatStamp(data, 0, stamp);
 		formatStamp(data, 7, reset_stamp);
 		data[OFF_RESET_DAY_OF_WEEK] = 0;
-		os.write(formatRequest(QualCode.RTC, drop, data));
+		os.write(formatRequest(QualCode.RTC, c.getDrop(), data));
 	}
 
 	/** Decode a STORE response */

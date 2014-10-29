@@ -165,8 +165,11 @@ abstract public class SS105Property extends ControllerProperty {
 	}
 
 	/** Encode a STORE request */
-	public void encodeStore(OutputStream os, int drop) throws IOException {
-		String h = formatHeader(drop);
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
+		String h = formatHeader(c.getDrop());
 		String req = formatSetRequest();
 		os.write(new String(h + req + '\r').getBytes(ASCII));
 	}

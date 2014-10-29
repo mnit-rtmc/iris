@@ -48,7 +48,8 @@ public class VehClassProperty extends G4Property {
 	/** Parse the data from one frame.
 	 * @param qual Qualifier code.
 	 * @param data Data packet. */
-	@Override protected void parseData(QualCode qual, byte[] data)
+	@Override
+	protected void parseData(QualCode qual, byte[] data)
 		throws IOException
 	{
 		switch(qual) {
@@ -61,7 +62,8 @@ public class VehClassProperty extends G4Property {
 	}
 
 	/** Encode a STORE request */
-	@Override public void encodeStore(OutputStream os, int drop)
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
 		byte[] data = new byte[G4VehClass.size];
@@ -69,7 +71,8 @@ public class VehClassProperty extends G4Property {
 			G4VehClass vc = G4VehClass.fromOrdinal(i + 1);
 			format8(data, i, getClassLen(vc));
 		}
-		os.write(formatRequest(QualCode.CLASSIFICATION, drop, data));
+		os.write(formatRequest(QualCode.CLASSIFICATION, c.getDrop(),
+			data));
 	}
 
 	/** Decode a STORE response */

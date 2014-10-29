@@ -112,7 +112,9 @@ abstract public class ControllerProperty {
 	}
 
 	/** Encode a STORE request */
-	public void encodeStore(OutputStream os, int drop) throws IOException {
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
 		throw new ProtocolException("STORE not supported");
 	}
 

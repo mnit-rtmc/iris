@@ -12,13 +12,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.DeviceRequest;
-
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * This class creates a Cohu PTZ request to initiate an iris movement.
@@ -36,11 +35,13 @@ public class MoveIrisProperty extends CohuPTZProperty {
 
 	/** Encode a STORE request */
 	@Override
-	public void encodeStore(OutputStream os, int drop) throws IOException {
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
 		byte[] message = new byte[5];
 		int i = 0;
 		message[i++] = (byte)0xf8;
-		message[i++] = (byte)drop;
+		message[i++] = (byte)c.getDrop();
 
 		boolean validRequest = true;
 		switch (devReq) {
@@ -60,9 +61,10 @@ public class MoveIrisProperty extends CohuPTZProperty {
 				validRequest = false;
 				break;
 		}
-		if (!validRequest) return;
-		message[i] = calculateChecksum(message, 1, i-1);
-		os.write(message);
+		if (validRequest) {
+			message[i] = calculateChecksum(message, 1, i - 1);
+			os.write(message);
+		}
 	}
 
 }

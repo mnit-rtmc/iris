@@ -60,7 +60,8 @@ public class SetupInfoProperty extends G4Property {
 	/** Parse the data from one frame.
 	 * @param qual Qualifier code.
 	 * @param data Data packet. */
-	@Override protected void parseData(QualCode qual, byte[] data)
+	@Override
+	protected void parseData(QualCode qual, byte[] data)
 		throws IOException
 	{
 		switch(qual) {
@@ -73,9 +74,11 @@ public class SetupInfoProperty extends G4Property {
 	}
 
 	/** Encode a STORE request */
-	@Override public void encodeStore(OutputStream os, int drop)
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
+		int drop = c.getDrop();
 		byte[] data = new byte[15];
 		format16(data, OFF_NEW_ID, drop);
 		format8(data, OFF_ZONES, n_zones);

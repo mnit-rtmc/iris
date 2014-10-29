@@ -14,11 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
-import java.io.EOFException;
 import us.mn.state.dot.tms.server.CameraImpl;
-import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -49,15 +46,6 @@ public class CohuPTZPoller extends MessagePoller implements CameraPoller {
 	/** Create a new Cohu PTZ poller */
 	public CohuPTZPoller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Create a new message for the specified drop address */
-	@Override
-	public CommMessage createMessage(ControllerImpl c)
-		throws EOFException
-	{
-		return new CohuPTZMessage(messenger.getOutputStream(c),
-			c.getDrop());
 	}
 
 	/** Check drop address validity */

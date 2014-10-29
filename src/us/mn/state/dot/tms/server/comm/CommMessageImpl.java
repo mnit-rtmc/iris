@@ -75,12 +75,12 @@ public class CommMessageImpl<T extends ControllerProperty>
 		messenger.drain();
 		OutputStream os = messenger.getOutputStream(controller);
 		int drop  = controller.getDrop();
-		if(os != null) {
-			for(T p: props)
-				p.encodeStore(os, drop);
+		if (os != null) {
+			for (T p: props)
+				p.encodeStore(controller, os);
 			os.flush();
 		}
-		for(T p: props) {
+		for (T p: props) {
 			p.decodeStore(messenger.getInputStream(p.getPath(),
 				controller), drop);
 		}

@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.manchester;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
@@ -79,9 +80,11 @@ abstract public class ManchesterProperty extends ControllerProperty {
 
 	/** Encode a STORE request */
 	@Override
-	public void encodeStore(OutputStream os, int drop) throws IOException {
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
 		// receiver address is zero-relative
-		os.write(createPacket(drop - 1));
+		os.write(createPacket(c.getDrop() - 1));
 	}
 
 	/** Decode a STORE response */

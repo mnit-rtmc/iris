@@ -12,14 +12,13 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
 import us.mn.state.dot.tms.DeviceRequest;
-
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * This class creates a Cohu PTZ request to change auto-focus mode.
@@ -37,11 +36,13 @@ public class SetAFModeProperty extends CohuPTZProperty {
 
 	/** Encode a STORE request */
 	@Override
-	public void encodeStore(OutputStream os, int drop) throws IOException {
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
 		byte[] message = new byte[6];		// max. msg size of 6
 		int i = 0;
 		message[i++] = (byte)0xf8;
-		message[i++] = (byte)drop;
+		message[i++] = (byte)c.getDrop();
 
 		boolean validRequest = true;
 		switch (devReq) {
@@ -59,9 +60,9 @@ public class SetAFModeProperty extends CohuPTZProperty {
 				validRequest = false;
 				break;
 		}
-		if (!validRequest) return;
-		message[i] = calculateChecksum(message, 1, i-1);
-		os.write(Arrays.copyOf(message, i+1));
+		if (validRequest) {
+			message[i] = calculateChecksum(message, 1, i - 1);
+			os.write(Arrays.copyOf(message, i + 1));
+		}
 	}
-
 }

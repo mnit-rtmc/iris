@@ -55,7 +55,10 @@ public class ResetProperty extends Org815Property {
 	}
 
 	/** Encode a STORE request */
-	public void encodeStore(OutputStream os, int drop) throws IOException {
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
 		os.write(requestStoreByte());
 	}
 

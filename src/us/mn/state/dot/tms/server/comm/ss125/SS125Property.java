@@ -348,9 +348,12 @@ abstract public class SS125Property extends ControllerProperty {
 	}
 
 	/** Encode a STORE request */
-	public void encodeStore(OutputStream os, int drop) throws IOException {
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
 		byte[] body = formatStore();
-		byte[] header = formatHeader(body, drop);
+		byte[] header = formatHeader(body, c.getDrop());
 		format8(body, body.length - 1, CRC.calculate(body));
 		os.write(header);
 		os.write(body);

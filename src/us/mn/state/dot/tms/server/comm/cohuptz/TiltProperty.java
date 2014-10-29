@@ -12,11 +12,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * A property to tilt a camera
@@ -33,12 +33,11 @@ public class TiltProperty extends CohuPTZProperty {
 		value = v;
 	}
 
-	/**
-	 * Encode a STORE request
-	 */
+	/** Encode a STORE request */
 	@Override
-	public void encodeStore(OutputStream os, int drop) throws IOException {
-
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
 		byte[] cmd = new byte[2];
 
 		if (Math.abs(value) < PTZ_THRESH) {
@@ -56,12 +55,10 @@ public class TiltProperty extends CohuPTZProperty {
 
 		byte[] msg = new byte[5];
 		msg[0] = (byte)0xf8;
-		msg[1] = (byte)drop;
+		msg[1] = (byte)c.getDrop();
 		msg[2] = cmd[0];
 		msg[3] = cmd[1];
 		msg[4] = calculateChecksum(msg, 1, 3);
-
 		os.write(msg);
 	}
-
 }
