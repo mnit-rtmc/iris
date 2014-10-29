@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
 
 /**
  * MndotPoller is a poller for the Mn/DOT 170 communication protocol,
- * revision 3, 4 or 5.
+ * revision 4 or 5.
  *
  * @author Douglas Lau
  */
