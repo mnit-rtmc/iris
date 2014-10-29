@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.LineReader;
 
 /**
@@ -79,7 +80,9 @@ public class OutletProperty extends DinRelayProperty {
 
 	/** Decode a QUERY response */
 	@Override
-	public void decodeQuery(InputStream is, int drop) throws IOException {
+	public void decodeQuery(ControllerImpl c, InputStream is)
+		throws IOException
+	{
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		for(int i = 0; line != null && i < MAX_LINES; i++) {

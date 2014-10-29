@@ -46,7 +46,10 @@ abstract public class Org815Property extends ControllerProperty {
 	abstract protected byte requestQueryByte();
 
 	/** Decode a QUERY response */
-	public void decodeQuery(InputStream is, int drop) throws IOException {
+	@Override
+	public void decodeQuery(ControllerImpl c, InputStream is)
+		throws IOException
+	{
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		if(line != null)

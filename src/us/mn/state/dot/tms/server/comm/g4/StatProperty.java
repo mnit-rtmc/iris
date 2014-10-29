@@ -220,10 +220,12 @@ public class StatProperty extends G4Property {
 	private boolean footer = false;
 
 	/** Decode a QUERY response */
-	@Override public void decodeQuery(InputStream is, int drop)
+	@Override
+	public void decodeQuery(ControllerImpl c, InputStream is)
 		throws IOException
 	{
-		while(!footer)
+		int drop = c.getDrop();
+		while (!footer)
 			parseFrame(is, drop);
 	}
 

@@ -195,7 +195,10 @@ abstract public class CanogaProperty extends ControllerProperty {
 	}
 
 	/** Decode a QUERY response */
-	public void decodeQuery(InputStream is, int drop) throws IOException {
+	@Override
+	public void decodeQuery(ControllerImpl c, InputStream is)
+		throws IOException
+	{
 		setValue(doResponse(is, request));
 	}
 

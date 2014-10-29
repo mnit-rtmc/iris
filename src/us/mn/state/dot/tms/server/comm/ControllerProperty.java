@@ -105,7 +105,9 @@ abstract public class ControllerProperty {
 	}
 
 	/** Decode a QUERY response */
-	public void decodeQuery(InputStream is, int drop) throws IOException {
+	public void decodeQuery(ControllerImpl c, InputStream is)
+		throws IOException
+	{
 		throw new ProtocolException("QUERY not supported");
 	}
 

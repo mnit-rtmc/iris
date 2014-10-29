@@ -149,9 +149,12 @@ abstract public class SS105Property extends ControllerProperty {
 	}
 
 	/** Decode a QUERY response */
-	public void decodeQuery(InputStream is, int drop) throws IOException {
+	@Override
+	public void decodeQuery(ControllerImpl c, InputStream is)
+		throws IOException
+	{
 		String line = getResponse(is);
-		String h = formatHeader(drop);
+		String h = formatHeader(c.getDrop());
 		String req = formatGetRequest();
 		parseQuery(parseResponse(line, h, req));
 	}

@@ -57,15 +57,14 @@ public class CommMessageImpl<T extends ControllerProperty>
 	public void queryProps() throws IOException {
 		messenger.drain();
 		OutputStream os = messenger.getOutputStream(controller);
-		int drop  = controller.getDrop();
-		if(os != null) {
-			for(T p: props)
+		if (os != null) {
+			for (T p: props)
 				p.encodeQuery(controller, os);
 			os.flush();
 		}
-		for(T p: props) {
-			p.decodeQuery(messenger.getInputStream(p.getPath(),
-				controller), drop);
+		for (T p: props) {
+			p.decodeQuery(controller, messenger.getInputStream(
+				p.getPath(), controller));
 		}
 	}
 

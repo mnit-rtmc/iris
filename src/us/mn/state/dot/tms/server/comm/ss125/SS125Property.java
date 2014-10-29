@@ -333,8 +333,11 @@ abstract public class SS125Property extends ControllerProperty {
 	}
 
 	/** Decode a QUERY response */
-	public void decodeQuery(InputStream is, int drop) throws IOException {
-		int n_body = decodeHead(is, drop);
+	@Override
+	public void decodeQuery(ControllerImpl c, InputStream is)
+		throws IOException
+	{
+		int n_body = decodeHead(is, c.getDrop());
 		byte[] body = decodeBody(is, n_body, MessageType.READ);
 		parseQuery(body);
 	}

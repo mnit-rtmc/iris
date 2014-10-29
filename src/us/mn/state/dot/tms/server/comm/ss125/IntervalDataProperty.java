@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.util.Date;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -54,9 +55,12 @@ public class IntervalDataProperty extends SS125Property {
 	}
 
 	/** Decode a QUERY response */
-	public void decodeQuery(InputStream is, int drop) throws IOException {
-		while(!isComplete()) {
-			super.decodeQuery(is, drop);
+	@Override
+	public void decodeQuery(ControllerImpl c, InputStream is)
+		throws IOException
+	{
+		while (!isComplete()) {
+			super.decodeQuery(c, is);
 			msg_sub_id = (byte)(msg_sub_id + 1);
 		}
 	}

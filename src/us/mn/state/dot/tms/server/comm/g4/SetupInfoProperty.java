@@ -50,10 +50,11 @@ public class SetupInfoProperty extends G4Property {
 	}
 
 	/** Decode a QUERY response */
-	@Override public void decodeQuery(InputStream is, int drop)
+	@Override
+	public void decodeQuery(ControllerImpl c, InputStream is)
 		throws IOException
 	{
-		parseFrame(is, drop);
+		parseFrame(is, c.getDrop());
 	}
 
 	/** Parse the data from one frame.
