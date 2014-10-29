@@ -47,11 +47,11 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 {
 	/** Get the meter number on the controller. */
 	static protected int getMeterNumber(RampMeterImpl meter) {
-		if(meter.isActive()) {
+		if (meter.isActive()) {
 			int pin = meter.getPin();
-			if(pin == 2)
+			if (pin == Op170.DEVICE_1_PIN)
 				return 1;
-			if(pin == 3)
+			if (pin == Op170.METER_2_PIN)
 				return 2;
 		}
 		return 0;
