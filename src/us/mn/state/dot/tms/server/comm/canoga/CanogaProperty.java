@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.canoga;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -89,13 +90,13 @@ abstract public class CanogaProperty extends ControllerProperty {
 	}
 
 	/** Format a request message */
-	static private byte[] formatRequest(byte drop, byte[] payload) {
+	static private byte[] formatRequest(int drop, byte[] payload) {
 		byte len = (byte)(payload.length + 7);
 		byte[] req = new byte[len];
 		req[OFF_HEADER] = '<';
 		req[OFF_LENGTH] = hex_msn(len);
 		req[OFF_LENGTH + 1] = hex_lsn(len);
-		req[OFF_ADDRESS] = drop;
+		req[OFF_ADDRESS] = (byte)drop;
 		System.arraycopy(payload, 0, req, OFF_MTYPE, payload.length);
 		byte xsum = checksum(req);
 		req[req.length - 3] = hex_msn(xsum);
@@ -186,8 +187,11 @@ abstract public class CanogaProperty extends ControllerProperty {
 	}
 
 	/** Encode a QUERY request */
-	public void encodeQuery(OutputStream os, int drop) throws IOException {
-		doRequest(os, formatRequest((byte)drop, formatPayloadGet()));
+	@Override
+	public void encodeQuery(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
+		doRequest(os, formatRequest(c.getDrop(), formatPayloadGet()));
 	}
 
 	/** Decode a QUERY response */
@@ -197,7 +201,7 @@ abstract public class CanogaProperty extends ControllerProperty {
 
 	/** Encode a STORE request */
 	public void encodeStore(OutputStream os, int drop) throws IOException {
-		doRequest(os, formatRequest((byte)drop, formatPayloadSet()));
+		doRequest(os, formatRequest(drop, formatPayloadSet()));
 	}
 
 	/** Decode a STORE response */

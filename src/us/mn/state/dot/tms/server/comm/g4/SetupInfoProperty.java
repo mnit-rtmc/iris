@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -40,11 +41,12 @@ public class SetupInfoProperty extends G4Property {
 	static private final int OFF_DATE = 12;
 
 	/** Encode a QUERY request */
-	@Override public void encodeQuery(OutputStream os, int drop)
+	@Override
+	public void encodeQuery(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
 		byte[] data = new byte[0];
-		os.write(formatRequest(QualCode.SETUP_QUERY, drop, data));
+		os.write(formatRequest(QualCode.SETUP_QUERY, c.getDrop(),data));
 	}
 
 	/** Decode a QUERY response */

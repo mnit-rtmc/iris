@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.g4;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -41,11 +42,12 @@ public class SensorInfoProperty extends G4Property {
 	static private final int OFF_MISC = 13;
 
 	/** Encode a QUERY request */
-	@Override public void encodeQuery(OutputStream os, int drop)
+	@Override
+	public void encodeQuery(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
 		byte[] data = new byte[0];
-		os.write(formatRequest(QualCode.INFO_QUERY, drop, data));
+		os.write(formatRequest(QualCode.INFO_QUERY, c.getDrop(), data));
 	}
 
 	/** Decode a QUERY response */

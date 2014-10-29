@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.utils.LineReader;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
@@ -35,7 +36,10 @@ public class ResetProperty extends Org815Property {
 	}
 
 	/** Encode a QUERY request */
-	public void encodeQuery(OutputStream os, int drop) throws IOException {
+	@Override
+	public void encodeQuery(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
 		throw new ProtocolException("QUERY not supported");
 	}
 

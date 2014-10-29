@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,7 @@ import java.io.OutputStream;
 import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -168,12 +169,13 @@ public class StatProperty extends G4Property {
 	}
 
 	/** Encode a QUERY request */
-	@Override public void encodeQuery(OutputStream os, int drop)
+	@Override
+	public void encodeQuery(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
 		byte[] data = new byte[1];
 		data[0] = 0;	// reserved for future use
-		os.write(formatRequest(QualCode.STAT_POLL, drop, data));
+		os.write(formatRequest(QualCode.STAT_POLL, c.getDrop(), data));
 	}
 
 	/** Message number (0 - 255) */

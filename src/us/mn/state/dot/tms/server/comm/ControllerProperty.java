@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.io.EOFException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * A controller property is one element of a CommMessage.  It represents a
@@ -97,7 +98,9 @@ abstract public class ControllerProperty {
 	}
 
 	/** Encode a QUERY request */
-	public void encodeQuery(OutputStream os, int drop) throws IOException {
+	public void encodeQuery(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
 		throw new ProtocolException("QUERY not supported");
 	}
 
