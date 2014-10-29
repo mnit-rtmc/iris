@@ -157,19 +157,12 @@ public class OpQueryMeterStatus extends Op170 {
 		MeterStatus status, boolean police, int rate)
 	{
 		meter.setPolicePanel(police);
-		if(!police)
-			meter.setManual(status.isManual());
-		boolean needs_red_time = false;
-		boolean metering = status.isMetering() ||
-			MeterRate.isMetering(rate);
-		if(metering != meter.isMetering()) {
-			needs_red_time = metering;
-			if(!metering)
-				meter.setRateNotify(null);
-		}
-		if(status.isManual() || !MeterRate.isCentralControl(rate))
-			needs_red_time = true;
-		if(MeterRate.isMetering(rate))
+		meter.setManual(status.isManual());
+		if (MeterRate.isMetering(rate))
 			phases.add(new QueryRedTime(meter, n, rate));
+		else if (status.isMetering())
+			logError("invalid state: " + status + ", " + rate);
+		else
+			meter.setRateNotify(null);
 	}
 }
