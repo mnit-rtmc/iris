@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,39 +33,21 @@ public class MeterStatus {
 	/** Time-of-day metering status from 170 */
 	static public final int TOD = 3;
 
-	/** Metering status descriptions */
-	static protected final String[] DESCRIPTION = {
-		"Flash", "Manual", "Metering", "Time-of-day"
-	};
-
-	/** Status code */
-	protected final int status;
-
-	/** Create new meter status */
-	public MeterStatus(int s) {
-		status = s;
-	}
-
 	/** Check if the status code is valid */
-	public boolean isValid() {
-		return status >= 0 && status < DESCRIPTION.length;
+	static public boolean isValid(int s) {
+		return s >= FLASH && s <= TOD;
 	}
 
 	/** Check if the status is metering */
-	public boolean isMetering() {
-		return status != FLASH;
+	static public boolean isMetering(int s) {
+		return s == MANUAL || s == CENTRAL || s == TOD;
 	}
 
 	/** Check if the status is manual mode */
-	public boolean isManual() {
-		return status == MANUAL;
+	static public boolean isManual(int s) {
+		return s == MANUAL;
 	}
 
-	/** Get a string description of the meter status */
-	public String toString() {
-		if(isValid())
-			return DESCRIPTION[status];
-		else
-			return "Unknown";
-	}
+	/** Disallow instantiation */
+	private MeterStatus() { }
 }

@@ -143,25 +143,24 @@ public class OpQueryMeterStatus extends Op170 {
 	{
 		if(!MeterRate.isValid(r))
 			throw new InvalidRateException(r);
-		MeterStatus status = new MeterStatus(s);
-		if(status.isValid()) {
+		if (MeterStatus.isValid(s)) {
 			boolean police = (p & POLICE_PANEL_BIT) != 0;
-			updateMeterStatus(meter, n, status, police, r);
+			updateMeterStatus(meter, n, s, police, r);
 			meter.updateGreenCount(stamp,adjustGreenCount(meter,g));
 		} else
 			throw new InvalidStatusException(s);
 	}
 
 	/** Update the status of the ramp meter */
-	protected void updateMeterStatus(RampMeterImpl meter, int n,
-		MeterStatus status, boolean police, int rate)
+	private void updateMeterStatus(RampMeterImpl meter, int n,
+		int s, boolean police, int rate) throws InvalidStatusException
 	{
 		meter.setPolicePanel(police);
-		meter.setManual(status.isManual());
+		meter.setManual(MeterStatus.isManual(s));
 		if (MeterRate.isMetering(rate))
 			phases.add(new QueryRedTime(meter, n, rate));
-		else if (status.isMetering())
-			logError("invalid state: " + status + ", " + rate);
+		else if (MeterStatus.isMetering(s))
+			throw new InvalidStatusException(s, rate);
 		else
 			meter.setRateNotify(null);
 	}
