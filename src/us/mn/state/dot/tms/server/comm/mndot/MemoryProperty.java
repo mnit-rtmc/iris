@@ -15,7 +15,9 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import us.mn.state.dot.tms.utils.HexString;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
@@ -57,16 +59,17 @@ public class MemoryProperty extends MndotProperty {
 		checkPayloadLength();
 	}
 
-	/** Format a basic "GET" request */
-	protected byte[] formatPayloadGet(Message m) throws IOException {
-		byte[] req = new byte[6];
-		req[OFF_DROP_CAT] = m.dropCat(READ_MEMORY);
-		req[OFF_LENGTH] = 3;
+	/** Encode a QUERY request */
+	@Override
+	public void encodeQuery(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
+		byte[] req = createRequest(c, READ_MEMORY, 3);
 		req[OFF_ADDRESS_MSB] = (byte)((address >> 8) & 0xFF);
 		req[OFF_ADDRESS_LSB] = (byte)(address & 0xFF);
 		req[OFF_READ_LENGTH] = (byte)payload.length;
-		req[req.length - 1] = checksum(req);
-		return req;
+		calculateChecksum(req);
+		os.write(req);
 	}
 
 	/** Get the expected number of octets in response to a GET request */

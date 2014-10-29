@@ -436,12 +436,15 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Check if the controller is a message feed controller */
 	public boolean isMsgFeed() {
+		return getProtocol() == CommProtocol.MSG_FEED;
+	}
+
+	/** Get the comm protocol */
+	public CommProtocol getProtocol() {
 		CommLinkImpl cl = comm_link;
-		if(cl != null) {
-			return CommProtocol.fromOrdinal(cl.getProtocol()) ==
-			       CommProtocol.MSG_FEED;
-		} else
-			return false;
+		return (cl != null)
+		      ? CommProtocol.fromOrdinal(cl.getProtocol())
+		      : null;
 	}
 
 	/** Get a sample value from an array */

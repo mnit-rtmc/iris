@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.CommProtocol;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -63,6 +65,35 @@ abstract public class MndotProperty extends ControllerProperty {
 	/** Offset for message payload field */
 	static protected final int OFF_PAYLOAD = 2;
 
+	/** Create a request packet.
+	 * @param c Controller.
+	 * @param cat Category code.
+	 * @param n_bytes Number of additional bytes.
+	 * @return Request packet. */
+	static protected byte[] createRequest(ControllerImpl c, int cat,
+		int n_bytes)
+	{
+		byte[] pkt = new byte[3 + n_bytes];
+		pkt[OFF_DROP_CAT] = dropCat(c, cat);
+		pkt[OFF_LENGTH] = (byte)n_bytes;
+		return pkt;
+	}
+
+	/** Make the initical drop/category byte */
+	static protected byte dropCat(ControllerImpl c, int cat) {
+		int drop = c.getDrop();
+		CommProtocol cp = c.getProtocol();
+		if (cp == CommProtocol.MNDOT_5)
+			return (byte)(drop << 3 | cat);
+		else
+			return (byte)(drop << 4 | cat);
+	}
+
+	/** Calculate the checksum for a request packet */
+	static protected void calculateChecksum(byte[] pkt) {
+		pkt[pkt.length - 1] = checksum(pkt);
+	}
+
 	/** Calculate the checksum of a buffer */
 	static protected byte checksum(byte[] buf) {
 		byte xsum = 0;
@@ -105,6 +136,23 @@ abstract public class MndotProperty extends ControllerProperty {
 			throw new ChecksumException(res);
 	}
 
+	/** Get response from the controller.
+	 * @param m Message.
+	 * @param c Controller.
+	 * @param expected Expected number of bytes in response.
+	 * @return Response packet. */
+	private byte[] doResponse(Message m, ControllerImpl c, int expected)
+		throws IOException
+	{
+		if (expected > 0) {
+			byte[] res = getResponse(m.input, expected);
+			validateChecksum(res);
+			m.validateResponse(c, res);
+			return res;
+		} else
+			return new byte[0];
+	}
+
 	/** Get response from the controller */
 	protected byte[] doResponse(Message m, byte[] req, int expected)
 		throws IOException
@@ -118,10 +166,6 @@ abstract public class MndotProperty extends ControllerProperty {
 			return new byte[0];
 	}
 
-	/** Format a basic "GET" request */
-	abstract protected byte[] formatPayloadGet(Message m)
-		throws IOException;
-
 	/** Get the expected number of octets in response to a GET request */
 	abstract protected int expectedGetOctets();
 
@@ -132,10 +176,10 @@ abstract public class MndotProperty extends ControllerProperty {
 
 	/** Perform a "GET" request */
 	public void doGetRequest(Message m) throws IOException {
-		byte[] req = formatPayloadGet(m);
-		m.input.skip(m.input.available());
-		doPoll(m.output, req);
-		byte[] res = doResponse(m, req, expectedGetOctets());
+		ControllerImpl c = m.getController();
+		encodeQuery(c, m.output);
+		m.output.flush();
+		byte[] res = doResponse(m, c, expectedGetOctets());
 		parseGetResponse(res);
 	}
 

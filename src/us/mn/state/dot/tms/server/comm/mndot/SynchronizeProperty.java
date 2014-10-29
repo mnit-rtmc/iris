@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,11 +26,6 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  * @author Douglas Lau
  */
 public class SynchronizeProperty extends MndotProperty {
-
-	/** Format a basic "GET" request */
-	protected byte[] formatPayloadGet(Message m) throws IOException {
-		throw new ProtocolException("SYNCHRONIZE IS SET ONLY");
-	}
 
 	/** Get the expected number of octets in response to a GET request */
 	protected int expectedGetOctets() {

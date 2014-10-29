@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.CommProtocol;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerException;
@@ -75,8 +76,8 @@ public class Message implements CommMessage {
 	/** Serial input stream */
 	protected final InputStream input;
 
-	/** Drop address */
-	protected final int drop;
+	/** Controller */
+	private final ControllerImpl controller;
 
 	/** Protocol version */
 	protected final CommProtocol protocol;
@@ -85,11 +86,18 @@ public class Message implements CommMessage {
 	protected MndotProperty prop;
 
 	/** Create a new Mndot protocol message */
-	public Message(OutputStream o, InputStream i, int d, CommProtocol p) {
+	public Message(OutputStream o, InputStream i, ControllerImpl c,
+		CommProtocol p)
+	{
 		output = o;
 		input = i;
-		drop = d;
+		controller = c;
 		protocol = p;
+	}
+
+	/** Get the controller */
+	public ControllerImpl getController() {
+		return controller;
 	}
 
 	/** Add a controller property */
@@ -102,9 +110,10 @@ public class Message implements CommMessage {
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	public void queryProps() throws IOException {
-		if(prop != null)
+		if (prop != null) {
+			input.skip(input.available());
 			prop.doGetRequest(this);
-		else
+		} else
 			throw new IOException("No property");
 	}
 
@@ -137,6 +146,18 @@ public class Message implements CommMessage {
 	}
 
 	/** Validate a response message */
+	protected void validateResponse(ControllerImpl c, byte[] res)
+		throws IOException
+	{
+		if (getDrop(res) != c.getDrop())
+			throw new ParsingException("DROP ADDRESS MISMATCH");
+		if (res.length < 2 ||
+		    res.length != res[MndotProperty.OFF_LENGTH] + 3)
+			throw new ParsingException("INVALID LENGTH");
+		checkStatus(getStat(res));
+	}
+
+	/** Validate a response message */
 	protected void validateResponse(byte[] req, byte[] res)
 		throws IOException
 	{
@@ -150,6 +171,7 @@ public class Message implements CommMessage {
 
 	/** Make the initical drop/category byte */
 	protected byte dropCat(int cat) {
+		int drop = controller.getDrop();
 		if(protocol == CommProtocol.MNDOT_5)
 			return (byte)(drop << 3 | cat);
 		else

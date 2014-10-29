@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,9 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Calendar;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -70,13 +72,14 @@ public class BinnedDataProperty extends MndotProperty {
 		return n_records;
 	}
 
-	/** Format a basic "GET" request */
-	protected byte[] formatPayloadGet(Message m) throws IOException {
-		byte[] req = new byte[3];
-		req[OFF_DROP_CAT] = m.dropCat(SEND_NEXT_RECORD);
-		req[OFF_LENGTH] = 0;
-		req[req.length - 1] = checksum(req);
-		return req;
+	/** Encode a QUERY request */
+	@Override
+	public void encodeQuery(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
+		byte[] req = createRequest(c, SEND_NEXT_RECORD, 0);
+		calculateChecksum(req);
+		os.write(req);
 	}
 
 	/** Get the expected number of octets in response to a GET request */
