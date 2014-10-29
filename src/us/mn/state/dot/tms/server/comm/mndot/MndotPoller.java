@@ -45,8 +45,7 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
 public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	MeterPoller, SamplePoller, BeaconPoller, LaneMarkingPoller
 {
-	/** Get the meter number on the controller. This does not belong in the
-	 * RampMeterImpl class because it only applies to the Mndot protocol. */
+	/** Get the meter number on the controller. */
 	static protected int getMeterNumber(RampMeterImpl meter) {
 		if(meter.isActive()) {
 			int pin = meter.getPin();
