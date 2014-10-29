@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -25,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Douglas Lau
  */
-public class OpQueryBeaconState extends OpDevice {
+public class OpQueryBeaconState extends Op170Device {
 
 	/** Beacon device */
 	private final BeaconImpl beacon;
@@ -37,6 +36,7 @@ public class OpQueryBeaconState extends OpDevice {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new QueryStatus();
 	}
@@ -47,8 +47,11 @@ public class OpQueryBeaconState extends OpDevice {
 		/** Query the beacon state */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] b = new byte[1];
+			MemoryProperty prop = new MemoryProperty(
+				Address.RAMP_METER_DATA, b);
 			mess.add(new MemoryProperty(Address.RAMP_METER_DATA,b));
 			mess.queryProps();
+			logQuery(prop);
 			beacon.setFlashingNotify(b[Address.OFF_STATUS] !=
 				MeterStatus.FLASH);
 			return null;

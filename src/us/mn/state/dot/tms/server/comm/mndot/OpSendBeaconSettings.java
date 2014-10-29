@@ -19,7 +19,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -27,16 +26,16 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Douglas Lau
  */
-public class OpSendBeaconSettings extends OpDevice {
+public class OpSendBeaconSettings extends Op170Device {
 
 	/** HOV preempt time (tenths of a second) (obsolete) */
-	static protected final int HOV_PREEMPT = 80;
+	static private final int HOV_PREEMPT = 80;
 
 	/** AM midpoint time (BCD; minute of day) */
-	static protected final int AM_MID_TIME = 730;
+	static private final int AM_MID_TIME = 730;
 
 	/** PM midpoint time (BCD; minute of day) */
-	static protected final int PM_MID_TIME = 1630;
+	static private final int PM_MID_TIME = 1630;
 
 	/** Beacon */
 	private final BeaconImpl beacon;
@@ -48,6 +47,7 @@ public class OpSendBeaconSettings extends OpDevice {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new SetTimingTable();
 	}
@@ -58,26 +58,28 @@ public class OpSendBeaconSettings extends OpDevice {
 		/** Set the timing table for the beacon */
 		protected Phase poll(CommMessage mess) throws IOException {
 			int a = Address.METER_1_TIMING_TABLE;
-			mess.add(createTimingTableProperty(a));
+			MemoryProperty prop = createTimingTableProperty(a);
+			mess.add(prop);
+			logStore(prop);
 			mess.storeProps();
 			return null;
 		}
 	}
 
 	/** Create a timing table property for the beacon */
-	protected MndotProperty createTimingTableProperty(int address)
+	private MemoryProperty createTimingTableProperty(int address)
 		throws IOException
 	{
 		int[] times = {AM_MID_TIME, PM_MID_TIME};
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		BCDOutputStream bcd = new BCDOutputStream(os);
-		for(int t = Calendar.AM; t <= Calendar.PM; t++) {
+		for (int t = Calendar.AM; t <= Calendar.PM; t++) {
 			bcd.write4(1);			// Startup GREEN
 			bcd.write4(1);			// Startup YELLOW
 			bcd.write4(3);			// Metering GREEN
 			bcd.write4(1);			// Metering YELLOW
 			bcd.write4(HOV_PREEMPT);
-			for(int i = 0; i < 6; i++)
+			for (int i = 0; i < 6; i++)
 				bcd.write4(1);		// Metering RED
 			bcd.write2(MeterRate.FLASH);	// TOD rate
 			bcd.write4(times[t]);		// TOD start time

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,10 +32,10 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpQueryLCSIndications extends OpLCS {
 
 	/** Device on/off status ("metering" status) */
-	protected final byte[] status = new byte[1];
+	private final byte[] status = new byte[1];
 
 	/** Special function output buffer */
-	protected final byte[] outputs = new byte[2];
+	private final byte[] outputs = new byte[2];
 
 	/** Create a new operation to query the LCS */
 	public OpQueryLCSIndications(LCSArrayImpl l) {
@@ -43,6 +43,7 @@ public class OpQueryLCSIndications extends OpLCS {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new QueryStatus();
 	}
@@ -52,10 +53,12 @@ public class OpQueryLCSIndications extends OpLCS {
 
 		/** Query the status */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new MemoryProperty(Address.RAMP_METER_DATA,
-				status));
+			MemoryProperty prop = new MemoryProperty(
+				Address.RAMP_METER_DATA, status);
+			mess.add(prop);
 			mess.queryProps();
-			if(isTurnedOn())
+			logQuery(prop);
+			if (isTurnedOn())
 				return new QueryOutputs();
 			else
 				return null;
@@ -67,37 +70,40 @@ public class OpQueryLCSIndications extends OpLCS {
 
 		/** Query the outputs */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(new MemoryProperty(
-				Address.SPECIAL_FUNCTION_OUTPUTS, outputs));
+			MemoryProperty prop = new MemoryProperty(
+				Address.SPECIAL_FUNCTION_OUTPUTS, outputs);
+			mess.add(prop);
 			mess.queryProps();
+			logQuery(prop);
 			return null;
 		}
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
-		if(isSuccess())
+		if (isSuccess())
 			lcs_array.setIndicationsCurrent(getIndications(), null);
 		super.cleanup();
 	}
 
 	/** Test if the LCS array is turned on */
-	protected boolean isTurnedOn() {
+	private boolean isTurnedOn() {
 		return status[Address.OFF_STATUS] != MeterStatus.FLASH;
 	}
 
 	/** Get the displayed indications */
-	protected Integer[] getIndications() {
+	private Integer[] getIndications() {
 		Integer[] ind = new Integer[lcs_array.getLaneCount()];
-		for(int i = 0; i < ind.length; i++)
+		for (int i = 0; i < ind.length; i++)
 			ind[i] = LaneUseIndication.DARK.ordinal();
-		if(isTurnedOn()) {
+		if (isTurnedOn()) {
 			Iterator<LCSIndication> it =
 				LCSIndicationHelper.iterator();
-			while(it.hasNext()) {
+			while (it.hasNext()) {
 				LCSIndication li = it.next();
-				if(li.getLcs().getArray() == lcs_array) {
-					if(li.getController() == controller)
+				if (li.getLcs().getArray() == lcs_array) {
+					if (li.getController() == controller)
 						checkIndication(li, ind);
 				}
 			}
@@ -106,13 +112,13 @@ public class OpQueryLCSIndications extends OpLCS {
 	}
 
 	/** Check if an indication is set */
-	protected void checkIndication(LCSIndication li, Integer[] ind) {
-		if(Op170.getSpecFuncOutput(outputs, li.getPin())) {
+	private void checkIndication(LCSIndication li, Integer[] ind) {
+		if (Op170.getSpecFuncOutput(outputs, li.getPin())) {
 			LCS lcs = li.getLcs();
 			int i = lcs.getLane() - 1;
 			// We must check bounds here in case the LCSIndication
 			// was added after the "ind" array was created
-			if(i >= 0 && i < ind.length)
+			if (i >= 0 && i < ind.length)
 				ind[i] = li.getIndication();
 		}
 	}

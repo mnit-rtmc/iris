@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class Op170 extends OpController {
 
 	/** MnDOT 170 debug log */
-	static private final DebugLog MNDOT_LOG = new DebugLog("mndot170");
+	static protected final DebugLog MNDOT_LOG = new DebugLog("mndot170");
 
 	/** I/O pin for first traffic device */
 	static protected final int DEVICE_1_PIN = 2;
@@ -156,8 +156,8 @@ abstract public class Op170 extends OpController {
 	/** Ramp meter being queried */
 	protected final RampMeterImpl meter2;
 
-	/** Create a new query meter status operatoin */
-	public Op170(PriorityLevel p, ControllerImpl c) {
+	/** Create a new 170 operation */
+	protected Op170(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
 		meter1 = lookupMeter1(controller);
 		meter2 = lookupMeter2(controller);

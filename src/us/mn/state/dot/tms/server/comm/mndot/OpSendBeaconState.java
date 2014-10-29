@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -25,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Douglas Lau
  */
-public class OpSendBeaconState extends OpDevice {
+public class OpSendBeaconState extends Op170Device {
 
 	/** Get the appropriate rate for the deployed state */
 	static private byte getDeployedRate(boolean f) {
@@ -59,6 +58,7 @@ public class OpSendBeaconState extends OpDevice {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new SetRate();
 	}
@@ -69,7 +69,9 @@ public class OpSendBeaconState extends OpDevice {
 		/** Write the meter rate to the controller */
 		protected Phase poll(CommMessage mess) throws IOException {
 			byte[] data = { rate };
-			mess.add(new MemoryProperty(address, data));
+			MemoryProperty prop = new MemoryProperty(address, data);
+			mess.add(prop);
+			logStore(prop);
 			mess.storeProps();
 			return null;
 		}
