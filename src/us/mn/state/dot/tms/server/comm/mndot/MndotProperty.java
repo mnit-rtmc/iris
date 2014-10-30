@@ -45,39 +45,28 @@ abstract public class MndotProperty extends ControllerProperty {
 	/** Maximum data bytes */
 	static private final int MAX_DATA_BYTES = 125;
 
-	/** Status codes for 170 communication protocol */
-	static private final int STAT_OK = 0;
-	static private final int STAT_BAD_MESSAGE = 1;
-	static private final int STAT_BAD_POLL_CHECKSUM = 2;
-	static private final int STAT_DOWNLOAD_REQUEST = 3;
-	static private final int STAT_WRITE_PROTECT = 4;
-	static private final int STAT_MESSAGE_SIZE = 5;
-	static private final int STAT_NO_DATA = 6;
-	static private final int STAT_NO_RAM = 7;
-	static private final int STAT_DOWNLOAD_REQUEST_4 = 8; // 4-bit addr
-
 	/** Parse packet status code.
 	 * @param status Recieved status code.
 	 * @throws IOException for status errors from controller. */
 	static private void parseStatus(int status) throws IOException {
-		switch(status) {
-		case STAT_OK:
+		switch (StatCode.fromOrdinal(status)) {
+		case OK:
 			return;
-		case STAT_BAD_MESSAGE:
+		case BAD_MESSAGE:
 			throw new ParsingException("BAD MESSAGE");
-		case STAT_BAD_POLL_CHECKSUM:
+		case BAD_POLL_CHECKSUM:
 			throw new ChecksumException(
 				"CONTROLLER I/O CHECKSUM ERROR");
-		case STAT_DOWNLOAD_REQUEST:
-		case STAT_DOWNLOAD_REQUEST_4:
+		case DOWNLOAD_REQUEST:
+		case DOWNLOAD_REQUEST_4:
 			throw new DownloadRequestException("CODE: " + status);
-		case STAT_WRITE_PROTECT:
+		case WRITE_PROTECT:
 			throw new ControllerException("WRITE PROTECT");
-		case STAT_MESSAGE_SIZE:
+		case MESSAGE_SIZE:
 			throw new ParsingException("MESSAGE SIZE");
-		case STAT_NO_DATA:
+		case NO_DATA:
 			throw new ControllerException("NO SAMPLE DATA");
-		case STAT_NO_RAM:
+		case NO_RAM:
 			throw new ControllerException("NO RAM");
 		default:
 			throw new ParsingException("BAD STATUS: " + status);
