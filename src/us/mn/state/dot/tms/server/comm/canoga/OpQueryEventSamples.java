@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpQueryEventSamples extends OpCanoga {
 
 	/** Binary detection request */
-	protected final BinaryDetectionProperty detection =
+	private final BinaryDetectionProperty detection =
 		new BinaryDetectionProperty();
 
 	/** Create a new operation to query detector event samples */
@@ -53,6 +53,7 @@ public class OpQueryEventSamples extends OpCanoga {
 	}
 
 	/** Create the first phase of the operation */
+	@Override
 	protected Phase<CanogaProperty> phaseOne() {
 		return new QueryCurrentEvents();
 	}
@@ -66,11 +67,9 @@ public class OpQueryEventSamples extends OpCanoga {
 		{
 			mess.add(detection);
 			mess.queryProps();
-			if(CANOGA_LOG.isOpen())
-				detection.debug(OpQueryEventSamples.this);
 			setSuccess(true);
 			detection.logEvents(controller);
-			if(controller.hasActiveDetector())
+			if (controller.hasActiveDetector())
 				return this;
 			else
 				return null;

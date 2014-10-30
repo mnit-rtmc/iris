@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.canoga;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -31,6 +32,9 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
 public class CanogaPoller extends MessagePoller<CanogaProperty>
 	implements SamplePoller
 {
+	/** Canoga debug log */
+	static protected final DebugLog CANOGA_LOG = new DebugLog("canoga");
+
 	/** Maximum address allowed for backplane addressing */
 	static protected final int ADDRESS_MAX_BACKPLANE = 15;
 
@@ -116,5 +120,11 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 			if(p == 30)
 				qes.binSamples();
 		}
+	}
+
+	/** Get the protocol debug log */
+	@Override
+	protected DebugLog protocolLog() {
+		return CANOGA_LOG;
 	}
 }

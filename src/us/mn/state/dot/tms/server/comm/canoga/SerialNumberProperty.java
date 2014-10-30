@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,7 @@ public class SerialNumberProperty extends CanogaProperty {
 	}
 
 	/** Get the property name */
+	@Override
 	protected String getName() {
 		return "Serial Number";
 	}
@@ -56,6 +57,7 @@ public class SerialNumberProperty extends CanogaProperty {
 	}
 
 	/** Get the requested value */
+	@Override
 	public String getValue() {
 		return serial_number;
 	}

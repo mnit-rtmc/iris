@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,11 +27,11 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpQueryConfig extends OpCanoga {
 
 	/** Canoga card serial number */
-	protected final SerialNumberProperty serial_number =
+	private final SerialNumberProperty serial_number =
 		new SerialNumberProperty();
 
 	/** Canoga firmware version */
-	protected final VersionProperty version = new VersionProperty();
+	private final VersionProperty version = new VersionProperty();
 
 	/** Create an operation to query the Canoga configuration */
 	public OpQueryConfig(ControllerImpl c) {
@@ -39,6 +39,7 @@ public class OpQueryConfig extends OpCanoga {
 	}
 
 	/** Create the first phase of the operation */
+	@Override
 	protected Phase<CanogaProperty> phaseOne() {
 		return new QuerySerialNumber();
 	}
@@ -52,7 +53,6 @@ public class OpQueryConfig extends OpCanoga {
 		{
 			mess.add(serial_number);
 			mess.queryProps();
-			logQuery(serial_number);
 			return new QueryVersion();
 		}
 	}
@@ -66,14 +66,14 @@ public class OpQueryConfig extends OpCanoga {
 		{
 			mess.add(version);
 			mess.queryProps();
-			logQuery(version);
 			return null;
 		}
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
-		if(isSuccess()) {
+		if (isSuccess()) {
 			controller.setVersion(version.getValue() + " (" +
 				serial_number.getValue() + ")");
 		}

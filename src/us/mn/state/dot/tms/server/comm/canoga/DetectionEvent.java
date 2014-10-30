@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,8 +84,9 @@ public class DetectionEvent {
 	}
 
 	/** Test if two detection events are the same */
+	@Override
 	public boolean equals(Object o) {
-		if(o instanceof DetectionEvent) {
+		if (o instanceof DetectionEvent) {
 			DetectionEvent other = (DetectionEvent)o;
 			return (duration == other.duration) &&
 			       (start == other.start) &&
@@ -96,13 +97,15 @@ public class DetectionEvent {
 	}
 
 	/** Calculate a hash code for the detection event */
+	@Override
 	public int hashCode() {
 		return (duration << 16) ^ (start ^ count);
 	}
 
 	/** Get a string representation of the detection event */
+	@Override
 	public String toString() {
-		return "duration:" + duration + ",start:" + start +
+		return "dur:" + duration + ",start:" + start +
 			",count:" + count + ",state:" + state;
 	}
 
@@ -113,13 +116,13 @@ public class DetectionEvent {
 
 	/** Check for transmission errors in event data */
 	public boolean hasErrors(DetectionEvent prev) {
-		if(prev == null || isReset())
+		if (prev == null || isReset())
 			return false;
-		if(start == prev.start)
+		if (start == prev.start)
 			return !equals(prev);
-		if(count == prev.count)
+		if (count == prev.count)
 			return !equals(prev);
-		if(duration > MAX_DURATION_MS)
+		if (duration > MAX_DURATION_MS)
 			return true;
 		else
 			return hasDataErrors(prev);
@@ -139,7 +142,7 @@ public class DetectionEvent {
 	private int calculateElapsed(DetectionEvent other) {
 		long e = start - other.start;
 		// Test for rollover (about once every 50 days)
-		if(e < 0)
+		if (e < 0)
 			e += (1 << 32);
 		return (int)e;
 	}
@@ -149,12 +152,12 @@ public class DetectionEvent {
 		DetectionEvent prev, int speed)
 	{
 		int headway = 0;
-		if(isHeadwayValid(prev)) {
+		if (isHeadwayValid(prev)) {
 			int missed = calculateMissed(prev);
-			for(int i = 0; i < missed; i++)
+			for (int i = 0; i < missed; i++)
 				det.logVehicle(stamp, 0, 0, 0);
 			// If no vehicles were missed, log headway
-			if(missed == 0)
+			if (missed == 0)
 				headway = calculateElapsed(prev);
 		} else {
 			// There is a gap in vehicle event log
@@ -165,7 +168,7 @@ public class DetectionEvent {
 
 	/** Test if headway from previous event is valid */
 	private boolean isHeadwayValid(DetectionEvent prev) {
-		if(prev == null || prev.isReset() || isReset())
+		if (prev == null || prev.isReset() || isReset())
 			return false;
 		else {
 			int headway = calculateElapsed(prev);
@@ -176,7 +179,7 @@ public class DetectionEvent {
 	/** Calculate the number of missed vehicles */
 	private int calculateMissed(DetectionEvent prev) {
 		int n_vehicles = count - prev.count;
-		if(n_vehicles < 0)
+		if (n_vehicles < 0)
 			n_vehicles += 256;
 		return n_vehicles > 0 ? n_vehicles - 1 : 0;
 	}
@@ -188,17 +191,17 @@ public class DetectionEvent {
 	 * @param spacing Distance spacing of detector pair.
 	 * @return Speed of vehicle, or 0 if speed is invalid. */
 	public int calculateSpeed(DetectionEvent upstream, Distance spacing) {
-		if(spacing.compareTo(MIN_SPACING) < 0)
+		if (spacing.compareTo(MIN_SPACING) < 0)
 			return 0;
-		if(!isDurationValid(upstream))
+		if (!isDurationValid(upstream))
 			return 0;
 		Interval min_elapsed = calculateMinElapsed(spacing);
 		Interval elapsed = calculateAvgElapsed(upstream);
-		if(elapsed.compareTo(min_elapsed) < 0)
+		if (elapsed.compareTo(min_elapsed) < 0)
 			return 0;
 		Speed spd = new Speed(spacing, elapsed);
 		int mph = spd.round(MPH);
-		if(mph < MIN_SPEED_MPH || mph > MAX_SPEED_MPH)
+		if (mph < MIN_SPEED_MPH || mph > MAX_SPEED_MPH)
 			return 0;
 		else
 			return mph;
@@ -208,12 +211,12 @@ public class DetectionEvent {
 	 * @param upstream Upstream (pair) detection event.
 	 * @return true if event duration is valid. */
 	private boolean isDurationValid(DetectionEvent upstream) {
-		if(duration < MIN_DURATION_MS)
+		if (duration < MIN_DURATION_MS)
 			return false;
 		int d = Math.round(duration * MATCH_DURATION);
-		if(upstream.duration < duration - d)
+		if (upstream.duration < duration - d)
 			return false;
-		if(upstream.duration > duration + d)
+		if (upstream.duration > duration + d)
 			return false;
 		return true;
 	}

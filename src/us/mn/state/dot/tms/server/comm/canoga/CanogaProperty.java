@@ -136,6 +136,7 @@ abstract public class CanogaProperty extends ControllerProperty {
 	abstract protected String getValue();
 
 	/** Get a string representation of the property */
+	@Override
 	public String toString() {
 		return getName() + ": " + getValue();
 	}

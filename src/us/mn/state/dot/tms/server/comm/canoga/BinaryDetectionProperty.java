@@ -71,7 +71,8 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	}
 
 	/** Validate a response message */
-	@Override protected void validateResponse(byte[] req, byte[] res)
+	@Override
+	protected void validateResponse(byte[] req, byte[] res)
 		throws ChecksumException
 	{
 		byte paysum = res[OFF_CHECKSUM];
@@ -98,8 +99,8 @@ public class BinaryDetectionProperty extends CanogaProperty {
 
 	/** Set the requested value */
 	protected void setValue(byte[] v) {
-		if(v.length == expectedResponseOctets()) {
-			for(int i = 0; i < 4; i++)
+		if (v.length == expectedResponseOctets()) {
+			for (int i = 0; i < 4; i++)
 				c_events[i] = parseEvent(v, i);
 		}
 	}
@@ -110,7 +111,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 			addGap();
 		event_time = TimeSteward.currentTimeMillis();
 		Calendar stamp = TimeSteward.getCalendarInstance();
-		for(int i = 0; i < 4; i++)
+		for (int i = 0; i < 4; i++)
 			logEvent(controller, stamp, i);
 	}
 
@@ -126,11 +127,11 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	{
 		DetectionEvent pe = p_events[inp];
 		DetectionEvent ce = c_events[inp];
-		if(ce == null || ce.hasErrors(pe))
+		if (ce == null || ce.hasErrors(pe))
 			return;
 		DetectorImpl det = controller.getDetectorAtPin(inp + 1);
-		if(det != null) {
-			if((!ce.isReset()) && (!ce.equals(pe))) {
+		if (det != null) {
+			if ((!ce.isReset()) && (!ce.equals(pe))) {
 				int speed = calculateSpeed(controller, inp);
 				ce.logEvent(stamp, det, pe, speed);
 			}
@@ -142,9 +143,9 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	/** Calculate the speed from a matching speed loop */
 	protected int calculateSpeed(ControllerImpl controller, int inp) {
 		int sp = controller.getSpeedPair(inp + 1);
-		if(sp > 0 && sp <= 4) {
+		if (sp > 0 && sp <= 4) {
 			DetectorImpl det = controller.getDetectorAtPin(inp + 1);
-			if(det != null) {
+			if (det != null) {
 				DetectionEvent ce = c_events[inp];
 				Distance spacing = new Distance(
 					det.getFieldLength(), FEET);
@@ -156,31 +157,23 @@ public class BinaryDetectionProperty extends CanogaProperty {
 	}
 
 	/** Get the property name */
+	@Override
 	protected String getName() {
 		return "Binary Detection";
 	}
 
 	/** Get the requested value */
+	@Override
 	public String getValue() {
 		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < 4; i++) {
-			if(i > 0)
-				sb.append("\n");
+		for (int i = 0; i < 4; i++) {
+			if (i > 0)
+				sb.append(" ");
 			sb.append("det:");
 			sb.append(i);
 			sb.append(',');
 			sb.append(c_events[i]);
 		}
 		return sb.toString();
-	}
-
-	/** Debug the event */
-	public void debug(OpQueryEventSamples op) {
-		for(int i = 0; i < 4; i++) {
-			DetectionEvent pe = p_events[i];
-			DetectionEvent ce = c_events[i];
-			if(ce != null && !ce.equals(pe))
-				op.logQuery(" event:" + i + "," + ce);
-		}
 	}
 }
