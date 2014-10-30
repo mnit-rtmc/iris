@@ -68,7 +68,6 @@ public class OpMoveCamera extends OpPelcoD {
 			CommMessage<PelcoDProperty> mess) throws IOException
 		{
 			mess.add(prop);
-			logStore(prop);
 			mess.storeProps();
 			n_sent++;
 			return shouldResend() ? this : null;

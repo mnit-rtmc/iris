@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.pelcod;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
@@ -31,6 +32,9 @@ import us.mn.state.dot.tms.server.comm.TransientPoller;
 public class PelcoDPoller extends TransientPoller<PelcoDProperty>
 	implements CameraPoller
 {
+	/** Pelco D debug log */
+	static private final DebugLog PELCOD_LOG = new DebugLog("pelcod");
+
 	/** Highest allowed address for Pelco D protocol */
 	static public final int ADDRESS_MAX = 254;
 
@@ -68,5 +72,11 @@ public class PelcoDPoller extends TransientPoller<PelcoDProperty>
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest r) {
 		addOperation(new OpDeviceRequest(c, r));
+	}
+
+	/** Get the protocol debug log */
+	@Override
+	protected DebugLog protocolLog() {
+		return PELCOD_LOG;
 	}
 }

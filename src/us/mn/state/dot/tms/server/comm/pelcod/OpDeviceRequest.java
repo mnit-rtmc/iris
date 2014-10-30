@@ -93,7 +93,6 @@ public class OpDeviceRequest extends OpPelcoD {
 			CommMessage<PelcoDProperty> mess) throws IOException
 		{
 			mess.add(prop);
-			logStore(prop);
 			mess.storeProps();
 			return null;
 		}

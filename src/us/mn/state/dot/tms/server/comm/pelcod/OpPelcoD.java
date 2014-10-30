@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.pelcod;
 
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -25,15 +24,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 abstract public class OpPelcoD extends OpDevice<PelcoDProperty> {
-
-	/** Pelco D debug log */
-	static private final DebugLog PELCOD_LOG = new DebugLog("pelcod");
-
-	/** Log a property store */
-	protected void logStore(PelcoDProperty prop) {
-		if (PELCOD_LOG.isOpen())
-			PELCOD_LOG.log(controller.getName() + ":= " + prop);
-	}
 
 	/** Create a new Pelco D operation */
 	protected OpPelcoD(CameraImpl c) {
