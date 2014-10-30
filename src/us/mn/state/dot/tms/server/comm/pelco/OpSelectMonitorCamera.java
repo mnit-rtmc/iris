@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,14 +28,14 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 public class OpSelectMonitorCamera extends OpPelco {
 
 	/** Parse the integer ID of a monitor or camera */
-	static protected int parseUID(String name) throws IOException {
+	static private int parseUID(String name) throws IOException {
 		String id = name;
-		while(id.length() > 0 && !Character.isDigit(id.charAt(0)))
+		while (id.length() > 0 && !Character.isDigit(id.charAt(0)))
 			id = id.substring(1);
 		try {
 			return Integer.parseInt(id);
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			throw new IOException("Invalid UID: " + name);
 		}
 	}
@@ -45,12 +45,12 @@ public class OpSelectMonitorCamera extends OpPelco {
 		String cam)
 	{
 		super(c, m, cam);
-		debug("BEGIN monitor");
 	}
 
 	/** Operation equality test */
+	@Override
 	public boolean equals(Object o) {
-		if(o instanceof OpSelectMonitorCamera) {
+		if (o instanceof OpSelectMonitorCamera) {
 			OpSelectMonitorCamera op = (OpSelectMonitorCamera)o;
 			return monitor == op.monitor &&
 			       camera.equals(op.camera);
@@ -59,6 +59,7 @@ public class OpSelectMonitorCamera extends OpPelco {
 	}
 
 	/** Create the first phase of the operation */
+	@Override
 	protected Phase<PelcoProperty> phaseOne() {
 		return new Select();
 	}
@@ -74,7 +75,6 @@ public class OpSelectMonitorCamera extends OpPelco {
 				monitor.getName())));
 			mess.add(new SelectCameraProperty(parseUID(camera)));
 			mess.storeProps();
-			debug("END monitor");
 			return null;
 		}
 	}

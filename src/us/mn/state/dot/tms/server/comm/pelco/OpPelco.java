@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import static us.mn.state.dot.tms.server.comm.pelco.PelcoPoller.PELCO_LOG;
 
 /**
  * OpPelco is the base class for the Pelco comm protocol.
@@ -27,14 +26,6 @@ import static us.mn.state.dot.tms.server.comm.pelco.PelcoPoller.PELCO_LOG;
  * @author Douglas Lau
  */
 abstract public class OpPelco extends OpController<PelcoProperty> {
-
-	/** Debug switch requests */
-	protected void debug(String desc) {
-		if(PELCO_LOG.isOpen()) {
-			PELCO_LOG.log(desc + " " + monitor.getName() + " -> " +
-				camera);
-		}
-	}
 
 	/** Video monitor to select camera on */
 	protected final VideoMonitor monitor;

@@ -44,4 +44,10 @@ public class SelectMonitorProperty extends PelcoProperty {
 	{
 		os.write(new String(monitor + CODE).getBytes());
 	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "select monitor " + monitor;
+	}
 }

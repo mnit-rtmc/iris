@@ -27,10 +27,10 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 public class SelectCameraProperty extends PelcoProperty {
 
 	/** Command to select a new camera */
-	static protected final String CODE = "#a";
+	static private final String CODE = "#a";
 
 	/** Camera to select */
-	protected final int camera;
+	private final int camera;
 
 	/** Create a new select camera property */
 	public SelectCameraProperty(int c) {
@@ -43,5 +43,11 @@ public class SelectCameraProperty extends PelcoProperty {
 		throws IOException
 	{
 		os.write(new String(camera + CODE).getBytes());
+	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "select camera " + camera;
 	}
 }

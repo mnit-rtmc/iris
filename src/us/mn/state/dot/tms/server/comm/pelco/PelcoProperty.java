@@ -29,9 +29,6 @@ import static us.mn.state.dot.tms.server.comm.pelco.PelcoPoller.PELCO_LOG;
  */
 abstract public class PelcoProperty extends ControllerProperty {
 
-	/** Value to indicate no selected camera */
-	static private final int CAMERA_NONE = -1;
-
 	/** Acknowledge response */
 	static private final String ACK = "AK";
 
@@ -47,11 +44,11 @@ abstract public class PelcoProperty extends ControllerProperty {
 	/** Get a response from the switcher */
 	protected String getResponse(InputStream is) throws IOException {
 		StringBuilder resp = new StringBuilder();
-		while(resp.length() <= MAX_RESPONSE) {
+		while (resp.length() <= MAX_RESPONSE) {
 			int value = is.read();
-			if(value < 0)
+			if (value < 0)
 				throw new EOFException("END OF STREAM");
-			if(value == EOR)
+			if (value == EOR)
 				break;
 			resp.append((char)value);
 		}
@@ -63,8 +60,8 @@ abstract public class PelcoProperty extends ControllerProperty {
 	public void decodeStore(ControllerImpl c, InputStream is)
 		throws IOException
 	{
-		// FIXME: what to do if NAK is returned?
 		String resp = getResponse(is);
+		// FIXME: what to do if NAK is returned?
 		PELCO_LOG.log("decodeStore: " + resp);
 	}
 }
