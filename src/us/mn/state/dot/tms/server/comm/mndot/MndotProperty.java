@@ -45,32 +45,14 @@ abstract public class MndotProperty extends ControllerProperty {
 	/** Maximum data bytes */
 	static private final int MAX_DATA_BYTES = 125;
 
-	/** Parse packet status code.
-	 * @param status Recieved status code.
-	 * @throws IOException for status errors from controller. */
-	static private void parseStatus(int status) throws IOException {
-		switch (StatCode.fromOrdinal(status)) {
-		case OK:
-			return;
-		case BAD_MESSAGE:
-			throw new ParsingException("BAD MESSAGE");
-		case BAD_POLL_CHECKSUM:
-			throw new ChecksumException(
-				"CONTROLLER I/O CHECKSUM ERROR");
-		case DOWNLOAD_REQUEST:
-		case DOWNLOAD_REQUEST_4:
-			throw new DownloadRequestException("CODE: " + status);
-		case WRITE_PROTECT:
-			throw new ControllerException("WRITE PROTECT");
-		case MESSAGE_SIZE:
-			throw new ParsingException("MESSAGE SIZE");
-		case NO_DATA:
-			throw new ControllerException("NO SAMPLE DATA");
-		case NO_RAM:
-			throw new ControllerException("NO RAM");
-		default:
-			throw new ParsingException("BAD STATUS: " + status);
-		}
+	/** Calculate the checksum of a packet.
+	 * @param pkt Packet.
+	 * @return Calculated checksum of packet. */
+	static private byte checksum(byte[] pkt) {
+		byte xsum = 0;
+		for (int i = 0; i < pkt.length - 1; i++)
+			xsum ^= pkt[i];
+		return xsum;
 	}
 
 	/** Create a request packet.
@@ -103,16 +85,6 @@ abstract public class MndotProperty extends ControllerProperty {
 	/** Calculate the checksum for a request packet */
 	static protected final void calculateChecksum(byte[] pkt) {
 		pkt[pkt.length - 1] = checksum(pkt);
-	}
-
-	/** Calculate the checksum of a packet.
-	 * @param pkt Packet.
-	 * @return Calculated checksum of packet. */
-	static private byte checksum(byte[] pkt) {
-		byte xsum = 0;
-		for (int i = 0; i < pkt.length - 1; i++)
-			xsum ^= pkt[i];
-		return xsum;
 	}
 
 	/** Read to the end of a buffer.
@@ -201,6 +173,34 @@ abstract public class MndotProperty extends ControllerProperty {
 		return (cp == CommProtocol.MNDOT_5)
 		     ? (drop_stat & 0x07)
 		     : (drop_stat & 0x0F);
+	}
+
+	/** Parse packet status code.
+	 * @param status Recieved status code.
+	 * @throws IOException for status errors from controller. */
+	static private void parseStatus(int status) throws IOException {
+		switch (StatCode.fromOrdinal(status)) {
+		case OK:
+			return;
+		case BAD_MESSAGE:
+			throw new ParsingException("BAD MESSAGE");
+		case BAD_POLL_CHECKSUM:
+			throw new ChecksumException(
+				"CONTROLLER I/O CHECKSUM ERROR");
+		case DOWNLOAD_REQUEST:
+		case DOWNLOAD_REQUEST_4:
+			throw new DownloadRequestException("CODE: " + status);
+		case WRITE_PROTECT:
+			throw new ControllerException("WRITE PROTECT");
+		case MESSAGE_SIZE:
+			throw new ParsingException("MESSAGE SIZE");
+		case NO_DATA:
+			throw new ControllerException("NO SAMPLE DATA");
+		case NO_RAM:
+			throw new ControllerException("NO RAM");
+		default:
+			throw new ParsingException("BAD STATUS: " + status);
+		}
 	}
 
 	/** Validate response length.
