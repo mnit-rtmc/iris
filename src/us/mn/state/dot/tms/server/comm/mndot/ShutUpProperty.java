@@ -41,4 +41,10 @@ public class ShutUpProperty extends MndotProperty {
 	public void decodeStore(ControllerImpl c, InputStream is) {
 		// No response expected
 	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return CatCode.SHUT_UP.toString();
+	}
 }

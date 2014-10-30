@@ -64,4 +64,10 @@ public class SynchronizeProperty extends MndotProperty {
 	protected void parseStore(byte[] pkt) throws IOException {
 		validateResponseLength(pkt, 3);
 	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return CatCode.SYNCHRONIZE_CLOCK.toString();
+	}
 }

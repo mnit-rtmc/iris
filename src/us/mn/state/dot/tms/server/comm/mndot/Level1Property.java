@@ -41,4 +41,10 @@ public class Level1Property extends MndotProperty {
 	public void decodeStore(ControllerImpl c, InputStream is) {
 		// No response expected
 	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return CatCode.LEVEL_1_RESTART.toString();
+	}
 }

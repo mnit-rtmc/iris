@@ -18,6 +18,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
+import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -107,5 +108,14 @@ public class BinnedDataProperty extends MndotProperty {
 	protected void parseStore(byte[] pkt) throws IOException {
 		validateResponseLength(pkt, 4);
 		n_records = pkt[OFF_PAYLOAD] & 0xFF;
+	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("bin: ");
+		sb.append(HexString.format(payload, ' '));
+		return sb.toString();
 	}
 }
