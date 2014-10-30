@@ -49,15 +49,21 @@ public class MsgFeedProperty extends ControllerProperty {
 	{
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
-		while(line != null) {
+		while (line != null) {
 			MsgFeedPoller.log("parsing " + line);
 			FeedMsg msg = new FeedMsg(feed, line);
-			if(msg.isValid()) {
+			if (msg.isValid()) {
 				FeedBucket.add(msg);
 				MsgFeedPoller.log("VALID " + msg);
 			} else
 				MsgFeedPoller.log("INVALID " + msg);
 			line = lr.readLine();
 		}
+	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "feed " + feed;
 	}
 }
