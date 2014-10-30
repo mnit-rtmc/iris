@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ss125;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -29,6 +30,9 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
 public class SS125Poller extends MessagePoller<SS125Property>
 	implements SamplePoller
 {
+	/** SS 125 debug log */
+	static protected final DebugLog SS125_LOG = new DebugLog("ss125");
+
 	/** Create a new SS125 poller */
 	public SS125Poller(String n, Messenger m) {
 		super(n, m);
@@ -72,5 +76,11 @@ public class SS125Poller extends MessagePoller<SS125Property>
 			if(c.hasActiveDetector())
 				addOperation(new OpQuerySamples(c, p));
 		}
+	}
+
+	/** Get the protocol debug log */
+	@Override
+	protected DebugLog protocolLog() {
+		return SS125_LOG;
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,6 @@ public class OpSendSensorSettings extends OpSS125 {
 			VersionProperty vr = new VersionProperty();
 			mess.add(vr);
 			mess.queryProps();
-			logQuery(vr);
 			controller.setVersion(vr.getVersion());
 			return new QueryGenConfig();
 		}
@@ -87,7 +86,6 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			mess.add(gen_config);
 			mess.queryProps();
-			logQuery(gen_config);
 			if(shouldUpdateGenConfig())
 				return new StoreGenConfig();
 			else
@@ -114,7 +112,6 @@ public class OpSendSensorSettings extends OpSS125 {
 				controller));
 			gen_config.setMetric(false);
 			mess.add(gen_config);
-			logStore(gen_config);
 			mess.storeProps();
 			config_updated = true;
 			return new QueryDataConfig();
@@ -130,8 +127,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			mess.add(data_config);
 			mess.queryProps();
-			logQuery(data_config);
-			if(shouldUpdateDataConfig())
+			if (shouldUpdateDataConfig())
 				return new StoreDataConfig();
 			else
 				return new QueryClassConfig();
@@ -168,7 +164,6 @@ public class OpSendSensorSettings extends OpSS125 {
 			data_config.getIntervalPush().setEnable(false);
 			data_config.getPresencePush().setEnable(false);
 			mess.add(data_config);
-			logStore(data_config);
 			mess.storeProps();
 			config_updated = true;
 			return new QueryClassConfig();
@@ -184,8 +179,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			mess.add(class_config);
 			mess.queryProps();
-			logQuery(class_config);
-			if(shouldUpdateClassConfig())
+			if (shouldUpdateClassConfig())
 				return new StoreClassConfig();
 			else
 				return new QueryDateTime();
@@ -211,7 +205,6 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			updateClassConfig();
 			mess.add(class_config);
-			logStore(class_config);
 			mess.storeProps();
 			config_updated = true;
 			return new QueryDateTime();
@@ -234,7 +227,6 @@ public class OpSendSensorSettings extends OpSS125 {
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
 			mess.queryProps();
-			logQuery(date_time);
 			if(shouldUpdateDateTime(date_time.getStamp().getTime()))
 				return new SendDateTime();
 			else
@@ -258,7 +250,6 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			DateTimeProperty date_time = new DateTimeProperty();
 			mess.add(date_time);
-			logStore(date_time);
 			mess.storeProps();
 			return configDonePhase();
 		}
@@ -281,7 +272,6 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			FlashConfigProperty flash = new FlashConfigProperty();
 			mess.add(flash);
-			logStore(flash);
 			mess.storeProps();
 			return null;
 		}

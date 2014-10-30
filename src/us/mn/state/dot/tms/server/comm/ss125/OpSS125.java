@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,10 @@
  */
 package us.mn.state.dot.tms.server.comm.ss125;
 
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import static us.mn.state.dot.tms.server.comm.ss125.SS125Poller.SS125_LOG;
 
 /**
  * Operation for SS125 device
@@ -26,25 +26,10 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 abstract public class OpSS125 extends OpController<SS125Property> {
 
-	/** SS 125 debug log */
-	static private final DebugLog SS125_LOG = new DebugLog("ss125");
-
 	/** Log an error msg */
 	protected void logError(String msg) {
-		if(SS125_LOG.isOpen())
+		if (SS125_LOG.isOpen())
 			SS125_LOG.log(controller.getName() + "! " + msg);
-	}
-
-	/** Log a property query */
-	protected void logQuery(SS125Property prop) {
-		if(SS125_LOG.isOpen())
-			SS125_LOG.log(controller.getName() + ": " + prop);
-	}
-
-	/** Log a property store */
-	protected void logStore(SS125Property prop) {
-		if(SS125_LOG.isOpen())
-			SS125_LOG.log(controller.getName() + ":= " + prop);
 	}
 
 	/** Create a new SS125 operation */
