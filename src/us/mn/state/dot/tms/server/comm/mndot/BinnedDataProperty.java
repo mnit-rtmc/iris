@@ -39,7 +39,7 @@ public class BinnedDataProperty extends MndotProperty {
 		STAMP_LENGTH + RECORD_LENGTH;
 
 	/** Binned data buffer payload */
-	protected final byte[] payload = new byte[BINNED_DATA_LENGTH];
+	private final byte[] payload = new byte[BINNED_DATA_LENGTH];
 
 	/** Get timestamp at the end of sample interval */
 	public long getStamp() throws IOException {
@@ -65,7 +65,7 @@ public class BinnedDataProperty extends MndotProperty {
 	}
 
 	/** Count of binned data records */
-	protected int n_records;
+	private int n_records;
 
 	/** Get the remaining record count */
 	public int getRecordCount() {
@@ -82,16 +82,14 @@ public class BinnedDataProperty extends MndotProperty {
 		os.write(req);
 	}
 
-	/** Get the expected number of octets in response to a GET request */
-	protected int expectedGetOctets() {
-		return payload.length + 3;
-	}
-
-	/** Parse the response to a GET request */
-	protected void parseGetResponse(byte[] buf) throws IOException {
-		if(buf.length != expectedGetOctets())
-			throw new ParsingException("Bad resp len:"+ buf.length);
-		System.arraycopy(buf, OFF_PAYLOAD, payload, 0, payload.length);
+	/** Parse a query response packet.
+	 * @param pkt Response packet.
+	 * @throws IOException on parse errors. */
+	@Override
+	protected void parseQuery(byte[] pkt) throws IOException {
+		if (pkt.length != payload.length + 3)
+			throw new ParsingException("Bad resp len:"+ pkt.length);
+		System.arraycopy(pkt, OFF_PAYLOAD, payload, 0, payload.length);
 	}
 
 	/** Format a basic "SET" request */

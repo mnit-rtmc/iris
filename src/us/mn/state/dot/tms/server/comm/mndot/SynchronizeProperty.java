@@ -27,11 +27,6 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  */
 public class SynchronizeProperty extends MndotProperty {
 
-	/** Get the expected number of octets in response to a GET request */
-	protected int expectedGetOctets() {
-		return 0;
-	}
-
 	/** Format a basic "SET" request */
 	protected byte[] formatPayloadSet(Message m) throws IOException {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();

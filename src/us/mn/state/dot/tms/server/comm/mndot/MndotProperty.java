@@ -21,12 +21,13 @@ import java.io.OutputStream;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.DownloadRequestException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Mndot Property
- * FIXME: convert to use ControllerProperty encode/decode methods.
+ * Mndot Property.
  *
  * @author Douglas Lau
  */
@@ -65,6 +66,48 @@ abstract public class MndotProperty extends ControllerProperty {
 	/** Offset for message payload field */
 	static protected final int OFF_PAYLOAD = 2;
 
+	/** Maximum data bytes */
+	static private final int MAX_DATA_BYTES = 125;
+
+	/** Status codes for 170 communication protocol */
+	static private final int STAT_OK = 0;
+	static private final int STAT_BAD_MESSAGE = 1;
+	static private final int STAT_BAD_POLL_CHECKSUM = 2;
+	static private final int STAT_DOWNLOAD_REQUEST = 3;
+	static private final int STAT_WRITE_PROTECT = 4;
+	static private final int STAT_MESSAGE_SIZE = 5;
+	static private final int STAT_NO_DATA = 6;
+	static private final int STAT_NO_RAM = 7;
+	static private final int STAT_DOWNLOAD_REQUEST_4 = 8; // 4-bit addr
+
+	/** Parse packet status code.
+	 * @param status Recieved status code.
+	 * @throws IOException for status errors from controller. */
+	static private void parseStatus(int status) throws IOException {
+		switch(status) {
+		case STAT_OK:
+			return;
+		case STAT_BAD_MESSAGE:
+			throw new ParsingException("BAD MESSAGE");
+		case STAT_BAD_POLL_CHECKSUM:
+			throw new ChecksumException(
+				"CONTROLLER I/O CHECKSUM ERROR");
+		case STAT_DOWNLOAD_REQUEST:
+		case STAT_DOWNLOAD_REQUEST_4:
+			throw new DownloadRequestException("CODE: " + status);
+		case STAT_WRITE_PROTECT:
+			throw new ControllerException("WRITE PROTECT");
+		case STAT_MESSAGE_SIZE:
+			throw new ParsingException("MESSAGE SIZE");
+		case STAT_NO_DATA:
+			throw new ControllerException("NO SAMPLE DATA");
+		case STAT_NO_RAM:
+			throw new ControllerException("NO RAM");
+		default:
+			throw new ParsingException("BAD STATUS: " + status);
+		}
+	}
+
 	/** Create a request packet.
 	 * @param c Controller.
 	 * @param cat Category code.
@@ -94,12 +137,102 @@ abstract public class MndotProperty extends ControllerProperty {
 		pkt[pkt.length - 1] = checksum(pkt);
 	}
 
-	/** Calculate the checksum of a buffer */
-	static protected byte checksum(byte[] buf) {
+	/** Calculate the checksum of a packet.
+	 * @param pkt Packet.
+	 * @return Calculated checksum of packet. */
+	static protected byte checksum(byte[] pkt) {
 		byte xsum = 0;
-		for(int i = 0; i < buf.length - 1; i++)
-			xsum ^= buf[i];
+		for (int i = 0; i < pkt.length - 1; i++)
+			xsum ^= pkt[i];
 		return xsum;
+	}
+
+	/** Read to the end of a buffer.
+	 * @param is Input stream to read.
+	 * @param buf Buffer to store data.
+	 * @param off Offset to start reading.
+	 * @throws EOFException at end of input stream.
+	 * @throws ParsingException when packet is not fully read. */
+	static private void readFully(InputStream is, byte[] buf, int off)
+		throws IOException
+	{
+		assert buf.length > off;
+		int len = buf.length - off;
+		int b = is.read(buf, off, len);
+		if (b < 0)
+			throw new EOFException("END OF STREAM");
+		if (b != len)
+			throw new ParsingException("BAD LENGTH");
+	}
+
+	/** Read a response from an input stream.
+	 * @param is InputStream to read from.
+	 * @return Packet read from stream.
+	 * @throws IOException on parse errors or end of stream. */
+	static private byte[] readResponse(InputStream is) throws IOException {
+		byte[] header = new byte[3];
+		readFully(is, header, 0);
+		int len = header[OFF_LENGTH];
+		if (len < 0 || len > MAX_DATA_BYTES)
+			throw new ParsingException("INVALID LENGTH: " + len);
+		if (len > 0) {
+			byte[] pkt = new byte[3 + len];
+			System.arraycopy(header, 0, pkt, 0, 3);
+			readFully(is, pkt, 3);
+			return pkt;
+		} else
+			return header;
+	}
+
+	/** Parse the drop address from a response packet.
+	 * @param pkt Response packet.
+	 * @param cp Communication protocol.
+	 * @return Drop address. */
+	static private int parseDrop(byte[] pkt, CommProtocol cp) {
+		int drop_sh = pkt[OFF_DROP_CAT] & 0xFF;
+		return (cp == CommProtocol.MNDOT_5)
+		     ? (drop_sh >> 3)
+		     : (drop_sh >> 4);
+	}
+
+	/** Validate a response checksum.
+	 * @param pkt Response packet.
+	 * @throws ChecksumException if checksum is invalid. */
+	static private void validateChecksum(byte[] pkt)
+		throws ChecksumException
+	{
+		byte xsum = pkt[pkt.length - 1];
+		if (xsum != checksum(pkt))
+			throw new ChecksumException(pkt);
+	}
+
+	/** Validate a response packet.
+	 * @param c Controller receiving response.
+	 * @param pkt Response packet.
+	 * @throws IOException on errors parsing the packet. */
+	static private void validateResponse(ControllerImpl c, byte[] pkt)
+		throws IOException
+	{
+		if (pkt.length < 3)
+			throw new ParsingException("TOO SHORT");
+		validateChecksum(pkt);
+		if (pkt.length != pkt[OFF_LENGTH] + 3)
+			throw new ParsingException("INVALID LENGTH");
+		CommProtocol cp = c.getProtocol();
+		if (parseDrop(pkt, cp) != c.getDrop())
+			throw new ParsingException("DROP ADDRESS MISMATCH");
+		parseStatus(parseStat(pkt, cp));
+	}
+
+	/** Parse the stat code from a response packet.
+	 * @param pkt Response packet.
+	 * @param cp Communication protocol.
+	 * @return Status code. */
+	static private int parseStat(byte[] pkt, CommProtocol cp) {
+		byte drop_stat = pkt[OFF_DROP_CAT];
+		return (cp == CommProtocol.MNDOT_5)
+		     ? (drop_stat & 0x07)
+		     : (drop_stat & 0x0F);
 	}
 
 	/** Poll the 170 controller */
@@ -126,33 +259,6 @@ abstract public class MndotProperty extends ControllerProperty {
 		return buf;
 	}
 
-	/** Compare the response with its trailing checksum */
-	protected void validateChecksum(byte[] res) throws ChecksumException,
-		ParsingException
-	{
-		byte paysum = res[res.length - 1];
-		byte xsum = checksum(res);
-		if(paysum != xsum)
-			throw new ChecksumException(res);
-	}
-
-	/** Get response from the controller.
-	 * @param m Message.
-	 * @param c Controller.
-	 * @param expected Expected number of bytes in response.
-	 * @return Response packet. */
-	private byte[] doResponse(Message m, ControllerImpl c, int expected)
-		throws IOException
-	{
-		if (expected > 0) {
-			byte[] res = getResponse(m.input, expected);
-			validateChecksum(res);
-			m.validateResponse(c, res);
-			return res;
-		} else
-			return new byte[0];
-	}
-
 	/** Get response from the controller */
 	protected byte[] doResponse(Message m, byte[] req, int expected)
 		throws IOException
@@ -166,12 +272,21 @@ abstract public class MndotProperty extends ControllerProperty {
 			return new byte[0];
 	}
 
-	/** Get the expected number of octets in response to a GET request */
-	abstract protected int expectedGetOctets();
+	/** Decode a QUERY response */
+	@Override
+	public void decodeQuery(ControllerImpl c, InputStream is)
+		throws IOException
+	{
+		byte[] pkt = readResponse(is);
+		validateResponse(c, pkt);
+		parseQuery(pkt);
+	}
 
-	/** Set the value of the GET request */
-	protected void parseGetResponse(byte[] buf) throws IOException {
-		// override this if necessary
+	/** Parse a query response packet.
+	 * @param pkt Response packet.
+	 * @throws IOException on parse errors. */
+	protected void parseQuery(byte[] pkt) throws IOException {
+		// Override if necessary
 	}
 
 	/** Perform a "GET" request */
@@ -179,8 +294,7 @@ abstract public class MndotProperty extends ControllerProperty {
 		ControllerImpl c = m.getController();
 		encodeQuery(c, m.output);
 		m.output.flush();
-		byte[] res = doResponse(m, c, expectedGetOctets());
-		parseGetResponse(res);
+		decodeQuery(c, m.input);
 	}
 
 	/** Format a basic "SET" request */

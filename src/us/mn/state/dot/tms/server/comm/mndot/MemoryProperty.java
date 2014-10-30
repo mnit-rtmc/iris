@@ -47,8 +47,8 @@ public class MemoryProperty extends MndotProperty {
 	private final byte[] payload;
 
 	/** Check for a valid payload length */
-	protected void checkPayloadLength() throws ProtocolException {
-		if(payload.length < 1 || payload.length > MAX_LENGTH)
+	private void checkPayloadLength() throws ProtocolException {
+		if (payload.length < 1 || payload.length > MAX_LENGTH)
 			throw new ProtocolException("INVALID PAYLOAD SIZE");
 	}
 
@@ -72,16 +72,14 @@ public class MemoryProperty extends MndotProperty {
 		os.write(req);
 	}
 
-	/** Get the expected number of octets in response to a GET request */
-	protected int expectedGetOctets() {
-		return payload.length + 3;
-	}
-
-	/** Parse the response from a GET request */
-	protected void parseGetResponse(byte[] buf) throws IOException {
-		if(buf.length != expectedGetOctets())
-			throw new ParsingException("Bad resp len:"+ buf.length);
-		System.arraycopy(buf, OFF_PAYLOAD, payload, 0, payload.length);
+	/** Parse a query response packet.
+	 * @param pkt Response packet.
+	 * @throws IOException on parse errors. */
+	@Override
+	protected void parseQuery(byte[] pkt) throws IOException {
+		if (pkt.length != payload.length + 3)
+			throw new ParsingException("Bad resp len:"+ pkt.length);
+		System.arraycopy(pkt, OFF_PAYLOAD, payload, 0, payload.length);
 	}
 
 	/** Format a basic "SET" request */
