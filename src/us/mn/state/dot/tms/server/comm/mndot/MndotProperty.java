@@ -123,7 +123,7 @@ abstract public class MndotProperty extends ControllerProperty {
 	}
 
 	/** Make the initical drop/category byte */
-	static protected byte dropCat(ControllerImpl c, int cat) {
+	static private byte dropCat(ControllerImpl c, int cat) {
 		int drop = c.getDrop();
 		CommProtocol cp = c.getProtocol();
 		if (cp == CommProtocol.MNDOT_5)
