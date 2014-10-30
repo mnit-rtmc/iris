@@ -68,7 +68,6 @@ public class OpDeployLaneMarking extends Op170Device {
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs);
 			mess.add(prop);
 			mess.queryProps();
-			logQuery(prop);
 			return new SetOutputs();
 		}
 	}
@@ -83,7 +82,6 @@ public class OpDeployLaneMarking extends Op170Device {
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs);
 			mess.add(prop);
 			mess.storeProps();
-			logStore(prop);
 			return null;
 		}
 	}

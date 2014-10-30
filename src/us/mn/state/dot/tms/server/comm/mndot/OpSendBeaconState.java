@@ -28,7 +28,7 @@ public class OpSendBeaconState extends Op170Device {
 
 	/** Get the appropriate rate for the deployed state */
 	static private byte getDeployedRate(boolean f) {
-		if(f)
+		if (f)
 			return MeterRate.CENTRAL;
 		else
 			return MeterRate.FORCED_FLASH;
@@ -71,7 +71,6 @@ public class OpSendBeaconState extends Op170Device {
 			byte[] data = { rate };
 			MemoryProperty prop = new MemoryProperty(address, data);
 			mess.add(prop);
-			logStore(prop);
 			mess.storeProps();
 			return null;
 		}

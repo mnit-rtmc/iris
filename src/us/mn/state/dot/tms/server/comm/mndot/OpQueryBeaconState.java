@@ -51,7 +51,6 @@ public class OpQueryBeaconState extends Op170Device {
 				Address.RAMP_METER_DATA, b);
 			mess.add(new MemoryProperty(Address.RAMP_METER_DATA,b));
 			mess.queryProps();
-			logQuery(prop);
 			beacon.setFlashingNotify(b[Address.OFF_STATUS] !=
 				MeterStatus.FLASH);
 			return null;

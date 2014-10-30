@@ -53,7 +53,6 @@ public class OpQuerySamples30Sec extends OpQuerySamples {
 				Address.DATA_BUFFER_30_SECOND, r);
 			mess.add(sample_mem);
 			mess.queryProps();
-			logQuery(sample_mem);
 			setStamp();
 			processData(r);
 			return null;

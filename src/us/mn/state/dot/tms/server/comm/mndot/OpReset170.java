@@ -32,6 +32,7 @@ public class OpReset170 extends Op170 {
 	}
 
 	/** Create the first phase of the operation */
+	@Override
 	protected Phase phaseOne() {
 		return new ResetDetectors();
 	}
@@ -49,7 +50,6 @@ public class OpReset170 extends Op170 {
 			MemoryProperty reset_mem = new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data);
 			mess.add(reset_mem);
-			logStore(reset_mem);
 			mess.storeProps();
 			return new ClearDetectors();
 		}
@@ -64,7 +64,6 @@ public class OpReset170 extends Op170 {
 			MemoryProperty reset_mem = new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data);
 			mess.add(reset_mem);
-			logStore(reset_mem);
 			mess.storeProps();
 			return new Level1Restart();
 		}

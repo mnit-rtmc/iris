@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
 import java.util.Calendar;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.RampMeterType;
@@ -24,6 +23,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import static us.mn.state.dot.tms.server.comm.mndot.MndotPoller.MNDOT_LOG;
 
 /**
  * 170 Controller operation
@@ -31,9 +31,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 abstract public class Op170 extends OpController {
-
-	/** MnDOT 170 debug log */
-	static protected final DebugLog MNDOT_LOG = new DebugLog("mndot170");
 
 	/** I/O pin for first traffic device */
 	static protected final int DEVICE_1_PIN = 2;
@@ -134,20 +131,8 @@ abstract public class Op170 extends OpController {
 
 	/** Log an error msg */
 	protected void logError(String msg) {
-		if(MNDOT_LOG.isOpen())
+		if (MNDOT_LOG.isOpen())
 			MNDOT_LOG.log(controller.getName() + "! " + msg);
-	}
-
-	/** Log a property query */
-	protected void logQuery(MndotProperty prop) {
-		if(MNDOT_LOG.isOpen())
-			MNDOT_LOG.log(controller.getName() + ": " + prop);
-	}
-
-	/** Log a property store */
-	protected void logStore(MndotProperty prop) {
-		if(MNDOT_LOG.isOpen())
-			MNDOT_LOG.log(controller.getName() + ":= " + prop);
 	}
 
 	/** Ramp meter being queried */

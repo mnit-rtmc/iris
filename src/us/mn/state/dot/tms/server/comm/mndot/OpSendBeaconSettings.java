@@ -60,7 +60,6 @@ public class OpSendBeaconSettings extends Op170Device {
 			int a = Address.METER_1_TIMING_TABLE;
 			MemoryProperty prop = createTimingTableProperty(a);
 			mess.add(prop);
-			logStore(prop);
 			mess.storeProps();
 			return null;
 		}

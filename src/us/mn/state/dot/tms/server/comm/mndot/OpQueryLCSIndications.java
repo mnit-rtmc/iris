@@ -57,7 +57,6 @@ public class OpQueryLCSIndications extends OpLCS {
 				Address.RAMP_METER_DATA, status);
 			mess.add(prop);
 			mess.queryProps();
-			logQuery(prop);
 			if (isTurnedOn())
 				return new QueryOutputs();
 			else
@@ -74,7 +73,6 @@ public class OpQueryLCSIndications extends OpLCS {
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs);
 			mess.add(prop);
 			mess.queryProps();
-			logQuery(prop);
 			return null;
 		}
 	}

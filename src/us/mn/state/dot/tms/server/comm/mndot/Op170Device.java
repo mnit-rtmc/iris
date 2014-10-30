@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import us.mn.state.dot.tms.server.DeviceImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.OpDevice;
-import static us.mn.state.dot.tms.server.comm.mndot.Op170.MNDOT_LOG;
 
 /**
  * 170 Device operation
@@ -25,24 +24,6 @@ import static us.mn.state.dot.tms.server.comm.mndot.Op170.MNDOT_LOG;
  * @author Douglas Lau
  */
 abstract public class Op170Device extends OpDevice {
-
-	/** Log an error msg */
-	protected void logError(String msg) {
-		if (MNDOT_LOG.isOpen())
-			MNDOT_LOG.log(controller.getName() + "! " + msg);
-	}
-
-	/** Log a property query */
-	protected void logQuery(MndotProperty prop) {
-		if (MNDOT_LOG.isOpen())
-			MNDOT_LOG.log(controller.getName() + ": " + prop);
-	}
-
-	/** Log a property store */
-	protected void logStore(MndotProperty prop) {
-		if (MNDOT_LOG.isOpen())
-			MNDOT_LOG.log(controller.getName() + ":= " + prop);
-	}
 
 	/** Create a new 170 device operation */
 	protected Op170Device(PriorityLevel p, DeviceImpl d) {

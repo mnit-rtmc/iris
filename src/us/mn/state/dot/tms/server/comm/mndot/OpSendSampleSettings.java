@@ -36,6 +36,7 @@ public class OpSendSampleSettings extends Op170 {
 	}
 
 	/** Create the first phase of the operation */
+	@Override
 	protected Phase phaseOne() {
 		return new SynchronizeClock();
 	}
@@ -61,37 +62,37 @@ public class OpSendSampleSettings extends Op170 {
 				Address.CABINET_TYPE, data);
 			mess.add(cab_mem);
 			mess.queryProps();
-			logQuery(cab_mem);
 			checkCabinetStyle(data[0]);
 			return new QueryPromVersion();
 		}
 	}
 
 	/** Check the dip switch settings against the selected cabinet style */
-	protected void checkCabinetStyle(int dips) {
+	private void checkCabinetStyle(int dips) {
 		Integer d = lookupDips();
-		if(d != null && d != dips)
+		if (d != null && d != dips)
 			setMaintStatus("CABINET STYLE " + dips);
 	}
 
 	/** Lookup the correct dip switch setting to the controller */
-	protected Integer lookupDips() {
+	private Integer lookupDips() {
 		Cabinet cab = controller.getCabinet();
-		if(cab != null) {
+		if (cab != null) {
 			CabinetStyle style = cab.getStyle();
-			if(style != null)
+			if (style != null)
 				return style.getDip();
 		}
 		return null;
 	}
 
 	/** Set the controller firmware version */
-	protected void setVersion(int major, int minor) {
+	private void setVersion(int major, int minor) {
 		String v = Integer.toString(major) + "." +
 			Integer.toString(minor);
 		controller.setVersion(v);
-		if(major < 4 || (major == 4 && minor < 2) ||
-			(major == 5 && minor < 4))
+		if ((major < 4)
+		 || (major == 4 && minor < 2)
+		 || (major == 5 && minor < 4))
 		{
 			logError("BUGGY 170 firmware! (version " + v + ")");
 		}
@@ -107,7 +108,6 @@ public class OpSendSampleSettings extends Op170 {
 				Address.PROM_VERSION, data);
 			mess.add(ver_mem);
 			mess.queryProps();
-			logQuery(ver_mem);
 			setVersion(data[0], data[1]);
 			return new QueueBitmap();
 		}
@@ -122,7 +122,6 @@ public class OpSendSampleSettings extends Op170 {
 			MemoryProperty queue_mem = new MemoryProperty(
 				Address.QUEUE_BITMAP, data);
 			mess.add(queue_mem);
-			logStore(queue_mem);
 			mess.storeProps();
 			return null;
 		}
@@ -131,15 +130,15 @@ public class OpSendSampleSettings extends Op170 {
 	/** Get the queue detector bitmap */
 	public byte[] getQueueBitmap() {
 		byte[] bitmap = new byte[DETECTOR_INPUTS / 8];
-		for(int inp = 0; inp < DETECTOR_INPUTS; inp++) {
-			if(isQueueDetector(inp))
+		for (int inp = 0; inp < DETECTOR_INPUTS; inp++) {
+			if (isQueueDetector(inp))
 				bitmap[inp / 8] |= 1 << (inp % 8);
 		}
 		return bitmap;
 	}
 
 	/** Test if a detector input has a queue detector associated */
-	protected boolean isQueueDetector(int inp) {
+	private boolean isQueueDetector(int inp) {
 		DetectorImpl d = controller.getDetectorAtPin(
 			FIRST_DETECTOR_PIN + inp);
 		return d != null && d.getLaneType() == LaneType.QUEUE.ordinal();

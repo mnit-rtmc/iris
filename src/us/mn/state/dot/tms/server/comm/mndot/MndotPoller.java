@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
@@ -44,6 +45,9 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
 public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	MeterPoller, SamplePoller, BeaconPoller, LaneMarkingPoller
 {
+	/** MnDOT 170 debug log */
+	static protected final DebugLog MNDOT_LOG = new DebugLog("mndot170");
+
 	/** Get the meter number on the controller. */
 	static protected int getMeterNumber(RampMeterImpl meter) {
 		if (meter.isActive()) {
@@ -263,5 +267,11 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 			// Ignore other requests
 			break;
 		}
+	}
+
+	/** Get the protocol debug log */
+	@Override
+	protected DebugLog protocolLog() {
+		return MNDOT_LOG;
 	}
 }

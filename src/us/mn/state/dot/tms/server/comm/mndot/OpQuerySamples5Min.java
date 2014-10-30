@@ -38,13 +38,13 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	static private final int MAX_SCANS = 18000;
 
 	/** Maximum number of records to read with "BAD TIMESTAMP" errors */
-	static protected final int MAX_BAD_RECORDS = 5;
+	static private final int MAX_BAD_RECORDS = 5;
 
 	/** Oldest time stamp to accept from controller */
-	protected final long oldest;
+	private final long oldest;
 
 	/** Newest timestamp to accept from controller */
-	protected final long newest;
+	private final long newest;
 
 	/** Count of records with "BAD TIMESTAMP" errors */
 	protected int n_bad = 0;
@@ -72,10 +72,10 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	protected class GetNextRecord extends Phase {
 
 		/** Binned data record */
-		protected byte[] rec;
+		private byte[] rec;
 
 		/** Try to get and delete the next record */
-		protected int tryNextRecord(CommMessage mess)
+		private int tryNextRecord(CommMessage mess)
 			throws IOException
 		{
 			BinnedDataProperty bin = new BinnedDataProperty();
@@ -89,9 +89,9 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 		}
 
 		/** Test if the timestamp is out of the valid range */
-		protected boolean isStampBad() {
+		private boolean isStampBad() {
 			long s = getStamp();
-			if(s < oldest || s > newest) {
+			if (s < oldest || s > newest) {
 				logError("BAD TIMESTAMP: " + new Date(s));
 				return true;
 			} else
@@ -99,25 +99,25 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 		}
 
 		/** Collect 5-minute data from the controller */
+		@Override
 		protected Phase poll(CommMessage mess) throws IOException {
 			int recs = 0;
 			try {
 				recs = tryNextRecord(mess);
-				if(isStampBad()) {
-					if(++n_bad > MAX_BAD_RECORDS)
+				if (isStampBad()) {
+					if (++n_bad > MAX_BAD_RECORDS)
 						return null;
 					else
 						return this;
 				}
 			}
-			catch(ControllerException e) {
+			catch (ControllerException e) {
 				setMaintStatus(e.getMessage());
 				rec = new byte[75];
 				MemoryProperty rec_mem = new MemoryProperty(
 					Address.DATA_BUFFER_5_MINUTE, rec);
 				mess.add(rec_mem);
 				mess.queryProps();
-				logQuery(rec_mem);
 				setStamp();
 			}
 			processData(rec);
@@ -137,8 +137,8 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	}
 
 	/** Update meter with the most recent 5-minute green count */
-	protected void updateGreenCount(RampMeterImpl meter, int g) {
-		if(meter != null) {
+	private void updateGreenCount(RampMeterImpl meter, int g) {
+		if (meter != null) {
 			meter.updateGreenCount5(getStamp(),
 				adjustGreenCount(meter, g));
 		}

@@ -28,11 +28,11 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpQueryAlarms extends Op170 {
 
 	/** Parse alarm special function input data */
-	static protected boolean[] parseAlarms(byte[] data) {
+	static private boolean[] parseAlarms(byte[] data) {
 		boolean[] alarms = new boolean[10];
-		for(int i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			alarms[i] = 1 == ((data[0] >> (i + 3)) & 1);
-		for(int i = 0; i < 5; i++)
+		for (int i = 0; i < 5; i++)
 			alarms[i + 5] = 1 == ((data[1] >> i) & 1);
 		return alarms;
 	}
@@ -43,6 +43,7 @@ public class OpQueryAlarms extends Op170 {
 	}
 
 	/** Create the first phase of the operation */
+	@Override
 	protected Phase phaseOne() {
 		return new GetAlarms();
 	}
@@ -57,12 +58,11 @@ public class OpQueryAlarms extends Op170 {
 				Address.ALARM_INPUTS, data);
 			mess.add(alarm_mem);
 			mess.queryProps();
-			logQuery(alarm_mem);
 			boolean[] alarms = parseAlarms(data);
-			for(int i = 0; i < 10; i++) {
+			for (int i = 0; i < 10; i++) {
 				int pin = ALARM_PIN + i;
 				AlarmImpl a = controller.getAlarm(pin);
-				if(a != null)
+				if (a != null)
 					a.setStateNotify(alarms[i]);
 			}
 			return null;

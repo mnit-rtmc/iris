@@ -34,7 +34,7 @@ public class OpQueryMeterStatus extends Op170 {
 	static protected final int POLICE_PANEL_BIT = 1 << 4;
 
 	/** Parse the red time from a BCD byte array */
-	static protected int parseRedTime(byte[] data) throws IOException {
+	static private int parseRedTime(byte[] data) throws IOException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(data);
 		BCDInputStream is = new BCDInputStream(bis);
 		return is.read4();
@@ -64,11 +64,10 @@ public class OpQueryMeterStatus extends Op170 {
 				Address.RAMP_METER_DATA, s);
 			mess.add(stat_mem);
 			mess.queryProps();
-			logQuery(stat_mem);
 			long stamp = TimeSteward.currentTimeMillis();
-			if(meter1 != null)
+			if (meter1 != null)
 				parseMeterData(meter1, 1, s, 0, stamp);
-			if(meter2 != null) {
+			if (meter2 != null) {
 				parseMeterData(meter2, 2, s,
 					Address.OFF_METER_2, stamp);
 			}
@@ -98,7 +97,6 @@ public class OpQueryMeterStatus extends Op170 {
 				data);
 			mess.add(red_mem);
 			mess.queryProps();
-			logQuery(red_mem);
 			float red = parseRedTime(data) / 10.0f;
 			int rate = RedTime.toReleaseRate(red,
 				meter.getMeterType());
