@@ -34,10 +34,10 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 abstract public class MndotProperty extends ControllerProperty {
 
 	/** Offset for DROP/CAT or DROP/STAT field */
-	static protected final int OFF_DROP_CAT = 0;
+	static private final int OFF_DROP_CAT = 0;
 
 	/** Offset for message length field */
-	static protected final int OFF_LENGTH = 1;
+	static private final int OFF_LENGTH = 1;
 
 	/** Offset for message payload field */
 	static protected final int OFF_PAYLOAD = 2;
