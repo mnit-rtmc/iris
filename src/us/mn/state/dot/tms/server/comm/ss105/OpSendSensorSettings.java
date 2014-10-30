@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,8 +57,7 @@ public class OpSendSensorSettings extends OpSS105 {
 			TimeIntervalProperty ti = new TimeIntervalProperty();
 			mess.add(ti);
 			mess.queryProps();
-			logQuery(ti);
-			if(ti.value == BINNING_INTERVAL)
+			if (ti.value == BINNING_INTERVAL)
 				return new GetClassification();
 			else
 				return new SetTimeInterval();
@@ -76,7 +75,6 @@ public class OpSendSensorSettings extends OpSS105 {
 				BINNING_INTERVAL);
 			mess.add(ti);
 			mess.storeProps();
-			logStore(ti);
 			return new GetClassification();
 		}
 	}
@@ -91,8 +89,7 @@ public class OpSendSensorSettings extends OpSS105 {
 			ClassificationProperty c = new ClassificationProperty();
 			mess.add(c);
 			mess.queryProps();
-			logQuery(c);
-			if(c.isDefault())
+			if (c.isDefault())
 				return new QueryVersion();
 			else
 				return new SetClassification();
@@ -108,7 +105,6 @@ public class OpSendSensorSettings extends OpSS105 {
 		{
 			ClassificationProperty c = new ClassificationProperty();
 			mess.add(c);
-			logStore(c);
 			mess.storeProps();
 			return new QueryVersion();
 		}
@@ -125,7 +121,6 @@ public class OpSendSensorSettings extends OpSS105 {
 			mess.add(vr);
 			try {
 				mess.queryProps();
-				logQuery(vr);
 				controller.setVersion(vr.getVersion());
 			}
 			catch(SocketTimeoutException e) {
@@ -144,7 +139,6 @@ public class OpSendSensorSettings extends OpSS105 {
 		{
 			TimeProperty tr = new TimeProperty();
 			mess.add(tr);
-			logStore(tr);
 			mess.storeProps();
 			return null;
 		}

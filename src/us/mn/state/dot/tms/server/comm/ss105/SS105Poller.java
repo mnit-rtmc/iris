@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.ss105;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -29,6 +30,9 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
 public class SS105Poller extends MessagePoller<SS105Property>
 	implements SamplePoller
 {
+	/** SS 105 debug log */
+	static protected final DebugLog SS105_LOG = new DebugLog("ss105");
+
 	/** Create a new SS105 poller */
 	public SS105Poller(String n, Messenger m) {
 		super(n, m);
@@ -72,5 +76,11 @@ public class SS105Poller extends MessagePoller<SS105Property>
 			if(c.hasActiveDetector())
 				addOperation(new OpQuerySamples(c, p));
 		}
+	}
+
+	/** Get the protocol debug log */
+	@Override
+	protected DebugLog protocolLog() {
+		return SS105_LOG;
 	}
 }

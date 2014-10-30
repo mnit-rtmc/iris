@@ -79,7 +79,6 @@ public class OpQuerySamples extends OpSS105 {
 		{
 			mess.add(samples);
 			mess.queryProps();
-			logQuery(samples);
 			stamp = samples.timestamp.getTime();
 			if(stamp < oldest || stamp > newest) {
 				logError("BAD TIMESTAMP: " + new Date(stamp));

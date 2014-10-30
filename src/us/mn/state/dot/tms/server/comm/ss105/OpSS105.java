@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,10 @@
  */
 package us.mn.state.dot.tms.server.comm.ss105;
 
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import static us.mn.state.dot.tms.server.comm.ss105.SS105Poller.SS105_LOG;
 
 /**
  * Operation for SS105 device
@@ -26,25 +26,10 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 abstract public class OpSS105 extends OpController<SS105Property> {
 
-	/** SS 105 debug log */
-	static private final DebugLog SS105_LOG = new DebugLog("ss105");
-
 	/** Log an error msg */
 	protected void logError(String msg) {
-		if(SS105_LOG.isOpen())
+		if (SS105_LOG.isOpen())
 			SS105_LOG.log(controller.getName() + "! " + msg);
-	}
-
-	/** Log a property query */
-	protected void logQuery(SS105Property prop) {
-		if(SS105_LOG.isOpen())
-			SS105_LOG.log(controller.getName() + ": " + prop);
-	}
-
-	/** Log a property store */
-	protected void logStore(SS105Property prop) {
-		if(SS105_LOG.isOpen())
-			SS105_LOG.log(controller.getName() + ":= " + prop);
 	}
 
 	/** Create a new SS105 operation */
