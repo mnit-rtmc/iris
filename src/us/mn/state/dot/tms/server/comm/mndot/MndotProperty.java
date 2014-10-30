@@ -265,15 +265,6 @@ abstract public class MndotProperty extends ControllerProperty {
 		// Override if necessary
 	}
 
-	/** Perform a "GET" request */
-	public void doGetRequest(Message m) throws IOException {
-		m.input.skip(m.input.available());
-		ControllerImpl c = m.getController();
-		encodeQuery(c, m.output);
-		m.output.flush();
-		decodeQuery(c, m.input);
-	}
-
 	/** Decode a STORE response */
 	@Override
 	public void decodeStore(ControllerImpl c, InputStream is)
@@ -289,14 +280,5 @@ abstract public class MndotProperty extends ControllerProperty {
 	 * @throws IOException on parse errors. */
 	protected void parseStore(byte[] pkt) throws IOException {
 		// Override if necessary
-	}
-
-	/** Perform a "SET" request */
-	public void doSetRequest(Message m) throws IOException {
-		m.input.skip(m.input.available());
-		ControllerImpl c = m.getController();
-		encodeStore(c, m.output);
-		m.output.flush();
-		decodeStore(c, m.input);
 	}
 }

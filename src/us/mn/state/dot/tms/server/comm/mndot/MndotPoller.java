@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
-import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.LaneMarkingPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
@@ -64,13 +63,6 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	public MndotPoller(String n, Messenger m, CommProtocol p) {
 		super(n, m);
 		protocol = p;
-	}
-
-	/** Create a new message for the specified controller */
-	@Override
-	public CommMessage createMessage(ControllerImpl c) throws IOException {
-		return new Message(messenger.getOutputStream(c),
-			messenger.getInputStream("", c), c);
 	}
 
 	/** Check if a drop address is valid */
