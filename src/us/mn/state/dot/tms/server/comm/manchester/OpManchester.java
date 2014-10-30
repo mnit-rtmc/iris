@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.manchester;
 
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -26,16 +25,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 abstract public class OpManchester extends OpDevice<ManchesterProperty> {
-
-	/** Manchester debug log */
-	static private final DebugLog MANCHESTER_LOG =
-		new DebugLog("manchester");
-
-	/** Log a property store */
-	protected void logStore(ManchesterProperty prop) {
-		if (MANCHESTER_LOG.isOpen())
-			MANCHESTER_LOG.log(controller.getName() + ":= " + prop);
-	}
 
 	/** Operation timeout in milliseconds */
 	static private final int OP_TIMEOUT_MS = 30000;

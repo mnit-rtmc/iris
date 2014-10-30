@@ -76,7 +76,6 @@ public class OpDeviceRequest extends OpManchester {
 			CommMessage<ManchesterProperty> mess) throws IOException
 		{
 			mess.add(prop);
-			logStore(prop);
 			mess.storeProps();
 			return (is_reset) ? new PowerOnPhase() : null;
 		}
@@ -100,7 +99,6 @@ public class OpDeviceRequest extends OpManchester {
 			else
 				TimeSteward.sleep_well(2000);
 			mess.add(p);
-			logStore(p);
 			mess.storeProps();
 			n_sent++;
 			return (n_sent < 4) ? this : null;

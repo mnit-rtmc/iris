@@ -64,6 +64,7 @@ public class OpMoveCamera extends OpManchester {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase<ManchesterProperty> phaseTwo() {
 		return new Move();
 	}
@@ -76,21 +77,12 @@ public class OpMoveCamera extends OpManchester {
 			CommMessage<ManchesterProperty> mess) throws IOException
 		{
 			sleepUntilReady();
-			if (pan != 0) {
-				PanProperty p = new PanProperty(pan);
-				logStore(p);
-				mess.add(p);
-			}
-			if (tilt != 0) {
-				TiltProperty p = new TiltProperty(tilt);
-				logStore(p);
-				mess.add(p);
-			}
-			if (zoom != 0) {
-				ZoomProperty p = new ZoomProperty(zoom);
-				logStore(p);
-				mess.add(p);
-			}
+			if (pan != 0)
+				mess.add(new PanProperty(pan));
+			if (tilt != 0)
+				mess.add(new TiltProperty(tilt));
+			if (zoom != 0)
+				mess.add(new ZoomProperty(zoom));
 			mess.storeProps();
 			if (isStopCmd() || isExpired())
 				return null;

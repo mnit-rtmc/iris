@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.manchester;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
@@ -31,6 +32,10 @@ import us.mn.state.dot.tms.server.comm.TransientPoller;
 public class ManchesterPoller extends TransientPoller<ManchesterProperty>
 	implements CameraPoller
 {
+	/** Manchester debug log */
+	static private final DebugLog MANCHESTER_LOG =
+		new DebugLog("manchester");
+
 	/** Highest allowed address for Manchester protocol */
 	static protected final int ADDRESS_MAX = 1024;
 
@@ -68,5 +73,11 @@ public class ManchesterPoller extends TransientPoller<ManchesterProperty>
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest r) {
 		addOperation(new OpDeviceRequest(c, r));
+	}
+
+	/** Get the protocol debug log */
+	@Override
+	protected DebugLog protocolLog() {
+		return MANCHESTER_LOG;
 	}
 }

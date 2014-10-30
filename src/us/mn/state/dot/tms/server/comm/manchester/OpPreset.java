@@ -35,6 +35,7 @@ public class OpPreset extends OpManchester {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase<ManchesterProperty> phaseTwo() {
 		return new CommandPreset();
 	}
@@ -47,7 +48,6 @@ public class OpPreset extends OpManchester {
 			CommMessage<ManchesterProperty> mess) throws IOException
 		{
 			mess.add(prop);
-			logStore(prop);
 			mess.storeProps();
 			return null;
 		}
