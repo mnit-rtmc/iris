@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -164,19 +164,20 @@ public class PortConfig {
 	}
 
 	/** Get a string representation */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if(isX3())
+		if (isX3())
 			sb.append("X3,");
 		else
 			sb.append("G4,");
-		if(isHighOccupancy())
+		if (isHighOccupancy())
 			sb.append("high_occ,");
 		sb.append(getMode());
 		sb.append(',');
 		sb.append(getPortType());
 		sb.append(',');
-		if(isRTSCTS())
+		if (isRTSCTS())
 			sb.append("rts_cts,");
 		sb.append(getBaudRate());
 		return sb.toString();

@@ -103,13 +103,14 @@ public class RTCProperty extends G4Property {
 
 	/** Parse RTC data */
 	private void parseRTC(byte[] data) throws ParsingException {
-		if(data.length != 14)
+		if (data.length != 14)
 			throw new ParsingException("INVALID RTC LENGTH");
 		stamp = parseStamp(data, 0);
 		reset_stamp = parseStamp(data, 7);
 	}
 
 	/** Get a string representation of the RTC property */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("time:");

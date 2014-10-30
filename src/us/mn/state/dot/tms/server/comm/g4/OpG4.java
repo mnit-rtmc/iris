@@ -15,10 +15,10 @@
  */
 package us.mn.state.dot.tms.server.comm.g4;
 
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import static us.mn.state.dot.tms.server.comm.g4.G4Poller.G4_LOG;
 
 /**
  * Operation for G4 device
@@ -28,25 +28,10 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 abstract public class OpG4 extends OpController<G4Property> {
 
-	/** Debug log */
-	static private final DebugLog G4_LOG = new DebugLog("g4");
-
 	/** Log an error msg */
 	protected void logError(String msg) {
-		if(G4_LOG.isOpen())
+		if (G4_LOG.isOpen())
 			G4_LOG.log(controller.getName() + "! " + msg);
-	}
-
-	/** Log a property query */
-	protected void logQuery(G4Property prop) {
-		if(G4_LOG.isOpen())
-			G4_LOG.log(controller.getName() + ": " + prop);
-	}
-
-	/** Log a property store */
-	protected void logStore(G4Property prop) {
-		if(G4_LOG.isOpen())
-			G4_LOG.log(controller.getName() + ":= " + prop);
 	}
 
 	/** Create a new G4 operation */

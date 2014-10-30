@@ -61,10 +61,11 @@ public class SensorInfoProperty extends G4Property {
 	/** Parse the data from one frame.
 	 * @param qual Qualifier code.
 	 * @param data Data packet. */
-	@Override protected void parseData(QualCode qual, byte[] data)
+	@Override
+	protected void parseData(QualCode qual, byte[] data)
 		throws IOException
 	{
-		switch(qual) {
+		switch (qual) {
 		case INFORMATION:
 			parseInformation(data);
 			break;
@@ -117,7 +118,7 @@ public class SensorInfoProperty extends G4Property {
 
 	/** Parse sensor information data */
 	private void parseInformation(byte[] data) throws ParsingException {
-		if(data.length != 14)
+		if (data.length != 14)
 			throw new ParsingException("INVALID INFO LENGTH");
 		mcu_rev = parse8(data, OFF_MCU_REV);
 		mcu_build = parse8(data, OFF_MCU_BUILD);
@@ -134,6 +135,7 @@ public class SensorInfoProperty extends G4Property {
 	}
 
 	/** Get a string representation of the statistical property */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("mcu_rev:");

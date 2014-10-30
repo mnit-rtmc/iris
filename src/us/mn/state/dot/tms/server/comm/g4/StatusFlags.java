@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,21 +49,21 @@ public class StatusFlags {
 		boolean m, boolean ts, boolean c, boolean mph)
 	{
 		int fs = 0;
-		if(f)
+		if (f)
 			fs |= FLAG_FIFO;
-		if(dl)
+		if (dl)
 			fs |= FLAG_DUAL_LOOP;
-		if(sf)
+		if (sf)
 			fs |= FLAG_6_FT;
-		if(z)
+		if (z)
 			fs |= FLAG_HIGH_Z;
-		if(m)
+		if (m)
 			fs |= FLAG_MEMORY;
-		if(ts)
+		if (ts)
 			fs |= FLAG_STAMP;
-		if(c)
+		if (c)
 			fs |= FLAG_CLOSURE;
-		if(mph)
+		if (mph)
 			fs |= FLAG_MPH;
 		flags = fs;
 	}
@@ -114,25 +114,26 @@ public class StatusFlags {
 	}
 
 	/** Get a string representation */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if(isFifo())
+		if (isFifo())
 			sb.append("fifo,");
-		if(isDualLoop())
+		if (isDualLoop())
 			sb.append("2loop,");
-		if(isSixFoot())
+		if (isSixFoot())
 			sb.append("6ft,");
-		if(isHighZ())
+		if (isHighZ())
 			sb.append("hiZ,");
-		if(isMemory())
+		if (isMemory())
 			sb.append("mem,");
-		if(isStamp())
+		if (isStamp())
 			sb.append("stamp,");
-		if(isClosure())
+		if (isClosure())
 			sb.append("closure,");
-		if(isMph())
+		if (isMph())
 			sb.append("mph,");
-		if(sb.length() > 0)
+		if (sb.length() > 0)
 			sb.deleteCharAt(sb.length() - 1);
 		return sb.toString();
 	}

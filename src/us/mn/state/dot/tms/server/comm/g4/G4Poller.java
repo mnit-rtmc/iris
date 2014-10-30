@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server.comm.g4;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
@@ -29,12 +30,16 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  */
 public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 
+	/** Debug log */
+	static protected final DebugLog G4_LOG = new DebugLog("g4");
+
 	/** Create a new G4 poller */
 	public G4Poller(String n, Messenger m) {
 		super(n, m);
 	}
 
 	/** Check if a sensor id is valid */
+	@Override
 	public boolean isAddressValid(int drop) {
 		return drop >= 0 && drop < 65536;
 	}
@@ -42,14 +47,14 @@ public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		if(c.getActive())
+		if (c.getActive())
 			addOperation(new OpSendSensorSettings(c, true));
 	}
 
 	/** Send sample settings to a controller. */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		if(c.getActive())
+		if (c.getActive())
 			addOperation(new OpSendSensorSettings(c, false));
 	}
 
@@ -58,8 +63,8 @@ public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
  	 * @param p Sample period in seconds. */
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
-		if(p == 30) {
-			if(c.hasActiveDetector())
+		if (p == 30) {
+			if (c.hasActiveDetector())
 				addOperation(new OpQueryStats(c, p));
 		}
 	}

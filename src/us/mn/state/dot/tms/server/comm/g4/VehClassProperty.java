@@ -52,7 +52,7 @@ public class VehClassProperty extends G4Property {
 	protected void parseData(QualCode qual, byte[] data)
 		throws IOException
 	{
-		switch(qual) {
+		switch (qual) {
 		case CLASSIFICATION:
 			parseClassification(data);
 			break;
@@ -67,7 +67,7 @@ public class VehClassProperty extends G4Property {
 		throws IOException
 	{
 		byte[] data = new byte[G4VehClass.size];
-		for(int i = 0; i < data.length; i++) {
+		for (int i = 0; i < data.length; i++) {
 			G4VehClass vc = G4VehClass.fromOrdinal(i + 1);
 			format8(data, i, getClassLen(vc));
 		}
@@ -98,19 +98,20 @@ public class VehClassProperty extends G4Property {
 
 	/** Parse classification data */
 	private void parseClassification(byte[] data) throws ParsingException {
-		if(data.length != G4VehClass.size)
+		if (data.length != G4VehClass.size)
 			throw new ParsingException("INVALID CLASS LENGTH");
-		for(int i = 0; i < data.length; i++) {
+		for (int i = 0; i < data.length; i++) {
 			G4VehClass vc = G4VehClass.fromOrdinal(i + 1);
 			setClassLen(vc, parse8(data, i));
 		}
 	}
 
 	/** Get a string representation of the vehicle classifications */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		for(G4VehClass vc: G4VehClass.values()) {
-			if(sb.length() > 0)
+		for (G4VehClass vc: G4VehClass.values()) {
+			if (sb.length() > 0)
 				sb.append(' ');
 			sb.append(vc);
 			sb.append(':');

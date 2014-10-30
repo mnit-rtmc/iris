@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ public class OpSendSensorSettings extends OpG4 {
 	}
 
 	/** Create the first phase of the operation */
+	@Override
 	protected Phase<G4Property> phaseOne() {
 		return new QuerySensorInfo();
 	}
@@ -70,7 +71,6 @@ public class OpSendSensorSettings extends OpG4 {
 		{
 			mess.add(sensor_info);
 			mess.queryProps();
-			logQuery(sensor_info);
 			controller.setVersion(sensor_info.getVersion());
 			return new QuerySetupInfo();
 		}
@@ -85,8 +85,7 @@ public class OpSendSensorSettings extends OpG4 {
 		{
 			mess.add(setup_info);
 			mess.queryProps();
-			logQuery(setup_info);
-			if(shouldUpdateSetupInfo())
+			if (shouldUpdateSetupInfo())
 				return new StoreSetupInfo();
 			else
 				return new QueryClassConfig();
@@ -159,7 +158,6 @@ public class OpSendSensorSettings extends OpG4 {
 		{
 			updateSetupInfo();
 			mess.add(setup_info);
-			logStore(setup_info);
 			mess.storeProps();
 			return new QueryClassConfig();
 		}
@@ -174,8 +172,7 @@ public class OpSendSensorSettings extends OpG4 {
 		{
 			mess.add(class_config);
 			mess.queryProps();
-			logQuery(class_config);
-			if(shouldUpdateClassConfig())
+			if (shouldUpdateClassConfig())
 				return new StoreClassConfig();
 			else
 				return new QueryRTC();
@@ -184,10 +181,10 @@ public class OpSendSensorSettings extends OpG4 {
 
 	/** Check if the vehicle class config should be updated */
 	private boolean shouldUpdateClassConfig() {
-		for(G4VehClass vc: G4VehClass.values()) {
+		for (G4VehClass vc: G4VehClass.values()) {
 			int dm = class_config.getClassLen(vc);
 			int lb = vc.v_class.lower_bound.round(DECIMETERS);
-			if(dm != lb)
+			if (dm != lb)
 				return true;
 		}
 		return false;
@@ -202,7 +199,6 @@ public class OpSendSensorSettings extends OpG4 {
 		{
 			updateClassConfig();
 			mess.add(class_config);
-			logStore(class_config);
 			mess.storeProps();
 			return new QueryRTC();
 		}
@@ -225,8 +221,7 @@ public class OpSendSensorSettings extends OpG4 {
 		{
 			mess.add(rtc);
 			mess.queryProps();
-			logQuery(rtc);
-			if(shouldUpdateRTC())
+			if (shouldUpdateRTC())
 				return new StoreRTC();
 			else
 				return null;
@@ -255,7 +250,6 @@ public class OpSendSensorSettings extends OpG4 {
 		{
 			updateRTC();
 			mess.add(rtc);
-			logStore(rtc);
 			mess.storeProps();
 			return null;
 		}

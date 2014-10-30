@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,13 +55,13 @@ public class StatComposition {
 	/** Create a new statistical composition code */
 	public StatComposition(boolean g, boolean h, boolean s85, int vc) {
 		int c = 0;
-		if(g)
+		if (g)
 			c |= FLAG_GAP;
-		if(h)
+		if (h)
 			c |= FLAG_HEADWAY;
-		if(s85)
+		if (s85)
 			c |= FLAG_SPEED85;
-		switch(vc) {
+		switch (vc) {
 		case 2:
 			c |= CLASSES_2;
 			break;
@@ -98,7 +98,7 @@ public class StatComposition {
 	/** Get the count of vehicle classes */
 	public int getClassCount() {
 		int c = comp & MASK_CLASS;
-		switch(c) {
+		switch (c) {
 		case CLASSES_2:
 			return 2;
 		case CLASSES_4:
@@ -111,13 +111,14 @@ public class StatComposition {
 	}
 
 	/** Get a string representation */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		if(hasGap())
+		if (hasGap())
 			sb.append("gap,");
-		if(hasHeadway())
+		if (hasHeadway())
 			sb.append("headway,");
-		if(hasSpeed85())
+		if (hasSpeed85())
 			sb.append("speed85,");
 		sb.append(getClassCount());
 		sb.append("_classes");

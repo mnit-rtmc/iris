@@ -64,7 +64,7 @@ public class SetupInfoProperty extends G4Property {
 	protected void parseData(QualCode qual, byte[] data)
 		throws IOException
 	{
-		switch(qual) {
+		switch (qual) {
 		case SETUP:
 			parseSetup(data);
 			break;
@@ -193,7 +193,7 @@ public class SetupInfoProperty extends G4Property {
 
 	/** Parse setup information data */
 	private void parseSetup(byte[] data) throws ParsingException {
-		if(data.length != 15)
+		if (data.length != 15)
 			throw new ParsingException("INVALID SETUP LENGTH");
 		new_id = parse16(data, OFF_NEW_ID);
 		n_zones = parse8(data, OFF_ZONES);
@@ -223,6 +223,7 @@ public class SetupInfoProperty extends G4Property {
 	}
 
 	/** Get a string representation of the statistical property */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("id:");

@@ -124,9 +124,9 @@ public class StatProperty extends G4Property {
 	/** Get the volume for the specified vehicle class.
 	 * @param vcls Vehicle class. */
 	public int[] getVolume(G4VehClass vcls) {
-		if(vcls != G4VehClass.SMALL) {
+		if (vcls != G4VehClass.SMALL) {
 			int[] vol = new int[MAX_LANES];
-			for(int i = 0; i < MAX_LANES; i++)
+			for (int i = 0; i < MAX_LANES; i++)
 				vol[i] = vol_class[i][vcls.ordinal()];
 			return vol;
 		} else
@@ -137,14 +137,14 @@ public class StatProperty extends G4Property {
 	 * not included in vehicle classes 1 through 5. */
 	private int[] getSmallClass() {
 		int[] vol = new int[MAX_LANES];
-		for(int i = 0; i < MAX_LANES; i++) {
+		for (int i = 0; i < MAX_LANES; i++) {
 			int v = volume[i];
-			for(int j = 1; j < G4VehClass.size; j++) {
+			for (int j = 1; j < G4VehClass.size; j++) {
 				int vc = vol_class[i][j];
-				if(vc > 0)
+				if (vc > 0)
 					v -= vc;
 			}
-			if(v >= 0)
+			if (v >= 0)
 				vol[i] = v;
 			else
 				vol[i] = MISSING_DATA;
@@ -156,14 +156,14 @@ public class StatProperty extends G4Property {
 	 * @param p Binning period (seconds). */
 	public StatProperty(int p) {
 		period = p;
-		for(int i = 0; i < MAX_LANES; i++) {
+		for (int i = 0; i < MAX_LANES; i++) {
 			volume[i] = MISSING_DATA;
 			scans[i] = MISSING_DATA;
 			speed[i] = MISSING_DATA;
 			gap[i] = MISSING_DATA;
 			headway[i] = MISSING_DATA;
 			speed85[i] = MISSING_DATA;
-			for(int j = 0; j < G4VehClass.size; j++)
+			for (int j = 0; j < G4VehClass.size; j++)
 				vol_class[i][j] = MISSING_DATA;
 		}
 	}
@@ -235,7 +235,7 @@ public class StatProperty extends G4Property {
 	@Override protected void parseData(QualCode qual, byte[] data)
 		throws IOException
 	{
-		switch(qual) {
+		switch (qual) {
 		case STAT_HEADER:
 			parseStatHeader(data);
 			break;
@@ -282,7 +282,7 @@ public class StatProperty extends G4Property {
 
 	/** Parse statistical header data */
 	private void parseStatHeader(byte[] data) throws ParsingException {
-		if(data.length != 22)
+		if (data.length != 22)
 			throw new ParsingException("INVALID HEADER LENGTH");
 		msg_num = parse8(data, OFF_MSG_NUM);
 		page_num = parse16(data, OFF_PAGE_NUM);
@@ -290,10 +290,10 @@ public class StatProperty extends G4Property {
 		stamp = parseStamp(data, OFF_STAMP);
 		n_zones = parse8(data, OFF_ZONES);
 		msg_comp = new StatComposition(parse8(data, OFF_COMP));
-		if(msg_comp.getClassCount() == 0)
+		if (msg_comp.getClassCount() == 0)
 			throw new ParsingException("INVALID COMP");
 		msg_period = parse16(data, OFF_PERIOD);
-		if(msg_period != period)
+		if (msg_period != period)
 			throw new ParsingException("INVALID PERIOD");
 		volt = parse8(data, OFF_VOLT);
 		health = parse8(data, OFF_HEALTH);
@@ -302,51 +302,51 @@ public class StatProperty extends G4Property {
 
 	/** Parse statistical volume data */
 	private void parseVolume(byte[] data) throws ParsingException {
-		if(data.length != getZones() * 2)
+		if (data.length != getZones() * 2)
 			throw new ParsingException("INVALID VOLUME LENGTH");
-		for(int i = 0; i < getZones(); i++) {
+		for (int i = 0; i < getZones(); i++) {
 			int val = parse16(data, i * 2);
-			if(val >= 0 && val <= MAX_VOLUME)
+			if (val >= 0 && val <= MAX_VOLUME)
 				volume[i] = val;
 		}
 	}
 
 	/** Parse statistical occupancy data */
 	private void parseOccupancy(byte[] data) throws ParsingException {
-		if(data.length != getZones() * 2)
+		if (data.length != getZones() * 2)
 			throw new ParsingException("INVALID OCCUPANCY LENGTH");
-		for(int i = 0; i < getZones(); i++) {
+		for (int i = 0; i < getZones(); i++) {
 			int val = parse16(data, i * 2);
-			if(val >= 0 && val <= MAX_SCANS)
+			if (val >= 0 && val <= MAX_SCANS)
 				scans[i] = val;
 		}
 	}
 
 	/** Parse statistical speed data */
 	private void parseSpeed(byte[] data) throws ParsingException {
-		if(data.length != getZones() * 2)
+		if (data.length != getZones() * 2)
 			throw new ParsingException("INVALID SPEED LENGTH");
-		for(int i = 0; i < getZones(); i++) {
+		for (int i = 0; i < getZones(); i++) {
 			int val = parse16(data, i * 2);
-			if(val >= 0 && val <= MAX_SPEED)
+			if (val >= 0 && val <= MAX_SPEED)
 				speed[i] = asMph(val);
 		}
 	}
 
 	/** Parse statistical gap data */
 	private void parseGap(byte[] data) throws ParsingException {
-		if(data.length != getZones() * 2)
+		if (data.length != getZones() * 2)
 			throw new ParsingException("INVALID GAP LENGTH");
-		for(int i = 0; i < getZones(); i++) {
+		for (int i = 0; i < getZones(); i++) {
 			int val = parse16(data, i * 2);
-			if(val >= 0 && val <= MAX_GAP)
+			if (val >= 0 && val <= MAX_GAP)
 				gap[i] = val;
 		}
 	}
 
 	/** Get a speed sample in mph units */
 	private int asMph(int val) {
-		if(stat_flags.isMph())
+		if (stat_flags.isMph())
 			return val;
 		else
 			return kphToMph(val);
@@ -356,48 +356,49 @@ public class StatProperty extends G4Property {
 	private void parseC(G4VehClass vcls, byte[] data)
 		throws ParsingException
 	{
-		if(data.length != getZones() * 2)
+		if (data.length != getZones() * 2)
 			throw new ParsingException("INVALID C LENGTH");
 		int j = vcls.ordinal();
-		for(int i = 0; i < getZones(); i++) {
+		for (int i = 0; i < getZones(); i++) {
 			int val = parse16(data, i * 2);
-			if(val >= 0 && val <= MAX_VOLUME)
+			if (val >= 0 && val <= MAX_VOLUME)
 				vol_class[i][j] = val;
 		}
 	}
 
 	/** Parse statistical headway data */
 	private void parseHeadway(byte[] data) throws ParsingException {
-		if(data.length != getZones() * 2)
+		if (data.length != getZones() * 2)
 			throw new ParsingException("INVALID HEADWAY LENGTH");
-		for(int i = 0; i < getZones(); i++) {
+		for (int i = 0; i < getZones(); i++) {
 			int val = parse16(data, i * 2);
-			if(val >= 0 && val <= MAX_HEADWAY)
+			if (val >= 0 && val <= MAX_HEADWAY)
 				headway[i] = val;
 		}
 	}
 
 	/** Parse statistical speed 85 data */
 	private void parseSpeed85(byte[] data) throws ParsingException {
-		if(data.length != getZones() * 2)
+		if (data.length != getZones() * 2)
 			throw new ParsingException("INVALID SPEED_85 LENGTH");
-		for(int i = 0; i < getZones(); i++) {
+		for (int i = 0; i < getZones(); i++) {
 			int val = parse16(data, i * 2);
-			if(val >= 0 && val <= MAX_SPEED)
+			if (val >= 0 && val <= MAX_SPEED)
 				speed85[i] = asMph(val);
 		}
 	}
 
 	/** Parse statistical footer data */
 	private void parseStatFooter(byte[] data) throws ParsingException {
-		if(data.length != 1)
+		if (data.length != 1)
 			throw new ParsingException("INVALID FOOTER LENGTH");
-		if(parse8(data, OFF_MSG_NUM) != msg_num)
+		if (parse8(data, OFF_MSG_NUM) != msg_num)
 			throw new ParsingException("INVALID FOOTER MSG #");
 		footer = true;
 	}
 
 	/** Get a string representation of the statistical property */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("msg#:");
@@ -432,14 +433,14 @@ public class StatProperty extends G4Property {
 	/** Get a string representation of a data array */
 	static private String arrayStr(String lbl, int[] a) {
 		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < MAX_LANES; i++) {
-			if(a[i] != MISSING_DATA)
+		for (int i = 0; i < MAX_LANES; i++) {
+			if (a[i] != MISSING_DATA)
 				sb.append(a[i]);
 			sb.append(',');
 		}
-		while(sb.length() > 0 && sb.charAt(sb.length() - 1) == ',')
+		while (sb.length() > 0 && sb.charAt(sb.length() - 1) == ',')
 			sb.deleteCharAt(sb.length() - 1);
-		if(sb.length() > 0)
+		if (sb.length() > 0)
 			return lbl + ':' + sb.toString() + ' ';
 		else
 			return "";

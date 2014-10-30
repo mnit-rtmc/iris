@@ -71,11 +71,10 @@ public class OpQueryStats extends OpG4 {
 		{
 			mess.add(stat);
 			mess.queryProps();
-			logQuery(stat);
 			long stamp = stat.getStamp();
 			PeriodicSample ps = new PeriodicSample(stamp, period,0);
 			long e = ps.end();
-			if(e < sample.start() || e > sample.end()) {
+			if (e < sample.start() || e > sample.end()) {
 				logError("BAD TIMESTAMP: " + new Date(stamp));
 				setFailed();
 				throw new DownloadRequestException(
