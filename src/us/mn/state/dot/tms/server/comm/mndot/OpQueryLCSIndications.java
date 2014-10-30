@@ -44,15 +44,17 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Create the second phase of the operation */
 	@Override
-	protected Phase phaseTwo() {
+	protected Phase<MndotProperty> phaseTwo() {
 		return new QueryStatus();
 	}
 
 	/** Phase to query the LCS status */
-	protected class QueryStatus extends Phase {
+	protected class QueryStatus extends Phase<MndotProperty> {
 
 		/** Query the status */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			MemoryProperty prop = new MemoryProperty(
 				Address.RAMP_METER_DATA, status);
 			mess.add(prop);
@@ -65,10 +67,12 @@ public class OpQueryLCSIndications extends OpLCS {
 	}
 
 	/** Phase to query the LCS special function outputs */
-	protected class QueryOutputs extends Phase {
+	protected class QueryOutputs extends Phase<MndotProperty> {
 
 		/** Query the outputs */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			MemoryProperty prop = new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs);
 			mess.add(prop);

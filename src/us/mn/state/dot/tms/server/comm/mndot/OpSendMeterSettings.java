@@ -28,7 +28,6 @@ import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -37,7 +36,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Douglas Lau
  */
-public class OpSendMeterSettings extends OpDevice {
+public class OpSendMeterSettings extends Op170Device {
 
 	/** Startup green time (tenths of a second) */
 	static protected final int STARTUP_GREEN = 80;
@@ -90,28 +89,28 @@ public class OpSendMeterSettings extends OpDevice {
 	public OpSendMeterSettings(RampMeterImpl m) {
 		super(PriorityLevel.DOWNLOAD, m);
 		meter = m;
-		if(meter.getAlgorithm() != MeterAlgorithm.NONE.ordinal())
+		if (meter.getAlgorithm() != MeterAlgorithm.NONE.ordinal())
 			updateTimingTable();
 	}
 
 	/** Update the timing table with active timing plans */
 	private void updateTimingTable() {
 		Iterator<MeterAction> it = MeterActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			MeterAction ma = it.next();
-			if(ma.getRampMeter() == meter)
-			   updateTable(ma);
+			if (ma.getRampMeter() == meter)
+			    updateTable(ma);
 		}
 	}
 
 	/** Update one timing table with a meter action */
 	private void updateTable(MeterAction ma) {
 		ActionPlan ap = ma.getActionPlan();
-		if(ap.getActive()) {
+		if (ap.getActive()) {
 			Iterator<TimeAction> it = TimeActionHelper.iterator();
-			while(it.hasNext()) {
+			while (it.hasNext()) {
 				TimeAction ta = it.next();
-				if(ta.getActionPlan() == ap)
+				if (ta.getActionPlan() == ap)
 					updateTable(ma, ta);
 			}
 		}
@@ -125,7 +124,7 @@ public class OpSendMeterSettings extends OpDevice {
 			meter.getMeterType());
 		table_red[p] = Math.round(r * 10);
 		table_rate[p] = MeterRate.TOD;
-		if(ma.getPhase() == ta.getPhase())
+		if (ma.getPhase() == ta.getPhase())
 			table_start[p] = Math.min(table_start[p], min);
 		else
 			table_stop[p] = Math.max(table_stop[p], min);
@@ -133,7 +132,7 @@ public class OpSendMeterSettings extends OpDevice {
 
 	/** Get the target release rate for the given period */
 	private int getTarget(int p) {
-		switch(p) {
+		switch (p) {
 		case Calendar.AM:
 			return meter.getAmTarget();
 		case Calendar.PM:
@@ -144,15 +143,18 @@ public class OpSendMeterSettings extends OpDevice {
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	@Override
+	protected Phase<MndotProperty> phaseTwo() {
 		return new ResetWatchdogMonitor();
 	}
 
 	/** Phase to reset the watchdog monitor */
-	protected class ResetWatchdogMonitor extends Phase {
+	protected class ResetWatchdogMonitor extends Phase<MndotProperty> {
 
 		/** Reset the watchdog monitor */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] data = {Address.WATCHDOG_BITS};
 			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS + 2, data));
@@ -162,10 +164,12 @@ public class OpSendMeterSettings extends OpDevice {
 	}
 
 	/** Phase to clear the watchdog monitor */
-	protected class ClearWatchdogMonitor extends Phase {
+	protected class ClearWatchdogMonitor extends Phase<MndotProperty> {
 
 		/** Clear the watchdog monitor */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] data = new byte[1];
 			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS + 2, data));
@@ -175,10 +179,12 @@ public class OpSendMeterSettings extends OpDevice {
 	}
 
 	/** Phase to set the comm fail time */
-	protected class SetCommFail extends Phase {
+	protected class SetCommFail extends Phase<MndotProperty> {
 
 		/** Set the comm fail time */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] data = {MeterPoller.COMM_FAIL_THRESHOLD};
 			mess.add(new MemoryProperty(Address.COMM_FAIL, data));
 			mess.storeProps();
@@ -187,10 +193,12 @@ public class OpSendMeterSettings extends OpDevice {
 	}
 
 	/** Phase to set the timing table for the ramp meter */
-	protected class SetTimingTable extends Phase {
+	protected class SetTimingTable extends Phase<MndotProperty> {
 
 		/** Set the timing table for the ramp meter */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			int a = getTableAddress();
 			mess.add(createTimingTableProperty(a));
 			mess.storeProps();
@@ -228,10 +236,12 @@ public class OpSendMeterSettings extends OpDevice {
 	}
 
 	/** Phase to clear the meter verifies for the ramp meter */
-	protected class ClearVerifies extends Phase {
+	protected class ClearVerifies extends Phase<MndotProperty> {
 
 		/** Clear the meter verifies for the ramp meter */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			int address = getVerifyAddress();
 			mess.add(new MemoryProperty(address, new byte[1]));
 			mess.storeProps();

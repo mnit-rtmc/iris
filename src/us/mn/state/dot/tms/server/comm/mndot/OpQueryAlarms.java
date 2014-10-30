@@ -44,15 +44,17 @@ public class OpQueryAlarms extends Op170 {
 
 	/** Create the first phase of the operation */
 	@Override
-	protected Phase phaseOne() {
+	protected Phase<MndotProperty> phaseOne() {
 		return new GetAlarms();
 	}
 
 	/** Phase to query the alarm states */
-	protected class GetAlarms extends Phase {
+	protected class GetAlarms extends Phase<MndotProperty> {
 
 		/** Query the meter red time */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] data = new byte[2];
 			MemoryProperty alarm_mem = new MemoryProperty(
 				Address.ALARM_INPUTS, data);

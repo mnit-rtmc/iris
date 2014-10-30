@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.ByteArrayOutputStream;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -26,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Douglas Lau
  */
-public class OpSendMeterRedTime extends OpDevice {
+public class OpSendMeterRedTime extends Op170Device {
 
 	/** Ramp meter */
 	protected final RampMeterImpl meter;
@@ -46,8 +45,9 @@ public class OpSendMeterRedTime extends OpDevice {
 	}
 
 	/** Operation equality test */
+	@Override
 	public boolean equals(Object o) {
-		if(o instanceof OpSendMeterRedTime) {
+		if (o instanceof OpSendMeterRedTime) {
 			OpSendMeterRedTime op = (OpSendMeterRedTime)o;
 			return meter == op.meter && red_time == op.red_time;
 		} else
@@ -55,15 +55,18 @@ public class OpSendMeterRedTime extends OpDevice {
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	@Override
+	protected Phase<MndotProperty> phaseTwo() {
 		return new SetRedTime();
 	}
 
 	/** Phase to set the red time for a ramp meter */
-	protected class SetRedTime extends Phase {
+	protected class SetRedTime extends Phase<MndotProperty> {
 
 		/** Write the new red time to the controller */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			ByteArrayOutputStream bo = new ByteArrayOutputStream(2);
 			BCDOutputStream os = new BCDOutputStream(bo);
 			os.write4(red_time);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -25,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Douglas Lau
  */
-public class OpSendMeterRate extends OpDevice {
+public class OpSendMeterRate extends Op170Device {
 
 	/** Ramp meter */
 	protected final RampMeterImpl meter;
@@ -41,15 +40,16 @@ public class OpSendMeterRate extends OpDevice {
 		super(PriorityLevel.COMMAND, m);
 		meter = m;
 		int a = Address.RAMP_METER_DATA + Address.OFF_REMOTE_RATE;
-		if(i == 2)
+		if (i == 2)
 			a += Address.OFF_METER_2;
 		address = a;
 		rate = (byte)r;
 	}
 
 	/** Operation equality test */
+	@Override
 	public boolean equals(Object o) {
-		if(o instanceof OpSendMeterRate) {
+		if (o instanceof OpSendMeterRate) {
 			OpSendMeterRate op = (OpSendMeterRate)o;
 			return meter == op.meter && rate == op.rate;
 		} else
@@ -57,19 +57,22 @@ public class OpSendMeterRate extends OpDevice {
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	@Override
+	protected Phase<MndotProperty> phaseTwo() {
 		return new SetRate();
 	}
 
 	/** Phase to set the metering rate */
-	protected class SetRate extends Phase {
+	protected class SetRate extends Phase<MndotProperty> {
 
 		/** Write the meter rate to the controller */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] data = { rate };
 			mess.add(new MemoryProperty(address, data));
 			mess.storeProps();
-			if(!MeterRate.isMetering(rate))
+			if (!MeterRate.isMetering(rate))
 				meter.setRateNotify(null);
 			return null;
 		}

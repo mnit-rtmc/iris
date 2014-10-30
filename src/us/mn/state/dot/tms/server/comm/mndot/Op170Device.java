@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.comm.OpDevice;
  *
  * @author Douglas Lau
  */
-abstract public class Op170Device extends OpDevice {
+abstract public class Op170Device extends OpDevice<MndotProperty> {
 
 	/** Create a new 170 device operation */
 	protected Op170Device(PriorityLevel p, DeviceImpl d) {

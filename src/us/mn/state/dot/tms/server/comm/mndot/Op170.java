@@ -30,7 +30,7 @@ import static us.mn.state.dot.tms.server.comm.mndot.MndotPoller.MNDOT_LOG;
  *
  * @author Douglas Lau
  */
-abstract public class Op170 extends OpController {
+abstract public class Op170 extends OpController<MndotProperty> {
 
 	/** I/O pin for first traffic device */
 	static protected final int DEVICE_1_PIN = 2;

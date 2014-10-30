@@ -37,15 +37,17 @@ public class OpQueryBeaconState extends Op170Device {
 
 	/** Create the second phase of the operation */
 	@Override
-	protected Phase phaseTwo() {
+	protected Phase<MndotProperty> phaseTwo() {
 		return new QueryStatus();
 	}
 
 	/** Phase to query the beacon state */
-	protected class QueryStatus extends Phase {
+	protected class QueryStatus extends Phase<MndotProperty> {
 
 		/** Query the beacon state */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] b = new byte[1];
 			MemoryProperty prop = new MemoryProperty(
 				Address.RAMP_METER_DATA, b);

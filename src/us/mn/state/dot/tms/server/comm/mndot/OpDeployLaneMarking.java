@@ -55,15 +55,17 @@ public class OpDeployLaneMarking extends Op170Device {
 
 	/** Create the second phase of the operation */
 	@Override
-	protected Phase phaseTwo() {
+	protected Phase<MndotProperty> phaseTwo() {
 		return new QueryOutputs();
 	}
 
 	/** Phase to query the special function outputs */
-	protected class QueryOutputs extends Phase {
+	protected class QueryOutputs extends Phase<MndotProperty> {
 
 		/** Query the special function outputs */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			MemoryProperty prop = new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs);
 			mess.add(prop);
@@ -73,10 +75,12 @@ public class OpDeployLaneMarking extends Op170Device {
 	}
 
 	/** Phase to set the special function outputs */
-	protected class SetOutputs extends Phase {
+	protected class SetOutputs extends Phase<MndotProperty> {
 
 		/** Set the special function outputs */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			updateOutputs();
 			MemoryProperty prop = new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs);

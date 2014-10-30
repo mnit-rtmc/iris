@@ -59,15 +59,17 @@ public class OpSendBeaconState extends Op170Device {
 
 	/** Create the second phase of the operation */
 	@Override
-	protected Phase phaseTwo() {
+	protected Phase<MndotProperty> phaseTwo() {
 		return new SetRate();
 	}
 
 	/** Phase to set the metering rate (which controls beacon) */
-	protected class SetRate extends Phase {
+	protected class SetRate extends Phase<MndotProperty> {
 
 		/** Write the meter rate to the controller */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] data = { rate };
 			MemoryProperty prop = new MemoryProperty(address, data);
 			mess.add(prop);

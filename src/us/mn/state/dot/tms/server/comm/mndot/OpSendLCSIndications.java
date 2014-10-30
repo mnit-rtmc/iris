@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,8 +46,9 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Operation equality test */
+	@Override
 	public boolean equals(Object o) {
-		if(o instanceof OpSendLCSIndications) {
+		if (o instanceof OpSendLCSIndications) {
 			OpSendLCSIndications op = (OpSendLCSIndications)o;
 			return lcs_array == op.lcs_array &&
 			       Arrays.equals(indications, op.indications);
@@ -56,15 +57,18 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase phaseTwo() {
+	@Override
+	protected Phase<MndotProperty> phaseTwo() {
 		return new TurnOffDevices();
 	}
 
 	/** Phase to turn off devices */
-	protected class TurnOffDevices extends Phase {
+	protected class TurnOffDevices extends Phase<MndotProperty> {
 
 		/** Turn off devices */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			int address = Address.RAMP_METER_DATA +
 				Address.OFF_REMOTE_RATE;
 			byte[] data = new byte[Address.OFF_METER_2 + 1];
@@ -77,15 +81,17 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Phase to set the special function output bits */
-	protected class SetOutputs extends Phase {
+	protected class SetOutputs extends Phase<MndotProperty> {
 
 		/** Set the special function outputs */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] buffer = createSpecialFunctionBuffer();
 			mess.add(new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS, buffer));
 			mess.storeProps();
-			if(isDark())
+			if (isDark())
 				return null;
 			else
 				return new TurnOnDevices();
@@ -93,10 +99,12 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Phase to turn on devices */
-	protected class TurnOnDevices extends Phase {
+	protected class TurnOnDevices extends Phase<MndotProperty> {
 
 		/** Turn on devices */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			int address = Address.RAMP_METER_DATA +
 				Address.OFF_REMOTE_RATE;
 			byte[] data = new byte[Address.OFF_METER_2 + 1];
@@ -109,16 +117,17 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
-		if(isSuccess())
+		if (isSuccess())
 			lcs_array.setIndicationsCurrent(indications, user);
 		super.cleanup();
 	}
 
 	/** Test if the new indications are all DARK */
 	protected boolean isDark() {
-		for(int i: indications) {
-			if(i != LaneUseIndication.DARK.ordinal())
+		for (int i: indications) {
+			if (i != LaneUseIndication.DARK.ordinal())
 				return false;
 		}
 		return true;
@@ -128,10 +137,10 @@ public class OpSendLCSIndications extends OpLCS {
 	protected byte[] createSpecialFunctionBuffer() {
 		byte[] buffer = new byte[2];
 		Iterator<LCSIndication> it = LCSIndicationHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			LCSIndication li = it.next();
-			if(li.getLcs().getArray() == lcs_array) {
-				if(li.getController() == controller)
+			if (li.getLcs().getArray() == lcs_array) {
+				if (li.getController() == controller)
 					checkIndication(li, buffer);
 			}
 		}
@@ -143,8 +152,8 @@ public class OpSendLCSIndications extends OpLCS {
 		int i = li.getLcs().getLane() - 1;
 		// We must check bounds here in case the LCSIndication
 		// was added after the "indications" array was created
-		if(i >= 0 && i < indications.length) {
-			if(indications[i] == li.getIndication())
+		if (i >= 0 && i < indications.length) {
+			if (indications[i] == li.getIndication())
 				Op170.setSpecFuncOutput(buffer, li.getPin());
 		}
 	}

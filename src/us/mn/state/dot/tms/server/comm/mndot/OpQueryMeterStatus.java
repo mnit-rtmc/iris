@@ -41,7 +41,8 @@ public class OpQueryMeterStatus extends Op170 {
 	}
 
 	/** List of remaining phases of operation */
-	protected final LinkedList<Phase> phases = new LinkedList<Phase>();
+	private final LinkedList<Phase<MndotProperty>> phases =
+		new LinkedList<Phase<MndotProperty>>();
 
 	/** Create a new query meter status operatoin */
 	public OpQueryMeterStatus(ControllerImpl c) {
@@ -50,15 +51,17 @@ public class OpQueryMeterStatus extends Op170 {
 
 	/** Create the first phase of the operation */
 	@Override
-	protected Phase phaseOne() {
+	protected Phase<MndotProperty> phaseOne() {
 		return new GetStatus();
 	}
 
 	/** Phase to get the status of the ramp meters */
-	protected class GetStatus extends Phase {
+	protected class GetStatus extends Phase<MndotProperty> {
 
 		/** Collect meter data from the controller */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] s = new byte[12];
 			MemoryProperty stat_mem = new MemoryProperty(
 				Address.RAMP_METER_DATA, s);
@@ -76,7 +79,7 @@ public class OpQueryMeterStatus extends Op170 {
 	}
 
 	/** Phase to query a ramp meter red time */
-	protected class QueryRedTime extends Phase {
+	protected class QueryRedTime extends Phase<MndotProperty> {
 
 		/** Ramp meter in question */
 		protected final RampMeterImpl meter;
@@ -91,7 +94,9 @@ public class OpQueryMeterStatus extends Op170 {
 		}
 
 		/** Query the meter red time */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] data = new byte[2];
 			MemoryProperty red_mem = new MemoryProperty(address,
 				data);

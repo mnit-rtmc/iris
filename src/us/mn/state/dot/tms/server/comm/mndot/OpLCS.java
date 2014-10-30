@@ -46,9 +46,9 @@ abstract public class OpLCS extends Op170Device {
 	protected DMSImpl[] lookupDMSs() {
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
 		DMSImpl[] _dmss = new DMSImpl[lcss.length];
-		for(int i = 0; i < lcss.length; i++) {
+		for (int i = 0; i < lcss.length; i++) {
 			DMS dms = DMSHelper.lookup(lcss[i].getName());
-			if(dms instanceof DMSImpl)
+			if (dms instanceof DMSImpl)
 				_dmss[i] = (DMSImpl)dms;
 		}
 		return _dmss;

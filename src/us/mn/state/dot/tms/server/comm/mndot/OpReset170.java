@@ -33,15 +33,17 @@ public class OpReset170 extends Op170 {
 
 	/** Create the first phase of the operation */
 	@Override
-	protected Phase phaseOne() {
+	protected Phase<MndotProperty> phaseOne() {
 		return new ResetDetectors();
 	}
 
 	/** Phase to reset the detectors */
-	protected class ResetDetectors extends Phase {
+	protected class ResetDetectors extends Phase<MndotProperty> {
 
 		/** Reset the detectors */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			// Enabling the detector-reset pin can cause some
 			// detector cards to have "chattering" volume, along
 			// with "occupancy plateaus".  This can happen if there
@@ -56,10 +58,12 @@ public class OpReset170 extends Op170 {
 	}
 
 	/** Phase to clear the detector reset */
-	protected class ClearDetectors extends Phase {
+	protected class ClearDetectors extends Phase<MndotProperty> {
 
 		/** Clear the detector reset */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] data = new byte[1];
 			MemoryProperty reset_mem = new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data);
@@ -70,10 +74,12 @@ public class OpReset170 extends Op170 {
 	}
 
 	/** Phase to restart the controller */
-	protected class Level1Restart extends Phase {
+	protected class Level1Restart extends Phase<MndotProperty> {
 
 		/** Restart the controller */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			mess.add(new Level1Property());
 			mess.storeProps();
 			return null;

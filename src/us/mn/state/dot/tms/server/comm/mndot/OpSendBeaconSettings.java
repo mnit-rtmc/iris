@@ -48,15 +48,17 @@ public class OpSendBeaconSettings extends Op170Device {
 
 	/** Create the second phase of the operation */
 	@Override
-	protected Phase phaseTwo() {
+	protected Phase<MndotProperty> phaseTwo() {
 		return new SetTimingTable();
 	}
 
 	/** Phase to set the timing table for the beacon */
-	protected class SetTimingTable extends Phase {
+	protected class SetTimingTable extends Phase<MndotProperty> {
 
 		/** Set the timing table for the beacon */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			int a = Address.METER_1_TIMING_TABLE;
 			MemoryProperty prop = createTimingTableProperty(a);
 			mess.add(prop);

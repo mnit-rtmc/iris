@@ -37,15 +37,17 @@ public class OpSendSampleSettings extends Op170 {
 
 	/** Create the first phase of the operation */
 	@Override
-	protected Phase phaseOne() {
+	protected Phase<MndotProperty> phaseOne() {
 		return new SynchronizeClock();
 	}
 
 	/** Phase to synchronize the clock */
-	protected class SynchronizeClock extends Phase {
+	protected class SynchronizeClock extends Phase<MndotProperty> {
 
 		/** Synchronize the clock */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			mess.add(new SynchronizeProperty());
 			mess.storeProps();
 			return new CheckCabinetType();
@@ -53,10 +55,12 @@ public class OpSendSampleSettings extends Op170 {
 	}
 
 	/** Phase to check the cabinet type */
-	protected class CheckCabinetType extends Phase {
+	protected class CheckCabinetType extends Phase<MndotProperty> {
 
 		/** Check the cabinet type */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] data = new byte[1];
 			MemoryProperty cab_mem = new MemoryProperty(
 				Address.CABINET_TYPE, data);
@@ -99,10 +103,12 @@ public class OpSendSampleSettings extends Op170 {
 	}
 
 	/** Phase to query the prom version */
-	protected class QueryPromVersion extends Phase {
+	protected class QueryPromVersion extends Phase<MndotProperty> {
 
 		/** Query the prom version */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] data = new byte[2];
 			MemoryProperty ver_mem = new MemoryProperty(
 				Address.PROM_VERSION, data);
@@ -114,10 +120,12 @@ public class OpSendSampleSettings extends Op170 {
 	}
 
 	/** Phase to set the queue detector bitmap */
-	protected class QueueBitmap extends Phase {
+	protected class QueueBitmap extends Phase<MndotProperty> {
 
 		/** Set the queue detector bitmap */
-		protected Phase poll(CommMessage mess) throws IOException {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
 			byte[] data = getQueueBitmap();
 			MemoryProperty queue_mem = new MemoryProperty(
 				Address.QUEUE_BITMAP, data);
