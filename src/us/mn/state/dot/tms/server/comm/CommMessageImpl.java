@@ -47,6 +47,7 @@ public class CommMessageImpl<T extends ControllerProperty>
 	}
 
 	/** Add a controller property */
+	@Override
 	public void add(T cp) {
 		props.add(cp);
 	}
@@ -54,6 +55,7 @@ public class CommMessageImpl<T extends ControllerProperty>
 	/** Query the controller properties.
 	 * @throws IOException On any errors sending message or receiving
 	 *         response */
+	@Override
 	public void queryProps() throws IOException {
 		messenger.drain();
 		OutputStream os = messenger.getOutputStream(controller);
@@ -71,6 +73,7 @@ public class CommMessageImpl<T extends ControllerProperty>
 	/** Store the controller properties.
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
+	@Override
 	public void storeProps() throws IOException {
 		messenger.drain();
 		OutputStream os = messenger.getOutputStream(controller);
