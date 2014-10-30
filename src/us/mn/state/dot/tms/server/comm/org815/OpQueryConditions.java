@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,6 @@ public class OpQueryConditions extends OpOrg815 {
 			ConditionsProperty cond = new ConditionsProperty();
 			mess.add(cond);
 			mess.queryProps();
-			logQuery(cond);
 			sensor.setAirTempNotify(null);
 			sensor.setWindSpeedNotify(null);
 			sensor.setWindDirNotify(null);
@@ -76,7 +75,6 @@ public class OpQueryConditions extends OpOrg815 {
 		{
 			ResetProperty reset = new ResetProperty();
 			mess.add(reset);
-			logQuery(reset);
 			mess.storeProps();
 			sensor.resetAccumulation();
 			return null;

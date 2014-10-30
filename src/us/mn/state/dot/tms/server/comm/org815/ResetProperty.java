@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
 public class ResetProperty extends Org815Property {
 
 	/** Get a string value of the property */
+	@Override
 	public String toString() {
 		return "reset accumulator";
 	}
@@ -44,12 +45,14 @@ public class ResetProperty extends Org815Property {
 	}
 
 	/** Get the QUERY request byte code */
+	@Override
 	protected byte requestQueryByte() {
 		// Not supported
 		return 0;
 	}
 
 	/** Parse a QUERY response */
+	@Override
 	protected void parseQuery(String line) throws IOException {
 		throw new ProtocolException("QUERY not supported");
 	}
@@ -63,7 +66,7 @@ public class ResetProperty extends Org815Property {
 	}
 
 	/** Get the STORE request byte code */
-	protected byte requestStoreByte() {
+	private byte requestStoreByte() {
 		return (byte)'R';
 	}
 
@@ -74,15 +77,15 @@ public class ResetProperty extends Org815Property {
 	{
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
-		if(line != null)
+		if (line != null)
 			parseStore(line);
 		else
 			throw new EOFException("END OF STREAM");
 	}
 
 	/** Parse a STORE response */
-	protected void parseStore(String line) throws IOException {
-		if(line.length() != 7)
+	private void parseStore(String line) throws IOException {
+		if (line.length() != 7)
 			throw new ParsingException("Invalid response: " + line);
 		parseAccumulation(line);
 	}

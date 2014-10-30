@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.org815;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
@@ -29,6 +30,9 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
 public class Org815Poller extends MessagePoller<Org815Property>
 	implements WeatherPoller
 {
+	/** ORG-815 debug log */
+	static private final DebugLog ORG815_LOG = new DebugLog("org815");
+
 	/** Create a new ORG-815 poller */
 	public Org815Poller(String n, Messenger m) {
 		super(n, m);
@@ -57,5 +61,11 @@ public class Org815Poller extends MessagePoller<Org815Property>
 	@Override
 	public void sendSettings(WeatherSensorImpl ws) {
 		addOperation(new OpQuerySettings(ws));
+	}
+
+	/** Get the protocol debug log */
+	@Override
+	protected DebugLog protocolLog() {
+		return ORG815_LOG;
 	}
 }

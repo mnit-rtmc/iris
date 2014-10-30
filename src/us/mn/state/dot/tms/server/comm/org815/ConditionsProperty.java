@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,17 +58,19 @@ public class ConditionsProperty extends Org815Property {
 	}
 
 	/** Get a string value of the property */
+	@Override
 	public String toString() {
 		return code + " rate: " + rate + " accum: " + accumulation;
 	}
 
 	/** Get the QUERY request byte code */
+	@Override
 	protected byte requestQueryByte() {
 		return (byte)'A';
 	}
 
 	/** Current weather condition */
-	protected ConditionCode code = ConditionCode.unknown;
+	private ConditionCode code = ConditionCode.unknown;
 
 	/** Get the current weather condition code */
 	public ConditionCode getConditionCode() {
@@ -81,7 +83,7 @@ public class ConditionsProperty extends Org815Property {
 	}
 
 	/** Current one-minute block average precipitation rate */
-	protected float rate = MISSING_DATA;
+	private float rate = MISSING_DATA;
 
 	/** Get the current one-minute block average precipitation rate */
 	public float getRate() {
@@ -89,7 +91,7 @@ public class ConditionsProperty extends Org815Property {
 	}
 
 	/** Accumulation since last reset */
-	protected float accumulation = MISSING_DATA;
+	private float accumulation = MISSING_DATA;
 
 	/** Get the accumulated precipitation since last reset */
 	public float getAccumulation() {
@@ -103,6 +105,7 @@ public class ConditionsProperty extends Org815Property {
 	}
 
 	/** Parse a QUERY response */
+	@Override
 	protected void parseQuery(String line) throws IOException {
 		// Responds with 15 or 16 characters, depending on version.
 		//   Ver. 44S (03-23-04) responds with 15 characters
@@ -123,7 +126,7 @@ public class ConditionsProperty extends Org815Property {
 	/** Parse the one-minute block average precipitation rate.
 	 * @param r 4-character rate to parse.
 	 * @return Precipitation rate in millimeters per hour. */
-	protected float parseRate(String r) throws IOException {
+	private float parseRate(String r) throws IOException {
 		if("----".equals(r))
 			return MISSING_DATA;
 		try {

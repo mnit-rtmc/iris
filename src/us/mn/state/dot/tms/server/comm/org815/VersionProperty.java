@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,21 +25,29 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class VersionProperty extends Org815Property {
 
 	/** Property value */
-	protected String value = "";
+	private String value = "";
 
-	/** Get a string value of the property */
-	public String toString() {
+	/** Get value of property */
+	public String getValue() {
 		return value;
 	}
 
+	/** Get a string value of the property */
+	@Override
+	public String toString() {
+		return "version: " + value;
+	}
+
 	/** Get the QUERY request byte code */
+	@Override
 	protected byte requestQueryByte() {
 		return (char)'V';
 	}
 
 	/** Parse a QUERY response */
+	@Override
 	protected void parseQuery(String line) throws IOException {
-		if(line.length() > 32)
+		if (line.length() > 32)
 			throw new ParsingException("Invalid version: " + line);
 		value = line.trim();
 	}
