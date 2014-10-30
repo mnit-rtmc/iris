@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.InputStream;
 import java.util.LinkedList;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -31,6 +32,9 @@ public class CommMessageImpl<T extends ControllerProperty>
 	/** Messenger object */
 	private final Messenger messenger;
 
+	/** Protocol debug log */
+	private final DebugLog p_log;
+
 	/** Controller to send message */
 	private final ControllerImpl controller;
 
@@ -39,9 +43,11 @@ public class CommMessageImpl<T extends ControllerProperty>
 
 	/** Create a new comm message.
 	 * @param m Messenger to use for communication.
+	 * @param pl Protocol debug log.
 	 * @param c Controller to send message. */
-	public CommMessageImpl(Messenger m, ControllerImpl c) {
+	public CommMessageImpl(Messenger m, DebugLog pl, ControllerImpl c) {
 		messenger = m;
+		p_log = pl;
 		controller = c;
 		props = new LinkedList<T>();
 	}
@@ -67,7 +73,14 @@ public class CommMessageImpl<T extends ControllerProperty>
 		for (T p: props) {
 			p.decodeQuery(controller, messenger.getInputStream(
 				p.getPath(), controller));
+			logQuery(p);
 		}
+	}
+
+	/** Log a property query */
+	private void logQuery(T prop) {
+		if (p_log != null && p_log.isOpen())
+			p_log.log(controller.getName() + ": " + prop);
 	}
 
 	/** Store the controller properties.
@@ -78,13 +91,21 @@ public class CommMessageImpl<T extends ControllerProperty>
 		messenger.drain();
 		OutputStream os = messenger.getOutputStream(controller);
 		if (os != null) {
-			for (T p: props)
+			for (T p: props) {
+				logStore(p);
 				p.encodeStore(controller, os);
+			}
 			os.flush();
 		}
 		for (T p: props) {
 			p.decodeStore(controller, messenger.getInputStream(
 				p.getPath(), controller));
 		}
+	}
+
+	/** Log a property store */
+	private void logStore(T prop) {
+		if (p_log != null && p_log.isOpen())
+			p_log.log(controller.getName() + ":= " + prop);
 	}
 }

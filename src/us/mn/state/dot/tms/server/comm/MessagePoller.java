@@ -313,7 +313,12 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	protected CommMessage<T> createMessage(ControllerImpl c)
 		throws IOException
 	{
-		return new CommMessageImpl<T>(messenger, c);
+		return new CommMessageImpl<T>(messenger, protocolLog(), c);
+	}
+
+	/** Get the protocol debug log */
+	protected DebugLog protocolLog() {
+		return null;
 	}
 
 	/** Respond to a download request from a controller */
