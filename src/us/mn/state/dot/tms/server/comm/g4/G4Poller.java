@@ -68,4 +68,10 @@ public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 				addOperation(new OpQueryStats(c, p));
 		}
 	}
+
+	/** Get the protocol debug log */
+	@Override
+	protected DebugLog protocolLog() {
+		return G4_LOG;
+	}
 }
