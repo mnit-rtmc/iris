@@ -54,7 +54,7 @@ public class OpSendLCSIndications extends OpLCS {
 	/** Operation equality test */
 	@Override
 	public boolean equals(Object o) {
-		if(o instanceof OpSendLCSIndications) {
+		if (o instanceof OpSendLCSIndications) {
 			OpSendLCSIndications op = (OpSendLCSIndications)o;
 			return lcs_array == op.lcs_array &&
 			       Arrays.equals(indications, op.indications);
@@ -110,10 +110,10 @@ public class OpSendLCSIndications extends OpLCS {
 	private boolean[] getOutlets(ControllerImpl c) {
 		boolean[] outlets = new boolean[8];
 		Iterator<LCSIndication> it = LCSIndicationHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			LCSIndication li = it.next();
-			if(li.getLcs().getArray() == lcs_array) {
-				if(li.getController() == c)
+			if (li.getLcs().getArray() == lcs_array) {
+				if (li.getController() == c)
 					updateIndication(li, outlets);
 			}
 		}
@@ -127,10 +127,10 @@ public class OpSendLCSIndications extends OpLCS {
 		int i = li.getLcs().getLane() - 1;
 		// We must check bounds here in case the LCSIndication
 		// was added after the "indications" array was created
-		if(i >= 0 && i < indications.length) {
-			if(indications[i] == li.getIndication()) {
+		if (i >= 0 && i < indications.length) {
+			if (indications[i] == li.getIndication()) {
 				int p = li.getPin() - 1;
-				if(p >= 0 && p < outlets.length)
+				if (p >= 0 && p < outlets.length)
 					outlets[p] = true;
 			}
 		}
@@ -138,10 +138,10 @@ public class OpSendLCSIndications extends OpLCS {
 
 	/** Cleanup the operation */
 	private synchronized void opComplete(boolean success) {
-		if(!success)
+		if (!success)
 			op_success = false;
 		n_ops--;
-		if(n_ops == 0 && op_success)
+		if (n_ops == 0 && op_success)
 			lcs_array.setIndicationsCurrent(indications, user);
 	}
 }

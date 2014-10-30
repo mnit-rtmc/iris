@@ -56,7 +56,6 @@ public class OpCommandOutlets extends OpDinRelay {
 		{
 			mess.add(property);
 			mess.queryProps();
-			logQuery(property);
 			return new TurnOffOutlets();
 		}
 	}
@@ -72,12 +71,11 @@ public class OpCommandOutlets extends OpDinRelay {
 			CommMessage<DinRelayProperty> mess) throws IOException
 		{
 			CommandProperty prop;
-			while(o_num < outlets.length) {
-				if(shouldTurnOff(o_num)) {
+			while (o_num < outlets.length) {
+				if (shouldTurnOff(o_num)) {
 					o_num++;
 					prop = new CommandProperty(o_num,false);
 					mess.add(prop);
-					logStore(prop);
 					mess.storeProps();
 					return this;
 				} else
@@ -90,7 +88,7 @@ public class OpCommandOutlets extends OpDinRelay {
 	/** Test if an outlet should be turned off */
 	private boolean shouldTurnOff(int o_num) {
 		boolean[] os = property.getOutletState();
-		if(o_num >= 0 && o_num < os.length && o_num < outlets.length)
+		if (o_num >= 0 && o_num < os.length && o_num < outlets.length)
 			return os[o_num] && !outlets[o_num];
 		else
 			return false;
@@ -107,12 +105,11 @@ public class OpCommandOutlets extends OpDinRelay {
 			CommMessage<DinRelayProperty> mess) throws IOException
 		{
 			CommandProperty prop;
-			while(o_num < outlets.length) {
-				if(shouldTurnOn(o_num)) {
+			while (o_num < outlets.length) {
+				if (shouldTurnOn(o_num)) {
 					o_num++;
 					prop = new CommandProperty(o_num, true);
 					mess.add(prop);
-					logStore(prop);
 					mess.storeProps();
 					return this;
 				} else

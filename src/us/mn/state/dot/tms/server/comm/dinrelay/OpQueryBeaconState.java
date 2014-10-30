@@ -19,7 +19,6 @@ import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import static us.mn.state.dot.tms.server.comm.dinrelay.OpDinRelay.DIN_LOG;
 
 /**
  * Query the state of a beacon
@@ -37,22 +36,13 @@ public class OpQueryBeaconState extends OpDevice<DinRelayProperty> {
 	{
 		public void updateOutlets(boolean[] outlets) {
 			int p = beacon.getPin();
-			if(p > 0 && p <= outlets.length)
+			if (p > 0 && p <= outlets.length)
 				beacon.setFlashingNotify(outlets[p - 1]);
 			else
 				setErrorStatus("Invalid pin");
 		}
-		public void complete(boolean success) {
-			if(success)
-				logQuery(property);
-		}
+		public void complete(boolean success) { }
 	});
-
-	/** Log a property query */
-	protected void logQuery(DinRelayProperty prop) {
-		if(DIN_LOG.isOpen())
-			DIN_LOG.log(controller.getName() + ": " + prop);
-	}
 
 	/** Create a new query beacon state operation */
 	public OpQueryBeaconState(BeaconImpl b) {

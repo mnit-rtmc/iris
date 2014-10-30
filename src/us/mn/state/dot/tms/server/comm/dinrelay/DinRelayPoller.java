@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.dinrelay;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.BeaconImpl;
@@ -32,6 +33,9 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	implements LCSPoller, BeaconPoller
 {
+	/** DIN relay debug log */
+	static final DebugLog DIN_LOG = new DebugLog("dinrelay");
+
 	/** Create a new DIN relay poller */
 	public DinRelayPoller(String n, Messenger m) {
 		super(n, m);
@@ -58,7 +62,7 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	/** Send a device request */
 	@Override
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
-		switch(r) {
+		switch (r) {
 		case SEND_SETTINGS:
 			addOperation(new OpSendLCSSettings(lcs_array));
 			break;
@@ -85,7 +89,7 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	/** Send a device request */
 	@Override
 	public void sendRequest(BeaconImpl b, DeviceRequest r) {
-		switch(r) {
+		switch (r) {
 		case QUERY_STATUS:
 			addOperation(new OpQueryBeaconState(b));
 			break;
@@ -99,5 +103,11 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	@Override
 	public void setFlashing(BeaconImpl b, boolean f) {
 		addOperation(new OpChangeBeaconState(b, f));
+	}
+
+	/** Get the protocol debug log */
+	@Override
+	protected DebugLog protocolLog() {
+		return DIN_LOG;
 	}
 }

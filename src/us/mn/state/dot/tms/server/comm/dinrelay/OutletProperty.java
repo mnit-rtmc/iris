@@ -64,8 +64,8 @@ public class OutletProperty extends DinRelayProperty {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("outlets:");
-		for(int i = 0; i < outlets.length; i++) {
-			if(i > 0)
+		for (int i = 0; i < outlets.length; i++) {
+			if (i > 0)
 				sb.append(' ');
 			sb.append(outlets[i]);
 		}
@@ -85,9 +85,9 @@ public class OutletProperty extends DinRelayProperty {
 	{
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
-		for(int i = 0; line != null && i < MAX_LINES; i++) {
+		for (int i = 0; line != null && i < MAX_LINES; i++) {
 			Matcher m = STATE.matcher(line);
-			if(m.find()) {
+			if (m.find()) {
 				setOutlets(m.group(1));
 				break;
 			}
@@ -99,20 +99,20 @@ public class OutletProperty extends DinRelayProperty {
 	private void setOutlets(String state) {
 		try {
 			int o = Integer.parseInt(state, 16);
-			for(int i = 0; i < 8; i++) {
-				if(((o >> i) & 1) == 1)
+			for (int i = 0; i < 8; i++) {
+				if (((o >> i) & 1) == 1)
 					outlets[i] = true;
 			}
 			parsed = true;
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			// don't update the outlet state
 		}
 	}
 
 	/** Complete the outlet property read */
 	public void complete(boolean success) {
-		if(success && parsed)
+		if (success && parsed)
 			callback.updateOutlets(outlets);
 		callback.complete(success && parsed);
 	}

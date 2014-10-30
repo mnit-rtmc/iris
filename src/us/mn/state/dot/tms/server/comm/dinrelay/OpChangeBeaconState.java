@@ -19,7 +19,6 @@ import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import static us.mn.state.dot.tms.server.comm.dinrelay.OpDinRelay.DIN_LOG;
 
 /**
  * Operation to change a beacon state.
@@ -34,12 +33,6 @@ public class OpChangeBeaconState extends OpDevice<DinRelayProperty> {
 	/** New state to change beacon */
 	private final boolean flash;
 
-	/** Log a property store */
-	protected void logStore(DinRelayProperty prop) {
-		if(DIN_LOG.isOpen())
-			DIN_LOG.log(controller.getName() + ":= " + prop);
-	}
-
 	/** Create a new change beacon state operation */
 	public OpChangeBeaconState(BeaconImpl b, boolean f) {
 		super(PriorityLevel.COMMAND, b);
@@ -50,7 +43,7 @@ public class OpChangeBeaconState extends OpDevice<DinRelayProperty> {
 	/** Operation equality test */
 	@Override
 	public boolean equals(Object o) {
-		if(o instanceof OpChangeBeaconState) {
+		if (o instanceof OpChangeBeaconState) {
 			OpChangeBeaconState op = (OpChangeBeaconState)o;
 			return beacon == op.beacon && flash == op.flash;
 		} else
@@ -71,13 +64,12 @@ public class OpChangeBeaconState extends OpDevice<DinRelayProperty> {
 			throws IOException
 		{
 			int p = beacon.getPin();
-			if(p < 1 && p > 8) {
+			if (p < 1 && p > 8) {
 				setErrorStatus("Invalid pin");
 				return null;
 			}
 			CommandProperty prop = new CommandProperty(p, flash);
 			mess.add(prop);
-			logStore(prop);
 			mess.storeProps();
 			beacon.setFlashingNotify(flash);
 			return null;

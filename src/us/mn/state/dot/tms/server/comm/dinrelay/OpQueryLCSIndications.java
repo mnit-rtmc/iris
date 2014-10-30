@@ -62,7 +62,7 @@ public class OpQueryLCSIndications extends OpLCS {
 		{
 			Iterator<ControllerImpl> it = controllers.iterator();
 			synchronized(this) {
-				while(it.hasNext())
+				while (it.hasNext())
 					createOutletOp(it.next());
 			}
 			return null;
@@ -94,10 +94,10 @@ public class OpQueryLCSIndications extends OpLCS {
 	 * @param outlets Current outlet state for controller. */
 	private void opUpdateOutlets(ControllerImpl c, boolean[] outlets) {
 		Iterator<LCSIndication> it = LCSIndicationHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			LCSIndication li = it.next();
-			if(li.getLcs().getArray() == lcs_array) {
-				if(li.getController() == c)
+			if (li.getLcs().getArray() == lcs_array) {
+				if (li.getController() == c)
 					updateIndication(li, outlets);
 			}
 		}
@@ -108,13 +108,13 @@ public class OpQueryLCSIndications extends OpLCS {
 	 * @param outlets Array of outlet states, indexed by pin */
 	private void updateIndication(LCSIndication li, boolean[] outlets) {
 		int p = li.getPin() - 1;
-		if(p >= 0 && p < outlets.length && outlets[p]) {
+		if (p >= 0 && p < outlets.length && outlets[p]) {
 			LCS lcs = li.getLcs();
 			int i = lcs.getLane() - 1;
 			// We must check bounds here in case the LCSIndication
 			// was added after the "indications" array was created
-			if(i >= 0 && i < indications.length) {
-				if(indications[i] != null) {
+			if (i >= 0 && i < indications.length) {
+				if (indications[i] != null) {
 					setErrorStatus("Indication conflict: " +
 						lcs.getLane());
 				}
@@ -131,8 +131,8 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Test if sub-operations are complete, and cleanup if necessary */
 	private synchronized void testComplete() {
-		if(n_ops <= 0) {
-			if(op_success)
+		if (n_ops <= 0) {
+			if (op_success)
 				setDarkIndications();
 			else
 				setAllIndications(null);
@@ -143,7 +143,7 @@ public class OpQueryLCSIndications extends OpLCS {
 
 	/** Cleanup one sub-operation */
 	private synchronized void opComplete(boolean success) {
-		if(!success)
+		if (!success)
 			op_success = false;
 		n_ops--;
 		testComplete();
@@ -152,15 +152,15 @@ public class OpQueryLCSIndications extends OpLCS {
 	/** Set null indications to DARK */
 	private void setDarkIndications() {
 		int v = LaneUseIndication.DARK.ordinal();
-		for(int i = 0; i < indications.length; i++) {
-			if(indications[i] == null)
+		for (int i = 0; i < indications.length; i++) {
+			if (indications[i] == null)
 				indications[i] = v;
 		}
 	}
 
 	/** Set all indications to one value */
 	private void setAllIndications(Integer value) {
-		for(int i = 0; i < indications.length; i++)
+		for (int i = 0; i < indications.length; i++)
 			indications[i] = value;
 	}
 }
