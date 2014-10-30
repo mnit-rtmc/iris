@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.stc;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmState;
@@ -31,6 +32,9 @@ import us.mn.state.dot.tms.server.comm.Messenger;
 public class STCPoller extends MessagePoller<STCProperty>
 	implements GateArmPoller
 {
+	/** Debug log */
+	static protected final DebugLog STC_LOG = new DebugLog("stc");
+
 	/** Create a new STC poller */
 	public STCPoller(String n, Messenger m) {
 		super(n, m);
@@ -72,5 +76,11 @@ public class STCPoller extends MessagePoller<STCProperty>
 	@Override
 	public void closeGate(GateArmImpl ga, User o) {
 		addOperation(new OpControlGate(ga, o, GateArmState.CLOSING));
+	}
+
+	/** Get the protocol debug log */
+	@Override
+	protected DebugLog protocolLog() {
+		return STC_LOG;
 	}
 }

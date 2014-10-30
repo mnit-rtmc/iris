@@ -66,7 +66,6 @@ public class OpControlGate extends OpSTC {
 			throws IOException
 		{
 			mess.add(control);
-			logStore(control);
 			mess.storeProps();
 			if(req_state != null)
 				gate_arm.setArmStateNotify(req_state, user);

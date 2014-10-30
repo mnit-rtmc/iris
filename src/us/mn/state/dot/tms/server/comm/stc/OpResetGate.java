@@ -50,7 +50,6 @@ public class OpResetGate extends OpSTC {
 		{
 			ResetProperty reset = new ResetProperty(password());
 			mess.add(reset);
-			logStore(reset);
 			mess.storeProps();
 			return new QueryVersion();
 		}
@@ -71,7 +70,6 @@ public class OpResetGate extends OpSTC {
 			mess.add(v);
 			try {
 				mess.queryProps();
-				logQuery(v);
 				gate_arm.setVersion(v.getVersion());
 				return null;
 			}
