@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -25,15 +24,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 abstract public class OpViconPTZ extends OpDevice<ViconPTZProperty> {
-
-	/** Vicon PTZ debug log */
-	static private final DebugLog VICON_LOG = new DebugLog("viconptz");
-
-	/** Log a property store */
-	protected void logStore(ViconPTZProperty prop) {
-		if (VICON_LOG.isOpen())
-			VICON_LOG.log(controller.getName() + ":= " + prop);
-	}
 
 	/** Create a new vicon PTZ operation */
 	public OpViconPTZ(CameraImpl c) {

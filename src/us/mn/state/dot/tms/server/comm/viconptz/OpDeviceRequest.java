@@ -85,7 +85,6 @@ public class OpDeviceRequest extends OpViconPTZ {
 			CommMessage<ViconPTZProperty> mess) throws IOException
 		{
 			mess.add(prop);
-			logStore(prop);
 			mess.storeProps();
 			return null;
 		}
@@ -102,7 +101,6 @@ public class OpDeviceRequest extends OpViconPTZ {
 			CommMessage<ViconPTZProperty> mess) throws IOException
 		{
 			mess.add(prop);
-			logStore(prop);
 			mess.storeProps();
 			n_sent++;
 			return (n_sent < 2) ? this : new AuxClearPhase();
@@ -118,7 +116,6 @@ public class OpDeviceRequest extends OpViconPTZ {
 		{
 			AuxProperty p = new AuxProperty(0);
 			mess.add(p);
-			logStore(p);
 			mess.storeProps();
 			return null;
 		}

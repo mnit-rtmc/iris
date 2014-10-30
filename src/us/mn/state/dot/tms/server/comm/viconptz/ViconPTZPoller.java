@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
@@ -31,6 +32,9 @@ import us.mn.state.dot.tms.server.comm.TransientPoller;
 public class ViconPTZPoller extends TransientPoller<ViconPTZProperty>
 	implements CameraPoller
 {
+	/** Vicon PTZ debug log */
+	static private final DebugLog VICON_LOG = new DebugLog("viconptz");
+
 	/** Highest allowed address for Vicon protocol */
 	static public final int ADDRESS_MAX = 254;
 
@@ -68,5 +72,11 @@ public class ViconPTZPoller extends TransientPoller<ViconPTZProperty>
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest r) {
 		addOperation(new OpDeviceRequest(c, r));
+	}
+
+	/** Get the protocol debug log */
+	@Override
+	protected DebugLog protocolLog() {
+		return VICON_LOG;
 	}
 }

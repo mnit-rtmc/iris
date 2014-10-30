@@ -66,7 +66,6 @@ public class OpMoveCamera extends OpViconPTZ {
 			CommMessage<ViconPTZProperty> mess) throws IOException
 		{
 			mess.add(prop);
-			logStore(prop);
 			mess.storeProps();
 			n_sent++;
 			return shouldResend() ? this : null;

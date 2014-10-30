@@ -67,7 +67,6 @@ public class OpPreset extends OpViconPTZ {
 			CommMessage<ViconPTZProperty> mess) throws IOException
 		{
 			mess.add(prop);
-			logStore(prop);
 			mess.storeProps();
 			return null;
 		}
