@@ -50,7 +50,8 @@ public class SynchronizeProperty extends MndotProperty {
 		throws IOException
 	{
 		byte[] sync = formatStamp(TimeSteward.getCalendarInstance());
-		byte[] pkt = createRequest(c, SYNCHRONIZE_CLOCK, sync.length);
+		byte[] pkt = createRequest(c, CatCode.SYNCHRONIZE_CLOCK,
+			sync.length);
 		System.arraycopy(sync, 0, pkt, OFF_PAYLOAD, sync.length);
 		calculateChecksum(pkt);
 		os.write(pkt);

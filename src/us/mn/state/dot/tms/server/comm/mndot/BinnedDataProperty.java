@@ -76,7 +76,7 @@ public class BinnedDataProperty extends MndotProperty {
 	public void encodeQuery(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] req = createRequest(c, SEND_NEXT_RECORD, 0);
+		byte[] req = createRequest(c, CatCode.SEND_NEXT_RECORD, 0);
 		calculateChecksum(req);
 		os.write(req);
 	}
@@ -95,7 +95,7 @@ public class BinnedDataProperty extends MndotProperty {
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] req = createRequest(c, DELETE_OLDEST_RECORD, 0);
+		byte[] req = createRequest(c, CatCode.DELETE_OLDEST_RECORD, 0);
 		calculateChecksum(req);
 		os.write(req);
 	}

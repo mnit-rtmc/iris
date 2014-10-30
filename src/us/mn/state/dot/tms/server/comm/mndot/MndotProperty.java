@@ -33,30 +33,6 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 abstract public class MndotProperty extends ControllerProperty {
 
-	/** "Shut up" command category code */
-	static protected final int SHUT_UP = 0;
-
-	/** Remote level-1 restart command category code */
-	static protected final int LEVEL_1_RESTART = 1;
-
-	/** Synchronize clock command category code */
-	static protected final int SYNCHRONIZE_CLOCK = 2;
-
-	/** Query record count command category code */
-	static protected final int QUERY_RECORD_COUNT = 3;
-
-	/** Send next record command category code */
-	static protected final int SEND_NEXT_RECORD = 4;
-
-	/** Delete oldest record command category code */
-	static protected final int DELETE_OLDEST_RECORD = 5;
-
-	/** Write memory command category code */
-	static protected final int WRITE_MEMORY = 6;
-
-	/** Read memory command category code */
-	static protected final int READ_MEMORY = 7;
-
 	/** Offset for DROP/CAT or DROP/STAT field */
 	static protected final int OFF_DROP_CAT = 0;
 
@@ -113,8 +89,8 @@ abstract public class MndotProperty extends ControllerProperty {
 	 * @param cat Category code.
 	 * @param n_bytes Number of additional bytes.
 	 * @return Request packet. */
-	static protected final byte[] createRequest(ControllerImpl c, int cat,
-		int n_bytes)
+	static protected final byte[] createRequest(ControllerImpl c,
+		CatCode cat, int n_bytes)
 	{
 		byte[] pkt = new byte[3 + n_bytes];
 		pkt[OFF_DROP_CAT] = dropCat(c, cat);
@@ -122,14 +98,17 @@ abstract public class MndotProperty extends ControllerProperty {
 		return pkt;
 	}
 
-	/** Make the initical drop/category byte */
-	static private byte dropCat(ControllerImpl c, int cat) {
+	/** Make the initical drop/category byte.
+	 * @param c Controller.
+	 * @param cat Category code.
+	 * @return Combined drop/category byte. */
+	static private byte dropCat(ControllerImpl c, CatCode cat) {
 		int drop = c.getDrop();
 		CommProtocol cp = c.getProtocol();
 		if (cp == CommProtocol.MNDOT_5)
-			return (byte)(drop << 3 | cat);
+			return (byte)(drop << 3 | cat.ordinal());
 		else
-			return (byte)(drop << 4 | cat);
+			return (byte)(drop << 4 | cat.ordinal());
 	}
 
 	/** Calculate the checksum for a request packet */

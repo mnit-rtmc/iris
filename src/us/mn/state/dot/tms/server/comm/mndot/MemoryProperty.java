@@ -73,7 +73,7 @@ public class MemoryProperty extends MndotProperty {
 	public void encodeQuery(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] req = createRequest(c, READ_MEMORY, 3);
+		byte[] req = createRequest(c, CatCode.READ_MEMORY, 3);
 		req[OFF_ADDRESS_MSB] = getAddressMsb();
 		req[OFF_ADDRESS_LSB] = getAddressLsb();
 		req[OFF_READ_LENGTH] = (byte)payload.length;
@@ -95,7 +95,8 @@ public class MemoryProperty extends MndotProperty {
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] pkt = createRequest(c, WRITE_MEMORY, payload.length + 2);
+		byte[] pkt = createRequest(c, CatCode.WRITE_MEMORY,
+			payload.length + 2);
 		pkt[OFF_ADDRESS_MSB] = getAddressMsb();
 		pkt[OFF_ADDRESS_LSB] = getAddressLsb();
 		System.arraycopy(payload, 0, pkt, 4, payload.length);

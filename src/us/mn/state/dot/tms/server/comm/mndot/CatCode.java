@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,31 +14,18 @@
  */
 package us.mn.state.dot.tms.server.comm.mndot;
 
-import java.io.InputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import us.mn.state.dot.tms.server.ControllerImpl;
-
 /**
- * Shut Up Property
+ * Message category codes.
  *
  * @author Douglas Lau
  */
-public class ShutUpProperty extends MndotProperty {
-
-	/** Encode a STORE request */
-	@Override
-	public void encodeStore(ControllerImpl c, OutputStream os)
-		throws IOException
-	{
-		byte[] pkt = createRequest(c, CatCode.SHUT_UP, 0);
-		calculateChecksum(pkt);
-		os.write(pkt);
-	}
-
-	/** Decode a STORE response */
-	@Override
-	public void decodeStore(ControllerImpl c, InputStream is) {
-		// No response expected
-	}
+public enum CatCode {
+	SHUT_UP,		// 0
+	LEVEL_1_RESTART,	// 1
+	SYNCHRONIZE_CLOCK,	// 2
+	QUERY_RECORD_COUNT,	// 3
+	SEND_NEXT_RECORD,	// 4
+	DELETE_OLDEST_RECORD,	// 5
+	WRITE_MEMORY,		// 6
+	READ_MEMORY;		// 7
 }

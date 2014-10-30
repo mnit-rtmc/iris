@@ -31,7 +31,7 @@ public class Level1Property extends MndotProperty {
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] pkt = createRequest(c, LEVEL_1_RESTART, 0);
+		byte[] pkt = createRequest(c, CatCode.LEVEL_1_RESTART, 0);
 		calculateChecksum(pkt);
 		os.write(pkt);
 	}
