@@ -70,7 +70,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	@Override
 	public CommMessage createMessage(ControllerImpl c) throws IOException {
 		return new Message(messenger.getOutputStream(c),
-			messenger.getInputStream("", c), c, protocol);
+			messenger.getInputStream("", c), c);
 	}
 
 	/** Check if a drop address is valid */

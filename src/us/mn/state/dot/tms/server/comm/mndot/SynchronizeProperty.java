@@ -16,9 +16,10 @@ package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.Calendar;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.server.comm.ProtocolException;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * Synchronize Property
@@ -27,28 +28,39 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  */
 public class SynchronizeProperty extends MndotProperty {
 
-	/** Format a basic "SET" request */
-	protected byte[] formatPayloadSet(Message m) throws IOException {
+	/** Format a buffer with a time stamp.
+	 * @param stamp Time stamp.
+	 * @return Buffer of 6 BCD-encoded bytes.
+	 * @throws IOException on error encoding to BCD. */
+	static private byte[] formatStamp(Calendar stamp) throws IOException {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		BCDOutputStream bcd = new BCDOutputStream(os);
-		Calendar now = TimeSteward.getCalendarInstance();
-		bcd.write2(now.get(Calendar.MONTH) + 1);
-		bcd.write2(now.get(Calendar.DAY_OF_MONTH));
-		bcd.write2(now.get(Calendar.YEAR) % 100);
-		bcd.write2(now.get(Calendar.HOUR_OF_DAY));
-		bcd.write2(now.get(Calendar.MINUTE));
-		bcd.write2(now.get(Calendar.SECOND));
-		byte[] sync = os.toByteArray();
-		byte[] req = new byte[9];
-		req[OFF_DROP_CAT] = m.dropCat(SYNCHRONIZE_CLOCK);
-		req[OFF_LENGTH] = (byte)sync.length;	// Always 6 octets
-		System.arraycopy(sync, 0, req, OFF_PAYLOAD, sync.length);
-		req[req.length - 1] = checksum(req);
-		return req;
+		bcd.write2(stamp.get(Calendar.MONTH) + 1);
+		bcd.write2(stamp.get(Calendar.DAY_OF_MONTH));
+		bcd.write2(stamp.get(Calendar.YEAR) % 100);
+		bcd.write2(stamp.get(Calendar.HOUR_OF_DAY));
+		bcd.write2(stamp.get(Calendar.MINUTE));
+		bcd.write2(stamp.get(Calendar.SECOND));
+		return os.toByteArray();
 	}
 
-	/** Get the expected number of octets in response to a SET request */
-	protected int expectedSetOctets() {
-		return 3;
+	/** Encode a STORE request */
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
+		byte[] sync = formatStamp(TimeSteward.getCalendarInstance());
+		byte[] pkt = createRequest(c, SYNCHRONIZE_CLOCK, sync.length);
+		System.arraycopy(sync, 0, pkt, OFF_PAYLOAD, sync.length);
+		calculateChecksum(pkt);
+		os.write(pkt);
+	}
+
+	/** Parse a store response packet.
+	 * @param pkt Response packet.
+	 * @throws IOException on parse errors. */
+	@Override
+	protected void parseStore(byte[] pkt) throws IOException {
+		validateResponseLength(pkt, 3);
 	}
 }

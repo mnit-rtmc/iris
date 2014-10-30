@@ -113,7 +113,7 @@ abstract public class MndotProperty extends ControllerProperty {
 	 * @param cat Category code.
 	 * @param n_bytes Number of additional bytes.
 	 * @return Request packet. */
-	static protected byte[] createRequest(ControllerImpl c, int cat,
+	static protected final byte[] createRequest(ControllerImpl c, int cat,
 		int n_bytes)
 	{
 		byte[] pkt = new byte[3 + n_bytes];
@@ -133,14 +133,14 @@ abstract public class MndotProperty extends ControllerProperty {
 	}
 
 	/** Calculate the checksum for a request packet */
-	static protected void calculateChecksum(byte[] pkt) {
+	static protected final void calculateChecksum(byte[] pkt) {
 		pkt[pkt.length - 1] = checksum(pkt);
 	}
 
 	/** Calculate the checksum of a packet.
 	 * @param pkt Packet.
 	 * @return Calculated checksum of packet. */
-	static protected byte checksum(byte[] pkt) {
+	static private byte checksum(byte[] pkt) {
 		byte xsum = 0;
 		for (int i = 0; i < pkt.length - 1; i++)
 			xsum ^= pkt[i];
@@ -235,41 +235,17 @@ abstract public class MndotProperty extends ControllerProperty {
 		     : (drop_stat & 0x0F);
 	}
 
-	/** Poll the 170 controller */
-	protected void doPoll(OutputStream output, byte[] req)
-		throws IOException
+	/** Validate response length.
+	 * @param pkt Response packet.
+	 * @param len Expected packet length.
+	 * @throws ParsingException if length is not valid. */
+	protected final void validateResponseLength(byte[] pkt, int len)
+		throws ParsingException
 	{
-		output.write(req);
-		output.flush();
-	}
-
-	/** Get a response from an input stream */
-	protected byte[] getResponse(InputStream is, int expected)
-		throws IOException
-	{
-		byte[] buf = new byte[expected];
-		int b = is.read(buf);
-		if(b < 0)
-			throw new EOFException("END OF STREAM");
-		if(b != buf.length) {
-			byte[] res = new byte[b];
-			System.arraycopy(buf, 0, res, 0, b);
-			return res;
+		if (pkt.length != len) {
+			throw new ParsingException("BAD RESPONSE LENGTH: " +
+				pkt.length + " FOR " + getClass());
 		}
-		return buf;
-	}
-
-	/** Get response from the controller */
-	protected byte[] doResponse(Message m, byte[] req, int expected)
-		throws IOException
-	{
-		if(expected > 0) {
-			byte[] res = getResponse(m.input, expected);
-			validateChecksum(res);
-			m.validateResponse(req, res);
-			return res;
-		} else
-			return new byte[0];
 	}
 
 	/** Decode a QUERY response */
@@ -291,30 +267,36 @@ abstract public class MndotProperty extends ControllerProperty {
 
 	/** Perform a "GET" request */
 	public void doGetRequest(Message m) throws IOException {
+		m.input.skip(m.input.available());
 		ControllerImpl c = m.getController();
 		encodeQuery(c, m.output);
 		m.output.flush();
 		decodeQuery(c, m.input);
 	}
 
-	/** Format a basic "SET" request */
-	abstract protected byte[] formatPayloadSet(Message m)
-		throws IOException;
+	/** Decode a STORE response */
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is)
+		throws IOException
+	{
+		byte[] pkt = readResponse(is);
+		validateResponse(c, pkt);
+		parseStore(pkt);
+	}
 
-	/** Get the expected number of octets in response to a SET request */
-	abstract protected int expectedSetOctets();
-
-	/** Parse the response to a SET request */
-	protected void parseSetResponse(byte[] buf) {
-		// override this if necessary
+	/** Parse a store response packet.
+	 * @param pkt Response packet.
+	 * @throws IOException on parse errors. */
+	protected void parseStore(byte[] pkt) throws IOException {
+		// Override if necessary
 	}
 
 	/** Perform a "SET" request */
 	public void doSetRequest(Message m) throws IOException {
-		byte[] req = formatPayloadSet(m);
 		m.input.skip(m.input.available());
-		doPoll(m.output, req);
-		byte[] res = doResponse(m, req, expectedSetOctets());
-		parseSetResponse(res);
+		ControllerImpl c = m.getController();
+		encodeStore(c, m.output);
+		m.output.flush();
+		decodeStore(c, m.input);
 	}
 }

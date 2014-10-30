@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
@@ -29,19 +28,29 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
 public class MemoryProperty extends MndotProperty {
 
 	/** Maximum length of a memory request (128 - 5 octet overhead) */
-	static protected final int MAX_LENGTH = 123;
+	static private final int MAX_LENGTH = 123;
 
 	/** Offset for MSB of memory address */
-	static protected final int OFF_ADDRESS_MSB = 2;
+	static private final int OFF_ADDRESS_MSB = 2;
 
 	/** Offset for LSB of memory address */
-	static protected final int OFF_ADDRESS_LSB = 3;
+	static private final int OFF_ADDRESS_LSB = 3;
 
 	/** Offset for memory read length */
-	static protected final int OFF_READ_LENGTH = 4;
+	static private final int OFF_READ_LENGTH = 4;
 
 	/** 170 controller memory address */
 	private final int address;
+
+	/** Get the MSB of the controller memory address */
+	private byte getAddressMsb() {
+		return (byte)((address >> 8) & 0xFF);
+	}
+
+	/** Get the LSB of the controller memory address */
+	private byte getAddressLsb() {
+		return (byte)(address & 0xFF);
+	}
 
 	/** 170 controller memory payload */
 	private final byte[] payload;
@@ -65,8 +74,8 @@ public class MemoryProperty extends MndotProperty {
 		throws IOException
 	{
 		byte[] req = createRequest(c, READ_MEMORY, 3);
-		req[OFF_ADDRESS_MSB] = (byte)((address >> 8) & 0xFF);
-		req[OFF_ADDRESS_LSB] = (byte)(address & 0xFF);
+		req[OFF_ADDRESS_MSB] = getAddressMsb();
+		req[OFF_ADDRESS_LSB] = getAddressLsb();
 		req[OFF_READ_LENGTH] = (byte)payload.length;
 		calculateChecksum(req);
 		os.write(req);
@@ -77,29 +86,25 @@ public class MemoryProperty extends MndotProperty {
 	 * @throws IOException on parse errors. */
 	@Override
 	protected void parseQuery(byte[] pkt) throws IOException {
-		if (pkt.length != payload.length + 3)
-			throw new ParsingException("Bad resp len:"+ pkt.length);
+		validateResponseLength(pkt, payload.length + 3);
 		System.arraycopy(pkt, OFF_PAYLOAD, payload, 0, payload.length);
 	}
 
-	/** Format a basic "SET" request */
-	protected byte[] formatPayloadSet(Message m) throws IOException {
-		byte[] req = new byte[payload.length + 5];
-		req[OFF_DROP_CAT] = m.dropCat(WRITE_MEMORY);
-		req[OFF_LENGTH] = (byte)(payload.length + 2);
-		req[OFF_ADDRESS_MSB] = (byte)((address >> 8) & 0xFF);
-		req[OFF_ADDRESS_LSB] = (byte)(address & 0xFF);
-		System.arraycopy(payload, 0, req, 4, payload.length);
-		req[req.length - 1] = checksum(req);
-		return req;
-	}
-
-	/** Get the expected number of octets in response to a SET request */
-	protected int expectedSetOctets() {
-		return 3;
+	/** Encode a STORE request */
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
+		byte[] pkt = createRequest(c, WRITE_MEMORY, payload.length + 2);
+		pkt[OFF_ADDRESS_MSB] = getAddressMsb();
+		pkt[OFF_ADDRESS_LSB] = getAddressLsb();
+		System.arraycopy(payload, 0, pkt, 4, payload.length);
+		calculateChecksum(pkt);
+		os.write(pkt);
 	}
 
 	/** Get a string representation of the property */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("mem ");

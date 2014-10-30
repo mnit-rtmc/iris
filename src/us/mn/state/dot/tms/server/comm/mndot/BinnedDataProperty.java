@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * Binned data property to query or clear oldest binned data record.
@@ -29,13 +28,13 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class BinnedDataProperty extends MndotProperty {
 
 	/** Number of octets for timestamp */
-	static protected final int STAMP_LENGTH = 5;
+	static private final int STAMP_LENGTH = 5;
 
 	/** Number of octets for binned data record */
-	static protected final int RECORD_LENGTH = 75;
+	static private final int RECORD_LENGTH = 75;
 
 	/** Number of octets for complete binned data buffer */
-	static protected final int BINNED_DATA_LENGTH =
+	static private final int BINNED_DATA_LENGTH =
 		STAMP_LENGTH + RECORD_LENGTH;
 
 	/** Binned data buffer payload */
@@ -46,7 +45,7 @@ public class BinnedDataProperty extends MndotProperty {
 		ByteArrayInputStream bis = new ByteArrayInputStream(payload);
 		BCDInputStream bcd = new BCDInputStream(bis);
 		int year = 1900 + bcd.read2();
-		if(year < 1989)
+		if (year < 1989)
 			year += 100;
 		int month = bcd.read2() - 1;
 		int day = bcd.read2();
@@ -87,27 +86,26 @@ public class BinnedDataProperty extends MndotProperty {
 	 * @throws IOException on parse errors. */
 	@Override
 	protected void parseQuery(byte[] pkt) throws IOException {
-		if (pkt.length != payload.length + 3)
-			throw new ParsingException("Bad resp len:"+ pkt.length);
+		validateResponseLength(pkt, payload.length + 3);
 		System.arraycopy(pkt, OFF_PAYLOAD, payload, 0, payload.length);
 	}
 
-	/** Format a basic "SET" request */
-	protected byte[] formatPayloadSet(Message m) throws IOException {
-		byte[] req = new byte[3];
-		req[OFF_DROP_CAT] = m.dropCat(DELETE_OLDEST_RECORD);
-		req[OFF_LENGTH] = 0;
-		req[req.length - 1] = checksum(req);
-		return req;
+	/** Encode a STORE request */
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
+		byte[] req = createRequest(c, DELETE_OLDEST_RECORD, 0);
+		calculateChecksum(req);
+		os.write(req);
 	}
 
-	/** Get the expected number of octets in response to a SET request */
-	protected int expectedSetOctets() {
-		return 4;
-	}
-
-	/** Parse the response to a SET request */
-	protected void parseSetResponse(byte[] buf) {
-		n_records = buf[OFF_PAYLOAD] & 0xFF;
+	/** Parse a store response packet.
+	 * @param pkt Response packet.
+	 * @throws IOException on parse errors. */
+	@Override
+	protected void parseStore(byte[] pkt) throws IOException {
+		validateResponseLength(pkt, 4);
+		n_records = pkt[OFF_PAYLOAD] & 0xFF;
 	}
 }

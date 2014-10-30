@@ -14,8 +14,10 @@
  */
 package us.mn.state.dot.tms.server.comm.mndot;
 
+import java.io.InputStream;
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.ProtocolException;
+import java.io.OutputStream;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * Level-1 Restart Property
@@ -24,17 +26,19 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  */
 public class Level1Property extends MndotProperty {
 
-	/** Format a basic "SET" request */
-	protected byte[] formatPayloadSet(Message m) throws IOException {
-		byte[] req = new byte[3];
-		req[OFF_DROP_CAT] = m.dropCat(LEVEL_1_RESTART);
-		req[OFF_LENGTH] = 0;
-		req[req.length - 1] = checksum(req);
-		return req;
+	/** Encode a STORE request */
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
+		byte[] pkt = createRequest(c, LEVEL_1_RESTART, 0);
+		calculateChecksum(pkt);
+		os.write(pkt);
 	}
 
-	/** Get the expected number of octets in response to a SET request */
-	protected int expectedSetOctets() {
-		return 0;
+	/** Decode a STORE response */
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is) {
+		// No response expected
 	}
 }
