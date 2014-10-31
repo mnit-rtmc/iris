@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
 /**
- * MndotPoller is a poller for the Mn/DOT 170 communication protocol,
+ * MndotPoller is a poller for the MnDOT 170 communication protocol,
  * revision 4 or 5.
  *
  * @author Douglas Lau
@@ -48,7 +48,9 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	/** MnDOT 170 debug log */
 	static protected final DebugLog MNDOT_LOG = new DebugLog("mndot170");
 
-	/** Get the meter number on the controller. */
+	/** Get the meter number on a controller.
+	 * @param meter Ramp meter.
+	 * @return Meter number (1 or 2) or 0 if unassigned. */
 	static protected int getMeterNumber(RampMeterImpl meter) {
 		if (meter.isActive()) {
 			int pin = meter.getPin();
@@ -61,9 +63,12 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	}
 
 	/** CommProtocol (4-bit or 5-bit) */
-	protected final CommProtocol protocol;
+	private final CommProtocol protocol;
 
-	/** Create a new Mn/DOT 170 poller */
+	/** Create a new MnDOT 170 poller.
+	 * @param n Comm link name.
+	 * @param m Messenger for communication.
+	 * @param p Communication protocol. */
 	public MndotPoller(String n, Messenger m, CommProtocol p) {
 		super(n, m);
 		protocol = p;
@@ -72,9 +77,9 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	/** Check if a drop address is valid */
 	@Override
 	public boolean isAddressValid(int drop) {
-		if(drop < 1 || drop > 31)
+		if (drop < 1 || drop > 31)
 			return false;
-		if(drop > 15 && protocol != CommProtocol.MNDOT_5)
+		if (drop > 15 && protocol != CommProtocol.MNDOT_5)
 			return false;
 		return true;
 	}
@@ -86,20 +91,20 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 		ss.setPriority(p);
 		addOperation(ss);
 		BeaconImpl beacon = c.getActiveBeacon();
-		if(beacon != null) {
+		if (beacon != null) {
 			OpSendBeaconSettings s =
 				new OpSendBeaconSettings(beacon);
 			s.setPriority(p);
 			addOperation(s);
 		}
 		RampMeterImpl meter1 = Op170.lookupMeter1(c);
-		if(meter1 != null) {
+		if (meter1 != null) {
 			OpSendMeterSettings s = new OpSendMeterSettings(meter1);
 			s.setPriority(p);
 			addOperation(s);
 		}
 		RampMeterImpl meter2 = Op170.lookupMeter2(c);
-		if(meter2 != null) {
+		if (meter2 != null) {
 			OpSendMeterSettings s = new OpSendMeterSettings(meter2);
 			s.setPriority(p);
 			addOperation(s);
@@ -109,14 +114,14 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		if(c.getActive())
+		if (c.getActive())
 			addOperation(new OpReset170(c));
 	}
 
 	/** Send sample settings to a controller */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		if(c.getActive())
+		if (c.getActive())
 			addOperation(new OpSendSampleSettings(c));
 	}
 
@@ -125,17 +130,17 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
  	 * @param p Sample period in seconds. */
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
-		switch(p) {
+		switch (p) {
 		case OpQuerySamples30Sec.SAMPLE_PERIOD_SEC:
-			if(c.hasActiveDetector())
+			if (c.hasActiveDetector())
 				addOperation(new OpQuerySamples30Sec(c));
 			// This should happen on a meter QUERY_STATUS, but
 			// green detectors need to be queried also...
-			if(c.hasActiveMeter())
+			if (c.hasActiveMeter())
 				addOperation(new OpQueryMeterStatus(c));
 			break;
 		case OpQuerySamples5Min.SAMPLE_PERIOD_SEC:
-			if(c.hasActiveDetector() || c.hasActiveMeter())
+			if (c.hasActiveDetector() || c.hasActiveMeter())
 				addOperation(new OpQuerySamples5Min(c));
 			break;
 		}
@@ -144,7 +149,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	/** Send a device request to a ramp meter */
 	@Override
 	public void sendRequest(RampMeterImpl meter, DeviceRequest r) {
-		switch(r) {
+		switch (r) {
 		case SEND_SETTINGS:
 			addOperation(new OpSendMeterSettings(meter));
 			break;
@@ -158,8 +163,8 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	@Override
 	public void sendReleaseRate(RampMeterImpl meter, Integer rate) {
 		int n = getMeterNumber(meter);
-		if(n > 0) {
-			if(shouldStop(meter, rate))
+		if (n > 0) {
+			if (shouldStop(meter, rate))
 				stopMetering(meter);
 			else {
 				float red = RedTime.fromReleaseRate(rate,
@@ -167,40 +172,40 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 				int r = Math.round(red * 10);
 				addOperation(new OpSendMeterRedTime(meter,
 					n, r));
-				if(!meter.isMetering())
+				if (!meter.isMetering())
 					startMetering(meter);
 			}
 		}
 	}
 
 	/** Should we stop metering? */
-	protected boolean shouldStop(RampMeterImpl meter, Integer rate) {
+	private boolean shouldStop(RampMeterImpl meter, Integer rate) {
 		// Workaround for errors in rx only (good tx)
 		return rate == null || rate == 0 || meter.isCommFailed();
 	}
 
 	/** Start metering */
-	protected void startMetering(RampMeterImpl meter) {
-		if(!meter.isFailed())
+	private void startMetering(RampMeterImpl meter) {
+		if (!meter.isFailed())
 			sendMeteringRate(meter, MeterRate.CENTRAL);
 	}
 
 	/** Stop metering */
-	protected void stopMetering(RampMeterImpl meter) {
+	private void stopMetering(RampMeterImpl meter) {
 		sendMeteringRate(meter, MeterRate.FORCED_FLASH);
 	}
 
 	/** Send a new metering rate */
-	protected void sendMeteringRate(RampMeterImpl meter, int rate) {
+	private void sendMeteringRate(RampMeterImpl meter, int rate) {
 		int n = getMeterNumber(meter);
-		if(n > 0)
+		if (n > 0)
 			addOperation(new OpSendMeterRate(meter, n, rate));
 	}
 
 	/** Send a device request to a beacon */
 	@Override
 	public void sendRequest(BeaconImpl beacon, DeviceRequest r) {
-		switch(r) {
+		switch (r) {
 		case SEND_SETTINGS:
 			addOperation(new OpSendBeaconSettings(beacon));
 			break;
@@ -222,7 +227,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	/** Send a device request to an LCS array */
 	@Override
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
-		switch(r) {
+		switch (r) {
 		case SEND_SETTINGS:
 			addOperation(new OpSendLCSSettings(lcs_array));
 			break;
@@ -255,7 +260,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	/** Send a device request to an alarm */
 	@Override
 	public void sendRequest(AlarmImpl alarm, DeviceRequest r) {
-		switch(r) {
+		switch (r) {
 		case QUERY_STATUS:
 			Controller c = alarm.getController();
 			if (c instanceof ControllerImpl) {
