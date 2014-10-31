@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ public interface Address {
 	/** Meter data offset for remote rate */
 	int OFF_REMOTE_RATE = 3;
 
-	/** Meter data offset for police panel & verifies */
+	/** Meter data offset for police panel &amp; verifies */
 	int OFF_POLICE_PANEL = 4;
 
 	/** Meter data offset for 5-minute green count */
