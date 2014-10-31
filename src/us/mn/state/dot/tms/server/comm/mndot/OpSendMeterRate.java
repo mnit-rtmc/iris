@@ -30,14 +30,14 @@ public class OpSendMeterRate extends Op170Device {
 	/** Get the meter number on a controller.
 	 * @return Meter number (1 or 2) or 0 if unassigned. */
 	private int meterNumber() {
-		if (meter.isActive()) {
-			int pin = meter.getPin();
-			if (pin == Op170.DEVICE_1_PIN)
-				return 1;
-			if (pin == Op170.METER_2_PIN)
-				return 2;
+		switch (meter.getPin()) {
+		case Op170.DEVICE_1_PIN:
+			return 1;
+		case Op170.METER_2_PIN:
+			return 2;
+		default:
+			return 0;
 		}
-		return 0;
 	}
 
 	/** Ramp meter */
