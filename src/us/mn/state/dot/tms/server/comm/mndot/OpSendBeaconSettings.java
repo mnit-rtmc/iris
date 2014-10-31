@@ -59,18 +59,15 @@ public class OpSendBeaconSettings extends Op170Device {
 		protected Phase<MndotProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			int a = tableAddress();
-			MemoryProperty prop = createTimingTableProperty(a);
-			mess.add(prop);
+			mess.add(new MemoryProperty(tableAddress(),
+				createTimingTable()));
 			mess.storeProps();
 			return null;
 		}
 	}
 
-	/** Create a timing table property for the beacon */
-	private MemoryProperty createTimingTableProperty(int address)
-		throws IOException
-	{
+	/** Create a timing table for the beacon */
+	private byte[] createTimingTable() throws IOException {
 		int[] times = {AM_MID_TIME, PM_MID_TIME};
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		BCDOutputStream bcd = new BCDOutputStream(os);
@@ -86,6 +83,6 @@ public class OpSendBeaconSettings extends Op170Device {
 			bcd.write4(times[t]);		// TOD start time
 			bcd.write4(times[t]);		// TOD stop time
 		}
-		return new MemoryProperty(address, os.toByteArray());
+		return os.toByteArray();
 	}
 }

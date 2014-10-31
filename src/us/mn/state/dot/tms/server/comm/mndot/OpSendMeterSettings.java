@@ -198,32 +198,30 @@ public class OpSendMeterSettings extends Op170Device {
 		protected Phase<MndotProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			int a = tableAddress();
-			mess.add(createTimingTableProperty(a));
+			mess.add(new MemoryProperty(tableAddress(),
+				createTimingTable()));
 			mess.storeProps();
 			return new ClearVerifies();
 		}
 	}
 
-	/** Create a timing table property for the meter */
-	protected MndotProperty createTimingTableProperty(int address)
-		throws IOException
-	{
+	/** Create a timing table for the meter */
+	private byte[] createTimingTable() throws IOException {
 		ByteArrayOutputStream os = new ByteArrayOutputStream();
 		BCDOutputStream bcd = new BCDOutputStream(os);
-		for(int t = Calendar.AM; t <= Calendar.PM; t++) {
+		for (int t = Calendar.AM; t <= Calendar.PM; t++) {
 			bcd.write4(STARTUP_GREEN);
 			bcd.write4(STARTUP_YELLOW);
 			bcd.write4(getGreenTime());
 			bcd.write4(getYellowTime());
 			bcd.write4(HOV_PREEMPT);
-			for(int i = 0; i < 6; i++)
+			for (int i = 0; i < 6; i++)
 				bcd.write4(table_red[t]);
 			bcd.write2(table_rate[t]);
 			bcd.write4(table_start[t]);
 			bcd.write4(table_stop[t]);
 		}
-		return new MemoryProperty(address, os.toByteArray());
+		return os.toByteArray();
 	}
 
 	/** Phase to clear the meter verifies for the ramp meter */
