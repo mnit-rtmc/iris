@@ -48,20 +48,6 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	/** MnDOT 170 debug log */
 	static protected final DebugLog MNDOT_LOG = new DebugLog("mndot170");
 
-	/** Get the meter number on a controller.
-	 * @param meter Ramp meter.
-	 * @return Meter number (1 or 2) or 0 if unassigned. */
-	static protected int getMeterNumber(RampMeterImpl meter) {
-		if (meter.isActive()) {
-			int pin = meter.getPin();
-			if (pin == Op170.DEVICE_1_PIN)
-				return 1;
-			if (pin == Op170.METER_2_PIN)
-				return 2;
-		}
-		return 0;
-	}
-
 	/** CommProtocol (4-bit or 5-bit) */
 	private final CommProtocol protocol;
 
@@ -162,44 +148,7 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	/** Send a new release rate to a ramp meter */
 	@Override
 	public void sendReleaseRate(RampMeterImpl meter, Integer rate) {
-		int n = getMeterNumber(meter);
-		if (n > 0) {
-			if (shouldStop(meter, rate))
-				stopMetering(meter);
-			else {
-				float red = RedTime.fromReleaseRate(rate,
-					meter.getMeterType());
-				int r = Math.round(red * 10);
-				addOperation(new OpSendMeterRedTime(meter,
-					n, r));
-				if (!meter.isMetering())
-					startMetering(meter);
-			}
-		}
-	}
-
-	/** Should we stop metering? */
-	private boolean shouldStop(RampMeterImpl meter, Integer rate) {
-		// Workaround for errors in rx only (good tx)
-		return rate == null || rate == 0 || meter.isCommFailed();
-	}
-
-	/** Start metering */
-	private void startMetering(RampMeterImpl meter) {
-		if (!meter.isFailed())
-			sendMeteringRate(meter, MeterRate.CENTRAL);
-	}
-
-	/** Stop metering */
-	private void stopMetering(RampMeterImpl meter) {
-		sendMeteringRate(meter, MeterRate.FORCED_FLASH);
-	}
-
-	/** Send a new metering rate */
-	private void sendMeteringRate(RampMeterImpl meter, int rate) {
-		int n = getMeterNumber(meter);
-		if (n > 0)
-			addOperation(new OpSendMeterRate(meter, n, rate));
+		addOperation(new OpSendMeterRate(meter, rate));
 	}
 
 	/** Send a device request to a beacon */

@@ -14,36 +14,67 @@
  */
 package us.mn.state.dot.tms.server.comm.mndot;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * Operation to update a 170 controller metering rate
+ * Operation to send release rate to a ramp meter.
  *
  * @author Douglas Lau
  */
 public class OpSendMeterRate extends Op170Device {
 
+	/** Get the meter number on a controller.
+	 * @return Meter number (1 or 2) or 0 if unassigned. */
+	private int meterNumber() {
+		if (meter.isActive()) {
+			int pin = meter.getPin();
+			if (pin == Op170.DEVICE_1_PIN)
+				return 1;
+			if (pin == Op170.METER_2_PIN)
+				return 2;
+		}
+		return 0;
+	}
+
 	/** Ramp meter */
-	protected final RampMeterImpl meter;
+	private final RampMeterImpl meter;
 
-	/** Controller memory address */
-	protected final int address;
+	/** Red time (tenths of a second) or null for no metering */
+	private final Integer red_time;
 
-	/** New metering rate */
-	protected final byte rate;
+	/** Create a new send meter rate operation.
+	 * @param rm Ramp meter.
+	 * @param rate Release rate (vehicles / hour) or null to stop. */
+	public OpSendMeterRate(RampMeterImpl rm, Integer rate) {
+		super(PriorityLevel.COMMAND, rm);
+		meter = rm;
+		red_time = calculateRedTime(rate);
+	}
 
-	/** Create a new meter rate command operation */
-	public OpSendMeterRate(RampMeterImpl m, int i, int r) {
-		super(PriorityLevel.COMMAND, m);
-		meter = m;
-		int a = Address.RAMP_METER_DATA + Address.OFF_REMOTE_RATE;
-		if (i == 2)
-			a += Address.OFF_METER_2;
-		address = a;
-		rate = (byte)r;
+	/** Calculate red time for metering.
+	 * @param rate Release rate.
+	 * @return Red time (tenths of a second) or null. */
+	private Integer calculateRedTime(Integer rate) {
+		int rt = (rate != null) ? redTimeFromRate(rate) : 0;
+		return (rt <= 0 || shouldStop()) ? null : rt;
+	}
+
+	/** Convert release rate to red time.
+	 * @param rate release rate (vehicles / hour).
+	 * @return Red time (tenths of a second). */
+	private int redTimeFromRate(int rate) {
+		float red = RedTime.fromReleaseRate(rate, meter.getMeterType());
+		return Math.round(red * 10);
+	}
+
+	/** Should we stop metering due to errors?
+	 * @return true to stop metering. */
+	private boolean shouldStop() {
+		return meter.isCommFailed();
 	}
 
 	/** Operation equality test */
@@ -51,7 +82,7 @@ public class OpSendMeterRate extends Op170Device {
 	public boolean equals(Object o) {
 		if (o instanceof OpSendMeterRate) {
 			OpSendMeterRate op = (OpSendMeterRate)o;
-			return meter == op.meter && rate == op.rate;
+			return meter == op.meter && red_time == op.red_time;
 		} else
 			return false;
 	}
@@ -59,22 +90,81 @@ public class OpSendMeterRate extends Op170Device {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<MndotProperty> phaseTwo() {
-		return new SetRate();
+		return (red_time != null) ? new SendRedTime() : new SendRate();
 	}
 
-	/** Phase to set the metering rate */
-	protected class SetRate extends Phase<MndotProperty> {
-
-		/** Write the meter rate to the controller */
+	/** Phase to send the red time */
+	protected class SendRedTime extends Phase<MndotProperty> {
 		protected Phase<MndotProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			byte[] data = { rate };
-			mess.add(new MemoryProperty(address, data));
+			mess.add(new MemoryProperty(redTimeAddress(),
+				formatRedTime()));
 			mess.storeProps();
-			if (!MeterRate.isMetering(rate))
-				meter.setRateNotify(null);
+			return (meter.isMetering()) ? null : new SendRate();
+		}
+	}
+
+	/** Get the red time address for the current timing table */
+	private int redTimeAddress() {
+		return Op170.getRedAddress(meterNumber(), MeterRate.CENTRAL);
+	}
+
+	/** Format a buffer with red time as BCD */
+	private byte[] formatRedTime() throws IOException {
+		assert red_time != null;
+		ByteArrayOutputStream bo = new ByteArrayOutputStream(2);
+		BCDOutputStream os = new BCDOutputStream(bo);
+		os.write4(red_time);
+		return bo.toByteArray();
+	}
+
+	/** Phase to send the (remote) metering rate */
+	protected class SendRate extends Phase<MndotProperty> {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
+			byte[] data = { (byte)remoteRate() };
+			mess.add(new MemoryProperty(remoteRateAddress(), data));
+			mess.storeProps();
 			return null;
 		}
+	}
+
+	/** Remote metering rate to send */
+	private int remoteRate() {
+		return (red_time != null)
+		      ? MeterRate.CENTRAL
+		      : MeterRate.FORCED_FLASH;
+	}
+
+	/** Get the controller address of the meter remote (central) rate */
+	private int remoteRateAddress() {
+		int a = Address.RAMP_METER_DATA + Address.OFF_REMOTE_RATE;
+		if (meterNumber() == 2)
+			return a + Address.OFF_METER_2;
+		else
+			return a;
+	}
+
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		if (isSuccess())
+			meter.setRateNotify(releaseRate());
+		super.cleanup();
+	}
+
+	/** Get the release rate (vehicles / hour) or null */
+	private Integer releaseRate() {
+		return (red_time != null) ? rateFromRedTime(red_time) : null;
+	}
+
+	/** Convert red time to release rate.
+	 * @param rt Red time (tenths of a second).
+	 * @return Release rate (vehicles / hour). */
+	private int rateFromRedTime(int rt) {
+		float red = rt / 10.0f;
+		return RedTime.toReleaseRate(red, meter.getMeterType());
 	}
 }
