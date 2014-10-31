@@ -59,7 +59,7 @@ public class OpSendBeaconSettings extends Op170Device {
 		protected Phase<MndotProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			int a = Address.METER_1_TIMING_TABLE;
+			int a = tableAddress();
 			MemoryProperty prop = createTimingTableProperty(a);
 			mess.add(prop);
 			mess.storeProps();

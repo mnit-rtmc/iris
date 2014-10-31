@@ -56,6 +56,15 @@ abstract public class Op170Device extends OpDevice<MndotProperty> {
 			return RAMP_METER_DATA + off;
 	}
 
+	/** Get memory address of the meter timing table.
+	 * @return Controller memory address for meter timing table. */
+	protected int tableAddress() {
+		if (meterNumber() == 2)
+			return Address.METER_2_TIMING_TABLE;
+		else
+			return Address.METER_1_TIMING_TABLE;
+	}
+
 	/** Create a new 170 device operation */
 	protected Op170Device(PriorityLevel p, DeviceImpl d) {
 		super(p, d);

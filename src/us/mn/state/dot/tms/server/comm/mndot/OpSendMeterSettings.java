@@ -198,19 +198,11 @@ public class OpSendMeterSettings extends Op170Device {
 		protected Phase<MndotProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			int a = getTableAddress();
+			int a = tableAddress();
 			mess.add(createTimingTableProperty(a));
 			mess.storeProps();
 			return new ClearVerifies();
 		}
-	}
-
-	/** Get the memory address of the meter timing table */
-	protected int getTableAddress() {
-		if(meter.getPin() == Op170.METER_2_PIN)
-			return Address.METER_2_TIMING_TABLE;
-		else
-			return Address.METER_1_TIMING_TABLE;
 	}
 
 	/** Create a timing table property for the meter */
