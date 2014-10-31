@@ -120,9 +120,8 @@ public class OpSendMeterSettings extends Op170Device {
 	private void updateTable(MeterAction ma, TimeAction ta) {
 		int p = TimeActionHelper.getPeriod(ta);
 		int min = minuteBCD(TimeActionHelper.getMinute(ta));
-		float r = RedTime.fromReleaseRate(getTarget(p),
+		table_red[p] = RedTime.fromReleaseRate(getTarget(p),
 			meter.getMeterType());
-		table_red[p] = Math.round(r * 10);
 		table_rate[p] = MeterRate.TOD;
 		if (ma.getPhase() == ta.getPhase())
 			table_start[p] = Math.min(table_start[p], min);

@@ -29,8 +29,8 @@ public class RedTime {
 	/** Calculate red time from a release rate.
 	 * @param rate Release rate (vehicles per hour).
 	 * @param mt Ordinal of ramp meter type.
-	 * @return Red time (seconds). */
-	static public float fromReleaseRate(int rate, int mt) {
+	 * @return Red time (tenths of a second). */
+	static public int fromReleaseRate(int rate, int mt) {
 		float secs_per_veh = Interval.HOUR.divide(rate);
 		if (mt == RampMeterType.SINGLE.ordinal())
 			secs_per_veh /= 2;
@@ -38,7 +38,8 @@ public class RedTime {
 		float yellow = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
 		float min_red = SystemAttrEnum.METER_MIN_RED_SECS.getFloat();
 		float red_time = secs_per_veh - (green + yellow);
-		return Math.max(red_time, min_red);
+		float red_secs = Math.max(red_time, min_red);
+		return Math.round(red_secs * 10);
 	}
 
 	/** Calculate release rate from a red time.

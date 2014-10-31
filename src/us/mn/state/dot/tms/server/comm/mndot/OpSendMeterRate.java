@@ -56,25 +56,25 @@ public class OpSendMeterRate extends Op170Device {
 	}
 
 	/** Calculate red time for metering.
-	 * @param rate Release rate.
+	 * @param rate Release rate, or null.
 	 * @return Red time (tenths of a second) or null. */
 	private Integer calculateRedTime(Integer rate) {
-		int rt = (rate != null) ? redTimeFromRate(rate) : 0;
-		return (rt <= 0 || shouldStop()) ? null : rt;
-	}
-
-	/** Convert release rate to red time.
-	 * @param rate release rate (vehicles / hour).
-	 * @return Red time (tenths of a second). */
-	private int redTimeFromRate(int rate) {
-		float red = RedTime.fromReleaseRate(rate, meter.getMeterType());
-		return Math.round(red * 10);
+		return shouldStop() ? null : redTimeFromRate(rate);
 	}
 
 	/** Should we stop metering due to errors?
 	 * @return true to stop metering. */
 	private boolean shouldStop() {
 		return meter.isCommFailed();
+	}
+
+	/** Convert release rate to red time.
+	 * @param rate release rate (vehicles / hour), or null.
+	 * @return Red time (tenths of a second), or null. */
+	private Integer redTimeFromRate(Integer rate) {
+		return (rate != null)
+		      ? RedTime.fromReleaseRate(rate, meter.getMeterType())
+		      : null;
 	}
 
 	/** Operation equality test */
