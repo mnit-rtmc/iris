@@ -82,7 +82,7 @@ public class OpSendBeaconSettings extends Op170Device {
 			bcd.write4(HOV_PREEMPT);
 			for (int i = 0; i < 6; i++)
 				bcd.write4(1);		// Metering RED
-			bcd.write2(MeterRate.FLASH);	// TOD rate
+			bcd.write2(MeterRate.OFF);	// TOD rate
 			bcd.write4(times[t]);		// TOD start time
 			bcd.write4(times[t]);		// TOD stop time
 		}

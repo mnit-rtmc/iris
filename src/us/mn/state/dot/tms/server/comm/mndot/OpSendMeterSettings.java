@@ -77,7 +77,7 @@ public class OpSendMeterSettings extends Op170Device {
 	protected final int[] table_red = {1, 1};
 
 	/** Meter rates for timing table */
-	protected final int[] table_rate = {MeterRate.FLASH, MeterRate.FLASH};
+	protected final int[] table_rate = {MeterRate.OFF, MeterRate.OFF};
 
 	/** Start times for timing table */
 	protected final int[] table_start = {AM_MID_TIME, PM_MID_TIME};

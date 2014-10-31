@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,14 +15,15 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 /**
- * Meter rates
+ * A meter rate controls whether a ramp meter is metering or flashing.  There
+ * are 6 metering rates and 2 flashing rates.
  *
  * @author Douglas Lau
  */
 public class MeterRate {
 
 	/** Flash (non-metering) rate */
-	static public final int FLASH = 0;
+	static public final int OFF = 0;
 
 	/** Central mode metering rate */
 	static public final int CENTRAL = 1;
@@ -30,18 +31,28 @@ public class MeterRate {
 	/** TOD mode metering rate */
 	static public final int TOD = 2;
 
+	/** Rate 3 */
+	static public final int RATE_3 = 3;
+
+	/** Rate 4 */
+	static public final int RATE_4 = 4;
+
+	/** Rate 5 */
+	static public final int RATE_5 = 5;
+
+	/** Rate 6 */
+	static public final int RATE_6 = 6;
+
 	/** Forced flash (metering disabled) rate */
 	static public final int FORCED_FLASH = 7;
 
+	/** Check if a given rate is valid */
 	static public boolean isValid(int r) {
-		return r >= FLASH && r <= FORCED_FLASH;
+		return r >= OFF && r <= FORCED_FLASH;
 	}
 
+	/** Check if a given rate is metering */
 	static public boolean isMetering(int r) {
-		return r > FLASH && r < FORCED_FLASH;
-	}
-
-	static public boolean isCentralControl(int r) {
-		return r == FORCED_FLASH || r == CENTRAL;
+		return r > OFF && r < FORCED_FLASH;
 	}
 }
