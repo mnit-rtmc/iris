@@ -49,8 +49,6 @@ public class OpQueryBeaconState extends Op170Device {
 			throws IOException
 		{
 			byte[] b = new byte[1];
-			MemoryProperty prop = new MemoryProperty(
-				Address.RAMP_METER_DATA, b);
 			mess.add(new MemoryProperty(Address.RAMP_METER_DATA,b));
 			mess.queryProps();
 			beacon.setFlashingNotify(b[Address.OFF_STATUS] !=
