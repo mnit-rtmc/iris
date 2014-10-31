@@ -248,11 +248,8 @@ public class OpSendMeterSettings extends Op170Device {
 		}
 	}
 
-	/** Get the memory address of the meter timing table */
-	protected int getVerifyAddress() {
-		int a = Address.RAMP_METER_DATA + Address.OFF_POLICE_PANEL;
-		if(meter.getPin() == Op170.METER_2_PIN)
-			a += Address.OFF_METER_2;
-		return a;
+	/** Get the memory address of the meter verify */
+	private int getVerifyAddress() {
+		return meterAddress(Address.OFF_POLICE_PANEL);
 	}
 }

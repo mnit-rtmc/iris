@@ -49,10 +49,10 @@ public class OpQueryBeaconState extends Op170Device {
 			throws IOException
 		{
 			byte[] b = new byte[1];
-			mess.add(new MemoryProperty(Address.RAMP_METER_DATA,b));
+			mess.add(new MemoryProperty(meterAddress(
+				Address.OFF_STATUS), b));
 			mess.queryProps();
-			beacon.setFlashingNotify(b[Address.OFF_STATUS] !=
-				MeterStatus.FLASH);
+			beacon.setFlashingNotify(b[0] != MeterStatus.FLASH);
 			return null;
 		}
 	}

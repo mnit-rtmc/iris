@@ -27,19 +27,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendMeterRate extends Op170Device {
 
-	/** Get the meter number on a controller.
-	 * @return Meter number (1 or 2) or 0 if unassigned. */
-	private int meterNumber() {
-		switch (meter.getPin()) {
-		case Op170.DEVICE_1_PIN:
-			return 1;
-		case Op170.METER_2_PIN:
-			return 2;
-		default:
-			return 0;
-		}
-	}
-
 	/** Ramp meter */
 	private final RampMeterImpl meter;
 
@@ -140,11 +127,7 @@ public class OpSendMeterRate extends Op170Device {
 
 	/** Get the controller address of the meter remote (central) rate */
 	private int remoteRateAddress() {
-		int a = Address.RAMP_METER_DATA + Address.OFF_REMOTE_RATE;
-		if (meterNumber() == 2)
-			return a + Address.OFF_METER_2;
-		else
-			return a;
+		return meterAddress(Address.OFF_REMOTE_RATE);
 	}
 
 	/** Cleanup the operation */

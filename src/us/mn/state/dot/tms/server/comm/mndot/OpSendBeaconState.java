@@ -43,7 +43,7 @@ public class OpSendBeaconState extends Op170Device {
 	/** Create a new send beacon state operation */
 	public OpSendBeaconState(BeaconImpl b, boolean f) {
 		super(PriorityLevel.COMMAND, b);
-		address = Address.RAMP_METER_DATA + Address.OFF_REMOTE_RATE;
+		address = meterAddress(Address.OFF_REMOTE_RATE);
 		rate = getDeployedRate(f);
 	}
 
