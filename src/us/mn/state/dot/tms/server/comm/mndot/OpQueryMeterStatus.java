@@ -33,7 +33,9 @@ public class OpQueryMeterStatus extends Op170 {
 	/** Police panel bit from verify data from 170 */
 	static protected final int POLICE_PANEL_BIT = 1 << 4;
 
-	/** Parse the red time from a BCD byte array */
+	/** Parse the red time from a BCD byte array.
+	 * @param data BCD encoded red time (tenths of a second).
+	 * @return Decoded red time (tenths of a second). */
 	static private int parseRedTime(byte[] data) throws IOException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(data);
 		BCDInputStream is = new BCDInputStream(bis);
@@ -102,8 +104,7 @@ public class OpQueryMeterStatus extends Op170 {
 				data);
 			mess.add(red_mem);
 			mess.queryProps();
-			float red = parseRedTime(data) / 10.0f;
-			int rate = RedTime.toReleaseRate(red,
+			int rate = RedTime.toReleaseRate(parseRedTime(data),
 				meter.getMeterType());
 			meter.setRateNotify(rate);
 			return phases.poll();

@@ -164,7 +164,6 @@ public class OpSendMeterRate extends Op170Device {
 	 * @param rt Red time (tenths of a second).
 	 * @return Release rate (vehicles / hour). */
 	private int rateFromRedTime(int rt) {
-		float red = rt / 10.0f;
-		return RedTime.toReleaseRate(red, meter.getMeterType());
+		return RedTime.toReleaseRate(rt, meter.getMeterType());
 	}
 }
