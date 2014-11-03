@@ -117,7 +117,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static private final int QUEUE_EMPTY_RESET_SECS = 60;
 
 	/** Threshold to determine when queue is empty */
-	static private final int QUEUE_EMPTY_THRESHOLD = -1;
+	static private final int QUEUE_EMPTY_THRESHOLD = -5;
 
 	/** Ratio for max rate to target rate */
 	static private final float TARGET_MAX_RATIO = 1.25f;
@@ -935,11 +935,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Check if the queue flow is low.  If the passage detector
-		 * is not good, assume this is true. */
+		 * is not good, assume this is false. */
 		private boolean isQueueFlowLow() {
 			return (passage_good)
 			     ? (isDemandBelowPassage() || isPassageBelowGreen())
-			     : true;
+			     : false;
 		}
 
 		/** Check if cumulative demand is below cumulative passage */
