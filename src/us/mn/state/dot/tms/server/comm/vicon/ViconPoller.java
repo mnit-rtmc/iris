@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2012  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,12 +40,16 @@ public class ViconPoller extends MessagePoller implements VideoMonitorPoller {
 	}
 
 	/** Create a new message for the specified drop address */
-	public CommMessage createMessage(ControllerImpl c) throws IOException {
+	@Override
+	protected CommMessage createCommMessage(ControllerImpl c)
+		throws IOException
+	{
 		return new Message(messenger.getOutputStream(c),
 			messenger.getInputStream("", c));
 	}
 
 	/** Check if a drop address is valid */
+	@Override
 	public boolean isAddressValid(int drop) {
 		return drop == VICON_DROP;
 	}

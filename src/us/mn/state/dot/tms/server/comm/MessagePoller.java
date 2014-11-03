@@ -231,7 +231,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 		final String oname = o.toString();
 		long start = TimeSteward.currentTimeMillis();
 		try {
-			o.poll(createMessage(o.getController()));
+			o.poll(createCommMessage(o.getController()));
 		}
 		catch(DeviceContentionException e) {
 			handleContention(o, e);
@@ -310,7 +310,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	abstract public boolean isAddressValid(int drop);
 
 	/** Create a message for the specified controller */
-	protected CommMessage<T> createMessage(ControllerImpl c)
+	protected CommMessage<T> createCommMessage(ControllerImpl c)
 		throws IOException
 	{
 		return new CommMessageImpl<T>(messenger, protocolLog(), c);

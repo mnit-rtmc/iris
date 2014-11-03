@@ -62,12 +62,16 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 	 * @return A newly created Message.
 	 * @throws IOException
 	 */
-	public CommMessage createMessage(ControllerImpl c) throws IOException {
+	@Override
+	protected CommMessage createCommMessage(ControllerImpl c)
+		throws IOException
+	{
 		return new Message(messenger.getOutputStream(c),
 				   messenger.getInputStream("", c));
 	}
 
 	/** Check if a drop address is valid */
+	@Override
 	public boolean isAddressValid(int drop) {
 		return ((drop >= MIN_ADDRESS) && (drop <= MAX_ADDRESS));
 	}

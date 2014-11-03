@@ -67,7 +67,9 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 
 	/** Create a new message for the specified controller */
 	@Override
-	public CommMessage createMessage(ControllerImpl c) throws IOException {
+	protected CommMessage createCommMessage(ControllerImpl c)
+		throws IOException
+	{
 		return snmp.new Message(messenger.getOutputStream(c),
 			messenger.getInputStream("", c), c.getPassword());
 	}

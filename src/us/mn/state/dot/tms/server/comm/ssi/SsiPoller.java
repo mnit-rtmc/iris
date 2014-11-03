@@ -53,7 +53,7 @@ public class SsiPoller extends MessagePoller implements WeatherPoller {
 	/** Create a new message for the specified controller, 
 	 *  called by MessagePoller.doPoll(). */
 	@Override
-	public CommMessage createMessage(ControllerImpl c) {
+	protected CommMessage createCommMessage(ControllerImpl c) {
 		return new SsiMessage(messenger);
 	}
 
