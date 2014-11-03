@@ -39,20 +39,7 @@ public class OpSendMeterRate extends Op170Device {
 	public OpSendMeterRate(RampMeterImpl rm, Integer rate) {
 		super(PriorityLevel.COMMAND, rm);
 		meter = rm;
-		red_time = calculateRedTime(rate);
-	}
-
-	/** Calculate red time for metering.
-	 * @param rate Release rate, or null.
-	 * @return Red time (tenths of a second) or null. */
-	private Integer calculateRedTime(Integer rate) {
-		return shouldStop() ? null : redTimeFromRate(rate);
-	}
-
-	/** Should we stop metering due to errors?
-	 * @return true to stop metering. */
-	private boolean shouldStop() {
-		return meter.isCommFailed();
+		red_time = redTimeFromRate(rate);
 	}
 
 	/** Convert release rate to red time.

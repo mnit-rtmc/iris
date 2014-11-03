@@ -665,7 +665,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Set the planned next release rate */
 	public void setRatePlanned(Integer r) {
 		Integer rp = ratePlanned;
-		if(r != null && rp != null)
+		if (r != null && rp != null)
 			ratePlanned = Math.min(rp, r);
 		else
 			ratePlanned = r;
@@ -673,18 +673,46 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Update the planned rate */
 	public void updateRatePlanned() {
-		if(!isLocked())
+		if (!isLocked())
 			setRateNext(ratePlanned);
 		setRatePlanned(null);
 	}
 
 	/** Set the release rate (vehicles per hour) */
+	@Override
 	public void setRateNext(Integer r) {
-		MeterPoller mp = getMeterPoller();
-		if(mp != null) {
-			if(r != null)
-				r = filterRate(Math.max(r, getMinimum()));
-			mp.sendReleaseRate(this, r);
+		sendReleaseRate(validateRate(r));
+	}
+
+	/** Validate a release rate to send to the meter */
+	private Integer validateRate(Integer r) {
+		return (r != null && isCommOk())
+		      ? filterRate(Math.max(r, getMinimum()))
+		      : null;
+	}
+
+	/** Check if communication to the meter is OK */
+	private boolean isCommOk() {
+		return getFailMillis() < MeterPoller.COMM_FAIL_THRESHOLD_MS;
+	}
+
+	/** Get the number of milliseconds the meter has been failed */
+	private long getFailMillis() {
+		ControllerImpl c = controller;	// Avoid race
+		return (c != null) ? c.getFailMillis() : Long.MAX_VALUE;
+	}
+
+	/** Get current minimum release rate (vehicles per hour) */
+	private int getMinimum() {
+		return (isFailed()) ? getMaxRelease() : getMinRelease();
+	}
+
+	/** Send a new release rate to the meter */
+	private void sendReleaseRate(Integer r) {
+		if (rateChanged(r)) {
+			MeterPoller mp = getMeterPoller();
+			if (mp != null)
+				mp.sendReleaseRate(this, r);
 		}
 	}
 
@@ -717,14 +745,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Is the ramp meter currently metering? */
 	public boolean isMetering() {
 		return rate != null;
-	}
-
-	/** Get the minimum release rate (vehicles per hour) */
-	protected int getMinimum() {
-		if(isFailed())
-			return SystemAttributeHelper.getMeterMaxRelease();
-		else
-			return SystemAttributeHelper.getMeterMinRelease();
 	}
 
 	/** Test if a meter needs maintenance */
@@ -905,16 +925,5 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	public R_NodeImpl getEntranceNode() {
 		R_NodeImpl n = getR_Node();
 		return (n != null) ? n.findEntrance(geo_loc) : null;
-	}
-
-	/** Check if meter comm is failed. */
-	public boolean isCommFailed() {
-		return getFailMillis() > MeterPoller.COMM_FAIL_THRESHOLD_MS;
-	}
-
-	/** Get the number of milliseconds the meter has been failed */
-	private long getFailMillis() {
-		ControllerImpl c = controller;	// Avoid race
-		return (c != null) ? c.getFailMillis() : Long.MAX_VALUE;
 	}
 }
