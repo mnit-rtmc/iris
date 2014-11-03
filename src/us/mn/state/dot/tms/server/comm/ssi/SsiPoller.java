@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
 
 /**
@@ -50,10 +51,10 @@ public class SsiPoller extends MessagePoller implements WeatherPoller {
 		super(n, m);
 	}
 
-	/** Create a new message for the specified controller, 
-	 *  called by MessagePoller.doPoll(). */
+	/** Create a new message for the specified operation.
+	 * @see MessagePoller.doPoll(). */
 	@Override
-	protected CommMessage createCommMessage(ControllerImpl c) {
+	protected CommMessage createCommMessage(OpController o) {
 		return new SsiMessage(messenger);
 	}
 

@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
 
 /**
@@ -39,11 +40,12 @@ public class ViconPoller extends MessagePoller implements VideoMonitorPoller {
 		super(n, m);
 	}
 
-	/** Create a new message for the specified drop address */
+	/** Create a new message for the specified operation */
 	@Override
-	protected CommMessage createCommMessage(ControllerImpl c)
+	protected CommMessage createCommMessage(OpController o)
 		throws IOException
 	{
+		ControllerImpl c = o.getController();
 		return new Message(messenger.getOutputStream(c),
 			messenger.getInputStream("", c));
 	}

@@ -231,7 +231,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 		final String oname = o.toString();
 		long start = TimeSteward.currentTimeMillis();
 		try {
-			o.poll(createCommMessage(o.getController()));
+			o.poll(createCommMessage(o));
 		}
 		catch(DeviceContentionException e) {
 			handleContention(o, e);
@@ -309,11 +309,13 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	/** Check if a drop address is valid */
 	abstract public boolean isAddressValid(int drop);
 
-	/** Create a message for the specified controller */
-	protected CommMessage<T> createCommMessage(ControllerImpl c)
+	/** Create a message for the specified operation.
+	 * @param o The operation.
+	 * @return New comm message. */
+	protected CommMessage<T> createCommMessage(OpController<T> o)
 		throws IOException
 	{
-		return new CommMessageImpl<T>(messenger, protocolLog(), c);
+		return new CommMessageImpl<T>(messenger, o, protocolLog());
 	}
 
 	/** Get the protocol debug log */

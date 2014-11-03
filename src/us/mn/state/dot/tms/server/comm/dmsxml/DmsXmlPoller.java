@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.StreamMessenger;
 import us.mn.state.dot.tms.utils.Log;
 
@@ -55,17 +56,18 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 	}
 
 	/**
-	 * Create a new message for the specified controller. Called
-	 * by parent MessagePoller.doPoll().
+	 * Create a new message for the specified operation.
+	 * @see MessagePoller.doPoll().
 	 *
-	 * @param c Associated controller.
+	 * @param o The controller operation.
 	 * @return A newly created Message.
 	 * @throws IOException
 	 */
 	@Override
-	protected CommMessage createCommMessage(ControllerImpl c)
+	protected CommMessage createCommMessage(OpController o)
 		throws IOException
 	{
+		ControllerImpl c = o.getController();
 		return new Message(messenger.getOutputStream(c),
 				   messenger.getInputStream("", c));
 	}

@@ -32,23 +32,23 @@ public class CommMessageImpl<T extends ControllerProperty>
 	/** Messenger object */
 	private final Messenger messenger;
 
+	/** Controller operation */
+	private final OpController<T> op;
+
 	/** Protocol debug log */
 	private final DebugLog p_log;
-
-	/** Controller to send message */
-	private final ControllerImpl controller;
 
 	/** Controller properties */
 	private final LinkedList<T> props;
 
 	/** Create a new comm message.
 	 * @param m Messenger to use for communication.
-	 * @param pl Protocol debug log.
-	 * @param c Controller to send message. */
-	public CommMessageImpl(Messenger m, DebugLog pl, ControllerImpl c) {
+	 * @param o Controller operation.
+	 * @param pl Protocol debug log. */
+	public CommMessageImpl(Messenger m, OpController o, DebugLog pl) {
 		messenger = m;
 		p_log = pl;
-		controller = c;
+		op = o;
 		props = new LinkedList<T>();
 	}
 
@@ -63,16 +63,17 @@ public class CommMessageImpl<T extends ControllerProperty>
 	 *         response */
 	@Override
 	public void queryProps() throws IOException {
+		ControllerImpl c = op.getController();
 		messenger.drain();
-		OutputStream os = messenger.getOutputStream(controller);
+		OutputStream os = messenger.getOutputStream(c);
 		if (os != null) {
 			for (T p: props)
-				p.encodeQuery(controller, os);
+				p.encodeQuery(c, os);
 			os.flush();
 		}
 		for (T p: props) {
-			p.decodeQuery(controller, messenger.getInputStream(
-				p.getPath(), controller));
+			p.decodeQuery(c, messenger.getInputStream(p.getPath(),
+				c));
 			logQuery(p);
 		}
 	}
@@ -80,7 +81,7 @@ public class CommMessageImpl<T extends ControllerProperty>
 	/** Log a property query */
 	private void logQuery(T prop) {
 		if (p_log != null && p_log.isOpen())
-			p_log.log(controller.getName() + ": " + prop);
+			p_log.log(op.getController().getName() + ": " + prop);
 	}
 
 	/** Store the controller properties.
@@ -88,24 +89,25 @@ public class CommMessageImpl<T extends ControllerProperty>
 	 *         response */
 	@Override
 	public void storeProps() throws IOException {
+		ControllerImpl c = op.getController();
 		messenger.drain();
-		OutputStream os = messenger.getOutputStream(controller);
+		OutputStream os = messenger.getOutputStream(c);
 		if (os != null) {
 			for (T p: props) {
 				logStore(p);
-				p.encodeStore(controller, os);
+				p.encodeStore(c, os);
 			}
 			os.flush();
 		}
 		for (T p: props) {
-			p.decodeStore(controller, messenger.getInputStream(
-				p.getPath(), controller));
+			p.decodeStore(c, messenger.getInputStream(p.getPath(),
+				c));
 		}
 	}
 
 	/** Log a property store */
 	private void logStore(T prop) {
 		if (p_log != null && p_log.isOpen())
-			p_log.log(controller.getName() + ":= " + prop);
+			p_log.log(op.getController().getName() + ":= " + prop);
 	}
 }
