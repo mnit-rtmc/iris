@@ -659,11 +659,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			return RampMeterQueue.UNKNOWN;
 	}
 
-	/** Is the ramp meter currently metering? */
-	public boolean isMetering() {
-		return rate != null;
-	}
-
 	/** Planned next release rate */
 	protected transient Integer ratePlanned = null;
 
@@ -683,9 +678,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		setRatePlanned(null);
 	}
 
-	/** Release rate (vehicles per hour) */
-	protected transient Integer rate = null;
-
 	/** Set the release rate (vehicles per hour) */
 	public void setRateNext(Integer r) {
 		MeterPoller mp = getMeterPoller();
@@ -695,6 +687,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			mp.sendReleaseRate(this, r);
 		}
 	}
+
+	/** Release rate (vehicles per hour) */
+	private transient Integer rate = null;
 
 	/** Set the release rate (and notify clients) */
 	public void setRateNotify(Integer r) {
@@ -717,6 +712,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Get the release rate (vehciels per hour) */
 	public Integer getRate() {
 		return rate;
+	}
+
+	/** Is the ramp meter currently metering? */
+	public boolean isMetering() {
+		return rate != null;
 	}
 
 	/** Get the minimum release rate (vehicles per hour) */
