@@ -111,7 +111,7 @@ abstract public class OpController<T extends ControllerProperty>
 
 	/** Get a string description of the operation */
 	@Override
-	public String toString() {
+	public final String toString() {
 		return super.toString() + " (" + id + ")";
 	}
 
