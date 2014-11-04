@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -69,7 +69,9 @@ abstract public class G4Property extends ControllerProperty {
 	}
 
 	/** Format time stamp */
-	protected void formatStamp(byte[] data, int pos, long st) {
+	protected void formatStamp(byte[] data, int pos, long st)
+		throws IOException
+	{
 		TimeZone utc = TimeZone.getTimeZone("GMT");
 		Calendar cal = Calendar.getInstance(utc);
 		cal.setTimeInMillis(st);

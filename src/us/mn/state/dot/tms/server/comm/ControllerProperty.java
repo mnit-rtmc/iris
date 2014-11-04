@@ -51,11 +51,35 @@ abstract public class ControllerProperty {
 	/** Format a 2-digit BCD value.
 	 * @param buf Buffer to store formatted value.
 	 * @param pos Starting position in buffer.
-	 * @param value Value to store in buffer. */
-	static protected void formatBCD2(byte[] buf, int pos, int value) {
-		int lo = value % 10;
-		int hi = (value / 10) % 10;
-		buf[pos] = (byte)((hi << 4) | lo);
+	 * @param value Binary value to convert to BCD. */
+	static protected void formatBCD2(byte[] buf, int pos, int value)
+		throws IOException
+	{
+		if (value < 0 || value > 99)
+			throw new IOException("INVALID BCD.2: " + value);
+		int d1 = bcd1(value);
+		int d2 = bcd2(value);
+		buf[pos] = (byte)((d2 << 4) | d1);
+	}
+
+	/** Get the first BCD digit (on the right) */
+	static private int bcd1(int i) {
+		return i & 0x0F;
+	}
+
+	/** Get the second BCD digit (from the right) */
+	static private int bcd2(int i) {
+		return (i / 10) & 0x0F;
+	}
+
+	/** Get the third BCD digit (from the right) */
+	static private int bcd3(int i) {
+		return (i / 100) & 0x0F;
+	}
+
+	/** Get the fourth BCD digit (from the right) */
+	static private int bcd4(int i) {
+		return (i / 1000) & 0x0F;
 	}
 
 	/** Parse an 8-bit value */
