@@ -50,12 +50,14 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 	}
 
 	/** Check if a drop address is valid */
+	@Override
 	public boolean isAddressValid(int drop) {
 		return (drop >= 0 && drop <= ADDRESS_MAX_BACKPLANE) ||
 		       (drop >= ADDRESS_MIN_EEPROM && drop <= ADDRESS_WILDCARD);
 	}
 
 	/** Perform a controller download */
+	@Override
 	public void download(ControllerImpl c, PriorityLevel p) {
 		if(c.getActive()) {
 			OpQueryConfig o = new OpQueryConfig(c);
@@ -65,7 +67,7 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 	}
 
 	/** List of all event data collectors on line */
-	protected final LinkedList<OpQueryEventSamples> collectors =
+	private final LinkedList<OpQueryEventSamples> collectors =
 		new LinkedList<OpQueryEventSamples>();
 
 	/** Find an existing event collector operation */
@@ -99,15 +101,13 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		if(c.getActive())
-			addOperation(new OpQueryConfig(c));
+		addOperation(new OpQueryConfig(c));
 	}
 
 	/** Send sample settings to a controller */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		if(c.getActive())
-			addOperation(new OpQueryConfig(c));
+		addOperation(new OpQueryConfig(c));
 	}
 
 	/** Query sample data.

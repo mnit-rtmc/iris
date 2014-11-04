@@ -47,15 +47,13 @@ public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		if (c.getActive())
-			addOperation(new OpSendSensorSettings(c, true));
+		addOperation(new OpSendSensorSettings(c, true));
 	}
 
 	/** Send sample settings to a controller. */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		if (c.getActive())
-			addOperation(new OpSendSensorSettings(c, false));
+		addOperation(new OpSendSensorSettings(c, false));
 	}
 
 	/** Query sample data.

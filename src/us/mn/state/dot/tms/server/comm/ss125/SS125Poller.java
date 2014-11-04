@@ -39,11 +39,13 @@ public class SS125Poller extends MessagePoller<SS125Property>
 	}
 
 	/** Check if a drop address is valid */
+	@Override
 	public boolean isAddressValid(int drop) {
 		return drop > 0 && drop < 65536;
 	}
 
 	/** Perform a controller download */
+	@Override
 	protected void download(ControllerImpl c, PriorityLevel p) {
 		if(c.getActive()) {
 			OpSendSensorSettings o =
@@ -56,15 +58,13 @@ public class SS125Poller extends MessagePoller<SS125Property>
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		if(c.getActive())
-			addOperation(new OpSendSensorSettings(c, true));
+		addOperation(new OpSendSensorSettings(c, true));
 	}
 
 	/** Send sample settings to a controller */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		if(c.getActive())
-			addOperation(new OpSendSensorSettings(c, false));
+		addOperation(new OpSendSensorSettings(c, false));
 	}
 
 	/** Query sample data.

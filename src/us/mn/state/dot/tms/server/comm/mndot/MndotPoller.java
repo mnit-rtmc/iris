@@ -100,15 +100,13 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		if (c.getActive())
-			addOperation(new OpReset170(c));
+		addOperation(new OpReset170(c));
 	}
 
 	/** Send sample settings to a controller */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		if (c.getActive())
-			addOperation(new OpSendSampleSettings(c));
+		addOperation(new OpSendSampleSettings(c));
 	}
 
 	/** Query sample data.
