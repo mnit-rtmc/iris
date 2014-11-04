@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.mndot;
 
+import java.util.Calendar;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.DeviceImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -25,6 +27,12 @@ import static us.mn.state.dot.tms.server.comm.mndot.Address.RAMP_METER_DATA;
  * @author Douglas Lau
  */
 abstract public class Op170Device extends OpDevice<MndotProperty> {
+
+	/** Test if it is afternoon */
+	static private boolean isAfternoon() {
+		return TimeSteward.getCalendarInstance().get(Calendar.AM_PM) ==
+		       Calendar.PM;
+	}
 
 	/** Get the meter number on a controller.
 	 * @param pin I/O pin.
@@ -57,12 +65,22 @@ abstract public class Op170Device extends OpDevice<MndotProperty> {
 	}
 
 	/** Get memory address of the meter timing table.
-	 * @return Controller memory address for meter timing table. */
+	 * @return Controller memory address of meter timing table. */
 	protected int tableAddress() {
 		if (meterNumber() == 2)
 			return Address.METER_2_TIMING_TABLE;
 		else
 			return Address.METER_1_TIMING_TABLE;
+	}
+
+	/** Get memory address of a red time in the current timing table.
+	 * @param rate Meter rate index (1-6).
+	 * @return Controller memory address of red time interval. */
+	protected int redAddress(int rate) {
+		int a = tableAddress() + Address.OFF_RED_TIME;
+		if (isAfternoon())
+			a += Address.OFF_PM_TIMING_TABLE;
+		return a + (rate * 2);
 	}
 
 	/** Create a new 170 device operation */

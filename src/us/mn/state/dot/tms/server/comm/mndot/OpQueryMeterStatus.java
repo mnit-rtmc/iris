@@ -88,11 +88,16 @@ public class OpQueryMeterStatus extends Op170Device {
 	/** Validate meter status and current rate */
 	private void validateMeterState() throws InvalidStateException {
 		int s = data[Address.OFF_STATUS];
-		int r = data[Address.OFF_CURRENT_RATE];
+		int r = currentRate();
 		if (!MeterStatus.isValid(s) ||
 		    !MeterRate.isValid(r) ||
 		    MeterStatus.isMetering(s) != MeterRate.isMetering(r))
 			throw new InvalidStateException(s, r);
+	}
+
+	/** Get the current metering rate */
+	private int currentRate() {
+		return data[Address.OFF_CURRENT_RATE];
 	}
 
 	/** Update ramp meter locks */
@@ -117,8 +122,7 @@ public class OpQueryMeterStatus extends Op170Device {
 
 	/** Check if current rate is metering (not flashing). */
 	private boolean isRateMetering() {
-		int r = data[Address.OFF_CURRENT_RATE];
-		return MeterRate.isMetering(r);
+		return MeterRate.isMetering(currentRate());
 	}
 
 	/** Phase to query a ramp meter red time */
@@ -137,10 +141,9 @@ public class OpQueryMeterStatus extends Op170Device {
 		}
 	}
 
-	/** Get the red time address for the current timing table */
+	/** Get the red time address for the current metering rate */
 	private int redTimeAddress() {
-		int r = data[Address.OFF_CURRENT_RATE];
-		return Op170.getRedAddress(meterNumber(), r);
+		return redAddress(currentRate());
 	}
 
 	/** Cleanup the operation */

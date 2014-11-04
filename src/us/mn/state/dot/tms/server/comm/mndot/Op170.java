@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import java.util.Calendar;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.RampMeterType;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -107,26 +105,6 @@ abstract public class Op170 extends OpController<MndotProperty> {
 			return g / 2;
 		} else
 			return g;
-	}
-
-	/** Get the controller memory address for a red time interval.
-	 * @param m Ramp meter (1 or 2).
-	 * @param rate Meter rate index (1-6).
-	 * @return Memory address of red time interval. */
-	static protected int getRedAddress(int m, int rate) {
-		int a = Address.METER_1_TIMING_TABLE;
-		if (m == 2)
-			a = Address.METER_2_TIMING_TABLE;
-		if (isAfternoon())
-			a += Address.OFF_PM_TIMING_TABLE;
-		a += Address.OFF_RED_TIME + (rate * 2);
-		return a;
-	}
-
-	/** Test if it is afternoon */
-	static private boolean isAfternoon() {
-		return TimeSteward.getCalendarInstance().get(Calendar.AM_PM) ==
-		       Calendar.PM;
 	}
 
 	/** Log an error msg */

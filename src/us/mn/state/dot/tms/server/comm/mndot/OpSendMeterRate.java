@@ -81,7 +81,7 @@ public class OpSendMeterRate extends Op170Device {
 
 	/** Get the red time address for the current timing table */
 	private int redTimeAddress() {
-		return Op170.getRedAddress(meterNumber(), MeterRate.CENTRAL);
+		return redAddress(MeterRate.CENTRAL);
 	}
 
 	/** Format a buffer with red time as BCD */
