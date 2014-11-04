@@ -109,7 +109,7 @@ public class MemoryProperty extends MndotProperty {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("mem ");
-		sb.append(Integer.toHexString(address));
+		sb.append(Integer.toHexString(address).toUpperCase());
 		sb.append(": ");
 		sb.append(HexString.format(payload, ' '));
 		return sb.toString();
