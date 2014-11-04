@@ -46,7 +46,7 @@ public class OpQueryMeterStatus extends Op170Device {
 	private final RampMeterImpl meter;
 
 	/** Data buffer */
-	private final byte[] data = new byte[6];
+	private final byte[] data = new byte[5];
 
 	/** Release rate (vehicles / hour) */
 	private Integer rate;
