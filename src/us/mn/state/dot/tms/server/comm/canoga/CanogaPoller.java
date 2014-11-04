@@ -115,11 +115,9 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
  	 * @param p Sample period in seconds. */
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
-		if(c.hasActiveDetector()) {
-			OpQueryEventSamples qes = getEventCollector(c);
-			if(p == 30)
-				qes.binSamples();
-		}
+		OpQueryEventSamples qes = getEventCollector(c);
+		if (p == 30)
+			qes.binSamples();
 	}
 
 	/** Get the protocol debug log */

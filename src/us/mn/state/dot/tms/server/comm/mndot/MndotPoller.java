@@ -116,13 +116,10 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 	public void querySamples(ControllerImpl c, int p) {
 		switch (p) {
 		case OpQuerySamples30Sec.SAMPLE_PERIOD_SEC:
-			if (c.hasActiveDetector())
-				addOperation(new OpQuerySamples30Sec(c));
+			addOperation(new OpQuerySamples30Sec(c));
 			break;
 		case OpQuerySamples5Min.SAMPLE_PERIOD_SEC:
-			// Must check for meters to read green counts
-			if (c.hasActiveDetector() || c.hasActiveMeter())
-				addOperation(new OpQuerySamples5Min(c));
+			addOperation(new OpQuerySamples5Min(c));
 			break;
 		}
 	}

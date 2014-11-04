@@ -72,10 +72,8 @@ public class SS105Poller extends MessagePoller<SS105Property>
  	 * @param p Sample period in seconds. */
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
-		if(p == 30) {
-			if(c.hasActiveDetector())
-				addOperation(new OpQuerySamples(c, p));
-		}
+		if (p == 30)
+			addOperation(new OpQuerySamples(c, p));
 	}
 
 	/** Get the protocol debug log */
