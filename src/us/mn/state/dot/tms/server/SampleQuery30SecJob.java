@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
 public class SampleQuery30SecJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
-	static private final int OFFSET_SECS = 8;
+	static public final int OFFSET_SECS = 8;
 
 	/** Create a new 30-second timer job */
 	public SampleQuery30SecJob() {
@@ -54,8 +54,7 @@ public class SampleQuery30SecJob extends Job {
 
 	/** Query 30-second sample data from one controller */
 	private void querySample30Sec(ControllerImpl c) {
-		// Must check hasActiveMeter for green counts (mndot protocol)
-		if (c.hasActiveDetector() || c.hasActiveMeter()) {
+		if (c.hasActiveDetector()) {
 			DevicePoller dp = c.getPoller();
 			if (dp instanceof SamplePoller) {
 				SamplePoller sp = (SamplePoller)dp;

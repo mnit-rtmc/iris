@@ -120,12 +120,9 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 		case OpQuerySamples30Sec.SAMPLE_PERIOD_SEC:
 			if (c.hasActiveDetector())
 				addOperation(new OpQuerySamples30Sec(c));
-			// This should happen on a meter QUERY_STATUS, but
-			// green detectors need to be queried also...
-			if (c.hasActiveMeter())
-				addOperation(new OpQueryMeterStatus(c));
 			break;
 		case OpQuerySamples5Min.SAMPLE_PERIOD_SEC:
+			// Must check for meters to read green counts
 			if (c.hasActiveDetector() || c.hasActiveMeter())
 				addOperation(new OpQuerySamples5Min(c));
 			break;
@@ -138,6 +135,9 @@ public class MndotPoller extends MessagePoller implements LCSPoller,AlarmPoller,
 		switch (r) {
 		case SEND_SETTINGS:
 			addOperation(new OpSendMeterSettings(meter));
+			break;
+		case QUERY_STATUS:
+			addOperation(new OpQueryMeterStatus(meter));
 			break;
 		default:
 			// Ignore other requests

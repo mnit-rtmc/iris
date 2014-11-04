@@ -24,14 +24,14 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * Operation to query the status of a ramp meter
+ * Operation to query the status of a ramp meter.
  *
  * @author Douglas Lau
  */
-public class OpQueryMeterStatus extends Op170 {
+public class OpQueryMeterStatus extends Op170Device {
 
 	/** Police panel bit from verify data from 170 */
-	static protected final int POLICE_PANEL_BIT = 1 << 4;
+	static private final int POLICE_PANEL_BIT = 1 << 4;
 
 	/** Parse the red time from a BCD byte array.
 	 * @param data BCD encoded red time (tenths of a second).
@@ -42,122 +42,112 @@ public class OpQueryMeterStatus extends Op170 {
 		return is.read4();
 	}
 
-	/** List of remaining phases of operation */
-	private final LinkedList<Phase<MndotProperty>> phases =
-		new LinkedList<Phase<MndotProperty>>();
+	/** Ramp meter */
+	private final RampMeterImpl meter;
 
-	/** Create a new query meter status operatoin */
-	public OpQueryMeterStatus(ControllerImpl c) {
-		super(PriorityLevel.DATA_30_SEC, c);
+	/** Data buffer */
+	private final byte[] data = new byte[6];
+
+	/** Release rate (vehicles / hour) */
+	private Integer rate;
+
+	/** Create a new query meter status operation.
+	 * @param rm Ramp meter. */
+	public OpQueryMeterStatus(RampMeterImpl rm) {
+		super(PriorityLevel.DATA_30_SEC, rm);
+		meter = rm;
 	}
 
-	/** Create the first phase of the operation */
+	/** Create the second phase of the operation */
 	@Override
-	protected Phase<MndotProperty> phaseOne() {
-		return new GetStatus();
+	protected Phase<MndotProperty> phaseTwo() {
+		return new QueryMeterData();
 	}
 
-	/** Phase to get the status of the ramp meters */
-	protected class GetStatus extends Phase<MndotProperty> {
-
-		/** Collect meter data from the controller */
+	/** Phase to query the meter data */
+	protected class QueryMeterData extends Phase<MndotProperty> {
 		protected Phase<MndotProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			byte[] s = new byte[12];
-			MemoryProperty stat_mem = new MemoryProperty(
-				Address.RAMP_METER_DATA, s);
-			mess.add(stat_mem);
+			MemoryProperty data_mem = new MemoryProperty(
+				meterAddress(Address.OFF_STATUS), data);
+			mess.add(data_mem);
 			mess.queryProps();
-			long stamp = TimeSteward.currentTimeMillis();
-			if (meter1 != null)
-				parseMeterData(meter1, 1, s, 0, stamp);
-			if (meter2 != null) {
-				parseMeterData(meter2, 2, s,
-					Address.OFF_METER_2, stamp);
-			}
-			return phases.poll();
+			parseMeterData();
+			return isRateMetering() ? new QueryRedTime() : null;
 		}
 	}
 
-	/** Phase to query a ramp meter red time */
-	protected class QueryRedTime extends Phase<MndotProperty> {
-
-		/** Ramp meter in question */
-		protected final RampMeterImpl meter;
-
-		/** Controller address of BCD red time */
-		protected final int address;
-
-		/** Create a new phase to query the ramp meter red time */
-		protected QueryRedTime(RampMeterImpl m, int n, int rate) {
-			meter = m;
-			address = getRedAddress(n, rate);
-		}
-
-		/** Query the meter red time */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
-		{
-			byte[] data = new byte[2];
-			MemoryProperty red_mem = new MemoryProperty(address,
-				data);
-			mess.add(red_mem);
-			mess.queryProps();
-			int rate = RedTime.toReleaseRate(parseRedTime(data),
-				meter.getMeterType());
-			meter.setRateNotify(rate);
-			return phases.poll();
-		}
+	/** Parse meter data */
+	private void parseMeterData() throws IOException {
+		validateMeterState();
+		updateMeterLocks();
+		updateGreenCount();
 	}
 
-	/** Parse meter data and process it */
-	protected void parseMeterData(RampMeterImpl meter, int n, byte[] data,
-		int base, long stamp) throws IOException
-	{
-		updateMeterData(meter, n, stamp,
-			data[base + Address.OFF_STATUS],
-			data[base + Address.OFF_CURRENT_RATE],
-			data[base + Address.OFF_GREEN_COUNT_30],
-			data[base + Address.OFF_POLICE_PANEL]);
-	}
-
-	/** Update meter with the most recent 30-second meter data.
-	 * @param meter Ramp meter.
-	 * @param n Meter number (1 or 2).
-	 * @param stamp Time stamp.
-	 * @param s Meter status.
-	 * @param r Metering rate.
-	 * @param g 30-second green count.
-	 * @param p Police-panel/verify status. */
-	private void updateMeterData(RampMeterImpl meter, int n, long stamp,
-		int s, int r, int g, int p) throws IOException
-	{
-		checkMeterState(s, r);
-		boolean police = (p & POLICE_PANEL_BIT) != 0;
-		updateMeterStatus(meter, n, s, police, r);
-		meter.updateGreenCount(stamp, adjustGreenCount(meter, g));
-	}
-
-	/** Check meter status and rate for valid values.
-	 * @param s Meter status code.
-	 * @param r Meter rate index. */
-	private void checkMeterState(int s, int r) throws InvalidStateException{
+	/** Validate meter status and current rate */
+	private void validateMeterState() throws InvalidStateException {
+		int s = data[Address.OFF_STATUS];
+		int r = data[Address.OFF_CURRENT_RATE];
 		if (!MeterStatus.isValid(s) ||
 		    !MeterRate.isValid(r) ||
 		    MeterStatus.isMetering(s) != MeterRate.isMetering(r))
 			throw new InvalidStateException(s, r);
 	}
 
-	/** Update the status of the ramp meter */
-	private void updateMeterStatus(RampMeterImpl meter, int n,
-		int s, boolean police, int rate)
-	{
-		meter.setPolicePanel(police);
+	/** Update ramp meter locks */
+	private void updateMeterLocks() {
+		meter.setPolicePanel(isPolicePanelOn());
+		int s = data[Address.OFF_STATUS];
 		meter.setManual(MeterStatus.isManual(s));
-		if (MeterRate.isMetering(rate))
-			phases.add(new QueryRedTime(meter, n, rate));
-		else
-			meter.setRateNotify(null);
+	}
+
+	/** Is the police panel switch on? */
+	private boolean isPolicePanelOn() {
+		int p = data[Address.OFF_POLICE_PANEL];
+		return (p & POLICE_PANEL_BIT) != 0;
+	}
+
+	/** Update the green count */
+	private void updateGreenCount() {
+		int g = data[Address.OFF_GREEN_COUNT_30];
+		meter.updateGreenCount(TimeSteward.currentTimeMillis(),
+			Op170.adjustGreenCount(meter, g));
+	}
+
+	/** Check if current rate is metering (not flashing). */
+	private boolean isRateMetering() {
+		int r = data[Address.OFF_CURRENT_RATE];
+		return MeterRate.isMetering(r);
+	}
+
+	/** Phase to query a ramp meter red time */
+	protected class QueryRedTime extends Phase<MndotProperty> {
+		protected Phase<MndotProperty> poll(CommMessage mess)
+			throws IOException
+		{
+			byte[] red_bcd = new byte[2];
+			MemoryProperty red_mem = new MemoryProperty(
+				redTimeAddress(), red_bcd);
+			mess.add(red_mem);
+			mess.queryProps();
+			rate = RedTime.toReleaseRate(parseRedTime(red_bcd),
+				meter.getMeterType());
+			return null;
+		}
+	}
+
+	/** Get the red time address for the current timing table */
+	private int redTimeAddress() {
+		int r = data[Address.OFF_CURRENT_RATE];
+		return Op170.getRedAddress(meterNumber(), r);
+	}
+
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		if (isSuccess())
+			meter.setRateNotify(rate);
+		super.cleanup();
 	}
 }

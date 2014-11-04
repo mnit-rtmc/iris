@@ -571,10 +571,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Request a device operation */
+	@Override
 	public void setDeviceRequest(int r) {
-		MeterPoller p = getMeterPoller();
-		if(p != null)
-			p.sendRequest(this, DeviceRequest.fromOrdinal(r));
+		MeterPoller mp = getMeterPoller();
+		if (mp != null)
+			mp.sendRequest(this, DeviceRequest.fromOrdinal(r));
 	}
 
 	/** Metering algorithm state */
