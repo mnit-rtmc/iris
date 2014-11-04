@@ -113,16 +113,8 @@ abstract public class Op170 extends OpController<MndotProperty> {
 			MNDOT_LOG.log(controller.getName() + "! " + msg);
 	}
 
-	/** Ramp meter being queried */
-	protected final RampMeterImpl meter1;
-
-	/** Ramp meter being queried */
-	protected final RampMeterImpl meter2;
-
 	/** Create a new 170 operation */
 	protected Op170(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
-		meter1 = lookupMeter1(controller);
-		meter2 = lookupMeter2(controller);
 	}
 }

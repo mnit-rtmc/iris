@@ -127,9 +127,9 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 				FIRST_DETECTOR_PIN, volume);
 			controller.storeOccupancy(getStamp(), SAMPLE_PERIOD_SEC,
 				FIRST_DETECTOR_PIN, scans, MAX_SCANS);
-			updateGreenCount(meter1,
+			updateGreenCount(lookupMeter1(controller),
 				rec[Address.OFF_GREEN_METER_1] & 0xFF);
-			updateGreenCount(meter2,
+			updateGreenCount(lookupMeter2(controller),
 				rec[Address.OFF_GREEN_METER_2] & 0xFF);
 			if(recs > 0 && TimeSteward.currentTimeMillis() < newest)
 				return this;
