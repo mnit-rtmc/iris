@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.mndot;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
@@ -28,31 +27,19 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  */
 public class SynchronizeProperty extends MndotProperty {
 
-	/** Format a buffer with a time stamp.
-	 * @param stamp Time stamp.
-	 * @return Buffer of 6 BCD-encoded bytes.
-	 * @throws IOException on error encoding to BCD. */
-	static private byte[] formatStamp(Calendar stamp) throws IOException {
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		BCDOutputStream bcd = new BCDOutputStream(os);
-		bcd.write2(stamp.get(Calendar.MONTH) + 1);
-		bcd.write2(stamp.get(Calendar.DAY_OF_MONTH));
-		bcd.write2(stamp.get(Calendar.YEAR) % 100);
-		bcd.write2(stamp.get(Calendar.HOUR_OF_DAY));
-		bcd.write2(stamp.get(Calendar.MINUTE));
-		bcd.write2(stamp.get(Calendar.SECOND));
-		return os.toByteArray();
-	}
-
 	/** Encode a STORE request */
 	@Override
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] sync = formatStamp(TimeSteward.getCalendarInstance());
-		byte[] pkt = createRequest(c, CatCode.SYNCHRONIZE_CLOCK,
-			sync.length);
-		System.arraycopy(sync, 0, pkt, OFF_PAYLOAD, sync.length);
+		Calendar stamp = TimeSteward.getCalendarInstance();
+		byte[] pkt = createRequest(c, CatCode.SYNCHRONIZE_CLOCK, 6);
+		formatBCD2(pkt, 2, stamp.get(Calendar.MONTH) + 1);
+		formatBCD2(pkt, 3, stamp.get(Calendar.DAY_OF_MONTH));
+		formatBCD2(pkt, 4, stamp.get(Calendar.YEAR) % 100);
+		formatBCD2(pkt, 5, stamp.get(Calendar.HOUR_OF_DAY));
+		formatBCD2(pkt, 6, stamp.get(Calendar.MINUTE));
+		formatBCD2(pkt, 7, stamp.get(Calendar.SECOND));
 		calculateChecksum(pkt);
 		os.write(pkt);
 	}
