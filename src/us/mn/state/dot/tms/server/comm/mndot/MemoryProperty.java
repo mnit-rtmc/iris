@@ -104,6 +104,20 @@ public class MemoryProperty extends MndotProperty {
 		os.write(pkt);
 	}
 
+	/** Format a 2-digit BCD value.
+	 * @param pos Starting position in payload.
+	 * @param v Binary value to convert to BCD. */
+	public void formatBCD2(int pos, int v) throws IOException {
+		formatBCD2(payload, pos, v);
+	}
+
+	/** Format a 4-digit BCD value.
+	 * @param pos Starting position in payload.
+	 * @param v Binary value to convert to BCD. */
+	public void formatBCD4(int pos, int v) throws IOException {
+		formatBCD4(payload, pos, v);
+	}
+
 	/** Get a string representation of the property */
 	@Override
 	public String toString() {

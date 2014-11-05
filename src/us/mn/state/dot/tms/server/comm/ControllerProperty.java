@@ -51,35 +51,46 @@ abstract public class ControllerProperty {
 	/** Format a 2-digit BCD value.
 	 * @param buf Buffer to store formatted value.
 	 * @param pos Starting position in buffer.
-	 * @param value Binary value to convert to BCD. */
-	static protected void formatBCD2(byte[] buf, int pos, int value)
+	 * @param v Binary value to convert to BCD. */
+	static protected void formatBCD2(byte[] buf, int pos, int v)
 		throws IOException
 	{
-		if (value < 0 || value > 99)
-			throw new IOException("INVALID BCD.2: " + value);
-		int d1 = bcd1(value);
-		int d2 = bcd2(value);
-		buf[pos] = (byte)((d2 << 4) | d1);
+		if (v < 0 || v > 99)
+			throw new IOException("INVALID BCD.2: " + v);
+		buf[pos] = (byte)((bcd2(v) << 4) | bcd1(1));
+	}
+
+	/** Format a 4-digit BCD value.
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param v Binary value to convert to BCD. */
+	static protected void formatBCD4(byte[] buf, int pos, int v)
+		throws IOException
+	{
+		if (v < 0 || v > 9999)
+			throw new IOException("INVALID BCD.4: " + v);
+		buf[pos + 0] = (byte)((bcd4(v) << 4) | bcd3(v));
+		buf[pos + 1] = (byte)((bcd2(v) << 4) | bcd1(v));
 	}
 
 	/** Get the first BCD digit (on the right) */
-	static private int bcd1(int i) {
-		return i & 0x0F;
+	static private int bcd1(int v) {
+		return v % 10;
 	}
 
 	/** Get the second BCD digit (from the right) */
-	static private int bcd2(int i) {
-		return (i / 10) & 0x0F;
+	static private int bcd2(int v) {
+		return (v / 10) % 10;
 	}
 
 	/** Get the third BCD digit (from the right) */
-	static private int bcd3(int i) {
-		return (i / 100) & 0x0F;
+	static private int bcd3(int v) {
+		return (v / 100) % 10;
 	}
 
 	/** Get the fourth BCD digit (from the right) */
-	static private int bcd4(int i) {
-		return (i / 1000) & 0x0F;
+	static private int bcd4(int v) {
+		return (v / 1000) % 10;
 	}
 
 	/** Parse an 8-bit value */

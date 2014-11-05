@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.mndot;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -72,8 +71,10 @@ public class OpSendMeterRate extends Op170Device {
 		protected Phase<MndotProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			mess.add(new MemoryProperty(redTimeAddress(),
-				formatRedTime()));
+			MemoryProperty p = new MemoryProperty(redTimeAddress(),
+				new byte[2]);
+			p.formatBCD4(0, red_time);
+			mess.add(p);
 			mess.storeProps();
 			return (meter.isMetering()) ? null : new SendRate();
 		}
@@ -84,22 +85,15 @@ public class OpSendMeterRate extends Op170Device {
 		return redAddress(MeterRate.CENTRAL);
 	}
 
-	/** Format a buffer with red time as BCD */
-	private byte[] formatRedTime() throws IOException {
-		assert red_time != null;
-		ByteArrayOutputStream bo = new ByteArrayOutputStream(2);
-		BCDOutputStream os = new BCDOutputStream(bo);
-		os.write4(red_time);
-		return bo.toByteArray();
-	}
-
 	/** Phase to send the (remote) metering rate */
 	protected class SendRate extends Phase<MndotProperty> {
 		protected Phase<MndotProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			byte[] data = { (byte)remoteRate() };
-			mess.add(new MemoryProperty(remoteRateAddress(), data));
+			MemoryProperty p = new MemoryProperty(
+				remoteRateAddress(), new byte[1]);
+			p.formatBCD2(0, remoteRate());
+			mess.add(p);
 			mess.storeProps();
 			return null;
 		}
