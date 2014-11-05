@@ -15,10 +15,8 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
 import java.util.Iterator;
-import java.util.LinkedList;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
@@ -38,52 +36,52 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendMeterSettings extends Op170Device {
 
-	/** Startup green time (tenths of a second) */
-	static protected final int STARTUP_GREEN = 80;
+	/** Startup green time (tenths of a second; BCD) */
+	static private final int STARTUP_GREEN = 0x0080;
 
-	/** Startup yellow time (tenths of a second) */
-	static protected final int STARTUP_YELLOW = 50;
+	/** Startup yellow time (tenths of a second; BCD) */
+	static private final int STARTUP_YELLOW = 0x0050;
 
-	/** HOV preempt time (tenths of a second) (obsolete) */
-	static protected final int HOV_PREEMPT = 80;
+	/** HOV preempt time (tenths of a second; BCD) (obsolete) */
+	static private final int HOV_PREEMPT = 0x0080;
 
-	/** AM midpoint time (BCD; minute of day) */
-	static protected final int AM_MID_TIME = 730;
+	/** AM midpoint time (minute-of-day; HHMM format) */
+	static private final int AM_MID_TIME = 730;
 
-	/** PM midpoint time (BCD; minute of day) */
-	static protected final int PM_MID_TIME = 1630;
+	/** PM midpoint time (minute-of-day; HHMM format) */
+	static private final int PM_MID_TIME = 1630;
 
-	/** Get the system meter green time */
-	static protected int getGreenTime() {
+	/** Get the system meter green time (tenths of a second) */
+	static private int getGreenTime() {
 		float g = SystemAttrEnum.METER_GREEN_SECS.getFloat();
 		return Math.round(g * 10);
 	}
 
-	/** Get the system meter yellow time */
-	static protected int getYellowTime() {
+	/** Get the system meter yellow time (tenths of a second) */
+	static private int getYellowTime() {
 		float g = SystemAttrEnum.METER_YELLOW_SECS.getFloat();
 		return Math.round(g * 10);
 	}
 
-	/** Convert minute-of-day (0-1440) to 4-digit BCD */
-	static protected int minuteBCD(int v) {
+	/** Convert minute-of-day (0-1440) to HHMM format */
+	static private int minuteHHMM(int v) {
 		return 100 * (v / 60) + v % 60;
 	}
 
 	/** Ramp meter */
-	protected final RampMeterImpl meter;
+	private final RampMeterImpl meter;
 
-	/** Red times for timing table */
-	protected final int[] table_red = {1, 1};
+	/** Red times for timing table (tenth of a second) */
+	private final int[] table_red = {1, 1};
 
 	/** Meter rates for timing table */
-	protected final int[] table_rate = {MeterRate.OFF, MeterRate.OFF};
+	private final int[] table_rate = {MeterRate.OFF, MeterRate.OFF};
 
 	/** Start times for timing table */
-	protected final int[] table_start = {AM_MID_TIME, PM_MID_TIME};
+	private final int[] table_start = {AM_MID_TIME, PM_MID_TIME};
 
 	/** Stop times for timing table */
-	protected final int[] table_stop = {AM_MID_TIME, PM_MID_TIME};
+	private final int[] table_stop = {AM_MID_TIME, PM_MID_TIME};
 
 	/** Create a new meter settings operation */
 	public OpSendMeterSettings(RampMeterImpl m) {
@@ -119,14 +117,14 @@ public class OpSendMeterSettings extends Op170Device {
 	/** Update one timing table with a time action */
 	private void updateTable(MeterAction ma, TimeAction ta) {
 		int p = TimeActionHelper.getPeriod(ta);
-		int min = minuteBCD(TimeActionHelper.getMinute(ta));
+		int hhmm = minuteHHMM(TimeActionHelper.getMinute(ta));
 		table_red[p] = RedTime.fromReleaseRate(getTarget(p),
 			meter.getMeterType());
 		table_rate[p] = MeterRate.TOD;
 		if (ma.getPhase() == ta.getPhase())
-			table_start[p] = Math.min(table_start[p], min);
+			table_start[p] = Math.min(table_start[p], hhmm);
 		else
-			table_stop[p] = Math.max(table_stop[p], min);
+			table_stop[p] = Math.max(table_stop[p], hhmm);
 	}
 
 	/** Get the target release rate for the given period */
@@ -198,30 +196,29 @@ public class OpSendMeterSettings extends Op170Device {
 		protected Phase<MndotProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			mess.add(new MemoryProperty(tableAddress(),
-				createTimingTable()));
+			MemoryProperty p = new MemoryProperty(tableAddress(),
+				new byte[54]);
+			formatTimingTable(p);
+			mess.add(p);
 			mess.storeProps();
 			return new ClearVerifies();
 		}
 	}
 
-	/** Create a timing table for the meter */
-	private byte[] createTimingTable() throws IOException {
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		BCDOutputStream bcd = new BCDOutputStream(os);
+	/** Format a timing table with BCD values */
+	private void formatTimingTable(MemoryProperty p) throws IOException {
 		for (int t = Calendar.AM; t <= Calendar.PM; t++) {
-			bcd.write4(STARTUP_GREEN);
-			bcd.write4(STARTUP_YELLOW);
-			bcd.write4(getGreenTime());
-			bcd.write4(getYellowTime());
-			bcd.write4(HOV_PREEMPT);
+			p.format16(STARTUP_GREEN);
+			p.format16(STARTUP_YELLOW);
+			p.formatBCD4(getGreenTime());
+			p.formatBCD4(getYellowTime());
+			p.format16(HOV_PREEMPT);
 			for (int i = 0; i < 6; i++)
-				bcd.write4(table_red[t]);
-			bcd.write2(table_rate[t]);
-			bcd.write4(table_start[t]);
-			bcd.write4(table_stop[t]);
+				p.formatBCD4(table_red[t]);
+			p.formatBCD2(table_rate[t]);
+			p.formatBCD4(table_start[t]);
+			p.formatBCD4(table_stop[t]);
 		}
-		return os.toByteArray();
 	}
 
 	/** Phase to clear the meter verifies for the ramp meter */
