@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.mndot;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Calendar;
@@ -43,15 +42,13 @@ public class BinnedDataProperty extends MndotProperty {
 
 	/** Get timestamp at the end of sample interval */
 	public long getStamp() throws IOException {
-		ByteArrayInputStream bis = new ByteArrayInputStream(payload);
-		BCDInputStream bcd = new BCDInputStream(bis);
-		int year = 1900 + bcd.read2();
+		int year = 1900 + parseBCD2(payload, 0);
 		if (year < 1989)
 			year += 100;
-		int month = bcd.read2() - 1;
-		int day = bcd.read2();
-		int hour = bcd.read2();
-		int minute = bcd.read2();
+		int month = parseBCD2(payload, 1) - 1;
+		int day = parseBCD2(payload, 2);
+		int hour = parseBCD2(payload, 3);
+		int minute = parseBCD2(payload, 4);
 		Calendar stamp = Calendar.getInstance();
 		stamp.set(year, month, day, hour, minute, 0);
 		return stamp.getTimeInMillis();
