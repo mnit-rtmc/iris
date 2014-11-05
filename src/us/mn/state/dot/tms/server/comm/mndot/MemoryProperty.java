@@ -55,6 +55,9 @@ public class MemoryProperty extends MndotProperty {
 	/** 170 controller memory payload */
 	private final byte[] payload;
 
+	/** Payload position offset */
+	private int pos = 0;
+
 	/** Check for a valid payload length */
 	private void checkPayloadLength() throws ProtocolException {
 		if (payload.length < 1 || payload.length > MAX_LENGTH)
@@ -105,17 +108,24 @@ public class MemoryProperty extends MndotProperty {
 	}
 
 	/** Format a 2-digit BCD value.
-	 * @param pos Starting position in payload.
 	 * @param v Binary value to convert to BCD. */
-	public void formatBCD2(int pos, int v) throws IOException {
+	public void formatBCD2(int v) throws IOException {
 		formatBCD2(payload, pos, v);
+		++pos;
 	}
 
 	/** Format a 4-digit BCD value.
-	 * @param pos Starting position in payload.
 	 * @param v Binary value to convert to BCD. */
-	public void formatBCD4(int pos, int v) throws IOException {
+	public void formatBCD4(int v) throws IOException {
 		formatBCD4(payload, pos, v);
+		pos += 2;
+	}
+
+	/** Format a 16-bit value.
+	 * @param v Binary value to format. */
+	public void format16(int v) {
+		format16(payload, pos, v);
+		pos += 2;
 	}
 
 	/** Get a string representation of the property */

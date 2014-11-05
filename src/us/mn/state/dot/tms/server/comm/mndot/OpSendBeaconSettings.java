@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import java.io.ByteArrayOutputStream;
 import java.util.Calendar;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -27,15 +26,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 public class OpSendBeaconSettings extends Op170Device {
-
-	/** HOV preempt time (tenths of a second) (obsolete) */
-	static private final int HOV_PREEMPT = 80;
-
-	/** AM midpoint time (BCD; minute of day) */
-	static private final int AM_MID_TIME = 730;
-
-	/** PM midpoint time (BCD; minute of day) */
-	static private final int PM_MID_TIME = 1630;
 
 	/** Beacon */
 	private final BeaconImpl beacon;
@@ -59,30 +49,29 @@ public class OpSendBeaconSettings extends Op170Device {
 		protected Phase<MndotProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			mess.add(new MemoryProperty(tableAddress(),
-				createTimingTable()));
+			MemoryProperty p = new MemoryProperty(tableAddress(),
+				new byte[54]);
+			formatTimingTable(p);
+			mess.add(p);
 			mess.storeProps();
 			return null;
 		}
 	}
 
-	/** Create a timing table for the beacon */
-	private byte[] createTimingTable() throws IOException {
-		int[] times = {AM_MID_TIME, PM_MID_TIME};
-		ByteArrayOutputStream os = new ByteArrayOutputStream();
-		BCDOutputStream bcd = new BCDOutputStream(os);
+	/** Format a timing table with BCD values */
+	private void formatTimingTable(MemoryProperty p) throws IOException {
+		final int[] times = { 0x0730, 0x1630 };
 		for (int t = Calendar.AM; t <= Calendar.PM; t++) {
-			bcd.write4(1);			// Startup GREEN
-			bcd.write4(1);			// Startup YELLOW
-			bcd.write4(3);			// Metering GREEN
-			bcd.write4(1);			// Metering YELLOW
-			bcd.write4(HOV_PREEMPT);
+			p.format16(0x0001);		// Startup GREEN
+			p.format16(0x0001);		// Startup YELLOW
+			p.format16(0x0003);		// Metering GREEN
+			p.format16(0x0001);		// Metering YELLOW
+			p.format16(0x0080);		// HOV preempt
 			for (int i = 0; i < 6; i++)
-				bcd.write4(1);		// Metering RED
-			bcd.write2(MeterRate.OFF);	// TOD rate
-			bcd.write4(times[t]);		// TOD start time
-			bcd.write4(times[t]);		// TOD stop time
+				p.format16(0x0001);	// Metering RED
+			p.formatBCD2(MeterRate.OFF);	// TOD rate
+			p.format16(times[t]);		// TOD start time
+			p.format16(times[t]);		// TOD stop time
 		}
-		return os.toByteArray();
 	}
 }

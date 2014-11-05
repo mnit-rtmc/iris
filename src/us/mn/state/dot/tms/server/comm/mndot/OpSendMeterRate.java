@@ -73,7 +73,7 @@ public class OpSendMeterRate extends Op170Device {
 		{
 			MemoryProperty p = new MemoryProperty(redTimeAddress(),
 				new byte[2]);
-			p.formatBCD4(0, red_time);
+			p.formatBCD4(red_time);
 			mess.add(p);
 			mess.storeProps();
 			return (meter.isMetering()) ? null : new SendRate();
@@ -92,7 +92,7 @@ public class OpSendMeterRate extends Op170Device {
 		{
 			MemoryProperty p = new MemoryProperty(
 				remoteRateAddress(), new byte[1]);
-			p.formatBCD2(0, remoteRate());
+			p.formatBCD2(remoteRate());
 			mess.add(p);
 			mess.storeProps();
 			return null;

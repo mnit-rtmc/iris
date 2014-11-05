@@ -44,8 +44,8 @@ abstract public class ControllerProperty {
 	 * @param pos Starting position in buffer.
 	 * @param value Value to store in buffer. */
 	static protected void format16(byte[] buf, int pos, int value) {
-		buf[pos] = (byte)((value >> 8) & 0xFF);
-		buf[pos + 1] = (byte)(value & 0xFF);
+		buf[pos + 0] = (byte)((value >> 8) & 0xFF);
+		buf[pos + 1] = (byte)((value >> 0) & 0xFF);
 	}
 
 	/** Format a 2-digit BCD value.
