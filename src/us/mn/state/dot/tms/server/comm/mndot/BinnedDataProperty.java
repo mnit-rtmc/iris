@@ -40,20 +40,6 @@ public class BinnedDataProperty extends MndotProperty {
 	/** Binned data buffer payload */
 	private final byte[] payload = new byte[BINNED_DATA_LENGTH];
 
-	/** Get timestamp at the end of sample interval */
-	public long getStamp() throws IOException {
-		int year = 1900 + parseBCD2(payload, 0);
-		if (year < 1989)
-			year += 100;
-		int month = parseBCD2(payload, 1) - 1;
-		int day = parseBCD2(payload, 2);
-		int hour = parseBCD2(payload, 3);
-		int minute = parseBCD2(payload, 4);
-		Calendar stamp = Calendar.getInstance();
-		stamp.set(year, month, day, hour, minute, 0);
-		return stamp.getTimeInMillis();
-	}
-
 	/** Get the binned data record */
 	public byte[] getRecord() {
 		byte[] rec = new byte[RECORD_LENGTH];
@@ -67,6 +53,14 @@ public class BinnedDataProperty extends MndotProperty {
 	/** Get the remaining record count */
 	public int getRecordCount() {
 		return n_records;
+	}
+
+	/** Stamp at end of sample interval */
+	private long stamp;
+
+	/** Get timestamp at the end of sample interval */
+	public long getStamp() {
+		return stamp;
 	}
 
 	/** Encode a QUERY request */
@@ -86,6 +80,21 @@ public class BinnedDataProperty extends MndotProperty {
 	protected void parseQuery(byte[] pkt) throws IOException {
 		validateResponseLength(pkt, payload.length + 3);
 		System.arraycopy(pkt, OFF_PAYLOAD, payload, 0, payload.length);
+		parseStamp();
+	}
+
+	/** Parse timestamp at the end of sample interval */
+	private void parseStamp() throws IOException {
+		int year = 1900 + parseBCD2(payload, 0);
+		if (year < 1989)
+			year += 100;
+		int month = parseBCD2(payload, 1) - 1;
+		int day = parseBCD2(payload, 2);
+		int hour = parseBCD2(payload, 3);
+		int minute = parseBCD2(payload, 4);
+		Calendar cal = Calendar.getInstance();
+		cal.set(year, month, day, hour, minute, 0);
+		stamp = cal.getTimeInMillis();
 	}
 
 	/** Encode a STORE request */
