@@ -40,19 +40,12 @@ import us.mn.state.dot.tms.server.comm.OpController;
  */
 public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 
-	/** Create an operation to send a DMS message */
-	static public OpDMS createSendMsgOp(DMSImpl dms, SignMessage sm,
-		User o)
-	{
-		return new OpSendDMSMessage(dms, sm, o, lookupMsgNum(sm));
-	}
-
 	/** Lookup a sign message number */
-	static protected int lookupMsgNum(SignMessage sm) {
+	static private int lookupMsgNum(SignMessage sm) {
 		LaneUseMulti lum = LaneUseMultiHelper.find(sm.getMulti());
-		if(lum != null) {
+		if (lum != null) {
 			Integer msg_num = lum.getMsgNum();
-			if(msg_num != null)
+			if (msg_num != null)
 				return msg_num;
 		}
 		return 1;
@@ -138,8 +131,10 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	{
 		if(dms.isMessageCurrentEquivalent(sm))
 			addOperation(new OpUpdateDMSDuration(dms, sm));
-		else
-			addOperation(createSendMsgOp(dms, sm, o));
+		else {
+			addOperation(new OpSendDMSMessage(dms, sm, o,
+				lookupMsgNum(sm)));
+		}
 	}
 
 	/** Send a device request message to an LCS array */
