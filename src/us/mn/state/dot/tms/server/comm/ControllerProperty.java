@@ -93,38 +93,70 @@ abstract public class ControllerProperty {
 		return (v / 1000) % 10;
 	}
 
-	/** Parse an 8-bit value */
-	static protected int parse8(byte[] body, int pos) {
-		return body[pos] & 0xFF;
+	/** Parse an 8-bit value.
+	 * @param buf Buffer to parse.
+	 * @param pos Starting position in buffer.
+	 * @return Parsed value. */
+	static protected int parse8(byte[] buf, int pos) {
+		return buf[pos] & 0xFF;
 	}
 
-	/** Parse a 16-bit value */
-	static protected int parse16(byte[] body, int pos) {
-		int hi = body[pos] & 0xFF;
-		int lo = body[pos + 1] & 0xFF;
+	/** Parse a 16-bit value.
+	 * @param buf Buffer to parse.
+	 * @param pos Starting position in buffer.
+	 * @return Parsed value. */
+	static protected int parse16(byte[] buf, int pos) {
+		int hi = buf[pos + 0] & 0xFF;
+		int lo = buf[pos + 1] & 0xFF;
 		return (hi << 8) | lo;
 	}
 
-	/** Parse a 32-bit value */
-	static protected int parse32(byte[] body, int pos) {
-		int b3 = body[pos] & 0xFF;
-		int b2 = body[pos + 1] & 0xFF;
-		int b1 = body[pos + 2] & 0xFF;
-		int b0 = body[pos + 3] & 0xFF;
+	/** Parse a 32-bit value.
+	 * @param buf Buffer to parse.
+	 * @param pos Starting position in buffer.
+	 * @return Parsed value. */
+	static protected int parse32(byte[] buf, int pos) {
+		int b3 = buf[pos + 0] & 0xFF;
+		int b2 = buf[pos + 1] & 0xFF;
+		int b1 = buf[pos + 2] & 0xFF;
+		int b0 = buf[pos + 3] & 0xFF;
 		return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
 	}
 
-	/** Parse a 2-digit BCD value */
-	static protected int parseBCD2(byte[] body, int pos)
+	/** Parse a 2-digit BCD value.
+	 * @param buf Buffer to parse.
+	 * @param pos Starting position in buffer.
+	 * @return Parsed value. */
+	static protected int parseBCD2(byte[] buf, int pos)
 		throws ParsingException
 	{
-		int bcd = body[pos];
-		int hi = (bcd >> 4) & 0x0F;
-		int lo = bcd & 0x0F;
-		if(hi >= 0 && hi < 10 && lo >= 0 && lo < 10)
-			return hi * 10 + lo;
+		int bcd = buf[pos];
+		int d1 = (bcd >> 0) & 0x0F;
+		int d2 = (bcd >> 4) & 0x0F;
+		if (d1 < 10 && d2 < 10)
+			return d2 * 10 + d1;
 		else
-			throw new ParsingException("Invalid BCD: " + bcd);
+			throw new ParsingException("INVALID BCD.2: " + bcd);
+	}
+
+	/** Parse a 4-digit BCD value.
+	 * @param buf Buffer to parse.
+	 * @param pos Starting position in buffer.
+	 * @return Parsed value. */
+	static protected int parseBCD4(byte[] buf, int pos)
+		throws ParsingException
+	{
+		int bcd0 = buf[pos + 0];
+		int bcd1 = buf[pos + 1];
+		int d1 = (bcd1 >> 0) & 0x0F;
+		int d2 = (bcd1 >> 4) & 0x0F;
+		int d3 = (bcd0 >> 0) & 0x0F;
+		int d4 = (bcd0 >> 4) & 0x0F;
+		if (d1 < 10 && d2 < 10 && d3 < 10 && d4 < 10)
+			return (d4 * 1000) + (d3 * 100) + (d2 * 10) + d1;
+		else
+			throw new ParsingException("INVALID BCD.4: " + bcd0 +
+				":" + bcd1);
 	}
 
 	/** Get the path for a property */
@@ -171,11 +203,11 @@ abstract public class ControllerProperty {
 		byte[] buf = new byte[n_bytes];
 		int n_tries = 0;
 		int n_rcv = 0;
-		while(n_rcv < n_bytes) {
-			if(n_tries > MAX_TRIES)
+		while (n_rcv < n_bytes) {
+			if (n_tries > MAX_TRIES)
 				throw new ParsingException("TOO MANY TRIES");
 			int b = is.read(buf, n_rcv, n_bytes - n_rcv);
-			if(b <= 0)
+			if (b <= 0)
 				throw new EOFException("END OF STREAM");
 			n_rcv += b;
 			n_tries++;

@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.mndot;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.RampMeterImpl;
@@ -30,15 +29,6 @@ public class OpQueryMeterStatus extends Op170Device {
 
 	/** Police panel bit from verify data from 170 */
 	static private final int POLICE_PANEL_BIT = 1 << 4;
-
-	/** Parse the red time from a BCD byte array.
-	 * @param data BCD encoded red time (tenths of a second).
-	 * @return Decoded red time (tenths of a second). */
-	static private int parseRedTime(byte[] data) throws IOException {
-		ByteArrayInputStream bis = new ByteArrayInputStream(data);
-		BCDInputStream is = new BCDInputStream(bis);
-		return is.read4();
-	}
 
 	/** Ramp meter */
 	private final RampMeterImpl meter;
@@ -128,12 +118,11 @@ public class OpQueryMeterStatus extends Op170Device {
 		protected Phase<MndotProperty> poll(CommMessage mess)
 			throws IOException
 		{
-			byte[] red_bcd = new byte[2];
 			MemoryProperty red_mem = new MemoryProperty(
-				redTimeAddress(), red_bcd);
+				redTimeAddress(), new byte[2]);
 			mess.add(red_mem);
 			mess.queryProps();
-			rate = RedTime.toReleaseRate(parseRedTime(red_bcd),
+			rate = RedTime.toReleaseRate(red_mem.parseBCD4(),
 				meter.getMeterType());
 			return null;
 		}

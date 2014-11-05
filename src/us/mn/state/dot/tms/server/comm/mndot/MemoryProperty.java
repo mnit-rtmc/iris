@@ -128,6 +128,14 @@ public class MemoryProperty extends MndotProperty {
 		pos += 2;
 	}
 
+	/** Parse a 4-digit BCD value.
+	 * @return Parsed value. */
+	public int parseBCD4() throws IOException {
+		int v = parseBCD4(payload, pos);
+		pos += 2;
+		return v;
+	}
+
 	/** Get a string representation of the property */
 	@Override
 	public String toString() {
