@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import us.mn.state.dot.tms.utils.LineReader;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
@@ -44,22 +45,23 @@ public class SsiProperty extends ControllerProperty {
 		records = recs;
 	}
 
-	/** Perform a get request, read and parse reccords from file */
-	public void doGetRequest(InputStream is) throws IOException {
-		if(is == null) {
-			SsiPoller.log("no input stream to read");
+	/** Decode a QUERY response */
+	@Override
+	public void decodeQuery(ControllerImpl c, InputStream is)
+		throws IOException
+	{
+		if (is == null)
 			throw new EOFException();
-		}
 		LineReader lr = new LineReader(is, MAX_RESP);
 		RwisHeader header = readHeader(lr);
 		String line = lr.readLine();
-		for(int i = 0; line != null && i < MAX_RECORDS; i++) {
+		for (int i = 0; line != null && i < MAX_RECORDS; i++) {
 			SsiPoller.log("parsing " + line);
 			RwisRec rec = new RwisRec(line, header);
 			SsiPoller.log("parsed rec=" + rec);
 			String site_id = rec.getSiteId();
 			// Only save record if site_id is in mapping
-			if(site_id != null && records.containsKey(site_id))
+			if (site_id != null && records.containsKey(site_id))
 				records.put(site_id, rec);
 			line = lr.readLine();
 		}

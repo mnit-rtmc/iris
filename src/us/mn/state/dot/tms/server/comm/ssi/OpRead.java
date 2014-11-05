@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * Operation to read the SSI file.
  *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class OpRead extends OpDevice {
 
@@ -47,15 +48,14 @@ public class OpRead extends OpDevice {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new PhaseCheck();
 	}
 
 	/** Phase to check records mapping */
 	private class PhaseCheck extends Phase {
-
-		/** Check the records mapping */
-		protected Phase poll(CommMessage cm) {
+		protected Phase poll(CommMessage mess) {
 			RwisRec rec = records.get(site_id);
 			if(rec == null || rec.isExpired()) {
 				// Add a null mapping for site_id
@@ -68,22 +68,16 @@ public class OpRead extends OpDevice {
 
 	/** Phase to read the file */
 	private class PhaseRead extends Phase {
-
-		/** Execute the phase
-		 * @throws IOException received from queryProps call. */
-		protected Phase poll(CommMessage cm) throws IOException {
-			SsiMessage m = (SsiMessage)cm;
-			m.add(new SsiProperty(records));
-			m.queryProps();
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(new SsiProperty(records));
+			mess.queryProps();
 			return new PhaseUpdate();
 		}
 	}
 
 	/** Phase to update the sensor */
 	private class PhaseUpdate extends Phase {
-
-		/** Update the sensor */
-		protected Phase poll(CommMessage cm) throws IOException {
+		protected Phase poll(CommMessage mess) throws IOException {
 			RwisRec rec = records.get(site_id);
 			if(rec == null || rec.isExpired()) {
 				rec = new RwisRec(site_id, new RwisHeader());

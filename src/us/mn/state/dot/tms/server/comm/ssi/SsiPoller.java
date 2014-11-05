@@ -18,12 +18,9 @@ package us.mn.state.dot.tms.server.comm.ssi;
 import java.util.HashMap;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
-import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
 
 /**
@@ -49,13 +46,6 @@ public class SsiPoller extends MessagePoller implements WeatherPoller {
 	/** Create a new poller */
 	public SsiPoller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Create a new message for the specified operation.
-	 * @see MessagePoller.doPoll(). */
-	@Override
-	protected CommMessage createCommMessage(OpController o) {
-		return new SsiMessage(messenger);
 	}
 
 	/** Drop address is always valid */
