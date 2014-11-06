@@ -28,3 +28,7 @@ CREATE VIEW recent_sign_event_view AS
 	FROM sign_event_view
 	WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
+
+-- Rename dms_poll_period_secs to lcs_poll_period_secs
+UPDATE iris.system_attribute SET name = 'lcs_poll_period_secs'
+	WHERE name = 'dms_poll_period_secs';

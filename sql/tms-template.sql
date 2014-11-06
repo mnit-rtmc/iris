@@ -2233,7 +2233,6 @@ dms_pixel_on_limit	1
 dms_pixel_maint_threshold	35
 dms_pixel_status_enable	true
 dms_pixel_test_timeout_secs	30
-dms_poll_period_secs	30
 dms_querymsg_enable	false
 dms_reset_enable	false
 dms_send_confirmation_enable	false
@@ -2251,6 +2250,7 @@ help_trouble_ticket_url
 incident_clear_secs	600
 kml_file_enable	false
 kml_filename	/var/www/html/iris-client/iris.kmz
+lcs_poll_period_secs	30
 map_icon_size_scale_max	30
 map_segment_max_meters	2000
 meter_event_purge_days	14
