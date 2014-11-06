@@ -41,7 +41,6 @@ import us.mn.state.dot.tms.server.comm.ss105.SS105Poller;
 import us.mn.state.dot.tms.server.comm.ss125.SS125Poller;
 import us.mn.state.dot.tms.server.comm.ssi.SsiPoller;
 import us.mn.state.dot.tms.server.comm.stc.STCPoller;
-import us.mn.state.dot.tms.server.comm.vicon.ViconPoller;
 import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
 
 /**
@@ -102,8 +101,6 @@ public class DevicePollerFactory {
 			return createSS125Poller();
 		case CANOGA:
 			return createCanogaPoller();
-		case VICON_SWITCHER:
-			return createViconPoller();
 		case PELCO_D_PTZ:
 			return createPelcoDPoller();
 		case MANCHESTER_PTZ:
@@ -256,11 +253,6 @@ public class DevicePollerFactory {
 	/** Create a Canoga poller */
 	private DevicePoller createCanogaPoller() throws IOException {
 		return new CanogaPoller(name, createSocketMessenger(TCP));
-	}
-
-	/** Create a Vicon poller */
-	private DevicePoller createViconPoller() throws IOException {
-		return new ViconPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create a PelcoD poller */

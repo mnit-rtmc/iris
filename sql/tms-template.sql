@@ -2076,7 +2076,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 2	MnDOT 170 (5-bit)
 3	SmartSensor 105
 4	Canoga
-5	Vicon Switcher
+5	Pelco P
 6	Pelco D PTZ
 7	NTCIP Class C
 8	Manchester PTZ
@@ -2101,7 +2101,6 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 27	Axis PTZ
 28	HySecurity STC
 29	Cohu PTZ
-30	Pelco P
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;
@@ -2204,7 +2203,7 @@ camera_ptz_panel_enable	false
 camera_util_panel_enable	false
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.18.0
+database_version	4.19.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false

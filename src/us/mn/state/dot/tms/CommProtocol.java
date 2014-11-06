@@ -41,8 +41,8 @@ public enum CommProtocol {
 	/** Canoga (4) */
 	CANOGA("Canoga"),
 
-	/** Vicon video matrix switcher (5) */
-	VICON_SWITCHER("Vicon Switcher"),
+	/** Pelco P (5) */
+	PELCO_P("Pelco P"),
 
 	/** Pelco D camera control (6) */
 	PELCO_D_PTZ("Pelco D PTZ"),
@@ -114,10 +114,7 @@ public enum CommProtocol {
 	HYSECURITY_STC("HySecurity STC"),
 
 	/** Cohu PTZ (29) */
-	COHU_PTZ("Cohu PTZ"),
-
-	/** Pelco P (30) */
-	PELCO_P("Pelco P");
+	COHU_PTZ("Cohu PTZ");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
@@ -129,8 +126,8 @@ public enum CommProtocol {
 
 	/** Get a comm protocol from an ordinal value */
 	static public CommProtocol fromOrdinal(short o) {
-		for(CommProtocol cp: CommProtocol.values()) {
-			if(cp.ordinal() == o)
+		for (CommProtocol cp: CommProtocol.values()) {
+			if (cp.ordinal() == o)
 				return cp;
 		}
 		return null;
@@ -139,7 +136,7 @@ public enum CommProtocol {
 	/** Get an array of comm protocol descriptions */
 	static public String[] getDescriptions() {
 		LinkedList<String> d = new LinkedList<String>();
-		for(CommProtocol cp: CommProtocol.values())
+		for (CommProtocol cp: values())
 			d.add(cp.description);
 		return d.toArray(new String[0]);
 	}
