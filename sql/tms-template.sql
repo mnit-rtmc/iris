@@ -2180,12 +2180,12 @@ COPY iris.meter_algorithm (id, description) FROM stdin;
 \.
 
 COPY iris.meter_lock (id, description) FROM stdin;
-1	Knocked down
+1	Maintenance
 2	Incident
-3	Testing
-4	Police panel
-5	Manual mode
-6	Other reason
+3	Construction
+4	Testing
+5	Police panel
+6	Manual mode
 \.
 
 COPY iris.encoder_type (id, description) FROM stdin;

@@ -32,3 +32,14 @@ GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 -- Rename dms_poll_period_secs to lcs_poll_period_secs
 UPDATE iris.system_attribute SET name = 'lcs_poll_period_secs'
 	WHERE name = 'dms_poll_period_secs';
+
+-- Update meter_lock look-up-table
+UPDATE iris.meter_lock SET description = 'Maintenance' WHERE id = 1;
+UPDATE iris.meter_lock SET description = 'Construction' WHERE id = 3;
+UPDATE iris.meter_lock SET description = 'Testing' WHERE id = 4;
+UPDATE iris.meter_lock SET description = 'Police panel' WHERE id = 5;
+UPDATE iris.meter_lock SET description = 'Manual mode' WHERE id = 6;
+
+-- Update existing ramp meter locks
+UPDATE iris.ramp_meter SET m_lock = null WHERE m_lock = 4 OR m_lock = 5;
+UPDATE iris.ramp_meter SET m_lock = 4 WHERE m_lock = 3 OR m_lock = 6;

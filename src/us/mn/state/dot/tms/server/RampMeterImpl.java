@@ -62,10 +62,6 @@ import us.mn.state.dot.tms.server.comm.MeterPoller;
  */
 public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
-	/** Ordinal value for lock "OFF" */
-	static protected final Integer OFF_ORDINAL =
-		new Integer(RampMeterLock.OFF.ordinal());
-
 	/** Default maximum wait time (in seconds) */
 	static public final int DEFAULT_MAX_WAIT = 240;
 
@@ -490,16 +486,17 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	protected RampMeterLock m_lock = null;
 
 	/** Set the ramp meter lock status */
+	@Override
 	public void setMLock(Integer l) {
 		// Required by RampMeter iface; shouldn't ever be called
 		m_lock = RampMeterLock.fromOrdinal(l);
 	}
 
 	/** Set the ramp meter lock (update) */
-	protected void setMLock(RampMeterLock l) throws TMSException {
-		if(l == m_lock)
+	private void setMLock(RampMeterLock l) throws TMSException {
+		if (l == m_lock)
 			return;
-		if(l != null)
+		if (l != null)
 			store.update(this, "m_lock", l.ordinal());
 		else
 			store.update(this, "m_lock", null);
@@ -513,24 +510,23 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			setMLock(l);
 			notifyAttribute("mLock");
 		}
-		catch(TMSException e) {
+		catch (TMSException e) {
 			e.printStackTrace();
 		}
 	}
 
 	/** Set the ramp meter lock status */
 	public void doSetMLock(Integer l) throws TMSException {
-		if(RampMeterLock.isControllerLock(l) || OFF_ORDINAL.equals(l))
+		RampMeterLock ml = RampMeterLock.fromOrdinal(l);
+		if (ml.controller_lock || ml == RampMeterLock.OFF)
 			throw new ChangeVetoException("Invalid lock value");
-		setMLock(RampMeterLock.fromOrdinal(l));
+		setMLock(ml);
 	}
 
 	/** Get the ramp meter lock status */
+	@Override
 	public Integer getMLock() {
-		if(m_lock != null)
-			return m_lock.ordinal();
-		else
-			return null;
+		return (m_lock != null) ? m_lock.ordinal() : null;
 	}
 
 	/** Is the metering rate locked? */
@@ -752,7 +748,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	private boolean needsMaintenance() {
 		RampMeterLock lck = m_lock;
 		return lck == RampMeterLock.POLICE_PANEL ||
-		       lck == RampMeterLock.KNOCK_DOWN;
+		       lck == RampMeterLock.MAINTENANCE;
 	}
 
 	/** Test if meter is online (active and not failed) */

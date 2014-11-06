@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2009  Minnesota Department of Transportation
+ * Copyright (C) 2003-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,61 +23,51 @@ import java.util.LinkedList;
  */
 public enum RampMeterLock {
 
-	/** Placeholder for lock-off status */
-	OFF(" "),
+	/** Placeholder for lock-off status (0) */
+	OFF(" ", false),
 
-	// FIXME: change "Knocked down" to Maintenance
-	//        add Construnction status
-	/** Lock knock down status */
-	KNOCK_DOWN("Knocked down"),
+	/** Lock for maintenance status (1) */
+	MAINTENANCE("Maintenance", false),
 
-	/** Lock for incident status */
-	INCIDENT("Incident"),
+	/** Lock for incident status (2) */
+	INCIDENT("Incident", false),
 
-	/** Lock testing status */
-	TESTING("Testing"),
+	/** Lock for construction status (3) */
+	CONSTRUCTION("Construction", false),
 
-	/** Lock by police panel status */
-	POLICE_PANEL("Police panel"),
+	/** Lock for testing status (4) */
+	TESTING("Testing", false),
 
-	/** Lock by manual metering status */
-	MANUAL("Manual mode"),
+	/** Lock by police panel status (5) */
+	POLICE_PANEL("Police panel", true),
 
-	/** Lock other status */
-	OTHER("Other reason");
+	/** Lock by manual metering status (6) */
+	MANUAL("Manual mode", true);
 
 	/** Create a new meter lock */
-	private RampMeterLock(String d) {
+	private RampMeterLock(String d, boolean cl) {
 		description = d;
+		controller_lock = cl;
 	}
 
 	/** Description of the lock reason */
 	public final String description;
 
+	/** Flag to indicate lock triggered by controller */
+	public final boolean controller_lock;
+
 	/** Get a ramp meter lock from an ordinal value */
 	static public RampMeterLock fromOrdinal(Integer o) {
-		if(o != null && o > 0 && o < values().length)
-			return values()[o];
-		else
-			return null;
+		return (o != null && o > 0 && o < values().length)
+		      ? values()[o]
+		      : null;
 	}
 
 	/** Get an array of lock descriptions */
 	static public String[] getDescriptions() {
 		LinkedList<String> d = new LinkedList<String>();
-		for(RampMeterLock lock: RampMeterLock.values())
+		for (RampMeterLock lock: values())
 			d.add(lock.description);
 		return d.toArray(new String[0]);
-	}
-
-	/** Check if a lock value is a "controller-only" lock */
-	static public boolean isControllerLock(Integer l) {
-		if(l != null) {
-			if(l == RampMeterLock.POLICE_PANEL.ordinal())
-				return true;
-			if(l == RampMeterLock.MANUAL.ordinal())
-				return true;
-		}
-		return false;
 	}
 }
