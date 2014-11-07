@@ -18,7 +18,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Calendar;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.SystemAttrEnum;
+import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 
 /**
  * The vehicle event log records vehicle detection events.
@@ -29,6 +32,11 @@ public class VehicleEventLog {
 
 	/** Maximum logged headway is 90 seconds */
 	static private final int MAX_HEADWAY = 90 * 1000;
+
+	/** Is archiving enabled? */
+	static private boolean isArchiveEnabled() {
+		return SystemAttrEnum.SAMPLE_ARCHIVE_ENABLE.getBoolean();
+	}
 
 	/** Get milliseconds for a given timestamp */
 	static private long getStampMillis(Calendar stamp) {
@@ -50,10 +58,17 @@ public class VehicleEventLog {
 	}
 
 	/** Log a vehicle detection event */
-	public void logVehicle(Calendar stamp, int duration, int headway,
-		int speed) throws IOException
+	public void logVehicle(final Calendar stamp, final int duration,
+		final int headway, final int speed)
 	{
-		appendEvent(stamp, formatEvent(stamp, duration, headway,speed));
+		if (isArchiveEnabled()) {
+			FLUSH.addJob(new Job() {
+				public void perform() throws IOException {
+					appendEvent(stamp, formatEvent(stamp,
+						duration, headway, speed));
+				}
+			});
+		}
 	}
 
 	/** Append an event to the log */
@@ -74,9 +89,15 @@ public class VehicleEventLog {
 	}
 
 	/** Log a gap in vehicle events */
-	public void logGap() throws IOException {
+	public void logGap() {
 		p_stamp = null;
-		appendEvent(null, "*\n");
+		if (isArchiveEnabled()) {
+			FLUSH.addJob(new Job() {
+				public void perform() throws IOException {
+					appendEvent(null, "*\n");
+				}
+			});
+		}
 	}
 
 	/** Time stamp of most recent vehicle event */

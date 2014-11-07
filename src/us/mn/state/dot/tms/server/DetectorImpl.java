@@ -23,7 +23,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
-import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -42,7 +41,6 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
-import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.FEET;
@@ -55,11 +53,6 @@ import us.mn.state.dot.tms.server.event.DetFailEvent;
  * @author Douglas Lau
  */
 public class DetectorImpl extends DeviceImpl implements Detector {
-
-	/** Is archiving enabled? */
-	static private boolean isArchiveEnabled() {
-		return SystemAttrEnum.SAMPLE_ARCHIVE_ENABLE.getBoolean();
-	}
 
 	/** Default average detector field length (feet) */
 	static private final float DEFAULT_FIELD_FT = 22.0f;
@@ -820,7 +813,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	}
 
 	/** Vehicle event log */
-	protected transient final VehicleEventLog v_log;
+	private transient final VehicleEventLog v_log;
 
 	/** Count of vehicles in current sampling period */
 	protected transient int ev_vehicles = 0;
@@ -839,8 +832,8 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	 * @param duration Event duration in milliseconds.
 	 * @param headway Headway since last event in milliseconds.
 	 * @param speed Speed in miles per hour. */
-	public void logVehicle(final Calendar stamp, final int duration,
-		final int headway, final int speed)
+	public void logVehicle(Calendar stamp, int duration, int headway,
+		int speed)
 	{
 		ev_vehicles++;
 		ev_duration += duration;
@@ -848,26 +841,13 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			ev_n_speed++;
 			ev_speed += speed;
 		}
-		if(isArchiveEnabled()) {
-			FLUSH.addJob(new Job() {
-				public void perform() throws IOException {
-					v_log.logVehicle(stamp, duration,
-						headway, speed);
-				}
-			});
-		}
+		v_log.logVehicle(stamp, duration, headway, speed);
 	}
 
 	/** Log a gap in vehicle events.
 	 */
 	public void logGap() {
-		if(isArchiveEnabled()) {
-			FLUSH.addJob(new Job() {
-				public void perform() throws IOException {
-					v_log.logGap();
-				}
-			});
-		}
+		v_log.logGap();
 	}
 
 	/** Bin 30-second sample data */
