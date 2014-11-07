@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -73,10 +73,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	static private final DebugLog DET_LOG = new DebugLog("detector");
 
 	/** Sample period for detectors (seconds) */
-	static private final int SAMPLE_PERIOD_SEC = 30;
-
-	/** Sample period for detectors (ms) */
-	static private final int SAMPLE_PERIOD_MS = SAMPLE_PERIOD_SEC * 1000;
+	static public final int SAMPLE_PERIOD_SEC = 30;
 
 	/** Time interval for sample period */
 	static private final Interval SAMPLE_INTERVAL = new Interval(
@@ -815,18 +812,6 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Vehicle event log */
 	private transient final VehicleEventLog v_log;
 
-	/** Count of vehicles in current sampling period */
-	protected transient int ev_vehicles = 0;
-
-	/** Total vehicle duration (milliseconds) in current sampling period */
-	protected transient int ev_duration = 0;
-
-	/** Count of sampled speed events in current sampling period */
-	protected transient int ev_n_speed = 0;
-
-	/** Sum of all vehicle speeds (mph) in current sampling period */
-	protected transient int ev_speed = 0;
-
 	/** Log a vehicle detection event.
 	 * @param stamp Timestamp of detection event.
 	 * @param duration Event duration in milliseconds.
@@ -835,12 +820,6 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	public void logVehicle(Calendar stamp, int duration, int headway,
 		int speed)
 	{
-		ev_vehicles++;
-		ev_duration += duration;
-		if(speed > 0) {
-			ev_n_speed++;
-			ev_speed += speed;
-		}
 		v_log.logVehicle(stamp, duration, headway, speed);
 	}
 
@@ -852,23 +831,10 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Bin 30-second sample data */
 	public void binEventSamples() {
-		last_volume = ev_vehicles;
-		OccupancySample occ = new OccupancySample(0, SAMPLE_PERIOD_SEC,
-			ev_duration, SAMPLE_PERIOD_MS);
-		last_scans = occ.as60HzScans();
-		last_speed = calculate_speed();
-		ev_vehicles = 0;
-		ev_duration = 0;
-		ev_n_speed = 0;
-		ev_speed = 0;
-	}
-
-	/** Calculate the average vehicle speed */
-	protected int calculate_speed() {
-		if(ev_n_speed > 0 && ev_speed > 0)
-			return ev_speed / ev_n_speed;
-		else
-			return MISSING_DATA;
+		last_volume = v_log.getVehicleCount();
+		last_scans = v_log.getOccupancy().as60HzScans();
+		last_speed = v_log.getSpeed();
+		v_log.binEventSamples();
 	}
 
 	/** Write a single detector as an XML element */
