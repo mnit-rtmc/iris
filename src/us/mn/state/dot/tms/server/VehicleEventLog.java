@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,14 @@ import us.mn.state.dot.sched.TimeSteward;
 public class VehicleEventLog {
 
 	/** Maximum logged headway is 90 seconds */
-	static protected final int MAX_HEADWAY = 90 * 1000;
+	static private final int MAX_HEADWAY = 90 * 1000;
+
+	/** Get milliseconds for a given timestamp */
+	static private long getStampMillis(Calendar stamp) {
+		return (stamp != null)
+		      ? stamp.getTimeInMillis()
+		      : TimeSteward.currentTimeMillis();
+	}
 
 	/** Sample archive factory */
 	private final SampleArchiveFactory factory;
@@ -55,7 +62,7 @@ public class VehicleEventLog {
 	{
 		File file = factory.createFile(sensor_id, "vlog",
 			getStampMillis(stamp));
-		if(file != null) {
+		if (file != null) {
 			FileWriter fw = new FileWriter(file, true);
 			try {
 				fw.write(line);
@@ -73,53 +80,45 @@ public class VehicleEventLog {
 	}
 
 	/** Time stamp of most recent vehicle event */
-	protected transient Calendar p_stamp;
+	private transient Calendar p_stamp;
 
 	/** Format a vehicle detection event */
-	protected String formatEvent(Calendar stamp, int duration, int headway,
+	private String formatEvent(Calendar stamp, int duration, int headway,
 		int speed)
 	{
 		boolean log_stamp = false;
 		StringBuilder b = new StringBuilder();
-		if(duration > 0)
+		if (duration > 0)
 			b.append(duration);
 		else
 			b.append('?');
 		b.append(',');
-		if(headway > 0 && headway <= MAX_HEADWAY)
+		if (headway > 0 && headway <= MAX_HEADWAY)
 			b.append(headway);
 		else {
 			b.append('?');
 			log_stamp = true;
 		}
-		if(p_stamp == null || (stamp.get(Calendar.HOUR) !=
+		if (p_stamp == null || (stamp.get(Calendar.HOUR) !=
 			p_stamp.get(Calendar.HOUR)))
 		{
 			log_stamp = true;
 		}
 		b.append(',');
 		p_stamp = stamp;
-		if(log_stamp) {
-			if(headway > 0 || duration > 0) {
+		if (log_stamp) {
+			if (headway > 0 || duration > 0) {
 				long st = stamp.getTimeInMillis();
 				b.append(TimeSteward.timeShortString(st));
 			} else
 				p_stamp = null;
 		}
 		b.append(',');
-		if(speed > 0)
+		if (speed > 0)
 			b.append(speed);
-		while(b.charAt(b.length() - 1) == ',')
+		while (b.charAt(b.length() - 1) == ',')
 			b.setLength(b.length() - 1);
 		b.append('\n');
 		return b.toString();
-	}
-
-	/** Get milliseconds for a given timestamp */
-	static protected long getStampMillis(Calendar stamp) {
-		if(stamp != null)
-			return stamp.getTimeInMillis();
-		else
-			return TimeSteward.currentTimeMillis();
 	}
 }
