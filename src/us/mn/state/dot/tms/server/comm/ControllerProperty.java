@@ -57,7 +57,7 @@ abstract public class ControllerProperty {
 	{
 		if (v < 0 || v > 99)
 			throw new IOException("INVALID BCD.2: " + v);
-		buf[pos] = (byte)((bcd2(v) << 4) | bcd1(1));
+		buf[pos] = (byte)((bcd2(v) << 4) | bcd1(v));
 	}
 
 	/** Format a 4-digit BCD value.
