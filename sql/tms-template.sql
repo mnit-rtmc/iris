@@ -2390,7 +2390,7 @@ PRV_0051	publish	camera/.*/publish	f	t	f	f
 PRV_0052	dms_control	dms/.*/messageNext	f	t	f	f
 PRV_0053	dms_control	dms/.*/ownerNext	f	t	f	f
 PRV_0054	dms_control	sign_message/.*	f	t	t	f
-PRV_0055	dms_control	beacon/.*/deployed	f	t	f	f
+PRV_0055	dms_control	beacon/.*/flashing	f	t	f	f
 PRV_0056	incident_control	incident/.*	f	t	t	t
 PRV_0057	lcs_control	lcs_array/.*/indicationsNext	f	t	f	f
 PRV_0058	lcs_control	lcs_array/.*/ownerNext	f	t	f	f
