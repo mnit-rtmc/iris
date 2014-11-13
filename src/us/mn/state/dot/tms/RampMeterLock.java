@@ -24,7 +24,7 @@ import java.util.LinkedList;
 public enum RampMeterLock {
 
 	/** Placeholder for lock-off status (0) */
-	OFF(" ", false),
+	OFF(" ", true),
 
 	/** Lock for maintenance status (1) */
 	MAINTENANCE("Maintenance", false),

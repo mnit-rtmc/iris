@@ -518,7 +518,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Set the ramp meter lock status */
 	public void doSetMLock(Integer l) throws TMSException {
 		RampMeterLock ml = RampMeterLock.fromOrdinal(l);
-		if (ml.controller_lock || ml == RampMeterLock.OFF)
+		if (ml != null && ml.controller_lock)
 			throw new ChangeVetoException("Invalid lock value");
 		setMLock(ml);
 	}
