@@ -66,7 +66,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Camera preset action */
 	private final IAction preset = new IAction("camera.preset") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = preset_cbx.getSelectedItem();
+			Object o = preset_mdl.getSelectedItem();
 			if (o instanceof CameraPreset)
 				proxy.setPreset((CameraPreset)o);
 			else
@@ -132,7 +132,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Beacon action */
 	private final IAction beacon = new IAction("ramp.meter.beacon") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = beacon_cbx.getSelectedItem();
+			Object o = beacon_mdl.getSelectedItem();
 			if (o instanceof Beacon)
 				proxy.setBeacon((Beacon)o);
 			else

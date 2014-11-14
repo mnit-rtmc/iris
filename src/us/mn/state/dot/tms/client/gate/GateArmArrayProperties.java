@@ -65,45 +65,71 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Camera action */
 	private final IAction camera = new IAction("camera") {
 		protected void doActionPerformed(ActionEvent e) {
-			proxy.setCamera((Camera)camera_cbx.getSelectedItem());
+			Object o = camera_mdl.getSelectedItem();
+			if (o instanceof Camera)
+				proxy.setCamera((Camera)o);
+			else
+				proxy.setCamera(null);
 		}
 	};
 
 	/** Camera combo box */
 	private final JComboBox camera_cbx = new JComboBox();
 
+	/** Camera combo box model */
+	private final WrapperComboBoxModel camera_mdl;
+
 	/** Approach camera action */
 	private final IAction approach = new IAction("gate.arm.approach") {
 		protected void doActionPerformed(ActionEvent e) {
-			proxy.setApproach(
-				(Camera)approach_cbx.getSelectedItem());
+			Object o = approach_mdl.getSelectedItem();
+			if (o instanceof Camera)
+				proxy.setApproach((Camera)o);
+			else
+				proxy.setApproach(null);
 		}
 	};
 
 	/** Approach camera combo box */
 	private final JComboBox approach_cbx = new JComboBox();
 
+	/** Approach camera combo box model */
+	private final WrapperComboBoxModel approach_mdl;
+
 	/** Prerequisite gate arm array */
 	private final IAction prereq = new IAction("gate.arm.prereq") {
 		protected void doActionPerformed(ActionEvent e) {
-			GateArmArray ga =
-				(GateArmArray)prereq_cbx.getSelectedItem();
-			proxy.setPrereq(ga != null ? ga.getName() : null);
+			Object o = prereq_mdl.getSelectedItem();
+			if (o instanceof GateArmArray) {
+				GateArmArray ga = (GateArmArray)o;
+				proxy.setPrereq(ga.getName());
+			} else
+				proxy.setPrereq(null);
 		}
 	};
 
 	/** Prerequisite combo box */
 	private final JComboBox prereq_cbx = new JComboBox();
 
+	/** Prerequisite combo box model */
+	private final WrapperComboBoxModel prereq_mdl;
+
 	/** Warning DMS action */
 	private final IAction dms = new IAction("gate.arm.dms") {
 		protected void doActionPerformed(ActionEvent e) {
-			proxy.setDms((DMS)dms_cbx.getSelectedItem());
+			Object o = dms_mdl.getSelectedItem();
+			if (o instanceof DMS)
+				proxy.setDms((DMS)o);
+			else
+				proxy.setDms(null);
 		}
 	};
 
 	/** Warning DMS combo box */
 	private final JComboBox dms_cbx = new JComboBox();
+
+	/** Warning DMS combo box model */
+	private final WrapperComboBoxModel dms_mdl;
 
 	/** Text field for OPEN quick message */
 	private final JTextField open_msg_txt = new JTextField(20);
@@ -174,6 +200,14 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Create a new gate arm array properties form */
 	public GateArmArrayProperties(Session s, GateArmArray ga) {
 		super(I18N.get("gate.arm.array") + ": ", s, ga);
+		camera_mdl = new WrapperComboBoxModel(
+			state.getCamCache().getCameraModel());
+		approach_mdl = new WrapperComboBoxModel(
+			state.getCamCache().getCameraModel());
+		prereq_mdl = new WrapperComboBoxModel(
+			state.getGateArmArrayModel(), true, true);
+		dms_mdl = new WrapperComboBoxModel(
+			state.getDmsCache().getDMSModel());
 		loc_pnl = new LocationPanel(s);
 		table_model = new GateArmTableModel(s, proxy);
 		table_model.initialize();
@@ -203,10 +237,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 
 	/** Create the location panel */
 	private JPanel createLocationPanel() {
-		camera_cbx.setModel(new WrapperComboBoxModel(
-			state.getCamCache().getCameraModel()));
-		approach_cbx.setModel(new WrapperComboBoxModel(
-			state.getCamCache().getCameraModel()));
+		camera_cbx.setModel(camera_mdl);
+		approach_cbx.setModel(approach_mdl);
 		loc_pnl.initialize();
 		loc_pnl.add("device.notes");
 		loc_pnl.add(notes_txt, Stretch.FULL);
@@ -244,10 +276,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 
 	/** Create gate arm setup panel */
 	private JPanel createSetupPanel() {
-		prereq_cbx.setModel(new WrapperComboBoxModel(
-			state.getGateArmArrayModel(), true, true));
-		dms_cbx.setModel(new WrapperComboBoxModel(
-			state.getDmsCache().getDMSModel()));
+		prereq_cbx.setModel(prereq_mdl);
+		dms_cbx.setModel(dms_mdl);
 		IPanel p = new IPanel();
 		p.add("gate.arm.prereq");
 		p.add(prereq_cbx, Stretch.LAST);
