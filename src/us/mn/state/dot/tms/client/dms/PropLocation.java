@@ -46,7 +46,7 @@ public class PropLocation extends LocationPanel {
 	/** External beacon action */
 	private final IAction beacon = new IAction("dms.beacon.ext") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = beacon_cbx.getSelectedItem();
+			Object o = beacon_mdl.getSelectedItem();
 			if (o instanceof Beacon)
 				dms.setBeacon((Beacon)o);
 			else
@@ -63,7 +63,7 @@ public class PropLocation extends LocationPanel {
 	/** Camera preset action */
 	private final IAction preset = new IAction("camera.preset") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = preset_cbx.getSelectedItem();
+			Object o = preset_mdl.getSelectedItem();
 			if (o instanceof CameraPreset)
 				dms.setPreset((CameraPreset)o);
 			else
