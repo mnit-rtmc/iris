@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2014  Minnesota Department of Transportation
- * Copyright (C) 2009-2010  AHMCT, University of California
+ * Copyright (C) 2009-2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  *
  * @author Douglas Lau
  * @author Michael Darter
+ * @author Travis Swanston
  */
 public class SignMessageComposer extends JPanel {
 
@@ -362,4 +363,12 @@ public class SignMessageComposer extends JPanel {
 		if (stm != null)
 			stm.updateMessageLibrary();
 	}
+
+	/** Store the composed message as a quick-message */
+	public void storeAsQuickMessage() {
+		String multi = composeMessage();
+		session.getDesktop().show(new StoreQuickMessageForm(session,
+			multi));
+	}
+
 }

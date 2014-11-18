@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +19,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Insets;
+import java.awt.geom.AffineTransform;
 import java.util.HashSet;
 import java.util.Iterator;
 import javax.swing.BorderFactory;
@@ -31,6 +33,7 @@ import javax.swing.border.EtchedBorder;
  * UI Widget stuff.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class Widgets {
 
@@ -98,6 +101,23 @@ public class Widgets {
 	/** Scale a dimension */
 	static public Dimension dimension(int w, int h) {
 		return new Dimension(UI.scaled(w), UI.scaled(h));
+	}
+
+	/**
+	 * Create a font derived from the look-and-feel.
+	 * @param key The font key name from which to derive
+	 * @param style The desired AWT Font style constant
+	 * @param scaling The desired scaling factor
+	 * @return The derived font
+	 */
+	static public Font deriveFont(Object key, int style, double scaling) {
+		Font font = UIManager.getFont(key);
+		if (font == null)
+			return null;
+		AffineTransform at = AffineTransform.getScaleInstance(
+			scaling, scaling);
+		Font newFont = font.deriveFont(style, at);
+		return newFont;
 	}
 
 	/** Get a scaled value */

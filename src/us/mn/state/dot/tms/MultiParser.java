@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +24,7 @@ import java.util.regex.Pattern;
  *
  * @author Douglas Lau
  * @author Michael Darter
+ * @author Travis Swanston
  */
 public class MultiParser {
 
@@ -323,7 +325,7 @@ public class MultiParser {
 
 	/** Return the MULTI string as a normalized valid MULTI string.
 	 * @return A normalized MULTI string with invalid characters and
-	 *         invalid tags removed, etc. */
+	 *         invalid tags removed, etc.  Does not return null. */
 	static public String normalize(String multi) {
 		NormalMultiString ms = new NormalMultiString();
 		parse(multi, ms);

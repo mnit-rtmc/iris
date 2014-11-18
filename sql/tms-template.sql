@@ -2234,6 +2234,7 @@ dms_pixel_maint_threshold	35
 dms_pixel_status_enable	true
 dms_pixel_test_timeout_secs	30
 dms_querymsg_enable	false
+dms_quickmsg_store_enable	false
 dms_reset_enable	false
 dms_send_confirmation_enable	false
 dmsxml_modem_op_timeout_secs	305

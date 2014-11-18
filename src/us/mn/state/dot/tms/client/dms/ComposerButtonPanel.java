@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +15,15 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.Widgets;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -27,6 +31,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  * composer panel.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class ComposerButtonPanel extends JPanel {
 
@@ -45,6 +50,18 @@ public class ComposerButtonPanel extends JPanel {
 
 	/** Button to clear the selected message */
 	private final JButton clear_btn = new JButton(clear);
+
+	/** Action to store as quick-message */
+	private final IAction store = new IAction("dms.quick.message.store",
+		SystemAttrEnum.DMS_QUICKMSG_STORE_ENABLE)
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			composer.storeAsQuickMessage();
+		}
+	};
+
+	/** Button to store the message in the composer as a quick-message */
+	private final JButton store_btn = new JButton(store);
 
 	/** Action used to send a message to the DMS */
 	private final IAction send_msg = new IAction("dms.send") {
@@ -97,6 +114,7 @@ public class ComposerButtonPanel extends JPanel {
 		GroupLayout.ParallelGroup bg = gl.createParallelGroup(
 			GroupLayout.Alignment.CENTER);
 		bg.addComponent(clear_btn);
+		bg.addComponent(store_btn);
 		bg.addComponent(send_btn);
 		bg.addComponent(blank_btn);
 		bg.addComponent(query_btn);
@@ -105,7 +123,9 @@ public class ComposerButtonPanel extends JPanel {
 		gl.setVerticalGroup(vert_g);
 		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
 		hg.addGroup(gl.createParallelGroup().addComponent(clear_btn));
-		hg.addGap(UI.hgap * 2, UI.hgap * 4, UI.hgap * 64);
+		hg.addGap(UI.hgap);
+		hg.addGroup(gl.createParallelGroup().addComponent(store_btn));
+		hg.addGap(UI.hgap);
 		hg.addGroup(gl.createParallelGroup().addComponent(send_btn));
 		hg.addGap(UI.hgap);
 		hg.addGroup(gl.createParallelGroup().addComponent(blank_btn));
@@ -116,11 +136,26 @@ public class ComposerButtonPanel extends JPanel {
 
 	/** Initialize the widgets */
 	private void initializeWidgets() {
-		clear_btn.setMargin(UI.buttonInsets());
-		// Leave send_btn margins alone, to make it stand out
-		blank_btn.setMargin(UI.buttonInsets());
-		query_btn.setMargin(UI.buttonInsets());
+		// set visibility for optional buttons
+		store_btn.setVisible(store.getIEnabled());
 		query_btn.setVisible(query_msg.getIEnabled());
+
+		clear_btn.setMargin(UI.buttonInsets());
+		store_btn.setMargin(UI.buttonInsets());
+		query_btn.setMargin(UI.buttonInsets());
+		// more prominent margins for send and blank
+		send_btn.setMargin(new Insets(UI.vgap, UI.hgap, UI.vgap,
+			UI.hgap));
+		blank_btn.setMargin(new Insets(UI.vgap, UI.hgap, UI.vgap,
+			UI.hgap));
+
+		// less prominent fonts for store, clear, and query
+		Font f = Widgets.deriveFont("Button.font", Font.PLAIN, 0.80);
+		if (f != null) {
+			clear_btn.setFont(f);
+			store_btn.setFont(f);
+			query_btn.setFont(f);
+		}
 	}
 
 	/** Dispose of the button panel */
@@ -133,6 +168,7 @@ public class ComposerButtonPanel extends JPanel {
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
 		clear.setEnabled(b);
+		store.setEnabled(b);
 		send_msg.setEnabled(b && dispatcher.canSend());
 		blank_msg.setEnabled(b && dispatcher.canSend());
 		query_msg.setEnabled(b && dispatcher.canRequest());

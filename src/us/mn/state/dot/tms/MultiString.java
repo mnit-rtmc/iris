@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +26,7 @@ import us.mn.state.dot.tms.units.Interval;
  *
  * @author Douglas Lau
  * @author Michael Darter
+ * @author Travis Swanston
  */
 public class MultiString implements Multi {
 
@@ -528,7 +530,11 @@ public class MultiString implements Multi {
 		return sb.toString().trim();
 	}
 
-	/** Normalize a MULTI string */
+	/**
+	 * Normalize a MULTI string.
+	 * @param ms The MULTI string to normalize.
+	 * @return The normalized MULTI string, never null.
+	 */
 	static public String normalize(String ms) {
 		return MultiParser.normalize(ms);
 	}
