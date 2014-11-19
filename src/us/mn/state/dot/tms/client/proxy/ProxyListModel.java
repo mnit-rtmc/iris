@@ -83,7 +83,7 @@ public class ProxyListModel<T extends SonarObject>
 
 	/** Add a new proxy to the list model */
 	protected final void proxyAddedSlow(T proxy) {
-		final int row = doProxyAdded(proxy);
+		int row = doProxyAdded(proxy);
 		if (row >= 0)
 			fireElementAdded(row);
 	}
@@ -150,7 +150,7 @@ public class ProxyListModel<T extends SonarObject>
 
 	/** Remove a proxy from the model */
 	protected final void proxyRemovedSlow(final T proxy) {
-		final int row = doProxyRemoved(proxy);
+		int row = doProxyRemoved(proxy);
 		if (row >= 0)
 			fireElementRemoved(row);
 	}
