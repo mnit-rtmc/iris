@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,13 +26,13 @@ import us.mn.state.dot.tms.ItemStyle;
 public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 
 	/** Proxy manager */
-	protected final ProxyManager<T> manager;
+	private final ProxyManager<T> manager;
 
 	/** Model name */
-	protected final String name;
+	private final String name;
 
 	/** Selection model for the list model */
-	protected final ProxyListSelectionModel<T> smodel;
+	private final ProxyListSelectionModel<T> smodel;
 
 	/** Create a new style list model */
 	public StyleListModel(ProxyManager<T> m, String n) {
@@ -44,9 +44,10 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 	}
 
 	/** Dispose of the list model */
+	@Override
 	public void dispose() {
 		super.dispose();
-		for(ListDataListener l: getListDataListeners())
+		for (ListDataListener l: getListDataListeners())
 			removeListDataListener(l);
 	}
 
@@ -56,9 +57,10 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 	}
 
 	/** Add a new proxy */
+	@Override
 	protected int doProxyAdded(T proxy) {
 		ItemStyle is = ItemStyle.lookupStyle(name);
-		if(manager.checkStyle(is, proxy))
+		if (manager.checkStyle(is, proxy))
 			return super.doProxyAdded(proxy);
 		else
 			return -1;
@@ -75,6 +77,7 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 	}
 
 	/** Get the style name */
+	@Override
 	public String toString() {
 		return name;
 	}
