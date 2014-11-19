@@ -300,16 +300,22 @@ public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Print camera as an XML element */
 	public void writeXml(Writer w) throws IOException {
+		if (isActive())
+			doWriteXml(w);
+	}
+
+	/** Write camera an an XML element */
+	private void doWriteXml(Writer w) throws IOException {
 		w.write("<camera");
 		w.write(createAttribute("name", getName()));
 		w.write(createAttribute("description",
-			GeoLocHelper.getDescription(geo_loc)));
+		        GeoLocHelper.getDescription(geo_loc)));
 		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
-		if(pos != null) {
+		if (pos != null) {
 			w.write(createAttribute("lon",
-				formatDouble(pos.getLongitude())));
+			        formatDouble(pos.getLongitude())));
 			w.write(createAttribute("lat",
-				formatDouble(pos.getLatitude())));
+			        formatDouble(pos.getLatitude())));
 		}
 		w.write("/>\n");
 	}
