@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.proxy;
 import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.AbstractListModel;
-import javax.swing.ListModel;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
@@ -86,10 +85,10 @@ public class ProxyListModel<T extends SonarObject>
 	protected final void proxyAddedSlow(T proxy) {
 		final int row = doProxyAdded(proxy);
 		if(row >= 0) {
-			final ListModel model = this;
 			runSwing(new Runnable() {
 				public void run() {
-					fireIntervalAdded(model, row, row);
+					fireIntervalAdded(ProxyListModel.this,
+						row, row);
 				}
 			});
 		}
@@ -121,10 +120,11 @@ public class ProxyListModel<T extends SonarObject>
 			enumerated = true;
 			final int row = proxies.size() - 1;
 			if(row >= 0) {
-				final ListModel model = this;
 				runSwing(new Runnable() {
 					public void run() {
-						fireIntervalAdded(model, 0,row);
+						fireIntervalAdded(
+							ProxyListModel.this, 0,
+							row);
 					}
 				});
 			}
@@ -147,12 +147,12 @@ public class ProxyListModel<T extends SonarObject>
 
 	/** Remove a proxy from the model */
 	protected final void proxyRemovedSlow(final T proxy) {
-		final ListModel model = this;
 		final int row = doProxyRemoved(proxy);
 		if(row >= 0) {
 			runSwing(new Runnable() {
 				public void run() {
-					fireIntervalRemoved(model, row, row);
+					fireIntervalRemoved(ProxyListModel.this,
+						row, row);
 				}
 			});
 		}
@@ -172,7 +172,6 @@ public class ProxyListModel<T extends SonarObject>
 	protected final void proxyChangedSlow(final T proxy,
 		final String attrib)
 	{
-		final ListModel model = this;
 		int pre_row, post_row;
 		synchronized(proxies) {
 			pre_row = doProxyRemoved(proxy);
@@ -182,7 +181,8 @@ public class ProxyListModel<T extends SonarObject>
 			final int row = pre_row;
 			runSwing(new Runnable() {
 				public void run() {
-					fireIntervalRemoved(model, row, row);
+					fireIntervalRemoved(ProxyListModel.this,
+						row, row);
 				}
 			});
 		}
@@ -190,7 +190,8 @@ public class ProxyListModel<T extends SonarObject>
 			final int row = post_row;
 			runSwing(new Runnable() {
 				public void run() {
-					fireIntervalAdded(model, row, row);
+					fireIntervalAdded(ProxyListModel.this,
+						row, row);
 				}
 			});
 		}
@@ -199,7 +200,8 @@ public class ProxyListModel<T extends SonarObject>
 			final int r1 = Math.max(pre_row, post_row);
 			runSwing(new Runnable() {
 				public void run() {
-					fireContentsChanged(model, r0, r1);
+					fireContentsChanged(ProxyListModel.this,
+						r0, r1);
 				}
 			});
 		}
