@@ -379,11 +379,14 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		int period = currentPeriod();
 		LinkedList<MeterAction> act = getMeterActions();
 		Iterator<TimeAction> it = TimeActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			TimeAction ta = it.next();
-			if(TimeActionHelper.getPeriod(ta) == period) {
-				if(checkTimeAction(ta, start, act))
-					return TimeActionHelper.getMinute(ta);
+			Integer min = TimeActionHelper.getMinuteOfDay(ta);
+			if (min != null) {
+				if (TimeActionHelper.getPeriod(min) == period) {
+					if (checkTimeAction(ta, start, act))
+						return min;
+				}
 			}
 		}
 		return TimeActionHelper.NOON;

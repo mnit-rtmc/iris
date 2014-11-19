@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,23 +45,26 @@ public class TimeActionHelper extends BaseHelper {
 			TimeAction.SONAR_TYPE));
 	}
 
-	/** Minute of 12 Noon in day */
-	static public final int NOON = 12 * 60;
+	/** Get the minute-of-day (0-1440) */
+	static public Integer getMinuteOfDay(TimeAction ta) {
+		Date d = parseTime(ta.getTimeOfDay());
+		return (d != null) ? getMinuteOfDay(d) : null;
+	}
 
 	/** Get the minute-of-day (0-1440) */
-	static public int getMinute(TimeAction ta) {
+	static private int getMinuteOfDay(Date d) {
 		Calendar cal = Calendar.getInstance();
-		cal.setTime(parseTime(ta.getTimeOfDay()));
+		cal.setTime(d);
 		return cal.get(Calendar.HOUR_OF_DAY) * 60 +
 		       cal.get(Calendar.MINUTE);
 	}
 
-	/** Get the peak period for a time action */
-	static public int getPeriod(TimeAction ta) {
-		if(getMinute(ta) < NOON)
-			return Calendar.AM;
-		else
-			return Calendar.PM;
+	/** Minute of 12 Noon in day */
+	static public final int NOON = 12 * 60;
+
+	/** Get the peak period for a minute-of-day */
+	static public int getPeriod(int min) {
+		return (min < NOON) ? Calendar.AM : Calendar.PM;
 	}
 
 	/** Date parser formats */
@@ -101,15 +104,16 @@ public class TimeActionHelper extends BaseHelper {
 			return null;
 	}
 
-	/** Parse a time string */
+	/** Parse a time string in one of the supported formats.
+	 * @param t Time string.
+	 * @return Date object, or null if time could not be parsed. */
 	static public Date parseTime(String t) {
-		for(DateFormat df: TIME_FORMATS) {
+		for (DateFormat df: TIME_FORMATS) {
 			try {
 				return df.parse(t);
 			}
-			catch(ParseException e) {
-				// Ignore
-			}
+			catch (ParseException e) { /* ignore */ }
+			catch (NumberFormatException e) { /* ignore */ }
 		}
 		return null;
 	}

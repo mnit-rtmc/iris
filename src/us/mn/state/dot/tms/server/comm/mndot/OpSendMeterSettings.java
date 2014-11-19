@@ -116,8 +116,15 @@ public class OpSendMeterSettings extends Op170Device {
 
 	/** Update one timing table with a time action */
 	private void updateTable(MeterAction ma, TimeAction ta) {
-		int p = TimeActionHelper.getPeriod(ta);
-		int hhmm = minuteHHMM(TimeActionHelper.getMinute(ta));
+		Integer min = TimeActionHelper.getMinuteOfDay(ta);
+		if (min != null)
+			updateTable(ma, ta, min);
+	}
+
+	/** Update one timing table with a time action */
+	private void updateTable(MeterAction ma, TimeAction ta, int min) {
+		int p = TimeActionHelper.getPeriod(min);
+		int hhmm = minuteHHMM(min);
 		table_red[p] = RedTime.fromReleaseRate(getTarget(p),
 			meter.getMeterType());
 		table_rate[p] = MeterRate.TOD;
