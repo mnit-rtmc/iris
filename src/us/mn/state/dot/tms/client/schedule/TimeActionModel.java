@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -175,8 +175,9 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	}
 
 	/** Add a new proxy to the table model */
+	@Override
 	protected int doProxyAdded(TimeAction ta) {
-		if(ta.getActionPlan() == action_plan)
+		if (ta.getActionPlan() == action_plan)
 			return super.doProxyAdded(ta);
 		else
 			return -1;

@@ -196,8 +196,9 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	}
 
 	/** Add a new proxy to the table model */
+	@Override
 	protected int doProxyAdded(DmsAction da) {
-		if(da.getActionPlan() == action_plan)
+		if (da.getActionPlan() == action_plan)
 			return super.doProxyAdded(da);
 		else
 			return -1;

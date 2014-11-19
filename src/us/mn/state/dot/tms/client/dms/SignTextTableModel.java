@@ -113,8 +113,9 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 	}
 
 	/** Add a new proxy to the table model */
+	@Override
 	protected int doProxyAdded(SignText proxy) {
-		if(proxy.getSignGroup() == group)
+		if (proxy.getSignGroup() == group)
 			return super.doProxyAdded(proxy);
 		else
 			return -1;

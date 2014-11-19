@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2005-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -94,8 +94,9 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	}
 
 	/** Add a new proxy to the table model */
+	@Override
 	protected int doProxyAdded(SignGroup proxy) {
-		if(isListed(proxy))
+		if (isListed(proxy))
 			return super.doProxyAdded(proxy);
 		else
 			return -1;

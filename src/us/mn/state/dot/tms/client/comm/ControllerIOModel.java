@@ -226,14 +226,16 @@ public class ControllerIOModel extends AbstractTableModel {
 			super(c);
 			model = new WrapperComboBoxModel(this, true);
 		}
-		@Override protected int doProxyAdded(T p) {
+		@Override
+		protected int doProxyAdded(T p) {
 			addIO(p);
-			if(p.getController() == null)
+			if (p.getController() == null)
 				return super.doProxyAdded(p);
 			else
 				return -1;
 		}
-		@Override protected int doProxyRemoved(T p) {
+		@Override
+		protected int doProxyRemoved(T p) {
 			removeIO(p);
 			return super.doProxyRemoved(p);
 		}
@@ -484,10 +486,10 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Add an IO to a pin on the controller */
-	protected void addIO(ControllerIO p) {
-		if(p.getController() == controller) {
+	private void addIO(ControllerIO p) {
+		if (p.getController() == controller) {
 			int pin = p.getPin();
-			if(pin > 0 && pin < io.length) {
+			if (pin > 0 && pin < io.length) {
 				io[pin] = p;
 				types[pin] = getType(p);
 				final int row = pin - 1;

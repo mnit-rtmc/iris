@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,8 +73,9 @@ public class MultipleSignTab extends JPanel implements
 		super(new GridBagLayout());
 		TypeCache<SignGroup> gc = cache.getSignGroups();
 		sign_group_model = new ProxyListModel<SignGroup>(gc) {
+			@Override
 			protected int doProxyAdded(SignGroup proxy) {
-				if(!proxy.getLocal())
+				if (!proxy.getLocal())
 					return super.doProxyAdded(proxy);
 				else
 					return -1;

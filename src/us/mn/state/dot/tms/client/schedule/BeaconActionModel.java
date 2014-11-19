@@ -98,9 +98,9 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 
 	/** Add a new proxy to the table model */
 	@Override
-	protected int doProxyAdded(BeaconAction la) {
-		if(la.getActionPlan() == action_plan)
-			return super.doProxyAdded(la);
+	protected int doProxyAdded(BeaconAction ba) {
+		if (ba.getActionPlan() == action_plan)
+			return super.doProxyAdded(ba);
 		else
 			return -1;
 	}

@@ -93,6 +93,7 @@ public class CamCache {
 		presets = new TypeCache<CameraPreset>(CameraPreset.class,
 			client);
 		preset_model = new ProxyListModel<CameraPreset>(presets) {
+			@Override
 			protected int doProxyAdded(CameraPreset cp) {
 				if (isAvailable(cp))
 					return super.doProxyAdded(cp);

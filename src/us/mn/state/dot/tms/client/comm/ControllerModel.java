@@ -149,8 +149,9 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	}
 
 	/** Add a new proxy to the table model */
+	@Override
 	protected int doProxyAdded(Controller proxy) {
-		if(proxy.getCommLink() == comm_link)
+		if (proxy.getCommLink() == comm_link)
 			return super.doProxyAdded(proxy);
 		else
 			return -1;
