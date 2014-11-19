@@ -148,14 +148,17 @@ public class ProxyListModel<T extends SonarObject>
 	/** Remove a proxy from the model */
 	protected final void proxyRemovedSlow(final T proxy) {
 		final int row = doProxyRemoved(proxy);
-		if(row >= 0) {
-			runSwing(new Runnable() {
-				public void run() {
-					fireIntervalRemoved(ProxyListModel.this,
-						row, row);
-				}
-			});
-		}
+		if (row >= 0)
+			fireElementRemoved(row);
+	}
+
+	/** Fire an interval removed for one element */
+	private void fireElementRemoved(final int i) {
+		runSwing(new Runnable() {
+			public void run() {
+				fireIntervalRemoved(ProxyListModel.this, i, i);
+			}
+		});
 	}
 
 	/** Remove a proxy from the model */
@@ -177,15 +180,8 @@ public class ProxyListModel<T extends SonarObject>
 			pre_row = doProxyRemoved(proxy);
 			post_row = doProxyAdded(proxy);
 		}
-		if(pre_row >= 0 && post_row < 0) {
-			final int row = pre_row;
-			runSwing(new Runnable() {
-				public void run() {
-					fireIntervalRemoved(ProxyListModel.this,
-						row, row);
-				}
-			});
-		}
+		if (pre_row >= 0 && post_row < 0)
+			fireElementRemoved(pre_row);
 		if(pre_row < 0 && post_row >= 0) {
 			final int row = post_row;
 			runSwing(new Runnable() {
