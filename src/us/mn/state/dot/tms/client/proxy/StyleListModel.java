@@ -31,6 +31,9 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 	/** Model name */
 	private final String name;
 
+	/** Item style */
+	private final ItemStyle style;
+
 	/** Selection model for the list model */
 	private final ProxyListSelectionModel<T> smodel;
 
@@ -39,6 +42,7 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 		super(m.getCache());
 		manager = m;
 		name = n;
+		style = ItemStyle.lookupStyle(name);
 		smodel = new ProxyListSelectionModel<T>(this,
 			m.getSelectionModel());
 	}
@@ -59,16 +63,10 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 	/** Add a new proxy */
 	@Override
 	protected int doProxyAdded(T proxy) {
-		ItemStyle is = ItemStyle.lookupStyle(name);
-		if (manager.checkStyle(is, proxy))
+		if (manager.checkStyle(style, proxy))
 			return super.doProxyAdded(proxy);
 		else
 			return -1;
-	}
-
-	/** Get the style name */
-	public String getName() {
-		return name;
 	}
 
 	/** Get the list selection model */
