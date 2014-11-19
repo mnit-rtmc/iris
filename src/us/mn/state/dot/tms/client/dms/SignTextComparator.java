@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.SignText;
 public class SignTextComparator implements Comparator<SignText> {
 
 	/** Compare one sign text message with another */
+	@Override
 	public int compare(SignText t0, SignText t1) {
 		Short s0 = t0.getLine();
 		Short s1 = t1.getLine();
@@ -40,6 +41,7 @@ public class SignTextComparator implements Comparator<SignText> {
 	}
 
 	/** Check equality */
+	@Override
 	public boolean equals(Object o) {
 		return o == this;
 	}

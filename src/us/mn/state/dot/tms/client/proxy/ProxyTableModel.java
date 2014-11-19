@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.table.AbstractTableModel;
@@ -47,13 +48,13 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Proxy columns */
 	private final ArrayList<ProxyColumn<T>> columns;
 
-	/** Create an empty set of proxies */
-	protected TreeSet<T> createProxySet() {
-		return new TreeSet<T>(new NumericAlphaComparator<T>());
+	/** Get a proxy comparator */
+	protected Comparator<T> comparator() {
+		return new NumericAlphaComparator<T>();
 	}
 
 	/** Set of all proxies */
-	protected final TreeSet<T> proxies = createProxySet();
+	protected final TreeSet<T> proxies = new TreeSet<T>(comparator());
 
 	/** Create a new proxy table model */
 	public ProxyTableModel(Session s, TypeCache<T> c) {

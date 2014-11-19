@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,22 +106,22 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Add a capability to an array of capabilities */
 	protected Capability[] addCapability(Capability[] caps, Capability cap){
-		TreeSet<Capability> cap_set = createProxySet();
-		for(Capability c: caps)
-			cap_set.add(c);
-		cap_set.add(cap);
-		return cap_set.toArray(new Capability[0]);
+		TreeSet<Capability> cs = new TreeSet<Capability>(comparator());
+		for (Capability c: caps)
+			cs.add(c);
+		cs.add(cap);
+		return cs.toArray(new Capability[0]);
 	}
 
 	/** Remove a capability from an array of capabilities */
 	protected Capability[] removeCapability(Capability[] caps,
 		Capability cap)
 	{
-		TreeSet<Capability> cap_set = createProxySet();
-		for(Capability c: caps)
-			cap_set.add(c);
-		cap_set.remove(cap);
-		return cap_set.toArray(new Capability[0]);
+		TreeSet<Capability> cs = new TreeSet<Capability>(comparator());
+		for (Capability c: caps)
+			cs.add(c);
+		cs.remove(cap);
+		return cs.toArray(new Capability[0]);
 	}
 
 	/** Check if the user can update role capabilities */

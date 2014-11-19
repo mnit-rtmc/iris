@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.TreeSet;
 import javax.swing.AbstractCellEditor;
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -125,23 +124,22 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	/** Comm link to match controllers */
 	protected final CommLink comm_link;
 
-	/** Create an empty set of proxies */
-	protected TreeSet<Controller> createProxySet() {
-		return new TreeSet<Controller>(
-			new Comparator<Controller>() {
-				public int compare(Controller a, Controller b) {
-					Short aa = Short.valueOf(a.getDrop());
-					Short bb = Short.valueOf(b.getDrop());
-					return aa.compareTo(bb);
-				}
-				public boolean equals(Object o) {
-					return o == this;
-				}
-				public int hashCode() {
-					return super.hashCode();
-				}
+	/** Get a proxy comparator */
+	@Override
+	protected Comparator<Controller> comparator() {
+		return new Comparator<Controller>() {
+			public int compare(Controller a, Controller b) {
+				Short aa = Short.valueOf(a.getDrop());
+				Short bb = Short.valueOf(b.getDrop());
+				return aa.compareTo(bb);
 			}
-		);
+			public boolean equals(Object o) {
+				return o == this;
+			}
+			public int hashCode() {
+				return super.hashCode();
+			}
+		};
 	}
 
 	/** Create a new controller table model */

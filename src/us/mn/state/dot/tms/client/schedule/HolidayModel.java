@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2012  Minnesota Department of Transportation
+ * Copyright (C) 2003-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -268,8 +268,8 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 
 	/** Add a holiday to an array */
 	protected Holiday[] addHoliday(Holiday[] holidays, Holiday hol) {
-		TreeSet<Holiday> h_set = createProxySet();
-		for(Holiday h: holidays)
+		TreeSet<Holiday> h_set = new TreeSet<Holiday>(comparator());
+		for (Holiday h: holidays)
 			h_set.add(h);
 		h_set.add(hol);
 		return h_set.toArray(new Holiday[0]);
@@ -277,8 +277,8 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 
 	/** Remove a holiday from an array */
 	protected Holiday[] removeHoliday(Holiday[] holidays, Holiday hol) {
-		TreeSet<Holiday> h_set = createProxySet();
-		for(Holiday h: holidays)
+		TreeSet<Holiday> h_set = new TreeSet<Holiday>(comparator());
+		for (Holiday h: holidays)
 			h_set.add(h);
 		h_set.remove(hol);
 		return h_set.toArray(new Holiday[0]);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2013  Minnesota Department of Transportation
+ * Copyright (C) 2005-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.ArrayList;
-import java.util.TreeSet;
 import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
@@ -107,9 +106,10 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 		return MultiParser.normalize(value.toString().trim());
 	}
 
-	/** Create an empty set of proxies */
-	protected TreeSet<SignText> createProxySet() {
-		return new TreeSet<SignText>(new SignTextComparator());
+	/** Get a proxy comparator */
+	@Override
+	protected SignTextComparator comparator() {
+		return new SignTextComparator();
 	}
 
 	/** Add a new proxy to the table model */
