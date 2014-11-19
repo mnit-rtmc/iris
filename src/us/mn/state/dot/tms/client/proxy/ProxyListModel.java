@@ -84,14 +84,17 @@ public class ProxyListModel<T extends SonarObject>
 	/** Add a new proxy to the list model */
 	protected final void proxyAddedSlow(T proxy) {
 		final int row = doProxyAdded(proxy);
-		if(row >= 0) {
-			runSwing(new Runnable() {
-				public void run() {
-					fireIntervalAdded(ProxyListModel.this,
-						row, row);
-				}
-			});
-		}
+		if (row >= 0)
+			fireElementAdded(row);
+	}
+
+	/** Fire an interval added for one element */
+	private void fireElementAdded(final int i) {
+		runSwing(new Runnable() {
+			public void run() {
+				fireIntervalAdded(ProxyListModel.this, i, i);
+			}
+		});
 	}
 
 	/** Add a new proxy to the list model */
@@ -182,15 +185,8 @@ public class ProxyListModel<T extends SonarObject>
 		}
 		if (pre_row >= 0 && post_row < 0)
 			fireElementRemoved(pre_row);
-		if(pre_row < 0 && post_row >= 0) {
-			final int row = post_row;
-			runSwing(new Runnable() {
-				public void run() {
-					fireIntervalAdded(ProxyListModel.this,
-						row, row);
-				}
-			});
-		}
+		if (pre_row < 0 && post_row >= 0)
+			fireElementAdded(post_row);
 		if(pre_row >= 0 && post_row >= 0) {
 			final int r0 = Math.min(pre_row, post_row);
 			final int r1 = Math.max(pre_row, post_row);
