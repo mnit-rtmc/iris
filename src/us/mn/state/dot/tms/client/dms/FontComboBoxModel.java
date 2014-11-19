@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.Comparator;
-import java.util.TreeSet;
 import javax.swing.ComboBoxModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Font;
@@ -45,24 +44,22 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 		initialize();
 	}
 
-	/** Create an empty set of proxies */
+	/** Get a font proxy comparator */
 	@Override
-	protected TreeSet<Font> createProxySet() {
-		return new TreeSet<Font>(
-			new Comparator<Font>() {
-				public int compare(Font f0, Font f1) {
-					Integer n0 = f0.getNumber();
-					Integer n1 = f1.getNumber();
-					return n0.compareTo(n1);
-				}
-				public boolean equals(Object o) {
-					return o == this;
-				}
-				public int hashCode() {
-					return super.hashCode();
-				}
+	protected Comparator<Font> comparator() {
+		return new Comparator<Font>() {
+			public int compare(Font f0, Font f1) {
+				Integer n0 = f0.getNumber();
+				Integer n1 = f1.getNumber();
+				return n0.compareTo(n1);
 			}
-		);
+			public boolean equals(Object o) {
+				return o == this;
+			}
+			public int hashCode() {
+				return super.hashCode();
+			}
+		};
 	}
 
 	/** Add a new proxy to the model */

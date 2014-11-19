@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.util.Comparator;
-import java.util.TreeSet;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
@@ -161,7 +160,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Comparator for ordering LCS arrays */
-	private final Comparator<LCSArray> comparator =
+	private final Comparator<LCSArray> lcs_comparator =
 		new Comparator<LCSArray>()
 	{
 		// FIXME: if an LCS array is moved, that will break the sort
@@ -204,8 +203,9 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	@Override
 	protected StyleListModel<LCSArray> createStyleListModel(Symbol s) {
 		return new StyleListModel<LCSArray>(this, s.getLabel()) {
-			@Override protected TreeSet<LCSArray> createProxySet() {
-				return new TreeSet<LCSArray>(comparator);
+			@Override
+			protected Comparator<LCSArray> comparator() {
+				return lcs_comparator;
 			}
 		};
 	}

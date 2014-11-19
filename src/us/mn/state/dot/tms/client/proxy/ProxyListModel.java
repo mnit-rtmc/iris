@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.TreeSet;
 import javax.swing.AbstractListModel;
@@ -41,13 +42,13 @@ public class ProxyListModel<T extends SonarObject>
 	/** Proxy type cache */
 	private final TypeCache<T> cache;
 
-	/** Create an empty set of proxies */
-	protected TreeSet<T> createProxySet() {
-		return new TreeSet<T>(new NumericAlphaComparator<T>());
+	/** Get a proxy comparator */
+	protected Comparator<T> comparator() {
+		return new NumericAlphaComparator<T>();
 	}
 
 	/** Set of all proxies */
-	private final TreeSet<T> proxies = createProxySet();
+	private final TreeSet<T> proxies = new TreeSet<T>(comparator());
 
 	/** Flag to indicate enumeration of all objects has completed */
 	private boolean enumerated = false;
