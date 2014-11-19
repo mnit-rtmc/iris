@@ -254,13 +254,6 @@ public class ProxyListModel<T extends SonarObject>
 		}
 	}
 
-	/** Delete the specified row */
-	public void deleteRow(int row) {
-		T proxy = getProxy(row);
-		if(proxy != null)
-			proxy.destroy();
-	}
-
 	/** Get the first proxy lower than the given proxy */
 	public T lower(T proxy) {
 		synchronized(proxies) {
