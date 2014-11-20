@@ -45,7 +45,8 @@ public class ProxyListModel<T extends SonarObject>
 	}
 
 	/** Proxy listener for SONAR updates */
-	private final SwingProxyAdapter<T> listener = new SwingProxyAdapter<T>() {
+	private final SwingProxyAdapter<T> listener = new SwingProxyAdapter<T>()
+	{
 		protected Comparator<T> comparator() {
 			return ProxyListModel.this.comp;
 		}
