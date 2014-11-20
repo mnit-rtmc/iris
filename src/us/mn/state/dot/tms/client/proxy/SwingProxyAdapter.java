@@ -33,7 +33,17 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	private final TreeSet<T> proxies = new TreeSet<T>(comparator());
 
 	/** Flag to pass along notifications */
-	private boolean notify = false;
+	private boolean notify;
+
+	/** Create a new swing proxy adapter */
+	protected SwingProxyAdapter(boolean n) {
+		notify = n;
+	}
+
+	/** Create a new swing proxy adapter */
+	public SwingProxyAdapter() {
+		this(false);
+	}
 
 	/** Add a proxy.
 	 * @see ProxyListener. */
@@ -79,7 +89,7 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	 * @see ProxyListener. */
 	@Override
 	public final void proxyChanged(final T proxy, final String attr) {
-		if (notify) {
+		if (notify && checkAttributeChange(attr)) {
 			runSwing(new Runnable() {
 				public void run() {
 					proxyChangedSwing(proxy, attr);
@@ -107,4 +117,9 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 
 	/** A proxy has been changed */
 	abstract protected void proxyChangedSwing(T proxy, String attr);
+
+	/** Check if an attribute change is interesting */
+	protected boolean checkAttributeChange(String attr) {
+		return true;
+	}
 }

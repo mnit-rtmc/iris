@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -26,7 +26,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
-import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
@@ -164,15 +163,11 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Add a proxy to the manager */
 	@Override
-	protected void proxyAddedSlow(final DMS dms) {
-		super.proxyAddedSlow(dms);
-		runSwing(new Runnable() {
-			public void run() {
-				DmsCellRenderer r = newCellRenderer();
-				r.setDms(dms);
-				renderers.put(dms.getName(), r);
-			}
-		});
+	protected void proxyAddedSwing(DMS dms) {
+		DmsCellRenderer r = newCellRenderer();
+		r.setDms(dms);
+		renderers.put(dms.getName(), r);
+		super.proxyAddedSwing(dms);
 	}
 
 	/** Create a cell renderer */
@@ -189,14 +184,11 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Called when a proxy attribute has changed */
 	@Override
-	protected void proxyChangedSlow(final DMS dms, final String a) {
-		runSwing(new Runnable() {
-			public void run() {
-				DmsCellRenderer r = lookupRenderer(dms);
-				if(r != null)
-					r.updateDms(dms, a);
-			}
-		});
+	protected void proxyChangedSwing(DMS dms, String a) {
+		DmsCellRenderer r = lookupRenderer(dms);
+		if (r != null)
+			r.updateDms(dms, a);
+		super.proxyChangedSwing(dms, a);
 	}
 
 	/** Create a proxy JList */

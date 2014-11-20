@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,6 +18,8 @@ package us.mn.state.dot.tms.client.proxy;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
+import java.util.Collection;
+import java.util.Comparator;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -27,15 +29,12 @@ import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 
 /**
@@ -79,39 +78,27 @@ abstract public class ProxyManager<T extends SonarObject> {
 	private final GeoLocManager loc_manager;
 
 	/** Listener for proxy events */
-	private final ProxyListener<T> listener = new ProxyListener<T>() {
-		public void proxyAdded(final T proxy) {
-			WORKER.addJob(new Job() {
-				public void perform() {
-					proxyAddedSlow(proxy);
-				}
-			});
+	private final SwingProxyAdapter<T> listener =
+		new SwingProxyAdapter<T>(true)
+	{
+		protected Comparator<T> comparator() {
+			return null;
 		}
-		public void enumerationComplete() {
-			WORKER.addJob(new Job() {
-				public void perform() {
-					enumerated = true;
-					layer.updateExtent();
-				}
-			});
+		protected void proxyAddedSwing(T proxy) {
+			ProxyManager.this.proxyAddedSwing(proxy);
 		}
-		public void proxyRemoved(final T proxy) {
-			WORKER.addJob(new Job() {
-				public void perform() {
-					proxyRemovedSlow(proxy);
-				}
-			});
+		protected void enumerationCompleteSwing(Collection<T> proxies) {
+			enumerated = true;
+			layer.updateExtent();
 		}
-		public void proxyChanged(final T proxy, final String a) {
-			if(checkAttributeChange(a)) {
-				WORKER.addJob(new Job() {
-					public void perform() {
-						proxyChangedSlow(proxy, a);
-					}
-				});
-			}
-			if(isStyleAttrib(a))
-				layer.updateStatus();
+		protected void proxyRemovedSwing(T proxy) {
+			ProxyManager.this.proxyRemovedSwing(proxy);
+		}
+		protected void proxyChangedSwing(T proxy, String attr) {
+			ProxyManager.this.proxyChangedSwing(proxy, attr);
+		}
+		protected boolean checkAttributeChange(String attr) {
+			return ProxyManager.this.checkAttributeChange(attr);
 		}
 	};
 
@@ -172,26 +159,21 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Add a proxy to the manager */
-	protected void proxyAddedSlow(T proxy) {
+	protected void proxyAddedSwing(T proxy) {
 		// NOTE: this also gets called when we "watch" an
 		//       object after it is selected.
 		MapGeoLoc loc = findGeoLoc(proxy);
-		if(loc != null) {
+		if (loc != null) {
 			loc.setManager(this);
 			loc.doUpdate();
 			map_cache.put(loc, proxy);
 		}
-		if(enumerated)
+		if (enumerated)
 			layer.updateGeometry();
 	}
 
-	/** Get the tangent angle for the given location */
-	public Double getTangentAngle(MapGeoLoc loc) {
-		return loc_manager.getTangentAngle(loc);
-	}
-
-	/** Called when a proxy has been removed */
-	protected void proxyRemovedSlow(T proxy) {
+	/** Remove a proxy from the manager */
+	protected void proxyRemovedSwing(T proxy) {
 		s_model.removeSelected(proxy);
 		map_cache.remove(proxy);
 		layer.updateGeometry();
@@ -203,8 +185,14 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Called when a proxy has been changed */
-	protected void proxyChangedSlow(T proxy, String a) {
-		// subclasses may override
+	protected void proxyChangedSwing(T proxy, String attr) {
+		if (isStyleAttrib(attr))
+			layer.updateStatus();
+	}
+
+	/** Get the tangent angle for the given location */
+	public Double getTangentAngle(MapGeoLoc loc) {
+		return loc_manager.getTangentAngle(loc);
 	}
 
 	/** Get the proxy type name */

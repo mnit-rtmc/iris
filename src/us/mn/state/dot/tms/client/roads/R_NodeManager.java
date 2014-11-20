@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,12 +129,12 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Add a new proxy to the r_node manager */
 	@Override
-	protected void proxyAddedSlow(R_Node n) {
-		super.proxyAddedSlow(n);
+	protected void proxyAddedSwing(R_Node n) {
+		super.proxyAddedSwing(n);
 		CorridorBase c = getCorridor(n);
-		if(c != null) {
+		if (c != null) {
 			c.addNode(n);
-			if(enumerated)
+			if (enumerated)
 				arrangeCorridor(c);
 		}
 	}
@@ -170,10 +170,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Called when an r_node has been removed */
 	@Override
-	protected void proxyRemovedSlow(R_Node n) {
-		super.proxyRemovedSlow(n);
+	protected void proxyRemovedSwing(R_Node n) {
+		super.proxyRemovedSwing(n);
 		CorridorBase c = getCorridor(n);
-		if(c != null) {
+		if (c != null) {
 			c.removeNode(n);
 			arrangeCorridor(c);
 		}

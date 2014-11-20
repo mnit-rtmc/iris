@@ -24,7 +24,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
@@ -38,7 +37,6 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import static us.mn.state.dot.tms.R_Node.MAX_LANES;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapAction;
@@ -49,6 +47,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -65,9 +64,9 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	private final ProxyListener<LCS> lcs_listener = new ProxyListener<LCS>()
 	{
 		public void proxyAdded(final LCS proxy) {
-			WORKER.addJob(new Job() {
-				public void perform() {
-					proxyAddedSlow(proxy.getArray());
+			runSwing(new Runnable() {
+				public void run() {
+					proxyAddedSwing(proxy.getArray());
 				}
 			});
 		}

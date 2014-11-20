@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +14,14 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import static us.mn.state.dot.tms.CorridorBase.nodeDistance;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.R_Node;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.units.Distance;
@@ -46,32 +45,22 @@ public class GeoLocManager {
 		new HashMap<String, MapGeoLoc>();
 
 	/** Listener for proxy events */
-	private final ProxyListener<GeoLoc> listener =
-		new ProxyListener<GeoLoc>()
+	private final SwingProxyAdapter<GeoLoc> listener =
+		new SwingProxyAdapter<GeoLoc>(true)
 	{
-		public void proxyAdded(final GeoLoc proxy) {
-			WORKER.addJob(new Job() {
-				public void perform() {
-					proxyAddedSlow(proxy);
-				}
-			});
+		protected Comparator<GeoLoc> comparator() {
+			return null;
 		}
-		public void enumerationComplete() { }
-		public void proxyRemoved(GeoLoc proxy) {
-			// Get the name before the proxy is destroyed
-			final String name = proxy.getName();
-			WORKER.addJob(new Job() {
-				public void perform() {
-					proxyRemovedSlow(name);
-				}
-			});
+		protected void proxyAddedSwing(GeoLoc proxy) {
+			GeoLocManager.this.proxyAddedSwing(proxy);
 		}
-		public void proxyChanged(final GeoLoc proxy, final String a) {
-			WORKER.addJob(new Job() {
-				public void perform() {
-					proxyChangedSlow(proxy, a);
-				}
-			});
+		protected void enumerationCompleteSwing(
+			Collection<GeoLoc> proxies) { }
+		protected void proxyRemovedSwing(GeoLoc proxy) {
+			GeoLocManager.this.proxyRemovedSwing(proxy);
+		}
+		protected void proxyChangedSwing(GeoLoc proxy, String attr) {
+			GeoLocManager.this.proxyChangedSwing(proxy, attr);
 		}
 	};
 
@@ -92,27 +81,22 @@ public class GeoLocManager {
 	}
 
 	/** Add a new GeoLoc to the manager */
-	private void proxyAddedSlow(GeoLoc proxy) {
+	private void proxyAddedSwing(GeoLoc proxy) {
 		MapGeoLoc loc = new MapGeoLoc(proxy);
-		synchronized(proxies) {
-			proxies.put(proxy.getName(), loc);
-		}
+		proxies.put(proxy.getName(), loc);
 	}
 
 	/** Remove a GeoLoc from the manager */
-	private void proxyRemovedSlow(String name) {
-		synchronized(proxies) {
+	private void proxyRemovedSwing(GeoLoc proxy) {
+		String name = proxy.getName();
+		if (name != null)
 			proxies.remove(name);
-		}
 	}
 
 	/** Change a proxy in the model */
-	private void proxyChangedSlow(GeoLoc proxy, String attrib) {
-		MapGeoLoc loc;
-		synchronized(proxies) {
-			loc = proxies.get(proxy.getName());
-		}
-		if(loc != null) {
+	private void proxyChangedSwing(GeoLoc proxy, String attrib) {
+		MapGeoLoc loc = proxies.get(proxy.getName());
+		if (loc != null) {
 			loc.doUpdate();
 			loc.updateGeometry();
 		}
