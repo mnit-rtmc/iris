@@ -62,13 +62,10 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 		};
 	}
 
-	/** Add a new proxy to the model */
+	/** Check if a proxy is included in the list */
 	@Override
-	protected int doProxyAdded(Font proxy) {
-		if (builder != null && builder.isFontUsable(proxy))
-			return super.doProxyAdded(proxy);
-		else
-			return -1;
+	protected boolean check(Font proxy) {
+		return builder != null && builder.isFontUsable(proxy);
 	}
 
 	/** Get the selected item */

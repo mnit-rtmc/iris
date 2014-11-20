@@ -227,12 +227,9 @@ public class ControllerIOModel extends AbstractTableModel {
 			model = new WrapperComboBoxModel(this, true);
 		}
 		@Override
-		protected int doProxyAdded(T p) {
+		protected boolean check(T p) {
 			addIO(p);
-			if (p.getController() == null)
-				return super.doProxyAdded(p);
-			else
-				return -1;
+			return p.getController() == null;
 		}
 		@Override
 		protected int doProxyRemoved(T p) {

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,8 +53,8 @@ public class ProxyListSelectionModel<T extends SonarObject>
 
 	/** Update the selection model when a selection is added */
 	private void doSelectionAdded(T proxy) {
-		int i = model.getRow(proxy);
-		if(i >= 0) {
+		int i = model.getIndex(proxy);
+		if (i >= 0) {
 			adjusting++;
 			addSelectionInterval(i, i);
 			adjusting--;
@@ -63,8 +63,8 @@ public class ProxyListSelectionModel<T extends SonarObject>
 
 	/** Update the selection model when a selection is removed */
 	private void doSelectionRemoved(T proxy) {
-		int i = model.getRow(proxy);
-		if(i >= 0) {
+		int i = model.getIndex(proxy);
+		if (i >= 0) {
 			adjusting++;
 			removeSelectionInterval(i, i);
 			adjusting--;
@@ -112,10 +112,10 @@ public class ProxyListSelectionModel<T extends SonarObject>
 		super.insertIndexInterval(index, length, before);
 		// NOTE: if the proxies being added are already selected,
 		//       we need to add them to this selection model
-		for(int i = index; i < index + length; i++) {
+		for (int i = index; i < index + length; i++) {
 			T proxy = model.getProxy(i);
-			if(proxy != null && sel_model.isSelected(proxy))
-				addSelectionInterval(index, index);
+			if (proxy != null && sel_model.isSelected(proxy))
+				addSelectionInterval(i, i);
 		}
 		adjusting--;
 	}
@@ -137,14 +137,14 @@ public class ProxyListSelectionModel<T extends SonarObject>
 		super.setSelectionInterval(index0, index1);
 		// NOTE: we need to deselect any selected items not in the
 		//       list model.
-		for(T proxy: sel_model.getSelected()) {
-			int i = model.getRow(proxy);
-			if(i < index0 || i > index1)
+		for (T proxy: sel_model.getSelected()) {
+			int i = model.getIndex(proxy);
+			if (i < index0 || i > index1)
 				sel_model.removeSelected(proxy);
 		}
-		for(int i = index0; i <= index1; i++) {
+		for (int i = index0; i <= index1; i++) {
 			T proxy = model.getProxy(i);
-			if(proxy != null)
+			if (proxy != null)
 				sel_model.addSelected(proxy);
 		}
 		adjusting--;

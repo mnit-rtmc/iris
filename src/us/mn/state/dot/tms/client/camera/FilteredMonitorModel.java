@@ -37,12 +37,9 @@ public class FilteredMonitorModel extends ProxyListModel<VideoMonitor> {
 		initialize();
 	}
 
-	/** Add a new proxy to the list model */
+	/** Check if a proxy is included in the list */
 	@Override
-	protected int doProxyAdded(VideoMonitor proxy) {
-		if (session.isUpdatePermitted(proxy, "camera"))
-			return super.doProxyAdded(proxy);
-		else
-			return -1;
+	protected boolean check(VideoMonitor proxy) {
+		return session.isUpdatePermitted(proxy, "camera");
 	}
 }

@@ -14,252 +14,152 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
-import java.util.Iterator;
-import java.util.TreeSet;
 import javax.swing.AbstractListModel;
-import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
-import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
- * List model for IRIS proxies. This class contains a TypeCache for a single
- * SonarObject. An object of this type is added as a listener to the TypeCache,
- * so that notification is received by instances of this class when any of the
- * SonarObjects change, are deleted, or new ones are added. This class also 
- * defines a TreeSet which contains proxy objects for the TypeCache objects.
+ * A swing ListModel kept in sync with a SONAR TypeCache.
  *
  * @author Douglas Lau
- * @author Michael Darter
  */
 public class ProxyListModel<T extends SonarObject>
-	extends AbstractListModel implements ProxyListener<T>
+	extends AbstractListModel
 {
 	/** Proxy type cache */
 	private final TypeCache<T> cache;
+
+	/** Proxy list */
+	private final ArrayList<T> list;
+
+	/** Proxy comparator */
+	private final Comparator<T> comp = comparator();
 
 	/** Get a proxy comparator */
 	protected Comparator<T> comparator() {
 		return new NumericAlphaComparator<T>();
 	}
 
-	/** Set of all proxies */
-	private final TreeSet<T> proxies = new TreeSet<T>(comparator());
-
-	/** Flag to indicate enumeration of all objects has completed */
-	private boolean enumerated = false;
+	/** Proxy listener for SONAR updates */
+	private final SwingProxyAdapter<T> listener = new SwingProxyAdapter<T>() {
+		protected Comparator<T> comparator() {
+			return ProxyListModel.this.comp;
+		}
+		protected void proxyAddedSwing(T proxy) {
+			int i = doProxyAdded(proxy);
+			if (i >= 0)
+				fireIntervalAdded(this, i, i);
+		}
+		protected void enumerationCompleteSwing(Collection<T> proxies) {
+			for (T proxy: proxies) {
+				if (check(proxy))
+					list.add(proxy);
+			}
+			int sz = list.size() - 1;
+			if (sz >= 0)
+				fireIntervalAdded(this, 0, sz);
+		}
+		protected void proxyRemovedSwing(T proxy) {
+			int i = doProxyRemoved(proxy);
+			if (i >= 0)
+				fireIntervalRemoved(this, i, i);
+		}
+		protected void proxyChangedSwing(T proxy, String attr) {
+			proxyChangedSwing(proxy);
+		}
+	};
 
 	/** Create a new proxy list model */
 	public ProxyListModel(TypeCache<T> c) {
 		cache = c;
+		list = new ArrayList<T>();
 	}
 
 	/** Initialize the proxy list model. This cannot be done in the
 	 * constructor because subclasses may not be fully constructed. */
 	public void initialize() {
-		cache.addProxyListener(this);
+		cache.addProxyListener(listener);
 	}
 
 	/** Dispose of the proxy model */
 	public void dispose() {
-		cache.removeProxyListener(this);
-		synchronized(proxies) {
-			proxies.clear();
-		}
+		cache.removeProxyListener(listener);
+		listener.dispose();
+	}
+
+	/** Check if a proxy is included in the list */
+	protected boolean check(T proxy) {
+		return true;
 	}
 
 	/** Add a new proxy to the model */
-	protected int doProxyAdded(T proxy) {
-		synchronized(proxies) {
-			if(proxies.add(proxy) && enumerated)
-				return getRow(proxy);
-			else
-				return -1;
-		}
-	}
-
-	/** Add a new proxy to the list model */
-	protected final void proxyAddedSlow(T proxy) {
-		int row = doProxyAdded(proxy);
-		if (row >= 0)
-			fireElementAdded(row);
-	}
-
-	/** Fire an interval added for one element */
-	private void fireElementAdded(final int i) {
-		runSwing(new Runnable() {
-			public void run() {
-				fireIntervalAdded(ProxyListModel.this, i, i);
+	private int doProxyAdded(T proxy) {
+		if (check(proxy)) {
+			int n_size = list.size();
+			for (int i = 0; i < n_size; ++i) {
+				int c = comp.compare(proxy, list.get(i));
+				if (c == 0)
+					return -1;
+				if (c < 0) {
+					list.add(i, proxy);
+					return i;
+				}
 			}
-		});
-	}
-
-	/** Add a new proxy to the list model */
-	@Override public final void proxyAdded(final T proxy) {
-		// Don't hog the SONAR TaskProcessor thread
-		WORKER.addJob(new Job() {
-			public void perform() {
-				proxyAddedSlow(proxy);
-			}
-		});
-	}
-
-	/** Enumeration of all proxies is complete */
-	@Override public void enumerationComplete() {
-		// Don't hog the SONAR TaskProcessor thread
-		WORKER.addJob(new Job() {
-			public void perform() {
-				enumerationCompleteSlow();
-			}
-		});
-	}
-
-	/** Complete the enumeration of a proxy list */
-	private void enumerationCompleteSlow() {
-		synchronized(proxies) {
-			enumerated = true;
-			final int row = proxies.size() - 1;
-			if(row >= 0) {
-				runSwing(new Runnable() {
-					public void run() {
-						fireIntervalAdded(
-							ProxyListModel.this, 0,
-							row);
-					}
-				});
-			}
-		}
+			list.add(proxy);
+			return n_size;
+		} else
+			return -1;
 	}
 
 	/** Remove a proxy from the model */
 	protected int doProxyRemoved(T proxy) {
-		synchronized(proxies) {
-			Iterator<T> it = proxies.iterator();
-			for(int row = 0; it.hasNext(); row++) {
-				if(proxy == it.next()) {
-					it.remove();
-					return row;
-				}
-			}
-		}
-		return -1;
-	}
-
-	/** Remove a proxy from the model */
-	protected final void proxyRemovedSlow(final T proxy) {
-		int row = doProxyRemoved(proxy);
-		if (row >= 0)
-			fireElementRemoved(row);
-	}
-
-	/** Fire an interval removed for one element */
-	private void fireElementRemoved(final int i) {
-		runSwing(new Runnable() {
-			public void run() {
-				fireIntervalRemoved(ProxyListModel.this, i, i);
-			}
-		});
-	}
-
-	/** Remove a proxy from the model */
-	@Override public final void proxyRemoved(final T proxy) {
-		// Don't hog the SONAR TaskProcessor thread
-		WORKER.addJob(new Job() {
-			public void perform() {
-				proxyRemovedSlow(proxy);
-			}
-		});
-	}
-
-	/** Change a proxy in the model */
-	protected final void proxyChangedSlow(final T proxy,
-		final String attrib)
-	{
-		int pre_row, post_row;
-		synchronized(proxies) {
-			pre_row = doProxyRemoved(proxy);
-			post_row = doProxyAdded(proxy);
-		}
-		if (pre_row >= 0 && post_row < 0)
-			fireElementRemoved(pre_row);
-		if (pre_row < 0 && post_row >= 0)
-			fireElementAdded(post_row);
-		if(pre_row >= 0 && post_row >= 0) {
-			final int r0 = Math.min(pre_row, post_row);
-			final int r1 = Math.max(pre_row, post_row);
-			runSwing(new Runnable() {
-				public void run() {
-					fireContentsChanged(ProxyListModel.this,
-						r0, r1);
-				}
-			});
-		}
+		int i = getIndex(proxy);
+		if (i >= 0)
+			list.remove(i);
+		return i;
 	}
 
 	/** Change a proxy in the list model */
-	@Override public final void proxyChanged(final T proxy,
-		final String attrib)
-	{
-		// Don't hog the SONAR TaskProcessor thread
-		WORKER.addJob(new Job() {
-			public void perform() {
-				proxyChangedSlow(proxy, attrib);
-			}
-		});
+	private void proxyChangedSwing(T proxy) {
+		int pre = doProxyRemoved(proxy);
+		int post = doProxyAdded(proxy);
+		if (pre >= 0 && post >= 0) {
+			int r0 = Math.min(pre, post);
+			int r1 = Math.max(pre, post);
+			fireContentsChanged(this, r0, r1);
+		} else if (pre >= 0 && post < 0)
+			fireIntervalRemoved(this, pre, pre);
+		else if (pre < 0 && post >= 0)
+			fireIntervalAdded(this, post, post);
 	}
 
 	/** Get the size (for ListModel) */
-	@Override public int getSize() {
-		synchronized(proxies) {
-			return proxies.size();
-		}
+	@Override
+	public int getSize() {
+		return list.size();
 	}
 
 	/** Get the element at the specified index (for ListModel) */
-	@Override public Object getElementAt(int index) {
-		return getProxy(index);
+	@Override
+	public Object getElementAt(int index) {
+		return list.get(index);
 	}
 
-	/** Get the proxy at the specified row */
-	public T getProxy(int row) {
-		synchronized(proxies) {
-			Iterator<T> it = proxies.iterator();
-			for(int i = 0; it.hasNext(); i++) {
-				T proxy = it.next();
-				if(i == row)
-					return proxy;
-			}
-			return null;
-		}
+	/** Get the proxy at the specified index */
+	public T getProxy(int i) {
+		return list.get(i);
 	}
 
-	/** Get the row for the specified proxy */
-	protected int getRow(T proxy) {
-		synchronized(proxies) {
-			Iterator<T> it = proxies.iterator();
-			for(int i = 0; it.hasNext(); i++) {
-				if(proxy.equals(it.next()))
-					return i;
-			}
-			return -1;
+	/** Get the index of the given proxy */
+	public int getIndex(T proxy) {
+		for (int i = 0; i < list.size(); ++i) {
+			if (proxy == list.get(i))
+				return i;
 		}
-	}
-
-	/** Get the first proxy lower than the given proxy */
-	public T lower(T proxy) {
-		synchronized(proxies) {
-			return proxies.lower(proxy);
-		}
-	}
-
-	/** Get the first proxy higher than the given proxy */
-	public T higher(T proxy) {
-		synchronized(proxies) {
-			return proxies.higher(proxy);
-		}
+		return -1;
 	}
 }

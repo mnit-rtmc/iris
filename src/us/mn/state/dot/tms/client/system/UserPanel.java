@@ -146,7 +146,8 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	}
 
 	/** Dispose of the panel */
-	@Override public void dispose() {
+	@Override
+	public void dispose() {
 		r_list.dispose();
 		watcher.dispose();
 		super.dispose();

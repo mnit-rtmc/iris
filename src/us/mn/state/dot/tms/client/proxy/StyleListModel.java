@@ -55,18 +55,15 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 			removeListDataListener(l);
 	}
 
+	/** Check if a proxy is included in the list */
+	@Override
+	protected boolean check(T proxy) {
+		return manager.checkStyle(style, proxy);
+	}
+
 	/** Get the proxy manager */
 	public ProxyManager<T> getManager() {
 		return manager;
-	}
-
-	/** Add a new proxy */
-	@Override
-	protected int doProxyAdded(T proxy) {
-		if (manager.checkStyle(style, proxy))
-			return super.doProxyAdded(proxy);
-		else
-			return -1;
 	}
 
 	/** Get the list selection model */

@@ -94,11 +94,8 @@ public class CamCache {
 			client);
 		preset_model = new ProxyListModel<CameraPreset>(presets) {
 			@Override
-			protected int doProxyAdded(CameraPreset cp) {
-				if (isAvailable(cp))
-					return super.doProxyAdded(cp);
-				else
-					return -1;
+			protected boolean check(CameraPreset cp) {
+				return isAvailable(cp);
 			}
 		};
 		preset_model.initialize();

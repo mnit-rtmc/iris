@@ -225,16 +225,22 @@ public class CameraDispatcher extends JPanel {
 
 	/** Select the next camera */
 	private void selectNextCamera() {
-		Camera cam = model.higher(selected);
-		if (cam != null)
-			sel_model.setSelected(cam);
+		int i = model.getIndex(selected);
+		if (i >= 0 && i < model.getSize() - 1) {
+			Camera cam = model.getProxy(i + 1);
+			if (cam != null)
+				sel_model.setSelected(cam);
+		}
 	}
 
 	/** Select the previous camera */
 	private void selectPreviousCamera() {
-		Camera cam = model.lower(selected);
-		if (cam != null)
-			sel_model.setSelected(cam);
+		int i = model.getIndex(selected);
+		if (i > 0) {
+			Camera cam = model.getProxy(i - 1);
+			if (cam != null)
+				sel_model.setSelected(cam);
+		}
 	}
 
 	/** Dispose of the camera viewer */

@@ -74,11 +74,8 @@ public class MultipleSignTab extends JPanel implements
 		TypeCache<SignGroup> gc = cache.getSignGroups();
 		sign_group_model = new ProxyListModel<SignGroup>(gc) {
 			@Override
-			protected int doProxyAdded(SignGroup proxy) {
-				if (!proxy.getLocal())
-					return super.doProxyAdded(proxy);
-				else
-					return -1;
+			protected boolean check(SignGroup proxy) {
+				return !proxy.getLocal();
 			}
 		};
 		sign_group_model.initialize();
@@ -139,9 +136,10 @@ public class MultipleSignTab extends JPanel implements
 	}
 
 	/** Get the selected sign group */
-	protected SignGroup getSelectedGroup() {
+	private SignGroup getSelectedGroup() {
 		ListSelectionModel s = group_list.getSelectionModel();
-		return sign_group_model.getProxy(s.getMinSelectionIndex());
+		int i = s.getMinSelectionIndex();
+		return (i >= 0) ? sign_group_model.getProxy(i) : null;
 	}
 
 	/** Called whenever a sign is added to the selection */
