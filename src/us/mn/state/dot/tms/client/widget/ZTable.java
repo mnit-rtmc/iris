@@ -41,13 +41,16 @@ public class ZTable extends JTable {
 	}
 
 	/** Get tooltip text for a mouse event */
+	@Override
 	public String getToolTipText(MouseEvent e) {
 		Point p = e.getPoint();
-		int row = convertRowIndexToModel(rowAtPoint(p));
-		int column = convertColumnIndexToModel(columnAtPoint(p));
-		if(row >= 0 && column >= 0)
-			return getToolTipText(row, column);
-		else
+		int v_row = rowAtPoint(p);
+		int v_col = columnAtPoint(p);
+		if (v_row >= 0 && v_col >= 0) {
+			int row = convertRowIndexToModel(v_row);
+			int col = convertColumnIndexToModel(v_col);
+			return getToolTipText(row, col);
+		} else
 			return null;
 	}
 
