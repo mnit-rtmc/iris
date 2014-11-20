@@ -15,19 +15,16 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.HashSet;
+import java.util.Collection;
+import java.util.Comparator;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import us.mn.state.dot.sched.Job;
-import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Table model for IRIS proxies.  This model allows a TableRowSorter to be used
@@ -39,45 +36,47 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	extends AbstractTableModel
 {
 	/** User session */
-	protected final Session session;
+	private final Session session;
 
 	/** Proxy type cache */
-	protected final TypeCache<T> cache;
+	private final TypeCache<T> cache;
 
 	/** Proxy columns */
 	private final ArrayList<ProxyColumn<T>> columns;
 
-	/** Set of all proxies */
-	protected final HashSet<T> proxies = new HashSet<T>();
+	/** Proxy list */
+	private final ArrayList<T> list;
 
-	/** Listener for SONAR proxy events */
-	private final ProxyListener<T> proxy_listener = new ProxyListener<T>() {
-		public void proxyAdded(final T proxy) {
-			// Don't hog the SONAR TaskProcessor thread
-			WORKER.addJob(new Job() {
-				public void perform() {
-					proxyAddedSlow(proxy);
-				}
-			});
+	/** Proxy listener for SONAR updates */
+	private final SwingProxyAdapter<T> listener = new SwingProxyAdapter<T>()
+	{
+		protected Comparator<T> comparator() {
+			return new NumericAlphaComparator<T>();
 		}
-		public void proxyRemoved(final T proxy) {
-			// Don't hog the SONAR TaskProcessor thread
-			WORKER.addJob(new Job() {
-				public void perform() {
-					proxyRemovedSlow(proxy);
-				}
-			});
+		protected void proxyAddedSwing(T proxy) {
+			int i = doProxyAdded(proxy);
+			if (i >= 0)
+				fireTableRowsInserted(i, i);
 		}
-		public void proxyChanged(final T proxy, final String attrib) {
-			// Don't hog the SONAR TaskProcessor thread
-			WORKER.addJob(new Job() {
-				public void perform() {
-					proxyChangedSlow(proxy, attrib);
-				}
-			});
+		protected void enumerationCompleteSwing(Collection<T> proxies) {
+			for (T proxy: proxies)
+				list.add(proxy);
+			int sz = list.size() - 1;
+			if (sz >= 0)
+				fireTableRowsInserted(0, sz);
 		}
-		public void enumerationComplete() {
-			// Nothing to do
+		protected void proxyRemovedSwing(T proxy) {
+			int i = doProxyRemoved(proxy);
+			if (i >= 0)
+				fireTableRowsDeleted(i, i);
+		}
+		protected void proxyChangedSwing(T proxy, String attr) {
+			int i = getIndex(proxy);
+			if (i >= 0)
+				fireTableRowsUpdated(i, i);
+		}
+		protected boolean checkAttributeChange(String attr) {
+			return ProxyTableModel2.this.checkAttributeChange(attr);
 		}
 	};
 
@@ -86,17 +85,18 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		session = s;
 		cache = c;
 		columns = createColumns();
+		list = new ArrayList<T>();
 	}
 
 	/** Initialize the proxy table model. This cannot be done in the
 	 * constructor because subclasses may not be fully constructed. */
 	public void initialize() {
-		cache.addProxyListener(proxy_listener);
+		cache.addProxyListener(listener);
 	}
 
 	/** Dispose of the proxy table model */
 	public void dispose() {
-		cache.removeProxyListener(proxy_listener);
+		cache.removeProxyListener(listener);
 	}
 
 	/** Create the columns in the model via method, which is called
@@ -104,172 +104,112 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	abstract protected ArrayList<ProxyColumn<T>> createColumns();
 
 	/** Get the count of columns in the table */
+	@Override
 	public int getColumnCount() {
 		return columns.size();
 	}
 
 	/** Get the proxy column at the given column index */
 	public ProxyColumn<T> getProxyColumn(int col) {
-		if(col >= 0 && col < columns.size())
+		if (col >= 0 && col < columns.size())
 			return columns.get(col);
 		else
 			return null;
 	}
 
 	/** Get the class of the specified column */
+	@Override
 	public Class getColumnClass(int col) {
 		ProxyColumn pc = getProxyColumn(col);
-		if(pc != null)
+		if (pc != null)
 			return pc.getColumnClass();
 		else
 			return null;
 	}
 
 	/** Get the value at the specified cell */
+	@Override
 	public Object getValueAt(int row, int col) {
 		T proxy = getRowProxy(row);
-		if(proxy != null) {
+		if (proxy != null) {
 			ProxyColumn pc = getProxyColumn(col);
-			if(pc != null)
+			if (pc != null)
 				return pc.getValueAt(proxy);
 		}
 		return null;
 	}
 
 	/** Check if the specified cell is editable */
+	@Override
 	public boolean isCellEditable(int row, int col) {
 		ProxyColumn pc = getProxyColumn(col);
 		return pc != null && pc.isEditable(getRowProxy(row));
 	}
 
 	/** Set the value at the specified cell */
+	@Override
 	public void setValueAt(Object value, int row, int col) {
 		ProxyColumn pc = getProxyColumn(col);
-		if(pc != null)
+		if (pc != null)
 			pc.setValueAt(getRowProxy(row), value);
 	}
 
 	/** Create the table column model */
 	public TableColumnModel createColumnModel() {
 		TableColumnModel m = new DefaultTableColumnModel();
-		for(int i = 0; i < columns.size(); ++i)
+		for (int i = 0; i < columns.size(); ++i)
 			columns.get(i).addColumn(m, i);
 		return m;
 	}
 
 	/** Add a new proxy to the table model */
-	private final int doProxyAdded(T proxy) {
-		synchronized(proxies) {
-			if(proxies.add(proxy))
-				return proxies.size() - 1;
-			else
+	private int doProxyAdded(T proxy) {
+		int n_size = list.size();
+		for (int i = 0; i < n_size; ++i) {
+			if (proxy == list.get(i))
 				return -1;
 		}
-	}
-
-	/** Add a new proxy to the table model */
-	protected final void proxyAddedSlow(T proxy) {
-		final int row = doProxyAdded(proxy);
-		if(row >= 0) {
-			runSwing(new Runnable() {
-				public void run() {
-					// should be:
-					// fireTableRowsInserted(row, row);
-					// but it causes repaint problems
-				}
-			});
-		}
+		list.add(proxy);
+		return n_size;
 	}
 
 	/** Remove a proxy from the table model */
-	private final int doProxyRemoved(T proxy) {
-		synchronized(proxies) {
-			Iterator<T> it = proxies.iterator();
-			for(int row = 0; it.hasNext(); row++) {
-				if(proxy == it.next()) {
-					it.remove();
-					return row;
-				}
-			}
-		}
-		return -1;
+	private int doProxyRemoved(T proxy) {
+		int i = getIndex(proxy);
+		if (i >= 0)
+			list.remove(i);
+		return i;
 	}
 
-	/** Remove a proxy from the table model */
-	protected final void proxyRemovedSlow(T proxy) {
-		final int row = doProxyRemoved(proxy);
-		if(row >= 0) {
-			runSwing(new Runnable() {
-				public void run() {
-					fireTableDataChanged();
-					// should be:
-					// fireTableRowsDeleted(row, row);
-					// but it causes repaint problems
-				}
-			});
-		}
-	}
-
-	/** Change a proxy in the table model */
-	protected void proxyChangedSlow(T proxy, String attrib) {
-		final int row = getRow(proxy);
-		if(row >= 0) {
-			runSwing(new Runnable() {
-				public void run() {
-					fireTableDataChanged();
-					// should be:
-					// fireTableRowsUpdated(row, row);
-					// but it causes repaint problems
-				}
-			});
-		}
+	/** Check if an attribute change is interesting */
+	protected boolean checkAttributeChange(String attr) {
+		return true;
 	}
 
 	/** Get the count of rows in the table */
+	@Override
 	public int getRowCount() {
-		synchronized(proxies) {
-			return proxies.size();
-		}
+		return list.size();
 	}
 
 	/** Get the proxy at the specified row */
 	public T getRowProxy(int row) {
-		if(row < 0)
-			return null;
-		synchronized(proxies) {
-			Iterator<T> it = proxies.iterator();
-			for(int i = 0; it.hasNext(); i++) {
-				T proxy = it.next();
-				if(i == row)
-					return proxy;
-			}
-			return null;
-		}
+		return (row >= 0) ? list.get(row) : null;
 	}
 
-	/** Get the row for the specified proxy */
-	protected int getRow(T proxy) {
-		synchronized(proxies) {
-			Iterator<T> it = proxies.iterator();
-			for(int i = 0; it.hasNext(); i++) {
-				if(proxy.equals(it.next()))
-					return i;
-			}
-			return -1;
+	/** Get the index of the given proxy */
+	public int getIndex(T proxy) {
+		for (int i = 0; i < list.size(); ++i) {
+			if (proxy == list.get(i))
+				return i;
 		}
-	}
-
-	/** Delete the specified row */
-	protected void deleteRow(int row) {
-		T proxy = getRowProxy(row);
-		if(proxy != null)
-			proxy.destroy();
+		return -1;
 	}
 
 	/** Show the properties form for a proxy */
 	public void showPropertiesForm(T proxy) {
 		SonarObjectForm<T> prop = createPropertiesForm(proxy);
-		if(prop != null)
+		if (prop != null)
 			session.getDesktop().show(prop);
 	}
 
@@ -291,7 +231,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	/** Check if the user can add a proxy */
 	public boolean canAdd(String n) {
 		String tname = getSonarType();
-		if(tname != null)
+		if (tname != null)
 			return session.canAdd(tname, n);
 		else
 			return false;

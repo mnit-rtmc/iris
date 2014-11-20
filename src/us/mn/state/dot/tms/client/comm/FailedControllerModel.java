@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 public class FailedControllerModel extends ProxyTableModel2<Controller> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<Controller>> createColumns() {
 		ArrayList<ProxyColumn<Controller>> cols =
 			new ArrayList<ProxyColumn<Controller>>(5);
@@ -98,9 +99,9 @@ public class FailedControllerModel extends ProxyTableModel2<Controller> {
 		super(s, s.getSonarState().getConCache().getControllers());
 	}
 
-	/** Change a proxy in the table model */
-	protected void proxyChangedSlow(Controller proxy, String attrib) {
-		if(!"status".equals(attrib))
-			super.proxyChangedSlow(proxy, attrib);
+	/** Check if an attribute change is interesting */
+	@Override
+	protected boolean checkAttributeChange(String attr) {
+		return !("status".equals(attr));
 	}
 }
