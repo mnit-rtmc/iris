@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,15 +14,15 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.R_Node;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
 
 /**
  * A detector hash keeps track of r_node / detector links.
@@ -42,30 +42,26 @@ public class DetectorHash {
 		new HashMap<String, HashSet<Detector>>();
 
 	/** Listener for detector proxies */
-	private final ProxyListener<Detector> listener =
-		new ProxyListener<Detector>()
+	private final SwingProxyAdapter<Detector> listener =
+		new SwingProxyAdapter<Detector>(true)
 	{
-		public void proxyAdded(final Detector proxy) {
-			WORKER.addJob(new Job() {
-				public void perform() {
-					proxyAddedSlow(proxy);
-				}
-			});
+		protected Comparator<Detector> comparator() {
+			return null;
 		}
-		public void proxyRemoved(final Detector proxy) {
-			WORKER.addJob(new Job() {
-				public void perform() {
-					proxyRemovedSlow(proxy);
-				}
-			});
+		protected void proxyAddedSwing(Detector proxy) {
+			DetectorHash.this.proxyAddedSwing(proxy);
 		}
-		public void proxyChanged(Detector proxy, String a) { }
-		public void enumerationComplete() {
-			WORKER.addJob(new Job() {
-				public void perform() {
-					enumerationCompleteSlow();
-				}
-			});
+		protected void enumerationCompleteSwing(
+			Collection<Detector> proxies)
+		{
+			r_node_manager.arrangeCorridors();
+		}
+		protected void proxyRemovedSwing(Detector proxy) {
+			DetectorHash.this.proxyRemovedSwing(proxy);
+		}
+		protected void proxyChangedSwing(Detector proxy, String attr) {}
+		protected boolean checkAttributeChange(String attr) {
+			return false;
 		}
 	};
 
@@ -91,22 +87,17 @@ public class DetectorHash {
 	}
 
 	/** Add a detector to the hash */
-	private void proxyAddedSlow(Detector det) {
+	private void proxyAddedSwing(Detector det) {
 		R_Node n = det.getR_Node();
-		if(n != null)
+		if (n != null)
 			getDetectors(n).add(det);
 	}
 
 	/** Remove a detector from the hash */
-	private void proxyRemovedSlow(Detector det) {
+	private void proxyRemovedSwing(Detector det) {
 		R_Node n = det.getR_Node();
-		if(n != null)
+		if (n != null)
 			getDetectors(n).remove(det);
-	}
-
-	/** Called when proxy enumeration is complete */
-	private void enumerationCompleteSlow() {
-		r_node_manager.arrangeCorridors();
 	}
 
 	/** Get the detectors for a specific r_node */
@@ -116,13 +107,11 @@ public class DetectorHash {
 
 	/** Get a detector set for a node ID */
 	private HashSet<Detector> getDetectors(String nid) {
-		synchronized(nodes) {
-			HashSet<Detector> dets = nodes.get(nid);
-			if(dets == null) {
-				dets = new HashSet<Detector>();
-				nodes.put(nid, dets);
-			}
-			return dets;
+		HashSet<Detector> dets = nodes.get(nid);
+		if (dets == null) {
+			dets = new HashSet<Detector>();
+			nodes.put(nid, dets);
 		}
+		return dets;
 	}
 }
