@@ -59,8 +59,10 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 				fireTableRowsInserted(i, i);
 		}
 		protected void enumerationCompleteSwing(Collection<T> proxies) {
-			for (T proxy: proxies)
-				list.add(proxy);
+			for (T proxy: proxies) {
+				if (check(proxy))
+					list.add(proxy);
+			}
 			int sz = list.size() - 1;
 			if (sz >= 0)
 				fireTableRowsInserted(0, sz);
@@ -71,9 +73,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 				fireTableRowsDeleted(i, i);
 		}
 		protected void proxyChangedSwing(T proxy, String attr) {
-			int i = getIndex(proxy);
-			if (i >= 0)
-				fireTableRowsUpdated(i, i);
+			proxyChangedSwing(proxy);
 		}
 		protected boolean checkAttributeChange(String attr) {
 			return ProxyTableModel2.this.checkAttributeChange(attr);
@@ -162,15 +162,23 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		return m;
 	}
 
+	/** Check if a proxy is included in the list */
+	protected boolean check(T proxy) {
+		return true;
+	}
+
 	/** Add a new proxy to the table model */
 	private int doProxyAdded(T proxy) {
-		int n_size = list.size();
-		for (int i = 0; i < n_size; ++i) {
-			if (proxy == list.get(i))
-				return -1;
-		}
-		list.add(proxy);
-		return n_size;
+		if (check(proxy)) {
+			int n_size = list.size();
+			for (int i = 0; i < n_size; ++i) {
+				if (proxy == list.get(i))
+					return -1;
+			}
+			list.add(proxy);
+			return n_size;
+		} else
+			return -1;
 	}
 
 	/** Remove a proxy from the table model */
@@ -179,6 +187,20 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		if (i >= 0)
 			list.remove(i);
 		return i;
+	}
+
+	/** Change a proxy in the table model */
+	private void proxyChangedSwing(T proxy) {
+		int pre = doProxyRemoved(proxy);
+		int post = doProxyAdded(proxy);
+		if (pre >= 0 && post >= 0) {
+			int r0 = Math.min(pre, post);
+			int r1 = Math.max(pre, post);
+			fireTableRowsUpdated(r0, r1);
+		} else if (pre >= 0 && post < 0)
+			fireTableRowsDeleted(pre, pre);
+		else if (pre < 0 && post >= 0)
+			fireTableRowsInserted(post, post);
 	}
 
 	/** Check if an attribute change is interesting */

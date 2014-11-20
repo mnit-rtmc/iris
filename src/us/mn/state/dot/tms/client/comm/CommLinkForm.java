@@ -27,14 +27,12 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
@@ -113,9 +111,6 @@ public class CommLinkForm extends AbstractForm implements ProxyView<CommLink> {
 	/** Table row sorter */
 	private final TableRowSorter<FailedControllerModel> sorter;
 
-	/** Table row filter */
-	private final RowFilter<FailedControllerModel, Integer> filter;
-
 	/** Action to show controller properties */
 	private final IAction controller = new IAction("controller") {
 		protected void doActionPerformed(ActionEvent e) {
@@ -167,16 +162,6 @@ public class CommLinkForm extends AbstractForm implements ProxyView<CommLink> {
 			new LinkedList<RowSorter.SortKey>();
 		keys.add(new RowSorter.SortKey(4, SortOrder.DESCENDING));
 		sorter.setSortKeys(keys);
-		filter = new RowFilter<FailedControllerModel, Integer>() {
-			public boolean include(Entry<? extends
-				FailedControllerModel, ? extends Integer> entry)
-			{
-				Controller ctrl = fmodel.getRowProxy(
-					entry.getIdentifier());
-				return ControllerHelper.isFailed(ctrl);
-			}
-		};
-		sorter.setRowFilter(filter);
 	}
 
 	/** Initializze the widgets in the form */

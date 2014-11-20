@@ -22,6 +22,7 @@ import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -97,6 +98,12 @@ public class FailedControllerModel extends ProxyTableModel2<Controller> {
 	/** Create a new failed controller table model */
 	public FailedControllerModel(Session s) {
 		super(s, s.getSonarState().getConCache().getControllers());
+	}
+
+	/** Check if a proxy is included in the list */
+	@Override
+	protected boolean check(Controller proxy) {
+		return ControllerHelper.isFailed(proxy);
 	}
 
 	/** Check if an attribute change is interesting */
