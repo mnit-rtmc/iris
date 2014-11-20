@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,16 +19,17 @@ import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for IRIS connections
  *
  * @author Douglas Lau
  */
-public class ConnectionModel extends ProxyTableModel<Connection> {
+public class ConnectionModel extends ProxyTableModel2<Connection> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<Connection>> createColumns() {
 		ArrayList<ProxyColumn<Connection>> cols =
 			new ArrayList<ProxyColumn<Connection>>(2);
@@ -52,10 +53,5 @@ public class ConnectionModel extends ProxyTableModel<Connection> {
 	/** Create a new connection table model */
 	public ConnectionModel(Session s) {
 		super(s, s.getSonarState().getConnections());
-	}
-
-	/** Get the count of rows in the table */
-	public int getRowCount() {
-		return super.getRowCount() - 1;
 	}
 }

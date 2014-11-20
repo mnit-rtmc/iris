@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,8 @@ public class ConnectionPanel extends IPanel {
 	}
 
 	/** Dispose of the panel */
-	@Override public void dispose() {
+	@Override
+	public void dispose() {
 		c_model.dispose();
 		super.dispose();
 	}
@@ -83,7 +84,10 @@ public class ConnectionPanel extends IPanel {
 	/** Change the selected connection */
 	private void selectConnection() {
 		ListSelectionModel s = c_table.getSelectionModel();
-		Connection c = c_model.getProxy(s.getMinSelectionIndex());
-		del_conn.setEnabled(c_model.canRemove(c));
+		int i = s.getMinSelectionIndex();
+		if (i >= 0) {
+			Connection c = c_model.getRowProxy(i);
+			del_conn.setEnabled(c_model.canRemove(c));
+		}
 	}
 }

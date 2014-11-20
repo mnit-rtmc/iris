@@ -250,6 +250,13 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		return true;
 	}
 
+	/** Delete the specified row */
+	public void deleteRow(int row) {
+		T proxy = getRowProxy(row);
+		if (proxy != null)
+			proxy.destroy();
+	}
+
 	/** Check if the user can add a proxy */
 	public boolean canAdd(String n) {
 		String tname = getSonarType();
