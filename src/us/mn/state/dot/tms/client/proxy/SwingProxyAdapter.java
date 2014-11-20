@@ -32,14 +32,14 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	/** Set of proxies used until the enumeration is complete */
 	private final TreeSet<T> proxies = new TreeSet<T>(comparator());
 
-	/** Flag to indicate enumeration complete has been received */
-	private boolean enumerated = false;
+	/** Flag to pass along notifications */
+	private boolean notify = false;
 
 	/** Add a proxy.
 	 * @see ProxyListener. */
 	@Override
 	public final void proxyAdded(final T proxy) {
-		if (enumerated) {
+		if (notify) {
 			runSwing(new Runnable() {
 				public void run() {
 					proxyAddedSwing(proxy);
@@ -53,7 +53,7 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	 * @see ProxyListener. */
 	@Override
 	public final void enumerationComplete() {
-		enumerated = true;
+		notify = true;
 		runSwing(new Runnable() {
 			public void run() {
 				enumerationCompleteSwing(proxies);
@@ -66,7 +66,7 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	 * @see ProxyListener. */
 	@Override
 	public final void proxyRemoved(final T proxy) {
-		if (enumerated) {
+		if (notify) {
 			runSwing(new Runnable() {
 				public void run() {
 					proxyRemovedSwing(proxy);
@@ -79,7 +79,7 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	 * @see ProxyListener. */
 	@Override
 	public final void proxyChanged(final T proxy, final String attr) {
-		if (enumerated) {
+		if (notify) {
 			runSwing(new Runnable() {
 				public void run() {
 					proxyChangedSwing(proxy, attr);
