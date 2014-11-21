@@ -19,15 +19,14 @@ import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for tag readers.
  *
  * @author Douglas Lau
  */
-public class TagReaderModel extends ProxyTableModel<TagReader> {
+public class TagReaderModel extends ProxyTableModel2<TagReader> {
 
 	/** Create the columns in the model */
 	@Override
@@ -37,14 +36,6 @@ public class TagReaderModel extends ProxyTableModel<TagReader> {
 		cols.add(new ProxyColumn<TagReader>("tag.reader", 120) {
 			public Object getValueAt(TagReader tr) {
 				return tr.getName();
-			}
-			public boolean isEditable(TagReader tr) {
-				return (tr == null) && canAdd();
-			}
-			public void setValueAt(TagReader tr, Object value) {
-				String v = value.toString().trim();
-				if (v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<TagReader>("location", 300) {
@@ -67,6 +58,18 @@ public class TagReaderModel extends ProxyTableModel<TagReader> {
 		return TagReader.SONAR_TYPE;
 	}
 
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 12;
+	}
+
+	/** Determine if create button is available */
+	@Override
+	public boolean canCreate() {
+		return true;
+	}
+
 	/** Determine if a properties form is available */
 	@Override
 	public boolean hasProperties() {
@@ -75,9 +78,7 @@ public class TagReaderModel extends ProxyTableModel<TagReader> {
 
 	/** Create a properties form for one proxy */
 	@Override
-	protected SonarObjectForm<TagReader> createPropertiesForm(
-		TagReader proxy)
-	{
+	protected TagReaderProperties createPropertiesForm(TagReader proxy) {
 		return new TagReaderProperties(session, proxy);
 	}
 }

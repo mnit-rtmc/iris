@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.toll;
 
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class TagReaderForm extends ProxyTableForm<TagReader> {
+public class TagReaderForm extends ProxyTableForm2<TagReader> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
@@ -34,11 +34,5 @@ public class TagReaderForm extends ProxyTableForm<TagReader> {
 	/** Create a new tag reader form */
 	public TagReaderForm(Session s) {
 		super(I18N.get("tag.readers"), new TagReaderModel(s));
-	}
-
-	/** Get the visible row count */
-	@Override
-	protected int getVisibleRowCount() {
-		return 12;
 	}
 }
