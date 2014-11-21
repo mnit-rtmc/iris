@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -157,10 +157,10 @@ public class SignTextComboBoxModel extends AbstractListModel
 	}
 
 	/** Get the edited sign text (if any) */
-	public SignText getEditedSignText() {
+	public ClientSignText getEditedSignText() {
 		SignText st = selected;
-		if(st instanceof ClientSignText && st != BLANK_SIGN_TEXT)
-			return st;
+		if (st instanceof ClientSignText && st != BLANK_SIGN_TEXT)
+			return (ClientSignText)st;
 		else
 			return null;
 	}

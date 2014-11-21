@@ -249,15 +249,15 @@ public class SignTextModel {
 	/** Update the message library with the currently selected messages */
 	public void updateMessageLibrary() {
 		for (SignTextComboBoxModel m: lines.values()) {
-			SignText st = m.getEditedSignText();
+			ClientSignText st = m.getEditedSignText();
 			if (st != null)
 				createSignText(st);
 		}
 	}
 
 	/** Add a SignText to the local sign text library.
-	 * @param st SignText to create (should be ClientSignText). */
-	private void createSignText(SignText st) {
+	 * @param st SignText to create. */
+	private void createSignText(ClientSignText st) {
 		SignGroup sg = getLocalSignGroup();
 		if (sg != null) {
 			creator.create(sg, st.getLine(), st.getMulti(),
