@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,31 +19,23 @@ import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for weather sensors.
  *
  * @author Douglas Lau
  */
-public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
+public class WeatherSensorModel extends ProxyTableModel2<WeatherSensor> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<WeatherSensor>> createColumns() {
 		ArrayList<ProxyColumn<WeatherSensor>> cols =
 			new ArrayList<ProxyColumn<WeatherSensor>>(2);
 		cols.add(new ProxyColumn<WeatherSensor>("weather.sensor", 120) {
 			public Object getValueAt(WeatherSensor ws) {
 				return ws.getName();
-			}
-			public boolean isEditable(WeatherSensor ws) {
-				return (ws == null) && canAdd();
-			}
-			public void setValueAt(WeatherSensor ws, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<WeatherSensor>("location", 300) {
@@ -61,17 +53,32 @@ public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return WeatherSensor.SONAR_TYPE;
 	}
 
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 12;
+	}
+
+	/** Determine if create button is available */
+	@Override
+	public boolean canCreate() {
+		return true;
+	}
+
 	/** Determine if a properties form is available */
+	@Override
 	public boolean hasProperties() {
 		return true;
 	}
 
 	/** Create a properties form for one proxy */
-	protected SonarObjectForm<WeatherSensor> createPropertiesForm(
+	@Override
+	protected WeatherSensorProperties createPropertiesForm(
 		WeatherSensor proxy)
 	{
 		return new WeatherSensorProperties(session, proxy);
