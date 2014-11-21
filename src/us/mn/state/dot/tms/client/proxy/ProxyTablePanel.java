@@ -15,10 +15,13 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.Box;
 import javax.swing.JButton;
+import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -40,6 +43,21 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 
 	/** Proxy table */
 	private final ZTable table;
+
+	/** Text field to add a proxy */
+	private final JTextField add_txt = new JTextField(16);
+
+	/** Action to create a proxy */
+	private final IAction add_proxy = new IAction("device.create") {
+		protected void doActionPerformed(ActionEvent e) {
+			String name = add_txt.getText();
+			add_txt.setText("");
+			model.createObject(name);
+		}
+	};
+
+	/** Button to add a proxy */
+	private final JButton add_btn = new JButton(add_proxy);
 
 	/** Action to display the proxy properties */
 	private final IAction show_props = new IAction("device.properties") {
@@ -79,7 +97,9 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		table.setColumnModel(model.createColumnModel());
 		table.setModel(model);
 		table.setRowHeight(UI.scaled(getRowHeight()));
-		table.setVisibleRowCount(getVisibleRowCount());
+		table.setVisibleRowCount(model.getVisibleRowCount());
+		add_txt.setEnabled(false);
+		add_btn.setEnabled(false);
 		show_props.setEnabled(false);
 		del_obj.setEnabled(false);
 	}
@@ -115,17 +135,36 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		});
 		if (model.hasProperties())
 			table.addMouseListener(mouser);
+		if (model.canCreate()) {
+			boolean ca = model.canAdd();
+			add_txt.setEnabled(ca);
+			add_btn.setEnabled(ca);
+			add_txt.addKeyListener(new KeyAdapter() {
+				public void keyPressed(KeyEvent e) {
+					if (e.getKeyCode() == KeyEvent.VK_ENTER)
+						add_btn.doClick();
+				}
+			});
+		}
 	}
 
 	/** Build the button box */
 	private Box buildButtonBox() {
 		Box box = Box.createHorizontalBox();
+		box.add(Box.createGlue());
+		if (model.canCreate()) {
+			box.add(add_txt);
+			box.add(Box.createHorizontalStrut(UI.hgap));
+			box.add(add_btn);
+			box.add(Box.createHorizontalStrut(UI.hgap));
+		}
 		if (model.hasProperties())
 			box.add(prop_btn);
-		if (model.hasDelete()) {
+		if (model.canDelete()) {
 			box.add(Box.createHorizontalStrut(UI.hgap));
 			box.add(new JButton(del_obj));
 		}
+		box.add(Box.createGlue());
 		return box;
 	}
 
@@ -137,11 +176,6 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	/** Get the row height */
 	protected int getRowHeight() {
 		return 18;
-	}
-
-	/** Get the visible row count */
-	protected int getVisibleRowCount() {
-		return 16;
 	}
 
 	/** Get the currently selected proxy */

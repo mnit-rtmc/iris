@@ -57,7 +57,7 @@ public class ConnectionModel extends ProxyTableModel2<Connection> {
 
 	/** Determine if delete button is available */
 	@Override
-	public boolean hasDelete() {
+	public boolean canDelete() {
 		return false;
 	}
 }

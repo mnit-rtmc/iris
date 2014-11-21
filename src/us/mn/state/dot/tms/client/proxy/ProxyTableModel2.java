@@ -36,7 +36,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	extends AbstractTableModel
 {
 	/** User session */
-	private final Session session;
+	protected final Session session;
 
 	/** Proxy type cache */
 	private final TypeCache<T> cache;
@@ -233,6 +233,11 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		return -1;
 	}
 
+	/** Get the visible row count */
+	public int getVisibleRowCount() {
+		return 16;
+	}
+
 	/** Show the properties form for a proxy */
 	public void showPropertiesForm(T proxy) {
 		SonarObjectForm<T> prop = createPropertiesForm(proxy);
@@ -245,13 +250,18 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		return null;
 	}
 
+	/** Determine if create button is available */
+	public boolean canCreate() {
+		return false;
+	}
+
 	/** Determine if a properties form is available */
 	public boolean hasProperties() {
 		return false;
 	}
 
 	/** Determine if delete button is available */
-	public boolean hasDelete() {
+	public boolean canDelete() {
 		return true;
 	}
 
@@ -260,6 +270,19 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		T proxy = getRowProxy(row);
 		if (proxy != null)
 			proxy.destroy();
+	}
+
+	/** Create an object with the given name */
+	public void createObject(String name) {
+		String n = name.trim();
+		if (n.length() > 0)
+			cache.createObject(n);
+	}
+
+	/** Get the SONAR type name.  Subclasses must override this to allow
+	 * canAdd permission checking to work correctly. */
+	protected String getSonarType() {
+		return null;
 	}
 
 	/** Check if the user can add a proxy */
@@ -274,12 +297,6 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	/** Check if the user can add a proxy */
 	public boolean canAdd() {
 		return canAdd("oname");
-	}
-
-	/** Get the SONAR type name.  Subclasses must override this to allow
-	 * canAdd permission checking to work correctly. */
-	protected String getSonarType() {
-		return null;
 	}
 
 	/** Check if the user can update a proxy */
