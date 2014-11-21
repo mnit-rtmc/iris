@@ -20,14 +20,14 @@ import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for capabilities assigned to IRIS roles
  *
  * @author Douglas Lau
  */
-public class RoleCapabilityModel extends ProxyTableModel<Capability> {
+public class RoleCapabilityModel extends ProxyTableModel2<Capability> {
 
 	/** Create the columns in the model */
 	@Override
@@ -46,7 +46,7 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 				return isAssigned(c);
 			}
 			public boolean isEditable(Capability c) {
-				return canUpdateRoleCapabilities();
+				return canUpdate(role, "capabilities");
 			}
 			public void setValueAt(Capability c, Object value) {
 				if (value instanceof Boolean)
@@ -100,12 +100,6 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 			fireTableDataChanged();
 	}
 
-	/** Get the count of rows in the table */
-	@Override
-	public int getRowCount() {
-		return super.getRowCount() - 1;
-	}
-
 	/** Add a capability to an array of capabilities */
 	protected Capability[] addCapability(Capability[] caps, Capability cap){
 		TreeSet<Capability> cs = new TreeSet<Capability>(comparator());
@@ -124,10 +118,5 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 			cs.add(c);
 		cs.remove(cap);
 		return cs.toArray(new Capability[0]);
-	}
-
-	/** Check if the user can update role capabilities */
-	private boolean canUpdateRoleCapabilities() {
-		return session.canUpdate(role, "capabilities");
 	}
 }

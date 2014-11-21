@@ -47,11 +47,16 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	/** Proxy list */
 	private final ArrayList<T> list;
 
+	/** Get a proxy comparator */
+	protected Comparator<T> comparator() {
+		return new NumericAlphaComparator<T>();
+	}
+
 	/** Proxy listener for SONAR updates */
 	private final SwingProxyAdapter<T> listener = new SwingProxyAdapter<T>()
 	{
 		protected Comparator<T> comparator() {
-			return new NumericAlphaComparator<T>();
+			return ProxyTableModel2.this.comparator();
 		}
 		protected void proxyAddedSwing(T proxy) {
 			int i = doProxyAdded(proxy);
@@ -283,7 +288,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	}
 
 	/** Check if the user can update a proxy */
-	public boolean canUpdate(T proxy, String aname) {
+	public boolean canUpdate(SonarObject proxy, String aname) {
 		return session.canUpdate(proxy, aname);
 	}
 
