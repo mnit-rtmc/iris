@@ -16,8 +16,6 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.MultiString;
@@ -160,10 +158,11 @@ public class ComposerPagePanel extends JPanel {
 	}
 
 	/** Get line model for a combo box */
-	private ComboBoxModel getLineModel(SignTextModel stm, int n) {
+	private SignTextComboBoxModel getLineModel(SignTextModel stm, int n) {
+		short line = getLineNumber(n);
 		return (stm != null && n < n_lines)
-		     ? stm.getLineModel(getLineNumber(n))
-		     : new DefaultComboBoxModel();
+		     ? stm.getLineModel(line)
+		     : new SignTextComboBoxModel(line);
 	}
 
 	/** Get line model number */
