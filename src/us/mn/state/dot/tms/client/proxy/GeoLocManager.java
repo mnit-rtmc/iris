@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -54,8 +53,6 @@ public class GeoLocManager {
 		protected void proxyAddedSwing(GeoLoc proxy) {
 			GeoLocManager.this.proxyAddedSwing(proxy);
 		}
-		protected void enumerationCompleteSwing(
-			Collection<GeoLoc> proxies) { }
 		protected void proxyRemovedSwing(GeoLoc proxy) {
 			GeoLocManager.this.proxyRemovedSwing(proxy);
 		}

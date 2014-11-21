@@ -110,7 +110,9 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	abstract protected void proxyAddedSwing(T proxy);
 
 	/** Enumeration of proxies is complete */
-	abstract protected void enumerationCompleteSwing(Collection<T> proxies);
+	protected void enumerationCompleteSwing(Collection<T> proxies) {
+		// subclasses can override
+	}
 
 	/** Remove a proxy */
 	abstract protected void proxyRemovedSwing(T proxy);
