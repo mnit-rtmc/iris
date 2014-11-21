@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ import java.awt.Rectangle;
 import java.awt.event.HierarchyBoundsAdapter;
 import java.awt.event.HierarchyEvent;
 import javax.swing.JLayeredPane;
-import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * ScreenLayout is a layout manager which lays out components on physical
@@ -64,7 +63,7 @@ public class ScreenLayout implements LayoutManager {
 
 	/** Get the minimum layout size */
 	public Dimension minimumLayoutSize(Container parent) {
-		return UI.dimension(100, 100);
+		return Widgets.UI.dimension(100, 100);
 	}
 
 	/** Layout the container */
