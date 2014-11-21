@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.Box;
@@ -109,7 +107,7 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		model.initialize();
 		createJobs();
 		addTable();
-		add(buildButtonBox(), Stretch.RIGHT);
+		add(buildButtonBox(), Stretch.FULL);
 	}
 
 	/** Dispose of the panel */
@@ -139,32 +137,28 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 			boolean ca = model.canAdd();
 			add_txt.setEnabled(ca);
 			add_btn.setEnabled(ca);
-			add_txt.addKeyListener(new KeyAdapter() {
-				public void keyPressed(KeyEvent e) {
-					if (e.getKeyCode() == KeyEvent.VK_ENTER)
-						add_btn.doClick();
-				}
-			});
+			add_txt.setAction(add_proxy);
 		}
 	}
 
 	/** Build the button box */
 	private Box buildButtonBox() {
 		Box box = Box.createHorizontalBox();
-		box.add(Box.createGlue());
+		if (model.hasProperties()) {
+			box.add(prop_btn);
+			box.add(Box.createHorizontalStrut(UI.hgap));
+		}
 		if (model.canCreate()) {
 			box.add(add_txt);
 			box.add(Box.createHorizontalStrut(UI.hgap));
 			box.add(add_btn);
 			box.add(Box.createHorizontalStrut(UI.hgap));
 		}
-		if (model.hasProperties())
-			box.add(prop_btn);
 		if (model.canDelete()) {
+			box.add(Box.createHorizontalGlue());
 			box.add(Box.createHorizontalStrut(UI.hgap));
 			box.add(new JButton(del_obj));
 		}
-		box.add(Box.createGlue());
 		return box;
 	}
 
