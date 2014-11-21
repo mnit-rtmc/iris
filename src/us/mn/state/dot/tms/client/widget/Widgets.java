@@ -38,7 +38,7 @@ public class Widgets {
 	static private final int HGAP = 4;
 
 	/** Standard vertical gap between components */
-	static private final int VGAP = 4;
+	static private final int VGAP = 2;
 
 	/** Current widget state */
 	static public Widgets UI = new Widgets(1);
