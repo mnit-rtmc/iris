@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<Capability>> createColumns() {
 		ArrayList<ProxyColumn<Capability>> cols =
 			new ArrayList<ProxyColumn<Capability>>(2);
@@ -48,7 +49,7 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 				return canUpdateRoleCapabilities();
 			}
 			public void setValueAt(Capability c, Object value) {
-				if(value instanceof Boolean)
+				if (value instanceof Boolean)
 					setAssigned(c, (Boolean)value);
 			}
 		});
@@ -58,9 +59,9 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 	/** Check if the given capability is assigned to the selected role */
 	protected boolean isAssigned(Capability cap) {
 		Role r = role;		// Avoid NPE
-		if(r != null) {
-			for(Capability c: r.getCapabilities())
-				if(c == cap)
+		if (r != null) {
+			for (Capability c: r.getCapabilities())
+				if (c == cap)
 					return true;
 		}
 		return false;
@@ -69,9 +70,9 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 	/** Assign or unassign the specified capability */
 	protected void setAssigned(Capability c, boolean a) {
 		Role r = role;		// Avoid NPE
-		if(r != null) {
+		if (r != null) {
 			Capability[] caps = r.getCapabilities();
-			if(a)
+			if (a)
 				caps = addCapability(caps, c);
 			else
 				caps = removeCapability(caps, c);
@@ -80,7 +81,7 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 	}
 
 	/** Currently selected role */
-	protected Role role;
+	private Role role;
 
 	/** Create a new role-capability table model */
 	public RoleCapabilityModel(Session s) {
@@ -95,11 +96,12 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Update the capabilities for the specified role */
 	public void updateRoleCapabilities(Role r) {
-		if(r == role)
+		if (r == role)
 			fireTableDataChanged();
 	}
 
 	/** Get the count of rows in the table */
+	@Override
 	public int getRowCount() {
 		return super.getRowCount() - 1;
 	}
@@ -125,7 +127,7 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 	}
 
 	/** Check if the user can update role capabilities */
-	protected boolean canUpdateRoleCapabilities() {
+	private boolean canUpdateRoleCapabilities() {
 		return session.canUpdate(role, "capabilities");
 	}
 }
