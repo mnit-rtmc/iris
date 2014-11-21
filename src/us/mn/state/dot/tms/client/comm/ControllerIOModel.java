@@ -30,7 +30,6 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
-import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.Beacon;
@@ -489,12 +488,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			if (pin > 0 && pin < io.length) {
 				io[pin] = p;
 				types[pin] = getType(p);
-				final int row = pin - 1;
-				runSwing(new Runnable() {
-					public void run() {
-						fireTableRowsUpdated(row, row);
-					}
-				});
+				int row = pin - 1;
+				fireTableRowsUpdated(row, row);
 			}
 		}
 	}
@@ -505,12 +500,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			if(io[pin] == p) {
 				io[pin] = null;
 				types[pin] = null;
-				final int row = pin - 1;
-				runSwing(new Runnable() {
-					public void run() {
-						fireTableRowsUpdated(row, row);
-					}
-				});
+				int row = pin - 1;
+				fireTableRowsUpdated(row, row);
 				return;
 			}
 		}
