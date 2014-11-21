@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
@@ -47,9 +46,6 @@ public class GeoLocManager {
 	private final SwingProxyAdapter<GeoLoc> listener =
 		new SwingProxyAdapter<GeoLoc>(true)
 	{
-		protected Comparator<GeoLoc> comparator() {
-			return null;
-		}
 		protected void proxyAddedSwing(GeoLoc proxy) {
 			GeoLocManager.this.proxyAddedSwing(proxy);
 		}

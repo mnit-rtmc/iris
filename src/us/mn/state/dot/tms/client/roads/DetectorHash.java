@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.util.Collection;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -45,9 +44,6 @@ public class DetectorHash {
 	private final SwingProxyAdapter<Detector> listener =
 		new SwingProxyAdapter<Detector>(true)
 	{
-		protected Comparator<Detector> comparator() {
-			return null;
-		}
 		protected void proxyAddedSwing(Detector proxy) {
 			DetectorHash.this.proxyAddedSwing(proxy);
 		}

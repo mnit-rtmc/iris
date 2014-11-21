@@ -19,7 +19,6 @@ import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.Collection;
-import java.util.Comparator;
 import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -81,9 +80,6 @@ abstract public class ProxyManager<T extends SonarObject> {
 	private final SwingProxyAdapter<T> listener =
 		new SwingProxyAdapter<T>(true)
 	{
-		protected Comparator<T> comparator() {
-			return null;
-		}
 		protected void proxyAddedSwing(T proxy) {
 			ProxyManager.this.proxyAddedSwing(proxy);
 		}

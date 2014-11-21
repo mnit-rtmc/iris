@@ -104,10 +104,14 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	}
 
 	/** Get a proxy comparator */
-	abstract protected Comparator<T> comparator();
+	protected Comparator<T> comparator() {
+		return null;
+	}
 
 	/** Add a proxy */
-	abstract protected void proxyAddedSwing(T proxy);
+	protected void proxyAddedSwing(T proxy) {
+		// subclasses can override
+	}
 
 	/** Enumeration of proxies is complete */
 	protected void enumerationCompleteSwing(Collection<T> proxies) {
@@ -115,10 +119,14 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 	}
 
 	/** Remove a proxy */
-	abstract protected void proxyRemovedSwing(T proxy);
+	protected void proxyRemovedSwing(T proxy) {
+		// subclasses can override
+	}
 
 	/** A proxy has been changed */
-	abstract protected void proxyChangedSwing(T proxy, String attr);
+	protected void proxyChangedSwing(T proxy, String attr) {
+		// subclasses can override
+	}
 
 	/** Check if an attribute change is interesting */
 	protected boolean checkAttributeChange(String attr) {
