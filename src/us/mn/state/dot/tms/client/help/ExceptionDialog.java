@@ -59,46 +59,23 @@ public class ExceptionDialog extends JDialog {
 	/** Create a new exception dialog without an owner */
 	public ExceptionDialog() {
 		super();
+		setResizable(false);
 	}
 
 	/** Create a new exception dialog */
 	public ExceptionDialog(Frame owner) {
 		super(owner, true);
+		setResizable(false);
 	}
 
 	/** Show an exception */
-	public void show(final Exception e) {
+	public void show(Exception e) {
 		e.printStackTrace();
 		setFatal(false);
-		TextPanel tpanel = createMessagePanel(e);
-		Box hbox = Box.createHorizontalBox();
-		hbox.add(Box.createHorizontalGlue());
-		JButton button = new JButton("OK");
-		button.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent a) {
-				if(fatal)
-					System.exit(-1);
-				setVisible(false);
-				dispose();
-			}
-		});
-		hbox.add(button);
-		if(fatal) {
-			hbox.add(Box.createHorizontalStrut(10));
-			button = new JButton("Detail");
-			button.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent a) {
-					JDialog std = new StackTraceDialog(e);
-					std.setVisible(true);
-				}
-			});
-			hbox.add(button);
-		}
-		hbox.add(Box.createHorizontalGlue());
-		tpanel.add(hbox);
-		tpanel.addSpacing();
+		TextPanel pnl = createMessagePanel(e);
+		pnl.add(createButtonBox(e));
 		getContentPane().removeAll();
-		getContentPane().add(tpanel);
+		getContentPane().add(pnl);
 		pack();
 		Screen.centerOnCurrent(this);
 		setVisible(true);
@@ -107,111 +84,140 @@ public class ExceptionDialog extends JDialog {
 	/** Create a text panel for an exception.
 	 * FIXME: add I18n strings. */
 	private TextPanel createMessagePanel(final Exception e) {
-		TextPanel tpanel = new TextPanel();
-		tpanel.addGlue();
+		TextPanel p = new TextPanel();
+		p.addGlue();
 		if (e instanceof AuthenticationException) {
-			tpanel.addText("Authentication failed:");
-			tpanel.addText(e.getMessage());
-			tpanel.addSpacing();
-			tpanel.addText("Please make sure your user");
-			tpanel.addText("name is correct, then");
-			tpanel.addText("type your password again.");
+			p.addText("Authentication failed:");
+			p.addText(e.getMessage());
+			p.addSpacing();
+			p.addText("Please make sure your user");
+			p.addText("name is correct, then");
+			p.addText("type your password again.");
 		}
 		else if (e instanceof ChangeVetoException) {
-			tpanel.addText("The change has been prevented");
-			tpanel.addText("for the following reason:");
-			tpanel.addSpacing();
-			tpanel.addText(e.getMessage());
+			p.addText("The change has been prevented");
+			p.addText("for the following reason:");
+			p.addSpacing();
+			p.addText(e.getMessage());
 		}
 		else if (e instanceof PermissionException) {
-			tpanel.addText("Permission denied:");
-			tpanel.addSpacing();
-			tpanel.addText(e.getMessage());
+			p.addText("Permission denied:");
+			p.addSpacing();
+			p.addText(e.getMessage());
 		}
 		else if (e instanceof SonarShowException) {
-			tpanel.addText("The following message was");
-			tpanel.addText("received from the IRIS server:");
-			tpanel.addSpacing();
-			tpanel.addText(e.getMessage());
+			p.addText("The following message was");
+			p.addText("received from the IRIS server:");
+			p.addSpacing();
+			p.addText(e.getMessage());
 		}
 		else if (e instanceof NumberFormatException) {
-			tpanel.addText("Number formatting error");
-			tpanel.addSpacing();
-			tpanel.addText("Please check all numeric");
-			tpanel.addText("fields and try again.");
+			p.addText("Number formatting error");
+			p.addSpacing();
+			p.addText("Please check all numeric");
+			p.addText("fields and try again.");
 		}
 		else if (e instanceof InvalidMessageException) {
-			tpanel.addText("Invalid message");
-			tpanel.addSpacing();
-			tpanel.addText("The sign is unable to display");
-			tpanel.addText("the following message:");
-			tpanel.addText(e.getMessage());
-			tpanel.addText("Please select a different message");
+			p.addText("Invalid message");
+			p.addSpacing();
+			p.addText("The sign is unable to display");
+			p.addText("the following message:");
+			p.addText(e.getMessage());
+			p.addText("Please select a different message");
 		}
 		else if (e instanceof ParseException) {
-			tpanel.addText("Parsing error");
-			tpanel.addText(e.getMessage());
-			tpanel.addText("Please try again.");
+			p.addText("Parsing error");
+			p.addText(e.getMessage());
+			p.addText("Please try again.");
 		}
 		else if (e instanceof SonarException) {
 			setFatal(true);
-			tpanel.addText("This program has encountered");
-			tpanel.addText("a problem while communicating");
-			tpanel.addText("with the IRIS server.");
-			tpanel.addSpacing();
-			tpanel.addText(e.getMessage());
+			p.addText("This program has encountered");
+			p.addText("a problem while communicating");
+			p.addText("with the IRIS server.");
+			p.addSpacing();
+			p.addText(e.getMessage());
 		}
 		else if (e instanceof Exception) {
-			sendEmailAlert(e, tpanel);
+			sendEmailAlert(e, p);
 			setFatal(true);
-			tpanel.addText("This program has encountered");
-			tpanel.addText("a serious problem.");
-			addAssistanceMessage(tpanel);
+			p.addText("This program has encountered");
+			p.addText("a serious problem.");
+			addAssistanceMessage(p);
 		}
-		tpanel.addSpacing();
+		p.addSpacing();
 		String lastLine = I18N.get("help.exception.lastline");
 		if (lastLine != null)
-			tpanel.addText(lastLine);
-		tpanel.addGlue();
-		tpanel.addSpacing();
-		return tpanel;
+			p.addText(lastLine);
+		p.addGlue();
+		p.addSpacing();
+		return p;
 	}
 
 	/** Add a message about what to do for assistance */
-	protected void addAssistanceMessage(TextPanel tpanel) {
-		tpanel.addSpacing();
-		tpanel.addText("For assistance, contact an");
-		tpanel.addText("IRIS system administrator.");
+	private void addAssistanceMessage(TextPanel p) {
+		p.addSpacing();
+		p.addText("For assistance, contact an");
+		p.addText("IRIS system administrator.");
 	}
 
 	/** Send an e-mail alert to the system administrators */
-	protected void sendEmailAlert(Exception e, TextPanel tpanel) {
+	private void sendEmailAlert(Exception e, TextPanel p) {
 		String host = SystemAttrEnum.EMAIL_SMTP_HOST.getString();
 		String sender = SystemAttrEnum.EMAIL_SENDER_CLIENT.getString();
 		String recip = SystemAttrEnum.EMAIL_RECIPIENT_BUGS.getString();
-		if(host != null && sender != null && recip != null) {
+		if (host != null && sender != null && recip != null) {
 			String trace = getStackTrace(e);
-			tpanel.addSpacing();
+			p.addSpacing();
 			try {
 				Emailer email = new Emailer(host, sender,recip);
 				email.send("IRIS Exception", trace);
-				tpanel.addText("A detailed error report");
-				tpanel.addText("has been emailed to:");
-				tpanel.addText(recip);
+				p.addText("A detailed error report");
+				p.addText("has been emailed to:");
+				p.addText(recip);
 			}
-			catch(MessagingException ex) {
+			catch (MessagingException ex) {
 				ex.printStackTrace();
-				tpanel.addText("Unable to send error");
-				tpanel.addText("report to:");
-				tpanel.addText(recip);
+				p.addText("Unable to send error");
+				p.addText("report to:");
+				p.addText(recip);
 			}
 		}
 	}
 
 	/** Get stack trace as a string */
-	protected String getStackTrace(Exception e) {
+	private String getStackTrace(Exception e) {
 		StringWriter writer = new StringWriter(200);
 		e.printStackTrace(new PrintWriter(writer));
 		return writer.toString();
+	}
+
+	/** Create a button box */
+	private Box createButtonBox(final Exception e) {
+		Box hbox = Box.createHorizontalBox();
+		hbox.add(Box.createHorizontalGlue());
+		JButton ok_btn = new JButton("OK");
+		ok_btn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent a) {
+				if (fatal)
+					System.exit(-1);
+				setVisible(false);
+				dispose();
+			}
+		});
+		hbox.add(ok_btn);
+		if (fatal) {
+			hbox.add(Box.createHorizontalStrut(10));
+			JButton dtl_btn = new JButton("Detail");
+			dtl_btn.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent a) {
+					JDialog std = new StackTraceDialog(e);
+					std.setVisible(true);
+				}
+			});
+			hbox.add(dtl_btn);
+		}
+		hbox.add(Box.createHorizontalGlue());
+		return hbox;
 	}
 }

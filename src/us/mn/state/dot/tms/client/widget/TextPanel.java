@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ public class TextPanel extends JPanel {
 	/** Create a new text panel */
 	public TextPanel() {
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+		setBorder(Widgets.UI.border);
 	}
 
 	/** Add glue to take excess space */
