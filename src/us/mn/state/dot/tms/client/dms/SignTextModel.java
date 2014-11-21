@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,21 +47,35 @@ public class SignTextModel {
 	/** Sign text type cache, list of all sign text lines */
 	private final TypeCache<SignText> sign_text;
 
+	/** Sign text creator */
+	private final SignTextCreator creator;
+
+	/** Set of DMS member groups.  Access must be synchronized because
+	 * the Swing EDT and sonar threads can access. */
+	private final HashSet<String> groups = new HashSet<String>();
+
+	/** Mapping of line numbers to combo box models */
+	private final HashMap<Short, SignTextComboBoxModel> lines =
+		new HashMap<Short, SignTextComboBoxModel>();
+
+	/** Last line in model */
+	private short last_line = 1;
+
 	/** Listener for sign text proxies */
 	private final ProxyListener<SignText> listener =
 		new ProxyListener<SignText>()
 	{
 		public void proxyAdded(SignText proxy) {
-			if(isMember(proxy.getSignGroup()))
+			if (isAssociated(proxy))
 				doAddSignText(proxy);
 		}
 		public void enumerationComplete() { }
 		public void proxyRemoved(SignText proxy) {
-			if(isMember(proxy.getSignGroup()))
+			if (isAssociated(proxy))
 				doRemoveSignText(proxy);
 		}
 		public void proxyChanged(SignText proxy, String a) {
-			if(isMember(proxy.getSignGroup()))
+			if (isAssociated(proxy))
 				doChangeSignText(proxy);
 		}
 	};
@@ -71,22 +85,17 @@ public class SignTextModel {
 		new ProxyListener<DmsSignGroup>()
 	{
 		public void proxyAdded(DmsSignGroup proxy) {
-			if(dms == proxy.getDms())
+			if (dms == proxy.getDms())
 				addGroup(proxy.getSignGroup());
 		}
 		public void enumerationComplete() { }
 		public void proxyRemoved(DmsSignGroup proxy) {
-			if(dms == proxy.getDms())
+			if (dms == proxy.getDms())
 				removeGroup(proxy.getSignGroup());
 		}
 		public void proxyChanged(DmsSignGroup proxy, String attrib) { }
 	};
 
-	/** Sign text creator */
-	private final SignTextCreator creator;
-
-	/** Last line in model */
-	private short last_line = 1;
 
 	/** Create a new sign text model */
 	public SignTextModel(Session s, DMS proxy) {
@@ -154,34 +163,41 @@ public class SignTextModel {
 	private void changeSignText(SignText st) {
 		// iterate through all combobox models because the line
 		// may have changed, moving it between comboboxes
-		for(SignTextComboBoxModel m: lines.values())
+		for (SignTextComboBoxModel m: lines.values())
 			m.remove(st);
-		// add to associated model
 		addSignText(st);
 	}
 
-	/** Set of DMS member groups */
-	private final HashSet<String> groups = new HashSet<String>();
+	/** Is the sign text associated with the DMS? */
+	private boolean isAssociated(SignText st) {
+		return isMember(st.getSignGroup());
+	}
 
 	/** Is the DMS a member of the specified group? */
 	private boolean isMember(SignGroup g) {
-		return g != null && groups.contains(g.getName());
+		synchronized (groups) {
+			return g != null && groups.contains(g.getName());
+		}
 	}
 
 	/** Add all SignText in one sign group to the model */
 	private void addGroup(SignGroup g) {
-		groups.add(g.getName());
-		for(SignText st: sign_text) {
-			if(st.getSignGroup() == g)
+		synchronized (groups) {
+			groups.add(g.getName());
+		}
+		for (SignText st: sign_text) {
+			if (st.getSignGroup() == g)
 				doAddSignText(st);
 		}
 	}
 
 	/** Remove all SignText in one sign group from the model */
 	private void removeGroup(SignGroup g) {
-		groups.remove(g.getName());
-		for(SignText st: sign_text) {
-			if(st.getSignGroup() == g)
+		synchronized (groups) {
+			groups.remove(g.getName());
+		}
+		for (SignText st: sign_text) {
+			if (st.getSignGroup() == g)
 				doRemoveSignText(st);
 		}
 	}
@@ -191,8 +207,8 @@ public class SignTextModel {
 	 * @return local SignGroup if it exists, otherwise null
 	 */
 	private SignGroup getLocalSignGroup() {
-		for(DmsSignGroup g: dms_sign_groups) {
-			if(isLocalSignGroup(g))
+		for (DmsSignGroup g: dms_sign_groups) {
+			if (isLocalSignGroup(g))
 				return g.getSignGroup();
 		}
 		return null;
@@ -206,20 +222,16 @@ public class SignTextModel {
 	/** Check if user is permitted to add sign text to local sign group */
 	public boolean isLocalSignTextAddPermitted() {
 		SignGroup sg = getLocalSignGroup();
-		if(sg != null) {
+		if (sg != null) {
 			String oname = sg.getName() + "_XX";
 			return creator.isAddPermitted(oname);
 		} else
 			return false;
 	}
 
-	/** Mapping of line numbers to combo box models */
-	private final HashMap<Short, SignTextComboBoxModel> lines =
-		new HashMap<Short, SignTextComboBoxModel>();
-
 	/** Get the combobox line model for the specified line */
 	public SignTextComboBoxModel getLineModel(short line) {
-		if(lines.containsKey(line))
+		if (lines.containsKey(line))
 			return lines.get(line);
 		else {
 			SignTextComboBoxModel m = new SignTextComboBoxModel(
@@ -236,9 +248,9 @@ public class SignTextModel {
 
 	/** Update the message library with the currently selected messages */
 	public void updateMessageLibrary() {
-		for(SignTextComboBoxModel m: lines.values()) {
+		for (SignTextComboBoxModel m: lines.values()) {
 			SignText st = m.getEditedSignText();
-			if(st != null)
+			if (st != null)
 				createSignText(st);
 		}
 	}
@@ -247,7 +259,7 @@ public class SignTextModel {
 	 * @param st SignText to create (should be ClientSignText). */
 	private void createSignText(SignText st) {
 		SignGroup sg = getLocalSignGroup();
-		if(sg != null) {
+		if (sg != null) {
 			creator.create(sg, st.getLine(), st.getMulti(),
 				st.getRank());
 		}
