@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,12 @@ package us.mn.state.dot.tms.client.system;
 
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.Capability;
+import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -51,7 +53,7 @@ public class UserRoleForm extends AbstractForm {
 	private final CapabilityPanel cap_panel;
 
 	/** Connection panel */
-	private final ConnectionPanel c_panel;
+	private final ProxyTablePanel<Connection> c_panel;
 
 	/** Create a new user role form */
 	public UserRoleForm(Session s) {
@@ -60,7 +62,8 @@ public class UserRoleForm extends AbstractForm {
 		u_panel = new UserTabPanel(s);
 		r_panel = new RolePanel(s);
 		cap_panel = new CapabilityPanel(s);
-		c_panel = new ConnectionPanel(s);
+		c_panel = new ProxyTablePanel<Connection>(
+			new ConnectionModel(s));
 	}
 
 	/** Initializze the widgets in the form */

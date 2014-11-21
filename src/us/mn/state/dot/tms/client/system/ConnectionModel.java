@@ -54,4 +54,10 @@ public class ConnectionModel extends ProxyTableModel2<Connection> {
 	public ConnectionModel(Session s) {
 		super(s, s.getSonarState().getConnections());
 	}
+
+	/** Determine if delete button is available */
+	@Override
+	public boolean hasDelete() {
+		return false;
+	}
 }
