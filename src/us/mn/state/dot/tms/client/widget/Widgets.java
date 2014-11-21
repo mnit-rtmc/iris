@@ -35,10 +35,10 @@ import javax.swing.border.EtchedBorder;
 public class Widgets {
 
 	/** Standard horizontal gap between components */
-	static private final int HGAP = 4;
+	static private final int HGAP = 3;
 
 	/** Standard vertical gap between components */
-	static private final int VGAP = 2;
+	static private final int VGAP = 3;
 
 	/** Current widget state */
 	static public Widgets UI = new Widgets(1);
