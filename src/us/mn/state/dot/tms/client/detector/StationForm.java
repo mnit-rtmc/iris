@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2013  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,25 +56,28 @@ public class StationForm extends ProxyTableForm<Station> {
 	/** Show the r_node for the selected station */
 	private void showRNode() {
 		Station s = getSelectedProxy();
-		if(s == null)
+		if (s == null)
 			return;
 		R_Node n = s.getR_Node();
 		session.getR_NodeManager().getSelectionModel().setSelected(n);
 	}
 
 	/** Add the table to the panel */
-	@Override protected void addTable(IPanel p) {
+	@Override
+	protected void addTable(IPanel p) {
 		p.add(table, Stretch.FULL);
 		p.add(new JButton(r_node), Stretch.RIGHT);
 	}
 
 	/** Get the row height */
-	@Override protected int getRowHeight() {
+	@Override
+	protected int getRowHeight() {
 		return 20;
 	}
 
 	/** Select a new proxy */
-	@Override protected void selectProxy() {
+	@Override
+	protected void selectProxy() {
 		r_node.setEnabled(getSelectedProxy() != null);
 	}
 }
