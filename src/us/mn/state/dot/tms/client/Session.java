@@ -214,7 +214,7 @@ public class Session {
 
 	/** Create the tile layer */
 	private TileLayer createTileLayer(String url) {
-		if(url != null)
+		if (url != null)
 			return new TileLayer("Base map", url, 1000);
 		else
 			return null;
@@ -227,7 +227,7 @@ public class Session {
 		initializeManagers();
 		addTabs();
 		seg_layer.start(props);
-		if(tile_layer != null)
+		if (tile_layer != null)
 			tile_layer.initialize();
 	}
 
@@ -248,55 +248,43 @@ public class Session {
 		plan_manager.initialize();
 	}
 
-	/** Add the tabs */
+	/** Add the tabs in the order specified by user_props file */
 	private void addTabs() {
-		// mapping of text id -> MapTab
-		HashMap<String,MapTab> tabMap = new HashMap<String,MapTab>();
-
-		if (inc_manager.canRead()) {
-			MapTab tab = inc_manager.createTab();
-			tabMap.put(tab.getTextId(), tab);
-			}
-		if (dms_manager.canRead()) {
-			MapTab tab = dms_manager.createTab();
-			tabMap.put(tab.getTextId(), tab);
-			}
-		if (cam_manager.canRead()) {
-			MapTab tab = cam_manager.createTab();
-			tabMap.put(tab.getTextId(), tab);
-			}
-		if (lcs_array_manager.canRead()) {
-			MapTab tab = lcs_array_manager.createTab();
-			tabMap.put(tab.getTextId(), tab);
-			}
-		if (meter_manager.canRead()) {
-			MapTab tab = meter_manager.createTab();
-			tabMap.put(tab.getTextId(), tab);
-			}
-		if (gate_arm_manager.canRead()) {
-			MapTab tab = gate_arm_manager.createTab();
-			tabMap.put(tab.getTextId(), tab);
-			}
-		if (r_node_manager.isAddPermitted()) {
-			MapTab tab = r_node_manager.createTab();
-			tabMap.put(tab.getTextId(), tab);
-			}
-		if (plan_manager.canRead()) {
-			MapTab tab = plan_manager.createTab();
-			tabMap.put(tab.getTextId(), tab);
-			}
-		if (controller_manager.canRead()) {
-			MapTab tab = controller_manager.createTab();
-			tabMap.put(tab.getTextId(), tab);
-			}
-
-		// iterate through tab list (or its default) from user props,
-		// adding tabs from tabMap as text id matches are found
-		String[] tablist = user_props.getTabList();
-		for (String t : tablist) {
-			MapTab tab = tabMap.get(t);
-			if (tab != null) tabs.add(tab);
+		HashMap<String, MapTab> tm = createTabs();
+		for (String t : user_props.getTabList()) {
+			MapTab tab = tm.get(t);
+			if (tab != null)
+				tabs.add(tab);
 		}
+	}
+
+	/** Create a mapping of text ids to map tabs */
+	private HashMap<String, MapTab> createTabs() {
+		HashMap<String, MapTab> tm = new HashMap<String, MapTab>();
+		if (inc_manager.canRead())
+			putMapTab(tm, inc_manager.createTab());
+		if (dms_manager.canRead())
+			putMapTab(tm, dms_manager.createTab());
+		if (cam_manager.canRead())
+			putMapTab(tm, cam_manager.createTab());
+		if (lcs_array_manager.canRead())
+			putMapTab(tm, lcs_array_manager.createTab());
+		if (meter_manager.canRead())
+			putMapTab(tm, meter_manager.createTab());
+		if (gate_arm_manager.canRead())
+			putMapTab(tm, gate_arm_manager.createTab());
+		if (r_node_manager.isAddPermitted())
+			putMapTab(tm, r_node_manager.createTab());
+		if (plan_manager.canRead())
+			putMapTab(tm, plan_manager.createTab());
+		if (controller_manager.canRead())
+			putMapTab(tm, controller_manager.createTab());
+		return tm;
+	}
+
+	/** Put a map tab into tab mapping (what?) */
+	static private void putMapTab(HashMap<String, MapTab> tm, MapTab tab) {
+		tm.put(tab.getTextId(), tab);
 	}
 
 	/** Create the layer states.  The map bean and model must be seperate
@@ -305,26 +293,26 @@ public class Session {
 	 * @param mb Map bean to render the layer states.
 	 * @param mm Map model to contain layer states. */
 	public void createLayers(MapBean mb, MapModel mm) {
-		if(tile_layer != null)
+		if (tile_layer != null)
 			mm.addLayer(tile_layer.createState(mb));
 		mm.addLayer(seg_layer.createState(mb));
-		if(controller_manager.canRead())
+		if (controller_manager.canRead())
 			mm.addLayer(controller_manager.createState(mb));
-		if(cam_manager.canRead())
+		if (cam_manager.canRead())
 			mm.addLayer(cam_manager.createState(mb));
-		if(meter_manager.canRead())
+		if (meter_manager.canRead())
 			mm.addLayer(meter_manager.createState(mb));
-		if(gate_arm_manager.canRead())
+		if (gate_arm_manager.canRead())
 			mm.addLayer(gate_arm_manager.createState(mb));
-		if(dms_manager.canRead())
+		if (dms_manager.canRead())
 			mm.addLayer(dms_manager.createState(mb));
-		if(lcs_array_manager.canRead())
+		if (lcs_array_manager.canRead())
 			mm.addLayer(lcs_array_manager.createState(mb));
-		if(beacon_manager.canRead())
+		if (beacon_manager.canRead())
 			mm.addLayer(beacon_manager.createState(mb));
-		if(inc_manager.canRead())
+		if (inc_manager.canRead())
 			mm.addLayer(inc_manager.createState(mb));
-		if(r_node_manager.isAddPermitted())
+		if (r_node_manager.isAddPermitted())
 			mm.addLayer(r_node_manager.createState(mb));
 	}
 
@@ -510,7 +498,7 @@ public class Session {
 	public void dispose() {
 		seg_layer.dispose();
 		desktop.closeFrames();
-		for(MapTab tab: tabs)
+		for (MapTab tab: tabs)
 			tab.dispose();
 		tabs.clear();
 		plan_manager.dispose();
