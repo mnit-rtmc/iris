@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,32 +18,23 @@ import java.util.ArrayList;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for incident details.
  *
  * @author Douglas Lau
  */
-public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
+public class IncidentDetailModel extends ProxyTableModel2<IncidentDetail> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<IncidentDetail>> createColumns() {
 		ArrayList<ProxyColumn<IncidentDetail>> cols =
 			new ArrayList<ProxyColumn<IncidentDetail>>(2);
 		cols.add(new ProxyColumn<IncidentDetail>("device.name", 90) {
 			public Object getValueAt(IncidentDetail dtl) {
 				return dtl.getName();
-			}
-			public boolean isEditable(IncidentDetail dtl) {
-				return (dtl == null) && canAdd();
-			}
-			public void setValueAt(IncidentDetail dtl,
-				Object value)
-			{
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<IncidentDetail>("device.description",
@@ -66,11 +57,21 @@ public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
 
 	/** Create a new incident detail table model */
 	public IncidentDetailModel(Session s) {
-		super(s, s.getSonarState().getIncidentDetails());
+		super(s, s.getSonarState().getIncidentDetails(),
+		      false,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return IncidentDetail.SONAR_TYPE;
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 12;
 	}
 }
