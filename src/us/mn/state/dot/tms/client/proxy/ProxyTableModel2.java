@@ -57,6 +57,9 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	/** Proxy list */
 	private final ArrayList<T> list;
 
+	/** Proxy comparator */
+	private final Comparator<T> comp = comparator();
+
 	/** Get a proxy comparator */
 	protected Comparator<T> comparator() {
 		return new NumericAlphaComparator<T>();
@@ -203,8 +206,13 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		if (check(proxy)) {
 			int n_size = list.size();
 			for (int i = 0; i < n_size; ++i) {
-				if (proxy == list.get(i))
+				int c = comp.compare(proxy, list.get(i));
+				if (c == 0)
 					return -1;
+				if (c < 0) {
+					list.add(i, proxy);
+					return i;
+				}
 			}
 			list.add(proxy);
 			return n_size;
