@@ -100,15 +100,19 @@ public class SystemAttributeTableModel extends ProxyTableModel2<SystemAttribute>
 
 	/** Create an object with the given name */
 	@Override
-	public void createObject(String n) {
-		String name = n.replace(" ","").toLowerCase();
-		if (name.isEmpty())
-			return;
+	public void createObject(String name) {
+		String n = name.replace(" ","").toLowerCase();
+		if (n.length() > 0)
+			cache.createObject(n, createAttrs(n));
+	}
+
+	/** Create attrs for a new system attribute */
+	private HashMap<String, Object> createAttrs(String name) {
 		SystemAttrEnum sa = SystemAttrEnum.lookup(name);
 		String def = (sa == null) ? "" : sa.getDefault();
 		HashMap<String, Object> attrs =	new HashMap<String, Object>();
 		attrs.put("value", def);
-		cache.createObject(name, attrs);
+		return attrs;
 	}
 
 	/** Renderer for system attribute names in a table cell */
