@@ -257,6 +257,11 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		return 16;
 	}
 
+	/** Get the row height */
+	public int getRowHeight() {
+		return 18;
+	}
+
 	/** Determine if a properties form is available */
 	public final boolean hasProperties() {
 		return has_properties;

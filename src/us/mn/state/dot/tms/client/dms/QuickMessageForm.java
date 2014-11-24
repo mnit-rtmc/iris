@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  * @author Doug Lau
  */
-public class QuickMessageForm extends ProxyTableForm<QuickMessage> {
+public class QuickMessageForm extends ProxyTableForm2<QuickMessage> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
@@ -37,16 +37,6 @@ public class QuickMessageForm extends ProxyTableForm<QuickMessage> {
 	 * @param s Session. */
 	public QuickMessageForm(Session s) {
 		super(I18N.get("quick.messages"),new QuickMessageTableModel(s));
-	}
-
-	/** Get the row height */
-	protected int getRowHeight() {
-		return 20;
-	}
-
-	/** Get the visible row count */
-	protected int getVisibleRowCount() {
-		return 12;
 	}
 }
 

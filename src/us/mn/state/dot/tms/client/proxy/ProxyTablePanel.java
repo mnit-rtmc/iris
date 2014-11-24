@@ -91,7 +91,7 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		table.setAutoCreateColumnsFromModel(false);
 		table.setColumnModel(model.createColumnModel());
 		table.setModel(model);
-		table.setRowHeight(UI.scaled(getRowHeight()));
+		table.setRowHeight(UI.scaled(model.getRowHeight()));
 		table.setVisibleRowCount(model.getVisibleRowCount());
 		show_props.setEnabled(false);
 		add_txt.setEnabled(false);
@@ -160,11 +160,6 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	/** Add the table to the panel */
 	protected void addTable() {
 		add(table, Stretch.FULL);
-	}
-
-	/** Get the row height */
-	protected int getRowHeight() {
-		return 18;
 	}
 
 	/** Get the currently selected proxy */

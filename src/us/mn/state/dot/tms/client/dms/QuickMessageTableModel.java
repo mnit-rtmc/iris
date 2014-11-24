@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for quick messages, which is for editing and creating
@@ -29,9 +29,10 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
+public class QuickMessageTableModel extends ProxyTableModel2<QuickMessage> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<QuickMessage>> createColumns() {
 		ArrayList<ProxyColumn<QuickMessage>> cols =
 			new ArrayList<ProxyColumn<QuickMessage>>(3);
@@ -40,14 +41,6 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 		{
 			public Object getValueAt(QuickMessage qm) {
 				return qm.getName();
-			}
-			public boolean isEditable(QuickMessage qm) {
-				return (qm == null) && canAdd();
-			}
-			public void setValueAt(QuickMessage qm, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<QuickMessage>("dms.group", 120) {
@@ -82,11 +75,27 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	/** Create a new table model.
 	 * @param s Session */
 	public QuickMessageTableModel(Session s) {
-		super(s, s.getSonarState().getDmsCache().getQuickMessages());
+		super(s, s.getSonarState().getDmsCache().getQuickMessages(),
+		      false,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return QuickMessage.SONAR_TYPE;
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 12;
+	}
+
+	/** Get the row height */
+	@Override
+	public int getRowHeight() {
+		return 20;
 	}
 }
