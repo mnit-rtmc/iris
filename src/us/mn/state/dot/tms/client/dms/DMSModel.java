@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,31 +19,23 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for Dynamic Message Signs.
  *
  * @author Douglas Lau
  */
-public class DMSModel extends ProxyTableModel<DMS> {
+public class DMSModel extends ProxyTableModel2<DMS> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<DMS>> createColumns() {
 		ArrayList<ProxyColumn<DMS>> cols =
 			new ArrayList<ProxyColumn<DMS>>(2);
 		cols.add(new ProxyColumn<DMS>("dms", 200) {
 			public Object getValueAt(DMS d) {
 				return d.getName();
-			}
-			public boolean isEditable(DMS d) {
-				return (d == null) && canAdd();
-			}
-			public void setValueAt(DMS d, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<DMS>("location", 300) {
@@ -57,21 +49,27 @@ public class DMSModel extends ProxyTableModel<DMS> {
 
 	/** Create a new DMS table model */
 	public DMSModel(Session s) {
-		super(s, s.getSonarState().getDmsCache().getDMSs());
-	}
-
-	/** Determine if a properties form is available */
-	public boolean hasProperties() {
-		return true;
-	}
-
-	/** Create a properties form for one proxy */
-	protected SonarObjectForm<DMS> createPropertiesForm(DMS proxy) {
-		return new DMSProperties(session, proxy);
+		super(s, s.getSonarState().getDmsCache().getDMSs(),
+		      true,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return DMS.SONAR_TYPE;
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 12;
+	}
+
+	/** Create a properties form for one proxy */
+	@Override
+	protected DMSProperties createPropertiesForm(DMS proxy) {
+		return new DMSProperties(session, proxy);
 	}
 }
