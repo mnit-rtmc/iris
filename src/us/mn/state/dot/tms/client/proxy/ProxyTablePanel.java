@@ -42,21 +42,6 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	/** Proxy table */
 	private final ZTable table;
 
-	/** Text field to add a proxy */
-	private final JTextField add_txt = new JTextField(16);
-
-	/** Action to create a proxy */
-	private final IAction add_proxy = new IAction("device.create") {
-		protected void doActionPerformed(ActionEvent e) {
-			String name = add_txt.getText();
-			add_txt.setText("");
-			model.createObject(name);
-		}
-	};
-
-	/** Button to add a proxy */
-	private final JButton add_btn = new JButton(add_proxy);
-
 	/** Action to display the proxy properties */
 	private final IAction show_props = new IAction("device.properties") {
 		protected void doActionPerformed(ActionEvent e) {
@@ -69,21 +54,33 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	/** Button to display the proxy properties */
 	private final JButton prop_btn = new JButton(show_props);
 
+	/** Text field to add a proxy */
+	private final JTextField add_txt = new JTextField(16);
+
+	/** Action to create a proxy */
+	private final IAction add_proxy = new IAction("device.create") {
+		protected void doActionPerformed(ActionEvent e) {
+			String name = add_txt.getText();
+			add_txt.setText("");
+			model.createObject(name);
+		}
+	};
+
+	/** Action to delete the selected proxy */
+	private final IAction del_proxy = new IAction("device.delete") {
+		protected void doActionPerformed(ActionEvent e) {
+			T proxy = getSelectedProxy();
+			if (proxy != null)
+				proxy.destroy();
+		}
+	};
+
 	/** Mouse listener for table */
 	private final MouseAdapter mouser = new MouseAdapter() {
 		@Override
 		public void mouseClicked(MouseEvent e) {
 			if (e.getClickCount() == 2)
 				prop_btn.doClick();
-		}
-	};
-
-	/** Action to delete the selected proxy */
-	private final IAction del_obj = new IAction("device.delete") {
-		protected void doActionPerformed(ActionEvent e) {
-			T proxy = getSelectedProxy();
-			if (proxy != null)
-				proxy.destroy();
 		}
 	};
 
@@ -96,10 +93,10 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		table.setModel(model);
 		table.setRowHeight(UI.scaled(getRowHeight()));
 		table.setVisibleRowCount(model.getVisibleRowCount());
-		add_txt.setEnabled(false);
-		add_btn.setEnabled(false);
 		show_props.setEnabled(false);
-		del_obj.setEnabled(false);
+		add_txt.setEnabled(false);
+		add_proxy.setEnabled(false);
+		del_proxy.setEnabled(false);
 	}
 
 	/** Initialise the panel */
@@ -134,9 +131,7 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		if (model.hasProperties())
 			table.addMouseListener(mouser);
 		if (model.canCreate()) {
-			boolean ca = model.canAdd();
-			add_txt.setEnabled(ca);
-			add_btn.setEnabled(ca);
+			add_proxy.setEnabled(model.canAdd());
 			add_txt.setAction(add_proxy);
 		}
 	}
@@ -151,13 +146,13 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		if (model.canCreate()) {
 			box.add(add_txt);
 			box.add(Box.createHorizontalStrut(UI.hgap));
-			box.add(add_btn);
+			box.add(new JButton(add_proxy));
 			box.add(Box.createHorizontalStrut(UI.hgap));
 		}
 		if (model.canDelete()) {
 			box.add(Box.createHorizontalGlue());
 			box.add(Box.createHorizontalStrut(UI.hgap));
-			box.add(new JButton(del_obj));
+			box.add(new JButton(del_proxy));
 		}
 		return box;
 	}
@@ -181,6 +176,6 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	protected void selectProxy() {
 		T proxy = getSelectedProxy();
 		show_props.setEnabled(proxy != null);
-		del_obj.setEnabled(model.canRemove(proxy));
+		del_proxy.setEnabled(model.canRemove(proxy));
 	}
 }
