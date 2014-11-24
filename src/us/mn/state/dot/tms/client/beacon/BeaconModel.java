@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
-import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 
 /**
  * Table model for beacons.
@@ -59,12 +58,6 @@ public class BeaconModel extends ProxyTableModel2<Beacon> {
 		return 12;
 	}
 
-	/** Determine if create button is available */
-	@Override
-	public boolean canCreate() {
-		return true;
-	}
-
 	/** Determine if a properties form is available */
 	@Override
 	public boolean hasProperties() {
@@ -75,6 +68,12 @@ public class BeaconModel extends ProxyTableModel2<Beacon> {
 	@Override
 	protected BeaconProperties createPropertiesForm(Beacon proxy) {
 		return new BeaconProperties(session, proxy);
+	}
+
+	/** Determine if create button is available */
+	@Override
+	public boolean canCreate() {
+		return true;
 	}
 
 	/** Get the SONAR type name */

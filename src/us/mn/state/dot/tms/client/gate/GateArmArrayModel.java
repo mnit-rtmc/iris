@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,32 +19,24 @@ import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for gate arm arrays.
  *
  * @author Douglas Lau
  */
-public class GateArmArrayModel extends ProxyTableModel<GateArmArray> {
+public class GateArmArrayModel extends ProxyTableModel2<GateArmArray> {
 
 	/** Create the columns in the model */
-	@Override protected ArrayList<ProxyColumn<GateArmArray>> createColumns()
+	@Override
+	protected ArrayList<ProxyColumn<GateArmArray>> createColumns()
 	{
 		ArrayList<ProxyColumn<GateArmArray>> cols =
 			new ArrayList<ProxyColumn<GateArmArray>>(2);
 		cols.add(new ProxyColumn<GateArmArray>("gate.arm.array", 200) {
 			public Object getValueAt(GateArmArray ga) {
 				return ga.getName();
-			}
-			public boolean isEditable(GateArmArray ga) {
-				return (ga == null) && canAdd();
-			}
-			public void setValueAt(GateArmArray ga, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<GateArmArray>("location", 300) {
@@ -62,19 +54,28 @@ public class GateArmArrayModel extends ProxyTableModel<GateArmArray> {
 	}
 
 	/** Determine if a properties form is available */
-	@Override public boolean hasProperties() {
+	@Override
+	public boolean hasProperties() {
 		return true;
 	}
 
 	/** Create a properties form for one proxy */
-	@Override protected SonarObjectForm<GateArmArray> createPropertiesForm(
+	@Override
+	protected GateArmArrayProperties createPropertiesForm(
 		GateArmArray proxy)
 	{
 		return new GateArmArrayProperties(session, proxy);
 	}
 
+	/** Determine if create button is available */
+	@Override
+	public boolean canCreate() {
+		return true;
+	}
+
 	/** Get the SONAR type name */
-	@Override protected String getSonarType() {
+	@Override
+	protected String getSonarType() {
 		return GateArmArray.SONAR_TYPE;
 	}
 }
