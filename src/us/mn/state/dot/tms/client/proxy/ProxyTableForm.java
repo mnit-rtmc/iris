@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 	public ProxyTableForm(String t, ProxyTableModel<T> m) {
 		super(t);
 		model = m;
-		table = createTable();
+		table = new ZTable();
 	}
 
 	/** Initialise the widgets on the form */
@@ -82,11 +82,6 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 	/** Dispose of the form */
 	protected void dispose() {
 		model.dispose();
-	}
-
-	/** Create the table */
-	protected ZTable createTable() {
-		return new ZTable();
 	}
 
 	/** Create Gui jobs */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,10 +15,8 @@
 package us.mn.state.dot.tms.client.system;
 
 import us.mn.state.dot.tms.SystemAttribute;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
-import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -27,7 +25,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class SystemAttributeForm extends ProxyTableForm<SystemAttribute> {
+public class SystemAttributeForm extends ProxyTableForm2<SystemAttribute> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
@@ -39,29 +37,5 @@ public class SystemAttributeForm extends ProxyTableForm<SystemAttribute> {
 		super(I18N.get("system.attributes"),
 			new SystemAttributeTableModel(s));
 		setHelpPageName("help.systemattributeform");
-	}
-
-	/** Create the table */
-	protected ZTable createTable() {
-		return new ZTable() {
-			public String getToolTipText(int row, int column) {
-				SystemAttribute sa = model.getProxy(row);
-				if(sa != null) {
-					return SystemAttrEnum.getDesc(
-						sa.getName());
-				} else
-					return null;
-			}
-		};
-	}
-
-	/** Get the row height */
-	protected int getRowHeight() {
-		return 20;
-	}
-
-	/** Get the visible row count */
-	protected int getVisibleRowCount() {
-		return 12;
 	}
 }

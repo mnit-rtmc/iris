@@ -24,6 +24,7 @@ import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.widget.ITableModel;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
@@ -33,13 +34,13 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
  * @author Douglas Lau
  */
 abstract public class ProxyTableModel2<T extends SonarObject>
-	extends AbstractTableModel
+	extends AbstractTableModel implements ITableModel
 {
 	/** User session */
 	protected final Session session;
 
 	/** Proxy type cache */
-	private final TypeCache<T> cache;
+	protected final TypeCache<T> cache;
 
 	/** Flag to show properties button */
 	private final boolean has_properties;
@@ -160,6 +161,12 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 			if (pc != null)
 				return pc.getValueAt(proxy);
 		}
+		return null;
+	}
+
+	/** Get tooltip text for a cell */
+	@Override
+	public String getToolTipText(int row, int col) {
 		return null;
 	}
 

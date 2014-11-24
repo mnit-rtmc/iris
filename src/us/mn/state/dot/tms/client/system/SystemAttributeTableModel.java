@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2005-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for system attributes.
@@ -35,9 +35,18 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
+public class SystemAttributeTableModel extends ProxyTableModel2<SystemAttribute>
+{
+	/** Check if a system attribute value is default */
+	static private boolean isValueDefault(SystemAttribute sa) {
+		if (sa == null)
+			return true;
+		SystemAttrEnum sae = SystemAttrEnum.lookup(sa.getName());
+		return sae == null || sae.equalsDefault();
+	}
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<SystemAttribute>> createColumns() {
 		ArrayList<ProxyColumn<SystemAttribute>> cols =
 			new ArrayList<ProxyColumn<SystemAttribute>>(2);
@@ -46,12 +55,6 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 		{
 			public Object getValueAt(SystemAttribute sa) {
 				return sa.getName();
-			}
-			public boolean isEditable(SystemAttribute sa) {
-				return (sa == null) && canAdd();
-			}
-			public void setValueAt(SystemAttribute sa,Object value){
-				addRow(value);
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new NameCellRenderer();
@@ -70,7 +73,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 				String v = value.toString();
 				SystemAttrEnum sae = SystemAttrEnum.lookup(
 					sa.getName());
-				if(sae != null)
+				if (sae != null)
 					v = sae.parseValue(v).toString();
 				sa.setValue(v);
 			}
@@ -83,20 +86,29 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 
 	/** Create a new table model */
 	public SystemAttributeTableModel(Session s) {
-		super(s, s.getSonarState().getSystemAttributes());
+		super(s, s.getSonarState().getSystemAttributes(),
+		      false,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
 	}
 
-	/** Add a row to the table */
-	protected void addRow(Object value) {
-		String aname = value.toString().replace(" ","").toLowerCase();
-		if(aname.isEmpty())
+	/** Get the SONAR type name */
+	@Override
+	protected String getSonarType() {
+		return SystemAttribute.SONAR_TYPE;
+	}
+
+	/** Create an object with the given name */
+	@Override
+	public void createObject(String n) {
+		String name = n.replace(" ","").toLowerCase();
+		if (name.isEmpty())
 			return;
-		// use default value if SA exists
-		SystemAttrEnum sa = SystemAttrEnum.lookup(aname); 
-		final String def = (sa == null ? "" : sa.getDefault());
+		SystemAttrEnum sa = SystemAttrEnum.lookup(name);
+		String def = (sa == null) ? "" : sa.getDefault();
 		HashMap<String, Object> attrs =	new HashMap<String, Object>();
 		attrs.put("value", def);
-		cache.createObject(aname, attrs);
+		cache.createObject(name, attrs);
 	}
 
 	/** Renderer for system attribute names in a table cell */
@@ -109,9 +121,9 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 			JLabel label = (JLabel)
 				super.getTableCellRendererComponent(table,
 				value, isSelected, hasFocus, row, column);
-			if(value instanceof String) {
+			if (value instanceof String) {
 				String v = (String)value;
-				if(SystemAttrEnum.lookup(v) == null)
+				if (SystemAttrEnum.lookup(v) == null)
 					label.setForeground(Color.RED);
 				else
 					label.setForeground(null);
@@ -129,8 +141,8 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 			JLabel label = (JLabel)
 				super.getTableCellRendererComponent(table,
 				value, isSelected, hasFocus, row, column);
-			SystemAttribute sa = getProxy(row);
-			if(!isValueDefault(sa)) {
+			SystemAttribute sa = getRowProxy(row);
+			if (!isValueDefault(sa)) {
 				Font f = label.getFont();
 				label.setFont(f.deriveFont(
 					f.getStyle() ^ Font.BOLD));
@@ -139,16 +151,24 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>{
 		}
 	}
 
-	/** Check if a system attribute value is default */
-	static protected boolean isValueDefault(SystemAttribute sa) {
-		if(sa == null)
-			return true;
-		SystemAttrEnum sae = SystemAttrEnum.lookup(sa.getName());
-		return sae == null || sae.equalsDefault();
+	/** Get tooltip text for a cell */
+	@Override
+	public String getToolTipText(int row, int col) {
+		SystemAttribute sa = getRowProxy(row);
+		return (sa != null)
+		      ? SystemAttrEnum.getDesc(sa.getName())
+		      : null;
 	}
 
-	/** Get the SONAR type name */
-	protected String getSonarType() {
-		return SystemAttribute.SONAR_TYPE;
+	/** Get the row height */
+	@Override
+	public int getRowHeight() {
+		return 20;
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 12;
 	}
 }

@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.client.widget.ITable;
 
 /**
  * A proxy table panel is a UI for displaying a table of proxy objects.
@@ -40,7 +40,7 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	private final ProxyTableModel2<T> model;
 
 	/** Proxy table */
-	private final ZTable table;
+	private final ITable table;
 
 	/** Action to display the proxy properties */
 	private final IAction show_props = new IAction("device.properties") {
@@ -87,12 +87,7 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	/** Create a new proxy table panel */
 	public ProxyTablePanel(ProxyTableModel2<T> m) {
 		model = m;
-		table = createTable();
-		table.setAutoCreateColumnsFromModel(false);
-		table.setColumnModel(model.createColumnModel());
-		table.setModel(model);
-		table.setRowHeight(UI.scaled(model.getRowHeight()));
-		table.setVisibleRowCount(model.getVisibleRowCount());
+		table = createTable(m);
 		show_props.setEnabled(false);
 		add_txt.setEnabled(false);
 		add_proxy.setEnabled(false);
@@ -114,8 +109,14 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	}
 
 	/** Create the table */
-	protected ZTable createTable() {
-		return new ZTable();
+	private ITable createTable(ProxyTableModel2<T> m) {
+		ITable t = new ITable(m);
+		t.setAutoCreateColumnsFromModel(false);
+		t.setColumnModel(m.createColumnModel());
+		t.setModel(m);
+		t.setRowHeight(UI.scaled(m.getRowHeight()));
+		t.setVisibleRowCount(m.getVisibleRowCount());
+		return t;
 	}
 
 	/** Create Gui jobs */
