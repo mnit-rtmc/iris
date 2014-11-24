@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,30 +19,23 @@ import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for modems
  *
  * @author Douglas Lau
  */
-public class ModemModel extends ProxyTableModel<Modem> {
+public class ModemModel extends ProxyTableModel2<Modem> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<Modem>> createColumns() {
 		ArrayList<ProxyColumn<Modem>> cols =
 			new ArrayList<ProxyColumn<Modem>>(4);
 		cols.add(new ProxyColumn<Modem>("modem", 80) {
 			public Object getValueAt(Modem m) {
 				return m.getName();
-			}
-			public boolean isEditable(Modem m) {
-				return (m == null) && canAdd();
-			}
-			public void setValueAt(Modem m, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<Modem>("comm.link.uri", 280) {
@@ -75,7 +68,7 @@ public class ModemModel extends ProxyTableModel<Modem> {
 				return canUpdate(m, "timeout");
 			}
 			public void setValueAt(Modem m, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					m.setTimeout((Integer)value);
 			}
 			protected TableCellEditor createCellEditor() {
@@ -87,10 +80,14 @@ public class ModemModel extends ProxyTableModel<Modem> {
 
 	/** Create a new modem table model */
 	public ModemModel(Session s) {
-		super(s, s.getSonarState().getConCache().getModems());
+		super(s, s.getSonarState().getConCache().getModems(),
+		      false,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return Modem.SONAR_TYPE;
 	}
