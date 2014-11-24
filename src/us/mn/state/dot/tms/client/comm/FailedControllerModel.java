@@ -97,7 +97,10 @@ public class FailedControllerModel extends ProxyTableModel2<Controller> {
 
 	/** Create a new failed controller table model */
 	public FailedControllerModel(Session s) {
-		super(s, s.getSonarState().getConCache().getControllers());
+		super(s, s.getSonarState().getConCache().getControllers(),
+		      false,	/* has_properties */
+		      false,	/* has_create */
+		      false);	/* has_delete */
 	}
 
 	/** Check if a proxy is included in the list */

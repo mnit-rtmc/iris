@@ -50,13 +50,16 @@ public class GateArmArrayModel extends ProxyTableModel2<GateArmArray> {
 
 	/** Create a new gate arm array table model */
 	public GateArmArrayModel(Session s) {
-		super(s, s.getSonarState().getGateArmArrays());
+		super(s, s.getSonarState().getGateArmArrays(),
+		      true,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
 	}
 
-	/** Determine if a properties form is available */
+	/** Get the SONAR type name */
 	@Override
-	public boolean hasProperties() {
-		return true;
+	protected String getSonarType() {
+		return GateArmArray.SONAR_TYPE;
 	}
 
 	/** Create a properties form for one proxy */
@@ -65,17 +68,5 @@ public class GateArmArrayModel extends ProxyTableModel2<GateArmArray> {
 		GateArmArray proxy)
 	{
 		return new GateArmArrayProperties(session, proxy);
-	}
-
-	/** Determine if create button is available */
-	@Override
-	public boolean canCreate() {
-		return true;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return GateArmArray.SONAR_TYPE;
 	}
 }

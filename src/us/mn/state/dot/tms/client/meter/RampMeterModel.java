@@ -49,30 +49,21 @@ public class RampMeterModel extends ProxyTableModel2<RampMeter> {
 
 	/** Create a new ramp meter table model */
 	public RampMeterModel(Session s) {
-		super(s, s.getSonarState().getRampMeters());
-	}
-
-	/** Determine if a properties form is available */
-	@Override
-	public boolean hasProperties() {
-		return true;
-	}
-
-	/** Create a properties form for one proxy */
-	@Override
-	protected RampMeterProperties createPropertiesForm(RampMeter proxy) {
-		return new RampMeterProperties(session, proxy);
-	}
-
-	/** Determine if create button is available */
-	@Override
-	public boolean canCreate() {
-		return true;
+		super(s, s.getSonarState().getRampMeters(),
+		      true,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
 	}
 
 	/** Get the SONAR type name */
 	@Override
 	protected String getSonarType() {
 		return RampMeter.SONAR_TYPE;
+	}
+
+	/** Create a properties form for one proxy */
+	@Override
+	protected RampMeterProperties createPropertiesForm(RampMeter proxy) {
+		return new RampMeterProperties(session, proxy);
 	}
 }

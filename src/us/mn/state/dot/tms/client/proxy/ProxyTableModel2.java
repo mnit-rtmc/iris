@@ -41,6 +41,15 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	/** Proxy type cache */
 	private final TypeCache<T> cache;
 
+	/** Flag to show properties button */
+	private final boolean has_properties;
+
+	/** Flag to show create button */
+	private final boolean has_create;
+
+	/** Flag to show delete button */
+	private final boolean has_delete;
+
 	/** Proxy columns */
 	private final ArrayList<ProxyColumn<T>> columns;
 
@@ -85,10 +94,20 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		}
 	};
 
-	/** Create a new proxy table model */
-	public ProxyTableModel2(Session s, TypeCache<T> c) {
+	/** Create a new proxy table model.
+	 * @param s User session.
+	 * @param c Proxy type cache.
+	 * @param hp Flag to add properties button.
+	 * @param hc Flag to allow creating new proxies.
+	 * @param hd Flag to allow deteting proxies. */
+	public ProxyTableModel2(Session s, TypeCache<T> c, boolean hp,
+		boolean hc, boolean hd)
+	{
 		session = s;
 		cache = c;
+		has_properties = hp;
+		has_create = hc;
+		has_delete = hd;
 		columns = createColumns();
 		list = new ArrayList<T>();
 	}
@@ -238,6 +257,11 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		return 16;
 	}
 
+	/** Determine if a properties form is available */
+	public final boolean hasProperties() {
+		return has_properties;
+	}
+
 	/** Show the properties form for a proxy */
 	public void showPropertiesForm(T proxy) {
 		SonarObjectForm<T> prop = createPropertiesForm(proxy);
@@ -251,25 +275,8 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	}
 
 	/** Determine if create button is available */
-	public boolean canCreate() {
-		return false;
-	}
-
-	/** Determine if a properties form is available */
-	public boolean hasProperties() {
-		return false;
-	}
-
-	/** Determine if delete button is available */
-	public boolean canDelete() {
-		return true;
-	}
-
-	/** Delete the specified row */
-	public void deleteRow(int row) {
-		T proxy = getRowProxy(row);
-		if (proxy != null)
-			proxy.destroy();
+	public final boolean hasCreate() {
+		return has_create;
 	}
 
 	/** Create an object with the given name */
@@ -277,6 +284,18 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		String n = name.trim();
 		if (n.length() > 0)
 			cache.createObject(n);
+	}
+
+	/** Determine if delete button is available */
+	public final boolean hasDelete() {
+		return has_delete;
+	}
+
+	/** Delete the specified row */
+	public void deleteRow(int row) {
+		T proxy = getRowProxy(row);
+		if (proxy != null)
+			proxy.destroy();
 	}
 
 	/** Get the SONAR type name.  Subclasses must override this to allow

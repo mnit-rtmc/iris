@@ -52,12 +52,9 @@ public class ConnectionModel extends ProxyTableModel2<Connection> {
 
 	/** Create a new connection table model */
 	public ConnectionModel(Session s) {
-		super(s, s.getSonarState().getConnections());
-	}
-
-	/** Determine if delete button is available */
-	@Override
-	public boolean canDelete() {
-		return false;
+		super(s, s.getSonarState().getConnections(),
+		      false,	/* has_properties */
+		      false,	/* has_create */
+		      false);	/* has_delete */
 	}
 }

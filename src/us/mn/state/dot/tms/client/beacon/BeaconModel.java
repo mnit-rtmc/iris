@@ -49,7 +49,16 @@ public class BeaconModel extends ProxyTableModel2<Beacon> {
 
 	/** Create a new beacon table model */
 	public BeaconModel(Session s) {
-		super(s, s.getSonarState().getBeacons());
+		super(s, s.getSonarState().getBeacons(),
+		      true,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
+	}
+
+	/** Get the SONAR type name */
+	@Override
+	protected String getSonarType() {
+		return Beacon.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */
@@ -58,27 +67,9 @@ public class BeaconModel extends ProxyTableModel2<Beacon> {
 		return 12;
 	}
 
-	/** Determine if a properties form is available */
-	@Override
-	public boolean hasProperties() {
-		return true;
-	}
-
 	/** Create a properties form for one proxy */
 	@Override
 	protected BeaconProperties createPropertiesForm(Beacon proxy) {
 		return new BeaconProperties(session, proxy);
-	}
-
-	/** Determine if create button is available */
-	@Override
-	public boolean canCreate() {
-		return true;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Beacon.SONAR_TYPE;
 	}
 }

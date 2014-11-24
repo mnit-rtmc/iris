@@ -49,7 +49,10 @@ public class WeatherSensorModel extends ProxyTableModel2<WeatherSensor> {
 
 	/** Create a new weather sensor table model */
 	public WeatherSensorModel(Session s) {
-		super(s, s.getSonarState().getWeatherSensors());
+		super(s, s.getSonarState().getWeatherSensors(),
+		      true,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
 	}
 
 	/** Get the SONAR type name */
@@ -62,18 +65,6 @@ public class WeatherSensorModel extends ProxyTableModel2<WeatherSensor> {
 	@Override
 	public int getVisibleRowCount() {
 		return 12;
-	}
-
-	/** Determine if create button is available */
-	@Override
-	public boolean canCreate() {
-		return true;
-	}
-
-	/** Determine if a properties form is available */
-	@Override
-	public boolean hasProperties() {
-		return true;
 	}
 
 	/** Create a properties form for one proxy */
