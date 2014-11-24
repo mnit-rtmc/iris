@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.client.system;
 
 import java.awt.event.ActionEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
 import javax.swing.JButton;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
@@ -64,19 +62,13 @@ public class LoginForm extends AbstractForm {
 	/** Initialize the form */
 	@Override
 	protected void initialize() {
-		final JButton login_btn = new JButton(login);
-		passwd_txt.addKeyListener(new KeyAdapter() {
-			public void keyPressed(KeyEvent e) {
-				if(e.getKeyCode() == KeyEvent.VK_ENTER)
-					login_btn.doClick();
-			}
-		});
+		passwd_txt.setAction(login);
 		IPanel p = new IPanel();
 		p.add("user.name");
 		p.add(user_txt, Stretch.LAST);
 		p.add("user.password");
 		p.add(passwd_txt, Stretch.LAST);
-		p.add(login_btn, Stretch.CENTER);
+		p.add(new JButton(login), Stretch.CENTER);
 		add(p);
 	}
 
