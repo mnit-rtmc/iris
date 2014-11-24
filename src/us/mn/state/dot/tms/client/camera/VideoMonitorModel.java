@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,30 +18,23 @@ import java.util.ArrayList;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for video monitors
  *
  * @author Douglas Lau
  */
-public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
+public class VideoMonitorModel extends ProxyTableModel2<VideoMonitor> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<VideoMonitor>> createColumns() {
 		ArrayList<ProxyColumn<VideoMonitor>> cols =
 			new ArrayList<ProxyColumn<VideoMonitor>>(3);
 		cols.add(new ProxyColumn<VideoMonitor>("video.monitor", 160) {
 			public Object getValueAt(VideoMonitor vm) {
 				return vm.getName();
-			}
-			public boolean isEditable(VideoMonitor vm) {
-				return (vm == null) && canAdd();
-			}
-			public void setValueAt(VideoMonitor vm, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<VideoMonitor>("device.description",
@@ -67,7 +60,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 				return canUpdate(vm);
 			}
 			public void setValueAt(VideoMonitor vm, Object value) {
-				if(value instanceof Boolean)
+				if (value instanceof Boolean)
 					vm.setRestricted((Boolean)value);
 			}
 		});
@@ -76,10 +69,14 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 
 	/** Create a new video monitor table model */
 	public VideoMonitorModel(Session s) {
-		super(s, s.getSonarState().getCamCache().getVideoMonitors());
+		super(s, s.getSonarState().getCamCache().getVideoMonitors(),
+		      false,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return VideoMonitor.SONAR_TYPE;
 	}
