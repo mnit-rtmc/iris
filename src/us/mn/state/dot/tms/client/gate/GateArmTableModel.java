@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,6 @@ import static us.mn.state.dot.tms.GateArmArray.MAX_ARMS;
 import us.mn.state.dot.tms.client.Session;
 import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for gate arms within an array.
