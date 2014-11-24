@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,31 +19,23 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for cameras
  *
  * @author Douglas Lau
  */
-public class CameraModel extends ProxyTableModel<Camera> {
+public class CameraModel extends ProxyTableModel2<Camera> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<Camera>> createColumns() {
 		ArrayList<ProxyColumn<Camera>> cols =
 			new ArrayList<ProxyColumn<Camera>>(3);
 		cols.add(new ProxyColumn<Camera>("camera", 200) {
 			public Object getValueAt(Camera c) {
 				return c.getName();
-			}
-			public boolean isEditable(Camera c) {
-				return (c == null) && canAdd();
-			}
-			public void setValueAt(Camera c, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<Camera>("location", 300) {
@@ -62,7 +54,7 @@ public class CameraModel extends ProxyTableModel<Camera> {
 				return canUpdate(c);
 			}
 			public void setValueAt(Camera c, Object value) {
-				if(value instanceof Boolean)
+				if (value instanceof Boolean)
 					c.setPublish((Boolean)value);
 			}
 		});
@@ -71,21 +63,27 @@ public class CameraModel extends ProxyTableModel<Camera> {
 
 	/** Create a new camera table model */
 	public CameraModel(Session s) {
-		super(s, s.getSonarState().getCamCache().getCameras());
-	}
-
-	/** Determine if a properties form is available */
-	public boolean hasProperties() {
-		return true;
-	}
-
-	/** Create a properties form for one proxy */
-	protected SonarObjectForm<Camera> createPropertiesForm(Camera proxy) {
-		return new CameraProperties(session, proxy);
+		super(s, s.getSonarState().getCamCache().getCameras(),
+		      true,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return Camera.SONAR_TYPE;
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 12;
+	}
+
+	/** Create a properties form for one proxy */
+	@Override
+	protected CameraProperties createPropertiesForm(Camera proxy) {
+		return new CameraProperties(session, proxy);
 	}
 }
