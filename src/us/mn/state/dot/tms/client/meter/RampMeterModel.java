@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,31 +19,23 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for ramp meters.
  *
  * @author Douglas Lau
  */
-public class RampMeterModel extends ProxyTableModel<RampMeter> {
+public class RampMeterModel extends ProxyTableModel2<RampMeter> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<RampMeter>> createColumns() {
 		ArrayList<ProxyColumn<RampMeter>> cols =
 			new ArrayList<ProxyColumn<RampMeter>>(2);
 		cols.add(new ProxyColumn<RampMeter>("ramp.meter", 200) {
 			public Object getValueAt(RampMeter rm) {
 				return rm.getName();
-			}
-			public boolean isEditable(RampMeter rm) {
-				return (rm == null) && canAdd();
-			}
-			public void setValueAt(RampMeter rm, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<RampMeter>("location", 300) {
@@ -61,18 +53,25 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 	}
 
 	/** Determine if a properties form is available */
+	@Override
 	public boolean hasProperties() {
 		return true;
 	}
 
 	/** Create a properties form for one proxy */
-	protected SonarObjectForm<RampMeter> createPropertiesForm(
-		RampMeter proxy)
-	{
+	@Override
+	protected RampMeterProperties createPropertiesForm(RampMeter proxy) {
 		return new RampMeterProperties(session, proxy);
 	}
 
+	/** Determine if create button is available */
+	@Override
+	public boolean canCreate() {
+		return true;
+	}
+
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return RampMeter.SONAR_TYPE;
 	}
