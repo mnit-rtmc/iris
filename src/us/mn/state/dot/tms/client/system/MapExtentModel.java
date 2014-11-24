@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,30 +24,23 @@ import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for map extents.
  *
  * @author Douglas Lau
  */
-public class MapExtentModel extends ProxyTableModel<MapExtent> {
+public class MapExtentModel extends ProxyTableModel2<MapExtent> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<MapExtent>> createColumns() {
 		ArrayList<ProxyColumn<MapExtent>> cols =
 			new ArrayList<ProxyColumn<MapExtent>>(4);
 		cols.add(new ProxyColumn<MapExtent>("location.map.extent", 160){
 			public Object getValueAt(MapExtent me) {
 				return me.getName();
-			}
-			public boolean isEditable(MapExtent me) {
-				return (me == null) && canAdd();
-			}
-			public void setValueAt(MapExtent me, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					createExtent(v);
 			}
 		});
 		cols.add(new ProxyColumn<MapExtent>("location.lon", 80,
@@ -96,21 +89,39 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 	}
 
 	/** Iris client */
-	protected final IrisClient client;
+	private final IrisClient client;
 
 	/** Create a new map extent table model */
 	public MapExtentModel(Session s, IrisClient ic) {
-		super(s, s.getSonarState().getMapExtents());
+		super(s, s.getSonarState().getMapExtents(),
+		      false,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
 		client = ic;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return MapExtent.SONAR_TYPE;
 	}
 
-	/** Create a new map extent */
-	protected void createExtent(String name) {
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 20;
+	}
+
+	/** Create an object with the given name */
+	@Override
+	public void createObject(String name) {
+		String n = name.trim();
+		if (n.length() > 0)
+			cache.createObject(n, createAttrs());
+	}
+
+	/** Create attrs for a new map extent */
+	private HashMap<String, Object> createAttrs() {
 		Point2D c = client.getMapModel().getCenter();
 		SphericalMercatorPosition smp = new SphericalMercatorPosition(
 			c.getX(), c.getY());
@@ -120,6 +131,6 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 		attrs.put("lat", pos.getLatitude());
 		attrs.put("lon", pos.getLongitude());
 		attrs.put("zoom", zoom.ordinal());
-		cache.createObject(name, attrs);
+		return attrs;
 	}
 }
