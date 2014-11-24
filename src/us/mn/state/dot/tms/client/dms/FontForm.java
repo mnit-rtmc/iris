@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ public class FontForm extends AbstractForm {
 		protected void doActionPerformed(ActionEvent e) {
 			ListSelectionModel s = f_table.getSelectionModel();
 			int row = s.getMinSelectionIndex();
-			if(row >= 0)
+			if (row >= 0)
 				f_model.deleteRow(row);
 		}
 	};
@@ -84,7 +84,7 @@ public class FontForm extends AbstractForm {
 	/** Check if the specified Graphic is from the selected font */
 	private boolean isFromSelectedFont(Graphic p) {
 		Font f = font;
-		if(f != null)
+		if (f != null)
 			return p.getName().startsWith(f.getName());
 		else
 			return false;
@@ -98,10 +98,10 @@ public class FontForm extends AbstractForm {
 		public void enumerationComplete() { }
 		public void proxyRemoved(Graphic p) { }
 		public void proxyChanged(Graphic p, String a) {
-			if(isFromSelectedFont(p)) {
+			if (isFromSelectedFont(p)) {
 				// The "pixels" attribute should be the
 				// last one changed (after width)
-				if(a.equals("pixels"))
+				if (a.equals("pixels"))
 					updateGraphic(p);
 			}
 		}
@@ -110,7 +110,7 @@ public class FontForm extends AbstractForm {
 	/** Check if the specified Glyph is from the selected font */
 	private boolean isFromSelectedFont(Glyph p) {
 		Font f = font;
-		if(f != null)
+		if (f != null)
 			return p.getName().startsWith(f.getName());
 		else
 			return false;
@@ -121,14 +121,14 @@ public class FontForm extends AbstractForm {
 		new ProxyListener<Glyph>()
 	{
 		public void proxyAdded(Glyph p) {
-			if(isFromSelectedFont(p)) {
+			if (isFromSelectedFont(p)) {
 				addGlyph(p);
 				repaint();
 			}
 		}
 		public void enumerationComplete() { }
 		public void proxyRemoved(Glyph p) {
-			if(isFromSelectedFont(p)) {
+			if (isFromSelectedFont(p)) {
 				removeGlyph(p);
 				repaint();
 			}
@@ -167,7 +167,8 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Initializze the widgets in the form */
-	@Override protected void initialize() {
+	@Override
+	protected void initialize() {
 		f_model.initialize();
 		add(createFontPanel());
 		graphics.addProxyListener(gr_listener);
@@ -175,7 +176,8 @@ public class FontForm extends AbstractForm {
 	}
 
 	/** Dispose of the form */
-	@Override protected void dispose() {
+	@Override
+	protected void dispose() {
 		glyph_pnl.dispose();
 		f_model.dispose();
 		graphics.removeProxyListener(gr_listener);
@@ -247,7 +249,7 @@ public class FontForm extends AbstractForm {
 	/** Create a list model containing font code points */
 	private DefaultListModel createCodePointModel() {
 		DefaultListModel model = new DefaultListModel();
-		for(int i = 32; i < 127; i++)
+		for (int i = 32; i < 127; i++)
 			model.addElement(i);
 		return model;
 	}
@@ -255,11 +257,11 @@ public class FontForm extends AbstractForm {
 	/** Lookup the glyphs in the selected font */
 	private void lookupGlyphs(Font font) {
 		Collection<Glyph> gs = FontHelper.lookupGlyphs(font);
-		synchronized(gmap) {
+		synchronized (gmap) {
 			gmap.clear();
 		}
 		renderer.clearBitmaps();
-		for(Glyph g: gs)
+		for (Glyph g: gs)
 			addGlyph(g);
 		glist.repaint();
 		selectGlyph();
@@ -267,9 +269,9 @@ public class FontForm extends AbstractForm {
 
 	/** Check if the currently selected font is deletable */
 	private boolean isFontDeletable() {
-		if(font == null)
+		if (font == null)
 			return false;
-		synchronized(gmap) {
+		synchronized (gmap) {
 			return gmap.isEmpty();
 		}
 	}
@@ -279,7 +281,7 @@ public class FontForm extends AbstractForm {
 		int c = g.getCodePoint();
 		GlyphInfo gi = new GlyphInfo(c, g);
 		renderer.setBitmap(c, gi.bmap);
-		synchronized(gmap) {
+		synchronized (gmap) {
 			gmap.put(c, gi);
 		}
 		glyph_pnl.setGlyph(gi);
@@ -290,7 +292,7 @@ public class FontForm extends AbstractForm {
 	private void removeGlyph(Glyph g) {
 		int c = g.getCodePoint();
 		renderer.setBitmap(c, null);
-		synchronized(gmap) {
+		synchronized (gmap) {
 			gmap.remove(c);
 		}
 		glyph_pnl.setGlyph(glyphInfo(c));
@@ -300,7 +302,7 @@ public class FontForm extends AbstractForm {
 	/** Update a Graphic in the GlyphInfo map */
 	private void updateGraphic(Graphic g) {
 		GlyphInfo gi = findGlyph(g);
-		if(gi != null) {
+		if (gi != null) {
 			addGlyph(gi.glyph);
 			glist.repaint();
 			pixel_pnl.repaint();
@@ -309,9 +311,9 @@ public class FontForm extends AbstractForm {
 
 	/** Find glyph data for a graphic */
 	private GlyphInfo findGlyph(Graphic g) {
-		synchronized(gmap) {
-			for(GlyphInfo gi: gmap.values()) {
-				if(gi.graphic == g)
+		synchronized (gmap) {
+			for (GlyphInfo gi: gmap.values()) {
+				if (gi.graphic == g)
 					return gi;
 			}
 		}
@@ -328,7 +330,7 @@ public class FontForm extends AbstractForm {
 		del_font.setEnabled(isFontDeletable());
 		int h = fontHeight(f);
 		int cw = fontWidth(f);
-		int w = cw > 0 ? (512 / cw) * cw : 512;
+		int w = (cw > 0) ? (512 / cw) * cw : 512;
 		pixel_pnl.setPhysicalDimensions(w, h, 4, 4, 1, 1);
 		pixel_pnl.setLogicalDimensions(w, h, cw, 0);
 		pixel_pnl.setGraphic(renderMessage(f));
@@ -337,21 +339,21 @@ public class FontForm extends AbstractForm {
 
 	/** Get the font height */
 	private int fontHeight(Font f) {
-		return f != null ? f.getHeight() : 0;
+		return (f != null) ? f.getHeight() : 0;
 	}
 
 	/** Get the font width */
 	private int fontWidth(Font f) {
-		return f != null ? f.getWidth() : 0;
+		return (f != null) ? f.getWidth() : 0;
 	}
 
 	/** Render a message to a raster graphic */
 	private RasterGraphic renderMessage(Font f) {
-		if(f != null) {
+		if (f != null) {
 			MultiString ms = new MultiString(I18N.get(
 				"font.glyph.sample"));
 			RasterGraphic[] pages = renderPages(f, ms);
-			if(pages != null && pages.length > 0)
+			if (pages != null && pages.length > 0)
 				return pages[0];
 		}
 		return null;
@@ -361,13 +363,13 @@ public class FontForm extends AbstractForm {
 	private RasterGraphic[] renderPages(Font f, MultiString ms) {
 		int h = fontHeight(f);
 		int cw = fontWidth(f);
-		int w = cw > 0 ? (512 / cw) * cw : 512;
+		int w = (cw > 0) ? (512 / cw) * cw : 512;
 		int df = f.getNumber();
 		RasterBuilder b = new RasterBuilder(w, h, cw, 0, df);
 		try {
 			return b.createPixmaps(ms);
 		}
-		catch(InvalidMessageException e) {
+		catch (InvalidMessageException e) {
 			return null;
 		}
 	}
@@ -380,18 +382,18 @@ public class FontForm extends AbstractForm {
 	/** Get selected code point */
 	private int selectedCodePoint() {
 		Object value = glist.getSelectedValue();
-		return value instanceof Integer ? (Integer)value : 0;
+		return (value instanceof Integer) ? (Integer)value : 0;
 	}
 
 	/** Get glyph information */
 	private GlyphInfo glyphInfo(int c) {
 		GlyphInfo gi = lookupGlyphInfo(c);
-		return gi != null ? gi : new GlyphInfo(c, null);
+		return (gi != null) ? gi : new GlyphInfo(c, null);
 	}
 
 	/** Lookup cached glyph information */
 	private GlyphInfo lookupGlyphInfo(int c) {
-		synchronized(gmap) {
+		synchronized (gmap) {
 			return gmap.get(c);
 		}
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,13 +21,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
- * Table model for DMS fonts
+ * Table model for DMS fonts.
  *
  * @author Douglas Lau
  */
 public class FontModel extends ProxyTableModel<Font> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<Font>> createColumns() {
 		ArrayList<ProxyColumn<Font>> cols =
 			new ArrayList<ProxyColumn<Font>>(7);
@@ -54,7 +55,7 @@ public class FontModel extends ProxyTableModel<Font> {
 				return canUpdate(f);
 			}
 			public void setValueAt(Font f, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					f.setNumber((Integer)value);
 			}
 		});
@@ -66,7 +67,7 @@ public class FontModel extends ProxyTableModel<Font> {
 				return canUpdate(f);
 			}
 			public void setValueAt(Font f, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					f.setHeight((Integer)value);
 			}
 		});
@@ -78,7 +79,7 @@ public class FontModel extends ProxyTableModel<Font> {
 				return canUpdate(f);
 			}
 			public void setValueAt(Font f, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					f.setWidth((Integer)value);
 			}
 		});
@@ -92,7 +93,7 @@ public class FontModel extends ProxyTableModel<Font> {
 				return canUpdate(f);
 			}
 			public void setValueAt(Font f, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					f.setLineSpacing((Integer)value);
 			}
 		});
@@ -106,7 +107,7 @@ public class FontModel extends ProxyTableModel<Font> {
 				return canUpdate(f);
 			}
 			public void setValueAt(Font f, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					f.setCharSpacing((Integer)value);
 			}
 		});
@@ -118,7 +119,7 @@ public class FontModel extends ProxyTableModel<Font> {
 				return canUpdate(f);
 			}
 			public void setValueAt(Font f, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					f.setVersionID((Integer)value);
 			}
 		});
@@ -131,6 +132,7 @@ public class FontModel extends ProxyTableModel<Font> {
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return Font.SONAR_TYPE;
 	}
