@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,30 +24,23 @@ import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for cabinet styles
  *
  * @author Douglas Lau
  */
-public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
+public class CabinetStyleModel extends ProxyTableModel2<CabinetStyle> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<CabinetStyle>> createColumns() {
 		ArrayList<ProxyColumn<CabinetStyle>> cols =
 			new ArrayList<ProxyColumn<CabinetStyle>>(2);
 		cols.add(new ProxyColumn<CabinetStyle>("cabinet.style", 90) {
 			public Object getValueAt(CabinetStyle cs) {
 				return cs.getName();
-			}
-			public boolean isEditable(CabinetStyle cs) {
-				return (cs == null) && canAdd();
-			}
-			public void setValueAt(CabinetStyle cs, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<CabinetStyle>("cabinet.style.dip", 60){
@@ -58,7 +51,7 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 				return canUpdate(cs);
 			}
 			public void setValueAt(CabinetStyle cs, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					cs.setDip((Integer)value);
 			}
 			protected TableCellEditor createCellEditor() {
@@ -70,24 +63,24 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 
 	/** Create a new cabinet style table model */
 	public CabinetStyleModel(Session s) {
-		super(s, s.getSonarState().getConCache().getCabinetStyles());
+		super(s, s.getSonarState().getConCache().getCabinetStyles(),
+		      false,	/* has_properties */
+		      true,	/* has_create */
+		      true);	/* has_delete */
 	}
 
 	/** Editor for dip values in a table cell */
 	public class DipEditor extends AbstractCellEditor
 		implements TableCellEditor
 	{
-		protected final SpinnerNumberModel model =
+		private final SpinnerNumberModel model =
 			new SpinnerNumberModel(0, 0, 256, 1);
-		protected final JSpinner spinner = new JSpinner(model);
+		private final JSpinner spinner = new JSpinner(model);
 
 		public Component getTableCellEditorComponent(JTable table,
 			Object value, boolean isSelected, int row, int column)
 		{
-			if(value != null)
-				spinner.setValue(value);
-			else
-				spinner.setValue(0);
+			spinner.setValue((value != null) ? value : 0);
 			return spinner;
 		}
 		public Object getCellEditorValue() {
@@ -96,7 +89,14 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return CabinetStyle.SONAR_TYPE;
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 12;
 	}
 }
