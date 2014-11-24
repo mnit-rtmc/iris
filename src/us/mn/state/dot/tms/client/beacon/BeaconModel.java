@@ -19,7 +19,7 @@ import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 
 /**
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
  *
  * @author Douglas Lau
  */
-public class BeaconModel extends ProxyTableModel<Beacon> {
+public class BeaconModel extends ProxyTableModel2<Beacon> {
 
 	/** Create the columns in the model */
 	@Override
@@ -37,14 +37,6 @@ public class BeaconModel extends ProxyTableModel<Beacon> {
 		cols.add(new ProxyColumn<Beacon>("beacon", 200) {
 			public Object getValueAt(Beacon b) {
 				return b.getName();
-			}
-			public boolean isEditable(Beacon b) {
-				return (b == null) && canAdd();
-			}
-			public void setValueAt(Beacon b, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<Beacon>("location", 300) {
@@ -61,6 +53,18 @@ public class BeaconModel extends ProxyTableModel<Beacon> {
 		super(s, s.getSonarState().getBeacons());
 	}
 
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 12;
+	}
+
+	/** Determine if create button is available */
+	@Override
+	public boolean canCreate() {
+		return true;
+	}
+
 	/** Determine if a properties form is available */
 	@Override
 	public boolean hasProperties() {
@@ -69,9 +73,7 @@ public class BeaconModel extends ProxyTableModel<Beacon> {
 
 	/** Create a properties form for one proxy */
 	@Override
-	protected SonarObjectForm<Beacon> createPropertiesForm(
-		Beacon proxy)
-	{
+	protected BeaconProperties createPropertiesForm(Beacon proxy) {
 		return new BeaconProperties(session, proxy);
 	}
 

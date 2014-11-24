@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.beacon;
 
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class BeaconForm extends ProxyTableForm<Beacon> {
+public class BeaconForm extends ProxyTableForm2<Beacon> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
@@ -34,10 +34,5 @@ public class BeaconForm extends ProxyTableForm<Beacon> {
 	/** Create a new beacon form */
 	public BeaconForm(Session s) {
 		super(I18N.get("beacons"), new BeaconModel(s));
-	}
-
-	/** Get the visible row count */
-	protected int getVisibleRowCount() {
-		return 12;
 	}
 }
