@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.roads;
 
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class RoadForm extends ProxyTableForm<Road> {
+public class RoadForm extends ProxyTableForm2<Road> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
@@ -34,10 +34,5 @@ public class RoadForm extends ProxyTableForm<Road> {
 	/** Create a new road form */
 	public RoadForm(Session s) {
 		super(I18N.get("location.road.plural"), new RoadModel(s));
-	}
-
-	/** Get the visible row count */
-	protected int getVisibleRowCount() {
-		return 20;
 	}
 }
