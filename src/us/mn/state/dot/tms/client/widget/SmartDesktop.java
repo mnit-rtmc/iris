@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.client.help.Help;
 import us.mn.state.dot.tms.client.widget.Screen;
 
 /**
- * SmartDesktop
+ * SmartDesktop is a JDesktopPane which manages JInternalFrames automatically.
  *
  * @author Douglas Lau
  * @author Michael Darter
