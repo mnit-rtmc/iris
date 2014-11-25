@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.client.widget.AbstractForm;
 public class ProxyTableForm2<T extends SonarObject> extends AbstractForm {
 
 	/** Proxy table panel */
-	private final ProxyTablePanel<T> panel;
+	protected final ProxyTablePanel<T> panel;
 
 	/** Create a new proxy table form */
 	public ProxyTableForm2(String t, ProxyTableModel2<T> m) {

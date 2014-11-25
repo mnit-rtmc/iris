@@ -100,7 +100,7 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		super.initialize();
 		model.initialize();
 		createJobs();
-		addTable();
+		add(table, Stretch.FULL);
 		add(buildButtonBox(), Stretch.FULL);
 	}
 
@@ -161,13 +161,8 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		return box;
 	}
 
-	/** Add the table to the panel */
-	protected void addTable() {
-		add(table, Stretch.FULL);
-	}
-
 	/** Get the currently selected proxy */
-	protected T getSelectedProxy() {
+	public T getSelectedProxy() {
 		return model.getRowProxy(table.getSelectedRow());
 	}
 

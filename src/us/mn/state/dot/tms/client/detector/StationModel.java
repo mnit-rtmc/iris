@@ -19,14 +19,14 @@ import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for stations.
  *
  * @author Douglas Lau
  */
-public class StationModel extends ProxyTableModel<Station> {
+public class StationModel extends ProxyTableModel2<Station> {
 
 	/** Create the columns in the model */
 	@Override
@@ -48,15 +48,10 @@ public class StationModel extends ProxyTableModel<Station> {
 
 	/** Create a new station table model */
 	public StationModel(Session s) {
-		super(s, s.getSonarState().getDetCache().getStations());
-	}
-
-	/** Get the count of rows in the table */
-	@Override
-	public int getRowCount() {
-		synchronized(proxies) {
-			return proxies.size();
-		}
+		super(s, s.getSonarState().getDetCache().getStations(),
+		      false,	/* has_properties */
+		      false,	/* has_create */
+		      false);	/* has_delete */
 	}
 
 	/** Get the SONAR type name */
@@ -65,9 +60,9 @@ public class StationModel extends ProxyTableModel<Station> {
 		return Station.SONAR_TYPE;
 	}
 
-	/** Determine if delete button is available */
+	/** Get the row height */
 	@Override
-	public boolean hasDelete() {
-		return false;
+	public int getRowHeight() {
+		return 20;
 	}
 }

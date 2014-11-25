@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class StationForm extends ProxyTableForm<Station> {
+public class StationForm extends ProxyTableForm2<Station> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
@@ -44,7 +44,7 @@ public class StationForm extends ProxyTableForm<Station> {
 	/** Action to display the r_node */
 	private final IAction r_node = new IAction("r_node") {
 		protected void doActionPerformed(ActionEvent e) {
-			Station s = getSelectedProxy();
+			Station s = panel.getSelectedProxy();
 			if (s != null)
 				sel_model.setSelected(s.getR_Node());
 		}
@@ -58,20 +58,8 @@ public class StationForm extends ProxyTableForm<Station> {
 
 	/** Add the table to the panel */
 	@Override
-	protected void addTable(IPanel p) {
-		p.add(table, Stretch.FULL);
-		p.add(new JButton(r_node), Stretch.RIGHT);
-	}
-
-	/** Get the row height */
-	@Override
-	protected int getRowHeight() {
-		return 20;
-	}
-
-	/** Select a new proxy */
-	@Override
-	protected void selectProxy() {
-		r_node.setEnabled(getSelectedProxy() != null);
+	public void initialize() {
+		super.initialize();
+		panel.add(new JButton(r_node), Stretch.RIGHT);
 	}
 }
