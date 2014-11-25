@@ -62,6 +62,7 @@ public class LoginForm extends AbstractForm {
 	/** Initialize the form */
 	@Override
 	protected void initialize() {
+		super.initialize();
 		passwd_txt.setAction(login);
 		IPanel p = new IPanel();
 		p.add("user.name");
@@ -76,7 +77,7 @@ public class LoginForm extends AbstractForm {
 	private void doLogin() {
 		char[] pwd = passwd_txt.getPassword();
 		passwd_txt.setText("");
-		close();
+		close(desktop);
 		client.login(user_txt.getText(), pwd);
 	}
 }

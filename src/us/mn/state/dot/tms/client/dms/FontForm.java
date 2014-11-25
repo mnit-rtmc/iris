@@ -169,6 +169,7 @@ public class FontForm extends AbstractForm {
 	/** Initializze the widgets in the form */
 	@Override
 	protected void initialize() {
+		super.initialize();
 		f_model.initialize();
 		add(createFontPanel());
 		graphics.addProxyListener(gr_listener);
@@ -182,6 +183,7 @@ public class FontForm extends AbstractForm {
 		f_model.dispose();
 		graphics.removeProxyListener(gr_listener);
 		glyphs.removeProxyListener(gl_listener);
+		super.dispose();
 	}
 
 	/** Create font panel */

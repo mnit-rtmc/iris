@@ -165,7 +165,9 @@ public class CommLinkForm extends AbstractForm implements ProxyView<CommLink> {
 	}
 
 	/** Initializze the widgets in the form */
-	@Override protected void initialize() {
+	@Override
+	protected void initialize() {
+		super.initialize();
 		model.initialize();
 		watcher.initialize();
 		fmodel.initialize();
@@ -179,12 +181,14 @@ public class CommLinkForm extends AbstractForm implements ProxyView<CommLink> {
 	}
 
 	/** Dispose of the form */
-	@Override protected void dispose() {
+	@Override
+	protected void dispose() {
 		watcher.dispose();
 		model.dispose();
 		fmodel.dispose();
-		if(cmodel != null)
+		if (cmodel != null)
 			cmodel.dispose();
+		super.dispose();
 	}
 
 	/** Create jobs */

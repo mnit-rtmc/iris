@@ -52,9 +52,6 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class IncidentDeployForm extends SonarObjectForm<Incident> {
 
-	/** Currently logged in user */
-	private final User user;
-
 	/** Incident manager */
 	private final IncidentManager manager;
 
@@ -75,14 +72,13 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	private final IAction send = new IAction("incident.send") {
 		protected void doActionPerformed(ActionEvent e) {
 			sendIndications();
-			close();
+			close(session.getDesktop());
 		}
 	};
 
 	/** Create a new incident deploy form */
 	public IncidentDeployForm(Session s, Incident inc, IncidentManager man){
 		super(I18N.get("incident") + ": ", s, inc);
-		user = session.getUser();
 		manager = man;
 		policy = new IncidentPolicy(inc);
 	}
@@ -100,7 +96,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 			session.getLCSArrayManager())
 		{
 			@Override protected User getUser(LCSArray lcs_array) {
-				return user;
+				return session.getUser();
 			}
 			@Override protected Integer[] getIndications(
 				LCSArray lcs_array)
@@ -216,7 +212,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	private void sendIndications(LCSArray lcs_array) {
 		Integer[] ind = indications.get(lcs_array.getName());
 		if(ind != null) {
-			lcs_array.setOwnerNext(user);
+			lcs_array.setOwnerNext(session.getUser());
 			lcs_array.setIndicationsNext(ind);
 		}
 	}
@@ -225,6 +221,6 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	@Override
 	protected void doUpdateAttribute(String a) {
 		if("cleared".equals(a) && proxy.getCleared())
-			close();
+			close(session.getDesktop());
 	}
 }

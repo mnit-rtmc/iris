@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,9 @@ public class AboutForm extends AbstractForm {
 	}
 
 	/** Initialize the About form */
-	@Override protected void initialize() {
+	@Override
+	protected void initialize() {
+		super.initialize();
 		IPanel p = new IPanel();
 		p.add(new JLabel(Icons.getIcon("iris")), Stretch.CENTER);
 		p.add(new JLabel(" "), Stretch.LAST);

@@ -23,6 +23,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
+import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -40,9 +41,6 @@ public class UserRoleForm extends AbstractForm {
 		       s.isUpdatePermitted(Privilege.SONAR_TYPE);
 	}
 
-	/** Tabbed pane */
-	private final JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
-
 	/** User tab panel */
 	private final UserTabPanel u_panel;
 
@@ -54,6 +52,9 @@ public class UserRoleForm extends AbstractForm {
 
 	/** Connection panel */
 	private final ProxyTablePanel<Connection> c_panel;
+
+	/** Tabbed pane */
+	private final JTabbedPane tab = new JTabbedPane(JTabbedPane.TOP);
 
 	/** Create a new user role form */
 	public UserRoleForm(Session s) {
@@ -69,6 +70,7 @@ public class UserRoleForm extends AbstractForm {
 	/** Initializze the widgets in the form */
 	@Override
 	protected void initialize() {
+		super.initialize();
 		u_panel.initialize();
 		r_panel.initialize();
 		cap_panel.initialize();
@@ -80,13 +82,13 @@ public class UserRoleForm extends AbstractForm {
 		add(tab);
 	}
 
-	/** Close the form */
+	/** Dispose of the form */
 	@Override
-	protected void close() {
-		super.close();
+	protected void dispose() {
 		u_panel.dispose();
 		r_panel.dispose();
 		cap_panel.dispose();
 		c_panel.dispose();
+		super.dispose();
 	}
 }

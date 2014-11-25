@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2013  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,7 +62,9 @@ public class ChangePasswordForm extends AbstractForm {
 	}
 
 	/** Initialize the form */
-	@Override protected void initialize() {
+	@Override
+	protected void initialize() {
+		super.initialize();
 		IPanel p = new IPanel();
 		p.add("user.password.old");
 		p.add(o_pwd_txt, Stretch.LAST);
@@ -78,7 +80,7 @@ public class ChangePasswordForm extends AbstractForm {
 	private void doPasswordChange() throws ChangeVetoException, IOException{
 		char[] n_pwd = n_pwd_txt.getPassword();
 		char[] v_pwd = v_pwd_txt.getPassword();
-		if(!Arrays.equals(n_pwd, v_pwd)) {
+		if (!Arrays.equals(n_pwd, v_pwd)) {
 			throw new ChangeVetoException(I18N.get(
 				"user.password.mismatch"));
 		}
@@ -86,7 +88,7 @@ public class ChangePasswordForm extends AbstractForm {
 		o_pwd_txt.setText("");
 		n_pwd_txt.setText("");
 		v_pwd_txt.setText("");
-		close();
+		close(session.getDesktop());
 		session.getSonarState().changePassword(new String(o_pwd),
 			new String(n_pwd));
 	}

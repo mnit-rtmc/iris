@@ -35,14 +35,18 @@ public class ProxyTableForm2<T extends SonarObject> extends AbstractForm {
 	}
 
 	/** Initialize the form */
+	@Override
 	public void initialize() {
+		super.initialize();
 		panel.initialize();
 		add(panel);
 	}
 
 	/** Dispose of the form */
+	@Override
 	public void dispose() {
 		panel.dispose();
 		removeAll();
+		super.dispose();
 	}
 }

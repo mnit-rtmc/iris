@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,9 +59,17 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	/** Initialize the widgets on the form */
 	@Override
 	protected void initialize() {
+		super.initialize();
 		watcher.initialize();
 		watcher.setProxy(proxy);
 		doUpdateAttribute(null);
+	}
+
+	/** Dispose of the form */
+	@Override
+	protected void dispose() {
+		watcher.dispose();
+		super.dispose();
 	}
 
 	/** Get the SONAR type cache */
@@ -80,7 +88,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	/** Clear the proxy view */
 	@Override
 	public final void clear() {
-		close();
+		close(session.getDesktop());
 	}
 
 	/** Update one combo box attribute on the form.
@@ -102,12 +110,6 @@ abstract public class SonarObjectForm<T extends SonarObject>
 				cmb.setEnabled(up);
 			cmb.setAction(act);
 		}
-	}
-
-	/** Dispose of the form */
-	@Override
-	protected void dispose() {
-		watcher.dispose();
 	}
 
 	/** Show another form */

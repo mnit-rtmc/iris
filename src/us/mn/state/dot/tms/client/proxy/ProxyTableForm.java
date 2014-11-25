@@ -73,15 +73,19 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 	}
 
 	/** Initialise the widgets on the form */
+	@Override
 	protected void initialize() {
+		super.initialize();
 		model.initialize();
 		createJobs();
 		add(createPanel());
 	}
 
 	/** Dispose of the form */
+	@Override
 	protected void dispose() {
 		model.dispose();
+		super.dispose();
 	}
 
 	/** Create Gui jobs */

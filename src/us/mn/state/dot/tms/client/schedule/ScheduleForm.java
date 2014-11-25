@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,9 +57,10 @@ public class ScheduleForm extends AbstractForm {
 	}
 
 	/** Initializze the widgets in the form */
+	@Override
 	protected void initialize() {
+		super.initialize();
 		p_panel.initialize();
-		tab.setBorder(new EmptyBorder(0, 0, 24, 0));
 		tab.add(I18N.get("action.plan.plural.long"), p_panel);
 		tab.add(I18N.get("action.plan.day.plural"), d_panel);
 		tab.add(I18N.get("action.plan.phase.plural"), pp_panel);
@@ -68,9 +69,11 @@ public class ScheduleForm extends AbstractForm {
 	}
 
 	/** Dispose of the form */
+	@Override
 	protected void dispose() {
 		pp_panel.dispose();
 		d_panel.dispose();
 		p_panel.dispose();
+		super.dispose();
 	}
 }

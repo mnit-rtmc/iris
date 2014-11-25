@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.widget;
 
-import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 
 /**
@@ -32,7 +31,6 @@ abstract public class AbstractForm extends JPanel {
 	/** Create a new abstract form */
 	protected AbstractForm(String t) {
 		title = t;
-		setBorder(Widgets.UI.border);
 	}
 
 	/** Get the title of the form */
@@ -41,25 +39,16 @@ abstract public class AbstractForm extends JPanel {
 	}
 
 	/** Initialize the form */
-	abstract protected void initialize();
+	protected void initialize() {
+		setBorder(Widgets.UI.border);
+	}
 
 	/** Dispose of the form */
 	protected void dispose() {}
 
 	/** Close the form */
-	protected void close() {
-		JInternalFrame f = frame;
-		if(f != null)
-			f.dispose();
-		frame = null;
-	}
-
-	/** Frame holding the form */
-	private JInternalFrame frame;
-
-	/** Set the frame holding the form */
-	public final void setFrame(JInternalFrame f) {
-		frame = f;
+	protected void close(SmartDesktop desktop) {
+		desktop.closeForm(this);
 	}
 
 	/** Help page name */

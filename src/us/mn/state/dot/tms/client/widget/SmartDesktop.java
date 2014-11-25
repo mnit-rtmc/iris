@@ -132,7 +132,6 @@ public class SmartDesktop extends JDesktopPane {
 			}
 		});
 		frame.setContentPane(form);
-		form.setFrame(frame);
 		return frame;
 	}
 
@@ -145,6 +144,13 @@ public class SmartDesktop extends JDesktopPane {
 	 * work. */
 	private void smartDesktopRequestFocus() {
 		this.requestFocus();
+	}
+
+	/** Close the given form */
+	public void closeForm(AbstractForm form) {
+		JInternalFrame f = findFrame(form.getTitle());
+		if (f != null)
+			f.dispose();
 	}
 
 	/** Dispose of the desktop */
