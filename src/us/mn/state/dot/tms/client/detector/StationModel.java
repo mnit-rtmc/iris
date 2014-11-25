@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
- * Table model for stations
+ * Table model for stations.
  *
  * @author Douglas Lau
  */
 public class StationModel extends ProxyTableModel<Station> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<Station>> createColumns() {
 		ArrayList<ProxyColumn<Station>> cols =
 			new ArrayList<ProxyColumn<Station>>(2);
@@ -51,6 +52,7 @@ public class StationModel extends ProxyTableModel<Station> {
 	}
 
 	/** Get the count of rows in the table */
+	@Override
 	public int getRowCount() {
 		synchronized(proxies) {
 			return proxies.size();
@@ -58,11 +60,13 @@ public class StationModel extends ProxyTableModel<Station> {
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return Station.SONAR_TYPE;
 	}
 
 	/** Determine if delete button is available */
+	@Override
 	public boolean hasDelete() {
 		return false;
 	}
