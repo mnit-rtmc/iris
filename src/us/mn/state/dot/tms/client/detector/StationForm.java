@@ -19,6 +19,7 @@ import javax.swing.JButton;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -37,29 +38,22 @@ public class StationForm extends ProxyTableForm<Station> {
 		return s.canRead(Station.SONAR_TYPE);
 	}
 
-	/** User session */
-	private final Session session;
+	/** R_Node selection model */
+	private final ProxySelectionModel<R_Node> sel_model;
 
 	/** Action to display the r_node */
 	private final IAction r_node = new IAction("r_node") {
 		protected void doActionPerformed(ActionEvent e) {
-			showRNode();
+			Station s = getSelectedProxy();
+			if (s != null)
+				sel_model.setSelected(s.getR_Node());
 		}
 	};
 
 	/** Create a new station form */
 	public StationForm(Session s) {
 		super(I18N.get("detector.station.plural"), new StationModel(s));
-		session = s;
-	}
-
-	/** Show the r_node for the selected station */
-	private void showRNode() {
-		Station s = getSelectedProxy();
-		if (s == null)
-			return;
-		R_Node n = s.getR_Node();
-		session.getR_NodeManager().getSelectionModel().setSelected(n);
+		sel_model = s.getR_NodeManager().getSelectionModel();
 	}
 
 	/** Add the table to the panel */
