@@ -16,8 +16,6 @@ package us.mn.state.dot.tms.client.widget;
 
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
-import us.mn.state.dot.tms.client.help.Help;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * An abstract form is a panel which contains a titled form. Most of the work
@@ -64,15 +62,15 @@ abstract public class AbstractForm extends JPanel {
 		frame = f;
 	}
 
-	/** Help page name, which is an I18N string */
-	private String helpPageName = Help.DEFAULT_HELP_PAGE_NAME;
+	/** Help page name */
+	private String helpPageName;
 
-	/** Get the form's help URL */
-	public final String getHelpPageUrl() {
-		return I18N.get(helpPageName);
+	/** Get the help page name for the form */
+	public final String getHelpPageName() {
+		return helpPageName;
 	}
 
-	/** Set the form's help page name, which is an I18N name */
+	/** Set the help page name for the form */
 	public final void setHelpPageName(String n) {
 		helpPageName = n;
 	}

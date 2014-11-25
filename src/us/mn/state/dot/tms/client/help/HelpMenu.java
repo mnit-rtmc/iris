@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@ public class HelpMenu extends JMenu {
 	private final JMenuItem ticket_item = new JMenuItem(new IAction(
 		"help.trouble.ticket")
 	{
-		protected void doActionPerformed(ActionEvent e)throws Exception{
-			Help.invokeHelp(SystemAttrEnum.
+		protected void doActionPerformed(ActionEvent e) {
+			Help.invokeHelpUrl(SystemAttrEnum.
 				HELP_TROUBLE_TICKET_URL.getString());
 		}
 	});
@@ -78,7 +78,7 @@ public class HelpMenu extends JMenu {
 	 * is inserted at the begining of the help menu and not removed
 	 * when the user logs out. */
 	private void addOpenTroubleTicketItem() {
-		if(!isMenuComponent(ticket_item))
+		if (!isMenuComponent(ticket_item))
 			insert(ticket_item, 0);
 	}
 }

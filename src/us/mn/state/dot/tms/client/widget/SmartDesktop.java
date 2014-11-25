@@ -25,7 +25,6 @@ import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 import javax.swing.event.InternalFrameAdapter;
 import javax.swing.event.InternalFrameEvent;
-import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.help.Help;
 import us.mn.state.dot.tms.client.widget.Screen;
@@ -73,15 +72,8 @@ public class SmartDesktop extends JDesktopPane {
 
 	/** Invoke the help system */
 	private void invokeHelp() {
-		client.WORKER.addJob(new Job() {
-			public void perform() throws IOException {
-				AbstractForm cf = focusedForm();
-				if (cf != null)
-					Help.invokeHelp(cf.getHelpPageUrl());
-				else
-					Help.invokeHelp(null);
-			}
-		});
+		AbstractForm cf = focusedForm();
+		Help.invokeHelp((cf != null) ? cf.getHelpPageName() : null);
 	}
 
 	/** Find the form with focus */

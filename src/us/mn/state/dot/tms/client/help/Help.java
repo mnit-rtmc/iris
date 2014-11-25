@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,9 @@ package us.mn.state.dot.tms.client.help;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import javax.swing.KeyStroke;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.utils.I18N;
+import static us.mn.state.dot.tms.client.IrisClient.WORKER;
 import us.mn.state.dot.tms.client.widget.WebBrowser;
 
 /**
@@ -32,18 +34,32 @@ import us.mn.state.dot.tms.client.widget.WebBrowser;
 public class Help {
 
 	/** System default help page name */
-	public final static String DEFAULT_HELP_PAGE_NAME = "Help.Default";
+	static private final String DEFAULT_HELP_PAGE_NAME = "Help.Default";
 
 	/** get key that initiates help system */
 	static public KeyStroke getSystemHelpKey() {
 		return KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0);
 	}
 
+	/** Invoke help with the specified page name.
+	 * @param name Name of help page to load. */
+	static public void invokeHelp(String name) {
+		invokeHelpUrl(I18N.get(pageName(name)));
+	}
+
+	/** Get a help page name */
+	static private String pageName(String name) {
+		return (name != null) ? name : DEFAULT_HELP_PAGE_NAME;
+	}
+
 	/** Invoke help with the specified URL.
-	 * @param url HTTP URL of help page to load. */
-	static public void invokeHelp(String url) throws IOException {
-		WebBrowser.open(url == null ? 
-			I18N.get(DEFAULT_HELP_PAGE_NAME) : url);
+	 * @param url URL of help page to load. */
+	static public void invokeHelpUrl(final String url) {
+		WORKER.addJob(new Job() {
+			public void perform() throws IOException {
+				WebBrowser.open(url);
+			}
+		});
 	}
 
 	/** constructor */
