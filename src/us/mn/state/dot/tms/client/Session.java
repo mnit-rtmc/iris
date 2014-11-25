@@ -497,7 +497,7 @@ public class Session {
 	/** Dispose of the session */
 	public void dispose() {
 		seg_layer.dispose();
-		desktop.closeFrames();
+		desktop.dispose();
 		for (MapTab tab: tabs)
 			tab.dispose();
 		tabs.clear();

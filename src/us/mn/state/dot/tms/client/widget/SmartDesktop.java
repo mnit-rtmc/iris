@@ -50,7 +50,7 @@ public class SmartDesktop extends JDesktopPane {
 			frame.setIcon(false);
 			frame.setSelected(true);
 		}
-		catch(PropertyVetoException e) {
+		catch (PropertyVetoException e) {
 			// Do nothing
 		}
 	}
@@ -65,8 +65,6 @@ public class SmartDesktop extends JDesktopPane {
 	public SmartDesktop(Screen s, IrisClient ic) {
 		screen = s;
 		client = ic;
-
-		// register the keystroke that invokes the help system
 		setFocusable(true); // required to receive focus notification
 		registerKeyboardAction(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -80,13 +78,64 @@ public class SmartDesktop extends JDesktopPane {
 	private void invokeHelp() {
 		client.WORKER.addJob(new Job() {
 			public void perform() throws IOException {
-				AbstractForm cf = findTopFrame();
-				if(cf != null)
+				AbstractForm cf = focusedForm();
+				if (cf != null)
 					Help.invokeHelp(cf.getHelpPageUrl());
 				else
 					Help.invokeHelp(null);
 			}
 		});
+	}
+
+	/** Find the form with focus */
+	private AbstractForm focusedForm() {
+		for (JInternalFrame f: getAllFrames()) {
+			if (f.getFocusOwner() != null) {
+				Container c = f.getContentPane();
+				if (c instanceof AbstractForm)
+					return (AbstractForm)c;
+			}
+		}
+		return null;
+	}
+
+	/** Show the specified form */
+	public void show(final AbstractForm form) {
+		SwingRunner.runSwing(new Runnable() {
+			public void run() {
+				doShow(form);
+			}
+		});
+	}
+
+	/** Show the specified form */
+	private void doShow(AbstractForm form) {
+		JInternalFrame frame = findFrame(form.getTitle());
+		if (frame != null)
+			selectFrame(frame);
+		else
+			frame = addForm(form);
+		frame.setLocation(screen.getCenteredLocation(this,
+			frame.getSize()));
+		frame.show();
+	}
+
+	/** Find a frame with a specific title */
+	private JInternalFrame findFrame(String title) {
+		for (JInternalFrame frame: getAllFrames()) {
+			if (title.equals(frame.getTitle()))
+				return frame;
+		}
+		return null;
+	}
+
+	/** Add an abstract form to the desktop pane */
+	private JInternalFrame addForm(AbstractForm form) {
+		form.initialize();
+		JInternalFrame frame = createFrame(form);
+		add(frame, FRAME_LAYER);
+		frame.pack();
+		return frame;
 	}
 
 	/** Create a new internal frame */
@@ -118,68 +167,20 @@ public class SmartDesktop extends JDesktopPane {
 		this.requestFocus();
 	}
 
-	/** Add an abstract form to the desktop pane */
-	private JInternalFrame addForm(AbstractForm form) {
-		form.initialize();
-		JInternalFrame frame = createFrame(form);
-		super.add(frame, FRAME_LAYER);
-		frame.pack();
-		return frame;
-	}
-
-	/** Find a frame with a specific title */
-	private JInternalFrame find(String title) {
-		for(JInternalFrame frame: getAllFrames()) {
-			if(title.equals(frame.getTitle()))
-				return frame;
-		}
-		return null;
-	}
-
-	/** Show the specified form */
-	public void show(final AbstractForm form) {
-		SwingRunner.runSwing(new Runnable() {
-			public void run() {
-				doShow(form);
-			}
-		});
-	}
-
-	/** Show the specified form */
-	private void doShow(AbstractForm form) {
-		JInternalFrame frame = find(form.getTitle());
-		if(frame != null)
-			selectFrame(frame);
-		else
-			frame = addForm(form);
-		frame.setLocation(screen.getCenteredLocation(this,
-			frame.getSize()));
-		frame.show();
-	}
-
-	/** Close all internal frames */
-	public void closeFrames() {
-		for(JInternalFrame frame: getAllFrames()) {
-			try {
-				frame.setClosed(true);
-			}
-			catch(PropertyVetoException e) {
-				// Do nothing
-			}
-		}
-	}
-
 	/** Dispose of the desktop */
 	public void dispose() {
 		closeFrames();
 	}
 
-	/** Find the top level frame */
-	private AbstractForm findTopFrame() {
-		for(JInternalFrame f: getAllFrames())
-			if(f.getFocusOwner() != null)
-				if(f.getContentPane() instanceof AbstractForm)
-					return (AbstractForm)f.getContentPane();
-		return null;
+	/** Close all internal frames */
+	private void closeFrames() {
+		for (JInternalFrame frame: getAllFrames()) {
+			try {
+				frame.setClosed(true);
+			}
+			catch (PropertyVetoException e) {
+				// Do nothing
+			}
+		}
 	}
 }
