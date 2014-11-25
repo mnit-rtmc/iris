@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<LaneUseMulti>> createColumns() {
 		ArrayList<ProxyColumn<LaneUseMulti>> cols =
 			new ArrayList<ProxyColumn<LaneUseMulti>>(6);
@@ -54,7 +55,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				return lum.getIndication();
 			}
 			public boolean isEditable(LaneUseMulti lum) {
-				if(lum != null)
+				if (lum != null)
 					return canUpdate(lum);
 				else
 					return canAdd();
@@ -62,7 +63,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 			public void setValueAt(LaneUseMulti lum, Object value) {
 				String v = value.toString();
 				int ind = lookupIndication(v);
-				if(lum != null)
+				if (lum != null)
 					lum.setIndication(ind);
 				else
 					createObject(ind);
@@ -86,7 +87,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				return canUpdate(lum);
 			}
 			public void setValueAt(LaneUseMulti lum, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					lum.setMsgNum((Integer)value);
 				else
 					lum.setMsgNum(null);
@@ -102,7 +103,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				return canUpdate(lum);
 			}
 			public void setValueAt(LaneUseMulti lum, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					lum.setWidth((Integer)value);
 			}
 		});
@@ -116,7 +117,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				return canUpdate(lum);
 			}
 			public void setValueAt(LaneUseMulti lum, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					lum.setHeight((Integer)value);
 			}
 		});
@@ -141,18 +142,18 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	}
 
 	/** Lookup a lane-use indication */
-	protected int lookupIndication(String desc) {
-		for(LaneUseIndication lui: LaneUseIndication.values()) {
-			if(desc.equals(lui.description))
+	private int lookupIndication(String desc) {
+		for (LaneUseIndication lui: LaneUseIndication.values()) {
+			if (desc.equals(lui.description))
 				return lui.ordinal();
 		}
 		return 0;
 	}
 
 	/** Create a new lane-use MULTI */
-	protected void createObject(int ind) {
+	private void createObject(int ind) {
 		String name = createUniqueName();
-		if(name != null) {
+		if (name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("indication", ind);
@@ -161,10 +162,10 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	}
 
 	/** Create a unique LaneUseMulti name */
-	protected String createUniqueName() {
-		for(int uid = 1; uid <= 256; uid++) {
+	private String createUniqueName() {
+		for (int uid = 1; uid <= 256; uid++) {
 			String n = "LUM_" + uid;
-			if(LaneUseMultiHelper.lookup(n) == null)
+			if (LaneUseMultiHelper.lookup(n) == null)
 				return n;
 		}
 		assert false;
@@ -172,6 +173,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return LaneUseMulti.SONAR_TYPE;
 	}
@@ -192,7 +194,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 
 	/** Get an indication description */
 	static protected String getIndication(Object value) {
-		if(value instanceof Integer) {
+		if (value instanceof Integer) {
 			return LaneUseIndication.fromOrdinal(
 				(Integer)value).description;
 		} else
