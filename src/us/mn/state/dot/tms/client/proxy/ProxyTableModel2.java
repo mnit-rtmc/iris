@@ -311,13 +311,6 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		return has_delete;
 	}
 
-	/** Delete the specified row */
-	public void deleteRow(int row) {
-		T proxy = getRowProxy(row);
-		if (proxy != null)
-			proxy.destroy();
-	}
-
 	/** Get the SONAR type name.  Subclasses must override this to allow
 	 * canAdd permission checking to work correctly. */
 	protected String getSonarType() {
