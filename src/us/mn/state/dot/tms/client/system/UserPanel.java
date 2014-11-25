@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2013  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,7 +127,9 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	}
 
 	/** Initialize the panel */
+	@Override
 	public void initialize() {
+		super.initialize();
 		add("user.name.full");
 		add(f_name_txt, Stretch.LAST);
 		add("user.password");

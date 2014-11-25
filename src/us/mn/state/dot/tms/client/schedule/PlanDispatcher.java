@@ -110,7 +110,9 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	}
 
 	/** Initialize the widgets on the panel */
+	@Override
 	public void initialize() {
+		super.initialize();
 		setTitle(I18N.get("action.plan.selected"));
 		add("action.plan.name");
 		add(name_lbl, Stretch.LAST);

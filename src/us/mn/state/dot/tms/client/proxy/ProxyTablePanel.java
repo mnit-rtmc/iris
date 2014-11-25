@@ -95,7 +95,9 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	}
 
 	/** Initialise the panel */
+	@Override
 	public void initialize() {
+		super.initialize();
 		model.initialize();
 		createJobs();
 		addTable();
@@ -103,9 +105,10 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	}
 
 	/** Dispose of the panel */
+	@Override
 	public void dispose() {
-		removeAll();
 		model.dispose();
+		super.dispose();
 	}
 
 	/** Create the table */

@@ -122,7 +122,9 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	}
 
 	/** Initialize the widgets on the panel */
+	@Override
 	public void initialize() {
+		super.initialize();
 		ButtonGroup group = new ButtonGroup();
 		group.add(on_btn);
 		group.add(off_btn);

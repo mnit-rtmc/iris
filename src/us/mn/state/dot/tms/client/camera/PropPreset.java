@@ -37,7 +37,9 @@ public class PropPreset extends IPanel {
 	}
 
 	/** Initialize the widgets on the panel */
+	@Override
 	public void initialize() {
+		super.initialize();
 		preset_mdl.initialize();
 		ZTable table = new ZTable();
 		table.setAutoCreateColumnsFromModel(false);

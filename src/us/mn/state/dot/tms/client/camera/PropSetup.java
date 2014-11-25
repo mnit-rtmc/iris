@@ -79,7 +79,9 @@ public class PropSetup extends IPanel {
 	}
 
 	/** Initialize the widgets on the panel */
+	@Override
 	public void initialize() {
+		super.initialize();
 		add("camera.encoder");
 		add(encoder_txt, Stretch.LAST);
 		add("camera.encoder.channel");

@@ -156,7 +156,12 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		session = s;
 		dispatcher = d;
 		cache = s.getSonarState().getDmsCache().getDMSs();
-		cache.addProxyListener(this);
+	}
+
+	/** Initialize the panel */
+	@Override
+	public void initialize() {
+		super.initialize();
 		preset_btn.setBorder(UI.buttonBorder());
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
@@ -189,6 +194,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		tab.add(I18N.get("dms.msg.preview"), preview_pnl);
 		add(tab, Stretch.CENTER);
 		createJobs();
+		cache.addProxyListener(this);
 	}
 
 	/** Create the widget jobs */
@@ -214,7 +220,10 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	}
 
 	/** Dispose of the sign tab */
+	@Override
 	public void dispose() {
+		current_pnl.removeMouseListener(popper);
+		preview_pnl.removeMouseListener(popper);
 		setSelected(null);
 		cache.removeProxyListener(this);
 		setPager(null);

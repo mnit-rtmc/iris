@@ -97,6 +97,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		tabPane.addTab(I18N.get("dms.multiple"), multipleTab);
 		add(tabPane, BorderLayout.CENTER);
 		add(composer, BorderLayout.SOUTH);
+		singleTab.initialize();
 		clearSelected();
 		selectionModel.addProxySelectionListener(this);
 	}

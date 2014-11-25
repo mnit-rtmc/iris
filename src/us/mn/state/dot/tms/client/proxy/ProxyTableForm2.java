@@ -46,7 +46,6 @@ public class ProxyTableForm2<T extends SonarObject> extends AbstractForm {
 	@Override
 	public void dispose() {
 		panel.dispose();
-		removeAll();
 		super.dispose();
 	}
 }

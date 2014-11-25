@@ -142,7 +142,9 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	}
 
 	/** Initialize the widgets on the panel */
+	@Override
 	public void initialize() {
+		super.initialize();
 		preset_btn.setBorder(BorderFactory.createEtchedBorder(
 			EtchedBorder.LOWERED));
 		// Make label opaque so that we can set the background color

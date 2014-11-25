@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,7 +105,9 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 	}
 
 	/** Initialize the panel */
+	@Override
 	public void initialize() {
+		super.initialize();
 		type_cbx.setAction(new NAction("r_node.type") {
 			protected void do_perform(R_Node n) {
 				n.setNodeType(type_cbx.getSelectedIndex());

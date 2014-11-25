@@ -144,7 +144,9 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	}
 
 	/** Initialize the panel */
+	@Override
 	public void initialize() {
+		super.initialize();
 		add("detector.lane.type");
 		add(type_cbx, Stretch.LAST);
 		add("detector.lane.number");
@@ -248,6 +250,7 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	}
 
 	/** Dispose of the panel */
+	@Override
 	public void dispose() {
 		type_cbx.setAction(null);
 		watcher.dispose();

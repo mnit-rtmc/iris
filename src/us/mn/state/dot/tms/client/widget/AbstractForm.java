@@ -44,7 +44,9 @@ abstract public class AbstractForm extends JPanel {
 	}
 
 	/** Dispose of the form */
-	protected void dispose() {}
+	protected void dispose() {
+		removeAll();
+	}
 
 	/** Close the form */
 	protected void close(SmartDesktop desktop) {

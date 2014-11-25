@@ -212,7 +212,9 @@ public class GateArmDispatcher extends IPanel
 	}
 
 	/** Initialize the widgets on the panel */
+	@Override
 	public void initialize() {
+		super.initialize();
 		interlock_lbl.setBorder(BorderFactory.createCompoundBorder(
 			BorderFactory.createLineBorder(Color.BLACK),
 			UI.panelBorder()));

@@ -59,6 +59,12 @@ public class PlanTablePanel<T extends SonarObject> extends IPanel {
 		table.setAutoCreateColumnsFromModel(false);
 		table.setRowHeight(ROW_HEIGHT);
 		table.setVisibleRowCount(10);
+	}
+
+	/** Initialize the panel */
+	@Override
+	public void initialize() {
+		super.initialize();
 		add(table, Stretch.FULL);
 		add(new JButton(del_action), Stretch.RIGHT);
 		del_action.setEnabled(false);
@@ -110,11 +116,12 @@ public class PlanTablePanel<T extends SonarObject> extends IPanel {
 	}
 
 	/** Dispose of the form */
-	@Override public void dispose() {
-		super.dispose();
-		if(model != null) {
+	@Override
+	public void dispose() {
+		if (model != null) {
 			model.dispose();
 			model = null;
 		}
+		super.dispose();
 	}
 }
