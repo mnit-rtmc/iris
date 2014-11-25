@@ -15,10 +15,12 @@
 package us.mn.state.dot.tms.client.detector;
 
 import java.util.ArrayList;
+import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
@@ -27,6 +29,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
  * @author Douglas Lau
  */
 public class StationModel extends ProxyTableModel2<Station> {
+
+	/** R_Node selection model */
+	private final ProxySelectionModel<R_Node> sel_model;
 
 	/** Create the columns in the model */
 	@Override
@@ -49,15 +54,22 @@ public class StationModel extends ProxyTableModel2<Station> {
 	/** Create a new station table model */
 	public StationModel(Session s) {
 		super(s, s.getSonarState().getDetCache().getStations(),
-		      false,	/* has_properties */
+		      true,	/* has_properties */
 		      false,	/* has_create */
 		      false);	/* has_delete */
+		sel_model = s.getR_NodeManager().getSelectionModel();
 	}
 
 	/** Get the SONAR type name */
 	@Override
 	protected String getSonarType() {
 		return Station.SONAR_TYPE;
+	}
+
+	/** Show the properties form */
+	@Override
+	public void showPropertiesForm(Station proxy) {
+		sel_model.setSelected(proxy.getR_Node());
 	}
 
 	/** Get the row height */
