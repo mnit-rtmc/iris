@@ -97,16 +97,7 @@ public class SmartDesktop extends JDesktopPane {
 	}
 
 	/** Show the specified form */
-	public void show(final AbstractForm form) {
-		SwingRunner.runSwing(new Runnable() {
-			public void run() {
-				doShow(form);
-			}
-		});
-	}
-
-	/** Show the specified form */
-	private void doShow(AbstractForm form) {
+	public void show(AbstractForm form) {
 		JInternalFrame frame = findFrame(form.getTitle());
 		if (frame != null)
 			selectFrame(frame);
