@@ -134,7 +134,7 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		});
 		if (model.hasProperties())
 			table.addMouseListener(mouser);
-		if (model.hasCreate()) {
+		if (model.hasCreateDelete()) {
 			add_proxy.setEnabled(model.canAdd());
 			add_txt.setAction(add_proxy);
 		}
@@ -147,15 +147,14 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 			box.add(prop_btn);
 			box.add(Box.createHorizontalStrut(UI.hgap));
 		}
-		if (model.hasCreate()) {
-			box.add(add_txt);
-			box.add(Box.createHorizontalStrut(UI.hgap));
-			box.add(new JButton(add_proxy));
-			box.add(Box.createHorizontalStrut(UI.hgap));
-		}
-		if (model.hasDelete()) {
+		if (model.hasCreateDelete()) {
 			box.add(Box.createHorizontalGlue());
-			box.add(Box.createHorizontalStrut(UI.hgap));
+			if (model.hasName()) {
+				box.add(add_txt);
+				box.add(Box.createHorizontalStrut(UI.hgap));
+			}
+			box.add(new JButton(add_proxy));
+			box.add(Box.createHorizontalStrut(2 * UI.hgap));
 			box.add(new JButton(del_proxy));
 		}
 		return box;

@@ -65,8 +65,8 @@ public class CameraModel extends ProxyTableModel2<Camera> {
 	public CameraModel(Session s) {
 		super(s, s.getSonarState().getCamCache().getCameras(),
 		      true,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

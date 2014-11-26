@@ -50,8 +50,8 @@ public class LCSArrayModel extends ProxyTableModel2<LCSArray> {
 	public LCSArrayModel(Session s) {
 		super(s, s.getSonarState().getLcsCache().getLCSArrays(),
 		      true,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

@@ -50,8 +50,8 @@ public class DetectorModel extends ProxyTableModel2<Detector> {
 	public DetectorModel(Session s) {
 		super(s, s.getSonarState().getDetCache().getDetectors(),
 		      false,	/* has_properties */
-		      false,	/* has_create */
-		      false);	/* has_delete */
+		      false,	/* has_create_delete */
+		      false);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

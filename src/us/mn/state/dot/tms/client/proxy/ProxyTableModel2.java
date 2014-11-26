@@ -45,11 +45,11 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	/** Flag to show properties button */
 	private final boolean has_properties;
 
-	/** Flag to show create button */
-	private final boolean has_create;
+	/** Flag to show create and delete buttons */
+	private final boolean has_create_delete;
 
-	/** Flag to show delete button */
-	private final boolean has_delete;
+	/** Flag to show name text field */
+	private final boolean has_name;
 
 	/** Proxy columns */
 	private final ArrayList<ProxyColumn<T>> columns;
@@ -102,16 +102,16 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	 * @param s User session.
 	 * @param c Proxy type cache.
 	 * @param hp Flag to add properties button.
-	 * @param hc Flag to allow creating new proxies.
-	 * @param hd Flag to allow deteting proxies. */
+	 * @param hcd Flag to add create and delete buttons.
+	 * @param hn Flag to add name text field. */
 	public ProxyTableModel2(Session s, TypeCache<T> c, boolean hp,
-		boolean hc, boolean hd)
+		boolean hcd, boolean hn)
 	{
 		session = s;
 		cache = c;
 		has_properties = hp;
-		has_create = hc;
-		has_delete = hd;
+		has_create_delete = hcd;
+		has_name = hn;
 		columns = createColumns();
 		list = new ArrayList<T>();
 	}
@@ -294,9 +294,9 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 		return null;
 	}
 
-	/** Determine if create button is available */
-	public final boolean hasCreate() {
-		return has_create;
+	/** Determine if create and delete buttons are available */
+	public final boolean hasCreateDelete() {
+		return has_create_delete;
 	}
 
 	/** Create an object with the given name */
@@ -306,9 +306,9 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 			cache.createObject(n);
 	}
 
-	/** Determine if delete button is available */
-	public final boolean hasDelete() {
-		return has_delete;
+	/** Determine if name text field is available */
+	public final boolean hasName() {
+		return has_name;
 	}
 
 	/** Get the SONAR type name.  Subclasses must override this to allow

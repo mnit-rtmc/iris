@@ -88,8 +88,8 @@ public class SystemAttributeTableModel extends ProxyTableModel2<SystemAttribute>
 	public SystemAttributeTableModel(Session s) {
 		super(s, s.getSonarState().getSystemAttributes(),
 		      false,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

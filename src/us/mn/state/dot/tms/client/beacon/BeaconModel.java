@@ -51,8 +51,8 @@ public class BeaconModel extends ProxyTableModel2<Beacon> {
 	public BeaconModel(Session s) {
 		super(s, s.getSonarState().getBeacons(),
 		      true,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

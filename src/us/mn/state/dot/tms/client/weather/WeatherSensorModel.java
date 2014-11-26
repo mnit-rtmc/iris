@@ -51,8 +51,8 @@ public class WeatherSensorModel extends ProxyTableModel2<WeatherSensor> {
 	public WeatherSensorModel(Session s) {
 		super(s, s.getSonarState().getWeatherSensors(),
 		      true,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

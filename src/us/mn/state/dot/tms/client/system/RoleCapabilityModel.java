@@ -87,8 +87,8 @@ public class RoleCapabilityModel extends ProxyTableModel2<Capability> {
 	public RoleCapabilityModel(Session s) {
 		super(s, s.getSonarState().getCapabilities(),
 		      false,	/* has_properties */
-		      false,	/* has_create */
-		      false);	/* has_delete */
+		      false,	/* has_create_delete */
+		      false);	/* has_name */
 	}
 
 	/** Set the capabilities for a new role */

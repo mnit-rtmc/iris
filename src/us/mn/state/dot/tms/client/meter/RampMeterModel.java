@@ -51,8 +51,8 @@ public class RampMeterModel extends ProxyTableModel2<RampMeter> {
 	public RampMeterModel(Session s) {
 		super(s, s.getSonarState().getRampMeters(),
 		      true,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

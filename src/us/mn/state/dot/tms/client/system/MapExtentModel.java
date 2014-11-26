@@ -95,8 +95,8 @@ public class MapExtentModel extends ProxyTableModel2<MapExtent> {
 	public MapExtentModel(Session s, IrisClient ic) {
 		super(s, s.getSonarState().getMapExtents(),
 		      false,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 		client = ic;
 	}
 

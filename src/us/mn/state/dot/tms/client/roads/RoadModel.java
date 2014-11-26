@@ -117,8 +117,8 @@ public class RoadModel extends ProxyTableModel2<Road> {
 	public RoadModel(Session s) {
 		super(s, s.getSonarState().getRoads(),
 		      false,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

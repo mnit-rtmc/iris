@@ -54,7 +54,7 @@ public class ConnectionModel extends ProxyTableModel2<Connection> {
 	public ConnectionModel(Session s) {
 		super(s, s.getSonarState().getConnections(),
 		      false,	/* has_properties */
-		      false,	/* has_create */
-		      false);	/* has_delete */
+		      false,	/* has_create_delete */
+		      false);	/* has_name */
 	}
 }

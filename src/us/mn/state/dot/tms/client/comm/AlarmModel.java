@@ -91,8 +91,8 @@ public class AlarmModel extends ProxyTableModel2<Alarm> {
 	public AlarmModel(Session s) {
 		super(s, s.getSonarState().getAlarms(),
 		      false,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Renderer for state in a table cell */

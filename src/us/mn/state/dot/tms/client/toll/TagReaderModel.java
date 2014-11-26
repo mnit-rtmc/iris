@@ -51,8 +51,8 @@ public class TagReaderModel extends ProxyTableModel2<TagReader> {
 	public TagReaderModel(Session s) {
 		super(s, s.getSonarState().getTagReaders(),
 		      true,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

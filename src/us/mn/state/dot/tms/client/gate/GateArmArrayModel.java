@@ -52,8 +52,8 @@ public class GateArmArrayModel extends ProxyTableModel2<GateArmArray> {
 	public GateArmArrayModel(Session s) {
 		super(s, s.getSonarState().getGateArmArrays(),
 		      true,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

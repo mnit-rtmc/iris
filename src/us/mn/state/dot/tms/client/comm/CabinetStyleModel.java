@@ -65,8 +65,8 @@ public class CabinetStyleModel extends ProxyTableModel2<CabinetStyle> {
 	public CabinetStyleModel(Session s) {
 		super(s, s.getSonarState().getConCache().getCabinetStyles(),
 		      false,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Editor for dip values in a table cell */

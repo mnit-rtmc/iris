@@ -71,8 +71,8 @@ public class VideoMonitorModel extends ProxyTableModel2<VideoMonitor> {
 	public VideoMonitorModel(Session s) {
 		super(s, s.getSonarState().getCamCache().getVideoMonitors(),
 		      false,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

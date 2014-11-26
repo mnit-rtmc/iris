@@ -59,8 +59,8 @@ public class IncidentDetailModel extends ProxyTableModel2<IncidentDetail> {
 	public IncidentDetailModel(Session s) {
 		super(s, s.getSonarState().getIncidentDetails(),
 		      false,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

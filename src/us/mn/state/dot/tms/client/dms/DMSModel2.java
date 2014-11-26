@@ -96,8 +96,8 @@ public class DMSModel2 extends ProxyTableModel2<DMS> {
 	public DMSModel2(Session s) {
 		super(s, s.getSonarState().getDmsCache().getDMSs(),
 		      true,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */

@@ -82,8 +82,8 @@ public class ModemModel extends ProxyTableModel2<Modem> {
 	public ModemModel(Session s) {
 		super(s, s.getSonarState().getConCache().getModems(),
 		      false,	/* has_properties */
-		      true,	/* has_create */
-		      true);	/* has_delete */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */
