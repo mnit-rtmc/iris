@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Component;
 import java.util.ArrayList;
-import java.util.HashMap;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.DefaultCellEditor;
@@ -29,14 +28,14 @@ import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for lane-use MULTI.
  *
  * @author Douglas Lau
  */
-public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
+public class LaneUseMultiModel extends ProxyTableModel2<LaneUseMulti> {
 
 	/** Create the columns in the model */
 	@Override
@@ -55,18 +54,13 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				return lum.getIndication();
 			}
 			public boolean isEditable(LaneUseMulti lum) {
-				if (lum != null)
-					return canUpdate(lum);
-				else
-					return canAdd();
+				return canUpdate(lum);
 			}
 			public void setValueAt(LaneUseMulti lum, Object value) {
 				String v = value.toString();
 				int ind = lookupIndication(v);
 				if (lum != null)
 					lum.setIndication(ind);
-				else
-					createObject(ind);
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new IndicationCellRenderer();
@@ -138,7 +132,10 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 
 	/** Create a new graphic table model */
 	public LaneUseMultiModel(Session s) {
-		super(s, s.getSonarState().getLcsCache().getLaneUseMultis());
+		super(s, s.getSonarState().getLcsCache().getLaneUseMultis(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      false);	/* has_name */
 	}
 
 	/** Lookup a lane-use indication */
@@ -151,14 +148,12 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	}
 
 	/** Create a new lane-use MULTI */
-	private void createObject(int ind) {
+	@Override
+	public void createObject(String n) {
+		// Ignore name given to us
 		String name = createUniqueName();
-		if (name != null) {
-			HashMap<String, Object> attrs =
-				new HashMap<String, Object>();
-			attrs.put("indication", ind);
-			cache.createObject(name, attrs);
-		}
+		if (name != null)
+			cache.createObject(name);
 	}
 
 	/** Create a unique LaneUseMulti name */
@@ -176,6 +171,18 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	@Override
 	protected String getSonarType() {
 		return LaneUseMulti.SONAR_TYPE;
+	}
+
+	/** Get the row height */
+	@Override
+	public int getRowHeight() {
+		return 22;
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 10;
 	}
 
 	/** Indication cell renderer */
