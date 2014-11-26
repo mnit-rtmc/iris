@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,15 +46,15 @@ public class R_NodeDetectorPanel extends JPanel {
 	/** Filter a string name */
 	static private String filterName(String n, int max_len) {
 		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < n.length(); i++) {
+		for (int i = 0; i < n.length(); i++) {
 			char c = n.charAt(i);
-			if(c >= '0' && c <= '9')
+			if (c >= '0' && c <= '9')
 				sb.append(c);
-			if(c >= 'A' && c <= 'Z')
+			if (c >= 'A' && c <= 'Z')
 				sb.append(c);
-			if(c >= 'a' && c <= 'z')
+			if (c >= 'a' && c <= 'z')
 				sb.append(c);
-			if(sb.length() >= max_len)
+			if (sb.length() >= max_len)
 				break;
 		}
 		return sb.toString();
@@ -73,8 +73,8 @@ public class R_NodeDetectorPanel extends JPanel {
 	private final IAction create_det = new IAction("detector.create") {
 		protected void doActionPerformed(ActionEvent e) {
 			R_NodeDetectorModel m = det_model;
-			if(m != null)
-				m.create(getDetectorName());
+			if (m != null)
+				m.createObject(getDetectorName());
 			det_txt.setText("");
 			lookupDetector();
 		}
@@ -87,10 +87,10 @@ public class R_NodeDetectorPanel extends JPanel {
 	private final IAction transfer_det = new IAction("detector.transfer") {
 		protected void doActionPerformed(ActionEvent e) {
 			R_NodeDetectorModel m = det_model;
-			if(m != null) {
+			if (m != null) {
 				Detector det = DetectorHelper.lookup(
 					getDetectorName());
-				if(det != null)
+				if (det != null)
 					m.transfer(det);
 			}
 			det_txt.setText("");
@@ -102,7 +102,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	private final IAction delete_det = new IAction("detector.delete") {
 		protected void doActionPerformed(ActionEvent e) {
 			Detector det = getSelectedDetector();
-			if(det != null)
+			if (det != null)
 				det.destroy();
 		}
 	};
@@ -116,7 +116,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	/** Set the r_node */
 	public void setR_Node(R_Node n) {
 		R_NodeDetectorModel m = det_model;
-		if(m != null)
+		if (m != null)
 			m.dispose();
 		det_model = new R_NodeDetectorModel(session, n);
 		det_model.initialize();
@@ -187,7 +187,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	private String getDetectorName() {
 		String name = det_txt.getText();
 		String n = filterName(name, 10);
-		if(!n.equals(name))
+		if (!n.equals(name))
 			det_txt.setText(n);
 		return n;
 	}
@@ -196,7 +196,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	private void lookupDetector() {
 		String name = getDetectorName();
 		Detector det = DetectorHelper.lookup(name);
-		if(name.length() > 0)
+		if (name.length() > 0)
 			det_lbl.setText(lookupLabel(det));
 		else
 			det_lbl.setText("");
@@ -206,7 +206,7 @@ public class R_NodeDetectorPanel extends JPanel {
 
 	/** Lookup a detector label */
 	private String lookupLabel(Detector det) {
-		if(det != null)
+		if (det != null)
 			return DetectorHelper.getLabel(det);
 		else
 			return "";
@@ -216,7 +216,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	private void selectDetector() {
 		Detector det = getSelectedDetector();
 		det_pnl.setDetector(det);
-		if(det != null) {
+		if (det != null) {
 			det_txt.setText("");
 			lookupDetector();
 		}
@@ -226,8 +226,8 @@ public class R_NodeDetectorPanel extends JPanel {
 	/** Get the currently selected detector */
 	private Detector getSelectedDetector() {
 		R_NodeDetectorModel m = det_model;
-		if(m != null)
-			return m.getProxy(det_table.getSelectedRow());
+		if (m != null)
+			return m.getRowProxy(det_table.getSelectedRow());
 		else
 			return null;
 	}
@@ -235,7 +235,7 @@ public class R_NodeDetectorPanel extends JPanel {
 	/** Dispose of the panel */
 	public void dispose() {
 		det_pnl.dispose();
-		if(det_model != null)
+		if (det_model != null)
 			det_model.dispose();
 		removeAll();
 	}
