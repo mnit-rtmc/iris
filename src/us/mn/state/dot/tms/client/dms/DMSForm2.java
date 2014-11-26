@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class DMSForm2 extends ProxyTableForm2<DMS> {
+public class DMSForm2 extends ProxyTableForm<DMS> {
 
 	/** Create a new DMS form */
 	public DMSForm2(Session s) {

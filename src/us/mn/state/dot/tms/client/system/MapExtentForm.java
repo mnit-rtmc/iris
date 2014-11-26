@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.system;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class MapExtentForm extends ProxyTableForm2<MapExtent> {
+public class MapExtentForm extends ProxyTableForm<MapExtent> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {

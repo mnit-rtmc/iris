@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.detector;
 import java.awt.GridLayout;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class DetectorForm extends ProxyTableForm2<Detector> {
+public class DetectorForm extends ProxyTableForm<Detector> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {

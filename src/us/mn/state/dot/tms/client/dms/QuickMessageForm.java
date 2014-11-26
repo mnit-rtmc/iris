@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  * @author Doug Lau
  */
-public class QuickMessageForm extends ProxyTableForm2<QuickMessage> {
+public class QuickMessageForm extends ProxyTableForm<QuickMessage> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {

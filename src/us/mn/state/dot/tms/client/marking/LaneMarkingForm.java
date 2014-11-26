@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.marking;
 
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class LaneMarkingForm extends ProxyTableForm2<LaneMarking> {
+public class LaneMarkingForm extends ProxyTableForm<LaneMarking> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {

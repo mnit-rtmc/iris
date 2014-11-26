@@ -23,19 +23,19 @@ import us.mn.state.dot.tms.client.widget.AbstractForm;
  *
  * @author Douglas Lau
  */
-public class ProxyTableForm2<T extends SonarObject> extends AbstractForm {
+public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 
 	/** Proxy table panel */
 	protected final ProxyTablePanel<T> panel;
 
 	/** Create a new proxy table form */
-	public ProxyTableForm2(String t, ProxyTableModel2<T> m) {
+	public ProxyTableForm(String t, ProxyTableModel2<T> m) {
 		super(t);
 		panel = new ProxyTablePanel<T>(m);
 	}
 
 	/** Create a new proxy table form */
-	public ProxyTableForm2(String t, ProxyTablePanel<T> p) {
+	public ProxyTableForm(String t, ProxyTablePanel<T> p) {
 		super(t);
 		panel = p;
 	}

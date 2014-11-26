@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.detector;
 
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class StationForm extends ProxyTableForm2<Station> {
+public class StationForm extends ProxyTableForm<Station> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {

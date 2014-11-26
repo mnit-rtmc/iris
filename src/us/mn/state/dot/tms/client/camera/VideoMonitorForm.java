@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.camera;
 
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class VideoMonitorForm extends ProxyTableForm2<VideoMonitor> {
+public class VideoMonitorForm extends ProxyTableForm<VideoMonitor> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {

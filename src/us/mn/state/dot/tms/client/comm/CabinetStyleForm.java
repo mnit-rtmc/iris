@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.comm;
 
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class CabinetStyleForm extends ProxyTableForm2<CabinetStyle> {
+public class CabinetStyleForm extends ProxyTableForm<CabinetStyle> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
