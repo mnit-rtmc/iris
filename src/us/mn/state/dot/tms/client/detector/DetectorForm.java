@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,11 +14,11 @@
  */
 package us.mn.state.dot.tms.client.detector;
 
+import java.awt.GridLayout;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
-import us.mn.state.dot.tms.client.widget.IPanel;
-import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm2;
+import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class DetectorForm extends ProxyTableForm<Detector> {
+public class DetectorForm extends ProxyTableForm2<Detector> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
@@ -38,31 +38,39 @@ public class DetectorForm extends ProxyTableForm<Detector> {
 
 	/** Create a new detector form */
 	public DetectorForm(Session s) {
-		super(I18N.get("detector.plural"), new DetectorModel(s));
-		det_pnl = new DetectorPanel(s, true);
-		det_pnl.initialize();
+		super(I18N.get("detector.plural"), new DetTablePanel(s));
+		det_pnl = ((DetTablePanel)panel).det_pnl;
 	}
 
-	/** Dispose of the form */
-	@Override protected void dispose() {
-		det_pnl.dispose();
-		super.dispose();
+	/** Detector table panel */
+	static private class DetTablePanel extends ProxyTablePanel<Detector> {
+		private final DetectorPanel det_pnl;
+		private DetTablePanel(Session s) {
+			super(new DetectorModel(s));
+			det_pnl = new DetectorPanel(s, true);
+		}
+		@Override
+		public void initialize() {
+			super.initialize();
+			det_pnl.initialize();
+		}
+		@Override
+		public void dispose() {
+			det_pnl.dispose();
+			super.dispose();
+		}
+		@Override
+		protected void selectProxy() {
+			super.selectProxy();
+			det_pnl.setDetector(getSelectedProxy());
+		}
 	}
 
-	/** Add the table to the panel */
-	@Override protected void addTable(IPanel p) {
-		p.add(table, Stretch.HALF);
-		p.add(det_pnl, Stretch.FULL);
-	}
-
-	/** Get the row height */
-	@Override protected int getRowHeight() {
-		return 20;
-	}
-
-	/** Select a new proxy */
-	@Override protected void selectProxy() {
-		super.selectProxy();
-		det_pnl.setDetector(getSelectedProxy());
+	/** Initialize the form */
+	@Override
+	public void initialize() {
+		super.initialize();
+		setLayout(new GridLayout(1, 2));
+		add(det_pnl);
 	}
 }
