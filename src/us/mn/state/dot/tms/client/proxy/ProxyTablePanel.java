@@ -17,8 +17,9 @@ package us.mn.state.dot.tms.client.proxy;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import javax.swing.Box;
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
+import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.SonarObject;
@@ -101,7 +102,7 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		model.initialize();
 		createJobs();
 		add(table, Stretch.FULL);
-		add(buildButtonBox(), Stretch.FULL);
+		add(buildButtonPanel(), Stretch.FULL);
 	}
 
 	/** Dispose of the panel */
@@ -149,24 +150,36 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		}
 	}
 
-	/** Build the button box */
-	private Box buildButtonBox() {
-		Box box = Box.createHorizontalBox();
+	/** Build the button panel */
+	private JPanel buildButtonPanel() {
+		JPanel pnl = new JPanel();
+		GroupLayout gl = new GroupLayout(pnl);
+		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
+		GroupLayout.ParallelGroup vg = gl.createBaselineGroup(false,
+			false);
 		if (model.hasProperties()) {
-			box.add(prop_btn);
-			box.add(Box.createHorizontalStrut(UI.hgap));
+			hg.addComponent(prop_btn);
+			vg.addComponent(prop_btn);
+			hg.addGap(UI.hgap);
 		}
 		if (model.hasCreateDelete()) {
-			box.add(Box.createHorizontalGlue());
 			if (model.hasName()) {
-				box.add(add_txt);
-				box.add(Box.createHorizontalStrut(UI.hgap));
+				hg.addComponent(add_txt);
+				vg.addComponent(add_txt);
+				hg.addGap(UI.hgap);
 			}
-			box.add(new JButton(add_proxy));
-			box.add(Box.createHorizontalStrut(2 * UI.hgap));
-			box.add(new JButton(del_proxy));
+			JButton add_btn = new JButton(add_proxy);
+			hg.addComponent(add_btn);
+			vg.addComponent(add_btn);
+			hg.addGap(2 * UI.hgap);
+			JButton del_btn = new JButton(del_proxy);
+			hg.addComponent(del_btn);
+			vg.addComponent(del_btn);
 		}
-		return box;
+		gl.setHorizontalGroup(hg);
+		gl.setVerticalGroup(vg);
+		pnl.setLayout(gl);
+		return pnl;
 	}
 
 	/** Get the currently selected proxy */
@@ -179,5 +192,16 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		T proxy = getSelectedProxy();
 		show_props.setEnabled(proxy != null);
 		del_proxy.setEnabled(model.canRemove(proxy));
+	}
+
+	/** Select a new proxy */
+	public void selectProxy(T proxy) {
+		int row = model.getIndex(proxy);
+		if (row >= 0) {
+			ListSelectionModel s = table.getSelectionModel();
+			s.setSelectionInterval(row, row);
+			table.scrollRectToVisible(
+				table.getCellRect(row, 0, true));
+		}
 	}
 }
