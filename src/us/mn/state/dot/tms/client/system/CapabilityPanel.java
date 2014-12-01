@@ -14,20 +14,13 @@
  */
 package us.mn.state.dot.tms.client.system;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import javax.swing.JButton;
+import javax.swing.GroupLayout;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
+import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
  * A panel for editing capabilities and privileges.
@@ -36,125 +29,75 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  */
 public class CapabilityPanel extends JPanel {
 
-	/** Table model for capabilities */
-	private final CapabilityModel cap_model;
+	/** Capability table panel */
+	private final ProxyTablePanel<Capability> cap_pnl;
 
-	/** Table model for privileges */
-	private PrivilegeModel p_model;
-
-	/** Table to hold the capability list */
-	private final ZTable cap_table = new ZTable();
-
-	/** Table to hold the privilege list */
-	private final ZTable p_table = new ZTable();
-
-	/** Action to delete the selected capability */
-	private final IAction del_cap = new IAction("capability.delete") {
-		protected void doActionPerformed(ActionEvent e) {
-			ListSelectionModel s = cap_table.getSelectionModel();
-			int row = s.getMinSelectionIndex();
-			if(row >= 0)
-				cap_model.deleteRow(row);
-		}
-	};
-
-	/** Aciton to delete the selected privilege */
-	private final IAction del_priv = new IAction("privilege.delete") {
-		protected void doActionPerformed(ActionEvent e) {
-			ListSelectionModel sp = p_table.getSelectionModel();
-			int row = sp.getMinSelectionIndex();
-			if(row >= 0)
-				p_model.deleteRow(row);
-		}
-	};
+	/** Privilege table panel */
+	private final ProxyTablePanel<Privilege> priv_pnl;
 
 	/** User session */
 	private final Session session;
 
 	/** Create a new capability panel */
 	public CapabilityPanel(Session s) {
-		super(new GridBagLayout());
-		session = s;
-		cap_model = new CapabilityModel(s);
-		p_model = new PrivilegeModel(session, null);
 		setBorder(UI.border);
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.left = 4;
-		bag.insets.right = 4;
-		bag.insets.top = 4;
-		bag.insets.bottom = 4;
-		cap_table.setModel(cap_model);
-		cap_table.setAutoCreateColumnsFromModel(false);
-		cap_table.setColumnModel(cap_model.createColumnModel());
-		cap_table.setVisibleRowCount(16);
-		JScrollPane pane = new JScrollPane(cap_table);
-		add(pane, bag);
-		p_table.setModel(p_model);
-		p_table.setAutoCreateColumnsFromModel(false);
-		p_table.setColumnModel(p_model.createColumnModel());
-		p_table.setVisibleRowCount(16);
-		pane = new JScrollPane(p_table);
-		add(pane, bag);
-		del_cap.setEnabled(false);
-		bag.gridx = 0;
-		bag.gridy = 1;
-		add(new JButton(del_cap), bag);
-		del_priv.setEnabled(false);
-		bag.gridx = 1;
-		add(new JButton(del_priv), bag);
+		session = s;
+		cap_pnl = new ProxyTablePanel<Capability>(
+			new CapabilityModel(s))
+		{
+			protected void selectProxy() {
+				selectCapability();
+				super.selectProxy();
+			}
+		};
+		priv_pnl = new ProxyTablePanel<Privilege>(
+			new PrivilegeModel(s, null));
 	}
 
 	/** Initializze the panel */
-	protected void initialize() {
-		cap_model.initialize();
-		p_model.initialize();
-		ListSelectionModel s = cap_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new IListSelectionAdapter() {
-			@Override
-			public void valueChanged() {
-				selectCapability();
-			}
-		});
-		ListSelectionModel sp = p_table.getSelectionModel();
-		sp.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		sp.addListSelectionListener(new IListSelectionAdapter() {
-			@Override
-			public void valueChanged() {
-				selectPrivilege();
-			}
-		});
+	public void initialize() {
+		cap_pnl.initialize();
+		priv_pnl.initialize();
+		layoutPanel();
+	}
+
+	/** Layout the panel */
+	private void layoutPanel() {
+		GroupLayout gl = new GroupLayout(this);
+		gl.setHonorsVisibility(false);
+		gl.setAutoCreateGaps(false);
+		gl.setAutoCreateContainerGaps(false);
+		gl.setHorizontalGroup(createHorizontalGroup(gl));
+		gl.setVerticalGroup(createVerticalGroup(gl));
+		setLayout(gl);
+	}
+
+	/** Create the horizontal group */
+	private GroupLayout.Group createHorizontalGroup(GroupLayout gl) {
+		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
+		hg.addComponent(cap_pnl);
+		hg.addGap(UI.hgap);
+		hg.addComponent(priv_pnl);
+		return hg;
+	}
+
+	/** Create the vertical group */
+	private GroupLayout.Group createVerticalGroup(GroupLayout gl) {
+		GroupLayout.ParallelGroup vg = gl.createParallelGroup();
+		vg.addComponent(cap_pnl);
+		vg.addComponent(priv_pnl);
+		return vg;
 	}
 
 	/** Dispose of the panel */
-	protected void dispose() {
-		cap_model.dispose();
-		p_model.dispose();
+	public void dispose() {
+		cap_pnl.dispose();
+		priv_pnl.dispose();
 	}
 
 	/** Change the selected capability */
 	private void selectCapability() {
-		ListSelectionModel s = cap_table.getSelectionModel();
-		Capability c = cap_model.getProxy(s.getMinSelectionIndex());
-		del_cap.setEnabled(cap_model.canRemove(c));
-		final PrivilegeModel pm = p_model;
-		p_model = new PrivilegeModel(session, c);
-		p_model.initialize();
-		p_table.clearSelection();
-		p_table.setModel(p_model);
-		pm.dispose();
-	}
-
-	/** Select a privilege */
-	private void selectPrivilege() {
-		Privilege p = getSelectedPrivilege();
-		del_priv.setEnabled(p_model.canRemove(p));
-	}
-
-	/** Get the selected privilege */
-	private Privilege getSelectedPrivilege() {
-		final PrivilegeModel pm = p_model;	// Avoid race
-		ListSelectionModel s = p_table.getSelectionModel();
-		return pm.getProxy(s.getMinSelectionIndex());
+		Capability c = cap_pnl.getSelectedProxy();
+		priv_pnl.setModel(new PrivilegeModel(session, c));
 	}
 }

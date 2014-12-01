@@ -20,16 +20,17 @@ import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
- * Table model for IRIS privileges
+ * Table model for IRIS privileges.
  *
  * @author Douglas Lau
  */
-public class PrivilegeModel extends ProxyTableModel<Privilege> {
+public class PrivilegeModel extends ProxyTableModel2<Privilege> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<Privilege>> createColumns() {
 		ArrayList<ProxyColumn<Privilege>> cols =
 			new ArrayList<ProxyColumn<Privilege>>(5);
@@ -38,14 +39,11 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 				return p.getPattern();
 			}
 			public boolean isEditable(Privilege p) {
-				return (p == null && canAdd()) || canUpdate(p);
+				return canUpdate(p);
 			}
 			public void setValueAt(Privilege p, Object value) {
 				String v = value.toString().trim();
-				if(p == null)
-					createPrivilege(v);
-				else
-					p.setPattern(v);
+				p.setPattern(v);
 			}
 		});
 		cols.add(new ProxyColumn<Privilege>("privilege.read", 60,
@@ -108,49 +106,50 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	}
 
 	/** Capability associated with privileges */
-	protected final Capability capability;
+	private final Capability capability;
 
 	/** Create a new privilege table model */
 	public PrivilegeModel(Session s, Capability c) {
-		super(s, s.getSonarState().getPrivileges());
+		super(s, s.getSonarState().getPrivileges(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      false);	/* has_name */
 		capability = c;
-	}
-
-	/** Add a new proxy to the table model */
-	@Override
-	protected int doProxyAdded(Privilege proxy) {
-		if (proxy.getCapability() == capability)
-			return super.doProxyAdded(proxy);
-		else
-			return -1;
-	}
-
-	/** Create a new privilege */
-	protected void createPrivilege(String p) {
-		String name = createUniqueName();
-		if(name != null) {
-			HashMap<String, Object> attrs =
-				new HashMap<String, Object>();
-			attrs.put("capability", capability);
-			attrs.put("pattern", p);
-			cache.createObject(name, attrs);
-		}
-	}
-
-	/** Create a unique privilege name */
-	protected String createUniqueName() {
-		for(int uid = 1; uid <= 9999; uid++) {
-			String n = "PRV_" + uid;
-			if(cache.lookupObject(n) == null)
-				return n;
-		}
-		assert false;
-		return null;
 	}
 
 	/** Get the SONAR type name */
 	@Override
 	protected String getSonarType() {
 		return Privilege.SONAR_TYPE;
+	}
+
+	/** Check if a proxy is included in the list */
+	@Override
+	protected boolean check(Privilege proxy) {
+		return proxy.getCapability() == capability;
+	}
+
+	/** Create an object with the given name */
+	@Override
+	public void createObject(String n) {
+		String name = createUniqueName();
+		if (name != null) {
+			HashMap<String, Object> attrs =
+				new HashMap<String, Object>();
+			attrs.put("capability", capability);
+			attrs.put("pattern", "");
+			cache.createObject(name, attrs);
+		}
+	}
+
+	/** Create a unique privilege name */
+	private String createUniqueName() {
+		for (int uid = 1; uid <= 9999; uid++) {
+			String n = "PRV_" + uid;
+			if (cache.lookupObject(n) == null)
+				return n;
+		}
+		assert false;
+		return null;
 	}
 }

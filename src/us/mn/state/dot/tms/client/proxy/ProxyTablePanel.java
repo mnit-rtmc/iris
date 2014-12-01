@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.client.widget.ITable;
 public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 
 	/** Table model */
-	private final ProxyTableModel2<T> model;
+	private ProxyTableModel2<T> model;
 
 	/** Proxy table */
 	private final ITable table;
@@ -109,6 +109,15 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	public void dispose() {
 		model.dispose();
 		super.dispose();
+	}
+
+	/** Set the model */
+	public void setModel(ProxyTableModel2<T> m) {
+		ProxyTableModel2<T> om = model;
+		m.initialize();
+		table.setModel(m);
+		model = m;
+		om.dispose();
 	}
 
 	/** Create the table */

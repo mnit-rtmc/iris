@@ -18,14 +18,14 @@ import java.util.ArrayList;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for IRIS capabilities
  *
  * @author Douglas Lau
  */
-public class CapabilityModel extends ProxyTableModel<Capability> {
+public class CapabilityModel extends ProxyTableModel2<Capability> {
 
 	/** Create the columns in the model */
 	@Override
@@ -35,14 +35,6 @@ public class CapabilityModel extends ProxyTableModel<Capability> {
 		cols.add(new ProxyColumn<Capability>("capability.name", 120) {
 			public Object getValueAt(Capability c) {
 				return c.getName();
-			}
-			public boolean isEditable(Capability c) {
-				return c == null && canAdd();
-			}
-			public void setValueAt(Capability c, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<Capability>("capability.enabled", 60,
@@ -55,7 +47,7 @@ public class CapabilityModel extends ProxyTableModel<Capability> {
 				return canUpdate(c);
 			}
 			public void setValueAt(Capability c, Object value) {
-				if(value instanceof Boolean)
+				if (value instanceof Boolean)
 					c.setEnabled((Boolean)value);
 			}
 		});
@@ -64,7 +56,10 @@ public class CapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Create a new capability table model */
 	public CapabilityModel(Session s) {
-		super(s, s.getSonarState().getCapabilities());
+		super(s, s.getSonarState().getCapabilities(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */
