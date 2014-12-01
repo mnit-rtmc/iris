@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,20 +14,13 @@
  */
 package us.mn.state.dot.tms.client.system;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.event.ActionEvent;
-import javax.swing.Box;
-import javax.swing.JButton;
+import javax.swing.GroupLayout;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
+import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
+import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
  * A panel for editing roles.
@@ -36,86 +29,73 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  */
 public class RolePanel extends JPanel {
 
-	/** Table model for roles */
-	private final RoleModel r_model;
+	/** User session */
+	private final Session session;
 
-	/** Table to hold the role list */
-	private final ZTable r_table = new ZTable();
+	/** Role table panel */
+	private final ProxyTablePanel<Role> role_pnl;
 
-	/** Table model for role capabilities */
-	private final RoleCapabilityModel rc_model;
-
-	/** Table to hold the role capability list */
-	private final ZTable rc_table = new ZTable();
-
-	/** Action to delete the selected role */
-	private final IAction del_role = new IAction("role.delete") {
-		protected void doActionPerformed(ActionEvent e) {
-			ListSelectionModel s = r_table.getSelectionModel();
-			int row = s.getMinSelectionIndex();
-			if(row >= 0)
-				r_model.deleteRow(row);
-		}
-	};
+	/** Capability table panel */
+	private final ProxyTablePanel<Capability> cap_pnl;
 
 	/** Create a new role panel */
 	public RolePanel(Session s) {
-		super(new GridBagLayout());
-		rc_model = new RoleCapabilityModel(s);
-		r_model = new RoleModel(s, rc_model);
 		setBorder(UI.border);
-		GridBagConstraints bag = new GridBagConstraints();
-		r_table.setModel(r_model);
-		r_table.setAutoCreateColumnsFromModel(false);
-		r_table.setColumnModel(r_model.createColumnModel());
-		r_table.setVisibleRowCount(16);
-		JScrollPane rpane = new JScrollPane(r_table);
-		bag.gridheight = 2;
-		add(rpane, bag);
-		rc_table.setModel(rc_model);
-		rc_table.setAutoCreateColumnsFromModel(false);
-		rc_table.setColumnModel(rc_model.createColumnModel());
-		rc_table.setRowSelectionAllowed(false);
-		rc_table.setVisibleRowCount(12);
-		bag.gridheight = 1;
-		bag.insets.left = 6;
-		JScrollPane spane = new JScrollPane(rc_table);
-		add(spane, bag);
-		del_role.setEnabled(false);
-		Box box = Box.createHorizontalBox();
-		box.add(Box.createHorizontalGlue());
-		box.add(new JButton(del_role));
-		box.add(Box.createHorizontalGlue());
-		bag.gridx = 1;
-		bag.gridy = 1;
-		add(box, bag);
+		session = s;
+		role_pnl = new ProxyTablePanel<Role>(new RoleModel(s)) {
+			protected void selectProxy() {
+				selectRole();
+				super.selectProxy();
+			}
+		};
+		cap_pnl = new ProxyTablePanel<Capability>(
+			new RoleCapabilityModel(s, null));
 	}
 
 	/** Initializze the panel */
-	protected void initialize() {
-		rc_model.initialize();
-		r_model.initialize();
-		ListSelectionModel s = r_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new IListSelectionAdapter() {
-			@Override
-			public void valueChanged() {
-				selectRole();
-			}
-		});
+	public void initialize() {
+		role_pnl.initialize();
+		cap_pnl.initialize();
+		layoutPanel();
+	}
+
+	/** Layout the panel */
+	private void layoutPanel() {
+		GroupLayout gl = new GroupLayout(this);
+		gl.setHonorsVisibility(false);
+		gl.setAutoCreateGaps(false);
+		gl.setAutoCreateContainerGaps(false);
+		gl.setHorizontalGroup(createHorizontalGroup(gl));
+		gl.setVerticalGroup(createVerticalGroup(gl));
+		setLayout(gl);
+	}
+
+	/** Create the horizontal group */
+	private GroupLayout.Group createHorizontalGroup(GroupLayout gl) {
+		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
+		hg.addComponent(role_pnl);
+		hg.addGap(UI.hgap);
+		hg.addComponent(cap_pnl);
+		return hg;
+	}
+
+	/** Create the vertical group */
+	private GroupLayout.Group createVerticalGroup(GroupLayout gl) {
+		GroupLayout.ParallelGroup vg = gl.createParallelGroup();
+		vg.addComponent(role_pnl);
+		vg.addComponent(cap_pnl);
+		return vg;
 	}
 
 	/** Dispose of the panel */
-	protected void dispose() {
-		r_model.dispose();
-		rc_model.dispose();
+	public void dispose() {
+		role_pnl.dispose();
+		cap_pnl.dispose();
 	}
 
 	/** Change the selected role */
 	private void selectRole() {
-		ListSelectionModel s = r_table.getSelectionModel();
-		Role r = r_model.getProxy(s.getMinSelectionIndex());
-		del_role.setEnabled(r_model.canRemove(r));
-		rc_model.setSelectedRole(r);
+		Role r = role_pnl.getSelectedProxy();
+		cap_pnl.setModel(new RoleCapabilityModel(session, r));
 	}
 }

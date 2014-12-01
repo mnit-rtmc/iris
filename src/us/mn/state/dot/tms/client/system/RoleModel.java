@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,30 +18,23 @@ import java.util.ArrayList;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
- * Table model for IRIS roles
+ * Table model for IRIS roles.
  *
  * @author Douglas Lau
  */
-public class RoleModel extends ProxyTableModel<Role> {
+public class RoleModel extends ProxyTableModel2<Role> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<Role>> createColumns() {
 		ArrayList<ProxyColumn<Role>> cols =
 			new ArrayList<ProxyColumn<Role>>(2);
 		cols.add(new ProxyColumn<Role>("role.name", 160) {
 			public Object getValueAt(Role r) {
 				return r.getName();
-			}
-			public boolean isEditable(Role r) {
-				return r == null && canAdd();
-			}
-			public void setValueAt(Role r, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<Role>("role.enabled", 60,
@@ -54,37 +47,30 @@ public class RoleModel extends ProxyTableModel<Role> {
 				return canUpdate(r);
 			}
 			public void setValueAt(Role r, Object value) {
-				if(value instanceof Boolean)
+				if (value instanceof Boolean)
 					r.setEnabled((Boolean)value);
 			}
 		});
 		return cols;
 	}
 
-	/** Role capability model */
-	protected final RoleCapabilityModel rc_model;
-
 	/** Create a new role table model */
-	public RoleModel(Session s, RoleCapabilityModel rc) {
-		super(s, s.getSonarState().getRoles());
-		rc_model = rc;
+	public RoleModel(Session s) {
+		super(s, s.getSonarState().getRoles(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return Role.SONAR_TYPE;
 	}
 
-	/** Change a role in the table model */
-	protected void proxyChangedSlow(Role proxy, String attrib) {
-		super.proxyChangedSlow(proxy, attrib);
-		if(attrib.equals("capabilities"))
-			rc_model.updateRoleCapabilities(proxy);
-	}
-
 	/** Check if the user can remove a role */
+	@Override
 	public boolean canRemove(Role r) {
-		return r != null && r.getCapabilities().length == 0 &&
-		       super.canRemove(r);
+		return super.canRemove(r) && r.getCapabilities().length == 0;
 	}
 }

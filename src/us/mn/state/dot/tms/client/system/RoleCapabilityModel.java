@@ -56,11 +56,10 @@ public class RoleCapabilityModel extends ProxyTableModel2<Capability> {
 		return cols;
 	}
 
-	/** Check if the given capability is assigned to the selected role */
-	protected boolean isAssigned(Capability cap) {
-		Role r = role;		// Avoid NPE
-		if (r != null) {
-			for (Capability c: r.getCapabilities())
+	/** Check if the given capability is assigned to the role */
+	private boolean isAssigned(Capability cap) {
+		if (role != null) {
+			for (Capability c: role.getCapabilities())
 				if (c == cap)
 					return true;
 		}
@@ -68,43 +67,31 @@ public class RoleCapabilityModel extends ProxyTableModel2<Capability> {
 	}
 
 	/** Assign or unassign the specified capability */
-	protected void setAssigned(Capability c, boolean a) {
-		Role r = role;		// Avoid NPE
-		if (r != null) {
-			Capability[] caps = r.getCapabilities();
+	private void setAssigned(Capability c, boolean a) {
+		if (role != null) {
+			Capability[] caps = role.getCapabilities();
 			if (a)
 				caps = addCapability(caps, c);
 			else
 				caps = removeCapability(caps, c);
-			r.setCapabilities(caps);
+			role.setCapabilities(caps);
 		}
 	}
 
-	/** Currently selected role */
-	private Role role;
+	/** Role for associated capabilities */
+	private final Role role;
 
 	/** Create a new role-capability table model */
-	public RoleCapabilityModel(Session s) {
+	public RoleCapabilityModel(Session s, Role r) {
 		super(s, s.getSonarState().getCapabilities(),
 		      false,	/* has_properties */
 		      false,	/* has_create_delete */
 		      false);	/* has_name */
-	}
-
-	/** Set the capabilities for a new role */
-	public void setSelectedRole(Role r) {
 		role = r;
-		fireTableDataChanged();
-	}
-
-	/** Update the capabilities for the specified role */
-	public void updateRoleCapabilities(Role r) {
-		if (r == role)
-			fireTableDataChanged();
 	}
 
 	/** Add a capability to an array of capabilities */
-	protected Capability[] addCapability(Capability[] caps, Capability cap){
+	private Capability[] addCapability(Capability[] caps, Capability cap) {
 		TreeSet<Capability> cs = new TreeSet<Capability>(comparator());
 		for (Capability c: caps)
 			cs.add(c);
@@ -113,7 +100,7 @@ public class RoleCapabilityModel extends ProxyTableModel2<Capability> {
 	}
 
 	/** Remove a capability from an array of capabilities */
-	protected Capability[] removeCapability(Capability[] caps,
+	private Capability[] removeCapability(Capability[] caps,
 		Capability cap)
 	{
 		TreeSet<Capability> cs = new TreeSet<Capability>(comparator());

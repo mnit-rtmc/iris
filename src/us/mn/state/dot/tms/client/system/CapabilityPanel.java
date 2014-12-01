@@ -29,14 +29,14 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  */
 public class CapabilityPanel extends JPanel {
 
+	/** User session */
+	private final Session session;
+
 	/** Capability table panel */
 	private final ProxyTablePanel<Capability> cap_pnl;
 
 	/** Privilege table panel */
 	private final ProxyTablePanel<Privilege> priv_pnl;
-
-	/** User session */
-	private final Session session;
 
 	/** Create a new capability panel */
 	public CapabilityPanel(Session s) {
