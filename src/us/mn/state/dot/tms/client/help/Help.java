@@ -17,9 +17,9 @@ package us.mn.state.dot.tms.client.help;
 import java.awt.event.KeyEvent;
 import java.io.IOException;
 import javax.swing.KeyStroke;
-import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.utils.I18N;
-import static us.mn.state.dot.tms.client.IrisClient.WORKER;
+import us.mn.state.dot.tms.client.widget.Invokable;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.client.widget.WebBrowser;
 
 /**
@@ -55,8 +55,8 @@ public class Help {
 	/** Invoke help with the specified URL.
 	 * @param url URL of help page to load. */
 	static public void invokeHelpUrl(final String url) {
-		WORKER.addJob(new Job() {
-			public void perform() throws IOException {
+		runSwing(new Invokable() {
+			public void invoke() throws IOException {
 				WebBrowser.open(url);
 			}
 		});
