@@ -70,7 +70,7 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	}
 
 	/** Full name text field */
-	private final JTextField f_name_txt = new JTextField(32);
+	private final JTextField f_name_txt = new JTextField(24);
 
 	/** Password entry component */
 	private final JPasswordField passwd_txt = new JPasswordField(16);
@@ -87,7 +87,7 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	};
 
 	/** Dn (distinguished name) field */
-	private final JTextField dn_txt = new JTextField(64);
+	private final JTextField dn_txt = new JTextField(32);
 
 	/** Role list model */
 	private final ProxyListModel<Role> r_list;

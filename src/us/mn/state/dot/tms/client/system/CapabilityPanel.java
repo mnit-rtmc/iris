@@ -93,6 +93,7 @@ public class CapabilityPanel extends JPanel {
 	public void dispose() {
 		cap_pnl.dispose();
 		priv_pnl.dispose();
+		removeAll();
 	}
 
 	/** Change the selected capability */

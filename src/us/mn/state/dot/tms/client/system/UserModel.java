@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,16 +18,17 @@ import java.util.ArrayList;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for IRIS users
  *
  * @author Douglas Lau
  */
-public class UserModel extends ProxyTableModel<User> {
+public class UserModel extends ProxyTableModel2<User> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<User>> createColumns() {
 		ArrayList<ProxyColumn<User>> cols =
 			new ArrayList<ProxyColumn<User>>(1);
@@ -35,24 +36,20 @@ public class UserModel extends ProxyTableModel<User> {
 			public Object getValueAt(User u) {
 				return u.getName();
 			}
-			public boolean isEditable(User u) {
-				return u == null && canAdd();
-			}
-			public void setValueAt(User u, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
-			}
 		});
 		return cols;
 	}
 
 	/** Create a new user table model */
 	public UserModel(Session s) {
-		super(s, s.getSonarState().getUsers());
+		super(s, s.getSonarState().getUsers(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return User.SONAR_TYPE;
 	}

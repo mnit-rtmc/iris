@@ -14,84 +14,83 @@
  */
 package us.mn.state.dot.tms.client.system;
 
-import java.awt.event.ActionEvent;
-import javax.swing.JButton;
-import javax.swing.ListSelectionModel;
+import javax.swing.GroupLayout;
+import javax.swing.JPanel;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
-import us.mn.state.dot.tms.client.widget.IPanel;
-import us.mn.state.dot.tms.client.widget.ZTable;
+import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A panel for editing users.
  *
  * @author Douglas Lau
  */
-public class UserTabPanel extends IPanel {
+public class UserTabPanel extends JPanel {
 
-	/** Table model for users */
-	private final UserModel u_model;
-
-	/** Table to hold the users */
-	private final ZTable u_table = new ZTable();
+	/** Role table panel */
+	private final ProxyTablePanel<User> utab_pnl;
 
 	/** User panel */
 	private final UserPanel user_pnl;
 
-	/** Action to delete the selected user */
-	private final IAction del_user = new IAction("user.delete") {
-		protected void doActionPerformed(ActionEvent e) {
-			ListSelectionModel s = u_table.getSelectionModel();
-			int row = s.getMinSelectionIndex();
-			if(row >= 0)
-				u_model.deleteRow(row);
-		}
-	};
-
 	/** Create a new user tab panel */
 	public UserTabPanel(Session s) {
-		u_model = new UserModel(s);
+		setBorder(UI.border);
+		utab_pnl = new ProxyTablePanel<User>(new UserModel(s)) {
+			protected void selectProxy() {
+				selectUser();
+				super.selectProxy();
+			}
+		};
 		user_pnl = new UserPanel(s);
-		u_table.setModel(u_model);
-		u_table.setAutoCreateColumnsFromModel(false);
-		u_table.setColumnModel(u_model.createColumnModel());
-		u_table.setVisibleRowCount(16);
-		add(u_table, Stretch.SOME);
-		add(user_pnl, Stretch.LAST);
-		add(new JButton(del_user), Stretch.RIGHT);
 	}
 
 	/** Initializze the widgets in the form */
-	@Override
 	public void initialize() {
-		super.initialize();
-		u_model.initialize();
+		utab_pnl.initialize();
 		user_pnl.initialize();
-		ListSelectionModel s = u_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new IListSelectionAdapter() {
-			@Override
-			public void valueChanged() {
-				selectUser();
-			}
-		});
+		layoutPanel();
+	}
+
+	/** Layout the panel */
+	private void layoutPanel() {
+		GroupLayout gl = new GroupLayout(this);
+		gl.setHonorsVisibility(false);
+		gl.setAutoCreateGaps(false);
+		gl.setAutoCreateContainerGaps(false);
+		gl.setHorizontalGroup(createHorizontalGroup(gl));
+		gl.setVerticalGroup(createVerticalGroup(gl));
+		setLayout(gl);
+	}
+
+	/** Create the horizontal group */
+	private GroupLayout.Group createHorizontalGroup(GroupLayout gl) {
+		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
+		hg.addComponent(utab_pnl);
+		hg.addGap(UI.hgap);
+		hg.addComponent(user_pnl);
+		return hg;
+	}
+
+	/** Create the vertical group */
+	private GroupLayout.Group createVerticalGroup(GroupLayout gl) {
+		GroupLayout.ParallelGroup vg = gl.createParallelGroup();
+		vg.addComponent(utab_pnl);
+		vg.addComponent(user_pnl);
+		return vg;
 	}
 
 	/** Dispose of the panel */
-	@Override
 	public void dispose() {
-		u_model.dispose();
+		utab_pnl.dispose();
 		user_pnl.dispose();
-		super.dispose();
+		removeAll();
 	}
 
 	/** Change the selected user */
 	private void selectUser() {
-		ListSelectionModel s = u_table.getSelectionModel();
-		User u = u_model.getProxy(s.getMinSelectionIndex());
+		User u = utab_pnl.getSelectedProxy();
 		user_pnl.setUser(u);
-		del_user.setEnabled(u_model.canRemove(u));
 	}
 }

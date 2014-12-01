@@ -91,6 +91,7 @@ public class RolePanel extends JPanel {
 	public void dispose() {
 		role_pnl.dispose();
 		cap_pnl.dispose();
+		removeAll();
 	}
 
 	/** Change the selected role */
