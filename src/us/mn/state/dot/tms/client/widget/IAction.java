@@ -18,8 +18,10 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import us.mn.state.dot.sched.ExceptionHandler;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.MainClient;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.MAX_ELAPSED;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -34,6 +36,12 @@ abstract public class IAction extends AbstractAction {
 		return MainClient.getHandler();
 	}
 
+	/** Log a message */
+	static private void log(String msg, long e) {
+		System.err.println("IAction took " + e + " ms");
+		System.err.println("  from: " + msg);
+	}
+
 	/** System attribute to enable action */
 	private final SystemAttrEnum attr;
 
@@ -45,11 +53,11 @@ abstract public class IAction extends AbstractAction {
 		String name = text_id != null ? I18N.get(text_id) : "";
 		putValue(Action.NAME, name);
 		int m = I18N.getKeyEvent(text_id);
-		if(m != 0)
+		if (m != 0)
 			putValue(Action.MNEMONIC_KEY, m);
 		String tt = I18N.getSilent(text_id + ".tooltip");
-		if(tt != null) {
-			if(m != 0) {
+		if (tt != null) {
+			if (m != 0) {
 				char c = I18N.getKeyEventChar(text_id);
 				tt += " (alt-" + c + ")";
 			}
@@ -65,28 +73,25 @@ abstract public class IAction extends AbstractAction {
 
 	/** Is the action enabled by system attribute? */
 	public boolean getIEnabled() {
-		if(attr != null)
-			return attr.getBoolean();
-		else
-			return true;
+		return (attr != null) ? attr.getBoolean() : true;
 	}
 
 	/** Perform the action */
 	@Override
 	public final void actionPerformed(ActionEvent ev) {
-		long start = System.currentTimeMillis();
+		long st = TimeSteward.currentTimeMillis();
 		try {
-			doActionPerformed(ev);
-		}
-		catch(Exception ex) {
-			getHandler().handle(ex);
-		}
-		finally {
-			long e = System.currentTimeMillis() - start;
-			if(e > 50) {
-				System.err.println("IAction took " + e + " ms");
-				System.err.println("  from: " + getClass());
+			try {
+				doActionPerformed(ev);
 			}
+			finally {
+				long e = TimeSteward.currentTimeMillis() - st;
+				if (e > MAX_ELAPSED)
+					log(getClass().toString(), e);
+			}
+		}
+		catch (Exception ex) {
+			getHandler().handle(ex);
 		}
 	}
 

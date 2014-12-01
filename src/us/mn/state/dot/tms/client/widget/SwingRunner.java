@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.client.MainClient;
 public final class SwingRunner {
 
 	/** Maximum elapsed time before logging */
-	static private final long MAX_ELAPSED = 50;
+	static public final long MAX_ELAPSED = 50;
 
 	/** Get the exception handler */
 	static private ExceptionHandler getHandler() {
@@ -43,11 +43,20 @@ public final class SwingRunner {
 
 	/** Run some runnable code */
 	static private void runNow(Runnable r) {
-		long start = TimeSteward.currentTimeMillis();
-		r.run();
-		long e = TimeSteward.currentTimeMillis() - start;
-		if (e > MAX_ELAPSED)
-			log(r.getClass().toString(), e);
+		long st = TimeSteward.currentTimeMillis();
+		try {
+			try {
+				r.run();
+			}
+			finally {
+				long e = TimeSteward.currentTimeMillis() - st;
+				if (e > MAX_ELAPSED)
+					log(r.getClass().toString(), e);
+			}
+		}
+		catch (Exception e) {
+			getHandler().handle(e);
+		}
 	}
 
 	/** Invoke a Runnable on the swing thread */
