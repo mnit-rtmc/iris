@@ -33,36 +33,29 @@ import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
- * Table model for controllers
+ * Table model for controllers.
  *
  * @author Douglas Lau
  */
-public class ControllerModel extends ProxyTableModel<Controller> {
+public class ControllerModel extends ProxyTableModel2<Controller> {
 
 	/** Color to display inactive controllers */
-	static protected final Color COLOR_INACTIVE = new Color(0, 0, 0, 32);
+	static private final Color COLOR_INACTIVE = new Color(0, 0, 0, 32);
 
 	/** Color to display available devices */
-	static protected final Color COLOR_AVAILABLE = new Color(96, 96, 255);
+	static private final Color COLOR_AVAILABLE = new Color(96, 96, 255);
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<Controller>> createColumns() {
 		ArrayList<ProxyColumn<Controller>> cols =
 			new ArrayList<ProxyColumn<Controller>>(7);
 		cols.add(new ProxyColumn<Controller>("controller", 90) {
 			public Object getValueAt(Controller c) {
 				return c.getName();
-			}
-			public boolean isEditable(Controller c) {
-				return (c == null) && canAdd();
-			}
-			public void setValueAt(Controller c, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					createController(v);
 			}
 		});
 		cols.add(new ProxyColumn<Controller>("location", 200) {
@@ -79,7 +72,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				return canUpdate(c);
 			}
 			public void setValueAt(Controller c, Object value) {
-				if(value instanceof Number)
+				if (value instanceof Number)
 					c.setDrop(((Number)value).shortValue());
 			}
 			protected TableCellEditor createCellEditor() {
@@ -96,7 +89,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				return canUpdate(c, "active");
 			}
 			public void setValueAt(Controller c, Object value) {
-				if(value instanceof Boolean)
+				if (value instanceof Boolean)
 					c.setActive((Boolean)value);
 			}
 		});
@@ -122,7 +115,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 	}
 
 	/** Comm link to match controllers */
-	protected final CommLink comm_link;
+	private final CommLink comm_link;
 
 	/** Get a proxy comparator */
 	@Override
@@ -131,7 +124,13 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 			public int compare(Controller a, Controller b) {
 				Short aa = Short.valueOf(a.getDrop());
 				Short bb = Short.valueOf(b.getDrop());
-				return aa.compareTo(bb);
+				int c = aa.compareTo(bb);
+				if (c == 0) {
+					String an = a.getName();
+					String bn = b.getName();
+					return an.compareTo(bn);
+				} else
+					return c;
 			}
 			public boolean equals(Object o) {
 				return o == this;
@@ -144,26 +143,46 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 
 	/** Create a new controller table model */
 	public ControllerModel(Session s, CommLink cl) {
-		super(s, s.getSonarState().getConCache().getControllers());
+		super(s, s.getSonarState().getConCache().getControllers(),
+		      true,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 		comm_link = cl;
 	}
 
-	/** Add a new proxy to the table model */
+	/** Get the SONAR type name */
 	@Override
-	protected int doProxyAdded(Controller proxy) {
-		if (proxy.getCommLink() == comm_link)
-			return super.doProxyAdded(proxy);
-		else
-			return -1;
+	protected String getSonarType() {
+		return Controller.SONAR_TYPE;
 	}
 
-	/** Check if the specified cell is editable */
-	public boolean isCellEditable(int row, int col) {
-		return comm_link != null && super.isCellEditable(row, col);
+	/** Create a properties form for one proxy */
+	@Override
+	protected ControllerForm createPropertiesForm(Controller proxy) {
+		return new ControllerForm(session, proxy);
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 10;
+	}
+
+	/** Get the row height */
+	@Override
+	public int getRowHeight() {
+		return 24;
+	}
+
+	/** Check if a proxy is included in the list */
+	@Override
+	protected boolean check(Controller proxy) {
+		return proxy.getCommLink() == comm_link;
 	}
 
 	/** Create a new controller */
-	protected void createController(String name) {
+	@Override
+	public void createObject(String name) {
 		DropNumberModel m = new DropNumberModel(comm_link, cache, 1);
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("comm_link", comm_link);
@@ -206,11 +225,11 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				(JLabel)super.getTableCellRendererComponent(
 				table, "", isSelected, hasFocus, row,
 				column);
-			if(value instanceof Controller) {
+			if (value instanceof Controller) {
 				Controller c = (Controller)value;
-				if(ControllerHelper.isFailed(c))
+				if (ControllerHelper.isFailed(c))
 					label.setIcon(fail);
-				else if(ControllerHelper.isActive(c))
+				else if (ControllerHelper.isActive(c))
 					label.setIcon(ok);
 				else
 					label.setIcon(inactive);
@@ -218,10 +237,5 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				label.setIcon(null);
 			return label;
 		}
-	}
-
-	/** Get the SONAR type name */
-	protected String getSonarType() {
-		return Controller.SONAR_TYPE;
 	}
 }

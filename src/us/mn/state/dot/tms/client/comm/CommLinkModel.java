@@ -14,23 +14,17 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
-import java.awt.Color;
-import java.awt.Component;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import javax.swing.DefaultCellEditor;
-import javax.swing.Icon;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 import us.mn.state.dot.tms.units.Interval;
 
 /**
@@ -38,31 +32,24 @@ import us.mn.state.dot.tms.units.Interval;
  *
  * @author Douglas Lau
  */
-public class CommLinkModel extends ProxyTableModel<CommLink> {
+public class CommLinkModel extends ProxyTableModel2<CommLink> {
 
 	/** List of all possible protocol selections */
-	static protected final LinkedList<String> PROTOCOLS =
+	static private final LinkedList<String> PROTOCOLS =
 		new LinkedList<String>();
 	static {
-		for(String cp: CommProtocol.getDescriptions())
+		for (String cp: CommProtocol.getDescriptions())
 			PROTOCOLS.add(cp);
 	}
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<CommLink>> createColumns() {
 		ArrayList<ProxyColumn<CommLink>> cols =
 			new ArrayList<ProxyColumn<CommLink>>(6);
 		cols.add(new ProxyColumn<CommLink>("comm.link", 90) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getName();
-			}
-			public boolean isEditable(CommLink cl) {
-				return (cl == null) && canAdd();
-			}
-			public void setValueAt(CommLink cl, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<CommLink>("device.description", 220) {
@@ -122,15 +109,15 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return canUpdate(cl, "pollEnabled");
 			}
 			public void setValueAt(CommLink cl, Object value) {
-				if(value instanceof Boolean)
+				if (value instanceof Boolean)
 					cl.setPollEnabled((Boolean)value);
 			}
 		});
 		cols.add(new ProxyColumn<CommLink>("comm.link.poll_period", 60){
 			public Object getValueAt(CommLink cl) {
 				Interval p = new Interval(cl.getPollPeriod());
-				for(Interval per: CommLink.VALID_PERIODS) {
-					if(p.equals(per))
+				for (Interval per: CommLink.VALID_PERIODS) {
+					if (p.equals(per))
 						return per;
 				}
 				return p;
@@ -139,7 +126,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return canUpdate(cl, "pollPeriod");
 			}
 			public void setValueAt(CommLink cl, Object value) {
-				if(value instanceof Interval) {
+				if (value instanceof Interval) {
 					Interval p = (Interval)value;
 					cl.setPollPeriod(p.round(
 						Interval.Units.SECONDS));
@@ -157,7 +144,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return canUpdate(cl, "timeout");
 			}
 			public void setValueAt(CommLink cl, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					cl.setTimeout((Integer)value);
 			}
 			protected TableCellEditor createCellEditor() {
@@ -169,33 +156,27 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 
 	/** Create a new comm link table model */
 	public CommLinkModel(Session s) {
-		super(s, s.getSonarState().getConCache().getCommLinks());
-	}
-
-	/** Renderer for link status in a table cell */
-	public class StatusCellRenderer extends DefaultTableCellRenderer {
-		protected final Icon ok = new CommLinkIcon(Color.BLUE);
-		protected final Icon fail = new CommLinkIcon(Color.GRAY);
-		public Component getTableCellRendererComponent(JTable table,
-			Object value, boolean isSelected, boolean hasFocus,
-			int row, int column)
-		{
-			JLabel label =
-				(JLabel)super.getTableCellRendererComponent(
-				table, "", isSelected, hasFocus, row,
-				column);
-			if(value == null)
-				label.setIcon(null);
-			else if("".equals(value))
-				label.setIcon(ok);
-			else
-				label.setIcon(fail);
-			return label;
-		}
+		super(s, s.getSonarState().getConCache().getCommLinks(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return CommLink.SONAR_TYPE;
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 8;
+	}
+
+	/** Get the row height */
+	@Override
+	public int getRowHeight() {
+		return 24;
 	}
 }

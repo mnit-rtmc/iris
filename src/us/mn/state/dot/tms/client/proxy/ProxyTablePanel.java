@@ -116,8 +116,8 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	public void setModel(ProxyTableModel2<T> m) {
 		ProxyTableModel2<T> om = model;
 		m.initialize();
-		table.setModel(m);
 		model = m;
+		table.setModel(m);
 		om.dispose();
 	}
 
