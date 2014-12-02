@@ -191,7 +191,7 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	protected void selectProxy() {
 		T proxy = getSelectedProxy();
 		show_props.setEnabled(proxy != null);
-		del_proxy.setEnabled(model.canRemove(proxy));
+		del_proxy.setEnabled(canRemove(proxy));
 	}
 
 	/** Select a new proxy */
@@ -203,5 +203,10 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 			table.scrollRectToVisible(
 				table.getCellRect(row, 0, true));
 		}
+	}
+
+	/** Check if a proxy can be removed */
+	public boolean canRemove(T proxy) {
+		return model.canRemove(proxy);
 	}
 }

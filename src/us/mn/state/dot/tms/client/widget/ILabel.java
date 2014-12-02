@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.widget;
 
 import java.awt.Font;
 import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 import us.mn.state.dot.tms.utils.I18N;
 
 /** 
@@ -28,9 +29,9 @@ public class ILabel extends JLabel {
 	/** Create an I18N'd label.
 	 * @param text_id I18N id for label text. */
 	public ILabel(String text_id) {
-		super(I18N.get(text_id));
+		super(I18N.get(text_id), SwingConstants.RIGHT);
 		int m = I18N.getKeyEvent(text_id);
-		if(m > 0)
+		if (m > 0)
 			setDisplayedMnemonic(m);
 	}
 

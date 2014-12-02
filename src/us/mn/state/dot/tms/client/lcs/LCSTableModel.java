@@ -16,20 +16,23 @@ package us.mn.state.dot.tms.client.lcs;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for LCS within an array.
  *
  * @author Douglas Lau
  */
-public class LCSTableModel extends ProxyTableModel<LCS> {
+public class LCSTableModel extends ProxyTableModel2<LCS> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<LCS>> createColumns() {
 		ArrayList<ProxyColumn<LCS>> cols =
 			new ArrayList<ProxyColumn<LCS>>(2);
@@ -42,47 +45,62 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 			public Object getValueAt(LCS lcs) {
 				return lcs.getName();
 			}
-			public boolean isEditable(LCS lcs) {
-				return (lcs == null) && canAdd();
-			}
-			public void setValueAt(LCS lcs, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					createLCS(v, getRowCount());
-			}
 		});
 		return cols;
 	}
 
-	/** Create a new LCS */
-	protected void createLCS(String name, int lane) {
-		HashMap<String, Object> attrs = new HashMap<String, Object>();
-		attrs.put("lcsArray", lcs_array);
-		attrs.put("lane", new Integer(lane));
-		cache.createObject(name, attrs);
-	}
-
 	/** LCS array */
-	protected final LCSArray lcs_array;
+	private final LCSArray lcs_array;
 
 	/** Create a new LCS table model */
 	public LCSTableModel(Session s, LCSArray la) {
-		super(s, s.getSonarState().getLcsCache().getLCSs());
+		super(s, s.getSonarState().getLcsCache().getLCSs(),
+		      true,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 		lcs_array = la;
-	}
-
-	/** Add a new proxy to the table model */
-	@Override
-	protected int doProxyAdded(LCS proxy) {
-		if (proxy.getArray() == lcs_array)
-			return super.doProxyAdded(proxy);
-		else
-			return -1;
 	}
 
 	/** Get the SONAR type name */
 	@Override
 	protected String getSonarType() {
 		return LCS.SONAR_TYPE;
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 12;
+	}
+
+	/** Check if a proxy is included in the list */
+	@Override
+	protected boolean check(LCS proxy) {
+		return proxy.getArray() == lcs_array;
+	}
+
+	/** Show the properties form for a proxy */
+	@Override
+	public void showPropertiesForm(LCS proxy) {
+		DMS dms = DMSHelper.lookup(proxy.getName());
+		if (dms != null)
+			session.getDMSManager().showPropertiesForm(dms);
+	}
+
+	/** Create a new LCS */
+	@Override
+	public void createObject(String name) {
+		int lane = getRowCount();
+		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		attrs.put("lcsArray", lcs_array);
+		attrs.put("lane", new Integer(lane));
+		cache.createObject(name, attrs);
+	}
+
+	/** Check if the user can remove a proxy */
+	@Override
+	public boolean canRemove(LCS proxy) {
+		return session.canRemove(proxy) &&
+		      (getIndex(proxy) == getRowCount() - 1);
 	}
 }
