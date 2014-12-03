@@ -56,7 +56,7 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	private final JButton prop_btn = new JButton(show_props);
 
 	/** Text field to add a proxy */
-	private final JTextField add_txt = new JTextField(16);
+	protected final JTextField add_txt = new JTextField(16);
 
 	/** Action to create a proxy */
 	protected final IAction add_proxy = new IAction("device.create") {
@@ -191,7 +191,7 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 
 	/** Create a new proxy object */
 	protected void createObject() {
-		String name = add_txt.getText();
+		String name = add_txt.getText().trim();
 		add_txt.setText("");
 		model.createObject(name);
 	}

@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.Color;
 import javax.swing.JTabbedPane;
-import javax.swing.border.EmptyBorder;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
@@ -31,18 +30,18 @@ public class ScheduleForm extends AbstractForm {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return ActionPlanPanel.isPermitted(s) &&
+		return ActionPlanTab.isPermitted(s) &&
 		       DayPlanPanel.isPermitted(s);
 	}
 
 	/** Tabbed pane */
-	protected final JTabbedPane tab = new JTabbedPane();
+	private final JTabbedPane tab = new JTabbedPane();
 
-	/** Action plan panel */
-	protected final ActionPlanPanel p_panel;
+	/** Action plan tab */
+	private final ActionPlanTab p_panel;
 
 	/** Day plan panel */
-	protected final DayPlanPanel d_panel;
+	private final DayPlanPanel d_panel;
 
 	/** Plan phase panel */
 	private final PlanTablePanel<PlanPhase> pp_panel;
@@ -50,7 +49,7 @@ public class ScheduleForm extends AbstractForm {
 	/** Create a new schedule form */
 	public ScheduleForm(Session s) {
 		super(I18N.get("action.plan.schedule.title"));
-		p_panel = new ActionPlanPanel(s);
+		p_panel = new ActionPlanTab(s);
 		d_panel = new DayPlanPanel(s);
 		pp_panel = new PlanTablePanel<PlanPhase>();
 		pp_panel.setTableModel(new PlanPhaseModel(s));
@@ -61,6 +60,7 @@ public class ScheduleForm extends AbstractForm {
 	protected void initialize() {
 		super.initialize();
 		p_panel.initialize();
+		pp_panel.initialize();
 		tab.add(I18N.get("action.plan.plural.long"), p_panel);
 		tab.add(I18N.get("action.plan.day.plural"), d_panel);
 		tab.add(I18N.get("action.plan.phase.plural"), pp_panel);
@@ -71,9 +71,9 @@ public class ScheduleForm extends AbstractForm {
 	/** Dispose of the form */
 	@Override
 	protected void dispose() {
-		pp_panel.dispose();
-		d_panel.dispose();
 		p_panel.dispose();
+		d_panel.dispose();
+		pp_panel.dispose();
 		super.dispose();
 	}
 }

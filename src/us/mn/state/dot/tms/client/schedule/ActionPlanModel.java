@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
@@ -32,35 +32,21 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  *
  * @author Douglas Lau
  */
-public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
+public class ActionPlanModel extends ProxyTableModel2<ActionPlan> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<ActionPlan>> createColumns() {
 		ArrayList<ProxyColumn<ActionPlan>> cols =
 			new ArrayList<ProxyColumn<ActionPlan>>(6);
 		cols.add(new ProxyColumn<ActionPlan>("action.plan.name", 120) {
 			public Object getValueAt(ActionPlan ap) {
-				if(ap != null)
-					return ap.getName();
-				else
-					return null;
-			}
-			public boolean isEditable(ActionPlan ap) {
-				return ap == null && default_phase != null &&
-				       canAdd();
-			}
-			public void setValueAt(ActionPlan ap, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					create(v);
+				return ap.getName();
 			}
 		});
 		cols.add(new ProxyColumn<ActionPlan>("device.description", 380){
 			public Object getValueAt(ActionPlan ap) {
-				if(ap != null)
-					return ap.getDescription();
-				else
-					return null;
+				return ap.getDescription();
 			}
 			public boolean isEditable(ActionPlan ap) {
 				return canUpdate(ap);
@@ -74,16 +60,13 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 			80, Boolean.class)
 		{
 			public Object getValueAt(ActionPlan ap) {
-				if(ap != null)
-					return ap.getSyncActions();
-				else
-					return null;
+				return ap.getSyncActions();
 			}
 			public boolean isEditable(ActionPlan ap) {
 				return canUpdate(ap);
 			}
 			public void setValueAt(ActionPlan ap, Object value) {
-				if(value instanceof Boolean)
+				if (value instanceof Boolean)
 					ap.setSyncActions((Boolean)value);
 			}
 		});
@@ -91,16 +74,13 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 			Boolean.class)
 		{
 			public Object getValueAt(ActionPlan ap) {
-				if(ap != null)
-					return ap.getSticky();
-				else
-					return null;
+				return ap.getSticky();
 			}
 			public boolean isEditable(ActionPlan ap) {
 				return canUpdate(ap);
 			}
 			public void setValueAt(ActionPlan ap, Object value) {
-				if(value instanceof Boolean)
+				if (value instanceof Boolean)
 					ap.setSticky((Boolean)value);
 			}
 		});
@@ -108,16 +88,13 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 			Boolean.class)
 		{
 			public Object getValueAt(ActionPlan ap) {
-				if(ap != null)
-					return ap.getActive();
-				else
-					return null;
+				return ap.getActive();
 			}
 			public boolean isEditable(ActionPlan ap) {
 				return canUpdate(ap);
 			}
 			public void setValueAt(ActionPlan ap, Object value) {
-				if(value instanceof Boolean)
+				if (value instanceof Boolean)
 					ap.setActive((Boolean)value);
 			}
 		});
@@ -125,22 +102,16 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 			"action.plan.default.phase", 100)
 		{
 			public Object getValueAt(ActionPlan ap) {
-				if(ap != null)
-					return ap.getDefaultPhase();
-				else
-					return default_phase;
+				return ap.getDefaultPhase();
 			}
 			public boolean isEditable(ActionPlan ap) {
-				return canUpdate(ap) || canAdd();
+				return canUpdate(ap);
 			}
 			public void setValueAt(ActionPlan ap, Object value) {
-				PlanPhase p = null;
-				if(value instanceof PlanPhase)
-					p = (PlanPhase)value;
-				if(ap != null)
+				if (value instanceof PlanPhase) {
+					PlanPhase p = (PlanPhase)value;
 					ap.setDefaultPhase(p);
-				else
-					default_phase = p;
+				}
 			}
 			protected TableCellEditor createCellEditor() {
 				JComboBox combo = new JComboBox();
@@ -152,44 +123,32 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 		return cols;
 	}
 
-	/** Get the value at the specified cell.  Note: this overrides the
-	 * method from ProxyTableModel to allow null proxies to be passed to
-	 * ProxyColumn.getValueAt. */
-	public Object getValueAt(int row, int col) {
-		ActionPlan ap = getProxy(row);
-		ProxyColumn pc = getProxyColumn(col);
-		if(pc != null)
-			return pc.getValueAt(ap);
-		else
-			return null;
-	}
-
 	/** Plan phase model */
 	private final ProxyListModel<PlanPhase> phase_model;
 
-	/** Default phase for new action plan */
-	private PlanPhase default_phase;
-
 	/** Create a new action plan table model */
 	public ActionPlanModel(Session s) {
-		super(s, s.getSonarState().getActionPlans());
+		super(s, s.getSonarState().getActionPlans(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 		phase_model = s.getSonarState().getPhaseModel();
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return ActionPlan.SONAR_TYPE;
 	}
 
-	/** Create a new action plan */
-	private void create(String name) {
-		PlanPhase p = default_phase;
-		if(p != null)
-			create(name, p);
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 8;
 	}
 
 	/** Create a new action plan */
-	private void create(String name, PlanPhase p) {
+	public void create(String name, PlanPhase p) {
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("default_phase", p);
 		attrs.put("phase", p);
