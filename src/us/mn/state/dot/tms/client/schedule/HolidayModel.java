@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
-import java.awt.Component;
 import java.text.DateFormatSymbols;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -22,50 +21,49 @@ import java.util.LinkedList;
 import java.util.TreeSet;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
-import javax.swing.JTable;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * Table model for holidays
+ * Table model for holidays.
  *
  * @author Douglas Lau
  */
-public class HolidayModel extends ProxyTableModel<Holiday> {
+public class HolidayModel extends ProxyTableModel2<Holiday> {
 
 	/** Date format symbols */
-	static protected final DateFormatSymbols SYMBOLS =
+	static private final DateFormatSymbols SYMBOLS =
 		new DateFormatSymbols();
 
 	/** Displayed string for a selection of "any" */
-	static protected final String ANY = "";
+	static private final String ANY = "";
 
 	/** List of all possible month selections */
-	static protected final LinkedList<String> MONTHS =
+	static private final LinkedList<String> MONTHS =
 		new LinkedList<String>();
 	static {
 		String[] months = SYMBOLS.getMonths();
 		MONTHS.add(ANY);
-		for(int m = Calendar.JANUARY; m <= Calendar.DECEMBER; m++)
+		for (int m = Calendar.JANUARY; m <= Calendar.DECEMBER; m++)
 			MONTHS.add(months[m]);
 	}
 
 	/** List of all possible day selections */
-	static protected final LinkedList<String> DAYS =
+	static private final LinkedList<String> DAYS =
 		new LinkedList<String>();
 	static {
 		DAYS.add(ANY);
-		for(int d = 1; d <= 31; d++)
+		for (int d = 1; d <= 31; d++)
 			DAYS.add(String.valueOf(d));
 	}
 
 	/** List of all possible week selections */
-	static protected final LinkedList<String> WEEKS =
+	static private final LinkedList<String> WEEKS =
 		new LinkedList<String>();
 	static {
 		WEEKS.add(I18N.get("action.plan.week.last"));
@@ -77,17 +75,17 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	}
 
 	/** List of all possible weekday selections */
-	static protected final LinkedList<String> WEEKDAYS =
+	static private final LinkedList<String> WEEKDAYS =
 		new LinkedList<String>();
 	static {
 		String[] weekdays = SYMBOLS.getWeekdays();
 		WEEKDAYS.add(ANY);
-		for(int d = Calendar.SUNDAY; d <= Calendar.SATURDAY; d++)
+		for (int d = Calendar.SUNDAY; d <= Calendar.SATURDAY; d++)
 			WEEKDAYS.add(weekdays[d]);
 	}
 
 	/** List of all possible shift selections */
-	static protected final LinkedList<String> SHIFTS =
+	static private final LinkedList<String> SHIFTS =
 		new LinkedList<String>();
 	static {
 		SHIFTS.add("-2");
@@ -98,6 +96,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	}
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<Holiday>> createColumns() {
 		ArrayList<ProxyColumn<Holiday>> cols =
 			new ArrayList<ProxyColumn<Holiday>>(7);
@@ -108,24 +107,16 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				return isAssigned(h);
 			}
 			public boolean isEditable(Holiday h) {
-				return h != null && canUpdateDayPlanHolidays();
+				return canUpdateDayPlanHolidays();
 			}
 			public void setValueAt(Holiday h, Object value) {
-				if(value instanceof Boolean)
+				if (value instanceof Boolean)
 					setAssigned(h, (Boolean)value);
 			}
 		});
 		cols.add(new ProxyColumn<Holiday>("action.plan.holiday", 200) {
 			public Object getValueAt(Holiday h) {
 				return h.getName();
-			}
-			public boolean isEditable(Holiday h) {
-				return h == null && canAdd();
-			}
-			public void setValueAt(Holiday h, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<Holiday>("action.plan.month", 100) {
@@ -210,42 +201,39 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 		return cols;
 	}
 
+	/** Selected day plan */
+	private final DayPlan day_plan;
+
 	/** Create a new holiday table model */
-	public HolidayModel(Session s) {
-		super(s, s.getSonarState().getHolidays());
+	public HolidayModel(Session s, DayPlan dp) {
+		super(s, s.getSonarState().getHolidays(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
+		day_plan = dp;
+	}
+
+	/** Get the SONAR type name */
+	@Override
+	protected String getSonarType() {
+		return Holiday.SONAR_TYPE;
 	}
 
 	/** Check if the day is blank for the specified holiday */
-	protected boolean isDayBlank(Holiday h) {
+	private boolean isDayBlank(Holiday h) {
 		return h.getDay() == 0;
 	}
 
 	/** Check if the week/shift is blank for the specified holiday */
-	protected boolean isWeekShiftBlank(Holiday h) {
+	private boolean isWeekShiftBlank(Holiday h) {
 		return (h.getWeek() == 0) && (h.getShift() == 0);
 	}
 
-	/** Currently selected day plan */
-	protected DayPlan day_plan;
-
-	/** Set the holidays for a day plan */
-	public void setDayPlan(DayPlan dp) {
-		day_plan = dp;
-		fireTableDataChanged();
-	}
-
-	/** Update the holidays for the specified day plan */
-	public void updateHolidays(DayPlan dp) {
-		if(dp == day_plan)
-			fireTableDataChanged();
-	}
-
 	/** Check if the given holiday is assigned */
-	protected Boolean isAssigned(Holiday hol) {
-		DayPlan dp = day_plan;	// Avoid NPE
-		if(dp != null) {
-			for(Holiday h: dp.getHolidays()) {
-				if(h == hol)
+	private Boolean isAssigned(Holiday hol) {
+		if (day_plan != null) {
+			for (Holiday h: day_plan.getHolidays()) {
+				if (h == hol)
 					return true;
 			}
 			return false;
@@ -254,20 +242,19 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	}
 
 	/** Assign or unassign the specified holiday */
-	protected void setAssigned(Holiday h, boolean a) {
-		DayPlan dp = day_plan;	// Avoid NPE
-		if(dp != null) {
-			Holiday[] holidays = dp.getHolidays();
-			if(a)
+	private void setAssigned(Holiday h, boolean a) {
+		if (day_plan != null) {
+			Holiday[] holidays = day_plan.getHolidays();
+			if (a)
 				holidays = addHoliday(holidays, h);
 			else
 				holidays = removeHoliday(holidays, h);
-			dp.setHolidays(holidays);
+			day_plan.setHolidays(holidays);
 		}
 	}
 
 	/** Add a holiday to an array */
-	protected Holiday[] addHoliday(Holiday[] holidays, Holiday hol) {
+	private Holiday[] addHoliday(Holiday[] holidays, Holiday hol) {
 		TreeSet<Holiday> h_set = new TreeSet<Holiday>(comparator());
 		for (Holiday h: holidays)
 			h_set.add(h);
@@ -276,7 +263,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	}
 
 	/** Remove a holiday from an array */
-	protected Holiday[] removeHoliday(Holiday[] holidays, Holiday hol) {
+	private Holiday[] removeHoliday(Holiday[] holidays, Holiday hol) {
 		TreeSet<Holiday> h_set = new TreeSet<Holiday>(comparator());
 		for (Holiday h: holidays)
 			h_set.add(h);
@@ -285,12 +272,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 	}
 
 	/** Check if the user can update day plan holidays */
-	protected boolean canUpdateDayPlanHolidays() {
+	private boolean canUpdateDayPlanHolidays() {
 		return session.canUpdate(day_plan, "holidays");
-	}
-
-	/** Get the SONAR type name */
-	protected String getSonarType() {
-		return Holiday.SONAR_TYPE;
 	}
 }

@@ -60,6 +60,7 @@ public class ScheduleForm extends AbstractForm {
 	protected void initialize() {
 		super.initialize();
 		p_panel.initialize();
+		d_panel.initialize();
 		pp_panel.initialize();
 		tab.add(I18N.get("action.plan.plural.long"), p_panel);
 		tab.add(I18N.get("action.plan.day.plural"), d_panel);

@@ -21,24 +21,21 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.JButton;
 import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
+import us.mn.state.dot.tms.client.proxy.ProxyView;
+import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.CalendarWidget;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
-import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
-import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.client.widget.ZTable;
 
 /**
  * A panel for editing day plans.
@@ -46,9 +43,6 @@ import us.mn.state.dot.tms.client.widget.ZTable;
  * @author Douglas Lau
  */
 public class DayPlanPanel extends JPanel {
-
-	/** Table row height */
-	static private final int ROW_HEIGHT = UI.scaled(22);
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
@@ -67,8 +61,21 @@ public class DayPlanPanel extends JPanel {
 	/** Cache of day plans */
 	private final TypeCache<DayPlan> cache;
 
-	/** Proxy listener to update day plan holiday model */
-	private final ProxyListener<DayPlan> listener;
+	/** Proxy watcher */
+	private final ProxyWatcher<DayPlan> watcher;
+
+	/** Proxy view for selected day plan */
+	private final ProxyView<DayPlan> view = new ProxyView<DayPlan>() {
+		public void update(DayPlan dp, String a) {
+			if ("holidays".equals(a)) {
+				updateCalendarWidget();
+				hol_pnl.repaint();
+			}
+		}
+		public void clear() {
+			hol_pnl.repaint();
+		}
+	};
 
 	/** Action for day plans */
 	private final IAction day = new IAction("action.plan.day") {
@@ -131,20 +138,8 @@ public class DayPlanPanel extends JPanel {
 	/** Calendar widget */
 	private final CalendarWidget cal_widget = new CalendarWidget();
 
-	/** Table model for holidays */
-	private final HolidayModel h_model;
-
-	/** Table to hold the holiday list */
-	private final ZTable h_table = new ZTable();
-
-	/** Action to delete the selected holiday */
-	private final IAction del_holiday = new IAction(
-		"action.plan.holiday.delete")
-	{
-		protected void doActionPerformed(ActionEvent e) {
-			deleteSelectedHoliday();
-		}
-	};
+	/** Holiday table panel */
+	private final ProxyTablePanel<Holiday> hol_pnl;
 
 	/** User session */
 	private final Session session;
@@ -154,6 +149,9 @@ public class DayPlanPanel extends JPanel {
 		super(new GridBagLayout());
 		session = s;
 		cache = s.getSonarState().getDayPlans();
+		watcher = new ProxyWatcher<DayPlan>(cache, view, false);
+		hol_pnl = new ProxyTablePanel<Holiday>(new HolidayModel(s,
+			null));
 		ListModel m = s.getSonarState().getDayModel();
 		day_cbox.setAction(day);
 		day_cbox.setPrototypeDisplayValue("0123456789");
@@ -192,32 +190,12 @@ public class DayPlanPanel extends JPanel {
 		bag.gridwidth = 6;
 		bag.gridheight = 1;
 		add(cal_widget, bag);
-		h_model = new HolidayModel(s);
-		h_model.initialize();
-		final ListSelectionModel lsm = h_table.getSelectionModel();
-		lsm.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		h_table.setModel(h_model);
-		h_table.setAutoCreateColumnsFromModel(false);
-		h_table.setColumnModel(h_model.createColumnModel());
-		h_table.setRowHeight(ROW_HEIGHT);
-		h_table.setVisibleRowCount(12);
 		bag.gridx = 0;
 		bag.gridy = 2;
 		bag.gridwidth = 9;
 		bag.gridheight = 1;
-		JScrollPane h_pane = new JScrollPane(h_table,
-			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
-			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		add(h_pane, bag);
-		bag.gridx = 2;
-		bag.gridy = 6;
-		bag.gridwidth = GridBagConstraints.REMAINDER;
-		add(new JButton(del_holiday), bag);
+		add(hol_pnl, bag);
 		del_plan.setEnabled(false);
-		del_holiday.setEnabled(false);
-		createWidgetJobs();
-		listener = createDayPlanListener();
-		cache.addProxyListener(listener);
 	}
 
 	/** Create a calendar button */
@@ -229,41 +207,25 @@ public class DayPlanPanel extends JPanel {
 		return btn;
 	}
 
-	/** Create a proxy listener to update day plan holiday model */
-	private ProxyListener<DayPlan> createDayPlanListener() {
-		return new ProxyListener<DayPlan>() {
-			public void proxyAdded(DayPlan dp) {}
-			public void enumerationComplete() {}
-			public void proxyRemoved(DayPlan dp) {}
-			public void proxyChanged(DayPlan dp, String attrib) {
-				if(attrib.equals("holidays")) {
-					h_model.updateHolidays(dp);
-					updateCalendarWidget();
-				}
-			}
-		};
+	/** Initialize the panel */
+	public void initialize() {
+		hol_pnl.initialize();
+		watcher.initialize();
+		createWidgetJobs();
 	}
 
 	/** Dispose of the panel */
 	public void dispose() {
-		h_model.dispose();
-		cache.removeProxyListener(listener);
+		watcher.dispose();
+		hol_pnl.dispose();
 	}
 
 	/** Create jobs for widget actions */
 	private void createWidgetJobs() {
-		h_table.getSelectionModel().addListSelectionListener(
-			new IListSelectionAdapter()
-		{
-			@Override
-			public void valueChanged() {
-				selectHoliday();
-			}
-		});
 		cal_widget.setHighlighter(new CalendarWidget.Highlighter() {
 			public boolean isHighlighted(Calendar cal) {
 				DayPlan dp = getSelectedPlan();
-				if(dp != null)
+				if (dp != null)
 					return DayPlanHelper.isHoliday(dp, cal);
 				else
 					return false;
@@ -294,18 +256,20 @@ public class DayPlanPanel extends JPanel {
 	/** Select a day plan */
 	private void selectDayPlan() {
 		Object item = day_cbox.getSelectedItem();
-		if(item != null) {
+		if (item != null) {
 			DayPlan dp = getSelectedPlan();
-			h_model.setDayPlan(dp);
+			hol_pnl.setModel(new HolidayModel(session, dp));
+			watcher.setProxy(dp);
 			del_plan.setEnabled(canRemove(dp));
-			if(dp == null) {
+			if (dp == null) {
 				day_cbox.setSelectedItem(null);
 				String name = item.toString().trim();
-				if(name.length() > 0 && canAdd(name))
+				if (name.length() > 0 && canAdd(name))
 					cache.createObject(name);
 			}
 		} else {
-			h_model.setDayPlan(null);
+			hol_pnl.setModel(new HolidayModel(session, null));
+			watcher.setProxy(null);
 			del_plan.setEnabled(false);
 		}
 		updateCalendarWidget();
@@ -330,20 +294,6 @@ public class DayPlanPanel extends JPanel {
 				dp.destroy();
 			day_cbox.setSelectedItem(null);
 		}
-	}
-
-	/** Change the selected holiday */
-	private void selectHoliday() {
-		Holiday h = h_model.getProxy(h_table.getSelectedRow());
-		del_holiday.setEnabled(h_model.canRemove(h));
-	}
-
-	/** Delete the selected holiday */
-	private void deleteSelectedHoliday() {
-		ListSelectionModel s = h_table.getSelectionModel();
-		int row = s.getMinSelectionIndex();
-		if(row >= 0)
-			h_model.deleteRow(row);
 	}
 
 	/** Check if the user can add */
