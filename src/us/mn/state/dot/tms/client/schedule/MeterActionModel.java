@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
@@ -35,24 +35,16 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  *
  * @author Douglas Lau
  */
-public class MeterActionModel extends ProxyTableModel<MeterAction> {
+public class MeterActionModel extends ProxyTableModel2<MeterAction> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<MeterAction>> createColumns() {
 		ArrayList<ProxyColumn<MeterAction>> cols =
 			new ArrayList<ProxyColumn<MeterAction>>(2);
 		cols.add(new ProxyColumn<MeterAction>("ramp.meter.long", 160) {
 			public Object getValueAt(MeterAction ma) {
 				return ma.getRampMeter();
-			}
-			public boolean isEditable(MeterAction ma) {
-				return ma == null && canAdd();
-			}
-			public void setValueAt(MeterAction ma, Object value) {
-				String v = value.toString().trim();
-				RampMeter rm = RampMeterHelper.lookup(v);
-				if(rm != null && action_plan != null)
-					create(rm);
 			}
 		});
 		cols.add(new ProxyColumn<MeterAction>("action.plan.phase", 100){
@@ -63,7 +55,7 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 				return canUpdate(ma);
 			}
 			public void setValueAt(MeterAction ma, Object value) {
-				if(value instanceof PlanPhase)
+				if (value instanceof PlanPhase)
 					ma.setPhase((PlanPhase)value);
 			}
 			protected TableCellEditor createCellEditor() {
@@ -77,36 +69,51 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 	}
 
 	/** Currently selected action plan */
-	protected final ActionPlan action_plan;
-
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return action_plan != null && super.canAdd();
-	}
+	private final ActionPlan action_plan;
 
 	/** Plan phase model */
 	private final ProxyListModel<PlanPhase> phase_model;
 
 	/** Create a new meter action table model */
 	public MeterActionModel(Session s, ActionPlan ap) {
-		super(s, s.getSonarState().getMeterActions());
+		super(s, s.getSonarState().getMeterActions(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 		action_plan = ap;
 		phase_model = s.getSonarState().getPhaseModel();
 	}
 
-	/** Add a new proxy to the table model */
+	/** Get the SONAR type name */
 	@Override
-	protected int doProxyAdded(MeterAction ma) {
-		if (ma.getActionPlan() == action_plan)
-			return super.doProxyAdded(ma);
-		else
-			return -1;
+	protected String getSonarType() {
+		return MeterAction.SONAR_TYPE;
+	}
+
+	/** Check if a proxy is included in the list */
+	@Override
+	protected boolean check(MeterAction proxy) {
+		return proxy.getActionPlan() == action_plan;
+	}
+
+	/** Check if the user can add a proxy */
+	@Override
+	public boolean canAdd() {
+		return action_plan != null && super.canAdd();
+	}
+
+	/** Create an object with the name */
+	@Override
+	public void createObject(String name) {
+		RampMeter rm = RampMeterHelper.lookup(name.trim());
+		if (rm != null && action_plan != null)
+			create(rm);
 	}
 
 	/** Create a new meter action */
-	protected void create(RampMeter rm) {
+	private void create(RampMeter rm) {
 		String name = createUniqueName();
-		if(name != null) {
+		if (name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
@@ -117,17 +124,12 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 	}
 
 	/** Create a unique meter action name */
-	protected String createUniqueName() {
-		for(int uid = 1; uid <= 999; uid++) {
+	private String createUniqueName() {
+		for (int uid = 1; uid <= 999; uid++) {
 			String n = action_plan.getName() + "_" + uid;
-			if(cache.lookupObject(n) == null)
+			if (cache.lookupObject(n) == null)
 				return n;
 		}
 		return null;
-	}
-
-	/** Get the SONAR type name */
-	protected String getSonarType() {
-		return MeterAction.SONAR_TYPE;
 	}
 }

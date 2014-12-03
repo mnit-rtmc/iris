@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.client.widget.ITable;
 public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 
 	/** Table model */
-	private ProxyTableModel2<T> model;
+	protected ProxyTableModel2<T> model;
 
 	/** Proxy table */
 	private final ITable table;
@@ -59,11 +59,9 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	private final JTextField add_txt = new JTextField(16);
 
 	/** Action to create a proxy */
-	private final IAction add_proxy = new IAction("device.create") {
+	protected final IAction add_proxy = new IAction("device.create") {
 		protected void doActionPerformed(ActionEvent e) {
-			String name = add_txt.getText();
-			add_txt.setText("");
-			model.createObject(name);
+			createObject();
 		}
 	};
 
@@ -89,10 +87,6 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	public ProxyTablePanel(ProxyTableModel2<T> m) {
 		model = m;
 		table = createTable(m);
-		show_props.setEnabled(false);
-		add_txt.setEnabled(false);
-		add_proxy.setEnabled(false);
-		del_proxy.setEnabled(false);
 	}
 
 	/** Initialise the panel */
@@ -100,6 +94,10 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	public void initialize() {
 		super.initialize();
 		model.initialize();
+		show_props.setEnabled(false);
+		add_txt.setEnabled(false);
+		add_proxy.setEnabled(false);
+		del_proxy.setEnabled(false);
 		createJobs();
 		add(table, Stretch.FULL);
 		add(buildButtonPanel(), Stretch.FULL);
@@ -118,7 +116,9 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		m.initialize();
 		model = m;
 		table.setModel(m);
-		om.dispose();
+		if (om != null)
+			om.dispose();
+		add_proxy.setEnabled(m.canAdd());
 	}
 
 	/** Create the table */
@@ -163,11 +163,7 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 			hg.addGap(UI.hgap);
 		}
 		if (model.hasCreateDelete()) {
-			if (model.hasName()) {
-				hg.addComponent(add_txt);
-				vg.addComponent(add_txt);
-				hg.addGap(UI.hgap);
-			}
+			addExtraWidgets(hg, vg);
 			JButton add_btn = new JButton(add_proxy);
 			hg.addComponent(add_btn);
 			vg.addComponent(add_btn);
@@ -180,6 +176,24 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		gl.setVerticalGroup(vg);
 		pnl.setLayout(gl);
 		return pnl;
+	}
+
+	/** Add extra widgets to the button panel */
+	protected void addExtraWidgets(GroupLayout.SequentialGroup hg,
+		GroupLayout.ParallelGroup vg)
+	{
+		if (model.hasName()) {
+			hg.addComponent(add_txt);
+			vg.addComponent(add_txt);
+			hg.addGap(UI.hgap);
+		}
+	}
+
+	/** Create a new proxy object */
+	protected void createObject() {
+		String name = add_txt.getText();
+		add_txt.setText("");
+		model.createObject(name);
 	}
 
 	/** Get the currently selected proxy */

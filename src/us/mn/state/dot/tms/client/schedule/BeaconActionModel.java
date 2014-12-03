@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  *
  * @author Douglas Lau
  */
-public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
+public class BeaconActionModel extends ProxyTableModel2<BeaconAction> {
 
 	/** Create the columns in the model */
 	@Override
@@ -46,17 +46,8 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 			public Object getValueAt(BeaconAction la) {
 				return la.getBeacon();
 			}
-			public boolean isEditable(BeaconAction la) {
-				return la == null && canAdd();
-			}
-			public void setValueAt(BeaconAction la, Object value) {
-				String v = value.toString().trim();
-				Beacon b = BeaconHelper.lookup(v);
-				if(b != null && action_plan != null)
-					create(b);
-			}
 		});
-		cols.add(new ProxyColumn<BeaconAction>("action.plan.phase", 100) {
+		cols.add(new ProxyColumn<BeaconAction>("action.plan.phase",100){
 			public Object getValueAt(BeaconAction la) {
 				return la.getPhase();
 			}
@@ -64,7 +55,7 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 				return canUpdate(la);
 			}
 			public void setValueAt(BeaconAction la, Object value) {
-				if(value instanceof PlanPhase)
+				if (value instanceof PlanPhase)
 					la.setPhase((PlanPhase)value);
 			}
 			protected TableCellEditor createCellEditor() {
@@ -77,8 +68,33 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 		return cols;
 	}
 
-	/** Currently selected action plan */
+	/** Action plan */
 	private final ActionPlan action_plan;
+
+	/** Plan phase model */
+	private final ProxyListModel<PlanPhase> phase_model;
+
+	/** Create a new beacon action table model */
+	public BeaconActionModel(Session s, ActionPlan ap) {
+		super(s, s.getSonarState().getBeaconActions(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
+		action_plan = ap;
+		phase_model = s.getSonarState().getPhaseModel();
+	}
+
+	/** Get the SONAR type name */
+	@Override
+	protected String getSonarType() {
+		return BeaconAction.SONAR_TYPE;
+	}
+
+	/** Check if a proxy is included in the list */
+	@Override
+	protected boolean check(BeaconAction proxy) {
+		return proxy.getActionPlan() == action_plan;
+	}
 
 	/** Check if the user can add a proxy */
 	@Override
@@ -86,29 +102,18 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 		return action_plan != null && super.canAdd();
 	}
 
-	/** Plan phase model */
-	private final ProxyListModel<PlanPhase> phase_model;
-
-	/** Create a new beacon action table model */
-	public BeaconActionModel(Session s, ActionPlan ap) {
-		super(s, s.getSonarState().getBeaconActions());
-		action_plan = ap;
-		phase_model = s.getSonarState().getPhaseModel();
-	}
-
-	/** Add a new proxy to the table model */
+	/** Create an object with the beacon name */
 	@Override
-	protected int doProxyAdded(BeaconAction ba) {
-		if (ba.getActionPlan() == action_plan)
-			return super.doProxyAdded(ba);
-		else
-			return -1;
+	public void createObject(String name) {
+		Beacon b = BeaconHelper.lookup(name.trim());
+		if (b != null && action_plan != null)
+			create(b);
 	}
 
 	/** Create a new beacon action */
 	private void create(Beacon b) {
 		String name = createUniqueName();
-		if(name != null) {
+		if (name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
@@ -120,17 +125,11 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 
 	/** Create a unique beacon action name */
 	private String createUniqueName() {
-		for(int uid = 1; uid <= 999; uid++) {
+		for (int uid = 1; uid <= 999; uid++) {
 			String n = action_plan.getName() + "_" + uid;
-			if(cache.lookupObject(n) == null)
+			if (cache.lookupObject(n) == null)
 				return n;
 		}
 		return null;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return BeaconAction.SONAR_TYPE;
 	}
 }

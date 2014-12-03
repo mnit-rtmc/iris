@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
@@ -35,24 +35,16 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  *
  * @author Douglas Lau
  */
-public class LaneActionModel extends ProxyTableModel<LaneAction> {
+public class LaneActionModel extends ProxyTableModel2<LaneAction> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<LaneAction>> createColumns() {
 		ArrayList<ProxyColumn<LaneAction>> cols =
 			new ArrayList<ProxyColumn<LaneAction>>(2);
 		cols.add(new ProxyColumn<LaneAction>("lane.marking", 160) {
 			public Object getValueAt(LaneAction la) {
 				return la.getLaneMarking();
-			}
-			public boolean isEditable(LaneAction la) {
-				return la == null && canAdd();
-			}
-			public void setValueAt(LaneAction la, Object value) {
-				String v = value.toString().trim();
-				LaneMarking lm = LaneMarkingHelper.lookup(v);
-				if(lm != null && action_plan != null)
-					create(lm);
 			}
 		});
 		cols.add(new ProxyColumn<LaneAction>("action.plan.phase", 100) {
@@ -63,7 +55,7 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 				return canUpdate(la);
 			}
 			public void setValueAt(LaneAction la, Object value) {
-				if(value instanceof PlanPhase)
+				if (value instanceof PlanPhase)
 					la.setPhase((PlanPhase)value);
 			}
 			protected TableCellEditor createCellEditor() {
@@ -77,36 +69,51 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	}
 
 	/** Currently selected action plan */
-	protected final ActionPlan action_plan;
-
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return action_plan != null && super.canAdd();
-	}
+	private final ActionPlan action_plan;
 
 	/** Plan phase model */
 	private final ProxyListModel<PlanPhase> phase_model;
 
 	/** Create a new lane action table model */
 	public LaneActionModel(Session s, ActionPlan ap) {
-		super(s, s.getSonarState().getLaneActions());
+		super(s, s.getSonarState().getLaneActions(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 		action_plan = ap;
 		phase_model = s.getSonarState().getPhaseModel();
 	}
 
-	/** Add a new proxy to the table model */
+	/** Get the SONAR type name */
 	@Override
-	protected int doProxyAdded(LaneAction la) {
-		if (la.getActionPlan() == action_plan)
-			return super.doProxyAdded(la);
-		else
-			return -1;
+	protected String getSonarType() {
+		return LaneAction.SONAR_TYPE;
+	}
+
+	/** Check if a proxy is included in the list */
+	@Override
+	protected boolean check(LaneAction proxy) {
+		return proxy.getActionPlan() == action_plan;
+	}
+
+	/** Check if the user can add a proxy */
+	@Override
+	public boolean canAdd() {
+		return action_plan != null && super.canAdd();
+	}
+
+	/** Create an object with the name */
+	@Override
+	public void createObject(String name) {
+		LaneMarking lm = LaneMarkingHelper.lookup(name.trim());
+		if (lm != null && action_plan != null)
+			create(lm);
 	}
 
 	/** Create a new lane action */
-	protected void create(LaneMarking lm) {
+	private void create(LaneMarking lm) {
 		String name = createUniqueName();
-		if(name != null) {
+		if (name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
@@ -117,17 +124,12 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	}
 
 	/** Create a unique lane action name */
-	protected String createUniqueName() {
-		for(int uid = 1; uid <= 999; uid++) {
+	private String createUniqueName() {
+		for (int uid = 1; uid <= 999; uid++) {
 			String n = action_plan.getName() + "_" + uid;
-			if(cache.lookupObject(n) == null)
+			if (cache.lookupObject(n) == null)
 				return n;
 		}
 		return null;
-	}
-
-	/** Get the SONAR type name */
-	protected String getSonarType() {
-		return LaneAction.SONAR_TYPE;
 	}
 }

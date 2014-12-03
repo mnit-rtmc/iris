@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  *
  * @author Douglas Lau
  */
-public class DmsActionModel extends ProxyTableModel<DmsAction> {
+public class DmsActionModel extends ProxyTableModel2<DmsAction> {
 
 	/** Allowed activation priorities */
 	static private final DMSMessagePriority[] A_PRIORITIES = {
@@ -66,6 +66,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	};
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<DmsAction>> createColumns() {
 		ArrayList<ProxyColumn<DmsAction>> cols =
 			new ArrayList<ProxyColumn<DmsAction>>(6);
@@ -74,15 +75,6 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		{
 			public Object getValueAt(DmsAction da) {
 				return da.getSignGroup();
-			}
-			public boolean isEditable(DmsAction da) {
-				return da == null && canAdd();
-			}
-			public void setValueAt(DmsAction da, Object value) {
-				String v = value.toString().trim();
-				SignGroup sg = SignGroupHelper.lookup(v);
-				if(sg != null && action_plan != null)
-					create(sg);
 			}
 		});
 		cols.add(new ProxyColumn<DmsAction>("action.plan.phase", 100) {
@@ -93,7 +85,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return canUpdate(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
-				if(value instanceof PlanPhase)
+				if (value instanceof PlanPhase)
 					da.setPhase((PlanPhase)value);
 			}
 			protected TableCellEditor createCellEditor() {
@@ -141,7 +133,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return canUpdate(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
-				if(value instanceof DMSMessagePriority) {
+				if (value instanceof DMSMessagePriority) {
 					DMSMessagePriority p =
 						(DMSMessagePriority)value;
 					da.setActivationPriority(p.ordinal());
@@ -163,7 +155,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return canUpdate(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
-				if(value instanceof DMSMessagePriority) {
+				if (value instanceof DMSMessagePriority) {
 					DMSMessagePriority p =
 						(DMSMessagePriority)value;
 					da.setRunTimePriority(p.ordinal());
@@ -178,41 +170,56 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	}
 
 	/** Currently selected action plan */
-	protected final ActionPlan action_plan;
-
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return action_plan != null && super.canAdd();
-	}
+	private final ActionPlan action_plan;
 
 	/** Plan phase model */
 	private final ProxyListModel<PlanPhase> phase_model;
 
 	/** Create a new DMS action table model */
 	public DmsActionModel(Session s, ActionPlan ap) {
-		super(s, s.getSonarState().getDmsActions());
+		super(s, s.getSonarState().getDmsActions(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 		action_plan = ap;
 		phase_model = s.getSonarState().getPhaseModel();
 	}
 
-	/** Add a new proxy to the table model */
+	/** Get the SONAR type name */
 	@Override
-	protected int doProxyAdded(DmsAction da) {
-		if (da.getActionPlan() == action_plan)
-			return super.doProxyAdded(da);
-		else
-			return -1;
+	protected String getSonarType() {
+		return DmsAction.SONAR_TYPE;
+	}
+
+	/** Check if a proxy is included in the list */
+	@Override
+	protected boolean check(DmsAction proxy) {
+		return proxy.getActionPlan() == action_plan;
+	}
+
+	/** Check if the user can add a proxy */
+	@Override
+	public boolean canAdd() {
+		return action_plan != null && super.canAdd();
+	}
+
+	/** Create an object with the name */
+	@Override
+	public void createObject(String name) {
+		SignGroup sg = SignGroupHelper.lookup(name.trim());
+		if (sg != null && action_plan != null)
+			create(sg);
 	}
 
 	/** Create a new DMS action */
-	protected void create(SignGroup sg) {
+	private void create(SignGroup sg) {
 		String name = createUniqueName();
-		if(name != null) {
+		if (name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("action_plan", action_plan);
 			attrs.put("sign_group", sg);
-			attrs.put("phase", action_plan.getDefaultPhase());
+			attrs.put("phase", lookupPlanPhase());
 			attrs.put("a_priority",
 				DMSMessagePriority.SCHEDULED.ordinal());
 			attrs.put("r_priority",
@@ -221,24 +228,19 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		}
 	}
 
-	/** Lookup the appropriate plan phase for a DMS action */
-	private PlanPhase lookupPlanPhase() {
-		PlanPhase phase = PlanPhaseHelper.lookup("deployed");
-		return (phase != null) ? phase : action_plan.getDefaultPhase();
-	}
-
 	/** Create a unique DMS action name */
-	protected String createUniqueName() {
+	private String createUniqueName() {
 		for(int uid = 1; uid <= 999; uid++) {
 			String n = action_plan.getName() + "_" + uid;
-			if(cache.lookupObject(n) == null)
+			if (cache.lookupObject(n) == null)
 				return n;
 		}
 		return null;
 	}
 
-	/** Get the SONAR type name */
-	protected String getSonarType() {
-		return DmsAction.SONAR_TYPE;
+	/** Lookup the appropriate plan phase for a DMS action */
+	private PlanPhase lookupPlanPhase() {
+		PlanPhase phase = PlanPhaseHelper.lookup("deployed");
+		return (phase != null) ? phase : action_plan.getDefaultPhase();
 	}
 }
