@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
@@ -30,9 +30,10 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  *
  * @author Douglas Lau
  */
-public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
+public class PlanPhaseModel extends ProxyTableModel2<PlanPhase> {
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<PlanPhase>> createColumns() {
 		ArrayList<ProxyColumn<PlanPhase>> cols =
 			new ArrayList<ProxyColumn<PlanPhase>>(3);
@@ -41,14 +42,6 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 		{
 			public Object getValueAt(PlanPhase p) {
 				return p.getName();
-			}
-			public boolean isEditable(PlanPhase p) {
-				return p == null && canAdd();
-			}
-			public void setValueAt(PlanPhase p, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<PlanPhase>("action.plan.phase.hold",
@@ -61,7 +54,7 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 				return canUpdate(p);
 			}
 			public void setValueAt(PlanPhase p, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					p.setHoldTime((Integer)value);
 			}
 		});
@@ -75,7 +68,7 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 				return canUpdate(p);
 			}
 			public void setValueAt(PlanPhase p, Object value) {
-				if(value instanceof PlanPhase)
+				if (value instanceof PlanPhase)
 					p.setNextPhase((PlanPhase)value);
 				else
 					p.setNextPhase(null);
@@ -95,11 +88,15 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 
 	/** Create a new plan phase table model */
 	public PlanPhaseModel(Session s) {
-		super(s, s.getSonarState().getPlanPhases());
+		super(s, s.getSonarState().getPlanPhases(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 		phase_model = s.getSonarState().getPhaseModel();
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return PlanPhase.SONAR_TYPE;
 	}

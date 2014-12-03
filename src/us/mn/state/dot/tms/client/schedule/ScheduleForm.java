@@ -18,6 +18,7 @@ import java.awt.Color;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -44,15 +45,14 @@ public class ScheduleForm extends AbstractForm {
 	private final DayPlanPanel d_panel;
 
 	/** Plan phase panel */
-	private final PlanTablePanel<PlanPhase> pp_panel;
+	private final ProxyTablePanel<PlanPhase> pp_panel;
 
 	/** Create a new schedule form */
 	public ScheduleForm(Session s) {
 		super(I18N.get("action.plan.schedule.title"));
 		p_panel = new ActionPlanTab(s);
 		d_panel = new DayPlanPanel(s);
-		pp_panel = new PlanTablePanel<PlanPhase>();
-		pp_panel.setTableModel(new PlanPhaseModel(s));
+		pp_panel =new ProxyTablePanel<PlanPhase>(new PlanPhaseModel(s));
 	}
 
 	/** Initializze the widgets in the form */
