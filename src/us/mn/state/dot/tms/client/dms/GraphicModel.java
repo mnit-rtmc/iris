@@ -14,30 +14,94 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.Component;
 import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.io.IOException;
 import java.util.ArrayList;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JTable;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.TreeSet;
+import javax.imageio.ImageIO;
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableCellRenderer;
+import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.PixmapGraphic;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.widget.Invokable;
+import us.mn.state.dot.tms.client.widget.SwingRunner;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * Table model for graphics
+ * Table model for graphics.
  *
  * @author Douglas Lau
  */
-public class GraphicModel extends ProxyTableModel<Graphic> {
+public class GraphicModel extends ProxyTableModel2<Graphic> {
+
+	/** Filename extension filter */
+	static private final FileNameExtensionFilter FILTER =
+		new FileNameExtensionFilter(I18N.get("graphic.image.filter"),
+		"png", "gif", "bmp");
+
+	/** Maximum allowed graphic height */
+	static private final int MAX_GRAPHIC_HEIGHT = 144;
+
+	/** Maximum allowed graphic width */
+	static private final int MAX_GRAPHIC_WIDTH = 200;
+
+	/** Check if an image can be a valid graphic */
+	static private void checkImageValid(BufferedImage im)
+		throws ChangeVetoException
+	{
+		checkImageSizeValid(im);
+		checkImageColorModelValid(im);
+	}
+
+	/** Check if an image size is valid for a graphic */
+	static private void checkImageSizeValid(BufferedImage im)
+		throws ChangeVetoException
+	{
+		if (im.getHeight() > MAX_GRAPHIC_HEIGHT ||
+		    im.getWidth() > MAX_GRAPHIC_WIDTH)
+		{
+			throw new ChangeVetoException(I18N.get(
+				"graphic.image.too.large"));
+		}
+	}
+
+	/** Check if an image color model is valid for a graphic */
+	static private void checkImageColorModelValid(BufferedImage im)
+		throws ChangeVetoException
+	{
+		ColorModel cm = im.getColorModel();
+		int bpp = cm.getPixelSize();
+		if (bpp != 1 && bpp != 24) {
+			throw new ChangeVetoException(I18N.get(
+				"graphic.image.wrong.bpp"));
+		}
+		if (cm.hasAlpha()) {
+			throw new ChangeVetoException(I18N.get(
+				"graphic.image.no.transparency"));
+		}
+	}
+
+	/** Get the bits-per-pixel of an image */
+	static private int imageBpp(BufferedImage im) {
+		ColorModel cm = im.getColorModel();
+		return cm.getPixelSize();
+	}
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<Graphic>> createColumns() {
 		ArrayList<ProxyColumn<Graphic>> cols =
 			new ArrayList<ProxyColumn<Graphic>>(6);
@@ -56,7 +120,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 				return canUpdate(g);
 			}
 			public void setValueAt(Graphic g, Object value) {
-				if(value instanceof Integer)
+				if (value instanceof Integer)
 					g.setGNumber((Integer)value);
 			}
 		});
@@ -86,87 +150,150 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 				return g;
 			}
 			protected TableCellRenderer createCellRenderer() {
-				return new ImageCellRenderer();
+				return new GraphicCellRenderer();
 			}
 		});
 		return cols;
 	}
 
-	/** Create the image column */
-	protected class ImageCellRenderer implements TableCellRenderer {
-		protected final ImageIcon icon = new ImageIcon();
-		public Component getTableCellRendererComponent(
-			JTable table, Object value, boolean isSelected,
-			boolean hasFocus, int row, int column)
-		{
-			BufferedImage im = createImage(value);
-			if(im != null) {
-				icon.setImage(im);
-				return new JLabel(icon);
-			} else
-				return new JLabel();
-		}
-	}
-
-	/** Create an image */
-	static protected BufferedImage createImage(Object value) {
-		if(value instanceof Graphic) {
-			RasterGraphic rg = GraphicHelper.createRaster(
-				(Graphic)value);
-			if(rg instanceof BitmapGraphic)
-				return createBitmapImage((BitmapGraphic)rg);
-			if(rg instanceof PixmapGraphic)
-				return createPixmapImage((PixmapGraphic)rg);
-		}
-		return null;
-	}
-
-	/** Create a bitmap image */
-	static private BufferedImage createBitmapImage(BitmapGraphic bg) {
-		BufferedImage im = new BufferedImage(bg.getWidth(),
-			bg.getHeight(), BufferedImage.TYPE_INT_RGB);
-		final int rgb = 0xFFFFFF;
-		for(int y = 0; y < bg.getHeight(); y++) {
-			for(int x = 0; x < bg.getWidth(); x++) {
-				if(bg.getPixel(x, y).isLit())
-					im.setRGB(x, y, rgb);
-			}
-		}
-		return im;
-	}
-
-	/** Create a pixmap image */
-	static private BufferedImage createPixmapImage(PixmapGraphic pg) {
-		BufferedImage im = new BufferedImage(pg.getWidth(),
-			pg.getHeight(), BufferedImage.TYPE_INT_RGB);
-		for(int y = 0; y < pg.getHeight(); y++) {
-			for(int x = 0; x < pg.getWidth(); x++)
-				im.setRGB(x, y, pg.getPixel(x, y).rgb());
-		}
-		return im;
-	}
-
 	/** Create a new graphic table model */
 	public GraphicModel(Session s) {
-		super(s, s.getSonarState().getGraphics());
-	}
-
-	/** Add a new proxy to the table model */
-	@Override
-	protected int doProxyAdded(Graphic proxy) {
-		if (proxy.getGNumber() != null)
-			return super.doProxyAdded(proxy);
-		else
-			return -1;
-	}
-
-	/** Get the count of rows in the table */
-	public int getRowCount() {
-		return super.getRowCount() - 1;
+		super(s, s.getSonarState().getGraphics(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      false);	/* has_name */
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	protected String getSonarType() {
 		return Graphic.SONAR_TYPE;
+	}
+
+	/** Check if a proxy is included in the list */
+	@Override
+	protected boolean check(Graphic proxy) {
+		return proxy.getGNumber() != null;
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 5;
+	}
+
+	/** Get the row height */
+	@Override
+	public int getRowHeight() {
+		return MAX_GRAPHIC_HEIGHT / 2;
+	}
+
+	/** Create an object with the given name */
+	@Override
+	public void createObject(String name) {
+		SwingRunner.runSwing(new Invokable() {
+			public void invoke() throws Exception {
+				createGraphic();
+			}
+		});
+	}
+
+	/** Create a new graphic */
+	private void createGraphic() throws IOException, ChangeVetoException {
+		JFileChooser jfc = new JFileChooser();
+		jfc.setFileFilter(FILTER);
+		int r = jfc.showOpenDialog(null);
+		if (r == JFileChooser.APPROVE_OPTION) {
+			BufferedImage im = ImageIO.read(jfc.getSelectedFile());
+			checkImageValid(im);
+			createGraphic(im);
+		}
+	}
+
+	/** Create a new graphic */
+	private void createGraphic(BufferedImage im) throws ChangeVetoException{
+		String name = createUniqueName();
+		Integer g_number = getGNumber();
+		RasterGraphic rg = createRaster(im);
+		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		attrs.put("g_number", g_number);
+		attrs.put("bpp", imageBpp(im));
+		attrs.put("width", im.getWidth());
+		attrs.put("height", im.getHeight());
+		attrs.put("pixels", encodePixels(rg));
+		cache.createObject(name, attrs);
+	}
+
+	/** Create a unique Graphic name */
+	private String createUniqueName() throws ChangeVetoException {
+		for (int uid = 1; uid <= 256; uid++) {
+			String n = "G_" + uid;
+			if (GraphicHelper.lookup(n) == null)
+				return n;
+		}
+		throw new ChangeVetoException(I18N.get("graphic.too.many"));
+	}
+
+	/** Get the next available graphic number */
+	private Integer getGNumber() throws ChangeVetoException {
+		TreeSet<Integer> gnums = new TreeSet<Integer>();
+		Iterator<Graphic> it = GraphicHelper.iterator();
+		while (it.hasNext()) {
+			Graphic g = it.next();
+			Integer gn = g.getGNumber();
+			if (gn != null)
+				gnums.add(gn);
+		}
+		for (int i = 1; i < 256; i++) {
+			if (!gnums.contains(i))
+				return i;
+		}
+		throw new ChangeVetoException(I18N.get("graphic.too.many"));
+	}
+
+	/** Create a raster graphic from a buffered image */
+	private RasterGraphic createRaster(BufferedImage im)
+		throws ChangeVetoException
+	{
+		switch (imageBpp(im)) {
+		case 1:
+			return createBitmap(im);
+		case 24:
+			return createPixmap(im);
+		default:
+			throw new ChangeVetoException(I18N.get(
+				"graphic.image.wrong.bpp"));
+		}
+	}
+
+	/** Create a bitmap graphic from a buffered image */
+	private RasterGraphic createBitmap(BufferedImage im) {
+		BitmapGraphic bg = new BitmapGraphic(im.getWidth(),
+			im.getHeight());
+		for (int y = 0; y < im.getHeight(); y++) {
+			for (int x = 0; x < im.getWidth(); x++) {
+				if ((im.getRGB(x, y) & 0xFFFFFF) > 0)
+					bg.setPixel(x, y, DmsColor.AMBER);
+			}
+		}
+		return bg;
+	}
+
+	/** Create a pixmap graphic from a buffered image */
+	private RasterGraphic createPixmap(BufferedImage im) {
+		PixmapGraphic pg = new PixmapGraphic(im.getWidth(),
+			im.getHeight());
+		for (int y = 0; y < im.getHeight(); y++) {
+			for (int x = 0; x < im.getWidth(); x++) {
+				DmsColor c = new DmsColor(im.getRGB(x, y));
+				pg.setPixel(x, y, c);
+			}
+		}
+		return pg;
+	}
+
+	/** Enocde the pixels of a raster to Base64 */
+	private String encodePixels(RasterGraphic rg) {
+		return Base64.encode(rg.getPixels());
 	}
 }
