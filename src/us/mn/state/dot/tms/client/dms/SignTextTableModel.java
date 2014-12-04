@@ -33,14 +33,20 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class SignTextTableModel extends ProxyTableModel<SignText> {
 
+	/** Format MULTI string */
+	static private String formatMulti(Object value) {
+		return MultiParser.normalize(value.toString().trim());
+	}
+
 	/** Cell renderer for this table */
-	static protected final DefaultTableCellRenderer RENDERER =
+	static private final DefaultTableCellRenderer RENDERER =
 		new DefaultTableCellRenderer();
 	static {
 		RENDERER.setHorizontalAlignment(SwingConstants.CENTER);
 	}
 
 	/** Create the columns in the model */
+	@Override
 	protected ArrayList<ProxyColumn<SignText>> createColumns() {
 		ArrayList<ProxyColumn<SignText>> cols =
 			new ArrayList<ProxyColumn<SignText>>(3);
@@ -52,7 +58,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 				return canUpdate(st);
 			}
 			public void setValueAt(SignText st, Object value) {
-				if(value instanceof Number) {
+				if (value instanceof Number) {
 					Number n = (Number)value;
 					st.setLine(n.shortValue());
 				}
@@ -63,16 +69,16 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 				return st.getMulti();
 			}
 			public boolean isEditable(SignText st) {
-				if(st != null)
+				if (st != null)
 					return canUpdate(st);
 				else
 					return canAdd();
 			}
 			public void setValueAt(SignText st, Object value) {
 				String v = formatMulti(value);
-				if(st != null)
+				if (st != null)
 					st.setMulti(v);
-				else if(v.length() > 0)
+				else if (v.length() > 0)
 					createSignText(v);
 			}
 			protected TableCellRenderer createCellRenderer() {
@@ -89,7 +95,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 				return canUpdate(st);
 			}
 			public void setValueAt(SignText st, Object value) {
-				if(value instanceof Number) {
+				if (value instanceof Number) {
 					Number n = (Number)value;
 					st.setRank(n.shortValue());
 				}
@@ -101,9 +107,17 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 		return cols;
 	}
 
-	/** Format MULTI string */
-	static protected String formatMulti(Object value) {
-		return MultiParser.normalize(value.toString().trim());
+	/** Sign group */
+	private final SignGroup group;
+
+	/** Sign text creator */
+	private final SignTextCreator creator;
+
+	/** Create a new sign text table model */
+	public SignTextTableModel(Session s, SignGroup g) {
+		super(s, s.getSonarState().getDmsCache().getSignText());
+		group = g;
+		creator = new SignTextCreator(s);
 	}
 
 	/** Get a proxy comparator */
@@ -121,26 +135,14 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 			return -1;
 	}
 
-	/** Sign group */
-	protected final SignGroup group;
-
-	/** Sign text creator */
-	protected final SignTextCreator creator;
-
-	/** Create a new sign text table model */
-	public SignTextTableModel(Session s, SignGroup g) {
-		super(s, s.getSonarState().getDmsCache().getSignText());
-		group = g;
-		creator = new SignTextCreator(s);
+	/** Check if the user can add a proxy */
+	@Override
+	public boolean canAdd() {
+		return creator.canAddSignText(group.getName() + "_XX");
 	}
 
 	/** Create a new sign text message using default line and rank values */
-	protected void createSignText(String multi) {
+	private void createSignText(String multi) {
 		creator.create(group, (short)1, multi, (short)50);
-	}
-
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return creator.canAddSignText(group.getName() + "_XX");
 	}
 }
