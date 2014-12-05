@@ -240,9 +240,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 
 	/** Select a new proxy */
 	protected void selectProxy() {
-		T proxy = getSelectedProxy();
-		show_props.setEnabled(proxy != null);
-		del_proxy.setEnabled(canRemove(proxy));
+		updateButtons();
 	}
 
 	/** Select a new proxy */
@@ -254,6 +252,13 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 			table.scrollRectToVisible(
 				table.getCellRect(row, 0, true));
 		}
+	}
+
+	/** Update the button enabled states */
+	public void updateButtons() {
+		T proxy = getSelectedProxy();
+		show_props.setEnabled(proxy != null);
+		del_proxy.setEnabled(canRemove(proxy));
 	}
 
 	/** Check if a proxy can be removed */

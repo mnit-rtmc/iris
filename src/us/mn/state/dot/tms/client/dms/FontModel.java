@@ -18,14 +18,14 @@ import java.util.ArrayList;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for DMS fonts.
  *
  * @author Douglas Lau
  */
-public class FontModel extends ProxyTableModel<Font> {
+public class FontModel extends ProxyTableModel2<Font> {
 
 	/** Create the columns in the model */
 	@Override
@@ -35,14 +35,6 @@ public class FontModel extends ProxyTableModel<Font> {
 		cols.add(new ProxyColumn<Font>("font", 140) {
 			public Object getValueAt(Font f) {
 				return f.getName();
-			}
-			public boolean isEditable(Font f) {
-				return (f == null) && canAdd();
-			}
-			public void setValueAt(Font f, Object value) {
-				String v = value.toString().trim();
-				if(v.length() > 0)
-					cache.createObject(v);
 			}
 		});
 		cols.add(new ProxyColumn<Font>("font.number", 70,
@@ -128,12 +120,21 @@ public class FontModel extends ProxyTableModel<Font> {
 
 	/** Create a new font table model */
 	public FontModel(Session s) {
-		super(s, s.getSonarState().getDmsCache().getFonts());
+		super(s, s.getSonarState().getDmsCache().getFonts(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 	}
 
 	/** Get the SONAR type name */
 	@Override
 	protected String getSonarType() {
 		return Font.SONAR_TYPE;
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 6;
 	}
 }
