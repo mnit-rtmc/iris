@@ -133,6 +133,7 @@ public class PropMessages extends JPanel {
 
 	/** Initialize the messages panel */
 	public void initialize() {
+		setBorder(UI.border);
 		sign_group_pnl.initialize();
 		sign_text_pnl.initialize();
 		font_cbx.setAction(new IAction("font") {
@@ -161,6 +162,7 @@ public class PropMessages extends JPanel {
 		gl.setAutoCreateContainerGaps(false);
 		gl.setHorizontalGroup(createHorizontalGroup(gl));
 		gl.setVerticalGroup(createVerticalGroup(gl));
+		gl.linkSize(font_lbl, font_height_ilbl);
 		setLayout(gl);
 	}
 

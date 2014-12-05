@@ -38,7 +38,7 @@ public class SignGroupTableModel extends ProxyTableModel2<SignGroup> {
 	protected ArrayList<ProxyColumn<SignGroup>> createColumns() {
 		ArrayList<ProxyColumn<SignGroup>> cols =
 			new ArrayList<ProxyColumn<SignGroup>>(2);
-		cols.add(new ProxyColumn<SignGroup>("dms.group", 120) {
+		cols.add(new ProxyColumn<SignGroup>("dms.group", 200) {
 			public Object getValueAt(SignGroup sg) {
 				return sg.getName();
 			}
