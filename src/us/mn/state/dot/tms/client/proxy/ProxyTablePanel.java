@@ -46,7 +46,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 	private final JScrollPane scroll_pn;
 
 	/** Button panel */
-	private final JPanel button_pnl;
+	private final JPanel button_pnl = new JPanel();
 
 	/** Action to display the proxy properties */
 	private final IAction show_props = new IAction("device.properties") {
@@ -93,7 +93,6 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		model = m;
 		table = createTable(m);
 		scroll_pn = createScrollPane(table);
-		button_pnl = buildButtonPanel();
 	}
 
 	/** Initialise the panel */
@@ -105,6 +104,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		add_proxy.setEnabled(false);
 		del_proxy.setEnabled(false);
 		createJobs();
+		initButtonPanel();
 		layoutPanel();
 	}
 
@@ -189,10 +189,9 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		}
 	}
 
-	/** Build the button panel */
-	private JPanel buildButtonPanel() {
-		JPanel pnl = new JPanel();
-		GroupLayout gl = new GroupLayout(pnl);
+	/** Initialize the button panel */
+	private void initButtonPanel() {
+		GroupLayout gl = new GroupLayout(button_pnl);
 		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
 		GroupLayout.ParallelGroup vg = gl.createBaselineGroup(false,
 			false);
@@ -213,8 +212,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		}
 		gl.setHorizontalGroup(hg);
 		gl.setVerticalGroup(vg);
-		pnl.setLayout(gl);
-		return pnl;
+		button_pnl.setLayout(gl);
 	}
 
 	/** Add extra widgets to the button panel */
