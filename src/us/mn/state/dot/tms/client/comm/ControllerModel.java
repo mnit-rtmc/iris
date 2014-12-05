@@ -33,14 +33,14 @@ import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for controllers.
  *
  * @author Douglas Lau
  */
-public class ControllerModel extends ProxyTableModel2<Controller> {
+public class ControllerModel extends ProxyTableModel<Controller> {
 
 	/** Color to display inactive controllers */
 	static private final Color COLOR_INACTIVE = new Color(0, 0, 0, 32);

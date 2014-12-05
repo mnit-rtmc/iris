@@ -19,14 +19,14 @@ import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for modems
  *
  * @author Douglas Lau
  */
-public class ModemModel extends ProxyTableModel2<Modem> {
+public class ModemModel extends ProxyTableModel<Modem> {
 
 	/** Create the columns in the model */
 	@Override

@@ -29,7 +29,7 @@ public class ProxyTableForm<T extends SonarObject> extends AbstractForm {
 	protected final ProxyTablePanel<T> panel;
 
 	/** Create a new proxy table form */
-	public ProxyTableForm(String t, ProxyTableModel2<T> m) {
+	public ProxyTableForm(String t, ProxyTableModel<T> m) {
 		super(t);
 		panel = new ProxyTablePanel<T>(m);
 	}

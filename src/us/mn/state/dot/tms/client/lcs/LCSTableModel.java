@@ -22,14 +22,14 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for LCS within an array.
  *
  * @author Douglas Lau
  */
-public class LCSTableModel extends ProxyTableModel2<LCS> {
+public class LCSTableModel extends ProxyTableModel<LCS> {
 
 	/** Create the columns in the model */
 	@Override

@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -78,7 +78,7 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 
 	/** Set the model */
 	@Override
-	public void setModel(ProxyTableModel2<TimeAction> m) {
+	public void setModel(ProxyTableModel<TimeAction> m) {
 		super.setModel(m);
 		boolean e = m.canAdd();
 		day_plan_lbl.setEnabled(e);
@@ -131,7 +131,7 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 
 	/** Get the time action model */
 	private TimeActionModel getTimeActionModel() {
-		ProxyTableModel2<TimeAction> mdl = model;
+		ProxyTableModel<TimeAction> mdl = model;
 		return (mdl instanceof TimeActionModel)
 		     ? (TimeActionModel)mdl
 		     : null;

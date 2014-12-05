@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  *
  * @author Douglas Lau
  */
-public class DmsActionModel extends ProxyTableModel2<DmsAction> {
+public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Allowed activation priorities */
 	static private final DMSMessagePriority[] A_PRIORITIES = {

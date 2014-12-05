@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for system attributes.
@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SystemAttributeTableModel extends ProxyTableModel2<SystemAttribute>
+public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 {
 	/** Check if a system attribute value is default */
 	static private boolean isValueDefault(SystemAttribute sa) {

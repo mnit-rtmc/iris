@@ -24,14 +24,14 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for sign text.
  *
  * @author Douglas Lau
  */
-public class SignTextTableModel extends ProxyTableModel2<SignText> {
+public class SignTextTableModel extends ProxyTableModel<SignText> {
 
 	/** Default rank */
 	static private final short DEF_RANK = (short)50;

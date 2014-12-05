@@ -24,14 +24,14 @@ import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for cabinet styles
  *
  * @author Douglas Lau
  */
-public class CabinetStyleModel extends ProxyTableModel2<CabinetStyle> {
+public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 
 	/** Create the columns in the model */
 	@Override

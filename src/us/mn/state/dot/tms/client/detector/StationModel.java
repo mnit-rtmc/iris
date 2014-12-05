@@ -21,14 +21,14 @@ import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for stations.
  *
  * @author Douglas Lau
  */
-public class StationModel extends ProxyTableModel2<Station> {
+public class StationModel extends ProxyTableModel<Station> {
 
 	/** R_Node selection model */
 	private final ProxySelectionModel<R_Node> sel_model;

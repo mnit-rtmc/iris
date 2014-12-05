@@ -19,14 +19,14 @@ import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for beacons.
  *
  * @author Douglas Lau
  */
-public class BeaconModel extends ProxyTableModel2<Beacon> {
+public class BeaconModel extends ProxyTableModel<Beacon> {
 
 	/** Create the columns in the model */
 	@Override

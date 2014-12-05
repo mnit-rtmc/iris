@@ -19,14 +19,14 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for LCS arrays.
  *
  * @author Douglas Lau
  */
-public class LCSArrayModel extends ProxyTableModel2<LCSArray> {
+public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 
 	/** Create the columns in the model */
 	@Override

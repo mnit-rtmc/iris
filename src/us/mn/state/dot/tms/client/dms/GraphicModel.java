@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.PixmapGraphic;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.Invokable;
 import us.mn.state.dot.tms.client.widget.SwingRunner;
 import us.mn.state.dot.tms.utils.I18N;
@@ -45,7 +45,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class GraphicModel extends ProxyTableModel2<Graphic> {
+public class GraphicModel extends ProxyTableModel<Graphic> {
 
 	/** Filename extension filter */
 	static private final FileNameExtensionFilter FILTER =

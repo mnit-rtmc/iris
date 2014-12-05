@@ -19,14 +19,14 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for detectors
  *
  * @author Douglas Lau
  */
-public class DetectorModel extends ProxyTableModel2<Detector> {
+public class DetectorModel extends ProxyTableModel<Detector> {
 
 	/** Create the columns in the model */
 	@Override

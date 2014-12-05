@@ -28,14 +28,14 @@ import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for lane-use MULTI.
  *
  * @author Douglas Lau
  */
-public class LaneUseMultiModel extends ProxyTableModel2<LaneUseMulti> {
+public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 
 	/** Create the columns in the model */
 	@Override

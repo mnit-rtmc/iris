@@ -19,14 +19,14 @@ import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for lane markings.
  *
  * @author Douglas Lau
  */
-public class LaneMarkingModel extends ProxyTableModel2<LaneMarking> {
+public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 
 	/** Create the columns in the model */
 	@Override

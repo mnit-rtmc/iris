@@ -18,14 +18,14 @@ import java.util.ArrayList;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for DMS fonts.
  *
  * @author Douglas Lau
  */
-public class FontModel extends ProxyTableModel2<Font> {
+public class FontModel extends ProxyTableModel<Font> {
 
 	/** Create the columns in the model */
 	@Override

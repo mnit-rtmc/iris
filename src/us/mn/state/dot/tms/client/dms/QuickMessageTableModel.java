@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for quick messages, which is for editing and creating
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class QuickMessageTableModel extends ProxyTableModel2<QuickMessage> {
+public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 
 	/** Create the columns in the model */
 	@Override

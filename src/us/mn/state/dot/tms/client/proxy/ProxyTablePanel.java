@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.client.widget.ITable;
 public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 
 	/** Table model */
-	protected ProxyTableModel2<T> model;
+	protected ProxyTableModel<T> model;
 
 	/** Proxy table */
 	private final ITable table;
@@ -89,7 +89,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 	};
 
 	/** Create a new proxy table panel */
-	public ProxyTablePanel(ProxyTableModel2<T> m) {
+	public ProxyTablePanel(ProxyTableModel<T> m) {
 		model = m;
 		table = createTable(m);
 		scroll_pn = createScrollPane(table);
@@ -143,8 +143,8 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 	}
 
 	/** Set the model */
-	public void setModel(ProxyTableModel2<T> m) {
-		ProxyTableModel2<T> om = model;
+	public void setModel(ProxyTableModel<T> m) {
+		ProxyTableModel<T> om = model;
 		m.initialize();
 		model = m;
 		table.setModel(m);
@@ -154,7 +154,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 	}
 
 	/** Create the table */
-	private ITable createTable(ProxyTableModel2<T> m) {
+	private ITable createTable(ProxyTableModel<T> m) {
 		ITable t = new ITable(m);
 		t.setAutoCreateColumnsFromModel(false);
 		t.setColumnModel(m.createColumnModel());

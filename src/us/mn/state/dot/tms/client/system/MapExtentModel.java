@@ -24,14 +24,14 @@ import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for map extents.
  *
  * @author Douglas Lau
  */
-public class MapExtentModel extends ProxyTableModel2<MapExtent> {
+public class MapExtentModel extends ProxyTableModel<MapExtent> {
 
 	/** Create the columns in the model */
 	@Override

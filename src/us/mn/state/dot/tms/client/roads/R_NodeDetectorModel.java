@@ -21,14 +21,14 @@ import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for r_node detectors
  *
  * @author Douglas Lau
  */
-public class R_NodeDetectorModel extends ProxyTableModel2<Detector> {
+public class R_NodeDetectorModel extends ProxyTableModel<Detector> {
 
 	/** Create the columns in the model */
 	@Override

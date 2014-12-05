@@ -18,14 +18,14 @@ import java.util.ArrayList;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for IRIS roles.
  *
  * @author Douglas Lau
  */
-public class RoleModel extends ProxyTableModel2<Role> {
+public class RoleModel extends ProxyTableModel<Role> {
 
 	/** Create the columns in the model */
 	@Override

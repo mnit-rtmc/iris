@@ -23,14 +23,14 @@ import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for roads
  *
  * @author Douglas Lau
  */
-public class RoadModel extends ProxyTableModel2<Road> {
+public class RoadModel extends ProxyTableModel<Road> {
 
 	/** Create the columns in the model */
 	@Override

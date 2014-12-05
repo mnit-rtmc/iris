@@ -18,14 +18,14 @@ import java.util.ArrayList;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for IRIS capabilities
  *
  * @author Douglas Lau
  */
-public class CapabilityModel extends ProxyTableModel2<Capability> {
+public class CapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Create the columns in the model */
 	@Override

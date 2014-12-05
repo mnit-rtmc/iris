@@ -19,14 +19,14 @@ import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for IRIS connections
  *
  * @author Douglas Lau
  */
-public class ConnectionModel extends ProxyTableModel2<Connection> {
+public class ConnectionModel extends ProxyTableModel<Connection> {
 
 	/** Create the columns in the model */
 	@Override

@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -34,7 +34,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class HolidayModel extends ProxyTableModel2<Holiday> {
+public class HolidayModel extends ProxyTableModel<Holiday> {
 
 	/** Date format symbols */
 	static private final DateFormatSymbols SYMBOLS =

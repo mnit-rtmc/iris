@@ -25,7 +25,7 @@ import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class AlarmModel extends ProxyTableModel2<Alarm> {
+public class AlarmModel extends ProxyTableModel<Alarm> {
 
 	/** Create the columns in the model */
 	@Override

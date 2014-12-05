@@ -19,14 +19,14 @@ import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for weather sensors.
  *
  * @author Douglas Lau
  */
-public class WeatherSensorModel extends ProxyTableModel2<WeatherSensor> {
+public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
 
 	/** Create the columns in the model */
 	@Override

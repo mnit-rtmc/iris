@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -88,7 +88,7 @@ public class ActionPlanPanel extends ProxyTablePanel<ActionPlan> {
 
 	/** Get the action plan model */
 	private ActionPlanModel getActionPlanModel() {
-		ProxyTableModel2<ActionPlan> mdl = model;
+		ProxyTableModel<ActionPlan> mdl = model;
 		return (mdl instanceof ActionPlanModel)
 		     ? (ActionPlanModel)mdl
 		     : null;

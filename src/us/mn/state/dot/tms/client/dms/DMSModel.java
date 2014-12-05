@@ -19,14 +19,14 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for Dynamic Message Signs.
  *
  * @author Douglas Lau
  */
-public class DMSModel extends ProxyTableModel2<DMS> {
+public class DMSModel extends ProxyTableModel<DMS> {
 
 	/** Create the columns in the model */
 	@Override

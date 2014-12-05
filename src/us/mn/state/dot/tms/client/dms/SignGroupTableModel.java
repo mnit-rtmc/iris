@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
 
 /**
@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
  *
  * @author Douglas Lau
  */
-public class SignGroupTableModel extends ProxyTableModel2<SignGroup> {
+public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 
 	/** Create the columns in the model */
 	@Override

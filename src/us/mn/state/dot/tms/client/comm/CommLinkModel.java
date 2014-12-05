@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.units.Interval;
 
 /**
@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.units.Interval;
  *
  * @author Douglas Lau
  */
-public class CommLinkModel extends ProxyTableModel2<CommLink> {
+public class CommLinkModel extends ProxyTableModel<CommLink> {
 
 	/** List of all possible protocol selections */
 	static private final LinkedList<String> PROTOCOLS =

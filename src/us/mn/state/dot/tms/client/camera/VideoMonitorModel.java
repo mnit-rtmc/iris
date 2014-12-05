@@ -18,14 +18,14 @@ import java.util.ArrayList;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for video monitors
  *
  * @author Douglas Lau
  */
-public class VideoMonitorModel extends ProxyTableModel2<VideoMonitor> {
+public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 
 	/** Create the columns in the model */
 	@Override

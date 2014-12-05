@@ -20,14 +20,14 @@ import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for IRIS privileges.
  *
  * @author Douglas Lau
  */
-public class PrivilegeModel extends ProxyTableModel2<Privilege> {
+public class PrivilegeModel extends ProxyTableModel<Privilege> {
 
 	/** Create the columns in the model */
 	@Override

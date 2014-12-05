@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
  *
  * @author Douglas Lau
  */
-abstract public class ProxyTableModel2<T extends SonarObject>
+abstract public class ProxyTableModel<T extends SonarObject>
 	extends AbstractTableModel implements ITableModel
 {
 	/** User session */
@@ -69,7 +69,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	private final SwingProxyAdapter<T> listener = new SwingProxyAdapter<T>()
 	{
 		protected Comparator<T> comparator() {
-			return ProxyTableModel2.this.comparator();
+			return ProxyTableModel.this.comparator();
 		}
 		protected void proxyAddedSwing(T proxy) {
 			int i = doProxyAdded(proxy);
@@ -94,7 +94,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 			proxyChangedSwing(proxy);
 		}
 		protected boolean checkAttributeChange(String attr) {
-			return ProxyTableModel2.this.checkAttributeChange(attr);
+			return ProxyTableModel.this.checkAttributeChange(attr);
 		}
 	};
 
@@ -104,7 +104,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	 * @param hp Flag to add properties button.
 	 * @param hcd Flag to add create and delete buttons.
 	 * @param hn Flag to add name text field. */
-	public ProxyTableModel2(Session s, TypeCache<T> c, boolean hp,
+	public ProxyTableModel(Session s, TypeCache<T> c, boolean hp,
 		boolean hcd, boolean hn)
 	{
 		session = s;

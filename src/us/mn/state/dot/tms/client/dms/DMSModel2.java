@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for DMS table form 2.
@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
  * @author Douglas Lau
  * @see DMSForm, DMSForm2
  */
-public class DMSModel2 extends ProxyTableModel2<DMS> {
+public class DMSModel2 extends ProxyTableModel<DMS> {
 
 	/** Create the columns in the model */
 	@Override
