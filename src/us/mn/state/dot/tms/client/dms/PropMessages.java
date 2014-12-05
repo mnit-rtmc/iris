@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,23 +16,15 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import javax.swing.BorderFactory;
-import javax.swing.JButton;
+import javax.swing.GroupLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.table.DefaultTableModel;
-import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.MultiString;
@@ -42,13 +34,12 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
-import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
-import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.INCHES;
 import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
@@ -68,42 +59,27 @@ public class PropMessages extends JPanel {
 		     ? Distance.Units.CENTIMETERS : INCHES;
 	}
 
-	/** Sign group table model */
-	private final SignGroupTableModel sign_group_model;
+	/** Sign grou panel */
+	private final ProxyTablePanel<SignGroup> sign_group_pnl;
 
-	/** Sign group table component */
-	private final ZTable group_table = new ZTable();
+	/** Sign text panel */
+	private final ProxyTablePanel<SignText> sign_text_pnl;
 
-	/** Action to delete a sign group */
-	private final IAction delete_group = new IAction("dms.group.delete") {
-		protected void doActionPerformed(ActionEvent e) {
-			SignGroup group = getSelectedGroup();
-			if(group != null)
-				group.destroy();
-		}
-	};
-
-	/** Sign text table model */
-	private SignTextTableModel sign_text_model;
-
-	/** Sign text table component */
-	private final ZTable sign_text_table = new ZTable();
-
-	/** Action to delete sign text message */
-	private final IAction delete_text = new IAction("dms.message.delete") {
-		 protected void doActionPerformed(ActionEvent e) {
-			SignText sign_text = getSelectedSignText();
-			if(sign_text != null)
-				sign_text.destroy();
-		}
-	};
+	/** Preview panel */
+	private final JPanel preview_pnl;
 
 	/** Sign pixel panel */
 	private final SignPixelPanel pixel_pnl = new SignPixelPanel(40, 400,
 		true);
 
+	/** Default font label */
+	private final ILabel font_lbl = new ILabel("dms.font.default");
+
 	/** Default font combo box */
 	private final JComboBox font_cbx = new JComboBox();
+
+	/** Font height label */
+	private final ILabel font_height_ilbl = new ILabel("dms.font.height");
 
 	/** Font height label */
 	private final JLabel font_height_lbl = IPanel.createValueLabel();
@@ -129,27 +105,36 @@ public class PropMessages extends JPanel {
 	/** User session */
 	private final Session session;
 
-	/** DMS cache */
-	private final DmsCache dms_cache;
-
 	/** DMS proxy */
 	private final DMS proxy;
 
-	/** Check if the user can update an attribute */
-	private boolean canUpdate(String aname) {
-		return session.canUpdate(proxy, aname);
-	}
-
 	/** Create a new DMS properties messages panel */
 	public PropMessages(Session s, DMS sign) {
-		super(new GridBagLayout());
 		session = s;
-		dms_cache = s.getSonarState().getDmsCache();
 		proxy = sign;
-		sign_group_model = new SignGroupTableModel(s, sign);
-		sign_group_model.initialize();
-		initGroupTable();
-		initSignTextTable();
+		sign_group_pnl = new ProxyTablePanel<SignGroup>(
+			new SignGroupTableModel(s, sign))
+		{
+			protected void selectProxy() {
+				super.selectProxy();
+				selectGroup();
+			}
+		};
+		sign_text_pnl = new ProxyTablePanel<SignText>(
+			new SignTextTableModel(s, null))
+		{
+			protected void selectProxy() {
+				super.selectProxy();
+				selectSignText();
+			}
+		};
+		preview_pnl = createPreviewPanel();
+	}
+
+	/** Initialize the messages panel */
+	public void initialize() {
+		sign_group_pnl.initialize();
+		sign_text_pnl.initialize();
 		font_cbx.setAction(new IAction("font") {
 			protected void doActionPerformed(ActionEvent e) {
 				proxy.setDefaultFont(
@@ -157,178 +142,98 @@ public class PropMessages extends JPanel {
 			}
 		});
 		font_cbx.setModel(new WrapperComboBoxModel(
-			dms_cache.getFontModel()));
-		initWidgets();
+			session.getSonarState().getDmsCache().getFontModel()));
+		layoutPanel();
 	}
 
 	/** Dispose of the form */
 	public void dispose() {
-		sign_group_model.dispose();
-		if(sign_text_model != null)
-			sign_text_model.dispose();
+		sign_group_pnl.dispose();
+		sign_text_pnl.dispose();
+		removeAll();
 	}
 
-	/** Initialize the widgets on the tab */
-	private void initWidgets() {
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets = UI.insets();
-		bag.fill = GridBagConstraints.BOTH;
-		bag.gridx = 0;
-		bag.gridy = 0;
-		bag.weightx = 0.25f;
-		bag.weighty = 1;
-		JScrollPane scroll = new JScrollPane(group_table);
-		add(scroll, bag);
-		scroll = new JScrollPane(sign_text_table);
-		scroll.setPreferredSize(UI.dimension(440, 0));
-		bag.gridx = 1;
-		bag.gridy = 0;
-		bag.weightx = 1;
-		add(scroll, bag);
-		bag.fill = GridBagConstraints.NONE;
-		bag.gridx = 0;
-		bag.gridy = 1;
-		bag.weightx = 0;
-		bag.weighty = 0;
-		delete_group.setEnabled(false);
-		add(new JButton(delete_group), bag);
-		bag.gridx = 1;
-		delete_text.setEnabled(false);
-		add(new JButton(delete_text), bag);
-		bag.gridx = 0;
-		bag.gridy = 2;
-		bag.gridwidth = 2;
-		bag.fill = GridBagConstraints.BOTH;
-		bag.weightx = 0.1f;
-		bag.weighty = 0.1f;
-		add(createPreviewPanel(), bag);
-		bag.gridx = 0;
-		bag.gridy = 3;
-		bag.gridwidth = 1;
-		bag.fill = GridBagConstraints.NONE;
-		bag.weightx = 0;
-		bag.weighty = 0;
-		bag.anchor = GridBagConstraints.EAST;
-		add(new ILabel("dms.font.default"), bag);
-		bag.gridx = 1;
-		bag.anchor = GridBagConstraints.WEST;
-		add(font_cbx, bag);
-		bag.gridx = 0;
-		bag.gridy = 4;
-		bag.anchor = GridBagConstraints.EAST;
-		add(new ILabel("dms.font.height"), bag);
-		bag.gridx = 1;
-		bag.anchor = GridBagConstraints.WEST;
-		add(font_height_lbl, bag);
-		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
-			bag.anchor = GridBagConstraints.CENTER;
-			bag.gridy = 5;
-			bag.gridx = 0;
-			add(aws_allowed_chk, bag);
-			bag.gridx = 1;
-			add(aws_control_chk, bag);
+	/** Layout the panel */
+	private void layoutPanel() {
+		GroupLayout gl = new GroupLayout(this);
+		gl.setHonorsVisibility(false);
+		gl.setAutoCreateGaps(false);
+		gl.setAutoCreateContainerGaps(false);
+		gl.setHorizontalGroup(createHorizontalGroup(gl));
+		gl.setVerticalGroup(createVerticalGroup(gl));
+		setLayout(gl);
+	}
+
+	/** Create the horizontal group */
+	private GroupLayout.Group createHorizontalGroup(GroupLayout gl) {
+		GroupLayout.ParallelGroup hg = gl.createParallelGroup();
+		GroupLayout.SequentialGroup g0 = gl.createSequentialGroup();
+		g0.addComponent(sign_group_pnl);
+		g0.addGap(UI.hgap);
+		g0.addComponent(sign_text_pnl);
+		hg.addGroup(g0);
+		hg.addComponent(preview_pnl);
+		GroupLayout.SequentialGroup g1 = gl.createSequentialGroup();
+		g1.addComponent(font_lbl);
+		g1.addGap(UI.hgap);
+		g1.addComponent(font_cbx);
+		hg.addGroup(g1);
+		GroupLayout.SequentialGroup g2 = gl.createSequentialGroup();
+		g2.addComponent(font_height_ilbl);
+		g2.addGap(UI.hgap);
+		g2.addComponent(font_height_lbl);
+		hg.addGroup(g2);
+		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
+			hg.addComponent(aws_allowed_chk);
+			hg.addComponent(aws_control_chk);
 		}
+		return hg;
+	}
+
+	/** Create the vertical group */
+	private GroupLayout.Group createVerticalGroup(GroupLayout gl) {
+		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
+		GroupLayout.ParallelGroup g0 = gl.createParallelGroup();
+		g0.addComponent(sign_group_pnl);
+		g0.addComponent(sign_text_pnl);
+		vg.addGroup(g0);
+		vg.addGap(UI.vgap);
+		vg.addComponent(preview_pnl);
+		vg.addGap(UI.vgap);
+		GroupLayout.ParallelGroup g1 = gl.createBaselineGroup(false,
+			false);
+		g1.addComponent(font_lbl);
+		g1.addComponent(font_cbx);
+		vg.addGroup(g1);
+		vg.addGap(UI.vgap);
+		GroupLayout.ParallelGroup g2 = gl.createBaselineGroup(false,
+			false);
+		g2.addComponent(font_height_ilbl);
+		g2.addComponent(font_height_lbl);
+		vg.addGroup(g2);
+		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
+			vg.addGap(UI.vgap);
+			vg.addComponent(aws_allowed_chk);
+			vg.addGap(UI.vgap);
+			vg.addComponent(aws_control_chk);
+		}
+		return vg;
 	}
 
 	/** Create a message preview panel */
 	private JPanel createPreviewPanel() {
 		pixel_pnl.setFilterColor(new Color(0, 0, 255, 48));
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.setBorder(BorderFactory.createTitledBorder(
+		JPanel pnl = new JPanel(new BorderLayout());
+		pnl.setBorder(BorderFactory.createTitledBorder(
 			I18N.get("dms.message.preview")));
-		panel.add(pixel_pnl, BorderLayout.CENTER);
-		return panel;
-	}
-
-	/** Initialize the sign group table */
-	private void initGroupTable() {
-		final ListSelectionModel s = group_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new IListSelectionAdapter() {
-			@Override
-			public void valueChanged() {
-				selectGroup();
-			}
-		});
-		group_table.setAutoCreateColumnsFromModel(false);
-		group_table.setColumnModel(
-			sign_group_model.createColumnModel());
-		group_table.setModel(sign_group_model);
-		group_table.setVisibleRowCount(12);
+		pnl.add(pixel_pnl, BorderLayout.CENTER);
+		return pnl;
 	}
 
 	/** Select a new sign group */
 	private void selectGroup() {
-		SignGroup group = getSelectedGroup();
-		if(group != null) {
-			if(sign_text_model != null)
-				sign_text_model.dispose();
-			sign_text_model = new SignTextTableModel(session,
-				group);
-			sign_text_model.initialize();
-			sign_text_table.clearSelection();
-			sign_text_table.setColumnModel(
-				sign_text_model.createColumnModel());
-			sign_text_table.setModel(sign_text_model);
-			delete_group.setEnabled(isGroupDeletable(group));
-		} else {
-			sign_text_table.setModel(new DefaultTableModel());
-			delete_group.setEnabled(false);
-		}
-	}
-
-	/** Check if a sign group is deletable */
-	private boolean isGroupDeletable(SignGroup sg) {
-		return hasNoReferences(sg) && canRemove(sg);
-	}
-
-	/** Check if a sign group has no references */
-	private boolean hasNoReferences(SignGroup group) {
-		return !(hasMembers(group) || hasSignText(group));
-	}
-
-	/** Check if a sign group has any members */
-	private boolean hasMembers(SignGroup group) {
-		for(DmsSignGroup g: dms_cache.getDmsSignGroups()) {
-			if(g.getSignGroup() == group)
-				return true;
-		}
-		return false;
-	}
-
-	/** Check if a sign group has any sign text messages */
-	private boolean hasSignText(SignGroup group) {
-		for(SignText t: dms_cache.getSignText()) {
-			if(t.getSignGroup() == group)
-				return true;
-		}
-		return false;
-	}
-
-	/** Check if the user can remove the specified sign group */
-	private boolean canRemove(SignGroup sg) {
-		return sign_group_model.canRemove(sg);
-	}
-
-	/** Get the selected sign group */
-	private SignGroup getSelectedGroup() {
-		ListSelectionModel s = group_table.getSelectionModel();
-		return sign_group_model.getProxy(s.getMinSelectionIndex());
-	}
-
-	/** Initialize the sign text table */
-	private void initSignTextTable() {
-		final ListSelectionModel s =
-			sign_text_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new IListSelectionAdapter() {
-			@Override
-			public void valueChanged() {
-				selectSignText();
-			}
-		});
-		sign_text_table.setAutoCreateColumnsFromModel(false);
-		sign_text_table.setVisibleRowCount(12);
+		sign_text_pnl.setModel(new SignTextTableModel(session,
+			sign_group_pnl.getSelectedProxy()));
 	}
 
 	/** Select a new sign text message */
@@ -338,35 +243,28 @@ public class PropMessages extends JPanel {
 		Integer hp = proxy.getHorizontalPitch();
 		Integer vp = proxy.getVerticalPitch();
 		Integer hb = proxy.getHorizontalBorder();
-		if(w != null && lh != null && hp != null && vp != null &&
-		   hb != null)
+		if (w != null && lh != null && hp != null && vp != null &&
+		    hb != null)
 		{
 			int h = lh * vp;
 			pixel_pnl.setPhysicalDimensions(w, h, hb, 0, hp, vp);
 		}
 		Integer wp = proxy.getWidthPixels();
 		Integer cw = proxy.getCharWidthPixels();
-		if(wp != null && lh != null && cw != null)
+		if (wp != null && lh != null && cw != null)
 			pixel_pnl.setLogicalDimensions(wp, lh, cw, 0);
 		pixel_pnl.repaint();
-		SignText st = getSelectedSignText();
-		if(st != null)
+		SignText st = sign_text_pnl.getSelectedProxy();
+		if (st != null)
 			pixel_pnl.setGraphic(renderMessage(st));
 		else
 			pixel_pnl.setGraphic(null);
-		delete_text.setEnabled(canRemove(st));
-	}
-
-	/** Check if the user can remove the specified sign text */
-	private boolean canRemove(SignText st) {
-		SignTextTableModel stm = sign_text_model;
-		return (stm != null) && (st != null) && stm.canRemove(st);
 	}
 
 	/** Get the line height of the sign */
 	private Integer getLineHeightPixels() {
 		RasterBuilder b = DMSHelper.createRasterBuilder(proxy);
-		if(b != null)
+		if (b != null)
 			return b.getLineHeightPixels();
 		else
 			return null;
@@ -376,7 +274,7 @@ public class PropMessages extends JPanel {
 	private RasterGraphic renderMessage(SignText st) {
 		MultiString multi = new MultiString(st.getMulti());
 		RasterGraphic[] pages = renderPages(multi);
-		if(pages != null && pages.length > 0)
+		if (pages != null && pages.length > 0)
 			return pages[0];
 		else
 			return null;
@@ -388,57 +286,53 @@ public class PropMessages extends JPanel {
 		Integer h = getLineHeightPixels();
 		Integer cw = proxy.getCharWidthPixels();
 		Integer ch = proxy.getCharHeightPixels();
-		if(w == null || h == null || cw == null || ch == null)
+		if (w == null || h == null || cw == null || ch == null)
 			return null;
 		int df = DMSHelper.getDefaultFontNumber(proxy);
 		RasterBuilder b = new RasterBuilder(w, h, cw, ch, df);
 		try {
 			return b.createPixmaps(ms);
 		}
-		catch(InvalidMessageException e) {
+		catch (InvalidMessageException e) {
 			return null;
 		}
-	}
-
-	/** Get the selected sign text message */
-	private SignText getSelectedSignText() {
-		SignTextTableModel m = sign_text_model;
-		if(m == null)
-			return null;
-		ListSelectionModel s = sign_text_table.getSelectionModel();
-		return m.getProxy(s.getMinSelectionIndex());
 	}
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
-		if(a == null || a.equals("defaultFont")) {
+		if (a == null || a.equals("defaultFont")) {
 			font_cbx.setEnabled(canUpdate("defaultFont"));
 			font_cbx.setSelectedItem(proxy.getDefaultFont());
 		}
-		if(a == null || a.equals("defaultFont") ||
-		   a.equals("verticalPitch"))
+		if (a == null || a.equals("defaultFont") ||
+		    a.equals("verticalPitch"))
 			font_height_lbl.setText(calculateFontHeight());
-		if(a == null || a.equals("awsAllowed")) {
+		if (a == null || a.equals("awsAllowed")) {
 			aws_allowed_chk.setEnabled(canUpdate("awsAllowed"));
 			aws_allowed_chk.setSelected(proxy.getAwsAllowed());
 		}
-		if(a == null || a.equals("awsControlled")) {
+		if (a == null || a.equals("awsControlled")) {
 			aws_control_chk.setEnabled(canUpdate("awsControlled"));
 			aws_control_chk.setSelected(proxy.getAwsControlled());
 		}
 		// NOTE: messageCurrent attribute changes after all sign
 		//       dimension attributes are updated.
-		if(a == null || a.equals("messageCurrent"))
+		if (a == null || a.equals("messageCurrent"))
 			selectSignText();
+	}
+
+	/** Check if the user can update an attribute */
+	private boolean canUpdate(String aname) {
+		return session.canUpdate(proxy, aname);
 	}
 
 	/** Calculate the height of the default font on the sign */
 	private String calculateFontHeight() {
 		Font f = proxy.getDefaultFont();
 		Integer vp = proxy.getVerticalPitch();
-		if(f != null && vp != null) {
+		if (f != null && vp != null) {
 			int h = f.getHeight();
-			if(h > 0 && vp > 0) {
+			if (h > 0 && vp > 0) {
 				float mm = (h - 0.5f) * vp;
 				Distance fh = new Distance(mm, MILLIMETERS);
 				return formatFontHeight(fh);

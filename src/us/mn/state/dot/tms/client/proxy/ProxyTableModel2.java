@@ -229,7 +229,7 @@ abstract public class ProxyTableModel2<T extends SonarObject>
 	}
 
 	/** Change a proxy in the table model */
-	private void proxyChangedSwing(T proxy) {
+	protected void proxyChangedSwing(T proxy) {
 		int pre = doProxyRemoved(proxy);
 		int post = doProxyAdded(proxy);
 		if (pre >= 0 && post >= 0) {

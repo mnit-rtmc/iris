@@ -24,14 +24,17 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
-import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.proxy.ProxyTableModel2;
 
 /**
  * Table model for sign text.
  *
  * @author Douglas Lau
  */
-public class SignTextTableModel extends ProxyTableModel<SignText> {
+public class SignTextTableModel extends ProxyTableModel2<SignText> {
+
+	/** Default rank */
+	static private final short DEF_RANK = (short)50;
 
 	/** Format MULTI string */
 	static private String formatMulti(Object value) {
@@ -69,23 +72,16 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 				return st.getMulti();
 			}
 			public boolean isEditable(SignText st) {
-				if (st != null)
-					return canUpdate(st);
-				else
-					return canAdd();
+				return canUpdate(st);
 			}
 			public void setValueAt(SignText st, Object value) {
-				String v = formatMulti(value);
-				if (st != null)
-					st.setMulti(v);
-				else if (v.length() > 0)
-					createSignText(v);
+				st.setMulti(formatMulti(value));
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return RENDERER;
 			}
 		});
-		cols.add(new ProxyColumn<SignText>("dms.rank", 32,
+		cols.add(new ProxyColumn<SignText>("dms.rank", 40,
 			Short.class)
 		{
 			public Object getValueAt(SignText st) {
@@ -115,9 +111,24 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 
 	/** Create a new sign text table model */
 	public SignTextTableModel(Session s, SignGroup g) {
-		super(s, s.getSonarState().getDmsCache().getSignText());
+		super(s, s.getSonarState().getDmsCache().getSignText(),
+		      false,	/* has_properties */
+		      true,	/* has_create_delete */
+		      true);	/* has_name */
 		group = g;
 		creator = new SignTextCreator(s);
+	}
+
+	/** Get the SONAR type name */
+	@Override
+	protected String getSonarType() {
+		return SignText.SONAR_TYPE;
+	}
+
+	/** Get the visible row count */
+	@Override
+	public int getVisibleRowCount() {
+		return 12;
 	}
 
 	/** Get a proxy comparator */
@@ -126,23 +137,25 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 		return new SignTextComparator();
 	}
 
-	/** Add a new proxy to the table model */
+	/** Check if a proxy is included in the list */
 	@Override
-	protected int doProxyAdded(SignText proxy) {
-		if (proxy.getSignGroup() == group)
-			return super.doProxyAdded(proxy);
-		else
-			return -1;
+	protected boolean check(SignText proxy) {
+		return proxy.getSignGroup() == group;
 	}
 
 	/** Check if the user can add a proxy */
 	@Override
 	public boolean canAdd() {
-		return creator.canAddSignText(group.getName() + "_XX");
+		return group != null && super.canAdd(group.getName() + "_XX");
 	}
 
 	/** Create a new sign text message using default line and rank values */
-	private void createSignText(String multi) {
-		creator.create(group, (short)1, multi, (short)50);
+	@Override
+	public void createObject(String v) {
+		if (group != null) {
+			String m = formatMulti(v);
+			if (m.length() > 0)
+				creator.create(group, (short)1, m, DEF_RANK);
+		}
 	}
 }
