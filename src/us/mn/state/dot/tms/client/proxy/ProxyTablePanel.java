@@ -20,13 +20,12 @@ import java.awt.event.MouseEvent;
 import javax.swing.GroupLayout;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
-import us.mn.state.dot.tms.client.widget.IPanel;
-import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.client.widget.ITable;
 
@@ -35,13 +34,19 @@ import us.mn.state.dot.tms.client.widget.ITable;
  *
  * @author Douglas Lau
  */
-public class ProxyTablePanel<T extends SonarObject> extends IPanel {
+public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 
 	/** Table model */
 	protected ProxyTableModel2<T> model;
 
 	/** Proxy table */
 	private final ITable table;
+
+	/** Scroll pane */
+	private final JScrollPane scroll_pn;
+
+	/** Button panel */
+	private final JPanel button_pnl;
 
 	/** Action to display the proxy properties */
 	private final IAction show_props = new IAction("device.properties") {
@@ -87,27 +92,54 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 	public ProxyTablePanel(ProxyTableModel2<T> m) {
 		model = m;
 		table = createTable(m);
+		scroll_pn = createScrollPane(table);
+		button_pnl = buildButtonPanel();
 	}
 
 	/** Initialise the panel */
-	@Override
 	public void initialize() {
-		super.initialize();
+		setBorder(UI.border);
 		model.initialize();
 		show_props.setEnabled(false);
 		add_txt.setEnabled(false);
 		add_proxy.setEnabled(false);
 		del_proxy.setEnabled(false);
 		createJobs();
-		add(table, Stretch.FULL);
-		add(buildButtonPanel(), Stretch.FULL);
+		layoutPanel();
+	}
+
+	/** Layout the panel */
+	private void layoutPanel() {
+		GroupLayout gl = new GroupLayout(this);
+		gl.setHonorsVisibility(false);
+		gl.setAutoCreateGaps(false);
+		gl.setAutoCreateContainerGaps(false);
+		gl.setHorizontalGroup(createHorizontalGroup(gl));
+		gl.setVerticalGroup(createVerticalGroup(gl));
+		setLayout(gl);
+	}
+
+	/** Create the horizontal group */
+	private GroupLayout.Group createHorizontalGroup(GroupLayout gl) {
+		GroupLayout.ParallelGroup hg = gl.createParallelGroup();
+		hg.addComponent(scroll_pn);
+		hg.addComponent(button_pnl);
+		return hg;
+	}
+
+	/** Create the vertical group */
+	private GroupLayout.Group createVerticalGroup(GroupLayout gl) {
+		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
+		vg.addComponent(scroll_pn);
+		vg.addGap(UI.vgap);
+		vg.addComponent(button_pnl);
+		return vg;
 	}
 
 	/** Dispose of the panel */
-	@Override
 	public void dispose() {
 		model.dispose();
-		super.dispose();
+		removeAll();
 	}
 
 	/** Set the model */
@@ -130,6 +162,13 @@ public class ProxyTablePanel<T extends SonarObject> extends IPanel {
 		t.setRowHeight(UI.scaled(m.getRowHeight()));
 		t.setVisibleRowCount(m.getVisibleRowCount());
 		return t;
+	}
+
+	/** Create a scroll pane */
+	private JScrollPane createScrollPane(ITable t) {
+		return new JScrollPane(t,
+			JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+			JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
 	}
 
 	/** Create Gui jobs */
