@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,31 +42,26 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 
 	/** Set bitmap for one character */
 	public void setBitmap(int c, BitmapGraphic bmap) {
-		synchronized(bitmaps) {
-			bitmaps.put(c, bmap);
-		}
+		bitmaps.put(c, bmap);
 	}
 
 	/** Clear bitmaps for all characters */
 	public void clearBitmaps() {
-		synchronized(bitmaps) {
-			bitmaps.clear();
-		}
+		bitmaps.clear();
 	}
 
 	/** Lookup one bitmap */
 	private BitmapGraphic lookupBitmap(int c) {
-		synchronized(bitmaps) {
-			return bitmaps.get(c);
-		}
+		return bitmaps.get(c);
 	}
 
 	/** Get a renderer for the specified list value */
+	@Override
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
 		String val = "";
-		if(value instanceof Integer) {
+		if (value instanceof Integer) {
 			int v = (Integer)value;
 			bitmap = lookupBitmap(v);
 			val = String.valueOf((char)v);
@@ -89,10 +84,11 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 	private int top;
 
 	/** Paint the currently configured glyph */
+	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		BitmapGraphic bmap = bitmap;
-		if(bmap != null) {
+		if (bmap != null) {
 			configureRenderer(bmap);
 			paintPixels((Graphics2D)g, bmap);
 		}
@@ -107,7 +103,7 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 
 	/** Calculate the pitch for the current glyph */
 	private float calculatePitch(BitmapGraphic bmap) {
-		if(bmap.getHeight() > 0)
+		if (bmap.getHeight() > 0)
 			return getBitmapHeight() / bmap.getHeight();
 		else
 			return 0;
@@ -116,7 +112,7 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 	/** Get height of area for bitmap */
 	private float getBitmapHeight() {
 		int h = getHeight();
-		return h > 2 ? h - 2 : 0;
+		return (h > 2) ? h - 2 : 0;
 	}
 
 	/** Calculate the left side of the current glyph */
@@ -142,9 +138,9 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 			RenderingHints.VALUE_ANTIALIAS_ON);
 		Ellipse2D pixel = new Ellipse2D.Float();
 		float yy = top;
-		for(int y = 0; y < bmap.getHeight(); y++, yy += pitch) {
+		for (int y = 0; y < bmap.getHeight(); y++, yy += pitch) {
 			float xx = left;
-			for(int x = 0; x < bmap.getWidth(); x++, xx += pitch){
+			for (int x = 0; x < bmap.getWidth(); x++, xx += pitch) {
 				g.setColor(bmap.getPixel(x, y).color);
 				pixel.setFrame(xx, yy, pitch, pitch);
 				g.fill(pixel);
