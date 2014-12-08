@@ -17,9 +17,9 @@ package us.mn.state.dot.tms.client.roads;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -45,6 +45,7 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -181,15 +182,29 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Arrange the corridor mapping */
 	public void arrangeCorridors() {
-		for(CorridorBase c: corridors.values())
-			arrangeCorridor(c);
+		processNextCorridor(new ArrayList<CorridorBase>(
+			corridors.values()).iterator());
+	}
+
+	/** Process the next corridor in an iterator.  Each corridors is
+	 * handled separately to keep the GUI relatively responsive.  This can't
+	 * be done on a background thread without adding synchronization. */
+	private void processNextCorridor(final Iterator<CorridorBase> it) {
+		if (it.hasNext()) {
+			runSwing(new Runnable() {
+				public void run() {
+					arrangeCorridor(it.next());
+					processNextCorridor(it);
+				}
+			});
+		}
 	}
 
 	/** Arrange a single corridor */
 	private void arrangeCorridor(CorridorBase c) {
 		c.arrangeNodes();
 		setTangentAngles(c);
-		if(c.getRoadDir() > 0)
+		if (c.getRoadDir() > 0)
 			seg_layer.updateCorridor(c);
 	}
 
