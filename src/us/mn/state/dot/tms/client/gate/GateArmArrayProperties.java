@@ -24,10 +24,8 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArm;
@@ -37,16 +35,13 @@ import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.comm.ControllerForm;
+import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
-import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -137,40 +132,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Text field for CLOSED quick message */
 	private final JTextField closed_msg_txt = new JTextField(20);
 
-	/** Gate arm table model */
-	private final GateArmTableModel table_model;
-
-	/** Gate arm table */
-	private final ZTable ga_table = new ZTable();
-
-	/** Gate arm controller action */
-	private final IAction controller = new IAction("controller") {
-		protected void doActionPerformed(ActionEvent e) {
-			GateArm ga = getSelectedGateArm();
-			if(ga != null) {
-				Controller c = ga.getController();
-				if(c != null) {
-					SmartDesktop sd = session.getDesktop();
-					sd.show(new ControllerForm(session, c));
-				}
-			}
-		}
-	};
-
-	/** Action to delete the selected LCS */
-	private final IAction delete_ga = new IAction("gate.arm.delete") {
-		protected void doActionPerformed(ActionEvent e) {
-			GateArm ga = getSelectedGateArm();
-			if(ga != null)
-				ga.destroy();
-		}
-	};
-
-	/** Get the selected gate arm */
-	private GateArm getSelectedGateArm() {
-		ListSelectionModel s = ga_table.getSelectionModel();
-		return table_model.getProxy(s.getMinSelectionIndex());
-	}
+	/** Gate arm table panel */
+	private final ProxyTablePanel<GateArm> ga_pnl;
 
 	/** Arm state label */
 	private final JLabel arm_state_lbl = IPanel.createValueLabel();
@@ -209,8 +172,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		dms_mdl = new WrapperComboBoxModel(
 			state.getDmsCache().getDMSModel());
 		loc_pnl = new LocationPanel(s);
-		table_model = new GateArmTableModel(s, proxy);
-		table_model.initialize();
+		ga_pnl = new ProxyTablePanel<GateArm>(new GateArmTableModel(
+			s, ga));
 	}
 
 	/** Get the SONAR type cache */
@@ -222,24 +185,25 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Initialize the widgets on the form */
 	@Override
 	protected void initialize() {
+		super.initialize();
+		loc_pnl.initialize();
+		ga_pnl.initialize();
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
 		tab.add(I18N.get("device.setup"), createSetupPanel());
-		tab.add(I18N.get("gate.arms"), createGateArmPanel());
+		tab.add(I18N.get("gate.arms"), ga_pnl);
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
-		if(canUpdate())
+		if (canUpdate())
 			createUpdateJobs();
 		settings.setEnabled(isUpdatePermitted("deviceRequest"));
 		disable.setEnabled(canUpdate("deviceRequest"));
-		super.initialize();
 	}
 
 	/** Create the location panel */
 	private JPanel createLocationPanel() {
 		camera_cbx.setModel(camera_mdl);
 		approach_cbx.setModel(approach_mdl);
-		loc_pnl.initialize();
 		loc_pnl.add("device.notes");
 		loc_pnl.add(notes_txt, Stretch.FULL);
 		loc_pnl.add("camera");
@@ -290,51 +254,6 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		return p;
 	}
 
-	/** Create gate arm panel */
-	private JPanel createGateArmPanel() {
-		initTable();
-		IPanel p = new IPanel();
-		p.add(ga_table, Stretch.FULL);
-		p.add(new JButton(controller));
-		p.add(new JButton(delete_ga), Stretch.LAST);
-		return p;
-	}
-
-	/** Initialize the table */
-	private void initTable() {
-		selectGateArm();
-		ListSelectionModel s = ga_table.getSelectionModel();
-		s.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-		s.addListSelectionListener(new IListSelectionAdapter() {
-			@Override
-			public void valueChanged() {
-				selectGateArm();
-			}
-		});
-		ga_table.setAutoCreateColumnsFromModel(false);
-		ga_table.setColumnModel(table_model.createColumnModel());
-		ga_table.setModel(table_model);
-		ga_table.setVisibleRowCount(GateArmArray.MAX_ARMS);
-	}
-
-	/** Select a gate arm in the table */
-	private void selectGateArm() {
-		GateArm ga = getSelectedGateArm();
-		if(ga != null)
-			selectGateArm(ga);
-		else {
-			controller.setEnabled(false);
-			delete_ga.setEnabled(false);
-		}
-	}
-
-	/** Select a gate arm in the table */
-	private void selectGateArm(GateArm ga) {
-		boolean c = ga.getController() != null;
-		controller.setEnabled(c);
-		delete_ga.setEnabled(!c && table_model.canRemove(ga));
-	}
-
 	/** Create ramp meter status panel */
 	private JPanel createStatusPanel() {
 		IPanel p = new IPanel();
@@ -350,7 +269,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Dispose of the form */
 	@Override
 	protected void dispose() {
-		table_model.dispose();
+		ga_pnl.dispose();
+		loc_pnl.dispose();
 		super.dispose();
 	}
 

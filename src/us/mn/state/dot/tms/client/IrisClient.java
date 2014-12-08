@@ -57,9 +57,6 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class IrisClient extends JFrame {
 
-	/** Worker thread */
-	static public final Scheduler WORKER = new Scheduler("worker");
-
 	/** Create the window title */
 	static private String createTitle(String suffix) {
 		return SystemAttrEnum.WINDOW_TITLE.getString() + suffix;
