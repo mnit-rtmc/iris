@@ -269,6 +269,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Dispose of the form */
 	@Override
 	protected void dispose() {
+		// Prevent dms being cleared on close
+		dms.setEnabled(false);
 		ga_pnl.dispose();
 		loc_pnl.dispose();
 		super.dispose();
