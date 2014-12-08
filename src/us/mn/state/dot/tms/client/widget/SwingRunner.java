@@ -61,7 +61,7 @@ public final class SwingRunner {
 
 	/** Invoke a Runnable on the swing thread */
 	static public void runSwing(final Runnable r) {
-		// NOTE: use invokeLater for 2 reasions:
+		// NOTE: use invokeLater for 2 reasons:
 		//    1. Serialize on the EDT no matter which thread we're on.
 		//    2. Drop any held locks before invoking the Runnable.
 		SwingUtilities.invokeLater(new Runnable() {
