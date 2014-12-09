@@ -22,6 +22,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextField;
+import static javax.swing.LayoutStyle.ComponentPlacement.RELATED;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -200,6 +201,8 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 			vg.addComponent(prop_btn);
 			hg.addGap(UI.hgap);
 		}
+		hg.addPreferredGap(RELATED, GroupLayout.DEFAULT_SIZE,
+			Short.MAX_VALUE);
 		if (model.hasCreateDelete()) {
 			addExtraWidgets(hg, vg);
 			JButton add_btn = new JButton(add_proxy);
