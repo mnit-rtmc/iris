@@ -251,20 +251,11 @@ public class IrisClient extends JFrame {
 	/** Set the selected tab in each screen pane */
 	private void setSelectedTabs(Session s) {
 		String[] st = user_props.getSelectedTabs();
-		for(int i = 0; i < s_panes.length && i < st.length; i++) {
-			MapTab mt = lookupTab(s, st[i]);
-			if(mt != null)
+		for (int i = 0; i < s_panes.length && i < st.length; i++) {
+			MapTab mt = s.lookupTab(st[i]);
+			if (mt != null)
 				s_panes[i].setSelectedTab(mt);
 		}
-	}
-
-	/** Lookup a map tab */
-	private MapTab lookupTab(Session s, String tid) {
-		for(MapTab mt: s.getTabs()) {
-			if(mt.getTextId().equals(tid))
-				return mt;
-		}
-		return null;
 	}
 
 	/** Login a user */

@@ -229,6 +229,15 @@ public class Session {
 		}
 	}
 
+	/** Lookup a map tab by text ID */
+	public MapTab lookupTab(String tid) {
+		for (MapTab mt: tabs) {
+			if (mt.getTextId().equals(tid))
+				return mt;
+		}
+		return null;
+	}
+
 	/** Create a mapping of text ids to map tabs */
 	private HashMap<String, MapTab> createTabs() {
 		HashMap<String, MapTab> tm = new HashMap<String, MapTab>();
