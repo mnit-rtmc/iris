@@ -42,7 +42,15 @@ public class RolePanel extends JPanel {
 	public RolePanel(Session s) {
 		setBorder(UI.border);
 		session = s;
-		role_pnl = new ProxyTablePanel<Role>(new RoleModel(s)) {
+		RoleModel r_mdl = new RoleModel(s) {
+			protected void proxyChangedSwing(Role r) {
+				super.proxyChangedSwing(r);
+				/* Repaint the capability panel when the
+				 * role capabilities are changed. */
+				cap_pnl.repaint();
+			}
+		};
+		role_pnl = new ProxyTablePanel<Role>(r_mdl) {
 			protected void selectProxy() {
 				selectRole();
 				super.selectProxy();
