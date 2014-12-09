@@ -35,11 +35,11 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	protected final ProxyManager<T> manager;
 
 	/** Map tab ID */
-	private final String text_id;
+	private final String tab_id;
 
-	/** Get the text ID */
-	public String getTextId() {
-		return text_id;
+	/** Get the tab ID */
+	public String getTabId() {
+		return tab_id;
 	}
 
 	/** Name of side panel tab */
@@ -61,10 +61,10 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	/** Create a new map tab */
 	protected MapTab(ProxyManager<T> m, String id) {
 		super(new BorderLayout());
-		text_id = id;
+		tab_id = id;
 		manager = m;
-		name = I18N.get(text_id);
-		tip = I18N.get(text_id + ".tab");
+		name = I18N.get(tab_id);
+		tip = I18N.get(tab_id + ".tab");
 	}
 
 	/** Create a new map tab */
