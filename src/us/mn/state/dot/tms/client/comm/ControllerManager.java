@@ -55,6 +55,12 @@ public class ControllerManager extends ProxyManager<Controller> {
 		return Controller.SONAR_TYPE;
 	}
 
+	/** Get the tab ID */
+	@Override
+	public String getTabId() {
+		return "comm";
+	}
+
 	/** Get the controller cache */
 	@Override
 	public TypeCache<Controller> getCache() {

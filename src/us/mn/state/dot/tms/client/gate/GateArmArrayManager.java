@@ -61,6 +61,12 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		return "gate.arm.array";
 	}
 
+	/** Get the tab ID */
+	@Override
+	public String getTabId() {
+		return "gate.arm";
+	}
+
 	/** Get the gate arm array cache */
 	@Override
 	public TypeCache<GateArmArray> getCache() {
