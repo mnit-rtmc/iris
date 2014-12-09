@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,10 +62,10 @@ public class IncidentManager extends ProxyManager<Incident> {
 		super(s, lm);
 	}
 
-	/** Get the proxy type name */
+	/** Get the sonar type name */
 	@Override
-	public String getProxyType() {
-		return "incident";
+	public String getSonarType() {
+		return Incident.SONAR_TYPE;
 	}
 
 	/** Get the incident cache */
@@ -74,12 +74,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 		return session.getSonarState().getIncidents();
 	}
 
-	/** Check if user can read incidents */
-	public boolean canRead() {
-		return session.canRead(Incident.SONAR_TYPE);
-	}
-
 	/** Create an incident map tab */
+	@Override
 	public IncidentTab createTab() {
 		return new IncidentTab(session, this);
 	}

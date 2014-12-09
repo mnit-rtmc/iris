@@ -79,10 +79,10 @@ public class DMSManager extends ProxyManager<DMS> {
 		super(s, lm, ItemStyle.DEPLOYED);
 	}
 
-	/** Get the proxy type name */
+	/** Get the sonar type name */
 	@Override
-	public String getProxyType() {
-		return "dms";
+	public String getSonarType() {
+		return DMS.SONAR_TYPE;
 	}
 
 	/** Get the DMS cache */
@@ -92,13 +92,9 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Create a DMS map tab */
+	@Override
 	public DMSTab createTab() {
 		return new DMSTab(session, this);
-	}
-
-	/** Check if user can read DMS */
-	public boolean canRead() {
-		return session.canRead(DMS.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,10 +49,10 @@ public class ControllerManager extends ProxyManager<Controller> {
 		super(s, lm);
 	}
 
-	/** Get the proxy type name */
+	/** Get the sonar type name */
 	@Override
-	public String getProxyType() {
-		return "controller";
+	public String getSonarType() {
+		return Controller.SONAR_TYPE;
 	}
 
 	/** Get the controller cache */
@@ -62,14 +62,16 @@ public class ControllerManager extends ProxyManager<Controller> {
 	}
 
 	/** Create a comm map tab */
+	@Override
 	public CommTab createTab() {
 		return new CommTab(session, this);
 	}
 
 	/** Check if user can read controllers */
+	@Override
 	public boolean canRead() {
-		return session.canRead(Controller.SONAR_TYPE) &&
-		       session.canRead(CommLink.SONAR_TYPE);
+		return super.canRead()
+		    && session.canRead(CommLink.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
 
 /**
@@ -191,8 +192,13 @@ abstract public class ProxyManager<T extends SonarObject> {
 		return loc_manager.getTangentAngle(loc);
 	}
 
+	/** Get the sonar type name */
+	abstract public String getSonarType();
+
 	/** Get the proxy type name */
-	abstract public String getProxyType();
+	public String getProxyType() {
+		return getSonarType();
+	}
 
 	/** Get longer proxy type name for display */
 	public String getLongProxyType() {
@@ -201,6 +207,16 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Get the proxy type cache */
 	abstract public TypeCache<T> getCache();
+
+	/** Create a map tab for the managed proxies */
+	public MapTab<T> createTab() {
+		return null;
+	}
+
+	/** Check if user can read managed proxies */
+	public boolean canRead() {
+		return session.canRead(getSonarType());
+	}
 
 	/** Create a list cell renderer */
 	public ListCellRenderer createCellRenderer() {

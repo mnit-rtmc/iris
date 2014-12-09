@@ -55,6 +55,12 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		super(s, lm);
 	}
 
+	/** Get the sonar type name */
+	@Override
+	public String getSonarType() {
+		return ActionPlan.SONAR_TYPE;
+	}
+
 	/** Get the proxy type name */
 	@Override
 	public String getProxyType() {
@@ -74,13 +80,9 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	}
 
 	/** Create a plan map tab */
+	@Override
 	public PlanTab createTab() {
 		return new PlanTab(session, this);
-	}
-
-	/** Check if user can read action plans */
-	public boolean canRead() {
-		return session.canRead(ActionPlan.SONAR_TYPE);
 	}
 
 	/** Find the map geo location for a proxy */

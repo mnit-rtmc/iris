@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.client.lcs.LCSIManager;
 import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
 import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.roads.SegmentLayer;
 import us.mn.state.dot.tms.client.schedule.PlanManager;
@@ -261,30 +262,27 @@ public class Session {
 	/** Create a mapping of text ids to map tabs */
 	private HashMap<String, MapTab> createTabs() {
 		HashMap<String, MapTab> tm = new HashMap<String, MapTab>();
-		if (inc_manager.canRead())
-			putMapTab(tm, inc_manager.createTab());
-		if (dms_manager.canRead())
-			putMapTab(tm, dms_manager.createTab());
-		if (cam_manager.canRead())
-			putMapTab(tm, cam_manager.createTab());
-		if (lcs_array_manager.canRead())
-			putMapTab(tm, lcs_array_manager.createTab());
-		if (meter_manager.canRead())
-			putMapTab(tm, meter_manager.createTab());
-		if (gate_arm_manager.canRead())
-			putMapTab(tm, gate_arm_manager.createTab());
-		if (r_node_manager.canRead())
-			putMapTab(tm, r_node_manager.createTab());
-		if (plan_manager.canRead())
-			putMapTab(tm, plan_manager.createTab());
-		if (controller_manager.canRead())
-			putMapTab(tm, controller_manager.createTab());
+		putMapTab(tm, inc_manager);
+		putMapTab(tm, dms_manager);
+		putMapTab(tm, cam_manager);
+		putMapTab(tm, lcs_array_manager);
+		putMapTab(tm, meter_manager);
+		putMapTab(tm, gate_arm_manager);
+		putMapTab(tm, r_node_manager);
+		putMapTab(tm, plan_manager);
+		putMapTab(tm, controller_manager);
 		return tm;
 	}
 
 	/** Put a map tab into tab mapping (what?) */
-	static private void putMapTab(HashMap<String, MapTab> tm, MapTab tab) {
-		tm.put(tab.getTextId(), tab);
+	static private void putMapTab(HashMap<String, MapTab> tm,
+		ProxyManager<?> man)
+	{
+		if (man.canRead()) {
+			MapTab<?> tab = man.createTab();
+			if (tab != null)
+				tm.put(tab.getTextId(), tab);
+		}
 	}
 
 	/** Create the layer states.  The map bean and model must be seperate

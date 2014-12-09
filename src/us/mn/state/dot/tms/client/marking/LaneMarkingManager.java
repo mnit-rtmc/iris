@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,12 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	/** Create a new lane marking manager */
 	public LaneMarkingManager(Session s, GeoLocManager lm) {
 		super(s, lm);
+	}
+
+	/** Get the sonar type name */
+	@Override
+	public String getSonarType() {
+		return LaneMarking.SONAR_TYPE;
 	}
 
 	/** Get the proxy type name */

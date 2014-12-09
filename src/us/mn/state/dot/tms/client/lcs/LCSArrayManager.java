@@ -102,6 +102,12 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		super.dispose();
 	}
 
+	/** Get the sonar type name */
+	@Override
+	public String getSonarType() {
+		return LCSArray.SONAR_TYPE;
+	}
+
 	/** Get the proxy type name */
 	@Override
 	public String getProxyType() {
@@ -122,13 +128,9 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	}
 
 	/** Create an LCS map tab */
+	@Override
 	public LcsTab createTab() {
 		return new LcsTab(session, this);
-	}
-
-	/** Check if user can read LCS arrays */
-	public boolean canRead() {
-		return session.canRead(LCSArray.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

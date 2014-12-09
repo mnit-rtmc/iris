@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,6 +61,12 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		super(s, lm);
 	}
 
+	/** Get the sonar type name */
+	@Override
+	public String getSonarType() {
+		return RampMeter.SONAR_TYPE;
+	}
+
 	/** Get the proxy type name */
 	@Override
 	public String getProxyType() {
@@ -80,13 +86,9 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	}
 
 	/** Create a ramp meter map tab */
+	@Override
 	public RampMeterTab createTab() {
 		return new RampMeterTab(session, this);
-	}
-
-	/** Check if user can read ramp meters */
-	public boolean canRead() {
-		return session.canRead(RampMeter.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

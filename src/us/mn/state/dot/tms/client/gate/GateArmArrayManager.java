@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,12 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		super(s, lm);
 	}
 
+	/** Get the sonar type name */
+	@Override
+	public String getSonarType() {
+		return GateArmArray.SONAR_TYPE;
+	}
+
 	/** Get the proxy type name */
 	@Override
 	public String getProxyType() {
@@ -62,14 +68,16 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	}
 
 	/** Create a gate arm map tab */
+	@Override
 	public GateArmTab createTab() {
 		return new GateArmTab(session, this);
 	}
 
 	/** Check if user can read gate arms + arrays */
+	@Override
 	public boolean canRead() {
-		return session.canRead(GateArmArray.SONAR_TYPE) &&
-		       session.canRead(GateArm.SONAR_TYPE);
+		return super.canRead()
+		    && session.canRead(GateArm.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

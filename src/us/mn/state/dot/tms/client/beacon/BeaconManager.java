@@ -45,21 +45,16 @@ public class BeaconManager extends ProxyManager<Beacon> {
 		super(s, lm);
 	}
 
-	/** Get the proxy type name */
+	/** Get the sonar type name */
 	@Override
-	public String getProxyType() {
-		return "beacon";
+	public String getSonarType() {
+		return Beacon.SONAR_TYPE;
 	}
 
 	/** Get the beacon cache */
 	@Override
 	public TypeCache<Beacon> getCache() {
 		return session.getSonarState().getBeacons();
-	}
-
-	/** Check if user can read beacons */
-	public boolean canRead() {
-		return session.canRead(Beacon.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

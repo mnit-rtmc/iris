@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,10 +60,10 @@ public class CameraManager extends ProxyManager<Camera> {
 		super(s, lm, ItemStyle.ACTIVE);
 	}
 
-	/** Get the proxy type name */
+	/** Get the sonar type name */
 	@Override
-	public String getProxyType() {
-		return "camera";
+	public String getSonarType() {
+		return Camera.SONAR_TYPE;
 	}
 
 	/** Get the camera cache */
@@ -73,13 +73,9 @@ public class CameraManager extends ProxyManager<Camera> {
 	}
 
 	/** Create a camera map tab */
+	@Override
 	public CameraTab createTab() {
 		return new CameraTab(session, this);
-	}
-
-	/** Check if user can read cameras */
-	public boolean canRead() {
-		return session.canRead(Camera.SONAR_TYPE);
 	}
 
 	/** Get the shape for a given proxy */

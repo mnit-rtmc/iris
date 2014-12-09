@@ -106,10 +106,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		seg_layer.initialize();
 	}
 
-	/** Get the proxy type */
+	/** Get the sonar type name */
 	@Override
-	public String getProxyType() {
-		return "r_node";
+	public String getSonarType() {
+		return R_Node.SONAR_TYPE;
 	}
 
 	/** Get the r_node cache */
@@ -119,13 +119,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Create an r_node map tab */
+	@Override
 	public R_NodeTab createTab() {
 		return new R_NodeTab(session, this);
-	}
-
-	/** Check if user is permitted to add r_nodes */
-	public boolean canRead() {
-		return session.canRead(R_Node.SONAR_TYPE);
 	}
 
 	/** Add a new proxy to the r_node manager */
