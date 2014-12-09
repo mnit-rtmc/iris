@@ -146,13 +146,9 @@ public class Session {
 		return lcs_array_manager;
 	}
 
-	/** List of all tabs */
-	private final List<MapTab> tabs = new LinkedList<MapTab>();
-
-	/** Get a list of all tabs */
-	public List<MapTab> getTabs() {
-		return tabs;
-	}
+	/** Mapping of all tabs */
+	private final HashMap<String, MapTab> all_tabs =
+		new HashMap<String, MapTab>();
 
 	/** Segment layer */
 	private final SegmentLayer seg_layer;
@@ -206,7 +202,7 @@ public class Session {
 		ParserConfigurationException
 	{
 		initializeManagers();
-		addTabs();
+		createTabs();
 		seg_layer.start(props);
 		if (tile_layer != null)
 			tile_layer.initialize();
@@ -219,36 +215,31 @@ public class Session {
 			man.initialize();
 	}
 
-	/** Add the tabs in the order specified by user_props file */
-	private void addTabs() {
-		HashMap<String, MapTab> tm = createTabs();
-		for (String t : user_props.getTabList()) {
-			MapTab tab = tm.get(t);
-			if (tab != null)
-				tabs.add(tab);
-		}
-	}
-
-	/** Lookup a map tab by text ID */
-	public MapTab lookupTab(String tid) {
-		for (MapTab mt: tabs) {
-			if (mt.getTextId().equals(tid))
-				return mt;
-		}
-		return null;
-	}
-
-	/** Create a mapping of text ids to map tabs */
-	private HashMap<String, MapTab> createTabs() {
-		HashMap<String, MapTab> tm = new HashMap<String, MapTab>();
+	/** Create all map tabs in all_tabs mapping */
+	private void createTabs() {
 		for (ProxyManager<?> man: managers) {
 			if (man.canRead()) {
 				MapTab<?> tab = man.createTab();
 				if (tab != null)
-					tm.put(tab.getTextId(), tab);
+					all_tabs.put(tab.getTextId(), tab);
 			}
 		}
-		return tm;
+	}
+
+	/** Get a list of tabs in the order specified by user_props */
+	public List<MapTab> getTabs() {
+		LinkedList<MapTab> tabs = new LinkedList<MapTab>();
+		for (String t : user_props.getTabList()) {
+			MapTab tab = all_tabs.get(t);
+			if (tab != null)
+				tabs.add(tab);
+		}
+		return tabs;
+	}
+
+	/** Lookup a map tab by text ID */
+	public MapTab lookupTab(String tid) {
+		return all_tabs.get(tid);
 	}
 
 	/** Create the layer states.  The map bean and model must be seperate
@@ -448,9 +439,9 @@ public class Session {
 	public void dispose() {
 		seg_layer.dispose();
 		desktop.dispose();
-		for (MapTab tab: tabs)
+		for (MapTab tab: all_tabs.values())
 			tab.dispose();
-		tabs.clear();
+		all_tabs.clear();
 		for (ProxyManager<?> man: managers)
 			man.dispose();
 		managers.clear();
