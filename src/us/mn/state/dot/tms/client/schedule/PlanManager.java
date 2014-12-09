@@ -200,10 +200,4 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	public String getDescription(ActionPlan plan) {
 		return plan.getName() + " -- " + plan.getDescription();
 	}
-
-	/** Get the layer zoom visibility threshold */
-	@Override
-	protected int getZoomThreshold() {
-		return 10;
-	}
 }

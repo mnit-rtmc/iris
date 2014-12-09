@@ -92,10 +92,4 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 	protected GeoLoc getGeoLoc(LCSIndication proxy) {
 		return null;
 	}
-
-	/** Get the layer zoom visibility threshold */
-	@Override
-	protected int getZoomThreshold() {
-		return 19;
-	}
 }

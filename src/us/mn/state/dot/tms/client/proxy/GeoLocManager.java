@@ -60,12 +60,16 @@ public class GeoLocManager {
 	/** Create a new GeoLoc manager */
 	public GeoLocManager(Session s) {
 		session = s;
-		getCache().addProxyListener(listener);
 	}
 
 	/** Get the geo loc cache */
 	private TypeCache<GeoLoc> getCache() {
 		return session.getSonarState().getGeoLocs();
+	}
+
+	/** Initialize the GeoLoc manager */
+	public void initialize() {
+		getCache().addProxyListener(listener);
 	}
 
 	/** Dispose of the GeoLoc manager */

@@ -271,7 +271,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Create layer state for a map bean */
-	public LayerState createState(MapBean mb) {
+	public final LayerState createState(MapBean mb) {
 		return layer.createState(mb);
 	}
 
@@ -422,5 +422,13 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Get the layer zoom visibility threshold */
-	abstract protected int getZoomThreshold();
+	protected int getZoomThreshold() {
+		// Zero indicates no layer for proxies
+		return 0;
+	}
+
+	/** Check if manager has a layer to display */
+	public final boolean hasLayer() {
+		return canRead() && (getZoomThreshold() > 0);
+	}
 }

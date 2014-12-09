@@ -100,9 +100,6 @@ public class Session {
 		return props;
 	}
 
-	/** Tile layer */
-	private final TileLayer tile_layer;
-
 	/** Mutable user properties stored on client workstation */
 	private final UserProperties user_props;
 
@@ -111,14 +108,19 @@ public class Session {
 		return user_props;
 	}
 
-	/** Segment layer */
-	private final SegmentLayer seg_layer;
-
 	/** Location manager */
 	private final GeoLocManager loc_manager;
 
-	/** Controller manager */
-	private final ControllerManager controller_manager;
+	/** List of proxy managers */
+	private final LinkedList<ProxyManager<?>> managers;
+
+	/** R_Node manager */
+	private final R_NodeManager r_node_manager;
+
+	/** Get the r_node manager */
+	public R_NodeManager getR_NodeManager() {
+		return r_node_manager;
+	}
 
 	/** Camera manager */
 	private final CameraManager cam_manager;
@@ -144,38 +146,6 @@ public class Session {
 		return lcs_array_manager;
 	}
 
-	/** LCS indication manager */
-	private final LCSIManager lcsi_manager;
-
-	/** Lane marking manager */
-	private final LaneMarkingManager lane_marking_manager;
-
-	/** R_Node manager */
-	private final R_NodeManager r_node_manager;
-
-	/** Get the r_node manager */
-	public R_NodeManager getR_NodeManager() {
-		return r_node_manager;
-	}
-
-	/** Beacon manager */
-	private final BeaconManager beacon_manager;
-
-	/** Weather sensor manager */
-	private final WeatherSensorManager weather_sensor_manager;
-
-	/** Ramp meter manager */
-	private final MeterManager meter_manager;
-
-	/** Gate arm array manager */
-	private final GateArmArrayManager gate_arm_manager;
-
-	/** Incident manager */
-	private final IncidentManager inc_manager;
-
-	/** Action plan manager */
-	private final PlanManager plan_manager;
-
 	/** List of all tabs */
 	private final List<MapTab> tabs = new LinkedList<MapTab>();
 
@@ -183,6 +153,12 @@ public class Session {
 	public List<MapTab> getTabs() {
 		return tabs;
 	}
+
+	/** Segment layer */
+	private final SegmentLayer seg_layer;
+
+	/** Tile layer */
+	private final TileLayer tile_layer;
 
 	/** Create a new session */
 	public Session(SonarState st, SmartDesktop d, Properties p,
@@ -196,19 +172,23 @@ public class Session {
 		user_props = up;
 		loc_manager = new GeoLocManager(this);
 		r_node_manager = new R_NodeManager(this, loc_manager);
-		controller_manager = new ControllerManager(this, loc_manager);
 		cam_manager = new CameraManager(this, loc_manager);
 		dms_manager = new DMSManager(this, loc_manager);
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
-		lcsi_manager = new LCSIManager(this, loc_manager);
-		lane_marking_manager = new LaneMarkingManager(this,loc_manager);
-		beacon_manager = new BeaconManager(this, loc_manager);
-		weather_sensor_manager = new WeatherSensorManager(this,
-			loc_manager);
-		meter_manager = new MeterManager(this, loc_manager);
-		gate_arm_manager = new GateArmArrayManager(this, loc_manager);
-		inc_manager = new IncidentManager(this, loc_manager);
-		plan_manager = new PlanManager(this, loc_manager);
+		managers = new LinkedList<ProxyManager<?>>();
+		managers.add(r_node_manager);
+		managers.add(new ControllerManager(this, loc_manager));
+		managers.add(cam_manager);
+		managers.add(new MeterManager(this, loc_manager));
+		managers.add(new GateArmArrayManager(this, loc_manager));
+		managers.add(dms_manager);
+		managers.add(lcs_array_manager);
+		managers.add(new LCSIManager(this, loc_manager));
+		managers.add(new LaneMarkingManager(this,loc_manager));
+		managers.add(new BeaconManager(this, loc_manager));
+		managers.add(new WeatherSensorManager(this, loc_manager));
+		managers.add(new IncidentManager(this, loc_manager));
+		managers.add(new PlanManager(this, loc_manager));
 		seg_layer = r_node_manager.getSegmentLayer();
 		tile_layer = createTileLayer(props.getProperty("map.tile.url"));
 	}
@@ -234,19 +214,9 @@ public class Session {
 
 	/** Initialize all the proxy managers */
 	private void initializeManagers() {
-		r_node_manager.initialize();
-		controller_manager.initialize();
-		cam_manager.initialize();
-		dms_manager.initialize();
-		lcs_array_manager.initialize();
-		lcsi_manager.initialize();
-		lane_marking_manager.initialize();
-		beacon_manager.initialize();
-		weather_sensor_manager.initialize();
-		meter_manager.initialize();
-		gate_arm_manager.initialize();
-		inc_manager.initialize();
-		plan_manager.initialize();
+		loc_manager.initialize();
+		for (ProxyManager<?> man: managers)
+			man.initialize();
 	}
 
 	/** Add the tabs in the order specified by user_props file */
@@ -262,15 +232,8 @@ public class Session {
 	/** Create a mapping of text ids to map tabs */
 	private HashMap<String, MapTab> createTabs() {
 		HashMap<String, MapTab> tm = new HashMap<String, MapTab>();
-		putMapTab(tm, inc_manager);
-		putMapTab(tm, dms_manager);
-		putMapTab(tm, cam_manager);
-		putMapTab(tm, lcs_array_manager);
-		putMapTab(tm, meter_manager);
-		putMapTab(tm, gate_arm_manager);
-		putMapTab(tm, r_node_manager);
-		putMapTab(tm, plan_manager);
-		putMapTab(tm, controller_manager);
+		for (ProxyManager<?> man: managers)
+			putMapTab(tm, man);
 		return tm;
 	}
 
@@ -294,24 +257,10 @@ public class Session {
 		if (tile_layer != null)
 			mm.addLayer(tile_layer.createState(mb));
 		mm.addLayer(seg_layer.createState(mb));
-		if (controller_manager.canRead())
-			mm.addLayer(controller_manager.createState(mb));
-		if (cam_manager.canRead())
-			mm.addLayer(cam_manager.createState(mb));
-		if (meter_manager.canRead())
-			mm.addLayer(meter_manager.createState(mb));
-		if (gate_arm_manager.canRead())
-			mm.addLayer(gate_arm_manager.createState(mb));
-		if (dms_manager.canRead())
-			mm.addLayer(dms_manager.createState(mb));
-		if (lcs_array_manager.canRead())
-			mm.addLayer(lcs_array_manager.createState(mb));
-		if (beacon_manager.canRead())
-			mm.addLayer(beacon_manager.createState(mb));
-		if (inc_manager.canRead())
-			mm.addLayer(inc_manager.createState(mb));
-		if (r_node_manager.canRead())
-			mm.addLayer(r_node_manager.createState(mb));
+		for (ProxyManager<?> man: managers) {
+			if (man.hasLayer())
+				mm.addLayer(man.createState(mb));
+		}
 	}
 
 	/** Check if the user can add an object.
@@ -499,19 +448,9 @@ public class Session {
 		for (MapTab tab: tabs)
 			tab.dispose();
 		tabs.clear();
-		plan_manager.dispose();
-		r_node_manager.dispose();
-		gate_arm_manager.dispose();
-		cam_manager.dispose();
-		dms_manager.dispose();
-		lcs_array_manager.dispose();
-		lcsi_manager.dispose();
-		lane_marking_manager.dispose();
-		beacon_manager.dispose();
-		weather_sensor_manager.dispose();
-		meter_manager.dispose();
-		controller_manager.dispose();
-		inc_manager.dispose();
+		for (ProxyManager<?> man: managers)
+			man.dispose();
+		managers.clear();
 		loc_manager.dispose();
 		state.quit();
 	}
