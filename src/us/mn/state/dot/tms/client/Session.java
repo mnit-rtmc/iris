@@ -232,20 +232,14 @@ public class Session {
 	/** Create a mapping of text ids to map tabs */
 	private HashMap<String, MapTab> createTabs() {
 		HashMap<String, MapTab> tm = new HashMap<String, MapTab>();
-		for (ProxyManager<?> man: managers)
-			putMapTab(tm, man);
-		return tm;
-	}
-
-	/** Put a map tab into tab mapping (what?) */
-	static private void putMapTab(HashMap<String, MapTab> tm,
-		ProxyManager<?> man)
-	{
-		if (man.canRead()) {
-			MapTab<?> tab = man.createTab();
-			if (tab != null)
-				tm.put(tab.getTextId(), tab);
+		for (ProxyManager<?> man: managers) {
+			if (man.canRead()) {
+				MapTab<?> tab = man.createTab();
+				if (tab != null)
+					tm.put(tab.getTextId(), tab);
+			}
 		}
+		return tm;
 	}
 
 	/** Create the layer states.  The map bean and model must be seperate
