@@ -90,7 +90,7 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 	/** Create a new LCS */
 	@Override
 	public void createObject(String name) {
-		int lane = getRowCount();
+		int lane = getRowCount() + 1;
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("lcsArray", lcs_array);
 		attrs.put("lane", new Integer(lane));
