@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,7 +48,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer {
 
 	/** Create a new SONAR map layer */
 	public ProxyLayer(ProxyManager<T> m) {
-		super(I18N.get(m.getProxyType()));
+		super(I18N.get(m.getLayerId()));
 		manager = m;
 	}
 

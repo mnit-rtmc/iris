@@ -48,9 +48,9 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 		return LaneMarking.SONAR_TYPE;
 	}
 
-	/** Get the proxy type name */
+	/** Get the layer ID */
 	@Override
-	public String getProxyType() {
+	public String getLayerId() {
 		return "lane.marking";
 	}
 

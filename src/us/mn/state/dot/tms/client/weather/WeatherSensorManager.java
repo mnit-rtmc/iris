@@ -48,9 +48,9 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 		return WeatherSensor.SONAR_TYPE;
 	}
 
-	/** Get the proxy type name */
+	/** Get the layer ID */
 	@Override
-	public String getProxyType() {
+	public String getLayerId() {
 		return "weather.sensor";
 	}
 
@@ -94,11 +94,5 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 	@Override
 	protected GeoLoc getGeoLoc(WeatherSensor proxy) {
 		return proxy.getGeoLoc();
-	}
-
-	/** Get the layer zoom visibility threshold */
-	@Override
-	protected int getZoomThreshold() {
-		return 12;
 	}
 }

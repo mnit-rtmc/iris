@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 
 	/** Create a new SONAR proxy theme */
 	public ProxyTheme(ProxyManager<T> m, Shape s) {
-		super(I18N.get(m.getProxyType()), s, lsize);
+		super(I18N.get(m.getLayerId()), s, lsize);
 		manager = m;
 	}
 

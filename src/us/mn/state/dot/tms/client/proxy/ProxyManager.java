@@ -195,19 +195,19 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Get the sonar type name */
 	abstract public String getSonarType();
 
-	/** Get the proxy type name */
-	public String getProxyType() {
+	/** Get the layer ID */
+	public String getLayerId() {
 		return getSonarType();
-	}
-
-	/** Get longer proxy type name for display */
-	public String getLongProxyType() {
-		return getProxyType();
 	}
 
 	/** Get the tab ID */
 	public String getTabId() {
-		return getProxyType();
+		return getLayerId();
+	}
+
+	/** Get longer proxy type name for display */
+	public String getLongProxyType() {
+		return getLayerId();
 	}
 
 	/** Get the proxy type cache */

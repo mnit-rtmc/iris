@@ -108,9 +108,9 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return LCSArray.SONAR_TYPE;
 	}
 
-	/** Get the proxy type name */
+	/** Get the layer ID */
 	@Override
-	public String getProxyType() {
+	public String getLayerId() {
 		return "lcs";
 	}
 

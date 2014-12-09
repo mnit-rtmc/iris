@@ -67,9 +67,9 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return RampMeter.SONAR_TYPE;
 	}
 
-	/** Get the proxy type name */
+	/** Get the layer ID */
 	@Override
-	public String getProxyType() {
+	public String getLayerId() {
 		return "ramp.meter";
 	}
 

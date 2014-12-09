@@ -55,9 +55,9 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		return GateArmArray.SONAR_TYPE;
 	}
 
-	/** Get the proxy type name */
+	/** Get the layer ID */
 	@Override
-	public String getProxyType() {
+	public String getLayerId() {
 		return "gate.arm.array";
 	}
 
