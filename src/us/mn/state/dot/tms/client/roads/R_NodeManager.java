@@ -124,8 +124,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Check if user is permitted to add r_nodes */
-	public boolean isAddPermitted() {
-		return session.isAddPermitted(R_Node.SONAR_TYPE);
+	public boolean canRead() {
+		return session.canRead(R_Node.SONAR_TYPE);
 	}
 
 	/** Add a new proxy to the r_node manager */

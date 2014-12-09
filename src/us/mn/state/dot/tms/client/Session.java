@@ -273,7 +273,7 @@ public class Session {
 			putMapTab(tm, meter_manager.createTab());
 		if (gate_arm_manager.canRead())
 			putMapTab(tm, gate_arm_manager.createTab());
-		if (r_node_manager.isAddPermitted())
+		if (r_node_manager.canRead())
 			putMapTab(tm, r_node_manager.createTab());
 		if (plan_manager.canRead())
 			putMapTab(tm, plan_manager.createTab());
@@ -312,7 +312,7 @@ public class Session {
 			mm.addLayer(beacon_manager.createState(mb));
 		if (inc_manager.canRead())
 			mm.addLayer(inc_manager.createState(mb));
-		if (r_node_manager.isAddPermitted())
+		if (r_node_manager.canRead())
 			mm.addLayer(r_node_manager.createState(mb));
 	}
 
