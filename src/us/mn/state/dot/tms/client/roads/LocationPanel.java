@@ -197,10 +197,10 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		add(cross_mod_cbx, Stretch.NONE);
 		add(cross_cbx);
 		add(cross_dir_cbx, Stretch.LAST);
-		add("location.lat");
+		add("location.latitude");
 		add(lat_txt, Stretch.WIDE);
 		add(new JButton(select_pt), Stretch.TALL);
-		add("location.lon");
+		add("location.longitude");
 		add(lon_txt, Stretch.WIDE);
 		add(new JLabel(), Stretch.LEFT);
 		createJobs();

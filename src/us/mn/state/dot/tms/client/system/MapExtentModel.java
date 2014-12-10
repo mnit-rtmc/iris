@@ -43,7 +43,7 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 				return me.getName();
 			}
 		});
-		cols.add(new ProxyColumn<MapExtent>("location.lon", 80,
+		cols.add(new ProxyColumn<MapExtent>("location.longitude", 80,
 			Float.class)
 		{
 			public Object getValueAt(MapExtent me) {
@@ -57,7 +57,7 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 					me.setLon((Float)value);
 			}
 		});
-		cols.add(new ProxyColumn<MapExtent>("location.lat", 80,
+		cols.add(new ProxyColumn<MapExtent>("location.latitude", 80,
 			Float.class)
 		{
 			public Object getValueAt(MapExtent me) {
