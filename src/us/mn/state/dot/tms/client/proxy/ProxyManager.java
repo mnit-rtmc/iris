@@ -23,6 +23,7 @@ import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
+import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
@@ -86,7 +87,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 		}
 		protected void enumerationCompleteSwing(Collection<T> proxies) {
 			enumerated = true;
-			layer.updateExtent();
+			updateExtent();
 		}
 		protected void proxyRemovedSwing(T proxy) {
 			ProxyManager.this.proxyRemovedSwing(proxy);
@@ -166,14 +167,26 @@ abstract public class ProxyManager<T extends SonarObject> {
 			map_cache.put(loc, proxy);
 		}
 		if (enumerated)
-			layer.updateGeometry();
+			updateGeometry();
 	}
 
 	/** Remove a proxy from the manager */
 	protected void proxyRemovedSwing(T proxy) {
 		s_model.removeSelected(proxy);
 		map_cache.remove(proxy);
-		layer.updateGeometry();
+		updateGeometry();
+	}
+
+	/** Update layer geometry */
+	public final void updateGeometry() {
+		if (layer != null)
+			layer.updateGeometry();
+	}
+
+	/** Update layer extend */
+	public final void updateExtent() {
+		if (layer != null)
+			layer.updateExtent();
 	}
 
 	/** Check if an attribute change is interesting */
@@ -183,7 +196,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Called when a proxy has been changed */
 	protected void proxyChangedSwing(T proxy, String attr) {
-		if (isStyleAttrib(attr))
+		if (layer != null && isStyleAttrib(attr))
 			layer.updateStatus();
 	}
 
@@ -270,9 +283,9 @@ abstract public class ProxyManager<T extends SonarObject> {
 		return theme;
 	}
 
-	/** Create a map layer for the proxy type */
-	public ProxyLayer<T> getLayer() {
-		return layer;
+	/** Test if a layer is the manager's layer */
+	public boolean checkLayer(Layer l) {
+		return l == layer;
 	}
 
 	/** Create layer state for a map bean */

@@ -45,7 +45,6 @@ import static us.mn.state.dot.tms.R_Node.MID_SHIFT;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyLayer;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -81,9 +80,6 @@ public class CorridorList extends JPanel {
 
 	/** Location type cache */
 	private final TypeCache<GeoLoc> geo_locs;
-
-	/** Roadway node layer */
-	private final ProxyLayer<R_Node> layer;
 
 	/** Selected roadway corridor */
 	private CorridorBase corridor;
@@ -197,7 +193,6 @@ public class CorridorList extends JPanel {
 		panel = p;
 		creator = new R_NodeCreator(s);
 		client = s.getDesktop().client;
-		layer = m.getLayer();
 		r_nodes = creator.getR_Nodes();
 		geo_locs = creator.getGeoLocs();
 		corridor_cbx.setAction(corr_act);
@@ -252,7 +247,7 @@ public class CorridorList extends JPanel {
 		client.setPointSelector(null);
 		manager.setCorridor(c);
 		updateListModel();
-		layer.updateExtent();
+		manager.updateExtent();
 	}
 
 	/** Dispose of the corridor chooser */

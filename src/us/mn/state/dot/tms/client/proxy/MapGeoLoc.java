@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,8 +79,8 @@ public class MapGeoLoc implements MapObject {
 
 	/** Update the layer geometry */
 	public void updateGeometry() {
-		if(manager != null)
-			manager.getLayer().updateGeometry();
+		if (manager != null)
+			manager.updateGeometry();
 	}
 
 	/** Get the default angle (radians) */

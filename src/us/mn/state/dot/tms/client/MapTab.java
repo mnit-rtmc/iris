@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client;
 
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
-import us.mn.state.dot.map.Layer;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.sonar.SonarObject;
@@ -79,15 +78,10 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 
 	/** Get the home layer for the tab */
 	public LayerState getHomeLayer(MapBean m) {
-		for(LayerState ls: m.getLayers()) {
-			if(isHomeLayer(ls.getLayer()))
+		for (LayerState ls: m.getLayers()) {
+			if (manager.checkLayer(ls.getLayer()))
 				return ls;
 		}
 		return null;
-	}
-
-	/** Test if a layer is the home layer for the tab */
-	private boolean isHomeLayer(Layer l) {
-		return l == manager.getLayer();
 	}
 }
