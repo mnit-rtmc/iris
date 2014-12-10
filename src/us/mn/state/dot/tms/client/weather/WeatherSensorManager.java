@@ -48,12 +48,6 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 		return WeatherSensor.SONAR_TYPE;
 	}
 
-	/** Get the layer ID */
-	@Override
-	public String getLayerId() {
-		return "weather.sensor";
-	}
-
 	/** Get the weather sensor cache */
 	@Override
 	public TypeCache<WeatherSensor> getCache() {

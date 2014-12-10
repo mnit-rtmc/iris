@@ -123,7 +123,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	@Override
 	protected JPopupMenu createPopupMulti(int n_selected) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel(I18N.get("incident.plural") + ": " +
+		p.add(new JLabel(I18N.get("incident.title") + ": " +
 			n_selected));
 		p.addSeparator();
 		// FIXME: add menu item to clear incident

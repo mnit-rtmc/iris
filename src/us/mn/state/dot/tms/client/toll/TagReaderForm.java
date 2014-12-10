@@ -33,6 +33,6 @@ public class TagReaderForm extends ProxyTableForm<TagReader> {
 
 	/** Create a new tag reader form */
 	public TagReaderForm(Session s) {
-		super(I18N.get("tag.readers"), new TagReaderModel(s));
+		super(I18N.get("tag_reader.title"), new TagReaderModel(s));
 	}
 }

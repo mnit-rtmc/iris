@@ -33,6 +33,6 @@ public class RampMeterForm extends ProxyTableForm<RampMeter> {
 
 	/** Create a new ramp meter form */
 	public RampMeterForm(Session s) {
-		super(I18N.get("ramp.meter.plural"), new RampMeterModel(s));
+		super(I18N.get("ramp_meter.title"), new RampMeterModel(s));
 	}
 }

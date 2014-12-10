@@ -125,7 +125,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 		loc_manager = lm;
 		def_style = ds;
 		theme = createTheme();
-		layer = createLayer();
+		layer = hasLayer() ? createLayer() : null;
 	}
 
 	/** Create a new proxy manager */
@@ -144,11 +144,6 @@ abstract public class ProxyManager<T extends SonarObject> {
 		s_model.dispose();
 		map_cache.dispose();
 		getCache().removeProxyListener(listener);
-	}
-
-	/** Create a style list model for the given symbol */
-	protected StyleListModel<T> createStyleListModel(Symbol s) {
-		return new StyleListModel<T>(this, s.getLabel());
 	}
 
 	/** Create a layer for this proxy type */
@@ -208,19 +203,9 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Get the sonar type name */
 	abstract public String getSonarType();
 
-	/** Get the layer ID */
-	public String getLayerId() {
-		return getSonarType();
-	}
-
 	/** Get the tab ID */
 	public String getTabId() {
-		return getLayerId();
-	}
-
-	/** Get longer proxy type name for display */
-	public String getLongProxyType() {
-		return getLayerId();
+		return getSonarType();
 	}
 
 	/** Get the proxy type cache */
@@ -311,13 +296,22 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Get the specified style list model */
 	public StyleListModel<T> getStyleModel(String s) {
-		Symbol sym = theme.getSymbol(s);
-		StyleListModel<T> slm = createStyleListModel(sym);
-		if(slm != null) {
+		StyleListModel<T> slm = createStyleListModel(s);
+		if (slm != null) {
 			slm.initialize();
 			return slm;
 		} else
 			return null;
+	}
+
+	/** Create a style list model for the given symbol name */
+	private StyleListModel<T> createStyleListModel(String s) {
+		return createStyleListModel(theme.getSymbol(s));
+	}
+
+	/** Create a style list model for the given symbol */
+	protected StyleListModel<T> createStyleListModel(Symbol s) {
+		return new StyleListModel<T>(this, s.getLabel());
 	}
 
 	/** Check if a given attribute affects a proxy style */

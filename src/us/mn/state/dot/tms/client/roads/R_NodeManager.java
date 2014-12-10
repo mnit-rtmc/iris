@@ -371,8 +371,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	@Override
 	protected JPopupMenu createPopupMulti(int n_selected) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " +
-			I18N.get("r_node.plural")));
+		p.add(new JLabel(I18N.get("r_node.title") + ": " +
+			n_selected));
 		return p;
 	}
 

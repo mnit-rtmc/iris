@@ -67,16 +67,10 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return RampMeter.SONAR_TYPE;
 	}
 
-	/** Get the layer ID */
+	/** Get the tab ID */
 	@Override
-	public String getLayerId() {
+	public String getTabId() {
 		return "ramp.meter";
-	}
-
-	/** Get longer proxy type name for display */
-	@Override
-	public String getLongProxyType() {
-		return "ramp.meter.long";
 	}
 
 	/** Get the ramp meter cache */
@@ -164,8 +158,8 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	@Override
 	protected JPopupMenu createPopupMulti(int n_selected) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " + I18N.get(
-			"ramp.meters.short")));
+		p.add(new JLabel(I18N.get("ramp_meter.title") + ": " +
+			n_selected));
 		p.addSeparator();
 		// FIXME: add turn on/off all actions
 		return p;

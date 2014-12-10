@@ -48,7 +48,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer {
 
 	/** Create a new SONAR map layer */
 	public ProxyLayer(ProxyManager<T> m) {
-		super(I18N.get(m.getLayerId()));
+		super(I18N.get(m.getSonarType()));
 		manager = m;
 	}
 
@@ -107,6 +107,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer {
 	}
 
 	/** Create a new layer state */
+	@Override
 	public LayerState createState(MapBean mb) {
 		LayerState s = new ProxyLayerState(this, mb);
 		s.addTheme(manager.getTheme());

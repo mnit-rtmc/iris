@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,7 +113,7 @@ public class ViewMenu extends JMenu {
 	private JMenuItem createMeterItem() {
 		if(!RampMeterForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("ramp.meter.long.plural") {
+		return new JMenuItem(new IAction("ramp_meter.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new RampMeterForm(session));
 			}
@@ -135,7 +135,7 @@ public class ViewMenu extends JMenu {
 	private JMenuItem createWeatherItem() {
 		if(!WeatherSensorForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("weather.sensors") {
+		return new JMenuItem(new IAction("weather_sensor.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new WeatherSensorForm(session));
 			}
@@ -146,7 +146,7 @@ public class ViewMenu extends JMenu {
 	private JMenuItem createGateArmItem() {
 		if(!GateArmArrayForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("gate.arms") {
+		return new JMenuItem(new IAction("gate_arm_array.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new GateArmArrayForm(session));
 			}

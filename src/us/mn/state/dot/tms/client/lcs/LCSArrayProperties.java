@@ -103,7 +103,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 
 	/** Create a new lane control signal properties form */
 	public LCSArrayProperties(Session s, LCSArray proxy) {
-		super(I18N.get("lcs.array") + ": ", s, proxy);
+		super(I18N.get("lcs_array") + ": ", s, proxy);
 		creator = new LCSIndicationCreator(s,
 			state.getLcsCache().getLCSIndications());
 		lcs_pnl = new ProxyTablePanel<LCS>(new LCSTableModel(s, proxy))

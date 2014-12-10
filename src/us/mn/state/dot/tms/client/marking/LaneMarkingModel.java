@@ -33,7 +33,7 @@ public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 	protected ArrayList<ProxyColumn<LaneMarking>> createColumns() {
 		ArrayList<ProxyColumn<LaneMarking>> cols =
 			new ArrayList<ProxyColumn<LaneMarking>>(2);
-		cols.add(new ProxyColumn<LaneMarking>("lane.marking", 120) {
+		cols.add(new ProxyColumn<LaneMarking>("lane_marking", 120) {
 			public Object getValueAt(LaneMarking lm) {
 				return lm.getName();
 			}

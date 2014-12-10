@@ -33,6 +33,7 @@ public class GateArmArrayForm extends ProxyTableForm<GateArmArray> {
 
 	/** Create a new gate arm array form */
 	public GateArmArrayForm(Session s) {
-		super(I18N.get("gate.arm.arrays"), new GateArmArrayModel(s));
+		super(I18N.get("gate_arm_array.title"),
+			new GateArmArrayModel(s));
 	}
 }

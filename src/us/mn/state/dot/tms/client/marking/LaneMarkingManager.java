@@ -48,12 +48,6 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 		return LaneMarking.SONAR_TYPE;
 	}
 
-	/** Get the layer ID */
-	@Override
-	public String getLayerId() {
-		return "lane.marking";
-	}
-
 	/** Get the lane marking cache */
 	@Override
 	public TypeCache<LaneMarking> getCache() {

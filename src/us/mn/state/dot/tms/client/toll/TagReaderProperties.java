@@ -56,7 +56,7 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 
 	/** Create a new tag reader properties form */
 	public TagReaderProperties(Session s, TagReader tr) {
-		super(I18N.get("tag.reader") + ": ", s, tr);
+		super(I18N.get("tag_reader") + ": ", s, tr);
 		loc_pnl = new LocationPanel(s);
 	}
 

@@ -108,9 +108,9 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return LCSArray.SONAR_TYPE;
 	}
 
-	/** Get the layer ID */
+	/** Get the tab ID */
 	@Override
-	public String getLayerId() {
+	public String getTabId() {
 		return "lcs";
 	}
 
@@ -266,8 +266,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	@Override
 	protected JPopupMenu createPopupMulti(int n_selected) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " +
-			I18N.get("lcs.arrays")));
+		p.add(new JLabel(I18N.get("lcs_array.title") + ": " +
+			n_selected));
 		p.addSeparator();
 		return p;
 	}

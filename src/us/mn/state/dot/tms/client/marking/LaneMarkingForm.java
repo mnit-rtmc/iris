@@ -33,6 +33,6 @@ public class LaneMarkingForm extends ProxyTableForm<LaneMarking> {
 
 	/** Create a new lane marking form */
 	public LaneMarkingForm(Session s) {
-		super(I18N.get("lane.markings"), new LaneMarkingModel(s));
+		super(I18N.get("lane_marking.title"), new LaneMarkingModel(s));
 	}
 }

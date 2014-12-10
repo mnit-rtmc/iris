@@ -33,6 +33,6 @@ public class CameraForm extends ProxyTableForm<Camera> {
 
 	/** Create a new camera form */
 	public CameraForm(Session s) {
-		super(I18N.get("camera.plural"), new CameraModel(s));
+		super(I18N.get("camera.title"), new CameraModel(s));
 	}
 }

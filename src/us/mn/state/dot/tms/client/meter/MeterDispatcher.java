@@ -131,7 +131,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		JPanel b_pnl = new JPanel(new GridLayout(1, 2));
 		b_pnl.add(on_btn);
 		b_pnl.add(off_btn);
-		setTitle(I18N.get("ramp.meter.selected"));
+		setTitle(I18N.get("ramp_meter.selected"));
 		add("device.name");
 		add(name_lbl);
 		add("camera");

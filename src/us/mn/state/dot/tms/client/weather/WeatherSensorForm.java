@@ -33,6 +33,7 @@ public class WeatherSensorForm extends ProxyTableForm<WeatherSensor> {
 
 	/** Create a new weather sensor form */
 	public WeatherSensorForm(Session s) {
-		super(I18N.get("weather.sensors"), new WeatherSensorModel(s));
+		super(I18N.get("weather_sensor.title"),
+			new WeatherSensorModel(s));
 	}
 }

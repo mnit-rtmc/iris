@@ -82,7 +82,7 @@ public class LaneUseMenu extends JMenu {
 	protected JMenuItem createLaneMarkingItem() {
 		if(!LaneMarkingForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("lane.markings") {
+		return new JMenuItem(new IAction("lane_marking.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new LaneMarkingForm(session));
 			}
@@ -92,7 +92,7 @@ public class LaneUseMenu extends JMenu {
 	/** Create the tag reader menu item */
 	private JMenuItem createTagReaderItem() {
 		if (TagReaderForm.isPermitted(session)) {
-			return new JMenuItem(new IAction("tag.readers") {
+			return new JMenuItem(new IAction("tag_reader.title") {
 				protected void doActionPerformed(ActionEvent e){
 				       desktop.show(new TagReaderForm(session));
 				}

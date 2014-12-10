@@ -33,6 +33,6 @@ public class LcsForm extends ProxyTableForm<LCSArray> {
 
 	/** Create a new LCS form */
 	public LcsForm(Session s) {
-		super(I18N.get("lcs.arrays"), new LCSArrayModel(s));
+		super(I18N.get("lcs_array.title"), new LCSArrayModel(s));
 	}
 }

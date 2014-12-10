@@ -55,12 +55,6 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		return GateArmArray.SONAR_TYPE;
 	}
 
-	/** Get the layer ID */
-	@Override
-	public String getLayerId() {
-		return "gate.arm.array";
-	}
-
 	/** Get the tab ID */
 	@Override
 	public String getTabId() {
@@ -146,8 +140,8 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	@Override
 	protected JPopupMenu createPopupMulti(int n_selected) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " + I18N.get(
-			"gate.arm.arrays")));
+		p.add(new JLabel(I18N.get("gate_arm_array.title") + ": " +
+			n_selected));
 		p.addSeparator();
 		return p;
 	}

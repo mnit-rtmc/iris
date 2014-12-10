@@ -33,7 +33,7 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 	protected ArrayList<ProxyColumn<LCSArray>> createColumns() {
 		ArrayList<ProxyColumn<LCSArray>> cols =
 			new ArrayList<ProxyColumn<LCSArray>>(2);
-		cols.add(new ProxyColumn<LCSArray>("lcs.array", 200) {
+		cols.add(new ProxyColumn<LCSArray>("lcs_array", 200) {
 			public Object getValueAt(LCSArray a) {
 				return a.getName();
 			}

@@ -42,7 +42,7 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 	protected ArrayList<ProxyColumn<MeterAction>> createColumns() {
 		ArrayList<ProxyColumn<MeterAction>> cols =
 			new ArrayList<ProxyColumn<MeterAction>>(2);
-		cols.add(new ProxyColumn<MeterAction>("ramp.meter.long", 160) {
+		cols.add(new ProxyColumn<MeterAction>("ramp_meter.long", 160) {
 			public Object getValueAt(MeterAction ma) {
 				return ma.getRampMeter();
 			}

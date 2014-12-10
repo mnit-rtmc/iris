@@ -44,12 +44,6 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 		return LCSIndication.SONAR_TYPE;
 	}
 
-	/** Get the layer ID */
-	@Override
-	public String getLayerId() {
-		return "lcs";
-	}
-
 	/** Get the LCS indication cache */
 	@Override
 	public TypeCache<LCSIndication> getCache() {

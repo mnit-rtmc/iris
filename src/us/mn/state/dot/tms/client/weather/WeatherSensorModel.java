@@ -33,7 +33,7 @@ public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
 	protected ArrayList<ProxyColumn<WeatherSensor>> createColumns() {
 		ArrayList<ProxyColumn<WeatherSensor>> cols =
 			new ArrayList<ProxyColumn<WeatherSensor>>(2);
-		cols.add(new ProxyColumn<WeatherSensor>("weather.sensor", 120) {
+		cols.add(new ProxyColumn<WeatherSensor>("weather_sensor", 120) {
 			public Object getValueAt(WeatherSensor ws) {
 				return ws.getName();
 			}

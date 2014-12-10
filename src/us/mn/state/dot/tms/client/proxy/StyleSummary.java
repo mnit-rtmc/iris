@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2013  Minnesota Department of Transportation
+ * Copyright (C) 2004-2014  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -298,7 +298,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Button click action */
 	private void setStyleAction(String style) {
-		String t = I18N.get(manager.getLongProxyType()) + " " +
+		String t = I18N.get(manager.getSonarType()) + " " +
 			I18N.get("device.status") + ": " + style;
 		border.setTitle(t);
 		// Force the border title to be repainted

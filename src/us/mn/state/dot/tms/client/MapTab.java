@@ -58,9 +58,9 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	protected MapTab(ProxyManager<T> m) {
 		super(new BorderLayout());
 		manager = m;
-		String tid = m.getTabId();
-		name = I18N.get(tid);
-		tip = I18N.get(tid + ".tab");
+		String t = m.getSonarType() + ".tab";
+		name = I18N.get(t);
+		tip = I18N.get(t + ".tooltip");
 	}
 
 	/** Perform any clean up necessary */

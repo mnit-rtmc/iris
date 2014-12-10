@@ -122,9 +122,9 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		add(dms_lbl, Stretch.LAST);
 		add("beacons");
 		add(beacon_lbl, Stretch.LAST);
-		add("lane.markings");
+		add("lane_marking.title");
 		add(lane_lbl, Stretch.LAST);
-		add("ramp.meter.long.plural");
+		add("ramp_meter.title");
 		add(meter_lbl, Stretch.LAST);
 		add("action.plan.phase");
 		add(phase_cbx, Stretch.LAST);

@@ -159,8 +159,8 @@ public class CameraManager extends ProxyManager<Camera> {
 	@Override
 	protected JPopupMenu createPopupMulti(int n_selected) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " +
-			I18N.get("camera.plural")));
+		p.add(new JLabel(I18N.get("camera.title") + ": " +
+			n_selected));
 		p.addSeparator();
 		p.add(new PublishAction(s_model));
 		p.add(new UnpublishAction(s_model));

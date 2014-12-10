@@ -61,16 +61,10 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		return ActionPlan.SONAR_TYPE;
 	}
 
-	/** Get the layer ID */
+	/** Get the tab ID */
 	@Override
-	public String getLayerId() {
+	public String getTabId() {
 		return "action.plan";
-	}
-
-	/** Get longer proxy type name for display */
-	@Override
-	public String getLongProxyType() {
-		return "action.plan.long";
 	}
 
 	/** Get the action plan cache */

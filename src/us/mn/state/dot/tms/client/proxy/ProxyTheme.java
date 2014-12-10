@@ -80,7 +80,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 
 	/** Create a new SONAR proxy theme */
 	public ProxyTheme(ProxyManager<T> m, Shape s) {
-		super(I18N.get(m.getLayerId()), s, lsize);
+		super(I18N.get(m.getSonarType()), s, lsize);
 		manager = m;
 	}
 

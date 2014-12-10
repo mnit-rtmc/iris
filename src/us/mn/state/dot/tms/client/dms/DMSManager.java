@@ -236,8 +236,8 @@ public class DMSManager extends ProxyManager<DMS> {
 	@Override
 	protected JPopupMenu createPopupMulti(int n_selected) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + ": " +
-			I18N.get("dms.plural")));
+		p.add(new JLabel(I18N.get("dms.title") + ": " +
+			n_selected));
 		p.addSeparator();
 		if(blankAction != null)
 			p.add(blankAction);

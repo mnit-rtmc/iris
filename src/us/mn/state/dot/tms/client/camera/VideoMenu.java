@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ public class VideoMenu extends JMenu {
 	private JMenuItem createCameraItem() {
 		if(!CameraForm.isPermitted(session))
 			return null;
-		return new JMenuItem(new IAction("camera.plural") {
+		return new JMenuItem(new IAction("camera.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new CameraForm(session));
 			}

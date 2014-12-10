@@ -127,8 +127,8 @@ public class ControllerManager extends ProxyManager<Controller> {
 	@Override
 	protected JPopupMenu createPopupMulti(int n_selected) {
 		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel("" + n_selected + " " +
-			I18N.get("controller.plural")));
+		p.add(new JLabel(I18N.get("controller.title") + ": " +
+			n_selected));
 		p.addSeparator();
 		return p;
 	}

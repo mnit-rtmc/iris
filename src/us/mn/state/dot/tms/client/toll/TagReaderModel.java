@@ -33,7 +33,7 @@ public class TagReaderModel extends ProxyTableModel<TagReader> {
 	protected ArrayList<ProxyColumn<TagReader>> createColumns() {
 		ArrayList<ProxyColumn<TagReader>> cols =
 			new ArrayList<ProxyColumn<TagReader>>(2);
-		cols.add(new ProxyColumn<TagReader>("tag.reader", 120) {
+		cols.add(new ProxyColumn<TagReader>("tag_reader", 120) {
 			public Object getValueAt(TagReader tr) {
 				return tr.getName();
 			}

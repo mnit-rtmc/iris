@@ -162,7 +162,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 
 	/** Create a new gate arm array properties form */
 	public GateArmArrayProperties(Session s, GateArmArray ga) {
-		super(I18N.get("gate.arm.array") + ": ", s, ga);
+		super(I18N.get("gate_arm_array") + ": ", s, ga);
 		camera_mdl = new WrapperComboBoxModel(
 			state.getCamCache().getCameraModel());
 		approach_mdl = new WrapperComboBoxModel(
@@ -191,7 +191,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
 		tab.add(I18N.get("device.setup"), createSetupPanel());
-		tab.add(I18N.get("gate.arms"), ga_pnl);
+		tab.add(I18N.get("gate_arm.title"), ga_pnl);
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
 		if (canUpdate())

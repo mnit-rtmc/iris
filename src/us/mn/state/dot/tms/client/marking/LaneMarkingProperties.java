@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ public class LaneMarkingProperties extends SonarObjectForm<LaneMarking> {
 
 	/** Create a new lane marking properties form */
 	public LaneMarkingProperties(Session s, LaneMarking lm) {
-		super(I18N.get("lane.marking") + ": ", s, lm);
+		super(I18N.get("lane_marking") + ": ", s, lm);
 		loc_pnl = new LocationPanel(s);
 	}
 

@@ -42,7 +42,7 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	protected ArrayList<ProxyColumn<LaneAction>> createColumns() {
 		ArrayList<ProxyColumn<LaneAction>> cols =
 			new ArrayList<ProxyColumn<LaneAction>>(2);
-		cols.add(new ProxyColumn<LaneAction>("lane.marking", 160) {
+		cols.add(new ProxyColumn<LaneAction>("lane_marking", 160) {
 			public Object getValueAt(LaneAction la) {
 				return la.getLaneMarking();
 			}

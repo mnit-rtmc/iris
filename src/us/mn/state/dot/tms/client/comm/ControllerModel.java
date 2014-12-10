@@ -93,7 +93,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 					c.setActive((Boolean)value);
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("comm", 44) {
+		cols.add(new ProxyColumn<Controller>("controller.comm", 44) {
 			public Object getValueAt(Controller c) {
 				return c;
 			}
