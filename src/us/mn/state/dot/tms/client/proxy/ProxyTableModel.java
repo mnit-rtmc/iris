@@ -39,6 +39,11 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** User session */
 	protected final Session session;
 
+	/** Get the user session */
+	public Session getSession() {
+		return session;
+	}
+
 	/** Proxy type cache */
 	protected final TypeCache<T> cache;
 

@@ -25,6 +25,7 @@ import javax.swing.JTextField;
 import static javax.swing.LayoutStyle.ComponentPlacement.RELATED;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -89,6 +90,13 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		}
 	};
 
+	/** Edit mode listener */
+	private final EditModeListener edit_lsnr = new EditModeListener() {
+		public void editModeChanged() {
+			updateButtons();
+		}
+	};
+
 	/** Create a new proxy table panel */
 	public ProxyTablePanel(ProxyTableModel<T> m) {
 		model = m;
@@ -105,6 +113,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		add_proxy.setEnabled(false);
 		del_proxy.setEnabled(false);
 		createJobs();
+		model.getSession().addEditModeListener(edit_lsnr);
 		initButtonPanel();
 		layoutPanel();
 	}
@@ -139,6 +148,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 
 	/** Dispose of the panel */
 	public void dispose() {
+		model.getSession().removeEditModeListener(edit_lsnr);
 		model.dispose();
 		removeAll();
 	}
@@ -151,7 +161,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		table.setModel(m);
 		if (om != null)
 			om.dispose();
-		add_proxy.setEnabled(m.canAdd());
+		updateButtons();
 	}
 
 	/** Create the table */
@@ -261,6 +271,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 	public void updateButtons() {
 		T proxy = getSelectedProxy();
 		show_props.setEnabled(proxy != null);
+		add_proxy.setEnabled(model.canAdd());
 		del_proxy.setEnabled(canRemove(proxy));
 	}
 
