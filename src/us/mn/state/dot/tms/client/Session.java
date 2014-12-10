@@ -71,6 +71,7 @@ public class Session {
 	/** Set the edit mode */
 	public void setEditMode(boolean m) {
 		edit_mode = m;
+		fireEditModeChange();
 	}
 
 	/** SONAR state */
@@ -155,6 +156,10 @@ public class Session {
 
 	/** Tile layer */
 	private final TileLayer tile_layer;
+
+	/** Listeners for edit mode changes */
+	private final LinkedList<EditModeListener> listeners =
+		new LinkedList<EditModeListener>();
 
 	/** Create a new session */
 	public Session(SonarState st, SmartDesktop d, Properties p,
@@ -437,6 +442,7 @@ public class Session {
 
 	/** Dispose of the session */
 	public void dispose() {
+		listeners.clear();
 		seg_layer.dispose();
 		desktop.dispose();
 		for (MapTab tab: all_tabs.values())
@@ -453,5 +459,21 @@ public class Session {
 	public long getSessionId() {
 		Connection c = state.lookupConnection();
 		return c != null ? c.getSessionId() : 0;
+	}
+
+	/** Add an edit mode listener */
+	public void addEditModeListener(EditModeListener l) {
+		listeners.add(l);
+	}
+
+	/** Remove an edit mode listener */
+	public void removeEditModeListener(EditModeListener l) {
+		listeners.remove(l);
+	}
+
+	/** Fire an edit mode change event */
+	private void fireEditModeChange() {
+		for (EditModeListener l: listeners)
+			l.editModeChanged();
 	}
 }

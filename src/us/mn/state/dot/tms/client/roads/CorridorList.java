@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import static us.mn.state.dot.tms.R_Node.MID_SHIFT;
+import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyLayer;
@@ -181,6 +182,13 @@ public class CorridorList extends JPanel {
 		}
 	};
 
+	/** Edit mode listener */
+	private final EditModeListener edit_lsnr = new EditModeListener() {
+		public void editModeChanged() {
+			updateButtons();
+		}
+	};
+
 	/** Create a new corridor list */
 	public CorridorList(Session s, R_NodeManager m, R_NodePanel p) {
 		super(new GridBagLayout());
@@ -232,6 +240,7 @@ public class CorridorList extends JPanel {
 		updateNodeSelection(null);
 		add_node.setEnabled(canAdd());
 		delete_node.setEnabled(false);
+		session.addEditModeListener(edit_lsnr);
 	}
 
 	/** Create the jobs */
@@ -248,6 +257,7 @@ public class CorridorList extends JPanel {
 
 	/** Dispose of the corridor chooser */
 	public void dispose() {
+		session.removeEditModeListener(edit_lsnr);
 		sel_model.removeProxySelectionListener(sel_listener);
 		geo_locs.removeProxyListener(loc_listener);
 		r_nodes.removeProxyListener(listener);
@@ -418,6 +428,12 @@ public class CorridorList extends JPanel {
 	private void updateNodeSelection(R_Node proxy) {
 		client.setPointSelector(null);
 		panel.setR_Node(proxy);
+		updateButtons();
+	}
+
+	/** Update the enabled state of add and delete buttons */
+	private void updateButtons() {
+		R_Node proxy = getSelectedNode();
 		add_node.setEnabled(canAdd());
 		delete_node.setEnabled(canRemove(proxy));
 	}
@@ -485,9 +501,7 @@ public class CorridorList extends JPanel {
 
 	/** Get the selected roadway node */
 	private R_Node getSelectedNode() {
-		for(R_Node n: sel_model.getSelected())
-			return n;
-		return null;
+		return sel_model.getSingleSelection();
 	}
 
 	/** Test if a new r_node can be added */
