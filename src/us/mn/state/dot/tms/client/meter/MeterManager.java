@@ -67,12 +67,6 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return RampMeter.SONAR_TYPE;
 	}
 
-	/** Get the tab ID */
-	@Override
-	public String getTabId() {
-		return "ramp.meter";
-	}
-
 	/** Get the ramp meter cache */
 	@Override
 	public TypeCache<RampMeter> getCache() {

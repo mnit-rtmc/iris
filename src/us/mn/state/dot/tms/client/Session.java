@@ -226,7 +226,7 @@ public class Session {
 			if (man.canRead()) {
 				MapTab<?> tab = man.createTab();
 				if (tab != null)
-					all_tabs.put(man.getTabId(), tab);
+					all_tabs.put(tab.getTabId(), tab);
 			}
 		}
 	}

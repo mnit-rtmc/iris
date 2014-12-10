@@ -61,12 +61,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 		return ActionPlan.SONAR_TYPE;
 	}
 
-	/** Get the tab ID */
-	@Override
-	public String getTabId() {
-		return "action.plan";
-	}
-
 	/** Get the action plan cache */
 	@Override
 	public TypeCache<ActionPlan> getCache() {

@@ -51,4 +51,10 @@ public class GateArmTab extends MapTab<GateArmArray> {
 		summary.dispose();
 		dispatcher.dispose();
 	}
+
+	/** Get the tab ID */
+	@Override
+	public String getTabId() {
+		return "gate.arm";
+	}
 }

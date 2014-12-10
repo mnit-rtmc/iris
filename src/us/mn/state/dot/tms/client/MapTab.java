@@ -34,9 +34,7 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 	protected final ProxyManager<T> manager;
 
 	/** Get the tab ID */
-	public String getTabId() {
-		return manager.getTabId();
-	}
+	abstract public String getTabId();
 
 	/** Name of side panel tab */
 	private final String name;

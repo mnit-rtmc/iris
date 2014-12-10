@@ -55,12 +55,6 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		return GateArmArray.SONAR_TYPE;
 	}
 
-	/** Get the tab ID */
-	@Override
-	public String getTabId() {
-		return "gate.arm";
-	}
-
 	/** Get the gate arm array cache */
 	@Override
 	public TypeCache<GateArmArray> getCache() {

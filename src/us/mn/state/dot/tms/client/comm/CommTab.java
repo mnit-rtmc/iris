@@ -46,9 +46,16 @@ public class CommTab extends MapTab<Controller> {
 	}
 
 	/** Dispose of the comm tab */
-	@Override public void dispose() {
+	@Override
+	public void dispose() {
 		super.dispose();
 		manager.getSelectionModel().clearSelection();
 		summary.dispose();
+	}
+
+	/** Get the tab ID */
+	@Override
+	public String getTabId() {
+		return "comm";
 	}
 }

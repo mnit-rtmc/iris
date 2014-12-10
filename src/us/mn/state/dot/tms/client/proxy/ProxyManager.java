@@ -203,11 +203,6 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Get the sonar type name */
 	abstract public String getSonarType();
 
-	/** Get the tab ID */
-	public String getTabId() {
-		return getSonarType();
-	}
-
 	/** Get the proxy type cache */
 	abstract public TypeCache<T> getCache();
 

@@ -108,12 +108,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return LCSArray.SONAR_TYPE;
 	}
 
-	/** Get the tab ID */
-	@Override
-	public String getTabId() {
-		return "lcs";
-	}
-
 	/** Get the LCS array cache */
 	@Override
 	public TypeCache<LCSArray> getCache() {

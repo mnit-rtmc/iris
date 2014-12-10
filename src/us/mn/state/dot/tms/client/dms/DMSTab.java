@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,9 +43,16 @@ public class DMSTab extends MapTab<DMS> {
 	}
 
 	/** Dispose of the DMS tab */
-	@Override public void dispose() {
+	@Override
+	public void dispose() {
 		super.dispose();
 		dispatcher.dispose();
 		summary.dispose();
+	}
+
+	/** Get the tab ID */
+	@Override
+	public String getTabId() {
+		return "dms";
 	}
 }
