@@ -370,5 +370,4 @@ public class SignMessageComposer extends JPanel {
 		session.getDesktop().show(new StoreQuickMessageForm(session,
 			multi));
 	}
-
 }

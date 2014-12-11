@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.Comparator;
-import java.util.TreeSet;
 import javax.swing.ComboBoxModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SignGroup;
@@ -29,7 +28,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 public class SignGroupComboBoxModel extends ProxyListModel<SignGroup>
 	implements ComboBoxModel
 {
-
 	/** Currently selected SignGroup */
 	private SignGroup sel_signgroup = null;
 
@@ -39,26 +37,22 @@ public class SignGroupComboBoxModel extends ProxyListModel<SignGroup>
 		initialize();
 	}
 
-	/** Create an empty set of proxies */
+	/** Get a proxy comparator */
 	@Override
-	protected TreeSet<SignGroup> createProxySet() {
-		return new TreeSet<SignGroup>(
-			new Comparator<SignGroup>() {
-				public int compare(SignGroup sg0,
-					SignGroup sg1)
-				{
-					String s0 = sg0.getName();
-					String s1 = sg1.getName();
-					return s0.compareTo(s1);
-				}
-				public boolean equals(Object o) {
-					return o == this;
-				}
-				public int hashCode() {
-					return super.hashCode();
-				}
+	protected Comparator<SignGroup> comparator() {
+		return new Comparator<SignGroup>() {
+			public int compare(SignGroup sg0, SignGroup sg1) {
+				String s0 = sg0.getName();
+				String s1 = sg1.getName();
+				return s0.compareTo(s1);
 			}
-		);
+			public boolean equals(Object o) {
+				return o == this;
+			}
+			public int hashCode() {
+				return super.hashCode();
+			}
+		};
 	}
 
 	/**
@@ -82,6 +76,4 @@ public class SignGroupComboBoxModel extends ProxyListModel<SignGroup>
 		// notify
 		fireContentsChanged(this, -1, -1);
 	}
-
 }
-

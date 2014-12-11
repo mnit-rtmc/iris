@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
 
-
 /**
  * A GUI form for storing a composed message into the quick-message library.
  *
@@ -90,7 +89,7 @@ public class StoreQuickMessageForm extends AbstractForm {
 		protected void doActionPerformed(ActionEvent e)
 			throws Exception
 		{
-			close();
+			close(session.getDesktop());
 		}
 	};
 
@@ -249,13 +248,7 @@ public class StoreQuickMessageForm extends AbstractForm {
 		attrs.put("sign_group", group);
 		attrs.put("multi", multi);
 		q_msgs.createObject(name, attrs);
-		close();
+		close(session.getDesktop());
 	}
-
-	/** Dispose of the form */
-	public void dispose() {
-		removeAll();
-	}
-
 }
 
