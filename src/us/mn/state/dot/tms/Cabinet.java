@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +22,7 @@ import us.mn.state.dot.sonar.SonarObject;
  * device controllers.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public interface Cabinet extends SonarObject {
 
@@ -36,9 +38,4 @@ public interface Cabinet extends SonarObject {
 	/** Get the cabinet location */
 	GeoLoc getGeoLoc();
 
-	/** Set the milepoint */
-	void setMile(Float m);
-
-	/** Get the milepoint */
-	Float getMile();
 }

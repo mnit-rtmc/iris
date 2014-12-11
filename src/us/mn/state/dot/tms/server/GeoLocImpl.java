@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2005-2013  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +30,7 @@ import us.mn.state.dot.tms.TMSException;
  * GeoLoc contains attributes necessary to describe a map location.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
@@ -36,7 +38,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GeoLocImpl.class);
 		store.query("SELECT name, roadway, road_dir, cross_street, " +
-			" cross_dir, cross_mod, lat, lon FROM iris." +
+			" cross_dir, cross_mod, lat, lon, milepoint " +
+			" FROM iris." +
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -48,7 +51,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 					row.getShort(5),	// cross_dir
 					row.getShort(6),	// cross_mod
 					(Double)row.getObject(7), // lat
-					(Double)row.getObject(8) // lon
+					(Double)row.getObject(8), // lon
+					row.getString(9)	// milepoint
 				));
 			}
 		});
@@ -65,6 +69,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		map.put("cross_mod", cross_mod);
 		map.put("lat", lat);
 		map.put("lon", lon);
+		map.put("milepoint", milepoint);
 		return map;
 	}
 
@@ -85,7 +90,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
 	/** Create a new geo location */
 	protected GeoLocImpl(String n, Road r, short rd, Road x, short xd,
-		short xm, Double lt, Double ln)
+		short xm, Double lt, Double ln, String mp)
 	{
 		this(n);
 		roadway = r;
@@ -95,14 +100,16 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		cross_mod = xm;
 		lat = lt;
 		lon = ln;
+		milepoint = mp;
 	}
 
 	/** Create a new geo location */
 	protected GeoLocImpl(Namespace ns, String n, String r, short rd,
-		String x, short xd, short xm, Double lt, Double ln)
+		String x, short xd, short xm, Double lt, Double ln, String mp)
 	{
 		this(n, (Road)ns.lookupObject(Road.SONAR_TYPE, r), rd,
-		     (Road)ns.lookupObject(Road.SONAR_TYPE, x), xd, xm, lt, ln);
+			(Road)ns.lookupObject(Road.SONAR_TYPE, x), xd, xm, lt,
+			ln, mp);
 	}
 
 	/** Roadway road */
@@ -263,4 +270,26 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public Double getLon() {
 		return lon;
 	}
+
+	/** Milepoint */
+	private String milepoint;
+
+	/** Set the milepoint */
+	public void setMilepoint(String mp) {
+		milepoint = mp;
+	}
+
+	/** Set the milepoint */
+	public void doSetMilepoint(String mp) throws TMSException {
+		if(mp == milepoint)
+			return;
+		store.update(this, "milepoint", mp);
+		setMilepoint(mp);
+	}
+
+	/** Get the milepoint */
+	public String getMilepoint() {
+		return milepoint;
+	}
+
 }

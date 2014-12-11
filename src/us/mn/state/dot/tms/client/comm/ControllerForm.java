@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +54,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * ControllerForm is a Swing dialog for editing Controller records
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class ControllerForm extends SonarObjectForm<Controller> {
 
@@ -100,9 +102,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Location panel */
 	private final LocationPanel loc_pnl;
-
-	/** Mile point text field */
-	private final JTextField mile_txt = new JTextField(10);
 
 	/** Cabinet style action */
 	private final IAction cab_style = new IAction("cabinet.style") {
@@ -211,8 +210,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
 		createSetupJobs();
-		if(canUpdateCabinet("mile"))
-			createCabinetJobs();
 		if(!canRequest()) {
 			clear_err.setEnabled(false);
 			reset.setEnabled(false);
@@ -296,32 +293,10 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Create the cabinet panel */
 	private JPanel createCabinetPanel() {
 		loc_pnl.initialize();
-		loc_pnl.add("cabinet.milepoint");
-		loc_pnl.add(mile_txt, Stretch.LAST);
 		loc_pnl.add("cabinet.style");
 		loc_pnl.add(cab_style_cbx, Stretch.LAST);
 		loc_pnl.setGeoLoc(cabinet.getGeoLoc());
 		return loc_pnl;
-	}
-
-	/** Create the jobs for the cabinet panel */
-	private void createCabinetJobs() {
-		mile_txt.addFocusListener(new FocusAdapter() {
-			@Override
-			public void focusLost(FocusEvent e) {
-				cabinet.setMile(parseMile());
-			}
-		});
-	}
-
-	/** Parse the mile point number */
-	private Float parseMile() {
-		try {
-			return Float.valueOf(mile_txt.getText());
-		}
-		catch(NumberFormatException e) {
-			return null;
-		}
 	}
 
 	/** Listener for cabinet proxy changes */
@@ -439,14 +414,6 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		if(a == null || a.equals("failedOps")) {
 			failed_lbl.setText(String.valueOf(
 				proxy.getFailedOps()));
-		}
-		if(a == null || a.equals("mile")) {
-			mile_txt.setEnabled(canUpdateCabinet("mile"));
-			Float m = cabinet.getMile();
-			if(m == null)
-				mile_txt.setText("");
-			else
-				mile_txt.setText(m.toString());
 		}
 		if(a == null || a.equals("style")) {
 			cab_style_cbx.setAction(null);

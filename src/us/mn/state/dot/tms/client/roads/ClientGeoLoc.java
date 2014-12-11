@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +22,7 @@ import us.mn.state.dot.tms.Road;
  * ClientGeoLoc is a client-side GeoLoc implementation.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class ClientGeoLoc implements GeoLoc {
 
@@ -128,6 +130,20 @@ public class ClientGeoLoc implements GeoLoc {
 	/** Get the longitude */
 	public Double getLon() {
 		return lon;
+	}
+
+	/** Set the milepoint (not applicable). */
+	public void setMilepoint(String m) {
+		// part of GeoLoc interface
+	}
+
+	/**
+	 * Get the milepoint (not applicable).
+	 * @return null
+	 */
+	public String getMilepoint() {
+		// part of GeoLoc interface
+		return null;
 	}
 
 	/** Distance from selected point (in spherical mercator "meters") */

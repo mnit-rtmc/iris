@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +25,7 @@ import us.mn.state.dot.tms.Road;
  * IncidentLoc is a client-side GeoLoc implementation for incidents.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class IncidentLoc implements GeoLoc {
 
@@ -136,6 +138,20 @@ public class IncidentLoc implements GeoLoc {
 	/** Get the longitude */
 	public Double getLon() {
 		return incident.getLon();
+	}
+
+	/** Set the milepoint (not applicable). */
+	public void setMilepoint(String m) {
+		// part of GeoLoc interface
+	}
+
+	/**
+	 * Get the milepoint (not applicable).
+	 * @return null
+	 */
+	public String getMilepoint() {
+		// part of GeoLoc interface
+		return null;
 	}
 
 	/** Get a description of an incident location */

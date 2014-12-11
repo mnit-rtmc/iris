@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@ import us.mn.state.dot.sonar.SonarObject;
  * GeoLoc contains attributes necessary to describe a map location.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public interface GeoLoc extends SonarObject {
 
@@ -67,4 +69,11 @@ public interface GeoLoc extends SonarObject {
 
 	/** Get the longitude */
 	Double getLon();
+
+	/** Set the milepoint */
+	void setMilepoint(String m);
+
+	/** Get the milepoint */
+	String getMilepoint();
+
 }

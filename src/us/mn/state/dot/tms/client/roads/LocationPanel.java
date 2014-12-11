@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2005-2014  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +44,7 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  * LocationPanel is a Swing panel for viewing and editing object locations.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 
@@ -156,6 +158,9 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	/** Longitude field */
 	private final JTextField lon_txt = new JTextField();
 
+	/** Milepoint field */
+	private final JTextField milepoint_txt = new JTextField();
+
 	/** Point selector */
 	private final PointSelector point_sel = new PointSelector() {
 		public boolean selectPoint(Point2D p) {
@@ -203,8 +208,21 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		add("location.longitude");
 		add(lon_txt, Stretch.WIDE);
 		add(new JLabel(), Stretch.LEFT);
+		add("location.milepoint");
+		add(milepoint_txt, Stretch.WIDE);
+		add(new JLabel(), Stretch.LEFT);
 		createJobs();
 		watcher.initialize();
+	}
+
+	/** Set the milepoint */
+	private void setMp(String mp) {
+		GeoLoc l = loc;
+		if(l == null)
+			return;
+		if(mp != null)
+			mp = mp.trim();
+		l.setMilepoint(("".equals(mp)) ? null : mp);
 	}
 
 	/** Dispose of the location panel */
@@ -226,6 +244,13 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 			@Override
 			public void focusLost(FocusEvent e) {
 				setLon(getTextDouble(lon_txt));
+			}
+		});
+		milepoint_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				String mp = milepoint_txt.getText();
+				setMp(mp);
 			}
 		});
 	}
@@ -277,6 +302,12 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 			lon_txt.setEnabled(p);
 			lon_txt.setText(asText(l.getLon()));
 			select_pt.setEnabled(p);
+		}
+		if(a == null || a.equals("milepoint")) {
+			boolean p = canUpdate(l, "milepoint");
+			milepoint_txt.setEnabled(p);
+			String mp = l.getMilepoint();
+			milepoint_txt.setText((mp==null) ? "" : mp);
 		}
 		// NOTE: this was needed to fix a problem where a combo box
 		//       displays the wrong entry after call to setSelectedItem
@@ -361,6 +392,8 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		lat_txt.setText("");
 		lon_txt.setEnabled(false);
 		lon_txt.setText("");
+		milepoint_txt.setEnabled(false);
+		milepoint_txt.setText("");
 		select_pt.setEnabled(false);
 	}
 }

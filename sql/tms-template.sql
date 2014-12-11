@@ -254,7 +254,8 @@ CREATE TABLE iris.geo_loc (
 	cross_dir smallint REFERENCES iris.direction(id),
 	cross_mod smallint REFERENCES iris.road_modifier(id),
 	lat double precision,
-	lon double precision
+	lon double precision,
+	milepoint VARCHAR(16)
 );
 
 CREATE TABLE iris.map_extent (
@@ -383,8 +384,7 @@ CREATE TABLE iris.cabinet_style (
 CREATE TABLE iris.cabinet (
 	name VARCHAR(20) PRIMARY KEY,
 	style VARCHAR(20) REFERENCES iris.cabinet_style(name),
-	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
-	mile real
+	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name)
 );
 
 CREATE TABLE iris.controller (
@@ -1910,7 +1910,7 @@ CREATE VIEW sign_text_view AS
 GRANT SELECT ON sign_text_view TO PUBLIC;
 
 CREATE VIEW cabinet_view AS
-	SELECT name, style, geo_loc, mile
+	SELECT name, style, geo_loc
 	FROM iris.cabinet;
 GRANT SELECT ON cabinet_view TO PUBLIC;
 
@@ -1949,7 +1949,7 @@ CREATE VIEW controller_device_view AS
 GRANT SELECT ON controller_device_view TO PUBLIC;
 
 CREATE VIEW controller_report AS
-	SELECT c.name, c.comm_link, c.drop_id, cab.mile, cab.geo_loc,
+	SELECT c.name, c.comm_link, c.drop_id, cab.geo_loc,
 	trim(l.roadway || ' ' || l.road_dir) || ' ' || l.cross_mod || ' ' ||
 		trim(l.cross_street || ' ' || l.cross_dir) AS "location",
 	cab.style AS "type", d.name AS device, d.pin,

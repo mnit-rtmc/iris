@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,21 +29,21 @@ import us.mn.state.dot.tms.TMSException;
  * A cabinet is a roadside enclosure containing one or more device controllers.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 
 	/** Load all the cabinets */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CabinetImpl.class);
-		store.query("SELECT name, style, geo_loc, mile FROM iris." +
+		store.query("SELECT name, style, geo_loc FROM iris." +
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new CabinetImpl(namespace,
 					row.getString(1),	// name
 					row.getString(2),	// style
-					row.getString(3),	// geo_loc
-					row.getFloat(4)		// mile
+					row.getString(3)	// geo_loc
 				));
 			}
 		});
@@ -54,7 +55,6 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 		map.put("name", name);
 		map.put("style", style);
 		map.put("geo_loc", geo_loc);
-		map.put("mile", mile);
 		return map;
 	}
 
@@ -77,19 +77,17 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 	}
 
 	/** Create a new cabinet */
-	protected CabinetImpl(String n, CabinetStyle s, GeoLocImpl l, Float m) {
+	protected CabinetImpl(String n, CabinetStyle s, GeoLocImpl l) {
 		super(n);
 		style = s;
 		geo_loc = l;
-		mile = m;
 	}
 
 	/** Create a new cabinet */
-	protected CabinetImpl(Namespace ns, String n, String s, String l,
-		Float m)
+	protected CabinetImpl(Namespace ns, String n, String s, String l)
 	{
 		this(n, (CabinetStyle)ns.lookupObject( CabinetStyle.SONAR_TYPE,
-		     s), (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, l), m);
+		     s), (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, l));
 	}
 
 	/** Cabinet style */
@@ -119,27 +117,6 @@ public class CabinetImpl extends BaseObjectImpl implements Cabinet {
 	/** Get the cabinet location */
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
-	}
-
-	/** Milepoint on freeway */
-	protected Float mile;
-
-	/** Set the milepoint */
-	public void setMile(Float m) {
-		mile = m;
-	}
-
-	/** Set the milepoint */
-	public void doSetMile(Float m) throws TMSException {
-		if(m == mile)
-			return;
-		store.update(this, "mile", m);
-		setMile(m);
-	}
-
-	/** Get the milepoint */
-	public Float getMile() {
-		return mile;
 	}
 
 	/** Destroy an object */
