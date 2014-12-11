@@ -23,10 +23,12 @@ import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
+import us.mn.state.dot.tms.server.event.BeaconEvent;
 
 /**
  * A Beacon is a light which flashes toward oncoming traffic.
@@ -195,6 +197,21 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		if(f != flashing) {
 			flashing = f;
 			notifyAttribute("flashing");
+			logBeaconEvent(f);
+		}
+	}
+
+	/** Log a beacon event */
+	private void logBeaconEvent(boolean f) {
+		EventType et = (f)
+		             ? EventType.BEACON_ON_EVENT
+		             : EventType.BEACON_OFF_EVENT;
+		BeaconEvent ev = new BeaconEvent(et, name);
+		try {
+			ev.doStore();
+		}
+		catch (TMSException e) {
+			e.printStackTrace();
 		}
 	}
 

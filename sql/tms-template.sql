@@ -1579,6 +1579,22 @@ CREATE VIEW meter_event_view AS
 	JOIN event.meter_limit_control ON limit_ctrl = meter_limit_control.id;
 GRANT SELECT ON meter_event_view TO PUBLIC;
 
+CREATE TABLE event.beacon_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date timestamp WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	beacon VARCHAR(10) NOT NULL REFERENCES iris._beacon
+		ON DELETE CASCADE,
+);
+
+CREATE VIEW beacon_event_view AS
+	SELECT event_id, event_date, event_description.description, beacon
+	FROM event.beacon_event
+	JOIN event.event_description
+	ON beacon_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON beacon_event_view TO PUBLIC;
+
 CREATE TABLE event.incident_detail (
 	name VARCHAR(8) PRIMARY KEY,
 	description VARCHAR(32) NOT NULL
@@ -2567,6 +2583,8 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 307	Gate Arm CLOSED
 308	Gate Arm TIMEOUT
 401	Meter event
+501	Beacon ON
+502	Beacon OFF
 \.
 
 COPY event.incident_detail (name, description) FROM stdin;

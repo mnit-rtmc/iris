@@ -56,3 +56,27 @@ ALTER TABLE iris.cabinet DROP COLUMN mile;
 -- add dms_quickmsg_store_enable system attribute
 INSERT INTO iris.system_attribute (name, value)
 	VALUES ('dms_quickmsg_store_enable', false);
+
+-- add beacon events
+CREATE TABLE event.beacon_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date timestamp WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	beacon VARCHAR(10) NOT NULL REFERENCES iris._beacon
+		ON DELETE CASCADE,
+);
+
+-- add beacon_event_view
+CREATE VIEW beacon_event_view AS
+	SELECT event_id, event_date, event_description.description, beacon
+	FROM event.beacon_event
+	JOIN event.event_description
+	ON beacon_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON beacon_event_view TO PUBLIC;
+
+-- added beacon event descriptions
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (501, 'Beacon ON');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (502, 'Beacon OFF');
