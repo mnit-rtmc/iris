@@ -43,8 +43,8 @@ public class SidePanel extends JPanel {
 	private final MapBean map;
 
 	/** List of tab switchers */
-	private final LinkedList<TabSwitcher> switchers =
-		new LinkedList<TabSwitcher>();
+	private final LinkedList<TabSwitcher<?>> switchers =
+		new LinkedList<TabSwitcher<?>>();
 
 	/** Most recently selected map tab ID.  This is not cleared when tabs
 	 * are removed, so that tab is remembered even after logout. */
@@ -76,24 +76,24 @@ public class SidePanel extends JPanel {
 	/** Update the selected tab */
 	private void updateSelectedTab() {
 		map.setPointSelector(null);
-		MapTab mt = getSelectedTab();
-		if(mt != null) {
+		MapTab<?> mt = getSelectedTab();
+		if (mt != null) {
 			setSelectedLayer(getHomeProxyLayerState(mt));
 			sel_tab = mt.getTabId();
 		}
 	}
 
 	/** Get the selected map tab */
-	private MapTab getSelectedTab() {
+	private MapTab<?> getSelectedTab() {
 		Component tab = tab_pane.getSelectedComponent();
-		if(tab instanceof MapTab)
+		if (tab instanceof MapTab)
 			return (MapTab)tab;
 		else
 			return null;
 	}
 
 	/** Set the selected map tab */
-	public void setSelectedTab(MapTab mt) {
+	public void setSelectedTab(MapTab<?> mt) {
 		try {
 			tab_pane.setSelectedComponent(mt);
 		}
@@ -103,7 +103,7 @@ public class SidePanel extends JPanel {
 	}
 
 	/** Get the home proxy layer state for a map tab */
-	private ProxyLayerState getHomeProxyLayerState(MapTab mt) {
+	private ProxyLayerState getHomeProxyLayerState(MapTab<?> mt) {
 		LayerState ls = mt.getHomeLayer(map);
 		if(ls instanceof ProxyLayerState)
 			return (ProxyLayerState)ls;
@@ -121,24 +121,26 @@ public class SidePanel extends JPanel {
 	}
 
 	/** Add a tab to the screen pane */
-	public void addTab(MapTab mt) {
+	public void addTab(MapTab<?> mt) {
 		tab_pane.addTab(mt.getName(), null, mt, mt.getTip());
 		mt.setMap(map);
 		ProxyLayerState pls = getHomeProxyLayerState(mt);
-		if(pls != null) {
-			if(tab_pane.getTabCount() == 1)
+		if (pls != null) {
+			if (tab_pane.getTabCount() == 1)
 				setSelectedLayer(pls);
-			TabSwitcher ts = new TabSwitcher(mt,
+			TabSwitcher<?> ts = new TabSwitcher(mt,
 				pls.getSelectionModel());
 			switchers.add(ts);
 		}
 	}
 
 	/** Class to listen for proxy selection events and select tabs */
-	private class TabSwitcher implements ProxySelectionListener {
-		private final MapTab tab;
-		private final ProxySelectionModel model;
-		protected TabSwitcher(MapTab mt, ProxySelectionModel psm) {
+	private class TabSwitcher<T extends SonarObject>
+		implements ProxySelectionListener<T>
+	{
+		private final MapTab<T> tab;
+		private final ProxySelectionModel<T> model;
+		protected TabSwitcher(MapTab<T> mt, ProxySelectionModel<T> psm){
 			tab = mt;
 			model = psm;
 			model.addProxySelectionListener(this);
@@ -147,16 +149,16 @@ public class SidePanel extends JPanel {
 			model.removeProxySelectionListener(this);
 		}
 		@Override
-		public void selectionAdded(SonarObject proxy) {
+		public void selectionAdded(T proxy) {
 			setSelectedTab(tab);
 		}
 		@Override
-		public void selectionRemoved(SonarObject proxy) { }
+		public void selectionRemoved(T proxy) { }
 	}
 
 	/** Remove all the tabs */
 	public void removeTabs() {
-		for(TabSwitcher ts: switchers)
+		for (TabSwitcher<?> ts: switchers)
 			ts.dispose();
 		switchers.clear();
 		sel_layer = null;
