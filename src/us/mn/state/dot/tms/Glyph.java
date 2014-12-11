@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,6 @@ public interface Glyph extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "glyph";
-
-	/** Set the font */
-	void setFont(Font f);
 
 	/** Get the font */
 	Font getFont();
