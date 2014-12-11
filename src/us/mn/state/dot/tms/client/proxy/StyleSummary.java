@@ -202,6 +202,10 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 		// select default style
 		setStyle(def_style.toString());
+	}
+
+	/** Initialize the style summary */
+	public void initialize() {
 		manager.getCache().addProxyListener(counter);
 	}
 

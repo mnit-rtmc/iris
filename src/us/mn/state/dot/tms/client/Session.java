@@ -225,8 +225,10 @@ public class Session {
 		for (ProxyManager<?> man: managers) {
 			if (man.canRead()) {
 				MapTab<?> tab = man.createTab();
-				if (tab != null)
+				if (tab != null) {
+					tab.initialize();
 					all_tabs.put(tab.getTabId(), tab);
+				}
 			}
 		}
 	}

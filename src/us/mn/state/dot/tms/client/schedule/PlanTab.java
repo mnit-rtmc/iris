@@ -38,10 +38,16 @@ public class PlanTab extends MapTab<ActionPlan> {
   	public PlanTab(Session session, PlanManager m) {
 		super(m);
 		dispatcher = new PlanDispatcher(session, m);
-		dispatcher.initialize();
 		summary = m.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
+	}
+
+	/** Initialize the plan tab */
+	@Override
+	public void initialize() {
+		dispatcher.initialize();
+		summary.initialize();
 	}
 
 	/** Dispose of the plan tab */

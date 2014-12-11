@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
 /**
  * GUI form for working with LaneControlSignal objects.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
  */
 public class LcsTab extends MapTab<LCSArray> {
@@ -38,10 +37,16 @@ public class LcsTab extends MapTab<LCSArray> {
 	public LcsTab(Session session, LCSArrayManager man) {
 		super(man);
 		dispatcher = new LcsDispatcher(session, man);
-		dispatcher.initialize();
 		summary = man.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
+	}
+
+	/** Initialize the LCS tab */
+	@Override
+	public void initialize() {
+		dispatcher.initialize();
+		summary.initialize();
 	}
 
 	/** Dispose of the LCS tab */

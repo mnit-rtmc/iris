@@ -44,7 +44,6 @@ public class IncidentTab extends MapTab<Incident> {
 		creator = new IncidentCreator(session, m.getTheme(),
 			m.getSelectionModel());
 		dispatcher = new IncidentDispatcher(session, m, creator);
-		dispatcher.initialize();
 		summary = m.createStyleSummary();
 		add(createNorthPanel(), BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
@@ -52,10 +51,17 @@ public class IncidentTab extends MapTab<Incident> {
 
 	/** Create the north panel */
 	private JPanel createNorthPanel() {
-		JPanel panel = new JPanel(new BorderLayout());
-		panel.add(creator, BorderLayout.NORTH);
-		panel.add(dispatcher, BorderLayout.CENTER);
-		return panel;
+		JPanel p = new JPanel(new BorderLayout());
+		p.add(creator, BorderLayout.NORTH);
+		p.add(dispatcher, BorderLayout.CENTER);
+		return p;
+	}
+
+	/** Initialize the incident tab */
+	@Override
+	public void initialize() {
+		dispatcher.initialize();
+		summary.initialize();
 	}
 
 	/** Dispose of the incident tab */

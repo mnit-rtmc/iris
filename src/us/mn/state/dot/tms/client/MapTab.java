@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyManager;
 /**
  * Side panel tab for main IRIS map interface.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
  */
 abstract public class MapTab<T extends SonarObject> extends JPanel {
@@ -60,6 +59,9 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 		name = I18N.get(t);
 		tip = I18N.get(t + ".tooltip");
 	}
+
+	/** Initialize the map tab */
+	abstract public void initialize();
 
 	/** Perform any clean up necessary */
 	public void dispose() {

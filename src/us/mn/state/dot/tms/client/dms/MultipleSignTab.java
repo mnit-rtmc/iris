@@ -24,7 +24,6 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
-import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
@@ -43,9 +42,8 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class MultipleSignTab extends JPanel implements
-	ProxySelectionListener<DMS>
-{
+public class MultipleSignTab extends JPanel {
+
 	/** Label to display selected sign count */
 	private final JLabel selectedLbl = new JLabel(I18N.get("dms.selected") +
 		":");
@@ -68,6 +66,18 @@ public class MultipleSignTab extends JPanel implements
 	/** Selection model */
 	protected final ProxySelectionModel<DMS> selectionModel;
 
+	/** Selection listener */
+	private final ProxySelectionListener<DMS> listener =
+		new ProxySelectionListener<DMS>()
+	{
+		public void selectionAdded(DMS dms) {
+			doSelectionAdded(dms);
+		}
+		public void selectionRemoved(DMS dms) {
+			doSelectionRemoved(dms);
+		}
+	};
+
 	/** Create a new multiple sign tab */
 	public MultipleSignTab(DmsCache cache, ProxySelectionModel<DMS> sm) {
 		super(new GridBagLayout());
@@ -78,7 +88,6 @@ public class MultipleSignTab extends JPanel implements
 				return !proxy.getLocal();
 			}
 		};
-		sign_group_model.initialize();
 		dms_sign_groups = cache.getDmsSignGroups();
 		group_list = new JList(sign_group_model);
 		group_list.addListSelectionListener(new IListSelectionAdapter(){
@@ -88,7 +97,17 @@ public class MultipleSignTab extends JPanel implements
 			}
 		});
 		selectionModel = sm;
-		selectionModel.addProxySelectionListener(this);
+	}
+
+	/** Initialize the sign tab */
+	public void initialize() {
+		sign_group_model.initialize();
+		layoutPanel();
+		selectionModel.addProxySelectionListener(listener);
+	}
+
+	/** Layout the panel */
+	private void layoutPanel() {
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.insets.top = UI.vgap;
 		bag.insets.left = UI.hgap;
@@ -116,7 +135,7 @@ public class MultipleSignTab extends JPanel implements
 
 	/** Dispose of the sign tab */
 	public void dispose() {
-		selectionModel.removeProxySelectionListener(this);
+		selectionModel.removeProxySelectionListener(listener);
 		sign_group_model.dispose();
 	}
 
@@ -143,35 +162,25 @@ public class MultipleSignTab extends JPanel implements
 	}
 
 	/** Called whenever a sign is added to the selection */
-	@Override
-	public void selectionAdded(final DMS dms) {
-		runSwing(new Runnable() {
-			public void run() {
-				sel_model.addElement(dms);
-				updateSelectedLabel();
-				SignGroup group = getSelectedGroup();
-				if(group != null && !isGroupMember(dms, group))
-					group_list.clearSelection();
-			}
-		});
+	private void doSelectionAdded(DMS dms) {
+		sel_model.addElement(dms);
+		updateSelectedLabel();
+		SignGroup group = getSelectedGroup();
+		if (group != null && !isGroupMember(dms, group))
+			group_list.clearSelection();
 	}
 
 	/** Called whenever a sign is removed from the selection */
-	@Override
-	public void selectionRemoved(final DMS dms) {
-		runSwing(new Runnable() {
-			public void run() {
-				sel_model.removeElement(dms);
-				updateSelectedLabel();
-				SignGroup group = getSelectedGroup();
-				if(group != null && isGroupMember(dms, group))
-					group_list.clearSelection();
-			}
-		});
+	private void doSelectionRemoved(DMS dms) {
+		sel_model.removeElement(dms);
+		updateSelectedLabel();
+		SignGroup group = getSelectedGroup();
+		if (group != null && isGroupMember(dms, group))
+			group_list.clearSelection();
 	}
 
 	/** Update the selected count label */
-	protected void updateSelectedLabel() {
+	private void updateSelectedLabel() {
 		selectedLbl.setText(I18N.get("dms.selected") + ": " +
 			selectionModel.getSelectedCount());
 	}

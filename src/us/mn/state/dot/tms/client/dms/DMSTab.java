@@ -42,6 +42,13 @@ public class DMSTab extends MapTab<DMS> {
 		add(summary, BorderLayout.CENTER);
 	}
 
+	/** Initialize the map tab */
+	@Override
+	public void initialize() {
+		dispatcher.initialize();
+		summary.initialize();
+	}
+
 	/** Dispose of the DMS tab */
 	@Override
 	public void dispose() {

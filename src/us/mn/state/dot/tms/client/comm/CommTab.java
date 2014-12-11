@@ -41,8 +41,14 @@ public class CommTab extends MapTab<Controller> {
 
 	/** Create the north panel */
 	private JPanel createNorthPanel() {
-		JPanel panel = new JPanel(new BorderLayout());
-		return panel;
+		JPanel p = new JPanel(new BorderLayout());
+		return p;
+	}
+
+	/** Initialize the comm tab */
+	@Override
+	public void initialize() {
+		summary.initialize();
 	}
 
 	/** Dispose of the comm tab */

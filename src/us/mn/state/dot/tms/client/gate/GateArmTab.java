@@ -37,10 +37,16 @@ public class GateArmTab extends MapTab<GateArmArray> {
   	public GateArmTab(Session session, GateArmArrayManager man) {
 		super(man);
 		dispatcher = new GateArmDispatcher(session, man);
-		dispatcher.initialize();
 		summary = man.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
+	}
+
+	/** Initialize the gate arm tab */
+	@Override
+	public void initialize() {
+		dispatcher.initialize();
+		summary.initialize();
 	}
 
 	/** Dispose of the tab */

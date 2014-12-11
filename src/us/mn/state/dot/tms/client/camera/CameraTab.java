@@ -18,6 +18,7 @@ import java.awt.BorderLayout;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.StyleSummary;
 
 /**
  * Provides a GUI for the camera tab on the operator interface for IRIS.
@@ -29,13 +30,23 @@ public class CameraTab extends MapTab<Camera> {
 	/** Camera dispatcher */
 	private final CameraDispatcher dispatcher;
 
+	/** Summary of cameras */
+	private final StyleSummary<Camera> summary;
+
 	/** Create a new camera tab for the IRIS client */
 	public CameraTab(Session session, CameraManager man) {
 		super(man);
 		dispatcher = new CameraDispatcher(session, man);
-		dispatcher.initialize();
+		summary = man.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);
-		add(man.createStyleSummary(), BorderLayout.CENTER);
+		add(summary, BorderLayout.CENTER);
+	}
+
+	/** Initialize the camera tab */
+	@Override
+	public void initialize() {
+		dispatcher.initialize();
+		summary.initialize();
 	}
 
 	/** Perform any clean up necessary */
@@ -43,6 +54,7 @@ public class CameraTab extends MapTab<Camera> {
 	public void dispose() {
 		super.dispose();
 		dispatcher.dispose();
+		summary.dispose();
 	}
 
 	/** Get the tab ID */

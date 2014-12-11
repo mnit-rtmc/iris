@@ -38,10 +38,16 @@ public class RampMeterTab extends MapTab<RampMeter> {
   	public RampMeterTab(Session session, MeterManager man) {
 		super(man);
 		dispatcher = new MeterDispatcher(session, man);
-		dispatcher.initialize();
 		summary = man.createStyleSummary();
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
+	}
+
+	/** Initialize the ramp meter tab */
+	@Override
+	public void initialize() {
+		dispatcher.initialize();
+		summary.initialize();
 	}
 
 	/** Dispose of the ramp meter tab */

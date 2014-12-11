@@ -36,9 +36,14 @@ public class R_NodeTab extends MapTab<R_Node> {
 	public R_NodeTab(Session session, R_NodeManager man) {
 		super(man);
 		panel = new R_NodePanel(session);
-		add(panel, BorderLayout.NORTH);
 		clist = new CorridorList(session, man, panel);
+		add(panel, BorderLayout.NORTH);
 		add(clist, BorderLayout.CENTER);
+	}
+
+	/** Initialize the roadway node tab */
+	@Override
+	public void initialize() {
 		panel.initialize();
 		clist.initialize();
 	}
@@ -46,9 +51,9 @@ public class R_NodeTab extends MapTab<R_Node> {
 	/** Dispose of the roadway tab */
 	@Override
 	public void dispose() {
+		super.dispose();
 		clist.dispose();
 		panel.dispose();
-		super.dispose();
 	}
 
 	/** Get the tab ID */
