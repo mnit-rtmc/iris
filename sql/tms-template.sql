@@ -1659,7 +1659,7 @@ CREATE VIEW geo_loc_view AS
 	r_dir.direction AS road_dir, r_dir.dir AS rdir,
 	m.modifier AS cross_mod, m.mod AS xmod, c.abbrev as xst,
 	l.cross_street, c_dir.direction AS cross_dir,
-	l.lat, l.lon
+	l.lat, l.lon, l.milepoint
 	FROM iris.geo_loc l
 	LEFT JOIN iris.road r ON l.roadway = r.name
 	LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
@@ -1949,7 +1949,7 @@ CREATE VIEW controller_device_view AS
 GRANT SELECT ON controller_device_view TO PUBLIC;
 
 CREATE VIEW controller_report AS
-	SELECT c.name, c.comm_link, c.drop_id, cab.geo_loc,
+	SELECT c.name, c.comm_link, c.drop_id, l.milepoint, cab.geo_loc,
 	trim(l.roadway || ' ' || l.road_dir) || ' ' || l.cross_mod || ' ' ||
 		trim(l.cross_street || ' ' || l.cross_dir) AS "location",
 	cab.style AS "type", d.name AS device, d.pin,
@@ -2205,7 +2205,7 @@ camera_ptz_panel_enable	false
 camera_util_panel_enable	false
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.19.0
+database_version	4.20.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
