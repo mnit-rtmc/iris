@@ -52,3 +52,7 @@ GRANT SELECT ON controller_report TO PUBLIC;
 
 -- drop mile column from cabinet
 ALTER TABLE iris.cabinet DROP COLUMN mile;
+
+-- add dms_quickmsg_store_enable system attribute
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('dms_quickmsg_store_enable', false);
