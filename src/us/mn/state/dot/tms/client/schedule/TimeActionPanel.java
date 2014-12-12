@@ -22,7 +22,6 @@ import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.ILabel;
@@ -37,7 +36,7 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 
 	/** Day plan model */
-	private final ProxyListModel<DayPlan> day_plan_mdl;
+	private final WrapperComboBoxModel day_plan_mdl;
 
 	/** Day plan label */
 	private final ILabel day_plan_lbl = new ILabel("action.plan.day");
@@ -60,7 +59,8 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 	/** Create a new time action panel */
 	public TimeActionPanel(Session s) {
 		super(new TimeActionModel(s, null));
-		day_plan_mdl = s.getSonarState().getDayModel();
+		day_plan_mdl = new WrapperComboBoxModel(
+			s.getSonarState().getDayModel());
 	}
 
 	/** Initialise the panel */
@@ -71,20 +71,9 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 		date_lbl.setEnabled(false);
 		time_lbl.setEnabled(false);
 		super.initialize();
-		day_plan_cbx.setModel(new WrapperComboBoxModel(day_plan_mdl));
+		day_plan_cbx.setModel(day_plan_mdl);
 		date_txt.setAction(add_proxy);
 		time_txt.setAction(add_proxy);
-	}
-
-	/** Set the model */
-	@Override
-	public void setModel(ProxyTableModel<TimeAction> m) {
-		super.setModel(m);
-		boolean e = m.canAdd();
-		day_plan_lbl.setEnabled(e);
-		day_plan_cbx.setEnabled(e);
-		date_lbl.setEnabled(e);
-		time_lbl.setEnabled(e);
 	}
 
 	/** Add create/delete widgets to the button panel */
@@ -113,6 +102,17 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 		super.addCreateDeleteWidgets(hg, vg);
 	}
 
+	/** Update the button panel */
+	@Override
+	public void updateButtonPanel() {
+		boolean e = model.canAdd();
+		day_plan_lbl.setEnabled(e);
+		day_plan_cbx.setEnabled(e);
+		date_lbl.setEnabled(e);
+		time_lbl.setEnabled(e);
+		super.updateButtonPanel();
+	}
+
 	/** Create a new proxy object */
 	@Override
 	protected void createObject() {
@@ -125,7 +125,7 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 				mdl.createObject(dp, sd, st);
 			}
 		}
-		day_plan_cbx.setSelectedItem(null);
+		day_plan_mdl.setSelectedItem(null);
 		date_txt.setText("");
 		time_txt.setText("");
 	}
@@ -146,7 +146,7 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 
 	/** Get the selected day plan */
 	private DayPlan getSelectedDayPlan() {
-		Object o = day_plan_cbx.getSelectedItem();
+		Object o = day_plan_mdl.getSelectedItem();
 		return (o instanceof DayPlan) ? (DayPlan)o : null;
 	}
 

@@ -19,7 +19,6 @@ import javax.swing.JComboBox;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.ILabel;
@@ -33,28 +32,29 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
  */
 public class ActionPlanPanel extends ProxyTablePanel<ActionPlan> {
 
-	/** Plan phase model */
-	private final ProxyListModel<PlanPhase> phase_model;
-
 	/** Plan phase label */
 	private final ILabel phase_lbl =new ILabel("action.plan.default.phase");
 
 	/** Plan phase combo box */
 	private final JComboBox phase_cbx = new JComboBox();
 
+	/** Plan phase model */
+	private final WrapperComboBoxModel phase_mdl;
+
 	/** Create a new action plan panel */
 	public ActionPlanPanel(Session s) {
 		super(new ActionPlanModel(s));
-		phase_model = s.getSonarState().getPhaseModel();
+		phase_mdl = new WrapperComboBoxModel(
+			s.getSonarState().getPhaseModel());
 	}
 
 	/** Initialise the panel */
 	@Override
 	public void initialize() {
 		super.initialize();
-		phase_cbx.setModel(new WrapperComboBoxModel(phase_model));
-		phase_lbl.setEnabled(model.canAdd());
-		phase_cbx.setEnabled(model.canAdd());
+		phase_cbx.setEnabled(false);
+		phase_cbx.setModel(phase_mdl);
+		phase_lbl.setEnabled(false);
 	}
 
 	/** Add create/delete widgets to the button panel */
@@ -71,6 +71,14 @@ public class ActionPlanPanel extends ProxyTablePanel<ActionPlan> {
 		super.addCreateDeleteWidgets(hg, vg);
 	}
 
+	/** Update the button panel */
+	@Override
+	public void updateButtonPanel() {
+		phase_lbl.setEnabled(model.canAdd());
+		phase_cbx.setEnabled(model.canAdd());
+		super.updateButtonPanel();
+	}
+
 	/** Create a new proxy object */
 	@Override
 	protected void createObject() {
@@ -83,7 +91,7 @@ public class ActionPlanPanel extends ProxyTablePanel<ActionPlan> {
 			}
 		}
 		add_txt.setText("");
-		phase_cbx.setSelectedItem(null);
+		phase_mdl.setSelectedItem(null);
 	}
 
 	/** Get the action plan model */
@@ -96,7 +104,7 @@ public class ActionPlanPanel extends ProxyTablePanel<ActionPlan> {
 
 	/** Get the selected phase */
 	private PlanPhase getSelectedPhase() {
-		Object o = phase_cbx.getSelectedItem();
+		Object o = phase_mdl.getSelectedItem();
 		return (o instanceof PlanPhase) ? (PlanPhase)o : null;
 	}
 }
