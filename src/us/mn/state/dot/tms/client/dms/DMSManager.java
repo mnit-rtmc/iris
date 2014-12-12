@@ -174,8 +174,9 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Check if an attribute change is interesting */
 	@Override
 	protected boolean checkAttributeChange(String a) {
-		return "messageCurrent".equals(a) ||
-		       "ownerCurrent".equals(a);
+		return super.checkAttributeChange(a)
+		    || "messageCurrent".equals(a)
+		    || "ownerCurrent".equals(a);
 	}
 
 	/** Called when a proxy attribute has changed */
