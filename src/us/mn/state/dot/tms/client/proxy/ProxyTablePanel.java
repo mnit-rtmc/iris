@@ -213,23 +213,15 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		}
 		hg.addPreferredGap(RELATED, GroupLayout.DEFAULT_SIZE,
 			Short.MAX_VALUE);
-		if (model.hasCreateDelete()) {
-			addExtraWidgets(hg, vg);
-			JButton add_btn = new JButton(add_proxy);
-			hg.addComponent(add_btn);
-			vg.addComponent(add_btn);
-			hg.addGap(2 * UI.hgap);
-			JButton del_btn = new JButton(del_proxy);
-			hg.addComponent(del_btn);
-			vg.addComponent(del_btn);
-		}
+		if (model.hasCreateDelete())
+			addCreateDeleteWidgets(hg, vg);
 		gl.setHorizontalGroup(hg);
 		gl.setVerticalGroup(vg);
 		button_pnl.setLayout(gl);
 	}
 
-	/** Add extra widgets to the button panel */
-	protected void addExtraWidgets(GroupLayout.SequentialGroup hg,
+	/** Add create/delete widgets to the button panel */
+	protected void addCreateDeleteWidgets(GroupLayout.SequentialGroup hg,
 		GroupLayout.ParallelGroup vg)
 	{
 		if (model.hasName()) {
@@ -237,6 +229,13 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 			vg.addComponent(add_txt);
 			hg.addGap(UI.hgap);
 		}
+		JButton add_btn = new JButton(add_proxy);
+		hg.addComponent(add_btn);
+		vg.addComponent(add_btn);
+		hg.addGap(2 * UI.hgap);
+		JButton del_btn = new JButton(del_proxy);
+		hg.addComponent(del_btn);
+		vg.addComponent(del_btn);
 	}
 
 	/** Create a new proxy object */

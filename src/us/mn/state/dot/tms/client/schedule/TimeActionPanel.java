@@ -87,9 +87,9 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 		time_lbl.setEnabled(e);
 	}
 
-	/** Add extra widgets to the button panel */
+	/** Add create/delete widgets to the button panel */
 	@Override
-	protected void addExtraWidgets(GroupLayout.SequentialGroup hg,
+	protected void addCreateDeleteWidgets(GroupLayout.SequentialGroup hg,
 		GroupLayout.ParallelGroup vg)
 	{
 		hg.addComponent(day_plan_lbl);
@@ -110,6 +110,7 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 		hg.addComponent(time_txt);
 		vg.addComponent(time_txt);
 		hg.addGap(UI.hgap);
+		super.addCreateDeleteWidgets(hg, vg);
 	}
 
 	/** Create a new proxy object */

@@ -57,9 +57,9 @@ public class ActionPlanPanel extends ProxyTablePanel<ActionPlan> {
 		phase_cbx.setEnabled(model.canAdd());
 	}
 
-	/** Add extra widgets to the button panel */
+	/** Add create/delete widgets to the button panel */
 	@Override
-	protected void addExtraWidgets(GroupLayout.SequentialGroup hg,
+	protected void addCreateDeleteWidgets(GroupLayout.SequentialGroup hg,
 		GroupLayout.ParallelGroup vg)
 	{
 		hg.addComponent(phase_lbl);
@@ -68,7 +68,7 @@ public class ActionPlanPanel extends ProxyTablePanel<ActionPlan> {
 		hg.addComponent(phase_cbx);
 		vg.addComponent(phase_cbx);
 		hg.addGap(UI.hgap);
-		super.addExtraWidgets(hg, vg);
+		super.addCreateDeleteWidgets(hg, vg);
 	}
 
 	/** Create a new proxy object */
