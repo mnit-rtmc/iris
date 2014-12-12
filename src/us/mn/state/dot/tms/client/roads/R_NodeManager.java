@@ -193,7 +193,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 					processNextCorridor(it);
 				}
 			});
-		}
+		} else
+			seg_layer.updateStatus();
 	}
 
 	/** Arrange a single corridor */

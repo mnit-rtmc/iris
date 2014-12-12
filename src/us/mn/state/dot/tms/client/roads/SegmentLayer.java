@@ -116,7 +116,7 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 	}
 
 	/** Update the layer status */
-	private void updateStatus() {
+	public void updateStatus() {
 		runSwing(new Runnable() {
 			public void run() {
 				fireLayerChanged(LayerChange.status);
