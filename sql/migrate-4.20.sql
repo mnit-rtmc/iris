@@ -64,7 +64,7 @@ CREATE TABLE event.beacon_event (
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	beacon VARCHAR(10) NOT NULL REFERENCES iris._beacon
-		ON DELETE CASCADE,
+		ON DELETE CASCADE
 );
 
 -- add beacon_event_view
