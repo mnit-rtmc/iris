@@ -194,10 +194,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		tab.add(I18N.get("gate_arm.title"), ga_pnl);
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
-		if (canUpdate())
-			createUpdateJobs();
+		createUpdateJobs();
 		settings.setEnabled(isUpdatePermitted("deviceRequest"));
-		disable.setEnabled(canUpdate("deviceRequest"));
 	}
 
 	/** Create the location panel */
@@ -276,51 +274,55 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		super.dispose();
 	}
 
+	/** Update the edit mode */
+	@Override
+	protected void updateEditMode() {
+		notes_txt.setEnabled(canUpdate("notes"));
+		camera.setEnabled(canUpdate("camera"));
+		approach.setEnabled(canUpdate("approach"));
+		prereq.setEnabled(canUpdate("prereq"));
+		dms.setEnabled(canUpdate("dms"));
+		open_msg_txt.setEnabled(canUpdate("openMsg"));
+		closed_msg_txt.setEnabled(canUpdate("closedMsg"));
+
+		disable.setEnabled(canUpdate("deviceRequest"));
+	}
+
 	/** Update one attribute on the form */
 	@Override
 	protected void doUpdateAttribute(String a) {
-		if(a == null || a.equals("notes")) {
-			notes_txt.setEnabled(canUpdate("notes"));
+		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
-		}
-		if(a == null || a.equals("camera")) {
+		if (a == null || a.equals("camera")) {
 			camera_cbx.setAction(null);
 			camera_cbx.setSelectedItem(proxy.getCamera());
-			camera.setEnabled(canUpdate("camera"));
 			camera_cbx.setAction(camera);
 		}
-		if(a == null || a.equals("approach")) {
+		if (a == null || a.equals("approach")) {
 			approach_cbx.setAction(null);
 			approach_cbx.setSelectedItem(proxy.getApproach());
-			approach.setEnabled(canUpdate("approach"));
 			approach_cbx.setAction(approach);
 		}
-		if(a == null || a.equals("prereq")) {
+		if (a == null || a.equals("prereq")) {
 			prereq_cbx.setAction(null);
 			prereq_cbx.setSelectedItem(GateArmArrayHelper.lookup(
 				proxy.getPrereq()));
-			prereq.setEnabled(canUpdate("prereq"));
 			prereq_cbx.setAction(prereq);
 		}
-		if(a == null || a.equals("dms")) {
+		if (a == null || a.equals("dms")) {
 			dms_cbx.setAction(null);
 			dms_cbx.setSelectedItem(proxy.getDms());
-			dms.setEnabled(canUpdate("dms"));
 			dms_cbx.setAction(dms);
 		}
-		if(a == null || a.equals("openMsg")) {
-			open_msg_txt.setEnabled(canUpdate("openMsg"));
+		if (a == null || a.equals("openMsg"))
 			open_msg_txt.setText(getOpenMsg());
-		}
-		if(a == null || a.equals("closedMsg")) {
-			closed_msg_txt.setEnabled(canUpdate("closedMsg"));
+		if (a == null || a.equals("closedMsg"))
 			closed_msg_txt.setText(getClosedMsg());
-		}
-		if(a == null || a.equals("armState")) {
+		if (a == null || a.equals("armState")) {
 			arm_state_lbl.setText(GateArmState.fromOrdinal(
 				proxy.getArmState()).toString());
 		}
-		if(a == null || a.equals("operation"))
+		if (a == null || a.equals("operation"))
 			op_lbl.setText(proxy.getOperation());
 	}
 

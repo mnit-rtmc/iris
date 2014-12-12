@@ -70,8 +70,7 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
 		add(tab);
-		if(canUpdate())
-			createUpdateJobs();
+		createUpdateJobs();
 		super.initialize();
 	}
 
@@ -109,12 +108,18 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 			showForm(new ControllerForm(session, c));
 	}
 
+	/** Update the edit mode */
+	@Override
+	protected void updateEditMode() {
+		notes_txt.setEnabled(canUpdate("notes"));
+	}
+
 	/** Update one attribute on the form */
 	@Override
 	protected void doUpdateAttribute(String a) {
-		if(a == null || a.equals("controller"))
+		if (a == null || a.equals("controller"))
 			controller.setEnabled(proxy.getController() != null);
-		if(a == null || a.equals("notes"))
+		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
 	}
 }

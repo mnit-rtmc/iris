@@ -20,6 +20,7 @@ import javax.swing.Action;
 import javax.swing.JComboBox;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
@@ -45,6 +46,13 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	/** Proxy watcher */
 	private final ProxyWatcher<T> watcher;
 
+	/** Edit mode listener */
+	private final EditModeListener edit_lsnr = new EditModeListener() {
+		public void editModeChanged() {
+			updateEditMode();
+		}
+	};
+
 	/** Create a new SONAR object form */
 	protected SonarObjectForm(String prefix, Session s, T p) {
 		super(prefix + p.getName());
@@ -62,18 +70,24 @@ abstract public class SonarObjectForm<T extends SonarObject>
 		super.initialize();
 		watcher.initialize();
 		watcher.setProxy(proxy);
+		updateEditMode();
 		doUpdateAttribute(null);
+		session.addEditModeListener(edit_lsnr);
 	}
 
 	/** Dispose of the form */
 	@Override
 	protected void dispose() {
+		session.removeEditModeListener(edit_lsnr);
 		watcher.dispose();
 		super.dispose();
 	}
 
 	/** Get the SONAR type cache */
 	abstract protected TypeCache<T> getTypeCache();
+
+	/** Update the edit mode */
+	protected void updateEditMode() { }
 
 	/** Update one attribute on the form */
 	@Override
@@ -89,27 +103,6 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	@Override
 	public final void clear() {
 		close(session.getDesktop());
-	}
-
-	/** Update one combo box attribute on the form.
-	 * @param a Name of current attribute.
-	 * @param an Attribute name for combo box.
-	 * @param cmb Combo box to update.
-	 * @param idx New index to select in combo box.
-	 * @param act Action for combo box. */
-	protected final void updateComboBox(String a, String an, JComboBox cmb,
-		int idx, Action act)
-	{
-		if(a == null || a.equals(an)) {
-			cmb.setAction(null);
-			cmb.setSelectedIndex(idx);
-			boolean up = canUpdate(an);
-			if(act != null)
-				act.setEnabled(up);
-			else
-				cmb.setEnabled(up);
-			cmb.setAction(act);
-		}
 	}
 
 	/** Show another form */

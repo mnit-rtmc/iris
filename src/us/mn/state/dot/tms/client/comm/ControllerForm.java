@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -210,7 +210,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
 		createSetupJobs();
-		if(!canRequest()) {
+		if (!canRequest()) {
 			clear_err.setEnabled(false);
 			reset.setEnabled(false);
 		}
@@ -257,37 +257,28 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the jobs for the setup panel */
 	private void createSetupJobs() {
-		if(canUpdate("drop")) {
-			drop_spn.addChangeListener(new ChangeListener() {
-				public void stateChanged(ChangeEvent e) {
-					Number n = (Number)drop_spn.getValue();
-					proxy.setDrop(n.shortValue());
-				}
-			});
-		}
-		if(canUpdate("password")) {
-			password.addFocusListener(new FocusAdapter() {
-				@Override
-				public void focusLost(FocusEvent e) {
-					String pwd = new String(
-						password.getPassword()).trim();
-					password.setText("");
-					if(pwd.length() > 0)
-						proxy.setPassword(pwd);
-				}
-			});
-		} else {
-			password.setEnabled(false);
-			clear_pwd.setEnabled(false);
-		}
-		if(canUpdate("notes")) {
-			notes_txt.addFocusListener(new FocusAdapter() {
-				@Override
-				public void focusLost(FocusEvent e) {
-					proxy.setNotes(notes_txt.getText());
-				}
-			});
-		}
+		drop_spn.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				Number n = (Number)drop_spn.getValue();
+				proxy.setDrop(n.shortValue());
+			}
+		});
+		password.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				String pwd = new String(
+					password.getPassword()).trim();
+				password.setText("");
+				if (pwd.length() > 0)
+					proxy.setPassword(pwd);
+			}
+		});
+		notes_txt.addFocusListener(new FocusAdapter() {
+			@Override
+			public void focusLost(FocusEvent e) {
+				proxy.setNotes(notes_txt.getText());
+			}
+		});
 	}
 
 	/** Create the cabinet panel */
@@ -353,72 +344,76 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		return p;
 	}
 
+	/** Update the edit mode */
+	@Override
+	protected void updateEditMode() {
+		password.setEnabled(canUpdate("password"));
+		clear_pwd.setEnabled(canUpdate("password"));
+		comm_link.setEnabled(canUpdate("commLink"));
+		drop_spn.setEnabled(canUpdate("drop"));
+		notes_txt.setEnabled(canUpdate("notes"));
+		active_chk.setEnabled(canUpdate("active"));
+		cab_style.setEnabled(canUpdateCabinet("style"));
+	}
+
 	/** Update one attribute on the form */
 	@Override
 	protected void doUpdateAttribute(String a) {
-		if(a == null || a.equals("commLink")) {
+		if (a == null || a.equals("commLink")) {
 			comm_link_cbx.setAction(null);
 			comm_link_cbx.setSelectedItem(proxy.getCommLink());
-			comm_link.setEnabled(canUpdate("commLink"));
 			comm_link_cbx.setAction(comm_link);
 			drop_model = new DropNumberModel(
 				proxy.getCommLink(), getTypeCache(),
 				proxy.getDrop());
 			drop_spn.setModel(drop_model);
 		}
-		if(a == null || a.equals("drop")) {
-			drop_spn.setEnabled(canUpdate("drop"));
+		if (a == null || a.equals("drop"))
 			drop_spn.setValue(proxy.getDrop());
-		}
-		if(a == null || a.equals("notes")) {
-			notes_txt.setEnabled(canUpdate("notes"));
+		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
-		}
-		if(a == null || a.equals("active")) {
-			active_chk.setEnabled(canUpdate("active"));
+		if (a == null || a.equals("active"))
 			active_chk.setSelected(proxy.getActive());
-		}
-		if(a == null || a.equals("version"))
+		if (a == null || a.equals("version"))
 			version_lbl.setText(proxy.getVersion());
-		if(a == null || a.equals("maint"))
+		if (a == null || a.equals("maint"))
 			maint_lbl.setText(proxy.getMaint());
-		if(a == null || a.equals("status"))
+		if (a == null || a.equals("status"))
 			status_lbl.setText(proxy.getStatus());
-		if(a == null || a.equals("failTime")) {
+		if (a == null || a.equals("failTime")) {
 			Long ft = proxy.getFailTime();
-			if(ft != null)
+			if (ft != null)
 				fail_time_lbl.setText(new Date(ft).toString());
 			else
 				fail_time_lbl.setText("");
 		}
-		if(a == null || a.equals("timeoutErr")) {
+		if (a == null || a.equals("timeoutErr")) {
 			timeout_lbl.setText(String.valueOf(
 				proxy.getTimeoutErr()));
 		}
-		if(a == null || a.equals("checksumErr")) {
+		if (a == null || a.equals("checksumErr")) {
 			checksum_lbl.setText(String.valueOf(
 				proxy.getChecksumErr()));
 		}
-		if(a == null || a.equals("parsingErr")) {
+		if (a == null || a.equals("parsingErr")) {
 			parsing_lbl.setText(String.valueOf(
 				proxy.getParsingErr()));
 		}
-		if(a == null || a.equals("controllerErr")) {
+		if (a == null || a.equals("controllerErr")) {
 			controller_lbl.setText(String.valueOf(
 				proxy.getControllerErr()));
 		}
-		if(a == null || a.equals("successOps")) {
+		if (a == null || a.equals("successOps")) {
 			success_lbl.setText(String.valueOf(
 				proxy.getSuccessOps()));
 		}
-		if(a == null || a.equals("failedOps")) {
+		if (a == null || a.equals("failedOps")) {
 			failed_lbl.setText(String.valueOf(
 				proxy.getFailedOps()));
 		}
-		if(a == null || a.equals("style")) {
+		if (a == null || a.equals("style")) {
 			cab_style_cbx.setAction(null);
 			cab_style_cbx.setSelectedItem(cabinet.getStyle());
-			cab_style.setEnabled(canUpdateCabinet("style"));
 			cab_style_cbx.setAction(cab_style);
 		}
 	}

@@ -300,23 +300,24 @@ public class PropMessages extends JPanel {
 		}
 	}
 
+	/** Update the edit mode */
+	public void updateEditMode() {
+		font_cbx.setEnabled(canUpdate("defaultFont"));
+		aws_allowed_chk.setEnabled(canUpdate("awsAllowed"));
+		aws_control_chk.setEnabled(canUpdate("awsControlled"));
+	}
+
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
-		if (a == null || a.equals("defaultFont")) {
-			font_cbx.setEnabled(canUpdate("defaultFont"));
+		if (a == null || a.equals("defaultFont"))
 			font_cbx.setSelectedItem(proxy.getDefaultFont());
-		}
 		if (a == null || a.equals("defaultFont") ||
 		    a.equals("verticalPitch"))
 			font_height_lbl.setText(calculateFontHeight());
-		if (a == null || a.equals("awsAllowed")) {
-			aws_allowed_chk.setEnabled(canUpdate("awsAllowed"));
+		if (a == null || a.equals("awsAllowed"))
 			aws_allowed_chk.setSelected(proxy.getAwsAllowed());
-		}
-		if (a == null || a.equals("awsControlled")) {
-			aws_control_chk.setEnabled(canUpdate("awsControlled"));
+		if (a == null || a.equals("awsControlled"))
 			aws_control_chk.setSelected(proxy.getAwsControlled());
-		}
 		// NOTE: messageCurrent attribute changes after all sign
 		//       dimension attributes are updated.
 		if (a == null || a.equals("messageCurrent"))

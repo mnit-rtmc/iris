@@ -134,8 +134,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		tab.add(I18N.get("device.setup"), createSetupPanel());
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
-		if (canUpdate())
-			createUpdateJobs();
+		createUpdateJobs();
 		settings.setEnabled(isUpdatePermitted("deviceRequest"));
 		super.initialize();
 	}
@@ -324,17 +323,21 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		return p;
 	}
 
+	/** Update the edit mode */
+	@Override
+	protected void updateEditMode() {
+		shift_spn.setEnabled(canUpdate("shift"));
+		notes_txt.setEnabled(canUpdate("notes"));
+		lock_cmb.setEnabled(canUpdate("lcsLock"));
+	}
+
 	/** Update one attribute on the form */
 	@Override
 	protected void doUpdateAttribute(String a) {
-		if (a == null || a.equals("shift")) {
-			shift_spn.setEnabled(canUpdate("shift"));
+		if (a == null || a.equals("shift"))
 			shift_spn.setValue(proxy.getShift());
-		}
-		if (a == null || a.equals("notes")) {
-			notes_txt.setEnabled(canUpdate("notes"));
+		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
-		}
 		if (a == null || a.equals("lcsLock")) {
 			lock_cmb.setAction(null);
 			Integer lk = proxy.getLcsLock();
@@ -342,7 +345,6 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 				lock_cmb.setSelectedIndex(lk);
 			else
 				lock_cmb.setSelectedIndex(0);
-			lock_cmb.setEnabled(canUpdate("lcsLock"));
 //			lock_cmb.setAction(new LockLcsAction(proxy, lock_cmb));
 		}
 		if (a == null || a.equals("operation"))

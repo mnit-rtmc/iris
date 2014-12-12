@@ -72,8 +72,7 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
 		add(tab);
-		if (canUpdate())
-			createUpdateJobs();
+		createUpdateJobs();
 		super.initialize();
 	}
 
@@ -102,6 +101,12 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 				proxy.setNotes(notes_txt.getText());
 			}
 		});
+	}
+
+	/** Update the edit mode */
+	@Override
+	protected void updateEditMode() {
+		notes_txt.setEnabled(canUpdate("notes"));
 	}
 
 	/** Update one attribute on the form */

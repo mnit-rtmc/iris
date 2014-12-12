@@ -156,7 +156,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JLabel queue_lbl = new JLabel();
 
 	/** Meter lock combo box component */
-	private final JComboBox lock_cmb = new JComboBox(
+	private final JComboBox lock_cbx = new JComboBox(
 		RampMeterLock.getDescriptions());
 
 	/** Lock meter action */
@@ -180,7 +180,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	public RampMeterProperties(Session s, RampMeter meter) {
 		super(I18N.get("ramp_meter") + ": ", s, meter);
 		loc_pnl = new LocationPanel(s);
-		lock_action = new LockMeterAction(meter, lock_cmb,
+		lock_action = new LockMeterAction(meter, lock_cbx,
 			isUpdatePermitted("mLock"));
 		preset_mdl = new WrapperComboBoxModel(
 			state.getCamCache().getPresetModel());
@@ -202,8 +202,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		tab.add(I18N.get("device.setup"), createSetupPanel());
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
-		if(canUpdate())
-			createUpdateJobs();
+		createUpdateJobs();
 		settings.setEnabled(isUpdatePermitted("deviceRequest"));
 		super.initialize();
 	}
@@ -291,7 +290,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		p.add("ramp.meter.queue");
 		p.add(queue_lbl, Stretch.LAST);
 		p.add("ramp.meter.lock");
-		p.add(lock_cmb, Stretch.LAST);
+		p.add(lock_cbx, Stretch.LAST);
 		p.add("device.operation");
 		p.add(op_lbl, Stretch.LAST);
 		// Make label opaque so that we can set the background color
@@ -302,48 +301,57 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		return p;
 	}
 
+	/** Update the edit mode */
+	@Override
+	protected void updateEditMode() {
+		notes_txt.setEnabled(canUpdate("notes"));
+		preset.setEnabled(canUpdate("preset"));
+		meter_type.setEnabled(canUpdate("meterType"));
+		storage_txt.setEnabled(canUpdate("storage"));
+		max_wait_txt.setEnabled(canUpdate("maxWait"));
+		algorithm.setEnabled(canUpdate("algorithm"));
+		am_target_txt.setEnabled(canUpdate("amTarget"));
+		pm_target_txt.setEnabled(canUpdate("pmTarget"));
+		beacon.setEnabled(canUpdate("beacon"));
+		lock_action.setEnabled(canUpdate("mLock"));
+	}
+
 	/** Update one attribute on the form */
 	@Override
 	protected void doUpdateAttribute(String a) {
-		if(a == null || a.equals("controller"))
+		if (a == null || a.equals("controller"))
 			controller.setEnabled(proxy.getController() != null);
-		if(a == null || a.equals("notes")) {
-			notes_txt.setEnabled(canUpdate("notes"));
+		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
-		}
 		if (a == null || a.equals("preset")) {
 			preset_cbx.setAction(null);
 			preset_mdl.setSelectedItem(proxy.getPreset());
-			preset.setEnabled(canUpdate("preset"));
 			preset_cbx.setAction(preset);
 		}
-		updateComboBox(a, "meterType", meter_type_cbx,
-			proxy.getMeterType(), meter_type);
-		if(a == null || a.equals("storage")) {
-			storage_txt.setEnabled(canUpdate("storage"));
+		if (a == null || a.equals("meterType")) {
+			meter_type_cbx.setAction(null);
+			meter_type_cbx.setSelectedIndex(proxy.getMeterType());
+			meter_type_cbx.setAction(meter_type);
+		}
+		if (a == null || a.equals("storage"))
 			storage_txt.setText("" + proxy.getStorage());
-		}
-		if(a == null || a.equals("maxWait")) {
-			max_wait_txt.setEnabled(canUpdate("maxWait"));
+		if (a == null || a.equals("maxWait"))
 			max_wait_txt.setText("" + proxy.getMaxWait());
+		if (a == null || a.equals("algorithm")) {
+			algorithm_cbx.setAction(null);
+			algorithm_cbx.setSelectedIndex(proxy.getAlgorithm());
+			algorithm_cbx.setAction(algorithm);
 		}
-		updateComboBox(a, "algorithm", algorithm_cbx,
-			proxy.getAlgorithm(), algorithm);
-		if(a == null || a.equals("amTarget")) {
-			am_target_txt.setEnabled(canUpdate("amTarget"));
+		if (a == null || a.equals("amTarget"))
 			am_target_txt.setText("" + proxy.getAmTarget());
-		}
-		if(a == null || a.equals("pmTarget")) {
-			pm_target_txt.setEnabled(canUpdate("pmTarget"));
+		if (a == null || a.equals("pmTarget"))
 			pm_target_txt.setText("" + proxy.getPmTarget());
-		}
 		if (a == null || a.equals("beacon")) {
 			beacon_cbx.setAction(null);
 			beacon_mdl.setSelectedItem(proxy.getBeacon());
-			beacon.setEnabled(canUpdate("beacon"));
 			beacon_cbx.setAction(beacon);
 		}
-		if(a == null || a.equals("rate")) {
+		if (a == null || a.equals("rate")) {
 			Integer rt = proxy.getRate();
 			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));
 			release_lbl.setText(RampMeterHelper.formatRelease(rt));
@@ -353,11 +361,15 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 				proxy.getQueue());
 			queue_lbl.setText(q.description);
 		}
-		updateComboBox(a, "mLock", lock_cmb, getMLock(), lock_action);
-		if(a == null || a.equals("operation"))
+		if (a == null || a.equals("mLock")) {
+			lock_cbx.setAction(null);
+			lock_cbx.setSelectedIndex(getMLock());
+			lock_cbx.setAction(lock_action);
+		}
+		if (a == null || a.equals("operation"))
 			op_lbl.setText(proxy.getOperation());
-		if(a == null || a.equals("styles")) {
-			if(ItemStyle.FAILED.checkBit(proxy.getStyles())) {
+		if (a == null || a.equals("styles")) {
+			if (ItemStyle.FAILED.checkBit(proxy.getStyles())) {
 				op_lbl.setForeground(Color.WHITE);
 				op_lbl.setBackground(Color.GRAY);
 			} else {
@@ -372,6 +384,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Get meter lock index */
 	private int getMLock() {
 		Integer ml = proxy.getMLock();
-		return ml != null ? ml : 0;
+		return (ml != null) ? ml : 0;
 	}
 }

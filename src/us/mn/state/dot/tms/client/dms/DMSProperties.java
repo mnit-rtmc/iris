@@ -104,6 +104,12 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		super.dispose();
 	}
 
+	/** Update the edit mode */
+	@Override
+	protected void updateEditMode() {
+		messages_pnl.updateEditMode();
+	}
+
 	/** Update one attribute on the form */
 	@Override
 	protected void doUpdateAttribute(String a) {

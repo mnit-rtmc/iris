@@ -95,43 +95,40 @@ public class PropSetup extends IPanel {
 
 	/** Create jobs */
 	private void createJobs() {
-		if (canUpdate("encoder")) {
-			encoder_txt.addFocusListener(new FocusAdapter() {
-				public void focusLost(FocusEvent e) {
-				    camera.setEncoder(encoder_txt.getText());
-				}
-			});
-		}
-		if (canUpdate("encoderChannel")) {
-			enc_chn_spn.addChangeListener(new ChangeListener() {
-				public void stateChanged(ChangeEvent e) {
-				    Number c = (Number)enc_chn_spn.getValue();
-				    camera.setEncoderChannel(c.intValue());
-				}
-			});
-		}
+		encoder_txt.addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) {
+			    camera.setEncoder(encoder_txt.getText());
+			}
+		});
+		enc_chn_spn.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+			    Number c = (Number)enc_chn_spn.getValue();
+			    camera.setEncoderChannel(c.intValue());
+			}
+		});
+	}
+
+	/** Update the edit mode */
+	public void updateEditMode() {
+		encoder_txt.setEnabled(canUpdate("encoder"));
+		enc_chn_spn.setEnabled(canUpdate("encoderChannel"));
+		encoder_type.setEnabled(canUpdate("encoderType"));
+		publish_chk.setEnabled(canUpdate("publish"));
 	}
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
-		if (a == null || a.equals("encoder")) {
-			encoder_txt.setEnabled(canUpdate("encoder"));
+		if (a == null || a.equals("encoder"))
 			encoder_txt.setText(camera.getEncoder());
-		}
-		if (a == null || a.equals("encoderChannel")) {
-			enc_chn_spn.setEnabled(canUpdate("encoderChannel"));
+		if (a == null || a.equals("encoderChannel"))
 			enc_chn_spn.setValue(camera.getEncoderChannel());
-		}
 		if (a == null || a.equals("encoderType")) {
 			enc_type_cbx.setAction(null);
 			enc_type_cbx.setSelectedIndex(camera.getEncoderType());
-			encoder_type.setEnabled(canUpdate("encoderType"));
 			enc_type_cbx.setAction(encoder_type);
 		}
-		if (a == null || a.equals("publish")) {
-			publish_chk.setEnabled(canUpdate("publish"));
+		if (a == null || a.equals("publish"))
 			publish_chk.setSelected(camera.getPublish());
-		}
 	}
 
 	/** Check if the user can update an attribute */
