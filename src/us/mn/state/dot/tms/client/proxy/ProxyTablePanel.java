@@ -93,7 +93,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 	/** Edit mode listener */
 	private final EditModeListener edit_lsnr = new EditModeListener() {
 		public void editModeChanged() {
-			updateButtons();
+			updateButtonPanel();
 		}
 	};
 
@@ -161,7 +161,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		table.setModel(m);
 		if (om != null)
 			om.dispose();
-		updateButtons();
+		updateButtonPanel();
 	}
 
 	/** Create the table */
@@ -252,7 +252,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 
 	/** Select a new proxy */
 	protected void selectProxy() {
-		updateButtons();
+		updateButtonPanel();
 	}
 
 	/** Select a new proxy */
@@ -266,8 +266,8 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		}
 	}
 
-	/** Update the button enabled states */
-	public void updateButtons() {
+	/** Update the button panel */
+	public void updateButtonPanel() {
 		T proxy = getSelectedProxy();
 		show_props.setEnabled(proxy != null);
 		add_proxy.setEnabled(model.canAdd());

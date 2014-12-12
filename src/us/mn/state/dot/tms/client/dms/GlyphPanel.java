@@ -99,7 +99,7 @@ public class GlyphPanel extends JPanel {
 		glyphs = s.getSonarState().getDmsCache().getGlyphs();
 		graphics = s.getSonarState().getGraphics();
 		ginfo = new GlyphInfo();
-		updateButtons();
+		updateButtonPanel();
 		setBorder(BorderFactory.createTitledBorder(
 			I18N.get("font.glyph.selected")));
 		GridBagConstraints bag = new GridBagConstraints();
@@ -142,7 +142,7 @@ public class GlyphPanel extends JPanel {
 	}
 
 	/** Update button enabled states */
-	private void updateButtons() {
+	private void updateButtonPanel() {
 		GlyphInfo gi = ginfo;
 		BitmapGraphic bg = bmap;
 		boolean e = fontHeight() > 0 && canAddAndUpdate();
@@ -172,7 +172,7 @@ public class GlyphPanel extends JPanel {
 	private void setBitmap(BitmapGraphic bg) {
 		bmap = bg;
 		geditor.setBitmap(bg);
-		updateButtons();
+		updateButtonPanel();
 	}
 
 	/** Narrow buton pressed */

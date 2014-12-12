@@ -181,7 +181,7 @@ public class CorridorList extends JPanel {
 	/** Edit mode listener */
 	private final EditModeListener edit_lsnr = new EditModeListener() {
 		public void editModeChanged() {
-			updateButtons();
+			updateButtonPanel();
 		}
 	};
 
@@ -423,11 +423,11 @@ public class CorridorList extends JPanel {
 	private void updateNodeSelection(R_Node proxy) {
 		client.setPointSelector(null);
 		panel.setR_Node(proxy);
-		updateButtons();
+		updateButtonPanel();
 	}
 
 	/** Update the enabled state of add and delete buttons */
-	private void updateButtons() {
+	private void updateButtonPanel() {
 		R_Node proxy = getSelectedNode();
 		add_node.setEnabled(canAdd());
 		delete_node.setEnabled(canRemove(proxy));

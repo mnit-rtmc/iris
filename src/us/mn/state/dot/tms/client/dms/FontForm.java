@@ -256,7 +256,7 @@ public class FontForm extends AbstractForm {
 		renderer.setBitmap(c, gi.bmap);
 		gmap.put(c, gi);
 		glyph_pnl.setGlyph(gi);
-		font_pnl.updateButtons();
+		font_pnl.updateButtonPanel();
 	}
 
 	/** Remove a Glyph from the glyph map */
@@ -265,7 +265,7 @@ public class FontForm extends AbstractForm {
 		renderer.setBitmap(c, null);
 		gmap.remove(c);
 		glyph_pnl.setGlyph(glyphInfo(c));
-		font_pnl.updateButtons();
+		font_pnl.updateButtonPanel();
 	}
 
 	/** Update a Graphic in the GlyphInfo map */
@@ -293,7 +293,7 @@ public class FontForm extends AbstractForm {
 		glyph_pnl.setFont(f);
 		font = f;
 		lookupGlyphs(f);
-		font_pnl.updateButtons();
+		font_pnl.updateButtonPanel();
 		int h = fontHeight(f);
 		int cw = fontWidth(f);
 		int w = (cw > 0) ? (512 / cw) * cw : 512;
