@@ -20,6 +20,7 @@ import java.awt.Component;
 import java.awt.Shape;
 import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
+import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -160,10 +161,23 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Add a proxy to the manager */
 	@Override
 	protected void proxyAddedSwing(DMS dms) {
+		updateCellRenderer(dms);
+		super.proxyAddedSwing(dms);
+	}
+
+	/** Update one DMS cell renderer */
+	private void updateCellRenderer(DMS dms) {
 		DmsCellRenderer r = newCellRenderer();
 		r.setDms(dms);
 		renderers.put(dms.getName(), r);
-		super.proxyAddedSwing(dms);
+	}
+
+	/** Enumeraton complete */
+	@Override
+	protected void enumerationCompleteSwing(Collection<DMS> proxies) {
+		super.enumerationCompleteSwing(proxies);
+		for (DMS dms : proxies)
+			updateCellRenderer(dms);
 	}
 
 	/** Create a cell renderer */
