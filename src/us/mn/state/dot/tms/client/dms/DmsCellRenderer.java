@@ -94,32 +94,28 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		 * and apperance of the renderer.
 		 * @param sz StyleSummary renderer size. */
 		static private DmsRendererMode determine(CellRendererSize sz) {
-			for(DmsRendererMode m : DmsRendererMode.values())
-				if(m.cell_size == sz)
+			for (DmsRendererMode m : DmsRendererMode.values()) {
+				if (m.cell_size == sz)
 					return m;
+			}
 			assert false;
 			return LARGE;
 		}
 	}
 
+	/** DMS to render */
+	public final DMS dms;
+
 	/** DMS cell renderer mode */
 	private final DmsRendererMode mode;
 
 	/** Create a new DMS cell renderer.
+	 * @param d DMS to render.
 	 * @param sz StyleSummary renderer cell size. */
-	public DmsCellRenderer(CellRendererSize sz) {
+	public DmsCellRenderer(DMS d, CellRendererSize sz) {
 		super(new BorderLayout());
+		dms = d;
 		mode = DmsRendererMode.determine(sz);
-		switch(mode) {
-		case SMALL:
-			initSmall();
-			break;
-		case MEDIUM:
-			initMedium();
-			break;
-		default:
-			initLarge();
-		}
 	}
 
 	/** Initialize a small size DMS cell renderer */
@@ -184,7 +180,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
-		if(isSelected) {
+		if (isSelected) {
 			Component temp = cell.getListCellRendererComponent(list,
 				value, index, isSelected, cellHasFocus);
 			title.setBackground(temp.getBackground());
@@ -193,44 +189,63 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 		return this;
 	}
 
-	/** Set the DMS to be displayed. All attributes are updated. */
-	public void setDms(DMS dms) {
-		updateDms(dms, "messageCurrent");
-		updateDms(dms, "ownerCurrent");
+	/** Update DMS attributes */
+	public void initialize() {
+		switch (mode) {
+		case SMALL:
+			initSmall();
+			break;
+		case MEDIUM:
+			initMedium();
+			break;
+		default:
+			initLarge();
+		}
+		updateAttr("messageCurrent");
+		updateAttr("ownerCurrent");
 	}
 
 	/** Update a specified attribute on the DMS.
-	 * @param dms DMS to update.
 	 * @param a Attribute to update. */
-	public void updateDms(DMS dms, String a) {
-		if(a.equals("messageCurrent")) {
+	public void updateAttr(String a) {
+		if (a.equals("messageCurrent")) {
 			String name = dms.getName();
 			name_lbl.setText(name);
 			String loc = GeoLocHelper.getDescription(
 				dms.getGeoLoc());
 			loc_lbl.setText(loc);
-			pixel_pnl.setFilterColor(
-				SignPixelPanel.filterColor(dms));
-			pixel_pnl.setDimensions(dms);
-			pixel_pnl.setGraphic(getPageOne(dms));
-			updateToolTip(dms, name, loc);
-		} else if(a.equals("ownerCurrent"))
-			user_lbl.setText(formatOwner(dms));
+			updatePixelPanel();
+			updateToolTip(name, loc);
+		} else if (a.equals("ownerCurrent"))
+			user_lbl.setText(formatOwner());
 	}
 
 	/** Format the owner name */
-	private String formatOwner(DMS dms) {
+	private String formatOwner() {
 		return IrisUserHelper.getNamePruned(dms.getOwnerCurrent());
 	}
 
+	/** Update the pixel panel */
+	private void updatePixelPanel() {
+		switch (mode) {
+		case MEDIUM:
+		case LARGE:
+			pixel_pnl.setFilterColor(
+				SignPixelPanel.filterColor(dms));
+			pixel_pnl.setDimensions(dms);
+			pixel_pnl.setGraphic(getPageOne());
+			break;
+		}
+	}
+
 	/** Update tooltip */
-	private void updateToolTip(DMS dms, String name, String loc) {
+	private void updateToolTip(String name, String loc) {
 		StringBuilder tt = new StringBuilder();
-		switch(mode) {
+		switch (mode) {
 		case SMALL:
-			String owner = formatOwner(dms);
+			String owner = formatOwner();
 			tt.append(name);
-			if(!owner.isEmpty()) {
+			if (!owner.isEmpty()) {
 				tt.append(": ");
 				tt.append(owner);
 			}
@@ -249,9 +264,9 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
  	}
 
 	/** Get the raster graphic for page one */
-	private RasterGraphic getPageOne(DMS dms) {
+	private RasterGraphic getPageOne() {
 		RasterGraphic[] rasters = DMSHelper.getRasters(dms);
-		if(rasters != null && rasters.length > 0)
+		if (rasters != null && rasters.length > 0)
 			return rasters[0];
 		else
 			return null;

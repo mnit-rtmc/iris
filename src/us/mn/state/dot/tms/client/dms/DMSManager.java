@@ -63,7 +63,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Color definition for AWS controlled style */
 	static private final Color COLOR_HELIOTROPE = new Color(1, 0.5f,0.9f);
 
-	/** Mapping of DMS names to cell renderers.  Owned by EDT. */
+	/** Mapping of DMS names to cell renderers */
 	private final HashMap<String, DmsCellRenderer> renderers =
 		new HashMap<String, DmsCellRenderer>();
 
@@ -138,7 +138,7 @@ public class DMSManager extends ProxyManager<DMS> {
 				boolean isSelected, boolean cellHasFocus)
 			{
 				DmsCellRenderer r = lookupRenderer(value);
-				if(r != null) {
+				if (r != null) {
 					return r.getListCellRendererComponent(
 						list, value, index, isSelected,
 						cellHasFocus);
@@ -148,10 +148,9 @@ public class DMSManager extends ProxyManager<DMS> {
 		};
 	}
 
-	/** Lookup a DMS cell renderer.
-	 * This must be called on the EDT. */
+	/** Lookup a DMS cell renderer */
 	private DmsCellRenderer lookupRenderer(Object value) {
-		if(value instanceof DMS) {
+		if (value instanceof DMS) {
 			DMS dms = (DMS)value;
 			return renderers.get(dms.getName());
 		} else
@@ -167,8 +166,8 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Update one DMS cell renderer */
 	private void updateCellRenderer(DMS dms) {
-		DmsCellRenderer r = newCellRenderer();
-		r.setDms(dms);
+		DmsCellRenderer r = new DmsCellRenderer(dms, getCellSize());
+		r.initialize();
 		renderers.put(dms.getName(), r);
 	}
 
@@ -178,11 +177,6 @@ public class DMSManager extends ProxyManager<DMS> {
 		super.enumerationCompleteSwing(proxies);
 		for (DMS dms : proxies)
 			updateCellRenderer(dms);
-	}
-
-	/** Create a cell renderer */
-	private DmsCellRenderer newCellRenderer() {
-		return new DmsCellRenderer(getCellSize());
 	}
 
 	/** Check if an attribute change is interesting */
@@ -198,7 +192,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	protected void proxyChangedSwing(DMS dms, String a) {
 		DmsCellRenderer r = lookupRenderer(dms);
 		if (r != null)
-			r.updateDms(dms, a);
+			r.updateAttr(a);
 		super.proxyChangedSwing(dms, a);
 	}
 
@@ -211,17 +205,12 @@ public class DMSManager extends ProxyManager<DMS> {
 		return list;
 	}
 
-	/** Set the current cell size.
-	 * This must be called on the EDT. */
+	/** Set the current cell size */
 	@Override
 	public void setCellSize(CellRendererSize size) {
 		super.setCellSize(size);
-		// update all cell renderers
-		for(String dms_id: renderers.keySet()) {
-			DmsCellRenderer r = newCellRenderer();
-			r.setDms(DMSHelper.lookup(dms_id));
-			renderers.put(dms_id, r);
-		}
+		for (DmsCellRenderer r: renderers.values())
+			updateCellRenderer(r.dms);
 	}
 
 	/** Create a properties form for the specified proxy */
