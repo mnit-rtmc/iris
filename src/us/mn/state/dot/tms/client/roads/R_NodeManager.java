@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -45,7 +46,8 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
-import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
+import us.mn.state.dot.tms.client.widget.Invokable;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -131,8 +133,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		CorridorBase c = getCorridor(n);
 		if (c != null) {
 			c.addNode(n);
-			if (enumerated)
-				arrangeCorridor(c);
+			arrangeCorridor(c);
 		}
 	}
 
@@ -176,25 +177,32 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		}
 	}
 
-	/** Arrange the corridor mapping */
-	public void arrangeCorridors() {
-		processNextCorridor(new ArrayList<CorridorBase>(
-			corridors.values()).iterator());
+	/** Enumeraton complete */
+	@Override
+	protected void enumerationCompleteSwing(Collection<R_Node> proxies) {
+		super.enumerationCompleteSwing(proxies);
+		for (R_Node n : proxies) {
+			CorridorBase c = getCorridor(n);
+			if (c != null)
+				c.addNode(n);
+		}
+		arrangeCorridors();
 	}
 
-	/** Process the next corridor in an iterator.  Each corridors is
-	 * handled separately to keep the GUI relatively responsive.  This can't
-	 * be done on a background thread without adding synchronization. */
-	private void processNextCorridor(final Iterator<CorridorBase> it) {
-		if (it.hasNext()) {
-			runSwing(new Runnable() {
-				public void run() {
-					arrangeCorridor(it.next());
-					processNextCorridor(it);
+	/** Arrange the corridor mapping */
+	private void arrangeCorridors() {
+		for (final CorridorBase c : corridors.values()) {
+			runQueued(new Invokable() {
+				public void invoke() {
+					arrangeCorridor(c);
 				}
 			});
-		} else
-			seg_layer.updateStatus();
+		}
+		runQueued(new Invokable() {
+			public void invoke() {
+				seg_layer.updateStatus();
+			}
+		});
 	}
 
 	/** Arrange a single corridor */

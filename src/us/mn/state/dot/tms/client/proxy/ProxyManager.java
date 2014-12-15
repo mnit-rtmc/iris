@@ -37,6 +37,8 @@ import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.widget.Invokable;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
 
 /**
  * A proxy manager is a container for SONAR proxy objects. It places each
@@ -80,13 +82,13 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Listener for proxy events */
 	private final SwingProxyAdapter<T> listener =
-		new SwingProxyAdapter<T>(true)
+		new SwingProxyAdapter<T>()
 	{
 		protected void proxyAddedSwing(T proxy) {
 			ProxyManager.this.proxyAddedSwing(proxy);
 		}
 		protected void enumerationCompleteSwing(Collection<T> proxies) {
-			enumerated = true;
+			ProxyManager.this.enumerationCompleteSwing(proxies);
 			updateExtent();
 		}
 		protected void proxyRemovedSwing(T proxy) {
@@ -115,9 +117,6 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Default style */
 	private final ItemStyle def_style;
-
-	/** Flag to indicate enumeration of all objects has completed */
-	protected boolean enumerated = false;
 
 	/** Create a new proxy manager */
 	protected ProxyManager(Session s, GeoLocManager lm, ItemStyle ds) {
@@ -155,14 +154,29 @@ abstract public class ProxyManager<T extends SonarObject> {
 	protected void proxyAddedSwing(T proxy) {
 		// NOTE: this also gets called when we "watch" an
 		//       object after it is selected.
+		cacheMapGeoLoc(proxy);
+		updateGeometry();
+	}
+
+	/** Cache a MapGeoLoc for one proxy */
+	private void cacheMapGeoLoc(T proxy) {
 		MapGeoLoc loc = findGeoLoc(proxy);
 		if (loc != null) {
 			loc.setManager(this);
 			loc.doUpdate();
 			map_cache.put(loc, proxy);
 		}
-		if (enumerated)
-			updateGeometry();
+	}
+
+	/** Enumeraton complete */
+	protected void enumerationCompleteSwing(Collection<T> proxies) {
+		for (final T p: proxies) {
+			runQueued(new Invokable() {
+				public void invoke() {
+					cacheMapGeoLoc(p);
+				}
+			});
+		}
 	}
 
 	/** Remove a proxy from the manager */
@@ -174,14 +188,24 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Update layer geometry */
 	public final void updateGeometry() {
-		if (layer != null)
-			layer.updateGeometry();
+		if (layer != null) {
+			runQueued(new Invokable() {
+				public void invoke() {
+					layer.updateGeometry();
+				}
+			});
+		}
 	}
 
 	/** Update layer extend */
 	public final void updateExtent() {
-		if (layer != null)
-			layer.updateExtent();
+		if (layer != null) {
+			runQueued(new Invokable() {
+				public void invoke() {
+					layer.updateExtent();
+				}
+			});
+		}
 	}
 
 	/** Check if an attribute change is interesting */

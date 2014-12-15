@@ -24,7 +24,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.DMS;
@@ -47,7 +46,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
-import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -59,21 +57,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** LCS array map object marker */
 	static private final LcsMarker MARKER = new LcsMarker();
-
-	/** Listener for LCS proxy events */
-	private final ProxyListener<LCS> lcs_listener = new ProxyListener<LCS>()
-	{
-		public void proxyAdded(final LCS proxy) {
-			runSwing(new Runnable() {
-				public void run() {
-					proxyAddedSwing(proxy.getArray());
-				}
-			});
-		}
-		public void enumerationComplete() { }
-		public void proxyRemoved(LCS proxy) { }
-		public void proxyChanged(LCS proxy, String a) { }
-	};
 
 	/** Action to blank the selected LCS array */
 	private BlankLcsAction blankAction;
@@ -88,20 +71,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		super(s, lm);
 	}
 
-	/** Initialize the proxy manager */
-	@Override
-	public void initialize() {
-		super.initialize();
-		getLCSCache().addProxyListener(lcs_listener);
-	}
-
-	/** Dispose of the proxy manager */
-	@Override
-	public void dispose() {
-		getLCSCache().removeProxyListener(lcs_listener);
-		super.dispose();
-	}
-
 	/** Get the sonar type name */
 	@Override
 	public String getSonarType() {
@@ -113,12 +82,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	public TypeCache<LCSArray> getCache() {
 		LcsCache cache = session.getSonarState().getLcsCache();
 		return cache.getLCSArrays();
-	}
-
-	/** Get the LCS cache */
-	private TypeCache<LCS> getLCSCache() {
-		LcsCache cache = session.getSonarState().getLcsCache();
-		return cache.getLCSs();
 	}
 
 	/** Create an LCS map tab */

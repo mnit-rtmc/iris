@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 		super(I18N.get("detector.segments"));
 		manager = m;
 		session = s;
-		det_hash = new DetectorHash(s, m);
+		det_hash = new DetectorHash(s);
 	}
 
 	/** Initialize the segment layer */

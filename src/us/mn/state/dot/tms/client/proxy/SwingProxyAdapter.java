@@ -105,7 +105,13 @@ abstract public class SwingProxyAdapter<T extends SonarObject>
 
 	/** Get a proxy comparator */
 	protected Comparator<T> comparator() {
-		return null;
+		return new Comparator<T>() {
+			public int compare(T a, T b) {
+				String an = a.getName();
+				String bn = b.getName();
+				return an.compareTo(bn);
+			}
+		};
 	}
 
 	/** Add a proxy */

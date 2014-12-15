@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -33,9 +32,6 @@ public class DetectorHash {
 	/** User session */
 	private final Session session;
 
-	/** R_Node manager */
-	private final R_NodeManager r_node_manager;
-
 	/** Mapping of r_node names to detector sets */
 	private final HashMap<String, HashSet<Detector>> nodes =
 		new HashMap<String, HashSet<Detector>>();
@@ -47,24 +43,17 @@ public class DetectorHash {
 		protected void proxyAddedSwing(Detector proxy) {
 			DetectorHash.this.proxyAddedSwing(proxy);
 		}
-		protected void enumerationCompleteSwing(
-			Collection<Detector> proxies)
-		{
-			r_node_manager.arrangeCorridors();
-		}
 		protected void proxyRemovedSwing(Detector proxy) {
 			DetectorHash.this.proxyRemovedSwing(proxy);
 		}
-		protected void proxyChangedSwing(Detector proxy, String attr) {}
 		protected boolean checkAttributeChange(String attr) {
 			return false;
 		}
 	};
 
 	/** Create a new detector hash */
-	public DetectorHash(Session s, R_NodeManager r_man) {
+	public DetectorHash(Session s) {
 		session = s;
-		r_node_manager = r_man;
 	}
 
 	/** Initialize the detector hash */

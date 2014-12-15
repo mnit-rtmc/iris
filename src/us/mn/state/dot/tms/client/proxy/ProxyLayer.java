@@ -22,7 +22,6 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
-import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.utils.I18N;
@@ -54,20 +53,12 @@ public class ProxyLayer<T extends SonarObject> extends Layer {
 
 	/** Update the layer geometry */
 	public void updateGeometry() {
-		runSwing(new Runnable() {
-			public void run() {
-				fireLayerChanged(LayerChange.geometry);
-			}
-		});
+		fireLayerChanged(LayerChange.geometry);
 	}
 
 	/** Update the layer status */
 	public void updateStatus() {
-		runSwing(new Runnable() {
-			public void run() {
-				fireLayerChanged(LayerChange.status);
-			}
-		});
+		fireLayerChanged(LayerChange.status);
 	}
 
 	/** Update the layer extent */

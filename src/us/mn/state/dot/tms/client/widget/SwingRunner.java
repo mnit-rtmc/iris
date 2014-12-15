@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.widget;
 
+import java.util.LinkedList;
 import javax.swing.SwingUtilities;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.TimeSteward;
@@ -96,6 +97,39 @@ public final class SwingRunner {
 				runNow(r);
 			}
 		});
+	}
+
+	/** Queue of invokables.  This is separate from the EDT queue so that
+	 * GUI events still happen while lower-priority tasks wait here. */
+	static private final LinkedList<Invokable> queue =
+		new LinkedList<Invokable>();
+
+	/** Queue an invokable on the swing thread */
+	static public void runQueued(final Invokable r) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				if (queue.isEmpty())
+					pollQueue();
+				queue.add(r);
+			}
+		});
+	}
+
+	/** Queue poll runnable */
+	static private final Runnable POLL_RUNNER = new Runnable() {
+		public void run() {
+			Invokable r = queue.poll();
+			if (r != null) {
+				runNow(r);
+				if (!queue.isEmpty())
+					pollQueue();
+			}
+		}
+	};
+
+	/** Poll invokables from the queue */
+	static private void pollQueue() {
+		SwingUtilities.invokeLater(POLL_RUNNER);
 	}
 
 	/** Don't allow instantiation */
