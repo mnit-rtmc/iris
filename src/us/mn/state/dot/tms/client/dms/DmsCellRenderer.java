@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -174,11 +174,13 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 	}
 
 	/** Check if the background is opaque */
+	@Override
 	public boolean isOpaque() {
 		return true;
 	}
 
 	/** Get a component configured to render a cell of the list */
+	@Override
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean cellHasFocus)
 	{
