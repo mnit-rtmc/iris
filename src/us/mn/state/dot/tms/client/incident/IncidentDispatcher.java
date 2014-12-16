@@ -49,9 +49,9 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.roads.LaneConfigurationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -197,8 +197,7 @@ public class IncidentDispatcher extends IPanel
 		super.initialize();
 		dtl_model.initialize();
 		detail_cbx.setRenderer(new IncidentDetailRenderer());
-		detail_cbx.setModel(new WrapperComboBoxModel(dtl_model, true,
-			true));
+		detail_cbx.setModel(new IComboBoxModel(dtl_model));
 		type_lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
 		cam_pnl.add(camera_cbx, CAMERA_CBOX);
 		cam_pnl.add(camera_btn, CAMERA_BTN);

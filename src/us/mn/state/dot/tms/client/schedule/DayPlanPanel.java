@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import java.awt.event.ActionEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import javax.swing.JButton;
-import javax.swing.ListModel;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -34,8 +33,8 @@ import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.CalendarWidget;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ILabel;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
  * A panel for editing day plans.
@@ -85,7 +84,7 @@ public class DayPlanPanel extends JPanel {
 	};
 
 	/** Combo box for day plans */
-	private final JComboBox day_cbox = new JComboBox();
+	private final JComboBox day_cbx = new JComboBox();
 
 	/** Action to delete the selected day plan */
 	private final IAction del_plan = new IAction("action.plan.day.delete") {
@@ -152,18 +151,18 @@ public class DayPlanPanel extends JPanel {
 		watcher = new ProxyWatcher<DayPlan>(cache, view, false);
 		hol_pnl = new ProxyTablePanel<Holiday>(new HolidayModel(s,
 			null));
-		ListModel m = s.getSonarState().getDayModel();
-		day_cbox.setAction(day);
-		day_cbox.setPrototypeDisplayValue("0123456789");
-		day_cbox.setModel(new WrapperComboBoxModel(m));
-		day_cbox.setEditable(canAdd());
+		day_cbx.setAction(day);
+		day_cbx.setPrototypeDisplayValue("0123456789");
+		day_cbx.setModel(new IComboBoxModel(
+			s.getSonarState().getDayModel()));
+		day_cbx.setEditable(canAdd());
 		GridBagConstraints bag = new GridBagConstraints();
 		bag.insets.top = 2;
 		bag.insets.bottom = 2;
 		bag.insets.left = 2;
 		bag.insets.right = 2;
 		add(new ILabel("action.plan.day"), bag);
-		add(day_cbox, bag);
+		add(day_cbx, bag);
 		bag.gridx = 0;
 		bag.gridy = 1;
 		bag.gridwidth = 2;
@@ -255,14 +254,14 @@ public class DayPlanPanel extends JPanel {
 
 	/** Select a day plan */
 	private void selectDayPlan() {
-		Object item = day_cbox.getSelectedItem();
+		Object item = day_cbx.getSelectedItem();
 		if (item != null) {
 			DayPlan dp = getSelectedPlan();
 			hol_pnl.setModel(new HolidayModel(session, dp));
 			watcher.setProxy(dp);
 			del_plan.setEnabled(canRemove(dp));
 			if (dp == null) {
-				day_cbox.setSelectedItem(null);
+				day_cbx.setSelectedItem(null);
 				String name = item.toString().trim();
 				if (name.length() > 0 && canAdd(name))
 					cache.createObject(name);
@@ -277,8 +276,8 @@ public class DayPlanPanel extends JPanel {
 
 	/** Get the selected day plan */
 	private DayPlan getSelectedPlan() {
-		Object item = day_cbox.getSelectedItem();
-		if(item != null)
+		Object item = day_cbx.getSelectedItem();
+		if (item != null)
 			return DayPlanHelper.lookup(item.toString().trim());
 		else
 			return null;
@@ -286,13 +285,13 @@ public class DayPlanPanel extends JPanel {
 
 	/** Delete the selected day plan */
 	private void deleteSelectedPlan() {
-		Object item = day_cbox.getSelectedItem();
-		if(item != null) {
+		Object item = day_cbx.getSelectedItem();
+		if (item != null) {
 			String name = item.toString();
 			DayPlan dp = DayPlanHelper.lookup(name);
-			if(dp != null)
+			if (dp != null)
 				dp.destroy();
-			day_cbox.setSelectedItem(null);
+			day_cbx.setSelectedItem(null);
 		}
 	}
 

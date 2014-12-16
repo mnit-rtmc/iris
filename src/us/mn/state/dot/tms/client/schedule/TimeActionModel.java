@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 
 /**
  * Table model for time actions assigned to action plans.
@@ -68,10 +68,9 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 					ta.setPhase((PlanPhase)value);
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox();
-				combo.setModel(new WrapperComboBoxModel(
-					phase_mdl));
-				return new DefaultCellEditor(combo);
+				JComboBox cbx = new JComboBox();
+				cbx.setModel(new IComboBoxModel(phase_mdl));
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		return cols;

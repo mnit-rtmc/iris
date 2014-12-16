@@ -49,7 +49,7 @@ import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -220,10 +220,10 @@ public class ControllerIOModel extends AbstractTableModel {
 	private class ControllerIOList<T extends ControllerIO>
 		extends ProxyListModel<T>
 	{
-		private final WrapperComboBoxModel model;
+		private final IComboBoxModel<T> model;
 		private ControllerIOList(TypeCache<T> c) {
 			super(c);
-			model = new WrapperComboBoxModel(this, true);
+			model = new IComboBoxModel<T>(this);
 		}
 		@Override
 		protected boolean check(T p) {

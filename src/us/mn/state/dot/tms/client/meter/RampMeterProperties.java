@@ -44,10 +44,10 @@ import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -64,13 +64,9 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Camera preset action */
-	private final IAction preset = new IAction("camera.preset") {
+	private final IAction preset_act = new IAction("camera.preset") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = preset_mdl.getSelectedItem();
-			if (o instanceof CameraPreset)
-				proxy.setPreset((CameraPreset)o);
-			else
-				proxy.setPreset(null);
+			proxy.setPreset(preset_mdl.getSelectedProxy());
 		}
 	};
 
@@ -78,7 +74,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JComboBox preset_cbx = new JComboBox();
 
 	/** Camera preset combo box model */
-	private final WrapperComboBoxModel preset_mdl;
+	private final IComboBoxModel<CameraPreset> preset_mdl;
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
@@ -130,13 +126,9 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JTextField pm_target_txt = new JTextField(6);
 
 	/** Beacon action */
-	private final IAction beacon = new IAction("ramp.meter.beacon") {
+	private final IAction beacon_act = new IAction("ramp.meter.beacon") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = beacon_mdl.getSelectedItem();
-			if (o instanceof Beacon)
-				proxy.setBeacon((Beacon)o);
-			else
-				proxy.setBeacon(null);
+			proxy.setBeacon(beacon_mdl.getSelectedProxy());
 		}
 	};
 
@@ -144,7 +136,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JComboBox beacon_cbx = new JComboBox();
 
 	/** Advance warning beacon combo box model */
-	private final WrapperComboBoxModel beacon_mdl;
+	private final IComboBoxModel<Beacon> beacon_mdl;
 
 	/** Release rate component */
 	private final JLabel release_lbl = new JLabel();
@@ -182,9 +174,9 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		loc_pnl = new LocationPanel(s);
 		lock_action = new LockMeterAction(meter, lock_cbx,
 			isUpdatePermitted("mLock"));
-		preset_mdl = new WrapperComboBoxModel(
+		preset_mdl = new IComboBoxModel<CameraPreset>(
 			state.getCamCache().getPresetModel());
-		beacon_mdl = new WrapperComboBoxModel(
+		beacon_mdl = new IComboBoxModel<Beacon>(
 			state.getBeaconModel());
 	}
 
@@ -306,14 +298,14 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	protected void updateEditMode() {
 		loc_pnl.updateEditMode();
 		notes_txt.setEnabled(canUpdate("notes"));
-		preset.setEnabled(canUpdate("preset"));
+		preset_act.setEnabled(canUpdate("preset"));
 		meter_type.setEnabled(canUpdate("meterType"));
 		storage_txt.setEnabled(canUpdate("storage"));
 		max_wait_txt.setEnabled(canUpdate("maxWait"));
 		algorithm.setEnabled(canUpdate("algorithm"));
 		am_target_txt.setEnabled(canUpdate("amTarget"));
 		pm_target_txt.setEnabled(canUpdate("pmTarget"));
-		beacon.setEnabled(canUpdate("beacon"));
+		beacon_act.setEnabled(canUpdate("beacon"));
 		lock_action.setEnabled(canUpdate("mLock"));
 	}
 
@@ -327,7 +319,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		if (a == null || a.equals("preset")) {
 			preset_cbx.setAction(null);
 			preset_mdl.setSelectedItem(proxy.getPreset());
-			preset_cbx.setAction(preset);
+			preset_cbx.setAction(preset_act);
 		}
 		if (a == null || a.equals("meterType")) {
 			meter_type_cbx.setAction(null);
@@ -350,7 +342,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		if (a == null || a.equals("beacon")) {
 			beacon_cbx.setAction(null);
 			beacon_mdl.setSelectedItem(proxy.getBeacon());
-			beacon_cbx.setAction(beacon);
+			beacon_cbx.setAction(beacon_act);
 		}
 		if (a == null || a.equals("rate")) {
 			Integer rt = proxy.getRate();

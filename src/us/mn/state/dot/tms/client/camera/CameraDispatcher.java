@@ -33,9 +33,9 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IPanel;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -181,7 +181,7 @@ public class CameraDispatcher extends JPanel {
 	private JComboBox createOutputCombo() {
 		JComboBox box = new JComboBox();
 		FilteredMonitorModel m = new FilteredMonitorModel(session);
-		box.setModel(new WrapperComboBoxModel(m));
+		box.setModel(new IComboBoxModel(m));
 		if (m.getSize() > 1)
 			box.setSelectedIndex(1);
 		return box;

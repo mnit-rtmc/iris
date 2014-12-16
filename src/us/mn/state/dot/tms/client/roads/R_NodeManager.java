@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
-import javax.swing.DefaultListModel;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
@@ -76,11 +76,11 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	private final Map<String, CorridorBase> corridors =
 		new TreeMap<String, CorridorBase>();
 
-	/** List model of all corridors */
-	private final DefaultListModel model = new DefaultListModel();
+	/** Combo box model of all corridors */
+	private final DefaultComboBoxModel model = new DefaultComboBoxModel();
 
 	/** Get the corridor list model */
-	public ListModel getCorridorModel() {
+	public DefaultComboBoxModel getCorridorModel() {
 		return model;
 	}
 
@@ -99,6 +99,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	public R_NodeManager(Session s, GeoLocManager lm) {
 		super(s, lm);
 		seg_layer = new SegmentLayer(session, this);
+		model.addElement(" ");
 	}
 
 	/** Initialize the r_node manager */
@@ -158,9 +159,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		String cid = c.getName();
 		corridors.put(cid, c);
 		Iterator<String> it = corridors.keySet().iterator();
-		for(int i = 0; it.hasNext(); i++) {
-			if(cid.equals(it.next())) {
-				model.add(i, c);
+		for (int i = 0; it.hasNext(); i++) {
+			if (cid.equals(it.next())) {
+				model.insertElementAt(c, i + 1);
 				return;
 			}
 		}

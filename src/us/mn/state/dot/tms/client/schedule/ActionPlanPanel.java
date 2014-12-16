@@ -21,9 +21,9 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
  * A panel for displaying a table of action plans.
@@ -39,12 +39,12 @@ public class ActionPlanPanel extends ProxyTablePanel<ActionPlan> {
 	private final JComboBox phase_cbx = new JComboBox();
 
 	/** Plan phase model */
-	private final WrapperComboBoxModel phase_mdl;
+	private final IComboBoxModel<PlanPhase> phase_mdl;
 
 	/** Create a new action plan panel */
 	public ActionPlanPanel(Session s) {
 		super(new ActionPlanModel(s));
-		phase_mdl = new WrapperComboBoxModel(
+		phase_mdl = new IComboBoxModel<PlanPhase>(
 			s.getSonarState().getPhaseModel());
 	}
 
@@ -84,7 +84,7 @@ public class ActionPlanPanel extends ProxyTablePanel<ActionPlan> {
 	protected void createObject() {
 		ActionPlanModel mdl = getActionPlanModel();
 		if (mdl != null) {
-			PlanPhase p = getSelectedPhase();
+			PlanPhase p = phase_mdl.getSelectedProxy();
 			if (p != null) {
 				String name = add_txt.getText().trim();
 				mdl.create(name, p);
@@ -100,11 +100,5 @@ public class ActionPlanPanel extends ProxyTablePanel<ActionPlan> {
 		return (mdl instanceof ActionPlanModel)
 		     ? (ActionPlanModel)mdl
 		     : null;
-	}
-
-	/** Get the selected phase */
-	private PlanPhase getSelectedPhase() {
-		Object o = phase_mdl.getSelectedItem();
-		return (o instanceof PlanPhase) ? (PlanPhase)o : null;
 	}
 }

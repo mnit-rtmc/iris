@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 
 /**
  * Table model for beacon actions assigned to action plans
@@ -59,10 +59,9 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 					la.setPhase((PlanPhase)value);
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox();
-				combo.setModel(new WrapperComboBoxModel(
-					phase_model));
-				return new DefaultCellEditor(combo);
+				JComboBox cbx = new JComboBox();
+				cbx.setModel(new IComboBoxModel(phase_mdl));
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		return cols;
@@ -72,7 +71,7 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 	private final ActionPlan action_plan;
 
 	/** Plan phase model */
-	private final ProxyListModel<PlanPhase> phase_model;
+	private final ProxyListModel<PlanPhase> phase_mdl;
 
 	/** Create a new beacon action table model */
 	public BeaconActionModel(Session s, ActionPlan ap) {
@@ -81,7 +80,7 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		action_plan = ap;
-		phase_model = s.getSonarState().getPhaseModel();
+		phase_mdl = s.getSonarState().getPhaseModel();
 	}
 
 	/** Get the SONAR type name */

@@ -26,13 +26,14 @@ import javax.swing.JTextField;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IPanel;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -93,19 +94,15 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	private final ProxyListModel<Role> r_list;
 
 	/** Role combo model */
-	private final WrapperComboBoxModel role_mdl;
+	private final IComboBoxModel<Role> role_mdl;
 
 	/** Role combo box */
 	private final JComboBox role_cbx;
 
 	/** Role action */
-	private final UAction role_action = new UAction("role") {
+	private final UAction role_act = new UAction("role") {
 		protected void do_perform(User u) {
-			Object item = role_cbx.getSelectedItem();
-			if(item instanceof Role)
-				u.setRole((Role)item);
-			else
-				u.setRole(null);
+			u.setRole(role_mdl.getSelectedProxy());
 		}
 	};
 
@@ -116,13 +113,20 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		}
 	});
 
+	/** Edit mode listener */
+	private final EditModeListener edit_lsnr = new EditModeListener() {
+		public void editModeChanged() {
+			updateEditMode();
+		}
+	};
+
 	/** Create the user panel */
 	public UserPanel(Session s) {
 		session = s;
 		TypeCache<User> cache = s.getSonarState().getUsers();
 		watcher = new ProxyWatcher<User>(cache, this, false);
 		r_list = new ProxyListModel<Role>(s.getSonarState().getRoles());
-		role_mdl = new WrapperComboBoxModel(r_list, true);
+		role_mdl = new IComboBoxModel<Role>(r_list);
 		role_cbx = new JComboBox(role_mdl);
 	}
 
@@ -144,12 +148,14 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		createJobs();
 		watcher.initialize();
 		r_list.initialize();
+		session.addEditModeListener(edit_lsnr);
 		clear();
 	}
 
 	/** Dispose of the panel */
 	@Override
 	public void dispose() {
+		session.removeEditModeListener(edit_lsnr);
 		r_list.dispose();
 		watcher.dispose();
 		super.dispose();
@@ -170,50 +176,56 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 				setDn(dn_txt.getText().trim());
 			}
 		});
-		role_cbx.setAction(role_action);
+		role_cbx.setAction(role_act);
 	}
 
 	/** Set the user's full name */
 	private void setFullName(String f) {
 		User u = user;
-		if(u != null)
+		if (u != null)
 			u.setFullName(f);
 	}
 
 	/** Set the user's dn (distinguished name) */
 	private void setDn(String n) {
 		User u = user;
-		if(u != null)
+		if (u != null)
 			u.setDn(n);
+	}
+
+	/** Update the edit mode */
+	private void updateEditMode() {
+		f_name_txt.setEnabled(canUpdate("fullName"));
+		boolean cu = canUpdate("password");
+		passwd_txt.setEnabled(cu);
+		change_pwd.setEnabled(cu);
+		dn_txt.setEnabled(canUpdate("dn"));
+		role_act.setEnabled(canUpdate("role"));
+		enabled_chk.setEnabled(canUpdate("enabled"));
+	}
+
+	/** Test if the user can update an attribute */
+	private boolean canUpdate(String a) {
+		return session.canUpdate(user, a);
 	}
 
 	/** Update one attribute (from ProxyView). */
 	@Override
 	public void update(User u, String a) {
-		if(a == null)
+		if (a == null) {
 			user = u;
-		if(a == null || a.equals("fullName")) {
-			f_name_txt.setEnabled(session.canUpdate(u, "fullName"));
+			updateEditMode();
+		}
+		if (a == null || a.equals("fullName"))
 			f_name_txt.setText(u.getFullName());
-		}
-		if(a == null || a.equals("password")) {
-			boolean cu = session.canUpdate(u, "password");
-			passwd_txt.setEnabled(cu);
+		if (a == null || a.equals("password"))
 			passwd_txt.setText("");
-			change_pwd.setEnabled(cu);
-		}
-		if(a == null || a.equals("dn")) {
-			dn_txt.setEnabled(session.canUpdate(u, "dn"));
+		if (a == null || a.equals("dn"))
 			dn_txt.setText(u.getDn());
-		}
-		if(a == null || a.equals("role")) {
-			role_cbx.setEnabled(session.canUpdate(u, "role"));
-			role_cbx.setSelectedItem(u.getRole());
-		}
-		if(a == null || a.equals("enabled")) {
-			enabled_chk.setEnabled(session.canUpdate(u, "enabled"));
+		if (a == null || a.equals("role"))
+			role_mdl.setSelectedItem(u.getRole());
+		if (a == null || a.equals("enabled"))
 			enabled_chk.setSelected(u.getEnabled());
-		}
 		repaint();
 	}
 
@@ -221,16 +233,11 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	@Override
 	public void clear() {
 		user = null;
-		f_name_txt.setEnabled(false);
+		updateEditMode();
 		f_name_txt.setText("");
-		passwd_txt.setEnabled(false);
 		passwd_txt.setText("");
-		change_pwd.setEnabled(false);
-		dn_txt.setEnabled(false);
 		dn_txt.setText("");
-		role_cbx.setEnabled(false);
-		role_cbx.setSelectedIndex(0);
-		enabled_chk.setEnabled(false);
+		role_mdl.setSelectedItem(null);
 		enabled_chk.setSelected(false);
 	}
 }

@@ -37,8 +37,8 @@ import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IPanel;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
  * LocationPanel is a Swing panel for viewing and editing object locations.
@@ -101,12 +101,12 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	private final JComboBox roadway_cbx = new JComboBox();
 
 	/** Roadway model */
-	private final WrapperComboBoxModel roadway_mdl;
+	private final IComboBoxModel<Road> roadway_mdl;
 
 	/** Roadway action */
 	private final LAction roadway_act = new LAction("location.roadway") {
 		protected void do_perform(GeoLoc l) {
-			l.setRoadway((Road)roadway_mdl.getSelectedItem());
+			l.setRoadway(roadway_mdl.getSelectedProxy());
 		}
 	};
 
@@ -137,12 +137,12 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	private final JComboBox cross_cbx = new JComboBox();
 
 	/** Cross street model */
-	private final WrapperComboBoxModel cross_mdl;
+	private final IComboBoxModel<Road> cross_mdl;
 
 	/** Cross street action */
 	private final LAction cross_act = new LAction("location.cross") {
 		protected void do_perform(GeoLoc l) {
-			l.setCrossStreet((Road)cross_mdl.getSelectedItem());
+			l.setCrossStreet(cross_mdl.getSelectedProxy());
 		}
 	};
 
@@ -192,10 +192,8 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		state = s.getSonarState();
 		TypeCache<GeoLoc> cache = state.getGeoLocs();
 		watcher = new ProxyWatcher<GeoLoc>(cache, this, false);
-		roadway_mdl = new WrapperComboBoxModel(state.getRoadModel(),
-			true);
-		cross_mdl = new WrapperComboBoxModel(state.getRoadModel(),
-			true);
+		roadway_mdl = new IComboBoxModel<Road>(state.getRoadModel());
+		cross_mdl = new IComboBoxModel<Road>(state.getRoadModel());
 	}
 
 	/** Initialize the location panel */

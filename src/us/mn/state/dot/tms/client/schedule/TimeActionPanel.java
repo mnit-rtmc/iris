@@ -24,9 +24,9 @@ import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 
 /**
  * A panel for displaying a table of time actions.
@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 
 	/** Day plan model */
-	private final WrapperComboBoxModel day_plan_mdl;
+	private final IComboBoxModel<DayPlan> day_plan_mdl;
 
 	/** Day plan label */
 	private final ILabel day_plan_lbl = new ILabel("action.plan.day");
@@ -59,7 +59,7 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 	/** Create a new time action panel */
 	public TimeActionPanel(Session s) {
 		super(new TimeActionModel(s, null));
-		day_plan_mdl = new WrapperComboBoxModel(
+		day_plan_mdl = new IComboBoxModel<DayPlan>(
 			s.getSonarState().getDayModel());
 	}
 
@@ -120,7 +120,7 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 		if (mdl != null) {
 			String st = getSelectedTime();
 			if (st != null) {
-				DayPlan dp = getSelectedDayPlan();
+				DayPlan dp = day_plan_mdl.getSelectedProxy();
 				String sd = getSelectedDate();
 				mdl.createObject(dp, sd, st);
 			}
@@ -142,12 +142,6 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 	private String getSelectedTime() {
 		Date td = TimeActionHelper.parseTime(time_txt.getText());
 		return TimeActionHelper.formatTime(td);
-	}
-
-	/** Get the selected day plan */
-	private DayPlan getSelectedDayPlan() {
-		Object o = day_plan_mdl.getSelectedItem();
-		return (o instanceof DayPlan) ? (DayPlan)o : null;
 	}
 
 	/** Get the selected date formatted as a string */

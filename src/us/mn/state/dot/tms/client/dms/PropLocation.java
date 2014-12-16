@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.client.camera.PresetComboRenderer;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -43,39 +43,31 @@ public class PropLocation extends LocationPanel {
 	/** Notes text area */
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
+	/** External beacon combo box model */
+	private final IComboBoxModel<Beacon> beacon_mdl;
+
 	/** External beacon action */
-	private final IAction beacon = new IAction("dms.beacon.ext") {
+	private final IAction beacon_act = new IAction("dms.beacon.ext") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = beacon_mdl.getSelectedItem();
-			if (o instanceof Beacon)
-				dms.setBeacon((Beacon)o);
-			else
-				dms.setBeacon(null);
+			dms.setBeacon(beacon_mdl.getSelectedProxy());
 		}
 	};
 
 	/** External beacon combo box */
 	private final JComboBox beacon_cbx = new JComboBox();
 
-	/** External beacon combo box model */
-	private final WrapperComboBoxModel beacon_mdl;
+	/** Camera preset combo box model */
+	private final IComboBoxModel<CameraPreset> preset_mdl;
 
 	/** Camera preset action */
-	private final IAction preset = new IAction("camera.preset") {
+	private final IAction preset_act = new IAction("camera.preset") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = preset_mdl.getSelectedItem();
-			if (o instanceof CameraPreset)
-				dms.setPreset((CameraPreset)o);
-			else
-				dms.setPreset(null);
+			dms.setPreset(preset_mdl.getSelectedProxy());
 		}
 	};
 
 	/** Camera preset combo box */
 	private final JComboBox preset_cbx = new JComboBox();
-
-	/** Camera preset combo box model */
-	private final WrapperComboBoxModel preset_mdl;
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
@@ -100,9 +92,8 @@ public class PropLocation extends LocationPanel {
 	public PropLocation(Session s, DMS sign) {
 		super(s);
 		dms = sign;
-		beacon_mdl = new WrapperComboBoxModel(
-			state.getBeaconModel());
-		preset_mdl = new WrapperComboBoxModel(
+		beacon_mdl = new IComboBoxModel<Beacon>(state.getBeaconModel());
+		preset_mdl = new IComboBoxModel<CameraPreset>(
 			state.getCamCache().getPresetModel());
 	}
 
@@ -140,8 +131,8 @@ public class PropLocation extends LocationPanel {
 	public void updateEditMode() {
 		super.updateEditMode();
 		notes_txt.setEnabled(canUpdate("notes"));
-		beacon.setEnabled(canUpdate("beacon"));
-		preset.setEnabled(canUpdate("preset"));
+		beacon_act.setEnabled(canUpdate("beacon"));
+		preset_act.setEnabled(canUpdate("preset"));
 	}
 
 	/** Update one attribute on the form tab */
@@ -153,12 +144,12 @@ public class PropLocation extends LocationPanel {
 		if (a == null || a.equals("beacon")) {
 			beacon_cbx.setAction(null);
 			beacon_mdl.setSelectedItem(dms.getBeacon());
-			beacon_cbx.setAction(beacon);
+			beacon_cbx.setAction(beacon_act);
 		}
 		if (a == null || a.equals("preset")) {
 			preset_cbx.setAction(null);
 			preset_mdl.setSelectedItem(dms.getPreset());
-			preset_cbx.setAction(preset);
+			preset_cbx.setAction(preset_act);
 		}
 	}
 

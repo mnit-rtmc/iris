@@ -39,9 +39,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -57,48 +57,42 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Notes text area */
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
+	/** Camera combo box model */
+	private final IComboBoxModel<Camera> camera_mdl;
+
 	/** Camera action */
-	private final IAction camera = new IAction("camera") {
+	private final IAction camera_act = new IAction("camera") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = camera_mdl.getSelectedItem();
-			if (o instanceof Camera)
-				proxy.setCamera((Camera)o);
-			else
-				proxy.setCamera(null);
+			proxy.setCamera(camera_mdl.getSelectedProxy());
 		}
 	};
 
 	/** Camera combo box */
 	private final JComboBox camera_cbx = new JComboBox();
 
-	/** Camera combo box model */
-	private final WrapperComboBoxModel camera_mdl;
+	/** Approach camera combo box model */
+	private final IComboBoxModel<Camera> approach_mdl;
 
 	/** Approach camera action */
-	private final IAction approach = new IAction("gate.arm.approach") {
+	private final IAction approach_act = new IAction("gate.arm.approach") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = approach_mdl.getSelectedItem();
-			if (o instanceof Camera)
-				proxy.setApproach((Camera)o);
-			else
-				proxy.setApproach(null);
+			proxy.setApproach(approach_mdl.getSelectedProxy());
 		}
 	};
 
 	/** Approach camera combo box */
 	private final JComboBox approach_cbx = new JComboBox();
 
-	/** Approach camera combo box model */
-	private final WrapperComboBoxModel approach_mdl;
+	/** Prerequisite combo box model */
+	private final IComboBoxModel<GateArmArray> prereq_mdl;
 
 	/** Prerequisite gate arm array */
-	private final IAction prereq = new IAction("gate.arm.prereq") {
+	private final IAction prereq_act = new IAction("gate.arm.prereq") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = prereq_mdl.getSelectedItem();
-			if (o instanceof GateArmArray) {
-				GateArmArray ga = (GateArmArray)o;
+			GateArmArray ga = prereq_mdl.getSelectedProxy();
+			if (ga != null)
 				proxy.setPrereq(ga.getName());
-			} else
+			else
 				proxy.setPrereq(null);
 		}
 	};
@@ -106,25 +100,18 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Prerequisite combo box */
 	private final JComboBox prereq_cbx = new JComboBox();
 
-	/** Prerequisite combo box model */
-	private final WrapperComboBoxModel prereq_mdl;
+	/** Warning DMS combo box model */
+	private final IComboBoxModel<DMS> dms_mdl;
 
 	/** Warning DMS action */
-	private final IAction dms = new IAction("gate.arm.dms") {
+	private final IAction dms_act = new IAction("gate.arm.dms") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = dms_mdl.getSelectedItem();
-			if (o instanceof DMS)
-				proxy.setDms((DMS)o);
-			else
-				proxy.setDms(null);
+			proxy.setDms(dms_mdl.getSelectedProxy());
 		}
 	};
 
 	/** Warning DMS combo box */
 	private final JComboBox dms_cbx = new JComboBox();
-
-	/** Warning DMS combo box model */
-	private final WrapperComboBoxModel dms_mdl;
 
 	/** Text field for OPEN quick message */
 	private final JTextField open_msg_txt = new JTextField(20);
@@ -163,13 +150,13 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Create a new gate arm array properties form */
 	public GateArmArrayProperties(Session s, GateArmArray ga) {
 		super(I18N.get("gate_arm_array") + ": ", s, ga);
-		camera_mdl = new WrapperComboBoxModel(
+		camera_mdl = new IComboBoxModel<Camera>(
 			state.getCamCache().getCameraModel());
-		approach_mdl = new WrapperComboBoxModel(
+		approach_mdl = new IComboBoxModel<Camera>(
 			state.getCamCache().getCameraModel());
-		prereq_mdl = new WrapperComboBoxModel(
-			state.getGateArmArrayModel(), true, true);
-		dms_mdl = new WrapperComboBoxModel(
+		prereq_mdl = new IComboBoxModel<GateArmArray>(
+			state.getGateArmArrayModel());
+		dms_mdl = new IComboBoxModel<DMS>(
 			state.getDmsCache().getDMSModel());
 		loc_pnl = new LocationPanel(s);
 		ga_pnl = new ProxyTablePanel<GateArm>(new GateArmTableModel(
@@ -268,7 +255,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	@Override
 	protected void dispose() {
 		// Prevent dms being cleared on close
-		dms.setEnabled(false);
+		dms_act.setEnabled(false);
 		ga_pnl.dispose();
 		loc_pnl.dispose();
 		super.dispose();
@@ -279,10 +266,10 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	protected void updateEditMode() {
 		loc_pnl.updateEditMode();
 		notes_txt.setEnabled(canUpdate("notes"));
-		camera.setEnabled(canUpdate("camera"));
-		approach.setEnabled(canUpdate("approach"));
-		prereq.setEnabled(canUpdate("prereq"));
-		dms.setEnabled(canUpdate("dms"));
+		camera_act.setEnabled(canUpdate("camera"));
+		approach_act.setEnabled(canUpdate("approach"));
+		prereq_act.setEnabled(canUpdate("prereq"));
+		dms_act.setEnabled(canUpdate("dms"));
 		open_msg_txt.setEnabled(canUpdate("openMsg"));
 		closed_msg_txt.setEnabled(canUpdate("closedMsg"));
 		disable.setEnabled(canUpdate("deviceRequest"));
@@ -296,23 +283,23 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		if (a == null || a.equals("camera")) {
 			camera_cbx.setAction(null);
 			camera_cbx.setSelectedItem(proxy.getCamera());
-			camera_cbx.setAction(camera);
+			camera_cbx.setAction(camera_act);
 		}
 		if (a == null || a.equals("approach")) {
 			approach_cbx.setAction(null);
 			approach_cbx.setSelectedItem(proxy.getApproach());
-			approach_cbx.setAction(approach);
+			approach_cbx.setAction(approach_act);
 		}
 		if (a == null || a.equals("prereq")) {
 			prereq_cbx.setAction(null);
 			prereq_cbx.setSelectedItem(GateArmArrayHelper.lookup(
 				proxy.getPrereq()));
-			prereq_cbx.setAction(prereq);
+			prereq_cbx.setAction(prereq_act);
 		}
 		if (a == null || a.equals("dms")) {
 			dms_cbx.setAction(null);
 			dms_cbx.setSelectedItem(proxy.getDms());
-			dms_cbx.setAction(dms);
+			dms_cbx.setAction(dms_act);
 		}
 		if (a == null || a.equals("openMsg"))
 			open_msg_txt.setText(getOpenMsg());

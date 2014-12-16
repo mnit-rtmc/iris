@@ -32,9 +32,9 @@ import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -58,13 +58,9 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 	};
 
 	/** Camera preset action */
-	private final IAction preset = new IAction("camera.preset") {
+	private final IAction preset_act = new IAction("camera.preset") {
 		protected void doActionPerformed(ActionEvent e) {
-			Object o = preset_cbx.getSelectedItem();
-			if (o instanceof CameraPreset)
-				proxy.setPreset((CameraPreset)o);
-			else
-				proxy.setPreset(null);
+			proxy.setPreset(preset_mdl.getSelectedProxy());
 		}
 	};
 
@@ -72,7 +68,7 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 	private final JComboBox preset_cbx = new JComboBox();
 
 	/** Camera preset combo box model */
-	private final WrapperComboBoxModel preset_mdl;
+	private final IComboBoxModel<CameraPreset> preset_mdl;
 
 	/** Message text area */
 	private final JTextArea message_txt = new JTextArea(3, 24);
@@ -81,7 +77,7 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 	public BeaconProperties(Session s, Beacon b) {
 		super(I18N.get("beacon") + ": ", s, b);
 		loc_pnl = new LocationPanel(s);
-		preset_mdl = new WrapperComboBoxModel(
+		preset_mdl = new IComboBoxModel<CameraPreset>(
 			state.getCamCache().getPresetModel());
 	}
 
@@ -159,7 +155,7 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 	protected void updateEditMode() {
 		loc_pnl.updateEditMode();
 		notes_txt.setEnabled(canUpdate("notes"));
-		preset.setEnabled(canUpdate("preset"));
+		preset_act.setEnabled(canUpdate("preset"));
 		message_txt.setEnabled(canUpdate("message"));
 	}
 
@@ -173,7 +169,7 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 		if (a == null || a.equals("preset")) {
 			preset_cbx.setAction(null);
 			preset_mdl.setSelectedItem(proxy.getPreset());
-			preset_cbx.setAction(preset);
+			preset_cbx.setAction(preset_act);
 		}
 		if (a == null || a.equals("message"))
 			message_txt.setText(proxy.getMessage());

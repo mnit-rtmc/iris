@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 
 /**
  * Table model for plan phases.
@@ -74,17 +74,16 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 					p.setNextPhase(null);
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox();
-				combo.setModel(new WrapperComboBoxModel(
-					phase_model));
-				return new DefaultCellEditor(combo);
+				JComboBox cbx = new JComboBox();
+				cbx.setModel(new IComboBoxModel(phase_mdl));
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		return cols;
 	}
 
 	/** Plan phase model */
-	private final ProxyListModel<PlanPhase> phase_model;
+	private final ProxyListModel<PlanPhase> phase_mdl;
 
 	/** Create a new plan phase table model */
 	public PlanPhaseModel(Session s) {
@@ -92,7 +91,7 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 		      false,	/* has_properties */
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-		phase_model = s.getSonarState().getPhaseModel();
+		phase_mdl = s.getSonarState().getPhaseModel();
 	}
 
 	/** Get the SONAR type name */

@@ -44,9 +44,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ZTable;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -61,11 +61,13 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Table row height */
 	static private final int ROW_HEIGHT = 24;
 
+	/** Comm link combo box model */
+	private final IComboBoxModel<CommLink> comm_link_mdl;
+
 	/** Comm link action */
-	private final IAction comm_link = new IAction("comm.link") {
+	private final IAction comm_link_act = new IAction("comm.link") {
 		protected void doActionPerformed(ActionEvent e) {
-			proxy.setCommLink(
-				(CommLink)comm_link_cbx.getSelectedItem());
+			proxy.setCommLink(comm_link_mdl.getSelectedProxy());
 		}
 	};
 
@@ -103,11 +105,13 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Location panel */
 	private final LocationPanel loc_pnl;
 
+	/** Cabinet style combo box model */
+	private final IComboBoxModel<CabinetStyle> cab_style_mdl;
+
 	/** Cabinet style action */
-	private final IAction cab_style = new IAction("cabinet.style") {
+	private final IAction cab_style_act = new IAction("cabinet.style") {
 		protected void doActionPerformed(ActionEvent e) {
-			cabinet.setStyle((CabinetStyle)
-				cab_style_cbx.getSelectedItem());
+			cabinet.setStyle(cab_style_mdl.getSelectedProxy());
 		}
 	};
 
@@ -170,22 +174,18 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		}
 	};
 
-	/** Comm Link list model */
-	private final ProxyListModel<CommLink> link_model;
-
-	/** Cabinet style list model */
-	private final ProxyListModel<CabinetStyle> sty_model;
-
 	/** Create a new controller form */
 	public ControllerForm(Session s, Controller c) {
 		super(I18N.get("controller") + ": ", s, c);
 		ConCache con_cache = state.getConCache();
-		link_model = con_cache.getCommLinkModel();
 		cabinets = con_cache.getCabinets();
 		cabinet = proxy.getCabinet();
 		cab_listener = new CabinetListener();
-		sty_model = con_cache.getCabinetStyleModel();
 		loc_pnl = new LocationPanel(s);
+		comm_link_mdl = new IComboBoxModel(con_cache.getCommLinkModel(),
+			false);
+		cab_style_mdl = new IComboBoxModel(
+			con_cache.getCabinetStyleModel());
 	}
 
 	/** Get the SONAR type cache */
@@ -200,10 +200,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		io_model = new ControllerIOModel(session, proxy);
 		io_model.initialize();
 		cabinets.addProxyListener(cab_listener);
-		comm_link_cbx.setModel(new WrapperComboBoxModel(link_model,
-			false));
-		cab_style_cbx.setModel(new WrapperComboBoxModel(sty_model,
-			true));
+		comm_link_cbx.setModel(comm_link_mdl);
+		cab_style_cbx.setModel(cab_style_mdl);
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("device.setup"), createSetupPanel());
 		tab.add(I18N.get("cabinet"), createCabinetPanel());
@@ -351,11 +349,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		loc_pnl.updateEditMode();
 		password.setEnabled(canUpdate("password"));
 		clear_pwd.setEnabled(canUpdate("password"));
-		comm_link.setEnabled(canUpdate("commLink"));
+		comm_link_act.setEnabled(canUpdate("commLink"));
 		drop_spn.setEnabled(canUpdate("drop"));
 		notes_txt.setEnabled(canUpdate("notes"));
 		active_chk.setEnabled(canUpdate("active"));
-		cab_style.setEnabled(canUpdateCabinet("style"));
+		cab_style_act.setEnabled(canUpdateCabinet("style"));
 	}
 
 	/** Update one attribute on the form */
@@ -364,7 +362,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		if (a == null || a.equals("commLink")) {
 			comm_link_cbx.setAction(null);
 			comm_link_cbx.setSelectedItem(proxy.getCommLink());
-			comm_link_cbx.setAction(comm_link);
+			comm_link_cbx.setAction(comm_link_act);
 			drop_model = new DropNumberModel(
 				proxy.getCommLink(), getTypeCache(),
 				proxy.getDrop());
@@ -415,8 +413,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		}
 		if (a == null || a.equals("style")) {
 			cab_style_cbx.setAction(null);
-			cab_style_cbx.setSelectedItem(cabinet.getStyle());
-			cab_style_cbx.setAction(cab_style);
+			cab_style_mdl.setSelectedItem(cabinet.getStyle());
+			cab_style_cbx.setAction(cab_style_act);
 		}
 	}
 }

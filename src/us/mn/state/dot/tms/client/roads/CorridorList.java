@@ -50,7 +50,6 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IWorker;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -196,8 +195,7 @@ public class CorridorList extends JPanel {
 		r_nodes = creator.getR_Nodes();
 		geo_locs = creator.getGeoLocs();
 		corridor_cbx.setAction(corr_act);
-		corridor_cbx.setModel(new WrapperComboBoxModel(
-			manager.getCorridorModel()));
+		corridor_cbx.setModel(manager.getCorridorModel());
 		sel_model = manager.getSelectionModel();
 		n_list.setCellRenderer(new R_NodeCellRenderer());
 		n_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

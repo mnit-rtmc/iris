@@ -36,10 +36,10 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.client.widget.WrapperComboBoxModel;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.INCHES;
 import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
@@ -142,7 +142,7 @@ public class PropMessages extends JPanel {
 					(Font)font_cbx.getSelectedItem());
 			}
 		});
-		font_cbx.setModel(new WrapperComboBoxModel(
+		font_cbx.setModel(new IComboBoxModel(
 			session.getSonarState().getDmsCache().getFontModel()));
 		layoutPanel();
 	}
