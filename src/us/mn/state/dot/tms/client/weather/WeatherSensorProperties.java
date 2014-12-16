@@ -111,6 +111,7 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	/** Update the edit mode */
 	@Override
 	protected void updateEditMode() {
+		loc_pnl.updateEditMode();
 		notes_txt.setEnabled(canUpdate("notes"));
 	}
 

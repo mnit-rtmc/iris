@@ -107,6 +107,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Update the edit mode */
 	@Override
 	protected void updateEditMode() {
+		location_pnl.updateEditMode();
 		messages_pnl.updateEditMode();
 	}
 

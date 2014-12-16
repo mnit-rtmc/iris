@@ -83,14 +83,19 @@ public class PropLocation extends LocationPanel {
 		});
 	}
 
+	/** Update the edit mode */
+	@Override
+	public void updateEditMode() {
+		super.updateEditMode();
+		notes_txt.setEnabled(canUpdate("notes"));
+	}
+
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
 		if (a == null || a.equals("controller"))
 			controller.setEnabled(camera.getController() != null);
-		if (a == null || a.equals("notes")) {
-			notes_txt.setEnabled(canUpdate("notes"));
+		if (a == null || a.equals("notes"))
 			notes_txt.setText(camera.getNotes());
-		}
 	}
 
 	/** Check if the user can update an attribute */

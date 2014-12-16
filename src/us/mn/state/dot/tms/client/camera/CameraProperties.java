@@ -77,6 +77,7 @@ public class CameraProperties extends SonarObjectForm<Camera> {
 	/** Update the edit mode */
 	@Override
 	protected void updateEditMode() {
+		location_pnl.updateEditMode();
 		setup_pnl.updateEditMode();
 	}
 

@@ -277,6 +277,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Update the edit mode */
 	@Override
 	protected void updateEditMode() {
+		loc_pnl.updateEditMode();
 		notes_txt.setEnabled(canUpdate("notes"));
 		camera.setEnabled(canUpdate("camera"));
 		approach.setEnabled(canUpdate("approach"));
@@ -284,7 +285,6 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		dms.setEnabled(canUpdate("dms"));
 		open_msg_txt.setEnabled(canUpdate("openMsg"));
 		closed_msg_txt.setEnabled(canUpdate("closedMsg"));
-
 		disable.setEnabled(canUpdate("deviceRequest"));
 	}
 

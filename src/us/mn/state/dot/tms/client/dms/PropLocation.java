@@ -87,7 +87,7 @@ public class PropLocation extends LocationPanel {
 	/** Controller lookup button pressed */
 	private void controllerPressed() {
 		Controller c = dms.getController();
-		if(c != null) {
+		if (c != null) {
 			session.getDesktop().show(
 				new ControllerForm(session, c));
 		}
@@ -135,24 +135,29 @@ public class PropLocation extends LocationPanel {
 		});
 	}
 
+	/** Update the edit mode */
+	@Override
+	public void updateEditMode() {
+		super.updateEditMode();
+		notes_txt.setEnabled(canUpdate("notes"));
+		beacon.setEnabled(canUpdate("beacon"));
+		preset.setEnabled(canUpdate("preset"));
+	}
+
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
-		if(a == null || a.equals("controller"))
+		if (a == null || a.equals("controller"))
 			controller.setEnabled(dms.getController() != null);
-		if(a == null || a.equals("notes")) {
-			notes_txt.setEnabled(canUpdate("notes"));
+		if (a == null || a.equals("notes"))
 			notes_txt.setText(dms.getNotes());
-		}
 		if (a == null || a.equals("beacon")) {
 			beacon_cbx.setAction(null);
 			beacon_mdl.setSelectedItem(dms.getBeacon());
-			beacon.setEnabled(canUpdate("beacon"));
 			beacon_cbx.setAction(beacon);
 		}
 		if (a == null || a.equals("preset")) {
 			preset_cbx.setAction(null);
 			preset_mdl.setSelectedItem(dms.getPreset());
-			preset.setEnabled(canUpdate("preset"));
 			preset_cbx.setAction(preset);
 		}
 	}

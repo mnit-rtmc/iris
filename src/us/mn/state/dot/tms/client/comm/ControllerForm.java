@@ -189,7 +189,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	}
 
 	/** Get the SONAR type cache */
-	@Override protected TypeCache<Controller> getTypeCache() {
+	@Override
+	protected TypeCache<Controller> getTypeCache() {
 		return state.getConCache().getControllers();
 	}
 
@@ -347,6 +348,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	/** Update the edit mode */
 	@Override
 	protected void updateEditMode() {
+		loc_pnl.updateEditMode();
 		password.setEnabled(canUpdate("password"));
 		clear_pwd.setEnabled(canUpdate("password"));
 		comm_link.setEnabled(canUpdate("commLink"));

@@ -157,6 +157,7 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 	/** Update the edit mode */
 	@Override
 	protected void updateEditMode() {
+		loc_pnl.updateEditMode();
 		notes_txt.setEnabled(canUpdate("notes"));
 		preset.setEnabled(canUpdate("preset"));
 		message_txt.setEnabled(canUpdate("message"));

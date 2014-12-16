@@ -100,10 +100,13 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	/** Roadway combobox */
 	private final JComboBox roadway_cbx = new JComboBox();
 
+	/** Roadway model */
+	private final WrapperComboBoxModel roadway_mdl;
+
 	/** Roadway action */
 	private final LAction roadway_act = new LAction("location.roadway") {
 		protected void do_perform(GeoLoc l) {
-			l.setRoadway((Road)roadway_cbx.getSelectedItem());
+			l.setRoadway((Road)roadway_mdl.getSelectedItem());
 		}
 	};
 
@@ -133,10 +136,13 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	/** Cross street combobox */
 	private final JComboBox cross_cbx = new JComboBox();
 
+	/** Cross street model */
+	private final WrapperComboBoxModel cross_mdl;
+
 	/** Cross street action */
 	private final LAction cross_act = new LAction("location.cross") {
 		protected void do_perform(GeoLoc l) {
-			l.setCrossStreet((Road)cross_cbx.getSelectedItem());
+			l.setCrossStreet((Road)cross_mdl.getSelectedItem());
 		}
 	};
 
@@ -186,16 +192,18 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		state = s.getSonarState();
 		TypeCache<GeoLoc> cache = state.getGeoLocs();
 		watcher = new ProxyWatcher<GeoLoc>(cache, this, false);
+		roadway_mdl = new WrapperComboBoxModel(state.getRoadModel(),
+			true);
+		cross_mdl = new WrapperComboBoxModel(state.getRoadModel(),
+			true);
 	}
 
 	/** Initialize the location panel */
 	@Override
 	public void initialize() {
 		super.initialize();
-		roadway_cbx.setModel(new WrapperComboBoxModel(
-			state.getRoadModel(), true));
-		cross_cbx.setModel(new WrapperComboBoxModel(
-			state.getRoadModel(), true));
+		roadway_cbx.setModel(roadway_mdl);
+		cross_cbx.setModel(cross_mdl);
 		add("location.roadway");
 		add(roadway_cbx);
 		add(road_dir_cbx, Stretch.LAST);
@@ -213,16 +221,6 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		add(new JLabel(), Stretch.LEFT);
 		createJobs();
 		watcher.initialize();
-	}
-
-	/** Set the milepoint */
-	private void setMp(String mp) {
-		GeoLoc l = loc;
-		if(l == null)
-			return;
-		if(mp != null)
-			mp = mp.trim();
-		l.setMilepoint(("".equals(mp)) ? null : mp);
 	}
 
 	/** Dispose of the location panel */
@@ -250,7 +248,7 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 			@Override
 			public void focusLost(FocusEvent e) {
 				String mp = milepoint_txt.getText();
-				setMp(mp);
+				setMilepoint(mp.trim());
 			}
 		});
 	}
@@ -265,49 +263,63 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	/** Set the latitude */
 	private void setLat(Double lt) {
 		GeoLoc l = loc;
-		if(l != null)
+		if (l != null)
 			l.setLat(lt);
 	}
 
 	/** Set the longitude */
 	private void setLon(Double ln) {
 		GeoLoc l = loc;
-		if(l != null)
+		if (l != null)
 			l.setLon(ln);
+	}
+
+	/** Set the milepoint */
+	private void setMilepoint(String mp) {
+		GeoLoc l = loc;
+		if (l != null)
+			l.setMilepoint(("".equals(mp)) ? null : mp);
+	}
+
+	/** Update the edit mode */
+	public void updateEditMode() {
+		GeoLoc l = loc;
+		roadway_act.setEnabled(canUpdate(l, "roadway"));
+		road_dir_act.setEnabled(canUpdate(l, "roadDir"));
+		cross_mod_act.setEnabled(canUpdate(l, "crossMod"));
+		cross_act.setEnabled(canUpdate(l, "crossStreet"));
+		cross_dir_act.setEnabled(canUpdate(l, "crossDir"));
+		lat_txt.setEnabled(canUpdate(l, "lat"));
+		lon_txt.setEnabled(canUpdate(l, "lon"));
+		select_pt.setEnabled(canUpdate(l, "lat")
+		                  && canUpdate(l, "lon"));
+		milepoint_txt.setEnabled(canUpdate(l, "milepoint"));
 	}
 
 	/** Update one attribute (from ProxyView). */
 	@Override
 	public void update(GeoLoc l, String a) {
-		if(a == null)
+		if (a == null) {
 			loc = l;
-		if(a == null || a.equals("roadway"))
+			updateEditMode();
+		}
+		if (a == null || a.equals("roadway"))
 			updateRoadway(l);
-		if(a == null || a.equals("roadDir"))
+		if (a == null || a.equals("roadDir"))
 			updateRoadDir(l);
-		if(a == null || a.equals("crossMod"))
+		if (a == null || a.equals("crossMod"))
 			updateCrossMod(l);
-		if(a == null || a.equals("crossStreet"))
+		if (a == null || a.equals("crossStreet"))
 			updateCrossStreet(l);
-		if(a == null || a.equals("crossDir"))
+		if (a == null || a.equals("crossDir"))
 			updateCrossDir(l);
-		if(a == null || a.equals("lat")) {
-			boolean p = canUpdate(l, "lat");
-			lat_txt.setEnabled(p);
+		if (a == null || a.equals("lat"))
 			lat_txt.setText(asText(l.getLat()));
-			select_pt.setEnabled(p);
-		}
-		if(a == null || a.equals("lon")) {
-			boolean p = canUpdate(l, "lon");
-			lon_txt.setEnabled(p);
+		if (a == null || a.equals("lon"))
 			lon_txt.setText(asText(l.getLon()));
-			select_pt.setEnabled(p);
-		}
-		if(a == null || a.equals("milepoint")) {
-			boolean p = canUpdate(l, "milepoint");
-			milepoint_txt.setEnabled(p);
+		if (a == null || a.equals("milepoint")) {
 			String mp = l.getMilepoint();
-			milepoint_txt.setText((mp==null) ? "" : mp);
+			milepoint_txt.setText((mp != null) ? mp : "");
 		}
 		// NOTE: this was needed to fix a problem where a combo box
 		//       displays the wrong entry after call to setSelectedItem
@@ -316,52 +328,37 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 
 	/** Update roadway attribute */
 	private void updateRoadway(GeoLoc l) {
-		boolean e = canUpdate(l, "roadway");
 		roadway_cbx.setAction(null);
-		roadway_cbx.setEnabled(e);
-		roadway_cbx.setSelectedItem(l.getRoadway());
-		if(e)
-			roadway_cbx.setAction(roadway_act);
+		roadway_mdl.setSelectedItem(l.getRoadway());
+		roadway_cbx.setAction(roadway_act);
 	}
 
 	/** Update roadway direction attribute */
 	private void updateRoadDir(GeoLoc l) {
-		boolean e = canUpdate(l, "roadDir");
 		road_dir_cbx.setAction(null);
-		road_dir_cbx.setEnabled(e);
 		road_dir_cbx.setSelectedIndex(l.getRoadDir());
-		if(e)
-			road_dir_cbx.setAction(road_dir_act);
+		road_dir_cbx.setAction(road_dir_act);
 	}
 
 	/** Update cross street modifier attribute */
 	private void updateCrossMod(GeoLoc l) {
-		boolean e = canUpdate(l, "crossMod");
 		cross_mod_cbx.setAction(null);
-		cross_mod_cbx.setEnabled(e);
 		cross_mod_cbx.setSelectedIndex(l.getCrossMod());
-		if(e)
-			cross_mod_cbx.setAction(cross_mod_act);
+		cross_mod_cbx.setAction(cross_mod_act);
 	}
 
 	/** Update cross street attribute */
 	private void updateCrossStreet(GeoLoc l) {
-		boolean e = canUpdate(l, "crossStreet");
 		cross_cbx.setAction(null);
-		cross_cbx.setEnabled(e);
-		cross_cbx.setSelectedItem(l.getCrossStreet());
-		if(e)
-			cross_cbx.setAction(cross_act);
+		cross_mdl.setSelectedItem(l.getCrossStreet());
+		cross_cbx.setAction(cross_act);
 	}
 
 	/** Update cross street direction attribute */
 	private void updateCrossDir(GeoLoc l) {
-		boolean e = canUpdate(l, "crossDir");
 		cross_dir_cbx.setAction(null);
-		cross_dir_cbx.setEnabled(e);
 		cross_dir_cbx.setSelectedIndex(l.getCrossDir());
-		if(e)
-			cross_dir_cbx.setAction(cross_dir_act);
+		cross_dir_cbx.setAction(cross_dir_act);
 	}
 
 	/** Test if the user can update an attribute */

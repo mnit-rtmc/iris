@@ -304,6 +304,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Update the edit mode */
 	@Override
 	protected void updateEditMode() {
+		loc_pnl.updateEditMode();
 		notes_txt.setEnabled(canUpdate("notes"));
 		preset.setEnabled(canUpdate("preset"));
 		meter_type.setEnabled(canUpdate("meterType"));
