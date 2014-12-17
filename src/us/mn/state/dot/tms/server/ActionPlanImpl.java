@@ -193,10 +193,12 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Set the active status */
 	public void doSetActive(boolean a) throws TMSException {
-		if(a == active)
-			return;
-		store.update(this, "active", a);
-		setActive(a);
+		if (a != active) {
+			if (a)
+				setPhaseNotify(default_phase);
+			store.update(this, "active", a);
+			setActive(a);
+		}
 	}
 
 	/** Get the active status */
