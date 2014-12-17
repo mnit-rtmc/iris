@@ -31,9 +31,6 @@ class StationManager {
 	/** Location of station sample XML file */
 	static private final String SAMPLE_XML = "stat_sample.xml";
 
-	/** Location of old, deprecated station XML file */
-	static private final String STATION_XML = "station.xml";
-
 	/** Calculate the current data for all stations */
 	public void calculateData() {
 		Iterator<Station> it = StationHelper.iterator();
@@ -98,46 +95,5 @@ class StationManager {
 	/** Print the tail of the station sample XML file */
 	private void writeSampleXmlTail(Writer w) throws IOException {
 		w.write("</traffic_sample>\n");
-	}
-
-	/** Write the station data out as XML.  This is retained for backwards
-	 * compatibility.  It is not recommended to use this XML file for new
-	 * software, since it may be removed in the future. */
-	public void writeStationXml() throws IOException {
-		XmlWriter w = new XmlWriter(STATION_XML, false) {
-			@Override protected void write(Writer w)
-				throws IOException
-			{
-				writeStationXmlHead(w);
-				writeStationXmlBody(w);
-				writeStationXmlTail(w);
-			}
-		};
-		w.write();
-	}
-
-	/** Print the header of the station sample XML file */
-	private void writeStationXmlHead(Writer w) throws IOException {
-		w.write("<?xml version='1.0'?>\n");
-		w.write("<station_data time_stamp='" +
-			TimeSteward.getDateInstance() +
-			"' sample_period='30'>\n");
-	}
-
-	/** Print the body of the station sample XML file */
-	private void writeStationXmlBody(Writer w) throws IOException {
-		Iterator<Station> it = StationHelper.iterator();
-		while(it.hasNext()) {
-			Station s = it.next();
-			if(s instanceof StationImpl) {
-				StationImpl si = (StationImpl)s;
-				si.writeStationXmlElement(w);
-			}
-		}
-	}
-
-	/** Print the tail of the station sample XML file */
-	private void writeStationXmlTail(Writer w) throws IOException {
-		w.write("</station_data>\n");
 	}
 }

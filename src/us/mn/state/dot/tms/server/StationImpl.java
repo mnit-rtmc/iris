@@ -410,27 +410,6 @@ public class StationImpl implements Station {
 		w.write("/>\n");
 	}
 
-	/** Write the current sample as an XML element.  This is used for the
-	 * old station.xml file, which should be removed at some point.  */
-	public void writeStationXmlElement(Writer w) throws IOException {
-		if(!getActive())
-			return;
-		String n = getIndex();
-		if(n.length() < 1)
-			return;
-		if(volume == MISSING_DATA)
-			w.write("\t<station id='" + n + "' status='fail'/>\n");
-		else {
-			w.write("\t<station id='" + n + "' status='ok'>\n");
-			w.write("\t\t<volume>" + volume + "</volume>\n");
-			w.write("\t\t<occupancy>" + occupancy +
-				"</occupancy>\n");
-			w.write("\t\t<flow>" + flow + "</flow>\n");
-			w.write("\t\t<speed>" + speed + "</speed>\n");
-			w.write("\t</station>\n");
-		}
-	}
-
 	/** Get the station index */
 	private String getIndex() {
 		if(name.startsWith("S"))

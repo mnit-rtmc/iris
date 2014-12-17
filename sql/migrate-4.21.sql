@@ -10,3 +10,6 @@ DELETE FROM iris.system_attribute WHERE name = 'sample_archive_directory';
 DELETE FROM iris.system_attribute WHERE name = 'kml_filename';
 DELETE FROM iris.system_attribute WHERE name = 'uptime_log_filename';
 DELETE FROM iris.system_attribute WHERE name = 'xml_output_directory';
+
+-- delete obsolete station_xml_enable system attribute
+DELETE FROM iris.system_attribute WHERE name = 'station_xml_enable';
