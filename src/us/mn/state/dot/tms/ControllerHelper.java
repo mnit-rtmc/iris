@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2014  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -72,7 +72,8 @@ public class ControllerHelper extends BaseHelper {
 
 	/** Test if a controller is active */
 	static public boolean isActive(Controller ctrl) {
-		return ctrl != null && ctrl.getActive();
+		return (ctrl != null)
+		    && (ctrl.getCondition() == CtrlCondition.ACTIVE.ordinal());
 	}
 
 	/** Check if a controller is failed */

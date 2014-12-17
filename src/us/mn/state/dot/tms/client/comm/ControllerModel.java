@@ -20,7 +20,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import javax.swing.AbstractCellEditor;
+import javax.swing.DefaultCellEditor;
 import javax.swing.Icon;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
@@ -30,6 +32,7 @@ import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
+import us.mn.state.dot.tms.CtrlCondition;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -79,18 +82,25 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				return new DropCellEditor();
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("controller.active", 50,
-			Boolean.class)
+		cols.add(new ProxyColumn<Controller>("controller.condition", 88)
 		{
 			public Object getValueAt(Controller c) {
-				return c.getActive();
+				return CtrlCondition.fromOrdinal(
+					c.getCondition());
 			}
 			public boolean isEditable(Controller c) {
-				return canUpdate(c, "active");
+				return canUpdate(c, "condition");
 			}
 			public void setValueAt(Controller c, Object value) {
-				if (value instanceof Boolean)
-					c.setActive((Boolean)value);
+				if (value instanceof CtrlCondition) {
+					CtrlCondition cc = (CtrlCondition)value;
+					c.setCondition(cc.ordinal());
+				}
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox cbx = new JComboBox(
+					CtrlCondition.values());
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		cols.add(new ProxyColumn<Controller>("controller.comm", 44) {

@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -34,6 +33,7 @@ import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.CtrlCondition;
 import static us.mn.state.dot.tms.DeviceRequest.QUERY_MESSAGE;
 import static us.mn.state.dot.tms.DeviceRequest.QUERY_STATUS;
 import us.mn.state.dot.tms.EventType;
@@ -68,17 +68,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, ControllerImpl.class);
 		store.query("SELECT name, cabinet, comm_link, drop_id, " +
-			"active, password, notes, fail_time FROM iris." +
+			"condition, password, notes, fail_time FROM iris." +
 			SONAR_TYPE  +";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ControllerImpl(
-					namespace,
 					row.getString(1),	// name
 					row.getString(2),	// cabinet
 					row.getString(3),	// comm_link
 					row.getShort(4),	// drop_id
-					row.getBoolean(5),	// active
+					row.getInt(5),		// condition
 					row.getString(6),	// password
 					row.getString(7),	// notes
 					row.getTimestamp(8)	// failTime
@@ -88,13 +87,14 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("cabinet", cabinet);
 		map.put("comm_link", comm_link);
 		map.put("drop_id", drop_id);
-		map.put("active", active);
+		map.put("condition", condition.ordinal());
 		map.put("password", password);
 		map.put("notes", notes);
 		map.put("fail_time", asTimestamp(failTime));
@@ -117,17 +117,18 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		CabinetImpl c = new CabinetImpl(n);
 		c.notifyCreate();
 		cabinet = c;
+		condition = CtrlCondition.PLANNED;
 	}
 
 	/** Create a new controller */
 	protected ControllerImpl(String n, CabinetImpl c, CommLink cl, short d,
-		boolean a, String p, String nt, Date ft) throws TMSException
+		int cnd, String p, String nt, Date ft) throws TMSException
 	{
 		super(n);
 		cabinet = c;
 		comm_link = commLinkImpl(cl);
 		drop_id = d;
-		active = a;
+		condition = CtrlCondition.fromOrdinal(cnd);
 		password = p;
 		notes = nt;
 		failTime = stampMillis(ft);
@@ -135,13 +136,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Create a new controller */
-	protected ControllerImpl(Namespace ns, String n, String c, String cl,
-		short d, boolean a, String p, String nt, Date ft)
-		throws TMSException
+	protected ControllerImpl(String n, String c, String cl, short d,
+		int cnd, String p, String nt, Date ft) throws TMSException
 	{
-		this(n, (CabinetImpl)ns.lookupObject(Cabinet.SONAR_TYPE, c),
-			(CommLink)ns.lookupObject(CommLink.SONAR_TYPE, cl),
-			d, a, p, nt, ft);
+		this(n, lookupCabinet(c), lookupCommLink(cl), d, cnd, p, nt,ft);
 	}
 
 	/** Initialize the transient fields */
@@ -261,27 +259,34 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			cl.testGateArmDisable(reason);
 	}
 
-	/** Active status flag */
-	protected boolean active;
+	/** Controller condition */
+	private CtrlCondition condition;
 
-	/** Set the active status */
-	public void setActive(boolean a) {
-		testGateArmDisable("active");
-		active = a;
+	/** Set the condition */
+	@Override
+	public void setCondition(int cnd) {
+		testGateArmDisable("condition");
+		condition = CtrlCondition.fromOrdinal(cnd);
 		updateStyles();
 	}
 
-	/** Set the active status */
-	public void doSetActive(boolean a) throws TMSException {
-		if(a == active)
-			return;
-		store.update(this, "active", a);
-		setActive(a);
+	/** Set the condition */
+	public void doSetCondition(int cnd) throws TMSException {
+		if (cnd != condition.ordinal()) {
+			store.update(this, "condition", cnd);
+			setCondition(cnd);
+		}
 	}
 
-	/** Get the active status */
-	public boolean getActive() {
-		return active;
+	/** Get the condition */
+	@Override
+	public int getCondition() {
+		return condition.ordinal();
+	}
+
+	/** Check if condition is active */
+	public boolean isActive() {
+		return condition == CtrlCondition.ACTIVE;
 	}
 
 	/** Access password */
@@ -356,9 +361,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Determine whether this controller has an active ramp meter */
 	public synchronized boolean hasActiveMeter() {
-		if(getActive()) {
-			for(ControllerIO io: io_pins.values()) {
-				if(io instanceof RampMeterImpl)
+		if (isActive()) {
+			for (ControllerIO io: io_pins.values()) {
+				if (io instanceof RampMeterImpl)
 					return true;
 			}
 		}
@@ -367,9 +372,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Get an active beacon for the controller */
 	public synchronized BeaconImpl getActiveBeacon() {
-		if(getActive()) {
-			for(ControllerIO io: io_pins.values()) {
-				if(io instanceof BeaconImpl)
+		if (isActive()) {
+			for (ControllerIO io: io_pins.values()) {
+				if (io instanceof BeaconImpl)
 					return (BeaconImpl)io;
 			}
 		}
@@ -399,9 +404,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Check whether this controller has any active detectors */
 	public synchronized boolean hasActiveDetector() {
-		if(getActive()) {
-			for(ControllerIO io: io_pins.values()) {
-				if(io instanceof DetectorImpl)
+		if (isActive()) {
+			for (ControllerIO io: io_pins.values()) {
+				if (io instanceof DetectorImpl)
 					return true;
 			}
 		}
@@ -821,7 +826,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Get the device poller */
 	public DevicePoller getPoller() {
-		if (getActive()) {
+		if (isActive()) {
 			DevicePoller dp = getPoller(comm_link);
 			if (dp == null && !isFailed()) {
 				setCommStatus("comm_link error");
@@ -925,7 +930,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public void writeXml(Writer w) throws IOException {
 		w.write("<controller");
 		w.write(createAttribute("name", getName()));
-		w.write(createAttribute("active", getActive()));
+		w.write(createAttribute("condition", condition));
 		w.write(createAttribute("drop", getDrop()));
 		CommLink cl = getCommLink();
 		if(cl != null)

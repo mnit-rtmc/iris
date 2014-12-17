@@ -387,12 +387,17 @@ CREATE TABLE iris.cabinet (
 	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name)
 );
 
+CREATE TABLE iris.condition (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(12) NOT NULL
+);
+
 CREATE TABLE iris.controller (
 	name VARCHAR(20) PRIMARY KEY,
 	drop_id smallint NOT NULL,
 	comm_link VARCHAR(20) NOT NULL REFERENCES iris.comm_link(name),
 	cabinet VARCHAR(20) NOT NULL REFERENCES iris.cabinet(name),
-	active boolean NOT NULL,
+	condition INTEGER NOT NULL REFERENCES iris.condition,
 	password VARCHAR(16),
 	notes VARCHAR(128) NOT NULL,
 	fail_time timestamp WITH time zone
@@ -1702,12 +1707,19 @@ CREATE VIEW roadway_station_view AS
 	WHERE r.geo_loc = l.name AND station_id IS NOT NULL;
 GRANT SELECT ON roadway_station_view TO PUBLIC;
 
-CREATE VIEW controller_loc_view AS
-	SELECT c.name, c.drop_id, c.comm_link, c.cabinet, c.active, c.notes,
-	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir
+CREATE VIEW controller_view AS
+	SELECT c.name, drop_id, comm_link, cabinet,
+	       cnd.description AS condition, notes, cab.geo_loc
 	FROM iris.controller c
 	LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
-	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name;
+	LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
+GRANT SELECT ON controller_view TO PUBLIC;
+
+CREATE VIEW controller_loc_view AS
+	SELECT c.name, drop_id, comm_link, cabinet, condition, c.notes,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir
+	FROM controller_view c
+	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name;
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
@@ -1758,14 +1770,13 @@ GRANT SELECT ON encoder_type_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
 	SELECT c.name, c.notes, c.encoder, c.encoder_channel,
-	et.description AS encoder_type, c.publish, c.geo_loc, l.roadway,
-	l.road_dir, l.cross_mod, l.cross_street,
-	l.cross_dir, l.lat, l.lon,
-	c.controller, ctr.comm_link, ctr.drop_id, ctr.active
+	       et.description AS encoder_type, c.publish, c.geo_loc, l.roadway,
+	       l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,l.lat,l.lon,
+	       c.controller, ctr.comm_link, ctr.drop_id, ctr.condition
 	FROM iris.camera c
-	JOIN iris.encoder_type et ON c.encoder_type = et.id
-	JOIN geo_loc_view l ON c.geo_loc = l.name
-	LEFT JOIN iris.controller ctr ON c.controller = ctr.name;
+	LEFT JOIN iris.encoder_type et ON c.encoder_type = et.id
+	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
+	LEFT JOIN controller_view ctr ON c.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;
 
 CREATE VIEW camera_preset_view AS
@@ -1778,64 +1789,61 @@ CREATE VIEW beacon_view AS
 	SELECT b.name, b.notes, b.message, p.camera, p.preset_num, b.geo_loc,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.lat, l.lon,
-	       b.controller, b.pin, ctr.comm_link, ctr.drop_id, ctr.active
+	       b.controller, b.pin, ctr.comm_link, ctr.drop_id, ctr.condition
 	FROM iris.beacon b
 	LEFT JOIN iris.camera_preset p ON b.preset = p.name
 	LEFT JOIN geo_loc_view l ON b.geo_loc = l.name
-	LEFT JOIN iris.controller ctr ON b.controller = ctr.name;
+	LEFT JOIN controller_view ctr ON b.controller = ctr.name;
 GRANT SELECT ON beacon_view TO PUBLIC;
 
 CREATE VIEW lane_marking_view AS
-	SELECT m.name, m.notes, m.geo_loc,
-	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.lat, l.lon,
-	m.controller, m.pin, ctr.comm_link, ctr.drop_id, ctr.active
+	SELECT m.name, m.notes, m.geo_loc, l.roadway, l.road_dir, l.cross_mod,
+	       l.cross_street, l.cross_dir, l.lat, l.lon,
+	       m.controller, m.pin, ctr.comm_link, ctr.drop_id, ctr.condition
 	FROM iris.lane_marking m
 	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name
-	LEFT JOIN iris.controller ctr ON m.controller = ctr.name;
+	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
 GRANT SELECT ON lane_marking_view TO PUBLIC;
 
 CREATE VIEW weather_sensor_view AS
-	SELECT w.name, w.notes, w.geo_loc,
-	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.lat, l.lon,
-	w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.active
+	SELECT w.name, w.notes, w.geo_loc, l.roadway, l.road_dir, l.cross_mod,
+	       l.cross_street, l.cross_dir, l.lat, l.lon,
+	       w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.condition
 	FROM iris.weather_sensor w
 	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
-	LEFT JOIN iris.controller ctr ON w.controller = ctr.name;
+	LEFT JOIN controller_view ctr ON w.controller = ctr.name;
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
 CREATE VIEW tag_reader_view AS
-	SELECT t.name, t.notes, t.geo_loc,
-	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.lat, l.lon,
-	t.controller, t.pin, ctr.comm_link, ctr.drop_id, ctr.active
+	SELECT t.name, t.notes, t.geo_loc, l.roadway, l.road_dir, l.cross_mod,
+	       l.cross_street, l.cross_dir, l.lat, l.lon,
+	       t.controller, t.pin, ctr.comm_link, ctr.drop_id, ctr.condition
 	FROM iris.tag_reader t
 	LEFT JOIN geo_loc_view l ON t.geo_loc = l.name
-	LEFT JOIN iris.controller ctr ON t.controller = ctr.name;
+	LEFT JOIN controller_view ctr ON t.controller = ctr.name;
 GRANT SELECT ON tag_reader_view TO PUBLIC;
 
 CREATE VIEW gate_arm_array_view AS
-	SELECT ga.name, ga.notes, ga.geo_loc,
-	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.lat, l.lon,
-	ga.controller, ga.pin, ctr.comm_link, ctr.drop_id, ctr.active,
-	ga.prereq, ga.camera, ga.approach, ga.dms, ga.open_msg, ga.closed_msg
+	SELECT ga.name, ga.notes, ga.geo_loc, l.roadway, l.road_dir,
+	       l.cross_mod, l.cross_street, l.cross_dir, l.lat, l.lon,
+	       ga.controller, ga.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
+	       ga.prereq, ga.camera, ga.approach, ga.dms, ga.open_msg,
+	       ga.closed_msg
 	FROM iris.gate_arm_array ga
 	LEFT JOIN geo_loc_view l ON ga.geo_loc = l.name
-	LEFT JOIN iris.controller ctr ON ga.controller = ctr.name;
+	LEFT JOIN controller_view ctr ON ga.controller = ctr.name;
 GRANT SELECT ON gate_arm_array_view TO PUBLIC;
 
 CREATE VIEW gate_arm_view AS
-	SELECT g.name, g.ga_array, g.notes, ga.geo_loc,
-	l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	l.lat, l.lon,
-	g.controller, g.pin, ctr.comm_link, ctr.drop_id, ctr.active,
-	ga.prereq, ga.camera, ga.approach, ga.dms, ga.open_msg, ga.closed_msg
+	SELECT g.name, g.ga_array, g.notes, ga.geo_loc, l.roadway, l.road_dir,
+	       l.cross_mod, l.cross_street, l.cross_dir, l.lat, l.lon,
+	       g.controller, g.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
+	       ga.prereq, ga.camera, ga.approach, ga.dms, ga.open_msg,
+	       ga.closed_msg
 	FROM iris.gate_arm g
 	JOIN iris.gate_arm_array ga ON g.ga_array = ga.name
 	LEFT JOIN geo_loc_view l ON ga.geo_loc = l.name
-	LEFT JOIN iris.controller ctr ON g.controller = ctr.name;
+	LEFT JOIN controller_view ctr ON g.controller = ctr.name;
 GRANT SELECT ON gate_arm_view TO PUBLIC;
 
 CREATE VIEW lane_type_view AS
@@ -1897,19 +1905,20 @@ CREATE VIEW detector_fail_view AS SELECT DISTINCT ON (device_id)
 GRANT SELECT ON detector_fail_view TO PUBLIC;
 
 CREATE VIEW detector_view AS
-	SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id,
-	d.pin, iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
-		d.lane_type, d.lane_number, d.abandoned) AS label,
-	rnd.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
-	l.cross_dir, d.lane_number, d.field_length, ln.description AS lane_type,
-	d.abandoned, d.force_fail, df.fail_reason, c.active, d.fake, d.notes
+	SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id, d.pin,
+	       iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
+	       d.lane_type, d.lane_number, d.abandoned) AS label,
+	       rnd.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
+	       l.cross_dir, d.lane_number, d.field_length,
+	       ln.description AS lane_type, d.abandoned, d.force_fail,
+	       df.fail_reason, c.condition, d.fake, d.notes
 	FROM (iris.detector d
 	LEFT OUTER JOIN detector_fail_view df
 		ON d.name = df.device_id AND force_fail = 't')
 	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
 	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
 	LEFT JOIN iris.lane_type ln ON d.lane_type = ln.id
-	LEFT JOIN iris.controller c ON d.controller = c.name;
+	LEFT JOIN controller_view c ON d.controller = c.name;
 GRANT SELECT ON detector_view TO PUBLIC;
 
 CREATE VIEW alarm_view AS
@@ -1929,12 +1938,6 @@ CREATE VIEW cabinet_view AS
 	SELECT name, style, geo_loc
 	FROM iris.cabinet;
 GRANT SELECT ON cabinet_view TO PUBLIC;
-
-CREATE VIEW controller_view AS
-	SELECT c.name, drop_id, comm_link, cabinet, active, notes, cab.geo_loc
-	FROM iris.controller c
-	JOIN iris.cabinet cab ON c.cabinet = cab.name;
-GRANT SELECT ON controller_view TO PUBLIC;
 
 CREATE VIEW device_controller_view AS
 	SELECT name, controller, pin
@@ -2135,6 +2138,13 @@ Prehistoric	10
 334Z-00	11
 334Z-05	13
 334ZP	15
+\.
+
+COPY iris.condition (id, description) FROM stdin;
+0	Planned
+1	Active
+2	Construction
+3	Removed
 \.
 
 COPY iris.lane_type (id, description, dcode) FROM stdin;
@@ -2388,7 +2398,7 @@ PRV_0038	maintenance	cabinet(/.*)?	t	f	f	f
 PRV_0039	maintenance	cabinet_style(/.*)?	t	f	f	f
 PRV_0040	maintenance	comm_link(/.*)?	t	f	f	f
 PRV_0041	maintenance	controller(/.*)?	t	f	f	f
-PRV_0042	maintenance	controller/.*/active	f	t	f	f
+PRV_0042	maintenance	controller/.*/condition	f	t	f	f
 PRV_0043	maintenance	controller/.*/download	f	t	f	f
 PRV_0044	maintenance	controller/.*/counters	f	t	f	f
 PRV_0045	maintenance	dms/.*/deviceRequest	f	t	f	f

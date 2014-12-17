@@ -293,6 +293,6 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		if (c == null)
 			return false;
 		else
-			return c.getActive();
+			return c.isActive();
 	}
 }

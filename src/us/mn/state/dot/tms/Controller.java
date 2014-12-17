@@ -47,11 +47,11 @@ public interface Controller extends SonarObject {
 	/** Get the drop address */
 	short getDrop();
 
-	/** Set the active status */
-	void setActive(boolean a);
+	/** Set the condition */
+	void setCondition(int c);
 
-	/** Get the active status */
-	boolean getActive();
+	/** Get the condition */
+	int getCondition();
 
 	/** Set the access password */
 	void setPassword(String pwd);

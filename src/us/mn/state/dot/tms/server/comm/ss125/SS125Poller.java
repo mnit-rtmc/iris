@@ -47,7 +47,7 @@ public class SS125Poller extends MessagePoller<SS125Property>
 	/** Perform a controller download */
 	@Override
 	protected void download(ControllerImpl c, PriorityLevel p) {
-		if(c.getActive()) {
+		if (c.isActive()) {
 			OpSendSensorSettings o =
 				new OpSendSensorSettings(c, true);
 			o.setPriority(p);

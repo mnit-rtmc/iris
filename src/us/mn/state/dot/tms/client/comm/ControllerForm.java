@@ -39,6 +39,7 @@ import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.CtrlCondition;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
@@ -95,12 +96,18 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		}
 	};
 
-	/** Active checkbox */
-	private final JCheckBox active_chk = new JCheckBox(new IAction(null) {
+	/** Condition action */
+	private final IAction condition_act = new IAction(
+		"controller.condition")
+	{
 		protected void doActionPerformed(ActionEvent e) {
-			proxy.setActive(active_chk.isSelected());
+			proxy.setCondition(condition_cbx.getSelectedIndex());
 		}
-	});
+	};
+
+	/** Condition combobox */
+	private final JComboBox condition_cbx =
+		new JComboBox(CtrlCondition.getDescriptions());
 
 	/** Location panel */
 	private final LocationPanel loc_pnl;
@@ -238,8 +245,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		p.add(new JButton(clear_pwd), Stretch.RIGHT);
 		p.add("device.notes");
 		p.add(notes_txt, Stretch.FULL);
-		p.add("controller.active");
-		p.add(active_chk, Stretch.LAST);
+		p.add("controller.condition");
+		p.add(condition_cbx, Stretch.LAST);
 		return p;
 	}
 
@@ -352,7 +359,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		comm_link_act.setEnabled(canUpdate("commLink"));
 		drop_spn.setEnabled(canUpdate("drop"));
 		notes_txt.setEnabled(canUpdate("notes"));
-		active_chk.setEnabled(canUpdate("active"));
+		condition_act.setEnabled(canUpdate("condition"));
 		cab_style_act.setEnabled(canUpdateCabinet("style"));
 	}
 
@@ -372,8 +379,11 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			drop_spn.setValue(proxy.getDrop());
 		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
-		if (a == null || a.equals("active"))
-			active_chk.setSelected(proxy.getActive());
+		if (a == null || a.equals("condition")) {
+			condition_cbx.setAction(null);
+			condition_cbx.setSelectedIndex(proxy.getCondition());
+			condition_cbx.setAction(condition_act);
+		}
 		if (a == null || a.equals("version"))
 			version_lbl.setText(proxy.getVersion());
 		if (a == null || a.equals("maint"))

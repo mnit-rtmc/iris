@@ -59,7 +59,7 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 	/** Perform a controller download */
 	@Override
 	public void download(ControllerImpl c, PriorityLevel p) {
-		if(c.getActive()) {
+		if (c.isActive()) {
 			OpQueryConfig o = new OpQueryConfig(c);
 			o.setPriority(p);
 			addOperation(o);

@@ -141,6 +141,24 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return null;
 	}
 
+	/** Lookup a cabinet */
+	static protected CabinetImpl lookupCabinet(String name) {
+		SonarObject so = lookupObject(CabinetImpl.SONAR_TYPE, name);
+		if (so instanceof CabinetImpl)
+			return (CabinetImpl)so;
+		else
+			return null;
+	}
+
+	/** Lookup a comm link */
+	static protected CommLinkImpl lookupCommLink(String name) {
+		SonarObject so = lookupObject(CommLinkImpl.SONAR_TYPE, name);
+		if (so instanceof CommLinkImpl)
+			return (CommLinkImpl)so;
+		else
+			return null;
+	}
+
 	/** Lookup a controller */
 	static protected ControllerImpl lookupController(String name) {
 		SonarObject so = lookupObject(ControllerImpl.SONAR_TYPE, name);

@@ -57,10 +57,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	/** Get the active status */
 	public boolean isActive() {
 		ControllerImpl c = controller;	// Avoid race
-		if(c == null)
-			return false;
-		else
-			return c.getActive();
+		return (c != null) && c.isActive();
 	}
 
 	/** Get the failure status */
