@@ -2221,7 +2221,7 @@ camera_ptz_panel_enable	false
 camera_util_panel_enable	false
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.20.0
+database_version	4.21.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
@@ -2282,7 +2282,6 @@ rwis_low_visibility_distance_m	152
 rwis_obs_age_limit_secs	240
 rwis_max_valid_wind_speed_kph	282
 sample_archive_enable	true
-sample_archive_directory	/var/lib/iris/traffic
 station_xml_enable	true
 tesla_host	
 travel_time_max_legs	8

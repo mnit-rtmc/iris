@@ -30,7 +30,6 @@ import java.util.zip.ZipFile;
 import java.util.zip.ZipOutputStream;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Job to create sample data archive files.
@@ -74,9 +73,7 @@ public class ArchiveSamplesJob extends Job {
 
 	/** Get an array of years in the sample archive directory */
 	protected File[] listYears() {
-		File arc = new File(
-			SystemAttrEnum.SAMPLE_ARCHIVE_DIRECTORY.getString(),
-			MainServer.districtId());
+		File arc = SampleArchiveFactoryImpl.sampleArchiveDir();
 		return arc.listFiles(new FileFilter() {
 			public boolean accept(File file) {
 				return file.isDirectory() &&

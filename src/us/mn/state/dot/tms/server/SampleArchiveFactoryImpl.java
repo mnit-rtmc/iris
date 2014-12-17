@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2013  Minnesota Department of Transportation
+ * Copyright (C) 2010-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,14 +27,18 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 public class SampleArchiveFactoryImpl implements SampleArchiveFactory {
 
+	/** Sample archive directory */
+	static public File sampleArchiveDir() {
+		return new File("/var/lib/iris/traffic",
+			MainServer.districtId());
+	}
+
 	/** Get a valid directory for a given date stamp.
 	 * @param stamp Time stamp
 	 * @return Directory to store sample data.
 	 * @throws IOException If directory cannot be created. */
 	static private String directory(long stamp) throws IOException {
-		File arc = new File(
-			SystemAttrEnum.SAMPLE_ARCHIVE_DIRECTORY.getString(),
-			MainServer.districtId());
+		File arc = sampleArchiveDir();
 		if(!arc.exists() && !arc.mkdir())
 			throw new IOException("mkdir failed: " + arc);
 		String d = TimeSteward.dateShortString(stamp);

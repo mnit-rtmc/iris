@@ -98,7 +98,6 @@ public enum SystemAttrEnum {
 	RWIS_OBS_AGE_LIMIT_SECS(240, 0),
 	RWIS_MAX_VALID_WIND_SPEED_KPH(282, 0),
 	SAMPLE_ARCHIVE_ENABLE(true),
-	SAMPLE_ARCHIVE_DIRECTORY("/var/lib/iris/traffic"),
 	STATION_XML_ENABLE(false),
 	TESLA_HOST(String.class),
 	TRAVEL_TIME_MAX_LEGS(8, 1, 20),
