@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2013  Minnesota Department of Transportation
+ * Copyright (C) 2005-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.zip.GZIPOutputStream;
-import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * A simple class for writing out XML documents
@@ -30,6 +29,10 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author Douglas Lau
  */
 abstract public class XmlWriter {
+
+	/** XML output directory */
+	static public final File XML_OUTPUT_DIRECTORY =
+		new File("/var/www/html/iris_xml/");
 
 	/** XML version and encoding declaration */
 	static protected final String XML_DECLARATION =
@@ -81,8 +84,7 @@ abstract public class XmlWriter {
 	public XmlWriter(String f, boolean gz) {
 		if(gz)
 			f = f + ".gz";
-		file = new File(
-			SystemAttrEnum.XML_OUTPUT_DIRECTORY.getString(), f);
+		file = new File(XML_OUTPUT_DIRECTORY, f);
 		temp = new File(file.getAbsolutePath() + "~");
 		gzip = gz;
 	}
