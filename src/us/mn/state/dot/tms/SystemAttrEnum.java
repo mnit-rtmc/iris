@@ -82,7 +82,6 @@ public enum SystemAttrEnum {
 	HELP_TROUBLE_TICKET_URL(String.class),
 	INCIDENT_CLEAR_SECS(600, 0, 3600),
 	KML_FILE_ENABLE(false),
-	KML_FILENAME("/var/www/html/iris-client/iris.kmz"),
 	LCS_POLL_PERIOD_SECS(30, 0, Change.RESTART_SERVER),
 	MAP_ICON_SIZE_SCALE_MAX(30f, 0f, 1000f),
 	MAP_SEGMENT_MAX_METERS(2000, 100, Change.RESTART_CLIENT),
