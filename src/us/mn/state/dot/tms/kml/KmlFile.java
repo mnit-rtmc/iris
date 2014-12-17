@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,14 +57,14 @@ public class KmlFile
 	 *  @param doc An object that implements the KmlDocument interface.
 	 *  @see KmlDocument, KmlObject
 	 */
-	public KmlFile(KmlDocument doc) {
+	private KmlFile(KmlDocument doc) {
 		m_doc = doc;
 	}
 
 	/** write kml file, overwriting existing file.
 	 *  @param fname File name to write. Should end in "kml" or "kmz".
 	 *  @return true on success else false on error. */
-	public boolean writeKmlKmz(String fname) {
+	private boolean writeKmlKmz(String fname) {
 		if(fname == null || fname.length() <=0) {
 			System.err.println("KmlFile.writeKml(): warning: " + 
 				" bogus kml/kmz file name: "+fname);
