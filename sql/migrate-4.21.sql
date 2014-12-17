@@ -8,3 +8,4 @@ UPDATE iris.system_attribute SET value = '4.21.0'
 -- delete insecure system attributes
 DELETE FROM iris.system_attribute WHERE name = 'sample_archive_directory';
 DELETE FROM iris.system_attribute WHERE name = 'kml_filename';
+DELETE FROM iris.system_attribute WHERE name = 'uptime_log_filename';

@@ -2287,7 +2287,6 @@ travel_time_max_legs	8
 travel_time_max_miles	16
 travel_time_min_mph	15
 uptime_log_enable	false
-uptime_log_filename	/var/www/html/irisuptimelog.csv
 vsa_bottleneck_id_mph	55
 vsa_control_threshold	-1000
 vsa_downstream_miles	0.2

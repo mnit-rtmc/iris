@@ -25,7 +25,6 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.BaseHelper;
-import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * The server profiler is used to periodically write interesting server 
@@ -36,6 +35,10 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author Michael Darter
  */
 public class Profiler {
+
+	/** Uptime log file name */
+	static private final File UPTIME_LOG_FILE =
+		new File("/var/www/html/irisuptimelog.csv");
 
 	/** Debug line length */
 	static private final int LINE_LEN = 58;
@@ -128,27 +131,9 @@ public class Profiler {
 		PROFILE_LOG.log(sb.toString());
 	}
 
-	/** Append to uptime log */
-	public void appendUptimeLog() throws IOException {
-		File f = getUptimeLogFile();
-		if(f != null)
-			appendUptimeLog(f);
-	}
-
-	/** Get the uptime log file */
-	private File getUptimeLogFile() {
-		String fn = SystemAttrEnum.UPTIME_LOG_FILENAME.getString();
-		if(fn != null && fn.length() > 0)
-			return new File(fn);
-		else {
-			PROFILE_LOG.log("warning: bogus file name: " + fn);
-			return null;
-		}
-	}
-
 	/** Append to uptime log file */
-	private void appendUptimeLog(File f) throws IOException {
-		FileWriter fw = new FileWriter(f, true);
+	public void appendUptimeLog() throws IOException {
+		FileWriter fw = new FileWriter(UPTIME_LOG_FILE, true);
 		try {
 			fw.write(createLogEntry());
 		}
