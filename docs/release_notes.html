@@ -9,6 +9,26 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.21.0 (18 Dec 2014)</dt>
+	<dd><ul>
+		<li>
+			Removed system attributes which allowed specifying a
+			filesystem path (gate arm security fix).
+			Use hardcoded values for kml_filename,
+			uptime_log_filename, xml_output_directory,
+			and sample_archive_directory.
+		</li>
+		<li>
+			Replaced controller "active" boolean with "condition"
+			enum (planned, active, construction, removed).
+		</li>
+		<li>
+			Removed obsolete station.xml output.
+		</li>
+		<li>
+			Fixed some user interface glitches.
+		</li>
+	</ul></dd>
 	<dt>4.20.0 (11 Dec 2014)</dt>
 	<dd><ul>
 		<li>
