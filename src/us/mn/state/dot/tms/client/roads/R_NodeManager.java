@@ -142,6 +142,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		if (c != null) {
 			c.addNode(n);
 			arrangeCorridor(c);
+			arrangeSegments(c);
 		}
 	}
 
@@ -182,6 +183,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		if (c != null) {
 			c.removeNode(n);
 			arrangeCorridor(c);
+			arrangeSegments(c);
 		}
 	}
 
@@ -195,6 +197,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 				c.addNode(n);
 		}
 		arrangeCorridors();
+		arrangeSegments();
 	}
 
 	/** Arrange the corridor mapping */
@@ -206,17 +209,27 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 				}
 			});
 		}
-		runQueued(new Invokable() {
-			public void invoke() {
-				seg_layer.updateStatus();
-			}
-		});
 	}
 
 	/** Arrange a single corridor */
 	private void arrangeCorridor(CorridorBase c) {
 		c.arrangeNodes();
 		setTangentAngles(c);
+	}
+
+	/** Arrange the segments for all corridors */
+	private void arrangeSegments() {
+		for (final CorridorBase c : corridors.values()) {
+			runQueued(new Invokable() {
+				public void invoke() {
+					arrangeSegments(c);
+				}
+			});
+		}
+	}
+
+	/** Arrange segments in a corridor */
+	private void arrangeSegments(CorridorBase c) {
 		if (c.getRoadDir() > 0)
 			seg_layer.updateCorridor(c);
 	}
