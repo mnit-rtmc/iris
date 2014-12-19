@@ -105,15 +105,15 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Initialize the r_node manager */
 	@Override
 	public void initialize() {
-		super.initialize();
 		seg_layer.initialize();
+		super.initialize();
 	}
 
 	/** Dispose of the r_node manager */
 	@Override
 	public void dispose() {
-		seg_layer.dispose();
 		super.dispose();
+		seg_layer.dispose();
 	}
 
 	/** Get the sonar type name */
