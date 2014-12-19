@@ -14,24 +14,19 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
-import javax.swing.Icon;
 import javax.swing.JComboBox;
-import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.CtrlCondition;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -44,12 +39,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class ControllerModel extends ProxyTableModel<Controller> {
-
-	/** Color to display inactive controllers */
-	static private final Color COLOR_INACTIVE = new Color(0, 0, 0, 32);
-
-	/** Color to display available devices */
-	static private final Color COLOR_AVAILABLE = new Color(96, 96, 255);
 
 	/** Create the columns in the model */
 	@Override
@@ -217,35 +206,6 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		}
 		public Object getCellEditorValue() {
 			return spinner.getValue();
-		}
-	}
-
-	/** Renderer for comm status in a table cell */
-	protected class CommCellRenderer extends DefaultTableCellRenderer {
-		protected final Icon ok = new ControllerIcon(
-			COLOR_AVAILABLE);
-		protected final Icon fail = new ControllerIcon(Color.GRAY);
-		protected final Icon inactive = new ControllerIcon(
-			COLOR_INACTIVE);
-		public Component getTableCellRendererComponent(JTable table,
-			Object value, boolean isSelected, boolean hasFocus,
-			int row, int column)
-		{
-			JLabel label =
-				(JLabel)super.getTableCellRendererComponent(
-				table, "", isSelected, hasFocus, row,
-				column);
-			if (value instanceof Controller) {
-				Controller c = (Controller)value;
-				if (ControllerHelper.isFailed(c))
-					label.setIcon(fail);
-				else if (ControllerHelper.isActive(c))
-					label.setIcon(ok);
-				else
-					label.setIcon(inactive);
-			} else
-				label.setIcon(null);
-			return label;
 		}
 	}
 }
