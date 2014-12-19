@@ -445,7 +445,6 @@ public class Session {
 	/** Dispose of the session */
 	public void dispose() {
 		listeners.clear();
-		seg_layer.dispose();
 		desktop.dispose();
 		for (MapTab tab: all_tabs.values())
 			tab.dispose();

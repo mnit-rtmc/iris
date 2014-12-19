@@ -109,6 +109,13 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		seg_layer.initialize();
 	}
 
+	/** Dispose of the r_node manager */
+	@Override
+	public void dispose() {
+		seg_layer.dispose();
+		super.dispose();
+	}
+
 	/** Get the sonar type name */
 	@Override
 	public String getSonarType() {
