@@ -114,6 +114,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		add_proxy.setEnabled(false);
 		del_proxy.setEnabled(false);
 		createJobs();
+		updateSortFilter();
 		model.getSession().addEditModeListener(edit_lsnr);
 		initButtonPanel();
 		layoutPanel();
@@ -173,10 +174,14 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		t.setModel(m);
 		t.setRowHeight(UI.scaled(m.getRowHeight()));
 		t.setVisibleRowCount(m.getVisibleRowCount());
-		RowSorter<ProxyTableModel<T>> sorter = m.createSorter();
-		if (sorter != null)
-			t.setRowSorter(sorter);
 		return t;
+	}
+
+	/** Update sort and/or filter */
+	protected final void updateSortFilter() {
+		RowSorter<ProxyTableModel<T>> sorter = model.createSorter();
+		if (sorter != null)
+			table.setRowSorter(sorter);
 	}
 
 	/** Create a scroll pane */
@@ -251,7 +256,10 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 
 	/** Get the currently selected proxy */
 	public T getSelectedProxy() {
-		return model.getRowProxy(table.getSelectedRow());
+		int ri = table.getSelectedRow();
+		return (ri >= 0)
+		     ? model.getRowProxy(table.convertRowIndexToModel(ri))
+		     : null;
 	}
 
 	/** Select a new proxy */
@@ -261,9 +269,10 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 
 	/** Select a new proxy */
 	public void selectProxy(T proxy) {
-		int row = model.getIndex(proxy);
-		if (row >= 0) {
+		int ri = model.getIndex(proxy);
+		if (ri >= 0) {
 			ListSelectionModel s = table.getSelectionModel();
+			int row = table.convertRowIndexToView(ri);
 			s.setSelectionInterval(row, row);
 			table.scrollRectToVisible(
 				table.getCellRect(row, 0, true));

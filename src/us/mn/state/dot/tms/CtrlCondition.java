@@ -44,4 +44,15 @@ public enum CtrlCondition {
 			d.add(c.toString());
 		return d.toArray(new String[0]);
 	}
+
+	/** Get values with null as first */
+	static public CtrlCondition[] values_with_null() {
+		return new CtrlCondition[] {
+			null,
+			PLANNED,
+			ACTIVE,
+			CONSTRUCTION,
+			REMOVED,
+		};
+	}
 }

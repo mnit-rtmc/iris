@@ -24,6 +24,7 @@ import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
+import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.table.TableCellEditor;
@@ -45,12 +46,22 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class ControllerTableModel extends ProxyTableModel<Controller> {
 
+	/** Get a controller comm state */
+	static private CommState getCommState(Controller c) {
+		if (ControllerHelper.isFailed(c))
+			return CommState.FAILED;
+		else if (ControllerHelper.isActive(c))
+			return CommState.OK;
+		else
+			return CommState.INACTIVE;
+	}
+
 	/** Create the columns in the model */
 	@Override
 	protected ArrayList<ProxyColumn<Controller>> createColumns() {
 		ArrayList<ProxyColumn<Controller>> cols =
 			new ArrayList<ProxyColumn<Controller>>(8);
-		cols.add(new ProxyColumn<Controller>("comm.link", 120) {
+		cols.add(new ProxyColumn<Controller>("comm.link", 110) {
 			public Object getValueAt(Controller c) {
 				return c.getCommLink().getName();
 			}
@@ -78,7 +89,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 					c.getCabinet().getGeoLoc());
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("controller.condition", 88,
+		cols.add(new ProxyColumn<Controller>("controller.condition", 98,
 			CtrlCondition.class)
 		{
 			public Object getValueAt(Controller c) {
@@ -103,12 +114,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 			CommState.class)
 		{
 			public Object getValueAt(Controller c) {
-				if (ControllerHelper.isFailed(c))
-					return CommState.FAILED;
-				else if (ControllerHelper.isActive(c))
-					return CommState.OK;
-				else
-					return CommState.INACTIVE;
+				return getCommState(c);
 			}
 			protected TableCellRenderer createCellRenderer() {
 				return new CommCellRenderer();
@@ -138,7 +144,28 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 	}
 
 	/** Comm link to filter controllers */
-	private CommLink comm_link;
+	private CommLink comm_link = null;
+
+	/** Set the comm link filter */
+	public void setCommLink(CommLink cl) {
+		comm_link = cl;
+	}
+
+	/** Condition to filter controllers */
+	private CtrlCondition condition = null;
+
+	/** Set the condition filter */
+	public void setCondition(CtrlCondition c) {
+		condition = c;
+	}
+
+	/** Comm state filter */
+	private CommState comm_state = null;
+
+	/** Set the comm state filter */
+	public void setCommState(CommState cs) {
+		comm_state = cs;
+	}
 
 	/** Get a proxy comparator */
 	@Override
@@ -164,7 +191,6 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 		      true,	/* has_properties */
 		      true,	/* has_create_delete */
 		      false);	/* has_name */
-		comm_link = null;
 	}
 
 	/** Get the SONAR type name */
@@ -201,7 +227,51 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 			new LinkedList<RowSorter.SortKey>();
 		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
 		sorter.setSortKeys(keys);
+		if (isFiltered())
+			sorter.setRowFilter(createFilter());
 		return sorter;
+	}
+
+	/** Check if rows are filtered */
+	private boolean isFiltered() {
+		return (comm_link != null)
+		    || (condition != null)
+		    || (comm_state != null);
+	}
+
+	/** Create a row filter */
+	private RowFilter<ProxyTableModel<Controller>, Integer> createFilter() {
+		return new RowFilter<ProxyTableModel<Controller>, Integer>() {
+			public boolean include(RowFilter.Entry<? extends
+				ProxyTableModel<Controller>, ? extends Integer>
+				entry)
+			{
+				int i = entry.getIdentifier();
+				Controller c = getRowProxy(i);
+				return (c != null)
+				    && isMatchingLink(c)
+				    && isMatchingCondition(c)
+				    && isMatchingCommState(c);
+			}
+		};
+	}
+
+	/** Check if comm link matches filter */
+	private boolean isMatchingLink(Controller c) {
+		return (comm_link == null)
+		    || (comm_link == c.getCommLink());
+	}
+
+	/** Check if condition matches filter */
+	private boolean isMatchingCondition(Controller c) {
+		return (condition == null)
+		    || (condition.ordinal() == c.getCondition());
+	}
+
+	/** Check if comm state matches filter */
+	private boolean isMatchingCommState(Controller c) {
+		return (comm_state == null)
+		    || (comm_state == getCommState(c));
 	}
 
 	/** Check if the user can add a controller */

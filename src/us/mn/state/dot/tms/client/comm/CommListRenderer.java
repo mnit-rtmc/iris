@@ -14,33 +14,32 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
-import java.awt.Color;
+import java.awt.Component;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.JLabel;
+import javax.swing.JList;
 
 /**
- * Comm state enumeration.
+ * Renderer for comm status in a list.
  *
  * @author Douglas Lau
  */
-public enum CommState {
-	INACTIVE (new Color(0, 0, 0, 32)),
-	OK       (new Color(96, 96, 255)),
-	FAILED   (Color.GRAY);
+public class CommListRenderer extends DefaultListCellRenderer {
 
-	/** Icon for the comm state */
-	public final ControllerIcon icon;
-
-	/** Create a comm state */
-	private CommState(Color c) {
-		icon = new ControllerIcon(c);
-	}
-
-	/** Get values with null as first */
-	static public CommState[] values_with_null() {
-		return new CommState[] {
-			null,
-			INACTIVE,
-			OK,
-			FAILED,
-		};
+	/** Get the table cell renderer component */
+	@Override
+	public Component getListCellRendererComponent(JList list, Object value,
+		int index, boolean isSelected, boolean hasFocus)
+	{
+		JLabel lbl = (JLabel)super.getListCellRendererComponent(
+			list, "", index, isSelected, hasFocus);
+		if (value instanceof CommState) {
+			CommState cs = (CommState)value;
+			lbl.setIcon(cs.icon);
+		} else {
+			lbl.setText(" ");
+			lbl.setIcon(null);
+		}
+		return lbl;
 	}
 }
