@@ -92,6 +92,9 @@ public class CommLinkForm extends AbstractForm {
 	/** Table model for controllers */
 	private final ProxyTablePanel<Controller> ctrl_pnl;
 
+	/** Table panel for controllers */
+	private final ProxyTablePanel<Controller> controller_pnl;
+
 	/** Table to hold failed controllers */
 	private final ZTable ftable = new ZTable();
 
@@ -125,6 +128,8 @@ public class CommLinkForm extends AbstractForm {
 		};
 		ctrl_pnl = new ProxyTablePanel<Controller>(
 			new ControllerModel(s, null));
+		controller_pnl = new ProxyTablePanel<Controller>(
+			new ControllerTableModel(s));
 		fmodel = new FailedControllerModel(s);
 		sorter = new TableRowSorter<FailedControllerModel>(fmodel);
 		sorter.setSortsOnUpdates(true);
@@ -141,8 +146,10 @@ public class CommLinkForm extends AbstractForm {
 		watcher.initialize();
 		link_pnl.initialize();
 		ctrl_pnl.initialize();
+		controller_pnl.initialize();
 		fmodel.initialize();
 		tab.add(I18N.get("comm.link.all"), createCommLinkPanel());
+		tab.add(I18N.get("controller"), controller_pnl);
 		tab.add(I18N.get("controller.failed"),
 			createFailedControllerPanel());
 		add(tab);
@@ -156,6 +163,7 @@ public class CommLinkForm extends AbstractForm {
 		watcher.dispose();
 		link_pnl.dispose();
 		ctrl_pnl.dispose();
+		controller_pnl.dispose();
 		fmodel.dispose();
 		super.dispose();
 	}

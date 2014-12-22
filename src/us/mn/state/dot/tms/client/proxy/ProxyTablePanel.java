@@ -24,6 +24,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextField;
 import static javax.swing.LayoutStyle.ComponentPlacement.RELATED;
 import javax.swing.ListSelectionModel;
+import javax.swing.RowSorter;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -172,6 +173,9 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		t.setModel(m);
 		t.setRowHeight(UI.scaled(m.getRowHeight()));
 		t.setVisibleRowCount(m.getVisibleRowCount());
+		RowSorter<ProxyTableModel<T>> sorter = m.createSorter();
+		if (sorter != null)
+			t.setRowSorter(sorter);
 		return t;
 	}
 

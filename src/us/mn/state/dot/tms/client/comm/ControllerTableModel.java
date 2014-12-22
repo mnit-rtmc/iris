@@ -18,13 +18,17 @@ import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import javax.swing.AbstractCellEditor;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JSpinner;
 import javax.swing.JTable;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
@@ -39,25 +43,21 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  *
  * @author Douglas Lau
  */
-public class ControllerModel extends ProxyTableModel<Controller> {
+public class ControllerTableModel extends ProxyTableModel<Controller> {
 
 	/** Create the columns in the model */
 	@Override
 	protected ArrayList<ProxyColumn<Controller>> createColumns() {
 		ArrayList<ProxyColumn<Controller>> cols =
-			new ArrayList<ProxyColumn<Controller>>(7);
-		cols.add(new ProxyColumn<Controller>("controller", 90) {
+			new ArrayList<ProxyColumn<Controller>>(8);
+		cols.add(new ProxyColumn<Controller>("comm.link", 120) {
 			public Object getValueAt(Controller c) {
-				return c.getName();
+				return c.getCommLink().getName();
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("location", 200) {
-			public Object getValueAt(Controller c) {
-				return GeoLocHelper.getDescription(
-					c.getCabinet().getGeoLoc());
-			}
-		});
-		cols.add(new ProxyColumn<Controller>("controller.drop", 60) {
+		cols.add(new ProxyColumn<Controller>("controller.drop", 54,
+			Short.class)
+		{
 			public Object getValueAt(Controller c) {
 				return c.getDrop();
 			}
@@ -72,7 +72,14 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				return new DropCellEditor();
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("controller.condition", 88)
+		cols.add(new ProxyColumn<Controller>("location", 200) {
+			public Object getValueAt(Controller c) {
+				return GeoLocHelper.getDescription(
+					c.getCabinet().getGeoLoc());
+			}
+		});
+		cols.add(new ProxyColumn<Controller>("controller.condition", 88,
+			CtrlCondition.class)
 		{
 			public Object getValueAt(Controller c) {
 				return CtrlCondition.fromOrdinal(
@@ -88,9 +95,8 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox cbx = new JComboBox(
-					CtrlCondition.values());
-				return new DefaultCellEditor(cbx);
+				return new DefaultCellEditor(new JComboBox(
+					CtrlCondition.values()));
 			}
 		});
 		cols.add(new ProxyColumn<Controller>("controller.comm", 44,
@@ -113,6 +119,16 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				return c.getStatus();
 			}
 		});
+		cols.add(new ProxyColumn<Controller>("controller.fail", 240,
+			Long.class)
+		{
+			public Object getValueAt(Controller c) {
+				return c.getFailTime();
+			}
+			protected TableCellRenderer createCellRenderer() {
+				return new TimeCellRenderer();
+			}
+		});
 		cols.add(new ProxyColumn<Controller>("controller.version", 120){
 			public Object getValueAt(Controller c) {
 				return c.getVersion();
@@ -121,8 +137,8 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		return cols;
 	}
 
-	/** Comm link to match controllers */
-	private final CommLink comm_link;
+	/** Comm link to filter controllers */
+	private CommLink comm_link;
 
 	/** Get a proxy comparator */
 	@Override
@@ -139,22 +155,16 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 				} else
 					return c;
 			}
-			public boolean equals(Object o) {
-				return o == this;
-			}
-			public int hashCode() {
-				return super.hashCode();
-			}
 		};
 	}
 
 	/** Create a new controller table model */
-	public ControllerModel(Session s, CommLink cl) {
+	public ControllerTableModel(Session s) {
 		super(s, s.getSonarState().getConCache().getControllers(),
 		      true,	/* has_properties */
 		      true,	/* has_create_delete */
-		      true);	/* has_name */
-		comm_link = cl;
+		      false);	/* has_name */
+		comm_link = null;
 	}
 
 	/** Get the SONAR type name */
@@ -181,21 +191,52 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		return 24;
 	}
 
-	/** Check if a proxy is included in the list */
+	/** Get a table row sorter */
 	@Override
-	protected boolean check(Controller proxy) {
-		return proxy.getCommLink() == comm_link;
+	public RowSorter<ProxyTableModel<Controller>> createSorter() {
+		TableRowSorter<ProxyTableModel<Controller>> sorter =
+			new TableRowSorter<ProxyTableModel<Controller>>(this);
+		sorter.setSortsOnUpdates(true);
+		LinkedList<RowSorter.SortKey> keys =
+			new LinkedList<RowSorter.SortKey>();
+		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+		sorter.setSortKeys(keys);
+		return sorter;
+	}
+
+	/** Check if the user can add a controller */
+	@Override
+	public boolean canAdd() {
+		return (comm_link != null) && super.canAdd();
 	}
 
 	/** Create a new controller */
 	@Override
-	public void createObject(String name) {
-		DropNumberModel m = new DropNumberModel(comm_link, cache, 1);
+	public void createObject(String n) {
+		String name = createUniqueName();
+		if (name != null && comm_link != null)
+			cache.createObject(name, createAttrs());
+	}
+
+	/** Create a unique controller name */
+	private String createUniqueName() {
+		for (int uid = 1; uid <= 99999; uid++) {
+			String n = "ctl_" + uid;
+			if (cache.lookupObject(n) == null)
+				return n;
+		}
+		assert false;
+		return null;
+	}
+
+	/** Create a mapping of attributes */
+	private HashMap<String, Object> createAttrs() {
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		DropNumberModel m = new DropNumberModel(comm_link, cache, 1);
 		attrs.put("comm_link", comm_link);
 		attrs.put("drop_id", m.getNextAvailable());
 		attrs.put("notes", "");
-		cache.createObject(name, attrs);
+		return attrs;
 	}
 
 	/** Editor for drop addresses in a table cell */
@@ -207,7 +248,7 @@ public class ControllerModel extends ProxyTableModel<Controller> {
 		protected final JSpinner spinner = new JSpinner(model);
 
 		public Component getTableCellEditorComponent(JTable table,
-			Object value, boolean isSelected, int row, int column)
+			Object value, boolean isSelected, int row, int col)
 		{
 			spinner.setValue(value);
 			return spinner;

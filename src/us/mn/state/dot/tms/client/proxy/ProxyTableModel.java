@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.proxy;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import javax.swing.RowSorter;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
@@ -28,7 +29,7 @@ import us.mn.state.dot.tms.client.widget.ITableModel;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
- * Table model for IRIS proxies.  This model allows a TableRowSorter to be used
+ * Table model for IRIS proxies.  This model allows a RowSorter to be used
  * with the table for sorting and filtering.
  *
  * @author Douglas Lau
@@ -280,6 +281,11 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Get the row height */
 	public int getRowHeight() {
 		return 18;
+	}
+
+	/** Get a table row sorter */
+	public RowSorter<ProxyTableModel<T>> createSorter() {
+		return null;
 	}
 
 	/** Determine if a properties form is available */
