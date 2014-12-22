@@ -14,7 +14,9 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
+import java.awt.event.ActionEvent;
 import javax.swing.GroupLayout;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CommLink;
@@ -24,6 +26,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.AbstractForm;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
@@ -64,6 +67,18 @@ public class CommLinkForm extends AbstractForm {
 	/** Comm link table panel */
 	private final ProxyTablePanel<CommLink> link_pnl;
 
+	/** Clear action */
+	private final IAction clear_act = new IAction(
+		"comm.link.clear")
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			link_pnl.selectProxy(null);
+		}
+	};
+
+	/** Clear comm link filter button */
+	private final JButton clear_btn = new JButton();
+
 	/** Comm link label */
 	private final JLabel link_lbl = new ILabel("comm.link.selected");
 
@@ -95,6 +110,7 @@ public class CommLinkForm extends AbstractForm {
 		watcher.initialize();
 		link_pnl.initialize();
 		controller_pnl.initialize();
+		clear_btn.setAction(clear_act);
 		layoutPanel();
 	}
 
@@ -122,8 +138,13 @@ public class CommLinkForm extends AbstractForm {
 	private GroupLayout.Group createHorizontalGroup(GroupLayout gl) {
 		GroupLayout.ParallelGroup hg = gl.createParallelGroup();
 		hg.addComponent(link_pnl);
-		hg.addGroup(gl.createSequentialGroup().addComponent(
-			link_lbl).addGap(UI.hgap).addComponent(link_status));
+		GroupLayout.SequentialGroup g0 = gl.createSequentialGroup();
+		g0.addComponent(clear_btn);
+		g0.addGap(UI.hgap);
+		g0.addComponent(link_lbl);
+		g0.addGap(UI.hgap);
+		g0.addComponent(link_status);
+		hg.addGroup(g0);
 		hg.addComponent(controller_pnl);
 		return hg;
 	}
@@ -134,6 +155,7 @@ public class CommLinkForm extends AbstractForm {
 		vg.addComponent(link_pnl);
 		GroupLayout.ParallelGroup g0 = gl.createBaselineGroup(false,
 			false);
+		g0.addComponent(clear_btn);
 		g0.addComponent(link_lbl);
 		g0.addComponent(link_status);
 		vg.addGroup(g0);

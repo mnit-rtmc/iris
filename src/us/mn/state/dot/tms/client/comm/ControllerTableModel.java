@@ -61,7 +61,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 	protected ArrayList<ProxyColumn<Controller>> createColumns() {
 		ArrayList<ProxyColumn<Controller>> cols =
 			new ArrayList<ProxyColumn<Controller>>(8);
-		cols.add(new ProxyColumn<Controller>("comm.link", 110) {
+		cols.add(new ProxyColumn<Controller>("comm.link", 100) {
 			public Object getValueAt(Controller c) {
 				return c.getCommLink().getName();
 			}
@@ -89,7 +89,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 					c.getCabinet().getGeoLoc());
 			}
 		});
-		cols.add(new ProxyColumn<Controller>("controller.condition", 98,
+		cols.add(new ProxyColumn<Controller>("controller.condition",100,
 			CtrlCondition.class)
 		{
 			public Object getValueAt(Controller c) {

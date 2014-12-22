@@ -180,8 +180,10 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 	/** Update sort and/or filter */
 	protected final void updateSortFilter() {
 		RowSorter<ProxyTableModel<T>> sorter = model.createSorter();
-		if (sorter != null)
+		if (sorter != null) {
 			table.setRowSorter(sorter);
+			updateButtonPanel();
+		}
 	}
 
 	/** Create a scroll pane */
@@ -269,14 +271,15 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 
 	/** Select a new proxy */
 	public void selectProxy(T proxy) {
+		ListSelectionModel s = table.getSelectionModel();
 		int ri = model.getIndex(proxy);
 		if (ri >= 0) {
-			ListSelectionModel s = table.getSelectionModel();
 			int row = table.convertRowIndexToView(ri);
 			s.setSelectionInterval(row, row);
 			table.scrollRectToVisible(
 				table.getCellRect(row, 0, true));
-		}
+		} else
+			s.clearSelection();
 	}
 
 	/** Update the button panel */
