@@ -74,10 +74,10 @@ public class UserProperties {
 		try {
 			read();
 		}
-		catch(FileNotFoundException e) {
+		catch (FileNotFoundException e) {
 			System.err.println("User properties: " +e.getMessage());
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			h.handle(e);
 		}
 	}
@@ -96,7 +96,7 @@ public class UserProperties {
 	/** Write properties */
 	public void write() throws IOException {
 		File f = getFile();
-		if(!f.canWrite())
+		if (!f.canWrite())
 			getDir().mkdirs();
 		FileOutputStream fos = new FileOutputStream(f);
 		try {
@@ -150,7 +150,7 @@ public class UserProperties {
 		try {
 			return Integer.parseInt(getPropString(name));
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			return null;
 		}
 	}
@@ -160,7 +160,7 @@ public class UserProperties {
 		try {
 			return Float.parseFloat(getPropString(name));
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			return null;
 		}
 	}
@@ -172,7 +172,7 @@ public class UserProperties {
 		Integer y = getPropInt(WIN_Y);
 		Integer w = getPropInt(WIN_WIDTH);
 		Integer h = getPropInt(WIN_HEIGHT);
-		if(x != null && y != null && w != null && h != null)
+		if (x != null && y != null && w != null && h != null)
 			return new Rectangle(x, y, w, h);
 		else
 			return null;
@@ -182,7 +182,7 @@ public class UserProperties {
 	 * @return Window extended state. */
 	public Integer getWindowState() {
 		Integer st = getPropInt(WIN_EXTSTATE);
-		if(st != null && st == JFrame.MAXIMIZED_BOTH)
+		if (st != null && st == JFrame.MAXIMIZED_BOTH)
 			return JFrame.MAXIMIZED_BOTH;
 		else
 			return null;
@@ -196,10 +196,10 @@ public class UserProperties {
 	/** Get array of currently selected tabs in each pane */
 	public String[] getSelectedTabs() {
 		ArrayList<String> st = new ArrayList<String>();
-		for(int i = 0; ; i++) {
+		for (int i = 0; ; i++) {
 			String pn = getTabPropName(i);
 			String t = getPropString(pn);
-			if(t.length() > 0)
+			if (t.length() > 0)
 				st.add(t);
 			else
 				break;
@@ -210,7 +210,7 @@ public class UserProperties {
 	/** Get the user interface scale factor */
 	public float getScale() {
 		Float s = getPropFloat(SCALE);
-		if(s != null && s >= 0.25f && s <= 4.0f)
+		if (s != null && s >= 0.25f && s <= 4.0f)
 			return s;
 		else
 			return 1f;
@@ -245,7 +245,7 @@ public class UserProperties {
 		setProp(WIN_WIDTH, r.width);
 		setProp(WIN_HEIGHT, r.height);
 		String[] st = frame.getSelectedTabs();
-		for(int i = 0; i < st.length; i++)
+		for (int i = 0; i < st.length; i++)
 			setProp(getTabPropName(i), st[i]);
 	}
 }
