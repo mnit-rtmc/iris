@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.client.widget.Screen;
 import us.mn.state.dot.tms.client.widget.ScreenLayout;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.client.widget.Widgets;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -62,7 +63,7 @@ public class IrisClient extends JFrame {
 	/** Create the window title.
 	 * @param s Current session, or null if not logged in. */
 	static private String createTitle(Session s) {
-		if(s != null) {
+		if (s != null) {
 			User u = s.getUser();
 			return createTitle(u.getName() + " (" +
 				u.getFullName() + ")");
@@ -123,12 +124,12 @@ public class IrisClient extends JFrame {
 		getContentPane().add(desktop);
 		menu_bar = new IMenuBar(this, desktop);
 		setMenuBar();
-		autoLogin();
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				doQuit();
 			}
 		});
+		autoLogin();
 	}
 
 	/** Quit the IRIS client application */
@@ -137,7 +138,7 @@ public class IrisClient extends JFrame {
 		try {
 			user_props.write();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 		System.exit(0);
@@ -175,7 +176,8 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Make the frame displayable (called by window toolkit) */
-	@Override public void addNotify() {
+	@Override
+	public void addNotify() {
 		super.addNotify();
 		setPosition();
 	}
@@ -183,11 +185,11 @@ public class IrisClient extends JFrame {
 	/** Set position of frame window using properties values */
 	private void setPosition() {
 		Rectangle r = user_props.getWindowPosition();
-		if(r == null)
+		if (r == null)
 			r = Screen.getMaximizedBounds();
 		setBounds(r);
 		Integer ext = user_props.getWindowState();
-		if(ext != null)
+		if (ext != null)
 			setExtendedState(ext);
 		getContentPane().validate();
 	}
@@ -196,20 +198,25 @@ public class IrisClient extends JFrame {
 	private void autoLogin() {
 		String user = client_props.getProperty("autologin.username");
 		String pws = client_props.getProperty("autologin.password");
-		if(user != null && pws != null) {
+		if (user != null && pws != null) {
 			char[] pwd = pws.toCharArray();
 			pws = null;
-			if(user.length() > 0 && pwd.length > 0)
+			if (user.length() > 0 && pwd.length > 0)
 				login(user, pwd);
 		}
+		runSwing(new Runnable() {
+			public void run() {
+				menu_bar.showLoginForm();
+			}
+		});
 	}
 
 	/** Get a list of all visible screen panes. Will return an empty
 	 * list if IRIS is minimized. */
 	private LinkedList<ScreenPane> getVisiblePanes() {
 		LinkedList<ScreenPane> visible = new LinkedList<ScreenPane>();
-		for(ScreenPane s: s_panes) {
-			if(s.isVisible())
+		for (ScreenPane s: s_panes) {
+			if (s.isVisible())
 				visible.add(s);
 		}
 		return visible;
@@ -220,14 +227,14 @@ public class IrisClient extends JFrame {
 		setMenuBar();
 		removeTabs();
 		Session s = session;
-		if(s != null)
+		if (s != null)
 			arrangeTabs(s);
 	}
 
 	/** Set the menu bar to the first visible screen pane */
 	private void setMenuBar() {
 		IMenuBar mb = menu_bar;
-		for(ScreenPane sp: getVisiblePanes()) {
+		for (ScreenPane sp: getVisiblePanes()) {
 			sp.setMenuBar(mb);
 			mb = null;
 		}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,13 +49,18 @@ public class IMenuBar extends JMenuBar {
 		session_menu.setEnabled(false);
 	}
 
+	/** Show the login form */
+	public void showLoginForm() {
+		session_menu.showLoginForm();
+	}
+
 	/** Set the current session */
 	public void setSession(Session s) {
 		JMenu vm = view_menu;
-		if(vm != null)
+		if (vm != null)
 			remove(vm);
 		boolean in = s != null;
-		if(in) {
+		if (in) {
 			view_menu = new ViewMenu(s);
 			add(view_menu, 1);
 		} else

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2014  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,9 +35,7 @@ public class SessionMenu extends JMenu {
 	/** Log in action */
 	private final IAction log_in = new IAction("connection.login") {
 		protected void doActionPerformed(ActionEvent e) {
-			Session s = client.getSession();
-			if(s == null)
-				desktop.show(new LoginForm(client, desktop));
+			showLoginForm();
 		}
 	};
 
@@ -52,7 +50,7 @@ public class SessionMenu extends JMenu {
 	private final IAction pwd_change = new IAction("user.password.change") {
 		protected void doActionPerformed(ActionEvent e) {
 			Session s = client.getSession();
-			if(s != null)
+			if (s != null)
 				desktop.show(new ChangePasswordForm(s));
 		}
 	};
@@ -79,6 +77,13 @@ public class SessionMenu extends JMenu {
 				client.quit();
 			}
 		}));
+	}
+
+	/** Show the login form */
+	public void showLoginForm() {
+		Session s = client.getSession();
+		if (s == null)
+			desktop.show(new LoginForm(client, desktop));
 	}
 
 	/** Set the logged-in status */
