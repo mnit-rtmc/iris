@@ -109,11 +109,11 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Create a new Iris client */
-	public IrisClient(Properties cp, ExceptionHandler h) {
+	public IrisClient(Properties cp, ExceptionHandler h) throws IOException{
 		super(createTitle(I18N.get("iris.logged.out")));
 		client_props = cp;
 		handler = h;
-		user_props = new UserProperties(client_props, h);
+		user_props = new UserProperties(client_props);
 		Widgets.init(user_props.getScale());
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();

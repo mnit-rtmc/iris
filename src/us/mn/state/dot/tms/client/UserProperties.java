@@ -24,7 +24,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 import javax.swing.JFrame;
-import us.mn.state.dot.sched.ExceptionHandler;
 
 /**
  * Persistent mutable user properties stored in a java properties file
@@ -69,16 +68,13 @@ public class UserProperties {
 	private final Properties client_props;
 
 	/** Create the user properties */
-	public UserProperties(Properties cp, ExceptionHandler h) {
+	public UserProperties(Properties cp) throws IOException {
 		client_props = cp;
 		try {
 			read();
 		}
 		catch (FileNotFoundException e) {
 			System.err.println("User properties: " +e.getMessage());
-		}
-		catch (IOException e) {
-			h.handle(e);
 		}
 	}
 
