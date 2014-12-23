@@ -37,10 +37,7 @@ public class MainClient {
 
 	/** Get the name of the property file to use */
 	static private String getPropertyFile(String[] args) {
-		if(args.length > 0)
-			return args[0];
-		else
-			return DEFAULT_PROPERTIES;
+		return (args.length > 0) ? args[0] : DEFAULT_PROPERTIES;
 	}
 
 	/** Main IRIS client entry point.
@@ -81,7 +78,7 @@ public class MainClient {
 			handler.setOwner(c);
 			c.setVisible(true);
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			handler.handle(e);
 		}
 	}
@@ -99,7 +96,7 @@ public class MainClient {
 	/** Update the proxy selector with the given property set */
 	static private void updateProxySelector(Properties props) {
 		HTTPProxySelector ps = new HTTPProxySelector(props);
-		if(ps.hasProxies())
+		if (ps.hasProxies())
 			ProxySelector.setDefault(ps);
 	}
 }
