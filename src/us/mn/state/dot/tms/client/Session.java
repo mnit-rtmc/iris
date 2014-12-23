@@ -104,11 +104,6 @@ public class Session {
 	/** Mutable user properties stored on client workstation */
 	private final UserProperties user_props;
 
-	/** Get the user properties */
-	public UserProperties getUserProperties() {
-		return user_props;
-	}
-
 	/** Location manager */
 	private final GeoLocManager loc_manager;
 
