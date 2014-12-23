@@ -128,6 +128,11 @@ public class IrisClient extends JFrame {
 			public void windowClosing(WindowEvent e) {
 				doQuit();
 			}
+			public void windowActivated(WindowEvent e) {
+				// On Linux, when switching back from another
+				// workspace, the client needs to be repainted
+				repaint();
+			}
 		});
 		autoLogin();
 	}
