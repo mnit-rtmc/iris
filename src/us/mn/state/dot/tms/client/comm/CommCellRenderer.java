@@ -32,8 +32,8 @@ public class CommCellRenderer extends DefaultTableCellRenderer {
 		Object value, boolean isSelected, boolean hasFocus,
 		int row, int col)
 	{
-		JLabel lbl = (JLabel)super.getTableCellRendererComponent(
-			table, "", isSelected, hasFocus, row, col);
+		JLabel lbl = (JLabel)super.getTableCellRendererComponent(table,
+			"", isSelected, hasFocus, row, col);
 		if (value instanceof CommState) {
 			CommState cs = (CommState)value;
 			lbl.setIcon(cs.icon);

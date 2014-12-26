@@ -26,20 +26,26 @@ import javax.swing.JList;
  */
 public class CommListRenderer extends DefaultListCellRenderer {
 
+	/** Get cell value as text */
+	static private String valueText(Object value) {
+		if (value instanceof CommState)
+			return value.toString();
+		else
+			return " ";
+	}
+
 	/** Get the table cell renderer component */
 	@Override
 	public Component getListCellRendererComponent(JList list, Object value,
 		int index, boolean isSelected, boolean hasFocus)
 	{
-		JLabel lbl = (JLabel)super.getListCellRendererComponent(
-			list, "", index, isSelected, hasFocus);
+		JLabel lbl = (JLabel)super.getListCellRendererComponent(list,
+			valueText(value), index, isSelected, hasFocus);
 		if (value instanceof CommState) {
 			CommState cs = (CommState)value;
 			lbl.setIcon(cs.icon);
-		} else {
-			lbl.setText(" ");
+		} else
 			lbl.setIcon(null);
-		}
 		return lbl;
 	}
 }
