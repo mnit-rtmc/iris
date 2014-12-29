@@ -26,23 +26,38 @@ public class SignTextComparator implements Comparator<SignText> {
 
 	/** Compare one sign text message with another */
 	@Override
-	public int compare(SignText t0, SignText t1) {
-		Short s0 = t0.getLine();
-		Short s1 = t1.getLine();
-		int c = s0.compareTo(s1);
-		if(c != 0)
-			return c;
-		s0 = t0.getRank();
-		s1 = t1.getRank();
-		c = s0.compareTo(s1);
-		if(c != 0)
-			return c;
-		return t0.getMulti().compareTo(t1.getMulti());
+	public int compare(SignText st0, SignText st1) {
+		int c = compareLine(st0, st1);
+		if (c == 0)
+			c = compareRank(st0, st1);
+		if (c == 0)
+			c = compareMulti(st0, st1);
+		if (c == 0)
+			c = compareName(st0, st1);
+		return c;
 	}
 
-	/** Check equality */
-	@Override
-	public boolean equals(Object o) {
-		return o == this;
+	/** Compare line numbers */
+	private int compareLine(SignText st0, SignText st1) {
+		Short l0 = st0.getLine();
+		Short l1 = st1.getLine();
+		return l0.compareTo(l1);
+	}
+
+	/** Compare ranks */
+	private int compareRank(SignText st0, SignText st1) {
+		Short r0 = st0.getRank();
+		Short r1 = st1.getRank();
+		return r0.compareTo(r1);
+	}
+
+	/** Compare multi strings */
+	private int compareMulti(SignText st0, SignText st1) {
+		return st0.getMulti().compareTo(st1.getMulti());
+	}
+
+	/** Compare names */
+	private int compareName(SignText st0, SignText st1) {
+		return st0.getName().compareTo(st1.getName());
 	}
 }
