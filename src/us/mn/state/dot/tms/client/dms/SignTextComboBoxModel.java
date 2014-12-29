@@ -56,8 +56,8 @@ public class SignTextComboBoxModel extends AbstractListModel
 	@Override
 	public Object getElementAt(int index) {
 		int i = 0;
-		for(SignText t: items) {
-			if(i == index)
+		for (SignText t: items) {
+			if (i == index)
 				return t;
 			i++;
 		}
@@ -78,8 +78,8 @@ public class SignTextComboBoxModel extends AbstractListModel
 	public Object getSelectedItem() {
 		SignText st = selected;
 		// filter lines that should be ignored
-		if(st != null && st instanceof ClientSignText) {
-			if(DMSHelper.ignoreLineFilter(st.getMulti()))
+		if (st != null && st instanceof ClientSignText) {
+			if (DMSHelper.ignoreLineFilter(st.getMulti()))
 				return BLANK_SIGN_TEXT;
 		}
 		return st;
@@ -93,9 +93,9 @@ public class SignTextComboBoxModel extends AbstractListModel
 	 */
 	@Override
 	public void setSelectedItem(Object s) {
-		if(s instanceof SignText)
+		if (s instanceof SignText)
 			selected = (SignText)s;
-		else if(s instanceof String)
+		else if (s instanceof String)
 			selected = getSignText((String)s);
 		else
 			selected = null;
@@ -106,10 +106,10 @@ public class SignTextComboBoxModel extends AbstractListModel
 	/** Get or create a sign text for the given string */
 	private SignText getSignText(String s) {
 		String m = MultiParser.normalize(s.trim());
-		if(m.length() == 0)
+		if (m.length() == 0)
 			return BLANK_SIGN_TEXT;
 		SignText st = lookupMessage(m);
-		if(st != null)
+		if (st != null)
 			return st;
 		else
 			return new ClientSignText(m, line, ON_THE_FLY_RANK);
@@ -118,8 +118,8 @@ public class SignTextComboBoxModel extends AbstractListModel
 	/** Lookup a sign text.
 	 * @return Existing SignText, or null if not found. */
 	private SignText lookupMessage(String t) {
-		for(SignText st: items) {
-			if(t.equals(st.getMulti()))
+		for (SignText st: items) {
+			if (t.equals(st.getMulti()))
 				return st;
 		}
 		return null;
@@ -128,8 +128,8 @@ public class SignTextComboBoxModel extends AbstractListModel
 	/** Find the index of an item */
 	private int find(SignText t) {
 		int i = 0;
-		for(SignText st: items) {
-			if(st.equals(t))
+		for (SignText st: items) {
+			if (st.equals(t))
 				return i;
 			i++;
 		}
@@ -138,9 +138,9 @@ public class SignTextComboBoxModel extends AbstractListModel
 
 	/** Add a SignText to the model */
 	public void add(SignText t) {
-		if(items.add(t)) {
+		if (items.add(t)) {
 			int i = find(t);
-			if(i >= 0)
+			if (i >= 0)
 				fireIntervalAdded(this, i, i);
 		}
 	}
@@ -148,9 +148,9 @@ public class SignTextComboBoxModel extends AbstractListModel
 	/** Remove a sign text from the model */
 	public void remove(SignText t) {
 		int i = find(t);
-		if(i >= 0) {
+		if (i >= 0) {
 			items.remove(t);
-			if(t.equals(selected))
+			if (t.equals(selected))
 				selected = null;
 			fireIntervalRemoved(this, i, i);
 		}
