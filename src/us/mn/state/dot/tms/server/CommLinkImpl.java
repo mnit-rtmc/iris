@@ -193,6 +193,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		store.update(this, "uri", u);
 		setUri(u);
 		closePoller();
+		setStatusNotify(Constants.UNKNOWN);
 	}
 
 	/** Get remote URI for link */
@@ -223,6 +224,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		store.update(this, "protocol", p);
 		setProtocol(p);
 		closePoller();
+		setStatusNotify(Constants.UNKNOWN);
 	}
 
 	/** Get the communication protocol */
@@ -246,6 +248,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		store.update(this, "poll_enabled", e);
 		setPollEnabled(e);
 		closePoller();
+		setStatusNotify(Constants.UNKNOWN);
 	}
 
 	/** Get polling enabled/disabled flag */
@@ -375,11 +378,11 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Communication link status */
-	protected transient String status = Constants.UNKNOWN;
+	private transient String status = Constants.UNKNOWN;
 
 	/** Set the communication status */
-	public void setStatusNotify(String s) {
-		if(s == null || s.equals(status))
+	private void setStatusNotify(String s) {
+		if (s == null || s.equals(status))
 			return;
 		status = s;
 		notifyAttribute("status");
