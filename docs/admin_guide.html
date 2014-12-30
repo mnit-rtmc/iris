@@ -87,7 +87,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">17 Dec 2014</div>
+<div id="stamp">30 Dec 2014</div>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
 
@@ -2198,7 +2198,7 @@ systemctl restart iris.service</pre>
 <pre class="code">yum update iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
 psql tms -f /var/lib/iris/sql/migrate-<i>{major}</i>.<i>{minor}</i>.sql
 iris_ctl update
-systemctl iris.service restart</pre>
+systemctl restart iris.service</pre>
 <p>
 	Note: when skipping one or more minor versions in an upgrade, <b>all</b>
 	migrate scripts must be run.
