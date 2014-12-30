@@ -437,6 +437,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	{
 		if (rs == GateArmState.WARN_CLOSE) {
 			setArmState(rs);
+			updateDmsMessage();
 			return;
 		}
 		for (int i = 0; i < MAX_ARMS; i++) {
@@ -451,7 +452,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		arm_state = gas;
 		notifyAttribute("armState");
 		updateStyles();
-		updateDmsMessage();
 		if (gas == GateArmState.TIMEOUT)
 			sendEmailAlert("COMMUNICATION FAILED: " + name);
 		if (gas == GateArmState.FAULT)
@@ -485,6 +485,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		if (gas != cs &&
 		   (gas != GateArmState.OPEN || cs != GateArmState.WARN_CLOSE))
 			setArmState(gas);
+		updateDmsMessage();
 	}
 
 	/** Get the aggregate arm state for all arms in the array */

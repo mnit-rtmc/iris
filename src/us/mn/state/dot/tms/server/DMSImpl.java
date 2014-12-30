@@ -1099,10 +1099,16 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 		return ap.ordinal() >= existing.getRunTimePriority();
 	}
 
-	/** Send a sign message created by IRIS server */
+	/** Send a sign message created by IRIS server.
+	 * @param m MULTI string.
+	 * @param be Beacon enabled.
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority. */
 	public void sendMessage(String m, boolean be, DMSMessagePriority ap,
 		DMSMessagePriority rp)
 	{
+		if (getMessageCurrent().getMulti().equals(m))
+			return;
 		SignMessage sm = createMessage(m, be, ap, rp, false, null);
 		try {
 			if(!isMessageCurrentEquivalent(sm))
