@@ -63,7 +63,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	}
 
 	/** Get a mapping of the columns */
-	@Override public Map<String, Object> getColumns() {
+	@Override
+	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("ga_array", ga_array);
@@ -75,12 +76,14 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	}
 
 	/** Get the database table name */
-	@Override public String getTable() {
+	@Override
+	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
-	@Override public String getTypeName() {
+	@Override
+	public String getTypeName() {
 		return SONAR_TYPE;
 	}
 
@@ -112,10 +115,10 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	private void setArrayIndex(GateArmImpl ga) {
 		try {
 			GateArmArrayImpl a = ga_array;
-			if(a != null)
+			if (a != null)
 				a.setIndex(idx, ga);
 		}
-		catch(TMSException e) {
+		catch (TMSException e) {
 			System.err.println("GateArmImpl.setArrayIndex: " +
 				getName() + " error");
 			e.printStackTrace();
@@ -123,13 +126,15 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	}
 
 	/** Initialize the gate arm */
-	@Override public void initTransients() {
+	@Override
+	public void initTransients() {
 		setArrayIndex(this);
 		super.initTransients();
 	}
 
 	/** Destroy an object */
-	@Override public void doDestroy() throws TMSException {
+	@Override
+	public void doDestroy() throws TMSException {
 		GateArmSystem.disable(name + ": destroy");
 		super.doDestroy();
 		setArrayIndex(null);
@@ -139,7 +144,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	private GateArmArrayImpl ga_array;
 
 	/** Get the gate arm array */
-	@Override public GateArmArrayImpl getGaArray() {
+	@Override
+	public GateArmArrayImpl getGaArray() {
 		return ga_array;
 	}
 
@@ -147,7 +153,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	private int idx;
 
 	/** Get the index in array (1 to MAX_ARMS) */
-	@Override public int getIdx() {
+	@Override
+	public int getIdx() {
 		return idx;
 	}
 
@@ -156,7 +163,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	 * @param op Old pin.
 	 * @param nc New controller.
 	 * @param np New pin. */
-	@Override protected void updateControllerPin(ControllerImpl oc, int op,
+	@Override
+	protected void updateControllerPin(ControllerImpl oc, int op,
 		ControllerImpl nc, int np)
 	{
 		GateArmSystem.disable("controller/pin");
@@ -168,17 +176,18 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 
 	/** Set the version */
 	public void setVersion(String v) {
-		if(!v.equals(version)) {
+		if (!v.equals(version)) {
 			version = v;
 			notifyAttribute("version");
 			ControllerImpl c = (ControllerImpl)getController();
-			if(c != null)
+			if (c != null)
 				c.setVersion(version);
 		}
 	}
 
 	/** Get the version */
-	@Override public String getVersion() {
+	@Override
+	public String getVersion() {
 		return version;
 	}
 
@@ -197,7 +206,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 		else {
 			checkTimeout();
 			GateArmPoller p = getGateArmPoller();
-			if(p != null)
+			if (p != null)
 				p.sendRequest(this, req);
 		}
 	}
@@ -205,8 +214,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Check for comm timeout */
 	public void checkTimeout() {
 		ControllerImpl c = (ControllerImpl)getController();
-		if(c != null) {
-			if(c.getFailMillis() > failTimeoutMS())
+		if (c != null) {
+			if (c.getFailMillis() > failTimeoutMS())
 				setArmStateNotify(TIMEOUT, null);
 		}
 	}
@@ -215,7 +224,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	 * this is used to shut off interlocks when disabling gate arm system.*/
 	public void sendInterlocks() {
 		GateArmPoller p = getGateArmPoller();
-		if(p != null)
+		if (p != null)
 			p.sendRequest(this, DeviceRequest.SEND_SETTINGS);
 	}
 
@@ -226,12 +235,12 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	 * @param gas Requested gate arm state.
 	 * @param o User requesting new state. */
 	public void requestArmState(GateArmState gas, User o) {
-		if(GateArmSystem.checkEnabled()) {
+		if (GateArmSystem.checkEnabled()) {
 			GateArmPoller p = getGateArmPoller();
-			if(p != null) {
-				if(gas == GateArmState.OPENING)
+			if (p != null) {
+				if (gas == GateArmState.OPENING)
 					p.openGate(this, o);
-				if(gas == GateArmState.CLOSING)
+				if (gas == GateArmState.CLOSING)
 					p.closeGate(this, o);
 			}
 		}
@@ -241,7 +250,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	 * @param gas Gate arm state.
 	 * @param o User who requested new state, or null. */
 	public void setArmStateNotify(GateArmState gas, User o) {
-		if(gas != arm_state) {
+		if (gas != arm_state) {
 			GateArmSystem.logEvent(gas, name, o);
 			arm_state = gas;
 			notifyAttribute("armState");
@@ -255,7 +264,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	}
 
 	/** Get the arm state */
-	@Override public int getArmState() {
+	@Override
+	public int getArmState() {
 		return getArmStateEnum().ordinal();
 	}
 

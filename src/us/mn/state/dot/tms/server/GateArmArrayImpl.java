@@ -76,7 +76,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Get a mapping of the columns */
-	@Override public Map<String, Object> getColumns() {
+	@Override
+	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("geo_loc", geo_loc);
@@ -93,12 +94,14 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Get the database table name */
-	@Override public String getTable() {
+	@Override
+	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
-	@Override public String getTypeName() {
+	@Override
+	public String getTypeName() {
 		return SONAR_TYPE;
 	}
 
@@ -142,19 +145,22 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Destroy an object */
-	@Override public void doDestroy() throws TMSException {
+	@Override
+	public void doDestroy() throws TMSException {
 		super.doDestroy();
 		geo_loc.notifyRemove();
 		GateArmSystem.disable(name + ": destroy array");
 	}
 
 	/** Set the controller of the device */
-	@Override public void doSetController(Controller c) throws TMSException{
+	@Override
+	public void doSetController(Controller c) throws TMSException{
 		throw new ChangeVetoException("Cannot assign controller");
 	}
 
 	/** Set the controller I/O pin number */
-	@Override public void doSetPin(int p) throws TMSException {
+	@Override
+	public void doSetPin(int p) throws TMSException {
 		throw new ChangeVetoException("Cannot assign pin");
 	}
 
@@ -162,7 +168,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private GeoLocImpl geo_loc;
 
 	/** Get the device location */
-	@Override public GeoLoc getGeoLoc() {
+	@Override
+	public GeoLoc getGeoLoc() {
 		return geo_loc;
 	}
 
@@ -170,21 +177,23 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private String prereq;
 
 	/** Set the prerequisite gate arm array */
-	@Override public void setPrereq(String pr) {
+	@Override
+	public void setPrereq(String pr) {
 		GateArmSystem.disable(name + ": prereq");
 		prereq = pr;
 	}
 
 	/** Set the prerequisite gate arm array */
 	public void doSetPrereq(String pr) throws TMSException {
-		if(stringEquals(pr, prereq))
-			return;
-		store.update(this, "prereq", pr);
-		setPrereq(pr);
+		if (!stringEquals(pr, prereq)) {
+			store.update(this, "prereq", pr);
+			setPrereq(pr);
+		}
 	}
 
 	/** Get prerequisite gate arm array */
-	@Override public String getPrereq() {
+	@Override
+	public String getPrereq() {
 		return prereq;
 	}
 
@@ -197,21 +206,23 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private Camera camera;
 
 	/** Set the verification camera */
-	@Override public void setCamera(Camera c) {
+	@Override
+	public void setCamera(Camera c) {
 		GateArmSystem.disable(name + ": camera");
 		camera = c;
 	}
 
 	/** Set the verification camera */
 	public void doSetCamera(Camera c) throws TMSException {
-		if(c != camera) {
+		if (c != camera) {
 			store.update(this, "camera", c);
 			setCamera(c);
 		}
 	}
 
 	/** Get verification camera */
-	@Override public Camera getCamera() {
+	@Override
+	public Camera getCamera() {
 		return camera;
 	}
 
@@ -219,21 +230,23 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private Camera approach;
 
 	/** Set the approach camera */
-	@Override public void setApproach(Camera c) {
+	@Override
+	public void setApproach(Camera c) {
 		GateArmSystem.disable(name + ": approach");
 		approach = c;
 	}
 
 	/** Set the approach camera */
 	public void doSetApproach(Camera c) throws TMSException {
-		if(c != approach) {
+		if (c != approach) {
 			store.update(this, "approach", c);
 			setApproach(c);
 		}
 	}
 
 	/** Get approach camera */
-	@Override public Camera getApproach() {
+	@Override
+	public Camera getApproach() {
 		return approach;
 	}
 
@@ -241,21 +254,23 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private DMS dms;
 
 	/** Set the DMS for warning */
-	@Override public void setDms(DMS d) {
+	@Override
+	public void setDms(DMS d) {
 		GateArmSystem.disable(name + ": dms");
 		dms = d;
 	}
 
 	/** Set the DMS for warning */
 	public void doSetDms(DMS d) throws TMSException {
-		if(d != dms) {
+		if (d != dms) {
 			store.update(this, "dms", d);
 			setDms(d);
 		}
 	}
 
 	/** Get the DMS for warning */
-	@Override public DMS getDms() {
+	@Override
+	public DMS getDms() {
 		return dms;
 	}
 
@@ -263,21 +278,23 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private QuickMessage open_msg;
 
 	/** Set the OPEN quick message */
-	@Override public void setOpenMsg(QuickMessage om) {
+	@Override
+	public void setOpenMsg(QuickMessage om) {
 		GateArmSystem.disable(name + ": openMsg");
 		open_msg = om;
 	}
 
 	/** Set the OPEN quick message */
 	public void doSetOpenMsg(QuickMessage om) throws TMSException {
-		if(om != open_msg) {
+		if (om != open_msg) {
 			store.update(this, "open_msg", om);
 			setOpenMsg(om);
 		}
 	}
 
 	/** Get the OPEN quick message */
-	@Override public QuickMessage getOpenMsg() {
+	@Override
+	public QuickMessage getOpenMsg() {
 		return open_msg;
 	}
 
@@ -285,21 +302,23 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private QuickMessage closed_msg;
 
 	/** Set the CLOSED quick message */
-	@Override public void setClosedMsg(QuickMessage cm) {
+	@Override
+	public void setClosedMsg(QuickMessage cm) {
 		GateArmSystem.disable(name + ": closedMsg");
 		closed_msg = cm;
 	}
 
 	/** Set the CLOSED quick message */
 	public void doSetClosedMsg(QuickMessage cm) throws TMSException {
-		if(cm != closed_msg) {
+		if (cm != closed_msg) {
 			store.update(this, "closed_msg", cm);
 			setClosedMsg(cm);
 		}
 	}
 
 	/** Get the CLOSED quick message */
-	@Override public QuickMessage getClosedMsg() {
+	@Override
+	public QuickMessage getClosedMsg() {
 		return closed_msg;
 	}
 
@@ -318,9 +337,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		throws TMSException
 	{
 		idx--;
-		if(idx < 0 || idx >= MAX_ARMS)
+		if (idx < 0 || idx >= MAX_ARMS)
 			throw new ChangeVetoException("Invalid index");
-		if(ga != null && arms[idx] != null)
+		if (ga != null && arms[idx] != null)
 			throw new ChangeVetoException("Already assigned");
 		arms[idx] = ga;
 	}
@@ -328,9 +347,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Request a device operation */
 	@Override
 	public void setDeviceRequest(int r) {
-		for(int i = 0; i < MAX_ARMS; i++) {
+		for (int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
-			if(ga != null)
+			if (ga != null)
 				ga.setDeviceRequest(r);
 		}
 	}
@@ -344,8 +363,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	 * There can be a race between two clients setting these attributes.  If
 	 * ownerNext is non-null when being set, then a race has been detected,
 	 * meaning two clients are trying to set the state at the same time. */
-	@Override public synchronized void setOwnerNext(User o) {
-		if(ownerNext != null && o != null) {
+	@Override
+	public synchronized void setOwnerNext(User o) {
+		if (ownerNext != null && o != null) {
 			System.err.println("GateArmArrayImpl.setOwnerNext: " +
 				getName() + ", " + ownerNext.getName() +
 				" vs. " + o.getName());
@@ -358,7 +378,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private transient GateArmState arm_state = GateArmState.UNKNOWN;
 
 	/** Set the next arm state (request change) */
-	@Override public void setArmStateNext(int gas) {
+	@Override
+	public void setArmStateNext(int gas) {
 		// Do nothing; required by iface
 	}
 
@@ -367,12 +388,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		User o_next = ownerNext;	// Avoid race
 		// ownerNext is only valid for one message, clear it
 		ownerNext = null;
-		if(o_next == null)
+		if (o_next == null)
 			throw new ChangeVetoException("MUST SET OWNER FIRST");
 		final GateArmState cs = arm_state;
 		GateArmState rs = validateStateReq(
 			GateArmState.fromOrdinal(gas), cs);
-		if((rs != cs) && checkEnabled())
+		if ((rs != cs) && checkEnabled())
 			requestArmState(rs, o_next);
 	}
 
@@ -384,23 +405,23 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private GateArmState validateStateReq(GateArmState rs, GateArmState cs)
 		throws TMSException
 	{
-		if(rs == GateArmState.OPENING) {
-			if(lock_state.isOpenDenied())
+		if (rs == GateArmState.OPENING) {
+			if (lock_state.isOpenDenied())
 				throw INTERLOCK_CONFLICT;
-			if(cs == GateArmState.CLOSED ||
+			if (cs == GateArmState.CLOSED ||
 			   cs == GateArmState.WARN_CLOSE)
 				return rs;
 		}
-		if(rs == GateArmState.WARN_CLOSE) {
-			if(lock_state.isCloseDenied())
+		if (rs == GateArmState.WARN_CLOSE) {
+			if (lock_state.isCloseDenied())
 				throw INTERLOCK_CONFLICT;
-			if(cs == GateArmState.OPEN)
+			if (cs == GateArmState.OPEN)
 				return rs;
 		}
-		if(rs == GateArmState.CLOSING) {
-			if(lock_state.isCloseDenied())
+		if (rs == GateArmState.CLOSING) {
+			if (lock_state.isCloseDenied())
 				throw INTERLOCK_CONFLICT;
-			if(cs == GateArmState.WARN_CLOSE ||
+			if (cs == GateArmState.WARN_CLOSE ||
 			   cs == GateArmState.FAULT)
 				return rs;
 		}
@@ -414,13 +435,13 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private synchronized void requestArmState(GateArmState rs, User o)
 		throws TMSException
 	{
-		if(rs == GateArmState.WARN_CLOSE) {
+		if (rs == GateArmState.WARN_CLOSE) {
 			setArmState(rs);
 			return;
 		}
-		for(int i = 0; i < MAX_ARMS; i++) {
+		for (int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
-			if(ga != null)
+			if (ga != null)
 				ga.requestArmState(rs, o);
 		}
 	}
@@ -431,23 +452,23 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		notifyAttribute("armState");
 		updateStyles();
 		updateDmsMessage();
-		if(gas == GateArmState.TIMEOUT)
+		if (gas == GateArmState.TIMEOUT)
 			sendEmailAlert("COMMUNICATION FAILED: " + name);
-		if(gas == GateArmState.FAULT)
+		if (gas == GateArmState.FAULT)
 			sendEmailAlert("FAULT: " + name);
 	}
 
 	/** Update the message displayed on the DMS */
 	private void updateDmsMessage() {
 		DMS d = dms;
-		if(d instanceof DMSImpl)
+		if (d instanceof DMSImpl)
 			updateDmsMessage((DMSImpl)d);
 	}
 
 	/** Update the message on the specified DMS */
 	private void updateDmsMessage(DMSImpl d) {
 		QuickMessage qm = isMsgOpen() ? getOpenMsg() : getClosedMsg();
-		if(qm != null)
+		if (qm != null)
 			d.sendMessage(qm.getMulti(), false, PSA, PSA);
 	}
 
@@ -461,8 +482,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		GateArmState cs = arm_state;
 		GateArmState gas = aggregateArmState();
 		// Don't update WARN_CLOSE back to OPEN
-		if(gas != cs &&
-		  (gas != GateArmState.OPEN || cs != GateArmState.WARN_CLOSE))
+		if (gas != cs &&
+		   (gas != GateArmState.OPEN || cs != GateArmState.WARN_CLOSE))
 			setArmState(gas);
 	}
 
@@ -475,11 +496,11 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		boolean closing = false;
 		boolean closed = false;
 		boolean timeout = false;
-		for(int i = 0; i < MAX_ARMS; i++) {
+		for (int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
-			if(ga != null && ga.isActive()) {
+			if (ga != null && ga.isActive()) {
 				GateArmState gas = ga.getArmStateEnum();
-				switch(gas) {
+				switch (gas) {
 				case UNKNOWN:
 					unknown = true;
 					break;
@@ -504,25 +525,26 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 				}
 			}
 		}
-		if(unknown)
+		if (unknown)
 			return GateArmState.UNKNOWN;
-		if(timeout)
+		if (timeout)
 			return GateArmState.TIMEOUT;
-		if(fault)
+		if (fault)
 			return GateArmState.FAULT;
-		if(opening && !closing)
+		if (opening && !closing)
 			return GateArmState.OPENING;
-		if(closing && !opening)
+		if (closing && !opening)
 			return GateArmState.CLOSING;
-		if(open && !(closed || opening || closing))
+		if (open && !(closed || opening || closing))
 			return GateArmState.OPEN;
-		if(closed && !(open || opening || closing))
+		if (closed && !(open || opening || closing))
 			return GateArmState.CLOSED;
 		return GateArmState.FAULT;
 	}
 
 	/** Get the arm state */
-	@Override public int getArmState() {
+	@Override
+	public int getArmState() {
 		return arm_state.ordinal();
 	}
 
@@ -532,23 +554,24 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Calculate item styles */
 	private long calculateStyles() {
 		long s = ItemStyle.ALL.bit();
-		if(isClosed())
+		if (isClosed())
 			s |= ItemStyle.CLOSED.bit();
-		if(isOpen())
+		if (isOpen())
 			s |= ItemStyle.OPEN.bit();
-		if(isMoving())
+		if (isMoving())
 			s |= ItemStyle.MOVING.bit();
-		if(needsMaintenance())
+		if (needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();
-		if(isFailed())
+		if (isFailed())
 			s |= ItemStyle.FAILED.bit();
-		if(!isActive())
+		if (!isActive())
 			s |= ItemStyle.INACTIVE.bit();
 		return s;
 	}
 
 	/** Update the item styles */
-	@Override public void updateStyles() {
+	@Override
+	public void updateStyles() {
 		setStyles(calculateStyles());
 		GateArmSystem.checkInterlocks(getRoad());
 		GateArmSystem.updateDependants();
@@ -560,7 +583,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set the item style bits (and notify clients) */
 	private void setStyles(long s) {
-		if(s != styles) {
+		if (s != styles) {
 			styles = s;
 			notifyAttribute("styles");
 		}
@@ -577,15 +600,16 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Send gate arm interlock settings */
 	private void sendInterlocks() {
-		for(int i = 0; i < MAX_ARMS; i++) {
+		for (int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
-			if(ga != null)
+			if (ga != null)
 				ga.sendInterlocks();
 		}
 	}
 
 	/** Get the interlock enum */
-	@Override public int getInterlock() {
+	@Override
+	public int getInterlock() {
 		return lock_state.getInterlock().ordinal();
 	}
 
@@ -602,7 +626,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set flag to indicate prerequisite closed */
 	private void setPrereqClosed(boolean c) {
-		if(lock_state.setPrereqClosed(c))
+		if (lock_state.setPrereqClosed(c))
 			setInterlockNotify();
 	}
 
@@ -617,7 +641,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Check open/close state of dependant gate arm array */
 	public void checkDependant() {
 		GateArmArrayImpl pr = getPrerequisite();
-		if(pr != null)
+		if (pr != null)
 			pr.dep_open = (pr.dep_open || isPossiblyOpen());
 	}
 
@@ -629,13 +653,13 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set flag to indicate dependant gate arm open */
 	private void setDependantOpen(boolean o) {
-		if(lock_state.setDependantOpen(o))
+		if (lock_state.setDependantOpen(o))
 			setInterlockNotify();
 	}
 
 	/** Set flag to enable gate arm system */
 	public void setSystemEnable(boolean e) {
-		if(lock_state.setSystemEnable(e && isActive()))
+		if (lock_state.setSystemEnable(e && isActive()))
 			setInterlockNotify();
 	}
 
@@ -645,9 +669,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set open conflict state */
 	private void setOpenConflict(boolean c) {
-		if(c != open_conflict) {
+		if (c != open_conflict) {
 			open_conflict = c;
-			if(c)
+			if (c)
 				sendEmailAlert("OPEN CONFLICT: " + name);
 		}
 	}
@@ -657,9 +681,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set close conflict state */
 	private void setCloseConflict(boolean c) {
-		if(c != close_conflict) {
+		if (c != close_conflict) {
 			close_conflict = c;
-			if(c)
+			if (c)
 				sendEmailAlert("CLOSE CONFLICT: " + name);
 		}
 	}
@@ -686,25 +710,27 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Set flag to indicate opposing direction open */
 	private void setOpposingOpen(boolean o) {
-		if(lock_state.setOpposingOpen(o))
+		if (lock_state.setOpposingOpen(o))
 			setInterlockNotify();
 	}
 
 	/** Get the active status */
-	@Override public boolean isActive() {
-		for(int i = 0; i < MAX_ARMS; i++) {
+	@Override
+	public boolean isActive() {
+		for (int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
-			if(ga != null && ga.isActive())
+			if (ga != null && ga.isActive())
 				return true;
 		}
 		return false;
 	}
 
 	/** Get the failure status */
-	@Override public boolean isFailed() {
-		for(int i = 0; i < MAX_ARMS; i++) {
+	@Override
+	public boolean isFailed() {
+		for (int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
-			if(ga != null && ga.isActive() && ga.isFailed())
+			if (ga != null && ga.isActive() && ga.isFailed())
 				return true;
 		}
 		return false;
@@ -755,7 +781,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Get item style bits */
-	@Override public long getStyles() {
+	@Override
+	public long getStyles() {
 		return styles;
 	}
 }
