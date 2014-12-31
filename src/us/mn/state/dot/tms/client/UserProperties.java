@@ -113,11 +113,6 @@ public class UserProperties {
 		setProp(name, Integer.toString(i));
 	}
 
-	/** Set a float property */
-	private void setProp(String name, float f) {
-		setProp(name, Float.toString(f));
-	}
-
 	/**
 	 * Get a string property, first checking user properties, then
 	 * client properties.  Note: properties which are not found in user
