@@ -222,7 +222,7 @@ public class Session {
 		}
 	}
 
-	/** Get a list of tabs in the order specified by user_props */
+	/** Get a list of tabs in the order specified by properties */
 	public List<MapTab> getTabs() {
 		LinkedList<MapTab> tabs = new LinkedList<MapTab>();
 		for (String t : UserProperty.getTabList(props)) {

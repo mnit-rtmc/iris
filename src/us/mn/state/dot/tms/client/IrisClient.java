@@ -88,8 +88,8 @@ public class IrisClient extends JFrame {
 	/** Screen layout for desktop pane */
 	private final ScreenLayout layout;
 
-	/** Client properties */
-	private final Properties client_props;
+	/** Combined user and client properties */
+	private final Properties props;
 
 	/** Exception handler */
 	private final ExceptionHandler handler;
@@ -106,11 +106,11 @@ public class IrisClient extends JFrame {
 	}
 
 	/** Create a new Iris client */
-	public IrisClient(Properties cp, ExceptionHandler h) throws IOException{
+	public IrisClient(Properties p, ExceptionHandler h) throws IOException {
 		super(createTitle(I18N.get("iris.logged.out")));
-		client_props = cp;
+		props = p;
 		handler = h;
-		Widgets.init(UserProperty.getScale(client_props));
+		Widgets.init(UserProperty.getScale(props));
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
@@ -135,9 +135,9 @@ public class IrisClient extends JFrame {
 
 	/** Quit the IRIS client application */
 	private void doQuit() {
-		UserProperty.setWindowProperties(client_props, this);
+		UserProperty.setWindowProperties(props, this);
 		try {
-			UserProperty.store(client_props);
+			UserProperty.store(props);
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -185,11 +185,11 @@ public class IrisClient extends JFrame {
 
 	/** Set position of frame window using properties values */
 	private void setPosition() {
-		Rectangle r = UserProperty.getWindowPosition(client_props);
+		Rectangle r = UserProperty.getWindowPosition(props);
 		if (r == null)
 			r = Screen.getMaximizedBounds();
 		setBounds(r);
-		Integer ext = UserProperty.getWindowState(client_props);
+		Integer ext = UserProperty.getWindowState(props);
 		if (ext != null)
 			setExtendedState(ext);
 		getContentPane().validate();
@@ -197,8 +197,8 @@ public class IrisClient extends JFrame {
 
 	/** Auto-login the user if enabled */
 	private void autoLogin() {
-		String user = client_props.getProperty("autologin.username");
-		String pws = client_props.getProperty("autologin.password");
+		String user = props.getProperty("autologin.username");
+		String pws = props.getProperty("autologin.password");
 		if (user != null && pws != null) {
 			char[] pwd = pws.toCharArray();
 			pws = null;
@@ -258,7 +258,7 @@ public class IrisClient extends JFrame {
 
 	/** Set the selected tab in each screen pane */
 	private void setSelectedTabs(Session s) {
-		String[] st = UserProperty.getSelectedTabs(client_props);
+		String[] st = UserProperty.getSelectedTabs(props);
 		for (int i = 0; i < s_panes.length && i < st.length; i++) {
 			MapTab mt = s.lookupTab(st[i]);
 			if (mt != null)
@@ -296,7 +296,7 @@ public class IrisClient extends JFrame {
 	/** Create a new session */
 	private Session createSession(String user, char[] pwd) {
 		try {
-			SonarState st = new SonarState(client_props, handler);
+			SonarState st = new SonarState(props, handler);
 			if(st.login(user, new String(pwd))) {
 				st.populateCaches();
 				try {
@@ -316,7 +316,7 @@ public class IrisClient extends JFrame {
 
 	/** Create a user session */
 	private Session createSession(SonarState st) throws Exception {
-		Session s = new Session(st, desktop, client_props);
+		Session s = new Session(st, desktop, props);
 		s.initialize();
 		return s;
 	}
@@ -369,7 +369,7 @@ public class IrisClient extends JFrame {
 
 	/** Logout of the current session */
 	public void logout() {
-		UserProperty.setWindowProperties(client_props, this);
+		UserProperty.setWindowProperties(props, this);
 		menu_bar.setSession(null);
 		removeTabs();
 		closeSession();
