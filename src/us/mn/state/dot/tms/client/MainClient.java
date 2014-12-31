@@ -87,7 +87,7 @@ public class MainClient {
 	static private IrisClient createClient(String loc,
 		ExceptionHandler handler) throws IOException
 	{
-		Properties props = PropertyLoader.load(loc);
+		Properties props = UserProperty.load(PropertyLoader.load(loc));
 		updateProxySelector(props);
 		I18N.initialize(props);
 		return new IrisClient(props, handler);

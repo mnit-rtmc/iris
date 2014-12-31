@@ -101,9 +101,6 @@ public class Session {
 		return props;
 	}
 
-	/** Mutable user properties stored on client workstation */
-	private final UserProperties user_props;
-
 	/** Location manager */
 	private final GeoLocManager loc_manager;
 
@@ -157,15 +154,12 @@ public class Session {
 		new LinkedList<EditModeListener>();
 
 	/** Create a new session */
-	public Session(SonarState st, SmartDesktop d, Properties p,
-		UserProperties up)
-	{
+	public Session(SonarState st, SmartDesktop d, Properties p) {
 		state = st;
 		user = state.getUser();
 		namespace = state.getNamespace();
 		desktop = d;
 		props = p;
-		user_props = up;
 		loc_manager = new GeoLocManager(this);
 		r_node_manager = new R_NodeManager(this, loc_manager);
 		cam_manager = new CameraManager(this, loc_manager);
@@ -231,7 +225,7 @@ public class Session {
 	/** Get a list of tabs in the order specified by user_props */
 	public List<MapTab> getTabs() {
 		LinkedList<MapTab> tabs = new LinkedList<MapTab>();
-		for (String t : user_props.getTabList()) {
+		for (String t : UserProperty.getTabList(props)) {
 			MapTab tab = all_tabs.get(t);
 			if (tab != null)
 				tabs.add(tab);

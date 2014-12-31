@@ -94,9 +94,6 @@ public class IrisClient extends JFrame {
 	/** Exception handler */
 	private final ExceptionHandler handler;
 
-	/** Mutable user properties stored on client workstation */
-	private final UserProperties user_props;
-
 	/** Menu bar */
 	private final IMenuBar menu_bar;
 
@@ -113,8 +110,7 @@ public class IrisClient extends JFrame {
 		super(createTitle(I18N.get("iris.logged.out")));
 		client_props = cp;
 		handler = h;
-		user_props = new UserProperties(client_props);
-		Widgets.init(user_props.getScale());
+		Widgets.init(UserProperty.getScale(client_props));
 		JPopupMenu.setDefaultLightWeightPopupEnabled(false);
 		screens = Screen.getAllScreens();
 		s_panes = new ScreenPane[screens.length];
@@ -139,9 +135,9 @@ public class IrisClient extends JFrame {
 
 	/** Quit the IRIS client application */
 	private void doQuit() {
-		user_props.setWindowProperties(this);
+		UserProperty.setWindowProperties(client_props, this);
 		try {
-			user_props.write();
+			UserProperty.store(client_props);
 		}
 		catch (IOException e) {
 			e.printStackTrace();
@@ -189,11 +185,11 @@ public class IrisClient extends JFrame {
 
 	/** Set position of frame window using properties values */
 	private void setPosition() {
-		Rectangle r = user_props.getWindowPosition();
+		Rectangle r = UserProperty.getWindowPosition(client_props);
 		if (r == null)
 			r = Screen.getMaximizedBounds();
 		setBounds(r);
-		Integer ext = user_props.getWindowState();
+		Integer ext = UserProperty.getWindowState(client_props);
 		if (ext != null)
 			setExtendedState(ext);
 		getContentPane().validate();
@@ -262,7 +258,7 @@ public class IrisClient extends JFrame {
 
 	/** Set the selected tab in each screen pane */
 	private void setSelectedTabs(Session s) {
-		String[] st = user_props.getSelectedTabs();
+		String[] st = UserProperty.getSelectedTabs(client_props);
 		for (int i = 0; i < s_panes.length && i < st.length; i++) {
 			MapTab mt = s.lookupTab(st[i]);
 			if (mt != null)
@@ -320,7 +316,7 @@ public class IrisClient extends JFrame {
 
 	/** Create a user session */
 	private Session createSession(SonarState st) throws Exception {
-		Session s = new Session(st, desktop, client_props, user_props);
+		Session s = new Session(st, desktop, client_props);
 		s.initialize();
 		return s;
 	}
@@ -373,7 +369,7 @@ public class IrisClient extends JFrame {
 
 	/** Logout of the current session */
 	public void logout() {
-		user_props.setWindowProperties(this);
+		UserProperty.setWindowProperties(client_props, this);
 		menu_bar.setSession(null);
 		removeTabs();
 		closeSession();
