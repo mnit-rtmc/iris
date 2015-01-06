@@ -49,8 +49,8 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
-{
+public class DMSDispatcher extends JPanel {
+
 	/** User session */
 	private final Session session;
 
@@ -59,6 +59,18 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Selection model */
 	private final ProxySelectionModel<DMS> sel_model;
+
+	/** Selection listener */
+	private final ProxySelectionListener<DMS> sel_listener =
+		new ProxySelectionListener<DMS>()
+	{
+		public void selectionAdded(DMS s) {
+			DMSDispatcher.this.selectionAdded(s);
+		}
+		public void selectionRemoved(DMS s) {
+			DMSDispatcher.this.selectionRemoved(s);
+		}
+	};
 
 	/** Sign message creator */
 	private final SignMessageCreator creator;
@@ -103,13 +115,13 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	public void initialize() {
 		singleTab.initialize();
 		multipleTab.initialize();
-		sel_model.addProxySelectionListener(this);
+		sel_model.addProxySelectionListener(sel_listener);
 		clearSelected();
 	}
 
 	/** Dispose of the dispatcher */
 	public void dispose() {
-		sel_model.removeProxySelectionListener(this);
+		sel_model.removeProxySelectionListener(sel_listener);
 		clearSelected();
 		removeAll();
 		singleTab.dispose();
@@ -315,9 +327,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Called whenever a sign is added to the selection */
-	@Override
-	public void selectionAdded(DMS dms) {
-		if(!checkDimensions(dms))
+	private void selectionAdded(DMS dms) {
+		if (!checkDimensions(dms))
 			createBuilder(dms);
 		updateSelected();
 	}
@@ -329,8 +340,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	}
 
 	/** Called whenever a sign is removed from the selection */
-	@Override
-	public void selectionRemoved(DMS dms) {
+	private void selectionRemoved(DMS dms) {
 		if (!areBuilderAndComposerValid()) {
 			builder = null;
 			for (DMS s: sel_model.getSelected()) {
