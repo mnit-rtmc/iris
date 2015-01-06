@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,29 +45,26 @@ import us.mn.state.dot.tms.utils.I18N;
 public class MultipleSignTab extends JPanel {
 
 	/** Label to display selected sign count */
-	private final JLabel selectedLbl = new JLabel(I18N.get("dms.selected") +
+	private final JLabel sel_lbl = new JLabel(I18N.get("dms.selected") +
 		":");
 
 	/** DMS sign group cache */
 	private final TypeCache<DmsSignGroup> dms_sign_groups;
 
 	/** Selected list model */
-	protected final DefaultListModel sel_model = new DefaultListModel();
-
-	/** Selected sign list */
-	protected final JList sel_list = new JList(sel_model);
+	private final DefaultListModel sign_mdl = new DefaultListModel();
 
 	/** List model of all non-local sign groups */
-	protected final ProxyListModel<SignGroup> sign_group_model;
+	private final ProxyListModel<SignGroup> sign_group_model;
 
 	/** Group list widget */
-	protected final JList group_list;
+	private final JList group_list;
 
 	/** Selection model */
-	protected final ProxySelectionModel<DMS> selectionModel;
+	private final ProxySelectionModel<DMS> sel_model;
 
 	/** Selection listener */
-	private final ProxySelectionListener<DMS> listener =
+	private final ProxySelectionListener<DMS> sel_listener =
 		new ProxySelectionListener<DMS>()
 	{
 		public void selectionAdded(DMS dms) {
@@ -96,14 +93,14 @@ public class MultipleSignTab extends JPanel {
 				selectGroup();
 			}
 		});
-		selectionModel = sm;
+		sel_model = sm;
 	}
 
 	/** Initialize the sign tab */
 	public void initialize() {
 		sign_group_model.initialize();
 		layoutPanel();
-		selectionModel.addProxySelectionListener(listener);
+		sel_model.addProxySelectionListener(sel_listener);
 	}
 
 	/** Layout the panel */
@@ -115,7 +112,7 @@ public class MultipleSignTab extends JPanel {
 		bag.gridx = 0;
 		bag.gridy = 0;
 		bag.fill = GridBagConstraints.BOTH;
-		add(selectedLbl, bag);
+		add(sel_lbl, bag);
 		bag.gridx = 1;
 		add(new ILabel("dms.groups"), bag);
 		bag.gridx = 0;
@@ -123,9 +120,10 @@ public class MultipleSignTab extends JPanel {
 		bag.weightx = 1;
 		bag.weighty = 1;
 		bag.insets.bottom = UI.vgap;
-		sel_list.setVisibleRowCount(6);
-		sel_list.setEnabled(false);
-		JScrollPane pane = new JScrollPane(sel_list);
+		JList list = new JList(sign_mdl);
+		list.setVisibleRowCount(6);
+		list.setEnabled(false);
+		JScrollPane pane = new JScrollPane(list);
 		add(pane, bag);
 		bag.gridx = 1;
 		group_list.setVisibleRowCount(6);
@@ -135,22 +133,22 @@ public class MultipleSignTab extends JPanel {
 
 	/** Dispose of the sign tab */
 	public void dispose() {
-		selectionModel.removeProxySelectionListener(listener);
+		sel_model.removeProxySelectionListener(sel_listener);
 		sign_group_model.dispose();
 	}
 
 	/** Select a new sign group */
 	protected void selectGroup() {
 		SignGroup group = getSelectedGroup();
-		List<DMS> selected = selectionModel.getSelected();
+		List<DMS> selected = sel_model.getSelected();
 		List<DMS> in_group = createGroupList(group);
-		for(DMS dms: in_group) {
-			if(!selected.contains(dms))
-				selectionModel.addSelected(dms);
+		for (DMS dms: in_group) {
+			if (!selected.contains(dms))
+				sel_model.addSelected(dms);
 		}
-		for(DMS dms: selected) {
-			if(!in_group.contains(dms))
-				selectionModel.removeSelected(dms);
+		for (DMS dms: selected) {
+			if (!in_group.contains(dms))
+				sel_model.removeSelected(dms);
 		}
 	}
 
@@ -163,7 +161,7 @@ public class MultipleSignTab extends JPanel {
 
 	/** Called whenever a sign is added to the selection */
 	private void doSelectionAdded(DMS dms) {
-		sel_model.addElement(dms);
+		sign_mdl.addElement(dms);
 		updateSelectedLabel();
 		SignGroup group = getSelectedGroup();
 		if (group != null && !isGroupMember(dms, group))
@@ -172,7 +170,7 @@ public class MultipleSignTab extends JPanel {
 
 	/** Called whenever a sign is removed from the selection */
 	private void doSelectionRemoved(DMS dms) {
-		sel_model.removeElement(dms);
+		sign_mdl.removeElement(dms);
 		updateSelectedLabel();
 		SignGroup group = getSelectedGroup();
 		if (group != null && isGroupMember(dms, group))
@@ -181,14 +179,14 @@ public class MultipleSignTab extends JPanel {
 
 	/** Update the selected count label */
 	private void updateSelectedLabel() {
-		selectedLbl.setText(I18N.get("dms.selected") + ": " +
-			selectionModel.getSelectedCount());
+		sel_lbl.setText(I18N.get("dms.selected") + ": " +
+			sel_model.getSelectedCount());
 	}
 
 	/** Check if a sign is a member of the specified group */
 	private boolean isGroupMember(DMS dms, SignGroup group) {
-		for(DmsSignGroup g: dms_sign_groups) {
-			if(dms == g.getDms() && group == g.getSignGroup())
+		for (DmsSignGroup g: dms_sign_groups) {
+			if (dms == g.getDms() && group == g.getSignGroup())
 				return true;
 		}
 		return false;
@@ -197,8 +195,8 @@ public class MultipleSignTab extends JPanel {
 	/** Create a list of all signs in a group */
 	private List<DMS> createGroupList(SignGroup group) {
 		LinkedList<DMS> signs = new LinkedList<DMS>();
-		for(DmsSignGroup g: dms_sign_groups) {
-			if(group == g.getSignGroup())
+		for (DmsSignGroup g: dms_sign_groups) {
+			if (group == g.getSignGroup())
 				signs.add(g.getDms());
 		}
 		return signs;
