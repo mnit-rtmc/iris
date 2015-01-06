@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	}
 
 	/** Listener for proxy selection events */
-	private final ProxySelectionListener<T> listener =
+	private final ProxySelectionListener<T> sel_listener =
 		new ProxySelectionListener<T>()
 	{
 		public void selectionAdded(T proxy) {
@@ -60,7 +60,7 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 		super(layer, mb);
 		manager = layer.getManager();
 		model = manager.getSelectionModel();
-		model.addProxySelectionListener(listener);
+		model.addProxySelectionListener(sel_listener);
 	}
 
 	/** Set the selection */
@@ -79,7 +79,7 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	@Override
 	public void dispose() {
 		super.dispose();
-		model.removeProxySelectionListener(listener);
+		model.removeProxySelectionListener(sel_listener);
 	}
 
 	/** Flag to indicate the tab is selected */
