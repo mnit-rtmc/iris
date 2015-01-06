@@ -485,6 +485,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		if (gas != cs &&
 		   (gas != GateArmState.OPEN || cs != GateArmState.WARN_CLOSE))
 			setArmState(gas);
+		else
+			checkEnabled();
 		updateDmsMessage();
 	}
 
