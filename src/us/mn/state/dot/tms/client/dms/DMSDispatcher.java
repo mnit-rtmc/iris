@@ -35,7 +35,6 @@ import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.utils.I18N;
@@ -97,8 +96,7 @@ public class DMSDispatcher extends JPanel {
 	public DMSDispatcher(Session s, DMSManager manager) {
 		super(new BorderLayout());
 		session = s;
-		SonarState st = session.getSonarState();
-		DmsCache dms_cache = st.getDmsCache();
+		DmsCache dms_cache = session.getSonarState().getDmsCache();
 		user = session.getUser();
 		creator = new SignMessageCreator(s, user);
 		sel_model = manager.getSelectionModel();
