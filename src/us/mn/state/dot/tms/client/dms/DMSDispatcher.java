@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -58,7 +58,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	private final User user;
 
 	/** Selection model */
-	private final ProxySelectionModel<DMS> selectionModel;
+	private final ProxySelectionModel<DMS> sel_model;
 
 	/** Sign message creator */
 	private final SignMessageCreator creator;
@@ -89,9 +89,9 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 		DmsCache dms_cache = st.getDmsCache();
 		user = session.getUser();
 		creator = new SignMessageCreator(s, user);
-		selectionModel = manager.getSelectionModel();
+		sel_model = manager.getSelectionModel();
 		singleTab = new SingleSignTab(session, this);
-		multipleTab = new MultipleSignTab(dms_cache, selectionModel);
+		multipleTab = new MultipleSignTab(dms_cache, sel_model);
 		composer = new SignMessageComposer(session, this, manager);
 		tabPane.addTab(I18N.get("dms.single"), singleTab);
 		tabPane.addTab(I18N.get("dms.multiple"), multipleTab);
@@ -103,13 +103,13 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	public void initialize() {
 		singleTab.initialize();
 		multipleTab.initialize();
-		selectionModel.addProxySelectionListener(this);
+		sel_model.addProxySelectionListener(this);
 		clearSelected();
 	}
 
 	/** Dispose of the dispatcher */
 	public void dispose() {
-		selectionModel.removeProxySelectionListener(this);
+		sel_model.removeProxySelectionListener(this);
 		clearSelected();
 		removeAll();
 		singleTab.dispose();
@@ -119,11 +119,11 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Get a list of the selected DMS */
 	private List<DMS> getSelected() {
-		List<DMS> sel = selectionModel.getSelected();
+		List<DMS> sel = sel_model.getSelected();
 		Iterator<DMS> it = sel.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			DMS dms = it.next();
-			if(!checkDimensions(dms))
+			if (!checkDimensions(dms))
 				it.remove();
 		}
 		return sel;
@@ -150,9 +150,9 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Remove all invalid selected DMS */
 	private void removeInvalidSelections() {
-		for(DMS dms: selectionModel.getSelected()) {
-			if(!checkDimensions(dms))
-				selectionModel.removeSelected(dms);
+		for (DMS dms: sel_model.getSelected()) {
+			if (!checkDimensions(dms))
+				sel_model.removeSelected(dms);
 		}
 	}
 
@@ -204,8 +204,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Get page prefix MULTI string from scheduled message (if any) */
 	public String getPagePrefix() {
-		DMS dms = selectionModel.getSingleSelection();
-		if(dms != null) {
+		DMS dms = sel_model.getSingleSelection();
+		if (dms != null) {
 			SignMessage sm = dms.getMessageSched();
 			if(sm != null && sm.getActivationPriority() ==
 			   DMSMessagePriority.PREFIX_PAGE.ordinal())
@@ -255,8 +255,8 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Blank the select DMS */
 	public void sendBlankMessage() {
-		List<DMS> sel = selectionModel.getSelected();
-		if(sel.size() > 0) {
+		List<DMS> sel = sel_model.getSelected();
+		if (sel.size() > 0) {
 			SignMessage sm = createBlankMessage();
 			if(sm != null) {
 				for(DMS dms: sel) {
@@ -307,7 +307,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Query the current message on all selected signs */
 	public void queryMessage() {
-		for(DMS dms: selectionModel.getSelected()) {
+		for (DMS dms: sel_model.getSelected()) {
 			dms.setDeviceRequest(
 				DeviceRequest.QUERY_MESSAGE.ordinal());
 		}
@@ -331,9 +331,9 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 	/** Called whenever a sign is removed from the selection */
 	@Override
 	public void selectionRemoved(DMS dms) {
-		if(!areBuilderAndComposerValid()) {
+		if (!areBuilderAndComposerValid()) {
 			builder = null;
-			for(DMS s: selectionModel.getSelected()) {
+			for (DMS s: sel_model.getSelected()) {
 				createBuilder(s);
 				break;
 			}
@@ -343,7 +343,7 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Check if the builder is valid for at least one selected DMS */
 	private boolean areBuilderAndComposerValid() {
-		List<DMS> sel = selectionModel.getSelected();
+		List<DMS> sel = sel_model.getSelected();
 		// If there is only one DMS selected, then the composer needs
 		// to be updated for that sign.
 		if(sel.size() > 1) {
@@ -357,11 +357,11 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Update the selected sign(s) */
 	private void updateSelected() {
-		List<DMS> sel = selectionModel.getSelected();
-		if(sel.size() == 0)
+		List<DMS> sel = sel_model.getSelected();
+		if (sel.size() == 0)
 			clearSelected();
-		else if(sel.size() == 1) {
-			for(DMS dms: sel)
+		else if (sel.size() == 1) {
+			for (DMS dms: sel)
 				setSelected(dms);
 		} else {
 			singleTab.setSelected(null);
@@ -477,11 +477,11 @@ public class DMSDispatcher extends JPanel implements ProxySelectionListener<DMS>
 
 	/** Can a device request be sent to all selected DMS? */
 	public boolean canRequest() {
-		List<DMS> sel = selectionModel.getSelected();
-		if(sel.isEmpty())
+		List<DMS> sel = sel_model.getSelected();
+		if (sel.isEmpty())
 			return false;
-		for(DMS dms: sel) {
-			if(!canRequest(dms))
+		for (DMS dms: sel) {
+			if (!canRequest(dms))
 				return false;
 		}
 		return true;
