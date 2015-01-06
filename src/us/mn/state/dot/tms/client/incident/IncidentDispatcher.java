@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class IncidentDispatcher extends IPanel
-	implements ProxyListener<Incident>, ProxySelectionListener<Incident>
+	implements ProxyListener<Incident>
 {
 	/** Size in pixels for each lane */
 	static private final int LANE_SIZE = UI.scaled(32);
@@ -84,6 +84,18 @@ public class IncidentDispatcher extends IPanel
 
 	/** Selection model */
 	private final ProxySelectionModel<Incident> sel_model;
+
+	/** Selection listener */
+	private final ProxySelectionListener<Incident> sel_listener =
+		new ProxySelectionListener<Incident>()
+	{
+		public void selectionAdded(Incident s) {
+			updateSelected();
+		}
+		public void selectionRemoved(Incident s) {
+			IncidentDispatcher.this.selectionRemoved(s);
+		}
+	};
 
 	/** Incident creator */
 	private final IncidentCreator creator;
@@ -217,7 +229,7 @@ public class IncidentDispatcher extends IPanel
 		createButtonJobs();
 		cache.addProxyListener(this);
 		clearSelected();
-		sel_model.addProxySelectionListener(this);
+		sel_model.addProxySelectionListener(sel_listener);
 	}
 
 	/** Build the impact box */
@@ -423,23 +435,16 @@ public class IncidentDispatcher extends IPanel
 	/** Dispose of the dispatcher */
 	@Override
 	public void dispose() {
-		sel_model.removeProxySelectionListener(this);
+		sel_model.removeProxySelectionListener(sel_listener);
 		cache.removeProxyListener(this);
 		clearSelected();
 		super.dispose();
 	}
 
-	/** Called whenever an object is added to the selection */
-	@Override
-	public void selectionAdded(Incident s) {
-		updateSelected();
-	}
-
 	/** Called whenever an object is removed from the selection */
-	@Override
-	public void selectionRemoved(Incident inc) {
+	private void selectionRemoved(Incident inc) {
 		updateSelected();
-		if(inc instanceof ClientIncident)
+		if (inc instanceof ClientIncident)
 			manager.removeIncident(inc.getName());
 	}
 
