@@ -170,7 +170,12 @@ public class OpSendDMSMessage extends OpDMS {
 				return new ModifyMessage();
 			else if(!modify_requested)
 				return new ModifyRequest();
-			else {
+			else if (status.isValid()) {
+				/* Some ledstar signs prevent dmsMessageStatus
+				 * from changing to modifyReq when in 'local'
+				 * dmsControlMode. */
+				return new QueryControlMode();
+			} else {
 				setErrorStatus(status.toString());
 				return null;
 			}
@@ -205,6 +210,20 @@ public class OpSendDMSMessage extends OpDMS {
 			logStore(prior);
 			mess.storeProps();
 			return new ValidateRequest();
+		}
+	}
+
+	/** Phase to query the control mode */
+	protected class QueryControlMode extends Phase {
+
+		/** Query the control mode */
+		protected Phase poll(CommMessage mess) throws IOException {
+			DmsControlMode mode = new DmsControlMode();
+			mess.add(mode);
+			mess.queryProps();
+			logQuery(mode);
+			setErrorStatus(mode.toString());
+			return null;
 		}
 	}
 
