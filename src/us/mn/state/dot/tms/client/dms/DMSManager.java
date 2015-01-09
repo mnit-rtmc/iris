@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -78,6 +78,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Create a new DMS manager */
 	public DMSManager(Session s, GeoLocManager lm) {
 		super(s, lm, ItemStyle.DEPLOYED);
+		s_model.setAllowMultiple(true);
 	}
 
 	/** Get the sonar type name */

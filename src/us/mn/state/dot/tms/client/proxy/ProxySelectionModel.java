@@ -34,9 +34,21 @@ public class ProxySelectionModel<T extends SonarObject> {
 	private final List<ProxySelectionListener<T>> lsnrs =
 		new LinkedList<ProxySelectionListener<T>>();
 
+	/** Flag to allow multiple selection */
+	private boolean allow_multiple = false;
+
+	/** Set the allow multiple selection flag */
+	public void setAllowMultiple(boolean m) {
+		allow_multiple = m;
+		if (selected.size() > 1)
+			clearSelection();
+	}
+
 	/** Add a proxy to the selection */
 	public void addSelected(T proxy) {
-		if (selected.add(proxy))
+		if (selected.size() > 0 && !allow_multiple)
+			setSelected(proxy);
+		else if (selected.add(proxy))
 			fireSelectionAdded(proxy);
 	}
 
