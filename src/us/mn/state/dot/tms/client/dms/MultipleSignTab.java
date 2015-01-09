@@ -23,7 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
+import static javax.swing.ListSelectionModel.SINGLE_SELECTION;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsSignGroup;
@@ -68,10 +68,10 @@ public class MultipleSignTab extends JPanel {
 		new ProxySelectionListener<DMS>()
 	{
 		public void selectionAdded(DMS dms) {
-			doSelectionAdded(dms);
+			doSelectionChanged();
 		}
 		public void selectionRemoved(DMS dms) {
-			doSelectionRemoved(dms);
+			doSelectionChanged();
 		}
 	};
 
@@ -87,6 +87,7 @@ public class MultipleSignTab extends JPanel {
 		};
 		dms_sign_groups = cache.getDmsSignGroups();
 		group_list = new JList(sign_group_model);
+		group_list.setSelectionMode(SINGLE_SELECTION);
 		group_list.addListSelectionListener(new IListSelectionAdapter(){
 			@Override
 			public void valueChanged() {
@@ -154,27 +155,22 @@ public class MultipleSignTab extends JPanel {
 
 	/** Get the selected sign group */
 	private SignGroup getSelectedGroup() {
-		ListSelectionModel s = group_list.getSelectionModel();
-		int i = s.getMinSelectionIndex();
+		int i = group_list.getSelectedIndex();
 		return (i >= 0) ? sign_group_model.getProxy(i) : null;
 	}
 
-	/** Called whenever a sign is added to the selection */
-	private void doSelectionAdded(DMS dms) {
-		sign_mdl.addElement(dms);
-		updateSelectedLabel();
+	/** Called whenever the selection is changed */
+	private void doSelectionChanged() {
+		sign_mdl.clear();
 		SignGroup group = getSelectedGroup();
-		if (group != null && !isGroupMember(dms, group))
-			group_list.clearSelection();
-	}
-
-	/** Called whenever a sign is removed from the selection */
-	private void doSelectionRemoved(DMS dms) {
-		sign_mdl.removeElement(dms);
+		for (DMS dms : sel_model.getSelected()) {
+			sign_mdl.addElement(dms);
+			if (group != null && !isGroupMember(dms, group)) {
+				group_list.clearSelection();
+				group = null;
+			}
+		}
 		updateSelectedLabel();
-		SignGroup group = getSelectedGroup();
-		if (group != null && isGroupMember(dms, group))
-			group_list.clearSelection();
 	}
 
 	/** Update the selected count label */
