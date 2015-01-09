@@ -64,10 +64,10 @@ public class DMSDispatcher extends JPanel {
 		new ProxySelectionListener<DMS>()
 	{
 		public void selectionAdded(DMS s) {
-			DMSDispatcher.this.selectionAdded(s);
+			selectionChanged();
 		}
 		public void selectionRemoved(DMS s) {
-			DMSDispatcher.this.selectionRemoved(s);
+			selectionChanged();
 		}
 	};
 
@@ -324,21 +324,8 @@ public class DMSDispatcher extends JPanel {
 		selectPreview(false);
 	}
 
-	/** Called whenever a sign is added to the selection */
-	private void selectionAdded(DMS dms) {
-		if (!checkDimensions(dms))
-			createBuilder(dms);
-		updateSelected();
-	}
-
-	/** Create a pixel map builder */
-	private void createBuilder(DMS dms) {
-		builder = DMSHelper.createRasterBuilder(dms);
-		composer.setSign(dms, builder);
-	}
-
-	/** Called whenever a sign is removed from the selection */
-	private void selectionRemoved(DMS dms) {
+	/** Called whenever the selection is changed */
+	private void selectionChanged() {
 		if (!areBuilderAndComposerValid()) {
 			builder = null;
 			for (DMS s: sel_model.getSelected()) {
@@ -352,15 +339,21 @@ public class DMSDispatcher extends JPanel {
 	/** Check if the builder is valid for at least one selected DMS */
 	private boolean areBuilderAndComposerValid() {
 		List<DMS> sel = sel_model.getSelected();
-		// If there is only one DMS selected, then the composer needs
-		// to be updated for that sign.
-		if(sel.size() > 1) {
-			for(DMS dms: sel) {
-				if(checkDimensions(dms))
+		// If there is only one DMS selected, then the
+		// composer needs to be updated for that sign.
+		if (sel.size() > 1) {
+			for (DMS dms: sel) {
+				if (checkDimensions(dms))
 					return true;
 			}
 		}
 		return false;
+	}
+
+	/** Create a pixel map builder */
+	private void createBuilder(DMS dms) {
+		builder = DMSHelper.createRasterBuilder(dms);
+		composer.setSign(dms, builder);
 	}
 
 	/** Update the selected sign(s) */
