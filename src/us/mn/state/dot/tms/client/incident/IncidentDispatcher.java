@@ -93,7 +93,7 @@ public class IncidentDispatcher extends IPanel
 			updateSelected();
 		}
 		public void selectionRemoved(Incident s) {
-			IncidentDispatcher.this.selectionRemoved(s);
+			updateSelected();
 		}
 	};
 
@@ -441,20 +441,15 @@ public class IncidentDispatcher extends IPanel
 		super.dispose();
 	}
 
-	/** Called whenever an object is removed from the selection */
-	private void selectionRemoved(Incident inc) {
-		updateSelected();
-		if (inc instanceof ClientIncident)
-			manager.removeIncident(inc.getName());
-	}
-
 	/** Update the selected object(s) */
 	private void updateSelected() {
 		Incident inc = sel_model.getSingleSelection();
-		if(inc != null)
+		if (inc != null)
 			setSelected(inc);
 		else
 			clearSelected();
+		if (!(inc instanceof ClientIncident))
+			manager.removeClientIncident();
 	}
 
 	/** Clear the selection */
