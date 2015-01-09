@@ -44,6 +44,11 @@ public class ProxySelectionModel<T extends SonarObject> {
 			clearSelection();
 	}
 
+	/** Get the allow multiple selection flag */
+	public boolean getAllowMultiple() {
+		return allow_multiple;
+	}
+
 	/** Add a proxy to the selection */
 	public void addSelected(T proxy) {
 		if (selected.size() > 0 && !allow_multiple)

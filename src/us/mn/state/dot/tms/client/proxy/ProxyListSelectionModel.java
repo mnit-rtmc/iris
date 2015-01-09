@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import javax.swing.DefaultListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
@@ -77,32 +75,9 @@ public class ProxyListSelectionModel<T extends SonarObject>
 	{
 		model = m;
 		sel_model = s;
+		if (!sel_model.getAllowMultiple())
+			setSelectionMode(SINGLE_SELECTION);
 		sel_model.addProxySelectionListener(listener);
-		addListSelectionListener(new ListSelectionListener() {
-			public void valueChanged(ListSelectionEvent e) {
-				if(adjusting > 0 || e.getValueIsAdjusting())
-					return;
-				updateProxySelectionModel(e);
-			}
-		});
-	}
-
-	/** Update the proxy selection model from a selection event */
-	private void updateProxySelectionModel(ListSelectionEvent e) {
-		updateProxySelectionModel(e.getFirstIndex(), e.getLastIndex());
-	}
-
-	/** Update the proxy selection model from a selection event */
-	private void updateProxySelectionModel(int index0, int index1) {
-		for(int i = index0; i <= index1; i++) {
-			T proxy = model.getProxy(i);
-			if(proxy != null) {
-				if(isSelectedIndex(i))
-					sel_model.addSelected(proxy);
-				else
-					sel_model.removeSelected(proxy);
-			}
-		}
 	}
 
 	/** Insert an interval into the model */
