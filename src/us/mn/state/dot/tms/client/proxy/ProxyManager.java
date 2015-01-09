@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -345,10 +345,9 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Show the properties form for the selected proxy */
 	public final void showPropertiesForm() {
-		if(s_model.getSelectedCount() == 1) {
-			for(T proxy: s_model.getSelected())
-				showPropertiesForm(proxy);
-		}
+		T proxy = s_model.getSingleSelection();
+		if (proxy != null)
+			showPropertiesForm(proxy);
 	}
 
 	/** Show the properties form for the specified proxy */
@@ -374,12 +373,13 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Create a popup menu for the selected proxy object(s) */
 	private JPopupMenu createPopup() {
-		int n_selected = s_model.getSelectedCount();
-		if(n_selected == 1) {
-			for(T proxy: s_model.getSelected())
-				return createPopupSingle(proxy);
+		T proxy = s_model.getSingleSelection();
+		if (proxy != null)
+			return createPopupSingle(proxy);
+		else {
+			int n_sel = s_model.getSelectedCount();
+			return (n_sel > 1) ? createPopupMulti(n_sel) : null;
 		}
-		return n_selected > 1 ? createPopupMulti(n_selected) : null;
 	}
 
 	/** Create a popup menu for a single object */
