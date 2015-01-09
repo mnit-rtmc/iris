@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,32 +30,32 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 
 	/** R_Node list model */
-	protected final R_NodeListModel model;
+	private final R_NodeListModel model;
 
 	/** Proxy selection model */
-	protected final ProxySelectionModel<R_Node> sel;
+	private final ProxySelectionModel<R_Node> sel;
 
 	/** The "valueIsAdjusting" crap doesn't work right */
-	protected int adjusting = 0;
+	private int adjusting = 0;
 
 	/** Listener for proxy selection events */
-	protected final ProxySelectionListener<R_Node> listener =
+	private final ProxySelectionListener<R_Node> listener =
 		new ProxySelectionListener<R_Node> ()
 	{
 		public void selectionAdded(R_Node proxy) {
-			if(adjusting == 0)
+			if (adjusting == 0)
 				doSelectionAdded(proxy);
 		}
 		public void selectionRemoved(R_Node proxy) {
-			if(adjusting == 0)
+			if (adjusting == 0)
 				doSelectionRemoved(proxy);
 		}
 	};
 
 	/** Update the selection model when a selection is added */
-	protected void doSelectionAdded(R_Node proxy) {
+	private void doSelectionAdded(R_Node proxy) {
 		int i = model.getRow(proxy);
-		if(i >= 0) {
+		if (i >= 0) {
 			adjusting++;
 			addSelectionInterval(i, i);
 			adjusting--;
@@ -63,9 +63,9 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 	}
 
 	/** Update the selection model when a selection is removed */
-	protected void doSelectionRemoved(R_Node proxy) {
+	private void doSelectionRemoved(R_Node proxy) {
 		int i = model.getRow(proxy);
-		if(i >= 0) {
+		if (i >= 0) {
 			adjusting++;
 			removeSelectionInterval(i, i);
 			adjusting--;
@@ -73,11 +73,11 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 	}
 
 	/** List selection listener */
-	protected final ListSelectionListener sel_listener =
+	private final ListSelectionListener sel_listener =
 		new ListSelectionListener()
 	{
 		public void valueChanged(ListSelectionEvent e) {
-			if(adjusting > 0 || e.getValueIsAdjusting())
+			if (adjusting > 0 || e.getValueIsAdjusting())
 				return;
 			updateProxySelectionModel(e);
 		}
@@ -89,7 +89,7 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 	{
 		model = m;
 		sel = s;
-		for(R_Node n: sel.getSelected())
+		for (R_Node n: sel.getSelected())
 			doSelectionAdded(n);
 		sel.addProxySelectionListener(listener);
 		addListSelectionListener(sel_listener);
@@ -102,16 +102,16 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 	}
 
 	/** Update the proxy selection model from a selection event */
-	protected void updateProxySelectionModel(ListSelectionEvent e) {
+	private void updateProxySelectionModel(ListSelectionEvent e) {
 		updateProxySelectionModel(e.getFirstIndex(), e.getLastIndex());
 	}
 
 	/** Update the proxy selection model from a selection event */
-	protected void updateProxySelectionModel(int index0, int index1) {
-		for(int i = index0; i <= index1; i++) {
+	private void updateProxySelectionModel(int index0, int index1) {
+		for (int i = index0; i <= index1; i++) {
 			R_Node proxy = model.getProxy(i);
-			if(proxy != null) {
-				if(isSelectedIndex(i))
+			if (proxy != null) {
+				if (isSelectedIndex(i))
 					sel.addSelected(proxy);
 				else
 					sel.removeSelected(proxy);
@@ -120,20 +120,22 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 	}
 
 	/** Insert an interval into the model */
+	@Override
 	public void insertIndexInterval(int index, int length, boolean before) {
 		adjusting++;
 		super.insertIndexInterval(index, length, before);
 		// NOTE: if the proxies being added are already selected,
 		//       we need to add them to this selection model
-		for(int i = index; i < index + length; i++) {
+		for (int i = index; i < index + length; i++) {
 			R_Node proxy = model.getProxy(i);
-			if(proxy != null && sel.isSelected(proxy))
+			if (proxy != null && sel.isSelected(proxy))
 				addSelectionInterval(index, index);
 		}
 		adjusting--;
 	}
 
 	/** Remove an interval from the model */
+	@Override
 	public void removeIndexInterval(int index0, int index1) {
 		// NOTE: other models should not be affected by removing
 		//       a proxy from this model
@@ -143,19 +145,20 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 	}
 
 	/** Set the selection interval */
+	@Override
 	public void setSelectionInterval(int index0, int index1) {
 		adjusting++;
 		super.setSelectionInterval(index0, index1);
 		// NOTE: we need to deselect any selected items not in the
 		//       list model.
-		for(R_Node proxy: sel.getSelected()) {
+		for (R_Node proxy: sel.getSelected()) {
 			int i = model.getRow(proxy);
-			if(i < index0 || i > index1)
+			if (i < index0 || i > index1)
 				sel.removeSelected(proxy);
 		}
-		for(int i = index0; i <= index1; i++) {
+		for (int i = index0; i <= index1; i++) {
 			R_Node proxy = model.getProxy(i);
-			if(proxy != null)
+			if (proxy != null)
 				sel.addSelected(proxy);
 		}
 		adjusting--;
