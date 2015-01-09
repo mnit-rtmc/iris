@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -127,20 +127,11 @@ public class CorridorList extends JPanel {
 	private final ProxySelectionListener<R_Node> sel_listener =
 		new ProxySelectionListener<R_Node>()
 	{
-		private R_Node r_node;
-		@Override
 		public void selectionAdded(R_Node proxy) {
-			if(!manager.checkCorridor(proxy)) {
-				CorridorBase cb = manager.getCorridor(proxy);
-				corridor_cbx.setSelectedItem(cb);
-			}
-			updateNodeSelection(proxy);
-			r_node = proxy;
+			updateNodeSelection(sel_model.getSingleSelection());
 		}
-		@Override
 		public void selectionRemoved(R_Node proxy) {
-			if(proxy == r_node)
-				updateNodeSelection(null);
+			updateNodeSelection(sel_model.getSingleSelection());
 		}
 	};
 
@@ -419,9 +410,18 @@ public class CorridorList extends JPanel {
 
 	/** Update the roadway node selection */
 	private void updateNodeSelection(R_Node proxy) {
+		if (isCorridorChanged(proxy)) {
+			CorridorBase cb = manager.getCorridor(proxy);
+			corridor_cbx.setSelectedItem(cb);
+		}
 		client.setPointSelector(null);
 		panel.setR_Node(proxy);
 		updateButtonPanel();
+	}
+
+	/** Check if the corridor is changed */
+	private boolean isCorridorChanged(R_Node proxy) {
+		return (proxy != null) && !manager.checkCorridor(proxy);
 	}
 
 	/** Update the enabled state of add and delete buttons */
