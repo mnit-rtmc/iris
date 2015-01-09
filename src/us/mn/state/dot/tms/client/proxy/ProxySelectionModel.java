@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,18 +31,18 @@ public class ProxySelectionModel<T extends SonarObject> {
 	private final Set<T> selected = new HashSet<T>();
 
 	/** The listeners of this model */
-	private final List<ProxySelectionListener<T>> listeners =
+	private final List<ProxySelectionListener<T>> lsnrs =
 		new LinkedList<ProxySelectionListener<T>>();
 
 	/** Add a proxy to the selection */
 	public void addSelected(T proxy) {
-		if(selected.add(proxy))
+		if (selected.add(proxy))
 			fireSelectionAdded(proxy);
 	}
 
 	/** Remove a proxy from the selection */
 	public void removeSelected(T proxy) {
-		if(selected.remove(proxy))
+		if (selected.remove(proxy))
 			fireSelectionRemoved(proxy);
 	}
 
@@ -51,8 +51,8 @@ public class ProxySelectionModel<T extends SonarObject> {
 		List<T> sel = getSelected();
 		selected.clear();
 		addSelected(proxy);
-		for(T _proxy: sel) {
-			if(_proxy != proxy)
+		for (T _proxy: sel) {
+			if (_proxy != proxy)
 				fireSelectionRemoved(_proxy);
 		}
 	}
@@ -61,7 +61,7 @@ public class ProxySelectionModel<T extends SonarObject> {
 	public void clearSelection() {
 		List<T> sel = getSelected();
 		selected.clear();
-		for(T proxy: sel)
+		for (T proxy: sel)
 			fireSelectionRemoved(proxy);
 	}
 
@@ -82,8 +82,8 @@ public class ProxySelectionModel<T extends SonarObject> {
 
 	/** Get a single selected proxy (if only one is selected) */
 	public T getSingleSelection() {
-		if(selected.size() == 1) {
-			for(T proxy: selected)
+		if (selected.size() == 1) {
+			for (T proxy: selected)
 				return proxy;
 		}
 		return null;
@@ -91,29 +91,29 @@ public class ProxySelectionModel<T extends SonarObject> {
 
 	/** Add a proxy selection listener to the model */
 	public void addProxySelectionListener(ProxySelectionListener<T> l) {
-		listeners.add(l);
+		lsnrs.add(l);
 	}
 
 	/** Remove a proxy selection listener from the model */
 	public void removeProxySelectionListener(ProxySelectionListener<T> l) {
-		listeners.remove(l);
+		lsnrs.remove(l);
 	}
 
 	/** Fire a selection added event to all listeners */
 	private void fireSelectionAdded(T proxy) {
-		for(ProxySelectionListener<T> l: listeners)
+		for (ProxySelectionListener<T> l: lsnrs)
 			l.selectionAdded(proxy);
 	}
 
 	/** Fire a selection removed event to all listeners */
 	private void fireSelectionRemoved(T proxy) {
-		for(ProxySelectionListener l: listeners)
+		for (ProxySelectionListener l: lsnrs)
 			l.selectionRemoved(proxy);
 	}
 
 	/** Dispose of the proxy selection model */
 	public void dispose() {
-		listeners.clear();
+		lsnrs.clear();
 		selected.clear();
 	}
 }
