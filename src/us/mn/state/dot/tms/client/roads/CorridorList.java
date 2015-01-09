@@ -124,13 +124,10 @@ public class CorridorList extends JPanel {
 	private R_NodeListSelectionModel smodel;
 
 	/** R_Node selection listener */
-	private final ProxySelectionListener<R_Node> sel_listener =
-		new ProxySelectionListener<R_Node>()
+	private final ProxySelectionListener sel_listener =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(R_Node proxy) {
-			updateNodeSelection(sel_model.getSingleSelection());
-		}
-		public void selectionRemoved(R_Node proxy) {
+		public void selectionChanged() {
 			updateNodeSelection(sel_model.getSingleSelection());
 		}
 	};

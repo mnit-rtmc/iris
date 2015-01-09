@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,13 +64,10 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	private final ProxySelectionModel<LCSArray> sel_model;
 
 	/** Selection listener */
-	private final ProxySelectionListener<LCSArray> sel_listener =
-		new ProxySelectionListener<LCSArray>()
+	private final ProxySelectionListener sel_listener =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(LCSArray la) {
-			setSelected(sel_model.getSingleSelection());
-		}
-		public void selectionRemoved(LCSArray la) {
+		public void selectionChanged() {
 			setSelected(sel_model.getSingleSelection());
 		}
 	};

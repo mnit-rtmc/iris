@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.DefaultListSelectionModel;
 import us.mn.state.dot.sonar.SonarObject;
 
@@ -32,41 +34,26 @@ public class ProxyListSelectionModel<T extends SonarObject>
 	/** Proxy selection model */
 	private final ProxySelectionModel<T> sel_model;
 
-	/** The "valueIsAdjusting" crap doesn't work right */
-	private int adjusting = 0;
-
 	/** Listener for proxy selection events */
-	private final ProxySelectionListener<T> listener =
-		new ProxySelectionListener<T> ()
+	private final ProxySelectionListener listener =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(T proxy) {
-			if(adjusting == 0)
-				doSelectionAdded(proxy);
-		}
-		public void selectionRemoved(T proxy) {
-			if(adjusting == 0)
-				doSelectionRemoved(proxy);
+		public void selectionChanged() {
+			if (!getValueIsAdjusting())
+				doSelectionChanged();
 		}
 	};
 
-	/** Update the selection model when a selection is added */
-	private void doSelectionAdded(T proxy) {
-		int i = model.getIndex(proxy);
-		if (i >= 0) {
-			adjusting++;
-			addSelectionInterval(i, i);
-			adjusting--;
+	/** Update the selection model when the selection is changed */
+	private void doSelectionChanged() {
+		setValueIsAdjusting(true);
+		clearSelection();
+		for (T proxy : sel_model.getSelected()) {
+			int i = model.getIndex(proxy);
+			if (i >= 0)
+				super.addSelectionInterval(i, i);
 		}
-	}
-
-	/** Update the selection model when a selection is removed */
-	private void doSelectionRemoved(T proxy) {
-		int i = model.getIndex(proxy);
-		if (i >= 0) {
-			adjusting++;
-			removeSelectionInterval(i, i);
-			adjusting--;
-		}
+		setValueIsAdjusting(false);
 	}
 
 	/** Create a new proxy list selection model */
@@ -83,45 +70,59 @@ public class ProxyListSelectionModel<T extends SonarObject>
 	/** Insert an interval into the model */
 	@Override
 	public void insertIndexInterval(int index, int length, boolean before) {
-		adjusting++;
 		super.insertIndexInterval(index, length, before);
 		// NOTE: if the proxies being added are already selected,
 		//       we need to add them to this selection model
 		for (int i = index; i < index + length; i++) {
 			T proxy = model.getProxy(i);
 			if (proxy != null && sel_model.isSelected(proxy))
-				addSelectionInterval(i, i);
+				super.addSelectionInterval(i, i);
 		}
-		adjusting--;
 	}
 
-	/** Remove an interval from the model */
+	/** Add a selection interval */
 	@Override
-	public void removeIndexInterval(int index0, int index1) {
-		// NOTE: other models should not be affected by removing
-		//       a proxy from this model
-		adjusting++;
-		super.removeIndexInterval(index0, index1);
-		adjusting--;
+	public void addSelectionInterval(int index0, int index1) {
+		super.addSelectionInterval(index0, index1);
+		Set<T> proxies = sel_model.getSelected();
+		for (int i = index0; i <= index1; i++) {
+			T proxy = model.getProxy(i);
+			if (proxy != null)
+				proxies.add(proxy);
+		}
+		setSelected(proxies);
+	}
+
+	/** Remove a selection interval */
+	@Override
+	public void removeSelectionInterval(int index0, int index1) {
+		super.removeSelectionInterval(index0, index1);
+		Set<T> proxies = sel_model.getSelected();
+		for (int i = index0; i <= index1; i++) {
+			T proxy = model.getProxy(i);
+			if (proxy != null)
+				proxies.remove(proxy);
+		}
+		setSelected(proxies);
 	}
 
 	/** Set the selection interval */
 	@Override
 	public void setSelectionInterval(int index0, int index1) {
-		adjusting++;
 		super.setSelectionInterval(index0, index1);
-		// NOTE: we need to deselect any selected items not in the
-		//       list model.
-		for (T proxy: sel_model.getSelected()) {
-			int i = model.getIndex(proxy);
-			if (i < index0 || i > index1)
-				sel_model.removeSelected(proxy);
-		}
+		HashSet<T> proxies = new HashSet<T>();
 		for (int i = index0; i <= index1; i++) {
 			T proxy = model.getProxy(i);
 			if (proxy != null)
-				sel_model.addSelected(proxy);
+				proxies.add(proxy);
 		}
-		adjusting--;
+		setSelected(proxies);
+	}
+
+	/** Set the selected proxies */
+	private void setSelected(Set<T> proxies) {
+		setValueIsAdjusting(true);
+		sel_model.setSelected(proxies);
+		setValueIsAdjusting(false);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2014  Minnesota Department of Transportation
+ * Copyright (C) 2005-2015  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -69,13 +69,10 @@ public class CameraDispatcher extends JPanel {
 	private final ProxySelectionModel<Camera> sel_model;
 
 	/** Selection listener */
-	private final ProxySelectionListener<Camera> sel_listener =
-		new ProxySelectionListener<Camera>()
+	private final ProxySelectionListener sel_listener =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(Camera c) {
-			selectCamera(sel_model.getSingleSelection());
-		}
-		public void selectionRemoved(Camera c) {
+		public void selectionChanged() {
 			selectCamera(sel_model.getSingleSelection());
 		}
 	};

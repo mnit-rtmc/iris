@@ -86,13 +86,10 @@ public class IncidentDispatcher extends IPanel
 	private final ProxySelectionModel<Incident> sel_model;
 
 	/** Selection listener */
-	private final ProxySelectionListener<Incident> sel_listener =
-		new ProxySelectionListener<Incident>()
+	private final ProxySelectionListener sel_listener =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(Incident s) {
-			updateSelected();
-		}
-		public void selectionRemoved(Incident s) {
+		public void selectionChanged() {
 			updateSelected();
 		}
 	};

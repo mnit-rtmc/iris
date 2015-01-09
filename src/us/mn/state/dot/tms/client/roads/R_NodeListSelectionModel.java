@@ -34,13 +34,10 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 	private final ProxySelectionModel<R_Node> sel;
 
 	/** Listener for proxy selection events */
-	private final ProxySelectionListener<R_Node> sel_lsnr =
-		new ProxySelectionListener<R_Node> ()
+	private final ProxySelectionListener sel_lsnr =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(R_Node proxy) {
-			doSelectionChanged();
-		}
-		public void selectionRemoved(R_Node proxy) {
+		public void selectionChanged() {
 			doSelectionChanged();
 		}
 	};

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,13 +84,13 @@ public class IncidentCreator extends JPanel {
 	private final IrisClient client;
 
 	/** Listener for proxy selection events */
-	private final ProxySelectionListener<Incident> sel_listener =
-		new ProxySelectionListener<Incident>()
+	private final ProxySelectionListener sel_listener =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(Incident inc) {
-			clearWidgets();
+		public void selectionChanged() {
+			if (sel_model.getSelectedCount() > 0)
+				clearWidgets();
 		}
-		public void selectionRemoved(Incident inc) { }
 	};
 
 	/** Create a new incident creator */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,18 +14,13 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
-import us.mn.state.dot.sonar.SonarObject;
-
 /**
  * An interface for listening to proxy selection events.
  *
  * @author Douglas Lau
  */
-public interface ProxySelectionListener<T extends SonarObject> {
+public interface ProxySelectionListener {
 
-	/** Fired when a proxy is added to the selection */
-	void selectionAdded(T proxy);
-
-	/** Fired when a proxy is removed from the selection */
-	void selectionRemoved(T proxy);
+	/** Fired when the proxy selection is changed */
+	void selectionChanged();
 }

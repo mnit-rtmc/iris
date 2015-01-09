@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2014  Minnesota Department of Transportation
+ * Copyright (C) 2011-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,13 +86,10 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	private final ProxySelectionModel<ActionPlan> sel_model;
 
 	/** Selection listener */
-	private final ProxySelectionListener<ActionPlan> sel_listener =
-		new ProxySelectionListener<ActionPlan>()
+	private final ProxySelectionListener sel_listener =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(ActionPlan s) {
-			setSelected(sel_model.getSingleSelection());
-		}
-		public void selectionRemoved(ActionPlan s) {
+		public void selectionChanged() {
 			setSelected(sel_model.getSingleSelection());
 		}
 	};

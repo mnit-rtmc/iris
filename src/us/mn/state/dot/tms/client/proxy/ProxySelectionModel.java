@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.proxy;
 
 import java.util.HashSet;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Set;
 import us.mn.state.dot.sonar.SonarObject;
 
@@ -31,8 +30,8 @@ public class ProxySelectionModel<T extends SonarObject> {
 	private final Set<T> selected = new HashSet<T>();
 
 	/** The listeners of this model */
-	private final List<ProxySelectionListener<T>> lsnrs =
-		new LinkedList<ProxySelectionListener<T>>();
+	private final LinkedList<ProxySelectionListener> lsnrs =
+		new LinkedList<ProxySelectionListener>();
 
 	/** Flag to allow multiple selection */
 	private boolean allow_multiple = false;
@@ -54,37 +53,38 @@ public class ProxySelectionModel<T extends SonarObject> {
 		if (selected.size() > 0 && !allow_multiple)
 			setSelected(proxy);
 		else if (selected.add(proxy))
-			fireSelectionAdded(proxy);
+			fireSelectionChanged();
 	}
 
 	/** Remove a proxy from the selection */
 	public void removeSelected(T proxy) {
 		if (selected.remove(proxy))
-			fireSelectionRemoved(proxy);
+			fireSelectionChanged();
 	}
 
 	/** Set a proxy to be a single selection */
 	public void setSelected(T proxy) {
-		List<T> sel = getSelected();
 		selected.clear();
-		addSelected(proxy);
-		for (T _proxy: sel) {
-			if (_proxy != proxy)
-				fireSelectionRemoved(_proxy);
-		}
+		selected.add(proxy);
+		fireSelectionChanged();
+	}
+
+	/** Set a list of proxies to be a selection */
+	public void setSelected(Set<T> proxies) {
+		selected.clear();
+		selected.addAll(proxies);
+		fireSelectionChanged();
 	}
 
 	/** Clear the proxy selection */
 	public void clearSelection() {
-		List<T> sel = getSelected();
 		selected.clear();
-		for (T proxy: sel)
-			fireSelectionRemoved(proxy);
+		fireSelectionChanged();
 	}
 
 	/** Get a list of the selected proxies */
-	public List<T> getSelected() {
-		return new LinkedList<T>(selected);
+	public Set<T> getSelected() {
+		return new HashSet<T>(selected);
 	}
 
 	/** Test if a proxy is selected */
@@ -107,25 +107,19 @@ public class ProxySelectionModel<T extends SonarObject> {
 	}
 
 	/** Add a proxy selection listener to the model */
-	public void addProxySelectionListener(ProxySelectionListener<T> l) {
+	public void addProxySelectionListener(ProxySelectionListener l) {
 		lsnrs.add(l);
 	}
 
 	/** Remove a proxy selection listener from the model */
-	public void removeProxySelectionListener(ProxySelectionListener<T> l) {
+	public void removeProxySelectionListener(ProxySelectionListener l) {
 		lsnrs.remove(l);
 	}
 
 	/** Fire a selection added event to all listeners */
-	private void fireSelectionAdded(T proxy) {
-		for (ProxySelectionListener<T> l: lsnrs)
-			l.selectionAdded(proxy);
-	}
-
-	/** Fire a selection removed event to all listeners */
-	private void fireSelectionRemoved(T proxy) {
+	private void fireSelectionChanged() {
 		for (ProxySelectionListener l: lsnrs)
-			l.selectionRemoved(proxy);
+			l.selectionChanged();
 	}
 
 	/** Dispose of the proxy selection model */

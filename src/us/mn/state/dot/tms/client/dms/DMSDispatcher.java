@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.util.Iterator;
-import java.util.List;
+import java.util.Set;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
@@ -60,14 +60,11 @@ public class DMSDispatcher extends JPanel {
 	private final ProxySelectionModel<DMS> sel_model;
 
 	/** Selection listener */
-	private final ProxySelectionListener<DMS> sel_listener =
-		new ProxySelectionListener<DMS>()
+	private final ProxySelectionListener sel_listener =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(DMS s) {
-			selectionChanged();
-		}
-		public void selectionRemoved(DMS s) {
-			selectionChanged();
+		public void selectionChanged() {
+			doSelectionChanged();
 		}
 	};
 
@@ -128,8 +125,8 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Get a list of the selected DMS */
-	private List<DMS> getSelected() {
-		List<DMS> sel = sel_model.getSelected();
+	private Set<DMS> getSelected() {
+		Set<DMS> sel = sel_model.getSelected();
 		Iterator<DMS> it = sel.iterator();
 		while (it.hasNext()) {
 			DMS dms = it.next();
@@ -160,10 +157,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Remove all invalid selected DMS */
 	private void removeInvalidSelections() {
-		for (DMS dms: sel_model.getSelected()) {
-			if (!checkDimensions(dms))
-				sel_model.removeSelected(dms);
-		}
+		sel_model.setSelected(getSelected());
 	}
 
 	/** If enabled, prompt the user with a send confirmation.
@@ -226,16 +220,16 @@ public class DMSDispatcher extends JPanel {
 
 	/** Send a new message to the selected DMS */
 	private void sendMessage() {
-		List<DMS> sel = getSelected();
-		if(sel.size() > 0) {
+		Set<DMS> sel = getSelected();
+		if (sel.size() > 0) {
 			SignMessage sm = createMessage();
-			if(sm != null) {
-				for(DMS dms: sel) {
+			if (sm != null) {
+				for (DMS dms: sel) {
 					dms.setOwnerNext(user);
 					dms.setMessageNext(sm);
 				}
 			}
-			if(sel.size() == 1)
+			if (sel.size() == 1)
 				composer.updateMessageLibrary();
 			selectPreview(false);
 		}
@@ -265,7 +259,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Blank the select DMS */
 	public void sendBlankMessage() {
-		List<DMS> sel = sel_model.getSelected();
+		Set<DMS> sel = sel_model.getSelected();
 		if (sel.size() > 0) {
 			SignMessage sm = createBlankMessage();
 			if(sm != null) {
@@ -325,7 +319,7 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Called whenever the selection is changed */
-	private void selectionChanged() {
+	private void doSelectionChanged() {
 		if (!areBuilderAndComposerValid()) {
 			builder = null;
 			for (DMS s: sel_model.getSelected()) {
@@ -338,7 +332,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Check if the builder is valid for at least one selected DMS */
 	private boolean areBuilderAndComposerValid() {
-		List<DMS> sel = sel_model.getSelected();
+		Set<DMS> sel = sel_model.getSelected();
 		// If there is only one DMS selected, then the
 		// composer needs to be updated for that sign.
 		if (sel.size() > 1) {
@@ -358,7 +352,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Update the selected sign(s) */
 	private void updateSelected() {
-		List<DMS> sel = sel_model.getSelected();
+		Set<DMS> sel = sel_model.getSelected();
 		if (sel.size() == 0)
 			clearSelected();
 		else if (sel.size() == 1) {
@@ -454,11 +448,11 @@ public class DMSDispatcher extends JPanel {
 
 	/** Can a message be sent to all selected DMS? */
 	public boolean canSend() {
-		List<DMS> sel = getSelected();
-		if(sel.isEmpty())
+		Set<DMS> sel = getSelected();
+		if (sel.isEmpty())
 			return false;
-		for(DMS dms: sel) {
-			if(!canSend(dms))
+		for (DMS dms: sel) {
+			if (!canSend(dms))
 				return false;
 		}
 		return true;
@@ -478,7 +472,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Can a device request be sent to all selected DMS? */
 	public boolean canRequest() {
-		List<DMS> sel = sel_model.getSelected();
+		Set<DMS> sel = sel_model.getSelected();
 		if (sel.isEmpty())
 			return false;
 		for (DMS dms: sel) {

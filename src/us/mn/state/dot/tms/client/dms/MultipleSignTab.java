@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -64,13 +64,10 @@ public class MultipleSignTab extends JPanel {
 	private final ProxySelectionModel<DMS> sel_model;
 
 	/** Selection listener */
-	private final ProxySelectionListener<DMS> sel_listener =
-		new ProxySelectionListener<DMS>()
+	private final ProxySelectionListener sel_listener =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(DMS dms) {
-			doSelectionChanged();
-		}
-		public void selectionRemoved(DMS dms) {
+		public void selectionChanged() {
 			doSelectionChanged();
 		}
 	};
@@ -141,16 +138,7 @@ public class MultipleSignTab extends JPanel {
 	/** Select a new sign group */
 	protected void selectGroup() {
 		SignGroup group = getSelectedGroup();
-		List<DMS> selected = sel_model.getSelected();
-		List<DMS> in_group = createGroupList(group);
-		for (DMS dms: in_group) {
-			if (!selected.contains(dms))
-				sel_model.addSelected(dms);
-		}
-		for (DMS dms: selected) {
-			if (!in_group.contains(dms))
-				sel_model.removeSelected(dms);
-		}
+		sel_model.setSelected(createGroupList(group));
 	}
 
 	/** Get the selected sign group */
@@ -189,8 +177,8 @@ public class MultipleSignTab extends JPanel {
 	}
 
 	/** Create a list of all signs in a group */
-	private List<DMS> createGroupList(SignGroup group) {
-		LinkedList<DMS> signs = new LinkedList<DMS>();
+	private Set<DMS> createGroupList(SignGroup group) {
+		HashSet<DMS> signs = new HashSet<DMS>();
 		for (DmsSignGroup g: dms_sign_groups) {
 			if (group == g.getSignGroup())
 				signs.add(g.getDms());

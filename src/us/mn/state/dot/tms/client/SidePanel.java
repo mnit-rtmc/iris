@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,7 +136,7 @@ public class SidePanel extends JPanel {
 
 	/** Class to listen for proxy selection events and select tabs */
 	private class TabSwitcher<T extends SonarObject>
-		implements ProxySelectionListener<T>
+		implements ProxySelectionListener
 	{
 		private final MapTab<T> tab;
 		private final ProxySelectionModel<T> model;
@@ -148,12 +148,10 @@ public class SidePanel extends JPanel {
 		protected void dispose() {
 			model.removeProxySelectionListener(this);
 		}
-		@Override
-		public void selectionAdded(T proxy) {
-			setSelectedTab(tab);
+		public void selectionChanged() {
+			if (model.getSelectedCount() > 0)
+				setSelectedTab(tab);
 		}
-		@Override
-		public void selectionRemoved(T proxy) { }
 	}
 
 	/** Remove all the tabs */

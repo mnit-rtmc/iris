@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -172,13 +172,10 @@ public class GateArmDispatcher extends IPanel
 	private GateArmArray ga_array;
 
 	/** Selection listener */
-	private final ProxySelectionListener<GateArmArray> sel_listener =
-		new ProxySelectionListener<GateArmArray>()
+	private final ProxySelectionListener sel_listener =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(GateArmArray ga) {
-			setSelected(sel_model.getSingleSelection());
-		}
-		public void selectionRemoved(GateArmArray ga) {
+		public void selectionChanged() {
 			setSelected(sel_model.getSingleSelection());
 		}
 	};

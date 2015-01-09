@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.client.proxy;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseEvent;
 import java.util.LinkedList;
-import java.util.List;
+import java.util.Set;
 import us.mn.state.dot.map.LayerChange;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
@@ -44,13 +44,10 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	}
 
 	/** Listener for proxy selection events */
-	private final ProxySelectionListener<T> sel_listener =
-		new ProxySelectionListener<T>()
+	private final ProxySelectionListener sel_listener =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(T proxy) {
-			setSelection();
-		}
-		public void selectionRemoved(T proxy) {
+		public void selectionChanged() {
 			setSelection();
 		}
 	};
@@ -65,11 +62,11 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 
 	/** Set the selection */
 	private void setSelection() {
-		List<T> proxies = model.getSelected();
+		Set<T> proxies = model.getSelected();
 		LinkedList<MapGeoLoc> sel = new LinkedList<MapGeoLoc>();
-		for(T proxy: proxies) {
+		for (T proxy: proxies) {
 			MapGeoLoc loc = manager.findGeoLoc(proxy);
-			if(loc != null)
+			if (loc != null)
 				sel.add(loc);
 		}
 		setSelections(sel.toArray(new MapGeoLoc[0]));
@@ -116,9 +113,9 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	/** Do mouse click event processing */
 	protected void doClick(MouseEvent e, MapObject o) {
 		T proxy = manager.findProxy(o);
-		if(proxy != null) {
+		if (proxy != null) {
 			int m = e.getModifiersEx();
-			if((m & InputEvent.CTRL_DOWN_MASK) != 0)
+			if ((m & InputEvent.CTRL_DOWN_MASK) != 0)
 				model.addSelected(proxy);
 			else
 				model.setSelected(proxy);

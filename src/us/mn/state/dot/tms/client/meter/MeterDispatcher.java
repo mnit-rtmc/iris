@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,13 +58,10 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	private final ProxySelectionModel<RampMeter> sel_model;
 
 	/** Selection listener */
-	private final ProxySelectionListener<RampMeter> sel_listener =
-		new ProxySelectionListener<RampMeter>()
+	private final ProxySelectionListener sel_listener =
+		new ProxySelectionListener()
 	{
-		public void selectionAdded(RampMeter rm) {
-			setSelected(sel_model.getSingleSelection());
-		}
-		public void selectionRemoved(RampMeter rm) {
+		public void selectionChanged() {
 			setSelected(sel_model.getSingleSelection());
 		}
 	};
