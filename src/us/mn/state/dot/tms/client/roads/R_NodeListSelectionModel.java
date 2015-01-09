@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.client.roads;
 
 import javax.swing.DefaultListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
@@ -35,53 +33,30 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 	/** Proxy selection model */
 	private final ProxySelectionModel<R_Node> sel;
 
-	/** The "valueIsAdjusting" crap doesn't work right */
-	private int adjusting = 0;
-
 	/** Listener for proxy selection events */
-	private final ProxySelectionListener<R_Node> listener =
+	private final ProxySelectionListener<R_Node> sel_lsnr =
 		new ProxySelectionListener<R_Node> ()
 	{
 		public void selectionAdded(R_Node proxy) {
-			if (adjusting == 0)
-				doSelectionAdded(proxy);
+			doSelectionChanged();
 		}
 		public void selectionRemoved(R_Node proxy) {
-			if (adjusting == 0)
-				doSelectionRemoved(proxy);
+			doSelectionChanged();
 		}
 	};
 
-	/** Update the selection model when a selection is added */
-	private void doSelectionAdded(R_Node proxy) {
-		int i = model.getRow(proxy);
-		if (i >= 0) {
-			adjusting++;
-			addSelectionInterval(i, i);
-			adjusting--;
-		}
-	}
-
-	/** Update the selection model when a selection is removed */
-	private void doSelectionRemoved(R_Node proxy) {
-		int i = model.getRow(proxy);
-		if (i >= 0) {
-			adjusting++;
-			removeSelectionInterval(i, i);
-			adjusting--;
-		}
-	}
-
-	/** List selection listener */
-	private final ListSelectionListener sel_listener =
-		new ListSelectionListener()
-	{
-		public void valueChanged(ListSelectionEvent e) {
-			if (adjusting > 0 || e.getValueIsAdjusting())
+	/** Update the selection model */
+	private void doSelectionChanged() {
+		R_Node proxy = sel.getSingleSelection();
+		if (proxy != null) {
+			int i = model.getRow(proxy);
+			if (i >= 0) {
+				super.setSelectionInterval(i, i);
 				return;
-			updateProxySelectionModel(e);
+			}
 		}
-	};
+		clearSelection();
+	}
 
 	/** Create a new r_node list selection model */
 	public R_NodeListSelectionModel(R_NodeListModel m,
@@ -89,78 +64,46 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 	{
 		model = m;
 		sel = s;
-		for (R_Node n: sel.getSelected())
-			doSelectionAdded(n);
-		sel.addProxySelectionListener(listener);
-		addListSelectionListener(sel_listener);
+		setSelectionMode(SINGLE_SELECTION);
+		doSelectionChanged();
+		sel.addProxySelectionListener(sel_lsnr);
+	}
+
+	/** Set the selection mode */
+	@Override
+	public void setSelectionMode(int m) {
+		if (m == SINGLE_SELECTION)
+			super.setSelectionMode(m);
+		else
+			throw new IllegalArgumentException();
 	}
 
 	/** Dispose of the model */
 	public void dispose() {
-		removeListSelectionListener(sel_listener);
-		sel.removeProxySelectionListener(listener);
-	}
-
-	/** Update the proxy selection model from a selection event */
-	private void updateProxySelectionModel(ListSelectionEvent e) {
-		updateProxySelectionModel(e.getFirstIndex(), e.getLastIndex());
-	}
-
-	/** Update the proxy selection model from a selection event */
-	private void updateProxySelectionModel(int index0, int index1) {
-		for (int i = index0; i <= index1; i++) {
-			R_Node proxy = model.getProxy(i);
-			if (proxy != null) {
-				if (isSelectedIndex(i))
-					sel.addSelected(proxy);
-				else
-					sel.removeSelected(proxy);
-			}
-		}
+		sel.removeProxySelectionListener(sel_lsnr);
 	}
 
 	/** Insert an interval into the model */
 	@Override
 	public void insertIndexInterval(int index, int length, boolean before) {
-		adjusting++;
 		super.insertIndexInterval(index, length, before);
-		// NOTE: if the proxies being added are already selected,
-		//       we need to add them to this selection model
+		// NOTE: if a proxy being added is already selected,
+		//       we need to add it to this selection model
 		for (int i = index; i < index + length; i++) {
 			R_Node proxy = model.getProxy(i);
 			if (proxy != null && sel.isSelected(proxy))
-				addSelectionInterval(index, index);
+				super.setSelectionInterval(i, i);
 		}
-		adjusting--;
-	}
-
-	/** Remove an interval from the model */
-	@Override
-	public void removeIndexInterval(int index0, int index1) {
-		// NOTE: other models should not be affected by removing
-		//       a proxy from this model
-		adjusting++;
-		super.removeIndexInterval(index0, index1);
-		adjusting--;
 	}
 
 	/** Set the selection interval */
 	@Override
 	public void setSelectionInterval(int index0, int index1) {
-		adjusting++;
 		super.setSelectionInterval(index0, index1);
-		// NOTE: we need to deselect any selected items not in the
-		//       list model.
-		for (R_Node proxy: sel.getSelected()) {
-			int i = model.getRow(proxy);
-			if (i < index0 || i > index1)
-				sel.removeSelected(proxy);
-		}
-		for (int i = index0; i <= index1; i++) {
-			R_Node proxy = model.getProxy(i);
-			if (proxy != null)
-				sel.addSelected(proxy);
-		}
-		adjusting--;
+		R_Node proxy = model.getProxy(index1);
+		if (proxy != null)
+			sel.setSelected(proxy);
+		else
+			sel.clearSelection();
 	}
 }
