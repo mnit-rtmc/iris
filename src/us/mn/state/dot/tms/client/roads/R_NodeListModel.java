@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,14 +32,14 @@ public class R_NodeListModel extends DefaultListModel {
 
 	/** Create a new r_node list model */
 	public R_NodeListModel(List<R_NodeModel> n_list) {
-		for(R_NodeModel r: n_list)
+		for (R_NodeModel r: n_list)
 			addElement(r);
 	}
 
 	/** Update the list item for the specified proxy */
 	public void updateItem(R_Node proxy) {
 		int row = getRow(proxy);
-		if(row >= 0)
+		if (row >= 0)
 			fireContentsChanged(this, row, row);
 	}
 
@@ -50,9 +50,9 @@ public class R_NodeListModel extends DefaultListModel {
 
 	/** Get the row for the specified proxy */
 	public int getRow(R_Node proxy) {
-		for(int i = 0; i < getSize(); i++) {
+		for (int i = 0; i < getSize(); i++) {
 			R_NodeModel m = (R_NodeModel)getElementAt(i);
-			if(m.r_node == proxy)
+			if (m.r_node == proxy)
 				return i;
 		}
 		return -1;
