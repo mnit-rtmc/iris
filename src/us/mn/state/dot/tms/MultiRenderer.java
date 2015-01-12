@@ -369,7 +369,7 @@ public class MultiRenderer extends MultiAdapter {
 			case TOP:
 				return tr_y;
 			case MIDDLE:
-				int ch = (c_height <= 0 ? 1 : c_height);
+				int ch = (c_height > 0) ? c_height : 1;
 				int h = tr_height / ch;
 				int r = getHeight() / ch;
 				return tr_y + (h - r) / 2 * ch;
@@ -553,7 +553,7 @@ public class MultiRenderer extends MultiAdapter {
 			}
 		}
 		int getLineSpacing() {
-			return font != null ? font.getLineSpacing() : 0;
+			return (font != null) ? font.getLineSpacing() : 0;
 		}
 		void render(int x, int base) throws InvalidMessageException {
 			int y = base - getHeight();
