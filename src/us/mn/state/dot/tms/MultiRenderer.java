@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,27 +86,30 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Set the page justification */
-	@Override public void setJustificationPage(JustificationPage jp) {
+	@Override
+	public void setJustificationPage(JustificationPage jp) {
 		super.setJustificationPage(jp);
 		Block block = new Block();
 		Block cb = currentBlock();
-		if(block.justp.ordinal() < cb.justp.ordinal())
+		if (block.justp.ordinal() < cb.justp.ordinal())
 			syntax_err = MultiSyntaxError.tagConflict;
-		if(block.justp.ordinal() > cb.justp.ordinal())
+		if (block.justp.ordinal() > cb.justp.ordinal())
 			blocks.addLast(block);
 	}
 
 	/** Set the character spacing.
 	 * @param sc Character spacing (null means use font spacing) */
-	@Override public void setCharSpacing(Integer sc) {
+	@Override
+	public void setCharSpacing(Integer sc) {
 		char_spacing = sc;
 	}
 
 	/** Add a span of text */
-	@Override public void addSpan(String span) {
-		if(page == ms_page) {
+	@Override
+	public void addSpan(String span) {
+		if (page == ms_page) {
 			Span s = new Span(span);
-			if(s.font != null) {
+			if (s.font != null) {
 				Block block = currentBlock();
 				block.addSpan(s);
 			} else
@@ -115,7 +118,8 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Add a new line */
-	@Override public void addLine(Integer spacing) {
+	@Override
+	public void addLine(Integer spacing) {
 		super.addLine(spacing);
 		Block block = currentBlock();
 		block.addLine(spacing);
@@ -123,13 +127,14 @@ public class MultiRenderer extends MultiAdapter {
 
 	/** Get the current text block */
 	protected Block currentBlock() {
-		if(blocks.isEmpty())
+		if (blocks.isEmpty())
 			blocks.addLast(new Block());
 		return blocks.peekLast();
 	}
 
 	/** Add a page */
-	@Override public void addPage() {
+	@Override
+	public void addPage() {
 		renderText();
 		resetTextRectangle();
 		super.addPage();
@@ -141,7 +146,8 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param z Background color (0-1 for monochrome1bit),
 	 *                           (0-255 for monochrome8bit),
 	 *                           (0-9 for colorClassic). */
-	@Override public void setPageBackground(int z) {
+	@Override
+	public void setPageBackground(int z) {
 		super.setPageBackground(z);
 		fillBackground();
 	}
@@ -150,7 +156,8 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param r Red component (0-255).
 	 * @param g Green component (0-255).
 	 * @param b Blue component (0-255). */
-	@Override public void setPageBackground(int r, int g, int b) {
+	@Override
+	public void setPageBackground(int r, int g, int b) {
 		super.setPageBackground(r, g, b);
 		fillBackground();
 	}
@@ -170,11 +177,10 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param z Color of rectangle (0-1 for monochrome1bit),
 	 *                             (0-255 for monochrome8bit),
 	 *                             (0-9 for colorClassic). */
-	@Override public void addColorRectangle(int x, int y, int w, int h,
-		int z)
-	{
+	@Override
+	public void addColorRectangle(int x, int y, int w, int h, int z) {
 		DmsColor clr = schemeColor(z);
-		if(clr != null)
+		if (clr != null)
 			fillRectangle(x, y, w, h, clr);
 	}
 
@@ -186,38 +192,40 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param r Red component (0-255).
 	 * @param g Green component (0-255).
 	 * @param b Blue component (0-255). */
-	@Override public void addColorRectangle(int x, int y, int w, int h,
-		int r, int g, int b)
+	@Override
+	public void addColorRectangle(int x, int y, int w, int h, int r, int g,
+		int b)
 	{
 		fillRectangle(x, y, w, h, new DmsColor(r, g, b));
 	}
 
 	/** Fill a rectangle with a specified color */
 	private void fillRectangle(int x, int y, int w, int h, DmsColor clr) {
-		if(page == ms_page) {
+		if (page == ms_page) {
 			x--;	/* make X zero-based for raster */
 			y--;	/* make Y zero-based for raster */
-			for(int yy = 0; yy < h; yy++) {
-				for(int xx = 0; xx < w; xx++)
+			for (int yy = 0; yy < h; yy++) {
+				for (int xx = 0; xx < w; xx++)
 					raster.setPixel(x + xx, y + yy, clr);
 			}
 		}
 	}
 
 	/** Set the text rectangle */
-	@Override public void setTextRectangle(int x, int y, int w, int h) {
+	@Override
+	public void setTextRectangle(int x, int y, int w, int h) {
 		renderText();
 		tr_x = x;
 		tr_y = y;
-		if(w == 0)
+		if (w == 0)
 			w = raster.getWidth() - (x - 1);
-		if(h == 0)
+		if (h == 0)
 			h = raster.getHeight() - (y - 1);
 		tr_width = w;
 		tr_height = h;
-		if(tr_x + tr_width > raster.getWidth() + 1)
+		if (tr_x + tr_width > raster.getWidth() + 1)
 			syntax_err = MultiSyntaxError.unsupportedTagValue;
-		if(tr_y + tr_height > raster.getHeight() + 1)
+		if (tr_y + tr_height > raster.getHeight() + 1)
 			syntax_err = MultiSyntaxError.unsupportedTagValue;
 	}
 
@@ -233,15 +241,15 @@ public class MultiRenderer extends MultiAdapter {
 
 	/** Render the current text rectangle */
 	protected void renderText() {
-		if(page == ms_page) {
+		if (page == ms_page) {
 			try {
-				for(Block block: blocks)
+				for (Block block: blocks)
 					block.render();
 			}
-			catch(InvalidMessageException e) {
+			catch (InvalidMessageException e) {
 				syntax_err=MultiSyntaxError.characterNotDefined;
 			}
-			catch(IndexOutOfBoundsException e) {
+			catch (IndexOutOfBoundsException e) {
 				syntax_err = MultiSyntaxError.textTooBig;
 			}
 		}
@@ -249,22 +257,17 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Add a graphic */
-	@Override public void addGraphic(int g_num, Integer x, Integer y,
-		String g_id)
-	{
-		if(page != ms_page)
+	@Override
+	public void addGraphic(int g_num, Integer x, Integer y, String g_id) {
+		if (page != ms_page)
 			return;
 		Graphic graphic = GraphicHelper.find(g_num);
-		if(graphic == null) {
+		if (graphic == null) {
 			syntax_err = MultiSyntaxError.graphicNotDefined;
 			return;
 		}
-		int x0 = 1;
-		int y0 = 1;
-		if(x != null)
-			x0 = x;
-		if(y != null)
-			y0 = y;
+		int x0 = (x != null) ? x : 1;
+		int y0 = (y != null) ? y : 1;
 		renderGraphic(graphic, ms_foreground, x0, y0);
 	}
 
@@ -278,14 +281,14 @@ public class MultiRenderer extends MultiAdapter {
 		y--;
 		RasterGraphic rg = GraphicHelper.createRaster(g);
 		try {
-			if(rg instanceof BitmapGraphic)
+			if (rg instanceof BitmapGraphic)
 				renderBitmap((BitmapGraphic)rg, fg, x, y);
-			else if(rg instanceof PixmapGraphic)
+			else if (rg instanceof PixmapGraphic)
 				renderPixmap((PixmapGraphic)rg, x, y);
 			else
 				syntax_err = MultiSyntaxError.graphicNotDefined;
 		}
-		catch(IndexOutOfBoundsException e) {
+		catch (IndexOutOfBoundsException e) {
 			// No MULTI syntax error for graphic too big
 			syntax_err = MultiSyntaxError.other;
 		}
@@ -299,9 +302,9 @@ public class MultiRenderer extends MultiAdapter {
 	private void renderBitmap(BitmapGraphic bg, DmsColor fg, int x, int y) {
 		int w = bg.getWidth();
 		int h = bg.getHeight();
-		for(int yy = 0; yy < h; yy++) {
-			for(int xx = 0; xx < w; xx++) {
-				if(bg.getPixel(xx, yy).isLit())
+		for (int yy = 0; yy < h; yy++) {
+			for (int xx = 0; xx < w; xx++) {
+				if (bg.getPixel(xx, yy).isLit())
 					raster.setPixel(x + xx, y + yy, fg);
 			}
 		}
@@ -314,8 +317,8 @@ public class MultiRenderer extends MultiAdapter {
 	private void renderPixmap(PixmapGraphic pg, int x, int y) {
 		int w = pg.getWidth();
 		int h = pg.getHeight();
-		for(int yy = 0; yy < h; yy++) {
-			for(int xx = 0; xx < w; xx++) {
+		for (int yy = 0; yy < h; yy++) {
+			for (int xx = 0; xx < w; xx++) {
 				DmsColor c = pg.getPixel(xx, yy);
 				raster.setPixel(x + xx, y + yy, c);
 			}
@@ -332,7 +335,7 @@ public class MultiRenderer extends MultiAdapter {
 		}
 		void addLine(Integer spacing) {
 			Line line = currentLine();
-			if(line.getHeight() == 0) {
+			if (line.getHeight() == 0) {
 				// The line height can be zero on full-matrix
 				// signs when no text has been specified.
 				// Adding an empty span to the line allows the
@@ -342,19 +345,19 @@ public class MultiRenderer extends MultiAdapter {
 			lines.addLast(new Line(spacing));
 		}
 		Line currentLine() {
-			if(lines.isEmpty())
+			if (lines.isEmpty())
 				lines.addLast(new Line(null));
 			return lines.peekLast();
 		}
 		void render() throws InvalidMessageException {
 			int top = getTop();
-			if(top < tr_y) {
+			if (top < tr_y) {
 				syntax_err = MultiSyntaxError.textTooBig;
 				return;
 			}
 			int y = 0;
 			Line pline = null;
-			for(Line line: lines) {
+			for (Line line: lines) {
 				y += line.getSpacing(pline);
 				y += line.getHeight();
 				line.render(top + y);
@@ -362,7 +365,7 @@ public class MultiRenderer extends MultiAdapter {
 			}
 		}
 		int getTop() {
-			switch(justp) {
+			switch (justp) {
 			case TOP:
 				return tr_y;
 			case MIDDLE:
@@ -379,9 +382,9 @@ public class MultiRenderer extends MultiAdapter {
 		int getHeight() {
 			int h = 0;
 			Line pline = null;
-			for(Line line: lines) {
+			for (Line line: lines) {
 				int lh = line.getHeight();
-				if(lh > 0) {
+				if (lh > 0) {
 					h += line.getSpacing(pline) + lh;
 					pline = line;
 				}
@@ -400,21 +403,21 @@ public class MultiRenderer extends MultiAdapter {
 		}
 		int getHeight() {
 			int h = c_height;
-			for(Fragment f: fragments)
+			for (Fragment f: fragments)
 				h = Math.max(h, f.getHeight());
 			return h;
 		}
 		private int getFragmentSpacing() {
 			int ls = 0;
-			for(Fragment f: fragments)
+			for (Fragment f: fragments)
 				ls = Math.max(ls, f.getSpacing());
 			return ls;
 		}
 		int getSpacing(Line prev) {
-			if(spacing != null)
+			if (spacing != null)
 				return spacing;
 			else {
-				if(prev == null)
+				if (prev == null)
 					return 0;
 				int sp0 = getFragmentSpacing();
 				int sp1 = prev.getFragmentSpacing();
@@ -428,19 +431,19 @@ public class MultiRenderer extends MultiAdapter {
 		void addSpan(Span s) {
 			Fragment f = new Fragment();
 			Fragment cf = currentFragment();
-			if(f.justl.ordinal() < cf.justl.ordinal())
+			if (f.justl.ordinal() < cf.justl.ordinal())
 				syntax_err = MultiSyntaxError.tagConflict;
-			if(f.justl.ordinal() > cf.justl.ordinal())
+			if (f.justl.ordinal() > cf.justl.ordinal())
 				fragments.addLast(f);
 			currentFragment().addSpan(s);
 		}
 		Fragment currentFragment() {
-			if(fragments.isEmpty())
+			if (fragments.isEmpty())
 				fragments.addLast(new Fragment());
 			return fragments.peekLast();
 		}
 		void render(int base) throws InvalidMessageException {
-			for(Fragment f: fragments)
+			for (Fragment f: fragments)
 				f.render(base);
 		}
 	}
@@ -451,13 +454,13 @@ public class MultiRenderer extends MultiAdapter {
 		protected final JustificationLine justl = ms_justl;
 		int getHeight() {
 			int h = c_height;
-			for(Span s: spans)
+			for (Span s: spans)
 				h = Math.max(h, s.getHeight());
 			return h;
 		}
 		int getSpacing() {
 			int ls = 0;
-			for(Span s: spans)
+			for (Span s: spans)
 				ls = Math.max(ls, s.getLineSpacing());
 			return ls;
 		}
@@ -466,13 +469,13 @@ public class MultiRenderer extends MultiAdapter {
 		}
 		void render(int base) throws InvalidMessageException {
 			int left = getLeft();
-			if(left < tr_x) {
+			if (left < tr_x) {
 				syntax_err = MultiSyntaxError.textTooBig;
 				return;
 			}
 			int x = 0;
 			Span pspan = null;
-			for(Span span: spans) {
+			for (Span span: spans) {
 				x += span.getCharSpacing(pspan);
 				span.render(left + x, base);
 				x += span.getWidth();
@@ -480,7 +483,7 @@ public class MultiRenderer extends MultiAdapter {
 			}
 		}
 		int getLeft() {
-			switch(justl) {
+			switch (justl) {
 			case LEFT:
 				return tr_x;
 			case CENTER:
@@ -497,7 +500,7 @@ public class MultiRenderer extends MultiAdapter {
 		int getWidth() {
 			int w = 0;
 			Span ps = null;
-			for(Span span: spans) {
+			for (Span span: spans) {
 				w += span.getCharSpacing(ps) + span.getWidth();
 				ps = span;
 			}
@@ -519,15 +522,15 @@ public class MultiRenderer extends MultiAdapter {
 		}
 		int getCharSpacing() {
 			Integer cs = char_spacing;
-			if(cs != null)
+			if (cs != null)
 				return cs;
-			else if(font != null)
+			else if (font != null)
 				return font.getCharSpacing();
 			else
 				return 1;
 		}
 		int getCharSpacing(Span other) {
-			if(other == null)
+			if (other == null)
 				return 0;
 			int sp0 = c_space;
 			int sp1 = other.c_space;
@@ -544,7 +547,7 @@ public class MultiRenderer extends MultiAdapter {
 				return FontHelper.calculateWidth(font, span,
 					c_space);
 			}
-			catch(InvalidMessageException e) {
+			catch (InvalidMessageException e) {
 				syntax_err=MultiSyntaxError.characterNotDefined;
 				return 0;
 			}
@@ -554,7 +557,7 @@ public class MultiRenderer extends MultiAdapter {
 		}
 		void render(int x, int base) throws InvalidMessageException {
 			int y = base - getHeight();
-			for(int i = 0; i < span.length(); i++) {
+			for (int i = 0; i < span.length(); i++) {
 				int cp = span.charAt(i);
 				Graphic g = FontHelper.lookupGraphic(font, cp);
 				renderGraphic(g, foreground, x, y);
