@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ public class Corridor extends CorridorBase {
 	}
 
 	/** Arrange the nodes in the corridor */
+	@Override
 	public void arrangeNodes() {
 		super.arrangeNodes();
 		linkDownstream();
@@ -49,13 +50,13 @@ public class Corridor extends CorridorBase {
 	protected void linkDownstream() {
 		Iterator<R_Node> down = r_nodes.iterator();
 		// Throw away first r_node in downstream iterator
-		if(down.hasNext())
+		if (down.hasNext())
 			down.next();
-		for(R_Node n: r_nodes) {
+		for (R_Node n: r_nodes) {
 			R_NodeImpl r_node = (R_NodeImpl)n;
-			if(down.hasNext()) {
+			if (down.hasNext()) {
 				R_NodeImpl d = (R_NodeImpl)down.next();
-				if(r_node.hasDownstreamLink())
+				if (r_node.hasDownstreamLink())
 					r_node.addDownstream(d);
 			}
 		}
@@ -68,9 +69,9 @@ public class Corridor extends CorridorBase {
 
 	/** Find an active node using a node finder callback interface */
 	public R_NodeImpl findActiveNode(NodeFinder finder) {
-		for(R_Node n: n_points.values()) {
+		for (R_Node n: n_points.values()) {
 			R_NodeImpl r_node = (R_NodeImpl)n;
-			if(r_node.getActive() && finder.check(r_node))
+			if (r_node.getActive() && finder.check(r_node))
 				return r_node;
 		}
 		return null;
@@ -83,12 +84,12 @@ public class Corridor extends CorridorBase {
 
 	/** Find a station using a station finder callback interface */
 	protected StationImpl findStation(StationFinder finder) {
-		for(Float m: n_points.keySet()) {
+		for (Float m: n_points.keySet()) {
 			assert m != null;
 			R_NodeImpl n = (R_NodeImpl)n_points.get(m);
-			if(n.getActive() && R_NodeHelper.isStation(n)) {
+			if (n.getActive() && R_NodeHelper.isStation(n)) {
 				StationImpl s = n.getStation();
-				if(s != null && finder.check(m, s))
+				if (s != null && finder.check(m, s))
 					return s;
 			}
 		}
@@ -112,9 +113,9 @@ public class Corridor extends CorridorBase {
 	public float calculateDistance(ODPair od) throws BadRouteException {
 		Float origin = calculateMilePoint(od.getOrigin());
 		Float destination = calculateMilePoint(od.getDestination());
-		if(origin == null || destination == null)
+		if (origin == null || destination == null)
 			throw new BadRouteException("No nodes on corridor");
-		if(origin > destination) {
+		if (origin > destination) {
 			throw new BadRouteException("Origin (" + origin +
 				") > destin (" + destination + "), " + od);
 		}
@@ -126,10 +127,10 @@ public class Corridor extends CorridorBase {
 		throws BadRouteException
 	{
 		Float m = calculateMilePoint(loc);
-		if(m == null)
+		if (m == null)
 			throw new BadRouteException("No nodes on corridor");
-		for(Float mile: n_points.keySet()) {
-			if(mile > m)
+		for (Float mile: n_points.keySet()) {
+			if (mile > m)
 				return (R_NodeImpl)n_points.get(mile);
 		}
 		throw new BadRouteException("No downstream nodes");
@@ -137,9 +138,9 @@ public class Corridor extends CorridorBase {
 
 	/** Find an active node using a node finder callback (reverse order) */
 	public R_NodeImpl findActiveNodeReverse(NodeFinder finder) {
-		for(R_Node n: n_points.descendingMap().values()) {
+		for (R_Node n: n_points.descendingMap().values()) {
 			R_NodeImpl r_node = (R_NodeImpl)n;
-			if(r_node.getActive() && finder.check(r_node))
+			if (r_node.getActive() && finder.check(r_node))
 				return r_node;
 		}
 		return null;
@@ -148,11 +149,11 @@ public class Corridor extends CorridorBase {
 	/** Get the IDs of all linked CD roads */
 	public Iterator<String> getLinkedCDRoads() {
 		HashSet<String> cds = new HashSet<String>();
-		for(R_Node r_node: n_points.values()) {
-			if(R_NodeHelper.isCD(r_node)) {
+		for (R_Node r_node: n_points.values()) {
+			if (R_NodeHelper.isCD(r_node)) {
 				GeoLoc l = r_node.getGeoLoc();
 				String c = GeoLocHelper.getLinkedCorridor(l);
-				if(c != null)
+				if (c != null)
 					cds.add(c);
 			}
 		}
@@ -165,7 +166,7 @@ public class Corridor extends CorridorBase {
 	{
 		w.write("<corridor route='" + roadway + "' dir='" +
 			Direction.fromOrdinal(road_dir).abbrev + "'>\n");
-		for(R_Node n: r_nodes) {
+		for (R_Node n: r_nodes) {
 			R_NodeImpl r_node = (R_NodeImpl)n;
 			r_node.writeXml(w, m_nodes);
 		}
@@ -178,7 +179,7 @@ public class Corridor extends CorridorBase {
 			new TreeMap<Float, StationImpl>();
 		findStation(new StationFinder() {
 			public boolean check(Float m, StationImpl s) {
-				if(s.getRollingAverageSpeed() > 0) {
+				if (s.getRollingAverageSpeed() > 0) {
 					s.calculateBottleneck(m, upstream);
 					upstream.put(m, s);
 				} else
