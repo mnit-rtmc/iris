@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,8 +83,9 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Operation equality test */
+	@Override
 	public boolean equals(Object o) {
-		if(o instanceof OpSendDMSMessage) {
+		if (o instanceof OpSendDMSMessage) {
 			OpSendDMSMessage op = (OpSendDMSMessage)o;
 			return dms == op.dms && SignMessageHelper.isEquivalent(
 			       message, op.message);
@@ -93,11 +94,12 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		dms.setMessageNext(message);
-		if(SignMessageHelper.isBlank(message))
+		if (SignMessageHelper.isBlank(message))
 			return new ActivateBlankMsg();
-		else if(msg_num > 1)
+		else if (msg_num > 1)
 			return new ActivateMessage();
 		else
 			return new ModifyRequest();
@@ -120,7 +122,7 @@ public class OpSendDMSMessage extends OpDMS {
 				logStore(act);
 				mess.storeProps();
 			}
-			catch(SNMP.Message.GenError e) {
+			catch (SNMP.Message.GenError e) {
 				return new QueryActivateMsgErr();
 			}
 			dms.setMessageCurrent(message, owner);
@@ -142,12 +144,12 @@ public class OpSendDMSMessage extends OpDMS {
 				logStore(status);
 				mess.storeProps();
 			}
-			catch(SNMP.Message.BadValue e) {
+			catch (SNMP.Message.BadValue e) {
 				// This should only happen if the message
 				// status is "validating" ...
 				return new QueryMsgStatus();
 			}
-			catch(SNMP.Message.GenError e) {
+			catch (SNMP.Message.GenError e) {
 				// This should never happen (but of
 				// course, it does for some vendors)
 				return new QueryMsgStatus();
@@ -166,9 +168,9 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
-			if(status.isModifying())
+			if (status.isModifying())
 				return new ModifyMessage();
-			else if(!modify_requested)
+			else if (!modify_requested)
 				return new ModifyRequest();
 			else if (status.isValid()) {
 				/* Some ledstar signs prevent dmsMessageStatus
@@ -240,7 +242,7 @@ public class OpSendDMSMessage extends OpDMS {
 				logStore(status);
 				mess.storeProps();
 			}
-			catch(SNMP.Message.GenError e) {
+			catch (SNMP.Message.GenError e) {
 				return new QueryValidateMsgErr(status);
 			}
 			return new QueryMsgValidity();
@@ -261,9 +263,9 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.queryProps();
 			logQuery(status);
 			logQuery(crc);
-			if(!status.isValid())
+			if (!status.isValid())
 				return new QueryValidateMsgErr(status);
-			if(message_crc != crc.getInteger()) {
+			if (message_crc != crc.getInteger()) {
 				String ms = "Message CRC: " +
 					Integer.toHexString(message_crc) + ", "+
 					Integer.toHexString(crc.getInteger());
@@ -300,9 +302,9 @@ public class OpSendDMSMessage extends OpDMS {
 			logQuery(error);
 			logQuery(m_err);
 			logQuery(e_pos);
-			if(error.isSyntaxMulti())
+			if (error.isSyntaxMulti())
 				setErrorStatus(m_err.toString());
-			else if(error.isError())
+			else if (error.isError())
 				setErrorStatus(error.toString());
 			else {
 				// This should never happen, but of course it
@@ -330,7 +332,7 @@ public class OpSendDMSMessage extends OpDMS {
 				logStore(act);
 				mess.storeProps();
 			}
-			catch(SNMP.Message.GenError e) {
+			catch (SNMP.Message.GenError e) {
 				return new QueryActivateMsgErr();
 			}
 			dms.setMessageCurrent(message, owner);
@@ -347,7 +349,7 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.add(error);
 			mess.queryProps();
 			logQuery(error);
-			switch(error.getEnum()) {
+			switch (error.getEnum()) {
 			case syntaxMULTI:
 				setErrorStatus(error.toString());
 				return new QueryMultiSyntaxErr();
@@ -363,7 +365,7 @@ public class OpSendDMSMessage extends OpDMS {
 			case messageCRC:
 				// This message doesn't exist in the table,
 				// so go back and modify the table.
-				if(!modify_requested)
+				if (!modify_requested)
 					return new ModifyRequest();
 				// else fall through to default case ...
 			default:
@@ -386,7 +388,7 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.queryProps();
 			logQuery(m_err);
 			logQuery(e_pos);
-			if(m_err.isOther())
+			if (m_err.isOther())
 				return new QueryOtherMultiErr(m_err);
 			else {
 				setErrorStatus(m_err.toString());
@@ -416,7 +418,7 @@ public class OpSendDMSMessage extends OpDMS {
 				logQuery(o_err);
 				setErrorStatus(o_err.toString());
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// For 1203v1, dmsMultiOtherErrorDescription
 				// had not been defined...
 				setErrorStatus(m_err.toString());
@@ -435,7 +437,7 @@ public class OpSendDMSMessage extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// must not be a Ledstar sign ...
 				return null;
 			}
@@ -457,7 +459,7 @@ public class OpSendDMSMessage extends OpDMS {
 			DmsMessageTimeRemaining time =
 				new DmsMessageTimeRemaining();
 			time.setInteger(getDuration());
-			if(isScheduledIndefinite())
+			if (isScheduledIndefinite())
 				setCommAndPower();
 			else
 				setCommAndPowerBlank();
@@ -498,6 +500,7 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
 		dms.setMessageNext(null);
 		super.cleanup();
