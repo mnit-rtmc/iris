@@ -25,7 +25,31 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 
 /**
- * Operation to send a new message to a DMS and activate it.
+ * Operation to send a message to a DMS and activate it.
+ *
+ * .    Possible phase transitions:
+ * |
+ * |              .---------------------------------------------.
+ * |              +                                             |
+ * |--+ ModifyRequest ----------+ QueryMsgStatus                |
+ * |           |                    |      |                    |
+ * |           +                    |      +                    |
+ * |        ModifyMessage +---------'    QueryControlMode       |
+ * |               |                                            |
+ * |               +                                            |
+ * |        ValidateRequest ----+ QueryValidateMsgErr           |
+ * |               |                +                           |
+ * |               +                |                           |
+ * |        QueryMsgValidity -------'  QueryLedstarActivateErr  |
+ * |           |                           +                    |
+ * |           +                           |                    |
+ * |--+ ActivateMessage --------+ QueryActivateMsgErr ----------'
+ * |           |                      +      |
+ * |           +                      |      +
+ * |        SetPostActivationStuff    |  QueryMultiSyntaxErr
+ * |           +                      |      |
+ * |           |                      |      +
+ * '--+ ActivateBlankMsg -------------'  QueryOtherMultiErr
  *
  * @author Douglas Lau
  */
