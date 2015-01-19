@@ -347,9 +347,10 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	@Override
 	protected R_NodeMapTheme createTheme() {
 		R_NodeMapTheme theme = new R_NodeMapTheme(this);
+		// order determines precidence of assigned style
+		theme.addStyle(ItemStyle.INACTIVE, COLOR_INACTIVE);
 		theme.addStyle(ItemStyle.GPS, COLOR_GPS);
 		theme.addStyle(ItemStyle.NO_LOC, COLOR_NO_LOC);
-		theme.addStyle(ItemStyle.INACTIVE, COLOR_INACTIVE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
