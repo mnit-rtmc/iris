@@ -14,9 +14,9 @@
  */
 package us.mn.state.dot.tms.client.help;
 
-import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.EOFException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.net.ConnectException;
@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.Emailer;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.widget.Screen;
 import us.mn.state.dot.tms.client.widget.TextPanel;
 
@@ -57,15 +58,20 @@ public class ExceptionDialog extends JDialog {
 			setTitle("Warning");
 	}
 
+	/** Iris client frame */
+	private final IrisClient client;
+
 	/** Create a new exception dialog without an owner */
 	public ExceptionDialog() {
 		super();
+		client = null;
 		setResizable(false);
 	}
 
 	/** Create a new exception dialog */
-	public ExceptionDialog(Frame owner) {
-		super(owner, true);
+	public ExceptionDialog(IrisClient ic) {
+		super(ic, true);
+		client = ic;
 		setResizable(false);
 	}
 
@@ -92,6 +98,13 @@ public class ExceptionDialog extends JDialog {
 			p.addText("server.  Please try again, or");
 			p.addText("contact a system administrator");
 			p.addText("for assistance.");
+			p.addSpacing();
+		}
+		else if (e instanceof EOFException) {
+			if (client != null)
+				client.logout();
+			p.addText("Lost connection to the IRIS");
+			p.addText("server.  Please log in again.");
 			p.addSpacing();
 		}
 		else if (e instanceof AuthenticationException) {
