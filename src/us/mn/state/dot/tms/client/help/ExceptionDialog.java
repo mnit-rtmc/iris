@@ -48,9 +48,9 @@ public class ExceptionDialog extends JDialog {
 	private void setFatal(boolean f) {
 		fatal = f;
 		if (fatal)
-			setTitle("Program error");
+			setTitle(I18N.get("help.exception.error"));
 		else
-			setTitle("Warning");
+			setTitle(I18N.get("help.exception.warning"));
 	}
 
 	/** Iris client frame */
@@ -83,89 +83,66 @@ public class ExceptionDialog extends JDialog {
 		setVisible(true);
 	}
 
-	/** Create a text panel for an exception.
-	 * FIXME: add I18n strings. */
+	/** Create a text panel for an exception */
 	private TextPanel createMessagePanel(final Exception e) {
 		TextPanel p = new TextPanel();
 		p.addGlue();
-		if (e instanceof ConnectException) {
-			p.addText("Unable to connect to the IRIS");
-			p.addText("server.  Please try again, or");
-			p.addText("contact a system administrator");
-			p.addText("for assistance.");
-			p.addSpacing();
-		}
+		if (e instanceof ConnectException)
+			p.addText(I18N.get("help.exception.connect"));
 		else if (e instanceof EOFException) {
 			if (client != null)
 				client.logout();
-			p.addText("Lost connection to the IRIS");
-			p.addText("server.  Please log in again.");
-			p.addSpacing();
+			p.addText(I18N.get("help.exception.disconnect"));
 		}
 		else if (e instanceof AuthenticationException) {
-			p.addText("Authentication failed:");
+			p.addText(I18N.get("help.exception.auth.failed"));
 			p.addText(e.getMessage());
 			p.addSpacing();
-			p.addText("Please make sure your user");
-			p.addText("name is correct, then");
-			p.addText("type your password again.");
+			p.addText(I18N.get("help.exception.auth.advice"));
 		}
 		else if (e instanceof ChangeVetoException) {
-			p.addText("The change has been prevented");
-			p.addText("for the following reason:");
+			p.addText(I18N.get("help.exception.change.veto"));
 			p.addSpacing();
 			p.addText(e.getMessage());
 		}
 		else if (e instanceof PermissionException) {
-			p.addText("Permission denied:");
+			p.addText(I18N.get("help.exception.permission.denied"));
 			p.addSpacing();
 			p.addText(e.getMessage());
 		}
 		else if (e instanceof SonarShowException) {
-			p.addText("The following message was");
-			p.addText("received from the IRIS server:");
+			p.addText(I18N.get("help.exception.show"));
 			p.addSpacing();
 			p.addText(e.getMessage());
 		}
 		else if (e instanceof NumberFormatException) {
-			p.addText("Number formatting error");
+			p.addText(I18N.get("help.exception.number.format"));
 			p.addSpacing();
-			p.addText("Please check all numeric");
-			p.addText("fields and try again.");
+			p.addText(I18N.get("help.exception.number.advice"));
 		}
 		else if (e instanceof InvalidMessageException) {
-			p.addText("Invalid message");
+			p.addText(I18N.get("help.exception.invalid.msg"));
 			p.addSpacing();
-			p.addText("The sign is unable to display");
-			p.addText("the following message:");
 			p.addText(e.getMessage());
-			p.addText("Please select a different message");
 		}
 		else if (e instanceof ParseException) {
-			p.addText("Parsing error");
+			p.addText(I18N.get("help.exception.parsing"));
+			p.addSpacing();
 			p.addText(e.getMessage());
-			p.addText("Please try again.");
 		}
 		else if (e instanceof SonarException) {
 			setFatal(true);
-			p.addText("This program has encountered");
-			p.addText("a problem while communicating");
-			p.addText("with the IRIS server.");
+			p.addText(I18N.get("help.exception.sonar"));
 			p.addSpacing();
 			p.addText(e.getMessage());
+			p.addText(I18N.get("help.exception.assist"));
 		}
 		else if (e instanceof Exception) {
 			setFatal(true);
-			p.addText("This program has encountered");
-			p.addText("a serious problem.");
+			p.addText(I18N.get("help.exception.unknown"));
 			p.addSpacing();
-			p.addText("For assistance, contact an");
-			p.addText("IRIS system administrator.");
+			p.addText(I18N.get("help.exception.assist"));
 		}
-		p.addSpacing();
-		String lastLine = I18N.get("help.exception.lastline");
-		if (lastLine != null)
-			p.addText(lastLine);
 		p.addGlue();
 		p.addSpacing();
 		return p;
@@ -175,8 +152,8 @@ public class ExceptionDialog extends JDialog {
 	private Box createButtonBox(final Exception e) {
 		Box hbox = Box.createHorizontalBox();
 		hbox.add(Box.createHorizontalGlue());
-		JButton ok_btn = new JButton("OK");
-		ok_btn.addActionListener(new ActionListener() {
+		JButton btn = new JButton(I18N.get("help.exception.dismiss"));
+		btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent a) {
 				if (fatal)
 					System.exit(-1);
@@ -184,17 +161,18 @@ public class ExceptionDialog extends JDialog {
 				dispose();
 			}
 		});
-		hbox.add(ok_btn);
+		hbox.add(btn);
 		if (fatal) {
 			hbox.add(Box.createHorizontalStrut(10));
-			JButton dtl_btn = new JButton("Detail");
-			dtl_btn.addActionListener(new ActionListener() {
+			JButton dtl = new JButton(I18N.get(
+				"help.exception.detail"));
+			dtl.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent a) {
 					JDialog std = new StackTraceDialog(e);
 					std.setVisible(true);
 				}
 			});
-			hbox.add(dtl_btn);
+			hbox.add(dtl);
 		}
 		hbox.add(Box.createHorizontalGlue());
 		return hbox;
