@@ -4,7 +4,7 @@
 #     and Douglas Lau
 #
 # IRIS -- Intelligent Roadway Information System
-# Copyright (C) 2009-2014  Minnesota Department of Transportation
+# Copyright (C) 2009-2015  Minnesota Department of Transportation
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ Source:		%{name}-%{version}.tar.gz
 URL:		@@RPM.URL@@
 BuildArch:	noarch
 Buildroot:	%{buildroot}
-Requires:	java-1.7.0-openjdk, postgresql-server, postgresql-jdbc, httpd
+Requires:	java-1.8.0-openjdk-headless, postgresql-server, postgresql-jdbc, httpd
 
 %Description
 @@RPM.DESCRIPTION@@
