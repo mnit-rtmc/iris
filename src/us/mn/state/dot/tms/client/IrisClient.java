@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  * Copyright (C) 2010-2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -202,8 +202,10 @@ public class IrisClient extends JFrame {
 		if (user != null && pws != null) {
 			char[] pwd = pws.toCharArray();
 			pws = null;
-			if (user.length() > 0 && pwd.length > 0)
+			if (user.length() > 0 && pwd.length > 0) {
 				login(user, pwd);
+				return;
+			}
 		}
 		runSwing(new Runnable() {
 			public void run() {
