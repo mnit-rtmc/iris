@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ public class ProxyListModel<T extends SonarObject>
 				fireIntervalRemoved(this, i, i);
 		}
 		protected void proxyChangedSwing(T proxy, String attr) {
-			proxyChangedSwing(proxy);
+			ProxyListModel.this.proxyChangedSwing(proxy);
 		}
 	};
 
