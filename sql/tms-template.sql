@@ -2231,7 +2231,7 @@ camera_ptz_panel_enable	false
 camera_util_panel_enable	false
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.21.0
+database_version	4.22.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
@@ -2265,11 +2265,9 @@ dms_reset_enable	false
 dms_send_confirmation_enable	false
 dmsxml_modem_op_timeout_secs	305
 dmsxml_op_timeout_secs	65
-email_sender_client	
 email_sender_server	
 email_smtp_host	
 email_recipient_aws	
-email_recipient_bugs	
 email_recipient_gate_arm	
 gate_arm_alert_timeout_secs	90
 help_trouble_ticket_enable	false

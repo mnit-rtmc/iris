@@ -17,11 +17,8 @@ package us.mn.state.dot.tms.client.help;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.EOFException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.net.ConnectException;
 import java.text.ParseException;
-import javax.mail.MessagingException;
 import javax.naming.AuthenticationException;
 import javax.swing.Box;
 import javax.swing.JButton;
@@ -32,8 +29,6 @@ import us.mn.state.dot.sonar.client.SonarShowException;
 import us.mn.state.dot.sonar.client.PermissionException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.Emailer;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.widget.Screen;
@@ -160,11 +155,12 @@ public class ExceptionDialog extends JDialog {
 			p.addText(e.getMessage());
 		}
 		else if (e instanceof Exception) {
-			sendEmailAlert(e, p);
 			setFatal(true);
 			p.addText("This program has encountered");
 			p.addText("a serious problem.");
-			addAssistanceMessage(p);
+			p.addSpacing();
+			p.addText("For assistance, contact an");
+			p.addText("IRIS system administrator.");
 		}
 		p.addSpacing();
 		String lastLine = I18N.get("help.exception.lastline");
@@ -173,44 +169,6 @@ public class ExceptionDialog extends JDialog {
 		p.addGlue();
 		p.addSpacing();
 		return p;
-	}
-
-	/** Add a message about what to do for assistance */
-	private void addAssistanceMessage(TextPanel p) {
-		p.addSpacing();
-		p.addText("For assistance, contact an");
-		p.addText("IRIS system administrator.");
-	}
-
-	/** Send an e-mail alert to the system administrators */
-	private void sendEmailAlert(Exception e, TextPanel p) {
-		String host = SystemAttrEnum.EMAIL_SMTP_HOST.getString();
-		String sender = SystemAttrEnum.EMAIL_SENDER_CLIENT.getString();
-		String recip = SystemAttrEnum.EMAIL_RECIPIENT_BUGS.getString();
-		if (host != null && sender != null && recip != null) {
-			String trace = getStackTrace(e);
-			p.addSpacing();
-			try {
-				Emailer email = new Emailer(host, sender,recip);
-				email.send("IRIS Exception", trace);
-				p.addText("A detailed error report");
-				p.addText("has been emailed to:");
-				p.addText(recip);
-			}
-			catch (MessagingException ex) {
-				ex.printStackTrace();
-				p.addText("Unable to send error");
-				p.addText("report to:");
-				p.addText(recip);
-			}
-		}
-	}
-
-	/** Get stack trace as a string */
-	private String getStackTrace(Exception e) {
-		StringWriter writer = new StringWriter(200);
-		e.printStackTrace(new PrintWriter(writer));
-		return writer.toString();
 	}
 
 	/** Create a button box */
