@@ -19,6 +19,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.ConnectException;
 import java.text.ParseException;
 import javax.mail.MessagingException;
 import javax.naming.AuthenticationException;
@@ -86,7 +87,14 @@ public class ExceptionDialog extends JDialog {
 	private TextPanel createMessagePanel(final Exception e) {
 		TextPanel p = new TextPanel();
 		p.addGlue();
-		if (e instanceof AuthenticationException) {
+		if (e instanceof ConnectException) {
+			p.addText("Unable to connect to the IRIS");
+			p.addText("server.  Please try again, or");
+			p.addText("contact a system administrator");
+			p.addText("for assistance.");
+			p.addSpacing();
+		}
+		else if (e instanceof AuthenticationException) {
 			p.addText("Authentication failed:");
 			p.addText(e.getMessage());
 			p.addSpacing();
