@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2014  Minnesota Department of Transportation
- * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,9 @@ public class CameraPTZ {
 	/** Is iris moving? */
 	private boolean irisMoving = false;
 
+	/** Is camera control currently enabled? */
+	private boolean controlEnabled = true;
+
 	/** Create a new camera PTZ control */
 	public CameraPTZ(Session s) {
 		session = s;
@@ -69,6 +72,26 @@ public class CameraPTZ {
 		return session.isUpdatePermitted(camera, "storePreset");
 	}
 
+	/**
+	 * Enable/disable control.  Allows camera controllability to be
+	 * toggled.  Does not affect clearMovement().
+	 *
+	 * @param en true to allow control, false to block control
+	 */
+	public synchronized void enableControl(boolean en) {
+		controlEnabled = en;
+	}
+
+	/** Is camera control currently enabled? */
+	public boolean isControlEnabled() {
+		return controlEnabled;
+	}
+
+	/** Is a camera currently selected? */
+	public boolean isCameraSelected() {
+		return (camera != null);
+	}
+
 	/** Set the camera */
 	public synchronized void setCamera(Camera c) {
 		if (camera != c) {
@@ -83,10 +106,20 @@ public class CameraPTZ {
 	}
 
 	/**
+	 * Send a PTZ command to the current camera, subject to the conditions
+	 * of doSendPtz().
+	 * Observes controlEnabled.
+	 */
+	public void sendPtz(float p, float t, float z) {
+		if (controlEnabled)
+			doSendPtz(p,t,z);
+	}
+
+	/**
 	 * Send a PTZ command to the current camera, unless it is a full-stop
 	 * and the camera is already fully stopped.
 	 */
-	public synchronized void sendPtz(float p, float t, float z) {
+	private synchronized void doSendPtz(float p, float t, float z) {
 		if (canControlPtz()) {
 			if (p != 0 || t != 0 || z != 0 || ptzMoving()) {
 				ptz[0] = p;
@@ -103,10 +136,19 @@ public class CameraPTZ {
 	}
 
 	/**
+	 * Send a device request to the current camera.
+	 * Observes controlEnabled.
+	 */
+	public void sendRequest(DeviceRequest dr) {
+		if (controlEnabled)
+			doSendRequest(dr);
+	}
+
+	/**
 	 * Send a device request to the current camera, tracking focus/iris
 	 * movement states.
 	 */
-	public synchronized void sendRequest(DeviceRequest dr) {
+	private synchronized void doSendRequest(DeviceRequest dr) {
 		if (canRequestDevice()) {
 			updateFocusAndIris(dr);
 			camera.setDeviceRequest(dr.ordinal());
@@ -136,15 +178,15 @@ public class CameraPTZ {
 	}
 
 	/**
-	 * Stop any movement for current camera, and clear the movement state
-	 * variables.
+	 * Stop any movement for the current camera (regardless of the value
+	 * of controlEnabled) and clear the movement state variables.
 	 */
 	public synchronized void clearMovement() {
-		sendPtz(0, 0, 0);
+		doSendPtz(0, 0, 0);
 		if (focusMoving)
-			sendRequest(DeviceRequest.CAMERA_FOCUS_STOP);
+			doSendRequest(DeviceRequest.CAMERA_FOCUS_STOP);
 		if (irisMoving)
-			sendRequest(DeviceRequest.CAMERA_IRIS_STOP);
+			doSendRequest(DeviceRequest.CAMERA_IRIS_STOP);
 		clearState();
 	}
 
@@ -157,17 +199,23 @@ public class CameraPTZ {
 		irisMoving = false;
 	}
 
-	/** Recall a camera preset */
+	/**
+	 * Recall a camera preset.
+	 * Observes controlEnabled.
+	 */
 	public synchronized void recallPreset(int p) {
-		if (canRecallPreset()) {
+		if (controlEnabled && canRecallPreset()) {
 			camera.setRecallPreset(p);
 			clearState();
 		}
 	}
 
-	/** Store a camera preset */
+	/**
+	 * Store a camera preset.
+	 * Observes controlEnabled.
+	 */
 	public synchronized void storePreset(int p) {
-		if (canStorePreset()) {
+		if (controlEnabled && canStorePreset()) {
 			camera.setStorePreset(p);
 			clearState();
 		}

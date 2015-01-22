@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +32,7 @@ import us.mn.state.dot.tms.client.widget.Icons;
  * Mouse event handler for PTZ control.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class MousePTZ {
 
@@ -174,6 +176,12 @@ public class MousePTZ {
 
 	/** Get the appropriate cursor */
 	private Cursor getCursor(MouseEvent e) {
+		if ((!cam_ptz.isControlEnabled())
+			|| (!cam_ptz.isCameraSelected()))
+		{
+			return Cursor.getPredefinedCursor(
+				Cursor.DEFAULT_CURSOR);
+		}
 		int x = e.getX();
 		int y = e.getY();
 		if(x < dead_left) {

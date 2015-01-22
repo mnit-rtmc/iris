@@ -86,6 +86,9 @@ public class CameraDispatcher extends JPanel {
 		}
 	};
 
+	/** Stream status listener */
+	private final StreamStatusListener ss_listener;
+
 	/** Camera list model */
 	private final ProxyListModel<Camera> model;
 
@@ -134,6 +137,7 @@ public class CameraDispatcher extends JPanel {
 		info_pnl = createInfoPanel();
 		stream_pnl = createStreamPanel();
 		control_pnl = new CamControlPanel(cam_ptz);
+		ss_listener = createStreamStatusListener();
 	}
 
 	/** Create camera information panel */
@@ -190,6 +194,76 @@ public class CameraDispatcher extends JPanel {
 			autoplay);
 	}
 
+	/** Create the StreamStatusListener */
+	private StreamStatusListener createStreamStatusListener() {
+		StreamStatusListener ssl = new StreamStatusListener() {
+			@Override
+			public void onStreamStarted() {
+				updateCamControls();
+			}
+			@Override
+			public void onStreamFinished() {
+				updateCamControls();
+			}
+		};
+		return ssl;
+	}
+
+	/**
+	 * Update the enable/disable status of the camera controls.
+	 * The criteria used to determine what is enabled/disabled include:
+	 * <ul>
+	 *   <li> if a camera is currently selected
+	 *   <li> if the camera has a controller
+	 *   <li> if the user has any camera control permissions
+	 *   <li> the value of the CAMERA_PTZ_BLIND system attribute
+	 *   <li> if a stream is currently active
+	 * </ul>
+	 *
+	 * Note: if the selected camera's EncoderType requires an external
+	 * viewer, the PTZ controls are enabled as long as the user has
+	 * permissions and the camera has a controller.  This is because
+	 * there is currently no practical way for IRIS to determine whether
+	 * an external stream is currently active.
+	 */
+	private void updateCamControls() {
+		if (selected == null) {
+			enablePTZ(false);
+			return;
+		}
+		// Does the camera have a controller?
+		boolean hasCtrl = (selected.getController() != null);
+		// Does the user have any relevant camera perms?
+		boolean hasPerms = (cam_ptz.canControlPtz() ||
+			cam_ptz.canRequestDevice() ||
+			cam_ptz.canRecallPreset() ||
+			cam_ptz.canStorePreset()
+			);
+		// Is the StreamPanel currently streaming?
+		boolean streaming = stream_pnl.isStreaming();
+		// Is an external viewer required?
+		boolean extOnly = CameraHelper.needsExternalViewer(selected);
+		// Is blind control permitted?
+		boolean blindOk = SystemAttrEnum.CAMERA_PTZ_BLIND.getBoolean();
+
+		// Enable or disable camera controls, based on above states.
+		boolean enable = (hasCtrl && hasPerms &&
+			(streaming || extOnly || blindOk));
+		enablePTZ(enable);
+	}
+
+	/**
+	 * Enable or disable PTZ controls.
+	 * Enables/disables control via CameraPTZ (applies to buttons, mouse,
+	 * and joystick), and enables/disables the CamControlPanel.
+	 *
+	 * @param enable true to enable, false to disable
+	 */
+	private void enablePTZ(boolean enable) {
+		cam_ptz.enableControl(enable);
+		control_pnl.setEnabled(enable);
+	}
+
 	/** Create the video output selection combo box */
 	private JComboBox createOutputCombo() {
 		JComboBox box = new JComboBox();
@@ -202,6 +276,7 @@ public class CameraDispatcher extends JPanel {
 
 	/** Initialize the widgets on the panel */
 	public void initialize() {
+		stream_pnl.bindStreamStatusListener(ss_listener);
 		output_cbx.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				monitorSelected();
@@ -258,6 +333,7 @@ public class CameraDispatcher extends JPanel {
 
 	/** Dispose of the camera viewer */
 	public void dispose() {
+		stream_pnl.unbindStreamStatusListener(ss_listener);
 		sel_model.removeProxySelectionListener(sel_listener);
 		joy_ptz.dispose();
 		cam_ptz.setCamera(null);
@@ -279,7 +355,7 @@ public class CameraDispatcher extends JPanel {
 				camera.getGeoLoc()));
 			stream_pnl.setCamera(camera);
 			selectMonitorCamera();
-			control_pnl.setEnabled(cam_ptz.canControlPtz());
+			updateCamControls();
 		} else
 			clear();
 	}
