@@ -299,18 +299,18 @@ public class IrisClient extends JFrame {
 	private Session createSession(String user, char[] pwd) {
 		try {
 			SonarState st = new SonarState(props, handler);
-			if(st.login(user, new String(pwd))) {
+			if (st.login(user, new String(pwd))) {
 				st.populateCaches();
 				try {
 					return createSession(st);
 				}
-				catch(Exception e) {
-					st.disconnect(e.getMessage());
+				catch (Exception e) {
+					st.disconnect();
 					throw e;
 				}
 			}
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			handler.handle(e);
 		}
 		return null;
