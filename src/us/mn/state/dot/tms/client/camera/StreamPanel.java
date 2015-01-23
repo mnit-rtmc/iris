@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2002-2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +22,8 @@ import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.HashSet;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -38,6 +41,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  *
  * @author Timothy Johnson
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class StreamPanel extends JPanel {
 
@@ -78,6 +82,9 @@ public class StreamPanel extends JPanel {
 	/** Current video stream */
 	private VideoStream stream = null;
 
+	/** Most recent streaming state.  State variable for event FSM. */
+	private boolean stream_state = false;
+
 	/** Create a mouse PTZ */
 	static private MousePTZ createMousePTZ(CameraPTZ cam_ptz, Dimension sz,
 		JPanel screen_pnl)
@@ -86,6 +93,10 @@ public class StreamPanel extends JPanel {
 		     ? new MousePTZ(cam_ptz, sz, screen_pnl)
 		     : null;
 	}
+
+	/** Stream status listeners to notify on stream status change events */
+	private final Set<StreamStatusListener> ssl_set =
+		new HashSet<StreamStatusListener>();
 
 	/** Create a new stream panel */
 	public StreamPanel(VideoRequest req, CameraPTZ cam_ptz) {
@@ -168,6 +179,7 @@ public class StreamPanel extends JPanel {
 			screen.setPreferredSize(screen_pnl.getPreferredSize());
 			screen_pnl.add(screen);
 			timer.start();
+			handleStateChange();
 		}
 		catch(IOException e) {
 			status_lbl.setText(e.getMessage());
@@ -197,6 +209,7 @@ public class StreamPanel extends JPanel {
 			stream = null;
 		}
 		status_lbl.setText(null);
+		handleStateChange();
 	}
 
 	/** Dispose of the stream panel */
@@ -205,4 +218,53 @@ public class StreamPanel extends JPanel {
 		if(mouse_ptz != null)
 			mouse_ptz.dispose();
 	}
+
+	/** Are we currently streaming? */
+	public boolean isStreaming() {
+		return (stream!=null) ? true : false;
+	}
+
+	/**
+	 * Handle a possible streaming state change.  If necessary, update
+	 * stream_state, streaming control button status, and notify
+	 * StreamStatusListeners, ensuring against superfluous duplicate
+	 * events.
+	 */
+	private void handleStateChange() {
+		boolean streaming = isStreaming();
+
+		// do nothing if streaming state unchanged
+		if (streaming == stream_state)
+			return;
+
+		// update stream_state
+		stream_state = streaming;
+
+		// notify listeners
+		for (StreamStatusListener ssl : ssl_set) {
+			if (stream_state)
+				ssl.onStreamStarted();
+			else
+				ssl.onStreamFinished();
+		}
+	}
+
+	/**
+	 * Bind a StreamStatusListener to this StreamPanel.
+	 */
+	public void bindStreamStatusListener(StreamStatusListener ssl) {
+		if (ssl == null)
+			return;
+		ssl_set.add(ssl);
+	}
+
+	/**
+	 * Unbind a StreamStatusListener from this StreamPanel.
+	 */
+	public void unbindStreamStatusListener(StreamStatusListener ssl) {
+		if (ssl == null)
+			return;
+		ssl_set.remove(ssl);
+	}
+
 }
