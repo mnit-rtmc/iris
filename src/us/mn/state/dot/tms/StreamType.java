@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +19,8 @@ package us.mn.state.dot.tms;
  * Stream type enumeration.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public enum StreamType {
-	NONE, MJPEG, MPEG4;
+	NONE, MJPEG, MPEG4, MMS;
 }

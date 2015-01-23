@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,25 +22,36 @@ import java.util.LinkedList;
  * in the iris.encoder_type look-up table.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public enum EncoderType {
 
 	/** Undefined encoder type (0) */
-	NONE(" ", StreamType.NONE),
+	NONE(" ", StreamType.NONE, false),
 
 	/** Axis MJPEG (1) */
-	AXIS_MJPEG("Axis MJPEG", StreamType.MJPEG),
+	AXIS_MJPEG("Axis MJPEG", StreamType.MJPEG, false),
 
 	/** Axis MPEG4 (2) */
-	AXIS_MPEG4("Axis MPEG4", StreamType.MPEG4),
+	AXIS_MPEG4("Axis MPEG4", StreamType.MPEG4, true),
 
 	/** Infinova MPEG4 (3) */
-	INFINOVA_MPEG4("Infinova MPEG4", StreamType.MPEG4);
+	INFINOVA_MPEG4("Infinova MPEG4", StreamType.MPEG4, true),
+
+	/** Axis MPEG4 RTP over RTSP (4) */
+	AXIS_MP4_AXRTSP("Axis MP4 axrtsp", StreamType.MPEG4, true),
+
+	/** Axis MPEG4 RTP over RTSP over HTTP (5) */
+	AXIS_MP4_AXRTSPHTTP("Axis MP4 axrtsphttp", StreamType.MPEG4, true),
+
+	/** Generic MMS (6) */
+	GENERIC_MMS("Generic MMS", StreamType.MMS, true);
 
 	/** Create a new encoder type */
-	private EncoderType(String d, StreamType st) {
+	private EncoderType(String d, StreamType st, boolean ext) {
 		description = d;
 		stream_type = st;
+		ext_viewer_only = ext;
 	}
 
 	/** Description */
@@ -47,6 +59,9 @@ public enum EncoderType {
 
 	/** Stream type */
 	public final StreamType stream_type;
+
+	/** Whether an external viewer is required for this encoder type */
+	public final boolean ext_viewer_only;
 
 	/** Get the string description of the encoder type */
 	public String toString() {

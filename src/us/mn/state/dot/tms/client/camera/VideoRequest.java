@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2003-2013  Minnesota Department of Transportation
+ * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,12 +24,14 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.client.MainClient;
+import us.mn.state.dot.tms.utils.URIUtils;
 
 /**
  * The video stream request parameter wrapper.
  *
  * @author Timothy Johnson
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class VideoRequest {
 
@@ -166,26 +169,61 @@ public class VideoRequest {
 
 	/** Create a camera encoder URL */
 	protected String getCameraUrl(Camera cam) throws IOException {
-		String ip = CameraHelper.parseEncoderIp(cam);
-		if(ip.length() < 1)
-			throw new IOException("No Encoder IP");
+		String enc = cam.getEncoder();
+		int chan = cam.getEncoderChannel();
+		String ip = null;
+
 		switch(getEncoderType(cam)) {
 		case AXIS_MJPEG:
-			/* The showlength parameter is needed to force ancient
-			 * (2401) servers to provide Content-Length headers */
-			return new String("http://" + ip +
-				"/axis-cgi/mjpg/video.cgi" +
-				"?camera=" + cam.getEncoderChannel() +
+			/* encoder field represents IP(:port) */
+			ip = parseEncoderIp(cam);	// throws IOE
+			/* showlength parameter needed to force ancient (2401)
+			 * servers to provide Content-Length headers */
+			return "http://" + ip + "/axis-cgi/mjpg/video.cgi" +
+				"?camera=" + chan +
 				"&resolution=" + size.getResolution() +
-				"&showlength=1");
+				"&showlength=1";
+
 		case AXIS_MPEG4:
-			return new String("rtsp://" + ip + "/mpeg4/" +
-				cam.getEncoderChannel() + "/media.amp");
+			/* encoder field represents IP(:port) */
+			ip = parseEncoderIp(cam);	// throws IOE
+			return "rtsp://" + ip + "/mpeg4/" + chan +
+				"/media.amp";
 		case INFINOVA_MPEG4:
-			return new String("rtsp://" + ip + "/1.AMP");
+			/* encoder field represents IP(:port) */
+			ip = parseEncoderIp(cam);	// throws IOE
+			return "rtsp://" + ip + "/1.AMP";
+		case AXIS_MP4_AXRTSP:
+			/* encoder field represents IP(:port) */
+			return "axrtsp://" + enc + "/mpeg4/" + chan +
+				"/media.amp";
+		case AXIS_MP4_AXRTSPHTTP:
+			/* encoder field represents IP(:port) */
+			return "axrtsphttp://" + enc + "/mpeg4/" + chan +
+				"/media.amp";
+		case GENERIC_MMS:
+			/* encoder field represents URL */
+			String url = cam.getEncoder();
+			if (!URIUtils.checkScheme(url,"mms"))
+				throw new IOException("Invalid encoder field");
+			return url;
 		default:
-			throw new IOException("No Encoder");
+			throw new IOException("Unsupported Encoder");
 		}
+	}
+
+	/**
+	 * Parse an IP(:port) from a Camera's encoder field.
+	 *
+	 * @param cam The Camera whose encoder field to parse
+	 * @return A String containing the parsed IP(:port)
+	 * @throws IOException upon parsing failure
+	 */
+	private String parseEncoderIp(Camera cam) throws IOException {
+		String ip = CameraHelper.parseEncoderIp(cam);
+		if (ip.length() < 1)
+			throw new IOException("Invalid encoder field");
+		return ip;
 	}
 
 	/** Get the stream type for a camera */
@@ -200,4 +238,6 @@ public class VideoRequest {
 	static protected EncoderType getEncoderType(Camera cam) {
 		return EncoderType.fromOrdinal(cam.getEncoderType());
 	}
+
 }
+
