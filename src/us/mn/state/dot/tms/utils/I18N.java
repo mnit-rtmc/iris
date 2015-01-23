@@ -50,8 +50,9 @@ public class I18N {
 	/** Resource bundle with language and country */
 	static private ResourceBundle lc_bundle = null;
 
-	/** Resource bundle with language only */
-	static private ResourceBundle l_bundle = null;
+	/** Resource bundle with language only.  Load the "en" bundle to use
+	 * before initialize is called. */
+	static private ResourceBundle l_bundle = getBundle("en");
 
 	/** Class can't be instantiated */
 	private I18N() {
