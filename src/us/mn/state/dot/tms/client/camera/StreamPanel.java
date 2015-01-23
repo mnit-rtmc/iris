@@ -285,10 +285,10 @@ public class StreamPanel extends JPanel {
 	private void playStream() {
 		stopStream();
 		if (camera == null) {
-			status_lbl.setText(null);
+			setStatusText(null);
 			return;
 		}
-		status_lbl.setText(I18N.get(
+		setStatusText(I18N.get(
 			"camera.stream.opening"));
 		requestStream(camera);
 	}
@@ -308,7 +308,7 @@ public class StreamPanel extends JPanel {
 			public void perform() {
 				VideoStream vs = stream;
 				if(vs != null && vs.isPlaying())
-					status_lbl.setText(vs.getStatus());
+					setStatusText(vs.getStatus());
 				else
 					clearStream();
 			}
@@ -329,7 +329,7 @@ public class StreamPanel extends JPanel {
 				stopStream();
 				camera = c;
 				updateButtonState();
-				status_lbl.setText(null);
+				setStatusText(null);
 				boolean canPlay = !(CameraHelper
 					.needsExternalViewer(camera));
 				if (canPlay && autoplay)
@@ -349,7 +349,7 @@ public class StreamPanel extends JPanel {
 			handleStateChange();
 		}
 		catch(IOException e) {
-			status_lbl.setText(e.getMessage());
+			setStatusText(e.getMessage());
 		}
 	}
 
@@ -375,7 +375,7 @@ public class StreamPanel extends JPanel {
 			vs.dispose();
 			stream = null;
 		}
-		status_lbl.setText(null);
+		setStatusText(null);
 		handleStateChange();
 	}
 
@@ -384,6 +384,11 @@ public class StreamPanel extends JPanel {
 		clearStream();
 		if(mouse_ptz != null)
 			mouse_ptz.dispose();
+	}
+
+	/** Set the status label. */
+	private void setStatusText(String s) {
+		status_lbl.setText(s);
 	}
 
 	/** Are we currently streaming? */
@@ -456,7 +461,7 @@ public class StreamPanel extends JPanel {
 		if (c == null)
 			return;
 		if (external_viewer == null) {
-			status_lbl.setText("Error: no external viewer defined.");
+			setStatusText("Error: no external viewer defined.");
 			return;
 		}
 		String url = null;
@@ -464,11 +469,11 @@ public class StreamPanel extends JPanel {
 			url = video_req.getCameraUrl(c);
 		}
 		catch(IOException e) {
-			status_lbl.setText("Error: " + e.getMessage());
+			setStatusText("Error: " + e.getMessage());
 			return;
 		}
 		if (url == null) {
-			status_lbl.setText("Error: cannot determine URL.");
+			setStatusText("Error: cannot determine URL.");
 			return;
 		}
 		String[] fields = external_viewer.split(",");
@@ -478,7 +483,7 @@ public class StreamPanel extends JPanel {
 			cmd.add(f);
 		cmd.add(url);
 		OSUtils.spawnProcess(cmd);
-		status_lbl.setText("External viewer launched.");
+		setStatusText("External viewer launched.");
 		return;
 	}
 
