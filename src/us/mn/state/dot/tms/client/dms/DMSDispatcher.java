@@ -125,7 +125,7 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Get a list of the selected DMS */
-	private Set<DMS> getSelected() {
+	private Set<DMS> getValidSelected() {
 		Set<DMS> sel = sel_model.getSelected();
 		Iterator<DMS> it = sel.iterator();
 		while (it.hasNext()) {
@@ -150,14 +150,14 @@ public class DMSDispatcher extends JPanel {
 
 	/** Send the currently selected message */
 	public void sendSelectedMessage() {
-		removeInvalidSelections();
-		if(shouldSendMessage())
+		if (shouldSendMessage())
 			sendMessage();
+		removeInvalidSelections();
 	}
 
 	/** Remove all invalid selected DMS */
 	private void removeInvalidSelections() {
-		sel_model.setSelected(getSelected());
+		sel_model.setSelected(getValidSelected());
 	}
 
 	/** If enabled, prompt the user with a send confirmation.
@@ -197,8 +197,8 @@ public class DMSDispatcher extends JPanel {
 	private String buildSelectedList() {
 		boolean first = true;
 		StringBuilder sb = new StringBuilder();
-		for(DMS dms: getSelected()) {
-			if(!first)
+		for (DMS dms: getValidSelected()) {
+			if (!first)
 				sb.append(", ");
 			sb.append(dms.getName());
 			first = false;
@@ -220,7 +220,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Send a new message to the selected DMS */
 	private void sendMessage() {
-		Set<DMS> sel = getSelected();
+		Set<DMS> sel = getValidSelected();
 		if (sel.size() > 0) {
 			SignMessage sm = createMessage();
 			if (sm != null) {
@@ -448,7 +448,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Can a message be sent to all selected DMS? */
 	public boolean canSend() {
-		Set<DMS> sel = getSelected();
+		Set<DMS> sel = getValidSelected();
 		if (sel.isEmpty())
 			return false;
 		for (DMS dms: sel) {
