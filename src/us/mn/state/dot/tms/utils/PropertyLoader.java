@@ -1,6 +1,6 @@
 /*
  * SONAR -- Simple Object Notification And Replication
- * Copyright (C) 2006-2010  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.utils;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.io.IOException;
 import java.net.URL;
@@ -28,31 +27,35 @@ import java.util.Properties;
  */
 public class PropertyLoader {
 
+	/** Load properties from the specified location */
+	static public Properties load(String loc) throws IOException {
+		Properties props = new Properties();
+		InputStream s = getInputStream(loc);
+		if (s != null) {
+			try {
+				props.load(s);
+			}
+			finally {
+				s.close();
+			}
+		}
+		return props;
+	}
+
 	/** Get an input stream for the specified property location */
-	static protected InputStream getInputStream(String loc)
+	static private InputStream getInputStream(String loc)
 		throws IOException
 	{
 		try {
 			return new FileInputStream(loc);
 		}
-		catch(FileNotFoundException e) {
-			return new URL(loc).openStream();
-		}
-	}
-
-	/** Load properties from the specified location */
-	static public Properties load(String loc) throws IOException {
-		InputStream s = getInputStream(loc);
-		Properties props = new Properties();
-		if(s != null) {
+		catch (IOException e) {
 			try {
-				props.load(s);
-				return props;
+				return new URL(loc).openStream();
 			}
-			finally {
-				s.close();
+			catch (IOException ee) {
+				throw e;
 			}
-		} else
-			return props;
+		}
 	}
 }
