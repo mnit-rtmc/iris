@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +19,14 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.TreeMap;
 import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
  * Helper class for cameras.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public class CameraHelper extends BaseHelper {
 
@@ -68,5 +71,18 @@ public class CameraHelper extends BaseHelper {
 			}
 		}
 		return cams.values();
+	}
+
+	/**
+	 * Does the camera require an external viewer?
+	 * @param cam The camera
+	 * @return Whether cam requires an external viewer,
+	 *         or false if cam is null.
+	 */
+	static public boolean needsExternalViewer(Camera cam) {
+		if (cam == null)
+			return false;
+		return EncoderType.fromOrdinal(cam.getEncoderType())
+			.ext_viewer_only;
 	}
 }

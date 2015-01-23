@@ -21,13 +21,16 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Properties;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -64,6 +67,12 @@ public class CameraDispatcher extends JPanel {
 
 	/** Proxy manager for camera devices */
 	private final CameraManager manager;
+
+	/** Client properties */
+	private final Properties client_props;
+
+	/** VideoRequest object */
+	private final VideoRequest video_req;
 
 	/** Selection model */
 	private final ProxySelectionModel<Camera> sel_model;
@@ -114,6 +123,8 @@ public class CameraDispatcher extends JPanel {
 	public CameraDispatcher(Session s, CameraManager man) {
 		session = s;
 		manager = man;
+		client_props = session.getProperties();
+		video_req = new VideoRequest(client_props, SIZE);
 		setLayout(new BorderLayout());
 		sel_model = manager.getSelectionModel();
 		model = session.getSonarState().getCamCache().getCameraModel();
@@ -171,7 +182,12 @@ public class CameraDispatcher extends JPanel {
 			SIZE);
 		vr.setSonarSessionId(session.getSessionId());
 		vr.setRate(30);
-		return new StreamPanel(vr, cam_ptz);
+		boolean controls = SystemAttrEnum.CAMERA_STREAM_CONTROLS_ENABLE
+			.getBoolean();
+		boolean autoplay = SystemAttrEnum.CAMERA_AUTOPLAY
+			.getBoolean();
+		return new StreamPanel(vr, cam_ptz, session, controls,
+			autoplay);
 	}
 
 	/** Create the video output selection combo box */

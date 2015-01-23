@@ -44,7 +44,8 @@ public enum UserProperty {
 	TAB_SEL_2	("tab.selected.2"),
 	TAB_SEL_3	("tab.selected.3"),
 	TAB_LIST	("tab.list"),
-	SCALE		("scale");
+	SCALE		("scale"),
+	VIDEO_EXTVIEWER	("video.extviewer");
 
 	/** Property name */
 	public final String name;
@@ -230,4 +231,17 @@ public enum UserProperty {
 			tl.add(f.trim());
 		return tl.toArray(new String[tl.size()]);
 	}
+
+	/**
+	 * Return the external video viewer executable string.
+	 * @return the external video viewer executable string,
+	 *         or null if not found.
+	 */
+	static public String getExternalVideoViewer(Properties p) {
+		String ev = getProp(p, VIDEO_EXTVIEWER);
+		if ("".equals(ev))
+			return null;
+		return ev;
+	}
+
 }
