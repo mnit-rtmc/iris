@@ -35,7 +35,7 @@ Source:		%{name}-%{version}.tar.gz
 URL:		@@RPM.URL@@
 BuildArch:	noarch
 Buildroot:	%{buildroot}
-Requires:	java-1.8.0-openjdk-headless, postgresql-server, postgresql-jdbc, httpd
+Requires:	java-1.7.0-openjdk, postgresql-server, postgresql-jdbc, httpd
 
 %Description
 @@RPM.DESCRIPTION@@
