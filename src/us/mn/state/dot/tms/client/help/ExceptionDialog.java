@@ -56,6 +56,25 @@ public class ExceptionDialog extends JDialog {
 	/** Iris client frame */
 	private final IrisClient client;
 
+	/** Action listener to dismiss dialog */
+	private final ActionListener dismiss = new ActionListener() {
+		public void actionPerformed(ActionEvent a) {
+			setVisible(false);
+			dispose();
+		}
+	};
+
+	/** Action listener to exit client */
+	private final ActionListener exit = new ActionListener() {
+		public void actionPerformed(ActionEvent a) {
+			setVisible(false);
+			dispose();
+			if (client != null)
+				client.logout();
+			System.exit(-1);
+		}
+	};
+
 	/** Create a new exception dialog without an owner */
 	public ExceptionDialog() {
 		super();
@@ -90,8 +109,7 @@ public class ExceptionDialog extends JDialog {
 		if (e instanceof ConnectException)
 			p.addText(I18N.get("help.exception.connect"));
 		else if (e instanceof EOFException) {
-			if (client != null)
-				client.logout();
+			setFatal(true);
 			p.addText(I18N.get("help.exception.disconnect"));
 		}
 		else if (e instanceof AuthenticationException) {
@@ -153,14 +171,7 @@ public class ExceptionDialog extends JDialog {
 		Box hbox = Box.createHorizontalBox();
 		hbox.add(Box.createHorizontalGlue());
 		JButton btn = new JButton(I18N.get("help.exception.dismiss"));
-		btn.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent a) {
-				if (fatal)
-					System.exit(-1);
-				setVisible(false);
-				dispose();
-			}
-		});
+		btn.addActionListener((fatal) ? (exit) : (dismiss));
 		hbox.add(btn);
 		if (fatal) {
 			hbox.add(Box.createHorizontalStrut(10));
