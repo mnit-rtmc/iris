@@ -41,13 +41,9 @@ import us.mn.state.dot.tms.client.widget.TextPanel;
  */
 public class ExceptionDialog extends JDialog {
 
-	/** Flag for fatal exceptions */
-	private boolean fatal = false;
-
-	/** Set the fatal status */
-	private void setFatal(boolean f) {
-		fatal = f;
-		if (fatal)
+	/** Set the title */
+	private void setTitle(boolean e) {
+		if (e)
 			setTitle(I18N.get("help.exception.error"));
 		else
 			setTitle(I18N.get("help.exception.warning"));
@@ -92,9 +88,7 @@ public class ExceptionDialog extends JDialog {
 	/** Show an exception */
 	public void show(Exception e) {
 		e.printStackTrace();
-		setFatal(false);
 		TextPanel pnl = createMessagePanel(e);
-		pnl.add(createButtonBox(e));
 		getContentPane().removeAll();
 		getContentPane().add(pnl);
 		pack();
@@ -104,12 +98,14 @@ public class ExceptionDialog extends JDialog {
 
 	/** Create a text panel for an exception */
 	private TextPanel createMessagePanel(final Exception e) {
+		boolean fatal = false;
+		boolean detail = false;
 		TextPanel p = new TextPanel();
 		p.addGlue();
 		if (e instanceof ConnectException)
 			p.addText(I18N.get("help.exception.connect"));
 		else if (e instanceof EOFException) {
-			setFatal(true);
+			fatal = true;
 			p.addText(I18N.get("help.exception.disconnect"));
 		}
 		else if (e instanceof AuthenticationException) {
@@ -149,31 +145,37 @@ public class ExceptionDialog extends JDialog {
 			p.addText(e.getMessage());
 		}
 		else if (e instanceof SonarException) {
-			setFatal(true);
+			fatal = true;
+			detail = true;
 			p.addText(I18N.get("help.exception.sonar"));
 			p.addSpacing();
 			p.addText(e.getMessage());
 			p.addText(I18N.get("help.exception.assist"));
 		}
 		else if (e instanceof Exception) {
-			setFatal(true);
+			fatal = true;
+			detail = true;
 			p.addText(I18N.get("help.exception.unknown"));
 			p.addSpacing();
 			p.addText(I18N.get("help.exception.assist"));
 		}
 		p.addGlue();
 		p.addSpacing();
+		setTitle(detail);
+		p.add(createButtonBox(e, fatal, detail));
 		return p;
 	}
 
 	/** Create a button box */
-	private Box createButtonBox(final Exception e) {
+	private Box createButtonBox(final Exception e, boolean fatal,
+		boolean detail)
+	{
 		Box hbox = Box.createHorizontalBox();
 		hbox.add(Box.createHorizontalGlue());
 		JButton btn = new JButton(I18N.get("help.exception.dismiss"));
 		btn.addActionListener((fatal) ? (exit) : (dismiss));
 		hbox.add(btn);
-		if (fatal) {
+		if (detail) {
 			hbox.add(Box.createHorizontalStrut(10));
 			JButton dtl = new JButton(I18N.get(
 				"help.exception.detail"));
