@@ -287,8 +287,7 @@ public class StreamPanel extends JPanel {
 			setStatusText(null);
 			return;
 		}
-		setStatusText(I18N.get(
-			"camera.stream.opening"));
+		setStatusText(I18N.get("camera.stream.opening"));
 		requestStream(camera);
 	}
 
@@ -329,9 +328,8 @@ public class StreamPanel extends JPanel {
 				camera = c;
 				updateButtonState();
 				setStatusText(null);
-				boolean canPlay = !(video_req
-					.needsExternalViewer(camera));
-				if (canPlay && autoplay)
+				boolean mjpeg = video_req.hasMJPEG(c);
+				if (mjpeg && autoplay)
 					playStream();
 			}
 		});
@@ -347,20 +345,18 @@ public class StreamPanel extends JPanel {
 			timer.start();
 			handleStateChange();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			setStatusText(e.getMessage());
 		}
 	}
 
 	/** Create a new video stream */
 	private VideoStream createStream(Camera c) throws IOException {
-		switch(video_req.getStreamType(c)) {
+		switch (video_req.getStreamType(c)) {
 		case MJPEG:
 			return new MJPEGStream(STREAMER, video_req, c);
-		case MPEG4:
-			throw new IOException("No decoder");
 		default:
-			throw new IOException("No encoder");
+			throw new IOException("Unable to stream");
 		}
 	}
 
@@ -403,18 +399,10 @@ public class StreamPanel extends JPanel {
 	 */
 	private void handleStateChange() {
 		boolean streaming = isStreaming();
-
-		// do nothing if streaming state unchanged
 		if (streaming == stream_state)
 			return;
-
-		// update stream_state
 		stream_state = streaming;
-
-		// update streaming button states
 		updateButtonState();
-
-		// notify listeners
 		for (StreamStatusListener ssl : ssl_set) {
 			if (stream_state)
 				ssl.onStreamStarted();
@@ -423,6 +411,7 @@ public class StreamPanel extends JPanel {
 		}
 	}
 
+	/** Update the button state */
 	private void updateButtonState() {
 		if (camera == null) {
 			stop_button.setEnabled(false);
@@ -431,10 +420,10 @@ public class StreamPanel extends JPanel {
 			return;
 		}
 		boolean streaming = isStreaming();
-		boolean extOnly = video_req.needsExternalViewer(camera);
-		stop_button.setEnabled(!extOnly && streaming);
-		play_button.setEnabled(!extOnly && !streaming);
-		playext_button.setEnabled(extOnly);
+		boolean mjpeg = video_req.hasMJPEG(camera);
+		stop_button.setEnabled(mjpeg && streaming);
+		play_button.setEnabled(mjpeg && !streaming);
+		playext_button.setEnabled(!mjpeg);
 	}
 
 	/**
@@ -485,5 +474,4 @@ public class StreamPanel extends JPanel {
 		setStatusText("External viewer launched.");
 		return;
 	}
-
 }

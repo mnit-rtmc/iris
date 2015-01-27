@@ -128,6 +128,8 @@ public class CameraDispatcher extends JPanel {
 		manager = man;
 		client_props = session.getProperties();
 		video_req = new VideoRequest(client_props, SIZE);
+		video_req.setSonarSessionId(session.getSessionId());
+		video_req.setRate(30);
 		setLayout(new BorderLayout());
 		sel_model = manager.getSelectionModel();
 		model = session.getSonarState().getCamCache().getCameraModel();
@@ -182,15 +184,11 @@ public class CameraDispatcher extends JPanel {
 
 	/** Create the stream panel */
 	private StreamPanel createStreamPanel() {
-		VideoRequest vr = new VideoRequest(session.getProperties(),
-			SIZE);
-		vr.setSonarSessionId(session.getSessionId());
-		vr.setRate(30);
 		boolean controls = SystemAttrEnum.CAMERA_STREAM_CONTROLS_ENABLE
 			.getBoolean();
 		boolean autoplay = SystemAttrEnum.CAMERA_AUTOPLAY
 			.getBoolean();
-		return new StreamPanel(vr, cam_ptz, session, controls,
+		return new StreamPanel(video_req, cam_ptz, session, controls,
 			autoplay);
 	}
 
@@ -231,22 +229,15 @@ public class CameraDispatcher extends JPanel {
 			enablePTZ(false);
 			return;
 		}
-		// Does the camera have a controller?
 		boolean hasCtrl = (selected.getController() != null);
-		// Does the user have any relevant camera perms?
 		boolean hasPerms = (cam_ptz.canControlPtz() ||
 			cam_ptz.canRequestDevice() ||
 			cam_ptz.canRecallPreset() ||
 			cam_ptz.canStorePreset()
-			);
-		// Is the StreamPanel currently streaming?
+		);
 		boolean streaming = stream_pnl.isStreaming();
-		// Is an external viewer required?
-		boolean extOnly = CameraHelper.needsExternalViewer(selected);
-		// Is blind control permitted?
+		boolean extOnly = !video_req.hasMJPEG(selected);
 		boolean blindOk = SystemAttrEnum.CAMERA_PTZ_BLIND.getBoolean();
-
-		// Enable or disable camera controls, based on above states.
 		boolean enable = (hasCtrl && hasPerms &&
 			(streaming || extOnly || blindOk));
 		enablePTZ(enable);

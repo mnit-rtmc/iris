@@ -73,30 +73,30 @@ public class VideoRequest {
 	}
 
 	/** Video host property name */
-	static protected final String VIDEO_HOST = "video.host";
+	static private final String VIDEO_HOST = "video.host";
 
 	/** Video port property name */
-	static protected final String VIDEO_PORT = "video.port";
+	static private final String VIDEO_PORT = "video.port";
 
 	/** Create a url for connecting to the video server.
 	 * @param p Properties */
-	protected String createBaseUrl(Properties p) {
-		String ip = p.getProperty(VIDEO_HOST);
-		if(ip != null) {
-			try {
-				ip = InetAddress.getByName(ip).getHostAddress();
-				String port = p.getProperty(VIDEO_PORT);
-				if(port != null)
-					return ip + ":" + port;
-				else
-					return ip;
-			}
-			catch(UnknownHostException uhe) {
-				System.out.println("Invalid video server " +
-					uhe.getMessage());
-			}
+	private String createBaseUrl(Properties p) {
+		String host = p.getProperty(VIDEO_HOST);
+		String port = p.getProperty(VIDEO_PORT);
+		return (host != null) ? createBaseUrl(host, port) : null;
+	}
+
+	/** Create a url for connecting to the video server */
+	private String createBaseUrl(String host, String port) {
+		try {
+			String ip =InetAddress.getByName(host).getHostAddress();
+			return (port != null) ? (ip + ":" + port) : ip;
 		}
-		return null;
+		catch (UnknownHostException e) {
+			System.out.println("Invalid video server " +
+				e.getMessage());
+			return null;
+		}
 	}
 
 	/** Sonar session identifier for authenticating to the video system */
@@ -149,24 +149,13 @@ public class VideoRequest {
 		size = sz;
 	}
 
-	/** Check if a camera requires an external viewer.
-	 * @param c Camera.
-	 * @return true if external viewer is needed. */
-	public boolean needsExternalViewer(Camera c) {
-		return (base_url == null)
-		     && CameraHelper.needsExternalViewer(c);
-	}
-
 	/** Create a URL for a stream */
-	public String getUrl(Camera cam) throws IOException {
-		if(base_url != null)
-			return getServletUrl(cam);
-		else
-			return getCameraUrl(cam);
+	public String getUrl(Camera c) throws IOException {
+		return (base_url != null) ? getServletUrl(c) : getCameraUrl(c);
 	}
 
 	/** Create a video servlet URL */
-	protected String getServletUrl(Camera cam) {
+	private String getServletUrl(Camera cam) {
 		return new String("http://" + base_url +
 			"/video/" + servlet_type.servlet +
 			"/" + district +
@@ -176,14 +165,13 @@ public class VideoRequest {
 	}
 
 	/** Create a camera encoder URL */
-	protected String getCameraUrl(Camera cam) throws IOException {
+	public String getCameraUrl(Camera cam) throws IOException {
 		String enc = cam.getEncoder();
 		int chan = cam.getEncoderChannel();
-		String ip = null;
+		String ip;
 
-		switch(getEncoderType(cam)) {
+		switch (CameraHelper.getEncoderType(cam)) {
 		case AXIS_MJPEG:
-			/* encoder field represents IP(:port) */
 			ip = parseEncoderIp(cam);	// throws IOE
 			/* showlength parameter needed to force ancient (2401)
 			 * servers to provide Content-Length headers */
@@ -191,30 +179,23 @@ public class VideoRequest {
 				"?camera=" + chan +
 				"&resolution=" + size.getResolution() +
 				"&showlength=1";
-
 		case AXIS_MPEG4:
-			/* encoder field represents IP(:port) */
 			ip = parseEncoderIp(cam);	// throws IOE
 			return "rtsp://" + ip + "/mpeg4/" + chan +
 				"/media.amp";
 		case INFINOVA_MPEG4:
-			/* encoder field represents IP(:port) */
 			ip = parseEncoderIp(cam);	// throws IOE
 			return "rtsp://" + ip + "/1.AMP";
 		case AXIS_MP4_AXRTSP:
-			/* encoder field represents IP(:port) */
 			return "axrtsp://" + enc + "/mpeg4/" + chan +
 				"/media.amp";
 		case AXIS_MP4_AXRTSPHTTP:
-			/* encoder field represents IP(:port) */
 			return "axrtsphttp://" + enc + "/mpeg4/" + chan +
 				"/media.amp";
 		case GENERIC_MMS:
-			/* encoder field represents URL */
-			String url = cam.getEncoder();
-			if (!URIUtils.checkScheme(url,"mms"))
+			if (!URIUtils.checkScheme(enc, "mms"))
 				throw new IOException("Invalid encoder field");
-			return url;
+			return enc;
 		default:
 			throw new IOException("Unsupported Encoder");
 		}
@@ -235,17 +216,17 @@ public class VideoRequest {
 	}
 
 	/** Get the stream type for a camera */
-	public StreamType getStreamType(Camera cam) {
-		if(base_url != null)
-			return StreamType.MJPEG;
-		else
-			return getEncoderType(cam).stream_type;
+	public StreamType getStreamType(Camera c) {
+		EncoderType et = CameraHelper.getEncoderType(c);
+		return (base_url != null)
+		      ? et.indirect_stream
+		      : et.direct_stream;
 	}
 
-	/** Get the encoder type for a camera */
-	static protected EncoderType getEncoderType(Camera cam) {
-		return EncoderType.fromOrdinal(cam.getEncoderType());
+	/** Check if stream type is MJPEG.
+	 * @param c Camera.
+	 * @return true if stream type is motion JPEG. */
+	public boolean hasMJPEG(Camera c) {
+		return (c != null) && (getStreamType(c) == StreamType.MJPEG);
 	}
-
 }
-

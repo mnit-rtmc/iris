@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2015  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,41 +27,45 @@ import java.util.LinkedList;
 public enum EncoderType {
 
 	/** Undefined encoder type (0) */
-	NONE(" ", StreamType.NONE, false),
+	NONE(" ", StreamType.NONE, StreamType.NONE),
 
 	/** Axis MJPEG (1) */
-	AXIS_MJPEG("Axis MJPEG", StreamType.MJPEG, false),
+	AXIS_MJPEG("Axis MJPEG", StreamType.MJPEG, StreamType.MJPEG),
 
 	/** Axis MPEG4 (2) */
-	AXIS_MPEG4("Axis MPEG4", StreamType.MPEG4, true),
+	AXIS_MPEG4("Axis MPEG4", StreamType.MPEG4, StreamType.MJPEG),
 
 	/** Infinova MPEG4 (3) */
-	INFINOVA_MPEG4("Infinova MPEG4", StreamType.MPEG4, true),
+	INFINOVA_MPEG4("Infinova MPEG4", StreamType.MPEG4, StreamType.MJPEG),
 
 	/** Axis MPEG4 RTP over RTSP (4) */
-	AXIS_MP4_AXRTSP("Axis MP4 axrtsp", StreamType.MPEG4, true),
+	AXIS_MP4_AXRTSP("Axis MP4 axrtsp", StreamType.MPEG4, StreamType.NONE),
 
 	/** Axis MPEG4 RTP over RTSP over HTTP (5) */
-	AXIS_MP4_AXRTSPHTTP("Axis MP4 axrtsphttp", StreamType.MPEG4, true),
+	AXIS_MP4_AXRTSPHTTP("Axis MP4 axrtsphttp", StreamType.MPEG4,
+	                    StreamType.NONE),
 
 	/** Generic MMS (6) */
-	GENERIC_MMS("Generic MMS", StreamType.MMS, true);
+	GENERIC_MMS("Generic MMS", StreamType.MMS, StreamType.NONE);
 
-	/** Create a new encoder type */
-	private EncoderType(String d, StreamType st, boolean ext) {
+	/** Create a new encoder type.
+	 * @param d Description.
+	 * @param dst Stream type of direct stream.
+	 * @param ist Stream type of indirect stream (using video servlet). */
+	private EncoderType(String d, StreamType dst, StreamType ist) {
 		description = d;
-		stream_type = st;
-		ext_viewer_only = ext;
+		direct_stream = dst;
+		indirect_stream = ist;
 	}
 
 	/** Description */
 	public final String description;
 
-	/** Stream type */
-	public final StreamType stream_type;
+	/** Direct stream type */
+	public final StreamType direct_stream;
 
-	/** Whether an external viewer is required for this encoder type */
-	public final boolean ext_viewer_only;
+	/** Indirect stream type (using video servlet) */
+	public final StreamType indirect_stream;
 
 	/** Get the string description of the encoder type */
 	public String toString() {
@@ -70,8 +74,8 @@ public enum EncoderType {
 
 	/** Get a encoder type from an ordinal value */
 	static public EncoderType fromOrdinal(int o) {
-		for(EncoderType et: EncoderType.values()) {
-			if(et.ordinal() == o)
+		for (EncoderType et: values()) {
+			if (et.ordinal() == o)
 				return et;
 		}
 		return NONE;
@@ -80,7 +84,7 @@ public enum EncoderType {
 	/** Get an array of encoder type descriptions */
 	static public String[] getDescriptions() {
 		LinkedList<String> d = new LinkedList<String>();
-		for(EncoderType et: EncoderType.values())
+		for (EncoderType et: values())
 			d.add(et.description);
 		return d.toArray(new String[0]);
 	}
