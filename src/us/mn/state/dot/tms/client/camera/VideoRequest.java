@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2013  Minnesota Department of Transportation
+ * Copyright (C) 2003-2015  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -147,6 +147,14 @@ public class VideoRequest {
 		base_url = createBaseUrl(p);
 		district = p.getProperty("district", "tms");
 		size = sz;
+	}
+
+	/** Check if a camera requires an external viewer.
+	 * @param c Camera.
+	 * @return true if external viewer is needed. */
+	public boolean needsExternalViewer(Camera c) {
+		return (base_url == null)
+		     && CameraHelper.needsExternalViewer(c);
 	}
 
 	/** Create a URL for a stream */

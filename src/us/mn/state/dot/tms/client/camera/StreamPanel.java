@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2014  Minnesota Department of Transportation
+ * Copyright (C) 2002-2015  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,7 +39,6 @@ import javax.swing.border.BevelBorder;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.UserProperty;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -330,7 +329,7 @@ public class StreamPanel extends JPanel {
 				camera = c;
 				updateButtonState();
 				setStatusText(null);
-				boolean canPlay = !(CameraHelper
+				boolean canPlay = !(video_req
 					.needsExternalViewer(camera));
 				if (canPlay && autoplay)
 					playStream();
@@ -432,7 +431,7 @@ public class StreamPanel extends JPanel {
 			return;
 		}
 		boolean streaming = isStreaming();
-		boolean extOnly = CameraHelper.needsExternalViewer(camera);
+		boolean extOnly = video_req.needsExternalViewer(camera);
 		stop_button.setEnabled(!extOnly && streaming);
 		play_button.setEnabled(!extOnly && !streaming);
 		playext_button.setEnabled(extOnly);
