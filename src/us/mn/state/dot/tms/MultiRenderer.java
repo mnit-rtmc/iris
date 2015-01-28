@@ -468,11 +468,12 @@ public class MultiRenderer extends MultiAdapter {
 			spans.add(s);
 		}
 		void render(int base) throws InvalidMessageException {
-			int left = getLeft();
-			if (left < tr_x) {
+			int ex = getExtra();
+			if (ex < 0) {
 				syntax_err = MultiSyntaxError.textTooBig;
 				return;
 			}
+			int left = getLeft(ex);
 			int x = 0;
 			Span pspan = null;
 			for (Span span: spans) {
@@ -482,17 +483,20 @@ public class MultiRenderer extends MultiAdapter {
 				pspan = span;
 			}
 		}
-		int getLeft() {
+		int getExtra() {
+			int cw = (c_width <= 0 ? 1 : c_width);
+			int w = tr_width / cw;
+			int r = getWidth() / cw;
+			return (w - r) * cw;
+		}
+		int getLeft(int ex) {
 			switch (justl) {
 			case LEFT:
 				return tr_x;
 			case CENTER:
-				int cw = (c_width <= 0 ? 1 : c_width);
-				int w = tr_width / cw;
-				int r = getWidth() / cw;
-				return tr_x + (w - r) / 2 * cw;
+				return tr_x + ex / 2;
 			case RIGHT:
-				return tr_x + tr_width - getWidth();
+				return tr_x + ex;
 			default:
 				return 0;
 			}
