@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -221,8 +221,8 @@ public class MultiStringTest extends TestCase {
 			equals("AB|C"));
 		assertTrue(MultiString.normalize("AB|{}{}C{}").
 			equals("AB|{}{}C{}"));
-		assertTrue(MultiString.normalize("ABC DEF").
-			equals("ABC DEF"));
+		assertTrue(MultiString.normalize("ABC_DEF").
+			equals("ABC_DEF"));
 		assertTrue(MultiString.normalize("ABC[bad]DEF").
 			equals("ABCDEF"));
 		assertTrue(MultiString.normalize("ABC[nl]DEF").
@@ -243,6 +243,7 @@ public class MultiStringTest extends TestCase {
 			equals("[fo3,beef]ABC DEF"));
 		assertTrue(MultiString.normalize("[g1]").
 			equals("[g1]"));
+		assertTrue(MultiString.normalize("[g1_]").equals(""));
 		assertTrue(MultiString.normalize("[g1,5,5]").
 			equals("[g1,5,5]"));
 		assertTrue(MultiString.normalize("[g1,5,5,beef]").
@@ -269,6 +270,10 @@ public class MultiStringTest extends TestCase {
 			equals("[pb0,128,255]"));
 		assertTrue(MultiString.normalize("[ttS100]").
 			equals("[ttS100]"));
+		assertTrue(MultiString.normalize("[feedL1]").
+			equals("[feedL1]"));
+		assertTrue(MultiString.normalize("[feedL1_2]").
+			equals("[feedL1_2]"));
 	}
 
 	public void testPageOnTime() {

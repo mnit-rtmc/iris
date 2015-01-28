@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,7 +30,7 @@ public class MultiParser {
 
 	/** Regular expression to locate tags */
 	static private final Pattern TAG = Pattern.compile(
-		"\\[([-A-Za-z,0-9]*)\\]");
+		"\\[([-A-Za-z,0-9_]*)\\]");
 
 	/** Regular expression to match supported MULTI tags */
 	static private final Pattern TAGS = Pattern.compile(
