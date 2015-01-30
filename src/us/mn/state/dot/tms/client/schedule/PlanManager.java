@@ -110,9 +110,9 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, ActionPlan proxy) {
-		if(!isUpdatePermitted(proxy))
+		if (!isUpdatePermitted(proxy))
 			return false;
-		switch(is) {
+		switch (is) {
 		case DMS:
 			return proxy.getActive() && hasDmsAction(proxy);
 		case BEACON:
@@ -140,9 +140,9 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Test if an action plan has time actions */
 	private boolean hasTimeAction(ActionPlan p) {
 		Iterator<TimeAction> it = TimeActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			TimeAction ta = it.next();
-			if(ta.getActionPlan() == p)
+			if (ta.getActionPlan() == p)
 				return true;
 		}
 		return false;
@@ -151,9 +151,9 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Test if an action plan has DMS actions */
 	private boolean hasDmsAction(ActionPlan p) {
 		Iterator<DmsAction> it = DmsActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			DmsAction da = it.next();
-			if(da.getActionPlan() == p)
+			if (da.getActionPlan() == p)
 				return true;
 		}
 		return false;
@@ -162,9 +162,9 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Test if an action plan has beacon actions */
 	private boolean hasBeaconAction(ActionPlan p) {
 		Iterator<BeaconAction> it = BeaconActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			BeaconAction ba = it.next();
-			if(ba.getActionPlan() == p)
+			if (ba.getActionPlan() == p)
 				return true;
 		}
 		return false;
@@ -173,9 +173,9 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Test if an action plan has lane actions */
 	private boolean hasLaneAction(ActionPlan p) {
 		Iterator<LaneAction> it = LaneActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			LaneAction la = it.next();
-			if(la.getActionPlan() == p)
+			if (la.getActionPlan() == p)
 				return true;
 		}
 		return false;
@@ -184,9 +184,9 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Test if an action plan has meter actions */
 	private boolean hasMeterAction(ActionPlan p) {
 		Iterator<MeterAction> it = MeterActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			MeterAction ma = it.next();
-			if(ma.getActionPlan() == p)
+			if (ma.getActionPlan() == p)
 				return true;
 		}
 		return false;
