@@ -53,4 +53,11 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 		styles.add(style);
 		addSymbol(new VectorSymbol(style, shp));
 	}
+
+	/** Add a new style to the theme */
+	public void addStyle(ItemStyle is, Shape shp, Color clr) {
+		Style style = new Style(is.toString(), OUTLINE, clr);
+		styles.add(style);
+		addSymbol(new VectorSymbol(style, shp));
+	}
 }

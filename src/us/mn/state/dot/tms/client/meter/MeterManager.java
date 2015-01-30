@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	static private final Color COLOR_DEPLOYED = new Color(192, 192, 0);
 
 	/** Color to display metering meters */
-	static private final Color COLOR_METERING = new Color(0, 192, 0);
+	static public final Color COLOR_METERING = new Color(0, 192, 0);
 
 	/** Create a new meter manager */
 	public MeterManager(Session s, GeoLocManager lm) {

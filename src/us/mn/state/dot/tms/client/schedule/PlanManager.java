@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2014  Minnesota Department of Transportation
+ * Copyright (C) 2011-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
+import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.util.Iterator;
@@ -37,6 +38,7 @@ import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.beacon.BeaconMarker;
 import us.mn.state.dot.tms.client.dms.DmsMarker;
+import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.meter.MeterMarker;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
@@ -49,6 +51,9 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  * @author Douglas Lau
  */
 public class PlanManager extends ProxyManager<ActionPlan> {
+
+	/** Color to display schedule icon */
+	static private final Color COLOR_SCHEDULE = new Color(0, 208, 208);
 
 	/** Create a new action plan manager */
 	public PlanManager(Session s, GeoLocManager lm) {
@@ -89,11 +94,14 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	@Override
 	protected PlanTheme createTheme() {
 		PlanTheme theme = new PlanTheme(this);
-		theme.addStyle(ItemStyle.DMS, new DmsMarker());
-		theme.addStyle(ItemStyle.BEACON, new BeaconMarker());
-		theme.addStyle(ItemStyle.METER, new MeterMarker());
+		theme.addStyle(ItemStyle.DMS, new DmsMarker(),
+			PlanTheme.COLOR_SCHEDULED);
+		theme.addStyle(ItemStyle.BEACON, new BeaconMarker(),
+			PlanTheme.COLOR_DEPLOYED);
+		theme.addStyle(ItemStyle.METER, new MeterMarker(),
+			MeterManager.COLOR_METERING);
 		theme.addStyle(ItemStyle.LANE);
-		theme.addStyle(ItemStyle.TIME, new TimeMarker());
+		theme.addStyle(ItemStyle.TIME, new TimeMarker(),COLOR_SCHEDULE);
 		theme.addStyle(ItemStyle.ACTIVE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
