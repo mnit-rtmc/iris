@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2014  Minnesota Department of Transportation
+ * Copyright (C) 2004-2015  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -231,14 +231,13 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			}
 			@Override
 			public void done() {
-				for(StyleWidgets sw: widgets.values())
-					sw.updateCountLabel();
+				updateCountLabels();
 			}
 		};
 		worker.execute();
 	}
 
-	/** Update the count labels for each style status.  Must be synchronized
+	/** Update the counts for each style status.  Must be synchronized
 	 * in case multiple IWorkers are created. */
 	private synchronized void doUpdateCounts() {
 		for(StyleWidgets sw: widgets.values())
@@ -247,6 +246,13 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			for(StyleWidgets sw: widgets.values())
 				sw.countProxy(proxy);
 		}
+	}
+
+	/** Update the count labels.  Must be synchronized in case multiple
+	 * IWorkers are created. */
+	private synchronized void updateCountLabels() {
+		for (StyleWidgets sw: widgets.values())
+			sw.updateCountLabel();
 	}
 
 	/** Create the optional panel that contains cell size buttons. */
