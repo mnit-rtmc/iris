@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2013  Minnesota Department of Transportation
+ * Copyright (C) 2011-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	static private final Color COLOR = new Color(255, 255, 0, 128);
 
 	/** Action plan object marker */
-	static protected final PlanMarker MARKER = new PlanMarker();
+	static private final PlanMarker MARKER = new PlanMarker();
 
 	/** Create a new plan theme */
 	public PlanTheme(PlanManager man) {
@@ -41,6 +41,7 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	}
 
 	/** Add a default style to the theme */
+	@Override
 	public void addStyle(ItemStyle is) {
 		Style style = new Style(is.toString(), OUTLINE, COLOR);
 		addStyle(style);
