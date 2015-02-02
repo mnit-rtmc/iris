@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -292,7 +292,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		loc_pnl.initialize();
 		loc_pnl.add("cabinet.style");
 		loc_pnl.add(cab_style_cbx, Stretch.LAST);
-		loc_pnl.setGeoLoc(cabinet.getGeoLoc());
+		loc_pnl.setGeoLoc((cabinet != null)
+		                 ? cabinet.getGeoLoc()
+		                 : null);
 		return loc_pnl;
 	}
 
@@ -302,7 +304,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		public void enumerationComplete() { }
 		public void proxyRemoved(Cabinet p) {}
 		public void proxyChanged(Cabinet p, final String a) {
-			if(p == cabinet)
+			if (p == cabinet)
 				doUpdateAttribute(a);
 		}
 	}
@@ -423,7 +425,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		}
 		if (a == null || a.equals("style")) {
 			cab_style_cbx.setAction(null);
-			cab_style_mdl.setSelectedItem(cabinet.getStyle());
+			cab_style_mdl.setSelectedItem((cabinet != null)
+			                             ? cabinet.getStyle()
+			                             : null);
 			cab_style_cbx.setAction(cab_style_act);
 		}
 	}
