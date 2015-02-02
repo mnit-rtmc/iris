@@ -39,21 +39,24 @@ public class ProxyListSelectionModel<T extends SonarObject>
 		new ProxySelectionListener()
 	{
 		public void selectionChanged() {
-			if (!getValueIsAdjusting())
+			if (adjusting == 0)
 				doSelectionChanged();
 		}
 	};
 
+	/** The "valueIsAdjusting" crap doesn't work */
+	private int adjusting = 0;
+
 	/** Update the selection model when the selection is changed */
 	private void doSelectionChanged() {
-		setValueIsAdjusting(true);
+		adjusting++;
 		clearSelection();
 		for (T proxy : sel_model.getSelected()) {
 			int i = model.getIndex(proxy);
 			if (i >= 0)
 				super.addSelectionInterval(i, i);
 		}
-		setValueIsAdjusting(false);
+		adjusting--;
 	}
 
 	/** Create a new proxy list selection model */
@@ -121,8 +124,8 @@ public class ProxyListSelectionModel<T extends SonarObject>
 
 	/** Set the selected proxies */
 	private void setSelected(Set<T> proxies) {
-		setValueIsAdjusting(true);
+		adjusting++;
 		sel_model.setSelected(proxies);
-		setValueIsAdjusting(false);
+		adjusting--;
 	}
 }
