@@ -70,6 +70,11 @@ public class ProxyListSelectionModel<T extends SonarObject>
 		sel_model.addProxySelectionListener(listener);
 	}
 
+	/** Dispose of the proxy list selection model */
+	public void dispose() {
+		sel_model.removeProxySelectionListener(listener);
+	}
+
 	/** Insert an interval into the model */
 	@Override
 	public void insertIndexInterval(int index, int length, boolean before) {

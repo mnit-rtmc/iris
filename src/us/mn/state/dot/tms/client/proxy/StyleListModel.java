@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,7 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 		super.dispose();
 		for (ListDataListener l: getListDataListeners())
 			removeListDataListener(l);
+		smodel.dispose();
 	}
 
 	/** Check if a proxy is included in the list */
