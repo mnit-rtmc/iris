@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2015  Minnesota Department of Transportation
  * Copyright (C) 2010-2014  AHMCT, University of California
+ * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,6 +55,11 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Travis Swanston
  */
 public class IrisClient extends JFrame {
+
+	/** Get the initial map extent name */
+	static public String getInitMapExtentName() {
+		return SystemAttrEnum.MAP_EXTENT_NAME_INITIAL.getString();
+	}
 
 	/** Create the window title */
 	static private String createTitle(String suffix) {
@@ -338,10 +344,14 @@ public class IrisClient extends JFrame {
 
 	/** Set initial map extent */
 	private void setInitExtent() {
-		MapExtent me = MapExtentHelper.lookup("Home");
-		if(me != null) {
-			for(ScreenPane sp: s_panes)
+		String en = getInitMapExtentName();
+		MapExtent me = MapExtentHelper.lookup(en);
+		if (me != null) {
+			for (ScreenPane sp: s_panes)
 				sp.setMapExtent(me);
+		} else {
+			System.err.println("Warning: initial map extent " +
+				en + "does not exist");
 		}
  	}
 

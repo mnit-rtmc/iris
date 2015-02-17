@@ -2238,7 +2238,7 @@ camera_util_panel_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.23.0
+database_version	4.24.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
@@ -2281,6 +2281,7 @@ help_trouble_ticket_enable	false
 help_trouble_ticket_url	
 incident_clear_secs	600
 lcs_poll_period_secs	30
+map_extent_name_initial	Home
 map_icon_size_scale_max	30
 map_segment_max_meters	2000
 meter_event_purge_days	14
