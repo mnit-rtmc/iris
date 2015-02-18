@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +33,7 @@ import static us.mn.state.dot.tms.GeoLocHelper.isSameCorridor;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
+import us.mn.state.dot.tms.SystemAttrEnum; 
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 
@@ -40,17 +42,24 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
  * object of this class represents one node on the roadway network.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
-	/** Default speed limit */
-	static public final int DEFAULT_SPEED_LIMIT = 55;
+	/** Get the minimum roadway speed limit */
+	static public int getMinSpeedLimit() {
+		return SystemAttrEnum.SPEED_LIMIT_MIN_MPH.getInt();
+	}
 
-	/** Minimum roadway speed limit */
-	static protected final int MINIMUM_SPEED_LIMIT = 45;
+	/** Get the default roadway speed limit */
+	static public int getDefaultSpeedLimit() {
+		return SystemAttrEnum.SPEED_LIMIT_DEFAULT_MPH.getInt();
+	}
 
-	/** Maximum roadway speed limit */
-	static protected final int MAXIMUM_SPEED_LIMIT = 75;
+	/** Get the maximum roadway speed limit */
+	static public int getMaxSpeedLimit() {
+		return SystemAttrEnum.SPEED_LIMIT_MAX_MPH.getInt();
+	}
 
 	/** Load all the r_nodes */
 	static protected void loadAll() throws TMSException {
@@ -473,7 +482,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Speed limit */
-	protected int speed_limit = DEFAULT_SPEED_LIMIT;
+	protected int speed_limit = getDefaultSpeedLimit();
 
 	/** Set the speed limit */
 	public void setSpeedLimit(int l) {
@@ -484,15 +493,31 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	public void doSetSpeedLimit(int l) throws TMSException {
 		if(l == speed_limit)
 			return;
-		if(l < MINIMUM_SPEED_LIMIT || l > MAXIMUM_SPEED_LIMIT)
-			throw new ChangeVetoException("Bad speed limit: " + l);
+		if (l < getMinSpeedLimit()) {
+			throw new ChangeVetoException("Specified speed " +
+				"limit (" + l + ") is less than minimum");
+		} else if (l > getMaxSpeedLimit()) {
+			throw new ChangeVetoException("Specified speed " +
+				"limit (" + l + ") is greater than maximum");
+		}
 		store.update(this, "speed_limit", l);
 		setSpeedLimit(l);
 	}
 
-	/** Get the speed limit */
+	/** Get the speed limit, which is bounded by a minimum and maximum */
 	public int getSpeedLimit() {
-		return speed_limit;
+		return boundedValue(getMinSpeedLimit(), speed_limit, 
+			getMaxSpeedLimit());
+	}
+
+	/** Return an integer bounded by a minimum and maximum value */
+	private int boundedValue(int min, int x, int max) {
+		if (x < min)
+			return min;
+		else if (x > max)
+			return max;
+		else
+			return x;
 	}
 
 	/** Administrator notes */
@@ -656,7 +681,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		if(getAbandoned())
 			w.write(" abandoned='t'");
 		int slim = getSpeedLimit();
-		if(slim != DEFAULT_SPEED_LIMIT)
+		if (slim != getDefaultSpeedLimit())
 			w.write(" s_limit='" + slim + "'");
 		List<R_NodeImpl> forks = getForks();
 		if(forks.size() > 0) {
