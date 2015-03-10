@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2015  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -48,7 +48,7 @@ abstract public class G4Property extends ControllerProperty {
 	/** Calculate a checksum */
 	static private int checksum(byte[] buf, int pos, int len) {
 		int c = 0;
-		for(int i = pos; i < pos + len; i++)
+		for (int i = pos; i < pos + len; i++)
 			c += buf[i] & 0xFF;
 		return c;
 	}
@@ -89,18 +89,18 @@ abstract public class G4Property extends ControllerProperty {
 	 * @param drop Sensor ID (drop address). */
 	protected void parseFrame(InputStream is, int drop) throws IOException {
 		byte[] header = recvResponse(is, OFF_SENSOR_ID);
-		if(parse16(header, OFF_SENTINEL) != SENTINEL)
+		if (parse16(header, OFF_SENTINEL) != SENTINEL)
 			throw new ParsingException("INVALID SENTINEL");
 		QualCode qual = QualCode.fromCode(parse8(header, OFF_QUAL));
 		int length = parse8(header, OFF_LENGTH);
-		if(length < MIN_DATA_LEN)
+		if (length < MIN_DATA_LEN)
 			throw new ParsingException("INVALID LENGTH: " + length);
 		byte[] body = recvResponse(is, 2 + length); // 2 byte sensor ID
 		int sid = parse16(body, 0);
-		if(sid != drop)
+		if (sid != drop)
 			throw new ParsingException("INVALID ID");
 		int cs = parse16(body, body.length - 2);
-		if(cs != checksum(body, 0, body.length - 2))
+		if (cs != checksum(body, 0, body.length - 2))
 			throw new ChecksumException(body);
 		// Copy everything but sensor ID and checksum (4 bytes)
 		byte[] data = new byte[body.length - 4];
@@ -112,7 +112,7 @@ abstract public class G4Property extends ControllerProperty {
 	 * @param qual Qualifier code.
 	 * @param data Data packet. */
 	protected void parseData(QualCode qual, byte[] data) throws IOException{
-		switch(qual) {
+		switch (qual) {
 		case ACK:
 			return;
 		case NAK:
