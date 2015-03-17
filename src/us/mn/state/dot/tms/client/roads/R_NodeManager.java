@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -150,8 +150,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	public CorridorBase getCorridor(R_Node r_node) {
 		GeoLoc loc = r_node.getGeoLoc();
 		String cid = GeoLocHelper.getCorridorName(loc);
-		if(cid != null) {
-			if(corridors.containsKey(cid))
+		if (cid != null) {
+			if (corridors.containsKey(cid))
 				return corridors.get(cid);
 			else {
 				CorridorBase c = new CorridorBase(loc);
@@ -239,16 +239,16 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		MapGeoLoc loc_a = null;		// upstream location
 		MapGeoLoc loc = null;		// current location
 		Iterator<MapGeoLoc> it = mapLocationIterator(c);
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			MapGeoLoc loc_b = it.next();	// downstream location
 			MapGeoLoc lup = loc_a != null ? loc_a : loc;
-			if(lup != null)
+			if (lup != null)
 				setTangentAngle(loc, lup, loc_b);
 			loc_a = loc;
 			loc = loc_b;
 		}
 		// special handling for last node
-		if(loc_a != null)
+		if (loc_a != null)
 			setTangentAngle(loc, loc_a, loc);
 	}
 
@@ -261,7 +261,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	{
 		double t = GeoLocHelper.calculateBearing(loc_a.getGeoLoc(),
 			loc_b.getGeoLoc());
-		if(!Double.isInfinite(t) && !Double.isNaN(t)) {
+		if (!Double.isInfinite(t) && !Double.isNaN(t)) {
 			loc.setTangent(t - NORTH_ANGLE);
 			loc.doUpdate();
 		}
@@ -286,14 +286,14 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 				return nloc != null;
 			}
 			private void primeLoc() {
-				if(nloc == null)
+				if (nloc == null)
 					nloc = nextLoc();
 			}
 			private MapGeoLoc nextLoc() {
-				while(it.hasNext()) {
+				while (it.hasNext()) {
 					R_Node n = it.next();
 					MapGeoLoc l = superFindGeoLoc(n);
-					if(l != null)
+					if (l != null)
 						return l;
 				}
 				return null;
@@ -322,7 +322,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, R_Node proxy) {
-		switch(is) {
+		switch (is) {
 		case GPS:
 			return !GeoLocHelper.isNull(getGeoLoc(proxy));
 		case NO_LOC:
@@ -358,7 +358,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Lookup the corridor for a location */
 	public CorridorBase lookupCorridor(GeoLoc loc) {
 		String cid = GeoLocHelper.getCorridorName(loc);
-		if(cid != null)
+		if (cid != null)
 			return corridors.get(cid);
 		else
 			return null;
@@ -367,8 +367,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Create a set of roadway nodes for the current corridor */
 	public Set<R_Node> createSet() {
 		HashSet<R_Node> nodes = new HashSet<R_Node>();
-		for(R_Node n: getCache()) {
-			if(checkCorridor(n))
+		for (R_Node n: getCache()) {
+			if (checkCorridor(n))
 				nodes.add(n);
 		}
 		return nodes;
@@ -381,7 +381,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Check if an r_node is on the specified corridor */
 	private boolean checkCorridor(CorridorBase cb, GeoLoc loc) {
-		if(cb == null)
+		if (cb == null)
 			return loc != null && loc.getRoadway() == null;
 		else {
 			return loc != null &&
@@ -410,7 +410,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Find the map geo location for a proxy */
 	@Override
 	public MapGeoLoc findGeoLoc(R_Node proxy) {
-		if(corridor == null || checkCorridor(proxy))
+		if (corridor == null || checkCorridor(proxy))
 			return super.findGeoLoc(proxy);
 		else
 			return null;
@@ -432,13 +432,13 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	{
 		GeoLoc loc = null;
 		double distance = Double.POSITIVE_INFINITY;
-		for(CorridorBase c: corridors.values()) {
+		for (CorridorBase c: corridors.values()) {
 			boolean cd = RoadClass.fromOrdinal(
 				c.getRoadway().getRClass()) ==RoadClass.CD_ROAD;
-			if((cd_road && !cd) || (cd && !cd_road))
+			if ((cd_road && !cd) || (cd && !cd_road))
 				continue;
 			ClientGeoLoc l = createGeoLoc(c, smp);
-			if(l != null && l.getDistance() < distance) {
+			if (l != null && l.getDistance() < distance) {
 				loc = l;
 				distance = l.getDistance();
 			}
@@ -457,14 +457,14 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		R_Node n1 = null;
 		R_Node n_prev = null;
 		double n_meters = Double.POSITIVE_INFINITY;
-		for(R_Node n: c) {
-			if(isContinuityBreak(n)) {
+		for (R_Node n: c) {
+			if (isContinuityBreak(n)) {
 				n_prev = null;
 				continue;
 			}
-			if(n_prev != null) {
+			if (n_prev != null) {
 				double m = calcDistance(n_prev, n, smp);
-				if(m < n_meters) {
+				if (m < n_meters) {
 					n0 = n_prev;
 					n1 = n;
 					n_meters = m;
@@ -472,7 +472,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			}
 			n_prev = n;
 		}
-		if(n0 != null)
+		if (n0 != null)
 			return createGeoLoc(n0, n1, smp, n_meters);
 		else
 			return null;
@@ -480,9 +480,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Check if a given node is a continuity break */
 	private boolean isContinuityBreak(R_Node n) {
-		if(n.getNodeType() == R_NodeType.ACCESS.ordinal())
+		if (n.getNodeType() == R_NodeType.ACCESS.ordinal())
 			return true;
-		if(n.getTransition() == R_NodeTransition.COMMON.ordinal())
+		if (n.getTransition() == R_NodeTransition.COMMON.ordinal())
 			return true;
 		return false;
 	}
@@ -514,7 +514,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		GeoLoc l1 = n1.getGeoLoc();
 		SphericalMercatorPosition pos = GeoLocHelper.segmentSnap(l0,
 			l1, smp);
-		if(pos != null) {
+		if (pos != null) {
 			Position p = pos.getPosition();
 			float lat = (float)p.getLatitude();
 			float lon = (float)p.getLongitude();
