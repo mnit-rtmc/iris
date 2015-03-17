@@ -34,6 +34,7 @@ import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
@@ -46,6 +47,7 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
+import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
 import us.mn.state.dot.tms.client.widget.Invokable;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
 import us.mn.state.dot.tms.utils.I18N;
@@ -84,6 +86,33 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		return model;
 	}
 
+	/** Detector cache */
+	private final TypeCache<Detector> det_cache;
+
+	/** Detector proxy listener */
+	private final SwingProxyAdapter<Detector> det_listener =
+		new SwingProxyAdapter<Detector>()
+	{
+		protected void proxyAddedSwing(Detector proxy) {
+			arrangeSegments(proxy);
+		}
+		protected void proxyRemovedSwing(Detector proxy) {
+			arrangeSegments(proxy);
+		}
+		protected boolean checkAttributeChange(String attr) {
+			return "r_node".equals(attr);
+		}
+		protected void proxyChangedSwing(Detector proxy, String attr) {
+			/* FIXME: should arrange old corridor too */
+			arrangeSegments(proxy);
+		}
+		protected void enumerationCompleteSwing(
+			Collection<Detector> proxies)
+		{
+			arrangeSegments();
+		}
+	};
+
 	/** Segment layer */
 	private final SegmentLayer seg_layer;
 
@@ -100,6 +129,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		super(s, lm);
 		seg_layer = new SegmentLayer(session, this);
 		model.addElement(" ");
+		det_cache = s.getSonarState().getDetCache().getDetectors();
 	}
 
 	/** Initialize the r_node manager */
@@ -107,11 +137,13 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	public void initialize() {
 		seg_layer.initialize();
 		super.initialize();
+		det_cache.addProxyListener(det_listener);
 	}
 
 	/** Dispose of the r_node manager */
 	@Override
 	public void dispose() {
+		det_cache.removeProxyListener(det_listener);
 		super.dispose();
 		seg_layer.dispose();
 	}
@@ -197,7 +229,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 				c.addNode(n);
 		}
 		arrangeCorridors();
-		arrangeSegments();
 	}
 
 	/** Arrange the corridor mapping */
@@ -232,6 +263,16 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	private void arrangeSegments(CorridorBase c) {
 		if (c.getRoadDir() > 0)
 			seg_layer.updateCorridor(c);
+	}
+
+	/** Arrange segments for a detector */
+	private void arrangeSegments(Detector d) {
+		R_Node n = d.getR_Node();
+		if (n != null) {
+			CorridorBase c = getCorridor(n);
+			if (c != null)
+				arrangeSegments(c);
+		}
 	}
 
 	/** Set the tangent angles for all the nodes in a corridor */
