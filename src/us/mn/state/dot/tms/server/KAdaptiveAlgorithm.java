@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2014  Minnesota Department of Transportation
+ * Copyright (C) 2001-2015  Minnesota Department of Transportation
  * Copyright (C) 2011-2012  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -121,6 +121,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Ratio for max rate to target rate */
 	static private final float TARGET_MAX_RATIO = 1.25f;
+
+	/** Ratio for max rate to target rate while flushing */
+	static private final float TARGET_MAX_RATIO_FLUSHING = 1.5f;
 
 	/** Ratio for min rate to target rate */
 	static private final float TARGET_MIN_RATIO = 0.75f;
@@ -1152,11 +1155,21 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			return Math.round(tracking_demand * ratio);
 		}
 
+		/** Get the target maximum rate ratio for current phase */
+		private float targetMaxRatio() {
+			switch (phase) {
+			case flushing:
+			     return TARGET_MAX_RATIO_FLUSHING;
+			default:
+			     return TARGET_MAX_RATIO;
+			}
+		}
+
 		/** Calculate target maximum rate.
 		 * @return Target maxumum rate (vehicles / hour). */
 		private int calculateMaximumRate() {
 			int target_max = Math.round(tracking_demand *
-				TARGET_MAX_RATIO);
+				targetMaxRatio());
 			return Math.max(target_max, min_rate);
 		}
 

@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<div id="stamp">12 Sep 2014</div>
+<div id="stamp">18 Mar 2015</div>
 <h2>Objectives</h2>
 <p>
 	The density adaptive ramp metering algorithm has two main objectives:
@@ -331,8 +331,9 @@
 </p>
 <h3 id='maximum_rate'>Maximum Rate</h3>
 <p>
-	The maximum metering rate is 125% of the
-	<a href='#tracking_demand'>tracking demand</a>.
+	The maximum metering rate is normally 125% of the
+	<a href='#tracking_demand'>tracking demand</a>, but it is increased to
+	150% during the <a href='#flushing'>flushing phase</a>.
 	This is intended to prevent the meter from releasing all vehicles in a
 	queue too quickly.
 	The maximum rate will be raised to match the minimum rate if that is
@@ -901,7 +902,8 @@
 </ul>
 <h3 id='flushing'>Flushing Phase</h3>
 <p>
-	In this phase, a ramp meter will cycle at the maximum metering rate.
+	In this phase, a ramp meter will cycle at the
+	<a href='#maximum_rate'>maximum metering rate</a>.
 	The following conditions will cause the meter to transition to the
 	<a href='#stopped'>stopped</a> phase:
 </p>
