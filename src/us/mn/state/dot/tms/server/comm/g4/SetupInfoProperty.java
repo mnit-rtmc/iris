@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,7 @@ public class SetupInfoProperty extends G4Property {
 	static private final int OFF_PORT_2 = 9;
 	static private final int OFF_STAT_FLAGS = 11;
 	static private final int OFF_DATE = 12;
+	static private final int OFF_RESERVED = 15;
 
 	/** Encode a QUERY request */
 	@Override
@@ -79,7 +80,7 @@ public class SetupInfoProperty extends G4Property {
 		throws IOException
 	{
 		int drop = c.getDrop();
-		byte[] data = new byte[15];
+		byte[] data = new byte[packet_len];
 		format16(data, OFF_NEW_ID, drop);
 		format8(data, OFF_ZONES, n_zones);
 		format16(data, OFF_MSG_PERIOD, msg_period);
@@ -89,6 +90,8 @@ public class SetupInfoProperty extends G4Property {
 		format16(data, OFF_PORT_2, port_2.getCode());
 		format8(data, OFF_STAT_FLAGS, stat_flags.getFlags());
 		formatDate(data, OFF_DATE, date);
+		if (packet_len >= 16)
+			format8(data, OFF_RESERVED, 0);
 		os.write(formatRequest(QualCode.SETUP, drop, data));
 	}
 
@@ -108,6 +111,9 @@ public class SetupInfoProperty extends G4Property {
 	{
 		parseFrame(is, c.getDrop());
 	}
+
+	/** Packet length (15 for old firmware; 16 for new) */
+	private int packet_len = 15;
 
 	/** New RTMS sensor ID */
 	private int new_id;
@@ -191,21 +197,28 @@ public class SetupInfoProperty extends G4Property {
 		date = d;
 	}
 
+	/** Reserved data */
+	private int reserved;
+
 	/** Parse setup information data */
 	private void parseSetup(byte[] data) throws ParsingException {
-		if (data.length != 15)
-			throw new ParsingException("INVALID SETUP LENGTH");
+		// Old firmware uses 15 bytes; new 16
+		if (data.length != 15 && data.length != 16)
+			throw new ParsingException("SETUP LEN: " + data.length);
+		packet_len = data.length;
 		new_id = parse16(data, OFF_NEW_ID);
 		n_zones = parse8(data, OFF_ZONES);
 		msg_period = parse16(data, OFF_MSG_PERIOD);
 		sensitivity = parse8(data, OFF_SENSITIVITY);
 		msg_comp = new StatComposition(parse8(data, OFF_COMP));
-		if(msg_comp.getClassCount() == 0)
+		if (msg_comp.getClassCount() == 0)
 			throw new ParsingException("INVALID COMP");
 		port_1 = new PortConfig(1, parse16(data, OFF_PORT_1));
 		port_2 = new PortConfig(2, parse16(data, OFF_PORT_2));
 		stat_flags = new StatusFlags(parse8(data, OFF_STAT_FLAGS));
 		date = parseDate(data, OFF_DATE);
+		if (packet_len >= 16)
+			reserved = parse8(data, OFF_RESERVED);
 	}
 
 	/** Parse configuration date */

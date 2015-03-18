@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,7 @@ public class SensorInfoProperty extends G4Property {
 	static private final int OFF_PROC_REV = 11;
 	static private final int OFF_CPLD_VER = 12;
 	static private final int OFF_MISC = 13;
+	static private final int OFF_RESERVED = 14;
 
 	/** Encode a QUERY request */
 	@Override
@@ -110,6 +111,9 @@ public class SensorInfoProperty extends G4Property {
 	/** Miscellaneous (serial port source) */
 	private int misc;
 
+	/** Reserved data */
+	private int reserved;
+
 	/** Get the version (for controller version property). */
 	public String getVersion() {
 		return "mcu:" + mcu_rev + '-' + mcu_build +
@@ -118,8 +122,9 @@ public class SensorInfoProperty extends G4Property {
 
 	/** Parse sensor information data */
 	private void parseInformation(byte[] data) throws ParsingException {
-		if (data.length != 14)
-			throw new ParsingException("INVALID INFO LENGTH");
+		// Old firmware uses 14 bytes; new 16
+		if (data.length != 14 && data.length != 16)
+			throw new ParsingException("INFO LEN: " + data.length);
 		mcu_rev = parse8(data, OFF_MCU_REV);
 		mcu_build = parse8(data, OFF_MCU_BUILD);
 		mcu_chk = parse8(data, OFF_MCU_CHK);
@@ -132,6 +137,8 @@ public class SensorInfoProperty extends G4Property {
 		proc_rev = parse8(data, OFF_PROC_REV);
 		cpld_ver = parse8(data, OFF_CPLD_VER);
 		misc = parse8(data, OFF_MISC);
+		if (data.length >= 16)
+			reserved = parse16(data, OFF_RESERVED);
 	}
 
 	/** Get a string representation of the statistical property */
