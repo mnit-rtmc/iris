@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,9 +53,13 @@ public class PropSetup extends IPanel {
 		new JComboBox(EncoderType.getDescriptions());
 
 	/** Encoder type action */
-	private final IAction encoder_type = new IAction("camera.encoder.type"){
+	private final IAction enc_type_act = new IAction("camera.encoder.type"){
 		protected void doActionPerformed(ActionEvent e) {
 		      camera.setEncoderType(enc_type_cbx.getSelectedIndex());
+		}
+		@Override
+		protected void doUpdateSelected() {
+			enc_type_cbx.setSelectedIndex(camera.getEncoderType());
 		}
 	};
 
@@ -82,6 +86,7 @@ public class PropSetup extends IPanel {
 	@Override
 	public void initialize() {
 		super.initialize();
+		enc_type_cbx.setAction(enc_type_act);
 		add("camera.encoder");
 		add(encoder_txt, Stretch.LAST);
 		add("camera.encoder.channel");
@@ -112,7 +117,7 @@ public class PropSetup extends IPanel {
 	public void updateEditMode() {
 		encoder_txt.setEnabled(canUpdate("encoder"));
 		enc_chn_spn.setEnabled(canUpdate("encoderChannel"));
-		encoder_type.setEnabled(canUpdate("encoderType"));
+		enc_type_act.setEnabled(canUpdate("encoderType"));
 		publish_chk.setEnabled(canUpdate("publish"));
 	}
 
@@ -122,11 +127,8 @@ public class PropSetup extends IPanel {
 			encoder_txt.setText(camera.getEncoder());
 		if (a == null || a.equals("encoderChannel"))
 			enc_chn_spn.setValue(camera.getEncoderChannel());
-		if (a == null || a.equals("encoderType")) {
-			enc_type_cbx.setAction(null);
-			enc_type_cbx.setSelectedIndex(camera.getEncoderType());
-			enc_type_cbx.setAction(encoder_type);
-		}
+		if (a == null || a.equals("encoderType"))
+			enc_type_act.updateSelected();
 		if (a == null || a.equals("publish"))
 			publish_chk.setSelected(camera.getPublish());
 	}

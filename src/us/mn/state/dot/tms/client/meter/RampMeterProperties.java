@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,6 +68,10 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		protected void doActionPerformed(ActionEvent e) {
 			proxy.setPreset(preset_mdl.getSelectedProxy());
 		}
+		@Override
+		protected void doUpdateSelected() {
+			preset_mdl.setSelectedItem(proxy.getPreset());
+		}
 	};
 
 	/** Camera preset combo box */
@@ -80,7 +84,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final IAction controller = new IAction("controller") {
 		protected void doActionPerformed(ActionEvent e) {
 			Controller c = proxy.getController();
-			if(c != null) {
+			if (c != null) {
 				SmartDesktop sd = session.getDesktop();
 				sd.show(new ControllerForm(session, c));
 			}
@@ -88,11 +92,15 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	};
 
 	/** Meter type action */
-	private final IAction meter_type = new IAction("ramp.meter.type") {
+	private final IAction meter_type_act = new IAction("ramp.meter.type") {
 		protected void doActionPerformed(ActionEvent e) {
 			int t = meter_type_cbx.getSelectedIndex();
-			if(t >= 0)
+			if (t >= 0)
 				proxy.setMeterType(t);
+		}
+		@Override
+		protected void doUpdateSelected() {
+			meter_type_cbx.setSelectedIndex(proxy.getMeterType());
 		}
 	};
 
@@ -107,11 +115,17 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JTextField max_wait_txt = new JTextField(5);
 
 	/** Metering algorithm action */
-	private final IAction algorithm = new IAction("ramp.meter.algorithm") {
+	private final IAction algorithm_act = new IAction(
+		"ramp.meter.algorithm")
+	{
 		protected void doActionPerformed(ActionEvent e) {
 			int a = algorithm_cbx.getSelectedIndex();
-			if(a >= 0)
+			if (a >= 0)
 				proxy.setAlgorithm(a);
+		}
+		@Override
+		protected void doUpdateSelected() {
+			algorithm_cbx.setSelectedIndex(proxy.getAlgorithm());
 		}
 	};
 
@@ -129,6 +143,10 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final IAction beacon_act = new IAction("ramp.meter.beacon") {
 		protected void doActionPerformed(ActionEvent e) {
 			proxy.setBeacon(beacon_mdl.getSelectedProxy());
+		}
+		@Override
+		protected void doUpdateSelected() {
+			beacon_mdl.setSelectedItem(proxy.getBeacon());
 		}
 	};
 
@@ -202,6 +220,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Create the location panel */
 	private JPanel createLocationPanel() {
 		preset_cbx.setModel(preset_mdl);
+		preset_cbx.setAction(preset_act);
 		preset_cbx.setRenderer(new PresetComboRenderer());
 		loc_pnl.initialize();
 		loc_pnl.add("device.notes");
@@ -253,7 +272,10 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 
 	/** Create ramp meter setup panel */
 	private JPanel createSetupPanel() {
+		meter_type_cbx.setAction(meter_type_act);
+		algorithm_cbx.setAction(algorithm_act);
 		beacon_cbx.setModel(beacon_mdl);
+		beacon_cbx.setAction(beacon_act);
 		IPanel p = new IPanel();
 		p.add("ramp.meter.type");
 		p.add(meter_type_cbx, Stretch.LAST);
@@ -299,10 +321,10 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		loc_pnl.updateEditMode();
 		notes_txt.setEnabled(canUpdate("notes"));
 		preset_act.setEnabled(canUpdate("preset"));
-		meter_type.setEnabled(canUpdate("meterType"));
+		meter_type_act.setEnabled(canUpdate("meterType"));
 		storage_txt.setEnabled(canUpdate("storage"));
 		max_wait_txt.setEnabled(canUpdate("maxWait"));
-		algorithm.setEnabled(canUpdate("algorithm"));
+		algorithm_act.setEnabled(canUpdate("algorithm"));
 		am_target_txt.setEnabled(canUpdate("amTarget"));
 		pm_target_txt.setEnabled(canUpdate("pmTarget"));
 		beacon_act.setEnabled(canUpdate("beacon"));
@@ -316,34 +338,22 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 			controller.setEnabled(proxy.getController() != null);
 		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
-		if (a == null || a.equals("preset")) {
-			preset_cbx.setAction(null);
-			preset_mdl.setSelectedItem(proxy.getPreset());
-			preset_cbx.setAction(preset_act);
-		}
-		if (a == null || a.equals("meterType")) {
-			meter_type_cbx.setAction(null);
-			meter_type_cbx.setSelectedIndex(proxy.getMeterType());
-			meter_type_cbx.setAction(meter_type);
-		}
+		if (a == null || a.equals("preset"))
+			preset_act.updateSelected();
+		if (a == null || a.equals("meterType"))
+			meter_type_act.updateSelected();
 		if (a == null || a.equals("storage"))
 			storage_txt.setText("" + proxy.getStorage());
 		if (a == null || a.equals("maxWait"))
 			max_wait_txt.setText("" + proxy.getMaxWait());
-		if (a == null || a.equals("algorithm")) {
-			algorithm_cbx.setAction(null);
-			algorithm_cbx.setSelectedIndex(proxy.getAlgorithm());
-			algorithm_cbx.setAction(algorithm);
-		}
+		if (a == null || a.equals("algorithm"))
+			algorithm_act.updateSelected();
 		if (a == null || a.equals("amTarget"))
 			am_target_txt.setText("" + proxy.getAmTarget());
 		if (a == null || a.equals("pmTarget"))
 			pm_target_txt.setText("" + proxy.getPmTarget());
-		if (a == null || a.equals("beacon")) {
-			beacon_cbx.setAction(null);
-			beacon_mdl.setSelectedItem(proxy.getBeacon());
-			beacon_cbx.setAction(beacon_act);
-		}
+		if (a == null || a.equals("beacon"))
+			beacon_act.updateSelected();
 		if (a == null || a.equals("rate")) {
 			Integer rt = proxy.getRate();
 			cycle_lbl.setText(RampMeterHelper.formatCycle(rt));

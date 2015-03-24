@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,9 @@ abstract public class IAction extends AbstractAction {
 	/** System attribute to enable action */
 	private final SystemAttrEnum attr;
 
+	/** Adjusting count */
+	private int adjusting = 0;
+
 	/** Create a new action.
 	 * @param text_id Text ID of I18N string.
 	 * @param sa Boolean attribute to determine if the action is enabled. */
@@ -79,23 +82,39 @@ abstract public class IAction extends AbstractAction {
 	/** Perform the action */
 	@Override
 	public final void actionPerformed(ActionEvent ev) {
-		long st = TimeSteward.currentTimeMillis();
 		try {
-			try {
-				doActionPerformed(ev);
-			}
-			finally {
-				long e = TimeSteward.currentTimeMillis() - st;
-				if (e > MAX_ELAPSED)
-					log(getClass().toString(), e);
-			}
+			if (adjusting == 0)
+				actionPerformedThrows(ev);
 		}
 		catch (Exception ex) {
 			getHandler().handle(ex);
 		}
 	}
 
+	/** Perform the action, possibly throwing an exception */
+	private void actionPerformedThrows(ActionEvent ev) throws Exception {
+		long st = TimeSteward.currentTimeMillis();
+		try {
+			doActionPerformed(ev);
+		}
+		finally {
+			long e = TimeSteward.currentTimeMillis() - st;
+			if (e > MAX_ELAPSED)
+				log(getClass().toString(), e);
+		}
+	}
+
 	/** Actually perform the action */
 	abstract protected void doActionPerformed(ActionEvent ev)
 		throws Exception;
+
+	/** Update selected item */
+	public void updateSelected() {
+		adjusting++;
+		doUpdateSelected();
+		adjusting--;
+	}
+
+	/** Update the selected item */
+	protected void doUpdateSelected() { }
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2014  Minnesota Department of Transportation
+ * Copyright (C) 2005-2015  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -54,14 +54,14 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		try {
 			return Double.parseDouble(v);
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			return null;
 		}
 	}
 
 	/** Get a double to use for a text field */
 	static private String asText(Double d) {
-		return d != null ? d.toString() : "";
+		return (d != null) ? d.toString() : "";
 	}
 
 	/** GeoLoc action */
@@ -71,10 +71,16 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		}
 		protected final void doActionPerformed(ActionEvent e) {
 			GeoLoc l = loc;
-			if(l != null)
+			if (l != null)
 				do_perform(l);
 		}
 		abstract void do_perform(GeoLoc l);
+		protected final void doUpdateSelected() {
+			GeoLoc l = loc;
+			if (l != null)
+				do_update(l);
+		}
+		abstract void do_update(GeoLoc l);
 	}
 
 	/** User session */
@@ -108,6 +114,9 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		protected void do_perform(GeoLoc l) {
 			l.setRoadway(roadway_mdl.getSelectedProxy());
 		}
+		protected void do_update(GeoLoc l) {
+			roadway_mdl.setSelectedItem(l.getRoadway());
+		}
 	};
 
 	/** Roadway direction combo box */
@@ -118,6 +127,9 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	private final LAction road_dir_act = new LAction("location.direction") {
 		protected void do_perform(GeoLoc l) {
 			l.setRoadDir((short)road_dir_cbx.getSelectedIndex());
+		}
+		protected void do_update(GeoLoc l) {
+			road_dir_cbx.setSelectedIndex(l.getRoadDir());
 		}
 	};
 
@@ -130,6 +142,9 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		protected void do_perform(GeoLoc l) {
 			short m = (short)cross_mod_cbx.getSelectedIndex();
 			l.setCrossMod(m);
+		}
+		protected void do_update(GeoLoc l) {
+			cross_mod_cbx.setSelectedIndex(l.getCrossMod());
 		}
 	};
 
@@ -144,6 +159,9 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		protected void do_perform(GeoLoc l) {
 			l.setCrossStreet(cross_mdl.getSelectedProxy());
 		}
+		protected void do_update(GeoLoc l) {
+			cross_mdl.setSelectedItem(l.getCrossStreet());
+		}
 	};
 
 	/** Cross street direction combobox */
@@ -155,6 +173,9 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		protected void do_perform(GeoLoc l) {
 			short d = (short)cross_dir_cbx.getSelectedIndex();
 			l.setCrossDir(d);
+		}
+		protected void do_update(GeoLoc l) {
+			cross_dir_cbx.setSelectedIndex(l.getCrossDir());
 		}
 	};
 
@@ -201,7 +222,12 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	public void initialize() {
 		super.initialize();
 		roadway_cbx.setModel(roadway_mdl);
+		roadway_cbx.setAction(roadway_act);
+		road_dir_cbx.setAction(road_dir_act);
+		cross_mod_cbx.setAction(cross_mod_act);
 		cross_cbx.setModel(cross_mdl);
+		cross_cbx.setAction(cross_act);
+		cross_dir_cbx.setAction(cross_dir_act);
 		add("location.roadway");
 		add(roadway_cbx);
 		add(road_dir_cbx, Stretch.LAST);
@@ -302,15 +328,15 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 			updateEditMode();
 		}
 		if (a == null || a.equals("roadway"))
-			updateRoadway(l);
+			roadway_act.updateSelected();
 		if (a == null || a.equals("roadDir"))
-			updateRoadDir(l);
+			road_dir_act.updateSelected();
 		if (a == null || a.equals("crossMod"))
-			updateCrossMod(l);
+			cross_mod_act.updateSelected();
 		if (a == null || a.equals("crossStreet"))
-			updateCrossStreet(l);
+			cross_act.updateSelected();
 		if (a == null || a.equals("crossDir"))
-			updateCrossDir(l);
+			cross_dir_act.updateSelected();
 		if (a == null || a.equals("lat"))
 			lat_txt.setText(asText(l.getLat()));
 		if (a == null || a.equals("lon"))
@@ -324,41 +350,6 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		repaint();
 	}
 
-	/** Update roadway attribute */
-	private void updateRoadway(GeoLoc l) {
-		roadway_cbx.setAction(null);
-		roadway_mdl.setSelectedItem(l.getRoadway());
-		roadway_cbx.setAction(roadway_act);
-	}
-
-	/** Update roadway direction attribute */
-	private void updateRoadDir(GeoLoc l) {
-		road_dir_cbx.setAction(null);
-		road_dir_cbx.setSelectedIndex(l.getRoadDir());
-		road_dir_cbx.setAction(road_dir_act);
-	}
-
-	/** Update cross street modifier attribute */
-	private void updateCrossMod(GeoLoc l) {
-		cross_mod_cbx.setAction(null);
-		cross_mod_cbx.setSelectedIndex(l.getCrossMod());
-		cross_mod_cbx.setAction(cross_mod_act);
-	}
-
-	/** Update cross street attribute */
-	private void updateCrossStreet(GeoLoc l) {
-		cross_cbx.setAction(null);
-		cross_mdl.setSelectedItem(l.getCrossStreet());
-		cross_cbx.setAction(cross_act);
-	}
-
-	/** Update cross street direction attribute */
-	private void updateCrossDir(GeoLoc l) {
-		cross_dir_cbx.setAction(null);
-		cross_dir_cbx.setSelectedIndex(l.getCrossDir());
-		cross_dir_cbx.setAction(cross_dir_act);
-	}
-
 	/** Test if the user can update an attribute */
 	private boolean canUpdate(GeoLoc l, String a) {
 		return session.canUpdate(l, a);
@@ -368,19 +359,14 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	@Override
 	public void clear() {
 		loc = null;
-		roadway_cbx.setAction(null);
 		roadway_cbx.setEnabled(false);
 		roadway_cbx.setSelectedIndex(0);
-		road_dir_cbx.setAction(null);
 		road_dir_cbx.setEnabled(false);
 		road_dir_cbx.setSelectedIndex(0);
-		cross_mod_cbx.setAction(null);
 		cross_mod_cbx.setEnabled(false);
 		cross_mod_cbx.setSelectedIndex(0);
-		cross_cbx.setAction(null);
 		cross_cbx.setEnabled(false);
 		cross_cbx.setSelectedIndex(0);
-		cross_dir_cbx.setAction(null);
 		cross_dir_cbx.setEnabled(false);
 		cross_dir_cbx.setSelectedIndex(0);
 		lat_txt.setEnabled(false);

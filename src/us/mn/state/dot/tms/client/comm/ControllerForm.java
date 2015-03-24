@@ -70,6 +70,10 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		protected void doActionPerformed(ActionEvent e) {
 			proxy.setCommLink(comm_link_mdl.getSelectedProxy());
 		}
+		@Override
+		protected void doUpdateSelected() {
+			comm_link_mdl.setSelectedItem(proxy.getCommLink());
+		}
 	};
 
 	/** Comm link combo box */
@@ -103,6 +107,10 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		protected void doActionPerformed(ActionEvent e) {
 			proxy.setCondition(condition_cbx.getSelectedIndex());
 		}
+		@Override
+		protected void doUpdateSelected() {
+			condition_cbx.setSelectedIndex(proxy.getCondition());
+		}
 	};
 
 	/** Condition combobox */
@@ -119,6 +127,12 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private final IAction cab_style_act = new IAction("cabinet.style") {
 		protected void doActionPerformed(ActionEvent e) {
 			cabinet.setStyle(cab_style_mdl.getSelectedProxy());
+		}
+		@Override
+		protected void doUpdateSelected() {
+			cab_style_mdl.setSelectedItem((cabinet != null)
+			                             ? cabinet.getStyle()
+			                             : null);
 		}
 	};
 
@@ -208,7 +222,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		io_model.initialize();
 		cabinets.addProxyListener(cab_listener);
 		comm_link_cbx.setModel(comm_link_mdl);
+		comm_link_cbx.setAction(comm_link_act);
 		cab_style_cbx.setModel(cab_style_mdl);
+		cab_style_cbx.setAction(cab_style_act);
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("device.setup"), createSetupPanel());
 		tab.add(I18N.get("cabinet"), createCabinetPanel());
@@ -235,6 +251,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Create the controller setup panel */
 	private JPanel createSetupPanel() {
+		condition_cbx.setAction(condition_act);
 		IPanel p = new IPanel();
 		p.add("comm.link");
 		p.add(comm_link_cbx, Stretch.LAST);
@@ -369,9 +386,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	@Override
 	protected void doUpdateAttribute(String a) {
 		if (a == null || a.equals("commLink")) {
-			comm_link_cbx.setAction(null);
-			comm_link_cbx.setSelectedItem(proxy.getCommLink());
-			comm_link_cbx.setAction(comm_link_act);
+			comm_link_act.updateSelected();
 			drop_model = new DropNumberModel(
 				proxy.getCommLink(), getTypeCache(),
 				proxy.getDrop());
@@ -381,11 +396,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			drop_spn.setValue(proxy.getDrop());
 		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
-		if (a == null || a.equals("condition")) {
-			condition_cbx.setAction(null);
-			condition_cbx.setSelectedIndex(proxy.getCondition());
-			condition_cbx.setAction(condition_act);
-		}
+		if (a == null || a.equals("condition"))
+			condition_act.updateSelected();
 		if (a == null || a.equals("version"))
 			version_lbl.setText(proxy.getVersion());
 		if (a == null || a.equals("maint"))
@@ -423,12 +435,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 			failed_lbl.setText(String.valueOf(
 				proxy.getFailedOps()));
 		}
-		if (a == null || a.equals("style")) {
-			cab_style_cbx.setAction(null);
-			cab_style_mdl.setSelectedItem((cabinet != null)
-			                             ? cabinet.getStyle()
-			                             : null);
-			cab_style_cbx.setAction(cab_style_act);
-		}
+		if (a == null || a.equals("style"))
+			cab_style_act.updateSelected();
 	}
 }

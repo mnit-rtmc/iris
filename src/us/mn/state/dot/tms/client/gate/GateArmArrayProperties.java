@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,6 +65,10 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		protected void doActionPerformed(ActionEvent e) {
 			proxy.setCamera(camera_mdl.getSelectedProxy());
 		}
+		@Override
+		protected void doUpdateSelected() {
+			camera_mdl.setSelectedItem(proxy.getCamera());
+		}
 	};
 
 	/** Camera combo box */
@@ -77,6 +81,10 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	private final IAction approach_act = new IAction("gate.arm.approach") {
 		protected void doActionPerformed(ActionEvent e) {
 			proxy.setApproach(approach_mdl.getSelectedProxy());
+		}
+		@Override
+		protected void doUpdateSelected() {
+			approach_mdl.setSelectedItem(proxy.getApproach());
 		}
 	};
 
@@ -95,6 +103,11 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 			else
 				proxy.setPrereq(null);
 		}
+		@Override
+		protected void doUpdateSelected() {
+			prereq_mdl.setSelectedItem(GateArmArrayHelper.lookup(
+				proxy.getPrereq()));
+		}
 	};
 
 	/** Prerequisite combo box */
@@ -107,6 +120,10 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	private final IAction dms_act = new IAction("gate.arm.dms") {
 		protected void doActionPerformed(ActionEvent e) {
 			proxy.setDms(dms_mdl.getSelectedProxy());
+		}
+		@Override
+		protected void doUpdateSelected() {
+			dms_mdl.setSelectedItem(proxy.getDms());
 		}
 	};
 
@@ -188,7 +205,9 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Create the location panel */
 	private JPanel createLocationPanel() {
 		camera_cbx.setModel(camera_mdl);
+		camera_cbx.setAction(camera_act);
 		approach_cbx.setModel(approach_mdl);
+		approach_cbx.setAction(approach_act);
 		loc_pnl.add("device.notes");
 		loc_pnl.add(notes_txt, Stretch.FULL);
 		loc_pnl.add("camera");
@@ -226,7 +245,9 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	/** Create gate arm setup panel */
 	private JPanel createSetupPanel() {
 		prereq_cbx.setModel(prereq_mdl);
+		prereq_cbx.setAction(prereq_act);
 		dms_cbx.setModel(dms_mdl);
+		dms_cbx.setAction(dms_act);
 		IPanel p = new IPanel();
 		p.add("gate.arm.prereq");
 		p.add(prereq_cbx, Stretch.LAST);
@@ -280,27 +301,14 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	protected void doUpdateAttribute(String a) {
 		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
-		if (a == null || a.equals("camera")) {
-			camera_cbx.setAction(null);
-			camera_cbx.setSelectedItem(proxy.getCamera());
-			camera_cbx.setAction(camera_act);
-		}
-		if (a == null || a.equals("approach")) {
-			approach_cbx.setAction(null);
-			approach_cbx.setSelectedItem(proxy.getApproach());
-			approach_cbx.setAction(approach_act);
-		}
-		if (a == null || a.equals("prereq")) {
-			prereq_cbx.setAction(null);
-			prereq_cbx.setSelectedItem(GateArmArrayHelper.lookup(
-				proxy.getPrereq()));
-			prereq_cbx.setAction(prereq_act);
-		}
-		if (a == null || a.equals("dms")) {
-			dms_cbx.setAction(null);
-			dms_cbx.setSelectedItem(proxy.getDms());
-			dms_cbx.setAction(dms_act);
-		}
+		if (a == null || a.equals("camera"))
+			camera_act.updateSelected();
+		if (a == null || a.equals("approach"))
+			approach_act.updateSelected();
+		if (a == null || a.equals("prereq"))
+			prereq_act.updateSelected();
+		if (a == null || a.equals("dms"))
+			dms_act.updateSelected();
 		if (a == null || a.equals("openMsg"))
 			open_msg_txt.setText(getOpenMsg());
 		if (a == null || a.equals("closedMsg"))

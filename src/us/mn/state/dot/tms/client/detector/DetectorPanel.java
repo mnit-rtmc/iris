@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2013  Minnesota Department of Transportation
+ * Copyright (C) 2010-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
@@ -53,16 +54,22 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		}
 		protected final void doActionPerformed(ActionEvent e) {
 			Detector d = detector;
-			if(d != null)
+			if (d != null)
 				do_perform(d);
 		}
 		abstract protected void do_perform(Detector d);
 	}
 
 	/** Lane type action */
-	private final DAction lane_type = new DAction("detector.lane.type") {
+	private final DAction type_act = new DAction("detector.lane.type") {
 		protected void do_perform(Detector d) {
 			d.setLaneType((short)type_cbx.getSelectedIndex());
+		}
+		@Override
+		protected void doUpdateSelected() {
+			Detector d = detector;
+			if (d != null)
+				type_cbx.setSelectedIndex(d.getLaneType());
 		}
 	};
 
@@ -125,6 +132,13 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	/** Proxy watcher */
 	private final ProxyWatcher<Detector> watcher;
 
+	/** Edit mode listener */
+	private final EditModeListener edit_lsnr = new EditModeListener() {
+		public void editModeChanged() {
+			updateEditMode();
+		}
+	};
+
 	/** Detector being edited */
 	private Detector detector;
 
@@ -147,6 +161,7 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	@Override
 	public void initialize() {
 		super.initialize();
+		type_cbx.setAction(type_act);
 		add("detector.lane.type");
 		add(type_cbx, Stretch.LAST);
 		add("detector.lane.number");
@@ -166,6 +181,7 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		createJobs();
 		watcher.initialize();
 		clear();
+		session.addEditModeListener(edit_lsnr);
 	}
 
 	/** Create the jobs */
@@ -199,51 +215,51 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	/** Set the detector lane number */
 	private void setLaneNumber(short n) {
 		Detector det = detector;
-		if(det != null)
+		if (det != null)
 			det.setLaneNumber(n);
 	}
 
 	/** Set the detector field length */
 	private void setFieldLength(float f) {
 		Detector det = detector;
-		if(det != null)
+		if (det != null)
 			det.setFieldLength(f);
 	}
 
 	/** Set the detector fake expression */
 	private void setFake(String f) {
 		Detector det = detector;
-		if(det != null)
+		if (det != null)
 			det.setFake(f);
 	}
 
 	/** Set the detector notes */
 	private void setNotes(String n) {
 		Detector det = detector;
-		if(det != null)
+		if (det != null)
 			det.setNotes(n);
 	}
 
 	/** Show the controller form for a detector */
 	private void showControllerForm(Detector d) {
 		ControllerForm form = createControllerForm(d);
-		if(form != null)
+		if (form != null)
 			session.getDesktop().show(form);
 	}
 
 	/** Show the r_node for a detector */
 	private void showRNode(Detector d) {
 		R_Node n = d.getR_Node();
-		if(n == null)
+		if (n == null)
 			return;
 		session.getR_NodeManager().getSelectionModel().setSelected(n);
 	}
 
 	/** Create a controller form */
 	private ControllerForm createControllerForm(Detector d) {
-		if(d != null) {
+		if (d != null) {
 			Controller c = d.getController();
-			if(c != null)
+			if (c != null)
 				return new ControllerForm(session, c);
 		}
 		return null;
@@ -252,51 +268,48 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	/** Dispose of the panel */
 	@Override
 	public void dispose() {
-		type_cbx.setAction(null);
+		clear();
+		session.removeEditModeListener(edit_lsnr);
 		watcher.dispose();
 		super.dispose();
+	}
+
+	/** Update the edit mode */
+	public void updateEditMode() {
+		Detector d = detector;
+		type_act.setEnabled(session.canUpdate(d, "laneType"));
+		lane_spn.setEnabled(session.canUpdate(d, "laneNumber"));
+		aband_chk.setEnabled(session.canUpdate(d, "abandoned"));
+		fail_chk.setEnabled(session.canUpdate(d, "forceFail"));
+		field_spn.setEnabled(session.canUpdate(d, "fieldLength"));
+		fake_txt.setEnabled(session.canUpdate(d, "fake"));
+		note_txt.setEnabled(session.canUpdate(d, "notes"));
+		controller_btn.setEnabled(d != null &&
+		                          d.getController() != null);
+		r_node_btn.setEnabled(d != null && d.getR_Node() != null);
 	}
 
 	/** Update one attribute (from ProxyView). */
 	@Override
 	public void update(Detector d, String a) {
-		if(a == null) {
+		if (a == null) {
 			detector = d;
-			controller_btn.setEnabled(d != null &&
-			                          d.getController() != null);
-			r_node_btn.setEnabled(d != null && d.getR_Node()!=null);
+			updateEditMode();
 		}
-		if(a == null || a.equals("laneType")) {
-			type_cbx.setAction(null);
-			type_cbx.setSelectedIndex(d.getLaneType());
-			lane_type.setEnabled(session.canUpdate(d, "laneType"));
-			type_cbx.setAction(lane_type);
-		}
-		if(a == null || a.equals("laneNumber")) {
+		if (a == null || a.equals("laneType"))
+			type_act.updateSelected();
+		if (a == null || a.equals("laneNumber"))
 			lane_spn.setValue(d.getLaneNumber());
-			lane_spn.setEnabled(session.canUpdate(d, "laneNumber"));
-		}
-		if(a == null || a.equals("abandoned")) {
-			aband_chk.setEnabled(session.canUpdate(d, "abandoned"));
+		if (a == null || a.equals("abandoned"))
 			aband_chk.setSelected(d.getAbandoned());
-		}
-		if(a == null || a.equals("forceFail")) {
-			fail_chk.setEnabled(session.canUpdate(d, "forceFail"));
+		if (a == null || a.equals("forceFail"))
 			fail_chk.setSelected(d.getForceFail());
-		}
-		if(a == null || a.equals("fieldLength")) {
-			field_spn.setEnabled(session.canUpdate(d,
-				"fieldLength"));
+		if (a == null || a.equals("fieldLength"))
 			field_spn.setValue(d.getFieldLength());
-		}
-		if(a == null || a.equals("fake")) {
+		if (a == null || a.equals("fake"))
 			fake_txt.setText(d.getFake());
-			fake_txt.setEnabled(session.canUpdate(d, "fake"));
-		}
-		if(a == null || a.equals("notes")) {
+		if (a == null || a.equals("notes"))
 			note_txt.setText(d.getNotes());
-			note_txt.setEnabled(session.canUpdate(d, "notes"));
-		}
 	}
 
 	/** Clear all attributes (from ProxyView). */

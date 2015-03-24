@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,6 +51,10 @@ public class PropLocation extends LocationPanel {
 		protected void doActionPerformed(ActionEvent e) {
 			dms.setBeacon(beacon_mdl.getSelectedProxy());
 		}
+		@Override
+		protected void doUpdateSelected() {
+			beacon_mdl.setSelectedItem(dms.getBeacon());
+		}
 	};
 
 	/** External beacon combo box */
@@ -63,6 +67,10 @@ public class PropLocation extends LocationPanel {
 	private final IAction preset_act = new IAction("camera.preset") {
 		protected void doActionPerformed(ActionEvent e) {
 			dms.setPreset(preset_mdl.getSelectedProxy());
+		}
+		@Override
+		protected void doUpdateSelected() {
+			preset_mdl.setSelectedItem(dms.getPreset());
 		}
 	};
 
@@ -102,7 +110,9 @@ public class PropLocation extends LocationPanel {
 	public void initialize() {
 		super.initialize();
 		beacon_cbx.setModel(beacon_mdl);
+		beacon_cbx.setAction(beacon_act);
 		preset_cbx.setModel(preset_mdl);
+		preset_cbx.setAction(preset_act);
 		preset_cbx.setRenderer(new PresetComboRenderer());
 		add("device.notes");
 		add(notes_txt, Stretch.FULL);
@@ -141,16 +151,10 @@ public class PropLocation extends LocationPanel {
 			controller.setEnabled(dms.getController() != null);
 		if (a == null || a.equals("notes"))
 			notes_txt.setText(dms.getNotes());
-		if (a == null || a.equals("beacon")) {
-			beacon_cbx.setAction(null);
-			beacon_mdl.setSelectedItem(dms.getBeacon());
-			beacon_cbx.setAction(beacon_act);
-		}
-		if (a == null || a.equals("preset")) {
-			preset_cbx.setAction(null);
-			preset_mdl.setSelectedItem(dms.getPreset());
-			preset_cbx.setAction(preset_act);
-		}
+		if (a == null || a.equals("beacon"))
+			beacon_act.updateSelected();
+		if (a == null || a.equals("preset"))
+			preset_act.updateSelected();
 	}
 
 	/** Check if the user can update an attribute */
