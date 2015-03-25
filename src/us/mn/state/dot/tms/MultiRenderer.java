@@ -29,7 +29,7 @@ public class MultiRenderer extends MultiAdapter {
 	/** Page to render */
 	protected final int page;
 
-	/** Character width (pixels) for character-matrix signs.  Use 0 for
+	/** Character width (pixels) for character-matrix signs.  Set to 1 for
 	 * line-matrix or full-matrix signs. */
 	protected final int c_width;
 
@@ -71,7 +71,7 @@ public class MultiRenderer extends MultiAdapter {
 	public MultiRenderer(RasterGraphic r, int p, int cw, int ch, int f) {
 		raster = r;
 		page = p;
-		c_width = cw;
+		c_width = (cw <= 0) ? 1 : cw;
 		c_height = ch;
 		ms_fnum = f;
 		resetTextRectangle();
@@ -484,17 +484,19 @@ public class MultiRenderer extends MultiAdapter {
 			}
 		}
 		int getExtra() {
-			int cw = (c_width <= 0 ? 1 : c_width);
-			int w = tr_width / cw;
-			int r = getWidth() / cw;
-			return (w - r) * cw;
+			int w = tr_width / c_width;
+			int r = getWidth() / c_width;
+			return (w - r) * c_width;
+		}
+		int floorCharWidth(int ex) {
+			return (ex / c_width) * c_width;
 		}
 		int getLeft(int ex) {
 			switch (justl) {
 			case LEFT:
 				return tr_x;
 			case CENTER:
-				return tr_x + ex / 2;
+				return tr_x + floorCharWidth(ex / 2);
 			case RIGHT:
 				return tr_x + ex;
 			default:
