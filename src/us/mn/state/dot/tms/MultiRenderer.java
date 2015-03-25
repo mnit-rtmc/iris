@@ -34,7 +34,7 @@ public class MultiRenderer extends MultiAdapter {
 	protected final int c_width;
 
 	/** Character height (pixels) for character- or line-matrix signs.
-	 * Use 0 for full-matrix signs. */
+	 * Set to 1 for full-matrix signs. */
 	protected final int c_height;
 
 	/** MULTI syntax error */
@@ -71,8 +71,8 @@ public class MultiRenderer extends MultiAdapter {
 	public MultiRenderer(RasterGraphic r, int p, int cw, int ch, int f) {
 		raster = r;
 		page = p;
-		c_width = (cw <= 0) ? 1 : cw;
-		c_height = ch;
+		c_width = (cw > 0) ? cw : 1;
+		c_height = (ch > 0) ? ch : 1;
 		ms_fnum = f;
 		resetTextRectangle();
 	}
@@ -350,11 +350,12 @@ public class MultiRenderer extends MultiAdapter {
 			return lines.peekLast();
 		}
 		void render() throws InvalidMessageException {
-			int top = getTop();
-			if (top < tr_y) {
+			int ex = getExtraHeight();
+			if (ex < 0) {
 				syntax_err = MultiSyntaxError.textTooBig;
 				return;
 			}
+			int top = getTop(ex);
 			int y = 0;
 			Line pline = null;
 			for (Line line: lines) {
@@ -364,17 +365,22 @@ public class MultiRenderer extends MultiAdapter {
 				pline = line;
 			}
 		}
-		int getTop() {
+		int getExtraHeight() {
+			int h = tr_height / c_height;
+			int r = getHeight() / c_height;
+			return (h - r) * c_height;
+		}
+		int floorCharHeight(int ex) {
+			return (ex / c_height) * c_height;
+		}
+		int getTop(int ex) {
 			switch (justp) {
 			case TOP:
 				return tr_y;
 			case MIDDLE:
-				int ch = (c_height > 0) ? c_height : 1;
-				int h = tr_height / ch;
-				int r = getHeight() / ch;
-				return tr_y + (h - r) / 2 * ch;
+				return tr_y + floorCharHeight(ex / 2);
 			case BOTTOM:
-				return tr_y + tr_height - getHeight();
+				return tr_y + ex;
 			default:
 				return 0;
 			}
@@ -402,7 +408,7 @@ public class MultiRenderer extends MultiAdapter {
 			spacing = s;
 		}
 		int getHeight() {
-			int h = c_height;
+			int h = 0;
 			for (Fragment f: fragments)
 				h = Math.max(h, f.getHeight());
 			return h;
@@ -453,7 +459,7 @@ public class MultiRenderer extends MultiAdapter {
 		protected final LinkedList<Span> spans = new LinkedList<Span>();
 		protected final JustificationLine justl = ms_justl;
 		int getHeight() {
-			int h = c_height;
+			int h = 0;
 			for (Span s: spans)
 				h = Math.max(h, s.getHeight());
 			return h;
@@ -468,7 +474,7 @@ public class MultiRenderer extends MultiAdapter {
 			spans.add(s);
 		}
 		void render(int base) throws InvalidMessageException {
-			int ex = getExtra();
+			int ex = getExtraWidth();
 			if (ex < 0) {
 				syntax_err = MultiSyntaxError.textTooBig;
 				return;
@@ -483,7 +489,7 @@ public class MultiRenderer extends MultiAdapter {
 				pspan = span;
 			}
 		}
-		int getExtra() {
+		int getExtraWidth() {
 			int w = tr_width / c_width;
 			int r = getWidth() / c_width;
 			return (w - r) * c_width;
@@ -546,7 +552,7 @@ public class MultiRenderer extends MultiAdapter {
 			return Math.round((sp0 + sp1) / 2.0f);
 		}
 		int getHeight() {
-			return font != null ? font.getHeight() : 0;
+			return (font != null) ? font.getHeight() : 0;
 		}
 		int getWidth() {
 			try {
