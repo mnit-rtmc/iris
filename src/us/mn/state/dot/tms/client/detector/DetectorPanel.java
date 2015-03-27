@@ -316,7 +316,7 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	@Override
 	public void clear() {
 		detector = null;
-		type_cbx.setEnabled(false);
+		type_act.setEnabled(false);
 		type_cbx.setSelectedIndex(0);
 		lane_spn.setEnabled(false);
 		lane_spn.setValue(0);
