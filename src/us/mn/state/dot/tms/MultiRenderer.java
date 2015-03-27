@@ -24,39 +24,39 @@ import java.util.LinkedList;
 public class MultiRenderer extends MultiAdapter {
 
 	/** Raster graphic to render */
-	protected final RasterGraphic raster;
+	private final RasterGraphic raster;
 
 	/** Page to render */
-	protected final int page;
+	private final int page;
 
 	/** Character width (pixels) for character-matrix signs.  Set to 1 for
 	 * line-matrix or full-matrix signs. */
-	protected final int c_width;
+	private final int c_width;
 
 	/** Character height (pixels) for character- or line-matrix signs.
 	 * Set to 1 for full-matrix signs. */
-	protected final int c_height;
+	private final int c_height;
 
 	/** MULTI syntax error */
 	private MultiSyntaxError syntax_err = MultiSyntaxError.none;
 
 	/** X position of text rectangle (1-based) */
-	protected int tr_x;
+	private int tr_x;
 
 	/** Y position of text rectangle (1-based) */
-	protected int tr_y;
+	private int tr_y;
 
 	/** Width of text rectangle */
-	protected int tr_width;
+	private int tr_width;
 
 	/** Height of text rectangle */
-	protected int tr_height;
+	private int tr_height;
 
 	/** Character spacing */
-	protected Integer char_spacing;
+	private Integer char_spacing;
 
 	/** List of all blocks within the current text rectangle */
-	protected final LinkedList<Block> blocks = new LinkedList<Block>();
+	private final LinkedList<Block> blocks = new LinkedList<Block>();
 
 	/**
 	 * Create a new MULTI renderer.
@@ -78,7 +78,7 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Reset the text rectangle to the size of the raster */
-	protected void resetTextRectangle() {
+	private void resetTextRectangle() {
 		tr_x = 1;
 		tr_y = 1;
 		tr_width = raster.getWidth();
@@ -126,7 +126,7 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Get the current text block */
-	protected Block currentBlock() {
+	private Block currentBlock() {
 		if (blocks.isEmpty())
 			blocks.addLast(new Block());
 		return blocks.peekLast();
@@ -240,7 +240,7 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** Render the current text rectangle */
-	protected void renderText() {
+	private void renderText() {
 		if (page == ms_page) {
 			try {
 				for (Block block: blocks)
@@ -276,7 +276,7 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param fg Foreground color.
 	 * @param x X-position on raster (1-based)
 	 * @param y Y-position on raster (1-based) */
-	protected void renderGraphic(Graphic g, DmsColor fg, int x, int y) {
+	private void renderGraphic(Graphic g, DmsColor fg, int x, int y) {
 		x--;
 		y--;
 		RasterGraphic rg = GraphicHelper.createRaster(g);
@@ -326,9 +326,9 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** A block of text to be rendered */
-	protected class Block {
-		protected final LinkedList<Line> lines = new LinkedList<Line>();
-		protected final JustificationPage justp = ms_justp;
+	private class Block {
+		private final LinkedList<Line> lines = new LinkedList<Line>();
+		private final JustificationPage justp = ms_justp;
 		void addSpan(Span s) {
 			Line line = currentLine();
 			line.addSpan(s);
@@ -400,8 +400,8 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** A line of text to be rendered */
-	protected class Line {
-		protected final LinkedList<Fragment> fragments =
+	private class Line {
+		private final LinkedList<Fragment> fragments =
 			new LinkedList<Fragment>();
 		private final Integer spacing;
 		Line(Integer s) {
@@ -455,9 +455,9 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** A fragment of text to be rendered */
-	protected class Fragment {
-		protected final LinkedList<Span> spans = new LinkedList<Span>();
-		protected final JustificationLine justl = ms_justl;
+	private class Fragment {
+		private final LinkedList<Span> spans = new LinkedList<Span>();
+		private final JustificationLine justl = ms_justl;
 		int getHeight() {
 			int h = 0;
 			for (Span s: spans)
@@ -521,12 +521,12 @@ public class MultiRenderer extends MultiAdapter {
 	}
 
 	/** A span of text to be rendered */
-	protected class Span {
-		protected final String span;
-		protected final Font font;
-		protected final DmsColor foreground;
-		protected final int c_space;
-		protected Span(String s) {
+	private class Span {
+		private final String span;
+		private final Font font;
+		private final DmsColor foreground;
+		private final int c_space;
+		private Span(String s) {
 			span = s;
 			font = FontHelper.find(ms_fnum);
 			foreground = ms_foreground;
