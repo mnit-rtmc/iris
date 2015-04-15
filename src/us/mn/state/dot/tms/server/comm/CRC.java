@@ -125,20 +125,34 @@ public class CRC {
 		return (reflect) ? do_reflect(v, width) : v;
 	}
 
-	/** Calculate the checksum for an array of data */
-	public int checksum(byte[] data) {
-		int v = seed;
-		for (byte d: data) {
-			if (reflect) {
-				int j = d ^ v;
-				v = (v >> 8) ^ table[j & 0xFF];
-			} else {
-				int j = d ^ (v >> width - 8);
-				v = (v << 8) ^ table[j & 0xFF];
-			}
+	/** Calculate CRC from previous state.
+	 * @param v Previous CRC state.
+	 * @param d Byte of data.
+	 * @return New CRC state. */
+	public int step(int v, byte d) {
+		if (reflect) {
+			int j = d ^ v;
+			return (v >> 8) ^ table[j & 0xFF];
+		} else {
+			int j = d ^ (v >> width - 8);
+			return (v << 8) ^ table[j & 0xFF];
 		}
+	}
+
+	/** Calculate the CRC result from final state.
+	 * @param v Final CRC state.
+	 * @return CRC result. */
+	public int result(int v) {
 		if (ref_out)
 			v = do_reflect(v, width);
 		return (v ^ xor_result) & mask;
+	}
+
+	/** Calculate the checksum for an array of data */
+	public int checksum(byte[] data) {
+		int v = seed;
+		for (byte d: data)
+			v = step(v, d);
+		return result(v);
 	}
 }
