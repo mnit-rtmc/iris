@@ -160,7 +160,7 @@ public class CRC {
 	}
 
 	/** Calculate the checksum for an array of data */
-	public int checksum(byte[] data) {
+	public int calculate(byte[] data) {
 		return calculate(data, data.length);
 	}
 }
