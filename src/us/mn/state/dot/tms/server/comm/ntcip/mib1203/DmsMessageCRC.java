@@ -36,8 +36,7 @@ public class DmsMessageCRC extends ASN1Integer {
 			dos.write(multi.getBytes());
 			dos.writeByte(beacon);
 			dos.writeByte(srv);
-			int crc = crc16.getCrc();
-			return ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF);
+			return crc16.getCrcSwapped();
 		}
 		catch (IOException e) {
 			// This should never happen

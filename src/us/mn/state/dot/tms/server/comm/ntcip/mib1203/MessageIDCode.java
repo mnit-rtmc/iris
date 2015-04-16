@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 	}
 
 	/** Cyclic redundancy check */
-	protected int crc;
+	private int crc;
 
 	/** Set the CRC */
 	public void setCrc(int c) {
