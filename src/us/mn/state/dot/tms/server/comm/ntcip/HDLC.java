@@ -75,7 +75,7 @@ abstract public class HDLC {
 		protected boolean clear = true;
 
 		/** CRC calculation (for FCS) */
-		protected CRC16 crc16;
+		private CRCStream crc16;
 
 		/** Create an HDLC frame output stream */
 		public FrameOutputStream(OutputStream os) {
@@ -88,7 +88,7 @@ abstract public class HDLC {
 		public void write(int b) throws IOException {
 			if(clear) {
 				super.write(FLAG);
-				crc16 = new CRC16();
+				crc16 = new CRCStream();
 				clear = false;
 			}
 			crc16.write(b);
@@ -209,9 +209,9 @@ abstract public class HDLC {
 				scanned = 0;
 				return;
 			}
-			CRC16 crc16 = new CRC16();
-			for(int c = 0; c < scanned; c++)
-				crc16.write(buf[c] & 0xFF);
+			CRCStream crc16 = new CRCStream();
+			for (int c = 0; c < scanned; c++)
+				crc16.write(buf[c]);
 			int crc = crc16.getCrc();
 			if (crc == fcs)
 				return;

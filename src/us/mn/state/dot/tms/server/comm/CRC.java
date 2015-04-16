@@ -52,7 +52,7 @@ public class CRC {
 	private final int polynomial;
 
 	/** Seed (initial) CRC value */
-	private final int seed;
+	public final int seed;
 
 	/** Reflect data bytes */
 	private final boolean reflect;
@@ -129,7 +129,7 @@ public class CRC {
 	 * @param v Previous CRC state.
 	 * @param d Byte of data.
 	 * @return New CRC state. */
-	public int step(int v, byte d) {
+	public int step(int v, int d) {
 		if (reflect) {
 			int j = d ^ v;
 			return (v >> 8) ^ table[j & 0xFF];

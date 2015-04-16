@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.server.comm.ntcip.CRC16;
+import us.mn.state.dot.tms.server.comm.ntcip.CRCStream;
 
 /**
  * GraphicInfoList is used to calculate a GraphicID.  It is encoded
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.CRC16;
  *
  * @author Douglas Lau
  */
-public class GraphicInfoList extends CRC16 {
+public class GraphicInfoList extends CRCStream {
 
 	/** Create a new GraphicInfoList */
 	public GraphicInfoList(Graphic graphic) throws IOException {

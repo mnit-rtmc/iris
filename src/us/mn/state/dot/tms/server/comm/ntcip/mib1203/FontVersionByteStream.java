@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.server.comm.ntcip.CRC16;
+import us.mn.state.dot.tms.server.comm.ntcip.CRCStream;
 
 /**
  * FontVersionByteStream is used to calculate a FontVersionID.  It is encoded
@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.CRC16;
  *
  * @author Douglas Lau
  */
-public class FontVersionByteStream extends CRC16 {
+public class FontVersionByteStream extends CRCStream {
 
 	/** Create a new FontVersionByteStream */
 	public FontVersionByteStream(Font font) throws IOException {
@@ -42,7 +42,7 @@ public class FontVersionByteStream extends CRC16 {
 		dos.writeByte(font.getLineSpacing());
 		dos.writeByte(1); // number of subsequent length octets
 		dos.writeByte(glyphs.size());
-		for(Glyph glyph: glyphs) {
+		for (Glyph glyph: glyphs) {
 			Graphic graphic = glyph.getGraphic();
 			byte[] bitmap = Base64.decode(graphic.getPixels());
 			dos.writeShort(glyph.getCodePoint());
