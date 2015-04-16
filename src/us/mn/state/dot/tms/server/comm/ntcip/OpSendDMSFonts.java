@@ -252,9 +252,7 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Check if a font version ID matches the automatic ID */
 	private boolean isAutoVersionIDCorrect(int v) throws IOException {
 		FontVersionByteStream fv = new FontVersionByteStream(font);
-		int crc = fv.getCrc();
-		int vid = ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF);
-		return v == vid;
+		return v == fv.getCrcSwapped();
 	}
 
 	/** Phase to query the initial font status */
