@@ -102,7 +102,9 @@ abstract public class HDLC {
 		/** Writes out a frame check sequence (FCS) and framing flag,
 		 * then flushes the whole message to the wrapped stream. */
 		public void flush() throws IOException {
-			int crc = crc16.getCrc();
+			/* NOTE: without ^ 0xFFFF, some DMS don't respond, */
+			/*       but some still do.  What is the deal? */
+			int crc = crc16.getCrc() ^ 0xFFFF;
 			byte fcs1 = (byte)(~crc >> 0);
 			byte fcs2 = (byte)(~crc >> 8);
 			write(fcs1);
