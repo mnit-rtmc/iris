@@ -115,7 +115,7 @@ public class CRC {
 	private int calculateTableValue(int i) {
 		int top_bit = 1 << (width - 1);
 		int ri = (reflect) ? do_reflect(i, 8) : i;
-		int v = ri << width - 8;
+		int v = ri << (width - 8);
 		for (int b = 0; b < 8; b++) {
 			if ((v & top_bit) != 0)
 				v = (v << 1) ^ polynomial;
@@ -134,7 +134,7 @@ public class CRC {
 			int j = d ^ v;
 			return (v >> 8) ^ table[j & 0xFF];
 		} else {
-			int j = d ^ (v >> width - 8);
+			int j = d ^ (v >> (width - 8));
 			return (v << 8) ^ table[j & 0xFF];
 		}
 	}
