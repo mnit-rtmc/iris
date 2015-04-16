@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,9 +44,9 @@ public class Crc8 {
 	/** Calculate the CRC-8 of a buffer.
 	 * @param buffer Buffer to be checked.
 	 * @return CRC-8 of the buffer. */
-	public int calculate(byte[] buffer) {
+	public int calculate(byte[] buffer, int n_bytes) {
 		int crc = 0;
-		for(int i = 0; i < buffer.length - 1; i++)
+		for (int i = 0; i < n_bytes; i++)
 			crc = table[(crc ^ buffer[i]) & 0xFF];
 		return crc & 0xFF;
 	}

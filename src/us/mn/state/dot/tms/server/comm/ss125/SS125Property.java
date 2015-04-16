@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,6 +64,11 @@ abstract public class SS125Property extends ControllerProperty {
 
 	/** CRC calculator */
 	static private final Crc8 CRC = new Crc8();
+
+	/** Calculate the CRC for a buffer */
+	static private int calculate(byte[] buf) {
+		return CRC.calculate(buf, buf.length - 1);
+	}
 
 	/** Format a boolean value.
 	 * @param buf Buffer to store formatted value.
@@ -230,7 +235,7 @@ abstract public class SS125Property extends ControllerProperty {
 		format16(header, OFF_SOURCE_ID, source_id);
 		format8(header, OFF_SEQUENCE, seq_num);
 		format8(header, OFF_BODY_SIZE, body.length - 1);
-		format8(header, OFF_CRC, CRC.calculate(header));
+		format8(header, OFF_CRC, calculate(header));
 		return header;
 	}
 
@@ -246,7 +251,7 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @throws IOException on error. */
 	private int decodeHead(InputStream is, int drop) throws IOException {
 		byte[] rhead = recvResponse(is, 11);
-		if(parse8(rhead, OFF_CRC) != CRC.calculate(rhead))
+		if (parse8(rhead, OFF_CRC) != calculate(rhead))
 			throw new ChecksumException("HEADER");
 		if(rhead[OFF_SENTINEL] != 'Z')
 			throw new ParsingException("SENTINEL");
@@ -289,7 +294,7 @@ abstract public class SS125Property extends ControllerProperty {
 		byte[] rbody = recvResponse(is, n_body + 1);
 		if(rbody.length < 4)
 			throw new ParsingException("BODY SIZE");
-		if(parse8(rbody, rbody.length - 1) != CRC.calculate(rbody))
+		if (parse8(rbody, rbody.length - 1) != calculate(rbody))
 			throw new ChecksumException("BODY CRC");
 		MessageID mid = MessageID.fromCode(parse8(rbody, OFF_MSG_ID));
 		if(mid != msgId())
@@ -322,7 +327,7 @@ abstract public class SS125Property extends ControllerProperty {
 	{
 		byte[] body = formatQuery();
 		byte[] header = formatHeader(body, c.getDrop());
-		format8(body, body.length - 1, CRC.calculate(body));
+		format8(body, body.length - 1, calculate(body));
 		os.write(header);
 		os.write(body);
 	}
@@ -354,7 +359,7 @@ abstract public class SS125Property extends ControllerProperty {
 	{
 		byte[] body = formatStore();
 		byte[] header = formatHeader(body, c.getDrop());
-		format8(body, body.length - 1, CRC.calculate(body));
+		format8(body, body.length - 1, calculate(body));
 		os.write(header);
 		os.write(body);
 	}
