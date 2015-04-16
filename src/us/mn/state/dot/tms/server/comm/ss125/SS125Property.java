@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.CRC;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
@@ -63,11 +64,11 @@ abstract public class SS125Property extends ControllerProperty {
 	static private final byte MSG_SUB_ID = 0;
 
 	/** CRC calculator */
-	static private final Crc8 CRC = new Crc8();
+	static private final CRC crc = new CRC(8, 0x1C, 0x00, false);
 
 	/** Calculate the CRC for a buffer */
 	static private int calculate(byte[] buf) {
-		return CRC.calculate(buf, buf.length - 1);
+		return crc.calculate(buf, buf.length - 1);
 	}
 
 	/** Format a boolean value.

@@ -35,6 +35,11 @@ public class CRCTest extends TestCase {
 		assertTrue(crc.checksum(CHECK) == 0xF4);
 	}
 
+	public void testSS125() {
+		CRC crc = new CRC(8, 0x1C, 0x00, false);
+		assertTrue(crc.checksum(CHECK) == 0xBC);
+	}
+
 	public void testCDMA2000() {
 		CRC crc = new CRC(8, 0x9B, 0xFF, false);
 		assertTrue(crc.checksum(CHECK) == 0xDA);

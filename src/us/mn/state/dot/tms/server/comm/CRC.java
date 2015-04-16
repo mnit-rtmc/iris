@@ -148,11 +148,19 @@ public class CRC {
 		return (v ^ xor_result) & mask;
 	}
 
+	/** Calculate the CRC for an array of data.
+	 * @param data Array of data.
+	 * @param n_bytes Number of bytes to check.
+	 * @return CRC of data. */
+	public int calculate(byte[] data, int n_bytes) {
+		int v = seed;
+		for (int i = 0; i < n_bytes; i++)
+			v = step(v, data[i]);
+		return result(v);
+	}
+
 	/** Calculate the checksum for an array of data */
 	public int checksum(byte[] data) {
-		int v = seed;
-		for (byte d: data)
-			v = step(v, d);
-		return result(v);
+		return calculate(data, data.length);
 	}
 }
