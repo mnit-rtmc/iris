@@ -103,7 +103,7 @@ abstract public class HDLC {
 		 * then flushes the whole message to the wrapped stream. */
 		public void flush() throws IOException {
 			int crc = crc16.getCrc();
-			byte fcs1 = (byte)~crc;
+			byte fcs1 = (byte)(~crc >> 0);
 			byte fcs2 = (byte)(~crc >> 8);
 			write(fcs1);
 			write(fcs2);
