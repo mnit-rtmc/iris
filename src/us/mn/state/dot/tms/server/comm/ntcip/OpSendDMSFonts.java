@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -252,7 +252,7 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Check if a font version ID matches the automatic ID */
 	private boolean isAutoVersionIDCorrect(int v) throws IOException {
 		FontVersionByteStream fv = new FontVersionByteStream(font);
-		int crc = fv.getCrc() ^ CRC16.INITIAL_CRC;
+		int crc = fv.getCrc();
 		int vid = ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF);
 		return v == vid;
 	}

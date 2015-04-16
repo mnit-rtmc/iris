@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ public class DmsMessageCRC extends ASN1Integer {
 			dos.write(multi.getBytes());
 			dos.writeByte(beacon);
 			dos.writeByte(srv);
-			int crc = crc16.getCrc() ^ CRC16.INITIAL_CRC;
+			int crc = crc16.getCrc();
 			return ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF);
 		}
 		catch(IOException e) {

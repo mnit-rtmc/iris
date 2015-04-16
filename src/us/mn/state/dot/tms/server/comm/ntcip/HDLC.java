@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -213,7 +213,7 @@ abstract public class HDLC {
 			for(int c = 0; c < scanned; c++)
 				crc16.write(buf[c] & 0xFF);
 			int crc = crc16.getCrc();
-			if((crc ^ fcs) == CRC16.INITIAL_CRC)
+			if (crc == fcs)
 				return;
 			byte[] corrupt = new byte[scanned];
 			System.arraycopy(buf, 0, corrupt, 0, scanned);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import java.io.OutputStream;
 public class CRC16 extends OutputStream {
 
 	/** INITIAL_CRC is the initial CRC value */
-	static public final int INITIAL_CRC = 0xFFFF;
+	static private final int INITIAL_CRC = 0xFFFF;
 
 	/** Look-up table for CRC calculations */
 	static protected final int[] TABLE = {
@@ -68,7 +68,7 @@ public class CRC16 extends OutputStream {
 
 	/** Get the calculated CRC */
 	public int getCrc() {
-		return crc;
+		return crc ^ INITIAL_CRC;
 	}
 
 	/** Write a byte to the CRC output stream */
