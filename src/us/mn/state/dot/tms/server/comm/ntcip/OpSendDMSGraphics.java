@@ -204,7 +204,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			mess.add(gid);
 			mess.queryProps();
 			logQuery(gid);
-			if(isIDCorrect(gid.getInteger())) {
+			if (isIDCorrect(gid.getInteger())) {
 				logError("Graphic valid");
 				return nextGraphicPhase();
 			} else
@@ -213,11 +213,9 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Compare the graphic ID */
-	protected boolean isIDCorrect(int g) throws IOException {
+	private boolean isIDCorrect(int g) throws IOException {
 		GraphicInfoList gil = new GraphicInfoList(graphic);
-		int crc = gil.getCrc();
-		int gid = ((crc & 0xFF) << 8) | ((crc >> 8) & 0xFF);
-		return g == gid;
+		return g == gil.getCrcSwapped();
 	}
 
 	/** Phase to query the initial graphic status */
@@ -424,7 +422,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			mess.add(gid);
 			mess.queryProps();
 			logQuery(gid);
-			if(!isIDCorrect(gid.getInteger())) {
+			if (!isIDCorrect(gid.getInteger())) {
 				setErrorStatus("Graphic " +graphic.getGNumber()+
 					" ID incorrect after validating");
 			}

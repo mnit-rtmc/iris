@@ -201,10 +201,10 @@ abstract public class HDLC {
 		/** Compare frame CRC against the frame check sequence */
 		protected void checkFrame() throws ChecksumException {
 			int fcs = 0;
-			if(scanned >= FRAME_CHECK) {
+			if (scanned >= FRAME_CHECK) {
 				scanned -= FRAME_CHECK;
-				fcs = (buf[scanned] & 0xFF) |
-					(buf[scanned + 1] & 0xFF) << 8;
+				fcs = (buf[scanned + 0] & 0xFF) |
+				      (buf[scanned + 1] & 0xFF) << 8;
 			} else {
 				scanned = 0;
 				return;

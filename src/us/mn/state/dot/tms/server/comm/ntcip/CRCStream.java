@@ -42,4 +42,10 @@ public class CRCStream extends OutputStream {
 	public int getCrc() {
 		return crc16.result(crc);
 	}
+
+	/** Get the calculated CRC with bytes swapped */
+	public int getCrcSwapped() {
+		int v = getCrc();
+		return ((v & 0xFF) << 8) | ((v >> 8) & 0xFF);
+	}
 }
