@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2006-2015  Minnesota Department of Transportation
- * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,7 @@ public class MultiParser {
 
 	/** Regular expression to match text between MULTI tags */
 	static private final Pattern TEXT_PATTERN = Pattern.compile(
-		"[' !#$%&()*+,-./0-9:;<=>?@A-Z^_`a-z{|}]*");
+		"[' !#$%&()*+,-./0-9:;<=>?@A-Z^_`a-z{|}\\\\~\"]*");
 
 	/** Don't allow instantiation */
 	private MultiParser() { }
