@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.units.Distance;
@@ -45,6 +46,11 @@ public class CameraWiperJob extends Job {
 	/** Threshold for determine whether a camera is near a weather sensor */
 	static private final double SENSOR_PROXIMITY_M = 4000;
 
+	/** Get the precipitation rate for activating wipers in mm/hr */
+	static public int getWiperPrecipRate() {
+		return SystemAttrEnum.CAMERA_WIPER_PRECIP_MM_HR.getInt();
+ 	}
+
 	/** Create a new camera wiper job */
 	public CameraWiperJob() {
 		super(Calendar.MINUTE, 1, Calendar.SECOND, OFFSET_SECS);
@@ -59,11 +65,13 @@ public class CameraWiperJob extends Job {
 
 	/** Get a set of locations with high precipitation rates */
 	private Set<GeoLoc> precipLocations() {
+		int wpr = getWiperPrecipRate();
 		HashSet<GeoLoc> locs = new HashSet<GeoLoc>();
 		Iterator<WeatherSensor> it = WeatherSensorHelper.iterator();
 		while (it.hasNext()) {
 			WeatherSensor ws = it.next();
-			if (WeatherSensorHelper.isHighPrecipRate(ws))
+			Integer pr = WeatherSensorHelper.getPrecipRate(ws);
+			if (pr != null && pr >= wpr)
 				locs.add(ws.getGeoLoc());
 		}
 		return locs;

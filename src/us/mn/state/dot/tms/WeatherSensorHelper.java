@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2015  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -100,17 +100,10 @@ public class WeatherSensorHelper extends BaseHelper {
 		return SystemAttrEnum.RWIS_OBS_AGE_LIMIT_SECS.getInt();
  	}
 
-	/** Get the high precipitation limit in mm/hr */
-	static public int getHighPrecipRate() {
-		// FIXME: add a system attribute
-		return 8;
- 	}
-
-	/** Is precipitation rate high? */
-	static public boolean isHighPrecipRate(WeatherSensor ws) {
-		if (isSampleExpired(ws))
-			return false;
-		Integer pr = ws.getPrecipRate();
-		return (pr != null) && pr >= getHighPrecipRate();
+	/** Get a valid precipitation rate, or null */
+	static public Integer getPrecipRate(WeatherSensor ws) {
+		return (isSampleExpired(ws))
+		      ? null
+		      : ws.getPrecipRate();
 	}
 }
