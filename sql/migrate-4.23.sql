@@ -8,3 +8,6 @@ UPDATE iris.system_attribute SET value = '4.23.0'
 -- add camera wiper system attribute
 INSERT INTO iris.system_attribute (name, value)
      VALUES ('camera_wiper_precip_mm_hr', 8);
+
+-- delete kml file enable system attribute
+DELETE FROM iris.system_attribute WHERE name = 'kml_file_enable';

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -203,7 +203,6 @@ public class MainServer {
 		FLUSH.addJob(new FlushSamplesJob(a_factory));
 		FLUSH.addJob(new ArchiveSamplesJob(a_factory));
 		FLUSH.addJob(new ProfilingJob());
-		FLUSH.addJob(new KmlWriterJob());
 		FLUSH.addJob(new XmlConfigJob());
 		FLUSH.addJob(new XmlConfigJob(1000));
 		FLUSH.addJob(new SignMessageXmlJob());

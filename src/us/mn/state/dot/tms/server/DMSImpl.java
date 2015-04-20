@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  * Copyright (C) 2012  Iteris Inc.
  *
@@ -54,7 +54,6 @@ import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.Point;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -66,18 +65,6 @@ import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.event.BrightnessSample;
 import us.mn.state.dot.tms.server.event.SignStatusEvent;
-import us.mn.state.dot.tms.kml.Kml;
-import us.mn.state.dot.tms.kml.KmlColor;
-import us.mn.state.dot.tms.kml.KmlColorImpl;
-import us.mn.state.dot.tms.kml.KmlGeometry;
-import us.mn.state.dot.tms.kml.KmlIconImpl;
-import us.mn.state.dot.tms.kml.KmlIconStyle;
-import us.mn.state.dot.tms.kml.KmlIconStyleImpl;
-import us.mn.state.dot.tms.kml.KmlPlacemark;
-import us.mn.state.dot.tms.kml.KmlRenderer;
-import us.mn.state.dot.tms.kml.KmlStyle;
-import us.mn.state.dot.tms.kml.KmlStyleImpl;
-import us.mn.state.dot.tms.kml.KmlStyleSelector;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -87,7 +74,7 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
+public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** DMS debug log */
 	static private final DebugLog DMS_LOG = new DebugLog("dms");
@@ -1742,93 +1729,6 @@ public class DMSImpl extends DeviceImpl implements DMS, KmlPlacemark {
 	/** Get item style bits */
 	public long getStyles() {
 		return styles;
-	}
-
-	/** render to kml (KmlPlacemark interface) */
-	public String renderKml() {
-		return KmlRenderer.render(this);
-	}
-
-	/** render inner elements to kml (KmlPlacemark interface) */
-	public String renderInnerKml() {
-		return "";
-	}
-
-	/** get kml placemark name (KmlPlacemark interface) */
-	public String getPlacemarkName() {
-		return getName();
-	}
-
-	/** Get geometry (KmlPlacemark interface) */
-	public KmlGeometry getGeometry() {
-		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
-		if(pos != null)
-			return new Point(pos.getLongitude(), pos.getLatitude());
-		else
-			return null;
-	}
-
-	/** get placemark description (KmlPlacemark interface) */
-	public String getPlacemarkDesc() {
-		StringBuilder desc = new StringBuilder();
-
-		desc.append(Kml.descItem("Location",
-			GeoLocHelper.getDescription(getGeoLoc())));
-
-		desc.append(Kml.descItem(DMSABBR + " Status",
-			DMSHelper.getAllStyles(this)));
-
-		String ml = DMSHelper.buildMsgLine(this);
-		desc.append(Kml.descItem("Message", ml));
-
-		String owner = (getOwnerCurrent() == null ? "none" :
-			getOwnerCurrent().getFullName());
-		desc.append(Kml.descItem("Author", owner));
-
-		SignMessage sm = getMessageCurrent();
-		desc.append(Kml.descItem("Font", SString.toString(
-			SignMessageHelper.getFontNames(sm, 1))));
-
-		desc.append(Kml.descItem("Notes", getNotes()));
-		desc.append(Kml.descItem("Last Operation", getOpStatus()));
-
-		desc.append("<br>Updated by IRIS " +
-			TimeSteward.getDateInstance() + "<br><br>");
-
-		desc.append("<br>");
-
-		return Kml.htmlDesc(desc.toString());
-	}
-
-	/** get kml style selector (KmlFolder interface) */
-	public KmlStyleSelector getKmlStyleSelector() {
-		KmlStyle style = new KmlStyleImpl();
-		KmlIconStyle is = new KmlIconStyleImpl();
-		is.setKmlColor(getKmlIconColor());
-		is.setKmlScale(1);
-		String icon = "http://maps.google.com/mapfiles/kml/paddle/" +
-			"wht-blank.png";
-		is.setKmlIcon(new KmlIconImpl(icon));
-		style.setIconStyle(is);
-		return style;
-	}
-
-	/** get kml icon color, which is a function of the DMS state */
-	public KmlColor getKmlIconColor() {
-		// note: this is a prioritized list
-		if(ItemStyle.AVAILABLE.checkBit(styles))
-			return KmlColorImpl.Blue;
-		if(ItemStyle.DEPLOYED.checkBit(styles))
-			return KmlColorImpl.Yellow;
-		if(ItemStyle.AWS_DEPLOYED.checkBit(styles))
-			return KmlColorImpl.Red;
-		if(ItemStyle.SCHEDULED.checkBit(styles))
-			return KmlColorImpl.Orange;
-		if(ItemStyle.MAINTENANCE.checkBit(styles))
-			return KmlColorImpl.Black;
-		if(ItemStyle.FAILED.checkBit(styles))
-			return KmlColorImpl.Gray;
-		return KmlColorImpl.Black;
 	}
 
 	/** Write DMS as an XML element */
