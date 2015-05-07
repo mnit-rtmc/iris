@@ -37,8 +37,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 public class OpSendDMSGraphics extends OpDMS {
 
 	/** Color scheme supported */
-	private final DmsColorScheme color_scheme =
-		new DmsColorScheme();
+	private final DmsColorScheme color_scheme = new DmsColorScheme();
 
 	/** Number of graphics supported */
 	private final DmsGraphicMaxEntries max_graphics =
@@ -93,28 +92,23 @@ public class OpSendDMSGraphics extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(color_scheme);
 			mess.add(max_graphics);
-			mess.add(num_graphics);
-			mess.add(max_size);
-			mess.add(available_memory);
 			mess.add(block_size);
 			try {
 				mess.queryProps();
 			}
 			catch (SNMP.Message.NoSuchName e) {
 				// Must be 1203v1 only (no graphics) ...
+				logError("no graphics support -- aborted");
 				return null;
 			}
 			logQuery(color_scheme);
 			logQuery(max_graphics);
-			logQuery(num_graphics);
-			logQuery(max_size);
-			logQuery(available_memory);
 			logQuery(block_size);
 			for (row = 1; row <= max_graphics.getInteger(); row++)
 				open_rows.add(row);
 			row = 1;
 			lookupGraphics();
-			return new QueryGraphicNumbers();
+			return new QueryOptionalGraphics();
 		}
 	}
 
@@ -141,6 +135,29 @@ public class OpSendDMSGraphics extends OpDMS {
 		return (g_num != null && w != null && h != null) &&
 		       (g.getWidth() <= w) && (g.getHeight() <= h) &&
 		       (g.getBpp() == 1 || g.getBpp() == bpp);
+	}
+
+	/** Phase to query optional graphics objects */
+	private class QueryOptionalGraphics extends Phase {
+
+		/** Query the optional graphics objects */
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(num_graphics);
+			mess.add(max_size);
+			mess.add(available_memory);
+			try {
+				mess.queryProps();
+			}
+			catch (SNMP.Message.NoSuchName e) {
+				// Some manufacturers don't support these
+				logError("optional graphics unsupported");
+				return new QueryGraphicNumbers();
+			}
+			logQuery(num_graphics);
+			logQuery(max_size);
+			logQuery(available_memory);
+			return new QueryGraphicNumbers();
+		}
 	}
 
 	/** Phase to query all graphic numbers */
