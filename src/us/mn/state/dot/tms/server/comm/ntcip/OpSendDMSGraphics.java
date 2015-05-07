@@ -37,43 +37,43 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 public class OpSendDMSGraphics extends OpDMS {
 
 	/** Color scheme supported */
-	protected final DmsColorScheme color_scheme =
+	private final DmsColorScheme color_scheme =
 		new DmsColorScheme();
 
 	/** Number of graphics supported */
-	protected final DmsGraphicMaxEntries max_graphics =
+	private final DmsGraphicMaxEntries max_graphics =
 		new DmsGraphicMaxEntries();
 
 	/** Number of graphics defined in graphic table */
-	protected final DmsGraphicNumEntries num_graphics =
+	private final DmsGraphicNumEntries num_graphics =
 		new DmsGraphicNumEntries();
 
 	/** Maximum size of a graphic */
-	protected final DmsGraphicMaxSize max_size = new DmsGraphicMaxSize();
+	private final DmsGraphicMaxSize max_size = new DmsGraphicMaxSize();
 
 	/** Available memory for storing graphics */
-	protected final AvailableGraphicMemory available_memory =
+	private final AvailableGraphicMemory available_memory =
 		new AvailableGraphicMemory();
 
 	/** Size of graphic blocks (in bytes) */
-	protected final DmsGraphicBlockSize block_size =
+	private final DmsGraphicBlockSize block_size =
 		new DmsGraphicBlockSize();
 
 	/** Mapping of graphic numbers to indices (row in table) */
-	protected final TreeMap<Integer, Integer> num_2_row =
+	private final TreeMap<Integer, Integer> num_2_row =
 		new TreeMap<Integer, Integer>();
 
 	/** Set of open rows in the graphic table */
-	protected final TreeSet<Integer> open_rows = new TreeSet<Integer>();
+	private final TreeSet<Integer> open_rows = new TreeSet<Integer>();
 
 	/** Iterator of graphics to be sent to the sign */
-	protected Iterator<Graphic> graphic_iterator;
+	private Iterator<Graphic> graphic_iterator;
 
 	/** Current graphic */
-	protected Graphic graphic;
+	private Graphic graphic;
 
 	/** Graphic row for graphic table */
-	protected int row;
+	private int row;
 
 	/** Create a new operation to send graphics to a DMS */
 	public OpSendDMSGraphics(DMSImpl d) {
@@ -81,12 +81,13 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new QueryGraphicsConfiguration();
 	}
 
 	/** Phase to query the graphics configuration */
-	protected class QueryGraphicsConfiguration extends Phase {
+	private class QueryGraphicsConfiguration extends Phase {
 
 		/** Query the graphics configuration */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -99,7 +100,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// Must be 1203v1 only (no graphics) ...
 				return null;
 			}
@@ -109,7 +110,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			logQuery(max_size);
 			logQuery(available_memory);
 			logQuery(block_size);
-			for(row = 1; row <= max_graphics.getInteger(); row++)
+			for (row = 1; row <= max_graphics.getInteger(); row++)
 				open_rows.add(row);
 			row = 1;
 			lookupGraphics();
@@ -121,10 +122,10 @@ public class OpSendDMSGraphics extends OpDMS {
 	private void lookupGraphics() {
 		LinkedList<Graphic> graphics = new LinkedList<Graphic>();
 		Iterator<Graphic> it = GraphicHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Graphic g = it.next();
 			Integer g_num = g.getGNumber();
-			if(shouldSend(g_num, g)) {
+			if (shouldSend(g_num, g)) {
 				graphics.add(g);
 				num_2_row.put(g_num, null);
 			}
@@ -133,7 +134,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Test if we should send the given graphic */
-	protected boolean shouldSend(Integer g_num, Graphic g) {
+	private boolean shouldSend(Integer g_num, Graphic g) {
 		Integer w = dms.getWidthPixels();
 		Integer h = dms.getHeightPixels();
 		int bpp = color_scheme.getEnum().getBpp();
@@ -143,7 +144,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Phase to query all graphic numbers */
-	protected class QueryGraphicNumbers extends Phase {
+	private class QueryGraphicNumbers extends Phase {
 
 		/** Query the graphic number for one graphic */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -155,11 +156,11 @@ public class OpSendDMSGraphics extends OpDMS {
 			logQuery(number);
 			logQuery(status);
 			Integer g_num = number.getInteger();
-			if(num_2_row.containsKey(g_num)) {
+			if (num_2_row.containsKey(g_num)) {
 				num_2_row.put(g_num, row);
 				open_rows.remove(row);
 			}
-			if(row < max_graphics.getInteger()) {
+			if (row < max_graphics.getInteger()) {
 				row++;
 				return this;
 			} else
@@ -168,11 +169,11 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Populate the num_2_row mapping */
-	protected Phase populateNum2Row() {
-		for(Integer g_num: num_2_row.keySet()) {
-			if(num_2_row.get(g_num) == null) {
+	private Phase populateNum2Row() {
+		for (Integer g_num: num_2_row.keySet()) {
+			if (num_2_row.get(g_num) == null) {
 				Integer r = open_rows.pollLast();
-				if(r != null)
+				if (r != null)
 					num_2_row.put(g_num, r);
 				else
 					num_2_row.remove(g_num);
@@ -182,11 +183,11 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Get the first phase of the next graphic */
-	protected Phase nextGraphicPhase() {
-		while(graphic_iterator.hasNext()) {
+	private Phase nextGraphicPhase() {
+		while (graphic_iterator.hasNext()) {
 			graphic = graphic_iterator.next();
 			Integer g_num = graphic.getGNumber();
-			if(num_2_row.containsKey(g_num)) {
+			if (num_2_row.containsKey(g_num)) {
 				row = num_2_row.get(g_num);
 				return new VerifyGraphic();
 			}
@@ -196,7 +197,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Phase to verify a graphic */
-	protected class VerifyGraphic extends Phase {
+	private class VerifyGraphic extends Phase {
 
 		/** Verify a graphic */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -219,7 +220,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Phase to query the initial graphic status */
-	protected class QueryInitialStatus extends Phase {
+	private class QueryInitialStatus extends Phase {
 
 		/** Query the initial graphic status */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -242,7 +243,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Invalidate the graphic */
-	protected class InvalidateGraphic extends Phase {
+	private class InvalidateGraphic extends Phase {
 
 		/** Invalidate the graphic entry in the graphic table */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -256,7 +257,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Phase to request modifying the graphic */
-	protected class RequestModify extends Phase {
+	private class RequestModify extends Phase {
 
 		/** Set the graphic status to modifyReq */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -270,7 +271,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Phase to verify the graphic status is modifying */
-	protected class VerifyStatusModifying extends Phase {
+	private class VerifyStatusModifying extends Phase {
 
 		/** Verify the graphic status is modifying */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -278,7 +279,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
-			if(status.getEnum() != DmsGraphicStatus.Enum.modifying){
+			if (status.getEnum() !=DmsGraphicStatus.Enum.modifying){
 				logError("graphic send aborted");
 				return nextGraphicPhase();
 			}
@@ -287,7 +288,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Create the graphic */
-	protected class CreateGraphic extends Phase {
+	private class CreateGraphic extends Phase {
 
 		/** Create a new graphic in the graphic table */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -307,7 +308,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			type.setEnum(DmsColorScheme.Enum.fromBpp(
 				graphic.getBpp()));
 			trans_enabled.setInteger(1);
-			if(graphic.getBpp() == 24) {
+			if (graphic.getBpp() == 24) {
 				trans_color.setOctetString(
 					new byte[] { 0, 0, 0 });
 			} else
@@ -332,16 +333,16 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Phase to send a block of a graphic */
-	protected class SendGraphicBlock extends Phase {
+	private class SendGraphicBlock extends Phase {
 
 		/** Graphic bitmap */
-		protected final byte[] bitmap;
+		private final byte[] bitmap;
 
 		/** Current block */
-		protected int block;
+		private int block;
 
 		/** Create a phase to send graphic blocks */
-		protected SendGraphicBlock() throws IOException {
+		private SendGraphicBlock() throws IOException {
 			bitmap = Base64.decode(graphic.getPixels());
 			block = 1;
 		}
@@ -354,7 +355,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			mess.add(block_bitmap);
 			logStore(block_bitmap);
 			mess.storeProps();
-			if(block * block_size.getInteger() < bitmap.length) {
+			if (block * block_size.getInteger() < bitmap.length) {
 				block++;
 				if (block % 20 == 0 && !controller.isFailed())
 					setSuccess(true);
@@ -364,7 +365,7 @@ public class OpSendDMSGraphics extends OpDMS {
 		}
 
 		/** Create a graphic block */
-		protected byte[] createBlock() {
+		private byte[] createBlock() {
 			int bsize = block_size.getInteger();
 			int pos = (block - 1) * bsize;
 			int blen = Math.min(bsize, bitmap.length - pos);
@@ -375,7 +376,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Phase to validate the graphic */
-	protected class ValidateGraphic extends Phase {
+	private class ValidateGraphic extends Phase {
 
 		/** Validate a graphic entry in the graphic table */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -389,10 +390,10 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Phase to verify the graphic status is ready for use */
-	protected class VerifyStatusReadyForUse extends Phase {
+	private class VerifyStatusReadyForUse extends Phase {
 
 		/** Time to stop checking if the graphic is ready for use */
-		protected final long expire = TimeSteward.currentTimeMillis() +
+		private final long expire = TimeSteward.currentTimeMillis() +
 			10 * 1000;
 
 		/** Verify the graphic status is ready for use */
@@ -401,10 +402,10 @@ public class OpSendDMSGraphics extends OpDMS {
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
-			if(status.getEnum() ==
-			   DmsGraphicStatus.Enum.readyForUse)
+			if (status.getEnum() ==
+			    DmsGraphicStatus.Enum.readyForUse)
 				return new VerifyGraphicFinal();
-			if(TimeSteward.currentTimeMillis() > expire) {
+			if (TimeSteward.currentTimeMillis() > expire) {
 				logError("graphic status timeout expired -- " +
 					"aborted");
 				return nextGraphicPhase();
@@ -414,7 +415,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	}
 
 	/** Phase to verify a graphic after validating */
-	protected class VerifyGraphicFinal extends Phase {
+	private class VerifyGraphicFinal extends Phase {
 
 		/** Verify a graphic */
 		protected Phase poll(CommMessage mess) throws IOException {
