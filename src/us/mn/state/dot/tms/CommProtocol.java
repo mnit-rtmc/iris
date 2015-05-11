@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -114,7 +114,10 @@ public enum CommProtocol {
 	HYSECURITY_STC("HySecurity STC"),
 
 	/** Cohu PTZ (29) */
-	COHU_PTZ("Cohu PTZ");
+	COHU_PTZ("Cohu PTZ"),
+
+	/** DR-500 doppler radar (30) */
+	DR_500("DR-500");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
@@ -126,7 +129,7 @@ public enum CommProtocol {
 
 	/** Get a comm protocol from an ordinal value */
 	static public CommProtocol fromOrdinal(short o) {
-		for (CommProtocol cp: CommProtocol.values()) {
+		for (CommProtocol cp: values()) {
 			if (cp.ordinal() == o)
 				return cp;
 		}
