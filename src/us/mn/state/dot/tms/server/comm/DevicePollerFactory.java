@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.server.comm.cohuptz.CohuPTZPoller;
 import us.mn.state.dot.tms.server.comm.dinrelay.DinRelayPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
+import us.mn.state.dot.tms.server.comm.dr500.DR500Poller;
 import us.mn.state.dot.tms.server.comm.e6.E6Poller;
 import us.mn.state.dot.tms.server.comm.g4.G4Poller;
 import us.mn.state.dot.tms.server.comm.infinova.InfinovaMessenger;
@@ -130,6 +131,8 @@ public class DevicePollerFactory {
 			return createSTCPoller();
 		case COHU_PTZ:
 			return createCohuPTZPoller();
+		case DR_500:
+			return createDR500Poller();
 		case ADDCO:
 			return createAddcoPoller();
 		case TRANSCORE_E6:
@@ -327,6 +330,12 @@ public class DevicePollerFactory {
 	private DevicePoller createCohuPTZPoller() throws IOException {
 		return new CohuPTZPoller(name, createSocketMessenger(TCP));
 	}
+
+	/** Create a DR-500 poller */
+	private DevicePoller createDR500Poller() throws IOException {
+		return new DR500Poller(name, createSocketMessenger(TCP));
+	}
+
 
 	/** Create an ADDCO poller */
 	private DevicePoller createAddcoPoller() throws IOException {
