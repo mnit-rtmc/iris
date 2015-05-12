@@ -160,7 +160,24 @@ public class OpSendSensorSettings extends OpDR500 {
 		{
 			mess.add(sf);
 			mess.queryProps();
-			return null;
+			return new QueryAll();
+		}
+	}
+
+	/** Phase to query all variables */
+	protected class QueryAll extends Phase<DR500Property> {
+
+		/** Variable index */
+		private byte index = 0;
+
+		/** Query all variables */
+		protected Phase<DR500Property> poll(
+			CommMessage<DR500Property> mess) throws IOException
+		{
+			mess.add(new VarIndexProperty(index));
+			mess.queryProps();
+			index++;
+			return this;
 		}
 	}
 }
