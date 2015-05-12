@@ -26,7 +26,7 @@ public enum VarName {
 	LO_SPEED("LO"),		/* low speed cutoff */
 	THRESHOLD_SPEED("SP"),	/* violator threshold */
 	HI_SPEED("HI"),		/* high speed cutoff */
-	FASTEST("SF");		/* fastest target if 1, else strongest*/
+	TARGET("SF");		/* fastest target if 1, else strongest */
 
 	/** Create a new variable name */
 	private VarName(String n) {
