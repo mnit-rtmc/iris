@@ -251,13 +251,14 @@ abstract public class DR500Property extends ControllerProperty {
 	}
 
 	/** Parse a STATUS response message */
-	protected void parseStatus(Response resp) throws ParsingException {
+	protected int parseStatus(Response resp) throws ParsingException {
 		if (resp.msg_code != MsgCode.STATUS_RESP)
 			throw new ParsingException("MSG CODE:" + resp.msg_code);
-		if (resp.body.length != 4)
+		if (resp.body.length != 2)
 			throw new ParsingException("STATUS LEN");
-		int status = parse32le(resp.body, 0);
-		if (status != 0)
+		int status = parse16le(resp.body, 0);
+		if (status < 0)
 			throw new ParsingException("STATUS:" + status);
+		return status;
 	}
 }

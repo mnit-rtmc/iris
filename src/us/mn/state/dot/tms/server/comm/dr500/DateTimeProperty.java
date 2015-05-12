@@ -22,6 +22,7 @@ import java.util.Date;
 import java.util.TimeZone;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * Date / Time Property.
@@ -64,7 +65,9 @@ public class DateTimeProperty extends DR500Property {
 	public void decodeStore(ControllerImpl c, InputStream is)
 		throws IOException
 	{
-		parseStatus(decodeResponse(is));
+		int status = parseStatus(decodeResponse(is));
+		if (status != 0)
+			throw new ParsingException("STATUS:" + status);
 	}
 
 	/** Get a string representation of the property */
