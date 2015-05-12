@@ -17,8 +17,6 @@ package us.mn.state.dot.tms.server.comm.dr500;
 import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.StringReader;
-import java.util.Properties;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
