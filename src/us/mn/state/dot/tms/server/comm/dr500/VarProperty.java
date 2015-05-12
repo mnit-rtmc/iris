@@ -115,6 +115,6 @@ public class VarProperty extends DR500Property {
 	/** Get a string representation of the property */
 	@Override
 	public String toString() {
-		return vname.name + ": " + value;
+		return vname + ": " + value;
 	}
 }
