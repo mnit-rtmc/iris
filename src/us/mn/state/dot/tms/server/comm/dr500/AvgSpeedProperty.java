@@ -23,19 +23,16 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * System information property.
+ * Average speed property.
  *
  * @author Douglas Lau
  */
-public class SysInfoProperty extends DR500Property {
+public class AvgSpeedProperty extends DR500Property {
 
 	/** Body of query request */
 	static private final byte[] BODY = new byte[] {
-		(byte) MsgCode.SYS_INFO.code
+		(byte) MsgCode.AVG_SPEED_QUERY.code
 	};
-
-	/** System information */
-	private final Properties sys_info = new Properties();
 
 	/** Encode a QUERY request */
 	@Override
@@ -50,50 +47,29 @@ public class SysInfoProperty extends DR500Property {
 	public void decodeQuery(ControllerImpl c, InputStream is)
 		throws IOException
 	{
-		Response resp = decodeResponse(is);
-		checkMsgCode(resp, MsgCode.SYS_INFO);
-		// SYS_INFO response is new line delimited set of <tag>=<value>
-		StringReader r = new StringReader(new String(resp.body, ASCII));
-		sys_info.clear();
-		sys_info.load(r);
+		speed = parseSpeed(decodeResponse(is));
 	}
 
-	/** Get the firmware version */
-	public String getVersion() {
-		StringBuilder sb = new StringBuilder();
-		String brd = sys_info.getProperty("BRD");
-		if (brd != null) {
-			sb.append("BRD=");
-			sb.append(brd);
-			sb.append(',');
-		}
-		String mod = sys_info.getProperty("MOD");
-		if (mod != null) {
-			sb.append("MOD=");
-			sb.append(mod);
-			sb.append(',');
-		}
-		String rev = sys_info.getProperty("REV");
-		if (rev != null) {
-			sb.append("REV=");
-			sb.append(rev);
-			sb.append(',');
-		}
-		if (sb.length() > 0)
-			return sb.substring(0, sb.length() - 1);
-		else
-			return "";
+	/** Parse a speed value response */
+	private Integer parseSpeed(Response resp) throws IOException {
+		checkMsgCode(resp, MsgCode.AVG_SPEED_RESP);
+		if (1 != resp.body.length)
+			throw new ParsingException("LEN:" + resp.body.length);
+		int sp = resp.body[0];
+		return (sp > 0) ? sp : null;
 	}
 
-	/** Get the radar type */
-	public RadarType getRadarType() {
-		String r = sys_info.getProperty("TYPE");
-		return RadarType.fromName(r);
+	/** Average speed */
+	private Integer speed;
+
+	/** Get the average speed */
+	public Integer getSpeed() {
+		return speed;
 	}
 
 	/** Get a string representation of the property */
 	@Override
 	public String toString() {
-		return sys_info.toString();
+		return "avg speed:" + speed;
 	}
 }

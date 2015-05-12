@@ -74,8 +74,7 @@ public class VarProperty extends DR500Property {
 
 	/** Parse a variable value response */
 	private int parseValue(Response resp) throws IOException {
-		if (resp.msg_code != MsgCode.VAR_RESP)
-			throw new ParsingException("MSG CODE:" + resp.msg_code);
+		checkMsgCode(resp, MsgCode.VAR_RESP);
 		if (5 != resp.body.length)
 			throw new ParsingException("LEN:" + resp.body.length);
 		byte dom = resp.body[0];

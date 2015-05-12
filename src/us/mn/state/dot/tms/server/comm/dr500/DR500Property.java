@@ -241,7 +241,7 @@ abstract public class DR500Property extends ControllerProperty {
 			System.arraycopy(rcv, 1, body, 0, body.length);
 			return new Response(mc, body);
 		} else
-			throw new ParsingException("UNKNOWN MSG CODE");
+			throw new ParsingException("MSG CODE:" + mc);
 	}
 
 	/** Decode a response */
@@ -252,13 +252,20 @@ abstract public class DR500Property extends ControllerProperty {
 
 	/** Parse a STATUS response message */
 	protected int parseStatus(Response resp) throws ParsingException {
-		if (resp.msg_code != MsgCode.STATUS_RESP)
-			throw new ParsingException("MSG CODE:" + resp.msg_code);
+		checkMsgCode(resp, MsgCode.STATUS_RESP);
 		if (resp.body.length != 2)
 			throw new ParsingException("STATUS LEN");
 		int status = parse16le(resp.body, 0);
 		if (status < 0)
 			throw new ParsingException("STATUS:" + status);
 		return status;
+	}
+
+	/** Check a response message code */
+	protected void checkMsgCode(Response resp, MsgCode mc)
+		throws ParsingException
+	{
+		if (resp.msg_code != mc)
+			throw new ParsingException("MSG CODE:" + resp.msg_code);
 	}
 }
