@@ -87,6 +87,31 @@ public class VarProperty extends DR500Property {
 		return parse16le(resp.body, 3);
 	}
 
+	/** Encode a STORE request */
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
+		byte[] vn = vname.name.getBytes(ASCII);
+		byte[] body = new byte[6];
+		assert 2 == vn.length;
+		body[0] = (byte) MsgCode.VAR_NAME_SET.code;
+		body[1] = 0;	/* config domain */
+		body[2] = vn[0];
+		body[3] = vn[1];
+		format16le(body, 4, value);
+		encodeRequest(os, body);
+	}
+
+	/** Decode a STORE response */
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is)
+		throws IOException
+	{
+		// status returned is index of variable, or -1 on error
+		parseStatus(decodeResponse(is));
+	}
+
 	/** Get a string representation of the property */
 	@Override
 	public String toString() {
