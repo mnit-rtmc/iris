@@ -86,6 +86,12 @@ public class SysInfoProperty extends DR500Property {
 			return "";
 	}
 
+	/** Get the radar type */
+	public RadarType getRadarType() {
+		String r = sys_info.getProperty("TYPE");
+		return RadarType.fromName(r);
+	}
+
 	/** Get a string representation of the property */
 	@Override
 	public String toString() {
