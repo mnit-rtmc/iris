@@ -223,9 +223,7 @@ abstract public class DR500Property extends ControllerProperty {
 		int n_body = n_pkt - 2;
 		if (n_body < 1)
 			throw new ParsingException("PACKET TOO SMALL");
-		int crc_lo = rcv[n_pkt - 2] & 0xFF;
-		int crc_hi = rcv[n_pkt - 1] & 0xFF;
-		int crc1 = (crc_hi << 8) | crc_lo;
+		int crc1 = parse16le(rcv, n_body);
 		int crc2 = crc.calculate(rcv, n_body);
 		if (crc1 == crc2)
 			return n_body;
@@ -250,5 +248,16 @@ abstract public class DR500Property extends ControllerProperty {
 	protected Response decodeResponse(InputStream is) throws IOException {
 		decodeHead(is);
 		return decodeBody(is);
+	}
+
+	/** Parse a STATUS response message */
+	protected void parseStatus(Response resp) throws ParsingException {
+		if (resp.msg_code != MsgCode.STATUS_RESP)
+			throw new ParsingException("MSG CODE:" + resp.msg_code);
+		if (resp.body.length != 4)
+			throw new ParsingException("STATUS LEN");
+		int status = parse32le(resp.body, 0);
+		if (status != 0)
+			throw new ParsingException("STATUS:" + status);
 	}
 }

@@ -59,6 +59,7 @@ public class SysInfoProperty extends DR500Property {
 		sys_info.load(r);
 	}
 
+	/** Get the firmware version */
 	public String getVersion() {
 		StringBuilder sb = new StringBuilder();
 		String brd = sys_info.getProperty("BRD");
