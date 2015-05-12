@@ -70,8 +70,8 @@ public class DR500Poller extends MessagePoller<DR500Property>
  	 * @param p Sample period in seconds. */
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
-//		if (p == 30)
-//			addOperation(new OpQuerySamples(c, p));
+		if (p == 30)
+			addOperation(new OpQuerySpeed(c, p));
 	}
 
 	/** Get the protocol debug log */
