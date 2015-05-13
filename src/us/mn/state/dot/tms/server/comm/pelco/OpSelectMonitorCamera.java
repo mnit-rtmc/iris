@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * Pelco operation to select the camera for one monitor.
@@ -28,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 public class OpSelectMonitorCamera extends OpPelco {
 
 	/** Parse the integer ID of a monitor or camera */
-	static private int parseUID(String name) throws IOException {
+	static private int parseUID(String name) throws ProtocolException {
 		String id = name;
 		while (id.length() > 0 && !Character.isDigit(id.charAt(0)))
 			id = id.substring(1);
@@ -36,7 +37,7 @@ public class OpSelectMonitorCamera extends OpPelco {
 			return Integer.parseInt(id);
 		}
 		catch (NumberFormatException e) {
-			throw new IOException("Invalid UID: " + name);
+			throw new ProtocolException("BAD UID: " + name);
 		}
 	}
 
