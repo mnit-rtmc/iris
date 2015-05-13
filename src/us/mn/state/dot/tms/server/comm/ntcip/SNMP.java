@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,8 +21,10 @@ import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
+import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * Simple Network Management Protocol (SNMP)
@@ -222,7 +224,7 @@ public class SNMP extends BER {
 				ASN1OctetString value = (ASN1OctetString)mo;
 				encodeOctetString(value.getOctetString());
 			} else
-				throw new IOException("UNKNOWN OBJECT TYPE");
+				throw new ProtocolException("UNKNOWN OBJ TYPE");
 		}
 
 		/** Encode a null variable binding */
@@ -277,7 +279,7 @@ public class SNMP extends BER {
 				ASN1OctetString value = (ASN1OctetString)mo;
 				value.setOctetString(decodeOctetString(is));
 			} else
-				throw new IOException("UNKNOWN OBJECT TYPE");
+				throw new ParsingException("UNKNOWN OBJ TYPE");
 		}
 
 		/** Decode a counter (from RFC1155-SMI) */
@@ -338,14 +340,28 @@ public class SNMP extends BER {
 			case TOO_BIG:
 				throw new TooBig();
 			case NO_SUCH_NAME:
-				throw new NoSuchName(index);
+				throw new NoSuchName(getName(index));
 			case BAD_VALUE:
-				throw new BadValue(index);
+				throw new BadValue(getObject(index));
 			case READ_ONLY:
-				throw new ReadOnly(index);
+				throw new ReadOnly(getName(index));
 			case GEN_ERROR:
-				throw new GenError(index);
+				throw new GenError(getObject(index));
 			}
+		}
+
+		/** Get the object name */
+		private ASN1Object getObject(int i) {
+			if (i > 0 && i <= mos.size())
+				return mos.get(i - 1);
+			else
+				return null;
+		}
+
+		/** Get the object name */
+		private String getName(int i) {
+			ASN1Object o = getObject(i);
+			return (o != null) ? o.getName() : null;
 		}
 
 		/** Request ID mismatch exception */
@@ -359,85 +375,47 @@ public class SNMP extends BER {
 		}
 
 		/** TooBig exception */
-		public class TooBig extends IOException {
+		public class TooBig extends ControllerException {
 
 			/** Create a new TooBig exception */
-			protected TooBig() {}
-
-			/** Get the error message string */
-			public String getMessage() {
-				return "tooBig";
+			protected TooBig() {
+				super("SNMP: TOO BIG");
 			}
 		}
 
 		/** NoSuchName exception */
-		public class NoSuchName extends IOException {
-
-			/** Object name */
-			protected final String name;
+		public class NoSuchName extends ControllerException {
 
 			/** Create a new NoSuchName exception */
-			protected NoSuchName(int i) {
-				name = (mos.get(i - 1)).getName();
-			}
-
-			/** Get the error message string */
-			public String getMessage() {
-				return "noSuchName: " + name;
+			protected NoSuchName(String n) {
+				super("SNMP: NO SUCH NAME: " + n);
 			}
 		}
 
 		/** BadValue exception */
-		public class BadValue extends IOException {
-
-			/** MIB Object */
-			protected final ASN1Object obj;
+		public class BadValue extends ControllerException {
 
 			/** Create a new BadValue exception */
-			protected BadValue(int i) {
-				obj = mos.get(i - 1);
-			}
-
-			/** Get the error message string */
-			public String getMessage() {
-				return "badValue: " + obj;
+			protected BadValue(ASN1Object o) {
+				super("SNMP: BAD VALUE: " + o);
 			}
 		}
 
 		/** ReadOnly exception */
-		public class ReadOnly extends IOException {
-
-			/** Object name */
-			protected final String name;
+		public class ReadOnly extends ControllerException {
 
 			/** Create a new ReadOnly exception */
-			protected ReadOnly(int i) {
-				name = (mos.get(i - 1)).getName();
-			}
-
-			/** Get the error message string */
-			public String getMessage() {
-				return "readOnly: " + name;
+			protected ReadOnly(String n) {
+				super("SNMP: READ ONLY: " + n);
 			}
 		}
 
 		/** GenError exception */
-		public class GenError extends IOException {
-
-			/** MIB Object */
-			protected final ASN1Object obj;
+		public class GenError extends ControllerException {
 
 			/** Create a new GenError exception */
-			protected GenError(int i) {
-				if(i > 0)
-					obj = mos.get(i - 1);
-				else
-					obj = null;
-			}
-
-			/** Get the error message string */
-			public String getMessage() {
-				return "genError: " + obj;
+			protected GenError(ASN1Object o) {
+				super("SNMP: GEN ERROR: " + o);
 			}
 		}
 	}
