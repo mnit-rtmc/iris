@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -148,6 +148,10 @@ public class OpSendDMSDefaults extends OpDMS {
 			catch(SNMP.Message.NoSuchName e) {
 				// Must not be a Ledstar sign
 				return new SkylineDefaults();
+			}
+			catch (SNMP.Message.BadValue e) {
+				// Daktronics uses this instead of NoSuchName
+				// Is there a better way to check for that?
 			}
 			return null;
 		}
