@@ -173,7 +173,7 @@ abstract public class DR500Property extends ControllerProperty {
 	 * @return Position of end marker, or -1 if not received. */
 	private int endMarker(int n_rcv) {
 		for (int i = 0; i < n_rcv; i++) {
-			if (MARK_END == rcv[i])
+			if (MARK_END == parse8(rcv, i))
 				return i;
 		}
 		return -1;
@@ -185,10 +185,10 @@ abstract public class DR500Property extends ControllerProperty {
 	private int removeEscapes(int n_end) throws ParsingException {
 		int j = 0;
 		for (int i = 0; i < n_end; i++, j++) {
-			switch ((int) rcv[i]) {
+			switch (parse8(rcv, i)) {
 			case MARK_ESC:
 				i++;
-				rcv[j] = (byte) parseEsc(rcv[i]);
+				rcv[j] = (byte) parseEsc(parse8(rcv, i));
 				break;
 			case MARK_BEGIN:
 			case MARK_END:
@@ -235,7 +235,7 @@ abstract public class DR500Property extends ControllerProperty {
 	 * @param n_body Number of bytes in body (including msg code).
 	 * @return Response object */
 	private Response buildResponse(int n_body) throws ParsingException {
-		MsgCode mc = MsgCode.fromCode(rcv[0]);
+		MsgCode mc = MsgCode.fromCode(parse8(rcv, 0));
 		if (mc != MsgCode.UNKNOWN) {
 			byte[] body = new byte[n_body - 1];
 			System.arraycopy(rcv, 1, body, 0, body.length);
