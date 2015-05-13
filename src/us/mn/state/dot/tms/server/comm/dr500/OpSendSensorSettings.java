@@ -26,26 +26,23 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendSensorSettings extends OpDR500 {
 
-	/** Units variable */
-	private final VarProperty un = new VarProperty(VarName.UNITS);
+	/** Sensitivity value */
+	static private final int SENSITIVITY_VAL = 99;
 
-	/** Binning interval variable */
-	private final VarProperty bn = new VarProperty(VarName.BIN_MINUTES);
+	/** Low speed value */
+	static private final int LO_SPEED_VAL = 1;
 
-	/** Sensitivity variable */
-	private final VarProperty st = new VarProperty(VarName.SENSITIVITY);
+	/** Threshold speed value */
+	static private final int THRESHOLD_SPEED_VAL = 121;
 
-	/** Low speed variable */
-	private final VarProperty lo = new VarProperty(VarName.LO_SPEED);
+	/** High speed value */
+	static private final int HI_SPEED_VAL = 120;
 
-	/** Threshold speed variable */
-	private final VarProperty sp = new VarProperty(VarName.THRESHOLD_SPEED);
+	/** Target value (0 = select strongest, 1 = select fastest) */
+	static private final int TARGET_VAL = 0;
 
-	/** High speed variable */
-	private final VarProperty hi = new VarProperty(VarName.HI_SPEED);
-
-	/** Target flag variable */
-	private final VarProperty sf = new VarProperty(VarName.TARGET);
+	/** Time average value (seconds) */
+	static private final int TIME_AVG_VAL = 30;
 
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c) {
@@ -80,8 +77,27 @@ public class OpSendSensorSettings extends OpDR500 {
 		protected Phase<DR500Property> poll(
 			CommMessage<DR500Property> mess) throws IOException
 		{
+			VarProperty un = new VarProperty(VarName.UNITS);
 			mess.add(un);
 			mess.queryProps();
+			if (un.getValue() != UnitsVar.MPH.ordinal())
+				return new StoreUnits();
+			else
+				return new QueryBinning();
+		}
+	}
+
+	/** Phase to store the units */
+	protected class StoreUnits extends Phase<DR500Property> {
+
+		/** Store the units */
+		protected Phase<DR500Property> poll(
+			CommMessage<DR500Property> mess) throws IOException
+		{
+			VarProperty un = new VarProperty(VarName.UNITS,
+				UnitsVar.MPH.ordinal());
+			mess.add(un);
+			mess.storeProps();
 			return new QueryBinning();
 		}
 	}
@@ -93,6 +109,7 @@ public class OpSendSensorSettings extends OpDR500 {
 		protected Phase<DR500Property> poll(
 			CommMessage<DR500Property> mess) throws IOException
 		{
+			VarProperty bn = new VarProperty(VarName.BIN_MINUTES);
 			mess.add(bn);
 			mess.queryProps();
 			return new QuerySensitivity();
@@ -106,8 +123,27 @@ public class OpSendSensorSettings extends OpDR500 {
 		protected Phase<DR500Property> poll(
 			CommMessage<DR500Property> mess) throws IOException
 		{
+			VarProperty st = new VarProperty(VarName.SENSITIVITY);
 			mess.add(st);
 			mess.queryProps();
+			if (st.getValue() != SENSITIVITY_VAL)
+				return new StoreSensitivity();
+			else
+				return new QueryLowSpeed();
+		}
+	}
+
+	/** Phase to store the sensitivity */
+	protected class StoreSensitivity extends Phase<DR500Property> {
+
+		/** Store the sensitivity */
+		protected Phase<DR500Property> poll(
+			CommMessage<DR500Property> mess) throws IOException
+		{
+			VarProperty st = new VarProperty(VarName.SENSITIVITY,
+				SENSITIVITY_VAL);
+			mess.add(st);
+			mess.storeProps();
 			return new QueryLowSpeed();
 		}
 	}
@@ -119,8 +155,27 @@ public class OpSendSensorSettings extends OpDR500 {
 		protected Phase<DR500Property> poll(
 			CommMessage<DR500Property> mess) throws IOException
 		{
+			VarProperty lo = new VarProperty(VarName.LO_SPEED);
 			mess.add(lo);
 			mess.queryProps();
+			if (lo.getValue() != LO_SPEED_VAL)
+				return new StoreLowSpeed();
+			else
+				return new QueryThresholdSpeed();
+		}
+	}
+
+	/** Phase to store the low speed */
+	protected class StoreLowSpeed extends Phase<DR500Property> {
+
+		/** Store the low speed */
+		protected Phase<DR500Property> poll(
+			CommMessage<DR500Property> mess) throws IOException
+		{
+			VarProperty lo = new VarProperty(VarName.LO_SPEED,
+				LO_SPEED_VAL);
+			mess.add(lo);
+			mess.storeProps();
 			return new QueryThresholdSpeed();
 		}
 	}
@@ -132,8 +187,28 @@ public class OpSendSensorSettings extends OpDR500 {
 		protected Phase<DR500Property> poll(
 			CommMessage<DR500Property> mess) throws IOException
 		{
+			VarProperty sp = new VarProperty(
+				VarName.THRESHOLD_SPEED);
 			mess.add(sp);
 			mess.queryProps();
+			if (sp.getValue() != THRESHOLD_SPEED_VAL)
+				return new StoreThresholdSpeed();
+			else
+				return new QueryHighSpeed();
+		}
+	}
+
+	/** Phase to store the threshold speed */
+	protected class StoreThresholdSpeed extends Phase<DR500Property> {
+
+		/** Store the threshold speed */
+		protected Phase<DR500Property> poll(
+			CommMessage<DR500Property> mess) throws IOException
+		{
+			VarProperty sp = new VarProperty(
+				VarName.THRESHOLD_SPEED, THRESHOLD_SPEED_VAL);
+			mess.add(sp);
+			mess.storeProps();
 			return new QueryHighSpeed();
 		}
 	}
@@ -145,8 +220,27 @@ public class OpSendSensorSettings extends OpDR500 {
 		protected Phase<DR500Property> poll(
 			CommMessage<DR500Property> mess) throws IOException
 		{
+			VarProperty hi = new VarProperty(VarName.HI_SPEED);
 			mess.add(hi);
 			mess.queryProps();
+			if (hi.getValue() != HI_SPEED_VAL)
+				return new StoreHighSpeed();
+			else
+				return new QueryTarget();
+		}
+	}
+
+	/** Phase to store the high speed */
+	protected class StoreHighSpeed extends Phase<DR500Property> {
+
+		/** Store the high speed */
+		protected Phase<DR500Property> poll(
+			CommMessage<DR500Property> mess) throws IOException
+		{
+			VarProperty hi = new VarProperty(VarName.HI_SPEED,
+				HI_SPEED_VAL);
+			mess.add(hi);
+			mess.storeProps();
 			return new QueryTarget();
 		}
 	}
@@ -158,26 +252,60 @@ public class OpSendSensorSettings extends OpDR500 {
 		protected Phase<DR500Property> poll(
 			CommMessage<DR500Property> mess) throws IOException
 		{
+			VarProperty sf = new VarProperty(VarName.TARGET);
 			mess.add(sf);
 			mess.queryProps();
-			return new QueryAll();
+			if (sf.getValue() != TARGET_VAL)
+				return new StoreTarget();
+			else
+				return new QueryTimeAvg();
 		}
 	}
 
-	/** Phase to query all variables */
-	protected class QueryAll extends Phase<DR500Property> {
+	/** Phase to store the target flag */
+	protected class StoreTarget extends Phase<DR500Property> {
 
-		/** Variable index */
-		private byte index = 0;
-
-		/** Query all variables */
+		/** Store the target flag */
 		protected Phase<DR500Property> poll(
 			CommMessage<DR500Property> mess) throws IOException
 		{
-			mess.add(new VarIndexProperty(index));
+			VarProperty sf = new VarProperty(VarName.TARGET,
+				TARGET_VAL);
+			mess.add(sf);
+			mess.storeProps();
+			return new QueryTimeAvg();
+		}
+	}
+
+	/** Phase to query time average */
+	protected class QueryTimeAvg extends Phase<DR500Property> {
+
+		/** Query time average */
+		protected Phase<DR500Property> poll(
+			CommMessage<DR500Property> mess) throws IOException
+		{
+			VarProperty ta = new VarProperty(VarName.TIME_AVG);
+			mess.add(ta);
 			mess.queryProps();
-			index++;
-			return this;
+			if (ta.getValue() != TIME_AVG_VAL)
+				return new StoreTimeAvg();
+			else
+				return null;
+		}
+	}
+
+	/** Phase to store time average */
+	protected class StoreTimeAvg extends Phase<DR500Property> {
+
+		/** Store time average */
+		protected Phase<DR500Property> poll(
+			CommMessage<DR500Property> mess) throws IOException
+		{
+			VarProperty ta = new VarProperty(VarName.TIME_AVG,
+				TIME_AVG_VAL);
+			mess.add(ta);
+			mess.storeProps();
+			return null;
 		}
 	}
 }
