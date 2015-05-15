@@ -66,6 +66,20 @@ public class OpSendSensorSettings extends OpDR500 {
 			mess.add(si);
 			mess.queryProps();
 			controller.setVersion(si.getVersion());
+			return new StoreDateTime();
+		}
+	}
+
+	/** Phase to store the date/time */
+	protected class StoreDateTime extends Phase<DR500Property> {
+
+		/** Store the date/time */
+		protected Phase<DR500Property> poll(
+			CommMessage<DR500Property> mess) throws IOException
+		{
+			DateTimeProperty dt = new DateTimeProperty();
+			mess.add(dt);
+			mess.storeProps();
 			return new QueryUnits();
 		}
 	}
