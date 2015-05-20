@@ -15,50 +15,55 @@
 package us.mn.state.dot.tms.utils;
 
 /**
- * Methods for converting byte arrays to and from hex string.
+ * Methods for converting byte arrays to and from a hexadecimal string.
  *
  * @author Michael Darter
  * @author Douglas Lau
  */
 public final class HexString {
 
-	/** Convert a byte to a string containing a hex value, and append to the
-	 * specified StringBuilder. e.g. 1 converts to "01". */
-	static private void appendHexString(StringBuilder sb, byte aByte) {
-		sb.append(Integer.toHexString((aByte >> 4) & 0x0F));
-		sb.append(Integer.toHexString(aByte & 0x0F));
+	/** Hexadecimal digits */
+	static private final String DIGITS = "0123456789ABCDEF";
+
+	/** Get one hexadecimal digit (upper case) */
+	static private char digit(int v) {
+		return DIGITS.charAt(v & 0x0F);
 	}
 
-	/** Format a byte as a hex string.
-	 * e.g. 1 converts to "01". */
-	static public String format(byte aByte) {
-		StringBuilder sb = new StringBuilder(2);
-		appendHexString(sb, aByte);
-		return sb.toString().toUpperCase();
+	/** Append one byte to a hexadecimal string builder.
+	 * @param sb String builder to append hexadecimal digits.
+	 * @param b Byte to append to string. */
+	static private void append(StringBuilder sb, byte b) {
+		sb.append(digit(b >> 4));
+		sb.append(digit(b >> 0));
 	}
 
-	 /** Format a byte array as a hex with no delimiter.
-	  * e.g. {0,1,2,3} to "00010203". */
+	/** Format a byte array as a hexadecimal string.
+	 * @param data Array of bytes to format.
+	 * @return Formatted hexadecimal string. */
 	static public String format(byte[] data) {
 		StringBuilder sb = new StringBuilder();
 		if (data != null) {
 			for (int i = 0; i < data.length; i++)
-				appendHexString(sb, data[i]);
+				append(sb, data[i]);
 		}
-		return sb.toString().toUpperCase();
+		return sb.toString();
 	}
 
-	/** Format a byte array as a hex string with specified delimiter. */
+	/** Format a byte array as a hexadecimal string.
+	 * @param data Array of bytes to format.
+	 * @param delim Delimeter between each byte.
+	 * @return Formatted hexadecimal string. */
 	static public String format(byte[] data, char delim) {
 		StringBuilder sb = new StringBuilder();
 		if (data != null) {
 			for (int i = 0; i < data.length; i++) {
 				if (i > 0)
 					sb.append(delim);
-				appendHexString(sb, data[i]);
+				append(sb, data[i]);
 			}
 		}
-		return sb.toString().toUpperCase();
+		return sb.toString();
 	}
 
 	/** Parse a hex string to a byte array.
@@ -80,7 +85,7 @@ public final class HexString {
 		return ba;
 	}
 
-	/** return true if the int is even else false */
+	/** Return true if the int is even else false */
 	static private boolean isEven(int n) {
 		return (n % 2) == 0;
 	}

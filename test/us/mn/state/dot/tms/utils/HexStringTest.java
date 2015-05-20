@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,28 +31,24 @@ public class HexStringTest extends TestCase {
 
 	static private byte[] toBytes(int[] idata) {
 		byte[] data = new byte[idata.length];
-		for(int i = 0; i < data.length; i++)
+		for (int i = 0; i < data.length; i++)
 			data[i] = (byte)idata[i];
 		return data;
 	}
 
-	static private void checkFormat1(int idata, String hex) {
-		byte data = (byte)idata;
-		assertTrue(HexString.format(data).equals(hex));
-	}
-
 	public void testFormat1() {
-		checkFormat1(0, "00");
-		checkFormat1(1, "01");
-		checkFormat1(10, "0A");
-		checkFormat1(11, "0B");
-		checkFormat1(12, "0C");
-		checkFormat1(13, "0D");
-		checkFormat1(14, "0E");
-		checkFormat1(15, "0F");
-		checkFormat1(16, "10");
-		checkFormat1(254, "FE");
-		checkFormat1(255, "FF");
+		checkFormat(new int[] { 0 }, "00");
+		checkFormat(new int[] { 1 }, "01");
+		checkFormat(new int[] { 9 }, "09");
+		checkFormat(new int[] { 10 }, "0A");
+		checkFormat(new int[] { 11 }, "0B");
+		checkFormat(new int[] { 12 }, "0C");
+		checkFormat(new int[] { 13 }, "0D");
+		checkFormat(new int[] { 14 }, "0E");
+		checkFormat(new int[] { 15 }, "0F");
+		checkFormat(new int[] { 16 }, "10");
+		checkFormat(new int[] { 254 }, "FE");
+		checkFormat(new int[] { 255 }, "FF");
 	}
 
 	static private void checkFormat(int[] idata, char delim, String hex) {
