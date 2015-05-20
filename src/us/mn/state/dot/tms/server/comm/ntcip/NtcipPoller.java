@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.OpController;
+import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
  * NtcipPoller

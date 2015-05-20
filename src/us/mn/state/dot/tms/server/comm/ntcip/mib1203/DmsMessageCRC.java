@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
 import java.io.DataOutputStream;
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.ntcip.CRCStream;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
  * DmsMessageCRC is a CRC based on the dmsMessageMultiString, dmsMessageBeacon,

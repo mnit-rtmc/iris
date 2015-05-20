@@ -19,8 +19,8 @@ import java.io.DataOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
-import us.mn.state.dot.tms.server.comm.ntcip.MIBNode;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
 
 /**
  * A MessageIDCode is a code which identifies a message.  It is encoded using

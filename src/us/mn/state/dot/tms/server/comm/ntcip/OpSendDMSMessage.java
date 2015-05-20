@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
+import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
  * Operation to send a message to a DMS and activate it.

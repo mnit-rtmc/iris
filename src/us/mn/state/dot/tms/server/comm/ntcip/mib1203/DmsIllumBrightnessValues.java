@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@ import java.io.DataOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.ntcip.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.ntcip.BrightnessLevel;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 
 /**
  * DmsIllumBrightnessValues is a sign brightness table.  It is encoded using
