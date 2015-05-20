@@ -53,20 +53,17 @@ public class SNMP extends BER {
 		}
 
 		/** Get-request tag */
-		static public final Tag GET_REQUEST =
-			new Tag(CONTEXT, true, 0);
+		static public final Tag GET_REQUEST = new Tag(CONTEXT, true, 0);
 
 		/** Get-next-request tag */
 		static public final Tag GET_NEXT_REQUEST =
 			new Tag(CONTEXT, true, 1);
 
 		/** Get-response tag */
-		static public final Tag GET_RESPONSE =
-			new Tag(CONTEXT, true, 2);
+		static public final Tag GET_RESPONSE = new Tag(CONTEXT, true,2);
 
 		/** Set-request tag */
-		static public final Tag SET_REQUEST =
-			new Tag(CONTEXT, true, 3);
+		static public final Tag SET_REQUEST = new Tag(CONTEXT, true, 3);
 
 		/** Trap tag */
 		static public final Tag TRAP = new Tag(CONTEXT, true, 4);
@@ -76,6 +73,7 @@ public class SNMP extends BER {
 	}
 
 	/** Get a tag that matches */
+	@Override
 	protected ASN1.Tag getTag(byte clazz, boolean constructed, int number) {
 		Tag tag = new Tag(clazz, constructed, number);
 		if (tag.equals(Tag.GET_REQUEST))
