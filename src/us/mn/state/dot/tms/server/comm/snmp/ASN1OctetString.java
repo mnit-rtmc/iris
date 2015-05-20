@@ -56,6 +56,12 @@ abstract public class ASN1OctetString extends ASN1Object {
 		return b.toString();
 	}
 
+	/** Encode an octet string */
+	@Override
+	public void encode(BER er) throws IOException {
+		er.encodeOctetString(value);
+	}
+
 	/** Decode an octet string */
 	@Override
 	public void decode(InputStream is, BER er) throws IOException {

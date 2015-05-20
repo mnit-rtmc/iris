@@ -215,25 +215,13 @@ public class SNMP extends BER {
 			}
 		}
 
-		/** Encode the value of an MIB object */
-		protected void encodeValue(ASN1Object mo) throws IOException {
-			if (mo instanceof ASN1Integer) {
-				ASN1Integer value = (ASN1Integer)mo;
-				encodeInteger(value.getInteger());
-			} else if (mo instanceof ASN1OctetString) {
-				ASN1OctetString value = (ASN1OctetString)mo;
-				encodeOctetString(value.getOctetString());
-			} else
-				throw new ProtocolException("UNKNOWN OBJ TYPE");
-		}
-
 		/** Encode a null variable binding */
 		protected void encodeVarBind(ASN1Object mo, boolean set)
 			throws IOException
 		{
 			encodeObjectIdentifier(mo.getOID());
 			if (set)
-				encodeValue(mo);
+				mo.encode(SNMP.this);
 			else
 				encodeNull();
 			encodeSequence(getEncodedData());

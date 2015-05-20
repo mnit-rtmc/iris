@@ -48,6 +48,12 @@ abstract public class ASN1Integer extends ASN1Object {
 		return String.valueOf(value);
 	}
 
+	/** Encode an integer */
+	@Override
+	public void encode(BER er) throws IOException {
+		er.encodeInteger(value);
+	}
+
 	/** Decode an integer */
 	@Override
 	public void decode(InputStream is, BER er) throws IOException {

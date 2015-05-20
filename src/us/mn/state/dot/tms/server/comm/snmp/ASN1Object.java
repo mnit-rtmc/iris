@@ -69,6 +69,9 @@ abstract public class ASN1Object extends ControllerProperty {
 		return getName() + getIndex() + ": " + getValue();
 	}
 
+	/** Encode the object */
+	abstract public void encode(BER er) throws IOException;
+
 	/** Decode the object */
 	abstract public void decode(InputStream is, BER er) throws IOException;
 }
