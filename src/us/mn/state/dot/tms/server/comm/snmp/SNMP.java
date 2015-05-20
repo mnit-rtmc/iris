@@ -44,51 +44,14 @@ public class SNMP extends BER {
 	static protected final int READ_ONLY = 4;
 	static protected final int GEN_ERROR = 5;
 
-	/** SNMP Identifier tag */
-	static public class Tag extends ASN1.Tag {
-
-		/** Create a new SNMP identifier tag */
-		protected Tag(byte c, boolean co, int n) {
-			super(c, co, n);
-		}
-
-		/** Get-request tag */
-		static public final Tag GET_REQUEST = new Tag(CONTEXT, true, 0);
-
-		/** Get-next-request tag */
-		static public final Tag GET_NEXT_REQUEST =
-			new Tag(CONTEXT, true, 1);
-
-		/** Get-response tag */
-		static public final Tag GET_RESPONSE = new Tag(CONTEXT, true,2);
-
-		/** Set-request tag */
-		static public final Tag SET_REQUEST = new Tag(CONTEXT, true, 3);
-
-		/** Trap tag */
-		static public final Tag TRAP = new Tag(CONTEXT, true, 4);
-
-		/** Counter tag (RFC1155-SMI) */
-		static public final Tag COUNTER = new Tag(APPLICATION, false,1);
-	}
-
 	/** Get a tag that matches */
 	@Override
-	protected ASN1.Tag getTag(byte clazz, boolean constructed, int number) {
-		Tag tag = new Tag(clazz, constructed, number);
-		if (tag.equals(Tag.GET_REQUEST))
-			return Tag.GET_REQUEST;
-		if (tag.equals(Tag.GET_NEXT_REQUEST))
-			return Tag.GET_NEXT_REQUEST;
-		if (tag.equals(Tag.GET_RESPONSE))
-			return Tag.GET_RESPONSE;
-		if (tag.equals(Tag.SET_REQUEST))
-			return Tag.SET_REQUEST;
-		if (tag.equals(Tag.TRAP))
-			return Tag.TRAP;
-		if (tag.equals(Tag.COUNTER))
-			return Tag.COUNTER;
-		return super.getTag(clazz, constructed, number);
+	protected Tag getTag(byte clazz, boolean constructed, int number) {
+		Tag tag = super.getTag(clazz, constructed, number);
+		if (tag != null)
+			return tag;
+		else
+			return SNMPTag.fromValues(clazz, constructed, number);
 	}
 
 	/** SNMP version number */
@@ -170,7 +133,7 @@ public class SNMP extends BER {
 				return;
 			is.skip(is.available());
 			encodeVarBindList(false);
-			encodeRequestPDU(Tag.GET_REQUEST);
+			encodeRequestPDU(SNMPTag.GET_REQUEST);
 			encodeSNMPMessage(community);
 			encoder.writeTo(os);
 			encoder.reset();
@@ -187,7 +150,7 @@ public class SNMP extends BER {
 				return;
 			is.skip(is.available());
 			encodeVarBindList(true);
-			encodeRequestPDU(Tag.SET_REQUEST);
+			encodeRequestPDU(SNMPTag.SET_REQUEST);
 			encodeSNMPMessage(community);
 			encoder.writeTo(os);
 			encoder.reset();
@@ -274,7 +237,7 @@ public class SNMP extends BER {
 		protected void decodeResponsePDU(InputStream is)
 			throws IOException
 		{
-			if (decodeIdentifier(is) != Tag.GET_RESPONSE)
+			if (decodeIdentifier(is) != SNMPTag.GET_RESPONSE)
 				throw new ParsingException("!GET_RESPONSE TAG");
 			if (decodeLength(is) > is.available())
 				throw new ParsingException("INVALID PDU LEN");

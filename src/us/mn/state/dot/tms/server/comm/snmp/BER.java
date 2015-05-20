@@ -40,17 +40,21 @@ abstract public class BER extends ASN1 {
 	/** Reserved length code constant */
 	static public final int RESERVED = 0xFF;
 
+	/** Tag numbers equal or greater than ONE_OCTET are encoded with more
+	 * than one octet */
+	static private final int ONE_OCTET = 0x1F;
+
 	/** Encode a BER identifier to the output stream */
 	protected void encodeIdentifier(Tag tag) throws IOException {
-		byte first = tag.clazz;
-		if (tag.constructed)
+		byte first = tag.getClazz();
+		int number = tag.getNumber();
+		if (tag.isConstructed())
 			first |= Tag.CONSTRUCTED;
-		if (tag.number < Tag.ONE_OCTET) {
-			encoder.write(first | tag.number);
+		if (number < ONE_OCTET) {
+			encoder.write(first | number);
 			return;
 		}
-		encoder.write(first | Tag.ONE_OCTET);
-		int number = tag.number;
+		encoder.write(first | ONE_OCTET);
 		byte[] buffer = new byte[5];
 		int start = 4;
 		buffer[start] = (byte)(number & SEVEN_BITS);
@@ -77,7 +81,7 @@ abstract public class BER extends ASN1 {
 
 	/** Encode a boolean value */
 	protected void encodeBoolean(boolean value) throws IOException {
-		encodeIdentifier(Tag.BOOLEAN);
+		encodeIdentifier(ASN1Tag.BOOLEAN);
 		encodeLength(1);
 		if (value)
 			encoder.write(0xFF);
@@ -98,21 +102,21 @@ abstract public class BER extends ASN1 {
 				buffer[len++] = (byte)(test >> 1);
 		}
 		buffer[len++] = (byte)(value & 0xFF);
-		encodeIdentifier(Tag.INTEGER);
+		encodeIdentifier(ASN1Tag.INTEGER);
 		encodeLength(len);
 		encoder.write(buffer, 0, len);
 	}
 
 	/** Encode an octet string */
 	protected void encodeOctetString(byte[] string) throws IOException {
-		encodeIdentifier(Tag.OCTET_STRING);
+		encodeIdentifier(ASN1Tag.OCTET_STRING);
 		encodeLength(string.length);
 		encoder.write(string);
 	}
 
 	/** Encode a null value */
 	protected void encodeNull() throws IOException {
-		encodeIdentifier(Tag.NULL);
+		encodeIdentifier(ASN1Tag.NULL);
 		encodeLength(0);
 	}
 
@@ -129,14 +133,14 @@ abstract public class BER extends ASN1 {
 			bs.write(subid);
 		}
 		byte[] buffer = bs.toByteArray();
-		encodeIdentifier(Tag.OBJECT_IDENTIFIER);
+		encodeIdentifier(ASN1Tag.OBJECT_IDENTIFIER);
 		encodeLength(buffer.length);
 		encoder.write(buffer);
 	}
 
 	/** Encode a sequence (or sequence-of) */
 	protected void encodeSequence(byte[] seq) throws IOException {
-		encodeIdentifier(Tag.SEQUENCE);
+		encodeIdentifier(ASN1Tag.SEQUENCE);
 		encodeLength(seq.length);
 		encoder.write(seq);
 	}
@@ -148,8 +152,8 @@ abstract public class BER extends ASN1 {
 			throw END_OF_STREAM;
 		byte clazz = (byte)(first & Tag.CLASS_MASK);
 		boolean constructed = (first & Tag.CONSTRUCTED) != 0;
-		int number = (first & Tag.ONE_OCTET);
-		if (number == Tag.ONE_OCTET)
+		int number = (first & ONE_OCTET);
+		if (number == ONE_OCTET)
 			number = decodeSubidentifier(is);
 		return getTag(clazz, constructed, number);
 	}
@@ -198,7 +202,7 @@ abstract public class BER extends ASN1 {
 
 	/** Decode an integer */
 	protected int decodeInteger(InputStream is) throws IOException {
-		if (decodeIdentifier(is) != Tag.INTEGER)
+		if (decodeIdentifier(is) != ASN1Tag.INTEGER)
 			throw new ParsingException("EXPECTED AN INTEGER TAG");
 		int length = decodeLength(is);
 		if (length < 1 || length > 4)
@@ -219,7 +223,7 @@ abstract public class BER extends ASN1 {
 
 	/** Decode an octet string */
 	protected byte[] decodeOctetString(InputStream is) throws IOException {
-		if (decodeIdentifier(is) != Tag.OCTET_STRING)
+		if (decodeIdentifier(is) != ASN1Tag.OCTET_STRING)
 			throw new ParsingException("EXPECTED OCTET STRING TAG");
 		int length = decodeLength(is);
 		if (length < 0)
@@ -239,7 +243,7 @@ abstract public class BER extends ASN1 {
 	protected int[] decodeObjectIdentifier(InputStream is)
 		throws IOException
 	{
-		if (decodeIdentifier(is) != Tag.OBJECT_IDENTIFIER) {
+		if (decodeIdentifier(is) != ASN1Tag.OBJECT_IDENTIFIER) {
 			throw new ParsingException(
 				"EXPECTED OBJECT IDENTIFIER TAG");
 		}
@@ -261,7 +265,7 @@ abstract public class BER extends ASN1 {
 	/** Decode a sequence (or sequence-of)
 	  * @return Length of sequence */
 	protected int decodeSequence(InputStream is) throws IOException {
-		if (decodeIdentifier(is) != Tag.SEQUENCE)
+		if (decodeIdentifier(is) != ASN1Tag.SEQUENCE)
 			throw new ParsingException("EXPECTED SEQUENCE TAG");
 		return decodeLength(is);
 	}

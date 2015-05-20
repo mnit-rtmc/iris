@@ -33,7 +33,7 @@ abstract public class Counter extends ASN1Integer {
 	/** Decode a counter */
 	@Override
 	public void decode(InputStream is, BER er) throws IOException {
-		if (er.decodeIdentifier(is) != SNMP.Tag.COUNTER)
+		if (er.decodeIdentifier(is) != SNMPTag.COUNTER)
 			throw new ParsingException("EXPECTED COUNTER");
 		int len = er.decodeLength(is);
 		if (len < 1 || len > 4)
