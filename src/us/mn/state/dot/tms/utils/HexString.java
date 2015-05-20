@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,6 @@ package us.mn.state.dot.tms.utils;
  */
 public final class HexString {
 
-	/** Prevent instantiation */
-	private HexString() { }
-
 	/** Convert a byte to a string containing a hex value, and append to the
 	 * specified StringBuilder. e.g. 1 converts to "01". */
 	static private void appendHexString(StringBuilder sb, byte aByte) {
@@ -44,8 +41,8 @@ public final class HexString {
 	  * e.g. {0,1,2,3} to "00010203". */
 	static public String format(byte[] data) {
 		StringBuilder sb = new StringBuilder();
-		if(data != null) {
-			for(int i = 0; i < data.length; i++)
+		if (data != null) {
+			for (int i = 0; i < data.length; i++)
 				appendHexString(sb, data[i]);
 		}
 		return sb.toString().toUpperCase();
@@ -54,9 +51,9 @@ public final class HexString {
 	/** Format a byte array as a hex string with specified delimiter. */
 	static public String format(byte[] data, char delim) {
 		StringBuilder sb = new StringBuilder();
-		if(data != null) {
-			for(int i = 0; i < data.length; i++) {
-				if(i > 0)
+		if (data != null) {
+			for (int i = 0; i < data.length; i++) {
+				if (i > 0)
 					sb.append(delim);
 				appendHexString(sb, data[i]);
 			}
@@ -71,11 +68,11 @@ public final class HexString {
 	 * @throws IllegalArgumentException if length is not even.
 	 * @throws NumberFormatException if hex cannot be parsed. */
 	static public byte[] parse(String hs) {
-		if(!isEven(hs.length()))
+		if (!isEven(hs.length()))
 			throw new IllegalArgumentException("Length not even");
 		int len = hs.length() / 2;
 		byte[] ba = new byte[len];
-		for(int i = 0; i < len; i++) {
+		for (int i = 0; i < len; i++) {
 			int j = i * 2;
 			String ss = hs.substring(j, j + 2);
 			ba[i] = (byte)Integer.parseInt(ss, 16);
@@ -85,6 +82,9 @@ public final class HexString {
 
 	/** return true if the int is even else false */
 	static private boolean isEven(int n) {
-		return n % 2 == 0;
+		return (n % 2) == 0;
 	}
+
+	/** Prevent instantiation */
+	private HexString() { }
 }
