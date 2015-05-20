@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
 abstract public class ASN1Object extends ControllerProperty {
 
 	/** MIB node */
-	protected final MIBNode node;
+	private final MIBNode node;
 
 	/** Create a new ASN1 object */
 	protected ASN1Object(MIBNode n) {
@@ -44,7 +44,7 @@ abstract public class ASN1Object extends ControllerProperty {
 	}
 
 	/** Get the class name (without packages) */
-	protected String getClassName() {
+	private String getClassName() {
 		String name = getClass().getName();
 		int i = name.lastIndexOf('.');
 		if (i >= 0)
@@ -54,7 +54,7 @@ abstract public class ASN1Object extends ControllerProperty {
 	}
 
 	/** Get the index of the MIB node */
-	protected String getIndex() {
+	private String getIndex() {
 		return node.getIndex();
 	}
 
@@ -62,6 +62,7 @@ abstract public class ASN1Object extends ControllerProperty {
 	abstract protected String getValue();
 
 	/** Create an object description */
+	@Override
 	public String toString() {
 		return getName() + getIndex() + ": " + getValue();
 	}

@@ -40,6 +40,7 @@ abstract public class ASN1Integer extends ASN1Object {
 	}
 
 	/** Get the object value */
+	@Override
 	protected String getValue() {
 		return String.valueOf(value);
 	}
