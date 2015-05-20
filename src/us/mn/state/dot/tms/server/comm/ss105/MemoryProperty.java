@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2014  Minnesota Department of Transportation
+ * Copyright (C) 2004-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss105;
 import java.io.InputStream;
 import java.io.IOException;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 
@@ -49,7 +50,8 @@ abstract public class MemoryProperty extends SS105Property {
 
 	/** Format a basic memory request */
 	protected String formatRequest() {
-		return "S" + hex(memoryAddress(), 6) + hex(memoryLength(), 4);
+		return "S" + HexString.format(memoryAddress(), 6) +
+		       HexString.format(memoryLength(), 4);
 	}
 
 	/** Format a basic "GET" request */

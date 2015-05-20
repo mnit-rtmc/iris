@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss105;
 import java.io.IOException;
 import java.util.Date;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -44,7 +45,7 @@ public class TimeProperty extends SS105Property {
 	protected String formatSetRequest() {
 		stamp = TimeSteward.currentTimeMillis();
 		int seconds = TimeStamp.secondsSinceEpoch(new Date(stamp));
-		return "S4" + hex(seconds, 8);
+		return "S4" + HexString.format(seconds, 8);
 	}
 
 	/** Parse the response to a QUERY */

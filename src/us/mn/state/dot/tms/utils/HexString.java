@@ -66,6 +66,17 @@ public final class HexString {
 		return sb.toString();
 	}
 
+	/** Format an integer as a hexadecimal string.
+	 * @param v Value to format.
+	 * @param d Number of digits to format.
+	 * @return Formatted hexadecimal string. */
+	static public String format(int v, int d) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = d - 1; i >= 0; i--)
+			sb.append(digit(v >> (i * 4)));
+		return sb.toString();
+	}
+
 	/** Parse a hex string to a byte array.
 	 * @param hs Hex string to parse.
 	 * @return byte array of parsed hex string.

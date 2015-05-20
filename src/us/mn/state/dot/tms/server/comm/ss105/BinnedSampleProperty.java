@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ss105;
 import java.io.IOException;
 import java.util.Date;
 import us.mn.state.dot.tms.VehLengthClass;
+import us.mn.state.dot.tms.utils.HexString;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -56,7 +57,7 @@ public class BinnedSampleProperty extends SS105Property {
 		if(age < 1)
 			return "XD";
 		else
-			return "XD" + hex(age, 4);
+			return "XD" + HexString.format(age, 4);
 	}
 
 	/** Format a basic "SET" request */

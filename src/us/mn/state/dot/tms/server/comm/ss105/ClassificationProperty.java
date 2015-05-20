@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import static us.mn.state.dot.tms.VehLengthClass.MEDIUM;
 import static us.mn.state.dot.tms.VehLengthClass.LONG;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.FEET;
+import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -80,12 +81,14 @@ public class ClassificationProperty extends MemoryProperty {
 
 	/** Format the buffer to write to SS105 memory */
 	protected String formatBuffer() {
-		return hex(short_min.round(FEET), 4) +
-		       hex(short_max.round(FEET), 4) + hex(0, 8) +
-		       hex(medium_min.round(FEET), 4) +
-		       hex(medium_max.round(FEET), 4) + hex(0, 8) +
-		       hex(long_min.round(FEET), 4) +
-		       hex(long_max.round(FEET), 4);
+		return HexString.format(short_min.round(FEET), 4) +
+		       HexString.format(short_max.round(FEET), 4) +
+		       HexString.format(0, 8) +
+		       HexString.format(medium_min.round(FEET), 4) +
+		       HexString.format(medium_max.round(FEET), 4) +
+		       HexString.format(0, 8) +
+		       HexString.format(long_min.round(FEET), 4) +
+		       HexString.format(long_max.round(FEET), 4);
 	}
 
 	/** Parse the response to a QUERY request */

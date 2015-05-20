@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2014  Minnesota Department of Transportation
+ * Copyright (C) 2004-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.LineReader;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
@@ -42,25 +43,12 @@ abstract public class SS105Property extends ControllerProperty {
 	/** Maximum number of bytes in a response */
 	static private final int MAX_RESP = 256;
 
-	/** Convert an integer to a hexadecimal number padded to d digits */
-	static protected String hex(int n, int d) {
-		String b = Integer.toHexString(n).toUpperCase();
-		if(n < 0) {
-			while(b.length() < d)
-				b = "F" + b;
-		} else {
-			while(b.length() < d)
-				b = "0" + b;
-		}
-		return b;
-	}
-
 	/** Calculate the checksum of a buffer */
 	static protected String checksum(String buf) {
 		int sum = 0;
 		for(int i = 0; i < buf.length(); i++)
 			sum += buf.charAt(i);
-		return hex(sum, 4);
+		return HexString.format(sum, 4);
 	}
 
 	/** Compare the response with its trailing checksum */
