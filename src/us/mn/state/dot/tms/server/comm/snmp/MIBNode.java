@@ -58,7 +58,7 @@ public class MIBNode {
 
 	/** Create an Object Identifier */
 	private int[] createOID(int length) {
-		if(parent == null)
+		if (parent == null)
 			return new int[length + nid.length];
 		else
 			return parent.fillOID(length + nid.length);
@@ -67,7 +67,7 @@ public class MIBNode {
 	/** Get the MIB index */
 	public String getIndex() {
 		StringBuilder b = new StringBuilder();
-		for(int i = 1; i < nid.length; i++) {
+		for (int i = 1; i < nid.length; i++) {
 			b.append('.');
 			b.append(nid[i]);
 		}

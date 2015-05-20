@@ -47,7 +47,7 @@ abstract public class ASN1Object extends ControllerProperty {
 	protected String getClassName() {
 		String name = getClass().getName();
 		int i = name.lastIndexOf('.');
-		if(i >= 0)
+		if (i >= 0)
 			return name.substring(i + 1);
 		else
 			return name;

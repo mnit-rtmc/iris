@@ -78,17 +78,17 @@ public class SNMP extends BER {
 	/** Get a tag that matches */
 	protected ASN1.Tag getTag(byte clazz, boolean constructed, int number) {
 		Tag tag = new Tag(clazz, constructed, number);
-		if(tag.equals(Tag.GET_REQUEST))
+		if (tag.equals(Tag.GET_REQUEST))
 			return Tag.GET_REQUEST;
-		if(tag.equals(Tag.GET_NEXT_REQUEST))
+		if (tag.equals(Tag.GET_NEXT_REQUEST))
 			return Tag.GET_NEXT_REQUEST;
-		if(tag.equals(Tag.GET_RESPONSE))
+		if (tag.equals(Tag.GET_RESPONSE))
 			return Tag.GET_RESPONSE;
-		if(tag.equals(Tag.SET_REQUEST))
+		if (tag.equals(Tag.SET_REQUEST))
 			return Tag.SET_REQUEST;
-		if(tag.equals(Tag.TRAP))
+		if (tag.equals(Tag.TRAP))
 			return Tag.TRAP;
-		if(tag.equals(Tag.COUNTER))
+		if (tag.equals(Tag.COUNTER))
 			return Tag.COUNTER;
 		return super.getTag(clazz, constructed, number);
 	}
@@ -119,12 +119,12 @@ public class SNMP extends BER {
 	protected void decodeSNMPMessage(InputStream is, String community)
 		throws IOException
 	{
-		if(decodeSequence(is) > is.available())
+		if (decodeSequence(is) > is.available())
 			throw new ParsingException("INVALID SNMP LENGTH");
-		if(decodeInteger(is) != 0)
+		if (decodeInteger(is) != 0)
 			throw new ParsingException("SNMP VERSION MISMATCH");
 		String c = new String(decodeOctetString(is));
-		if(!c.equals(community))
+		if (!c.equals(community))
 			throw new ParsingException("SNMP COMMUNITY MISMATCH");
 	}
 
@@ -153,13 +153,13 @@ public class SNMP extends BER {
 			is = i;
 			community = (c != null) ? c : PUBLIC;
 			request_id = last_request++;
-			if(last_request > REQUEST_ID_MAX_LEDSTAR_BUG)
+			if (last_request > REQUEST_ID_MAX_LEDSTAR_BUG)
 				last_request = 0;
 		}
 
 		/** Add a controller property */
 		public void add(ControllerProperty cp) {
-			if(cp instanceof ASN1Object)
+			if (cp instanceof ASN1Object)
 				mos.add((ASN1Object)cp);
 		}
 
@@ -168,7 +168,7 @@ public class SNMP extends BER {
 		 * @throws IOException On any errors sending a request or
 		 *         receiving response */
 		public void queryProps() throws IOException {
-			if(mos.isEmpty())
+			if (mos.isEmpty())
 				return;
 			is.skip(is.available());
 			encodeVarBindList(false);
@@ -185,7 +185,7 @@ public class SNMP extends BER {
 		 * @throws IOException On any errors sending a request or
 		 *         receiving response */
 		public void storeProps() throws IOException {
-			if(mos.isEmpty())
+			if (mos.isEmpty())
 				return;
 			is.skip(is.available());
 			encodeVarBindList(true);
@@ -199,17 +199,17 @@ public class SNMP extends BER {
 
 		/** Decode a response to a SET or GET request */
 		protected void decodeResponse() throws IOException {
-			for(int i = 0;; i++) {
+			for (int i = 0;; i++) {
 				try {
 					decodeSNMPMessage(is, community);
 					decodeResponsePDU(is);
 					decodeVarBindList(is);
 					return;
 				}
-				catch(RequestIDException e) {
+				catch (RequestIDException e) {
 					SNMP_LOG.log(e.getMessage());
 					is.skip(is.available());
-					if(i >= 5)
+					if (i >= 5)
 						throw e;
 				}
 			}
@@ -217,10 +217,10 @@ public class SNMP extends BER {
 
 		/** Encode the value of an MIB object */
 		protected void encodeValue(ASN1Object mo) throws IOException {
-			if(mo instanceof ASN1Integer) {
+			if (mo instanceof ASN1Integer) {
 				ASN1Integer value = (ASN1Integer)mo;
 				encodeInteger(value.getInteger());
-			} else if(mo instanceof ASN1OctetString) {
+			} else if (mo instanceof ASN1OctetString) {
 				ASN1OctetString value = (ASN1OctetString)mo;
 				encodeOctetString(value.getOctetString());
 			} else
@@ -232,7 +232,7 @@ public class SNMP extends BER {
 			throws IOException
 		{
 			encodeObjectIdentifier(mo.getOID());
-			if(set)
+			if (set)
 				encodeValue(mo);
 			else
 				encodeNull();
@@ -244,7 +244,7 @@ public class SNMP extends BER {
 			throws IOException
 		{
 			ByteArrayOutputStream vb = new ByteArrayOutputStream();
-			for(ASN1Object mo: mos) {
+			for (ASN1Object mo: mos) {
 				encodeVarBind(mo, set);
 				vb.write(getEncodedData());
 			}
@@ -269,13 +269,13 @@ public class SNMP extends BER {
 		protected void decodeValue(InputStream is, ASN1Object mo)
 			throws IOException
 		{
-			if(mo instanceof Counter) {
+			if (mo instanceof Counter) {
 				Counter value = (Counter)mo;
 				value.setInteger(decodeCounter(is));
-			} else if(mo instanceof ASN1Integer) {
+			} else if (mo instanceof ASN1Integer) {
 				ASN1Integer value = (ASN1Integer)mo;
 				value.setInteger(decodeInteger(is));
-			} else if(mo instanceof ASN1OctetString) {
+			} else if (mo instanceof ASN1OctetString) {
 				ASN1OctetString value = (ASN1OctetString)mo;
 				value.setOctetString(decodeOctetString(is));
 			} else
@@ -284,20 +284,20 @@ public class SNMP extends BER {
 
 		/** Decode a counter (from RFC1155-SMI) */
 		protected int decodeCounter(InputStream is) throws IOException {
-			if(decodeIdentifier(is) != Tag.COUNTER)
+			if (decodeIdentifier(is) != Tag.COUNTER)
 				throw new ParsingException("EXPECTED COUNTER");
 			int length = decodeLength(is);
-			if(length < 1 || length > 4) {
+			if (length < 1 || length > 4) {
 				throw new ParsingException(
 					"INVALID COUNTER LENGTH");
 			}
 			int value = is.read();
-			if(value < 0)
+			if (value < 0)
 				throw END_OF_STREAM;
-			for(int i = 1; i < length; i++) {
+			for (int i = 1; i < length; i++) {
 				value <<= 8;
 				int v = is.read();
-				if(v < 0)
+				if (v < 0)
 					throw END_OF_STREAM;
 				value |= v;
 			}
@@ -319,7 +319,7 @@ public class SNMP extends BER {
 			throws IOException
 		{
 			decodeSequence(is);
-			for(ASN1Object mo: mos)
+			for (ASN1Object mo: mos)
 				decodeVarBind(is, mo);
 		}
 
@@ -327,16 +327,16 @@ public class SNMP extends BER {
 		protected void decodeResponsePDU(InputStream is)
 			throws IOException
 		{
-			if(decodeIdentifier(is) != Tag.GET_RESPONSE)
+			if (decodeIdentifier(is) != Tag.GET_RESPONSE)
 				throw new ParsingException("!GET_RESPONSE TAG");
-			if(decodeLength(is) > is.available())
+			if (decodeLength(is) > is.available())
 				throw new ParsingException("INVALID PDU LEN");
 			int request = decodeInteger(is);
-			if(request != request_id)
+			if (request != request_id)
 				throw new RequestIDException(request);
 			int error = decodeInteger(is);
 			int index = decodeInteger(is);
-			switch(error) {
+			switch (error) {
 			case TOO_BIG:
 				throw new TooBig();
 			case NO_SUCH_NAME:

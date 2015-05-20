@@ -68,14 +68,14 @@ abstract public class ASN1 {
 
 		/** Compare this tag with another for equality */
 		public boolean equals(Object obj) {
-			if(!(obj instanceof Tag))
+			if (!(obj instanceof Tag))
 				return false;
 			Tag o = (Tag)obj;
-			if(clazz != o.clazz)
+			if (clazz != o.clazz)
 				return false;
-			if(constructed != o.constructed)
+			if (constructed != o.constructed)
 				return false;
-			if(number != o.number)
+			if (number != o.number)
 				return false;
 			return true;
 		}
@@ -114,19 +114,19 @@ abstract public class ASN1 {
 	/** Get the tag with matching parameters */
 	protected Tag getTag(byte clazz, boolean constructed, int number) {
 		Tag tag = new Tag(clazz, constructed, number);
-		if(tag.equals(Tag.BOOLEAN))
+		if (tag.equals(Tag.BOOLEAN))
 			return Tag.BOOLEAN;
-		if(tag.equals(Tag.INTEGER))
+		if (tag.equals(Tag.INTEGER))
 			return Tag.INTEGER;
-		if(tag.equals(Tag.BIT_STRING))
+		if (tag.equals(Tag.BIT_STRING))
 			return Tag.BIT_STRING;
-		if(tag.equals(Tag.OCTET_STRING))
+		if (tag.equals(Tag.OCTET_STRING))
 			return Tag.OCTET_STRING;
-		if(tag.equals(Tag.NULL))
+		if (tag.equals(Tag.NULL))
 			return Tag.NULL;
-		if(tag.equals(Tag.OBJECT_IDENTIFIER))
+		if (tag.equals(Tag.OBJECT_IDENTIFIER))
 			return Tag.OBJECT_IDENTIFIER;
-		if(tag.equals(Tag.SEQUENCE))
+		if (tag.equals(Tag.SEQUENCE))
 			return Tag.SEQUENCE;
 		return null;
 	}

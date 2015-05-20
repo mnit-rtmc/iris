@@ -43,12 +43,12 @@ abstract public class ASN1OctetString extends ASN1Object {
 	@Override
 	protected String getValue() {
 		StringBuilder b = new StringBuilder();
-		for(byte v: value) {
+		for (byte v: value) {
 			b.append(v & 0xFF);
 			b.append(",");
 		}
 		// remove trailing comma
-		if(b.length() > 1)
+		if (b.length() > 1)
 			b.setLength(b.length() - 1);
 		return b.toString();
 	}
