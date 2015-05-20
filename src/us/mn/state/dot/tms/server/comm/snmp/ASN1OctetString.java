@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.snmp;
 
+import java.io.InputStream;
+import java.io.IOException;
+
 /**
  * ASN1 Octet String.
  *
@@ -51,5 +54,11 @@ abstract public class ASN1OctetString extends ASN1Object {
 		if (b.length() > 1)
 			b.setLength(b.length() - 1);
 		return b.toString();
+	}
+
+	/** Decode an octet string */
+	@Override
+	public void decode(InputStream is, BER er) throws IOException {
+		value = er.decodeOctetString(is);
 	}
 }

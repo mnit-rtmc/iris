@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.snmp;
 
+import java.io.InputStream;
+import java.io.IOException;
+
 /**
  * ASN1 Integer.  Base class for MIB integer objects.
  *
@@ -43,5 +46,11 @@ abstract public class ASN1Integer extends ASN1Object {
 	@Override
 	protected String getValue() {
 		return String.valueOf(value);
+	}
+
+	/** Decode an integer */
+	@Override
+	public void decode(InputStream is, BER er) throws IOException {
+		value = er.decodeInteger(is);
 	}
 }

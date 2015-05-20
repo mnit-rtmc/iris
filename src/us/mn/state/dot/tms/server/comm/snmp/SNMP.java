@@ -265,45 +265,6 @@ public class SNMP extends BER {
 			encoder.write(buffer);
 		}
 
-		/** Decode the value of an MIB object */
-		protected void decodeValue(InputStream is, ASN1Object mo)
-			throws IOException
-		{
-			if (mo instanceof Counter) {
-				Counter value = (Counter)mo;
-				value.setInteger(decodeCounter(is));
-			} else if (mo instanceof ASN1Integer) {
-				ASN1Integer value = (ASN1Integer)mo;
-				value.setInteger(decodeInteger(is));
-			} else if (mo instanceof ASN1OctetString) {
-				ASN1OctetString value = (ASN1OctetString)mo;
-				value.setOctetString(decodeOctetString(is));
-			} else
-				throw new ParsingException("UNKNOWN OBJ TYPE");
-		}
-
-		/** Decode a counter (from RFC1155-SMI) */
-		protected int decodeCounter(InputStream is) throws IOException {
-			if (decodeIdentifier(is) != Tag.COUNTER)
-				throw new ParsingException("EXPECTED COUNTER");
-			int length = decodeLength(is);
-			if (length < 1 || length > 4) {
-				throw new ParsingException(
-					"INVALID COUNTER LENGTH");
-			}
-			int value = is.read();
-			if (value < 0)
-				throw END_OF_STREAM;
-			for (int i = 1; i < length; i++) {
-				value <<= 8;
-				int v = is.read();
-				if (v < 0)
-					throw END_OF_STREAM;
-				value |= v;
-			}
-			return value;
-		}
-
 		/** Decode a variable binding */
 		protected void decodeVarBind(InputStream is, ASN1Object mo)
 			throws IOException
@@ -311,7 +272,7 @@ public class SNMP extends BER {
 			decodeSequence(is);
 			// FIXME: compare with OID from mo
 			decodeObjectIdentifier(is);
-			decodeValue(is, mo);
+			mo.decode(is, SNMP.this);
 		}
 
 		/** Decode the variable binding list */

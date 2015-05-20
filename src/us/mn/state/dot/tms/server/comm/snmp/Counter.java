@@ -14,6 +14,10 @@
  */
 package us.mn.state.dot.tms.server.comm.snmp;
 
+import java.io.InputStream;
+import java.io.IOException;
+import us.mn.state.dot.tms.server.comm.ParsingException;
+
 /**
  * Counter from RFC1155-SMI.
  *
@@ -24,5 +28,26 @@ abstract public class Counter extends ASN1Integer {
 	/** Create a new counter */
 	protected Counter(MIBNode n) {
 		super(n);
+	}
+
+	/** Decode a counter */
+	@Override
+	public void decode(InputStream is, BER er) throws IOException {
+		if (er.decodeIdentifier(is) != SNMP.Tag.COUNTER)
+			throw new ParsingException("EXPECTED COUNTER");
+		int len = er.decodeLength(is);
+		if (len < 1 || len > 4)
+			throw new ParsingException("INVALID COUNTER LENGTH");
+		int val = is.read();
+		if (val < 0)
+			throw BER.END_OF_STREAM;
+		for (int i = 1; i < len; i++) {
+			val <<= 8;
+			int v = is.read();
+			if (v < 0)
+				throw BER.END_OF_STREAM;
+			val |= v;
+		}
+		value = val;
 	}
 }

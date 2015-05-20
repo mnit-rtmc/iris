@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.snmp;
 
+import java.io.InputStream;
+import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
@@ -66,4 +68,7 @@ abstract public class ASN1Object extends ControllerProperty {
 	public String toString() {
 		return getName() + getIndex() + ": " + getValue();
 	}
+
+	/** Decode the object */
+	abstract public void decode(InputStream is, BER er) throws IOException;
 }
