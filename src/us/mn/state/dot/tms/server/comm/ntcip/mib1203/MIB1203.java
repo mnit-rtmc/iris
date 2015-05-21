@@ -91,10 +91,15 @@ public enum MIB1203 {
 	  tempMinSignHousing		(statTemp, new int[] {5, 0}),
 	  tempMaxSignHousing		(statTemp, new int[] {6, 0}),
 	graphicDefinition		(dms, 10),
-	dmsGraphicTable			(graphicDefinition, 6),
-	dmsGraphicEntry			(dmsGraphicTable, 1),
-	dmsGraphicBitmapTable		(graphicDefinition, 7),
-	dmsGraphicBitmapEntry		(dmsGraphicBitmapTable, 1);
+	  dmsGraphicMaxEntries		(graphicDefinition, new int[] {1, 0}),
+	  dmsGraphicNumEntries		(graphicDefinition, new int[] {2, 0}),
+	  dmsGraphicMaxSize		(graphicDefinition, new int[] {3, 0}),
+	  availableGraphicMemory	(graphicDefinition, new int[] {4, 0}),
+	  dmsGraphicBlockSize		(graphicDefinition, new int[] {5, 0}),
+	  dmsGraphicTable		(graphicDefinition, 6),
+	  dmsGraphicEntry		(dmsGraphicTable, 1),
+	  dmsGraphicBitmapTable		(graphicDefinition, 7),
+	  dmsGraphicBitmapEntry		(dmsGraphicBitmapTable, 1);
 
 	private final MIBNode node;
 	private MIB1203(MIB1201 p, int n) {

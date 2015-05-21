@@ -28,6 +28,8 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -41,23 +43,20 @@ public class OpSendDMSGraphics extends OpDMS {
 	private final DmsColorScheme color_scheme = new DmsColorScheme();
 
 	/** Number of graphics supported */
-	private final DmsGraphicMaxEntries max_graphics =
-		new DmsGraphicMaxEntries();
+	private final ASN1Integer max_graphics = dmsGraphicMaxEntries.makeInt();
 
 	/** Number of graphics defined in graphic table */
-	private final DmsGraphicNumEntries num_graphics =
-		new DmsGraphicNumEntries();
+	private final ASN1Integer num_graphics = dmsGraphicNumEntries.makeInt();
 
 	/** Maximum size of a graphic */
-	private final DmsGraphicMaxSize max_size = new DmsGraphicMaxSize();
+	private final ASN1Integer max_size = dmsGraphicMaxSize.makeInt();
 
 	/** Available memory for storing graphics */
-	private final AvailableGraphicMemory available_memory =
-		new AvailableGraphicMemory();
+	private final ASN1Integer available_memory =
+		availableGraphicMemory.makeInt();
 
 	/** Size of graphic blocks (in bytes) */
-	private final DmsGraphicBlockSize block_size =
-		new DmsGraphicBlockSize();
+	private final ASN1Integer block_size = dmsGraphicBlockSize.makeInt();
 
 	/** Mapping of graphic numbers to indices (row in table) */
 	private final TreeMap<Integer, Integer> num_2_row =
