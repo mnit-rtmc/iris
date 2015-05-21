@@ -24,8 +24,8 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 import us.mn.state.dot.tms.utils.Emailer;
-import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -87,7 +87,7 @@ class Message implements CommMessage
 	/** set timeout value in MS */
 	public void setTimeoutMS(int ms) {
 		m_dmsTimeoutMS = (ms <= 0 ? DEFAULT_TIMEOUT_DMS_MS : ms);
-		Log.finest("DmsXml.Message.setTimeoutMS(" + ms + 
+		LOG.log("DmsXml.Message.setTimeoutMS(" + ms + 
 			") called.");
 	}
 
@@ -156,7 +156,7 @@ class Message implements CommMessage
 		// send message
 		updateInterStatus("Sending request to sensorserver.");
 		long starttime=TimeSteward.currentTimeMillis();
-		Log.finest("queryProps(): Writing " + array.length + 
+		LOG.log("queryProps(): Writing " + array.length + 
 			" bytes to SensorServer: " + 
 			SString.byteArrayToString(array) + ".");
 		m_is.resetBuffer();
@@ -189,7 +189,7 @@ class Message implements CommMessage
 						"</" + DMSXMLMSGTAG + ">");
 					setCompletionTimeMS((int)STime.
 						calcTimeDeltaMS(starttime));
-					Log.finer("Response received in " + 
+					LOG.log("Response received in " + 
 						getCompletionTimeMS() + 
 						" ms.");
 				}
@@ -202,7 +202,7 @@ class Message implements CommMessage
 				istatus = new String[] 
 					{"Can't connect to SensorServer."};
 				handleAwsFailure(istatus[0]);
-				Log.warning(istatus[0]);
+				LOG.log("WARNING: " + istatus[0]);
 				throw new IOException(istatus[0]);
 			} catch(Exception ex) {
 				istatus = new String[] 
@@ -225,7 +225,7 @@ class Message implements CommMessage
 					" seconds). Timeout is " + 
 					m_dmsTimeoutMS / 1000 + " secs). ";
 				handleAwsFailure(err);
-				Log.severe(err);
+				LOG.log(err);
 				istatus = new String[] {"Timed out waiting " +
 					"for sensorserver."};
 				updateInterStatus(istatus);
@@ -234,7 +234,7 @@ class Message implements CommMessage
 			}
 
 			// parse response
-			Log.finest("dmsxml.Message.queryProps(): " +
+			LOG.log("dmsxml.Message.queryProps(): " +
 				"found complete token:" + token);
 
 			try {
@@ -272,7 +272,7 @@ class Message implements CommMessage
 	 *  SensorServer occurred. 
 	 * @return true on failure else false. */
 	protected boolean checkAwsFailure() {
-		Log.finest("Message.checkAwsFailure() called. this=" + 
+		LOG.log("Message.checkAwsFailure() called. this=" + 
 			toString() + ", ownerIsAws=" + ownerIsAws());
  		if(m_xelems == null)
 			return false;
@@ -355,7 +355,7 @@ class Message implements CommMessage
 
 		// generate an error message
 		String errmsg = getAwsFailureMessage() + errmsgnote;
-		Log.warning("Warning: failure to send AWS message to DMS: " + 
+		LOG.log("WARNING: failure to send AWS message to DMS: " + 
 			errmsg);
 
 		// build email
@@ -369,17 +369,17 @@ class Message implements CommMessage
 		   recip == null || recip.length() <= 0 ||
 		   sender == null || sender.length() <= 0)
 		{
-			Log.warning("Message.handleAwsFailure(): didn't" +
+			LOG.log("WARNING: didn't" +
 				"try to send AWS error email.");
 		} else {
 			try {
 				Emailer email = new Emailer(host, sender,recip);
 				email.send(subject, errmsg);
-				Log.finest("Message.handleAwsFailure(): " + 
+				LOG.log("Message.handleAwsFailure(): " + 
 					"sent email");
 			}
 			catch(MessagingException e) {
-				Log.warning("Message.handleAwsFailure(): " +
+				LOG.log("WARNING: " +
 					"email failed: " + e.getMessage());
 			}
 		}

@@ -22,7 +22,7 @@ import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.util.GregorianCalendar;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.utils.Log;
+import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 
 /**
  * A specialized stream reader for reading tokens.
@@ -113,12 +113,12 @@ class TokenStreamReader
 				return token;
 
 			// read
-			//Log.finest("TokenStreamReader:Waiting for bytes to read, buf="+m_pb.toString());
+			//LOG.log("TokenStreamReader:Waiting for bytes to read, buf="+m_pb.toString());
 			try {
 				numread = m_inps.read(fragment, 0,fragment.length);
 			} catch (SocketTimeoutException ex) {
 
-				// Log.finest("TokenStreamReader:Ignored SocketTimeoutException:"+ex);
+				// LOG.log("TokenStreamReader:Ignored SocketTimeoutException:"+ex);
 				// check if timed out
 				if(this.timedOut(start, timeout)) {
 					return (null);
@@ -127,28 +127,28 @@ class TokenStreamReader
 				TimeSteward.sleep_well(m_sleeptime);
 				continue;
 			} catch (IOException ex) {
-				//Log.finest("TokenStreamReader:Client disconnected.");
+				//LOG.log("TokenStreamReader:Client disconnected.");
 				throw ex;
 			}
 
-			//Log.finest("TokenStreamReader:Read " + numread + " bytes from client.");
+			//LOG.log("TokenStreamReader:Read " + numread + " bytes from client.");
 
 			// bytes received
 			if(numread > 0) {
 
 				// add to existing parse buffer, throws IllegalStateException if cap exceeded
-				// Log.finest("TokenStreamReader:parsebuffer: length="+m_pb.length()+", cap="+m_pb.capacity()+", maxcap="+m_pb.maxSize()+".");
-				// Log.finest("TokenStreamReader:Adding "+numread+" chars to existing ParseBuffer.");
+				// LOG.log("TokenStreamReader:parsebuffer: length="+m_pb.length()+", cap="+m_pb.capacity()+", maxcap="+m_pb.maxSize()+".");
+				// LOG.log("TokenStreamReader:Adding "+numread+" chars to existing ParseBuffer.");
 				m_pb.append(numread, fragment);
 
-				// Log.finest("TokenStreamReader:parsebuffer: length="+m_pb.length()+", cap="+m_pb.capacity()+", maxcap="+m_pb.maxSize()+".");
+				// LOG.log("TokenStreamReader:parsebuffer: length="+m_pb.length()+", cap="+m_pb.capacity()+", maxcap="+m_pb.maxSize()+".");
 
 				// is a complete token in buffer? if yes, extract it,
 				// and delete text in buffer preceeding token, if any.
 				token = m_pb.getToken(ParseBuffer.ExtractType.DDK,
 					tokenstart, tokenend);
 
-				// Log.finest("TokenStreamReader:Extracted token, length now "+m_pb.length()+".");
+				// LOG.log("TokenStreamReader:Extracted token, length now "+m_pb.length()+".");
 
 				// read again with no sleep
 				if(token == null) {
@@ -157,14 +157,14 @@ class TokenStreamReader
 				// found token
 				} else {
 
-					// Log.finest("TokenStreamReader:Found complete token:"+token);
+					// LOG.log("TokenStreamReader:Found complete token:"+token);
 					return (token);
 				}
 
 			// disconnect
 			} else if(numread < 0) {
 
-				// Log.finest("TokenStreamReader:Client disconnected (numread<0).");
+				// LOG.log("TokenStreamReader:Client disconnected (numread<0).");
 				throw new IOException("client disconnected");
 			}
 
@@ -191,7 +191,7 @@ class TokenStreamReader
 		}
 
 		if(TokenStreamReader.calcTimeDeltaMS(start) + m_sleeptime > timeout) {
-			// Log.finest("TokenStreamReader:Timed out, waited "+timeout/1000+" secs.");
+			// LOG.log("TokenStreamReader:Timed out, waited "+timeout/1000+" secs.");
 			return (true);
 		}
 

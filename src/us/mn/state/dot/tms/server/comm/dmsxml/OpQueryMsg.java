@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
 import us.mn.state.dot.tms.utils.HexString;
-import us.mn.state.dot.tms.utils.Log;
+import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 
 /**
  * Operation to query the current message on a DMS.
@@ -207,21 +207,21 @@ class OpQueryMsg extends OpDms {
 			argbitmap = HexString.parse(sbitmap);
 		}
 		catch(IllegalArgumentException e) {
-			Log.severe("WARNING: received invalid bitmap " +
+			LOG.log("SEVERE: received invalid bitmap " +
 				e.getMessage());
 			return null;
 		}
 		if(argbitmap.length % BM_PGLEN_BYTES != 0) {
-			Log.severe("WARNING: received bogus bitmap " +
+			LOG.log("SEVERE: received bogus bitmap " +
 				"size: len=" + argbitmap.length +
 				", BM_PGLEN_BYTES=" + BM_PGLEN_BYTES);
 			return null;
 		}
-		Log.finest("OpQueryMsg.createSignMessageWithBitmap() " +
+		LOG.log("OpQueryMsg.createSignMessageWithBitmap() " +
 			"called: argbitmap.len=" + argbitmap.length + ".");
 
 		int numpgs = calcNumPages(argbitmap);
-		Log.finest("OpQueryMsg.createSignMessageWithBitmap(): "+
+		LOG.log("OpQueryMsg.createSignMessageWithBitmap(): "+
 			"numpages=" + numpgs);
 		if(numpgs <= 0)
 			return null;
@@ -231,7 +231,7 @@ class OpQueryMsg extends OpDms {
 			pages[pg] = extractBitmap(argbitmap, pg);
 
 		String multi = createMultiUsingBitmap(pages, pgOnTime);
-		Log.finest("OpQueryMsg.createSignMessageWithBitmap(): "+
+		LOG.log("OpQueryMsg.createSignMessageWithBitmap(): "+
 			"multistring=" + multi);
 
 		// priority is invalid, as expected
@@ -255,7 +255,7 @@ class OpQueryMsg extends OpDms {
 			pt = PageTimeHelper.defaultPageOnInterval(true);
 		String ret = MultiString.replacePageOnTime(
 			multi, pt.round(DECISECONDS));
-		Log.finest("OpQueryMsg.updatePageOnTime(): " +
+		LOG.log("OpQueryMsg.updatePageOnTime(): " +
 			"updated multi w/ page display time: " + ret);
 		return ret;
 	}
@@ -361,14 +361,14 @@ class OpQueryMsg extends OpDms {
 				// display time (pg on-time)
 				int ms = xrr.getResInt("DisplayTimeMS");
 				pgOnTime = new Interval(ms, MILLISECONDS);
-				Log.finest("PhaseQueryMsg: ms=" + ms +
+				LOG.log("PhaseQueryMsg: ms=" + ms +
 					", pgOnTime=" + pgOnTime.ms());
 
 				// bitmap
 				usebitmap = xrr.getResBoolean("UseBitmap");
 				bitmap = xrr.getResString("Bitmap");
 
-				Log.finest(
+				LOG.log(
 					"OpQueryMsg() parsed msg values: " +
 					"IsValid:" + valid + 
 					", MsgTextAvailable:" + txtavail + 
@@ -382,7 +382,7 @@ class OpQueryMsg extends OpDms {
 					", bitmap:" + bitmap);
 			}
 		} catch (IllegalArgumentException ex) {
-			Log.severe("OpQueryMsg: Malformed XML received:" +
+			LOG.log("SEVERE: Malformed XML received:" +
 			    ex + ", id=" + id);
 			valid=false;
 			errmsg=ex.getMessage();
@@ -404,7 +404,7 @@ class OpQueryMsg extends OpDms {
 				irisUser = IrisUserHelper.lookup(owner);
 				String iuser = (irisUser == null ? 
 					"null" : irisUser.getName());
-				Log.finest("OpQueryMsg: owner read from " + 
+				LOG.log("OpQueryMsg: owner read from " + 
 					"sensorserver=" + owner + 
 					", Iris user lookup=" + iuser);
 			}
@@ -463,14 +463,14 @@ class OpQueryMsg extends OpDms {
 
 		// valid flag is false
 		} else {
-			Log.finest("OpQueryMsg: response from SensorServer " +
+			LOG.log("OpQueryMsg: response from SensorServer " +
 				"received, ignored, Xml valid field is " +
 				"false, errmsg=" + errmsg);
 			setErrorStatus(errmsg);
 
 			// try again
 			if(flagFailureShouldRetry(errmsg)) {
-				Log.finest("OpQueryMsg: will retry op.");
+				LOG.log("OpQueryMsg: will retry op.");
 				return true;
 			}
 		}
@@ -499,7 +499,7 @@ class OpQueryMsg extends OpDms {
 				return null;
 
 			updateInterStatus("Starting operation", false);
-			Log.finest("OpQueryMsg.PhaseQueryMsg.poll(msg) " +
+			LOG.log("OpQueryMsg.PhaseQueryMsg.poll(msg) " +
 				"called, dms=" + m_dms.getName());
 
 			Message mess = (Message) argmess;

@@ -53,7 +53,7 @@ final class ParseBuffer
 		m_maxsize = maxsize;
 		m_emptySpot = 0;
 
-		// Log.finest("m_buffer="+this.toString()+",capacity="+this.capacity()+", length="+this.length()+",maxsize="+this.maxSize());
+		// LOG.log("m_buffer="+this.toString()+",capacity="+this.capacity()+", length="+this.length()+",maxsize="+this.maxSize());
 	}
 
 	/** initialize the buffer */
@@ -89,7 +89,7 @@ final class ParseBuffer
 			throw new IllegalArgumentException("arg is invalid");
 		}
 
-		// Log.finest("Will append "+numbytes+" bytes.");
+		// LOG.log("Will append "+numbytes+" bytes.");
 		char[] ca = byteArrayToCharArray(numbytes, ba);
 		if(ca != null)
 			append(numbytes, ca);
@@ -134,11 +134,11 @@ final class ParseBuffer
 			throw new IllegalArgumentException("arg is invalid");
 		}
 
-		// Log.finest("Will append "+numchars+" chars.");
+		// LOG.log("Will append "+numchars+" chars.");
 		// expand?
 		int newlen = this.length() + numchars;
 
-		// Log.finest("newlen="+newlen);
+		// LOG.log("newlen="+newlen);
 		if(newlen > this.capacity()) {
 			this.expand(newlen);
 		}
@@ -147,7 +147,7 @@ final class ParseBuffer
 		System.arraycopy(a, 0, m_buffer, this.length(), numchars);
 		m_emptySpot += numchars;
 
-		// Log.finest("m_buffer="+this.toString()+",capacity="+this.capacity()+", length="+this.length());
+		// LOG.log("m_buffer="+this.toString()+",capacity="+this.capacity()+", length="+this.length());
 		assert(m_emptySpot >= 0) && (m_emptySpot <= this.capacity());
 	}
 
@@ -160,7 +160,7 @@ final class ParseBuffer
 		{
 
 			// create
-			//Log.info("T1");
+			//LOG.info("T1");
 
 			ParseBuffer b = new ParseBuffer(5, 10);
 
@@ -171,7 +171,7 @@ final class ParseBuffer
 			}
 
 			// append
-			//Log.info("T2");
+			//LOG.info("T2");
 			b.append(new char[] { 'a', 'b', 'c' });
 			ok = ok && (b.length() == 3) && (b.capacity() == 5);
 			ok = ok && (b.toString().compareTo("abc") == 0);
@@ -181,7 +181,7 @@ final class ParseBuffer
 			}
 
 			// 2nd append
-			//Log.info("T3");
+			//LOG.info("T3");
 			b.append(new char[] { 'd', 'e', 'f' });
 			ok = ok && (b.length() == 6) && (b.capacity() == 6);
 			ok = ok && (b.toString().compareTo("abcdef") == 0);
@@ -191,7 +191,7 @@ final class ParseBuffer
 			}
 
 			// exceed capacity
-			//Log.info("T4");
+			//LOG.info("T4");
 
 			boolean ok2 = false;
 
@@ -211,7 +211,7 @@ final class ParseBuffer
 			}
 
 			// append nothing
-			//Log.info("T5");
+			//LOG.info("T5");
 			b.append(new char[0]);
 			ok = ok && (b.length() == 6) && (b.capacity() == 6);
 			ok = ok && (b.toString().compareTo("abcdef") == 0);
@@ -223,7 +223,7 @@ final class ParseBuffer
 
 		// get token
 		{
-			//Log.info("T6");
+			//LOG.info("T6");
 
 			ParseBuffer zb = new ParseBuffer(5, 10);
 
@@ -244,7 +244,7 @@ final class ParseBuffer
 
 		// extract token
 		{
-			//Log.info("T7");
+			//LOG.info("T7");
 
 			ParseBuffer b = new ParseBuffer(5, 10);
 
@@ -265,7 +265,7 @@ final class ParseBuffer
 
 		// extract token
 		{
-			//Log.info("T8");
+			//LOG.info("T8");
 
 			ParseBuffer x1 = new ParseBuffer(2, 10);
 
@@ -292,7 +292,7 @@ final class ParseBuffer
 
 		// extract token-overlap
 		{
-			//Log.info("T9");
+			//LOG.info("T9");
 
 			ParseBuffer x1 = new ParseBuffer(2, 10);
 
@@ -322,7 +322,7 @@ final class ParseBuffer
 
 		// extract token-all
 		{
-			//Log.info("T10");
+			//LOG.info("T10");
 
 			ParseBuffer x1 = new ParseBuffer(2, 10);
 
@@ -349,7 +349,7 @@ final class ParseBuffer
 
 		// remove chunk
 		{
-			//Log.info("T11");
+			//LOG.info("T11");
 
 			ParseBuffer x1;
 
@@ -387,7 +387,7 @@ final class ParseBuffer
 
 		// append with specified length
 		{
-			//Log.info("T12");
+			//LOG.info("T12");
 
 			ParseBuffer b = new ParseBuffer(10, 10);
 
@@ -405,7 +405,7 @@ final class ParseBuffer
 
 		// test init
 		{
-			//Log.info("T13");
+			//LOG.info("T13");
 
 			ParseBuffer b = new ParseBuffer(10, 10);
 
@@ -424,7 +424,7 @@ final class ParseBuffer
 			}
 		}
 
-		//Log.info("ParseBuffer.test() done, return=" + ok);
+		//LOG.info("ParseBuffer.test() done, return=" + ok);
 
 		return (ok);
 	}
@@ -470,7 +470,7 @@ final class ParseBuffer
 		// does the start exist?
 		int i1 = b.indexOf(start, 0);
 
-		// Log.finest("i1="+i1);
+		// LOG.log("i1="+i1);
 		if(i1 < 0) {
 			return (null);
 		}
@@ -478,7 +478,7 @@ final class ParseBuffer
 		// does the end exist?
 		int i2 = b.indexOf(end, i1);
 
-		// Log.finest("i2="+i2);
+		// LOG.log("i2="+i2);
 		if(i2 < 0) {
 			return (null);
 		}
@@ -492,7 +492,7 @@ final class ParseBuffer
 		// get substring
 		String ret = b.substring(i1, i2 + end.length());
 
-		// Log.finest("ret="+ret+", len="+ret.length());
+		// LOG.log("ret="+ret+", len="+ret.length());
 
 		// remove chunk
 		this.removeChunk(et, i1, i2 + end.length());
@@ -509,7 +509,7 @@ final class ParseBuffer
 	 */
 	void removeChunk(ParseBuffer.ExtractType et, int start,	int end) {
 
-		// Log.finest("before remove: m_buffer="+this.toString()+", len="+this.length()+",cap="+this.capacity());
+		// LOG.log("before remove: m_buffer="+this.toString()+", len="+this.length()+",cap="+this.capacity());
 		if(et == ExtractType.KKK) {
 			return;
 		}
@@ -551,7 +551,7 @@ final class ParseBuffer
 
 			if(keep) {
 
-				// Log.finest("ParseBuffer.removeRange(): keep: i="+i+", j="+j);
+				// LOG.log("ParseBuffer.removeRange(): keep: i="+i+", j="+j);
 				nb[j] = m_buffer[i];
 				++j;
 				++nb_len;
@@ -562,7 +562,7 @@ final class ParseBuffer
 		this.setLength(nb_len);
 		assert initcap == this.capacity();
 
-		// Log.finest("after remove: m_buffer="+this.toString()+", len="+this.length()+",cap="+this.capacity());
+		// LOG.log("after remove: m_buffer="+this.toString()+", len="+this.length()+",cap="+this.capacity());
 	}
 
 	/**
@@ -575,9 +575,9 @@ final class ParseBuffer
 	/** to string */
 	public String toString() {
 
-		// Log.finest("len="+this.length());
-		// Log.finest("cap="+this.capacity());
-		// Log.finest("b="+m_buffer.toString());
+		// LOG.log("len="+this.length());
+		// LOG.log("cap="+this.capacity());
+		// LOG.log("b="+m_buffer.toString());
 		StringBuilder s = new StringBuilder(this.length());
 
 		for(int i = 0; i < this.length(); ++i) {
@@ -638,19 +638,19 @@ final class ParseBuffer
 			    "Max size exeeded in ParseBuffer.expand()");
 		}
 
-		// Log.finest("newcap="+newcap);
+		// LOG.log("newcap="+newcap);
 		char[] na = new char[newcap];
 
 		System.arraycopy(m_buffer, 0, na, 0, this.length());
 
-		// Log.finest("m_buffer1="+this.toString()+",length="+m_buffer.length);
+		// LOG.log("m_buffer1="+this.toString()+",length="+m_buffer.length);
 		m_buffer = na;
 
-		// Log.finest("m_buffer2="+this.toString()+",length="+m_buffer.length);
+		// LOG.log("m_buffer2="+this.toString()+",length="+m_buffer.length);
 		assert(this.length() >= 0)
 		      && (this.length() <= this.capacity());
 
-		// Log.finest("new length="+this.length());
+		// LOG.log("new length="+this.length());
 	}
 }
 

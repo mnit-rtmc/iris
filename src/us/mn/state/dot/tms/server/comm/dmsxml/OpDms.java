@@ -28,9 +28,9 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 import us.mn.state.dot.tms.utils.I18N;
-import us.mn.state.dot.tms.utils.Log;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -159,7 +159,7 @@ abstract class OpDms extends OpDevice {
 	private int calcTimeoutMS() {
 		SignAccess a = SignAccess.get(m_dms);
 		int s = a.get(m_dms).timeoutSecs();
-		Log.finest("Op timeout is " + s + " secs, SignAccess=" + a + 
+		LOG.log("Op timeout is " + s + " secs, SignAccess=" + a + 
 			", dms=" + m_dms);
 		return s * 1000;
 	}
@@ -397,7 +397,7 @@ abstract class OpDms extends OpDevice {
 					{
 						type = DMSType.VMS_FULL;
 					} else {
-						Log.severe("SEVERE: Unknown "
+						LOG.log("SEVERE: Unknown "
 							+ "matrix type read (" 
 							+ stype + ")");
 					}
@@ -424,7 +424,7 @@ abstract class OpDms extends OpDevice {
 						"signWidthPixels");
 				}
 			} catch (IllegalArgumentException ex) {
-				Log.severe("PhaseGetConfig: Malformed XML " +
+				LOG.log("PhaseGetConfig: Malformed XML " +
 					"received:" + ex + ", id=" + id);
 				valid = false;
 				errmsg = ex.getMessage();
@@ -465,7 +465,7 @@ abstract class OpDms extends OpDevice {
 
 			// failure
 			} else {
-				Log.warning("PhaseGetConfig: response from " +
+				LOG.log("WARNING: response from " +
 					"SensorServer received, ignored " +
 					"because Xml valid field is false, " +
 					"errmsg=" + errmsg);
@@ -473,7 +473,7 @@ abstract class OpDms extends OpDevice {
 
 				// try again
 				if(flagFailureShouldRetry(errmsg)) {
-					Log.finest("PhaseGetConfig: will " +
+					LOG.log("PhaseGetConfig: will " +
 						"retry failed op.");
 					return true;
 				}

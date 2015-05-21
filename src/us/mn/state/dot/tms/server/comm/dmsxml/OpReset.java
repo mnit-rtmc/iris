@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import us.mn.state.dot.tms.utils.Log;
+import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 
 /**
  * Operation to reset the DMS.
@@ -106,7 +106,7 @@ class OpReset extends OpDms
 				errmsg = FAILURE_UNKNOWN;
 
 		} catch (IllegalArgumentException ex) {
-			Log.severe("OpReset.PhaseResetDms: " +
+			LOG.log("SEVERE OpReset.PhaseResetDms: " +
 				"Malformed XML received:" + ex +
 				", id=" + id);
 			valid=false;
@@ -128,13 +128,13 @@ class OpReset extends OpDms
 
 		// valid flag is false
 		} else {
-			Log.finest("OpReset: isvalid is false, " +
+			LOG.log("OpReset: isvalid is false, " +
 				"errmsg=" + errmsg);
 			setErrorStatus(errmsg);
 
 			// try again
 			if (flagFailureShouldRetry(errmsg)) {
-				Log.finest("OpReset: will retry " +
+				LOG.log("OpReset: will retry " +
 					"failed operation.");
 				return true;
 			}
@@ -159,7 +159,7 @@ class OpReset extends OpDms
 		{
 			updateInterStatus("Starting operation", false);
 
-			Log.finest(
+			LOG.log(
 			    "OpReset.PhaseResetDms.poll(msg) called.");
 
 			Message mess = (Message) argmess;

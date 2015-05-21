@@ -21,8 +21,8 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import us.mn.state.dot.tms.utils.Log;
 
 /**
  * Operation to blank the DMS.
@@ -108,9 +108,9 @@ class OpBlank extends OpDms
 				errmsg = FAILURE_UNKNOWN;
 
 			// valid resp received?
-			Log.finest("OpBlank: isvalid =" + valid);
+			LOG.log("OpBlank: isvalid =" + valid);
 		} catch (IllegalArgumentException ex) {
-			Log.severe("Malformed XML received in OpBlank(msg):" +
+			LOG.log("Malformed XML received in OpBlank(msg):" +
 				ex + ",id=" + id);
 			valid = false;
 			errmsg = ex.getMessage();
@@ -124,7 +124,7 @@ class OpBlank extends OpDms
 		if(valid) {
 			m_dms.setMessageCurrent(m_sm, m_user);
 		} else {
-			Log.finest(
+			LOG.log(
 				"OpBlank: response from SensorServer " +
 				"received, ignored because Xml valid " +
 				"field is false, errmsg=" + errmsg);
@@ -132,7 +132,7 @@ class OpBlank extends OpDms
 
 			// try again
 			if(flagFailureShouldRetry(errmsg)) {
-				Log.finest("OpBlank: will retry failed op.");
+				LOG.log("OpBlank: will retry failed op.");
 				return true;
 
 			// give up

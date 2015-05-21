@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -31,7 +32,6 @@ import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.StreamMessenger;
-import us.mn.state.dot.tms.utils.Log;
 
 /**
  * This class provides a DMS Poller that communicates with
@@ -44,6 +44,9 @@ import us.mn.state.dot.tms.utils.Log;
  * @author Michael Darter
  */
 public class DmsXmlPoller extends MessagePoller implements DMSPoller {
+
+	/** Debug log */
+	static protected final DebugLog LOG = new DebugLog("dmsxml");
 
 	/** valid address range (inclusive) */
 	static public final int MAX_ADDRESS = 255;
@@ -87,7 +90,7 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 	public void sendMessage(DMSImpl dms, SignMessage m, User o)
 		throws InvalidMessageException
 	{
-		Log.finest("DmsXmlPoller.sendMessage(" + dms + ", " + 
+		LOG.log("DmsXmlPoller.sendMessage(" + dms + ", " + 
 			m + ", " + o+ ") called.");
 		if(dms == null || m == null)
 			return;
@@ -148,7 +151,7 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 			// ignore
 		} else {
 			// ignore other requests
-			Log.finest("DmsXmlPoller.sendRequest(" + 
+			LOG.log("DmsXmlPoller.sendRequest(" + 
 				dms.getName() +	"): ignored request r=" + r);
 		}
 	}

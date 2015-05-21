@@ -26,7 +26,8 @@ import java.nio.charset.Charset;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import us.mn.state.dot.tms.utils.Log;
+import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
+
 
 /**
  * Convenience class for writing Xml.
@@ -175,7 +176,7 @@ final class Xml {
             throw new IllegalArgumentException("invalid args in Xml.parseRes()");
         }
 
-        //Log.finest("lev1name=" + lev1name + ", lev2name=" + lev2name + ", xml=" + xml);
+        //LOG.log("lev1name=" + lev1name + ", lev2name=" + lev2name + ", xml=" + xml);
 
         Pair[] ret = null;
 
@@ -195,7 +196,7 @@ final class Xml {
                     throw new IOException("Didn't find tag:" + lev1name + " in xml:" + xml);
                 }
 
-                //Log.finest("1st level (" + lev1name + ") num children=" + list.getLength());
+                //LOG.log("1st level (" + lev1name + ") num children=" + list.getLength());
                 topelem1 = (Element) list.item(0);
             }
 
@@ -209,7 +210,7 @@ final class Xml {
             // cycle through children, adding to container
             NodeList children = topelem2.getChildNodes();
 
-            //Log.finest("2nd level (" + lev2name + ") num children=" + children.getLength());
+            //LOG.log("2nd level (" + lev2name + ") num children=" + children.getLength());
             ret = new Pair[children.getLength()];
 
             for (int c = 0; c < children.getLength(); c++) {
@@ -218,20 +219,20 @@ final class Xml {
                 String v     = child.getTextContent();
 
                 // create pair
-                //Log.finest("name=" + n + "," + "value=" + v);
+                //LOG.log("name=" + n + "," + "value=" + v);
 
                 Pair p = new Pair(n, v);
 
                 ret[c] = p;
             }
         } catch (ParserConfigurationException ex) {
-            Log.finest("Exception:" + ex);
+            LOG.log("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (SAXException ex) {
-            Log.finest("Exception:" + ex);
+            LOG.log("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (IOException ex) {
-            Log.finest("Exception:" + ex);
+            LOG.log("Exception:" + ex);
             throw ex;
         }
 
@@ -255,7 +256,7 @@ final class Xml {
             throw new IllegalArgumentException("invalid args in Xml.parseTagAndChildren()");
         }
 
-        //Log.finest("tagname=" + tagname + ", xml=" + xml);
+        //LOG.log("tagname=" + tagname + ", xml=" + xml);
 
         Pair[] ret = null;
 
@@ -277,13 +278,13 @@ final class Xml {
                 }
 
                 topelem = (Element) list.item(0);
-                //Log.finest("tagname=" + tagname + ", num children=" + list.getLength());
+                //LOG.log("tagname=" + tagname + ", num children=" + list.getLength());
             }
 
             // cycle through children, adding to container
             NodeList children = topelem.getChildNodes();
 
-            //Log.finest("2nd level num children=" + children.getLength());
+            //LOG.log("2nd level num children=" + children.getLength());
             ret = new Pair[children.getLength()];
 
             for (int c = 0; c < children.getLength(); c++) {
@@ -292,20 +293,20 @@ final class Xml {
                 String v     = child.getTextContent();
 
                 // create pair
-                //Log.finest("name=" + n + "," + "value=" + v);
+                //LOG.log("name=" + n + "," + "value=" + v);
 
                 Pair p = new Pair(n, v);
 
                 ret[c] = p;
             }
         } catch (ParserConfigurationException ex) {
-            Log.finest("Exception:" + ex);
+            LOG.log("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (SAXException ex) {
-            Log.finest("Exception:" + ex);
+            LOG.log("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (IOException ex) {
-            Log.finest("Exception:" + ex);
+            LOG.log("Exception:" + ex);
             throw ex;
         }
 
@@ -361,13 +362,13 @@ final class Xml {
 
             ret = topelem2.getNodeName();
         } catch (ParserConfigurationException ex) {
-            Log.finest("Exception:" + ex);
+            LOG.log("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (SAXException ex) {
-            Log.finest("Exception:" + ex);
+            LOG.log("Exception:" + ex);
             throw new IOException(ex.toString());
         } catch (IOException ex) {
-            Log.finest("Exception:" + ex);
+            LOG.log("Exception:" + ex);
             throw new IOException(ex.toString());
         }
 

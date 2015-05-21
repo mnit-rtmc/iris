@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
 import us.mn.state.dot.tms.utils.HexString;
-import us.mn.state.dot.tms.utils.Log;
+import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 
 /**
  * Operation to send a new message to a DMS.
@@ -230,10 +230,10 @@ class OpMessage extends OpDms {
 			if(!valid && errmsg.length() <= 0)
 				errmsg = FAILURE_UNKNOWN;
 
-			Log.finest("OpMessage.parseResponse(): parsed msg " +
+			LOG.log("OpMessage.parseResponse(): parsed msg " +
 				"values: IsValid:" + valid + ".");
 		} catch (IllegalArgumentException ex) {
-			Log.severe("OpMessage.parseResponse(): Malformed " +
+			LOG.log("OpMessage.parseResponse(): Malformed " +
 				"XML received:" + ex+", id=" + id);
 			valid = false;
 			errmsg = ex.getMessage();
@@ -248,7 +248,7 @@ class OpMessage extends OpDms {
 			setErrorStatus("");
 			m_dms.setMessageCurrent(m_sm, m_user);
 		} else {
-			Log.finest("OpMessage.parseResponse(): response " +
+			LOG.log("OpMessage.parseResponse(): response " +
 				"from SensorServer received, ignored " +
 				"because Xml valid field is false, " +
 				"errmsg=" + errmsg + ", id=" + id);
@@ -256,7 +256,7 @@ class OpMessage extends OpDms {
 
 			// try again
 			if(flagFailureShouldRetry(errmsg)) {
-				Log.finest("OpMessage: will retry " +
+				LOG.log("OpMessage: will retry " +
 					"failed operation.");
 				return true;
 
@@ -307,7 +307,7 @@ class OpMessage extends OpDms {
 			throws IOException 
 		{
 			updateInterStatus("Starting operation", false);
-			Log.finest("PhaseSendMessage.poll(msg) called.");
+			LOG.log("PhaseSendMessage.poll(msg) called.");
 
 			Message mess = (Message) argmess;
 
