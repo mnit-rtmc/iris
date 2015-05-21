@@ -78,11 +78,9 @@ public class OpSendDMSDefaults extends OpDMS {
 
 		/** Set the pixel service schedule */
 		protected Phase poll(CommMessage mess) throws IOException {
-			VmsPixelServiceDuration dur =
-				new VmsPixelServiceDuration();
-			VmsPixelServiceFrequency freq =
-				new VmsPixelServiceFrequency();
-			VmsPixelServiceTime time = new VmsPixelServiceTime();
+			ASN1Integer dur = vmsPixelServiceDuration.makeInt();
+			ASN1Integer freq = vmsPixelServiceFrequency.makeInt();
+			ASN1Integer time = vmsPixelServiceTime.makeInt();
 			dur.setInteger(10);
 			freq.setInteger(1440);
 			time.setInteger(180);
