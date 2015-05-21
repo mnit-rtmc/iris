@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,8 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
  * Operation to incorporate brightness feedback for a DMS.
@@ -34,20 +36,18 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	protected final EventType event_type;
 
 	/** Maximum photocell level */
-	protected final DmsIllumMaxPhotocellLevel max_level =
-		new DmsIllumMaxPhotocellLevel();
+	private final ASN1Integer max_level =
+		dmsIllumMaxPhotocellLevel.makeInt();
 
 	/** Photocell level status */
-	protected final DmsIllumPhotocellLevelStatus p_level =
-		new DmsIllumPhotocellLevelStatus();
+	private final ASN1Integer p_level =
+		dmsIllumPhotocellLevelStatus.makeInt();
 
 	/** Light output status */
-	protected final DmsIllumLightOutputStatus light =
-		new DmsIllumLightOutputStatus();
+	private final ASN1Integer light = dmsIllumLightOutputStatus.makeInt();
 
 	/** Total number of supported brightness levels */
-	protected final DmsIllumNumBrightLevels b_levels =
-		new DmsIllumNumBrightLevels();
+	private final ASN1Integer b_levels = dmsIllumNumBrightLevels.makeInt();
 
 	/** Brightness table */
 	protected final DmsIllumBrightnessValues brightness =
@@ -95,7 +95,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			logQuery(b_levels);
 			logQuery(brightness);
 			logQuery(control);
-			if(control.isPhotocell())
+			if (control.isPhotocell())
 				return new SetManualControl();
 			else
 				return new SetBrightnessTable();
@@ -124,7 +124,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 			// NOTE: if the existing table is not valid, don't mess
 			//       with it.  This check is needed for a certain
 			//       vendor, which has a wacky brightness table.
-			if(brightness.isValid()) {
+			if (brightness.isValid()) {
 				brightness.setTable(calculateTable());
 				mess.add(brightness);
 				logStore(brightness);

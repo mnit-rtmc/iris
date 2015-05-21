@@ -42,9 +42,14 @@ public class OpQueryDMSStatus extends OpDMS {
 		return SystemAttrEnum.DMS_PIXEL_MAINT_THRESHOLD.getInt();
 	}
 
+	/** Get the light output as percent */
+	static private int getPercent(ASN1Integer light) {
+		return Math.round(light.getInteger() / 655.35f);
+	}
+
 	/** Photocell level */
-	protected final DmsIllumPhotocellLevelStatus p_level =
-		new DmsIllumPhotocellLevelStatus();
+	private final ASN1Integer p_level =
+		dmsIllumPhotocellLevelStatus.makeInt();
 
 	/** List of light sensor status */
 	protected final LinkedList<String> light_sensors =
@@ -87,10 +92,10 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query the DMS brightness status */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsIllumBrightLevelStatus b_level =
-				new DmsIllumBrightLevelStatus();
-			DmsIllumLightOutputStatus light =
-				new DmsIllumLightOutputStatus();
+			ASN1Integer b_level =
+				dmsIllumBrightLevelStatus.makeInt();
+			ASN1Integer light =
+				dmsIllumLightOutputStatus.makeInt();
 			DmsIllumControl control = new DmsIllumControl();
 			mess.add(p_level);
 			mess.add(b_level);
@@ -101,7 +106,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(b_level);
 			logQuery(light);
 			logQuery(control);
-			dms.setLightOutput(light.getPercent());
+			dms.setLightOutput(getPercent(light));
 			return new QueryMessageTable();
 		}
 	}
