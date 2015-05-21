@@ -41,8 +41,13 @@ abstract public class ASN1Object extends ControllerProperty {
 
 	/** Get the object name */
 	public final String getName() {
-		String n = getClassName();
-		return n.substring(0, 1).toLowerCase() + n.substring(1);
+		String nm = node.getName();
+		if (nm != null)
+			return nm;
+		else {
+			String n = getClassName();
+			return n.substring(0, 1).toLowerCase() + n.substring(1);
+		}
 	}
 
 	/** Get the class name (without packages) */

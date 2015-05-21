@@ -54,7 +54,7 @@ public class MIBNode {
 
 	/** Create a new child node */
 	public MIBNode child(int[] n) {
-		return child(n, "");
+		return child(n, null);
 	}
 
 	/** Create a new child node */
@@ -91,5 +91,10 @@ public class MIBNode {
 			b.append(nid[i]);
 		}
 		return b.toString();
+	}
+
+	/** Get the node name */
+	public String getName() {
+		return name;
 	}
 }
