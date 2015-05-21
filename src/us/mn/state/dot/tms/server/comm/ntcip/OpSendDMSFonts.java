@@ -45,11 +45,10 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 public class OpSendDMSFonts extends OpDMS {
 
 	/** Number of fonts supported */
-	protected final NumFonts num_fonts = new NumFonts();
+	private final ASN1Integer num_fonts = numFonts.makeInt();
 
 	/** Maximum number of characters in a font */
-	protected final MaxFontCharacters max_characters =
-		new MaxFontCharacters();
+	private final ASN1Integer max_characters = maxFontCharacters.makeInt();
 
 	/** Mapping of font numbers to row in font table */
 	protected final TreeMap<Integer, Integer> num_2_row =
@@ -90,8 +89,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Query the maximum character size (v2 only) */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontMaxCharacterSize max_char =
-				new FontMaxCharacterSize();
+			ASN1Integer max_char = fontMaxCharacterSize.makeInt();
 			mess.add(max_char);
 			try {
 				mess.queryProps();
