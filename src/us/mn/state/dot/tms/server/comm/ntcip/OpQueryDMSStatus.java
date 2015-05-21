@@ -111,15 +111,13 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query the DMS message table status */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsNumPermanentMsg perm_num = new DmsNumPermanentMsg();
-			DmsNumChangeableMsg chg_num = new DmsNumChangeableMsg();
-			DmsMaxChangeableMsg chg_max = new DmsMaxChangeableMsg();
-			DmsFreeChangeableMemory chg_mem =
-				new DmsFreeChangeableMemory();
-			DmsNumVolatileMsg vol_num = new DmsNumVolatileMsg();
-			DmsMaxVolatileMsg vol_max = new DmsMaxVolatileMsg();
-			DmsFreeVolatileMemory vol_mem =
-				new DmsFreeVolatileMemory();
+			ASN1Integer perm_num = dmsNumPermanentMsg.makeInt();
+			ASN1Integer chg_num = dmsNumChangeableMsg.makeInt();
+			ASN1Integer chg_max = dmsMaxChangeableMsg.makeInt();
+			ASN1Integer chg_mem = dmsFreeChangeableMemory.makeInt();
+			ASN1Integer vol_num = dmsNumVolatileMsg.makeInt();
+			ASN1Integer vol_max = dmsMaxVolatileMsg.makeInt();
+			ASN1Integer vol_mem = dmsFreeVolatileMemory.makeInt();
 			mess.add(perm_num);
 			mess.add(chg_num);
 			mess.add(chg_max);
