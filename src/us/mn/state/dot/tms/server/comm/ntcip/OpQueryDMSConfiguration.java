@@ -191,9 +191,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			MonochromeColor m_color = new MonochromeColor();
 			DmsColorScheme color_scheme = new DmsColorScheme();
 			DmsSupportedMultiTags tags =new DmsSupportedMultiTags();
-			DmsMaxNumberPages pages = new DmsMaxNumberPages();
-			DmsMaxMultiStringLength m_len =
-				new DmsMaxMultiStringLength();
+			ASN1Integer pages = dmsMaxNumberPages.makeInt();
+			ASN1Integer m_len = dmsMaxMultiStringLength.makeInt();
 			mess.add(m_color);
 			mess.add(color_scheme);
 			mess.add(tags);

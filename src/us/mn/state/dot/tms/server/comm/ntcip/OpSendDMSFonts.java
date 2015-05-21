@@ -33,6 +33,8 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -73,7 +75,7 @@ public class OpSendDMSFonts extends OpDMS {
 		super(PriorityLevel.DOWNLOAD, d);
 		FontFinder ff = new FontFinder(d);
 		LinkedList<Font> fonts = ff.getFonts();
-		for(Font f: fonts)
+		for (Font f: fonts)
 			num_2_row.put(f.getNumber(), null);
 		font_iterator = fonts.iterator();
 	}
@@ -96,7 +98,7 @@ public class OpSendDMSFonts extends OpDMS {
 				logQuery(max_char);
 				version2 = true;
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// Note: if this object doesn't exist, then the
 				//       sign must not support v2.
 				version2 = false;
@@ -115,7 +117,7 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.queryProps();
 			logQuery(num_fonts);
 			logQuery(max_characters);
-			for(row = 1; row <= num_fonts.getInteger(); row++)
+			for (row = 1; row <= num_fonts.getInteger(); row++)
 				open_rows.add(row);
 			row = 1;
 			return new QueryFontNumbers();
@@ -130,29 +132,29 @@ public class OpSendDMSFonts extends OpDMS {
 			FontNumber number = new FontNumber(row);
 			FontStatus status = new FontStatus(row);
 			mess.add(number);
-			if(version2)
+			if (version2)
 				mess.add(status);
 			try {
 				mess.queryProps();
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// Note: some vendors respond with NoSuchName
 				//       if the font is not valid
 				populateNum2Row();
 				return nextFontPhase();
 			}
 			logQuery(number);
-			if(version2)
+			if (version2)
 				logQuery(status);
 			else
 				status.setEnum(FontStatus.Enum.unmanaged);
 			Integer f_num = number.getInteger();
-			if(num_2_row.containsKey(f_num)) {
-				if(status.isUpdatable())
+			if (num_2_row.containsKey(f_num)) {
+				if (status.isUpdatable())
 					num_2_row.put(f_num, row);
 				open_rows.remove(row);
 			}
-			if(row < num_fonts.getInteger()) {
+			if (row < num_fonts.getInteger()) {
 				row++;
 				return this;
 			} else {
@@ -168,15 +170,15 @@ public class OpSendDMSFonts extends OpDMS {
 		// ConcurrentModificationException on num_2_row TreeMap
 		LinkedList<Integer> f_nums = new LinkedList<Integer>();
 		f_nums.addAll(num_2_row.keySet());
-		for(Integer f_num: f_nums)
+		for (Integer f_num: f_nums)
 			populateNum2Row(f_num);
 	}
 
 	/** Populate one font number in mapping */
 	private void populateNum2Row(Integer f_num) {
-		if(num_2_row.get(f_num) == null) {
+		if (num_2_row.get(f_num) == null) {
 			Integer r = open_rows.pollLast();
-			if(r != null)
+			if (r != null)
 				num_2_row.put(f_num, r);
 			else
 				num_2_row.remove(f_num);
@@ -185,10 +187,10 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Get the first phase of the next font */
 	protected Phase nextFontPhase() {
-		while(font_iterator.hasNext()) {
+		while (font_iterator.hasNext()) {
 			font = font_iterator.next();
 			Integer f_num = font.getNumber();
-			if(num_2_row.containsKey(f_num)) {
+			if (num_2_row.containsKey(f_num)) {
 				row = num_2_row.get(f_num);
 				return new VerifyFont();
 			}
@@ -200,7 +202,7 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Abort upload of the current font */
 	private void abortUpload(String msg) {
 		Font f = font;
-		if(f != null) {
+		if (f != null) {
 			String s = "Font " + f.getNumber() + " aborted -- "+msg;
 			logError(s);
 			setMaintStatus(s);
@@ -217,21 +219,21 @@ public class OpSendDMSFonts extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// Note: some vendors respond with NoSuchName
 				//       if the font is not valid
 				version.setInteger(-1);
 			}
 			int v = version.getInteger();
 			logQuery(version);
-			if(isVersionIDCorrect(v)) {
+			if (isVersionIDCorrect(v)) {
 				logError("Font is valid");
-				if(font == dms.getDefaultFont())
+				if (font == dms.getDefaultFont())
 					return new SetDefaultFont();
 				else
 					return nextFontPhase();
 			} else {
-				if(version2)
+				if (version2)
 					return new QueryInitialStatus();
 				else
 					return new InvalidateFont();
@@ -265,7 +267,7 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
-			switch(status.getEnum()) {
+			switch (status.getEnum()) {
 			case notUsed:
 				return new RequestStatusModify();
 			case modifying:
@@ -304,7 +306,7 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
-			if(status.getEnum() != FontStatus.Enum.notUsed) {
+			if (status.getEnum() != FontStatus.Enum.notUsed) {
 				abortUpload("Expected notUsed, was "
 					+ status.getEnum());
 				return nextFontPhase();
@@ -336,7 +338,7 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
-			if(status.getEnum() != FontStatus.Enum.modifying) {
+			if (status.getEnum() != FontStatus.Enum.modifying) {
 				abortUpload("Expected modifying, was " +
 					status.getEnum());
 				return nextFontPhase();
@@ -356,7 +358,7 @@ public class OpSendDMSFonts extends OpDMS {
 			try {
 				mess.storeProps();
 			}
-			catch(SNMP.Message.GenError e) {
+			catch (SNMP.Message.GenError e) {
 				// Some vendors (Skyline) respond with GenError
 				// if the font is not currently valid
 			}
@@ -391,8 +393,8 @@ public class OpSendDMSFonts extends OpDMS {
 			logStore(line_spacing);
 			mess.storeProps();
 			Collection<Glyph> glyphs =FontHelper.lookupGlyphs(font);
-			if(glyphs.isEmpty()) {
-				if(version2)
+			if (glyphs.isEmpty()) {
+				if (version2)
 					return new ValidateFontV2();
 				else
 					return new ValidateFontV1();
@@ -416,7 +418,7 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Create a new add character phase */
 		public AddCharacter(Collection<Glyph> c) {
 			chars = c.iterator();
-			if(chars.hasNext())
+			if (chars.hasNext())
 				glyph = chars.next();
 		}
 
@@ -439,11 +441,11 @@ public class OpSendDMSFonts extends OpDMS {
 			count++;
 			if (count % 20 == 0 && !controller.isFailed())
 				setSuccess(true);
-			if(chars.hasNext()) {
+			if (chars.hasNext()) {
 				glyph = chars.next();
 				return this;
 			} else {
-				if(version2)
+				if (version2)
 					return new ValidateFontV2();
 				else
 					return new ValidateFontV1();
@@ -462,7 +464,7 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(height);
 			logStore(height);
 			mess.storeProps();
-			if(font == dms.getDefaultFont())
+			if (font == dms.getDefaultFont())
 				return new SetDefaultFont();
 			else
 				return nextFontPhase();
@@ -499,14 +501,14 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
-			switch(status.getEnum()) {
+			switch (status.getEnum()) {
 			case readyForUse:
-				if(font == dms.getDefaultFont())
+				if (font == dms.getDefaultFont())
 					return new SetDefaultFont();
 				else
 					return nextFontPhase();
 			case calculatingID:
-				if(TimeSteward.currentTimeMillis() > expire) {
+				if (TimeSteward.currentTimeMillis() > expire) {
 					abortUpload("Still calculatingID, " +
 						CALCULATING_ID_SECS +" seconds"+
 						" after readyForUseReq");
@@ -526,7 +528,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Set the default font numbmer */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DefaultFont dfont = new DefaultFont();
+			ASN1Integer dfont = defaultFont.makeInt();
 			dfont.setInteger(font.getNumber());
 			mess.add(dfont);
 			logStore(dfont);

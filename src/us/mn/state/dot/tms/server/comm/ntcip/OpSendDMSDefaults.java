@@ -104,8 +104,8 @@ public class OpSendDMSDefaults extends OpDMS {
 				new DefaultJustificationLine();
 			DefaultJustificationPage page =
 				new DefaultJustificationPage();
-			DefaultPageOnTime on_time = new DefaultPageOnTime();
-			DefaultPageOffTime off_time = new DefaultPageOffTime();
+			ASN1Integer on_time = defaultPageOnTime.makeInt();
+			ASN1Integer off_time = defaultPageOffTime.makeInt();
 			line.setEnum(Multi.JustificationLine.CENTER);
 			page.setEnum(Multi.JustificationPage.TOP);
 			on_time.setInteger(Math.round(10 * SystemAttrEnum.
@@ -146,7 +146,7 @@ public class OpSendDMSDefaults extends OpDMS {
 				logStore(override);
 				logStore(limit);
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// Must not be a Ledstar sign
 				return new SkylineDefaults();
 			}
@@ -188,7 +188,7 @@ public class OpSendDMSDefaults extends OpDMS {
 				logStore(night_rate);
 				logStore(max_lvl);
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// Must not be a Skyline sign
 				return new AddcoDefaults();
 			}
