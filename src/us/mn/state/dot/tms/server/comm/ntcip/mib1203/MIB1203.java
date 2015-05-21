@@ -27,6 +27,10 @@ import static us.mn.state.dot.tms.server.comm.snmp.ObjFactory.*;
 public enum MIB1203 {
 	dms				(MIB1201.devices, 3),
 	dmsSignCfg			(dms, 1),
+	  dmsSignHeight			(dmsSignCfg, new int[] {3, 0}),
+	  dmsSignWidth			(dmsSignCfg, new int[] {4, 0}),
+	  dmsHorizontalBorder		(dmsSignCfg, new int[] {5, 0}),
+	  dmsVerticalBorder		(dmsSignCfg, new int[] {6, 0}),
 	vmsCfg				(dms, 2),
 	  vmsCharacterHeightPixels	(vmsCfg, new int[] {1, 0}),
 	  vmsCharacterWidthPixels	(vmsCfg, new int[] {2, 0}),

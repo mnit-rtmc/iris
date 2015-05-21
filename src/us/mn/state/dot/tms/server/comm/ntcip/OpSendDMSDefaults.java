@@ -212,10 +212,10 @@ public class OpSendDMSDefaults extends OpDMS {
 			   dms.getDmsType() == DMSType.VMS_CHAR.ordinal() &&
 			   controller.getPassword() != null)
 			{
-				DmsHorizontalBorder h_border =
-					new DmsHorizontalBorder();
-				DmsVerticalBorder v_border =
-					new DmsVerticalBorder();
+				ASN1Integer h_border =
+					dmsHorizontalBorder.makeInt();
+				ASN1Integer v_border =
+					dmsVerticalBorder.makeInt();
 				ASN1Integer h_pitch =
 					vmsHorizontalPitch.makeInt();
 				ASN1Integer v_pitch =vmsVerticalPitch.makeInt();

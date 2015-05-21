@@ -108,11 +108,10 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsSignAccess access = new DmsSignAccess();
 			DmsSignType type = new DmsSignType();
-			DmsSignHeight height = new DmsSignHeight();
-			DmsSignWidth width = new DmsSignWidth();
-			DmsHorizontalBorder h_border =
-				new DmsHorizontalBorder();
-			DmsVerticalBorder v_border = new DmsVerticalBorder();
+			ASN1Integer height = dmsSignHeight.makeInt();
+			ASN1Integer width = dmsSignWidth.makeInt();
+			ASN1Integer h_border = dmsHorizontalBorder.makeInt();
+			ASN1Integer v_border = dmsVerticalBorder.makeInt();
 			DmsLegend legend = new DmsLegend();
 			DmsBeaconType beacon = new DmsBeaconType();
 			DmsSignTechnology tech = new DmsSignTechnology();
