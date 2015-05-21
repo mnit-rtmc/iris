@@ -22,10 +22,31 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  *
  * @author Douglas Lau
  */
-public interface MIB {
-	MIBNode skyline = MIB1201._private.child(18);
-	MIBNode skylineDevices = skyline.child(2);
-	MIBNode skylineDms = skylineDevices.child(3);
-	MIBNode skylineDmsSignCfg = skylineDms.child(1);
-	MIBNode skylineDmsStatus = skylineDms.child(9);
+public enum MIB {
+	skyline			(MIB1201._private, 18),
+	skylineDevices		(skyline, 2),
+	skylineDms		(skylineDevices, 3),
+	skylineDmsSignCfg	(skylineDms, 1),
+	skylineDmsStatus	(skylineDms, 9);
+
+	private final MIBNode node;
+	private MIB(MIB1201 p, int n) {
+		// FIXME: add name
+		node = p.child(n);
+	}
+	private MIB(MIB p, int n) {
+		node = p.node.child(n, toString());
+	}
+	private MIB(MIB p, int[] n) {
+		node = p.node.child(n, toString());
+	}
+
+	public MIBNode child(int n) {
+		// FIXME: add name
+		return node.child(n);
+	}
+	public MIBNode child(int[] n) {
+		// FIXME: add name
+		return node.child(n);
+	}
 }

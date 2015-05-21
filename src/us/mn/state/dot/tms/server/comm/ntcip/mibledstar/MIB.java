@@ -22,9 +22,30 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  *
  * @author Douglas Lau
  */
-public interface MIB {
-	MIBNode ledstar = MIB1201._private.child(16);
-	MIBNode ledstarDMS = ledstar.child(1);
-	MIBNode ledstarSignControl = ledstarDMS.child(1);
-	MIBNode ledstarDiagnostics = ledstarDMS.child(2);
+public enum MIB {
+	ledstar			(MIB1201._private, 16),
+	ledstarDMS		(ledstar, 1),
+	ledstarSignControl	(ledstarDMS, 1),
+	ledstarDiagnostics	(ledstarDMS, 2);
+
+	private final MIBNode node;
+	private MIB(MIB1201 p, int n) {
+		// FIXME: add name
+		node = p.child(n);
+	}
+	private MIB(MIB p, int n) {
+		node = p.node.child(n, toString());
+	}
+	private MIB(MIB p, int[] n) {
+		node = p.node.child(n, toString());
+	}
+
+	public MIBNode child(int n) {
+		// FIXME: add name
+		return node.child(n);
+	}
+	public MIBNode child(int[] n) {
+		// FIXME: add name
+		return node.child(n);
+	}
 }
