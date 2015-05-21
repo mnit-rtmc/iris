@@ -21,14 +21,38 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  *
  * @author Douglas Lau
  */
-public interface MIB1201 {
-	MIBNode nema = MIBNode.root( new int[] { 1, 3, 6, 1, 4, 1, 1206 } );
-	MIBNode _private = nema.child(3);
-	MIBNode transportation = nema.child(4);
-	MIBNode devices = transportation.child(2);
-	MIBNode global = devices.child(6);
-	MIBNode globalConfiguration = global.child(1);
-	MIBNode globalModuleTable = globalConfiguration.child(3);
-	MIBNode moduleTableEntry = globalModuleTable.child(1);
-	MIBNode globalMaxModules = globalConfiguration.child(new int[] {2, 0});
+public enum MIB1201 {
+	nema			(new int[] { 1, 3, 6, 1, 4, 1, 1206 }),
+	_private		(nema, 3),
+	transportation		(nema, 4),
+	devices			(transportation, 2),
+	global			(devices, 6),
+	globalConfiguration	(global, 1),
+	globalModuleTable	(globalConfiguration, 3),
+	moduleTableEntry	(globalModuleTable, 1),
+	globalMaxModules	(globalConfiguration, new int[] { 2, 0 });
+
+	private final MIB1201 parent;
+	private final MIBNode node;
+	private MIB1201(int[] n) {
+		parent = null;
+		node = MIBNode.root(n, toString());
+	}
+	private MIB1201(MIB1201 p, int n) {
+		parent = p;
+		node = parent.node.child(n, toString());
+	}
+	private MIB1201(MIB1201 p, int[] n) {
+		parent = p;
+		node = parent.node.child(n, toString());
+	}
+
+	public MIBNode child(int n) {
+		// FIXME: add name
+		return node.child(n);
+	}
+	public MIBNode child(int[] n) {
+		// FIXME: add name
+		return node.child(n);
+	}
 }
