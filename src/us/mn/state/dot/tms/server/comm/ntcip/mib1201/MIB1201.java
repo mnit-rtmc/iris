@@ -32,19 +32,15 @@ public enum MIB1201 {
 	moduleTableEntry	(globalModuleTable, 1),
 	globalMaxModules	(globalConfiguration, new int[] { 2, 0 });
 
-	private final MIB1201 parent;
 	private final MIBNode node;
 	private MIB1201(int[] n) {
-		parent = null;
 		node = MIBNode.root(n, toString());
 	}
 	private MIB1201(MIB1201 p, int n) {
-		parent = p;
-		node = parent.node.child(n, toString());
+		node = p.node.child(n, toString());
 	}
 	private MIB1201(MIB1201 p, int[] n) {
-		parent = p;
-		node = parent.node.child(n, toString());
+		node = p.node.child(n, toString());
 	}
 
 	public MIBNode child(int n) {

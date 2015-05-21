@@ -22,35 +22,56 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  *
  * @author Douglas Lau
  */
-public interface MIB1203 {
-	MIBNode dms = MIB1201.devices.child(3);
-	MIBNode dmsSignCfg = dms.child(1);
-	MIBNode vmsCfg = dms.child(2);
-	MIBNode fontDefinition = dms.child(3);
-	MIBNode fontTable = fontDefinition.child(2);
-	MIBNode fontEntry = fontTable.child(1);
-	MIBNode characterTable = fontDefinition.child(4);
-	MIBNode characterEntry = characterTable.child(1);
-	MIBNode multiCfg = dms.child(4);
-	MIBNode dmsMessage = dms.child(5);
-	MIBNode dmsMessageTable = dmsMessage.child(8);
-	MIBNode dmsMessageEntry = dmsMessageTable.child(1);
-	MIBNode signControl = dms.child(6);
-	MIBNode illum = dms.child(7);
-	MIBNode dmsStatus = dms.child(9);
-	MIBNode statError = dmsStatus.child(7);
-	MIBNode pixelFailureTable = statError.child(3);
-	MIBNode pixelFailureEntry = pixelFailureTable.child(1);
-	MIBNode dmsPowerStatusTable = statError.child(13);
-	MIBNode dmsPowerStatusEntry = dmsPowerStatusTable.child(1);
-	MIBNode dmsLampStatusTable = statError.child(24);
-	MIBNode dmsLampStatusEntry = dmsLampStatusTable.child(1);
-	MIBNode dmsLightSensorStatusTable = statError.child(30);
-	MIBNode dmsLightSensorStatusEntry = dmsLightSensorStatusTable.child(1);
-	MIBNode statTemp = dmsStatus.child(9);
-	MIBNode graphicDefinition = dms.child(10);
-	MIBNode dmsGraphicTable = graphicDefinition.child(6);
-	MIBNode dmsGraphicEntry = dmsGraphicTable.child(1);
-	MIBNode dmsGraphicBitmapTable = graphicDefinition.child(7);
-	MIBNode dmsGraphicBitmapEntry = dmsGraphicBitmapTable.child(1);
+public enum MIB1203 {
+	dms				(MIB1201.devices, 3),
+	dmsSignCfg			(dms, 1),
+	vmsCfg				(dms, 2),
+	fontDefinition			(dms, 3),
+	fontTable			(fontDefinition, 2),
+	fontEntry			(fontTable, 1),
+	characterTable			(fontDefinition, 4),
+	characterEntry			(characterTable, 1),
+	multiCfg			(dms, 4),
+	dmsMessage			(dms, 5),
+	dmsMessageTable			(dmsMessage, 8),
+	dmsMessageEntry			(dmsMessageTable, 1),
+	signControl			(dms, 6),
+	illum				(dms, 7),
+	dmsStatus			(dms, 9),
+	statError			(dmsStatus, 7),
+	pixelFailureTable		(statError, 3),
+	pixelFailureEntry		(pixelFailureTable, 1),
+	dmsPowerStatusTable		(statError, 13),
+	dmsPowerStatusEntry		(dmsPowerStatusTable, 1),
+	dmsLampStatusTable		(statError, 24),
+	dmsLampStatusEntry		(dmsLampStatusTable, 1),
+	dmsLightSensorStatusTable	(statError, 30),
+	dmsLightSensorStatusEntry	(dmsLightSensorStatusTable, 1),
+	statTemp			(dmsStatus, 9),
+	graphicDefinition		(dms, 10),
+	dmsGraphicTable			(graphicDefinition, 6),
+	dmsGraphicEntry			(dmsGraphicTable, 1),
+	dmsGraphicBitmapTable		(graphicDefinition, 7),
+	dmsGraphicBitmapEntry		(dmsGraphicBitmapTable, 1);
+
+	private final MIBNode node;
+	private MIB1203(MIB1201 p, int n) {
+		// FIXME: add name
+		node = p.child(n);
+	}
+	private MIB1203(MIB1203 p, int n) {
+		node = p.node.child(n, toString());
+	}
+	private MIB1203(MIB1203 p, int[] n) {
+		node = p.node.child(n, toString());
+	}
+
+	public MIBNode child(int n) {
+		// FIXME: add name
+		return node.child(n);
+	}
+	public MIBNode child(int[] n) {
+		// FIXME: add name
+		return node.child(n);
+	}
 }
