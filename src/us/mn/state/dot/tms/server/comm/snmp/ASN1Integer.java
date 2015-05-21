@@ -22,10 +22,10 @@ import java.io.IOException;
  *
  * @author Douglas Lau
  */
-abstract public class ASN1Integer extends ASN1Object {
+public class ASN1Integer extends ASN1Object {
 
 	/** Create a new ASN1 integer */
-	protected ASN1Integer(MIBNode n) {
+	public ASN1Integer(MIBNode n) {
 		super(n);
 	}
 

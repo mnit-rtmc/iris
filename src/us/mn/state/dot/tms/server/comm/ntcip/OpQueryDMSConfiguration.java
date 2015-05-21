@@ -19,7 +19,9 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -48,7 +50,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 
 		/** Query the number of modules */
 		protected Phase poll(CommMessage mess) throws IOException {
-			GlobalMaxModules modules = new GlobalMaxModules();
+			ASN1Integer modules = globalMaxModules.makeInt();
 			mess.add(modules);
 			mess.queryProps();
 			logQuery(modules);

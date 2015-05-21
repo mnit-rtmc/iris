@@ -14,7 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1201;
 
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
+import static us.mn.state.dot.tms.server.comm.snmp.ObjFactory.*;
 
 /**
  * MIB nodes for NTCIP 1201 (Global Object Definitions)
@@ -50,5 +52,8 @@ public enum MIB1201 {
 	public MIBNode child(int[] n) {
 		// FIXME: add name
 		return node.child(n);
+	}
+	public ASN1Integer makeInt() {
+		return INTEGER.make(node);
 	}
 }

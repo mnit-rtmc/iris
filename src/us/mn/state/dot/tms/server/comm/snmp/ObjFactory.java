@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,19 +12,24 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1201;
-
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+package us.mn.state.dot.tms.server.comm.snmp;
 
 /**
- * Ntcip GlobalMaxModules object
+ * ASN1 object factory.
  *
  * @author Douglas Lau
  */
-public class GlobalMaxModules extends ASN1Integer {
+abstract public class ObjFactory<T extends ASN1Object> {
 
-	/** Create a new GlobalMaxModules object */
-	public GlobalMaxModules() {
-		super(MIB1201.globalConfiguration.child(new int[] {2, 0}));
-	}
+	/** Make an object */
+	abstract public T make(MIBNode n);
+
+	/** Integer factory */
+	static public ObjFactory<ASN1Integer> INTEGER =
+		new ObjFactory<ASN1Integer>()
+	{
+		public ASN1Integer make(MIBNode n) {
+			return new ASN1Integer(n);
+		}
+	};
 }
