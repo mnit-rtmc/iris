@@ -25,6 +25,6 @@ public class FontIndex extends ASN1Integer {
 
 	/** Create a new font index object */
 	public FontIndex(int font) {
-		super(MIB1203.fontEntry.create(new int[] { 1, font }));
+		super(MIB1203.fontEntry.child(new int[] { 1, font }));
 	}
 }

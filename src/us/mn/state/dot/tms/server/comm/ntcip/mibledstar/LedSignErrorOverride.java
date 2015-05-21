@@ -25,6 +25,6 @@ public class LedSignErrorOverride extends ASN1Integer {
 
 	/** Create a new LedSignErrorOverride object */
 	public LedSignErrorOverride() {
-		super(MIB.ledstarSignControl.create(new int[] {2, 0}));
+		super(MIB.ledstarSignControl.child(new int[] {2, 0}));
 	}
 }

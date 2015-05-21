@@ -25,6 +25,6 @@ public class VmsCharacterHeightPixels extends ASN1Integer {
 
 	/** Create a new VmsCharacterHeightPixels object */
 	public VmsCharacterHeightPixels() {
-		super(MIB1203.vmsCfg.create(new int[] {1, 0}));
+		super(MIB1203.vmsCfg.child(new int[] {1, 0}));
 	}
 }

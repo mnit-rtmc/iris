@@ -41,7 +41,7 @@ public class DmsPowerStatus extends ASN1Integer {
 
 	/** Create a new DmsPowerStatus object */
 	public DmsPowerStatus(int row) {
-		super(MIB1203.dmsPowerStatusEntry.create(new int[] {4, row}));
+		super(MIB1203.dmsPowerStatusEntry.child(new int[] {4, row}));
 	}
 
 	/** Set the enum value */

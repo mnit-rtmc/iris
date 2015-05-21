@@ -26,7 +26,7 @@ public class DmsLightSensorIndex extends ASN1Integer {
 
 	/** Create a new DmsLightSensorIndex object */
 	public DmsLightSensorIndex(int row) {
-		super(MIB1203.dmsLightSensorStatusEntry.create(
+		super(MIB1203.dmsLightSensorStatusEntry.child(
 			new int[] {1, row}));
 	}
 }

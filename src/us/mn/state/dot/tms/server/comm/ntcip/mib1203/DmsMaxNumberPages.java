@@ -25,6 +25,6 @@ public class DmsMaxNumberPages extends ASN1Integer {
 
 	/** Create a new DmsMaxNumberPages object */
 	public DmsMaxNumberPages() {
-		super(MIB1203.multiCfg.create(new int[] {15, 0}));
+		super(MIB1203.multiCfg.child(new int[] {15, 0}));
 	}
 }

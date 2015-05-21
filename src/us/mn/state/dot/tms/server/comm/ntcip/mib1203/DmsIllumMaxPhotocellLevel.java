@@ -25,6 +25,6 @@ public class DmsIllumMaxPhotocellLevel extends ASN1Integer {
 
 	/** Create a new DmsIllumMaxPhotocellLevel object */
 	public DmsIllumMaxPhotocellLevel() {
-		super(MIB1203.illum.create(new int[] {2, 0}));
+		super(MIB1203.illum.child(new int[] {2, 0}));
 	}
 }

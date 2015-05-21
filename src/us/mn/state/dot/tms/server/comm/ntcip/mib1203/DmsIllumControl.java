@@ -48,7 +48,7 @@ public class DmsIllumControl extends ASN1Integer {
 
 	/** Create a new DmsIllumControl object */
 	public DmsIllumControl() {
-		super(MIB1203.illum.create(new int[] {1, 0}));
+		super(MIB1203.illum.child(new int[] {1, 0}));
 	}
 
 	/** Set the control value */

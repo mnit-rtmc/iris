@@ -26,6 +26,6 @@ public class DmsGraphicMaxSize extends ASN1Integer {
 
 	/** Create a new DmsGraphicMaxSize object */
 	public DmsGraphicMaxSize() {
-		super(MIB1203.graphicDefinition.create(new int[] {3, 0}));
+		super(MIB1203.graphicDefinition.child(new int[] {3, 0}));
 	}
 }

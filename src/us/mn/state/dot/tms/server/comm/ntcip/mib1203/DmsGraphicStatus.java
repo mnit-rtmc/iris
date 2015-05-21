@@ -40,7 +40,7 @@ public class DmsGraphicStatus extends ASN1Integer {
 
 	/** Create a new DmsGraphicStatus object */
 	public DmsGraphicStatus(int row) {
-		super(MIB1203.dmsGraphicEntry.create(new int[] {10, row}));
+		super(MIB1203.dmsGraphicEntry.child(new int[] {10, row}));
 	}
 
 	/** Set the enum value */

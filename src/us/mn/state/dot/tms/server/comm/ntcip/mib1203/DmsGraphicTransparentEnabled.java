@@ -26,6 +26,6 @@ public class DmsGraphicTransparentEnabled extends ASN1Integer {
 
 	/** Create a new DmsGraphicTransparentEnabled object */
 	public DmsGraphicTransparentEnabled(int row) {
-		super(MIB1203.dmsGraphicEntry.create(new int[] {8, row}));
+		super(MIB1203.dmsGraphicEntry.child(new int[] {8, row}));
 	}
 }

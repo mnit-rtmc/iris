@@ -25,6 +25,6 @@ public class TempMinAmbient extends ASN1Integer {
 
 	/** Create a new TempMinAmbient object */
 	public TempMinAmbient() {
-		super(MIB1203.statTemp.create(new int[] {3, 0}));
+		super(MIB1203.statTemp.child(new int[] {3, 0}));
 	}
 }

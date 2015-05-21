@@ -25,6 +25,6 @@ public class DmsGraphicID extends ASN1Integer {
 
 	/** Create a new DmsGraphicID object */
 	public DmsGraphicID(int row) {
-		super(MIB1203.dmsGraphicEntry.create(new int[] {7, row}));
+		super(MIB1203.dmsGraphicEntry.child(new int[] {7, row}));
 	}
 }

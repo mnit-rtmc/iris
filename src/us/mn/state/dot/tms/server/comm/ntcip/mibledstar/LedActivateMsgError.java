@@ -33,7 +33,7 @@ public class LedActivateMsgError extends ASN1Integer {
 
 	/** Create a new LedActivateMsgError */
 	public LedActivateMsgError() {
-		super(MIB.ledstarDiagnostics.create(new int[] {12, 0}));
+		super(MIB.ledstarDiagnostics.child(new int[] {12, 0}));
 	}
 
 	/** Get the object value */

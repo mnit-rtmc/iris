@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,6 @@ public class DmsMultiOtherErrorDescription extends DisplayString {
 
 	/** Create a new DmsMultiOtherErrorDescription object */
 	public DmsMultiOtherErrorDescription() {
-		super(MIB1203.signControl.create(new int[] {20, 0}));
+		super(MIB1203.signControl.child(new int[] {20, 0}));
 	}
 }

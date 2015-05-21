@@ -25,7 +25,7 @@ public class SignFaceHeatStatus extends ASN1Integer {
 
 	/** Create a new SignFaceHeatStatus object */
 	public SignFaceHeatStatus() {
-		super(MIB.skylineDmsStatus.create(new int[] {4, 0}));
+		super(MIB.skylineDmsStatus.child(new int[] {4, 0}));
 	}
 
 	/** Get the object value */

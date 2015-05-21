@@ -26,7 +26,7 @@ public class DefaultJustificationPage extends ASN1Integer {
 
 	/** Create a new DefaultJustificationPage object */
 	public DefaultJustificationPage() {
-		super(MIB1203.multiCfg.create(new int[] {7, 0}));
+		super(MIB1203.multiCfg.child(new int[] {7, 0}));
 	}
 
 	/** Set the enum value */

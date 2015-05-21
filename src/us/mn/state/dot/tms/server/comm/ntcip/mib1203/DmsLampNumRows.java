@@ -26,6 +26,6 @@ public class DmsLampNumRows extends ASN1Integer {
 
 	/** Create a new DmsLampNumRows object */
 	public DmsLampNumRows() {
-		super(MIB1203.statError.create(new int[] {23, 0}));
+		super(MIB1203.statError.child(new int[] {23, 0}));
 	}
 }

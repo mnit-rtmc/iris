@@ -25,7 +25,7 @@ public class ModuleModel extends ASN1OctetString {
 
 	/** Create a new module model object */
 	public ModuleModel(int row) {
-		super(MIB1201.moduleTableEntry.create(new int[] { 4, row }));
+		super(MIB1201.moduleTableEntry.child(new int[] { 4, row }));
 	}
 
 	/** Get the object value */

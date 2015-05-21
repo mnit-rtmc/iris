@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,6 @@ public class DmsPowerDescription extends DisplayString {
 
 	/** Create a new DmsPowerDescription object */
 	public DmsPowerDescription(int row) {
-		super(MIB1203.dmsPowerStatusEntry.create(new int[] {2, row}));
+		super(MIB1203.dmsPowerStatusEntry.child(new int[] {2, row}));
 	}
 }

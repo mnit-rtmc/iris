@@ -43,7 +43,7 @@ public class DmsBeaconType extends ASN1Integer {
 
 	/** Create a new DmsBeaconType object */
 	public DmsBeaconType() {
-		super(MIB1203.dmsSignCfg.create(new int[] {8, 0}));
+		super(MIB1203.dmsSignCfg.child(new int[] {8, 0}));
 	}
 
 	/** Set the integer value */

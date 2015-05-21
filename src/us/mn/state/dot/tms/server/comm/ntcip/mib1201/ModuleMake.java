@@ -25,7 +25,7 @@ public class ModuleMake extends ASN1OctetString {
 
 	/** Create a new module make object */
 	public ModuleMake(int row) {
-		super(MIB1201.moduleTableEntry.create(new int[] { 3, row }));
+		super(MIB1201.moduleTableEntry.child(new int[] { 3, row }));
 	}
 
 	/** Get the object value */

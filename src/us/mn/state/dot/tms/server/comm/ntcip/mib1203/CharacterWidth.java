@@ -25,7 +25,7 @@ public class CharacterWidth extends ASN1Integer {
 
 	/** Create a new CharacterWidth object */
 	public CharacterWidth(int font, int index) {
-		super(MIB1203.characterEntry.create(new int[] {
+		super(MIB1203.characterEntry.child(new int[] {
 			2, font, index}));
 	}
 }

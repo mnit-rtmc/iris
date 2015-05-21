@@ -25,7 +25,7 @@ public class CharacterBitmap extends ASN1OctetString {
 
 	/** Create a new CharacterBitmap object */
 	public CharacterBitmap(int font, int index) {
-		super(MIB1203.characterEntry.create(new int[] {
+		super(MIB1203.characterEntry.child(new int[] {
 			3, font, index}));
 	}
 }

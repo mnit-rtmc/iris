@@ -25,6 +25,6 @@ public class DynBrightDayRate extends ASN1Integer {
 
 	/** Create a new DynBrightDayRate object */
 	public DynBrightDayRate() {
-		super(MIB.skylineDmsSignCfg.create(new int[] {2, 0}));
+		super(MIB.skylineDmsSignCfg.child(new int[] {2, 0}));
 	}
 }

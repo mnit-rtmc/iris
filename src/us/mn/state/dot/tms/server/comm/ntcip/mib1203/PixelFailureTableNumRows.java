@@ -25,6 +25,6 @@ public class PixelFailureTableNumRows extends ASN1Integer {
 
 	/** Create a new PixelFailureTableNumRows object */
 	public PixelFailureTableNumRows() {
-		super(MIB1203.statError.create(new int[] {2, 0}));
+		super(MIB1203.statError.child(new int[] {2, 0}));
 	}
 }

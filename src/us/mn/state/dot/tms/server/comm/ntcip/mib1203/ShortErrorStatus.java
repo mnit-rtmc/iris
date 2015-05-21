@@ -88,7 +88,7 @@ public class ShortErrorStatus extends ASN1Integer {
 
 	/** Create a new ShortErrorStatus object */
 	public ShortErrorStatus() {
-		super(MIB1203.statError.create(new int[] {1, 0}));
+		super(MIB1203.statError.child(new int[] {1, 0}));
 	}
 
 	/** Get the object value */

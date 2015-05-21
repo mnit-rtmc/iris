@@ -25,6 +25,6 @@ public class DmsHorizontalBorder extends ASN1Integer {
 
 	/** Create a new DmsHorizontalBorder object */
 	public DmsHorizontalBorder() {
-		super(MIB1203.dmsSignCfg.create(new int[] {5, 0}));
+		super(MIB1203.dmsSignCfg.child(new int[] {5, 0}));
 	}
 }

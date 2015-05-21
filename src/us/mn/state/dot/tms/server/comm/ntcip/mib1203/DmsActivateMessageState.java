@@ -43,7 +43,7 @@ public class DmsActivateMessageState extends ASN1Integer {
 
 	/** Create a new DmsActivateMessageState object */
 	public DmsActivateMessageState() {
-		super(MIB1203.signControl.create(new int[] {25, 0}));
+		super(MIB1203.signControl.child(new int[] {25, 0}));
 	}
 
 	/** Get the object value */

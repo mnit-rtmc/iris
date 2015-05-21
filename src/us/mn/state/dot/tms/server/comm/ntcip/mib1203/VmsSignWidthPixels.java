@@ -25,6 +25,6 @@ public class VmsSignWidthPixels extends ASN1Integer {
 
 	/** Create a new VmsSignWidthPixels object */
 	public VmsSignWidthPixels() {
-		super(MIB1203.vmsCfg.create(new int[] {4, 0}));
+		super(MIB1203.vmsCfg.child(new int[] {4, 0}));
 	}
 }

@@ -26,6 +26,6 @@ public class FontMaxCharacterSize extends ASN1Integer {
 
 	/** Create a new FontMaxCharacterSize object */
 	public FontMaxCharacterSize() {
-		super(MIB1203.fontDefinition.create(new int[] {5, 0}));
+		super(MIB1203.fontDefinition.child(new int[] {5, 0}));
 	}
 }

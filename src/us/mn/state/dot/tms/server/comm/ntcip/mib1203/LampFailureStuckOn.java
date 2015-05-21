@@ -25,7 +25,7 @@ public class LampFailureStuckOn extends ASN1OctetString {
 
 	/** Create a new LampFailureStuckOn object */
 	public LampFailureStuckOn() {
-		super(MIB1203.statError.create(new int[] {5, 0}));
+		super(MIB1203.statError.child(new int[] {5, 0}));
 	}
 
 	/** Get the object value */

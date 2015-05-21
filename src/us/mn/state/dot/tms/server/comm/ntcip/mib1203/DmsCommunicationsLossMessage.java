@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2009  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,6 @@ public class DmsCommunicationsLossMessage extends MessageIDCode {
 
 	/** Create a new DMS communications loss message object */
 	public DmsCommunicationsLossMessage() {
-		super(MIB1203.signControl.create(new int[] {12, 0}));
+		super(MIB1203.signControl.child(new int[] {12, 0}));
 	}
 }

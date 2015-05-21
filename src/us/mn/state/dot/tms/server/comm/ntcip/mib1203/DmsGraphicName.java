@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,6 @@ public class DmsGraphicName extends DisplayString {
 
 	/** Create a new DmsGraphicName object */
 	public DmsGraphicName(int row) {
-		super(MIB1203.dmsGraphicEntry.create(new int[] {3, row}));
+		super(MIB1203.dmsGraphicEntry.child(new int[] {3, row}));
 	}
 }

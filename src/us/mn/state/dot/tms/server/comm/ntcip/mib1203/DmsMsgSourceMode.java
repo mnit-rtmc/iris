@@ -42,7 +42,7 @@ public class DmsMsgSourceMode extends ASN1Integer {
 
 	/** Create a new DmsMsgSourceMode object */
 	public DmsMsgSourceMode() {
-		super(MIB1203.signControl.create(new int[] {7, 0}));
+		super(MIB1203.signControl.child(new int[] {7, 0}));
 	}
 
 	/** Set the integer value */

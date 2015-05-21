@@ -45,7 +45,7 @@ public class ControllerErrorStatus extends ASN1Integer {
 
 	/** Create a new ControllerErrorStatus object */
 	public ControllerErrorStatus() {
-		super(MIB1203.statError.create(new int[] {10, 0}));
+		super(MIB1203.statError.child(new int[] {10, 0}));
 	}
 
 	/** Get the object value */

@@ -57,7 +57,7 @@ public class DmsMessageCRC extends ASN1Integer {
 
 	/** Create a new DmsMessageCRC object */
 	public DmsMessageCRC(DmsMessageMemoryType.Enum m, int number) {
-		super(MIB1203.dmsMessageEntry.create(new int[] {
+		super(MIB1203.dmsMessageEntry.child(new int[] {
 			5, m.ordinal(), number}));
 	}
 }

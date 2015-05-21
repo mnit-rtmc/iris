@@ -25,7 +25,7 @@ public class DmsMessagePixelService extends ASN1Integer {
 
 	/** Create a new DmsMessagePixelService object */
 	public DmsMessagePixelService(DmsMessageMemoryType.Enum m, int number) {
-		super(MIB1203.dmsMessageEntry.create(new int[] {
+		super(MIB1203.dmsMessageEntry.child(new int[] {
 			7, m.ordinal(), number}));
 	}
 }

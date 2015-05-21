@@ -25,6 +25,6 @@ public class MaxFontCharacters extends ASN1Integer {
 
 	/** Create a new MaxFontCharacters object */
 	public MaxFontCharacters() {
-		super(MIB1203.fontDefinition.create(new int[] {3, 0}));
+		super(MIB1203.fontDefinition.child(new int[] {3, 0}));
 	}
 }

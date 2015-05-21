@@ -26,6 +26,6 @@ public class DmsPowerIndex extends ASN1Integer {
 
 	/** Create a new DmsPowerIndex object */
 	public DmsPowerIndex(int row) {
-		super(MIB1203.dmsPowerStatusEntry.create(new int[] {1, row}));
+		super(MIB1203.dmsPowerStatusEntry.child(new int[] {1, row}));
 	}
 }

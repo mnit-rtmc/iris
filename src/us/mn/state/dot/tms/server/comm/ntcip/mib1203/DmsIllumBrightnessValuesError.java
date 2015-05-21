@@ -40,7 +40,7 @@ public class DmsIllumBrightnessValuesError extends ASN1Integer {
 
 	/** Create a new DmsIllumBrightnessValuesError object */
 	public DmsIllumBrightnessValuesError() {
-		super(MIB1203.illum.create(new int[] {8, 0}));
+		super(MIB1203.illum.child(new int[] {8, 0}));
 	}
 
 	/** Get the object value */

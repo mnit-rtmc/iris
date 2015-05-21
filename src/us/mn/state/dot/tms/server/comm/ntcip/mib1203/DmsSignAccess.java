@@ -37,7 +37,7 @@ public class DmsSignAccess extends ASN1Integer {
 
 	/** Create a new DmsSignAccess object */
 	public DmsSignAccess() {
-		super(MIB1203.dmsSignCfg.create(new int[] {1, 0}));
+		super(MIB1203.dmsSignCfg.child(new int[] {1, 0}));
 	}
 
 	/** Get the object value */

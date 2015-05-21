@@ -40,7 +40,7 @@ public class DmsLightSensorStatus extends ASN1Integer {
 
 	/** Create a new DmsLightSensorStatus object */
 	public DmsLightSensorStatus(int row) {
-		super(MIB1203.dmsLightSensorStatusEntry.create(
+		super(MIB1203.dmsLightSensorStatusEntry.child(
 			new int[] {4, row}));
 	}
 

@@ -95,7 +95,7 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 
 	/** Create a new DmsIllumBrightnessValues object */
 	public DmsIllumBrightnessValues() {
-		super(MIB1203.illum.create(new int[] {7, 0}));
+		super(MIB1203.illum.child(new int[] {7, 0}));
 	}
 
 	/** Set the brightness table */

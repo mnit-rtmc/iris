@@ -26,7 +26,7 @@ public class FanFailures extends ASN1OctetString {
 
 	/** Create a new FanFailures object */
 	public FanFailures() {
-		super(MIB1203.statError.create(new int[] {8, 0}));
+		super(MIB1203.statError.child(new int[] {8, 0}));
 	}
 
 	/** Set the octet string value */

@@ -25,6 +25,6 @@ public class FontVersionID extends ASN1Integer {
 
 	/** Create a new FontVersionID object */
 	public FontVersionID(int font) {
-		super(MIB1203.fontEntry.create(new int[] { 7, font }));
+		super(MIB1203.fontEntry.child(new int[] { 7, font }));
 	}
 }

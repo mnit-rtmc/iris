@@ -25,6 +25,6 @@ public class DefaultPageOffTime extends ASN1Integer {
 
 	/** Create a new DefaultPageOffTime object */
 	public DefaultPageOffTime() {
-		super(MIB1203.multiCfg.create(new int[] {9, 0}));
+		super(MIB1203.multiCfg.child(new int[] {9, 0}));
 	}
 }

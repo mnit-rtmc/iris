@@ -46,7 +46,7 @@ public class DmsSignTechnology extends ASN1Integer {
 
 	/** Create a new DmsSignTechnology object */
 	public DmsSignTechnology() {
-		super(MIB1203.dmsSignCfg.create(new int[] {9, 0}));
+		super(MIB1203.dmsSignCfg.child(new int[] {9, 0}));
 	}
 
 	/** Get the object value */

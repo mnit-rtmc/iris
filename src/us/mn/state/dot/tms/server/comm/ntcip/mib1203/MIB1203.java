@@ -22,49 +22,35 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  *
  * @author Douglas Lau
  */
-class MIB1203 extends MIBNode {
-
-	private MIB1203() {
-		super(null, null);
-		assert false;
-	}
-
-	static public final MIBNode dms = MIB1201.devices.create(3);
-	static public final MIBNode dmsSignCfg = dms.create(1);
-	static public final MIBNode vmsCfg = dms.create(2);
-	static public final MIBNode fontDefinition = dms.create(3);
-	static public final MIBNode fontTable = fontDefinition.create(2);
-	static public final MIBNode fontEntry = fontTable.create(1);
-	static public final MIBNode characterTable = fontDefinition.create(4);
-	static public final MIBNode characterEntry = characterTable.create(1);
-	static public final MIBNode multiCfg = dms.create(4);
-	static public final MIBNode dmsMessage = dms.create(5);
-	static public final MIBNode dmsMessageTable = dmsMessage.create(8);
-	static public final MIBNode dmsMessageEntry = dmsMessageTable.create(1);
-	static public final MIBNode signControl = dms.create(6);
-	static public final MIBNode illum = dms.create(7);
-	static public final MIBNode dmsStatus = dms.create(9);
-	static public final MIBNode statError = dmsStatus.create(7);
-	static public final MIBNode pixelFailureTable = statError.create(3);
-	static public final MIBNode pixelFailureEntry =
-		pixelFailureTable.create(1);
-	static public final MIBNode dmsPowerStatusTable = statError.create(13);
-	static public final MIBNode dmsPowerStatusEntry =
-		dmsPowerStatusTable.create(1);
-	static public final MIBNode dmsLampStatusTable = statError.create(24);
-	static public final MIBNode dmsLampStatusEntry =
-		dmsLampStatusTable.create(1);
-	static public final MIBNode dmsLightSensorStatusTable =
-		statError.create(30);
-	static public final MIBNode dmsLightSensorStatusEntry =
-		dmsLightSensorStatusTable.create(1);
-	static public final MIBNode statTemp = dmsStatus.create(9);
-	static public final MIBNode graphicDefinition = dms.create(10);
-	static public final MIBNode dmsGraphicTable =
-		graphicDefinition.create(6);
-	static public final MIBNode dmsGraphicEntry = dmsGraphicTable.create(1);
-	static public final MIBNode dmsGraphicBitmapTable =
-		graphicDefinition.create(7);
-	static public final MIBNode dmsGraphicBitmapEntry =
-		dmsGraphicBitmapTable.create(1);
+public interface MIB1203 {
+	MIBNode dms = MIB1201.devices.child(3);
+	MIBNode dmsSignCfg = dms.child(1);
+	MIBNode vmsCfg = dms.child(2);
+	MIBNode fontDefinition = dms.child(3);
+	MIBNode fontTable = fontDefinition.child(2);
+	MIBNode fontEntry = fontTable.child(1);
+	MIBNode characterTable = fontDefinition.child(4);
+	MIBNode characterEntry = characterTable.child(1);
+	MIBNode multiCfg = dms.child(4);
+	MIBNode dmsMessage = dms.child(5);
+	MIBNode dmsMessageTable = dmsMessage.child(8);
+	MIBNode dmsMessageEntry = dmsMessageTable.child(1);
+	MIBNode signControl = dms.child(6);
+	MIBNode illum = dms.child(7);
+	MIBNode dmsStatus = dms.child(9);
+	MIBNode statError = dmsStatus.child(7);
+	MIBNode pixelFailureTable = statError.child(3);
+	MIBNode pixelFailureEntry = pixelFailureTable.child(1);
+	MIBNode dmsPowerStatusTable = statError.child(13);
+	MIBNode dmsPowerStatusEntry = dmsPowerStatusTable.child(1);
+	MIBNode dmsLampStatusTable = statError.child(24);
+	MIBNode dmsLampStatusEntry = dmsLampStatusTable.child(1);
+	MIBNode dmsLightSensorStatusTable = statError.child(30);
+	MIBNode dmsLightSensorStatusEntry = dmsLightSensorStatusTable.child(1);
+	MIBNode statTemp = dmsStatus.child(9);
+	MIBNode graphicDefinition = dms.child(10);
+	MIBNode dmsGraphicTable = graphicDefinition.child(6);
+	MIBNode dmsGraphicEntry = dmsGraphicTable.child(1);
+	MIBNode dmsGraphicBitmapTable = graphicDefinition.child(7);
+	MIBNode dmsGraphicBitmapEntry = dmsGraphicBitmapTable.child(1);
 }

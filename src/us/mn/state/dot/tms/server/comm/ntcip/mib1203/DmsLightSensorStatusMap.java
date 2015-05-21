@@ -26,7 +26,7 @@ public class DmsLightSensorStatusMap extends ASN1OctetString {
 
 	/** Create a new DmsLightSensorStatusMap object */
 	public DmsLightSensorStatusMap() {
-		super(MIB1203.statError.create(new int[] {28, 0}));
+		super(MIB1203.statError.child(new int[] {28, 0}));
 	}
 
 	/** Get the object value */

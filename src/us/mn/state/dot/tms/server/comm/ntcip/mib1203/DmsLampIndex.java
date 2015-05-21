@@ -26,6 +26,6 @@ public class DmsLampIndex extends ASN1Integer {
 
 	/** Create a new DmsLampIndex object */
 	public DmsLampIndex(int row) {
-		super(MIB1203.dmsLampStatusEntry.create(new int[] {1, row}));
+		super(MIB1203.dmsLampStatusEntry.child(new int[] {1, row}));
 	}
 }

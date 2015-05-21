@@ -40,7 +40,7 @@ public class DmsMemoryMgmt extends ASN1Integer {
 
 	/** Create a new DmsMemoryMgmt object */
 	public DmsMemoryMgmt() {
-		super(MIB1203.signControl.create(new int[] {16, 0}));
+		super(MIB1203.signControl.child(new int[] {16, 0}));
 	}
 
 	/** Set the integer value */

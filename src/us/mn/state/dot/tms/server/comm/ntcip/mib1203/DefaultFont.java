@@ -26,6 +26,6 @@ public class DefaultFont extends ASN1Integer {
 
 	/** Create a new DefaultFont object */
 	public DefaultFont() {
-		super(MIB1203.multiCfg.create(new int[] {5, 0}));
+		super(MIB1203.multiCfg.child(new int[] {5, 0}));
 	}
 }

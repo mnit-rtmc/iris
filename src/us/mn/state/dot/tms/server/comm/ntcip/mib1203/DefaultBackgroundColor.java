@@ -26,7 +26,7 @@ public class DefaultBackgroundColor extends ASN1Integer {
 
 	/** Create a new DefaultBackgroundColor object */
 	public DefaultBackgroundColor() {
-		super(MIB1203.multiCfg.create(new int[] {1, 0}));
+		super(MIB1203.multiCfg.child(new int[] {1, 0}));
 	}
 
 	/** Get the enum value */

@@ -43,7 +43,7 @@ public class PixelFailureStatus extends ASN1Integer {
 
 	/** Create a new pixel failure status object */
 	public PixelFailureStatus(PixelFailureDetectionType.Enum t, int row) {
-		super(MIB1203.pixelFailureEntry.create(new int[] {5,
+		super(MIB1203.pixelFailureEntry.child(new int[] {5,
 		      t.ordinal(), row}));
 	}
 

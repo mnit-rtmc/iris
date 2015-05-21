@@ -25,6 +25,6 @@ public class DmsGraphicHeight extends ASN1Integer {
 
 	/** Create a new DmsGraphicHeight object */
 	public DmsGraphicHeight(int row) {
-		super(MIB1203.dmsGraphicEntry.create(new int[] {4, row}));
+		super(MIB1203.dmsGraphicEntry.child(new int[] {4, row}));
 	}
 }

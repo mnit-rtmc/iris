@@ -27,7 +27,7 @@ public class DmsLightSensorCurrentReading extends ASN1Integer {
 
 	/** Create a new DmsLightSensorCurrentReading object */
 	public DmsLightSensorCurrentReading(int row) {
-		super(MIB1203.dmsLightSensorStatusEntry.create(
+		super(MIB1203.dmsLightSensorStatusEntry.child(
 			new int[] {3, row}));
 	}
 }

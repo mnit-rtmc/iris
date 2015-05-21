@@ -41,7 +41,7 @@ public class FontStatus extends ASN1Integer {
 
 	/** Create a new FontStatus object */
 	public FontStatus(int font) {
-		super(MIB1203.fontEntry.create(new int[] { 8, font }));
+		super(MIB1203.fontEntry.child(new int[] { 8, font }));
 	}
 
 	/** Set the enum value */

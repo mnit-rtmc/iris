@@ -25,7 +25,7 @@ public class DmsGraphicBlockBitmap extends ASN1OctetString {
 
 	/** Create a new DmsGraphicBlockBitmap object */
 	public DmsGraphicBlockBitmap(int row, int block) {
-		super(MIB1203.dmsGraphicBitmapEntry.create(new int[] {3, row,
+		super(MIB1203.dmsGraphicBitmapEntry.child(new int[] {3, row,
 			block}));
 	}
 }

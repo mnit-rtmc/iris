@@ -21,6 +21,11 @@ package us.mn.state.dot.tms.server.comm.snmp;
  */
 public class MIBNode {
 
+	/** Create a root MIB node */
+	static public MIBNode root(int[] n) {
+		return new MIBNode(null, n);
+	}
+
 	/** Parent node */
 	private final MIBNode parent;
 
@@ -28,19 +33,19 @@ public class MIBNode {
 	private final int[] nid;
 
 	/** Create a node in a MIB */
-	protected MIBNode(MIBNode p, int[] n) {
+	private MIBNode(MIBNode p, int[] n) {
 		parent = p;
 		nid = n;
 	}
 
 	/** Create a new child node */
-	public MIBNode create(int[] n) {
+	public MIBNode child(int[] n) {
 		return new MIBNode(this, n);
 	}
 
 	/** Create a new child node */
-	public MIBNode create(int n) {
-		return create(new int[] { n });
+	public MIBNode child(int n) {
+		return child(new int[] { n });
 	}
 
 	/** Create an Object Identifier */

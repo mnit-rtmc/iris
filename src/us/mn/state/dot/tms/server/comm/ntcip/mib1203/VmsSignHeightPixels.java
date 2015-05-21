@@ -25,6 +25,6 @@ public class VmsSignHeightPixels extends ASN1Integer {
 
 	/** Create a new VmsSignHeightPixels object */
 	public VmsSignHeightPixels() {
-		super(MIB1203.vmsCfg.create(new int[] {3, 0}));
+		super(MIB1203.vmsCfg.child(new int[] {3, 0}));
 	}
 }

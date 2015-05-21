@@ -39,7 +39,7 @@ public class LampTestActivation extends ASN1Integer {
 
 	/** Create a new LampTestActivation object */
 	public LampTestActivation() {
-		super(MIB1203.statError.create(new int[] {7, 0}));
+		super(MIB1203.statError.child(new int[] {7, 0}));
 		value = Enum.test.ordinal();
 	}
 

@@ -25,6 +25,6 @@ public class DmsIllumPhotocellLevelStatus extends ASN1Integer {
 
 	/** Create a new DmsIllumPhotocellLevelStatus object */
 	public DmsIllumPhotocellLevelStatus() {
-		super(MIB1203.illum.create(new int[] {3, 0}));
+		super(MIB1203.illum.child(new int[] {3, 0}));
 	}
 }

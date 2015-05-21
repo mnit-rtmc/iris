@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,6 @@ public class DmsActivateErrorMsgCode extends MessageActivationCode {
 
 	/** Create a new DmsActivateErrorMsgCode object */
 	public DmsActivateErrorMsgCode() {
-		super(MIB1203.signControl.create(new int[] {24, 0}));
+		super(MIB1203.signControl.child(new int[] {24, 0}));
 	}
 }

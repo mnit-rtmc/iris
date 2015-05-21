@@ -26,6 +26,6 @@ public class DmsGraphicTransparentColor extends ASN1OctetString {
 
 	/** Create a new DmsGraphicTransparentColor object */
 	public DmsGraphicTransparentColor(int row) {
-		super(MIB1203.dmsGraphicEntry.create(new int[] {9, row}));
+		super(MIB1203.dmsGraphicEntry.child(new int[] {9, row}));
 	}
 }

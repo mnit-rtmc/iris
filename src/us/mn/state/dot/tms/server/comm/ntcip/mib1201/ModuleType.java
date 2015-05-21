@@ -39,7 +39,7 @@ public class ModuleType extends ASN1Integer {
 
 	/** Create a new module type object */
 	public ModuleType(int row) {
-		super(MIB1201.moduleTableEntry.create(new int[] { 6, row }));
+		super(MIB1201.moduleTableEntry.child(new int[] { 6, row }));
 	}
 
 	/** Get the enum value */

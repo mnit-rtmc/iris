@@ -25,6 +25,6 @@ public class GlobalMaxModules extends ASN1Integer {
 
 	/** Create a new GlobalMaxModules object */
 	public GlobalMaxModules() {
-		super(MIB1201.globalConfiguration.create(new int[] {2, 0}));
+		super(MIB1201.globalConfiguration.child(new int[] {2, 0}));
 	}
 }

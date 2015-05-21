@@ -27,6 +27,6 @@ public class DmsPixelFailureMessageRows extends ASN1Integer {
 
 	/** Create a new DmsPixelFailureMessageRows object */
 	public DmsPixelFailureMessageRows() {
-		super(MIB1203.statError.create(new int[] {20, 0}));
+		super(MIB1203.statError.child(new int[] {20, 0}));
 	}
 }

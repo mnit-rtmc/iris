@@ -22,16 +22,10 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  *
  * @author Douglas Lau
  */
-class MIB extends MIBNode {
-
-	private MIB() {
-		super(null, null);
-		assert false;
-	}
-
-	static public final MIBNode skyline = MIB1201._private.create(18);
-	static public final MIBNode skylineDevices = skyline.create(2);
-	static public final MIBNode skylineDms = skylineDevices.create(3);
-	static public final MIBNode skylineDmsSignCfg = skylineDms.create(1);
-	static public final MIBNode skylineDmsStatus = skylineDms.create(9);
+public interface MIB {
+	MIBNode skyline = MIB1201._private.child(18);
+	MIBNode skylineDevices = skyline.child(2);
+	MIBNode skylineDms = skylineDevices.child(3);
+	MIBNode skylineDmsSignCfg = skylineDms.child(1);
+	MIBNode skylineDmsStatus = skylineDms.child(9);
 }

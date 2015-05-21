@@ -25,6 +25,6 @@ public class DmsTempCritical extends ASN1Integer {
 
 	/** Create a new DmsTempCritical object */
 	public DmsTempCritical() {
-		super(MIB.skylineDmsSignCfg.create(new int[] {11, 0}));
+		super(MIB.skylineDmsSignCfg.child(new int[] {11, 0}));
 	}
 }

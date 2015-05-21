@@ -25,6 +25,6 @@ public class TempMaxAmbient extends ASN1Integer {
 
 	/** Create a new TempMaxAmbient object */
 	public TempMaxAmbient() {
-		super(MIB1203.statTemp.create(new int[] {4, 0}));
+		super(MIB1203.statTemp.child(new int[] {4, 0}));
 	}
 }

@@ -25,7 +25,7 @@ public class DmsIllumLightOutputStatus extends ASN1Integer {
 
 	/** Create a new DmsIllumLightOutputStatus object */
 	public DmsIllumLightOutputStatus() {
-		super(MIB1203.illum.create(new int[] {9, 0}));
+		super(MIB1203.illum.child(new int[] {9, 0}));
 	}
 
 	/** Get the light output as percent */

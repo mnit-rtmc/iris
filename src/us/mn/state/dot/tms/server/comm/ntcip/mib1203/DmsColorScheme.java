@@ -73,7 +73,7 @@ public class DmsColorScheme extends ASN1Integer {
 
 	/** Create a new DmsColorScheme object */
 	public DmsColorScheme() {
-		super(MIB1203.multiCfg.create(new int[] {11, 0}));
+		super(MIB1203.multiCfg.child(new int[] {11, 0}));
 	}
 
 	/** Get the enum value */

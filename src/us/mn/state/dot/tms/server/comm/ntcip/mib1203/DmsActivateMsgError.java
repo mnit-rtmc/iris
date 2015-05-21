@@ -41,7 +41,7 @@ public class DmsActivateMsgError extends ASN1Integer {
 
 	/** Create a new DmsActivateMsgError object */
 	public DmsActivateMsgError() {
-		super(MIB1203.signControl.create(new int[] {17, 0}));
+		super(MIB1203.signControl.child(new int[] {17, 0}));
 	}
 
 	/** Set the integer value */

@@ -26,6 +26,6 @@ public class DmsPowerVoltage extends ASN1Integer {
 
 	/** Create a new DmsPowerVoltage object */
 	public DmsPowerVoltage(int row) {
-		super(MIB1203.dmsPowerStatusEntry.create(new int[] {5, row}));
+		super(MIB1203.dmsPowerStatusEntry.child(new int[] {5, row}));
 	}
 }

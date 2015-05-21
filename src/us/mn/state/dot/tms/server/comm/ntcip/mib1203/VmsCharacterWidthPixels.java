@@ -25,6 +25,6 @@ public class VmsCharacterWidthPixels extends ASN1Integer {
 
 	/** Create a new VmsCharacterWidthPixels object */
 	public VmsCharacterWidthPixels() {
-		super(MIB1203.vmsCfg.create(new int[] {2, 0}));
+		super(MIB1203.vmsCfg.child(new int[] {2, 0}));
 	}
 }

@@ -25,6 +25,6 @@ public class DmsMaxMultiStringLength extends ASN1Integer {
 
 	/** Create a new DmsMaxMultiStringLength object */
 	public DmsMaxMultiStringLength() {
-		super(MIB1203.multiCfg.create(new int[] {16, 0}));
+		super(MIB1203.multiCfg.child(new int[] {16, 0}));
 	}
 }

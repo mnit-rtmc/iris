@@ -25,7 +25,7 @@ public class DmsIllumManLevel extends ASN1Integer {
 
 	/** Create a new DmsIllumManLevel object */
 	public DmsIllumManLevel(int l) {
-		super(MIB1203.illum.create(new int[] {6, 0}));
+		super(MIB1203.illum.child(new int[] {6, 0}));
 		value = l;
 	}
 }

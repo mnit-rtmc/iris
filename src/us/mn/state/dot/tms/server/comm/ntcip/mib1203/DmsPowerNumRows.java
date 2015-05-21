@@ -26,6 +26,6 @@ public class DmsPowerNumRows extends ASN1Integer {
 
 	/** Create a new DmsPowerNumRows object */
 	public DmsPowerNumRows() {
-		super(MIB1203.statError.create(new int[] {12, 0}));
+		super(MIB1203.statError.child(new int[] {12, 0}));
 	}
 }

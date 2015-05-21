@@ -25,7 +25,7 @@ public class DmsSWReset extends ASN1Integer {
 
 	/** Create a new DmsSWReset object */
 	public DmsSWReset() {
-		super(MIB1203.signControl.create(new int[] {2, 0}));
+		super(MIB1203.signControl.child(new int[] {2, 0}));
 		value = 1;
 	}
 }

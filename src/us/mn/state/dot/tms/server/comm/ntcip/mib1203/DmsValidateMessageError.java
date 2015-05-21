@@ -39,7 +39,7 @@ public class DmsValidateMessageError extends ASN1Integer {
 
 	/** Create a new DmsValidateMessageError object */
 	public DmsValidateMessageError() {
-		super(MIB1203.dmsMessage.create(new int[] {9, 0}));
+		super(MIB1203.dmsMessage.child(new int[] {9, 0}));
 	}
 
 	/** Set the integer value */

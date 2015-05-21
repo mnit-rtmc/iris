@@ -25,6 +25,6 @@ public class DmsSignWidth extends ASN1Integer {
 
 	/** Create a new DmsSignWidth object */
 	public DmsSignWidth() {
-		super(MIB1203.dmsSignCfg.create(new int[] {4, 0}));
+		super(MIB1203.dmsSignCfg.child(new int[] {4, 0}));
 	}
 }

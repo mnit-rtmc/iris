@@ -25,7 +25,7 @@ public class DmsGraphicBitmapIndex extends ASN1Integer {
 
 	/** Create a new DmsGraphicBitmapIndex object */
 	public DmsGraphicBitmapIndex(int row, int block) {
-		super(MIB1203.dmsGraphicBitmapEntry.create(new int[] {1, row,
+		super(MIB1203.dmsGraphicBitmapEntry.child(new int[] {1, row,
 			block}));
 	}
 }

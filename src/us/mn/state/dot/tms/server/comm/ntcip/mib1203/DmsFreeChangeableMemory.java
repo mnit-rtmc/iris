@@ -25,6 +25,6 @@ public class DmsFreeChangeableMemory extends ASN1Integer {
 
 	/** Create a new DmsFreeChangeableMemory object */
 	public DmsFreeChangeableMemory() {
-		super(MIB1203.dmsMessage.create(new int[] {4, 0}));
+		super(MIB1203.dmsMessage.child(new int[] {4, 0}));
 	}
 }

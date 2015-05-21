@@ -25,7 +25,7 @@ public class DmsMessageBeacon extends ASN1Integer {
 
 	/** Create a new DmsMessageBeacon object */
 	public DmsMessageBeacon(DmsMessageMemoryType.Enum m, int number) {
-		super(MIB1203.dmsMessageEntry.create(new int[] {
+		super(MIB1203.dmsMessageEntry.child(new int[] {
 			6, m.ordinal(), number}));
 	}
 

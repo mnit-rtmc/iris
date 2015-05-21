@@ -25,6 +25,6 @@ public class DmsMultiSyntaxErrorPosition extends ASN1Integer {
 
 	/** Create a new DmsMultiSyntaxErrorPosition object */
 	public DmsMultiSyntaxErrorPosition() {
-		super(MIB1203.signControl.create(new int[] {19, 0}));
+		super(MIB1203.signControl.child(new int[] {19, 0}));
 	}
 }

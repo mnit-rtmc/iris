@@ -25,6 +25,6 @@ public class FontName extends DisplayString {
 
 	/** Create a new font name object */
 	public FontName(int font) {
-		super(MIB1203.fontEntry.create(new int[] { 3, font }));
+		super(MIB1203.fontEntry.child(new int[] { 3, font }));
 	}
 }

@@ -26,7 +26,7 @@ public class DmsMultiSyntaxError extends ASN1Integer {
 
 	/** Create a new DmsMultiSyntaxError object */
 	public DmsMultiSyntaxError() {
-		super(MIB1203.signControl.create(new int[] {18, 0}));
+		super(MIB1203.signControl.child(new int[] {18, 0}));
 	}
 
 	/** Set the integer value */

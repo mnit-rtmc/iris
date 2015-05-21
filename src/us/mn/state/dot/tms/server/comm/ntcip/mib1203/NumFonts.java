@@ -25,6 +25,6 @@ public class NumFonts extends ASN1Integer {
 
 	/** Create a new NumFonts object */
 	public NumFonts() {
-		super(MIB1203.fontDefinition.create(new int[] {1, 0}));
+		super(MIB1203.fontDefinition.child(new int[] {1, 0}));
 	}
 }

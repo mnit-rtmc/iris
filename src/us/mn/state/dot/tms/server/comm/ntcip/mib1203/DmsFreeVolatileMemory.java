@@ -25,6 +25,6 @@ public class DmsFreeVolatileMemory extends ASN1Integer {
 
 	/** Create a new DmsFreeVolatileMemory object */
 	public DmsFreeVolatileMemory() {
-		super(MIB1203.dmsMessage.create(new int[] {7, 0}));
+		super(MIB1203.dmsMessage.child(new int[] {7, 0}));
 	}
 }

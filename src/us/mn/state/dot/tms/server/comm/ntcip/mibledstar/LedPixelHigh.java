@@ -25,6 +25,6 @@ public class LedPixelHigh extends ASN1Integer {
 
 	/** Create a new LedPixelHigh object */
 	public LedPixelHigh() {
-		super(MIB.ledstarSignControl.create(new int[] {8, 0}));
+		super(MIB.ledstarSignControl.child(new int[] {8, 0}));
 	}
 }

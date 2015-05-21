@@ -25,6 +25,6 @@ public class DmsIllumNumBrightLevels extends ASN1Integer {
 
 	/** Create a new DmsIllumNumBrightLevels object */
 	public DmsIllumNumBrightLevels() {
-		super(MIB1203.illum.create(new int[] {4, 0}));
+		super(MIB1203.illum.child(new int[] {4, 0}));
 	}
 }

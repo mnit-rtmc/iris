@@ -25,6 +25,6 @@ public class DmsMaxVolatileMsg extends ASN1Integer {
 
 	/** Create a new DmsMaxVolatileMsg object */
 	public DmsMaxVolatileMsg() {
-		super(MIB1203.dmsMessage.create(new int[] {6, 0}));
+		super(MIB1203.dmsMessage.child(new int[] {6, 0}));
 	}
 }

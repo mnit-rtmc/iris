@@ -25,6 +25,6 @@ public class DmsNumVolatileMsg extends ASN1Integer {
 
 	/** Create a new DmsNumVolatileMsg object */
 	public DmsNumVolatileMsg() {
-		super(MIB1203.dmsMessage.create(new int[] {5, 0}));
+		super(MIB1203.dmsMessage.child(new int[] {5, 0}));
 	}
 }

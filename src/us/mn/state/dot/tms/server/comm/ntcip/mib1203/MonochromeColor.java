@@ -25,7 +25,7 @@ public class MonochromeColor extends ASN1OctetString {
 
 	/** Create a new MonochromeColor object */
 	public MonochromeColor() {
-		super(MIB1203.vmsCfg.create(new int[] {7, 0}));
+		super(MIB1203.vmsCfg.child(new int[] {7, 0}));
 	}
 
 	/** Get the value array.

@@ -27,6 +27,6 @@ public class VmsPixelServiceFrequency extends ASN1Integer {
 
 	/** Create a new VmsPixelServiceFrequency object */
 	public VmsPixelServiceFrequency() {
-		super(MIB1203.signControl.create(new int[] {22, 0}));
+		super(MIB1203.signControl.child(new int[] {22, 0}));
 	}
 }

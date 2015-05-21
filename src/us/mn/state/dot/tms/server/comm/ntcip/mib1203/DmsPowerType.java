@@ -41,7 +41,7 @@ public class DmsPowerType extends ASN1Integer {
 
 	/** Create a new DmsPowerType object */
 	public DmsPowerType(int row) {
-		super(MIB1203.dmsPowerStatusEntry.create(new int[] {6, row}));
+		super(MIB1203.dmsPowerStatusEntry.child(new int[] {6, row}));
 	}
 
 	/** Set the enum value */

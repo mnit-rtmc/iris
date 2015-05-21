@@ -22,15 +22,9 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  *
  * @author Douglas Lau
  */
-class MIB extends MIBNode {
-
-	private MIB() {
-		super(null, null);
-		assert false;
-	}
-
-	static public final MIBNode ledstar = MIB1201._private.create(16);
-	static public final MIBNode ledstarDMS = ledstar.create(1);
-	static public final MIBNode ledstarSignControl = ledstarDMS.create(1);
-	static public final MIBNode ledstarDiagnostics = ledstarDMS.create(2);
+public interface MIB {
+	MIBNode ledstar = MIB1201._private.child(16);
+	MIBNode ledstarDMS = ledstar.child(1);
+	MIBNode ledstarSignControl = ledstarDMS.child(1);
+	MIBNode ledstarDiagnostics = ledstarDMS.child(2);
 }

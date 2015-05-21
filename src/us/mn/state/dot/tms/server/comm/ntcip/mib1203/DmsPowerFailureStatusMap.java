@@ -26,7 +26,7 @@ public class DmsPowerFailureStatusMap extends ASN1OctetString {
 
 	/** Create a new DmsPowerFailureStatusMap object */
 	public DmsPowerFailureStatusMap() {
-		super(MIB1203.statError.create(new int[] {11, 0}));
+		super(MIB1203.statError.child(new int[] {11, 0}));
 	}
 
 	/** Get the object value */

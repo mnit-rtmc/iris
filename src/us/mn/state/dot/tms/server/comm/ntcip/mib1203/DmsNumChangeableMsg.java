@@ -25,6 +25,6 @@ public class DmsNumChangeableMsg extends ASN1Integer {
 
 	/** Create a new DmsNumChangeableMsg object */
 	public DmsNumChangeableMsg() {
-		super(MIB1203.dmsMessage.create(new int[] {2, 0}));
+		super(MIB1203.dmsMessage.child(new int[] {2, 0}));
 	}
 }

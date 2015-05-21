@@ -26,6 +26,6 @@ public class DmsGraphicBlockSize extends ASN1Integer {
 
 	/** Create a new DmsGraphicBlockSize object */
 	public DmsGraphicBlockSize() {
-		super(MIB1203.graphicDefinition.create(new int[] {5, 0}));
+		super(MIB1203.graphicDefinition.child(new int[] {5, 0}));
 	}
 }

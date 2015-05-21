@@ -25,7 +25,7 @@ public class DmsGraphicBlockNumber extends ASN1Integer {
 
 	/** Create a new DmsGraphicBlockNumber object */
 	public DmsGraphicBlockNumber(int row, int block) {
-		super(MIB1203.dmsGraphicBitmapEntry.create(new int[] {2, row,
+		super(MIB1203.dmsGraphicBitmapEntry.child(new int[] {2, row,
 			block}));
 	}
 }

@@ -26,6 +26,6 @@ public class AvailableGraphicMemory extends Counter {
 
 	/** Create a new AvailableGraphicMemory object */
 	public AvailableGraphicMemory() {
-		super(MIB1203.graphicDefinition.create(new int[] {4, 0}));
+		super(MIB1203.graphicDefinition.child(new int[] {4, 0}));
 	}
 }

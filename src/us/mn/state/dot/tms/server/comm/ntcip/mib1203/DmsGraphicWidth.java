@@ -25,6 +25,6 @@ public class DmsGraphicWidth extends ASN1Integer {
 
 	/** Create a new DmsGraphicWidth object */
 	public DmsGraphicWidth(int row) {
-		super(MIB1203.dmsGraphicEntry.create(new int[] {5, row}));
+		super(MIB1203.dmsGraphicEntry.child(new int[] {5, row}));
 	}
 }

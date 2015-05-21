@@ -45,7 +45,7 @@ public class DmsControlMode extends ASN1Integer {
 
 	/** Create a new DmsControlMode object */
 	public DmsControlMode() {
-		super(MIB1203.signControl.create(new int[] {1, 0}));
+		super(MIB1203.signControl.child(new int[] {1, 0}));
 	}
 
 	/** Set the integer value */

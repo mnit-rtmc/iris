@@ -26,6 +26,6 @@ public class DmsLampPixelRight extends ASN1Integer {
 
 	/** Create a new DmsLampPixelRight object */
 	public DmsLampPixelRight(int row) {
-		super(MIB1203.dmsLampStatusEntry.create(new int[] {8, row}));
+		super(MIB1203.dmsLampStatusEntry.child(new int[] {8, row}));
 	}
 }

@@ -25,7 +25,7 @@ public class PixelFailureIndex extends ASN1Integer {
 
 	/** Create a new pixel failure index object */
 	public PixelFailureIndex(PixelFailureDetectionType.Enum t, int row) {
-		super(MIB1203.pixelFailureEntry.create(new int[] {2,
+		super(MIB1203.pixelFailureEntry.child(new int[] {2,
 		      t.ordinal(), row}));
 	}
 }

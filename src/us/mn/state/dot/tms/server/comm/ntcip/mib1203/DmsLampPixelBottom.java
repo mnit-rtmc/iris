@@ -26,6 +26,6 @@ public class DmsLampPixelBottom extends ASN1Integer {
 
 	/** Create a new DmsLampPixelBottom object */
 	public DmsLampPixelBottom(int row) {
-		super(MIB1203.dmsLampStatusEntry.create(new int[] {7, row}));
+		super(MIB1203.dmsLampStatusEntry.child(new int[] {7, row}));
 	}
 }

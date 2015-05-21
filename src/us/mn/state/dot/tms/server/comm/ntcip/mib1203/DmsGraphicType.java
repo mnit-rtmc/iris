@@ -25,7 +25,7 @@ public class DmsGraphicType extends ASN1Integer {
 
 	/** Create a new DmsGraphicType object */
 	public DmsGraphicType(int row) {
-		super(MIB1203.dmsGraphicEntry.create(new int[] {6, row}));
+		super(MIB1203.dmsGraphicEntry.child(new int[] {6, row}));
 	}
 
 	/** Set the enum value */

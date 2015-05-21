@@ -39,7 +39,7 @@ public class PixelTestActivation extends ASN1Integer {
 
 	/** Create a new PixelTestActivation object */
 	public PixelTestActivation() {
-		super(MIB1203.statError.create(new int[] {4, 0}));
+		super(MIB1203.statError.child(new int[] {4, 0}));
 	}
 
 	/** Set the enum value */

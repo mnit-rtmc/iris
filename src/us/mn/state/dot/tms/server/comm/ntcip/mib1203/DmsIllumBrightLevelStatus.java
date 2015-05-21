@@ -25,6 +25,6 @@ public class DmsIllumBrightLevelStatus extends ASN1Integer {
 
 	/** Create a new DmsIllumBrightLevelStatus object */
 	public DmsIllumBrightLevelStatus() {
-		super(MIB1203.illum.create(new int[] {5, 0}));
+		super(MIB1203.illum.child(new int[] {5, 0}));
 	}
 }

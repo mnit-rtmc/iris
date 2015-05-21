@@ -25,7 +25,7 @@ public class DmsStatDoorOpen extends ASN1Integer {
 
 	/** Create a new DmsStatDoorOpen object */
 	public DmsStatDoorOpen() {
-		super(MIB1203.dmsStatus.create(new int[] {6, 0}));
+		super(MIB1203.dmsStatus.child(new int[] {6, 0}));
 	}
 
 	/** Get the object value */

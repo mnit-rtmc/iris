@@ -25,6 +25,6 @@ public class FontLineSpacing extends ASN1Integer {
 
 	/** Create a new font line spacing object */
 	public FontLineSpacing(int font) {
-		super(MIB1203.fontEntry.create(new int[] { 6, font }));
+		super(MIB1203.fontEntry.child(new int[] { 6, font }));
 	}
 }

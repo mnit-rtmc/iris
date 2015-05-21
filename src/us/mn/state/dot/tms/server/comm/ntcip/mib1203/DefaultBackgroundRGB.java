@@ -26,7 +26,7 @@ public class DefaultBackgroundRGB extends ASN1OctetString {
 
 	/** Create a new DefaultBackgroundRGB object */
 	public DefaultBackgroundRGB() {
-		super(MIB1203.multiCfg.create(new int[] {12, 0}));
+		super(MIB1203.multiCfg.child(new int[] {12, 0}));
 	}
 
 	/** Get the value array.

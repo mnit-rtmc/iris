@@ -25,6 +25,6 @@ public class TempMaxSignHousing extends ASN1Integer {
 
 	/** Create a new TempMaxSignHousing object */
 	public TempMaxSignHousing() {
-		super(MIB1203.statTemp.create(new int[] {6, 0}));
+		super(MIB1203.statTemp.child(new int[] {6, 0}));
 	}
 }

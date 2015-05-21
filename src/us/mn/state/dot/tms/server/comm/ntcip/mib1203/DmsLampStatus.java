@@ -40,7 +40,7 @@ public class DmsLampStatus extends ASN1Integer {
 
 	/** Create a new DmsLampStatus object */
 	public DmsLampStatus(int row) {
-		super(MIB1203.dmsLampStatusEntry.create(new int[] {4, row}));
+		super(MIB1203.dmsLampStatusEntry.child(new int[] {4, row}));
 	}
 
 	/** Set the enum value */

@@ -25,6 +25,6 @@ public class DmsNumPermanentMsg extends ASN1Integer {
 
 	/** Create a new DmsNumPermanentMsg object */
 	public DmsNumPermanentMsg() {
-		super(MIB1203.dmsMessage.create(new int[] {1, 0}));
+		super(MIB1203.dmsMessage.child(new int[] {1, 0}));
 	}
 }

@@ -25,6 +25,6 @@ public class VmsHorizontalPitch extends ASN1Integer {
 
 	/** Create a new VmsHorizontalPitch object */
 	public VmsHorizontalPitch() {
-		super(MIB1203.vmsCfg.create(new int[] {5, 0}));
+		super(MIB1203.vmsCfg.child(new int[] {5, 0}));
 	}
 }

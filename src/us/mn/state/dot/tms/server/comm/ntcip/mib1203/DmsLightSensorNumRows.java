@@ -26,6 +26,6 @@ public class DmsLightSensorNumRows extends ASN1Integer {
 
 	/** Create a new DmsLightSensorNumRows object */
 	public DmsLightSensorNumRows() {
-		super(MIB1203.statError.create(new int[] {29, 0}));
+		super(MIB1203.statError.child(new int[] {29, 0}));
 	}
 }

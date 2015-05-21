@@ -25,6 +25,6 @@ public class TempMaxCtrlCabinet extends ASN1Integer {
 
 	/** Create a new TempMaxCtrlCabinet object */
 	public TempMaxCtrlCabinet() {
-		super(MIB1203.statTemp.create(new int[] {2, 0}));
+		super(MIB1203.statTemp.child(new int[] {2, 0}));
 	}
 }

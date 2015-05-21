@@ -25,6 +25,6 @@ public class DmsSignHeight extends ASN1Integer {
 
 	/** Create a new DmsSignHeight object */
 	public DmsSignHeight() {
-		super(MIB1203.dmsSignCfg.create(new int[] {3, 0}));
+		super(MIB1203.dmsSignCfg.child(new int[] {3, 0}));
 	}
 }

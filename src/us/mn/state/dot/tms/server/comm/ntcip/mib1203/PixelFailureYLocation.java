@@ -25,7 +25,7 @@ public class PixelFailureYLocation extends ASN1Integer {
 
 	/** Create a new pixel failure Y location object */
 	public PixelFailureYLocation(PixelFailureDetectionType.Enum t, int row){
-		super(MIB1203.pixelFailureEntry.create(new int[] {4,
+		super(MIB1203.pixelFailureEntry.child(new int[] {4,
 		      t.ordinal(), row}));
 	}
 }

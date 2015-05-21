@@ -39,7 +39,7 @@ public class DmsLegend extends ASN1Integer {
 
 	/** Create a new DmsLegend object */
 	public DmsLegend() {
-		super(MIB1203.dmsSignCfg.create(new int[] {7, 0}));
+		super(MIB1203.dmsSignCfg.child(new int[] {7, 0}));
 	}
 
 	/** Set the integer value */
