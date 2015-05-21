@@ -23,8 +23,10 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -142,8 +144,8 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query the DMS controller temperature */
 		protected Phase poll(CommMessage mess) throws IOException {
-			TempMinCtrlCabinet min_cab = new TempMinCtrlCabinet();
-			TempMaxCtrlCabinet max_cab = new TempMaxCtrlCabinet();
+			ASN1Integer min_cab = tempMinCtrlCabinet.makeInt();
+			ASN1Integer max_cab = tempMaxCtrlCabinet.makeInt();
 			mess.add(min_cab);
 			mess.add(max_cab);
 			mess.queryProps();
@@ -151,7 +153,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(max_cab);
 			int mn = min_cab.getInteger();
 			int mx = max_cab.getInteger();
-			if(mn <= mx) {
+			if (mn <= mx) {
 				dms.setMinCabinetTemp(mn);
 				dms.setMaxCabinetTemp(mx);
 			} else {
@@ -167,8 +169,8 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query the DMS ambient temperature */
 		protected Phase poll(CommMessage mess) throws IOException {
-			TempMinAmbient min_amb = new TempMinAmbient();
-			TempMaxAmbient max_amb = new TempMaxAmbient();
+			ASN1Integer min_amb = tempMinAmbient.makeInt();
+			ASN1Integer max_amb = tempMaxAmbient.makeInt();
 			mess.add(min_amb);
 			mess.add(max_amb);
 			try {
@@ -177,7 +179,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				logQuery(max_amb);
 				int mn = min_amb.getInteger();
 				int mx = max_amb.getInteger();
-				if(mn <= mx) {
+				if (mn <= mx) {
 					dms.setMinAmbientTemp(mn);
 					dms.setMaxAmbientTemp(mx);
 				} else {
@@ -185,7 +187,7 @@ public class OpQueryDMSStatus extends OpDMS {
 					dms.setMaxAmbientTemp(null);
 				}
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// Ledstar has no ambient temp objects
 				dms.setMinAmbientTemp(null);
 				dms.setMaxAmbientTemp(null);
@@ -199,8 +201,8 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query the DMS housing temperature */
 		protected Phase poll(CommMessage mess) throws IOException {
-			TempMinSignHousing min_hou = new TempMinSignHousing();
-			TempMaxSignHousing max_hou = new TempMaxSignHousing();
+			ASN1Integer min_hou = tempMinSignHousing.makeInt();
+			ASN1Integer max_hou = tempMaxSignHousing.makeInt();
 			mess.add(min_hou);
 			mess.add(max_hou);
 			mess.queryProps();
@@ -208,7 +210,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			logQuery(max_hou);
 			int mn = min_hou.getInteger();
 			int mx = max_hou.getInteger();
-			if(mn <= mx) {
+			if (mn <= mx) {
 				dms.setMinHousingTemp(mn);
 				dms.setMaxHousingTemp(mx);
 			} else {
@@ -238,18 +240,18 @@ public class OpQueryDMSStatus extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsActivateMsgError msg_err = new DmsActivateMsgError();
 			ControllerErrorStatus con = new ControllerErrorStatus();
-			if(shortError.checkError(ShortErrorStatus.MESSAGE))
+			if (shortError.checkError(ShortErrorStatus.MESSAGE))
 				mess.add(msg_err);
-			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
+			if (shortError.checkError(ShortErrorStatus.CONTROLLER))
 				mess.add(con);
-			if(shortError.checkError(ShortErrorStatus.PIXEL))
+			if (shortError.checkError(ShortErrorStatus.PIXEL))
 				mess.add(pix_rows);
 			mess.queryProps();
-			if(shortError.checkError(ShortErrorStatus.MESSAGE))
+			if (shortError.checkError(ShortErrorStatus.MESSAGE))
 				logQuery(msg_err);
-			if(shortError.checkError(ShortErrorStatus.CONTROLLER))
+			if (shortError.checkError(ShortErrorStatus.CONTROLLER))
 				logQuery(con);
-			if(shortError.checkError(ShortErrorStatus.PIXEL))
+			if (shortError.checkError(ShortErrorStatus.PIXEL))
 				logQuery(pix_rows);
 			return new QueryTestAndMessageRows();
 		}
@@ -267,7 +269,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				logQuery(test_rows);
 				logQuery(message_rows);
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// Must be 1203v1 only
 				int n_rows = pix_rows.getInteger();
 				test_rows.setInteger(n_rows);
@@ -287,13 +289,13 @@ public class OpQueryDMSStatus extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// 1203v2 not supported ...
 				dms.setPowerStatus(new String[0]);
 				return new LedstarStatus();
 			}
 			logQuery(n_pwr);
-			if(n_pwr.getInteger() > 0)
+			if (n_pwr.getInteger() > 0)
 				return new QueryPowerStatus(n_pwr.getInteger());
 			else {
 				dms.setPowerStatus(new String[0]);
@@ -327,7 +329,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// Come on, man!  If we got here, 1203v2
 				// objects should really be supported ...
 				dms.setPowerStatus(new String[0]);
@@ -342,13 +344,13 @@ public class OpQueryDMSStatus extends OpDMS {
 				p_type.getValue(), status.getValue(),
 				mfr_status.getValue() + ' ' +
 				formatVoltage(voltage.getInteger()));
-			if(status.getEnum() == DmsPowerStatus.Enum.powerFail)
+			if (status.getEnum() == DmsPowerStatus.Enum.powerFail)
 				n_failed++;
 			row++;
-			if(row <= supplies.length)
+			if (row <= supplies.length)
 				return this;
 			else {
-				if(2 * n_failed > supplies.length)
+				if (2 * n_failed > supplies.length)
 					setErrorStatus("POWER");
 				dms.setPowerStatus(supplies);
 				return new LightSensorCount();
@@ -358,7 +360,7 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Format power supply voltage */
 	static protected String formatVoltage(int volts) {
-		if(volts >= 0 && volts < 65535)
+		if (volts >= 0 && volts < 65535)
 			return "" + (volts / 100f) + " volts";
 		else
 			return "";
@@ -382,12 +384,12 @@ public class OpQueryDMSStatus extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// 1203v2 not supported ...
 				return new LedstarStatus();
 			}
 			logQuery(n_snsr);
-			if(n_snsr.getInteger() > 0) {
+			if (n_snsr.getInteger() > 0) {
 				return new QueryLightSensorStatus(
 					n_snsr.getInteger());
 			} else
@@ -421,7 +423,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			light_sensors.add(desc.getValue() + "," +
 				status.getValue() + "," + reading.getInteger());
 			row++;
-			if(row <= n_sensors)
+			if (row <= n_sensors)
 				return this;
 			else
 				return new LedstarStatus();
@@ -445,7 +447,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				dms.setLdcPotBase(null);
 				dms.setPixelCurrentLow(null);
 				dms.setPixelCurrentHigh(null);
@@ -480,10 +482,10 @@ public class OpQueryDMSStatus extends OpDMS {
 				logQuery(sensor);
 				dms.setHeatTapeStatus(heat.getValue());
 				dms.setPowerStatus(power.getPowerStatus());
-				if(power.isCritical())
+				if (power.isCritical())
 					setErrorStatus("POWER");
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// Ignore; only Skyline has these objects
 			}
 			return null;
@@ -492,7 +494,7 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Cleanup the operation */
 	public void cleanup() {
-		if(isSuccess()) {
+		if (isSuccess()) {
 			dms.setPhotocellStatus(formatPhotocellStatus());
 			setMaintStatus(formatMaintStatus());
 			setErrorStatus(formatErrorStatus());
@@ -509,7 +511,7 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Get the composite photocell status */
 	protected String photocellStatus() {
-		if(shortError.checkError(ShortErrorStatus.PHOTOCELL))
+		if (shortError.checkError(ShortErrorStatus.PHOTOCELL))
 			return "fail";
 		else
 			return "noError";
@@ -517,10 +519,10 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Format the new maintenance status */
 	protected String formatMaintStatus() {
-		if(shortError.isMaintenance())
+		if (shortError.isMaintenance())
 			return shortError.getValue();
-		if(shortError.checkError(ShortErrorStatus.PIXEL) &&
-		   getPixelErrorCount() > pixelMaintThreshold())
+		if (shortError.checkError(ShortErrorStatus.PIXEL) &&
+		    getPixelErrorCount() > pixelMaintThreshold())
 			return "Too many pixel errors";
 		else
 			return "";
@@ -530,7 +532,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	protected String formatErrorStatus() {
 		// If no error status bits should be reported,
 		// clear the controller error status by setting "".
-		if(shortError.isCritical())
+		if (shortError.isCritical())
 			return shortError.getValue();
 		else
 			return "";
