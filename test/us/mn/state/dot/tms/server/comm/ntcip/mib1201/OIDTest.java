@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1201;
 
 import java.util.Arrays;
 import junit.framework.TestCase;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201.*;
 
 /** 
  * OID tests.
@@ -32,7 +33,7 @@ public class OIDTest extends TestCase {
 	/** test cases */
 	public void test() {
 		int[] oid;
-		oid = new GlobalMaxModules().getOID();
+		oid = globalMaxModules.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 2, 0
 		}));

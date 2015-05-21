@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
 import java.util.Arrays;
 import junit.framework.TestCase;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 
 /** 
  * OID tests.
@@ -40,19 +41,19 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 2, 0
 		}));
-		oid = new DmsSignHeight().getOID();
+		oid = dmsSignHeight.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 3, 0
 		}));
-		oid = new DmsSignWidth().getOID();
+		oid = dmsSignWidth.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 4, 0
 		}));
-		oid = new DmsHorizontalBorder().getOID();
+		oid = dmsHorizontalBorder.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 5, 0
 		}));
-		oid = new DmsVerticalBorder().getOID();
+		oid = dmsVerticalBorder.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 6, 0
 		}));
@@ -69,32 +70,32 @@ public class OIDTest extends TestCase {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 9, 0
 		}));
 
-		oid = new VmsCharacterHeightPixels().getOID();
+		oid = vmsCharacterHeightPixels.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 1, 0
 		}));
-		oid = new VmsCharacterWidthPixels().getOID();
+		oid = vmsCharacterWidthPixels.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 2, 0
 		}));
-		oid = new VmsSignHeightPixels().getOID();
+		oid = vmsSignHeightPixels.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 3, 0
 		}));
-		oid = new VmsSignWidthPixels().getOID();
+		oid = vmsSignWidthPixels.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 4, 0
 		}));
-		oid = new VmsHorizontalPitch().getOID();
+		oid = vmsHorizontalPitch.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 5, 0
 		}));
-		oid = new VmsVerticalPitch().getOID();
+		oid = vmsVerticalPitch.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 6, 0
 		}));
 
-		oid = new NumFonts().getOID();
+		oid = numFonts.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 1, 0
 		}));
@@ -130,7 +131,7 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 8, 5
 		}));
-		oid = new MaxFontCharacters().getOID();
+		oid = maxFontCharacters.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 3, 0
 		}));
@@ -142,12 +143,12 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 4, 1, 3, 5, 32
 		}));
-		oid = new FontMaxCharacterSize().getOID();
+		oid = fontMaxCharacterSize.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 5, 0
 		}));
 
-		oid = new DefaultFont().getOID();
+		oid = defaultFont.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 5, 0
 		}));
@@ -159,11 +160,11 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 7, 0
 		}));
-		oid = new DefaultPageOnTime().getOID();
+		oid = defaultPageOnTime.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 8, 0
 		}));
-		oid = new DefaultPageOffTime().getOID();
+		oid = defaultPageOffTime.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 9, 0
 		}));
@@ -261,15 +262,15 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 18, 0
 		}));
-		oid = new VmsPixelServiceDuration().getOID();
+		oid = vmsPixelServiceDuration.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 21, 0
 		}));
-		oid = new VmsPixelServiceFrequency().getOID();
+		oid = vmsPixelServiceFrequency.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 22, 0
 		}));
-		oid = new VmsPixelServiceTime().getOID();
+		oid = vmsPixelServiceTime.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 23, 0
 		}));
@@ -278,23 +279,23 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 1, 0
 		}));
-		oid = new DmsIllumMaxPhotocellLevel().getOID();
+		oid = dmsIllumMaxPhotocellLevel.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 2, 0
 		}));
-		oid = new DmsIllumPhotocellLevelStatus().getOID();
+		oid = dmsIllumPhotocellLevelStatus.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 3, 0
 		}));
-		oid = new DmsIllumNumBrightLevels().getOID();
+		oid = dmsIllumNumBrightLevels.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 4, 0
 		}));
-		oid = new DmsIllumBrightLevelStatus().getOID();
+		oid = dmsIllumBrightLevelStatus.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 5, 0
 		}));
-		oid = new DmsIllumManLevel(0).getOID();
+		oid = dmsIllumManLevel.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 6, 0
 		}));
@@ -306,7 +307,7 @@ public class OIDTest extends TestCase {
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 8, 0
 		}));
-		oid = new DmsIllumLightOutputStatus().getOID();
+		oid = dmsIllumLightOutputStatus.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 9, 0
 		}));
@@ -376,48 +377,48 @@ public class OIDTest extends TestCase {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 10, 0
 		}));
 
-		oid = new TempMinCtrlCabinet().getOID();
+		oid = tempMinCtrlCabinet.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 1, 0
 		}));
-		oid = new TempMaxCtrlCabinet().getOID();
+		oid = tempMaxCtrlCabinet.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 2, 0
 		}));
-		oid = new TempMinAmbient().getOID();
+		oid = tempMinAmbient.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 3, 0
 		}));
-		oid = new TempMaxAmbient().getOID();
+		oid = tempMaxAmbient.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 4, 0
 		}));
-		oid = new TempMinSignHousing().getOID();
+		oid = tempMinSignHousing.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 5, 0
 		}));
-		oid = new TempMaxSignHousing().getOID();
+		oid = tempMaxSignHousing.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 6, 0
 		}));
 
-		oid = new DmsGraphicMaxEntries().getOID();
+		oid = dmsGraphicMaxEntries.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 1, 0
 		}));
-		oid = new DmsGraphicNumEntries().getOID();
+		oid = dmsGraphicNumEntries.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 2, 0
 		}));
-		oid = new DmsGraphicMaxSize().getOID();
+		oid = dmsGraphicMaxSize.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 3, 0
 		}));
-		oid = new AvailableGraphicMemory().getOID();
+		oid = availableGraphicMemory.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 4, 0
 		}));
-		oid = new DmsGraphicBlockSize().getOID();
+		oid = dmsGraphicBlockSize.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 5, 0
 		}));

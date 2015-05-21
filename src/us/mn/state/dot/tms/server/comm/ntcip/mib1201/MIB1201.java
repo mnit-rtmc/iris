@@ -44,6 +44,9 @@ public enum MIB1201 {
 	private MIB1201(MIB1201 p, int[] n) {
 		node = p.node.child(n, toString());
 	}
+	public int[] oid() {
+		return node.createOID();
+	}
 
 	public MIBNode child(int n) {
 		// FIXME: add name

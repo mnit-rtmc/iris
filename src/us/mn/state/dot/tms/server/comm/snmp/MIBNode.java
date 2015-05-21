@@ -67,20 +67,24 @@ public class MIBNode {
 		return fillOID(0);
 	}
 
-	/** Fill an Object Identifier */
-	private int[] fillOID(int length) {
-		int[] oid = createOID(length);
-		int s = oid.length - length - nid.length;
+	/** Fill an Object Identifier.
+	 * @param extra Extra elements in OID.
+	 * @return Object Identifier array. */
+	private int[] fillOID(int extra) {
+		int[] oid = makeOID(extra);
+		int s = oid.length - extra - nid.length;
 		System.arraycopy(nid, 0, oid, s, nid.length);
 		return oid;
 	}
 
-	/** Create an Object Identifier */
-	private int[] createOID(int length) {
+	/** Make an Object Identifier.
+	 * @param extra Extra elements in OID.
+	 * @return Object Identifier array. */
+	private int[] makeOID(int extra) {
 		if (parent == null)
-			return new int[length + nid.length];
+			return new int[extra + nid.length];
 		else
-			return parent.fillOID(length + nid.length);
+			return parent.fillOID(extra + nid.length);
 	}
 
 	/** Get the MIB index */
