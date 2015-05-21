@@ -23,8 +23,10 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -216,10 +218,9 @@ public class OpSendDMSDefaults extends OpDMS {
 					new DmsHorizontalBorder();
 				DmsVerticalBorder v_border =
 					new DmsVerticalBorder();
-				VmsHorizontalPitch h_pitch =
-					new VmsHorizontalPitch();
-				VmsVerticalPitch v_pitch =
-					new VmsVerticalPitch();
+				ASN1Integer h_pitch =
+					vmsHorizontalPitch.makeInt();
+				ASN1Integer v_pitch =vmsVerticalPitch.makeInt();
 				h_border.setInteger(50);
 				v_border.setInteger(69);
 				h_pitch.setInteger(69);

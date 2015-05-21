@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -152,15 +153,13 @@ public class OpQueryDMSConfiguration extends OpDMS {
 
 		/** Query the VMS information */
 		protected Phase poll(CommMessage mess) throws IOException {
-			VmsSignHeightPixels s_height =
-				new VmsSignHeightPixels();
-			VmsSignWidthPixels s_width = new VmsSignWidthPixels();
-			VmsHorizontalPitch h_pitch = new VmsHorizontalPitch();
-			VmsVerticalPitch v_pitch = new VmsVerticalPitch();
-			VmsCharacterHeightPixels c_height =
-				new VmsCharacterHeightPixels();
-			VmsCharacterWidthPixels c_width =
-				new VmsCharacterWidthPixels();
+			ASN1Integer s_height = vmsSignHeightPixels.makeInt();
+			ASN1Integer s_width = vmsSignWidthPixels.makeInt();
+			ASN1Integer h_pitch = vmsHorizontalPitch.makeInt();
+			ASN1Integer v_pitch = vmsVerticalPitch.makeInt();
+			ASN1Integer c_height =
+				vmsCharacterHeightPixels.makeInt();
+			ASN1Integer c_width = vmsCharacterWidthPixels.makeInt();
 			mess.add(s_height);
 			mess.add(s_width);
 			mess.add(h_pitch);

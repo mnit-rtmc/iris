@@ -15,7 +15,9 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
+import static us.mn.state.dot.tms.server.comm.snmp.ObjFactory.*;
 
 /**
  * MIB nodes for NTCIP 1203
@@ -26,6 +28,12 @@ public enum MIB1203 {
 	dms				(MIB1201.devices, 3),
 	dmsSignCfg			(dms, 1),
 	vmsCfg				(dms, 2),
+	  vmsCharacterHeightPixels	(vmsCfg, new int[] {1, 0}),
+	  vmsCharacterWidthPixels	(vmsCfg, new int[] {2, 0}),
+	  vmsSignHeightPixels		(vmsCfg, new int[] {3, 0}),
+	  vmsSignWidthPixels		(vmsCfg, new int[] {4, 0}),
+	  vmsHorizontalPitch		(vmsCfg, new int[] {5, 0}),
+	  vmsVerticalPitch		(vmsCfg, new int[] {6, 0}),
 	fontDefinition			(dms, 3),
 	fontTable			(fontDefinition, 2),
 	fontEntry			(fontTable, 1),
@@ -73,5 +81,8 @@ public enum MIB1203 {
 	public MIBNode child(int[] n) {
 		// FIXME: add name
 		return node.child(n);
+	}
+	public ASN1Integer makeInt() {
+		return INTEGER.make(node);
 	}
 }
