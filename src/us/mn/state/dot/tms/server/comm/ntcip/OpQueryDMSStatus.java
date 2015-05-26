@@ -27,6 +27,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mibledstar.MIB.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -242,7 +243,8 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query more DMS failure status */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsActivateMsgError msg_err = new DmsActivateMsgError();
+			ASN1Enum<DmsActivateMsgError> msg_err = new ASN1Enum<
+				DmsActivateMsgError>(dmsActivateMsgError.node);
 			ControllerErrorStatus con = new ControllerErrorStatus();
 			if (shortError.checkError(ShortErrorStatus.MESSAGE))
 				mess.add(msg_err);

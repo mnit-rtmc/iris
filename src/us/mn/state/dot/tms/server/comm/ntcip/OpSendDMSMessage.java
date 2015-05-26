@@ -16,13 +16,17 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.MultiSyntaxError;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -245,7 +249,8 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Query the control mode */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsControlMode mode = new DmsControlMode();
+			ASN1Enum<DmsControlMode> mode = new ASN1Enum<
+				DmsControlMode>(dmsControlMode.node);
 			mess.add(mode);
 			mess.queryProps();
 			logQuery(mode);
@@ -317,9 +322,9 @@ public class OpSendDMSMessage extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsValidateMessageError error =
 				new DmsValidateMessageError();
-			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();
-			DmsMultiSyntaxErrorPosition e_pos =
-				new DmsMultiSyntaxErrorPosition();
+			ASN1Enum<MultiSyntaxError> m_err = new ASN1Enum<
+				MultiSyntaxError>(dmsMultiSyntaxError.node);
+			ASN1Integer e_pos=dmsMultiSyntaxErrorPosition.makeInt();
 			mess.add(error);
 			mess.add(m_err);
 			mess.add(e_pos);
@@ -370,7 +375,8 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Query an activate message error */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsActivateMsgError error = new DmsActivateMsgError();
+			ASN1Enum<DmsActivateMsgError> error = new ASN1Enum<
+				DmsActivateMsgError>(dmsActivateMsgError.node);
 			mess.add(error);
 			mess.queryProps();
 			logQuery(error);
@@ -405,15 +411,15 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Query a MULTI syntax error */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsMultiSyntaxError m_err = new DmsMultiSyntaxError();
-			DmsMultiSyntaxErrorPosition e_pos =
-				new DmsMultiSyntaxErrorPosition();
+			ASN1Enum<MultiSyntaxError> m_err = new ASN1Enum<
+				MultiSyntaxError>(dmsMultiSyntaxError.node);
+			ASN1Integer e_pos=dmsMultiSyntaxErrorPosition.makeInt();
 			mess.add(m_err);
 			mess.add(e_pos);
 			mess.queryProps();
 			logQuery(m_err);
 			logQuery(e_pos);
-			if (m_err.isOther())
+			if (m_err.getEnum() == MultiSyntaxError.other)
 				return new QueryOtherMultiErr(m_err);
 			else {
 				setErrorStatus(m_err.toString());
@@ -426,10 +432,10 @@ public class OpSendDMSMessage extends OpDMS {
 	protected class QueryOtherMultiErr extends Phase {
 
 		/** MULTI syntax error */
-		protected final DmsMultiSyntaxError m_err;
+		private final ASN1Enum<MultiSyntaxError> m_err;
 
 		/** Create a phase to query an other MULTI error */
-		protected QueryOtherMultiErr(DmsMultiSyntaxError er) {
+		protected QueryOtherMultiErr(ASN1Enum<MultiSyntaxError> er) {
 			m_err = er;
 		}
 
@@ -477,12 +483,11 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Set the post-activation objects */
 		protected Phase poll(CommMessage mess) throws IOException {
-			// NOTE: setting DmsMessageTimeRemaining should not
+			// NOTE: setting dmsMessageTimeRemaining should not
 			//       be necessary.  I don't really know why it's
 			//       done here -- probably to work around some
 			//       stupid sign bug.  It may no longer be needed.
-			DmsMessageTimeRemaining time =
-				new DmsMessageTimeRemaining();
+			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 			time.setInteger(getDuration());
 			if (isScheduledIndefinite())
 				setCommAndPower();

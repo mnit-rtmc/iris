@@ -14,44 +14,25 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip DmsMsgSourceMode object
+ * Enumeration of message source modes.
  *
  * @author Douglas Lau
  */
-public class DmsMsgSourceMode extends ASN1Integer {
-
-	/** Enumeration of message source modes */
-	static public enum Enum {
-		undefined, other, local, external,
-		otherCom1, otherCom2, otherCom3, otherCom4,
-		central, timebasedScheduler, powerRecovery, reset, commLoss,
-		powerLoss, endDuration;
-
-		/** Get message source mode from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new DmsMsgSourceMode object */
-	public DmsMsgSourceMode() {
-		super(MIB1203.signControl.child(new int[] {7, 0}));
-	}
-
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum DmsMsgSourceMode {
+	undefined,
+	other,
+	local,
+	external,
+	otherCom1,
+	otherCom2,
+	otherCom3,
+	otherCom4,
+	central,
+	timebasedScheduler,
+	powerRecovery,
+	reset,
+	commLoss,
+	powerLoss,
+	endDuration;
 }

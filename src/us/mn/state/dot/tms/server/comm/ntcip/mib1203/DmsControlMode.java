@@ -14,47 +14,17 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip DmsControlMode object
+ * Enumeration of message control modes.
  *
  * @author Douglas Lau
  */
-public class DmsControlMode extends ASN1Integer {
-
-	/** Enumeration of message control modes */
-	static public enum Enum {
-		undefined,
-		other,			// deprecated in v2
-		local,
-		external,		// deprecated in v2
-		central,
-		centralOverride,
-		simulation;		// deprecated in v2
-
-		/** Get message control mode from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for (Enum e: values()) {
-				if (e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new DmsControlMode object */
-	public DmsControlMode() {
-		super(MIB1203.signControl.child(new int[] {1, 0}));
-	}
-
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum DmsControlMode {
+	undefined,
+	other,			// deprecated in v2
+	local,
+	external,		// deprecated in v2
+	central,
+	centralOverride,
+	simulation;		// deprecated in v2
 }

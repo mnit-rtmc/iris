@@ -14,40 +14,15 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip DmsActivateMessageState object
+ * Enumeration of message activation states.
  *
  * @author Douglas Lau
  */
-public class DmsActivateMessageState extends ASN1Integer {
-
-	/** Enumeration of message activation states */
-	static public enum Enum {
-		undefined,
-		fastActivationSign,
-		slowActivatedOK,
-		slowActivatedError,
-		slowActivating;
-
-		/** Get message activation state from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new DmsActivateMessageState object */
-	public DmsActivateMessageState() {
-		super(MIB1203.signControl.child(new int[] {25, 0}));
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum DmsActivateMessageState {
+	undefined,
+	fastActivationSign,
+	slowActivatedOK,
+	slowActivatedError,
+	slowActivating;
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2013  Minnesota Department of Transportation
+ * Copyright (C) 2002-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
  * Operatoin to reset a dynamic message sign.
@@ -30,7 +32,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 public class OpResetDMS extends OpDMS {
 
 	/** Timeout (ms) to wait for a controller reset */
-	static protected final long RESET_TIMEOUT = 45 * 1000;
+	static private final long RESET_TIMEOUT = 45 * 1000;
 
 	/** Create a new DMS reset object */
 	public OpResetDMS(DMSImpl d) {
@@ -47,7 +49,8 @@ public class OpResetDMS extends OpDMS {
 
 		/** Execute the DMS reset */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsSWReset reset = new DmsSWReset();
+			ASN1Integer reset = dmsSWReset.makeInt();
+			reset.setInteger(1);
 			mess.add(reset);
 			logStore(reset);
 			mess.storeProps();
@@ -59,23 +62,23 @@ public class OpResetDMS extends OpDMS {
 	protected class CheckResetCompletion extends Phase {
 
 		/** Time to stop checking if the test has completed */
-		protected final long expire = TimeSteward.currentTimeMillis() + 
+		private final long expire = TimeSteward.currentTimeMillis() + 
 			RESET_TIMEOUT;
 
 		/** Check for reset completion */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsSWReset reset = new DmsSWReset();
+			ASN1Integer reset = dmsSWReset.makeInt();
 			mess.add(reset);
 			try {
 				mess.queryProps();
 				logQuery(reset);
-				if(reset.getInteger() == 0)
+				if (reset.getInteger() == 0)
 					return null;
 			}
-			catch(SocketTimeoutException e) {
+			catch (SocketTimeoutException e) {
 				// Controller must still be offline
 			}
-			if(TimeSteward.currentTimeMillis() > expire) {
+			if (TimeSteward.currentTimeMillis() > expire) {
 				logError("reset timeout expired -- giving up");
 				return null;
 			} else

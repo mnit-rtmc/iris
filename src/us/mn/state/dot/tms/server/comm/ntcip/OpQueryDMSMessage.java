@@ -24,6 +24,8 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
  * Operation to query the current message on a DMS.
@@ -49,12 +51,12 @@ public class OpQueryDMSMessage extends OpDMS {
 	/** Process the message table source from the sign controller */
 	private Phase processMessageSource() {
 		DmsMessageMemoryType.Enum mem_type = source.getMemoryType();
-		if(mem_type != null) {
+		if (mem_type != null) {
 			/* We have to test isBlank before isValid, because some
 			 * signs use 'undefined' source for blank messages. */
-			if(mem_type.isBlank())
+			if (mem_type.isBlank())
 				return processMessageBlank();
-			else if(mem_type.isValid())
+			else if (mem_type.isValid())
 				return processMessageValid();
 		}
 		return processMessageInvalid();
@@ -64,7 +66,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	private Phase processMessageBlank() {
 		/* The sign is blank.  If IRIS thinks there is a message on it,
 		 * that's wrong and needs to be updated. */
-		if(!dms.isMsgBlank())
+		if (!dms.isMsgBlank())
 			setCurrentMessage(dms.createBlankMessage());
 		return null;
 	}
@@ -73,7 +75,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	private Phase processMessageValid() {
 		/* The sign is not blank.  If IRIS thinks it is blank, then
 		 * we need to query the current message on the sign. */
-		if(dms.isMsgBlank())
+		if (dms.isMsgBlank())
 			return new QueryCurrentMessage();
 		/* Compare the CRC of the message on the sign to the
 		 * CRC of the message IRIS knows about */
@@ -123,8 +125,7 @@ public class OpQueryDMSMessage extends OpDMS {
 				DmsMessageMemoryType.Enum.currentBuffer, 1);
 			DmsMessageStatus status = new DmsMessageStatus(
 				DmsMessageMemoryType.Enum.currentBuffer, 1);
-			DmsMessageTimeRemaining time =
-				new DmsMessageTimeRemaining();
+			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 			mess.add(multi);
 			mess.add(beacon);
 			mess.add(prior);
@@ -136,7 +137,7 @@ public class OpQueryDMSMessage extends OpDMS {
 			logQuery(prior);
 			logQuery(status);
 			logQuery(time);
-			if(status.isValid()) {
+			if (status.isValid()) {
 				Integer d = parseDuration(time.getInteger());
 				setCurrentMessage(multi.getValue(),
 					beacon.isEnabled(), prior.getEnum(), d);
@@ -157,7 +158,7 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Set the current message on the sign */
 	private void setCurrentMessage(SignMessage sm) {
-		if(sm != null)
+		if (sm != null)
 			dms.setMessageCurrent(sm, null);
 		else
 			setErrorStatus("MSG RENDER FAILED");

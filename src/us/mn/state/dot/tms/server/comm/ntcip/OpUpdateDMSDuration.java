@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2013  Minnesota Department of Transportation
+ * Copyright (C) 2004-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,8 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
  * Operation to update the duration of the current DMS message.
@@ -29,7 +31,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 public class OpUpdateDMSDuration extends OpDMS {
 
 	/** Sign message to update */
-	protected final SignMessage message;
+	private final SignMessage message;
 
 	/** Create a new DMS update duration operation */
 	public OpUpdateDMSDuration(DMSImpl d, SignMessage m) {
@@ -38,12 +40,13 @@ public class OpUpdateDMSDuration extends OpDMS {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new SetTimeRemaining();
 	}
 
 	/** Get the message duration */
-	protected int getDuration() {
+	private int getDuration() {
 		return getDuration(message.getDuration());
 	}
 
@@ -52,10 +55,10 @@ public class OpUpdateDMSDuration extends OpDMS {
 
 		/** Set the message time remaining */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsMessageTimeRemaining remaining =
-				new DmsMessageTimeRemaining(getDuration());
-			mess.add(remaining);
-			logStore(remaining);
+			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
+			time.setInteger(getDuration());
+			mess.add(time);
+			logStore(time);
 			mess.storeProps();
 			return null;
 		}

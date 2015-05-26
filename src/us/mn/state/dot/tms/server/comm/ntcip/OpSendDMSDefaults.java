@@ -43,6 +43,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new SetCommPowerLoss();
 	}
@@ -52,9 +53,8 @@ public class OpSendDMSDefaults extends OpDMS {
 
 		/** Set the comm loss action */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsShortPowerLossTime power_time =
-				new DmsShortPowerLossTime();
-			DmsTimeCommLoss comm_time = new DmsTimeCommLoss();
+			ASN1Integer power_time =dmsShortPowerLossTime.makeInt();
+			ASN1Integer comm_time = dmsTimeCommLoss.makeInt();
 			DmsEndDurationMessage end_msg =
 				new DmsEndDurationMessage();
 			power_time.setInteger(0);
@@ -207,10 +207,10 @@ public class OpSendDMSDefaults extends OpDMS {
 			//       "administrator" community name.  We need to
 			//       check that the password is not null before
 			//       attempting to set them.
-			if(make != null &&
-			   make.startsWith("ADDCO") &&
-			   dms.getDmsType() == DMSType.VMS_CHAR.ordinal() &&
-			   controller.getPassword() != null)
+			if (make != null &&
+			    make.startsWith("ADDCO") &&
+			    dms.getDmsType() == DMSType.VMS_CHAR.ordinal() &&
+			    controller.getPassword() != null)
 			{
 				ASN1Integer h_border =
 					dmsHorizontalBorder.makeInt();

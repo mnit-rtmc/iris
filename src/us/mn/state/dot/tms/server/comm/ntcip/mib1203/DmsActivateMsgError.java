@@ -17,45 +17,21 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
- * Ntcip DmsActivateMsgError object
+ * Enumeration of message activation errors.
  *
  * @author Douglas Lau
  */
-public class DmsActivateMsgError extends ASN1Integer {
-
-	/** Enumeration of message activation errors */
-	static public enum Enum {
-		undefined, other, none, priority, messageStatus,
-		messageMemoryType, messageNumber, messageCRC, syntaxMULTI,
-		localMode, centralMode, centralOverrideMode;
-
-		/** Get activation error from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new DmsActivateMsgError object */
-	public DmsActivateMsgError() {
-		super(MIB1203.signControl.child(new int[] {17, 0}));
-	}
-
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
-
-	/** Get the enum value */
-	public Enum getEnum() {
-		return Enum.fromOrdinal(value);
-	}
+public enum DmsActivateMsgError {
+	undefined,
+	other,
+	none,
+	priority,
+	messageStatus,
+	messageMemoryType,
+	messageNumber,
+	messageCRC,
+	syntaxMULTI,
+	localMode,
+	centralMode,
+	centralOverrideMode;
 }
