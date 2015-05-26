@@ -14,45 +14,24 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip DmsBeaconType object
+ * Enumeration of beacon types.
  *
  * @author Douglas Lau
  */
-public class DmsBeaconType extends ASN1Integer {
-
-	/** Enumeration of beacon types */
-	static public enum Enum {
-		undefined, other, none, oneBeacon, twoBeaconSyncFlash,
-		twoBeaconsOppFlash, fourBeaconSyncFlash, fourBeaconAltRowFlash,
-		fourBeaconAltColumnFlash, fourBeaconAltDiagonalFlash,
-		fourBeaconNoSyncFlash, oneBeaconStrobe, twoBeaconStrobe,
-		fourBeaconStrobe;
-
-		/** Get beacon type from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new DmsBeaconType object */
-	public DmsBeaconType() {
-		super(MIB1203.dmsSignCfg.child(new int[] {8, 0}));
-	}
-
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum DmsBeaconType {
+	undefined,
+	other,
+	none,
+	oneBeacon,
+	twoBeaconSyncFlash,
+	twoBeaconsOppFlash,
+	fourBeaconSyncFlash,
+	fourBeaconAltRowFlash,
+	fourBeaconAltColumnFlash,
+	fourBeaconAltDiagonalFlash,
+	fourBeaconNoSyncFlash,
+	oneBeaconStrobe,
+	twoBeaconStrobe,
+	fourBeaconStrobe;
 }

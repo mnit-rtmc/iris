@@ -127,7 +127,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 
 	/** Get the object value */
 	@Override
-	protected String getValue() {
+	public String getValue() {
 		StringBuilder b = new StringBuilder();
 		b.append(memory);
 		b.append(",");

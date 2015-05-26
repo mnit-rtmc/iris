@@ -26,13 +26,14 @@ public class DmsSignType extends ASN1Integer {
 
 	/** Create a new DmsSignType object */
 	public DmsSignType() {
-		super(MIB1203.dmsSignCfg.child(new int[] {2, 0}));
+		super(MIB1203.dmsSignType.node);
 	}
 
 	/** Get the object value as a String */
+	@Override
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
-		if((value & 0x80) != 0)
+		if ((getInteger() & 0x80) != 0)
 			b.append("Portable ");
 		b.append(getValueEnum().description);
 		return b.toString();
@@ -40,6 +41,6 @@ public class DmsSignType extends ASN1Integer {
 
 	/** Get the object value as a DMSType */
 	public DMSType getValueEnum() {
-		return DMSType.fromOrdinal(value & 0x7f);
+		return DMSType.fromOrdinal(getInteger() & 0x7f);
 	}
 }

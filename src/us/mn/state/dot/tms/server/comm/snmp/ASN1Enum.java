@@ -75,7 +75,7 @@ public class ASN1Enum<T extends Enum> extends ASN1Integer {
 
 	/** Get the object value */
 	@Override
-	protected String getValue() {
+	public String getValue() {
 		T e = getEnum();
 		return (e != null) ? e.toString() : "null";
 	}

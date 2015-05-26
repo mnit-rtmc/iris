@@ -46,27 +46,29 @@ public class DmsSignTechnology extends ASN1Integer {
 
 	/** Create a new DmsSignTechnology object */
 	public DmsSignTechnology() {
-		super(MIB1203.dmsSignCfg.child(new int[] {9, 0}));
+		super(MIB1203.dmsSignTechnology.node);
 	}
 
 	/** Get the object value */
+	@Override
 	public String getValue() {
+		int v = getInteger();
 		StringBuilder b = new StringBuilder();
-		if((value & DRUM) > 0)
+		if ((v & DRUM) > 0)
 			b.append("Drum, ");
-		if((value & LAMP) > 0)
+		if ((v & LAMP) > 0)
 			b.append("Lamp, ");
-		if((value & SHUTTERED) > 0)
+		if ((v & SHUTTERED) > 0)
 			b.append("Shuttered, ");
-		if((value & FIBER_OPTIC) > 0)
+		if ((v & FIBER_OPTIC) > 0)
 			b.append("Fiber Optics, ");
-		if((value & FLIP_DISK) > 0)
+		if ((v & FLIP_DISK) > 0)
 			b.append("Flip Disk, ");
-		if((value & LED) > 0)
+		if ((v & LED) > 0)
 			b.append("LED, ");
-		if((value & OTHER) > 0)
+		if ((v & OTHER) > 0)
 			b.append("Other, ");
-		if(b.length() == 0)
+		if (b.length() == 0)
 			b.append("None");
 		else {
 			// remove trailing comma and space

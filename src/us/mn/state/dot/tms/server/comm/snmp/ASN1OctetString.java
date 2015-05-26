@@ -44,7 +44,7 @@ abstract public class ASN1OctetString extends ASN1Object {
 
 	/** Get the object value */
 	@Override
-	protected String getValue() {
+	public String getValue() {
 		StringBuilder b = new StringBuilder();
 		for (byte v: value) {
 			b.append(v & 0xFF);

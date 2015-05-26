@@ -78,7 +78,7 @@ abstract public class ASN1Object extends ControllerProperty {
 	}
 
 	/** Get the object value */
-	abstract protected String getValue();
+	abstract public String getValue();
 
 	/** Create an object description */
 	@Override

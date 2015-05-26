@@ -35,7 +35,8 @@ abstract public class DisplayString extends ASN1OctetString {
 	}
 
 	/** Get the object value */
-	protected String getValue() {
+	@Override
+	public String getValue() {
 		return new String(value);
 	}
 }

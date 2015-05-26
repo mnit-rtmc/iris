@@ -39,14 +39,14 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 		DataOutputStream dos = new DataOutputStream(bos);
 		try {
 			dos.writeByte(table.length);
-			for(BrightnessLevel lvl: table) {
+			for (BrightnessLevel lvl: table) {
 				dos.writeShort(lvl.output);
 				dos.writeShort(lvl.pc_down);
 				dos.writeShort(lvl.pc_up);
 			}
 			return bos.toByteArray();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 		finally {
@@ -54,7 +54,7 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 				dos.close();
 				bos.close();
 			}
-			catch(IOException e) {
+			catch (IOException e) {
 				// exceptions on close are stupid -- ignore
 			}
 		}
@@ -70,7 +70,7 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 		try {
 			int n_lvls = dis.readByte();
 			BrightnessLevel[] table = new BrightnessLevel[n_lvls];
-			for(int i = 0; i < n_lvls; i++) {
+			for (int i = 0; i < n_lvls; i++) {
 				BrightnessLevel lvl = new BrightnessLevel();
 				lvl.output = dis.readUnsignedShort();
 				lvl.pc_down = dis.readUnsignedShort();
@@ -79,7 +79,7 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 			}
 			return table;
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 		finally {
@@ -87,7 +87,7 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 				dis.close();
 				bis.close();
 			}
-			catch(IOException e) {
+			catch (IOException e) {
 				// exceptions on close are stupid -- ignore
 			}
 		}
@@ -110,11 +110,11 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 
 	/** Get the object value */
 	@Override
-	protected String getValue() {
+	public String getValue() {
 		StringBuilder b = new StringBuilder();
 		BrightnessLevel[] table = getTable();
 		b.append(table.length);
-		for(BrightnessLevel lvl: table) {
+		for (BrightnessLevel lvl: table) {
 			b.append(", (");
 			b.append(lvl.output);
 			b.append(",");
@@ -132,14 +132,14 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 		int output = 0;
 		int down = 0;
 		int up = 0;
-		for(BrightnessLevel lvl: table) {
-			if(lvl.pc_up < lvl.pc_down)
+		for (BrightnessLevel lvl: table) {
+			if (lvl.pc_up < lvl.pc_down)
 				return false;
-			if(lvl.output < output)
+			if (lvl.output < output)
 				return false;
-			if(lvl.pc_down < down)
+			if (lvl.pc_down < down)
 				return false;
-			if(lvl.pc_up < up)
+			if (lvl.pc_up < up)
 				return false;
 			output = lvl.output;
 			down = lvl.pc_down;

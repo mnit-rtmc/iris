@@ -153,7 +153,7 @@ abstract public class MessageActivationCode extends ASN1OctetString {
 
 	/** Get the object value */
 	@Override
-	protected String getValue() {
+	public String getValue() {
 		StringBuilder b = new StringBuilder();
 		b.append(duration);
 		b.append(",");

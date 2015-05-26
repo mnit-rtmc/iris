@@ -37,21 +37,23 @@ public class DmsSignAccess extends ASN1Integer {
 
 	/** Create a new DmsSignAccess object */
 	public DmsSignAccess() {
-		super(MIB1203.dmsSignCfg.child(new int[] {1, 0}));
+		super(MIB1203.dmsSignAccess.node);
 	}
 
 	/** Get the object value */
+	@Override
 	public String getValue() {
+		int v = getInteger();
 		StringBuilder b = new StringBuilder();
-		if((value & FRONT) > 0)
+		if ((v & FRONT) > 0)
 			b.append("Front, ");
-		if((value & BACK) > 0)
+		if ((v & BACK) > 0)
 			b.append("Back, ");
-		if((value & WALK_IN) > 0)
+		if ((v & WALK_IN) > 0)
 			b.append("Walk-in, ");
-		if((value & OTHER) > 0)
+		if ((v & OTHER) > 0)
 			b.append("Other, ");
-		if(b.length() == 0)
+		if (b.length() == 0)
 			b.append("None");
 		else {
 			// remove trailing comma and space
