@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -39,8 +40,15 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  */
 public class OpSendDMSGraphics extends OpDMS {
 
+	/** Make an ASN1Enum for DmsGraphicStatus */
+	static private ASN1Enum<DmsGraphicStatus> makeStatus(int row) {
+		return new ASN1Enum<DmsGraphicStatus>(dmsGraphicStatus.node,
+			new int[] { row });
+	}
+
 	/** Color scheme supported */
-	private final DmsColorScheme color_scheme = new DmsColorScheme();
+	private final ASN1Enum<DmsColorScheme> color_scheme = new ASN1Enum<
+		DmsColorScheme>(dmsColorScheme.node);
 
 	/** Number of graphics supported */
 	private final ASN1Integer max_graphics = dmsGraphicMaxEntries.makeInt();
@@ -131,7 +139,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	private boolean shouldSend(Integer g_num, Graphic g) {
 		Integer w = dms.getWidthPixels();
 		Integer h = dms.getHeightPixels();
-		int bpp = color_scheme.getEnum().getBpp();
+		int bpp = color_scheme.getEnum().bpp;
 		return (g_num != null && w != null && h != null) &&
 		       (g.getWidth() <= w) && (g.getHeight() <= h) &&
 		       (g.getBpp() == 1 || g.getBpp() == bpp);
@@ -165,8 +173,8 @@ public class OpSendDMSGraphics extends OpDMS {
 
 		/** Query the graphic number for one graphic */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsGraphicNumber number = new DmsGraphicNumber(row);
-			DmsGraphicStatus status = new DmsGraphicStatus(row);
+			ASN1Integer number = dmsGraphicNumber.makeInt(row);
+			ASN1Enum<DmsGraphicStatus> status = makeStatus(row);
 			mess.add(number);
 			mess.add(status);
 			mess.queryProps();
@@ -218,7 +226,7 @@ public class OpSendDMSGraphics extends OpDMS {
 
 		/** Verify a graphic */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsGraphicID gid = new DmsGraphicID(row);
+			ASN1Integer gid = dmsGraphicID.makeInt(row);
 			mess.add(gid);
 			mess.queryProps();
 			logQuery(gid);
@@ -241,7 +249,7 @@ public class OpSendDMSGraphics extends OpDMS {
 
 		/** Query the initial graphic status */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsGraphicStatus status = new DmsGraphicStatus(row);
+			ASN1Enum<DmsGraphicStatus> status = makeStatus(row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
@@ -264,8 +272,8 @@ public class OpSendDMSGraphics extends OpDMS {
 
 		/** Invalidate the graphic entry in the graphic table */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsGraphicStatus status = new DmsGraphicStatus(row);
-			status.setEnum(DmsGraphicStatus.Enum.notUsedReq);
+			ASN1Enum<DmsGraphicStatus> status = makeStatus(row);
+			status.setEnum(DmsGraphicStatus.notUsedReq);
 			mess.add(status);
 			logStore(status);
 			mess.storeProps();
@@ -278,8 +286,8 @@ public class OpSendDMSGraphics extends OpDMS {
 
 		/** Set the graphic status to modifyReq */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsGraphicStatus status = new DmsGraphicStatus(row);
-			status.setEnum(DmsGraphicStatus.Enum.modifyReq);
+			ASN1Enum<DmsGraphicStatus> status = makeStatus(row);
+			status.setEnum(DmsGraphicStatus.modifyReq);
 			mess.add(status);
 			logStore(status);
 			mess.storeProps();
@@ -292,11 +300,11 @@ public class OpSendDMSGraphics extends OpDMS {
 
 		/** Verify the graphic status is modifying */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsGraphicStatus status = new DmsGraphicStatus(row);
+			ASN1Enum<DmsGraphicStatus> status = makeStatus(row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
-			if (status.getEnum() !=DmsGraphicStatus.Enum.modifying){
+			if (status.getEnum() != DmsGraphicStatus.modifying) {
 				logError("graphic send aborted");
 				return nextGraphicPhase();
 			}
@@ -309,21 +317,21 @@ public class OpSendDMSGraphics extends OpDMS {
 
 		/** Create a new graphic in the graphic table */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsGraphicNumber number = new DmsGraphicNumber(row);
+			ASN1Integer number = dmsGraphicNumber.makeInt(row);
 			DmsGraphicName name = new DmsGraphicName(row);
-			DmsGraphicHeight height = new DmsGraphicHeight(row);
-			DmsGraphicWidth width = new DmsGraphicWidth(row);
-			DmsGraphicType type = new DmsGraphicType(row);
-			DmsGraphicTransparentEnabled trans_enabled =
-				new DmsGraphicTransparentEnabled(row);
+			ASN1Integer height = dmsGraphicHeight.makeInt(row);
+			ASN1Integer width = dmsGraphicWidth.makeInt(row);
+			ASN1Enum<DmsColorScheme> type = new ASN1Enum<
+				DmsColorScheme>(dmsGraphicType.node, row);
+			ASN1Integer trans_enabled =
+				dmsGraphicTransparentEnabled.makeInt(row);
 			DmsGraphicTransparentColor trans_color =
 				new DmsGraphicTransparentColor(row);
 			number.setInteger(graphic.getGNumber());
 			name.setString(graphic.getName());
 			height.setInteger(graphic.getHeight());
 			width.setInteger(graphic.getWidth());
-			type.setEnum(DmsColorScheme.Enum.fromBpp(
-				graphic.getBpp()));
+			type.setEnum(DmsColorScheme.fromBpp(graphic.getBpp()));
 			trans_enabled.setInteger(1);
 			if (graphic.getBpp() == 24) {
 				trans_color.setOctetString(
@@ -397,8 +405,8 @@ public class OpSendDMSGraphics extends OpDMS {
 
 		/** Validate a graphic entry in the graphic table */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsGraphicStatus status = new DmsGraphicStatus(row);
-			status.setEnum(DmsGraphicStatus.Enum.readyForUseReq);
+			ASN1Enum<DmsGraphicStatus> status = makeStatus(row);
+			status.setEnum(DmsGraphicStatus.readyForUseReq);
 			mess.add(status);
 			logStore(status);
 			mess.storeProps();
@@ -415,12 +423,11 @@ public class OpSendDMSGraphics extends OpDMS {
 
 		/** Verify the graphic status is ready for use */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsGraphicStatus status = new DmsGraphicStatus(row);
+			ASN1Enum<DmsGraphicStatus> status = makeStatus(row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
-			if (status.getEnum() ==
-			    DmsGraphicStatus.Enum.readyForUse)
+			if (status.getEnum() == DmsGraphicStatus.readyForUse)
 				return new VerifyGraphicFinal();
 			if (TimeSteward.currentTimeMillis() > expire) {
 				logError("graphic status timeout expired -- " +
@@ -436,7 +443,7 @@ public class OpSendDMSGraphics extends OpDMS {
 
 		/** Verify a graphic */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsGraphicID gid = new DmsGraphicID(row);
+			ASN1Integer gid = dmsGraphicID.makeInt(row);
 			mess.add(gid);
 			mess.queryProps();
 			logQuery(gid);

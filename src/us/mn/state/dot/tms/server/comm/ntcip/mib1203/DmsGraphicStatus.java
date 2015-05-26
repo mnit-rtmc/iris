@@ -14,47 +14,20 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
  * DmsGraphicStatus indicates the current status of the graphic.
  *
  * @author Douglas Lau
  */
-public class DmsGraphicStatus extends ASN1Integer {
-
-	/** Enumeration of graphic status values */
-	static public enum Enum {
-		undefined, notUsed, modifying, calculatingID, readyForUse,
-		inUse, permanent, modifyReq, readyForUseReq, notUsedReq;
-
-		/** Get graphic status from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new DmsGraphicStatus object */
-	public DmsGraphicStatus(int row) {
-		super(MIB1203.dmsGraphicEntry.child(new int[] {10, row}));
-	}
-
-	/** Set the enum value */
-	public void setEnum(Enum v) {
-		value = v.ordinal();
-	}
-
-	/** Get the enum value */
-	public Enum getEnum() {
-		return Enum.fromOrdinal(value);
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum DmsGraphicStatus {
+	undefined,
+	notUsed,
+	modifying,
+	calculatingID,
+	readyForUse,
+	inUse,
+	permanent,
+	modifyReq,
+	readyForUseReq,
+	notUsedReq;
 }

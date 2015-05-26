@@ -14,75 +14,33 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
  * DmsColorScheme indicates which color scheme is supported by the sign.
  * This object was added in 1203v2.
  *
  * @author Douglas Lau
  */
-public class DmsColorScheme extends ASN1Integer {
+public enum DmsColorScheme {
+	undefined	(0),
+	monochrome1bit	(1),
+	monochrome8bit	(8),
+	colorClassic	(4),
+	color24bit	(24);
 
-	/** Enumeration of color schemes */
-	static public enum Enum {
-		undefined, monochrome1bit, monochrome8bit,
-		colorClassic, color24bit;
+	/** Number of bits per pixel */
+	public final int bpp;
 
-		/** Get color scheme from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-
-		/** Lookup an enum from bpp */
-		static public Enum fromBpp(int bpp) {
-			switch(bpp) {
-			case 1:
-				return monochrome1bit;
-			case 4:
-				// FIXME: add support for colorClassic scheme
-				return colorClassic;
-			case 8:
-				return monochrome8bit;
-			case 24:
-				return color24bit;
-			}
-			return undefined;
-		}
-
-		/** Get the bpp of the color scheme */
-		public int getBpp() {
-			switch(this) {
-			case monochrome1bit:
-				return 1;
-			case monochrome8bit:
-				return 8;
-			case colorClassic:
-				return 8;
-			case color24bit:
-				return 24;
-			default:
-				return 0;
-			}
-		}
+	/** Create a new color scheme */
+	private DmsColorScheme(int b) {
+		bpp = b;
 	}
 
-	/** Create a new DmsColorScheme object */
-	public DmsColorScheme() {
-		super(MIB1203.multiCfg.child(new int[] {11, 0}));
-	}
-
-	/** Get the enum value */
-	public Enum getEnum() {
-		return Enum.fromOrdinal(value);
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
+	/** Lookup from bpp */
+	static public DmsColorScheme fromBpp(int bpp) {
+		for (DmsColorScheme s: values()) {
+			if (s.bpp == bpp)
+				return s;
+		}
+		return undefined;
 	}
 }

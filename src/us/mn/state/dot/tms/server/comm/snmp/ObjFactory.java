@@ -22,12 +22,18 @@ package us.mn.state.dot.tms.server.comm.snmp;
 abstract public class ObjFactory<T extends ASN1Object> {
 
 	/** Make an object */
+	abstract public T make(MIBNode n, int[] idx);
+
+	/** Make an object */
 	abstract public T make(MIBNode n);
 
 	/** Integer factory */
 	static public ObjFactory<ASN1Integer> INTEGER =
 		new ObjFactory<ASN1Integer>()
 	{
+		public ASN1Integer make(MIBNode n, int[] idx) {
+			return new ASN1Integer(n, idx);
+		}
 		public ASN1Integer make(MIBNode n) {
 			return new ASN1Integer(n);
 		}

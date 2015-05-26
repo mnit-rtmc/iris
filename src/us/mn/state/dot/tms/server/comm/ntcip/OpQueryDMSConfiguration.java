@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1201.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -189,7 +190,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		/** Query the 1203v2 objects */
 		protected Phase poll(CommMessage mess) throws IOException {
 			MonochromeColor m_color = new MonochromeColor();
-			DmsColorScheme color_scheme = new DmsColorScheme();
+			ASN1Enum<DmsColorScheme> color_scheme = new ASN1Enum<
+				DmsColorScheme>(dmsColorScheme.node);
 			DmsSupportedMultiTags tags =new DmsSupportedMultiTags();
 			ASN1Integer pages = dmsMaxNumberPages.makeInt();
 			ASN1Integer m_len = dmsMaxMultiStringLength.makeInt();

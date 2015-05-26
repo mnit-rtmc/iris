@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
 import static us.mn.state.dot.tms.server.comm.snmp.ObjFactory.*;
@@ -27,52 +28,53 @@ import static us.mn.state.dot.tms.server.comm.snmp.ObjFactory.*;
 public enum MIB1203 {
 	dms				(MIB1201.devices, 3),
 	dmsSignCfg			(dms, 1),
-	  dmsSignHeight			(dmsSignCfg, new int[] {3, 0}),
-	  dmsSignWidth			(dmsSignCfg, new int[] {4, 0}),
-	  dmsHorizontalBorder		(dmsSignCfg, new int[] {5, 0}),
-	  dmsVerticalBorder		(dmsSignCfg, new int[] {6, 0}),
+	  dmsSignHeight			(dmsSignCfg, 3),
+	  dmsSignWidth			(dmsSignCfg, 4),
+	  dmsHorizontalBorder		(dmsSignCfg, 5),
+	  dmsVerticalBorder		(dmsSignCfg, 6),
 	vmsCfg				(dms, 2),
-	  vmsCharacterHeightPixels	(vmsCfg, new int[] {1, 0}),
-	  vmsCharacterWidthPixels	(vmsCfg, new int[] {2, 0}),
-	  vmsSignHeightPixels		(vmsCfg, new int[] {3, 0}),
-	  vmsSignWidthPixels		(vmsCfg, new int[] {4, 0}),
-	  vmsHorizontalPitch		(vmsCfg, new int[] {5, 0}),
-	  vmsVerticalPitch		(vmsCfg, new int[] {6, 0}),
+	  vmsCharacterHeightPixels	(vmsCfg, 1),
+	  vmsCharacterWidthPixels	(vmsCfg, 2),
+	  vmsSignHeightPixels		(vmsCfg, 3),
+	  vmsSignWidthPixels		(vmsCfg, 4),
+	  vmsHorizontalPitch		(vmsCfg, 5),
+	  vmsVerticalPitch		(vmsCfg, 6),
 	fontDefinition			(dms, 3),
-	  numFonts			(fontDefinition, new int[] {1, 0}),
+	  numFonts			(fontDefinition, 1),
 	  fontTable			(fontDefinition, 2),
 	  fontEntry			(fontTable, 1),
-	  maxFontCharacters		(fontDefinition, new int[] {3, 0}),
+	  maxFontCharacters		(fontDefinition, 3),
 	  characterTable		(fontDefinition, 4),
 	  characterEntry		(characterTable, 1),
-	  fontMaxCharacterSize		(fontDefinition, new int[] {5, 0}),// V2
+	  fontMaxCharacterSize		(fontDefinition, 5), // V2
 	multiCfg			(dms, 4),
-	  defaultFont			(multiCfg, new int[] {5, 0}),
-	  defaultPageOnTime		(multiCfg, new int[] {8, 0}),
-	  defaultPageOffTime		(multiCfg, new int[] {9, 0}),
-	  dmsMaxNumberPages		(multiCfg, new int[] {15, 0}),
-	  dmsMaxMultiStringLength	(multiCfg, new int[] {16, 0}),
+	  defaultFont			(multiCfg, 5),
+	  defaultPageOnTime		(multiCfg, 8),
+	  defaultPageOffTime		(multiCfg, 9),
+	  dmsColorScheme		(multiCfg, 11),
+	  dmsMaxNumberPages		(multiCfg, 15),
+	  dmsMaxMultiStringLength	(multiCfg, 16),
 	dmsMessage			(dms, 5),
-	  dmsNumPermanentMsg		(dmsMessage, new int[] {1, 0}),
-	  dmsNumChangeableMsg		(dmsMessage, new int[] {2, 0}),
-	  dmsMaxChangeableMsg		(dmsMessage, new int[] {3, 0}),
-	  dmsFreeChangeableMemory	(dmsMessage, new int[] {4, 0}),
-	  dmsNumVolatileMsg		(dmsMessage, new int[] {5, 0}),
-	  dmsMaxVolatileMsg		(dmsMessage, new int[] {6, 0}),
-	  dmsFreeVolatileMemory		(dmsMessage, new int[] {7, 0}),
+	  dmsNumPermanentMsg		(dmsMessage, 1),
+	  dmsNumChangeableMsg		(dmsMessage, 2),
+	  dmsMaxChangeableMsg		(dmsMessage, 3),
+	  dmsFreeChangeableMemory	(dmsMessage, 4),
+	  dmsNumVolatileMsg		(dmsMessage, 5),
+	  dmsMaxVolatileMsg		(dmsMessage, 6),
+	  dmsFreeVolatileMemory		(dmsMessage, 7),
 	dmsMessageTable			(dmsMessage, 8),
 	  dmsMessageEntry		(dmsMessageTable, 1),
 	signControl			(dms, 6),
-	  vmsPixelServiceDuration	(signControl, new int[] {21, 0}),
-	  vmsPixelServiceFrequency	(signControl, new int[] {22, 0}),
-	  vmsPixelServiceTime		(signControl, new int[] {23, 0}),
+	  vmsPixelServiceDuration	(signControl, 21),
+	  vmsPixelServiceFrequency	(signControl, 22),
+	  vmsPixelServiceTime		(signControl, 23),
 	illum				(dms, 7),
-	  dmsIllumMaxPhotocellLevel	(illum, new int[] {2, 0}),
-	  dmsIllumPhotocellLevelStatus	(illum, new int[] {3, 0}),
-	  dmsIllumNumBrightLevels	(illum, new int[] {4, 0}),
-	  dmsIllumBrightLevelStatus	(illum, new int[] {5, 0}),
-	  dmsIllumManLevel		(illum, new int[] {6, 0}),
-	  dmsIllumLightOutputStatus	(illum, new int[] {9, 0}),
+	  dmsIllumMaxPhotocellLevel	(illum, 2),
+	  dmsIllumPhotocellLevelStatus	(illum, 3),
+	  dmsIllumNumBrightLevels	(illum, 4),
+	  dmsIllumBrightLevelStatus	(illum, 5),
+	  dmsIllumManLevel		(illum, 6),
+	  dmsIllumLightOutputStatus	(illum, 9),
 	dmsStatus			(dms, 9),
 	  statError			(dmsStatus, 7),
 	  pixelFailureTable		(statError, 3),
@@ -84,32 +86,38 @@ public enum MIB1203 {
 	  dmsLightSensorStatusTable	(statError, 30),
 	  dmsLightSensorStatusEntry	(dmsLightSensorStatusTable, 1),
 	  statTemp			(dmsStatus, 9),
-	  tempMinCtrlCabinet		(statTemp, new int[] {1, 0}),
-	  tempMaxCtrlCabinet		(statTemp, new int[] {2, 0}),
-	  tempMinAmbient		(statTemp, new int[] {3, 0}),
-	  tempMaxAmbient		(statTemp, new int[] {4, 0}),
-	  tempMinSignHousing		(statTemp, new int[] {5, 0}),
-	  tempMaxSignHousing		(statTemp, new int[] {6, 0}),
+	  tempMinCtrlCabinet		(statTemp, 1),
+	  tempMaxCtrlCabinet		(statTemp, 2),
+	  tempMinAmbient		(statTemp, 3),
+	  tempMaxAmbient		(statTemp, 4),
+	  tempMinSignHousing		(statTemp, 5),
+	  tempMaxSignHousing		(statTemp, 6),
 	graphicDefinition		(dms, 10),
-	  dmsGraphicMaxEntries		(graphicDefinition, new int[] {1, 0}),
-	  dmsGraphicNumEntries		(graphicDefinition, new int[] {2, 0}),
-	  dmsGraphicMaxSize		(graphicDefinition, new int[] {3, 0}),
-	  availableGraphicMemory	(graphicDefinition, new int[] {4, 0}),
-	  dmsGraphicBlockSize		(graphicDefinition, new int[] {5, 0}),
+	  dmsGraphicMaxEntries		(graphicDefinition, 1),
+	  dmsGraphicNumEntries		(graphicDefinition, 2),
+	  dmsGraphicMaxSize		(graphicDefinition, 3),
+	  availableGraphicMemory	(graphicDefinition, 4),
+	  dmsGraphicBlockSize		(graphicDefinition, 5),
 	  dmsGraphicTable		(graphicDefinition, 6),
 	  dmsGraphicEntry		(dmsGraphicTable, 1),
+	    dmsGraphicIndex		(dmsGraphicEntry, 1),
+	    dmsGraphicNumber		(dmsGraphicEntry, 2),
+	    dmsGraphicHeight		(dmsGraphicEntry, 4),
+	    dmsGraphicWidth		(dmsGraphicEntry, 5),
+	    dmsGraphicType		(dmsGraphicEntry, 6),
+	    dmsGraphicID		(dmsGraphicEntry, 7),
+	    dmsGraphicTransparentEnabled(dmsGraphicEntry, 8),
+	    dmsGraphicStatus		(dmsGraphicEntry, 10),
 	  dmsGraphicBitmapTable		(graphicDefinition, 7),
-	  dmsGraphicBitmapEntry		(dmsGraphicBitmapTable, 1);
+	    dmsGraphicBitmapEntry	(dmsGraphicBitmapTable, 1),
+	      dmsGraphicBlockNumber	(dmsGraphicBitmapEntry, 2);
 
-	private final MIBNode node;
+	public final MIBNode node;
+
 	private MIB1203(MIB1201 p, int n) {
-		// FIXME: add name
 		node = p.child(n);
 	}
 	private MIB1203(MIB1203 p, int n) {
-		node = p.node.child(n, toString());
-	}
-	private MIB1203(MIB1203 p, int[] n) {
 		node = p.node.child(n, toString());
 	}
 	public int[] oid(int i) {
@@ -131,5 +139,11 @@ public enum MIB1203 {
 	}
 	public ASN1Integer makeInt() {
 		return INTEGER.make(node);
+	}
+	public ASN1Integer makeInt(int r) {
+		return INTEGER.make(node, new int[] { r });
+	}
+	public ASN1Integer makeInt(int[] idx) {
+		return INTEGER.make(node, idx);
 	}
 }
