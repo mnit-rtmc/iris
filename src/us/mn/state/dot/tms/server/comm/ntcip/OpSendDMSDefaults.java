@@ -60,7 +60,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			power_time.setInteger(0);
 			comm_time.setInteger(SystemAttrEnum.
 				DMS_COMM_LOSS_MINUTES.getInt());
-			end_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
+			end_msg.setMemoryType(DmsMessageMemoryType.blank);
 			end_msg.setNumber(1);
 			end_msg.setCrc(0);
 			mess.add(power_time);

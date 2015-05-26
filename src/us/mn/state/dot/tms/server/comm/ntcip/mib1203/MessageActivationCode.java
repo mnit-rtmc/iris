@@ -62,16 +62,16 @@ abstract public class MessageActivationCode extends ASN1OctetString {
 	}
 
 	/** Memory type */
-	protected int memory;
+	private int memory;
 
 	/** Set the memory type */
-	public void setMemoryType(DmsMessageMemoryType.Enum m) {
+	public void setMemoryType(DmsMessageMemoryType m) {
 		memory = m.ordinal();
 	}
 
 	/** Get the memory type */
-	public DmsMessageMemoryType.Enum getMemoryType() {
-		return DmsMessageMemoryType.Enum.fromOrdinal(memory);
+	public DmsMessageMemoryType getMemoryType() {
+		return DmsMessageMemoryType.fromOrdinal(memory);
 	}
 
 	/** Message number */
@@ -159,7 +159,7 @@ abstract public class MessageActivationCode extends ASN1OctetString {
 		b.append(",");
 		b.append(priority);
 		b.append(",");
-		b.append(DmsMessageMemoryType.Enum.fromOrdinal(memory));
+		b.append(DmsMessageMemoryType.fromOrdinal(memory));
 		b.append(",");
 		b.append(number);
 		b.append(",");

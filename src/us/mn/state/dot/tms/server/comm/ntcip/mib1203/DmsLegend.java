@@ -14,41 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip DmsLegend object
+ * Enumeration of legends.
  *
  * @author Douglas Lau
  */
-public class DmsLegend extends ASN1Integer {
-
-	/** Enumeration of legends */
-	static public enum Enum {
-		undefined, other, noLegend, legendExists;
-
-		/** Get legend from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new DmsLegend object */
-	public DmsLegend() {
-		super(MIB1203.dmsSignCfg.child(new int[] {7, 0}));
-	}
-
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum DmsLegend {
+	undefined,
+	other,
+	noLegend,
+	legendExists;
 }

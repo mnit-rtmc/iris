@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 public class DmsMessagePixelService extends ASN1Integer {
 
 	/** Create a new DmsMessagePixelService object */
-	public DmsMessagePixelService(DmsMessageMemoryType.Enum m, int number) {
+	public DmsMessagePixelService(DmsMessageMemoryType m, int number) {
 		super(MIB1203.dmsMessageEntry.child(new int[] {
 			7, m.ordinal(), number}));
 	}

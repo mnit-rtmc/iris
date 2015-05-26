@@ -142,7 +142,7 @@ public class OpSendDMSMessage extends OpDMS {
 			DmsActivateMessage act = new DmsActivateMessage();
 			act.setDuration(DURATION_INDEFINITE);
 			act.setPriority(MAX_MESSAGE_PRIORITY);
-			act.setMemoryType(DmsMessageMemoryType.Enum.blank);
+			act.setMemoryType(DmsMessageMemoryType.blank);
 			act.setNumber(1);
 			act.setCrc(0);
 			act.setAddress(0);
@@ -166,7 +166,7 @@ public class OpSendDMSMessage extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			modify_requested = true;
 			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, msg_num);
+				DmsMessageMemoryType.changeable, msg_num);
 			status.setEnum(DmsMessageStatus.Enum.modifyReq);
 			mess.add(status);
 			try {
@@ -193,7 +193,7 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Query the message status */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, msg_num);
+				DmsMessageMemoryType.changeable, msg_num);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
@@ -219,14 +219,14 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Modify the message */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageMultiString multi = new DmsMessageMultiString(
-				DmsMessageMemoryType.Enum.changeable, msg_num);
+				DmsMessageMemoryType.changeable, msg_num);
 			DmsMessageBeacon beacon = new DmsMessageBeacon(
-				DmsMessageMemoryType.Enum.changeable, msg_num);
+				DmsMessageMemoryType.changeable, msg_num);
 			DmsMessagePixelService srv = new DmsMessagePixelService(
-				DmsMessageMemoryType.Enum.changeable, msg_num);
+				DmsMessageMemoryType.changeable, msg_num);
 			DmsMessageRunTimePriority prior =
 				new DmsMessageRunTimePriority(
-				DmsMessageMemoryType.Enum.changeable, msg_num);
+				DmsMessageMemoryType.changeable, msg_num);
 			multi.setString(message.getMulti());
 			beacon.setEnabled(message.getBeaconEnabled());
 			srv.setInteger(0);
@@ -265,7 +265,7 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Set the status to validate request */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, msg_num);
+				DmsMessageMemoryType.changeable, msg_num);
 			status.setEnum(DmsMessageStatus.Enum.validateReq);
 			mess.add(status);
 			try {
@@ -285,9 +285,9 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Query the message validity */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.changeable, msg_num);
+				DmsMessageMemoryType.changeable, msg_num);
 			DmsMessageCRC crc = new DmsMessageCRC(
-				DmsMessageMemoryType.Enum.changeable, msg_num);
+				DmsMessageMemoryType.changeable, msg_num);
 			mess.add(status);
 			mess.add(crc);
 			mess.queryProps();
@@ -353,7 +353,7 @@ public class OpSendDMSMessage extends OpDMS {
 			DmsActivateMessage act = new DmsActivateMessage();
 			act.setDuration(getDuration());
 			act.setPriority(MAX_MESSAGE_PRIORITY);
-			act.setMemoryType(DmsMessageMemoryType.Enum.changeable);
+			act.setMemoryType(DmsMessageMemoryType.changeable);
 			act.setNumber(msg_num);
 			act.setCrc(message_crc);
 			act.setAddress(0);
@@ -511,20 +511,20 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** Set the comm loss and power recovery msgs */
 	protected void setCommAndPower() {
-		comm_msg.setMemoryType(DmsMessageMemoryType.Enum.changeable);
+		comm_msg.setMemoryType(DmsMessageMemoryType.changeable);
 		comm_msg.setNumber(msg_num);
 		comm_msg.setCrc(message_crc);
-		long_msg.setMemoryType(DmsMessageMemoryType.Enum.changeable);
+		long_msg.setMemoryType(DmsMessageMemoryType.changeable);
 		long_msg.setNumber(msg_num);
 		long_msg.setCrc(message_crc);
 	}
 
 	/** Set the comm loss and power recovery msgs to blank */
 	protected void setCommAndPowerBlank() {
-		comm_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
+		comm_msg.setMemoryType(DmsMessageMemoryType.blank);
 		comm_msg.setNumber(1);
 		comm_msg.setCrc(0);
-		long_msg.setMemoryType(DmsMessageMemoryType.Enum.blank);
+		long_msg.setMemoryType(DmsMessageMemoryType.blank);
 		long_msg.setNumber(1);
 		long_msg.setCrc(0);
 	}

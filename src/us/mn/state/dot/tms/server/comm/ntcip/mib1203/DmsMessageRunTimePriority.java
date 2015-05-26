@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 public class DmsMessageRunTimePriority extends ASN1Integer {
 
 	/** Create a new DmsMessageRunTimePriority object */
-	public DmsMessageRunTimePriority(DmsMessageMemoryType.Enum m,
+	public DmsMessageRunTimePriority(DmsMessageMemoryType m,
 		int number)
 	{
 		super(MIB1203.dmsMessageEntry.child(new int[] {

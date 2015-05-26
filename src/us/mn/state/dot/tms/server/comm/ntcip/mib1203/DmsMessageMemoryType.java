@@ -14,54 +14,41 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip DmsMessageMemoryType object
+ * Enumeration of memory types.
  *
  * @author Douglas Lau
  */
-public class DmsMessageMemoryType extends ASN1Integer {
+public enum DmsMessageMemoryType {
+	undefined	(false),
+	other		(false),
+	permanent	(true),
+	changeable	(true),
+	_volatile	(true),
+	currentBuffer	(false),
+	schedule	(true),
+	blank		(true);
 
-	/** Enumeration of memory types */
-	static public enum Enum {
-		undefined, other, permanent, changeable, _volatile,
-		currentBuffer, schedule, blank;
+	/** Valid for deploying messages */
+	public final boolean valid;
 
-		/** Get memory type from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-
-		/** Test if a message memory type is "blank" */
-		public boolean isBlank() {
-		 	// For some vendors (1203v1), blank messages are
-		 	// undefined in dmsMsgTableSource
-			return this == blank || this == undefined;
-		}
-
-		/** Test if a message memory type is "valid" */
-		public boolean isValid() {
-			switch(this) {
-			case permanent:
-			case changeable:
-			case _volatile:
-			case schedule:
-			case blank:
-				return true;
-			default:
-				return false;
-			}
-		}
+	/** Create a new message memory type */
+	private DmsMessageMemoryType(boolean v) {
+		valid = v;
 	}
 
-	/** Create a new memory type object */
-	public DmsMessageMemoryType(Enum m, int number) {
-		super(MIB1203.dmsMessageEntry.child(new int[] {
-			1, m.ordinal(), number}));
+	/** Test if a message memory type is "blank" */
+	public boolean isBlank() {
+	 	// For some vendors (1203v1), blank messages are
+	 	// undefined in dmsMsgTableSource
+		return this == blank || this == undefined;
+	}
+
+	/** Get memory type from an ordinal value */
+	static public DmsMessageMemoryType fromOrdinal(int o) {
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return undefined;
 	}
 }

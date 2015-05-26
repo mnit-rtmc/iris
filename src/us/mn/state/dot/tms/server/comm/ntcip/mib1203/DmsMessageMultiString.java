@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 public class DmsMessageMultiString extends ASN1OctetString {
 
 	/** Create a new MULTI string object */
-	public DmsMessageMultiString(DmsMessageMemoryType.Enum m, int number) {
+	public DmsMessageMultiString(DmsMessageMemoryType m, int number) {
 		super(MIB1203.dmsMessageEntry.child(new int[] {
 			3, m.ordinal(), number}));
 	}

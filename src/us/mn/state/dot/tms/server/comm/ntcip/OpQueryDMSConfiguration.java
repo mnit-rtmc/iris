@@ -114,7 +114,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			ASN1Integer width = dmsSignWidth.makeInt();
 			ASN1Integer h_border = dmsHorizontalBorder.makeInt();
 			ASN1Integer v_border = dmsVerticalBorder.makeInt();
-			DmsLegend legend = new DmsLegend();
+			ASN1Enum<DmsLegend> legend = new ASN1Enum<DmsLegend>(
+				dmsLegend.node);
 			ASN1Enum<DmsBeaconType> beacon = new ASN1Enum<
 				DmsBeaconType>(dmsBeaconType.node);
 			DmsSignTechnology tech = new DmsSignTechnology();

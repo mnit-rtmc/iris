@@ -36,7 +36,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 	 * @param c CRC of message.
 	 * @return Encoded array of bytes.
 	 * @throws IllegalArgumentException, if encoding fails. */
-	static private byte[] encodeValue(DmsMessageMemoryType.Enum m, int n,
+	static private byte[] encodeValue(DmsMessageMemoryType m, int n,
 		int c)
 	{
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -47,7 +47,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 			dos.writeShort(c);
 			return bos.toByteArray();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 		finally {
@@ -55,7 +55,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 				dos.close();
 				bos.close();
 			}
-			catch(IOException e) {
+			catch (IOException e) {
 				// exceptions on close are stupid -- ignore
 			}
 		}
@@ -67,21 +67,21 @@ abstract public class MessageIDCode extends ASN1OctetString {
 	}
 
 	/** Memory type */
-	protected DmsMessageMemoryType.Enum memory;
+	private DmsMessageMemoryType memory;
 
 	/** Set the memory type */
-	public void setMemoryType(DmsMessageMemoryType.Enum m) {
+	public void setMemoryType(DmsMessageMemoryType m) {
 		value = encodeValue(m, number, crc);
 		memory = m;
 	}
 
 	/** Get the memory type */
-	public DmsMessageMemoryType.Enum getMemoryType() {
+	public DmsMessageMemoryType getMemoryType() {
 		return memory;
 	}
 
 	/** Message number */
-	protected int number;
+	private int number;
 
 	/** Set the message number */
 	public void setNumber(int n) {
@@ -114,13 +114,13 @@ abstract public class MessageIDCode extends ASN1OctetString {
 		ByteArrayInputStream bis = new ByteArrayInputStream(v);
 		DataInputStream dis = new DataInputStream(bis);
 		try {
-			memory = DmsMessageMemoryType.Enum.fromOrdinal(
+			memory = DmsMessageMemoryType.fromOrdinal(
 				dis.readUnsignedByte());
 			number = dis.readUnsignedShort();
 			crc = dis.readUnsignedShort();
 			value = v;
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}

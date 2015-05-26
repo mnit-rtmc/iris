@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 public class DmsMessageBeacon extends ASN1Integer {
 
 	/** Create a new DmsMessageBeacon object */
-	public DmsMessageBeacon(DmsMessageMemoryType.Enum m, int number) {
+	public DmsMessageBeacon(DmsMessageMemoryType m, int number) {
 		super(MIB1203.dmsMessageEntry.child(new int[] {
 			6, m.ordinal(), number}));
 	}

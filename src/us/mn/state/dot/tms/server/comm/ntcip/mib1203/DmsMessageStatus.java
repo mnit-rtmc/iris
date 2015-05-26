@@ -39,7 +39,7 @@ public class DmsMessageStatus extends ASN1Integer {
 	}
 
 	/** Create a new DmsMessageStatus object */
-	public DmsMessageStatus(DmsMessageMemoryType.Enum m, int number) {
+	public DmsMessageStatus(DmsMessageMemoryType m, int number) {
 		super(MIB1203.dmsMessageEntry.child(new int[] {
 			9, m.ordinal(), number}));
 	}

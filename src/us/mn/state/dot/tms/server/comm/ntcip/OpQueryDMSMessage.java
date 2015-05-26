@@ -50,13 +50,13 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Process the message table source from the sign controller */
 	private Phase processMessageSource() {
-		DmsMessageMemoryType.Enum mem_type = source.getMemoryType();
+		DmsMessageMemoryType mem_type = source.getMemoryType();
 		if (mem_type != null) {
-			/* We have to test isBlank before isValid, because some
+			/* We have to test isBlank before "valid", because some
 			 * signs use 'undefined' source for blank messages. */
 			if (mem_type.isBlank())
 				return processMessageBlank();
-			else if (mem_type.isValid())
+			else if (mem_type.valid)
 				return processMessageValid();
 		}
 		return processMessageInvalid();
@@ -117,14 +117,14 @@ public class OpQueryDMSMessage extends OpDMS {
 		/** Query the current message */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageMultiString multi = new DmsMessageMultiString(
-				DmsMessageMemoryType.Enum.currentBuffer, 1);
+				DmsMessageMemoryType.currentBuffer, 1);
 			DmsMessageBeacon beacon = new DmsMessageBeacon(
-				DmsMessageMemoryType.Enum.currentBuffer, 1);
+				DmsMessageMemoryType.currentBuffer, 1);
 			DmsMessageRunTimePriority prior =
 				new DmsMessageRunTimePriority(
-				DmsMessageMemoryType.Enum.currentBuffer, 1);
+				DmsMessageMemoryType.currentBuffer, 1);
 			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.Enum.currentBuffer, 1);
+				DmsMessageMemoryType.currentBuffer, 1);
 			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 			mess.add(multi);
 			mess.add(beacon);
