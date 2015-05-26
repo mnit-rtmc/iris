@@ -24,29 +24,28 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 public class LedActivateMsgError extends ASN1Integer {
 
 	/** Activate message error descriptions */
-	static protected final String[] ERROR = {
+	static private final String[] ERROR = {
 		"Over temperature", "Bad pixel limit", "Draw error"
 	};
 
-	/** Bit masks */
-	static protected final int[] BIT = { 1, 2, 4 };
-
 	/** Create a new LedActivateMsgError */
 	public LedActivateMsgError() {
-		super(MIB.ledstarDiagnostics.child(new int[] {12, 0}));
+		super(MIB.ledActivateMsgError.node);
 	}
 
 	/** Get the object value */
+	@Override
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
-		for(int i = 0; i < 3; i++) {
-			if((value & BIT[i]) != 0) {
-				if(b.length() > 0)
+		for (int i = 0; i < ERROR.length; i++) {
+			int bit = 1 << i;
+			if ((value & bit) != 0) {
+				if (b.length() > 0)
 					b.append(" / ");
 				b.append(ERROR[i]);
 			}
 		}
-		if(b.length() < 1)
+		if (b.length() < 1)
 			b.append("None");
 		return b.toString();
 	}

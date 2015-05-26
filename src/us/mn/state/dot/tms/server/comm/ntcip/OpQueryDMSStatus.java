@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mibledstar.MIB.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
@@ -436,10 +437,10 @@ public class OpQueryDMSStatus extends OpDMS {
 	/** Phase to query Ledstar-specific status */
 	protected class LedstarStatus extends Phase {
 
-		protected final LedLdcPotBase potBase = new LedLdcPotBase();
-		protected final LedPixelLow low = new LedPixelLow();
-		protected final LedPixelHigh high = new LedPixelHigh();
-		protected final LedBadPixelLimit bad = new LedBadPixelLimit();
+		private final ASN1Integer potBase = ledLdcPotBase.makeInt();
+		private final ASN1Integer low = ledPixelLow.makeInt();
+		private final ASN1Integer high = ledPixelHigh.makeInt();
+		private final ASN1Integer bad = ledBadPixelLimit.makeInt();
 
 		/** Query Ledstar-specific status */
 		protected Phase poll(CommMessage mess) throws IOException {

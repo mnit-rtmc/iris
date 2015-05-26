@@ -32,7 +32,7 @@ public enum MIB1201 {
 	globalConfiguration	(global, 1),
 	globalModuleTable	(globalConfiguration, 3),
 	moduleTableEntry	(globalModuleTable, 1),
-	globalMaxModules	(globalConfiguration, new int[] { 2, 0 });
+	globalMaxModules	(globalConfiguration, 2);
 
 	private final MIBNode node;
 	private MIB1201(int[] n) {
@@ -44,8 +44,13 @@ public enum MIB1201 {
 	private MIB1201(MIB1201 p, int[] n) {
 		node = p.node.child(n, toString());
 	}
+	public int[] oid(int i) {
+		int[] o = node.createOID(1);
+		o[o.length - 1] = i;
+		return o;
+	}
 	public int[] oid() {
-		return node.createOID();
+		return oid(0);
 	}
 
 	public MIBNode child(int n) {

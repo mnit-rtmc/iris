@@ -15,37 +15,41 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mibledstar;
 
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
+import static us.mn.state.dot.tms.server.comm.snmp.ObjFactory.*;
 
 /**
  * MIB nodes for Ledstar NTCIP signs.
  *
+ * ledBadPixelLimit is the number of failed pixels needed before the sign will
+ * refuse to activate a message (with dmsActivateMsgError.OTHER).  Setting to
+ * zero disables shortErrorStatus.PIXEL error reporting.
+ *
  * @author Douglas Lau
  */
 public enum MIB {
-	ledstar			(MIB1201._private, 16),
-	ledstarDMS		(ledstar, 1),
-	ledstarSignControl	(ledstarDMS, 1),
-	ledstarDiagnostics	(ledstarDMS, 2);
+	ledstar				(MIB1201._private, 16),
+	ledstarDMS			(ledstar, 1),
+	ledstarSignControl		(ledstarDMS, 1),
+	  ledHighTempCutoff		(ledstarSignControl, 1),
+	  ledSignErrorOverride		(ledstarSignControl, 2),
+	  ledBadPixelLimit		(ledstarSignControl, 3),
+	  ledLdcPotBase			(ledstarSignControl, 6),
+	  ledPixelLow			(ledstarSignControl, 7),
+	  ledPixelHigh			(ledstarSignControl, 8),
+	ledstarDiagnostics		(ledstarDMS, 2),
+	  ledActivateMsgError		(ledstarDiagnostics, 12);
 
-	private final MIBNode node;
+	public final MIBNode node;
+
 	private MIB(MIB1201 p, int n) {
-		// FIXME: add name
 		node = p.child(n);
 	}
 	private MIB(MIB p, int n) {
 		node = p.node.child(n, toString());
 	}
-	private MIB(MIB p, int[] n) {
-		node = p.node.child(n, toString());
-	}
-
-	public MIBNode child(int n) {
-		// FIXME: add name
-		return node.child(n);
-	}
-	public MIBNode child(int[] n) {
-		// FIXME: add name
-		return node.child(n);
+	public ASN1Integer makeInt() {
+		return INTEGER.make(node);
 	}
 }

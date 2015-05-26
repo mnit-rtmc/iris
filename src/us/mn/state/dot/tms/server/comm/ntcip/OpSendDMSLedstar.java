@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mibledstar.MIB.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
  * Operation to set the Ledstar pixel current thresholds
@@ -28,13 +30,13 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 public class OpSendDMSLedstar extends OpDMS {
 
 	/** LDC pot base value */
-	protected final LedLdcPotBase potBase = new LedLdcPotBase();
+	private final ASN1Integer potBase = ledLdcPotBase.makeInt();
 
 	/** Pixel low current threshold */
-	protected final LedPixelLow currentLow = new LedPixelLow();
+	private final ASN1Integer currentLow = ledPixelLow.makeInt();
 
 	/** Pixel high current threshols */
-	protected final LedPixelHigh currentHigh = new LedPixelHigh();
+	private final ASN1Integer currentHigh = ledPixelHigh.makeInt();
 
 	/** Create a new DMS set pixel threshold operation */
 	public OpSendDMSLedstar(DMSImpl d) {

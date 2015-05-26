@@ -38,6 +38,8 @@ public class OIDTest extends TestCase {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 2, 0
 		}));
 		oid = new ModuleMake(7).getOID();
+for (int i: oid) System.err.print(" " + i);
+System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 3, 1, 3, 7
 		}));

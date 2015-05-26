@@ -26,7 +26,7 @@ abstract public class ASN1OctetString extends ASN1Object {
 
 	/** Create a new ASN1 octet string */
 	protected ASN1OctetString(MIBNode n) {
-		super(n);
+		super(n, new int[] { 0 });
 	}
 
 	/** Actual octet string value */

@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mibledstar.MIB.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
@@ -130,10 +131,9 @@ public class OpSendDMSDefaults extends OpDMS {
 
 		/** Set Ledstar-specific object defaults */
 		protected Phase poll(CommMessage mess) throws IOException {
-			LedHighTempCutoff temp = new LedHighTempCutoff();
-			LedSignErrorOverride override = 
-				new LedSignErrorOverride();
-			LedBadPixelLimit limit = new LedBadPixelLimit();
+			ASN1Integer temp = ledHighTempCutoff.makeInt();
+			ASN1Integer override = ledSignErrorOverride.makeInt();
+			ASN1Integer limit = ledBadPixelLimit.makeInt();
 			temp.setInteger(
 				SystemAttrEnum.DMS_HIGH_TEMP_CUTOFF.getInt());
 			limit.setInteger(500);

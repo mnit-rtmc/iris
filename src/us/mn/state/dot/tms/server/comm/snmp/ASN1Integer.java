@@ -24,9 +24,17 @@ import java.io.IOException;
  */
 public class ASN1Integer extends ASN1Object {
 
-	/** Create a new ASN1 integer */
+	/** Create a new ASN1 integer.
+	 * @param n MIB node.
+	 * @param idx Node index. */
+	public ASN1Integer(MIBNode n, int[] idx) {
+		super(n, idx);
+	}
+
+	/** Create a new ASN1 integer.
+	 * @param n MIB node. */
 	public ASN1Integer(MIBNode n) {
-		super(n);
+		super(n, new int[] { 0 });
 	}
 
 	/** Actual integer value */

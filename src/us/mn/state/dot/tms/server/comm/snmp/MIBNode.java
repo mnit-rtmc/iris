@@ -62,9 +62,11 @@ public class MIBNode {
 		return child(new int[] { n });
 	}
 
-	/** Create an Object Identifier */
-	public int[] createOID() {
-		return fillOID(0);
+	/** Create an Object Identifier.
+	 * @param extra Extra elements in OID.
+	 * @return Object Identifier array. */
+	public int[] createOID(int extra) {
+		return fillOID(extra);
 	}
 
 	/** Fill an Object Identifier.
@@ -85,16 +87,6 @@ public class MIBNode {
 			return new int[extra + nid.length];
 		else
 			return parent.fillOID(extra + nid.length);
-	}
-
-	/** Get the MIB index */
-	public String getIndex() {
-		StringBuilder b = new StringBuilder();
-		for (int i = 1; i < nid.length; i++) {
-			b.append('.');
-			b.append(nid[i]);
-		}
-		return b.toString();
 	}
 
 	/** Get the node name */

@@ -29,14 +29,21 @@ abstract public class ASN1Object extends ControllerProperty {
 	/** MIB node */
 	private final MIBNode node;
 
+	/** Node index ID */
+	private final int[] nid;
+
 	/** Create a new ASN1 object */
-	protected ASN1Object(MIBNode n) {
+	protected ASN1Object(MIBNode n, int[] nid) {
 		node = n;
+		this.nid = nid;
 	}
 
 	/** Get the object identifier */
 	public int[] getOID() {
-		return node.createOID();
+		int[] oid = node.createOID(nid.length);
+		int s = oid.length - nid.length;
+		System.arraycopy(nid, 0, oid, s, nid.length);
+		return oid;
 	}
 
 	/** Get the object name */
@@ -60,9 +67,14 @@ abstract public class ASN1Object extends ControllerProperty {
 			return name;
 	}
 
-	/** Get the index of the MIB node */
+	/** Get the MIB index */
 	private String getIndex() {
-		return node.getIndex();
+		StringBuilder b = new StringBuilder();
+		for (int n: nid) {
+			b.append('.');
+			b.append(n);
+		}
+		return b.toString();
 	}
 
 	/** Get the object value */

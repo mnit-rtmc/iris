@@ -112,8 +112,13 @@ public enum MIB1203 {
 	private MIB1203(MIB1203 p, int[] n) {
 		node = p.node.child(n, toString());
 	}
+	public int[] oid(int i) {
+		int[] o = node.createOID(1);
+		o[o.length - 1] = i;
+		return o;
+	}
 	public int[] oid() {
-		return node.createOID();
+		return oid(0);
 	}
 
 	public MIBNode child(int n) {
