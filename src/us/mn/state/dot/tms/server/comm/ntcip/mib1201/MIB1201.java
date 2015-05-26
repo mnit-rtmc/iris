@@ -24,17 +24,19 @@ import static us.mn.state.dot.tms.server.comm.snmp.ObjFactory.*;
  * @author Douglas Lau
  */
 public enum MIB1201 {
-	nema			(new int[] { 1, 3, 6, 1, 4, 1, 1206 }),
-	_private		(nema, 3),
-	transportation		(nema, 4),
-	devices			(transportation, 2),
-	global			(devices, 6),
-	globalConfiguration	(global, 1),
-	globalModuleTable	(globalConfiguration, 3),
-	moduleTableEntry	(globalModuleTable, 1),
-	globalMaxModules	(globalConfiguration, 2);
+	nema				(new int[] { 1, 3, 6, 1, 4, 1, 1206 }),
+	_private			(nema, 3),
+	transportation			(nema, 4),
+	devices				(transportation, 2),
+	global				(devices, 6),
+	globalConfiguration		(global, 1),
+	globalMaxModules		(globalConfiguration, 2),
+	globalModuleTable		(globalConfiguration, 3),
+	  moduleTableEntry		(globalModuleTable, 1),
+	    moduleType			(moduleTableEntry, 6);
 
-	private final MIBNode node;
+	public final MIBNode node;
+
 	private MIB1201(int[] n) {
 		node = MIBNode.root(n, toString());
 	}

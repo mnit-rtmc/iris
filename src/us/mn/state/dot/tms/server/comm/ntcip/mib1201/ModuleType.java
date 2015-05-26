@@ -14,41 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1201;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip ModuleType object
+ * Enumeration of module types.
  *
  * @author Douglas Lau
  */
-public class ModuleType extends ASN1Integer {
-
-	/** Enumeration of module types */
-	static public enum Enum {
-		undefined, other, hardware, software;
-
-		/** Get module type from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new module type object */
-	public ModuleType(int row) {
-		super(MIB1201.moduleTableEntry.child(new int[] { 6, row }));
-	}
-
-	/** Get the enum value */
-	public Enum getEnum() {
-		return Enum.fromOrdinal(value);
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum ModuleType {
+	undefined,
+	other,
+	hardware,
+	software;
 }

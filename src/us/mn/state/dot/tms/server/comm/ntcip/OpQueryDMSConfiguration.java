@@ -79,7 +79,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			ModuleMake make = new ModuleMake(mod);
 			ModuleModel model = new ModuleModel(mod);
 			ModuleVersion version = new ModuleVersion(mod);
-			ModuleType m_type = new ModuleType(mod);
+			ASN1Enum<ModuleType> m_type = new ASN1Enum<ModuleType>(
+				moduleType.node, mod);
 			mess.add(make);
 			mess.add(model);
 			mess.add(version);
@@ -89,13 +90,13 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			logQuery(model);
 			logQuery(version);
 			logQuery(m_type);
-			if(m_type.getEnum() == ModuleType.Enum.software) {
+			if (m_type.getEnum() == ModuleType.software) {
 				dms.setMake(make.getValue());
 				dms.setModel(model.getValue());
 				dms.setVersion(version.getValue());
 			}
 			mod += 1;
-			if(mod < count)
+			if (mod < count)
 				return this;
 			else
 				return new QueryDmsInfo();
