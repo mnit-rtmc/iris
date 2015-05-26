@@ -70,6 +70,11 @@ public enum MIB1203 {
 	dmsMessageTable			(dmsMessage, 8),
 	  dmsMessageEntry		(dmsMessageTable, 1),
 	    dmsMessageMemoryType	(dmsMessageEntry, 1),
+	    dmsMessageCRC		(dmsMessageEntry, 5),
+	    dmsMessageBeacon		(dmsMessageEntry, 6),
+	    dmsMessagePixelService	(dmsMessageEntry, 7),
+	    dmsMessageRunTimePriority	(dmsMessageEntry, 8),
+	    dmsMessageStatus		(dmsMessageEntry, 9),
 	signControl			(dms, 6),
 	  dmsControlMode		(signControl, 1),
 	  dmsSWReset			(signControl, 2),
@@ -162,5 +167,8 @@ public enum MIB1203 {
 	}
 	public ASN1Integer makeInt(int[] idx) {
 		return INTEGER.make(node, idx);
+	}
+	public ASN1Integer makeInt(DmsMessageMemoryType m, int n) {
+		return INTEGER.make(node, new int[] { m.ordinal(), n });
 	}
 }

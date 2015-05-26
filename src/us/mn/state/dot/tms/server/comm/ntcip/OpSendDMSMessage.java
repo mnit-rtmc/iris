@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.MultiSyntaxError;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -63,6 +64,14 @@ public class OpSendDMSMessage extends OpDMS {
 	/** Maximum message priority */
 	static protected final int MAX_MESSAGE_PRIORITY = 255;
 
+	/** Make a new DmsMessageStatus enum */
+	static private ASN1Enum<DmsMessageStatus> makeStatus(
+		DmsMessageMemoryType mem, int n)
+	{
+		return new ASN1Enum<DmsMessageStatus>(dmsMessageStatus.node,
+			new int[] { mem.ordinal(), n });
+	}
+
 	/** Communication loss message */
 	protected final DmsCommunicationsLossMessage comm_msg =
 		new DmsCommunicationsLossMessage();
@@ -86,7 +95,7 @@ public class OpSendDMSMessage extends OpDMS {
 	protected final int msg_num;
 
 	/** Message CRC */
-	protected final int message_crc;
+	private final int message_crc;
 
 	/** User who deployed the message */
 	protected final User owner;
@@ -165,9 +174,9 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Set the status to modify request */
 		protected Phase poll(CommMessage mess) throws IOException {
 			modify_requested = true;
-			DmsMessageStatus status = new DmsMessageStatus(
+			ASN1Enum<DmsMessageStatus> status = makeStatus(
 				DmsMessageMemoryType.changeable, msg_num);
-			status.setEnum(DmsMessageStatus.Enum.modifyReq);
+			status.setEnum(DmsMessageStatus.modifyReq);
 			mess.add(status);
 			try {
 				logStore(status);
@@ -192,16 +201,16 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Query the message status */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsMessageStatus status = new DmsMessageStatus(
+			ASN1Enum<DmsMessageStatus> status = makeStatus(
 				DmsMessageMemoryType.changeable, msg_num);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
-			if (status.isModifying())
+			if (status.getEnum() == DmsMessageStatus.modifying)
 				return new ModifyMessage();
 			else if (!modify_requested)
 				return new ModifyRequest();
-			else if (status.isValid()) {
+			else if (status.getEnum() == DmsMessageStatus.valid) {
 				/* Some ledstar signs prevent dmsMessageStatus
 				 * from changing to modifyReq when in 'local'
 				 * dmsControlMode. */
@@ -220,15 +229,16 @@ public class OpSendDMSMessage extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageMultiString multi = new DmsMessageMultiString(
 				DmsMessageMemoryType.changeable, msg_num);
-			DmsMessageBeacon beacon = new DmsMessageBeacon(
+			ASN1Integer beacon = dmsMessageBeacon.makeInt(
 				DmsMessageMemoryType.changeable, msg_num);
-			DmsMessagePixelService srv = new DmsMessagePixelService(
+			ASN1Integer srv = dmsMessagePixelService.makeInt(
 				DmsMessageMemoryType.changeable, msg_num);
-			DmsMessageRunTimePriority prior =
-				new DmsMessageRunTimePriority(
-				DmsMessageMemoryType.changeable, msg_num);
+			ASN1Enum<DMSMessagePriority> prior = new ASN1Enum<
+				DMSMessagePriority>(dmsMessageRunTimePriority
+				.node, new int[] { DmsMessageMemoryType
+				.changeable.ordinal(), msg_num });
 			multi.setString(message.getMulti());
-			beacon.setEnabled(message.getBeaconEnabled());
+			beacon.setInteger(message.getBeaconEnabled() ? 1 : 0);
 			srv.setInteger(0);
 			prior.setInteger(message.getRunTimePriority());
 			mess.add(multi);
@@ -264,9 +274,9 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Set the status to validate request */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsMessageStatus status = new DmsMessageStatus(
+			ASN1Enum<DmsMessageStatus> status = makeStatus(
 				DmsMessageMemoryType.changeable, msg_num);
-			status.setEnum(DmsMessageStatus.Enum.validateReq);
+			status.setEnum(DmsMessageStatus.validateReq);
 			mess.add(status);
 			try {
 				logStore(status);
@@ -284,16 +294,16 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Query the message validity */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsMessageStatus status = new DmsMessageStatus(
+			ASN1Enum<DmsMessageStatus> status = makeStatus(
 				DmsMessageMemoryType.changeable, msg_num);
-			DmsMessageCRC crc = new DmsMessageCRC(
+			ASN1Integer crc = dmsMessageCRC.makeInt(
 				DmsMessageMemoryType.changeable, msg_num);
 			mess.add(status);
 			mess.add(crc);
 			mess.queryProps();
 			logQuery(status);
 			logQuery(crc);
-			if (!status.isValid())
+			if (status.getEnum() != DmsMessageStatus.valid)
 				return new QueryValidateMsgErr(status);
 			if (message_crc != crc.getInteger()) {
 				String ms = "Message CRC: " +
@@ -311,10 +321,10 @@ public class OpSendDMSMessage extends OpDMS {
 	protected class QueryValidateMsgErr extends Phase {
 
 		/** Status code which triggered validate error */
-		private final DmsMessageStatus status;
+		private final ASN1Enum<DmsMessageStatus> status;
 
 		/** Create a query validate message error phase */
-		protected QueryValidateMsgErr(DmsMessageStatus s) {
+		protected QueryValidateMsgErr(ASN1Enum<DmsMessageStatus> s) {
 			status = s;
 		}
 

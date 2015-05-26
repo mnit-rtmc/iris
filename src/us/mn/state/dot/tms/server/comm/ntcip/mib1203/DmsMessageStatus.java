@@ -14,53 +14,19 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip DmsMessageStatus object
+ * Enumeration of message status values.
  *
  * @author Douglas Lau
  */
-public class DmsMessageStatus extends ASN1Integer {
-
-	/** Enumeration of font status values */
-	static public enum Enum {
-		undefined, notUsed, modifying, validating, valid, error,
-		modifyReq, validateReq, notUsedReq;
-
-		/** Get font status from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new DmsMessageStatus object */
-	public DmsMessageStatus(DmsMessageMemoryType m, int number) {
-		super(MIB1203.dmsMessageEntry.child(new int[] {
-			9, m.ordinal(), number}));
-	}
-
-	/** Set the enum value */
-	public void setEnum(Enum v) {
-		value = v.ordinal();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
-
-	/** Is the status "modifying"? */
-	public boolean isModifying() {
-		return Enum.fromOrdinal(value) == Enum.modifying;
-	}
-
-	/** Is the status "valid"? */
-	public boolean isValid() {
-		return Enum.fromOrdinal(value) == Enum.valid;
-	}
+public enum DmsMessageStatus {
+	undefined,
+	notUsed,
+	modifying,
+	validating,
+	valid,
+	error,
+	modifyReq,
+	validateReq,
+	notUsedReq;
 }

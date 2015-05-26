@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
@@ -118,13 +119,18 @@ public class OpQueryDMSMessage extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsMessageMultiString multi = new DmsMessageMultiString(
 				DmsMessageMemoryType.currentBuffer, 1);
-			DmsMessageBeacon beacon = new DmsMessageBeacon(
+			ASN1Integer beacon = dmsMessageBeacon.makeInt(
 				DmsMessageMemoryType.currentBuffer, 1);
-			DmsMessageRunTimePriority prior =
-				new DmsMessageRunTimePriority(
-				DmsMessageMemoryType.currentBuffer, 1);
-			DmsMessageStatus status = new DmsMessageStatus(
-				DmsMessageMemoryType.currentBuffer, 1);
+			ASN1Enum<DMSMessagePriority> prior = new ASN1Enum<
+				DMSMessagePriority>(dmsMessageRunTimePriority
+				.node, new int[] { DmsMessageMemoryType
+				.currentBuffer.ordinal(), 1 });
+			ASN1Enum<DmsMessageStatus> status = new ASN1Enum<
+				DmsMessageStatus>(dmsMessageStatus.node,
+				new int[]
+			{
+				DmsMessageMemoryType.currentBuffer.ordinal(), 1
+			});
 			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 			mess.add(multi);
 			mess.add(beacon);
@@ -137,10 +143,10 @@ public class OpQueryDMSMessage extends OpDMS {
 			logQuery(prior);
 			logQuery(status);
 			logQuery(time);
-			if (status.isValid()) {
+			if (status.getEnum() == DmsMessageStatus.valid) {
 				Integer d = parseDuration(time.getInteger());
 				setCurrentMessage(multi.getValue(),
-					beacon.isEnabled(), prior.getEnum(), d);
+					beacon.getInteger(), prior.getEnum(),d);
 			} else {
 				logError("INVALID STATUS");
 				setErrorStatus(status.toString());
@@ -150,10 +156,11 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Set the current message on the sign */
-	private void setCurrentMessage(String multi, boolean be,
+	private void setCurrentMessage(String multi, int be,
 		DMSMessagePriority p, Integer duration)
 	{
-		setCurrentMessage(dms.createMessage(multi, be, p, p, duration));
+		setCurrentMessage(dms.createMessage(multi, (be == 1), p, p,
+			duration));
 	}
 
 	/** Set the current message on the sign */
