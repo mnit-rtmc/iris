@@ -26,9 +26,10 @@ public class ASN1Enum<T extends Enum> extends ASN1Integer {
 
 	/** Create a new ASN1 enum.
 	 * @param n MIB node.
-	 * @param idx Node index. */
-	public ASN1Enum(MIBNode n, int[] idx) {
-		super(n, idx);
+	 * @param idx Node index.
+	 * @param j Table index. */
+	public ASN1Enum(MIBNode n, int idx, int j) {
+		super(n, new int[] { idx, j });
 	}
 
 	/** Create a new ASN1 enum.

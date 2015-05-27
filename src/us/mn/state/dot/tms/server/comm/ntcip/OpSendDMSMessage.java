@@ -62,14 +62,14 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 public class OpSendDMSMessage extends OpDMS {
 
 	/** Maximum message priority */
-	static protected final int MAX_MESSAGE_PRIORITY = 255;
+	static private final int MAX_MESSAGE_PRIORITY = 255;
 
 	/** Make a new DmsMessageStatus enum */
 	static private ASN1Enum<DmsMessageStatus> makeStatus(
 		DmsMessageMemoryType mem, int n)
 	{
 		return new ASN1Enum<DmsMessageStatus>(dmsMessageStatus.node,
-			new int[] { mem.ordinal(), n });
+			mem.ordinal(), n);
 	}
 
 	/** Communication loss message */
@@ -235,8 +235,8 @@ public class OpSendDMSMessage extends OpDMS {
 				DmsMessageMemoryType.changeable, msg_num);
 			ASN1Enum<DMSMessagePriority> prior = new ASN1Enum<
 				DMSMessagePriority>(dmsMessageRunTimePriority
-				.node, new int[] { DmsMessageMemoryType
-				.changeable.ordinal(), msg_num });
+				.node,DmsMessageMemoryType.changeable.ordinal(),
+				msg_num);
 			multi.setString(message.getMulti());
 			beacon.setInteger(message.getBeaconEnabled() ? 1 : 0);
 			srv.setInteger(0);

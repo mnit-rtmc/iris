@@ -43,7 +43,7 @@ public class OpSendDMSGraphics extends OpDMS {
 	/** Make an ASN1Enum for DmsGraphicStatus */
 	static private ASN1Enum<DmsGraphicStatus> makeStatus(int row) {
 		return new ASN1Enum<DmsGraphicStatus>(dmsGraphicStatus.node,
-			new int[] { row });
+			row);
 	}
 
 	/** Color scheme supported */
