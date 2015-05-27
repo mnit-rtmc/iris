@@ -103,8 +103,15 @@ public enum MIB1203 {
 	  pixelFailureEntry		(pixelFailureTable, 1),
 	  dmsPowerStatusTable		(statError, 13),
 	  dmsPowerStatusEntry		(dmsPowerStatusTable, 1),
-	  dmsLampStatusTable		(statError, 24),
+	  dmsLampNumRows		(statError, 23),	// V2
+	  dmsLampStatusTable		(statError, 24),	// V2
 	  dmsLampStatusEntry		(dmsLampStatusTable, 1),
+	    dmsLampIndex		(dmsLampStatusEntry, 1),
+	    dmsLampStatus		(dmsLampStatusEntry, 4),
+	    dmsLampPixelTop		(dmsLampStatusEntry, 5),
+	    dmsLampPixelLeft		(dmsLampStatusEntry, 6),
+	    dmsLampPixelBottom		(dmsLampStatusEntry, 7),
+	    dmsLampPixelRight		(dmsLampStatusEntry, 8),
 	  dmsLightSensorNumRows		(statError, 29),	// V2
 	  dmsLightSensorStatusTable	(statError, 30),	// V2
 	  dmsLightSensorStatusEntry	(dmsLightSensorStatusTable, 1),
