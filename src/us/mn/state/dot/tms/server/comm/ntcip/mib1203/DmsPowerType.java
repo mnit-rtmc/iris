@@ -14,48 +14,19 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * DmsPowerType indicates the type of power supply.  This object was added in
- * NTCIP 1203 v2.
+ * Enumeration of power types.
+ * Added in NTCIP 1203 v2.
  *
  * @author Douglas Lau
  */
-public class DmsPowerType extends ASN1Integer {
-
-	/** Enumeration of power types */
-	static public enum Enum {
-		undefined, other, acLine, generator, solar, battery_UPS,
-		ledSupply, lampSupply;
-
-		/** Get power type from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new DmsPowerType object */
-	public DmsPowerType(int row) {
-		super(MIB1203.dmsPowerStatusEntry.child(new int[] {6, row}));
-	}
-
-	/** Set the enum value */
-	public void setEnum(Enum v) {
-		value = v.ordinal();
-	}
-
-	/** Get the enum value */
-	public Enum getEnum() {
-		return Enum.fromOrdinal(value);
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum DmsPowerType {
+	undefined,
+	other,
+	acLine,
+	generator,
+	solar,
+	battery_UPS,
+	ledSupply,
+	lampSupply;
 }

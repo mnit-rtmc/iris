@@ -290,7 +290,7 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query number of power supplies */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsPowerNumRows n_pwr = new DmsPowerNumRows();
+			ASN1Integer n_pwr = dmsPowerNumRows.makeInt();
 			mess.add(n_pwr);
 			try {
 				mess.queryProps();
@@ -322,11 +322,13 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query status of one power supply */
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsPowerDescription desc = new DmsPowerDescription(row);
-			DmsPowerType p_type = new DmsPowerType(row);
-			DmsPowerStatus status = new DmsPowerStatus(row);
+			ASN1Enum<DmsPowerType> p_type = new ASN1Enum<
+				DmsPowerType>(dmsPowerType.node, row);
+			ASN1Enum<DmsPowerStatus> status = new ASN1Enum<
+				DmsPowerStatus>(dmsPowerStatus.node, row);
 			DmsPowerMfrStatus mfr_status = new DmsPowerMfrStatus(
 				row);
-			DmsPowerVoltage voltage = new DmsPowerVoltage(row);
+			ASN1Integer voltage = dmsPowerVoltage.makeInt(row);
 			mess.add(desc);
 			mess.add(p_type);
 			mess.add(status);
@@ -350,7 +352,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				p_type.getValue(), status.getValue(),
 				mfr_status.getValue() + ' ' +
 				formatVoltage(voltage.getInteger()));
-			if (status.getEnum() == DmsPowerStatus.Enum.powerFail)
+			if (status.getEnum() == DmsPowerStatus.powerFail)
 				n_failed++;
 			row++;
 			if (row <= supplies.length)
