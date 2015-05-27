@@ -43,8 +43,7 @@ public class PixelFailureStatus extends ASN1Integer {
 
 	/** Create a new pixel failure status object */
 	public PixelFailureStatus(PixelFailureDetectionType t, int row) {
-		super(MIB1203.pixelFailureStatus.node,
-			new int[] { t.ordinal(), row });
+		super(MIB1203.pixelFailureStatus.node, t.ordinal(), row);
 	}
 
 	/** Test if the pixel is stuck on */
@@ -71,6 +70,7 @@ public class PixelFailureStatus extends ASN1Integer {
 	}
 
 	/** Get the object value */
+	@Override
 	public String getValue() {
 		int v = getInteger();
 		StringBuilder b = new StringBuilder();

@@ -18,7 +18,6 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
-import static us.mn.state.dot.tms.server.comm.snmp.ObjFactory.*;
 
 /**
  * MIB nodes for NTCIP 1203
@@ -204,15 +203,15 @@ public enum MIB1203 {
 		return node.child(n);
 	}
 	public ASN1Integer makeInt() {
-		return INTEGER.make(node);
+		return new ASN1Integer(node);
 	}
 	public ASN1Integer makeInt(int r) {
-		return INTEGER.make(node, new int[] { r });
+		return new ASN1Integer(node, r);
 	}
 	public ASN1Integer makeInt(int r, int s) {
-		return INTEGER.make(node, new int[] { r, s });
+		return new ASN1Integer(node, r, s);
 	}
 	public ASN1Integer makeInt(DmsMessageMemoryType m, int n) {
-		return INTEGER.make(node, new int[] { m.ordinal(), n });
+		return new ASN1Integer(node, m.ordinal(), n);
 	}
 }

@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.ntcip.mibledstar;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
-import static us.mn.state.dot.tms.server.comm.snmp.ObjFactory.*;
 
 /**
  * MIB nodes for Ledstar NTCIP signs.
@@ -50,6 +49,6 @@ public enum MIB {
 		node = p.node.child(n, toString());
 	}
 	public ASN1Integer makeInt() {
-		return INTEGER.make(node);
+		return new ASN1Integer(node);
 	}
 }

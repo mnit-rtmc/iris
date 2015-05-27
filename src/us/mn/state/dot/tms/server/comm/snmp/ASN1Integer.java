@@ -26,9 +26,17 @@ public class ASN1Integer extends ASN1Object {
 
 	/** Create a new ASN1 integer.
 	 * @param n MIB node.
+	 * @param idx Node index.
+	 * @param j Table index. */
+	public ASN1Integer(MIBNode n, int idx, int j) {
+		super(n, new int[] { idx, j });
+	}
+
+	/** Create a new ASN1 integer.
+	 * @param n MIB node.
 	 * @param idx Node index. */
-	public ASN1Integer(MIBNode n, int[] idx) {
-		super(n, idx);
+	public ASN1Integer(MIBNode n, int idx) {
+		super(n, new int[] { idx });
 	}
 
 	/** Create a new ASN1 integer.
