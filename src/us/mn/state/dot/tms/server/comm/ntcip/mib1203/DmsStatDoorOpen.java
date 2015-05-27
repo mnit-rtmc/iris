@@ -25,21 +25,22 @@ public class DmsStatDoorOpen extends ASN1Integer {
 
 	/** Create a new DmsStatDoorOpen object */
 	public DmsStatDoorOpen() {
-		super(MIB1203.dmsStatus.child(new int[] {6, 0}));
+		super(MIB1203.dmsStatDoorOpen.node);
 	}
 
 	/** Get the object value */
+	@Override
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
-		for(int i = 0; i < 8; i++) {
+		for (int i = 0; i < 8; i++) {
 			int bit = 1 << i;
-			if((value & bit) != 0) {
+			if ((value & bit) != 0) {
 				b.append("#");
 				b.append(i + 1);
 				b.append(", ");
 			}
 		}
-		if(b.length() == 0)
+		if (b.length() == 0)
 			b.append("None");
 		else {
 			// remove trailing comma and space

@@ -450,7 +450,7 @@ public class OpSendDMSFonts extends OpDMS {
 			int code_point = glyph.getCodePoint();
 			Graphic graphic = glyph.getGraphic();
 			byte[] pixels = Base64.decode(graphic.getPixels());
-			CharacterWidth char_width = new CharacterWidth(row,
+			ASN1Integer char_width = characterWidth.makeInt(row,
 				code_point);
 			CharacterBitmap char_bitmap = new CharacterBitmap(row,
 				code_point);

@@ -57,7 +57,8 @@ public enum MIB1203 {
 	    fontStatus			(fontEntry, 8),
 	  maxFontCharacters		(fontDefinition, 3),
 	  characterTable		(fontDefinition, 4),
-	    characterEntry		(characterTable, 1),
+	  characterEntry		(characterTable, 1),
+	    characterWidth		(characterEntry, 2),
 	  fontMaxCharacterSize		(fontDefinition, 5), // V2
 	multiCfg			(dms, 4),
 	  defaultBackgroundColor	(multiCfg, 1),
@@ -78,7 +79,7 @@ public enum MIB1203 {
 	  dmsNumVolatileMsg		(dmsMessage, 5),
 	  dmsMaxVolatileMsg		(dmsMessage, 6),
 	  dmsFreeVolatileMemory		(dmsMessage, 7),
-	dmsMessageTable			(dmsMessage, 8),
+	  dmsMessageTable		(dmsMessage, 8),
 	  dmsMessageEntry		(dmsMessageTable, 1),
 	    dmsMessageMemoryType	(dmsMessageEntry, 1),
 	    dmsMessageCRC		(dmsMessageEntry, 5),
@@ -86,6 +87,7 @@ public enum MIB1203 {
 	    dmsMessagePixelService	(dmsMessageEntry, 7),
 	    dmsMessageRunTimePriority	(dmsMessageEntry, 8),
 	    dmsMessageStatus		(dmsMessageEntry, 9),
+	  dmsValidateMessageError	(dmsMessage, 9),
 	signControl			(dms, 6),
 	  dmsControlMode		(signControl, 1),
 	  dmsSWReset			(signControl, 2),
@@ -102,13 +104,16 @@ public enum MIB1203 {
 	  vmsPixelServiceTime		(signControl, 23),
 	  dmsActivateMessageState	(signControl, 25),
 	illum				(dms, 7),
+	  dmsIllumControl		(illum, 1),
 	  dmsIllumMaxPhotocellLevel	(illum, 2),
 	  dmsIllumPhotocellLevelStatus	(illum, 3),
 	  dmsIllumNumBrightLevels	(illum, 4),
 	  dmsIllumBrightLevelStatus	(illum, 5),
 	  dmsIllumManLevel		(illum, 6),
+	  dmsIllumBrightnessValuesError	(illum, 8),
 	  dmsIllumLightOutputStatus	(illum, 9),
 	dmsStatus			(dms, 9),
+	  dmsStatDoorOpen		(dmsStatus, 6),
 	  statError			(dmsStatus, 7),
 	  pixelFailureTableNumRows	(statError, 2),
 	  pixelFailureTable		(statError, 3),
@@ -120,6 +125,7 @@ public enum MIB1203 {
 	    pixelFailureStatus		(pixelFailureEntry, 5),
 	  pixelTestActivation		(statError, 4),
 	  lampTestActivation		(statError, 7),
+	  fanTestActivation		(statError, 9),
 	  dmsPixelFailureTestRows	(statError, 19),	// V2
 	  dmsPixelFailureMessageRows	(statError, 20),	// V2
 	  dmsPowerNumRows		(statError, 12),	// V2
@@ -168,8 +174,9 @@ public enum MIB1203 {
 	    dmsGraphicTransparentEnabled(dmsGraphicEntry, 8),
 	    dmsGraphicStatus		(dmsGraphicEntry, 10),
 	  dmsGraphicBitmapTable		(graphicDefinition, 7),
-	    dmsGraphicBitmapEntry	(dmsGraphicBitmapTable, 1),
-	      dmsGraphicBlockNumber	(dmsGraphicBitmapEntry, 2);
+	  dmsGraphicBitmapEntry		(dmsGraphicBitmapTable, 1),
+	    dmsGraphicBitmapIndex	(dmsGraphicBitmapEntry, 1),
+	    dmsGraphicBlockNumber	(dmsGraphicBitmapEntry, 2);
 
 	public final MIBNode node;
 
@@ -202,8 +209,8 @@ public enum MIB1203 {
 	public ASN1Integer makeInt(int r) {
 		return INTEGER.make(node, new int[] { r });
 	}
-	public ASN1Integer makeInt(int[] idx) {
-		return INTEGER.make(node, idx);
+	public ASN1Integer makeInt(int r, int s) {
+		return INTEGER.make(node, new int[] { r, s });
 	}
 	public ASN1Integer makeInt(DmsMessageMemoryType m, int n) {
 		return INTEGER.make(node, new int[] { m.ordinal(), n });

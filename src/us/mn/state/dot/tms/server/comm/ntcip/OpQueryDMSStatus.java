@@ -83,6 +83,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new QueryBrightness();
 	}
@@ -96,7 +97,8 @@ public class OpQueryDMSStatus extends OpDMS {
 				dmsIllumBrightLevelStatus.makeInt();
 			ASN1Integer light =
 				dmsIllumLightOutputStatus.makeInt();
-			DmsIllumControl control = new DmsIllumControl();
+			ASN1Enum<DmsIllumControl> control = new ASN1Enum<
+				DmsIllumControl>(dmsIllumControl.node);
 			mess.add(p_level);
 			mess.add(b_level);
 			mess.add(light);

@@ -14,37 +14,17 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip DmsIllumBrightnessValuesError object
+ * Enumeration of brightness values errors.
  *
  * @author Douglas Lau
  */
-public class DmsIllumBrightnessValuesError extends ASN1Integer {
-
-	/** Enumeration of brightness values errors */
-	static public enum Enum {
-		undefined, other, none, photocellGap, negativeSlope,
-		tooManyLevels, invalidData;
-
-		/** Get brightness values error from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new DmsIllumBrightnessValuesError object */
-	public DmsIllumBrightnessValuesError() {
-		super(MIB1203.illum.child(new int[] {8, 0}));
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum DmsIllumBrightnessValuesError {
+	undefined,
+	other,
+	none,
+	photocellGap,
+	negativeSlope,
+	tooManyLevels,
+	invalidData;
 }

@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
@@ -33,7 +34,11 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 public class OpUpdateDMSBrightness extends OpDMS {
 
 	/** Event type (DMS_BRIGHT_GOOD, DMS_BRIGHT_LOW or DMS_BRIGHT_HIGH) */
-	protected final EventType event_type;
+	private final EventType event_type;
+
+	/** Illumination control */
+	private final ASN1Enum<DmsIllumControl> control =
+		new ASN1Enum<DmsIllumControl>(dmsIllumControl.node);
 
 	/** Maximum photocell level */
 	private final ASN1Integer max_level =
@@ -50,7 +55,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	private final ASN1Integer b_levels = dmsIllumNumBrightLevels.makeInt();
 
 	/** Brightness table */
-	protected final DmsIllumBrightnessValues brightness =
+	private final DmsIllumBrightnessValues brightness =
 		new DmsIllumBrightnessValues();
 
 	/** Create a new DMS brightness feedback operation */
@@ -60,6 +65,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new QueryBrightness();
 	}
@@ -89,13 +95,12 @@ public class OpUpdateDMSBrightness extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(b_levels);
 			mess.add(brightness);
-			DmsIllumControl control = new DmsIllumControl();
 			mess.add(control);
 			mess.queryProps();
 			logQuery(b_levels);
 			logQuery(brightness);
 			logQuery(control);
-			if (control.isPhotocell())
+			if (control.getEnum() == DmsIllumControl.photocell)
 				return new SetManualControl();
 			else
 				return new SetBrightnessTable();
@@ -107,8 +112,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 
 		/** Set the manual control mode */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsIllumControl control = new DmsIllumControl();
-			control.setEnum(DmsIllumControl.Enum.manual);
+			control.setEnum(DmsIllumControl.manual);
 			mess.add(control);
 			logStore(control);
 			mess.storeProps();
@@ -146,8 +150,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 
 		/** Set the photocell control mode */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsIllumControl control = new DmsIllumControl();
-			control.setEnum(DmsIllumControl.Enum.photocell);
+			control.setEnum(DmsIllumControl.photocell);
 			mess.add(control);
 			logStore(control);
 			mess.storeProps();

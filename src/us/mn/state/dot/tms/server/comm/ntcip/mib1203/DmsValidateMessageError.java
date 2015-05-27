@@ -14,51 +14,16 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip DmsValidateMessageError object
+ * Enumeration of message validation errors.
  *
  * @author Douglas Lau
  */
-public class DmsValidateMessageError extends ASN1Integer {
-
-	/** Enumeration of message validation errors */
-	static public enum Enum {
-		undefined, other, none, beacons, pixelService, syntaxMULTI;
-
-		/** Get message validation error from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new DmsValidateMessageError object */
-	public DmsValidateMessageError() {
-		super(MIB1203.dmsMessage.child(new int[] {9, 0}));
-	}
-
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
-
-	/** Test for a MULTI syntax error */
-	public boolean isSyntaxMulti() {
-		return Enum.fromOrdinal(value) == Enum.syntaxMULTI;
-	}
-
-	/** Test if there is an error */
-	public boolean isError() {
-		return Enum.fromOrdinal(value) != Enum.none;
-	}
+public enum DmsValidateMessageError {
+	undefined,
+	other,
+	none,
+	beacons,
+	pixelService,
+	syntaxMULTI;
 }

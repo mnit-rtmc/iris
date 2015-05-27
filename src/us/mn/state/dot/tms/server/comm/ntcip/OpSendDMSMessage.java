@@ -330,8 +330,9 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Query a validate message error */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsValidateMessageError error =
-				new DmsValidateMessageError();
+			ASN1Enum<DmsValidateMessageError> error = new ASN1Enum<
+				DmsValidateMessageError>(
+				dmsValidateMessageError.node);
 			ASN1Enum<MultiSyntaxError> m_err = new ASN1Enum<
 				MultiSyntaxError>(dmsMultiSyntaxError.node);
 			ASN1Integer e_pos=dmsMultiSyntaxErrorPosition.makeInt();
@@ -342,11 +343,16 @@ public class OpSendDMSMessage extends OpDMS {
 			logQuery(error);
 			logQuery(m_err);
 			logQuery(e_pos);
-			if (error.isSyntaxMulti())
+			switch (error.getEnum()) {
+			case syntaxMULTI:
 				setErrorStatus(m_err.toString());
-			else if (error.isError())
+				break;
+			case other:
+			case beacons:
+			case pixelService:
 				setErrorStatus(error.toString());
-			else {
+				break;
+			default:
 				// This should never happen, but of course it
 				// does in some cases with Addco signs.
 				setErrorStatus(status.toString());

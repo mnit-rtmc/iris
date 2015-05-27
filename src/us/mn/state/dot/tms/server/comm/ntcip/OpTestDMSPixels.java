@@ -210,9 +210,9 @@ public class OpTestDMSPixels extends OpDMS {
 		/** Query one row in the pixel failure table */
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer x_loc = pixelFailureXLocation.makeInt(
-				new int[] { detectionType.ordinal(), row });
+				detectionType.ordinal(), row);
 			ASN1Integer y_loc = pixelFailureYLocation.makeInt(
-				new int[] { detectionType.ordinal(), row });
+				detectionType.ordinal(), row);
 			PixelFailureStatus status = new PixelFailureStatus(
 				detectionType, row);
 			mess.add(x_loc);

@@ -14,43 +14,15 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip FanTestActivation object. This object has been deprecated by
- * NTCIP 1203 v2.
+ * Enumeration of fan test activation.
+ * Deprecated by NTCIP 1203 v2.
  *
  * @author Douglas Lau
  */
-public class FanTestActivation extends ASN1Integer {
-
-	/** Enumeration of test activation */
-	static public enum Enum {
-		undefined, other, noTest, test;
-
-		/** Get test activation status from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new FanTestActivation object */
-	public FanTestActivation() {
-		super(MIB1203.statError.child(new int[] {9, 0}));
-		value = Enum.test.ordinal();
-	}
-
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum FanTestActivation {
+	undefined,
+	other,
+	noTest,
+	test;
 }
