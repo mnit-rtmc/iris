@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.server.comm.ntcip.CRCStream;
 
 /**
- * FontVersionByteStream is used to calculate a FontVersionID.  It is encoded
+ * FontVersionByteStream is used to calculate fontVersionID.  It is encoded
  * using OER (NTCIP 1102).
  *
  * @author Douglas Lau

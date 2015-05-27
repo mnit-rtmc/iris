@@ -14,61 +14,23 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip FontStatus object.  This object was added in 1203 v2.
+ * Enumeration of font status values.
+ * Added in 1203 v2.
  *
  * @author Douglas Lau
  */
-public class FontStatus extends ASN1Integer {
-
-	/** Enumeration of font status values */
-	static public enum Enum {
-		undefined, notUsed, modifying, calculatingID, readyForUse,
-		inUse, permanent, modifyReq, readyForUseReq, notUsedReq,
-		unmanagedReq, unmanaged;
-
-		/** Get font status from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new FontStatus object */
-	public FontStatus(int font) {
-		super(MIB1203.fontEntry.child(new int[] { 8, font }));
-	}
-
-	/** Set the enum value */
-	public void setEnum(Enum v) {
-		value = v.ordinal();
-	}
-
-	/** Get the enum value */
-	public Enum getEnum() {
-		return Enum.fromOrdinal(value);
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
-
-	/** Check if the font can be updated */
-	public boolean isUpdatable() {
-		switch(getEnum()) {
-		case notUsed:
-		case modifying:
-		case readyForUse:
-		case unmanaged:
-			return true;
-		default:
-			return false;
-		}
-	}
+public enum FontStatus {
+	undefined,
+	notUsed,
+	modifying,
+	calculatingID,
+	readyForUse,
+	inUse,
+	permanent,
+	modifyReq,
+	readyForUseReq,
+	notUsedReq,
+	unmanagedReq,
+	unmanaged;
 }

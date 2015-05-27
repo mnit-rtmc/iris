@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -51,23 +52,23 @@ public class OpSendDMSFonts extends OpDMS {
 	private final ASN1Integer max_characters = maxFontCharacters.makeInt();
 
 	/** Mapping of font numbers to row in font table */
-	protected final TreeMap<Integer, Integer> num_2_row =
+	private final TreeMap<Integer, Integer> num_2_row =
 		new TreeMap<Integer, Integer>();
 
 	/** Set of open rows in the font table */
-	protected final TreeSet<Integer> open_rows = new TreeSet<Integer>();
+	private final TreeSet<Integer> open_rows = new TreeSet<Integer>();
 
 	/** Iterator of fonts to be sent to the sign */
-	protected final Iterator<Font> font_iterator;
+	private final Iterator<Font> font_iterator;
 
 	/** Current font */
-	protected Font font;
+	private Font font;
 
 	/** Current row in font table */
-	protected int row;
+	private int row;
 
 	/** Flag for version 2 controller (with support for fontStatus) */
-	protected boolean version2;
+	private boolean version2;
 
 	/** Create a new operation to send fonts to a DMS */
 	public OpSendDMSFonts(DMSImpl d) {
@@ -80,6 +81,7 @@ public class OpSendDMSFonts extends OpDMS {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new Query1203Version();
 	}
@@ -127,8 +129,9 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Query the font number for one font */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontNumber number = new FontNumber(row);
-			FontStatus status = new FontStatus(row);
+			ASN1Integer number = fontNumber.makeInt(row);
+			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
+				fontStatus.node, row);
 			mess.add(number);
 			if (version2)
 				mess.add(status);
@@ -145,13 +148,8 @@ public class OpSendDMSFonts extends OpDMS {
 			if (version2)
 				logQuery(status);
 			else
-				status.setEnum(FontStatus.Enum.unmanaged);
-			Integer f_num = number.getInteger();
-			if (num_2_row.containsKey(f_num)) {
-				if (status.isUpdatable())
-					num_2_row.put(f_num, row);
-				open_rows.remove(row);
-			}
+				status.setEnum(FontStatus.unmanaged);
+			updateRow(number.getInteger(), status.getEnum());
 			if (row < num_fonts.getInteger()) {
 				row++;
 				return this;
@@ -159,6 +157,28 @@ public class OpSendDMSFonts extends OpDMS {
 				populateNum2Row();
 				return nextFontPhase();
 			}
+		}
+	}
+
+	/** Update one row of the font table */
+	private void updateRow(Integer f_num, FontStatus status) {
+		if (num_2_row.containsKey(f_num)) {
+			if (isUpdatable(status))
+				num_2_row.put(f_num, row);
+			open_rows.remove(row);
+		}
+	}
+
+	/** Check if the font can be updated */
+	private boolean isUpdatable(FontStatus status) {
+		switch (status) {
+		case notUsed:
+		case modifying:
+		case readyForUse:
+		case unmanaged:
+			return true;
+		default:
+			return false;
 		}
 	}
 
@@ -212,7 +232,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Verify a font */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontVersionID version = new FontVersionID(row);
+			ASN1Integer version = fontVersionID.makeInt(row);
 			mess.add(version);
 			try {
 				mess.queryProps();
@@ -261,7 +281,8 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Query the initial font status */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontStatus status = new FontStatus(row);
+			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
+				fontStatus.node, row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
@@ -286,8 +307,9 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Request the font status be "notUsed" */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontStatus status = new FontStatus(row);
-			status.setEnum(FontStatus.Enum.notUsedReq);
+			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
+				fontStatus.node, row);
+			status.setEnum(FontStatus.notUsedReq);
 			mess.add(status);
 			logStore(status);
 			mess.storeProps();
@@ -300,11 +322,12 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Verify the font status is "notUsed" */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontStatus status = new FontStatus(row);
+			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
+				fontStatus.node, row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
-			if (status.getEnum() != FontStatus.Enum.notUsed) {
+			if (status.getEnum() != FontStatus.notUsed) {
 				abortUpload("Expected notUsed, was "
 					+ status.getEnum());
 				return nextFontPhase();
@@ -318,8 +341,9 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Set the font status to modifying */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontStatus status = new FontStatus(row);
-			status.setEnum(FontStatus.Enum.modifyReq);
+			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
+				fontStatus.node, row);
+			status.setEnum(FontStatus.modifyReq);
 			mess.add(status);
 			logStore(status);
 			mess.storeProps();
@@ -332,11 +356,12 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Verify the font status is modifying */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontStatus status = new FontStatus(row);
+			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
+				fontStatus.node, row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
-			if (status.getEnum() != FontStatus.Enum.modifying) {
+			if (status.getEnum() != FontStatus.modifying) {
 				abortUpload("Expected modifying, was " +
 					status.getEnum());
 				return nextFontPhase();
@@ -350,7 +375,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Invalidate a font entry in the font table */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontHeight height = new FontHeight(row);
+			ASN1Integer height = fontHeight.makeInt(row);
 			mess.add(height);
 			logStore(height);
 			try {
@@ -369,11 +394,11 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Create a new font in the font table */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontNumber number = new FontNumber(row);
+			ASN1Integer number = fontNumber.makeInt(row);
 			FontName name = new FontName(row);
-			FontHeight height = new FontHeight(row);
-			FontCharSpacing char_spacing = new FontCharSpacing(row);
-			FontLineSpacing line_spacing = new FontLineSpacing(row);
+			ASN1Integer height = fontHeight.makeInt(row);
+			ASN1Integer char_spacing = fontCharSpacing.makeInt(row);
+			ASN1Integer line_spacing = fontLineSpacing.makeInt(row);
 			number.setInteger(font.getNumber());
 			name.setString(font.getName());
 			height.setInteger(font.getHeight());
@@ -457,7 +482,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Validate a font entry in the font table */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontHeight height = new FontHeight(row);
+			ASN1Integer height = fontHeight.makeInt(row);
 			height.setInteger(font.getHeight());
 			mess.add(height);
 			logStore(height);
@@ -474,8 +499,9 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Validate a font entry in the font table */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontStatus status = new FontStatus(row);
-			status.setEnum(FontStatus.Enum.readyForUseReq);
+			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
+				fontStatus.node, row);
+			status.setEnum(FontStatus.readyForUseReq);
 			mess.add(status);
 			logStore(status);
 			mess.storeProps();
@@ -490,12 +516,13 @@ public class OpSendDMSFonts extends OpDMS {
 		static private final int CALCULATING_ID_SECS = 15;
 
 		/** Time to stop checking if the font is ready for use */
-		protected final long expire = TimeSteward.currentTimeMillis() + 
+		private final long expire = TimeSteward.currentTimeMillis() + 
 			CALCULATING_ID_SECS * 1000;
 
 		/** Verify the font status is ready for use */
 		protected Phase poll(CommMessage mess) throws IOException {
-			FontStatus status = new FontStatus(row);
+			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
+				fontStatus.node, row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);

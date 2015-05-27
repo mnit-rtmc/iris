@@ -14,42 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip LampTestActivation object
+ * Enumeration of lamp test activation.
  *
  * @author Douglas Lau
  */
-public class LampTestActivation extends ASN1Integer {
-
-	/** Enumeration of test activation */
-	static public enum Enum {
-		undefined, other, noTest, test;
-
-		/** Get test activation status from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new LampTestActivation object */
-	public LampTestActivation() {
-		super(MIB1203.statError.child(new int[] {7, 0}));
-		value = Enum.test.ordinal();
-	}
-
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum LampTestActivation {
+	undefined,
+	other,
+	noTest,
+	test;
 }

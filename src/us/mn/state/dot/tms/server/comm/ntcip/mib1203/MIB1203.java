@@ -47,7 +47,14 @@ public enum MIB1203 {
 	fontDefinition			(dms, 3),
 	  numFonts			(fontDefinition, 1),
 	  fontTable			(fontDefinition, 2),
-	    fontEntry			(fontTable, 1),
+	  fontEntry			(fontTable, 1),
+	    fontIndex			(fontEntry, 1),
+	    fontNumber			(fontEntry, 2),
+	    fontHeight			(fontEntry, 4),
+	    fontCharSpacing		(fontEntry, 5),
+	    fontLineSpacing		(fontEntry, 6),
+	    fontVersionID		(fontEntry, 7),
+	    fontStatus			(fontEntry, 8),
 	  maxFontCharacters		(fontDefinition, 3),
 	  characterTable		(fontDefinition, 4),
 	    characterEntry		(characterTable, 1),
@@ -108,6 +115,7 @@ public enum MIB1203 {
 	    pixelFailureYLocation	(pixelFailureEntry, 4),
 	    pixelFailureStatus		(pixelFailureEntry, 5),
 	  pixelTestActivation		(statError, 4),
+	  lampTestActivation		(statError, 7),
 	  dmsPixelFailureTestRows	(statError, 19),	// V2
 	  dmsPixelFailureMessageRows	(statError, 20),	// V2
 	  dmsPowerNumRows		(statError, 12),	// V2
