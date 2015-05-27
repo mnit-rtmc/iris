@@ -14,48 +14,15 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * DmsLightSensorStatus contains the current status of a light sensor.  This
- * object was added in NTCIP 1203 v2.
+ * Enumeration of light sensor status values.
+ * Added in NTCIP 1203 v2.
  *
  * @author Douglas Lau
  */
-public class DmsLightSensorStatus extends ASN1Integer {
-
-	/** Enumeration of light sensor status values */
-	static public enum Enum {
-		undefined, other, noError, fail;
-
-		/** Get light sensor status from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new DmsLightSensorStatus object */
-	public DmsLightSensorStatus(int row) {
-		super(MIB1203.dmsLightSensorStatusEntry.child(
-			new int[] {4, row}));
-	}
-
-	/** Set the enum value */
-	public void setEnum(Enum v) {
-		value = v.ordinal();
-	}
-
-	/** Get the enum value */
-	public Enum getEnum() {
-		return Enum.fromOrdinal(value);
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum DmsLightSensorStatus {
+	undefined,
+	other,
+	noError,
+	fail;
 }

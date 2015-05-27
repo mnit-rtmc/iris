@@ -384,8 +384,7 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query number of light sensors */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsLightSensorNumRows n_snsr =
-				new DmsLightSensorNumRows();
+			ASN1Integer n_snsr = dmsLightSensorNumRows.makeInt();
 			mess.add(n_snsr);
 			try {
 				mess.queryProps();
@@ -405,8 +404,8 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Phase to query light sensor status */
 	protected class QueryLightSensorStatus extends Phase {
-		protected final int n_sensors;
-		protected int row = 1;	// row in DmsLightSensorStatusTable
+		private final int n_sensors;
+		private int row = 1;	// row in DmsLightSensorStatusTable
 		protected QueryLightSensorStatus(int n_snsr) {
 			n_sensors = n_snsr;
 		}
@@ -415,10 +414,11 @@ public class OpQueryDMSStatus extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			DmsLightSensorDescription desc =
 				new DmsLightSensorDescription(row);
-			DmsLightSensorStatus status =
-				new DmsLightSensorStatus(row);
-			DmsLightSensorCurrentReading reading =
-				new DmsLightSensorCurrentReading(row);
+			ASN1Enum<DmsLightSensorStatus> status = new ASN1Enum<
+				DmsLightSensorStatus>(dmsLightSensorStatus.node,
+				row);
+			ASN1Integer reading = dmsLightSensorCurrentReading
+				.makeInt(row);
 			mess.add(desc);
 			mess.add(status);
 			mess.add(reading);
