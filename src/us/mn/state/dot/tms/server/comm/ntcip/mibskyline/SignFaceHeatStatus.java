@@ -29,8 +29,10 @@ public class SignFaceHeatStatus extends ASN1Integer {
 	}
 
 	/** Get the object value */
+	@Override
 	public String getValue() {
-		switch(value) {
+		int v = getInteger();
+		switch (v) {
 		case 1:
 			return "ON";
 		default:

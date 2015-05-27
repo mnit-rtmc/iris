@@ -38,7 +38,7 @@ public class ASN1Integer extends ASN1Object {
 	}
 
 	/** Actual integer value */
-	protected int value;
+	private int value;
 
 	/** Set the integer value */
 	public void setInteger(int v) {
@@ -53,18 +53,18 @@ public class ASN1Integer extends ASN1Object {
 	/** Get the object value */
 	@Override
 	public String getValue() {
-		return String.valueOf(value);
+		return String.valueOf(getInteger());
 	}
 
 	/** Encode an integer */
 	@Override
 	public void encode(BER er) throws IOException {
-		er.encodeInteger(value);
+		er.encodeInteger(getInteger());
 	}
 
 	/** Decode an integer */
 	@Override
 	public void decode(InputStream is, BER er) throws IOException {
-		value = er.decodeInteger(is);
+		setInteger(er.decodeInteger(is));
 	}
 }

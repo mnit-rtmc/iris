@@ -49,7 +49,8 @@ public class PixelFailureStatus extends ASN1Integer {
 
 	/** Test if the pixel is stuck on */
 	public boolean isStuckOn() {
-		return (value & STUCK_ON) != 0;
+		int v = getInteger();
+		return (v & STUCK_ON) != 0;
 	}
 
 	/** Test if the pixel is stuck off */
@@ -58,29 +59,32 @@ public class PixelFailureStatus extends ASN1Integer {
 	}
 
 	/** Test if the pixel is stuck off (1203v1) */
-	protected boolean isStuckOffV1() {
-		return (value & (STUCK_ON | PARTIAL_FAILURE)) == 0;
+	private boolean isStuckOffV1() {
+		int v = getInteger();
+		return (v & (STUCK_ON | PARTIAL_FAILURE)) == 0;
 	}
 
 	/** Test if the pixel is stuck off (1203v2) */
-	protected boolean isStuckOffV2() {
-		return (value & STUCK_OFF) != 0;
+	private boolean isStuckOffV2() {
+		int v = getInteger();
+		return (v & STUCK_OFF) != 0;
 	}
 
 	/** Get the object value */
 	public String getValue() {
+		int v = getInteger();
 		StringBuilder b = new StringBuilder();
 		if (isStuckOn())
 			b.append("Stuck ON, ");
 		if (isStuckOff())
 			b.append("Stuck OFF, ");
-		if ((value & PARTIAL_FAILURE) != 0)
+		if ((v & PARTIAL_FAILURE) != 0)
 			b.append("partial failure, ");
-		if ((value & COLOR_ERROR) != 0)
+		if ((v & COLOR_ERROR) != 0)
 			b.append("color error, ");
-		if ((value & ELECTRICAL_ERROR) != 0)
+		if ((v & ELECTRICAL_ERROR) != 0)
 			b.append("electrical error, ");
-		if ((value & MECHANICAL_ERROR) != 0)
+		if ((v & MECHANICAL_ERROR) != 0)
 			b.append("mechanical error, ");
 		// remove trailing comma and space
 		if (b.length() > 1)

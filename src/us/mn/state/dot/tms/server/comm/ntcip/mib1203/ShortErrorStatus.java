@@ -94,9 +94,10 @@ public class ShortErrorStatus extends ASN1Integer {
 	/** Get the object value */
 	@Override
 	public String getValue() {
+		int v = getInteger();
 		StringBuilder buf = new StringBuilder();
 		for (int i = 0; i < ERROR.length; i++) {
-			if ((value & 1 << i) != 0) {
+			if ((v & 1 << i) != 0) {
 				if (buf.length() > 0)
 					buf.append(", ");
 				buf.append(ERROR[i]);
@@ -111,20 +112,23 @@ public class ShortErrorStatus extends ASN1Integer {
 
 	/** Check if an error bit is set */
 	public boolean checkError(int mask) {
-		return (value & mask) > 0;
+		int v = getInteger();
+		return (v & mask) > 0;
 	}
 
 	/** Check if we should report the error for maintenance */
 	public boolean isMaintenance() {
+		int v = getInteger();
 		// MESSAGE errors can pop up for lots of reasons,
 		// so we shouldn't consider them real errors.
 		// PIXEL errors are only reported if pixelFailureTableNumRows.0
 		// is greater than dms_pixel_maint_threshold system attribute.
-		return (value & MAINT_MASK) != 0;
+		return (v & MAINT_MASK) != 0;
 	}
 
 	/** Check if the error is critical (prevents operation) */
 	public boolean isCritical() {
-		return (value & CRITICAL_MASK) != 0;
+		int v = getInteger();
+		return (v & CRITICAL_MASK) != 0;
 	}
 }

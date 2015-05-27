@@ -48,6 +48,6 @@ abstract public class Counter extends ASN1Integer {
 				throw BER.END_OF_STREAM;
 			val |= v;
 		}
-		value = val;
+		setInteger(val);
 	}
 }

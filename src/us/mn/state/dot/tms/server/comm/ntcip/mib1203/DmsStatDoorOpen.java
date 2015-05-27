@@ -31,10 +31,11 @@ public class DmsStatDoorOpen extends ASN1Integer {
 	/** Get the object value */
 	@Override
 	public String getValue() {
+		int v = getInteger();
 		StringBuilder b = new StringBuilder();
 		for (int i = 0; i < 8; i++) {
 			int bit = 1 << i;
-			if ((value & bit) != 0) {
+			if ((v & bit) != 0) {
 				b.append("#");
 				b.append(i + 1);
 				b.append(", ");

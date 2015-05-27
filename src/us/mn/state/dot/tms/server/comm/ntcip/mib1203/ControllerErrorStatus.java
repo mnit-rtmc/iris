@@ -49,16 +49,18 @@ public class ControllerErrorStatus extends ASN1Integer {
 	}
 
 	/** Get the object value */
+	@Override
 	public String getValue() {
+		int v = getInteger();
 		StringBuilder buf = new StringBuilder();
-		for(int i = 0; i < ERROR.length; i++) {
-			if((value & 1 << i) != 0) {
-				if(buf.length() > 0)
+		for (int i = 0; i < ERROR.length; i++) {
+			if ((v & 1 << i) != 0) {
+				if (buf.length() > 0)
 					buf.append(", ");
 				buf.append(ERROR[i] + " ERROR");
 			}
 		}
-		if(buf.length() == 0)
+		if (buf.length() == 0)
 			buf.append("OK");
 		return buf.toString();
 	}
