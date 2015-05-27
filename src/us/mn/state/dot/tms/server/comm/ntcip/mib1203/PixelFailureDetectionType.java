@@ -14,42 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * PixelFailureDetectionType
+ * Enumeration of pixel failure detection types.
  *
  * @author Douglas Lau
  */
-public class PixelFailureDetectionType extends ASN1Integer {
-
-	/** Enumeration of failure detection types */
-	static public enum Enum {
-		undefined, other, pixelTest, messageDisplay;
-
-		/** Get failure detection type from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new pixel failure detection type object */
-	public PixelFailureDetectionType(int row) {
-		super(MIB1203.pixelFailureEntry.child(new int[] {1,
-			Enum.pixelTest.ordinal(), row}));
-	}
-
-	/** Set the integer value */
-	public void setInteger(int v) {
-		value = Enum.fromOrdinal(v).ordinal();
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum PixelFailureDetectionType {
+	undefined,
+	other,
+	pixelTest,
+	messageDisplay;
 }

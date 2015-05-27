@@ -99,8 +99,17 @@ public enum MIB1203 {
 	  dmsIllumLightOutputStatus	(illum, 9),
 	dmsStatus			(dms, 9),
 	  statError			(dmsStatus, 7),
+	  pixelFailureTableNumRows	(statError, 2),
 	  pixelFailureTable		(statError, 3),
 	  pixelFailureEntry		(pixelFailureTable, 1),
+	    pixelFailureDetectionType	(pixelFailureEntry, 1),
+	    pixelFailureIndex		(pixelFailureEntry, 2),
+	    pixelFailureXLocation	(pixelFailureEntry, 3),
+	    pixelFailureYLocation	(pixelFailureEntry, 4),
+	    pixelFailureStatus		(pixelFailureEntry, 5),
+	  pixelTestActivation		(statError, 4),
+	  dmsPixelFailureTestRows	(statError, 19),	// V2
+	  dmsPixelFailureMessageRows	(statError, 20),	// V2
 	  dmsPowerNumRows		(statError, 12),	// V2
 	  dmsPowerStatusTable		(statError, 13),	// V2
 	  dmsPowerStatusEntry		(dmsPowerStatusTable, 1),

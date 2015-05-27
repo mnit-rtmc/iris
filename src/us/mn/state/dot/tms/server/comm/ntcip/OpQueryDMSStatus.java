@@ -54,23 +54,21 @@ public class OpQueryDMSStatus extends OpDMS {
 		dmsIllumPhotocellLevelStatus.makeInt();
 
 	/** List of light sensor status */
-	protected final LinkedList<String> light_sensors =
+	private final LinkedList<String> light_sensors =
 		new LinkedList<String>();
 
 	/** Short Error status */
 	protected final ShortErrorStatus shortError = new ShortErrorStatus();
 
 	/** Pixel failure table row count */
-	private final PixelFailureTableNumRows pix_rows =
-		new PixelFailureTableNumRows();
+	private final ASN1Integer pix_rows = pixelFailureTableNumRows.makeInt();
 
 	/** Number of rows in pixel failure table found by pixel testing */
-	private final DmsPixelFailureTestRows test_rows =
-		new DmsPixelFailureTestRows();
+	private final ASN1Integer test_rows = dmsPixelFailureTestRows.makeInt();
 
 	/** Number of rows in pixel failure table found by message display */
-	private final DmsPixelFailureMessageRows message_rows =
-		new DmsPixelFailureMessageRows();
+	private final ASN1Integer message_rows =
+		dmsPixelFailureMessageRows.makeInt();
 
 	/** Get the pixel error count */
 	public int getPixelErrorCount() {

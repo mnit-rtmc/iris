@@ -42,9 +42,9 @@ public class PixelFailureStatus extends ASN1Integer {
 	static public final int PARTIAL_FAILURE = 1 << 5;
 
 	/** Create a new pixel failure status object */
-	public PixelFailureStatus(PixelFailureDetectionType.Enum t, int row) {
-		super(MIB1203.pixelFailureEntry.child(new int[] {5,
-		      t.ordinal(), row}));
+	public PixelFailureStatus(PixelFailureDetectionType t, int row) {
+		super(MIB1203.pixelFailureStatus.node,
+			new int[] { t.ordinal(), row });
 	}
 
 	/** Test if the pixel is stuck on */
@@ -70,20 +70,20 @@ public class PixelFailureStatus extends ASN1Integer {
 	/** Get the object value */
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
-		if(isStuckOn())
+		if (isStuckOn())
 			b.append("Stuck ON, ");
-		if(isStuckOff())
+		if (isStuckOff())
 			b.append("Stuck OFF, ");
-		if((value & PARTIAL_FAILURE) != 0)
+		if ((value & PARTIAL_FAILURE) != 0)
 			b.append("partial failure, ");
-		if((value & COLOR_ERROR) != 0)
+		if ((value & COLOR_ERROR) != 0)
 			b.append("color error, ");
-		if((value & ELECTRICAL_ERROR) != 0)
+		if ((value & ELECTRICAL_ERROR) != 0)
 			b.append("electrical error, ");
-		if((value & MECHANICAL_ERROR) != 0)
+		if ((value & MECHANICAL_ERROR) != 0)
 			b.append("mechanical error, ");
 		// remove trailing comma and space
-		if(b.length() > 1)
+		if (b.length() > 1)
 			b.setLength(b.length() - 2);
 		return b.toString();
 	}

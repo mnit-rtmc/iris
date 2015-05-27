@@ -17,43 +17,14 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 
 /**
- * Ntcip PixelTestActivation object
+ * Enumeration of pixel test activation.
  *
  * @author Douglas Lau
  */
-public class PixelTestActivation extends ASN1Integer {
-
-	/** Enumeration of test activation */
-	static public enum Enum {
-		undefined, other, noTest, test, clearTable;
-
-		/** Get test activation status from an ordinal value */
-		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
-					return e;
-			}
-			return undefined;
-		}
-	}
-
-	/** Create a new PixelTestActivation object */
-	public PixelTestActivation() {
-		super(MIB1203.statError.child(new int[] {4, 0}));
-	}
-
-	/** Set the enum value */
-	public void setEnum(Enum v) {
-		value = v.ordinal();
-	}
-
-	/** Get the enum value */
-	public Enum getEnum() {
-		return Enum.fromOrdinal(value);
-	}
-
-	/** Get the object value */
-	public String getValue() {
-		return Enum.fromOrdinal(value).toString();
-	}
+public enum PixelTestActivation {
+	undefined,
+	other,
+	noTest,
+	test,
+	clearTable;
 }

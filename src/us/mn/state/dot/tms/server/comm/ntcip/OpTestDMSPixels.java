@@ -25,6 +25,9 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -35,25 +38,28 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 public class OpTestDMSPixels extends OpDMS {
 
 	/** Flag to indicate whether a pixel test should be performed */
-	protected final boolean perform_test;
+	private final boolean perform_test;
+
+	/** Pixel test activation */
+	private final ASN1Enum<PixelTestActivation> activation = new ASN1Enum<
+		PixelTestActivation>(pixelTestActivation.node);
 
 	/** Stuck ON bitmap */
-	protected final BitmapGraphic stuck_on;
+	private final BitmapGraphic stuck_on;
 
 	/** Stuck OFF bitmap */
-	protected final BitmapGraphic stuck_off;
+	private final BitmapGraphic stuck_off;
 
 	/** Number of rows in pixel failure table */
-	protected final PixelFailureTableNumRows total_rows =
-		new PixelFailureTableNumRows();
+	private final ASN1Integer total_rows =
+		pixelFailureTableNumRows.makeInt();
 
 	/** Number of rows in pixel failure table found by pixel testing */
-	protected final DmsPixelFailureTestRows test_rows =
-		new DmsPixelFailureTestRows();
+	private final ASN1Integer test_rows = dmsPixelFailureTestRows.makeInt();
 
 	/** Number of rows in pixel failure table found by message display */
-	protected final DmsPixelFailureMessageRows message_rows =
-		new DmsPixelFailureMessageRows();
+	private final ASN1Integer message_rows =
+		dmsPixelFailureMessageRows.makeInt();
 
 	/** Create a new test DMS pixel operation */
 	public OpTestDMSPixels(DMSImpl d, boolean p) {
@@ -61,17 +67,18 @@ public class OpTestDMSPixels extends OpDMS {
 		perform_test = p;
 		Integer w = d.getWidthPixels();
 		Integer h = d.getHeightPixels();
-		if(w == null)
+		if (w == null)
 			w = 0;
-		if(h == null)
+		if (h == null)
 			h = 0;
 		stuck_on = new BitmapGraphic(w, h);
 		stuck_off = new BitmapGraphic(w, h);
 	}
 
 	/** Create the second phase of the operation */
+	@Override 
 	protected Phase phaseTwo() {
-		if(perform_test)
+		if (perform_test)
 			return new QueryTestStatus();
 		else
 			return new QueryRowCount();
@@ -82,11 +89,10 @@ public class OpTestDMSPixels extends OpDMS {
 
 		/** Query the status of pixel test activation */
 		protected Phase poll(CommMessage mess) throws IOException {
-			PixelTestActivation test = new PixelTestActivation();
-			mess.add(test);
+			mess.add(activation);
 			mess.queryProps();
-			logQuery(test);
-			if(test.getEnum() == PixelTestActivation.Enum.noTest)
+			logQuery(activation);
+			if (activation.getEnum() == PixelTestActivation.noTest)
 				return new ActivatePixelTest();
 			else
 				return new CheckTestCompletion();
@@ -98,10 +104,9 @@ public class OpTestDMSPixels extends OpDMS {
 
 		/** Activate the pixel test */
 		protected Phase poll(CommMessage mess) throws IOException {
-			PixelTestActivation test = new PixelTestActivation();
-			test.setEnum(PixelTestActivation.Enum.test);
-			mess.add(test);
-			logStore(test);
+			activation.setEnum(PixelTestActivation.test);
+			mess.add(activation);
+			logStore(activation);
 			mess.storeProps();
 			return new CheckTestCompletion();
 		}
@@ -110,20 +115,16 @@ public class OpTestDMSPixels extends OpDMS {
 	/** Phase to check for test completion */
 	protected class CheckTestCompletion extends Phase {
 
-		/** Pixel test activation */
-		protected final PixelTestActivation test =
-			new PixelTestActivation();
-
 		/** Time to stop checking if the test has completed */
-		protected final long expire = TimeSteward.currentTimeMillis() +
+		private final long expire = TimeSteward.currentTimeMillis() +
 		       1000*SystemAttrEnum.DMS_PIXEL_TEST_TIMEOUT_SECS.getInt();
 
 		/** Check for test completion */
 		protected Phase poll(CommMessage mess) throws IOException {
-			mess.add(test);
+			mess.add(activation);
 			mess.queryProps();
-			logQuery(test);
-			if(test.getEnum() == PixelTestActivation.Enum.noTest)
+			logQuery(activation);
+			if (activation.getEnum() == PixelTestActivation.noTest)
 				return new QueryRowCount();
 			if(TimeSteward.currentTimeMillis() > expire) {
 				logError("pixel test timeout expired -- " +
@@ -142,7 +143,7 @@ public class OpTestDMSPixels extends OpDMS {
 			mess.add(total_rows);
 			mess.queryProps();
 			logQuery(total_rows);
-			if(total_rows.getInteger() > 0)
+			if (total_rows.getInteger() > 0)
 				return new QueryTestAndMessageRows();
 			else
 				return null;
@@ -161,19 +162,19 @@ public class OpTestDMSPixels extends OpDMS {
 				logQuery(test_rows);
 				logQuery(message_rows);
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// Must be 1203v1 only, so try reading the
 				// total row count from each table
 				int n_rows = total_rows.getInteger();
 				test_rows.setInteger(n_rows);
 				message_rows.setInteger(n_rows);
 			}
-			if(test_rows.getInteger() > 0) {
+			if (test_rows.getInteger() > 0) {
 				return new QueryRows(PixelFailureDetectionType.
-					Enum.pixelTest);
-			} else if(message_rows.getInteger() > 0) {
+					pixelTest);
+			} else if (message_rows.getInteger() > 0) {
 				return new QueryRows(PixelFailureDetectionType.
-					Enum.messageDisplay);
+					messageDisplay);
 			} else
 				return null;
 		}
@@ -183,35 +184,35 @@ public class OpTestDMSPixels extends OpDMS {
 	protected class QueryRows extends Phase {
 
 		/** Detection type */
-		protected final PixelFailureDetectionType.Enum detectionType;
+		private final PixelFailureDetectionType detectionType;
 
 		/** Number of rows to query */
-		protected final int n_rows;
+		private final int n_rows;
 
 		/** Row to query */
-		protected int row = 1;
+		private int row = 1;
 
 		/** Create a new phase to query the rows */
-		public QueryRows(PixelFailureDetectionType.Enum dt) {
+		public QueryRows(PixelFailureDetectionType dt) {
 			detectionType = dt;
-			if(isPixelTest())
+			if (isPixelTest())
 				n_rows = test_rows.getInteger();
 			else
 				n_rows = message_rows.getInteger();
 		}
 
 		/** Is this phase querying pixel test rows? */
-		protected boolean isPixelTest() {
+		private boolean isPixelTest() {
 			return detectionType ==
-			       PixelFailureDetectionType.Enum.pixelTest;
+			       PixelFailureDetectionType.pixelTest;
 		}
 
 		/** Query one row in the pixel failure table */
 		protected Phase poll(CommMessage mess) throws IOException {
-			PixelFailureXLocation x_loc = new PixelFailureXLocation(
-				detectionType, row);
-			PixelFailureYLocation y_loc = new PixelFailureYLocation(
-				detectionType, row);
+			ASN1Integer x_loc = pixelFailureXLocation.makeInt(
+				new int[] { detectionType.ordinal(), row });
+			ASN1Integer y_loc = pixelFailureYLocation.makeInt(
+				new int[] { detectionType.ordinal(), row });
 			PixelFailureStatus status = new PixelFailureStatus(
 				detectionType, row);
 			mess.add(x_loc);
@@ -220,7 +221,7 @@ public class OpTestDMSPixels extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (SNMP.Message.NoSuchName e) {
 				// We've gone past the end of the table for
 				// this detection type.  Must be a v1 sign.
 				return nextTablePhase();
@@ -230,12 +231,12 @@ public class OpTestDMSPixels extends OpDMS {
 			logQuery(status);
 			int x = x_loc.getInteger() - 1;
 			int y = y_loc.getInteger() - 1;
-			if(status.isStuckOn())
+			if (status.isStuckOn())
 				setStuckOn(x, y);
 			else
 				setStuckOff(x, y);
 			row++;
-			if(row <= n_rows)
+			if (row <= n_rows)
 				return this;
 			else
 				return nextTablePhase();
@@ -243,9 +244,9 @@ public class OpTestDMSPixels extends OpDMS {
 
 		/** Get the next table phase */
 		private Phase nextTablePhase() {
-			if(isPixelTest() && message_rows.getInteger() > 0) {
+			if (isPixelTest() && message_rows.getInteger() > 0) {
 				return new QueryRows(PixelFailureDetectionType.
-					Enum.messageDisplay);
+					messageDisplay);
 			} else
 				return null;
 		}
@@ -256,7 +257,7 @@ public class OpTestDMSPixels extends OpDMS {
 		try {
 			stuck_on.setPixel(x, y, DmsColor.AMBER);
 		}
-		catch(IndexOutOfBoundsException e) {
+		catch (IndexOutOfBoundsException e) {
 			// Ignore; configuration has not been read yet
 		}
 	}
@@ -266,14 +267,15 @@ public class OpTestDMSPixels extends OpDMS {
 		try {
 			stuck_off.setPixel(x, y, DmsColor.AMBER);
 		}
-		catch(IndexOutOfBoundsException e) {
+		catch (IndexOutOfBoundsException e) {
 			// Ignore; configuration has not been read yet
 		}
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
-		if(isSuccess()) {
+		if (isSuccess()) {
 			String[] status = new String[2];
 			status[DMS.STUCK_OFF_BITMAP] =
 				Base64.encode(stuck_off.getPixels());
