@@ -60,7 +60,11 @@ public enum MIB1203 {
 	    characterEntry		(characterTable, 1),
 	  fontMaxCharacterSize		(fontDefinition, 5), // V2
 	multiCfg			(dms, 4),
+	  defaultBackgroundColor	(multiCfg, 1),
+	  defaultForegroundColor	(multiCfg, 2),
 	  defaultFont			(multiCfg, 5),
+	  defaultJustificationLine	(multiCfg, 6),
+	  defaultJustificationPage	(multiCfg, 7),
 	  defaultPageOnTime		(multiCfg, 8),
 	  defaultPageOffTime		(multiCfg, 9),
 	  dmsColorScheme		(multiCfg, 11),

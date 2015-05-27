@@ -17,7 +17,8 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
-import us.mn.state.dot.tms.Multi;
+import us.mn.state.dot.tms.Multi.JustificationLine;
+import us.mn.state.dot.tms.Multi.JustificationPage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -27,6 +28,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mibledstar.MIB.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -101,14 +103,16 @@ public class OpSendDMSDefaults extends OpDMS {
 
 		/** Set the message defaults */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DefaultJustificationLine line =
-				new DefaultJustificationLine();
-			DefaultJustificationPage page =
-				new DefaultJustificationPage();
+			ASN1Enum<JustificationLine> line = new ASN1Enum<
+				JustificationLine>(defaultJustificationLine
+				.node);
+			ASN1Enum<JustificationPage> page = new ASN1Enum<
+				JustificationPage>(defaultJustificationPage
+				.node);
 			ASN1Integer on_time = defaultPageOnTime.makeInt();
 			ASN1Integer off_time = defaultPageOffTime.makeInt();
-			line.setEnum(Multi.JustificationLine.CENTER);
-			page.setEnum(Multi.JustificationPage.TOP);
+			line.setEnum(JustificationLine.CENTER);
+			page.setEnum(JustificationPage.TOP);
 			on_time.setInteger(Math.round(10 * SystemAttrEnum.
 				DMS_PAGE_ON_DEFAULT_SECS.getFloat()));
 			off_time.setInteger(Math.round(10 * SystemAttrEnum.
