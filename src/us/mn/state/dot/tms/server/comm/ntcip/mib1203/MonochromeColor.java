@@ -55,6 +55,7 @@ public class MonochromeColor extends ASN1OctetString {
 	}
 
 	/** Get the object value */
+	@Override
 	public String getValue() {
 		byte[] fg = getForeground();
 		byte[] bg = getBackground();
