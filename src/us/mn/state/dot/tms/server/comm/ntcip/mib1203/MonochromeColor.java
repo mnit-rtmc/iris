@@ -31,7 +31,7 @@ public class MonochromeColor extends ASN1OctetString {
 	/** Get the value array.
 	 * @return Array of 6 bytes (3 RGB on and 3 RGB off colors) */
 	private byte[] valArray() {
-		byte[] val = value;
+		byte[] val = getOctetString();
 		if (val.length == 6)
 			return val;
 		else

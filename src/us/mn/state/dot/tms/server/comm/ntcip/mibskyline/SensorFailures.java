@@ -29,20 +29,23 @@ public class SensorFailures extends ASN1OctetString {
 	}
 
 	/** Get the object value */
+	@Override
 	public String getValue() {
+		byte[] v = getOctetString();
 		StringBuilder buf = new StringBuilder();
 		int f = 1;
-		for(int i = 0; i < value.length; i++) {
-			for(int b = 0; b < 8; b++, f++) {
-				if((value[i] & 1 << b) != 0) {
-					if(buf.length() > 0)
+		for (int i = 0; i < v.length; i++) {
+			for (int b = 0; b < 8; b++, f++) {
+				int bit = 1 << b;
+				if ((v[i] & bit) != 0) {
+					if (buf.length() > 0)
 						buf.append(", ");
 					buf.append("#");
 					buf.append(f);
 				}
 			}
 		}
-		if(buf.length() == 0)
+		if (buf.length() == 0)
 			buf.append("None");
 		return buf.toString();
 	}

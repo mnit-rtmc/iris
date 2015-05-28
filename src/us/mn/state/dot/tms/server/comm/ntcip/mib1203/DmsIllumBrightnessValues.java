@@ -100,12 +100,12 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 
 	/** Set the brightness table */
 	public void setTable(BrightnessLevel[] table) {
-		value = encodeTable(table);
+		setOctetString(encodeTable(table));
 	}
 
 	/** Get the brightness table */
 	public BrightnessLevel[] getTable() {
-		return decodeTable(value);
+		return decodeTable(getOctetString());
 	}
 
 	/** Get the object value */

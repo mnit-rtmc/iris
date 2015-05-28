@@ -40,7 +40,7 @@ public class ASN1OctetString extends ASN1Object {
 	}
 
 	/** Actual octet string value */
-	protected byte[] value = new byte[0];
+	private byte[] value = new byte[0];
 
 	/** Set the octet string value */
 	public void setOctetString(byte[] v) {
