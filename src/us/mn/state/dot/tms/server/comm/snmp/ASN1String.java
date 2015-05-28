@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,24 +12,28 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.ntcip.mib1201;
-
-import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
+package us.mn.state.dot.tms.server.comm.snmp;
 
 /**
- * Ntcip ModuleModel object
+ * ASN1 String.
  *
  * @author Douglas Lau
  */
-public class ModuleModel extends ASN1OctetString {
+public class ASN1String extends ASN1OctetString {
 
-	/** Create a new module model object */
-	public ModuleModel(int row) {
-		super(MIB1201.moduleTableEntry.child(new int[] { 4, row }));
+	/** Create a new ASN1 string */
+	public ASN1String(MIBNode n, int idx) {
+		super(n, idx);
+	}
+
+	/** Create a new ASN1 string */
+	public ASN1String(MIBNode n) {
+		super(n);
 	}
 
 	/** Get the object value */
+	@Override
 	public String getValue() {
-		return new String(value);
+		return new String(getOctetString());
 	}
 }

@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1201;
 
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
 
 /**
@@ -32,6 +33,9 @@ public enum MIB1201 {
 	globalMaxModules		(globalConfiguration, 2),
 	globalModuleTable		(globalConfiguration, 3),
 	  moduleTableEntry		(globalModuleTable, 1),
+	    moduleMake			(moduleTableEntry, 3),
+	    moduleModel			(moduleTableEntry, 4),
+	    moduleVersion		(moduleTableEntry, 5),
 	    moduleType			(moduleTableEntry, 6);
 
 	public final MIBNode node;
@@ -61,5 +65,8 @@ public enum MIB1201 {
 	}
 	public ASN1Integer makeInt() {
 		return new ASN1Integer(node);
+	}
+	public ASN1String makeStr(int r) {
+		return new ASN1String(node, r);
 	}
 }

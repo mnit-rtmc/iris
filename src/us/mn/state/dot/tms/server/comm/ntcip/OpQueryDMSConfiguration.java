@@ -25,6 +25,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -77,9 +78,9 @@ public class OpQueryDMSConfiguration extends OpDMS {
 
 		/** Query the module make, model and version */
 		protected Phase poll(CommMessage mess) throws IOException {
-			ModuleMake make = new ModuleMake(mod);
-			ModuleModel model = new ModuleModel(mod);
-			ModuleVersion version = new ModuleVersion(mod);
+			ASN1String make = moduleMake.makeStr(mod);
+			ASN1String model = moduleModel.makeStr(mod);
+			ASN1String version = moduleVersion.makeStr(mod);
 			ASN1Enum<ModuleType> m_type = new ASN1Enum<ModuleType>(
 				moduleType.node, mod);
 			mess.add(make);

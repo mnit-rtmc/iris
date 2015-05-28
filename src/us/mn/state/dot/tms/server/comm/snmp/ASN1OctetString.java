@@ -22,10 +22,15 @@ import java.io.IOException;
  *
  * @author Douglas Lau
  */
-abstract public class ASN1OctetString extends ASN1Object {
+public class ASN1OctetString extends ASN1Object {
 
 	/** Create a new ASN1 octet string */
-	protected ASN1OctetString(MIBNode n) {
+	public ASN1OctetString(MIBNode n, int idx) {
+		super(n, new int[] { idx });
+	}
+
+	/** Create a new ASN1 octet string */
+	public ASN1OctetString(MIBNode n) {
 		super(n, new int[] { 0 });
 	}
 
