@@ -27,6 +27,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mibledstar.MIB.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mibskyline.MIB.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
@@ -481,7 +482,7 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query Skyline-specific status */
 		protected Phase poll(CommMessage mess) throws IOException {
-			SignFaceHeatStatus heat = new SignFaceHeatStatus();
+			ASN1Integer heat = signFaceHeatStatus.makeInt();
 			IllumPowerStatus power = new IllumPowerStatus();
 			SensorFailures sensor = new SensorFailures();
 			mess.add(heat);

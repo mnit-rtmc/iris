@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mibskyline;
 
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
 
 /**
@@ -23,13 +24,20 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  * @author Douglas Lau
  */
 public enum MIB {
-	skyline			(MIB1201._private, 18),
-	skylineDevices		(skyline, 2),
-	skylineDms		(skylineDevices, 3),
-	skylineDmsSignCfg	(skylineDms, 1),
-	skylineDmsStatus	(skylineDms, 9);
+	skyline				(MIB1201._private, 18),
+	skylineDevices			(skyline, 2),
+	skylineDms			(skylineDevices, 3),
+	skylineDmsSignCfg		(skylineDms, 1),
+	  dynBrightDayNight		(skylineDmsSignCfg, 1),
+	  dynBrightDayRate		(skylineDmsSignCfg, 2),
+	  dynBrightNightRate		(skylineDmsSignCfg, 3),
+	  dynBrightMaxNightManLvl	(skylineDmsSignCfg, 8),
+	  dmsTempCritical		(skylineDmsSignCfg, 11),
+	skylineDmsStatus		(skylineDms, 9),
+	  signFaceHeatStatus		(skylineDmsStatus, 4);
 
 	private final MIBNode node;
+
 	private MIB(MIB1201 p, int n) {
 		// FIXME: add name
 		node = p.child(n);
@@ -37,8 +45,8 @@ public enum MIB {
 	private MIB(MIB p, int n) {
 		node = p.node.child(n, toString());
 	}
-	private MIB(MIB p, int[] n) {
-		node = p.node.child(n, toString());
+	public ASN1Integer makeInt() {
+		return new ASN1Integer(node);
 	}
 
 	public MIBNode child(int n) {

@@ -28,6 +28,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mibledstar.MIB.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
+import static us.mn.state.dot.tms.server.comm.ntcip.mibskyline.MIB.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
@@ -167,12 +168,11 @@ public class OpSendDMSDefaults extends OpDMS {
 
 		/** Set Skyline-specific object defaults */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsTempCritical temp = new DmsTempCritical();
-			DynBrightDayNight day_night = new DynBrightDayNight();
-			DynBrightDayRate day_rate = new DynBrightDayRate();
-			DynBrightNightRate night_rate =new DynBrightNightRate();
-			DynBrightMaxNightManLvl max_lvl =
-				new DynBrightMaxNightManLvl();
+			ASN1Integer temp = dmsTempCritical.makeInt();
+			ASN1Integer day_night = dynBrightDayNight.makeInt();
+			ASN1Integer day_rate = dynBrightDayRate.makeInt();
+			ASN1Integer night_rate = dynBrightNightRate.makeInt();
+			ASN1Integer max_lvl = dynBrightMaxNightManLvl.makeInt();
 			temp.setInteger(
 				SystemAttrEnum.DMS_HIGH_TEMP_CUTOFF.getInt());
 			day_night.setInteger(32);
