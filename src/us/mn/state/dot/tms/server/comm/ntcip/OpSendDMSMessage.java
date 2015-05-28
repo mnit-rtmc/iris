@@ -461,8 +461,8 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Query an other MULTI error */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsMultiOtherErrorDescription o_err =
-				new DmsMultiOtherErrorDescription();
+			ASN1String o_err = new ASN1String(
+				dmsMultiOtherErrorDescription.node);
 			mess.add(o_err);
 			try {
 				mess.queryProps();

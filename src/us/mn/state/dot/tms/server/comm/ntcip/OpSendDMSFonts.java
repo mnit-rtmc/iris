@@ -37,6 +37,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -396,7 +397,7 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Create a new font in the font table */
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer number = fontNumber.makeInt(row);
-			FontName name = new FontName(row);
+			ASN1String name = new ASN1String(fontName.node, row);
 			ASN1Integer height = fontHeight.makeInt(row);
 			ASN1Integer char_spacing = fontCharSpacing.makeInt(row);
 			ASN1Integer line_spacing = fontLineSpacing.makeInt(row);

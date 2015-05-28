@@ -31,6 +31,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mibskyline.MIB.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -327,13 +328,14 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query status of one power supply */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsPowerDescription desc = new DmsPowerDescription(row);
+			ASN1String desc = new ASN1String(dmsPowerDescription
+				.node, row);
 			ASN1Enum<DmsPowerType> p_type = new ASN1Enum<
 				DmsPowerType>(dmsPowerType.node, row);
 			ASN1Enum<DmsPowerStatus> status = new ASN1Enum<
 				DmsPowerStatus>(dmsPowerStatus.node, row);
-			DmsPowerMfrStatus mfr_status = new DmsPowerMfrStatus(
-				row);
+			ASN1String mfr_status = new ASN1String(
+				dmsPowerMfrStatus.node, row);
 			ASN1Integer voltage = dmsPowerVoltage.makeInt(row);
 			mess.add(desc);
 			mess.add(p_type);
@@ -419,8 +421,8 @@ public class OpQueryDMSStatus extends OpDMS {
 
 		/** Query status of one light sensor */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsLightSensorDescription desc =
-				new DmsLightSensorDescription(row);
+			ASN1String desc = new ASN1String(
+				dmsLightSensorDescription.node, row);
 			ASN1Enum<DmsLightSensorStatus> status = new ASN1Enum<
 				DmsLightSensorStatus>(dmsLightSensorStatus.node,
 				row);

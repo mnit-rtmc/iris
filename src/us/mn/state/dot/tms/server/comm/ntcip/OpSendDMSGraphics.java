@@ -32,6 +32,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -319,7 +320,8 @@ public class OpSendDMSGraphics extends OpDMS {
 		/** Create a new graphic in the graphic table */
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer number = dmsGraphicNumber.makeInt(row);
-			DmsGraphicName name = new DmsGraphicName(row);
+			ASN1String name = new ASN1String(dmsGraphicName.node,
+				row);
 			ASN1Integer height = dmsGraphicHeight.makeInt(row);
 			ASN1Integer width = dmsGraphicWidth.makeInt(row);
 			ASN1Enum<DmsColorScheme> type = new ASN1Enum<
