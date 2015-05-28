@@ -126,7 +126,7 @@ public class MessageActivationCode extends ASN1OctetString {
 			crc = dis.readUnsignedShort();
 			address = dis.readInt();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
 	}
