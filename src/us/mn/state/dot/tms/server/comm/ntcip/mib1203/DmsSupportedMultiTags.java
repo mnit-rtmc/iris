@@ -40,7 +40,7 @@ public class DmsSupportedMultiTags extends ASN1OctetString {
 
 	/** Create a new DmsSupportedMultiTags object */
 	public DmsSupportedMultiTags() {
-		super(MIB1203.multiCfg.child(new int[] {14, 0}));
+		super(MIB1203.dmsSupportedMultiTags.node);
 	}
 
 	/** Get the object value */

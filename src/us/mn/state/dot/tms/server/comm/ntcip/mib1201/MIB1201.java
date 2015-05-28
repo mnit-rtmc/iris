@@ -55,14 +55,6 @@ public enum MIB1201 {
 		return oid(0);
 	}
 
-	public MIBNode child(int n) {
-		// FIXME: add name
-		return node.child(n);
-	}
-	public MIBNode child(int[] n) {
-		// FIXME: add name
-		return node.child(n);
-	}
 	public ASN1Integer makeInt() {
 		return new ASN1Integer(node);
 	}

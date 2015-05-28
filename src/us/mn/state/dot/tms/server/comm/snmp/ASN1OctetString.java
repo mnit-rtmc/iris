@@ -30,6 +30,11 @@ public class ASN1OctetString extends ASN1Object {
 	}
 
 	/** Create a new ASN1 octet string */
+	public ASN1OctetString(MIBNode n, int idx, int j) {
+		super(n, new int[] { idx, j });
+	}
+
+	/** Create a new ASN1 octet string */
 	public ASN1OctetString(MIBNode n) {
 		super(n, new int[] { 0 });
 	}

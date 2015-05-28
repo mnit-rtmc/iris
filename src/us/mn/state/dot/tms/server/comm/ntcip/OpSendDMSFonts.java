@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -452,8 +453,8 @@ public class OpSendDMSFonts extends OpDMS {
 			byte[] pixels = Base64.decode(graphic.getPixels());
 			ASN1Integer char_width = characterWidth.makeInt(row,
 				code_point);
-			CharacterBitmap char_bitmap = new CharacterBitmap(row,
-				code_point);
+			ASN1OctetString char_bitmap = new ASN1OctetString(
+				characterBitmap.node, row, code_point);
 			char_width.setInteger(graphic.getWidth());
 			char_bitmap.setOctetString(pixels);
 			mess.add(char_width);

@@ -39,7 +39,7 @@ public class IllumPowerStatus extends ASN1OctetString {
 
 	/** Create a new IllumPowerStatus object */
 	public IllumPowerStatus() {
-		super(MIB.skylineDmsStatus.child(new int[] {2, 0}));
+		super(MIB.illumPowerStatus.node);
 	}
 
 	/** Get the object value */

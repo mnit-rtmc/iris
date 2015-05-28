@@ -58,6 +58,7 @@ public enum MIB1203 {
 	  characterTable		(fontDefinition, 4),
 	  characterEntry		(characterTable, 1),
 	    characterWidth		(characterEntry, 2),
+	    characterBitmap		(characterEntry, 3),
 	  fontMaxCharacterSize		(fontDefinition, 5), // V2
 	multiCfg			(dms, 4),
 	  defaultBackgroundColor	(multiCfg, 1),
@@ -68,6 +69,7 @@ public enum MIB1203 {
 	  defaultPageOnTime		(multiCfg, 8),
 	  defaultPageOffTime		(multiCfg, 9),
 	  dmsColorScheme		(multiCfg, 11),
+	  dmsSupportedMultiTags		(multiCfg, 14),
 	  dmsMaxNumberPages		(multiCfg, 15),
 	  dmsMaxMultiStringLength	(multiCfg, 16),
 	dmsMessage			(dms, 5),
@@ -124,7 +126,9 @@ public enum MIB1203 {
 	    pixelFailureYLocation	(pixelFailureEntry, 4),
 	    pixelFailureStatus		(pixelFailureEntry, 5),
 	  pixelTestActivation		(statError, 4),
+	  lampFailureStuckOn		(statError, 5),
 	  lampTestActivation		(statError, 7),
+	  fanFailures			(statError, 8),
 	  fanTestActivation		(statError, 9),
 	  controllerErrorStatus		(statError, 10),
 	  dmsPixelFailureTestRows	(statError, 19),	// V2
@@ -145,6 +149,7 @@ public enum MIB1203 {
 	    dmsLampPixelLeft		(dmsLampStatusEntry, 6),
 	    dmsLampPixelBottom		(dmsLampStatusEntry, 7),
 	    dmsLampPixelRight		(dmsLampStatusEntry, 8),
+	  dmsLightSensorStatusMap	(statError, 28),	// V2
 	  dmsLightSensorNumRows		(statError, 29),	// V2
 	  dmsLightSensorStatusTable	(statError, 30),	// V2
 	  dmsLightSensorStatusEntry	(dmsLightSensorStatusTable, 1),
@@ -182,7 +187,7 @@ public enum MIB1203 {
 	public final MIBNode node;
 
 	private MIB1203(MIB1201 p, int n) {
-		node = p.child(n);
+		node = p.node.child(n);
 	}
 	private MIB1203(MIB1203 p, int n) {
 		node = p.node.child(n, toString());

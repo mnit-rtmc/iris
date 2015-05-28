@@ -34,27 +34,19 @@ public enum MIB {
 	  dynBrightMaxNightManLvl	(skylineDmsSignCfg, 8),
 	  dmsTempCritical		(skylineDmsSignCfg, 11),
 	skylineDmsStatus		(skylineDms, 9),
-	  signFaceHeatStatus		(skylineDmsStatus, 4);
+	  illumPowerStatus		(skylineDmsStatus, 2),
+	  signFaceHeatStatus		(skylineDmsStatus, 4),
+	  sensorFailures		(skylineDmsStatus, 17);
 
-	private final MIBNode node;
+	public final MIBNode node;
 
 	private MIB(MIB1201 p, int n) {
-		// FIXME: add name
-		node = p.child(n);
+		node = p.node.child(n, toString());
 	}
 	private MIB(MIB p, int n) {
 		node = p.node.child(n, toString());
 	}
 	public ASN1Integer makeInt() {
 		return new ASN1Integer(node);
-	}
-
-	public MIBNode child(int n) {
-		// FIXME: add name
-		return node.child(n);
-	}
-	public MIBNode child(int[] n) {
-		// FIXME: add name
-		return node.child(n);
 	}
 }

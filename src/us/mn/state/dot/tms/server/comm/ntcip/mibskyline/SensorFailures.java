@@ -25,7 +25,7 @@ public class SensorFailures extends ASN1OctetString {
 
 	/** Create a new SensorFailures object */
 	public SensorFailures() {
-		super(MIB.skylineDmsStatus.child(new int[] {17, 0}));
+		super(MIB.sensorFailures.node);
 	}
 
 	/** Get the object value */

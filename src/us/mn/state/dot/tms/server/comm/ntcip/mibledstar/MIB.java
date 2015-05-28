@@ -43,7 +43,7 @@ public enum MIB {
 	public final MIBNode node;
 
 	private MIB(MIB1201 p, int n) {
-		node = p.child(n);
+		node = p.node.child(n, toString());
 	}
 	private MIB(MIB p, int n) {
 		node = p.node.child(n, toString());
