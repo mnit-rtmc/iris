@@ -209,14 +209,39 @@ public enum MIB1203 {
 	    dmsGraphicBlockNumber	(dmsGraphicBitmapEntry, 2),
 	    dmsGraphicBlockBitmap	(dmsGraphicBitmapEntry, 3);
 
+	/** MIB node */
 	public final MIBNode node;
 
+	/** Create a node with MIB1201 parent */
 	private MIB1203(MIB1201 p, int n) {
 		node = p.node.child(n, toString());
 	}
+
+	/** Create a new MIB1203 node */
 	private MIB1203(MIB1203 p, int n) {
 		node = p.node.child(n, toString());
 	}
+
+	/** Make an integer */
+	public ASN1Integer makeInt() {
+		return new ASN1Integer(node);
+	}
+
+	/** Make an integer */
+	public ASN1Integer makeInt(int r) {
+		return new ASN1Integer(node, r);
+	}
+
+	/** Make an integer */
+	public ASN1Integer makeInt(int r, int s) {
+		return new ASN1Integer(node, r, s);
+	}
+
+	/** Make an integer */
+	public ASN1Integer makeInt(DmsMessageMemoryType m, int n) {
+		return new ASN1Integer(node, m.ordinal(), n);
+	}
+
 	public int[] oid(int i) {
 		int[] o = node.createOID(1);
 		o[o.length - 1] = i;
@@ -224,26 +249,5 @@ public enum MIB1203 {
 	}
 	public int[] oid() {
 		return oid(0);
-	}
-
-	public MIBNode child(int n) {
-		// FIXME: add name
-		return node.child(n);
-	}
-	public MIBNode child(int[] n) {
-		// FIXME: add name
-		return node.child(n);
-	}
-	public ASN1Integer makeInt() {
-		return new ASN1Integer(node);
-	}
-	public ASN1Integer makeInt(int r) {
-		return new ASN1Integer(node, r);
-	}
-	public ASN1Integer makeInt(int r, int s) {
-		return new ASN1Integer(node, r, s);
-	}
-	public ASN1Integer makeInt(DmsMessageMemoryType m, int n) {
-		return new ASN1Integer(node, m.ordinal(), n);
 	}
 }

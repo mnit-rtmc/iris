@@ -38,14 +38,20 @@ public enum MIB {
 	  signFaceHeatStatus		(skylineDmsStatus, 4),
 	  sensorFailures		(skylineDmsStatus, 17);
 
+	/** MIB node */
 	public final MIBNode node;
 
+	/** Create a node with MIB1201 parent */
 	private MIB(MIB1201 p, int n) {
 		node = p.node.child(n, toString());
 	}
+
+	/** Create a new skyline MIB node */
 	private MIB(MIB p, int n) {
 		node = p.node.child(n, toString());
 	}
+
+	/** Make an integer */
 	public ASN1Integer makeInt() {
 		return new ASN1Integer(node);
 	}

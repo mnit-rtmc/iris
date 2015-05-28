@@ -38,14 +38,29 @@ public enum MIB1201 {
 	    moduleVersion		(moduleTableEntry, 5),
 	    moduleType			(moduleTableEntry, 6);
 
+	/** MIB node */
 	public final MIBNode node;
 
+	/** Create the root node */
 	private MIB1201(int[] n) {
 		node = MIBNode.root(n, toString());
 	}
+
+	/** Create a new MIB1201 node */
 	private MIB1201(MIB1201 p, int n) {
 		node = p.node.child(n, toString());
 	}
+
+	/** Make an integer */
+	public ASN1Integer makeInt() {
+		return new ASN1Integer(node);
+	}
+
+	/** Make a string */
+	public ASN1String makeStr(int r) {
+		return new ASN1String(node, r);
+	}
+
 	public int[] oid(int i) {
 		int[] o = node.createOID(1);
 		o[o.length - 1] = i;
@@ -53,12 +68,5 @@ public enum MIB1201 {
 	}
 	public int[] oid() {
 		return oid(0);
-	}
-
-	public ASN1Integer makeInt() {
-		return new ASN1Integer(node);
-	}
-	public ASN1String makeStr(int r) {
-		return new ASN1String(node, r);
 	}
 }
