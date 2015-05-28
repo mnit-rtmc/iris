@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  *
  * @author Douglas Lau
  */
-abstract public class MessageIDCode extends ASN1OctetString {
+public class MessageIDCode extends ASN1OctetString {
 
 	/** Encode message ID value.
 	 * @param m Message memory type.
@@ -62,7 +62,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 	}
 
 	/** Create a new MessageIDCode */
-	protected MessageIDCode(MIBNode n) {
+	public MessageIDCode(MIBNode n) {
 		super(n);
 	}
 
@@ -71,7 +71,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 
 	/** Set the memory type */
 	public void setMemoryType(DmsMessageMemoryType m) {
-		value = encodeValue(m, number, crc);
+		super.setOctetString(encodeValue(m, number, crc));
 		memory = m;
 	}
 
@@ -85,7 +85,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 
 	/** Set the message number */
 	public void setNumber(int n) {
-		value = encodeValue(memory, n, crc);
+		super.setOctetString(encodeValue(memory, n, crc));
 		number = n;
 	}
 
@@ -99,7 +99,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 
 	/** Set the CRC */
 	public void setCrc(int c) {
-		value = encodeValue(memory, number, c);
+		super.setOctetString(encodeValue(memory, number, c));
 		crc = c;
 	}
 
@@ -118,7 +118,7 @@ abstract public class MessageIDCode extends ASN1OctetString {
 				dis.readUnsignedByte());
 			number = dis.readUnsignedShort();
 			crc = dis.readUnsignedShort();
-			value = v;
+			super.setOctetString(v);
 		}
 		catch (IOException e) {
 			throw new IllegalArgumentException(e);

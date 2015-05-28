@@ -76,18 +76,18 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Communication loss message */
-	protected final DmsCommunicationsLossMessage comm_msg =
-		new DmsCommunicationsLossMessage();
+	private final MessageIDCode comm_msg = new MessageIDCode(
+		dmsCommunicationsLossMessage.node);
 
 	/** Long power recovery message */
-	protected final DmsLongPowerRecoveryMessage long_msg =
-		new DmsLongPowerRecoveryMessage();
+	private final MessageIDCode long_msg = new MessageIDCode(
+		dmsLongPowerRecoveryMessage.node);
 
 	/** Flag to avoid phase loops */
-	protected boolean modify_requested = false;
+	private boolean modify_requested = false;
 
 	/** Sign message */
-	protected final SignMessage message;
+	private final SignMessage message;
 
 	/** Message number (row in changeable message table).  This is normally
 	 * 1 for uncached messages.  If a number greater than 1 is used, an
@@ -95,16 +95,16 @@ public class OpSendDMSMessage extends OpDMS {
 	 * changeable message table will be updated and then the message will
 	 * be activated.  This allows complex messages to remain cached and
 	 * activated quickly. */
-	protected final int msg_num;
+	private final int msg_num;
 
 	/** Message CRC */
 	private final int message_crc;
 
 	/** User who deployed the message */
-	protected final User owner;
+	private final User owner;
 
 	/** Get the message duration */
-	protected int getDuration() {
+	private int getDuration() {
 		return getDuration(message.getDuration());
 	}
 

@@ -48,7 +48,8 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Source table (memory type) or the currently displayed message */
-	private final DmsMsgTableSource source = new DmsMsgTableSource();
+	private final MessageIDCode source = new MessageIDCode(
+		dmsMsgTableSource.node);
 
 	/** Process the message table source from the sign controller */
 	private Phase processMessageSource() {

@@ -58,8 +58,8 @@ public class OpSendDMSDefaults extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer power_time =dmsShortPowerLossTime.makeInt();
 			ASN1Integer comm_time = dmsTimeCommLoss.makeInt();
-			DmsEndDurationMessage end_msg =
-				new DmsEndDurationMessage();
+			MessageIDCode end_msg = new MessageIDCode(
+				dmsEndDurationMessage.node);
 			power_time.setInteger(0);
 			comm_time.setInteger(SystemAttrEnum.
 				DMS_COMM_LOSS_MINUTES.getInt());
