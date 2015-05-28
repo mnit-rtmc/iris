@@ -30,8 +30,8 @@ public class DmsSupportedMultiTags extends ASN1OctetString {
 
 		/** Get MULTI tag from an ordinal value */
 		static protected Enum fromOrdinal(int o) {
-			for(Enum e: Enum.values()) {
-				if(e.ordinal() == o)
+			for (Enum e: values()) {
+				if (e.ordinal() == o)
 					return e;
 			}
 			return null;
@@ -44,19 +44,20 @@ public class DmsSupportedMultiTags extends ASN1OctetString {
 	}
 
 	/** Get the object value */
+	@Override
 	public String getValue() {
 		boolean[] tags = tagArray();
 		StringBuilder b = new StringBuilder();
-		for(int i = 0; i < tags.length; i++) {
-			if(tags[i]) {
+		for (int i = 0; i < tags.length; i++) {
+			if (tags[i]) {
 				Enum tag = Enum.fromOrdinal(i);
-				if(tag != null) {
+				if (tag != null) {
 					b.append(tag.toString());
 					b.append(',');
 				}
 			}
 		}
-		if(b.length() == 0)
+		if (b.length() == 0)
 			return "None";
 		else {
 			// remove trailing comma
@@ -70,8 +71,8 @@ public class DmsSupportedMultiTags extends ASN1OctetString {
 	private boolean[] tagArray() {
 		byte[] bits = bitmapArray();
 		boolean[] tags = new boolean[32];
-		for(int i = 0; i < 4; i++) {
-			for(int j = 0; j < 8; j++) {
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 8; j++) {
 				int k = i * 8 + j;
 				int bit = 1 << j;
 				tags[k] = ((bits[i] & bit) != 0);
@@ -84,7 +85,7 @@ public class DmsSupportedMultiTags extends ASN1OctetString {
 	 * @return Array of 4 bytes */
 	private byte[] bitmapArray() {
 		byte[] val = value;
-		if(val.length == 4)
+		if (val.length == 4)
 			return val;
 		else
 			return new byte[4];
