@@ -28,15 +28,15 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  *
  * @author Douglas Lau
  */
-abstract public class MessageActivationCode extends ASN1OctetString {
+public class MessageActivationCode extends ASN1OctetString {
 
 	/** Create a new MessageActivationCode */
-	protected MessageActivationCode(MIBNode n) {
+	public MessageActivationCode(MIBNode n) {
 		super(n);
 	}
 
 	/** Message duration */
-	protected int duration;
+	private int duration;
 
 	/** Set the message duration */
 	public void setDuration(int d) {
@@ -49,7 +49,7 @@ abstract public class MessageActivationCode extends ASN1OctetString {
 	}
 
 	/** Activation priority */
-	protected int priority;
+	private int priority;
 
 	/** Set the activation priority */
 	public void setPriority(int p) {
@@ -75,7 +75,7 @@ abstract public class MessageActivationCode extends ASN1OctetString {
 	}
 
 	/** Message number */
-	protected int number;
+	private int number;
 
 	/** Set the message number */
 	public void setNumber(int n) {
@@ -101,7 +101,7 @@ abstract public class MessageActivationCode extends ASN1OctetString {
 	}
 
 	/** Source address */
-	protected int address;
+	private int address;
 
 	/** Set the source address */
 	public void setAddress(int a) {
@@ -145,7 +145,7 @@ abstract public class MessageActivationCode extends ASN1OctetString {
 			dos.writeInt(address);
 			return bos.toByteArray();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			e.printStackTrace();
 			return new byte[0];
 		}

@@ -151,7 +151,8 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Activate a blank message */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsActivateMessage act = new DmsActivateMessage();
+			MessageActivationCode act = new MessageActivationCode(
+				dmsActivateMessage.node);
 			act.setDuration(DURATION_INDEFINITE);
 			act.setPriority(MAX_MESSAGE_PRIORITY);
 			act.setMemoryType(DmsMessageMemoryType.blank);
@@ -370,7 +371,8 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Activate the message */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsActivateMessage act = new DmsActivateMessage();
+			MessageActivationCode act = new MessageActivationCode(
+				dmsActivateMessage.node);
 			act.setDuration(getDuration());
 			act.setPriority(MAX_MESSAGE_PRIORITY);
 			act.setMemoryType(DmsMessageMemoryType.changeable);
