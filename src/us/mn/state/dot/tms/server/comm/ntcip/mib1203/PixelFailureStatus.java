@@ -28,14 +28,14 @@ public enum PixelFailureStatus {
 	PARTIAL_FAILURE;	// v2
 
 	/** Test if a bit flag is set */
-	static private boolean isBitSet(PixelFailureStatus s, int v) {
-		int bit = 1 << s.ordinal();
+	private boolean isSet(int v) {
+		int bit = 1 << ordinal();
 		return (v & bit) != 0;
 	}
 
 	/** Test if the pixel is stuck on */
 	static public boolean isStuckOn(int v) {
-		return isBitSet(STUCK_ON, v);
+		return STUCK_ON.isSet(v);
 	}
 
 	/** Test if the pixel is stuck off */
@@ -46,11 +46,11 @@ public enum PixelFailureStatus {
 	/** Test if the pixel is stuck off (1203v1) */
 	static private boolean isStuckOffV1(int v) {
 		/** stuck off assumed for 1203v1 when STUCK_ON unset */
-		return !(isBitSet(STUCK_ON, v) | isBitSet(PARTIAL_FAILURE, v));
+		return !(STUCK_ON.isSet(v) | PARTIAL_FAILURE.isSet(v));
 	}
 
 	/** Test if the pixel is stuck off (1203v2) */
 	static private boolean isStuckOffV2(int v) {
-		return isBitSet(STUCK_OFF, v);
+		return STUCK_OFF.isSet(v);
 	}
 }
