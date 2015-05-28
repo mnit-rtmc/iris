@@ -30,6 +30,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mibledstar.MIB.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -229,8 +230,9 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Modify the message */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsMessageMultiString multi = new DmsMessageMultiString(
-				DmsMessageMemoryType.changeable, msg_num);
+			ASN1String multi = new ASN1String(dmsMessageMultiString
+				.node,DmsMessageMemoryType.changeable.ordinal(),
+				msg_num);
 			ASN1Integer beacon = dmsMessageBeacon.makeInt(
 				DmsMessageMemoryType.changeable, msg_num);
 			ASN1Integer srv = dmsMessagePixelService.makeInt(

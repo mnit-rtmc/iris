@@ -25,14 +25,14 @@ public class MonochromeColor extends ASN1OctetString {
 
 	/** Create a new MonochromeColor object */
 	public MonochromeColor() {
-		super(MIB1203.vmsCfg.child(new int[] {7, 0}));
+		super(MIB1203.monochromeColor.node);
 	}
 
 	/** Get the value array.
 	 * @return Array of 6 bytes (3 RGB on and 3 RGB off colors) */
 	private byte[] valArray() {
 		byte[] val = value;
-		if(val.length == 6)
+		if (val.length == 6)
 			return val;
 		else
 			return new byte[6];

@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -325,8 +326,8 @@ public class OpSendDMSGraphics extends OpDMS {
 				DmsColorScheme>(dmsGraphicType.node, row);
 			ASN1Integer trans_enabled =
 				dmsGraphicTransparentEnabled.makeInt(row);
-			DmsGraphicTransparentColor trans_color =
-				new DmsGraphicTransparentColor(row);
+			ASN1OctetString trans_color = new ASN1OctetString(
+				dmsGraphicTransparentColor.node, row);
 			number.setInteger(graphic.getGNumber());
 			name.setString(graphic.getName());
 			height.setInteger(graphic.getHeight());
@@ -374,8 +375,8 @@ public class OpSendDMSGraphics extends OpDMS {
 
 		/** Send a graphic block */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsGraphicBlockBitmap block_bitmap =
-				new DmsGraphicBlockBitmap(row, block);
+			ASN1OctetString block_bitmap = new ASN1OctetString(
+				dmsGraphicBlockBitmap.node, row, block);
 			block_bitmap.setOctetString(createBlock());
 			mess.add(block_bitmap);
 			logStore(block_bitmap);

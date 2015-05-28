@@ -22,6 +22,11 @@ package us.mn.state.dot.tms.server.comm.snmp;
 public class ASN1String extends ASN1OctetString {
 
 	/** Create a new ASN1 string */
+	public ASN1String(MIBNode n, int idx, int j) {
+		super(n, idx, j);
+	}
+
+	/** Create a new ASN1 string */
 	public ASN1String(MIBNode n, int idx) {
 		super(n, idx);
 	}
@@ -29,6 +34,11 @@ public class ASN1String extends ASN1OctetString {
 	/** Create a new ASN1 string */
 	public ASN1String(MIBNode n) {
 		super(n);
+	}
+
+	/** Set the octet string to a string */
+	public void setString(String v) {
+		setOctetString(v.getBytes());
 	}
 
 	/** Get the object value */

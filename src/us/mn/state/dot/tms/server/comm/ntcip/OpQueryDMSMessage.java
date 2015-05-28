@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 
 /**
  * Operation to query the current message on a DMS.
@@ -117,8 +118,9 @@ public class OpQueryDMSMessage extends OpDMS {
 
 		/** Query the current message */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsMessageMultiString multi = new DmsMessageMultiString(
-				DmsMessageMemoryType.currentBuffer, 1);
+			ASN1String multi = new ASN1String(dmsMessageMultiString
+				.node, DmsMessageMemoryType.currentBuffer
+				.ordinal(), 1);
 			ASN1Integer beacon = dmsMessageBeacon.makeInt(
 				DmsMessageMemoryType.currentBuffer, 1);
 			ASN1Enum<DMSMessagePriority> prior = new ASN1Enum<

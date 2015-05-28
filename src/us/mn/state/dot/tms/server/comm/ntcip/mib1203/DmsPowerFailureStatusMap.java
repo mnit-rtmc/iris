@@ -26,22 +26,23 @@ public class DmsPowerFailureStatusMap extends ASN1OctetString {
 
 	/** Create a new DmsPowerFailureStatusMap object */
 	public DmsPowerFailureStatusMap() {
-		super(MIB1203.statError.child(new int[] {11, 0}));
+		super(MIB1203.dmsPowerFailureStatusMap.node);
 	}
 
 	/** Get the object value */
+	@Override
 	public String getValue() {
 		StringBuilder sb = new StringBuilder();
 		int p = 1;
-		for(byte v: value) {
-			for(int bit = 0x01; bit < 0x0100; bit <<= 1, p++) {
-				if((v & bit) != 0) {
+		for (byte v: value) {
+			for (int bit = 0x01; bit < 0x0100; bit <<= 1, p++) {
+				if ((v & bit) != 0) {
 					sb.append(", #");
 					sb.append(p);
 				}
 			}
 		}
-		if(sb.length() < 2)
+		if (sb.length() < 2)
 			return "OK";
 		else
 			return sb.substring(2);

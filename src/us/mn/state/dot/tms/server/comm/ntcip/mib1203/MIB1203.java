@@ -43,6 +43,7 @@ public enum MIB1203 {
 	  vmsSignWidthPixels		(vmsCfg, 4),
 	  vmsHorizontalPitch		(vmsCfg, 5),
 	  vmsVerticalPitch		(vmsCfg, 6),
+	  monochromeColor		(vmsCfg, 7),		// V2
 	fontDefinition			(dms, 3),
 	  numFonts			(fontDefinition, 1),
 	  fontTable			(fontDefinition, 2),
@@ -69,6 +70,8 @@ public enum MIB1203 {
 	  defaultPageOnTime		(multiCfg, 8),
 	  defaultPageOffTime		(multiCfg, 9),
 	  dmsColorScheme		(multiCfg, 11),
+	  defaultBackgroundRGB		(multiCfg, 12),		// V2
+	  defaultForegroundRGB		(multiCfg, 13),		// V2
 	  dmsSupportedMultiTags		(multiCfg, 14),
 	  dmsMaxNumberPages		(multiCfg, 15),
 	  dmsMaxMultiStringLength	(multiCfg, 16),
@@ -83,6 +86,7 @@ public enum MIB1203 {
 	  dmsMessageTable		(dmsMessage, 8),
 	  dmsMessageEntry		(dmsMessageTable, 1),
 	    dmsMessageMemoryType	(dmsMessageEntry, 1),
+	    dmsMessageMultiString	(dmsMessageEntry, 3),
 	    dmsMessageCRC		(dmsMessageEntry, 5),
 	    dmsMessageBeacon		(dmsMessageEntry, 6),
 	    dmsMessagePixelService	(dmsMessageEntry, 7),
@@ -111,6 +115,7 @@ public enum MIB1203 {
 	  dmsIllumNumBrightLevels	(illum, 4),
 	  dmsIllumBrightLevelStatus	(illum, 5),
 	  dmsIllumManLevel		(illum, 6),
+	  dmsIllumBrightnessValues	(illum, 7),
 	  dmsIllumBrightnessValuesError	(illum, 8),
 	  dmsIllumLightOutputStatus	(illum, 9),
 	dmsStatus			(dms, 9),
@@ -127,10 +132,12 @@ public enum MIB1203 {
 	    pixelFailureStatus		(pixelFailureEntry, 5),
 	  pixelTestActivation		(statError, 4),
 	  lampFailureStuckOn		(statError, 5),
+	  lampFailureStuckOff		(statError, 6),
 	  lampTestActivation		(statError, 7),
 	  fanFailures			(statError, 8),
 	  fanTestActivation		(statError, 9),
 	  controllerErrorStatus		(statError, 10),
+	  dmsPowerFailureStatusMap	(statError, 11),	// V2
 	  dmsPixelFailureTestRows	(statError, 19),	// V2
 	  dmsPixelFailureMessageRows	(statError, 20),	// V2
 	  dmsPowerNumRows		(statError, 12),	// V2
@@ -178,16 +185,18 @@ public enum MIB1203 {
 	    dmsGraphicType		(dmsGraphicEntry, 6),
 	    dmsGraphicID		(dmsGraphicEntry, 7),
 	    dmsGraphicTransparentEnabled(dmsGraphicEntry, 8),
+	    dmsGraphicTransparentColor	(dmsGraphicEntry, 9),
 	    dmsGraphicStatus		(dmsGraphicEntry, 10),
 	  dmsGraphicBitmapTable		(graphicDefinition, 7),
 	  dmsGraphicBitmapEntry		(dmsGraphicBitmapTable, 1),
 	    dmsGraphicBitmapIndex	(dmsGraphicBitmapEntry, 1),
-	    dmsGraphicBlockNumber	(dmsGraphicBitmapEntry, 2);
+	    dmsGraphicBlockNumber	(dmsGraphicBitmapEntry, 2),
+	    dmsGraphicBlockBitmap	(dmsGraphicBitmapEntry, 3);
 
 	public final MIBNode node;
 
 	private MIB1203(MIB1201 p, int n) {
-		node = p.node.child(n);
+		node = p.node.child(n, toString());
 	}
 	private MIB1203(MIB1203 p, int n) {
 		node = p.node.child(n, toString());
