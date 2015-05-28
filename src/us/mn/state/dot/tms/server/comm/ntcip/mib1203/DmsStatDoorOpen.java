@@ -14,39 +14,18 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip DmsStatDoorOpen object
+ * Enumeration of door open errors.
  *
  * @author Douglas Lau
  */
-public class DmsStatDoorOpen extends ASN1Integer {
-
-	/** Create a new DmsStatDoorOpen object */
-	public DmsStatDoorOpen() {
-		super(MIB1203.dmsStatDoorOpen.node);
-	}
-
-	/** Get the object value */
-	@Override
-	public String getValue() {
-		int v = getInteger();
-		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < 8; i++) {
-			int bit = 1 << i;
-			if ((v & bit) != 0) {
-				b.append("#");
-				b.append(i + 1);
-				b.append(", ");
-			}
-		}
-		if (b.length() == 0)
-			b.append("None");
-		else {
-			// remove trailing comma and space
-			b.setLength(b.length() - 2);
-		}
-		return b.toString();
-	}
+public enum DmsStatDoorOpen {
+	DOOR_1,
+	DOOR_2,
+	DOOR_3,
+	DOOR_4,
+	DOOR_5,
+	DOOR_6,
+	DOOR_7,
+	DOOR_8;
 }

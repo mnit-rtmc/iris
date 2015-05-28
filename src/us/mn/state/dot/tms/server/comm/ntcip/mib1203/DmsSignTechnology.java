@@ -14,66 +14,17 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip DmsSignTechnology object
+ * Enumeration of sign technology flags.
  *
  * @author Douglas Lau
  */
-public class DmsSignTechnology extends ASN1Integer {
-
-	/** Other technology */
-	static public final int OTHER = 1 << 0;
-
-	/** LED technology */
-	static public final int LED = 1 << 1;
-
-	/** Flip disk technology */
-	static public final int FLIP_DISK = 1 << 2;
-
-	/** Fiber optic technology */
-	static public final int FIBER_OPTIC = 1 << 3;
-
-	/** Shuttered technology */
-	static public final int SHUTTERED = 1 << 4;
-
-	/** Lamp technology */
-	static public final int LAMP = 1 << 5;
-
-	/** Drum technology */
-	static public final int DRUM = 1 << 6;
-
-	/** Create a new DmsSignTechnology object */
-	public DmsSignTechnology() {
-		super(MIB1203.dmsSignTechnology.node);
-	}
-
-	/** Get the object value */
-	@Override
-	public String getValue() {
-		int v = getInteger();
-		StringBuilder b = new StringBuilder();
-		if ((v & DRUM) > 0)
-			b.append("Drum, ");
-		if ((v & LAMP) > 0)
-			b.append("Lamp, ");
-		if ((v & SHUTTERED) > 0)
-			b.append("Shuttered, ");
-		if ((v & FIBER_OPTIC) > 0)
-			b.append("Fiber Optics, ");
-		if ((v & FLIP_DISK) > 0)
-			b.append("Flip Disk, ");
-		if ((v & LED) > 0)
-			b.append("LED, ");
-		if ((v & OTHER) > 0)
-			b.append("Other, ");
-		if (b.length() == 0)
-			b.append("None");
-		else {
-			// remove trailing comma and space
-			b.setLength(b.length() - 2);
-		}
-		return b.toString();
-	}
+public enum DmsSignTechnology {
+	OTHER,
+	LED,
+	FLIP_DISK,
+	FIBER_OPTIC,
+	SHUTTERED,
+	LAMP,
+	DRUM;
 }

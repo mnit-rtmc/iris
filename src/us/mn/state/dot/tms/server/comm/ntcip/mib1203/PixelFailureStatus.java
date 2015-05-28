@@ -14,81 +14,43 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * PixelFailureStatus
+ * Enumeration of pixel failure status flags.
  *
  * @author Douglas Lau
  */
-public class PixelFailureStatus extends ASN1Integer {
+public enum PixelFailureStatus {
+	STUCK_ON,
+	COLOR_ERROR,
+	ELECTRICAL_ERROR,
+	MECHANICAL_ERROR,
+	STUCK_OFF,		// v2
+	PARTIAL_FAILURE;	// v2
 
-	/** Stuck on (for 1203v1 stuck off assumed when unset) */
-	static public final int STUCK_ON = 1 << 0;
-
-	/** Color error */
-	static public final int COLOR_ERROR = 1 << 1;
-
-	/** Electrical error */
-	static public final int ELECTRICAL_ERROR = 1 << 2;
-
-	/** Mechanical error */
-	static public final int MECHANICAL_ERROR = 1 << 3;
-
-	/** Stuck off (added in 1203v2) */
-	static public final int STUCK_OFF = 1 << 4;
-
-	/** Partial failure (added in 1203v2) */
-	static public final int PARTIAL_FAILURE = 1 << 5;
-
-	/** Create a new pixel failure status object */
-	public PixelFailureStatus(PixelFailureDetectionType t, int row) {
-		super(MIB1203.pixelFailureStatus.node, t.ordinal(), row);
+	/** Test if a bit flag is set */
+	static private boolean isBitSet(PixelFailureStatus s, int v) {
+		int bit = 1 << s.ordinal();
+		return (v & bit) != 0;
 	}
 
 	/** Test if the pixel is stuck on */
-	public boolean isStuckOn() {
-		int v = getInteger();
-		return (v & STUCK_ON) != 0;
+	static public boolean isStuckOn(int v) {
+		return isBitSet(STUCK_ON, v);
 	}
 
 	/** Test if the pixel is stuck off */
-	public boolean isStuckOff() {
-		return isStuckOffV1() || isStuckOffV2();
+	static public boolean isStuckOff(int v) {
+		return isStuckOffV1(v) || isStuckOffV2(v);
 	}
 
 	/** Test if the pixel is stuck off (1203v1) */
-	private boolean isStuckOffV1() {
-		int v = getInteger();
-		return (v & (STUCK_ON | PARTIAL_FAILURE)) == 0;
+	static private boolean isStuckOffV1(int v) {
+		/** stuck off assumed for 1203v1 when STUCK_ON unset */
+		return !(isBitSet(STUCK_ON, v) | isBitSet(PARTIAL_FAILURE, v));
 	}
 
 	/** Test if the pixel is stuck off (1203v2) */
-	private boolean isStuckOffV2() {
-		int v = getInteger();
-		return (v & STUCK_OFF) != 0;
-	}
-
-	/** Get the object value */
-	@Override
-	public String getValue() {
-		int v = getInteger();
-		StringBuilder b = new StringBuilder();
-		if (isStuckOn())
-			b.append("Stuck ON, ");
-		if (isStuckOff())
-			b.append("Stuck OFF, ");
-		if ((v & PARTIAL_FAILURE) != 0)
-			b.append("partial failure, ");
-		if ((v & COLOR_ERROR) != 0)
-			b.append("color error, ");
-		if ((v & ELECTRICAL_ERROR) != 0)
-			b.append("electrical error, ");
-		if ((v & MECHANICAL_ERROR) != 0)
-			b.append("mechanical error, ");
-		// remove trailing comma and space
-		if (b.length() > 1)
-			b.setLength(b.length() - 2);
-		return b.toString();
+	static private boolean isStuckOffV2(int v) {
+		return isBitSet(STUCK_OFF, v);
 	}
 }

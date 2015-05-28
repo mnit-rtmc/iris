@@ -25,8 +25,10 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
-import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
+import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.LedActivateMsgError;
+import static us.mn.state.dot.tms.server.comm.ntcip.mibledstar.MIB.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -479,7 +481,8 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Query a Ledstar activate message error */
 		protected Phase poll(CommMessage mess) throws IOException {
-			LedActivateMsgError error = new LedActivateMsgError();
+			ASN1Flags<LedActivateMsgError> error = new ASN1Flags<
+				LedActivateMsgError>(ledActivateMsgError.node);
 			mess.add(error);
 			try {
 				mess.queryProps();

@@ -114,6 +114,7 @@ public enum MIB1203 {
 	dmsStatus			(dms, 9),
 	  dmsStatDoorOpen		(dmsStatus, 6),
 	  statError			(dmsStatus, 7),
+	  shortErrorStatus		(statError, 1),
 	  pixelFailureTableNumRows	(statError, 2),
 	  pixelFailureTable		(statError, 3),
 	  pixelFailureEntry		(pixelFailureTable, 1),
@@ -125,6 +126,7 @@ public enum MIB1203 {
 	  pixelTestActivation		(statError, 4),
 	  lampTestActivation		(statError, 7),
 	  fanTestActivation		(statError, 9),
+	  controllerErrorStatus		(statError, 10),
 	  dmsPixelFailureTestRows	(statError, 19),	// V2
 	  dmsPixelFailureMessageRows	(statError, 20),	// V2
 	  dmsPowerNumRows		(statError, 12),	// V2

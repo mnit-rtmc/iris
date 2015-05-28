@@ -14,40 +14,13 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mibledstar;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ledstar LedActivateMsgError object
+ * Enum of Ledstar activate message errors.
  *
  * @author Douglas Lau
  */
-public class LedActivateMsgError extends ASN1Integer {
-
-	/** Activate message error descriptions */
-	static private final String[] ERROR = {
-		"Over temperature", "Bad pixel limit", "Draw error"
-	};
-
-	/** Create a new LedActivateMsgError */
-	public LedActivateMsgError() {
-		super(MIB.ledActivateMsgError.node);
-	}
-
-	/** Get the object value */
-	@Override
-	public String getValue() {
-		int v = getInteger();
-		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < ERROR.length; i++) {
-			int bit = 1 << i;
-			if ((v & bit) != 0) {
-				if (b.length() > 0)
-					b.append(" / ");
-				b.append(ERROR[i]);
-			}
-		}
-		if (b.length() < 1)
-			b.append("None");
-		return b.toString();
-	}
+public enum LedActivateMsgError {
+	OVER_TEMPERATURE,
+	BAD_PIXEL_LIMIT,
+	DRAW_ERROR;
 }

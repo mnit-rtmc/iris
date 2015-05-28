@@ -52,13 +52,19 @@ public class ASN1Enum<T extends Enum> extends ASN1Integer {
 
 	/** Get the enum value */
 	public T getEnum() {
-		T[] values = genericType().getEnumConstants();
+		T[] values = lookupEnumConstants();
 		if (values != null) {
 			int v = getInteger();
 			if (v >= 0 && v < values.length)
 				return values[v];
 		}
 		return null;
+	}
+
+	/** Lookup the enum constant values */
+	protected T[] lookupEnumConstants() {
+		Class<T> gt = genericType();
+		return (gt != null) ? gt.getEnumConstants() : null;
 	}
 
 	/** Lookup the type of T */

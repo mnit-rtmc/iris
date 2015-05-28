@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibledstar.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mibledstar.MIB.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -58,7 +59,8 @@ public class OpQueryDMSStatus extends OpDMS {
 		new LinkedList<String>();
 
 	/** Short Error status */
-	protected final ShortErrorStatus shortError = new ShortErrorStatus();
+	private final ASN1Flags<ShortErrorStatus> shortError = new ASN1Flags<
+		ShortErrorStatus>(shortErrorStatus.node);
 
 	/** Pixel failure table row count */
 	private final ASN1Integer pix_rows = pixelFailureTableNumRows.makeInt();
@@ -245,19 +247,22 @@ public class OpQueryDMSStatus extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Enum<DmsActivateMsgError> msg_err = new ASN1Enum<
 				DmsActivateMsgError>(dmsActivateMsgError.node);
-			ControllerErrorStatus con = new ControllerErrorStatus();
-			if (shortError.checkError(ShortErrorStatus.MESSAGE))
+			ASN1Flags<ControllerErrorStatus> con = new ASN1Flags<
+				ControllerErrorStatus>(controllerErrorStatus
+				.node);
+			int se = shortError.getInteger();
+			if (ShortErrorStatus.MESSAGE.isSet(se))
 				mess.add(msg_err);
-			if (shortError.checkError(ShortErrorStatus.CONTROLLER))
+			if (ShortErrorStatus.CONTROLLER.isSet(se))
 				mess.add(con);
-			if (shortError.checkError(ShortErrorStatus.PIXEL))
+			if (ShortErrorStatus.PIXEL.isSet(se))
 				mess.add(pix_rows);
 			mess.queryProps();
-			if (shortError.checkError(ShortErrorStatus.MESSAGE))
+			if (ShortErrorStatus.MESSAGE.isSet(se))
 				logQuery(msg_err);
-			if (shortError.checkError(ShortErrorStatus.CONTROLLER))
+			if (ShortErrorStatus.CONTROLLER.isSet(se))
 				logQuery(con);
-			if (shortError.checkError(ShortErrorStatus.PIXEL))
+			if (ShortErrorStatus.PIXEL.isSet(se))
 				logQuery(pix_rows);
 			return new QueryTestAndMessageRows();
 		}
@@ -367,7 +372,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	}
 
 	/** Format power supply voltage */
-	static protected String formatVoltage(int volts) {
+	static private String formatVoltage(int volts) {
 		if (volts >= 0 && volts < 65535)
 			return "" + (volts / 100f) + " volts";
 		else
@@ -375,8 +380,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	}
 
 	/** Trim and join four strings */
-	static protected String join(String s0, String s1, String s2, String s3)
-	{
+	static private String join(String s0, String s1, String s2, String s3) {
 		return s0.trim() + ',' + s1.trim() + ',' + s2.trim() + ',' +
 		       s3.trim();
 	}
@@ -501,6 +505,7 @@ public class OpQueryDMSStatus extends OpDMS {
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
 		if (isSuccess()) {
 			dms.setPhotocellStatus(formatPhotocellStatus());
@@ -511,38 +516,69 @@ public class OpQueryDMSStatus extends OpDMS {
 	}
 
 	/** Format the photocell status table */
-	protected String[] formatPhotocellStatus() {
+	private String[] formatPhotocellStatus() {
 		light_sensors.add("composite," + photocellStatus() + "," +
 			p_level.getInteger());
 		return light_sensors.toArray(new String[0]);
 	}
 
 	/** Get the composite photocell status */
-	protected String photocellStatus() {
-		if (shortError.checkError(ShortErrorStatus.PHOTOCELL))
+	private String photocellStatus() {
+		if (ShortErrorStatus.PHOTOCELL.isSet(shortError.getInteger()))
 			return "fail";
 		else
 			return "noError";
 	}
 
 	/** Format the new maintenance status */
-	protected String formatMaintStatus() {
-		if (shortError.isMaintenance())
+	private String formatMaintStatus() {
+		if (hasMaintenanceError() || hasPixelError())
 			return shortError.getValue();
-		if (shortError.checkError(ShortErrorStatus.PIXEL) &&
-		    getPixelErrorCount() > pixelMaintThreshold())
-			return "Too many pixel errors";
 		else
 			return "";
 	}
 
+	/** Check if we should report the error for maintenance */
+	private boolean hasMaintenanceError() {
+		int se = shortError.getInteger();
+		// MESSAGE errors can pop up for lots of reasons,
+		// so we shouldn't consider them real errors.
+		return ShortErrorStatus.LAMP.isSet(se)
+		    || ShortErrorStatus.PHOTOCELL.isSet(se)
+		    || ShortErrorStatus.TEMPERATURE.isSet(se)
+		    || ShortErrorStatus.CLIMATE_CONTROL.isSet(se)
+		    || ShortErrorStatus.DOOR_OPEN.isSet(se)
+		    || ShortErrorStatus.DRUM_ROTOR.isSet(se)
+		    || ShortErrorStatus.HUMIDITY.isSet(se)
+		    || ShortErrorStatus.POWER.isSet(se);
+	}
+
+	/** Check if we have too many pixel errors */
+	private boolean hasPixelError() {
+		int se = shortError.getInteger();
+		// PIXEL errors are only reported if pixelFailureTableNumRows.0
+		// is greater than dms_pixel_maint_threshold system attribute.
+		return ShortErrorStatus.PIXEL.isSet(se)
+		    && getPixelErrorCount() > pixelMaintThreshold();
+	}
+
 	/** Format the new error status */
-	protected String formatErrorStatus() {
+	private String formatErrorStatus() {
 		// If no error status bits should be reported,
 		// clear the controller error status by setting "".
-		if (shortError.isCritical())
+		if (hasCriticalError())
 			return shortError.getValue();
 		else
 			return "";
+	}
+
+	/** Check if there is a critical error */
+	private boolean hasCriticalError() {
+		int se = shortError.getInteger();
+		return ShortErrorStatus.OTHER.isSet(se)
+		    || ShortErrorStatus.COMMUNICATIONS.isSet(se)
+		    || ShortErrorStatus.ATTACHED_DEVICE.isSet(se)
+		    || ShortErrorStatus.CONTROLLER.isSet(se)
+		    || ShortErrorStatus.CRITICAL_TEMPERATURE.isSet(se);
 	}
 }

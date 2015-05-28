@@ -14,51 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip DmsSignAccess object
+ * Enumeration of sign access flags.
  *
  * @author Douglas Lau
  */
-public class DmsSignAccess extends ASN1Integer {
-
-	/** Other access (?) */
-	static public final int OTHER = 1 << 0;
-
-	/** Walk-in access */
-	static public final int WALK_IN = 1 << 1;
-
-	/** Back access */
-	static public final int BACK = 1 << 2;
-
-	/** Front access */
-	static public final int FRONT = 1 << 3;
-
-	/** Create a new DmsSignAccess object */
-	public DmsSignAccess() {
-		super(MIB1203.dmsSignAccess.node);
-	}
-
-	/** Get the object value */
-	@Override
-	public String getValue() {
-		int v = getInteger();
-		StringBuilder b = new StringBuilder();
-		if ((v & FRONT) > 0)
-			b.append("Front, ");
-		if ((v & BACK) > 0)
-			b.append("Back, ");
-		if ((v & WALK_IN) > 0)
-			b.append("Walk-in, ");
-		if ((v & OTHER) > 0)
-			b.append("Other, ");
-		if (b.length() == 0)
-			b.append("None");
-		else {
-			// remove trailing comma and space
-			b.setLength(b.length() - 2);
-		}
-		return b.toString();
-	}
+public enum DmsSignAccess {
+	OTHER,
+	WALK_IN,
+	REAR,
+	FRONT;
 }

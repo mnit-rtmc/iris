@@ -23,6 +23,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201.*;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -108,7 +109,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 
 		/** Query the DMS information */
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsSignAccess access = new DmsSignAccess();
+			ASN1Flags<DmsSignAccess> access = new ASN1Flags<
+				DmsSignAccess>(dmsSignAccess.node);
 			DmsSignType type = new DmsSignType();
 			ASN1Integer height = dmsSignHeight.makeInt();
 			ASN1Integer width = dmsSignWidth.makeInt();
@@ -118,7 +120,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				dmsLegend.node);
 			ASN1Enum<DmsBeaconType> beacon = new ASN1Enum<
 				DmsBeaconType>(dmsBeaconType.node);
-			DmsSignTechnology tech = new DmsSignTechnology();
+			ASN1Flags<DmsSignTechnology> tech = new ASN1Flags<
+				DmsSignTechnology>(dmsSignTechnology.node);
 			mess.add(access);
 			mess.add(type);
 			mess.add(height);

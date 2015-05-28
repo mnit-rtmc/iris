@@ -14,54 +14,15 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
-
 /**
- * Ntcip ControllerErrorStatus object
+ * Enumeration of controller error status.
  *
  * @author Douglas Lau
  */
-public class ControllerErrorStatus extends ASN1Integer {
-
-	/** Other error */
-	static public final int OTHER = 1 << 0;
-
-	/** PROM error */
-	static public final int PROM = 1 << 1;
-
-	/** Program/processor error */
-	static public final int PROCESSOR = 1 << 2;
-
-	/** RAM error */
-	static public final int RAM = 1 << 3;
-
-	/** Controller-to-display interface error */
-	static public final int DISPLAY = 1 << 4;
-
-	/** Error descriptions */
-	static protected final String ERROR[] = {
-		"OTHER", "PROM", "PROGRAM/PROCESSOR", "RAM", "DISPLAY"
-	};
-
-	/** Create a new ControllerErrorStatus object */
-	public ControllerErrorStatus() {
-		super(MIB1203.statError.child(new int[] {10, 0}));
-	}
-
-	/** Get the object value */
-	@Override
-	public String getValue() {
-		int v = getInteger();
-		StringBuilder buf = new StringBuilder();
-		for (int i = 0; i < ERROR.length; i++) {
-			if ((v & 1 << i) != 0) {
-				if (buf.length() > 0)
-					buf.append(", ");
-				buf.append(ERROR[i] + " ERROR");
-			}
-		}
-		if (buf.length() == 0)
-			buf.append("OK");
-		return buf.toString();
-	}
+public enum ControllerErrorStatus {
+	OTHER,
+	PROM,
+	PROGRAM_PROCESSOR,
+	RAM,
+	DISPLAY;
 }

@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -213,8 +214,9 @@ public class OpTestDMSPixels extends OpDMS {
 				detectionType.ordinal(), row);
 			ASN1Integer y_loc = pixelFailureYLocation.makeInt(
 				detectionType.ordinal(), row);
-			PixelFailureStatus status = new PixelFailureStatus(
-				detectionType, row);
+			ASN1Flags<PixelFailureStatus> status = new ASN1Flags<
+				PixelFailureStatus>(pixelFailureStatus.node,
+				detectionType.ordinal(), row);
 			mess.add(x_loc);
 			mess.add(y_loc);
 			mess.add(status);
@@ -231,9 +233,9 @@ public class OpTestDMSPixels extends OpDMS {
 			logQuery(status);
 			int x = x_loc.getInteger() - 1;
 			int y = y_loc.getInteger() - 1;
-			if (status.isStuckOn())
+			if (PixelFailureStatus.isStuckOn(status.getInteger()))
 				setStuckOn(x, y);
-			else
+			if (PixelFailureStatus.isStuckOff(status.getInteger()))
 				setStuckOff(x, y);
 			row++;
 			if (row <= n_rows)
