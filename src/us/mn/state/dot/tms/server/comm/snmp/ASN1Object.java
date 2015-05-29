@@ -48,23 +48,7 @@ abstract public class ASN1Object extends ControllerProperty {
 
 	/** Get the object name */
 	public final String getName() {
-		String nm = node.getName();
-		if (nm != null)
-			return nm;
-		else {
-			String n = getClassName();
-			return n.substring(0, 1).toLowerCase() + n.substring(1);
-		}
-	}
-
-	/** Get the class name (without packages) */
-	private String getClassName() {
-		String name = getClass().getName();
-		int i = name.lastIndexOf('.');
-		if (i >= 0)
-			return name.substring(i + 1);
-		else
-			return name;
+		return node.getName();
 	}
 
 	/** Get the MIB index */
