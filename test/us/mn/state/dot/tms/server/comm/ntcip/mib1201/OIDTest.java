@@ -25,12 +25,10 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201.*;
  */
 public class OIDTest extends TestCase {
 
-	/** constructor */
 	public OIDTest(String name) {
 		super(name);
 	}
 
-	/** test cases */
 	public void test() {
 		int[] oid;
 		oid = globalMaxModules.makeInt().oid();
@@ -38,8 +36,6 @@ public class OIDTest extends TestCase {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 2, 0
 		}));
 		oid = moduleMake.makeStr(7).oid();
-for (int i: oid) System.err.print(" " + i);
-System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 3, 1, 3, 7
 		}));
