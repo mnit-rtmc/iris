@@ -89,6 +89,26 @@ public class MIBNode {
 			return parent.fillOID(extra + nid.length);
 	}
 
+	/** Get the object identifier */
+	public int[] oid(int i, int j) {
+		int[] o = createOID(2);
+		o[o.length - 2] = i;
+		o[o.length - 1] = j;
+		return o;
+	}
+
+	/** Get the object identifier */
+	public int[] oid(int i) {
+		int[] o = createOID(1);
+		o[o.length - 1] = i;
+		return o;
+	}
+
+	/** Get the object identifier */
+	public int[] oid() {
+		return oid(0);
+	}
+
 	/** Get the node name */
 	public String getName() {
 		return name;

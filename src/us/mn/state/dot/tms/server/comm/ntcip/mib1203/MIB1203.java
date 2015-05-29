@@ -241,13 +241,4 @@ public enum MIB1203 {
 	public ASN1Integer makeInt(DmsMessageMemoryType m, int n) {
 		return new ASN1Integer(node, m.ordinal(), n);
 	}
-
-	public int[] oid(int i) {
-		int[] o = node.createOID(1);
-		o[o.length - 1] = i;
-		return o;
-	}
-	public int[] oid() {
-		return oid(0);
-	}
 }

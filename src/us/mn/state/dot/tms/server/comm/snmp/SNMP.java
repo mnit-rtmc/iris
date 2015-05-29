@@ -180,7 +180,7 @@ public class SNMP extends BER {
 		protected void encodeVarBind(ASN1Object mo, boolean set)
 			throws IOException
 		{
-			encodeObjectIdentifier(mo.getOID());
+			encodeObjectIdentifier(mo.oid());
 			if (set)
 				mo.encode(SNMP.this);
 			else

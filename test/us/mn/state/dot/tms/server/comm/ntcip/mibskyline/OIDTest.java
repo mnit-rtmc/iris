@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip.mibskyline;
 
 import java.util.Arrays;
 import junit.framework.TestCase;
+import static us.mn.state.dot.tms.server.comm.ntcip.mibskyline.MIB.*;
 
 /** 
  * OID tests.
@@ -24,45 +25,42 @@ import junit.framework.TestCase;
  */
 public class OIDTest extends TestCase {
 
-	/** constructor */
 	public OIDTest(String name) {
 		super(name);
 	}
 
-	/** test cases */
 	public void test() {
 		int[] oid;
-
-		oid = new DynBrightDayNight().getOID();
+		oid = dynBrightDayNight.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 1, 0
 		}));
-		oid = new DynBrightDayRate().getOID();
+		oid = dynBrightDayRate.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 2, 0
 		}));
-		oid = new DynBrightNightRate().getOID();
+		oid = dynBrightNightRate.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 3, 0
 		}));
-		oid = new DynBrightMaxNightManLvl().getOID();
+		oid = dynBrightMaxNightManLvl.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 8, 0
 		}));
-		oid = new DmsTempCritical().getOID();
+		oid = dmsTempCritical.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 1, 11, 0
 		}));
 
-		oid = new IllumPowerStatus().getOID();
+		oid = illumPowerStatus.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 9, 2, 0
 		}));
-		oid = new SignFaceHeatStatus().getOID();
+		oid = signFaceHeatStatus.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 9, 4, 0
 		}));
-		oid = new SensorFailures().getOID();
+		oid = sensorFailures.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 3, 18, 2, 3, 9, 17, 0
 		}));

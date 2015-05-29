@@ -60,13 +60,4 @@ public enum MIB1201 {
 	public ASN1String makeStr(int r) {
 		return new ASN1String(node, r);
 	}
-
-	public int[] oid(int i) {
-		int[] o = node.createOID(1);
-		o[o.length - 1] = i;
-		return o;
-	}
-	public int[] oid() {
-		return oid(0);
-	}
 }

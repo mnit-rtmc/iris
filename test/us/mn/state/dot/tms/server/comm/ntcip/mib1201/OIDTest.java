@@ -33,25 +33,25 @@ public class OIDTest extends TestCase {
 	/** test cases */
 	public void test() {
 		int[] oid;
-		oid = globalMaxModules.oid();
+		oid = globalMaxModules.makeInt().oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 2, 0
 		}));
-		oid = new ModuleMake(7).getOID();
+		oid = moduleMake.makeStr(7).oid();
 for (int i: oid) System.err.print(" " + i);
 System.err.println();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 3, 1, 3, 7
 		}));
-		oid = new ModuleModel(7).getOID();
+		oid = moduleModel.makeStr(7).oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 3, 1, 4, 7
 		}));
-		oid = new ModuleVersion(7).getOID();
+		oid = moduleVersion.makeStr(7).oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 3, 1, 5, 7
 		}));
-		oid = new ModuleType(7).getOID();
+		oid = moduleType.makeStr(7).oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 6, 1, 3, 1, 6, 7
 		}));

@@ -39,7 +39,7 @@ abstract public class ASN1Object extends ControllerProperty {
 	}
 
 	/** Get the object identifier */
-	public int[] getOID() {
+	public int[] oid() {
 		int[] oid = node.createOID(nid.length);
 		int s = oid.length - nid.length;
 		System.arraycopy(nid, 0, oid, s, nid.length);

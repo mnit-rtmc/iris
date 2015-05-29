@@ -25,457 +25,483 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
  */
 public class OIDTest extends TestCase {
 
-	/** constructor */
 	public OIDTest(String name) {
 		super(name);
 	}
 
-	/** test cases */
-	public void test() {
+	public void testConfig() {
 		int[] oid;
-		oid = new DmsSignAccess().getOID();
+		oid = dmsSignAccess.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 1, 0
 		}));
-		oid = new DmsSignType().getOID();
+		oid = dmsSignType.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 2, 0
 		}));
-		oid = dmsSignHeight.oid();
+		oid = dmsSignHeight.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 3, 0
 		}));
-		oid = dmsSignWidth.oid();
+		oid = dmsSignWidth.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 4, 0
 		}));
-		oid = dmsHorizontalBorder.oid();
+		oid = dmsHorizontalBorder.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 5, 0
 		}));
-		oid = dmsVerticalBorder.oid();
+		oid = dmsVerticalBorder.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 6, 0
 		}));
-		oid = new DmsLegend().getOID();
+		oid = dmsLegend.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 7, 0
 		}));
-		oid = new DmsBeaconType().getOID();
+		oid = dmsBeaconType.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 8, 0
 		}));
-		oid = new DmsSignTechnology().getOID();
+		oid = dmsSignTechnology.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 1, 9, 0
 		}));
+	}
 
-		oid = vmsCharacterHeightPixels.oid();
+	public void testDimensions() {
+		int[] oid;
+		oid = vmsCharacterHeightPixels.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 1, 0
 		}));
-		oid = vmsCharacterWidthPixels.oid();
+		oid = vmsCharacterWidthPixels.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 2, 0
 		}));
-		oid = vmsSignHeightPixels.oid();
+		oid = vmsSignHeightPixels.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 3, 0
 		}));
-		oid = vmsSignWidthPixels.oid();
+		oid = vmsSignWidthPixels.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 4, 0
 		}));
-		oid = vmsHorizontalPitch.oid();
+		oid = vmsHorizontalPitch.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 5, 0
 		}));
-		oid = vmsVerticalPitch.oid();
+		oid = vmsVerticalPitch.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 2, 6, 0
 		}));
+	}
 
-		oid = numFonts.oid();
+	public void testFonts() {
+		int[] oid;
+		oid = numFonts.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 1, 0
 		}));
-		oid = new FontIndex(5).getOID();
+		oid = fontIndex.node.oid(5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 1, 5
 		}));
-		oid = new FontNumber(5).getOID();
+		oid = fontNumber.node.oid(5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 2, 5
 		}));
-		oid = new FontName(5).getOID();
+		oid = fontName.node.oid(5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 3, 5
 		}));
-		oid = new FontHeight(5).getOID();
+		oid = fontHeight.node.oid(5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 4, 5
 		}));
-		oid = new FontCharSpacing(5).getOID();
+		oid = fontCharSpacing.node.oid(5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 5, 5
 		}));
-		oid = new FontLineSpacing(5).getOID();
+		oid = fontLineSpacing.node.oid(5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 6, 5
 		}));
-		oid = new FontVersionID(5).getOID();
+		oid = fontVersionID.node.oid(5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 7, 5
 		}));
-		oid = new FontStatus(5).getOID();
+		oid = fontStatus.node.oid(5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 2, 1, 8, 5
 		}));
-		oid = maxFontCharacters.oid();
+		oid = maxFontCharacters.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 3, 0
 		}));
-		oid = new CharacterWidth(5, 32).getOID();
+		oid = characterWidth.node.oid(5, 32);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 4, 1, 2, 5, 32
 		}));
-		oid = new CharacterBitmap(5, 32).getOID();
+		oid = characterBitmap.node.oid(5, 32);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 4, 1, 3, 5, 32
 		}));
-		oid = fontMaxCharacterSize.oid();
+		oid = fontMaxCharacterSize.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 3, 5, 0
 		}));
+	}
 
-		oid = defaultFont.oid();
+	public void testMultiCfg() {
+		int[] oid;
+		oid = defaultFont.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 5, 0
 		}));
-		oid = new DefaultJustificationLine().getOID();
+		oid = defaultJustificationLine.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 6, 0
 		}));
-		oid = new DefaultJustificationPage().getOID();
+		oid = defaultJustificationPage.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 7, 0
 		}));
-		oid = defaultPageOnTime.oid();
+		oid = defaultPageOnTime.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 8, 0
 		}));
-		oid = defaultPageOffTime.oid();
+		oid = defaultPageOffTime.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 9, 0
 		}));
-		oid = new DmsColorScheme().getOID();
+		oid = dmsColorScheme.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 4, 11, 0
 		}));
+	}
 
-		oid = new DmsMessageMemoryType(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+	public void testMessage() {
+		int[] oid;
+		oid = dmsMessageMemoryType.node.oid(
+			DmsMessageMemoryType.currentBuffer.ordinal(), 1);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 1, 5, 1
 		}));
-		oid = new DmsMessageMultiString(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+		oid = dmsMessageMultiString.node.oid(
+			DmsMessageMemoryType.currentBuffer.ordinal(), 1);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 3, 5, 1
 		}));
-		oid = new DmsMessageCRC(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+		oid = dmsMessageCRC.node.oid(
+			DmsMessageMemoryType.currentBuffer.ordinal(), 1);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 5, 5, 1
 		}));
-		oid = new DmsMessageBeacon(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+		oid = dmsMessageBeacon.node.oid(
+			DmsMessageMemoryType.currentBuffer.ordinal(), 1);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 6, 5, 1
 		}));
-		oid = new DmsMessagePixelService(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+		oid = dmsMessagePixelService.node.oid(
+			DmsMessageMemoryType.currentBuffer.ordinal(), 1);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 7, 5, 1
 		}));
-		oid = new DmsMessageRunTimePriority(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+		oid = dmsMessageRunTimePriority.node.oid(
+			DmsMessageMemoryType.currentBuffer.ordinal(), 1);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 8, 5, 1
 		}));
-		oid = new DmsMessageStatus(DmsMessageMemoryType.Enum.currentBuffer, 1).getOID();
+		oid = dmsMessageStatus.node.oid(
+			DmsMessageMemoryType.currentBuffer.ordinal(), 1);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 8, 1, 9, 5, 1
 		}));
-		oid = new DmsValidateMessageError().getOID();
+		oid = dmsValidateMessageError.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 5, 9, 0
 		}));
+	}
 
-		oid = new DmsSWReset().getOID();
+	public void testControl() {
+		int[] oid;
+		oid = dmsSWReset.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 2, 0
 		}));
-		oid = new DmsActivateMessage().getOID();
+		oid = dmsActivateMessage.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 3, 0
 		}));
-		oid = new DmsMessageTimeRemaining().getOID();
+		oid = dmsMessageTimeRemaining.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 4, 0
 		}));
-		oid = new DmsMsgTableSource().getOID();
+		oid = dmsMsgTableSource.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 5, 0
 		}));
-		oid = new DmsMsgSourceMode().getOID();
+		oid = dmsMsgSourceMode.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 7, 0
 		}));
-		oid = new DmsShortPowerRecoveryMessage().getOID();
+		oid = dmsShortPowerRecoveryMessage.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 8, 0
 		}));
-		oid = new DmsLongPowerRecoveryMessage().getOID();
+		oid = dmsLongPowerRecoveryMessage.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 9, 0
 		}));
-		oid = new DmsShortPowerLossTime().getOID();
+		oid = dmsShortPowerLossTime.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 10, 0
 		}));
-		oid = new DmsCommunicationsLossMessage().getOID();
+		oid = dmsCommunicationsLossMessage.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 12, 0
 		}));
-		oid = new DmsTimeCommLoss().getOID();
+		oid = dmsTimeCommLoss.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 13, 0
 		}));
-		oid = new DmsPowerLossMessage().getOID();
+		oid = dmsPowerLossMessage.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 14, 0
 		}));
-		oid = new DmsEndDurationMessage().getOID();
+		oid = dmsEndDurationMessage.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 15, 0
 		}));
-		oid = new DmsActivateMsgError().getOID();
+		oid = dmsActivateMsgError.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 17, 0
 		}));
-		oid = new DmsMultiSyntaxError().getOID();
+		oid = dmsMultiSyntaxError.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 18, 0
 		}));
-		oid = vmsPixelServiceDuration.oid();
+		oid = vmsPixelServiceDuration.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 21, 0
 		}));
-		oid = vmsPixelServiceFrequency.oid();
+		oid = vmsPixelServiceFrequency.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 22, 0
 		}));
-		oid = vmsPixelServiceTime.oid();
+		oid = vmsPixelServiceTime.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 6, 23, 0
 		}));
+	}
 
-		oid = new DmsIllumControl().getOID();
+	public void testIllum() {
+		int[] oid;
+		oid = dmsIllumControl.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 1, 0
 		}));
-		oid = dmsIllumMaxPhotocellLevel.oid();
+		oid = dmsIllumMaxPhotocellLevel.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 2, 0
 		}));
-		oid = dmsIllumPhotocellLevelStatus.oid();
+		oid = dmsIllumPhotocellLevelStatus.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 3, 0
 		}));
-		oid = dmsIllumNumBrightLevels.oid();
+		oid = dmsIllumNumBrightLevels.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 4, 0
 		}));
-		oid = dmsIllumBrightLevelStatus.oid();
+		oid = dmsIllumBrightLevelStatus.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 5, 0
 		}));
-		oid = dmsIllumManLevel.oid();
+		oid = dmsIllumManLevel.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 6, 0
 		}));
-		oid = new DmsIllumBrightnessValues().getOID();
+		oid = dmsIllumBrightnessValues.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 7, 0
 		}));
-		oid = new DmsIllumBrightnessValuesError().getOID();
+		oid = dmsIllumBrightnessValuesError.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 8, 0
 		}));
-		oid = dmsIllumLightOutputStatus.oid();
+		oid = dmsIllumLightOutputStatus.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 7, 9, 0
 		}));
+	}
 
-		oid = new DmsStatDoorOpen().getOID();
+	public void testStatus() {
+		int[] oid;
+		oid = dmsStatDoorOpen.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 6, 0
 		}));
-		oid = new ShortErrorStatus().getOID();
+		oid = shortErrorStatus.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 1, 0
 		}));
-		oid = new PixelFailureTableNumRows().getOID();
+		oid = pixelFailureTableNumRows.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 2, 0
 		}));
-		oid = new PixelFailureDetectionType(5).getOID();
+		int pt = PixelFailureDetectionType.pixelTest.ordinal();
+		oid = pixelFailureDetectionType.node.oid(pt, 5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 3, 1, 1, 2, 5
 		}));
-		oid = new PixelFailureIndex(
-			PixelFailureDetectionType.Enum.pixelTest, 5).getOID();
+		oid = pixelFailureIndex.node.oid(pt, 5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 3, 1, 2, 2, 5
 		}));
-		oid = new PixelFailureXLocation(
-			PixelFailureDetectionType.Enum.pixelTest, 5).getOID();
+		oid = pixelFailureXLocation.node.oid(pt, 5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 3, 1, 3, 2, 5
 		}));
-		oid = new PixelFailureYLocation(
-			PixelFailureDetectionType.Enum.pixelTest, 5).getOID();
+		oid = pixelFailureYLocation.node.oid(pt, 5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 3, 1, 4, 2, 5
 		}));
-		oid = new PixelFailureStatus(
-			PixelFailureDetectionType.Enum.pixelTest, 5).getOID();
+		oid = pixelFailureStatus.node.oid(pt, 5);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 3, 1, 5, 2, 5
 		}));
-		oid = new PixelTestActivation().getOID();
+		oid = pixelTestActivation.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 4, 0
 		}));
-		oid = new LampFailureStuckOn().getOID();
+		oid = lampFailureStuckOn.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 5, 0
 		}));
-		oid = new LampFailureStuckOff().getOID();
+		oid = lampFailureStuckOff.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 6, 0
 		}));
-		oid = new LampTestActivation().getOID();
+		oid = lampTestActivation.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 7, 0
 		}));
-		oid = new FanFailures().getOID();
+		oid = fanFailures.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 8, 0
 		}));
-		oid = new FanTestActivation().getOID();
+		oid = fanTestActivation.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 9, 0
 		}));
-		oid = new ControllerErrorStatus().getOID();
+		oid = controllerErrorStatus.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 7, 10, 0
 		}));
+	}
 
-		oid = tempMinCtrlCabinet.oid();
+	public void testTemp() {
+		int[] oid;
+		oid = tempMinCtrlCabinet.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 1, 0
 		}));
-		oid = tempMaxCtrlCabinet.oid();
+		oid = tempMaxCtrlCabinet.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 2, 0
 		}));
-		oid = tempMinAmbient.oid();
+		oid = tempMinAmbient.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 3, 0
 		}));
-		oid = tempMaxAmbient.oid();
+		oid = tempMaxAmbient.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 4, 0
 		}));
-		oid = tempMinSignHousing.oid();
+		oid = tempMinSignHousing.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 5, 0
 		}));
-		oid = tempMaxSignHousing.oid();
+		oid = tempMaxSignHousing.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 9, 9, 6, 0
 		}));
+	}
 
-		oid = dmsGraphicMaxEntries.oid();
+	public void testGraphic() {
+		int[] oid;
+		oid = dmsGraphicMaxEntries.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 1, 0
 		}));
-		oid = dmsGraphicNumEntries.oid();
+		oid = dmsGraphicNumEntries.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 2, 0
 		}));
-		oid = dmsGraphicMaxSize.oid();
+		oid = dmsGraphicMaxSize.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 3, 0
 		}));
-		oid = availableGraphicMemory.oid();
+		oid = availableGraphicMemory.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 4, 0
 		}));
-		oid = dmsGraphicBlockSize.oid();
+		oid = dmsGraphicBlockSize.node.oid();
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 5, 0
 		}));
-		oid = new DmsGraphicIndex(15).getOID();
+		oid = dmsGraphicIndex.node.oid(15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 6, 1, 1, 15
 		}));
-		oid = new DmsGraphicNumber(15).getOID();
+		oid = dmsGraphicNumber.node.oid(15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 6, 1, 2, 15
 		}));
-		oid = new DmsGraphicName(15).getOID();
+		oid = dmsGraphicName.node.oid(15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 6, 1, 3, 15
 		}));
-		oid = new DmsGraphicHeight(15).getOID();
+		oid = dmsGraphicHeight.node.oid(15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 6, 1, 4, 15
 		}));
-		oid = new DmsGraphicWidth(15).getOID();
+		oid = dmsGraphicWidth.node.oid(15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 6, 1, 5, 15
 		}));
-		oid = new DmsGraphicType(15).getOID();
+		oid = dmsGraphicType.node.oid(15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 6, 1, 6, 15
 		}));
-		oid = new DmsGraphicID(15).getOID();
+		oid = dmsGraphicID.node.oid(15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 6, 1, 7, 15
 		}));
-		oid = new DmsGraphicTransparentEnabled(15).getOID();
+		oid = dmsGraphicTransparentEnabled.node.oid(15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 6, 1, 8, 15
 		}));
-		oid = new DmsGraphicTransparentColor(15).getOID();
+		oid = dmsGraphicTransparentColor.node.oid(15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 6, 1, 9, 15
 		}));
-		oid = new DmsGraphicStatus(15).getOID();
+		oid = dmsGraphicStatus.node.oid(15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 6, 1, 10, 15
 		}));
-		oid = new DmsGraphicBitmapIndex(6, 15).getOID();
+		oid = dmsGraphicBitmapIndex.node.oid(6, 15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 7, 1, 1, 6, 15
 		}));
-		oid = new DmsGraphicBlockNumber(6, 15).getOID();
+		oid = dmsGraphicBlockNumber.node.oid(6, 15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 7, 1, 2, 6, 15
 		}));
-		oid = new DmsGraphicBlockBitmap(6, 15).getOID();
+		oid = dmsGraphicBlockBitmap.node.oid(6, 15);
 		assertTrue(Arrays.equals(oid, new int[] {
 			1, 3, 6, 1, 4, 1, 1206, 4, 2, 3, 10, 7, 1, 3, 6, 15
 		}));
-
-for(int i: oid) System.err.print(" " + i);
-System.err.println();
 	}
 }
