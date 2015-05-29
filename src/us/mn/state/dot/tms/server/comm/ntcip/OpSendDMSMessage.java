@@ -71,8 +71,8 @@ public class OpSendDMSMessage extends OpDMS {
 	static private ASN1Enum<DmsMessageStatus> makeStatus(
 		DmsMessageMemoryType mem, int n)
 	{
-		return new ASN1Enum<DmsMessageStatus>(dmsMessageStatus.node,
-			mem.ordinal(), n);
+		return new ASN1Enum<DmsMessageStatus>(DmsMessageStatus.class,
+			dmsMessageStatus.node, mem.ordinal(), n);
 	}
 
 	/** Communication loss message */
@@ -239,8 +239,9 @@ public class OpSendDMSMessage extends OpDMS {
 			ASN1Integer srv = dmsMessagePixelService.makeInt(
 				DmsMessageMemoryType.changeable, msg_num);
 			ASN1Enum<DMSMessagePriority> prior = new ASN1Enum<
-				DMSMessagePriority>(dmsMessageRunTimePriority
-				.node,DmsMessageMemoryType.changeable.ordinal(),
+				DMSMessagePriority>(DMSMessagePriority.class,
+				dmsMessageRunTimePriority.node,
+				DmsMessageMemoryType.changeable.ordinal(),
 				msg_num);
 			multi.setString(message.getMulti());
 			beacon.setInteger(message.getBeaconEnabled() ? 1 : 0);
@@ -265,7 +266,8 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Query the control mode */
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Enum<DmsControlMode> mode = new ASN1Enum<
-				DmsControlMode>(dmsControlMode.node);
+				DmsControlMode>(DmsControlMode.class,
+				dmsControlMode.node);
 			mess.add(mode);
 			mess.queryProps();
 			logQuery(mode);
@@ -337,9 +339,11 @@ public class OpSendDMSMessage extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Enum<DmsValidateMessageError> error = new ASN1Enum<
 				DmsValidateMessageError>(
+				DmsValidateMessageError.class,
 				dmsValidateMessageError.node);
 			ASN1Enum<MultiSyntaxError> m_err = new ASN1Enum<
-				MultiSyntaxError>(dmsMultiSyntaxError.node);
+				MultiSyntaxError>(MultiSyntaxError.class,
+				dmsMultiSyntaxError.node);
 			ASN1Integer e_pos=dmsMultiSyntaxErrorPosition.makeInt();
 			mess.add(error);
 			mess.add(m_err);
@@ -398,7 +402,8 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Query an activate message error */
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Enum<DmsActivateMsgError> error = new ASN1Enum<
-				DmsActivateMsgError>(dmsActivateMsgError.node);
+				DmsActivateMsgError>(DmsActivateMsgError.class,
+				dmsActivateMsgError.node);
 			mess.add(error);
 			mess.queryProps();
 			logQuery(error);
@@ -434,7 +439,8 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Query a MULTI syntax error */
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Enum<MultiSyntaxError> m_err = new ASN1Enum<
-				MultiSyntaxError>(dmsMultiSyntaxError.node);
+				MultiSyntaxError>(MultiSyntaxError.class,
+				dmsMultiSyntaxError.node);
 			ASN1Integer e_pos=dmsMultiSyntaxErrorPosition.makeInt();
 			mess.add(m_err);
 			mess.add(e_pos);
@@ -486,7 +492,8 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Query a Ledstar activate message error */
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Flags<LedActivateMsgError> error = new ASN1Flags<
-				LedActivateMsgError>(ledActivateMsgError.node);
+				LedActivateMsgError>(LedActivateMsgError.class,
+				ledActivateMsgError.node);
 			mess.add(error);
 			try {
 				mess.queryProps();

@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201;
-import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
 

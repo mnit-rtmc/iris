@@ -125,11 +125,12 @@ public class OpQueryDMSMessage extends OpDMS {
 			ASN1Integer beacon = dmsMessageBeacon.makeInt(
 				DmsMessageMemoryType.currentBuffer, 1);
 			ASN1Enum<DMSMessagePriority> prior = new ASN1Enum<
-				DMSMessagePriority>(dmsMessageRunTimePriority
-				.node, DmsMessageMemoryType.currentBuffer
-				.ordinal(), 1);
+				DMSMessagePriority>(DMSMessagePriority.class,
+				dmsMessageRunTimePriority.node,
+				DmsMessageMemoryType.currentBuffer.ordinal(),1);
 			ASN1Enum<DmsMessageStatus> status = new ASN1Enum<
-				DmsMessageStatus>(dmsMessageStatus.node,
+				DmsMessageStatus>(DmsMessageStatus.class,
+				dmsMessageStatus.node,
 				DmsMessageMemoryType.currentBuffer.ordinal(),1);
 			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 			mess.add(multi);

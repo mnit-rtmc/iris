@@ -62,7 +62,7 @@ public class OpQueryDMSStatus extends OpDMS {
 
 	/** Short Error status */
 	private final ASN1Flags<ShortErrorStatus> shortError = new ASN1Flags<
-		ShortErrorStatus>(shortErrorStatus.node);
+		ShortErrorStatus>(ShortErrorStatus.class,shortErrorStatus.node);
 
 	/** Pixel failure table row count */
 	private final ASN1Integer pix_rows = pixelFailureTableNumRows.makeInt();
@@ -102,7 +102,8 @@ public class OpQueryDMSStatus extends OpDMS {
 			ASN1Integer light =
 				dmsIllumLightOutputStatus.makeInt();
 			ASN1Enum<DmsIllumControl> control = new ASN1Enum<
-				DmsIllumControl>(dmsIllumControl.node);
+				DmsIllumControl>(DmsIllumControl.class,
+				dmsIllumControl.node);
 			mess.add(p_level);
 			mess.add(b_level);
 			mess.add(light);
@@ -248,10 +249,11 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query more DMS failure status */
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Enum<DmsActivateMsgError> msg_err = new ASN1Enum<
-				DmsActivateMsgError>(dmsActivateMsgError.node);
+				DmsActivateMsgError>(DmsActivateMsgError.class,
+				dmsActivateMsgError.node);
 			ASN1Flags<ControllerErrorStatus> con = new ASN1Flags<
-				ControllerErrorStatus>(controllerErrorStatus
-				.node);
+				ControllerErrorStatus>(ControllerErrorStatus
+				.class, controllerErrorStatus.node);
 			int se = shortError.getInteger();
 			if (ShortErrorStatus.MESSAGE.isSet(se))
 				mess.add(msg_err);
@@ -331,9 +333,11 @@ public class OpQueryDMSStatus extends OpDMS {
 			ASN1String desc = new ASN1String(dmsPowerDescription
 				.node, row);
 			ASN1Enum<DmsPowerType> p_type = new ASN1Enum<
-				DmsPowerType>(dmsPowerType.node, row);
+				DmsPowerType>(DmsPowerType.class,
+				dmsPowerType.node, row);
 			ASN1Enum<DmsPowerStatus> status = new ASN1Enum<
-				DmsPowerStatus>(dmsPowerStatus.node, row);
+				DmsPowerStatus>(DmsPowerStatus.class,
+				dmsPowerStatus.node, row);
 			ASN1String mfr_status = new ASN1String(
 				dmsPowerMfrStatus.node, row);
 			ASN1Integer voltage = dmsPowerVoltage.makeInt(row);
@@ -424,8 +428,8 @@ public class OpQueryDMSStatus extends OpDMS {
 			ASN1String desc = new ASN1String(
 				dmsLightSensorDescription.node, row);
 			ASN1Enum<DmsLightSensorStatus> status = new ASN1Enum<
-				DmsLightSensorStatus>(dmsLightSensorStatus.node,
-				row);
+				DmsLightSensorStatus>(DmsLightSensorStatus.class,
+				dmsLightSensorStatus.node, row);
 			ASN1Integer reading = dmsLightSensorCurrentReading
 				.makeInt(row);
 			mess.add(desc);

@@ -43,7 +43,8 @@ public class OpTestDMSPixels extends OpDMS {
 
 	/** Pixel test activation */
 	private final ASN1Enum<PixelTestActivation> activation = new ASN1Enum<
-		PixelTestActivation>(pixelTestActivation.node);
+		PixelTestActivation>(PixelTestActivation.class,
+		pixelTestActivation.node);
 
 	/** Stuck ON bitmap */
 	private final BitmapGraphic stuck_on;
@@ -215,8 +216,9 @@ public class OpTestDMSPixels extends OpDMS {
 			ASN1Integer y_loc = pixelFailureYLocation.makeInt(
 				detectionType.ordinal(), row);
 			ASN1Flags<PixelFailureStatus> status = new ASN1Flags<
-				PixelFailureStatus>(pixelFailureStatus.node,
-				detectionType.ordinal(), row);
+				PixelFailureStatus>(PixelFailureStatus.class,
+				pixelFailureStatus.node,detectionType.ordinal(),
+				row);
 			mess.add(x_loc);
 			mess.add(y_loc);
 			mess.add(status);

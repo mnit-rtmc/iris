@@ -36,9 +36,13 @@ public enum ShortErrorStatus {
 	DOOR_OPEN,
 	HUMIDITY;
 
+	/** Get the bit flag */
+	public int bit() {
+		return 1 << ordinal();
+	}
+
 	/** Test if the flag is set */
 	public boolean isSet(int v) {
-		int bit = 1 << ordinal();
-		return (v & bit) != 0;
+		return (v & bit()) != 0;
 	}
 }

@@ -47,6 +47,12 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  */
 public class OpSendDMSFonts extends OpDMS {
 
+	/** Make a font status object */
+	static private ASN1Enum<FontStatus> makeStatus(int row) {
+		return new ASN1Enum<FontStatus>(FontStatus.class,
+			fontStatus.node, row);
+	}
+
 	/** Number of fonts supported */
 	private final ASN1Integer num_fonts = numFonts.makeInt();
 
@@ -132,8 +138,7 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Query the font number for one font */
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer number = fontNumber.makeInt(row);
-			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
-				fontStatus.node, row);
+			ASN1Enum<FontStatus> status = makeStatus(row);
 			mess.add(number);
 			if (version2)
 				mess.add(status);
@@ -283,8 +288,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Query the initial font status */
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
-				fontStatus.node, row);
+			ASN1Enum<FontStatus> status = makeStatus(row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
@@ -309,8 +313,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Request the font status be "notUsed" */
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
-				fontStatus.node, row);
+			ASN1Enum<FontStatus> status = makeStatus(row);
 			status.setEnum(FontStatus.notUsedReq);
 			mess.add(status);
 			logStore(status);
@@ -324,8 +327,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Verify the font status is "notUsed" */
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
-				fontStatus.node, row);
+			ASN1Enum<FontStatus> status = makeStatus(row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
@@ -343,8 +345,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Set the font status to modifying */
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
-				fontStatus.node, row);
+			ASN1Enum<FontStatus> status = makeStatus(row);
 			status.setEnum(FontStatus.modifyReq);
 			mess.add(status);
 			logStore(status);
@@ -358,8 +359,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Verify the font status is modifying */
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
-				fontStatus.node, row);
+			ASN1Enum<FontStatus> status = makeStatus(row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
@@ -501,8 +501,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Validate a font entry in the font table */
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
-				fontStatus.node, row);
+			ASN1Enum<FontStatus> status = makeStatus(row);
 			status.setEnum(FontStatus.readyForUseReq);
 			mess.add(status);
 			logStore(status);
@@ -523,8 +522,7 @@ public class OpSendDMSFonts extends OpDMS {
 
 		/** Verify the font status is ready for use */
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = new ASN1Enum<FontStatus>(
-				fontStatus.node, row);
+			ASN1Enum<FontStatus> status = makeStatus(row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);

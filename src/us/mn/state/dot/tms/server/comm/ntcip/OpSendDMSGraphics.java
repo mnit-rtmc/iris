@@ -44,13 +44,13 @@ public class OpSendDMSGraphics extends OpDMS {
 
 	/** Make an ASN1Enum for DmsGraphicStatus */
 	static private ASN1Enum<DmsGraphicStatus> makeStatus(int row) {
-		return new ASN1Enum<DmsGraphicStatus>(dmsGraphicStatus.node,
-			row);
+		return new ASN1Enum<DmsGraphicStatus>(DmsGraphicStatus.class,
+			dmsGraphicStatus.node, row);
 	}
 
 	/** Color scheme supported */
 	private final ASN1Enum<DmsColorScheme> color_scheme = new ASN1Enum<
-		DmsColorScheme>(dmsColorScheme.node);
+		DmsColorScheme>(DmsColorScheme.class, dmsColorScheme.node);
 
 	/** Number of graphics supported */
 	private final ASN1Integer max_graphics = dmsGraphicMaxEntries.makeInt();
@@ -325,7 +325,8 @@ public class OpSendDMSGraphics extends OpDMS {
 			ASN1Integer height = dmsGraphicHeight.makeInt(row);
 			ASN1Integer width = dmsGraphicWidth.makeInt(row);
 			ASN1Enum<DmsColorScheme> type = new ASN1Enum<
-				DmsColorScheme>(dmsGraphicType.node, row);
+				DmsColorScheme>(DmsColorScheme.class,
+				dmsGraphicType.node, row);
 			ASN1Integer trans_enabled =
 				dmsGraphicTransparentEnabled.makeInt(row);
 			ASN1OctetString trans_color = new ASN1OctetString(

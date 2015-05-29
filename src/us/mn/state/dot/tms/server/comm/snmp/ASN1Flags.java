@@ -25,21 +25,21 @@ public class ASN1Flags<T extends Enum> extends ASN1Enum {
 	 * @param n MIB node.
 	 * @param idx Node index.
 	 * @param j Table index. */
-	public ASN1Flags(MIBNode n, int idx, int j) {
-		super(n, idx, j);
+	public ASN1Flags(Class<T> e, MIBNode n, int idx, int j) {
+		super(e, n, idx, j);
 	}
 
 	/** Create a new ASN1 flags enum.
 	 * @param n MIB node.
 	 * @param idx Node index. */
-	public ASN1Flags(MIBNode n, int idx) {
-		super(n, idx);
+	public ASN1Flags(Class<T> e, MIBNode n, int idx) {
+		super(e, n, idx);
 	}
 
 	/** Create a new ASN1 flags enum.
 	 * @param n MIB node. */
-	public ASN1Flags(MIBNode n) {
-		super(n);
+	public ASN1Flags(Class<T> e, MIBNode n) {
+		super(e, n);
 	}
 
 	/** Get the object value */

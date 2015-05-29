@@ -105,11 +105,11 @@ public class OpSendDMSDefaults extends OpDMS {
 		/** Set the message defaults */
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Enum<JustificationLine> line = new ASN1Enum<
-				JustificationLine>(defaultJustificationLine
-				.node);
+				JustificationLine>(JustificationLine.class,
+				defaultJustificationLine.node);
 			ASN1Enum<JustificationPage> page = new ASN1Enum<
-				JustificationPage>(defaultJustificationPage
-				.node);
+				JustificationPage>(JustificationPage.class,
+				defaultJustificationPage.node);
 			ASN1Integer on_time = defaultPageOnTime.makeInt();
 			ASN1Integer off_time = defaultPageOffTime.makeInt();
 			line.setEnum(JustificationLine.CENTER);

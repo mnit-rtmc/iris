@@ -24,25 +24,31 @@ import java.lang.reflect.Type;
  */
 public class ASN1Enum<T extends Enum> extends ASN1Integer {
 
+	/** Enum class (needed because Java generics sucks) */
+	private final Class<T> eclass;
+
 	/** Create a new ASN1 enum.
 	 * @param n MIB node.
 	 * @param idx Node index.
 	 * @param j Table index. */
-	public ASN1Enum(MIBNode n, int idx, int j) {
+	public ASN1Enum(Class<T> e, MIBNode n, int idx, int j) {
 		super(n, idx, j);
+		eclass = e;
 	}
 
 	/** Create a new ASN1 enum.
 	 * @param n MIB node.
 	 * @param idx Node index. */
-	public ASN1Enum(MIBNode n, int idx) {
+	public ASN1Enum(Class<T> e, MIBNode n, int idx) {
 		super(n, idx);
+		eclass = e;
 	}
 
 	/** Create a new ASN1 enum.
 	 * @param n MIB node. */
-	public ASN1Enum(MIBNode n) {
+	public ASN1Enum(Class<T> e, MIBNode n) {
 		super(n);
+		eclass = e;
 	}
 
 	/** Set the enum value */
@@ -62,22 +68,8 @@ public class ASN1Enum<T extends Enum> extends ASN1Integer {
 	}
 
 	/** Lookup the enum constant values */
-	protected T[] lookupEnumConstants() {
-		Class<T> gt = genericType();
-		return (gt != null) ? gt.getEnumConstants() : null;
-	}
-
-	/** Lookup the type of T */
-	@SuppressWarnings("unchecked")
-	private Class<T> genericType() {
-		Type sc = getClass().getGenericSuperclass();
-		if (sc instanceof ParameterizedType) {
-			ParameterizedType pt = (ParameterizedType)sc;
-			Type[] types = pt.getActualTypeArguments();
-			if (types != null && types.length > 0)
-				return (Class<T>) types[0];
-		}
-		return null;
+	protected final T[] lookupEnumConstants() {
+		return eclass.getEnumConstants();
 	}
 
 	/** Get the object value */

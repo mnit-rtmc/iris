@@ -38,7 +38,8 @@ public class OpUpdateDMSBrightness extends OpDMS {
 
 	/** Illumination control */
 	private final ASN1Enum<DmsIllumControl> control =
-		new ASN1Enum<DmsIllumControl>(dmsIllumControl.node);
+		new ASN1Enum<DmsIllumControl>(DmsIllumControl.class,
+		dmsIllumControl.node);
 
 	/** Maximum photocell level */
 	private final ASN1Integer max_level =

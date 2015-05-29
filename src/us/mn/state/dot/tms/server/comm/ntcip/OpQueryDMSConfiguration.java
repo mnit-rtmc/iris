@@ -82,7 +82,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			ASN1String model = moduleModel.makeStr(mod);
 			ASN1String version = moduleVersion.makeStr(mod);
 			ASN1Enum<ModuleType> m_type = new ASN1Enum<ModuleType>(
-				moduleType.node, mod);
+				ModuleType.class, moduleType.node, mod);
 			mess.add(make);
 			mess.add(model);
 			mess.add(version);
@@ -111,18 +111,21 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		/** Query the DMS information */
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Flags<DmsSignAccess> access = new ASN1Flags<
-				DmsSignAccess>(dmsSignAccess.node);
+				DmsSignAccess>(DmsSignAccess.class,
+				dmsSignAccess.node);
 			DmsSignType type = new DmsSignType();
 			ASN1Integer height = dmsSignHeight.makeInt();
 			ASN1Integer width = dmsSignWidth.makeInt();
 			ASN1Integer h_border = dmsHorizontalBorder.makeInt();
 			ASN1Integer v_border = dmsVerticalBorder.makeInt();
 			ASN1Enum<DmsLegend> legend = new ASN1Enum<DmsLegend>(
-				dmsLegend.node);
+				DmsLegend.class, dmsLegend.node);
 			ASN1Enum<DmsBeaconType> beacon = new ASN1Enum<
-				DmsBeaconType>(dmsBeaconType.node);
+				DmsBeaconType>(DmsBeaconType.class,
+				dmsBeaconType.node);
 			ASN1Flags<DmsSignTechnology> tech = new ASN1Flags<
-				DmsSignTechnology>(dmsSignTechnology.node);
+				DmsSignTechnology>(DmsSignTechnology.class,
+				dmsSignTechnology.node);
 			mess.add(access);
 			mess.add(type);
 			mess.add(height);
@@ -198,7 +201,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			MonochromeColor m_color = new MonochromeColor();
 			ASN1Enum<DmsColorScheme> color_scheme = new ASN1Enum<
-				DmsColorScheme>(dmsColorScheme.node);
+				DmsColorScheme>(DmsColorScheme.class,
+				dmsColorScheme.node);
 			DmsSupportedMultiTags tags =new DmsSupportedMultiTags();
 			ASN1Integer pages = dmsMaxNumberPages.makeInt();
 			ASN1Integer m_len = dmsMaxMultiStringLength.makeInt();
