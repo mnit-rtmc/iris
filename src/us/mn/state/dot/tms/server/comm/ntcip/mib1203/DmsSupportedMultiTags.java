@@ -84,7 +84,7 @@ public class DmsSupportedMultiTags extends ASN1OctetString {
 	/** Get the bitmap array.
 	 * @return Array of 4 bytes */
 	private byte[] bitmapArray() {
-		byte[] val = getOctetString();
+		byte[] val = getByteValue();
 		if (val.length == 4)
 			return val;
 		else

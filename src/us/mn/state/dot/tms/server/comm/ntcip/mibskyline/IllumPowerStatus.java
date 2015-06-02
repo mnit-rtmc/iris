@@ -45,7 +45,7 @@ public class IllumPowerStatus extends ASN1OctetString {
 	/** Get the object value */
 	@Override
 	public String getValue() {
-		byte[] v = getOctetString();
+		byte[] v = getByteValue();
 		StringBuilder sb = new StringBuilder();
 		for (int i = 0; i < v.length; i++) {
 			sb.append(", #");
@@ -62,7 +62,7 @@ public class IllumPowerStatus extends ASN1OctetString {
 	/** Get power status for all power supplies.
 	 * @see DMS.getPowerStatus */
 	public String[] getPowerStatus() {
-		byte[] vals = getOctetString();
+		byte[] vals = getByteValue();
 		String[] supplies = new String[vals.length];
 		for (int i = 0; i < vals.length; i++)
 			supplies[i] = getPowerStatus(vals, i);
@@ -97,7 +97,7 @@ public class IllumPowerStatus extends ASN1OctetString {
 
 	/** Check if the power status is critical */
 	public boolean isCritical() {
-		byte[] vals = getOctetString();
+		byte[] vals = getByteValue();
 		int n_failed = 0;
 		for (byte v: vals) {
 			switch (Enum.fromOrdinal(v)) {

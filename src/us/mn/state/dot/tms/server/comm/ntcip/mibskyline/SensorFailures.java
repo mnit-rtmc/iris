@@ -31,7 +31,7 @@ public class SensorFailures extends ASN1OctetString {
 	/** Get the object value */
 	@Override
 	public String getValue() {
-		byte[] v = getOctetString();
+		byte[] v = getByteValue();
 		StringBuilder buf = new StringBuilder();
 		int f = 1;
 		for (int i = 0; i < v.length; i++) {

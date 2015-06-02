@@ -30,48 +30,18 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  */
 public class MessageIDCode extends ASN1OctetString {
 
-	/** Encode message ID value.
-	 * @param m Message memory type.
-	 * @param n Message number.
-	 * @param c CRC of message.
-	 * @return Encoded array of bytes.
-	 * @throws IllegalArgumentException, if encoding fails. */
-	static private byte[] encodeValue(DmsMessageMemoryType m, int n,
-		int c)
-	{
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(bos);
-		try {
-			dos.writeByte(m.ordinal());
-			dos.writeShort(n);
-			dos.writeShort(c);
-			return bos.toByteArray();
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
-		finally {
-			try {
-				dos.close();
-				bos.close();
-			}
-			catch (IOException e) {
-				// exceptions on close are stupid -- ignore
-			}
-		}
-	}
-
 	/** Create a new MessageIDCode */
 	public MessageIDCode(MIBNode n) {
 		super(n);
 	}
 
 	/** Memory type */
-	private DmsMessageMemoryType memory;
+	private DmsMessageMemoryType memory = DmsMessageMemoryType.undefined;
 
 	/** Set the memory type */
 	public void setMemoryType(DmsMessageMemoryType m) {
-		super.setOctetString(encodeValue(m, number, crc));
+		if (m == null)
+			throw new IllegalArgumentException();
 		memory = m;
 	}
 
@@ -85,7 +55,6 @@ public class MessageIDCode extends ASN1OctetString {
 
 	/** Set the message number */
 	public void setNumber(int n) {
-		super.setOctetString(encodeValue(memory, n, crc));
 		number = n;
 	}
 
@@ -99,7 +68,6 @@ public class MessageIDCode extends ASN1OctetString {
 
 	/** Set the CRC */
 	public void setCrc(int c) {
-		super.setOctetString(encodeValue(memory, number, c));
 		crc = c;
 	}
 
@@ -108,21 +76,28 @@ public class MessageIDCode extends ASN1OctetString {
 		return crc;
 	}
 
-	/** Set the octet string value */
+	/** Set the octet string value.
+	 * Note: the value from ASN1OctetString is not used. */
 	@Override
-	public void setOctetString(byte[] v) {
+	public void setOctetString(byte[] v) throws IOException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(v);
 		DataInputStream dis = new DataInputStream(bis);
-		try {
-			memory = DmsMessageMemoryType.fromOrdinal(
-				dis.readUnsignedByte());
-			number = dis.readUnsignedShort();
-			crc = dis.readUnsignedShort();
-			super.setOctetString(v);
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
+		memory = DmsMessageMemoryType.fromOrdinal(
+			dis.readUnsignedByte());
+		number = dis.readUnsignedShort();
+		crc = dis.readUnsignedShort();
+	}
+
+	/** Get the octet string value.
+	 * Note: the value from ASN1OctetString is not used. */
+	@Override
+	public byte[] getOctetString() throws IOException {
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		dos.writeByte(memory.ordinal());
+		dos.writeShort(number);
+		dos.writeShort(crc);
+		return bos.toByteArray();
 	}
 
 	/** Get the object value */

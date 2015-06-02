@@ -43,20 +43,30 @@ public class ASN1OctetString extends ASN1Object {
 	private byte[] value = new byte[0];
 
 	/** Set the octet string value */
-	public void setOctetString(byte[] v) {
+	protected void setByteValue(byte[] v) {
 		value = v;
 	}
 
 	/** Get the octet string value */
-	public byte[] getOctetString() {
+	protected byte[] getByteValue() {
 		return value;
+	}
+
+	/** Set the octet string value */
+	public void setOctetString(byte[] v) throws IOException {
+		setByteValue(v);
+	}
+
+	/** Get the octet string value */
+	public byte[] getOctetString() throws IOException {
+		return getByteValue();
 	}
 
 	/** Get the object value */
 	@Override
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
-		for (byte v: value) {
+		for (byte v: getByteValue()) {
 			b.append(v & 0xFF);
 			b.append(",");
 		}
@@ -69,12 +79,12 @@ public class ASN1OctetString extends ASN1Object {
 	/** Encode an octet string */
 	@Override
 	public void encode(BER er) throws IOException {
-		er.encodeOctetString(value);
+		er.encodeOctetString(getOctetString());
 	}
 
 	/** Decode an octet string */
 	@Override
 	public void decode(InputStream is, BER er) throws IOException {
-		value = er.decodeOctetString(is);
+		setOctetString(er.decodeOctetString(is));
 	}
 }

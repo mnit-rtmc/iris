@@ -62,16 +62,18 @@ public class MessageActivationCode extends ASN1OctetString {
 	}
 
 	/** Memory type */
-	private int memory;
+	private DmsMessageMemoryType memory = DmsMessageMemoryType.undefined;
 
 	/** Set the memory type */
 	public void setMemoryType(DmsMessageMemoryType m) {
-		memory = m.ordinal();
+		if (m == null)
+			throw new IllegalArgumentException();
+		memory = m;
 	}
 
 	/** Get the memory type */
 	public DmsMessageMemoryType getMemoryType() {
-		return DmsMessageMemoryType.fromOrdinal(memory);
+		return memory;
 	}
 
 	/** Message number */
@@ -113,42 +115,34 @@ public class MessageActivationCode extends ASN1OctetString {
 		return address;
 	}
 
-	/** Set the octet string value */
+	/** Set the octet string value.
+	 * Note: the value from ASN1OctetString is not used. */
 	@Override
-	public void setOctetString(byte[] value) {
+	public void setOctetString(byte[] value) throws IOException {
 		ByteArrayInputStream bis = new ByteArrayInputStream(value);
 		DataInputStream dis = new DataInputStream(bis);
-		try {
-			duration = dis.readUnsignedShort();
-			priority = dis.readUnsignedByte();
-			memory = dis.readUnsignedByte();
-			number = dis.readUnsignedShort();
-			crc = dis.readUnsignedShort();
-			address = dis.readInt();
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
+		duration = dis.readUnsignedShort();
+		priority = dis.readUnsignedByte();
+		memory = DmsMessageMemoryType.fromOrdinal(
+			dis.readUnsignedByte());
+		number = dis.readUnsignedShort();
+		crc = dis.readUnsignedShort();
+		address = dis.readInt();
 	}
 
-	/** Get the octet string value */
+	/** Get the octet string value.
+	 * Note: the value from ASN1OctetString is not used. */
 	@Override
-	public byte[] getOctetString() {
+	public byte[] getOctetString() throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		DataOutputStream dos = new DataOutputStream(bos);
-		try {
-			dos.writeShort(duration);
-			dos.writeByte(priority);
-			dos.writeByte(memory);
-			dos.writeShort(number);
-			dos.writeShort(crc);
-			dos.writeInt(address);
-			return bos.toByteArray();
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-			return new byte[0];
-		}
+		dos.writeShort(duration);
+		dos.writeByte(priority);
+		dos.writeByte(memory.ordinal());
+		dos.writeShort(number);
+		dos.writeShort(crc);
+		dos.writeInt(address);
+		return bos.toByteArray();
 	}
 
 	/** Get the object value */
@@ -159,7 +153,7 @@ public class MessageActivationCode extends ASN1OctetString {
 		b.append(",");
 		b.append(priority);
 		b.append(",");
-		b.append(DmsMessageMemoryType.fromOrdinal(memory));
+		b.append(memory);
 		b.append(",");
 		b.append(number);
 		b.append(",");

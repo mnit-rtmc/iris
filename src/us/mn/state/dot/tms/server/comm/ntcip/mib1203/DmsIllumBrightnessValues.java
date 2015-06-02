@@ -30,36 +30,6 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
  */
 public class DmsIllumBrightnessValues extends ASN1OctetString {
 
-	/** Encode a brightness table.
-	 * @param table Array of brightness levels.
-	 * @return Encoded table as an array of bytes.
-	 * @throws IllegalArgumentException, if encoding fails. */
-	static private byte[] encodeTable(BrightnessLevel[] table) {
-		ByteArrayOutputStream bos = new ByteArrayOutputStream();
-		DataOutputStream dos = new DataOutputStream(bos);
-		try {
-			dos.writeByte(table.length);
-			for (BrightnessLevel lvl: table) {
-				dos.writeShort(lvl.output);
-				dos.writeShort(lvl.pc_down);
-				dos.writeShort(lvl.pc_up);
-			}
-			return bos.toByteArray();
-		}
-		catch (IOException e) {
-			throw new IllegalArgumentException(e);
-		}
-		finally {
-			try {
-				dos.close();
-				bos.close();
-			}
-			catch (IOException e) {
-				// exceptions on close are stupid -- ignore
-			}
-		}
-	}
-
 	/** Decode a brightness table.
 	 * @param value Encoded table as an array of bytes.
 	 * @return Decoded brightness table as an array of brightness levels.
@@ -82,15 +52,6 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 		catch (IOException e) {
 			throw new IllegalArgumentException(e);
 		}
-		finally {
-			try {
-				dis.close();
-				bis.close();
-			}
-			catch (IOException e) {
-				// exceptions on close are stupid -- ignore
-			}
-		}
 	}
 
 	/** Create a new DmsIllumBrightnessValues object */
@@ -100,12 +61,25 @@ public class DmsIllumBrightnessValues extends ASN1OctetString {
 
 	/** Set the brightness table */
 	public void setTable(BrightnessLevel[] table) {
-		setOctetString(encodeTable(table));
+		ByteArrayOutputStream bos = new ByteArrayOutputStream();
+		DataOutputStream dos = new DataOutputStream(bos);
+		try {
+			dos.writeByte(table.length);
+			for (BrightnessLevel lvl: table) {
+				dos.writeShort(lvl.output);
+				dos.writeShort(lvl.pc_down);
+				dos.writeShort(lvl.pc_up);
+			}
+			setByteValue(bos.toByteArray());
+		}
+		catch (IOException e) {
+			throw new IllegalArgumentException(e);
+		}
 	}
 
 	/** Get the brightness table */
 	public BrightnessLevel[] getTable() {
-		return decodeTable(getOctetString());
+		return decodeTable(getByteValue());
 	}
 
 	/** Get the object value */

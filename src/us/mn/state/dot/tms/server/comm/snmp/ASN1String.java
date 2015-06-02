@@ -38,12 +38,12 @@ public class ASN1String extends ASN1OctetString {
 
 	/** Set the octet string to a string */
 	public void setString(String v) {
-		setOctetString(v.getBytes());
+		setByteValue(v.getBytes());
 	}
 
 	/** Get the object value */
 	@Override
 	public String getValue() {
-		return new String(getOctetString());
+		return new String(getByteValue());
 	}
 }
