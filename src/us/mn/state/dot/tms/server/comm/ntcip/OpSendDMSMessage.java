@@ -38,27 +38,27 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  *
  * .    Possible phase transitions:
  * |
- * |              .---------------------------------------------.
- * |              +                                             |
- * |--+ ModifyRequest ----------+ QueryMsgStatus                |
- * |           |                    |      |                    |
- * |           +                    |      +                    |
- * |        ModifyMessage +---------'    QueryControlMode       |
- * |               |                                            |
- * |               +                                            |
- * |        ValidateRequest ----+ QueryValidateMsgErr           |
- * |               |                +                           |
- * |               +                |                           |
- * |        QueryMsgValidity -------'  QueryLedstarActivateErr  |
- * |           |                           +                    |
- * |           +                           |                    |
- * |--+ ActivateMessage --------+ QueryActivateMsgErr ----------'
- * |           |                      +      |
- * |           +                      |      +
- * |        SetPostActivationStuff    |  QueryMultiSyntaxErr
- * |           +                      |      |
- * |           |                      |      +
- * '--+ ActivateBlankMsg -------------'  QueryOtherMultiErr
+ * |              .-----------------------------------------------.
+ * |              +                                               |
+ * |--+ ModifyRequest -------+ QueryMsgStatus                     |
+ * |         |                   |      |                         |
+ * |         +                   |      +                         |
+ * |      ModifyMessage +--------'    QueryControlMode            |
+ * |             |                                                |
+ * |             +                                                |
+ * |      ValidateRequest ---+ QueryValidateMsgErr                |
+ * |             |               +                                |
+ * |             +               |                                |
+ * |      QueryMsgValidity ------'           QueryOtherMultiErr   |
+ * |         |                                   +                |
+ * |         +                                   |                |
+ * |--+ ActivateMessage --------------.  QueryMultiSyntaxErr      |
+ * |         |                        |        +                  |
+ * |         +                        +        |                  |
+ * |      SetPostActivationStuff    QueryActivateMsgErr ----------'
+ * |         +                        +        |
+ * |         |                        |        +
+ * '--+ ActivateBlankMsg -------------'  QueryLedstarActivateErr
  *
  * @author Douglas Lau
  */
