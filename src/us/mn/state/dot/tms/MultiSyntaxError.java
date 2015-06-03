@@ -21,30 +21,29 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  */
 public enum MultiSyntaxError {
-
-	undefined,		/* 0 */
-	other,			/* 1 */
-	none,			/* 2 */
-	unsupportedTag,		/* 3 */
-	unsupportedTagValue,	/* 4 */
-	textTooBig,		/* 5 */
-	fontNotDefined,		/* 6 */
-	characterNotDefined,	/* 7 */
-	fieldDeviceNotExist,	/* 8 */
-	fieldDeviceError,	/* 9 */
-	flashRegionError,	/* 10 */
-	tagConflict,		/* 11 */
-	tooManyPages,		/* 12 */
-	fontVersionID,		/* 13 */
-	graphicID,		/* 14 */
-	graphicNotDefined;	/* 15 */
+	undefined,		/*  0     */
+	other,			/*  1     */
+	none,			/*  2     */
+	unsupportedTag,		/*  3     */
+	unsupportedTagValue,	/*  4     */
+	textTooBig,		/*  5     */
+	fontNotDefined,		/*  6     */
+	characterNotDefined,	/*  7     */
+	fieldDeviceNotExist,	/*  8     */
+	fieldDeviceError,	/*  9     */
+	flashRegionError,	/* 10     */
+	tagConflict,		/* 11     */
+	tooManyPages,		/* 12     */
+	fontVersionID,		/* 13  V2 */
+	graphicID,		/* 14  V2 */
+	graphicNotDefined;	/* 15  V2 */
 
 	/** Get MULTI syntax error from an ordinal value */
 	static public MultiSyntaxError fromOrdinal(int o) {
-		for (MultiSyntaxError e: values()) {
-			if (e.ordinal() == o)
-				return e;
-		}
-		return undefined;
+		MultiSyntaxError v[] = values();
+		if (o >= 0 && o < v.length)
+			return v[o];
+		else
+			return undefined;
 	}
 }
