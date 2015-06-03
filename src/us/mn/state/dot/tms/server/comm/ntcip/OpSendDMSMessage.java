@@ -38,8 +38,8 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  *
  * .    Possible phase transitions:
  * |
- * |              .-----------------------------------------------.
- * |              +                                               |
+ * |            .-------------------------------------------------.
+ * |            +                 |                               |
  * |--+ ModifyRequest -----+ QueryMsgStatus                       |
  * |         |                 |     |                            |
  * |         +                 |     +                            |
