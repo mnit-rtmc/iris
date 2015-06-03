@@ -40,10 +40,10 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  * |
  * |              .-----------------------------------------------.
  * |              +                                               |
- * |--+ ModifyRequest -------+ QueryMsgStatus                     |
- * |         |                   |      |                         |
- * |         +                   |      +                         |
- * |      ModifyMessage +--------'    QueryControlMode            |
+ * |--+ ModifyRequest -----+ QueryMsgStatus                       |
+ * |         |                 |     |                            |
+ * |         +                 |     +                            |
+ * |      ModifyMessage +------'   QueryControlMode               |
  * |             |                                                |
  * |             +                                                |
  * |      ValidateRequest ---+ QueryValidateMsgErr                |
@@ -51,14 +51,14 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  * |             +               |      |                         |
  * |      QueryMsgValidity ------'      +                         |
  * |         |                     QueryMultiSyntaxErr            |
- * |         +                            +      |                |
- * |--+ ActivateMessage -------------.    |      +                |
- * |         |                       |    |    QueryOtherMultiErr |
- * |         +                       +    |                       |
- * |      SetPostActivationStuff   QueryActivateMsgErr -----------'
- * |         +                       +          |
- * |         |                       |          +
- * '--+ ActivateBlankMsg ------------'    QueryLedstarActivateErr
+ * |         +                       +      |                     |
+ * |--+ ActivateMessage -------.     |      +                     |
+ * |         |                 |     |    QueryOtherMultiErr      |
+ * |         +                 +     |                            |
+ * |      SetLossMessages    QueryActivateMsgErr -----------------'
+ * |         +                 +          |
+ * |         |                 |          +
+ * '--+ ActivateBlankMsg ------'    QueryLedstarActivateErr
  *
  * @author Douglas Lau
  */
@@ -168,7 +168,7 @@ public class OpSendDMSMessage extends OpDMS {
 				return new QueryActivateMsgErr();
 			}
 			dms.setMessageCurrent(message, owner);
-			return new SetPostActivationStuff();
+			return new SetLossMessages();
 		}
 	}
 
@@ -383,7 +383,7 @@ public class OpSendDMSMessage extends OpDMS {
 				return new QueryActivateMsgErr();
 			}
 			dms.setMessageCurrent(message, owner);
-			return new SetPostActivationStuff();
+			return new SetLossMessages();
 		}
 	}
 
@@ -498,10 +498,10 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 	}
 
-	/** Phase to set the post-activation objects */
-	protected class SetPostActivationStuff extends Phase {
+	/** Phase to set the comm and power loss messages */
+	protected class SetLossMessages extends Phase {
 
-		/** Set the post-activation objects */
+		/** Set the comm and power loss messages */
 		protected Phase poll(CommMessage mess) throws IOException {
 			// NOTE: setting dmsMessageTimeRemaining should not
 			//       be necessary.  I don't really know why it's
@@ -525,12 +525,12 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Check if the message is scheduled and has indefinite duration */
-	protected boolean isScheduledIndefinite() {
+	private boolean isScheduledIndefinite() {
 		return message.getScheduled() && message.getDuration() == null;
 	}
 
 	/** Set the comm loss and power recovery msgs */
-	protected void setCommAndPower() {
+	private void setCommAndPower() {
 		comm_msg.setMemoryType(DmsMessageMemoryType.changeable);
 		comm_msg.setNumber(msg_num);
 		comm_msg.setCrc(message_crc);
@@ -540,7 +540,7 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Set the comm loss and power recovery msgs to blank */
-	protected void setCommAndPowerBlank() {
+	private void setCommAndPowerBlank() {
 		comm_msg.setMemoryType(DmsMessageMemoryType.blank);
 		comm_msg.setNumber(1);
 		comm_msg.setCrc(0);
