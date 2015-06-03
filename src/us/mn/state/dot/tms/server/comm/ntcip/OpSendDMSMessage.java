@@ -39,26 +39,26 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  * .    Possible phase transitions:
  * |
  * |            .-------------------------------------------------.
- * |            +                 |                               |
- * |--+ ModifyRequest -----+ QueryMsgStatus                       |
- * |         |                 |     |                            |
- * |         +                 |     +                            |
- * |      ModifyMessage +------'   QueryControlMode               |
- * |             |                                                |
- * |             +                                                |
- * |      ValidateRequest ---+ QueryValidateMsgErr                |
- * |             |               +      |                         |
- * |             +               |      |                         |
- * |      QueryMsgValidity ------'      +                         |
- * |         |                     QueryMultiSyntaxErr            |
- * |         +                       +      |                     |
- * |--+ ActivateMessage -------.     |      +                     |
- * |         |                 |     |    QueryOtherMultiErr      |
- * |         +                 +     |                            |
- * |      SetLossMessages    QueryActivateMsgErr -----------------'
- * |         +                 +          |
- * |         |                 |          +
- * '--+ ActivateBlankMsg ------'    QueryLedstarActivateErr
+ * |            +               |                                 |
+ * |--+ MsgModifyReq ----+ QueryMsgStatus                         |
+ * |         |               |     |                              |
+ * |         +               |     +                              |
+ * |      ModifyMsg +--------'   QueryControlMode                 |
+ * |         |                                                    |
+ * |         +                                                    |
+ * |      MsgValidateReq --+ QueryValidateMsgErr                  |
+ * |         |                 +      |                           |
+ * |         +                 |      |                           |
+ * |      QueryMsgValidity ----'      +                           |
+ * |         |                   QueryMultiSyntaxErr              |
+ * |         +                     +      |                       |
+ * |--+ ActivateMsg -------.       |      +                       |
+ * |         |             |       |    QueryOtherMultiErr        |
+ * |         +             +       |                              |
+ * |      SetLossMsgs    QueryActivateMsgErr ---------------------'
+ * |         +             +          |
+ * |         |             |          +
+ * '--+ ActivateBlankMsg --'    QueryLedstarActivateErr
  *
  * @author Douglas Lau
  */
@@ -141,9 +141,9 @@ public class OpSendDMSMessage extends OpDMS {
 		if (SignMessageHelper.isBlank(message))
 			return new ActivateBlankMsg();
 		else if (msg_num > 1)
-			return new ActivateMessage();
+			return new ActivateMsg();
 		else
-			return new ModifyRequest();
+			return new MsgModifyReq();
 	}
 
 	/** Phase to activate a blank message */
@@ -168,14 +168,14 @@ public class OpSendDMSMessage extends OpDMS {
 				return new QueryActivateMsgErr();
 			}
 			dms.setMessageCurrent(message, owner);
-			return new SetLossMessages();
+			return new SetLossMsgs();
 		}
 	}
 
-	/** Phase to set the status to modify request */
-	protected class ModifyRequest extends Phase {
+	/** Phase to set message status to modify request */
+	protected class MsgModifyReq extends Phase {
 
-		/** Set the status to modify request */
+		/** Set message status to modify request */
 		protected Phase poll(CommMessage mess) throws IOException {
 			modify_requested = true;
 			ASN1Enum<DmsMessageStatus> status = makeStatus(
@@ -196,7 +196,7 @@ public class OpSendDMSMessage extends OpDMS {
 				// course, it does for some vendors)
 				return new QueryMsgStatus();
 			}
-			return new ModifyMessage();
+			return new ModifyMsg();
 		}
 	}
 
@@ -211,9 +211,9 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.queryProps();
 			logQuery(status);
 			if (status.getEnum() == DmsMessageStatus.modifying)
-				return new ModifyMessage();
+				return new ModifyMsg();
 			else if (!modify_requested)
-				return new ModifyRequest();
+				return new MsgModifyReq();
 			else if (status.getEnum() == DmsMessageStatus.valid) {
 				/* Some ledstar signs prevent dmsMessageStatus
 				 * from changing to modifyReq when in 'local'
@@ -227,7 +227,7 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Phase to modify the message */
-	protected class ModifyMessage extends Phase {
+	protected class ModifyMsg extends Phase {
 
 		/** Modify the message */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -256,7 +256,7 @@ public class OpSendDMSMessage extends OpDMS {
 			logStore(srv);
 			logStore(prior);
 			mess.storeProps();
-			return new ValidateRequest();
+			return new MsgValidateReq();
 		}
 	}
 
@@ -276,10 +276,10 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 	}
 
-	/** Phase to set the status to validate request */
-	protected class ValidateRequest extends Phase {
+	/** Phase to set message status to validate request */
+	protected class MsgValidateReq extends Phase {
 
-		/** Set the status to validate request */
+		/** Set message status to validate request */
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Enum<DmsMessageStatus> status = makeStatus(
 				DmsMessageMemoryType.changeable, msg_num);
@@ -320,7 +320,7 @@ public class OpSendDMSMessage extends OpDMS {
 				setErrorStatus(ms);
 				return null;
 			}
-			return new ActivateMessage();
+			return new ActivateMsg();
 		}
 	}
 
@@ -362,7 +362,7 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Phase to activate the message */
-	protected class ActivateMessage extends Phase {
+	protected class ActivateMsg extends Phase {
 
 		/** Activate the message */
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -383,7 +383,7 @@ public class OpSendDMSMessage extends OpDMS {
 				return new QueryActivateMsgErr();
 			}
 			dms.setMessageCurrent(message, owner);
-			return new SetLossMessages();
+			return new SetLossMsgs();
 		}
 	}
 
@@ -414,7 +414,7 @@ public class OpSendDMSMessage extends OpDMS {
 				// This message doesn't exist in the table,
 				// so go back and modify the table.
 				if (!modify_requested)
-					return new ModifyRequest();
+					return new MsgModifyReq();
 				// else fall through to default case ...
 			default:
 				setErrorStatus(error.toString());
@@ -499,7 +499,7 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Phase to set the comm and power loss messages */
-	protected class SetLossMessages extends Phase {
+	protected class SetLossMsgs extends Phase {
 
 		/** Set the comm and power loss messages */
 		protected Phase poll(CommMessage mess) throws IOException {
