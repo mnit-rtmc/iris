@@ -36,6 +36,7 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 /**
  * Operation to send a message to a DMS and activate it.
  *
+ * <pre>
  * .    Possible phase transitions:
  * |
  * |            .-------------------------------------------------.
@@ -59,6 +60,7 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  * |         +             +          |
  * |         |             |          +
  * '--+ ActivateBlankMsg --'    QueryLedstarActivateErr
+ * </pre>
  *
  * @author Douglas Lau
  */
