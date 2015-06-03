@@ -47,18 +47,18 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  * |             |                                                |
  * |             +                                                |
  * |      ValidateRequest ---+ QueryValidateMsgErr                |
- * |             |               +                                |
- * |             +               |                                |
- * |      QueryMsgValidity ------'           QueryOtherMultiErr   |
- * |         |                                   +                |
- * |         +                                   |                |
- * |--+ ActivateMessage --------------.  QueryMultiSyntaxErr      |
- * |         |                        |        +                  |
- * |         +                        +        |                  |
- * |      SetPostActivationStuff    QueryActivateMsgErr ----------'
- * |         +                        +        |
- * |         |                        |        +
- * '--+ ActivateBlankMsg -------------'  QueryLedstarActivateErr
+ * |             |               +      |                         |
+ * |             +               |      |                         |
+ * |      QueryMsgValidity ------'      +                         |
+ * |         |                     QueryMultiSyntaxErr            |
+ * |         +                            +      |                |
+ * |--+ ActivateMessage -------------.    |      +                |
+ * |         |                       |    |    QueryOtherMultiErr |
+ * |         +                       +    |                       |
+ * |      SetPostActivationStuff   QueryActivateMsgErr -----------'
+ * |         +                       +          |
+ * |         |                       |          +
+ * '--+ ActivateBlankMsg ------------'    QueryLedstarActivateErr
  *
  * @author Douglas Lau
  */
@@ -341,21 +341,12 @@ public class OpSendDMSMessage extends OpDMS {
 				DmsValidateMessageError>(
 				DmsValidateMessageError.class,
 				dmsValidateMessageError.node);
-			ASN1Enum<MultiSyntaxError> m_err = new ASN1Enum<
-				MultiSyntaxError>(MultiSyntaxError.class,
-				dmsMultiSyntaxError.node);
-			ASN1Integer e_pos=dmsMultiSyntaxErrorPosition.makeInt();
 			mess.add(error);
-			mess.add(m_err);
-			mess.add(e_pos);
 			mess.queryProps();
 			logQuery(error);
-			logQuery(m_err);
-			logQuery(e_pos);
 			switch (error.getEnum()) {
 			case syntaxMULTI:
-				setErrorStatus(m_err.toString());
-				break;
+				return new QueryMultiSyntaxErr();
 			case other:
 			case beacons:
 			case pixelService:
@@ -409,7 +400,6 @@ public class OpSendDMSMessage extends OpDMS {
 			logQuery(error);
 			switch (error.getEnum()) {
 			case syntaxMULTI:
-				setErrorStatus(error.toString());
 				return new QueryMultiSyntaxErr();
 			case other:
 				setErrorStatus(error.toString());
