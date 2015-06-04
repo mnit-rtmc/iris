@@ -23,10 +23,10 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-abstract public class Counter extends ASN1Integer {
+public class Counter extends ASN1Integer {
 
 	/** Create a new counter */
-	protected Counter(MIBNode n) {
+	public Counter(MIBNode n) {
 		super(n);
 	}
 

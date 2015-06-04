@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.Counter;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -63,8 +64,8 @@ public class OpSendDMSGraphics extends OpDMS {
 	private final ASN1Integer max_size = dmsGraphicMaxSize.makeInt();
 
 	/** Available memory for storing graphics */
-	private final ASN1Integer available_memory =
-		availableGraphicMemory.makeInt();
+	private final Counter available_memory = new Counter(
+		availableGraphicMemory.node);
 
 	/** Size of graphic blocks (in bytes) */
 	private final ASN1Integer block_size = dmsGraphicBlockSize.makeInt();
