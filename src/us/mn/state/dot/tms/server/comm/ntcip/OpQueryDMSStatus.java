@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -197,7 +198,7 @@ public class OpQueryDMSStatus extends OpDMS {
 					dms.setMaxAmbientTemp(null);
 				}
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Ledstar has no ambient temp objects
 				dms.setMinAmbientTemp(null);
 				dms.setMaxAmbientTemp(null);
@@ -284,7 +285,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				logQuery(test_rows);
 				logQuery(message_rows);
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Must be 1203v1 only
 				int n_rows = pix_rows.getInteger();
 				test_rows.setInteger(n_rows);
@@ -304,7 +305,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// 1203v2 not supported ...
 				dms.setPowerStatus(new String[0]);
 				return new LedstarStatus();
@@ -349,7 +350,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Come on, man!  If we got here, 1203v2
 				// objects should really be supported ...
 				dms.setPowerStatus(new String[0]);
@@ -402,7 +403,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// 1203v2 not supported ...
 				return new LedstarStatus();
 			}
@@ -466,7 +467,7 @@ public class OpQueryDMSStatus extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				dms.setLdcPotBase(null);
 				dms.setPixelCurrentLow(null);
 				dms.setPixelCurrentHigh(null);
@@ -504,7 +505,7 @@ public class OpQueryDMSStatus extends OpDMS {
 				if (power.isCritical())
 					setErrorStatus("POWER");
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Ignore; only Skyline has these objects
 			}
 			return null;

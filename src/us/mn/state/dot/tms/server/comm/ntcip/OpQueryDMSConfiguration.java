@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -35,16 +36,13 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  */
 public class OpQueryDMSConfiguration extends OpDMS {
 
-	/** DMS to query configuration */
-	protected final DMSImpl dms;
-
 	/** Create a new DMS query configuration object */
 	public OpQueryDMSConfiguration(DMSImpl d) {
 		super(PriorityLevel.DOWNLOAD, d);
-		dms = d;
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new QueryModuleCount();
 	}
@@ -66,10 +64,10 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	protected class QueryModules extends Phase {
 
 		/** Count of rows in the module table */
-		protected final int count;
+		private final int count;
 
 		/** Module number to query */
-		protected int mod = 1;
+		private int mod = 1;
 
 		/** Create a queryModules phase */
 		protected QueryModules(int c) {
@@ -219,7 +217,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				logQuery(pages);
 				logQuery(m_len);
 			}
-			catch(SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Sign supports 1203v1 only
 			}
 			return null;
@@ -227,6 +225,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
 		dms.setConfigure(isSuccess());
 		super.cleanup();

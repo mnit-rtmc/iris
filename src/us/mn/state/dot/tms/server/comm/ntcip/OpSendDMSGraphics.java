@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -106,7 +107,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Must be 1203v1 only (no graphics) ...
 				logError("no graphics support -- aborted");
 				return null;
@@ -158,7 +159,7 @@ public class OpSendDMSGraphics extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Some manufacturers don't support these
 				logError("optional graphics unsupported");
 				return new QueryGraphicNumbers();

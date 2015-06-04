@@ -38,6 +38,8 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.GenError;
+import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -106,7 +108,7 @@ public class OpSendDMSFonts extends OpDMS {
 				logQuery(max_char);
 				version2 = true;
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Note: if this object doesn't exist, then the
 				//       sign must not support v2.
 				version2 = false;
@@ -145,7 +147,7 @@ public class OpSendDMSFonts extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Note: some vendors respond with NoSuchName
 				//       if the font is not valid
 				populateNum2Row();
@@ -244,7 +246,7 @@ public class OpSendDMSFonts extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Note: some vendors respond with NoSuchName
 				//       if the font is not valid
 				version.setInteger(-1);
@@ -383,7 +385,7 @@ public class OpSendDMSFonts extends OpDMS {
 			try {
 				mess.storeProps();
 			}
-			catch (SNMP.Message.GenError e) {
+			catch (GenError e) {
 				// Some vendors (Skyline) respond with GenError
 				// if the font is not currently valid
 			}

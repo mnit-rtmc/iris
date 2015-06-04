@@ -31,6 +31,8 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mibskyline.MIB.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.BadValue;
+import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -151,11 +153,11 @@ public class OpSendDMSDefaults extends OpDMS {
 				logStore(override);
 				logStore(limit);
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Must not be a Ledstar sign
 				return new SkylineDefaults();
 			}
-			catch (SNMP.Message.BadValue e) {
+			catch (BadValue e) {
 				// Daktronics uses this instead of NoSuchName
 				// Is there a better way to check for that?
 			}
@@ -192,7 +194,7 @@ public class OpSendDMSDefaults extends OpDMS {
 				logStore(night_rate);
 				logStore(max_lvl);
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Must not be a Skyline sign
 				return new AddcoDefaults();
 			}

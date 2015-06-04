@@ -29,6 +29,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -164,7 +165,7 @@ public class OpTestDMSPixels extends OpDMS {
 				logQuery(test_rows);
 				logQuery(message_rows);
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// Must be 1203v1 only, so try reading the
 				// total row count from each table
 				int n_rows = total_rows.getInteger();
@@ -225,7 +226,7 @@ public class OpTestDMSPixels extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// We've gone past the end of the table for
 				// this detection type.  Must be a v1 sign.
 				return nextTablePhase();

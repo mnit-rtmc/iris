@@ -21,10 +21,8 @@ import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
-import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * Simple Network Management Protocol (SNMP)
@@ -241,9 +239,9 @@ public class SNMP extends BER {
 				throw new ParsingException("!GET_RESPONSE TAG");
 			if (decodeLength(is) > is.available())
 				throw new ParsingException("INVALID PDU LEN");
-			int request = decodeInteger(is);
-			if (request != request_id)
-				throw new RequestIDException(request);
+			int req = decodeInteger(is);
+			if (req != request_id)
+				throw new RequestIDException(req, request_id);
 			int error = decodeInteger(is);
 			int index = decodeInteger(is);
 			switch (error) {
@@ -272,61 +270,6 @@ public class SNMP extends BER {
 		private String getName(int i) {
 			ASN1Object o = getObject(i);
 			return (o != null) ? o.getName() : null;
-		}
-
-		/** Request ID mismatch exception */
-		public class RequestIDException extends ParsingException {
-
-			/** Create a new Request-ID exception */
-			protected RequestIDException(int request) {
-				super("SNMP REQUEST ID: " + request + " != " +
-					request_id);
-			}
-		}
-
-		/** TooBig exception */
-		public class TooBig extends ControllerException {
-
-			/** Create a new TooBig exception */
-			protected TooBig() {
-				super("SNMP: TOO BIG");
-			}
-		}
-
-		/** NoSuchName exception */
-		public class NoSuchName extends ControllerException {
-
-			/** Create a new NoSuchName exception */
-			protected NoSuchName(String n) {
-				super("SNMP: NO SUCH NAME: " + n);
-			}
-		}
-
-		/** BadValue exception */
-		public class BadValue extends ControllerException {
-
-			/** Create a new BadValue exception */
-			protected BadValue(ASN1Object o) {
-				super("SNMP: BAD VALUE: " + o);
-			}
-		}
-
-		/** ReadOnly exception */
-		public class ReadOnly extends ControllerException {
-
-			/** Create a new ReadOnly exception */
-			protected ReadOnly(String n) {
-				super("SNMP: READ ONLY: " + n);
-			}
-		}
-
-		/** GenError exception */
-		public class GenError extends ControllerException {
-
-			/** Create a new GenError exception */
-			protected GenError(ASN1Object o) {
-				super("SNMP: GEN ERROR: " + o);
-			}
 		}
 	}
 }

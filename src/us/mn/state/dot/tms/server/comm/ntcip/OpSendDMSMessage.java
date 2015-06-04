@@ -31,6 +31,9 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.BadValue;
+import us.mn.state.dot.tms.server.comm.snmp.GenError;
+import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
@@ -166,7 +169,7 @@ public class OpSendDMSMessage extends OpDMS {
 				logStore(act);
 				mess.storeProps();
 			}
-			catch (SNMP.Message.GenError e) {
+			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
 			dms.setMessageCurrent(message, owner);
@@ -188,12 +191,12 @@ public class OpSendDMSMessage extends OpDMS {
 				logStore(status);
 				mess.storeProps();
 			}
-			catch (SNMP.Message.BadValue e) {
+			catch (BadValue e) {
 				// This should only happen if the message
 				// status is "validating" ...
 				return new QueryMsgStatus();
 			}
-			catch (SNMP.Message.GenError e) {
+			catch (GenError e) {
 				// This should never happen (but of
 				// course, it does for some vendors)
 				return new QueryMsgStatus();
@@ -291,7 +294,7 @@ public class OpSendDMSMessage extends OpDMS {
 				logStore(status);
 				mess.storeProps();
 			}
-			catch (SNMP.Message.GenError e) {
+			catch (GenError e) {
 				return new QueryValidateMsgErr(status);
 			}
 			return new QueryMsgValidity();
@@ -381,7 +384,7 @@ public class OpSendDMSMessage extends OpDMS {
 				logStore(act);
 				mess.storeProps();
 			}
-			catch (SNMP.Message.GenError e) {
+			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
 			dms.setMessageCurrent(message, owner);
@@ -439,9 +442,12 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.queryProps();
 			logQuery(m_err);
 			logQuery(e_pos);
-			if (m_err.getEnum() == MultiSyntaxError.other)
+			switch (m_err.getEnum()) {
+			case other:
 				return new QueryOtherMultiErr(m_err);
-			else {
+			case graphicID:
+			case graphicNotDefined:
+			default:
 				setErrorStatus(m_err.toString());
 				return null;
 			}
@@ -469,7 +475,7 @@ public class OpSendDMSMessage extends OpDMS {
 				logQuery(o_err);
 				setErrorStatus(o_err.toString());
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// For 1203v1, dmsMultiOtherErrorDescription
 				// had not been defined...
 				setErrorStatus(m_err.toString());
@@ -490,7 +496,7 @@ public class OpSendDMSMessage extends OpDMS {
 			try {
 				mess.queryProps();
 			}
-			catch (SNMP.Message.NoSuchName e) {
+			catch (NoSuchName e) {
 				// must not be a Ledstar sign ...
 				return null;
 			}
