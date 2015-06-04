@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Iterator;
 
 /**
@@ -43,10 +44,10 @@ public class GraphicHelper extends BaseHelper {
 	/** Find a graphic using a graphic number */
 	static public Graphic find(int g_num) {
 		Iterator<Graphic> it = iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Graphic g = it.next();
 			Integer gn = g.getGNumber();
-			if(gn != null && gn == g_num)
+			if (gn != null && gn == g_num)
 				return g;
 		}
 		return null;
@@ -55,7 +56,7 @@ public class GraphicHelper extends BaseHelper {
 	/** Create a raster graphic */
 	static public RasterGraphic createRaster(Graphic g) {
 		try {
-			switch(g.getBpp()) {
+			switch (g.getBpp()) {
 			case 1:
 				return createBitmap(g);
 			case 24:
@@ -64,11 +65,11 @@ public class GraphicHelper extends BaseHelper {
 				return null;
 			}
 		}
-		catch(IndexOutOfBoundsException e) {
+		catch (IndexOutOfBoundsException e) {
 			// pixel data was wrong length
 			return null;
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			// pixel data Base64 decode failed
 			return null;
 		}
@@ -88,5 +89,38 @@ public class GraphicHelper extends BaseHelper {
 			g.getHeight());
 		pg.setPixels(Base64.decode(g.getPixels()));
 		return pg;
+	}
+
+	/** Lookup all graphics in a MULTI string.
+	 * @param multi MULTI string to parse.
+	 * @return Iterator of Graphic objects referenced in MULTI string */
+	static public Iterator<Graphic> lookupMulti(String multi) {
+		final LinkedList<Integer> g_nums = new LinkedList<Integer>();
+		MultiParser.parse(multi, new MultiAdapter() {
+			@Override
+			public void addGraphic(int g_num, Integer x, Integer y,
+				String g_id)
+			{
+				g_nums.add(g_num);
+			}
+		});
+		return lookup(g_nums);
+	}
+
+	/** Lookup a list of Graphic objects by number.
+	 * @param g_nums List of graphic numbers.
+	 * @return Iterator of Graphic objects in list */
+	static private Iterator<Graphic> lookup(LinkedList<Integer> g_nums) {
+		LinkedList<Graphic> graphics = new LinkedList<Graphic>();
+		for (Integer g_num: g_nums) {
+			Graphic g = find(g_num);
+			if (g != null)
+				graphics.add(g);
+			else {
+				graphics.clear();
+				break;
+			}
+		}
+		return graphics.iterator();
 	}
 }

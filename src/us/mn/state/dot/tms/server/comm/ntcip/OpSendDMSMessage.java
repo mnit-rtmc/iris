@@ -15,8 +15,14 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.MultiSyntaxError;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -30,6 +36,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mibledstar.MIB.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.server.comm.snmp.BadValue;
 import us.mn.state.dot.tms.server.comm.snmp.GenError;
@@ -40,26 +47,26 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  * Operation to send a message to a DMS and activate it.
  *
  * <pre>
- * .    Possible phase transitions:
+ * .    Crazy phase transition diagram:
  * |
- * |            .-------------------------------------------------.
- * |            +               |                                 |
- * |--+ MsgModifyReq ----+ QueryMsgStatus                         |
- * |         |               |     |                              |
- * |         +               |     +                              |
- * |      ModifyMsg +--------'   QueryControlMode                 |
- * |         |                                                    |
- * |         +                                                    |
- * |      MsgValidateReq --+ QueryValidateMsgErr                  |
- * |         |                 +      |                           |
- * |         +                 |      |                           |
- * |      QueryMsgValidity ----'      +                           |
- * |         |                   QueryMultiSyntaxErr              |
- * |         +                     +      |                       |
- * |--+ ActivateMsg -------.       |      +                       |
- * |         |             |       |    QueryOtherMultiErr        |
- * |         +             +       |                              |
- * |      SetLossMsgs    QueryActivateMsgErr ---------------------'
+ * |            .-----------------------------------------------------------.
+ * |            +               |                                           |
+ * |--+ MsgModifyReq ----+ QueryMsgStatus          + QueryGraphicsConfig    |
+ * |         |               |     |               | FindGraphicNumber      |
+ * |         +               |     +               | CheckGraphic           |
+ * |      ModifyMsg +--------'   QueryControlMode  |   SetGraphicNotUsed    |
+ * |         |                                     | SetGraphicModifying    |
+ * |         +                                     | VerifyGraphicModifying |
+ * |      MsgValidateReq --+ QueryValidateMsgErr   | CreateGraphic          |
+ * |         |                 +      |            | SendGraphicBlock       |
+ * |         +                 |      |            | ValidateGraphic        |
+ * |      QueryMsgValidity ----'      +            | VerifyGraphicReady     |
+ * |         |                   QueryMultiSyntaxErr VerifyGraphicID        |
+ * |         +                     +      |                  |              |
+ * |--+ ActivateMsg -------.       |      +                  '--------------|
+ * |         |             |       |    QueryOtherMultiErr                  |
+ * |         +             +       |                                        |
+ * |      SetLossMsgs    QueryActivateMsgErr -------------------------------'
  * |         +             +          |
  * |         |             |          +
  * '--+ ActivateBlankMsg --'    QueryLedstarActivateErr
@@ -80,16 +87,11 @@ public class OpSendDMSMessage extends OpDMS {
 			dmsMessageStatus.node, mem.ordinal(), n);
 	}
 
-	/** Communication loss message */
-	private final MessageIDCode comm_msg = new MessageIDCode(
-		dmsCommunicationsLossMessage.node);
-
-	/** Long power recovery message */
-	private final MessageIDCode long_msg = new MessageIDCode(
-		dmsLongPowerRecoveryMessage.node);
-
-	/** Flag to avoid phase loops */
-	private boolean modify_requested = false;
+	/** Make a new DmsGraphicStatus enum */
+	static private ASN1Enum<DmsGraphicStatus> makeGStatus(int row) {
+		return new ASN1Enum<DmsGraphicStatus>(DmsGraphicStatus.class,
+			dmsGraphicStatus.node, row);
+	}
 
 	/** Sign message */
 	private final SignMessage message;
@@ -108,6 +110,34 @@ public class OpSendDMSMessage extends OpDMS {
 	/** User who deployed the message */
 	private final User owner;
 
+	/** Communication loss message */
+	private final MessageIDCode comm_msg = new MessageIDCode(
+		dmsCommunicationsLossMessage.node);
+
+	/** Long power recovery message */
+	private final MessageIDCode long_msg = new MessageIDCode(
+		dmsLongPowerRecoveryMessage.node);
+
+	/** Flag to avoid phase loops */
+	private boolean modify_requested = false;
+
+	/** Iterator of graphics in the sign message */
+	private final Iterator<Graphic> graphics;
+
+	/** List of DmsGraphicStatus for each row in table */
+	private final ArrayList<ASN1Enum<DmsGraphicStatus>> g_stat =
+		new ArrayList<ASN1Enum<DmsGraphicStatus>>();
+
+	/** Color scheme supported (for graphics) */
+	private final ASN1Enum<DmsColorScheme> color_scheme = new ASN1Enum<
+		DmsColorScheme>(DmsColorScheme.class, dmsColorScheme.node);
+
+	/** Number of graphics supported */
+	private final ASN1Integer max_graphics = dmsGraphicMaxEntries.makeInt();
+
+	/** Size of graphic blocks (in bytes) */
+	private final ASN1Integer block_size = dmsGraphicBlockSize.makeInt();
+
 	/** Get the message duration */
 	private int getDuration() {
 		return getDuration(message.getDuration());
@@ -121,6 +151,7 @@ public class OpSendDMSMessage extends OpDMS {
 		msg_num = mn;
 		message_crc = DmsMessageCRC.calculate(sm.getMulti(),
 			sm.getBeaconEnabled(), 0);
+		graphics = GraphicHelper.lookupMulti(sm.getMulti());
 	}
 
 	/** Create a new send DMS message operation */
@@ -447,6 +478,11 @@ public class OpSendDMSMessage extends OpDMS {
 				return new QueryOtherMultiErr(m_err);
 			case graphicID:
 			case graphicNotDefined:
+				/* Note: if the graphics iterator is empty,
+				 *       then just fail the operation. */
+				if (graphics.hasNext())
+					return new QueryGraphicsConfig();
+				// else fall through to default case ...
 			default:
 				setErrorStatus(m_err.toString());
 				return null;
@@ -562,5 +598,401 @@ public class OpSendDMSMessage extends OpDMS {
 	public void cleanup() {
 		dms.setMessageNext(null);
 		super.cleanup();
+	}
+
+	/** Phase to query the graphics configuration */
+	private class QueryGraphicsConfig extends Phase {
+
+		/** Query the graphics configuration */
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(color_scheme);
+			mess.add(max_graphics);
+			mess.add(block_size);
+			mess.queryProps();
+			logQuery(color_scheme);
+			logQuery(max_graphics);
+			logQuery(block_size);
+			initGraphicStatus();
+			return nextGraphicPhase();
+		}
+	}
+
+	/** Get the first phase of the next graphic */
+	private Phase nextGraphicPhase() {
+		if (graphics.hasNext())
+			return new FindGraphicNumber(graphics.next());
+		else {
+			/* Note: do not check modify_requested flag here, since
+			 * the operation is starting over after updating
+			 * graphics.  This will not cause a phase loop because
+			 * QueryGraphicsConfig will not happen once graphics
+			 * iterator has been exhausted. */
+			return new MsgModifyReq();
+		}
+	}
+
+	/** Initialize the graphic status list */
+	private void initGraphicStatus() {
+		g_stat.clear();
+		for (int i = 0; i < max_graphics.getInteger(); i++) {
+			ASN1Enum<DmsGraphicStatus> e = makeGStatus(i + 1);
+			e.setEnum(DmsGraphicStatus.undefined);
+			g_stat.add(e);
+		}
+	}
+
+	/** Set the status of one graphic row.  Once a row has been set to
+	 * readyForUseReq, it will not be set to another status.
+	 * @param row Row in graphic table.
+	 * @param st Graphic status. */
+	private void setGraphicStatus(int row, DmsGraphicStatus st) {
+		ASN1Enum<DmsGraphicStatus> e = g_stat.get(row - 1);
+		if (e.getEnum() != DmsGraphicStatus.readyForUseReq)
+			e.setEnum(st);
+	}
+
+	/** Check if a graphic row is available */
+	private boolean isGraphicAvailable(int row) {
+		ASN1Enum<DmsGraphicStatus> e = g_stat.get(row - 1);
+		switch (e.getEnum()) {
+		case notUsed:
+		case modifying:
+			return true;
+		default:
+			return false;
+		}
+	}
+
+	/** Check if a graphic row is ready for use */
+	private boolean isGraphicReady(int row) {
+		ASN1Enum<DmsGraphicStatus> e = g_stat.get(row - 1);
+		return e.getEnum() == DmsGraphicStatus.readyForUse;
+	}
+
+	/** Get the last available graphic row.  If no rows are available,
+	 * get the last usable graphic row. */
+	private int getAvailableGraphic() {
+		int mg = max_graphics.getInteger();
+		for (int i = mg; i > 0; i--) {
+			if (isGraphicAvailable(i))
+				return i;
+		}
+		for (int i = mg; i > 0; i--) {
+			if (isGraphicReady(i))
+				return i;
+		}
+		return 0;
+	}
+
+	/** Phase to find row with specific graphic number.  Starting with the
+	 * row which equals the number, search in reverse order. */
+	private class FindGraphicNumber extends Phase {
+		private final Graphic graphic;
+		private final int g_num;
+		private int row;
+		private FindGraphicNumber(Graphic g) {
+			graphic = g;
+			Integer gn = graphic.getGNumber();
+			g_num = (gn != null) ? gn : 0;
+			row = grow(g_num);
+		}
+		private int grow(int i) {
+			int mg = max_graphics.getInteger();
+			return (i > 0) ? Math.min(i, mg) : mg;
+		}
+
+		/** Query the graphic number for one graphic */
+		protected Phase poll(CommMessage mess) throws IOException {
+			if (g_num < 1) {
+				setErrorStatus("Bad graphic #: " + g_num);
+				return null;
+			}
+			ASN1Integer number = dmsGraphicNumber.makeInt(row);
+			ASN1Enum<DmsGraphicStatus> status = makeGStatus(row);
+			mess.add(number);
+			mess.add(status);
+			mess.queryProps();
+			logQuery(number);
+			logQuery(status);
+			int gn = number.getInteger();
+			if (gn == g_num)
+				return new CheckGraphic(graphic, row, status);
+			setGraphicStatus(row, status.getEnum());
+			// Check previous row
+			row = grow(row - 1);
+			if (row != grow(g_num))
+				return this;
+			// No graphic with dmsGraphicNumber equal to g_num
+			// was found -- just pick an available row
+			row = getAvailableGraphic();
+			if (row > 0) {
+				return new CheckGraphic(graphic, row,
+					g_stat.get(row - 1));
+			} else {
+				setErrorStatus("Graphic table full");
+				return null;
+			}
+		}
+	}
+
+	/** Phase to check a graphic */
+	private class CheckGraphic extends Phase {
+		private final Graphic graphic;
+		private final int row;
+		private final ASN1Enum<DmsGraphicStatus> status;
+		private CheckGraphic(Graphic g, int r,
+			ASN1Enum<DmsGraphicStatus> s)
+		{
+			graphic = g;
+			row = r;
+			status = s;
+		}
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Integer gid = dmsGraphicID.makeInt(row);
+			mess.add(gid);
+			mess.queryProps();
+			logQuery(gid);
+			if (isIDCorrect(graphic, gid.getInteger()))
+				return nextGraphicPhase();
+			switch (status.getEnum()) {
+			case modifying:
+			case calculatingID:
+			case readyForUse:
+				return new SetGraphicNotUsed(graphic, row);
+			case notUsed:
+				return new SetGraphicModifying(graphic, row);
+			default:
+				setErrorStatus(status.toString());
+				return null;
+			}
+		}
+	}
+
+	/** Phase to set a graphic to notUsed status */
+	private class SetGraphicNotUsed extends Phase {
+		private final Graphic graphic;
+		private final int row;
+		private SetGraphicNotUsed(Graphic g, int r) {
+			graphic = g;
+			row = r;
+		}
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Enum<DmsGraphicStatus> status = makeGStatus(row);
+			status.setEnum(DmsGraphicStatus.notUsedReq);
+			mess.add(status);
+			logStore(status);
+			mess.storeProps();
+			return new SetGraphicModifying(graphic, row);
+		}
+	}
+
+	/** Phase to set a graphic to modifying status */
+	private class SetGraphicModifying extends Phase {
+		private final Graphic graphic;
+		private final int row;
+		private SetGraphicModifying(Graphic g, int r) {
+			graphic = g;
+			row = r;
+		}
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Enum<DmsGraphicStatus> status = makeGStatus(row);
+			status.setEnum(DmsGraphicStatus.modifyReq);
+			mess.add(status);
+			logStore(status);
+			mess.storeProps();
+			return new VerifyGraphicModifying(graphic, row);
+		}
+	}
+
+	/** Phase to verify the graphic status is modifying */
+	private class VerifyGraphicModifying extends Phase {
+		private final Graphic graphic;
+		private final int row;
+		private VerifyGraphicModifying(Graphic g, int r) {
+			graphic = g;
+			row = r;
+		}
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Enum<DmsGraphicStatus> status = makeGStatus(row);
+			mess.add(status);
+			mess.queryProps();
+			logQuery(status);
+			if (status.getEnum() != DmsGraphicStatus.modifying) {
+				setErrorStatus(status.toString());
+				return null;
+			}
+			return new CreateGraphic(graphic, row);
+		}
+	}
+
+	/** Phase to create a graphic */
+	private class CreateGraphic extends Phase {
+		private final Graphic graphic;
+		private final int row;
+		private CreateGraphic(Graphic g, int r) {
+			graphic = g;
+			row = r;
+		}
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Integer number = dmsGraphicNumber.makeInt(row);
+			ASN1String name = new ASN1String(dmsGraphicName.node,
+				row);
+			ASN1Integer height = dmsGraphicHeight.makeInt(row);
+			ASN1Integer width = dmsGraphicWidth.makeInt(row);
+			ASN1Enum<DmsColorScheme> type = new ASN1Enum<
+				DmsColorScheme>(DmsColorScheme.class,
+				dmsGraphicType.node, row);
+			ASN1Integer trans_enabled =
+				dmsGraphicTransparentEnabled.makeInt(row);
+			ASN1OctetString trans_color = new ASN1OctetString(
+				dmsGraphicTransparentColor.node, row);
+			number.setInteger(graphic.getGNumber());
+			name.setString(graphic.getName());
+			height.setInteger(graphic.getHeight());
+			width.setInteger(graphic.getWidth());
+			type.setEnum(DmsColorScheme.fromBpp(graphic.getBpp()));
+			trans_enabled.setInteger(1);
+			if (graphic.getBpp() == 24) {
+				trans_color.setOctetString(
+					new byte[] { 0, 0, 0 });
+			} else
+				trans_color.setOctetString(new byte[] { 0 });
+			mess.add(number);
+			mess.add(name);
+			mess.add(height);
+			mess.add(width);
+			mess.add(type);
+			mess.add(trans_enabled);
+			mess.add(trans_color);
+			logStore(number);
+			logStore(name);
+			logStore(height);
+			logStore(width);
+			logStore(type);
+			logStore(trans_enabled);
+			logStore(trans_color);
+			mess.storeProps();
+			return new SendGraphicBlock(graphic, row);
+		}
+	}
+
+	/** Phase to send a block of a graphic */
+	private class SendGraphicBlock extends Phase {
+		private final Graphic graphic;
+		private final int row;
+		private final byte[] bitmap;
+		private int block;
+
+		/** Create a phase to send graphic blocks */
+		private SendGraphicBlock(Graphic g, int r) throws IOException {
+			graphic = g;
+			row = r;
+			bitmap = Base64.decode(g.getPixels());
+			block = 1;
+		}
+
+		/** Send a graphic block */
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1OctetString block_bitmap = new ASN1OctetString(
+				dmsGraphicBlockBitmap.node, row, block);
+			block_bitmap.setOctetString(createBlock());
+			mess.add(block_bitmap);
+			logStore(block_bitmap);
+			mess.storeProps();
+			if (block * block_size.getInteger() < bitmap.length) {
+				block++;
+				if (block % 20 == 0 && !controller.isFailed())
+					setSuccess(true);
+				return this;
+			} else
+				return new ValidateGraphic(graphic, row);
+		}
+
+		/** Create a graphic block */
+		private byte[] createBlock() {
+			int bsize = block_size.getInteger();
+			int pos = (block - 1) * bsize;
+			int blen = Math.min(bsize, bitmap.length - pos);
+			byte[] bdata = new byte[blen];
+			System.arraycopy(bitmap, pos, bdata, 0, blen);
+			return bdata;
+		}
+	}
+
+	/** Phase to validate the graphic */
+	private class ValidateGraphic extends Phase {
+		private final Graphic graphic;
+		private final int row;
+		private ValidateGraphic(Graphic g, int r) {
+			graphic = g;
+			row = r;
+		}
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Enum<DmsGraphicStatus> status = makeGStatus(row);
+			status.setEnum(DmsGraphicStatus.readyForUseReq);
+			mess.add(status);
+			logStore(status);
+			mess.storeProps();
+			return new VerifyGraphicReady(graphic, row);
+		}
+	}
+
+	/** Phase to verify the graphic status is ready for use */
+	private class VerifyGraphicReady extends Phase {
+
+		/** Time to stop checking if the graphic is ready for use */
+		private final long expire = TimeSteward.currentTimeMillis() +
+			10 * 1000;
+
+		private final Graphic graphic;
+		private final int row;
+		private VerifyGraphicReady(Graphic g, int r) {
+			graphic = g;
+			row = r;
+		}
+
+		/** Verify the graphic status is ready for use */
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Enum<DmsGraphicStatus> status = makeGStatus(row);
+			mess.add(status);
+			mess.queryProps();
+			logQuery(status);
+			if (status.getEnum() == DmsGraphicStatus.readyForUse)
+				return new VerifyGraphicID(graphic, row);
+			if (TimeSteward.currentTimeMillis() < expire)
+				return this;
+			else {
+				setErrorStatus("Graphic not ready: " + status);
+				return null;
+			}
+		}
+	}
+
+	/** Phase to verify a graphic ID */
+	private class VerifyGraphicID extends Phase {
+		private final Graphic graphic;
+		private final int row;
+		private VerifyGraphicID(Graphic g, int r) {
+			graphic = g;
+			row = r;
+		}
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Integer gid = dmsGraphicID.makeInt(row);
+			mess.add(gid);
+			mess.queryProps();
+			logQuery(gid);
+			if (!isIDCorrect(graphic, gid.getInteger())) {
+				setErrorStatus("Graphic ID incorrect");
+				return null;
+			}
+			setGraphicStatus(row, DmsGraphicStatus.readyForUseReq);
+			return nextGraphicPhase();
+		}
+	}
+
+	/** Compare the graphic ID */
+	private boolean isIDCorrect(Graphic graphic, int g) throws IOException {
+		GraphicInfoList gil = new GraphicInfoList(graphic);
+		return g == gil.getCrcSwapped();
 	}
 }
