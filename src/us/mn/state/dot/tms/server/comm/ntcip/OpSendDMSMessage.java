@@ -667,9 +667,15 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** Get the first phase of the next graphic */
 	private Phase nextGraphicPhase() {
-		if (graphics.hasNext())
-			return new FindGraphicNumber(graphics.next());
-		else {
+		if (graphics.hasNext()) {
+			Graphic g = graphics.next();
+			String e = checkGraphic(g);
+			if (e != null) {
+				setErrorStatus(e);
+				return null;
+			}
+			return new FindGraphicNumber(g);
+		} else {
 			/* Note: do not check modify_requested flag here, since
 			 * the operation is starting over after updating
 			 * graphics.  This will not cause a phase loop because
@@ -677,6 +683,23 @@ public class OpSendDMSMessage extends OpDMS {
 			 * iterator has been exhausted. */
 			return new MsgModifyReq();
 		}
+	}
+
+	/** Test if a graphic should be sent to the DMS */
+	private String checkGraphic(Graphic g) {
+		Integer g_num = g.getGNumber();
+		if (null == g_num || g_num < 1 || g_num > 255)
+			return "Invalid graphic number";
+		int bpp = color_scheme.getEnum().bpp;
+		if (g.getBpp() != 1 && g.getBpp() != bpp)
+			return "Invalid graphic depth";
+		Integer w = dms.getWidthPixels();
+		Integer h = dms.getHeightPixels();
+		if (null == w || null == h)
+			return "Unknown DMS dimensions";
+		if (g.getWidth() > w || g.getHeight() > h)
+			return "Invalid graphic size";
+		return null;
 	}
 
 	/** Initialize the graphic status list */
