@@ -87,7 +87,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		case SEND_SETTINGS:
 			addOperation(new OpSendDMSFonts(dms));
 			addOperation(new OpSendDMSDefaults(dms));
-			addOperation(new OpSendDMSGraphics(dms));
 			break;
 		case QUERY_CONFIGURATION:
 			addOperation(new OpQueryDMSConfiguration(dms));
