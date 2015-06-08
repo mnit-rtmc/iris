@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.server.comm.snmp.Counter;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
@@ -35,6 +36,16 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  * @author Douglas Lau
  */
 public class OpQueryDMSConfiguration extends OpDMS {
+
+	/** Number of graphics defined in graphic table */
+	private final ASN1Integer num_graphics = dmsGraphicNumEntries.makeInt();
+
+	/** Maximum size of a graphic */
+	private final ASN1Integer max_size = dmsGraphicMaxSize.makeInt();
+
+	/** Available memory for storing graphics */
+	private final Counter available_memory = new Counter(
+		availableGraphicMemory.node);
 
 	/** Create a new DMS query configuration object */
 	public OpQueryDMSConfiguration(DMSImpl d) {
@@ -219,7 +230,30 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			}
 			catch (NoSuchName e) {
 				// Sign supports 1203v1 only
+				return null;
 			}
+			return new QueryGraphics();
+		}
+	}
+
+	/** Phase to query graphics objects */
+	private class QueryGraphics extends Phase {
+
+		/** Query graphics objects */
+		protected Phase poll(CommMessage mess) throws IOException {
+			mess.add(num_graphics);
+			mess.add(max_size);
+			mess.add(available_memory);
+			try {
+				mess.queryProps();
+			}
+			catch (NoSuchName e) {
+				logError("no graphics support");
+				return null;
+			}
+			logQuery(num_graphics);
+			logQuery(max_size);
+			logQuery(available_memory);
 			return null;
 		}
 	}
