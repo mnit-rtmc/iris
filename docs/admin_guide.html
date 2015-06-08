@@ -87,7 +87,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">21 Jan 2015</div>
+<div id="stamp">8 Jun 2015</div>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
 
@@ -310,7 +310,7 @@
 	since Java is architecture independent.
 	It can be installed with the following command (as root):
 </p>
-<pre class="code">yum install iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm</pre>
+<pre class="code">dnf install iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm</pre>
 <p>
 	Yum will install dependencies not already installed, including
 	<a href="http://openjdk.java.net">OpenJDK</a>,
@@ -655,7 +655,7 @@
 
 <h4>Download and install PostGIS</h4>
 <p>
-<pre class="code">sudo yum install postgis postgis-docs postgis-utils</pre>
+<pre class="code">sudo dnf install postgis postgis-docs postgis-utils</pre>
 </p>
 
 <h4>Configure PostGIS and create spatial DB</h4>
@@ -678,7 +678,7 @@ vim /var/lib/pgsql/data/postgresql.conf
 	autovacuum = off
 	shared_buffers = 4GB
 	temp_buffers = 128MB
-	maintenance_work_mem = 4GB 
+	maintenance_work_mem = 4GB
 service postgresql restart
 </pre>
 </p>
@@ -687,14 +687,14 @@ service postgresql restart
 <p>
 <pre class="code">
 su - tms
-sudo yum -y install git
-sudo yum -y install geos-devel proj-devel postgresql-devel libxml2-devel bzip2-devel 
-sudo yum -y install gcc-c++ protobuf-c-devel autoconf automake libtool
+sudo dnf -y install git
+sudo dnf -y install geos-devel proj-devel postgresql-devel libxml2-devel bzip2-devel
+sudo dnf -y install gcc-c++ protobuf-c-devel autoconf automake libtool
 mkdir ~/osm; cd ~/osm
 git clone https://github.com/openstreetmap/osm2pgsql.git
 cd ~/osm/osm2pgsql
 ./autogen.sh
-./configure 
+./configure
 make
 sudo make install
 </pre>
@@ -702,9 +702,9 @@ sudo make install
 
 <h4>Import OSM planet file into PostGIS</h4>
 <p>
-	This process takes a long time (around 30 hours). See performance comparisons 
-	<a href="http://wiki.openstreetmap.org/wiki/Osm2pgsql/benchmarks">here</a>. 
-	Determine the bounding box for the region of interest. For Minnesota it 
+	This process takes a long time (around 30 hours). See performance comparisons
+	<a href="http://wiki.openstreetmap.org/wiki/Osm2pgsql/benchmarks">here</a>.
+	Determine the bounding box for the region of interest. For Minnesota it
 	is: -97.5, 43.0, -89.0, 49.5.
 </p>
 <pre class="code">
@@ -720,12 +720,12 @@ osm2pgsql -v --number-processes=16 -d gis -s --bbox -97.5, 43.0, -89.0, 49.5 pla
 <pre class="code">
 su - tms
 # Install dependencies
-sudo yum -y install make gcc47 gcc-c++ bzip2-devel libpng-devel libtiff-devel \
+sudo dnf -y install make gcc47 gcc-c++ bzip2-devel libpng-devel libtiff-devel \
       zlib-devel libjpeg-devel libxml2-devel python-setuptools git-all \
       python-nose python27-devel python27 proj-devel proj proj-epsg \
       proj-nad freetype-devel freetype libicu-devel libicu
 # Install optional deps
-sudo yum -y install gdal-devel gdal postgresql-devel sqlite-devel sqlite \
+sudo dnf -y install gdal-devel gdal postgresql-devel sqlite-devel sqlite \
       libcurl-devel libcurl cairo-devel cairo pycairo-devel pycairo
 # Build recent version of Boost
 export JOBS=`grep -c ^processor /proc/cpuinfo`
@@ -779,7 +779,7 @@ echo “import mapnik” | python
 	See <a href="https://github.com/mapnik/mapnik/blob/v2.2.0/INSTALL.md">docs</a>.
 </p>
 <pre class="code">
-sudo yum -y install svn
+sudo dnf -y install svn
 cd ~/osm
 svn export http://svn.openstreetmap.org/applications/rendering/mapnik
 # Install prepared world boundary data
@@ -2010,9 +2010,9 @@ FIXME
 	sign.
 	Sometimes, they are called <b>flashers</b> or <b>wig-wags</b>.
 	Internal and external beacons are supported. Internal beacons are
-	controlled through the DMS controller, are activated through the 
-	NTCIP DMS protocol and are considered part of the DMS. External 
-	beacons use dedicated controllers and protocols (e.g. MNDOT 170 4, 
+	controlled through the DMS controller, are activated through the
+	NTCIP DMS protocol and are considered part of the DMS. External
+	beacons use dedicated controllers and protocols (e.g. MNDOT 170 4,
 	MNDOT 170 5).
 </p>
 
@@ -2187,7 +2187,7 @@ zcat tms-20120523.sql.gz | pgsql tms</pre>
 	With the new rpm file available, a stable upgrade can be accomplished
 	with the following commands (as root):
 </p>
-<pre class="code">yum update iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
+<pre class="code">dnf update iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
 iris_ctl update
 systemctl restart iris.service</pre>
 <p>
@@ -2200,7 +2200,7 @@ systemctl restart iris.service</pre>
 	The following commands can be used to perform an unstable upgrade
 	(as root):
 </p>
-<pre class="code">yum update iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
+<pre class="code">dnf update iris-<i>{major}</i>.<i>{minor}</i>.<i>{micro}</i>-<i>{build}</i>.noarch.rpm
 psql tms -f /var/lib/iris/sql/migrate-<i>{major}</i>.<i>{minor}</i>.sql
 iris_ctl update
 systemctl restart iris.service</pre>
@@ -2233,7 +2233,7 @@ FIXME
 	development system.
 	Some additional development packages must be installed.
 </p>
-<pre class="code">yum install java-1.8.0-openjdk-devel ant-junit mercurial rpm-build gcc</pre>
+<pre class="code">dnf install java-devel-openjdk ant-junit mercurial rpm-build gcc</pre>
 <p>
 	In a suitable development directory, clone the iris mercurial
 	repository.
