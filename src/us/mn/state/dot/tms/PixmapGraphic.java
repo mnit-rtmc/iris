@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,17 +27,18 @@ public class PixmapGraphic extends RasterGraphic {
 	}
 
 	/** Get the pixel data length in bytes */
+	@Override
 	public int length() {
 		return width * height * 3;
 	}
 
 	/** Get the pixel index for the specified location */
-	protected int pixelIndex(int x, int y) {
-		if(x < 0 || x > width) {
+	private int pixelIndex(int x, int y) {
+		if (x < 0 || x > width) {
 			throw new IndexOutOfBoundsException("x=" + x +
 				", width=" + width);
 		}
-		if(y < 0 || y > height) {
+		if (y < 0 || y > height) {
 			throw new IndexOutOfBoundsException("y=" + y +
 				", height=" + height);
 		}
@@ -45,6 +46,7 @@ public class PixmapGraphic extends RasterGraphic {
 	}
 
 	/** Get the pixel color at the specified location */
+	@Override
 	public DmsColor getPixel(int x, int y) {
 		int p = pixelIndex(x, y);
 		// FIXME: should be BGR to match NTCIP 1203
@@ -55,6 +57,7 @@ public class PixmapGraphic extends RasterGraphic {
 	}
 
 	/** Set the pixel color at the specified location */
+	@Override
 	public void setPixel(int x, int y, DmsColor clr) {
 		int p = pixelIndex(x, y);
 		// FIXME: should be BGR to match NTCIP 1203

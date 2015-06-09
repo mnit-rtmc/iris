@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ abstract public class RasterGraphic {
 
 	/** Set the pixel data */
 	public void setPixels(byte[] p) {
-		if(p.length != length()) {
+		if (p.length != length()) {
 			throw new IndexOutOfBoundsException("p=" + p.length +
 				", length=" + length());
 		}
@@ -73,9 +73,9 @@ abstract public class RasterGraphic {
 	/** Get the count of lit pixels */
 	public int getLitCount() {
 		int n_lit = 0;
-		for(int x = 0; x < width; x++) {
-			for(int y = 0; y < height; y++) {
-				if(getPixel(x, y).isLit())
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (getPixel(x, y).isLit())
 					n_lit++;
 			}
 		}
@@ -90,8 +90,8 @@ abstract public class RasterGraphic {
 		int y1 = Math.max(b.height - height, 0) / 2;
 		int w = Math.min(width, b.width);
 		int h = Math.min(height, b.height);
-		for(int x = 0; x < w; x++) {
-			for(int y = 0; y < h; y++) {
+		for (int x = 0; x < w; x++) {
+			for (int y = 0; y < h; y++) {
 				DmsColor v = b.getPixel(x1 + x, y1 + y);
 				setPixel(x0 + x, y0 + y, v);
 			}
@@ -100,13 +100,13 @@ abstract public class RasterGraphic {
 
 	/** Update the raster by clearing pixels not in another raster */
 	public void union(RasterGraphic rg) {
-		if(width != rg.width)
+		if (width != rg.width)
 			throw new IndexOutOfBoundsException("width mismatch");
-		if(height != rg.height)
+		if (height != rg.height)
 			throw new IndexOutOfBoundsException("height mismatch");
-		for(int x = 0; x < width; x++) {
-			for(int y = 0; y < height; y++) {
-				if(!rg.getPixel(x, y).isLit())
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (!rg.getPixel(x, y).isLit())
 					setPixel(x, y, DmsColor.BLACK);
 			}
 		}
@@ -114,13 +114,13 @@ abstract public class RasterGraphic {
 
 	/** Update the raster by clearing pixels in another raster */
 	public void difference(RasterGraphic rg) {
-		if(width != rg.width)
+		if (width != rg.width)
 			throw new IndexOutOfBoundsException("width mismatch");
-		if(height != rg.height)
+		if (height != rg.height)
 			throw new IndexOutOfBoundsException("height mismatch");
-		for(int x = 0; x < width; x++) {
-			for(int y = 0; y < height; y++) {
-				if(rg.getPixel(x, y).isLit())
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (rg.getPixel(x, y).isLit())
 					setPixel(x, y, DmsColor.BLACK);
 			}
 		}

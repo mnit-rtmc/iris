@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2011  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,17 +27,18 @@ public class BitmapGraphic extends RasterGraphic {
 	}
 
 	/** Get the pixel data length in bytes */
+	@Override
 	public int length() {
 		return (width * height + 7) / 8;
 	}
 
 	/** Get the pixel index for the specified location */
-	protected int pixelIndex(int x, int y) {
-		if(x < 0 || x > width) {
+	private int pixelIndex(int x, int y) {
+		if (x < 0 || x > width) {
 			throw new IndexOutOfBoundsException("x=" + x +
 				", width=" + width);
 		}
-		if(y < 0 || y > height) {
+		if (y < 0 || y > height) {
 			throw new IndexOutOfBoundsException("y=" + y +
 				", height=" + height);
 		}
@@ -45,22 +46,24 @@ public class BitmapGraphic extends RasterGraphic {
 	}
 
 	/** Get the pixel color at the specified location */
+	@Override
 	public DmsColor getPixel(int x, int y) {
 		int p = pixelIndex(x, y);
 		int by = p / 8;
 		int bi = 7 - (p % 8);
-		if(((pixels[by] >> bi) & 1) > 0)
+		if (((pixels[by] >> bi) & 1) > 0)
 			return DmsColor.AMBER;
 		else
 			return DmsColor.BLACK;
 	}
 
 	/** Set the pixel color at the specified location */
+	@Override
 	public void setPixel(int x, int y, DmsColor clr) {
 		int p = pixelIndex(x, y);
 		int by = p / 8;
 		int bi = 1 << (7 - (p % 8));
-		if(clr.isLit())
+		if (clr.isLit())
 			pixels[by] |= bi;
 		else
 			pixels[by] &= bi ^ 0xff;
@@ -70,9 +73,9 @@ public class BitmapGraphic extends RasterGraphic {
 	public void outline() {
 		BitmapGraphic b = createBlankCopy();
 		b.copy(this);
-		for(int x = 0; x < width; x++) {
-			for(int y = 0; y < height; y++) {
-				if(b.getPixel(x, y).isLit())
+		for (int x = 0; x < width; x++) {
+			for (int y = 0; y < height; y++) {
+				if (b.getPixel(x, y).isLit())
 					setNeighbors(x, y);
 			}
 		}
@@ -80,13 +83,13 @@ public class BitmapGraphic extends RasterGraphic {
 	}
 
 	/** Set the neighbors of the specified pixel */
-	protected void setNeighbors(int x, int y) {
+	private void setNeighbors(int x, int y) {
 		int xmin = Math.max(x - 1, 0);
 		int xmax = Math.min(x + 2, width);
 		int ymin = Math.max(y - 1, 0);
 		int ymax = Math.min(y + 2, height);
-		for(int xx = xmin; xx < xmax; xx++) {
-			for(int yy = ymin; yy < ymax; yy++)
+		for (int xx = xmin; xx < xmax; xx++) {
+			for (int yy = ymin; yy < ymax; yy++)
 				setPixel(xx, yy, DmsColor.AMBER);
 		}
 	}
