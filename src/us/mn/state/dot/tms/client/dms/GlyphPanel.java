@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ import javax.swing.JPanel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
@@ -160,7 +159,7 @@ public class GlyphPanel extends JPanel {
 	/** Get the glyph bitmap */
 	private BitmapGraphic glyphBitmap(GlyphInfo gi) {
 		assert gi != null;
-		if(gi.bmap != null) {
+		if (gi.bmap != null) {
 			BitmapGraphic bg = gi.bmap.createBlankCopy();
 			bg.copy(gi.bmap);
 			return bg;
@@ -178,7 +177,7 @@ public class GlyphPanel extends JPanel {
 	/** Narrow buton pressed */
 	private void narrowPressed() {
 		BitmapGraphic bg = bmap;
-		if(bg.getWidth() > 0) {
+		if (bg.getWidth() > 0) {
 			BitmapGraphic b = new BitmapGraphic(bg.getWidth() - 1,
 				bg.getHeight());
 			b.copy(bg);
@@ -189,7 +188,7 @@ public class GlyphPanel extends JPanel {
 	/** Widen buton pressed */
 	private void widenPressed() {
 		BitmapGraphic bg = bmap;
-		if(bg.getWidth() < MAX_GLYPH_WIDTH) {
+		if (bg.getWidth() < MAX_GLYPH_WIDTH) {
 			BitmapGraphic b = new BitmapGraphic(bg.getWidth() + 1,
 				bg.getHeight());
 			b.copy(bg);
@@ -201,16 +200,16 @@ public class GlyphPanel extends JPanel {
 	private void applyPressed() {
 		GlyphInfo gi = ginfo;
 		BitmapGraphic bg = bmap;
-		if(gi.exists())
+		if (gi.exists())
 			updateGlyph(gi, bg);
-		else if(bg.getWidth() > 0)
+		else if (bg.getWidth() > 0)
 			createGlyph(gi, bg);
 	}
 
 	/** Update an existing Glyph */
 	private void updateGlyph(GlyphInfo gi, BitmapGraphic bg) {
 		assert gi.exists();
-		if(bg.getWidth() > 0) {
+		if (bg.getWidth() > 0) {
 			gi.graphic.setWidth(bg.getWidth());
 			gi.graphic.setPixels(Base64.encode(bg.getPixels()));
 		} else {
@@ -225,7 +224,7 @@ public class GlyphPanel extends JPanel {
 		assert !gi.exists();
 		int c = gi.code_point;
 		Font f = font;
-		if(c > 0 && f != null) {
+		if (c > 0 && f != null) {
 			String name = f.getName() + "_" + c;
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
