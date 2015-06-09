@@ -16,6 +16,7 @@ package us.mn.state.dot.tms;
 
 /**
  * PixmapGraphic is a simple 24-bit graphic pixmap for DMS display feedback.
+ * Pixel data is stored in BGR order.
  *
  * @author Douglas Lau
  */
@@ -49,10 +50,9 @@ public class PixmapGraphic extends RasterGraphic {
 	@Override
 	public DmsColor getPixel(int x, int y) {
 		int p = pixelIndex(x, y);
-		// FIXME: should be BGR to match NTCIP 1203
-		int red = pixels[p] & 0xFF;
+		int blue = pixels[p + 0] & 0xFF;
 		int green = pixels[p + 1] & 0xFF;
-		int blue = pixels[p + 2] & 0xFF;
+		int red = pixels[p + 2] & 0xFF;
 		return new DmsColor(red, green, blue);
 	}
 
@@ -60,9 +60,8 @@ public class PixmapGraphic extends RasterGraphic {
 	@Override
 	public void setPixel(int x, int y, DmsColor clr) {
 		int p = pixelIndex(x, y);
-		// FIXME: should be BGR to match NTCIP 1203
-		pixels[p] = (byte)clr.red;
+		pixels[p + 0] = (byte)clr.blue;
 		pixels[p + 1] = (byte)clr.green;
-		pixels[p + 2] = (byte)clr.blue;
+		pixels[p + 2] = (byte)clr.red;
 	}
 }

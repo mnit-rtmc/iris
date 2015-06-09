@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,11 +63,13 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -95,116 +97,126 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	}
 
 	/** Graphic number */
-	protected Integer g_number;
+	private Integer g_number;
 
 	/** Set the graphic number */
+	@Override
 	public void setGNumber(Integer g) {
 		g_number = g;
 	}
 
 	/** Set the graphic number */
 	public void doSetGNumber(Integer g) throws TMSException {
-		if(g == g_number)
+		if (g == g_number)
 			return;
-		if(g != null && (g < 1 || g > 255))
+		if (g != null && (g < 1 || g > 255))
 			throw new ChangeVetoException("Invalid g_number");
 		store.update(this, "g_number", g);
 		setGNumber(g);
 	}
 
 	/** Get the graphic number */
+	@Override
 	public Integer getGNumber() {
 		return g_number;
 	}
 
 	/** Bits per pixel */
-	protected int bpp;
+	private int bpp;
 
 	/** Set the bits-per-pixel (1, 8, 24) */
+	@Override
 	public void setBpp(int b) {
 		bpp = b;
 	}
 
 	/** Set the bits-per-pixel (1, 8, 24) */
 	public void doSetBpp(int b) throws TMSException {
-		if(b == bpp)
+		if (b == bpp)
 			return;
-		if(b != 1 && b != 8 && b != 24)
+		if (b != 1 && b != 8 && b != 24)
 			throw new ChangeVetoException("Invalid bpp");
 		store.update(this, "bpp", b);
 		setBpp(b);
 	}
 
 	/** Get the bits-per-pixel */
+	@Override
 	public int getBpp() {
 		return bpp;
 	}
 
 	/** Height (number of pixels) */
-	protected int height;
+	private int height;
 
 	/** Set the height (pixels) */
+	@Override
 	public void setHeight(int h) {
 		height = h;
 	}
 
 	/** Set the height (pixels) */
 	public void doSetHeight(int h) throws TMSException {
-		if(h == height)
+		if (h == height)
 			return;
 		store.update(this, "height", h);
 		setHeight(h);
 	}
 
 	/** Get the height (pixels) */
+	@Override
 	public int getHeight() {
 		return height;
 	}
 
 	/** Width (number of pixels) */
-	protected int width;
+	private int width;
 
 	/** Set the width (pixels) */
+	@Override
 	public void setWidth(int w) {
 		width = w;
 	}
 
 	/** Set the width (pixels) */
 	public void doSetWidth(int w) throws TMSException {
-		if(w == width)
+		if (w == width)
 			return;
 		store.update(this, "width", w);
 		setWidth(w);
 	}
 
 	/** Get the width (pixels) */
+	@Override
 	public int getWidth() {
 		return width;
 	}
 
-	/** Pixel data (base64 encoded) */
-	protected String pixels;
+	/** Pixel data (base64 encoded).  For 24-bit, uses BGR. */
+	private String pixels;
 
-	/** Set the pixel data (base64 encoded) */
+	/** Set the pixel data (base64 encoded).  For 24-bit, uses BGR. */
+	@Override
 	public void setPixels(String p) {
 		pixels = p;
 	}
 
 	/** Set the pixel data (base64 encoded) */
 	public void doSetPixels(String p) throws TMSException {
-		if(p.equals(pixels))
+		if (p.equals(pixels))
 			return;
 		try {
 			Base64.decode(p);
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			throw new ChangeVetoException("Invalid Base64 data");
 		}
 		store.update(this, "pixels", p);
 		setPixels(p);
 	}
 
-	/** Get the pixel data (base64 encoded) */
+	/** Get the pixel data (base64 encoded).  For 24-bit, uses BGR. */
+	@Override
 	public String getPixels() {
 		return pixels;
 	}

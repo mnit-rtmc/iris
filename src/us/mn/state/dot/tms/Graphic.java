@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,9 +50,9 @@ public interface Graphic extends SonarObject {
 	/** Get the width (pixels) */
 	int getWidth();
 
-	/** Set the pixel data (base64 encoded) */
+	/** Set the pixel data (base64 encoded).  For 24-bit, uses BGR. */
 	void setPixels(String p);
 
-	/** Get the pixel data (base64 encoded) */
+	/** Get the pixel data (base64 encoded).  For 24-bit, uses BGR. */
 	String getPixels();
 }
