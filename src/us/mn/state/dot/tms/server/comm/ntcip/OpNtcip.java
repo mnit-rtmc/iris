@@ -61,7 +61,7 @@ abstract public class OpNtcip extends OpDevice {
 		MultiString ms = new MultiString(m);
 		if (ms.isBlank())
 			return LaneUseIndication.DARK.ordinal();
-		LaneUseMulti lum = findLaneUseMulti(m);
+		LaneUseMulti lum = findLaneUseMulti(parseMulti(m));
 		if (lum != null)
 			return lum.getIndication();
 		else
