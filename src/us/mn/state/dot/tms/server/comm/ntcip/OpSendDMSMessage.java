@@ -495,6 +495,10 @@ public class OpSendDMSMessage extends OpDMS {
 		/** MULTI syntax error */
 		private final ASN1Enum<MultiSyntaxError> m_err;
 
+		/** Other error string */
+		private final ASN1String o_err = new ASN1String(
+			dmsMultiOtherErrorDescription.node);
+
 		/** Create a phase to query an other MULTI error */
 		protected QueryOtherMultiErr(ASN1Enum<MultiSyntaxError> er) {
 			m_err = er;
@@ -502,12 +506,12 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Query an other MULTI error */
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1String o_err = new ASN1String(
-				dmsMultiOtherErrorDescription.node);
 			mess.add(o_err);
 			try {
 				mess.queryProps();
 				logQuery(o_err);
+				if (isGraphicError() && graphics.hasNext())
+					return new QueryGraphicsConfig();
 				setErrorStatus(o_err.toString());
 			}
 			catch (NoSuchName e) {
@@ -516,6 +520,19 @@ public class OpSendDMSMessage extends OpDMS {
 				setErrorStatus(m_err.toString());
 			}
 			return null;
+		}
+
+		/** Check if 'other' error is a graphic error */
+		private boolean isGraphicError() {
+			// NOTE: there is no standard MultiSyntaxError defined
+			//       for graphics which do not fit, similar to
+			//       textTooBig.  Ledstar, for one, sets
+			//	 dmsMultiSyntaxError to 'other' and
+			//	 dmsMultiOtherErrorDescription to
+			//	 "Graphic off right edge of sign".
+			//	 Let's just check if "graphic" is in the string.
+			return o_err.toString().toLowerCase().contains(
+				"graphic");
 		}
 	}
 
