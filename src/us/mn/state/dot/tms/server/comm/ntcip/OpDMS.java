@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2013  Minnesota Department of Transportation
+ * Copyright (C) 2002-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,9 +31,9 @@ abstract public class OpDMS extends OpNtcip {
 
 	/** Filter message duration (valid for NTCIP) */
 	static protected int getDuration(Integer d) {
-		if(d == null || d >= DURATION_INDEFINITE)
+		if (d == null || d >= DURATION_INDEFINITE)
 			return DURATION_INDEFINITE;
-		else if(d < 0)
+		else if (d < 0)
 			return 0;
 		else
 			return d;
@@ -41,7 +41,7 @@ abstract public class OpDMS extends OpNtcip {
 
 	/** Parse an NTCIP duration value */
 	static protected Integer parseDuration(int d) {
-		if(d <= 0 || d >= DURATION_INDEFINITE)
+		if (d <= 0 || d >= DURATION_INDEFINITE)
 			return null;
 		else
 			return d;
@@ -57,8 +57,9 @@ abstract public class OpDMS extends OpNtcip {
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
-		if(isSuccess())
+		if (isSuccess())
 			dms.requestConfigure();
 		else
 			dms.setConfigure(false);

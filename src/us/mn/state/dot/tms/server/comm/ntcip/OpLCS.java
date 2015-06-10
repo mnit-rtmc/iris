@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,26 +63,27 @@ abstract public class OpLCS extends OpNtcip {
 	}
 
 	/** Cleanup the operation */
+	@Override
 	public void cleanup() {
-		if(isSuccess())
+		if (isSuccess())
 			lcs_array.setIndicationsCurrent(ind_after, user);
-		for(DMSImpl dms: dmss) {
-			if(dms == null || dms.isFailed())
+		for (DMSImpl dms: dmss) {
+			if (dms == null || dms.isFailed())
 				setFailed();
 		}
 		super.cleanup();
 	}
 
 	/** Lookup DMSs for an LCS array */
-	protected void lookupDMSs() {
+	private void lookupDMSs() {
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
-		if(lcss.length != ind_before.length) {
+		if (lcss.length != ind_before.length) {
 			logError("lookupDMS: array invalid");
 			return;
 		}
-		for(int i = 0; i < lcss.length; i++) {
+		for (int i = 0; i < lcss.length; i++) {
 			DMS dms = DMSHelper.lookup(lcss[i].getName());
-			if(dms instanceof DMSImpl)
+			if (dms instanceof DMSImpl)
 				dmss[i] = (DMSImpl)dms;
 		}
 	}

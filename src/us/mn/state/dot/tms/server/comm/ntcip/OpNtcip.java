@@ -32,19 +32,19 @@ abstract public class OpNtcip extends OpDevice {
 
 	/** Log an error msg */
 	protected void logError(String msg) {
-		if(NTCIP_LOG.isOpen())
+		if (NTCIP_LOG.isOpen())
 			NTCIP_LOG.log(device.getName() + "! " + msg);
 	}
 
 	/** Log a property query */
 	protected void logQuery(ASN1Object prop) {
-		if(NTCIP_LOG.isOpen())
+		if (NTCIP_LOG.isOpen())
 			NTCIP_LOG.log(device.getName() + ": " + prop);
 	}
 
 	/** Log a property store */
 	protected void logStore(ASN1Object prop) {
-		if(NTCIP_LOG.isOpen())
+		if (NTCIP_LOG.isOpen())
 			NTCIP_LOG.log(device.getName() + ":= " + prop);
 	}
 

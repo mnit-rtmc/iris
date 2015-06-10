@@ -53,7 +53,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	}
 
 	/** SNMP message protocol */
-	protected final SNMP snmp = new SNMP();
+	private final SNMP snmp = new SNMP();
 
 	/** Create a new Ntcip poller */
 	public NtcipPoller(String n, Messenger m) {
@@ -80,7 +80,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	/** Send a device request message to the sign */
 	@Override
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {
-		switch(r) {
+		switch (r) {
 		case RESET_DEVICE:
 			addOperation(new OpResetDMS(dms));
 			break;
@@ -129,7 +129,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	public void sendMessage(DMSImpl dms, SignMessage sm, User o)
 		throws InvalidMessageException
 	{
-		if(dms.isMessageCurrentEquivalent(sm))
+		if (dms.isMessageCurrentEquivalent(sm))
 			addOperation(new OpUpdateDMSDuration(dms, sm));
 		else {
 			addOperation(new OpSendDMSMessage(dms, sm, o,
@@ -140,7 +140,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	/** Send a device request message to an LCS array */
 	@Override
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
-		switch(r) {
+		switch (r) {
 		case SEND_SETTINGS:
 			addOperation(new OpSendLCSSettings(lcs_array));
 			break;
