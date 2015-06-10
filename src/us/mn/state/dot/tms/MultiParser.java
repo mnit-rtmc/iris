@@ -30,11 +30,11 @@ public class MultiParser {
 
 	/** Regular expression to locate tags */
 	static private final Pattern TAG = Pattern.compile(
-		"\\[([-A-Za-z,0-9_]*)\\]");
+		"\\[([-/A-Za-z,0-9_]*)\\]");
 
 	/** Regular expression to match supported MULTI tags */
-	static private final Pattern TAGS = Pattern.compile(
-		"(cb|pb|cf|cr|fo|g|jl|jp|nl|np|pt|sc|tr|tt|vsa|slow|feed)(.*)");
+	static private final Pattern TAGS = Pattern.compile("(cb|pb|cf|cr|fo|" +
+		"g|jl|jp|nl|np|pt|sc|/sc|tr|tt|vsa|slow|feed)(.*)");
 
 	/** Regular expression to match text between MULTI tags */
 	static private final Pattern TEXT_PATTERN = Pattern.compile(
@@ -49,56 +49,58 @@ public class MultiParser {
 	static public void parse(String multi, Multi cb) {
 		int offset = 0;
 		Matcher m = TAG.matcher(multi);
-		while(m.find()) {
-			if(m.start() > offset)
+		while (m.find()) {
+			if (m.start() > offset)
 				cb.addSpan(multi.substring(offset, m.start()));
 			offset = m.end();
 			// m.group(1) strips off tag brackets
 			parseTag(m.group(1), cb);
 		}
-		if(offset < multi.length())
+		if (offset < multi.length())
 			cb.addSpan(multi.substring(offset));
 	}
 
 	/** Parse one MULTI tag */
 	static private void parseTag(String tag, Multi cb) {
 		Matcher mtag = TAGS.matcher(tag);
-		if(mtag.find()) {
+		if (mtag.find()) {
 			String tid = mtag.group(1).toLowerCase();
 			String tparam = mtag.group(2);
-			if(tid.equals("cb"))
+			if (tid.equals("cb"))
 				parseColorBackground(tparam, cb);
-			else if(tid.equals("pb"))
+			else if (tid.equals("pb"))
 				parsePageBackground(tparam, cb);
-			else if(tid.equals("cf"))
+			else if (tid.equals("cf"))
 				parseColorForeground(tparam, cb);
-			else if(tid.equals("cr"))
+			else if (tid.equals("cr"))
 				parseColorRectangle(tparam, cb);
-			else if(tid.equals("fo"))
+			else if (tid.equals("fo"))
 				parseFont(tparam, cb);
-			else if(tid.equals("g"))
+			else if (tid.equals("g"))
 				parseGraphic(tparam, cb);
-			else if(tid.equals("jl"))
+			else if (tid.equals("jl"))
 				parseJustificationLine(tparam, cb);
-			else if(tid.equals("jp"))
+			else if (tid.equals("jp"))
 				parseJustificationPage(tparam, cb);
-			else if(tid.equals("nl"))
+			else if (tid.equals("nl"))
 				cb.addLine(parseInt(tparam));
-			else if(tid.equals("np"))
+			else if (tid.equals("np"))
 				cb.addPage();
-			else if(tid.equals("pt"))
+			else if (tid.equals("pt"))
 				parsePageTimes(tparam, cb);
-			else if(tid.equals("sc"))
+			else if (tid.equals("sc"))
 				parseCharSpacing(tparam, cb);
-			else if(tid.equals("tr"))
+			else if (tid.equals("/sc"))
+				parseCharSpacing(null, cb);
+			else if (tid.equals("tr"))
 				parseTextRectangle(tparam, cb);
-			else if(tid.equals("tt"))
+			else if (tid.equals("tt"))
 				cb.addTravelTime(tparam);
-			else if(tid.equals("vsa"))
+			else if (tid.equals("vsa"))
 				cb.addSpeedAdvisory();
-			else if(tid.equals("slow"))
+			else if (tid.equals("slow"))
 				parseSlowWarning(tparam, cb);
-			else if(tid.equals("feed"))
+			else if (tid.equals("feed"))
 				cb.addFeed(tparam);
 		}
 	}
@@ -106,22 +108,22 @@ public class MultiParser {
 	/** Parse a (deprecated) background color tag */
 	static private void parseColorBackground(String v, Multi cb) {
 		Integer x = parseInt(v);
-		if(x != null)
+		if (x != null)
 			cb.setColorBackground(x);
 	}
 
 	/** Parse a page background color tag */
 	static private void parsePageBackground(String v, Multi cb) {
 		String[] args = v.split(",", 3);
-		if(args.length == 1) {
+		if (args.length == 1) {
 			Integer z = parseInt(args, 0);
-			if(z != null)
+			if (z != null)
 				cb.setPageBackground(z);
 		} else {
 			Integer r = parseInt(args, 0);
 			Integer g = parseInt(args, 1);
 			Integer b = parseInt(args, 2);
-			if(r != null && g != null && b != null)
+			if (r != null && g != null && b != null)
 				cb.setPageBackground(r, g, b);
 		}
 	}
@@ -129,15 +131,15 @@ public class MultiParser {
 	/** Parse a color foreground tag */
 	static private void parseColorForeground(String v, Multi cb) {
 		String[] args = v.split(",", 3);
-		if(args.length == 1) {
+		if (args.length == 1) {
 			Integer x = parseInt(args, 0);
-			if(x != null)
+			if (x != null)
 				cb.setColorForeground(x);
 		} else {
 			Integer r = parseInt(args, 0);
 			Integer g = parseInt(args, 1);
 			Integer b = parseInt(args, 2);
-			if(r != null && g != null && b != null)
+			if (r != null && g != null && b != null)
 				cb.setColorForeground(r, g, b);
 		}
 	}
@@ -154,8 +156,10 @@ public class MultiParser {
 		Integer r = parseInt(args, 4);
 		Integer g = parseInt(args, 5);
 		Integer b = parseInt(args, 6);
-		if(x != null && y != null && w != null && h !=null && r !=null){
-			if(g != null && b != null)
+		if (x != null && y != null && w != null && h != null &&
+		    r != null)
+		{
+			if (g != null && b != null)
 				cb.addColorRectangle(x, y, w, h, r, g, b);
 			else
 				cb.addColorRectangle(x, y, w, h, r);
@@ -169,9 +173,9 @@ public class MultiParser {
 		String[] args = f.split(",", 2);
 		Integer f_num = parseInt(args, 0);
 		String f_id = null;
-		if(args.length > 1)
+		if (args.length > 1)
 			f_id = args[1];
-		if(f_num != null)
+		if (f_num != null)
 			cb.setFont(f_num, f_id);
 	}
 
@@ -184,9 +188,9 @@ public class MultiParser {
 		Integer x = parseInt(args, 1);
 		Integer y = parseInt(args, 2);
 		String g_id = null;
-		if(args.length > 3)
+		if (args.length > 3)
 			g_id = args[3];
-		if(g_num != null)
+		if (g_num != null)
 			cb.addGraphic(g_num, x, y, g_id);
 	}
 
@@ -196,7 +200,7 @@ public class MultiParser {
 	static private void parseJustificationLine(String v, Multi cb) {
 		Multi.JustificationLine jl = Multi.JustificationLine.UNDEFINED;
 		Integer j = parseInt(v);
-		if(j != null)
+		if (j != null)
 			jl = Multi.JustificationLine.fromOrdinal(j);
 		cb.setJustificationLine(jl);
 	}
@@ -207,7 +211,7 @@ public class MultiParser {
 	static private void parseJustificationPage(String v, Multi cb) {
 		Multi.JustificationPage jp = Multi.JustificationPage.UNDEFINED;
 		Integer j = parseInt(v);
-		if(j != null)
+		if (j != null)
 			jp = Multi.JustificationPage.fromOrdinal(j);
 		cb.setJustificationPage(jp);
 	}
@@ -238,7 +242,7 @@ public class MultiParser {
 		Integer y = parseInt(args, 1);
 		Integer w = parseInt(args, 2);
 		Integer h = parseInt(args, 3);
-		if(x != null && y != null && w != null && h != null)
+		if (x != null && y != null && w != null && h != null)
 			cb.setTextRectangle(x, y, w, h);
 	}
 
@@ -252,13 +256,13 @@ public class MultiParser {
 		Integer b = parseInt(args, 1);
 		String units = parseSpeedUnits(args, 2);
 		boolean dist = parseDist(args, 3);
-		if(isSpeedValid(spd) && isBackupValid(b))
+		if (isSpeedValid(spd) && isBackupValid(b))
 			cb.addSlowWarning(spd, b, units, dist);
 	}
 
 	/** Parse an integer value */
 	static private Integer parseInt(String[] args, int n) {
-		if(n < args.length)
+		if (n < args.length)
 			return parseInt(args[n]);
 		else
 			return null;
@@ -269,7 +273,7 @@ public class MultiParser {
 		try {
 			return Integer.parseInt(param);
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			return null;
 		}
 	}
@@ -286,7 +290,7 @@ public class MultiParser {
 
 	/** Parse a speed units value */
 	static private String parseSpeedUnits(String[] args, int n) {
-		if(n < args.length)
+		if (n < args.length)
 			return parseSpeedUnits(args[n]);
 		else
 			return "mph";
@@ -294,7 +298,7 @@ public class MultiParser {
 
 	/** Parse a speed units value */
 	static private String parseSpeedUnits(String param) {
-		if(param.equals("kph"))
+		if (param.equals("kph"))
 			return param;
 		else
 			return "mph";
@@ -302,7 +306,7 @@ public class MultiParser {
 
 	/** Parse a "dist" value */
 	static private boolean parseDist(String[] args, int n) {
-		if(n < args.length)
+		if (n < args.length)
 			return parseDist(args[n]);
 		else
 			return false;
@@ -315,9 +319,9 @@ public class MultiParser {
 
 	/** Validate a MULTI string */
 	static public boolean isValid(String multi) {
-		for(String t: TAG.split(multi)) {
+		for (String t: TAG.split(multi)) {
 			Matcher m = TEXT_PATTERN.matcher(t);
-			if(!m.matches())
+			if (!m.matches())
 				return false;
 		}
 		return true;
@@ -337,7 +341,7 @@ public class MultiParser {
 		@Override
 		public void addSpan(String s) {
 			Matcher m = TEXT_PATTERN.matcher(s);
-			while(m.find())
+			while (m.find())
 				super.addSpan(m.group());
 		}
 	}

@@ -39,6 +39,8 @@ public class MultiStringTest extends TestCase {
 		assertTrue("ABC DEF".equals(new MultiString(
 			"ABC [sc4]DEF").asText()));
 		assertTrue("ABC DEF".equals(new MultiString(
+			"ABC [sc4]DEF[/sc]").asText()));
+		assertTrue("ABC DEF".equals(new MultiString(
 			"ABC[jl4]DEF").asText()));
 		assertTrue("ABC  DEF".equals(new MultiString(
 			"ABC[nl]DEF").asText()));
@@ -86,6 +88,10 @@ public class MultiStringTest extends TestCase {
 			new String[] { "ABC", "DEF" });
 		checkGetLines("ABC[nl]DEF[nl2]GHI",
 			new String[] { "ABC", "DEF", "GHI" });
+		// character spacing tags
+		checkGetLines("ABC[sc3]DEF", new String[] { "ABC[sc3]DEF" });
+		checkGetLines("ABC[sc3]DEF[/sc]GHI", new String[] {
+			"ABC[sc3]DEF[/sc]GHI" });
 	}
 
 	public void testGetTextLineTags() {
@@ -127,11 +133,11 @@ public class MultiStringTest extends TestCase {
 	}
 
 	private void checkGetLines(String multi, String[] text) {
-		for(int i = 1; i <= 6; i++) {
+		for (int i = 1; i <= 6; i++) {
 			String[] lns = new MultiString(multi).getLines(i);
 			assertTrue(lns.length == i);
-			for(int j = 0; j < i; j++) {
-				if(j < text.length)
+			for (int j = 0; j < i; j++) {
+				if (j < text.length)
 					assertTrue(lns[j].equals(text[j]));
 				else
 					assertTrue(lns[j].equals(""));
@@ -262,6 +268,10 @@ public class MultiStringTest extends TestCase {
 			equals("[pt10o5]"));
 		assertTrue(MultiString.normalize("[pto5]").
 			equals("[pto5]"));
+		assertTrue(MultiString.normalize("ABC[sc3]DEF").
+			equals("ABC[sc3]DEF"));
+		assertTrue(MultiString.normalize("ABC[sc3]DEF[/sc]GHI").
+			equals("ABC[sc3]DEF[/sc]GHI"));
 		assertTrue(MultiString.normalize("[tr1,1,40,20]").
 			equals("[tr1,1,40,20]"));
 		assertTrue(MultiString.normalize("[tr1,1,0,0]").
@@ -506,7 +516,7 @@ public class MultiStringTest extends TestCase {
 		try {
 			new MultiString(null);
 			assertTrue(false);
-		} catch(NullPointerException ex) {
+		} catch (NullPointerException ex) {
 			assertTrue(true);
 		}
 
@@ -518,36 +528,29 @@ public class MultiStringTest extends TestCase {
 		// nl tag
 		assertTrue(new MultiString("ABC[nl]DEF").isValid());
 		assertTrue(new MultiString("ABC[nl1]DEF").isValid());
-		//assertFalse(new MultiString("ABC[nl12]DEF").isValid());
 
 		// fo tag
 		assertTrue(new MultiString("ABC[fo]DEF").isValid());
 		assertTrue(new MultiString("ABC[fo1]DEF").isValid());
 		assertTrue(new MultiString("ABC[fo12]DEF").isValid());
 		assertTrue(new MultiString("ABC[fo123]DEF").isValid());
-		//assertFalse(new MultiString("ABC[fo1234]DEF").isValid());
 
 		// np tag
 		assertTrue(new MultiString("ABC[np]DEF").isValid());
-		assertTrue(new MultiString("ABC[nl1]DEF").isValid());
 
 		// jp tag
-		//assertFalse(new MultiString("ABC[jp]DEF").isValid());
 		assertTrue(new MultiString("ABC[jp1]DEF").isValid());
 		assertTrue(new MultiString("ABC[jp2]DEF").isValid());
 		assertTrue(new MultiString("ABC[jp3]DEF").isValid());
 		assertTrue(new MultiString("ABC[jp4]DEF").isValid());
-		//assertFalse(new MultiString("ABC[jp5]DEF").isValid());
 
 		// pt tag
 		assertTrue(new MultiString("ABC[pto]").isValid());
 		assertTrue(new MultiString("ABC[pt1o]").isValid());
 		assertTrue(new MultiString("ABC[pt12o]").isValid());
 		assertTrue(new MultiString("ABC[pt123o]").isValid());
-		//assertFalse(new MultiString("ABC[pt1234o]").isValid());
 		assertTrue(new MultiString("ABC[pto1]").isValid());
 		assertTrue(new MultiString("ABC[pto12]").isValid());
 		assertTrue(new MultiString("ABC[pto123]").isValid());
-		//assertFalse(new MultiString("ABC[pto1234]").isValid());
 	}
 }
