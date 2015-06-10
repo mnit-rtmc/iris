@@ -14,16 +14,22 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip;
 
+import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
+import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DeviceImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1203.GraphicInfoList;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Object;
+import us.mn.state.dot.tms.utils.HexString;
 
 /**
  * Operation for NTCIP device.
@@ -57,6 +63,47 @@ abstract public class OpNtcip extends OpDevice {
 			return lum.getIndication();
 		else
 			return null;
+	}
+
+	/** Parse a MULTI string and add graphic version IDs.
+	 * @param ms Original MULTI string.
+	 * @return MULTI string with graphic IDs added. */
+	static protected String parseMulti(String ms) {
+		MultiString multi = new MultiString() {
+			@Override
+			public void addGraphic(int g_num, Integer x, Integer y,
+				String g_id)
+			{
+				if (null == g_id) {
+					g_id = calculateGraphicID(g_num);
+					if (g_id != null) {
+						x = (x != null) ? x : 1;
+						y = (y != null) ? y : 1;
+					}
+				}
+				super.addGraphic(g_num, x, y, g_id);
+			}
+		};
+		MultiParser.parse(ms, multi);
+		return multi.toString();
+	}
+
+	/** Calculate the graphic ID.
+	 * @param g_num Graphic number.
+	 * @return 4-digit hexadecimal graphic ID, or null. */
+	static private String calculateGraphicID(int g_num) {
+		Graphic g = GraphicHelper.find(g_num);
+		if (g != null) {
+			try {
+				GraphicInfoList gil = new GraphicInfoList(g);
+				int gid = gil.getCrcSwapped();
+				return HexString.format(gid, 4);
+			}
+			catch (IOException e) {
+				return null;
+			}
+		}
+		return null;
 	}
 
 	/** Log an error msg */

@@ -23,12 +23,9 @@ import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
-import us.mn.state.dot.tms.MultiParser;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.MultiSyntaxError;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -96,47 +93,6 @@ public class OpSendDMSMessage extends OpDMS {
 			dmsGraphicStatus.node, row);
 	}
 
-	/** Create a MULTI string with proper graphic tags.
-	 * @param ms Original MULTI string.
-	 * @return MULTI string with graphic IDs added. */
-	static private String createMulti(String ms) {
-		MultiString _multi = new MultiString() {
-			@Override
-			public void addGraphic(int g_num, Integer x, Integer y,
-				String g_id)
-			{
-				if (null == g_id) {
-					g_id = calculateGraphicID(g_num);
-					if (g_id != null) {
-						x = (x != null) ? x : 1;
-						y = (y != null) ? y : 1;
-					}
-				}
-				super.addGraphic(g_num, x, y, g_id);
-			}
-		};
-		MultiParser.parse(ms, _multi);
-		return _multi.toString();
-	}
-
-	/** Calculate the graphic ID.
-	 * @param g_num Graphic number.
-	 * @return 4-digit hexadecimal graphic ID, or null. */
-	static private String calculateGraphicID(int g_num) {
-		Graphic g = GraphicHelper.find(g_num);
-		if (g != null) {
-			try {
-				GraphicInfoList gil = new GraphicInfoList(g);
-				int gid = gil.getCrcSwapped();
-				return HexString.format(gid, 4);
-			}
-			catch (IOException e) {
-				return null;
-			}
-		}
-		return null;
-	}
-
 	/** Sign message */
 	private final SignMessage message;
 
@@ -194,7 +150,7 @@ public class OpSendDMSMessage extends OpDMS {
 	public OpSendDMSMessage(DMSImpl d, SignMessage sm, User o) {
 		super(PriorityLevel.COMMAND, d);
 		message = sm;
-		multi = createMulti(sm.getMulti());
+		multi = parseMulti(sm.getMulti());
 		owner = o;
 		msg_num = lookupMsgNum(sm);
 		message_crc = DmsMessageCRC.calculate(multi,
