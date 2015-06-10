@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,11 +48,11 @@ public class LaneUseMultiHelper extends BaseHelper {
 	 * @return A lane-use MULTI. */
 	static public LaneUseMulti find(int ind, int w, int h) {
 		Iterator<LaneUseMulti> it = iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			LaneUseMulti lum = it.next();
-			if(lum.getIndication() == ind &&
-			   lum.getWidth() == w &&
-			   lum.getHeight() == h)
+			if (lum.getIndication() == ind &&
+			    lum.getWidth() == w &&
+			    lum.getHeight() == h)
 				return lum;
 		}
 		return null;
@@ -61,10 +61,10 @@ public class LaneUseMultiHelper extends BaseHelper {
 	/** Find a lane-use MULTI which matches a MULTI string */
 	static public LaneUseMulti find(String multi) {
 		Iterator<LaneUseMulti> it = iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			LaneUseMulti lum = it.next();
 			QuickMessage qm = lum.getQuickMessage();
-			if(qm != null && match(qm.getMulti(), multi))
+			if (qm != null && match(qm.getMulti(), multi))
 				return lum;
 		}
 		return null;
