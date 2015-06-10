@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import java.util.regex.Pattern;
 
 /**
  * Helper class for LaneUseMulti.
@@ -56,38 +55,5 @@ public class LaneUseMultiHelper extends BaseHelper {
 				return lum;
 		}
 		return null;
-	}
-
-	/** Find a lane-use MULTI which matches a MULTI string */
-	static public LaneUseMulti find(String multi) {
-		Iterator<LaneUseMulti> it = iterator();
-		while (it.hasNext()) {
-			LaneUseMulti lum = it.next();
-			QuickMessage qm = lum.getQuickMessage();
-			if (qm != null && match(qm.getMulti(), multi))
-				return lum;
-		}
-		return null;
-	}
-
-	/** Test if a quick message matches a multi string */
-	static private boolean match(String qm, String multi) {
-		return Pattern.matches(createRegex(qm), multi);
-	}
-
-	/** Create a regex which matches any speed advisory values */
-	static private String createRegex(String qm) {
-		MultiString re = new MultiString() {
-			public void addSpeedAdvisory() {
-				// Add unquoted regex to match 2 digits
-				addSpan("\\E[0-9].\\Q");
-			}
-		};
-		// Start quoting for regex
-		re.addSpan("\\Q");
-		MultiParser.parse(qm, re);
-		// End quoting for regex
-		re.addSpan("\\E");
-		return re.toString();
 	}
 }

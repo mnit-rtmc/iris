@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import java.util.Iterator;
+import java.util.regex.Pattern;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
@@ -23,6 +25,7 @@ import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DeviceImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -43,7 +46,7 @@ abstract public class OpNtcip extends OpDevice {
 
 	/** Lookup a sign message number */
 	static protected int lookupMsgNum(SignMessage sm) {
-		LaneUseMulti lum = LaneUseMultiHelper.find(sm.getMulti());
+		LaneUseMulti lum = findLaneUseMulti(sm.getMulti());
 		if (lum != null) {
 			Integer msg_num = lum.getMsgNum();
 			if (msg_num != null)
@@ -58,11 +61,49 @@ abstract public class OpNtcip extends OpDevice {
 		MultiString ms = new MultiString(m);
 		if (ms.isBlank())
 			return LaneUseIndication.DARK.ordinal();
-		LaneUseMulti lum = LaneUseMultiHelper.find(m);
+		LaneUseMulti lum = findLaneUseMulti(m);
 		if (lum != null)
 			return lum.getIndication();
 		else
 			return null;
+	}
+
+	/** Find a lane-use MULTI which matches a MULTI string */
+	static private LaneUseMulti findLaneUseMulti(String multi) {
+		Iterator<LaneUseMulti> it = LaneUseMultiHelper.iterator();
+		while (it.hasNext()) {
+			LaneUseMulti lum = it.next();
+			QuickMessage qm = lum.getQuickMessage();
+			if (qm != null && match(qm, multi))
+				return lum;
+		}
+		return null;
+	}
+
+	/** Test if a quick message matches a multi string.
+	 * @param qm Quick message.
+	 * @param multi MULTI string to compare.
+	 * @return true if they match. */
+	static private boolean match(QuickMessage qm, String multi) {
+		String re = createRegex(parseMulti(qm.getMulti()));
+		return Pattern.matches(re, multi);
+	}
+
+	/** Create a regex which matches any speed advisory values */
+	static private String createRegex(String qm) {
+		MultiString re = new MultiString() {
+			@Override
+			public void addSpeedAdvisory() {
+				// Add unquoted regex to match 2 digits
+				addSpan("\\E[0-9].\\Q");
+			}
+		};
+		// Start quoting for regex
+		re.addSpan("\\Q");
+		MultiParser.parse(qm, re);
+		// End quoting for regex
+		re.addSpan("\\E");
+		return re.toString();
 	}
 
 	/** Parse a MULTI string and add graphic version IDs.
