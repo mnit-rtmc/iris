@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,23 +26,23 @@ import java.nio.charset.UnmappableCharacterException;
 public class Base64 {
 
 	/** Line length for Base64 encoded data */
-	static protected final int LINE_LENGTH = 76;
+	static private final int LINE_LENGTH = 76;
 
 	/** Code points used for Base64 encoding */
-	static protected final String CODE =
+	static private final String CODE =
 		"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz" +
 		"0123456789+/";
 
 	/** Get the character code of one 6-bit value */
-	static protected char getCode(int value) {
+	static private char getCode(int value) {
 		return CODE.charAt(value & 0x3f);
 	}
 
 	/** Calculate the chunk value from source byte array */
-	static protected int chunk(byte[] src, int off) {
-		return (src[off] & 0xFF) << 16 |
-			(src[off + 1] & 0xFF) << 8 |
-			(src[off + 2] & 0xFF);
+	static private int chunk(byte[] src, int off) {
+		return (src[off + 0] & 0xFF) << 16 |
+		       (src[off + 1] & 0xFF) << 8 |
+		       (src[off + 2] & 0xFF);
 	}
 
 	/** Encode bytes into a 4-character Base64 chunk */
@@ -51,14 +51,8 @@ public class Base64 {
 	{
 		dest.append(getCode(src >> 18));
 		dest.append(getCode(src >> 12));
-		if(n_bytes > 1)
-			dest.append(getCode(src >> 6));
-		else
-			dest.append('=');
-		if(n_bytes > 2)
-			dest.append(getCode(src));
-		else
-			dest.append('=');
+		dest.append((n_bytes > 1) ? getCode(src >> 6) : '=');
+		dest.append((n_bytes > 2) ? getCode(src) : '=');
 	}
 
 	/** Encode an array of bytes to a Base64 string */
@@ -66,16 +60,16 @@ public class Base64 {
 		int d = 0;
 		int line = 0;
 		StringBuilder dest = new StringBuilder();
-		for(; d < src.length - 2; d += 3) {
+		for (; d < src.length - 2; d += 3) {
 			encodeChunk(chunk(src, d), 3, dest);
 			line += 4;
-			if(line == LINE_LENGTH) {
+			if (line == LINE_LENGTH) {
 				dest.append('\n');
 				line = 0;
 			}
 		}
 		int rem = src.length - d;
-		if(rem > 0) {
+		if (rem > 0) {
 			byte[] c = new byte[3];
 			System.arraycopy(src, d, c, 0, rem);
 			encodeChunk(chunk(c, 0), rem, dest);
@@ -84,20 +78,20 @@ public class Base64 {
 	}
 
 	/** Code for equals-sign */
-	static protected final int EQUALS_SIGN = -1;
+	static private final int EQUALS_SIGN = -1;
 
 	/** Code for whitespace */
-	static protected final int WHITESPACE = -2;
+	static private final int WHITESPACE = -2;
 
 	/** Code for unmapped characters */
-	static protected final int UNMAPPED = -3;
+	static private final int UNMAPPED = -3;
 
 	/** Decode table used for Base64 decoding */
-	static protected final int[] DECODE = new int[0x80];
+	static private final int[] DECODE = new int[0x80];
 	static {
-		for(int i = 0; i < DECODE.length; i++)
+		for (int i = 0; i < DECODE.length; i++)
 			DECODE[i] = UNMAPPED;
-		for(int i = 0; i < CODE.length(); i++) {
+		for (int i = 0; i < CODE.length(); i++) {
 			int c = CODE.charAt(i);
 			DECODE[c] = i;
 		}
@@ -109,24 +103,24 @@ public class Base64 {
 	}
 
 	/** Get the 6-bit value of one character coce */
-	static protected int getValue(char code) {
-		if(code < 0 || code >= DECODE.length)
+	static private int getValue(char code) {
+		if (code < 0 || code >= DECODE.length)
 			return UNMAPPED;
 		return DECODE[code];
 	}
 
 	/** Calculate a chunk array from an encoded string */
-	static protected byte[] chunk(StringBuilder src) throws IOException {
+	static private byte[] chunk(StringBuilder src) throws IOException {
 		int c = 0;
 		int s = 0;
 		int i = 1;
-		for(; s < src.length(); s++) {
+		for (; s < src.length(); s++) {
 			int v = getValue(src.charAt(s));
-			if(v == UNMAPPED)
+			if (v == UNMAPPED)
 				throw new UnmappableCharacterException(0);
-			if(v >= 0) {
+			if (v >= 0) {
 				c |= v << (24 - i * 6);
-				if(i > 4)
+				if (i > 4)
 					break;
 				i++;
 			}
@@ -134,11 +128,11 @@ public class Base64 {
 		src.delete(0, s);
 		int l = Math.max(0, i - 2);
 		byte[] b = new byte[l];
-		if(l > 0)
+		if (l > 0)
 			b[0] = (byte)((c >> 16) & 0xFF);
-		if(l > 1)
+		if (l > 1)
 			b[1] = (byte)((c >> 8) & 0xFF);
-		if(l > 2)
+		if (l > 2)
 			b[2] = (byte)(c & 0xFF);
 		return b;
 	}
@@ -147,7 +141,7 @@ public class Base64 {
 	static public byte[] decode(String s) throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream();
 		StringBuilder b = new StringBuilder(s);
-		while(b.length() > 0) {
+		while (b.length() > 0) {
 			byte[] c = chunk(b);
 			bos.write(c, 0, c.length);
 		}
