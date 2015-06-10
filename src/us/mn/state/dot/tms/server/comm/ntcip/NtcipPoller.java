@@ -19,10 +19,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.LaneUseMulti;
-import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
@@ -40,17 +37,6 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  * @author Douglas Lau
  */
 public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
-
-	/** Lookup a sign message number */
-	static private int lookupMsgNum(SignMessage sm) {
-		LaneUseMulti lum = LaneUseMultiHelper.find(sm.getMulti());
-		if (lum != null) {
-			Integer msg_num = lum.getMsgNum();
-			if (msg_num != null)
-				return msg_num;
-		}
-		return 1;
-	}
 
 	/** SNMP message protocol */
 	private final SNMP snmp = new SNMP();
@@ -131,10 +117,8 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	{
 		if (dms.isMessageCurrentEquivalent(sm))
 			addOperation(new OpUpdateDMSDuration(dms, sm));
-		else {
-			addOperation(new OpSendDMSMessage(dms, sm, o,
-				lookupMsgNum(sm)));
-		}
+		else
+			addOperation(new OpSendDMSMessage(dms, sm, o));
 	}
 
 	/** Send a device request message to an LCS array */

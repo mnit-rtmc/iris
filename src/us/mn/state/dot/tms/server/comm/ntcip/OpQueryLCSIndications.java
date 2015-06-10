@@ -15,10 +15,6 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.LaneUseIndication;
-import us.mn.state.dot.tms.LaneUseMulti;
-import us.mn.state.dot.tms.LaneUseMultiHelper;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
@@ -61,18 +57,5 @@ public class OpQueryLCSIndications extends OpLCS {
 			SignMessage sm = dms.getMessageCurrent();
 			return lookupIndication(sm);
 		}
-	}
-
-	/** Lookup an indication on a sign message */
-	private Integer lookupIndication(SignMessage sm) {
-		String m = sm.getMulti();
-		MultiString ms = new MultiString(m);
-		if (ms.isBlank())
-			return LaneUseIndication.DARK.ordinal();
-		LaneUseMulti lum = LaneUseMultiHelper.find(m);
-		if (lum != null)
-			return lum.getIndication();
-		else
-			return null;
 	}
 }

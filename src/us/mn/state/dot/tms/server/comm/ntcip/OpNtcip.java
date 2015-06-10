@@ -15,6 +15,11 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.LaneUseIndication;
+import us.mn.state.dot.tms.LaneUseMulti;
+import us.mn.state.dot.tms.LaneUseMultiHelper;
+import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DeviceImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -29,6 +34,30 @@ abstract public class OpNtcip extends OpDevice {
 
 	/** NTCIP debug log */
 	static private final DebugLog NTCIP_LOG = new DebugLog("ntcip");
+
+	/** Lookup a sign message number */
+	static protected int lookupMsgNum(SignMessage sm) {
+		LaneUseMulti lum = LaneUseMultiHelper.find(sm.getMulti());
+		if (lum != null) {
+			Integer msg_num = lum.getMsgNum();
+			if (msg_num != null)
+				return msg_num;
+		}
+		return 1;
+	}
+
+	/** Lookup an LCS indication on a sign message */
+	static protected Integer lookupIndication(SignMessage sm) {
+		String m = sm.getMulti();
+		MultiString ms = new MultiString(m);
+		if (ms.isBlank())
+			return LaneUseIndication.DARK.ordinal();
+		LaneUseMulti lum = LaneUseMultiHelper.find(m);
+		if (lum != null)
+			return lum.getIndication();
+		else
+			return null;
+	}
 
 	/** Log an error msg */
 	protected void logError(String msg) {

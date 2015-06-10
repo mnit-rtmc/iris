@@ -191,20 +191,15 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Create a new send DMS message operation */
-	public OpSendDMSMessage(DMSImpl d, SignMessage sm, User o, int mn) {
+	public OpSendDMSMessage(DMSImpl d, SignMessage sm, User o) {
 		super(PriorityLevel.COMMAND, d);
 		message = sm;
 		multi = createMulti(sm.getMulti());
 		owner = o;
-		msg_num = mn;
+		msg_num = lookupMsgNum(sm);
 		message_crc = DmsMessageCRC.calculate(multi,
 			sm.getBeaconEnabled(), 0);
 		graphics = GraphicHelper.lookupMulti(multi);
-	}
-
-	/** Create a new send DMS message operation */
-	public OpSendDMSMessage(DMSImpl d, SignMessage sm, User o) {
-		this(d, sm, o, 1);
 	}
 
 	/** Operation equality test */
