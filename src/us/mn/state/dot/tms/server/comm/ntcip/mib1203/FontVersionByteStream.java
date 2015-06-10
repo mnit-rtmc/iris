@@ -17,12 +17,12 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Collection;
-import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.server.comm.ntcip.CRCStream;
+import us.mn.state.dot.tms.utils.Base64;
 
 /**
  * FontVersionByteStream is used to calculate fontVersionID.  It is encoded

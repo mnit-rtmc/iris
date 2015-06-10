@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -159,7 +159,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Get the bitmaps for all pages of the message.
 	 * @return Base64-encoded bitmap data.
-	 * @see us.mn.state.dot.tms.Base64 */
+	 * @see us.mn.state.dot.tms.utils.Base64 */
 	public String getBitmaps() {
 		return bitmaps;
 	}

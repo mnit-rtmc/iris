@@ -20,8 +20,8 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
-import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.utils.Base64;
 
 /**
  * A HttpFileMessenger is a class which reads a file from a URL using http.
@@ -39,7 +39,7 @@ public class HttpFileMessenger extends Messenger {
 
 	/** Get the URL */
 	private URL getUrl() throws MalformedURLException {
-		if(path != null && path.length() > 0)
+		if (path != null && path.length() > 0)
 			return new URL(url, path);
 		else
 			return url;
@@ -77,7 +77,7 @@ public class HttpFileMessenger extends Messenger {
 	/** Open the messenger */
 	private void open(String upass) throws IOException {
 		URLConnection c = getUrl().openConnection();
-		if(upass != null) {
+		if (upass != null) {
 			String auth = "Basic " + new String(Base64.encode(
 				upass.getBytes()));
 			c.setRequestProperty("Authorization", auth);
@@ -91,11 +91,11 @@ public class HttpFileMessenger extends Messenger {
 	/** Close the messenger */
 	public void close() {
 		InputStream in = input;
-		if(in != null) {
+		if (in != null) {
 			try {
 				in.close();
 			}
-			catch(IOException e) {
+			catch (IOException e) {
 				// Ignore
 			}
 		}
@@ -105,8 +105,7 @@ public class HttpFileMessenger extends Messenger {
 
 	/** Get the input stream */
 	@Override
-	public InputStream getInputStream(String p) throws IOException
-	{
+	public InputStream getInputStream(String p) throws IOException {
 		path = p;
 		// make a new HTTP connection each time called
 		close();

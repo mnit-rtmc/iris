@@ -22,7 +22,6 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.TreeSet;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.Base64;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontFinder;
@@ -41,6 +40,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.server.comm.snmp.GenError;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
+import us.mn.state.dot.tms.utils.Base64;
 
 /**
  * Operation to send a set of fonts to a DMS controller.

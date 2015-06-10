@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.Iterator;
+import us.mn.state.dot.tms.utils.Base64;
 
 /**
  * Graphic helper methods.

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms;
+package us.mn.state.dot.tms.utils;
 
 import java.io.IOException;
 import junit.framework.TestCase;
@@ -33,7 +33,7 @@ public class Base64Test extends TestCase {
 			byte[] m = Base64.decode("");
 			assertTrue(m.length == 0);
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			e.printStackTrace();
 			assertTrue(false);
 		}
@@ -41,10 +41,10 @@ public class Base64Test extends TestCase {
 
 	public void test() {
 		// encode, decode
-		for(int l = 1; l < 80; l++) {
+		for (int l = 1; l < 80; l++) {
 			byte[] m = new byte[l];
-			for(int i = 0; i < 256; i++) {
-				for(int j = 0; j < l; j++)
+			for (int i = 0; i < 256; i++) {
+				for (int j = 0; j < l; j++)
 					m[j] = (byte)i;
 				// round-trip encode, decode, compare result
 				String v = Base64.encode(m);
@@ -53,7 +53,7 @@ public class Base64Test extends TestCase {
 					assertTrue("l=" + l + ", i=" + i, 
 						java.util.Arrays.equals(b, m));
 				}
-				catch(IOException e) {
+				catch (IOException e) {
 					e.printStackTrace();
 					assertTrue(false);
 				}

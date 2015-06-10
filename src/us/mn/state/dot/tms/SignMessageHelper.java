@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import java.util.Iterator;
+import us.mn.state.dot.tms.utils.Base64;
 
 /**
  * Helper for dealing with sign messages.
@@ -54,22 +55,22 @@ public class SignMessageHelper extends BaseHelper {
 		int api = ap.ordinal();
 		int rpi = rp.ordinal();
 		Iterator<SignMessage> it = iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			SignMessage sm = it.next();
-			if(multi.equals(sm.getMulti()) &&
-			   bitmaps.equals(sm.getBitmaps()) &&
-			   api == sm.getActivationPriority() &&
-			   rpi == sm.getRunTimePriority() &&
-			   s == sm.getScheduled() &&
-			   integerEquals(d, sm.getDuration()))
+			if (multi.equals(sm.getMulti()) &&
+			    bitmaps.equals(sm.getBitmaps()) &&
+			    api == sm.getActivationPriority() &&
+			    rpi == sm.getRunTimePriority() &&
+			    s == sm.getScheduled() &&
+			    integerEquals(d, sm.getDuration()))
 				return sm;
 		}
 		return null;
 	}
 
 	/** Compare two (possibly-null) integers for equality */
-	static protected boolean integerEquals(Integer i0, Integer i1) {
-		if(i0 == null)
+	static private boolean integerEquals(Integer i0, Integer i1) {
+		if (i0 == null)
 			return i1 == null;
 		else
 			return i0.equals(i1);
@@ -81,19 +82,19 @@ public class SignMessageHelper extends BaseHelper {
 	 * @return True if sm1 and sm2 have equal MULTIs, priorities, 
 	 *         and bitmaps. */
 	static public boolean isEquivalent(SignMessage sm1, SignMessage sm2) {
-		if(sm1 == null && sm2 == null)
+		if (sm1 == null && sm2 == null)
 			return true;
-		if(sm1 == null || sm2 == null)
+		if (sm1 == null || sm2 == null)
 			return false;
-		if(!new MultiString(sm1.getMulti()).equals(sm2.getMulti()))
+		if (!new MultiString(sm1.getMulti()).equals(sm2.getMulti()))
 			return false;
-		if(sm1.getActivationPriority() != sm2.getActivationPriority())
+		if (sm1.getActivationPriority() != sm2.getActivationPriority())
 			return false;
-		if(sm1.getRunTimePriority() != sm2.getRunTimePriority())
+		if (sm1.getRunTimePriority() != sm2.getRunTimePriority())
 			return false;
 		final String bm1 = sm1.getBitmaps();
 		final String bm2 = sm2.getBitmaps();
-		if(bm1 == null)
+		if (bm1 == null)
 			return bm2 == null;
 		else
 			return bm1.equals(bm2);
@@ -105,12 +106,12 @@ public class SignMessageHelper extends BaseHelper {
 	 *	    of pages in the message */
 	static public String[] getFontNames(SignMessage sm, int f_num) {
 		int[] fn = getFonts(sm, f_num);
-		if(fn == null || fn.length <= 0)
+		if (fn == null || fn.length <= 0)
 			return new String[0];
 		String[] fns = new String[fn.length];
-		for(int i=0; i < fns.length; ++i) {
+		for (int i = 0; i < fns.length; ++i) {
 			Font font = FontHelper.find(fn[i]);
-			if(font != null)
+			if (font != null)
 				fns[i] = font.getName();
 			else
 				fns[i] = "Font #" + fn[i];
@@ -121,11 +122,13 @@ public class SignMessageHelper extends BaseHelper {
 	/** Get an array of font numbers in a message.
 	 * @param f_num Default font number, one based.
 	 * @return An array of font numbers for each page of the message. */
-	static protected int[] getFonts(SignMessage sm, int f_num) {
-		if(sm == null)
+	static private int[] getFonts(SignMessage sm, int f_num) {
+		if (sm == null)
 			return new int[0];
-		MultiString m = new MultiString(sm.getMulti());
-		return m.getFonts(f_num);
+		else {
+			MultiString m = new MultiString(sm.getMulti());
+			return m.getFonts(f_num);
+		}
 	}
 
 	/** Check if a sign message is blank */
@@ -142,9 +145,9 @@ public class SignMessageHelper extends BaseHelper {
 	/** Check if the bitmap is blank */
 	static public boolean isBitmapBlank(SignMessage m) {
 		byte[] bmaps = decodeBitmaps(m);
-		if(bmaps != null) {
-			for(byte b: bmaps) {
-				if(b != 0)
+		if (bmaps != null) {
+			for (byte b: bmaps) {
+				if (b != 0)
 					return false;
 			}
 			return true;
@@ -157,20 +160,20 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param DMS with the graphic.
 	 * @return Array of bitmaps, one for each page, or null on error. */
 	static public BitmapGraphic[] getBitmaps(SignMessage sm, DMS dms) {
-		if(sm == null || dms == null)
+		if (sm == null || dms == null)
 			return null;
 		byte[] bmaps = decodeBitmaps(sm);
-		if(bmaps == null)
+		if (bmaps == null)
 			return null;
 		BitmapGraphic bg = DMSHelper.createBitmapGraphic(dms);
-		if(bg == null)
+		if (bg == null)
 			return null;
 		int blen = bg.length();
-		if(blen == 0 || bmaps.length % blen != 0)
+		if (blen == 0 || bmaps.length % blen != 0)
 			return null;
 		int n_pages = bmaps.length / blen;
 		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
-		for(int i = 0; i < n_pages; i++) {
+		for (int i = 0; i < n_pages; i++) {
 			bitmaps[i] = DMSHelper.createBitmapGraphic(dms);
 			byte[] b = new byte[blen];
 			System.arraycopy(bmaps, i * blen, b, 0, blen);
@@ -181,13 +184,13 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Decode the bitmaps on a sign message */
 	static private byte[] decodeBitmaps(SignMessage sm) {
-		if(sm != null) {
+		if (sm != null) {
 			String bmaps = sm.getBitmaps();
-			if(bmaps != null) {
+			if (bmaps != null) {
 				try {
 					return Base64.decode(bmaps);
 				}
-				catch(IOException e) {
+				catch (IOException e) {
 					// fall through
 				}
 			}
