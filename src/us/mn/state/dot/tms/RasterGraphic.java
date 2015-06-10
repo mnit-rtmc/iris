@@ -74,6 +74,11 @@ abstract public class RasterGraphic {
 	/** Get the pixel color at the specified location */
 	abstract public DmsColor getPixel(int x, int y);
 
+	/** Get the pixel color at the specified location */
+	public DmsColor getPixel(int x, int y, DmsColor fg) {
+		return getPixel(x, y);
+	}
+
 	/** Set the pixel color at the specified location */
 	abstract public void setPixel(int x, int y, DmsColor clr);
 
@@ -101,6 +106,23 @@ abstract public class RasterGraphic {
 			for (int y = 0; y < h; y++) {
 				DmsColor v = b.getPixel(x1 + x, y1 + y);
 				setPixel(x0 + x, y0 + y, v);
+			}
+		}
+	}
+
+	/** Copy another raster graphic onto the raster.
+	 * @param rg RasterGraphic to copy.
+	 * @param x0 X-position on raster (0-based).
+	 * @param y0 Y-position on raster (0-based).
+	 * @param fg Foreground color. */
+	public void copy(RasterGraphic rg, int x0, int y0, DmsColor fg) {
+		int w = rg.getWidth();
+		int h = rg.getHeight();
+		for (int y = 0; y < h; y++) {
+			for (int x = 0; x < w; x++) {
+				DmsColor c = rg.getPixel(x, y, fg);
+				if (c.isLit())
+					setPixel(x0 + x, y0 + y, c);
 			}
 		}
 	}

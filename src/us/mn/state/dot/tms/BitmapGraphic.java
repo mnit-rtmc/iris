@@ -48,11 +48,17 @@ public class BitmapGraphic extends RasterGraphic {
 	/** Get the pixel color at the specified location */
 	@Override
 	public DmsColor getPixel(int x, int y) {
+		return getPixel(x, y, DmsColor.AMBER);
+	}
+
+	/** Get the pixel color at the specified location */
+	@Override
+	public DmsColor getPixel(int x, int y, DmsColor fg) {
 		int p = pixelIndex(x, y);
 		int by = p / 8;
 		int bi = 7 - (p % 8);
 		if (((pixels[by] >> bi) & 1) > 0)
-			return DmsColor.AMBER;
+			return fg;
 		else
 			return DmsColor.BLACK;
 	}
