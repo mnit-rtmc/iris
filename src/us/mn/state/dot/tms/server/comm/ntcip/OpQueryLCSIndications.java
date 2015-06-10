@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,27 +34,28 @@ public class OpQueryLCSIndications extends OpLCS {
 	/** Create a new operation to send LCS indications */
 	public OpQueryLCSIndications(LCSArrayImpl l) {
 		super(PriorityLevel.DEVICE_DATA, l);
-		if(l.isQueryAllowed())
+		if (l.isQueryAllowed())
 			lookupIndications();
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return null;
 	}
 
 	/** Lookup the indications on the LCS array */
-	protected void lookupIndications() {
-		for(int i = 0; i < dmss.length; i++) {
+	private void lookupIndications() {
+		for (int i = 0; i < dmss.length; i++) {
 			DMSImpl dms = dmss[i];
-			if(dms != null)
+			if (dms != null)
 				ind_after[i] = lookupIndication(dms);
 		}
 	}
 
 	/** Lookup an indication on a DMS */
-	protected Integer lookupIndication(DMSImpl dms) {
-		if(dms.isFailed() || DMSHelper.hasCriticalError(dms))
+	private Integer lookupIndication(DMSImpl dms) {
+		if (dms.isFailed() || DMSHelper.hasCriticalError(dms))
 			return null;
 		else {
 			SignMessage sm = dms.getMessageCurrent();
@@ -63,13 +64,13 @@ public class OpQueryLCSIndications extends OpLCS {
 	}
 
 	/** Lookup an indication on a sign message */
-	protected Integer lookupIndication(SignMessage sm) {
+	private Integer lookupIndication(SignMessage sm) {
 		String m = sm.getMulti();
 		MultiString ms = new MultiString(m);
-		if(ms.isBlank())
+		if (ms.isBlank())
 			return LaneUseIndication.DARK.ordinal();
 		LaneUseMulti lum = LaneUseMultiHelper.find(m);
-		if(lum != null)
+		if (lum != null)
 			return lum.getIndication();
 		else
 			return null;
