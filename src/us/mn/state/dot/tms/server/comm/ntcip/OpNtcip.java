@@ -45,8 +45,8 @@ abstract public class OpNtcip extends OpDevice {
 	static private final DebugLog NTCIP_LOG = new DebugLog("ntcip");
 
 	/** Lookup a sign message number */
-	static protected int lookupMsgNum(SignMessage sm) {
-		LaneUseMulti lum = findLaneUseMulti(sm.getMulti());
+	static protected int lookupMsgNum(String ms) {
+		LaneUseMulti lum = findLaneUseMulti(ms);
 		if (lum != null) {
 			Integer msg_num = lum.getMsgNum();
 			if (msg_num != null)

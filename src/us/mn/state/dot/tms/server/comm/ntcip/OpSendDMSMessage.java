@@ -152,7 +152,7 @@ public class OpSendDMSMessage extends OpDMS {
 		message = sm;
 		multi = parseMulti(sm.getMulti());
 		owner = o;
-		msg_num = lookupMsgNum(sm);
+		msg_num = lookupMsgNum(multi);
 		message_crc = DmsMessageCRC.calculate(multi,
 			sm.getBeaconEnabled(), 0);
 		graphics = GraphicHelper.lookupMulti(multi);
