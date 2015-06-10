@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.tms.utils.Base64;
+
 /**
  * RasterGraphic is a raster graphic for DMS display feedback.
  *
@@ -48,7 +50,7 @@ abstract public class RasterGraphic {
 	}
 
 	/** Set the pixel data */
-	public void setPixels(byte[] p) {
+	public void setPixelData(byte[] p) {
 		if (p.length != length()) {
 			throw new IndexOutOfBoundsException("p=" + p.length +
 				", length=" + length());
@@ -57,8 +59,13 @@ abstract public class RasterGraphic {
 	}
 
 	/** Get the pixel data */
-	public byte[] getPixels() {
+	public byte[] getPixelData() {
 		return pixels;
+	}
+
+	/** Get pixel data enocded to Base64 */
+	public String getEncodedPixels() {
+		return Base64.encode(pixels);
 	}
 
 	/** Get the pixel data length in bytes */

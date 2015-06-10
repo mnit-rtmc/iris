@@ -118,10 +118,10 @@ public class PropPixels extends IPanel {
 	public void updateAttribute(String a) {
 		// NOTE: messageCurrent attribute changes after all sign
 		//       dimension attributes are updated.
-		if(a == null || a.equals("pixelStatus") ||
-		   a.equals("messageCurrent"))
+		if (a == null || a.equals("pixelStatus") ||
+		    a.equals("messageCurrent"))
 			updatePixelStatus();
-		if(a == null) {
+		if (a == null) {
 			boolean r = canRequest();
 			query_pixels.setEnabled(r);
 			test_pixels.setEnabled(r);
@@ -133,12 +133,12 @@ public class PropPixels extends IPanel {
 		updatePixelPanel(stuck_off_pnl);
 		updatePixelPanel(stuck_on_pnl);
 		String[] pixels = dms.getPixelStatus();
-		if(pixels != null && pixels.length == 2) {
+		if (pixels != null && pixels.length == 2) {
 			try {
 				updatePixelStatus(pixels);
 				return;
 			}
-			catch(IOException e) {
+			catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
@@ -151,15 +151,15 @@ public class PropPixels extends IPanel {
 	private void updatePixelStatus(String[] pixels) throws IOException {
 		BitmapGraphic stuckOff = createBlankBitmap();
 		BitmapGraphic stuckOn = createBlankBitmap();
-		if(stuckOff == null || stuckOn == null)
+		if (stuckOff == null || stuckOn == null)
 			return;
 		byte[] b_off = Base64.decode(pixels[DMS.STUCK_OFF_BITMAP]);
-		if(b_off.length == stuckOff.length())
-			stuckOff.setPixels(b_off);
+		if (b_off.length == stuckOff.length())
+			stuckOff.setPixelData(b_off);
 		stuck_off_pnl.setGraphic(stuckOff);
 		byte[] b_on = Base64.decode(pixels[DMS.STUCK_ON_BITMAP]);
-		if(b_on.length == stuckOn.length())
-			stuckOn.setPixels(b_on);
+		if (b_on.length == stuckOn.length())
+			stuckOn.setPixelData(b_on);
 		stuck_on_pnl.setGraphic(stuckOn);
 		int n_off = stuckOff.getLitCount();
 		int n_on = stuckOn.getLitCount();
@@ -170,7 +170,7 @@ public class PropPixels extends IPanel {
 	private BitmapGraphic createBlankBitmap() {
 		Integer w = dms.getWidthPixels();	// Avoid race
 		Integer h = dms.getHeightPixels();	// Avoid race
-		if(w != null && h != null)
+		if (w != null && h != null)
 			return new BitmapGraphic(w, h);
 		else
 			return null;

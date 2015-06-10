@@ -303,7 +303,7 @@ public class DMSDispatcher extends JPanel {
 		int blen = bmaps[0].length();
 		byte[] bitmaps = new byte[bmaps.length * blen];
 		for(int i = 0; i < bmaps.length; i++) {
-			byte[] pix = bmaps[i].getPixels();
+			byte[] pix = bmaps[i].getPixelData();
 			System.arraycopy(pix, 0, bitmaps, i * blen, blen);
 		}
 		return Base64.encode(bitmaps);

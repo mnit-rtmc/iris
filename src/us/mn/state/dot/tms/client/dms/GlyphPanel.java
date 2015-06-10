@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -211,7 +210,7 @@ public class GlyphPanel extends JPanel {
 		assert gi.exists();
 		if (bg.getWidth() > 0) {
 			gi.graphic.setWidth(bg.getWidth());
-			gi.graphic.setPixels(Base64.encode(bg.getPixels()));
+			gi.graphic.setPixels(bg.getEncodedPixels());
 		} else {
 			gi.glyph.destroy();
 			gi.graphic.destroy();
@@ -231,7 +230,7 @@ public class GlyphPanel extends JPanel {
 			attrs.put("bpp", 1);
 			attrs.put("height", bg.getHeight());
 			attrs.put("width", bg.getWidth());
-			attrs.put("pixels", Base64.encode(bg.getPixels()));
+			attrs.put("pixels", bg.getEncodedPixels());
 			graphics.createObject(name, attrs);
 			attrs.clear();
 			attrs.put("font", f);

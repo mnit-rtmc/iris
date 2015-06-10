@@ -1013,20 +1013,20 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		// Don't validate if the sign dimensions have changed
 		if(b_off.length != blen || b_on.length != blen)
 			return;
-		stuckOff.setPixels(b_off);
-		stuckOn.setPixels(b_on);
+		stuckOff.setPixelData(b_off);
+		stuckOn.setPixelData(b_on);
 		int n_pages = bitmaps.length / blen;
 		byte[] b = new byte[blen];
 		for(int p = 0; p < n_pages; p++) {
 			System.arraycopy(bitmaps, p * blen, b, 0, blen);
-			bitmap.setPixels(b);
+			bitmap.setPixelData(b);
 			bitmap.union(stuckOff);
 			int n_lit = bitmap.getLitCount();
 			if(n_lit > off_limit) {
 				throw new ChangeVetoException(
 					"Too many stuck off pixels: " + n_lit);
 			}
-			bitmap.setPixels(b);
+			bitmap.setPixelData(b);
 			bitmap.outline();
 			bitmap.union(stuckOn);
 			n_lit = bitmap.getLitCount();
@@ -1406,8 +1406,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	{
 		int blen = pages[0].length();
 		byte[] bitmap = new byte[pages.length * blen];
-		for(int i = 0; i < pages.length; i++) {
-			byte[] page = pages[i].getPixels();
+		for (int i = 0; i < pages.length; i++) {
+			byte[] page = pages[i].getPixelData();
 			System.arraycopy(page, 0, bitmap, i * blen, blen);
 		}
 		String bitmaps = Base64.encode(bitmap);

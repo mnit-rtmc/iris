@@ -80,7 +80,7 @@ public class GraphicHelper extends BaseHelper {
 	static private RasterGraphic createBitmap(Graphic g) throws IOException{
 		BitmapGraphic bg = new BitmapGraphic(g.getWidth(),
 			g.getHeight());
-		bg.setPixels(Base64.decode(g.getPixels()));
+		bg.setPixelData(Base64.decode(g.getPixels()));
 		return bg;
 	}
 
@@ -88,7 +88,7 @@ public class GraphicHelper extends BaseHelper {
 	static private RasterGraphic createPixmap(Graphic g) throws IOException{
 		PixmapGraphic pg = new PixmapGraphic(g.getWidth(),
 			g.getHeight());
-		pg.setPixels(Base64.decode(g.getPixels()));
+		pg.setPixelData(Base64.decode(g.getPixels()));
 		return pg;
 	}
 

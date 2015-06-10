@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.Invokable;
 import us.mn.state.dot.tms.client.widget.SwingRunner;
-import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -220,7 +219,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 		attrs.put("bpp", imageBpp(im));
 		attrs.put("width", im.getWidth());
 		attrs.put("height", im.getHeight());
-		attrs.put("pixels", encodePixels(rg));
+		attrs.put("pixels", rg.getEncodedPixels());
 		cache.createObject(name, attrs);
 	}
 
@@ -290,10 +289,5 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 			}
 		}
 		return pg;
-	}
-
-	/** Enocde the pixels of a raster to Base64 */
-	private String encodePixels(RasterGraphic rg) {
-		return Base64.encode(rg.getPixels());
 	}
 }

@@ -30,7 +30,6 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Flags;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
-import us.mn.state.dot.tms.utils.Base64;
 
 /**
  * This operation tests the pixel status of a DMS.
@@ -283,9 +282,9 @@ public class OpTestDMSPixels extends OpDMS {
 		if (isSuccess()) {
 			String[] status = new String[2];
 			status[DMS.STUCK_OFF_BITMAP] =
-				Base64.encode(stuck_off.getPixels());
+				stuck_off.getEncodedPixels();
 			status[DMS.STUCK_ON_BITMAP] =
-				Base64.encode(stuck_on.getPixels());
+				stuck_on.getEncodedPixels();
 			dms.setPixelStatus(status);
 		}
 		super.cleanup();

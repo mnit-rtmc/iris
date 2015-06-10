@@ -177,7 +177,7 @@ public class SignMessageHelper extends BaseHelper {
 			bitmaps[i] = DMSHelper.createBitmapGraphic(dms);
 			byte[] b = new byte[blen];
 			System.arraycopy(bmaps, i * blen, b, 0, blen);
-			bitmaps[i].setPixels(b);
+			bitmaps[i].setPixelData(b);
 		}
 		return bitmaps;
 	}

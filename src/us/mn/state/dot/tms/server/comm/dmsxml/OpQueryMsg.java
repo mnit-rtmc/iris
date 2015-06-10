@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -157,7 +157,7 @@ class OpQueryMsg extends OpDms {
 	{
 		byte[] pix = extractPage(argbitmap, pg);
 		BitmapGraphic bm = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
-		bm.setPixels(pix);
+		bm.setPixelData(pix);
 		return bm;
 	}
 

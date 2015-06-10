@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -83,9 +83,9 @@ class OpMessage extends OpDms {
 	 * bitmap is adjusted as necessary.
 	 */
 	private String getBitmapPage(BitmapGraphic bg) {
-		BitmapGraphic newbmg = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
-		newbmg.copy(bg);
-		return HexString.format(newbmg.getPixels());
+		BitmapGraphic b = new BitmapGraphic(BM_WIDTH, BM_HEIGHT);
+		b.copy(bg);
+		return HexString.format(b.getPixelData());
 	}
 
 	/** Create the second phase of the operation */
