@@ -2018,9 +2018,18 @@ FIXME
 
 <h3 id="alarms">Alarms</h3>
 <p>
-	An alarm is a simple device which is triggered when an event happens.
-	The event could be an equipment failure, high temperature, etc.
-	Alarms can be monitored to help maintain field devices.
+	An alarm is a simple device triggered by an event. 
+	The event might be an equipment failure, high temperature, or low 
+	voltage in a field controller.
+	Alarms can be monitored to help maintain field devices. 
+	Device drivers trigger alarms based on field controller states, 
+	information read from controllers (e.g. voltages), etc. 
+	Users can view the status of alarms on the Alarm Form. The Status
+	Column indicates the state of each alarm, which can be Clear or 
+	Triggered.
+	Alarms are created using the Alarm Form and can only be created for 
+	controllers using a protocol driver that generate alarms.
+	For example, the Mn/DOT ramp meter drivers.
 </p>
 
 <h3 id="rwis">Road Weather Information Systems</h3>
@@ -2294,8 +2303,17 @@ hgbase.url=http://iris.dot.state.mn.us/hg/index.cgi/
 <h3 id="future_plans">Future Plans</h3>
 FIXME
 
-<h3 id="contributing">Contributing</h3>
+<h3 id="contributing">Contributing Source Code</h3>
 FIXME
+
+<h3 id="contributing">Contributing to the Admin Guide</h3>
+<p>
+	Please format text so there is a newline after each sentence. 
+	This makes patches less cluttered. 
+	Also, line length should be 80 characters or less.
+	When patch files are submitted directly, using a .patch file 
+	extension is preferred.
+</p>
 
 <h3 id="coding_style">Coding Style</h3>
 <p>
