@@ -84,6 +84,10 @@
     <h3><a href="#contributing">Contributing</a></h3>
     <h3><a href="#coding_style">Coding Style</a></h3>
   </div>
+  <h2><a id="stepbystep_link" href="#stepbystep">Step-by-step</a></h2>
+  <div id="stepbystep_div">
+    <h3><a href="#createplan">Create a Plan to Activate DMS Messages</a></h3>
+  </div>
 </div>
 
 <div class="mainbar">
@@ -2368,6 +2372,81 @@ FIXME
 	from their operands by a space.
 </p>
 
+<h2 id="stepbystep">Step-by-step</h2>
+
+<h3 id="createplan">Create a Plan to Activate DMS Messages</h3>
+<p>
+<ol>
+<li>
+Make sure edit mode is on.
+</li>
+<li>
+Open the Plans and Schedules Form: click the View menu / Plans and Schedules
+</li>
+<li>
+	Create a Phase (if it doesn't exist already)
+	<ul>
+		<li>Click the Plan Phases Tab</li>
+		<li>Type the name of the new phase, e.g. "msg_on"</li>
+		<li>Press the Create Button</li>
+		<li>The new Phase should appear in the upper table</li>
+	</ul>
+</li>
+<li>
+	Create an Action Plan
+	<ul>
+		<li>Click the "Action Plans" tab</li>
+		<li>Select the phase "msg_on" in the Default Phase 
+			combobox.</li>
+		<li>Type the name of the new Action Plan in the edit field, 
+			e.g. "slick_roads"</li>
+		<li>Press the Create Button</li>
+		<li>The new Plan should appear in the lower table</li>
+	</ul>
+</li>
+<li>
+	Create the DMS Actions
+	<ul>
+		<li>Click on the Action Plan just created 
+			(e.g. slick_roads)</li>
+		<li>Click the DMS Actions tab</li>
+		<li>In the edit field on the bottom of the form, type the 
+			name of an existing sign group</li>
+		<li>Press the Create button</li>
+		<li>The new DMS Action should appear in the table</li>
+		<li>Click on the "Quick Message" column in the DMS Action 
+			just created</li>
+		<li>Specify the name of an existing quick message to send 
+			to the sign</li>
+		<li>Repeat the above DMS Actions steps as many times as 
+			desired to send a message to additional sign 
+			groups.</li>
+	</ul>
+</li>
+<li>
+	Activate the messages on the signs
+	<ul>
+		<li>On the Action Plans tab, click the desired 
+			action plan.</li>
+		<li>Click the "Active" checkbox.</li>
+		<li>Signs are activated and deactivated every 30 seconds 
+			(at :29 and :59), so wait at least 30 seconds for the 
+			messages to appear or disappear.</li>
+		<li>Unselect the Active checkbox to blank the signs.</li>
+	</ul>
+</li>
+</ol>
+Notes:
+	<ul>
+		<li>Before running through these steps, create the Sign 
+			Groups and Quick Messages desired.</li>
+		<li>The quick messages that the Action Plan references don't 
+			have to be assigned to a Sign Group.</li>
+		<li>Use the dms debug log to diagnose problems with scheduled 
+			messages not appearing on signs.</li>
+	</ul>
+
+</p>
 </div>
 
 </body>
