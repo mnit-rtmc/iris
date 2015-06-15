@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
+import javax.swing.JOptionPane;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
@@ -208,6 +209,11 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		SignGroup sg = SignGroupHelper.lookup(name.trim());
 		if (sg != null && action_plan != null)
 			create(sg);
+		else {
+			JOptionPane.showMessageDialog(null, "To create a " + 
+				"new DMS Action, please specify the name " +
+				"of an existing Sign Group.");
+		}
 	}
 
 	/** Create a new DMS action */
