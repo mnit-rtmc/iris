@@ -83,8 +83,9 @@ public class OpQueryDMSMessage extends OpDMS {
 		/* Compare the CRC of the message on the sign to the
 		 * CRC of the message IRIS knows about */
 		SignMessage sm = dms.getMessageCurrent();
-		int crc = DmsMessageCRC.calculate(sm.getMulti(),
-			sm.getBeaconEnabled(), 0);
+		String multi = parseMulti(sm.getMulti());
+		int crc = DmsMessageCRC.calculate(multi, sm.getBeaconEnabled(),
+			0);
 		if (crc != source.getCrc())
 			return new QueryCurrentMessage();
 		else
@@ -119,7 +120,7 @@ public class OpQueryDMSMessage extends OpDMS {
 
 		/** Query the current message */
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1String multi = new ASN1String(dmsMessageMultiString
+			ASN1String ms = new ASN1String(dmsMessageMultiString
 				.node, DmsMessageMemoryType.currentBuffer
 				.ordinal(), 1);
 			ASN1Integer beacon = dmsMessageBeacon.makeInt(
@@ -133,20 +134,20 @@ public class OpQueryDMSMessage extends OpDMS {
 				dmsMessageStatus.node,
 				DmsMessageMemoryType.currentBuffer.ordinal(),1);
 			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
-			mess.add(multi);
+			mess.add(ms);
 			mess.add(beacon);
 			mess.add(prior);
 			mess.add(status);
 			mess.add(time);
 			mess.queryProps();
-			logQuery(multi);
+			logQuery(ms);
 			logQuery(beacon);
 			logQuery(prior);
 			logQuery(status);
 			logQuery(time);
 			if (status.getEnum() == DmsMessageStatus.valid) {
 				Integer d = parseDuration(time.getInteger());
-				setCurrentMessage(multi.getValue(),
+				setCurrentMessage(ms.getValue(),
 					beacon.getInteger(), prior.getEnum(),d);
 			} else {
 				logError("INVALID STATUS");
