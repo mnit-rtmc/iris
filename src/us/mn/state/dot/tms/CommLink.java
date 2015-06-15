@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,12 +17,14 @@ package us.mn.state.dot.tms;
 
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.HOURS;
 import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 
 /**
  * A CommLink is a network connection for device communication.
  *
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 public interface CommLink extends SonarObject {
 
@@ -45,6 +48,11 @@ public interface CommLink extends SonarObject {
 		new Interval(20, MINUTES),
 		new Interval(30, MINUTES),
 		new Interval(60, MINUTES),
+		new Interval(2, HOURS),
+		new Interval(4, HOURS),
+		new Interval(8, HOURS),
+		new Interval(12, HOURS),
+		new Interval(24, HOURS),
 	};
 
 	/** Set text description */
