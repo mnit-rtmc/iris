@@ -65,7 +65,6 @@ import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.event.BrightnessSample;
 import us.mn.state.dot.tms.server.event.SignStatusEvent;
 import us.mn.state.dot.tms.utils.Base64;
-import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -79,8 +78,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** DMS debug log */
 	static private final DebugLog DMS_LOG = new DebugLog("dms");
 
-	/** DMS name, e.g. CMS or DMS */
-	static private final String DMSABBR = I18N.get("dms");
+	/** DMS schedule debug log */
+	static private final DebugLog SCHED_LOG = new DebugLog("sched");
 
 	/** Load all the DMS */
 	static protected void loadAll() throws TMSException {
@@ -944,7 +943,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	private SignMessage validateMessage(SignMessage sm) throws TMSException{
 		MultiString multi = new MultiString(sm.getMulti());
 		SignMessage sched = messageSched;	// Avoid race
-		if(sched != null && multi.isBlank()) {
+		if (sched != null && multi.isBlank()) {
 			// Don't blank the sign if there's a scheduled message
 			// -- send the scheduled message instead.
 			try {
@@ -952,8 +951,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 					new MultiString(sched.getMulti()));
 				return sched;
 			}
-			catch(TMSException e) {
-				logError("sched msg not valid: " +
+			catch (TMSException e) {
+				logSched("sched msg not valid: " +
 					e.getMessage());
 				// Ok, go ahead and blank the sign
 			}
@@ -1098,10 +1097,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			return;
 		SignMessage sm = createMessage(m, be, ap, rp, false, null);
 		try {
-			if(!isMessageCurrentEquivalent(sm))
+			if (!isMessageCurrentEquivalent(sm))
 				doSetMessageNext(sm, null);
 		}
-		catch(TMSException e) {
+		catch (TMSException e) {
 			logError(e.getMessage());
 		}
 	}
@@ -1281,7 +1280,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		try {
 			BrightnessSample.lookup(this, bh);
 		}
-		catch(TMSException e) {
+		catch (TMSException e) {
 			logError("brightness feedback: " + e.getMessage());
 		}
 	}
@@ -1335,13 +1334,13 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		Integer d)
 	{
 		RasterBuilder rb = DMSHelper.createRasterBuilder(this);
-		if(rb != null) {
+		if (rb != null) {
 			MultiString ms = new MultiString(m);
 			try {
 				BitmapGraphic[] pages = rb.createBitmaps(ms);
 				return createMessageB(m, be, pages, ap, rp,s,d);
 			}
-			catch(InvalidMessageException e) {
+			catch (InvalidMessageException e) {
 				logError("invalid msg: " + e.getMessage());
 			}
 		}
@@ -1452,7 +1451,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			sm.notifyCreate();
 			return sm;
 		}
-		catch(SonarException e) {
+		catch (SonarException e) {
 			// This can pretty much only happen when the SONAR task
 			// processor does not store the sign message within 30
 			// seconds.  It *shouldn't* happen, but there may be
@@ -1551,26 +1550,33 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Log a DMS message */
 	private void logError(String msg) {
-		DMS_LOG.log(getName() + ": " + msg);
+		if (DMS_LOG.isOpen())
+			DMS_LOG.log(getName() + ": " + msg);
+	}
+
+	/** Log a schedule message */
+	private void logSched(String msg) {
+		if (SCHED_LOG.isOpen())
+			SCHED_LOG.log(getName() + ": " + msg);
 	}
 
 	/** Update the scheduled message on the sign */
 	public void updateScheduledMessage() {
-		if(!is_scheduled) {
-			logError("no message scheduled");
+		if (!is_scheduled) {
+			logSched("no message scheduled");
 			setMessageSched(createBlankScheduledMessage());
 		}
 		SignMessage sm = messageSched;
-		if(shouldActivate(sm)) {
+		if (shouldActivate(sm)) {
 			try {
-				logError("set message to " + sm.getMulti());
+				logSched("set message to " + sm.getMulti());
 				doSetMessageNext(sm, null);
 			}
-			catch(TMSException e) {
-				logError(e.getMessage());
+			catch (TMSException e) {
+				logSched(e.getMessage());
 			}
-		} else if(sm != null)
-			logError("sched msg not sent " + sm.getMulti());
+		} else if (sm != null)
+			logSched("sched msg not sent " + sm.getMulti());
 		is_scheduled = false;
 	}
 
