@@ -1376,7 +1376,7 @@ CREATE TABLE iris.sign_text (
 
 CREATE TABLE iris.sign_message (
 	name VARCHAR(20) PRIMARY KEY,
-	multi VARCHAR(256) NOT NULL,
+	multi VARCHAR(512) NOT NULL,
 	beacon_enabled BOOLEAN NOT NULL,
 	bitmaps text NOT NULL,
 	a_priority INTEGER NOT NULL,
