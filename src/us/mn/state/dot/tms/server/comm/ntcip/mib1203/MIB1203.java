@@ -72,9 +72,9 @@ public enum MIB1203 {
 	  dmsColorScheme		(multiCfg, 11),
 	  defaultBackgroundRGB		(multiCfg, 12),		// V2
 	  defaultForegroundRGB		(multiCfg, 13),		// V2
-	  dmsSupportedMultiTags		(multiCfg, 14),
-	  dmsMaxNumberPages		(multiCfg, 15),
-	  dmsMaxMultiStringLength	(multiCfg, 16),
+	  dmsSupportedMultiTags		(multiCfg, 14),		// V2
+	  dmsMaxNumberPages		(multiCfg, 15),		// V2
+	  dmsMaxMultiStringLength	(multiCfg, 16),		// V2
 	dmsMessage			(dms, 5),
 	  dmsNumPermanentMsg		(dmsMessage, 1),
 	  dmsNumChangeableMsg		(dmsMessage, 2),
