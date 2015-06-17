@@ -2296,6 +2296,9 @@ rwis_low_visibility_distance_m	152
 rwis_obs_age_limit_secs	240
 rwis_max_valid_wind_speed_kph	282
 sample_archive_enable	true
+speed_limit_min_mph	45
+speed_limit_default_mph	55
+speed_limit_max_mph	75
 tesla_host	
 travel_time_max_legs	8
 travel_time_max_miles	16
