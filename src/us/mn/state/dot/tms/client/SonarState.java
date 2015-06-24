@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,6 +52,7 @@ import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TimeAction;
+import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.camera.CamCache;
 import us.mn.state.dot.tms.client.comm.ConCache;
@@ -268,6 +269,15 @@ public class SonarState extends Client {
 	/** Get the tag reader cache */
 	public TypeCache<TagReader> getTagReaders() {
 		return tag_readers;
+	}
+
+	/** Cache of toll zones */
+	private final TypeCache<TollZone> toll_zones =
+		new TypeCache<TollZone>(TollZone.class, this);
+
+	/** Get the toll zone cache */
+	public TypeCache<TollZone> getTollZones() {
+		return toll_zones;
 	}
 
 	/** Cache of gate arm arrays */
@@ -493,6 +503,7 @@ public class SonarState extends Client {
 		con_cache.populate(this);
 		det_cache.populate(this);
 		cam_cache.populate(this);
+		populateReadable(toll_zones);
 		populateReadable(alarms);
 		populateReadable(beacons);
 		if(canRead(Beacon.SONAR_TYPE))

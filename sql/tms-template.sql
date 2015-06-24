@@ -343,6 +343,12 @@ ALTER TABLE iris.r_node ADD CONSTRAINT right_edge_ck
 ALTER TABLE iris.r_node ADD CONSTRAINT active_ck
 	CHECK (active = FALSE OR abandoned = FALSE);
 
+CREATE TABLE iris.toll_zone (
+	name VARCHAR(20) PRIMARY KEY,
+	start_id VARCHAR(10) REFERENCES iris.r_node(station_id),
+	end_id VARCHAR(10) REFERENCES iris.r_node(station_id)
+);
+
 CREATE TABLE iris.sign_group (
 	name VARCHAR(16) PRIMARY KEY,
 	local BOOLEAN NOT NULL
@@ -1707,6 +1713,11 @@ CREATE VIEW roadway_station_view AS
 	WHERE r.geo_loc = l.name AND station_id IS NOT NULL;
 GRANT SELECT ON roadway_station_view TO PUBLIC;
 
+CREATE VIEW toll_zone_view AS
+	SELECT name, start_id, end_id
+	FROM iris.toll_zone;
+GRANT SELECT ON toll_zone_view TO PUBLIC;
+
 CREATE VIEW controller_view AS
 	SELECT c.name, drop_id, comm_link, cabinet,
 	       cnd.description AS condition, notes, cab.geo_loc
@@ -2430,6 +2441,7 @@ PRV_0061	meter_control	ramp_meter/.*/rateNext	f	t	f	f
 PRV_0062	detection	detector(/.*)?	t	f	f	f
 PRV_0063	detection	r_node(/.*)?	t	f	f	f
 PRV_0064	detection	station(/.*)?	t	f	f	f
+PRV_006A	detection	toll_zone(/.*)?	t	f	f	f
 PRV_0065	plan_control	action_plan/.*/phase	f	t	f	f
 PRV_0066	plan_tab	action_plan(/.*)?	t	f	f	f
 PRV_0067	plan_tab	day_plan(/.*)?	t	f	f	f
@@ -2482,6 +2494,7 @@ PRV_0110	device_admin	lcs_array/.*	f	t	t	t
 PRV_0111	device_admin	lcs_indication/.*	f	t	t	t
 PRV_0112	device_admin	modem/.*	f	t	t	t
 PRV_0113	device_admin	r_node/.*	f	t	t	t
+PRV_011C	device_admin	toll_zone/.*	f	t	t	t
 PRV_0114	device_admin	ramp_meter/.*	f	t	t	t
 PRV_0115	device_admin	road/.*	f	t	t	t
 PRV_0116	device_admin	video_monitor/.*	f	t	t	t

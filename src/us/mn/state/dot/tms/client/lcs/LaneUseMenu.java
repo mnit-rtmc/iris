@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.marking.LaneMarkingForm;
 import us.mn.state.dot.tms.client.toll.TagReaderForm;
+import us.mn.state.dot.tms.client.toll.TollZoneForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
@@ -52,6 +53,9 @@ public class LaneUseMenu extends JMenu {
 		if(item != null)
 			add(item);
 		item = createTagReaderItem();
+		if (item != null)
+			add(item);
+		item = createTollZoneItem();
 		if (item != null)
 			add(item);
 	}
@@ -95,6 +99,18 @@ public class LaneUseMenu extends JMenu {
 			return new JMenuItem(new IAction("tag_reader.title") {
 				protected void doActionPerformed(ActionEvent e){
 				       desktop.show(new TagReaderForm(session));
+				}
+			});
+		} else
+			return null;
+	}
+
+	/** Create the toll zone menu item */
+	private JMenuItem createTollZoneItem() {
+		if (TollZoneForm.isPermitted(session)) {
+			return new JMenuItem(new IAction("toll_zone.title") {
+				protected void doActionPerformed(ActionEvent e){
+				       desktop.show(new TollZoneForm(session));
 				}
 			});
 		} else
