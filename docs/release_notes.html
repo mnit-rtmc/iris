@@ -9,6 +9,42 @@
 <body>
 <h1>MnDOT IRIS Release Notes</h1>
 <dl>
+	<dt>4.24.0 (25 June 2015)</dt>
+	<dd><ul>
+		<li>
+			Added basic toll zone DB table and class.
+		</li>
+		<li>
+			Enhanced NTCIP "send DMS message" operation to check
+			graphic IDs and update graphics if necessary.
+		</li>
+		<li>
+			Added NTCIP workaround for Daktronics DMS.
+		</li>
+		<li>
+			Refactored NTCIP MIB code to use Java enum.
+		</li>
+		<li>
+			Fixed NTCIP 24-bit graphics to use BGR (not RGB).
+		</li>
+		<li>
+			Added support for closing [/sc] (character spacing)
+			MULTI tags.
+		</li>
+		<li>
+			Fixed problems with NTCIP exception handling.
+		</li>
+		<li>
+			Split out SNMP code from NTCIP driver.
+		</li>
+		<li>
+			Added map_extent_name_initial system attribute.
+		</li>
+		<li>
+			Added speed_limit_min_mph, speed_limit_default_mph, and
+			speed_limit_max_mph system attributes.
+		</li>
+	</ul></dd>
 	<dt>4.23.0 (20 Apr 2015)</dt>
 	<dd><ul>
 		<li>
