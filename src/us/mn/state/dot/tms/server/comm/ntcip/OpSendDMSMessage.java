@@ -199,6 +199,13 @@ public class OpSendDMSMessage extends OpDMS {
 				logStore(act);
 				mess.storeProps();
 			}
+			catch (NoSuchName e) {
+				// Some Ledstar signs will return NoSuchName
+				// when trying to set dmsActivateMessage with
+				// the "wrong" community name (Public).
+				setErrorStatus("READ ONLY (NoSuchName)");
+				return null;
+			}
 			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
@@ -413,6 +420,13 @@ public class OpSendDMSMessage extends OpDMS {
 			try {
 				logStore(act);
 				mess.storeProps();
+			}
+			catch (NoSuchName e) {
+				// Some Ledstar signs will return NoSuchName
+				// when trying to set dmsActivateMessage with
+				// the "wrong" community name (Public).
+				setErrorStatus("READ ONLY (NoSuchName)");
+				return null;
 			}
 			catch (GenError e) {
 				return new QueryActivateMsgErr();
