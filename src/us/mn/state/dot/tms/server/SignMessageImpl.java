@@ -213,6 +213,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		w.write(createAttribute("duration", getDuration()));
 		w.write(createAttribute("multi", multi));
 		w.write(createAttribute("bitmaps", getBitmaps()));
+		w.write(createAttribute("deploy_time", dms.getDeployTime()));
 		w.write("/>\n");
 	}
 }

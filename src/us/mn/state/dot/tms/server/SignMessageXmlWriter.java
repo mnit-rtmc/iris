@@ -68,6 +68,7 @@ public class SignMessageXmlWriter extends XmlWriter {
 		w.write("<!ATTLIST sign_message duration CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST sign_message multi CDATA #REQUIRED>\n");
 		w.write("<!ATTLIST sign_message bitmaps CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST sign_message deploy_time CDATA #IMPLIED>\n");
 		w.write("]>\n");
 	}
 
