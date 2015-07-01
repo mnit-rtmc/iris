@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2015  Minnesota Department of Transportation
- * Copyright (C) 2010-2014  AHMCT, University of California
+ * Copyright (C) 2010-2015  AHMCT, University of California
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,6 +29,7 @@ import java.util.Properties;
 import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JPopupMenu;
+import javax.swing.ToolTipManager;
 import us.mn.state.dot.geokit.ZoomLevel;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
@@ -126,6 +127,7 @@ public class IrisClient extends JFrame {
 		getContentPane().add(desktop);
 		menu_bar = new IMenuBar(this, desktop);
 		setMenuBar();
+		configureTooltips();
 		addWindowListener(new WindowAdapter() {
 			public void windowClosing(WindowEvent e) {
 				doQuit();
@@ -179,6 +181,34 @@ public class IrisClient extends JFrame {
 				}
 			});
 			desktop.add(sp, JLayeredPane.DEFAULT_LAYER);
+		}
+	}
+
+	/** Configure tooltips */
+	private void configureTooltips() {
+		String tdInitial = props.getProperty("tooltip.delay.initial");
+		String tdDismiss = props.getProperty("tooltip.delay.dismiss");
+		String tdReshow = props.getProperty("tooltip.delay.reshow");
+		try {
+			int ms = Integer.parseInt(tdInitial);
+			ToolTipManager.sharedInstance().setInitialDelay(ms);
+		}
+		catch (NumberFormatException e) {
+			// NOP: use default
+		}
+		try {
+			int ms = Integer.parseInt(tdDismiss);
+			ToolTipManager.sharedInstance().setDismissDelay(ms);
+		}
+		catch (NumberFormatException e) {
+			// NOP: use default
+		}
+		try {
+			int ms = Integer.parseInt(tdReshow);
+			ToolTipManager.sharedInstance().setReshowDelay(ms);
+		}
+		catch (NumberFormatException e) {
+			// NOP: use default
 		}
 	}
 
