@@ -227,6 +227,12 @@ public class MultiStringTest extends TestCase {
 			equals("AB|C"));
 		assertTrue(MultiString.normalize("AB|{}{}C{}").
 			equals("AB|{}{}C{}"));
+		assertTrue(MultiString.normalize("!\"#$%&\'()*+,-./").
+			equals("!\"#$%&\'()*+,-./"));
+		assertTrue(MultiString.normalize(":;<=>?@\\^_`{|}~").
+			equals(":;<=>?@\\^_`{|}~"));
+		assertTrue(MultiString.normalize("[]][\t\b\n\r\f").
+			equals(""));
 		assertTrue(MultiString.normalize("ABC_DEF").
 			equals("ABC_DEF"));
 		assertTrue(MultiString.normalize("ABC[bad]DEF").
