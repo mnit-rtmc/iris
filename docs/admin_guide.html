@@ -86,6 +86,7 @@
   </div>
   <h2><a id="stepbystep_link" href="#stepbystep">Step-by-step</a></h2>
   <div id="stepbystep_div">
+    <h3><a href="#adddms">Create a DMS, Comm Link, and Controller</a></h3>
     <h3><a href="#createplan">Create a Plan to Activate DMS Messages</a></h3>
   </div>
 </div>
@@ -2373,6 +2374,83 @@ FIXME
 </p>
 
 <h2 id="stepbystep">Step-by-step</h2>
+<h3 id="adddms">Create a DMS, Comm Link, and Controller</h3>
+<p>
+<ol>
+<li>
+Make sure edit mode is on.
+</li>
+<li>
+	Create the new DMS
+	<ul>
+		<li>Open the DMS Form: click View / Message Signs / 
+			DMS</li>
+		<li>Type the name of the new DMS in the edit field
+			at the bottom of the form and press the Create 
+			button.</li>
+		<li>Find the new DMS in the data table and select it.</li>
+		<li>Click the Properties button and the DMS Properties Form 
+			will appear.</li>
+		<li>On the Location Tab specify the road and location of the
+			physical DMS.</li>
+		<li>On the Messages Tab select the default DMS font.</li>
+		<li>Close the DMS Properties form.</li>
+	</ul>
+</li>
+<li>
+	Create a new comm link
+	<ul>
+		<li>Open the Comm Link Form: click View / Maintenance / 
+			Comm Links</li>
+		<li>Type the name of the new comm link in the edit field
+			in the middle of the form and press the Create 
+			button.</li>
+		<li>Find the newly created comm link in the data table in
+			the top of the form and select it.</li>
+		<li>Enter a more complete description in the Description
+			field as needed.</li>
+		<li>Enter the controller URI in the URI column, e.g. 
+			"tcp://10.20.30.40:1234" or "udp://10.20.30.40:1234"
+			for signs that use UDP.</li>
+		<li>Select the desired protocol.</li>
+		<li>Enter the desired polling period and timeout.</li>
+		<li>Enable the Comm Link by clicking the Enabled Checkbox.</li>
+	</ul>
+</li>
+<li>
+	Create a new controller associated with the comm link
+	<ul>
+		<li>In the Comm Link Form with the desired comm link 
+			selected, click the Create button on the bottom 
+			of the form.</li>
+		<li>Select the new controller in the lower data table and 
+			click the Properties Button. The Controller Form 
+			should appear.</li>
+		<li>On the Controller Form Setup Tab, change the condition 
+			to active.</li>
+		<li>On the Cabinet Tab specify the DMS cabinet location and
+			style.</li>
+		<li>On the Controller Form IO Tab, for Pin=1, select DMS in
+			the Type column. In the Device column, select the
+			name of the DMS created above.</li>
+	</ul>
+</li>
+<li>
+	View DMS Status
+	<ul>
+		<li>If the comm link is enabled (per above) and the controller
+			condition is active (per above), the number of 
+			successful and failed operations is visible in 
+			real-time on the Controller's Status Tab.</li>
+		<li>View the DMS configuration on the DMS Form Configuration 
+			tab. The Query Configuration button on that tab 
+			manually queries the sign.</li>
+		<li>The Status Tab on the DMS Form shows additional status
+			information.</li>
+	</ul>
+</li>
+</ol>
+</p>
 
 <h3 id="createplan">Create a Plan to Activate DMS Messages</h3>
 <p>
