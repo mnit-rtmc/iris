@@ -531,6 +531,7 @@ public class MultiRenderer extends MultiAdapter {
 			return Math.round((sp0 + sp1) / 2.0f);
 		}
 		int getHeight() {
+			assert font != null;
 			return (font != null) ? font.getHeight() : 0;
 		}
 		int getWidth() {
@@ -544,6 +545,7 @@ public class MultiRenderer extends MultiAdapter {
 			}
 		}
 		int getLineSpacing() {
+			assert font != null;
 			return (font != null && isFullMatrix())
 			      ? font.getLineSpacing()
 			      : 0;
