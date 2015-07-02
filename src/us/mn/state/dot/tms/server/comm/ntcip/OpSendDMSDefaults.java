@@ -19,7 +19,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.Multi.JustificationLine;
 import us.mn.state.dot.tms.Multi.JustificationPage;
-import us.mn.state.dot.tms.SystemAttrEnum;
+import static us.mn.state.dot.tms.SystemAttrEnum.*;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -63,8 +63,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			MessageIDCode end_msg = new MessageIDCode(
 				dmsEndDurationMessage.node);
 			power_time.setInteger(0);
-			comm_time.setInteger(SystemAttrEnum.
-				DMS_COMM_LOSS_MINUTES.getInt());
+			comm_time.setInteger(DMS_COMM_LOSS_MINUTES.getInt());
 			end_msg.setMemoryType(DmsMessageMemoryType.blank);
 			end_msg.setNumber(1);
 			end_msg.setCrc(0);
@@ -114,11 +113,11 @@ public class OpSendDMSDefaults extends OpDMS {
 				defaultJustificationPage.node);
 			ASN1Integer on_time = defaultPageOnTime.makeInt();
 			ASN1Integer off_time = defaultPageOffTime.makeInt();
-			line.setEnum(JustificationLine.CENTER);
-			page.setEnum(JustificationPage.TOP);
-			on_time.setInteger(Math.round(10 * SystemAttrEnum.
+			line.setInteger(DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
+			page.setInteger(DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
+			on_time.setInteger(Math.round(10 *
 				DMS_PAGE_ON_DEFAULT_SECS.getFloat()));
-			off_time.setInteger(Math.round(10 * SystemAttrEnum.
+			off_time.setInteger(Math.round(10 *
 				DMS_PAGE_OFF_DEFAULT_SECS.getFloat()));
 			mess.add(line);
 			mess.add(page);
@@ -141,8 +140,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			ASN1Integer temp = ledHighTempCutoff.makeInt();
 			ASN1Integer override = ledSignErrorOverride.makeInt();
 			ASN1Integer limit = ledBadPixelLimit.makeInt();
-			temp.setInteger(
-				SystemAttrEnum.DMS_HIGH_TEMP_CUTOFF.getInt());
+			temp.setInteger(DMS_HIGH_TEMP_CUTOFF.getInt());
 			limit.setInteger(500);
 			mess.add(temp);
 			mess.add(override);
@@ -175,8 +173,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			ASN1Integer day_rate = dynBrightDayRate.makeInt();
 			ASN1Integer night_rate = dynBrightNightRate.makeInt();
 			ASN1Integer max_lvl = dynBrightMaxNightManLvl.makeInt();
-			temp.setInteger(
-				SystemAttrEnum.DMS_HIGH_TEMP_CUTOFF.getInt());
+			temp.setInteger(DMS_HIGH_TEMP_CUTOFF.getInt());
 			day_night.setInteger(32);
 			day_rate.setInteger(1);
 			night_rate.setInteger(15);
