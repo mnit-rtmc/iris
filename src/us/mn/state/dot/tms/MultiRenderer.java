@@ -52,7 +52,7 @@ public class MultiRenderer extends MultiAdapter {
 	/** Height of text rectangle */
 	private int tr_height;
 
-	/** Character spacing */
+	/** Character spacing (set by [sc] tag) */
 	private Integer char_spacing;
 
 	/** List of all blocks within the current text rectangle */
@@ -75,6 +75,16 @@ public class MultiRenderer extends MultiAdapter {
 		c_height = (ch > 0) ? ch : 1;
 		ms_fnum = f;
 		resetTextRectangle();
+	}
+
+	/** Check for character-matrix sign */
+	private boolean isCharMatrix() {
+		return c_width > 1;
+	}
+
+	/** Check for full-matrix sign */
+	private boolean isFullMatrix() {
+		return c_height == 1;
 	}
 
 	/** Reset the text rectangle to the size of the raster */
@@ -503,6 +513,8 @@ public class MultiRenderer extends MultiAdapter {
 			Integer cs = char_spacing;
 			if (cs != null)
 				return cs;
+			else if (isCharMatrix())
+				return 0;
 			else if (font != null)
 				return font.getCharSpacing();
 			else
@@ -532,7 +544,9 @@ public class MultiRenderer extends MultiAdapter {
 			}
 		}
 		int getLineSpacing() {
-			return (font != null) ? font.getLineSpacing() : 0;
+			return (font != null && isFullMatrix())
+			      ? font.getLineSpacing()
+			      : 0;
 		}
 		void render(int x, int base) throws InvalidMessageException {
 			int y = base - getHeight();
