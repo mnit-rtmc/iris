@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,6 +76,9 @@ public interface CommLink extends SonarObject {
 
 	/** Get poll period (seconds) */
 	int getPollPeriod();
+
+	/** Maximum timeout (milliseconds) */
+	int MAX_TIMEOUT_MS = 20 * 1000;
 
 	/** Set the polling timeout (milliseconds) */
 	void setTimeout(int t);
