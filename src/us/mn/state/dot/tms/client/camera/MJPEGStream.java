@@ -84,6 +84,10 @@ public class MJPEGStream implements VideoStream {
 		HttpURLConnection.setFollowRedirects(true);
 		c.setConnectTimeout(TIMEOUT_DIRECT);
 		c.setReadTimeout(TIMEOUT_DIRECT);
+		int resp = c.getResponseCode();
+		if (resp != HttpURLConnection.HTTP_OK) {
+			throw new IOException(c.getResponseMessage());
+		}
 		return c.getInputStream();
 	}
 
