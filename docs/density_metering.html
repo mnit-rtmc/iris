@@ -7,7 +7,7 @@
 </head>
 
 <body>
-<div id="stamp">18 Mar 2015</div>
+<div id="stamp">8 Jul 2015</div>
 <h2>Objectives</h2>
 <p>
 	The density adaptive ramp metering algorithm has two main objectives:
@@ -252,8 +252,8 @@
 	queue was empty.
 	The <em>queue empty ratio</em> is 2 times the empty queue duration
 	divided by maximum wait time, limited to a range between 0 and 1.
-	The demand overcount adjustment is equal to the queue length multiplied
-	by the queue empty ratio.
+	The demand overcount adjustment is the queue length times the queue
+	empty ratio.
 </p>
 
 <svg class='right' version="1.1" xmlns="http://www.w3.org/2000/svg"
@@ -331,13 +331,11 @@
 </p>
 <h3 id='maximum_rate'>Maximum Rate</h3>
 <p>
-	The maximum metering rate is normally 125% of the
+	The maximum rate is normally 125% of the
 	<a href='#tracking_demand'>tracking demand</a>, but it is increased to
 	150% during the <a href='#flushing'>flushing phase</a>.
-	This is intended to prevent the meter from releasing all vehicles in a
-	queue too quickly.
-	The maximum rate will be raised to match the minimum rate if that is
-	higher.
+	This is to prevent the meter from releasing a queue too quickly.
+	The maximum rate will not be lower than the minimum rate.
 </p>
 
 <h3 id='minimum_rate'>Minimum Rate</h3>
