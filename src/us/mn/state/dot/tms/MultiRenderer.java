@@ -129,10 +129,10 @@ public class MultiRenderer extends MultiAdapter {
 
 	/** Add a new line */
 	@Override
-	public void addLine(Integer spacing) {
-		super.addLine(spacing);
+	public void addLine(Integer ls) {
+		super.addLine(ls);
 		Block block = currentBlock();
-		block.addLine(spacing);
+		block.addLine(ls);
 	}
 
 	/** Get the current text block */
@@ -310,7 +310,7 @@ public class MultiRenderer extends MultiAdapter {
 			Line line = currentLine();
 			line.addSpan(s);
 		}
-		void addLine(Integer spacing) {
+		void addLine(Integer ls) {
 			Line line = currentLine();
 			if (line.getHeight() == 0) {
 				// The line height can be zero on full-matrix
@@ -319,7 +319,7 @@ public class MultiRenderer extends MultiAdapter {
 				// height to be taken from the current font.
 				line.addSpan(new Span(""));
 			}
-			lines.addLast(new Line(spacing));
+			lines.addLast(new Line(ls));
 		}
 		Line currentLine() {
 			if (lines.isEmpty())
@@ -336,7 +336,7 @@ public class MultiRenderer extends MultiAdapter {
 			int y = 0;
 			Line pline = null;
 			for (Line line: lines) {
-				y += line.getSpacing(pline);
+				y += line.getLineSpacing(pline);
 				y += line.getHeight();
 				line.render(top + y);
 				pline = line;
@@ -368,7 +368,7 @@ public class MultiRenderer extends MultiAdapter {
 			for (Line line: lines) {
 				int lh = line.getHeight();
 				if (lh > 0) {
-					h += line.getSpacing(pline) + lh;
+					h += line.getLineSpacing(pline) + lh;
 					pline = line;
 				}
 			}
@@ -380,9 +380,9 @@ public class MultiRenderer extends MultiAdapter {
 	private class Line {
 		private final LinkedList<Fragment> fragments =
 			new LinkedList<Fragment>();
-		private final Integer spacing;
+		private final Integer line_spacing;
 		Line(Integer s) {
-			spacing = s;
+			line_spacing = s;
 		}
 		int getHeight() {
 			int h = 0;
@@ -393,12 +393,12 @@ public class MultiRenderer extends MultiAdapter {
 		private int getFragmentSpacing() {
 			int ls = 0;
 			for (Fragment f: fragments)
-				ls = Math.max(ls, f.getSpacing());
+				ls = Math.max(ls, f.getLineSpacing());
 			return ls;
 		}
-		int getSpacing(Line prev) {
-			if (spacing != null)
-				return spacing;
+		int getLineSpacing(Line prev) {
+			if (line_spacing != null)
+				return line_spacing;
 			else {
 				if (prev == null)
 					return 0;
@@ -441,7 +441,7 @@ public class MultiRenderer extends MultiAdapter {
 				h = Math.max(h, s.getHeight());
 			return h;
 		}
-		int getSpacing() {
+		int getLineSpacing() {
 			int ls = 0;
 			for (Span s: spans)
 				ls = Math.max(ls, s.getLineSpacing());
