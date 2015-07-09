@@ -397,6 +397,8 @@ public class MultiRenderer extends MultiAdapter {
 			return ls;
 		}
 		int getLineSpacing(Line prev) {
+			if (!isFullMatrix())
+				return 0;
 			if (line_spacing != null)
 				return line_spacing;
 			else {
@@ -546,9 +548,7 @@ public class MultiRenderer extends MultiAdapter {
 		}
 		int getLineSpacing() {
 			assert font != null;
-			return (font != null && isFullMatrix())
-			      ? font.getLineSpacing()
-			      : 0;
+			return (font != null) ? font.getLineSpacing() : 0;
 		}
 		void render(int x, int base) throws InvalidMessageException {
 			int y = base - getHeight();
