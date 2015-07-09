@@ -510,11 +510,11 @@ public class MultiRenderer extends MultiAdapter {
 			c_space = getCharSpacing();
 		}
 		int getCharSpacing() {
+			if (isCharMatrix())
+				return 0;
 			Integer cs = char_spacing;
 			if (cs != null)
 				return cs;
-			else if (isCharMatrix())
-				return 0;
 			else if (font != null)
 				return font.getCharSpacing();
 			else
