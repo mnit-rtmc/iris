@@ -223,6 +223,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	private GeoLocImpl geo_loc;
 
 	/** Get the device location */
+	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
 	}
@@ -295,6 +296,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	private boolean awsAllowed;
 
 	/** Allow (or deny) sign control by Automated Warning System */
+	@Override
 	public void setAwsAllowed(boolean a) {
 		awsAllowed = a;
 	}
@@ -308,6 +310,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Is sign allowed to be controlled by Automated Warning System? */
+	@Override
 	public boolean getAwsAllowed() {
 		return awsAllowed;
 	}
@@ -316,6 +319,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	private boolean awsControlled;
 
 	/** Set sign to Automated Warning System controlled */
+	@Override
 	public void setAwsControlled(boolean a) {
 		awsControlled = a;
 	}
@@ -329,6 +333,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Is sign controlled by Automated Warning System? */
+	@Override
 	public boolean getAwsControlled() {
 		return awsControlled;
 	}
@@ -337,6 +342,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	private Font default_font;
 
 	/** Set the default font */
+	@Override
 	public void setDefaultFont(Font f) {
 		default_font = f;
 	}
@@ -350,6 +356,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the default font */
+	@Override
 	public Font getDefaultFont() {
 		return default_font;
 	}
@@ -366,6 +373,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the make */
+	@Override
 	public String getMake() {
 		return make;
 	}
@@ -382,6 +390,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the model */
+	@Override
 	public String getModel() {
 		return model;
 	}
@@ -401,6 +410,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the version */
+	@Override
 	public String getVersion() {
 		return version;
 	}
@@ -417,6 +427,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get sign access description */
+	@Override
 	public String getSignAccess() {
 		return signAccess;
 	}
@@ -433,6 +444,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get sign type as an int (via enum) */
+	@Override
 	public int getDmsType() {
 		return dms_type.ordinal();
 	}
@@ -449,6 +461,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get sign legend */
+	@Override
 	public String getLegend() {
 		return legend;
 	}
@@ -465,6 +478,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get beacon type description */
+	@Override
 	public String getBeaconType() {
 		return beaconType;
 	}
@@ -481,6 +495,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get sign technology description */
+	@Override
 	public String getTechnology() {
 		return technology;
 	}
@@ -498,6 +513,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get height of the sign face (mm) */
+	@Override
 	public Integer getFaceHeight() {
 		return faceHeight;
 	}
@@ -515,6 +531,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get width of the sign face (mm) */
+	@Override
 	public Integer getFaceWidth() {
 		return faceWidth;
 	}
@@ -531,6 +548,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get horizontal border (mm) */
+	@Override
 	public Integer getHorizontalBorder() {
 		return horizontalBorder;
 	}
@@ -547,6 +565,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get vertical border (mm) */
+	@Override
 	public Integer getVerticalBorder() {
 		return verticalBorder;
 	}
@@ -563,6 +582,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get horizontal pitch (mm) */
+	@Override
 	public Integer getHorizontalPitch() {
 		return horizontalPitch;
 	}
@@ -579,6 +599,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get vertical pitch (mm) */
+	@Override
 	public Integer getVerticalPitch() {
 		return verticalPitch;
 	}
@@ -596,6 +617,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get sign height (pixels) */
+	@Override
 	public Integer getHeightPixels() {
 		return heightPixels;
 	}
@@ -613,6 +635,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get sign width (pixels) */
+	@Override
 	public Integer getWidthPixels() {
 		return widthPixels;
 	}
@@ -647,6 +670,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get character height (pixels) */
+	@Override
 	public Integer getCharHeightPixels() {
 		return charHeightPixels;
 	}
@@ -663,6 +687,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get character width (pixels) */
+	@Override
 	public Integer getCharWidthPixels() {
 		return charWidthPixels;
 	}
@@ -685,6 +710,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the minimum cabinet temperature */
+	@Override
 	public Integer getMinCabinetTemp() {
 		return minCabinetTemp;
 	}
@@ -701,6 +727,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the maximum cabinet temperature */
+	@Override
 	public Integer getMaxCabinetTemp() {
 		return maxCabinetTemp;
 	}
@@ -717,6 +744,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the minimum ambient temperature */
+	@Override
 	public Integer getMinAmbientTemp() {
 		return minAmbientTemp;
 	}
@@ -733,6 +761,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the maximum ambient temperature */
+	@Override
 	public Integer getMaxAmbientTemp() {
 		return maxAmbientTemp;
 	}
@@ -749,6 +778,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the minimum housing temperature */
+	@Override
 	public Integer getMinHousingTemp() {
 		return minHousingTemp;
 	}
@@ -765,6 +795,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the maximum housing temperature */
+	@Override
 	public Integer getMaxHousingTemp() {
 		return maxHousingTemp;
 	}
@@ -781,6 +812,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the light output of the sign (percentage) */
+	@Override
 	public Integer getLightOutput() {
 		return lightOutput;
 	}
@@ -798,6 +830,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the pixel status array */
+	@Override
 	public String[] getPixelStatus() {
 		return pixelStatus;
 	}
@@ -816,6 +849,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the power supply status table */
+	@Override
 	public String[] getPowerStatus() {
 		return powerStatus;
 	}
@@ -833,6 +867,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the photocell status table */
+	@Override
 	public String[] getPhotocellStatus() {
 		return photocellStatus;
 	}
@@ -845,6 +880,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Request a device operation (query message, test pixels, etc.) */
+	@Override
 	public void setDeviceRequest(int r) {
 		sendDeviceRequest(DeviceRequest.fromOrdinal(r));
 	}
@@ -858,6 +894,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * a race between two clients setting these attributes.  If ownerNext
 	 * is non-null when being set, then a race has been detected, meaning
 	 * two clients are trying to send a message at the same time. */
+	@Override
 	public synchronized void setOwnerNext(User o) {
 		if (ownerNext != null && o != null) {
 			System.err.println("DMSImpl.setOwnerNext: " + getName()+
@@ -882,6 +919,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * ReaperJob from destroying a SignMessage before it has been sent to
 	 * a sign.
 	 * @see DeviceImpl.acquire */
+	@Override
 	public void setMessageNext(SignMessage sm) {
 		messageNext = sm;
 	}
@@ -1129,6 +1167,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Get the current messasge.
 	 * @return Currently active message (cannot be null) */
+	@Override
 	public SignMessage getMessageCurrent() {
 		return messageCurrent;
 	}
@@ -1143,6 +1182,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Get the current message owner.
 	 * @return User who deployed the current message. */
+	@Override
 	public User getOwnerCurrent() {
 		return ownerCurrent;
 	}
@@ -1186,6 +1226,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Get the message deploy time.
 	 * @return Time message was deployed (ms since epoch).
 	 * @see java.lang.System.currentTimeMillis */
+	@Override
 	public long getDeployTime() {
 		return deployTime;
 	}
@@ -1200,6 +1241,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	private transient Integer ldcPotBase;
 
 	/** Set the LDC pot base */
+	@Override
 	public void setLdcPotBase(Integer base) {
 		if (!integerEquals(base, ldcPotBase)) {
 			ldcPotBase = base;
@@ -1208,6 +1250,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the LDC pot base */
+	@Override
 	public Integer getLdcPotBase() {
 		return ldcPotBase;
 	}
@@ -1216,6 +1259,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	private transient Integer pixelCurrentLow;
 
 	/** Set the pixel low curent threshold */
+	@Override
 	public void setPixelCurrentLow(Integer low) {
 		if (!integerEquals(low, pixelCurrentLow)) {
 			pixelCurrentLow = low;
@@ -1224,6 +1268,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the pixel low current threshold */
+	@Override
 	public Integer getPixelCurrentLow() {
 		return pixelCurrentLow;
 	}
@@ -1232,6 +1277,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	private transient Integer pixelCurrentHigh;
 
 	/** Set the pixel high curent threshold */
+	@Override
 	public void setPixelCurrentHigh(Integer high) {
 		if (!integerEquals(high, pixelCurrentHigh)) {
 			pixelCurrentHigh = high;
@@ -1240,6 +1286,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get the pixel high current threshold */
+	@Override
 	public Integer getPixelCurrentHigh() {
 		return pixelCurrentHigh;
 	}
@@ -1256,6 +1303,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get sign face heat tape status */
+	@Override
 	public String getHeatTapeStatus() {
 		return heatTapeStatus;
 	}
@@ -1473,6 +1521,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Get the scheduled sign messasge.
 	 * @return Scheduled sign message */
+	@Override
 	public SignMessage getMessageSched() {
 		return messageSched;
 	}
@@ -1734,6 +1783,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Get item style bits */
+	@Override
 	public long getStyles() {
 		return styles;
 	}
