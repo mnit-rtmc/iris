@@ -191,9 +191,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Set the controller to which this DMS is assigned */
+	@Override
 	public void setController(Controller c) {
 		super.setController(c);
-		if(c != null)
+		if (c != null)
 			setConfigure(false);
 	}
 
@@ -300,10 +301,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Allow (or deny) sign control by Automated Warning System */
 	public void doSetAwsAllowed(boolean a) throws TMSException {
-		if(a == awsAllowed)
-			return;
-		store.update(this, "aws_allowed", a);
-		setAwsAllowed(a);
+		if (a != awsAllowed) {
+			store.update(this, "aws_allowed", a);
+			setAwsAllowed(a);
+		}
 	}
 
 	/** Is sign allowed to be controlled by Automated Warning System? */
@@ -321,10 +322,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set sign to Automated Warning System controlled */
 	public void doSetAwsControlled(boolean a) throws TMSException {
-		if(a == awsControlled)
-			return;
-		store.update(this, "aws_controlled", a);
-		setAwsControlled(a);
+		if (a != awsControlled) {
+			store.update(this, "aws_controlled", a);
+			setAwsControlled(a);
+		}
 	}
 
 	/** Is sign controlled by Automated Warning System? */
@@ -342,10 +343,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the default font */
 	public void doSetDefaultFont(Font f) throws TMSException {
-		if(f == default_font)
-			return;
-		store.update(this, "default_font", f);
-		setDefaultFont(f);
+		if (f != default_font) {
+			store.update(this, "default_font", f);
+			setDefaultFont(f);
+		}
 	}
 
 	/** Get the default font */
@@ -358,7 +359,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the make */
 	public void setMake(String m) {
-		if(!m.equals(make)) {
+		if (!m.equals(make)) {
 			make = m;
 			notifyAttribute("make");
 		}
@@ -374,7 +375,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the model */
 	public void setModel(String m) {
-		if(!m.equals(model)) {
+		if (!m.equals(model)) {
 			model = m;
 			notifyAttribute("model");
 		}
@@ -390,11 +391,11 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the version */
 	public void setVersion(String v) {
-		if(!v.equals(version)) {
+		if (!v.equals(version)) {
 			version = v;
 			notifyAttribute("version");
 			ControllerImpl c = (ControllerImpl)getController();
-			if(c != null)
+			if (c != null)
 				c.setVersion(version);
 		}
 	}
@@ -409,7 +410,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set sign access description */
 	public void setSignAccess(String a) {
-		if(!a.equals(signAccess)) {
+		if (!a.equals(signAccess)) {
 			signAccess = a;
 			notifyAttribute("signAccess");
 		}
@@ -425,7 +426,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set sign type */
 	public void setDmsType(DMSType t) {
-		if(t != dms_type) {
+		if (t != dms_type) {
 			dms_type = t;
 			notifyAttribute("dmsType");
 		}
@@ -441,7 +442,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set sign legend */
 	public void setLegend(String l) {
-		if(!l.equals(legend)) {
+		if (!l.equals(legend)) {
 			legend = l;
 			notifyAttribute("legend");
 		}
@@ -457,7 +458,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set beacon type description */
 	public void setBeaconType(String t) {
-		if(!t.equals(beaconType)) {
+		if (!t.equals(beaconType)) {
 			beaconType = t;
 			notifyAttribute("beaconType");
 		}
@@ -473,7 +474,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set sign technology description */
 	public void setTechnology(String t) {
-		if(!t.equals(technology)) {
+		if (!t.equals(technology)) {
 			technology = t;
 			notifyAttribute("technology");
 		}
@@ -489,7 +490,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set height of sign face (mm) */
 	public void setFaceHeight(Integer h) {
-		if(!integerEquals(h, faceHeight)) {
+		if (!integerEquals(h, faceHeight)) {
 			faceHeight = h;
 			notifyAttribute("faceHeight");
 			updateStyles();
@@ -506,7 +507,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set width of sign face (mm) */
 	public void setFaceWidth(Integer w) {
-		if(!integerEquals(w, faceWidth)) {
+		if (!integerEquals(w, faceWidth)) {
 			faceWidth = w;
 			notifyAttribute("faceWidth");
 			updateStyles();
@@ -523,7 +524,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set horizontal border (mm) */
 	public void setHorizontalBorder(Integer b) {
-		if(!integerEquals(b, horizontalBorder)) {
+		if (!integerEquals(b, horizontalBorder)) {
 			horizontalBorder = b;
 			notifyAttribute("horizontalBorder");
 		}
@@ -539,7 +540,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set vertical border (mm) */
 	public void setVerticalBorder(Integer b) {
-		if(!integerEquals(b, verticalBorder)) {
+		if (!integerEquals(b, verticalBorder)) {
 			verticalBorder = b;
 			notifyAttribute("verticalBorder");
 		}
@@ -555,7 +556,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set horizontal pitch (mm) */
 	public void setHorizontalPitch(Integer p) {
-		if(!integerEquals(p, horizontalPitch)) {
+		if (!integerEquals(p, horizontalPitch)) {
 			horizontalPitch = p;
 			notifyAttribute("horizontalPitch");
 		}
@@ -571,7 +572,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set vertical pitch (mm) */
 	public void setVerticalPitch(Integer p) {
-		if(!integerEquals(p, verticalPitch)) {
+		if (!integerEquals(p, verticalPitch)) {
 			verticalPitch = p;
 			notifyAttribute("verticalPitch");
 		}
@@ -587,7 +588,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set sign height (pixels) */
 	public void setHeightPixels(Integer h) {
-		if(!integerEquals(h, heightPixels)) {
+		if (!integerEquals(h, heightPixels)) {
 			heightPixels = h;
 			// FIXME: update bitmap graphics plus stuck on/off
 			notifyAttribute("heightPixels");
@@ -604,7 +605,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set sign width (pixels) */
 	public void setWidthPixels(Integer w) {
-		if(!integerEquals(w, widthPixels)) {
+		if (!integerEquals(w, widthPixels)) {
 			widthPixels = w;
 			// FIXME: update bitmap graphics plus stuck on/off
 			notifyAttribute("widthPixels");
@@ -624,9 +625,9 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		// NOTE: some crazy vendors think line-matrix signs should have
 		//       a variable character height, so we have to fix their
 		//       mistake here ... uggh
-		if(h == 0 && DMSType.isFixedHeight(dms_type))
+		if (h == 0 && DMSType.isFixedHeight(dms_type))
 			h = estimateLineHeight();
-		if(!integerEquals(h, charHeightPixels)) {
+		if (!integerEquals(h, charHeightPixels)) {
 			charHeightPixels = h;
 			notifyAttribute("charHeightPixels");
 		}
@@ -635,10 +636,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Estimate the line height (pixels) */
 	protected Integer estimateLineHeight() {
 		Integer h = heightPixels;
-		if(h != null) {
+		if (h != null) {
 			int m = SystemAttrEnum.DMS_MAX_LINES.getInt();
-			for(int i = m; i > 0; i--) {
-				if(h % i == 0)
+			for (int i = m; i > 0; i--) {
+				if (h % i == 0)
 					return h / i;
 			}
 		}
@@ -655,7 +656,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set character width (pixels) */
 	public void setCharWidthPixels(Integer w) {
-		if(!integerEquals(w, charWidthPixels)) {
+		if (!integerEquals(w, charWidthPixels)) {
 			charWidthPixels = w;
 			notifyAttribute("charWidthPixels");
 		}
@@ -677,7 +678,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the minimum cabinet temperature */
 	public void setMinCabinetTemp(Integer t) {
-		if(!integerEquals(t, minCabinetTemp)) {
+		if (!integerEquals(t, minCabinetTemp)) {
 			minCabinetTemp = t;
 			notifyAttribute("minCabinetTemp");
 		}
@@ -693,7 +694,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the maximum cabinet temperature */
 	public void setMaxCabinetTemp(Integer t) {
-		if(!integerEquals(t, maxCabinetTemp)) {
+		if (!integerEquals(t, maxCabinetTemp)) {
 			maxCabinetTemp = t;
 			notifyAttribute("maxCabinetTemp");
 		}
@@ -709,7 +710,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the minimum ambient temperature */
 	public void setMinAmbientTemp(Integer t) {
-		if(!integerEquals(t, minAmbientTemp)) {
+		if (!integerEquals(t, minAmbientTemp)) {
 			minAmbientTemp = t;
 			notifyAttribute("minAmbientTemp");
 		}
@@ -725,7 +726,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the maximum ambient temperature */
 	public void setMaxAmbientTemp(Integer t) {
-		if(!integerEquals(t, maxAmbientTemp)) {
+		if (!integerEquals(t, maxAmbientTemp)) {
 			maxAmbientTemp = t;
 			notifyAttribute("maxAmbientTemp");
 		}
@@ -741,7 +742,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the minimum housing temperature */
 	public void setMinHousingTemp(Integer t) {
-		if(!integerEquals(t, minHousingTemp)) {
+		if (!integerEquals(t, minHousingTemp)) {
 			minHousingTemp = t;
 			notifyAttribute("minHousingTemp");
 		}
@@ -757,7 +758,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the maximum housing temperature */
 	public void setMaxHousingTemp(Integer t) {
-		if(!integerEquals(t, maxHousingTemp)) {
+		if (!integerEquals(t, maxHousingTemp)) {
 			maxHousingTemp = t;
 			notifyAttribute("maxHousingTemp");
 		}
@@ -773,7 +774,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the light output of the sign (percentage) */
 	public void setLightOutput(Integer l) {
-		if(!integerEquals(l, lightOutput)) {
+		if (!integerEquals(l, lightOutput)) {
 			lightOutput = l;
 			notifyAttribute("lightOutput");
 		}
@@ -790,7 +791,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the pixel status array */
 	public void setPixelStatus(String[] p) {
-		if(!Arrays.equals(p, pixelStatus)) {
+		if (!Arrays.equals(p, pixelStatus)) {
 			pixelStatus = p;
 			notifyAttribute("pixelStatus");
 		}
@@ -808,7 +809,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the power supply status table */
 	public void setPowerStatus(String[] t) {
-		if(!Arrays.equals(t, powerStatus)) {
+		if (!Arrays.equals(t, powerStatus)) {
 			powerStatus = t;
 			notifyAttribute("powerStatus");
 		}
@@ -825,7 +826,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the photocell status table */
 	public void setPhotocellStatus(String[] t) {
-		if(!Arrays.equals(t, photocellStatus)) {
+		if (!Arrays.equals(t, photocellStatus)) {
 			photocellStatus = t;
 			notifyAttribute("photocellStatus");
 		}
@@ -858,7 +859,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * is non-null when being set, then a race has been detected, meaning
 	 * two clients are trying to send a message at the same time. */
 	public synchronized void setOwnerNext(User o) {
-		if(ownerNext != null && o != null) {
+		if (ownerNext != null && o != null) {
 			System.err.println("DMSImpl.setOwnerNext: " + getName()+
 				", " + ownerNext.getName() + " vs. " +
 				o.getName());
@@ -892,7 +893,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		User o_next = ownerNext;	// Avoid race
 		// ownerNext is only valid for one message, clear it
 		ownerNext = null;
-		if(o_next == null)
+		if (o_next == null)
 			throw new ChangeVetoException("MUST SET OWNER FIRST");
 		doSetMessageNext(sm, o_next);
 	}
@@ -902,11 +903,11 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		throws TMSException
 	{
 		DMSPoller p = getDMSPoller();
-		if(p == null) {
+		if (p == null) {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
-		if(shouldActivate(sm))
+		if (shouldActivate(sm))
 			doSetMessageNext(sm, o, p);
 	}
 
@@ -920,12 +921,12 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		throws TMSException
 	{
 		SignMessage smn = validateMessage(sm);
-		if(smn != sm)
+		if (smn != sm)
 			o = null;
 		// FIXME: there should be a better way to clear cached routes
 		//        in travel time estimator
 		int ap = smn.getActivationPriority();
-		if(ap == DMSMessagePriority.OVERRIDE.ordinal())
+		if (ap == DMSMessagePriority.OVERRIDE.ordinal())
 			formatter.clear();
 		p.sendMessage(this, smn, o);
 	}
@@ -965,17 +966,17 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	protected void validateBitmaps(SignMessage sm, MultiString multi)
 		throws TMSException
 	{
-		if(!multi.isValid()) {
+		if (!multi.isValid()) {
 			throw new InvalidMessageException(name +
 				": INVALID MESSAGE, " + sm.getMulti());
 		}
 		try {
 			validateBitmaps(sm.getBitmaps(), multi);
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			throw new ChangeVetoException("Base64 decode error");
 		}
-		catch(IndexOutOfBoundsException e) {
+		catch (IndexOutOfBoundsException e) {
 			throw new ChangeVetoException(e.getMessage());
 		}
 	}
@@ -987,13 +988,13 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		byte[] bitmaps = Base64.decode(bmaps);
 		BitmapGraphic bitmap = createBlankBitmap();
 		int blen = bitmap.length();
-		if(blen == 0)
+		if (blen == 0)
 			throw new ChangeVetoException("Invalid sign size");
-		if(bitmaps.length % blen != 0)
+		if (bitmaps.length % blen != 0)
 			throw new ChangeVetoException("Invalid bitmap length");
-		if(!multi.isBlank()) {
+		if (!multi.isBlank()) {
 			String[] pixels = pixelStatus;	// Avoid races
-			if(pixels != null && pixels.length == 2)
+			if (pixels != null && pixels.length == 2)
 				validateBitmaps(bitmaps, pixels, bitmap);
 		}
 	}
@@ -1010,18 +1011,18 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		byte[] b_off = Base64.decode(pixels[STUCK_OFF_BITMAP]);
 		byte[] b_on = Base64.decode(pixels[STUCK_ON_BITMAP]);
 		// Don't validate if the sign dimensions have changed
-		if(b_off.length != blen || b_on.length != blen)
+		if (b_off.length != blen || b_on.length != blen)
 			return;
 		stuckOff.setPixelData(b_off);
 		stuckOn.setPixelData(b_on);
 		int n_pages = bitmaps.length / blen;
 		byte[] b = new byte[blen];
-		for(int p = 0; p < n_pages; p++) {
+		for (int p = 0; p < n_pages; p++) {
 			System.arraycopy(bitmaps, p * blen, b, 0, blen);
 			bitmap.setPixelData(b);
 			bitmap.union(stuckOff);
 			int n_lit = bitmap.getLitCount();
-			if(n_lit > off_limit) {
+			if (n_lit > off_limit) {
 				throw new ChangeVetoException(
 					"Too many stuck off pixels: " + n_lit);
 			}
@@ -1029,7 +1030,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			bitmap.outline();
 			bitmap.union(stuckOn);
 			n_lit = bitmap.getLitCount();
-			if(n_lit > on_limit) {
+			if (n_lit > on_limit) {
 				throw new ChangeVetoException(
 					"Too many stuck on pixels: " + n_lit);
 			}
@@ -1042,7 +1043,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	{
 		Integer w = widthPixels;	// Avoid race
 		Integer h = heightPixels;	// Avoid race
-		if(w != null && h != null)
+		if (w != null && h != null)
 			return new BitmapGraphic(w, h);
 		else
 			throw new ChangeVetoException("Width/height is null");
@@ -1052,7 +1053,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param sm SignMessage being activated.
 	 * @return true If priority is high enough to deploy. */
 	public boolean shouldActivate(SignMessage sm) {
-		if(sm != null) {
+		if (sm != null) {
 			DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
 			       sm.getActivationPriority());
 			return shouldActivate(ap, sm.getScheduled()) &&
@@ -1078,9 +1079,9 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	static private boolean shouldActivate(SignMessage existing,
 		DMSMessagePriority ap, boolean sched)
 	{
-		if(existing == null)
+		if (existing == null)
 			return true;
-		if(existing.getScheduled() && sched)
+		if (existing.getScheduled() && sched)
 			return true;
 		return ap.ordinal() >= existing.getRunTimePriority();
 	}
@@ -1154,12 +1155,12 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	protected void logMessage(SignMessage sm, User o) {
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = sm.getMulti();
-		if(SignMessageHelper.isBlank(sm)) {
+		if (SignMessageHelper.isBlank(sm)) {
 			et = EventType.DMS_CLEARED;
 			text = null;
 		}
 		String owner = null;
-		if(o != null)
+		if (o != null)
 			owner = o.getName();
 		logEvent(new SignStatusEvent(et, name, text, owner));
 	}
@@ -1200,7 +1201,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the LDC pot base */
 	public void setLdcPotBase(Integer base) {
-		if(!integerEquals(base, ldcPotBase)) {
+		if (!integerEquals(base, ldcPotBase)) {
 			ldcPotBase = base;
 			notifyAttribute("ldcPotBase");
 		}
@@ -1216,7 +1217,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the pixel low curent threshold */
 	public void setPixelCurrentLow(Integer low) {
-		if(!integerEquals(low, pixelCurrentLow)) {
+		if (!integerEquals(low, pixelCurrentLow)) {
 			pixelCurrentLow = low;
 			notifyAttribute("pixelCurrentLow");
 		}
@@ -1232,7 +1233,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the pixel high curent threshold */
 	public void setPixelCurrentHigh(Integer high) {
-		if(!integerEquals(high, pixelCurrentHigh)) {
+		if (!integerEquals(high, pixelCurrentHigh)) {
 			pixelCurrentHigh = high;
 			notifyAttribute("pixelCurrentHigh");
 		}
@@ -1248,7 +1249,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set sign face heat tape status */
 	public void setHeatTapeStatus(String h) {
-		if(!h.equals(heatTapeStatus)) {
+		if (!h.equals(heatTapeStatus)) {
 			heatTapeStatus = h;
 			notifyAttribute("heatTapeStatus");
 		}
@@ -1299,7 +1300,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		DMSMessagePriority ap)
 	{
 		MultiString ms = new MultiString(m);
-		if(ms.isBlank())
+		if (ms.isBlank())
 			return createBlankMessage(ap);
 		else {
 			return createMessage(m, be, ap,
@@ -1378,12 +1379,12 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	{
 		Integer w = widthPixels;
 		Integer h = heightPixels;
-		if(w == null || w < 1)
+		if (w == null || w < 1)
 			return null;
-		if(h == null || h < 1)
+		if (h == null || h < 1)
 			return null;
 		BitmapGraphic[] bmaps = new BitmapGraphic[pages.length];
-		for(int i = 0; i < bmaps.length; i++) {
+		for (int i = 0; i < bmaps.length; i++) {
 			bmaps[i] = new BitmapGraphic(w, h);
 			bmaps[i].copy(pages[i]);
 		}
@@ -1427,7 +1428,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		Integer d)
 	{
 		SignMessage esm = SignMessageHelper.find(m, b, ap, rp, s, d);
-		if(esm != null)
+		if (esm != null)
 			return esm;
 		else
 			return createMessageC(m, be, b, ap, rp, s, d);
@@ -1479,7 +1480,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Set the scheduled sign message.
 	 * @param sm New scheduled sign message */
 	private void setMessageSched(SignMessage sm) {
-		if(!SignMessageHelper.isEquivalent(messageSched, sm)) {
+		if (!SignMessageHelper.isEquivalent(messageSched, sm)) {
 			messageSched = sm;
 			notifyAttribute("messageSched");
 		}
@@ -1487,13 +1488,13 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Check if a DMS action is deployable */
 	public boolean isDeployable(DmsAction da) {
-		if(hasError())
+		if (hasError())
 			return false;
 		SignMessage sm = createMessage(da);
 		try {
 			return sm == validateMessage(sm);
 		}
-		catch(TMSException e) {
+		catch (TMSException e) {
 			return false;
 		}
 	}
@@ -1501,8 +1502,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Perform a DMS action */
 	public void performAction(DmsAction da) {
 		SignMessage sm = createMessage(da);
-		if(sm != null) {
-			if(shouldReplaceScheduled(sm)) {
+		if (sm != null) {
+			if (shouldReplaceScheduled(sm)) {
 				setMessageSched(sm);
 				is_scheduled = true;
 			}
@@ -1582,7 +1583,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Create a blank scheduled message */
 	private SignMessage createBlankScheduledMessage() {
-		if(isCurrentScheduled())
+		if (isCurrentScheduled())
 			return createBlankMessage();
 		else
 			return null;
@@ -1677,9 +1678,9 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Test if DMS needs maintenance */
 	public boolean needsMaintenance() {
-		if(!isOnline())
+		if (!isOnline())
 			return false;
-		if(hasCriticalError())
+		if (hasCriticalError())
 			return true;
 		return !DMSHelper.getMaintenance(this).isEmpty();
 	}
@@ -1695,29 +1696,29 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Update the DMS styles */
 	public void updateStyles() {
 		long s = ItemStyle.ALL.bit();
-		if(getController() == null)
+		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
-		if(isLCS())
+		if (isLCS())
 			s |= ItemStyle.LCS.bit();
 		else {
-			if(needsMaintenance())
+			if (needsMaintenance())
 				s |= ItemStyle.MAINTENANCE.bit();
-			if(isActive() && isFailed())
+			if (isActive() && isFailed())
 				s |= ItemStyle.FAILED.bit();
-			if(!isActive())
+			if (!isActive())
 				s |= ItemStyle.INACTIVE.bit();
-			if(!isForGateArm()) {
-				if(isAvailable())
+			if (!isForGateArm()) {
+				if (isAvailable())
 					s |= ItemStyle.AVAILABLE.bit();
-				if(isUserDeployed())
+				if (isUserDeployed())
 					s |= ItemStyle.DEPLOYED.bit();
-				if(isTravelTimeDeployed())
+				if (isTravelTimeDeployed())
 					s |= ItemStyle.TRAVEL_TIME.bit();
-				if(isScheduleDeployed())
+				if (isScheduleDeployed())
 					s |= ItemStyle.SCHEDULED.bit();
-				if(isAwsDeployed())
+				if (isAwsDeployed())
 					s |= ItemStyle.AWS_DEPLOYED.bit();
-				if(isAwsControlled())
+				if (isAwsControlled())
 					s |= ItemStyle.AWS_CONTROLLED.bit();
 			}
 		}
@@ -1726,7 +1727,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Set the item style bits (and notify clients) */
 	private void setStyles(long s) {
-		if(s != styles) {
+		if (s != styles) {
 			styles = s;
 			notifyAttribute("styles");
 		}
@@ -1744,7 +1745,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		w.write(createAttribute("description",
 			GeoLocHelper.getDescription(geo_loc)));
 		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
-		if(pos != null) {
+		if (pos != null) {
 			w.write(createAttribute("lon",
 				formatDouble(pos.getLongitude())));
 			w.write(createAttribute("lat",
@@ -1758,7 +1759,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Write the sign message as xml */
 	public void writeSignMessageXml(Writer w) throws IOException {
 		SignMessage msg = getMessageCurrent();
-		if(msg instanceof SignMessageImpl)
+		if (msg instanceof SignMessageImpl)
 			((SignMessageImpl)msg).writeXml(w, this);
 	}
 
