@@ -145,7 +145,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Create a dynamic message sign */
-	protected DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
+	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, Beacon b, CameraPreset cp, boolean aa,
 		boolean ac, Font df)
 	{
@@ -161,7 +161,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Create a dynamic message sign */
-	protected DMSImpl(String n, String loc, String c,
+	private DMSImpl(String n, String loc, String c,
 		int p, String nt, String b, String cp, boolean aa, boolean ac,
 		String df)
 	{
@@ -176,7 +176,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Create a blank message for the sign */
-	protected SignMessage createBlankMessage(DMSMessagePriority ap) {
+	private SignMessage createBlankMessage(DMSMessagePriority ap) {
 		String bitmaps = Base64.encode(new byte[0]);
 		return createMessage("", false, bitmaps, ap,
 			DMSMessagePriority.BLANK, false, null);
@@ -205,7 +205,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Configure flag indicates that the sign has been configured */
-	protected boolean configure;
+	private boolean configure;
 
 	/** Set the configure flag.
 	 *  @param c Set to true to indicate the DMS is configured. */
@@ -220,7 +220,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Device location */
-	protected GeoLocImpl geo_loc;
+	private GeoLocImpl geo_loc;
 
 	/** Get the device location */
 	public GeoLoc getGeoLoc() {
@@ -292,7 +292,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Administrator allowed AWS control */
-	protected boolean awsAllowed;
+	private boolean awsAllowed;
 
 	/** Allow (or deny) sign control by Automated Warning System */
 	public void setAwsAllowed(boolean a) {
@@ -313,7 +313,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** AWS controlled */
-	protected boolean awsControlled;
+	private boolean awsControlled;
 
 	/** Set sign to Automated Warning System controlled */
 	public void setAwsControlled(boolean a) {
@@ -334,7 +334,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Default font */
-	protected Font default_font;
+	private Font default_font;
 
 	/** Set the default font */
 	public void setDefaultFont(Font f) {
@@ -355,7 +355,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Make (manufacturer) */
-	protected transient String make;
+	private transient String make;
 
 	/** Set the make */
 	public void setMake(String m) {
@@ -371,7 +371,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Model */
-	protected transient String model;
+	private transient String model;
 
 	/** Set the model */
 	public void setModel(String m) {
@@ -387,7 +387,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Software version */
-	protected transient String version;
+	private transient String version;
 
 	/** Set the version */
 	public void setVersion(String v) {
@@ -406,7 +406,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Sign access description */
-	protected transient String signAccess;
+	private transient String signAccess;
 
 	/** Set sign access description */
 	public void setSignAccess(String a) {
@@ -422,7 +422,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Sign type enum value */
-	protected transient DMSType dms_type = DMSType.UNKNOWN;
+	private transient DMSType dms_type = DMSType.UNKNOWN;
 
 	/** Set sign type */
 	public void setDmsType(DMSType t) {
@@ -438,7 +438,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Sign legend string */
-	protected transient String legend;
+	private transient String legend;
 
 	/** Set sign legend */
 	public void setLegend(String l) {
@@ -454,7 +454,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Beacon type description */
-	protected transient String beaconType;
+	private transient String beaconType;
 
 	/** Set beacon type description */
 	public void setBeaconType(String t) {
@@ -470,7 +470,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Sign technology description */
-	protected transient String technology;
+	private transient String technology;
 
 	/** Set sign technology description */
 	public void setTechnology(String t) {
@@ -486,7 +486,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Height of sign face (mm) */
-	protected transient Integer faceHeight;
+	private transient Integer faceHeight;
 
 	/** Set height of sign face (mm) */
 	public void setFaceHeight(Integer h) {
@@ -503,7 +503,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Width of the sign face (mm) */
-	protected transient Integer faceWidth;
+	private transient Integer faceWidth;
 
 	/** Set width of sign face (mm) */
 	public void setFaceWidth(Integer w) {
@@ -520,7 +520,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Horizontal border (mm) */
-	protected transient Integer horizontalBorder;
+	private transient Integer horizontalBorder;
 
 	/** Set horizontal border (mm) */
 	public void setHorizontalBorder(Integer b) {
@@ -536,7 +536,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Vertical border (mm) */
-	protected transient Integer verticalBorder;
+	private transient Integer verticalBorder;
 
 	/** Set vertical border (mm) */
 	public void setVerticalBorder(Integer b) {
@@ -552,7 +552,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Horizontal pitch (mm) */
-	protected transient Integer horizontalPitch;
+	private transient Integer horizontalPitch;
 
 	/** Set horizontal pitch (mm) */
 	public void setHorizontalPitch(Integer p) {
@@ -568,7 +568,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Vertical pitch (mm) */
-	protected transient Integer verticalPitch;
+	private transient Integer verticalPitch;
 
 	/** Set vertical pitch (mm) */
 	public void setVerticalPitch(Integer p) {
@@ -584,7 +584,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Sign height (pixels) */
-	protected transient Integer heightPixels;
+	private transient Integer heightPixels;
 
 	/** Set sign height (pixels) */
 	public void setHeightPixels(Integer h) {
@@ -601,7 +601,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Sign width in pixels */
-	protected transient Integer widthPixels;
+	private transient Integer widthPixels;
 
 	/** Set sign width (pixels) */
 	public void setWidthPixels(Integer w) {
@@ -618,7 +618,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Character height (pixels; 0 means variable) */
-	protected transient Integer charHeightPixels;
+	private transient Integer charHeightPixels;
 
 	/** Set character height (pixels) */
 	public void setCharHeightPixels(Integer h) {
@@ -634,7 +634,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Estimate the line height (pixels) */
-	protected Integer estimateLineHeight() {
+	private Integer estimateLineHeight() {
 		Integer h = heightPixels;
 		if (h != null) {
 			int m = SystemAttrEnum.DMS_MAX_LINES.getInt();
@@ -652,7 +652,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Character width (pixels; 0 means variable) */
-	protected transient Integer charWidthPixels;
+	private transient Integer charWidthPixels;
 
 	/** Set character width (pixels) */
 	public void setCharWidthPixels(Integer w) {
@@ -674,7 +674,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Minimum cabinet temperature */
-	protected transient Integer minCabinetTemp;
+	private transient Integer minCabinetTemp;
 
 	/** Set the minimum cabinet temperature */
 	public void setMinCabinetTemp(Integer t) {
@@ -690,7 +690,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Maximum cabinet temperature */
-	protected transient Integer maxCabinetTemp;
+	private transient Integer maxCabinetTemp;
 
 	/** Set the maximum cabinet temperature */
 	public void setMaxCabinetTemp(Integer t) {
@@ -706,7 +706,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Minimum ambient temperature */
-	protected transient Integer minAmbientTemp;
+	private transient Integer minAmbientTemp;
 
 	/** Set the minimum ambient temperature */
 	public void setMinAmbientTemp(Integer t) {
@@ -722,7 +722,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Maximum ambient temperature */
-	protected transient Integer maxAmbientTemp;
+	private transient Integer maxAmbientTemp;
 
 	/** Set the maximum ambient temperature */
 	public void setMaxAmbientTemp(Integer t) {
@@ -738,7 +738,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Minimum housing temperature */
-	protected transient Integer minHousingTemp;
+	private transient Integer minHousingTemp;
 
 	/** Set the minimum housing temperature */
 	public void setMinHousingTemp(Integer t) {
@@ -754,7 +754,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Maximum housing temperature */
-	protected transient Integer maxHousingTemp;
+	private transient Integer maxHousingTemp;
 
 	/** Set the maximum housing temperature */
 	public void setMaxHousingTemp(Integer t) {
@@ -770,7 +770,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Current light output (percentage) of the sign */
-	protected transient Integer lightOutput;
+	private transient Integer lightOutput;
 
 	/** Set the light output of the sign (percentage) */
 	public void setLightOutput(Integer l) {
@@ -787,7 +787,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Pixel status.  This is an array of two Base64-encoded bitmaps.
 	 * The first indicates stuck-off pixels, the second stuck-on pixels. */
-	protected transient String[] pixelStatus;
+	private transient String[] pixelStatus;
 
 	/** Set the pixel status array */
 	public void setPixelStatus(String[] p) {
@@ -805,7 +805,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Power supply status.  This is an array of status for each power
 	 * supply.
 	 * @see DMS.getPowerStatus */
-	protected transient String[] powerStatus = new String[0];
+	private transient String[] powerStatus = new String[0];
 
 	/** Set the power supply status table */
 	public void setPowerStatus(String[] t) {
@@ -822,7 +822,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Photocell status.  This is an array of status for each photocell.
 	 * @see DMS.getPhotocellStatus */
-	protected transient String[] photocellStatus = new String[0];
+	private transient String[] photocellStatus = new String[0];
 
 	/** Set the photocell status table */
 	public void setPhotocellStatus(String[] t) {
@@ -851,7 +851,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** The owner of the next message to be displayed.  This is a write-only
 	 * SONAR attribute. */
-	protected transient User ownerNext;
+	private transient User ownerNext;
 
 	/** Set the message owner.  When a user sends a new message to the DMS,
 	 * two attributes must be set: ownerNext and messageNext.  There can be
@@ -873,7 +873,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * getting queued during the time when a message gets queued and it
 	 * becomes activated.
 	 * @see DMSImpl#shouldActivate */
-	protected transient SignMessage messageNext;
+	private transient SignMessage messageNext;
 
 	/** Set the next sign message.  This method is not called by SONAR
 	 * automatically; instead, it must be called by operations after
@@ -917,7 +917,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param o User sending message, may be null.
 	 * @param p DMS poller, may not be null.
 	 */
-	protected void doSetMessageNext(SignMessage sm, User o, DMSPoller p)
+	private void doSetMessageNext(SignMessage sm, User o, DMSPoller p)
 		throws TMSException
 	{
 		SignMessage smn = validateMessage(sm);
@@ -963,7 +963,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Validate the message bitmaps */
-	protected void validateBitmaps(SignMessage sm, MultiString multi)
+	private void validateBitmaps(SignMessage sm, MultiString multi)
 		throws TMSException
 	{
 		if (!multi.isValid()) {
@@ -982,7 +982,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Validate the message bitmaps */
-	protected void validateBitmaps(String bmaps, MultiString multi)
+	private void validateBitmaps(String bmaps, MultiString multi)
 		throws IOException, ChangeVetoException
 	{
 		byte[] bitmaps = Base64.decode(bmaps);
@@ -1000,7 +1000,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Validate the message bitmaps */
-	protected void validateBitmaps(byte[] bitmaps, String[] pixels,
+	private void validateBitmaps(byte[] bitmaps, String[] pixels,
 		BitmapGraphic bitmap) throws IOException, ChangeVetoException
 	{
 		int blen = bitmap.length();
@@ -1038,7 +1038,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Create a blank bitmap */
-	protected BitmapGraphic createBlankBitmap()
+	private BitmapGraphic createBlankBitmap()
 		throws ChangeVetoException
 	{
 		Integer w = widthPixels;	// Avoid race
@@ -1107,7 +1107,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Current message (Shall not be null) */
-	protected transient SignMessage messageCurrent = createBlankMessage();
+	private transient SignMessage messageCurrent = createBlankMessage();
 
 	/**
 	 * Set the current message.
@@ -1139,7 +1139,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Owner of current message */
-	protected transient User ownerCurrent;
+	private transient User ownerCurrent;
 
 	/** Get the current message owner.
 	 * @return User who deployed the current message. */
@@ -1152,7 +1152,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param sm Sign message
 	 * @param o User associated with sign message
 	 */
-	protected void logMessage(SignMessage sm, User o) {
+	private void logMessage(SignMessage sm, User o) {
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = sm.getMulti();
 		if (SignMessageHelper.isBlank(sm)) {
@@ -1175,10 +1175,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Message deploy time */
-	protected long deployTime = 0;
+	private long deployTime = 0;
 
 	/** Set the message deploy time */
-	protected void setDeployTime() {
+	private void setDeployTime() {
 		deployTime = TimeSteward.currentTimeMillis();
 		notifyAttribute("deployTime");
 	}
@@ -1197,7 +1197,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** LDC pot base (Ledstar-specific value) */
-	protected transient Integer ldcPotBase;
+	private transient Integer ldcPotBase;
 
 	/** Set the LDC pot base */
 	public void setLdcPotBase(Integer base) {
@@ -1213,7 +1213,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Pixel low current threshold (Ledstar-specific value) */
-	protected transient Integer pixelCurrentLow;
+	private transient Integer pixelCurrentLow;
 
 	/** Set the pixel low curent threshold */
 	public void setPixelCurrentLow(Integer low) {
@@ -1229,7 +1229,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Pixel high current threshold (Ledstar-specific value) */
-	protected transient Integer pixelCurrentHigh;
+	private transient Integer pixelCurrentHigh;
 
 	/** Set the pixel high curent threshold */
 	public void setPixelCurrentHigh(Integer high) {
@@ -1245,7 +1245,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Sign face heat tape status */
-	protected transient String heatTapeStatus;
+	private transient String heatTapeStatus;
 
 	/** Set sign face heat tape status */
 	public void setHeatTapeStatus(String h) {
@@ -1330,7 +1330,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param s Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	protected SignMessage createMessage(String m, boolean be,
+	private SignMessage createMessage(String m, boolean be,
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
 		Integer d)
 	{
@@ -1373,7 +1373,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param s Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	protected SignMessage createMessage(String m, boolean be,
+	private SignMessage createMessage(String m, boolean be,
 		BitmapGraphic[] pages, DMSMessagePriority ap,
 		DMSMessagePriority rp, boolean s, Integer d)
 	{
@@ -1466,7 +1466,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * performAction is called at least once between each call to
 	 * updateScheduledMessage.  If not, then the scheduled message is
 	 * cleared. */
-	protected transient boolean is_scheduled;
+	private transient boolean is_scheduled;
 
 	/** Current scheduled message */
 	private transient SignMessage messageSched = null;
@@ -1512,7 +1512,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Test if the given sign message should replace the current
 	 * scheduled message. */
-	protected boolean shouldReplaceScheduled(SignMessage sm) {
+	private boolean shouldReplaceScheduled(SignMessage sm) {
 		SignMessage s = messageSched;	// Avoid NPE
 		return s == null ||
 		       sm.getActivationPriority() > s.getActivationPriority() ||
@@ -1522,7 +1522,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Create a message for the sign.
 	 * @param da DMS action
 	 * @return New sign message, or null on error */
-	protected SignMessage createMessage(DmsAction da) {
+	private SignMessage createMessage(DmsAction da) {
 		String m = formatter.createMulti(da);
 		if (m != null) {
 			boolean be = da.getBeaconEnabled();
