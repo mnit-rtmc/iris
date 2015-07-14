@@ -232,7 +232,7 @@ public class OpSendDMSFonts extends OpDMS {
 		if (f != null) {
 			String s = "Font " + f.getNumber() + " aborted -- "+msg;
 			logError(s);
-			setMaintStatus(s);
+			setErrorStatus(s);
 		}
 	}
 
