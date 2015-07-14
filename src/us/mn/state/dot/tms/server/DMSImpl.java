@@ -1743,6 +1743,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	private transient long styles = 0;
 
 	/** Update the DMS styles */
+	@Override
 	public void updateStyles() {
 		long s = ItemStyle.ALL.bit();
 		if (getController() == null)

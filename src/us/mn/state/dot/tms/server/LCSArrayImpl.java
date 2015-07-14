@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -564,6 +564,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	private transient long styles = 0;
 
 	/** Update the LCS array styles */
+	@Override
 	public void updateStyles() {
 		long s = ItemStyle.ALL.bit();
 		if(isAvailable())
