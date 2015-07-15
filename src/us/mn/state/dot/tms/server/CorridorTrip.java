@@ -73,13 +73,6 @@ public class CorridorTrip {
 	/** Origin/destination pair */
 	private final ODPair od_pair;
 
-	/** Throw a BadRouteException with the specified message */
-	private void throwException(String message) throws BadRouteException {
-		throw new BadRouteException(message + " (" +
-			corridor.getName() + ", origin: " + origin +
-			", destination: " + destination + ")");
-	}
-
 	/** Milepoint of the trip origin */
 	private final float origin;
 
@@ -114,6 +107,13 @@ public class CorridorTrip {
 		stations = c.createStationMap();
 		if (stations.isEmpty())
 			throwException("No stations");
+	}
+
+	/** Throw a BadRouteException with the specified message */
+	private void throwException(String msg) throws BadRouteException {
+		throw new BadRouteException(msg + " (" + corridor.getName() +
+		                            ", o: " + origin +
+		                            ", d: " + destination + ")");
 	}
 
 	/** Get the trip distance.
