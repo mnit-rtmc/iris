@@ -111,9 +111,7 @@ public class CorridorTrip {
 
 	/** Throw a BadRouteException with the specified message */
 	private void throwException(String msg) throws BadRouteException {
-		throw new BadRouteException(msg + " (" + corridor.getName() +
-		                            ", o: " + origin +
-		                            ", d: " + destination + ")");
+		throw new BadRouteException(msg + " (" + toString() + ")");
 	}
 
 	/** Get the trip distance.
@@ -220,20 +218,22 @@ public class CorridorTrip {
 		return findTripTime(new TripTimer(final_dest));
 	}
 
-	/** Print the trip to a print stream */
+	/** Get a string representation of the trip */
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("trip: ");
-		sb.append("o: ");
+		sb.append(corridor.getName());
+		sb.append(", o: ");
 		sb.append(origin);
 		sb.append(", d: ");
 		sb.append(destination);
 		sb.append(", st: ");
 		for (StationImpl s: stations.values()) {
 			sb.append(s.getName());
-			sb.append(" ");
+			sb.append(' ');
 		}
+		sb.setLength(sb.length() - 1);
 		return sb.toString();
 	}
 }
