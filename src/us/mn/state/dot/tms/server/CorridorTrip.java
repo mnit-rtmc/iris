@@ -27,11 +27,34 @@ import us.mn.state.dot.tms.units.Interval;
  */
 public class CorridorTrip {
 
+	/** Calculate the travel time for one link */
+	static private float link_time(float start, float end, float o,
+		float d, float speed)
+	{
+		float link = Math.min(end, d) - Math.max(start, o);
+		if (link > 0)
+			return link / speed;
+		else
+			return 0;
+	}
+
+	/** Calculate the travel time between two stations */
+	static private float station_time(float m0, float m1, float[] spd,
+		float o, float d)
+	{
+		float h = 0;
+		float t = (m1 - m0) / 3;
+		h += link_time(m0, m0 + t, o, d, spd[0]);
+		h += link_time(m0 + t, m1 - t, o, d, (spd[0] + spd[1]) / 2);
+		h += link_time(m1 - t, m1, o, d, spd[1]);
+		return h;
+	}
+
 	/** Distance to use low station speed at end of trip (miles) */
-	static protected final float LOW_SPEED_DISTANCE = 1.0f;
+	static private final float LOW_SPEED_DISTANCE = 1.0f;
 
 	/** Maximum allowed length of a travel time link (miles) */
-	static protected final float MAX_LINK_LENGTH = 0.6f;
+	static private final float MAX_LINK_LENGTH = 0.6f;
 
 	/** Debug log */
 	private final DebugLog dlog;
@@ -40,7 +63,7 @@ public class CorridorTrip {
 	private final String name;
 
 	/** Corridor for the trip */
-	protected final Corridor corridor;
+	private final Corridor corridor;
 
 	/** Get the corridor */
 	public Corridor getCorridor() {
@@ -48,23 +71,23 @@ public class CorridorTrip {
 	}
 
 	/** Origin/destination pair */
-	protected final ODPair od_pair;
+	private final ODPair od_pair;
 
 	/** Throw a BadRouteException with the specified message */
-	protected void throwException(String message) throws BadRouteException {
+	private void throwException(String message) throws BadRouteException {
 		throw new BadRouteException(message + " (" +
 			corridor.getName() + ", origin: " + origin +
 			", destination: " + destination + ")");
 	}
 
 	/** Milepoint of the trip origin */
-	protected final float origin;
+	private final float origin;
 
 	/** Milepoint of the trip destination */
-	protected final float destination;
+	private final float destination;
 
 	/** Mapping from mile point to station */
-	protected final TreeMap<Float, StationImpl> stations;
+	private final TreeMap<Float, StationImpl> stations;
 
 	/** Create a new corridor trip.
 	 * @param dl Debug log.
@@ -78,18 +101,18 @@ public class CorridorTrip {
 		name = n;
 		corridor = c;
 		od_pair = od;
-		if(!c.getName().equals(od.getCorridorName()))
+		if (!c.getName().equals(od.getCorridorName()))
 			throwException("Bad trip");
 		Float o = c.calculateMilePoint(od.getOrigin());
 		Float d = c.calculateMilePoint(od.getDestination());
-		if(o == null || d == null)
+		if (o == null || d == null)
 			throwException("No nodes on corridor");
 		origin = o;
 		destination = d;
-		if(origin > destination)
+		if (origin > destination)
 			throwException("Origin > destination");
 		stations = c.createStationMap();
-		if(stations.isEmpty())
+		if (stations.isEmpty())
 			throwException("No stations");
 	}
 
@@ -100,31 +123,8 @@ public class CorridorTrip {
 		return new Distance(d, Distance.Units.MILES);
 	}
 
-	/** Calculate the travel time for one link */
-	static protected float link_time(float start, float end, float o,
-		float d, float speed)
-	{
-		float link = Math.min(end, d) - Math.max(start, o);
-		if(link > 0)
-			return link / speed;
-		else
-			return 0;
-	}
-
-	/** Calculate the travel time between two stations */
-	static protected float station_time(float m0, float m1, float[] spd,
-		float o, float d)
-	{
-		float h = 0;
-		float t = (m1 - m0) / 3;
-		h += link_time(m0, m0 + t, o, d, spd[0]);
-		h += link_time(m0 + t, m1 - t, o, d, (spd[0] + spd[1]) / 2);
-		h += link_time(m1 - t, m1, o, d, spd[1]);
-		return h;
-	}
-
 	/** Trip timer calculates travel times between consecutive stations */
-	protected class TripTimer {
+	private class TripTimer {
 
 		float low_mile = destination;
 		float[] low = new float[2];
@@ -133,7 +133,7 @@ public class CorridorTrip {
 		float hours = 0;
 
 		TripTimer(boolean final_destin) {
-			if(final_destin)
+			if (final_destin)
 				low_mile -= LOW_SPEED_DISTANCE;
 		}
 
@@ -161,7 +161,7 @@ public class CorridorTrip {
 	}
 
 	/** Check the length of a link between two milepoints */
-	static protected boolean checkLinkLength(float start, float end) {
+	static private boolean checkLinkLength(float start, float end) {
 		return (end - start) > (3 * MAX_LINK_LENGTH);
 	}
 
@@ -172,25 +172,25 @@ public class CorridorTrip {
 		float pmile = 0;
 		boolean first = true;
 
-		for(Float mile: stations.keySet()) {
-			if(checkLinkLength(mile, origin))
+		for (Float mile: stations.keySet()) {
+			if (checkLinkLength(mile, origin))
 				continue;
-			if(checkLinkLength(destination, mile))
+			if (checkLinkLength(destination, mile))
 				break;
 			StationImpl s = stations.get(mile);
 			float _avg = s.getSmoothedAverageSpeed();
 			float _low = s.getSmoothedLowSpeed();
-			if(_avg <= 0 || _low <= 0)
+			if (_avg <= 0 || _low <= 0)
 				continue;
 			avg = _avg;
 			low = _low;
-			if(first) {
+			if (first) {
 				float mm = mile - MAX_LINK_LENGTH;
-				if(mm > origin)
+				if (mm > origin)
 					throwException("Start > origin");
 				tt.firstStation(mm, avg, low);
 				first = false;
-			} else if(checkLinkLength(pmile, mile)) {
+			} else if (checkLinkLength(pmile, mile)) {
 				float llen = mile - pmile;
 				throwException("Link too long (" + llen +
 					") " + s);
@@ -198,13 +198,13 @@ public class CorridorTrip {
 				tt.nextStation(mile, avg, low);
 			pmile = mile;
 		}
-		if(first)
+		if (first)
 			throwException("No speed data");
-		else if(avg <= 0 || low <= 0)
+		else if (avg <= 0 || low <= 0)
 			throwException("Missing destin data");
-		else if(pmile < destination) {
+		else if (pmile < destination) {
 			float mm = pmile + MAX_LINK_LENGTH;
-			if(mm < destination)
+			if (mm < destination)
 				throwException("End < destin");
 			tt.nextStation(mm, avg, low);
 		}
@@ -221,6 +221,7 @@ public class CorridorTrip {
 	}
 
 	/** Print the trip to a print stream */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("trip: ");
@@ -229,7 +230,7 @@ public class CorridorTrip {
 		sb.append(", d: ");
 		sb.append(destination);
 		sb.append(", st: ");
-		for(StationImpl s: stations.values()) {
+		for (StationImpl s: stations.values()) {
 			sb.append(s.getName());
 			sb.append(" ");
 		}

@@ -48,7 +48,7 @@ public class TravelTimeEstimator {
 	}
 
 	/** Round up to the next 5 minutes */
-	static protected int roundUp5Min(int min) {
+	static private int roundUp5Min(int min) {
 		return ((min - 1) / 5 + 1) * 5;
 	}
 
@@ -56,10 +56,10 @@ public class TravelTimeEstimator {
 	private final String name;
 
 	/** Origin location */
-	protected final GeoLoc origin;
+	private final GeoLoc origin;
 
 	/** Mapping of station IDs to routes */
-	protected final HashMap<String, Route> s_routes =
+	private final HashMap<String, Route> s_routes =
 		new HashMap<String, Route>();
 
 	/** Create a new travel time estimator */
@@ -72,18 +72,18 @@ public class TravelTimeEstimator {
 	public String replaceTravelTimes(String trav) {
 		TravelCallback cb = new TravelCallback();
 		MultiParser.parse(trav, cb);
-		if(cb.isChanged()) {
+		if (cb.isChanged()) {
 			cb.clear();
 			MultiParser.parse(trav, cb);
 		}
-		if(cb.valid)
+		if (cb.valid)
 			return cb.toString();
 		else
 			return null;
 	}
 
 	/** MultiString for replacing travel time tags */
-	protected class TravelCallback extends MultiString {
+	private class TravelCallback extends MultiString {
 
 		/* If all routes are on the same corridor, when the
 		 * "OVER X" form is used, it must be used for all
@@ -91,15 +91,15 @@ public class TravelTimeEstimator {
 		 * for each destination. Then, determine if the "OVER"
 		 * form should be used. After that, replace the travel
 		 * time tags with the selected values. */
-		protected boolean any_over = false;
-		protected boolean all_over = false;
+		private boolean any_over = false;
+		private boolean all_over = false;
 
-		protected boolean valid = true;
+		private boolean valid = true;
 
 		/** Add a travel time destination */
 		public void addTravelTime(String sid) {
 			Route r = lookupRoute(sid);
-			if(r != null)
+			if (r != null)
 				addTravelTime(r);
 			else {
 				logTravel("NO ROUTE TO " + sid);
@@ -108,27 +108,27 @@ public class TravelTimeEstimator {
 		}
 
 		/** Add a travel time for a route */
-		protected void addTravelTime(Route r) {
+		private void addTravelTime(Route r) {
 			boolean final_dest = isFinalDest(r);
 			try {
 				int mn = calculateTravelTime(r, final_dest);
 				int slow = maximumTripMinutes(r.getDistance());
 				addTravelTime(mn, slow);
 			}
-			catch(BadRouteException e) {
+			catch (BadRouteException e) {
 				logTravel("BAD ROUTE, " + e.getMessage());
 				valid = false;
 			}
 		}
 
 		/** Add a travel time */
-		protected void addTravelTime(int mn, int slow) {
+		private void addTravelTime(int mn, int slow) {
 			boolean over = mn > slow;
-			if(over) {
+			if (over) {
 				any_over = true;
 				mn = slow;
 			}
-			if(over || all_over) {
+			if (over || all_over) {
 				mn = roundUp5Min(mn);
 				addSpan("OVER " + String.valueOf(mn));
 			} else
@@ -136,43 +136,43 @@ public class TravelTimeEstimator {
 		}
 
 		/** Check if the callback has changed formatting mode */
-		protected boolean isChanged() {
+		private boolean isChanged() {
 			all_over = any_over && isSingleCorridor();
 			return all_over;
 		}
 	}
 
 	/** Lookup a route by station ID */
-	protected Route lookupRoute(String sid) {
-		if(!s_routes.containsKey(sid)) {
+	private Route lookupRoute(String sid) {
+		if (!s_routes.containsKey(sid)) {
 			Route r = createRoute(sid);
-			if(r != null)
+			if (r != null)
 				s_routes.put(sid, r);
 		}
 		return s_routes.get(sid);
 	}
 
 	/** Create one route to a travel time destination */
-	protected Route createRoute(String sid) {
+	private Route createRoute(String sid) {
 		Station s = StationHelper.lookup(sid);
-		if(s != null)
+		if (s != null)
 			return createRoute(s);
 		else
 			return null;
 	}
 
 	/** Create one route to a travel time destination */
-	protected Route createRoute(Station s) {
+	private Route createRoute(Station s) {
 		GeoLoc dest = s.getR_Node().getGeoLoc();
 		return createRoute(dest);
 	}
 
 	/** Create one route to a travel time destination */
-	protected Route createRoute(GeoLoc dest) {
+	private Route createRoute(GeoLoc dest) {
 		RouteBuilder builder = new RouteBuilder(TRAVEL_LOG, name,
 			BaseObjectImpl.corridors);
 		SortedSet<Route> routes = builder.findRoutes(origin, dest);
-		if(routes.size() > 0)
+		if (routes.size() > 0)
 			return routes.first();
 		else
 			return null;
@@ -185,9 +185,9 @@ public class TravelTimeEstimator {
 	}
 
 	/** Check if the given route is a final destination */
-	protected boolean isFinalDest(Route r) {
-		for(Route ro: s_routes.values()) {
-			if(ro != r && isSameCorridor(r, ro) &&
+	private boolean isFinalDest(Route r) {
+		for (Route ro: s_routes.values()) {
+			if (ro != r && isSameCorridor(r, ro) &&
 				r.getDistance().m() < ro.getDistance().m())
 			{
 				return false;
@@ -197,18 +197,18 @@ public class TravelTimeEstimator {
 	}
 
 	/** Are two routes confined to the same single corridor */
-	protected boolean isSameCorridor(Route r1, Route r2) {
-		if(r1 != null && r2 != null) {
+	private boolean isSameCorridor(Route r1, Route r2) {
+		if (r1 != null && r2 != null) {
 			Corridor c1 = r1.getOnlyCorridor();
 			Corridor c2 = r2.getOnlyCorridor();
-			if(c1 != null && c2 != null)
+			if (c1 != null && c2 != null)
 				return c1 == c2;
 		}
 		return false;
 	}
 
 	/** Calculate the travel time for the given route */
-	protected int calculateTravelTime(Route route, boolean final_dest)
+	private int calculateTravelTime(Route route, boolean final_dest)
 		throws BadRouteException
 	{
 		Interval t = route.getTravelTime(final_dest).convert(MINUTES);
@@ -216,15 +216,15 @@ public class TravelTimeEstimator {
 	}
 
 	/** Are all the routes confined to the same single corridor */
-	protected boolean isSingleCorridor() {
+	private boolean isSingleCorridor() {
 		Corridor cor = null;
-		for(Route r: s_routes.values()) {
+		for (Route r: s_routes.values()) {
 			Corridor c = r.getOnlyCorridor();
-			if(c == null)
+			if (c == null)
 				return false;
-			if(cor == null)
+			if (cor == null)
 				cor = c;
-			else if(c != cor)
+			else if (c != cor)
 				return false;
 		}
 		return cor != null;

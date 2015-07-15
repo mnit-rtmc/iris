@@ -107,23 +107,22 @@ public class RouteBuilder {
 			ODPair od = new ODPair(origin, dest, false);
 			float dist = distance + c.calculateDistance(od);
 			if (isLogging()) {
-				log("SEARCH FOR " +
-					GeoLocHelper.getDescription(destination)
-					+ " (" + i + ", " + dist + " miles) " +
-					od);
+				log("SEARCH FOR " + GeoLocHelper.getDescription(
+				    destination) + " (" + i + ", " + dist +
+				    " miles) " + od);
 			}
 			if (dist > max_mi) {
 				if (isLogging()) {
 					log("MAX DISTANCE (" + max_mi +
-						") EXCEEDED");
+					    ") EXCEEDED");
 				}
 				break;
 			}
 			i++;
 			if (i > MAX_R_NODE_LIMIT) {
 				if (isLogging()) {
-					log("BREAKING R_NODE LOOP AT "+
-						r_node.getName());
+					log("BREAKING R_NODE LOOP AT " +
+					    r_node.getName());
 				}
 				break;
 			}
@@ -224,8 +223,8 @@ public class RouteBuilder {
 		max_mi = Math.min(max_mi, r.getGoodness());
 		if (isLogging()) {
 			GeoLoc dest = odf.getDestination();
-			log("FOUND ROUTE TO " +
-				GeoLocHelper.getDescription(dest) + ", " + r);
+			log("FOUND ROUTE TO " + GeoLocHelper.getDescription(
+			    dest) + ", " + r);
 			if (max_mi == r.getGoodness())
 				log("LOWERED MAX DIST TO " + max_mi);
 		}

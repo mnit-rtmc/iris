@@ -70,7 +70,7 @@ public class Route implements Comparable<Route> {
 
 	/** Get the "only" corridor (if the route is just a single corridor) */
 	public Corridor getOnlyCorridor() {
-		if(trips.size() == 1)
+		if (trips.size() == 1)
 			return trips.getFirst().getCorridor();
 		else
 			return null;
@@ -80,7 +80,7 @@ public class Route implements Comparable<Route> {
 	 * @return Total route distance. */
 	public Distance getDistance() {
 		Distance d = new Distance(0);
-		for(CorridorTrip trip: trips)
+		for (CorridorTrip trip: trips)
 			d = d.add(trip.getDistance());
 		return d;
 	}
@@ -91,26 +91,28 @@ public class Route implements Comparable<Route> {
 			TRIP_PENALTY * trips.size();
 	}
 
-	/** Compare to another route (for sorting) */
-	public int compareTo(Route o) {
-		return (int)Math.signum(getGoodness() - o.getGoodness());
-	}
-
 	/** Get the current travel time */
 	public Interval getTravelTime(boolean final_dest)
 		throws BadRouteException
 	{
-		if(trips.isEmpty())
+		if (trips.isEmpty())
 			throw new BadRouteException("Route is empty");
 		Interval t = new Interval(turns, Interval.Units.MINUTES);
-		for(CorridorTrip trip: trips)
+		for (CorridorTrip trip: trips)
 			t = t.add(trip.getTravelTime(final_dest));
 		if (dlog.isOpen())
 			dlog.log(name + ": TRAVEL TIME " + t);
 		return t;
 	}
 
+	/** Compare to another route (for sorting) */
+	@Override
+	public int compareTo(Route o) {
+		return (int)Math.signum(getGoodness() - o.getGoodness());
+	}
+
 	/** Get a string representation of the route */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append(getDistance());
@@ -119,7 +121,7 @@ public class Route implements Comparable<Route> {
 		sb.append(" turns, ");
 		sb.append(getGoodness());
 		sb.append(" goodness, ");
-		for(CorridorTrip trip: trips)
+		for (CorridorTrip trip: trips)
 			sb.append(trip.toString());
 		return sb.toString();
 	}
