@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.util.LinkedList;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -29,24 +30,27 @@ import us.mn.state.dot.tms.units.Distance;
  */
 public class RouteBuilder {
 
-	/** Check if we're logging */
-	static private boolean isLogging() {
-		return TravelTime.isLogging();
-	}
-
-	/** Log a message to the travel debug log */
-	static private void log(String msg) {
-		TravelTime.log(msg);
-	}
-
 	/** Maximum distance from origin to a corridor node (in meters) */
 	static private final float MAX_ORIGIN_M = 1000;
 
 	/** Maximum number of R_Nodes to follow on a corridor */
 	static private final int MAX_R_NODE_LIMIT = 100;
 
+	/** Debug log */
+	private final DebugLog dlog;
+
 	/** Name to use for debugging purposes */
 	private final String name;
+
+	/** Check if we're logging */
+	private boolean isLogging() {
+		return dlog.isOpen();
+	}
+
+	/** Log a message to the debug log */
+	private void log(String msg) {
+		dlog.log(name + ": " + msg);
+	}
 
 	/** Corridor manager */
 	private final CorridorManager corridors;
@@ -64,9 +68,11 @@ public class RouteBuilder {
 	private final TreeSet<Route> routes = new TreeSet<Route>();
 
 	/** Create a new route builder.
+	 * @param dl Debug log.
 	 * @param n Name (for debugging).
 	 * @param c Corridor manager. */
-	public RouteBuilder(String n, CorridorManager c) {
+	public RouteBuilder(DebugLog dl, String n, CorridorManager c) {
+		dlog = dl;
 		name = n;
 		corridors = c;
 	}
@@ -81,12 +87,12 @@ public class RouteBuilder {
 	{
 		String cid = GeoLocHelper.getCorridorName(origin);
 		if (cid == null) {
-			log(name + ": BAD ORIGIN: " + origin.getName());
+			log("BAD ORIGIN: " + origin.getName());
 			return;
 		}
 		Corridor c = corridors.getCorridor(cid);
 		if (c == null) {
-			log(name + ": MISSING CORRIDOR: " + cid);
+			log("MISSING CORRIDOR: " + cid);
 			return;
 		}
 		R_NodeImpl r_node = c.findDownstreamNode(origin);
@@ -101,14 +107,14 @@ public class RouteBuilder {
 			ODPair od = new ODPair(origin, dest, false);
 			float dist = distance + c.calculateDistance(od);
 			if (isLogging()) {
-				log(name + ": SEARCH FOR " +
+				log("SEARCH FOR " +
 					GeoLocHelper.getDescription(destination)
 					+ " (" + i + ", " + dist + " miles) " +
 					od);
 			}
 			if (dist > max_mi) {
 				if (isLogging()) {
-					log(name + ": MAX DISTANCE (" + max_mi +
+					log("MAX DISTANCE (" + max_mi +
 						") EXCEEDED");
 				}
 				break;
@@ -116,7 +122,7 @@ public class RouteBuilder {
 			i++;
 			if (i > MAX_R_NODE_LIMIT) {
 				if (isLogging()) {
-					log(name + ": BREAKING R_NODE LOOP AT "+
+					log("BREAKING R_NODE LOOP AT "+
 						r_node.getName());
 				}
 				break;
@@ -161,7 +167,7 @@ public class RouteBuilder {
 	 * @param e Bad route exception. */
 	private void debugRouteException(BadRouteException e) {
 		if (isLogging())
-			log(name + ": BAD ROUTE: " + e.getMessage());
+			log("BAD ROUTE: " + e.getMessage());
 	}
 
 	/** Find all paths from an origin to a destination.
@@ -197,13 +203,13 @@ public class RouteBuilder {
 	 * @param odf Origin / destination pair.
 	 * @throws BadRouteException on route error. */
 	private void buildRoute(ODPair odf) throws BadRouteException {
-		Route r = new Route(name);
+		Route r = new Route(dlog, name);
 		int turns = 0;
 		for (ODPair od: path) {
 			Corridor c = corridors.getCorridor(od);
 			if (c == null)
 				throw new BadRouteException("MISSING CORRIDOR");
-			r.addTrip(new CorridorTrip(name, c, od));
+			r.addTrip(new CorridorTrip(dlog, name, c, od));
 			if (od.hasTurn())
 				turns++;
 		}
@@ -211,17 +217,17 @@ public class RouteBuilder {
 		Corridor c = corridors.getCorridor(odf);
 		if (c == null)
 			throw new BadRouteException("MISSING CORRIDOR");
-		r.addTrip(new CorridorTrip(name, c, odf));
+		r.addTrip(new CorridorTrip(dlog, name, c, odf));
 		routes.add(r);
 		// NOTE: this optimisation will prevent us from finding some
 		// secondary routes; we're only interested in the best route.
 		max_mi = Math.min(max_mi, r.getGoodness());
 		if (isLogging()) {
 			GeoLoc dest = odf.getDestination();
-			log(name + ": FOUND ROUTE TO " +
+			log("FOUND ROUTE TO " +
 				GeoLocHelper.getDescription(dest) + ", " + r);
 			if (max_mi == r.getGoodness())
-				log(name + ": LOWERED MAX DIST TO " + max_mi);
+				log("LOWERED MAX DIST TO " + max_mi);
 		}
 	}
 

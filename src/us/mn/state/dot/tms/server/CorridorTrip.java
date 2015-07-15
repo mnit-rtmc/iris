@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.io.PrintStream;
 import java.util.TreeMap;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Interval;
 
@@ -32,8 +33,11 @@ public class CorridorTrip {
 	/** Maximum allowed length of a travel time link (miles) */
 	static protected final float MAX_LINK_LENGTH = 0.6f;
 
+	/** Debug log */
+	private final DebugLog dlog;
+
 	/** Name to use for debugging purposes */
-	protected final String name;
+	private final String name;
 
 	/** Corridor for the trip */
 	protected final Corridor corridor;
@@ -62,10 +66,15 @@ public class CorridorTrip {
 	/** Mapping from mile point to station */
 	protected final TreeMap<Float, StationImpl> stations;
 
-	/** Create a new corridor trip */
-	public CorridorTrip(String n, Corridor c, ODPair od)
+	/** Create a new corridor trip.
+	 * @param dl Debug log.
+	 * @param n Name (for debugging).
+	 * @param c Corridor.
+	 * @param od Origin-destination pair. */
+	public CorridorTrip(DebugLog dl, String n, Corridor c, ODPair od)
 		throws BadRouteException
 	{
+		dlog = dl;
 		name = n;
 		corridor = c;
 		od_pair = od;
@@ -143,9 +152,9 @@ public class CorridorTrip {
 				low_mile);
 			hours += station_time(smile, mile, low, low_mile,
 				destination);
-			if(TravelTime.isLogging()) {
-				TravelTime.log(name + " st: " + mile + ", " +
-					_avg + ", " + _low + ", h: " + hours);
+			if (dlog.isOpen()) {
+				dlog.log(name + " st: " + mile + ", " + _avg +
+					", " + _low + ", h: " + hours);
 			}
 			smile = mile;
 		}

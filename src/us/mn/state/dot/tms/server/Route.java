@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.io.PrintStream;
 import java.util.LinkedList;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Interval;
 
@@ -30,18 +31,24 @@ public class Route implements Comparable<Route> {
 	/** Penalty (in goodness) for each trip in a route */
 	static private final float TRIP_PENALTY = 0.25f;
 
+	/** Debug log */
+	private final DebugLog dlog;
+
 	/** Name for route debugging */
 	private final String name;
 
 	/** List of corridor trips */
-	protected final LinkedList<CorridorTrip> trips =
+	private final LinkedList<CorridorTrip> trips =
 		new LinkedList<CorridorTrip>();
 
 	/** Number of turns in route */
-	protected int turns;
+	private int turns;
 
-	/** Create a new route */
-	public Route(String n) {
+	/** Create a new route.
+	 * @param dl Debug log.
+	 * @param n Name (for debugging). */
+	public Route(DebugLog dl, String n) {
+		dlog = dl;
 		name = n;
 		turns = 0;
 	}
@@ -98,8 +105,8 @@ public class Route implements Comparable<Route> {
 		Interval t = new Interval(turns, Interval.Units.MINUTES);
 		for(CorridorTrip trip: trips)
 			t = t.add(trip.getTravelTime(final_dest));
-		if(TravelTime.isLogging())
-			TravelTime.log(name +" TRAVEL TIME " + t);
+		if (dlog.isOpen())
+			dlog.log(name + ": TRAVEL TIME " + t);
 		return t;
 	}
 

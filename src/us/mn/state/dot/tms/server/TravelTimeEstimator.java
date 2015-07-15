@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2013  Minnesota Department of Transportation
+ * Copyright (C) 2006-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.util.HashMap;
 import java.util.SortedSet;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.MultiString;
@@ -34,6 +35,9 @@ import static us.mn.state.dot.tms.units.Speed.Units.MPH;
  * @author Douglas Lau
  */
 public class TravelTimeEstimator {
+
+	/** Travel time debug log */
+	static private final DebugLog TRAVEL_LOG = new DebugLog("travel");
 
 	/** Calculate the maximum trip minute to display on the sign */
 	static private int maximumTripMinutes(Distance d) {
@@ -165,7 +169,7 @@ public class TravelTimeEstimator {
 
 	/** Create one route to a travel time destination */
 	protected Route createRoute(GeoLoc dest) {
-		RouteBuilder builder = new RouteBuilder(name,
+		RouteBuilder builder = new RouteBuilder(TRAVEL_LOG, name,
 			BaseObjectImpl.corridors);
 		SortedSet<Route> routes = builder.findRoutes(origin, dest);
 		if(routes.size() > 0)
@@ -175,9 +179,9 @@ public class TravelTimeEstimator {
 	}
 
 	/** Log a travel time error */
-	protected void logTravel(String m) {
-		if(TravelTime.isLogging())
-			TravelTime.log(name + ": " + m);
+	private void logTravel(String m) {
+		if (TRAVEL_LOG.isOpen())
+			TRAVEL_LOG.log(name + ": " + m);
 	}
 
 	/** Check if the given route is a final destination */
