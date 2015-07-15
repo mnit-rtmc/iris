@@ -230,14 +230,17 @@ public class RouteBuilder {
 		}
 	}
 
-	/** Find all the routes from an origin to a destination.
+	/** Find the shortest route from an origin to a destination.
 	 * @param o Route origin.
 	 * @param d Route destination.
-	 * @return Sorted set of routes. */
-	public SortedSet<Route> findRoutes(GeoLoc o, GeoLoc d) {
+	 * @return Shortest route found. */
+	public Route findShortestRoute(GeoLoc o, GeoLoc d) {
 		routes.clear();
 		path.clear();
 		findPaths(0, o, d);
-		return routes;
+		if (routes.size() > 0)
+			return routes.first();
+		else
+			return null;
 	}
 }

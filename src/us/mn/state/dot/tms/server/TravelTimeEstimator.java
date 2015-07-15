@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.HashMap;
-import java.util.SortedSet;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiParser;
@@ -171,11 +170,7 @@ public class TravelTimeEstimator {
 	private Route createRoute(GeoLoc dest) {
 		RouteBuilder builder = new RouteBuilder(TRAVEL_LOG, name,
 			BaseObjectImpl.corridors);
-		SortedSet<Route> routes = builder.findRoutes(origin, dest);
-		if (routes.size() > 0)
-			return routes.first();
-		else
-			return null;
+		return builder.findShortestRoute(origin, dest);
 	}
 
 	/** Log a travel time error */
