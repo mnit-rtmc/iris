@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.LinkedList;
-import java.util.SortedSet;
 import java.util.TreeSet;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
