@@ -204,18 +204,12 @@ public class RouteBuilder {
 		Route r = new Route(dlog, name);
 		int turns = 0;
 		for (ODPair od: path) {
-			Corridor c = corridors.getCorridor(od);
-			if (c == null)
-				throw new BadRouteException("MISSING CORRIDOR");
-			r.addTrip(new CorridorTrip(dlog, name, c, od));
+			r.addTrip(createTrip(od));
 			if (od.hasTurn())
 				turns++;
 		}
 		r.setTurns(turns);
-		Corridor c = corridors.getCorridor(odf);
-		if (c == null)
-			throw new BadRouteException("MISSING CORRIDOR");
-		r.addTrip(new CorridorTrip(dlog, name, c, odf));
+		r.addTrip(createTrip(odf));
 		routes.add(r);
 		// NOTE: this optimisation will prevent us from finding some
 		// secondary routes; we're only interested in the best route.
@@ -227,6 +221,15 @@ public class RouteBuilder {
 			if (max_mi == r.getGoodness())
 				log("LOWERED MAX DIST TO " + max_mi);
 		}
+	}
+
+	/** Create one corridor trip */
+	private CorridorTrip createTrip(ODPair od) throws BadRouteException {
+		Corridor c = corridors.getCorridor(od);
+		if (c != null)
+			return new CorridorTrip(dlog, name, c, od);
+		else
+			throw new BadRouteException("MISSING CORRIDOR");
 	}
 
 	/** Find the shortest route from an origin to a destination.
