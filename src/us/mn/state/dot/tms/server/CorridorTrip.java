@@ -228,12 +228,6 @@ public class CorridorTrip {
 		sb.append(origin);
 		sb.append(", d: ");
 		sb.append(destination);
-		sb.append(", st: ");
-		for (StationImpl s: stations.values()) {
-			sb.append(s.getName());
-			sb.append(' ');
-		}
-		sb.setLength(sb.length() - 1);
 		return sb.toString();
 	}
 }
