@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.io.PrintStream;
 import java.util.TreeMap;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.units.Distance;
