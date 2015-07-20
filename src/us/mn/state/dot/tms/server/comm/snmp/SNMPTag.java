@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +19,7 @@ package us.mn.state.dot.tms.server.comm.snmp;
  * SNMP Identifier tag.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public enum SNMPTag implements Tag {
 	GET_REQUEST		(CONTEXT, true, 0),
@@ -25,7 +27,8 @@ public enum SNMPTag implements Tag {
 	GET_RESPONSE		(CONTEXT, true, 2),
 	SET_REQUEST		(CONTEXT, true, 3),
 	TRAP			(CONTEXT, true, 4),
-	COUNTER			(APPLICATION, false, 1);
+	COUNTER			(APPLICATION, false, 1),
+	INTEGER_SKYLINE		(APPLICATION, false, 2);
 
 	/** Tag class */
 	private final byte clazz;

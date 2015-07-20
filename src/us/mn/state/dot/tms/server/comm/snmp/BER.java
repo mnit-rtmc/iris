@@ -202,7 +202,10 @@ abstract public class BER extends ASN1 {
 
 	/** Decode an integer */
 	protected int decodeInteger(InputStream is) throws IOException {
-		if (decodeIdentifier(is) != ASN1Tag.INTEGER)
+		Tag tag = decodeIdentifier(is);
+		// Skyline signs return dmsFreeChangeableMemory and 
+		// dmsFreeVolatileMemory as INTEGER_SKYLINE instead of INTEGER
+		if (tag != ASN1Tag.INTEGER && tag != SNMPTag.INTEGER_SKYLINE)
 			throw new ParsingException("EXPECTED AN INTEGER TAG");
 		int length = decodeLength(is);
 		if (length < 1 || length > 4)
