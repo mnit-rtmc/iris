@@ -227,7 +227,7 @@ public class RouteBuilder {
 	private CorridorTrip createTrip(ODPair od) throws BadRouteException {
 		Corridor c = corridors.getCorridor(od);
 		if (c != null)
-			return new CorridorTrip(dlog, name, c, od);
+			return new CorridorTrip(c, od);
 		else
 			throw new BadRouteException("MISSING CORRIDOR");
 	}

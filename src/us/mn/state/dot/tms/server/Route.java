@@ -70,7 +70,7 @@ public class Route implements Comparable<Route> {
 	/** Get the "only" corridor (if the route is just a single corridor) */
 	public Corridor getOnlyCorridor() {
 		if (trips.size() == 1)
-			return trips.getFirst().getCorridor();
+			return trips.getFirst().corridor;
 		else
 			return null;
 	}
@@ -97,8 +97,11 @@ public class Route implements Comparable<Route> {
 		if (trips.isEmpty())
 			throw new BadRouteException("Route is empty");
 		Interval t = new Interval(turns, Interval.Units.MINUTES);
-		for (CorridorTrip trip: trips)
-			t = t.add(trip.getTravelTime(final_dest));
+		for (CorridorTrip trip: trips) {
+			TripTimer tt = new TripTimer(dlog, name, trip,
+				final_dest);
+			t = t.add(tt.calculate());
+		}
 		if (dlog.isOpen())
 			dlog.log(name + ": TRAVEL TIME " + t);
 		return t;
