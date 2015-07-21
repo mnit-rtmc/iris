@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
- * A route builder builds a set of routes.
+ * A route builder builds a route from an origin to a destination.
  *
  * @author Douglas Lau
  */
