@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ public final class Speed {
 	 * @param i Interval part of pair.
 	 * @return Value to use for speed. */
 	static private double createValue(Distance d, Interval i) {
-		if(Units.lookup(d.units, i.units) != null)
+		if (Units.lookup(d.units, i.units) != null)
 			return d.value / i.value;
 		else {
 			d = d.convert(KILOMETERS);
@@ -48,7 +48,7 @@ public final class Speed {
 	 * @return Units to use for speed. */
 	static private Units createUnits(Distance d, Interval i) {
 		Units u = Units.lookup(d.units, i.units);
-		return u != null ? u : Units.KPH;
+		return (u != null) ? u : Units.KPH;
 	}
 
 	/** Enumeration of speed units */
@@ -84,8 +84,8 @@ public final class Speed {
 		 * @param i Interval units.
 		 * @return Speed units. */
 		static private Units lookup(Distance.Units d, Interval.Units i){
-			for(Units u: Units.values()) {
-				if(u.d_units == d && u.i_units == i)
+			for (Units u: Units.values()) {
+				if (u.d_units == d && u.i_units == i)
 					return u;
 			}
 			return null;
@@ -128,7 +128,7 @@ public final class Speed {
 	 * @param u Units to convert to.
 	 * @return Speed in specified units. */
 	public Speed convert(Units u) {
-		if(u == units)
+		if (u == units)
 			return this;
 		else {
 			double v = kph();
@@ -140,7 +140,7 @@ public final class Speed {
 	 * @param u Units to return.
 	 * @return Speed as a float value. */
 	public float asFloat(Units u) {
-		if(u == units)
+		if (u == units)
 			return (float)value;
 		else
 			return (float)(kph() / u.kph);
@@ -150,7 +150,7 @@ public final class Speed {
 	 * @param u Units to return.
 	 * @return Speed rounded to nearest whole unit. */
 	public int round(Units u) {
-		if(u == units)
+		if (u == units)
 			return (int)Math.round(value);
 		else
 			return (int)Math.round(kph() / u.kph);
@@ -160,7 +160,7 @@ public final class Speed {
 	 * @param d Other speed.
 	 * @return Sum of speeds. */
 	public Speed add(Speed d) {
-		if(d.units == units)
+		if (d.units == units)
 			return new Speed(value + d.value, units);
 		else
 			return new Speed(kph() + d.kph());
@@ -176,10 +176,11 @@ public final class Speed {
 	}
 
 	/** Compare for equality */
-	@Override public boolean equals(Object other) {
-		if(other instanceof Speed) {
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof Speed) {
 			Speed o = (Speed)other;
-			if(units == o.units)
+			if (units == o.units)
 				return value == o.value;
 			else
 				return kph() == o.kph();
@@ -188,12 +189,14 @@ public final class Speed {
 	}
 
 	/** Get a speed hash code */
-	@Override public int hashCode() {
+	@Override
+	public int hashCode() {
 		return new Double(kph()).hashCode();
 	}
 
 	/** Get a string representation of a speed */
-	@Override public String toString() {
+	@Override
+	public String toString() {
 		return value + " " + units.label;
 	}
 

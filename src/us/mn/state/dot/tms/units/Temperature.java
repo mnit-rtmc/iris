@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ public final class Temperature {
 
 	/** Get the temperature in degrees Kelvin */
 	public double kelvin() {
-		if(units == Units.KELVIN)
+		if (units == Units.KELVIN)
 			return value;
 		else
 			return (value + units.k_offset) * units.k_scale;
@@ -79,7 +79,7 @@ public final class Temperature {
 	 * @param u Units to convert to.
 	 * @return Temperature in specified units. */
 	public Temperature convert(Units u) {
-		if(u == units)
+		if (u == units)
 			return this;
 		else {
 			double k = kelvin();
@@ -96,10 +96,11 @@ public final class Temperature {
 	}
 
 	/** Compare for equality */
-	@Override public boolean equals(Object other) {
-		if(other instanceof Temperature) {
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof Temperature) {
 			Temperature o = (Temperature)other;
-			if(units == o.units)
+			if (units == o.units)
 				return value == o.value;
 			else
 				return kelvin() == o.kelvin();
@@ -107,13 +108,15 @@ public final class Temperature {
 			return false;
 	}
 
-	/** Get an temperature hash code */
-	@Override public int hashCode() {
+	/** Get a temperature hash code */
+	@Override
+	public int hashCode() {
 		return new Double(kelvin()).hashCode();
 	}
 
 	/** Get a string representation of an temperature */
-	@Override public String toString() {
+	@Override
+	public String toString() {
 		return value + " " + units.label;
 	}
 

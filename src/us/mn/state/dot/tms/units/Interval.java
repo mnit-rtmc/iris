@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,7 +74,7 @@ public final class Interval implements Comparable<Interval> {
 
 	/** Get the interval in milliseconds */
 	public long ms() {
-		if(units == Units.MILLISECONDS)
+		if (units == Units.MILLISECONDS)
 			return Math.round(value);
 		else {
 			return Math.round(value * units.seconds /
@@ -84,7 +84,7 @@ public final class Interval implements Comparable<Interval> {
 
 	/** Number of seconds in interval */
 	public double seconds() {
-		if(units == Units.SECONDS)
+		if (units == Units.SECONDS)
 			return value;
 		else
 			return value * units.seconds;
@@ -94,7 +94,7 @@ public final class Interval implements Comparable<Interval> {
 	 * @param u Units to convert to.
 	 * @return Interval in specified units. */
 	public Interval convert(Units u) {
-		if(u == units)
+		if (u == units)
 			return this;
 		else {
 			double s = seconds();
@@ -106,7 +106,7 @@ public final class Interval implements Comparable<Interval> {
 	 * @param u Units to return.
 	 * @return Interval rounded to nearest whole unit. */
 	public int round(Units u) {
-		if(u == units)
+		if (u == units)
 			return (int)Math.round(value);
 		else
 			return (int)Math.round(seconds() / u.seconds);
@@ -115,7 +115,7 @@ public final class Interval implements Comparable<Interval> {
 	/** Divide into another interval */
 	public float per(Interval i) {
 		double s = seconds();
-		if(s > 0)
+		if (s > 0)
 			return (float)(i.seconds() / s);
 		else
 			return 0;
@@ -130,7 +130,7 @@ public final class Interval implements Comparable<Interval> {
 	 * @param o Other interval.
 	 * @return Sum of intervals. */
 	public Interval add(Interval o) {
-		if(o.units == units)
+		if (o.units == units)
 			return new Interval(value + o.value, units);
 		else
 			return new Interval(seconds() + o.seconds());
@@ -139,9 +139,9 @@ public final class Interval implements Comparable<Interval> {
 	/** Compare for equality */
 	@Override
 	public boolean equals(Object other) {
-		if(other instanceof Interval) {
+		if (other instanceof Interval) {
 			Interval o = (Interval)other;
-			if(units == o.units)
+			if (units == o.units)
 				return value == o.value;
 			else
 				return seconds() == o.seconds();
@@ -152,7 +152,7 @@ public final class Interval implements Comparable<Interval> {
 	/** Compare with another interval */
 	@Override
 	public int compareTo(Interval o) {
-		if(units == o.units)
+		if (units == o.units)
 			return Double.compare(value, o.value);
 		else
 			return Double.compare(seconds(), o.seconds());

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2013  Minnesota Department of Transportation
+ * Copyright (C) 2012-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ public final class Distance implements Comparable<Distance> {
 	 * @param u Units to convert to.
 	 * @return Distance in specified units. */
 	public Distance convert(Units u) {
-		if(u == units)
+		if (u == units)
 			return this;
 		else {
 			double v = m();
@@ -90,7 +90,7 @@ public final class Distance implements Comparable<Distance> {
 	 * @param u Units to return.
 	 * @return Distance as a float value. */
 	public float asFloat(Units u) {
-		if(u == units)
+		if (u == units)
 			return (float)value;
 		else
 			return (float)(m() / u.meters);
@@ -100,7 +100,7 @@ public final class Distance implements Comparable<Distance> {
 	 * @param u Units to return.
 	 * @return Distance rounded to nearest whole unit. */
 	public int round(Units u) {
-		if(u == units)
+		if (u == units)
 			return (int)Math.round(value);
 		else
 			return (int)Math.round(m() / u.meters);
@@ -110,17 +110,18 @@ public final class Distance implements Comparable<Distance> {
 	 * @param d Other distance.
 	 * @return Sum of distances. */
 	public Distance add(Distance d) {
-		if(d.units == units)
+		if (d.units == units)
 			return new Distance(value + d.value, units);
 		else
 			return new Distance(m() + d.m());
 	}
 
 	/** Compare for equality */
-	@Override public boolean equals(Object other) {
-		if(other instanceof Distance) {
+	@Override
+	public boolean equals(Object other) {
+		if (other instanceof Distance) {
 			Distance o = (Distance)other;
-			if(units == o.units)
+			if (units == o.units)
 				return value == o.value;
 			else
 				return m() == o.m();
@@ -129,20 +130,23 @@ public final class Distance implements Comparable<Distance> {
 	}
 
 	/** Compare with another distance */
-	@Override public int compareTo(Distance o) {
-		if(units == o.units)
+	@Override
+	public int compareTo(Distance o) {
+		if (units == o.units)
 			return Double.compare(value, o.value);
 		else
 			return Double.compare(m(), o.m());
 	}
 
 	/** Get a distance hash code */
-	@Override public int hashCode() {
+	@Override
+	public int hashCode() {
 		return new Double(m()).hashCode();
 	}
 
 	/** Get a string representation of a distance */
-	@Override public String toString() {
+	@Override
+	public String toString() {
 		return value + " " + units.label;
 	}
 
