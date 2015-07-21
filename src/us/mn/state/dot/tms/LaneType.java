@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,7 +80,7 @@ public enum LaneType {
 	HOV("HOV", "H", new Interval(8, HOURS), new Interval(3, MINUTES)),
 
 	/** High Occupancy / Toll (HOT) lane type (15) */
-	HOT("HOT", "HT", new Interval(8, HOURS), new Interval(3, MINUTES)),
+	HOT("HOT", "HT", new Interval(72, HOURS), new Interval(3, MINUTES)),
 
 	/** Dynamic shoulder lane type (16) */
 	SHOULDER("Shoulder", "D", new Interval(72, HOURS), new Interval(3,
