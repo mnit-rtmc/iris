@@ -170,7 +170,7 @@ public class TravelTimeEstimator {
 	private Route createRoute(GeoLoc dest) {
 		RouteBuilder builder = new RouteBuilder(TRAVEL_LOG, name,
 			BaseObjectImpl.corridors);
-		return builder.findShortestRoute(origin, dest);
+		return builder.findBestRoute(origin, dest);
 	}
 
 	/** Log a travel time error */

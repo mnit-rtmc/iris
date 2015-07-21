@@ -232,11 +232,11 @@ public class RouteBuilder {
 			throw new BadRouteException("MISSING CORRIDOR");
 	}
 
-	/** Find the shortest route from an origin to a destination.
+	/** Find the best route from an origin to a destination.
 	 * @param o Route origin.
 	 * @param d Route destination.
-	 * @return Shortest route found. */
-	public Route findShortestRoute(GeoLoc o, GeoLoc d) {
+	 * @return Best route found. */
+	public Route findBestRoute(GeoLoc o, GeoLoc d) {
 		routes.clear();
 		path.clear();
 		findPaths(0, o, d);
