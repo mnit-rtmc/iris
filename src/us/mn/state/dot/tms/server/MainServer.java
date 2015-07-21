@@ -194,6 +194,7 @@ public class MainServer {
 		TIMER.addJob(new CameraWiperJob());
 		TIMER.addJob(new SendSettingsJob());
 		TIMER.addJob(new SendSettingsJob(500));
+		TIMER.addJob(new TollZoneJob());
 		TIMER.addJob(new ReaperJob());
 		TIMER.addJob(new MsgFeedQueryJob());
 	}

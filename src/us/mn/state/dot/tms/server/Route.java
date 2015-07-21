@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.util.LinkedList;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Interval;
 
@@ -102,9 +103,27 @@ public class Route implements Comparable<Route> {
 				final_dest);
 			t = t.add(tt.calculate());
 		}
-		if (dlog.isOpen())
-			dlog.log(name + ": TRAVEL TIME " + t);
+		if (isLogging())
+			log("TRAVEL TIME " + t);
 		return t;
+	}
+
+	/** Check if we're logging */
+	private boolean isLogging() {
+		return dlog.isOpen();
+	}
+
+	/** Log a message */
+	private void log(String m) {
+		dlog.log(name + ": " + m);
+	}
+
+	/** Get a set of detectors on route */
+	public DetectorSet getDetectorSet(LaneType lt) {
+		DetectorSet ds = new DetectorSet();
+		for (CorridorTrip trip: trips)
+			trip.lookupDetectors(ds, lt);
+		return ds;
 	}
 
 	/** Compare to another route (for sorting) */

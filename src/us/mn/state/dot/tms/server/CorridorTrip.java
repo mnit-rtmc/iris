@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
+import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
@@ -59,6 +61,32 @@ public class CorridorTrip {
 	public Distance getDistance() {
 		float d = destination - origin;
 		return new Distance(d, Distance.Units.MILES);
+	}
+
+	/** Lookup detectors on a corridor trip */
+	public void lookupDetectors(final DetectorSet ds, final LaneType lt) {
+		corridor.findStation(new Corridor.StationFinder() {
+			public boolean check(Float m, StationImpl s) {
+				if (isWithinTrip(m))
+					ds.addDetectors(lookupDetectors(s), lt);
+				return false;
+			}
+		});
+	}
+
+	/** Check if a milepoint is within the trip */
+	private boolean isWithinTrip(float m) {
+		return m > origin && m <= destination;
+	}
+
+	/** Lookup the detectors for one station */
+	private DetectorSet lookupDetectors(StationImpl s) {
+		R_Node n = s.getR_Node();
+		if (n instanceof R_NodeImpl) {
+			R_NodeImpl rn = (R_NodeImpl)n;
+			return rn.getDetectorSet();
+		} else
+			return new DetectorSet();
 	}
 
 	/** Get a string representation of the trip */

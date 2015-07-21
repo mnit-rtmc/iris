@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -179,6 +179,17 @@ public class DetectorSet {
 			}
 		}
 		return n_dets > 0 ? k / n_dets : MISSING_DATA;
+	}
+
+	/** Get the max density */
+	public Double getMaxDensity() {
+		Double k = null;
+		for (DetectorImpl det: detectors) {
+			double d = det.getDensity();
+			if (d >= 0 && (k == null || d > k))
+				k = d;
+		}
+		return k;
 	}
 
 	/** Get the maximum occupancy for the detector set */

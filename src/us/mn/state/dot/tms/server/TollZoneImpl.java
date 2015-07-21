@@ -17,6 +17,10 @@ package us.mn.state.dot.tms.server;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TMSException;
 
@@ -26,6 +30,12 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class TollZoneImpl extends BaseObjectImpl implements TollZone {
+
+	/** Toll zone debug log */
+	static private final DebugLog TOLL_LOG = new DebugLog("toll");
+
+	/** Maximum number of time steps needed for sample history */
+	static private final int MAX_STEPS = 12;
 
 	/** Load all the toll zones */
 	static protected void loadAll() throws TMSException {
@@ -121,5 +131,71 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	@Override
 	public String getEndID() {
 		return end_id;
+	}
+
+	/** Density history (vehicles / mile) */
+	private final BoundedSampleHistory k_hist =
+		new BoundedSampleHistory(MAX_STEPS);
+
+	/** Update density */
+	public void updateDensity() {
+		k_hist.push(calculateMaxDensity());
+	}
+
+	/** Calculate the current maximum zone density */
+	private Double calculateMaxDensity() {
+		GeoLoc o = StationHelper.lookupGeoLoc(start_id);
+		GeoLoc d = StationHelper.lookupGeoLoc(end_id);
+		if (o == null) {
+			if (isLogging())
+				log("Invalid zone start: " + start_id);
+			return null;
+		} else if (d == null) {
+			if (isLogging())
+				log("Invalid zone end: " + end_id);
+			return null;
+		} else {
+			Route r = buildRoute(o, d);
+			DetectorSet ds = r.getDetectorSet(LaneType.HOT);
+			return ds.getMaxDensity();
+		}
+	}
+
+	/** Build a route from an origin to a destination */
+	private Route buildRoute(GeoLoc o, GeoLoc d) {
+		RouteBuilder builder = new RouteBuilder(TOLL_LOG, name,
+			BaseObjectImpl.corridors);
+		return builder.findBestRoute(o, d);
+	}
+
+	/** Magic constant to convert density to price dollars */
+	static private final double ALPHA = 0.05932;
+
+	/** Magic exponent to convert density to price dollars */
+	static private final double BETA = 1.156;
+
+	/** Calculate the pricing */
+	public void calculatePricing() {
+		Double k_hot = k_hist.average();
+		if (k_hot != null) {
+			/* This was arrived at by using a least squares fit */
+			double price = ALPHA * Math.pow(k_hot, BETA);
+			int quarters = (int)Math.round(price * 4);
+			float rprice = quarters / 4.0f;
+			if (isLogging()) {
+				log("k_hot: " + k_hot + ", price: " + price +
+				    ", $:" + rprice);
+			}
+		}
+	}
+
+	/** Check if we're logging */
+	private boolean isLogging() {
+		return TOLL_LOG.isOpen();
+	}
+
+	/** Log a toll zone message */
+	private void log(String m) {
+		TOLL_LOG.log(name + ": " + m);
 	}
 }
