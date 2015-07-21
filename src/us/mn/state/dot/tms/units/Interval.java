@@ -112,6 +112,16 @@ public final class Interval implements Comparable<Interval> {
 			return (int)Math.round(seconds() / u.seconds);
 	}
 
+	/** Floor an interval to whole unit.
+	 * @param u Units to return.
+	 * @return Interval floored to whole unit. */
+	public int floor(Units u) {
+		if (u == units)
+			return (int)value;
+		else
+			return (int)(seconds() / u.seconds);
+	}
+
 	/** Divide into another interval */
 	public float per(Interval i) {
 		double s = seconds();

@@ -206,8 +206,8 @@ public class TravelTimeEstimator {
 	private int calculateTravelTime(Route route, boolean final_dest)
 		throws BadRouteException
 	{
-		Interval t = route.getTravelTime(final_dest).convert(MINUTES);
-		return (int)t.value + 1;
+		int m = route.getTravelTime(final_dest).floor(MINUTES);
+		return m + 1;
 	}
 
 	/** Are all the routes confined to the same single corridor */
