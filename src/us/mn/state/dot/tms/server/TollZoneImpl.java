@@ -163,9 +163,10 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		} else {
 			Route r = buildRoute(o, d);
 			DetectorSet ds = r.getDetectorSet(LaneType.HOT);
+			Double max_k = ds.getMaxDensity();
 			if (isLogging())
-				log("Det: " + ds + ", k:" + ds.getMaxDensity());
-			return ds.getMaxDensity();
+				log("Det: " + ds + ", k: " + max_k);
+			return max_k;
 		}
 	}
 
