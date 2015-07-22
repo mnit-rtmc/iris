@@ -30,26 +30,26 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 public class DetectorSet {
 
 	/** Estimated sustainable capacity of mainline right lanes */
-	static protected final int CAP_RIGHT_LANE = 1800;
+	static private final int CAP_RIGHT_LANE = 1800;
 
 	/** Estimated sustainable capacity of other lanes */
-	static protected final int CAP_OTHER_LANE = 2100;
+	static private final int CAP_OTHER_LANE = 2100;
 
 	/** Threshold for a drop in density to indicate an incident */
-	static protected final int DENSITY_DROP_THRESHOLD = 50;
+	static private final int DENSITY_DROP_THRESHOLD = 50;
 
 	/** Density considered "full" for space capacity calculation */
-	static protected final int FULL_DENSITY = 32;
+	static private final int FULL_DENSITY = 32;
 
 	/** Detector comparator */
-	static protected final Comparator<DetectorImpl> COMPARATOR =
+	static private final Comparator<DetectorImpl> COMPARATOR =
 		new Comparator<DetectorImpl>()
 	{
 		public int compare(DetectorImpl a, DetectorImpl b) {
 			int la = a.getLaneNumber();
 			int lb = b.getLaneNumber();
 			int n = la - lb;
-			if(n == 0) {
+			if (n == 0) {
 				return NumericAlphaComparator.compareStrings(
 					a.getName(), b.getName());
 			} else
@@ -58,7 +58,7 @@ public class DetectorSet {
 	};
 
 	/** Set of detectors */
-	protected final TreeSet<DetectorImpl> detectors =
+	private final TreeSet<DetectorImpl> detectors =
 		new TreeSet<DetectorImpl>(COMPARATOR);
 
 	/** Add a detector to the detector set */
@@ -88,16 +88,16 @@ public class DetectorSet {
 
 	/** Add all the detectors from another detector set */
 	public void addDetectors(DetectorSet other) {
-		if(other == null)
+		if (other == null)
 			return;
-		for(DetectorImpl det: other.detectors)
+		for (DetectorImpl det: other.detectors)
 			detectors.add(det);
 	}
 
 	/** Add the detectors of the given type from another detector set */
 	public void addDetectors(DetectorSet other, LaneType lt) {
-		for(DetectorImpl d: other.detectors) {
-			if(lt.ordinal() == d.getLaneType())
+		for (DetectorImpl d: other.detectors) {
+			if (lt.ordinal() == d.getLaneType())
 				addDetector(d);
 		}
 	}
@@ -105,8 +105,8 @@ public class DetectorSet {
 	/** Remove all the detectors from another detector set */
 	public boolean removeDetectors(DetectorSet other) {
 		boolean match = false;
-		for(DetectorImpl det: other.detectors) {
-			if(detectors.remove(det))
+		for (DetectorImpl det: other.detectors) {
+			if (detectors.remove(det))
 				match = true;
 		}
 		return match;
@@ -114,8 +114,8 @@ public class DetectorSet {
 
 	/** Test if the detector set is defined */
 	public boolean isDefined() {
-		for(DetectorImpl det: detectors) {
-			if(det.isActive())
+		for (DetectorImpl det: detectors) {
+			if (det.isActive())
 				return true;
 		}
 		return false;
@@ -128,8 +128,8 @@ public class DetectorSet {
 
 	/** Test if the detector set is not bad */
 	public boolean isNotBad() {
-		for(DetectorImpl det: detectors) {
-			if(det.getFlow() == MISSING_DATA)
+		for (DetectorImpl det: detectors) {
+			if (det.getFlow() == MISSING_DATA)
 				return false;
 		}
 		return true;
@@ -137,8 +137,8 @@ public class DetectorSet {
 
 	/** Test if the detector set is (defined and) sampling "real" data */
 	public boolean isPerfect() {
-		for(DetectorImpl det: detectors) {
-			if(!det.isSampling())
+		for (DetectorImpl det: detectors) {
+			if (!det.isSampling())
 				return false;
 		}
 		return isDefined();
@@ -148,9 +148,9 @@ public class DetectorSet {
 	public int getVolume() {
 		boolean defined = false;
 		int vol = 0;
-		for(DetectorImpl det: detectors) {
+		for (DetectorImpl det: detectors) {
 			int v = det.getVolume();
-			if(v < 0)
+			if (v < 0)
 				return v;
 			vol += v;
 			defined = true;
@@ -162,7 +162,7 @@ public class DetectorSet {
 		Note: assumes that isGood returned true. */
 	public int getFlow() {
 		int flow = 0;
-		for(DetectorImpl det: detectors)
+		for (DetectorImpl det: detectors)
 			flow += (int)det.getFlow();
 		return flow;
 	}
@@ -171,9 +171,9 @@ public class DetectorSet {
 	public float getDensity() {
 		float k = 0;
 		int n_dets = 0;
-		for(DetectorImpl det: detectors) {
+		for (DetectorImpl det: detectors) {
 			float d = det.getDensity();
-			if(d >= 0) {
+			if (d >= 0) {
 				k += d;
 				n_dets++;
 			}
@@ -195,7 +195,7 @@ public class DetectorSet {
 	/** Get the maximum occupancy for the detector set */
 	public float getMaxOccupancy() {
 		float occ = 0;
-		for(DetectorImpl det: detectors)
+		for (DetectorImpl det: detectors)
 			occ = Math.max(det.getOccupancy(), occ);
 		return occ;
 	}
@@ -209,18 +209,18 @@ public class DetectorSet {
 	public float getUpstreamCapacity() {
 		float max_density = MISSING_DATA;
 		float speed = MISSING_DATA;
-		for(DetectorImpl det: detectors) {
+		for (DetectorImpl det: detectors) {
 			float d = det.getDensity();
 			float s = det.getSpeed();
-			if(d > max_density && s != MISSING_DATA) {
+			if (d > max_density && s != MISSING_DATA) {
 				max_density = d;
 				speed = s;
 			}
 		}
-		if(max_density < 0)
+		if (max_density < 0)
 			return MISSING_DATA;
 		float spare_density = FULL_DENSITY - max_density;
-		if(spare_density <= 0)
+		if (spare_density <= 0)
 			return 0;
 		else
 			return spare_density * speed;
@@ -231,12 +231,12 @@ public class DetectorSet {
 		float d_this = 0;
 		float d_last = 0;
 		Road xStreet = null;
-		for(DetectorImpl det: detectors) {
+		for (DetectorImpl det: detectors) {
 			float d = det.getDensity();
-			if(d < 0)
+			if (d < 0)
 				continue;
 			GeoLoc loc = det.lookupGeoLoc();
-			if(xStreet != null &&
+			if (xStreet != null &&
 				xStreet == loc.getCrossStreet())
 			{
 				d_this = Math.max(d_this, d);
@@ -245,37 +245,38 @@ public class DetectorSet {
 				d_this = d;
 				xStreet = loc.getCrossStreet();
 			}
-			if(d_this < d_last - DENSITY_DROP_THRESHOLD)
+			if (d_this < d_last - DENSITY_DROP_THRESHOLD)
 				return false;
 		}
 		return true;
 	}
 
 	/** Get a string representation (for debugging) */
+	@Override
 	public String toString() {
-		StringBuffer buf = new StringBuffer();
-		buf.append('\'');
-		for(DetectorImpl det: detectors) {
-			buf.append(det.getName());
-			buf.append(' ');
+		StringBuilder sb = new StringBuilder();
+		sb.append('\'');
+		for (DetectorImpl det: detectors) {
+			sb.append(det.getName());
+			sb.append(' ');
 		}
-		if(detectors.size() == 0)
-			buf.append('\'');
+		if (detectors.size() == 0)
+			sb.append('\'');
 		else
-			buf.setCharAt(buf.length() - 1, '\'');
-		return buf.toString();
+			sb.setCharAt(sb.length() - 1, '\'');
+		return sb.toString();
 	}
 
 	/** Get a detector set attribute string */
 	public String asAttr() {
-		if(size() > 0) {
+		if (size() > 0) {
 			StringBuilder b = new StringBuilder();
-			for(DetectorImpl det: detectors) {
+			for (DetectorImpl det: detectors) {
 				b.append(" ");
 				b.append(det.getName());
 			}
 			String attr = b.toString().trim();
-			if(attr.length() > 0)
+			if (attr.length() > 0)
 				return attr;
 		}
 		return null;
