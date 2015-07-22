@@ -37,6 +37,12 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Maximum number of time steps needed for sample history */
 	static private final int MAX_STEPS = 12;
 
+	/** Magic constant to convert density to price dollars */
+	static private final double ALPHA = 0.05932;
+
+	/** Magic exponent to convert density to price dollars */
+	static private final double BETA = 1.156;
+
 	/** Load all the toll zones */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, TollZoneImpl.class);
@@ -134,7 +140,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	}
 
 	/** Density history (vehicles / mile) */
-	private final BoundedSampleHistory k_hist =
+	private transient final BoundedSampleHistory k_hist =
 		new BoundedSampleHistory(MAX_STEPS);
 
 	/** Update density */
@@ -157,6 +163,8 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		} else {
 			Route r = buildRoute(o, d);
 			DetectorSet ds = r.getDetectorSet(LaneType.HOT);
+			if (isLogging())
+				log("Detectors: " + ds);
 			return ds.getMaxDensity();
 		}
 	}
@@ -167,12 +175,6 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 			BaseObjectImpl.corridors);
 		return builder.findBestRoute(o, d);
 	}
-
-	/** Magic constant to convert density to price dollars */
-	static private final double ALPHA = 0.05932;
-
-	/** Magic exponent to convert density to price dollars */
-	static private final double BETA = 1.156;
 
 	/** Calculate the pricing */
 	public void calculatePricing() {
