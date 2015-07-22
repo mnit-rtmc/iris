@@ -178,7 +178,7 @@ public class DetectorSet {
 				n_dets++;
 			}
 		}
-		return n_dets > 0 ? k / n_dets : MISSING_DATA;
+		return (n_dets > 0) ? (k / n_dets) : MISSING_DATA;
 	}
 
 	/** Get the max density */
@@ -265,21 +265,6 @@ public class DetectorSet {
 		else
 			sb.setCharAt(sb.length() - 1, '\'');
 		return sb.toString();
-	}
-
-	/** Get a detector set attribute string */
-	public String asAttr() {
-		if (size() > 0) {
-			StringBuilder b = new StringBuilder();
-			for (DetectorImpl det: detectors) {
-				b.append(" ");
-				b.append(det.getName());
-			}
-			String attr = b.toString().trim();
-			if (attr.length() > 0)
-				return attr;
-		}
-		return null;
 	}
 
 	/** Get the detector set for the given lane type */
