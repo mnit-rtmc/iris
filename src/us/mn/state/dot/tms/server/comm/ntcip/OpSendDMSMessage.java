@@ -60,7 +60,7 @@ import us.mn.state.dot.tms.utils.Base64;
  * |      MsgValidateReq --+ QueryValidateMsgErr   | CreateGraphic          |
  * |         |                 +      |            | SendGraphicBlock       |
  * |         +                 |      |            | ValidateGraphic        |
- * |      QueryMsgValidity ----'      +            | VerifyGraphicReady     |
+ * |      ChkMsgValid ---------'      +            | VerifyGraphicReady     |
  * |         |                   QueryMultiSyntaxErr VerifyGraphicID        |
  * |         +                     +      |                  |              |
  * |--+ ActivateMsg -------.       |      +              (ActivateMsg) or --|
@@ -331,12 +331,12 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (GenError e) {
 				return new QueryValidateMsgErr(status);
 			}
-			return new QueryMsgValidity();
+			return new ChkMsgValid();
 		}
 	}
 
-	/** Phase to query the message validity */
-	protected class QueryMsgValidity extends Phase {
+	/** Phase to check message status is valid */
+	protected class ChkMsgValid extends Phase {
 
 		/** Query the message validity */
 		protected Phase poll(CommMessage mess) throws IOException {
