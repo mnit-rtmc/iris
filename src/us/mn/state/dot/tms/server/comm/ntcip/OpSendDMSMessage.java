@@ -51,9 +51,9 @@ import us.mn.state.dot.tms.utils.Base64;
  * |
  * |            .-----------------------------------------------------------.
  * |            +                                                           |
- * |--+ MsgModifyReq ----+ QueryMsgStatus          + QueryGraphicsConfig    |
- * |         |               |     |               | FindGraphicNumber      |
- * |         +               |     +               | CheckGraphic           |
+ * |--+ MsgModifyReq ----+ ChkMsgModifying         + QueryGraphicsConfig    |
+ * |                         |     |               | FindGraphicNumber      |
+ * |                         |     +               | CheckGraphic           |
  * |      ModifyMsg +--------'   QueryControlMode  |   SetGraphicNotUsed    |
  * |         |                                     | SetGraphicModifying    |
  * |         +                                     | VerifyGraphicModifying |
@@ -230,19 +230,19 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (BadValue e) {
 				// This should only happen if the message
 				// status is "validating" ...
-				return new QueryMsgStatus();
+				return new ChkMsgModifying();
 			}
 			catch (GenError e) {
 				// This should never happen (but of
 				// course, it does for some vendors)
-				return new QueryMsgStatus();
+				return new ChkMsgModifying();
 			}
-			return new ModifyMsg();
+			return new ChkMsgModifying();
 		}
 	}
 
-	/** Phase to query the message status */
-	protected class QueryMsgStatus extends Phase {
+	/** Phase to check message status is modifying */
+	protected class ChkMsgModifying extends Phase {
 
 		/** Query the message status */
 		protected Phase poll(CommMessage mess) throws IOException {
