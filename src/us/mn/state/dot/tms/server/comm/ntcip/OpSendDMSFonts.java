@@ -231,7 +231,6 @@ public class OpSendDMSFonts extends OpDMS {
 		Font f = font;
 		if (f != null) {
 			String s = "Font " + f.getNumber() + " aborted -- "+msg;
-			logError(s);
 			setErrorStatus(s);
 		}
 	}

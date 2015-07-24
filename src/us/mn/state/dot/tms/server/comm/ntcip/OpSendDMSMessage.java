@@ -355,7 +355,6 @@ public class OpSendDMSMessage extends OpDMS {
 				String ms = "Message CRC: " +
 					Integer.toHexString(message_crc) + ", "+
 					Integer.toHexString(crc.getInteger());
-				logError(ms);
 				setErrorStatus(ms);
 				return null;
 			}

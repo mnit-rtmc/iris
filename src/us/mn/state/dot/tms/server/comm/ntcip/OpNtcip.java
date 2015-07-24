@@ -169,4 +169,12 @@ abstract public class OpNtcip extends OpDevice {
 	protected OpNtcip(PriorityLevel p, DeviceImpl d) {
 		super(p, d);
 	}
+
+	/** Set the error status message.  If non-null, the controller "error"
+	 * attribute is set to this message when the operation completes. */
+	@Override
+	public void setErrorStatus(String s) {
+		logError(s);
+		super.setErrorStatus(s);
+	}
 }
