@@ -50,7 +50,7 @@ import us.mn.state.dot.tms.utils.Base64;
  * .    Crazy phase transition diagram:
  * |
  * |            .-----------------------------------------------------------.
- * |            +               |                                           |
+ * |            +                                                           |
  * |--+ MsgModifyReq ----+ QueryMsgStatus          + QueryGraphicsConfig    |
  * |         |               |     |               | FindGraphicNumber      |
  * |         +               |     +               | CheckGraphic           |
@@ -254,8 +254,6 @@ public class OpSendDMSMessage extends OpDMS {
 			logQuery(status);
 			if (status.getEnum() == DmsMessageStatus.modifying)
 				return new ModifyMsg();
-			else if (!modify_requested)
-				return new MsgModifyReq();
 			else if (status.getEnum() == DmsMessageStatus.valid) {
 				/* Some ledstar signs prevent dmsMessageStatus
 				 * from changing to modifyReq when in 'local'
