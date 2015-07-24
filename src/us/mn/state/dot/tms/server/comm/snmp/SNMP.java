@@ -35,12 +35,12 @@ public class SNMP extends BER {
 	static private final DebugLog SNMP_LOG = new DebugLog("snmp");
 
  	/** SNMP error status codes */
-	static protected final int NO_ERROR = 0;
-	static protected final int TOO_BIG = 1;
-	static protected final int NO_SUCH_NAME = 2;
-	static protected final int BAD_VALUE = 3;
-	static protected final int READ_ONLY = 4;
-	static protected final int GEN_ERROR = 5;
+	static private final int NO_ERROR = 0;
+	static private final int TOO_BIG = 1;
+	static private final int NO_SUCH_NAME = 2;
+	static private final int BAD_VALUE = 3;
+	static private final int READ_ONLY = 4;
+	static private final int GEN_ERROR = 5;
 
 	/** Get a tag that matches */
 	@Override
@@ -60,13 +60,13 @@ public class SNMP extends BER {
 
 	/** Ledstar firmware bug workaround. Instead of 128,129,130,..., it
 	 * returns -128,-127,-126,... */
-	static protected final int REQUEST_ID_MAX_LEDSTAR_BUG = 127;
+	static private final int REQUEST_ID_MAX_LEDSTAR_BUG = 127;
 
 	/** Last SNMP request-id */
-	protected int last_request = 0;
+	private int last_request = 0;
 
 	/** Encode an SNMP message */
-	protected void encodeSNMPMessage(String community) throws IOException {
+	private void encodeSNMPMessage(String community) throws IOException {
 		byte[] pdu = getEncodedData();
 		encodeInteger(SNMP_VERSION);
 		encodeOctetString(community.getBytes());
@@ -75,7 +75,7 @@ public class SNMP extends BER {
 	}
 
 	/** Decode an SNMP message */
-	protected void decodeSNMPMessage(InputStream is, String community)
+	private void decodeSNMPMessage(InputStream is, String community)
 		throws IOException
 	{
 		if (decodeSequence(is) > is.available())
@@ -91,19 +91,19 @@ public class SNMP extends BER {
 	public class Message implements CommMessage {
 
 		/** Output stream for this message */
-		protected final OutputStream os;
+		private final OutputStream os;
 
 		/** Input stream for this message */
-		protected final InputStream is;
+		private final InputStream is;
 
 		/** Community name */
-		protected final String community;
+		private final String community;
 
 		/** SNMP request-id */
 		public final int request_id;
 
 		/** List of objects set or get with this message */
-		protected final LinkedList<ASN1Object> mos =
+		private final LinkedList<ASN1Object> mos =
 			new LinkedList<ASN1Object>();
 
 		/** Create a new SNMP message */
@@ -157,7 +157,7 @@ public class SNMP extends BER {
 		}
 
 		/** Decode a response to a SET or GET request */
-		protected void decodeResponse() throws IOException {
+		private void decodeResponse() throws IOException {
 			for (int i = 0;; i++) {
 				try {
 					decodeSNMPMessage(is, community);
@@ -175,7 +175,7 @@ public class SNMP extends BER {
 		}
 
 		/** Encode a null variable binding */
-		protected void encodeVarBind(ASN1Object mo, boolean set)
+		private void encodeVarBind(ASN1Object mo, boolean set)
 			throws IOException
 		{
 			encodeObjectIdentifier(mo.oid());
@@ -187,9 +187,7 @@ public class SNMP extends BER {
 		}
 
 		/** Encode the variable binding list */
-		protected void encodeVarBindList(boolean set)
-			throws IOException
-		{
+		private void encodeVarBindList(boolean set) throws IOException {
 			ByteArrayOutputStream vb = new ByteArrayOutputStream();
 			for (ASN1Object mo: mos) {
 				encodeVarBind(mo, set);
@@ -200,7 +198,7 @@ public class SNMP extends BER {
 
 		/** Encode an SNMP request PDU
 		 * @param tag PDU type identifier */
-		protected void encodeRequestPDU(Tag tag) throws IOException {
+		private void encodeRequestPDU(Tag tag) throws IOException {
 			byte[] varBindList = getEncodedData();
 			encodeInteger(request_id);
 			encodeInteger(0);	// error-status
@@ -213,7 +211,7 @@ public class SNMP extends BER {
 		}
 
 		/** Decode a variable binding */
-		protected void decodeVarBind(InputStream is, ASN1Object mo)
+		private void decodeVarBind(InputStream is, ASN1Object mo)
 			throws IOException
 		{
 			decodeSequence(is);
@@ -223,7 +221,7 @@ public class SNMP extends BER {
 		}
 
 		/** Decode the variable binding list */
-		protected void decodeVarBindList(InputStream is)
+		private void decodeVarBindList(InputStream is)
 			throws IOException
 		{
 			decodeSequence(is);
@@ -232,7 +230,7 @@ public class SNMP extends BER {
 		}
 
 		/** Decode an SNMP response PDU */
-		protected void decodeResponsePDU(InputStream is)
+		private void decodeResponsePDU(InputStream is)
 			throws IOException
 		{
 			if (decodeIdentifier(is) != SNMPTag.GET_RESPONSE)
