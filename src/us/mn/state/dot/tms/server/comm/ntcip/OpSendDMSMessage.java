@@ -63,7 +63,7 @@ import us.mn.state.dot.tms.utils.Base64;
  * |      QueryMsgValidity ----'      +            | VerifyGraphicReady     |
  * |         |                   QueryMultiSyntaxErr VerifyGraphicID        |
  * |         +                     +      |                  |              |
- * |--+ ActivateMsg -------.       |      +                  '--------------|
+ * |--+ ActivateMsg -------.       |      +              (ActivateMsg) or --|
  * |         |             |       |    QueryOtherMultiErr                  |
  * |         +             +       |                                        |
  * |      SetLossMsgs    QueryActivateMsgErr -------------------------------'
@@ -122,7 +122,7 @@ public class OpSendDMSMessage extends OpDMS {
 		dmsLongPowerRecoveryMessage.node);
 
 	/** Flag to avoid phase loops */
-	private boolean modify_requested = false;
+	private boolean msg_validated = false;
 
 	/** Iterator of graphics in the sign message */
 	private final Iterator<Graphic> graphics;
@@ -219,7 +219,6 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Set message status to modify request */
 		protected Phase poll(CommMessage mess) throws IOException {
-			modify_requested = true;
 			ASN1Enum<DmsMessageStatus> status = makeStatus(
 				DmsMessageMemoryType.changeable, msg_num);
 			status.setEnum(DmsMessageStatus.modifyReq);
@@ -360,6 +359,7 @@ public class OpSendDMSMessage extends OpDMS {
 				setErrorStatus(ms);
 				return null;
 			}
+			msg_validated = true;
 			return new ActivateMsg();
 		}
 	}
@@ -458,9 +458,9 @@ public class OpSendDMSMessage extends OpDMS {
 			case messageStatus:
 			case messageNumber:
 			case messageCRC:
-				// This message doesn't exist in the table,
-				// so go back and modify the table.
-				if (!modify_requested)
+				// If the message has not been validated
+				// yet, go back and do that.
+				if (!msg_validated)
 					return new MsgModifyReq();
 				// else fall through to default case ...
 			default:
@@ -656,12 +656,12 @@ public class OpSendDMSMessage extends OpDMS {
 			}
 			return new FindGraphicNumber(g);
 		} else {
-			/* Note: do not check modify_requested flag here, since
-			 * the operation is starting over after updating
-			 * graphics.  This will not cause a phase loop because
-			 * QueryGraphicsConfig will not happen once graphics
-			 * iterator has been exhausted. */
-			return new MsgModifyReq();
+			/* If the message has already been validated,
+			 * we can activate it now. */
+			if (msg_validated)
+				return new ActivateMsg();
+			else
+				return new MsgModifyReq();
 		}
 	}
 
