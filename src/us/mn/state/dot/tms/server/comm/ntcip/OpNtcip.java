@@ -174,7 +174,8 @@ abstract public class OpNtcip extends OpDevice {
 	 * attribute is set to this message when the operation completes. */
 	@Override
 	public void setErrorStatus(String s) {
-		logError(s);
+		if (s != null && s.length() > 0)
+			logError(s);
 		super.setErrorStatus(s);
 	}
 }
