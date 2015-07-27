@@ -52,9 +52,9 @@ import us.mn.state.dot.tms.utils.Base64;
  * |            .-----------------------------------------------------------.
  * |            +                                                           |
  * |--+ MsgModifyReq ----+ ChkMsgModifying         + QueryGraphicsConfig    |
- * |                         |     |               | FindGraphicNumber      |
- * |                         |     +               | CheckGraphic           |
- * |      ModifyMsg +--------'   QueryControlMode  |   SetGraphicNotUsed    |
+ * |                         |                     | FindGraphicNumber      |
+ * |                         |                     | CheckGraphic           |
+ * |      ModifyMsg +--------'                     |   SetGraphicNotUsed    |
  * |         |                                     | SetGraphicModifying    |
  * |         +                                     | VerifyGraphicModifying |
  * |      MsgValidateReq --+ QueryValidateMsgErr   | CreateGraphic          |
@@ -246,19 +246,26 @@ public class OpSendDMSMessage extends OpDMS {
 
 		/** Query the message status */
 		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Enum<DmsControlMode> mode = new ASN1Enum<
+				DmsControlMode>(DmsControlMode.class,
+				dmsControlMode.node);
 			ASN1Enum<DmsMessageStatus> status = makeStatus(
 				DmsMessageMemoryType.changeable, msg_num);
+			mess.add(mode);
 			mess.add(status);
 			mess.queryProps();
+			logQuery(mode);
 			logQuery(status);
+			if (mode.getEnum() != DmsControlMode.central) {
+				// Some Ledstar signs will return GEN error
+				// when modifying a message in 'local' mode.
+				// It's better if we don't even try.
+				setErrorStatus(mode.toString());
+				return null;
+			}
 			if (status.getEnum() == DmsMessageStatus.modifying)
 				return new ModifyMsg();
-			else if (status.getEnum() == DmsMessageStatus.valid) {
-				/* Some ledstar signs prevent dmsMessageStatus
-				 * from changing to modifyReq when in 'local'
-				 * dmsControlMode. */
-				return new QueryControlMode();
-			} else {
+			else {
 				setErrorStatus(status.toString());
 				return null;
 			}
@@ -296,22 +303,6 @@ public class OpSendDMSMessage extends OpDMS {
 			logStore(prior);
 			mess.storeProps();
 			return new MsgValidateReq();
-		}
-	}
-
-	/** Phase to query the control mode */
-	protected class QueryControlMode extends Phase {
-
-		/** Query the control mode */
-		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<DmsControlMode> mode = new ASN1Enum<
-				DmsControlMode>(DmsControlMode.class,
-				dmsControlMode.node);
-			mess.add(mode);
-			mess.queryProps();
-			logQuery(mode);
-			setErrorStatus(mode.toString());
-			return null;
 		}
 	}
 
