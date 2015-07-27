@@ -256,18 +256,20 @@ public class SNMP extends BER {
 			}
 		}
 
-		/** Get the object name */
-		private ASN1Object getObject(int i) {
+		/** Get the object name/value */
+		private String getObject(int i) {
 			if (i > 0 && i <= mos.size())
-				return mos.get(i - 1);
+				return mos.get(i - 1).toString();
 			else
-				return null;
+				return String.valueOf(i);
 		}
 
 		/** Get the object name */
 		private String getName(int i) {
-			ASN1Object o = getObject(i);
-			return (o != null) ? o.getName() : null;
+			if (i > 0 && i <= mos.size())
+				return mos.get(i - 1).getName();
+			else
+				return String.valueOf(i);
 		}
 	}
 }

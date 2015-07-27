@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.ControllerException;
 public class GenError extends ControllerException {
 
 	/** Create a new GenError exception */
-	public GenError(ASN1Object o) {
+	public GenError(String o) {
 		super("SNMP: GEN ERROR: " + o);
 	}
 }

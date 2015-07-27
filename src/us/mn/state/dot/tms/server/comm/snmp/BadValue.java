@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.ControllerException;
 public class BadValue extends ControllerException {
 
 	/** Create a new BadValue exception */
-	public BadValue(ASN1Object o) {
+	public BadValue(String o) {
 		super("SNMP: BAD VALUE: " + o);
 	}
 }
