@@ -2134,6 +2134,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 28	HySecurity STC
 29	Cohu PTZ
 30	DR-500
+31	ADDCO
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;

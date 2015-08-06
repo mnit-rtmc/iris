@@ -117,7 +117,10 @@ public enum CommProtocol {
 	COHU_PTZ("Cohu PTZ"),
 
 	/** DR-500 doppler radar (30) */
-	DR_500("DR-500");
+	DR_500("DR-500"),
+
+	/** ADDCO NodeComm sign control (31) */
+	ADDCO("ADDCO");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
