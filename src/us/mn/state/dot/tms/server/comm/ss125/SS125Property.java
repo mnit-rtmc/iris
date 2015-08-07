@@ -100,17 +100,6 @@ abstract public class SS125Property extends ControllerProperty {
 		buf[pos + 2] = (byte)(value & 0xFF);
 	}
 
-	/** Format a 32-bit value.
-	 * @param buf Buffer to store formatted value.
-	 * @param pos Starting position in buffer.
-	 * @param value Value to store in buffer. */
-	static protected void format32(byte[] buf, int pos, int value) {
-		buf[pos] = (byte)((value >> 24) & 0xFF);
-		buf[pos + 1] = (byte)((value >> 16) & 0xFF);
-		buf[pos + 2] = (byte)((value >> 8) & 0xFF);
-		buf[pos + 3] = (byte)(value & 0xFF);
-	}
-
 	/** Format a string to a byte array.
 	 * @param buf Buffer to store formatted value.
 	 * @param pos Starting position in buffer.

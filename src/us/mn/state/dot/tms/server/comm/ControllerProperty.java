@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,10 +42,49 @@ abstract public class ControllerProperty {
 	/** Format a 16-bit value.
 	 * @param buf Buffer to store formatted value.
 	 * @param pos Starting position in buffer.
-	 * @param value Value to store in buffer. */
-	static protected void format16(byte[] buf, int pos, int value) {
+	 * @param value Value to store in buffer.
+	 * @return Next position in buffer. */
+	static protected int format16(byte[] buf, int pos, int value) {
 		buf[pos + 0] = (byte)((value >> 8) & 0xFF);
 		buf[pos + 1] = (byte)((value >> 0) & 0xFF);
+		return pos + 2;
+	}
+
+	/** Format a 16-bit value (little-endian).
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param value Value to store in buffer.
+	 * @return Next position in buffer. */
+	static protected int format16le(byte[] buf, int pos, int value) {
+		buf[pos + 0] = (byte)((value >> 0) & 0xFF);
+		buf[pos + 1] = (byte)((value >> 8) & 0xFF);
+		return pos + 2;
+	}
+
+	/** Format a 32-bit value.
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param value Value to store in buffer.
+	 * @return Next position in buffer. */
+	static protected int format32(byte[] buf, int pos, int value) {
+		buf[pos + 0] = (byte)((value >> 24) & 0xFF);
+		buf[pos + 1] = (byte)((value >> 16) & 0xFF);
+		buf[pos + 2] = (byte)((value >> 8) & 0xFF);
+		buf[pos + 3] = (byte)((value >> 0) & 0xFF);
+		return pos + 4;
+	}
+
+	/** Format a 32-bit value (little-endian).
+	 * @param buf Buffer to store formatted value.
+	 * @param pos Starting position in buffer.
+	 * @param value Value to store in buffer.
+	 * @return Next position in buffer. */
+	static protected int format32le(byte[] buf, int pos, int value) {
+		buf[pos + 0] = (byte)((value >> 0) & 0xFF);
+		buf[pos + 1] = (byte)((value >> 8) & 0xFF);
+		buf[pos + 2] = (byte)((value >> 16) & 0xFF);
+		buf[pos + 3] = (byte)((value >> 24) & 0xFF);
+		return pos + 4;
 	}
 
 	/** Format a 2-digit BCD value.
@@ -111,6 +150,16 @@ abstract public class ControllerProperty {
 		return (hi << 8) | lo;
 	}
 
+	/** Parse a 16-bit value (little-endian).
+	 * @param buf Buffer to parse.
+	 * @param pos Starting position in buffer.
+	 * @return Parsed value. */
+	static protected int parse16le(byte[] buf, int pos) {
+		int lo = buf[pos + 0] & 0xFF;
+		int hi = buf[pos + 1] & 0xFF;
+		return (hi << 8) | lo;
+	}
+
 	/** Parse a 32-bit value.
 	 * @param buf Buffer to parse.
 	 * @param pos Starting position in buffer.
@@ -120,6 +169,18 @@ abstract public class ControllerProperty {
 		int b2 = buf[pos + 1] & 0xFF;
 		int b1 = buf[pos + 2] & 0xFF;
 		int b0 = buf[pos + 3] & 0xFF;
+		return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
+	}
+
+	/** Parse a 32-bit value (little-endian).
+	 * @param buf Buffer to parse.
+	 * @param pos Starting position in buffer.
+	 * @return Parsed value. */
+	static protected int parse32le(byte[] buf, int pos) {
+		int b0 = buf[pos + 0] & 0xFF;
+		int b1 = buf[pos + 1] & 0xFF;
+		int b2 = buf[pos + 2] & 0xFF;
+		int b3 = buf[pos + 3] & 0xFF;
 		return (b3 << 24) | (b2 << 16) | (b1 << 8) | b0;
 	}
 
