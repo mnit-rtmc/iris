@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2014  Minnesota Department of Transportation
+ * Copyright (C) 2011-2015  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  * Copyright (C) 2014  AHMCT, University of California
  *
@@ -23,6 +23,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.ModemImpl;
+import us.mn.state.dot.tms.server.comm.addco.AddcoPoller;
+import us.mn.state.dot.tms.server.comm.addco.AddcoMessenger;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.server.comm.cohuptz.CohuPTZPoller;
 import us.mn.state.dot.tms.server.comm.dinrelay.DinRelayPoller;
@@ -127,6 +129,8 @@ public class DevicePollerFactory {
 			return createSTCPoller();
 		case COHU_PTZ:
 			return createCohuPTZPoller();
+		case ADDCO:
+			return createAddcoPoller();
 		default:
 			throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -319,5 +323,11 @@ public class DevicePollerFactory {
 	/** Create a Cohu PTZ poller */
 	private DevicePoller createCohuPTZPoller() throws IOException {
 		return new CohuPTZPoller(name, createSocketMessenger(TCP));
+	}
+
+	/** Create an ADDCO poller */
+	private DevicePoller createAddcoPoller() throws IOException {
+		return new AddcoPoller(name, new AddcoMessenger(
+			createSocketMessenger(TCP)));
 	}
 }
