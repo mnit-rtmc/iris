@@ -160,13 +160,24 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 			if (isLogging())
 				log("Invalid zone end: " + end_id);
 			return null;
-		} else {
-			Route r = buildRoute(o, d);
+		} else
+			return calculateMaxDensity(buildRoute(o, d));
+	}
+
+	/** Calculate the current maximum zone density */
+	private Double calculateMaxDensity(Route r) {
+		if (r != null) {
 			DetectorSet ds = r.getDetectorSet(LaneType.HOT);
 			Double max_k = ds.getMaxDensity();
 			if (isLogging())
 				log("Det: " + ds + ", k: " + max_k);
 			return max_k;
+		} else {
+			if (isLogging()) {
+				log("No route from " + start_id + " to " +
+				    end_id);
+			}
+			return null;
 		}
 	}
 
