@@ -45,13 +45,6 @@ public class AddcoPoller extends MessagePoller implements DMSPoller {
 	@Override
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {
 		switch (r) {
-		case RESET_DEVICE:
-//			addOperation(new OpResetDMS(dms));
-			break;
-		case SEND_SETTINGS:
-//			addOperation(new OpSendDMSFonts(dms));
-//			addOperation(new OpSendDMSDefaults(dms));
-			break;
 		case QUERY_CONFIGURATION:
 //			addOperation(new OpQueryDMSConfiguration(dms));
 			break;
@@ -60,12 +53,6 @@ public class AddcoPoller extends MessagePoller implements DMSPoller {
 			break;
 		case QUERY_STATUS:
 //			addOperation(new OpQueryDMSStatus(dms));
-			break;
-		case QUERY_PIXEL_FAILURES:
-//			addOperation(new OpTestDMSPixels(dms, false));
-			break;
-		case TEST_PIXELS:
-//			addOperation(new OpTestDMSPixels(dms, true));
 			break;
 		default:
 			// Ignore other requests
