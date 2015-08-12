@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.addco;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
@@ -29,6 +30,9 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  * @author Douglas Lau
  */
 public class AddcoPoller extends MessagePoller implements DMSPoller {
+
+	/** Addco debug log */
+	static private final DebugLog ADDCO_LOG = new DebugLog("addco");
 
 	/** Create a new ADDCO poller */
 	public AddcoPoller(String n, Messenger m) {
@@ -52,7 +56,7 @@ public class AddcoPoller extends MessagePoller implements DMSPoller {
 //			addOperation(new OpQueryDMSMessage(dms));
 			break;
 		case QUERY_STATUS:
-//			addOperation(new OpQueryDMSStatus(dms));
+			addOperation(new OpQueryDMSStatus(dms));
 			break;
 		default:
 			// Ignore other requests
@@ -66,5 +70,11 @@ public class AddcoPoller extends MessagePoller implements DMSPoller {
 		throws InvalidMessageException
 	{
 //		addOperation(new OpSendDMSMessage(dms, sm, o));
+	}
+
+	/** Get the protocol debug log */
+	@Override
+	protected DebugLog protocolLog() {
+		return ADDCO_LOG;
 	}
 }
