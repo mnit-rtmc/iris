@@ -50,7 +50,7 @@ public class AddcoPoller extends MessagePoller implements DMSPoller {
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {
 		switch (r) {
 		case QUERY_CONFIGURATION:
-//			addOperation(new OpQueryDMSConfiguration(dms));
+			addOperation(new OpQueryDMSConfiguration(dms));
 			break;
 		case QUERY_MESSAGE:
 			addOperation(new OpQueryDMSMessage(dms));
