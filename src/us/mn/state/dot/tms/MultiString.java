@@ -470,36 +470,42 @@ public class MultiString implements Multi {
 		return ptc.pageOffIntervals(dflt);
 	}
 
-	/** Replace all the page on times in a MULTI string with the specified
-	 * value.  If no on-time is specified, then a page time tag is
-	 * prepended.
+	/** Replace all the page times in a MULTI string.
+	 * If no page time tag exists, then a page time tag is prepended.
 	 * @param multi MULTI string.
 	 * @param pt_on Page on-time in tenths of a second.
+	 * @param pt_off Page off-time in tenths of a second.
 	 * @return The updated MULTI string. */
-	public MultiString replacePageOnTime(final int pt_on) {
-		return new MultiString(replacePageOnTime(toString(), pt_on));
-	}
-
-	/** Replace all the page on times in a MULTI string with the specified
-	 * value.  If no on-time is specified, then a page time tag is
-	 * prepended.
-	 * @param multi MULTI string.
-	 * @param pt_on Page on-time in tenths of a second.
-	 * @return The updated MULTI string. */
-	static public String replacePageOnTime(String multi, final int pt_on) {
+	static public String replacePageTime(String multi, final Integer pt_on,
+		final Integer pt_off)
+	{
 		if (multi.indexOf("[pt") < 0) {
 			MultiString ms = new MultiString();
-			ms.setPageTimes(pt_on, null);
+			ms.setPageTimes(pt_on, pt_off);
 			return ms.toString() + multi;
 		}
 		MultiString ms = new MultiString() {
 			@Override
 			public void setPageTimes(Integer on, Integer off) {
-				super.setPageTimes(pt_on, off);
+				super.setPageTimes(pt_on, pt_off);
 			}
 		};
 		MultiParser.parse(multi, ms);
 		return ms.toString();
+	}
+
+	/** Get MULTI string for specified page */
+	public String getPage(int p) {
+		String[] pages = getPages();
+		if (p >= 0 && p < pages.length)
+			return pages[p];
+		else
+			return "";
+	}
+
+	/** Get message pages as an array of strings */
+	private String[] getPages() {
+		return multi.toString().split("\\[np\\]");
 	}
 
 	/** Get message lines as an array of strings (with tags).
@@ -507,7 +513,7 @@ public class MultiString implements Multi {
 	 * @param n_lines Number of lines per page.
 	 * @return A string array containing text for each line. */
 	public String[] getLines(int n_lines) {
-		String[] pages = multi.toString().split("\\[np\\]");
+		String[] pages = getPages();
 		int n_total = n_lines * pages.length;
 		String[] lines = new String[n_total];
 		for (int i = 0; i < lines.length; i++)

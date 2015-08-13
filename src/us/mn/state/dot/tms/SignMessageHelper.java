@@ -68,6 +68,23 @@ public class SignMessageHelper extends BaseHelper {
 		return null;
 	}
 
+	/** Find a sign message with matching attributes.
+	 * @param multi MULTI string.
+	 * @param be Beacon enabled flag.
+	 * @param bitmaps Bitmaps for all pages. */
+	static public SignMessage find(String multi, boolean be, String bitmaps)
+	{
+		Iterator<SignMessage> it = iterator();
+		while (it.hasNext()) {
+			SignMessage sm = it.next();
+			if (multi.equals(sm.getMulti()) &&
+			    be == sm.getBeaconEnabled() &&
+			    bitmaps.equals(sm.getBitmaps()))
+				return sm;
+		}
+		return null;
+	}
+
 	/** Compare two (possibly-null) integers for equality */
 	static private boolean integerEquals(Integer i0, Integer i1) {
 		if (i0 == null)

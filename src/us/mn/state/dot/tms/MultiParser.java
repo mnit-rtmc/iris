@@ -337,7 +337,7 @@ public class MultiParser {
 	}
 
 	/** A MULTI string which is automatically normalized */
-	static private class NormalMultiString extends MultiString {
+	static public class NormalMultiString extends MultiString {
 		@Override
 		public void addSpan(String s) {
 			Matcher m = TEXT_PATTERN.matcher(s);

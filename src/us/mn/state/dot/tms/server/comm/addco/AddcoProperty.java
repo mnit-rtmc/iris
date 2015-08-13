@@ -26,8 +26,18 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 abstract public class AddcoProperty extends ControllerProperty {
 
+	/** Charset name for ASCII */
+	static private final String ASCII = "US-ASCII";
+
 	/** "Any" Address (not multi-drop) */
 	static protected final int ADDR_ANY = -1;
+
+	/** Parse an ASCII value */
+	static protected String parseAscii(byte[] buf, int pos, int n_len)
+		throws IOException
+	{
+		return new String(buf, pos, n_len, ASCII);
+	}
 
 	/** Decode header of response */
 	protected int decodeHead(InputStream is, MsgCode mc) throws IOException{
@@ -48,5 +58,15 @@ abstract public class AddcoProperty extends ControllerProperty {
 		if (addr != ADDR_ANY)
 			throw new ParsingException("ADDRESS: " + addr);
 		return body;
+	}
+
+	/** Check response command */
+	protected void checkCommand(byte[] body, String cmnd) throws IOException
+	{
+		assert body.length >= 4;
+		assert cmnd.length() == 2;
+		String c = parseAscii(body, 2, 2);
+		if (!c.equals(cmnd))
+			throw new ParsingException("INVALID COMMAND: " + c);
 	}
 }

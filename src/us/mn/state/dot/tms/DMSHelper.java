@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -217,6 +217,21 @@ public class DMSHelper extends BaseHelper {
 		Integer hp = dms.getHeightPixels();
 		if(wp != null && hp != null)
 			return new BitmapGraphic(wp, hp);
+		else
+			return null;
+	}
+
+	/** Create bitmap graphics for all pages of a specified DMS.
+	 * @param dms The sign.
+	 * @param ms Message MULTI string.
+	 * @return Array of bitmap graphics for the sign, or null.
+	 * @throws InvalidMessageException if MULTI string is invalid. */
+	static public BitmapGraphic[] createBitmaps(DMS dms, String ms)
+		throws InvalidMessageException
+	{
+		RasterBuilder rb = createRasterBuilder(dms);
+		if (rb != null)
+			return rb.createBitmaps(new MultiString(ms));
 		else
 			return null;
 	}

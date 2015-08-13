@@ -53,7 +53,6 @@ import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MultiString;
-import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -1382,16 +1381,13 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
 		Integer d)
 	{
-		RasterBuilder rb = DMSHelper.createRasterBuilder(this);
-		if (rb != null) {
-			MultiString ms = new MultiString(m);
-			try {
-				BitmapGraphic[] pages = rb.createBitmaps(ms);
+		try {
+			BitmapGraphic[] pages = DMSHelper.createBitmaps(this,m);
+			if (pages != null)
 				return createMessageB(m, be, pages, ap, rp,s,d);
-			}
-			catch (InvalidMessageException e) {
-				logError("invalid msg: " + e.getMessage());
-			}
+		}
+		catch (InvalidMessageException e) {
+			logError("invalid msg: " + e.getMessage());
 		}
 		return null;
 	}
@@ -1416,6 +1412,30 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
 	 * @param pages Pre-rendered graphics for all pages.
+	 * @return New sign message, or null on error. */
+	public SignMessage createMessage(String m, boolean be,
+		BitmapGraphic[] pages)
+	{
+		BitmapGraphic[] bmaps = copyBitmaps(pages);
+		if (bmaps != null) {
+			String ebm = encodeBitmaps(bmaps);
+			SignMessage esm = SignMessageHelper.find(m, be, ebm);
+			if (esm != null)
+				return esm;
+			else {
+				DMSMessagePriority p =
+					DMSMessagePriority.OTHER_SYSTEM;
+				return createMessageC(m, be, ebm, p, p, true,
+					null);
+			}
+		} else
+			return null;
+	}
+
+	/** Create a message for the sign.
+	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
+	 * @param pages Pre-rendered graphics for all pages.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param s Scheduled flag.
@@ -1425,6 +1445,17 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		BitmapGraphic[] pages, DMSMessagePriority ap,
 		DMSMessagePriority rp, boolean s, Integer d)
 	{
+		BitmapGraphic[] bmaps = copyBitmaps(pages);
+		if (bmaps != null)
+			return createMessageB(m, be, bmaps, ap, rp, s, d);
+		else
+			return null;
+	}
+
+	/** Copy an array of bitmaps into the DMS dimensions.
+	 * @param pages Array of bitmap graphics.
+	 * @return Bitmap graphics with same dimensions as DMS, or null. */
+	private BitmapGraphic[] copyBitmaps(BitmapGraphic[] pages) {
 		Integer w = widthPixels;
 		Integer h = heightPixels;
 		if (w == null || w < 1)
@@ -1436,7 +1467,18 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			bmaps[i] = new BitmapGraphic(w, h);
 			bmaps[i].copy(pages[i]);
 		}
-		return createMessageB(m, be, bmaps, ap, rp, s, d);
+		return bmaps;
+	}
+
+	/** Encode bitmap data */
+	private String encodeBitmaps(BitmapGraphic[] pages) {
+		int blen = pages[0].length();
+		byte[] bitmap = new byte[pages.length * blen];
+		for (int i = 0; i < pages.length; i++) {
+			byte[] page = pages[i].getPixelData();
+			System.arraycopy(page, 0, bitmap, i * blen, blen);
+		}
+		return Base64.encode(bitmap);
 	}
 
 	/** Create a new message (B version).
@@ -1452,14 +1494,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		BitmapGraphic[] pages, DMSMessagePriority ap,
 		DMSMessagePriority rp, boolean s, Integer d)
 	{
-		int blen = pages[0].length();
-		byte[] bitmap = new byte[pages.length * blen];
-		for (int i = 0; i < pages.length; i++) {
-			byte[] page = pages[i].getPixelData();
-			System.arraycopy(page, 0, bitmap, i * blen, blen);
-		}
-		String bitmaps = Base64.encode(bitmap);
-		return createMessage(m, be, bitmaps, ap, rp, s, d);
+		return createMessage(m, be, encodeBitmaps(pages), ap, rp, s, d);
 	}
 
 	/** Create a new sign message.

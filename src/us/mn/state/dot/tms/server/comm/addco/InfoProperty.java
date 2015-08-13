@@ -65,8 +65,7 @@ public class InfoProperty extends AddcoProperty {
 
 	/** Parse a query response */
 	private void parseQuery(byte[] body) throws IOException {
-		if (body[2] != 'R' || body[3] != 'I')
-			throw new ParsingException("INVALID COMMAND");
+		checkCommand(body, "RI");
 		// Don't know what body[4] contains
 		d_volts = body[5];
 		// Don't know what body[6] contains

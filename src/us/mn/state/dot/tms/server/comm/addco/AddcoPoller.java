@@ -53,7 +53,7 @@ public class AddcoPoller extends MessagePoller implements DMSPoller {
 //			addOperation(new OpQueryDMSConfiguration(dms));
 			break;
 		case QUERY_MESSAGE:
-//			addOperation(new OpQueryDMSMessage(dms));
+			addOperation(new OpQueryDMSMessage(dms));
 			break;
 		case QUERY_STATUS:
 			addOperation(new OpQueryDMSStatus(dms));
