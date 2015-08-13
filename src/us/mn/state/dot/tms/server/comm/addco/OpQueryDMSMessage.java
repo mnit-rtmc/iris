@@ -67,8 +67,18 @@ public class OpQueryDMSMessage extends OpAddco {
 	/** Set the current message on the sign */
 	private void setCurrentMessage() {
 		String multi = message.getMulti();
-		BitmapGraphic[] bitmaps = message.getBitmaps();
-		setCurrentMessage(dms.createMessage(multi, false, bitmaps));
+		BitmapGraphic[] bmaps = message.getBitmaps();
+		setCurrentMessage(createSignMessage(multi, bmaps));
+	}
+
+	/** Create a sign message for the sign */
+	private SignMessage createSignMessage(String multi,
+		BitmapGraphic[] bmaps)
+	{
+		if (bmaps.length == 0)
+			return dms.createBlankMessage();
+		else
+			return dms.createMessage(multi, false, bmaps);
 	}
 
 	/** Set the current message on the sign */
