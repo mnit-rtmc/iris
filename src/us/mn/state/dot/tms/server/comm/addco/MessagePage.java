@@ -67,6 +67,14 @@ public class MessagePage {
 		bitmap = createBitmap(dms, ms);
 	}
 
+	/** Create a new message page.
+	 * @param ms MULTI string.
+	 * @param bmap Bitmap graphic. */
+	public MessagePage(String ms, BitmapGraphic bmap) {
+		multi = new MultiString(ms).getPage(0);
+		bitmap = bmap;
+	}
+
 	/** Create a bitmap for a DMS */
 	private BitmapGraphic createBitmap(DMSImpl dms, String ms) {
 		try {

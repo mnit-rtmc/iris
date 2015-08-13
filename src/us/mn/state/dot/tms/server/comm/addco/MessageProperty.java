@@ -18,6 +18,8 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.BitmapGraphic;
+import static us.mn.state.dot.tms.DmsColor.AMBER;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -37,6 +39,17 @@ public class MessageProperty extends AddcoProperty {
 
 	/** CRC-16 algorithm */
 	static private final CRC crc16 = new CRC(16, 0x8005, 0xFFFF, true);
+
+	/** Calculate the stride of a bitmap */
+	static private int bitmapStride(int width) {
+		// Stride is always a multiple of 4 bytes
+		return (((width - 1) / 32) + 1) * 4;
+	}
+
+	/** Calculate the number of bytes in a bitmap */
+	static private int bitmapBytes(int width, int height) {
+		return height * bitmapStride(width);
+	}
 
 	/** DMS for message */
 	private final DMSImpl dms;
@@ -102,20 +115,11 @@ public class MessageProperty extends AddcoProperty {
 	private MessagePage parsePage(byte[] body, int p, int n_pages)
 		throws IOException
 	{
-		int unknown0 = parse16le(body, pos);
-		pos += 2;
-		if (unknown0 != 8)
-			throw new ParsingException("UNKNOWN0: " + unknown0);
+		parseCheck2(body, "UNKNOWN0", 8, 8);
 		int seq = parse8(body, pos);
 		pos++;
-		int p_no = parse16le(body, pos);
-		pos += 2;
-		if (p_no != p + 1)
-			throw new ParsingException("PAGE #: " + p_no);
-		int p_tot = parse16le(body, pos);
-		pos += 2;
-		if (p_tot != n_pages)
-			throw new ParsingException("PAGES: " + p_tot);
+		parseCheck2(body, "PAGE #", p + 1, p + 1);
+		parseCheck2(body, "PAGES", n_pages, n_pages);
 		int p_type = parse8(body, pos);
 		pos++;
 		int p_on = parse8(body, pos);
@@ -135,29 +139,27 @@ public class MessageProperty extends AddcoProperty {
 		throws IOException
 	{
 		final int i_pos = pos;
-		int n_len = parse16le(body, pos);
-		pos += 2;
-		if (n_len < 0 || n_len > 64)
-			throw new ParsingException("NLEN: " + n_len);
+		int n_len = parseCheck2(body, "NLEN", 0, 64);
 		String name = parseAscii(body, pos, n_len);
 		pos += n_len;
-		int t_len = parse16le(body, pos);
-		pos += 2;
-		if (t_len < 0 || t_len > 64)
-			throw new ParsingException("TLEN: " + t_len);
+		int t_len = parseCheck2(body, "TLEN", 0, 64);
 		String text = parseAscii(body, pos, t_len);
 		pos += t_len;
-		int zero = parse16le(body, pos);
-		pos += 2;
-		if (zero != 0)
-			throw new ParsingException("ZERO: " + zero);
+		parseCheck2(body, "ZERO", 0, 0);
+		parseCheckCrc(body, i_pos);
+		String multi = MultiString.replacePageTime(text, p_on, p_off);
+		return new MessagePage(dms, multi);
+	}
+
+	/** Parse a CRC-16 and check it */
+	private void parseCheckCrc(byte[] body, int i_pos)
+		throws ChecksumException
+	{
 		int crc = calculateCrc(body, i_pos);
 		int rc = parse16le(body, pos);
 		pos += 2;
 		if (rc != crc)
 			throw new ChecksumException(body);
-		String multi = MultiString.replacePageTime(text, p_on, p_off);
-		return new MessagePage(dms, multi);
 	}
 
 	/** Calculate a CRC-16 */
@@ -169,9 +171,97 @@ public class MessageProperty extends AddcoProperty {
 	}
 
 	/** Parse a bitmap page of a message */
-	private MessagePage parseBitmapPage(byte[] body, int p_on, int p_off) {
-		// FIXME
-		return null;
+	private MessagePage parseBitmapPage(byte[] body, int p_on, int p_off)
+		throws IOException
+	{
+		final int i_pos = pos;
+		int n_len = parseCheck2(body, "NLEN", 0, 64);
+		String name = parseAscii(body, pos, n_len);
+		pos += n_len;
+		int b_len = parseCheck2(body, "BLEN", 0, 4096);
+		String bm = parseAscii(body, pos, 2);
+		pos += 2;
+		if (!bm.equals("BM"))
+			throw new ParsingException("BM: " + bm);
+		parseCheck2(body, "BLEN2", b_len, b_len);
+		parseCheck2(body, "Z0", 0, 0);
+		parseCheck4(body, "Z1", 0, 0);
+		parseCheck4(body, "EXTRA", 62, 62);
+		parseCheck4(body, "UNKNOWN1", 40, 40);
+		int width = parseCheck4(body, "WIDTH", 0, 256);
+		int height = parseCheck4(body, "HEIGHT", 0, 256);
+		parseCheck2(body, "UNKNOWN2", 1, 1);
+		parseCheck2(body, "UNKNOWN3", 1, 1);
+		parseCheck4(body, "UNKNOWN4", 0, 0);
+		int n_bytes = bitmapBytes(width, height);
+		parseCheck4(body, "BBYTES", n_bytes, n_bytes);
+		parse4(body);	// ???
+		parse4(body);	// ???
+		parse4(body);	// ???
+		parse4(body);	// ???
+		parseCheck4(body, "Z2", 0, 0);
+		parseCheck2(body, "UNKNOWN5", -1, -1);
+		parseCheck2(body, "UNKNOWN6", 255, 255);
+		BitmapGraphic bmap = parseBitmap(body, width, height);
+		parseCheck2(body, "Z3", 0, 0);
+		parseCheckCrc(body, i_pos);
+		String multi = MultiString.replacePageTime(name, p_on, p_off);
+		return new MessagePage(multi, bmap);
+	}
+
+	/** Parse a bitmap graphic */
+	private BitmapGraphic parseBitmap(byte[] body, int width, int height)
+		throws ParsingException
+	{
+		int stride = bitmapStride(width);
+		BitmapGraphic bmap = DMSHelper.createBitmapGraphic(dms);
+		// FIXME: check dimensions
+		for (int y = 0; y < height; y++) {
+			int iy = height - y - 1;
+			int off = 0;
+			int bit = 7;
+			for (int x = 0; x < width; x++) {
+				if ((body[pos + off] & (1 << bit)) != 0)
+					bmap.setPixel(x, iy, AMBER);
+				if (bit > 0)
+					bit--;
+				else {
+					off++;
+					bit = 7;
+				}
+			}
+			pos += stride;
+		}
+		return bmap;
+	}
+
+	/** Parse a 2-byte value and check it's within range */
+	private int parseCheck2(byte[] body, String vname, int mn, int mx)
+		throws ParsingException
+	{
+		int val = parse16le(body, pos);
+		pos += 2;
+		if (val < mn || val > mx)
+			throw new ParsingException(vname + ": " + val);
+		return val;
+	}
+
+	/** Parse a 4-byte value and check it's within range */
+	private int parseCheck4(byte[] body, String vname, int mn, int mx)
+		throws ParsingException
+	{
+		int val = parse32le(body, pos);
+		pos += 4;
+		if (val < mn || val > mx)
+			throw new ParsingException(vname + ": " + val);
+		return val;
+	}
+
+	/** Parse a 4-byte value */
+	private int parse4(byte[] body) {
+		int val = parse32le(body, pos);
+		pos += 4;
+		return val;
 	}
 
 	/** Get the message MULTI string */
