@@ -200,7 +200,7 @@ public class MessageProperty extends AddcoProperty {
 		parse4(body);	// ???
 		parse4(body);	// ???
 		parseCheck4(body, "Z2", 0, 0);
-		parseCheck2(body, "UNKNOWN5", -1, -1);
+		parseCheck2(body, "UNKNOWN5", 65535, 65535);
 		parseCheck2(body, "UNKNOWN6", 255, 255);
 		BitmapGraphic bmap = parseBitmap(body, width, height);
 		parseCheck2(body, "Z3", 0, 0);
