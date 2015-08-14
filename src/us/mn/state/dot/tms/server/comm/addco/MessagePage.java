@@ -107,7 +107,9 @@ public class MessagePage {
 	/** Get the page on time (deciseconds) */
 	public int getPageOnTime() {
 		Interval p_on = new MultiString(multi).pageOnInterval();
-		return p_on.round(Interval.Units.DECISECONDS);
+		int p = p_on.round(Interval.Units.DECISECONDS);
+		// Zero page-on time is invalid -- use 2.0 seconds
+		return (p > 0) ? p : 20;
 	}
 
 	/** Get the page off time (deciseconds) */
