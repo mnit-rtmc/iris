@@ -23,7 +23,8 @@ public enum MsgCode {
 	UNKNOWN(-1),
 	NORMAL(1),		/** Normal message */
 	ACK_MORE(5),		/** Acknowledge; response following */
-	ACK(6);			/** Acknowledge */
+	ACK(6),			/** Acknowledge */
+	ERR(8);			/** Invalid -- maybe CRC error? */
 
 	/** Message code */
 	public final int code;
