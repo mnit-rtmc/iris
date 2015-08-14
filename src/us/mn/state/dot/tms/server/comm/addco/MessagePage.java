@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.units.Interval;
 
 /**
  * A message page contains the MULTI string and bitmap for one page of an
@@ -88,6 +89,11 @@ public class MessagePage {
 		return DMSHelper.createBitmapGraphic(dms);
 	}
 
+	/** Get the name for the page (MULTI string without [pt] tag) */
+	public String getName() {
+		return MultiString.stripPageTime(multi);
+	}
+
 	/** Get the MULTI string for the page */
 	public String getMulti() {
 		return multi;
@@ -96,5 +102,17 @@ public class MessagePage {
 	/** Get the bitmap graphic for the page */
 	public BitmapGraphic getBitmap() {
 		return bitmap;
+	}
+
+	/** Get the page on time (deciseconds) */
+	public int getPageOnTime() {
+		Interval p_on = new MultiString(multi).pageOnInterval();
+		return p_on.round(Interval.Units.DECISECONDS);
+	}
+
+	/** Get the page off time (deciseconds) */
+	public int getPageOffTime() {
+		Interval p_off = new MultiString(multi).pageOffInterval();
+		return p_off.round(Interval.Units.DECISECONDS);
 	}
 }

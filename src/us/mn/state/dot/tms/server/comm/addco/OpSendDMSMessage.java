@@ -15,43 +15,64 @@
 package us.mn.state.dot.tms.server.comm.addco;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * Operation to query the current message on an Addco DMS.
+ * Operation to send a message to a DMS.
  *
  * @author Douglas Lau
  */
-public class OpQueryDMSMessage extends OpAddco {
+public class OpSendDMSMessage extends OpAddco {
+
+	/** Sign message */
+	private final SignMessage message;
+
+	/** User who deployed the message */
+	private final User owner;
 
 	/** DMS message property */
 	private final MessageProperty msg_prop;
 
-	/** Create a new DMS query status object */
-	public OpQueryDMSMessage(DMSImpl d) {
-		super(PriorityLevel.DEVICE_DATA, d);
-		msg_prop = new MessageProperty(d);
+	/** Create a new send DMS message operation */
+	public OpSendDMSMessage(DMSImpl d, SignMessage sm, User o) {
+		super(PriorityLevel.COMMAND, d);
+		message = sm;
+		owner = o;
+		msg_prop = new MessageProperty(d, sm);
+	}
+
+	/** Operation equality test */
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof OpSendDMSMessage) {
+			OpSendDMSMessage op = (OpSendDMSMessage)o;
+			return dms == op.dms && SignMessageHelper.isEquivalent(
+			       message, op.message);
+		} else
+			return false;
 	}
 
 	/** Create the second phase of the operation */
 	@Override
-	protected Phase phaseTwo() {
-		return new QueryMessage();
+	protected Phase<AddcoProperty> phaseTwo() {
+		dms.setMessageNext(message);
+		return new SendMsg();
 	}
 
-	/** Phase to query the current message */
-	private class QueryMessage extends Phase<AddcoProperty> {
+	/** Phase to send the message */
+	private class SendMsg extends Phase<AddcoProperty> {
 
-		/** Query the current message */
+		/** Send the message */
 		protected Phase<AddcoProperty> poll(CommMessage mess)
 			throws IOException
 		{
 			mess.add(msg_prop);
-			mess.queryProps();
+			mess.storeProps();
 			return null;
 		}
 	}
@@ -60,32 +81,8 @@ public class OpQueryDMSMessage extends OpAddco {
 	@Override
 	public void cleanup() {
 		if (isSuccess())
-			setCurrentMessage();
+			dms.setMessageCurrent(message, owner);
+		dms.setMessageNext(null);
 		super.cleanup();
-	}
-
-	/** Set the current message on the sign */
-	private void setCurrentMessage() {
-		String multi = msg_prop.getMulti();
-		BitmapGraphic[] bmaps = msg_prop.getBitmaps();
-		setCurrentMessage(createSignMessage(multi, bmaps));
-	}
-
-	/** Create a sign message for the sign */
-	private SignMessage createSignMessage(String multi,
-		BitmapGraphic[] bmaps)
-	{
-		if (bmaps.length == 0)
-			return dms.createBlankMessage();
-		else
-			return dms.createMessage(multi, false, bmaps);
-	}
-
-	/** Set the current message on the sign */
-	private void setCurrentMessage(SignMessage sm) {
-		if (sm != null)
-			dms.setMessageCurrent(sm, null);
-		else
-			setErrorStatus("MSG RENDER FAILED");
 	}
 }

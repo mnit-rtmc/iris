@@ -460,6 +460,17 @@ public class MultiString implements Multi {
 		return ptc.pageOnIntervals(dflt);
 	}
 
+	/** Get the page-off interval for the 1st page. If no page-off is
+	 * specified in the MULTI string, the default is returned, which
+	 * is a function of the number of pages in the multi-string.
+	 * @return The page-off interval. */
+	public Interval pageOffInterval() {
+		Interval dflt = PageTimeHelper.defaultPageOffInterval();
+		Interval[] pg_off = pageOffIntervals(dflt);
+		// return 1st page off-time read, even if specified per page
+		return pg_off[0];
+	}
+
 	/** Get an array of page-off time intervals.
 	 * @param dflt Default page-off time.
 	 * @return An array of page-off time Intervals, one value per page. */
@@ -489,6 +500,16 @@ public class MultiString implements Multi {
 			public void setPageTimes(Integer on, Integer off) {
 				super.setPageTimes(pt_on, pt_off);
 			}
+		};
+		MultiParser.parse(multi, ms);
+		return ms.toString();
+	}
+
+	/** Strip all page time tags from a MULTI string */
+	static public String stripPageTime(String multi) {
+		MultiString ms = new MultiString() {
+			@Override
+			public void setPageTimes(Integer on, Integer off) { }
 		};
 		MultiParser.parse(multi, ms);
 		return ms.toString();

@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import static us.mn.state.dot.tms.DmsColor.AMBER;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
@@ -36,6 +37,9 @@ public class MessageProperty extends AddcoProperty {
 
 	/** Length of query request (bytes) */
 	static private final int QUERY_REQ_LEN = 11;
+
+	/** Length of blank request (bytes) */
+	static private final int BLANK_REQ_LEN = 7;
 
 	/** CRC-16 algorithm */
 	static private final CRC crc16 = new CRC(16, 0x8005, 0xFFFF, true);
@@ -55,7 +59,7 @@ public class MessageProperty extends AddcoProperty {
 	private final DMSImpl dms;
 
 	/** All pages of the message */
-	private MessagePage[] pages = new MessagePage[0];
+	private MessagePage[] pages;
 
 	/** Current parsing position */
 	private int pos;
@@ -63,6 +67,25 @@ public class MessageProperty extends AddcoProperty {
 	/** Create a new message property */
 	public MessageProperty(DMSImpl d) {
 		dms = d;
+		pages = new MessagePage[0];
+	}
+
+	/** Create a new message property */
+	public MessageProperty(DMSImpl d, SignMessage sm) {
+		dms = d;
+		String ms = sm.getMulti();
+		pages = new MessagePage[getNumPages(ms)];
+		for (int p = 0; p < pages.length; p++)
+			pages[p] = new MessagePage(dms, sm, p);
+	}
+
+	/** Get the number of pages for a MULTI string */
+	private int getNumPages(String ms) {
+		MultiString multi = new MultiString(ms);
+		if (multi.isBlank())
+			return 0;
+		else
+			return multi.getNumPages();
 	}
 
 	/** Encode a QUERY request */
@@ -281,6 +304,148 @@ public class MessageProperty extends AddcoProperty {
 		for (int i = 0; i < bmaps.length; i++)
 			bmaps[i] = pages[i].getBitmap();
 		return bmaps;
+	}
+
+	/** Encode a STORE request */
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os)
+		throws IOException
+	{
+		os.write(formatStore());
+	}
+
+	/** Format a STORE request */
+	private byte[] formatStore() throws IOException {
+		if (pages.length < 1)
+			return formatBlank();
+		int n_bytes = storeReqBytes();
+		byte[] buf = new byte[n_bytes];
+		format8(buf, 0, MsgCode.NORMAL.code);
+		format16le(buf, 1, n_bytes + 2);	// + 2 FCS bytes
+		format16le(buf, 3, ADDR_ANY);
+		buf[5] = 'S';
+		buf[6] = 'R';
+		format16le(buf, 7, pages.length);
+		pos = 9;
+		for (int p = 0; p < pages.length; p++)
+			formatPage(buf, p);
+		return buf;
+	}
+
+	/** Format a blank STORE request */
+	private byte[] formatBlank() throws IOException {
+		byte[] buf = new byte[BLANK_REQ_LEN];
+		format8(buf, 0, MsgCode.NORMAL.code);
+		format16le(buf, 1, BLANK_REQ_LEN + 2);	// + 2 FCS bytes
+		format16le(buf, 3, ADDR_ANY);
+		buf[5] = 'S';
+		buf[6] = 'B';
+		return buf;
+	}
+
+	/** Format one page of a STORE request */
+	private void formatPage(byte[] buf, int p) {
+		MessagePage page = pages[p];
+		BitmapGraphic bmap = page.getBitmap();
+		format2(buf, 8);
+		format1(buf, -1);
+		format2(buf, p + 1);
+		format2(buf, pages.length);
+		format1(buf, 0);
+		format2(buf, page.getPageOnTime());
+		format2(buf, page.getPageOffTime());
+		final int i_pos = pos;
+		String name = page.getName();
+		format2(buf, name.length());
+		for (int i = 0; i < name.length(); i++)
+			format1(buf, name.charAt(i));
+		int n_bytes = bitmapBytes(page);
+		int width = bmap.getWidth();
+		int height = bmap.getHeight();
+		format2(buf, n_bytes);
+		format1(buf, 'B');
+		format1(buf, 'M');
+		format2(buf, n_bytes);
+		format2(buf, 0);	// ???
+		format4(buf, 0);	// ???
+		format4(buf, 62);	// extra bytes
+		format4(buf, 40);	// ???
+		format4(buf, width);
+		format4(buf, height);
+		format2(buf, 1);	// ???
+		format2(buf, 1);	// ???
+		format4(buf, 0);	// ???
+		format4(buf, bitmapBytes(width, height));
+		format4(buf, 0);	// ???
+		format4(buf, 0);	// ???
+		format4(buf, 0);	// ???
+		format4(buf, 0);	// ???
+		format4(buf, 0);	// ???
+		format2(buf, -1);	// ???
+		format2(buf, 255);	// ???
+		formatBitmap(buf, bmap);
+		format2(buf, 0);	// ???
+		format2(buf, calculateCrc(buf, i_pos));
+	}
+
+	/** Format a 1 byte value */
+	private void format1(byte[] buf, int v) {
+		format8(buf, pos, v);
+		pos++;
+	}
+
+	/** Format a 2 byte value */
+	private void format2(byte[] buf, int v) {
+		format16le(buf, pos, v);
+		pos += 2;
+	}
+
+	/** Format a 2 byte value */
+	private void format4(byte[] buf, int v) {
+		format32le(buf, pos, v);
+		pos += 4;
+	}
+
+	/** Calculate the bytes in a STORE request */
+	private int storeReqBytes() {
+		int n_bytes = 9;
+		for (MessagePage page: pages)
+			n_bytes += storeReqBytes(page);
+		return n_bytes;
+	}
+
+	/** Calculate the bytes in a STORE request for one page */
+	private int storeReqBytes(MessagePage page) {
+		return 18 + page.getName().length() + bitmapBytes(page);
+	}
+
+	/** Calculate the number of bytes in a bitmap */
+	private int bitmapBytes(MessagePage page) {
+		BitmapGraphic bmap = page.getBitmap();
+		return 62 + bitmapBytes(bmap.getWidth(), bmap.getHeight());
+	}
+
+	/** Format a bitmap graphic */
+	private void formatBitmap(byte[] buf, BitmapGraphic bmap) {
+		int width = bmap.getWidth();
+		int height = bmap.getHeight();
+		int stride = bitmapStride(width);
+		for (int y = 0; y < height; y++) {
+			int iy = height - y - 1;
+			int off = 0;
+			int bit = 7;
+			for (int x = 0; x < width; x++) {
+				if (bmap.getPixel(x, iy) == AMBER)
+					buf[pos + off] |= (1 << bit);
+				if (bit > 0)
+					bit--;
+				else {
+					off++;
+					bit = 7;
+				}
+			}
+			pos += stride;
+		}
 	}
 
 	/** Get a string representation of the property */

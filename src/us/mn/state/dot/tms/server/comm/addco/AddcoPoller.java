@@ -69,7 +69,7 @@ public class AddcoPoller extends MessagePoller implements DMSPoller {
 	public void sendMessage(DMSImpl dms, SignMessage sm, User o)
 		throws InvalidMessageException
 	{
-//		addOperation(new OpSendDMSMessage(dms, sm, o));
+		addOperation(new OpSendDMSMessage(dms, sm, o));
 	}
 
 	/** Get the protocol debug log */
