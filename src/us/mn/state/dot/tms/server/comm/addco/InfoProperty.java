@@ -57,6 +57,7 @@ public class InfoProperty extends AddcoProperty {
 	public void decodeQuery(ControllerImpl c, InputStream is)
 		throws IOException
 	{
+		decodeHead(is, MsgCode.ACK_MORE);
 		int len = decodeHead(is, MsgCode.NORMAL);
 		if (len != INFO_RESP_LEN)
 			throw new ParsingException("MSG LEN: " + len);
@@ -67,7 +68,7 @@ public class InfoProperty extends AddcoProperty {
 	private void parseQuery(byte[] body) throws IOException {
 		checkCommand(body, "RI");
 		// Don't know what body[4] contains
-		d_volts = body[5];
+		d_volts = body[5] & 0xFF;
 		// Don't know what body[6] contains
 	}
 
