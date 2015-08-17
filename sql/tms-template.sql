@@ -2304,6 +2304,8 @@ meter_min_red_secs	0.1
 meter_yellow_secs	0.7
 msg_feed_verify	true
 operation_retry_threshold	3
+route_max_legs	8
+route_max_miles	16
 rwis_high_wind_speed_kph	40
 rwis_low_visibility_distance_m	152
 rwis_obs_age_limit_secs	240
@@ -2313,8 +2315,6 @@ speed_limit_min_mph	45
 speed_limit_default_mph	55
 speed_limit_max_mph	75
 tesla_host	
-travel_time_max_legs	8
-travel_time_max_miles	16
 travel_time_min_mph	15
 uptime_log_enable	false
 vsa_bottleneck_id_mph	55

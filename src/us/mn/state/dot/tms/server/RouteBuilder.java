@@ -55,10 +55,10 @@ public class RouteBuilder {
 	private final CorridorManager corridors;
 
 	/** Maximum number of corridor legs */
-	private final int legs = SystemAttrEnum.TRAVEL_TIME_MAX_LEGS.getInt();
+	private final int legs = SystemAttrEnum.ROUTE_MAX_LEGS.getInt();
 
 	/** Maximum route distance (miles) */
-	private float max_mi = SystemAttrEnum.TRAVEL_TIME_MAX_MILES.getInt();
+	private float max_mi = SystemAttrEnum.ROUTE_MAX_MILES.getInt();
 
 	/** Working path */
 	private final LinkedList<ODPair> path = new LinkedList<ODPair>();
