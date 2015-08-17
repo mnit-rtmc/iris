@@ -20,8 +20,6 @@ import java.io.OutputStream;
 import java.io.BufferedOutputStream;
 import java.io.FilterOutputStream;
 import java.io.InputStream;
-import java.io.FilterInputStream;
-import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.CRC;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -40,10 +38,6 @@ abstract public class AddcoDL {
 	static private final ParsingException NOISE =
 		new ParsingException("RANDOM LINE NOISE");
 
-	/** Invalid escape sequence */
-	static private final ParsingException INVALID_ESC =
-		new ParsingException("INVALID ESCAPE SEQUENCE");
-
 	/** Maximum message size */
 	static private final int MAX_MESSAGE = 1024;
 
@@ -58,9 +52,6 @@ abstract public class AddcoDL {
 	/** BIT6 is the sixth bit (starting from 1).  It is used for the
 	 * transparency technique in the frame I/O streams. */
 	static private final int BIT6 = 0x20;
-
-	/** Frame check sequence is two bytes */
-	static private final int FRAME_CHECK = 2;
 
 	/** CRC-16 algorithm */
 	static private final CRC crc16 = new CRC(16, 0x8005, 0xFFFF, true);
@@ -105,8 +96,8 @@ abstract public class AddcoDL {
 		@Override
 		public void flush() throws IOException {
 			int fcs = crc16.result(crc);
-			byte fcs1 = (byte)(crc >> 0);
-			byte fcs2 = (byte)(crc >> 8);
+			byte fcs1 = (byte)(crc >> 8);
+			byte fcs2 = (byte)(crc >> 0);
 			write(fcs1);
 			write(fcs2);
 			super.write(FLAG);
@@ -115,140 +106,95 @@ abstract public class AddcoDL {
 		}
 	}
 
-	/** A FilterInputStream which reads messages framed with a FLAG octet
+	/** An InputStream which reads messages framed with a FLAG octet
 	 * and performs a transparency technique to collapse ESCAPE sequences
-	 * into single octets.  It also computes a CRC and compares it with
-	 * the frame check sequence.<p>
-	 *
-	 * Note: this class does not extend BufferedInputStream because of
-	 * timing problems associated with filling the buffer. */
-	static public class FInputStream extends FilterInputStream {
+	 * into single octets. */
+	static public class FInputStream extends InputStream {
 
-		/** Buffer where scanned data is stored */
+		/** Wrapped input stream */
+		private final InputStream wrapped;
+
+		/** Buffer where data is stored */
 		private final byte[] buf = new byte[MAX_MESSAGE];
 
-		/** Number of bytes which have been scanned into the buffer */
-		private int scanned = 0;
+		/** Number of bytes which have been read into the buffer */
+		private int n_bytes = 0;
 
-		/** Position of next byte in scanned buffer */
+		/** Position of next byte in buffer */
 		private int pos = 0;
+
+		/** Was previous byte an ESCAPE? */
+		private boolean esc = false;
 
 		/** Create a new ADDCO input stream */
 		public FInputStream(InputStream is) {
-			super(is);
-		}
-
-		/** Scan for the beginning of the next frame */
-		private void scanFrame() throws IOException {
-			pos = 0;
-			scanned = 0;
-			for (int i = 0; i < MAX_MESSAGE; i++) {
-				int b = super.read();
-				if (b < 0)
-					throw END_OF_STREAM;
-				if (FLAG == b)
-					return;
-			}
-			throw NOISE;
-		}
-
-		/** Scan until the next frame flag
-		 * @return True if scanning needs to continue */
-		private boolean scan() throws IOException {
-			while (super.available() == 0) {
-				int b = super.read();
-				if (b < 0)
-					throw END_OF_STREAM;
-				if (FLAG == b)
-					return false;
-				buf[scanned++] = (byte)b;
-				if (MAX_MESSAGE == scanned)
-					throw NOISE;
-			}
-			int a = Math.min(super.available(),
-				MAX_MESSAGE - scanned);
-			int b = super.read(buf, scanned, a);
-			if (b < 0)
-				throw END_OF_STREAM;
-			for (int i = 0; i < b; i++) {
-				if (FLAG == buf[scanned])
-					return false;
-				else
-					scanned++;
-			}
-			if (MAX_MESSAGE == scanned)
-				throw NOISE;
-			return true;
-		}
-
-		/** Scan and replace escape sequences. Replaces ESCAPE followed
-		 * by FLAG ^ BIT6 with FLAG and ESCAPE followed by
-		 * ESCAPE ^ BIT6 with ESCAPE. */
-		private void scanEscapes() throws ParsingException {
-			for (int c = 0; c < scanned; c++) {
-				int b = buf[c] & 0xFF;
-				if (ESCAPE == b) {
-					b = (buf[c + 1] & 0xFF) ^ BIT6;
-					if (b != FLAG && b != ESCAPE)
-						throw INVALID_ESC;
-					buf[c + 1] = (byte)b;
-					System.arraycopy(buf, c + 1, buf, c,
-						scanned - c);
-					scanned--;
-				}
-			}
-		}
-
-		/** Compare frame CRC against the frame check sequence */
-		private void checkFrame() throws ChecksumException {
-			int fcs = 0;
-			if (scanned >= FRAME_CHECK) {
-				scanned -= FRAME_CHECK;
-				fcs = (buf[scanned + 0] & 0xFF) |
-				      (buf[scanned + 1] & 0xFF) << 8;
-			} else {
-				scanned = 0;
-				return;
-			}
-			int crc = crc16.seed;
-			for (int c = 0; c < scanned; c++)
-				crc = crc16.step(crc, buf[c]);
-			if (crc16.result(crc) == fcs)
-				return;
-			byte[] corrupt = new byte[scanned];
-			System.arraycopy(buf, 0, corrupt, 0, scanned);
-			scanned = 0;
-			throw new ChecksumException(corrupt);
-		}
-
-		/** Scan the next message */
-		private void scanMessage() throws IOException {
-			scanFrame();
-			while (scan());
-			scanEscapes();
-			checkFrame();
+			wrapped = is;
 		}
 
 		/** Read the next byte from the input stream */
 		@Override
 		public int read() throws IOException {
-			while (pos >= scanned)
-				scanMessage();
-			return buf[pos++] & 0xFF;
+			for (int i = 0; i < 10; i++) {
+				readAvailLoop();
+				int b = readNext();
+				if (b >= 0)
+					return b;
+			}
+			throw NOISE;
+		}
+
+		/** Read any available data into buffer */
+		private void readAvailLoop() throws IOException {
+			for (int i = 0; i < 10; i++) {
+				if (pos < n_bytes)
+					return;
+				readAvailable();
+			}
+			throw NOISE;
+		}
+
+		/** Read all available data into buffer */
+		private void readAvailable() throws IOException {
+			pos = 0;
+			n_bytes = wrapped.read(buf);
+			if (n_bytes < 0)
+				throw END_OF_STREAM;
+			if (MAX_MESSAGE == n_bytes)
+				throw NOISE;
+		}
+
+		/** Read the next byte in buffer */
+		private int readNext() {
+			assert pos < n_bytes;
+			int b = buf[pos] & 0xFF;
+			pos++;
+			if (FLAG == b) {
+				esc = false;
+				return -1;
+			}
+			if (esc) {
+				esc = false;
+				return b ^ BIT6;
+			}
+			if (ESCAPE == b) {
+				esc = true;
+				return -1;
+			}
+			return b;
 		}
 
 		/** Get the number of available bytes */
 		@Override
 		public int available() {
-			return scanned - pos;
+			return n_bytes - pos;
 		}
 
 		/** Skip all data currently in the stream */
 		@Override
 		public long skip(long n) throws IOException {
-			scanned = 0;
+			n_bytes = 0;
 			pos = 0;
-			return super.skip(super.available());
+			return wrapped.skip(wrapped.available());
 		}
 	}
 }

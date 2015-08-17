@@ -16,7 +16,9 @@ package us.mn.state.dot.tms.server.comm.addco;
 
 import java.io.InputStream;
 import java.io.IOException;
+import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.CRC;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -30,7 +32,10 @@ abstract public class AddcoProperty extends ControllerProperty {
 	static private final String ASCII = "US-ASCII";
 
 	/** "Any" Address (not multi-drop) */
-	static protected final int ADDR_ANY = -1;
+	static protected final int ADDR_ANY = 65535;
+
+	/** CRC-16 algorithm */
+	static private final CRC crc16 = new CRC(16, 0x8005, 0xFFFF, true);
 
 	/** Parse an ASCII value */
 	static protected String parseAscii(byte[] buf, int pos, int n_len)
@@ -39,13 +44,25 @@ abstract public class AddcoProperty extends ControllerProperty {
 		return new String(buf, pos, n_len, ASCII);
 	}
 
+	/** Current CRC value */
+	private int crc;
+
+	/** Process the CRC for a buffer */
+	private void processCrc(byte[] buf) {
+		for (byte b: buf)
+			crc = crc16.step(crc, b);
+	}
+
 	/** Decode header of response */
 	protected int decodeHead(InputStream is, MsgCode mc) throws IOException{
+		crc = crc16.seed;
 		byte[] bc = recvResponse(is, 1);
+		processCrc(bc);
 		if (bc[0] != mc.code)
 			throw new ParsingException("MSG CODE: " + bc[0]);
 		if (mc == MsgCode.NORMAL) {
 			byte[] len = recvResponse(is, 2);
+			processCrc(len);
 			return parse16le(len, 0);
 		} else
 			return 0;
@@ -54,9 +71,14 @@ abstract public class AddcoProperty extends ControllerProperty {
 	/** Decode body of response */
 	protected byte[] decodeBody(InputStream is, int len) throws IOException{
 		byte[] body = recvResponse(is, len - 5); // - header / fcs
+		processCrc(body);
 		int addr = parse16le(body, 0);
 		if (addr != ADDR_ANY)
 			throw new ParsingException("ADDRESS: " + addr);
+		byte[] b_fcs = recvResponse(is, 2);
+		int fcs = ((b_fcs[0] & 0xFF) << 8) | (b_fcs[1] & 0xFF);
+		if (fcs != crc16.result(crc))
+			throw new ChecksumException(b_fcs);
 		return body;
 	}
 

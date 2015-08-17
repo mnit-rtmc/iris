@@ -116,6 +116,7 @@ public class MessageProperty extends AddcoProperty {
 	public void decodeQuery(ControllerImpl c, InputStream is)
 		throws IOException
 	{
+		decodeHead(is, MsgCode.ACK_MORE);
 		int len = decodeHead(is, MsgCode.NORMAL);
 		if (len < 10)
 			throw new ParsingException("MSG LEN: " + len);
@@ -237,8 +238,7 @@ public class MessageProperty extends AddcoProperty {
 		throws ParsingException
 	{
 		int stride = bitmapStride(width);
-		BitmapGraphic bmap = DMSHelper.createBitmapGraphic(dms);
-		// FIXME: check dimensions
+		BitmapGraphic bmap = new BitmapGraphic(width, height);
 		for (int y = 0; y < height; y++) {
 			int iy = height - y - 1;
 			int off = 0;
@@ -302,8 +302,20 @@ public class MessageProperty extends AddcoProperty {
 	public BitmapGraphic[] getBitmaps() {
 		BitmapGraphic[] bmaps = new BitmapGraphic[pages.length];
 		for (int i = 0; i < bmaps.length; i++)
-			bmaps[i] = pages[i].getBitmap();
+			bmaps[i] = getBitmap(pages[i]);
 		return bmaps;
+	}
+
+	/** Get a bitmap for one page */
+	private BitmapGraphic getBitmap(MessagePage page) {
+		BitmapGraphic bmap = page.getBitmap();
+		/* If possible, make dimensions match DMS */
+		BitmapGraphic dmap = DMSHelper.createBitmapGraphic(dms);
+		if (dmap != null) {
+			dmap.copy(bmap);
+			return dmap;
+		} else
+			return bmap;
 	}
 
 	/** Encode a STORE request */
@@ -352,8 +364,8 @@ public class MessageProperty extends AddcoProperty {
 		format2(buf, p + 1);
 		format2(buf, pages.length);
 		format1(buf, 0);
-		format2(buf, page.getPageOnTime());
-		format2(buf, page.getPageOffTime());
+		format1(buf, page.getPageOnTime());
+		format1(buf, page.getPageOffTime());
 		final int i_pos = pos;
 		String name = page.getName();
 		format2(buf, name.length());
@@ -446,6 +458,13 @@ public class MessageProperty extends AddcoProperty {
 			}
 			pos += stride;
 		}
+	}
+
+	/** Decode a STORE response */
+	public void decodeStore(ControllerImpl c, InputStream is)
+		throws IOException
+	{
+		decodeHead(is, MsgCode.ACK);
 	}
 
 	/** Get a string representation of the property */
