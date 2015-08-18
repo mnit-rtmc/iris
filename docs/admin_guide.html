@@ -278,6 +278,7 @@
 	<li>Travel time estimation for traveler information</li>
 	<li>Variable speed advisories</li>
 	<li>Coordinated ramp metering strategies</li>
+	<li>High-occupancy / toll (HOT) lane operation</li>
 </ul>
 
 <h2 id="installation">Installation</h2>
@@ -1753,7 +1754,7 @@ FIXME
 	    <td>No</td>
 	</tr>
 	<tr>
-	    <td>[mv<i>...</i>]</td>
+	    <td>[mv<i>…</i>]</td>
 	    <td>Moving text</td>
 	    <td>No</td>
 	</tr>
@@ -1806,6 +1807,11 @@ FIXME
 	<tr>
 	    <td>[feed<i>n</i>]</td>
 	    <td><a href="#msg_feed">Message feed</a></td>
+	    <td>IRIS-only</td>
+	</tr>
+	<tr>
+	    <td>[tz<i>{o,c,p}</i>,<i>{tzid_0},</i>…<i>{tzid_n}</i>]</td>
+	    <td><a href="#tolling">Toll Zone</a></td>
 	    <td>IRIS-only</td>
 	</tr>
 </table>
@@ -2112,6 +2118,7 @@ FIXME
 <h4>Toll Zones</h4>
 <p>
 	A toll zone is a segment of roadway between two stations.
+	Multiple zones may overlap if necessary.
 	Select the <span class="menu">View ➔ Lane Use ➔ Toll Zones</span>
 	menu item to display the Toll Zone form.
 	All HOT lane detectors between the starting station and ending station
@@ -2124,6 +2131,38 @@ FIXME
 <div class="label">p = α ⋅ k <sup>β</sup>, where α = 0.05932 and β = 1.156</div>
 <p>
 	The toll price is then rounded to the nearest $0.25.
+</p>
+<h4>Pricing on DMS</h4>
+<p>
+	A DMS can display pricing information at the beginning of a toll zone.
+	This is accomplished using an IRIS-specific <a href="multi">MULTI</a>
+	tag.
+	The tag has two or more parameters.
+	The first must be either "o", "c" or "p".
+	These indicate that the toll zone is <i>open</i>, <i>closed</i>, or
+	<i>priced</i>, respectively.
+	The second parameter is the (first) toll zone ID.
+	Additional toll zone IDs may be provided; the price will be the sum of
+	prices for all specified toll zones.
+	If the first parameter is "o", the MULTI tag will be replaced with the
+	string "OPEN".
+	For "c", the string "CLOSED" will be used.
+	For "p", the calculated price will be displayed in dollars and cents,
+	for example "2.75".
+</p>
+<p>
+	Price events are logged when a DMS message is verified.
+	For "p", the price as calculated is logged.
+	For "o" or "c", a price of 0 is logged.
+</p>
+<h4>Tag Readers</h4>
+<p>
+	Tag readers are typically located just downstream of a pricing DMS.
+	When a toll tag transponder is read, an event is logged in the database.
+	The event includes the date and time, tag ID and toll zone.
+	This can be used with the logged pricing information to build a list of
+	trips for each tag ID.
+	This information can be used to bill customers.
 </p>
 
 <h2 id="troubleshooting">Troubleshooting</h2>
