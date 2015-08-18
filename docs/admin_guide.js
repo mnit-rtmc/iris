@@ -18,7 +18,7 @@ function bindShowOnly(sections, sec) {
 function bindClicks() {
 	var sections = ['contents', 'overview', 'installation', 'basic_setup',
 		'devices', 'features', 'troubleshooting', 'maintenance',
-		'development'];
+		'development', 'stepbystep'];
 	for(var i = 0; i < sections.length; i++) {
 		hide(sections[i] + '_div');
 		bindShowOnly(sections, sections[i]);
