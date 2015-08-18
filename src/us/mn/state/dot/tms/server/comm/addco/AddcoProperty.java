@@ -31,9 +31,6 @@ abstract public class AddcoProperty extends ControllerProperty {
 	/** Charset name for ASCII */
 	static private final String ASCII = "US-ASCII";
 
-	/** "Any" Address (not multi-drop) */
-	static protected final int ADDR_ANY = 65535;
-
 	/** CRC-16 algorithm */
 	static private final CRC crc16 = new CRC(16, 0x8005, 0xFFFF, true);
 
@@ -69,11 +66,13 @@ abstract public class AddcoProperty extends ControllerProperty {
 	}
 
 	/** Decode body of response */
-	protected byte[] decodeBody(InputStream is, int len) throws IOException{
+	protected byte[] decodeBody(InputStream is, int address, int len)
+		throws IOException
+	{
 		byte[] body = recvResponse(is, len - 5); // - header / fcs
 		processCrc(body);
 		int addr = parse16le(body, 0);
-		if (addr != ADDR_ANY)
+		if (addr != (address & 0xFFFF))
 			throw new ParsingException("ADDRESS: " + addr);
 		byte[] b_fcs = recvResponse(is, 2);
 		int fcs = ((b_fcs[0] & 0xFF) << 8) | (b_fcs[1] & 0xFF);

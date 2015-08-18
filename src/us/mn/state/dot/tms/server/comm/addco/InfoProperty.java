@@ -38,15 +38,15 @@ public class InfoProperty extends AddcoProperty {
 	public void encodeQuery(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		os.write(formatQuery());
+		os.write(formatQuery(c.getDrop()));
 	}
 
 	/** Format a QUERY request */
-	private byte[] formatQuery() throws IOException {
+	private byte[] formatQuery(int address) throws IOException {
 		byte[] buf = new byte[INFO_REQ_LEN];
 		format8(buf, 0, MsgCode.NORMAL.code);
 		format16le(buf, 1, INFO_REQ_LEN + 2);	// + 2 FCS bytes
-		format16le(buf, 3, ADDR_ANY);
+		format16le(buf, 3, address);
 		buf[5] = 'G';
 		buf[6] = 'I';
 		return buf;
@@ -61,7 +61,7 @@ public class InfoProperty extends AddcoProperty {
 		int len = decodeHead(is, MsgCode.NORMAL);
 		if (len != INFO_RESP_LEN)
 			throw new ParsingException("MSG LEN: " + len);
-		parseQuery(decodeBody(is, INFO_RESP_LEN));
+		parseQuery(decodeBody(is, c.getDrop(), INFO_RESP_LEN));
 	}
 
 	/** Parse a query response */

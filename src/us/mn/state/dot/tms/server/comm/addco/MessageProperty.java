@@ -93,15 +93,15 @@ public class MessageProperty extends AddcoProperty {
 	public void encodeQuery(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		os.write(formatQuery());
+		os.write(formatQuery(c.getDrop()));
 	}
 
 	/** Format a QUERY request */
-	private byte[] formatQuery() throws IOException {
+	private byte[] formatQuery(int address) throws IOException {
 		byte[] buf = new byte[QUERY_REQ_LEN];
 		format8(buf, 0, MsgCode.NORMAL.code);
 		format16le(buf, 1, QUERY_REQ_LEN + 2);	// + 2 FCS bytes
-		format16le(buf, 3, ADDR_ANY);
+		format16le(buf, 3, address);
 		buf[5] = 'G';
 		buf[6] = 'M';
 		format8(buf, 7, -1);	// ???
@@ -120,7 +120,7 @@ public class MessageProperty extends AddcoProperty {
 		int len = decodeHead(is, MsgCode.NORMAL);
 		if (len < 10)
 			throw new ParsingException("MSG LEN: " + len);
-		parseQuery(decodeBody(is, len));
+		parseQuery(decodeBody(is, c.getDrop(), len));
 	}
 
 	/** Parse a query response */
@@ -323,18 +323,18 @@ public class MessageProperty extends AddcoProperty {
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		os.write(formatStore());
+		os.write(formatStore(c.getDrop()));
 	}
 
 	/** Format a STORE request */
-	private byte[] formatStore() throws IOException {
+	private byte[] formatStore(int address) throws IOException {
 		if (pages.length < 1)
-			return formatBlank();
+			return formatBlank(address);
 		int n_bytes = storeReqBytes();
 		byte[] buf = new byte[n_bytes];
 		format8(buf, 0, MsgCode.NORMAL.code);
 		format16le(buf, 1, n_bytes + 2);	// + 2 FCS bytes
-		format16le(buf, 3, ADDR_ANY);
+		format16le(buf, 3, address);
 		buf[5] = 'S';
 		buf[6] = 'R';
 		format16le(buf, 7, pages.length);
@@ -345,11 +345,11 @@ public class MessageProperty extends AddcoProperty {
 	}
 
 	/** Format a blank STORE request */
-	private byte[] formatBlank() throws IOException {
+	private byte[] formatBlank(int address) throws IOException {
 		byte[] buf = new byte[BLANK_REQ_LEN];
 		format8(buf, 0, MsgCode.NORMAL.code);
 		format16le(buf, 1, BLANK_REQ_LEN + 2);	// + 2 FCS bytes
-		format16le(buf, 3, ADDR_ANY);
+		format16le(buf, 3, address);
 		buf[5] = 'S';
 		buf[6] = 'B';
 		return buf;
