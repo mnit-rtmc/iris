@@ -436,27 +436,27 @@ public class MultiStringTest extends TestCase {
 	public void testReplacePageOnTime() {
 		checkReplacePageTimes("YA1[np]YA2",
 		                      "[pt4o]YA1[np]YA2",
-		                      7, 4, new int[] { 4, 4 });
+		                      7, 4, null, new int[] { 4, 4 });
 		checkReplacePageTimes("[pt3o]YA1[np]OH YA2",
 		                      "[pt4o]YA1[np]OH YA2",
-		                      7, 4, new int[] { 4, 4 });
+		                      7, 4, null, new int[] { 4, 4 });
 		checkReplacePageTimes("[pt3o50]YA1[np]OH YA2",
 		                      "[pt4o50]YA1[np]OH YA2",
-		                      7, 4, new int[] { 4, 4 });
+		                      7, 4, 50, new int[] { 4, 4 });
 		checkReplacePageTimes("[pt3o50]YA1[np][pt22o60]OH YA2",
-		                      "[pt4o50]YA1[np][pt4o60]OH YA2",
-		                      7, 4, new int[] { 4, 4 });
+		                      "[pt4o50]YA1[np][pt4o50]OH YA2",
+		                      7, 4, 50, new int[] { 4, 4 });
 	}
 
 	private void checkReplacePageTimes(String ms, String cms, int dflt_ds,
-		int pot, int[] intvls)
+		int pot, Integer pof, int[] intvls)
 	{
 		Interval dflt = new Interval(dflt_ds, DECISECONDS);
-		MultiString ms1 = new MultiString(ms);
-		MultiString ms2 = ms1.replacePageOnTime(pot);
+		MultiString ms2 = new MultiString(MultiString.replacePageTime(
+			ms, pot, pof));
 		Interval[] t = ms2.pageOnIntervals(dflt);
 		assertTrue(t.length == intvls.length);
-		for(int i = 0; i < t.length; i++) {
+		for (int i = 0; i < t.length; i++) {
 			Interval val = new Interval(intvls[i], DECISECONDS);
 			assertTrue(t[i].equals(val));
 		}
