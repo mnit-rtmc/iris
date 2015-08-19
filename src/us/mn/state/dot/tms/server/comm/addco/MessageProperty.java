@@ -180,7 +180,7 @@ public class MessageProperty extends AddcoProperty {
 		throws ChecksumException
 	{
 		int crc = calculateCrc(body, i_pos);
-		int rc = parse16le(body, pos);
+		int rc = parse16(body, pos);	// swap bytes; not LE
 		pos += 2;
 		if (rc != crc)
 			throw new ChecksumException(body);

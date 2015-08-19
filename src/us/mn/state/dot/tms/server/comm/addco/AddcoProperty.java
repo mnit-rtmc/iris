@@ -75,7 +75,7 @@ abstract public class AddcoProperty extends ControllerProperty {
 		if (addr != (address & 0xFFFF))
 			throw new ParsingException("ADDRESS: " + addr);
 		byte[] b_fcs = recvResponse(is, 2);
-		int fcs = ((b_fcs[0] & 0xFF) << 8) | (b_fcs[1] & 0xFF);
+		int fcs = parse16(b_fcs, 0);	// swap bytes; not LE
 		if (fcs != crc16.result(crc))
 			throw new ChecksumException(b_fcs);
 		return body;
