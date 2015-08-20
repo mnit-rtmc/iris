@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -469,7 +469,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private void updateDmsMessage(DMSImpl d) {
 		QuickMessage qm = isMsgOpen() ? getOpenMsg() : getClosedMsg();
 		if (qm != null)
-			d.sendMessage(qm.getMulti(), false, PSA, PSA);
+			d.sendMessage(qm.getMulti(), false, PSA, PSA, false);
 	}
 
 	/** Test if message should be open */

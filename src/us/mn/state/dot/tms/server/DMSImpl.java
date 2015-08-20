@@ -1127,13 +1127,14 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param m MULTI string.
 	 * @param be Beacon enabled.
 	 * @param ap Activation priority.
-	 * @param rp Run-time priority. */
+	 * @param rp Run-time priority.
+	 * @param sc Scheduled flag. */
 	public void sendMessage(String m, boolean be, DMSMessagePriority ap,
-		DMSMessagePriority rp)
+		DMSMessagePriority rp, boolean sc)
 	{
 		if (getMessageCurrent().getMulti().equals(m))
 			return;
-		SignMessage sm = createMessage(m, be, ap, rp, false, null);
+		SignMessage sm = createMessage(m, be, ap, rp, sc, null);
 		try {
 			if (!isMessageCurrentEquivalent(sm))
 				doSetMessageNext(sm, null);
