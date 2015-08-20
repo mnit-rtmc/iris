@@ -152,7 +152,7 @@ public class MessageProperty extends AddcoProperty {
 		pos++;
 		if (p_type == 0)
 			return parseBitmapPage(body, p_on, p_off);
-		else if (p_type == 16)
+		else if (p_type == 16 || p_type == 18)
 			return parseTextPage(body, p_on, p_off);
 		else
 			throw new ParsingException("PTYPE: " + p_type);
@@ -170,7 +170,7 @@ public class MessageProperty extends AddcoProperty {
 		String text = parseAscii(body, pos, t_len);
 		pos += t_len;
 		parseCheck2(body, "ZERO", 0, 0);
-		parseCheck2(body, "5008", 5008, 5008);
+		parseCheck2(body, "UNKNOWN7", 0, 65535);
 		String multi = MultiString.replacePageTime(text, p_on, p_off);
 		return new MessagePage(dms, multi);
 	}
