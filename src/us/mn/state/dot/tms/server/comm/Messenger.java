@@ -87,7 +87,7 @@ abstract public class Messenger {
 
 	/** Get an output stream for the specified controller */
 	public OutputStream getOutputStream(ControllerImpl c)
-		throws EOFException
+		throws IOException
 	{
 		OutputStream os = getOutputStream();
 		if(os == null)

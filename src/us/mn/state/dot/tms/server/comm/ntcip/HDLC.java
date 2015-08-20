@@ -23,6 +23,7 @@ import java.io.InputStream;
 import java.io.FilterInputStream;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
+import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * This is an implementation of the ISO/IEC standard 3309 High-level Data
@@ -36,16 +37,6 @@ abstract public class HDLC {
 	/** End of stream exception */
 	static protected final EOFException END_OF_STREAM =
 		new EOFException("END OF STREAM");
-
-	/** Invalid address exception */
-	static public final class InvalidAddressException
-		extends IndexOutOfBoundsException
-	{
-		/** Create an invalid address exception */
-		public InvalidAddressException(int address) {
-			super("Invalid HDLC address: " + address);
-		}
-	}
 
 	/** Maximum message size */
 	static protected final int MAX_MESSAGE = 1024;
@@ -270,10 +261,14 @@ abstract public class HDLC {
 	static protected final byte ADDRESS_LAST = 0x01;
 
 	/** Create an HDLC address buffer */
-	static protected byte[] createAddress(int address) {
-		if(address < 1 || address > NTCIP_MAX_ADDRESS)
-			throw new InvalidAddressException(address);
-		if(address < 64)
+	static private byte[] createAddress(int address)
+		throws ProtocolException
+	{
+		if (address < 1 || address > NTCIP_MAX_ADDRESS) {
+			throw new ProtocolException("INVALID HDLC ADDRESS: " +
+				address);
+		}
+		if (address < 64)
 			return create1ByteAddress(address);
 		else
 			return create2ByteAddress(address);
@@ -331,7 +326,9 @@ abstract public class HDLC {
 		protected boolean next = true;
 
 		/** Create an HDLC addressed output stream */
-		public AddressedOutputStream(OutputStream out, int address) {
+		public AddressedOutputStream(OutputStream out, int address)
+			throws ProtocolException
+		{
 			super(out);
 			add_buf = createAddress(address);
 		}
