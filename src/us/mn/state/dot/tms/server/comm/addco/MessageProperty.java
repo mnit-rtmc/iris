@@ -170,20 +170,9 @@ public class MessageProperty extends AddcoProperty {
 		String text = parseAscii(body, pos, t_len);
 		pos += t_len;
 		parseCheck2(body, "ZERO", 0, 0);
-		parseCheckCrc(body, i_pos);
+		parseCheck2(body, "5008", 5008, 5008);
 		String multi = MultiString.replacePageTime(text, p_on, p_off);
 		return new MessagePage(dms, multi);
-	}
-
-	/** Parse a CRC-16 and check it */
-	private void parseCheckCrc(byte[] body, int i_pos)
-		throws ChecksumException
-	{
-		int crc = calculateCrc(body, i_pos);
-		int rc = parse16(body, pos);	// swap bytes; not LE
-		pos += 2;
-		if (rc != crc)
-			throw new ChecksumException(body);
 	}
 
 	/** Calculate a CRC-16 */
@@ -285,6 +274,17 @@ public class MessageProperty extends AddcoProperty {
 		int val = parse32le(body, pos);
 		pos += 4;
 		return val;
+	}
+
+	/** Parse a CRC-16 and check it */
+	private void parseCheckCrc(byte[] body, int i_pos)
+		throws ChecksumException
+	{
+		int crc = calculateCrc(body, i_pos);
+		int rc = parse16(body, pos);	// swap bytes; not LE
+		pos += 2;
+		if (rc != crc)
+			throw new ChecksumException(body);
 	}
 
 	/** Get the message MULTI string */
