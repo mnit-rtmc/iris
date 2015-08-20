@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,9 +32,6 @@ public class PageTimeHelperTest extends TestCase {
 	}
 
 	public void testValidateOnInterval() {
-		assertTrue(PageTimeHelper.validateOnInterval(new Interval(0),
-			true).equals(PageTimeHelper.defaultPageOnInterval(
-			true)));
 		assertTrue(PageTimeHelper.validateOnInterval(new Interval(0),
 			false).equals(PageTimeHelper.minPageOnInterval()));
 	}

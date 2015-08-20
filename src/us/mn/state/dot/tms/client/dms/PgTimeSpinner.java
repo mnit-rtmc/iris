@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ public class PgTimeSpinner extends JSpinner {
 
 	/** Does the current message have single or multiple pages.
 	 *  This determines if zero is an acceptable value. */
-	protected boolean m_singlepg = true;
+	private boolean m_singlepg = true;
 
 	/** Page time spinner model, which allows for an closed range of
 	 *  values. Single page messages also allow a value of zero. */
@@ -91,7 +91,7 @@ public class PgTimeSpinner extends JSpinner {
 		/** Get the next value, or null if the next value would be
 		 *  out of range. */
 		public Object getNextValue() {
-			if(m_singlepg && m_value == 0)
+			if (m_singlepg && m_value == 0)
 				return m_min.seconds();
 			else
 				return validate(m_value + m_inc);
@@ -100,7 +100,7 @@ public class PgTimeSpinner extends JSpinner {
 		/** Get previous value, or null if the previous value is
 		 *  out of range. */
 		public Object getPreviousValue() {
-			if(m_singlepg && m_value == 0)
+			if (m_singlepg && m_value == 0)
 				return null;
 			else
 				return validate(m_value - m_inc);
@@ -137,7 +137,7 @@ public class PgTimeSpinner extends JSpinner {
 	/** Create a new page time spinner */
 	public PgTimeSpinner() {
 		setModel(new PgTimeSpinnerModel(
-			PageTimeHelper.defaultPageOnInterval(true).seconds(),
+			PageTimeHelper.defaultPageOnInterval().seconds(),
 			PageTimeHelper.minPageOnInterval(), INC_ONTIME_SECS));
 		setToolTipText(I18N.get("dms.page.on.time.tooltip"));
 
@@ -152,10 +152,8 @@ public class PgTimeSpinner extends JSpinner {
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
 		// if disabled, reset value to default
-		if(!b) {
-			setValue(PageTimeHelper.defaultPageOnInterval(
-				m_singlepg));
-		}
+		if (!b)
+			setValue(PageTimeHelper.defaultPageOnInterval());
 	}
 
 	/** Set value using seconds */
@@ -172,10 +170,14 @@ public class PgTimeSpinner extends JSpinner {
 	/** Get the current value as an Interval */
 	public Interval getValueInterval() {
 		Object v = getValue();
-		if(v instanceof Number)
+		if (v instanceof Number)
 			return new Interval(((Number)v).floatValue());
-		else
-			return PageTimeHelper.defaultPageOnInterval(m_singlepg);
+		else {
+			if (m_singlepg)
+				return new Interval(0);
+			else
+				return PageTimeHelper.defaultPageOnInterval();
+		}
 	}
 
 	/** Set value using the page on-time specified in the 1st page

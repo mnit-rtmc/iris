@@ -439,12 +439,10 @@ public class MultiString implements Multi {
 	}
 
 	/** Get the page-on interval for the 1st page. If no page-on is
-	 * specified in the MULTI string, the default is returned, which
-	 * is a function of the number of pages in the multi-string.
+	 * specified in the MULTI string, the default is returned.
 	 * @return The page-on interval. */
 	public Interval pageOnInterval() {
-		Interval dflt = PageTimeHelper.defaultPageOnInterval(
-			singlePage());
+		Interval dflt = PageTimeHelper.defaultPageOnInterval();
 		Interval[] pg_on = pageOnIntervals(dflt);
 		// return 1st page on-time read, even if specified per page
 		return pg_on[0];
@@ -461,8 +459,7 @@ public class MultiString implements Multi {
 	}
 
 	/** Get the page-off interval for the 1st page. If no page-off is
-	 * specified in the MULTI string, the default is returned, which
-	 * is a function of the number of pages in the multi-string.
+	 * specified in the MULTI string, the default is returned.
 	 * @return The page-off interval. */
 	public Interval pageOffInterval() {
 		Interval dflt = PageTimeHelper.defaultPageOffInterval();

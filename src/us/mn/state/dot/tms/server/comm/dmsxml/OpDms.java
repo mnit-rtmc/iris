@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2014  Minnesota Department of Transportation
+ * Copyright (C) 2002-2015  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -233,12 +233,19 @@ abstract class OpDms extends OpDevice {
 	Interval determinePageOnInterval(String multi) {
 		MultiString ms = new MultiString(multi);
 		boolean single = (ms.getNumPages() <= 1);
-		Interval dflt_on = PageTimeHelper.defaultPageOnInterval(single);
+		Interval dflt_on = defaultPageOnInterval(single);
 		Interval[] on_int = ms.pageOnIntervals(dflt_on);
 		// extract from 1st page of MULTI
 		assert on_int != null && on_int.length > 0;
 		Interval pg_1 = on_int[0];
 		return PageTimeHelper.validateOnInterval(pg_1, single);
+	}
+
+	/** Get the default page on interval */
+	private Interval defaultPageOnInterval(boolean single) {
+		return (single)
+		      ? new Interval(0)
+		      : PageTimeHelper.defaultPageOnInterval();
 	}
 
 	/** Update operation intermediate status in the client.

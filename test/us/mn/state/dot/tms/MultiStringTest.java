@@ -293,17 +293,16 @@ public class MultiStringTest extends TestCase {
 	}
 
 	public void testPageOnTime() {
+		Interval df_pgon = PageTimeHelper.defaultPageOnInterval();
 		// test page time specified once for entire message
 		assertTrue(new MultiString("ABC[nl]DEF").
-			pageOnInterval().equals(new Interval(0)));
-		Interval defspg = PageTimeHelper.defaultPageOnInterval(true);
-		Interval defmpg = PageTimeHelper.defaultPageOnInterval(false);
+			pageOnInterval().equals(df_pgon));
 		assertTrue(new MultiString("").
-			pageOnInterval().equals(defspg));
+			pageOnInterval().equals(df_pgon));
 		assertTrue(new MultiString("ABC[nl]DEF").
-			pageOnInterval().equals(defspg));
+			pageOnInterval().equals(df_pgon));
 		assertTrue(new MultiString("ABC[np]DEF").
-			pageOnInterval().equals(defmpg));
+			pageOnInterval().equals(df_pgon));
 		assertTrue(new MultiString("[pt13o0]ABC[nl]DEF").
 			pageOnInterval().round(DECISECONDS) == 13);
 		assertTrue(new MultiString("ABC[nl][pt14o]DEF").
@@ -311,9 +310,9 @@ public class MultiStringTest extends TestCase {
 		assertTrue(new MultiString("ABC[nl]DEF[pt14o]").
 			pageOnInterval().round(DECISECONDS) == 14);
 		assertTrue(new MultiString("ABC[np][pt14o]DEF").
-			pageOnInterval().equals(defmpg));
+			pageOnInterval().equals(df_pgon));
 		assertTrue(new MultiString("ABC[np]DEF[pt14o]").
-			pageOnInterval().equals(defmpg));
+			pageOnInterval().equals(df_pgon));
 	}
 
 	public void testPageOnIntervals() {

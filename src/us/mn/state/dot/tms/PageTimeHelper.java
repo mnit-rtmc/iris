@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,15 +42,10 @@ public class PageTimeHelper {
 			SystemAttrEnum.DMS_PAGE_ON_MAX_SECS.getFloat());
 	}
 
-	/** Get default page-on interval.
-	 * @param singlepg True for single-page messages. */
-	static public Interval defaultPageOnInterval(boolean singlepg) {
-		if(singlepg)
-			return new Interval(0);
-		else {
-			return new Interval(SystemAttrEnum.
-				DMS_PAGE_ON_DEFAULT_SECS.getFloat());
-		}
+	/** Get default page-on interval */
+	static public Interval defaultPageOnInterval() {
+		return new Interval(
+			SystemAttrEnum.DMS_PAGE_ON_DEFAULT_SECS.getFloat());
 	}
 
 	/** Get default page-off interval */
@@ -112,7 +107,7 @@ public class PageTimeHelper {
 	 * @return Array of page-on intervals (for each page). */
 	static public Interval[] pageOnIntervals(String ms) {
 		MultiString m = new MultiString(ms);
-		return m.pageOnIntervals(defaultPageOnInterval(m.singlePage()));
+		return m.pageOnIntervals(defaultPageOnInterval());
 	}
 
 	/** Get the page-off intervals for the specified MULTI string.
