@@ -92,8 +92,10 @@ public class OpQueryDMSStatus extends OpAddco {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		if (isSuccess())
+		if (isSuccess()) {
 			setMaintStatus(formatMaintStatus());
+			setErrorStatus("");
+		}
 		super.cleanup();
 	}
 
