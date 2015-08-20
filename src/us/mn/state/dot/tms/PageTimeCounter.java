@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ public class PageTimeCounter extends MultiAdapter {
 	}
 
 	/** Add a page */
+	@Override
 	public void addPage() {
 		super.addPage();
 		assert ms_page >= 0;
@@ -50,6 +51,7 @@ public class PageTimeCounter extends MultiAdapter {
 	/** Set the page times.
 	 * @param pt_on Page on time (deciseconds; null means default)
 	 * @param pt_off Page off time (deciseconds; null means default) */
+	@Override
 	public void setPageTimes(Integer pt_on, Integer pt_off) {
 		super.setPageTimes(pt_on, pt_off);
 		assert ms_page >= 0;
@@ -63,14 +65,14 @@ public class PageTimeCounter extends MultiAdapter {
 	 * @return Page-on interval for current page. */
 	private Interval pageOnInterval() {
 		Integer pt = ms_pt_on;
-		return pt != null ? new Interval(pt, DECISECONDS) : null;
+		return (pt != null) ? new Interval(pt, DECISECONDS) : null;
 	}
 
 	/** Get the current page-off interval.
 	 * @return Page-off interval for current page. */
 	private Interval pageOffInterval() {
 		Integer pt = ms_pt_off;
-		return pt != null ? new Interval(pt, DECISECONDS) : null;
+		return (pt != null) ? new Interval(pt, DECISECONDS) : null;
 	}
 
 	/** Get an array of page-on intervals.
@@ -78,9 +80,9 @@ public class PageTimeCounter extends MultiAdapter {
 	 * @return Array of page-on intervals. */
 	public Interval[] pageOnIntervals(Interval dflt) {
 		Interval[] ret = new Interval[page_on.length];
-		for(int i = 0; i < ret.length; i++) {
+		for (int i = 0; i < ret.length; i++) {
 			Interval p = page_on[i];
-			ret[i] = p != null ? p : dflt;
+			ret[i] = (p != null) ? p : dflt;
 		}
 		return ret;
 	}
@@ -90,9 +92,9 @@ public class PageTimeCounter extends MultiAdapter {
 	 * @return Array of page-off intervals. */
 	public Interval[] pageOffIntervals(Interval dflt) {
 		Interval[] ret = new Interval[page_off.length];
-		for(int i = 0; i < ret.length; i++) {
+		for (int i = 0; i < ret.length; i++) {
 			Interval p = page_off[i];
-			ret[i] = p != null ? p : dflt;
+			ret[i] = (p != null) ? p : dflt;
 		}
 		return ret;
 	}
