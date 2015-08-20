@@ -1128,13 +1128,13 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param be Beacon enabled.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
-	 * @param sc Scheduled flag. */
+	 * @param sch Scheduled flag. */
 	public void sendMessage(String m, boolean be, DMSMessagePriority ap,
-		DMSMessagePriority rp, boolean sc)
+		DMSMessagePriority rp, boolean sch)
 	{
 		if (getMessageCurrent().getMulti().equals(m))
 			return;
-		SignMessage sm = createMessage(m, be, ap, rp, sc, null);
+		SignMessage sm = createMessage(m, be, ap, rp, sch, null);
 		try {
 			if (!isMessageCurrentEquivalent(sm))
 				doSetMessageNext(sm, null);
@@ -1366,8 +1366,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	public SignMessage createMessage(String m, boolean be,
 		DMSMessagePriority ap, DMSMessagePriority rp, Integer d)
 	{
-		boolean s = DMSMessagePriority.isScheduled(rp);
-		return createMessage(m, be, ap, rp, s, d);
+		boolean sch = DMSMessagePriority.isScheduled(rp);
+		return createMessage(m, be, ap, rp, sch, d);
 	}
 
 	/** Create a message for the sign.
@@ -1375,17 +1375,17 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param be Beacon enabled flag.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
-	 * @param s Scheduled flag.
+	 * @param sch Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMessage(String m, boolean be,
-		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
+		DMSMessagePriority ap, DMSMessagePriority rp, boolean sch,
 		Integer d)
 	{
 		try {
 			BitmapGraphic[] pages = DMSHelper.createBitmaps(this,m);
 			if (pages != null)
-				return createMessageB(m, be, pages, ap, rp,s,d);
+				return createMessageB(m, be, pages,ap,rp,sch,d);
 		}
 		catch (InvalidMessageException e) {
 			logError("invalid msg: " + e.getMessage());
@@ -1405,8 +1405,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		BitmapGraphic[] pages, DMSMessagePriority ap,
 		DMSMessagePriority rp, Integer d)
 	{
-		boolean s = DMSMessagePriority.isScheduled(rp);
-		return createMessage(m, be, pages, ap, rp, s, d);
+		boolean sch = DMSMessagePriority.isScheduled(rp);
+		return createMessage(m, be, pages, ap, rp, sch, d);
 	}
 
 	/** Create a message for the sign.
@@ -1426,7 +1426,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			else {
 				DMSMessagePriority p =
 					DMSMessagePriority.OTHER_SYSTEM;
-				return createMessageC(m, be, ebm, p, p, true,
+				boolean sch = DMSMessagePriority.isScheduled(p);
+				return createMessageC(m, be, ebm, p, p, sch,
 					null);
 			}
 		} else
@@ -1439,16 +1440,16 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param pages Pre-rendered graphics for all pages.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
-	 * @param s Scheduled flag.
+	 * @param sch Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMessage(String m, boolean be,
 		BitmapGraphic[] pages, DMSMessagePriority ap,
-		DMSMessagePriority rp, boolean s, Integer d)
+		DMSMessagePriority rp, boolean sch, Integer d)
 	{
 		BitmapGraphic[] bmaps = copyBitmaps(pages);
 		if (bmaps != null)
-			return createMessageB(m, be, bmaps, ap, rp, s, d);
+			return createMessageB(m, be, bmaps, ap, rp, sch, d);
 		else
 			return null;
 	}
@@ -1488,14 +1489,14 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param pages Pre-rendered graphics for all pages.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
-	 * @param s Scheduled flag.
+	 * @param sch Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMessageB(String m, boolean be,
 		BitmapGraphic[] pages, DMSMessagePriority ap,
-		DMSMessagePriority rp, boolean s, Integer d)
+		DMSMessagePriority rp, boolean sch, Integer d)
 	{
-		return createMessage(m, be, encodeBitmaps(pages), ap, rp, s, d);
+		return createMessage(m, be, encodeBitmaps(pages), ap, rp,sch,d);
 	}
 
 	/** Create a new sign message.
@@ -1504,18 +1505,18 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param b Message bitmaps (Base64).
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
-	 * @param s Scheduled flag.
+	 * @param sch Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMessage(String m, boolean be, String b,
-		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
+		DMSMessagePriority ap, DMSMessagePriority rp, boolean sch,
 		Integer d)
 	{
-		SignMessage esm = SignMessageHelper.find(m, b, ap, rp, s, d);
+		SignMessage esm = SignMessageHelper.find(m, b, ap, rp, sch, d);
 		if (esm != null)
 			return esm;
 		else
-			return createMessageC(m, be, b, ap, rp, s, d);
+			return createMessageC(m, be, b, ap, rp, sch, d);
 	}
 
 	/** Create a new sign message (C version).
