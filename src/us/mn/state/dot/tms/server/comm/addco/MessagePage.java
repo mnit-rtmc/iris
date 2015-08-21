@@ -80,7 +80,7 @@ public class MessagePage {
 	private BitmapGraphic createBitmap(DMSImpl dms, String ms) {
 		try {
 			BitmapGraphic[] bmaps = DMSHelper.createBitmaps(dms,ms);
-			if (bmaps.length > 0)
+			if (bmaps != null && bmaps.length > 0)
 				return bmaps[0];
 		}
 		catch (InvalidMessageException e) {
