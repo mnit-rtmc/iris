@@ -93,7 +93,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">19 Aug 2015</div>
+<div id="stamp">21 Aug 2015</div>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
 
@@ -1810,7 +1810,7 @@ FIXME
 	    <td>IRIS-only</td>
 	</tr>
 	<tr>
-	    <td>[tz<i>{o,c,p}</i>,<i>{tzid_0},</i>…<i>{tzid_n}</i>]</td>
+	    <td>[tz<i>{p,o,c}</i>,<i>{tz0},</i>…<i>{tzn}</i>]</td>
 	    <td><a href="#tolling">Toll Zone</a></td>
 	    <td>IRIS-only</td>
 	</tr>
@@ -2118,15 +2118,14 @@ FIXME
 <h4>Toll Zones</h4>
 <p>
 	A toll zone is a segment of roadway between two stations.
-	Multiple zones may overlap if necessary.
 	Select the <span class="menu">View ➔ Lane Use ➔ Toll Zones</span>
 	menu item to display the Toll Zone form.
 	All HOT lane detectors between the starting station and ending station
-	are used to calculate the toll (not including the starting station).
-	Every 3 minutes, a toll is calculated for each toll zone using data
-	from the most recent 6 minutes.
-	The toll is based on the highest density recorded among the HOT lane
-	detectors in the zone.
+	can be used to calculate the toll.
+	Every 3 minutes, tolls are calculated using data from the most recent 6
+	minutes.
+	Within a zone, each station has an associated toll, based on the highest
+	density recorded among HOT lane detectors downstream of that station.
 </p>
 <div class="label">p = α ⋅ k <sup>β</sup>, where α = 0.05932 and β = 1.156</div>
 <p>
@@ -2134,29 +2133,36 @@ FIXME
 </p>
 <h4>Pricing on DMS</h4>
 <p>
-	A DMS can display pricing information at the beginning of a toll zone.
+	A DMS can display pricing information for toll zones.
 	This is accomplished using an IRIS-specific <a href="#multi">MULTI</a>
 	tag.
-	The tag has two or more parameters.
-	The first incidates the tolling mode, and must be "o", "c" or "p".
-	These indicate that the toll zone is <i>open</i>, <i>closed</i>, or
-	<i>priced</i>, respectively.
+	The tag has two or more parameters, separated by commas.
+	The first parameter is the tolling mode, and must be "p", "o" or "c".
+	These indicate <i>priced</i>, <i>open</i> or <i>closed</i>,
+	respectively.
 	The second parameter is the (first) toll zone ID.
 	Additional toll zone IDs may be provided; the price will be the sum of
 	prices for all specified toll zones.
-	If the first parameter is "o", the MULTI tag will be replaced with the
-	string "OPEN".
-	For "c", the string "CLOSED" will be used.
-	For "p", the calculated price will be displayed in dollars and cents,
-	for example "2.75".
+	The tolls will be based on the first station downstream of the DMS.
+	Two <a href="#system_attributes">system attributes</a>,
+	toll_min_dollars and toll_max_dollars, limit the calculated price.
+</p>
+<p>
+	If the tolling mode is <i>priced</i>, the MULTI tag will be replaced
+	with the calculated price, in dollars and cents, for example "2.75".
+	For <i>open</i> and <i>closed</i> modes, the MULTI tag will be replaced
+	with an empty string.
+	To display an associated message in these modes, add "OPEN" or "CLOSED"
+	after the MULTI tag.
 </p>
 <p>
 	Price events are logged when a message is sent to a DMS, and again when
 	the message is verified.
 	The price event includes the date and time, toll zone, tolling mode
-	(open, closed, pricing), price and sent / verified status.
-	For "p", the price as calculated is logged.
-	For "o" or "c", a price of 0 is logged.
+	(<i>priced</i>, <i>open</i>, <i>closed</i>), price and sent / verified
+	status.
+	In <i>priced</i> mode, the displayed price is logged.
+	For <i>open</i> or <i>closed</i>, a price of 0 is logged.
 </p>
 <h4>Tag Readers</h4>
 <p>
