@@ -1332,16 +1332,31 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 
 <h3 id="controllers">Controllers</h3>
 <p>
-	After a comm link has been created, a <b>controller</b> must be
-	associated with it.
+	A <b>controller</b> is an end-point for a <a href="#comm_links">comm
+	link</a>.
+	They are managed with the comm link interface (found at
+	<span class="menu">View ➔ Maintenance ➔ Comm Links</span> in the menu).
+	Each controller can have one or more associated <a href="#devices">
+	devices</a>, depending on the protocol.
+	Sometimes a controller represents a separate physical "box", which is
+	connected to devices, and other times the controller may be embedded
+	within the device.
+	In any case, IRIS requires a controller for any communication to a
+	device.
+	Controllers can be assigned to a <b>cabinet</b>, which has location
+	information, to allow displaying on a map.
+</p>
+
+<h4 id="drop_address">Drop Address</h4>
+<p>
 	Some protocols support <b>multi-drop</b> addressing, and others are
 	<b>single-drop</b> only.
 	Multi-drop addressing allows multiple controllers to share the same
 	comm link.
+	It is typically used with serial communication protocols.
 	Each controller is assigned a unique (to the comm link) drop address,
 	which is used to route all messages sent to the controller.
-	Controllers can be assigned to a <b>cabinet</b>, which has location
-	information, to allow displaying on a map.
+	For single-drop protocols, the drop address is ignored.
 </p>
 
 <h4 id="io_pins">I/O Pins</h4>
