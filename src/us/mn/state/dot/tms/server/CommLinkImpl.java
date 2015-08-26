@@ -345,7 +345,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			poller = DevicePollerFactory.create(name, protocol,uri);
 			poller.setTimeout(timeout);
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			closePoller();
 			setStatusNotify("I/O error: " + e.getMessage());
 		}
@@ -362,20 +362,16 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Set all controllers to a failed status */
-	private void failControllers() {
-		synchronized (controllers) {
-			for (ControllerImpl c: controllers.values())
-				c.setFailed(true);
-		}
+	private synchronized void failControllers() {
+		for (ControllerImpl c: controllers.values())
+			c.setFailed(true);
 	}
 
 	/** Poll all controllers */
-	private void pollControllers() {
-		synchronized (controllers) {
-			for (ControllerImpl c: controllers.values()) {
-				if (c.isActive())
-					c.pollDevices();
-			}
+	private synchronized void pollControllers() {
+		for (ControllerImpl c: controllers.values()) {
+			if (c.isActive())
+				c.pollDevices();
 		}
 	}
 
@@ -400,24 +396,18 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		new TreeMap<Integer, ControllerImpl>();
 
 	/** Put a controller on the link */
-	public void putController(int d, ControllerImpl c)
+	public synchronized void putController(int d, ControllerImpl c)
 		throws ChangeVetoException
 	{
-		synchronized(controllers) {
-			if(controllers.containsKey(d)) {
-				throw new ChangeVetoException("Drop " + d +
-					" exists");
-			}
-			controllers.put(d, c);
-		}
+		if (controllers.containsKey(d))
+			throw new ChangeVetoException("Drop " + d + " exists");
+		controllers.put(d, c);
 	}
 
 	/** Pull a controller from the link */
-	public void pullController(ControllerImpl c) {
+	public synchronized void pullController(ControllerImpl c) {
 		Integer d = new Integer(c.getDrop());
-		synchronized(controllers) {
-			controllers.remove(d);
-		}
+		controllers.remove(d);
 	}
 
 	/** Check if a modem is required for the link */
