@@ -31,6 +31,7 @@
   <div id="basic_setup_div">
     <h3><a href="#client_properties">Client Properties</a></h3>
     <h3><a href="#user_properties">User Properties</a></h3>
+    <h3><a href="#edit_mode">Edit Mode</a></h3>
     <h3><a href="#system_attributes">System Attributes</a></h3>
     <h3><a href="#users_and_roles">Users and Roles</a></h3>
     <h3><a href="#mapping">Mapping</a></h3>
@@ -584,6 +585,20 @@
 	but all other properties will be left unchanged.
 </p>
 
+<h3 id="edit_mode">Edit Mode</h3>
+<p>
+	There is an <b>edit mode</b> toggle button on the lower-right corner of
+	the IRIS client.
+	When the edit mode is <b>OFF</b>, all configuration changes will be
+	disallowed.
+	This feature prevents administrators from accidentally modifying the
+	system while looking up information.
+	It is recommended to only turn the edit mode <b>ON</b> while updating
+	the system configuration.
+	Note: edit mode does not grant any capabilities which are not already
+	associated with the <a href="#users_and_roles">user's role</a>.
+</p>
+
 <h3 id="system_attributes">System Attributes</h3>
 <p>
 	A <b>system attribute</b> is a configurable value which can be used to
@@ -605,7 +620,7 @@
 	described in more detail below.
 </p>
 
-<h4 id="system_attributes">map_segment_max_meters</h4>
+<h4>map_segment_max_meters</h4>
 <p>
 	This is used for two distinct purposes: 1) specifying the maximum
 	distance between adjacent stations to draw segments on the map and
@@ -2052,16 +2067,16 @@ FIXME
 
 <h3 id="alarms">Alarms</h3>
 <p>
-	An alarm is a simple device triggered by an event. 
-	The event might be an equipment failure, high temperature, or low 
+	An alarm is a simple device triggered by an event.
+	The event might be an equipment failure, high temperature, or low
 	voltage in a field controller.
-	Alarms can be monitored to help maintain field devices. 
-	Device drivers trigger alarms based on field controller states, 
-	information read from controllers (e.g. voltages), etc. 
+	Alarms can be monitored to help maintain field devices.
+	Device drivers trigger alarms based on field controller states,
+	information read from controllers (e.g. voltages), etc.
 	Users can view the status of alarms on the Alarm Form. The Status
-	Column indicates the state of each alarm, which can be Clear or 
+	Column indicates the state of each alarm, which can be Clear or
 	Triggered.
-	Alarms are created using the Alarm Form and can only be created for 
+	Alarms are created using the Alarm Form and can only be created for
 	controllers using a protocol driver that generate alarms.
 	For example, the Mn/DOT ramp meter drivers.
 </p>
@@ -2413,10 +2428,10 @@ FIXME
 
 <h3 id="contributing">Contributing to the Admin Guide</h3>
 <p>
-	Please format text so there is a newline after each sentence. 
-	This makes patches less cluttered. 
+	Please format text so there is a newline after each sentence.
+	This makes patches less cluttered.
 	Also, line length should be 80 characters or less.
-	When patch files are submitted directly, using a .patch file 
+	When patch files are submitted directly, using a .patch file
 	extension is preferred.
 </p>
 
@@ -2477,77 +2492,66 @@ FIXME
 <h3 id="adddms">Create a DMS, Comm Link, and Controller</h3>
 <p>
 <ol>
-<li>
-Make sure edit mode is on.
+<li>Make sure <a href="#edit_mode">edit mode</a> is <b>ON</b>.</li>
+<li>Create the new DMS
+    <ul>
+	<li>Select the <span class="menu">View ➔ Message Signs ➔ DMS
+	    </span> menu item to display the DMS form.</li>
+	<li>Type the name of the new DMS in the edit field at the bottom
+	    of the form and press the Create button.</li>
+	<li>Find the new DMS in the data table and select it.</li>
+	<li>Click the Properties button and the DMS Properties Form
+	    will appear.</li>
+	<li>On the Location Tab specify the road and location of the
+	    physical DMS.</li>
+	<li>On the Messages Tab select the default DMS font.</li>
+	<li>Close the DMS Properties form.</li>
+    </ul>
 </li>
-<li>
-	Create the new DMS
-	<ul>
-		<li>Open the DMS Form: click View / Message Signs / 
-			DMS</li>
-		<li>Type the name of the new DMS in the edit field
-			at the bottom of the form and press the Create 
-			button.</li>
-		<li>Find the new DMS in the data table and select it.</li>
-		<li>Click the Properties button and the DMS Properties Form 
-			will appear.</li>
-		<li>On the Location Tab specify the road and location of the
-			physical DMS.</li>
-		<li>On the Messages Tab select the default DMS font.</li>
-		<li>Close the DMS Properties form.</li>
-	</ul>
+<li>Create a new comm link
+    <ul>
+	<li>Select the <span class="menu">View ➔ Maintenance ➔ Comm Links
+	    </span> menu item to display the Comm Links form.</li>
+	<li>Type the name of the new comm link in the edit field in the middle
+	    of the form and press the Create button.</li>
+	<li>Find the newly created comm link in the data table in the top of the
+	    form and select it.</li>
+	<li>Enter a more complete description in the Description field as
+	    needed.</li>
+	<li>Enter the controller URI in the URI column, e.g.
+	    "tcp://10.20.30.40:1234" or "udp://10.20.30.40:1234" for signs that
+	    use UDP.</li>
+	<li>Select the desired protocol.</li>
+	<li>Enter the desired polling period and timeout.</li>
+	<li>Enable the Comm Link by clicking the Enabled Checkbox.</li>
+    </ul>
 </li>
-<li>
-	Create a new comm link
-	<ul>
-		<li>Open the Comm Link Form: click View / Maintenance / 
-			Comm Links</li>
-		<li>Type the name of the new comm link in the edit field
-			in the middle of the form and press the Create 
-			button.</li>
-		<li>Find the newly created comm link in the data table in
-			the top of the form and select it.</li>
-		<li>Enter a more complete description in the Description
-			field as needed.</li>
-		<li>Enter the controller URI in the URI column, e.g. 
-			"tcp://10.20.30.40:1234" or "udp://10.20.30.40:1234"
-			for signs that use UDP.</li>
-		<li>Select the desired protocol.</li>
-		<li>Enter the desired polling period and timeout.</li>
-		<li>Enable the Comm Link by clicking the Enabled Checkbox.</li>
-	</ul>
+<li>Create a new controller associated with the comm link
+    <ul>
+	<li>In the Comm Link Form with the desired comm link selected, click the
+	    Create button on the bottom of the form.</li>
+	<li>Select the new controller in the lower data table and click the
+	    Properties Button. The Controller Form should appear.</li>
+	<li>On the Controller Form Setup Tab, change the condition to active.
+	</li>
+	<li>On the Cabinet Tab specify the DMS cabinet location and style.</li>
+	<li>On the Controller Form IO Tab, for Pin=1, select DMS in the Type
+	    column. In the Device column, select the name of the DMS created
+	    above.</li>
+    </ul>
 </li>
-<li>
-	Create a new controller associated with the comm link
-	<ul>
-		<li>In the Comm Link Form with the desired comm link 
-			selected, click the Create button on the bottom 
-			of the form.</li>
-		<li>Select the new controller in the lower data table and 
-			click the Properties Button. The Controller Form 
-			should appear.</li>
-		<li>On the Controller Form Setup Tab, change the condition 
-			to active.</li>
-		<li>On the Cabinet Tab specify the DMS cabinet location and
-			style.</li>
-		<li>On the Controller Form IO Tab, for Pin=1, select DMS in
-			the Type column. In the Device column, select the
-			name of the DMS created above.</li>
-	</ul>
-</li>
-<li>
-	View DMS Status
-	<ul>
-		<li>If the comm link is enabled (per above) and the controller
-			condition is active (per above), the number of 
-			successful and failed operations is visible in 
-			real-time on the Controller's Status Tab.</li>
-		<li>View the DMS configuration on the DMS Form Configuration 
-			tab. The Query Configuration button on that tab 
-			manually queries the sign.</li>
-		<li>The Status Tab on the DMS Form shows additional status
-			information.</li>
-	</ul>
+<li>View DMS Status
+    <ul>
+	<li>If the comm link is enabled (per above) and the controller condition
+	    is active (per above), the number of successful and failed
+	    operations is visible in real-time on the Controller's Status Tab.
+	</li>
+	<li>View the DMS configuration on the DMS Form Configuration tab. The
+	    Query Configuration button on that tab manually queries the sign.
+	</li>
+	<li>The Status Tab on the DMS Form shows additional status information.
+	</li>
+    </ul>
 </li>
 </ol>
 </p>
@@ -2555,74 +2559,63 @@ Make sure edit mode is on.
 <h3 id="createplan">Create a Plan to Activate DMS Messages</h3>
 <p>
 <ol>
-<li>
-Make sure edit mode is on.
+<li>Make sure <a href="#edit_mode">edit mode</a> is <b>ON</b>.</li>
+<li>Select the <span class="menu">View ➔ Plans and Schedules</span> menu item to
+    display the Plans and Schedules form.</li>
+<li>Create a Phase (if it doesn't exist already)
+    <ul>
+	<li>Click the Plan Phases Tab</li>
+	<li>Type the name of the new phase, e.g. "msg_on"</li>
+	<li>Press the Create Button</li>
+	<li>The new Phase should appear in the upper table</li>
+    </ul>
 </li>
-<li>
-Open the Plans and Schedules Form: click the View menu / Plans and Schedules
+<li>Create an Action Plan
+    <ul>
+	<li>Click the "Action Plans" tab</li>
+	<li>Select the phase "msg_on" in the Default Phase combobox.</li>
+	<li>Type the name of the new Action Plan in the edit field,
+	    e.g. "slick_roads"</li>
+	<li>Press the Create Button</li>
+	<li>The new Plan should appear in the lower table</li>
+    </ul>
 </li>
-<li>
-	Create a Phase (if it doesn't exist already)
-	<ul>
-		<li>Click the Plan Phases Tab</li>
-		<li>Type the name of the new phase, e.g. "msg_on"</li>
-		<li>Press the Create Button</li>
-		<li>The new Phase should appear in the upper table</li>
-	</ul>
+<li>Create the DMS Actions
+    <ul>
+	<li>Click on the Action Plan just created (e.g. slick_roads)</li>
+	<li>Click the DMS Actions tab</li>
+	<li>In the edit field on the bottom of the form, type the name of an
+	    existing sign group</li>
+	<li>Press the Create button</li>
+	<li>The new DMS Action should appear in the table</li>
+	<li>Click on the "Quick Message" column in the DMS Action just created
+	</li>
+	<li>Specify the name of an existing quick message to send to the sign
+	</li>
+	<li>Repeat the above DMS Actions steps as many times as desired to send
+	    a message to additional sign groups.</li>
+    </ul>
 </li>
-<li>
-	Create an Action Plan
-	<ul>
-		<li>Click the "Action Plans" tab</li>
-		<li>Select the phase "msg_on" in the Default Phase 
-			combobox.</li>
-		<li>Type the name of the new Action Plan in the edit field, 
-			e.g. "slick_roads"</li>
-		<li>Press the Create Button</li>
-		<li>The new Plan should appear in the lower table</li>
-	</ul>
-</li>
-<li>
-	Create the DMS Actions
-	<ul>
-		<li>Click on the Action Plan just created 
-			(e.g. slick_roads)</li>
-		<li>Click the DMS Actions tab</li>
-		<li>In the edit field on the bottom of the form, type the 
-			name of an existing sign group</li>
-		<li>Press the Create button</li>
-		<li>The new DMS Action should appear in the table</li>
-		<li>Click on the "Quick Message" column in the DMS Action 
-			just created</li>
-		<li>Specify the name of an existing quick message to send 
-			to the sign</li>
-		<li>Repeat the above DMS Actions steps as many times as 
-			desired to send a message to additional sign 
-			groups.</li>
-	</ul>
-</li>
-<li>
-	Activate the messages on the signs
-	<ul>
-		<li>On the Action Plans tab, click the desired 
-			action plan.</li>
-		<li>Click the "Active" checkbox.</li>
-		<li>Signs are activated and deactivated every 30 seconds 
-			(at :29 and :59), so wait at least 30 seconds for the 
-			messages to appear or disappear.</li>
-		<li>Unselect the Active checkbox to blank the signs.</li>
-	</ul>
+<li>Activate the messages on the signs
+    <ul>
+	<li>On the Action Plans tab, click the desired action plan.</li>
+	<li>Click the "Active" checkbox.</li>
+	<li>Signs are activated and deactivated every 30 seconds (at :29 and
+	    :59), so wait at least 30 seconds for the messages to appear or
+	    disappear.</li>
+	<li>Unselect the Active checkbox to blank the signs.</li>
+    </ul>
 </li>
 </ol>
 Notes:
-	<ul>
-		<li>Before running through these steps, create the Sign 
-			Groups and Quick Messages desired.</li>
-		<li>The quick messages that the Action Plan references don't 
-			have to be assigned to a Sign Group.</li>
-		<li>Use the dms debug log to diagnose problems with scheduled 
-			messages not appearing on signs.</li>
-	</ul>
+<ul>
+	<li>Before running through these steps, create the Sign Groups and Quick
+	    Messages desired.</li>
+	<li>The quick messages that the Action Plan references don't have to be
+	    assigned to a Sign Group.</li>
+	<li>Use the dms debug log to diagnose problems with scheduled messages
+	    not appearing on signs.</li>
+</ul>
 
 </p>
 </div>
