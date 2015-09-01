@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,19 +33,20 @@ import java.nio.ByteBuffer;
 public class DatagramMessenger extends Messenger {
 
 	/** Address to connect */
-	protected final SocketAddress address;
+	private final SocketAddress address;
 
 	/** UDP socket */
-	protected DatagramSocket socket;
+	private DatagramSocket socket;
 
 	/** Receive timeout (ms) */
-	protected int timeout = 750;
+	private int timeout = 750;
 
 	/** Set the receive timeout */
+	@Override
 	public void setTimeout(int t) throws IOException {
 		timeout = t;
 		DatagramSocket s = socket;
-		if(s != null)
+		if (s != null)
 			s.setSoTimeout(t);
 	}
 
@@ -55,6 +56,7 @@ public class DatagramMessenger extends Messenger {
 	}
 
 	/** Open the datagram messenger */
+	@Override
 	public void open() throws IOException {
 		socket = new DatagramSocket();
 		socket.setSoTimeout(timeout);
@@ -64,9 +66,10 @@ public class DatagramMessenger extends Messenger {
 	}
 
 	/** Close the datagram messenger */
+	@Override
 	public void close() {
 		DatagramSocket s = socket;
-		if(s != null) {
+		if (s != null) {
 			s.disconnect();
 			s.close();
 			socket = null;
@@ -76,66 +79,69 @@ public class DatagramMessenger extends Messenger {
 	}
 
 	/** Output stream for sending datagrams */
-	protected class DatagramOutputStream extends OutputStream {
+	private class DatagramOutputStream extends OutputStream {
 
 		/** Buffer for assembling packets to send */
-		protected final ByteBuffer buffer = ByteBuffer.allocate(1024);
+		private final ByteBuffer buffer = ByteBuffer.allocate(1024);
 
 		/** Packet to send */
-		protected final DatagramPacket packet =
+		private final DatagramPacket packet =
 			new DatagramPacket(buffer.array(), 1024);
 
 		/** Write a byte to the buffer */
+		@Override
 		public void write(int b) {
 			buffer.put((byte)b);
 		}
 
 		/** Flush packet to datagram */
+		@Override
 		public void flush() throws IOException {
 			packet.setLength(buffer.position());
 			buffer.clear();
 			DatagramSocket s = socket;
-			if(s != null)
+			if (s != null)
 				s.send(packet);
 		}
 	}
 
 	/** Input stream for receiving datagrams */
-	protected class DatagramInputStream extends InputStream {
+	private class DatagramInputStream extends InputStream {
 
 		/** Buffer for storing received datagram */
-		protected final ByteBuffer buffer = ByteBuffer.allocate(1024);
+		private final ByteBuffer buffer = ByteBuffer.allocate(1024);
 
 		/** Packet to receive */
-		protected final DatagramPacket packet =
+		private final DatagramPacket packet =
 			new DatagramPacket(buffer.array(), 1024);
 
 		/** Create a new datagram input stream */
-		protected DatagramInputStream() {
+		private DatagramInputStream() {
 			// no data in buffer before a packet is received
 			buffer.limit(0);
 		}
 
 		/** Read a byte from a received datagram */
+		@Override
 		public int read() throws IOException {
 			try {
 				return buffer.get() & 0xFF;
 			}
-			catch(BufferUnderflowException e) {
+			catch (BufferUnderflowException e) {
 				receivePacket();
 				try {
 					return buffer.get() & 0xFF;
 				}
-				catch(BufferUnderflowException e2) {
+				catch (BufferUnderflowException e2) {
 					throw new SocketTimeoutException("DIS");
 				}
 			}
 		}
 
 		/** Recvie and buffer a datagram */
-		protected void receivePacket() throws IOException {
+		private void receivePacket() throws IOException {
 			DatagramSocket s = socket;
-			if(s != null) {
+			if (s != null) {
 				packet.setLength(1024);
 				s.receive(packet);
 				buffer.position(0);
@@ -144,13 +150,14 @@ public class DatagramMessenger extends Messenger {
 		}
 
 		/** Get the number of available bytes */
+		@Override
 		public int available() {
 			return buffer.remaining();
 		}
 
 		/** Skip the given number of bytes in the input stream */
 		public void skip(int b) {
-			if(b >= buffer.remaining()) {
+			if (b >= buffer.remaining()) {
 				buffer.clear();
 				buffer.limit(0);
 			} else
