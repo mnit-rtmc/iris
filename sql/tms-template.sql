@@ -2135,6 +2135,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 29	Cohu PTZ
 30	DR-500
 31	ADDCO
+32	TransCore E6
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;
@@ -2251,7 +2252,7 @@ camera_util_panel_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.25.0
+database_version	4.26.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dms_aws_enable	false
