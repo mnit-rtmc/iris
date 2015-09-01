@@ -29,8 +29,9 @@ import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.server.comm.cohuptz.CohuPTZPoller;
 import us.mn.state.dot.tms.server.comm.dinrelay.DinRelayPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
-import us.mn.state.dot.tms.server.comm.infinova.InfinovaMessenger;
+import us.mn.state.dot.tms.server.comm.e6.E6Poller;
 import us.mn.state.dot.tms.server.comm.g4.G4Poller;
+import us.mn.state.dot.tms.server.comm.infinova.InfinovaMessenger;
 import us.mn.state.dot.tms.server.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.server.comm.mndot.MndotPoller;
 import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
@@ -131,6 +132,8 @@ public class DevicePollerFactory {
 			return createCohuPTZPoller();
 		case ADDCO:
 			return createAddcoPoller();
+		case TRANSCORE_E6:
+			return createE6Poller();
 		default:
 			throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -329,5 +332,10 @@ public class DevicePollerFactory {
 	private DevicePoller createAddcoPoller() throws IOException {
 		return new AddcoPoller(name, new AddcoMessenger(
 			createSocketMessenger(TCP)));
+	}
+
+	/** Create a TransCore E6 poller */
+	private DevicePoller createE6Poller() throws IOException {
+		return new E6Poller(name, createSocketMessenger(UDP));
 	}
 }

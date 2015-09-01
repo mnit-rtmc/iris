@@ -120,7 +120,10 @@ public enum CommProtocol {
 	DR_500("DR-500"),
 
 	/** ADDCO NodeComm sign control (31) */
-	ADDCO("ADDCO");
+	ADDCO("ADDCO"),
+
+	/** TransCore E6 tag reader (32) */
+	TRANSCORE_E6("TransCore E6");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {

@@ -158,24 +158,34 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Ensure the thread is started */
 	private void ensureStarted() {
-		if(shouldStart())
-			thread.start();
+		if (shouldStart())
+			startPolling();
 	}
 
 	/** Should the thread be started? */
 	private synchronized boolean shouldStart() {
-		if(state == ThreadState.NOT_STARTED) {
+		if (state == ThreadState.NOT_STARTED) {
 			setThreadState(ThreadState.STARTING);
 			return true;
 		} else
 			return false;
 	}
 
+	/** Start polling */
+	protected void startPolling() {
+		thread.start();
+	}
+
+	/** Stop polling */
+	protected void stopPolling() {
+		addOperation(new KillThread<T>());
+	}
+
 	/** Destroy the poller */
 	@Override
 	public final void destroy() {
 		if (isConnected())
-			addOperation(new KillThread<T>());
+			stopPolling();
 	}
 
 	/** Open messenger and perform operations */
