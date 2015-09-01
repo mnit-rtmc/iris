@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,10 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * @author Douglas Lau
  */
 abstract public class Messenger {
+
+	/** Exception thrown when messenger is closed */
+	static private final EOFException CLOSED = new EOFException(
+		"MESSENGER CLOSED");
 
 	/** Input stream */
 	protected InputStream input;
@@ -60,8 +64,8 @@ abstract public class Messenger {
 		throws IOException
 	{
 		InputStream is = getInputStream(path);
-		if(is == null)
-			throw new EOFException("MESSENGER CLOSED");
+		if (is == null)
+			throw CLOSED;
 		else
 			return input;
 	}
@@ -90,8 +94,8 @@ abstract public class Messenger {
 		throws IOException
 	{
 		OutputStream os = getOutputStream();
-		if(os == null)
-			throw new EOFException("MESSENGER CLOSED");
+		if (os == null)
+			throw CLOSED;
 		else
 			return os;
 	}
@@ -113,9 +117,9 @@ abstract public class Messenger {
 	/** Drain any bytes from the input stream */
 	public void drain() throws IOException {
 		InputStream is = input;
-		if(is != null) {
+		if (is != null) {
 			int a = is.available();
-			if(a > 0)
+			if (a > 0)
 				is.skip(a);
 		}
 	}
