@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.e6;
 
+import java.io.InputStream;
+import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
@@ -28,22 +30,25 @@ import us.mn.state.dot.tms.server.comm.TagReaderPoller;
  */
 public class E6Poller extends MessagePoller implements TagReaderPoller {
 
+	/** Local port */
+	static public final int LOCAL_PORT = 58001;
+
 	/** E6 debug log */
 	static private final DebugLog E6_LOG = new DebugLog("e6");
 
-	/** Thread group for all response threads */
-	static private final ThreadGroup RESP = new ThreadGroup("Resp");
+	/** Thread group for all receive threads */
+	static private final ThreadGroup RECV = new ThreadGroup("Recv");
 
-	/** Thread to receive responses */
+	/** Thread to receive packets */
 	private final Thread r_thread;
 
 	/** Create a new E6 poller */
 	public E6Poller(String n, Messenger m) {
 		super(n, m);
- 		r_thread = new Thread(RESP, "Resp: " + n) {
+ 		r_thread = new Thread(RECV, "Recv: " + n) {
 			@Override
 			public void run() {
-				receiveResponses();
+				receivePackets();
 			}
 		};
 		r_thread.setDaemon(true);
@@ -59,16 +64,26 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** Stop polling */
 	@Override
 	protected void stopPolling() {
+		r_thread.interrupt();
 		super.stopPolling();
-		// FIXME: kill r_thread
 	}
 
-	/** Receive responses */
-	private void receiveResponses() {
-		while (true) {
-			// FIXME
-			break;
+	/** Receive packets */
+	private void receivePackets() {
+		try {
+			while (!r_thread.isInterrupted()) {
+				receivePacket();
+			}
 		}
+		catch (IOException e) {
+			setStatus(exceptionMessage(e));
+		}
+	}
+
+	/** Receive one packet */
+	private void receivePacket() throws IOException {
+		InputStream is = messenger.getInputStream("");
+		// FIXME
 	}
 
 	/** Check if a drop address is valid */

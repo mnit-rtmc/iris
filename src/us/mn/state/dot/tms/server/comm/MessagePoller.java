@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,9 +32,9 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	implements DevicePoller
 {
 	/** Get a message describing an IO exception */
-	static private String exceptionMessage(IOException e) {
+	static protected String exceptionMessage(IOException e) {
 		String m = e.getMessage();
-		if(m != null && m.length() > 0)
+		if (m != null && m.length() > 0)
 			return m;
 		else
 			return e.getClass().getSimpleName();
@@ -84,6 +84,11 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Poller status */
 	private String status = null;
+
+	/** Set the poller status */
+	protected void setStatus(String s) {
+		status = s;
+	}
 
 	/** Get the poller status */
 	@Override
@@ -196,14 +201,14 @@ abstract public class MessagePoller<T extends ControllerProperty>
 			performOperations();
 			setThreadState(ThreadState.CLOSING);
 		}
-		catch(HangUpException e) {
-			status = exceptionMessage(e);
+		catch (HangUpException e) {
+			setStatus(exceptionMessage(e));
 			hung_up = true;
 		}
-		catch(IOException e) {
-			status = exceptionMessage(e);
+		catch (IOException e) {
+			setStatus(exceptionMessage(e));
 		}
-		catch(RuntimeException e) {
+		catch (RuntimeException e) {
 			e.printStackTrace();
 		}
 		finally {

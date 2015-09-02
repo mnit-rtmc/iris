@@ -32,8 +32,11 @@ import java.nio.ByteBuffer;
  */
 public class DatagramMessenger extends Messenger {
 
-	/** Address to connect */
-	private final SocketAddress address;
+	/** Local port to bind */
+	private final Integer port;
+
+	/** Remote address to connect */
+	private final SocketAddress remote;
 
 	/** UDP socket */
 	private DatagramSocket socket;
@@ -50,19 +53,35 @@ public class DatagramMessenger extends Messenger {
 			s.setSoTimeout(t);
 	}
 
-	/** Create a new datagram messenger */
-	public DatagramMessenger(SocketAddress a) {
-		address = a;
+	/** Create a new datagram messenger.
+	 * @param p Local port (null for any).
+	 * @param ra Remote socket address. */
+	public DatagramMessenger(Integer p, SocketAddress ra) {
+		port = p;
+		remote = ra;
+	}
+
+	/** Create a new datagram messenger.
+	 * @param ra Remote socket address. */
+	public DatagramMessenger(SocketAddress ra) {
+		this(null, ra);
 	}
 
 	/** Open the datagram messenger */
 	@Override
 	public void open() throws IOException {
-		socket = new DatagramSocket();
+		socket = createSocket();
 		socket.setSoTimeout(timeout);
-		socket.connect(address);
+		socket.connect(remote);
 		input = new DatagramInputStream();
 		output = new DatagramOutputStream();
+	}
+
+	/** Create the socket */
+	private DatagramSocket createSocket() throws IOException {
+		return (port != null)
+		      ? new DatagramSocket(port)
+		      : new DatagramSocket();
 	}
 
 	/** Close the datagram messenger */

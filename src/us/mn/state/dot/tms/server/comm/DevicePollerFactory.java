@@ -336,6 +336,13 @@ public class DevicePollerFactory {
 
 	/** Create a TransCore E6 poller */
 	private DevicePoller createE6Poller() throws IOException {
-		return new E6Poller(name, createSocketMessenger(UDP));
+		try {
+			URI u = createURI(UDP);
+			return new E6Poller(name, new DatagramMessenger(
+				E6Poller.LOCAL_PORT, createSocketAddress(u)));
+		}
+		catch (URISyntaxException e) {
+			throw new IOException("INVALID URI");
+		}
 	}
 }
