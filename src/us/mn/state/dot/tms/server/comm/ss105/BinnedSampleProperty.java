@@ -156,12 +156,20 @@ public class BinnedSampleProperty extends SS105Property {
 		if(payload.length() % LANE_SAMPLE_BYTES != 0)
 			throw new ParsingException("INVALID SAMPLE SIZE");
 		int lanes = payload.length() / LANE_SAMPLE_BYTES;
-		samples = new LaneSample[lanes];
-		for(int i = 0, j = 0; i < lanes; i++) {
-			samples[i] = new LaneSample(payload.substring(
-				j, j + LANE_SAMPLE_BYTES));
+		samples = buildSamples(lanes, payload);
+	}
+
+	/** Build lane sample array */
+	private LaneSample[] buildSamples(int lanes, String payload)
+		throws IOException
+	{
+		LaneSample[] s = new LaneSample[lanes];
+		for (int i = 0, j = 0; i < lanes; i++) {
+			s[i] = new LaneSample(payload.substring(j,
+				j + LANE_SAMPLE_BYTES));
 			j += LANE_SAMPLE_BYTES;
 		}
+		return s;
 	}
 
 	/** Get a string representation of the sample data */
