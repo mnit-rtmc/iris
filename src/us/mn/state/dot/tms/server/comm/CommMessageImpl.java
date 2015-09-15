@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,12 @@ public class CommMessageImpl<T extends ControllerProperty>
 		props.add(cp);
 	}
 
+	/** Get the output stream */
+	private OutputStream getOutputStream() throws IOException {
+		ControllerImpl c = op.getController();
+		return messenger.getOutputStream(c);
+	}
+
 	/** Query the controller properties.
 	 * @throws IOException On any errors sending message or receiving
 	 *         response */
@@ -65,7 +71,7 @@ public class CommMessageImpl<T extends ControllerProperty>
 	public void queryProps() throws IOException {
 		ControllerImpl c = op.getController();
 		messenger.drain();
-		OutputStream os = messenger.getOutputStream(c);
+		OutputStream os = getOutputStream();
 		if (os != null) {
 			for (T p: props)
 				p.encodeQuery(c, os);
@@ -91,7 +97,7 @@ public class CommMessageImpl<T extends ControllerProperty>
 	public void storeProps() throws IOException {
 		ControllerImpl c = op.getController();
 		messenger.drain();
-		OutputStream os = messenger.getOutputStream(c);
+		OutputStream os = getOutputStream();
 		if (os != null) {
 			for (T p: props) {
 				logStore(p);
