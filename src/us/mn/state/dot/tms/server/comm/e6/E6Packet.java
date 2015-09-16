@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
+import us.mn.state.dot.tms.utils.HexString;
 
 /**
  * E6 packet.
@@ -111,5 +112,11 @@ public class E6Packet {
 			return data;
 		}
 		throw new ParsingException("BAD LEN: " + n_bytes);
+	}
+
+	/** Get a string representation */
+	@Override
+	public String toString() {
+		return "pkt:" + HexString.format(pkt, n_bytes, ':');
 	}
 }

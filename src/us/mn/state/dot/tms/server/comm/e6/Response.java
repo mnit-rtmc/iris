@@ -57,4 +57,12 @@ public class Response {
 	public int bits() {
 		return r_type.bits | r_status.bits | cmd_response;
 	}
+
+	/** Get a string representation */
+	@Override
+	public String toString() {
+		return "r_type=" + r_type + "," +
+		       "r_status=" + r_status + "," +
+		       "cmd_response=" + cmd_response;
+	}
 }

@@ -47,6 +47,12 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** E6 debug log */
 	static public final DebugLog E6_LOG = new DebugLog("e6");
 
+	/** Log a packet */
+	static private void log(String x, E6Packet pkt) {
+		if (E6_LOG.isOpen())
+			E6_LOG.log(x + " " + pkt.toString());
+	}
+
 	/** Transmit Packet */
 	private final E6Packet tx_pkt = new E6Packet();
 
@@ -101,6 +107,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	private void receivePacket() throws IOException {
 		synchronized (rx_pkt) {
 			rx_pkt.receive(messenger.getInputStream(""));
+			log("rx", rx_pkt);
 			// FIXME: deal with msn / csn
 			Command cmd = rx_pkt.parseCommand();
 			if (cmd.acknowledge) {
@@ -130,6 +137,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 		data[1] = (byte) (ACK.bits() << 0);
 		data[2] = rx_pkt.parseMsn();
 		tx_pkt.format(ack, data);
+		log("tx", tx_pkt);
 		tx_pkt.send(messenger.getOutputStream());
 	}
 
@@ -157,6 +165,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** Send a query packet */
 	public void sendQuery(E6Property p) throws IOException {
 		tx_pkt.format(p.queryCmd(), p.data());
+		log("tx", tx_pkt);
 		tx_pkt.send(messenger.getOutputStream());
 	}
 

@@ -70,4 +70,12 @@ public class Command {
 			b |= ACKNOWLEDGE_BIT;
 		return b;
 	}
+
+	/** Get a string representation */
+	@Override
+	public String toString() {
+		return "group=" + group + "," +
+		       "unsolicited=" + unsolicited + "," +
+		       "acknowledge=" + acknowledge;
+	}
 }

@@ -52,18 +52,27 @@ public final class HexString {
 
 	/** Format a byte array as a hexadecimal string.
 	 * @param data Array of bytes to format.
+	 * @param len Length of array.
 	 * @param delim Delimeter between each byte.
 	 * @return Formatted hexadecimal string. */
-	static public String format(byte[] data, char delim) {
+	static public String format(byte[] data, int len, char delim) {
 		StringBuilder sb = new StringBuilder();
 		if (data != null) {
-			for (int i = 0; i < data.length; i++) {
+			for (int i = 0; i < len; i++) {
 				if (i > 0)
 					sb.append(delim);
 				append(sb, data[i]);
 			}
 		}
 		return sb.toString();
+	}
+
+	/** Format a byte array as a hexadecimal string.
+	 * @param data Array of bytes to format.
+	 * @param delim Delimeter between each byte.
+	 * @return Formatted hexadecimal string. */
+	static public String format(byte[] data, char delim) {
+		return format(data, data.length, delim);
 	}
 
 	/** Format an integer as a hexadecimal string.
