@@ -47,6 +47,9 @@ abstract public class Messenger {
 	/** Set the messenger timeout */
 	abstract public void setTimeout(int t) throws IOException;
 
+	/** Get the messenger timeout */
+	abstract public int getTimeout();
+
 	/** Get the input stream.
 	 * @param path Relative path name.  Only needed for protocols which
 	 *             require it, such as HTTP.

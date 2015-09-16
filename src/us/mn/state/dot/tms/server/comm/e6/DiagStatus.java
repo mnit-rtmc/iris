@@ -15,29 +15,38 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.ControllerProperty;
-import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
- * E6 property.
+ * Diagnostic status property.
  *
  * @author Douglas Lau
  */
-abstract public class E6Property extends ControllerProperty {
+public class DiagStatus extends E6Property {
+
+	/** Diagnostic command */
+	static private final Command CMD = new Command(CommandGroup.DIAGNOSTIC,
+		false, false);
+
+	/** Command code */
+	static private final int code = 0x0001;
 
 	/** Get the query command */
-	public Command queryCmd() throws IOException {
-		throw new ProtocolException("QUERY not supported");
-	}
-
-	/** Get the store command */
-	public Command storeCmd() throws IOException {
-		throw new ProtocolException("STORE not supported");
+	@Override
+	public Command queryCmd() {
+		return CMD;
 	}
 
 	/** Get the packet data */
-	abstract public byte[] data();
+	@Override
+	public byte[] data() {
+		byte[] d = new byte[2];
+		d[0] = (byte) (code >> 8);
+		d[1] = (byte) (code >> 0);
+		return d;
+	}
 
 	/** Parse a received packet */
-	abstract public void parse(byte[] data) throws IOException;
+	public void parse(byte[] data) throws IOException {
+		// FIXME
+	}
 }

@@ -53,6 +53,12 @@ public class DatagramMessenger extends Messenger {
 			s.setSoTimeout(t);
 	}
 
+	/** Get the receive timeout */
+	@Override
+	public int getTimeout() {
+		return timeout;
+	}
+
 	/** Create a new datagram messenger.
 	 * @param p Local port (null for any).
 	 * @param ra Remote socket address. */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,6 +90,12 @@ public class ModemMessenger extends Messenger {
 		log("set timeout to " + t + " ms");
 		wrapped.setTimeout(t);
 		timeout = t;
+	}
+
+	/** Get the receive timeout */
+	@Override
+	public int getTimeout() {
+		return timeout;
 	}
 
 	/** Open the messenger */

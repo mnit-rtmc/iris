@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
@@ -28,6 +30,10 @@ import us.mn.state.dot.tms.server.comm.TagReaderPoller;
  * @author Douglas Lau
  */
 public class E6Poller extends MessagePoller implements TagReaderPoller {
+
+	/** Timeout exception */
+	static private final IOException TIMEOUT =
+		new SocketTimeoutException("TIMEOUT");
 
 	/** Local port */
 	static public final int LOCAL_PORT = 58001;
@@ -46,6 +52,9 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 
 	/** Receive Packet */
 	private final E6Packet rx_pkt = new E6Packet();
+
+	/** Waiting flag */
+	private boolean waiting = false;
 
 	/** Create a new E6 poller */
 	public E6Poller(String n, Messenger m) {
@@ -90,8 +99,65 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 
 	/** Receive one packet */
 	private void receivePacket() throws IOException {
-		rx_pkt.receive(messenger.getInputStream(""));
-		// FIXME: if op waiting, notify it; else log tag read
+		synchronized (rx_pkt) {
+			rx_pkt.receive(messenger.getInputStream(""));
+			// FIXME: deal with msn / csn
+			Command cmd = rx_pkt.parseCommand();
+			if (cmd.acknowledge) {
+				// FIXME: that's good
+				return;
+			} else
+				sendAck(cmd);
+			if (cmd.unsolicited) {
+				// FIXME: log tag read
+				return;
+			} else if (waiting) {
+				waiting = false;
+				rx_pkt.notify();
+			}
+		}
+	}
+
+	/** ACK response */
+	static private final Response ACK = new Response(
+		ResponseType.SYNCHRONOUS, ResponseStatus.CONTROL, 0);
+
+	/** Send an ack packet */
+	private void sendAck(Command cmd) throws IOException {
+		Command ack = new Command(cmd.group, false, true);
+		byte[] data = new byte[3];
+		data[0] = (byte) (ACK.bits() << 8);
+		data[1] = (byte) (ACK.bits() << 0);
+		data[2] = rx_pkt.parseMsn();
+		tx_pkt.format(ack, data);
+		tx_pkt.send(messenger.getOutputStream());
+	}
+
+	/** Wait for a response packet */
+	public void waitResponse(E6Property p) throws IOException {
+		synchronized (rx_pkt) {
+			try {
+				waiting = true;
+				try {
+					rx_pkt.wait(messenger.getTimeout());
+				}
+				catch (InterruptedException e) {
+					// doesn't matter
+				}
+				if (waiting)
+					throw TIMEOUT;
+				p.parse(rx_pkt.parseData());
+			}
+			finally {
+				waiting = false;
+			}
+		}
+	}
+
+	/** Send a query packet */
+	public void sendQuery(E6Property p) throws IOException {
+		tx_pkt.format(p.queryCmd(), p.data());
+		tx_pkt.send(messenger.getOutputStream());
 	}
 
 	/** Check if a drop address is valid */
@@ -105,7 +171,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	public void sendRequest(TagReaderImpl tr, DeviceRequest r) {
 		switch (r) {
 		case SEND_SETTINGS:
-			addOperation(new OpSendSettings(tr));
+			addOperation(new OpSendSettings(tr, this));
 			break;
 		default:
 			// Ignore other requests

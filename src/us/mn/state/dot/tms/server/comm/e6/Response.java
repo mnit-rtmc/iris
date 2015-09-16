@@ -52,4 +52,9 @@ public class Response {
 		r_status = rs;
 		cmd_response = cr & CMD_RESPONSE_BITS;
 	}
+
+	/** Get response bits */
+	public int bits() {
+		return r_type.bits | r_status.bits | cmd_response;
+	}
 }

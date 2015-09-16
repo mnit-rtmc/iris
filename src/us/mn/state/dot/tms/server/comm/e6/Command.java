@@ -60,4 +60,14 @@ public class Command {
 		unsolicited = uns;
 		acknowledge = ack;
 	}
+
+	/** Get command bits */
+	public int bits() {
+		int b = group.bits;
+		if (unsolicited)
+			b |= UNSOLICITED_BIT;
+		if (acknowledge)
+			b |= ACKNOWLEDGE_BIT;
+		return b;
+	}
 }

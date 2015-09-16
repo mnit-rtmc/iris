@@ -27,8 +27,8 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpSendSettings extends OpE6 {
 
 	/** Create a new "send settings" operation */
-	public OpSendSettings(TagReaderImpl tr) {
-		super(PriorityLevel.DOWNLOAD, tr);
+	public OpSendSettings(TagReaderImpl tr, E6Poller ep) {
+		super(PriorityLevel.DOWNLOAD, tr, ep);
 	}
 
 	/** Create the second phase of the operation */
@@ -44,6 +44,9 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
+			DiagStatus stat = new DiagStatus();
+			poller.sendQuery(stat);
+			poller.waitResponse(stat);
 			// FIXME
 			return null;
 		}

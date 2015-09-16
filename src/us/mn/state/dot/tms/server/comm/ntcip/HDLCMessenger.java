@@ -42,6 +42,12 @@ public class HDLCMessenger extends Messenger {
 		wrapped.setTimeout(t);
 	}
 
+	/** Get the receive timeout */
+	@Override
+	public int getTimeout() {
+		return wrapped.getTimeout();
+	}
+
 	/** Open the messenger */
 	@Override
 	public void open() throws IOException {

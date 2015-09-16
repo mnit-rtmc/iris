@@ -35,9 +35,13 @@ abstract public class OpE6 extends OpDevice<E6Property> {
 	/** Tag reader device */
 	protected final TagReaderImpl tag_reader;
 
+	/** Poller */
+	protected final E6Poller poller;
+
 	/** Create a new E6 operation */
-	protected OpE6(PriorityLevel p, TagReaderImpl tr) {
+	protected OpE6(PriorityLevel p, TagReaderImpl tr, E6Poller ep) {
 		super(p, tr);
 		tag_reader = tr;
+		poller = ep;
 	}
 }
