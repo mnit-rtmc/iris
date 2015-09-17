@@ -381,7 +381,7 @@ public class IrisClient extends JFrame {
 				sp.setMapExtent(me);
 		} else {
 			System.err.println("Warning: initial map extent " +
-				en + "does not exist");
+				en + " does not exist");
 		}
  	}
 
