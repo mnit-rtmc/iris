@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -109,6 +109,12 @@ class Message implements CommMessage
 	/** get completion time in MS */
 	public int getCompletionTimeMS() {
 		return(m_completiontimeMS);
+	}
+
+	/** Log a property query */
+	@Override
+	public void logQuery(ControllerProperty prop) {
+		// not implemented
 	}
 
 	/** Add an XmlElem to this message */

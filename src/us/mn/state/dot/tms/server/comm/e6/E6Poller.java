@@ -140,8 +140,11 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 			// FIXME: log tag read
 			return;
 		} else if (waiting) {
-			waiting = false;
-			resp_pkt.copy(rx_pkt);
+			Response rsp = rx_pkt.parseResponse();
+			if (rsp == Response.COMMAND_COMPLETE) {
+				waiting = false;
+				resp_pkt.copy(rx_pkt);
+			}
 		}
 	}
 

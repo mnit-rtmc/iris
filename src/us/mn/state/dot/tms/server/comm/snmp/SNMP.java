@@ -139,6 +139,12 @@ public class SNMP extends BER {
 			decodeResponse();
 		}
 
+		/** Log a property query */
+		@Override
+		public void logQuery(ControllerProperty prop) {
+			// not implemented
+		}
+
 		/** Store the controller properties.  This is accomplished with
 		 * an SNMP set-request.
 		 * @throws IOException On any errors sending a request or

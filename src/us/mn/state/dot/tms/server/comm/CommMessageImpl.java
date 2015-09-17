@@ -85,7 +85,8 @@ public class CommMessageImpl<T extends ControllerProperty>
 	}
 
 	/** Log a property query */
-	private void logQuery(T prop) {
+	@Override
+	public void logQuery(T prop) {
 		if (p_log != null && p_log.isOpen())
 			p_log.log(op + ": " + prop);
 	}
@@ -112,7 +113,7 @@ public class CommMessageImpl<T extends ControllerProperty>
 	}
 
 	/** Log a property store */
-	private void logStore(T prop) {
+	protected void logStore(T prop) {
 		if (p_log != null && p_log.isOpen())
 			p_log.log(op + ":= " + prop);
 	}

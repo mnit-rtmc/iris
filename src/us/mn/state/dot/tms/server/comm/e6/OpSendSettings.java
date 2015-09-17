@@ -47,7 +47,7 @@ public class OpSendSettings extends OpE6 {
 			DiagStatus stat = new DiagStatus();
 			poller.sendQuery(stat);
 			poller.waitResponse(stat);
-			// FIXME
+			mess.logQuery(stat);
 			return null;
 		}
 	}

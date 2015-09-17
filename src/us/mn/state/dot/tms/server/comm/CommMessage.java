@@ -36,4 +36,7 @@ public interface CommMessage<T extends ControllerProperty> {
 	 * @throws IOException On any errors sending a request or receiving
 	 *         response */
 	void storeProps() throws IOException;
+
+	/** Log a property query */
+	void logQuery(T prop);
 }
