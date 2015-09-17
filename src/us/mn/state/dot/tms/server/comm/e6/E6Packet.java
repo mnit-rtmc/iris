@@ -35,6 +35,9 @@ public class E6Packet {
 	/** Packet messenger */
 	private final PacketMessenger pkt_mess;
 
+	/** Flag for rx packets */
+	private final boolean rx;
+
 	/** Packet buffer */
 	private final byte[] pkt = new byte[128];
 
@@ -52,8 +55,9 @@ public class E6Packet {
 	private byte csn = 0;
 
 	/** Create a new E6 packet */
-	public E6Packet(PacketMessenger pm) {
+	public E6Packet(PacketMessenger pm, boolean r) {
 		pkt_mess = pm;
+		rx = r;
 	}
 
 	/** Format command packet */
@@ -125,7 +129,7 @@ public class E6Packet {
 	public Response parseResponse() throws IOException {
 		if (n_bytes >= 9) {
 			int r = parseResp();
-			Response rsp = Response.create(r);
+			Response rsp = Response.fromBits(r);
 			if (rsp != null)
 				return rsp;
 			else
@@ -162,10 +166,12 @@ public class E6Packet {
 			sb.append(' ');
 			sb.append(cmd);
 		}
-		Response rsp = Response.create(parseResp());
-		if (rsp != null) {
-			sb.append(' ');
-			sb.append(rsp);
+		if (rx) {
+			Response rsp = Response.fromBits(parseResp());
+			if (rsp != null) {
+				sb.append(' ');
+				sb.append(rsp);
+			}
 		}
 		return sb.toString();
 	}

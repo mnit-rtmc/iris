@@ -19,24 +19,19 @@ package us.mn.state.dot.tms.server.comm.e6;
  *
  * @author Douglas Lau
  */
-public class Response {
+public enum Response {
+	ACK		(ResponseType.SYNCHRONOUS, ResponseStatus.CONTROL, 0),
+	MSG_SEQ_ERROR	(ResponseType.SYNCHRONOUS, ResponseStatus.ERROR, 1);
+
+	/** Create a new response */
+	private Response(ResponseType rt, ResponseStatus rs, int cr) {
+		r_type = rt;
+		r_stat = rs;
+		cmd_resp = cr & CMD_RESPONSE_BITS;
+	}
 
 	/** Bit flags for command response */
 	static private final int CMD_RESPONSE_BITS = 0xFF;
-
-	/** Create a response from bits.
-	 * @param b Bits of response from packet.
-	 * @return Valid response, or null on error. */
-	static public Response create(int b) {
-		ResponseType rt = ResponseType.lookup(b);
-		ResponseStatus rs = ResponseStatus.lookup(b);
-		if (rt != null && rs != null) {
-			int cr = b & CMD_RESPONSE_BITS;
-			if ((rt.bits | rs.bits | cr) == b)
-				return new Response(rt, rs, cr);
-		}
-		return null;
-	}
 
 	/** Response type */
 	public final ResponseType r_type;
@@ -47,23 +42,35 @@ public class Response {
 	/** Command group command response */
 	public final int cmd_resp;
 
-	/** Create a new response */
-	public Response(ResponseType rt, ResponseStatus rs, int cr) {
-		r_type = rt;
-		r_stat = rs;
-		cmd_resp = cr & CMD_RESPONSE_BITS;
-	}
-
 	/** Get response bits */
 	public int bits() {
 		return r_type.bits | r_stat.bits | cmd_resp;
 	}
 
-	/** Get a string representation */
-	@Override
-	public String toString() {
-		return "r_type=" + r_type + "," +
-		       "r_stat=" + r_stat + "," +
-		       "cmd_resp=" + cmd_resp;
+	/** Lookup a response from bits.
+	 * @param b Bits of response from packet.
+	 * @return Valid response, or null on error. */
+	static public Response fromBits(int b) {
+		ResponseType rt = ResponseType.lookup(b);
+		ResponseStatus rs = ResponseStatus.lookup(b);
+		if (rt != null && rs != null) {
+			int cr = b & CMD_RESPONSE_BITS;
+			if ((rt.bits | rs.bits | cr) == b)
+				return fromValues(rt, rs, cr);
+		}
+		return null;
+	}
+
+	/** Lookup a response from values */
+	static private Response fromValues(ResponseType rt, ResponseStatus rs,
+		int cr)
+	{
+		for (Response r: values()) {
+			if (rt == r.r_type &&
+			    rs == r.r_stat &&
+			    cr == r.cmd_resp)
+				return r;
+		}
+		return null;
 	}
 }

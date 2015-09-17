@@ -33,10 +33,6 @@ import us.mn.state.dot.tms.server.comm.TagReaderPoller;
  */
 public class E6Poller extends MessagePoller implements TagReaderPoller {
 
-	/** ACK response */
-	static private final Response ACK = new Response(
-		ResponseType.SYNCHRONOUS, ResponseStatus.CONTROL, 0);
-
 	/** Timeout exception */
 	static private final IOException TIMEOUT =
 		new SocketTimeoutException("TIMEOUT");
@@ -75,8 +71,8 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	public E6Poller(String n, PacketMessenger m) {
 		super(n, m);
 		pkt_mess = m;
-		tx_pkt = new E6Packet(m);
-		rx_pkt = new E6Packet(m);
+		tx_pkt = new E6Packet(m, false);
+		rx_pkt = new E6Packet(m, true);
  		rx_thread = new Thread(RECV, "Recv: " + n) {
 			@Override
 			public void run() {
@@ -151,8 +147,8 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	private void sendAck(Command cmd) throws IOException {
 		Command ack = new Command(cmd.group, false, true);
 		byte[] data = new byte[3];
-		data[0] = (byte) (ACK.bits() << 8);
-		data[1] = (byte) (ACK.bits() << 0);
+		data[0] = (byte) (Response.ACK.bits() << 8);
+		data[1] = (byte) (Response.ACK.bits() << 0);
 		data[2] = rx_pkt.parseMsn();
 		tx_pkt.format(ack, data);
 		log("tx", tx_pkt);
