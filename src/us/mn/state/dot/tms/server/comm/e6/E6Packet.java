@@ -60,13 +60,21 @@ public class E6Packet {
 		rx = r;
 	}
 
+	/** Copy from another packet */
+	public synchronized void copy(E6Packet p) {
+		System.arraycopy(p.pkt, 0, pkt, 0, pkt.length);
+		n_bytes = p.n_bytes;
+		msn = p.msn;
+		csn = p.csn;
+		notify();
+	}
+
 	/** Format command packet */
 	public void format(Command cmd, byte[] data) {
 		n_bytes = data.length + 7;
 		pkt[0] = (byte) ((n_bytes >> 8) & 0xFF);
 		pkt[1] = (byte) ((n_bytes >> 0) & 0xFF);
 		pkt[2] = (byte) (msn & 0xFF);
-		msn++;
 		int b = cmd.bits();
 		pkt[3] = (byte) ((b >> 8) & 0xFF);
 		pkt[4] = (byte) ((b >> 0) & 0xFF);
@@ -86,6 +94,11 @@ public class E6Packet {
 	public void send() throws IOException {
 		datagram.setLength(n_bytes);
 		pkt_mess.send(datagram);
+	}
+
+	/** Increment the message sequence number (MSN) */
+	public void incrementMsn() {
+		msn++;
 	}
 
 	/** Receive one packet */

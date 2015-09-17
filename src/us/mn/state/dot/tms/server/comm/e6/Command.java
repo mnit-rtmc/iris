@@ -75,8 +75,7 @@ public class Command {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("group=");
-		sb.append(group.toString());
+		sb.append(group);
 		if (unsolicited)
  			sb.append(",unsolicited");
 		if (acknowledge)

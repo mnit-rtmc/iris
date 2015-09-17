@@ -21,7 +21,11 @@ package us.mn.state.dot.tms.server.comm.e6;
  */
 public enum Response {
 	ACK		(ResponseType.SYNCHRONOUS, ResponseStatus.CONTROL, 0),
-	MSG_SEQ_ERROR	(ResponseType.SYNCHRONOUS, ResponseStatus.ERROR, 1);
+	MSG_SEQ_ERROR	(ResponseType.SYNCHRONOUS, ResponseStatus.ERROR, 1),
+	COMMAND_COMPLETE(ResponseType.ASYNCHRONOUS, ResponseStatus.OK, 0),
+	COMMAND_IN_PROGRESS(ResponseType.ASYNCHRONOUS, ResponseStatus.OK, 1),
+	STATUS_CHANGE_ERR(ResponseType.UNSOLICITED, ResponseStatus.ERROR, 10),
+	STATUS_CHANGE_OK(ResponseType.UNSOLICITED, ResponseStatus.OK, 10);
 
 	/** Create a new response */
 	private Response(ResponseType rt, ResponseStatus rs, int cr) {

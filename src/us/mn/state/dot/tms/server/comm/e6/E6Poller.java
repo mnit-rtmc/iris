@@ -64,6 +64,9 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** Receive Packet */
 	private final E6Packet rx_pkt;
 
+	/** Response Packet */
+	private final E6Packet resp_pkt;
+
 	/** Waiting flag */
 	private boolean waiting = false;
 
@@ -73,6 +76,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 		pkt_mess = m;
 		tx_pkt = new E6Packet(m, false);
 		rx_pkt = new E6Packet(m, true);
+		resp_pkt = new E6Packet(m, true);
  		rx_thread = new Thread(RECV, "Recv: " + n) {
 			@Override
 			public void run() {
@@ -123,23 +127,21 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 
 	/** Receive one packet */
 	private void doReceivePacket() throws IOException {
-		synchronized (rx_pkt) {
-			rx_pkt.receive();
-			log("rx", rx_pkt);
-			// FIXME: deal with msn / csn
-			Command cmd = rx_pkt.parseCommand();
-			if (cmd.acknowledge) {
-				// FIXME: that's good
-				return;
-			} else
-				sendAck(cmd);
-			if (cmd.unsolicited) {
-				// FIXME: log tag read
-				return;
-			} else if (waiting) {
-				waiting = false;
-				rx_pkt.notify();
-			}
+		rx_pkt.receive();
+		log("rx", rx_pkt);
+		// FIXME: deal with msn / csn
+		Command cmd = rx_pkt.parseCommand();
+		if (cmd.acknowledge) {
+			// FIXME: that's good
+			return;
+		} else
+			sendAck(cmd);
+		if (cmd.unsolicited) {
+			// FIXME: log tag read
+			return;
+		} else if (waiting) {
+			waiting = false;
+			resp_pkt.copy(rx_pkt);
 		}
 	}
 
@@ -147,28 +149,30 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	private void sendAck(Command cmd) throws IOException {
 		Command ack = new Command(cmd.group, false, true);
 		byte[] data = new byte[3];
-		data[0] = (byte) (Response.ACK.bits() << 8);
-		data[1] = (byte) (Response.ACK.bits() << 0);
+		data[0] = (byte) (Response.ACK.bits() >> 8);
+		data[1] = (byte) (Response.ACK.bits() >> 0);
 		data[2] = rx_pkt.parseMsn();
-		tx_pkt.format(ack, data);
-		log("tx", tx_pkt);
-		tx_pkt.send();
+		synchronized (tx_pkt) {
+			tx_pkt.format(ack, data);
+			log("tx", tx_pkt);
+			tx_pkt.send();
+		}
 	}
 
 	/** Wait for a response packet */
 	public void waitResponse(E6Property p) throws IOException {
-		synchronized (rx_pkt) {
+		synchronized (resp_pkt) {
 			try {
 				waiting = true;
 				try {
-					rx_pkt.wait(pkt_mess.getTimeout());
+					resp_pkt.wait(pkt_mess.getTimeout());
 				}
 				catch (InterruptedException e) {
 					// doesn't matter
 				}
 				if (waiting)
 					throw TIMEOUT;
-				p.parse(rx_pkt.parseData());
+				p.parse(resp_pkt.parseData());
 			}
 			finally {
 				waiting = false;
@@ -178,9 +182,12 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 
 	/** Send a query packet */
 	public void sendQuery(E6Property p) throws IOException {
-		tx_pkt.format(p.queryCmd(), p.data());
-		log("tx", tx_pkt);
-		tx_pkt.send();
+		synchronized (tx_pkt) {
+			tx_pkt.format(p.queryCmd(), p.data());
+			log("tx", tx_pkt);
+			tx_pkt.send();
+			tx_pkt.incrementMsn();
+		}
 	}
 
 	/** Check if a drop address is valid */
