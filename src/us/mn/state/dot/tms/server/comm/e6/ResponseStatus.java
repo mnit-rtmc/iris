@@ -42,7 +42,7 @@ public enum ResponseStatus {
 
 	/** Lookup the response status for a response */
 	static public ResponseStatus lookup(int b) {
-		int s_bits = status_bits();
+		int s_bits = b & status_bits();
 		for (ResponseStatus rs: values()) {
 			if ((rs.bits & s_bits) == rs.bits)
 				return rs;

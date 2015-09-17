@@ -46,7 +46,7 @@ public enum CommandGroup {
 
 	/** Lookup the command group for a command */
 	static public CommandGroup lookup(int b) {
-		int g_bits = group_bits();
+		int g_bits = b & group_bits();
 		for (CommandGroup cg: values()) {
 			if ((cg.bits & g_bits) == cg.bits)
 				return cg;

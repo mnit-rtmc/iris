@@ -74,8 +74,13 @@ public class Command {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "group=" + group + "," +
-		       "unsolicited=" + unsolicited + "," +
-		       "acknowledge=" + acknowledge;
+		StringBuilder sb = new StringBuilder();
+		sb.append("group=");
+		sb.append(group.toString());
+		if (unsolicited)
+ 			sb.append(",unsolicited");
+		if (acknowledge)
+ 			sb.append(",ack");
+		return sb.toString();
 	}
 }

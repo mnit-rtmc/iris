@@ -338,7 +338,7 @@ public class DevicePollerFactory {
 	private DevicePoller createE6Poller() throws IOException {
 		try {
 			URI u = createURI(UDP);
-			return new E6Poller(name, new DatagramMessenger(
+			return new E6Poller(name, new PacketMessenger(
 				E6Poller.LOCAL_PORT, createSocketAddress(u)));
 		}
 		catch (URISyntaxException e) {

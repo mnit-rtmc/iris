@@ -14,14 +14,16 @@
  */
 package us.mn.state.dot.tms.server.comm.e6;
 
+import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
-import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.PacketMessenger;
 import us.mn.state.dot.tms.server.comm.TagReaderPoller;
 
 /**
@@ -30,6 +32,10 @@ import us.mn.state.dot.tms.server.comm.TagReaderPoller;
  * @author Douglas Lau
  */
 public class E6Poller extends MessagePoller implements TagReaderPoller {
+
+	/** ACK response */
+	static private final Response ACK = new Response(
+		ResponseType.SYNCHRONOUS, ResponseStatus.CONTROL, 0);
 
 	/** Timeout exception */
 	static private final IOException TIMEOUT =
@@ -41,9 +47,6 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** Thread group for all receive threads */
 	static private final ThreadGroup RECV = new ThreadGroup("Recv");
 
-	/** Thread to receive packets */
-	private final Thread rx_thread;
-
 	/** E6 debug log */
 	static public final DebugLog E6_LOG = new DebugLog("e6");
 
@@ -53,18 +56,27 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 			E6_LOG.log(x + " " + pkt.toString());
 	}
 
+	/** Packet messenger */
+	private final PacketMessenger pkt_mess;
+
+	/** Thread to receive packets */
+	private final Thread rx_thread;
+
 	/** Transmit Packet */
-	private final E6Packet tx_pkt = new E6Packet();
+	private final E6Packet tx_pkt;
 
 	/** Receive Packet */
-	private final E6Packet rx_pkt = new E6Packet();
+	private final E6Packet rx_pkt;
 
 	/** Waiting flag */
 	private boolean waiting = false;
 
 	/** Create a new E6 poller */
-	public E6Poller(String n, Messenger m) {
+	public E6Poller(String n, PacketMessenger m) {
 		super(n, m);
+		pkt_mess = m;
+		tx_pkt = new E6Packet(m);
+		rx_pkt = new E6Packet(m);
  		rx_thread = new Thread(RECV, "Recv: " + n) {
 			@Override
 			public void run() {
@@ -105,8 +117,18 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 
 	/** Receive one packet */
 	private void receivePacket() throws IOException {
+		try {
+			doReceivePacket();
+		}
+		catch (SocketTimeoutException e) {
+			// we expect lots of timeouts
+		}
+	}
+
+	/** Receive one packet */
+	private void doReceivePacket() throws IOException {
 		synchronized (rx_pkt) {
-			rx_pkt.receive(messenger.getInputStream(""));
+			rx_pkt.receive();
 			log("rx", rx_pkt);
 			// FIXME: deal with msn / csn
 			Command cmd = rx_pkt.parseCommand();
@@ -125,10 +147,6 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 		}
 	}
 
-	/** ACK response */
-	static private final Response ACK = new Response(
-		ResponseType.SYNCHRONOUS, ResponseStatus.CONTROL, 0);
-
 	/** Send an ack packet */
 	private void sendAck(Command cmd) throws IOException {
 		Command ack = new Command(cmd.group, false, true);
@@ -138,7 +156,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 		data[2] = rx_pkt.parseMsn();
 		tx_pkt.format(ack, data);
 		log("tx", tx_pkt);
-		tx_pkt.send(messenger.getOutputStream());
+		tx_pkt.send();
 	}
 
 	/** Wait for a response packet */
@@ -147,7 +165,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 			try {
 				waiting = true;
 				try {
-					rx_pkt.wait(messenger.getTimeout());
+					rx_pkt.wait(pkt_mess.getTimeout());
 				}
 				catch (InterruptedException e) {
 					// doesn't matter
@@ -166,7 +184,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	public void sendQuery(E6Property p) throws IOException {
 		tx_pkt.format(p.queryCmd(), p.data());
 		log("tx", tx_pkt);
-		tx_pkt.send(messenger.getOutputStream());
+		tx_pkt.send();
 	}
 
 	/** Check if a drop address is valid */

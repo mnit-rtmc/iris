@@ -23,12 +23,14 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -54,10 +56,22 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 		}
 	};
 
+	/** Status panel */
+	private final IPanel status_pnl;
+
+	/** Send settings action */
+	private final IAction settings = new IAction("device.send.settings") {
+		protected void doActionPerformed(ActionEvent e) {
+			proxy.setDeviceRequest(DeviceRequest.
+				SEND_SETTINGS.ordinal());
+		}
+	};
+
 	/** Create a new tag reader properties form */
 	public TagReaderProperties(Session s, TagReader tr) {
 		super(I18N.get("tag_reader") + ": ", s, tr);
 		loc_pnl = new LocationPanel(s);
+		status_pnl = new IPanel();
 	}
 
 	/** Get the SONAR type cache */
@@ -71,6 +85,7 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 	protected void initialize() {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), createLocationPanel());
+		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
 		createUpdateJobs();
 		super.initialize();
@@ -91,6 +106,13 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 		loc_pnl.add(new JButton(controller), Stretch.RIGHT);
 		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		return loc_pnl;
+	}
+
+	/** Create the status panel */
+	private IPanel createStatusPanel() {
+		status_pnl.initialize();
+		status_pnl.add(new JButton(settings), Stretch.RIGHT);
+		return status_pnl;
 	}
 
 	/** Create the widget jobs */
@@ -117,5 +139,14 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 			controller.setEnabled(proxy.getController() != null);
 		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
+		if (a == null) {
+			boolean r = canRequest();
+			settings.setEnabled(r);
+		}
+	}
+
+	/** Check if the user can make device requests */
+	private boolean canRequest() {
+		return isUpdatePermitted("deviceRequest");
 	}
 }

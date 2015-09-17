@@ -42,7 +42,7 @@ public enum ResponseType {
 
 	/** Lookup the response type for a response */
 	static public ResponseType lookup(int b) {
-		int t_bits = type_bits();
+		int t_bits = b & type_bits();
 		for (ResponseType rt: values()) {
 			if ((rt.bits & t_bits) == rt.bits)
 				return rt;

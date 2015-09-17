@@ -18,9 +18,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.sql.ResultSet;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
+import us.mn.state.dot.tms.server.comm.TagReaderPoller;
 
 /**
  * A tag reader is a sensor for vehicle transponders, which are used for
@@ -113,6 +116,21 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	/** Request a device operation */
 	@Override
 	public void setDeviceRequest(int r) {
-		// no device requests are currently supported
+		sendDeviceRequest(DeviceRequest.fromOrdinal(r));
+	}
+
+	/** Request a device operation */
+	private void sendDeviceRequest(DeviceRequest dr) {
+		TagReaderPoller p = getTagReaderPoller();
+		if (p != null)
+			p.sendRequest(this, dr);
+	}
+
+	/** Get the tag reader poller */
+	private TagReaderPoller getTagReaderPoller() {
+		DevicePoller dp = getPoller();
+		return (dp instanceof TagReaderPoller)
+		     ? (TagReaderPoller)dp
+		     : null;
 	}
 }
