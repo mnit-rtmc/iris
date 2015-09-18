@@ -63,6 +63,21 @@ public class OpSendSettings extends OpE6 {
 			poller.sendQuery(ctrl);
 			poller.waitResponse(ctrl);
 			mess.logQuery(ctrl);
+			return new QueryAppendData();
+		}
+	}
+
+	/** Phase to query the append data */
+	private class QueryAppendData extends Phase<E6Property> {
+
+		/** Query the append data */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			AppendDataProp append = new AppendDataProp();
+			poller.sendQuery(append);
+			poller.waitResponse(append);
+			mess.logQuery(append);
 			return new QueryDiagStatus();
 		}
 	}
