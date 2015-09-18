@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,8 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
+import us.mn.state.dot.tms.TagReader;
+import us.mn.state.dot.tms.TagReaderHelper;
 
 /**
  * Job to send settings to all field controllers.
@@ -63,6 +65,7 @@ public class SendSettingsJob extends Job {
 		requestLCS(DeviceRequest.SEND_SETTINGS);
 		requestRampMeters(DeviceRequest.SEND_SETTINGS);
 		requestBeacons(DeviceRequest.SEND_SETTINGS);
+		requestTagReaders(DeviceRequest.SEND_SETTINGS);
 	}
 
 	/** Send a request to all DMS */
@@ -98,6 +101,15 @@ public class SendSettingsJob extends Job {
 		while(it.hasNext()) {
 			Beacon b = it.next();
 			b.setDeviceRequest(req.ordinal());
+		}
+	}
+
+	/** Send a request to all tag readers */
+	private void requestTagReaders(DeviceRequest req) {
+		Iterator<TagReader> it = TagReaderHelper.iterator();
+		while (it.hasNext()) {
+			TagReader tr = it.next();
+			tr.setDeviceRequest(req.ordinal());
 		}
 	}
 }
