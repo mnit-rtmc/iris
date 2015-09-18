@@ -74,7 +74,7 @@ public class E6Packet {
 		n_bytes = data.length + 7;
 		pkt[0] = (byte) ((n_bytes >> 8) & 0xFF);
 		pkt[1] = (byte) ((n_bytes >> 0) & 0xFF);
-		pkt[2] = (byte) (msn & 0xFF);
+		pkt[2] = msn;
 		int b = cmd.bits();
 		pkt[3] = (byte) ((b >> 8) & 0xFF);
 		pkt[4] = (byte) ((b >> 0) & 0xFF);
@@ -96,9 +96,14 @@ public class E6Packet {
 		pkt_mess.send(datagram);
 	}
 
-	/** Increment the message sequence number (MSN) */
-	public void incrementMsn() {
-		msn++;
+	/** Get the message sequence number (MSN) */
+	public byte getMsn() {
+		return msn;
+	}
+
+	/** Update the message sequence number (MSN) */
+	public void updateMsn() {
+		msn = (byte) (parseMsn() + 1);
 	}
 
 	/** Receive one packet */

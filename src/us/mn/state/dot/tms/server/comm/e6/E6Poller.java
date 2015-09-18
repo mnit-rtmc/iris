@@ -129,13 +129,16 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	private void doReceivePacket() throws IOException {
 		rx_pkt.receive();
 		log("rx", rx_pkt);
-		// FIXME: deal with msn / csn
 		Command cmd = rx_pkt.parseCommand();
-		if (cmd.acknowledge) {
-			// FIXME: that's good
+		if (cmd.acknowledge)
 			return;
-		} else
+		else
 			sendAck(cmd);
+		if (rx_pkt.parseMsn() != rx_pkt.getMsn()) {
+			if (E6_LOG.isOpen())
+				E6_LOG.log("rx *** msn seq ERROR ***");
+		}
+		rx_pkt.updateMsn();
 		if (cmd.unsolicited) {
 			// FIXME: log tag read
 			return;
@@ -150,13 +153,29 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 
 	/** Send an ack packet */
 	private void sendAck(Command cmd) throws IOException {
-		Command ack = new Command(cmd.group, false, true);
+		Command c = new Command(cmd.group, false, true);
 		byte[] data = new byte[3];
 		data[0] = (byte) (Response.ACK.bits() >> 8);
 		data[1] = (byte) (Response.ACK.bits() >> 0);
 		data[2] = rx_pkt.parseMsn();
 		synchronized (tx_pkt) {
-			tx_pkt.format(ack, data);
+			tx_pkt.format(c, data);
+			log("tx", tx_pkt);
+			tx_pkt.send();
+		}
+	}
+
+	/** Send an seq error packet.  May not be supported by E6. */
+	private void sendSeqErr(Command cmd) throws IOException {
+		Command c = new Command(cmd.group, false, false);
+		byte[] data = new byte[4];
+		data[0] = (byte) (Response.MSG_SEQ_ERROR.bits() >> 8);
+		data[1] = (byte) (Response.MSG_SEQ_ERROR.bits() >> 0);
+		data[2] = rx_pkt.getMsn();
+		data[3] = rx_pkt.parseMsn();
+		synchronized (tx_pkt) {
+			tx_pkt.updateMsn();
+			tx_pkt.format(c, data);
 			log("tx", tx_pkt);
 			tx_pkt.send();
 		}
@@ -186,10 +205,10 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** Send a query packet */
 	public void sendQuery(E6Property p) throws IOException {
 		synchronized (tx_pkt) {
+			tx_pkt.updateMsn();
 			tx_pkt.format(p.queryCmd(), p.data());
 			log("tx", tx_pkt);
 			tx_pkt.send();
-			tx_pkt.incrementMsn();
 		}
 	}
 
