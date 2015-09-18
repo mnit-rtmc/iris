@@ -33,9 +33,9 @@ public class ModeProp extends E6Property {
 	/** Mode number */
 	private int mode = 0;
 
-	/** Get the query command */
+	/** Get the command */
 	@Override
-	public Command queryCmd() {
+	public Command command() {
 		return CMD;
 	}
 

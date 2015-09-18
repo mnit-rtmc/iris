@@ -25,18 +25,18 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  */
 abstract public class E6Property extends ControllerProperty {
 
-	/** Get the query command */
-	public Command queryCmd() throws IOException {
+	/** Get the command */
+	abstract public Command command() throws IOException;
+
+	/** Get the query packet data */
+	public byte[] queryData() throws IOException {
 		throw new ProtocolException("QUERY not supported");
 	}
 
-	/** Get the store command */
-	public Command storeCmd() throws IOException {
+	/** Get the store packet data */
+	public byte[] storeData() throws IOException {
 		throw new ProtocolException("STORE not supported");
 	}
-
-	/** Get the query packet data */
-	abstract public byte[] queryData();
 
 	/** Parse a received packet */
 	abstract public void parse(byte[] data) throws IOException;

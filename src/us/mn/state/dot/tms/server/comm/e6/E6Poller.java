@@ -190,7 +190,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	public void sendQuery(E6Property p) throws IOException {
 		synchronized (tx_pkt) {
 			tx_pkt.updateMsn();
-			tx_pkt.format(p.queryCmd(), p.queryData());
+			tx_pkt.format(p.command(), p.queryData());
 			log("tx", tx_pkt);
 			tx_pkt.send();
 		}

@@ -33,9 +33,9 @@ public class DiagStatus extends E6Property {
 	/** Diagnostic status codes */
 	private final byte[] stat = new byte[8];
 
-	/** Get the query command */
+	/** Get the command */
 	@Override
-	public Command queryCmd() {
+	public Command command() {
 		return CMD;
 	}
 
