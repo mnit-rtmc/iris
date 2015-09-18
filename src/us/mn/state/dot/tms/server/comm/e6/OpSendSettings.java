@@ -48,6 +48,21 @@ public class OpSendSettings extends OpE6 {
 			poller.sendQuery(mode);
 			poller.waitResponse(mode);
 			mess.logQuery(mode);
+			return new QueryMuxMode();
+		}
+	}
+
+	/** Phase to query the mux mode */
+	private class QueryMuxMode extends Phase<E6Property> {
+
+		/** Query the mux mode */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MuxModeProp mode = new MuxModeProp();
+			poller.sendQuery(mode);
+			poller.waitResponse(mode);
+			mess.logQuery(mode);
 			return new QueryRFControl();
 		}
 	}
