@@ -63,6 +63,21 @@ public class OpSendSettings extends OpE6 {
 			poller.sendQuery(ctrl);
 			poller.waitResponse(ctrl);
 			mess.logQuery(ctrl);
+			return new QueryMasterSlave();
+		}
+	}
+
+	/** Phase to query the master/slave setting */
+	private class QueryMasterSlave extends Phase<E6Property> {
+
+		/** Query the master/slave setting */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MasterSlaveProp mstr = new MasterSlaveProp();
+			poller.sendQuery(mstr);
+			poller.waitResponse(mstr);
+			mess.logQuery(mstr);
 			return new QueryAppendData();
 		}
 	}
