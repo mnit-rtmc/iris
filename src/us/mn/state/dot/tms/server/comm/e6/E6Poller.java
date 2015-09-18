@@ -140,7 +140,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 			sendAck(cmd);
 		if (rx_pkt.parseMsn() != rx_pkt.getMsn()) {
 			if (E6_LOG.isOpen())
-				E6_LOG.log("rx *** msn seq ERROR ***");
+				E6_LOG.log(name + " rx *** msn seq ERROR ***");
 		}
 		rx_pkt.updateMsn();
 		if (cmd.unsolicited) {
