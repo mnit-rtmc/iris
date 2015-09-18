@@ -48,6 +48,21 @@ public class OpSendSettings extends OpE6 {
 			poller.sendQuery(mode);
 			poller.waitResponse(mode);
 			mess.logQuery(mode);
+			return new QueryRFControl();
+		}
+	}
+
+	/** Phase to query the RF control */
+	private class QueryRFControl extends Phase<E6Property> {
+
+		/** Query the RF control */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFControlProp ctrl = new RFControlProp();
+			poller.sendQuery(ctrl);
+			poller.waitResponse(ctrl);
+			mess.logQuery(ctrl);
 			return new QueryDiagStatus();
 		}
 	}
