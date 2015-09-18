@@ -25,11 +25,10 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 public class DiagStatus extends E6Property {
 
 	/** Diagnostic command */
-	static private final Command CMD = new Command(CommandGroup.DIAGNOSTIC,
-		false, false);
+	static private final Command CMD = new Command(CommandGroup.DIAGNOSTIC);
 
-	/** Command code */
-	static private final int code = 0x0001;
+	/** Query command code */
+	static private final int QUERY = 0x0001;
 
 	/** Diagnostic status codes */
 	private final byte[] stat = new byte[8];
@@ -40,12 +39,11 @@ public class DiagStatus extends E6Property {
 		return CMD;
 	}
 
-	/** Get the packet data */
+	/** Get the query packet data */
 	@Override
-	public byte[] data() {
+	public byte[] queryData() {
 		byte[] d = new byte[2];
-		d[0] = (byte) (code >> 8);
-		d[1] = (byte) (code >> 0);
+		format16(d, 0, QUERY);
 		return d;
 	}
 
@@ -53,8 +51,8 @@ public class DiagStatus extends E6Property {
 	public void parse(byte[] d) throws IOException {
 		if (d.length != 12)
 			throw new ParsingException("DATA LEN: " + d.length);
-		if (d[2] != 0 || d[3] != 1)
-			throw new ParsingException("BAD DIAG STAT");
+		if (parse16(d, 2) != QUERY)
+			throw new ParsingException("SUB CMD");
 		System.arraycopy(d, 4, stat, 0, stat.length);
 	}
 

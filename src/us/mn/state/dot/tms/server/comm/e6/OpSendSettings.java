@@ -34,7 +34,22 @@ public class OpSendSettings extends OpE6 {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<E6Property> phaseTwo() {
-		return new QueryDiagStatus();
+		return new QueryMode();
+	}
+
+	/** Phase to query the mode */
+	private class QueryMode extends Phase<E6Property> {
+
+		/** Query the mode */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			ModeProp mode = new ModeProp();
+			poller.sendQuery(mode);
+			poller.waitResponse(mode);
+			mess.logQuery(mode);
+			return new QueryDiagStatus();
+		}
 	}
 
 	/** Phase to query the diagnostic status */

@@ -167,7 +167,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 
 	/** Send an seq error packet.  May not be supported by E6. */
 	private void sendSeqErr(Command cmd) throws IOException {
-		Command c = new Command(cmd.group, false, false);
+		Command c = new Command(cmd.group);
 		byte[] data = new byte[4];
 		data[0] = (byte) (Response.MSG_SEQ_ERROR.bits() >> 8);
 		data[1] = (byte) (Response.MSG_SEQ_ERROR.bits() >> 0);
@@ -206,7 +206,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	public void sendQuery(E6Property p) throws IOException {
 		synchronized (tx_pkt) {
 			tx_pkt.updateMsn();
-			tx_pkt.format(p.queryCmd(), p.data());
+			tx_pkt.format(p.queryCmd(), p.queryData());
 			log("tx", tx_pkt);
 			tx_pkt.send();
 		}

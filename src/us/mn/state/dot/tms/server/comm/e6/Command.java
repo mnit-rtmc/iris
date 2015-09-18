@@ -61,6 +61,11 @@ public class Command {
 		acknowledge = ack;
 	}
 
+	/** Create a new command */
+	public Command(CommandGroup cg) {
+		this(cg, false, false);
+	}
+
 	/** Get command bits */
 	public int bits() {
 		int b = group.bits;
