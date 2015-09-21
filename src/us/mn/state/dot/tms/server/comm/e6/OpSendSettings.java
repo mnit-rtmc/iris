@@ -63,19 +63,35 @@ public class OpSendSettings extends OpE6 {
 			poller.sendQuery(mode);
 			poller.waitResponse(mode);
 			mess.logQuery(mode);
-			return new QueryFreq();
+			return new QueryDownlink();
 		}
 	}
 
-	/** Phase to query the frequency */
-	private class QueryFreq extends Phase<E6Property> {
+	/** Phase to query the downlink frequency */
+	private class QueryDownlink extends Phase<E6Property> {
 
-		/** Query the frequency */
+		/** Query the downlink frequency */
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
 			FrequencyProp freq = new FrequencyProp(
 				FrequencyProp.Source.downlink);
+			poller.sendQuery(freq);
+			poller.waitResponse(freq);
+			mess.logQuery(freq);
+			return new QueryUplink();
+		}
+	}
+
+	/** Phase to query the uplink frequency */
+	private class QueryUplink extends Phase<E6Property> {
+
+		/** Query the uplink frequency */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			FrequencyProp freq = new FrequencyProp(
+				FrequencyProp.Source.uplink);
 			poller.sendQuery(freq);
 			poller.waitResponse(freq);
 			mess.logQuery(freq);
