@@ -19,6 +19,8 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * Data detect threshold property.
+ * For SeGo, the range is 0 - 20 dB.
+ * For ASTMv6, the range is 0 - 15 dB.
  *
  * @author Douglas Lau
  */
