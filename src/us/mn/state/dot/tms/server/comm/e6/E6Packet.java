@@ -78,10 +78,9 @@ public class E6Packet {
 		int b = cmd.bits();
 		pkt[3] = (byte) ((b >> 8) & 0xFF);
 		pkt[4] = (byte) ((b >> 0) & 0xFF);
-		if (cmd.group == CommandGroup.SYSTEM_INFO) {
+		if (cmd.group == CommandGroup.SYSTEM_INFO)
 			pkt[5] = (byte) (csn & 0xFF);
-			csn++;
-		} else
+		else
 			pkt[5] = 0;
 		System.arraycopy(data, 0, pkt, 6, data.length);
 		int xsum = 0;
@@ -104,6 +103,11 @@ public class E6Packet {
 	/** Update the message sequence number (MSN) */
 	public void updateMsn() {
 		msn = (byte) (parseMsn() + 1);
+	}
+
+	/** Update the command sequence number (CSN) */
+	public void updateCsn() {
+		csn++;
 	}
 
 	/** Receive one packet */
