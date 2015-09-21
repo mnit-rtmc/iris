@@ -140,6 +140,37 @@ public class OpSendSettings extends OpE6 {
 			poller.sendQuery(atten);
 			poller.waitResponse(atten);
 			mess.logQuery(atten);
+			return new QuerySeGoSeen();
+		}
+	}
+
+	/** Phase to query the SeGo seen count */
+	private class QuerySeGoSeen extends Phase<E6Property> {
+
+		/** Query the SeGo seen count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			SeenCountProp seen = new SeenCountProp(RFProtocol.SeGo);
+			poller.sendQuery(seen);
+			poller.waitResponse(seen);
+			mess.logQuery(seen);
+			return new QueryASTMv6Seen();
+		}
+	}
+
+	/** Phase to query the ASTMv6 seen count */
+	private class QueryASTMv6Seen extends Phase<E6Property> {
+
+		/** Query the ASTMv6 seen count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			SeenCountProp seen = new SeenCountProp(
+				RFProtocol.ASTMv6);
+			poller.sendQuery(seen);
+			poller.waitResponse(seen);
+			mess.logQuery(seen);
 			return new QuerySeGoDataDetect();
 		}
 	}

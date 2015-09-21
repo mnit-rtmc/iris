@@ -32,7 +32,7 @@ public enum RFProtocol {
 	/** Lookup an RF protocol from an ordinal value. */
 	static public RFProtocol fromOrdinal(int o) {
 		for (RFProtocol p: values()) {
-			if (p.ordinal() == 0)
+			if (p.ordinal() == o)
 				return p;
 		}
 		return null;
