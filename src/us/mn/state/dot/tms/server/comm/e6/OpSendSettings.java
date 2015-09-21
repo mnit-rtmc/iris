@@ -110,6 +110,21 @@ public class OpSendSettings extends OpE6 {
 			poller.sendQuery(mode);
 			poller.waitResponse(mode);
 			mess.logQuery(mode);
+			return new QueryLineLoss();
+		}
+	}
+
+	/** Phase to query the line loss */
+	private class QueryLineLoss extends Phase<E6Property> {
+
+		/** Query the line loss */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			LineLossProp loss = new LineLossProp();
+			poller.sendQuery(loss);
+			poller.waitResponse(loss);
+			mess.logQuery(loss);
 			return new QueryRFControl();
 		}
 	}
