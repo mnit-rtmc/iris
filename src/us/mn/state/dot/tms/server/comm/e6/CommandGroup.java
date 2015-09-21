@@ -22,7 +22,7 @@ package us.mn.state.dot.tms.server.comm.e6;
 public enum CommandGroup {
 	SYSTEM_INFO		(0x8000),
 	DIGITAL_IO		(0x4000),
-	RF_TRANCEIVER		(0x2000),
+	RF_TRANSCEIVER		(0x2000),
 	TAG_TRANSACTION_CONFIG	(0x1000),
 	TAG_TRANSACTION		(0x0800),
 	MODE			(0x0400),
