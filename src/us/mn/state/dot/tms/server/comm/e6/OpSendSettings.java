@@ -34,7 +34,23 @@ public class OpSendSettings extends OpE6 {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<E6Property> phaseTwo() {
-		return new QueryTimeDate();
+		return new QueryAckTimeout();
+	}
+
+	/** Phase to query the data ack timeout */
+	private class QueryAckTimeout extends Phase<E6Property> {
+
+		/** Query the ack timeout */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			AckTimeoutProp timeout = new AckTimeoutProp(
+				AckTimeoutProp.Protocol.udp_ip);
+			poller.sendQuery(timeout);
+			poller.waitResponse(timeout);
+			mess.logQuery(timeout);
+			return new QueryTimeDate();
+		}
 	}
 
 	/** Phase to query the time / date */
