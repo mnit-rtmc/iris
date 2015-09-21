@@ -110,6 +110,36 @@ public class OpSendSettings extends OpE6 {
 			poller.sendQuery(mode);
 			poller.waitResponse(mode);
 			mess.logQuery(mode);
+			return new QuerySeGoAtten();
+		}
+	}
+
+	/** Phase to query the SeGo RF attenuation */
+	private class QuerySeGoAtten extends Phase<E6Property> {
+
+		/** Query the SeGo RF attenuation */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFAttenProp atten = new RFAttenProp(RFProtocol.SeGo);
+			poller.sendQuery(atten);
+			poller.waitResponse(atten);
+			mess.logQuery(atten);
+			return new QueryASTMv6Atten();
+		}
+	}
+
+	/** Phase to query the ASTMv6 RF attenuation */
+	private class QueryASTMv6Atten extends Phase<E6Property> {
+
+		/** Query the ASTMv6 RF attenuation */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFAttenProp atten = new RFAttenProp(RFProtocol.ASTMv6);
+			poller.sendQuery(atten);
+			poller.waitResponse(atten);
+			mess.logQuery(atten);
 			return new QueryLineLoss();
 		}
 	}
