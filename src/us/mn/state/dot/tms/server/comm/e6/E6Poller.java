@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.DebugLog;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.MessagePoller;

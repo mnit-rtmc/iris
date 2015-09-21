@@ -34,7 +34,22 @@ public class OpSendSettings extends OpE6 {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<E6Property> phaseTwo() {
-		return new QueryMode();
+		return new QueryTimeDate();
+	}
+
+	/** Phase to query the time / date */
+	private class QueryTimeDate extends Phase<E6Property> {
+
+		/** Query the time / date */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			TimeDateProp stamp = new TimeDateProp();
+			poller.sendQuery(stamp);
+			poller.waitResponse(stamp);
+			mess.logQuery(stamp);
+			return new QueryMode();
+		}
 	}
 
 	/** Phase to query the mode */
