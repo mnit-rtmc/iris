@@ -134,7 +134,7 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			DiagStatus stat = new DiagStatus();
+			DiagStatusProp stat = new DiagStatusProp();
 			poller.sendQuery(stat);
 			poller.waitResponse(stat);
 			mess.logQuery(stat);

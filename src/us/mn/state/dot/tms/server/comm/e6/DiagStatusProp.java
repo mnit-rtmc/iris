@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-public class DiagStatus extends E6Property {
+public class DiagStatusProp extends E6Property {
 
 	/** Diagnostic command */
 	static private final Command CMD = new Command(CommandGroup.DIAGNOSTIC);
