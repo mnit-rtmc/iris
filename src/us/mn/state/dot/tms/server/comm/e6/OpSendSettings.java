@@ -48,6 +48,22 @@ public class OpSendSettings extends OpE6 {
 			poller.sendQuery(stamp);
 			poller.waitResponse(stamp);
 			mess.logQuery(stamp);
+			return new QueryBufferedTransactions();
+		}
+	}
+
+	/** Phase to query the buffered tag transaction count */
+	private class QueryBufferedTransactions extends Phase<E6Property> {
+
+		/** Query the buffered tag transaction count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			BufferedTransactionProp count =
+				new BufferedTransactionProp();
+			poller.sendQuery(count);
+			poller.waitResponse(count);
+			mess.logQuery(count);
 			return new QueryMode();
 		}
 	}
