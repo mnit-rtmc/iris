@@ -232,6 +232,21 @@ public class OpSendSettings extends OpE6 {
 			poller.sendQuery(ctrl);
 			poller.waitResponse(ctrl);
 			mess.logQuery(ctrl);
+			return new QueryAntennaChannel();
+		}
+	}
+
+	/** Phase to query the manual antenna channel control */
+	private class QueryAntennaChannel extends Phase<E6Property> {
+
+		/** Query the manual antenna channel */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			AntennaChannelProp chan = new AntennaChannelProp();
+			poller.sendQuery(chan);
+			poller.waitResponse(chan);
+			mess.logQuery(chan);
 			return new QueryMasterSlave();
 		}
 	}
