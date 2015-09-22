@@ -297,6 +297,21 @@ public class OpSendSettings extends OpE6 {
 			    AntennaChannelProp.Value.disable_manual_control);
 			mess.logStore(chan);
 			poller.sendStore(chan);
+			return new StoreMasterSlave();
+		}
+	}
+
+	/** Phase to store the master/slave setting */
+	private class StoreMasterSlave extends Phase<E6Property> {
+
+		/** Store the master/slave setting */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MasterSlaveProp mstr = new MasterSlaveProp(
+				MasterSlaveProp.Value.master, 0);
+			mess.logStore(mstr);
+			poller.sendStore(mstr);
 			return new QueryDownlink();
 		}
 	}

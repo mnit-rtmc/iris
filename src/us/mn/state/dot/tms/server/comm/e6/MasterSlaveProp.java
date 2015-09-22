@@ -47,10 +47,21 @@ public class MasterSlaveProp extends E6Property {
 	};
 
 	/** Master / slave value */
-	private Value value = Value.slave;
+	private Value value;
 
 	/** Slave select count */
-	private int slave = 0;
+	private int slave;
+
+	/** Create a new master/slave property */
+	public MasterSlaveProp(Value v, int s) {
+		value = v;
+		slave = s;
+	}
+
+	/** Create a new master/slave property */
+	public MasterSlaveProp() {
+		this(Value.slave, 0);
+	}
 
 	/** Get the command */
 	@Override
@@ -79,6 +90,25 @@ public class MasterSlaveProp extends E6Property {
 		else
 			throw new ParsingException("BAD MASTER/SLAVE");
 		slave = d[5];
+	}
+
+	/** Get the store packet data */
+	@Override
+	public byte[] storeData() {
+		byte[] d = new byte[4];
+		format16(d, 0, STORE);
+		format8(d, 2, 1 << value.ordinal());
+		format8(d, 3, slave);
+		return d;
+	}
+
+	/** Parse a received store packet */
+	@Override
+	public void parseStore(byte[] d) throws IOException {
+		if (d.length != 4)
+			throw new ParsingException("DATA LEN: " + d.length);
+		if (parse16(d, 2) != STORE)
+			throw new ParsingException("SUB CMD");
 	}
 
 	/** Get a string representation */
