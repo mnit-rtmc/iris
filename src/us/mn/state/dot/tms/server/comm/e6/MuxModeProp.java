@@ -54,7 +54,17 @@ public class MuxModeProp extends E6Property {
 	};
 
 	/** Mux mode value */
-	private Value value = Value.no_multiplexing;
+	private Value value;
+
+	/** Create a mux mode property */
+	public MuxModeProp(Value v) {
+		value = v;
+	}
+
+	/** Create a mux mode property */
+	public MuxModeProp() {
+		this(Value.no_multiplexing);
+	}
 
 	/** Get the command */
 	@Override
@@ -82,6 +92,24 @@ public class MuxModeProp extends E6Property {
 			value = v;
 		else
 			throw new ParsingException("BAD MUX");
+	}
+
+	/** Get the store packet data */
+	@Override
+	public byte[] storeData() {
+		byte[] d = new byte[3];
+		format16(d, 0, STORE);
+		format8(d, 2, value.bits);
+		return d;
+	}
+
+	/** Parse a received store packet */
+	@Override
+	public void parseStore(byte[] d) throws IOException {
+		if (d.length != 4)
+			throw new ParsingException("DATA LEN: " + d.length);
+		if (parse16(d, 2) != STORE)
+			throw new ParsingException("SUB CMD");
 	}
 
 	/** Get a string representation */

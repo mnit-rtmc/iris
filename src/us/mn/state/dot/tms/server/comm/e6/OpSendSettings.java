@@ -267,6 +267,21 @@ public class OpSendSettings extends OpE6 {
 				RFControlProp.Value.continuous);
 			mess.logStore(ctrl);
 			poller.sendStore(ctrl);
+			return new StoreMuxMode();
+		}
+	}
+
+	/** Phase to store the mux mode */
+	private class StoreMuxMode extends Phase<E6Property> {
+
+		/** Store the mux mode */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MuxModeProp mode = new MuxModeProp(
+				MuxModeProp.Value.channel_0);
+			mess.logStore(mode);
+			poller.sendStore(mode);
 			return new QueryDownlink();
 		}
 	}
