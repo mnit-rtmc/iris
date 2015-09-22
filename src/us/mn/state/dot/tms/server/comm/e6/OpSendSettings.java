@@ -21,6 +21,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Operation to send settings to an E6.
+ * If the reader is in stop mode, send all settings.
+ * Otherwise, check that settings are ok, and if not, put into stop mode and
+ * start over.
  *
  * @author Douglas Lau
  */
@@ -113,11 +116,45 @@ public class OpSendSettings extends OpE6 {
 			poller.sendQuery(mode);
 			mess.logQuery(mode);
 			if (mode.getMode() == ModeProp.Mode.stop)
-				return new QueryDownlink();
+				return new StoreDownlink();
 			else
-				return null;
+				return new QueryDownlink();
 		}
 	}
+
+	/** Phase to store the downlink frequency */
+	private class StoreDownlink extends Phase<E6Property> {
+
+		/** Store the downlink frequency */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			FrequencyProp freq = new FrequencyProp(
+				FrequencyProp.Source.downlink, 915.75f);
+			mess.logStore(freq);
+			poller.sendStore(freq);
+			return new StoreUplink();
+		}
+	}
+
+	/** Phase to store the uplink frequency */
+	private class StoreUplink extends Phase<E6Property> {
+
+		/** Store the uplink frequency */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			FrequencyProp freq = new FrequencyProp(
+				FrequencyProp.Source.uplink, 903.25f);
+			mess.logStore(freq);
+			poller.sendStore(freq);
+			return new QueryDownlink();
+		}
+	}
+
+
+
+
 
 	/** Phase to query the downlink frequency */
 	private class QueryDownlink extends Phase<E6Property> {

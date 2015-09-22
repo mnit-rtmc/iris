@@ -24,6 +24,11 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class FrequencyProp extends E6Property {
 
+	/** Get the frequency value */
+	static private int freqValue(float mhz) {
+		return Math.round((mhz - 800) * 4);
+	}
+
 	/** RF transceiver command */
 	static private final Command CMD = new Command(
 		CommandGroup.RF_TRANSCEIVER);
@@ -49,11 +54,23 @@ public class FrequencyProp extends E6Property {
 	private final Source source;
 
 	/** Frequency value */
-	private int value = 0;
+	private int value;
+
+	/** Get the frequency (MHz) */
+	public float getFrequency() {
+		return 800 + (value * 0.25f);
+	}
+
+	/** Create a frequency property */
+	public FrequencyProp(Source s, float mhz) {
+		source = s;
+		value = freqValue(mhz);
+	}
 
 	/** Create a frequency property */
 	public FrequencyProp(Source s) {
 		source = s;
+		value = 0;
 	}
 
 	/** Get the command */
@@ -88,10 +105,35 @@ public class FrequencyProp extends E6Property {
 		value = parse16(d, 4);
 	}
 
+	/** Get the store packet data */
+	@Override
+	public byte[] storeData() {
+		byte[] d = new byte[5];
+		format8(d, 0, STORE);
+		format8(d, 1, source.ordinal());
+		format16(d, 2, value);
+		format8(d, 4, 0x0D);	// Carriage-return
+		return d;
+	}
+
+	/** Parse a received store packet */
+	@Override
+	public void parseStore(byte[] d) throws IOException {
+		if (d.length != 6)
+			throw new ParsingException("DATA LEN: " + d.length);
+		if (parse8(d, 2) != STORE)
+			throw new ParsingException("SUB CMD");
+		if (parse8(d, 3) != source.ordinal())
+			throw new ParsingException("SOURCE");
+		if (parse8(d, 4) != 0)
+			throw new ParsingException("ACK");
+		if (parse8(d, 5) != 0x0D)
+			throw new ParsingException("CR");
+	}
+
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		float mhz = 800 + (value * 0.25f);
-		return source + " frequency: " + mhz + " MHz";
+		return source + " frequency: " + getFrequency() + " MHz";
 	}
 }
