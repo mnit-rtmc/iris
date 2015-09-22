@@ -45,10 +45,13 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** E6 debug log */
 	static public final DebugLog E6_LOG = new DebugLog("e6");
 
+	/** E6 pkt debug log */
+	static public final DebugLog E6_PKT_LOG = new DebugLog("e6_pkt");
+
 	/** Log a packet */
 	private void log(String x, E6Packet pkt) {
-		if (E6_LOG.isOpen())
-			E6_LOG.log(name + ' ' + x + ' ' + pkt.toString());
+		if (E6_PKT_LOG.isOpen())
+			E6_PKT_LOG.log(name + ' ' + x + ' ' + pkt.toString());
 	}
 
 	/** Packet messenger */
@@ -143,8 +146,8 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 		else
 			sendAck(cmd);
 		if (rx_pkt.parseMsn() != rx_pkt.getMsn()) {
-			if (E6_LOG.isOpen())
-				E6_LOG.log(name + " rx *** msn seq ERROR ***");
+			if (E6_PKT_LOG.isOpen())
+				E6_PKT_LOG.log(name + " rx ** msn seq ERR **");
 		}
 		rx_pkt.updateMsn();
 		if (cmd.unsolicited) {
