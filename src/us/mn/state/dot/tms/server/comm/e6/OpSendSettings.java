@@ -312,11 +312,24 @@ public class OpSendSettings extends OpE6 {
 				MasterSlaveProp.Value.master, 0);
 			mess.logStore(mstr);
 			poller.sendStore(mstr);
-			return new QueryDownlink();
+			return new StoreAppendData();
 		}
 	}
 
+	/** Phase to store the append data */
+	private class StoreAppendData extends Phase<E6Property> {
 
+		/** Store the append data */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			AppendDataProp append = new AppendDataProp(
+				AppendDataProp.Value.date_time_stamp);
+			mess.logStore(append);
+			poller.sendStore(append);
+			return new QueryDownlink();
+		}
+	}
 
 	/** Phase to query the downlink frequency */
 	private class QueryDownlink extends Phase<E6Property> {

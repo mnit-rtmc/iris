@@ -46,7 +46,17 @@ public class AppendDataProp extends E6Property {
 	};
 
 	/** Append data value */
-	private Value value = Value.disabled;
+	private Value value;
+
+	/** Create a new append data value */
+	public AppendDataProp(Value v) {
+		value = v;
+	}
+
+	/** Create a new append data value */
+	public AppendDataProp() {
+		this(Value.disabled);
+	}
 
 	/** Get the command */
 	@Override
@@ -74,6 +84,24 @@ public class AppendDataProp extends E6Property {
 			value = v;
 		else
 			throw new ParsingException("BAD APPEND DATA");
+	}
+
+	/** Get the store packet data */
+	@Override
+	public byte[] storeData() {
+		byte[] d = new byte[3];
+		format16(d, 0, STORE);
+		format8(d, 2, value.ordinal());
+		return d;
+	}
+
+	/** Parse a received store packet */
+	@Override
+	public void parseStore(byte[] d) throws IOException {
+		if (d.length != 4)
+			throw new ParsingException("DATA LEN: " + d.length);
+		if (parse16(d, 2) != STORE)
+			throw new ParsingException("SUB CMD");
 	}
 
 	/** Get a string representation */
