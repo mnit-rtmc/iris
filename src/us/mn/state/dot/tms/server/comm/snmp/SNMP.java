@@ -145,6 +145,12 @@ public class SNMP extends BER {
 			// not implemented
 		}
 
+		/** Log a property store */
+		@Override
+		public void logStore(ControllerProperty prop) {
+			// not implemented
+		}
+
 		/** Store the controller properties.  This is accomplished with
 		 * an SNMP set-request.
 		 * @throws IOException On any errors sending a request or

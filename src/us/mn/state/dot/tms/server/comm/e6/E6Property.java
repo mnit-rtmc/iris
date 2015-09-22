@@ -38,6 +38,13 @@ abstract public class E6Property extends ControllerProperty {
 		throw new ProtocolException("STORE not supported");
 	}
 
-	/** Parse a received packet */
-	abstract public void parse(byte[] data) throws IOException;
+	/** Parse a received query packet */
+	public void parseQuery(byte[] data) throws IOException {
+		throw new ProtocolException("QUERY not supported");
+	}
+
+	/** Parse a received store packet */
+	public void parseStore(byte[] data) throws IOException {
+		throw new ProtocolException("STORE not supported");
+	}
 }

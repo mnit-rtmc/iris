@@ -70,8 +70,9 @@ public class MuxModeProp extends E6Property {
 		return d;
 	}
 
-	/** Parse a received packet */
-	public void parse(byte[] d) throws IOException {
+	/** Parse a received query packet */
+	@Override
+	public void parseQuery(byte[] d) throws IOException {
 		if (d.length != 5)
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse16(d, 2) != QUERY)

@@ -39,4 +39,7 @@ public interface CommMessage<T extends ControllerProperty> {
 
 	/** Log a property query */
 	void logQuery(T prop);
+
+	/** Log a property store */
+	void logStore(T prop);
 }

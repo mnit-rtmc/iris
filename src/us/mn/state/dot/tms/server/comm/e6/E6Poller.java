@@ -168,8 +168,21 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 		}
 	}
 
-	/** Wait for a response packet */
-	public void waitResponse(E6Property p) throws IOException {
+	/** Send a store packet */
+	public void sendStore(E6Property p) throws IOException {
+		synchronized (tx_pkt) {
+			tx_pkt.updateMsn();
+			if (p.command().group == CommandGroup.SYSTEM_INFO)
+				tx_pkt.updateCsn();
+			tx_pkt.format(p.command(), p.storeData());
+			log("tx", tx_pkt);
+			tx_pkt.send();
+		}
+		waitStore(p);
+	}
+
+	/** Wait for a store response packet */
+	private void waitStore(E6Property p) throws IOException {
 		synchronized (resp_pkt) {
 			try {
 				waiting = true;
@@ -181,7 +194,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 				}
 				if (waiting)
 					throw TIMEOUT;
-				p.parse(resp_pkt.parseData());
+				p.parseStore(resp_pkt.parseData());
 			}
 			finally {
 				waiting = false;
@@ -198,6 +211,28 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 			tx_pkt.format(p.command(), p.queryData());
 			log("tx", tx_pkt);
 			tx_pkt.send();
+		}
+		waitQuery(p);
+	}
+
+	/** Wait for a query response packet */
+	private void waitQuery(E6Property p) throws IOException {
+		synchronized (resp_pkt) {
+			try {
+				waiting = true;
+				try {
+					resp_pkt.wait(pkt_mess.getTimeout());
+				}
+				catch (InterruptedException e) {
+					// doesn't matter
+				}
+				if (waiting)
+					throw TIMEOUT;
+				p.parseQuery(resp_pkt.parseData());
+			}
+			finally {
+				waiting = false;
+			}
 		}
 	}
 

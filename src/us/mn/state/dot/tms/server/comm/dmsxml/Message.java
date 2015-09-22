@@ -117,6 +117,12 @@ class Message implements CommMessage
 		// not implemented
 	}
 
+	/** Log a property store */
+	@Override
+	public void logStore(ControllerProperty prop) {
+		// not implemented
+	}
+
 	/** Add an XmlElem to this message */
 	public void add(ControllerProperty xmlrr) {
 		if(!(xmlrr instanceof XmlElem))

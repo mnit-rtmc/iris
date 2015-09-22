@@ -47,7 +47,6 @@ public class OpSendSettings extends OpE6 {
 			AckTimeoutProp timeout = new AckTimeoutProp(
 				AckTimeoutProp.Protocol.udp_ip);
 			poller.sendQuery(timeout);
-			poller.waitResponse(timeout);
 			mess.logQuery(timeout);
 			return new QueryTimeDate();
 		}
@@ -62,7 +61,6 @@ public class OpSendSettings extends OpE6 {
 		{
 			TimeDateProp stamp = new TimeDateProp();
 			poller.sendQuery(stamp);
-			poller.waitResponse(stamp);
 			mess.logQuery(stamp);
 			return new QueryBufferedTransactions();
 		}
@@ -78,7 +76,6 @@ public class OpSendSettings extends OpE6 {
 			BufferedTransactionProp count =
 				new BufferedTransactionProp();
 			poller.sendQuery(count);
-			poller.waitResponse(count);
 			mess.logQuery(count);
 			return new QueryMode();
 		}
@@ -93,7 +90,6 @@ public class OpSendSettings extends OpE6 {
 		{
 			ModeProp mode = new ModeProp();
 			poller.sendQuery(mode);
-			poller.waitResponse(mode);
 			mess.logQuery(mode);
 			return new QueryDownlink();
 		}
@@ -109,7 +105,6 @@ public class OpSendSettings extends OpE6 {
 			FrequencyProp freq = new FrequencyProp(
 				FrequencyProp.Source.downlink);
 			poller.sendQuery(freq);
-			poller.waitResponse(freq);
 			mess.logQuery(freq);
 			return new QueryUplink();
 		}
@@ -125,7 +120,6 @@ public class OpSendSettings extends OpE6 {
 			FrequencyProp freq = new FrequencyProp(
 				FrequencyProp.Source.uplink);
 			poller.sendQuery(freq);
-			poller.waitResponse(freq);
 			mess.logQuery(freq);
 			return new QueryMuxMode();
 		}
@@ -140,8 +134,22 @@ public class OpSendSettings extends OpE6 {
 		{
 			MuxModeProp mode = new MuxModeProp();
 			poller.sendQuery(mode);
-			poller.waitResponse(mode);
 			mess.logQuery(mode);
+			return new StoreSeGoAtten();
+		}
+	}
+
+	/** Phase to store the SeGo RF attenuation */
+	private class StoreSeGoAtten extends Phase<E6Property> {
+
+		/** Store the SeGo RF attenuation */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFAttenProp atten = new RFAttenProp(RFProtocol.SeGo,
+				1, 1);
+			mess.logStore(atten);
+			poller.sendStore(atten);
 			return new QuerySeGoAtten();
 		}
 	}
@@ -155,7 +163,6 @@ public class OpSendSettings extends OpE6 {
 		{
 			RFAttenProp atten = new RFAttenProp(RFProtocol.SeGo);
 			poller.sendQuery(atten);
-			poller.waitResponse(atten);
 			mess.logQuery(atten);
 			return new QueryASTMv6Atten();
 		}
@@ -170,7 +177,6 @@ public class OpSendSettings extends OpE6 {
 		{
 			RFAttenProp atten = new RFAttenProp(RFProtocol.ASTMv6);
 			poller.sendQuery(atten);
-			poller.waitResponse(atten);
 			mess.logQuery(atten);
 			return new QuerySeGoSeen();
 		}
@@ -185,7 +191,6 @@ public class OpSendSettings extends OpE6 {
 		{
 			SeenCountProp seen = new SeenCountProp(RFProtocol.SeGo);
 			poller.sendQuery(seen);
-			poller.waitResponse(seen);
 			mess.logQuery(seen);
 			return new QueryASTMv6Seen();
 		}
@@ -201,7 +206,6 @@ public class OpSendSettings extends OpE6 {
 			SeenCountProp seen = new SeenCountProp(
 				RFProtocol.ASTMv6);
 			poller.sendQuery(seen);
-			poller.waitResponse(seen);
 			mess.logQuery(seen);
 			return new QuerySeGoDataDetect();
 		}
@@ -216,7 +220,6 @@ public class OpSendSettings extends OpE6 {
 		{
 			DataDetectProp det = new DataDetectProp(RFProtocol.SeGo);
 			poller.sendQuery(det);
-			poller.waitResponse(det);
 			mess.logQuery(det);
 			return new QueryASTMv6DataDetect();
 		}
@@ -232,7 +235,6 @@ public class OpSendSettings extends OpE6 {
 			DataDetectProp det = new DataDetectProp(
 				RFProtocol.ASTMv6);
 			poller.sendQuery(det);
-			poller.waitResponse(det);
 			mess.logQuery(det);
 			return new QueryLineLoss();
 		}
@@ -247,7 +249,6 @@ public class OpSendSettings extends OpE6 {
 		{
 			LineLossProp loss = new LineLossProp();
 			poller.sendQuery(loss);
-			poller.waitResponse(loss);
 			mess.logQuery(loss);
 			return new QueryRFControl();
 		}
@@ -262,7 +263,6 @@ public class OpSendSettings extends OpE6 {
 		{
 			RFControlProp ctrl = new RFControlProp();
 			poller.sendQuery(ctrl);
-			poller.waitResponse(ctrl);
 			mess.logQuery(ctrl);
 			return new QueryAntennaChannel();
 		}
@@ -277,7 +277,6 @@ public class OpSendSettings extends OpE6 {
 		{
 			AntennaChannelProp chan = new AntennaChannelProp();
 			poller.sendQuery(chan);
-			poller.waitResponse(chan);
 			mess.logQuery(chan);
 			return new QueryMasterSlave();
 		}
@@ -292,7 +291,6 @@ public class OpSendSettings extends OpE6 {
 		{
 			MasterSlaveProp mstr = new MasterSlaveProp();
 			poller.sendQuery(mstr);
-			poller.waitResponse(mstr);
 			mess.logQuery(mstr);
 			return new QueryAppendData();
 		}
@@ -307,7 +305,6 @@ public class OpSendSettings extends OpE6 {
 		{
 			AppendDataProp append = new AppendDataProp();
 			poller.sendQuery(append);
-			poller.waitResponse(append);
 			mess.logQuery(append);
 			return new QueryDiagStatus();
 		}
@@ -322,7 +319,6 @@ public class OpSendSettings extends OpE6 {
 		{
 			DiagStatusProp stat = new DiagStatusProp();
 			poller.sendQuery(stat);
-			poller.waitResponse(stat);
 			mess.logQuery(stat);
 			return null;
 		}
