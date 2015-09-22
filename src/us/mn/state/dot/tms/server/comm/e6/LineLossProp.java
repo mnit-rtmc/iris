@@ -37,6 +37,16 @@ public class LineLossProp extends E6Property {
 	/** Line loss value (0 - 3 dB) */
 	private int value = 0;
 
+	/** Create a line loss property */
+	public LineLossProp(int v) {
+		value = v;
+	}
+
+	/** Create a line loss property */
+	public LineLossProp() {
+		this(0);
+	}
+
 	/** Get the command */
 	@Override
 	public Command command() {
@@ -64,6 +74,31 @@ public class LineLossProp extends E6Property {
 		if (parse8(d, 5) != 0x0D)
 			throw new ParsingException("CR");
 		value = parse8(d, 3);
+	}
+
+	/** Get the store packet data */
+	@Override
+	public byte[] storeData() {
+		byte[] d = new byte[3];
+		format8(d, 0, STORE);
+		format8(d, 1, value);
+		format8(d, 2, 0x0D);	// Carriage-return
+		return d;
+	}
+
+	/** Parse a received store packet */
+	@Override
+	public void parseStore(byte[] d) throws IOException {
+		if (d.length != 6)
+			throw new ParsingException("DATA LEN: " + d.length);
+		if (parse8(d, 2) != STORE)
+			throw new ParsingException("SUB CMD");
+		if (parse8(d, 3) != value)
+			throw new ParsingException("LINE LOSS");
+		if (parse8(d, 4) != 0)
+			throw new ParsingException("ACK");
+		if (parse8(d, 5) != 0x0D)
+			throw new ParsingException("CR");
 	}
 
 	/** Get a string representation */

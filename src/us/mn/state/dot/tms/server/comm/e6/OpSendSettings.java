@@ -238,9 +238,24 @@ public class OpSendSettings extends OpE6 {
 				RFProtocol.ASTMv6, 15);
 			mess.logStore(det);
 			poller.sendStore(det);
+			return new StoreLineLoss();
+		}
+	}
+
+	/** Phase to store the line loss */
+	private class StoreLineLoss extends Phase<E6Property> {
+
+		/** Store the line loss */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			LineLossProp loss = new LineLossProp(2);
+			mess.logStore(loss);
+			poller.sendStore(loss);
 			return new QueryDownlink();
 		}
 	}
+
 
 
 
