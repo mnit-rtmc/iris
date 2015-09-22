@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.e6;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -26,6 +27,12 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  * @author Douglas Lau
  */
 public class TimeDateProp extends E6Property {
+
+	/** Get a UTC calendar */
+	static private Calendar getUTCCalendar() {
+		TimeZone UTC = TimeZone.getTimeZone("UTC");
+		return Calendar.getInstance(UTC);
+	}
 
 	/** System information command */
 	static private final Command CMD =new Command(CommandGroup.SYSTEM_INFO);
@@ -79,7 +86,7 @@ public class TimeDateProp extends E6Property {
 		int ms = d[7] * 10;
 		if (ms < 0 || ms > 999)
 			throw new ParsingException("BAD MS");
-		Calendar cal = Calendar.getInstance();
+		Calendar cal = getUTCCalendar();
 		cal.clear();
 		cal.set(Calendar.MILLISECOND, ms);
 		cal.set(year, month, date, hour, min, sec);
