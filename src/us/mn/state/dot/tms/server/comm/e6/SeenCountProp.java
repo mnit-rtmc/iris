@@ -37,14 +37,21 @@ public class SeenCountProp extends E6Property {
 	private final RFProtocol protocol;
 
 	/** Seen count frames */
-	private int seen = 0;
+	private int seen;
 
 	/** Unique count frames */
-	private int unique = 0;
+	private int unique;
+
+	/** Create a seen count property */
+	public SeenCountProp(RFProtocol p, int s, int u) {
+		protocol = p;
+		seen = s;
+		unique = u;
+	}
 
 	/** Create a seen count property */
 	public SeenCountProp(RFProtocol p) {
-		protocol = p;
+		this(p, 0, 0);
 	}
 
 	/** Get the command */
@@ -73,6 +80,28 @@ public class SeenCountProp extends E6Property {
 			throw new ParsingException("RF PROTOCOL");
 		seen = parse16(d, 5);
 		unique = parse16(d, 7);
+	}
+
+	/** Get the store packet data */
+	@Override
+	public byte[] storeData() {
+		byte[] d = new byte[7];
+		format16(d, 0, STORE);
+		format8(d, 2, protocol.ordinal());
+		format16(d, 3, seen);
+		format16(d, 5, unique);
+		return d;
+	}
+
+	/** Parse a received store packet */
+	@Override
+	public void parseStore(byte[] d) throws IOException {
+		if (d.length != 5)
+			throw new ParsingException("DATA LEN: " + d.length);
+		if (parse16(d, 2) != STORE)
+			throw new ParsingException("SUB CMD");
+		if (RFProtocol.fromOrdinal(parse8(d, 4)) != protocol)
+			throw new ParsingException("RF PROTOCOL");
 	}
 
 	/** Get a string representation */

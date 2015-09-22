@@ -178,6 +178,36 @@ public class OpSendSettings extends OpE6 {
 				15, 15);
 			mess.logStore(atten);
 			poller.sendStore(atten);
+			return new StoreSeGoSeen();
+		}
+	}
+
+	/** Phase to store the SeGo seen count */
+	private class StoreSeGoSeen extends Phase<E6Property> {
+
+		/** Store the SeGo seen count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			SeenCountProp seen = new SeenCountProp(RFProtocol.SeGo,
+				40, 255);
+			mess.logStore(seen);
+			poller.sendStore(seen);
+			return new StoreASTMv6Seen();
+		}
+	}
+
+	/** Phase to store the ASTMv6 seen count */
+	private class StoreASTMv6Seen extends Phase<E6Property> {
+
+		/** Store the ASTMv6 seen count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			SeenCountProp seen = new SeenCountProp(
+				RFProtocol.ASTMv6, 40, 255);
+			mess.logStore(seen);
+			poller.sendStore(seen);
 			return new QueryDownlink();
 		}
 	}
