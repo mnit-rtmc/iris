@@ -254,6 +254,9 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 		case SEND_SETTINGS:
 			addOperation(new OpSendSettings(tr, this));
 			break;
+		case QUERY_STATUS:
+			addOperation(new OpQueryStatus(tr, this));
+			break;
 		default:
 			// Ignore other requests
 			break;

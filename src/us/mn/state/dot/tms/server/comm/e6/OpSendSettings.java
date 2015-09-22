@@ -113,24 +113,9 @@ public class OpSendSettings extends OpE6 {
 			poller.sendQuery(mode);
 			mess.logQuery(mode);
 			if (mode.getMode() == ModeProp.Mode.stop)
-				return new QueryBufferedTransactions();
+				return new QueryDownlink();
 			else
-				return new QueryDiagStatus();
-		}
-	}
-
-	/** Phase to query the buffered tag transaction count */
-	private class QueryBufferedTransactions extends Phase<E6Property> {
-
-		/** Query the buffered tag transaction count */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			BufferedTransactionProp count =
-				new BufferedTransactionProp();
-			poller.sendQuery(count);
-			mess.logQuery(count);
-			return new QueryDownlink();
+				return null;
 		}
 	}
 
@@ -360,20 +345,6 @@ public class OpSendSettings extends OpE6 {
 			AppendDataProp append = new AppendDataProp();
 			poller.sendQuery(append);
 			mess.logQuery(append);
-			return new QueryDiagStatus();
-		}
-	}
-
-	/** Phase to query the diagnostic status */
-	private class QueryDiagStatus extends Phase<E6Property> {
-
-		/** Query diag status */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			DiagStatusProp stat = new DiagStatusProp();
-			poller.sendQuery(stat);
-			mess.logQuery(stat);
 			return null;
 		}
 	}

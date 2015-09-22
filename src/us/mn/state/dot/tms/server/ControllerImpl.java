@@ -872,6 +872,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			AlarmImpl a = (AlarmImpl)io;
 			a.sendDeviceRequest(QUERY_STATUS);
 		}
+		if (io instanceof TagReaderImpl) {
+			TagReaderImpl tr = (TagReaderImpl)io;
+			tr.sendDeviceRequest(QUERY_STATUS);
+		}
 	}
 
 	/** Perform a controller download (reset) */
