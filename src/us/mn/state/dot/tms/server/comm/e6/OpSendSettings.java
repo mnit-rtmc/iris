@@ -32,6 +32,9 @@ public class OpSendSettings extends OpE6 {
 	/** Messenger timeout */
 	private final int timeout;
 
+	/** Flag to indicate stop mode */
+	private boolean stop = false;
+
 	/** Create a new "send settings" operation */
 	public OpSendSettings(TagReaderImpl tr, E6Poller ep) {
 		super(PriorityLevel.DOWNLOAD, tr, ep);
@@ -115,9 +118,10 @@ public class OpSendSettings extends OpE6 {
 			ModeProp mode = new ModeProp();
 			poller.sendQuery(mode);
 			mess.logQuery(mode);
-			if (mode.getMode() == ModeProp.Mode.stop)
+			if (mode.getMode() == ModeProp.Mode.stop) {
+				stop = true;
 				return new StoreDownlink();
-			else
+			} else
 				return new QueryDownlink();
 		}
 	}
@@ -527,6 +531,23 @@ public class OpSendSettings extends OpE6 {
 			AppendDataProp append = new AppendDataProp();
 			poller.sendQuery(append);
 			mess.logQuery(append);
+			if (stop)
+				return new StoreMode();
+			else
+				return null;
+		}
+	}
+
+	/** Phase to store the mode */
+	private class StoreMode extends Phase<E6Property> {
+
+		/** Store the mode */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			ModeProp mode = new ModeProp(ModeProp.Mode.read_write);
+			mess.logStore(mode);
+			poller.sendStore(mode);
 			return null;
 		}
 	}
