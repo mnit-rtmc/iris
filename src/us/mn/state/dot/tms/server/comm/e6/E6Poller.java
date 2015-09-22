@@ -54,6 +54,11 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** Packet messenger */
 	private final PacketMessenger pkt_mess;
 
+	/** Get the packet timeout */
+	public int getTimeout() {
+		return pkt_mess.getTimeout();
+	}
+
 	/** Poller name */
 	private final String name;
 
@@ -187,7 +192,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 			try {
 				waiting = true;
 				try {
-					resp_pkt.wait(pkt_mess.getTimeout());
+					resp_pkt.wait(getTimeout());
 				}
 				catch (InterruptedException e) {
 					// doesn't matter
@@ -221,7 +226,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 			try {
 				waiting = true;
 				try {
-					resp_pkt.wait(pkt_mess.getTimeout());
+					resp_pkt.wait(getTimeout());
 				}
 				catch (InterruptedException e) {
 					// doesn't matter

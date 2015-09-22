@@ -26,15 +26,34 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendSettings extends OpE6 {
 
+	/** Messenger timeout */
+	private final int timeout;
+
 	/** Create a new "send settings" operation */
 	public OpSendSettings(TagReaderImpl tr, E6Poller ep) {
 		super(PriorityLevel.DOWNLOAD, tr, ep);
+		timeout = ep.getTimeout();
 	}
 
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<E6Property> phaseTwo() {
-		return new QueryAckTimeout();
+		return new StoreAckTimeout();
+	}
+
+	/** Phase to store the data ack timeout */
+	private class StoreAckTimeout extends Phase<E6Property> {
+
+		/** Store the ack timeout */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			AckTimeoutProp dat = new AckTimeoutProp(
+				AckTimeoutProp.Protocol.udp_ip, timeout);
+			mess.logStore(dat);
+			poller.sendStore(dat);
+			return new QueryAckTimeout();
+		}
 	}
 
 	/** Phase to query the data ack timeout */
@@ -62,6 +81,20 @@ public class OpSendSettings extends OpE6 {
 			TimeDateProp stamp = new TimeDateProp();
 			poller.sendQuery(stamp);
 			mess.logQuery(stamp);
+			return new QueryMode();
+		}
+	}
+
+	/** Phase to query the mode */
+	private class QueryMode extends Phase<E6Property> {
+
+		/** Query the mode */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			ModeProp mode = new ModeProp();
+			poller.sendQuery(mode);
+			mess.logQuery(mode);
 			return new QueryBufferedTransactions();
 		}
 	}
@@ -77,20 +110,6 @@ public class OpSendSettings extends OpE6 {
 				new BufferedTransactionProp();
 			poller.sendQuery(count);
 			mess.logQuery(count);
-			return new QueryMode();
-		}
-	}
-
-	/** Phase to query the mode */
-	private class QueryMode extends Phase<E6Property> {
-
-		/** Query the mode */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			ModeProp mode = new ModeProp();
-			poller.sendQuery(mode);
-			mess.logQuery(mode);
 			return new QueryDownlink();
 		}
 	}

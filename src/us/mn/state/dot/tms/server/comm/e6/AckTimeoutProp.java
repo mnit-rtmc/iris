@@ -48,11 +48,17 @@ public class AckTimeoutProp extends E6Property {
 	private final Protocol protocol;
 
 	/** Data acknowledge timeout (ms) */
-	private int timeout = 0;
+	private int timeout;
+
+	/** Create a new acknowledge timeout property */
+	public AckTimeoutProp(Protocol p, int t) {
+		protocol = p;
+		timeout = t;
+	}
 
 	/** Create a new acknowledge timeout property */
 	public AckTimeoutProp(Protocol p) {
-		protocol = p;
+		this(p, 0);
 	}
 
 	/** Get the command */
@@ -80,6 +86,27 @@ public class AckTimeoutProp extends E6Property {
 		if (Protocol.fromOrdinal(parse8(d, 4)) != protocol)
 			throw new ParsingException("PROTOCOL");
 		timeout = parse16(d, 5);
+	}
+
+	/** Get the store packet data */
+	@Override
+	public byte[] storeData() {
+		byte[] d = new byte[5];
+		format16(d, 0, STORE);
+		format8(d, 2, protocol.ordinal());
+		format16(d, 3, timeout);
+		return d;
+	}
+
+	/** Parse a received store packet */
+	@Override
+	public void parseStore(byte[] d) throws IOException {
+		if (d.length != 5)
+			throw new ParsingException("DATA LEN: " + d.length);
+		if (parse16(d, 2) != STORE)
+			throw new ParsingException("SUB CMD");
+		if (Protocol.fromOrdinal(parse8(d, 4)) != protocol)
+			throw new ParsingException("PROTOCOL");
 	}
 
 	/** Get a string representation */
