@@ -148,10 +148,39 @@ public class OpSendSettings extends OpE6 {
 				FrequencyProp.Source.uplink, 903.25f);
 			mess.logStore(freq);
 			poller.sendStore(freq);
-			return new QueryDownlink();
+			return new StoreSeGoAtten();
 		}
 	}
 
+	/** Phase to store the SeGo RF attenuation */
+	private class StoreSeGoAtten extends Phase<E6Property> {
+
+		/** Store the SeGo RF attenuation */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFAttenProp atten = new RFAttenProp(RFProtocol.SeGo,
+				1, 1);
+			mess.logStore(atten);
+			poller.sendStore(atten);
+			return new StoreASTMv6Atten();
+		}
+	}
+
+	/** Phase to store the ASTMv6 RF attenuation */
+	private class StoreASTMv6Atten extends Phase<E6Property> {
+
+		/** Store the ASTMv6 RF attenuation */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFAttenProp atten = new RFAttenProp(RFProtocol.ASTMv6,
+				15, 15);
+			mess.logStore(atten);
+			poller.sendStore(atten);
+			return new QueryDownlink();
+		}
+	}
 
 
 
@@ -182,35 +211,6 @@ public class OpSendSettings extends OpE6 {
 				FrequencyProp.Source.uplink);
 			poller.sendQuery(freq);
 			mess.logQuery(freq);
-			return new QueryMuxMode();
-		}
-	}
-
-	/** Phase to query the mux mode */
-	private class QueryMuxMode extends Phase<E6Property> {
-
-		/** Query the mux mode */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			MuxModeProp mode = new MuxModeProp();
-			poller.sendQuery(mode);
-			mess.logQuery(mode);
-			return new StoreSeGoAtten();
-		}
-	}
-
-	/** Phase to store the SeGo RF attenuation */
-	private class StoreSeGoAtten extends Phase<E6Property> {
-
-		/** Store the SeGo RF attenuation */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			RFAttenProp atten = new RFAttenProp(RFProtocol.SeGo,
-				1, 1);
-			mess.logStore(atten);
-			poller.sendStore(atten);
 			return new QuerySeGoAtten();
 		}
 	}
@@ -225,21 +225,6 @@ public class OpSendSettings extends OpE6 {
 			RFAttenProp atten = new RFAttenProp(RFProtocol.SeGo);
 			poller.sendQuery(atten);
 			mess.logQuery(atten);
-			return new StoreASTMv6Atten();
-		}
-	}
-
-	/** Phase to store the ASTMv6 RF attenuation */
-	private class StoreASTMv6Atten extends Phase<E6Property> {
-
-		/** Store the ASTMv6 RF attenuation */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			RFAttenProp atten = new RFAttenProp(RFProtocol.ASTMv6,
-				15, 15);
-			mess.logStore(atten);
-			poller.sendStore(atten);
 			return new QueryASTMv6Atten();
 		}
 	}
@@ -340,6 +325,20 @@ public class OpSendSettings extends OpE6 {
 			RFControlProp ctrl = new RFControlProp();
 			poller.sendQuery(ctrl);
 			mess.logQuery(ctrl);
+			return new QueryMuxMode();
+		}
+	}
+
+	/** Phase to query the mux mode */
+	private class QueryMuxMode extends Phase<E6Property> {
+
+		/** Query the mux mode */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MuxModeProp mode = new MuxModeProp();
+			poller.sendQuery(mode);
+			mess.logQuery(mode);
 			return new QueryAntennaChannel();
 		}
 	}
