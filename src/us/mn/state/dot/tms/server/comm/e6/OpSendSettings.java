@@ -282,6 +282,21 @@ public class OpSendSettings extends OpE6 {
 				MuxModeProp.Value.channel_0);
 			mess.logStore(mode);
 			poller.sendStore(mode);
+			return new StoreAntennaChannel();
+		}
+	}
+
+	/** Phase to store the manual antenna channel control */
+	private class StoreAntennaChannel extends Phase<E6Property> {
+
+		/** Store the manual antenna channel */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			AntennaChannelProp chan = new AntennaChannelProp(
+			    AntennaChannelProp.Value.disable_manual_control);
+			mess.logStore(chan);
+			poller.sendStore(chan);
 			return new QueryDownlink();
 		}
 	}

@@ -54,7 +54,17 @@ public class AntennaChannelProp extends E6Property {
 	};
 
 	/** Antenna channel control value */
-	private Value value = Value.disable_manual_control;
+	private Value value;
+
+	/** Create an antenna channel property */
+	public AntennaChannelProp(Value v) {
+		value = v;
+	}
+
+	/** Create an antenna channel property */
+	public AntennaChannelProp() {
+		this(Value.disable_manual_control);
+	}
 
 	/** Get the command */
 	@Override
@@ -82,6 +92,24 @@ public class AntennaChannelProp extends E6Property {
 			value = v;
 		else
 			throw new ParsingException("BAD ANTENNA CHANNEL");
+	}
+
+	/** Get the store packet data */
+	@Override
+	public byte[] storeData() {
+		byte[] d = new byte[3];
+		format16(d, 0, STORE);
+		format8(d, 2, value.value);
+		return d;
+	}
+
+	/** Parse a received store packet */
+	@Override
+	public void parseStore(byte[] d) throws IOException {
+		if (d.length != 4)
+			throw new ParsingException("DATA LEN: " + d.length);
+		if (parse16(d, 2) != STORE)
+			throw new ParsingException("SUB CMD");
 	}
 
 	/** Get a string representation */
