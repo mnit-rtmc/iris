@@ -18,7 +18,8 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * RF attenuation property.
+ * RF attenuation property.  NOTE: if this property is queried before being
+ * stored, the response will be a NAK, as a SUB_COMMAND_ERROR.
  *
  * @author Douglas Lau
  */
@@ -86,6 +87,32 @@ public class RFAttenProp extends E6Property {
 			throw new ParsingException("CR");
 		downlink = (d[4] >> 4) & 0x0F;
 		uplink =   (d[4] >> 0) & 0x0F;
+	}
+
+	/** Get the store packet data */
+	@Override
+	public byte[] storeData() {
+		byte[] d = new byte[4];
+		format8(d, 0, STORE);
+		format8(d, 1, protocol.ordinal() << 4);
+		format8(d, 2, ((downlink << 4) & 0xF0) | (uplink & 0x0F));
+		format8(d, 3, 0x0D);	// Carriage-return
+		return d;
+	}
+
+	/** Parse a received store packet */
+	@Override
+	public void parseStore(byte[] d) throws IOException {
+		if (d.length != 6)
+			throw new ParsingException("DATA LEN: " + d.length);
+		if (parse8(d, 2) != STORE)
+			throw new ParsingException("SUB CMD");
+		if (RFProtocol.fromOrdinal(parse8(d, 3) >> 4) != protocol)
+			throw new ParsingException("RF PROTOCOL");
+		if (parse8(d, 4) != 0)
+			throw new ParsingException("ACK");
+		if (parse8(d, 5) != 0x0D)
+			throw new ParsingException("CR");
 	}
 
 	/** Get a string representation */

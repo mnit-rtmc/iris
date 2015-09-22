@@ -164,6 +164,21 @@ public class OpSendSettings extends OpE6 {
 			RFAttenProp atten = new RFAttenProp(RFProtocol.SeGo);
 			poller.sendQuery(atten);
 			mess.logQuery(atten);
+			return new StoreASTMv6Atten();
+		}
+	}
+
+	/** Phase to store the ASTMv6 RF attenuation */
+	private class StoreASTMv6Atten extends Phase<E6Property> {
+
+		/** Store the ASTMv6 RF attenuation */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFAttenProp atten = new RFAttenProp(RFProtocol.ASTMv6,
+				15, 15);
+			mess.logStore(atten);
+			poller.sendStore(atten);
 			return new QueryASTMv6Atten();
 		}
 	}
