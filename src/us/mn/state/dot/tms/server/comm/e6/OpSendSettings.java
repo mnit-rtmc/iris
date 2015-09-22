@@ -252,10 +252,24 @@ public class OpSendSettings extends OpE6 {
 			LineLossProp loss = new LineLossProp(2);
 			mess.logStore(loss);
 			poller.sendStore(loss);
-			return new QueryDownlink();
+			return new StoreRFControl();
 		}
 	}
 
+	/** Phase to store the RF control */
+	private class StoreRFControl extends Phase<E6Property> {
+
+		/** Store the RF control */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFControlProp ctrl = new RFControlProp(
+				RFControlProp.Value.continuous);
+			mess.logStore(ctrl);
+			poller.sendStore(ctrl);
+			return new QueryDownlink();
+		}
+	}
 
 
 
