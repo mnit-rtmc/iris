@@ -40,11 +40,17 @@ public class DataDetectProp extends E6Property {
 	private final RFProtocol protocol;
 
 	/** Data detect value (0 - 20 dB) */
-	private int value = 0;
+	private int value;
+
+	/** Create a data detect property */
+	public DataDetectProp(RFProtocol p, int v) {
+		protocol = p;
+		value = v;
+	}
 
 	/** Create a data detect property */
 	public DataDetectProp(RFProtocol p) {
-		protocol = p;
+		this(p, 0);
 	}
 
 	/** Get the command */
@@ -77,6 +83,32 @@ public class DataDetectProp extends E6Property {
 		if (parse8(d, 6) != 0x0D)
 			throw new ParsingException("CR");
 		value = parse8(d, 4);
+	}
+
+	/** Get the store packet data */
+	@Override
+	public byte[] storeData() {
+		byte[] d = new byte[4];
+		format8(d, 0, STORE);
+		format8(d, 1, protocol.ordinal() << 4);
+		format8(d, 2, value);
+		format8(d, 3, 0x0D);	// Carriage-return
+		return d;
+	}
+
+	/** Parse a received store packet */
+	@Override
+	public void parseStore(byte[] d) throws IOException {
+		if (d.length != 6)
+			throw new ParsingException("DATA LEN: " + d.length);
+		if (parse8(d, 2) != STORE)
+			throw new ParsingException("SUB CMD");
+		if (RFProtocol.fromOrdinal(parse8(d, 3) >> 4) != protocol)
+			throw new ParsingException("RF PROTOCOL");
+		if (parse8(d, 4) != 0)
+			throw new ParsingException("ACK");
+		if (parse8(d, 5) != 0x0D)
+			throw new ParsingException("CR");
 	}
 
 	/** Get a string representation */

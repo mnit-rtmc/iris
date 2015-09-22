@@ -208,10 +208,39 @@ public class OpSendSettings extends OpE6 {
 				RFProtocol.ASTMv6, 40, 255);
 			mess.logStore(seen);
 			poller.sendStore(seen);
-			return new QueryDownlink();
+			return new StoreSeGoDataDetect();
 		}
 	}
 
+	/** Phase to store the SeGo data detect */
+	private class StoreSeGoDataDetect extends Phase<E6Property> {
+
+		/** Store the SeGo data detect */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			DataDetectProp det = new DataDetectProp(RFProtocol.SeGo,
+				0);
+			mess.logStore(det);
+			poller.sendStore(det);
+			return new StoreASTMv6DataDetect();
+		}
+	}
+
+	/** Phase to store the ASTMv6 data detect */
+	private class StoreASTMv6DataDetect extends Phase<E6Property> {
+
+		/** Store the ASTMv6 data detect */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			DataDetectProp det = new DataDetectProp(
+				RFProtocol.ASTMv6, 15);
+			mess.logStore(det);
+			poller.sendStore(det);
+			return new QueryDownlink();
+		}
+	}
 
 
 
