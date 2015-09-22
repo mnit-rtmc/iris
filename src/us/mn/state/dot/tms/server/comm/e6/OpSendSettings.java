@@ -112,7 +112,10 @@ public class OpSendSettings extends OpE6 {
 			ModeProp mode = new ModeProp();
 			poller.sendQuery(mode);
 			mess.logQuery(mode);
-			return new QueryBufferedTransactions();
+			if (mode.getMode() == ModeProp.Mode.stop)
+				return new QueryBufferedTransactions();
+			else
+				return new QueryDiagStatus();
 		}
 	}
 
