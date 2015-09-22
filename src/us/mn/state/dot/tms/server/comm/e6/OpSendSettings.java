@@ -81,6 +81,23 @@ public class OpSendSettings extends OpE6 {
 			TimeDateProp stamp = new TimeDateProp();
 			poller.sendQuery(stamp);
 			mess.logQuery(stamp);
+			if (stamp.isNear(500))
+				return new QueryMode();
+			else
+				return new StoreTimeDate();
+		}
+	}
+
+	/** Phase to store the time / date */
+	private class StoreTimeDate extends Phase<E6Property> {
+
+		/** Store the time / date */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			TimeDateProp stamp = new TimeDateProp();
+			mess.logStore(stamp);
+			poller.sendStore(stamp);
 			return new QueryMode();
 		}
 	}

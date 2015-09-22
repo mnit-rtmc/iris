@@ -44,12 +44,18 @@ public class TimeDateProp extends E6Property {
 	static private final int QUERY = 0x0004;
 
 	/** Time / date stamp */
-	private long stamp = 0;
+	private long stamp = TimeSteward.currentTimeMillis();
 
 	/** Get the command */
 	@Override
 	public Command command() {
 		return CMD;
+	}
+
+	/** Check if stamp is near current time */
+	public boolean isNear(long dur) {
+		long now = TimeSteward.currentTimeMillis();
+		return (now - dur) < stamp && (now + dur) > stamp;
 	}
 
 	/** Get the query packet data */
@@ -91,6 +97,32 @@ public class TimeDateProp extends E6Property {
 		cal.set(Calendar.MILLISECOND, ms);
 		cal.set(year, month, date, hour, min, sec);
 		stamp = cal.getTimeInMillis();
+	}
+
+	/** Get the store packet data */
+	@Override
+	public byte[] storeData() {
+		Calendar cal = getUTCCalendar();
+		cal.setTimeInMillis(stamp);
+		byte[] d = new byte[9];
+		format16(d, 0, STORE);
+		format8(d, 2, cal.get(Calendar.HOUR_OF_DAY));
+		format8(d, 3, cal.get(Calendar.MINUTE));
+		format8(d, 4, cal.get(Calendar.SECOND));
+		format8(d, 5, cal.get(Calendar.MILLISECOND) / 10);
+		format8(d, 6, cal.get(Calendar.MONTH) + 1);
+		format8(d, 7, cal.get(Calendar.DATE));
+		format8(d, 8, cal.get(Calendar.YEAR) - 2000);
+		return d;
+	}
+
+	/** Parse a received store packet */
+	@Override
+	public void parseStore(byte[] d) throws IOException {
+		if (d.length != 4)
+			throw new ParsingException("DATA LEN: " + d.length);
+		if (parse16(d, 2) != STORE)
+			throw new ParsingException("SUB CMD");
 	}
 
 	/** Get a string representation */
