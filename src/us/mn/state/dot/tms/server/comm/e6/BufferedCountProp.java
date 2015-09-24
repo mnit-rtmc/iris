@@ -18,37 +18,27 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Buffering mode property.
+ * Buffered tag transaction count property.
  *
  * @author Douglas Lau
  */
-public class BufferingModeProp extends E6Property {
+public class BufferedCountProp extends E6Property {
 
 	/** System information command */
 	static private final Command CMD =new Command(CommandGroup.SYSTEM_INFO);
 
 	/** Store command code */
-	static private final int STORE = 0x0016;
+	static private final int STORE = 0x0009;
 
 	/** Query command code */
-	static private final int QUERY = 0x0017;
+	static private final int QUERY = 0x0008;
 
-	/** Buffering enabled */
-	private boolean enabled;
+	/** Count of buffered tag transactions */
+	private int count = 0;
 
-	/** Is buffering enabled? */
-	public boolean isEnabled() {
-		return enabled;
-	}
-
-	/** Create a new buffering mode property */
-	public BufferingModeProp(boolean e) {
-		enabled = e;
-	}
-
-	/** Create a new buffering mode property */
-	public BufferingModeProp() {
-		this(false);
+	/** Get the buffered tag transaction count */
+	public int getCount() {
+		return count;
 	}
 
 	/** Get the command */
@@ -68,34 +58,16 @@ public class BufferingModeProp extends E6Property {
 	/** Parse a received query packet */
 	@Override
 	public void parseQuery(byte[] d) throws IOException {
-		if (d.length != 5)
+		if (d.length != 9)
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse16(d, 2) != QUERY)
 			throw new ParsingException("SUB CMD");
-		enabled = parse8(d, 4) != 0;
-	}
-
-	/** Get the store packet data */
-	@Override
-	public byte[] storeData() {
-		byte[] d = new byte[3];
-		format16(d, 0, STORE);
-		format8(d, 2, (enabled) ? 1 : 0);
-		return d;
-	}
-
-	/** Parse a received store packet */
-	@Override
-	public void parseStore(byte[] d) throws IOException {
-		if (d.length != 4)
-			throw new ParsingException("DATA LEN: " + d.length);
-		if (parse16(d, 2) != STORE)
-			throw new ParsingException("SUB CMD");
+		count = parse32(d, 4);
 	}
 
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "buffered transaction mode: " + enabled;
+		return "buffered tag transaction count: " + count;
 	}
 }

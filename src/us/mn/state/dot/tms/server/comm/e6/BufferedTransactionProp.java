@@ -18,7 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Buffered tag transaction count property.
+ * Buffered tag transaction property.
  *
  * @author Douglas Lau
  */
@@ -27,14 +27,16 @@ public class BufferedTransactionProp extends E6Property {
 	/** System information command */
 	static private final Command CMD =new Command(CommandGroup.SYSTEM_INFO);
 
-	/** Store command code */
-	static private final int STORE = 0x0009;
-
 	/** Query command code */
-	static private final int QUERY = 0x0008;
+	static private final int QUERY = 0x0007;
 
-	/** Count of buffered tag transactions */
-	private int count = 0;
+	/** Buffered transaction number */
+	private final int n_trans;
+
+	/** Create a new buffered transaction property */
+	public BufferedTransactionProp(int n) {
+		n_trans = n;
+	}
 
 	/** Get the command */
 	@Override
@@ -45,24 +47,26 @@ public class BufferedTransactionProp extends E6Property {
 	/** Get the query packet data */
 	@Override
 	public byte[] queryData() {
-		byte[] d = new byte[2];
+		byte[] d = new byte[6];
 		format16(d, 0, QUERY);
+		format32(d, 2, n_trans);
 		return d;
 	}
 
 	/** Parse a received query packet */
 	@Override
 	public void parseQuery(byte[] d) throws IOException {
-		if (d.length != 9)
+		if (d.length < 8 || d.length > 64)
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse16(d, 2) != QUERY)
 			throw new ParsingException("SUB CMD");
-		count = parse32(d, 4);
+		if (parse32(d, 4) != n_trans)
+			throw new ParsingException("TRANSACTION NUMBER");
 	}
 
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "buffered tag transactions: " + count;
+		return "buffered tag transaction: " + n_trans;
 	}
 }

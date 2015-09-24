@@ -47,21 +47,6 @@ public class OpQueryStatus extends OpE6 {
 			DiagStatusProp stat = new DiagStatusProp();
 			poller.sendQuery(stat);
 			mess.logQuery(stat);
-			return new QueryBufferedTransactions();
-		}
-	}
-
-	/** Phase to query the buffered tag transaction count */
-	private class QueryBufferedTransactions extends Phase<E6Property> {
-
-		/** Query the buffered tag transaction count */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			BufferedTransactionProp count =
-				new BufferedTransactionProp();
-			poller.sendQuery(count);
-			mess.logQuery(count);
 			return new QueryBufferingMode();
 		}
 	}
@@ -76,7 +61,63 @@ public class OpQueryStatus extends OpE6 {
 			BufferingModeProp mode = new BufferingModeProp();
 			poller.sendQuery(mode);
 			mess.logQuery(mode);
-			return null;
+			if (mode.isEnabled())
+				return new StoreBufferingMode();
+			else
+				return new QueryBufferedCount();
+		}
+	}
+
+	/** Phase to store the buffering mode */
+	private class StoreBufferingMode extends Phase<E6Property> {
+
+		/** Store the buffering mode */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			BufferingModeProp mode = new BufferingModeProp(false);
+			mess.logStore(mode);
+			poller.sendStore(mode);
+			return new QueryBufferedCount();
+		}
+	}
+
+	/** Phase to query the buffered tag transaction count */
+	private class QueryBufferedCount extends Phase<E6Property> {
+
+		/** Query the buffered tag transaction count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			BufferedCountProp count = new BufferedCountProp();
+			poller.sendQuery(count);
+			mess.logQuery(count);
+			return new QueryBufferedTransactions(count.getCount());
+		}
+	}
+
+	/** Phase to query the buffered tag transactions */
+	private class QueryBufferedTransactions extends Phase<E6Property> {
+		private final int n_count;
+		private int n_curr;
+		private QueryBufferedTransactions(int n) {
+			n_count = n;
+			n_curr = 1;
+		}
+
+		/** Query the buffered tag transactions */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			BufferedTransactionProp trans =
+				new BufferedTransactionProp(n_curr);
+			poller.sendQuery(trans);
+			mess.logQuery(trans);
+			if (n_curr < n_count) {
+				n_curr++;
+				return this;
+			} else
+				return null;
 		}
 	}
 }
