@@ -76,6 +76,18 @@ public class Command {
 		return b;
 	}
 
+	/** Test for equality */
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Command) {
+			Command c = (Command) o;
+			return group == c.group &&
+			       unsolicited == c.unsolicited &&
+			       acknowledge == c.acknowledge;
+		} else
+			return false;
+	}
+
 	/** Get a string representation */
 	@Override
 	public String toString() {

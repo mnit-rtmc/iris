@@ -75,9 +75,13 @@ public class E6Packet {
 		if (pending != null) {
 			Response rsp = p.parseResponse();
 			if (rsp == Response.COMMAND_COMPLETE) {
-				pending = null;
-				copy(p);
-				return true;
+				Command cmd = p.parseCommand();
+				if (cmd.equals(pending.cmd) &&
+				    p.parseSubCmd(cmd) == pending.sub_cmd)
+				{
+					copy(p);
+					return true;
+				}
 			}
 		}
 		return false;
@@ -85,6 +89,7 @@ public class E6Packet {
 
 	/** Copy from another packet */
 	private void copy(E6Packet p) {
+		pending = null;
 		System.arraycopy(p.pkt, 0, pkt, 0, pkt.length);
 		n_bytes = p.n_bytes;
 		msn = p.msn;
@@ -220,6 +225,21 @@ public class E6Packet {
 			return ((pkt[6] & 0xFF) << 8) | (pkt[7] & 0xFF);
 		else
 			return 0;
+	}
+
+	/** Parse the sub-command field */
+	private int parseSubCmd(Command cmd) {
+		switch (cmd.group) {
+		case RF_TRANSCEIVER:
+			if (n_bytes >= 9)
+				return pkt[8] & 0xFF;
+			break;
+		default:
+			if (n_bytes >= 9)
+				return ((pkt[8] & 0xFF) << 8) | (pkt[9] & 0xFF);
+			break;
+		}
+		return 0;
 	}
 
 	/** Get a string representation */

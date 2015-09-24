@@ -189,9 +189,19 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 			log("tx", tx_pkt);
 			tx_pkt.send();
 		}
+		Command cmd = p.command();
+		return new PendingCommand(cmd, getSubCmd(cmd, data));
+	}
+
+	/** Get the sub-command */
+	private int getSubCmd(Command cmd, byte[] data) {
 		// FIXME: get sub-command from property?
-		int sc = ((data[0] << 8) & 0xFF) | ((data[1] << 0) & 0xFF);
-		return new PendingCommand(p.command(), sc);
+		switch (cmd.group) {
+		case RF_TRANSCEIVER:
+			return data[0] & 0xFF;
+		default:
+			return ((data[0] << 8) & 0xFF) | (data[1] & 0xFF);
+		}
 	}
 
 	/** Send a query packet */
