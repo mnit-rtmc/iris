@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.e6;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.SocketTimeoutException;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.PacketMessenger;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -28,6 +29,10 @@ import us.mn.state.dot.tms.utils.HexString;
  * @author Douglas Lau
  */
 public class E6Packet {
+
+	/** Timeout exception */
+	static private final IOException TIMEOUT =
+		new SocketTimeoutException("TIMEOUT");
 
 	/** Exception thrown when stream is closed */
 	static private final EOFException CLOSED = new EOFException("CLOSED");
@@ -60,13 +65,62 @@ public class E6Packet {
 		rx = r;
 	}
 
+	/** Pending command */
+	private PendingCommand pending;
+
+	/** Check for a response to a pending command */
+	public synchronized boolean checkResponse(E6Packet p)
+		throws IOException
+	{
+		if (pending != null) {
+			Response rsp = p.parseResponse();
+			if (rsp == Response.COMMAND_COMPLETE) {
+				pending = null;
+				copy(p);
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Copy from another packet */
-	public synchronized void copy(E6Packet p) {
+	private void copy(E6Packet p) {
 		System.arraycopy(p.pkt, 0, pkt, 0, pkt.length);
 		n_bytes = p.n_bytes;
 		msn = p.msn;
 		csn = p.csn;
 		notify();
+	}
+
+	/** Wait for a response to a pending command */
+	public synchronized byte[] waitData(int timeout, PendingCommand pc)
+		throws IOException
+	{
+		try {
+			pending = pc;
+			try {
+				wait(timeout);
+			}
+			catch (InterruptedException e) {
+				// doesn't matter
+			}
+			if (pending != null)
+				throw TIMEOUT;
+			return parseData();
+		}
+		finally {
+			pending = null;
+		}
+	}
+
+	/** Parse the packet data */
+	private byte[] parseData() throws IOException {
+		if (n_bytes >= 7) {
+			byte[] data = new byte[n_bytes - 7];
+			System.arraycopy(pkt, 6, data, 0, data.length);
+			return data;
+		}
+		throw new ParsingException("BAD LEN: " + n_bytes);
 	}
 
 	/** Format command packet */
@@ -166,16 +220,6 @@ public class E6Packet {
 			return ((pkt[6] & 0xFF) << 8) | (pkt[7] & 0xFF);
 		else
 			return 0;
-	}
-
-	/** Parse the packet data */
-	public byte[] parseData() throws IOException {
-		if (n_bytes >= 7) {
-			byte[] data = new byte[n_bytes - 7];
-			System.arraycopy(pkt, 6, data, 0, data.length);
-			return data;
-		}
-		throw new ParsingException("BAD LEN: " + n_bytes);
 	}
 
 	/** Get a string representation */

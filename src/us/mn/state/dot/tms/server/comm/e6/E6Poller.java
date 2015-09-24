@@ -77,9 +77,6 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** Response Packet */
 	private final E6Packet resp_pkt;
 
-	/** Waiting flag */
-	private boolean waiting = false;
-
 	/** Create a new E6 poller */
 	public E6Poller(String n, PacketMessenger m) {
 		super(n, m);
@@ -150,14 +147,8 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 				E6_PKT_LOG.log(name + " rx ** msn seq ERR **");
 		}
 		rx_pkt.updateMsn();
-		if (waiting) {
-			Response rsp = rx_pkt.parseResponse();
-			if (rsp == Response.COMMAND_COMPLETE) {
-				waiting = false;
-				resp_pkt.copy(rx_pkt);
-			}
+		if (resp_pkt.checkResponse(rx_pkt))
 			return;
-		}
 		if (cmd.unsolicited) {
 			// FIXME: log tag read
 			return;
@@ -180,70 +171,35 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 
 	/** Send a store packet */
 	public void sendStore(E6Property p) throws IOException {
+		byte[] data = p.storeData();
+		PendingCommand pc = sendPacket(p, data);
+		byte[] resp = resp_pkt.waitData(getTimeout(), pc);
+		p.parseStore(resp);
+	}
+
+	/** Send a packet */
+	private PendingCommand sendPacket(E6Property p, byte[] data)
+		throws IOException
+	{
 		synchronized (tx_pkt) {
 			tx_pkt.updateMsn();
 			if (p.command().group == CommandGroup.SYSTEM_INFO)
 				tx_pkt.updateCsn();
-			tx_pkt.format(p.command(), p.storeData());
+			tx_pkt.format(p.command(), data);
 			log("tx", tx_pkt);
 			tx_pkt.send();
 		}
-		waitStore(p);
-	}
-
-	/** Wait for a store response packet */
-	private void waitStore(E6Property p) throws IOException {
-		synchronized (resp_pkt) {
-			try {
-				waiting = true;
-				try {
-					resp_pkt.wait(getTimeout());
-				}
-				catch (InterruptedException e) {
-					// doesn't matter
-				}
-				if (waiting)
-					throw TIMEOUT;
-				p.parseStore(resp_pkt.parseData());
-			}
-			finally {
-				waiting = false;
-			}
-		}
+		// FIXME: get sub-command from property?
+		int sc = ((data[0] << 8) & 0xFF) | ((data[1] << 0) & 0xFF);
+		return new PendingCommand(p.command(), sc);
 	}
 
 	/** Send a query packet */
 	public void sendQuery(E6Property p) throws IOException {
-		synchronized (tx_pkt) {
-			tx_pkt.updateMsn();
-			if (p.command().group == CommandGroup.SYSTEM_INFO)
-				tx_pkt.updateCsn();
-			tx_pkt.format(p.command(), p.queryData());
-			log("tx", tx_pkt);
-			tx_pkt.send();
-		}
-		waitQuery(p);
-	}
-
-	/** Wait for a query response packet */
-	private void waitQuery(E6Property p) throws IOException {
-		synchronized (resp_pkt) {
-			try {
-				waiting = true;
-				try {
-					resp_pkt.wait(getTimeout());
-				}
-				catch (InterruptedException e) {
-					// doesn't matter
-				}
-				if (waiting)
-					throw TIMEOUT;
-				p.parseQuery(resp_pkt.parseData());
-			}
-			finally {
-				waiting = false;
-			}
-		}
+		byte[] data = p.queryData();
+		PendingCommand pc = sendPacket(p, data);
+		byte[] resp = resp_pkt.waitData(getTimeout(), pc);
+		p.parseQuery(resp);
 	}
 
 	/** Check if a drop address is valid */
