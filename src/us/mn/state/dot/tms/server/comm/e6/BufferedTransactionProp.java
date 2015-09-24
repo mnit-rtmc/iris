@@ -59,13 +59,13 @@ public class BufferedTransactionProp extends E6Property {
 	/** Parse a received query packet */
 	@Override
 	public void parseQuery(byte[] d) throws IOException {
-		if (d.length < 8 || d.length > 64)
+		if (d.length < 9 || d.length > 64)
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse16(d, 2) != QUERY)
 			throw new ParsingException("SUB CMD");
 		if (parse32(d, 4) != n_trans)
 			throw new ParsingException("TRANSACTION NUMBER");
-		transaction = new TagTransaction(d, 8);
+		transaction = new TagTransaction(d, 8, d.length - 9);
 	}
 
 	/** Get a string representation */

@@ -150,15 +150,17 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 				E6_PKT_LOG.log(name + " rx ** msn seq ERR **");
 		}
 		rx_pkt.updateMsn();
-		if (cmd.unsolicited) {
-			// FIXME: log tag read
-			return;
-		} else if (waiting) {
+		if (waiting) {
 			Response rsp = rx_pkt.parseResponse();
 			if (rsp == Response.COMMAND_COMPLETE) {
 				waiting = false;
 				resp_pkt.copy(rx_pkt);
 			}
+			return;
+		}
+		if (cmd.unsolicited) {
+			// FIXME: log tag read
+			return;
 		}
 	}
 

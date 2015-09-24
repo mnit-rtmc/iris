@@ -26,14 +26,16 @@ public class TagTransaction extends ControllerProperty {
 
 	/** Tag transaction types */
 	public enum TransactionType {
-		SeGo_streamlined_read	(0x3021),
-		read_verify_page	(0x3022),
-		SeGo_seen_frame_count	(0x3043),
-		ASTM_read		(0x5014);
-		private TransactionType(int c) {
+		SeGo_streamlined_read	(0x3021, 27),
+		read_verify_page	(0x3022, 19),
+		SeGo_seen_frame_count	(0x3043, 12),
+		ASTM_read		(0x5014, 12);
+		private TransactionType(int c, int l) {
 			code = c;
+			len = l;
 		}
 		public final int code;
+		public final int len;
 		static public TransactionType fromCode(int c) {
 			for (TransactionType tt: values()) {
 				if (tt.code == c)
@@ -43,20 +45,39 @@ public class TagTransaction extends ControllerProperty {
 		}
 	}
 
-	/** Tag transaction type */
-	public final TransactionType t_type;
+	/** Transaction data */
+	private final byte[] data;
 
 	/** Create a new tag transaction */
-	public TagTransaction(byte[] data, int off) throws ParsingException {
-		int c = parse16(data, off);
-		t_type = TransactionType.fromCode(c);
-		if (t_type == null)
-			throw new ParsingException("TRANSACTION TYPE: " + c);
+	public TagTransaction(byte[] d, int off, int len) {
+		data = new byte[len];
+		System.arraycopy(d, off, data, 0, len);
+	}
+
+	/** Get the transaction type */
+	public TransactionType getTransactionType() {
+		int c = parse16(data, 0);
+		return TransactionType.fromCode(c);
+	}
+
+	/** Get the transponder ID */
+	public Integer getId() {
+		TransactionType tt = getTransactionType();
+		switch (tt) {
+		case SeGo_streamlined_read:
+			if (data.length == tt.len)
+				return parse32(data, 6) & 0xFFFFFF;
+			break;
+		default:
+			break;
+		}
+		return null;
 	}
 
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "tag transaction: " + t_type;
+		return "tag transaction: " + getTransactionType() + ' ' +
+			getId();
 	}
 }
