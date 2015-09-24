@@ -118,219 +118,8 @@ public class OpSendSettings extends OpE6 {
 			ModeProp mode = new ModeProp();
 			poller.sendQuery(mode);
 			mess.logQuery(mode);
-			if (mode.getMode() == ModeProp.Mode.stop) {
+			if (mode.getMode() == ModeProp.Mode.stop)
 				stop = true;
-				return new StoreDownlink();
-			} else
-				return new QueryDownlink();
-		}
-	}
-
-	/** Phase to store the downlink frequency */
-	private class StoreDownlink extends Phase<E6Property> {
-
-		/** Store the downlink frequency */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			FrequencyProp freq = new FrequencyProp(
-				FrequencyProp.Source.downlink, 915.75f);
-			mess.logStore(freq);
-			poller.sendStore(freq);
-			return new StoreUplink();
-		}
-	}
-
-	/** Phase to store the uplink frequency */
-	private class StoreUplink extends Phase<E6Property> {
-
-		/** Store the uplink frequency */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			FrequencyProp freq = new FrequencyProp(
-				FrequencyProp.Source.uplink, 903.25f);
-			mess.logStore(freq);
-			poller.sendStore(freq);
-			return new StoreSeGoAtten();
-		}
-	}
-
-	/** Phase to store the SeGo RF attenuation */
-	private class StoreSeGoAtten extends Phase<E6Property> {
-
-		/** Store the SeGo RF attenuation */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			RFAttenProp atten = new RFAttenProp(RFProtocol.SeGo,
-				1, 1);
-			mess.logStore(atten);
-			poller.sendStore(atten);
-			return new StoreASTMv6Atten();
-		}
-	}
-
-	/** Phase to store the ASTMv6 RF attenuation */
-	private class StoreASTMv6Atten extends Phase<E6Property> {
-
-		/** Store the ASTMv6 RF attenuation */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			RFAttenProp atten = new RFAttenProp(RFProtocol.ASTMv6,
-				15, 15);
-			mess.logStore(atten);
-			poller.sendStore(atten);
-			return new StoreSeGoSeen();
-		}
-	}
-
-	/** Phase to store the SeGo seen count */
-	private class StoreSeGoSeen extends Phase<E6Property> {
-
-		/** Store the SeGo seen count */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			SeenCountProp seen = new SeenCountProp(RFProtocol.SeGo,
-				40, 255);
-			mess.logStore(seen);
-			poller.sendStore(seen);
-			return new StoreASTMv6Seen();
-		}
-	}
-
-	/** Phase to store the ASTMv6 seen count */
-	private class StoreASTMv6Seen extends Phase<E6Property> {
-
-		/** Store the ASTMv6 seen count */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			SeenCountProp seen = new SeenCountProp(
-				RFProtocol.ASTMv6, 40, 255);
-			mess.logStore(seen);
-			poller.sendStore(seen);
-			return new StoreSeGoDataDetect();
-		}
-	}
-
-	/** Phase to store the SeGo data detect */
-	private class StoreSeGoDataDetect extends Phase<E6Property> {
-
-		/** Store the SeGo data detect */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			DataDetectProp det = new DataDetectProp(RFProtocol.SeGo,
-				0);
-			mess.logStore(det);
-			poller.sendStore(det);
-			return new StoreASTMv6DataDetect();
-		}
-	}
-
-	/** Phase to store the ASTMv6 data detect */
-	private class StoreASTMv6DataDetect extends Phase<E6Property> {
-
-		/** Store the ASTMv6 data detect */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			DataDetectProp det = new DataDetectProp(
-				RFProtocol.ASTMv6, 15);
-			mess.logStore(det);
-			poller.sendStore(det);
-			return new StoreLineLoss();
-		}
-	}
-
-	/** Phase to store the line loss */
-	private class StoreLineLoss extends Phase<E6Property> {
-
-		/** Store the line loss */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			LineLossProp loss = new LineLossProp(2);
-			mess.logStore(loss);
-			poller.sendStore(loss);
-			return new StoreRFControl();
-		}
-	}
-
-	/** Phase to store the RF control */
-	private class StoreRFControl extends Phase<E6Property> {
-
-		/** Store the RF control */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			RFControlProp ctrl = new RFControlProp(
-				RFControlProp.Value.continuous);
-			mess.logStore(ctrl);
-			poller.sendStore(ctrl);
-			return new StoreMuxMode();
-		}
-	}
-
-	/** Phase to store the mux mode */
-	private class StoreMuxMode extends Phase<E6Property> {
-
-		/** Store the mux mode */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			MuxModeProp mode = new MuxModeProp(
-				MuxModeProp.Value.channel_0);
-			mess.logStore(mode);
-			poller.sendStore(mode);
-			return new StoreAntennaChannel();
-		}
-	}
-
-	/** Phase to store the manual antenna channel control */
-	private class StoreAntennaChannel extends Phase<E6Property> {
-
-		/** Store the manual antenna channel */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			AntennaChannelProp chan = new AntennaChannelProp(
-			    AntennaChannelProp.Value.disable_manual_control);
-			mess.logStore(chan);
-			poller.sendStore(chan);
-			return new StoreMasterSlave();
-		}
-	}
-
-	/** Phase to store the master/slave setting */
-	private class StoreMasterSlave extends Phase<E6Property> {
-
-		/** Store the master/slave setting */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			MasterSlaveProp mstr = new MasterSlaveProp(
-				MasterSlaveProp.Value.master, 0);
-			mess.logStore(mstr);
-			poller.sendStore(mstr);
-			return new StoreAppendData();
-		}
-	}
-
-	/** Phase to store the append data */
-	private class StoreAppendData extends Phase<E6Property> {
-
-		/** Store the append data */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			AppendDataProp append = new AppendDataProp(
-				AppendDataProp.Value.date_time_stamp);
-			mess.logStore(append);
-			poller.sendStore(append);
 			return new QueryDownlink();
 		}
 	}
@@ -563,6 +352,217 @@ public class OpSendSettings extends OpE6 {
 			mess.logStore(mode);
 			poller.sendStore(mode);
 			return null;
+		}
+	}
+
+	/* -- Experimental stuff -- */
+
+	/** Phase to store the downlink frequency */
+	private class StoreDownlink extends Phase<E6Property> {
+
+		/** Store the downlink frequency */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			FrequencyProp freq = new FrequencyProp(
+				FrequencyProp.Source.downlink, 915.75f);
+			mess.logStore(freq);
+			poller.sendStore(freq);
+			return new StoreUplink();
+		}
+	}
+
+	/** Phase to store the uplink frequency */
+	private class StoreUplink extends Phase<E6Property> {
+
+		/** Store the uplink frequency */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			FrequencyProp freq = new FrequencyProp(
+				FrequencyProp.Source.uplink, 903.25f);
+			mess.logStore(freq);
+			poller.sendStore(freq);
+			return new StoreSeGoAtten();
+		}
+	}
+
+	/** Phase to store the SeGo RF attenuation */
+	private class StoreSeGoAtten extends Phase<E6Property> {
+
+		/** Store the SeGo RF attenuation */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFAttenProp atten = new RFAttenProp(RFProtocol.SeGo,
+				1, 1);
+			mess.logStore(atten);
+			poller.sendStore(atten);
+			return new StoreASTMv6Atten();
+		}
+	}
+
+	/** Phase to store the ASTMv6 RF attenuation */
+	private class StoreASTMv6Atten extends Phase<E6Property> {
+
+		/** Store the ASTMv6 RF attenuation */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFAttenProp atten = new RFAttenProp(RFProtocol.ASTMv6,
+				15, 15);
+			mess.logStore(atten);
+			poller.sendStore(atten);
+			return new StoreSeGoSeen();
+		}
+	}
+
+	/** Phase to store the SeGo seen count */
+	private class StoreSeGoSeen extends Phase<E6Property> {
+
+		/** Store the SeGo seen count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			SeenCountProp seen = new SeenCountProp(RFProtocol.SeGo,
+				40, 255);
+			mess.logStore(seen);
+			poller.sendStore(seen);
+			return new StoreASTMv6Seen();
+		}
+	}
+
+	/** Phase to store the ASTMv6 seen count */
+	private class StoreASTMv6Seen extends Phase<E6Property> {
+
+		/** Store the ASTMv6 seen count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			SeenCountProp seen = new SeenCountProp(
+				RFProtocol.ASTMv6, 40, 255);
+			mess.logStore(seen);
+			poller.sendStore(seen);
+			return new StoreSeGoDataDetect();
+		}
+	}
+
+	/** Phase to store the SeGo data detect */
+	private class StoreSeGoDataDetect extends Phase<E6Property> {
+
+		/** Store the SeGo data detect */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			DataDetectProp det = new DataDetectProp(RFProtocol.SeGo,
+				0);
+			mess.logStore(det);
+			poller.sendStore(det);
+			return new StoreASTMv6DataDetect();
+		}
+	}
+
+	/** Phase to store the ASTMv6 data detect */
+	private class StoreASTMv6DataDetect extends Phase<E6Property> {
+
+		/** Store the ASTMv6 data detect */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			DataDetectProp det = new DataDetectProp(
+				RFProtocol.ASTMv6, 15);
+			mess.logStore(det);
+			poller.sendStore(det);
+			return new StoreLineLoss();
+		}
+	}
+
+	/** Phase to store the line loss */
+	private class StoreLineLoss extends Phase<E6Property> {
+
+		/** Store the line loss */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			LineLossProp loss = new LineLossProp(2);
+			mess.logStore(loss);
+			poller.sendStore(loss);
+			return new StoreRFControl();
+		}
+	}
+
+	/** Phase to store the RF control */
+	private class StoreRFControl extends Phase<E6Property> {
+
+		/** Store the RF control */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFControlProp ctrl = new RFControlProp(
+				RFControlProp.Value.continuous);
+			mess.logStore(ctrl);
+			poller.sendStore(ctrl);
+			return new StoreMuxMode();
+		}
+	}
+
+	/** Phase to store the mux mode */
+	private class StoreMuxMode extends Phase<E6Property> {
+
+		/** Store the mux mode */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MuxModeProp mode = new MuxModeProp(
+				MuxModeProp.Value.no_multiplexing);
+			mess.logStore(mode);
+			poller.sendStore(mode);
+			return new StoreAntennaChannel();
+		}
+	}
+
+	/** Phase to store the manual antenna channel control */
+	private class StoreAntennaChannel extends Phase<E6Property> {
+
+		/** Store the manual antenna channel */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			AntennaChannelProp chan = new AntennaChannelProp(
+			    AntennaChannelProp.Value.disable_manual_control);
+			mess.logStore(chan);
+			poller.sendStore(chan);
+			return new StoreMasterSlave();
+		}
+	}
+
+	/** Phase to store the master/slave setting */
+	private class StoreMasterSlave extends Phase<E6Property> {
+
+		/** Store the master/slave setting */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MasterSlaveProp mstr = new MasterSlaveProp(
+				MasterSlaveProp.Value.master, 0);
+			mess.logStore(mstr);
+			poller.sendStore(mstr);
+			return new StoreAppendData();
+		}
+	}
+
+	/** Phase to store the append data */
+	private class StoreAppendData extends Phase<E6Property> {
+
+		/** Store the append data */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			AppendDataProp append = new AppendDataProp(
+				AppendDataProp.Value.date_time_stamp);
+			mess.logStore(append);
+			poller.sendStore(append);
+			return new QueryDownlink();
 		}
 	}
 }
