@@ -33,6 +33,9 @@ public class BufferedTransactionProp extends E6Property {
 	/** Buffered transaction number */
 	private final int n_trans;
 
+	/** Tag Transaction */
+	private TagTransaction transaction;
+
 	/** Create a new buffered transaction property */
 	public BufferedTransactionProp(int n) {
 		n_trans = n;
@@ -62,11 +65,12 @@ public class BufferedTransactionProp extends E6Property {
 			throw new ParsingException("SUB CMD");
 		if (parse32(d, 4) != n_trans)
 			throw new ParsingException("TRANSACTION NUMBER");
+		transaction = new TagTransaction(d, 8);
 	}
 
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "buffered tag transaction: " + n_trans;
+		return "buffered: " + n_trans + ' ' + transaction;
 	}
 }
