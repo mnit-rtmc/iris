@@ -62,6 +62,20 @@ public class OpQueryStatus extends OpE6 {
 				new BufferedTransactionProp();
 			poller.sendQuery(count);
 			mess.logQuery(count);
+			return new QueryBufferingMode();
+		}
+	}
+
+	/** Phase to query the buffering mode */
+	private class QueryBufferingMode extends Phase<E6Property> {
+
+		/** Query the buffering mode */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			BufferingModeProp mode = new BufferingModeProp();
+			poller.sendQuery(mode);
+			mess.logQuery(mode);
 			return null;
 		}
 	}

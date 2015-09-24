@@ -361,6 +361,20 @@ public class OpSendSettings extends OpE6 {
 				FrequencyProp.Source.uplink);
 			poller.sendQuery(freq);
 			mess.logQuery(freq);
+			return new QueryProtocols();
+		}
+	}
+
+	/** Phase to query the protocols */
+	private class QueryProtocols extends Phase<E6Property> {
+
+		/** Query the protocols */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			ProtocolProp prot = new ProtocolProp();
+			poller.sendQuery(prot);
+			mess.logQuery(prot);
 			return new QuerySeGoAtten();
 		}
 	}
