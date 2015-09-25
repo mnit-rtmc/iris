@@ -183,7 +183,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 		if (data.length >= 3) {
 			TagTransaction tt = new TagTransaction(data, 2,
 				data.length - 3);
-			E6_LOG.log("tag response: " + tt);
+			E6_LOG.log(tt.toString());
 		}
 	}
 

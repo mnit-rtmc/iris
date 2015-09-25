@@ -24,12 +24,18 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class TagTransaction extends ControllerProperty {
 
+	/** SeGo region code for MN */
+	static private final int REGION_MN = 0x0A;
+
+	/** SeGo agency code for MnDOT */
+	static private final int AGENCY_MNDOT = 0x09;
+
 	/** Tag transaction types */
 	public enum TransactionType {
 		SeGo_streamlined_read	(0x3021, 27),
 		read_verify_page	(0x3022, 19),
-		SeGo_seen_frame_count	(0x3043, 12),
-		ASTM_read		(0x5014, 12);
+		seen_frame_count	(0x3043, 12),
+		ASTM_read		(0x5014, 16);
 		private TransactionType(int c, int l) {
 			code = c;
 			len = l;
@@ -62,22 +68,75 @@ public class TagTransaction extends ControllerProperty {
 
 	/** Get the transponder ID */
 	public Integer getId() {
-		TransactionType tt = getTransactionType();
-		switch (tt) {
-		case SeGo_streamlined_read:
-			if (data.length == tt.len)
-				return parse32(data, 5) & 0xFFFFFF;
-			break;
-		default:
-			break;
-		}
+		if (isValidSeGoRead())
+			return parseSeGoId();
+		if (isValidASTMRead())
+			return parseASTMId();
 		return null;
+	}
+
+	/** Check if transaction is a valid SeGo streamlined read */
+	private boolean isValidSeGoRead() {
+		TransactionType tt = getTransactionType();
+		if (tt == TransactionType.SeGo_streamlined_read) {
+			// FIXME: check CRC
+			return (data.length == tt.len);
+		}
+		return false;
+	}
+
+	/** Parse a SeGo ID */
+	private Integer parseSeGoId() {
+		if (parse8(data, 4) != REGION_MN)
+			return null;
+		if (parse8(data, 5) != AGENCY_MNDOT)
+			return null;
+		return parse32(data, 5) & 0xFFFFFF;
+	}
+
+	/** Check if transaction is a valid ASTM read */
+	private boolean isValidASTMRead() {
+		TransactionType tt = getTransactionType();
+		if (tt == TransactionType.ASTM_read) {
+			// FIXME: check CRC
+			return (data.length == tt.len);
+		}
+		return false;
+	}
+
+	/** Parse an ASTM ID */
+	private Integer parseASTMId() {
+		return parse32(data, 3);
+	}
+
+	/** Get HOV flag */
+	public Boolean getHOV() {
+		if (isValidSeGoRead())
+			return parseSeGoHOV();
+		return null;
+	}
+
+	/** Parse a SeGo HOV flag */
+	private Boolean parseSeGoHOV() {
+		return (parse8(data, 2) & 0x03) != 0;
 	}
 
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "tag transaction: " + getTransactionType() + ' ' +
-			getId();
+		StringBuilder sb = new StringBuilder();
+		sb.append("tag transaction: ");
+		sb.append(getTransactionType());
+		Integer tid = getId();
+		if (tid != null) {
+			sb.append(' ');
+			sb.append(Integer.toHexString(tid));
+		}
+		Boolean hov = getHOV();
+		if (hov != null) {
+			sb.append(" HOV: ");
+			sb.append(hov);
+		}
+		return sb.toString();
 	}
 }
