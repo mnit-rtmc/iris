@@ -66,7 +66,7 @@ public class TagTransaction extends ControllerProperty {
 		switch (tt) {
 		case SeGo_streamlined_read:
 			if (data.length == tt.len)
-				return parse32(data, 6) & 0xFFFFFF;
+				return parse32(data, 5) & 0xFFFFFF;
 			break;
 		default:
 			break;
