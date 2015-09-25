@@ -32,6 +32,10 @@ import us.mn.state.dot.tms.server.comm.TagReaderPoller;
  */
 public class E6Poller extends MessagePoller implements TagReaderPoller {
 
+	/** Tag response */
+	static private final Command TAG_RESPONSE = new Command(
+		CommandGroup.MODE);
+
 	/** Timeout exception */
 	static private final IOException TIMEOUT =
 		new SocketTimeoutException("TIMEOUT");
@@ -76,6 +80,9 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 
 	/** Response Packet */
 	private final E6Packet resp_pkt;
+
+	/** Tag reader */
+	private TagReaderImpl reader;
 
 	/** Create a new E6 poller */
 	public E6Poller(String n, PacketMessenger m) {
@@ -149,9 +156,10 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 		rx_pkt.updateMsn();
 		if (resp_pkt.checkResponse(rx_pkt))
 			return;
-		if (cmd.unsolicited) {
-			// FIXME: log tag read
-			return;
+		if (cmd.equals(TAG_RESPONSE)) {
+			Response rsp = rx_pkt.parseResponse();
+			if (rsp == Response.COMMAND_COMPLETE)
+				logTagTransaction();
 		}
 	}
 
@@ -166,6 +174,16 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 			tx_pkt.format(c, data);
 			log("tx", tx_pkt);
 			tx_pkt.send();
+		}
+	}
+
+	/** Log a real-time tag transaction */
+	private void logTagTransaction() throws IOException {
+		byte[] data = rx_pkt.parseData();
+		if (data.length >= 3) {
+			TagTransaction tt = new TagTransaction(data, 2,
+				data.length - 3);
+			E6_LOG.log("tag response: " + tt);
 		}
 	}
 
@@ -221,6 +239,9 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** Send a device request message to the tag reader */
 	@Override
 	public void sendRequest(TagReaderImpl tr, DeviceRequest r) {
+		// FIXME: this is hacky
+		if (reader != tr)
+			reader = tr;
 		switch (r) {
 		case SEND_SETTINGS:
 			addOperation(new OpSendSettings(tr, this));

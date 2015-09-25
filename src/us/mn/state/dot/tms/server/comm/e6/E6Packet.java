@@ -119,7 +119,7 @@ public class E6Packet {
 	}
 
 	/** Parse the packet data */
-	private byte[] parseData() throws IOException {
+	public byte[] parseData() throws IOException {
 		if (n_bytes >= 7) {
 			byte[] data = new byte[n_bytes - 7];
 			System.arraycopy(pkt, 6, data, 0, data.length);
