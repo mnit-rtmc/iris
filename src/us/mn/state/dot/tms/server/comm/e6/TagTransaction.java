@@ -61,9 +61,12 @@ public class TagTransaction extends ControllerProperty {
 	}
 
 	/** Get the transaction type */
-	public TransactionType getTransactionType() {
-		int c = parse16(data, 0);
-		return TransactionType.fromCode(c);
+	private TransactionType getTransactionType() {
+		if (data.length >= 2) {
+			int c = parse16(data, 0);
+			return TransactionType.fromCode(c);
+		}
+		return null;
 	}
 
 	/** Get the transponder ID */
