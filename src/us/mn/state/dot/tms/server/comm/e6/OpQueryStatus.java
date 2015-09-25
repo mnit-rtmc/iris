@@ -117,11 +117,25 @@ public class OpQueryStatus extends OpE6 {
 				new BufferedTransactionProp(n_curr);
 			poller.sendQuery(trans);
 			mess.logQuery(trans);
+			logRead(trans.getTransaction());
 			if (n_curr < n_count) {
 				n_curr++;
 				return this;
 			} else
 				return new ClearBufferedCount();
+		}
+	}
+
+	/** Log one tag read */
+	private void logRead(TagTransaction tt) {
+		if (tt.isValidRead()) {
+			Long stamp = tt.getStamp();
+			Integer tid = tt.getId();
+			Boolean hov = tt.getHOV();
+			if (stamp != null && tid != null) {
+				tag_reader.logRead(stamp, tt.getTagType(), tid,
+					hov);
+			}
 		}
 	}
 

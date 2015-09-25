@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.util.Date;
+import us.mn.state.dot.tms.server.TagType;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -65,6 +66,20 @@ public class TagTransaction extends E6Property {
 	public TagTransaction(byte[] d, int off, int len) {
 		data = new byte[len];
 		System.arraycopy(d, off, data, 0, len);
+	}
+
+	/** Check if tag transaction is a valid read */
+	public boolean isValidRead() {
+		return isValidSeGoRead() || isValidASTMRead();
+	}
+
+	/** Get the tag type */
+	public TagType getTagType() {
+		if (isValidSeGoRead())
+			return TagType.SeGo_MnDOT;
+		if (isValidASTMRead())
+			return TagType.ASTMv6_MnDOT;
+		return null;
 	}
 
 	/** Get the transaction type */
@@ -147,11 +162,13 @@ public class TagTransaction extends E6Property {
 	public Boolean getHOV() {
 		if (isValidSeGoRead())
 			return parseSeGoHOV();
+		if (isValidASTMRead())
+			return false;
 		return null;
 	}
 
 	/** Parse a SeGo HOV flag */
-	private Boolean parseSeGoHOV() {
+	private boolean parseSeGoHOV() {
 		return (parse8(data, 2) & 0x03) != 0;
 	}
 

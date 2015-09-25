@@ -184,6 +184,15 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 			TagTransaction tt = new TagTransaction(data, 2,
 				data.length - 2);
 			E6_LOG.log(tt.toString());
+			if (tt.isValidRead() && reader != null) {
+				Long stamp = tt.getStamp();
+				Integer tid = tt.getId();
+				Boolean hov = tt.getHOV();
+				if (stamp != null && tid != null) {
+					reader.logRead(stamp, tt.getTagType(),
+						tid, hov);
+				}
+			}
 		}
 	}
 

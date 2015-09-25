@@ -68,6 +68,11 @@ public class BufferedTransactionProp extends E6Property {
 		transaction = new TagTransaction(d, 8, d.length - 8);
 	}
 
+	/** Get the tag transaction */
+	public TagTransaction getTransaction() {
+		return transaction;
+	}
+
 	/** Get a string representation */
 	@Override
 	public String toString() {

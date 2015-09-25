@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,5 +132,15 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		return (dp instanceof TagReaderPoller)
 		     ? (TagReaderPoller)dp
 		     : null;
+	}
+
+	/** Log a tag (transponder) read event.
+	 * @param stamp Timestamp of read event.
+	 * @param tt Tag (transponder) type.
+	 * @param tid Tag (transponder) ID.
+	 * @param hov HOV switch flag. */
+	public void logRead(long stamp, TagType tt, int tid, boolean hov) {
+		// FIXME
+System.err.println("tag: " + name + ", " + new java.util.Date(stamp) + ", " + tt + ", " + tid + ", hov:" + hov);
 	}
 }
