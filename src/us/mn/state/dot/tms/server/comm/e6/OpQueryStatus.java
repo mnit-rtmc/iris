@@ -117,7 +117,21 @@ public class OpQueryStatus extends OpE6 {
 				n_curr++;
 				return this;
 			} else
-				return null;
+				return new ClearBufferedCount();
+		}
+	}
+
+	/** Phase to clear the buffered tag transaction count */
+	private class ClearBufferedCount extends Phase<E6Property> {
+
+		/** Clear the buffered tag transaction count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			BufferedCountProp count = new BufferedCountProp();
+			mess.logStore(count);
+			poller.sendStore(count);
+			return null;
 		}
 	}
 }

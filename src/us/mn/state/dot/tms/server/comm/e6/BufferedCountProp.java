@@ -65,6 +65,24 @@ public class BufferedCountProp extends E6Property {
 		count = parse32(d, 4);
 	}
 
+	/** Get the store packet data */
+	@Override
+	public byte[] storeData() {
+		byte[] d = new byte[4];
+		format16(d, 0, STORE);
+		format16(d, 2, 0xA5A5);	// magic word to clear buffer
+		return d;
+	}
+
+	/** Parse a received store packet */
+	@Override
+	public void parseStore(byte[] d) throws IOException {
+		if (d.length != 4)
+			throw new ParsingException("DATA LEN: " + d.length);
+		if (parse16(d, 2) != STORE)
+			throw new ParsingException("SUB CMD");
+	}
+
 	/** Get a string representation */
 	@Override
 	public String toString() {
