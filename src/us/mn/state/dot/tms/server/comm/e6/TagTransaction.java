@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.e6;
 
+import java.util.Date;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -22,7 +23,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  *
  * @author Douglas Lau
  */
-public class TagTransaction extends ControllerProperty {
+public class TagTransaction extends E6Property {
 
 	/** SeGo region code for MN */
 	static private final int REGION_MN = 0x0A;
@@ -32,10 +33,10 @@ public class TagTransaction extends ControllerProperty {
 
 	/** Tag transaction types */
 	public enum TransactionType {
-		SeGo_streamlined_read	(0x3021, 27),
-		read_verify_page	(0x3022, 19),
-		seen_frame_count	(0x3043, 12),
-		ASTM_read		(0x5014, 16);
+		SeGo_streamlined_read	(0x3021, 28),
+		read_verify_page	(0x3022, 20),
+		seen_frame_count	(0x3043, 13),
+		ASTM_read		(0x5014, 17);
 		private TransactionType(int c, int l) {
 			code = c;
 			len = l;
@@ -54,6 +55,12 @@ public class TagTransaction extends ControllerProperty {
 	/** Transaction data */
 	private final byte[] data;
 
+	/** Get the command */
+	public Command command() {
+		// FIXME: hacky -- not a real property
+		return null;
+	}
+
 	/** Create a new tag transaction */
 	public TagTransaction(byte[] d, int off, int len) {
 		data = new byte[len];
@@ -66,6 +73,30 @@ public class TagTransaction extends ControllerProperty {
 			int c = parse16(data, 0);
 			return TransactionType.fromCode(c);
 		}
+		return null;
+	}
+
+	/** Get the date/time stamp */
+	public Long getStamp() {
+		if (isValidSeGoRead())
+			return parseStamp(21);
+		if (isValidASTMRead())
+			return parseStamp(10);
+		return null;
+	}
+
+	/** Parse a time / date stamp */
+	private Long parseStamp(int off) {
+		try {
+			return parseTimeDate(data, off);
+		}
+		catch (ParsingException e) {
+			return null;
+		}
+	}
+
+	/** Parse an ASTM stamp */
+	private Long parseASTMStamp() {
 		return null;
 	}
 
@@ -130,6 +161,11 @@ public class TagTransaction extends ControllerProperty {
 		StringBuilder sb = new StringBuilder();
 		sb.append("tag transaction: ");
 		sb.append(getTransactionType());
+		Long stamp = getStamp();
+		if (stamp != null) {
+			sb.append(' ');
+			sb.append(new Date(stamp));
+		}
 		Integer tid = getId();
 		if (tid != null) {
 			sb.append(' ');

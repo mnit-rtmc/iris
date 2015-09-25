@@ -180,9 +180,9 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** Log a real-time tag transaction */
 	private void logTagTransaction() throws IOException {
 		byte[] data = rx_pkt.parseData();
-		if (data.length >= 3) {
+		if (data.length > 2) {
 			TagTransaction tt = new TagTransaction(data, 2,
-				data.length - 3);
+				data.length - 2);
 			E6_LOG.log(tt.toString());
 		}
 	}
