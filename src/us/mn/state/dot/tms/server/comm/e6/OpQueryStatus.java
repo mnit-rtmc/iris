@@ -92,7 +92,11 @@ public class OpQueryStatus extends OpE6 {
 			BufferedCountProp count = new BufferedCountProp();
 			poller.sendQuery(count);
 			mess.logQuery(count);
-			return new QueryBufferedTransactions(count.getCount());
+			int n = count.getCount();
+			if (n > 0)
+				return new QueryBufferedTransactions(n);
+			else
+				return null;
 		}
 	}
 
