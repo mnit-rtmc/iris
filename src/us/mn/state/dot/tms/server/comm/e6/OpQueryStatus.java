@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.e6;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.server.TagReaderImpl;
+import us.mn.state.dot.tms.server.TagType;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -130,10 +131,11 @@ public class OpQueryStatus extends OpE6 {
 	private void logRead(TagTransaction tt) {
 		if (tt.isValidRead()) {
 			Long stamp = tt.getStamp();
-			String tid = tt.getId();
+			TagType typ = tt.getTagType();
+			Integer tid = tt.getId();
 			Boolean hov = tt.getHOV();
-			if (stamp != null && tid != null)
-				tag_reader.logRead(stamp, tid, hov);
+			if (stamp != null && typ != null && tid != null)
+				tag_reader.logRead(stamp, typ, tid, hov);
 		}
 	}
 

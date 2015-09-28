@@ -29,8 +29,11 @@ public class TagReadEvent extends BaseEvent {
 	/** Database table name */
 	static private final String TABLE = "event.tag_read_event";
 
+	/** Tag type */
+	private final int tag_type;
+
 	/** Tag (transponder) ID */
-	private final String tag_id;
+	private final int tag_id;
 
 	/** Tag Reader ID */
 	private final String tag_reader;
@@ -38,21 +41,22 @@ public class TagReadEvent extends BaseEvent {
 	/** Toll zone ID */
 	private final String toll_zone;
 
-	/** Corridor ID */
-	private final String corridor;
+	/** Tollway ID */
+	private final String tollway;
 
 	/** HOV flag */
 	private final boolean hov;
 
 	/** Create a new tag read event */
-	public TagReadEvent(EventType et, Date ed, String tid, String tr,
-		String tz, String c, boolean h)
+	public TagReadEvent(EventType et, Date ed, int tt, int tid,
+		String tr, String tz, String tw, boolean h)
 	{
 		super(et, ed);
+		tag_type = tt;
 		tag_id = tid;
 		tag_reader = tr;
 		toll_zone = tz;
-		corridor = c;
+		tollway = tw;
 		hov = h;
 	}
 
@@ -68,10 +72,11 @@ public class TagReadEvent extends BaseEvent {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_date", event_date);
 		map.put("event_desc_id", event_type.id);
+		map.put("tag_type", tag_type);
 		map.put("tag_id", tag_id);
 		map.put("tag_reader", tag_reader);
 		map.put("toll_zone", toll_zone);
-		map.put("corridor", corridor);
+		map.put("tollway", tollway);
 		map.put("hov", hov);
 		return map;
 	}

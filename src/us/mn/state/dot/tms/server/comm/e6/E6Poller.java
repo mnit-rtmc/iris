@@ -21,6 +21,7 @@ import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
+import us.mn.state.dot.tms.server.TagType;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.PacketMessenger;
 import us.mn.state.dot.tms.server.comm.TagReaderPoller;
@@ -186,10 +187,11 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 			E6_LOG.log(tt.toString());
 			if (tt.isValidRead() && reader != null) {
 				Long stamp = tt.getStamp();
-				String tid = tt.getId();
+				TagType typ = tt.getTagType();
+				Integer tid = tt.getId();
 				Boolean hov = tt.getHOV();
-				if (stamp != null && tid != null)
-					reader.logRead(stamp, tid, hov);
+				if (stamp != null && typ != null && tid != null)
+					reader.logRead(stamp, typ, tid, hov);
 			}
 		}
 	}

@@ -1606,26 +1606,35 @@ CREATE VIEW beacon_event_view AS
 	ON beacon_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON beacon_event_view TO PUBLIC;
 
+CREATE TABLE event.tag_type (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
 CREATE TABLE event.tag_read_event (
 	event_id SERIAL PRIMARY KEY,
 	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
-	tag_id VARCHAR(16) NOT NULL,
+	tag_type INTEGER NOT NULL REFERENCES event.tag_type,
+	tag_id INTEGER NOT NULL,
 	tag_reader VARCHAR(10) NOT NULL,
 	toll_zone VARCHAR(20) REFERENCES iris.toll_zone
 		ON DELETE SET NULL,
-	corridor VARCHAR(16) NOT NULL,
+	tollway VARCHAR(16) NOT NULL,
 	hov BOOLEAN NOT NULL,
 	trip_id INTEGER
 );
 
 CREATE VIEW tag_read_event_view AS
-	SELECT event_id, event_date, event_description.description, tag_id,
-	       tag_reader, toll_zone, corridor, hov, trip_id
+	SELECT event_id, event_date, event_description.description,
+	       tag_type.description AS tag_type, tag_id, tag_reader, toll_zone,
+	       tollway, hov, trip_id
 	FROM event.tag_read_event
 	JOIN event.event_description
-	ON tag_read_event.event_desc_id = event_description.event_desc_id;
+	ON   tag_read_event.event_desc_id = event_description.event_desc_id
+	JOIN event.tag_type
+	ON   tag_read_event.tag_type = tag_type.id;
 GRANT SELECT ON tag_read_event_view TO PUBLIC;
 
 CREATE TABLE event.incident_detail (
@@ -2679,6 +2688,11 @@ COPY event.meter_limit_control (id, description) FROM stdin;
 2	wait limit
 3	target minimum
 4	backup limit
+\.
+
+COPY event.tag_type (id, description) FROM stdin;
+0	ASTMv6
+1	SeGo
 \.
 
 -- Fonts

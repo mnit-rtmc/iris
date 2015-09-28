@@ -140,12 +140,13 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Log a tag (transponder) read event.
 	 * @param stamp Timestamp of read event.
+	 * @param tt Tag Type.
 	 * @param tid Tag (transponder) ID.
 	 * @param hov HOV switch flag. */
-	public void logRead(long stamp, String tid, boolean hov) {
+	public void logRead(long stamp, TagType tt, int tid, boolean hov) {
 		TagReadEvent ev = new TagReadEvent(EventType.TAG_READ,
-			new Date(stamp), tid, name, lookupZone(),
-			GeoLocHelper.getCorridorID(geo_loc), hov);
+			new Date(stamp), tt.ordinal(), tid, name, lookupZone(),
+			lookupTollway(), hov);
 		try {
 			ev.doStore();
 		}
@@ -158,5 +159,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	private String lookupZone() {
 		// FIXME
 		return null;
+	}
+
+	/** Lookup the tollway */
+	private String lookupTollway() {
+		// FIXME: filter out CD road name
+		return GeoLocHelper.getCorridorID(geo_loc);
 	}
 }
