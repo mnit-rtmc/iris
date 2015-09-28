@@ -2236,6 +2236,7 @@ COPY iris.encoder_type (id, description) FROM stdin;
 4	Axis MP4 axrtsp
 5	Axis MP4 axrtsphttp
 6	Generic MMS
+7	Axis JPEG
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;

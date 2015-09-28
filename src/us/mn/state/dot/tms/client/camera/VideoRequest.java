@@ -196,6 +196,7 @@ public class VideoRequest {
 			if (!URIUtils.checkScheme(enc, "mms"))
 				throw new IOException("Invalid encoder field");
 			return enc;
+		case AXIS_JPEG:
 		default:
 			throw new IOException("Unsupported Encoder");
 		}

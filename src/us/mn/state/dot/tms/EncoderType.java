@@ -46,7 +46,10 @@ public enum EncoderType {
 	                    StreamType.NONE),
 
 	/** Generic MMS (6) */
-	GENERIC_MMS("Generic MMS", StreamType.MMS, StreamType.NONE);
+	GENERIC_MMS("Generic MMS", StreamType.MMS, StreamType.NONE),
+
+	/** Axis JPEG (7) */
+	AXIS_JPEG("Axis JPEG", StreamType.NONE, StreamType.MJPEG);
 
 	/** Create a new encoder type.
 	 * @param d Description.
