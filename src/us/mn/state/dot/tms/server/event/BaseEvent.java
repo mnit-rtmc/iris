@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,9 +37,14 @@ abstract public class BaseEvent implements Storable {
 	public final Date event_date;
 
 	/** Create a new base event */
-	protected BaseEvent(EventType e) {
-		event_type = e;
-		event_date = new Date();
+	protected BaseEvent(EventType et, Date ed) {
+		event_type = et;
+		event_date = ed;
+	}
+
+	/** Create a new base event */
+	protected BaseEvent(EventType et) {
+		this(et, new Date());
 	}
 
 	/** Get the primary key name */

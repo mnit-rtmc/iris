@@ -130,12 +130,10 @@ public class OpQueryStatus extends OpE6 {
 	private void logRead(TagTransaction tt) {
 		if (tt.isValidRead()) {
 			Long stamp = tt.getStamp();
-			Integer tid = tt.getId();
+			String tid = tt.getId();
 			Boolean hov = tt.getHOV();
-			if (stamp != null && tid != null) {
-				tag_reader.logRead(stamp, tt.getTagType(), tid,
-					hov);
-			}
+			if (stamp != null && tid != null)
+				tag_reader.logRead(stamp, tid, hov);
 		}
 	}
 

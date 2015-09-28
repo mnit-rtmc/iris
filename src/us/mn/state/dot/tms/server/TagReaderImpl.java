@@ -14,16 +14,20 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.ResultSet;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.TagReaderPoller;
+import us.mn.state.dot.tms.server.event.TagReadEvent;
 
 /**
  * A tag reader is a sensor for vehicle transponders, which are used for
@@ -136,11 +140,23 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Log a tag (transponder) read event.
 	 * @param stamp Timestamp of read event.
-	 * @param tt Tag (transponder) type.
 	 * @param tid Tag (transponder) ID.
 	 * @param hov HOV switch flag. */
-	public void logRead(long stamp, TagType tt, int tid, boolean hov) {
+	public void logRead(long stamp, String tid, boolean hov) {
+		TagReadEvent ev = new TagReadEvent(EventType.TAG_READ,
+			new Date(stamp), tid, name, lookupZone(),
+			GeoLocHelper.getCorridorID(geo_loc), hov);
+		try {
+			ev.doStore();
+		}
+		catch (TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Lookup the toll zone for the reader */
+	private String lookupZone() {
 		// FIXME
-System.err.println("tag: " + name + ", " + new java.util.Date(stamp) + ", " + tt + ", " + tid + ", hov:" + hov);
+		return null;
 	}
 }

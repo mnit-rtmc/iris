@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.util.Date;
-import us.mn.state.dot.tms.server.TagType;
+import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -73,15 +73,6 @@ public class TagTransaction extends E6Property {
 		return isValidSeGoRead() || isValidASTMRead();
 	}
 
-	/** Get the tag type */
-	public TagType getTagType() {
-		if (isValidSeGoRead())
-			return TagType.SeGo_MnDOT;
-		if (isValidASTMRead())
-			return TagType.ASTMv6_MnDOT;
-		return null;
-	}
-
 	/** Get the transaction type */
 	private TransactionType getTransactionType() {
 		if (data.length >= 2) {
@@ -116,12 +107,17 @@ public class TagTransaction extends E6Property {
 	}
 
 	/** Get the transponder ID */
-	public Integer getId() {
+	public String getId() {
 		if (isValidSeGoRead())
-			return parseSeGoId();
+			return formatId(TagType.SeGo, parseSeGoId());
 		if (isValidASTMRead())
-			return parseASTMId();
+			return formatId(TagType.ASTM, parseASTMId());
 		return null;
+	}
+
+	/** Format the transponder ID */
+	private String formatId(TagType tt, int serial) {
+		return tt.toString() + '_' + HexString.format(serial, 8);
 	}
 
 	/** Check if transaction is a valid SeGo streamlined read */
@@ -183,10 +179,10 @@ public class TagTransaction extends E6Property {
 			sb.append(' ');
 			sb.append(new Date(stamp));
 		}
-		Integer tid = getId();
+		String tid = getId();
 		if (tid != null) {
 			sb.append(' ');
-			sb.append(Integer.toHexString(tid));
+			sb.append(tid);
 		}
 		Boolean hov = getHOV();
 		if (hov != null) {

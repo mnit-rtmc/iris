@@ -1606,6 +1606,28 @@ CREATE VIEW beacon_event_view AS
 	ON beacon_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON beacon_event_view TO PUBLIC;
 
+CREATE TABLE event.tag_read_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date timestamp WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	tag_id VARCHAR(16) NOT NULL,
+	tag_reader VARCHAR(10) NOT NULL,
+	toll_zone VARCHAR(20) REFERENCES iris.toll_zone
+		ON DELETE SET NULL,
+	corridor VARCHAR(16) NOT NULL,
+	hov BOOLEAN NOT NULL,
+	trip_id INTEGER
+);
+
+CREATE VIEW tag_read_event_view AS
+	SELECT event_id, event_date, event_description.description, tag_id,
+	       tag_reader, toll_zone, corridor, hov, trip_id
+	FROM event.tag_read_event
+	JOIN event.event_description
+	ON tag_read_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON tag_read_event_view TO PUBLIC;
+
 CREATE TABLE event.incident_detail (
 	name VARCHAR(8) PRIMARY KEY,
 	description VARCHAR(32) NOT NULL
@@ -2615,6 +2637,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 401	Meter event
 501	Beacon ON
 502	Beacon OFF
+601	Tag Read
 \.
 
 COPY event.incident_detail (name, description) FROM stdin;

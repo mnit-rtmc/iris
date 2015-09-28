@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server;
+package us.mn.state.dot.tms.server.comm.e6;
 
 /**
  * Tag (vehicle transponder) type enumeration.
@@ -20,6 +20,6 @@ package us.mn.state.dot.tms.server;
  * @author Douglas Lau
  */
 public enum TagType {
-	ASTMv6_MnDOT,
-	SeGo_MnDOT;
+	ASTM,
+	SeGo;
 }
