@@ -1,7 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2002-2015  Minnesota Department of Transportation
- * Copyright (C) 2008-2010  AHMCT, University of California
+ * Copyright (C) 2008-2014  AHMCT, University of California
+ * Copyright (C) 2012 Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +18,8 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
 import java.util.Random;
+import javax.mail.MessagingException;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
@@ -27,6 +30,7 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import us.mn.state.dot.tms.utils.Emailer;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
@@ -38,6 +42,7 @@ import us.mn.state.dot.tms.utils.SString;
  *
  * @author Michael Darter
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 abstract class OpDms extends OpDevice {
 
@@ -288,6 +293,88 @@ abstract class OpDms extends OpDevice {
 		mess.setOperation(this);
 		// send and read response, throws IOException
 		mess.queryProps();
+	}
+
+	/** Return true if the message owner is Reinit */
+	static boolean ownerIsReinit(final String o) {
+		if (o == null)
+			return false;
+		else
+			return o.toLowerCase().equals("reinit");
+	}
+
+	/**
+	 * Set the maintenance status string.
+	 * @return True if the maintenance status was set and it also changed
+	 *         relative to the value stored in the controller.
+	 */
+	public boolean updateMaintStatus(String o) {
+		boolean reinit_detect = SystemAttrEnum.DMSXML_REINIT_DETECT.getBoolean();
+		if (!reinit_detect) {
+			return false;
+		}
+		if (ownerIsReinit(o)) {
+			String msg = "Power cycle event";
+			setMaintStatus(msg);
+			return !msg.equals(getControllerMaintStatus());
+		} else {
+			// NOTE: won't this wipe out existing maint status
+			// (from other causes)?:
+			setMaintStatus("");
+			return false;
+		}
+	}
+
+	/** Log a message to stderr */
+		static private void logStderr(String msg) {
+		System.err.println(TimeSteward.currentDateTimeString(true)
+			+ "DMSXML: " + msg);
+	}
+
+	/** Send power cycle email */
+	public void sendMaintenanceEmail() {
+		String msg = "IRIS has placed CMS " + m_dms + " into "
+			+ "\"maintenance\" mode.  One reason this may have "
+			+ "happened is if IRIS has found the sign to be "
+			+ "unexpectedly blank, which could indicate that the "
+			+ "sign controller's power has been cycled.";
+		String subject = "CMS maintenance alert: " + m_dms;
+		String host = SystemAttrEnum.EMAIL_SMTP_HOST.getString();
+		if (host == null || host.length() <= 0) {
+			logStderr("Alert!  DMS reinit detect (" + m_dms
+				+ ") email failed: invalid host.  "
+				+ "Message: " + msg);
+			return;
+		}
+		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
+		if (sender == null || sender.length() <= 0) {
+			logStderr("Alert!  DMS reinit detect (" + m_dms
+				+ ") email failed: invalid sender.  "
+				+ "Message: " + msg);
+			return;
+		}
+		String recip =
+			SystemAttrEnum.EMAIL_RECIPIENT_DMSXML_REINIT.getString();
+		if (recip == null || recip.length() <= 0) {
+			logStderr("Alert!  DMS reinit detect (" + m_dms
+				+ ") email failed: invalid recipient.  "
+				+ "Message: " + msg);
+			return;
+		}
+		try {
+			Emailer email = new Emailer(host, sender, recip);
+			email.send(subject, msg);
+		}
+		catch(MessagingException e) {
+			logStderr("Alert!  DMS reinit detect (" + m_dms
+				+ ") email failed: " + e.getMessage()
+				+ ".  Message: " + msg);
+		}
+	}
+
+	/** Get the maint status message in the controller */
+	private String getControllerMaintStatus() {
+		return controller.getMaint();
 	}
 
 	/** Phase to query the dms config, which is used by subclasses */

@@ -1,7 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2012  Minnesota Department of Transportation
- * Copyright (C) 2008-2010  AHMCT, University of California
+ * Copyright (C) 2008-2014  AHMCT, University of California
+ * Copyright (C) 2012 Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +30,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Michael Darter
  * @author Douglas Lau
+ * @author Travis Swanston
  */
 class OpBlank extends OpDms
 {
@@ -121,6 +123,7 @@ class OpBlank extends OpDms
 		complete(mess);
 
 		// update dms
+		updateMaintStatus("");
 		if(valid) {
 			m_dms.setMessageCurrent(m_sm, m_user);
 		} else {

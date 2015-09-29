@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2012  Iteris Inc.
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,9 +76,11 @@ public enum SystemAttrEnum {
 	DMS_SEND_CONFIRMATION_ENABLE(false, Change.RESTART_CLIENT),
 	DMSXML_MODEM_OP_TIMEOUT_SECS(5 * 60 + 5, 5),
 	DMSXML_OP_TIMEOUT_SECS(60 + 5, 5),
+	DMSXML_REINIT_DETECT(false),
 	EMAIL_SENDER_SERVER(String.class),
 	EMAIL_SMTP_HOST(String.class),
 	EMAIL_RECIPIENT_AWS(String.class),
+	EMAIL_RECIPIENT_DMSXML_REINIT(String.class),
 	EMAIL_RECIPIENT_GATE_ARM(String.class),
 	GATE_ARM_ALERT_TIMEOUT_SECS(90, 10),
 	HELP_TROUBLE_TICKET_ENABLE(false),
