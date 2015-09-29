@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.util.Date;
+import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.TagType;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -170,6 +171,18 @@ public class TagTransaction extends E6Property {
 	/** Parse a SeGo HOV flag */
 	private boolean parseSeGoHOV() {
 		return (parse8(data, 2) & 0x03) != 0;
+	}
+
+	/** Log one tag read */
+	public void logRead(TagReaderImpl tr) {
+		if (isValidRead()) {
+			Long stamp = getStamp();
+			TagType typ = getTagType();
+			Integer tid = getId();
+			Boolean hov = getHOV();
+			if (stamp != null && typ != null && tid != null)
+				tr.logRead(stamp, typ, tid, hov);
+		}
 	}
 
 	/** Get a string representation */

@@ -14,14 +14,11 @@
  */
 package us.mn.state.dot.tms.server.comm.e6;
 
-import java.io.InputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
-import us.mn.state.dot.tms.server.TagType;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.PacketMessenger;
 import us.mn.state.dot.tms.server.comm.TagReaderPoller;
@@ -177,15 +174,10 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 		if (data.length > 2) {
 			TagTransaction tt = new TagTransaction(data, 2,
 				data.length - 2);
-			E6_LOG.log(tt.toString());
-			if (tt.isValidRead() && reader != null) {
-				Long stamp = tt.getStamp();
-				TagType typ = tt.getTagType();
-				Integer tid = tt.getId();
-				Boolean hov = tt.getHOV();
-				if (stamp != null && typ != null && tid != null)
-					reader.logRead(stamp, typ, tid, hov);
-			}
+			if (reader != null)
+				tt.logRead(reader);
+			if (E6_LOG.isOpen())
+				E6_LOG.log(tt.toString());
 		}
 	}
 
