@@ -40,15 +40,6 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** E6 debug log */
 	static public final DebugLog E6_LOG = new DebugLog("e6");
 
-	/** E6 pkt debug log */
-	static public final DebugLog E6_PKT_LOG = new DebugLog("e6_pkt");
-
-	/** Log a packet */
-	private void log(String x, E6Packet pkt) {
-		if (E6_PKT_LOG.isOpen())
-			E6_PKT_LOG.log(name + ' ' + x + ' ' + pkt.toString());
-	}
-
 	/** Packet messenger */
 	private final PacketMessenger pkt_mess;
 
@@ -134,17 +125,12 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** Receive one packet */
 	private void doReceivePacket() throws IOException {
 		rx_pkt.receive();
-		log("rx", rx_pkt);
 		Command cmd = rx_pkt.parseCommand();
 		if (cmd.acknowledge)
 			return;
 		else
-			sendAck(cmd);
-		if (rx_pkt.parseMsn() != rx_pkt.getMsn()) {
-			if (E6_PKT_LOG.isOpen())
-				E6_PKT_LOG.log(name + " rx ** msn seq ERR **");
-		}
-		rx_pkt.updateMsn();
+			sendAck(cmd, rx_pkt.parseMsn());
+		rx_pkt.advanceMsn();
 		if (resp_pkt.checkResponse(rx_pkt))
 			return;
 		if (cmd.equals(TAG_RESPONSE)) {
@@ -155,17 +141,13 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	}
 
 	/** Send an ack packet */
-	private void sendAck(Command cmd) throws IOException {
+	private void sendAck(Command cmd, byte msn) throws IOException {
 		Command c = new Command(cmd.group, false, true);
 		byte[] data = new byte[3];
 		data[0] = (byte) (Response.ACK.bits() >> 8);
 		data[1] = (byte) (Response.ACK.bits() >> 0);
 		data[2] = rx_pkt.parseMsn();
-		synchronized (tx_pkt) {
-			tx_pkt.format(c, data);
-			log("tx", tx_pkt);
-			tx_pkt.send();
-		}
+		tx_pkt.send(c, data);
 	}
 
 	/** Log a real-time tag transaction */
@@ -184,24 +166,16 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** Send a store packet */
 	public void sendStore(E6Property p) throws IOException {
 		byte[] data = p.storeData();
-		PendingCommand pc = sendPacket(p, data);
+		PendingCommand pc = sendPacket(p.command(), data);
 		byte[] resp = resp_pkt.waitData(getTimeout(), pc);
 		p.parseStore(resp);
 	}
 
 	/** Send a packet */
-	private PendingCommand sendPacket(E6Property p, byte[] data)
+	private PendingCommand sendPacket(Command cmd, byte[] data)
 		throws IOException
 	{
-		synchronized (tx_pkt) {
-			tx_pkt.updateMsn();
-			if (p.command().group == CommandGroup.SYSTEM_INFO)
-				tx_pkt.updateCsn();
-			tx_pkt.format(p.command(), data);
-			log("tx", tx_pkt);
-			tx_pkt.send();
-		}
-		Command cmd = p.command();
+		tx_pkt.send(cmd, data);
 		return new PendingCommand(cmd, getSubCmd(cmd, data));
 	}
 
@@ -219,7 +193,7 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	/** Send a query packet */
 	public void sendQuery(E6Property p) throws IOException {
 		byte[] data = p.queryData();
-		PendingCommand pc = sendPacket(p, data);
+		PendingCommand pc = sendPacket(p.command(), data);
 		byte[] resp = resp_pkt.waitData(getTimeout(), pc);
 		p.parseQuery(resp);
 	}

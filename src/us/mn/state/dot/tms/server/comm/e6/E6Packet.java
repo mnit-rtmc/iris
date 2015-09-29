@@ -18,6 +18,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.SocketTimeoutException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.PacketMessenger;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -30,12 +31,23 @@ import us.mn.state.dot.tms.utils.HexString;
  */
 public class E6Packet {
 
+	/** E6 pkt debug log */
+	static private final DebugLog E6_PKT_LOG = new DebugLog("e6_pkt");
+
 	/** Timeout exception */
 	static private final IOException TIMEOUT =
 		new SocketTimeoutException("TIMEOUT");
 
 	/** Exception thrown when stream is closed */
 	static private final EOFException CLOSED = new EOFException("CLOSED");
+
+	/** Log a packet */
+	private void log(String x) {
+		if (E6_PKT_LOG.isOpen()) {
+			E6_PKT_LOG.log(x + datagram.getSocketAddress() + ' ' +
+				toString());
+		}
+	}
 
 	/** Packet messenger */
 	private final PacketMessenger pkt_mess;
@@ -63,6 +75,41 @@ public class E6Packet {
 	public E6Packet(PacketMessenger pm, boolean r) {
 		pkt_mess = pm;
 		rx = r;
+	}
+
+	/** Send the packet */
+	public synchronized void send(Command cmd, byte[] data)
+		throws IOException
+	{
+		if (!cmd.acknowledge) {
+			updateMsn();
+			if (cmd.group == CommandGroup.SYSTEM_INFO)
+				csn++;
+		}
+		format(cmd, data);
+		datagram.setLength(n_bytes);
+		pkt_mess.send(datagram);
+		log("tx");
+	}
+
+	/** Format command packet */
+	private void format(Command cmd, byte[] data) {
+		n_bytes = data.length + 7;
+		pkt[0] = (byte) ((n_bytes >> 8) & 0xFF);
+		pkt[1] = (byte) ((n_bytes >> 0) & 0xFF);
+		pkt[2] = msn;
+		int b = cmd.bits();
+		pkt[3] = (byte) ((b >> 8) & 0xFF);
+		pkt[4] = (byte) ((b >> 0) & 0xFF);
+		if (cmd.group == CommandGroup.SYSTEM_INFO)
+			pkt[5] = (byte) (csn & 0xFF);
+		else
+			pkt[5] = 0;
+		System.arraycopy(data, 0, pkt, 6, data.length);
+		int xsum = 0;
+		for (int i = 0; i < n_bytes - 1; i++)
+			xsum += pkt[i];
+		pkt[n_bytes - 1] = (byte) (xsum & 0xFF);
 	}
 
 	/** Pending command */
@@ -128,45 +175,21 @@ public class E6Packet {
 		throw new ParsingException("BAD LEN: " + n_bytes);
 	}
 
-	/** Format command packet */
-	public void format(Command cmd, byte[] data) {
-		n_bytes = data.length + 7;
-		pkt[0] = (byte) ((n_bytes >> 8) & 0xFF);
-		pkt[1] = (byte) ((n_bytes >> 0) & 0xFF);
-		pkt[2] = msn;
-		int b = cmd.bits();
-		pkt[3] = (byte) ((b >> 8) & 0xFF);
-		pkt[4] = (byte) ((b >> 0) & 0xFF);
-		if (cmd.group == CommandGroup.SYSTEM_INFO)
-			pkt[5] = (byte) (csn & 0xFF);
-		else
-			pkt[5] = 0;
-		System.arraycopy(data, 0, pkt, 6, data.length);
-		int xsum = 0;
-		for (int i = 0; i < n_bytes - 1; i++)
-			xsum += pkt[i];
-		pkt[n_bytes - 1] = (byte) (xsum & 0xFF);
-	}
-
-	/** Send one packet */
-	public void send() throws IOException {
-		datagram.setLength(n_bytes);
-		pkt_mess.send(datagram);
-	}
-
 	/** Get the message sequence number (MSN) */
 	public byte getMsn() {
 		return msn;
 	}
 
 	/** Update the message sequence number (MSN) */
-	public void updateMsn() {
+	private void updateMsn() {
 		msn = (byte) (parseMsn() + 1);
 	}
 
-	/** Update the command sequence number (CSN) */
-	public void updateCsn() {
-		csn++;
+	/** Advance the message sequence number (MSN) */
+	public void advanceMsn() {
+		if (parseMsn() != msn)
+			E6_PKT_LOG.log("rx ** msn seq ERR **");
+		updateMsn();
 	}
 
 	/** Receive one packet */
@@ -184,6 +207,7 @@ public class E6Packet {
 		xsum &= 0xFF;
 		if (xsum != (pkt[n_bytes - 1] & 0xFF))
 			throw new ChecksumException(pkt);
+		log("rx");
 	}
 
 	/** Parse the command */
