@@ -27,9 +27,6 @@ import java.net.SocketAddress;
  */
 public class PacketMessenger extends Messenger {
 
-	/** Local port to bind */
-	private final Integer port;
-
 	/** Remote address to connect */
 	private final SocketAddress remote;
 
@@ -53,12 +50,10 @@ public class PacketMessenger extends Messenger {
 	}
 
 	/** Create a new datagram packet messenger.
-	 * @param p Local port.
 	 * @param ra Remote socket address. */
-	public PacketMessenger(Integer p, SocketAddress ra) throws IOException {
-		port = p;
+	public PacketMessenger(SocketAddress ra) throws IOException {
 		remote = ra;
-		socket = new DatagramSocket(p);
+		socket = new DatagramSocket();
 		socket.setSoTimeout(timeout);
 		socket.connect(remote);
 	}

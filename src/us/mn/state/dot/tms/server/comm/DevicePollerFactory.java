@@ -339,7 +339,7 @@ public class DevicePollerFactory {
 		try {
 			URI u = createURI(UDP);
 			return new E6Poller(name, new PacketMessenger(
-				E6Poller.LOCAL_PORT, createSocketAddress(u)));
+				createSocketAddress(u)));
 		}
 		catch (URISyntaxException e) {
 			throw new IOException("INVALID URI");

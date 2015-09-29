@@ -37,9 +37,6 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 	static private final Command TAG_RESPONSE = new Command(
 		CommandGroup.MODE);
 
-	/** Local port */
-	static public final int LOCAL_PORT = 58001;
-
 	/** Thread group for all receive threads */
 	static private final ThreadGroup RECV = new ThreadGroup("Recv");
 
