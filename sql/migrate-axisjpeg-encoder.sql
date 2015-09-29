@@ -1,6 +1,0 @@
-\set ON_ERROR_STOP
-
-SET SESSION AUTHORIZATION 'tms';
-
-INSERT INTO iris.encoder_type VALUES (7, 'Axis JPEG');
-

@@ -51,3 +51,10 @@ COPY event.tag_type (id, description) FROM stdin;
 0	ASTMv6
 1	SeGo
 \.
+
+-- add Axis JPEG encoder type
+INSERT INTO iris.encoder_type VALUES (7, 'Axis JPEG');
+
+-- add dmsxml reinit system attributes
+INSERT INTO iris.system_attribute (name, value) VALUES ('dmsxml_reinit_detect', false);
+INSERT INTO iris.system_attribute (name, value) VALUES ('email_recipient_dmsxml_reinit', '');
