@@ -17,10 +17,10 @@ package us.mn.state.dot.tms.server.comm.e6;
 import java.io.EOFException;
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
-import us.mn.state.dot.tms.server.comm.PacketMessenger;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.utils.HexString;
 
@@ -49,8 +49,8 @@ public class E6Packet {
 		}
 	}
 
-	/** Packet messenger */
-	private final PacketMessenger pkt_mess;
+	/** Datagram socket */
+	private final DatagramSocket socket;
 
 	/** Flag for rx packets */
 	private final boolean rx;
@@ -72,8 +72,8 @@ public class E6Packet {
 	private byte csn = 0;
 
 	/** Create a new E6 packet */
-	public E6Packet(PacketMessenger pm, boolean r) {
-		pkt_mess = pm;
+	public E6Packet(DatagramSocket s, boolean r) {
+		socket = s;
 		rx = r;
 	}
 
@@ -88,7 +88,7 @@ public class E6Packet {
 		}
 		format(cmd, data);
 		datagram.setLength(n_bytes);
-		pkt_mess.send(datagram);
+		socket.send(datagram);
 		log("tx");
 	}
 
@@ -175,11 +175,6 @@ public class E6Packet {
 		throw new ParsingException("BAD LEN: " + n_bytes);
 	}
 
-	/** Get the message sequence number (MSN) */
-	public byte getMsn() {
-		return msn;
-	}
-
 	/** Update the message sequence number (MSN) */
 	private void updateMsn() {
 		msn = (byte) (parseMsn() + 1);
@@ -194,7 +189,8 @@ public class E6Packet {
 
 	/** Receive one packet */
 	public void receive() throws IOException {
-		pkt_mess.receive(datagram);
+		datagram.setLength(128);
+		socket.receive(datagram);
 		n_bytes = datagram.getLength();
 		if (n_bytes < 0)
 			throw CLOSED;

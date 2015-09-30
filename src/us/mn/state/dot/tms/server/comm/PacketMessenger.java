@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
 
@@ -32,6 +31,11 @@ public class PacketMessenger extends Messenger {
 
 	/** UDP socket */
 	private final DatagramSocket socket;
+
+	/** Get the UDP socket */
+	public DatagramSocket getSocket() {
+		return socket;
+	}
 
 	/** Receive timeout (ms) */
 	private int timeout = 750;
@@ -69,16 +73,5 @@ public class PacketMessenger extends Messenger {
 	public void close() {
 		socket.disconnect();
 		socket.close();
-	}
-
-	/** Send one datagram packet */
-	public void send(DatagramPacket datagram) throws IOException {
-		socket.send(datagram);
-	}
-
-	/** Receive one datagram packet */
-	public void receive(DatagramPacket datagram) throws IOException {
-		datagram.setLength(128);
-		socket.receive(datagram);
 	}
 }

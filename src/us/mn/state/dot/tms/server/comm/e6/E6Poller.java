@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.io.IOException;
+import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -71,9 +72,10 @@ public class E6Poller extends MessagePoller implements TagReaderPoller {
 		super(n, m);
 		name = n;
 		pkt_mess = m;
-		tx_pkt = new E6Packet(m, false);
-		rx_pkt = new E6Packet(m, true);
-		resp_pkt = new E6Packet(m, true);
+		DatagramSocket s = m.getSocket();
+		tx_pkt = new E6Packet(s, false);
+		rx_pkt = new E6Packet(s, true);
+		resp_pkt = new E6Packet(s, true);
  		rx_thread = new Thread(RECV, "Recv: " + n) {
 			@Override
 			public void run() {
