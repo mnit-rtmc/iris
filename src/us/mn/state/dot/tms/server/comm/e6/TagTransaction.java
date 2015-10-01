@@ -18,6 +18,7 @@ import java.util.Date;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.TagType;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.CRC;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -26,6 +27,9 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  * @author Douglas Lau
  */
 public class TagTransaction extends E6Property {
+
+	/** SeGo Page 0 CRC */
+	static private final CRC PAGE0_CRC = new CRC(12, 0x80F, 0x000, false);
 
 	/** SeGo region code for MN */
 	static private final int REGION_MN = 0x0A;
@@ -128,11 +132,24 @@ public class TagTransaction extends E6Property {
 	/** Check if transaction is a valid SeGo streamlined read */
 	private boolean isValidSeGoRead() {
 		TransactionType tt = getTransactionType();
-		if (tt == TransactionType.SeGo_streamlined_read) {
-			// FIXME: check CRC
-			return (data.length == tt.len);
-		}
-		return false;
+		if (tt == TransactionType.SeGo_streamlined_read)
+			return (data.length == tt.len) && isValidSeGoCRC();
+		else
+			return false;
+	}
+
+	/** Check if SeGo page 0 CRC is valid */
+	private boolean isValidSeGoCRC() {
+		byte[] page0 = new byte[7];
+		page0[0] = (byte) ((data[2] << 4) | (data[3] >> 4));
+		page0[1] = (byte) ((data[3] << 4) | (data[4] >> 4));
+		page0[2] = (byte) ((data[4] << 4) | (data[5] >> 4));
+		page0[3] = (byte) ((data[5] << 4) | (data[6] >> 4));
+		page0[4] = (byte) ((data[6] << 4) | (data[7] >> 4));
+		page0[5] = (byte) ((data[7] << 4) | (data[8] >> 4));
+		page0[6] = (byte) (data[8] << 4);
+		int crc12 = ((data[2] & 0xF0) << 4) | (data[9] & 0xFF);
+		return PAGE0_CRC.calculate(page0) == crc12;
 	}
 
 	/** Parse a SeGo ID */
