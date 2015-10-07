@@ -26,6 +26,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpQueryStatus extends OpE6 {
 
+	/** Diagnostic status */
+	private final DiagStatusProp stat = new DiagStatusProp();
+
 	/** Create a new "query status" operation */
 	public OpQueryStatus(TagReaderImpl tr, E6Poller ep) {
 		super(PriorityLevel.DEVICE_DATA, tr, ep);
@@ -44,7 +47,6 @@ public class OpQueryStatus extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			DiagStatusProp stat = new DiagStatusProp();
 			poller.sendQuery(stat);
 			mess.logQuery(stat);
 			return new QueryBufferingMode();
@@ -140,5 +142,25 @@ public class OpQueryStatus extends OpE6 {
 			poller.sendStore(count);
 			return null;
 		}
+	}
+
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		if (isSuccess()) {
+			setMaintStatus(formatMaintStatus());
+			setErrorStatus(formatErrorStatus());
+		}
+		super.cleanup();
+	}
+
+	/** Format the new maintenance status */
+	private String formatMaintStatus() {
+		return stat.formatMaint();
+	}
+
+	/** Format the new error status */
+	private String formatErrorStatus() {
+		return stat.formatErrors();
 	}
 }
