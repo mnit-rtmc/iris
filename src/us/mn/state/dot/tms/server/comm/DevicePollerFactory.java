@@ -336,7 +336,6 @@ public class DevicePollerFactory {
 		return new DR500Poller(name, createSocketMessenger(TCP));
 	}
 
-
 	/** Create an ADDCO poller */
 	private DevicePoller createAddcoPoller() throws IOException {
 		return new AddcoPoller(name, new AddcoMessenger(
