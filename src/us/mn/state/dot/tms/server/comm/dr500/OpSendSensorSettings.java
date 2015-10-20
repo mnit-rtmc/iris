@@ -44,6 +44,10 @@ public class OpSendSensorSettings extends OpDR500 {
 	/** Time average value (seconds) */
 	static private final int TIME_AVG_VAL = 30;
 
+	/** Requested mode flags */
+	static private int MODE_FLAGS = ModeFlag.SLOW_FILTER.flag
+	                              | ModeFlag.RAIN_FILTER.flag;
+
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c) {
 		super(PriorityLevel.DOWNLOAD, c);
@@ -304,7 +308,7 @@ public class OpSendSensorSettings extends OpDR500 {
 			if (ta.getValue() != TIME_AVG_VAL)
 				return new StoreTimeAvg();
 			else
-				return null;
+				return new QueryMode();
 		}
 	}
 
@@ -318,6 +322,42 @@ public class OpSendSensorSettings extends OpDR500 {
 			VarProperty ta = new VarProperty(VarName.TIME_AVG,
 				TIME_AVG_VAL);
 			mess.add(ta);
+			mess.storeProps();
+			return new QueryMode();
+		}
+	}
+
+	/** Phase to query mode */
+	protected class QueryMode extends Phase<DR500Property> {
+
+		/** Query mode */
+		protected Phase<DR500Property> poll(
+			CommMessage<DR500Property> mess) throws IOException
+		{
+			VarProperty mode = new VarProperty(VarName.MODE);
+			mess.add(mode);
+			mess.queryProps();
+			int f = mode.getValue() | MODE_FLAGS;
+			if (f != mode.getValue())
+				return new StoreMode(f);
+			else
+				return null;
+		}
+	}
+
+	/** Phase to store mode */
+	protected class StoreMode extends Phase<DR500Property> {
+		private final int flags;
+		private StoreMode(int f) {
+			flags = f;
+		}
+
+		/** Store mode */
+		protected Phase<DR500Property> poll(
+			CommMessage<DR500Property> mess) throws IOException
+		{
+			VarProperty mode = new VarProperty(VarName.MODE, flags);
+			mess.add(mode);
 			mess.storeProps();
 			return null;
 		}

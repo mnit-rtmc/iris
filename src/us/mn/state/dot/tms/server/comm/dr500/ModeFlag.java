@@ -15,27 +15,22 @@
 package us.mn.state.dot.tms.server.comm.dr500;
 
 /**
- * Enum of radar variable names.
+ * Enum of radar mode flags.
  *
  * @author Douglas Lau
  */
-public enum VarName {
-	MODE("MO"),		/* mode flags */
-	UNITS("UN"),		/* 0: mph, 1: kph, 2: fps, 3: mps */
-	BIN_MINUTES("BN"),	/* binning interval (1-??) */
-	SENSITIVITY("ST"),	/* percentage of max range (10-99) */
-	LO_SPEED("LO"),		/* low speed cutoff */
-	THRESHOLD_SPEED("SP"),	/* violator threshold */
-	HI_SPEED("HI"),		/* high speed cutoff */
-	TARGET("SF"),		/* fastest target if 1, else strongest */
-	TIME_AVG("TA");		/* time to calculate avg speed (seconds) */
+public enum ModeFlag {
+	CONSOLE0(1),		/* enable master serial port output */
+	CONSOLE1(2),		/* enable slave serial port output */
+	SLOW_FILTER(10),	/* enable slow target filtering */
+	AVG_SPEED(11),		/* enable average speed output */
+	RAIN_FILTER(15);	/* enable rain filtering */
 
-	/** Create a new variable name */
-	private VarName(String n) {
-		assert 2 == n.length();
-		name = n;
+	/** Create a mode flag value */
+	private ModeFlag(int f) {
+		flag = 1 << f;
 	}
 
-	/** Variable name */
-	public final String name;
+	/** Bit flag */
+	public final int flag;
 }
