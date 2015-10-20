@@ -46,14 +46,15 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Load all the toll zones */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, TollZoneImpl.class);
-		store.query("SELECT name, start_id, end_id " +
+		store.query("SELECT name, start_id, end_id, tollway " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new TollZoneImpl(
 					row.getString(1),	// name
 					row.getString(2),	// start_id
-					row.getString(3)	// end_id
+					row.getString(3),	// end_id
+					row.getString(4)	// tollway
 				));
 			}
 		});
@@ -66,6 +67,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		map.put("name", name);
 		map.put("start_id", start_id);
 		map.put("end_id", end_id);
+		map.put("tollway", tollway);
 		return map;
 	}
 
@@ -87,10 +89,11 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	}
 
 	/** Create a new toll zone */
-	protected TollZoneImpl(String n, String sid, String eid) {
+	protected TollZoneImpl(String n, String sid, String eid, String tw) {
 		this(n);
 		start_id = sid;
 		end_id = eid;
+		tollway = tw;
 	}
 
 	/** Starting station ID */
@@ -137,6 +140,29 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	@Override
 	public String getEndID() {
 		return end_id;
+	}
+
+	/** Tollway ID */
+	private String tollway;
+
+	/** Set the tollway ID */
+	@Override
+	public void setTollway(String tw) {
+		tollway = tw;
+	}
+
+	/** Set the tollway ID */
+	public void doSetTollway(String tw) throws TMSException {
+		if (!stringEquals(tw, tollway)) {
+			store.update(this, "tollway", tw);
+			setTollway(tw);
+		}
+	}
+
+	/** Get the tollway ID */
+	@Override
+	public String getTollway() {
+		return tollway;
 	}
 
 	/** Density history (vehicles / mile) */

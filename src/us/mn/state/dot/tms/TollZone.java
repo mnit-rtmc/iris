@@ -37,4 +37,10 @@ public interface TollZone extends SonarObject {
 
 	/** Get the ending station ID */
 	String getEndID();
+
+	/** Set the tollway ID */
+	void setTollway(String tw);
+
+	/** Get the tollway ID */
+	String getTollway();
 }

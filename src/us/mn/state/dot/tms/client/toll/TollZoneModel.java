@@ -61,6 +61,18 @@ public class TollZoneModel extends ProxyTableModel<TollZone> {
 				tz.setEndID((eid.length() > 0) ? eid : null);
 			}
 		});
+		cols.add(new ProxyColumn<TollZone>("toll_zone.tollway", 180) {
+			public Object getValueAt(TollZone tz) {
+				return tz.getTollway();
+			}
+			public boolean isEditable(TollZone tz) {
+				return canUpdate(tz);
+			}
+			public void setValueAt(TollZone tz, Object value) {
+				String tw = value.toString().trim();
+				tz.setTollway((tw.length() > 0) ? tw : null);
+			}
+		});
 		return cols;
 	}
 
