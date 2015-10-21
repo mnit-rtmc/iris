@@ -27,6 +27,11 @@ import javax.swing.Box;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.sonar.client.TypeCache;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -86,6 +91,30 @@ public class CameraDispatcher extends JPanel {
 		}
 	};
 
+	/** Cache of Camera proxy objects */
+	private final TypeCache<Camera> cache;
+
+	/** Proxy listener */
+	private final ProxyListener<Camera> proxy_listener =
+		new ProxyListener<Camera>()
+	{
+		public void proxyAdded(Camera proxy) {}
+		public void enumerationComplete() {}
+		public void proxyRemoved(Camera proxy) {}
+		public void proxyChanged(Camera proxy, String a) {
+			if (proxy != selected)
+				return;
+			if ((a == null) || ("opStatus".equals(a))) {
+				final String stat = proxy.getOpStatus();
+				runSwing(new Runnable() {
+					public void run() {
+						updateOpStatus(stat);
+					}
+				});
+			}
+		}
+	};
+
 	/** Stream status listener */
 	private final StreamStatusListener ss_listener;
 
@@ -103,6 +132,9 @@ public class CameraDispatcher extends JPanel {
 
 	/** Selected video monitor output */
 	private VideoMonitor video_monitor;
+
+	/** Displays the current device op status */
+	private final JLabel op_status_lbl = IPanel.createValueLabel();
 
 	/** Camera PTZ control */
 	private final CameraPTZ cam_ptz;
@@ -139,6 +171,8 @@ public class CameraDispatcher extends JPanel {
 		info_pnl = createInfoPanel();
 		stream_pnl = createStreamPanel();
 		control_pnl = new CamControlPanel(cam_ptz);
+		cache = session.getSonarState().getCamCache().getCameras();
+		cache.addProxyListener(proxy_listener);
 		ss_listener = createStreamStatusListener();
 	}
 
@@ -179,6 +213,15 @@ public class CameraDispatcher extends JPanel {
 		gbc.gridx = 1;
 		p.add(location_lbl, gbc);
 
+		if (SystemAttrEnum.DEVICE_OP_STATUS_ENABLE.getBoolean()) {
+			gbc.gridx = 0;
+			gbc.gridy = 2;
+			p.add(new ILabel("device.op.status"), gbc);
+			gbc.gridx = 1;
+			gbc.gridwidth = 3;
+			p.add(op_status_lbl, gbc);
+		}
+
 		return p;
 	}
 
@@ -205,6 +248,19 @@ public class CameraDispatcher extends JPanel {
 			}
 		};
 		return ssl;
+	}
+
+	/**
+	 * Update the Op Status field.  The resulting field will contain the
+	 * status string and a current timestamp.
+	 * @param stat the status string
+	 */
+	private void updateOpStatus(String stat) {
+		String s = "";
+		if ((stat != null) && (!(stat.equals(""))))
+			s += stat + ", " + TimeSteward
+				.currentDateTimeString(true);
+		op_status_lbl.setText(s);
 	}
 
 	/**
@@ -326,6 +382,7 @@ public class CameraDispatcher extends JPanel {
 	public void dispose() {
 		stream_pnl.unbindStreamStatusListener(ss_listener);
 		sel_model.removeProxySelectionListener(sel_listener);
+		cache.removeProxyListener(proxy_listener);
 		joy_ptz.dispose();
 		cam_ptz.setCamera(null);
 		stream_pnl.dispose();
@@ -338,12 +395,15 @@ public class CameraDispatcher extends JPanel {
 	private void selectCamera(final Camera camera) {
 		if (camera == selected)
 			return;
+		if (selected != null)
+			cache.ignoreObject(selected);
 		cam_ptz.setCamera(camera);
 		selected = camera;
 		if (camera != null) {
 			name_lbl.setText(camera.getName());
 			location_lbl.setText(GeoLocHelper.getDescription(
 				camera.getGeoLoc()));
+			cache.watchObject(camera);
 			stream_pnl.setCamera(camera);
 			selectMonitorCamera();
 			updateCamControls();
@@ -374,5 +434,6 @@ public class CameraDispatcher extends JPanel {
 		location_lbl.setText("");
 		stream_pnl.setCamera(null);
 		control_pnl.setEnabled(false);
+		op_status_lbl.setText("");
 	}
 }
