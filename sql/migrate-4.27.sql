@@ -13,3 +13,7 @@ CREATE OR REPLACE VIEW toll_zone_view AS
 	SELECT name, start_id, end_id, tollway
 	FROM iris.toll_zone;
 GRANT SELECT ON toll_zone_view TO PUBLIC;
+
+-- rename dms_op_status_enable sys attr to device_op_status_enable
+UPDATE iris.system_attribute SET name = 'device_op_status_enable'
+	WHERE name = 'dms_op_status_enable'

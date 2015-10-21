@@ -2287,6 +2287,7 @@ client_units_si	true
 comm_event_purge_days	14
 database_version	4.27.0
 detector_auto_fail_enable	true
+device_op_status_enable	false
 dialup_poll_period_mins	120
 dms_aws_enable	false
 dms_brightness_enable	true
@@ -2302,7 +2303,6 @@ dms_lamp_test_timeout_secs	30
 dms_manufacturer_enable	true
 dms_max_lines	3
 dms_message_min_pages	1
-dms_op_status_enable	false
 dms_page_off_default_secs	0.0
 dms_page_on_default_secs	2.0
 dms_page_on_max_secs	10.0
