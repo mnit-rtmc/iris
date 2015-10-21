@@ -1053,14 +1053,15 @@ CREATE TRIGGER weather_sensor_delete_trig
 CREATE TABLE iris._tag_reader (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes VARCHAR(64) NOT NULL
+	notes VARCHAR(64) NOT NULL,
+	toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name)
 );
 
 ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.tag_reader AS SELECT
-	t.name, geo_loc, controller, pin, notes
+	t.name, geo_loc, controller, pin, notes, toll_zone
 	FROM iris._tag_reader t JOIN iris._device_io d ON t.name = d.name;
 
 CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
@@ -1068,8 +1069,8 @@ CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._tag_reader (name, geo_loc, notes)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes);
+	INSERT INTO iris._tag_reader (name, geo_loc, notes, toll_zone)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone);
 	RETURN NEW;
 END;
 $tag_reader_insert$ LANGUAGE plpgsql;
@@ -1087,7 +1088,8 @@ BEGIN
 	 WHERE name = OLD.name;
 	UPDATE iris._tag_reader
 	   SET geo_loc = NEW.geo_loc,
-	       notes = NEW.notes
+	       notes = NEW.notes,
+	       toll_zone = NEW.toll_zone
 	 WHERE name = OLD.name;
 	RETURN NEW;
 END;
@@ -1859,8 +1861,8 @@ CREATE VIEW weather_sensor_view AS
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
 CREATE VIEW tag_reader_view AS
-	SELECT t.name, t.notes, t.geo_loc, l.roadway, l.road_dir, l.cross_mod,
-	       l.cross_street, l.cross_dir, l.lat, l.lon,
+	SELECT t.name, t.notes, t.toll_zone, t.geo_loc, l.roadway, l.road_dir,
+	       l.cross_mod, l.cross_street, l.cross_dir, l.lat, l.lon,
 	       t.controller, t.pin, ctr.comm_link, ctr.drop_id, ctr.condition
 	FROM iris.tag_reader t
 	LEFT JOIN geo_loc_view l ON t.geo_loc = l.name

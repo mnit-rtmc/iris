@@ -169,6 +169,15 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return null;
 	}
 
+	/** Lookup a toll zone */
+	static protected TollZoneImpl lookupTollZone(String name) {
+		SonarObject so = lookupObject(TollZoneImpl.SONAR_TYPE, name);
+		if (so instanceof TollZoneImpl)
+			return (TollZoneImpl)so;
+		else
+			return null;
+	}
+
 	/** Lookup a beacon */
 	static protected BeaconImpl lookupBeacon(String name) {
 		SonarObject so = lookupObject(BeaconImpl.SONAR_TYPE, name);

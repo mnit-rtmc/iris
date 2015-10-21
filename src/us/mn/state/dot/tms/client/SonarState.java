@@ -280,6 +280,14 @@ public class SonarState extends Client {
 		return toll_zones;
 	}
 
+	/** Toll zone proxy list model */
+	private final ProxyListModel<TollZone> toll_zone_model;
+
+	/** Get the toll zone list model */
+	public ProxyListModel<TollZone> getTollZoneModel() {
+		return toll_zone_model;
+	}
+
 	/** Cache of gate arm arrays */
 	private final TypeCache<GateArmArray> gate_arm_arrays =
 		new TypeCache<GateArmArray>(GateArmArray.class, this);
@@ -430,6 +438,8 @@ public class SonarState extends Client {
 		handler = h;
 		road_model = new ProxyListModel<Road>(roads);
 		road_model.initialize();
+		toll_zone_model = new ProxyListModel<TollZone>(toll_zones);
+		toll_zone_model.initialize();
 		cam_cache = new CamCache(this);
 		con_cache = new ConCache(this);
 		det_cache = new DetCache(this);

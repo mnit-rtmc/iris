@@ -27,4 +27,10 @@ public interface TagReader extends Device {
 
 	/** Get the device location */
 	GeoLoc getGeoLoc();
+
+	/** Set the toll zone */
+	void setTollZone(TollZone tz);
+
+	/** Get the toll zone */
+	TollZone getTollZone();
 }

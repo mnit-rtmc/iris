@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.TagReaderPoller;
 import us.mn.state.dot.tms.server.event.TagReadEvent;
@@ -39,8 +40,9 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	/** Load all the tag readers */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, TagReaderImpl.class);
-		store.query("SELECT name, geo_loc, controller, pin, notes " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, geo_loc, controller, pin, notes, " +
+			"toll_zone FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new TagReaderImpl(
@@ -48,7 +50,8 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 					row.getString(2),	// geo_loc
 					row.getString(3),	// controller
 					row.getInt(4),		// pin
-					row.getString(5)	// notes
+					row.getString(5),	// notes
+					row.getString(6)	// toll_zone
 				));
 			}
 		});
@@ -63,6 +66,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("toll_zone", toll_zone);
 		return map;
 	}
 
@@ -88,16 +92,20 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Create a tag reader */
 	protected TagReaderImpl(String n, GeoLocImpl l, ControllerImpl c,
-		int p, String nt)
+		int p, String nt, TollZone tz)
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
+		toll_zone = tz;
 		initTransients();
 	}
 
 	/** Create a tag reader */
-	protected TagReaderImpl(String n, String l, String c, int p, String nt){
-		this(n, lookupGeoLoc(l), lookupController(c), p, nt);
+	protected TagReaderImpl(String n, String l, String c, int p, String nt,
+		String tz)
+	{
+		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
+		     lookupTollZone(tz));
 	}
 
 	/** Destroy an object */
@@ -114,6 +122,29 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
+	}
+
+	/** Toll zone */
+	private TollZone toll_zone;
+
+	/** Set the toll zone */
+	@Override
+	public void setTollZone(TollZone tz) {
+		toll_zone = tz;
+	}
+
+	/** Set the toll zone */
+	public void doSetTollZone(TollZone tz) throws TMSException {
+		if (tz != toll_zone) {
+			store.update(this, "toll_zone", tz);
+			setTollZone(tz);
+		}
+	}
+
+	/** Get the toll zone */
+	@Override
+	public TollZone getTollZone() {
+		return toll_zone;
 	}
 
 	/** Request a device operation */
@@ -144,7 +175,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	 * @param hov HOV switch flag. */
 	public void logRead(long stamp, TagType tt, int tid, boolean hov) {
 		TagReadEvent ev = new TagReadEvent(EventType.TAG_READ,
-			new Date(stamp), tt.ordinal(), tid, name, lookupZone(),
+			new Date(stamp), tt.ordinal(), tid, name, getZoneName(),
 			hov);
 		try {
 			ev.doStore();
@@ -154,9 +185,9 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		}
 	}
 
-	/** Lookup the toll zone for the reader */
-	private String lookupZone() {
-		// FIXME
-		return null;
+	/** Get the toll zone name */
+	private String getZoneName() {
+		TollZone tz = toll_zone;
+		return (tz != null) ? tz.getName() : null;
 	}
 }

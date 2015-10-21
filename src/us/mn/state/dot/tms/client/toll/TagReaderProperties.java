@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -25,11 +26,13 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.TagReader;
+import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
@@ -46,6 +49,24 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 
 	/** Notes text area */
 	private final JTextArea notes_txt = new JTextArea(3, 24);
+
+	/** Toll zone combobox */
+	private final JComboBox toll_zone_cbx = new JComboBox();
+
+	/** Toll zone model */
+	private final IComboBoxModel<TollZone> toll_zone_mdl;
+
+	/** Toll zone action */
+	private final IAction toll_zone_act = new IAction("toll_zone") {
+		@Override
+		protected void doActionPerformed(ActionEvent e) {
+			proxy.setTollZone(toll_zone_mdl.getSelectedProxy());
+		}
+		@Override
+		protected void doUpdateSelected() {
+			toll_zone_mdl.setSelectedItem(proxy.getTollZone());
+		}
+	};
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
@@ -70,6 +91,8 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 	/** Create a new tag reader properties form */
 	public TagReaderProperties(Session s, TagReader tr) {
 		super(I18N.get("tag_reader") + ": ", s, tr);
+		toll_zone_mdl = new IComboBoxModel<TollZone>(
+			s.getSonarState().getTollZoneModel());
 		loc_pnl = new LocationPanel(s);
 		status_pnl = new IPanel();
 	}
@@ -100,10 +123,14 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 
 	/** Create the location panel */
 	private JPanel createLocationPanel() {
+		toll_zone_cbx.setModel(toll_zone_mdl);
+		toll_zone_cbx.setAction(toll_zone_act);
 		loc_pnl.initialize();
 		loc_pnl.add("device.notes");
 		loc_pnl.add(notes_txt, Stretch.FULL);
 		loc_pnl.add(new JButton(controller), Stretch.RIGHT);
+		loc_pnl.add("toll_zone");
+		loc_pnl.add(toll_zone_cbx, Stretch.LEFT);
 		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		return loc_pnl;
 	}
@@ -130,6 +157,7 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 	protected void updateEditMode() {
 		loc_pnl.updateEditMode();
 		notes_txt.setEnabled(canUpdate("notes"));
+		toll_zone_act.setEnabled(canUpdate("toll_zone"));
 	}
 
 	/** Update one attribute on the form */
@@ -139,6 +167,8 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 			controller.setEnabled(proxy.getController() != null);
 		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
+		if (a == null || a.equals("toll_zone"))
+			toll_zone_act.updateSelected();
 		if (a == null) {
 			boolean r = canRequest();
 			settings.setEnabled(r);
