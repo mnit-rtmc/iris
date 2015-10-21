@@ -22,7 +22,6 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
@@ -146,7 +145,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	public void logRead(long stamp, TagType tt, int tid, boolean hov) {
 		TagReadEvent ev = new TagReadEvent(EventType.TAG_READ,
 			new Date(stamp), tt.ordinal(), tid, name, lookupZone(),
-			lookupTollway(), hov);
+			hov);
 		try {
 			ev.doStore();
 		}
@@ -159,11 +158,5 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	private String lookupZone() {
 		// FIXME
 		return null;
-	}
-
-	/** Lookup the tollway */
-	private String lookupTollway() {
-		// FIXME: filter out CD road name
-		return GeoLocHelper.getCorridorID(geo_loc);
 	}
 }

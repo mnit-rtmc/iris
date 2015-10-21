@@ -41,22 +41,18 @@ public class TagReadEvent extends BaseEvent {
 	/** Toll zone ID */
 	private final String toll_zone;
 
-	/** Tollway ID */
-	private final String tollway;
-
 	/** HOV flag */
 	private final boolean hov;
 
 	/** Create a new tag read event */
 	public TagReadEvent(EventType et, Date ed, int tt, int tid,
-		String tr, String tz, String tw, boolean h)
+		String tr, String tz, boolean h)
 	{
 		super(et, ed);
 		tag_type = tt;
 		tag_id = tid;
 		tag_reader = tr;
 		toll_zone = tz;
-		tollway = tw;
 		hov = h;
 	}
 
@@ -76,7 +72,6 @@ public class TagReadEvent extends BaseEvent {
 		map.put("tag_id", tag_id);
 		map.put("tag_reader", tag_reader);
 		map.put("toll_zone", toll_zone);
-		map.put("tollway", tollway);
 		map.put("hov", hov);
 		return map;
 	}
