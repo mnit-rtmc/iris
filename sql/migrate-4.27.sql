@@ -114,3 +114,18 @@ CREATE VIEW tag_read_event_view AS
 	LEFT JOIN iris.toll_zone
 	ON        tag_reader.toll_zone = toll_zone.name;
 GRANT SELECT ON tag_read_event_view TO PUBLIC;
+
+-- create update trigger for tag_read_event_view
+CREATE FUNCTION event.tag_read_event_view_update() RETURNS TRIGGER AS
+	$tag_read_event_view_update$
+BEGIN
+	UPDATE event.tag_read_event
+	   SET trip_id = NEW.trip_id
+	 WHERE event_id = OLD.event_id;
+	RETURN NEW;
+END;
+$tag_read_event_view_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tag_read_event_view_update_trig
+    INSTEAD OF UPDATE ON tag_read_event_view
+    FOR EACH ROW EXECUTE PROCEDURE event.tag_read_event_view_update();

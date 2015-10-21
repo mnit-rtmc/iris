@@ -1641,6 +1641,22 @@ CREATE VIEW tag_read_event_view AS
 	ON        tag_reader.toll_zone = toll_zone.name;
 GRANT SELECT ON tag_read_event_view TO PUBLIC;
 
+-- Allow trip_id column to be updated by roles which have been granted
+-- update permission on tag_read_event_view
+CREATE FUNCTION event.tag_read_event_view_update() RETURNS TRIGGER AS
+	$tag_read_event_view_update$
+BEGIN
+	UPDATE event.tag_read_event
+	   SET trip_id = NEW.trip_id
+	 WHERE event_id = OLD.event_id;
+	RETURN NEW;
+END;
+$tag_read_event_view_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tag_read_event_view_update_trig
+    INSTEAD OF UPDATE ON tag_read_event_view
+    FOR EACH ROW EXECUTE PROCEDURE event.tag_read_event_view_update();
+
 CREATE TABLE event.incident_detail (
 	name VARCHAR(8) PRIMARY KEY,
 	description VARCHAR(32) NOT NULL
