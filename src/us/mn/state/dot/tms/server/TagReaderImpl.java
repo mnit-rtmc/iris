@@ -175,19 +175,12 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	 * @param hov HOV switch flag. */
 	public void logRead(long stamp, TagType tt, int tid, boolean hov) {
 		TagReadEvent ev = new TagReadEvent(EventType.TAG_READ,
-			new Date(stamp), tt.ordinal(), tid, name, getZoneName(),
-			hov);
+			new Date(stamp), tt.ordinal(), tid, name, hov);
 		try {
 			ev.doStore();
 		}
 		catch (TMSException e) {
 			e.printStackTrace();
 		}
-	}
-
-	/** Get the toll zone name */
-	private String getZoneName() {
-		TollZone tz = toll_zone;
-		return (tz != null) ? tz.getName() : null;
 	}
 }

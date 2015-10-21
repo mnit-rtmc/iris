@@ -1622,8 +1622,6 @@ CREATE TABLE event.tag_read_event (
 	tag_type INTEGER NOT NULL REFERENCES event.tag_type,
 	tag_id INTEGER NOT NULL,
 	tag_reader VARCHAR(10) NOT NULL,
-	toll_zone VARCHAR(20) REFERENCES iris.toll_zone
-		ON DELETE SET NULL,
 	hov BOOLEAN NOT NULL,
 	trip_id INTEGER
 );
@@ -1637,8 +1635,10 @@ CREATE VIEW tag_read_event_view AS
 	ON   tag_read_event.event_desc_id = event_description.event_desc_id
 	JOIN event.tag_type
 	ON   tag_read_event.tag_type = tag_type.id
+	JOIN iris.tag_reader
+	ON   tag_read_event.tag_reader = tag_reader.name
 	LEFT JOIN iris.toll_zone
-	ON        tag_read_event.toll_zone = toll_zone.name;
+	ON        tag_reader.toll_zone = toll_zone.name;
 GRANT SELECT ON tag_read_event_view TO PUBLIC;
 
 CREATE TABLE event.incident_detail (

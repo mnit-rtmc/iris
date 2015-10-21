@@ -18,26 +18,6 @@ GRANT SELECT ON toll_zone_view TO PUBLIC;
 UPDATE iris.system_attribute SET name = 'device_op_status_enable'
 	WHERE name = 'dms_op_status_enable';
 
--- drop old tag_read_event_view
-DROP VIEW tag_read_event_view;
-
--- drop tollway from event.tag_read_event table
-ALTER TABLE event.tag_read_event DROP COLUMN tollway;
-
--- change tag_read_event_view to use tollway from toll_zone
-CREATE VIEW tag_read_event_view AS
-	SELECT event_id, event_date, event_description.description,
-	       tag_type.description AS tag_type, tag_id, tag_reader,
-	       toll_zone, tollway, hov, trip_id
-	FROM event.tag_read_event
-	JOIN event.event_description
-	ON   tag_read_event.event_desc_id = event_description.event_desc_id
-	JOIN event.tag_type
-	ON   tag_read_event.tag_type = tag_type.id
-	LEFT JOIN iris.toll_zone
-	ON        tag_read_event.toll_zone = toll_zone.name;
-GRANT SELECT ON tag_read_event_view TO PUBLIC;
-
 -- add toll_zone column to tag_reader
 DROP VIEW tag_reader_view;
 DROP VIEW iris.tag_reader;
@@ -111,3 +91,26 @@ CREATE VIEW tag_reader_view AS
 	LEFT JOIN geo_loc_view l ON t.geo_loc = l.name
 	LEFT JOIN controller_view ctr ON t.controller = ctr.name;
 GRANT SELECT ON tag_reader_view TO PUBLIC;
+
+-- drop old tag_read_event_view
+DROP VIEW tag_read_event_view;
+
+-- drop toll_zone and tollway from event.tag_read_event table
+ALTER TABLE event.tag_read_event DROP COLUMN toll_zone;
+ALTER TABLE event.tag_read_event DROP COLUMN tollway;
+
+-- change tag_read_event_view to use tollway from toll_zone
+CREATE VIEW tag_read_event_view AS
+	SELECT event_id, event_date, event_description.description,
+	       tag_type.description AS tag_type, tag_id, tag_reader,
+	       toll_zone, tollway, hov, trip_id
+	FROM event.tag_read_event
+	JOIN event.event_description
+	ON   tag_read_event.event_desc_id = event_description.event_desc_id
+	JOIN event.tag_type
+	ON   tag_read_event.tag_type = tag_type.id
+	JOIN iris.tag_reader
+	ON   tag_read_event.tag_reader = tag_reader.name
+	LEFT JOIN iris.toll_zone
+	ON        tag_reader.toll_zone = toll_zone.name;
+GRANT SELECT ON tag_read_event_view TO PUBLIC;
