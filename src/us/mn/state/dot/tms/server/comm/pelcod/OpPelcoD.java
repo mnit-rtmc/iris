@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2015  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -37,6 +37,7 @@ abstract public class OpPelcoD extends OpDevice<PelcoDProperty> {
 	 */
 	protected OpPelcoD(CameraImpl c, String d) {
 		super(PriorityLevel.COMMAND, c);
+		assert d != null;
 		op_desc = d;
 		device.setOpStatus("sending cmd");
 	}
@@ -44,7 +45,7 @@ abstract public class OpPelcoD extends OpDevice<PelcoDProperty> {
 	/** Return operation description */
 	@Override
 	public String getOperationDescription() {
-		return (op_desc == null ? "Unnamed operation" : op_desc);
+		return op_desc;
 	}
 
 	/**
@@ -59,5 +60,4 @@ abstract public class OpPelcoD extends OpDevice<PelcoDProperty> {
 		String s = getOperationDescription() + ": " + stat;
 		device.setOpStatus(s);
 	}
-
 }
