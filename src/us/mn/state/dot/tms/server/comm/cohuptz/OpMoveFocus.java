@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,13 +43,16 @@ public class OpMoveFocus extends OpCohuPTZ {
 
 	/** Begin the operation. */
 	@Override
-	protected Phase phaseTwo() {
+	protected Phase<CohuPTZProperty> phaseTwo() {
 		return new MoveFocus();
 	}
 
 	/** Main phase. */
-	protected class MoveFocus extends Phase {
-		protected Phase poll(CommMessage mess) throws IOException {
+	protected class MoveFocus extends Phase<CohuPTZProperty> {
+		protected Phase<CohuPTZProperty> poll(
+			CommMessage<CohuPTZProperty> mess)
+			throws IOException
+		{
 			mess.add(new MoveFocusProperty(devReq));
 			doStoreProps(mess);
 			return null;

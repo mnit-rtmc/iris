@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,13 +54,16 @@ public class OpPTZCamera extends OpCohuPTZ {
 
 	/** Begin the operation. */
 	@Override
-	public Phase phaseTwo() {
+	protected Phase<CohuPTZProperty> phaseTwo() {
 		return new PanPhase();
 	}
 
 	/** pan phase, 1/3 */
-	protected class PanPhase extends Phase {
-		protected Phase poll(CommMessage mess) throws IOException {
+	protected class PanPhase extends Phase<CohuPTZProperty> {
+		protected Phase<CohuPTZProperty> poll(
+				CommMessage<CohuPTZProperty> mess)
+				throws IOException
+			{
 			if (pan != null) {
 				mess.add(new PanProperty(pan.floatValue()));
 				doStoreProps(mess);
@@ -70,8 +73,11 @@ public class OpPTZCamera extends OpCohuPTZ {
 	}
 
 	/** tilt phase, 2/3 */
-	protected class TiltPhase extends Phase {
-		protected Phase poll(CommMessage mess) throws IOException {
+	protected class TiltPhase extends Phase<CohuPTZProperty> {
+		protected Phase<CohuPTZProperty> poll(
+			CommMessage<CohuPTZProperty> mess)
+			throws IOException
+		{
 			if (tilt != null) {
 				mess.add(new TiltProperty(tilt.floatValue()));
 				doStoreProps(mess);
@@ -81,8 +87,11 @@ public class OpPTZCamera extends OpCohuPTZ {
 	}
 
 	/** zoom phase, 3/3 */
-	protected class ZoomPhase extends Phase {
-		protected Phase poll(CommMessage mess) throws IOException {
+	protected class ZoomPhase extends Phase<CohuPTZProperty> {
+		protected Phase<CohuPTZProperty> poll(
+			CommMessage<CohuPTZProperty> mess)
+			throws IOException
+		{
 			if (zoom != null) {
 				mess.add(new ZoomProperty(zoom.floatValue()));
 				doStoreProps(mess);

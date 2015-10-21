@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  *
  * @author Travis Swanston
  */
-abstract public class OpCohuPTZ extends OpDevice {
+abstract public class OpCohuPTZ extends OpDevice<CohuPTZProperty> {
 
 	/** Minimum time interval (ms) to enforce between Cohu commands */
 	static protected final int MIN_CMD_INTERVAL_MS = 25;
@@ -61,7 +61,7 @@ abstract public class OpCohuPTZ extends OpDevice {
 	 * transaction with the device (Cohu devices require a short delay
 	 * between commands).
 	 */
-	protected void doStoreProps(CommMessage mess) throws IOException {
+	protected void doStoreProps(CommMessage<CohuPTZProperty> mess) throws IOException {
 		pauseIfNeeded();
 		mess.storeProps();
 		poller.setLastCmdTime(System.currentTimeMillis());

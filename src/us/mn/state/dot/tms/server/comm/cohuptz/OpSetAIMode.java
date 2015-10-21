@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,13 +43,16 @@ public class OpSetAIMode extends OpCohuPTZ {
 
 	/** Begin the operation. */
 	@Override
-	protected Phase phaseTwo() {
+	protected Phase<CohuPTZProperty> phaseTwo() {
 		return new SetAIMode();
 	}
 
 	/** Main phase. */
-	protected class SetAIMode extends Phase {
-		protected Phase poll(CommMessage mess) throws IOException {
+	protected class SetAIMode extends Phase<CohuPTZProperty> {
+		protected Phase<CohuPTZProperty> poll(
+			CommMessage<CohuPTZProperty> mess)
+			throws IOException
+		{
 			mess.add(new SetAIModeProperty(devReq));
 			doStoreProps(mess);
 			return null;
