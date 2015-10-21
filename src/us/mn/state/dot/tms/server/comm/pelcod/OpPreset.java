@@ -25,6 +25,9 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  */
 public class OpPreset extends OpPelcoD {
 
+	/** Op description */
+	static private final String OP_DESC = "preset";
+
 	/** Get recall or store property command.
 	 * @param s Store or recall.
 	 * @return Extended property command. */
@@ -38,7 +41,7 @@ public class OpPreset extends OpPelcoD {
 
 	/** Create a new operation for a camera preset */
 	public OpPreset(CameraImpl c, boolean s, int p) {
-		super(c);
+		super(c, OP_DESC);
 		prop = new ExtendedProperty(getCommand(s), p);
 	}
 
@@ -56,6 +59,7 @@ public class OpPreset extends OpPelcoD {
 		{
 			mess.add(prop);
 			mess.storeProps();
+			updateOpStatus("cmd sent");
 			return null;
 		}
 	}

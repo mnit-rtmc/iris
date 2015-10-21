@@ -27,6 +27,9 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  */
 public class OpMoveCamera extends OpPelcoD {
 
+	/** Op description */
+	static private final String OP_DESC = "PTZ";
+
 	/** Range of PTZ values */
 	static private final int PTZ_RANGE = 64;
 
@@ -45,7 +48,7 @@ public class OpMoveCamera extends OpPelcoD {
 
 	/** Create a new operation to move a camera */
 	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
-		super(c);
+		super(c, OP_DESC);
 		int pan = map_float(p, PTZ_RANGE);
 		int tilt = map_float(t, PTZ_RANGE);
 		int zoom = map_float(z, PTZ_RANGE);
@@ -70,6 +73,7 @@ public class OpMoveCamera extends OpPelcoD {
 			mess.add(prop);
 			mess.storeProps();
 			n_sent++;
+			updateOpStatus("cmd sent");
 			return shouldResend() ? this : null;
 		}
 

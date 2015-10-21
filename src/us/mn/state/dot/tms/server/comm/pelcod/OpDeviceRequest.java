@@ -28,6 +28,9 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  */
 public class OpDeviceRequest extends OpPelcoD {
 
+	/** Op description */
+	static private final String OP_DESC = "misc.";
+
 	/** Get property associated with a device request.
 	 * @param dr Device request.
 	 * @return Associated property. */
@@ -77,7 +80,7 @@ public class OpDeviceRequest extends OpPelcoD {
 	 * @param dr the DeviceRequest representing the desired op.
 	 */
 	public OpDeviceRequest(CameraImpl c, DeviceRequest dr) {
-		super(c);
+		super(c, OP_DESC);
 		prop = getProperty(dr);
 	}
 
@@ -94,6 +97,7 @@ public class OpDeviceRequest extends OpPelcoD {
 		{
 			mess.add(prop);
 			mess.storeProps();
+			updateOpStatus("cmd sent");
 			return null;
 		}
 	}
