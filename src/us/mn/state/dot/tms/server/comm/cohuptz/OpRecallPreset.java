@@ -27,6 +27,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpRecallPreset extends OpCohuPTZ {
 
+	/** Op description */
+	static private final String OP_DESC = "recall";
+
 	/** The camera preset to recall */
 	private final int preset;
 
@@ -37,7 +40,7 @@ public class OpRecallPreset extends OpCohuPTZ {
 	 * @param p the preset number to recall
 	 */
 	public OpRecallPreset(CameraImpl c, CohuPTZPoller cp, int p) {
-		super(PriorityLevel.COMMAND, c, cp);
+		super(PriorityLevel.COMMAND, c, cp, OP_DESC);
 		preset = p;
 	}
 
@@ -56,6 +59,7 @@ public class OpRecallPreset extends OpCohuPTZ {
 		{
 			mess.add(new RecallPresetProperty(preset));
 			doStoreProps(mess);
+			updateOpStatus("cmd sent");
 			return null;
 		}
 	}

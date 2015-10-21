@@ -28,6 +28,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpMoveFocus extends OpCohuPTZ {
 
+	/** Op description */
+	static private final String OP_DESC = "focus";
+
 	protected final DeviceRequest devReq;
 
 	/**
@@ -37,7 +40,7 @@ public class OpMoveFocus extends OpCohuPTZ {
 	 * @param dr the DeviceRequest representing the desired op
 	 */
 	public OpMoveFocus(CameraImpl c, CohuPTZPoller cp, DeviceRequest dr) {
-		super(PriorityLevel.COMMAND, c, cp);
+		super(PriorityLevel.COMMAND, c, cp, OP_DESC);
 		devReq = dr;
 	}
 
@@ -55,6 +58,7 @@ public class OpMoveFocus extends OpCohuPTZ {
 		{
 			mess.add(new MoveFocusProperty(devReq));
 			doStoreProps(mess);
+			updateOpStatus("cmd sent");
 			return null;
 		}
 	}

@@ -27,13 +27,16 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpResetCamera extends OpCohuPTZ {
 
+	/** Op description */
+	static private final String OP_DESC = "reset";
+
 	/**
 	 * Create the operation.
 	 * @param c the CameraImpl instance
 	 * @param cp the CohuPTZPoller instance
 	 */
 	public OpResetCamera(CameraImpl c, CohuPTZPoller cp) {
-		super(PriorityLevel.COMMAND, c, cp);
+		super(PriorityLevel.COMMAND, c, cp, OP_DESC);
 	}
 
 	/** Begin the operation. */
@@ -50,6 +53,7 @@ public class OpResetCamera extends OpCohuPTZ {
 		{
 			mess.add(new ResetCameraProperty());
 			doStoreProps(mess);
+			updateOpStatus("cmd sent");
 			return null;
 		}
 	}

@@ -27,6 +27,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpStorePreset extends OpCohuPTZ {
 
+	/** Op description */
+	static private final String OP_DESC = "store";
+
 	/** The camera preset to store */
 	private final int preset;
 
@@ -38,7 +41,7 @@ public class OpStorePreset extends OpCohuPTZ {
 	 */
 
 	public OpStorePreset(CameraImpl c, CohuPTZPoller cp, int p) {
-		super(PriorityLevel.COMMAND, c, cp);
+		super(PriorityLevel.COMMAND, c, cp, OP_DESC);
 		preset = p;
 	}
 
@@ -57,6 +60,7 @@ public class OpStorePreset extends OpCohuPTZ {
 		{
 			mess.add(new StorePresetProperty(preset));
 			doStoreProps(mess);
+			updateOpStatus("cmd sent");
 			return null;
 		}
 	}

@@ -28,6 +28,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpPTZCamera extends OpCohuPTZ {
 
+	/** Op description */
+	static private final String OP_DESC = "PTZ";
+
 	/** pan vector */
 	protected final Float pan;
 
@@ -46,7 +49,7 @@ public class OpPTZCamera extends OpCohuPTZ {
 	 * @param z the zoom vector [-1..1] or null for NOP
 	 */
 	public OpPTZCamera(CameraImpl c, CohuPTZPoller cp, Float p, Float t, Float z) {
-		super(PriorityLevel.COMMAND, c, cp);
+		super(PriorityLevel.COMMAND, c, cp, OP_DESC);
 		pan  = p;
 		tilt = t;
 		zoom = z;
@@ -67,6 +70,7 @@ public class OpPTZCamera extends OpCohuPTZ {
 			if (pan != null) {
 				mess.add(new PanProperty(pan.floatValue()));
 				doStoreProps(mess);
+				updateOpStatus("pan sent");
 			}
 			return new TiltPhase();
 		}
@@ -81,6 +85,7 @@ public class OpPTZCamera extends OpCohuPTZ {
 			if (tilt != null) {
 				mess.add(new TiltProperty(tilt.floatValue()));
 				doStoreProps(mess);
+				updateOpStatus("tilt sent");
 			}
 			return new ZoomPhase();
 		}
@@ -95,6 +100,7 @@ public class OpPTZCamera extends OpCohuPTZ {
 			if (zoom != null) {
 				mess.add(new ZoomProperty(zoom.floatValue()));
 				doStoreProps(mess);
+				updateOpStatus("zoom sent");
 			}
 			return null;
 		}

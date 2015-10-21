@@ -28,6 +28,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSetAIMode extends OpCohuPTZ {
 
+	/** Op description */
+	static private final String OP_DESC = "A/I";
+
 	protected final DeviceRequest devReq;
 
 	/**
@@ -37,7 +40,7 @@ public class OpSetAIMode extends OpCohuPTZ {
 	 * @param dr the DeviceRequest representing the desired op
 	 */
 	public OpSetAIMode(CameraImpl c, CohuPTZPoller cp, DeviceRequest dr) {
-		super(PriorityLevel.COMMAND, c, cp);
+		super(PriorityLevel.COMMAND, c, cp, OP_DESC);
 		devReq = dr;
 	}
 
@@ -55,6 +58,7 @@ public class OpSetAIMode extends OpCohuPTZ {
 		{
 			mess.add(new SetAIModeProperty(devReq));
 			doStoreProps(mess);
+			updateOpStatus("cmd sent");
 			return null;
 		}
 	}
