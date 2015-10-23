@@ -168,6 +168,7 @@ public class CorridorList extends JPanel {
 	/** Edit mode listener */
 	private final EditModeListener edit_lsnr = new EditModeListener() {
 		public void editModeChanged() {
+			panel.updateEditMode();
 			updateButtonPanel();
 		}
 	};

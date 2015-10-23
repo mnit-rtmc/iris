@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 		}
 		protected final void doActionPerformed(ActionEvent e) {
 			R_Node n = node;
-			if(n != null)
+			if (n != null)
 				do_perform(n);
 		}
 		abstract void do_perform(R_Node n);
@@ -201,80 +201,76 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 	/** Set the number of lanes */
 	private void setLanes(int l) {
 		R_Node n = node;
-		if(n != null)
+		if (n != null)
 			n.setLanes(l);
 	}
 
 	/** Set the lane shift */
 	private void setShift(int s) {
 		R_Node n = node;
-		if(n != null)
+		if (n != null)
 			n.setShift(s);
 	}
 
 	/** Set the station ID */
 	private void setStationID(String s) {
 		R_Node n = node;
-		if(n != null)
+		if (n != null)
 			n.setStationID(s.length() > 0 ? s : null);
 	}
 
 	/** Set the speed limit */
 	private void setSpeedLimit(int s) {
 		R_Node n = node;
-		if(n != null)
+		if (n != null)
 			n.setSpeedLimit(s);
+	}
+
+	/** Update the edit mode */
+	public void updateEditMode() {
+		R_Node n = node;
+		type_cbx.setEnabled(canUpdate(n, "nodeType"));
+		pick_chk.setEnabled(canUpdate(n, "pickable"));
+		above_chk.setEnabled(canUpdate(n, "above"));
+		trans_cbx.setEnabled(canUpdate(n, "transition"));
+		lane_spn.setEnabled(canUpdate(n, "lanes"));
+		attach_chk.setEnabled(canUpdate(n, "attachSide"));
+		shift_spn.setEnabled(canUpdate(n, "shift"));
+		active_chk.setEnabled(canUpdate(n, "active"));
+		station_txt.setEnabled(canUpdate(n, "stationID"));
+		abandoned_chk.setEnabled(canUpdate(n, "abandoned"));
+		speed_spn.setEnabled(canUpdate(n, "speedLimit"));
 	}
 
 	/** Update one attribute (from ProxyView). */
 	@Override
 	public void update(R_Node n, String a) {
-		if(a == null)
+		if (a == null) {
 			node = n;
-		if(a == null || a.equals("nodeType")) {
-			type_cbx.setEnabled(canUpdate(n, "nodeType"));
+			updateEditMode();
+		}
+		if (a == null || a.equals("nodeType"))
 			type_cbx.setSelectedIndex(n.getNodeType());
-		}
-		if(a == null || a.equals("pickable")) {
-			pick_chk.setEnabled(canUpdate(n, "pickable"));
+		if (a == null || a.equals("pickable"))
 			pick_chk.setSelected(n.getPickable());
-		}
-		if(a == null || a.equals("above")) {
-			above_chk.setEnabled(canUpdate(n, "above"));
+		if (a == null || a.equals("above"))
 			above_chk.setSelected(n.getAbove());
-		}
-		if(a == null || a.equals("transition")) {
-			trans_cbx.setEnabled(canUpdate(n, "transition"));
+		if (a == null || a.equals("transition"))
 			trans_cbx.setSelectedIndex(n.getTransition());
-		}
-		if(a == null || a.equals("lanes")) {
-			lane_spn.setEnabled(canUpdate(n, "lanes"));
+		if (a == null || a.equals("lanes"))
 			lane_spn.setValue(n.getLanes());
-		}
-		if(a == null || a.equals("attachSide")) {
-			attach_chk.setEnabled(canUpdate(n, "attachSide"));
+		if (a == null || a.equals("attachSide"))
 			attach_chk.setSelected(n.getAttachSide());
-		}
-		if(a == null || a.equals("shift")) {
-			shift_spn.setEnabled(canUpdate(n, "shift"));
+		if (a == null || a.equals("shift"))
 			shift_spn.setValue(n.getShift());
-		}
-		if(a == null || a.equals("active")) {
-			active_chk.setEnabled(canUpdate(n, "active"));
+		if (a == null || a.equals("active"))
 			active_chk.setSelected(n.getActive());
-		}
-		if(a == null || a.equals("stationID")) {
-			station_txt.setEnabled(canUpdate(n, "stationID"));
+		if (a == null || a.equals("stationID"))
 			station_txt.setText(n.getStationID());
-		}
-		if(a == null || a.equals("abandoned")) {
-			abandoned_chk.setEnabled(canUpdate(n, "abandoned"));
+		if (a == null || a.equals("abandoned"))
 			abandoned_chk.setSelected(n.getAbandoned());
-		}
-		if(a == null || a.equals("speedLimit")) {
-			speed_spn.setEnabled(canUpdate(n, "speedLimit"));
+		if (a == null || a.equals("speedLimit"))
 			speed_spn.setValue(n.getSpeedLimit());
-		}
 	}
 
 	/** Clear all attributes (from ProxyView). */

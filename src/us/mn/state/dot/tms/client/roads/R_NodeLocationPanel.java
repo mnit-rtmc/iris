@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,20 +68,25 @@ public class R_NodeLocationPanel extends LocationPanel {
 	/** Set the node notes */
 	private void setNotes(String nt) {
 		R_Node n = node;
-		if(n != null)
+		if (n != null)
 			n.setNotes(nt);
 	}
 
 	/** Update one attribute */
 	public void update(R_Node n, String a) {
-		if(a == null) {
+		if (a == null) {
 			node = n;
 			name_lbl.setText(n.getName());
 		}
-		if(a == null || a.equals("notes")) {
-			notes_txt.setEnabled(canUpdate(n, "notes"));
+		if (a == null || a.equals("notes"))
 			notes_txt.setText(n.getNotes());
-		}
+	}
+
+	/** Update the edit mode */
+	@Override
+	public void updateEditMode() {
+		super.updateEditMode();
+		notes_txt.setEnabled(canUpdate(node, "notes"));
 	}
 
 	/** Clear all attributes */

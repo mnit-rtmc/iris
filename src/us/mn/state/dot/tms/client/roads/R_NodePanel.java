@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ public class R_NodePanel extends JPanel {
 
 	/** Set a new r_node */
 	public void setR_Node(R_Node n) {
-		if(n != null)
+		if (n != null)
 			loc_pnl.setGeoLoc(n.getGeoLoc());
 		else
 			loc_pnl.setGeoLoc(null);
@@ -93,6 +93,12 @@ public class R_NodePanel extends JPanel {
 		tab.add(I18N.get("device.setup"), setup_pnl);
 		tab.add(I18N.get("detector.plural"), det_pnl);
 		add(tab, BorderLayout.CENTER);
+	}
+
+	/** Update the edit mode */
+	public void updateEditMode() {
+		loc_pnl.updateEditMode();
+		setup_pnl.updateEditMode();
 	}
 
 	/** Dispose of the panel */
