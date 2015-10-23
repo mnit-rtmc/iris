@@ -95,7 +95,7 @@
 </div>
 
 <div class="mainbar">
-<div id="stamp">8 Oct 2015</div>
+<div id="stamp">23 Oct 2015</div>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
 
@@ -2062,6 +2062,27 @@ FIXME
 	section of roadway.
 	They can be used, for example, for reversible lanes which can be changed
 	by time of day.
+</p>
+<p>
+	There are a couple of extra security features to restrict access to
+	gate arm control.
+	There is a whitelist of IP addresses from which IRIS clients are allowed
+	to control gate arms.
+	It is specified as a property in the
+	<code>/etc/iris/iris-server.properties</code> configuration file.
+	The property is <code>gate.arm.whitelist</code>, and it contains a list
+	of addresses in CIDR notation (exact IP, or ranges specified as
+	192.168.1.0/24).
+</p>
+<p>
+	Another gate arm security feature causes the entire "gate arm system"
+	to be disabled whenever any configuration change is made to a gate arm.
+	This includes changes to a gate arm array, controller or associated
+	comm link.
+	IRIS will not send any command to open or close any gate arm in this
+	state.
+	The only way to re-enable gate arm control is to create a file at
+	<code>/var/lib/iris/gate_arm_enable</code> (using touch).
 </p>
 
 <h3 id="tag_readers">Tag Readers</h3>
