@@ -224,7 +224,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 			float rprice = quarters / 4.0f;
 			if (isLogging()) {
 				log("k_hot: " + k_hot + ", price: " + price +
-				    ", $:" + rprice);
+				    ", $" + rprice);
 			}
 		}
 	}
