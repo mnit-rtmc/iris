@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,23 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class MapSegment implements MapObject {
 
+	/** Get the scale factor for the road class */
+	static private float roadClassScale(RoadClass rc) {
+		switch (rc) {
+		case ARTERIAL:
+		case EXPRESSWAY:
+			return 4;
+		case FREEWAY:
+			return 6;
+		case CD_ROAD:
+			return 5;
+		default:
+			return 3;
+		}
+	}
+
 	/** Identity transform */
-	static protected final AffineTransform IDENTITY_TRANSFORM =
+	static private final AffineTransform IDENTITY_TRANSFORM =
 		new AffineTransform();
 
 	/** Get the coordinate transform */
@@ -47,13 +62,13 @@ public class MapSegment implements MapObject {
 	}
 
 	/** Segment object */
-	protected final Segment segment;
+	private final Segment segment;
 
 	/** Lane for segment (null for all lanes) */
-	protected final Integer lane;
+	private final Integer lane;
 
 	/** Shape to render */
-	protected final Shape shape;
+	private final Shape shape;
 
 	/** Get the shape to draw this object */
 	public Shape getShape() {
@@ -61,7 +76,7 @@ public class MapSegment implements MapObject {
 	}
 
 	/** Shape to draw outline */
-	protected final Shape outline;
+	private final Shape outline;
 
 	/** Get the outline to draw this object */
 	public Shape getOutlineShape() {
@@ -79,35 +94,20 @@ public class MapSegment implements MapObject {
 	}
 
 	/** Calculate the spacing between the centerline and segment */
-	protected float calculateInner(float scale) {
+	private float calculateInner(float scale) {
 		return scale * roadClassScale() / 14;
 	}
 
 	/** Calculate the ideal segment width */
-	protected float calculateWidth(float scale) {
+	private float calculateWidth(float scale) {
 		return scale * roadClassScale();
 	}
 
 	/** Get the scale factor for the road class */
-	protected float roadClassScale() {
+	private float roadClassScale() {
 		Road r = segment.getModel().r_node.getGeoLoc().getRoadway();
 		RoadClass rc = RoadClass.fromOrdinal(r.getRClass());
 		return roadClassScale(rc) * UI.scale;
-	}
-
-	/** Get the scale factor for the road class */
-	static protected float roadClassScale(RoadClass rc) {
-		switch(rc) {
-		case ARTERIAL:
-		case EXPRESSWAY:
-			return 4;
-		case FREEWAY:
-			return 6;
-		case CD_ROAD:
-			return 5;
-		default:
-			return 3;
-		}
 	}
 
 	/** Create a new map segment */
@@ -126,13 +126,13 @@ public class MapSegment implements MapObject {
 	}
 
 	/** Calculate the width of one lane */
-	protected float calculateLaneWidth(float scale) {
+	private float calculateLaneWidth(float scale) {
 		return calculateWidth(scale) / 2 +
 		       5 * (20 - scale) / 20;
 	}
 
 	/** Create the shape to draw this object */
-	protected Shape createShape(float inner_a, float outer_a, float inner_b,
+	private Shape createShape(float inner_a, float outer_a, float inner_b,
 		float outer_b)
 	{
 		Point2D.Float p = new Point2D.Float();
@@ -152,7 +152,7 @@ public class MapSegment implements MapObject {
 	}
 
 	/** Create the outline to draw this object */
-	protected Shape createOutline(float inner_a, float outer_a,
+	private Shape createOutline(float inner_a, float outer_a,
 		float inner_b, float outer_b)
 	{
 		Point2D.Float p = new Point2D.Float();
@@ -174,30 +174,30 @@ public class MapSegment implements MapObject {
 	public String getTip() {
 		StringBuilder sb = new StringBuilder();
 		String label = segment.getLabel(lane);
-		if(label != null)
+		if (label != null)
 			sb.append(label);
 		Integer flow = getFlow();
-		if(flow != null) {
+		if (flow != null) {
 			sb.append("\n ");
 			sb.append(I18N.get("units.flow"));
 			sb.append(" = ");
 			sb.append(flow);
 		}
 		Integer density = getDensity();
-		if(density != null) {
+		if (density != null) {
 			sb.append("\n ");
 			sb.append(I18N.get("units.density"));
 			sb.append(" = ");
 			sb.append(density);
 		}
 		Integer speed = getSpeed();
-		if(speed != null) {
+		if (speed != null) {
 			sb.append("\n ");
 			sb.append(I18N.get("units.speed"));
 			sb.append(" = ");
 			sb.append(speed);
 		}
-		if(sb.length() > 0)
+		if (sb.length() > 0)
 			return sb.toString();
 		else
 			return null;
