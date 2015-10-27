@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,6 +68,7 @@ abstract public class SegmentTheme extends StyledTheme {
 	}
 
 	/** Draw the specified map object */
+	@Override
 	public void draw(Graphics2D g, MapObject mo, float scale) {
 		// don't apply transform
 		getSymbol(mo).draw(g, mo.getShape(), mo.getOutlineShape(),
@@ -75,6 +76,7 @@ abstract public class SegmentTheme extends StyledTheme {
 	}
 
 	/** Draw a selected map object */
+	@Override
 	public void drawSelected(Graphics2D g, MapObject mo, float scale) {
 		Shape shape = mo.getShape();
 		Outline outline = Outline.createDashed(Color.WHITE, 2);
@@ -97,8 +99,9 @@ abstract public class SegmentTheme extends StyledTheme {
 	abstract protected Style getStyle(MapSegment ms);
 
 	/** Get the tooltip text for a given segment */
+	@Override
 	public String getTip(MapObject mo) {
-		if(mo instanceof MapSegment)
+		if (mo instanceof MapSegment)
 			return ((MapSegment)mo).getTip();
 		else
 			return null;
