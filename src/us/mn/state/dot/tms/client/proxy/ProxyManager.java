@@ -146,7 +146,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Create a layer for this proxy type */
-	protected ProxyLayer<T> createLayer() {
+	private ProxyLayer<T> createLayer() {
 		return new ProxyLayer<T>(this);
 	}
 
@@ -353,7 +353,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Show the properties form for the specified proxy */
 	public final void showPropertiesForm(T proxy) {
 		SonarObjectForm<T> form = createPropertiesForm(proxy);
-		if(form != null)
+		if (form != null)
 			session.getDesktop().show(form);
 	}
 
@@ -365,7 +365,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Show the popup menu for the selected proxy or proxies */
 	public void showPopupMenu(MouseEvent e) {
 		JPopupMenu popup = createPopup();
-		if(popup != null) {
+		if (popup != null) {
 			popup.setInvoker(e.getComponent());
 			popup.show(e.getComponent(), e.getX(), e.getY());
 		}
@@ -403,10 +403,10 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Iterate through all proxy objects */
 	private MapObject forEach(MapSearcher ms, AffineTransform at) {
 		shape = getShape(at);
-		synchronized(map_cache) {
-			for(MapGeoLoc loc: map_cache) {
-				if(isLocationSet(loc)) {
-					if(ms.next(loc))
+		synchronized (map_cache) {
+			for (MapGeoLoc loc: map_cache) {
+				if (isLocationSet(loc)) {
+					if (ms.next(loc))
 						return loc;
 				}
 			}
@@ -422,7 +422,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Find the map geo location for a proxy */
 	public MapGeoLoc findGeoLoc(T proxy) {
 		GeoLoc loc = getGeoLoc(proxy);
-		if(loc != null)
+		if (loc != null)
 			return loc_manager.findMapGeoLoc(loc);
 		else
 			return null;
@@ -433,7 +433,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Find a proxy matching the given map object */
 	public T findProxy(MapObject mo) {
-		if(mo instanceof MapGeoLoc)
+		if (mo instanceof MapGeoLoc)
 			return map_cache.lookup((MapGeoLoc)mo);
 		else
 			return null;
