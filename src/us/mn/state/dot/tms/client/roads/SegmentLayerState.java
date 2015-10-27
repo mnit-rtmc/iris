@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,7 @@ public class SegmentLayerState extends LayerState {
 	@Override
 	public boolean isVisible() {
 		Boolean v = getVisible();
-		return v != null ? v : isZoomVisible();
+		return (v != null) ? v : isZoomVisible();
 	}
 
 	/** Is the layer visible at the current zoom level? */
@@ -55,7 +55,7 @@ public class SegmentLayerState extends LayerState {
 	/** Iterate through the segments in the layer */
 	@Override
 	public MapObject forEach(MapSearcher s) {
-		if(isPastLaneZoomThreshold())
+		if (isPastLaneZoomThreshold())
 			return forEachLane(s);
 		else
 			return forEachStation(s);
@@ -69,9 +69,9 @@ public class SegmentLayerState extends LayerState {
 	/** Iterate through the stations in the layer */
 	private MapObject forEachStation(MapSearcher s) {
 		float scale = getScale();
-		for(Segment seg: seg_layer) {
+		for (Segment seg: seg_layer) {
 			MapSegment ms = new MapSegment(seg, scale);
-			if(s.next(ms))
+			if (s.next(ms))
 				return ms;
 		}
 		return null;
@@ -82,12 +82,12 @@ public class SegmentLayerState extends LayerState {
 	 * @return Map object found, if any. */
 	private MapObject forEachLane(MapSearcher s) {
 		float scale = getScale();
-		for(Segment seg: seg_layer) {
-			for(int sh = seg.getLeftMin(); sh < seg.getRightMax();
-			    sh++)
+		for (Segment seg: seg_layer) {
+			for (int sh = seg.getLeftMin(); sh < seg.getRightMax();
+			     sh++)
 			{
 				MapSegment ms = new MapSegment(seg, sh, scale);
-				if(s.next(ms))
+				if (s.next(ms))
 					return ms;
 			}
 		}
@@ -95,6 +95,7 @@ public class SegmentLayerState extends LayerState {
 	}
 
 	/** Search a layer for a map object containing the given point */
+	@Override
 	public MapObject search(final Point2D p) {
 		return forEach(new MapSearcher() {
 			public boolean next(MapObject mo) {
