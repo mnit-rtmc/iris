@@ -26,7 +26,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class R_NodeMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
-	static private final int MARKER_SIZE_PIX = UI.scaled(18);
+	static private final int MARKER_SIZE_PIX = UI.scaled(16);
 
 	/** Create a new r_node marker */
 	public R_NodeMarker() {

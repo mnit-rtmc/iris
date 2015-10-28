@@ -14,15 +14,12 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
@@ -30,7 +27,6 @@ import java.util.TreeMap;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import javax.swing.ListModel;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import us.mn.state.dot.geokit.Position;
@@ -43,7 +39,6 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
@@ -52,6 +47,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
+import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
 import us.mn.state.dot.tms.client.widget.Invokable;
@@ -67,15 +63,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Offset angle for default North map markers */
 	static private final double NORTH_ANGLE = Math.PI / 2;
-
-	/** Background color for nodes with GPS points */
-	static public final Color COLOR_GPS = Color.GREEN;
-
-	/** Background color for nodes with bad locations */
-	static public final Color COLOR_NO_LOC = Color.RED;
-
-	/** Background color for inactive nodes */
-	static public final Color COLOR_INACTIVE = Color.GRAY;
 
 	/** Marker to draw r_nodes */
 	static private final R_NodeMarker MARKER = new R_NodeMarker();
@@ -374,23 +361,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		return MARKER.createTransformedShape(at);
 	}
 
-	/** Check the style of the specified proxy */
-	@Override
-	public boolean checkStyle(ItemStyle is, R_Node proxy) {
-		switch (is) {
-		case GPS:
-			return !GeoLocHelper.isNull(getGeoLoc(proxy));
-		case NO_LOC:
-			return GeoLocHelper.isNull(getGeoLoc(proxy));
-		case INACTIVE:
-			return !proxy.getActive();
-		case ALL:
-			return true;
-		default:
-			return false;
-		}
-	}
-
 	/** Create a style list model for the given symbol */
 	@Override
 	protected StyleListModel<R_Node> createStyleListModel(Symbol s) {
@@ -400,14 +370,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Create a theme for r_nodes */
 	@Override
-	protected R_NodeMapTheme createTheme() {
-		R_NodeMapTheme theme = new R_NodeMapTheme(this);
-		// order determines precedence of assigned style
-		theme.addStyle(ItemStyle.INACTIVE, COLOR_INACTIVE);
-		theme.addStyle(ItemStyle.GPS, COLOR_GPS);
-		theme.addStyle(ItemStyle.NO_LOC, COLOR_NO_LOC);
-		theme.addStyle(ItemStyle.ALL);
-		return theme;
+	protected ProxyTheme<R_Node> createTheme() {
+		return new ProxyTheme<R_Node>(this, MARKER);
 	}
 
 	/** Lookup the corridor for a location */

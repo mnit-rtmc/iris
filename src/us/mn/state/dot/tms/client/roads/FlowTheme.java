@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class FlowTheme extends SegmentTheme {
 
 	/** Flow styles */
-	static protected final Style[] F_STYLES = new Style[] {
+	static private final Style[] F_STYLES = new Style[] {
 		new Style(I18N.get("units.flow.low"), OUTLINE, GREEN),
 		new Style(I18N.get("units.flow.medium"), OUTLINE, YELLOW),
 		new Style(I18N.get("units.flow.med.high"), OUTLINE, ORANGE),
@@ -36,22 +36,23 @@ public class FlowTheme extends SegmentTheme {
 	/** Create a new flow theme */
 	public FlowTheme() {
 		super(I18N.get("units.flow"));
-		for(Style s: F_STYLES)
+		for (Style s: F_STYLES)
 			addStyle(s);
 	}
 
 	/** Get the style to draw a given segment */
-	protected Style getStyle(MapSegment ms) {
+	@Override
+	protected Style getSegmentStyle(MapSegment ms) {
 		Integer f = ms.getFlow();
-		if(f == null)
+		if (f == null)
 			return DEFAULT_STYLE;
-		if(f <= 1500)
+		if (f <= 1500)
 			return F_STYLES[0];
-		if(f <= 2000)
+		if (f <= 2000)
 			return F_STYLES[1];
-		if(f <= 2500)
+		if (f <= 2500)
 			return F_STYLES[2];
-		if(f <= 4000)
+		if (f <= 4000)
 			return F_STYLES[3];
 		return F_STYLES[4];
 	}

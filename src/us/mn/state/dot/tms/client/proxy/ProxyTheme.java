@@ -102,6 +102,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	}
 
 	/** Get an appropriate style for the given map object */
+	@Override
 	public Style getStyle(MapObject o) {
 		T proxy = manager.findProxy(o);
 		if (proxy != null)

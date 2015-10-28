@@ -60,6 +60,10 @@ abstract public class SegmentTheme extends StyledTheme {
 	static protected final Style DEFAULT_STYLE = new Style(I18N.get(
 		"detector.no.data"), OUTLINE, GRAY);
 
+	/** R_node style theme */
+	static private final Style R_NODE_STYLE = new Style(I18N.get("r_node"),
+		OUTLINE, new Color(255, 96, 128, 128));
+
 	/** Size of legend icons */
 	static private final int lsize = UI.scaled(22);
 
@@ -67,6 +71,7 @@ abstract public class SegmentTheme extends StyledTheme {
 	protected SegmentTheme(String name) {
 		super(name, new Rectangle(0, 0, 200, 200), lsize);
 		addStyle(DEFAULT_STYLE);
+		addStyle(R_NODE_STYLE);
 	}
 
 	/** Draw the specified map object */
@@ -89,16 +94,17 @@ abstract public class SegmentTheme extends StyledTheme {
 	}
 
 	/** Get the style to draw a given map object */
+	@Override
 	public Style getStyle(MapObject mo) {
 		if (mo instanceof MapSegment) {
 			MapSegment ms = (MapSegment)mo;
-			return getStyle(ms);
+			return getSegmentStyle(ms);
 		} else
-			return DEFAULT_STYLE;
+			return R_NODE_STYLE;
 	}
 
 	/** Get the style to draw a given segment */
-	abstract protected Style getStyle(MapSegment ms);
+	abstract protected Style getSegmentStyle(MapSegment ms);
 
 	/** Get the tooltip text for a given segment */
 	@Override

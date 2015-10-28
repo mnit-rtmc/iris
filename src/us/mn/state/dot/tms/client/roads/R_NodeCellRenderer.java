@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,6 +44,15 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  * @author Douglas Lau
  */
 public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
+
+	/** Background color for nodes with GPS points */
+	static private final Color COLOR_GPS = Color.GREEN;
+
+	/** Background color for nodes with bad locations */
+	static private final Color COLOR_NO_LOC = Color.RED;
+
+	/** Background color for inactive nodes */
+	static private final Color COLOR_INACTIVE = Color.GRAY;
 
 	/** Width of one lane */
 	static private final int LANE_WIDTH = UI.scaled(20);
@@ -106,16 +115,16 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	/** Set the selected status of the component */
 	protected void setSelected(boolean sel) {
 		selected = sel;
-		if(sel)
+		if (sel)
 			setBackground(Color.LIGHT_GRAY);
 		else {
 			GeoLoc loc = r_node.getGeoLoc();
-			if(GeoLocHelper.isNull(loc))
-				setBackground(R_NodeManager.COLOR_NO_LOC);
-			else if(r_node.getActive())
-				setBackground(R_NodeManager.COLOR_GPS);
+			if (GeoLocHelper.isNull(loc))
+				setBackground(COLOR_NO_LOC);
+			else if (r_node.getActive())
+				setBackground(COLOR_GPS);
 			else
-				setBackground(R_NodeManager.COLOR_INACTIVE);
+				setBackground(COLOR_INACTIVE);
 		}
 	}
 

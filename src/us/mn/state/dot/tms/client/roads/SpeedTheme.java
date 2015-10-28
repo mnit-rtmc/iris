@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class SpeedTheme extends SegmentTheme {
 
 	/** Speed styles */
-	static protected final Style[] S_STYLES = new Style[] {
+	static private final Style[] S_STYLES = new Style[] {
 		new Style(I18N.get("units.speed.low"), OUTLINE, RED),
 		new Style(I18N.get("units.speed.low.med"), OUTLINE, ORANGE),
 		new Style(I18N.get("units.speed.medium"), OUTLINE, YELLOW),
@@ -36,22 +36,23 @@ public class SpeedTheme extends SegmentTheme {
 	/** Create a new speed theme */
 	public SpeedTheme() {
 		super(I18N.get("units.speed"));
-		for(Style s: S_STYLES)
+		for (Style s: S_STYLES)
 			addStyle(s);
 	}
 
 	/** Get the style to draw a given segment */
-	protected Style getStyle(MapSegment ms) {
+	@Override
+	protected Style getSegmentStyle(MapSegment ms) {
 		Integer spd = ms.getSpeed();
-		if(spd == null)
+		if (spd == null)
 			return DEFAULT_STYLE;
-		if(spd < 25)
+		if (spd < 25)
 			return S_STYLES[0];
-		if(spd < 40)
+		if (spd < 40)
 			return S_STYLES[1];
-		if(spd < 55)
+		if (spd < 55)
 			return S_STYLES[2];
-		if(spd < 90)
+		if (spd < 90)
 			return S_STYLES[3];
 		return S_STYLES[4];
 	}

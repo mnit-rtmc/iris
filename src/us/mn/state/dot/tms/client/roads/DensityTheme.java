@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class DensityTheme extends SegmentTheme {
 
 	/** Density styles */
-	static protected final Style[] D_STYLES = new Style[] {
+	static private final Style[] D_STYLES = new Style[] {
 		new Style(I18N.get("units.density.low"), OUTLINE, GREEN),
 		new Style(I18N.get("units.density.medium"), OUTLINE, ORANGE),
 		new Style(I18N.get("units.density.high"), OUTLINE, RED),
@@ -35,20 +35,21 @@ public class DensityTheme extends SegmentTheme {
 	/** Create a new density theme */
 	public DensityTheme() {
 		super(I18N.get("units.density"));
-		for(Style s: D_STYLES)
+		for (Style s: D_STYLES)
 			addStyle(s);
 	}
 
 	/** Get the style to draw a given segment */
-	protected Style getStyle(MapSegment ms) {
+	@Override
+	protected Style getSegmentStyle(MapSegment ms) {
 		Integer d = ms.getDensity();
-		if(d == null)
+		if (d == null)
 			return DEFAULT_STYLE;
-		if(d < 30)
+		if (d < 30)
 			return D_STYLES[0];
-		if(d < 50)
+		if (d < 50)
 			return D_STYLES[1];
-		if(d < 200)
+		if (d < 200)
 			return D_STYLES[2];
 		return D_STYLES[3];
 	}
