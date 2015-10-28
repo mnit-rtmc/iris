@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -104,7 +104,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	/** Get an appropriate style for the given map object */
 	public Style getStyle(MapObject o) {
 		T proxy = manager.findProxy(o);
-		if(proxy != null)
+		if (proxy != null)
 			return getStyle(proxy);
 		else
 			return dstyle;
@@ -113,9 +113,9 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	/** Get an appropriate style for the given proxy object */
 	protected Style getStyle(T proxy) {
 		// FIXME: combine styles when it applies (locked meters)
-		for(Style st: styles) {
+		for (Style st: styles) {
 			ItemStyle is = ItemStyle.lookupStyle(st.getLabel());
-			if(manager.checkStyle(is, proxy))
+			if (manager.checkStyle(is, proxy))
 				return st;
 		}
 		return dstyle;
@@ -124,7 +124,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	/** Get tooltip text for the given map object */
 	public String getTip(MapObject o) {
 		T proxy = manager.findProxy(o);
-		if(proxy != null)
+		if (proxy != null)
 			return manager.getDescription(proxy);
 		else
 			return null;

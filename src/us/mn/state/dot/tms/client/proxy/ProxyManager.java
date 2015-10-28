@@ -269,11 +269,6 @@ abstract public class ProxyManager<T extends SonarObject> {
 		return shape;
 	}
 
-	/** Set the current marker shape */
-	public final void setShape(Shape s) {
-		shape = s;
-	}
-
 	/** Set the shape scale */
 	public void setShapeScale(float scale) {
 		float sc = adjustScale(scale);
