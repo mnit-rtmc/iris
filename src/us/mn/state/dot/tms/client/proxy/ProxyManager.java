@@ -115,6 +115,11 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Map layer for the proxy type */
 	private final ProxyLayer<T> layer;
 
+	/** Get the map layer */
+	public ProxyLayer<T> getLayer() {
+		return layer;
+	}
+
 	/** Default style */
 	private final ItemStyle def_style;
 
@@ -269,6 +274,14 @@ abstract public class ProxyManager<T extends SonarObject> {
 		shape = s;
 	}
 
+	/** Set the shape scale */
+	public void setShapeScale(float scale) {
+		float sc = adjustScale(scale);
+		AffineTransform at = new AffineTransform();
+		at.setToScale(sc, sc);
+		shape = getShape(at);
+	}
+
 	/** Current cell renderer size */
 	private CellRendererSize m_cellSize = CellRendererSize.LARGE;
 
@@ -293,7 +306,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Create layer state for a map bean */
-	public final LayerState createState(MapBean mb) {
+	public LayerState createState(MapBean mb) {
 		return layer.createState(mb);
 	}
 
@@ -393,20 +406,11 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Iterate through all proxy objects */
-	public MapObject forEach(MapSearcher ms, float scale) {
-		float sc = adjustScale(scale);
-		AffineTransform at = new AffineTransform();
-		at.setToScale(sc, sc);
-		return forEach(ms, at);
-	}
-
-	/** Iterate through all proxy objects */
-	private MapObject forEach(MapSearcher ms, AffineTransform at) {
-		shape = getShape(at);
+	public MapObject forEach(MapSearcher s) {
 		synchronized (map_cache) {
 			for (MapGeoLoc loc: map_cache) {
 				if (isLocationSet(loc)) {
-					if (ms.next(loc))
+					if (s.next(loc))
 						return loc;
 				}
 			}

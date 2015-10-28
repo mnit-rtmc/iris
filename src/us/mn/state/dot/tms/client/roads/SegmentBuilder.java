@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,10 +25,6 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
-import us.mn.state.dot.map.Layer;
-import us.mn.state.dot.map.LayerChange;
-import us.mn.state.dot.map.LayerState;
-import us.mn.state.dot.map.MapBean;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Detector;
@@ -42,18 +38,23 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * SegmentLayer is a class for drawing roadway segments.
+ * SegmentBuilder is a class for building roadway segments.
  *
  * @author Douglas Lau
   */
-public class SegmentLayer extends Layer implements Iterable<Segment> {
+public class SegmentBuilder implements Iterable<Segment> {
+
+	/** Check if two locations are too distant */
+	static private boolean isTooDistant(MapGeoLoc l0, MapGeoLoc l1) {
+		Distance m = GeoLocHelper.distanceTo(l0.getGeoLoc(),
+			l1.getGeoLoc());
+		return m == null ||
+		       m.m() > SystemAttrEnum.MAP_SEGMENT_MAX_METERS.getInt();
+	}
 
 	/** Mapping of corridor names to segment lists */
 	private final ConcurrentSkipListMap<String, List<Segment>> cor_segs =
 		new ConcurrentSkipListMap<String, List<Segment>>();
-
-	/** Client session */
-	private final Session session;
 
 	/** R_Node manager */
 	private final R_NodeManager manager;
@@ -67,15 +68,13 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 	/** Sensor reader */
 	private SensorReader reader;
 
-	/** Create a new segment layer */
-	public SegmentLayer(Session s, R_NodeManager m) {
-		super(I18N.get("detector.segments"));
+	/** Create a new segment builder */
+	public SegmentBuilder(Session s, R_NodeManager m) {
 		manager = m;
-		session = s;
 		det_hash = new DetectorHash(s);
 	}
 
-	/** Initialize the segment layer */
+	/** Initialize the segment builder */
 	public void initialize() {
 		det_hash.initialize();
 	}
@@ -85,14 +84,14 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 		ParserConfigurationException
 	{
 		String loc = props.getProperty("tdxml.detector.url");
-		if(loc != null)
+		if (loc != null)
 			reader = new SensorReader(new URL(loc), this);
 	}
 
-	/** Dispose of the segment layer */
+	/** Dispose of the segment builder */
 	public void dispose() {
 		SensorReader sr = reader;
-		if(sr != null)
+		if (sr != null)
 			sr.dispose();
 		reader = null;
 		det_hash.dispose();
@@ -119,12 +118,12 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 	public void updateStatus() {
 		runSwing(new Runnable() {
 			public void run() {
-				fireLayerChanged(LayerChange.status);
+				manager.getLayer().updateStatus();
 			}
 		});
 	}
 
-	/** Update a corridor on the segment layer */
+	/** Update a corridor */
 	public void updateCorridor(CorridorBase corridor) {
 		List<Segment> below = new LinkedList<Segment>();
 		List<Segment> above = new LinkedList<Segment>();
@@ -132,22 +131,22 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 		MapGeoLoc uloc = null;	// upstream node location
 		MapGeoLoc ploc = null;	// previous node location
 		R_NodeModel mdl = null;	// node model
-		for(R_Node n: corridor) {
-			MapGeoLoc loc = manager.findGeoLoc(n);
+		for (R_Node n: corridor) {
+			MapGeoLoc loc = findGeoLoc(n);
 			// Node may not be on selected corridor...
-			if(loc == null)
+			if (loc == null)
 				continue;
-			if(un != null) {
-				if(R_NodeHelper.isJoined(n) &&
-				   !isTooDistant(ploc, loc))
+			if (un != null) {
+				if (R_NodeHelper.isJoined(n) &&
+				    !isTooDistant(ploc, loc))
 				{
 					boolean td = isTooDistant(uloc, loc);
 					mdl = new R_NodeModel(n, mdl);
 					Segment seg = new Segment(mdl, un,
 						ploc, loc, samples, td);
-					if(!td)
-					   seg.addDetection(getDetectors(un));
-					if(n.getAbove())
+					if (!td)
+					    seg.addDetection(getDetectors(un));
+					if (n.getAbove())
 						above.add(seg);
 					else
 						below.add(seg);
@@ -156,7 +155,7 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 			} else
 				mdl = null;
 			ploc = loc;
-			if(un == null || R_NodeHelper.isStationBreak(n)) {
+			if (un == null || R_NodeHelper.isStationBreak(n)) {
 				un = n;
 				uloc = loc;
 			}
@@ -166,22 +165,14 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 		cor_segs.put('z' + corridor.getName(), above);
 	}
 
+	/** Find the map geo loc */
+	public MapGeoLoc findGeoLoc(R_Node n) {
+		return manager.findGeoLoc(n);
+	}
+
 	/** Get a set of detectors for an r_node */
 	private Set<Detector> getDetectors(R_Node n) {
 		return det_hash.getDetectors(n);
-	}
-
-	/** Check if two locations are too distant */
-	static private boolean isTooDistant(MapGeoLoc l0, MapGeoLoc l1) {
-		Distance m = GeoLocHelper.distanceTo(l0.getGeoLoc(),
-			l1.getGeoLoc());
-		return m == null ||
-		       m.m() > SystemAttrEnum.MAP_SEGMENT_MAX_METERS.getInt();
-	}
-
-	/** Create a new layer state */
-	public LayerState createState(MapBean mb) {
-		return new SegmentLayerState(this, mb);
 	}
 
 	/** Create a segment iterator.  This uses the cor_segs mapping, which
@@ -192,17 +183,17 @@ public class SegmentLayer extends Layer implements Iterable<Segment> {
 		return new Iterator<Segment>() {
 			Iterator<Segment> segs;
 			public boolean hasNext() {
-				if(segs != null && segs.hasNext())
+				if (segs != null && segs.hasNext())
 					return true;
-				while(cors.hasNext()) {
+				while (cors.hasNext()) {
 					segs = cors.next().iterator();
-					if(segs.hasNext())
+					if (segs.hasNext())
 						return true;
 				}
 				return false;
 			}
 			public Segment next() {
-				if(segs != null)
+				if (segs != null)
 					return segs.next();
 				else
 					throw new NoSuchElementException();

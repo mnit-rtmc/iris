@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,13 +67,13 @@ public class ProxyLayer<T extends SonarObject> extends Layer {
 			@Override
 			public Rectangle2D doInBackground() {
 				ExtentCalculator calc = new ExtentCalculator();
-				manager.forEach(calc, 1);
+				manager.forEach(calc);
 				return calc.extent;
 			}
 			@Override
 			public void done() {
 				Rectangle2D e = getResult();
-				if(e != null)
+				if (e != null)
 					setExtent(e);
 			}
 		};
@@ -88,7 +88,7 @@ public class ProxyLayer<T extends SonarObject> extends Layer {
 			AffineTransform t = o.getTransform();
 			Rectangle2D b = t.createTransformedShape(
 				EXTENT_SHAPE).getBounds2D();
-			if(extent == null) {
+			if (extent == null) {
 				extent = new Rectangle2D.Double();
 				extent.setRect(b);
 			} else

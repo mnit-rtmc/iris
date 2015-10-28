@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class R_NodeMarker extends AbstractMarker {
 
 	/** Size in pixels to render marker */
-	static private final int MARKER_SIZE_PIX = UI.scaled(12);
+	static private final int MARKER_SIZE_PIX = UI.scaled(18);
 
 	/** Create a new r_node marker */
 	public R_NodeMarker() {

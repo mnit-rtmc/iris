@@ -44,7 +44,6 @@ import us.mn.state.dot.tms.client.meter.MeterManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
-import us.mn.state.dot.tms.client.roads.SegmentLayer;
 import us.mn.state.dot.tms.client.schedule.PlanManager;
 import us.mn.state.dot.tms.client.toll.TagReaderManager;
 import us.mn.state.dot.tms.client.weather.WeatherSensorManager;
@@ -144,9 +143,6 @@ public class Session {
 	private final HashMap<String, MapTab> all_tabs =
 		new HashMap<String, MapTab>();
 
-	/** Segment layer */
-	private final SegmentLayer seg_layer;
-
 	/** Tile layer */
 	private final TileLayer tile_layer;
 
@@ -181,7 +177,6 @@ public class Session {
 		managers.add(new WeatherSensorManager(this, loc_manager));
 		managers.add(new IncidentManager(this, loc_manager));
 		managers.add(new PlanManager(this, loc_manager));
-		seg_layer = r_node_manager.getSegmentLayer();
 		tile_layer = createTileLayer(props.getProperty("map.tile.url"));
 	}
 
@@ -199,7 +194,7 @@ public class Session {
 	{
 		initializeManagers();
 		createTabs();
-		seg_layer.start(props);
+		r_node_manager.start(props);
 		if (tile_layer != null)
 			tile_layer.initialize();
 	}
@@ -248,7 +243,6 @@ public class Session {
 	public void createLayers(MapBean mb, MapModel mm) {
 		if (tile_layer != null)
 			mm.addLayer(tile_layer.createState(mb));
-		mm.addLayer(seg_layer.createState(mb));
 		for (ProxyManager<?> man: managers) {
 			if (man.hasLayer())
 				mm.addLayer(man.createState(mb));

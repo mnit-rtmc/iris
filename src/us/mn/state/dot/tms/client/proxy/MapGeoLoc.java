@@ -190,7 +190,7 @@ public class MapGeoLoc implements MapObject {
 
 	/** Get the map object shape */
 	public Shape getShape() {
-		return manager != null ? manager.getShape() : null;
+		return (manager != null) ? manager.getShape() : null;
 	}
 
 	/** Get the outline shape */

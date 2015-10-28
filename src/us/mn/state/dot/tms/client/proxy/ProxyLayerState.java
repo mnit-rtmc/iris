@@ -84,10 +84,10 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 
 	/** Set the tab selected flag */
 	public void setTabSelected(boolean ts) {
-		if(tab_selected && !ts)
+		if (tab_selected && !ts)
 			model.clearSelection();
 		tab_selected = ts;
-		if(getVisible() == null)
+		if (getVisible() == null)
 			fireLayerChanged(LayerChange.visibility);
 	}
 
@@ -95,7 +95,7 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	@Override
 	public boolean isVisible() {
 		Boolean v = getVisible();
-		return v != null ? v : tab_selected || isZoomVisible();
+		return (v != null) ? v : tab_selected || isZoomVisible();
 	}
 
 	/** Is the layer visible at the current zoom level? */
@@ -107,12 +107,12 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	/** Iterate through all shapes in the layer */
 	@Override
 	public MapObject forEach(MapSearcher s) {
-		return manager.forEach(s, getScale());
+		manager.setShapeScale(getScale());
+		return manager.forEach(s);
 	}
 
 	/** Do mouse click event processing */
-	protected void doClick(MouseEvent e, MapObject o) {
-		T proxy = manager.findProxy(o);
+	private void doClick(MouseEvent e, T proxy) {
 		if (proxy != null) {
 			int m = e.getModifiersEx();
 			if ((m & InputEvent.CTRL_DOWN_MASK) != 0)
@@ -127,13 +127,15 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 	/** Do left-click event processing */
 	@Override
 	protected void doLeftClick(MouseEvent e, MapObject o) {
-		doClick(e, o);
+		doClick(e, manager.findProxy(o));
 	}
 
 	/** Do right-click event processing */
 	@Override
 	protected void doRightClick(MouseEvent e, MapObject o) {
-		doClick(e, o);
-		manager.showPopupMenu(e);
+		T proxy = manager.findProxy(o);
+		doClick(e, proxy);
+		if (proxy != null)
+			manager.showPopupMenu(e);
 	}
 }

@@ -18,10 +18,12 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
+import java.awt.geom.AffineTransform;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.StyledTheme;
+import us.mn.state.dot.map.Symbol;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -70,7 +72,8 @@ abstract public class SegmentTheme extends StyledTheme {
 	/** Draw the specified map object */
 	@Override
 	public void draw(Graphics2D g, MapObject mo, float scale) {
-		// don't apply transform
+		/* These map objects will always be MapSegment,
+		 * so don't apply a transform */
 		getSymbol(mo).draw(g, mo.getShape(), mo.getOutlineShape(),
 			scale);
 	}
@@ -78,21 +81,20 @@ abstract public class SegmentTheme extends StyledTheme {
 	/** Draw a selected map object */
 	@Override
 	public void drawSelected(Graphics2D g, MapObject mo, float scale) {
-		Shape shape = mo.getShape();
-		Outline outline = Outline.createDashed(Color.WHITE, 2);
-		g.setColor(outline.color);
-		g.setStroke(outline.getStroke(scale));
-		g.draw(shape);
-		outline = Outline.createSolid(Color.WHITE, 4);
-		Shape ellipse = createEllipse(shape);
-		g.setStroke(outline.getStroke(scale));
-		g.draw(ellipse);
+		/* Selected map object will always be the r_node */
+		AffineTransform t = g.getTransform();
+		super.draw(g, mo, scale);
+		g.setTransform(t);
+		super.drawSelected(g, mo, scale);
 	}
 
 	/** Get the style to draw a given map object */
 	public Style getStyle(MapObject mo) {
-		MapSegment ms = (MapSegment)mo;
-		return getStyle(ms);
+		if (mo instanceof MapSegment) {
+			MapSegment ms = (MapSegment)mo;
+			return getStyle(ms);
+		} else
+			return DEFAULT_STYLE;
 	}
 
 	/** Get the style to draw a given segment */

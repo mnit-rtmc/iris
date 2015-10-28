@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,10 +54,10 @@ public class SensorReader {
 	/** Parse an attribute as an integer value */
 	static private Integer parseInt(String v) {
 		try {
-			if(v != null)
+			if (v != null)
 				return Integer.parseInt(v);
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			// Invalid value
 		}
 		return null;
@@ -78,8 +78,8 @@ public class SensorReader {
 	/** Flag to indicate the time stamp changed since last time */
 	private boolean time_changed = false;
 
-	/** Segment layer */
-	private final SegmentLayer seg_layer;
+	/** Segment builder */
+	private final SegmentBuilder builder;
 
 	/** Sensor handler */
 	private final SensorHandler handler = new SensorHandler();
@@ -94,11 +94,11 @@ public class SensorReader {
 	};
 
 	/** Create a new sensor reader */
-	public SensorReader(URL u, SegmentLayer sl) throws SAXException,
+	public SensorReader(URL u, SegmentBuilder sb) throws SAXException,
 		ParserConfigurationException
 	{
 		url = u;
-		seg_layer = sl;
+		builder = sb;
 		SAXParserFactory factory = SAXParserFactory.newInstance();
 		parser = factory.newSAXParser();
 		// Read the sensor data right away
@@ -122,19 +122,19 @@ public class SensorReader {
 			time_changed = false;
 			parse();
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			e.printStackTrace();
 		}
-		catch(SAXException e) {
+		catch (SAXException e) {
 			e.printStackTrace();
 		}
 		finally {
 			long now = System.currentTimeMillis();
-			if(time_changed) {
+			if (time_changed) {
 				receive_stamp = now;
-				seg_layer.completeSamples();
-			} else if(now - receive_stamp > SAMPLE_VALID_MS)
-				seg_layer.clearSamples();
+				builder.completeSamples();
+			} else if (now - receive_stamp > SAMPLE_VALID_MS)
+				builder.clearSamples();
 		}
 	}
 
@@ -152,9 +152,9 @@ public class SensorReader {
 		public void startElement(String uri, String localName,
 			String qname, Attributes attrs)
 		{
-			if(qname.equals("traffic_sample"))
+			if (qname.equals("traffic_sample"))
 				handleTrafficSample(attrs);
-			if(qname.equals("sample"))
+			if (qname.equals("sample"))
 				handleSample(attrs);
 		}
 	}
@@ -170,17 +170,17 @@ public class SensorReader {
 	private void notifySensorSample(String sensor, String f, String s) {
 		Integer flow = parseInt(f);
 		Integer speed = parseInt(s);
-		if(flow != null || speed != null)
-			seg_layer.update(new SensorSample(sensor, flow, speed));
+		if (flow != null || speed != null)
+			builder.update(new SensorSample(sensor, flow, speed));
 	}
 
 	/** Handle one sensor sample element */
 	private void handleSample(Attributes attrs) {
-		if(time_changed) {
+		if (time_changed) {
 			String sensor = attrs.getValue("sensor");
 			String flow = attrs.getValue("flow");
 			String speed = attrs.getValue("speed");
-			if(sensor != null)
+			if (sensor != null)
 				notifySensorSample(sensor, flow, speed);
 		}
 	}

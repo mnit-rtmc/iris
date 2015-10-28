@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
  */
 public class DetectorHash {
 
-	/** User session */
-	private final Session session;
+	/** Detector cache */
+	private final TypeCache<Detector> cache;
 
 	/** Mapping of r_node names to detector sets */
 	private final HashMap<String, HashSet<Detector>> nodes =
@@ -53,22 +53,17 @@ public class DetectorHash {
 
 	/** Create a new detector hash */
 	public DetectorHash(Session s) {
-		session = s;
+		cache = s.getSonarState().getDetCache().getDetectors();
 	}
 
 	/** Initialize the detector hash */
 	public void initialize() {
-		getCache().addProxyListener(listener);
+		cache.addProxyListener(listener);
 	}
 
 	/** Dispose of the detector hash */
 	public void dispose() {
-		getCache().removeProxyListener(listener);
-	}
-
-	/** Get the detector cache */
-	private TypeCache<Detector> getCache() {
-		return session.getSonarState().getDetCache().getDetectors();
+		cache.removeProxyListener(listener);
 	}
 
 	/** Add a detector to the hash */

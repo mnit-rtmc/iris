@@ -17,20 +17,26 @@ package us.mn.state.dot.tms.client.roads;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import java.util.TreeMap;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListModel;
+import javax.xml.parsers.ParserConfigurationException;
+import org.xml.sax.SAXException;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
+import us.mn.state.dot.map.LayerState;
+import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
@@ -113,8 +119,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		}
 	};
 
-	/** Segment layer */
-	private final SegmentLayer seg_layer;
+	/** Segment builder */
+	private final SegmentBuilder builder;
 
 	/** Currently selected corridor */
 	private CorridorBase corridor;
@@ -127,7 +133,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Create a new roadway node manager */
 	public R_NodeManager(Session s, GeoLocManager lm) {
 		super(s, lm);
-		seg_layer = new SegmentLayer(session, this);
+		builder = new SegmentBuilder(session, this);
 		model.addElement(" ");
 		det_cache = s.getSonarState().getDetCache().getDetectors();
 	}
@@ -135,7 +141,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Initialize the r_node manager */
 	@Override
 	public void initialize() {
-		seg_layer.initialize();
+		builder.initialize();
 		super.initialize();
 		det_cache.addProxyListener(det_listener);
 	}
@@ -145,7 +151,14 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	public void dispose() {
 		det_cache.removeProxyListener(det_listener);
 		super.dispose();
-		seg_layer.dispose();
+		builder.dispose();
+	}
+
+	/** Start reading sensor data */
+	public void start(Properties props) throws IOException, SAXException,
+		ParserConfigurationException
+	{
+		builder.start(props);
 	}
 
 	/** Get the sonar type name */
@@ -164,6 +177,12 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	@Override
 	public R_NodeTab createTab() {
 		return new R_NodeTab(session, this);
+	}
+
+	/** Create layer state for a map bean */
+	@Override
+	public LayerState createState(MapBean mb) {
+		return new SegmentLayerState(this, getLayer(), mb, builder);
 	}
 
 	/** Add a new proxy to the r_node manager */
@@ -262,7 +281,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Arrange segments in a corridor */
 	private void arrangeSegments(CorridorBase c) {
 		if (c.getRoadDir() > 0)
-			seg_layer.updateCorridor(c);
+			builder.updateCorridor(c);
 	}
 
 	/** Arrange segments for a detector */
@@ -333,7 +352,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			private MapGeoLoc nextLoc() {
 				while (it.hasNext()) {
 					R_Node n = it.next();
-					MapGeoLoc l = superFindGeoLoc(n);
+					MapGeoLoc l = findGeoLoc(n);
 					if (l != null)
 						return l;
 				}
@@ -347,11 +366,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			}
 			public void remove() { }
 		};
-	}
-
-	/** Get the segment layer */
-	public SegmentLayer getSegmentLayer() {
-		return seg_layer;
 	}
 
 	/** Get a transformed marker shape */
@@ -388,7 +402,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	@Override
 	protected R_NodeMapTheme createTheme() {
 		R_NodeMapTheme theme = new R_NodeMapTheme(this);
-		// order determines precidence of assigned style
+		// order determines precedence of assigned style
 		theme.addStyle(ItemStyle.INACTIVE, COLOR_INACTIVE);
 		theme.addStyle(ItemStyle.GPS, COLOR_GPS);
 		theme.addStyle(ItemStyle.NO_LOC, COLOR_NO_LOC);
@@ -446,20 +460,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		p.add(new JLabel(I18N.get("r_node.title") + ": " +
 			n_selected));
 		return p;
-	}
-
-	/** Find the map geo location for a proxy */
-	@Override
-	public MapGeoLoc findGeoLoc(R_Node proxy) {
-		if (corridor == null || checkCorridor(proxy))
-			return super.findGeoLoc(proxy);
-		else
-			return null;
-	}
-
-	/** Find the map geo location for a proxy */
-	private MapGeoLoc superFindGeoLoc(R_Node proxy) {
-		return super.findGeoLoc(proxy);
 	}
 
 	/** Get the GeoLoc for the specified proxy */
@@ -568,6 +568,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Get the layer zoom visibility threshold */
 	@Override
 	protected int getZoomThreshold() {
-		return 18;
+		return 10;
 	}
 }

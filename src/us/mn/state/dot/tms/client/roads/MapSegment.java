@@ -19,6 +19,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import us.mn.state.dot.map.MapObject;
+import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
@@ -64,6 +65,11 @@ public class MapSegment implements MapObject {
 	/** Segment object */
 	private final Segment segment;
 
+	/** Get the r_node */
+	public R_Node getR_Node() {
+		return segment.getModel().r_node;
+	}
+
 	/** Lane for segment (null for all lanes) */
 	private final Integer lane;
 
@@ -105,7 +111,7 @@ public class MapSegment implements MapObject {
 
 	/** Get the scale factor for the road class */
 	private float roadClassScale() {
-		Road r = segment.getModel().r_node.getGeoLoc().getRoadway();
+		Road r = getR_Node().getGeoLoc().getRoadway();
 		RoadClass rc = RoadClass.fromOrdinal(r.getRClass());
 		return roadClassScale(rc) * UI.scale;
 	}
