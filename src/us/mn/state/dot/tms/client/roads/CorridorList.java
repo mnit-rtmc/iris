@@ -243,8 +243,7 @@ public class CorridorList extends JPanel {
 		sel_model.addProxySelectionListener(sel_listener);
 		createJobs();
 		updateNodeSelection(null);
-		add_node.setEnabled(canAdd());
-		delete_node.setEnabled(false);
+		updateButtonPanel();
 		session.addEditModeListener(edit_lsnr);
 	}
 
@@ -483,7 +482,6 @@ public class CorridorList extends JPanel {
 				lanes, shift);
 		} else
 			creator.create(pos);
-		add_node.setEnabled(canAdd());
 	}
 
 	/** Get a position */
