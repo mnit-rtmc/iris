@@ -160,19 +160,19 @@ public class CorridorList extends JPanel {
 		new ProxyListener<R_Node>()
 	{
 		private boolean enumerated = false;
-		public void proxyAdded(R_Node proxy) {
+		public void proxyAdded(R_Node n) {
 			if (enumerated)
-				nodeAdded(proxy);
+				nodeAdded(n);
 		}
 		public void enumerationComplete() {
 			enumerated = true;
 			updateListModel();
 		}
-		public void proxyRemoved(R_Node proxy) {
-			nodeRemoved(proxy);
+		public void proxyRemoved(R_Node n) {
+			nodeRemoved(n);
 		}
-		public void proxyChanged(R_Node proxy, String a) {
-			nodeChanged(proxy, a);
+		public void proxyChanged(R_Node n, String a) {
+			nodeChanged(n, a);
 		}
 	};
 
@@ -180,11 +180,11 @@ public class CorridorList extends JPanel {
 	private final ProxyListener<GeoLoc> loc_listener =
 		new ProxyListener<GeoLoc>()
 	{
-		public void proxyAdded(GeoLoc proxy) { }
+		public void proxyAdded(GeoLoc n) { }
 		public void enumerationComplete() { }
-		public void proxyRemoved(GeoLoc proxy) { }
-		public void proxyChanged(GeoLoc proxy, String a) {
-			geoLocChanged(proxy, a);
+		public void proxyRemoved(GeoLoc n) { }
+		public void proxyChanged(GeoLoc n, String a) {
+			geoLocChanged(n, a);
 		}
 	};
 
@@ -271,23 +271,23 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Called when an r_node has been added */
-	private void nodeAdded(R_Node proxy) {
-		if (checkCorridor(proxy))
+	private void nodeAdded(R_Node n) {
+		if (checkCorridor(n))
 			updateListModel();
 	}
 
 	/** Called when an r_node has been removed */
-	private void nodeRemoved(R_Node proxy) {
-		if (checkCorridor(proxy))
+	private void nodeRemoved(R_Node n) {
+		if (checkCorridor(n))
 			updateListModel();
 	}
 
 	/** Called when an r_node attribute has changed */
-	private void nodeChanged(R_Node proxy, String a) {
+	private void nodeChanged(R_Node n, String a) {
 		if (a.equals("abandoned"))
 			updateListModel();
-		else if (checkCorridor(proxy))
-			n_model.updateItem(proxy);
+		else if (checkCorridor(n))
+			n_model.updateItem(n);
 	}
 
 	/** Called when a GeoLoc proxy attribute has changed */
@@ -379,8 +379,8 @@ public class CorridorList extends JPanel {
 		CorridorBase c = createCorridor(node_s);
 		if (c != null) {
 			R_NodeModel prev = null;
-			for (R_Node proxy: c) {
-				R_NodeModel m = new R_NodeModel(proxy, prev);
+			for (R_Node n: c) {
+				R_NodeModel m = new R_NodeModel(n, prev);
 				nodes.add(0, m);
 				prev = m;
 			}
@@ -408,9 +408,9 @@ public class CorridorList extends JPanel {
 			new LinkedList<R_NodeModel>();
 		Iterator<R_Node> it = node_s.iterator();
 		while (it.hasNext()) {
-			R_Node proxy = it.next();
-			if (isNullOrAbandoned(proxy)) {
-				no_loc.add(new R_NodeModel(proxy, null));
+			R_Node n = it.next();
+			if (isNullOrAbandoned(n)) {
+				no_loc.add(new R_NodeModel(n, null));
 				it.remove();
 			}
 		}
@@ -435,26 +435,26 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Update the roadway node selection */
-	private void updateNodeSelection(R_Node proxy) {
-		if (isCorridorChanged(proxy)) {
-			CorridorBase cb = manager.getCorridor(proxy);
+	private void updateNodeSelection(R_Node n) {
+		if (isCorridorChanged(n)) {
+			CorridorBase cb = manager.getCorridor(n);
 			corridor_cbx.setSelectedItem(cb);
 		}
 		client.setPointSelector(null);
-		panel.setR_Node(proxy);
+		panel.setR_Node(n);
 		updateButtonPanel();
 	}
 
 	/** Check if the corridor is changed */
-	private boolean isCorridorChanged(R_Node proxy) {
-		return (proxy != null) && !checkCorridor(proxy);
+	private boolean isCorridorChanged(R_Node n) {
+		return (n != null) && !checkCorridor(n);
 	}
 
 	/** Update the enabled state of add and delete buttons */
 	private void updateButtonPanel() {
-		R_Node proxy = getSelectedNode();
+		R_Node n = getSelectedNode();
 		add_node.setEnabled(canAdd());
-		delete_node.setEnabled(canRemove(proxy));
+		delete_node.setEnabled(canRemove(n));
 	}
 
 	/** Do the add node action */
@@ -510,10 +510,10 @@ public class CorridorList extends JPanel {
 
 	/** Do the delete node action */
 	private void doDeleteNode() {
-		R_Node proxy = getSelectedNode();
-		if (proxy != null) {
-			GeoLoc loc = proxy.getGeoLoc();
-			proxy.destroy();
+		R_Node n = getSelectedNode();
+		if (n != null) {
+			GeoLoc loc = n.getGeoLoc();
+			n.destroy();
 			loc.destroy();
 		}
 	}
