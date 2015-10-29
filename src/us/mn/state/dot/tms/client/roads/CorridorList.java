@@ -359,7 +359,7 @@ public class CorridorList extends JPanel {
 		{
 			@Override
 			public List<R_NodeModel> doInBackground() {
-				return createNodeList(createSet());
+				return createNodeList();
 			}
 			@Override
 			public void done() {
@@ -372,9 +372,10 @@ public class CorridorList extends JPanel {
 	}
 
 	/** Create a list model of roadway node models for one corridor */
-	private List<R_NodeModel> createNodeList(Set<R_Node> node_s) {
-		LinkedList<R_NodeModel> nodes = new LinkedList<R_NodeModel>();
+	private List<R_NodeModel> createNodeList() {
+		Set<R_Node> node_s = createSet();
 		List<R_NodeModel> no_loc = createNullLocList(node_s);
+		LinkedList<R_NodeModel> nodes = new LinkedList<R_NodeModel>();
 		CorridorBase c = createCorridor(node_s);
 		if (c != null) {
 			R_NodeModel prev = null;
