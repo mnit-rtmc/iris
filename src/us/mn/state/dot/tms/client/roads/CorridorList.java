@@ -51,7 +51,8 @@ import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * This component allows a corridor to be chosen from a list
+ * The corridor list is a widget which allows selecting a corridor from a
+ * combo box and displaying all r_nodes of the selected corridor in a list.
  *
  * @author Douglas Lau
  */
