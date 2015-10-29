@@ -70,11 +70,11 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		new TreeMap<String, CorridorBase>();
 
 	/** Combo box model of all corridors */
-	private final DefaultComboBoxModel model = new DefaultComboBoxModel();
+	private final DefaultComboBoxModel cor_mdl = new DefaultComboBoxModel();
 
 	/** Get the corridor list model */
 	public DefaultComboBoxModel getCorridorModel() {
-		return model;
+		return cor_mdl;
 	}
 
 	/** Detector cache */
@@ -111,7 +111,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	public R_NodeManager(Session s, GeoLocManager lm) {
 		super(s, lm);
 		builder = new SegmentBuilder(session, this);
-		model.addElement(" ");
+		cor_mdl.addElement(" ");
 		det_cache = s.getSonarState().getDetCache().getDetectors();
 	}
 
@@ -197,7 +197,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		Iterator<String> it = corridors.keySet().iterator();
 		for (int i = 0; it.hasNext(); i++) {
 			if (cid.equals(it.next())) {
-				model.insertElementAt(c, i + 1);
+				cor_mdl.insertElementAt(c, i + 1);
 				return;
 			}
 		}
