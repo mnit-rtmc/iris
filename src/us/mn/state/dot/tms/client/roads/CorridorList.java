@@ -141,13 +141,13 @@ public class CorridorList extends JPanel {
 	private final JList n_list = new JList();
 
 	/** Roadway node list model */
-	private R_NodeListModel n_model = new R_NodeListModel();
+	private R_NodeListModel node_mdl = new R_NodeListModel();
 
 	/** R_Node list selection model */
 	private R_NodeListSelectionModel smodel;
 
 	/** R_Node selection listener */
-	private final ProxySelectionListener sel_listener =
+	private final ProxySelectionListener sel_lsnr =
 		new ProxySelectionListener()
 	{
 		public void selectionChanged() {
@@ -156,7 +156,7 @@ public class CorridorList extends JPanel {
 	};
 
 	/** Listener for r_node changes */
-	private final ProxyListener<R_Node> listener =
+	private final ProxyListener<R_Node> node_lsnr =
 		new ProxyListener<R_Node>()
 	{
 		private boolean enumerated = false;
@@ -177,7 +177,7 @@ public class CorridorList extends JPanel {
 	};
 
 	/** Listener for geo_loc changes */
-	private final ProxyListener<GeoLoc> loc_listener =
+	private final ProxyListener<GeoLoc> loc_lsnr =
 		new ProxyListener<GeoLoc>()
 	{
 		public void proxyAdded(GeoLoc n) { }
@@ -238,9 +238,9 @@ public class CorridorList extends JPanel {
 		bag.weighty = 1;
 		JScrollPane scroll = new JScrollPane(n_list);
 		add(scroll, bag);
-		r_nodes.addProxyListener(listener);
-		geo_locs.addProxyListener(loc_listener);
-		sel_model.addProxySelectionListener(sel_listener);
+		r_nodes.addProxyListener(node_lsnr);
+		geo_locs.addProxyListener(loc_lsnr);
+		sel_model.addProxySelectionListener(sel_lsnr);
 		createJobs();
 		updateNodeSelection(null);
 		updateButtonPanel();
@@ -263,10 +263,14 @@ public class CorridorList extends JPanel {
 	/** Dispose of the corridor chooser */
 	public void dispose() {
 		session.removeEditModeListener(edit_lsnr);
-		sel_model.removeProxySelectionListener(sel_listener);
-		geo_locs.removeProxyListener(loc_listener);
-		r_nodes.removeProxyListener(listener);
+		sel_model.removeProxySelectionListener(sel_lsnr);
+		geo_locs.removeProxyListener(loc_lsnr);
+		r_nodes.removeProxyListener(node_lsnr);
 		removeAll();
+		if (smodel != null) {
+			smodel.dispose();
+			smodel = null;
+		}
 	}
 
 	/** Called when an r_node has been added */
@@ -286,7 +290,7 @@ public class CorridorList extends JPanel {
 		if (a.equals("abandoned"))
 			updateListModel();
 		else if (checkCorridor(n))
-			n_model.updateItem(n);
+			node_mdl.updateItem(n);
 	}
 
 	/** Called when a GeoLoc proxy attribute has changed */
@@ -339,7 +343,7 @@ public class CorridorList extends JPanel {
 	/** Check the node list for a geo location. This is needed in case
 	 * the geo location has changed to a different corridor. */
 	private boolean checkNodeList(GeoLoc loc) {
-		R_NodeListModel mdl = n_model;
+		R_NodeListModel mdl = node_mdl;
 		for (int i = 0; i < mdl.getSize(); i++) {
 			Object obj = mdl.get(i);
 			if (obj instanceof R_NodeModel) {
@@ -426,9 +430,9 @@ public class CorridorList extends JPanel {
 	private void setListModel(List<R_NodeModel> nodes) {
 		if (smodel != null)
 			smodel.dispose();
-		n_model = new R_NodeListModel(nodes);
-		smodel = new R_NodeListSelectionModel(n_model, sel_model);
-		n_list.setModel(n_model);
+		node_mdl = new R_NodeListModel(nodes);
+		smodel = new R_NodeListSelectionModel(node_mdl, sel_model);
+		n_list.setModel(node_mdl);
 		n_list.setSelectionModel(smodel);
 		n_list.ensureIndexIsVisible(n_list.getLeadSelectionIndex());
 	}
@@ -494,7 +498,7 @@ public class CorridorList extends JPanel {
 	/** Find an r_node model near a point */
 	private R_NodeModel findModel(CorridorBase c, Position pos) {
 		R_Node found = c.findLastBefore(pos);
-		R_NodeListModel mdl = n_model;
+		R_NodeListModel mdl = node_mdl;
 		for (int i = 0; i < mdl.getSize(); i++) {
 			Object elem = mdl.get(i);
 			if (elem instanceof R_NodeModel) {
