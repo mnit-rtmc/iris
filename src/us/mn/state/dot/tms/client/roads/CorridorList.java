@@ -20,6 +20,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
 import java.util.Iterator;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -255,7 +256,7 @@ public class CorridorList extends JPanel {
 	/** Set a new selected corridor */
 	private void setCorridor(CorridorBase c) {
 		client.setPointSelector(null);
-		manager.setCorridor(c);
+		corridor = c;
 		updateListModel();
 		manager.updateExtent();
 	}
@@ -271,13 +272,13 @@ public class CorridorList extends JPanel {
 
 	/** Called when an r_node has been added */
 	private void nodeAdded(R_Node proxy) {
-		if (manager.checkCorridor(proxy))
+		if (checkCorridor(proxy))
 			updateListModel();
 	}
 
 	/** Called when an r_node has been removed */
 	private void nodeRemoved(R_Node proxy) {
-		if (manager.checkCorridor(proxy))
+		if (checkCorridor(proxy))
 			updateListModel();
 	}
 
@@ -285,7 +286,7 @@ public class CorridorList extends JPanel {
 	private void nodeChanged(R_Node proxy, String a) {
 		if (a.equals("abandoned"))
 			updateListModel();
-		else if (manager.checkCorridor(proxy))
+		else if (checkCorridor(proxy))
 			n_model.updateItem(proxy);
 	}
 
@@ -316,8 +317,24 @@ public class CorridorList extends JPanel {
 
 	/** Check the corridor for an r_node with the given name */
 	private boolean checkCorridor(String name) {
-		R_Node proxy = r_nodes.lookupObject(name);
-		return proxy != null && manager.checkCorridor(proxy);
+		R_Node n = r_nodes.lookupObject(name);
+		return n != null && checkCorridor(n);
+	}
+
+	/** Check the corridor of an r_node */
+	private boolean checkCorridor(R_Node n) {
+		return checkCorridor(corridor, n.getGeoLoc());
+	}
+
+	/** Check if an r_node is on the specified corridor */
+	private boolean checkCorridor(CorridorBase cb, GeoLoc loc) {
+		if (cb == null)
+			return loc != null && loc.getRoadway() == null;
+		else {
+			return loc != null &&
+			       cb.getRoadway() == loc.getRoadway() &&
+			       cb.getRoadDir() == loc.getRoadDir();
+		}
 	}
 
 	/** Check the node list for a geo location. This is needed in case
@@ -342,7 +359,7 @@ public class CorridorList extends JPanel {
 		{
 			@Override
 			public List<R_NodeModel> doInBackground() {
-				return createNodeList(manager.createSet());
+				return createNodeList(createSet());
 			}
 			@Override
 			public void done() {
@@ -358,16 +375,26 @@ public class CorridorList extends JPanel {
 	private List<R_NodeModel> createNodeList(Set<R_Node> node_s) {
 		LinkedList<R_NodeModel> nodes = new LinkedList<R_NodeModel>();
 		List<R_NodeModel> no_loc = createNullLocList(node_s);
-		corridor = createCorridor(node_s);
-		if (corridor != null) {
+		CorridorBase c = createCorridor(node_s);
+		if (c != null) {
 			R_NodeModel prev = null;
-			for (R_Node proxy: corridor) {
+			for (R_Node proxy: c) {
 				R_NodeModel m = new R_NodeModel(proxy, prev);
 				nodes.add(0, m);
 				prev = m;
 			}
 		}
 		nodes.addAll(no_loc);
+		return nodes;
+	}
+
+	/** Create a set of roadway nodes for the current corridor */
+	private Set<R_Node> createSet() {
+		HashSet<R_Node> nodes = new HashSet<R_Node>();
+		for (R_Node n: manager.getCache()) {
+			if (checkCorridor(n))
+				nodes.add(n);
+		}
 		return nodes;
 	}
 
@@ -419,7 +446,7 @@ public class CorridorList extends JPanel {
 
 	/** Check if the corridor is changed */
 	private boolean isCorridorChanged(R_Node proxy) {
-		return (proxy != null) && !manager.checkCorridor(proxy);
+		return (proxy != null) && !checkCorridor(proxy);
 	}
 
 	/** Update the enabled state of add and delete buttons */

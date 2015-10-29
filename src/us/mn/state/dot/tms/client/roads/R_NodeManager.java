@@ -18,11 +18,9 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.TreeMap;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
@@ -108,14 +106,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Segment builder */
 	private final SegmentBuilder builder;
-
-	/** Currently selected corridor */
-	private CorridorBase corridor;
-
-	/** Select a new roadway corridor */
-	public void setCorridor(CorridorBase c) {
-		corridor = c;
-	}
 
 	/** Create a new roadway node manager */
 	public R_NodeManager(Session s, GeoLocManager lm) {
@@ -381,32 +371,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			return corridors.get(cid);
 		else
 			return null;
-	}
-
-	/** Create a set of roadway nodes for the current corridor */
-	public Set<R_Node> createSet() {
-		HashSet<R_Node> nodes = new HashSet<R_Node>();
-		for (R_Node n: getCache()) {
-			if (checkCorridor(n))
-				nodes.add(n);
-		}
-		return nodes;
-	}
-
-	/** Check the corridor of an r_node */
-	public boolean checkCorridor(R_Node n) {
-		return checkCorridor(corridor, n.getGeoLoc());
-	}
-
-	/** Check if an r_node is on the specified corridor */
-	private boolean checkCorridor(CorridorBase cb, GeoLoc loc) {
-		if (cb == null)
-			return loc != null && loc.getRoadway() == null;
-		else {
-			return loc != null &&
-			       cb.getRoadway() == loc.getRoadway() &&
-			       cb.getRoadDir() == loc.getRoadDir();
-		}
 	}
 
 	/** Create a popup menu for a single selection */
