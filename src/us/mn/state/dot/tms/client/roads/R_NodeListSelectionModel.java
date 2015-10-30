@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 
 	/** R_Node list model */
-	private final R_NodeListModel model;
+	private final R_NodeListModel node_mdl;
 
 	/** Proxy selection model */
 	private final ProxySelectionModel<R_Node> sel;
@@ -46,7 +46,7 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 	private void doSelectionChanged() {
 		R_Node proxy = sel.getSingleSelection();
 		if (proxy != null) {
-			int i = model.getRow(proxy);
+			int i = node_mdl.getRow(proxy);
 			if (i >= 0) {
 				super.setSelectionInterval(i, i);
 				return;
@@ -59,7 +59,7 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 	public R_NodeListSelectionModel(R_NodeListModel m,
 		ProxySelectionModel<R_Node> s)
 	{
-		model = m;
+		node_mdl = m;
 		sel = s;
 		setSelectionMode(SINGLE_SELECTION);
 		doSelectionChanged();
@@ -87,7 +87,7 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 		// NOTE: if a proxy being added is already selected,
 		//       we need to add it to this selection model
 		for (int i = index; i < index + length; i++) {
-			R_Node proxy = model.getProxy(i);
+			R_Node proxy = node_mdl.getProxy(i);
 			if (proxy != null && sel.isSelected(proxy))
 				super.setSelectionInterval(i, i);
 		}
@@ -97,7 +97,7 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 	@Override
 	public void setSelectionInterval(int index0, int index1) {
 		super.setSelectionInterval(index0, index1);
-		R_Node proxy = model.getProxy(index1);
+		R_Node proxy = node_mdl.getProxy(index1);
 		if (proxy != null)
 			sel.setSelected(proxy);
 		else
