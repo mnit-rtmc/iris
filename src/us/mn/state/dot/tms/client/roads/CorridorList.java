@@ -45,6 +45,7 @@ import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.IWorker;
+import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -266,11 +267,18 @@ public class CorridorList extends IPanel {
 	}
 
 	/** Called when an r_node attribute has changed */
-	private void nodeChanged(R_Node n, String a) {
-		if (a.equals("abandoned"))
-			updateListModel();
-		else if (checkCorridor(n))
-			node_mdl.updateItem(n);
+	private void nodeChanged(final R_Node n, String a) {
+		if (checkCorridor(n)) {
+			if (a.equals("abandoned"))
+				updateListModel();
+			else {
+				runSwing(new Runnable() {
+					public void run() {
+						node_mdl.updateItem(n);
+					}
+				});
+			}
+		}
 	}
 
 	/** Called when a GeoLoc proxy attribute has changed */
