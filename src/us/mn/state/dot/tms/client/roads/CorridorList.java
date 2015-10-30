@@ -14,9 +14,6 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Point2D;
 import java.util.Iterator;
@@ -28,8 +25,6 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
@@ -47,7 +42,8 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -57,7 +53,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class CorridorList extends JPanel {
+public class CorridorList extends IPanel {
 
 	/** Create a sorted list of roadway nodes for one corridor */
 	static private CorridorBase createCorridor(Set<R_Node> node_s) {
@@ -198,7 +194,6 @@ public class CorridorList extends JPanel {
 
 	/** Create a new corridor list */
 	public CorridorList(Session s, R_NodeManager m, R_NodePanel p) {
-		super(new GridBagLayout());
 		session = s;
 		manager = m;
 		panel = p;
@@ -217,27 +212,12 @@ public class CorridorList extends JPanel {
 
 	/** Initialize the corridor list */
 	public void initialize() {
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.gridx = GridBagConstraints.RELATIVE;
-		bag.gridy = 0;
-		bag.insets = new Insets(2, 4, 2, 4);
-		add(new ILabel("r_node.corridor"), bag);
-		bag.weightx = 0.5f;
-		bag.fill = GridBagConstraints.BOTH;
-		add(corridor_cbx, bag);
-		bag.weightx = 0;
-		bag.fill = GridBagConstraints.NONE;
-		add(new ILabel("r_node"), bag);
-		add(new JButton(add_node), bag);
-		add(new JButton(delete_node), bag);
-		bag.gridx = 0;
-		bag.gridy = 1;
-		bag.gridwidth = 5;
-		bag.fill = GridBagConstraints.BOTH;
-		bag.weightx = 1;
-		bag.weighty = 1;
-		JScrollPane scroll = new JScrollPane(n_list);
-		add(scroll, bag);
+		add("r_node.corridor");
+		add(corridor_cbx, Stretch.SOME);
+		add("r_node");
+		add(new JButton(add_node), Stretch.NONE);
+		add(new JButton(delete_node), Stretch.LAST);
+		add(n_list, Stretch.FULL);
 		r_nodes.addProxyListener(node_lsnr);
 		geo_locs.addProxyListener(loc_lsnr);
 		sel_mdl.addProxySelectionListener(sel_lsnr);
