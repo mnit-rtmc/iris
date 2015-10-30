@@ -257,8 +257,8 @@ public class OpSendDMSMessage extends OpDMS {
 			logQuery(mode);
 			logQuery(status);
 			if (mode.getEnum() != DmsControlMode.central) {
-				// Some Ledstar signs will return GEN error
-				// when modifying a message in 'local' mode.
+				// If we modify a message when the sign is in
+				// 'local' mode, we will get a GEN error.
 				// It's better if we don't even try.
 				setErrorStatus(mode.toString());
 				return null;
