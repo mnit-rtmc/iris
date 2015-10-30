@@ -135,7 +135,7 @@ public class CorridorList extends JPanel {
 	};
 
 	/** R_Node selection model */
-	private final ProxySelectionModel<R_Node> sel_model;
+	private final ProxySelectionModel<R_Node> sel_mdl;
 
 	/** List component for nodes */
 	private final JList n_list = new JList();
@@ -144,14 +144,14 @@ public class CorridorList extends JPanel {
 	private R_NodeListModel node_mdl = new R_NodeListModel();
 
 	/** R_Node list selection model */
-	private R_NodeListSelectionModel smodel;
+	private R_NodeListSelectionModel list_sel_mdl;
 
 	/** R_Node selection listener */
 	private final ProxySelectionListener sel_lsnr =
 		new ProxySelectionListener()
 	{
 		public void selectionChanged() {
-			updateNodeSelection(sel_model.getSingleSelection());
+			updateNodeSelection(sel_mdl.getSingleSelection());
 		}
 	};
 
@@ -208,7 +208,7 @@ public class CorridorList extends JPanel {
 		geo_locs = creator.getGeoLocs();
 		corridor_cbx.setAction(corr_act);
 		corridor_cbx.setModel(manager.getCorridorModel());
-		sel_model = manager.getSelectionModel();
+		sel_mdl = manager.getSelectionModel();
 		n_list.setCellRenderer(new R_NodeCellRenderer());
 		n_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 		setBorder(BorderFactory.createTitledBorder(
@@ -240,7 +240,7 @@ public class CorridorList extends JPanel {
 		add(scroll, bag);
 		r_nodes.addProxyListener(node_lsnr);
 		geo_locs.addProxyListener(loc_lsnr);
-		sel_model.addProxySelectionListener(sel_lsnr);
+		sel_mdl.addProxySelectionListener(sel_lsnr);
 		createJobs();
 		updateNodeSelection(null);
 		updateButtonPanel();
@@ -263,13 +263,13 @@ public class CorridorList extends JPanel {
 	/** Dispose of the corridor chooser */
 	public void dispose() {
 		session.removeEditModeListener(edit_lsnr);
-		sel_model.removeProxySelectionListener(sel_lsnr);
+		sel_mdl.removeProxySelectionListener(sel_lsnr);
 		geo_locs.removeProxyListener(loc_lsnr);
 		r_nodes.removeProxyListener(node_lsnr);
 		removeAll();
-		if (smodel != null) {
-			smodel.dispose();
-			smodel = null;
+		if (list_sel_mdl != null) {
+			list_sel_mdl.dispose();
+			list_sel_mdl = null;
 		}
 	}
 
@@ -428,12 +428,12 @@ public class CorridorList extends JPanel {
 	/** Set the corridor list model.
 	 * This must be called on the EDT. */
 	private void setListModel(List<R_NodeModel> nodes) {
-		if (smodel != null)
-			smodel.dispose();
+		if (list_sel_mdl != null)
+			list_sel_mdl.dispose();
 		node_mdl = new R_NodeListModel(nodes);
-		smodel = new R_NodeListSelectionModel(node_mdl, sel_model);
+		list_sel_mdl = new R_NodeListSelectionModel(node_mdl, sel_mdl);
 		n_list.setModel(node_mdl);
-		n_list.setSelectionModel(smodel);
+		n_list.setSelectionModel(list_sel_mdl);
 		n_list.ensureIndexIsVisible(n_list.getLeadSelectionIndex());
 	}
 
@@ -522,7 +522,7 @@ public class CorridorList extends JPanel {
 
 	/** Get the selected roadway node */
 	private R_Node getSelectedNode() {
-		return sel_model.getSingleSelection();
+		return sel_mdl.getSingleSelection();
 	}
 
 	/** Test if a new r_node can be added */
