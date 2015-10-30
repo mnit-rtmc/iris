@@ -199,7 +199,7 @@ public class CorridorList extends IPanel {
 		panel = p;
 		creator = new R_NodeCreator(s);
 		client = s.getDesktop().client;
-		r_nodes = creator.getR_Nodes();
+		r_nodes = manager.getCache();
 		geo_locs = creator.getGeoLocs();
 		corridor_cbx.setAction(corr_act);
 		corridor_cbx.setModel(manager.getCorridorModel());

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,11 +43,6 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	/** R_Node type cache */
 	private final TypeCache<R_Node> r_nodes;
 
-	/** Get the r_node type cache */
-	public TypeCache<R_Node> getR_Nodes() {
-		return r_nodes;
-	}
-
 	/** Geo loc type cache */
 	private final TypeCache<GeoLoc> geo_locs;
 
@@ -77,16 +72,16 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	{
 		Float lat = null;
 		Float lon = null;
-		if(pos != null) {
-			lat = (float)pos.getLatitude();
-			lon = (float)pos.getLongitude();
+		if (pos != null) {
+			lat = (float) pos.getLatitude();
+			lon = (float) pos.getLongitude();
 		}
 		String name = createUniqueR_NodeName();
-		if(canAdd(name)) {
+		if (canAdd(name)) {
 			putAttrs(name, lanes, shift);
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
-			if(roadway != null)
+			if (roadway != null)
 				attrs.put("roadway", roadway);
 			attrs.put("road_dir", new Short(road_dir));
 			attrs.put("lat", lat);
@@ -101,7 +96,7 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 			new HashMap<String, Object>();
 		attrs.put("lanes", lanes);
 		attrs.put("shift", shift);
-		synchronized(in_process) {
+		synchronized (in_process) {
 			in_process.put(name, attrs);
 		}
 	}
@@ -116,10 +111,10 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 		// NOTE: uid needs to persist between calls so that calling
 		// this method twice in a row doesn't return the same name
 		final int uid_max = r_nodes.size() + MAX_IN_PROCESS_NAMES;
-		for(int i = 0; i < uid_max; i++) {
+		for (int i = 0; i < uid_max; i++) {
 			final int _uid = (uid + i) % uid_max + 1;
 			String n = "rnd_" + _uid;
-			if(r_nodes.lookupObject(n) == null) {
+			if (r_nodes.lookupObject(n) == null) {
 				uid = _uid;
 				return n;
 			}
@@ -135,10 +130,11 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 	}
 
 	/** Called when a new GeoLoc is added */
-	@Override public void proxyAdded(GeoLoc loc) {
+	@Override
+	public void proxyAdded(GeoLoc loc) {
 		String name = loc.getName();
 		HashMap<String, Object> attrs = getAttrs(name);
-		if(attrs != null) {
+		if (attrs != null) {
 			attrs.put("geo_loc", loc);
 			r_nodes.createObject(name, attrs);
 		}
@@ -146,23 +142,26 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 
 	/** Get a set of attributes for an in-process name */
 	private HashMap<String, Object> getAttrs(String name) {
-		synchronized(in_process) {
+		synchronized (in_process) {
 			return in_process.remove(name);
 		}
 	}
 
 	/** Called after enumeration is complete */
-	@Override public void enumerationComplete() {
+	@Override
+	public void enumerationComplete() {
 		// not interested
 	}
 
 	/** Called when a GeoLoc is removed */
-	@Override public void proxyRemoved(GeoLoc loc) {
+	@Override
+	public void proxyRemoved(GeoLoc loc) {
 		// not interested
 	}
 
 	/** Called when a GeoLoc attribute changes */
-	@Override public void proxyChanged(GeoLoc loc, String a) {
+	@Override
+	public void proxyChanged(GeoLoc loc, String a) {
 		// not interested
 	}
 }
