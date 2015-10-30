@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.R_Node;
  *
  * @author Douglas Lau
  */
-public class R_NodeListModel extends DefaultListModel {
+public class R_NodeListModel extends DefaultListModel<R_NodeModel> {
 
 	/** Create a new r_node list model */
 	public R_NodeListModel() {
@@ -36,23 +36,24 @@ public class R_NodeListModel extends DefaultListModel {
 			addElement(r);
 	}
 
-	/** Update the list item for the specified proxy */
-	public void updateItem(R_Node proxy) {
-		int row = getRow(proxy);
+	/** Update the list item for the specified r_node */
+	public void updateItem(R_Node n) {
+		int row = getRow(n);
 		if (row >= 0)
 			fireContentsChanged(this, row, row);
 	}
 
-	/** Get the proxy at the specified row */
+	/** Get the r_node at the specified row */
 	public R_Node getProxy(int row) {
-		return ((R_NodeModel)getElementAt(row)).r_node;
+		R_NodeModel m = get(row);
+		return (m != null) ? m.r_node : null;
 	}
 
-	/** Get the row for the specified proxy */
-	public int getRow(R_Node proxy) {
+	/** Get the row for the specified r_node */
+	public int getRow(R_Node n) {
 		for (int i = 0; i < getSize(); i++) {
-			R_NodeModel m = (R_NodeModel)getElementAt(i);
-			if (m.r_node == proxy)
+			R_NodeModel m = get(i);
+			if (m.r_node == n)
 				return i;
 		}
 		return -1;
