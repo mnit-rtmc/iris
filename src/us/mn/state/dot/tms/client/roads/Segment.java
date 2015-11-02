@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,7 +86,7 @@ public class Segment {
 		samples = sds;
 		too_distant = td;
 		shift = model.getShift(upstream);
-		if(!too_distant)
+		if (!too_distant)
 			labels.put(null, getStationLabel());
 	}
 
@@ -96,11 +96,11 @@ public class Segment {
 		sb.append(I18N.get("detector.station"));
 		sb.append(" ");
 		String sid = upstream.getStationID();
-		if(sid != null && sid.length() > 0) {
+		if (sid != null && sid.length() > 0) {
 			sb.append(sid);
 			sb.append(": ");
 			Station sta = StationHelper.lookup(sid);
-			if(sta != null)
+			if (sta != null)
 				sb.append(StationHelper.getLabel(sta));
 		}
 		return sb.toString().trim();
@@ -108,7 +108,7 @@ public class Segment {
 
 	/** Add detection to the segment */
 	public void addDetection(Set<Detector> dets) {
-		for(Detector d: dets) {
+		for (Detector d: dets) {
 			String sid = d.getName();
 			int ln = d.getLaneNumber();
 			lane_sensors.put(sid, ln);
@@ -121,7 +121,7 @@ public class Segment {
 		int ln = det.getLaneNumber();
 		StringBuilder sb = new StringBuilder();
 		String lbl = labels.get(ln);
-		if(lbl != null) {
+		if (lbl != null) {
 			sb.append(lbl);
 			sb.append('\n');
 		}
@@ -143,20 +143,20 @@ public class Segment {
 	public Integer getFlow(Integer lane) {
 		int total = 0;
 		int count = 0;
-		for(Map.Entry<String, Integer> ent: lane_sensors.entrySet()) {
-			if(lane == null || lane == ent.getValue()) {
+		for (Map.Entry<String, Integer> ent: lane_sensors.entrySet()) {
+			if (lane == null || lane == ent.getValue()) {
 				String sid = ent.getKey();
 				SensorSample s = samples.getSample(sid);
-				if(s != null) {
+				if (s != null) {
 					Integer f = s.getFlow();
-					if(f != null) {
+					if (f != null) {
 						total += f;
 						count++;
 					}
 				}
 			}
 		}
-		if(count > 0)
+		if (count > 0)
 			return total / count;
 		else
 			return null;
@@ -166,20 +166,20 @@ public class Segment {
 	public Integer getSpeed(Integer lane) {
 		int total = 0;
 		int count = 0;
-		for(Map.Entry<String, Integer> ent: lane_sensors.entrySet()) {
-			if(lane == null || lane == ent.getValue()) {
+		for (Map.Entry<String, Integer> ent: lane_sensors.entrySet()) {
+			if (lane == null || lane == ent.getValue()) {
 				String sid = ent.getKey();
 				SensorSample s = samples.getSample(sid);
-				if(s != null) {
+				if (s != null) {
 					Integer spd = s.getSpeed();
-					if(spd != null) {
+					if (spd != null) {
 						total += spd;
 						count++;
 					}
 				}
 			}
 		}
-		if(count > 0)
+		if (count > 0)
 			return total / count;
 		else
 			return null;
@@ -189,20 +189,20 @@ public class Segment {
 	public Integer getDensity(Integer lane) {
 		int total = 0;
 		int count = 0;
-		for(Map.Entry<String, Integer> ent: lane_sensors.entrySet()) {
-			if(lane == null || lane == ent.getValue()) {
+		for (Map.Entry<String, Integer> ent: lane_sensors.entrySet()) {
+			if (lane == null || lane == ent.getValue()) {
 				String sid = ent.getKey();
 				SensorSample s = samples.getSample(sid);
-				if(s != null) {
+				if (s != null) {
 					Integer d = s.getDensity();
-					if(d != null) {
+					if (d != null) {
 						total += d;
 						count++;
 					}
 				}
 			}
 		}
-		if(count > 0)
+		if (count > 0)
 			return total / count;
 		else
 			return null;
