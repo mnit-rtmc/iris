@@ -15,14 +15,11 @@
  */
 package us.mn.state.dot.tms.client;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
-import javax.xml.parsers.ParserConfigurationException;
-import org.xml.sax.SAXException;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapModel;
 import us.mn.state.dot.map.TileLayer;
@@ -151,14 +148,16 @@ public class Session {
 		new LinkedList<EditModeListener>();
 
 	/** Create a new session */
-	public Session(SonarState st, SmartDesktop d, Properties p) {
+	public Session(SonarState st, SmartDesktop d, Properties p)
+		throws Exception
+	{
 		state = st;
 		user = state.getUser();
 		namespace = state.getNamespace();
 		desktop = d;
 		props = p;
 		loc_manager = new GeoLocManager(this);
-		r_node_manager = new R_NodeManager(this, loc_manager);
+		r_node_manager = new R_NodeManager(this, loc_manager, p);
 		cam_manager = new CameraManager(this, loc_manager);
 		dms_manager = new DMSManager(this, loc_manager);
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
@@ -189,12 +188,9 @@ public class Session {
 	}
 
 	/** Initialize the session */
-	public void initialize() throws IOException, SAXException,
-		ParserConfigurationException
-	{
+	public void initialize() throws Exception {
 		initializeManagers();
 		createTabs();
-		r_node_manager.start(props);
 		if (tile_layer != null)
 			tile_layer.initialize();
 	}

@@ -108,9 +108,11 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	private final SegmentBuilder builder;
 
 	/** Create a new roadway node manager */
-	public R_NodeManager(Session s, GeoLocManager lm) {
+	public R_NodeManager(Session s, GeoLocManager lm, Properties p)
+		throws IOException, SAXException, ParserConfigurationException
+	{
 		super(s, lm);
-		builder = new SegmentBuilder(session, this);
+		builder = new SegmentBuilder(session, this, p);
 		cor_mdl.addElement(" ");
 		det_cache = s.getSonarState().getDetCache().getDetectors();
 	}
@@ -129,13 +131,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		det_cache.removeProxyListener(det_listener);
 		super.dispose();
 		builder.dispose();
-	}
-
-	/** Start reading sensor data */
-	public void start(Properties props) throws IOException, SAXException,
-		ParserConfigurationException
-	{
-		builder.start(props);
 	}
 
 	/** Get the sonar type name */

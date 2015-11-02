@@ -35,7 +35,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * SegmentBuilder is a class for building roadway segments.
@@ -66,12 +65,25 @@ public class SegmentBuilder implements Iterable<Segment> {
 	private final SampleDataSet samples = new SampleDataSet();
 
 	/** Sensor reader */
-	private SensorReader reader;
+	private final SensorReader reader;
 
 	/** Create a new segment builder */
-	public SegmentBuilder(Session s, R_NodeManager m) {
+	public SegmentBuilder(Session s, R_NodeManager m, Properties p)
+		throws IOException, SAXException, ParserConfigurationException
+	{
 		manager = m;
 		det_hash = new DetectorHash(s);
+		reader = createReader(p);
+	}
+
+	/** Create a sensor reader */
+	private SensorReader createReader(Properties props) throws IOException,
+		SAXException, ParserConfigurationException
+	{
+		String loc = props.getProperty("tdxml.detector.url");
+		return (loc != null)
+		     ? new SensorReader(new URL(loc), this)
+		     : null;
 	}
 
 	/** Initialize the segment builder */
@@ -79,21 +91,10 @@ public class SegmentBuilder implements Iterable<Segment> {
 		det_hash.initialize();
 	}
 
-	/** Start reading sensor data */
-	public void start(Properties props) throws IOException, SAXException,
-		ParserConfigurationException
-	{
-		String loc = props.getProperty("tdxml.detector.url");
-		if (loc != null)
-			reader = new SensorReader(new URL(loc), this);
-	}
-
 	/** Dispose of the segment builder */
 	public void dispose() {
-		SensorReader sr = reader;
-		if (sr != null)
-			sr.dispose();
-		reader = null;
+		if (reader != null)
+			reader.dispose();
 		det_hash.dispose();
 	}
 
