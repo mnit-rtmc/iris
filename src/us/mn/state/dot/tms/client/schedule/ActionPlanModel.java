@@ -49,7 +49,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				return ap.getDescription();
 			}
 			public boolean isEditable(ActionPlan ap) {
-				return canUpdate(ap);
+				return canUpdate(ap, "description");
 			}
 			public void setValueAt(ActionPlan ap, Object value) {
 				String v = value.toString().trim();
@@ -63,7 +63,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				return ap.getSyncActions();
 			}
 			public boolean isEditable(ActionPlan ap) {
-				return canUpdate(ap);
+				return canUpdate(ap, "sync_actions");
 			}
 			public void setValueAt(ActionPlan ap, Object value) {
 				if (value instanceof Boolean)
@@ -77,7 +77,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				return ap.getSticky();
 			}
 			public boolean isEditable(ActionPlan ap) {
-				return canUpdate(ap);
+				return canUpdate(ap, "sticky");
 			}
 			public void setValueAt(ActionPlan ap, Object value) {
 				if (value instanceof Boolean)
@@ -91,7 +91,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				return ap.getActive();
 			}
 			public boolean isEditable(ActionPlan ap) {
-				return canUpdate(ap);
+				return canUpdate(ap, "active");
 			}
 			public void setValueAt(ActionPlan ap, Object value) {
 				if (value instanceof Boolean)
@@ -105,7 +105,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 				return ap.getDefaultPhase();
 			}
 			public boolean isEditable(ActionPlan ap) {
-				return canUpdate(ap);
+				return canUpdate(ap, "default_phase");
 			}
 			public void setValueAt(ActionPlan ap, Object value) {
 				if (value instanceof PlanPhase) {
