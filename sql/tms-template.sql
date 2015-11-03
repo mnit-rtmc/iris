@@ -2304,7 +2304,7 @@ camera_util_panel_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.27.0
+database_version	4.28.0
 detector_auto_fail_enable	true
 device_op_status_enable	false
 dialup_poll_period_mins	120
@@ -2370,6 +2370,8 @@ speed_limit_min_mph	45
 speed_limit_default_mph	55
 speed_limit_max_mph	75
 tesla_host	
+toll_min_price	0.25
+toll_max_price	8
 travel_time_min_mph	15
 uptime_log_enable	false
 vsa_bottleneck_id_mph	55

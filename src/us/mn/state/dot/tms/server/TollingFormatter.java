@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Tolling Formatter
@@ -26,6 +27,21 @@ import us.mn.state.dot.tms.TollZoneHelper;
  * @author Douglas Lau
  */
 public class TollingFormatter {
+
+	/** Get minimum tolling price */
+	static private float min_price() {
+		return SystemAttrEnum.TOLL_MIN_PRICE.getFloat();
+	}
+
+	/** Get maximum tolling price */
+	static private float max_price() {
+		return SystemAttrEnum.TOLL_MAX_PRICE.getFloat();
+	}
+
+	/** Limit tolling price */
+	static private float limit_price(float p) {
+		return Math.min(Math.max(p, min_price()), max_price());
+	}
 
 	/** Number formatter */
 	private final NumberFormat formatter = NumberFormat.getNumberInstance();
@@ -76,8 +92,7 @@ public class TollingFormatter {
 			else
 				return null;
 		}
-		// FIXME: limit within toll_min_price / toll_max_price
-		return formatter.format(price);
+		return formatter.format(limit_price(price));
 	}
 
 	/** Lookup the current price for a toll zone */
