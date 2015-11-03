@@ -34,7 +34,7 @@ public class MultiParser {
 
 	/** Regular expression to match supported MULTI tags */
 	static private final Pattern TAGS = Pattern.compile("(cb|pb|cf|cr|fo|" +
-		"g|jl|jp|nl|np|pt|sc|/sc|tr|tt|vsa|slow|feed)(.*)");
+		"g|jl|jp|nl|np|pt|sc|/sc|tr|tt|vsa|slow|feed|tz)(.*)");
 
 	/** Regular expression to match text between MULTI tags */
 	static private final Pattern TEXT_PATTERN = Pattern.compile(
@@ -102,6 +102,8 @@ public class MultiParser {
 				parseSlowWarning(tparam, cb);
 			else if (tid.equals("feed"))
 				cb.addFeed(tparam);
+			else if (tid.equals("tz"))
+				parseTolling(tparam, cb);
 		}
 	}
 
@@ -258,6 +260,21 @@ public class MultiParser {
 		boolean dist = parseDist(args, 3);
 		if (isSpeedValid(spd) && isBackupValid(b))
 			cb.addSlowWarning(spd, b, units, dist);
+	}
+
+	/** Parse tolling tag [tz{p,o,c},z1,...zn].
+	 * @param v Tolling tag value ({p,o,c},z1,...zn).
+	 * @param cb Callback to set tag. */
+	static private void parseTolling(String v, Multi cb) {
+		String[] args = v.split(",", 1);
+		if (args.length == 2) {
+			String mode = args[0];
+			String[] zones = args[1].split(",");
+			if (mode.equals("p") ||
+			    mode.equals("o") ||
+			    mode.equals("c"))
+				cb.addTolling(mode, zones);
+		}
 	}
 
 	/** Parse an integer value */

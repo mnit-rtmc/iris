@@ -244,4 +244,10 @@ public class MultiAdapter implements Multi {
 	public void addFeed(String fid) {
 		// subclass must handle
 	}
+
+	/** Add a tolling message */
+	@Override
+	public void addTolling(String mode, String[] zones) {
+		// subclass must handle
+	}
 }

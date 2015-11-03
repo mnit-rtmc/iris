@@ -345,6 +345,18 @@ public class MultiString implements Multi {
 		multi.append("]");
 	}
 
+	/** Add a tolling message */
+	@Override
+	public void addTolling(String mode, String[] zones) {
+		multi.append("[tz");
+		multi.append(mode);
+		for (String z: zones) {
+			multi.append(',');
+			multi.append(z);
+		}
+		multi.append("]");
+	}
+
 	/** Get the value of the MULTI string */
 	@Override
 	public String toString() {

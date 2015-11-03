@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -162,4 +162,7 @@ public interface Multi {
 
 	/** Add a feed message */
 	void addFeed(String fid);
+
+	/** Add a tolling message */
+	void addTolling(String mode, String[] zones);
 }
