@@ -214,19 +214,32 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		return builder.findBestRoute(o, d);
 	}
 
+	/** Current toll zone price */
+	private float rprice = 0;
+
+	/** Get the current toll zone price */
+	public float getPrice() {
+		// FIXME: limit within toll_min_price / toll_max_price
+		return rprice;
+	}
+
 	/** Calculate the pricing */
 	public void calculatePricing() {
 		Double k_hot = k_hist.average();
+		rprice = calculatePricing(k_hot);
+		if (isLogging())
+			log("k_hot: " + k_hot + ", price: $" + rprice);
+	}
+
+	/** Calculate the pricing */
+	private float calculatePricing(Double k_hot) {
 		if (k_hot != null) {
 			/* This was arrived at by using a least squares fit */
 			double price = ALPHA * Math.pow(k_hot, BETA);
-			int quarters = (int)Math.round(price * 4);
-			float rprice = quarters / 4.0f;
-			if (isLogging()) {
-				log("k_hot: " + k_hot + ", price: " + price +
-				    ", $" + rprice);
-			}
-		}
+			int quarters = (int) Math.round(price * 4);
+			return quarters / 4.0f;
+		} else
+			return 0;
 	}
 
 	/** Check if we're logging */
