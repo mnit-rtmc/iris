@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,13 +51,13 @@ public class MultiFormatter {
 	/** Create a multi string for a DMS action */
 	public String createMulti(DmsAction da) {
 		QuickMessage qm = da.getQuickMessage();
-		if(qm != null) {
+		if (qm != null) {
 			FeedCallback fc = new FeedCallback(dms,
 				da.getSignGroup());
 			MultiParser.parse(qm.getMulti(), fc);
 			String m = fc.toString();
 			MultiString multi = new MultiString(m);
-			if(!multi.isBlank())
+			if (!multi.isBlank())
 				return createMulti(m);
 		}
 		return null;
@@ -69,9 +69,9 @@ public class MultiFormatter {
 	private String createMulti(String qm) {
 		// FIXME: combine these into a single MULTI parse step.
 		String tm = travel_est.replaceTravelTimes(qm);
-		if(tm != null) {
+		if (tm != null) {
 			String am = advisory.replaceSpeedAdvisory(tm);
-			if(am != null)
+			if (am != null)
 				return slow_warn.replaceSlowWarning(am);
 		}
 		return null;
