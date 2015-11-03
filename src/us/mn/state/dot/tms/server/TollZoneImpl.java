@@ -219,7 +219,6 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 
 	/** Get the current toll zone price */
 	public float getPrice() {
-		// FIXME: limit within toll_min_price / toll_max_price
 		return rprice;
 	}
 

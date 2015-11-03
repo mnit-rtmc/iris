@@ -39,6 +39,9 @@ public class MultiFormatter {
 	/** Slow warning formatter */
 	private final SlowWarningFormatter slow_warn;
 
+	/** Tolling formatter */
+	private final TollingFormatter toll_form;
+
 	/** Create a new MULTI formatter */
 	public MultiFormatter(DMSImpl d) {
 		dms = d;
@@ -46,6 +49,7 @@ public class MultiFormatter {
 		travel_est = new TravelTimeEstimator(dms.getName(), g);
 		advisory = new SpeedAdvisoryCalculator(g);
 		slow_warn = new SlowWarningFormatter(g);
+		toll_form = new TollingFormatter();
 	}
 
 	/** Create a multi string for a DMS action */
@@ -71,8 +75,11 @@ public class MultiFormatter {
 		String tm = travel_est.replaceTravelTimes(qm);
 		if (tm != null) {
 			String am = advisory.replaceSpeedAdvisory(tm);
-			if (am != null)
-				return slow_warn.replaceSlowWarning(am);
+			if (am != null) {
+				String sm = slow_warn.replaceSlowWarning(am);
+				if (sm != null)
+					return toll_form.replaceTolling(sm);
+			}
 		}
 		return null;
 	}
