@@ -170,12 +170,12 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Create a blank message for the sign */
-	public SignMessage createBlankMessage() {
-		return createBlankMessage(DMSMessagePriority.OVERRIDE);
+	public SignMessage createBlankMsg() {
+		return createBlankMsg(DMSMessagePriority.OVERRIDE);
 	}
 
 	/** Create a blank message for the sign */
-	private SignMessage createBlankMessage(DMSMessagePriority ap) {
+	private SignMessage createBlankMsg(DMSMessagePriority ap) {
 		String bmaps = Base64.encode(new byte[0]);
 		return createMessage("", false, bmaps, ap,
 			DMSMessagePriority.BLANK, false, null);
@@ -1152,7 +1152,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Current message (Shall not be null) */
-	private transient SignMessage messageCurrent = createBlankMessage();
+	private transient SignMessage messageCurrent = createBlankMsg();
 
 	/**
 	 * Set the current message.
@@ -1356,7 +1356,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	{
 		MultiString ms = new MultiString(m);
 		if (ms.isBlank())
-			return createBlankMessage(ap);
+			return createBlankMsg(ap);
 		else {
 			return createMessage(m, be, ap,
 				DMSMessagePriority.OPERATOR, null);
@@ -1686,7 +1686,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Create a blank scheduled message */
 	private SignMessage createBlankScheduledMessage() {
 		if (isCurrentScheduled())
-			return createBlankMessage();
+			return createBlankMsg();
 		else
 			return null;
 	}

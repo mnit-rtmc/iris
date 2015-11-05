@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2015  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -123,10 +123,8 @@ class OpReset extends OpDms
 		updateMaintStatus("");
 		if(valid) {
 			setErrorStatus("");
-
-			// set blank message
-			SignMessage sm = m_dms.createBlankMessage();
-			if(sm != null)
+			SignMessage sm = m_dms.createBlankMsg();
+			if (sm != null)
                 		m_dms.setMessageCurrent(sm, null);
 
 		// valid flag is false

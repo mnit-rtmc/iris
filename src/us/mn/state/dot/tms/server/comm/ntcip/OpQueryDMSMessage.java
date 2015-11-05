@@ -67,7 +67,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		/* The sign is blank.  If IRIS thinks there is a message on it,
 		 * that's wrong and needs to be updated. */
 		if (!dms.isMsgBlank())
-			setCurrentMessage(dms.createBlankMessage());
+			setCurrentMessage(dms.createBlankMsg());
 		return null;
 	}
 

@@ -76,7 +76,7 @@ public class OpQueryDMSMessage extends OpAddco {
 		BitmapGraphic[] bmaps)
 	{
 		if (bmaps.length == 0)
-			return dms.createBlankMessage();
+			return dms.createBlankMsg();
 		else
 			return dms.createMessage(multi, false, bmaps);
 	}
