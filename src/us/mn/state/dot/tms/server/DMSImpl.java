@@ -177,7 +177,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Create a blank message for the sign */
 	private SignMessage createBlankMsg(DMSMessagePriority ap) {
 		String bmaps = Base64.encode(new byte[0]);
-		return createMessage("", false, bmaps, ap,
+		return findOrCreateMsg("", false, bmaps, ap,
 			DMSMessagePriority.BLANK, false, null);
 	}
 
@@ -1505,10 +1505,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		BitmapGraphic[] pages, DMSMessagePriority ap,
 		DMSMessagePriority rp, boolean sch, Integer d)
 	{
-		return createMessage(m, be, encodeBitmaps(pages), ap, rp,sch,d);
+		return findOrCreateMsg(m, be, encodeBitmaps(pages),ap,rp,sch,d);
 	}
 
-	/** Create a new sign message.
+	/** Find or create a sign message.
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
 	 * @param bmaps Message bitmaps (Base64).
@@ -1517,7 +1517,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param sch Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMessage(String m, boolean be, String bmaps,
+	private SignMessage findOrCreateMsg(String m, boolean be, String bmaps,
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean sch,
 		Integer d)
 	{
