@@ -174,7 +174,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Create a blank message for the sign */
-	private SignMessage createBlankMsg(DMSMessagePriority ap) {
+	public SignMessage createBlankMsg(DMSMessagePriority ap) {
 		String bmaps = Base64.encode(new byte[0]);
 		return findOrCreateMsg("", false, bmaps, ap, BLANK, false,null);
 	}
@@ -1342,21 +1342,6 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Interface for handling brightness samples */
 	static public interface BrightnessHandler {
 		void feedback(EventType et, int photo, int output);
-	}
-
-	/** Create a message for the sign (LCS).
-	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
-	 * @param p Activation priority.
-	 * @return New sign message, or null on error. */
-	public SignMessage createMsg(String m, boolean be,
-		DMSMessagePriority ap)
-	{
-		MultiString ms = new MultiString(m);
-		if (ms.isBlank())
-			return createBlankMsg(ap);
-		else
-			return createMsg(m, be, ap, OPERATOR, null);
 	}
 
 	/** Create a pre-rendered message for the sign (ADDCO).

@@ -16,9 +16,11 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSMessagePriority;
+import static us.mn.state.dot.tms.DMSMessagePriority.*;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
+import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
@@ -38,18 +40,18 @@ public class OpSendLCSIndications extends OpLCS {
 	static protected DMSMessagePriority getActivationPriority(int ind) {
 		switch(LaneUseIndication.fromOrdinal(ind)) {
 		case LANE_CLOSED:
-			return DMSMessagePriority.INCIDENT_HIGH;
+			return INCIDENT_HIGH;
 		case LANE_CLOSED_AHEAD:
 		case MERGE_RIGHT:
 		case MERGE_LEFT:
 		case MERGE_BOTH:
 		case MUST_EXIT_RIGHT:
 		case MUST_EXIT_LEFT:
-			return DMSMessagePriority.INCIDENT_MED;
+			return INCIDENT_MED;
 		case USE_CAUTION:
-			return DMSMessagePriority.INCIDENT_LOW;
+			return INCIDENT_LOW;
 		default:
-			return DMSMessagePriority.OPERATOR;
+			return OPERATOR;
 		}
 	}
 
@@ -92,22 +94,29 @@ public class OpSendLCSIndications extends OpLCS {
 	protected SignMessage createSignMessage(int lane) {
 		int ind = indications[lane];
 		DMSImpl dms = dmss[lane];
-		if(dms != null) {
+		if (dms != null) {
 			Integer w = dms.getWidthPixels();
 			Integer h = dms.getHeightPixels();
-			if(w == null || h == null)
+			if (w == null || h == null)
 				return null;
 			String ms = createIndicationMulti(ind, w, h);
-			if(ms != null) {
-				// This is a *slow* operation, because it has
-				// to schedule a job on the SONAR task processor
-				// thread, which might have a queue of tasks
-				// already pending.
-				return dms.createMsg(ms, false,
-					getActivationPriority(ind));
-			}
+			if (ms != null)
+				return createSignMessage(dms, ms, ind);
 		}
 		return null;
+	}
+
+	/** Create a sign message.
+	 * This is a *slow* operation, because it has to schedule a job on the
+	 * SONAR task processor thread, which might have a queue of tasks
+	 * already pending. */
+	private SignMessage createSignMessage(DMSImpl dms, String ms, int ind) {
+		DMSMessagePriority ap = getActivationPriority(ind);
+		MultiString multi = new MultiString(ms);
+		if (multi.isBlank())
+			return dms.createBlankMsg(ap);
+		else
+			return dms.createMsg(ms, false, ap, OPERATOR, null);
 	}
 
 	/** Create a MULTI string for a lane use indication */
