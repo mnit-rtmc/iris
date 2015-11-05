@@ -1511,37 +1511,37 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Create a new sign message.
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
-	 * @param b Message bitmaps (Base64).
+	 * @param bmaps Message bitmaps (Base64).
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param sch Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMessage(String m, boolean be, String b,
+	private SignMessage createMessage(String m, boolean be, String bmaps,
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean sch,
 		Integer d)
 	{
-		SignMessage esm = SignMessageHelper.find(m, b, ap, rp, sch, d);
+		SignMessage esm = SignMessageHelper.find(m, bmaps, ap,rp,sch,d);
 		if (esm != null)
 			return esm;
 		else
-			return createMsgNotify(m, be, b, ap, rp, sch, d);
+			return createMsgNotify(m, be, bmaps, ap, rp, sch, d);
 	}
 
 	/** Create a new sign message and notify clients.
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
-	 * @param b Message bitmaps (Base64).
+	 * @param bmaps Message bitmaps (Base64).
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param s Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMsgNotify(String m, boolean be, String b,
+	private SignMessage createMsgNotify(String m, boolean be, String bmaps,
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
 		Integer d)
 	{
-		SignMessageImpl sm = new SignMessageImpl(m, be, b, ap, rp, s,d);
+		SignMessageImpl sm = new SignMessageImpl(m, be,bmaps,ap,rp,s,d);
 		try {
 			sm.notifyCreate();
 			return sm;
