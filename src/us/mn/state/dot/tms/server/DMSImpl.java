@@ -40,8 +40,7 @@ import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
-import static us.mn.state.dot.tms.DMSMessagePriority.AWS;
-import static us.mn.state.dot.tms.DMSMessagePriority.TRAVEL_TIME;
+import static us.mn.state.dot.tms.DMSMessagePriority.*;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Font;
@@ -171,14 +170,13 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Create a blank message for the sign */
 	public SignMessage createBlankMsg() {
-		return createBlankMsg(DMSMessagePriority.OVERRIDE);
+		return createBlankMsg(OVERRIDE);
 	}
 
 	/** Create a blank message for the sign */
 	private SignMessage createBlankMsg(DMSMessagePriority ap) {
 		String bmaps = Base64.encode(new byte[0]);
-		return findOrCreateMsg("", false, bmaps, ap,
-			DMSMessagePriority.BLANK, false, null);
+		return findOrCreateMsg("", false, bmaps, ap, BLANK, false,null);
 	}
 
 	/** Destroy an object */
@@ -963,7 +961,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		// FIXME: there should be a better way to clear cached routes
 		//        in travel time estimator
 		int ap = smn.getActivationPriority();
-		if (ap == DMSMessagePriority.OVERRIDE.ordinal())
+		if (ap == OVERRIDE.ordinal())
 			formatter.clear();
 		p.sendMessage(this, smn, o);
 	}
@@ -1357,10 +1355,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		MultiString ms = new MultiString(m);
 		if (ms.isBlank())
 			return createBlankMsg(ap);
-		else {
-			return createMessage(m, be, ap,
-				DMSMessagePriority.OPERATOR, null);
-		}
+		else
+			return createMessage(m, be, ap, OPERATOR, null);
 	}
 
 	/** Create a pre-rendered message for the sign (ADDCO).
@@ -1377,8 +1373,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			if (esm != null)
 				return esm;
 			else {
-				DMSMessagePriority mp =
-					DMSMessagePriority.OTHER_SYSTEM;
+				DMSMessagePriority mp = OTHER_SYSTEM;
 				boolean sch = DMSMessagePriority.isScheduled(mp);
 				return createMsgNotify(m, be, bmaps, mp, mp,sch,
 					null);
