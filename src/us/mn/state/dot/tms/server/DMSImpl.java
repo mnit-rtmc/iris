@@ -1427,7 +1427,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 				DMSMessagePriority p =
 					DMSMessagePriority.OTHER_SYSTEM;
 				boolean sch = DMSMessagePriority.isScheduled(p);
-				return createMessageC(m, be, ebm, p, p, sch,
+				return createMsgNotify(m, be, ebm, p, p, sch,
 					null);
 			}
 		} else
@@ -1516,10 +1516,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		if (esm != null)
 			return esm;
 		else
-			return createMessageC(m, be, b, ap, rp, sch, d);
+			return createMsgNotify(m, be, b, ap, rp, sch, d);
 	}
 
-	/** Create a new sign message (C version).
+	/** Create a new sign message and notify clients.
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
 	 * @param b Message bitmaps (Base64).
@@ -1528,7 +1528,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param s Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMessageC(String m, boolean be, String b,
+	private SignMessage createMsgNotify(String m, boolean be, String b,
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
 		Integer d)
 	{
@@ -1542,7 +1542,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			// processor does not store the sign message within 30
 			// seconds.  It *shouldn't* happen, but there may be
 			// a rare bug which triggers it.
-			logError("createMessageC: " + e.getMessage());
+			logError("createMsgNotify: " + e.getMessage());
 			return null;
 		}
 	}
