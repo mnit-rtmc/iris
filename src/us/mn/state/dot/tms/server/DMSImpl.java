@@ -176,8 +176,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Create a blank message for the sign */
 	private SignMessage createBlankMessage(DMSMessagePriority ap) {
-		String bitmaps = Base64.encode(new byte[0]);
-		return createMessage("", false, bitmaps, ap,
+		String bmaps = Base64.encode(new byte[0]);
+		return createMessage("", false, bmaps, ap,
 			DMSMessagePriority.BLANK, false, null);
 	}
 
@@ -1025,29 +1025,33 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	private void validateBitmaps(String bmaps, MultiString multi)
 		throws IOException, ChangeVetoException
 	{
-		byte[] bitmaps = Base64.decode(bmaps);
-		BitmapGraphic bitmap = createBlankBitmap();
-		int blen = bitmap.length();
+		byte[] b_data = Base64.decode(bmaps);
+		BitmapGraphic bg = createBlankBitmap();
+		int blen = bg.length();
 		if (blen == 0)
 			throw new ChangeVetoException("Invalid sign size");
-		if (bitmaps.length % blen != 0)
+		if (b_data.length % blen != 0)
 			throw new ChangeVetoException("Invalid bitmap length");
 		if (!multi.isBlank()) {
 			String[] pixels = pixelStatus;	// Avoid races
 			if (pixels != null && pixels.length == 2)
-				validateBitmaps(bitmaps, pixels, bitmap);
+				validateBitmaps(b_data, pixels, bg);
 		}
 	}
 
-	/** Validate the message bitmaps */
-	private void validateBitmaps(byte[] bitmaps, String[] pixels,
-		BitmapGraphic bitmap) throws IOException, ChangeVetoException
+	/** Validate the message bitmaps.
+	 * @param b_data Decoded bitmap data.
+	 * @param pixels Pixel status bitmaps (stuck off and stuck on).
+	 * @param bg Temporary bitmap graphic.
+	 * @throws IOException, ChangeVetoException. */
+	private void validateBitmaps(byte[] b_data, String[] pixels,
+		BitmapGraphic bg) throws IOException, ChangeVetoException
 	{
-		int blen = bitmap.length();
+		int blen = bg.length();
 		int off_limit = SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt();
 		int on_limit = SystemAttrEnum.DMS_PIXEL_ON_LIMIT.getInt();
-		BitmapGraphic stuckOff = bitmap.createBlankCopy();
-		BitmapGraphic stuckOn = bitmap.createBlankCopy();
+		BitmapGraphic stuckOff = bg.createBlankCopy();
+		BitmapGraphic stuckOn = bg.createBlankCopy();
 		byte[] b_off = Base64.decode(pixels[STUCK_OFF_BITMAP]);
 		byte[] b_on = Base64.decode(pixels[STUCK_ON_BITMAP]);
 		// Don't validate if the sign dimensions have changed
@@ -1055,21 +1059,21 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			return;
 		stuckOff.setPixelData(b_off);
 		stuckOn.setPixelData(b_on);
-		int n_pages = bitmaps.length / blen;
-		byte[] b = new byte[blen];
+		int n_pages = b_data.length / blen;
+		byte[] bd = new byte[blen];
 		for (int p = 0; p < n_pages; p++) {
-			System.arraycopy(bitmaps, p * blen, b, 0, blen);
-			bitmap.setPixelData(b);
-			bitmap.union(stuckOff);
-			int n_lit = bitmap.getLitCount();
+			System.arraycopy(b_data, p * blen, bd, 0, blen);
+			bg.setPixelData(bd);
+			bg.union(stuckOff);
+			int n_lit = bg.getLitCount();
 			if (n_lit > off_limit) {
 				throw new ChangeVetoException(
 					"Too many stuck off pixels: " + n_lit);
 			}
-			bitmap.setPixelData(b);
-			bitmap.outline();
-			bitmap.union(stuckOn);
-			n_lit = bitmap.getLitCount();
+			bg.setPixelData(bd);
+			bg.outline();
+			bg.union(stuckOn);
+			n_lit = bg.getLitCount();
 			if (n_lit > on_limit) {
 				throw new ChangeVetoException(
 					"Too many stuck on pixels: " + n_lit);
@@ -1420,17 +1424,17 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	public SignMessage createMessage(String m, boolean be,
 		BitmapGraphic[] pages)
 	{
-		BitmapGraphic[] bmaps = copyBitmaps(pages);
-		if (bmaps != null) {
-			String ebm = encodeBitmaps(bmaps);
-			SignMessage esm = SignMessageHelper.find(m, be, ebm);
+		BitmapGraphic[] p = copyBitmaps(pages);
+		if (p != null) {
+			String bmaps = encodeBitmaps(p);
+			SignMessage esm = SignMessageHelper.find(m, be, bmaps);
 			if (esm != null)
 				return esm;
 			else {
-				DMSMessagePriority p =
+				DMSMessagePriority mp =
 					DMSMessagePriority.OTHER_SYSTEM;
-				boolean sch = DMSMessagePriority.isScheduled(p);
-				return createMsgNotify(m, be, ebm, p, p, sch,
+				boolean sch = DMSMessagePriority.isScheduled(mp);
+				return createMsgNotify(m, be, bmaps, mp, mp,sch,
 					null);
 			}
 		} else
@@ -1450,9 +1454,9 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		BitmapGraphic[] pages, DMSMessagePriority ap,
 		DMSMessagePriority rp, boolean sch, Integer d)
 	{
-		BitmapGraphic[] bmaps = copyBitmaps(pages);
-		if (bmaps != null)
-			return createMessageB(m, be, bmaps, ap, rp, sch, d);
+		BitmapGraphic[] p = copyBitmaps(pages);
+		if (p != null)
+			return createMessageB(m, be, p, ap, rp, sch, d);
 		else
 			return null;
 	}
@@ -1467,12 +1471,12 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			return null;
 		if (h == null || h < 1)
 			return null;
-		BitmapGraphic[] bmaps = new BitmapGraphic[pages.length];
-		for (int i = 0; i < bmaps.length; i++) {
-			bmaps[i] = new BitmapGraphic(w, h);
-			bmaps[i].copy(pages[i]);
+		BitmapGraphic[] p = new BitmapGraphic[pages.length];
+		for (int i = 0; i < p.length; i++) {
+			p[i] = new BitmapGraphic(w, h);
+			p[i].copy(pages[i]);
 		}
-		return bmaps;
+		return p;
 	}
 
 	/** Encode bitmaps to Base64.
@@ -1480,12 +1484,12 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @return Base64-encoded bitmaps. */
 	private String encodeBitmaps(BitmapGraphic[] pages) {
 		int blen = pages[0].length();
-		byte[] bitmap = new byte[pages.length * blen];
+		byte[] b_data = new byte[pages.length * blen];
 		for (int i = 0; i < pages.length; i++) {
 			byte[] page = pages[i].getPixelData();
-			System.arraycopy(page, 0, bitmap, i * blen, blen);
+			System.arraycopy(page, 0, b_data, i * blen, blen);
 		}
-		return Base64.encode(bitmap);
+		return Base64.encode(b_data);
 	}
 
 	/** Create a new message (B version).
