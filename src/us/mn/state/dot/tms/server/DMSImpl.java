@@ -1573,7 +1573,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	public boolean isDeployable(DmsAction da) {
 		if (hasError())
 			return false;
-		SignMessage sm = createMessage(da);
+		SignMessage sm = createMsgSched(da);
 		try {
 			return sm == validateMessage(sm);
 		}
@@ -1585,7 +1585,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Perform a DMS action.
 	 * @param ds DMS action. */
 	public void performAction(DmsAction da) {
-		SignMessage sm = createMessage(da);
+		SignMessage sm = createMsgSched(da);
 		if (sm != null) {
 			if (shouldReplaceScheduled(sm)) {
 				setMessageSched(sm);
@@ -1604,10 +1604,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		       sm.getRunTimePriority() >= s.getRunTimePriority();
 	}
 
-	/** Create a message for the sign.
+	/** Create a scheduled message.
 	 * @param da DMS action
 	 * @return New sign message, or null on error */
-	private SignMessage createMessage(DmsAction da) {
+	private SignMessage createMsgSched(DmsAction da) {
 		String m = formatter.createMulti(da);
 		if (m != null) {
 			boolean be = da.getBeaconEnabled();
