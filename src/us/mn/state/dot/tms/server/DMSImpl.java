@@ -1430,10 +1430,21 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean sch,
 		Integer d)
 	{
+		String bmaps = renderBitmaps(m);
+		if (bmaps != null)
+			return findOrCreateMsg(m, be, bmaps, ap, rp, sch, d);
+		else
+			return null;
+	}
+
+	/** Render bitmaps for all pages of a message.
+	 * @param m MULTI string for message.
+	 * @return Base64-encoded bitmaps, or null on error. */
+	private String renderBitmaps(String m) {
 		try {
 			BitmapGraphic[] pages = DMSHelper.createBitmaps(this,m);
 			if (pages != null)
-				return createMessageB(m, be, pages,ap,rp,sch,d);
+				return encodeBitmaps(pages);
 		}
 		catch (InvalidMessageException e) {
 			logError("invalid msg: " + e.getMessage());
