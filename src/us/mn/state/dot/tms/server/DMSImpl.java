@@ -1139,7 +1139,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	{
 		if (getMessageCurrent().getMulti().equals(m))
 			return;
-		SignMessage sm = createMessage(m, be, ap, rp, sch, null);
+		SignMessage sm = createMsg(m, be, ap, rp, sch, null);
 		try {
 			if (!isMessageCurrentEquivalent(sm))
 				doSetMessageNext(sm, null);
@@ -1349,14 +1349,14 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param be Beacon enabled flag.
 	 * @param p Activation priority.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMessage(String m, boolean be,
+	public SignMessage createMsg(String m, boolean be,
 		DMSMessagePriority ap)
 	{
 		MultiString ms = new MultiString(m);
 		if (ms.isBlank())
 			return createBlankMsg(ap);
 		else
-			return createMessage(m, be, ap, OPERATOR, null);
+			return createMsg(m, be, ap, OPERATOR, null);
 	}
 
 	/** Create a pre-rendered message for the sign (ADDCO).
@@ -1409,11 +1409,11 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param rp Run-time priority.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMessage(String m, boolean be,
+	public SignMessage createMsg(String m, boolean be,
 		DMSMessagePriority ap, DMSMessagePriority rp, Integer d)
 	{
 		boolean sch = DMSMessagePriority.isScheduled(rp);
-		return createMessage(m, be, ap, rp, sch, d);
+		return createMsg(m, be, ap, rp, sch, d);
 	}
 
 	/** Create a message for the sign.
@@ -1424,7 +1424,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param sch Scheduled flag.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMessage(String m, boolean be,
+	private SignMessage createMsg(String m, boolean be,
 		DMSMessagePriority ap, DMSMessagePriority rp, boolean sch,
 		Integer d)
 	{
@@ -1611,7 +1611,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
 				da.getRunTimePriority());
 			Integer d = getDuration(da);
-			return createMessage(m, be, ap, rp, true, d);
+			return createMsg(m, be, ap, rp, true, d);
 		} else
 			return null;
 	}

@@ -158,7 +158,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	private void setCurrentMessage(String multi, int be,
 		DMSMessagePriority p, Integer duration)
 	{
-		setCurrentMessage(dms.createMessage(multi, (be == 1), p, p,
+		setCurrentMessage(dms.createMsg(multi, (be == 1), p, p,
 			duration));
 	}
 

@@ -436,9 +436,9 @@ class OpQueryMsg extends OpDms {
 				// MULTI string.
 				msgtext = updatePageOnTime(msgtext, pgOnTime);
 				SignMessageImpl sm = (SignMessageImpl)
-					m_dms.createMessage(msgtext, false,
-					apri, rpri, duramins);
-				if(sm != null)
+					m_dms.createMsg(msgtext, false, apri,
+					rpri, duramins);
+				if (sm != null)
 					m_dms.setMessageCurrent(sm, irisUser);
 
 			// don't have text
@@ -456,9 +456,9 @@ class OpQueryMsg extends OpDms {
 				}
 				if(sm == null) {
 					sm = (SignMessageImpl)m_dms.
-						createMessage("", false, apri,
-						rpri, null);
-					if(sm != null) {
+						createMsg("", false, apri, rpri,
+						null);
+					if (sm != null) {
 						m_dms.setMessageCurrent(sm, 
 							irisUser);
 					}
