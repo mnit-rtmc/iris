@@ -1466,9 +1466,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		DMSMessagePriority rp, boolean sch, Integer d)
 	{
 		BitmapGraphic[] p = copyBitmaps(pages);
-		if (p != null)
-			return createMessageB(m, be, p, ap, rp, sch, d);
-		else
+		if (p != null) {
+			String bmaps = encodeBitmaps(p);
+			return findOrCreateMsg(m, be, bmaps, ap, rp, sch, d);
+		} else
 			return null;
 	}
 
@@ -1501,22 +1502,6 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			System.arraycopy(page, 0, b_data, i * blen, blen);
 		}
 		return Base64.encode(b_data);
-	}
-
-	/** Create a new message (B version).
-	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
-	 * @param pages Pre-rendered graphics for all pages.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
-	 * @param sch Scheduled flag.
-	 * @param d Duration in minutes; null means indefinite.
-	 * @return New sign message, or null on error. */
-	private SignMessage createMessageB(String m, boolean be,
-		BitmapGraphic[] pages, DMSMessagePriority ap,
-		DMSMessagePriority rp, boolean sch, Integer d)
-	{
-		return findOrCreateMsg(m, be, encodeBitmaps(pages),ap,rp,sch,d);
 	}
 
 	/** Find or create a sign message.
