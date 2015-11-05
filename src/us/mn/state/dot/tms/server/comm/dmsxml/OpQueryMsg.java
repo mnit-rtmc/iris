@@ -242,8 +242,8 @@ class OpQueryMsg extends OpDms {
 		if(rpri == DMSMessagePriority.INVALID)
 			rpri = DMSMessagePriority.OTHER_SYSTEM;
 
-		return (SignMessageImpl)m_dms.createMessage(multi, false, pages, 
-			apri, rpri, duration);
+		return (SignMessageImpl) m_dms.createMsgRendered(multi, false,
+			pages, apri, rpri, duration);
 	}
 
 	/** Return a MULTI with an updated page on-time with 

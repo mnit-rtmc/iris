@@ -78,7 +78,7 @@ public class OpQueryDMSMessage extends OpAddco {
 		if (bmaps.length == 0)
 			return dms.createBlankMsg();
 		else
-			return dms.createMessage(multi, false, bmaps);
+			return dms.createMsgRendered(multi, false, bmaps);
 	}
 
 	/** Set the current message on the sign */

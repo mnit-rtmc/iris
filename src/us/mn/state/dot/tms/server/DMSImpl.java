@@ -1363,12 +1363,12 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		}
 	}
 
-	/** Create a message for the sign (ADDCO).
+	/** Create a pre-rendered message for the sign (ADDCO).
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
 	 * @param pages Pre-rendered graphics for all pages.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMessage(String m, boolean be,
+	public SignMessage createMsgRendered(String m, boolean be,
 		BitmapGraphic[] pages)
 	{
 		String bmaps = encodeAdjustedBitmaps(pages);
@@ -1387,7 +1387,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			return null;
 	}
 
-	/** Create a message for the sign (DMSXML).
+	/** Create a pre-rendered message for the sign (DMSXML).
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
 	 * @param pages Pre-rendered graphics for all pages.
@@ -1395,12 +1395,16 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param rp Run-time priority.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMessage(String m, boolean be,
+	public SignMessage createMsgRendered(String m, boolean be,
 		BitmapGraphic[] pages, DMSMessagePriority ap,
 		DMSMessagePriority rp, Integer d)
 	{
-		boolean sch = DMSMessagePriority.isScheduled(rp);
-		return createMessage(m, be, pages, ap, rp, sch, d);
+		String bmaps = encodeAdjustedBitmaps(pages);
+		if (bmaps != null) {
+			boolean sch = DMSMessagePriority.isScheduled(rp);
+			return findOrCreateMsg(m, be, bmaps, ap, rp, sch, d);
+		} else
+			return null;
 	}
 
 	/** Create a message for the sign.
@@ -1449,26 +1453,6 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			logError("invalid msg: " + e.getMessage());
 		}
 		return null;
-	}
-
-	/** Create a message for the sign.
-	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
-	 * @param pages Pre-rendered graphics for all pages.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
-	 * @param sch Scheduled flag.
-	 * @param d Duration in minutes; null means indefinite.
-	 * @return New sign message, or null on error. */
-	private SignMessage createMessage(String m, boolean be,
-		BitmapGraphic[] pages, DMSMessagePriority ap,
-		DMSMessagePriority rp, boolean sch, Integer d)
-	{
-		String bmaps = encodeAdjustedBitmaps(pages);
-		if (bmaps != null)
-			return findOrCreateMsg(m, be, bmaps, ap, rp, sch, d);
-		else
-			return null;
 	}
 
 	/** Encode bitmaps to Base64 after adjusting dimensions.
