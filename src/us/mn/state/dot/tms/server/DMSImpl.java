@@ -1123,13 +1123,13 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		return ap.ordinal() >= existing.getRunTimePriority();
 	}
 
-	/** Send a sign message created by IRIS server.
+	/** Deploy (create and send) a sign message.
 	 * @param m MULTI string.
 	 * @param be Beacon enabled.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param sch Scheduled flag. */
-	public void sendMessage(String m, boolean be, DMSMessagePriority ap,
+	public void deployMsg(String m, boolean be, DMSMessagePriority ap,
 		DMSMessagePriority rp, boolean sch)
 	{
 		if (getMessageCurrent().getMulti().equals(m))
