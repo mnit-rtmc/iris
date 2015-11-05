@@ -1018,7 +1018,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		}
 	}
 
-	/** Validate the message bitmaps */
+	/** Validate message bitmaps.
+	 * @param bmaps Base64-encoded bitmaps.
+	 * @param multi Message MULTI string.
+	 * @throws IOException, ChangeVetoException. */
 	private void validateBitmaps(String bmaps, MultiString multi)
 		throws IOException, ChangeVetoException
 	{
@@ -1472,7 +1475,9 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		return bmaps;
 	}
 
-	/** Encode bitmap data */
+	/** Encode bitmaps to Base64.
+	 * @param pages Bitmap graphics for all pages.
+	 * @return Base64-encoded bitmaps. */
 	private String encodeBitmaps(BitmapGraphic[] pages) {
 		int blen = pages[0].length();
 		byte[] bitmap = new byte[pages.length * blen];
@@ -1572,7 +1577,9 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		}
 	}
 
-	/** Check if a DMS action is deployable */
+	/** Check if a DMS action is deployable.
+	 * @param da DMS action.
+	 * @return true if action is deployable. */
 	public boolean isDeployable(DmsAction da) {
 		if (hasError())
 			return false;
@@ -1585,7 +1592,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		}
 	}
 
-	/** Perform a DMS action */
+	/** Perform a DMS action.
+	 * @param ds DMS action. */
 	public void performAction(DmsAction da) {
 		SignMessage sm = createMessage(da);
 		if (sm != null) {
@@ -1596,8 +1604,9 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		}
 	}
 
-	/** Test if the given sign message should replace the current
-	 * scheduled message. */
+	/** Test if a message should replace the current scheduled message.
+	 * @param sm SignMessage to test.
+	 * @return true if scheduled message should be replaced. */
 	private boolean shouldReplaceScheduled(SignMessage sm) {
 		SignMessage s = messageSched;	// Avoid NPE
 		return s == null ||
@@ -1622,10 +1631,13 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			return null;
 	}
 
-	/** Get the duration of a DMS action. */
+	/** Get the duration of a DMS action.
+	 * @param da DMS action.
+	 * @return Duration (minutes), or null for indefinite. */
 	private Integer getDuration(DmsAction da) {
-		return da.getActionPlan().getSticky() ? null :
-			getUnstickyDuration();
+		return da.getActionPlan().getSticky()
+		     ? null
+		     : getUnstickyDuration();
 	}
 
 	/** Get the duration of an unsticky action */
