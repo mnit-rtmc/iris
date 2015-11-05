@@ -1346,7 +1346,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		void feedback(EventType et, int photo, int output);
 	}
 
-	/** Create a message for the sign.
+	/** Create a message for the sign (LCS).
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
 	 * @param p Activation priority.
@@ -1361,6 +1361,47 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			return createMessage(m, be, ap,
 				DMSMessagePriority.OPERATOR, null);
 		}
+	}
+
+	/** Create a message for the sign (ADDCO).
+	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
+	 * @param pages Pre-rendered graphics for all pages.
+	 * @return New sign message, or null on error. */
+	public SignMessage createMessage(String m, boolean be,
+		BitmapGraphic[] pages)
+	{
+		BitmapGraphic[] p = copyBitmaps(pages);
+		if (p != null) {
+			String bmaps = encodeBitmaps(p);
+			SignMessage esm = SignMessageHelper.find(m, be, bmaps);
+			if (esm != null)
+				return esm;
+			else {
+				DMSMessagePriority mp =
+					DMSMessagePriority.OTHER_SYSTEM;
+				boolean sch = DMSMessagePriority.isScheduled(mp);
+				return createMsgNotify(m, be, bmaps, mp, mp,sch,
+					null);
+			}
+		} else
+			return null;
+	}
+
+	/** Create a message for the sign (DMSXML).
+	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
+	 * @param pages Pre-rendered graphics for all pages.
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
+	 * @param d Duration in minutes; null means indefinite.
+	 * @return New sign message, or null on error. */
+	public SignMessage createMessage(String m, boolean be,
+		BitmapGraphic[] pages, DMSMessagePriority ap,
+		DMSMessagePriority rp, Integer d)
+	{
+		boolean sch = DMSMessagePriority.isScheduled(rp);
+		return createMessage(m, be, pages, ap, rp, sch, d);
 	}
 
 	/** Create a message for the sign.
@@ -1398,47 +1439,6 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			logError("invalid msg: " + e.getMessage());
 		}
 		return null;
-	}
-
-	/** Create a message for the sign.
-	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
-	 * @param pages Pre-rendered graphics for all pages.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
-	 * @param d Duration in minutes; null means indefinite.
-	 * @return New sign message, or null on error. */
-	public SignMessage createMessage(String m, boolean be,
-		BitmapGraphic[] pages, DMSMessagePriority ap,
-		DMSMessagePriority rp, Integer d)
-	{
-		boolean sch = DMSMessagePriority.isScheduled(rp);
-		return createMessage(m, be, pages, ap, rp, sch, d);
-	}
-
-	/** Create a message for the sign.
-	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
-	 * @param pages Pre-rendered graphics for all pages.
-	 * @return New sign message, or null on error. */
-	public SignMessage createMessage(String m, boolean be,
-		BitmapGraphic[] pages)
-	{
-		BitmapGraphic[] p = copyBitmaps(pages);
-		if (p != null) {
-			String bmaps = encodeBitmaps(p);
-			SignMessage esm = SignMessageHelper.find(m, be, bmaps);
-			if (esm != null)
-				return esm;
-			else {
-				DMSMessagePriority mp =
-					DMSMessagePriority.OTHER_SYSTEM;
-				boolean sch = DMSMessagePriority.isScheduled(mp);
-				return createMsgNotify(m, be, bmaps, mp, mp,sch,
-					null);
-			}
-		} else
-			return null;
 	}
 
 	/** Create a message for the sign.
