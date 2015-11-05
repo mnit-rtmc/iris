@@ -1371,9 +1371,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	public SignMessage createMessage(String m, boolean be,
 		BitmapGraphic[] pages)
 	{
-		BitmapGraphic[] p = copyBitmaps(pages);
-		if (p != null) {
-			String bmaps = encodeBitmaps(p);
+		String bmaps = encodeAdjustedBitmaps(pages);
+		if (bmaps != null) {
 			SignMessage esm = SignMessageHelper.find(m, be, bmaps);
 			if (esm != null)
 				return esm;
@@ -1465,12 +1464,19 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		BitmapGraphic[] pages, DMSMessagePriority ap,
 		DMSMessagePriority rp, boolean sch, Integer d)
 	{
-		BitmapGraphic[] p = copyBitmaps(pages);
-		if (p != null) {
-			String bmaps = encodeBitmaps(p);
+		String bmaps = encodeAdjustedBitmaps(pages);
+		if (bmaps != null)
 			return findOrCreateMsg(m, be, bmaps, ap, rp, sch, d);
-		} else
+		else
 			return null;
+	}
+
+	/** Encode bitmaps to Base64 after adjusting dimensions.
+	 * @param pages Bitmap graphics for all pages.
+	 * @return Base64-encoded bitmaps, or null on error. */
+	private String encodeAdjustedBitmaps(BitmapGraphic[] pages) {
+		BitmapGraphic[] p = copyBitmaps(pages);
+		return (p != null) ? encodeBitmaps(p) : null;
 	}
 
 	/** Copy an array of bitmaps into the DMS dimensions.
