@@ -114,7 +114,7 @@ public class OpSendLCSIndications extends OpLCS {
 		DMSMessagePriority ap = getActivationPriority(ind);
 		MultiString multi = new MultiString(ms);
 		if (multi.isBlank())
-			return dms.createBlankMsg(ap);
+			return dms.createMsgBlank(ap);
 		else
 			return dms.createMsg(ms, false, ap, OPERATOR, null);
 	}

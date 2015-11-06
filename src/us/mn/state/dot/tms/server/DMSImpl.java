@@ -169,12 +169,12 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Create a blank message for the sign */
-	public SignMessage createBlankMsg() {
-		return createBlankMsg(OVERRIDE);
+	public SignMessage createMsgBlank() {
+		return createMsgBlank(OVERRIDE);
 	}
 
 	/** Create a blank message for the sign */
-	public SignMessage createBlankMsg(DMSMessagePriority ap) {
+	public SignMessage createMsgBlank(DMSMessagePriority ap) {
 		String bmaps = Base64.encode(new byte[0]);
 		return findOrCreateMsg("", false, bmaps, ap, BLANK, false,null);
 	}
@@ -1150,7 +1150,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	}
 
 	/** Current message (Shall not be null) */
-	private transient SignMessage messageCurrent = createBlankMsg();
+	private transient SignMessage messageCurrent = createMsgBlank();
 
 	/**
 	 * Set the current message.
@@ -1652,7 +1652,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Create a blank scheduled message */
 	private SignMessage createBlankScheduledMessage() {
 		if (isCurrentScheduled())
-			return createBlankMsg();
+			return createMsgBlank();
 		else
 			return null;
 	}
