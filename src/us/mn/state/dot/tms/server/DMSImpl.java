@@ -54,6 +54,8 @@ import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgSource;
+import static us.mn.state.dot.tms.SignMsgSource.*;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
@@ -176,7 +178,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Create a blank message for the sign */
 	public SignMessage createMsgBlank(DMSMessagePriority ap) {
 		String bmaps = Base64.encode(new byte[0]);
-		return findOrCreateMsg("", false, bmaps, ap, BLANK, false,null);
+		return findOrCreateMsg("", false, bmaps, ap, BLANK, operator,
+			null);
 	}
 
 	/** Destroy an object */
@@ -1098,7 +1101,7 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		if (sm != null) {
 			DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
 			       sm.getActivationPriority());
-			return shouldActivate(ap, sm.getScheduled()) &&
+			return shouldActivate(ap, sm.getSource()) &&
 			       SignMessageHelper.lookup(sm.getName()) == sm;
 		} else
 			return false;
@@ -1106,24 +1109,25 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Test if a message should be activated.
 	 * @param ap Activation priority.
-	 * @param sched Scheduled flag.
+	 * @param src Message source.
 	 * @return True if message should be activated; false otherwise. */
-	private boolean shouldActivate(DMSMessagePriority ap, boolean sched) {
-		return shouldActivate(messageCurrent, ap, sched) &&
-		       shouldActivate(messageNext, ap, sched);
+	private boolean shouldActivate(DMSMessagePriority ap, int src) {
+		return shouldActivate(messageCurrent, ap, src) &&
+		       shouldActivate(messageNext, ap, src);
 	}
 
 	/** Test if a sign message should be activated.
 	 * @param existing Message existing on DMS.
 	 * @param ap Activation priority.
-	 * @param sched Scheduled flag.
+	 * @param src Message source.
 	 * @return True if message should be activated; false otherwise. */
 	static private boolean shouldActivate(SignMessage existing,
-		DMSMessagePriority ap, boolean sched)
+		DMSMessagePriority ap, int src)
 	{
 		if (existing == null)
 			return true;
-		if (existing.getScheduled() && sched)
+		if (SignMsgSource.isScheduled(existing.getSource()) &&
+		    SignMsgSource.isScheduled(src))
 			return true;
 		return ap.ordinal() >= existing.getRunTimePriority();
 	}
@@ -1133,13 +1137,13 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param be Beacon enabled.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
-	 * @param sch Scheduled flag. */
+	 * @param src Message source. */
 	public void deployMsg(String m, boolean be, DMSMessagePriority ap,
-		DMSMessagePriority rp, boolean sch)
+		DMSMessagePriority rp, SignMsgSource src)
 	{
 		if (getMessageCurrent().getMulti().equals(m))
 			return;
-		SignMessage sm = createMsg(m, be, ap, rp, sch, null);
+		SignMessage sm = createMsg(m, be, ap, rp, src, null);
 		try {
 			if (!isMessageCurrentEquivalent(sm))
 				doSetMessageNext(sm, null);
@@ -1359,9 +1363,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 				return esm;
 			else {
 				DMSMessagePriority mp = OTHER_SYSTEM;
-				boolean sch = DMSMessagePriority.isScheduled(mp);
-				return createMsgNotify(m, be, bmaps, mp, mp,sch,
-					null);
+				return createMsgNotify(m, be, bmaps, mp, mp,
+					external, null);
 			}
 		} else
 			return null;
@@ -1380,10 +1383,9 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		DMSMessagePriority rp, Integer d)
 	{
 		String bmaps = encodeAdjustedBitmaps(pages);
-		if (bmaps != null) {
-			boolean sch = DMSMessagePriority.isScheduled(rp);
-			return findOrCreateMsg(m, be, bmaps, ap, rp, sch, d);
-		} else
+		if (bmaps != null)
+			return findOrCreateMsg(m, be, bmaps, ap, rp,external,d);
+		else
 			return null;
 	}
 
@@ -1392,30 +1394,16 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param be Beacon enabled flag.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
+	 * @param src Message source.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	public SignMessage createMsg(String m, boolean be,
-		DMSMessagePriority ap, DMSMessagePriority rp, Integer d)
-	{
-		boolean sch = DMSMessagePriority.isScheduled(rp);
-		return createMsg(m, be, ap, rp, sch, d);
-	}
-
-	/** Create a message for the sign.
-	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
-	 * @param sch Scheduled flag.
-	 * @param d Duration in minutes; null means indefinite.
-	 * @return New sign message, or null on error. */
-	private SignMessage createMsg(String m, boolean be,
-		DMSMessagePriority ap, DMSMessagePriority rp, boolean sch,
+		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
 		Integer d)
 	{
 		String bmaps = renderBitmaps(m);
 		if (bmaps != null)
-			return findOrCreateMsg(m, be, bmaps, ap, rp, sch, d);
+			return findOrCreateMsg(m, be, bmaps, ap, rp, src, d);
 		else
 			return null;
 	}
@@ -1480,18 +1468,18 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param bmaps Message bitmaps (Base64).
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
-	 * @param sch Scheduled flag.
+	 * @param src Message source.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage findOrCreateMsg(String m, boolean be, String bmaps,
-		DMSMessagePriority ap, DMSMessagePriority rp, boolean sch,
+		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
 		Integer d)
 	{
-		SignMessage esm = SignMessageHelper.find(m, bmaps, ap,rp,sch,d);
+		SignMessage esm = SignMessageHelper.find(m, bmaps, ap,rp,src,d);
 		if (esm != null)
 			return esm;
 		else
-			return createMsgNotify(m, be, bmaps, ap, rp, sch, d);
+			return createMsgNotify(m, be, bmaps, ap, rp, src, d);
 	}
 
 	/** Create a new sign message and notify clients.
@@ -1500,14 +1488,15 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	 * @param bmaps Message bitmaps (Base64).
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
-	 * @param s Scheduled flag.
+	 * @param src Message source.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMsgNotify(String m, boolean be, String bmaps,
-		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
+		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
 		Integer d)
 	{
-		SignMessageImpl sm = new SignMessageImpl(m, be,bmaps,ap,rp,s,d);
+		SignMessageImpl sm = new SignMessageImpl(m, be, bmaps, ap, rp,
+			src, d);
 		try {
 			sm.notifyCreate();
 			return sm;
@@ -1595,8 +1584,11 @@ public class DMSImpl extends DeviceImpl implements DMS {
 				da.getActivationPriority());
 			DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
 				da.getRunTimePriority());
+			SignMsgSource src = formatter.isTolling(da)
+			                  ? tolling
+			                  : schedule;
 			Integer d = getDuration(da);
-			return createMsg(m, be, ap, rp, true, d);
+			return createMsg(m, be, ap, rp, src, d);
 		} else
 			return null;
 	}
@@ -1661,10 +1653,10 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	private boolean isCurrentScheduled() {
 		// If either the current or next message is not scheduled,
 		// then we won't consider the message scheduled
-		SignMessage cur = messageCurrent;
-		SignMessage nxt = messageNext;
-		return (cur == null || cur.getScheduled()) &&
-		       (nxt == null || nxt.getScheduled());
+		SignMessage c = messageCurrent;
+		SignMessage n = messageNext;
+		return (c == null || SignMsgSource.isScheduled(c.getSource()))
+		    && (n == null || SignMsgSource.isScheduled(n.getSource()));
 	}
 
 	/** Test if DMS is part of an LCS array */
@@ -1694,7 +1686,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 
 	/** Test if the current message is "scheduled" */
 	private boolean isMsgScheduled() {
-		return getMessageCurrent().getScheduled();
+		return SignMsgSource.isScheduled(
+			getMessageCurrent().getSource());
 	}
 
 	/** Test if the current message has beacon enabled */

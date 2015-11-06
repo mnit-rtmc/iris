@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
+import static us.mn.state.dot.tms.SignMsgSource.lcs;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
@@ -116,7 +117,7 @@ public class OpSendLCSIndications extends OpLCS {
 		if (multi.isBlank())
 			return dms.createMsgBlank(ap);
 		else
-			return dms.createMsg(ms, false, ap, OPERATOR, null);
+			return dms.createMsg(ms, false, ap, OPERATOR, lcs,null);
 	}
 
 	/** Create a MULTI string for a lane use indication */

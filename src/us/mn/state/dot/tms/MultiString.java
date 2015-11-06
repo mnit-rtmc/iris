@@ -403,6 +403,18 @@ public class MultiString implements Multi {
 		return _b.toString().trim().isEmpty();
 	}
 
+	/** Does the MULTI string have a tolling [tz] tag? */
+	public boolean isTolling() {
+		final StringBuilder _b = new StringBuilder();
+		MultiParser.parse(toString(), new MultiAdapter() {
+			@Override
+			public void addTolling(String mode, String[] zones) {
+				_b.append(mode);
+			}
+		});
+		return _b.length() > 0;
+	}
+
 	/** Return a value indicating if the message is single or multi-page.
 	 * @return True if the message contains a single page else false
 	 * for multi-page. */

@@ -47,9 +47,16 @@ public class SignMessageHelper extends BaseHelper {
 			SignMessage.SONAR_TYPE));
 	}
 
-	/** Find a sign message with matching attributes */
+	/** Find a sign message with matching attributes.
+	 * @param multi MULTI string.
+	 * @param bitmaps Bitmaps for all pages.
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
+	 * @param src Message source.
+	 * @param d Duration (null for indefinite).
+	 * @return Matching sign message, or null if not found. */
 	static public SignMessage find(String multi, String bitmaps,
-		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
+		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
 		Integer d)
 	{
 		int api = ap.ordinal();
@@ -61,7 +68,7 @@ public class SignMessageHelper extends BaseHelper {
 			    bitmaps.equals(sm.getBitmaps()) &&
 			    api == sm.getActivationPriority() &&
 			    rpi == sm.getRunTimePriority() &&
-			    s == sm.getScheduled() &&
+			    src.ordinal() == sm.getSource() &&
 			    integerEquals(d, sm.getDuration()))
 				return sm;
 		}
@@ -71,7 +78,8 @@ public class SignMessageHelper extends BaseHelper {
 	/** Find a sign message with matching attributes.
 	 * @param multi MULTI string.
 	 * @param be Beacon enabled flag.
-	 * @param bitmaps Bitmaps for all pages. */
+	 * @param bitmaps Bitmaps for all pages.
+	 * @return Matching sign message, or null if not found. */
 	static public SignMessage find(String multi, boolean be, String bitmaps)
 	{
 		Iterator<SignMessage> it = iterator();

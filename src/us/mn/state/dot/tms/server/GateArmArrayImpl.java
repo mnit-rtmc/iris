@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.Road;
+import static us.mn.state.dot.tms.SignMsgSource.gate_arm;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.GateArmSystem.checkEnabled;
 import static us.mn.state.dot.tms.server.GateArmSystem.sendEmailAlert;
@@ -469,7 +470,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private void updateDmsMessage(DMSImpl d) {
 		QuickMessage qm = isMsgOpen() ? getOpenMsg() : getClosedMsg();
 		if (qm != null)
-			d.deployMsg(qm.getMulti(), false, PSA, PSA, false);
+			d.deployMsg(qm.getMulti(), false, PSA, PSA, gate_arm);
 	}
 
 	/** Test if message should be open */

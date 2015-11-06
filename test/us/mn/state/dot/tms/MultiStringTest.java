@@ -517,7 +517,6 @@ public class MultiStringTest extends TestCase {
 	}
 
 	public void testEtc() {
-		// constructor
 		try {
 			new MultiString(null);
 			assertTrue(false);
@@ -525,31 +524,25 @@ public class MultiStringTest extends TestCase {
 			assertTrue(true);
 		}
 
-		// isValid
 		assertTrue(new MultiString().isValid());
 		assertTrue(new MultiString("").isValid());
 		assertTrue(new MultiString("ABC").isValid());
 
-		// nl tag
 		assertTrue(new MultiString("ABC[nl]DEF").isValid());
 		assertTrue(new MultiString("ABC[nl1]DEF").isValid());
 
-		// fo tag
 		assertTrue(new MultiString("ABC[fo]DEF").isValid());
 		assertTrue(new MultiString("ABC[fo1]DEF").isValid());
 		assertTrue(new MultiString("ABC[fo12]DEF").isValid());
 		assertTrue(new MultiString("ABC[fo123]DEF").isValid());
 
-		// np tag
 		assertTrue(new MultiString("ABC[np]DEF").isValid());
 
-		// jp tag
 		assertTrue(new MultiString("ABC[jp1]DEF").isValid());
 		assertTrue(new MultiString("ABC[jp2]DEF").isValid());
 		assertTrue(new MultiString("ABC[jp3]DEF").isValid());
 		assertTrue(new MultiString("ABC[jp4]DEF").isValid());
 
-		// pt tag
 		assertTrue(new MultiString("ABC[pto]").isValid());
 		assertTrue(new MultiString("ABC[pt1o]").isValid());
 		assertTrue(new MultiString("ABC[pt12o]").isValid());
@@ -557,5 +550,31 @@ public class MultiStringTest extends TestCase {
 		assertTrue(new MultiString("ABC[pto1]").isValid());
 		assertTrue(new MultiString("ABC[pto12]").isValid());
 		assertTrue(new MultiString("ABC[pto123]").isValid());
+	}
+
+	public void testBlank() {
+		assertTrue(new MultiString("").isBlank());
+		assertTrue(new MultiString(" ").isBlank());
+		assertTrue(new MultiString("\t").isBlank());
+		assertTrue(new MultiString("[nl]").isBlank());
+		assertTrue(new MultiString("[np]").isBlank());
+		assertTrue(new MultiString("[pt1o1]").isBlank());
+		assertTrue(new MultiString("[jp2]").isBlank());
+		assertTrue(new MultiString("[jl3]").isBlank());
+		assertTrue(new MultiString("[fo2]").isBlank());
+		assertTrue(new MultiString("[sc2]").isBlank());
+		assertTrue(new MultiString("[tr1,1,20,20]").isBlank());
+
+		assertFalse(new MultiString("A").isBlank());
+		assertFalse(new MultiString("[g1]").isBlank());
+		assertFalse(new MultiString("[pb0,1,2]").isBlank());
+	}
+
+	public void testTolling() {
+		assertFalse(new MultiString("").isTolling());
+		assertFalse(new MultiString("ABC[nl]DEF").isTolling());
+		assertTrue(new MultiString("[tzp,Z123]").isTolling());
+		assertTrue(new MultiString("[tzo,Z123]").isTolling());
+		assertTrue(new MultiString("[tzc,Z123]").isTolling());
 	}
 }

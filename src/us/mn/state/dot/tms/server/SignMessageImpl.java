@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 
@@ -59,7 +60,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
 		store.query("SELECT name, multi, beacon_enabled, bitmaps, " +
-			"a_priority, r_priority, scheduled, duration FROM " +
+			"a_priority, r_priority, source, duration FROM " +
 			"iris.sign_message;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -70,7 +71,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 					row.getString(4),	// bitmaps
 					row.getInt(5),		// a_priority
 					row.getInt(6),		// r_priority
-					row.getBoolean(7),	// scheduled
+					row.getInt(7),		// source
 					(Integer)row.getObject(8) // duration
 				));
 			}
@@ -86,7 +87,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		map.put("bitmaps", bitmaps);
 		map.put("a_priority", activationPriority);
 		map.put("r_priority", runTimePriority);
-		map.put("scheduled", scheduled);
+		map.put("source", source);
 		map.put("duration", duration);
 		return map;
 	}
@@ -108,7 +109,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Create a sign message */
 	protected SignMessageImpl(String n, String m, boolean be, String b,
-		int ap, int rp, boolean s, Integer d)
+		int ap, int rp, int s, Integer d)
 	{
 		super(n);
 		multi = m;
@@ -116,13 +117,13 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		bitmaps = b;
 		activationPriority = ap;
 		runTimePriority = rp;
-		scheduled = s;
+		source = s;
 		duration = d;		
 	}
 
 	/** Create a new sign message (by IRIS) */
 	public SignMessageImpl(String m, boolean be, String b,
-		DMSMessagePriority ap, DMSMessagePriority rp, boolean s,
+		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource s,
 		Integer d)
 	{
 		super(createUniqueName());
@@ -131,7 +132,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		bitmaps = b;
 		activationPriority = ap.ordinal();
 		runTimePriority = rp.ordinal();
-		scheduled = s;
+		source = s.ordinal();
 		duration = d;
 	}
 
@@ -184,13 +185,14 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		return runTimePriority;
 	}
 
-	/** Scheduled flag */
-	protected boolean scheduled;
+	/** Sign message source */
+	private int source;
 
-	/** Get the scheduled flag.
-	 * @return True if the message was scheduled. */
-	public boolean getScheduled() {
-		return scheduled;
+	/** Get the sign message source value.
+	 * @return Sign message source.
+	 * @see us.mn.state.dot.tms.SignMsgSource */
+	public int getSource() {
+		return source;
 	}
 
 	/** Duration of this message (minutes) */
@@ -209,7 +211,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		w.write(createAttribute("status", DMSHelper.getAllStyles(dms)));
 		w.write(createAttribute("run_priority", runTimePriority));
 		w.write(createAttribute("act_priority", activationPriority));
-		w.write(createAttribute("scheduled", getScheduled()));
+		w.write(createAttribute("source", getSource()));
 		w.write(createAttribute("duration", getDuration()));
 		w.write(createAttribute("multi", multi));
 		w.write(createAttribute("bitmaps", getBitmaps()));

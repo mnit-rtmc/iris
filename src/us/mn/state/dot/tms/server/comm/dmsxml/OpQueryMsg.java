@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SignMessage;
+import static us.mn.state.dot.tms.SignMsgSource.external;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -437,7 +438,7 @@ class OpQueryMsg extends OpDms {
 				msgtext = updatePageOnTime(msgtext, pgOnTime);
 				SignMessageImpl sm = (SignMessageImpl)
 					m_dms.createMsg(msgtext, false, apri,
-					rpri, duramins);
+					rpri, external, duramins);
 				if (sm != null)
 					m_dms.setMessageCurrent(sm, irisUser);
 
@@ -457,7 +458,7 @@ class OpQueryMsg extends OpDms {
 				if(sm == null) {
 					sm = (SignMessageImpl)m_dms.
 						createMsg("", false, apri, rpri,
-						null);
+						external, null);
 					if (sm != null) {
 						m_dms.setMessageCurrent(sm, 
 							irisUser);

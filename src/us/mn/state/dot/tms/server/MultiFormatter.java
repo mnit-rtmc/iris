@@ -84,6 +84,15 @@ public class MultiFormatter {
 		return null;
 	}
 
+	/** Check if DMS action is tolling */
+	public boolean isTolling(DmsAction da) {
+		QuickMessage qm = da.getQuickMessage();
+		if (qm != null)
+			return new MultiString(qm.getMulti()).isTolling();
+		else
+			return false;
+	}
+
 	/** Clear the current routes */
 	public void clear() {
 		travel_est.clear();

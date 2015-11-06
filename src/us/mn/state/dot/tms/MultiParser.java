@@ -266,7 +266,7 @@ public class MultiParser {
 	 * @param v Tolling tag value ({p,o,c},z1,...zn).
 	 * @param cb Callback to set tag. */
 	static private void parseTolling(String v, Multi cb) {
-		String[] args = v.split(",", 1);
+		String[] args = v.split(",", 2);
 		if (args.length == 2) {
 			String mode = args[0];
 			String[] zones = args[1].split(",");

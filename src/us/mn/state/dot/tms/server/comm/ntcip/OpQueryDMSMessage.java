@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -158,7 +159,10 @@ public class OpQueryDMSMessage extends OpDMS {
 	private void setCurrentMessage(String multi, int be,
 		DMSMessagePriority p, Integer duration)
 	{
-		setCurrentMessage(dms.createMsg(multi, (be == 1), p, p,
+		SignMsgSource src = DMSMessagePriority.isScheduled(p)
+		                  ? SignMsgSource.schedule
+		                  : SignMsgSource.external;
+		setCurrentMessage(dms.createMsg(multi, (be == 1), p, p, src,
 			duration));
 	}
 

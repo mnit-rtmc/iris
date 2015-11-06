@@ -21,6 +21,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import static us.mn.state.dot.tms.SignMsgSource.operator;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 
@@ -68,8 +69,8 @@ public class SignMessageCreator {
 		DMSMessagePriority ap, DMSMessagePriority rp, Integer duration)
 	{
 		SignMessage sm = SignMessageHelper.find(multi, bitmaps, ap, rp,
-			false, duration);
-		if(sm != null)
+			operator, duration);
+		if (sm != null)
 			return sm;
 		String name = createName();
 		if (name != null)
@@ -99,12 +100,13 @@ public class SignMessageCreator {
 		attrs.put("bitmaps", bitmaps);
 		attrs.put("activationPriority", new Integer(ap.ordinal()));
 		attrs.put("runTimePriority", new Integer(rp.ordinal()));
-		if(duration != null)
+		attrs.put("source", new Integer(operator.ordinal()));
+		if (duration != null)
 			attrs.put("duration", duration);
 		sign_messages.createObject(name, attrs);
 		SignMessage sm = getProxy(name);
 		// Make sure this is the sign message we just created
-		if(sm != null && multi.equals(sm.getMulti()))
+		if (sm != null && multi.equals(sm.getMulti()))
 			return sm;
 		else
 			return null;
@@ -113,14 +115,14 @@ public class SignMessageCreator {
 	/** Get the sign message proxy object */
 	protected SignMessage getProxy(String name) {
 		// wait for up to 20 seconds for proxy to be created
-		for(int i = 0; i < 200; i++) {
+		for (int i = 0; i < 200; i++) {
 			SignMessage m = sign_messages.lookupObject(name);
-			if(m != null)
+			if (m != null)
 				return m;
 			try {
 				Thread.sleep(100);
 			}
-			catch(InterruptedException e) {
+			catch (InterruptedException e) {
 				// Ignore
 			}
 		}
@@ -130,7 +132,7 @@ public class SignMessageCreator {
 	/** Create a sign message name */
 	protected String createName() {
 		String name = createUniqueSignMessageName();
-		if(canAddSignMessage(name))
+		if (canAddSignMessage(name))
 			return name;
 		else
 			return null;
@@ -172,8 +174,8 @@ public class SignMessageCreator {
 	private HashSet<String> createSignMessageNameSet() {
 		String name = user.getName();
 		HashSet<String> names = new HashSet<String>();
-		for(SignMessage sm: sign_messages) {
-			if(sm.getName().startsWith(name))
+		for (SignMessage sm: sign_messages) {
+			if (sm.getName().startsWith(name))
 				names.add(sm.getName());
 		}
 		return names;

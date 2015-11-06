@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.MultiSyntaxError;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -588,7 +589,8 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** Check if the message is scheduled and has indefinite duration */
 	private boolean isScheduledIndefinite() {
-		return message.getScheduled() && message.getDuration() == null;
+		return SignMsgSource.isScheduled(message.getSource()) &&
+		       message.getDuration() == null;
 	}
 
 	/** Set the comm loss and power recovery msgs */
