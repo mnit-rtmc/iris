@@ -14,14 +14,17 @@
  */
 package us.mn.state.dot.tms.server;
 
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.OpDevice;
+import us.mn.state.dot.tms.server.event.BaseEvent;
 
 /**
  * DeviceImpl is the base class for all field devices, including detectors,
@@ -271,5 +274,14 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 			return c.isConnected();
 		else
 			return false;
+	}
+
+	/** Log an event */
+	protected void logEvent(final BaseEvent ev) {
+		FLUSH.addJob(new Job() {
+			public void perform() throws TMSException {
+				ev.doStore();
+			}
+		});
 	}
 }

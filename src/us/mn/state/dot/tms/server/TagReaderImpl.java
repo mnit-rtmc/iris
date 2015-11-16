@@ -176,11 +176,6 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	public void logRead(long stamp, TagType tt, int tid, boolean hov) {
 		TagReadEvent ev = new TagReadEvent(EventType.TAG_READ,
 			new Date(stamp), tt.ordinal(), tid, name, hov);
-		try {
-			ev.doStore();
-		}
-		catch (TMSException e) {
-			e.printStackTrace();
-		}
+		logEvent(ev);
 	}
 }
