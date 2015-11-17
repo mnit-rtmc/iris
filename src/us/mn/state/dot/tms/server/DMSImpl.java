@@ -52,6 +52,7 @@ import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MultiString;
+import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgSource;
@@ -63,6 +64,7 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.event.BrightnessSample;
+import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.SignStatusEvent;
 import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.SString;
@@ -922,6 +924,8 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	@Override
 	public void setMessageNext(SignMessage sm) {
 		messageNext = sm;
+		if (sm.getSource() == tolling.ordinal())
+			logPriceMessages(sm, EventType.PRICE_DEPLOYED);
 	}
 
 	/** Set the next sign message.  This is called by SONAR when the
@@ -1156,14 +1160,14 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Current message (Shall not be null) */
 	private transient SignMessage messageCurrent = createMsgBlank();
 
-	/**
-	 * Set the current message.
-	 * @param sm Sign message
-	 * @param o User associated with sign message
-	 */
+	/** Set the current message.
+	 * @param sm Sign message.
+	 * @param o Sign message owner, or null. */
 	public void setMessageCurrent(SignMessage sm, User o) {
 		if (!isMessageCurrentEquivalent(sm)) {
 			logMessage(sm, o);
+			if (sm.getSource() == tolling.ordinal())
+				logPriceMessages(sm, EventType.PRICE_VERIFIED);
 			setDeployTime();
 			messageCurrent = sm;
 			notifyAttribute("messageCurrent");
@@ -1196,11 +1200,9 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		return ownerCurrent;
 	}
 
-	/**
-	 * Log a message.
-	 * @param sm Sign message
-	 * @param o User associated with sign message
-	 */
+	/** Log a message.
+	 * @param sm Sign message.
+	 * @param o Sign message owner, or null. */
 	private void logMessage(SignMessage sm, User o) {
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = sm.getMulti();
@@ -1214,13 +1216,28 @@ public class DMSImpl extends DeviceImpl implements DMS {
 		logEvent(new SignStatusEvent(et, name, text, owner));
 	}
 
-	/** Log a sign status event */
-	private void logEvent(final SignStatusEvent ev) {
-		FLUSH.addJob(new Job() {
-			public void perform() throws TMSException {
-				ev.doStore();
+	/** Log price (tolling) messages.
+	 * @param sm Sign message.
+	 * @param et Event type. */
+	private void logPriceMessages(SignMessage sm, EventType et) {
+		HashMap<String, Float> prices = getPrices(sm);
+		if (prices != null) {
+			for (Map.Entry<String, Float> ent: prices.entrySet()) {
+				String tz = ent.getKey();
+				Float price = ent.getValue();
+				logEvent(new PriceMessageEvent(et, name, tz,
+				                               price));
 			}
-		});
+		}
+	}
+
+	/** Get map of prices for a sign message */
+	private HashMap<String, Float> getPrices(SignMessage sm) {
+		if (sm instanceof SignMessageImpl) {
+			SignMessageImpl smi = (SignMessageImpl) sm;
+			return smi.getPrices();
+		} else
+			return null;
 	}
 
 	/** Message deploy time */
@@ -1588,9 +1605,29 @@ public class DMSImpl extends DeviceImpl implements DMS {
 			                  ? tolling
 			                  : schedule;
 			Integer d = getDuration(da);
-			return createMsg(m, be, ap, rp, src, d);
+			SignMessage sm = createMsg(m, be, ap, rp, src, d);
+			addPricesToMsg(sm, da);
+			return sm;
 		} else
 			return null;
+	}
+
+	/** Add tolling prices to a sign message */
+	private void addPricesToMsg(SignMessage sm, DmsAction da) {
+		if (sm instanceof SignMessageImpl) {
+			SignMessageImpl smi = (SignMessageImpl) sm;
+			smi.setPrices(calculatePrices(da));
+		}
+	}
+
+	/** Calculate prices for a tolling message */
+	private HashMap<String, Float> calculatePrices(DmsAction da) {
+		QuickMessage qm = da.getQuickMessage();
+		if (qm != null) {
+			TollingFormatter tf = new TollingFormatter();
+			return tf.calculatePrices(qm.getMulti());
+		}
+		return null;
 	}
 
 	/** Get the duration of a DMS action.

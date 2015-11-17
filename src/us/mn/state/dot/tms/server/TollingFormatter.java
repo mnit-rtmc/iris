@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.text.NumberFormat;
+import java.util.HashMap;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.TollZone;
@@ -64,26 +65,51 @@ public class TollingFormatter {
 			return null;
 	}
 
+	/** Calculate prices for tolling tags.
+	 * @param multi MULTI string to parse.
+	 * @return Hash map of toll zones and prices. */
+	public HashMap<String, Float> calculatePrices(String multi) {
+		MultiCallback cb = new MultiCallback();
+		MultiParser.parse(multi, cb);
+		if (cb.valid && cb.prices.size() > 0)
+			return cb.prices;
+		else
+			return null;
+	}
+
 	/** MultiString for replacing tolling tags */
 	private class MultiCallback extends MultiString {
 
 		protected boolean valid = true;
+		protected HashMap<String, Float> prices =
+			new HashMap<String, Float>();
 
 		/** Add a tolling message */
 		@Override
 		public void addTolling(String mode, String[] zones) {
-			if ("p".equals(mode)) {
-				String p = formatPrice(zones);
-				if (p != null)
-					addSpan(p);
-				else
-					valid = false;
+			if (zones.length < 1) {
+				valid = false;
+				return;
 			}
+			String z = zones[zones.length - 1];
+			if ("p".equals(mode)) {
+				Float p = calculatePrice(zones);
+				if (p != null) {
+					prices.put(z, p);
+					addSpan(formatter.format(p));
+				} else
+					valid = false;
+			} else if ("o".equals(mode) || "c".equals(mode))
+				prices.put(z, 0f);
+			else
+				valid = false;
 		}
 	}
 
-	/** Format the price for tolling zones */
-	private String formatPrice(String[] zones) {
+	/** Calculate the price for tolling zones */
+	private Float calculatePrice(String[] zones) {
+		if (zones.length < 1)
+			return null;
 		float price = 0;
 		for (String zid: zones) {
 			Float p = lookupPrice(zid);
@@ -92,7 +118,7 @@ public class TollingFormatter {
 			else
 				return null;
 		}
-		return formatter.format(limit_price(price));
+		return limit_price(price);
 	}
 
 	/** Lookup the current price for a toll zone */

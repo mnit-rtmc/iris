@@ -1657,6 +1657,24 @@ CREATE TRIGGER tag_read_event_view_update_trig
     INSTEAD OF UPDATE ON tag_read_event_view
     FOR EACH ROW EXECUTE PROCEDURE event.tag_read_event_view_update();
 
+CREATE TABLE event.price_message_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date timestamp WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	device_id VARCHAR(20) NOT NULL,
+	toll_zone VARCHAR(20) NOT NULL,
+	price NUMERIC(4,2) NOT NULL
+);
+
+CREATE VIEW price_message_event_view AS
+	SELECT event_id, event_date, event_description.description,
+	       device_id, toll_zone, price
+	FROM event.price_message_event
+	JOIN event.event_description
+	ON price_message_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON price_message_event_view TO PUBLIC;
+
 CREATE TABLE event.incident_detail (
 	name VARCHAR(8) PRIMARY KEY,
 	description VARCHAR(32) NOT NULL
@@ -2671,6 +2689,8 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 501	Beacon ON
 502	Beacon OFF
 601	Tag Read
+651	Price DEPLOYED
+652	Price VERIFIED
 \.
 
 COPY event.incident_detail (name, description) FROM stdin;
