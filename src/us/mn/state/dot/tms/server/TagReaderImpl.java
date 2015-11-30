@@ -17,9 +17,13 @@ package us.mn.state.dot.tms.server;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
 import java.sql.ResultSet;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TagReader;
@@ -37,9 +41,14 @@ import us.mn.state.dot.tms.server.event.TagReadEvent;
  */
 public class TagReaderImpl extends DeviceImpl implements TagReader {
 
+	/** Tag Reader / DMS table mapping */
+	static private TableMapping mapping;
+
 	/** Load all the tag readers */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, TagReaderImpl.class);
+		mapping = new TableMapping(store, "iris", "tag_reader",
+			"dms");
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"toll_zone FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
@@ -92,20 +101,34 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Create a tag reader */
 	protected TagReaderImpl(String n, GeoLocImpl l, ControllerImpl c,
-		int p, String nt, TollZone tz)
+		int p, String nt, TollZone tz) throws TMSException
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
 		toll_zone = tz;
+		dmss = lookupDMSMapping();
 		initTransients();
 	}
 
 	/** Create a tag reader */
 	protected TagReaderImpl(String n, String l, String c, int p, String nt,
-		String tz)
+		String tz) throws TMSException
 	{
 		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
 		     lookupTollZone(tz));
+	}
+
+	/** Lookup mapping of DMS */
+	private DMSImpl[] lookupDMSMapping() throws TMSException {
+		TreeSet<DMSImpl> d_set = new TreeSet<DMSImpl>();
+		for (Object o: mapping.lookup(SONAR_TYPE, this)) {
+			if (o instanceof String) {
+				DMS dms = DMSHelper.lookup((String) o);
+				if (dms instanceof DMSImpl)
+					d_set.add((DMSImpl) dms);
+			}
+		}
+		return d_set.toArray(new DMSImpl[0]);
 	}
 
 	/** Destroy an object */
@@ -145,6 +168,44 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	@Override
 	public TollZone getTollZone() {
 		return toll_zone;
+	}
+
+	/** DMSs for the tag reader */
+	private DMSImpl[] dmss = new DMSImpl[0];
+
+	/** Set the DMSs assigned to the tag reader */
+	@Override
+	public void setSigns(DMS[] ds) {
+		dmss = makeDMSArray(ds);
+	}
+
+	/** Make an ordered array of DMSs */
+	private DMSImpl[] makeDMSArray(DMS[] ds) {
+		TreeSet<DMSImpl> d_set = new TreeSet<DMSImpl>();
+		for (DMS d: ds) {
+			if (d instanceof DMSImpl)
+				d_set.add((DMSImpl) d);
+		}
+		return d_set.toArray(new DMSImpl[0]);
+	}
+
+	/** Set the DMSs assigned to the tag reader */
+	public void doSetSigns(DMS[] ds) throws TMSException {
+		TreeSet<Storable> d_set = new TreeSet<Storable>();
+		for (DMS d: ds) {
+			if (d instanceof DMSImpl)
+				d_set.add((DMSImpl) d);
+			else
+				throw new ChangeVetoException("Invalid DMS");
+		}
+		mapping.update(SONAR_TYPE, this, d_set);
+		setSigns(ds);
+	}
+
+	/** Get the DMSs assigned to the tag reader */
+	@Override
+	public DMS[] getSigns() {
+		return dmss;
 	}
 
 	/** Request a device operation */

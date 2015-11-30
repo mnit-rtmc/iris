@@ -75,7 +75,7 @@ import us.mn.state.dot.tms.utils.SString;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSImpl extends DeviceImpl implements DMS {
+public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** DMS debug log */
 	static private final DebugLog DMS_LOG = new DebugLog("dms");
@@ -132,6 +132,12 @@ public class DMSImpl extends DeviceImpl implements DMS {
 	/** Get the SONAR type name */
 	public String getTypeName() {
 		return SONAR_TYPE;
+	}
+
+	/** Compare to another holiday */
+	@Override
+	public int compareTo(DMSImpl o) {
+		return name.compareTo(o.name);
 	}
 
 	/** MULTI message formatter */

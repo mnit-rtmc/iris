@@ -40,3 +40,9 @@ CREATE VIEW price_message_event_view AS
 	JOIN event.event_description
 	ON price_message_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON price_message_event_view TO PUBLIC;
+
+-- add tag_reader_dms relation
+CREATE TABLE iris.tag_reader_dms (
+	tag_reader VARCHAR(10) NOT NULL REFERENCES iris._tag_reader,
+	dms VARCHAR(10) NOT NULL REFERENCES iris._dms
+);

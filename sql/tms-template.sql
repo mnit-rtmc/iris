@@ -1115,6 +1115,11 @@ CREATE TRIGGER tag_reader_delete_trig
     INSTEAD OF DELETE ON iris.tag_reader
     FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_delete();
 
+CREATE TABLE iris.tag_reader_dms (
+	tag_reader VARCHAR(10) NOT NULL REFERENCES iris._tag_reader,
+	dms VARCHAR(10) NOT NULL REFERENCES iris._dms
+);
+
 CREATE TABLE iris.lcs_lock (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(16) NOT NULL

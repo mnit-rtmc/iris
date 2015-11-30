@@ -17,14 +17,18 @@ package us.mn.state.dot.tms.client.toll;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import java.util.LinkedList;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.client.Session;
@@ -55,6 +59,15 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 
 	/** Toll zone model */
 	private final IComboBoxModel<TollZone> toll_zone_mdl;
+
+	/** First DMS */
+	private final JTextField dms_1 = new JTextField(10);
+
+	/** Second DMS */
+	private final JTextField dms_2 = new JTextField(10);
+
+	/** Third DMS */
+	private final JTextField dms_3 = new JTextField(10);
 
 	/** Toll zone action */
 	private final IAction toll_zone_act = new IAction("toll_zone") {
@@ -131,6 +144,10 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 		loc_pnl.add(new JButton(controller), Stretch.RIGHT);
 		loc_pnl.add("toll_zone");
 		loc_pnl.add(toll_zone_cbx, Stretch.LEFT);
+		loc_pnl.add("dms");
+		loc_pnl.add(dms_1);
+		loc_pnl.add(dms_2);
+		loc_pnl.add(dms_3, Stretch.RIGHT);
 		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		return loc_pnl;
 	}
@@ -150,7 +167,28 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 				proxy.setNotes(notes_txt.getText());
 			}
 		});
+		dms_1.addFocusListener(dms_update);
+		dms_2.addFocusListener(dms_update);
+		dms_3.addFocusListener(dms_update);
 	}
+
+	/** DMS update job */
+	private final FocusAdapter dms_update = new FocusAdapter() {
+		@Override
+		public void focusLost(FocusEvent e) {
+			DMS d1 = DMSHelper.lookup(dms_1.getText());
+			DMS d2 = DMSHelper.lookup(dms_2.getText());
+			DMS d3 = DMSHelper.lookup(dms_3.getText());
+			LinkedList<DMS> ds = new LinkedList<DMS>();
+			if (d1 != null)
+				ds.add(d1);
+			if (d2 != null)
+				ds.add(d2);
+			if (d3 != null)
+				ds.add(d3);
+			proxy.setSigns(ds.toArray(new DMS[0]));
+		}
+	};
 
 	/** Update the edit mode */
 	@Override
@@ -158,6 +196,10 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 		loc_pnl.updateEditMode();
 		notes_txt.setEnabled(canUpdate("notes"));
 		toll_zone_act.setEnabled(canUpdate("toll_zone"));
+		boolean ud = canUpdate("signs");
+		dms_1.setEnabled(ud);
+		dms_2.setEnabled(ud);
+		dms_3.setEnabled(ud);
 	}
 
 	/** Update one attribute on the form */
@@ -169,10 +211,20 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 			notes_txt.setText(proxy.getNotes());
 		if (a == null || a.equals("toll_zone"))
 			toll_zone_act.updateSelected();
+		if (a == null || a.equals("signs"))
+			updateSigns();
 		if (a == null) {
 			boolean r = canRequest();
 			settings.setEnabled(r);
 		}
+	}
+
+	/** Update the signs */
+	private void updateSigns() {
+		DMS[] ds = proxy.getSigns();
+		dms_1.setText((ds.length > 0) ? ds[0].getName() : "");
+		dms_2.setText((ds.length > 1) ? ds[1].getName() : "");
+		dms_3.setText((ds.length > 2) ? ds[2].getName() : "");
 	}
 
 	/** Check if the user can make device requests */
