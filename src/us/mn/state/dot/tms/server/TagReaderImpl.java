@@ -232,11 +232,14 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	/** Log a tag (transponder) read event.
 	 * @param stamp Timestamp of read event.
 	 * @param tt Tag Type.
+	 * @param agency Agency ID.
 	 * @param tid Tag (transponder) ID.
 	 * @param hov HOV switch flag. */
-	public void logRead(long stamp, TagType tt, int tid, boolean hov) {
+	public void logRead(long stamp, TagType tt, Integer agency, int tid,
+		boolean hov)
+	{
 		TagReadEvent ev = new TagReadEvent(EventType.TAG_READ,
-			new Date(stamp), tt.ordinal(), tid, name, hov);
+			new Date(stamp), tt.ordinal(), agency, tid, name, hov);
 		logEvent(ev);
 	}
 }

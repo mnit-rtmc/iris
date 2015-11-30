@@ -46,3 +46,27 @@ CREATE TABLE iris.tag_reader_dms (
 	tag_reader VARCHAR(10) NOT NULL REFERENCES iris._tag_reader,
 	dms VARCHAR(10) NOT NULL REFERENCES iris._dms
 );
+
+-- add agency field to tag_read_event
+ALTER TABLE event.tag_read_event ADD COLUMN agency INTEGER;
+
+-- recreate tag_read_event_view
+DROP VIEW tag_read_event_view;
+CREATE VIEW tag_read_event_view AS
+	SELECT event_id, event_date, event_description.description,
+	       tag_type.description AS tag_type, agency, tag_id, tag_reader,
+	       toll_zone, tollway, hov, trip_id
+	FROM event.tag_read_event
+	JOIN event.event_description
+	ON   tag_read_event.event_desc_id = event_description.event_desc_id
+	JOIN event.tag_type
+	ON   tag_read_event.tag_type = tag_type.id
+	JOIN iris.tag_reader
+	ON   tag_read_event.tag_reader = tag_reader.name
+	LEFT JOIN iris.toll_zone
+	ON        tag_reader.toll_zone = toll_zone.name;
+GRANT SELECT ON tag_read_event_view TO PUBLIC;
+
+CREATE TRIGGER tag_read_event_view_update_trig
+    INSTEAD OF UPDATE ON tag_read_event_view
+    FOR EACH ROW EXECUTE PROCEDURE event.tag_read_event_view_update();

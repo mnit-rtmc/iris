@@ -120,6 +120,14 @@ public class TagTransaction extends E6Property {
 		return null;
 	}
 
+	/** Get the agency ID */
+	public Integer getAgency() {
+		if (isValidSeGoRead())
+			return parseSeGoAgency();
+		else
+			return null;
+	}
+
 	/** Get the transponder ID */
 	public Integer getId() {
 		if (isValidSeGoRead())
@@ -152,12 +160,14 @@ public class TagTransaction extends E6Property {
 		return PAGE0_CRC.calculate(page0) == crc12;
 	}
 
+	/** Parse a SeGo agency */
+	private Integer parseSeGoAgency() {
+		return parse16(data, 4);
+	}
+
 	/** Parse a SeGo ID */
 	private Integer parseSeGoId() {
-		if (parse8(data, 4) != REGION_MN)
-			return null;
-		if (parse8(data, 5) != AGENCY_MNDOT)
-			return null;
+		/* Note: byte 5 is agency, but we mask it off here */
 		return parse32(data, 5) & 0xFFFFFF;
 	}
 
@@ -195,10 +205,11 @@ public class TagTransaction extends E6Property {
 		if (isValidRead()) {
 			Long stamp = getStamp();
 			TagType typ = getTagType();
+			Integer agency = getAgency();
 			Integer tid = getId();
 			Boolean hov = getHOV();
 			if (stamp != null && typ != null && tid != null)
-				tr.logRead(stamp, typ, tid, hov);
+				tr.logRead(stamp, typ, agency, tid, hov);
 		}
 	}
 

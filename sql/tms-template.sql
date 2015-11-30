@@ -1625,6 +1625,7 @@ CREATE TABLE event.tag_read_event (
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	tag_type INTEGER NOT NULL REFERENCES event.tag_type,
+	agency INTEGER,
 	tag_id INTEGER NOT NULL,
 	tag_reader VARCHAR(10) NOT NULL,
 	hov BOOLEAN NOT NULL,
@@ -1633,7 +1634,7 @@ CREATE TABLE event.tag_read_event (
 
 CREATE VIEW tag_read_event_view AS
 	SELECT event_id, event_date, event_description.description,
-	       tag_type.description AS tag_type, tag_id, tag_reader,
+	       tag_type.description AS tag_type, agency, tag_id, tag_reader,
 	       toll_zone, tollway, hov, trip_id
 	FROM event.tag_read_event
 	JOIN event.event_description
