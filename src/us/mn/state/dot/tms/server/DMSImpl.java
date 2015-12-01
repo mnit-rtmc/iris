@@ -930,7 +930,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public void setMessageNext(SignMessage sm) {
 		messageNext = sm;
-		if (sm.getSource() == tolling.ordinal())
+		if (sm != null && sm.getSource() == tolling.ordinal())
 			logPriceMessages(sm, EventType.PRICE_DEPLOYED);
 	}
 
