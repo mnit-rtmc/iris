@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 '''This simple script connects to an IRIS database and exports a single font in
-Imago .ifnt format.'''
+ADDCO .ifnt format.'''
 
 from sys import argv, exit
 from base64 import b64decode
@@ -55,7 +55,7 @@ def lit_pixel(bmap, width, row, col):
 	return (ord(bmap[b8]) >> bit) & 1
 
 if len(argv) != 2:
-	print "Usage:\n./imago_export.py [font-name]\n"
+	print "Usage:\n%s [font-name]\n" % argv[0]
 	exit(1)
 connection = pgdb.connect(database='tms')
 read_font(connection, argv[1])
