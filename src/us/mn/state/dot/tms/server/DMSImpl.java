@@ -930,8 +930,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public void setMessageNext(SignMessage sm) {
 		messageNext = sm;
-		if (sm != null && sm.getSource() == tolling.ordinal())
-			logPriceMessages(sm, EventType.PRICE_DEPLOYED);
 	}
 
 	/** Set the next sign message.  This is called by SONAR when the
@@ -1674,6 +1672,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (shouldActivate(sm)) {
 			try {
 				logSched("set message to " + sm.getMulti());
+				if (sm.getSource() == tolling.ordinal()) {
+					logPriceMessages(sm,
+						EventType.PRICE_DEPLOYED);
+				}
 				doSetMessageNext(sm, null);
 			}
 			catch (TMSException e) {
