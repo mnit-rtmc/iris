@@ -146,7 +146,7 @@ public class TagTransaction extends E6Property {
 			return false;
 	}
 
-	/** Check if SeGo page 0 CRC is valid */
+	/** Check if SeGo page 0 CRC is valid.  NOTE: length must be valid */
 	private boolean isValidSeGoCRC() {
 		byte[] page0 = new byte[7];
 		page0[0] = (byte) ((data[2] << 4) | (data[3] >> 4));
@@ -156,8 +156,12 @@ public class TagTransaction extends E6Property {
 		page0[4] = (byte) ((data[6] << 4) | (data[7] >> 4));
 		page0[5] = (byte) ((data[7] << 4) | (data[8] >> 4));
 		page0[6] = (byte) (data[8] << 4);
-		int crc12 = ((data[2] & 0xF0) << 4) | (data[9] & 0xFF);
-		return PAGE0_CRC.calculate(page0) == crc12;
+		return PAGE0_CRC.calculate(page0) == getSeGoCRC12();
+	}
+
+	/** Get SeGo CRC-12 from data packet */
+	private int getSeGoCRC12() {
+		return ((data[2] & 0xF0) << 4) | (data[9] & 0xFF);
 	}
 
 	/** Parse a SeGo agency */
@@ -218,7 +222,17 @@ public class TagTransaction extends E6Property {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("tag transaction: ");
-		sb.append(getTransactionType());
+		TransactionType tt = getTransactionType();
+		sb.append(tt);
+		if (tt == TransactionType.SeGo_streamlined_read) {
+			if (data.length != tt.len) {
+				sb.append(" INVALID LENGTH: ");
+				sb.append(data.length);
+			} else if (!isValidSeGoCRC()) {
+				sb.append(" INVALID CRC: ");
+				sb.append(getSeGoCRC12());
+			}
+		}
 		Long stamp = getStamp();
 		if (stamp != null) {
 			sb.append(' ');
