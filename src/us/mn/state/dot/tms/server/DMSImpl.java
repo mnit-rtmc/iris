@@ -1106,13 +1106,21 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param sm SignMessage being activated.
 	 * @return true If priority is high enough to deploy. */
 	public boolean shouldActivate(SignMessage sm) {
-		if (sm != null) {
-			DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
-			       sm.getActivationPriority());
-			return shouldActivate(ap, sm.getSource()) &&
-			       SignMessageHelper.lookup(sm.getName()) == sm;
-		} else
-			return false;
+		return (sm != null)
+		      ? shouldActivate(sm, sm.getSource())
+		      : false;
+	}
+
+	/** Check if a message should be activated based on priority.
+	 * @param sm SignMessage being activated.
+	 * @param src Message source.
+	 * @return true If priority is high enough to deploy. */
+	private boolean shouldActivate(SignMessage sm, int src) {
+		assert sm != null;
+		DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
+		       sm.getActivationPriority());
+		return shouldActivate(ap, src) &&
+		       SignMessageHelper.lookup(sm.getName()) == sm;
 	}
 
 	/** Test if a message should be activated.
@@ -1669,7 +1677,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			setMessageSched(createBlankScheduledMessage());
 		}
 		SignMessage sm = messageSched;
-		if (shouldActivate(sm)) {
+		// NOTE: use schedule for source even for blank messages
+		if (shouldActivate(sm, schedule.ordinal())) {
 			try {
 				logSched("set message to " + sm.getMulti());
 				if (sm.getSource() == tolling.ordinal()) {
