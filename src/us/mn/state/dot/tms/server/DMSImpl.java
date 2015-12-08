@@ -1677,6 +1677,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			setMessageSched(createBlankScheduledMessage());
 		}
 		SignMessage sm = messageSched;
+		if (sm != null)
+			updateScheduledMessage(sm);
+		is_scheduled = false;
+	}
+
+	/** Update the scheduled message on the sign */
+	private void updateScheduledMessage(SignMessage sm) {
 		// NOTE: use schedule for source even for blank messages
 		if (shouldActivate(sm, schedule.ordinal())) {
 			try {
@@ -1690,9 +1697,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			catch (TMSException e) {
 				logSched(e.getMessage());
 			}
-		} else if (sm != null)
+		} else
 			logSched("sched msg not sent " + sm.getMulti());
-		is_scheduled = false;
 	}
 
 	/** Create a blank scheduled message */
