@@ -17,10 +17,11 @@ package us.mn.state.dot.tms.client.toll;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
-import java.util.LinkedList;
+import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
@@ -61,8 +62,45 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 	/** Toll zone model */
 	private final IComboBoxModel<TollZone> toll_zone_mdl;
 
-	/** DMS text fields */
-	private final JTextField[] dms_txt = new JTextField[6];
+	/** DMS text field (for adding) */
+	private final JTextField dms_txt = new JTextField(10);
+
+	/** DMS list model */
+	private final DefaultListModel<DMS> dms_mdl =
+		new DefaultListModel<DMS>();
+
+	/** DMS list */
+	private final JList dms_lst = new JList(dms_mdl);
+
+	/** Link DMS action */
+	private final IAction link_btn = new IAction("tag_reader.link") {
+		protected void doActionPerformed(ActionEvent e) {
+			DMS d = DMSHelper.lookup(dms_txt.getText());
+			if (d != null) {
+				dms_mdl.addElement(d);
+				updateSignLinks();
+			}
+			dms_txt.setText("");
+		}
+	};
+
+	/** Unlink DMS action */
+	private final IAction unlink_btn = new IAction("tag_reader.unlink") {
+		protected void doActionPerformed(ActionEvent e) {
+			int s = dms_lst.getSelectedIndex();
+			if (s >= 0) {
+				dms_mdl.remove(s);
+				updateSignLinks();
+			}
+		}
+	};
+
+	/** Update sign links */
+	private void updateSignLinks() {
+		DMS[] signs = new DMS[dms_mdl.size()];
+		dms_mdl.copyInto(signs);
+		proxy.setSigns(signs);
+	}
 
 	/** Toll zone action */
 	private final IAction toll_zone_act = new IAction("toll_zone") {
@@ -103,8 +141,8 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 			s.getSonarState().getTollZoneModel());
 		loc_pnl = new LocationPanel(s);
 		status_pnl = new IPanel();
-		for (int i = 0; i < dms_txt.length; i++)
-			dms_txt[i] = new JTextField(10);
+		dms_lst.setPrototypeCellValue("1234567890123456");
+		dms_lst.setVisibleRowCount(6);
 	}
 
 	/** Get the SONAR type cache */
@@ -142,13 +180,13 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 		loc_pnl.add("toll_zone");
 		loc_pnl.add(toll_zone_cbx, Stretch.LEFT);
 		loc_pnl.add("dms");
-		loc_pnl.add(dms_txt[0]);
-		loc_pnl.add(dms_txt[1]);
-		loc_pnl.add(dms_txt[2], Stretch.RIGHT);
+		loc_pnl.add(dms_txt);
 		loc_pnl.add(new JLabel());
-		loc_pnl.add(dms_txt[3]);
-		loc_pnl.add(dms_txt[4]);
-		loc_pnl.add(dms_txt[5], Stretch.RIGHT);
+		loc_pnl.add(dms_lst, Stretch.TALL);
+		loc_pnl.add(new JLabel());
+		loc_pnl.add(new JButton(link_btn));
+		loc_pnl.add(new JButton(unlink_btn));
+		loc_pnl.add(new JLabel(), Stretch.LEFT);
 		loc_pnl.setGeoLoc(proxy.getGeoLoc());
 		return loc_pnl;
 	}
@@ -168,23 +206,7 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 				proxy.setNotes(notes_txt.getText());
 			}
 		});
-		for (JTextField txt: dms_txt)
-			txt.addFocusListener(dms_update);
 	}
-
-	/** DMS update job */
-	private final FocusAdapter dms_update = new FocusAdapter() {
-		@Override
-		public void focusLost(FocusEvent e) {
-			LinkedList<DMS> ds = new LinkedList<DMS>();
-			for (JTextField txt: dms_txt) {
-				DMS d = DMSHelper.lookup(txt.getText());
-				if (d != null)
-					ds.add(d);
-			}
-			proxy.setSigns(ds.toArray(new DMS[0]));
-		}
-	};
 
 	/** Update the edit mode */
 	@Override
@@ -193,8 +215,10 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 		notes_txt.setEnabled(canUpdate("notes"));
 		toll_zone_act.setEnabled(canUpdate("toll_zone"));
 		boolean ud = canUpdate("signs");
-		for (JTextField txt: dms_txt)
-			txt.setEnabled(ud);
+		dms_txt.setEnabled(ud);
+		dms_lst.setEnabled(ud);
+		link_btn.setEnabled(ud);
+		unlink_btn.setEnabled(ud);
 	}
 
 	/** Update one attribute on the form */
@@ -216,11 +240,11 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 
 	/** Update the signs */
 	private void updateSigns() {
-		DMS[] ds = proxy.getSigns();
-		for (int i = 0; i < 6; i++) {
-			String t = (ds.length > i) ? ds[i].getName() : "";
-			dms_txt[i].setText(t);
-		}
+		dms_txt.setText("");
+		DMS[] signs = proxy.getSigns();
+		dms_mdl.clear();
+		for (DMS d: signs)
+			dms_mdl.addElement(d);
 	}
 
 	/** Check if the user can make device requests */
