@@ -149,14 +149,19 @@ public class TagTransaction extends E6Property {
 	/** Check if SeGo page 0 CRC is valid.  NOTE: length must be valid */
 	private boolean isValidSeGoCRC() {
 		byte[] page0 = new byte[7];
-		page0[0] = (byte) ((data[2] << 4) | (data[3] >> 4));
-		page0[1] = (byte) ((data[3] << 4) | (data[4] >> 4));
-		page0[2] = (byte) ((data[4] << 4) | (data[5] >> 4));
-		page0[3] = (byte) ((data[5] << 4) | (data[6] >> 4));
-		page0[4] = (byte) ((data[6] << 4) | (data[7] >> 4));
-		page0[5] = (byte) ((data[7] << 4) | (data[8] >> 4));
+		page0[0] = getShiftedData(2);
+		page0[1] = getShiftedData(3);
+		page0[2] = getShiftedData(4);
+		page0[3] = getShiftedData(5);
+		page0[4] = getShiftedData(6);
+		page0[5] = getShiftedData(7);
 		page0[6] = (byte) (data[8] << 4);
 		return PAGE0_CRC.calculate(page0) == getSeGoCRC12();
+	}
+
+	/** Get data shifted by 4 bits (for CRC) */
+	private byte getShiftedData(int o) {
+		return (byte) ((data[o] << 4) | ((data[o + 1] >> 4) & 0x0F));
 	}
 
 	/** Get SeGo CRC-12 from data packet */
