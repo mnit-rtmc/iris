@@ -10,3 +10,10 @@ CREATE VIEW tag_reader_dms_view AS
 	SELECT tag_reader, dms
 	FROM iris.tag_reader_dms;
 GRANT SELECT ON tag_reader_dms_view TO PUBLIC;
+
+-- Add dms_action_view
+CREATE VIEW dms_action_view AS
+	SELECT name, action_plan, sign_group, phase, quick_message,
+	       beacon_enabled, a_priority, r_priority
+	FROM iris.dms_action;
+GRANT SELECT ON dms_action_view TO PUBLIC;

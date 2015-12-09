@@ -1738,6 +1738,12 @@ CREATE VIEW time_action_view AS
 	FROM iris.time_action;
 GRANT SELECT ON time_action_view TO PUBLIC;
 
+CREATE VIEW dms_action_view AS
+	SELECT name, action_plan, sign_group, phase, quick_message,
+	       beacon_enabled, a_priority, r_priority
+	FROM iris.dms_action;
+GRANT SELECT ON dms_action_view TO PUBLIC;
+
 CREATE VIEW meter_action_view AS
 	SELECT ramp_meter, ta.phase, time_of_day, day_plan, sched_date
 	FROM iris.meter_action ma, iris.action_plan ap, iris.time_action ta
