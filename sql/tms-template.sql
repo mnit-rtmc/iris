@@ -1909,6 +1909,11 @@ CREATE VIEW tag_reader_view AS
 	LEFT JOIN controller_view ctr ON t.controller = ctr.name;
 GRANT SELECT ON tag_reader_view TO PUBLIC;
 
+CREATE VIEW tag_reader_dms_view AS
+	SELECT tag_reader, dms
+	FROM iris.tag_reader_dms;
+GRANT SELECT ON tag_reader_dms_view TO PUBLIC;
+
 CREATE VIEW gate_arm_array_view AS
 	SELECT ga.name, ga.notes, ga.geo_loc, l.roadway, l.road_dir,
 	       l.cross_mod, l.cross_street, l.cross_dir, l.lat, l.lon,
@@ -2328,7 +2333,7 @@ camera_util_panel_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.28.0
+database_version	4.29.0
 detector_auto_fail_enable	true
 device_op_status_enable	false
 dialup_poll_period_mins	120
