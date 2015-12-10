@@ -87,6 +87,12 @@ public class TagTransaction extends E6Property {
 		return null;
 	}
 
+	/** Check if the data length is valid for the transaction type */
+	private boolean isLengthValid() {
+		TransactionType tt = getTransactionType();
+		return (tt != null) && (data.length == tt.len);
+	}
+
 	/** Get the date/time stamp */
 	public Long getStamp() {
 		if (isValidSeGoRead())
@@ -140,14 +146,22 @@ public class TagTransaction extends E6Property {
 	/** Check if transaction is a valid SeGo streamlined read */
 	private boolean isValidSeGoRead() {
 		TransactionType tt = getTransactionType();
-		if (tt == TransactionType.SeGo_streamlined_read)
-			return (data.length == tt.len) && isValidSeGoCRC();
-		else
+		if (tt == TransactionType.SeGo_streamlined_read) {
+			return isLengthValid()
+			    && isSeGoMnPass()
+			    && isValidMnPassCRC();
+		} else
 			return false;
 	}
 
+	/** Is it a SeGo MnPass tag? */
+	private boolean isSeGoMnPass() {
+		/* Non-MnPass tags have E022 at start of page 0 */
+		return data[2] != 0xE0;
+	}
+
 	/** Check if SeGo page 0 CRC is valid.  NOTE: length must be valid */
-	private boolean isValidSeGoCRC() {
+	private boolean isValidMnPassCRC() {
 		byte[] page0 = new byte[7];
 		page0[0] = getShiftedData(2);
 		page0[1] = getShiftedData(3);
@@ -185,7 +199,7 @@ public class TagTransaction extends E6Property {
 		TransactionType tt = getTransactionType();
 		if (tt == TransactionType.ASTM_read) {
 			// FIXME: check CRC
-			return (data.length == tt.len);
+			return isLengthValid();
 		}
 		return false;
 	}
@@ -229,11 +243,13 @@ public class TagTransaction extends E6Property {
 		sb.append("tag transaction: ");
 		TransactionType tt = getTransactionType();
 		sb.append(tt);
+		if (!isLengthValid()) {
+			sb.append(" INVALID LENGTH: ");
+			sb.append(data.length);
+			return sb.toString();
+		}
 		if (tt == TransactionType.SeGo_streamlined_read) {
-			if (data.length != tt.len) {
-				sb.append(" INVALID LENGTH: ");
-				sb.append(data.length);
-			} else if (!isValidSeGoCRC()) {
+			if (isSeGoMnPass() && !isValidMnPassCRC()) {
 				sb.append(" INVALID CRC: ");
 				sb.append(getSeGoCRC12());
 			}
