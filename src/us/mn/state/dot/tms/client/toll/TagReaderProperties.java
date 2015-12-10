@@ -77,12 +77,24 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 		protected void doActionPerformed(ActionEvent e) {
 			DMS d = DMSHelper.lookup(dms_txt.getText());
 			if (d != null) {
-				dms_mdl.addElement(d);
+				insertIntoModel(d);
 				updateSignLinks();
 			}
 			dms_txt.setText("");
 		}
 	};
+
+	/** Insert a DMS into the link model */
+	private void insertIntoModel(DMS d) {
+		for (int i = 0; i < dms_mdl.size(); i++) {
+			DMS s = dms_mdl.get(i);
+			if (d.getName().compareTo(s.getName()) < 0) {
+				dms_mdl.add(i, d);
+				return;
+			}
+		}
+		dms_mdl.addElement(d);
+	}
 
 	/** Unlink DMS action */
 	private final IAction unlink_btn = new IAction("tag_reader.unlink") {
