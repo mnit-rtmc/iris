@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,9 +87,10 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		enabled = e;
 		TreeSet<IrisCapabilityImpl> caps =
 			new TreeSet<IrisCapabilityImpl>();
-		for(Object o: mapping.lookup("role", this)) {
-			caps.add((IrisCapabilityImpl)ns.lookupObject(
-				"capability", (String)o));
+		for (String o: mapping.lookup("role", this)) {
+			Object c = ns.lookupObject("capability", o);
+			if (c instanceof IrisCapabilityImpl)
+				caps.add((IrisCapabilityImpl) c);
 		}
 		capabilities = caps.toArray(new IrisCapabilityImpl[0]);
 	}

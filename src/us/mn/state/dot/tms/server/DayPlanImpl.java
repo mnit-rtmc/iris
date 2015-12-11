@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2015  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,8 +76,11 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 	protected DayPlanImpl(Namespace ns, String n) throws TMSException {
 		this(n);
 		TreeSet<HolidayImpl> hset = new TreeSet<HolidayImpl>();
-		for(Object o: mapping.lookup(SONAR_TYPE, this))
-			hset.add((HolidayImpl)HolidayHelper.lookup((String)o));
+		for (String o: mapping.lookup(SONAR_TYPE, this)) {
+			Holiday h = HolidayHelper.lookup(o);
+			if (h instanceof HolidayImpl)
+				hset.add((HolidayImpl) h);
+		}
 		holidays = hset.toArray(new HolidayImpl[0]);
 	}
 

@@ -47,7 +47,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	/** Load all the tag readers */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, TagReaderImpl.class);
-		mapping = new TableMapping(store, "iris", "tag_reader",
+		mapping = new TableMapping(store, "iris", SONAR_TYPE,
 			"dms");
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"toll_zone FROM iris." + SONAR_TYPE + ";",
@@ -121,12 +121,10 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	/** Lookup mapping of DMS */
 	private DMSImpl[] lookupDMSMapping() throws TMSException {
 		TreeSet<DMSImpl> d_set = new TreeSet<DMSImpl>();
-		for (Object o: mapping.lookup(SONAR_TYPE, this)) {
-			if (o instanceof String) {
-				DMS dms = DMSHelper.lookup((String) o);
-				if (dms instanceof DMSImpl)
-					d_set.add((DMSImpl) dms);
-			}
+		for (String o: mapping.lookup(SONAR_TYPE, this)) {
+			DMS dms = DMSHelper.lookup(o);
+			if (dms instanceof DMSImpl)
+				d_set.add((DMSImpl) dms);
 		}
 		return d_set.toArray(new DMSImpl[0]);
 	}
