@@ -28,19 +28,19 @@ import us.mn.state.dot.tms.TMSException;
 public class TableMapping {
 
 	/** Connection to SQL database */
-	protected final SQLConnection store;
+	private final SQLConnection store;
 
 	/** Schema name */
-	protected final String schema;
+	private final String schema;
 
 	/** Name of mapping table */
-	protected final String name;
+	private final String name;
 
 	/** Name of first table */
-	protected final String table0;
+	private final String table0;
 
 	/** Name of second table */
-	protected final String table1;
+	private final String table1;
 
 	/** Create a new database table mapping */
 	public TableMapping(SQLConnection s, String sch, String t0, String t1) {
@@ -52,17 +52,17 @@ public class TableMapping {
 	}
 
 	/** Given one of the tables in the mapping, get the other one */
-	protected String getOtherTable(String table) throws TMSException {
-		if(table.equals(table0))
+	private String getOtherTable(String table) throws TMSException {
+		if (table.equals(table0))
 			return table1;
-		else if(table.equals(table1))
+		else if (table.equals(table1))
 			return table0;
 		else
 			throw new TMSException("INVALID TABLE " + table);
 	}
 
 	/** Create an SQL lookup query */
-	protected String createLookup(String table, String key)
+	private String createLookup(String table, String key)
 		throws TMSException
 	{
 		return "SELECT " + getOtherTable(table) + " FROM " + schema +
@@ -84,13 +84,13 @@ public class TableMapping {
 	}
 
 	/** Create an SQL delete statement */
-	protected String createDelete(String table, String key) {
+	private String createDelete(String table, String key) {
 		return "DELETE FROM " + schema + "." + name + " WHERE " +
 			table + " = '" + key + "';";
 	}
 
 	/** Create the start of an SQL insert statement */
-	protected String createInsertStart(String table, String key)
+	private String createInsertStart(String table, String key)
 		throws TMSException
 	{
 		return "INSERT INTO " + schema + "." + name + "(" + table +
@@ -105,12 +105,12 @@ public class TableMapping {
 		final String insert = createInsertStart(table, key);
 		final Iterator<Storable> it = values.iterator();
 		store.batch(new BatchFactory() {
-			protected boolean first = true;
+			private boolean first = true;
 			public String next() {
-				if(first) {
+				if (first) {
 					first = false;
 					return createDelete(table, key);
-				} else if(it.hasNext()) {
+				} else if (it.hasNext()) {
 					Storable v = it.next();
 					return insert + v.getKey() + "');";
 				} else
@@ -124,7 +124,7 @@ public class TableMapping {
 		throws TMSException
 	{
 		HashSet<Storable> set = new HashSet<Storable>(values.length);
-		for(Storable s: values)
+		for (Storable s: values)
 			set.add(s);
 		update(table, owner, set);
 	}
