@@ -45,22 +45,19 @@ public class TollZoneJob extends Job {
 	/** Perform the job */
 	@Override
 	public void perform() {
-		updateDensity();
 		int p3 = period3Minute();
-		if (p3 != period_3) {
-			calculatePricing();
-			period_3 = p3;
-		}
+		updateDensity(p3 != period_3);
+		period_3 = p3;
 	}
 
 	/** Update density for all toll zones */
-	private void updateDensity() {
+	private void updateDensity(boolean np) {
 		Iterator<TollZone> it = TollZoneHelper.iterator();
 		while (it.hasNext()) {
 			TollZone tz = it.next();
 			if (tz instanceof TollZoneImpl) {
-				TollZoneImpl zone = (TollZoneImpl)tz;
-				zone.updateDensity();
+				TollZoneImpl zone = (TollZoneImpl) tz;
+				zone.updateDensity(np);
 			}
 		}
 	}
@@ -69,17 +66,5 @@ public class TollZoneJob extends Job {
 	private int period3Minute() {
 		int min = TimeSteward.currentMinuteOfDayInt();
 		return min / PERIOD_MINS;
-	}
-
-	/** Calculate pricing for all toll zones */
-	private void calculatePricing() {
-		Iterator<TollZone> it = TollZoneHelper.iterator();
-		while (it.hasNext()) {
-			TollZone tz = it.next();
-			if (tz instanceof TollZoneImpl) {
-				TollZoneImpl zone = (TollZoneImpl)tz;
-				zone.calculatePricing();
-			}
-		}
 	}
 }

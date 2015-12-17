@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.text.NumberFormat;
 import java.util.HashMap;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.TollZone;
@@ -44,11 +45,19 @@ public class TollingFormatter {
 		return Math.min(Math.max(p, min_price()), max_price());
 	}
 
+	/** Tolling formatter label */
+	private final String lbl;
+
+	/** Origin location */
+	private final GeoLoc origin;
+
 	/** Number formatter */
 	private final NumberFormat formatter = NumberFormat.getNumberInstance();
 
 	/** Create a tolling formatter */
-	public TollingFormatter() {
+	public TollingFormatter(String l, GeoLoc o) {
+		lbl = l;
+		origin = o;
 		formatter.setMinimumFractionDigits(2);
 		formatter.setMaximumFractionDigits(2);
 	}
@@ -126,7 +135,7 @@ public class TollingFormatter {
 		TollZone z = TollZoneHelper.lookup(zid);
 		if (z instanceof TollZoneImpl) {
 			TollZoneImpl tz = (TollZoneImpl) z;
-			return tz.getPrice();
+			return tz.getPrice(lbl, origin);
 		} else
 			return null;
 	}

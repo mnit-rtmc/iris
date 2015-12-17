@@ -140,6 +140,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return name.compareTo(o.name);
 	}
 
+	/** Tolling formatter */
+	private final TollingFormatter toll_formatter;
+
 	/** MULTI message formatter */
 	private final MultiFormatter formatter;
 
@@ -149,7 +152,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		GeoLocImpl g = new GeoLocImpl(name);
 		g.notifyCreate();
 		geo_loc = g;
-		formatter = new MultiFormatter(this);
+		toll_formatter = new TollingFormatter(n, g);
+		formatter = new MultiFormatter(this, toll_formatter);
 	}
 
 	/** Create a dynamic message sign */
@@ -164,7 +168,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		awsAllowed = aa;
 		awsControlled = ac;
 		default_font = df;
-		formatter = new MultiFormatter(this);
+		toll_formatter = new TollingFormatter(n, loc);
+		formatter = new MultiFormatter(this, toll_formatter);
 		initTransients();
 	}
 
@@ -1635,11 +1640,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Calculate prices for a tolling message */
 	private HashMap<String, Float> calculatePrices(DmsAction da) {
 		QuickMessage qm = da.getQuickMessage();
-		if (qm != null) {
-			TollingFormatter tf = new TollingFormatter();
-			return tf.calculatePrices(qm.getMulti());
-		}
-		return null;
+		if (qm != null)
+			return toll_formatter.calculatePrices(qm.getMulti());
+		else
+			return null;
 	}
 
 	/** Get the duration of a DMS action.

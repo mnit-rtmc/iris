@@ -181,15 +181,9 @@ public class DetectorSet {
 		return (n_dets > 0) ? (k / n_dets) : MISSING_DATA;
 	}
 
-	/** Get the max density */
-	public Double getMaxDensity() {
-		Double k = null;
-		for (DetectorImpl det: detectors) {
-			double d = det.getDensity();
-			if (d >= 0 && (k == null || d > k))
-				k = d;
-		}
-		return k;
+	/** Check if a detector is in the set */
+	public boolean hasDetector(DetectorImpl det) {
+		return detectors.contains(det);
 	}
 
 	/** Get the maximum occupancy for the detector set */

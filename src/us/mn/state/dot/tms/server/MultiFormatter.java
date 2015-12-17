@@ -43,13 +43,13 @@ public class MultiFormatter {
 	private final TollingFormatter toll_form;
 
 	/** Create a new MULTI formatter */
-	public MultiFormatter(DMSImpl d) {
+	public MultiFormatter(DMSImpl d, TollingFormatter tf) {
 		dms = d;
 		GeoLoc g = d.getGeoLoc();
 		travel_est = new TravelTimeEstimator(dms.getName(), g);
 		advisory = new SpeedAdvisoryCalculator(g);
 		slow_warn = new SlowWarningFormatter(g);
-		toll_form = new TollingFormatter();
+		toll_form = tf;
 	}
 
 	/** Create a multi string for a DMS action */

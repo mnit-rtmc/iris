@@ -59,9 +59,11 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		CabinetImpl.loadAll();
 		ControllerImpl.loadAll();
 		R_NodeImpl.loadAll();
-		TollZoneImpl.loadAll();
+		/* NOTE: must happen after r_nodes are loaded */
+		corridors.createCorridors();
 		AlarmImpl.loadAll();
 		DetectorImpl.loadAll();
+		TollZoneImpl.loadAll();
 		CameraImpl.loadAll();
 		CameraPresetImpl.loadAll();
 		BeaconImpl.loadAll();
@@ -221,13 +223,24 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	}
 
 	/** Get a string representation of the object */
+	@Override
 	public final String toString() {
 		return name;
 	}
 
 	/** Calculate a hash code */
+	@Override
 	public int hashCode() {
 		return name.hashCode();
+	}
+
+	/** Test if the object equals another */
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof BaseObjectImpl)
+			return name.equals(((BaseObjectImpl) o).name);
+		else
+			return false;
 	}
 
 	/** Store an object */
