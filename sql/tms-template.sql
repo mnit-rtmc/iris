@@ -1632,6 +1632,8 @@ CREATE TABLE event.tag_read_event (
 	trip_id INTEGER
 );
 
+CREATE INDEX ON event.tag_read_event(tag_id);
+
 CREATE VIEW tag_read_event_view AS
 	SELECT event_id, event_date, event_description.description,
 	       tag_type.description AS tag_type, agency, tag_id, tag_reader,
@@ -2339,7 +2341,7 @@ camera_util_panel_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.29.0
+database_version	4.30.0
 detector_auto_fail_enable	true
 device_op_status_enable	false
 dialup_poll_period_mins	120
