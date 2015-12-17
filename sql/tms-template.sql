@@ -352,7 +352,8 @@ CREATE TABLE iris.toll_zone (
 
 CREATE TABLE iris.sign_group (
 	name VARCHAR(16) PRIMARY KEY,
-	local BOOLEAN NOT NULL
+	local BOOLEAN NOT NULL,
+	hidden BOOLEAN NOT NULL
 );
 
 CREATE TABLE iris.quick_message (

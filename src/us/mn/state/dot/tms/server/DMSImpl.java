@@ -22,6 +22,7 @@ import java.sql.ResultSet;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sched.DebugLog;
@@ -37,6 +38,8 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DmsAction;
+import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
@@ -1733,6 +1736,19 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return GateArmArrayHelper.checkDMS(this);
 	}
 
+	/** Test if DMS is in a hidden sign group */
+	private boolean isHidden() {
+		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
+		while (it.hasNext()) {
+			DmsSignGroup dsg = it.next();
+			if (dsg.getDms() == this) {
+				if (dsg.getSignGroup().getHidden())
+					return true;
+			}
+		}
+		return false;
+	}
+
 	/** Test if DMS is online (active and not failed) */
 	public boolean isOnline() {
 		return isActive() && !isFailed();
@@ -1826,6 +1842,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			s |= ItemStyle.NO_CONTROLLER.bit();
 		if (isLCS())
 			s |= ItemStyle.LCS.bit();
+		if (isHidden())
+			s |= ItemStyle.HIDDEN.bit();
 		else {
 			if (needsMaintenance())
 				s |= ItemStyle.MAINTENANCE.bit();
