@@ -93,6 +93,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		BeaconActionImpl.loadAll();
 		LaneActionImpl.loadAll();
 		MeterActionImpl.loadAll();
+		DMSImpl.updateAllStyles();
 	}
 
 	/** Get the time as a time stamp */

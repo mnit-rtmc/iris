@@ -111,6 +111,18 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		});
 	}
 
+	/** Update all DMS item styles */
+	static void updateAllStyles() {
+		Iterator<DMS> it = DMSHelper.iterator();
+		while (it.hasNext()) {
+			DMS d = it.next();
+			if (d instanceof DMSImpl) {
+				DMSImpl dms = (DMSImpl) d;
+				dms.updateStyles();
+			}
+		}
+	}
+
 	/** Get a mapping of the columns */
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
@@ -1837,14 +1849,15 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Update the DMS styles */
 	@Override
 	public void updateStyles() {
+		boolean hidden = isHidden();
 		long s = ItemStyle.ALL.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
 		if (isLCS())
 			s |= ItemStyle.LCS.bit();
-		if (isHidden())
+		if (hidden)
 			s |= ItemStyle.HIDDEN.bit();
-		else {
+		if (!(isLCS() || hidden)) {
 			if (needsMaintenance())
 				s |= ItemStyle.MAINTENANCE.bit();
 			if (isActive() && isFailed())
