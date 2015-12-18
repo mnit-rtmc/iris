@@ -1676,6 +1676,9 @@ CREATE TABLE event.price_message_event (
 	price NUMERIC(4,2) NOT NULL
 );
 
+CREATE INDEX ON event.price_message_event(event_date);
+CREATE INDEX ON event.price_message_event(device_id);
+
 CREATE VIEW price_message_event_view AS
 	SELECT event_id, event_date, event_description.description,
 	       device_id, toll_zone, price
