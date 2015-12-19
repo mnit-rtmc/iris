@@ -1550,11 +1550,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Flag for current scheduled message.  This is used to guarantee that
+	/** Current scheduled action.  This is used to guarantee that
 	 * performAction is called at least once between each call to
 	 * updateScheduledMessage.  If not, then the scheduled message is
 	 * cleared. */
-	private transient boolean is_scheduled;
+	private transient DmsAction sched_action;
 
 	/** Current scheduled message */
 	private transient SignMessage messageSched = null;
@@ -1597,7 +1597,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (sm != null) {
 			if (shouldReplaceScheduled(sm)) {
 				setMessageSched(sm);
-				is_scheduled = true;
+				sched_action = da;
 			}
 		}
 	}
@@ -1618,7 +1618,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage createMsgSched(DmsAction da) {
 		String m = formatter.createMulti(da);
 		if (m != null) {
-			setPrices(da);
 			boolean be = da.getBeaconEnabled();
 			DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
 				da.getActivationPriority());
@@ -1638,7 +1637,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set tolling prices */
 	private void setPrices(DmsAction da) {
-		prices = calculatePrices(da);
+		prices = (da != null) ? calculatePrices(da) : null;
 	}
 
 	/** Calculate prices for a tolling message */
@@ -1680,14 +1679,15 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Update the scheduled message on the sign */
 	public void updateScheduledMessage() {
-		if (!is_scheduled) {
+		if (sched_action == null) {
 			logSched("no message scheduled");
 			setMessageSched(createBlankScheduledMessage());
 		}
+		setPrices(sched_action);
 		SignMessage sm = messageSched;
 		if (sm != null)
 			updateScheduledMessage(sm);
-		is_scheduled = false;
+		sched_action = null;
 	}
 
 	/** Update the scheduled message on the sign */
