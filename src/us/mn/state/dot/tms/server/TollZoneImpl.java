@@ -39,7 +39,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	static private final int MAX_STEPS = 12;
 
 	/** Magic constant to convert density to price dollars */
-	static private final double ALPHA = 0.05932;
+	static private final double ALPHA = 0.0575;
 
 	/** Magic exponent to convert density to price dollars */
 	static private final double BETA = 1.156;
