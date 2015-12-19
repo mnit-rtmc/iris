@@ -18,6 +18,7 @@ package us.mn.state.dot.tms;
 import java.io.IOException;
 import java.util.Iterator;
 import us.mn.state.dot.tms.utils.Base64;
+import static us.mn.state.dot.tms.SignMsgSource.*;
 
 /**
  * Helper for dealing with sign messages.
@@ -68,11 +69,21 @@ public class SignMessageHelper extends BaseHelper {
 			    bitmaps.equals(sm.getBitmaps()) &&
 			    api == sm.getActivationPriority() &&
 			    rpi == sm.getRunTimePriority() &&
-			    src.ordinal() == sm.getSource() &&
+			    checkSource(src, sm) &&
 			    integerEquals(d, sm.getDuration()))
 				return sm;
 		}
 		return null;
+	}
+
+	/** Check sign message source.
+	 * @param src Message source.
+	 * @param sm Sign message to check.
+	 * @return true if source matches. */
+	static private boolean checkSource(SignMsgSource src, SignMessage sm) {
+		SignMsgSource sms = SignMsgSource.fromOrdinal(sm.getSource());
+		return (src == sms) ||
+		       (src == schedule) && (sms == tolling);
 	}
 
 	/** Find a sign message with matching attributes.
