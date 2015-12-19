@@ -1197,7 +1197,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param o Sign message owner, or null. */
 	public void setMessageCurrent(SignMessage sm, User o) {
 		if (sm.getSource() == tolling.ordinal())
-			logPriceMessages(sm, EventType.PRICE_VERIFIED);
+			logPriceMessages(EventType.PRICE_VERIFIED);
 		if (!isMessageCurrentEquivalent(sm)) {
 			logMessage(sm, o);
 			setDeployTime();
@@ -1249,27 +1249,17 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Log price (tolling) messages.
-	 * @param sm Sign message.
 	 * @param et Event type. */
-	private void logPriceMessages(SignMessage sm, EventType et) {
-		HashMap<String, Float> prices = getPrices(sm);
-		if (prices != null) {
-			for (Map.Entry<String, Float> ent: prices.entrySet()) {
+	private void logPriceMessages(EventType et) {
+		HashMap<String, Float> p = prices;
+		if (p != null) {
+			for (Map.Entry<String, Float> ent: p.entrySet()) {
 				String tz = ent.getKey();
 				Float price = ent.getValue();
 				logEvent(new PriceMessageEvent(et, name, tz,
 				                               price));
 			}
 		}
-	}
-
-	/** Get map of prices for a sign message */
-	private HashMap<String, Float> getPrices(SignMessage sm) {
-		if (sm instanceof SignMessageImpl) {
-			SignMessageImpl smi = (SignMessageImpl) sm;
-			return smi.getPrices();
-		} else
-			return null;
 	}
 
 	/** Message deploy time */
@@ -1628,6 +1618,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage createMsgSched(DmsAction da) {
 		String m = formatter.createMulti(da);
 		if (m != null) {
+			setPrices(da);
 			boolean be = da.getBeaconEnabled();
 			DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
 				da.getActivationPriority());
@@ -1637,19 +1628,17 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			                  ? tolling
 			                  : schedule;
 			Integer d = getDuration(da);
-			SignMessage sm = createMsg(m, be, ap, rp, src, d);
-			addPricesToMsg(sm, da);
-			return sm;
+			return createMsg(m, be, ap, rp, src, d);
 		} else
 			return null;
 	}
 
-	/** Add tolling prices to a sign message */
-	private void addPricesToMsg(SignMessage sm, DmsAction da) {
-		if (sm instanceof SignMessageImpl) {
-			SignMessageImpl smi = (SignMessageImpl) sm;
-			smi.setPrices(calculatePrices(da));
-		}
+	/** Tolling prices */
+	private transient HashMap<String, Float> prices;
+
+	/** Set tolling prices */
+	private void setPrices(DmsAction da) {
+		prices = calculatePrices(da);
 	}
 
 	/** Calculate prices for a tolling message */
@@ -1707,10 +1696,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (shouldActivate(sm, schedule.ordinal())) {
 			try {
 				logSched("set message to " + sm.getMulti());
-				if (sm.getSource() == tolling.ordinal()) {
-					logPriceMessages(sm,
-						EventType.PRICE_DEPLOYED);
-				}
+				if (sm.getSource() == tolling.ordinal())
+				    logPriceMessages(EventType.PRICE_DEPLOYED);
 				doSetMessageNext(sm, null);
 			}
 			catch (TMSException e) {

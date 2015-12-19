@@ -218,17 +218,4 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		w.write(createAttribute("deploy_time", dms.getDeployTime()));
 		w.write("/>\n");
 	}
-
-	/** Tolling prices */
-	private transient HashMap<String, Float> prices;
-
-	/** Set tolling prices */
-	public void setPrices(HashMap<String, Float> p) {
-		prices = p;
-	}
-
-	/** Get tolling prices */
-	public HashMap<String, Float> getPrices() {
-		return prices;
-	}
 }
