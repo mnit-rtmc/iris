@@ -1196,6 +1196,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param sm Sign message.
 	 * @param o Sign message owner, or null. */
 	public void setMessageCurrent(SignMessage sm, User o) {
+if (SCHED_LOG.isOpen()) {
+	logSched("set msg current " + sm.getName() + ", src: " + sm.getSource());
+}
 		if (sm.getSource() == tolling.ordinal())
 			logPriceMessages(EventType.PRICE_VERIFIED);
 		if (!isMessageCurrentEquivalent(sm)) {
