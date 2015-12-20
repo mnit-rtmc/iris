@@ -86,8 +86,10 @@ public class OpQueryDMSMessage extends OpDMS {
 			0);
 		if (crc != source.getCrc())
 			return new QueryCurrentMessage();
-		else
+		else {
+			setCurrentMessage(sm);
 			return null;
+		}
 	}
 
 	/** Process an invalid message source from the sign controller */
