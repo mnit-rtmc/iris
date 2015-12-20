@@ -78,7 +78,7 @@ public class OpQueryDMSMessage extends OpAddco {
 	private SignMessage createSignMessage(String multi,
 		BitmapGraphic[] bmaps)
 	{
-		if (bmaps.length == 0)
+		if (bmaps.length == 0 || new MultiString(multi).isBlank())
 			return dms.createMsgBlank();
 		else
 			return dms.createMsgRendered(multi, false, bmaps);
