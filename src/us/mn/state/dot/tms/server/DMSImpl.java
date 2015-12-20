@@ -1703,8 +1703,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			catch (TMSException e) {
 				logSched(e.getMessage());
 			}
-		} else
-			logSched("sched msg not sent " + sm.getMulti());
+		} else if (SCHED_LOG.isOpen()) {
+			boolean eq = SignMessageHelper.lookup(sm.getName())==sm;
+			logSched("sched msg " + sm.getName() + " not sent " +
+				sm.getMulti() + ", eq: " + eq + ", curr: " +
+				messageCurrent + ", next: " + messageNext);
+		}
 	}
 
 	/** Create a blank scheduled message */
