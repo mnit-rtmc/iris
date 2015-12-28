@@ -112,7 +112,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		throws IOException, SAXException, ParserConfigurationException
 	{
 		super(s, lm);
-		builder = new SegmentBuilder(session, this, p);
+		builder = canRead()
+		       ? new SegmentBuilder(session, this, p)
+		       : null;
 		cor_mdl.addElement(" ");
 		det_cache = s.getSonarState().getDetCache().getDetectors();
 	}
@@ -120,17 +122,21 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Initialize the r_node manager */
 	@Override
 	public void initialize() {
-		builder.initialize();
 		super.initialize();
-		det_cache.addProxyListener(det_listener);
+		if (builder != null) {
+			builder.initialize();
+			det_cache.addProxyListener(det_listener);
+		}
 	}
 
 	/** Dispose of the r_node manager */
 	@Override
 	public void dispose() {
-		det_cache.removeProxyListener(det_listener);
+		if (builder != null) {
+			det_cache.removeProxyListener(det_listener);
+			builder.dispose();
+		}
 		super.dispose();
-		builder.dispose();
 	}
 
 	/** Get the sonar type name */
@@ -492,5 +498,11 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	@Override
 	protected int getZoomThreshold() {
 		return 10;
+	}
+
+	/** Check if user can read r_nodes / detectors */
+	@Override
+	public boolean canRead() {
+		return super.canRead() && session.canRead(Detector.SONAR_TYPE);
 	}
 }
