@@ -123,7 +123,6 @@ public class FakeDetector {
 	/** Calculate the fake detector data */
 	public void calculate() {
 		flow = calculateFlow();
-		calculateSpeed();
 	}
 
 	/** Flow rate from earlier sampling interval */
@@ -170,11 +169,8 @@ public class FakeDetector {
 		return flow;
 	}
 
-	/** Speed from earlier sampling interval */
-	private transient float speed = MISSING_DATA;
-
-	/** Calculate the fake detector speed */
-	private void calculateSpeed() {
+	/** Get the calculated speed */
+	public float getSpeed() {
 		float t_speed = 0;
 		int n_speed = 0;
 		for (DetectorImpl det: plus) {
@@ -184,11 +180,6 @@ public class FakeDetector {
 				n_speed++;
 			}
 		}
-		speed = calculateAverage(t_speed, n_speed);
-	}
-
-	/** Get the calculated speed */
-	public float getSpeed() {
-		return speed;
+		return calculateAverage(t_speed, n_speed);
 	}
 }
