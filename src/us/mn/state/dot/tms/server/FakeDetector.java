@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.server;
 
 import java.util.LinkedList;
 import java.util.StringTokenizer;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DetectorHelper;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 
 /**
@@ -32,23 +32,16 @@ public class FakeDetector {
 		return (count > 0) ? total / count : MISSING_DATA;
 	}
 
-	/** Plus composite type */
-	static private final int PLUS = 1;
-
-	/** Minus composite type */
-	static private final int MINUS = -1;
-
-	/** Constant composite type */
-	static private final int CONSTANT = 0;
-
-	/** Percent composite type */
-	static private final int PERCENT = 2;
+	/** Enum of composites */
+	private enum Composite {
+		PLUS, MINUS, CONSTANT, PERCENT;
+	}
 
 	/** Array of detectors which add to the fake detector */
-	private DetectorImpl[] plus;
+	private final DetectorImpl[] plus;
 
 	/** Array of detectors which subtract from the fake detector */
-	private DetectorImpl[] minus;
+	private final DetectorImpl[] minus;
 
 	/** Constant flow rate to begin estimation */
 	private int constant = 0;
@@ -81,47 +74,45 @@ public class FakeDetector {
 	}
 
 	/** Create a new fake detector */
-	public FakeDetector(String d, Namespace ns)
-		throws NumberFormatException
-	{
+	public FakeDetector(String d) throws NumberFormatException {
 		LinkedList<DetectorImpl> p = new LinkedList<DetectorImpl>();
 		LinkedList<DetectorImpl> m = new LinkedList<DetectorImpl>();
-		int type = PLUS;
+		Composite comp = Composite.PLUS;
 		StringTokenizer tok = new StringTokenizer(d, " +-#%", true);
 		while (tok.hasMoreTokens()) {
 			String t = tok.nextToken();
 			if (t.equals("+")) {
-				type = PLUS;
+				comp = Composite.PLUS;
 				continue;
 			}
 			if (t.equals("-")) {
-				type = MINUS;
+				comp = Composite.MINUS;
 				continue;
 			}
 			if (t.equals("#")) {
-				type = CONSTANT;
+				comp = Composite.CONSTANT;
 				continue;
 			}
 			if (t.equals("%")) {
-				type = PERCENT;
+				comp = Composite.PERCENT;
 				continue;
 			}
 			if (t.equals(" "))
 				continue;
-			if (type == CONSTANT) {
+			if (comp == Composite.CONSTANT) {
 				constant = Integer.parseInt(t);
 				continue;
 			}
-			if (type == PERCENT) {
+			if (comp == Composite.PERCENT) {
 				percent = Integer.parseInt(t);
 				continue;
 			}
-			DetectorImpl det = (DetectorImpl) ns.lookupObject(
-				Detector.SONAR_TYPE, t);
-			if (det != null) {
-				if (type == PLUS)
+			Detector dt = DetectorHelper.lookup(t);
+			if (dt instanceof DetectorImpl) {
+				DetectorImpl det = (DetectorImpl) dt;
+				if (comp == Composite.PLUS)
 					p.add(det);
-				if (type == MINUS)
+				if (comp == Composite.MINUS)
 					m.add(det);
 			}
 		}

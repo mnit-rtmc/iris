@@ -460,9 +460,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		throws ChangeVetoException
 	{
 		try {
-			return (f != null)
-			      ? new FakeDetector(f, namespace)
-			      : null;
+			return (f != null) ? new FakeDetector(f) : null;
 		}
 		catch (NumberFormatException e) {
 			throw new ChangeVetoException(
