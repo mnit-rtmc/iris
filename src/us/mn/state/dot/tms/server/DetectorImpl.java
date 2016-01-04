@@ -556,10 +556,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Get the current volume */
 	public int getVolume() {
-		if (isSampling())
-			return last_volume;
-		else
-			return MISSING_DATA;
+		return isSampling() ? last_volume : MISSING_DATA;
 	}
 
 	/** Get the current occupancy */
@@ -573,10 +570,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Get the current flow rate (vehicles per hour) */
 	public float getFlow() {
 		int flow = getFlowRaw();
-		if (flow != MISSING_DATA)
-			return flow;
-		else
-			return getFlowFake();
+		return (flow >= 0) ? flow : getFlowFake();
 	}
 
 	/** Get the current raw (non-faked) flow rate (vehicles per hour) */
@@ -592,19 +586,19 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	/** Get the fake flow rate (vehicles per hour) */
 	private float getFlowFake() {
 		FakeDetector f = fake_det;
-		if (f != null)
-			return f.getFlow();
-		else
-			return MISSING_DATA;
+		return (f != null) ? f.getFlow() : MISSING_DATA;
 	}
 
 	/** Get the current density (vehicles per mile) */
 	public float getDensity() {
-		float density = getDensityFromFlowSpeed();
-		if (density != MISSING_DATA)
-			return density;
-		else
-			return getDensityFromOccupancy();
+		float k = getDensityRaw();
+		return (k >= 0) ? k : getDensityFake();
+	}
+
+	/** Get the current raw (non-faked) density (vehicles per mile) */
+	protected float getDensityRaw() {
+		float k = getDensityFromFlowSpeed();
+		return (k >= 0) ? k : getDensityFromOccupancy();
 	}
 
 	/** Get the density from flow and speed (vehicles per mile) */
@@ -628,6 +622,12 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			return MISSING_DATA;
 	}
 
+	/** Get fake density (vehicles per mile) */
+	private float getDensityFake() {
+		FakeDetector f = fake_det;
+		return (f != null) ? f.getDensity() : MISSING_DATA;
+	}
+
 	/** Get the current speed (miles per hour) */
 	public float getSpeed() {
 		float speed = getSpeedRaw();
@@ -642,10 +642,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 
 	/** Get the current raw (non-faked) speed (miles per hour) */
 	protected float getSpeedRaw() {
-		if (isSampling())
-			return last_speed;
-		else
-			return MISSING_DATA;
+		return isSampling() ? last_speed : MISSING_DATA;
 	}
 
 	/** Get speed estimate based on flow / density */

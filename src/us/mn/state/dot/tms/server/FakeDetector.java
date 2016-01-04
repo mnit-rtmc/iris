@@ -169,7 +169,7 @@ public class FakeDetector {
 		return flow;
 	}
 
-	/** Get the calculated speed */
+	/** Get the fake speed (miles per hour) */
 	public float getSpeed() {
 		float t_speed = 0;
 		int n_speed = 0;
@@ -181,5 +181,19 @@ public class FakeDetector {
 			}
 		}
 		return calculateAverage(t_speed, n_speed);
+	}
+
+	/** Get the fake density (vehicle per mile) */
+	public float getDensity() {
+		float t_density = 0;
+		int n_density = 0;
+		for (DetectorImpl det: plus) {
+			float k = det.getDensityRaw();
+			if (k >= 0) {
+				t_density += k;
+				n_density++;
+			}
+		}
+		return calculateAverage(t_density, n_density);
 	}
 }
