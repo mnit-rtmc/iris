@@ -579,7 +579,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			return getFlowFake();
 	}
 
-	/** Get the current raw flow rate (vehicles per hour) */
+	/** Get the current raw (non-faked) flow rate (vehicles per hour) */
 	protected int getFlowRaw() {
 		int volume = getVolume();
 		if (volume >= 0) {
@@ -640,7 +640,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 			return getSpeedFake();
 	}
 
-	/** Get the current raw speed (miles per hour) */
+	/** Get the current raw (non-faked) speed (miles per hour) */
 	protected float getSpeedRaw() {
 		if (isSampling())
 			return last_speed;
