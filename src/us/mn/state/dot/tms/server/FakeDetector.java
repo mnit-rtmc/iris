@@ -34,14 +34,11 @@ public class FakeDetector {
 
 	/** Enum of composites */
 	private enum Composite {
-		PLUS, MINUS, CONSTANT, PERCENT;
+		PLUS, CONSTANT, PERCENT;
 	}
 
 	/** Array of detectors which add to the fake detector */
 	private final DetectorImpl[] plus;
-
-	/** Array of detectors which subtract from the fake detector */
-	private final DetectorImpl[] minus;
 
 	/** Constant flow rate to begin estimation */
 	private int constant = 0;
@@ -62,10 +59,6 @@ public class FakeDetector {
 				b.append('+');
 			b.append(det.getName());
 		}
-		for (DetectorImpl det: minus) {
-			b.append('-');
-			b.append(det.getName());
-		}
 		if (percent != 100) {
 			b.append('%');
 			b.append(percent);
@@ -76,17 +69,12 @@ public class FakeDetector {
 	/** Create a new fake detector */
 	public FakeDetector(String d) throws NumberFormatException {
 		LinkedList<DetectorImpl> p = new LinkedList<DetectorImpl>();
-		LinkedList<DetectorImpl> m = new LinkedList<DetectorImpl>();
 		Composite comp = Composite.PLUS;
-		StringTokenizer tok = new StringTokenizer(d, " +-#%", true);
+		StringTokenizer tok = new StringTokenizer(d, " +#%", true);
 		while (tok.hasMoreTokens()) {
 			String t = tok.nextToken();
 			if (t.equals("+")) {
 				comp = Composite.PLUS;
-				continue;
-			}
-			if (t.equals("-")) {
-				comp = Composite.MINUS;
 				continue;
 			}
 			if (t.equals("#")) {
@@ -112,61 +100,21 @@ public class FakeDetector {
 				DetectorImpl det = (DetectorImpl) dt;
 				if (comp == Composite.PLUS)
 					p.add(det);
-				if (comp == Composite.MINUS)
-					m.add(det);
 			}
 		}
 		plus = (DetectorImpl []) p.toArray(new DetectorImpl[0]);
-		minus = (DetectorImpl []) m.toArray(new DetectorImpl[0]);
-	}
-
-	/** Calculate the fake detector data */
-	public void calculate() {
-		flow = calculateFlow();
-	}
-
-	/** Flow rate from earlier sampling interval */
-	private transient float flow = MISSING_DATA;
-
-	/** Left over flow from earlier sampling intervals */
-	private transient float leftover = 0;
-
-	/** Calculate the fake detector flow rate */
-	private float calculateFlow() {
-		float flw = 0;
-		for (int i = 0; i < plus.length; i++) {
-			int f = plus[i].getFlowRaw();
-			if (f < 0) {
-				leftover = 0;
-				return MISSING_DATA;
-			}
-			flw += f;
-		}
-		for (int i = 0; i < minus.length; i++) {
-			int f = minus[i].getFlowRaw();
-			if (f < 0) {
-				leftover = 0;
-				return MISSING_DATA;
-			}
-			flw -= f;
-		}
-		if (flw < 0) {
-			leftover += flw;
-			flw = 0;
-		}
-		else if (leftover < 0) {
-			float diff = Math.max(leftover, -flw);
-			leftover -= diff;
-			flw += diff;
-		}
-		float ff = (constant + flw) * percent / 100.0f;
-		float adj = (flow > 0) ? ff - flow : ff;
-		return flow + 0.01f * adj;
 	}
 
 	/** Get the calculated flow rate */
 	public float getFlow() {
-		return flow;
+		float flow = 0;
+		for (int i = 0; i < plus.length; i++) {
+			int f = plus[i].getFlowRaw();
+			if (f < 0)
+				return MISSING_DATA;
+			flow += f;
+		}
+		return (constant + flow) * percent / 100.0f;
 	}
 
 	/** Get the fake speed (miles per hour) */

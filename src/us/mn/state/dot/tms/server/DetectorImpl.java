@@ -502,13 +502,6 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 		return fake;
 	}
 
-	/** Calculate the fake data if necessary */
-	public void calculateFakeData() {
-		FakeDetector f = fake_det;
-		if (f != null)
-			f.calculate();
-	}
-
 	/** Request a device operation */
 	@Override
 	public void setDeviceRequest(int r) {

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -86,11 +86,10 @@ public class FlushXmlJob extends Job {
 	/** Write the body of the detector sample XML file */
 	private void writeSampleXmlBody(Writer w) throws IOException {
 		Iterator<Detector> it = DetectorHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Detector d = it.next();
-			if(d instanceof DetectorImpl) {
-				DetectorImpl det = (DetectorImpl)d;
-				det.calculateFakeData();
+			if (d instanceof DetectorImpl) {
+				DetectorImpl det = (DetectorImpl) d;
 				det.writeSampleXml(w);
 			}
 		}
