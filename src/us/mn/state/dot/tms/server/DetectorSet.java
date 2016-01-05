@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -159,26 +159,12 @@ public class DetectorSet {
 	}
 
 	/** Get the current flow rate of the detector set.
-		Note: assumes that isGood returned true. */
+	 * Note: assumes that isGood returned true. */
 	public int getFlow() {
 		int flow = 0;
 		for (DetectorImpl det: detectors)
 			flow += (int)det.getFlow();
 		return flow;
-	}
-
-	/** Get the average density of the detector set */
-	public float getDensity() {
-		float k = 0;
-		int n_dets = 0;
-		for (DetectorImpl det: detectors) {
-			float d = det.getDensity();
-			if (d >= 0) {
-				k += d;
-				n_dets++;
-			}
-		}
-		return (n_dets > 0) ? (k / n_dets) : MISSING_DATA;
 	}
 
 	/** Check if a detector is in the set */
