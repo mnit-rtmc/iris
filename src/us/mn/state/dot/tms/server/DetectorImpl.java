@@ -52,7 +52,7 @@ import us.mn.state.dot.tms.server.event.DetFailEvent;
  *
  * @author Douglas Lau
  */
-public class DetectorImpl extends DeviceImpl implements Detector {
+public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Default average detector field length (feet) */
 	static private final float DEFAULT_FIELD_FT = 22.0f;
@@ -561,6 +561,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	}
 
 	/** Get the current flow rate (vehicles per hour) */
+	@Override
 	public float getFlow() {
 		int flow = getFlowRaw();
 		return (flow >= 0) ? flow : getFlowFake();
@@ -583,6 +584,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	}
 
 	/** Get the current density (vehicles per mile) */
+	@Override
 	public float getDensity() {
 		float k = getDensityRaw();
 		return (k >= 0) ? k : getDensityFake();
@@ -622,6 +624,7 @@ public class DetectorImpl extends DeviceImpl implements Detector {
 	}
 
 	/** Get the current speed (miles per hour) */
+	@Override
 	public float getSpeed() {
 		float speed = getSpeedRaw();
 		if (speed > 0)
