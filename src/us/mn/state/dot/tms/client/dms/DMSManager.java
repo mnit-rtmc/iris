@@ -206,7 +206,8 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Check if a MapGeoLoc style is visible */
 	private boolean isStyleVisible(MapGeoLoc loc) {
 		DMS dms = findProxy(loc);
-		return (dms != null) && isStyleVisible(dms);
+		return (dms != null) &&
+		       (isStyleVisible(dms) || s_model.isSelected(dms));
 	}
 
 	/** Check if a DMS style is visible */
