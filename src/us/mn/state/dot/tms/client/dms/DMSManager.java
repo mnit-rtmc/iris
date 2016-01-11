@@ -197,21 +197,9 @@ public class DMSManager extends ProxyManager<DMS> {
 		super.proxyChangedSwing(dms, a);
 	}
 
-	/** Check if a MapGeoLoc is visible */
-	@Override
-	protected boolean isVisible(MapGeoLoc loc) {
-		return super.isVisible(loc) && isStyleVisible(loc);
-	}
-
-	/** Check if a MapGeoLoc style is visible */
-	private boolean isStyleVisible(MapGeoLoc loc) {
-		DMS dms = findProxy(loc);
-		return (dms != null) &&
-		       (isStyleVisible(dms) || s_model.isSelected(dms));
-	}
-
 	/** Check if a DMS style is visible */
-	private boolean isStyleVisible(DMS dms) {
+	@Override
+	protected boolean isStyleVisible(DMS dms) {
 		long styles = dms.getStyles();
 		return !(ItemStyle.LCS.checkBit(styles) ||
 		         ItemStyle.HIDDEN.checkBit(styles));

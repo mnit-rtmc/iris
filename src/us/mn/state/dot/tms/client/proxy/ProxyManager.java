@@ -417,8 +417,20 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Check if a MapGeoLoc is visible */
-	protected boolean isVisible(MapGeoLoc loc) {
-		return isLocationSet(loc);
+	private boolean isVisible(MapGeoLoc loc) {
+		return isLocationSet(loc) && isStyleVisible(loc);
+	}
+
+	/** Check if a MapGeoLoc style is visible */
+	private boolean isStyleVisible(MapGeoLoc loc) {
+		T proxy = findProxy(loc);
+		return (proxy != null) &&
+		       (isStyleVisible(proxy) || s_model.isSelected(proxy));
+	}
+
+	/** Check if a proxy style is visible */
+	protected boolean isStyleVisible(T proxy) {
+		return true;
 	}
 
 	/** Find the map geo location for a proxy */
