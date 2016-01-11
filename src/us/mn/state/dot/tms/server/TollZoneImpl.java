@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
@@ -87,7 +88,6 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Create a new toll zone */
 	public TollZoneImpl(String n) {
 		super(n);
-		initDensityHistory();
 	}
 
 	/** Create a new toll zone */
@@ -96,7 +96,6 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		start_id = sid;
 		end_id = eid;
 		tollway = tw;
-		initDensityHistory();
 	}
 
 	/** Starting station ID */
@@ -106,7 +105,6 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	@Override
 	public void setStartID(String sid) {
 		start_id = sid;
-		initDensityHistory();
 	}
 
 	/** Set the starting station ID */
@@ -130,7 +128,6 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	@Override
 	public void setEndID(String eid) {
 		end_id = eid;
-		initDensityHistory();
 	}
 
 	/** Set the ending station ID */
@@ -194,14 +191,6 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	private transient final HashMap<DetectorImpl, DensityHist> k_hist =
 		new HashMap<DetectorImpl, DensityHist>();
 
-	/** Initialize the density history for all detectors in the zone */
-	private void initDensityHistory() {
-		DetectorSet ds = lookupDetectors(buildRoute());
-		if (isLogging())
-			log("Detectors: " + ds);
-		initDensityHistory(ds);
-	}
-
 	/** Lookup all HOT detectors in a route.
 	 * @param r The route.
 	 * @return Set of all HOT detectors in the route. */
@@ -253,13 +242,6 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		return builder.findBestRoute(o, d);
 	}
 
-	/** Initialize the density history for the given detector set */
-	private synchronized void initDensityHistory(DetectorSet ds) {
-		k_hist.clear();
-		for (DetectorImpl det: ds.toArray())
-			k_hist.put(det, new DensityHist());
-	}
-
 	/** Update density.
 	 * @param np New pricing period (if true). */
 	public synchronized void updateDensity(boolean np) {
@@ -277,11 +259,35 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		DetectorSet ds = lookupDetectors(buildRoute(o));
 		if (isLogging())
 			log(lbl + " detectors: " + ds);
+		updateDensityHistory(ds);
 		Double k_hot = findMaxDensity(ds);
 		float price = calculatePricing(k_hot);
 		if (isLogging())
 			log(lbl + " k_hot: " + k_hot + ", price: $" + price);
 		return price;
+	}
+
+	/** Update density history for the given detector set */
+	private synchronized void updateDensityHistory(DetectorSet ds) {
+		removeHistoryMappings(ds);
+		addHistoryMappings(ds);
+	}
+
+	/** Remove mappings from k_hist if not in detector set */
+	private void removeHistoryMappings(DetectorSet ds) {
+		Iterator<DetectorImpl> it = k_hist.keySet().iterator();
+		while (it.hasNext()) {
+			if (!ds.hasDetector(it.next()))
+				it.remove();
+		}
+	}
+
+	/** Add mappings from detector set if they don't exist */
+	private void addHistoryMappings(DetectorSet ds) {
+		for (DetectorImpl det: ds.toArray()) {
+			if (!k_hist.containsKey(det))
+				k_hist.put(det, new DensityHist());
+		}
 	}
 
 	/** Find the max density within a detector set */
