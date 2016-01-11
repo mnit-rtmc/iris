@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,9 +68,9 @@ public class MapGeoLoc implements MapObject {
 
 	/** Update the geo loc map object */
 	public void doUpdate() {
-		if(manager != null) {
+		if (manager != null) {
 			Double tan = manager.getTangentAngle(this);
-			if(tan != null)
+			if (tan != null)
 				setTangent(tan);
 		}
 		updateTransform();
@@ -85,7 +85,7 @@ public class MapGeoLoc implements MapObject {
 
 	/** Get the default angle (radians) */
 	private double getDefaultAngle() {
-		switch(Direction.fromOrdinal(loc.getRoadDir())) {
+		switch (Direction.fromOrdinal(loc.getRoadDir())) {
 		case NORTH:
 			return RAD_NORTH;
 		case SOUTH:
@@ -104,7 +104,7 @@ public class MapGeoLoc implements MapObject {
 
 	/** Set the tangent angle (radians) */
 	public void setTangent(double t) {
-		if(Double.isInfinite(t) || Double.isNaN(t))
+		if (Double.isInfinite(t) || Double.isNaN(t))
 			System.err.println("MapGeoLoc.setTangent: Bad tangent");
 		else
 			tangent = t;
@@ -112,7 +112,7 @@ public class MapGeoLoc implements MapObject {
 
 	/** Get the tangent angle (radians) */
 	public double getTangent() {
-		if(tangent != null)
+		if (tangent != null)
 			return tangent;
 		else
 			return getDefaultAngle();
@@ -124,11 +124,11 @@ public class MapGeoLoc implements MapObject {
 	 * @return true If the point was set, otherwise false. */
 	public boolean setPoint(Point2D p, float distance) {
 		SphericalMercatorPosition smp = pos;
-		if(smp != null) {
+		if (smp != null) {
 			double x = smp.getX();
 			double y = smp.getY();
 			Double t = tangent;
-			if(t != null) {
+			if (t != null) {
 				double xo = distance * Math.cos(t);
 				double yo = distance * Math.sin(t);
 				p.setLocation(x + xo, y + yo);
@@ -145,7 +145,7 @@ public class MapGeoLoc implements MapObject {
 	/** Update the traffic device transform */
 	private void updateTransform() {
 		pos = GeoLocHelper.getPosition(loc);
-		if(pos != null)
+		if (pos != null)
 			transform.setToTranslation(pos.getX(), pos.getY());
 		else
 			transform.setToIdentity();
@@ -153,6 +153,7 @@ public class MapGeoLoc implements MapObject {
 	}
 
 	/** Get the transform to render as a map object */
+	@Override
 	public AffineTransform getTransform() {
 		return transform;
 	}
@@ -165,12 +166,13 @@ public class MapGeoLoc implements MapObject {
 		try {
 			itransform.setTransform(transform.createInverse());
 		}
-		catch(NoninvertibleTransformException e) {
+		catch (NoninvertibleTransformException e) {
 			e.printStackTrace();
 		}
 	}
 
 	/** Get the inverse transform */
+	@Override
 	public AffineTransform getInverseTransform() {
 		return itransform;
 	}
@@ -189,11 +191,13 @@ public class MapGeoLoc implements MapObject {
 	}
 
 	/** Get the map object shape */
+	@Override
 	public Shape getShape() {
 		return (manager != null) ? manager.getShape() : null;
 	}
 
 	/** Get the outline shape */
+	@Override
 	public Shape getOutlineShape() {
 		return getShape();
 	}
