@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -72,6 +72,11 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Get the map icon maximum size scale */
 	static private float getIconSizeScaleMax() {
 		return SystemAttrEnum.MAP_ICON_SIZE_SCALE_MAX.getFloat();
+	}
+
+	/** Check if the location is set */
+	static private boolean isLocationSet(MapGeoLoc loc) {
+		return loc != null && !GeoLocHelper.isNull(loc.getGeoLoc());
 	}
 
 	/** User session */
@@ -404,18 +409,16 @@ abstract public class ProxyManager<T extends SonarObject> {
 	public MapObject forEach(MapSearcher s) {
 		synchronized (map_cache) {
 			for (MapGeoLoc loc: map_cache) {
-				if (isLocationSet(loc)) {
-					if (s.next(loc))
-						return loc;
-				}
+				if (isVisible(loc) && s.next(loc))
+					return loc;
 			}
 		}
 		return null;
 	}
 
-	/** Check if the location is set */
-	static private boolean isLocationSet(MapGeoLoc loc) {
-		return loc != null && !GeoLocHelper.isNull(loc.getGeoLoc());
+	/** Check if a MapGeoLoc is visible */
+	protected boolean isVisible(MapGeoLoc loc) {
+		return isLocationSet(loc);
 	}
 
 	/** Find the map geo location for a proxy */

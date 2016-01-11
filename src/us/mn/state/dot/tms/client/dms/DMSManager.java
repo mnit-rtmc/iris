@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -197,6 +197,25 @@ public class DMSManager extends ProxyManager<DMS> {
 		super.proxyChangedSwing(dms, a);
 	}
 
+	/** Check if a MapGeoLoc is visible */
+	@Override
+	protected boolean isVisible(MapGeoLoc loc) {
+		return super.isVisible(loc) && isStyleVisible(loc);
+	}
+
+	/** Check if a MapGeoLoc style is visible */
+	private boolean isStyleVisible(MapGeoLoc loc) {
+		DMS dms = findProxy(loc);
+		return (dms != null) && isStyleVisible(dms);
+	}
+
+	/** Check if a DMS style is visible */
+	private boolean isStyleVisible(DMS dms) {
+		long styles = dms.getStyles();
+		return !(ItemStyle.LCS.checkBit(styles) ||
+		         ItemStyle.HIDDEN.checkBit(styles));
+	}
+
 	/** Create a proxy JList */
 	@Override
 	public ProxyJList<DMS> createList() {
@@ -247,17 +266,6 @@ public class DMSManager extends ProxyManager<DMS> {
 		if(blankAction != null)
 			p.add(blankAction);
 		return p;
-	}
-
-	/** Find the map geo location for a DMS */
-	@Override
-	public MapGeoLoc findGeoLoc(DMS proxy) {
-		if (ItemStyle.LCS.checkBit(proxy.getStyles()))
-			return null;
-		else if (ItemStyle.HIDDEN.checkBit(proxy.getStyles()))
-			return null;
-		else
-			return super.findGeoLoc(proxy);
 	}
 
 	/** Find the map geo location for a proxy */
