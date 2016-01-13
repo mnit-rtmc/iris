@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  * Copyright (C) 2012  Iteris Inc.
  *
@@ -1843,8 +1843,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		long s = ItemStyle.ALL.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
-		if (isLCS())
-			s |= ItemStyle.LCS.bit();
 		if (hidden)
 			s |= ItemStyle.HIDDEN.bit();
 		if (!(isLCS() || hidden)) {

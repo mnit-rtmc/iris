@@ -200,9 +200,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Check if a DMS style is visible */
 	@Override
 	protected boolean isStyleVisible(DMS dms) {
-		long styles = dms.getStyles();
-		return !(ItemStyle.LCS.checkBit(styles) ||
-		         ItemStyle.HIDDEN.checkBit(styles));
+		return !ItemStyle.HIDDEN.checkBit(dms.getStyles());
 	}
 
 	/** Create a proxy JList */
