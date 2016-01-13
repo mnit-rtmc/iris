@@ -48,12 +48,10 @@ import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
-import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
@@ -1728,16 +1726,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		    && (n == null || SignMsgSource.isScheduled(n.getSource()));
 	}
 
-	/** Test if DMS is part of an LCS array */
-	private boolean isLCS() {
-		return LCSHelper.lookup(name) != null;
-	}
-
-	/** Test if DMS is associated with a gate arm array */
-	private boolean isForGateArm() {
-		return GateArmArrayHelper.checkDMS(this);
-	}
-
 	/** Test if DMS is in a hidden sign group */
 	private boolean isHidden() {
 		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
@@ -1843,29 +1831,27 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		long s = ItemStyle.ALL.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
+		if (!isActive())
+			s |= ItemStyle.INACTIVE.bit();
 		if (hidden)
 			s |= ItemStyle.HIDDEN.bit();
-		if (!(isLCS() || hidden)) {
+		else {
 			if (needsMaintenance())
 				s |= ItemStyle.MAINTENANCE.bit();
 			if (isActive() && isFailed())
 				s |= ItemStyle.FAILED.bit();
-			if (!isActive())
-				s |= ItemStyle.INACTIVE.bit();
-			if (!isForGateArm()) {
-				if (isAvailable())
-					s |= ItemStyle.AVAILABLE.bit();
-				if (isUserDeployed())
-					s |= ItemStyle.DEPLOYED.bit();
-				if (isTravelTimeDeployed())
-					s |= ItemStyle.TRAVEL_TIME.bit();
-				if (isScheduleDeployed())
-					s |= ItemStyle.SCHEDULED.bit();
-				if (isAwsDeployed())
-					s |= ItemStyle.AWS_DEPLOYED.bit();
-				if (isAwsControlled())
-					s |= ItemStyle.AWS_CONTROLLED.bit();
-			}
+			if (isAvailable())
+				s |= ItemStyle.AVAILABLE.bit();
+			if (isUserDeployed())
+				s |= ItemStyle.DEPLOYED.bit();
+			if (isTravelTimeDeployed())
+				s |= ItemStyle.TRAVEL_TIME.bit();
+			if (isScheduleDeployed())
+				s |= ItemStyle.SCHEDULED.bit();
+			if (isAwsDeployed())
+				s |= ItemStyle.AWS_DEPLOYED.bit();
+			if (isAwsControlled())
+				s |= ItemStyle.AWS_CONTROLLED.bit();
 		}
 		setStyles(s);
 	}

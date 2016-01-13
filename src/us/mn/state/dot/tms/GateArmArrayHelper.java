@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ public class GateArmArrayHelper extends BaseHelper {
 
 	/** Lookup the gate arm array with the specified name */
 	static public GateArmArray lookup(String name) {
-		return (GateArmArray)namespace.lookupObject(
+		return (GateArmArray) namespace.lookupObject(
 			GateArmArray.SONAR_TYPE, name);
 	}
 
@@ -38,16 +38,5 @@ public class GateArmArrayHelper extends BaseHelper {
 	static public Iterator<GateArmArray> iterator() {
 		return new IteratorWrapper<GateArmArray>(namespace.iterator(
 			GateArmArray.SONAR_TYPE));
-	}
-
-	/** Check if a DMS is associated with a gate arm array */
-	static public boolean checkDMS(DMS dms) {
-		Iterator<GateArmArray> it = iterator();
-		while(it.hasNext()) {
-			GateArmArray ga = it.next();
-			if(dms == ga.getDms())
-				return true;
-		}
-		return false;
 	}
 }
