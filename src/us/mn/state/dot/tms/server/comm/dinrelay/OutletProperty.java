@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.utils.LineReader;
 
 /**
@@ -50,9 +51,6 @@ public class OutletProperty extends DinRelayProperty {
 
 	/** Outlet powered status */
 	private final boolean[] outlets = new boolean[8];
-
-	/** Flag to indicate state has been parsed */
-	private boolean parsed = false;
 
 	/** Get outlet state */
 	public boolean[] getOutletState() {
@@ -89,31 +87,32 @@ public class OutletProperty extends DinRelayProperty {
 			Matcher m = STATE.matcher(line);
 			if (m.find()) {
 				setOutlets(m.group(1));
-				break;
+				return;
 			}
 			line = lr.readLine();
 		}
+		/* NOTE: blank page is returned with wrong auth */
+		throw new ControllerException("AUTH REQUIRED");
 	}
 
 	/** Set the outlet state */
-	private void setOutlets(String state) {
+	private void setOutlets(String state) throws IOException {
 		try {
 			int o = Integer.parseInt(state, 16);
 			for (int i = 0; i < 8; i++) {
 				if (((o >> i) & 1) == 1)
 					outlets[i] = true;
 			}
-			parsed = true;
 		}
 		catch (NumberFormatException e) {
-			// don't update the outlet state
+			throw new ControllerException("OUTLETS");
 		}
 	}
 
 	/** Complete the outlet property read */
 	public void complete(boolean success) {
-		if (success && parsed)
+		if (success)
 			callback.updateOutlets(outlets);
-		callback.complete(success && parsed);
+		callback.complete(success);
 	}
 }
