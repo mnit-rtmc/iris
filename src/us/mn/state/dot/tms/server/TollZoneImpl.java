@@ -256,10 +256,10 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	 * @param o Origin (location of DMS).
 	 * @return Price (dollars). */
 	public float getPrice(String lbl, GeoLoc o) {
+		updateDensityHistory(lbl);
 		DetectorSet ds = lookupDetectors(buildRoute(o));
 		if (isLogging())
-			log(lbl + " detectors: " + ds);
-		updateDensityHistory(ds);
+			log(lbl + " use detectors: " + ds);
 		Double k_hot = findMaxDensity(ds);
 		float price = calculatePricing(k_hot);
 		if (isLogging())
@@ -267,10 +267,15 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		return price;
 	}
 
-	/** Update density history for the given detector set */
-	private synchronized void updateDensityHistory(DetectorSet ds) {
-		removeHistoryMappings(ds);
-		addHistoryMappings(ds);
+	/** Update density history for all detectors in the toll zone */
+	private void updateDensityHistory(String lbl) {
+		DetectorSet ds = lookupDetectors(buildRoute());
+		if (isLogging())
+			log(lbl + " all detectors: " + ds);
+		synchronized (this) {
+			removeHistoryMappings(ds);
+			addHistoryMappings(ds);
+		}
 	}
 
 	/** Remove mappings from k_hist if not in detector set */
