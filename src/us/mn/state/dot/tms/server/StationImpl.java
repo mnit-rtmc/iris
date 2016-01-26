@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2014  Minnesota Department of Transportation
+ * Copyright (C) 2004-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
  *
  * @author Douglas Lau
  */
-public class StationImpl implements Station {
+public class StationImpl implements Station, VehicleSampler {
 
 	/** Breakdown speed (should be system attribute?) */
 	static private final int VSA_BREAKDOWN_SPEED_MPH = 25;
@@ -210,6 +210,7 @@ public class StationImpl implements Station {
 	private int flow = MISSING_DATA;
 
 	/** Get the average station flow */
+	@Override
 	public int getFlow() {
 		return flow;
 	}
@@ -218,6 +219,7 @@ public class StationImpl implements Station {
 	private float density = MISSING_DATA;
 
 	/** Get the average station density */
+	@Override
 	public float getDensity() {
 		return density;
 	}
@@ -226,6 +228,7 @@ public class StationImpl implements Station {
 	private float speed = MISSING_DATA;
 
 	/** Get the average station speed */
+	@Override
 	public float getSpeed() {
 		return speed;
 	}
