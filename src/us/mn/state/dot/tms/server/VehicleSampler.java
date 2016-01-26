@@ -23,7 +23,7 @@ package us.mn.state.dot.tms.server;
 public interface VehicleSampler {
 
 	/** Get the current flow rate (vehicles per hour) */
-	float getFlow();
+	int getFlow();
 
 	/** Get the current density (vehicles per mile) */
 	float getDensity();

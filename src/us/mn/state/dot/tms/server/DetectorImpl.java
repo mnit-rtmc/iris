@@ -562,7 +562,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the current flow rate (vehicles per hour) */
 	@Override
-	public float getFlow() {
+	public int getFlow() {
 		int flow = getFlowRaw();
 		return (flow >= 0) ? flow : getFlowFake();
 	}
@@ -578,7 +578,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Get the fake flow rate (vehicles per hour) */
-	private float getFlowFake() {
+	private int getFlowFake() {
 		FakeDetector f = fake_det;
 		return (f != null) ? f.getFlow() : MISSING_DATA;
 	}

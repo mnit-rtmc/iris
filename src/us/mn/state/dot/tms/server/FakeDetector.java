@@ -106,7 +106,7 @@ public class FakeDetector {
 	}
 
 	/** Get the calculated flow rate */
-	public float getFlow() {
+	public int getFlow() {
 		float flow = 0;
 		for (int i = 0; i < plus.length; i++) {
 			int f = plus[i].getFlowRaw();
@@ -114,7 +114,7 @@ public class FakeDetector {
 				return MISSING_DATA;
 			flow += f;
 		}
-		return (constant + flow) * percent / 100.0f;
+		return Math.round((constant + flow) * percent / 100.0f);
 	}
 
 	/** Get the fake speed (miles per hour) */
