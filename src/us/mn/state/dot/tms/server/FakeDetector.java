@@ -25,7 +25,7 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
  *
  * @author Douglas Lau
  */
-public class FakeDetector {
+public class FakeDetector implements VehicleSampler {
 
 	/** Calculate the average from a total and sample count */
 	static private float calculateAverage(float total, int count) {
@@ -106,6 +106,7 @@ public class FakeDetector {
 	}
 
 	/** Get the calculated flow rate */
+	@Override
 	public int getFlow() {
 		float flow = 0;
 		for (int i = 0; i < plus.length; i++) {
@@ -117,21 +118,8 @@ public class FakeDetector {
 		return Math.round((constant + flow) * percent / 100.0f);
 	}
 
-	/** Get the fake speed (miles per hour) */
-	public float getSpeed() {
-		float t_speed = 0;
-		int n_speed = 0;
-		for (DetectorImpl det: plus) {
-			float s = det.getSpeedRaw();
-			if (s > 0) {
-				t_speed += s;
-				n_speed++;
-			}
-		}
-		return calculateAverage(t_speed, n_speed);
-	}
-
 	/** Get the fake density (vehicle per mile) */
+	@Override
 	public float getDensity() {
 		float t_density = 0;
 		int n_density = 0;
@@ -143,5 +131,20 @@ public class FakeDetector {
 			}
 		}
 		return calculateAverage(t_density, n_density);
+	}
+
+	/** Get the fake speed (miles per hour) */
+	@Override
+	public float getSpeed() {
+		float t_speed = 0;
+		int n_speed = 0;
+		for (DetectorImpl det: plus) {
+			float s = det.getSpeedRaw();
+			if (s > 0) {
+				t_speed += s;
+				n_speed++;
+			}
+		}
+		return calculateAverage(t_speed, n_speed);
 	}
 }
