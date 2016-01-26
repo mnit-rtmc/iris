@@ -81,9 +81,14 @@ public class DetectorSet {
 		return detectors.size();
 	}
 
-	/** Check if another detector set is the same */
-	public boolean isSame(DetectorSet other) {
-		return detectors.equals(other.detectors);
+	/** Check if another detector set equals this */
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof DetectorSet) {
+			DetectorSet ds = (DetectorSet) obj;
+			return detectors.equals(ds.detectors);
+		} else
+			return false;
 	}
 
 	/** Add all the detectors from another detector set */
@@ -222,7 +227,7 @@ public class DetectorSet {
 				continue;
 			GeoLoc loc = det.lookupGeoLoc();
 			if (xStreet != null &&
-				xStreet == loc.getCrossStreet())
+			    xStreet == loc.getCrossStreet())
 			{
 				d_this = Math.max(d_this, d);
 			} else {
