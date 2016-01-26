@@ -144,14 +144,14 @@ public class DetectorSet {
 		return isDefined();
 	}
 
-	/** Get the current volume of the detector set */
+	/** Get the current total volume */
 	public int getVolume() {
 		boolean defined = false;
 		int vol = 0;
 		for (DetectorImpl det: detectors) {
 			int v = det.getVolume();
 			if (v < 0)
-				return v;
+				return MISSING_DATA;
 			vol += v;
 			defined = true;
 		}
@@ -160,14 +160,16 @@ public class DetectorSet {
 
 	/** Get the current total flow rate */
 	public int getFlow() {
+		boolean defined = false;
 		int flow = 0;
 		for (DetectorImpl det: detectors) {
 			int f = det.getFlow();
 			if (f < 0)
 				return MISSING_DATA;
 			flow += f;
+			defined = true;
 		}
-		return flow;
+		return defined ? flow : MISSING_DATA;
 	}
 
 	/** Check if a detector is in the set */
