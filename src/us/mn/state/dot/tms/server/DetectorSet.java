@@ -158,12 +158,15 @@ public class DetectorSet {
 		return defined ? vol : MISSING_DATA;
 	}
 
-	/** Get the current flow rate of the detector set.
-	 * Note: assumes that isGood returned true. */
+	/** Get the current total flow rate */
 	public int getFlow() {
 		int flow = 0;
-		for (DetectorImpl det: detectors)
-			flow += (int)det.getFlow();
+		for (DetectorImpl det: detectors) {
+			int f = det.getFlow();
+			if (f < 0)
+				return MISSING_DATA;
+			flow += f;
+		}
 		return flow;
 	}
 
