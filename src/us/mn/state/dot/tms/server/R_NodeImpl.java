@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -567,15 +567,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 				set.addDetector(d);
 		}
 		return set;
-	}
-
-	/** Does this node have the specified detector? */
-	public boolean hasDetector(DetectorImpl det) {
-		for(DetectorImpl d: detectors.toArray()) {
-			if(d == det)
-				return true;
-		}
-		return false;
 	}
 
 	/** Downstream roadway nodes */

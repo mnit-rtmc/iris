@@ -182,13 +182,9 @@ public class StationImpl implements Station, VehicleSampler {
 	}
 
 	/** Get a string representation of the station */
+	@Override
 	public String toString() {
 		return name;
-	}
-
-	/** Does this node have the specified detector? */
-	public boolean hasDetector(DetectorImpl det) {
-		return r_node.hasDetector(det);
 	}
 
 	/** Is this station active? */
