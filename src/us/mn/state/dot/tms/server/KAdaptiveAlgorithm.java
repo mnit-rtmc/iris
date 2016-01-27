@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2015  Minnesota Department of Transportation
+ * Copyright (C) 2001-2016  Minnesota Department of Transportation
  * Copyright (C) 2011-2012  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -615,19 +615,19 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		private final StationNode s_node;
 
 		/** Queue detector set */
-		private final DetectorSet queue = new DetectorSet();
+		private final DetectorSet queue;
 
 		/** Passage detector set */
-		private final DetectorSet passage = new DetectorSet();
+		private final DetectorSet passage;
 
 		/** Merge detector set */
-		private final DetectorSet merge = new DetectorSet();
+		private final DetectorSet merge;
 
 		/** Bypass detector set */
-		private final DetectorSet bypass = new DetectorSet();
+		private final DetectorSet bypass;
 
 		/** Green count detector set */
-		private final DetectorSet green = new DetectorSet();
+		private final DetectorSet green;
 
 		/** Metering phase */
 		private MeteringPhase phase = MeteringPhase.not_started;
@@ -699,11 +699,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			meter = mtr;
 			node = en;
 			DetectorSet ds = meter.getDetectorSet();
-			queue.addDetectors(ds, LaneType.QUEUE);
-			passage.addDetectors(ds, LaneType.PASSAGE);
-			merge.addDetectors(ds, LaneType.MERGE);
-			bypass.addDetectors(ds, LaneType.BYPASS);
-			green.addDetectors(ds, LaneType.GREEN);
+			queue = ds.getDetectorSet(LaneType.QUEUE);
+			passage = ds.getDetectorSet(LaneType.PASSAGE);
+			merge = ds.getDetectorSet(LaneType.MERGE);
+			bypass = ds.getDetectorSet(LaneType.BYPASS);
+			green = ds.getDetectorSet(LaneType.GREEN);
 			s_node = getAssociatedStation();
 		}
 
