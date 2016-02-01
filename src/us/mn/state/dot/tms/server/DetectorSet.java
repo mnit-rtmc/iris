@@ -87,6 +87,11 @@ public class DetectorSet {
 		return dets;
 	}
 
+	/** Get all detectors */
+	public ArrayList<DetectorImpl> getAll() {
+		return new ArrayList<DetectorImpl>(detectors);
+	}
+
 	/** Add a detector to the detector set */
 	public void addDetector(DetectorImpl det) {
 		detectors.add(det);

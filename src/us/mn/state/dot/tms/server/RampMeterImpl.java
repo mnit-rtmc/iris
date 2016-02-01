@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -816,35 +817,49 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Get the detector set associated with the ramp meter */
-	public DetectorSet getDetectorSet() {
-		final DetectorSet ds = new DetectorSet();
-		Corridor.NodeFinder finder = new Corridor.NodeFinder() {
-			public boolean check(R_NodeImpl n) {
-				if(n.getNodeType() ==
-					R_NodeType.ENTRANCE.ordinal())
-				{
-					GeoLoc l = n.getGeoLoc();
-					if(GeoLocHelper.matchesRoot(l, geo_loc))
-					{
-						ds.addDetectors(
-							n.getDetectorSet());
-					}
-				}
-				return false;
-			}
-		};
+	private DetectorSet getDetectorSet(DetectorSet.Filter f) {
+		DetFinder finder = new DetFinder(f);
 		Corridor corridor = getCorridor();
-		if(corridor != null) {
+		if (corridor != null) {
 			corridor.findActiveNode(finder);
 			Iterator<String> it = corridor.getLinkedCDRoads();
-			while(it.hasNext()) {
+			while (it.hasNext()) {
 				String cd = it.next();
 				Corridor cd_road = corridors.getCorridor(cd);
-				if(cd_road != null)
+				if (cd_road != null)
 					cd_road.findActiveNode(finder);
 			}
 		}
-		return ds;
+		return new DetectorSet(finder.detectors);
+	}
+
+	/** Get the set of non-abandoned detectors */
+	public DetectorSet getDetectorSet() {
+		return getDetectorSet(new DetectorSet.Filter() {
+			public boolean check(DetectorImpl d) {
+				return !d.getAbandoned();
+			}
+		});
+	}
+
+	/** Detector finder */
+	private class DetFinder implements Corridor.NodeFinder {
+		private final ArrayList<DetectorImpl> detectors =
+			new ArrayList<DetectorImpl>();
+		private final DetectorSet.Filter filter;
+		private DetFinder(DetectorSet.Filter f) {
+			filter = f;
+		}
+		public boolean check(R_NodeImpl n) {
+			if (n.getNodeType() == R_NodeType.ENTRANCE.ordinal()) {
+				GeoLoc l = n.getGeoLoc();
+				if (GeoLocHelper.matchesRoot(l, geo_loc)) {
+					DetectorSet ds = n.getDetectorSet();
+					detectors.addAll(ds.filter(filter));
+				}
+			}
+			return false;
+		}
 	}
 
 	/** Green count detector */
@@ -852,12 +867,15 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Lookup the green count detector */
 	private void lookupGreenDetector() {
-		DetectorImpl[] g = getDetectorSet().getDetectorSet(
-			LaneType.GREEN).toArray();
-		if(g.length > 0)
-			green_det = g[0];
-		else
-			green_det = null;
+		final int GREEN = LaneType.GREEN.ordinal();
+		DetectorSet ds = getDetectorSet(new DetectorSet.Filter() {
+			public boolean check(DetectorImpl d) {
+				return (GREEN == d.getLaneType()) &&
+				       !d.getAbandoned();
+			}
+		});
+		ArrayList<DetectorImpl> dets = ds.getAll();
+		green_det = (dets.size() > 0) ? dets.get(0) : null;
 	}
 
 	/** Update the 30-second green count */
