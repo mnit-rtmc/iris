@@ -37,8 +37,7 @@ public class SamplerSet {
 		new HashSet<DetectorImpl>();
 
 	/** Create an empty sampler set */
-	public SamplerSet() {
-	}
+	public SamplerSet() { }
 
 	/** Create a new sampler set */
 	public SamplerSet(Collection<DetectorImpl> dets) {
