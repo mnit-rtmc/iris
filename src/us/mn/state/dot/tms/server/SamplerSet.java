@@ -25,7 +25,7 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
  *
  * @author Douglas Lau
  */
-public class SamplerSet {
+public class SamplerSet implements VehicleSampler {
 
 	/** Vehicle sampler filter */
 	static public interface Filter {
@@ -77,6 +77,12 @@ public class SamplerSet {
 		return samplers.size();
 	}
 
+	/** Calculate a hash code */
+	@Override
+	public int hashCode() {
+		return samplers.hashCode();
+	}
+
 	/** Check if another vehicle sampler set equals this */
 	@Override
 	public boolean equals(Object obj) {
@@ -85,6 +91,11 @@ public class SamplerSet {
 			return samplers.equals(ss.samplers);
 		} else
 			return false;
+	}
+
+	/** Check if a vehicle sampler is in the set */
+	public boolean hasDetector(VehicleSampler vs) {
+		return samplers.contains(vs);
 	}
 
 	/** Test if the sampler set is (defined and) sampling "real" data */
@@ -101,36 +112,65 @@ public class SamplerSet {
 	}
 
 	/** Get the current total count */
+	@Override
 	public int getCount() {
-		boolean defined = false;
-		int vol = 0;
+		int count = 0;
+		int n_count = 0;
 		for (VehicleSampler vs: samplers) {
-			int v = vs.getCount();
-			if (v < 0)
+			int c = vs.getCount();
+			if (c >= 0) {
+				count += c;
+				n_count++;
+			} else
 				return MISSING_DATA;
-			vol += v;
-			defined = true;
 		}
-		return defined ? vol : MISSING_DATA;
+		return (n_count > 0) ? count : MISSING_DATA;
 	}
 
 	/** Get the current total flow rate */
+	@Override
 	public int getFlow() {
-		boolean defined = false;
 		int flow = 0;
-		for (VehicleSampler det: samplers) {
-			int f = det.getFlow();
-			if (f < 0)
+		int n_flow = 0;
+		for (VehicleSampler vs: samplers) {
+			int f = vs.getFlow();
+			if (f >= 0) {
+				flow += f;
+				n_flow++;
+			} else
 				return MISSING_DATA;
-			flow += f;
-			defined = true;
 		}
-		return defined ? flow : MISSING_DATA;
+		return (n_flow > 0) ? flow : MISSING_DATA;
 	}
 
-	/** Check if a detector is in the set */
-	public boolean hasDetector(VehicleSampler vs) {
-		return samplers.contains(vs);
+	/** Get the current density (vehicle per mile) */
+	@Override
+	public float getDensity() {
+		float t_density = 0;
+		int n_density = 0;
+		for (VehicleSampler vs: samplers) {
+			float k = vs.getDensity();
+			if (k >= 0) {
+				t_density += k;
+				n_density++;
+			}
+		}
+		return (n_density > 0) ? (t_density / n_density) : MISSING_DATA;
+	}
+
+	/** Get the current average speed */
+	@Override
+	public float getSpeed() {
+		float t_speed = 0;
+		int n_speed = 0;
+		for (VehicleSampler vs: samplers) {
+			float s = vs.getSpeed();
+			if (s > 0) {
+				t_speed += s;
+				n_speed++;
+			}
+		}
+		return (n_speed > 0) ? (t_speed / n_speed) : MISSING_DATA;
 	}
 
 	/** Get the maximum occupancy */
