@@ -25,7 +25,8 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
- * A detector set is a logical grouping of detectors
+ * A detector set is a logical grouping of detectors.
+ * Tied to obsolete StratifiedAlgorithm code.
  *
  * @author Douglas Lau
  */
@@ -59,32 +60,16 @@ public class DetectorSet {
 		}
 	};
 
-	/** Detector filter */
-	static public interface Filter {
-		boolean check(DetectorImpl d);
-	}
-
 	/** Set of detectors */
 	private final TreeSet<DetectorImpl> detectors =
 		new TreeSet<DetectorImpl>(COMPARATOR);
 
-	public DetectorSet() {
-		// FIXME: remove
-	}
+	/** Create an empty detector set */
+	public DetectorSet() { }
 
 	/** Create a new detector set */
 	public DetectorSet(Collection<DetectorImpl> dets) {
 		detectors.addAll(dets);
-	}
-
-	/** Filter a detector set */
-	public ArrayList<DetectorImpl> filter(Filter f) {
-		ArrayList<DetectorImpl> dets = new ArrayList<DetectorImpl>();
-		for (DetectorImpl d: detectors) {
-			if (f.check(d))
-				dets.add(d);
-		}
-		return dets;
 	}
 
 	/** Get all detectors */
@@ -178,20 +163,6 @@ public class DetectorSet {
 				return false;
 		}
 		return isDefined();
-	}
-
-	/** Get the current total volume */
-	public int getVolume() {
-		boolean defined = false;
-		int vol = 0;
-		for (DetectorImpl det: detectors) {
-			int v = det.getVolume();
-			if (v < 0)
-				return MISSING_DATA;
-			vol += v;
-			defined = true;
-		}
-		return defined ? vol : MISSING_DATA;
 	}
 
 	/** Get the current total flow rate */
