@@ -65,17 +65,17 @@ public class CorridorTrip {
 	}
 
 	/** Lookup samplers on a corridor trip */
-	public ArrayList<DetectorImpl> lookupSamplers(final LaneType lt) {
-		final ArrayList<DetectorImpl> dets =
-			new ArrayList<DetectorImpl>();
+	public ArrayList<VehicleSampler> lookupSamplers(final LaneType lt) {
+		final ArrayList<VehicleSampler> samplers =
+			new ArrayList<VehicleSampler>();
 		corridor.findStation(new Corridor.StationFinder() {
 			public boolean check(Float m, StationImpl s) {
 				if (isWithinTrip(m))
-					dets.addAll(lookupSamplers(s, lt));
+					samplers.addAll(lookupSamplers(s, lt));
 				return false;
 			}
 		});
-		return dets;
+		return samplers;
 	}
 
 	/** Check if a milepoint is within the trip */
@@ -84,13 +84,17 @@ public class CorridorTrip {
 	}
 
 	/** Lookup the samplers for one station and lane type */
-	private ArrayList<DetectorImpl> lookupSamplers(StationImpl s,
+	private ArrayList<VehicleSampler> lookupSamplers(StationImpl s,
 		final LaneType lt)
 	{
 		SamplerSet ss = lookupSamplers(s);
 		return ss.filter(new SamplerSet.Filter() {
-			public boolean check(DetectorImpl d) {
-				return lt.ordinal() == d.getLaneType();
+			public boolean check(VehicleSampler vs) {
+				if (vs instanceof DetectorImpl) {
+					DetectorImpl d = (DetectorImpl) vs;
+					return lt.ordinal() == d.getLaneType();
+				} else
+					return false;
 			}
 		});
 	}

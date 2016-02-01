@@ -121,10 +121,10 @@ public class Route implements Comparable<Route> {
 
 	/** Get a set of vehicle samplers on route */
 	public SamplerSet getSamplerSet(LaneType lt) {
-		ArrayList<DetectorImpl> dets = new ArrayList<DetectorImpl>();
+		ArrayList<VehicleSampler> vs = new ArrayList<VehicleSampler>();
 		for (CorridorTrip trip: trips)
-			dets.addAll(trip.lookupSamplers(lt));
-		return new SamplerSet(dets);
+			vs.addAll(trip.lookupSamplers(lt));
+		return new SamplerSet(vs);
 	}
 
 	/** Compare to another route (for sorting) */

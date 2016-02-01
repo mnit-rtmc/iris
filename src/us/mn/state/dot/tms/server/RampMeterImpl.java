@@ -830,27 +830,41 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 					cd_road.findActiveNode(finder);
 			}
 		}
-		return new SamplerSet(finder.detectors);
+		return new SamplerSet(finder.samplers);
 	}
 
 	/** Get the set of non-abandoned detectors */
 	public SamplerSet getSamplerSet() {
 		return getSamplerSet(new SamplerSet.Filter() {
-			public boolean check(DetectorImpl d) {
-				return !d.getAbandoned();
+			public boolean check(VehicleSampler vs) {
+				if (vs instanceof DetectorImpl) {
+					DetectorImpl d = (DetectorImpl) vs;
+					return !d.getAbandoned();
+				} else
+					return false;
 			}
 		});
 	}
 
+	/** Get an array of detectors */
+	static private ArrayList<DetectorImpl> toDets(SamplerSet ss) {
+		ArrayList<DetectorImpl> dets = new ArrayList<DetectorImpl>();
+		for (VehicleSampler vs: ss.getAll()) {
+			if (vs instanceof DetectorImpl)
+				dets.add((DetectorImpl) vs);
+		}
+		return dets;
+	}
+
 	/** Get the set of non-abandoned detectors */
 	public DetectorSet getDetectorSet() {
-		return new DetectorSet(getSamplerSet().getAll());
+		return new DetectorSet(toDets(getSamplerSet()));
 	}
 
 	/** Detector finder */
 	private class DetFinder implements Corridor.NodeFinder {
-		private final ArrayList<DetectorImpl> detectors =
-			new ArrayList<DetectorImpl>();
+		private final ArrayList<VehicleSampler> samplers =
+			new ArrayList<VehicleSampler>();
 		private final SamplerSet.Filter filter;
 		private DetFinder(SamplerSet.Filter f) {
 			filter = f;
@@ -860,7 +874,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 				GeoLoc l = n.getGeoLoc();
 				if (GeoLocHelper.matchesRoot(l, geo_loc)) {
 					SamplerSet ds = n.getSamplerSet();
-					detectors.addAll(ds.filter(filter));
+					samplers.addAll(ds.filter(filter));
 				}
 			}
 			return false;
@@ -873,13 +887,17 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Lookup the green count detector */
 	private void lookupGreenDetector() {
 		final int GREEN = LaneType.GREEN.ordinal();
-		SamplerSet ds = getSamplerSet(new SamplerSet.Filter() {
-			public boolean check(DetectorImpl d) {
-				return (GREEN == d.getLaneType()) &&
-				       !d.getAbandoned();
+		SamplerSet ss = getSamplerSet(new SamplerSet.Filter() {
+			public boolean check(VehicleSampler vs) {
+				if (vs instanceof DetectorImpl) {
+					DetectorImpl d = (DetectorImpl) vs;
+					return (GREEN == d.getLaneType()) &&
+					       !d.getAbandoned();
+				} else
+					return false;
 			}
 		});
-		ArrayList<DetectorImpl> dets = ds.getAll();
+		ArrayList<DetectorImpl> dets = toDets(ss);
 		green_det = (dets.size() > 0) ? dets.get(0) : null;
 	}
 

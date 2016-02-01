@@ -552,6 +552,12 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return isSampling() ? last_volume : MISSING_DATA;
 	}
 
+	/** Get the most recent sample count */
+	@Override
+	public int getCount() {
+		return getVolume();
+	}
+
 	/** Get the current occupancy */
 	public float getOccupancy() {
 		if (isSampling() && last_scans != MISSING_DATA)

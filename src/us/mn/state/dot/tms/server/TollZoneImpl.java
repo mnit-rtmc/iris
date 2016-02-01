@@ -187,9 +187,9 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		}
 	}
 
-	/** Mapping of density history for all detectors */
-	private transient final HashMap<DetectorImpl, DensityHist> k_hist =
-		new HashMap<DetectorImpl, DensityHist>();
+	/** Mapping of density history for all vehicle samplers */
+	private transient final HashMap<VehicleSampler, DensityHist> k_hist =
+		new HashMap<VehicleSampler, DensityHist>();
 
 	/** Lookup all HOT detectors in a route.
 	 * @param r The route.
@@ -245,7 +245,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Update density.
 	 * @param np New pricing period (if true). */
 	public synchronized void updateDensity(boolean np) {
-		for (Map.Entry<DetectorImpl, DensityHist> e: k_hist.entrySet()){
+		for (Map.Entry<VehicleSampler,DensityHist> e:k_hist.entrySet()){
 			double k = e.getKey().getDensity();
 			e.getValue().updateDensity(np, k);
 		}
@@ -280,7 +280,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 
 	/** Remove mappings from k_hist if not in sampler set */
 	private void removeHistoryMappings(SamplerSet ss) {
-		Iterator<DetectorImpl> it = k_hist.keySet().iterator();
+		Iterator<VehicleSampler> it = k_hist.keySet().iterator();
 		while (it.hasNext()) {
 			if (!ss.hasDetector(it.next()))
 				it.remove();
@@ -289,16 +289,18 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 
 	/** Add mappings from sampler set if they don't exist */
 	private void addHistoryMappings(SamplerSet ss) {
-		for (DetectorImpl det: ss.getAll()) {
-			if (!k_hist.containsKey(det))
-				k_hist.put(det, new DensityHist());
+		for (VehicleSampler vs: ss.getAll()) {
+			if (!k_hist.containsKey(vs))
+				k_hist.put(vs, new DensityHist());
 		}
 	}
 
 	/** Find the max density within a sampler set */
 	private synchronized Double findMaxDensity(SamplerSet ss) {
 		Double k_hot = null;
-		for (Map.Entry<DetectorImpl, DensityHist> e: k_hist.entrySet()){
+		for (Map.Entry<VehicleSampler, DensityHist> e:
+		     k_hist.entrySet())
+		{
 			if (ss.hasDetector(e.getKey())) {
 				Double k = e.getValue().density;
 				if (k_hot == null || (k != null && k > k_hot))

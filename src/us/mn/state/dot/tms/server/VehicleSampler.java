@@ -22,6 +22,9 @@ package us.mn.state.dot.tms.server;
  */
 public interface VehicleSampler {
 
+	/** Get the most recent vehicle sample count */
+	int getCount();
+
 	/** Get the current flow rate (vehicles per hour) */
 	int getFlow();
 

@@ -197,13 +197,19 @@ public class StationImpl implements Station, VehicleSampler {
 	}
 
 	/** Current average station volume */
-	private float volume = MISSING_DATA;
+	private int volume = MISSING_DATA;
 
 	/** Current average station occupancy */
 	private float occupancy = MISSING_DATA;
 
 	/** Current average station flow */
 	private int flow = MISSING_DATA;
+
+	/** Get the current vehicle count */
+	@Override
+	public int getCount() {
+		return volume;
+	}
 
 	/** Get the average station flow */
 	@Override
@@ -379,7 +385,7 @@ public class StationImpl implements Station, VehicleSampler {
 					low = Math.min(f, low);
 			}
 		}
-		volume = average(t_volume, n_volume);
+		volume = Math.round(average(t_volume, n_volume));
 		occupancy = average(t_occ, n_occ);
 		flow = Math.round(average(t_flow, n_flow));
 		density = average(t_density, n_density);

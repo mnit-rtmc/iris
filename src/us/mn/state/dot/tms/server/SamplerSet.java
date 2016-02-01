@@ -29,25 +29,25 @@ public class SamplerSet {
 
 	/** Vehicle sampler filter */
 	static public interface Filter {
-		boolean check(DetectorImpl d);
+		boolean check(VehicleSampler d);
 	}
 
 	/** Set of samplers */
-	private final HashSet<DetectorImpl> samplers =
-		new HashSet<DetectorImpl>();
+	private final HashSet<VehicleSampler> samplers =
+		new HashSet<VehicleSampler>();
 
 	/** Create an empty sampler set */
 	public SamplerSet() { }
 
 	/** Create a new sampler set */
-	public SamplerSet(Collection<DetectorImpl> dets) {
+	public SamplerSet(Collection<? extends VehicleSampler> dets) {
 		samplers.addAll(dets);
 	}
 
 	/** Filter a vehicle sampler set */
-	public ArrayList<DetectorImpl> filter(Filter f) {
-		ArrayList<DetectorImpl> dets = new ArrayList<DetectorImpl>();
-		for (DetectorImpl d: samplers) {
+	public ArrayList<VehicleSampler> filter(Filter f) {
+		ArrayList<VehicleSampler> dets = new ArrayList<VehicleSampler>();
+		for (VehicleSampler d: samplers) {
 			if (f.check(d))
 				dets.add(d);
 		}
@@ -55,17 +55,21 @@ public class SamplerSet {
 	}
 
 	/** Filter a vehicle sampler set */
-	public ArrayList<DetectorImpl> filter(final LaneType lt) {
+	public ArrayList<VehicleSampler> filter(final LaneType lt) {
 		return filter(new Filter() {
-			public boolean check(DetectorImpl d) {
-				return lt.ordinal() == d.getLaneType();
+			public boolean check(VehicleSampler vs) {
+				if (vs instanceof DetectorImpl) {
+					DetectorImpl d = (DetectorImpl) vs;
+					return lt.ordinal() == d.getLaneType();
+				} else
+					return false;
 			}
 		});
 	}
 
 	/** Get all samplers */
-	public ArrayList<DetectorImpl> getAll() {
-		return new ArrayList<DetectorImpl>(samplers);
+	public ArrayList<VehicleSampler> getAll() {
+		return new ArrayList<VehicleSampler>(samplers);
 	}
 
 	/** Get the number of samplers in the sampler set */
@@ -85,19 +89,23 @@ public class SamplerSet {
 
 	/** Test if the sampler set is (defined and) sampling "real" data */
 	public boolean isPerfect() {
-		for (DetectorImpl det: samplers) {
-			if (!det.isSampling())
+		for (VehicleSampler vs: samplers) {
+			if (vs instanceof DetectorImpl) {
+				DetectorImpl det = (DetectorImpl) vs;
+				if (!det.isSampling())
+					return false;
+			} else
 				return false;
 		}
 		return (samplers.size() > 0);
 	}
 
-	/** Get the current total volume */
-	public int getVolume() {
+	/** Get the current total count */
+	public int getCount() {
 		boolean defined = false;
 		int vol = 0;
-		for (DetectorImpl det: samplers) {
-			int v = det.getVolume();
+		for (VehicleSampler vs: samplers) {
+			int v = vs.getCount();
 			if (v < 0)
 				return MISSING_DATA;
 			vol += v;
@@ -110,7 +118,7 @@ public class SamplerSet {
 	public int getFlow() {
 		boolean defined = false;
 		int flow = 0;
-		for (DetectorImpl det: samplers) {
+		for (VehicleSampler det: samplers) {
 			int f = det.getFlow();
 			if (f < 0)
 				return MISSING_DATA;
@@ -121,15 +129,19 @@ public class SamplerSet {
 	}
 
 	/** Check if a detector is in the set */
-	public boolean hasDetector(DetectorImpl det) {
-		return samplers.contains(det);
+	public boolean hasDetector(VehicleSampler vs) {
+		return samplers.contains(vs);
 	}
 
 	/** Get the maximum occupancy */
 	public float getMaxOccupancy() {
 		float occ = 0;
-		for (DetectorImpl det: samplers)
-			occ = Math.max(det.getOccupancy(), occ);
+		for (VehicleSampler vs: samplers) {
+			if (vs instanceof DetectorImpl) {
+				DetectorImpl det = (DetectorImpl) vs;
+				occ = Math.max(det.getOccupancy(), occ);
+			}
+		}
 		return occ;
 	}
 
@@ -137,15 +149,13 @@ public class SamplerSet {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append('\'');
-		for (DetectorImpl det: samplers) {
-			sb.append(det.getName());
-			sb.append(' ');
+		sb.append('{');
+		for (VehicleSampler vs: samplers) {
+			if (sb.length() > 0)
+				sb.append(' ');
+			sb.append(vs.toString());
 		}
-		if (samplers.size() == 0)
-			sb.append('\'');
-		else
-			sb.setCharAt(sb.length() - 1, '\'');
+		sb.append('}');
 		return sb.toString();
 	}
 }

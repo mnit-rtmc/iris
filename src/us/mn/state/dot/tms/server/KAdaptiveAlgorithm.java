@@ -803,7 +803,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				passage_accum += passage_vol;
 			else
 				passage_good = false;
-			int green_vol = green.getVolume();
+			int green_vol = green.getCount();
 			if (green_vol > 0)
 				green_accum += green_vol;
 		}
@@ -811,12 +811,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Calculate passage count (vehicles).
 		 * @return Passage vehicle count */
 		private int calculatePassageCount() {
-			int vol = passage.getVolume();
+			int vol = passage.getCount();
 			if (vol >= 0)
 				return vol;
-			vol = merge.getVolume();
+			vol = merge.getCount();
 			if (vol >= 0) {
-				int b = bypass.getVolume();
+				int b = bypass.getCount();
 				if (b > 0) {
 					vol -= b;
 					if (vol < 0)
@@ -844,7 +844,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Get queue demand volume for the current period */
 		private float queueDemandVolume() {
-			float vol = queue.getVolume();
+			float vol = queue.getCount();
 			if (vol >= 0)
 				return vol;
 			else {
