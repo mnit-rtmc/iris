@@ -817,7 +817,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Get the detector set associated with the ramp meter */
-	private DetectorSet getDetectorSet(DetectorSet.Filter f) {
+	private SamplerSet getSamplerSet(SamplerSet.Filter f) {
 		DetFinder finder = new DetFinder(f);
 		Corridor corridor = getCorridor();
 		if (corridor != null) {
@@ -830,31 +830,36 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 					cd_road.findActiveNode(finder);
 			}
 		}
-		return new DetectorSet(finder.detectors);
+		return new SamplerSet(finder.detectors);
 	}
 
 	/** Get the set of non-abandoned detectors */
-	public DetectorSet getDetectorSet() {
-		return getDetectorSet(new DetectorSet.Filter() {
+	public SamplerSet getSamplerSet() {
+		return getSamplerSet(new SamplerSet.Filter() {
 			public boolean check(DetectorImpl d) {
 				return !d.getAbandoned();
 			}
 		});
 	}
 
+	/** Get the set of non-abandoned detectors */
+	public DetectorSet getDetectorSet() {
+		return new DetectorSet(getSamplerSet().getAll());
+	}
+
 	/** Detector finder */
 	private class DetFinder implements Corridor.NodeFinder {
 		private final ArrayList<DetectorImpl> detectors =
 			new ArrayList<DetectorImpl>();
-		private final DetectorSet.Filter filter;
-		private DetFinder(DetectorSet.Filter f) {
+		private final SamplerSet.Filter filter;
+		private DetFinder(SamplerSet.Filter f) {
 			filter = f;
 		}
 		public boolean check(R_NodeImpl n) {
 			if (n.getNodeType() == R_NodeType.ENTRANCE.ordinal()) {
 				GeoLoc l = n.getGeoLoc();
 				if (GeoLocHelper.matchesRoot(l, geo_loc)) {
-					DetectorSet ds = n.getDetectorSet();
+					SamplerSet ds = n.getSamplerSet();
 					detectors.addAll(ds.filter(filter));
 				}
 			}
@@ -868,7 +873,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Lookup the green count detector */
 	private void lookupGreenDetector() {
 		final int GREEN = LaneType.GREEN.ordinal();
-		DetectorSet ds = getDetectorSet(new DetectorSet.Filter() {
+		SamplerSet ds = getSamplerSet(new SamplerSet.Filter() {
 			public boolean check(DetectorImpl d) {
 				return (GREEN == d.getLaneType()) &&
 				       !d.getAbandoned();

@@ -542,7 +542,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Node detectors */
-	protected transient DetectorSet detectors = new DetectorSet();
+	private transient DetectorSet detectors = new DetectorSet();
 
 	/** Add a detector to the r_node */
 	public void addDetector(DetectorImpl det) {
@@ -567,6 +567,11 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 				set.addDetector(d);
 		}
 		return set;
+	}
+
+	/** Get the sampler set */
+	public SamplerSet getSamplerSet() {
+		return new SamplerSet(detectors.getAll());
 	}
 
 	/** Downstream roadway nodes */
