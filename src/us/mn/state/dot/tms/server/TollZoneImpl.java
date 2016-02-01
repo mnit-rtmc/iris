@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -194,15 +194,15 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Lookup all HOT detectors in a route.
 	 * @param r The route.
 	 * @return Set of all HOT detectors in the route. */
-	private DetectorSet lookupDetectors(Route r) {
+	private SamplerSet lookupDetectors(Route r) {
 		if (r != null)
-			return r.getDetectorSet(LaneType.HOT);
+			return r.getSamplerSet(LaneType.HOT);
 		else {
 			if (isLogging()) {
 				log("No route from " + start_id + " to " +
 				    end_id);
 			}
-		      	return new DetectorSet();
+		      	return new SamplerSet();
 		}
 	}
 
@@ -257,10 +257,10 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	 * @return Price (dollars). */
 	public float getPrice(String lbl, GeoLoc o) {
 		updateDensityHistory(lbl);
-		DetectorSet ds = lookupDetectors(buildRoute(o));
+		SamplerSet ss = lookupDetectors(buildRoute(o));
 		if (isLogging())
-			log(lbl + " use detectors: " + ds);
-		Double k_hot = findMaxDensity(ds);
+			log(lbl + " use detectors: " + ss);
+		Double k_hot = findMaxDensity(ss);
 		float price = calculatePricing(k_hot);
 		if (isLogging())
 			log(lbl + " k_hot: " + k_hot + ", price: $" + price);
@@ -269,37 +269,37 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 
 	/** Update density history for all detectors in the toll zone */
 	private void updateDensityHistory(String lbl) {
-		DetectorSet ds = lookupDetectors(buildRoute());
+		SamplerSet ss = lookupDetectors(buildRoute());
 		if (isLogging())
-			log(lbl + " all detectors: " + ds);
+			log(lbl + " all detectors: " + ss);
 		synchronized (this) {
-			removeHistoryMappings(ds);
-			addHistoryMappings(ds);
+			removeHistoryMappings(ss);
+			addHistoryMappings(ss);
 		}
 	}
 
-	/** Remove mappings from k_hist if not in detector set */
-	private void removeHistoryMappings(DetectorSet ds) {
+	/** Remove mappings from k_hist if not in sampler set */
+	private void removeHistoryMappings(SamplerSet ss) {
 		Iterator<DetectorImpl> it = k_hist.keySet().iterator();
 		while (it.hasNext()) {
-			if (!ds.hasDetector(it.next()))
+			if (!ss.hasDetector(it.next()))
 				it.remove();
 		}
 	}
 
-	/** Add mappings from detector set if they don't exist */
-	private void addHistoryMappings(DetectorSet ds) {
-		for (DetectorImpl det: ds.toArray()) {
+	/** Add mappings from sampler set if they don't exist */
+	private void addHistoryMappings(SamplerSet ss) {
+		for (DetectorImpl det: ss.getAll()) {
 			if (!k_hist.containsKey(det))
 				k_hist.put(det, new DensityHist());
 		}
 	}
 
-	/** Find the max density within a detector set */
-	private synchronized Double findMaxDensity(DetectorSet ds) {
+	/** Find the max density within a sampler set */
+	private synchronized Double findMaxDensity(SamplerSet ss) {
 		Double k_hot = null;
 		for (Map.Entry<DetectorImpl, DensityHist> e: k_hist.entrySet()){
-			if (ds.hasDetector(e.getKey())) {
+			if (ss.hasDetector(e.getKey())) {
 				Double k = e.getValue().density;
 				if (k_hot == null || (k != null && k > k_hot))
 					k_hot = k;

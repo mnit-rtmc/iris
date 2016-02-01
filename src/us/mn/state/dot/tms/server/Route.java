@@ -119,12 +119,12 @@ public class Route implements Comparable<Route> {
 		dlog.log(name + ": " + m);
 	}
 
-	/** Get a set of detectors on route */
-	public DetectorSet getDetectorSet(LaneType lt) {
+	/** Get a set of vehicle samplers on route */
+	public SamplerSet getSamplerSet(LaneType lt) {
 		ArrayList<DetectorImpl> dets = new ArrayList<DetectorImpl>();
 		for (CorridorTrip trip: trips)
-			dets.addAll(trip.lookupDetectors(lt));
-		return new DetectorSet(dets);
+			dets.addAll(trip.lookupSamplers(lt));
+		return new SamplerSet(dets);
 	}
 
 	/** Compare to another route (for sorting) */

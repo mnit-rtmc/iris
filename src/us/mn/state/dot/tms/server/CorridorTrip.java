@@ -64,14 +64,14 @@ public class CorridorTrip {
 		return new Distance(d, Distance.Units.MILES);
 	}
 
-	/** Lookup detectors on a corridor trip */
-	public ArrayList<DetectorImpl> lookupDetectors(final LaneType lt) {
+	/** Lookup samplers on a corridor trip */
+	public ArrayList<DetectorImpl> lookupSamplers(final LaneType lt) {
 		final ArrayList<DetectorImpl> dets =
 			new ArrayList<DetectorImpl>();
 		corridor.findStation(new Corridor.StationFinder() {
 			public boolean check(Float m, StationImpl s) {
 				if (isWithinTrip(m))
-					dets.addAll(lookupDets(s, lt));
+					dets.addAll(lookupSamplers(s, lt));
 				return false;
 			}
 		});
@@ -83,26 +83,26 @@ public class CorridorTrip {
 		return m > origin && m <= destination;
 	}
 
-	/** Lookup the detectors for one station and lane type */
-	private ArrayList<DetectorImpl> lookupDets(StationImpl s,
+	/** Lookup the samplers for one station and lane type */
+	private ArrayList<DetectorImpl> lookupSamplers(StationImpl s,
 		final LaneType lt)
 	{
-		DetectorSet ds = lookupDetectors(s);
-		return ds.filter(new DetectorSet.Filter() {
+		SamplerSet ss = lookupSamplers(s);
+		return ss.filter(new SamplerSet.Filter() {
 			public boolean check(DetectorImpl d) {
 				return lt.ordinal() == d.getLaneType();
 			}
 		});
 	}
 
-	/** Lookup the detectors for one station */
-	private DetectorSet lookupDetectors(StationImpl s) {
+	/** Lookup the samplers for one station */
+	private SamplerSet lookupSamplers(StationImpl s) {
 		R_Node n = s.getR_Node();
 		if (n instanceof R_NodeImpl) {
 			R_NodeImpl rn = (R_NodeImpl)n;
-			return rn.getDetectorSet();
+			return rn.getSamplerSet();
 		} else
-			return new DetectorSet();
+			return new SamplerSet();
 	}
 
 	/** Get a string representation of the trip */

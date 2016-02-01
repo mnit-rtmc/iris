@@ -35,6 +35,10 @@ public class SamplerSet {
 	private final HashSet<DetectorImpl> samplers =
 		new HashSet<DetectorImpl>();
 
+	/** Create an empty sampler set */
+	public SamplerSet() {
+	}
+
 	/** Create a new sampler set */
 	public SamplerSet(Collection<DetectorImpl> dets) {
 		samplers.addAll(dets);
