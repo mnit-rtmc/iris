@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.units.Distance;
@@ -64,19 +65,34 @@ public class CorridorTrip {
 	}
 
 	/** Lookup detectors on a corridor trip */
-	public void lookupDetectors(final DetectorSet ds, final LaneType lt) {
+	public ArrayList<DetectorImpl> lookupDetectors(final LaneType lt) {
+		final ArrayList<DetectorImpl> dets =
+			new ArrayList<DetectorImpl>();
 		corridor.findStation(new Corridor.StationFinder() {
 			public boolean check(Float m, StationImpl s) {
 				if (isWithinTrip(m))
-					ds.addDetectors(lookupDetectors(s), lt);
+					dets.addAll(lookupDets(s, lt));
 				return false;
 			}
 		});
+		return dets;
 	}
 
 	/** Check if a milepoint is within the trip */
 	private boolean isWithinTrip(float m) {
 		return m > origin && m <= destination;
+	}
+
+	/** Lookup the detectors for one station and lane type */
+	private ArrayList<DetectorImpl> lookupDets(StationImpl s,
+		final LaneType lt)
+	{
+		DetectorSet ds = lookupDetectors(s);
+		return ds.filter(new DetectorSet.Filter() {
+			public boolean check(DetectorImpl d) {
+				return lt.ordinal() == d.getLaneType();
+			}
+		});
 	}
 
 	/** Lookup the detectors for one station */

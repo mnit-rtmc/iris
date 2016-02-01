@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.TreeSet;
 import us.mn.state.dot.tms.GeoLoc;
@@ -57,9 +59,33 @@ public class DetectorSet {
 		}
 	};
 
+	/** Detector filter */
+	static public interface Filter {
+		boolean check(DetectorImpl d);
+	}
+
 	/** Set of detectors */
 	private final TreeSet<DetectorImpl> detectors =
 		new TreeSet<DetectorImpl>(COMPARATOR);
+
+	public DetectorSet() {
+		// FIXME: remove
+	}
+
+	/** Create a new detector set */
+	public DetectorSet(Collection<DetectorImpl> dets) {
+		detectors.addAll(dets);
+	}
+
+	/** Filter a detector set */
+	public ArrayList<DetectorImpl> filter(Filter f) {
+		ArrayList<DetectorImpl> dets = new ArrayList<DetectorImpl>();
+		for (DetectorImpl d: detectors) {
+			if (f.check(d))
+				dets.add(d);
+		}
+		return dets;
+	}
 
 	/** Add a detector to the detector set */
 	public void addDetector(DetectorImpl det) {
