@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import us.mn.state.dot.tms.LaneType;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 
 /**
@@ -52,6 +53,15 @@ public class SamplerSet {
 				dets.add(d);
 		}
 		return dets;
+	}
+
+	/** Filter a vehicle sampler set */
+	public ArrayList<DetectorImpl> filter(final LaneType lt) {
+		return filter(new Filter() {
+			public boolean check(DetectorImpl d) {
+				return lt.ordinal() == d.getLaneType();
+			}
+		});
 	}
 
 	/** Get all samplers */

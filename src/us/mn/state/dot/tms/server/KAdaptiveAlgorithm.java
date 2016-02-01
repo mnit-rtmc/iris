@@ -614,20 +614,20 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Station node association */
 		private final StationNode s_node;
 
-		/** Queue detector set */
-		private final DetectorSet queue;
+		/** Queue sampler set */
+		private final SamplerSet queue;
 
-		/** Passage detector set */
-		private final DetectorSet passage;
+		/** Passage sampler set */
+		private final SamplerSet passage;
 
-		/** Merge detector set */
-		private final DetectorSet merge;
+		/** Merge sampler set */
+		private final SamplerSet merge;
 
-		/** Bypass detector set */
-		private final DetectorSet bypass;
+		/** Bypass sampler set */
+		private final SamplerSet bypass;
 
-		/** Green count detector set */
-		private final DetectorSet green;
+		/** Green count sampler set */
+		private final SamplerSet green;
 
 		/** Metering phase */
 		private MeteringPhase phase = MeteringPhase.not_started;
@@ -698,12 +698,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		public MeterState(RampMeterImpl mtr, EntranceNode en) {
 			meter = mtr;
 			node = en;
-			DetectorSet ds = meter.getDetectorSet();
-			queue = ds.getDetectorSet(LaneType.QUEUE);
-			passage = ds.getDetectorSet(LaneType.PASSAGE);
-			merge = ds.getDetectorSet(LaneType.MERGE);
-			bypass = ds.getDetectorSet(LaneType.BYPASS);
-			green = ds.getDetectorSet(LaneType.GREEN);
+			SamplerSet ss = meter.getSamplerSet();
+			queue = new SamplerSet(ss.filter(LaneType.QUEUE));
+			passage = new SamplerSet(ss.filter(LaneType.PASSAGE));
+			merge = new SamplerSet(ss.filter(LaneType.MERGE));
+			bypass = new SamplerSet(ss.filter(LaneType.BYPASS));
+			green = new SamplerSet(ss.filter(LaneType.GREEN));
 			s_node = getAssociatedStation();
 		}
 
