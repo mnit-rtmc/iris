@@ -102,7 +102,8 @@ public class CorridorTrip {
 		// Create sampler set combining all detectors in station.
 		// This is needed to average densities over multiple HOT lanes.
 		ArrayList<VehicleSampler> arr = new ArrayList<VehicleSampler>();
-		arr.add(new SamplerSet(dets));
+		if (dets.size() > 0)
+			arr.add(new SamplerSet(dets));
 		return arr;
 	}
 
