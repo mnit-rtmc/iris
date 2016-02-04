@@ -191,7 +191,7 @@ public class SamplerSet implements VehicleSampler {
 		StringBuilder sb = new StringBuilder();
 		sb.append('{');
 		for (VehicleSampler vs: samplers) {
-			if (sb.length() > 0)
+			if (sb.length() > 1)
 				sb.append(' ');
 			sb.append(vs.toString());
 		}
