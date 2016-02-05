@@ -1807,7 +1807,7 @@ GRANT SELECT ON toll_zone_view TO PUBLIC;
 
 CREATE VIEW controller_view AS
 	SELECT c.name, drop_id, comm_link, cabinet,
-	       cnd.description AS condition, notes, cab.geo_loc
+	       cnd.description AS condition, notes, cab.geo_loc, fail_time
 	FROM iris.controller c
 	LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
 	LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
@@ -2345,7 +2345,7 @@ camera_util_panel_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.30.0
+database_version	4.31.0
 detector_auto_fail_enable	true
 device_op_status_enable	false
 dialup_poll_period_mins	120
