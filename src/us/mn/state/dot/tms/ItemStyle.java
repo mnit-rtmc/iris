@@ -46,7 +46,6 @@ public enum ItemStyle {
 	TRAVEL_TIME,
 	AWS_CONTROLLED,
 	AWS_DEPLOYED,
-	LCS,			/* FIXME: obsolete -- remove */
 	/* Camera styles */
 	PLAYLIST,
 	UNPUBLISHED,
