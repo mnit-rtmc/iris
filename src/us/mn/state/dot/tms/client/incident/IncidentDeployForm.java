@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,10 +63,11 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		new HashMap<String, Integer []>();
 
 	/** Model for deployment list */
-	private final DefaultListModel model = new DefaultListModel();
+	private final DefaultListModel<LCSArray> model =
+		new DefaultListModel<LCSArray>();
 
 	/** List of deployments for the incident */
-	private final JList list = new JList(model);
+	private final JList<LCSArray> list = new JList<LCSArray>(model);
 
 	/** Action to send device messages */
 	private final IAction send = new IAction("incident.send") {
@@ -113,9 +114,9 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	private void populateList() {
 		IncidentLoc loc = new IncidentLoc(proxy);
 		CorridorBase cb = manager.lookupCorridor(loc);
-		if(cb != null) {
+		if (cb != null) {
 			Float mp = cb.calculateMilePoint(loc);
-			if(mp != null)
+			if (mp != null)
 				populateList(cb, mp);
 		}
 	}
@@ -126,12 +127,12 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		LaneConfiguration config = cb.laneConfiguration(
 			getWgs84Position());
 		int shift = config.leftShift;
-		for(Distance up: upstream.keySet()) {
+		for (Distance up: upstream.keySet()) {
 			LCSArray lcs_array = upstream.get(up);
 			int l_shift = lcs_array.getShift() - shift;
 			Integer[] ind = policy.createIndications(up, lcs_array,
 				l_shift, config.getLanes());
-			if(shouldDeploy(ind)) {
+			if (shouldDeploy(ind)) {
 				model.addElement(lcs_array);
 				indications.put(lcs_array.getName(), ind);
 			}
@@ -150,14 +151,14 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		TreeMap<Distance, LCSArray> upstream =
 			new TreeMap<Distance, LCSArray>();
 		Iterator<LCSArray> lit = LCSArrayHelper.iterator();
-		while(lit.hasNext()) {
+		while (lit.hasNext()) {
 			LCSArray lcs_array = lit.next();
 			GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_array);
-			if(loc != null && loc.getRoadway() == cb.getRoadway() &&
-			   loc.getRoadDir() == cb.getRoadDir())
+			if (loc != null && loc.getRoadway() == cb.getRoadway() &&
+			    loc.getRoadDir() == cb.getRoadDir())
 			{
 				Float lp = cb.calculateMilePoint(loc);
-				if(lp != null && mp > lp) {
+				if (lp != null && mp > lp) {
 					Distance up = new Distance(mp - lp,
 						Distance.Units.MILES);
 					upstream.put(up, lcs_array);
@@ -169,9 +170,9 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 
 	/** Check if a set of indications should be deployed */
 	static private boolean shouldDeploy(Integer[] ind) {
-		for(int i: ind) {
+		for (int i: ind) {
 			LaneUseIndication li = LaneUseIndication.fromOrdinal(i);
-			switch(LaneUseIndication.fromOrdinal(i)) {
+			switch (LaneUseIndication.fromOrdinal(i)) {
 			case DARK:
 			case LANE_OPEN:
 				continue;
@@ -201,17 +202,14 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 
 	/** Send new indications to LCS arrays for the incident */
 	private void sendIndications() {
-		for(int i = 0; i < model.getSize(); i++) {
-			Object e = model.getElementAt(i);
-			if(e instanceof LCSArray)
-				sendIndications((LCSArray)e);
-		}
+		for (int i = 0; i < model.getSize(); i++)
+			sendIndications(model.getElementAt(i));
 	}
 
 	/** Send new indications to the specified LCS array */
 	private void sendIndications(LCSArray lcs_array) {
 		Integer[] ind = indications.get(lcs_array.getName());
-		if(ind != null) {
+		if (ind != null) {
 			lcs_array.setOwnerNext(session.getUser());
 			lcs_array.setIndicationsNext(ind);
 		}
@@ -220,7 +218,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	/** Update one attribute on the form */
 	@Override
 	protected void doUpdateAttribute(String a) {
-		if("cleared".equals(a) && proxy.getCleared())
+		if ("cleared".equals(a) && proxy.getCleared())
 			close(session.getDesktop());
 	}
 }
