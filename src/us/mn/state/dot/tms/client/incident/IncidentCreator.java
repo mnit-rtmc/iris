@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ public class IncidentCreator extends JPanel {
 	private final JToggleButton hazard_btn;
 
 	/** Lane type combo box */
-	private final JComboBox ltype_cbx;
+	private final JComboBox<LaneType> ltype_cbx;
 
 	/** Incident selection model */
 	private final ProxySelectionModel<Incident> sel_model;
@@ -134,8 +134,8 @@ public class IncidentCreator extends JPanel {
 	}
 
 	/** Create the lane type combo box */
-	private JComboBox createLaneTypeCombo() {
-		return new JComboBox(new LaneType[] {
+	private JComboBox<LaneType> createLaneTypeCombo() {
+		return new JComboBox<LaneType>(new LaneType[] {
 			LaneType.MAINLINE,
 			LaneType.EXIT,
 			LaneType.MERGE,
