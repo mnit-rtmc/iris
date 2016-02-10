@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -107,7 +107,8 @@ public class IncidentDispatcher extends IPanel
 	private final JLabel type_lbl = createValueLabel();
 
 	/** Incident detail combo box */
-	private final JComboBox detail_cbx = new JComboBox();
+	private final JComboBox<IncidentDetail> detail_cbx =
+		new JComboBox<IncidentDetail>();
 
 	/** Location of incident */
 	private final JLabel location_lbl = createValueLabel();
@@ -119,7 +120,7 @@ public class IncidentDispatcher extends IPanel
 	private final JPanel cam_pnl = new JPanel(cam_cards);
 
 	/** Verify camera combo box */
-	private final JComboBox camera_cbx = new JComboBox();
+	private final JComboBox<Camera> camera_cbx = new JComboBox<Camera>();
 
 	/** Verify camera button */
 	private final JButton camera_btn = new JButton();
@@ -353,7 +354,7 @@ public class IncidentDispatcher extends IPanel
 	/** Get the selected camera */
 	private Object getSelectedCamera() {
 		Object cam = camera_cbx.getSelectedItem();
-		if(cam != null)
+		if (cam != null)
 			return cam;
 		else
 			return "";
@@ -526,7 +527,7 @@ public class IncidentDispatcher extends IPanel
 			type_lbl.setIcon(manager.getIcon(inc));
 			location_lbl.setText(
 				manager.getGeoLoc(inc).getDescription());
-			if(inc instanceof ClientIncident)
+			if (inc instanceof ClientIncident)
 				camera_cbx.setModel(createCameraModel(inc));
 			setCameraAction(inc);
 		}
@@ -553,22 +554,23 @@ public class IncidentDispatcher extends IPanel
 	}
 
 	/** Create a combo box model for nearby cameras */
-	private DefaultComboBoxModel createCameraModel(Incident inc) {
-		DefaultComboBoxModel model = new DefaultComboBoxModel();
-		if(inc instanceof ClientIncident) {
+	private DefaultComboBoxModel<Camera> createCameraModel(Incident inc) {
+		DefaultComboBoxModel<Camera> mdl =
+			new DefaultComboBoxModel<Camera>();
+		if (inc instanceof ClientIncident) {
 			ClientIncident ci = (ClientIncident)inc;
 			Position pos = ci.getWgs84Position();
-			for(Camera cam: CameraHelper.findNearest(pos, 5)) {
-				model.addElement(cam);
-				if(model.getSelectedItem() == null)
-					model.setSelectedItem(cam);
+			for (Camera cam: CameraHelper.findNearest(pos, 5)) {
+				mdl.addElement(cam);
+				if (mdl.getSelectedItem() == null)
+					mdl.setSelectedItem(cam);
 			}
-			model.addElement(null);
+			mdl.addElement(null);
 		} else {
-			model.addElement(inc.getCamera());
-			model.setSelectedItem(inc.getCamera());
+			mdl.addElement(inc.getCamera());
+			mdl.setSelectedItem(inc.getCamera());
 		}
-		return model;
+		return mdl;
 	}
 
 	/** Check if the user is permitted to add the named incident */
