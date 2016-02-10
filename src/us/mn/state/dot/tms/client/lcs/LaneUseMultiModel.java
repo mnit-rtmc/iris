@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				return new IndicationCellRenderer();
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(
+				JComboBox<String> combo = new JComboBox<String>(
 					LaneUseIndication.getDescriptions());
 				return new DefaultCellEditor(combo);
 			}
