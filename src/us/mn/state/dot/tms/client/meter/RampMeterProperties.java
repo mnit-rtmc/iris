@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	};
 
 	/** Camera preset combo box */
-	private final JComboBox preset_cbx = new JComboBox();
+	private final JComboBox<CameraPreset> preset_cbx =
+		new JComboBox<CameraPreset>();
 
 	/** Camera preset combo box model */
 	private final IComboBoxModel<CameraPreset> preset_mdl;
@@ -105,7 +106,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	};
 
 	/** Meter type combo box component */
-	private final JComboBox meter_type_cbx = new JComboBox(
+	private final JComboBox<String> meter_type_cbx = new JComboBox<String>(
 		RampMeterType.getDescriptions());
 
 	/** Field for Storage length (feet) */
@@ -130,7 +131,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	};
 
 	/** Combo box for metering algorithm */
-	private final JComboBox algorithm_cbx = new JComboBox(
+	private final JComboBox<String> algorithm_cbx = new JComboBox<String>(
 		MeterAlgorithm.getDescriptions());
 
 	/** Field for AM target rate */
@@ -166,7 +167,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JLabel queue_lbl = new JLabel();
 
 	/** Meter lock combo box component */
-	private final JComboBox lock_cbx = new JComboBox(
+	private final JComboBox<String> lock_cbx = new JComboBox<String>(
 		RampMeterLock.getDescriptions());
 
 	/** Lock meter action */
