@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,8 +112,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
-		p.add(new MapAction(desktop.client, proxy, proxy.getLat(),
-			proxy.getLon()));
+		p.add(new MapAction<Incident>(desktop.client, proxy,
+			proxy.getLat(), proxy.getLon()));
 		p.addSeparator();
 		// FIXME: add menu item to clear incident
 		return p;
