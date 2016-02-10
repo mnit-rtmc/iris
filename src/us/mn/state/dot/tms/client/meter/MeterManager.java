@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,17 +129,18 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(meter)));
 		p.addSeparator();
-		p.add(new MapAction(desktop.client, meter, meter.getGeoLoc()));
-		if(session.isUpdatePermitted(meter)) {
+		p.add(new MapAction<RampMeter>(desktop.client, meter,
+			meter.getGeoLoc()));
+		if (session.isUpdatePermitted(meter)) {
 			p.addSeparator();
-			if(meter.getRate() != null) {
+			if (meter.getRate() != null) {
 				p.add(new ShrinkQueueAction(meter, true));
 				p.add(new GrowQueueAction(meter, true));
 				p.add(new TurnOffAction(meter, true));
 			} else
 				p.add(new TurnOnAction(meter, true));
 		}
-		if(TeslaAction.isConfigured()) {
+		if (TeslaAction.isConfigured()) {
 			p.addSeparator();
 			p.add(new TeslaAction<RampMeter>(meter));
 		}
