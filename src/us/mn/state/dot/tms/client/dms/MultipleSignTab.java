@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,13 +52,14 @@ public class MultipleSignTab extends JPanel {
 	private final TypeCache<DmsSignGroup> dms_sign_groups;
 
 	/** Selected list model */
-	private final DefaultListModel sign_mdl = new DefaultListModel();
+	private final DefaultListModel<DMS> sign_mdl =
+		new DefaultListModel<DMS>();
 
 	/** List model of all non-local sign groups */
 	private final ProxyListModel<SignGroup> sign_group_model;
 
 	/** Group list widget */
-	private final JList group_list;
+	private final JList<SignGroup> group_list;
 
 	/** Selection model */
 	private final ProxySelectionModel<DMS> sel_model;
@@ -83,7 +84,7 @@ public class MultipleSignTab extends JPanel {
 			}
 		};
 		dms_sign_groups = cache.getDmsSignGroups();
-		group_list = new JList(sign_group_model);
+		group_list = new JList<SignGroup>(sign_group_model);
 		group_list.setSelectionMode(SINGLE_SELECTION);
 		group_list.addListSelectionListener(new IListSelectionAdapter(){
 			@Override
@@ -118,7 +119,7 @@ public class MultipleSignTab extends JPanel {
 		bag.weightx = 1;
 		bag.weighty = 1;
 		bag.insets.bottom = UI.vgap;
-		JList list = new JList(sign_mdl);
+		JList<DMS> list = new JList<DMS>(sign_mdl);
 		list.setVisibleRowCount(6);
 		list.setEnabled(false);
 		JScrollPane pane = new JScrollPane(list);
