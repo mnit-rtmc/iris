@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,17 +46,17 @@ public enum LocModifier {
 	}
 
 	/** Get the string representation of a location modifier */
+	@Override
 	public String toString() {
 		return description;
 	}
 
 	/** Get a location modifier from an ordinal value */
 	static public LocModifier fromOrdinal(short o) {
-		for(LocModifier m: LocModifier.values()) {
-			if(m.ordinal() == o)
-				return m;
-		}
-		return AT;
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return AT;
 	}
 
 	/** Check if an ordinal value is valid */
