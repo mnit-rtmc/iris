@@ -233,7 +233,7 @@ public class DMSManager extends ProxyManager<DMS> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(dms)));
 		p.addSeparator();
-		p.add(new MapAction(desktop.client, dms, dms.getGeoLoc()));
+		p.add(new MapAction<DMS>(desktop.client, dms, dms.getGeoLoc()));
 		p.addSeparator();
 		if(blankAction != null)
 			p.add(blankAction);
