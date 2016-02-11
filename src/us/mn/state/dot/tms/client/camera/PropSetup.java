@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2015  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,8 +49,8 @@ public class PropSetup extends IPanel {
 	private final JSpinner enc_chn_spn = new JSpinner(num_model);
 
 	/** Encoder type combobox */
-	private final JComboBox enc_type_cbx =
-		new JComboBox(EncoderType.getDescriptions());
+	private final JComboBox<String> enc_type_cbx =
+		new JComboBox<String>(EncoderType.getDescriptions());
 
 	/** Encoder type action */
 	private final IAction enc_type_act = new IAction("camera.encoder.type"){
