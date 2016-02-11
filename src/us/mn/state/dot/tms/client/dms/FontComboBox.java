@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class FontComboBox extends JComboBox implements ActionListener {
+public class FontComboBox extends JComboBox<Font> implements ActionListener {
 
 	/** Is this control IRIS enabled? */
 	static public boolean getIEnabled() {
@@ -38,7 +38,7 @@ public class FontComboBox extends JComboBox implements ActionListener {
 	}
 
 	/** Font combo box model */
-	private FontComboBoxModel m_fontModel;
+	private FontComboBoxModel font_mdl;
 
 	/** Sign message composer */
 	private final SignMessageComposer composer;
@@ -57,14 +57,14 @@ public class FontComboBox extends JComboBox implements ActionListener {
 
 	/** Set the raster builder */
 	public void setBuilder(RasterBuilder rb) {
-		if(m_fontModel != null)
-			m_fontModel.dispose();
-		if(rb != null) {
-			m_fontModel = new FontComboBoxModel(composer.getFonts(),
+		if (font_mdl != null)
+			font_mdl.dispose();
+		if (rb != null) {
+			font_mdl = new FontComboBoxModel(composer.getFonts(),
 				rb);
-			setModel(m_fontModel);
+			setModel(font_mdl);
 		} else
-			setModel(new DefaultComboBoxModel());
+			setModel(new DefaultComboBoxModel<Font>());
 	}
 
 	/** Set the selected font number */
@@ -76,8 +76,8 @@ public class FontComboBox extends JComboBox implements ActionListener {
 
 	/** Get the selected font number or null if nothing selected. */
 	protected Integer getFontNumber() {
-		Font font = (Font)getSelectedItem();
-		if(font != null)
+		Font font = (Font) getSelectedItem();
+		if (font != null)
 			return font.getNumber();
 		else
 			return null;
@@ -94,7 +94,7 @@ public class FontComboBox extends JComboBox implements ActionListener {
 	 * setSelectedItem() call. Defined in interface ActionListener. */
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if(adjusting == 0)
+		if (adjusting == 0)
 			composer.updateMessage();
 	}
 
@@ -103,7 +103,7 @@ public class FontComboBox extends JComboBox implements ActionListener {
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
 		// if disabled, reset value to default
-		if(!b)
+		if (!b)
 			setSelectedItem(null);
 	}
 }
