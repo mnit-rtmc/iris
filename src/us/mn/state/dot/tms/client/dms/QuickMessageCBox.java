@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -42,24 +42,25 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class QuickMessageCBox extends JComboBox {
+public class QuickMessageCBox extends JComboBox<QuickMessage> {
 
 	/** Given a QuickMessage or String, return the cooresponding quick 
 	 * message name or an empty string if none exists. */
-	static protected String getQuickLibMsgName(Object obj) {
-		if(obj instanceof String)
-			return (String)obj;
-		else if(obj instanceof QuickMessage)
-			return ((QuickMessage)obj).getName();
+	static private String getQuickLibMsgName(Object obj) {
+		if (obj instanceof String)
+			return (String) obj;
+		else if (obj instanceof QuickMessage)
+			return ((QuickMessage) obj).getName();
 		else
 			return "";
 	}
 
 	/** Combo box model for quick messages */
-	protected final DefaultComboBoxModel model = new DefaultComboBoxModel();
+	private final DefaultComboBoxModel<QuickMessage> model =
+		new DefaultComboBoxModel<QuickMessage>();
 
 	/** DMS dispatcher */
-	protected final DMSDispatcher dispatcher;
+	private final DMSDispatcher dispatcher;
 
 	/** Focus listener for editor component */
 	private final FocusListener focus_listener;
@@ -107,7 +108,7 @@ public class QuickMessageCBox extends JComboBox {
 		String name = item.replace(" ", "");
 		getEditor().setItem(name);
 		QuickMessage qm = QuickMessageHelper.lookup(name);
-		if(qm != null) {
+		if (qm != null) {
 			model.setSelectedItem(qm);
 			updateDispatcher(qm);
 		}
@@ -154,8 +155,8 @@ public class QuickMessageCBox extends JComboBox {
 	public void setSelectedItem(Object obj) {
 		String nametoset = getQuickLibMsgName(obj);
 		String namecur = getSelectedName();
-		if(!namecur.equals(nametoset)) {
-			if(nametoset.isEmpty())
+		if (!namecur.equals(nametoset)) {
+			if (nametoset.isEmpty())
 				super.setSelectedItem(null);
 			else {
 				QuickMessage qm = QuickMessageHelper.lookup(
@@ -166,7 +167,7 @@ public class QuickMessageCBox extends JComboBox {
 	}
 
 	/** Get the name of the currently selected quick message */
-	protected String getSelectedName() {
+	private String getSelectedName() {
 		return getQuickLibMsgName(getSelectedItem());
 	}
 
@@ -175,7 +176,7 @@ public class QuickMessageCBox extends JComboBox {
 		TreeSet<QuickMessage> msgs = createMessageSet(dms);
 		adjusting++;
 		model.removeAllElements();
-		for(QuickMessage qm: msgs)
+		for (QuickMessage qm: msgs)
 			model.addElement(qm);
 		adjusting--;
 	}
@@ -185,15 +186,15 @@ public class QuickMessageCBox extends JComboBox {
 		TreeSet<QuickMessage> msgs = new TreeSet<QuickMessage>(
 			new NumericAlphaComparator<QuickMessage>());
 		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			DmsSignGroup dsg = it.next();
-			if(dsg.getDms() == dms) {
+			if (dsg.getDms() == dms) {
 				SignGroup sg = dsg.getSignGroup();
 				Iterator<QuickMessage> qit =
 					QuickMessageHelper.iterator();
-				while(qit.hasNext()) {
+				while (qit.hasNext()) {
 					QuickMessage qm = qit.next();
-					if(qm.getSignGroup() == sg)
+					if (qm.getSignGroup() == sg)
 						msgs.add(qm);
 				}
 			}
