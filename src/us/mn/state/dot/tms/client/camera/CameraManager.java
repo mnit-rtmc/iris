@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -137,7 +137,7 @@ public class CameraManager extends ProxyManager<Camera> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(c)));
 		p.addSeparator();
-		p.add(new MapAction(desktop.client, c, c.getGeoLoc()));
+		p.add(new MapAction<Camera>(desktop.client, c, c.getGeoLoc()));
 		p.addSeparator();
 		p.add(new PublishAction(s_model));
 		p.add(new UnpublishAction(s_model));
