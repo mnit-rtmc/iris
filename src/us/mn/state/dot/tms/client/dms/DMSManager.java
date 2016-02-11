@@ -132,10 +132,10 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a list cell renderer */
 	@Override
-	public ListCellRenderer createCellRenderer() {
-		return new ListCellRenderer() {
+	public ListCellRenderer<DMS> createCellRenderer() {
+		return new ListCellRenderer<DMS>() {
 			public Component getListCellRendererComponent(
-				JList list, Object value, int index,
+				JList<? extends DMS> list, DMS value, int index,
 				boolean isSelected, boolean cellHasFocus)
 			{
 				DmsCellRenderer r = lookupRenderer(value);
@@ -150,11 +150,10 @@ public class DMSManager extends ProxyManager<DMS> {
 	}
 
 	/** Lookup a DMS cell renderer */
-	private DmsCellRenderer lookupRenderer(Object value) {
-		if (value instanceof DMS) {
-			DMS dms = (DMS)value;
+	private DmsCellRenderer lookupRenderer(DMS dms) {
+		if (dms != null)
 			return renderers.get(dms.getName());
-		} else
+		else
 			return null;
 	}
 
