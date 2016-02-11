@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Dimension;
+import java.util.ArrayList;
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
@@ -32,17 +34,21 @@ import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
  */
 public class IndicationSelector extends JPanel {
 
+	/** Maximum number of lanes */
+	static private final int N_LANES = MAX_SHIFT + 1;
+
 	/** Pixel width of each lane */
 	private final int pixels;
 
 	/** Array of lane-use indication combo boxes (left to right) */
-	private final JComboBox[] indications = new JComboBox[MAX_SHIFT + 1];
+	private final ArrayList<JComboBox<LaneUseIndication>> indications =
+		new ArrayList<JComboBox<LaneUseIndication>>(N_LANES);
 
 	/** Number of lanes */
-	protected int n_lanes = 0;
+	private int n_lanes = 0;
 
 	/** Lane shift */
-	protected int shift = 0;
+	private int shift = 0;
 
 	/** Create a new indication selector */
 	public IndicationSelector(int p) {
@@ -52,11 +58,12 @@ public class IndicationSelector extends JPanel {
 		setMinimumSize(new Dimension(w, p - 16));
 		setPreferredSize(new Dimension(w, p - 16));
 		IndicationRenderer ir = new IndicationRenderer(p - 26);
-		for(int i = 0; i < indications.length; i++) {
-			JComboBox cbx = new JComboBox();
+		for (int i = 0; i < N_LANES; i++) {
+			JComboBox<LaneUseIndication> cbx =
+				new JComboBox<LaneUseIndication>();
 			cbx.setRenderer(ir);
 			add(cbx);
-			indications[i] = cbx;
+			indications.add(cbx);
 			cbx.setBounds(getX(i), 0, pixels, p - 18);
 		}
 		setOpaque(false);
@@ -79,10 +86,10 @@ public class IndicationSelector extends JPanel {
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
 		n_lanes = lcss.length;
 		shift = lcs_array.getShift();
-		for(int i = 0; i < indications.length; i++) {
-			JComboBox cbx = indications[i];
+		for (int i = 0; i < indications.size(); i++) {
+			JComboBox<LaneUseIndication> cbx = indications.get(i);
 			int ln = shift + n_lanes - 1 - i;
-			if(ln >= 0 && ln < n_lanes) {
+			if (ln >= 0 && ln < n_lanes) {
 				cbx.setModel(createModel(lcss[ln]));
 				cbx.setVisible(true);
 			} else {
@@ -93,19 +100,19 @@ public class IndicationSelector extends JPanel {
 	}
 
 	/** Create a combo box model for selecting lane-use indications */
-	protected DefaultComboBoxModel createModel(LCS lcs) {
-		if(lcs != null) {
-			return new DefaultComboBoxModel(
+	private ComboBoxModel<LaneUseIndication> createModel(LCS lcs) {
+		if (lcs != null) {
+			return new DefaultComboBoxModel<LaneUseIndication>(
 				LCSHelper.lookupIndications(lcs));
 		} else
-			return new DefaultComboBoxModel();
+			return new DefaultComboBoxModel<LaneUseIndication>();
 	}
 
 	/** Enable/disable all widgets */
 	public void setEnabled(boolean enabled) {
-		for(JComboBox cbx: indications) {
+		for (JComboBox<LaneUseIndication> cbx: indications) {
 			cbx.setEnabled(enabled);
-			if(!enabled) {
+			if (!enabled) {
 				cbx.setVisible(false);
 				cbx.removeAllItems();
 			}
@@ -114,14 +121,15 @@ public class IndicationSelector extends JPanel {
 
 	/** Set the selected indications */
 	public void setIndications(Integer[] ind) {
-		if(ind.length != n_lanes)
+		if (ind.length != n_lanes)
 			return;
-		for(int i = 0; i < indications.length; i++) {
+		for (int i = 0; i < indications.size(); i++) {
 			int ln = shift + n_lanes - 1 - i;
-			if(ln >= 0 && ln < ind.length) {
+			if (ln >= 0 && ln < ind.length) {
 				LaneUseIndication lui = 
 					LaneUseIndication.fromOrdinal(ind[ln]);
-				JComboBox cbx = indications[i];
+				JComboBox<LaneUseIndication> cbx =
+					indications.get(i);
 				cbx.setSelectedItem(lui != null ? lui :
 					LaneUseIndication.DARK);
 			}
@@ -131,13 +139,14 @@ public class IndicationSelector extends JPanel {
 	/** Get the selected indications */
 	public Integer[] getIndications() {
 		Integer[] ind = new Integer[n_lanes];
-		for(int i = 0; i < indications.length; i++) {
+		for (int i = 0; i < indications.size(); i++) {
 			int ln = shift + n_lanes - 1 - i;
-			if(ln >= 0 && ln < ind.length) {
-				JComboBox cbx = indications[i];
+			if (ln >= 0 && ln < ind.length) {
+				JComboBox<LaneUseIndication> cbx =
+					indications.get(i);
 				LaneUseIndication lui = (LaneUseIndication)
 					cbx.getSelectedItem();
-				if(lui != null)
+				if (lui != null)
 					ind[ln] = lui.ordinal();
 				else
 					return null;
