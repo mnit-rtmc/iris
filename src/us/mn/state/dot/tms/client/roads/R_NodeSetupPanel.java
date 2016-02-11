@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,15 +56,15 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 	}
 
 	/** Node type combobox */
-	private final JComboBox type_cbx =
-		new JComboBox(R_NodeType.getDescriptions());
+	private final JComboBox<String> type_cbx =
+		new JComboBox<String>(R_NodeType.getDescriptions());
 
 	/** Pickable check box */
 	private final JCheckBox pick_chk = new JCheckBox();
 
 	/** Transition type combobox */
-	private final JComboBox trans_cbx =
-		new JComboBox(R_NodeTransition.getDescriptions());
+	private final JComboBox<String> trans_cbx =
+		new JComboBox<String>(R_NodeTransition.getDescriptions());
 
 	/** Above check box */
 	private final JCheckBox above_chk = new JCheckBox();
