@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,8 @@ public class ComposerMiscPanel extends JPanel {
 	private final ILabel dur_lbl = new ILabel("dms.duration");
 
 	/** Used to select the expires time for a message (optional) */
-	private final JComboBox dur_cbx = new JComboBox(Expiration.values());
+	private final JComboBox<Expiration> dur_cbx =
+		new JComboBox<Expiration>(Expiration.values());
 
 	/** Page on time label */
 	private final ILabel pg_on_lbl = new ILabel("dms.page.on.time");
@@ -206,7 +207,7 @@ public class ComposerMiscPanel extends JPanel {
 
 	/** Get the selected duration */
 	public Integer getDuration() {
-		Expiration e = (Expiration)dur_cbx.getSelectedItem();
+		Expiration e = (Expiration) dur_cbx.getSelectedItem();
 		return (e != null) ? e.duration : null;
 	}
 
