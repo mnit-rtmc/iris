@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public class PropLocation extends LocationPanel {
 	};
 
 	/** External beacon combo box */
-	private final JComboBox beacon_cbx = new JComboBox();
+	private final JComboBox<Beacon> beacon_cbx = new JComboBox<Beacon>();
 
 	/** Camera preset combo box model */
 	private final IComboBoxModel<CameraPreset> preset_mdl;
@@ -75,7 +75,8 @@ public class PropLocation extends LocationPanel {
 	};
 
 	/** Camera preset combo box */
-	private final JComboBox preset_cbx = new JComboBox();
+	private final JComboBox<CameraPreset> preset_cbx =
+		new JComboBox<CameraPreset>();
 
 	/** Controller action */
 	private final IAction controller = new IAction("controller") {
