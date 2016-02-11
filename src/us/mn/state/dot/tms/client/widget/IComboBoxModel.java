@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,12 +27,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  *
  * @author Douglas Lau
  */
-public class IComboBoxModel<T extends SonarObject> extends AbstractListModel
-	implements ComboBoxModel
+public class IComboBoxModel<T extends SonarObject> extends AbstractListModel<T>
+	implements ComboBoxModel<T>
 {
-	/** Blank entry in combo box */
-	static private final String BLANK = " ";
-
 	/** Underlying list model */
 	private final ProxyListModel<T> model;
 
@@ -66,14 +63,14 @@ public class IComboBoxModel<T extends SonarObject> extends AbstractListModel
 
 	/** Get an element from the list model */
 	@Override
-	public Object getElementAt(int i) {
+	public T getElementAt(int i) {
 		if (extra != null) {
 			if (i == 0)
 				return extra;
 			i--;
 		}
 		if (null_allowed)
-			return (i > 0) ? model.getElementAt(i - 1) : BLANK;
+			return (i > 0) ? model.getElementAt(i - 1) : null;
 		else
 			return model.getElementAt(i);
 	}
@@ -101,8 +98,9 @@ public class IComboBoxModel<T extends SonarObject> extends AbstractListModel
 
 	/** Set the selected item */
 	@Override
+	@SuppressWarnings("unchecked")
 	public void setSelectedItem(Object s) {
-		T sel = (!BLANK.equals(s)) ? (T)s : null;
+		T sel = (s != null) ? (T) s : null;
 		extra = isExtra(sel) ? sel : null;
 		selected = sel;
 		fireContentsChanged(this, -1, -1);

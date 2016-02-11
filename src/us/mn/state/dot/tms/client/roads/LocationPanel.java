@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2015  Minnesota Department of Transportation
+ * Copyright (C) 2005-2016  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -104,7 +104,7 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	}
 
 	/** Roadway combobox */
-	private final JComboBox roadway_cbx = new JComboBox();
+	private final JComboBox<Road> roadway_cbx = new JComboBox<Road>();
 
 	/** Roadway model */
 	private final IComboBoxModel<Road> roadway_mdl;
@@ -120,13 +120,13 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	};
 
 	/** Roadway direction combo box */
-	private final JComboBox road_dir_cbx = new JComboBox(
+	private final JComboBox<String> road_dir_cbx = new JComboBox<String>(
 		Direction.getDescriptions());
 
 	/** Roadway direction action */
 	private final LAction road_dir_act = new LAction("location.direction") {
 		protected void do_perform(GeoLoc l) {
-			l.setRoadDir((short)road_dir_cbx.getSelectedIndex());
+			l.setRoadDir((short) road_dir_cbx.getSelectedIndex());
 		}
 		protected void do_update(GeoLoc l) {
 			road_dir_cbx.setSelectedIndex(l.getRoadDir());
@@ -134,13 +134,13 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	};
 
 	/** Cross street modifier combobox */
-	private final JComboBox cross_mod_cbx = new JComboBox(
-		LocModifier.values());
+	private final JComboBox<LocModifier> cross_mod_cbx =
+		new JComboBox<LocModifier>(LocModifier.values());
 
 	/** Cross street modifier action */
 	private final LAction cross_mod_act = new LAction("location.cross.mod"){
 		protected void do_perform(GeoLoc l) {
-			short m = (short)cross_mod_cbx.getSelectedIndex();
+			short m = (short) cross_mod_cbx.getSelectedIndex();
 			l.setCrossMod(m);
 		}
 		protected void do_update(GeoLoc l) {
@@ -165,13 +165,13 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	};
 
 	/** Cross street direction combobox */
-	private final JComboBox cross_dir_cbx = new JComboBox(
+	private final JComboBox<String> cross_dir_cbx = new JComboBox<String>(
 		Direction.getAbbreviations());
 
 	/** Cross street direction action */
 	private final LAction cross_dir_act = new LAction("location.cross.dir"){
 		protected void do_perform(GeoLoc l) {
-			short d = (short)cross_dir_cbx.getSelectedIndex();
+			short d = (short) cross_dir_cbx.getSelectedIndex();
 			l.setCrossDir(d);
 		}
 		protected void do_update(GeoLoc l) {
