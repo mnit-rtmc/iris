@@ -82,7 +82,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Create a list cell renderer */
 	@Override
-	public ListCellRenderer createCellRenderer() {
+	public ListCellRenderer<Incident> createCellRenderer() {
 		return new IncidentCellRenderer(this);
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.proxy;
 import java.awt.Component;
 import javax.swing.JList;
 import javax.swing.DefaultListCellRenderer;
+import javax.swing.ListCellRenderer;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
@@ -25,8 +26,12 @@ import us.mn.state.dot.sonar.SonarObject;
  * @author Douglas Lau
  */
 public class ProxyCellRenderer<T extends SonarObject>
-	extends DefaultListCellRenderer
+	implements ListCellRenderer<T>
 {
+	/** Default cell renderer */
+	private final DefaultListCellRenderer renderer =
+		new DefaultListCellRenderer();
+
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 
@@ -36,14 +41,14 @@ public class ProxyCellRenderer<T extends SonarObject>
 	}
 
 	/** Get a list cell renderer component */
-	public Component getListCellRendererComponent(JList list, Object value,
-		int index, boolean isSelected, boolean cellHasFocus)
+	@Override
+	public Component getListCellRendererComponent(JList<? extends T> list,
+		T value, int index, boolean isSelected, boolean cellHasFocus)
 	{
-		T proxy = (T)value;
-		String v = null;
-		if(proxy != null)
-			v = manager.getDescription(proxy);
-		return super.getListCellRendererComponent(list, v, index,
+		String v = (value != null)
+		         ? manager.getDescription(value)
+		         : null;
+		return renderer.getListCellRendererComponent(list, v, index,
 			isSelected, cellHasFocus);
 	}
 }

@@ -113,7 +113,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Create a list cell renderer */
 	@Override
-	public ListCellRenderer createCellRenderer() {
+	public ListCellRenderer<LCSArray> createCellRenderer() {
 		return new LCSArrayCellRenderer(this);
 	}
 

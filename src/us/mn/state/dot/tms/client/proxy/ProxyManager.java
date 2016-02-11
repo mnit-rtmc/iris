@@ -251,7 +251,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Create a list cell renderer */
-	public ListCellRenderer createCellRenderer() {
+	public ListCellRenderer<T> createCellRenderer() {
 		return new ProxyCellRenderer<T>(this);
 	}
 

@@ -39,8 +39,9 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  *
  * @author Douglas Lau
  */
-public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
-
+public class LCSArrayCellRenderer extends JPanel
+	implements ListCellRenderer<LCSArray>
+{
 	/** Size in pixels for each LCS in array */
 	static private final int LCS_SIZE = UI.scaled(20);
 
@@ -114,11 +115,11 @@ public class LCSArrayCellRenderer extends JPanel implements ListCellRenderer {
 	 * @return              Component to use for rendering the LCS.
 	 */
 	@Override
-	public Component getListCellRendererComponent(JList list, Object value,
-		int index, boolean isSelected, boolean cellHasFocus)
+	public Component getListCellRendererComponent(
+		JList<? extends LCSArray> list, LCSArray value, int index,
+		boolean isSelected, boolean cellHasFocus)
 	{
-		if (value instanceof LCSArray)
-			setLcsArray((LCSArray) value);
+		setLcsArray(value);
 		if (isSelected) {
 			Component temp = cell.getListCellRendererComponent(list,
 				value, index, isSelected, cellHasFocus);
