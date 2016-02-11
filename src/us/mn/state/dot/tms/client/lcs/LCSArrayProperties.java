@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		new LinkedList<JCheckBox>();
 
 	/** LCS lock combo box component */
-	private final JComboBox lock_cmb = new JComboBox(
+	private final JComboBox<String> lock_cmb = new JComboBox<String>(
 		LCSArrayLock.getDescriptions());
 
 	/** Operation description label */
