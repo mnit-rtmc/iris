@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	private final JLabel operation_lbl = createValueLabel();
 
 	/** LCS lock combo box component */
-	private final JComboBox lock_cmb = new JComboBox(
+	private final JComboBox<String> lock_cmb = new JComboBox<String>(
 		LCSArrayLock.getDescriptions());
 
 	/** Lane configuration panel */
@@ -224,14 +224,14 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 			send.setEnabled(isUpdatePermitted(la) &&
 				op.equals("None"));
 		}
-		if(a == null || a.equals("lcsLock")) {
+		if (a == null || a.equals("lcsLock")) {
 			Integer lk = la.getLcsLock();
-			if(lk != null)
+			if (lk != null)
 				lock_cmb.setSelectedIndex(lk);
 			else
 				lock_cmb.setSelectedIndex(0);
 		}
-		if(a == null || a.equals("indicationsCurrent")) {
+		if (a == null || a.equals("indicationsCurrent")) {
 			Integer[] ind = la.getIndicationsCurrent();
 			lcs_pnl.setIndications(ind, la.getShift());
 			lcs_pnl.setClickHandler(
@@ -251,7 +251,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		lane_config.setConfiguration(manager.laneConfiguration(la));
 		ind_selector.setLCSArray(la);
 		ind_selector.setEnabled(update);
-		if(update)
+		if (update)
 			lock_cmb.setAction(new LockLcsAction(la, lock_cmb));
 		else
 			lock_cmb.setAction(null);
