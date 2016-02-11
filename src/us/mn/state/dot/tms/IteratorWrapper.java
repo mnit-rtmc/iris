@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2013  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,17 +33,21 @@ public class IteratorWrapper<T extends SonarObject> implements Iterator<T> {
 	}
 
 	/** Check if the iterator has a next value */
-	@Override public boolean hasNext() {
+	@Override
+	public boolean hasNext() {
 		return wrapped.hasNext();
 	}
 
 	/** Get the next object from the iterator */
-	@Override public T next() {
-		return (T)wrapped.next();
+	@Override
+	@SuppressWarnings("unchecked")
+	public T next() {
+		return (T) wrapped.next();
 	}
 
 	/** Remove most recent object */
-	@Override public void remove() {
+	@Override
+	public void remove() {
 		throw new UnsupportedOperationException();
 	}
 }
