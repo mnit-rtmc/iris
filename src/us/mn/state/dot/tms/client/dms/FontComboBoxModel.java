@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  * @author Douglas Lau
  */
 public class FontComboBoxModel extends ProxyListModel<Font>
-	implements ComboBoxModel 
+	implements ComboBoxModel<Font>
 {
 	/** Raster graphic builder */
 	private final RasterBuilder builder;
@@ -74,7 +74,7 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 		return sel_font;
 	}
 
-	/** 
+	/**
 	 * Set the selected item. This method is called by the combobox when:
 	 * 	-the focus leaves the combobox with a String arg when editable.
 	 *      -a combobox item is clicked on via the mouse.
@@ -83,7 +83,7 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 	@Override
 	public void setSelectedItem(Object f) {
 		if (f instanceof Font)
-			sel_font = (Font)f;
+			sel_font = (Font) f;
 		else if (f == null)
 			sel_font = null;
 		else

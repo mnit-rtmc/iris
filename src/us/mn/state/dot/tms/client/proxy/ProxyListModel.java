@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.utils.NumericAlphaComparator;
  * @author Douglas Lau
  */
 public class ProxyListModel<T extends SonarObject>
-	extends AbstractListModel
+	extends AbstractListModel<T>
 {
 	/** Proxy type cache */
 	private final TypeCache<T> cache;
@@ -146,7 +146,7 @@ public class ProxyListModel<T extends SonarObject>
 
 	/** Get the element at the specified index (for ListModel) */
 	@Override
-	public Object getElementAt(int index) {
+	public T getElementAt(int index) {
 		return list.get(index);
 	}
 

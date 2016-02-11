@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +27,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  * @author Travis Swanston
  */
 public class SignGroupComboBoxModel extends ProxyListModel<SignGroup>
-	implements ComboBoxModel
+	implements ComboBoxModel<SignGroup>
 {
 	/** Currently selected SignGroup */
 	private SignGroup sel_signgroup = null;
@@ -69,11 +70,10 @@ public class SignGroupComboBoxModel extends ProxyListModel<SignGroup>
 	/** Set the selected item. */
 	@Override
 	public void setSelectedItem(Object sg) {
-		if (sg == null)
+		if (sg instanceof SignGroup)
+			sel_signgroup = (SignGroup) sg;
+		else
 			sel_signgroup = null;
-		else if (sg instanceof SignGroup)
-			sel_signgroup = (SignGroup)sg;
-		// notify
 		fireContentsChanged(this, -1, -1);
 	}
 }

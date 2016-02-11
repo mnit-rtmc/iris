@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2015  Minnesota Department of Transportation
+ * Copyright (C) 2004-2016  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,7 +36,6 @@ import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
-import javax.swing.ListCellRenderer;
 import javax.swing.border.TitledBorder;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.SonarObject;
@@ -141,14 +140,13 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	{
 		super(new GridBagLayout());
 		manager = man;
-		ListCellRenderer renderer = manager.createCellRenderer();
 		border = BorderFactory.createTitledBorder("");
 		setBorder(border);
 		GridBagConstraints bag = new GridBagConstraints();
 		ProxyTheme<T> theme = manager.getTheme();
 		List<Symbol> symbols = theme.getSymbols();
 		p_list = manager.createList();
-		p_list.setCellRenderer(renderer);
+		p_list.setCellRenderer(manager.createCellRenderer());
 		JScrollPane sp = new JScrollPane(p_list);
 		final int n_rows = (symbols.size() - 1) / STYLE_COLS + 1;
 		// grid is filled top to bottom, left to right
@@ -292,8 +290,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** The cell renderer has changed sizes, update cell renderers. */
 	private void updateRenderer(CellRendererSize size) {
 		manager.setCellSize(size);
-		ListCellRenderer renderer = manager.createCellRenderer();
-		p_list.setCellRenderer(renderer);
+		p_list.setCellRenderer(manager.createCellRenderer());
 	}
 
 	/** Set the selected style, results in action + button selection
