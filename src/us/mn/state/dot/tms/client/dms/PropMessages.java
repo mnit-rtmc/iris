@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,7 +76,7 @@ public class PropMessages extends JPanel {
 	private final ILabel font_lbl = new ILabel("dms.font.default");
 
 	/** Default font combo box */
-	private final JComboBox font_cbx = new JComboBox();
+	private final JComboBox<Font> font_cbx = new JComboBox<Font>();
 
 	/** Font height label */
 	private final ILabel font_height_ilbl = new ILabel("dms.font.height");
@@ -139,10 +139,10 @@ public class PropMessages extends JPanel {
 		font_cbx.setAction(new IAction("font") {
 			protected void doActionPerformed(ActionEvent e) {
 				proxy.setDefaultFont(
-					(Font)font_cbx.getSelectedItem());
+					(Font) font_cbx.getSelectedItem());
 			}
 		});
-		font_cbx.setModel(new IComboBoxModel(
+		font_cbx.setModel(new IComboBoxModel<Font>(
 			session.getSonarState().getDmsCache().getFontModel()));
 		layoutPanel();
 	}
