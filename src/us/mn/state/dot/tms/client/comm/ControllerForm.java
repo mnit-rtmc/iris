@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -77,7 +77,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	};
 
 	/** Comm link combo box */
-	private final JComboBox comm_link_cbx = new JComboBox();
+	private final JComboBox<CommLink> comm_link_cbx =
+		new JComboBox<CommLink>();
 
 	/** Model for drop address spinner */
 	private DropNumberModel drop_model;
@@ -114,8 +115,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	};
 
 	/** Condition combobox */
-	private final JComboBox condition_cbx =
-		new JComboBox(CtrlCondition.getDescriptions());
+	private final JComboBox<String> condition_cbx =
+		new JComboBox<String>(CtrlCondition.getDescriptions());
 
 	/** Location panel */
 	private final LocationPanel loc_pnl;
@@ -137,7 +138,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	};
 
 	/** Cabinet style combo box */
-	private final JComboBox cab_style_cbx = new JComboBox();
+	private final JComboBox<CabinetStyle> cab_style_cbx =
+		new JComboBox<CabinetStyle>();
 
 	/** Cabinet for controller */
 	private final Cabinet cabinet;
@@ -203,9 +205,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		cabinet = proxy.getCabinet();
 		cab_listener = new CabinetListener();
 		loc_pnl = new LocationPanel(s);
-		comm_link_mdl = new IComboBoxModel(con_cache.getCommLinkModel(),
-			false);
-		cab_style_mdl = new IComboBoxModel(
+		comm_link_mdl = new IComboBoxModel<CommLink>(
+			con_cache.getCommLinkModel(), false);
+		cab_style_mdl = new IComboBoxModel<CabinetStyle>(
 			con_cache.getCabinetStyleModel());
 	}
 
