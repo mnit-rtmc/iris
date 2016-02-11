@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -143,13 +143,14 @@ public class PresetModel extends AbstractTableModel {
 		}
 		public void setValueAt(CameraPreset p, Object value) {
 			if (value instanceof Direction) {
-				Direction d = (Direction)value;
-				p.setDirection((short)d.ordinal());
+				Direction d = (Direction) value;
+				p.setDirection((short) d.ordinal());
 			}
 		}
 		protected TableCellEditor createCellEditor() {
-			JComboBox combo = new JComboBox(Direction.values());
-			return new DefaultCellEditor(combo);
+			JComboBox<Direction> cbx =
+				new JComboBox<Direction>(Direction.values());
+			return new DefaultCellEditor(cbx);
 		}
 	};
 
@@ -179,14 +180,14 @@ public class PresetModel extends AbstractTableModel {
 	/** Get the class of the specified column */
 	@Override
 	public Class getColumnClass(int col) {
-		ProxyColumn pc = getProxyColumn(col);
+		ProxyColumn<CameraPreset> pc = getProxyColumn(col);
 		return (pc != null) ? pc.getColumnClass() : null;
 	}
 
 	/** Get the value at the specified cell */
 	@Override
 	public Object getValueAt(int row, int col) {
-		ProxyColumn pc = getProxyColumn(col);
+		ProxyColumn<CameraPreset> pc = getProxyColumn(col);
 		if (pc == col_number)
 			return row + 1;
 		else if (pc != null) {
@@ -200,14 +201,14 @@ public class PresetModel extends AbstractTableModel {
 	/** Check if the specified cell is editable */
 	@Override
 	public boolean isCellEditable(int row, int col) {
-		ProxyColumn pc = getProxyColumn(col);
-		return pc != null && pc.isEditable(getRowProxy(row));
+		ProxyColumn<CameraPreset> pc = getProxyColumn(col);
+		return (pc != null) && pc.isEditable(getRowProxy(row));
 	}
 
 	/** Set the value at the specified cell */
 	@Override
 	public void setValueAt(Object value, int row, int col) {
-		ProxyColumn pc = getProxyColumn(col);
+		ProxyColumn<CameraPreset> pc = getProxyColumn(col);
 		if (pc == col_enabled) {
 			if (value instanceof Boolean)
 				setPresetEnabled(row, (Boolean)value);
