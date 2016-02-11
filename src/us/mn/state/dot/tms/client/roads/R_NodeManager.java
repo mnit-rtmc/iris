@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2015  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
@@ -70,10 +71,11 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		new TreeMap<String, CorridorBase>();
 
 	/** Combo box model of all corridors */
-	private final DefaultComboBoxModel cor_mdl = new DefaultComboBoxModel();
+	private final DefaultComboBoxModel<CorridorBase> cor_mdl =
+		new DefaultComboBoxModel<CorridorBase>();
 
 	/** Get the corridor list model */
-	public DefaultComboBoxModel getCorridorModel() {
+	public ComboBoxModel<CorridorBase> getCorridorModel() {
 		return cor_mdl;
 	}
 
@@ -115,7 +117,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		builder = canRead()
 		       ? new SegmentBuilder(session, this, p)
 		       : null;
-		cor_mdl.addElement(" ");
+		cor_mdl.addElement(null);
 		det_cache = s.getSonarState().getDetCache().getDetectors();
 	}
 

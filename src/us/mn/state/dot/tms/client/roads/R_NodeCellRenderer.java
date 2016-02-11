@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,8 +43,9 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  *
  * @author Douglas Lau
  */
-public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
-
+public class R_NodeCellRenderer extends JPanel
+	implements ListCellRenderer<R_NodeModel>
+{
 	/** Background color for nodes with GPS points */
 	static private final Color COLOR_GPS = Color.GREEN;
 
@@ -91,29 +92,30 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	protected R_NodeType node_type;
 
 	/** Set the r_node model */
-	protected void setModel(R_NodeModel m) {
+	private void setModel(R_NodeModel m) {
 		model = m;
-		r_node = model.r_node;
-		node_type = R_NodeType.fromOrdinal(r_node.getNodeType());
+		r_node = (m != null) ? model.r_node : null;
+		node_type = (r_node != null)
+		          ? R_NodeType.fromOrdinal(r_node.getNodeType())
+		          : null;
 	}
 
 	/** Configure the renderer component */
-	public Component getListCellRendererComponent(JList list, Object value,
-		int index, boolean isSelected, boolean cellHasFocus)
+	@Override
+	public Component getListCellRendererComponent(
+		JList<? extends R_NodeModel> list, R_NodeModel mdl, int index,
+		boolean isSelected, boolean cellHasFocus)
 	{
-		if(value instanceof R_NodeModel) {
-			setModel((R_NodeModel)value);
-			setSelected(isSelected);
-			return this;
-		} else
-			return null;
+		setModel(mdl);
+		setSelected(isSelected);
+		return this;
 	}
 
 	/** Selected status */
-	protected boolean selected;
+	private boolean selected;
 
 	/** Set the selected status of the component */
-	protected void setSelected(boolean sel) {
+	private void setSelected(boolean sel) {
 		selected = sel;
 		if (sel)
 			setBackground(Color.LIGHT_GRAY);
@@ -151,6 +153,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	}
 
 	/** Paint the renderer */
+	@Override
 	public void paintComponent(Graphics g) {
 		Dimension d = (Dimension)getSize();
 		int width = (int)d.getWidth();
@@ -168,9 +171,9 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 		drawSpeedLimit(g2, height);
 		String xStreet = GeoLocHelper.getCrossDescription(
 			r_node.getGeoLoc());
-		if(xStreet != null)
+		if (xStreet != null)
 			drawCrossStreet(g2, xStreet, height);
-		if(selected)
+		if (selected)
 			drawShiftHandle(g2, height);
 	}
 
@@ -185,9 +188,9 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	/** Draw the yellow lines */
 	protected void drawYellowLines(Graphics2D g, int height) {
 		g.setColor(Color.YELLOW);
-		if(model.hasMainline())
+		if (model.hasMainline())
 			g.draw(createYellowMainLine(height));
-		switch(node_type) {
+		switch (node_type) {
 		case ENTRANCE:
 			g.draw(createEntranceYellow());
 			break;
@@ -207,9 +210,9 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	/** Draw the white lines */
 	protected void drawWhiteLines(Graphics2D g, int height) {
 		g.setColor(Color.WHITE);
-		if(model.hasMainline())
+		if (model.hasMainline())
 			g.draw(createWhiteMainLine(height));
-		switch(node_type) {
+		switch (node_type) {
 		case ENTRANCE:
 			g.draw(createEntranceWhite());
 			break;
@@ -229,9 +232,9 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	/** Fill the roadway area */
 	protected void fillRoadway(Graphics2D g, int height) {
 		g.setColor(Color.BLACK);
-		if(model.hasMainline())
+		if (model.hasMainline())
 			g.fill(createMainRoadway(height));
-		switch(node_type) {
+		switch (node_type) {
 		case ENTRANCE:
 			g.fill(createEntranceRoadway());
 			break;
@@ -253,15 +256,15 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	protected void drawSkipStripes(Graphics2D g, int height) {
 		g.setColor(Color.WHITE);
 		g.setStroke(LINE_DASHED);
-		if(model.hasMainline())
+		if (model.hasMainline())
 			drawMainlineSkipStripes(g, height);
-		switch(node_type) {
+		switch (node_type) {
 		case ENTRANCE:
-			for(int lane = 1; lane < r_node.getLanes(); lane++)
+			for (int lane = 1; lane < r_node.getLanes(); lane++)
 				g.draw(createEntranceRamp(lane, true));
 			break;
 		case EXIT:
-			for(int lane = 1; lane < r_node.getLanes(); lane++)
+			for (int lane = 1; lane < r_node.getLanes(); lane++)
 				g.draw(createExitRamp(lane, true));
 			break;
 		}
@@ -274,12 +277,12 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 		int right0 = getDownstreamLine(false);
 		int right1 = getUpstreamLine(false);
 		int left = Math.max(left0, left1);
-		if(left0 == left1)
+		if (left0 == left1)
 			left += LANE_WIDTH;
 		int right = Math.min(right0, right1);
-		if(right0 == right1)
+		if (right0 == right1)
 			right -= LANE_WIDTH;
-		for(int i = left; i <= right; i += LANE_WIDTH)
+		for (int i = left; i <= right; i += LANE_WIDTH)
 			g.draw(new Line2D.Double(i, 0, i, height));
 	}
 
@@ -289,7 +292,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 		int y1, int y2, int y3)
 	{
 		int x1, x2, x3;
-		if(r_node.getAttachSide()) {
+		if (r_node.getAttachSide()) {
 			x1 = x - LANE_WIDTH * 3;
 			x2 = x - LANE_WIDTH;
 			x3 = x + LANE_WIDTH * lane;
@@ -301,8 +304,8 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 		R_NodeTransition nt = R_NodeTransition.fromOrdinal(
 			r_node.getTransition());
 		GeneralPath path = new GeneralPath();
-		if(reverse) {
-			if(nt == R_NodeTransition.LOOP) {
+		if (reverse) {
+			if (nt == R_NodeTransition.LOOP) {
 				path.moveTo(x3, y3);
 				path.curveTo(x3, y0, x1, y1, x1, y2);
 			} else {
@@ -310,7 +313,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 				path.curveTo(x3, y1, x2, y1, x1, y1);
 			}
 		} else {
-			if(nt == R_NodeTransition.LOOP) {
+			if (nt == R_NodeTransition.LOOP) {
 				path.moveTo(x1, y2);
 				path.curveTo(x1, y1, x3, y0, x3, y3);
 			} else {
@@ -341,7 +344,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Create the yellow (left side) fog line for an entrance ramp */
 	protected Shape createEntranceYellow() {
-		if(r_node.getAttachSide())
+		if (r_node.getAttachSide())
 			return createEntranceRamp(0, false);
 		else
 			return createEntranceRamp(r_node.getLanes(), false);
@@ -349,7 +352,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Create the white (right side) fog line for an entrance ramp */
 	protected Shape createEntranceWhite() {
-		if(r_node.getAttachSide())
+		if (r_node.getAttachSide())
 			return createEntranceRamp(r_node.getLanes(), true);
 		else
 			return createEntranceRamp(0, true);
@@ -377,7 +380,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Create the yellow (left side) fog line for an exit ramp */
 	protected Shape createExitYellow() {
-		if(r_node.getAttachSide())
+		if (r_node.getAttachSide())
 			return createExitRamp(0, false);
 		else
 			return createExitRamp(r_node.getLanes(), false);
@@ -385,7 +388,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Create the white (right side) fog line for an exit ramp */
 	protected Shape createExitWhite() {
-		if(r_node.getAttachSide())
+		if (r_node.getAttachSide())
 			return createExitRamp(r_node.getLanes(), true);
 		else
 			return createExitRamp(0, true);
@@ -402,7 +405,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	/** Draw the detector locations */
 	protected void drawDetectors(Graphics2D g, int height) {
 		g.setStroke(LINE_BASIC);
-		switch(node_type) {
+		switch (node_type) {
 		case STATION:
 			drawStationDetectors(g);
 			break;
@@ -416,7 +419,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	protected void drawStationDetectors(Graphics2D g) {
 		final int y = 2;
 		int r = getDownstreamLine(false) - LANE_WIDTH + 4;
-		for(int i = 0; i < r_node.getLanes(); i++) {
+		for (int i = 0; i < r_node.getLanes(); i++) {
 			int x = r - LANE_WIDTH * i;
 			drawDetector(g, x, y, Integer.toString(i + 1));
 		}
@@ -426,7 +429,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	protected int getHovDiamondX() {
 		boolean side = r_node.getAttachSide();
 		int x = getDownstreamLine(side);
-		if(side)
+		if (side)
 			return x - LANE_WIDTH * 2;
 		else
 			return x + LANE_WIDTH;
@@ -436,7 +439,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	protected void drawEntranceDetectors(Graphics2D g, int height) {
 		R_NodeTransition nt = R_NodeTransition.fromOrdinal(
 			r_node.getTransition());
-		if(nt == R_NodeTransition.HOV) {
+		if (nt == R_NodeTransition.HOV) {
 			int x = getHovDiamondX();
 			int y = height - LANE_HEIGHT - 1;
 			GeneralPath path = new GeneralPath();
@@ -468,7 +471,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Draw the speed limit */
 	protected void drawSpeedLimit(Graphics2D g, int height) {
-		switch(node_type) {
+		switch (node_type) {
 		case STATION:
 			int x = getDownstreamLine(false) + LANE_WIDTH;
 			int y = 2;
@@ -543,7 +546,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Get the preferred height */
 	protected int getPreferredHeight() {
-		switch(node_type) {
+		switch (node_type) {
 		case ENTRANCE:
 		case EXIT:
 			return LANE_HEIGHT * (r_node.getLanes() + 2);
@@ -554,6 +557,7 @@ public class R_NodeCellRenderer extends JPanel implements ListCellRenderer {
 	}
 
 	/** Get the preferred renderer size */
+	@Override
 	public Dimension getPreferredSize() {
 		return new Dimension(WIDTH, getPreferredHeight());
 	}

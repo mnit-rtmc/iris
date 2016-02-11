@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2015  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -108,14 +108,15 @@ public class CorridorList extends IPanel {
 		protected void doActionPerformed(ActionEvent e) {
 			Object s = corridor_cbx.getSelectedItem();
 			if (s instanceof CorridorBase)
-				setCorridor((CorridorBase)s);
+				setCorridor((CorridorBase) s);
 			else
 				setCorridor(null);
 		}
 	};
 
 	/** Combo box to select a roadway corridor */
-	private final JComboBox corridor_cbx = new JComboBox();
+	private final JComboBox<CorridorBase> corridor_cbx =
+		new JComboBox<CorridorBase>();
 
 	/** Action to add a new roadway node */
 	private final IAction add_node = new IAction("r_node.add") {
@@ -135,7 +136,7 @@ public class CorridorList extends IPanel {
 	private final ProxySelectionModel<R_Node> sel_mdl;
 
 	/** List component for nodes */
-	private final JList n_list = new JList();
+	private final JList<R_NodeModel> n_list = new JList<R_NodeModel>();
 
 	/** Roadway node list model */
 	private R_NodeListModel node_mdl = new R_NodeListModel();
