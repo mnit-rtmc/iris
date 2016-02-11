@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2015  Minnesota Department of Transportation
+ * Copyright (C) 2005-2016  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -312,10 +312,10 @@ public class CameraDispatcher extends JPanel {
 	}
 
 	/** Create the video output selection combo box */
-	private JComboBox createOutputCombo() {
-		JComboBox box = new JComboBox();
+	private JComboBox<VideoMonitor> createOutputCombo() {
+		JComboBox<VideoMonitor> box = new JComboBox<VideoMonitor>();
 		FilteredMonitorModel m = new FilteredMonitorModel(session);
-		box.setModel(new IComboBoxModel(m));
+		box.setModel(new IComboBoxModel<VideoMonitor>(m));
 		if (m.getSize() > 1)
 			box.setSelectedIndex(1);
 		return box;
@@ -415,7 +415,7 @@ public class CameraDispatcher extends JPanel {
 	private void monitorSelected() {
 		Object o = output_cbx.getSelectedItem();
 		if (o instanceof VideoMonitor) {
-			video_monitor = (VideoMonitor)o;
+			video_monitor = (VideoMonitor) o;
 			selectMonitorCamera();
 		} else
 			video_monitor = null;
