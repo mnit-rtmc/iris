@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,25 +60,25 @@ import us.mn.state.dot.tms.utils.I18N;
 public class ControllerIOModel extends AbstractTableModel {
 
 	/** Count of columns in table model */
-	static protected final int COLUMN_COUNT = 3;
+	static private final int COLUMN_COUNT = 3;
 
 	/** Pin column number */
-	static protected final int COL_PIN = 0;
+	static private final int COL_PIN = 0;
 
 	/** Device type column number */
-	static protected final int COL_TYPE = 1;
+	static private final int COL_TYPE = 1;
 
 	/** Device column number */
-	static protected final int COL_DEVICE = 2;
+	static private final int COL_DEVICE = 2;
 
 	/** Device types which can be associated with controller IO */
-	protected enum DeviceType {
+	private enum DeviceType {
 		Alarm, Camera, Detector, DMS, Gate_Arm, Lane_Marking,
 		LCSIndication, Ramp_Meter, Beacon, Weather_Sensor, Tag_Reader
 	}
 
 	/** Types of IO devices */
-	static protected final LinkedList<DeviceType> IO_TYPE =
+	static private final LinkedList<DeviceType> IO_TYPE =
 		new LinkedList<DeviceType>();
 	static {
 		IO_TYPE.add(null);
@@ -96,26 +96,26 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Get the type of the specified ControllerIO device */
-	static protected DeviceType getType(ControllerIO cio) {
-		if(cio instanceof Alarm)
+	static private DeviceType getType(ControllerIO cio) {
+		if (cio instanceof Alarm)
 			return DeviceType.Alarm;
-		else if(cio instanceof Camera)
+		else if (cio instanceof Camera)
 			return DeviceType.Camera;
-		else if(cio instanceof Detector)
+		else if (cio instanceof Detector)
 			return DeviceType.Detector;
-		else if(cio instanceof DMS)
+		else if (cio instanceof DMS)
 			return DeviceType.DMS;
-		else if(cio instanceof GateArm)
+		else if (cio instanceof GateArm)
 			return DeviceType.Gate_Arm;
-		else if(cio instanceof LaneMarking)
+		else if (cio instanceof LaneMarking)
 			return DeviceType.Lane_Marking;
-		else if(cio instanceof LCSIndication)
+		else if (cio instanceof LCSIndication)
 			return DeviceType.LCSIndication;
-		else if(cio instanceof RampMeter)
+		else if (cio instanceof RampMeter)
 			return DeviceType.Ramp_Meter;
-		else if(cio instanceof Beacon)
+		else if (cio instanceof Beacon)
 			return DeviceType.Beacon;
-		else if(cio instanceof WeatherSensor)
+		else if (cio instanceof WeatherSensor)
 			return DeviceType.Weather_Sensor;
 		else if (cio instanceof TagReader)
 			return DeviceType.Tag_Reader;
@@ -124,114 +124,114 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Compare two device types for equality */
-	static protected boolean compareTypes(DeviceType t0, DeviceType t1) {
-		if(t0 == null)
+	static private boolean compareTypes(DeviceType t0, DeviceType t1) {
+		if (t0 == null)
 			return t1 == null;
 		else
 			return t0 == t1;
 	}
 
-	/** Controller object */
-	protected final Controller controller;
-
 	/** Login session */
-	protected final Session session;
+	private final Session session;
 
 	/** SONAR state */
-	protected final SonarState state;
+	private final SonarState state;
+
+	/** Controller object */
+	private final Controller controller;
+
+	/** Device cell editor */
+	private final DeviceCellEditor cell_editor;
 
 	/** Array of ControllerIO assignments */
-	protected final ControllerIO[] io;
+	private final ControllerIO[] io;
 
 	/** Array of ControllerIO device types */
-	protected final DeviceType[] types;
+	private final DeviceType[] types;
+
+	/** Controller IO list for null device type */
+	private final ControllerIOList null_list;
 
 	/** Controller IO list for alarms */
-	private final ControllerIOList<Alarm> a_list;
+	private final ControllerIOList a_list;
 
 	/** Controller IO list for cameras */
-	private final ControllerIOList<Camera> c_list;
+	private final ControllerIOList c_list;
 
 	/** Controller IO list for detectors */
-	private final ControllerIOList<Detector> dt_list;
+	private final ControllerIOList dt_list;
 
 	/** Controller IO list for DMSs */
-	private final ControllerIOList<DMS> dms_list;
+	private final ControllerIOList dms_list;
 
 	/** Controller IO list for gate arms */
-	private final ControllerIOList<GateArm> gate_list;
+	private final ControllerIOList gate_list;
 
 	/** Controller IO list for lane markings */
-	private final ControllerIOList<LaneMarking> lmark_list;
+	private final ControllerIOList lmark_list;
 
 	/** Controller IO list for LCS indications */
-	private final ControllerIOList<LCSIndication> lcsi_list;
+	private final ControllerIOList lcsi_list;
 
 	/** Controller IO list for ramp meters */
-	private final ControllerIOList<RampMeter> m_list;
+	private final ControllerIOList m_list;
 
 	/** Controller IO list for beacons */
-	private final ControllerIOList<Beacon> b_list;
+	private final ControllerIOList b_list;
 
 	/** Controller IO list for weather sensors */
-	private final ControllerIOList<WeatherSensor> wsensor_list;
+	private final ControllerIOList wsensor_list;
 
 	/** Controller IO list for toll readers */
-	private final ControllerIOList<TagReader> tr_list;
-
-	/** Model for null device type */
-	private final ComboBoxModel no_model = new DefaultComboBoxModel();
+	private final ControllerIOList tr_list;
 
 	/** Device combo box */
-	protected final JComboBox d_combo = new JComboBox();
+	private final JComboBox<ControllerIO> d_combo =
+		new JComboBox<ControllerIO>();
 
 	/** Create a new controller IO model */
 	public ControllerIOModel(Session s, Controller c) {
 		session = s;
 		state = s.getSonarState();;
 		controller = c;
+		cell_editor = new DeviceCellEditor();
 		io = new ControllerIO[Controller.ALL_PINS];
 		types = new DeviceType[Controller.ALL_PINS];
 		d_combo.setRenderer(new DeviceComboRenderer());
-		a_list = new ControllerIOList<Alarm>(state.getAlarms());
-		c_list = new ControllerIOList<Camera>(
-			state.getCamCache().getCameras());
-		dt_list = new ControllerIOList<Detector>(
+		null_list = new ControllerIOList(null);
+		a_list = new ControllerIOList(state.getAlarms());
+		c_list = new ControllerIOList(state.getCamCache().getCameras());
+		dt_list = new ControllerIOList(
 			state.getDetCache().getDetectors());
-		dms_list = new ControllerIOList<DMS>(
-			state.getDmsCache().getDMSs());
-		gate_list = new ControllerIOList<GateArm>(
-			state.getGateArms());
-		lmark_list = new ControllerIOList<LaneMarking>(
-			state.getLaneMarkings());
-		lcsi_list = new ControllerIOList<LCSIndication>(
+		dms_list = new ControllerIOList(state.getDmsCache().getDMSs());
+		gate_list = new ControllerIOList(state.getGateArms());
+		lmark_list = new ControllerIOList(state.getLaneMarkings());
+		lcsi_list = new ControllerIOList(
 			state.getLcsCache().getLCSIndications());
-		m_list = new ControllerIOList<RampMeter>(
-			state.getRampMeters());
-		b_list = new ControllerIOList<Beacon>(
-			state.getBeacons());
-		wsensor_list = new ControllerIOList<WeatherSensor>(
-			state.getWeatherSensors());
-		tr_list = new ControllerIOList<TagReader>(
-			state.getTagReaders());
+		m_list = new ControllerIOList(state.getRampMeters());
+		b_list = new ControllerIOList(state.getBeacons());
+		wsensor_list = new ControllerIOList(state.getWeatherSensors());
+		tr_list = new ControllerIOList(state.getTagReaders());
 	}
 
 	/** Controller IO list model */
-	private class ControllerIOList<T extends ControllerIO>
-		extends ProxyListModel<T>
-	{
-		private final IComboBoxModel<T> model;
-		private ControllerIOList(TypeCache<T> c) {
+	private class ControllerIOList extends ProxyListModel<ControllerIO> {
+		private final IComboBoxModel<ControllerIO> model;
+		private final CellEditorComboBoxModel<ControllerIO> editor_mdl;
+		@SuppressWarnings("unchecked")
+		private ControllerIOList(TypeCache c) {
 			super(c);
-			model = new IComboBoxModel<T>(this);
+			model = new IComboBoxModel<ControllerIO>(this);
+			editor_mdl = new CellEditorComboBoxModel<ControllerIO>(
+				cell_editor, model);
 		}
 		@Override
-		protected boolean check(T p) {
+		protected boolean check(ControllerIO p) {
 			addIO(p);
 			return p.getController() == null;
 		}
 		@Override
-		protected int doProxyRemoved(T p) {
+		protected int doProxyRemoved(ControllerIO p) {
 			removeIO(p);
 			return super.doProxyRemoved(p);
 		}
@@ -268,19 +268,22 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Get the count of columns in the table */
+	@Override
 	public int getColumnCount() {
 		return COLUMN_COUNT;
 	}
 
 	/** Get the count of rows in the table */
+	@Override
 	public int getRowCount() {
 		return io.length - 1;
 	}
 
 	/** Get the value at the specified cell */
+	@Override
 	public Object getValueAt(int row, int column) {
 		int pin = row + 1;
-		switch(column) {
+		switch (column) {
 		case COL_PIN:
 			return pin;
 		case COL_TYPE:
@@ -293,12 +296,13 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Is the specified cell editable? */
+	@Override
 	public boolean isCellEditable(int row, int col) {
 		return col != COL_PIN && canUpdateIO();
 	}
 
 	/** Check if the user can update device IO */
-	protected boolean canUpdateIO() {
+	private boolean canUpdateIO() {
 		return canUpdateIO(Alarm.SONAR_TYPE) &&
 		       canUpdateIO(Camera.SONAR_TYPE) &&
 		       canUpdateIO(Detector.SONAR_TYPE) &&
@@ -313,15 +317,16 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Check if the user can update one device IO */
-	protected boolean canUpdateIO(String tname) {
+	private boolean canUpdateIO(String tname) {
 		return session.canUpdate(tname, "pin") &&
 		       session.canUpdate(tname, "controller");
 	}
 
 	/** Set the value of one cell in the table */
+	@Override
 	public void setValueAt(Object value, int row, int column) {
 		int pin = row + 1;
-		switch(column) {
+		switch (column) {
 		case COL_TYPE:
 			setDeviceType(pin, (DeviceType)value);
 			break;
@@ -332,11 +337,11 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Set the device type */
-	protected void setDeviceType(int pin, DeviceType io_type) {
+	private void setDeviceType(int pin, DeviceType io_type) {
 		int row = pin - 1;
-		if(io_type != types[pin]) {
+		if (io_type != types[pin]) {
 			ControllerIO cio = io[pin];
-			if(cio != null)
+			if (cio != null)
 				cio.setController(null);
 			types[pin] = io_type;
 			io[pin] = null;
@@ -344,77 +349,46 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Set the device */
-	protected void setDevice(int pin, Object value) {
+	private void setDevice(int pin, Object value) {
 		clearDevice(pin);
-		if(value instanceof ControllerIO) {
-			ControllerIO cio = (ControllerIO)value;
+		if (value instanceof ControllerIO) {
+			ControllerIO cio = (ControllerIO) value;
 			cio.setPin(pin);
 			cio.setController(controller);
 		}
 	}
 
 	/** Clear the device at the specified pin */
-	protected void clearDevice(int pin) {
+	private void clearDevice(int pin) {
 		ControllerIO cio = io[pin];
-		if(cio != null)
+		if (cio != null)
 			cio.setController(null);
 	}
 
 	/** Create the pin column */
-	protected TableColumn createPinColumn() {
+	private TableColumn createPinColumn() {
 		TableColumn c = new TableColumn(COL_PIN, 44);
 		c.setHeaderValue(I18N.get("controller.pin"));
 		return c;
 	}
 
 	/** Create the type column */
-	protected TableColumn createTypeColumn() {
+	private TableColumn createTypeColumn() {
 		TableColumn c = new TableColumn(COL_TYPE, 100);
 		c.setHeaderValue(I18N.get("device.type"));
-		JComboBox combo = new JComboBox(IO_TYPE.toArray());
-		c.setCellEditor(new DefaultCellEditor(combo));
+		JComboBox<DeviceType> cbx = new JComboBox<DeviceType>(
+			IO_TYPE.toArray(new DeviceType[0]));
+		c.setCellEditor(new DefaultCellEditor(cbx));
 		return c;
 	}
 
 	/** Create the device column */
-	protected TableColumn createDeviceColumn() {
+	private TableColumn createDeviceColumn() {
 		TableColumn c = new TableColumn(COL_DEVICE, 140);
 		c.setHeaderValue(I18N.get("device"));
-		c.setCellEditor(new DeviceCellEditor());
+		c.setCellEditor(cell_editor);
 		c.setCellRenderer(new DeviceCellRenderer());
 		return c;
-	}
-
-	/** Get the device model for the given device type */
-	protected ComboBoxModel getDeviceModel(DeviceType d) {
-		if(d == null)
-			return no_model;
-		switch(d) {
-		case Alarm:
-			return a_list.model;
-		case Camera:
-			return c_list.model;
-		case Detector:
-			return dt_list.model;
-		case DMS:
-			return dms_list.model;
-		case Gate_Arm:
-			return gate_list.model;
-		case Lane_Marking:
-			return lmark_list.model;
-		case LCSIndication:
-			return lcsi_list.model;
-		case Ramp_Meter:
-			return m_list.model;
-		case Beacon:
-			return b_list.model;
-		case Weather_Sensor:
-			return wsensor_list.model;
-		case Tag_Reader:
-			return tr_list.model;
-		default:
-			return no_model;
-		}
 	}
 
 	/** Inner class for editing cells in the device column */
@@ -425,14 +399,45 @@ public class ControllerIOModel extends AbstractTableModel {
 			Object value, boolean isSelected, int row, int column)
 		{
 			int pin = row + 1;
-			ComboBoxModel model = getDeviceModel(types[pin]);
-			model.setSelectedItem(value);
-			d_combo.setModel(new CellEditorComboBoxModel(this,
-				model));
+			ControllerIOList io_list = getIOList(types[pin]);
+			io_list.model.setSelectedItem(value);
+			d_combo.setModel(io_list.editor_mdl);
 			return d_combo;
 		}
 		public Object getCellEditorValue() {
 			return d_combo.getSelectedItem();
+		}
+	}
+
+	/** Lookup a controller IO list for a given device type */
+	private ControllerIOList getIOList(DeviceType d) {
+		if (d == null)
+			return null_list;
+		switch (d) {
+		case Alarm:
+			return a_list;
+		case Camera:
+			return c_list;
+		case Detector:
+			return dt_list;
+		case DMS:
+			return dms_list;
+		case Gate_Arm:
+			return gate_list;
+		case Lane_Marking:
+			return lmark_list;
+		case LCSIndication:
+			return lcsi_list;
+		case Ramp_Meter:
+			return m_list;
+		case Beacon:
+			return b_list;
+		case Weather_Sensor:
+			return wsensor_list;
+		case Tag_Reader:
+			return tr_list;
+		default:
+			return null_list;
 		}
 	}
 
@@ -461,8 +466,8 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Get a device label (normally name) */
-	protected Object getDeviceLabel(Object value) {
-		if(value instanceof LCSIndication) {
+	private Object getDeviceLabel(Object value) {
+		if (value instanceof LCSIndication) {
 			LCSIndication lcsi = (LCSIndication)value;
 			LCS lcs = lcsi.getLcs();
 			LaneUseIndication lui = LaneUseIndication.fromOrdinal(
@@ -495,9 +500,9 @@ public class ControllerIOModel extends AbstractTableModel {
 	}
 
 	/** Remove an IO from a pin on the controller */
-	protected void removeIO(ControllerIO p) {
-		for(int pin = 0; pin < io.length; pin++) {
-			if(io[pin] == p) {
+	private void removeIO(ControllerIO p) {
+		for (int pin = 0; pin < io.length; pin++) {
+			if (io[pin] == p) {
 				io[pin] = null;
 				types[pin] = null;
 				int row = pin - 1;

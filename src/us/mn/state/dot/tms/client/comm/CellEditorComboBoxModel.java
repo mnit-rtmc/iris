@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,20 +23,19 @@ import javax.swing.event.ListDataListener;
  *
  * @author Douglas Lau
  */
-public class CellEditorComboBoxModel implements ComboBoxModel {
+public class CellEditorComboBoxModel<T> implements ComboBoxModel<T> {
+	private final CellEditor editor;
 
-	protected final CellEditor editor;
+	private final ComboBoxModel<T> model;
 
-	protected final ComboBoxModel model;
-
-	public CellEditorComboBoxModel(CellEditor ce, ComboBoxModel m) {
+	public CellEditorComboBoxModel(CellEditor ce, ComboBoxModel<T> m) {
 		editor = ce;
 		model = m;
 	}
 	public int getSize() {
 		return model.getSize();
 	}
-	public Object getElementAt(int index) {
+	public T getElementAt(int index) {
 		return model.getElementAt(index);
 	}
 	public void addListDataListener(ListDataListener l) {
