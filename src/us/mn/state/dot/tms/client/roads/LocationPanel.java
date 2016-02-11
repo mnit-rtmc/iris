@@ -149,7 +149,7 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	};
 
 	/** Cross street combobox */
-	private final JComboBox cross_cbx = new JComboBox();
+	private final JComboBox<Road> cross_cbx = new JComboBox<Road>();
 
 	/** Cross street model */
 	private final IComboBoxModel<Road> cross_mdl;
