@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,10 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
 import java.awt.Component;
-import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
 
@@ -28,28 +28,36 @@ import us.mn.state.dot.tms.SignText;
  *
  * @author Douglas Lau
  */
-public class SignTextCellRenderer extends BasicComboBoxRenderer {
+public class SignTextCellRenderer implements ListCellRenderer<SignText> {
 
 	/** Highlight color for special rank levels */
-	static protected final Color HIGHLIGHT = new Color(204, 204, 255);
+	static private final Color HIGHLIGHT = new Color(204, 204, 255);
+
+	/** Cell renderer */
+	private final DefaultListCellRenderer cell =
+		new DefaultListCellRenderer();
+
+	/** Create a new sign text cell renderer */
+	public SignTextCellRenderer() {
+		cell.setHorizontalAlignment(SwingConstants.CENTER);
+	}
 
 	/** Configure the renderer component for a sign text message */
-	public Component getListCellRendererComponent(JList list,
-		Object value, int index, boolean isSelected,
-		boolean cellHasFocus)
+	@Override
+	public Component getListCellRendererComponent(
+		JList<? extends SignText> list, SignText value, int index,
+		boolean isSelected, boolean cellHasFocus)
 	{
 		String v = "";
-		short rank = 50;
-		if(value instanceof SignText) {
-			SignText t = (SignText)value;
-			v = new MultiString(t.getMulti()).asText();
-			rank = t.getRank();
-		}
-		JLabel r = (JLabel)super.getListCellRendererComponent(
-			list, v, index, isSelected, cellHasFocus);
-		r.setHorizontalAlignment(SwingConstants.CENTER);
-		if(rank != 50 && !isSelected)
-			r.setBackground(HIGHLIGHT);
-		return r;
+		if (value != null) {
+			v = new MultiString(value.getMulti()).asText();
+			if (value.getRank() != 50 && !isSelected)
+				cell.setBackground(HIGHLIGHT);
+			else
+				cell.setBackground(null);
+		} else
+			cell.setBackground(null);
+		return cell.getListCellRendererComponent(list, v, index,
+			isSelected, cellHasFocus);
 	}
 }

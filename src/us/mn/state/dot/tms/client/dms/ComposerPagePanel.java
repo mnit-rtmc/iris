@@ -62,7 +62,8 @@ public class ComposerPagePanel extends JPanel {
 		line_pnl = new JPanel[max_lines];
 		font_cbx = new FontComboBox(composer);
 		for (int i = 0; i < max_lines; i++) {
-			line_cbx[i] = new MsgComboBox(composer);
+			line_cbx[i] = new MsgComboBox(composer,
+				getLineNumber(i));
 			line_cbx[i].initialize();
 		}
 		layoutPanel();

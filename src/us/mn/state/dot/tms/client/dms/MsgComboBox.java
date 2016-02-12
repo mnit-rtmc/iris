@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2016  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class MsgComboBox extends JComboBox {
+public class MsgComboBox extends JComboBox<SignText> {
 
 	/** Combobox edit mode.  These values correspond to the
 	 * dms_composer_edit_mode system attribute. */
@@ -44,11 +44,10 @@ public class MsgComboBox extends JComboBox {
 
 		/** Convert an int to enum */
 		static public EditMode fromOrdinal(int o) {
-			for(EditMode em: values()) {
-				if(em.ordinal() == o)
-					return em;
-			}
-			return NEVER;
+			if (o >= 0 && o < values().length)
+				return values()[o];
+			else
+				return NEVER;
 		}
 
 		/** Get the edit mode */
@@ -58,22 +57,22 @@ public class MsgComboBox extends JComboBox {
 		}
 	}
 
+	/** Rank for on-the-fly created sign messages */
+	static private final short ON_THE_FLY_RANK = 99;
+
+	/** Blank client-side sign text object */
+	static private final SignText BLANK_SIGN_TEXT =
+		new ClientSignText("");
+
 	/** Prototype sign text */
 	static private final SignText PROTOTYPE_SIGN_TEXT =
 		new ClientSignText("12345678901234567890");
 
-	/** Format an item as a string */
-	static private String formatItem(Object o) {
-		String txt = "";
-		if(o instanceof SignText)
-			txt = ((SignText)o).getMulti();
-		else if(o != null)
-			txt = o.toString();
-		return MultiParser.normalize(txt);
-	}
-
 	/** Sign message composer containing the combo box */
 	private final SignMessageComposer composer;
+
+	/** Sign text line number */
+	private final short line;
 
 	/** Edit mode for combo box */
 	private EditMode edit_mode = EditMode.NEVER;
@@ -99,8 +98,9 @@ public class MsgComboBox extends JComboBox {
 
 	/** Create a message combo box.
 	 * @param c Sign message composer. */
-	public MsgComboBox(SignMessageComposer c) {
+	public MsgComboBox(SignMessageComposer c, short ln) {
 		composer = c;
+		line = ln;
 		setMaximumRowCount(21);
 		// NOTE: We use a prototype display value so that combo boxes
 		//       are always the same size.  This prevents all the
@@ -124,7 +124,7 @@ public class MsgComboBox extends JComboBox {
 		};
 		editorListener = new ActionListener() {
 			public void actionPerformed(ActionEvent ae) {
-				if(edit_mode == EditMode.AFTERKEY)
+				if (edit_mode == EditMode.AFTERKEY)
 					setEditable(false);
 			}
 		};
@@ -152,9 +152,9 @@ public class MsgComboBox extends JComboBox {
 	 * @param cam Flag to indicate messages can be added. */
 	public void setEditMode(boolean cam) {
 		edit_mode = getEditMode(cam);
-		if(isEditable() && edit_mode != EditMode.ALWAYS)
+		if (isEditable() && edit_mode != EditMode.ALWAYS)
 			setEditable(false);
-		if(!isEditable() && edit_mode == EditMode.ALWAYS)
+		if (!isEditable() && edit_mode == EditMode.ALWAYS)
 			setEditable(true);
 	}
 
@@ -162,7 +162,7 @@ public class MsgComboBox extends JComboBox {
 	 * @param cam Flag to indicate the user can add messages */
 	private EditMode getEditMode(boolean cam) {
 		EditMode em = EditMode.getEditMode();
-		if(em == EditMode.AFTERKEY && !cam)
+		if (em == EditMode.AFTERKEY && !cam)
 			return EditMode.NEVER;
 		else
 			return em;
@@ -173,8 +173,8 @@ public class MsgComboBox extends JComboBox {
 
 	/** Respond to a key typed event */
 	private void doKeyTyped(KeyEvent ke) {
-		if(edit_mode == EditMode.AFTERKEY) {
-			if(!isEditable()) {
+		if (edit_mode == EditMode.AFTERKEY) {
+			if (!isEditable()) {
 				setEditable(true);
 				key_event = ke;
 			}
@@ -183,7 +183,7 @@ public class MsgComboBox extends JComboBox {
 
 	/** Respond to a focus gained event */
 	private void doFocusGained() {
-		if(key_event != null) {
+		if (key_event != null) {
 			editor.dispatchEvent(key_event);
 			key_event = null;
 		}
@@ -191,49 +191,55 @@ public class MsgComboBox extends JComboBox {
 
 	/** Respond to a focus lost event */
 	private void doFocusLost() {
-		if(edit_mode == EditMode.AFTERKEY)
+		if (edit_mode == EditMode.AFTERKEY)
 			setEditable(false);
 		composer.updateMessage();
 	}
 
 	/** Get message text */
 	public String getMessage() {
-		Object o = getSelectedItem();
-		if(o instanceof SignText) {
-			if(edit_mode == EditMode.ALWAYS)
-				return formatItem(editor.getItem());
-			else
-				return ((SignText)o).getMulti();
-		} else
-			return "";
+		SignText st = getSignText();
+		return (st != null) ? st.getMulti() : "";
+	}
+
+	/** Get the sign text */
+	private SignText getSignText() {
+		Object o = (edit_mode == EditMode.ALWAYS)
+		         ? editor.getItem() : getSelectedItem();
+		return (o instanceof SignText) ? (SignText) o : null;
 	}
 
 	/** Editor for message combo box */
 	private class Editor extends JTextField implements ComboBoxEditor {
 
-		/** Last set value of the editor */
-		protected Object value;
-
 		/** Get the component for the combo box editor */
+		@Override
 		public Component getEditorComponent() {
 			return this;
 		}
 
 		/** Return the edited item */
+		@Override
 		public Object getItem() {
-			String nv = formatItem(getText());
-			if(value instanceof SignText) {
-				if(nv.equals(formatItem(value)))
-					return value;
-			}
-			return nv;
+			return toSignText(getText());
 		}
 
 		/** Set the item that should be edited.
 		 * @param item New value of item */
+		@Override
 		public void setItem(Object item) {
-			setText(formatItem(item));
-			value = item;
+			setText(toSignText(item).getMulti());
 		}
+	}
+
+	/** Convert an item to sign text */
+	private SignText toSignText(Object item) {
+		if (item instanceof SignText)
+			return (SignText) item;
+		else if (item != null) {
+			String txt = MultiParser.normalize(item.toString());
+			return new ClientSignText(txt, line, ON_THE_FLY_RANK);
+		} else
+			return BLANK_SIGN_TEXT;
 	}
 }

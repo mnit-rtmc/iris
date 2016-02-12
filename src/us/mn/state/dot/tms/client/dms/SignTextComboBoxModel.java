@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,8 +28,8 @@ import us.mn.state.dot.tms.SignText;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SignTextComboBoxModel extends AbstractListModel
-	implements ComboBoxModel
+public class SignTextComboBoxModel extends AbstractListModel<SignText>
+	implements ComboBoxModel<SignText>
 {
 	/** Rank for on-the-fly created sign messages */
 	static private final short ON_THE_FLY_RANK = 99;
@@ -54,7 +54,7 @@ public class SignTextComboBoxModel extends AbstractListModel
 
 	/** Get the element at the specified index */
 	@Override
-	public Object getElementAt(int index) {
+	public SignText getElementAt(int index) {
 		int i = 0;
 		for (SignText t: items) {
 			if (i == index)
