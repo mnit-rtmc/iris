@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,11 +88,13 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			}
 			public void setValueAt(DmsAction da, Object value) {
 				if (value instanceof PlanPhase)
-					da.setPhase((PlanPhase)value);
+					da.setPhase((PlanPhase) value);
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox cbx = new JComboBox();
-				cbx.setModel(new IComboBoxModel(phase_mdl));
+				JComboBox<PlanPhase> cbx = new JComboBox
+					<PlanPhase>();
+				cbx.setModel(new IComboBoxModel<PlanPhase>(
+					phase_mdl));
 				return new DefaultCellEditor(cbx);
 			}
 		});
@@ -141,8 +143,9 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(A_PRIORITIES);
-				return new DefaultCellEditor(combo);
+				JComboBox<DMSMessagePriority> cbx =new JComboBox
+					<DMSMessagePriority>(A_PRIORITIES);
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		cols.add(new ProxyColumn<DmsAction>("dms.priority.run.time",
@@ -163,8 +166,9 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(R_PRIORITIES);
-				return new DefaultCellEditor(combo);
+				JComboBox<DMSMessagePriority> cbx =new JComboBox
+					<DMSMessagePriority>(R_PRIORITIES);
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		return cols;
@@ -235,7 +239,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Create a unique DMS action name */
 	private String createUniqueName() {
-		for(int uid = 1; uid <= 999; uid++) {
+		for (int uid = 1; uid <= 999; uid++) {
 			String n = action_plan.getName() + "_" + uid;
 			if (cache.lookupObject(n) == null)
 				return n;
