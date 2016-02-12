@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,8 +99,8 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	@Override
 	public boolean checkStyle(ItemStyle is, GateArmArray proxy) {
 		long styles = proxy.getStyles();
-		for(ItemStyle s: ItemStyle.toStyles(styles)) {
-			if(s == is)
+		for (ItemStyle s: ItemStyle.toStyles(styles)) {
+			if (s == is)
 				return true;
 		}
 		return false;
@@ -119,9 +119,10 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(ga)));
 		p.addSeparator();
-		p.add(new MapAction(desktop.client, ga, ga.getGeoLoc()));
+		p.add(new MapAction<GateArmArray>(desktop.client, ga,
+			ga.getGeoLoc()));
 		p.addSeparator();
-		if(TeslaAction.isConfigured()) {
+		if (TeslaAction.isConfigured()) {
 			p.addSeparator();
 			p.add(new TeslaAction<GateArmArray>(ga));
 		}
