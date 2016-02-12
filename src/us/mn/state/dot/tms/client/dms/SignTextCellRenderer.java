@@ -33,6 +33,14 @@ public class SignTextCellRenderer implements ListCellRenderer<SignText> {
 	/** Highlight color for special rank levels */
 	static private final Color HIGHLIGHT = new Color(204, 204, 255);
 
+	/** Get a sign text as string */
+	static private String asText(SignText value) {
+		if (value != null)
+			return new MultiString(value.getMulti()).asText();
+		else
+			return "";
+	}
+
 	/** Cell renderer */
 	private final DefaultListCellRenderer cell =
 		new DefaultListCellRenderer();
@@ -48,16 +56,11 @@ public class SignTextCellRenderer implements ListCellRenderer<SignText> {
 		JList<? extends SignText> list, SignText value, int index,
 		boolean isSelected, boolean cellHasFocus)
 	{
-		String v = "";
-		if (value != null) {
-			v = new MultiString(value.getMulti()).asText();
-			if (value.getRank() != 50 && !isSelected)
-				cell.setBackground(HIGHLIGHT);
-			else
-				cell.setBackground(null);
-		} else
-			cell.setBackground(null);
-		return cell.getListCellRendererComponent(list, v, index,
+		cell.setBackground(null);
+		cell.getListCellRendererComponent(list, asText(value), index,
 			isSelected, cellHasFocus);
+		if (value != null && (value.getRank() != 50) && !isSelected)
+			cell.setBackground(HIGHLIGHT);
+		return cell;
 	}
 }
