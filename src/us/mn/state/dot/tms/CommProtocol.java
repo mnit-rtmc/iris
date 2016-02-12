@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,8 +14,6 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms;
-
-import java.util.LinkedList;
 
 /**
  * Communication protocol enumeration.  The ordinal values correspond to the
@@ -133,20 +131,17 @@ public enum CommProtocol {
 	/** Protocol description */
 	public final String description;
 
-	/** Get a comm protocol from an ordinal value */
-	static public CommProtocol fromOrdinal(short o) {
-		for (CommProtocol cp: values()) {
-			if (cp.ordinal() == o)
-				return cp;
-		}
-		return null;
+	/** Get the string representation */
+	@Override
+	public String toString() {
+		return description;
 	}
 
-	/** Get an array of comm protocol descriptions */
-	static public String[] getDescriptions() {
-		LinkedList<String> d = new LinkedList<String>();
-		for (CommProtocol cp: values())
-			d.add(cp.description);
-		return d.toArray(new String[0]);
+	/** Get a comm protocol from an ordinal value */
+	static public CommProtocol fromOrdinal(short o) {
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return null;
 	}
 }

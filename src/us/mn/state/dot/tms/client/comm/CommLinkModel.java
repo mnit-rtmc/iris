@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.comm;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
@@ -34,14 +33,6 @@ import us.mn.state.dot.tms.units.Interval;
  * @author Douglas Lau
  */
 public class CommLinkModel extends ProxyTableModel<CommLink> {
-
-	/** List of all possible protocol selections */
-	static private final LinkedList<String> PROTOCOLS =
-		new LinkedList<String>();
-	static {
-		for (String cp: CommProtocol.getDescriptions())
-			PROTOCOLS.add(cp);
-	}
 
 	/** Create the columns in the model */
 	@Override
@@ -85,19 +76,23 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 		});
 		cols.add(new ProxyColumn<CommLink>("comm.link.protocol", 140) {
 			public Object getValueAt(CommLink cl) {
-				return PROTOCOLS.get(cl.getProtocol());
+//				return PROTOCOLS.get(cl.getProtocol());
+				return CommProtocol.fromOrdinal(
+					cl.getProtocol());
 			}
 			public boolean isEditable(CommLink cl) {
 				return canUpdate(cl, "protocol");
 			}
 			public void setValueAt(CommLink cl, Object value) {
-				cl.setProtocol(Short.valueOf(
-					(short)PROTOCOLS.indexOf(value)));
+				if (value instanceof CommProtocol) {
+					CommProtocol cp = (CommProtocol) value;
+					cl.setProtocol((short) cp.ordinal());
+				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(
-					PROTOCOLS.toArray());
-				return new DefaultCellEditor(combo);
+				JComboBox<CommProtocol> cbx = new JComboBox
+					<CommProtocol>(CommProtocol.values());
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		cols.add(new ProxyColumn<CommLink>("comm.link.poll_enabled", 56,
