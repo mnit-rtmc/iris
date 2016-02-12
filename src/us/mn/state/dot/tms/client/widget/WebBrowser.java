@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2014  Minnesota Department of Transportation
+ * Copyright (C) 2005-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,22 +64,23 @@ public class WebBrowser {
 	/** Open a web browser on a Mac computer */
 	static private void openMac(String url) throws IOException {
 		try {
-			Class mgr = Class.forName("com.apple.eio.FileManager");
+			Class<?> mgr = Class.forName(
+				"com.apple.eio.FileManager");
 			Method openURL = mgr.getDeclaredMethod("openURL",
 				new Class[] { String.class }
 			);
 			openURL.invoke(null, new Object[] { url });
 		}
-		catch(ClassNotFoundException e) {
+		catch (ClassNotFoundException e) {
 			throw BROWSER_NOT_FOUND;
 		}
-		catch(NoSuchMethodException e) {
+		catch (NoSuchMethodException e) {
 			throw BROWSER_NOT_FOUND;
 		}
-		catch(IllegalAccessException e) {
+		catch (IllegalAccessException e) {
 			throw BROWSER_NOT_FOUND;
 		}
-		catch(InvocationTargetException e) {
+		catch (InvocationTargetException e) {
 			throw BROWSER_NOT_FOUND;
 		}
 	}
@@ -115,7 +116,7 @@ public class WebBrowser {
 		try {
 			return p.waitFor() == 0;
 		}
-		catch(InterruptedException e) {
+		catch (InterruptedException e) {
 			return false;
 		}
 	}
