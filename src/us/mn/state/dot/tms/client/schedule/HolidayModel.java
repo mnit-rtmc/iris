@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2014  Minnesota Department of Transportation
+ * Copyright (C) 2003-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -130,9 +130,9 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				h.setMonth(MONTHS.indexOf(value) - 1);
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(
-					MONTHS.toArray());
-				return new DefaultCellEditor(combo);
+				JComboBox<String> cbx = new JComboBox<String>(
+					MONTHS.toArray(new String[0]));
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		cols.add(new ProxyColumn<Holiday>("action.plan.day.name", 64) {
@@ -146,8 +146,9 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				h.setDay(DAYS.indexOf(value));
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(DAYS.toArray());
-				return new DefaultCellEditor(combo);
+				JComboBox<String> cbx = new JComboBox<String>(
+					DAYS.toArray(new String[0]));
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		cols.add(new ProxyColumn<Holiday>("action.plan.week", 80) {
@@ -161,9 +162,9 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				h.setWeek(WEEKS.indexOf(value) - 1);
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(
-					WEEKS.toArray());
-				return new DefaultCellEditor(combo);
+				JComboBox<String> cbx = new JComboBox<String>(
+					WEEKS.toArray(new String[0]));
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		cols.add(new ProxyColumn<Holiday>("action.plan.weekday", 100) {
@@ -177,9 +178,9 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				h.setWeekday(WEEKDAYS.indexOf(value));
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(
-					WEEKDAYS.toArray());
-				return new DefaultCellEditor(combo);
+				JComboBox<String> cbx = new JComboBox<String>(
+					WEEKDAYS.toArray(new String[0]));
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		cols.add(new ProxyColumn<Holiday>("action.plan.day.shift", 64) {
@@ -193,9 +194,9 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 				h.setShift(SHIFTS.indexOf(value) - 2);
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(
-					SHIFTS.toArray());
-				return new DefaultCellEditor(combo);
+				JComboBox<String> cbx = new JComboBox<String>(
+					SHIFTS.toArray(new String[0]));
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		return cols;
