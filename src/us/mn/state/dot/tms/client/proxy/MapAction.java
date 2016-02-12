@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.client.IrisClient;
  *
  * @author Douglas Lau
  */
-public class MapAction<T extends SonarObject> extends ProxyAction {
+public class MapAction<T extends SonarObject> extends ProxyAction<T> {
 
 	/** IRIS client */
 	private final IrisClient client;
@@ -52,8 +52,9 @@ public class MapAction<T extends SonarObject> extends ProxyAction {
 	}
 
 	/** Actually perform the action */
+	@Override
 	protected void doActionPerformed(ActionEvent e) {
-		if(lat != null && lon != null) {
+		if (lat != null && lon != null) {
 			client.setMapExtent(ZoomLevel.FIFTEEN, lat.floatValue(),
 				lon.floatValue());
 		}
