@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,7 +84,7 @@ public class DayPlanPanel extends JPanel {
 	};
 
 	/** Combo box for day plans */
-	private final JComboBox day_cbx = new JComboBox();
+	private final JComboBox<DayPlan> day_cbx = new JComboBox<DayPlan>();
 
 	/** Action to delete the selected day plan */
 	private final IAction del_plan = new IAction("action.plan.day.delete") {
@@ -152,8 +152,7 @@ public class DayPlanPanel extends JPanel {
 		hol_pnl = new ProxyTablePanel<Holiday>(new HolidayModel(s,
 			null));
 		day_cbx.setAction(day);
-		day_cbx.setPrototypeDisplayValue("0123456789");
-		day_cbx.setModel(new IComboBoxModel(
+		day_cbx.setModel(new IComboBoxModel<DayPlan>(
 			s.getSonarState().getDayModel()));
 		day_cbx.setEditable(canAdd());
 		GridBagConstraints bag = new GridBagConstraints();
