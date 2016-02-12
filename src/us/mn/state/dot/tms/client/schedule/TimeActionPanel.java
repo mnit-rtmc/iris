@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@ public class TimeActionPanel extends ProxyTablePanel<TimeAction> {
 	private final ILabel day_plan_lbl = new ILabel("action.plan.day");
 
 	/** Day plan combo box */
-	private final JComboBox day_plan_cbx = new JComboBox();
+	private final JComboBox<DayPlan> day_plan_cbx =new JComboBox<DayPlan>();
 
 	/** Date label */
 	private final ILabel date_lbl = new ILabel("action.plan.date");
