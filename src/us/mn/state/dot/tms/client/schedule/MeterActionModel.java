@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,8 +59,10 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 					ma.setPhase((PlanPhase)value);
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox cbx = new JComboBox();
-				cbx.setModel(new IComboBoxModel(phase_mdl));
+				JComboBox<PlanPhase> cbx = new JComboBox
+					<PlanPhase>();
+				cbx.setModel(new IComboBoxModel<PlanPhase>(
+					phase_mdl));
 				return new DefaultCellEditor(cbx);
 			}
 		});
