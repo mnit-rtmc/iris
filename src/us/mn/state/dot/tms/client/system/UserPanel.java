@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -97,7 +97,7 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	private final IComboBoxModel<Role> role_mdl;
 
 	/** Role combo box */
-	private final JComboBox role_cbx;
+	private final JComboBox<Role> role_cbx;
 
 	/** Role action */
 	private final UAction role_act = new UAction("role") {
@@ -127,7 +127,7 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		watcher = new ProxyWatcher<User>(cache, this, false);
 		r_list = new ProxyListModel<Role>(s.getSonarState().getRoles());
 		role_mdl = new IComboBoxModel<Role>(r_list);
-		role_cbx = new JComboBox(role_mdl);
+		role_cbx = new JComboBox<Role>(role_mdl);
 	}
 
 	/** Initialize the panel */
