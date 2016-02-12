@@ -152,7 +152,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	};
 
 	/** Advance warning beacon combo box */
-	private final JComboBox beacon_cbx = new JComboBox();
+	private final JComboBox<Beacon> beacon_cbx = new JComboBox<Beacon>();
 
 	/** Advance warning beacon combo box model */
 	private final IComboBoxModel<Beacon> beacon_mdl;
