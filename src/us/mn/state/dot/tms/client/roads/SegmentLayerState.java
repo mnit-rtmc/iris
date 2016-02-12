@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,8 +37,8 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 	private final SegmentBuilder builder;
 
 	/** Create a new segment layer */
-	public SegmentLayerState(R_NodeManager m, ProxyLayer l, MapBean mb,
-		SegmentBuilder sb)
+	public SegmentLayerState(R_NodeManager m, ProxyLayer<R_Node> l,
+		MapBean mb, SegmentBuilder sb)
 	{
 		super(l, mb);
 		setTheme(new DensityTheme());
