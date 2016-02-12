@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +25,7 @@ import us.mn.state.dot.tms.client.Session;
  *
  * @author Travis Swanston
  */
-public class SignGroupComboBox extends JComboBox {
+public class SignGroupComboBox extends JComboBox<SignGroup> {
 
 	/** SignGroup combo box model */
 	private SignGroupComboBoxModel model;
@@ -48,6 +49,4 @@ public class SignGroupComboBox extends JComboBox {
 		if (!enable)
 			setSelectedItem(null);
 	}
-
 }
-
