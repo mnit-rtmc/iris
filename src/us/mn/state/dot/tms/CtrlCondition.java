@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,8 +13,6 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms;
-
-import java.util.LinkedList;
 
 /**
  * Controller condition enumeration.   The ordinal values correspond to the
@@ -30,19 +28,10 @@ public enum CtrlCondition {
 
 	/** Get a controller condition from an ordinal value */
 	static public CtrlCondition fromOrdinal(int o) {
-		for (CtrlCondition c: values()) {
-			if (c.ordinal() == o)
-				return c;
-		}
-		return PLANNED;
-	}
-
-	/** Get an array of condition descriptions */
-	static public String[] getDescriptions() {
-		LinkedList<String> d = new LinkedList<String>();
-		for (CtrlCondition c: values())
-			d.add(c.toString());
-		return d.toArray(new String[0]);
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return PLANNED;
 	}
 
 	/** Get values with null as first */

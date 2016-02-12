@@ -115,8 +115,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	};
 
 	/** Condition combobox */
-	private final JComboBox<String> condition_cbx =
-		new JComboBox<String>(CtrlCondition.getDescriptions());
+	private final JComboBox<CtrlCondition> condition_cbx =
+		new JComboBox<CtrlCondition>(CtrlCondition.values());
 
 	/** Location panel */
 	private final LocationPanel loc_pnl;
