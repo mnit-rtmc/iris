@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,14 +45,15 @@ public class ControllerPanel extends ProxyTablePanel<Controller> {
 		protected void doActionPerformed(ActionEvent e) {
 			Object v = cond_cbx.getSelectedItem();
 			if (v instanceof CtrlCondition)
-				setCondition((CtrlCondition)v);
+				setCondition((CtrlCondition) v);
 			else
 				setCondition(null);
 		}
 	};
 
 	/** Condition combobox */
-	private final JComboBox cond_cbx;
+	private final JComboBox<CtrlCondition> cond_cbx =
+		new JComboBox<CtrlCondition>(CtrlCondition.values_with_null());
 
 	/** Comm filter label */
 	private final ILabel comm_lbl = new ILabel("controller.comm.filter");
@@ -69,13 +70,12 @@ public class ControllerPanel extends ProxyTablePanel<Controller> {
 	};
 
 	/** Comm state combo box */
-	private final JComboBox comm_cbx;
+	private final JComboBox<CommState> comm_cbx =
+		new JComboBox<CommState>(CommState.values_with_null());
 
 	/** Create a new controller panel */
 	public ControllerPanel(Session s) {
 		super(new ControllerTableModel(s));
-		cond_cbx = new JComboBox(CtrlCondition.values_with_null());
-		comm_cbx = new JComboBox(CommState.values_with_null());
 	}
 
 	/** Initialize the panel */
