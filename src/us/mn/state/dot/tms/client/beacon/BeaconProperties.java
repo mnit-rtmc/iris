@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2015  Minnesota Department of Transportation
+ * Copyright (C) 2004-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,7 +69,8 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 	};
 
 	/** Camera preset combo box */
-	private final JComboBox preset_cbx = new JComboBox();
+	private final JComboBox<CameraPreset> preset_cbx =
+		new JComboBox<CameraPreset>();
 
 	/** Camera preset combo box model */
 	private final IComboBoxModel<CameraPreset> preset_mdl;
