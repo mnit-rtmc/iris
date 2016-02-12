@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,8 @@ public class ActionPlanPanel extends ProxyTablePanel<ActionPlan> {
 	private final ILabel phase_lbl =new ILabel("action.plan.default.phase");
 
 	/** Plan phase combo box */
-	private final JComboBox phase_cbx = new JComboBox();
+	private final JComboBox<PlanPhase> phase_cbx =
+		new JComboBox<PlanPhase>();
 
 	/** Plan phase model */
 	private final IComboBoxModel<PlanPhase> phase_mdl;
