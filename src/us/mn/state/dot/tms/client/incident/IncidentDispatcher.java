@@ -101,7 +101,7 @@ public class IncidentDispatcher extends IPanel
 	private final TypeCache<Incident> cache;
 
 	/** Incident detail proxy list model */
-	private final ProxyListModel<IncidentDetail> dtl_model;
+	private final ProxyListModel<IncidentDetail> detail_mdl;
 
 	/** Type label */
 	private final JLabel type_lbl = createValueLabel();
@@ -197,7 +197,7 @@ public class IncidentDispatcher extends IPanel
 		sel_model = manager.getSelectionModel();
 		creator = ic;
 		cache = s.getSonarState().getIncidents();
-		dtl_model = new ProxyListModel<IncidentDetail>(
+		detail_mdl = new ProxyListModel<IncidentDetail>(
 			s.getSonarState().getIncidentDetails());
 	}
 
@@ -205,9 +205,10 @@ public class IncidentDispatcher extends IPanel
 	@Override
 	public void initialize() {
 		super.initialize();
-		dtl_model.initialize();
+		detail_mdl.initialize();
 		detail_cbx.setRenderer(new IncidentDetailRenderer());
-		detail_cbx.setModel(new IComboBoxModel(dtl_model));
+		detail_cbx.setModel(new IComboBoxModel<IncidentDetail>(
+			detail_mdl));
 		type_lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
 		cam_pnl.add(camera_cbx, CAMERA_CBOX);
 		cam_pnl.add(camera_btn, CAMERA_BTN);
@@ -345,8 +346,8 @@ public class IncidentDispatcher extends IPanel
 	/** Get the selected incident detail */
 	private IncidentDetail getSelectedDetail() {
 		Object detail = detail_cbx.getSelectedItem();
-		if(detail instanceof IncidentDetail)
-			return (IncidentDetail)detail;
+		if (detail instanceof IncidentDetail)
+			return (IncidentDetail) detail;
 		else
 			return null;
 	}
@@ -380,14 +381,14 @@ public class IncidentDispatcher extends IPanel
 	/** Get the incident proxy object */
 	protected Incident getProxy(String name) {
 		// wait for up to 20 seconds for proxy to be created
-		for(int i = 0; i < 200; i++) {
+		for (int i = 0; i < 200; i++) {
 			Incident inc = IncidentHelper.lookup(name);
-			if(inc != null)
+			if (inc != null)
 				return inc;
 			try {
 				Thread.sleep(100);
 			}
-			catch(InterruptedException e) {
+			catch (InterruptedException e) {
 				// Ignore
 			}
 		}
@@ -416,7 +417,7 @@ public class IncidentDispatcher extends IPanel
 	/** A proxy has been changed */
 	@Override
 	public void proxyChanged(Incident proxy, String a) {
-		if(proxy == sel_model.getSingleSelection())
+		if (proxy == sel_model.getSingleSelection())
 			updateAttribute(proxy, a);
 	}
 
@@ -477,7 +478,7 @@ public class IncidentDispatcher extends IPanel
 
 	/** Set a single selected incident */
 	private void setSelected(Incident inc) {
-		if(inc instanceof ClientIncident)
+		if (inc instanceof ClientIncident)
 			watch(null);
 		else
 			watch(inc);
@@ -491,7 +492,7 @@ public class IncidentDispatcher extends IPanel
 
 	/** Enable the dispatcher widgets */
 	private void enableWidgets(Incident inc) {
-		if(inc instanceof ClientIncident) {
+		if (inc instanceof ClientIncident) {
 			boolean create = isAddPermitted("oname");
 			detail_cbx.setEnabled(create);
 			camera_cbx.setEnabled(create);
@@ -521,7 +522,7 @@ public class IncidentDispatcher extends IPanel
 
 	/** Update one attribute on the form */
 	protected void doUpdateAttribute(Incident inc, String a) {
-		if(a == null) {
+		if (a == null) {
 			detail_cbx.setSelectedItem(inc.getDetail());
 			type_lbl.setText(manager.getTypeDesc(inc));
 			type_lbl.setIcon(manager.getIcon(inc));
@@ -531,11 +532,11 @@ public class IncidentDispatcher extends IPanel
 				camera_cbx.setModel(createCameraModel(inc));
 			setCameraAction(inc);
 		}
-		if(a == null || a.equals("impact"))
+		if (a == null || a.equals("impact"))
 			impact_pnl.setImpact(inc.getImpact());
-		if(a == null || a.equals("cleared"))
+		if (a == null || a.equals("cleared"))
 			clear_btn.setSelected(inc.getCleared());
-		if(a != null && (a.equals("impact") || a.equals("cleared")))
+		if (a != null && (a.equals("impact") || a.equals("cleared")))
 			enableWidgets(inc);
 	}
 
@@ -585,7 +586,7 @@ public class IncidentDispatcher extends IPanel
 
 	/** Check if the user can deploy signs for an incident */
 	private boolean canDeploy(Incident inc) {
-		switch(LaneType.fromOrdinal(inc.getLaneType())) {
+		switch (LaneType.fromOrdinal(inc.getLaneType())) {
 		case MAINLINE:
 			return canSendIndications();
 		default:
