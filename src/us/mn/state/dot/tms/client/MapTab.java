@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,8 @@ import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 
 /**
  * Side panel tab for main IRIS map interface.
@@ -51,6 +53,17 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 		return tip;
 	}
 
+	/** Listener to select side panel tab */
+	private final ProxySelectionListener listener =
+		new ProxySelectionListener()
+	{
+		public void selectionChanged() {
+			if (side_pnl != null &&
+			    getSelectionModel().getSelectedCount() > 0)
+				side_pnl.setSelectedTab(MapTab.this);
+		}
+	};
+
 	/** Create a new map tab */
 	protected MapTab(ProxyManager<T> m) {
 		super(new BorderLayout());
@@ -58,6 +71,12 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 		String t = m.getSonarType() + ".tab";
 		name = I18N.get(t);
 		tip = I18N.get(t + ".tooltip");
+		getSelectionModel().addProxySelectionListener(listener);
+	}
+
+	/** Get the proxy selection model */
+	private ProxySelectionModel<T> getSelectionModel() {
+		return manager.getSelectionModel();
 	}
 
 	/** Initialize the map tab */
@@ -65,7 +84,16 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 
 	/** Perform any clean up necessary */
 	public void dispose() {
+		getSelectionModel().removeProxySelectionListener(listener);
 		removeAll();
+	}
+
+	/** Side panel for this tab */
+	private SidePanel side_pnl;
+
+	/** Set the side panel */
+	public void setSidePanel(SidePanel p) {
+		side_pnl = p;
 	}
 
 	/** Current map for this tab */

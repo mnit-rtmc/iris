@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.util.LinkedList;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
@@ -25,8 +24,6 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
-import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
-import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -41,10 +38,6 @@ public class SidePanel extends JPanel {
 
 	/** Map associated with the pane */
 	private final MapBean map;
-
-	/** List of tab switchers */
-	private final LinkedList<TabSwitcher<?>> switchers =
-		new LinkedList<TabSwitcher<?>>();
 
 	/** Most recently selected map tab ID.  This is not cleared when tabs
 	 * are removed, so that tab is remembered even after logout. */
@@ -97,25 +90,16 @@ public class SidePanel extends JPanel {
 		try {
 			tab_pane.setSelectedComponent(mt);
 		}
-		catch(IllegalArgumentException e) {
+		catch (IllegalArgumentException e) {
 			// maybe that tab is on another screen?
 		}
 	}
 
-	/** Get the home proxy layer state for a map tab */
-	private ProxyLayerState getHomeProxyLayerState(MapTab<?> mt) {
-		LayerState ls = mt.getHomeLayer(map);
-		if(ls instanceof ProxyLayerState)
-			return (ProxyLayerState)ls;
-		else
-			return null;
-	}
-
 	/** Set the selected layer */
 	private void setSelectedLayer(ProxyLayerState sel) {
-		if(sel_layer != null && sel != sel_layer)
+		if (sel_layer != null && sel != sel_layer)
 			sel_layer.setTabSelected(false);
-		if(sel != null)
+		if (sel != null)
 			sel.setTabSelected(true);
 		sel_layer = sel;
 	}
@@ -124,41 +108,25 @@ public class SidePanel extends JPanel {
 	public void addTab(MapTab<?> mt) {
 		tab_pane.addTab(mt.getName(), null, mt, mt.getTip());
 		mt.setMap(map);
+		mt.setSidePanel(this);
 		ProxyLayerState pls = getHomeProxyLayerState(mt);
 		if (pls != null) {
 			if (tab_pane.getTabCount() == 1)
 				setSelectedLayer(pls);
-			TabSwitcher<?> ts = new TabSwitcher(mt,
-				pls.getSelectionModel());
-			switchers.add(ts);
 		}
 	}
 
-	/** Class to listen for proxy selection events and select tabs */
-	private class TabSwitcher<T extends SonarObject>
-		implements ProxySelectionListener
-	{
-		private final MapTab<T> tab;
-		private final ProxySelectionModel<T> model;
-		protected TabSwitcher(MapTab<T> mt, ProxySelectionModel<T> psm){
-			tab = mt;
-			model = psm;
-			model.addProxySelectionListener(this);
-		}
-		protected void dispose() {
-			model.removeProxySelectionListener(this);
-		}
-		public void selectionChanged() {
-			if (model.getSelectedCount() > 0)
-				setSelectedTab(tab);
-		}
+	/** Get the home proxy layer state for a map tab */
+	private ProxyLayerState getHomeProxyLayerState(MapTab<?> mt) {
+		LayerState ls = mt.getHomeLayer(map);
+		if (ls instanceof ProxyLayerState)
+			return (ProxyLayerState) ls;
+		else
+			return null;
 	}
 
 	/** Remove all the tabs */
 	public void removeTabs() {
-		for (TabSwitcher<?> ts: switchers)
-			ts.dispose();
-		switchers.clear();
 		sel_layer = null;
 		tab_pane.removeAll();
 	}
@@ -166,7 +134,7 @@ public class SidePanel extends JPanel {
 	/** Set the menu bar */
 	public void setMenuBar(IMenuBar bar) {
 		removeAll();
-		if(bar != null)
+		if (bar != null)
 			add(bar, BorderLayout.NORTH);
 		add(tab_pane, BorderLayout.CENTER);
 	}
