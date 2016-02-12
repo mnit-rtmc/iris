@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import java.awt.geom.Ellipse2D;
 import java.util.HashMap;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
+import javax.swing.ListCellRenderer;
 import us.mn.state.dot.tms.BitmapGraphic;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
@@ -31,10 +32,25 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  *
  * @author Douglas Lau
  */
-public class GlyphCellRenderer extends DefaultListCellRenderer {
+public class GlyphCellRenderer implements ListCellRenderer<Integer> {
 
 	/** Margin reserved for default renderer */
 	static private final int MARGIN = UI.scaled(12);
+
+	/** Cell to render */
+	private final DefaultListCellRenderer cell =
+		new DefaultListCellRenderer()
+	{
+		@Override
+		public void paintComponent(Graphics g) {
+			super.paintComponent(g);
+			BitmapGraphic bmap = bitmap;
+			if (bmap != null) {
+				configureRenderer(bmap);
+				paintPixels((Graphics2D) g, bmap);
+			}
+		}
+	};
 
 	/** Hash of code points to bitmap graphics */
 	private final HashMap<Integer, BitmapGraphic> bitmaps =
@@ -57,17 +73,18 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 
 	/** Get a renderer for the specified list value */
 	@Override
-	public Component getListCellRendererComponent(JList list, Object value,
-		int index, boolean isSelected, boolean cellHasFocus)
+	public Component getListCellRendererComponent(
+		JList<? extends Integer> list, Integer value, int index,
+		boolean isSelected, boolean cellHasFocus)
 	{
 		String val = "";
-		if (value instanceof Integer) {
-			int v = (Integer)value;
+		if (value != null) {
+			int v = value;
 			bitmap = lookupBitmap(v);
-			val = String.valueOf((char)v);
+			val = String.valueOf((char) v);
 		} else
 			bitmap = null;
-		return super.getListCellRendererComponent(list, val, index,
+		return cell.getListCellRendererComponent(list, val, index,
 			isSelected, cellHasFocus);
 	}
 
@@ -82,17 +99,6 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 
 	/** Top margin for currently configured glyph */
 	private int top;
-
-	/** Paint the currently configured glyph */
-	@Override
-	public void paintComponent(Graphics g) {
-		super.paintComponent(g);
-		BitmapGraphic bmap = bitmap;
-		if (bmap != null) {
-			configureRenderer(bmap);
-			paintPixels((Graphics2D)g, bmap);
-		}
-	}
 
 	/** Configure the list cell renderer */
 	private void configureRenderer(BitmapGraphic bmap) {
@@ -111,7 +117,7 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 
 	/** Get height of area for bitmap */
 	private float getBitmapHeight() {
-		int h = getHeight();
+		int h = cell.getHeight();
 		return (h > 2) ? h - 2 : 0;
 	}
 
@@ -123,7 +129,7 @@ public class GlyphCellRenderer extends DefaultListCellRenderer {
 
 	/** Get width of area for bitmap */
 	private int getBitmapWidth() {
-		return getWidth() - MARGIN;
+		return cell.getWidth() - MARGIN;
 	}
 
 	/** Calculate the top of the current glyph */
