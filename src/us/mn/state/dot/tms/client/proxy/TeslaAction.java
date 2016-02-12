@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.client.widget.WebBrowser;
  *
  * @author Douglas Lau
  */
-public class TeslaAction<T extends SonarObject> extends ProxyAction {
+public class TeslaAction<T extends SonarObject> extends ProxyAction<T> {
 
 	/** Check if the TESLA system attribute is configured */
 	static public boolean isConfigured() {
@@ -38,16 +38,17 @@ public class TeslaAction<T extends SonarObject> extends ProxyAction {
 	public TeslaAction(T p) {
 		super("device.log", p);
 		Object v = getValue(Action.NAME);
-		if(v instanceof String) {
-			String s = (String)v;
+		if (v instanceof String) {
+			String s = (String) v;
 			putValue(Action.NAME, s + " " + p.getName());
 		}
 	}
 
 	/** Actually perform the action */
+	@Override
 	protected void doActionPerformed(ActionEvent e) throws IOException {
 		String host = SystemAttrEnum.TESLA_HOST.getString();
-		if(host != null && host.trim().length() > 0) {
+		if (host != null && host.trim().length() > 0) {
 			WebBrowser.open(new URL("http://" + host +
 				"/tesla/user/Ticket.do?" +
 				"command=form" +
