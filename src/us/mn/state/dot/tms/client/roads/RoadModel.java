@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,9 +67,9 @@ public class RoadModel extends ProxyTableModel<Road> {
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(
-					RoadClass.values());
-				return new DefaultCellEditor(combo);
+				JComboBox<RoadClass> cbx = new JComboBox
+					<RoadClass>(RoadClass.values());
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		cols.add(new ProxyColumn<Road>("location.direction", 120) {
@@ -86,9 +86,9 @@ public class RoadModel extends ProxyTableModel<Road> {
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(
-					Direction.values());
-				return new DefaultCellEditor(combo);
+				JComboBox<Direction> cbx = new JComboBox
+					<Direction>(Direction.values());
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		cols.add(new ProxyColumn<Road>("location.alt_dir", 120) {
@@ -105,9 +105,9 @@ public class RoadModel extends ProxyTableModel<Road> {
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox combo = new JComboBox(
-					Direction.values());
-				return new DefaultCellEditor(combo);
+				JComboBox<Direction> cbx = new JComboBox
+					<Direction>(Direction.values());
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		return cols;
