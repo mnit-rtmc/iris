@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,8 +106,9 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				return new DefaultCellEditor(new JComboBox(
-					CtrlCondition.values()));
+				JComboBox<CtrlCondition> cbx = new JComboBox
+					<CtrlCondition>(CtrlCondition.values());
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		cols.add(new ProxyColumn<Controller>("controller.comm", 44,
