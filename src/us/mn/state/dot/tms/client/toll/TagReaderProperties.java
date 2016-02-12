@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2015  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,8 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 	private final JTextArea notes_txt = new JTextArea(3, 24);
 
 	/** Toll zone combobox */
-	private final JComboBox toll_zone_cbx = new JComboBox();
+	private final JComboBox<TollZone> toll_zone_cbx =
+		new JComboBox<TollZone>();
 
 	/** Toll zone model */
 	private final IComboBoxModel<TollZone> toll_zone_mdl;
@@ -70,7 +71,7 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 		new DefaultListModel<DMS>();
 
 	/** DMS list */
-	private final JList dms_lst = new JList(dms_mdl);
+	private final JList<DMS> dms_lst = new JList<DMS>(dms_mdl);
 
 	/** Link DMS action */
 	private final IAction link_btn = new IAction("tag_reader.link") {
@@ -153,7 +154,6 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 			s.getSonarState().getTollZoneModel());
 		loc_pnl = new LocationPanel(s);
 		status_pnl = new IPanel();
-		dms_lst.setPrototypeCellValue("1234567890123456");
 		dms_lst.setVisibleRowCount(6);
 	}
 
