@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2015  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,7 +72,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	};
 
 	/** Camera combo box */
-	private final JComboBox camera_cbx = new JComboBox();
+	private final JComboBox<Camera> camera_cbx = new JComboBox<Camera>();
 
 	/** Approach camera combo box model */
 	private final IComboBoxModel<Camera> approach_mdl;
@@ -89,7 +89,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	};
 
 	/** Approach camera combo box */
-	private final JComboBox approach_cbx = new JComboBox();
+	private final JComboBox<Camera> approach_cbx = new JComboBox<Camera>();
 
 	/** Prerequisite combo box model */
 	private final IComboBoxModel<GateArmArray> prereq_mdl;
@@ -111,7 +111,8 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	};
 
 	/** Prerequisite combo box */
-	private final JComboBox prereq_cbx = new JComboBox();
+	private final JComboBox<GateArmArray> prereq_cbx =
+		new JComboBox<GateArmArray>();
 
 	/** Warning DMS combo box model */
 	private final IComboBoxModel<DMS> dms_mdl;
@@ -128,7 +129,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	};
 
 	/** Warning DMS combo box */
-	private final JComboBox dms_cbx = new JComboBox();
+	private final JComboBox<DMS> dms_cbx = new JComboBox<DMS>();
 
 	/** Text field for OPEN quick message */
 	private final JTextField open_msg_txt = new JTextField(20);
