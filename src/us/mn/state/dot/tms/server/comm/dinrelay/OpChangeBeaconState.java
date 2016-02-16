@@ -60,8 +60,8 @@ public class OpChangeBeaconState extends OpDevice<DinRelayProperty> {
 	protected class ChangeBeacon extends Phase<DinRelayProperty> {
 
 		/** Change the beacon state */
-		protected Phase<DinRelayProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<DinRelayProperty> poll(
+			CommMessage<DinRelayProperty> mess) throws IOException
 		{
 			int p = beacon.getPin();
 			if (p < 1 && p > 8) {
