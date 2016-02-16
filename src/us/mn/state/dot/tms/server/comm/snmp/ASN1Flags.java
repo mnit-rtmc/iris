@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ public class ASN1Flags<T extends Enum> extends ASN1Enum {
 	 * @param n MIB node.
 	 * @param idx Node index.
 	 * @param j Table index. */
+	@SuppressWarnings("unchecked")
 	public ASN1Flags(Class<T> e, MIBNode n, int idx, int j) {
 		super(e, n, idx, j);
 	}
@@ -32,12 +33,14 @@ public class ASN1Flags<T extends Enum> extends ASN1Enum {
 	/** Create a new ASN1 flags enum.
 	 * @param n MIB node.
 	 * @param idx Node index. */
+	@SuppressWarnings("unchecked")
 	public ASN1Flags(Class<T> e, MIBNode n, int idx) {
 		super(e, n, idx);
 	}
 
 	/** Create a new ASN1 flags enum.
 	 * @param n MIB node. */
+	@SuppressWarnings("unchecked")
 	public ASN1Flags(Class<T> e, MIBNode n) {
 		super(e, n);
 	}
