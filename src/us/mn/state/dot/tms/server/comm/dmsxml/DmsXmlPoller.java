@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,12 +18,10 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -36,7 +34,7 @@ import us.mn.state.dot.tms.server.comm.StreamMessenger;
 /**
  * This class provides a DMS Poller that communicates with
  * a standalone server via XML that provides DMS functionality.
- * It was developed for the Caltrans IRIS implementation. It 
+ * It was developed for the Caltrans IRIS implementation. It
  * maybe use useful for any application that needs to interface
  * IRIS DMS functionality with an external application.
  *
@@ -87,10 +85,11 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 	 *  @param o User sending message, may be null.
 	 *  @throws InvalidMessageException
 	 *  @see DMSImpl, DMS */
+	@SuppressWarnings("unchecked")
 	public void sendMessage(DMSImpl dms, SignMessage m, User o)
 		throws InvalidMessageException
 	{
-		LOG.log("DmsXmlPoller.sendMessage(" + dms + ", " + 
+		LOG.log("DmsXmlPoller.sendMessage(" + dms + ", " +
 			m + ", " + o+ ") called.");
 		if(dms == null || m == null)
 			return;
@@ -113,7 +112,7 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 		_sendRequest(dms, r, u, false);
 	}
 
-	/** Perform an initial get-configuration and a get-status 
+	/** Perform an initial get-configuration and a get-status
 	 *  operation for periodically queriable DMS. */
 	private void initialPoll(DMSImpl d, DeviceRequest r, User u) {
 		if(d == null)
@@ -129,8 +128,9 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 	}
 
 	/** Send a device request message to the sign from a specific user */
-	private void _sendRequest(DMSImpl dms, DeviceRequest r, User u, 
-		boolean startup) 
+	@SuppressWarnings("unchecked")
+	private void _sendRequest(DMSImpl dms, DeviceRequest r, User u,
+		boolean startup)
 	{
 		if(dms == null)
 			return;
@@ -151,7 +151,7 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 			// ignore
 		} else {
 			// ignore other requests
-			LOG.log("DmsXmlPoller.sendRequest(" + 
+			LOG.log("DmsXmlPoller.sendRequest(" +
 				dms.getName() +	"): ignored request r=" + r);
 		}
 	}

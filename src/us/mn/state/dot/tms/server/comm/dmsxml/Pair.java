@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -50,6 +50,7 @@ public class Pair {
 	 *          if not found.
 	 * @throws IOException if the specified car is not found.
 	 */
+	@SuppressWarnings("unchecked")
 	public static Pair findCar(Pair[] list, Comparable argcar)
 		throws IOException
 	{
