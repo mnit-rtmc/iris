@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2015  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ public class CommMessageImpl<T extends ControllerProperty>
 	 * @param m Messenger to use for communication.
 	 * @param o Controller operation.
 	 * @param pl Protocol debug log. */
-	public CommMessageImpl(Messenger m, OpController o, DebugLog pl) {
+	public CommMessageImpl(Messenger m, OpController<T> o, DebugLog pl) {
 		messenger = m;
 		p_log = pl;
 		op = o;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -286,12 +286,17 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Handle device contention.  Another operation has the device lock.
 	 * Ensure that we don't have a priority inversion problem. */
+	@SuppressWarnings("unchecked")
 	private void handleContention(Operation<T> op,
 		DeviceContentionException e)
 	{
-		Operation<T> oc = e.operation;
-		if(oc.getPriority().ordinal() > op.getPriority().ordinal()) {
-			if(PRIO_LOG.isOpen()) {
+		handleContention(op, e.operation);
+	}
+
+	/** Handle device contention */
+	private void handleContention(Operation<T> op, Operation<T> oc) {
+		if (oc.getPriority().ordinal() > op.getPriority().ordinal()) {
+			if (PRIO_LOG.isOpen()) {
 				PRIO_LOG.log("BUMPING " + oc + " from " +
 					oc.getPriority() + " to " +
 					op.getPriority());
@@ -299,7 +304,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 			oc.setPriority(op.getPriority());
 			// If, for some crazy reason, the operation is
 			// not on our queue, it will not be requeued.
-			if(!requeueOperation(oc)) {
+			if (!requeueOperation(oc)) {
 				oc.setFailed();
 				oc.cleanup();
 			}
