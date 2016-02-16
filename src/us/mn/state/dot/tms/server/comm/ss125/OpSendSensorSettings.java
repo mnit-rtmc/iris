@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -256,8 +256,8 @@ public class OpSendSensorSettings extends OpSS125 {
 	}
 
 	/** Phase after configuration is done */
-	protected Phase configDonePhase() {
-		if(config_updated)
+	protected Phase<SS125Property> configDonePhase() {
+		if (config_updated)
 			return new StoreConfigFlash();
 		else
 			return null;
