@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public class OpQueryDMSMessage extends OpAddco {
 
 	/** Create the second phase of the operation */
 	@Override
-	protected Phase phaseTwo() {
+	protected Phase<AddcoProperty> phaseTwo() {
 		return new QueryMessage();
 	}
 
@@ -48,8 +48,8 @@ public class OpQueryDMSMessage extends OpAddco {
 	private class QueryMessage extends Phase<AddcoProperty> {
 
 		/** Query the current message */
-		protected Phase<AddcoProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<AddcoProperty> poll(
+			CommMessage<AddcoProperty> mess) throws IOException
 		{
 			mess.add(msg_prop);
 			mess.queryProps();

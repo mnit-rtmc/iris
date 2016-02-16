@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,9 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  *
  * @author Douglas Lau
  */
-public class AddcoPoller extends MessagePoller implements DMSPoller {
-
+public class AddcoPoller extends MessagePoller<AddcoProperty>
+	implements DMSPoller
+{
 	/** Addco debug log */
 	static private final DebugLog ADDCO_LOG = new DebugLog("addco");
 
