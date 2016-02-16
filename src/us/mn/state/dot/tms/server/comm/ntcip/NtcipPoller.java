@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,6 +64,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	}
 
 	/** Send a device request message to the sign */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {
 		switch (r) {
@@ -111,6 +112,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	}
 
 	/** Send a new message to the sign */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void sendMessage(DMSImpl dms, SignMessage sm, User o)
 		throws InvalidMessageException
@@ -122,6 +124,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	}
 
 	/** Send a device request message to an LCS array */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch (r) {
@@ -141,6 +144,7 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	 * @param lcs_array LCS array.
 	 * @param ind New lane use indications.
 	 * @param o User who deployed the indications. */
+	@SuppressWarnings("unchecked")
 	@Override
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)

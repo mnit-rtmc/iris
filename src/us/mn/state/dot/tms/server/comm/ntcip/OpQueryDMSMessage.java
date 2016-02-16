@@ -107,6 +107,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	protected class QueryMessageSource extends Phase {
 
 		/** Query the current message source */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(source);
 			mess.queryProps();
@@ -119,6 +120,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	protected class QueryCurrentMessage extends Phase {
 
 		/** Query the current message */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1String ms = new ASN1String(dmsMessageMultiString
 				.node, DmsMessageMemoryType.currentBuffer

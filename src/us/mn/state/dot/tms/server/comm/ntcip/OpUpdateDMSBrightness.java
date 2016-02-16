@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,6 +75,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	protected class QueryBrightness extends Phase {
 
 		/** Query the DMS brightness status */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(max_level);
 			mess.add(p_level);
@@ -93,6 +94,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	protected class QueryBrightnessTable extends Phase {
 
 		/** Get the brightness table */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(b_levels);
 			mess.add(brightness);
@@ -112,6 +114,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	protected class SetManualControl extends Phase {
 
 		/** Set the manual control mode */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			control.setEnum(DmsIllumControl.manual);
 			mess.add(control);
@@ -125,6 +128,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	protected class SetBrightnessTable extends Phase {
 
 		/** Set the brightness table */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			// NOTE: if the existing table is not valid, don't mess
 			//       with it.  This check is needed for a certain
@@ -150,6 +154,7 @@ public class OpUpdateDMSBrightness extends OpDMS {
 	protected class SetPhotocellControl extends Phase {
 
 		/** Set the photocell control mode */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			control.setEnum(DmsIllumControl.photocell);
 			mess.add(control);

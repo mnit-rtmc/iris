@@ -62,6 +62,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	protected class QueryModuleCount extends Phase {
 
 		/** Query the number of modules */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer modules = globalMaxModules.makeInt();
 			mess.add(modules);
@@ -86,6 +87,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		}
 
 		/** Query the module make, model and version */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1String make = moduleMake.makeStr(mod);
 			ASN1String model = moduleModel.makeStr(mod);
@@ -118,6 +120,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	protected class QueryDmsInfo extends Phase {
 
 		/** Query the DMS information */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Flags<DmsSignAccess> access = new ASN1Flags<
 				DmsSignAccess>(DmsSignAccess.class,
@@ -171,6 +174,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	protected class QueryVmsInfo extends Phase {
 
 		/** Query the VMS information */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer s_height = vmsSignHeightPixels.makeInt();
 			ASN1Integer s_width = vmsSignWidthPixels.makeInt();
@@ -207,6 +211,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	protected class QueryV2 extends Phase {
 
 		/** Query the 1203v2 objects */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			MonochromeColor m_color = new MonochromeColor();
 			ASN1Enum<DmsColorScheme> color_scheme = new ASN1Enum<
@@ -240,6 +245,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	private class QueryGraphics extends Phase {
 
 		/** Query graphics objects */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(num_graphics);
 			mess.add(max_size);

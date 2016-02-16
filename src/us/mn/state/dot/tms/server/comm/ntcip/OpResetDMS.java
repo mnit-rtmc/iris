@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2015  Minnesota Department of Transportation
+ * Copyright (C) 2002-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,6 +48,7 @@ public class OpResetDMS extends OpDMS {
 	protected class ExecuteReset extends Phase {
 
 		/** Execute the DMS reset */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer reset = dmsSWReset.makeInt();
 			reset.setInteger(1);
@@ -66,6 +67,7 @@ public class OpResetDMS extends OpDMS {
 			RESET_TIMEOUT;
 
 		/** Check for reset completion */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer reset = dmsSWReset.makeInt();
 			mess.add(reset);

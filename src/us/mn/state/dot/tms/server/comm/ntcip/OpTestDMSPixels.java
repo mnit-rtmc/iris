@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,6 +90,7 @@ public class OpTestDMSPixels extends OpDMS {
 	protected class QueryTestStatus extends Phase {
 
 		/** Query the status of pixel test activation */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(activation);
 			mess.queryProps();
@@ -105,6 +106,7 @@ public class OpTestDMSPixels extends OpDMS {
 	protected class ActivatePixelTest extends Phase {
 
 		/** Activate the pixel test */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			activation.setEnum(PixelTestActivation.test);
 			mess.add(activation);
@@ -122,6 +124,7 @@ public class OpTestDMSPixels extends OpDMS {
 		       1000*SystemAttrEnum.DMS_PIXEL_TEST_TIMEOUT_SECS.getInt();
 
 		/** Check for test completion */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(activation);
 			mess.queryProps();
@@ -141,6 +144,7 @@ public class OpTestDMSPixels extends OpDMS {
 	protected class QueryRowCount extends Phase {
 
 		/** Query the row count in pixel failure table */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(total_rows);
 			mess.queryProps();
@@ -156,6 +160,7 @@ public class OpTestDMSPixels extends OpDMS {
 	protected class QueryTestAndMessageRows extends Phase {
 
 		/** Query test/message rows in pixel failure table */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			mess.add(test_rows);
 			mess.add(message_rows);
@@ -210,6 +215,7 @@ public class OpTestDMSPixels extends OpDMS {
 		}
 
 		/** Query one row in the pixel failure table */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer x_loc = pixelFailureXLocation.makeInt(
 				detectionType.ordinal(), row);

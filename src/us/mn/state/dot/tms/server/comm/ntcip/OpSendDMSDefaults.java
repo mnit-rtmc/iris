@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	protected class SetCommPowerLoss extends Phase {
 
 		/** Set the comm loss action */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer power_time =dmsShortPowerLossTime.makeInt();
 			ASN1Integer comm_time = dmsTimeCommLoss.makeInt();
@@ -82,6 +83,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	protected class PixelService extends Phase {
 
 		/** Set the pixel service schedule */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer dur = vmsPixelServiceDuration.makeInt();
 			ASN1Integer freq = vmsPixelServiceFrequency.makeInt();
@@ -104,6 +106,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	protected class MessageDefaults extends Phase {
 
 		/** Set the message defaults */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Enum<JustificationLine> line = new ASN1Enum<
 				JustificationLine>(JustificationLine.class,
@@ -136,6 +139,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	protected class LedstarDefaults extends Phase {
 
 		/** Set Ledstar-specific object defaults */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer temp = ledHighTempCutoff.makeInt();
 			ASN1Integer override = ledSignErrorOverride.makeInt();
@@ -167,6 +171,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	protected class SkylineDefaults extends Phase {
 
 		/** Set Skyline-specific object defaults */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer temp = dmsTempCritical.makeInt();
 			ASN1Integer day_night = dynBrightDayNight.makeInt();
@@ -203,6 +208,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	protected class AddcoDefaults extends Phase {
 
 		/** Set ADDCO-specific object defaults */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			// ADDCO brick signs have these dimensions
 			String make = dms.getMake();
