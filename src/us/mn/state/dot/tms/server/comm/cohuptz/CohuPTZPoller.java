@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +26,9 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  *
  * @author Travis Swanston
  */
-public class CohuPTZPoller extends MessagePoller implements CameraPoller {
-
+public class CohuPTZPoller extends MessagePoller<CohuPTZProperty>
+	implements CameraPoller
+{
 	/** Cohu camera address range constants */
 	static public final int ADDR_MIN = 1;
 	static public final int ADDR_MAX = 223;
