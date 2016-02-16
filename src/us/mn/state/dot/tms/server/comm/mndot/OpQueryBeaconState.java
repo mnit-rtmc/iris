@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2014  Minnesota Department of Transportation
+ * Copyright (C) 2004-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,8 +45,8 @@ public class OpQueryBeaconState extends Op170Device {
 	protected class QueryStatus extends Phase<MndotProperty> {
 
 		/** Query the beacon state */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			byte[] b = new byte[1];
 			mess.add(new MemoryProperty(meterAddress(

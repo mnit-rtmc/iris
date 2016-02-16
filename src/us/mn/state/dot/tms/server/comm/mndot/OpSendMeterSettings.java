@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -156,8 +156,8 @@ public class OpSendMeterSettings extends Op170Device {
 	protected class ResetWatchdogMonitor extends Phase<MndotProperty> {
 
 		/** Reset the watchdog monitor */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			byte[] data = {Address.WATCHDOG_BITS};
 			mess.add(new MemoryProperty(
@@ -171,8 +171,8 @@ public class OpSendMeterSettings extends Op170Device {
 	protected class ClearWatchdogMonitor extends Phase<MndotProperty> {
 
 		/** Clear the watchdog monitor */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			byte[] data = new byte[1];
 			mess.add(new MemoryProperty(
@@ -186,8 +186,8 @@ public class OpSendMeterSettings extends Op170Device {
 	protected class SetCommFail extends Phase<MndotProperty> {
 
 		/** Set the comm fail time */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			byte[] data = {MeterPoller.COMM_FAIL_THRESHOLD};
 			mess.add(new MemoryProperty(Address.COMM_FAIL, data));
@@ -200,8 +200,8 @@ public class OpSendMeterSettings extends Op170Device {
 	protected class SetTimingTable extends Phase<MndotProperty> {
 
 		/** Set the timing table for the ramp meter */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			MemoryProperty p = new MemoryProperty(tableAddress(),
 				new byte[54]);
@@ -232,8 +232,8 @@ public class OpSendMeterSettings extends Op170Device {
 	protected class ClearVerifies extends Phase<MndotProperty> {
 
 		/** Clear the meter verifies for the ramp meter */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			int address = getVerifyAddress();
 			mess.add(new MemoryProperty(address, new byte[1]));

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,8 +41,8 @@ public class OpReset170 extends Op170 {
 	protected class ResetDetectors extends Phase<MndotProperty> {
 
 		/** Reset the detectors */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			// Enabling the detector-reset pin can cause some
 			// detector cards to have "chattering" volume, along
@@ -61,8 +61,8 @@ public class OpReset170 extends Op170 {
 	protected class ClearDetectors extends Phase<MndotProperty> {
 
 		/** Clear the detector reset */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			byte[] data = new byte[1];
 			MemoryProperty reset_mem = new MemoryProperty(
@@ -77,8 +77,8 @@ public class OpReset170 extends Op170 {
 	protected class Level1Restart extends Phase<MndotProperty> {
 
 		/** Restart the controller */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			mess.add(new Level1Property());
 			mess.storeProps();

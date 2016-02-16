@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,8 +66,8 @@ public class OpSendLCSIndications extends OpLCS {
 	protected class TurnOffDevices extends Phase<MndotProperty> {
 
 		/** Turn off devices */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			int address = Address.RAMP_METER_DATA +
 				Address.OFF_REMOTE_RATE;
@@ -84,8 +84,8 @@ public class OpSendLCSIndications extends OpLCS {
 	protected class SetOutputs extends Phase<MndotProperty> {
 
 		/** Set the special function outputs */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			byte[] buffer = createSpecialFunctionBuffer();
 			mess.add(new MemoryProperty(
@@ -102,8 +102,8 @@ public class OpSendLCSIndications extends OpLCS {
 	protected class TurnOnDevices extends Phase<MndotProperty> {
 
 		/** Turn on devices */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			int address = Address.RAMP_METER_DATA +
 				Address.OFF_REMOTE_RATE;

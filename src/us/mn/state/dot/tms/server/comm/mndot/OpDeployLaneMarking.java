@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,8 +63,8 @@ public class OpDeployLaneMarking extends Op170Device {
 	protected class QueryOutputs extends Phase<MndotProperty> {
 
 		/** Query the special function outputs */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			MemoryProperty prop = new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS, outputs);
@@ -78,8 +78,8 @@ public class OpDeployLaneMarking extends Op170Device {
 	protected class SetOutputs extends Phase<MndotProperty> {
 
 		/** Set the special function outputs */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			updateOutputs();
 			MemoryProperty prop = new MemoryProperty(

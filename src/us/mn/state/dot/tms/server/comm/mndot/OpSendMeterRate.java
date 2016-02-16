@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,8 +68,8 @@ public class OpSendMeterRate extends Op170Device {
 
 	/** Phase to send the red time */
 	protected class SendRedTime extends Phase<MndotProperty> {
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			MemoryProperty p = new MemoryProperty(redTimeAddress(),
 				new byte[2]);
@@ -87,8 +87,8 @@ public class OpSendMeterRate extends Op170Device {
 
 	/** Phase to send the (remote) metering rate */
 	protected class SendRate extends Phase<MndotProperty> {
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			MemoryProperty p = new MemoryProperty(
 				remoteRateAddress(), new byte[1]);

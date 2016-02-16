@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,8 +54,8 @@ public class OpQueryMeterStatus extends Op170Device {
 
 	/** Phase to query the meter data */
 	protected class QueryMeterData extends Phase<MndotProperty> {
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			MemoryProperty data_mem = new MemoryProperty(
 				meterAddress(Address.OFF_STATUS), data);
@@ -115,8 +115,8 @@ public class OpQueryMeterStatus extends Op170Device {
 
 	/** Phase to query a ramp meter red time */
 	protected class QueryRedTime extends Phase<MndotProperty> {
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			MemoryProperty red_mem = new MemoryProperty(
 				redTimeAddress(), new byte[2]);

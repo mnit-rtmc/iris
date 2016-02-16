@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,8 +45,8 @@ public class OpSendSampleSettings extends Op170 {
 	protected class SynchronizeClock extends Phase<MndotProperty> {
 
 		/** Synchronize the clock */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			mess.add(new SynchronizeProperty());
 			mess.storeProps();
@@ -58,8 +58,8 @@ public class OpSendSampleSettings extends Op170 {
 	protected class CheckCabinetType extends Phase<MndotProperty> {
 
 		/** Check the cabinet type */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			byte[] data = new byte[1];
 			MemoryProperty cab_mem = new MemoryProperty(
@@ -106,8 +106,8 @@ public class OpSendSampleSettings extends Op170 {
 	protected class QueryPromVersion extends Phase<MndotProperty> {
 
 		/** Query the prom version */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			byte[] data = new byte[2];
 			MemoryProperty ver_mem = new MemoryProperty(
@@ -123,8 +123,8 @@ public class OpSendSampleSettings extends Op170 {
 	protected class QueueBitmap extends Phase<MndotProperty> {
 
 		/** Set the queue detector bitmap */
-		protected Phase<MndotProperty> poll(CommMessage mess)
-			throws IOException
+		protected Phase<MndotProperty> poll(
+			CommMessage<MndotProperty> mess) throws IOException
 		{
 			byte[] data = getQueueBitmap();
 			MemoryProperty queue_mem = new MemoryProperty(
