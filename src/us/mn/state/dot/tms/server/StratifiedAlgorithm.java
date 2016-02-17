@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2012  Minnesota Department of Transportation
+ * Copyright (C) 2001-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -1185,9 +1185,9 @@ public class StratifiedAlgorithm implements MeterAlgorithmState {
 			}
 		}
 		ListIterator<Zone> li = getZoneIterator();
-		while(li.hasPrevious()) {
-			Zone z = (Zone)li.previous();
-			if(z.isBroken()) {
+		while (li.hasPrevious()) {
+			Zone z = li.previous();
+			if (z.isBroken()) {
 				z.resetControlled();
 				for(Zone zone: zones) {
 					if(zone.isGood())
