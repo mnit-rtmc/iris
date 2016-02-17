@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ public class VersionProperty extends Org815Property {
 	/** Get the QUERY request byte code */
 	@Override
 	protected byte requestQueryByte() {
-		return (char)'V';
+		return 'V';
 	}
 
 	/** Parse a QUERY response */
