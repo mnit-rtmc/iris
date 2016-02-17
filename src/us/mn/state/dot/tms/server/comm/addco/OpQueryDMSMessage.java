@@ -94,8 +94,11 @@ public class OpQueryDMSMessage extends OpAddco {
 		if (bmaps.length == 0 || new MultiString(multi).isBlank())
 			return dms.createMsgBlank();
 		else {
+			// NOTE: this is most commonly called when IRIS server
+			//       is restarted.  Set run-time priority to PSA
+			//       so that scheduled messages will take over.
 			return dms.createMsgRendered(multi, false, bmaps,
-				OTHER_SYSTEM, BLANK, null);
+				OTHER_SYSTEM, PSA, null);
 		}
 	}
 
