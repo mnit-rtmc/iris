@@ -29,8 +29,9 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class SsiPoller extends MessagePoller implements WeatherPoller {
-
+public class SsiPoller extends MessagePoller<SsiProperty>
+	implements WeatherPoller
+{
 	/** SSI logger */
 	static private final DebugLog LOG = new DebugLog("ssi");
 
