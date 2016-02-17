@@ -247,7 +247,7 @@
 		       source="1.7"
 		       target="1.7">
 			<classpath refid="classpath"/>
-<!--			<compilerarg value="-Xlint:unchecked"/> -->
+			<compilerarg value="-Xlint:unchecked"/>
 		</javac>
 	</target>
 
