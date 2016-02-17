@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ public class RwisHeader {
 	/** Parse the fields of a line */
 	static private String[] parseFields(String line) {
 		String[] fs = line.split(",");
-		for(int i = 0; i < fs.length; i++)
+		for (int i = 0; i < fs.length; i++)
 			fs[i] = fs[i].trim();
 		return fs;
 	}
@@ -49,10 +49,10 @@ public class RwisHeader {
 	public RwisHeader(String line) throws ParsingException {
 		raw_header = line;
 		String[] fs = parseFields(line);
-		if(fs.length < 1 || !fs[0].equals("Siteid"))
+		if (fs.length < 1 || !fs[0].equals("Siteid"))
 			throw new ParsingException("invalid header record");
 		fields = new HashMap<String, Integer>();
-		for(int i = 0; i < fs.length; i++)
+		for (int i = 0; i < fs.length; i++)
 			fields.put(fs[i], i);
 	}
 
@@ -66,13 +66,14 @@ public class RwisHeader {
 	/** Get a named field from a record */
 	public String getField(String[] rec, String name) {
 		Integer col = fields.get(name);
-		if(col != null && col < rec.length)
+		if (col != null && col < rec.length)
 			return rec[col];
 		else
 			return null;
 	}
 
 	/** To string */
+	@Override
 	public String toString() {
 		return "(RwisHeader: " + raw_header + ")";
 	}

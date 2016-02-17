@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -70,7 +70,7 @@ public class SsiProperty extends ControllerProperty {
 	/** Read the header */
 	private RwisHeader readHeader(LineReader lr) throws IOException {
 		String line = lr.readLine();
-		if(line != null)
+		if (line != null)
 			return new RwisHeader(line);
 		else
 			return null;

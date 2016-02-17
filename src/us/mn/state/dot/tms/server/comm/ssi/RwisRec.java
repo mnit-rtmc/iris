@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
- * Copyright (C) 2012-2013  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,7 +49,7 @@ public class RwisRec {
 	/** Parse the fields of a line */
 	static private String[] parseFields(String line) {
 		String[] fs = line.split(",");
-		for(int i = 0; i < fs.length; i++)
+		for (int i = 0; i < fs.length; i++)
 			fs[i] = fs[i].trim();
 		return fs;
 	}
@@ -65,7 +65,7 @@ public class RwisRec {
 			Date pd = sdf.parse(field);
 			return pd.getTime();
 		}
-		catch(ParseException e) {
+		catch (ParseException e) {
 			return null;
 		}
 	}
@@ -75,7 +75,7 @@ public class RwisRec {
 	 * @return Parsed temperature. */
 	static private Temperature parseTemp(String field) {
 		Double t = parseDouble(field);
-		if(t != null)
+		if (t != null)
 			return new Temperature(t / 100);
 		else
 			return null;
@@ -86,7 +86,7 @@ public class RwisRec {
 		try {
 			return Integer.parseInt(field);
 		}
-		catch(NumberFormatException ex) {
+		catch (NumberFormatException ex) {
 			return null;
 		}
 	}
@@ -96,7 +96,7 @@ public class RwisRec {
 	 * @return Parsed speed. */
 	static private Speed parseMph(String field) {
 		Integer mph = parseInt(field);
-		if(mph != null)
+		if (mph != null)
 			return new Speed(mph, MPH);
 		else
 			return null;
@@ -107,7 +107,7 @@ public class RwisRec {
 	 * @return Parsed distance. */
 	static private Distance parseFt(String field) {
 		Integer ft = parseInt(field);
-		if(ft != null)
+		if (ft != null)
 			return new Distance(ft, FEET);
 		else
 			return null;
@@ -118,7 +118,7 @@ public class RwisRec {
 	 * @return Parsed distance. */
 	static private Distance parseMm(String field) {
 		Integer mm = parseInt(field);
-		if(mm != null)
+		if (mm != null)
 			return new Distance(mm, MILLIMETERS);
 		else
 			return null;
@@ -129,7 +129,7 @@ public class RwisRec {
 		try {
 			return Double.parseDouble(field);
 		}
-		catch(NumberFormatException ex) {
+		catch (NumberFormatException ex) {
 			return null;
 		}
 	}
@@ -270,7 +270,7 @@ public class RwisRec {
 
 	/** Update the air temp */
 	private void updateAirTemp(WeatherSensorImpl ws) {
-		if(air_temp != null)
+		if (air_temp != null)
 			ws.setAirTempNotify(air_temp.round(CELSIUS));
 		else
 			ws.setAirTempNotify(null);
@@ -278,7 +278,7 @@ public class RwisRec {
 
 	/** Update the wind speed */
 	private void updateWindSpeed(WeatherSensorImpl ws) {
-		if(wind_speed_avg != null)
+		if (wind_speed_avg != null)
 			ws.setWindSpeedNotify(wind_speed_avg.round(KPH));
 		else
 			ws.setWindSpeedNotify(null);
@@ -291,7 +291,7 @@ public class RwisRec {
 
 	/** Update the weather sensor precip accumulation */
 	private void updateAccumulation(WeatherSensorImpl ws) {
-		if(precip_accum != null && precip_accum.value >= 0) {
+		if (precip_accum != null && precip_accum.value >= 0) {
 			ws.updateAccumulation(precip_accum.round(MICROMETERS),
 				create_time);
 		} else
@@ -300,7 +300,7 @@ public class RwisRec {
 
 	/** Update the weather sensor visibility */
 	private void updateVisibility(WeatherSensorImpl ws) {
-		if(visibility != null && visibility.value >= 0)
+		if (visibility != null && visibility.value >= 0)
 			ws.setVisibilityNotify(visibility.round(METERS));
 		else
 			ws.setVisibilityNotify(null);

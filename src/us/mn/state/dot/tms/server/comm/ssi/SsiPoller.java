@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
 public class SsiPoller extends MessagePoller implements WeatherPoller {
 
 	/** SSI logger */
-	static public final DebugLog LOG = new DebugLog("ssi");
+	static private final DebugLog LOG = new DebugLog("ssi");
 
 	/** Log an SSI message */
 	static public void log(String msg) {
@@ -57,7 +57,7 @@ public class SsiPoller extends MessagePoller implements WeatherPoller {
 	/** Send a device request */
 	@Override
 	public void sendRequest(WeatherSensorImpl ws, DeviceRequest r) {
-		switch(r) {
+		switch (r) {
 		case QUERY_STATUS:
 			addOperation(new OpRead(ws, records));
 			break;

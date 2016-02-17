@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010  AHMCT, University of California
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ public class OpRead extends OpDevice {
 	private class PhaseCheck extends Phase {
 		protected Phase poll(CommMessage mess) {
 			RwisRec rec = records.get(site_id);
-			if(rec == null || rec.isExpired()) {
+			if (rec == null || rec.isExpired()) {
 				// Add a null mapping for site_id
 				records.put(site_id, null);
 				return new PhaseRead();
@@ -79,7 +79,7 @@ public class OpRead extends OpDevice {
 	private class PhaseUpdate extends Phase {
 		protected Phase poll(CommMessage mess) throws IOException {
 			RwisRec rec = records.get(site_id);
-			if(rec == null || rec.isExpired()) {
+			if (rec == null || rec.isExpired()) {
 				rec = new RwisRec(site_id, new RwisHeader());
 				records.put(site_id, rec);
 			}
