@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2010  Minnesota Department of Transportation
+ * Copyright (C) 2003-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,10 +35,10 @@ import java.util.TreeSet;
 public class Screen implements Comparable {
 
 	/** All available screens */
-	static protected final Screen[] ALL_SCREENS = getAllScreens();
+	static private final Screen[] ALL_SCREENS = getAllScreens();
 
 	/** Create a point centered on a rectangle */
-	static protected Point createCenterPoint(Rectangle rect, Dimension sz) {
+	static private Point createCenterPoint(Rectangle rect, Dimension sz) {
 		int x = rect.x + rect.width / 2 - sz.width / 2;
 		int y = rect.y + rect.height / 2 - sz.height / 2;
 		x = Math.max(x, rect.x);
@@ -47,10 +47,10 @@ public class Screen implements Comparable {
 	}
 
 	/** Graphics configuration */
-	protected final GraphicsConfiguration config;
+	private final GraphicsConfiguration config;
 
 	/** Bounds (with insets included) */
-	protected final Rectangle bounds;
+	private final Rectangle bounds;
 
 	/** Get the screen bounds */
 	public Rectangle getBounds() {
@@ -58,12 +58,13 @@ public class Screen implements Comparable {
 	}
 
 	/** Create a display screen object */
-	protected Screen(GraphicsConfiguration c, Rectangle b) {
+	private Screen(GraphicsConfiguration c, Rectangle b) {
 		config = c;
 		bounds = new Rectangle(b);
 	}
 
 	/** Compare the screen to another screen */
+	@Override
 	public int compareTo(Object o) {
 		Screen other = (Screen)o;
 		return bounds.x - other.bounds.x;
@@ -76,7 +77,7 @@ public class Screen implements Comparable {
 		Rectangle rect = new Rectangle(bounds);
 		rect.translate(-loc.x, -loc.y);
 		rect = rect.intersection(bounds);
-		if(bnd.intersects(rect))
+		if (bnd.intersects(rect))
 			return createCenterPoint(bnd.intersection(rect), sz);
 		else
 			return createCenterPoint(bnd, sz);
@@ -91,8 +92,8 @@ public class Screen implements Comparable {
 	static public void centerOnCurrent(Window w) {
 		int x = w.getX();
 		int y = w.getY();
-		for(Screen s: ALL_SCREENS) {
-			if(s.getBounds().contains(x, y)) {
+		for (Screen s: ALL_SCREENS) {
+			if (s.getBounds().contains(x, y)) {
 				s.centerWindow(w);
 				return;
 			}
@@ -100,17 +101,17 @@ public class Screen implements Comparable {
 	}
 
 	/** Add a screen to the list if it does not intersect other screens */
-	static protected void addScreen(TreeSet<Screen> ms, Screen m) {
-		for(Screen s: ms) {
+	static private void addScreen(TreeSet<Screen> ms, Screen m) {
+		for (Screen s: ms) {
 			Rectangle r = s.bounds;
-			if(m.bounds.intersects(r))
+			if (m.bounds.intersects(r))
 				return;
 		}
 		ms.add(m);
 	}
 
 	/** Add all screens for the specified graphics device */
-	static protected void addDeviceScreens(GraphicsDevice gd,
+	static private void addDeviceScreens(GraphicsDevice gd,
 		TreeSet<Screen> ms)
 	{
 		GraphicsConfiguration c = gd.getDefaultConfiguration();
@@ -121,7 +122,7 @@ public class Screen implements Comparable {
 		double w = b.getWidth();
 		double h = b.getHeight() - (insets.top + insets.bottom);
 		Rectangle r = new Rectangle();
-		if(w > h * 2) {
+		if (w > h * 2) {
 			w /= 2.0;
 			r.setRect(x, y, w - insets.left, h);
 			addScreen(ms, new Screen(c, r));
@@ -140,15 +141,15 @@ public class Screen implements Comparable {
 		TreeSet<Screen> ms = new TreeSet<Screen>();
 		GraphicsEnvironment g =
 			GraphicsEnvironment.getLocalGraphicsEnvironment();
-		for(GraphicsDevice gd: g.getScreenDevices())
+		for (GraphicsDevice gd: g.getScreenDevices())
 			addDeviceScreens(gd, ms);
-		return (Screen [])ms.toArray(new Screen[0]);
+		return ms.toArray(new Screen[0]);
 	}
 
 	/** Get the maximized bounds for all screens */
 	static public Rectangle getMaximizedBounds() {
 		Rectangle b = new Rectangle();
-		for(Screen s: ALL_SCREENS)
+		for (Screen s: ALL_SCREENS)
 			b = b.union(s.bounds);
 		return b;
 	}
@@ -158,9 +159,9 @@ public class Screen implements Comparable {
 		try {
 			return p.getLocationOnScreen();
 		}
-		catch(IllegalComponentStateException e) {
+		catch (IllegalComponentStateException e) {
 			Point point = new Point();
-			while(p != null) {
+			while (p != null) {
 				point.translate(p.getX(), p.getY());
 				p = p.getParent();
 			}
