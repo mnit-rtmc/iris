@@ -155,7 +155,7 @@ public class R_NodeCellRenderer extends JPanel
 	/** Paint the renderer */
 	@Override
 	public void paintComponent(Graphics g) {
-		Dimension d = (Dimension)getSize();
+		Dimension d = getSize();
 		int width = (int)d.getWidth();
 		int height = (int)d.getHeight();
 		Graphics2D g2 = (Graphics2D)g;
