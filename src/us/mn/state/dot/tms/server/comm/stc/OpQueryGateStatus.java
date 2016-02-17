@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ public class OpQueryGateStatus extends OpSTC {
 	protected class QueryVersion extends Phase<STCProperty> {
 
 		/** Query the version */
-		protected Phase<STCProperty> poll(CommMessage mess)
+		protected Phase<STCProperty> poll(CommMessage<STCProperty> mess)
 			throws IOException
 		{
 			VersionProperty v = new VersionProperty(password());
@@ -70,7 +70,7 @@ public class OpQueryGateStatus extends OpSTC {
 	protected class QueryStatus extends Phase<STCProperty> {
 
 		/** Query the status */
-		protected Phase<STCProperty> poll(CommMessage mess)
+		protected Phase<STCProperty> poll(CommMessage<STCProperty> mess)
 			throws IOException
 		{
 			mess.add(status);
@@ -85,7 +85,7 @@ public class OpQueryGateStatus extends OpSTC {
 		gate_arm.setArmStateNotify(status.getState(), null);
 		setMaintStatus(status.getMaintStatus());
 		updateMaintStatus();
-		if(shouldUpdateOpCount()) {
+		if (shouldUpdateOpCount()) {
 			controller.completeOperation(id, isSuccess());
 			op_time += OP_COUNT_INTERVAL_MS;
 		}
@@ -100,7 +100,7 @@ public class OpQueryGateStatus extends OpSTC {
 	@Override
 	public void cleanup() {
 		super.cleanup();
-		if(!isSuccess())
+		if (!isSuccess())
 			gate_arm.checkTimeout();
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ public class OpResetGate extends OpSTC {
 	protected class ExecuteReset extends Phase<STCProperty> {
 
 		/** Execute the reset */
-		protected Phase<STCProperty> poll(CommMessage mess)
+		protected Phase<STCProperty> poll(CommMessage<STCProperty> mess)
 			throws IOException
 		{
 			ResetProperty reset = new ResetProperty(password());
@@ -63,7 +63,7 @@ public class OpResetGate extends OpSTC {
 			RESET_TIMEOUT;
 
 		/** Query the version */
-		protected Phase<STCProperty> poll(CommMessage mess)
+		protected Phase<STCProperty> poll(CommMessage<STCProperty> mess)
 			throws IOException
 		{
 			VersionProperty v = new VersionProperty(password());
@@ -73,10 +73,10 @@ public class OpResetGate extends OpSTC {
 				gate_arm.setVersion(v.getVersion());
 				return null;
 			}
-			catch(SocketTimeoutException e) {
+			catch (SocketTimeoutException e) {
 				// Controller must still be offline
 			}
-			if(TimeSteward.currentTimeMillis() > expire) {
+			if (TimeSteward.currentTimeMillis() > expire) {
 				logError("reset timeout expired -- giving up");
 				return null;
 			} else
