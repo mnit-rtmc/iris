@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -84,24 +84,6 @@ public class SignMessageHelper extends BaseHelper {
 		SignMsgSource sms = SignMsgSource.fromOrdinal(sm.getSource());
 		return (src == sms) ||
 		       (src == schedule) && (sms == tolling);
-	}
-
-	/** Find a sign message with matching attributes.
-	 * @param multi MULTI string.
-	 * @param be Beacon enabled flag.
-	 * @param bitmaps Bitmaps for all pages.
-	 * @return Matching sign message, or null if not found. */
-	static public SignMessage find(String multi, boolean be, String bitmaps)
-	{
-		Iterator<SignMessage> it = iterator();
-		while (it.hasNext()) {
-			SignMessage sm = it.next();
-			if (multi.equals(sm.getMulti()) &&
-			    be == sm.getBeaconEnabled() &&
-			    bitmaps.equals(sm.getBitmaps()))
-				return sm;
-		}
-		return null;
 	}
 
 	/** Compare two (possibly-null) integers for equality */

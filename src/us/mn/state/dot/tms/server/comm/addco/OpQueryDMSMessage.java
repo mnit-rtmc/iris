@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.addco;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.BitmapGraphic;
+import static us.mn.state.dot.tms.DMSMessagePriority.*;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -67,11 +68,23 @@ public class OpQueryDMSMessage extends OpAddco {
 
 	/** Set the current message on the sign */
 	private void setCurrentMessage() {
+		String multi = getMulti();
+		if (!multi.equals(getMultiCurrent())) {
+			BitmapGraphic[] bmaps = msg_prop.getBitmaps();
+			setCurrentMessage(createSignMessage(multi, bmaps));
+		}
+	}
+
+	/** Get multi string from message property */
+	private String getMulti() {
 		String multi = msg_prop.getMulti();
 		// FIXME: should only strip non-default page times
-		multi = MultiString.stripPageTime(multi);
-		BitmapGraphic[] bmaps = msg_prop.getBitmaps();
-		setCurrentMessage(createSignMessage(multi, bmaps));
+		return MultiString.stripPageTime(multi);
+	}
+
+	/** Get current multi string on sign */
+	private String getMultiCurrent() {
+		return dms.getMessageCurrent().getMulti();
 	}
 
 	/** Create a sign message for the sign */
@@ -80,8 +93,10 @@ public class OpQueryDMSMessage extends OpAddco {
 	{
 		if (bmaps.length == 0 || new MultiString(multi).isBlank())
 			return dms.createMsgBlank();
-		else
-			return dms.createMsgRendered(multi, false, bmaps);
+		else {
+			return dms.createMsgRendered(multi, false, bmaps,
+				OTHER_SYSTEM, BLANK, null);
+		}
 	}
 
 	/** Set the current message on the sign */

@@ -1384,29 +1384,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		void feedback(EventType et, int photo, int output);
 	}
 
-	/** Create a pre-rendered message for the sign (ADDCO).
-	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
-	 * @param pages Pre-rendered graphics for all pages.
-	 * @return New sign message, or null on error. */
-	public SignMessage createMsgRendered(String m, boolean be,
-		BitmapGraphic[] pages)
-	{
-		String bmaps = encodeAdjustedBitmaps(pages);
-		if (bmaps != null) {
-			SignMessage esm = SignMessageHelper.find(m, be, bmaps);
-			if (esm != null)
-				return esm;
-			else {
-				DMSMessagePriority mp = OTHER_SYSTEM;
-				return createMsgNotify(m, be, bmaps, mp, mp,
-					external, null);
-			}
-		} else
-			return null;
-	}
-
-	/** Create a pre-rendered message for the sign (DMSXML).
+	/** Create a pre-rendered message for the sign (ADDCO, DMSXML).
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
 	 * @param pages Pre-rendered graphics for all pages.
