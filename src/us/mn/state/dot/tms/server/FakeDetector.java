@@ -102,7 +102,7 @@ public class FakeDetector implements VehicleSampler {
 					p.add(det);
 			}
 		}
-		plus = (DetectorImpl []) p.toArray(new DetectorImpl[0]);
+		plus = p.toArray(new DetectorImpl[0]);
 	}
 
 	/** Get the most recent sample count */
