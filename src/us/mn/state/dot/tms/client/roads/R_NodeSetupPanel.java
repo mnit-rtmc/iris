@@ -56,8 +56,8 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 	}
 
 	/** Node type combobox */
-	private final JComboBox<String> type_cbx =
-		new JComboBox<String>(R_NodeType.getDescriptions());
+	private final JComboBox<R_NodeType> type_cbx =
+		new JComboBox<R_NodeType>(R_NodeType.values());
 
 	/** Pickable check box */
 	private final JCheckBox pick_chk = new JCheckBox();
