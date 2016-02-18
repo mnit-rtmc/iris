@@ -88,8 +88,8 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	private final JLabel operation_lbl = createValueLabel();
 
 	/** LCS lock combo box component */
-	private final JComboBox<String> lock_cmb = new JComboBox<String>(
-		LCSArrayLock.getDescriptions());
+	private final JComboBox<LCSArrayLock> lock_cbx = new JComboBox
+		<LCSArrayLock>(LCSArrayLock.values());
 
 	/** Lane configuration panel */
 	private final LaneConfigurationPanel lane_config =
@@ -158,7 +158,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		add("device.operation");
 		add(operation_lbl, Stretch.LAST);
 //		add("lcs.lock");
-//		add(lock_cmb, Stretch.LAST);
+//		add(lock_cbx, Stretch.LAST);
 		add(buildSelectorBox(), Stretch.FULL);
 		add(createButtonPanel(), Stretch.RIGHT);
 		watcher.initialize();
@@ -227,9 +227,9 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		if (a == null || a.equals("lcsLock")) {
 			Integer lk = la.getLcsLock();
 			if (lk != null)
-				lock_cmb.setSelectedIndex(lk);
+				lock_cbx.setSelectedIndex(lk);
 			else
-				lock_cmb.setSelectedIndex(0);
+				lock_cbx.setSelectedIndex(0);
 		}
 		if (a == null || a.equals("indicationsCurrent")) {
 			Integer[] ind = la.getIndicationsCurrent();
@@ -252,10 +252,10 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		ind_selector.setLCSArray(la);
 		ind_selector.setEnabled(update);
 		if (update)
-			lock_cmb.setAction(new LockLcsAction(la, lock_cmb));
+			lock_cbx.setAction(new LockLcsAction(la, lock_cbx));
 		else
-			lock_cmb.setAction(null);
-		lock_cmb.setEnabled(update);
+			lock_cbx.setAction(null);
+		lock_cbx.setEnabled(update);
 		send.setEnabled(update);
 		blank_btn.setEnabled(update);
 	}
@@ -324,8 +324,8 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		status_lbl.setForeground(null);
 		status_lbl.setBackground(null);
 		operation_lbl.setText("");
-		lock_cmb.setEnabled(false);
-		lock_cmb.setSelectedItem(null);
+		lock_cbx.setEnabled(false);
+		lock_cbx.setSelectedItem(null);
 		ind_selector.setEnabled(false);
 		send.setEnabled(false);
 		blank_btn.setEnabled(false);

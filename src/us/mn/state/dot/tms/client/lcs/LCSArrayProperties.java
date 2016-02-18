@@ -87,8 +87,8 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		new LinkedList<JCheckBox>();
 
 	/** LCS lock combo box component */
-	private final JComboBox<String> lock_cmb = new JComboBox<String>(
-		LCSArrayLock.getDescriptions());
+	private final JComboBox<LCSArrayLock> lock_cbx = new JComboBox
+		<LCSArrayLock>(LCSArrayLock.values());
 
 	/** Operation description label */
 	private final JLabel op_lbl = new JLabel();
@@ -316,7 +316,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	private JPanel createStatusPanel() {
 		IPanel p = new IPanel();
 		p.add("lcs.lock");
-		p.add(lock_cmb, Stretch.LAST);
+		p.add(lock_cbx, Stretch.LAST);
 		p.add("device.operation");
 		p.add(op_lbl, Stretch.LAST);
 		p.add(new JButton(settings), Stretch.CENTER);
@@ -328,7 +328,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	protected void updateEditMode() {
 		shift_spn.setEnabled(canUpdate("shift"));
 		notes_txt.setEnabled(canUpdate("notes"));
-		lock_cmb.setEnabled(canUpdate("lcsLock"));
+		lock_cbx.setEnabled(canUpdate("lcsLock"));
 	}
 
 	/** Update one attribute on the form */
@@ -339,13 +339,13 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		if (a == null || a.equals("notes"))
 			notes_txt.setText(proxy.getNotes());
 		if (a == null || a.equals("lcsLock")) {
-			lock_cmb.setAction(null);
+			lock_cbx.setAction(null);
 			Integer lk = proxy.getLcsLock();
 			if (lk != null)
-				lock_cmb.setSelectedIndex(lk);
+				lock_cbx.setSelectedIndex(lk);
 			else
-				lock_cmb.setSelectedIndex(0);
-//			lock_cmb.setAction(new LockLcsAction(proxy, lock_cmb));
+				lock_cbx.setSelectedIndex(0);
+//			lock_cbx.setAction(new LockLcsAction(proxy, lock_cbx));
 		}
 		if (a == null || a.equals("operation"))
 			op_lbl.setText(proxy.getOperation());

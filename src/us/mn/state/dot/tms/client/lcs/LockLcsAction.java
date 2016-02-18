@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.lcs;
 import java.awt.event.ActionEvent;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.LCSArrayLock;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
 /**
@@ -27,20 +28,21 @@ import us.mn.state.dot.tms.client.proxy.ProxyAction;
 public class LockLcsAction extends ProxyAction<LCSArray> {
 
 	/** Lock combo box component */
-	private final JComboBox lock_cbx;
+	private final JComboBox<LCSArrayLock> lock_cbx;
 
 	/** Create a new action to lock the selected LCS array */
-	public LockLcsAction(LCSArray p, JComboBox c) {
+	public LockLcsAction(LCSArray p, JComboBox<LCSArrayLock> c) {
 		super("lcs.locked", p);
 		lock_cbx = c;
 	}
 
 	/** Actually perform the action */
+	@Override
 	protected void doActionPerformed(ActionEvent e) {
 		int s = lock_cbx.getSelectedIndex();
-		if(s >= 0) {
+		if (s >= 0) {
 			Integer lk = new Integer(s);
-			if(s == 0)
+			if (s == 0)
 				lk = null;
 			proxy.setLcsLock(lk);
 		}
