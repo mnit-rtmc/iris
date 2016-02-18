@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2106  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,10 +41,9 @@ public enum ColorClassic {
 
 	/** Get classic color from an ordinal value */
 	static public ColorClassic fromOrdinal(int o) {
-		for(ColorClassic c: values()) {
-			if(c.ordinal() == o)
-				return c;
-		}
-		return null;
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return null;
 	}
 }
