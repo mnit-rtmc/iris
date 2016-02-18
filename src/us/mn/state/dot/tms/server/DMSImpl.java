@@ -77,9 +77,6 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
-	/** DMS debug log */
-	static private final DebugLog DMS_LOG = new DebugLog("dms");
-
 	/** DMS schedule debug log */
 	static private final DebugLog SCHED_LOG = new DebugLog("sched");
 
@@ -922,9 +919,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public synchronized void setOwnerNext(User o) {
 		if (ownerNext != null && o != null) {
-			System.err.println("DMSImpl.setOwnerNext: " + getName()+
-				", " + ownerNext.getName() + " vs. " +
-				o.getName());
+			logError("OWNER CONFLICT: " + ownerNext.getName() +
+			         " vs. " + o.getName());
 			ownerNext = null;
 		} else
 			ownerNext = o;
@@ -952,13 +948,19 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Set the next sign message.  This is called by SONAR when the
 	 * messageNext attribute is set.  The ownerNext attribute should have
 	 * been set by the client prior to setting this attribute. */
-	public void doSetMessageNext(SignMessage sm) throws TMSException {
-		User o_next = ownerNext;	// Avoid race
-		// ownerNext is only valid for one message, clear it
-		ownerNext = null;
-		if (o_next == null)
-			throw new ChangeVetoException("MUST SET OWNER FIRST");
-		doSetMessageNext(sm, o_next);
+	public synchronized void doSetMessageNext(SignMessage sm)
+		throws TMSException
+	{
+		try {
+			if (ownerNext != null)
+				doSetMessageNext(sm, ownerNext);
+			else
+				throw new ChangeVetoException("OWNER CONFLICT");
+		}
+		finally {
+			// ownerNext is only valid for one message, clear it
+			ownerNext = null;
+		}
 	}
 
 	/** Set the next sign message and owner */
@@ -1638,12 +1640,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		/** FIXME: this should be twice the polling period for the
 		 *         sign.  Modem signs should have a longer duration. */
 		return 1;
-	}
-
-	/** Log a DMS message */
-	private void logError(String msg) {
-		if (DMS_LOG.isOpen())
-			DMS_LOG.log(getName() + ": " + msg);
 	}
 
 	/** Log a schedule message */

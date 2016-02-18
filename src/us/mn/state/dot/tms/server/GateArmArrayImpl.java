@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2015  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -367,9 +367,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override
 	public synchronized void setOwnerNext(User o) {
 		if (ownerNext != null && o != null) {
-			System.err.println("GateArmArrayImpl.setOwnerNext: " +
-				getName() + ", " + ownerNext.getName() +
-				" vs. " + o.getName());
+			logError("OWNER CONFLICT: " + ownerNext.getName() +
+			         " vs. " + o.getName());
 			ownerNext = null;
 		} else
 			ownerNext = o;
@@ -385,17 +384,26 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Set the arm state (request change) */
-	public void doSetArmStateNext(int gas) throws TMSException {
-		User o_next = ownerNext;	// Avoid race
-		// ownerNext is only valid for one message, clear it
-		ownerNext = null;
-		if (o_next == null)
-			throw new ChangeVetoException("MUST SET OWNER FIRST");
+	public synchronized void doSetArmStateNext(int gas) throws TMSException{
+		try {
+			if (ownerNext != null)
+				doSetArmStateNext(gas, ownerNext);
+			else
+				throw new ChangeVetoException("OWNER CONFLICT");
+		}
+		finally {
+			// ownerNext is only valid for one message, clear it
+			ownerNext = null;
+		}
+	}
+
+	/** Set the arm state (request change) */
+	private void doSetArmStateNext(int gas, User o) throws TMSException {
 		final GateArmState cs = arm_state;
 		GateArmState rs = validateStateReq(
 			GateArmState.fromOrdinal(gas), cs);
 		if ((rs != cs) && checkEnabled())
-			requestArmState(rs, o_next);
+			requestArmState(rs, ownerNext);
 	}
 
 	/** Validate a new requested gate arm state.

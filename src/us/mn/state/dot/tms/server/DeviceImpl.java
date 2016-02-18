@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -35,6 +36,15 @@ import us.mn.state.dot.tms.server.event.BaseEvent;
 abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	ControllerIO
 {
+	/** Device debug log */
+	static private final DebugLog DEVICE_LOG = new DebugLog("device");
+
+	/** Log a device message */
+	protected void logError(String msg) {
+		if (DEVICE_LOG.isOpen())
+			DEVICE_LOG.log(getName() + ": " + msg);
+	}
+
 	/** Create a new device */
 	protected DeviceImpl(String n) throws TMSException, SonarException {
 		super(n);

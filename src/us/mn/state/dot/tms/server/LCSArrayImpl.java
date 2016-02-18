@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -204,10 +204,9 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Set the next indications owner */
 	public synchronized void setOwnerNext(User o) {
-		if(ownerNext != null && o != null) {
-			System.err.println("LCSArrayImpl.setOwnerNext: " +
-				getName() + ", " + ownerNext.getName() +
-				" vs. " + o.getName());
+		if (ownerNext != null && o != null) {
+			logError("OWNER CONFLICT: " + ownerNext.getName() +
+			         " vs. " + o.getName());
 			ownerNext = null;
 		} else
 			ownerNext = o;
