@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,12 +89,11 @@ public interface Multi {
 		UNDEFINED, OTHER, LEFT, CENTER, RIGHT, FULL;
 
 		/** Get line justification from an ordinal value */
-		static public JustificationLine fromOrdinal(int v) {
-			for(JustificationLine lj: values()) {
-				if(lj.ordinal() == v)
-					return lj;
-			}
-			return UNDEFINED;
+		static public JustificationLine fromOrdinal(int o) {
+			if (o >= 0 && o < values().length)
+				return values()[o];
+			else
+				return UNDEFINED;
 		}
 
 		/** Default line justification */
@@ -110,12 +109,11 @@ public interface Multi {
 		UNDEFINED, OTHER, TOP, MIDDLE, BOTTOM;
 
 		/** Get page justification from an ordinal value */
-		static public JustificationPage fromOrdinal(int v) {
-			for(JustificationPage pj: values()) {
-				if(pj.ordinal() == v)
-					return pj;
-			}
-			return UNDEFINED;
+		static public JustificationPage fromOrdinal(int o) {
+			if (o >= 0 && o < values().length)
+				return values()[o];
+			else
+				return UNDEFINED;
 		}
 
 		/** Default page justification */
