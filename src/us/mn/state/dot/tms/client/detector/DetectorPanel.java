@@ -63,7 +63,7 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	/** Lane type action */
 	private final DAction type_act = new DAction("detector.lane.type") {
 		protected void do_perform(Detector d) {
-			d.setLaneType((short)type_cbx.getSelectedIndex());
+			d.setLaneType((short) type_cbx.getSelectedIndex());
 		}
 		@Override
 		protected void doUpdateSelected() {
@@ -74,8 +74,8 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	};
 
 	/** Lane type combobox */
-	private final JComboBox<String> type_cbx =
-		new JComboBox<String>(LaneType.getDescriptions());
+	private final JComboBox<LaneType> type_cbx =
+		new JComboBox<LaneType>(LaneType.values());
 
 	/** Spinner for lane number */
 	private final JSpinner lane_spn = new JSpinner(

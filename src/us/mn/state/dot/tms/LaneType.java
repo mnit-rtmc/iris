@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.LinkedList;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 import static us.mn.state.dot.tms.units.Interval.Units.HOURS;
@@ -106,7 +105,8 @@ public enum LaneType {
 	/** Lock on threshold */
 	public final Interval lock_on_threshold;
 
-	/** Get the string description of the lane type */
+	/** Get the string description */
+	@Override
 	public String toString() {
 		return description;
 	}
@@ -170,18 +170,9 @@ public enum LaneType {
 
 	/** Get a lane type from an ordinal value */
 	static public LaneType fromOrdinal(short o) {
-		for(LaneType lt: LaneType.values()) {
-			if(lt.ordinal() == o)
-				return lt;
-		}
-		return NONE;
-	}
-
-	/** Get an array of lane type descriptions */
-	static public String[] getDescriptions() {
-		LinkedList<String> d = new LinkedList<String>();
-		for(LaneType lt: LaneType.values())
-			d.add(lt.description);
-		return d.toArray(new String[0]);
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return NONE;
 	}
 }
