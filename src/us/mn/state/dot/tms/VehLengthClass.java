@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,10 +45,9 @@ public enum VehLengthClass {
 
 	/** Get a vehicle length class from an ordinal */
 	static public VehLengthClass fromOrdinal(int o) {
-		for(VehLengthClass vc: VehLengthClass.values()) {
-			if(vc.ordinal() == o)
-				return vc;
-		}
-		return SHORT;
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return SHORT;
 	}
 }
