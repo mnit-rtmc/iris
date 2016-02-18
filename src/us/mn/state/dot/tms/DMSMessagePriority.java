@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,11 +42,10 @@ public enum DMSMessagePriority {
 
 	/** Get a DMSMessagePriority from an ordinal value */
 	public static DMSMessagePriority fromOrdinal(int o) {
-		for (DMSMessagePriority e: values()) {
-			if (e.ordinal() == o)
-				return e;
-		}
-		return INVALID;
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return INVALID;
 	}
 
 	/** Test if a run-time priority was "scheduled" */
