@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2015  Minnesota Department of Transportation
+ * Copyright (C) 2011-2016  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -14,8 +14,6 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms;
-
-import java.util.LinkedList;
 
 /**
  * Encoder type enumeration.   The ordinal values correspond to the records
@@ -70,25 +68,17 @@ public enum EncoderType {
 	/** Indirect stream type (using video servlet) */
 	public final StreamType indirect_stream;
 
-	/** Get the string description of the encoder type */
+	/** Get the string representation */
+	@Override
 	public String toString() {
 		return description;
 	}
 
 	/** Get a encoder type from an ordinal value */
 	static public EncoderType fromOrdinal(int o) {
-		for (EncoderType et: values()) {
-			if (et.ordinal() == o)
-				return et;
-		}
-		return NONE;
-	}
-
-	/** Get an array of encoder type descriptions */
-	static public String[] getDescriptions() {
-		LinkedList<String> d = new LinkedList<String>();
-		for (EncoderType et: values())
-			d.add(et.description);
-		return d.toArray(new String[0]);
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return NONE;
 	}
 }

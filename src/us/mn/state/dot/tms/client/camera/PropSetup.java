@@ -49,8 +49,8 @@ public class PropSetup extends IPanel {
 	private final JSpinner enc_chn_spn = new JSpinner(num_model);
 
 	/** Encoder type combobox */
-	private final JComboBox<String> enc_type_cbx =
-		new JComboBox<String>(EncoderType.getDescriptions());
+	private final JComboBox<EncoderType> enc_type_cbx =
+		new JComboBox<EncoderType>(EncoderType.values());
 
 	/** Encoder type action */
 	private final IAction enc_type_act = new IAction("camera.encoder.type"){
