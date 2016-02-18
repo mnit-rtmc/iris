@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2014  Minnesota Department of Transportation
+ * Copyright (C) 2003-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,8 +13,6 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms;
-
-import java.util.LinkedList;
 
 /**
  * A ramp meter lock specifies the reason for locking a meter.
@@ -53,6 +51,12 @@ public enum RampMeterLock {
 	/** Description of the lock reason */
 	public final String description;
 
+	/** Get the string representation */
+	@Override
+	public String toString() {
+		return description;
+	}
+
 	/** Flag to indicate lock triggered by controller */
 	public final boolean controller_lock;
 
@@ -61,13 +65,5 @@ public enum RampMeterLock {
 		return (o != null && o > 0 && o < values().length)
 		      ? values()[o]
 		      : null;
-	}
-
-	/** Get an array of lock descriptions */
-	static public String[] getDescriptions() {
-		LinkedList<String> d = new LinkedList<String>();
-		for (RampMeterLock lock: values())
-			d.add(lock.description);
-		return d.toArray(new String[0]);
 	}
 }

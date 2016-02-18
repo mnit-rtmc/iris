@@ -167,8 +167,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	private final JLabel queue_lbl = new JLabel();
 
 	/** Meter lock combo box component */
-	private final JComboBox<String> lock_cbx = new JComboBox<String>(
-		RampMeterLock.getDescriptions());
+	private final JComboBox<RampMeterLock> lock_cbx = new JComboBox
+		<RampMeterLock>(RampMeterLock.values());
 
 	/** Lock meter action */
 	private final LockMeterAction lock_action;
@@ -388,6 +388,6 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	/** Get meter lock index */
 	private int getMLock() {
 		Integer ml = proxy.getMLock();
-		return (ml != null) ? ml : 0;
+		return (ml != null) ? ml : RampMeterLock.OFF.ordinal();
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,33 +17,36 @@ package us.mn.state.dot.tms.client.meter;
 import java.awt.event.ActionEvent;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterLock;
 import us.mn.state.dot.tms.client.proxy.ProxyAction;
 
 /**
  * This action sets a lock on the selected meter.
  *
- * @author Erik Engstrom
  * @author Douglas Lau
  */
 public class LockMeterAction extends ProxyAction<RampMeter> {
 
 	/** Lock combo box component */
-	private final JComboBox lock_cbx;
+	private final JComboBox<RampMeterLock> lock_cbx;
 
 	/** Create a new action to lock the selected ramp meter */
-	public LockMeterAction(RampMeter rm, JComboBox c, boolean e) {
+	public LockMeterAction(RampMeter rm, JComboBox<RampMeterLock> c,
+		boolean e)
+	{
 		super("ramp.meter.locked", rm);
 		lock_cbx = c;
 		setEnabled(e);
 	}
 
 	/** Actually perform the action */
+	@Override
 	protected void doActionPerformed(ActionEvent e) {
-		if(proxy != null) {
+		if (proxy != null) {
 			int s = lock_cbx.getSelectedIndex();
-			if(s >= 0) {
+			if (s >= 0) {
 				Integer lk = new Integer(s);
-				if(s == 0)
+				if (s == 0)
 					lk = null;
 				proxy.setMLock(lk);
 			}
