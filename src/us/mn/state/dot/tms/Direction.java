@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2010  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,8 +13,6 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms;
-
-import java.util.LinkedList;
 
 /**
  * Direction-of-travel enumeration.  The ordinal values correspond to the
@@ -51,7 +49,8 @@ public enum Direction {
 		det_dir = dt;
 	}
 
-	/** Get the string representation of a direction */
+	/** Get the string representation */
+	@Override
 	public String toString() {
 		return description;
 	}
@@ -63,26 +62,9 @@ public enum Direction {
 
 	/** Get a direction from an ordinal value */
 	static public Direction fromOrdinal(short o) {
-		for(Direction d: Direction.values()) {
-			if(d.ordinal() == o)
-				return d;
-		}
-		return UNKNOWN;
-	}
-
-	/** Get an array of direction descriptions */
-	static public String[] getDescriptions() {
-		LinkedList<String> a = new LinkedList<String>();
-		for(Direction d: Direction.values())
-			a.add(d.description);
-		return a.toArray(new String[0]);
-	}
-
-	/** Get an array of direction abbreviations */
-	static public String[] getAbbreviations() {
-		LinkedList<String> a = new LinkedList<String>();
-		for(Direction d: Direction.values())
-			a.add(d.abbrev);
-		return a.toArray(new String[0]);
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return UNKNOWN;
 	}
 }

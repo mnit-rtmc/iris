@@ -15,14 +15,18 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.geom.Point2D;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JTextField;
+import javax.swing.ListCellRenderer;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
@@ -120,8 +124,8 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	};
 
 	/** Roadway direction combo box */
-	private final JComboBox<String> road_dir_cbx = new JComboBox<String>(
-		Direction.getDescriptions());
+	private final JComboBox<Direction> road_dir_cbx = new JComboBox
+		<Direction>(Direction.values());
 
 	/** Roadway direction action */
 	private final LAction road_dir_act = new LAction("location.direction") {
@@ -165,8 +169,8 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	};
 
 	/** Cross street direction combobox */
-	private final JComboBox<String> cross_dir_cbx = new JComboBox<String>(
-		Direction.getAbbreviations());
+	private final JComboBox<Direction> cross_dir_cbx = new JComboBox
+		<Direction>(Direction.values());
 
 	/** Cross street direction action */
 	private final LAction cross_dir_act = new LAction("location.cross.dir"){
@@ -228,6 +232,18 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		cross_cbx.setModel(cross_mdl);
 		cross_cbx.setAction(cross_act);
 		cross_dir_cbx.setAction(cross_dir_act);
+		cross_dir_cbx.setRenderer(new ListCellRenderer<Direction>() {
+			private final DefaultListCellRenderer cell =
+				new DefaultListCellRenderer();
+			public Component getListCellRendererComponent(
+				JList<? extends Direction> list,Direction value,
+				int index, boolean isSelected, boolean focus)
+			{
+				String v = (value != null) ? value.abbrev : "";
+				return cell.getListCellRendererComponent(list,
+					v, index, isSelected, focus);
+			}
+		});
 		add("location.roadway");
 		add(roadway_cbx);
 		add(road_dir_cbx, Stretch.LAST);
