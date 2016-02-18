@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2010  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,8 +13,6 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms;
-
-import java.util.LinkedList;
 
 /**
  * An enumeration of all r_node transitions.  The ordinal values correspond to
@@ -56,20 +54,17 @@ public enum R_NodeTransition {
 	/** R_Node transition description */
 	public final String description;
 
-	/** Get an r_node transition from an ordinal value */
-	static public R_NodeTransition fromOrdinal(int o) {
-		for(R_NodeTransition rt: R_NodeTransition.values()) {
-			if(rt.ordinal() == o)
-				return rt;
-		}
-		return null;
+	/** Get the string representation */
+	@Override
+	public String toString() {
+		return description;
 	}
 
-	/** Get an array of r_node transition descriptions */
-	static public String[] getDescriptions() {
-		LinkedList<String> d = new LinkedList<String>();
-		for(R_NodeTransition rt: R_NodeTransition.values())
-			d.add(rt.description);
-		return d.toArray(new String[0]);
+	/** Get an r_node transition from an ordinal value */
+	static public R_NodeTransition fromOrdinal(int o) {
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return null;
 	}
 }
