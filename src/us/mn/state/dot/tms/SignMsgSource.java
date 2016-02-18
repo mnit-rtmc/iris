@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +30,10 @@ public enum SignMsgSource {
 
 	/** Get a sign message source from an ordinal value */
 	static public SignMsgSource fromOrdinal(int o) {
-		for (SignMsgSource s: values()) {
-			if (s.ordinal() == o)
-				return s;
-		}
-		return null;
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return null;
 	}
 
 	/** Check if a sign message source is scheduled */
