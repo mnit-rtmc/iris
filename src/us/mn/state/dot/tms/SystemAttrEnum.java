@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  * Copyright (C) 2014  AHMCT, University of California
  *
@@ -47,7 +47,7 @@ public enum SystemAttrEnum {
 	DIALUP_POLL_PERIOD_MINS(60, 2, 1440),
 	DMS_AWS_ENABLE(false),
 	DMS_BRIGHTNESS_ENABLE(true, Change.RESTART_CLIENT),
-	DMS_COMM_LOSS_MINUTES(5, 1, 60),
+	DMS_COMM_LOSS_MINUTES(5, 0, 65535),
 	DMS_COMPOSER_EDIT_MODE(1, 0, 2, Change.RESTART_CLIENT), 
 	DMS_DEFAULT_JUSTIFICATION_LINE(3, 2, 5, Change.RESTART_CLIENT),
 	DMS_DEFAULT_JUSTIFICATION_PAGE(2, 2, 4, Change.RESTART_CLIENT),
