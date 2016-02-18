@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,10 +30,9 @@ public enum GateArmInterlock {
 
 	/** Get gate arm interlock from an ordinal value */
 	static public GateArmInterlock fromOrdinal(int o) {
-		for(GateArmInterlock gai: GateArmInterlock.values()) {
-			if(gai.ordinal() == o)
-				return gai;
-		}
-		return null;
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return null;
 	}
 }
