@@ -131,8 +131,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	};
 
 	/** Combo box for metering algorithm */
-	private final JComboBox<String> algorithm_cbx = new JComboBox<String>(
-		MeterAlgorithm.getDescriptions());
+	private final JComboBox<MeterAlgorithm> algorithm_cbx = new JComboBox
+		<MeterAlgorithm>(MeterAlgorithm.values());
 
 	/** Field for AM target rate */
 	private final JTextField am_target_txt = new JTextField(6);

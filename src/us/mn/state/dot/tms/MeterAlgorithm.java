@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,8 +13,6 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms;
-
-import java.util.LinkedList;
 
 /**
  * Meter algorithm enumeration.
@@ -43,20 +41,17 @@ public enum MeterAlgorithm {
 	/** Description of the algorithm */
 	public final String description;
 
-	/** Get a meter algorithm from an ordinal value */
-	static public MeterAlgorithm fromOrdinal(int o) {
-		for(MeterAlgorithm ma: MeterAlgorithm.values()) {
-			if(ma.ordinal() == o)
-				return ma;
-		}
-		return NONE;
+	/** Get the string representation */
+	@Override
+	public String toString() {
+		return description;
 	}
 
-	/** Get an array of meter algorithm descriptions */
-	static public String[] getDescriptions() {
-		LinkedList<String> d = new LinkedList<String>();
-		for(MeterAlgorithm ma: MeterAlgorithm.values())
-			d.add(ma.description);
-		return d.toArray(new String[0]);
+	/** Get a meter algorithm from an ordinal value */
+	static public MeterAlgorithm fromOrdinal(int o) {
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return NONE;
 	}
 }
