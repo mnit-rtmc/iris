@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -806,13 +806,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	private void logCommEvent(EventType event, String id) {
 		if (CommEvent.getCommEventPurgeDays() <= 0)
 			return;
-		CommEvent ev = new CommEvent(event, getName(), id);
-		try {
-			ev.doStore();
-		}
-		catch(TMSException e) {
-			e.printStackTrace();
-		};
+		logEvent(new CommEvent(event, getName(), id));
 	}
 
 	/** Complete a controller operation */

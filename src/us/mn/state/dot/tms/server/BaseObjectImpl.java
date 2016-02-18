@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,14 @@ package us.mn.state.dot.tms.server;
 
 import java.text.NumberFormat;
 import java.util.Date;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.MainServer.FLUSH;
+import us.mn.state.dot.tms.server.event.BaseEvent;
 
 /**
  * Base object class for storable SONAR objects.
@@ -300,5 +303,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		NumberFormat nf = NumberFormat.getNumberInstance();
 		nf.setMaximumFractionDigits(5);
 		return nf.format(value);
+	}
+
+	/** Log an event */
+	static public void logEvent(final BaseEvent ev) {
+		FLUSH.addJob(new Job() {
+			public void perform() throws TMSException {
+				ev.doStore();
+			}
+		});
 	}
 }

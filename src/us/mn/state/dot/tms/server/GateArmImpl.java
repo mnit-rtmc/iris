@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
+import us.mn.state.dot.tms.server.event.GateArmEvent;
 
 /**
  * A Gate Arm is a device for restricting access to a ramp on a road.
@@ -249,7 +250,8 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	 * @param o User who requested new state, or null. */
 	public void setArmStateNotify(GateArmState gas, User o) {
 		if (gas != arm_state) {
-			GateArmSystem.logEvent(gas, name, o);
+			String owner = (o != null) ? o.getName() : null;
+			logEvent(new GateArmEvent(gas, name, owner));
 			arm_state = gas;
 			notifyAttribute("armState");
 		}

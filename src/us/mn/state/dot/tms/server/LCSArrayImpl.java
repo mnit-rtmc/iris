@@ -303,20 +303,12 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	protected void logIndications(Integer[] ind, User o) {
 		EventType et = EventType.LCS_DEPLOYED;
 		String text = createLogText(ind);
-		if(areAllDark(ind)) {
+		if (areAllDark(ind)) {
 			et = EventType.LCS_CLEARED;
 			text = null;
 		}
-		String owner = null;
-		if(o != null)
-			owner = o.getName();
-		SignStatusEvent ev = new SignStatusEvent(et, name, text, owner);
-		try {
-			ev.doStore();
-		}
-		catch(TMSException e) {
-			e.printStackTrace();
-		}
+		String owner = (o != null) ? o.getName() : null;
+		logEvent(new SignStatusEvent(et, name, text, owner));
 	}
 
 	/** Create a message to log LCS sign status event */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.io.File;
 import java.util.Iterator;
 import javax.mail.MessagingException;
-import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmArrayHelper;
@@ -28,8 +26,6 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
-import static us.mn.state.dot.tms.server.MainServer.FLUSH;
-import us.mn.state.dot.tms.server.event.GateArmEvent;
 import us.mn.state.dot.tms.utils.Emailer;
 
 /**
@@ -124,17 +120,6 @@ public class GateArmSystem {
 		default:
 			return null;
 		}
-	}
-
-	/** Log a gate arm state event */
-	static public void logEvent(GateArmState gas, String name, User o) {
-		String owner = o != null ? o.getName() : null;
-		final GateArmEvent ev = new GateArmEvent(gas, name, owner);
-		FLUSH.addJob(new Job() {
-			public void perform() throws TMSException {
-				ev.doStore();
-			}
-		});
 	}
 
 	/** Send an email alert */

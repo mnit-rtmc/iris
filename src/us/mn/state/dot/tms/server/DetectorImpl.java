@@ -668,13 +668,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			return;
 		if (isDetectorAutoFailEnabled())
 			doForceFail();
-		DetFailEvent ev = new DetFailEvent(event_type, getName());
-		try {
-			ev.doStore();
-		}
-		catch (TMSException e) {
-			e.printStackTrace();
-		}
+		logEvent(new DetFailEvent(event_type, getName()));
 	}
 
 	/** Is detector auto-fail enabled? */

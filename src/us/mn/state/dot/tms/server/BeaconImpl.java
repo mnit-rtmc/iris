@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2014  Minnesota Department of Transportation
+ * Copyright (C) 2004-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -206,13 +206,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		EventType et = (f)
 		             ? EventType.BEACON_ON_EVENT
 		             : EventType.BEACON_OFF_EVENT;
-		BeaconEvent ev = new BeaconEvent(et, name);
-		try {
-			ev.doStore();
-		}
-		catch (TMSException e) {
-			e.printStackTrace();
-		}
+		logEvent(new BeaconEvent(et, name));
 	}
 
 	/** Get a beacon poller */

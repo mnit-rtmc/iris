@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeterQueue;
-import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.HOUR;
 import static us.mn.state.dot.tms.server.Constants.FEET_PER_MILE;
@@ -1454,12 +1453,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				demand_adj, estimateWaitSecs(),
 				limit_control.ordinal(), min_rate, release_rate,
 				max_rate, dns, seg_den);
-			try {
-				ev.doStore();
-			}
-			catch(TMSException e) {
-				e.printStackTrace();
-			};
+			BaseObjectImpl.logEvent(ev);
 		}
 	}
 }
