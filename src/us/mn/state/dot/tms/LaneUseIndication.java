@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2010  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms;
 
-import java.util.LinkedList;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -79,19 +78,17 @@ public enum LaneUseIndication {
 	/** Description of the lane use indication */
 	public final String description;
 
+	/** Get the string representation */
+	@Override
+	public String toString() {
+		return description;
+	}
+
 	/** Get a lane use indication from an ordinal value */
 	static public LaneUseIndication fromOrdinal(Integer o) {
-		if(o != null && o >= 0 && o < values().length)
+		if (o != null && o >= 0 && o < values().length)
 			return values()[o];
 		else
 			return null;
-	}
-
-	/** Get an array of lock descriptions */
-	static public String[] getDescriptions() {
-		LinkedList<String> d = new LinkedList<String>();
-		for(LaneUseIndication i: LaneUseIndication.values())
-			d.add(i.description);
-		return d.toArray(new String[0]);
 	}
 }

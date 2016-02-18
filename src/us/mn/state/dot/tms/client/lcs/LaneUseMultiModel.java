@@ -19,9 +19,7 @@ import java.util.ArrayList;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
 import javax.swing.DefaultCellEditor;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
-import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
@@ -51,24 +49,24 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 			"lane.use.multi.indication", 100)
 		{
 			public Object getValueAt(LaneUseMulti lum) {
-				return lum.getIndication();
+				return LaneUseIndication.fromOrdinal(
+					lum.getIndication());
 			}
 			public boolean isEditable(LaneUseMulti lum) {
 				return canUpdate(lum);
 			}
 			public void setValueAt(LaneUseMulti lum, Object value) {
-				String v = value.toString();
-				int ind = lookupIndication(v);
-				if (lum != null)
-					lum.setIndication(ind);
-			}
-			protected TableCellRenderer createCellRenderer() {
-				return new IndicationCellRenderer();
+				if (value instanceof LaneUseIndication) {
+					LaneUseIndication v =
+						(LaneUseIndication) value;
+					lum.setIndication(v.ordinal());
+				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox<String> combo = new JComboBox<String>(
-					LaneUseIndication.getDescriptions());
-				return new DefaultCellEditor(combo);
+				JComboBox<LaneUseIndication> cbx =
+					new JComboBox<LaneUseIndication>(
+					LaneUseIndication.values());
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		cols.add(new ProxyColumn<LaneUseMulti>("lane.use.multi.msg", 80,
@@ -138,15 +136,6 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 		      false);	/* has_name */
 	}
 
-	/** Lookup a lane-use indication */
-	private int lookupIndication(String desc) {
-		for (LaneUseIndication lui: LaneUseIndication.values()) {
-			if (desc.equals(lui.description))
-				return lui.ordinal();
-		}
-		return 0;
-	}
-
 	/** Create a new lane-use MULTI */
 	@Override
 	public void createObject(String n) {
@@ -183,28 +172,5 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	@Override
 	public int getVisibleRowCount() {
 		return 10;
-	}
-
-	/** Indication cell renderer */
-	static protected class IndicationCellRenderer
-		extends DefaultTableCellRenderer
-	{
-		public Component getTableCellRendererComponent(JTable table,
-			Object value, boolean isSelected, boolean hasFocus,
-			int row, int column)
-		{
-			return super.getTableCellRendererComponent(table,
-				getIndication(value), isSelected, hasFocus,
-				row, column);
-		}
-	}
-
-	/** Get an indication description */
-	static protected String getIndication(Object value) {
-		if (value instanceof Integer) {
-			return LaneUseIndication.fromOrdinal(
-				(Integer)value).description;
-		} else
-			return null;
 	}
 }
