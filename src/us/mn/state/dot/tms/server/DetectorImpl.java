@@ -22,7 +22,6 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -68,9 +67,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Maximum number of scans in 30 seconds */
 	static private final int MAX_C30 = 1800;
-
-	/** Detector debug log */
-	static private final DebugLog DET_LOG = new DebugLog("detector");
 
 	/** Sample period for detectors (seconds) */
 	static public final int SAMPLE_PERIOD_SEC = 30;
@@ -214,8 +210,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			fake_det = createFakeDetector(fake);
 		}
 		catch (ChangeVetoException e) {
-			DET_LOG.log("Invalid FAKE Detector: " + name +
-				" (" + fake + ")");
+			logError("Invalid FAKE Detector (" + fake + ")");
 			fake = null;
 		}
 	}
