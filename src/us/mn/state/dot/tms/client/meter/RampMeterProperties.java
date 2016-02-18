@@ -106,8 +106,8 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	};
 
 	/** Meter type combo box component */
-	private final JComboBox<String> meter_type_cbx = new JComboBox<String>(
-		RampMeterType.getDescriptions());
+	private final JComboBox<RampMeterType> meter_type_cbx = new JComboBox
+		<RampMeterType>(RampMeterType.values());
 
 	/** Field for Storage length (feet) */
 	private final JTextField storage_txt = new JTextField(6);
