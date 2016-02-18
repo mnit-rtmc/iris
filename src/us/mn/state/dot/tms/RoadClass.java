@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,17 +45,17 @@ public enum RoadClass {
 	}
 
 	/** Get the string representation of a road class */
+	@Override
 	public String toString() {
 		return description;
 	}
 
 	/** Get a road class from an ordinal value */
 	static public RoadClass fromOrdinal(short o) {
-		for(RoadClass c: RoadClass.values()) {
-			if(c.ordinal() == o)
-				return c;
-		}
-		return NONE;
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return NONE;
 	}
 
 	/** Check if an ordinal value is valid */
