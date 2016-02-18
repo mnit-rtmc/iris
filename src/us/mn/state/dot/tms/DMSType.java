@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,11 +54,10 @@ public enum DMSType {
 
 	/** Get a DMS type from an ordinal value */
 	static public DMSType fromOrdinal(int o) {
-		for(DMSType t: DMSType.values()) {
-			if(t.ordinal() == o)
-				return t;
-		}
-		return UNKNOWN;
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return UNKNOWN;
 	}
 
 	/** Check if a DMS type is fixed-height VMS */
