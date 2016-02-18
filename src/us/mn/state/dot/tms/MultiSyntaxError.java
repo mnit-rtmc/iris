@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,9 +40,8 @@ public enum MultiSyntaxError {
 
 	/** Get MULTI syntax error from an ordinal value */
 	static public MultiSyntaxError fromOrdinal(int o) {
-		MultiSyntaxError v[] = values();
-		if (o >= 0 && o < v.length)
-			return v[o];
+		if (o >= 0 && o < values().length)
+			return values()[o];
 		else
 			return undefined;
 	}
