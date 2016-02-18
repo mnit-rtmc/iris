@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -109,10 +109,9 @@ public enum DeviceRequest {
 
 	/** Get device request from an ordinal value */
 	static public DeviceRequest fromOrdinal(int o) {
-		for (DeviceRequest dr: DeviceRequest.values()) {
-			if (dr.ordinal() == o)
-				return dr;
-		}
-		return NO_REQUEST;
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return NO_REQUEST;
 	}
 }
