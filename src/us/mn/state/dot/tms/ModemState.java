@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,15 +26,15 @@ public enum ModemState {
 
 	/** Get a modem state from an ordinal value */
 	static public ModemState fromOrdinal(int o) {
-		for(ModemState ms: ModemState.values()) {
-			if(ms.ordinal() == o)
-				return ms;
-		}
-		return null;
+		if (o >= 0 && o < values().length)
+			return values()[o];
+		else
+			return null;
 	}
 
 	/** Check if a modem state is in error */
 	static public boolean isError(int o) {
-		return o == open_error.ordinal() || o ==connect_error.ordinal();
+		return (o == open_error.ordinal()) ||
+		       (o == connect_error.ordinal());
 	}
 }
