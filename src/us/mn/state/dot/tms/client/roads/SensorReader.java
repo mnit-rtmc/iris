@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public class SensorReader {
 	private final Job job = new Job(Calendar.SECOND, 30, Calendar.SECOND,
 		OFFSET_SECS)
 	{
-		public void perform() {
+		public void perform() throws Exception {
 			readXmlFile();
 		}
 	};
@@ -103,7 +103,7 @@ public class SensorReader {
 		parser = factory.newSAXParser();
 		// Read the sensor data right away
 		READER.addJob(new Job() {
-			public void perform() {
+			public void perform() throws Exception {
 				readXmlFile();
 			}
 		});
@@ -117,16 +117,10 @@ public class SensorReader {
 	}
 
 	/** Read and parse an XML file */
-	private void readXmlFile() {
+	private void readXmlFile() throws IOException, SAXException {
 		try {
 			time_changed = false;
 			parse();
-		}
-		catch (IOException e) {
-			e.printStackTrace();
-		}
-		catch (SAXException e) {
-			e.printStackTrace();
 		}
 		finally {
 			long now = System.currentTimeMillis();
