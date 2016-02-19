@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,15 +43,14 @@ public class TMSException extends Exception {
 		stack_trace = writer.toString();
 	}
 
-	/**
-	 * Print the composite message and the embedded stack trace to
-	 * the specified stream <code>ps</code>.
-	 * @param ps the print stream
-	 */
+	/** Print the composite message and the embedded stack trace to
+	 * the specified print stream.
+	 * @param ps Print stream. */
+	@Override
 	public void printStackTrace(PrintStream ps) {
-		synchronized(ps) {
+		synchronized (ps) {
 			ps.println("TMSException:");
-			if(stack_trace != null) {
+			if (stack_trace != null) {
 				ps.println(this);
 				ps.print(stack_trace);
 			} else
@@ -60,19 +59,19 @@ public class TMSException extends Exception {
 	}
 
 	/** Prints the composite message to <code>System.err</code> */
+	@Override
 	public void printStackTrace() {
 		printStackTrace(System.err);
 	}
 
-	/**
-	 * Prints the composite message and the embedded stack trace to
-	 * the specified print writer <code>pw</code>.
-	 * @param pw the print writer
-	 */
+	/** Prints the composite message and the embedded stack trace to
+	 * the specified print writer.
+	 * @param pw Print writer. */
+	@Override
 	public void printStackTrace(PrintWriter pw) {
-		synchronized(pw) {
+		synchronized (pw) {
 			pw.println("TMSException:");
-			if(stack_trace != null) {
+			if (stack_trace != null) {
 				pw.println(this);
 				pw.print(stack_trace);
 			} else
