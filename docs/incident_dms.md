@@ -69,6 +69,7 @@ Tag      | Description
 `[pck0]` | Pickable node cross-street text (all caps)
 `[pck1]` | Abbreviated pickable node text (all caps)
 `[alt]`  | Alternate freeway text
+`[mi]`   | Miles from DMS to node
 
 For `[pck0]`, a prefix of "I-" is stripped, and certain prefixes are replaced
 with "HWY ":
