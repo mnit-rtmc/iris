@@ -18,9 +18,10 @@ When "Deploy" button is pressed, all DMS within the range of the incident are
 found.  Each of these DMS will be deployed if matching *descriptor*, *locator*
 and *advice* are found.
 
-When the incident is cleared, another match is performed.  If there is no match,
-the message is blank.  Otherwise, a message with PSA priority is deployed for
-5 minutes.
+When the incident is cleared, all associated DMS are blanked.  The only
+exception is for *MAJOR* incidents.  In that case, another match is performed
+with *cleared* set to *YES*.  If a matching message is found, it will be
+deployed with PSA priority for 5 minutes.
 
 ### Incident Descriptor
 
