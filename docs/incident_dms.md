@@ -73,26 +73,27 @@ Tag      | Description
 `[alt]`  | Alternate freeway text
 `[mi]`   | Miles from DMS to node
 
-Road names are converted to all capital letters, and certain prefixes and
-suffixes are replaced.
+Road names are converted to all capital letters.  For the `[loc]` tag, certain
+prefixes and suffixes are replaced with other values.  For the `[abbr]` tag,
+all matching prefixes and suffixes are stripped.
 
-Type   | Value    | `[loc]` | `[abbr]`
--------|----------|---------|---------
-Prefix | U.S.     | HWY     | ""
-Prefix | T.H.     | HWY     | ""
-Prefix | C.S.A.H. | CTY     | ""
-Prefix | I-       | ""      | ""
-Suffix | AVE      | AVE     | ""
-Suffix | BLVD     | BLVD    | ""
-Suffix | DR       | DR      | ""
-Suffix | HWY      | HWY     | ""
-Suffix | LN       | LN      | ""
-Suffix | PKWY     | PKWY    | ""
-Suffix | PL       | PL      | ""
-Suffix | RD       | RD      | ""
-Suffix | ST       | ST      | ""
-Suffix | TR       | TR      | ""
-Suffix | WAY      | WAY     | ""
+Type   | Value    | Replacement
+-------|----------|------------
+Prefix | U.S.     | HWY
+Prefix | T.H.     | HWY
+Prefix | C.S.A.H. | CTY
+Prefix | I-       |
+Suffix | AVE      | AVE
+Suffix | BLVD     | BLVD
+Suffix | DR       | DR
+Suffix | HWY      | HWY
+Suffix | LN       | LN
+Suffix | PKWY     | PKWY
+Suffix | PL       | PL
+Suffix | RD       | RD
+Suffix | ST       | ST
+Suffix | TR       | TR
+Suffix | WAY      | WAY
 
 ### Incident Advice
 
