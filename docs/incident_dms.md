@@ -62,6 +62,7 @@ FAR    | NO       | YES      | `[mod] [pck0]`         | AT 494
 MIDDLE | YES      | Y/N      | ON `[alt]`             | ON 394 EAST
 FAR    | YES      | YES      | ON `[alt]` AT `[pck0]` | ON 394 AT HWY 100
 
+Several MULTI-like tags are defined for incident locators.
 
 Tag      | Description
 ---------|-------------------------------------------
@@ -71,32 +72,29 @@ Tag      | Description
 `[alt]`  | Alternate freeway text
 `[mi]`   | Miles from DMS to node
 
-For `[pck0]`, a prefix of "I-" is stripped, and certain prefixes are replaced
-with "HWY ":
+Road names are converted to all capital letters, and certain prefixes and
+suffixes are replaced.
 
-  * U.S.
-  * T.H.
-  * C.S.A.H.
+Prefix   | `[pck0]` | `[pck1]`
+---------|----------|---------
+U.S.     | "HWY "   | ""
+T.H.     | "HWY "   | ""
+C.S.A.H. | "CTY "   | ""
+I-       | ""       | ""
 
-For `[pck1]`, certain prefixes are stripped:
-
-  * U.S.
-  * T.H.
-  * C.S.A.H.
-
-For `[pck1]`, certain suffixes are stripped:
-
-  * AVE
-  * BLVD
-  * DR
-  * HWY
-  * LN
-  * PKWY
-  * PL
-  * RD
-  * ST
-  * TR
-  * WAY
+Suffix | `[pck1]`
+-------|---------
+AVE    | ""
+BLVD   | ""
+DR     | ""
+HWY    | ""
+LN     | ""
+PKWY   | ""
+PL     | ""
+RD     | ""
+ST     | ""
+TR     | ""
+WAY    | ""
 
 ### Incident Advice
 
