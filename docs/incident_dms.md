@@ -56,45 +56,42 @@ than 0.5 miles.
 Range  | Branched | Pickable | Multi                  | Example
 -------|----------|----------|------------------------|------------------
 NEAR   | NO       | Y/N      | AHEAD                  | AHEAD
-MIDDLE | NO       | YES      | `[mod] [pck0]`         | AT HWY 100
+MIDDLE | NO       | YES      | `[mod] [loc]`          | AT HWY 100
 MIDDLE | NO       | NO       | `[mi]` MILES AHEAD     | 8 MILES AHEAD
-FAR    | NO       | YES      | `[mod] [pck0]`         | AT 494
+FAR    | NO       | YES      | `[mod] [loc]`          | AT 494
 MIDDLE | YES      | Y/N      | ON `[alt]`             | ON 394 EAST
-FAR    | YES      | YES      | ON `[alt]` AT `[pck0]` | ON 394 AT HWY 100
+FAR    | YES      | YES      | ON `[alt]` AT `[loc]`  | ON 394 AT HWY 100
 
 Several MULTI-like tags are defined for incident locators.
 
 Tag      | Description
----------|-------------------------------------------
+---------|-----------------------------------------------
 `[mod]`  | Location modifier (AT, N OF, S OF, etc.)
-`[pck0]` | Pickable node cross-street text (all caps)
-`[pck1]` | Abbreviated pickable node text (all caps)
+`[loc]`  | Road name of node nearest incident
+`[abbr]` | Abbreviated road name of node nearest incident
 `[alt]`  | Alternate freeway text
 `[mi]`   | Miles from DMS to node
 
 Road names are converted to all capital letters, and certain prefixes and
 suffixes are replaced.
 
-Prefix   | `[pck0]` | `[pck1]`
----------|----------|---------
-U.S.     | "HWY "   | ""
-T.H.     | "HWY "   | ""
-C.S.A.H. | "CTY "   | ""
-I-       | ""       | ""
-
-Suffix | `[pck1]`
--------|---------
-AVE    | ""
-BLVD   | ""
-DR     | ""
-HWY    | ""
-LN     | ""
-PKWY   | ""
-PL     | ""
-RD     | ""
-ST     | ""
-TR     | ""
-WAY    | ""
+Type   | Value    | `[loc]` | `[abbr]`
+-------|----------|---------|---------
+Prefix | U.S.     | HWY     | ""
+Prefix | T.H.     | HWY     | ""
+Prefix | C.S.A.H. | CTY     | ""
+Prefix | I-       | ""      | ""
+Suffix | AVE      | AVE     | ""
+Suffix | BLVD     | BLVD    | ""
+Suffix | DR       | DR      | ""
+Suffix | HWY      | HWY     | ""
+Suffix | LN       | LN      | ""
+Suffix | PKWY     | PKWY    | ""
+Suffix | PL       | PL      | ""
+Suffix | RD       | RD      | ""
+Suffix | ST       | ST      | ""
+Suffix | TR       | TR      | ""
+Suffix | WAY      | WAY     | ""
 
 ### Incident Advice
 
