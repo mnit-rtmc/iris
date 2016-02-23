@@ -99,13 +99,13 @@ public class CommMessageImpl<T extends ControllerProperty>
 		ControllerImpl c = op.getController();
 		messenger.drain();
 		OutputStream os = getOutputStream();
-		if (os != null) {
-			for (T p: props) {
-				logStore(p);
+		for (T p: props) {
+			logStore(p);
+			if (os != null)
 				p.encodeStore(c, os);
-			}
-			os.flush();
 		}
+		if (os != null)
+			os.flush();
 		for (T p: props) {
 			p.decodeStore(c, messenger.getInputStream(p.getPath(),
 				c));

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2015  Minnesota Department of Transportation
+ * Copyright (C) 2011-2016  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  * Copyright (C) 2014  AHMCT, University of California
  *
@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.server.ModemImpl;
 import us.mn.state.dot.tms.server.comm.addco.AddcoPoller;
 import us.mn.state.dot.tms.server.comm.addco.AddcoMessenger;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
+import us.mn.state.dot.tms.server.comm.cbw.CBWPoller;
 import us.mn.state.dot.tms.server.comm.cohuptz.CohuPTZPoller;
 import us.mn.state.dot.tms.server.comm.dinrelay.DinRelayPoller;
 import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
@@ -137,6 +138,8 @@ public class DevicePollerFactory {
 			return createAddcoPoller();
 		case TRANSCORE_E6:
 			return createE6Poller();
+		case CBW:
+			return createCBWPoller();
 		default:
 			throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -319,6 +322,11 @@ public class DevicePollerFactory {
 	/** Create a DIN relay poller */
 	private DevicePoller createDinRelayPoller() throws IOException {
 		return new DinRelayPoller(name, createHttpFileMessenger());
+	}
+
+	/** Create a new Control By Web poller */
+	private DevicePoller createCBWPoller() throws IOException {
+		return new CBWPoller(name, createHttpFileMessenger());
 	}
 
 	/** Create a STC poller */

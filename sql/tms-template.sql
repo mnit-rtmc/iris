@@ -2228,6 +2228,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 30	DR-500
 31	ADDCO
 32	TransCore E6
+33	Control By Web
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;
@@ -2345,7 +2346,7 @@ camera_util_panel_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.31.0
+database_version	4.32.0
 detector_auto_fail_enable	true
 device_op_status_enable	false
 dialup_poll_period_mins	120
