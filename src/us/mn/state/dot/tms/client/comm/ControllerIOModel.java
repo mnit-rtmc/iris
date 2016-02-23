@@ -20,9 +20,7 @@ import javax.swing.AbstractCellEditor;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultCellEditor;
 import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JComboBox;
-import javax.swing.JList;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
@@ -50,6 +48,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IListCellRenderer;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -197,7 +196,12 @@ public class ControllerIOModel extends AbstractTableModel {
 		cell_editor = new DeviceCellEditor();
 		io = new ControllerIO[Controller.ALL_PINS];
 		types = new DeviceType[Controller.ALL_PINS];
-		d_combo.setRenderer(new DeviceComboRenderer());
+		d_combo.setRenderer(new IListCellRenderer<ControllerIO>() {
+			@Override
+			protected String valueToString(ControllerIO value) {
+				return getDeviceLabel(value).toString();
+			}
+		});
 		null_list = new ControllerIOList(null);
 		a_list = new ControllerIOList(state.getAlarms());
 		c_list = new ControllerIOList(state.getCamCache().getCameras());
@@ -450,18 +454,6 @@ public class ControllerIOModel extends AbstractTableModel {
 			return super.getTableCellRendererComponent(table,
 				getDeviceLabel(value), isSelected, hasFocus,
 				row, column);
-		}
-	}
-
-	/** Inner class for rendering combo editor in the device column */
-	protected class DeviceComboRenderer extends DefaultListCellRenderer {
-		public Component getListCellRendererComponent(JList list,
-			Object value, int index, boolean isSelected,
-			boolean cellHasFocus)
-		{
-			return super.getListCellRendererComponent(list,
-				getDeviceLabel(value), index, isSelected,
-				cellHasFocus);
 		}
 	}
 
