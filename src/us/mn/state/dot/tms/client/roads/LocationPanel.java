@@ -15,18 +15,15 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
 import java.awt.geom.Point2D;
-import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
@@ -42,6 +39,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IListCellRenderer;
 import us.mn.state.dot.tms.client.widget.IPanel;
 
 /**
@@ -232,16 +230,10 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		cross_cbx.setModel(cross_mdl);
 		cross_cbx.setAction(cross_act);
 		cross_dir_cbx.setAction(cross_dir_act);
-		cross_dir_cbx.setRenderer(new ListCellRenderer<Direction>() {
-			private final DefaultListCellRenderer cell =
-				new DefaultListCellRenderer();
-			public Component getListCellRendererComponent(
-				JList<? extends Direction> list,Direction value,
-				int index, boolean isSelected, boolean focus)
-			{
-				String v = (value != null) ? value.abbrev : "";
-				return cell.getListCellRendererComponent(list,
-					v, index, isSelected, focus);
+		cross_dir_cbx.setRenderer(new IListCellRenderer<Direction>() {
+			@Override
+			protected String valueToString(Direction value) {
+				return value.abbrev;
 			}
 		});
 		add("location.roadway");
