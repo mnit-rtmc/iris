@@ -30,15 +30,20 @@ import us.mn.state.dot.tms.SignText;
  */
 public class SignTextCellRenderer implements ListCellRenderer<SignText> {
 
+	/** Blank string (must contain a space to be visible on combo box) */
+	static private final String BLANK = " ";
+
 	/** Highlight color for special rank levels */
 	static private final Color HIGHLIGHT = new Color(204, 204, 255);
 
 	/** Get a sign text as string */
 	static private String asText(SignText value) {
-		if (value != null)
-			return new MultiString(value.getMulti()).asText();
-		else
-			return "";
+		if (value != null) {
+			String v = new MultiString(value.getMulti()).asText();
+			if (v.length() > 0)
+				return v;
+		}
+		return BLANK;
 	}
 
 	/** Cell renderer */
