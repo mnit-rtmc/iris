@@ -139,7 +139,11 @@ public class MessageProperty extends AddcoProperty {
 	private MessagePage parsePage(byte[] body, int p, int n_pages)
 		throws IOException
 	{
-		parseCheck2(body, "UNKNOWN0", 8, 8);
+		int p_unk = parse2(body);
+		// This value is almost always 8, but in some possible error
+		// conditions, it is 1.  Needs more investigation.
+		if (p_unk != 8 && p_unk != 1)
+			throw new ParsingException("UNKNOWN0: " + p_unk);
 		int seq = parse8(body, pos);
 		pos++;
 		parseCheck2(body, "PAGE #", p + 1, p + 1);
@@ -251,10 +255,16 @@ public class MessageProperty extends AddcoProperty {
 	private int parseCheck2(byte[] body, String vname, int mn, int mx)
 		throws ParsingException
 	{
-		int val = parse16le(body, pos);
-		pos += 2;
+		int val = parse2(body);
 		if (val < mn || val > mx)
 			throw new ParsingException(vname + ": " + val);
+		return val;
+	}
+
+	/** Parse a 2-byte value */
+	private int parse2(byte[] body) {
+		int val = parse16le(body, pos);
+		pos += 2;
 		return val;
 	}
 
@@ -262,8 +272,7 @@ public class MessageProperty extends AddcoProperty {
 	private int parseCheck4(byte[] body, String vname, int mn, int mx)
 		throws ParsingException
 	{
-		int val = parse32le(body, pos);
-		pos += 4;
+		int val = parse4(body);
 		if (val < mn || val > mx)
 			throw new ParsingException(vname + ": " + val);
 		return val;
