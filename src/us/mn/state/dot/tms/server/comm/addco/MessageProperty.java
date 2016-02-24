@@ -22,11 +22,13 @@ import static us.mn.state.dot.tms.DmsColor.AMBER;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.CRC;
 import us.mn.state.dot.tms.server.comm.ParsingException;
+import static us.mn.state.dot.tms.server.comm.addco.AddcoPoller.ADDCO_LOG;
 
 /**
  * Addco Message Property.
@@ -53,6 +55,12 @@ public class MessageProperty extends AddcoProperty {
 	/** Calculate the number of bytes in a bitmap */
 	static private int bitmapBytes(int width, int height) {
 		return height * bitmapStride(width);
+	}
+
+	/** Log an error msg */
+	private void logError(String msg) {
+		if (ADDCO_LOG.isOpen())
+			ADDCO_LOG.log(dms.getName() + "! " + msg);
 	}
 
 	/** DMS for message */
@@ -140,9 +148,9 @@ public class MessageProperty extends AddcoProperty {
 		throws IOException
 	{
 		int p_unk = parse2(body);
-		// This value is almost always 8, but in some possible error
-		// conditions, it is 1.  Needs more investigation.
-		if (p_unk != 8 && p_unk != 1)
+		if (1 == p_unk)
+			return parseUnknownPage(body);
+		else if (8 != p_unk)
 			throw new ParsingException("UNKNOWN0: " + p_unk);
 		int seq = parse8(body, pos);
 		pos++;
@@ -160,6 +168,12 @@ public class MessageProperty extends AddcoProperty {
 			return parseTextPage(body, p_on, p_off);
 		else
 			throw new ParsingException("PTYPE: " + p_type);
+	}
+
+	/** Parse an unknown page */
+	private MessagePage parseUnknownPage(byte[] body) throws IOException {
+		logError("UNKNOWN PAGE: " + HexString.format(body, ':'));
+		throw new ParsingException("UNKNOWN PAGE");
 	}
 
 	/** Parse a text page of a message */
