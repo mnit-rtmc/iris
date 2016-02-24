@@ -1374,7 +1374,7 @@ CREATE TRIGGER gate_arm_update_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_update();
 
 CREATE TABLE iris.dms_sign_group (
-	name VARCHAR(24) PRIMARY KEY,
+	name VARCHAR(28) PRIMARY KEY,
 	dms VARCHAR(10) NOT NULL REFERENCES iris._dms,
 	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group
 );
