@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	{
 		String vimp = IncidentImpact.fromArray(
 			IncidentImpact.fromString(imp));
-		if(!vimp.equals(imp))
+		if (!vimp.equals(imp))
 			throw new ChangeVetoException("Invalid impact: " + imp);
 	}
 
@@ -83,6 +83,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -102,11 +103,13 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "event." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -157,57 +160,64 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Name of replaced incident */
-	protected String replaces;
+	private String replaces;
 
 	/** Get name of incident this replaces */
+	@Override
 	public String getReplaces() {
 		return replaces;
 	}
 
 	/** Event type (id of EventType enum) */
-	protected int event_desc_id;
+	private int event_desc_id;
 
 	/** Get the event type */
+	@Override
 	public int getEventType() {
 		return event_desc_id;
 	}
 
 	/** Event date (timestamp) */
-	protected Date event_date = TimeSteward.getDateInstance();
+	private Date event_date = TimeSteward.getDateInstance();
 
 	/** Get the event date (timestamp) */
+	@Override
 	public long getEventDate() {
 		return event_date.getTime();
 	}
 
 	/** Incident detail */
-	protected IncidentDetail detail;
+	private IncidentDetail detail;
 
 	/** Get the incident detail */
+	@Override
 	public IncidentDetail getDetail() {
 		return detail;
 	}
 
 	/** Lane type ordinal */
-	protected short lane_type = (short)LaneType.MAINLINE.ordinal();
+	private short lane_type = (short) LaneType.MAINLINE.ordinal();
 
 	/** Get the lane type */
+	@Override
 	public short getLaneType() {
 		return lane_type;
 	}
 
 	/** Road for incident location */
-	protected Road road;
+	private Road road;
 
 	/** Get the road */
+	@Override
 	public Road getRoad() {
 		return road;
 	}
 
 	/** Direction on road */
-	protected short dir;
+	private short dir;
 
 	/** Get the road direction */
+	@Override
 	public short getDir() {
 		return dir;
 	}
@@ -216,6 +226,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	private double lat;
 
 	/** Get the latitude */
+	@Override
 	public double getLat() {
 		return lat;
 	}
@@ -224,50 +235,56 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	private double lon;
 
 	/** Get the longitude */
+	@Override
 	public double getLon() {
 		return lon;
 	}
 
 	/** Camera for verificaiton */
-	protected Camera camera;
+	private Camera camera;
 
 	/** Get the verification camera */
+	@Override
 	public Camera getCamera() {
 		return camera;
 	}
 
 	/** Impact code */
-	protected String impact = "";
+	private String impact = "";
 
 	/** Get the current impact code.
 	 * @see us.mn.state.dot.tms.Incident.getImpact() */
+	@Override
 	public String getImpact() {
 		return impact;
 	}
 
 	/** Set the impact code */
+	@Override
 	public void setImpact(String imp) {
 		impact = imp;
 	}
 
 	/** Set the impact code */
 	public void doSetImpact(String imp) throws TMSException {
-		if(imp.equals(impact))
-			return;
-		validateImpact(imp);
-		store.update(this, "impact", imp);
-		setImpact(imp);
+		if (!imp.equals(impact)) {
+			validateImpact(imp);
+			store.update(this, "impact", imp);
+			setImpact(imp);
+		}
 	}
 
 	/** Incident cleared status */
-	protected boolean cleared = false;
+	private boolean cleared = false;
 
 	/** Get the cleared status */
+	@Override
 	public boolean getCleared() {
 		return cleared;
 	}
 
 	/** Set the cleared status */
+	@Override
 	public void setCleared(boolean c) {
 		cleared = c;
 		clear_time = TimeSteward.currentTimeMillis();
@@ -275,14 +292,14 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 
 	/** Set the cleared status */
 	public void doSetCleared(boolean c) throws TMSException {
-		if(c == cleared)
-			return;
-		store.update(this, "cleared", c);
-		setCleared(c);
+		if (c != cleared) {
+			store.update(this, "cleared", c);
+			setCleared(c);
+		}
 	}
 
 	/** Time the incident was cleared */
-	protected long clear_time = TimeSteward.currentTimeMillis();
+	private long clear_time = TimeSteward.currentTimeMillis();
 
 	/** Get the time the incident was cleared */
 	public long getClearTime() {
@@ -295,19 +312,19 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		String loc = lookupLocation();
 		w.write("<incident");
 		w.write(createAttribute("name", getName()));
-		if(replaces != null)
+		if (replaces != null)
 			w.write(createAttribute("replaces", replaces));
 		w.write(createAttribute("event_type",
 			EventType.fromId(event_desc_id)));
 		w.write(createAttribute("event_date", event_date));
-		if(dtl != null)
+		if (dtl != null)
 			w.write(createAttribute("detail", dtl));
 		w.write(createAttribute("lane_type",
 			LaneType.fromOrdinal(lane_type)));
 		w.write(createAttribute("road", road));
 		w.write(createAttribute("dir",
 			Direction.fromOrdinal(dir).abbrev));
-		if(loc != null)
+		if (loc != null)
 			w.write(createAttribute("location", loc));
 		Position pos = getWgs84Position();
 		w.write(createAttribute("lon",
@@ -323,20 +340,17 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	/** Lookup the detail description */
 	private String lookupDetail() {
 		IncidentDetail dtl = detail;
-		if(dtl != null)
-			return dtl.getDescription();
-		else
-			return null;
+		return (dtl != null) ? dtl.getDescription() : null;
 	}
 
 	/** Lookup the incident location */
 	private String lookupLocation() {
 		Corridor cor = corridors.getCorridor(
 			GeoLocHelper.getCorridorName(road, dir));
-		if(cor == null)
+		if (cor == null)
 			return null;
 		R_Node rnd = cor.findNearest(getWgs84Position());
-		if(rnd == null)
+		if (rnd == null)
 			return null;
 		return GeoLocHelper.getCrossDescription(rnd.getGeoLoc());
 	}
