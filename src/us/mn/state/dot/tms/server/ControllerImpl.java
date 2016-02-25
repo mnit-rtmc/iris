@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
+import static us.mn.state.dot.tms.CommProtocol.MSG_FEED;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
@@ -44,6 +45,7 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
+import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
 import us.mn.state.dot.tms.server.event.CommEvent;
 
 /**
@@ -439,11 +441,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return null;
 	}
 
-	/** Check if the controller is a message feed controller */
-	public boolean isMsgFeed() {
-		return getProtocol() == CommProtocol.MSG_FEED;
-	}
-
 	/** Get the comm protocol */
 	public CommProtocol getProtocol() {
 		CommLinkImpl cl = comm_link;
@@ -836,6 +833,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		// Must call getDevices so we don't hold the lock
 		for (ControllerIO io: getDevices())
 			pollDevice(io);
+		// Message feed is not associated with devices
+		queryMsgFeed();
 	}
 
 	/** Get a list of all devices on controller */
@@ -869,6 +868,17 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if (io instanceof TagReaderImpl) {
 			TagReaderImpl tr = (TagReaderImpl)io;
 			tr.sendDeviceRequest(QUERY_STATUS);
+		}
+	}
+
+	/** Query msg feed */
+	private void queryMsgFeed() {
+		if (MSG_FEED == getProtocol()) {
+			DevicePoller dp = getPoller();
+			if (dp instanceof MsgFeedPoller) {
+				MsgFeedPoller mfp = (MsgFeedPoller) dp;
+				mfp.queryMessages(this);
+			}
 		}
 	}
 

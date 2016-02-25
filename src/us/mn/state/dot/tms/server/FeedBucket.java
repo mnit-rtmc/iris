@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,8 @@ public class FeedBucket {
 	/** Get a feed message from the bucket */
 	static public synchronized FeedMsg getMessage(String fid, String dms) {
 		HashMap<String, FeedMsg> feed = getFeed(fid);
-		return feed.get(dms);
+		FeedMsg msg = feed.get(dms);
+		return (msg != null && !msg.hasExpired()) ? msg : null;
 	}
 
 	/** Get the specified feed */
