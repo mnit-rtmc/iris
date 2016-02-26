@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller;
 import us.mn.state.dot.tms.server.comm.dr500.DR500Poller;
 import us.mn.state.dot.tms.server.comm.e6.E6Poller;
 import us.mn.state.dot.tms.server.comm.g4.G4Poller;
+import us.mn.state.dot.tms.server.comm.incfeed.IncFeedPoller;
 import us.mn.state.dot.tms.server.comm.infinova.InfinovaMessenger;
 import us.mn.state.dot.tms.server.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.server.comm.mndot.MndotPoller;
@@ -140,6 +141,8 @@ public class DevicePollerFactory {
 			return createE6Poller();
 		case CBW:
 			return createCBWPoller();
+		case INC_FEED:
+			return createIncFeedPoller();
 		default:
 			throw new ProtocolException("INVALID PROTOCOL");
 		}
@@ -286,6 +289,11 @@ public class DevicePollerFactory {
 	/** Create a MSG FEED poller */
 	private DevicePoller createMsgFeedPoller() throws IOException {
 		return new MsgFeedPoller(name, createHttpFileMessenger());
+	}
+
+	/** Create a incident feed poller */
+	private DevicePoller createIncFeedPoller() throws IOException {
+		return new IncFeedPoller(name, createHttpFileMessenger());
 	}
 
 	/** Create a Pelco video switch poller */

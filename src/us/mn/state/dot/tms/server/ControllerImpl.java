@@ -45,6 +45,7 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
+import us.mn.state.dot.tms.server.comm.incfeed.IncFeedPoller;
 import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
 import us.mn.state.dot.tms.server.event.CommEvent;
 
@@ -830,11 +831,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Poll controller devices */
 	public void pollDevices() {
+		// Feed are not associated with devices
+		queryFeeds();
 		// Must call getDevices so we don't hold the lock
 		for (ControllerIO io: getDevices())
 			pollDevice(io);
-		// Message feed is not associated with devices
-		queryMsgFeed();
 	}
 
 	/** Get a list of all devices on controller */
@@ -848,6 +849,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			DMSImpl dms = (DMSImpl)io;
 			if (dms.isPeriodicallyQueriable())
 				dms.sendDeviceRequest(QUERY_MESSAGE);
+			// FIXME: perform DMS actions with feed tags now
 		}
 		if (io instanceof GateArmImpl) {
 			GateArmImpl ga = (GateArmImpl)io;
@@ -871,14 +873,33 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
+	/** Query feeds */
+	private void queryFeeds() {
+		switch (getProtocol()) {
+		case INC_FEED:
+			queryIncFeed();
+			break;
+		case MSG_FEED:
+			queryMsgFeed();
+			break;
+		}
+	}
+
+	/** Query incident feed */
+	private void queryIncFeed() {
+		DevicePoller dp = getPoller();
+		if (dp instanceof IncFeedPoller) {
+			IncFeedPoller ifp = (IncFeedPoller) dp;
+			ifp.queryIncidents(this);
+		}
+	}
+
 	/** Query msg feed */
 	private void queryMsgFeed() {
-		if (MSG_FEED == getProtocol()) {
-			DevicePoller dp = getPoller();
-			if (dp instanceof MsgFeedPoller) {
-				MsgFeedPoller mfp = (MsgFeedPoller) dp;
-				mfp.queryMessages(this);
-			}
+		DevicePoller dp = getPoller();
+		if (dp instanceof MsgFeedPoller) {
+			MsgFeedPoller mfp = (MsgFeedPoller) dp;
+			mfp.queryMessages(this);
 		}
 	}
 

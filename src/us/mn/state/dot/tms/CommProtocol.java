@@ -124,7 +124,10 @@ public enum CommProtocol {
 	TRANSCORE_E6("TransCore E6"),
 
 	/** Control By Web (33) */
-	CBW("CBW");
+	CBW("CBW"),
+
+	/** Incident feed (34) */
+	INC_FEED("Incident Feed");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
