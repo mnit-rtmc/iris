@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
- * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,21 +12,22 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.roads;
-
-import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.Road;
+package us.mn.state.dot.tms;
 
 /**
- * ClientGeoLoc is a client-side GeoLoc implementation.
+ * TransGeoLoc is a transient GeoLoc implementation.
  *
  * @author Douglas Lau
- * @author Travis Swanston
  */
-public class ClientGeoLoc implements GeoLoc {
+public class TransGeoLoc implements GeoLoc {
 
-	/** Create a client location */
-	public ClientGeoLoc(Road road, short rd, float lt, float ln, double d) {
+	/** Create a transient location.
+	 * @param road Road location.
+	 * @param rd Road direction.
+	 * @param lt Latitude.
+	 * @param ln Longitude.
+	 * @param d Distance. */
+	public TransGeoLoc(Road road, short rd, float lt, float ln, double d) {
 		roadway = road;
 		road_dir = rd;
 		lat = lt;
@@ -36,85 +36,88 @@ public class ClientGeoLoc implements GeoLoc {
 	}
 
 	/** Get the type name */
+	@Override
 	public String getTypeName() {
-		return "client_geo_loc";
+		return "trans_geo_loc";
 	}
 
 	/** Get the name */
+	@Override
 	public String getName() {
-		return "client_geo_loc";
+		return "trans_geo_loc";
 	}
 
 	/** Destroy the loc */
+	@Override
 	public void destroy() {
 		// nothing to do
 	}
 
 	/** Roadway */
-	protected final Road roadway;
+	private final Road roadway;
 
 	/** Set the roadway name */
-	public void setRoadway(Road f) {
-		// part of GeoLoc interface
-	}
+	@Override
+	public void setRoadway(Road f) { }
 
 	/** Get the roadway name */
+	@Override
 	public Road getRoadway() {
 		return roadway;
 	}
 
 	/** Roadway direction */
-	protected final short road_dir;
+	private final short road_dir;
 
 	/** Set the roadway direction */
-	public void setRoadDir(short d) {
-		// part of GeoLoc interface
-	}
+	@Override
+	public void setRoadDir(short d) { }
 
 	/** Get the roadway direction */
+	@Override
 	public short getRoadDir() {
 		return road_dir;
 	}
 
 	/** Set the cross-street name */
-	public void setCrossStreet(Road x) {
-		// part of GeoLoc interface
-	}
+	@Override
+	public void setCrossStreet(Road x) { }
 
 	/** Get the cross-street name */
+	@Override
 	public Road getCrossStreet() {
 		return null;
 	}
 
 	/** Set the cross street direction */
-	public void setCrossDir(short d) {
-		// part of GeoLoc interface
-	}
+	@Override
+	public void setCrossDir(short d) { }
 
 	/** Get the cross street direction */
+	@Override
 	public short getCrossDir() {
-		return 0;
+		return (short) Direction.UNKNOWN.ordinal();
 	}
 
 	/** Set the cross street modifier */
-	public void setCrossMod(short m) {
-		// part of GeoLoc interface
-	}
+	@Override
+	public void setCrossMod(short m) { }
 
 	/** Get the cross street modifier */
+	@Override
 	public short getCrossMod() {
-		return 0;
+		return (short) LocModifier.AT.ordinal();
 	}
 
 	/** Latitude */
 	private final double lat;
 
 	/** Set the latitude */
-	public void setLat(Double lt) {
-		// part of GeoLoc interface
-	}
+	@Override
+	public void setLat(Double lt) { }
 
 	/** Get the latitude */
+	@Override
 	public Double getLat() {
 		return lat;
 	}
@@ -123,26 +126,22 @@ public class ClientGeoLoc implements GeoLoc {
 	private final double lon;
 
 	/** Set the longitude */
-	public void setLon(Double ln) {
-		// part of GeoLoc interface
-	}
+	@Override
+	public void setLon(Double ln) { }
 
 	/** Get the longitude */
+	@Override
 	public Double getLon() {
 		return lon;
 	}
 
-	/** Set the milepoint (not applicable). */
-	public void setMilepoint(String m) {
-		// part of GeoLoc interface
-	}
+	/** Set the milepoint */
+	@Override
+	public void setMilepoint(String m) { }
 
-	/**
-	 * Get the milepoint (not applicable).
-	 * @return null
-	 */
+	/** Get the milepoint */
+	@Override
 	public String getMilepoint() {
-		// part of GeoLoc interface
 		return null;
 	}
 

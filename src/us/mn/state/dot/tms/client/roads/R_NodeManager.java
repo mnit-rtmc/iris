@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RoadClass;
+import us.mn.state.dot.tms.TransGeoLoc;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
@@ -409,7 +410,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 				c.getRoadway().getRClass()) ==RoadClass.CD_ROAD;
 			if ((cd_road && !cd) || (cd && !cd_road))
 				continue;
-			ClientGeoLoc l = createGeoLoc(c, smp);
+			TransGeoLoc l = createGeoLoc(c, smp);
 			if (l != null && l.getDistance() < distance) {
 				loc = l;
 				distance = l.getDistance();
@@ -421,8 +422,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Create the nearest GeoLoc for the given corridor.
 	 * @param c Corridor to search.
 	 * @param smp Selected point (spherical mercator position).
-	 * @return ClientGeoLoc snapped to corridor, or null if not found. */
-	private ClientGeoLoc createGeoLoc(CorridorBase c,
+	 * @return TransGeoLoc snapped to corridor, or null if not found. */
+	private TransGeoLoc createGeoLoc(CorridorBase c,
 		SphericalMercatorPosition smp)
 	{
 		R_Node n0 = null;
@@ -478,8 +479,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	 * @param n1 Second (adjacent) node.
 	 * @param smp Selected point (spherical mercator position).
 	 * @param d Distance (meters).
-	 * @return ClientGeoLoc snapped to corridor, or null if not found. */
-	private ClientGeoLoc createGeoLoc(R_Node n0, R_Node n1,
+	 * @return TransGeoLoc snapped to corridor, or null if not found. */
+	private TransGeoLoc createGeoLoc(R_Node n0, R_Node n1,
 		SphericalMercatorPosition smp, double dist)
 	{
 		GeoLoc l0 = n0.getGeoLoc();
@@ -490,7 +491,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			Position p = pos.getPosition();
 			float lat = (float)p.getLatitude();
 			float lon = (float)p.getLongitude();
-			return new ClientGeoLoc(l0.getRoadway(),
+			return new TransGeoLoc(l0.getRoadway(),
 				l0.getRoadDir(), lat, lon, dist);
 		} else
 			return null;
