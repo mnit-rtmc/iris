@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -433,19 +433,29 @@ public class GeoLocHelper extends BaseHelper {
 	 * @param l0 First end of line segment.
 	 * @param l1 Second end of line segment.
 	 * @param smp Selected point (spherical mercator position).
-	 * @return Selected point snapped to line segment. */
-	static public SphericalMercatorPosition segmentSnap(GeoLoc l0,
-		GeoLoc l1, SphericalMercatorPosition smp)
+	 * @return Transient geo loc snapped to line segment. */
+	static public TransGeoLoc snapSegment(GeoLoc l0, GeoLoc l1,
+		SphericalMercatorPosition smp)
 	{
 		SphericalMercatorPosition p0 = getPosition(l0);
 		SphericalMercatorPosition p1 = getPosition(l1);
-		if(p0 == null || p1 == null)
-			return null;
-		else {
+		if (p0 != null && p1 != null) {
 			MapLineSegment seg = new MapLineSegment(p0.getX(),
 				p0.getY(), p1.getX(), p1.getY());
 			MapVector pnt = seg.snap(smp.getX(), smp.getY());
-			return new SphericalMercatorPosition(pnt.x, pnt.y);
+			return createTransient(pnt, l0);
 		}
+		return null;
+	}
+
+	/** Create a transient geo location */
+	static private TransGeoLoc createTransient(MapVector pnt, GeoLoc l0) {
+		SphericalMercatorPosition pos = new SphericalMercatorPosition(
+			pnt.x, pnt.y);
+		Position p = pos.getPosition();
+		float lat = (float) p.getLatitude();
+		float lon = (float) p.getLongitude();
+		return new TransGeoLoc(l0.getRoadway(), l0.getRoadDir(), lat,
+			lon);
 	}
 }

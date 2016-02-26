@@ -456,7 +456,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			n_prev = n;
 		}
 		if (n0 != null) {
-			TransGeoLoc loc = createGeoLoc(n0, n1, smp);
+			GeoLoc l0 = n0.getGeoLoc();
+			GeoLoc l1 = n1.getGeoLoc();
+			TransGeoLoc loc = GeoLocHelper.snapSegment(l0, l1, smp);
 			if (loc != null)
 				return new GeoLocDist(loc, n_meters);
 		}
@@ -484,28 +486,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		GeoLoc l0 = n0.getGeoLoc();
 		GeoLoc l1 = n1.getGeoLoc();
 		return GeoLocHelper.segmentDistance(l0, l1, smp);
-	}
-
-	/** Create a GeoLoc projected onto the line between two nodes.
-	 * @param n0 First node.
-	 * @param n1 Second (adjacent) node.
-	 * @param smp Selected point (spherical mercator position).
-	 * @return TransGeoLoc snapped to corridor, or null if not found. */
-	private TransGeoLoc createGeoLoc(R_Node n0, R_Node n1,
-		SphericalMercatorPosition smp)
-	{
-		GeoLoc l0 = n0.getGeoLoc();
-		GeoLoc l1 = n1.getGeoLoc();
-		SphericalMercatorPosition pos = GeoLocHelper.segmentSnap(l0,
-			l1, smp);
-		if (pos != null) {
-			Position p = pos.getPosition();
-			float lat = (float)p.getLatitude();
-			float lon = (float)p.getLongitude();
-			return new TransGeoLoc(l0.getRoadway(),
-				l0.getRoadDir(), lat, lon);
-		} else
-			return null;
 	}
 
 	/** Get the layer zoom visibility threshold */
