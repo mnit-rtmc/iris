@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,32 +41,30 @@ public class DetectorHelper extends BaseHelper {
 	}
 
 	/** Get the geo location of a detector */
-	static public GeoLoc getGeoLoc(Detector det) {
-		R_Node n = det.getR_Node();
-		if(n != null)
-			return n.getGeoLoc();
-		else
-			return null;
+	static public GeoLoc getGeoLoc(Detector d) {
+		R_Node n = d.getR_Node();
+		return (n != null) ? n.getGeoLoc() : null;
 	}
 
 	/** Get the detector label */
 	static public String getLabel(Detector det) {
 		StringBuilder b = new StringBuilder();
 		b.append(GeoLocHelper.getRootLabel(getGeoLoc(det)));
-		if(b.toString().equals(GeoLocHelper.FUTURE))
+		if (b.toString().equals(GeoLocHelper.FUTURE))
 			return b.toString();
 		LaneType lt = LaneType.fromOrdinal(det.getLaneType());
 		b.append(lt.suffix);
 		int l_num = det.getLaneNumber();
-		if(l_num > 0)
+		if (l_num > 0)
 			b.append(l_num);
-		if(det.getAbandoned())
+		if (det.getAbandoned())
 			b.append("-ABND");
 		return b.toString();
 	}
 
 	/** Test if a detector is active */
-	static public boolean isActive(Detector det) {
-		return ControllerHelper.isActive(det.getController());
+	static public boolean isActive(Detector d) {
+		return ControllerHelper.isActive(d.getController())
+		    && !d.getAbandoned();
 	}
 }
