@@ -427,8 +427,8 @@ public class GeoLocHelper extends BaseHelper {
 	 * @param l0 First end of line segment.
 	 * @param l1 Second end of line segment.
 	 * @param smp Selected point (spherical mercator position).
-	 * @return Transient geo loc snapped to line segment. */
-	static public TransGeoLoc snapSegment(GeoLoc l0, GeoLoc l1,
+	 * @return GeoLoc snapped to line segment. */
+	static public GeoLoc snapSegment(GeoLoc l0, GeoLoc l1,
 		SphericalMercatorPosition smp)
 	{
 		SphericalMercatorPosition p0 = getPosition(l0);

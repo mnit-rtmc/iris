@@ -428,7 +428,7 @@ public class CorridorBase implements Iterable<R_Node> {
 			l_prev = l;
 		}
 		if (l0 != null) {
-			TransGeoLoc loc = GeoLocHelper.snapSegment(l0, l1, smp);
+			GeoLoc loc = GeoLocHelper.snapSegment(l0, l1, smp);
 			if (loc != null)
 				return new GeoLocDist(loc, n_meters);
 		}
@@ -445,9 +445,9 @@ public class CorridorBase implements Iterable<R_Node> {
 
 	/** GeoLoc / distance pair */
 	static public class GeoLocDist {
-		public final TransGeoLoc loc;
+		public final GeoLoc loc;
 		public final double dist;
-		private GeoLocDist(TransGeoLoc l, double d) {
+		private GeoLocDist(GeoLoc l, double d) {
 			loc = l;
 			dist = d;
 		}
