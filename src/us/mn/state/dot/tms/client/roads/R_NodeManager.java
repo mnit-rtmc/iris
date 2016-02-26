@@ -395,8 +395,8 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		return proxy.getGeoLoc();
 	}
 
-	/** Create a GeoLoc snapped to nearest corridor */
-	public GeoLoc createGeoLoc(SphericalMercatorPosition smp,
+	/** Create a GeoLoc snapped to nearest r_node segment */
+	public GeoLoc snapGeoLoc(SphericalMercatorPosition smp,
 		boolean cd_road)
 	{
 		GeoLoc loc = null;
