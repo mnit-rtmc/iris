@@ -400,16 +400,16 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		boolean cd_road)
 	{
 		GeoLoc loc = null;
-		double distance = Double.POSITIVE_INFINITY;
+		double dist = Double.POSITIVE_INFINITY;
 		for (CorridorBase c: corridors.values()) {
 			boolean cd = RoadClass.fromOrdinal(
 				c.getRoadway().getRClass()) ==RoadClass.CD_ROAD;
 			if ((cd_road && !cd) || (cd && !cd_road))
 				continue;
-			CorridorBase.GeoLocDist ld = c.snapGeoLoc(smp);
-			if (ld != null && ld.dist < distance) {
+			CorridorBase.GeoLocDist ld = c.snapGeoLoc(smp, dist);
+			if (ld != null && ld.dist < dist) {
 				loc = ld.loc;
-				distance = ld.dist;
+				dist = ld.dist;
 			}
 		}
 		return loc;

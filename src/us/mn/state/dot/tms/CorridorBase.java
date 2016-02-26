@@ -398,12 +398,15 @@ public class CorridorBase implements Iterable<R_Node> {
 
 	/** Snap a point to the corridor.
 	 * @param smp Selected point (spherical mercator position).
+	 * @param max_dist Maximum distance to snap.
 	 * @return GeoLocDist snapped to corridor, or null if not found. */
-	public GeoLocDist snapGeoLoc(SphericalMercatorPosition smp) {
+	public GeoLocDist snapGeoLoc(SphericalMercatorPosition smp,
+		final double max_dist)
+	{
 		R_Node n0 = null;
 		R_Node n1 = null;
 		R_Node n_prev = null;
-		double n_meters = Double.POSITIVE_INFINITY;
+		double n_meters = max_dist;
 		for (R_Node n: r_nodes) {
 			if (R_NodeHelper.isContinuityBreak(n)) {
 				n_prev = null;
