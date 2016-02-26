@@ -258,8 +258,6 @@ public class IncidentCreator extends JPanel {
 	private void createIncident(String replaces, EventType et,
 		IncidentDetail dtl, LaneType lt, GeoLoc loc)
 	{
-		/* FIXME: move this logic to CorridorBase.snapGeoLoc */
-		loc = snapLaneType(lt, loc);
 		Road road = loc.getRoadway();
 		short dir = loc.getRoadDir();
 		Position pos = GeoLocHelper.getWgs84Position(loc);
@@ -271,26 +269,6 @@ public class IncidentCreator extends JPanel {
 				(float) pos.getLongitude(),
 				createImpact(n_lanes));
 			sel_model.setSelected(ci);
-		}
-	}
-
-	/** Snap a location to the proper lane type */
-	private GeoLoc snapLaneType(LaneType lt, GeoLoc loc) {
-		CorridorBase cb = r_node_manager.lookupCorridor(loc);
-		if (cb == null)
-			return loc;
-		Position pos = GeoLocHelper.getWgs84Position(loc);
-		if (pos == null)
-			return loc;
-		switch (lt) {
-		case EXIT:
-			R_Node n = cb.findNearest(pos, R_NodeType.EXIT);
-			return (n != null) ? n.getGeoLoc() : loc;
-		case MERGE:
-			R_Node mn = cb.findNearest(pos, R_NodeType.ENTRANCE);
-			return (mn != null) ? mn.getGeoLoc() : loc;
-		default:
-			return loc;
 		}
 	}
 

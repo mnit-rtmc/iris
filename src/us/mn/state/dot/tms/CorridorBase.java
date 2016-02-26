@@ -403,10 +403,53 @@ public class CorridorBase implements Iterable<R_Node> {
 	 * @param max_dist Maximum distance to snap.
 	 * @return GeoLocDist snapped to corridor, or null if not found. */
 	public GeoLocDist snapGeoLoc(SphericalMercatorPosition smp, LaneType lt,
-		final double max_dist)
+		double max_dist)
 	{
 		if (!checkLaneType(lt))
 			return null;
+		GeoLocDist gld = snapGeoLoc(smp, max_dist);
+		if (gld != null) {
+			// FIXME: only call this for EXIT / MERGE lane types
+			GeoLoc loc = snapLaneType(lt, gld.loc);
+			if (loc != null)
+				return new GeoLocDist(loc, gld.dist);
+		}
+		return gld;
+	}
+
+	/** Check if the road class matches a lane type */
+	private boolean checkLaneType(LaneType lt) {
+		RoadClass rc = RoadClass.fromOrdinal(roadway.getRClass());
+		boolean cd_cls = (rc == RoadClass.CD_ROAD);
+		boolean cd_typ = (lt == LaneType.CD_LANE);
+		return cd_cls == cd_typ;
+	}
+
+	/** Snap a location to the proper lane type */
+	private GeoLoc snapLaneType(LaneType lt, GeoLoc loc) {
+		// FIXME: there's gotta be a better way to do this ...
+		Position pos = GeoLocHelper.getWgs84Position(loc);
+		if (pos == null)
+			return null;
+		switch (lt) {
+		case EXIT:
+			R_Node n = findNearest(pos, R_NodeType.EXIT);
+			return (n != null) ? n.getGeoLoc() : null;
+		case MERGE:
+			R_Node mn = findNearest(pos, R_NodeType.ENTRANCE);
+			return (mn != null) ? mn.getGeoLoc() : null;
+		default:
+			return null;
+		}
+	}
+
+	/** Snap a point to the corridor.
+	 * @param smp Selected point (spherical mercator position).
+	 * @param max_dist Maximum distance to snap.
+	 * @return GeoLocDist snapped to corridor, or null if not found. */
+	private GeoLocDist snapGeoLoc(SphericalMercatorPosition smp,
+		final double max_dist)
+	{
 		double n_meters = max_dist;
 		GeoLoc l0 = null;
 		GeoLoc l1 = null;
@@ -433,14 +476,6 @@ public class CorridorBase implements Iterable<R_Node> {
 				return new GeoLocDist(loc, n_meters);
 		}
 		return null;
-	}
-
-	/** Check if the road class matches a lane type */
-	private boolean checkLaneType(LaneType lt) {
-		RoadClass rc = RoadClass.fromOrdinal(roadway.getRClass());
-		boolean cd_cls = (rc == RoadClass.CD_ROAD);
-		boolean cd_typ = (lt == LaneType.CD_LANE);
-		return cd_cls == cd_typ;
 	}
 
 	/** GeoLoc / distance pair */
