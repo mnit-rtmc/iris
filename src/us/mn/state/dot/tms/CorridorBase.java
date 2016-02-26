@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,11 +32,8 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 public class CorridorBase implements Iterable<R_Node> {
 
 	/** Adjustment for r_node milepoints falling on exact same spot */
-	static protected float calculateEpsilon(float v) {
-		if(v != 0)
-			return v * 0.0000001f;
-		else
-			return 0.0000001f;
+	static private float calculateEpsilon(float v) {
+		return (v != 0) ? (v * 0.0000001f) : 0.0000001f;
 	}
 
 	/** Calculate the distance to another roadway node */
@@ -50,12 +47,12 @@ public class CorridorBase implements Iterable<R_Node> {
 	}
 
 	/** Check if the r_node location is valid */
-	static protected boolean hasLocation(R_Node n) {
+	static private boolean hasLocation(R_Node n) {
 		return !GeoLocHelper.isNull(n.getGeoLoc());
 	}
 
 	/** Corridor name */
-	protected final String name;
+	private final String name;
 
 	/** Get the corridor name */
 	public String getName() {
@@ -63,6 +60,7 @@ public class CorridorBase implements Iterable<R_Node> {
 	}
 
 	/** Get a string representation of the corridor */
+	@Override
 	public String toString() {
 		return name;
 	}
@@ -89,7 +87,7 @@ public class CorridorBase implements Iterable<R_Node> {
 	}
 
 	/** Set of unsorted roadway nodes */
-	protected final Set<R_Node> unsorted = new HashSet<R_Node>();
+	private final Set<R_Node> unsorted = new HashSet<R_Node>();
 
 	/** Roadway node list */
 	protected final LinkedList<R_Node> r_nodes = new LinkedList<R_Node>();
@@ -107,7 +105,7 @@ public class CorridorBase implements Iterable<R_Node> {
 
 	/** Add a roadway node to the corridor */
 	public void addNode(R_Node r_node) {
-		if(hasLocation(r_node) && !r_node.getAbandoned()) {
+		if (hasLocation(r_node) && !r_node.getAbandoned()) {
 			unsorted.add(r_node);
 			unsorted.addAll(r_nodes);
 			r_nodes.clear();
@@ -130,34 +128,34 @@ public class CorridorBase implements Iterable<R_Node> {
 	}
 
 	/** Sort the roadway nodes for the corridor */
-	protected void sortNodes() {
+	private void sortNodes() {
 		assert r_nodes.isEmpty();
 		beginList();
-		while(!unsorted.isEmpty())
+		while (!unsorted.isEmpty())
 			linkNearestNode();
-		if(isReversed())
+		if (isReversed())
 			reverseList();
 	}
 
 	/** Put one r_node into the list */
-	protected void beginList() {
+	private void beginList() {
 		// Only way to get one Set element is to get iterator
 		Iterator<R_Node> it = unsorted.iterator();
-		if(it.hasNext()) {
+		if (it.hasNext()) {
 			r_nodes.add(it.next());
 			it.remove();
 		}
 	}
 
 	/** Link the nearest node */
-	protected void linkNearestNode() {
+	private void linkNearestNode() {
 		R_Node first = r_nodes.getFirst();
 		R_Node last = r_nodes.getLast();
 		NodeDistance fnear = findNearest(first);
 		NodeDistance lnear = findNearest(last);
-		if(fnear == null || lnear == null)
+		if (fnear == null || lnear == null)
 			unsorted.clear();
-		else if(fnear.meters < lnear.meters) {
+		else if (fnear.meters < lnear.meters) {
 			r_nodes.addFirst(fnear.node);
 			unsorted.remove(fnear.node);
 		} else {
@@ -167,9 +165,9 @@ public class CorridorBase implements Iterable<R_Node> {
 	}
 
 	/** Simple structure to hold a node and distance */
-	protected class NodeDistance {
-		protected final double meters;
-		protected final R_Node node;
+	private class NodeDistance {
+		private final double meters;
+		private final R_Node node;
 		public NodeDistance(Double m, R_Node n) {
 			meters = m;
 			node = n;
@@ -177,30 +175,30 @@ public class CorridorBase implements Iterable<R_Node> {
 	}
 
 	/** Find the nearest unsorted node to the given node */
-	protected NodeDistance findNearest(R_Node end) {
+	private NodeDistance findNearest(R_Node end) {
 		NodeDistance near = null;
-		for(R_Node r_node: unsorted) {
+		for (R_Node r_node: unsorted) {
 			Distance m = nodeDistance(r_node, end);
-			if(m != null && (near == null || m.m() < near.meters))
+			if (m != null && (near == null || m.m() < near.meters))
 				near = new NodeDistance(m.m(), r_node);
 		}
 		return near;
 	}
 
 	/** Check if the roadway nodes are in reverse order */
-	protected boolean isReversed() {
+	private boolean isReversed() {
 		return r_nodes.size() > 1 && !isUpstreamToDownstream();
 	}
 
 	/** Check if the nodes are in upstream-to-downstream order */
-	protected boolean isUpstreamToDownstream() {
+	private boolean isUpstreamToDownstream() {
 		R_Node first = r_nodes.getFirst();
 		R_Node last = r_nodes.getLast();
 		Position pf = GeoLocHelper.getWgs84Position(first.getGeoLoc());
 		Position pl = GeoLocHelper.getWgs84Position(last.getGeoLoc());
-		if(pf == null || pl == null)
+		if (pf == null || pl == null)
 			return false;
-		switch(Direction.fromOrdinal(road_dir)) {
+		switch (Direction.fromOrdinal(road_dir)) {
 		case NORTH:
 			return pf.getLatitude() < pl.getLatitude();
 		case SOUTH:
@@ -220,26 +218,26 @@ public class CorridorBase implements Iterable<R_Node> {
 	}
 
 	/** Reverse the list of roadway nodes */
-	protected void reverseList() {
+	private void reverseList() {
 		LinkedList<R_Node> tmp = new LinkedList<R_Node>(r_nodes);
 		r_nodes.clear();
-		for(R_Node r_node: tmp)
+		for (R_Node r_node: tmp)
 			r_nodes.addFirst(r_node);
 	}
 
 	/** Calculate the mile points for all nodes on the corridor */
-	protected void calculateNodeMilePoints() {
+	private void calculateNodeMilePoints() {
 		assert n_points.isEmpty();
 		float miles = 0;
 		R_Node previous = null;
-		for(R_Node n: r_nodes) {
-			if(previous != null) {
+		for (R_Node n: r_nodes) {
+			if (previous != null) {
 				Distance m = nodeDistance(previous, n);
-				if(m == null)
+				if (m == null)
 					continue;
 				miles += m.asFloat(MILES);
 			}
-			while(n_points.containsKey(miles))
+			while (n_points.containsKey(miles))
 				miles += calculateEpsilon(miles);
 			n_points.put(miles, n);
 			previous = n;
@@ -250,32 +248,32 @@ public class CorridorBase implements Iterable<R_Node> {
 	 * @param loc Location to calculate.
 	 * @return Mile point for location, or null if no r_nodes exist. */
 	public Float calculateMilePoint(GeoLoc loc) {
-		if(n_points.isEmpty())
+		if (n_points.isEmpty())
 			return null;
 		R_Node nearest = null;
 		R_Node n_after = null;
 		float n_mile = 0;
 		double n_meters = 0;
-		for(Float mile: n_points.keySet()) {
+		for (Float mile: n_points.keySet()) {
 			R_Node n = n_points.get(mile);
 			Distance m = nodeDistance(n, loc);
-			if(m != null) {
+			if (m != null) {
 				double ms = m.m();
-				if(nearest == null || ms < n_meters) {
+				if (nearest == null || ms < n_meters) {
 					nearest = n;
 					n_after = n;
 					n_mile = mile;
 					n_meters = ms;
-				} else if(n_after == nearest)
+				} else if (n_after == nearest)
 					n_after = n;
 			}
 		}
-		if(nearest == null || n_after == null)
+		if (nearest == null || n_after == null)
 			return null;
 		float mi = new Distance(n_meters).asFloat(MILES);
 		Distance m0 = nodeDistance(n_after, nearest);
 		Distance m1 = nodeDistance(n_after, loc);
-		if(m0 != null && m1 != null && m0.m() > m1.m())
+		if (m0 != null && m1 != null && m0.m() > m1.m())
 			return n_mile + mi;
 		else
 			return n_mile - mi;
@@ -283,9 +281,9 @@ public class CorridorBase implements Iterable<R_Node> {
 
 	/** Get the mile point for a specified node */
 	public Float getMilePoint(R_Node r_node) {
-		for(Float mile: n_points.keySet()) {
+		for (Float mile: n_points.keySet()) {
 			R_Node n = n_points.get(mile);
-			if(n == r_node)
+			if (n == r_node)
 				return mile;
 		}
 		return null;
@@ -299,19 +297,16 @@ public class CorridorBase implements Iterable<R_Node> {
 	/** Find the nearest node to the given location */
 	public R_Node findNearest(GeoLoc loc) {
 		Position pos = GeoLocHelper.getWgs84Position(loc);
-		if(pos != null)
-			return findNearest(pos);
-		else
-			return null;
+		return (pos != null) ? findNearest(pos) : null;
 	}
 
 	/** Find the nearest node to the given position */
 	public R_Node findNearest(Position pos) {
 		R_Node nearest = null;
 		double n_meters = 0;
-		for(R_Node n: r_nodes) {
+		for (R_Node n: r_nodes) {
 			Distance m = distanceTo(n.getGeoLoc(), pos);
-			if(m != null && (nearest == null || m.m() < n_meters)) {
+			if (m != null && (nearest == null || m.m() < n_meters)) {
 				nearest = n;
 				n_meters = m.m();
 			}
@@ -323,11 +318,11 @@ public class CorridorBase implements Iterable<R_Node> {
 	public R_Node findNearest(Position pos, R_NodeType nt) {
 		R_Node nearest = null;
 		double n_meters = 0;
-		for(R_Node n: r_nodes) {
-			if(n.getNodeType() != nt.ordinal())
+		for (R_Node n: r_nodes) {
+			if (n.getNodeType() != nt.ordinal())
 				continue;
 			Distance m = distanceTo(n.getGeoLoc(), pos);
-			if(m != null && (nearest == null || m.m() < n_meters)) {
+			if (m != null && (nearest == null || m.m() < n_meters)) {
 				nearest = n;
 				n_meters = m.m();
 			}
@@ -341,29 +336,29 @@ public class CorridorBase implements Iterable<R_Node> {
 		R_Node n_before = null;
 		R_Node n_after = null;
 		double n_meters = 0;
-		for(R_Node n: r_nodes) {
+		for (R_Node n: r_nodes) {
 			Distance m = distanceTo(n.getGeoLoc(), pos);
-			if(m != null) {
+			if (m != null) {
 				double ms = m.m();
-				if(nearest == null || ms < n_meters) {
+				if (nearest == null || ms < n_meters) {
 					n_before = nearest;
 					nearest = n;
 					n_after = n;
 					n_meters = ms;
-				} else if(ms == n_meters) {
+				} else if (ms == n_meters) {
 					// coincident points
 					nearest = n;
 					n_after = n;
-				} else if(n_after == nearest)
+				} else if (n_after == nearest)
 					n_after = n;
 			}
 		}
-		if(nearest == null)
+		if (nearest == null)
 			return null;
 		GeoLoc ga = n_after.getGeoLoc();
 		Distance m0 = distanceTo(ga, nearest.getGeoLoc());
 		Distance m1 = distanceTo(ga, pos);
-		if(m0 != null && m1 != null && m0.m() > m1.m())
+		if (m0 != null && m1 != null && m0.m() > m1.m())
 			return nearest;
 		else
 			return n_before;
@@ -372,7 +367,7 @@ public class CorridorBase implements Iterable<R_Node> {
 	/** Get the lane configuration at the given location */
 	public LaneConfiguration laneConfiguration(Position pos) {
 		R_Node node = findLastBefore(pos);
-		if(node != null)
+		if (node != null)
 			return laneConfiguration(node);
 		else
 			return new LaneConfiguration(0, 0);
@@ -382,18 +377,18 @@ public class CorridorBase implements Iterable<R_Node> {
 	private LaneConfiguration laneConfiguration(R_Node node) {
 		int left = 0;
 		int right = 0;
-		for(R_Node n: r_nodes) {
-			if(n.getAttachSide())
+		for (R_Node n: r_nodes) {
+			if (n.getAttachSide())
 				left = n.getShift();
 			else
 				right = n.getShift();
-			if(n.getNodeType() == R_NodeType.STATION.ordinal()) {
-				if(n.getAttachSide())
+			if (n.getNodeType() == R_NodeType.STATION.ordinal()) {
+				if (n.getAttachSide())
 					right = left + n.getLanes();
 				else
 					left = right - n.getLanes();
 			}
-			if(n == node)
+			if (n == node)
 				return new LaneConfiguration(left, right);
 		}
 		// Node not found on corridor
