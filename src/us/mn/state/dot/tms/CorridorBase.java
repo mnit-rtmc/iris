@@ -399,11 +399,14 @@ public class CorridorBase implements Iterable<R_Node> {
 
 	/** Snap a point to the corridor.
 	 * @param smp Selected point (spherical mercator position).
+	 * @param lt Lane type (MAINLINE, EXIT, MERGE or CD_LANE).
 	 * @param max_dist Maximum distance to snap.
 	 * @return GeoLocDist snapped to corridor, or null if not found. */
-	public GeoLocDist snapGeoLoc(SphericalMercatorPosition smp,
+	public GeoLocDist snapGeoLoc(SphericalMercatorPosition smp, LaneType lt,
 		final double max_dist)
 	{
+		if (!checkLaneType(lt))
+			return null;
 		double n_meters = max_dist;
 		GeoLoc l0 = null;
 		GeoLoc l1 = null;
@@ -430,6 +433,14 @@ public class CorridorBase implements Iterable<R_Node> {
 				return new GeoLocDist(loc, n_meters);
 		}
 		return null;
+	}
+
+	/** Check if the road class matches a lane type */
+	private boolean checkLaneType(LaneType lt) {
+		RoadClass rc = RoadClass.fromOrdinal(roadway.getRClass());
+		boolean cd_cls = (rc == RoadClass.CD_ROAD);
+		boolean cd_typ = (lt == LaneType.CD_LANE);
+		return cd_cls == cd_typ;
 	}
 
 	/** GeoLoc / distance pair */

@@ -37,8 +37,8 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
@@ -396,17 +396,11 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Create a GeoLoc snapped to nearest r_node segment */
-	public GeoLoc snapGeoLoc(SphericalMercatorPosition smp,
-		boolean cd_road)
-	{
+	public GeoLoc snapGeoLoc(SphericalMercatorPosition smp, LaneType lt) {
 		GeoLoc loc = null;
 		double dist = Double.POSITIVE_INFINITY;
 		for (CorridorBase c: corridors.values()) {
-			boolean cd = RoadClass.fromOrdinal(
-				c.getRoadway().getRClass()) ==RoadClass.CD_ROAD;
-			if ((cd_road && !cd) || (cd && !cd_road))
-				continue;
-			CorridorBase.GeoLocDist ld = c.snapGeoLoc(smp, dist);
+			CorridorBase.GeoLocDist ld = c.snapGeoLoc(smp, lt,dist);
 			if (ld != null && ld.dist < dist) {
 				loc = ld.loc;
 				dist = ld.dist;

@@ -244,8 +244,7 @@ public class IncidentCreator extends JPanel {
 	private void createIncident(String replaces, EventType et,
 		IncidentDetail dtl, LaneType lt, SphericalMercatorPosition smp)
 	{
-		GeoLoc loc = r_node_manager.snapGeoLoc(smp,
-			(lt == LaneType.CD_LANE));
+		GeoLoc loc = r_node_manager.snapGeoLoc(smp, lt);
 		if (loc != null)
 			createIncident(replaces, et, dtl, lt, loc);
 	}
@@ -259,6 +258,7 @@ public class IncidentCreator extends JPanel {
 	private void createIncident(String replaces, EventType et,
 		IncidentDetail dtl, LaneType lt, GeoLoc loc)
 	{
+		/* FIXME: move this logic to CorridorBase.snapGeoLoc */
 		loc = snapLaneType(lt, loc);
 		Road road = loc.getRoadway();
 		short dir = loc.getRoadDir();
