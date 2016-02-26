@@ -64,15 +64,15 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	static private final R_NodeMarker MARKER = new R_NodeMarker();
 
 	/** Map to of corridor names to corridors */
-	private final Map<String, CorridorBase> corridors =
-		new TreeMap<String, CorridorBase>();
+	private final Map<String, CorridorBase<R_Node>> corridors =
+		new TreeMap<String, CorridorBase<R_Node>>();
 
 	/** Combo box model of all corridors */
-	private final DefaultComboBoxModel<CorridorBase> cor_mdl =
-		new DefaultComboBoxModel<CorridorBase>();
+	private final DefaultComboBoxModel<CorridorBase<R_Node>> cor_mdl =
+		new DefaultComboBoxModel<CorridorBase<R_Node>>();
 
 	/** Get the corridor list model */
-	public ComboBoxModel<CorridorBase> getCorridorModel() {
+	public ComboBoxModel<CorridorBase<R_Node>> getCorridorModel() {
 		return cor_mdl;
 	}
 
@@ -166,7 +166,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	@Override
 	protected void proxyAddedSwing(R_Node n) {
 		super.proxyAddedSwing(n);
-		CorridorBase c = getCorridor(n);
+		CorridorBase<R_Node> c = getCorridor(n);
 		if (c != null) {
 			c.addNode(n);
 			arrangeCorridor(c);
@@ -175,14 +175,15 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Get a corridor for the specified r_node */
-	public CorridorBase getCorridor(R_Node r_node) {
+	public CorridorBase<R_Node> getCorridor(R_Node r_node) {
 		GeoLoc loc = r_node.getGeoLoc();
 		String cid = GeoLocHelper.getCorridorName(loc);
 		if (cid != null) {
 			if (corridors.containsKey(cid))
 				return corridors.get(cid);
 			else {
-				CorridorBase c = new CorridorBase(loc);
+				CorridorBase<R_Node> c = new CorridorBase
+					<R_Node>(loc);
 				addCorridor(c);
 				return c;
 			}
@@ -191,7 +192,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Add a corridor to the corridor model */
-	private void addCorridor(CorridorBase c) {
+	private void addCorridor(CorridorBase<R_Node> c) {
 		String cid = c.getName();
 		corridors.put(cid, c);
 		Iterator<String> it = corridors.keySet().iterator();
@@ -207,7 +208,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	@Override
 	protected void proxyRemovedSwing(R_Node n) {
 		super.proxyRemovedSwing(n);
-		CorridorBase c = getCorridor(n);
+		CorridorBase<R_Node> c = getCorridor(n);
 		if (c != null) {
 			c.removeNode(n);
 			arrangeCorridor(c);
@@ -220,7 +221,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	protected void enumerationCompleteSwing(Collection<R_Node> proxies) {
 		super.enumerationCompleteSwing(proxies);
 		for (R_Node n : proxies) {
-			CorridorBase c = getCorridor(n);
+			CorridorBase<R_Node> c = getCorridor(n);
 			if (c != null)
 				c.addNode(n);
 		}
@@ -229,7 +230,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Arrange the corridor mapping */
 	private void arrangeCorridors() {
-		for (final CorridorBase c : corridors.values()) {
+		for (final CorridorBase<R_Node> c : corridors.values()) {
 			runQueued(new Invokable() {
 				public void invoke() {
 					arrangeCorridor(c);
@@ -239,14 +240,14 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Arrange a single corridor */
-	private void arrangeCorridor(CorridorBase c) {
+	private void arrangeCorridor(CorridorBase<R_Node> c) {
 		c.arrangeNodes();
 		setTangentAngles(c);
 	}
 
 	/** Arrange the segments for all corridors */
 	private void arrangeSegments() {
-		for (final CorridorBase c : corridors.values()) {
+		for (final CorridorBase<R_Node> c : corridors.values()) {
 			runQueued(new Invokable() {
 				public void invoke() {
 					arrangeSegments(c);
@@ -256,7 +257,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Arrange segments in a corridor */
-	private void arrangeSegments(CorridorBase c) {
+	private void arrangeSegments(CorridorBase<R_Node> c) {
 		if (c.getRoadDir() > 0)
 			builder.updateCorridor(c);
 	}
@@ -265,14 +266,14 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	private void arrangeSegments(Detector d) {
 		R_Node n = d.getR_Node();
 		if (n != null) {
-			CorridorBase c = getCorridor(n);
+			CorridorBase<R_Node> c = getCorridor(n);
 			if (c != null)
 				arrangeSegments(c);
 		}
 	}
 
 	/** Set the tangent angles for all the nodes in a corridor */
-	private void setTangentAngles(CorridorBase c) {
+	private void setTangentAngles(CorridorBase<R_Node> c) {
 		MapGeoLoc loc_a = null;		// upstream location
 		MapGeoLoc loc = null;		// current location
 		Iterator<MapGeoLoc> it = mapLocationIterator(c);
@@ -314,7 +315,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Create an iterator for MapGeoLocs on a corridor.
 	 * @param c Corridor.
 	 * @return MapGeoLoc iterator for R_Nodes on corridor. */
-	private Iterator<MapGeoLoc> mapLocationIterator(CorridorBase c) {
+	private Iterator<MapGeoLoc> mapLocationIterator(CorridorBase<R_Node> c){
 		final Iterator<R_Node> it = c.iterator();
 		return new Iterator<MapGeoLoc>() {
 			private MapGeoLoc nloc = null;
@@ -365,7 +366,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	}
 
 	/** Lookup the corridor for a location */
-	public CorridorBase lookupCorridor(GeoLoc loc) {
+	public CorridorBase<R_Node> lookupCorridor(GeoLoc loc) {
 		String cid = GeoLocHelper.getCorridorName(loc);
 		if (cid != null)
 			return corridors.get(cid);
@@ -399,7 +400,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	public GeoLoc snapGeoLoc(SphericalMercatorPosition smp, LaneType lt) {
 		GeoLoc loc = null;
 		double dist = Double.POSITIVE_INFINITY;
-		for (CorridorBase c: corridors.values()) {
+		for (CorridorBase<R_Node> c: corridors.values()) {
 			CorridorBase.GeoLocDist ld = c.snapGeoLoc(smp, lt,dist);
 			if (ld != null && ld.dist < dist) {
 				loc = ld.loc;

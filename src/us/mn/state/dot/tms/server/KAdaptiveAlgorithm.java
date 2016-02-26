@@ -21,7 +21,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RampMeterQueue;
 import us.mn.state.dot.tms.units.Interval;
@@ -248,9 +247,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private Node createNodes() {
 		Node first = null;
 		Node prev = null;
-		Iterator<R_Node> itr = corridor.iterator();
+		Iterator<R_NodeImpl> itr = corridor.iterator();
 		while (itr.hasNext()) {
-			R_NodeImpl rnode = (R_NodeImpl) itr.next();
+			R_NodeImpl rnode = itr.next();
 			Node n = createNode(rnode, prev);
 			if (n != null)
 				prev = n;

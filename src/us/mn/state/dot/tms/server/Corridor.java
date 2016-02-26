@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
 
 /**
@@ -32,7 +31,7 @@ import us.mn.state.dot.tms.R_NodeHelper;
  *
  * @author Douglas Lau
  */
-public class Corridor extends CorridorBase {
+public class Corridor extends CorridorBase<R_NodeImpl> {
 
 	/** Create a new corridor */
 	public Corridor(GeoLoc loc) {
@@ -47,17 +46,16 @@ public class Corridor extends CorridorBase {
 	}
 
 	/** Link each node with the next downstream node in the corridor */
-	protected void linkDownstream() {
-		Iterator<R_Node> down = r_nodes.iterator();
+	private void linkDownstream() {
+		Iterator<R_NodeImpl> down = iterator();
 		// Throw away first r_node in downstream iterator
 		if (down.hasNext())
 			down.next();
-		for (R_Node n: r_nodes) {
-			R_NodeImpl r_node = (R_NodeImpl)n;
+		for (R_NodeImpl n: this) {
 			if (down.hasNext()) {
-				R_NodeImpl d = (R_NodeImpl)down.next();
-				if (r_node.hasDownstreamLink())
-					r_node.addDownstream(d);
+				R_NodeImpl d = down.next();
+				if (n.hasDownstreamLink())
+					n.addDownstream(d);
 			}
 		}
 	}
@@ -69,10 +67,9 @@ public class Corridor extends CorridorBase {
 
 	/** Find an active node using a node finder callback interface */
 	public R_NodeImpl findActiveNode(NodeFinder finder) {
-		for (R_Node n: n_points.values()) {
-			R_NodeImpl r_node = (R_NodeImpl)n;
-			if (r_node.getActive() && finder.check(r_node))
-				return r_node;
+		for (R_NodeImpl n: n_points.values()) {
+			if (n.getActive() && finder.check(n))
+				return n;
 		}
 		return null;
 	}
@@ -86,7 +83,7 @@ public class Corridor extends CorridorBase {
 	protected StationImpl findStation(StationFinder finder) {
 		for (Float m: n_points.keySet()) {
 			assert m != null;
-			R_NodeImpl n = (R_NodeImpl)n_points.get(m);
+			R_NodeImpl n = n_points.get(m);
 			if (n.getActive() && R_NodeHelper.isStation(n)) {
 				StationImpl s = n.getStation();
 				if (s != null && finder.check(m, s))
@@ -131,17 +128,16 @@ public class Corridor extends CorridorBase {
 			throw new BadRouteException("No nodes on corridor");
 		for (Float mile: n_points.keySet()) {
 			if (mile > m)
-				return (R_NodeImpl)n_points.get(mile);
+				return n_points.get(mile);
 		}
 		throw new BadRouteException("No downstream nodes");
 	}
 
 	/** Find an active node using a node finder callback (reverse order) */
 	public R_NodeImpl findActiveNodeReverse(NodeFinder finder) {
-		for (R_Node n: n_points.descendingMap().values()) {
-			R_NodeImpl r_node = (R_NodeImpl)n;
-			if (r_node.getActive() && finder.check(r_node))
-				return r_node;
+		for (R_NodeImpl n: n_points.descendingMap().values()) {
+			if (n.getActive() && finder.check(n))
+				return n;
 		}
 		return null;
 	}
@@ -149,7 +145,7 @@ public class Corridor extends CorridorBase {
 	/** Get the IDs of all linked CD roads */
 	public Iterator<String> getLinkedCDRoads() {
 		HashSet<String> cds = new HashSet<String>();
-		for (R_Node r_node: n_points.values()) {
+		for (R_NodeImpl r_node: n_points.values()) {
 			if (R_NodeHelper.isCD(r_node)) {
 				GeoLoc l = r_node.getGeoLoc();
 				String c = GeoLocHelper.getLinkedCorridor(l);
@@ -166,10 +162,8 @@ public class Corridor extends CorridorBase {
 	{
 		w.write("<corridor route='" + roadway + "' dir='" +
 			Direction.fromOrdinal(road_dir).abbrev + "'>\n");
-		for (R_Node n: r_nodes) {
-			R_NodeImpl r_node = (R_NodeImpl)n;
-			r_node.writeXml(w, m_nodes);
-		}
+		for (R_NodeImpl n: this)
+			n.writeXml(w, m_nodes);
 		w.write("</corridor>\n");
 	}
 

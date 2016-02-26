@@ -57,10 +57,10 @@ import us.mn.state.dot.tms.utils.I18N;
 public class CorridorList extends IPanel {
 
 	/** Create a sorted list of roadway nodes for one corridor */
-	static private CorridorBase createCorridor(Set<R_Node> node_s) {
+	static private CorridorBase<R_Node> createCorridor(Set<R_Node> node_s) {
 		GeoLoc loc = getCorridorLoc(node_s);
 		if (loc != null) {
-			CorridorBase c = new CorridorBase(loc);
+			CorridorBase<R_Node> c = new CorridorBase<R_Node>(loc);
 			for (R_Node n: node_s)
 				c.addNode(n);
 			c.arrangeNodes();
@@ -101,22 +101,23 @@ public class CorridorList extends IPanel {
 	private final TypeCache<GeoLoc> geo_locs;
 
 	/** Selected roadway corridor */
-	private CorridorBase corridor;
+	private CorridorBase<R_Node> corridor;
 
 	/** Corridor action */
 	private final IAction corr_act = new IAction("r_node.corridor") {
+		@SuppressWarnings("unchecked")
 		protected void doActionPerformed(ActionEvent e) {
 			Object s = corridor_cbx.getSelectedItem();
 			if (s instanceof CorridorBase)
-				setCorridor((CorridorBase) s);
+				setCorridor((CorridorBase<R_Node>) s);
 			else
 				setCorridor(null);
 		}
 	};
 
 	/** Combo box to select a roadway corridor */
-	private final JComboBox<CorridorBase> corridor_cbx =
-		new JComboBox<CorridorBase>();
+	private final JComboBox<CorridorBase<R_Node>> corridor_cbx =
+		new JComboBox<CorridorBase<R_Node>>();
 
 	/** Action to add a new roadway node */
 	private final IAction add_node = new IAction("r_node.add") {
@@ -235,7 +236,7 @@ public class CorridorList extends IPanel {
 	}
 
 	/** Set a new selected corridor */
-	private void setCorridor(CorridorBase c) {
+	private void setCorridor(CorridorBase<R_Node> c) {
 		client.setPointSelector(null);
 		corridor = c;
 		updateListModel();
@@ -319,7 +320,7 @@ public class CorridorList extends IPanel {
 	}
 
 	/** Check if an r_node is on the specified corridor */
-	private boolean checkCorridor(CorridorBase cb, GeoLoc loc) {
+	private boolean checkCorridor(CorridorBase<R_Node> cb, GeoLoc loc) {
 		if (cb == null)
 			return loc != null && loc.getRoadway() == null;
 		else {
@@ -368,7 +369,7 @@ public class CorridorList extends IPanel {
 		Set<R_Node> node_s = createSet();
 		List<R_NodeModel> no_loc = createNullLocList(node_s);
 		LinkedList<R_NodeModel> nodes = new LinkedList<R_NodeModel>();
-		CorridorBase c = createCorridor(node_s);
+		CorridorBase<R_Node> c = createCorridor(node_s);
 		if (c != null) {
 			R_NodeModel prev = null;
 			for (R_Node n: c) {
@@ -429,7 +430,7 @@ public class CorridorList extends IPanel {
 	/** Update the roadway node selection */
 	private void updateNodeSelection(R_Node n) {
 		if (isCorridorChanged(n)) {
-			CorridorBase cb = manager.getCorridor(n);
+			CorridorBase<R_Node> cb = manager.getCorridor(n);
 			corridor_cbx.setSelectedItem(cb);
 		}
 		client.setPointSelector(null);
@@ -461,7 +462,7 @@ public class CorridorList extends IPanel {
 	}
 
 	/** Create a new node at a specified point */
-	private void createNode(CorridorBase c, Point2D p) {
+	private void createNode(CorridorBase<R_Node> c, Point2D p) {
 		Position pos = getWgs84Position(p);
 		if (c != null) {
 			int lanes = 2;
@@ -485,7 +486,7 @@ public class CorridorList extends IPanel {
 	}
 
 	/** Find an r_node model near a point */
-	private R_NodeModel findModel(CorridorBase c, Position pos) {
+	private R_NodeModel findModel(CorridorBase<R_Node> c, Position pos) {
 		R_Node found = c.findLastBefore(pos);
 		R_NodeListModel mdl = node_mdl;
 		for (int i = 0; i < mdl.getSize(); i++) {
