@@ -22,6 +22,7 @@ import java.util.TreeMap;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import static us.mn.state.dot.tms.GeoLocHelper.distanceTo;
+import static us.mn.state.dot.tms.GeoLocHelper.segmentDistance;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
@@ -403,47 +404,32 @@ public class CorridorBase implements Iterable<R_Node> {
 	public GeoLocDist snapGeoLoc(SphericalMercatorPosition smp,
 		final double max_dist)
 	{
-		R_Node n0 = null;
-		R_Node n1 = null;
-		R_Node n_prev = null;
 		double n_meters = max_dist;
+		GeoLoc l0 = null;
+		GeoLoc l1 = null;
+		GeoLoc l_prev = null;
 		for (R_Node n: r_nodes) {
 			if (R_NodeHelper.isContinuityBreak(n)) {
-				n_prev = null;
+				l_prev = null;
 				continue;
 			}
-			if (n_prev != null) {
-				double m = calcDistance(n_prev, n, smp);
+			GeoLoc l = n.getGeoLoc();
+			if (l_prev != null) {
+				double m = segmentDistance(l_prev, l, smp);
 				if (m < n_meters) {
-					n0 = n_prev;
-					n1 = n;
+					l0 = l_prev;
+					l1 = l;
 					n_meters = m;
 				}
 			}
-			n_prev = n;
+			l_prev = l;
 		}
-		if (n0 != null) {
-			GeoLoc l0 = n0.getGeoLoc();
-			GeoLoc l1 = n1.getGeoLoc();
+		if (l0 != null) {
 			TransGeoLoc loc = GeoLocHelper.snapSegment(l0, l1, smp);
 			if (loc != null)
 				return new GeoLocDist(loc, n_meters);
 		}
 		return null;
-	}
-
-	/** Calculate the distance from a point to the given line segment.
-	 * @param n0 First r_node
-	 * @param n1 Second (adjacent) r_node.
-	 * @param smp Selected point (spherical mercator position).
-	 * @return Distance (spherical mercator "meters") from segment to
-	 *         selected point. */
-	private double calcDistance(R_Node n0, R_Node n1,
-		SphericalMercatorPosition smp)
-	{
-		GeoLoc l0 = n0.getGeoLoc();
-		GeoLoc l1 = n1.getGeoLoc();
-		return GeoLocHelper.segmentDistance(l0, l1, smp);
 	}
 
 	/** GeoLoc / distance pair */
