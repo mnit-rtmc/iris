@@ -167,18 +167,18 @@ public class IncidentCreator extends JPanel {
 
 	/** Handler for button changed events */
 	private void buttonChanged(JToggleButton btn, EventType et) {
-		if(btn.isSelected()) {
+		if (btn.isSelected()) {
 			sel_model.clearSelection();
 			// NOTE: cannot use ButtonGroup for this because it
 			// will not let the user deselect a button by clicking
 			// on it once it has been selected.  Arrgh!
-			if(btn != crash_btn && crash_btn.isSelected())
+			if (btn != crash_btn && crash_btn.isSelected())
 				crash_btn.setSelected(false);
-			if(btn != stall_btn && stall_btn.isSelected())
+			if (btn != stall_btn && stall_btn.isSelected())
 				stall_btn.setSelected(false);
-			if(btn != work_btn && work_btn.isSelected())
+			if (btn != work_btn && work_btn.isSelected())
 				work_btn.setSelected(false);
-			if(btn != hazard_btn && hazard_btn.isSelected())
+			if (btn != hazard_btn && hazard_btn.isSelected())
 				hazard_btn.setSelected(false);
 		}
 	}
@@ -228,8 +228,8 @@ public class IncidentCreator extends JPanel {
 	private void createIncident(String replaces, EventType et,
 		SphericalMercatorPosition smp)
 	{
-		LaneType lt = (LaneType)ltype_cbx.getSelectedItem();
-		if(lt != null) {
+		LaneType lt = (LaneType) ltype_cbx.getSelectedItem();
+		if (lt != null) {
 			createIncident(replaces, et, (IncidentDetail)null, lt,
 				smp);
 		}
@@ -241,7 +241,7 @@ public class IncidentCreator extends JPanel {
 	{
 		GeoLoc loc = r_node_manager.createGeoLoc(smp,
 			lt == LaneType.CD_LANE);
-		if(loc != null)
+		if (loc != null)
 			createIncident(replaces, et, dtl, lt, loc);
 	}
 
@@ -254,11 +254,11 @@ public class IncidentCreator extends JPanel {
 		short dir = loc.getRoadDir();
 		Position pos = GeoLocHelper.getWgs84Position(loc);
 		int n_lanes = getLaneCount(lt, loc);
-		if(pos != null && n_lanes > 0) {
+		if (pos != null && n_lanes > 0) {
 			ClientIncident ci = new ClientIncident(replaces, et.id,
-				dtl, (short)lt.ordinal(), road, dir,
-				(float)pos.getLatitude(),
-				(float)pos.getLongitude(),
+				dtl, (short) lt.ordinal(), road, dir,
+				(float) pos.getLatitude(),
+				(float) pos.getLongitude(),
 				createImpact(n_lanes));
 			sel_model.setSelected(ci);
 		}
@@ -267,24 +267,18 @@ public class IncidentCreator extends JPanel {
 	/** Snap a location to the proper lane type */
 	private GeoLoc snapGeoLoc(LaneType lt, GeoLoc loc) {
 		CorridorBase cb = r_node_manager.lookupCorridor(loc);
-		if(cb == null)
+		if (cb == null)
 			return loc;
 		Position pos = GeoLocHelper.getWgs84Position(loc);
-		if(pos == null)
+		if (pos == null)
 			return loc;
-		switch(lt) {
+		switch (lt) {
 		case EXIT:
 			R_Node n = cb.findNearest(pos, R_NodeType.EXIT);
-			if(n != null)
-				return n.getGeoLoc();
-			else
-				return loc;
+			return (n != null) ? n.getGeoLoc() : loc;
 		case MERGE:
 			R_Node mn = cb.findNearest(pos, R_NodeType.ENTRANCE);
-			if(mn != null)
-				return mn.getGeoLoc();
-			else
-				return loc;
+			return (mn != null) ? mn.getGeoLoc() : loc;
 		default:
 			return loc;
 		}
@@ -294,21 +288,15 @@ public class IncidentCreator extends JPanel {
 	private int getLaneCount(LaneType lt, GeoLoc loc) {
 		CorridorBase cb = r_node_manager.lookupCorridor(loc);
 		Position pos = GeoLocHelper.getWgs84Position(loc);
-		if(pos == null)
+		if (pos == null)
 			return 0;
-		switch(lt) {
+		switch (lt) {
 		case EXIT:
 			R_Node n = cb.findNearest(pos, R_NodeType.EXIT);
-			if(n != null)
-				return n.getLanes();
-			else
-				return 0;
+			return (n != null) ? n.getLanes() : 0;
 		case MERGE:
 			R_Node mn = cb.findNearest(pos, R_NodeType.ENTRANCE);
-			if(mn != null)
-				return mn.getLanes();
-			else
-				return 0;
+			return (mn != null) ? mn.getLanes() : 0;
 		default:
 			return cb.laneConfiguration(pos).getLanes();
 		}
@@ -317,20 +305,20 @@ public class IncidentCreator extends JPanel {
 	/** Create an impact string for the given number of lanes */
 	private String createImpact(int n_lanes) {
 		StringBuilder sb = new StringBuilder();
-		for(int i = 0; i < n_lanes + 2; i++)
+		for (int i = 0; i < n_lanes + 2; i++)
 			sb.append(FREE_FLOWING._char);
 		return sb.toString();
 	}
 
 	/** Get the selected toggle button */
 	private JToggleButton getSelected() {
-		if(crash_btn.isSelected())
+		if (crash_btn.isSelected())
 			return crash_btn;
-		if(stall_btn.isSelected())
+		if (stall_btn.isSelected())
 			return stall_btn;
-		if(work_btn.isSelected())
+		if (work_btn.isSelected())
 			return work_btn;
-		if(hazard_btn.isSelected())
+		if (hazard_btn.isSelected())
 			return hazard_btn;
 		return null;
 	}
@@ -338,13 +326,13 @@ public class IncidentCreator extends JPanel {
 	/** Clear the widgets */
 	private void clearWidgets() {
 		client.setPointSelector(null);
-		if(crash_btn.isSelected())
+		if (crash_btn.isSelected())
 			crash_btn.setSelected(false);
-		if(stall_btn.isSelected())
+		if (stall_btn.isSelected())
 			stall_btn.setSelected(false);
-		if(work_btn.isSelected())
+		if (work_btn.isSelected())
 			work_btn.setSelected(false);
-		if(hazard_btn.isSelected())
+		if (hazard_btn.isSelected())
 			hazard_btn.setSelected(false);
 		ltype_cbx.setSelectedItem(LaneType.MAINLINE);
 	}
