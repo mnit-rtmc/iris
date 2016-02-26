@@ -235,7 +235,12 @@ public class IncidentCreator extends JPanel {
 		}
 	}
 
-	/** Create an incident */
+	/** Create an incident.
+	 * @param replaces Name of incident being replaced.
+	 * @param et Event type.
+	 * @param dtl Incident detail.
+	 * @param lt Lane type.
+	 * @param smp Position (lat / lon). */
 	private void createIncident(String replaces, EventType et,
 		IncidentDetail dtl, LaneType lt, SphericalMercatorPosition smp)
 	{
@@ -245,11 +250,16 @@ public class IncidentCreator extends JPanel {
 			createIncident(replaces, et, dtl, lt, loc);
 	}
 
-	/** Create an incident */
+	/** Create and select an incident.
+	 * @param replaces Name of incident being replaced.
+	 * @param et Event type.
+	 * @param dtl Incident detail.
+	 * @param lt Lane type.
+	 * @param loc Incident location. */
 	private void createIncident(String replaces, EventType et,
 		IncidentDetail dtl, LaneType lt, GeoLoc loc)
 	{
-		loc = snapGeoLoc(lt, loc);
+		loc = snapLaneType(lt, loc);
 		Road road = loc.getRoadway();
 		short dir = loc.getRoadDir();
 		Position pos = GeoLocHelper.getWgs84Position(loc);
@@ -265,7 +275,7 @@ public class IncidentCreator extends JPanel {
 	}
 
 	/** Snap a location to the proper lane type */
-	private GeoLoc snapGeoLoc(LaneType lt, GeoLoc loc) {
+	private GeoLoc snapLaneType(LaneType lt, GeoLoc loc) {
 		CorridorBase cb = r_node_manager.lookupCorridor(loc);
 		if (cb == null)
 			return loc;
