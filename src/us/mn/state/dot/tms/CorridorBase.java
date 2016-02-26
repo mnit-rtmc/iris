@@ -14,9 +14,10 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeMap;
 import us.mn.state.dot.geokit.Position;
@@ -92,7 +93,7 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	private final Set<T> unsorted = new HashSet<T>();
 
 	/** Roadway node list */
-	private final LinkedList<T> r_nodes = new LinkedList<T>();
+	private final ArrayList<T> r_nodes = new ArrayList<T>();
 
 	/** Mapping from milepoint to r_node */
 	protected final TreeMap<Float, T> n_points =
@@ -136,7 +137,7 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		while (!unsorted.isEmpty())
 			linkNearestNode();
 		if (isReversed())
-			reverseList();
+			Collections.reverse(r_nodes);
 	}
 
 	/** Put one r_node into the list */
@@ -151,17 +152,18 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 
 	/** Link the nearest node */
 	private void linkNearestNode() {
-		T first = r_nodes.getFirst();
-		T last = r_nodes.getLast();
+		assert r_nodes.size() > 0;
+		T first = r_nodes.get(0);
+		T last = r_nodes.get(r_nodes.size() - 1);
 		NodeDistance fnear = findNearest(first);
 		NodeDistance lnear = findNearest(last);
 		if (fnear == null || lnear == null)
 			unsorted.clear();
 		else if (fnear.meters < lnear.meters) {
-			r_nodes.addFirst(fnear.node);
+			r_nodes.add(0, fnear.node);
 			unsorted.remove(fnear.node);
 		} else {
-			r_nodes.addLast(lnear.node);
+			r_nodes.add(lnear.node);
 			unsorted.remove(lnear.node);
 		}
 	}
@@ -194,8 +196,9 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 
 	/** Check if the nodes are in upstream-to-downstream order */
 	private boolean isUpstreamToDownstream() {
-		T first = r_nodes.getFirst();
-		T last = r_nodes.getLast();
+		assert r_nodes.size() > 1;
+		T first = r_nodes.get(0);
+		T last = r_nodes.get(r_nodes.size() - 1);
 		Position pf = GeoLocHelper.getWgs84Position(first.getGeoLoc());
 		Position pl = GeoLocHelper.getWgs84Position(last.getGeoLoc());
 		if (pf == null || pl == null)
@@ -217,14 +220,6 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 			return false;
 		}
 		return false;
-	}
-
-	/** Reverse the list of roadway nodes */
-	private void reverseList() {
-		LinkedList<T> tmp = new LinkedList<T>(r_nodes);
-		r_nodes.clear();
-		for (T r_node: tmp)
-			r_nodes.addFirst(r_node);
 	}
 
 	/** Calculate the mile points for all nodes on the corridor */
