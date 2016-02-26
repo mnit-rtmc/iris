@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.Set;
 import java.util.TreeMap;
 import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import static us.mn.state.dot.tms.GeoLocHelper.distanceTo;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
@@ -393,5 +394,62 @@ public class CorridorBase implements Iterable<R_Node> {
 		}
 		// Node not found on corridor
 		return new LaneConfiguration(0, 0);
+	}
+
+	/** Snap a point to the corridor.
+	 * @param smp Selected point (spherical mercator position).
+	 * @return GeoLocDist snapped to corridor, or null if not found. */
+	public GeoLocDist snapGeoLoc(SphericalMercatorPosition smp) {
+		R_Node n0 = null;
+		R_Node n1 = null;
+		R_Node n_prev = null;
+		double n_meters = Double.POSITIVE_INFINITY;
+		for (R_Node n: r_nodes) {
+			if (R_NodeHelper.isContinuityBreak(n)) {
+				n_prev = null;
+				continue;
+			}
+			if (n_prev != null) {
+				double m = calcDistance(n_prev, n, smp);
+				if (m < n_meters) {
+					n0 = n_prev;
+					n1 = n;
+					n_meters = m;
+				}
+			}
+			n_prev = n;
+		}
+		if (n0 != null) {
+			GeoLoc l0 = n0.getGeoLoc();
+			GeoLoc l1 = n1.getGeoLoc();
+			TransGeoLoc loc = GeoLocHelper.snapSegment(l0, l1, smp);
+			if (loc != null)
+				return new GeoLocDist(loc, n_meters);
+		}
+		return null;
+	}
+
+	/** Calculate the distance from a point to the given line segment.
+	 * @param n0 First r_node
+	 * @param n1 Second (adjacent) r_node.
+	 * @param smp Selected point (spherical mercator position).
+	 * @return Distance (spherical mercator "meters") from segment to
+	 *         selected point. */
+	private double calcDistance(R_Node n0, R_Node n1,
+		SphericalMercatorPosition smp)
+	{
+		GeoLoc l0 = n0.getGeoLoc();
+		GeoLoc l1 = n1.getGeoLoc();
+		return GeoLocHelper.segmentDistance(l0, l1, smp);
+	}
+
+	/** GeoLoc / distance pair */
+	static public class GeoLocDist {
+		public final TransGeoLoc loc;
+		public final double dist;
+		private GeoLocDist(TransGeoLoc l, double d) {
+			loc = l;
+			dist = d;
+		}
 	}
 }

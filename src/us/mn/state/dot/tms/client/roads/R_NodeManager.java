@@ -28,7 +28,6 @@ import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
-import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
@@ -39,8 +38,6 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.R_NodeTransition;
-import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.TransGeoLoc;
 import us.mn.state.dot.tms.client.Session;
@@ -410,82 +407,13 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 				c.getRoadway().getRClass()) ==RoadClass.CD_ROAD;
 			if ((cd_road && !cd) || (cd && !cd_road))
 				continue;
-			GeoLocDist ld = createGeoLoc(c, smp);
+			CorridorBase.GeoLocDist ld = c.snapGeoLoc(smp);
 			if (ld != null && ld.dist < distance) {
 				loc = ld.loc;
 				distance = ld.dist;
 			}
 		}
 		return loc;
-	}
-
-	/** GeoLoc / distance pair */
-	static private class GeoLocDist {
-		private final TransGeoLoc loc;
-		private final double dist;
-		private GeoLocDist(TransGeoLoc l, double d) {
-			loc = l;
-			dist = d;
-		}
-	}
-
-	/** Create the nearest GeoLoc for the given corridor.
-	 * @param c Corridor to search.
-	 * @param smp Selected point (spherical mercator position).
-	 * @return GeoLocDist snapped to corridor, or null if not found. */
-	private GeoLocDist createGeoLoc(CorridorBase c,
-		SphericalMercatorPosition smp)
-	{
-		R_Node n0 = null;
-		R_Node n1 = null;
-		R_Node n_prev = null;
-		double n_meters = Double.POSITIVE_INFINITY;
-		for (R_Node n: c) {
-			if (isContinuityBreak(n)) {
-				n_prev = null;
-				continue;
-			}
-			if (n_prev != null) {
-				double m = calcDistance(n_prev, n, smp);
-				if (m < n_meters) {
-					n0 = n_prev;
-					n1 = n;
-					n_meters = m;
-				}
-			}
-			n_prev = n;
-		}
-		if (n0 != null) {
-			GeoLoc l0 = n0.getGeoLoc();
-			GeoLoc l1 = n1.getGeoLoc();
-			TransGeoLoc loc = GeoLocHelper.snapSegment(l0, l1, smp);
-			if (loc != null)
-				return new GeoLocDist(loc, n_meters);
-		}
-		return null;
-	}
-
-	/** Check if a given node is a continuity break */
-	private boolean isContinuityBreak(R_Node n) {
-		if (n.getNodeType() == R_NodeType.ACCESS.ordinal())
-			return true;
-		if (n.getTransition() == R_NodeTransition.COMMON.ordinal())
-			return true;
-		return false;
-	}
-
-	/** Calculate the distance from a point to the given line segment.
-	 * @param n0 First r_node
-	 * @param n1 Second (adjacent) r_node.
-	 * @param smp Selected point (spherical mercator position).
-	 * @return Distance (spherical mercator "meters") from segment to
-	 *         selected point. */
-	private double calcDistance(R_Node n0, R_Node n1,
-		SphericalMercatorPosition smp)
-	{
-		GeoLoc l0 = n0.getGeoLoc();
-		GeoLoc l1 = n1.getGeoLoc();
-		return GeoLocHelper.segmentDistance(l0, l1, smp);
 	}
 
 	/** Get the layer zoom visibility threshold */
