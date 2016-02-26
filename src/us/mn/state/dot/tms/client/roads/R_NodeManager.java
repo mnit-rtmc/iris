@@ -410,20 +410,30 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 				c.getRoadway().getRClass()) ==RoadClass.CD_ROAD;
 			if ((cd_road && !cd) || (cd && !cd_road))
 				continue;
-			TransGeoLoc l = createGeoLoc(c, smp);
-			if (l != null && l.getDistance() < distance) {
-				loc = l;
-				distance = l.getDistance();
+			GeoLocDist ld = createGeoLoc(c, smp);
+			if (ld != null && ld.dist < distance) {
+				loc = ld.loc;
+				distance = ld.dist;
 			}
 		}
 		return loc;
 	}
 
+	/** GeoLoc / distance pair */
+	static private class GeoLocDist {
+		private final TransGeoLoc loc;
+		private final double dist;
+		private GeoLocDist(TransGeoLoc l, double d) {
+			loc = l;
+			dist = d;
+		}
+	}
+
 	/** Create the nearest GeoLoc for the given corridor.
 	 * @param c Corridor to search.
 	 * @param smp Selected point (spherical mercator position).
-	 * @return TransGeoLoc snapped to corridor, or null if not found. */
-	private TransGeoLoc createGeoLoc(CorridorBase c,
+	 * @return GeoLocDist snapped to corridor, or null if not found. */
+	private GeoLocDist createGeoLoc(CorridorBase c,
 		SphericalMercatorPosition smp)
 	{
 		R_Node n0 = null;
@@ -445,10 +455,12 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			}
 			n_prev = n;
 		}
-		if (n0 != null)
-			return createGeoLoc(n0, n1, smp, n_meters);
-		else
-			return null;
+		if (n0 != null) {
+			TransGeoLoc loc = createGeoLoc(n0, n1, smp);
+			if (loc != null)
+				return new GeoLocDist(loc, n_meters);
+		}
+		return null;
 	}
 
 	/** Check if a given node is a continuity break */
@@ -478,10 +490,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	 * @param n0 First node.
 	 * @param n1 Second (adjacent) node.
 	 * @param smp Selected point (spherical mercator position).
-	 * @param d Distance (meters).
 	 * @return TransGeoLoc snapped to corridor, or null if not found. */
 	private TransGeoLoc createGeoLoc(R_Node n0, R_Node n1,
-		SphericalMercatorPosition smp, double dist)
+		SphericalMercatorPosition smp)
 	{
 		GeoLoc l0 = n0.getGeoLoc();
 		GeoLoc l1 = n1.getGeoLoc();
@@ -492,7 +503,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			float lat = (float)p.getLatitude();
 			float lon = (float)p.getLongitude();
 			return new TransGeoLoc(l0.getRoadway(),
-				l0.getRoadDir(), lat, lon, dist);
+				l0.getRoadDir(), lat, lon);
 		} else
 			return null;
 	}

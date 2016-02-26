@@ -25,14 +25,12 @@ public class TransGeoLoc implements GeoLoc {
 	 * @param road Road location.
 	 * @param rd Road direction.
 	 * @param lt Latitude.
-	 * @param ln Longitude.
-	 * @param d Distance. */
-	public TransGeoLoc(Road road, short rd, float lt, float ln, double d) {
+	 * @param ln Longitude. */
+	public TransGeoLoc(Road road, short rd, float lt, float ln) {
 		roadway = road;
 		road_dir = rd;
 		lat = lt;
 		lon = ln;
-		distance = d;
 	}
 
 	/** Get the type name */
@@ -143,13 +141,5 @@ public class TransGeoLoc implements GeoLoc {
 	@Override
 	public String getMilepoint() {
 		return null;
-	}
-
-	/** Distance from selected point (in spherical mercator "meters") */
-	private final double distance;
-
-	/** Get distance from selected point (in spherical mercator "meters") */
-	public double getDistance() {
-		return distance;
 	}
 }
