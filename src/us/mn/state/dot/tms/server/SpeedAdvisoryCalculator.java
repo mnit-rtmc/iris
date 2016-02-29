@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2013  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -81,24 +80,16 @@ public class SpeedAdvisoryCalculator {
 
 	/** Calculate the speed advisory */
 	private Integer calculateSpeedAdvisory() {
-		String c = GeoLocHelper.getCorridorName(loc);
-		if(c != null)
-			return calculateSpeedAdvisory(c);
-		else
-			return null;
+		Corridor c = BaseObjectImpl.corridors.getCorridor(loc);
+		return (c != null) ? calculateSpeedAdvisory(c) : null;
 	}
 
 	/** Calculate the speed advisory */
-	private Integer calculateSpeedAdvisory(String c) {
-		Corridor cor = BaseObjectImpl.corridors.getCorridor(c);
-		if(cor != null) {
-			Float m = cor.calculateMilePoint(loc);
-			if(VSA_LOG.isOpen())
-				VSA_LOG.log(loc.getName() + ", mp: " + m);
-			if(m != null)
-				return calculateSpeedAdvisory(cor, m);
-		}
-		return null;
+	private Integer calculateSpeedAdvisory(Corridor cor) {
+		Float m = cor.calculateMilePoint(loc);
+		if (VSA_LOG.isOpen())
+			VSA_LOG.log(loc.getName() + ", mp: " + m);
+		return (m != null) ? calculateSpeedAdvisory(cor, m) : null;
 	}
 
 	/** Calculate the speed advisory */

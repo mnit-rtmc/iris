@@ -21,6 +21,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.units.Distance;
@@ -144,5 +146,11 @@ public class CorridorManager {
 	public synchronized void findBottlenecks() {
 		for(Corridor c: corridors.values())
 			c.findBottlenecks();
+	}
+
+	/** Lookup the corridor for a location */
+	public Corridor getCorridor(GeoLoc loc) {
+		String c = GeoLocHelper.getCorridorName(loc);
+		return (c != null) ? getCorridor(c) : null;
 	}
 }

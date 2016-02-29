@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.units.Distance;
@@ -118,11 +117,7 @@ public class SlowWarningFormatter {
 	/** Lookup the corridor for the given location.
 	 * @return Freeway corridor. */
 	private Corridor lookupCorridor() {
-		String c = GeoLocHelper.getCorridorName(loc);
-		if(c != null)
-			return BaseObjectImpl.corridors.getCorridor(c);
-		else
-			return null;
+		return BaseObjectImpl.corridors.getCorridor(loc);
 	}
 
 	/** Estimate the slow warning distance.

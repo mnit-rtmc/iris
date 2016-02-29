@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -84,14 +84,9 @@ public class RouteBuilder {
 	private void searchCorridor(float distance, GeoLoc origin,
 		GeoLoc destination) throws BadRouteException
 	{
-		String cid = GeoLocHelper.getCorridorName(origin);
-		if (cid == null) {
-			log("BAD ORIGIN: " + origin.getName());
-			return;
-		}
-		Corridor c = corridors.getCorridor(cid);
+		Corridor c = corridors.getCorridor(origin);
 		if (c == null) {
-			log("MISSING CORRIDOR: " + cid);
+			log("BAD ORIGIN: " + origin.getName());
 			return;
 		}
 		R_NodeImpl r_node = c.findDownstreamNode(origin);

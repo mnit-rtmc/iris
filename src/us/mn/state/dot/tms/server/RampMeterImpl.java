@@ -929,8 +929,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Get the corridor containing the ramp meter */
 	public Corridor getCorridor() {
-		String cid = GeoLocHelper.getCorridorName(geo_loc);
-		return corridors.getCorridor(cid);
+		return corridors.getCorridor(geo_loc);
 	}
 
 	/** Write meter as an XML element */
