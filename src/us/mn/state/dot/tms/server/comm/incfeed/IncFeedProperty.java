@@ -47,8 +47,8 @@ public class IncFeedProperty extends ControllerProperty {
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		while (line != null) {
-			IncFeedPoller.log("parsing " + line);
-			// FIXME: parse
+			ParsedIncident inc = new ParsedIncident(line);
+			IncFeedPoller.log("parsed " + inc);
 			line = lr.readLine();
 		}
 	}
