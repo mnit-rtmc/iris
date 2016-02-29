@@ -401,16 +401,15 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	public GeoLocDist snapGeoLoc(SphericalMercatorPosition smp, LaneType lt,
 		double max_dist)
 	{
-		if (!checkLaneType(lt))
-			return null;
-		GeoLocDist gld = snapGeoLoc(smp, max_dist);
-		if (gld != null) {
-			// FIXME: only call this for EXIT / MERGE lane types
-			GeoLoc loc = snapLaneType(lt, gld.loc);
-			if (loc != null)
-				return new GeoLocDist(loc, gld.dist);
+		switch (lt) {
+		case EXIT:
+		case MERGE:
+		case MAINLINE:
+		case CD_LANE:
+			if (checkLaneType(lt))
+				return snapGeoLoc2(smp, lt, max_dist);
 		}
-		return gld;
+		return null;
 	}
 
 	/** Check if the road class matches a lane type */
@@ -421,50 +420,38 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		return cd_cls == cd_typ;
 	}
 
-	/** Snap a location to the proper lane type */
-	private GeoLoc snapLaneType(LaneType lt, GeoLoc loc) {
-		// FIXME: there's gotta be a better way to do this ...
-		Position pos = GeoLocHelper.getWgs84Position(loc);
-		if (pos == null)
-			return null;
-		switch (lt) {
-		case EXIT:
-			T n = findNearest(pos, R_NodeType.EXIT);
-			return (n != null) ? n.getGeoLoc() : null;
-		case MERGE:
-			T mn = findNearest(pos, R_NodeType.ENTRANCE);
-			return (mn != null) ? mn.getGeoLoc() : null;
-		default:
-			return null;
-		}
-	}
-
 	/** Snap a point to the corridor.
 	 * @param smp Selected point (spherical mercator position).
 	 * @param max_dist Maximum distance to snap.
 	 * @return GeoLocDist snapped to corridor, or null if not found. */
-	private GeoLocDist snapGeoLoc(SphericalMercatorPosition smp,
-		final double max_dist)
+	private GeoLocDist snapGeoLoc2(SphericalMercatorPosition smp,
+		LaneType lt, final double max_dist)
 	{
 		double n_meters = max_dist;
 		GeoLoc l0 = null;
 		GeoLoc l1 = null;
-		GeoLoc l_prev = null;
+		GeoLoc lp = null;	/* previous location */
+		T np = null;		/* previous node */
 		for (T n: r_nodes) {
 			if (R_NodeHelper.isContinuityBreak(n)) {
-				l_prev = null;
+				np = null;
+				lp = null;
 				continue;
 			}
 			GeoLoc l = n.getGeoLoc();
-			if (l_prev != null) {
-				double m = segmentDistance(l_prev, l, smp);
+			if ((lp != null) &&
+			   (!skipExit(lt, np)) &&
+			   (!skipEntrance(lt, n)))
+			{
+				double m = segmentDistance(lp, l, smp);
 				if (m < n_meters) {
-					l0 = l_prev;
+					l0 = lp;
 					l1 = l;
 					n_meters = m;
 				}
 			}
-			l_prev = l;
+			np = n;
+			lp = l;
 		}
 		if (l0 != null) {
 			GeoLoc loc = GeoLocHelper.snapSegment(l0, l1, smp);
@@ -472,6 +459,20 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 				return new GeoLocDist(loc, n_meters);
 		}
 		return null;
+	}
+
+	/** Check if exit lane type should be skipped */
+	private boolean skipExit(LaneType lt, T n) {
+		return (n != null) &&
+		       (lt == LaneType.EXIT) &&
+		       !R_NodeHelper.isExit(n);
+	}
+
+	/** Check if entrance lane type should be skipped */
+	private boolean skipEntrance(LaneType lt, T n) {
+		assert (n != null);
+		return (lt == LaneType.MERGE) &&
+		       !R_NodeHelper.isEntrance(n);
 	}
 
 	/** GeoLoc / distance pair */
