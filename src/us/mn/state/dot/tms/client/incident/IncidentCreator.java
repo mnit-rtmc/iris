@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
-import static us.mn.state.dot.tms.IncidentImpact.FREE_FLOWING;
+import us.mn.state.dot.tms.IncidentImpact;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
@@ -266,7 +266,7 @@ public class IncidentCreator extends JPanel {
 				dtl, (short) lt.ordinal(), road, dir,
 				(float) pos.getLatitude(),
 				(float) pos.getLongitude(),
-				createImpact(n_lanes));
+				IncidentImpact.fromLanes(n_lanes));
 			sel_model.setSelected(ci);
 		}
 	}
@@ -275,14 +275,6 @@ public class IncidentCreator extends JPanel {
 	private int getLaneCount(LaneType lt, GeoLoc loc) {
 		CorridorBase cb = r_node_manager.lookupCorridor(loc);
 		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
-	}
-
-	/** Create an impact string for the given number of lanes */
-	private String createImpact(int n_lanes) {
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < n_lanes + 2; i++)
-			sb.append(FREE_FLOWING._char);
-		return sb.toString();
 	}
 
 	/** Get the selected toggle button */

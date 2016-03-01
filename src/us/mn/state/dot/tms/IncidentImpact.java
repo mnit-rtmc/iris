@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2013  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,6 +60,16 @@ public enum IncidentImpact {
 		StringBuilder sb = new StringBuilder();
 		for(IncidentImpact v: imp)
 			sb.append(v != null ? v._char : FREE_FLOWING._char);
+		return sb.toString();
+	}
+
+	/** Create an impact string for the given number of lanes.
+	 * @param n_lanes Number of lanes.
+	 * @return Coded string of incident impact by lane. */
+	static public String fromLanes(int n_lanes) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < n_lanes + 2; i++)
+			sb.append(FREE_FLOWING._char);
 		return sb.toString();
 	}
 }
