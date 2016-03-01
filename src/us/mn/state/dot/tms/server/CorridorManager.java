@@ -21,11 +21,14 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
+import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
 /**
  * This is a class to manage roadway network corridors.
@@ -33,6 +36,9 @@ import us.mn.state.dot.tms.units.Distance;
  * @author Douglas Lau
  */
 public class CorridorManager {
+
+	/** Maximum distance to snap */
+	static private final Distance MAX_DIST = new Distance(1, MILES);
 
 	/** Map to hold all corridors */
 	protected final Map<String, Corridor> corridors =
@@ -152,5 +158,22 @@ public class CorridorManager {
 	public Corridor getCorridor(GeoLoc loc) {
 		String c = GeoLocHelper.getCorridorName(loc);
 		return (c != null) ? getCorridor(c) : null;
+	}
+
+	/** Create a GeoLoc snapped to nearest r_node segment.
+	 * NOTE: copied from client/roads/R_NodeManager. */
+	public synchronized GeoLoc snapGeoLoc(SphericalMercatorPosition smp,
+		LaneType lt)
+	{
+		GeoLoc loc = null;
+		Distance dist = MAX_DIST;
+		for (Corridor c: corridors.values()) {
+			Corridor.GeoLocDist ld = c.snapGeoLoc(smp, lt, dist);
+			if (ld != null && ld.dist.m() < dist.m()) {
+				loc = ld.loc;
+				dist = ld.dist;
+			}
+		}
+		return loc;
 	}
 }

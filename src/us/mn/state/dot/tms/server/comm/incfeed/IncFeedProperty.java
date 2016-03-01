@@ -17,7 +17,13 @@ package us.mn.state.dot.tms.server.comm.incfeed;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.geokit.SphericalMercatorPosition;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.utils.LineReader;
+import static us.mn.state.dot.tms.server.BaseObjectImpl.corridors;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
@@ -49,13 +55,27 @@ public class IncFeedProperty extends ControllerProperty {
 		while (line != null) {
 			ParsedIncident inc = new ParsedIncident(line);
 			IncFeedPoller.log("parsed " + inc);
+			if (inc.isValid())
+				checkIncident(inc);
 			line = lr.readLine();
+		}
+	}
+
+	/** Check a parsed incident */
+	private void checkIncident(ParsedIncident inc) {
+		Position pos = new Position(inc.lat, inc.lon);
+		SphericalMercatorPosition smp =
+			SphericalMercatorPosition.convert(pos);
+		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE);
+		if (loc != null) {
+			IncFeedPoller.log("loc: " +
+				GeoLocHelper.getCorridorName(loc));
 		}
 	}
 
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "inc.feed " + feed;
+		return "inc.feed";
 	}
 }

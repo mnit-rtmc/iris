@@ -60,34 +60,19 @@ public class ParsedIncident {
 	private final String line;
 
 	/** Incident ID */
-	private final String id;
-
-	/** Get the ID */
-	public String getId() {
-		return id;
-	}
+	public final String id;
 
 	/** Incident type */
-	private final EventType inc_type;
-
-	/** Get the incident type */
-	public EventType getIncType() {
-		return inc_type;
-	}
+	public final EventType inc_type;
 
 	/** Incident detail */
-	private final IncidentDetail detail;
-
-	/** Get the incident detail */
-	public IncidentDetail getDetail() {
-		return detail;
-	}
+	public final IncidentDetail detail;
 
 	/** Latitude */
-	private final Double lat;
+	public final Double lat;
 
 	/** Longitude */
-	private final Double lon;
+	public final Double lon;
 
 	/** Create a new parsed incident */
 	public ParsedIncident(String line) {

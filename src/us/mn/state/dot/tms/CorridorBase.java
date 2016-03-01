@@ -399,7 +399,7 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	 * @param max_dist Maximum distance to snap.
 	 * @return GeoLocDist snapped to corridor, or null if not found. */
 	public GeoLocDist snapGeoLoc(SphericalMercatorPosition smp, LaneType lt,
-		double max_dist)
+		Distance max_dist)
 	{
 		switch (lt) {
 		case EXIT:
@@ -425,9 +425,9 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	 * @param max_dist Maximum distance to snap.
 	 * @return GeoLocDist snapped to corridor, or null if not found. */
 	private GeoLocDist snapGeoLoc2(SphericalMercatorPosition smp,
-		LaneType lt, final double max_dist)
+		LaneType lt, Distance max_dist)
 	{
-		double n_meters = max_dist;
+		double dist = max_dist.m();
 		GeoLoc l0 = null;
 		GeoLoc l1 = null;
 		GeoLoc lp = null;	/* previous location */
@@ -444,10 +444,10 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 			   (!skipEntrance(lt, n)))
 			{
 				double m = segmentDistance(lp, l, smp);
-				if (m < n_meters) {
+				if (m < dist) {
 					l0 = lp;
 					l1 = l;
-					n_meters = m;
+					dist = m;
 				}
 			}
 			np = n;
@@ -456,7 +456,7 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		if (l0 != null) {
 			GeoLoc loc = GeoLocHelper.snapSegment(l0, l1, smp);
 			if (loc != null)
-				return new GeoLocDist(loc, n_meters);
+				return new GeoLocDist(loc, new Distance(dist));
 		}
 		return null;
 	}
@@ -478,8 +478,8 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	/** GeoLoc / distance pair */
 	static public class GeoLocDist {
 		public final GeoLoc loc;
-		public final double dist;
-		private GeoLocDist(GeoLoc l, double d) {
+		public final Distance dist;
+		private GeoLocDist(GeoLoc l, Distance d) {
 			loc = l;
 			dist = d;
 		}

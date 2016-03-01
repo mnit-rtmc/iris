@@ -48,6 +48,8 @@ import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
 import us.mn.state.dot.tms.client.widget.Invokable;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -62,6 +64,9 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Marker to draw r_nodes */
 	static private final R_NodeMarker MARKER = new R_NodeMarker();
+
+	/** Maximum distance to snap */
+	static private final Distance MAX_DIST = new Distance(1, MILES);
 
 	/** Map to of corridor names to corridors */
 	private final Map<String, CorridorBase<R_Node>> corridors =
@@ -396,13 +401,14 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		return proxy.getGeoLoc();
 	}
 
-	/** Create a GeoLoc snapped to nearest r_node segment */
+	/** Create a GeoLoc snapped to nearest r_node segment.
+	 * NOTE: copied to server/CorridorManager. */
 	public GeoLoc snapGeoLoc(SphericalMercatorPosition smp, LaneType lt) {
 		GeoLoc loc = null;
-		double dist = Double.POSITIVE_INFINITY;
+		Distance dist = MAX_DIST;
 		for (CorridorBase<R_Node> c: corridors.values()) {
 			CorridorBase.GeoLocDist ld = c.snapGeoLoc(smp, lt,dist);
-			if (ld != null && ld.dist < dist) {
+			if (ld != null && ld.dist.m() < dist.m()) {
 				loc = ld.loc;
 				dist = ld.dist;
 			}
