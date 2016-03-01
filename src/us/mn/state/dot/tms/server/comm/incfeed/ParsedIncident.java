@@ -74,15 +74,19 @@ public class ParsedIncident {
 	/** Longitude */
 	public final Double lon;
 
+	/** Camera */
+	public final String cam;
+
 	/** Create a new parsed incident */
 	public ParsedIncident(String line) {
 		this.line = line;
-		String[] inc = line.split(",", 5);
+		String[] inc = line.split(",", 7);
 		id = (inc.length > 0) ? inc[0] : null;
 		inc_type = (inc.length > 1) ? parseType(inc[1]) : null;
 		detail = (inc.length > 2) ? parseDetail(inc[2]) : null;
 		lat = (inc.length > 3) ? parseDouble(inc[3]) : null;
 		lon = (inc.length > 4) ? parseDouble(inc[4]) : null;
+		cam = (inc.length > 5) ? inc[5] : null;
 	}
 
 	/** Get a string representation */
@@ -94,7 +98,7 @@ public class ParsedIncident {
 	/** Get parsed string representation */
 	private String parsedToString() {
 		return id + "," + inc_type + "," + detail + "," + lat +
-		       "," + lon;
+		       "," + lon + "," + cam;
 	}
 
 	/** Check if incident is valid */

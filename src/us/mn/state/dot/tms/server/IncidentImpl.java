@@ -92,14 +92,15 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	 * @param d Direction on road.
 	 * @param lt Latitude.
 	 * @param ln Longitude.
+	 * @param cam Camera.
 	 * @param im Lane impact.
 	 * @return New incident or null on failure. */
 	static public IncidentImpl createNotify(String n, int et,
 		IncidentDetail dtl, short lnt, Road r, short d, double lt,
-		double ln, String im)
+		double ln, Camera cam, String im)
 	{
 		IncidentImpl inc = new IncidentImpl(n, null, et, new Date(),
-			dtl, lnt, r, d, lt, ln, null, im, false);
+			dtl, lnt, r, d, lt, ln, cam, im, false);
 		try {
 			inc.notifyCreate();
 			return inc;

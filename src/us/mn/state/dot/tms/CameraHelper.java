@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,5 +75,41 @@ public class CameraHelper extends BaseHelper {
 			}
 		}
 		return cams.values();
+	}
+
+	/** Find a camera with the specific UID */
+	static public Camera findUID(String uid) {
+		Integer id = parseUID(uid);
+		if (id != null) {
+			Iterator<Camera> it = iterator();
+			while (it.hasNext()) {
+				Camera cam = it.next();
+				Integer cid = parseUID(cam.getName());
+				if (id.equals(cid))
+					return cam;
+			}
+		}
+		return null;
+	}
+
+	/** Parse the integer ID of a camera */
+	static public Integer parseUID(String uid) {
+		String id = stripNonDigitPrefix(uid);
+		try {
+			return Integer.parseInt(id);
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	/** Strip non-digit prefix from a string */
+	static private String stripNonDigitPrefix(String v) {
+		int i = 0;
+		for (i = 0; i < v.length(); i++) {
+			if (Character.isDigit(v.charAt(i)))
+				break;
+		}
+		return v.substring(i);
 	}
 }

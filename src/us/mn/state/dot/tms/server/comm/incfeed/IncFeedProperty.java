@@ -17,8 +17,11 @@ package us.mn.state.dot.tms.server.comm.incfeed;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Iterator;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
+import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -87,11 +90,12 @@ public class IncFeedProperty extends ControllerProperty {
 		IncFeedPoller.log("loc: " + GeoLocHelper.getCorridorName(loc));
 		int n_lanes = getLaneCount(LaneType.MAINLINE, loc);
 		if (n_lanes > 0) {
+			Camera cam = lookupCamera(inc);
 			return IncidentImpl.createNotify("_" + inc.id,
 				inc.inc_type.ordinal(), inc.detail,
 				(short) LaneType.MAINLINE.ordinal(),
 				loc.getRoadway(), loc.getRoadDir(), inc.lat,
-				inc.lon, IncidentImpact.fromLanes(n_lanes));
+				inc.lon, cam,IncidentImpact.fromLanes(n_lanes));
 		} else
 			return null;
 	}
@@ -100,6 +104,16 @@ public class IncFeedProperty extends ControllerProperty {
 	private int getLaneCount(LaneType lt, GeoLoc loc) {
 		CorridorBase cb = corridors.getCorridor(loc);
 		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
+	}
+
+	/** Lookup the camera */
+	private Camera lookupCamera(ParsedIncident inc) {
+		Camera cam = CameraHelper.findUID(inc.cam);
+		if (cam != null)
+			return cam;
+		Iterator<Camera> it = CameraHelper.findNearest(
+			new Position(inc.lat, inc.lon), 1).iterator();
+		return it.hasNext() ? it.next() : null;
 	}
 
 	/** Get a string representation */
