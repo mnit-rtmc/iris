@@ -393,6 +393,23 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		return new LaneConfiguration(0, 0);
 	}
 
+	/** Get the lane count a given location */
+	public int getLaneCount(LaneType lt, GeoLoc loc) {
+		Position pos = GeoLocHelper.getWgs84Position(loc);
+		if (pos == null)
+			return 0;
+		switch (lt) {
+		case EXIT:
+			R_Node n = findNearest(pos, R_NodeType.EXIT);
+			return (n != null) ? n.getLanes() : 0;
+		case MERGE:
+			R_Node mn = findNearest(pos, R_NodeType.ENTRANCE);
+			return (mn != null) ? mn.getLanes() : 0;
+		default:
+			return laneConfiguration(pos).getLanes();
+		}
+	}
+
 	/** Snap a point to the corridor.
 	 * @param smp Selected point (spherical mercator position).
 	 * @param lt Lane type (MAINLINE, EXIT, MERGE or CD_LANE).

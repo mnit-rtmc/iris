@@ -40,7 +40,6 @@ import static us.mn.state.dot.tms.IncidentImpact.FREE_FLOWING;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
@@ -275,19 +274,7 @@ public class IncidentCreator extends JPanel {
 	/** Get the lane count at the incident location */
 	private int getLaneCount(LaneType lt, GeoLoc loc) {
 		CorridorBase cb = r_node_manager.lookupCorridor(loc);
-		Position pos = GeoLocHelper.getWgs84Position(loc);
-		if (pos == null)
-			return 0;
-		switch (lt) {
-		case EXIT:
-			R_Node n = cb.findNearest(pos, R_NodeType.EXIT);
-			return (n != null) ? n.getLanes() : 0;
-		case MERGE:
-			R_Node mn = cb.findNearest(pos, R_NodeType.ENTRANCE);
-			return (mn != null) ? mn.getLanes() : 0;
-		default:
-			return cb.laneConfiguration(pos).getLanes();
-		}
+		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
 	}
 
 	/** Create an impact string for the given number of lanes */
