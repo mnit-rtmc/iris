@@ -23,6 +23,7 @@ import java.util.Map;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Direction;
@@ -80,6 +81,37 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 				));
 			}
 		});
+	}
+
+	/** Create an incident and notify clients.
+	 * @param n Incident name.
+	 * @param et Event type.
+	 * @param dtl Incident detail.
+	 * @param lnt Lane type.
+	 * @param r Road.
+	 * @param d Direction on road.
+	 * @param lt Latitude.
+	 * @param ln Longitude.
+	 * @param im Lane impact.
+	 * @return New incident or null on failure. */
+	static public IncidentImpl createNotify(String n, int et,
+		IncidentDetail dtl, short lnt, Road r, short d, double lt,
+		double ln, String im)
+	{
+		IncidentImpl inc = new IncidentImpl(n, null, et, new Date(),
+			dtl, lnt, r, d, lt, ln, null, im, false);
+		try {
+			inc.notifyCreate();
+			return inc;
+		}
+		catch (SonarException e) {
+			// This can pretty much only happen when the SONAR task
+			// processor does not store the incident within 30
+			// seconds.  It *shouldn't* happen, but there may be
+			// a rare bug which triggers it.
+			System.err.println("createNotify: " + e.getMessage());
+			return null;
+		}
 	}
 
 	/** Get a mapping of the columns */
@@ -295,6 +327,19 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		if (c != cleared) {
 			store.update(this, "cleared", c);
 			setCleared(c);
+		}
+	}
+
+	/** Set the cleared status (notify clients) */
+	public void setClearedNotify(boolean c) {
+		try {
+			if (c != cleared) {
+				doSetCleared(c);
+				notifyAttribute("cleared");
+			}
+		}
+		catch (TMSException e) {
+			e.printStackTrace();
 		}
 	}
 

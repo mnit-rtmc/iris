@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.utils.LineReader;
 import static us.mn.state.dot.tms.server.BaseObjectImpl.corridors;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.IncidentImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
@@ -37,12 +38,12 @@ public class IncFeedProperty extends ControllerProperty {
 	/** Maximum number of chars in response for line reader */
 	static private final int MAX_RESP = 1024;
 
-	/** Feed name */
-	private final String feed;
+	/** Feed cache */
+	private final FeedCache cache;
 
 	/** Create a new incident feed property */
-	public IncFeedProperty(String fd) {
-		feed = fd;
+	public IncFeedProperty(FeedCache fc) {
+		cache = fc;
 	}
 
 	/** Decode a QUERY response */
@@ -59,18 +60,33 @@ public class IncFeedProperty extends ControllerProperty {
 				checkIncident(inc);
 			line = lr.readLine();
 		}
+		cache.update();
 	}
 
 	/** Check a parsed incident */
 	private void checkIncident(ParsedIncident inc) {
+		if (cache.contains(inc.id))
+			cache.refresh(inc.id);
+		else
+			cache.put(inc.id, createIncident(inc));
+	}
+
+	/** Create an incident */
+	private IncidentImpl createIncident(ParsedIncident inc) {
 		Position pos = new Position(inc.lat, inc.lon);
 		SphericalMercatorPosition smp =
 			SphericalMercatorPosition.convert(pos);
 		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE);
-		if (loc != null) {
-			IncFeedPoller.log("loc: " +
-				GeoLocHelper.getCorridorName(loc));
-		}
+		return (loc != null) ? createIncident(inc, loc) : null;
+	}
+
+	/** Create an incident */
+	private IncidentImpl createIncident(ParsedIncident inc, GeoLoc loc) {
+		IncFeedPoller.log("loc: " + GeoLocHelper.getCorridorName(loc));
+		return IncidentImpl.createNotify("_" + inc.id,
+			inc.inc_type.ordinal(), inc.detail,
+			(short) LaneType.MAINLINE.ordinal(), loc.getRoadway(),
+			loc.getRoadDir(), inc.lat, inc.lon, "");
 	}
 
 	/** Get a string representation */

@@ -38,6 +38,9 @@ public class IncFeedPoller extends MessagePoller<IncFeedProperty> {
 	/** Feed ID */
 	private final String feed_id;
 
+	/** Feed cache */
+	private final FeedCache cache = new FeedCache();
+
 	/** Create a new poller */
 	public IncFeedPoller(String n, Messenger m) {
 		super(n, m);
@@ -52,7 +55,7 @@ public class IncFeedPoller extends MessagePoller<IncFeedProperty> {
 
 	/** Query incident feed */
 	public void queryIncidents(ControllerImpl c) {
-		addOperation(new OpReadIncFeed(c, feed_id));
+		addOperation(new OpReadIncFeed(c, feed_id, cache));
 	}
 
 	/** Get the protocol debug log */

@@ -31,15 +31,19 @@ public class OpReadIncFeed extends OpController<IncFeedProperty> {
 	/** Feed name */
 	private final String feed;
 
+	/** Feed cache */
+	private final FeedCache cache;
+
 	/** Log a message */
 	private void logMsg(String msg) {
 		IncFeedPoller.log(feed + ": " + msg);
 	}
 
 	/** Create a new operation to read incident feed */
-	protected OpReadIncFeed(ControllerImpl c, String fid) {
+	protected OpReadIncFeed(ControllerImpl c, String fid, FeedCache fc) {
 		super(PriorityLevel.DATA_30_SEC, c);
 		feed = fid;
+		cache = fc;
 		logMsg("Polling feed");
 	}
 
@@ -56,7 +60,7 @@ public class OpReadIncFeed extends OpController<IncFeedProperty> {
 		protected Phase<IncFeedProperty> poll(
 			CommMessage<IncFeedProperty> mess) throws IOException
 		{
-			mess.add(new IncFeedProperty(feed));
+			mess.add(new IncFeedProperty(cache));
 			mess.queryProps();
 			return null;
 		}
