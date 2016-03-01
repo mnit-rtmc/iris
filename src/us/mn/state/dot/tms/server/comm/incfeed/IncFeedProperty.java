@@ -19,8 +19,10 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
+import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.IncidentImpact;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.utils.LineReader;
 import static us.mn.state.dot.tms.server.BaseObjectImpl.corridors;
@@ -83,10 +85,21 @@ public class IncFeedProperty extends ControllerProperty {
 	/** Create an incident */
 	private IncidentImpl createIncident(ParsedIncident inc, GeoLoc loc) {
 		IncFeedPoller.log("loc: " + GeoLocHelper.getCorridorName(loc));
-		return IncidentImpl.createNotify("_" + inc.id,
-			inc.inc_type.ordinal(), inc.detail,
-			(short) LaneType.MAINLINE.ordinal(), loc.getRoadway(),
-			loc.getRoadDir(), inc.lat, inc.lon, "");
+		int n_lanes = getLaneCount(LaneType.MAINLINE, loc);
+		if (n_lanes > 0) {
+			return IncidentImpl.createNotify("_" + inc.id,
+				inc.inc_type.ordinal(), inc.detail,
+				(short) LaneType.MAINLINE.ordinal(),
+				loc.getRoadway(), loc.getRoadDir(), inc.lat,
+				inc.lon, IncidentImpact.fromLanes(n_lanes));
+		} else
+			return null;
+	}
+
+	/** Get the lane count at the incident location */
+	private int getLaneCount(LaneType lt, GeoLoc loc) {
+		CorridorBase cb = corridors.getCorridor(loc);
+		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
 	}
 
 	/** Get a string representation */
