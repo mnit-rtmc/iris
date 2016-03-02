@@ -50,7 +50,8 @@ public class ClientIncident implements Incident {
 	/** Get the SONAR object name */
 	@Override
 	public String getName() {
-		return NAME;
+		// must be unique due to selection model
+		return NAME + Integer.toString(System.identityHashCode(this));
 	}
 
 	/** Get the SONAR type name */
