@@ -23,6 +23,7 @@ import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.map.Style;
 import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
@@ -39,7 +40,6 @@ import us.mn.state.dot.tms.client.proxy.MapAction;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.StyleSummary;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -101,6 +101,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 		theme.addStyle(ItemStyle.STALL, new Color(255, 128, 255));
 		theme.addStyle(ItemStyle.ROADWORK, new Color(255, 208, 128));
 		theme.addStyle(ItemStyle.HAZARD, new Color(255, 255, 128));
+		theme.addStyle(ItemStyle.UNCONFIRMED, new Color(255, 255, 255,
+			128), IncidentTheme.UN_OUTLINE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
@@ -196,7 +198,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Check if a given attribute affects a proxy style */
 	@Override
 	public boolean isStyleAttrib(String a) {
-		return "cleared".equals(a);
+		return "cleared".equals(a) || "confirmed".equals(a);
 	}
 
 	/** Check the style of the specified proxy */
@@ -216,6 +218,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 			return et == EventType.INCIDENT_HAZARD;
 		case CLEARED:
 			return proxy.getCleared();
+		case UNCONFIRMED:
+			return !proxy.getConfirmed();
 		case ALL:
 			return true;
 		default:
@@ -236,24 +240,6 @@ public class IncidentManager extends ProxyManager<Incident> {
 		}
 	}
 
-	/** Get the style for an event type */
-	static private String getStyle(EventType et) {
-		if(et == null)
-			return null;
-		switch(et) {
-		case INCIDENT_CRASH:
-			return ItemStyle.CRASH.toString();
-		case INCIDENT_STALL:
-			return ItemStyle.STALL.toString();
-		case INCIDENT_ROADWORK:
-			return ItemStyle.ROADWORK.toString();
-		case INCIDENT_HAZARD:
-			return ItemStyle.HAZARD.toString();
-		default:
-			return null;
-		}
-	}
-
 	/** Get the description of an incident */
 	@Override
 	public String getDescription(Incident inc) {
@@ -267,10 +253,10 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Get the incident type description */
 	public String getTypeDesc(Incident inc) {
-		String sty = getStyle(getEventType(inc));
-		if(sty != null) {
+		Style sty = getTheme().getStyle(inc);
+		if (sty != null) {
 			LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
-			return getTypeDesc(sty, getLaneType(lt));
+			return getTypeDesc(sty.getLabel(), getLaneType(lt));
 		} else
 			return "";
 	}
@@ -301,9 +287,9 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Get the symbol for an incident */
 	public Symbol getSymbol(Incident inc) {
-		String sty = getStyle(getEventType(inc));
-		if(sty != null)
-			return getTheme().getSymbol(sty);
+		Style sty = getTheme().getStyle(inc);
+		if (sty != null)
+			return getTheme().getSymbol(sty.getLabel());
 		else
 			return null;
 	}

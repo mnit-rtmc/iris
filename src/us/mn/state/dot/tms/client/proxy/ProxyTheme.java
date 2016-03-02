@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	}
 
 	/** Get an appropriate style for the given proxy object */
-	protected Style getStyle(T proxy) {
+	public Style getStyle(T proxy) {
 		// FIXME: combine styles when it applies (locked meters)
 		for (Style st: styles) {
 			ItemStyle is = ItemStyle.lookupStyle(st.getLabel());

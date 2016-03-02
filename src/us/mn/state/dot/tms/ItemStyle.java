@@ -41,6 +41,7 @@ public enum ItemStyle {
 	STALL,
 	ROADWORK,
 	HAZARD,
+	UNCONFIRMED,
 	/* DMS styles */
 	SCHEDULED,
 	TRAVEL_TIME,
@@ -58,9 +59,6 @@ public enum ItemStyle {
 	CLOSED,
 	OPEN,
 	MOVING,
-	/* R_Node styles */
-	GPS,
-	NO_LOC,
 	/* Plan styles */
 	DMS,
 	BEACON,
@@ -69,6 +67,7 @@ public enum ItemStyle {
 	TIME;
 
 	/** Get a string representation of the item style */
+	@Override
 	public String toString() {
 		return I18N.get("item.style." +
 			name().toLowerCase().replace('_', '.'));
