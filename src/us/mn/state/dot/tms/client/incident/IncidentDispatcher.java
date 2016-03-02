@@ -490,11 +490,11 @@ public class IncidentDispatcher extends IPanel
 	/** Enable the dispatcher widgets */
 	private void enableWidgets(Incident inc) {
 		if (inc instanceof ClientIncident) {
-			boolean create = isAddPermitted("oname");
-			detail_cbx.setEnabled(create);
-			camera_cbx.setEnabled(create);
+			boolean p = isAddPermitted("oname");
+			detail_cbx.setEnabled(p);
+			camera_cbx.setEnabled(p);
 			cam_cards.show(cam_pnl, CAMERA_CBOX);
-			log_inc.setEnabled(create);
+			log_inc.setEnabled(p);
 			deploy_inc.setEnabled(false);
 			clear_inc.setEnabled(false);
 			edit_inc.setEnabled(false);
