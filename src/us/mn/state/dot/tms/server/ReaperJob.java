@@ -65,9 +65,9 @@ public class ReaperJob extends Job {
 
 	/** Reap an incident */
 	private void reapIncident(IncidentImpl inc) {
-		if(inc.getCleared()) {
-			if(inc.getClearTime() + getIncidentClearThreshold() <
-			   TimeSteward.currentTimeMillis())
+		if (inc.getCleared()) {
+			if (inc.getClearTime() + getIncidentClearThreshold() <
+			    TimeSteward.currentTimeMillis())
 				inc.notifyRemove();
 		}
 	}
