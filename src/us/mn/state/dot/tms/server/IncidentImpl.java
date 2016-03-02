@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
+import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.IncidentImpact;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
@@ -99,6 +100,10 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		IncidentDetail dtl, short lnt, Road r, short d, double lt,
 		double ln, Camera cam, String im)
 	{
+		// Check if the incident exists already
+		Incident _inc = IncidentHelper.lookup(n);
+		if (_inc instanceof IncidentImpl)
+			return (IncidentImpl) _inc;
 		IncidentImpl inc = new IncidentImpl(n, null, et, new Date(),
 			dtl, lnt, r, d, lt, ln, cam, im, false);
 		try {
