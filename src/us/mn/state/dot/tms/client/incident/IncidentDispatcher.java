@@ -157,9 +157,12 @@ public class IncidentDispatcher extends IPanel
 	private final IAction clear_inc = new IAction("incident.clear") {
 		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = sel_model.getSingleSelection();
-			if (inc != null &&
-			  !(inc instanceof ClientIncident))
-				inc.setCleared(clear_btn.isSelected());
+			if (inc != null) {
+				boolean c = clear_btn.isSelected();
+				inc.setCleared(c);
+				if (c && !inc.getConfirmed())
+					inc.destroy();
+			}
 		}
 	};
 

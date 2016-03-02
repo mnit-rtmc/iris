@@ -52,8 +52,11 @@ public class FeedCache {
 		for (String id: incidents.keySet()) {
 			if (!nxt.containsKey(id)) {
 				IncidentImpl inc = incidents.get(id);
-				if (inc != null)
+				if (inc != null) {
 					inc.setClearedNotify(true);
+					if (!inc.getConfirmed())
+						inc.notifyRemove();
+				}
 			}
 		}
 		incidents.clear();
