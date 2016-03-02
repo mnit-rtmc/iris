@@ -136,9 +136,9 @@ public class IncidentDispatcher extends IPanel
 	private final IAction log_inc = new IAction("incident.log") {
 		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = sel_model.getSingleSelection();
-			if(inc instanceof ClientIncident)
-				create((ClientIncident)inc);
-			else if(inc != null)
+			if (inc instanceof ClientIncident)
+				create((ClientIncident) inc);
+			else if (inc != null)
 				logUpdate(inc);
 		}
 	};
@@ -147,8 +147,8 @@ public class IncidentDispatcher extends IPanel
 	private final IAction deploy_inc = new IAction("incident.deploy") {
 		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = sel_model.getSingleSelection();
-			if(inc != null &&
-			   !(inc instanceof ClientIncident))
+			if (inc != null &&
+			  !(inc instanceof ClientIncident))
 				showDeployForm(inc);
 		}
 	};
@@ -157,8 +157,8 @@ public class IncidentDispatcher extends IPanel
 	private final IAction clear_inc = new IAction("incident.clear") {
 		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = sel_model.getSingleSelection();
-			if(inc != null &&
-			   !(inc instanceof ClientIncident))
+			if (inc != null &&
+			  !(inc instanceof ClientIncident))
 				inc.setCleared(clear_btn.isSelected());
 		}
 	};
@@ -170,7 +170,7 @@ public class IncidentDispatcher extends IPanel
 	private final IAction edit_inc = new IAction("incident.edit") {
 		protected void doActionPerformed(ActionEvent e) {
 			Incident inc = sel_model.getSingleSelection();
-			if(inc != null)
+			if (inc != null)
 				editIncident(inc);
 		}
 	};
@@ -181,10 +181,10 @@ public class IncidentDispatcher extends IPanel
 	/** Watch an incident */
 	private void watch(final Incident nw) {
 		final Incident ow = watching;
-		if(ow != null)
+		if (ow != null)
 			cache.ignoreObject(ow);
 		watching = nw;
-		if(nw != null)
+		if (nw != null)
 			cache.watchObject(nw);
 	}
 
@@ -257,7 +257,7 @@ public class IncidentDispatcher extends IPanel
 		impact_pnl.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent ce) {
 				Incident inc = watching;
-				if(inc != null)
+				if (inc != null)
 					enableWidgets(inc);
 			}
 		});
@@ -276,12 +276,12 @@ public class IncidentDispatcher extends IPanel
 	/** Create a new incident */
 	private void create(ClientIncident inc) {
 		String name = createUniqueIncidentName();
-		if(isAddPermitted(name)) {
+		if (isAddPermitted(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			Incident rpl = getReplaces(inc);
-			if(rpl != null) {
-				if(!needsReplacing(inc, rpl)) {
+			if (rpl != null) {
+				if (!needsReplacing(inc, rpl)) {
 					logUpdate(rpl);
 					return;
 				}
@@ -290,7 +290,7 @@ public class IncidentDispatcher extends IPanel
 			}
 			attrs.put("event_desc_id", inc.getEventType());
 			IncidentDetail dtl = getSelectedDetail();
-			if(dtl != null)
+			if (dtl != null)
 				attrs.put("detail", dtl);
 			attrs.put("lane_type", inc.getLaneType());
 			attrs.put("road", inc.getRoad());
@@ -302,7 +302,7 @@ public class IncidentDispatcher extends IPanel
 			attrs.put("cleared", false);
 			cache.createObject(name, attrs);
 			Incident proxy = getProxy(name);
-			if(proxy != null)
+			if (proxy != null)
 				sel_model.setSelected(proxy);
 			else
 				sel_model.clearSelection();
@@ -312,10 +312,7 @@ public class IncidentDispatcher extends IPanel
 	/** Get the incident that is being replaced */
 	private Incident getReplaces(ClientIncident inc) {
 		String rpl = inc.getReplaces();
-		if(rpl != null)
-			return cache.lookupObject(rpl);
-		else
-			return null;
+		return (rpl != null) ? cache.lookupObject(rpl) : null;
 	}
 
 	/** Test if an incident needs to be replaced */
@@ -329,9 +326,9 @@ public class IncidentDispatcher extends IPanel
 	}
 
 	/** Get name of original incident this replaces */
-	private static String getOriginalReplaces(Incident inc) {
+	static private String getOriginalReplaces(Incident inc) {
 		String rpl = inc.getReplaces();
-		if(rpl != null && rpl.length() > 0)
+		if (rpl != null && rpl.length() > 0)
 			return rpl;
 		else
 			return inc.getName();
@@ -379,7 +376,7 @@ public class IncidentDispatcher extends IPanel
 	}
 
 	/** Get the incident proxy object */
-	protected Incident getProxy(String name) {
+	private Incident getProxy(String name) {
 		// wait for up to 20 seconds for proxy to be created
 		for (int i = 0; i < 200; i++) {
 			Incident inc = IncidentHelper.lookup(name);
@@ -423,7 +420,7 @@ public class IncidentDispatcher extends IPanel
 
 	/** Update an attribute for the given proxy.
 	 * FIXME: this should use ProxyWatcher */
-	protected void updateAttribute(final Incident proxy, final String a) {
+	private void updateAttribute(final Incident proxy, final String a) {
 		runSwing(new Runnable() {
 			public void run() {
 				doUpdateAttribute(proxy, a);
