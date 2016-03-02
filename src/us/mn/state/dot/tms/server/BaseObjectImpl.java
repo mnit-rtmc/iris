@@ -139,6 +139,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return null;
 	}
 
+	/** Lookup a road */
+	static protected RoadImpl lookupRoad(String name) {
+		SonarObject so = lookupObject(RoadImpl.SONAR_TYPE, name);
+		return (so instanceof RoadImpl) ? (RoadImpl) so : null;
+	}
+
 	/** Lookup a geo location */
 	static protected GeoLocImpl lookupGeoLoc(String name) {
 		SonarObject so = lookupObject(GeoLocImpl.SONAR_TYPE, name);
@@ -191,6 +197,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return (BeaconImpl)so;
 		else
 			return null;
+	}
+
+	/** Lookup a camera */
+	static protected CameraImpl lookupCamera(String name) {
+		SonarObject so = lookupObject(CameraImpl.SONAR_TYPE, name);
+		return (so instanceof CameraImpl) ? (CameraImpl) so : null;
 	}
 
 	/** Lookup a camera preset */

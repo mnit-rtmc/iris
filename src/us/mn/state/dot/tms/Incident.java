@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,4 +83,7 @@ public interface Incident extends SonarObject {
 
 	/** Set the cleared status */
 	void setCleared(boolean c);
+
+	/** Get the confirmed status */
+	boolean getConfirmed();
 }

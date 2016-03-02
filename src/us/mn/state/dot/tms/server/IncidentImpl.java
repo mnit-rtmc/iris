@@ -61,7 +61,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		namespace.registerType(SONAR_TYPE, IncidentImpl.class);
 		store.query("SELECT name, replaces, event_desc_id, " +
 			"event_date, detail, lane_type, road, dir, lat, " +
-			"lon, camera, impact, cleared FROM event." +
+			"lon, camera, impact, cleared, confirmed FROM event." +
 			SONAR_TYPE + " WHERE cleared = 'f';",new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -78,7 +78,8 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 					row.getDouble(10),	// lon
 					row.getString(11),	// camera
 					row.getString(12),	// impact
-					row.getBoolean(13)	// cleared
+					row.getBoolean(13),	// cleared
+					row.getBoolean(14)	// confirmed
 				));
 			}
 		});
@@ -105,7 +106,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		if (_inc instanceof IncidentImpl)
 			return (IncidentImpl) _inc;
 		IncidentImpl inc = new IncidentImpl(n, null, et, new Date(),
-			dtl, lnt, r, d, lt, ln, cam, im, false);
+			dtl, lnt, r, d, lt, ln, cam, im, false, false);
 		try {
 			inc.notifyCreate();
 			return inc;
@@ -137,6 +138,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		map.put("camera", camera);
 		map.put("impact", impact);
 		map.put("cleared", cleared);
+		map.put("confirmed", confirmed);
 		return map;
 	}
 
@@ -160,18 +162,17 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	/** Create an incident */
 	protected IncidentImpl(Namespace ns, String n, String rpl, int et,
 		Date ed, String dtl, short lnt, String r, short d, double lt,
-		double ln, String cam, String im, boolean c)
+		double ln, String cam, String im, boolean clr, boolean cnf)
 	{
 		this(n, rpl, et, ed, (IncidentDetail)ns.lookupObject(
-		     IncidentDetail.SONAR_TYPE, dtl), lnt,
-		     (Road)ns.lookupObject(Road.SONAR_TYPE, r), d, lt, ln,
-		     (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam), im, c);
+		     IncidentDetail.SONAR_TYPE, dtl), lnt, lookupRoad(r), d, lt,
+		     ln, lookupCamera(cam), im, clr, cnf);
 	}
 
 	/** Create an incident */
 	protected IncidentImpl(String n, String rpl, int et, Date ed,
 		IncidentDetail dtl, short lnt, Road r, short d, double lt,
-		double ln, Camera cam, String im, boolean c)
+		double ln, Camera cam, String im, boolean clr, boolean cnf)
 	{
 		super(n);
 		replaces = rpl;
@@ -185,7 +186,8 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		lon = ln;
 		camera = cam;
 		impact = im;
-		cleared = c;
+		cleared = clr;
+		confirmed = cnf;
 	}
 
 	/** Destroy an object */
@@ -307,6 +309,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	public void doSetImpact(String imp) throws TMSException {
 		if (!imp.equals(impact)) {
 			validateImpact(imp);
+			setConfirmedNotify(true);
 			store.update(this, "impact", imp);
 			setImpact(imp);
 		}
@@ -357,6 +360,24 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		return clear_time;
 	}
 
+	/** Incident confirmed status */
+	private boolean confirmed = true;
+
+	/** Get the confirmed status */
+	@Override
+	public boolean getConfirmed() {
+		return confirmed;
+	}
+
+	/** Set the confirmed status */
+	private void setConfirmedNotify(boolean c) throws TMSException {
+		if (c != confirmed) {
+			store.update(this, "confirmed", c);
+			confirmed = c;
+			notifyAttribute("confirmed");
+		}
+	}
+
 	/** Write the incident as xml */
 	public void writeXml(Writer w) throws IOException {
 		String dtl = lookupDetail();
@@ -385,6 +406,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		w.write(createAttribute("camera", camera));
 		w.write(createAttribute("impact", impact));
 		w.write(createAttribute("cleared", cleared));
+		w.write(createAttribute("confirmed", confirmed));
 		w.write("/>\n");
 	}
 

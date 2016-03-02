@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,66 +48,75 @@ public class ClientIncident implements Incident {
 	}
 
 	/** Get the SONAR object name */
+	@Override
 	public String getName() {
 		return NAME;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
 
 	/** Name of replaced incident */
-	protected final String replaces;
+	private final String replaces;
 
 	/** Get name of incident this replaces.  Note: for client incidents,
 	 * this is not the original incident (in a chain), but the previous
 	 * incident. */
+	@Override
 	public String getReplaces() {
 		return replaces;
 	}
 
 	/** Event type */
-	protected final int event_type;
+	private final int event_type;
 
 	/** Get the event type */
+	@Override
 	public int getEventType() {
 		return event_type;
 	}
 
 	/** Get the event date (timestamp) */
+	@Override
 	public long getEventDate() {
 		return System.currentTimeMillis();
 	}
 
 	/** Incident detail */
-	protected final IncidentDetail detail;
+	private final IncidentDetail detail;
 
 	/** Get the incident detail */
+	@Override
 	public IncidentDetail getDetail() {
 		return detail;
 	}
 
 	/** Lane type */
-	protected final LaneType lane_type;
+	private final LaneType lane_type;
 
 	/** Get the lane type ordinal */
+	@Override
 	public short getLaneType() {
-		return (short)lane_type.ordinal();
+		return (short) lane_type.ordinal();
 	}
 
 	/** Road */
-	protected final Road road;
+	private final Road road;
 
 	/** Get the road */
+	@Override
 	public Road getRoad() {
 		return road;
 	}
 
 	/** Road direction */
-	protected final short dir;
+	private final short dir;
 
 	/** Get the road direction */
+	@Override
 	public short getDir() {
 		return dir;
 	}
@@ -116,6 +125,7 @@ public class ClientIncident implements Incident {
 	private final double lat;
 
 	/** Get the latitude */
+	@Override
 	public double getLat() {
 		return lat;
 	}
@@ -124,39 +134,52 @@ public class ClientIncident implements Incident {
 	private final double lon;
 
 	/** Get the longitude */
+	@Override
 	public double getLon() {
 		return lon;
 	}
 
 	/** Get the verification camera */
+	@Override
 	public Camera getCamera() {
 		return null;
 	}
 
 	/** Impact string */
-	protected String impact;
+	private String impact;
 
 	/** Get the current impact code */
+	@Override
 	public String getImpact() {
 		return impact;
 	}
 
 	/** Set the impact code */
+	@Override
 	public void setImpact(String imp) {
 		impact = imp;
 	}
 
 	/** Get the cleared status */
+	@Override
 	public boolean getCleared() {
 		return false;
 	}
 
 	/** Set the cleared status */
+	@Override
 	public void setCleared(boolean c) {
 		// cannot clear an incident which hasn't been logged
 	}
 
+	/** Get the confirmed status */
+	@Override
+	public boolean getConfirmed() {
+		return false;
+	}
+
 	/** Destroy the object */
+	@Override
 	public void destroy() {
 		// do nothing
 	}

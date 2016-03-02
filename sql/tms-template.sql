@@ -1707,7 +1707,8 @@ CREATE TABLE event.incident (
 	lon double precision NOT NULL,
 	camera VARCHAR(10),
 	impact VARCHAR(20) NOT NULL,
-	cleared BOOLEAN NOT NULL
+	cleared BOOLEAN NOT NULL,
+	confirmed BOOLEAN NOT NULL
 );
 
 CREATE TABLE event.incident_update (
@@ -1715,14 +1716,16 @@ CREATE TABLE event.incident_update (
 	incident VARCHAR(16) NOT NULL REFERENCES event.incident(name),
 	event_date timestamp WITH time zone NOT NULL,
 	impact VARCHAR(20) NOT NULL,
-	cleared BOOLEAN NOT NULL
+	cleared BOOLEAN NOT NULL,
+	confirmed BOOLEAN NOT NULL
 );
 
 CREATE FUNCTION event.incident_update_trig() RETURNS TRIGGER AS
 $incident_update_trig$
 BEGIN
-    INSERT INTO event.incident_update (incident, event_date, impact, cleared)
-        VALUES (NEW.name, now(), NEW.impact, NEW.cleared);
+    INSERT INTO event.incident_update
+               (incident, event_date, impact, cleared, confirmed)
+        VALUES (NEW.name, now(), NEW.impact, NEW.cleared, NEW.confirmed);
     RETURN NEW;
 END;
 $incident_update_trig$ LANGUAGE plpgsql;
@@ -2148,7 +2151,7 @@ GRANT SELECT ON gate_arm_event_view TO PUBLIC;
 
 CREATE VIEW incident_view AS
     SELECT iu.event_id, name, iu.event_date, ed.description, road,
-           d.direction, iu.impact, iu.cleared, camera,
+           d.direction, iu.impact, iu.cleared, iu.confirmed, camera,
            ln.description AS lane_type, detail, replaces, lat, lon
     FROM event.incident i
     JOIN event.incident_update iu ON i.name = iu.incident
