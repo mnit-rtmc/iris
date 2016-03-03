@@ -91,6 +91,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -111,11 +112,13 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -158,43 +161,48 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Initialize transient fields */
+	@Override
 	public void initTransients() {
 		station = createStation(station_id);
-		if(station != null) {
+		if (station != null) {
 			try {
 				namespace.addObject(station);
 			}
-			catch(NamespaceError e) {
+			catch (NamespaceError e) {
 				e.printStackTrace();
 			}
 		}
 	}
 
 	/** Node location */
-	protected GeoLocImpl geo_loc;
+	private GeoLocImpl geo_loc;
 
 	/** Set the location.  This is needed for creating a new phantom r_node
 	 * with SONAR.  It is an error to call this method this after the
 	 * r_node has been created. */
+	@Override
 	public void setGeoLoc(GeoLoc loc) {
 		assert geo_loc == null;
-		geo_loc = (GeoLocImpl)loc;
+		geo_loc = (GeoLocImpl) loc;
 	}
 
 	/** Get the location */
+	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
 	}
 
 	/** Node type */
-	protected R_NodeType node_type = R_NodeType.STATION;
+	private R_NodeType node_type = R_NodeType.STATION;
 
 	/** Get the node type */
+	@Override
 	public int getNodeType() {
 		return node_type.ordinal();
 	}
 
 	/** Set the node type */
+	@Override
 	public void setNodeType(int t) {
 		node_type = R_NodeType.fromOrdinal(t);
 	}
@@ -202,9 +210,9 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Set the node type */
 	public void doSetNodeType(int t) throws TMSException {
 		R_NodeType nt = R_NodeType.fromOrdinal(t);
-		if(nt == null)
+		if (nt == null)
 			throw new ChangeVetoException("Bad node type: " + t);
-		if(nt == node_type)
+		if (nt == node_type)
 			return;
 		store.update(this, "node_type", t);
 		setNodeType(t);
@@ -226,8 +234,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Test if this r_node type can be linked in a corridor */
-	protected boolean isCorridorType() {
-		switch(node_type) {
+	public boolean isCorridorType() {
+		switch (node_type) {
 			case STATION:
 			case ENTRANCE:
 			case EXIT:
@@ -239,51 +247,56 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Pickable flag */
-	protected boolean pickable;
+	private boolean pickable;
 
 	/** Set the pickable flag */
+	@Override
 	public void setPickable(boolean p) {
 		pickable = p;
 	}
 
 	/** Set the pickable flag */
 	public void doSetPickable(boolean p) throws TMSException {
-		if(p == pickable)
-			return;
-		store.update(this, "pickable", p);
-		setPickable(p);
+		if (p != pickable) {
+			store.update(this, "pickable", p);
+			setPickable(p);
+		}
 	}
 
 	/** Is this node pickable? */
+	@Override
 	public boolean getPickable() {
 		return pickable;
 	}
 
 	/** Above flag */
-	protected boolean above;
+	private boolean above;
 
 	/** Set the above flag */
+	@Override
 	public void setAbove(boolean a) {
 		above = a;
 	}
 
 	/** Set the above flag */
 	public void doSetAbove(boolean a) throws TMSException {
-		if(a == above)
-			return;
-		store.update(this, "above", a);
-		setAbove(a);
+		if (a != above) {
+			store.update(this, "above", a);
+			setAbove(a);
+		}
 	}
 
 	/** Is this node above? */
+	@Override
 	public boolean getAbove() {
 		return above;
 	}
 
 	/** Transition type */
-	protected R_NodeTransition transition = R_NodeTransition.NONE;
+	private R_NodeTransition transition = R_NodeTransition.NONE;
 
 	/** Set the transition type */
+	@Override
 	public void setTransition(int t) {
 		transition = R_NodeTransition.fromOrdinal(t);
 	}
@@ -291,26 +304,27 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Set the transition type */
 	public void doSetTransition(int t) throws TMSException {
 		R_NodeTransition trn = R_NodeTransition.fromOrdinal(t);
-		if(trn == null)
+		if (trn == null)
 			throw new ChangeVetoException("Bad transition: " + t);
-		if(trn == transition)
+		if (trn == transition)
 			return;
 		store.update(this, "transition", t);
 		setTransition(t);
 	}
 
 	/** Get the transition type */
+	@Override
 	public int getTransition() {
 		return transition.ordinal();
 	}
 
 	/** Check if this r_node is an exit to a common section */
-	protected boolean isCommonExit() {
+	private boolean isCommonExit() {
 		return isExit() && (transition == R_NodeTransition.COMMON);
 	}
 
 	/** Check if this r_node has a link to the downstream r_node */
-	protected boolean hasDownstreamLink() {
+	public boolean hasDownstreamLink() {
 		return isCorridorType() && !isCommonExit();
 	}
 
@@ -323,45 +337,49 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Number of lanes */
-	protected int lanes;
+	private int lanes;
 
 	/** Set the number of lanes */
+	@Override
 	public void setLanes(int l) {
 		lanes = l;
 	}
 
 	/** Set the number of lanes */
 	public void doSetLanes(int l) throws TMSException {
-		if(l == lanes)
+		if (l == lanes)
 			return;
-		if(l < 0 || l > MAX_LANES)
+		if (l < 0 || l > MAX_LANES)
 			throw new ChangeVetoException("Bad lanes: " + l);
 		store.update(this, "lanes", l);
 		setLanes(l);
 	}
 
 	/** Get the number of lanes */
+	@Override
 	public int getLanes() {
 		return lanes;
 	}
 
 	/** Attach side value */
-	protected boolean attach_side;
+	private boolean attach_side;
 
 	/** Set the attach side */
+	@Override
 	public void setAttachSide(boolean s) {
 		attach_side = s;
 	}
 
 	/** Set the attach side */
 	public void doSetAttachSide(boolean s) throws TMSException {
-		if(s == attach_side)
-			return;
-		store.update(this, "attach_side", s);
-		setAttachSide(s);
+		if (s != attach_side) {
+			store.update(this, "attach_side", s);
+			setAttachSide(s);
+		}
 	}
 
 	/** Get the attach side (true = left, false = right) */
+	@Override
 	public boolean getAttachSide() {
 		return attach_side;
 	}
@@ -370,42 +388,46 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	private int shift = MIN_SHIFT;
 
 	/** Set the lane shift */
+	@Override
 	public void setShift(int s) {
 		shift = s;
 	}
 
 	/** Set the lane shift */
 	public void doSetShift(int s) throws TMSException {
-		if(s == shift)
+		if (s == shift)
 			return;
-		if(s < MIN_SHIFT || s > MAX_SHIFT)
+		if (s < MIN_SHIFT || s > MAX_SHIFT)
 			throw new ChangeVetoException("Bad shift: " + s);
 		store.update(this, "shift", s);
 		setShift(s);
 	}
 
 	/** Get the lane shift */
+	@Override
 	public int getShift() {
 		return shift;
 	}
 
 	/** Active state */
-	protected boolean active;
+	private boolean active;
 
 	/** Set the active state */
+	@Override
 	public void setActive(boolean a) {
 		active = a;
 	}
 
 	/** Set the active state */
 	public void doSetActive(boolean a) throws TMSException {
-		if(a == active)
-			return;
-		store.update(this, "active", a);
-		setActive(a);
+		if (a != active) {
+			store.update(this, "active", a);
+			setActive(a);
+		}
 	}
 
 	/** Get the active state */
+	@Override
 	public boolean getActive() {
 		return active;
 	}
@@ -414,39 +436,42 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	private boolean abandoned;
 
 	/** Set the abandoned state */
+	@Override
 	public void setAbandoned(boolean a) {
 		abandoned = a;
 	}
 
 	/** Set the abandoned state */
 	public void doSetAbandoned(boolean a) throws TMSException {
-		if(a == abandoned)
-			return;
-		store.update(this, "abandoned", a);
-		setAbandoned(a);
+		if (a != abandoned) {
+			store.update(this, "abandoned", a);
+			setAbandoned(a);
+		}
 	}
 
 	/** Get the abandoned state */
+	@Override
 	public boolean getAbandoned() {
 		return abandoned;
 	}
 
 	/** Staiton ID */
-	protected String station_id;
+	private String station_id;
 
 	/** Station object */
-	protected StationImpl station;
+	private StationImpl station;
 
 	/** Set the station ID */
+	@Override
 	public void setStationID(String s) {
 		station_id = s;
 	}
 
 	/** Set the station ID */
 	public void doSetStationID(String s) throws TMSException {
-		if(stringEquals(s, station_id))
+		if (stringEquals(s, station_id))
 			return;
-		if(s != null && s.equals(""))
+		if (s != null && s.equals(""))
 			throw new ChangeVetoException("Invalid Station ID");
 		store.update(this, "station_id", s);
 		StationImpl stat = createStation(s);
@@ -455,23 +480,21 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Get the station ID */
+	@Override
 	public String getStationID() {
 		return station_id;
 	}
 
 	/** Create a station */
-	protected StationImpl createStation(String sid) {
-		if(sid != null)
-			return new StationImpl(sid, this);
-		else
-			return null;
+	private StationImpl createStation(String sid) {
+		return (sid != null) ? new StationImpl(sid, this) : null;
 	}
 
 	/** Update the station */
-	protected void updateStation(StationImpl os, StationImpl s) {
-		if(s != null)
+	private void updateStation(StationImpl os, StationImpl s) {
+		if (s != null)
 			MainServer.server.addObject(s);
-		if(os != null)
+		if (os != null)
 			os.notifyRemove();
 		station = s;
 	}
@@ -482,16 +505,17 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Speed limit */
-	protected int speed_limit = getDefaultSpeedLimit();
+	private int speed_limit = getDefaultSpeedLimit();
 
 	/** Set the speed limit */
+	@Override
 	public void setSpeedLimit(int l) {
 		speed_limit = l;
 	}
 
 	/** Set the speed limit */
 	public void doSetSpeedLimit(int l) throws TMSException {
-		if(l == speed_limit)
+		if (l == speed_limit)
 			return;
 		if (l < getMinSpeedLimit()) {
 			throw new ChangeVetoException("Specified speed " +
@@ -505,6 +529,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Get the speed limit, which is bounded by a minimum and maximum */
+	@Override
 	public int getSpeedLimit() {
 		return boundedValue(getMinSpeedLimit(), speed_limit, 
 			getMaxSpeedLimit());
@@ -521,22 +546,24 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Administrator notes */
-	protected String notes;
+	private String notes;
 
 	/** Set the administrator notes */
+	@Override
 	public void setNotes(String n) {
 		notes = n;
 	}
 
 	/** Set the administrator notes */
 	public void doSetNotes(String n) throws TMSException {
-		if(n.equals(notes))
-			return;
-		store.update(this, "notes", n);
-		setNotes(n);
+		if (!n.equals(notes)) {
+			store.update(this, "notes", n);
+			setNotes(n);
+		}
 	}
 
 	/** Get the administrator notes */
+	@Override
 	public String getNotes() {
 		return notes;
 	}
@@ -562,8 +589,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Get the (active) detector set for the r_node */
 	public DetectorSet getDetectorSet() {
 		DetectorSet set = new DetectorSet();
-		for(DetectorImpl d: detectors.toArray()) {
-			if(!d.getAbandoned())
+		for (DetectorImpl d: detectors.toArray()) {
+			if (!d.getAbandoned())
 				set.addDetector(d);
 		}
 		return set;
@@ -575,7 +602,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Downstream roadway nodes */
-	protected transient final List<R_NodeImpl> downstream =
+	private transient final List<R_NodeImpl> downstream =
 		new LinkedList<R_NodeImpl>();
 
 	/** Clear the downstream roadway nodes */
@@ -596,8 +623,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Get a list of nodes forked from here */
 	public List<R_NodeImpl> getForks() {
 		LinkedList<R_NodeImpl> forks = new LinkedList<R_NodeImpl>();
-		for(R_NodeImpl d: downstream) {
-			if(!isSameCorridor(geo_loc, d.geo_loc))
+		for (R_NodeImpl d: downstream) {
+			if (!isSameCorridor(geo_loc, d.geo_loc))
 				forks.add(d);
 		}
 		return forks;
@@ -608,18 +635,18 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	 * @param gl GeoLoc of corridor.
 	 * @return R_Node entrance to corridor (or null). */
 	public R_NodeImpl findEntrance(final GeoLoc gl) {
-		if(isSameCorridor(gl, geo_loc))
+		if (isSameCorridor(gl, geo_loc))
 			return this;
 		R_NodeImpl n = this;
-		while(n != null) {
+		while (n != null) {
 			List<R_NodeImpl> d = n.getDownstream();
 			n = null;
-			for(R_NodeImpl dn: d) {
+			for (R_NodeImpl dn: d) {
 				GeoLoc dgl = dn.getGeoLoc();
-				if(isSameCorridor(dgl, gl))
+				if (isSameCorridor(dgl, gl))
 					return dn;
 				// Only scan original corridor
-				if(isSameCorridor(dgl, geo_loc))
+				if (isSameCorridor(dgl, geo_loc))
 					n = dn;
 			}
 		}
@@ -638,26 +665,26 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	{
 		w.write("  <r_node");
 		w.write(createAttribute("name", name));
-		if(node_type != R_NodeType.STATION)
+		if (node_type != R_NodeType.STATION)
 			w.write(" n_type='" + node_type.description + "'");
-		if(pickable)
+		if (pickable)
 			w.write(" pickable='t'");
-		if(above)
+		if (above)
 			w.write(" above='t'");
-		if(transition != R_NodeTransition.NONE)
+		if (transition != R_NodeTransition.NONE)
 			w.write(" transition='" + transition.description+"'");
 		String sid = station_id;
-		if(sid != null)
+		if (sid != null)
 			w.write(createAttribute("station_id", sid));
 		GeoLoc loc = geo_loc;
-		if(loc != null) {
+		if (loc != null) {
 			String mod = GeoLocHelper.getModifier(loc);
-			if(loc.getCrossMod() == 0)
+			if (loc.getCrossMod() == 0)
 				mod = "";
 			String lbl = GeoLocHelper.getCrossDescription(loc, mod);
 			w.write(createAttribute("label", lbl));
 			Position pos = GeoLocHelper.getWgs84Position(loc);
-			if(pos != null) {
+			if (pos != null) {
 				w.write(createAttribute("lon",
 					formatDouble(pos.getLongitude())));
 				w.write(createAttribute("lat",
@@ -665,36 +692,36 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 			}
 		}
 		int l = getLanes();
-		if(l != 0)
+		if (l != 0)
 			w.write(" lanes='" + l + "'");
-		if(getAttachSide())
+		if (getAttachSide())
 			w.write(" attach_side='left'");
 		int s = getShift();
-		if(s != 0)
+		if (s != 0)
 			w.write(" shift='" + s + "'");
-		if(!getActive())
+		if (!getActive())
 			w.write(" active='f'");
-		if(getAbandoned())
+		if (getAbandoned())
 			w.write(" abandoned='t'");
 		int slim = getSpeedLimit();
 		if (slim != getDefaultSpeedLimit())
 			w.write(" s_limit='" + slim + "'");
 		List<R_NodeImpl> forks = getForks();
-		if(forks.size() > 0) {
+		if (forks.size() > 0) {
 			w.write(" forks='");
 			StringBuilder b = new StringBuilder();
-			for(R_NodeImpl f: forks)
+			for (R_NodeImpl f: forks)
 				b.append(f.getName() + " ");
 			w.write(b.toString().trim() + "'");
 		}
 		DetectorImpl[] dets = detectors.toArray();
-		if(dets.length > 0 || m_nodes.containsKey(name)) {
+		if (dets.length > 0 || m_nodes.containsKey(name)) {
 			w.write(">\n");
-			for(DetectorImpl det: dets) {
+			for (DetectorImpl det: dets) {
 				w.write("    ");
 				det.writeXmlElement(w);
 			}
-			if(m_nodes.containsKey(name)) {
+			if (m_nodes.containsKey(name)) {
 				RampMeterImpl meter = m_nodes.get(name);
 				w.write("    ");
 				meter.writeXml(w);
