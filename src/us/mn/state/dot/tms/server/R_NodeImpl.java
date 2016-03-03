@@ -607,23 +607,29 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Clear the downstream roadway nodes */
 	public void clearDownstream() {
-		downstream.clear();
+		synchronized (downstream) {
+			downstream.clear();
+		}
 	}
 
 	/** Add a downstream roadway node */
 	public void addDownstream(R_NodeImpl d) {
-		downstream.add(d);
+		synchronized (downstream) {
+			downstream.add(d);
+		}
 	}
 
 	/** Get a list of the downstream nodes */
 	public List<R_NodeImpl> getDownstream() {
-		return downstream;
+		synchronized (downstream) {
+			return new LinkedList<R_NodeImpl>(downstream);
+		}
 	}
 
 	/** Get a list of nodes forked from here */
-	public List<R_NodeImpl> getForks() {
+	private List<R_NodeImpl> getForks() {
 		LinkedList<R_NodeImpl> forks = new LinkedList<R_NodeImpl>();
-		for (R_NodeImpl d: downstream) {
+		for (R_NodeImpl d: getDownstream()) {
 			if (!isSameCorridor(geo_loc, d.geo_loc))
 				forks.add(d);
 		}
