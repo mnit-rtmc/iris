@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.incfeed;
 import java.io.IOException;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.IncidentCache;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -31,8 +32,8 @@ public class OpReadIncFeed extends OpController<IncFeedProperty> {
 	/** Feed name */
 	private final String feed;
 
-	/** Feed cache */
-	private final FeedCache cache;
+	/** Incident cache */
+	private final IncidentCache cache;
 
 	/** Log a message */
 	private void logMsg(String msg) {
@@ -40,10 +41,10 @@ public class OpReadIncFeed extends OpController<IncFeedProperty> {
 	}
 
 	/** Create a new operation to read incident feed */
-	protected OpReadIncFeed(ControllerImpl c, String fid, FeedCache fc) {
+	protected OpReadIncFeed(ControllerImpl c, String fid, IncidentCache ic){
 		super(PriorityLevel.DATA_30_SEC, c);
 		feed = fid;
-		cache = fc;
+		cache = ic;
 		logMsg("Polling feed");
 	}
 

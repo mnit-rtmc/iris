@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.utils.LineReader;
 import static us.mn.state.dot.tms.server.BaseObjectImpl.corridors;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.IncidentCache;
 import us.mn.state.dot.tms.server.IncidentImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
@@ -43,12 +44,12 @@ public class IncFeedProperty extends ControllerProperty {
 	/** Maximum number of chars in response for line reader */
 	static private final int MAX_RESP = 1024;
 
-	/** Feed cache */
-	private final FeedCache cache;
+	/** Incident cache */
+	private final IncidentCache cache;
 
 	/** Create a new incident feed property */
-	public IncFeedProperty(FeedCache fc) {
-		cache = fc;
+	public IncFeedProperty(IncidentCache ic) {
+		cache = ic;
 	}
 
 	/** Decode a QUERY response */

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.incfeed;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.IncidentCache;
 import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 
@@ -38,9 +39,6 @@ public class IncFeedPoller extends MessagePoller<IncFeedProperty> {
 	/** Feed ID */
 	private final String feed_id;
 
-	/** Feed cache */
-	private final FeedCache cache = new FeedCache();
-
 	/** Create a new poller */
 	public IncFeedPoller(String n, Messenger m) {
 		super(n, m);
@@ -54,7 +52,7 @@ public class IncFeedPoller extends MessagePoller<IncFeedProperty> {
 	}
 
 	/** Query incident feed */
-	public void queryIncidents(ControllerImpl c) {
+	public void queryIncidents(ControllerImpl c, IncidentCache cache) {
 		addOperation(new OpReadIncFeed(c, feed_id, cache));
 	}
 

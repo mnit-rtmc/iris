@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,5 +36,6 @@ public class EventPurgeJob extends Job {
 	public void perform() throws TMSException {
 		CommEvent.purgeRecords();
 		MeterEvent.purgeRecords();
+		ControllerImpl.inc_cache.purge();
 	}
 }
