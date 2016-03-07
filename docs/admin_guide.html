@@ -275,6 +275,7 @@
 	<li>SSI RWIS sensor</li>
 	<li>DLI DIN Relay (LCS, beacons)</li>
 	<li>Control By Web (beacons)</li>
+	<li>Incident Feed (external system provided)</li>
 </ul>
 <h3 id="advanced_features">Advanced Features</h3>
 <p>
@@ -1312,6 +1313,11 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td><a href="#beacons">beacons</a></td>
 	    <td>TCP / HTTP</td>
 	</tr>
+	<tr>
+	    <td>Incident feed</td>
+	    <td><a href="#inc_feed">Incidents</a> from external system</td>
+	    <td>TCP / HTTP</td>
+	</tr>
 </table>
 <p/>
 
@@ -1383,6 +1389,25 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	if enabled on the setup page of the device (setup.html).
 	To allow IRIS to authenticate, the password field of the controller
 	in IRIS must have <i>none:</i> prepended to the actual password.
+</p>
+
+<h4 id="inc_feed">Incident Feed Protocol</h4>
+<p>
+	The "inc feed" protocol can be used to interface IRIS with an external
+	system that generates <a href="#incident_management">incidents</a>.
+	Periodically, IRIS will poll the URI (using HTTP) for incidents.
+	The external system should respond with an ASCII text file, with one
+	line per active incident.
+</p>
+<p>
+	Each line should contain 6 fields, separated by comma characters ","
+	and terminated with a single newline character "\n" (ASCII 0x0A).
+	The fields are incident ID, type, incident detail, latitude, longitude,
+	and camera ID.
+	The type must be CRASH, STALL, ROADWORK, or HAZARD.
+	The detail may be blank, or one of the incident detail names.
+	Latitude and longitude must be coordinates of the incident.
+	Camera ID may be blank, or the ID of a camera to view the incident.
 </p>
 
 <h3 id="controllers">Controllers</h3>
