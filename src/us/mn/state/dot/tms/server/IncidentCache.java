@@ -72,6 +72,7 @@ public class IncidentCache {
 				clear(id);
 			}
 		}
+		incidents.putAll(nxt);
 		nxt.clear();
 	}
 
