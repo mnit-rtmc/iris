@@ -149,7 +149,7 @@ public class MessageProperty extends AddcoProperty {
 	{
 		int p_unk = parse2(body);
 		if (1 == p_unk)
-			return parseUnknownPage(body);
+			return parseBlankPage(body);
 		else if (8 != p_unk)
 			throw new ParsingException("UNKNOWN0: " + p_unk);
 		int seq = parse8(body, pos);
@@ -170,10 +170,10 @@ public class MessageProperty extends AddcoProperty {
 			throw new ParsingException("PTYPE: " + p_type);
 	}
 
-	/** Parse an unknown page */
-	private MessagePage parseUnknownPage(byte[] body) throws IOException {
-		logError("UNKNOWN PAGE: " + HexString.format(body, ':'));
-		throw new ParsingException("UNKNOWN PAGE");
+	/** Parse a blank page */
+	private MessagePage parseBlankPage(byte[] body) throws IOException {
+		logError("BLANK PAGE: " + HexString.format(body, ':'));
+		return new MessagePage(dms, "");
 	}
 
 	/** Parse a text page of a message */
