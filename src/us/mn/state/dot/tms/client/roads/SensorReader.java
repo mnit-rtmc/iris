@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.zip.GZIPInputStream;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
@@ -88,7 +89,7 @@ public class SensorReader {
 	private final Job job = new Job(Calendar.SECOND, 30, Calendar.SECOND,
 		OFFSET_SECS)
 	{
-		public void perform() throws Exception {
+		public void perform() {
 			readXmlFile();
 		}
 	};
@@ -103,7 +104,7 @@ public class SensorReader {
 		parser = factory.newSAXParser();
 		// Read the sensor data right away
 		READER.addJob(new Job() {
-			public void perform() throws Exception {
+			public void perform() {
 				readXmlFile();
 			}
 		});
@@ -117,10 +118,14 @@ public class SensorReader {
 	}
 
 	/** Read and parse an XML file */
-	private void readXmlFile() throws IOException, SAXException {
+	private void readXmlFile() {
 		try {
 			time_changed = false;
 			parse();
+		}
+		catch (Exception e) {
+			System.err.println("" + new Date() +
+				" SensorReader.readXmlFile: " + e.getMessage());
 		}
 		finally {
 			long now = System.currentTimeMillis();
