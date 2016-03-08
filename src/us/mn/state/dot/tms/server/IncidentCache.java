@@ -68,8 +68,8 @@ public class IncidentCache {
 		while (it.hasNext()) {
 			String id = it.next();
 			if (!nxt.containsKey(id)) {
-				it.remove();
 				clear(id);
+				it.remove();
 			}
 		}
 		incidents.putAll(nxt);
