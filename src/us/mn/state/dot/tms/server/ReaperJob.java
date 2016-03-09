@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 public class ReaperJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
-	static protected final int OFFSET_SECS = 27;
+	static private final int OFFSET_SECS = 27;
 
 	/** List of reapable sign messages */
 	private final LinkedList<SignMessageImpl> reapable;
@@ -56,10 +56,10 @@ public class ReaperJob extends Job {
 	/** Reap incidents which have been cleared for awhile */
 	private void reapIncidents() {
 		Iterator<Incident> it = IncidentHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Incident inc = it.next();
-			if(inc instanceof IncidentImpl)
-				reapIncident((IncidentImpl)inc);
+			if (inc instanceof IncidentImpl)
+				reapIncident((IncidentImpl) inc);
 		}
 	}
 
@@ -85,7 +85,7 @@ public class ReaperJob extends Job {
 		// only happen during a very short window about one minute
 		// after the message loses its last reference.  Is it worth
 		// making a fix for this unlikely scenario?
-		if(reapable.isEmpty()) {
+		if (reapable.isEmpty()) {
 			findReapableMessages();
 			removeReferencedMessages();
 		} else {
@@ -102,26 +102,26 @@ public class ReaperJob extends Job {
 		// This is needed because objects are removed
 		// asynchronously from the namespace.
 		SignMessage m = SignMessageHelper.lookup(sm.getName());
-		if((m == sm) && !isReferenced(m))
+		if ((m == sm) && !isReferenced(m))
 			sm.notifyRemove();
 	}
 
 	/** Find all reapable sign messages */
 	private void findReapableMessages() {
 		Iterator<SignMessage> it = SignMessageHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			SignMessage sm = it.next();
-			if(sm instanceof SignMessageImpl)
-				reapable.add((SignMessageImpl)sm);
+			if (sm instanceof SignMessageImpl)
+				reapable.add((SignMessageImpl) sm);
 		}
 	}
 
 	/** Remove referenced sign messages */
 	private void removeReferencedMessages() {
 		Iterator<SignMessageImpl> it = reapable.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			SignMessage sm = it.next();
-			if(isReferenced(sm))
+			if (isReferenced(sm))
 				it.remove();
 		}
 	}
@@ -129,11 +129,11 @@ public class ReaperJob extends Job {
 	/** Check if a sign message is referenced by any DMS */
 	private boolean isReferenced(SignMessage sm) {
 		Iterator<DMS> it = DMSHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			DMS dms = it.next();
-			if(dms instanceof DMSImpl) {
-				DMSImpl dmsi = (DMSImpl)dms;
-				if(dmsi.hasReference(sm))
+			if (dms instanceof DMSImpl) {
+				DMSImpl dmsi = (DMSImpl) dms;
+				if (dmsi.hasReference(sm))
 					return true;
 			}
 		}
