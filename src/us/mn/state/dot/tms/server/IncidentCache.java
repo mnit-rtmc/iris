@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import us.mn.state.dot.tms.IncidentHelper;
 
 /**
  * Cache of incidents in incident feeds.
@@ -87,8 +88,13 @@ public class IncidentCache {
 	/** Clear one incident */
 	private void clear(IncidentImpl inc) {
 		inc.setClearedNotify(true);
-		if (!inc.getConfirmed())
+		if (!inc.getConfirmed() && isActive(inc))
 			inc.notifyRemove();
+	}
+
+	/** Check if an incident is active */
+	private boolean isActive(IncidentImpl inc) {
+		return inc == IncidentHelper.lookup(inc.getName());
 	}
 
 	/** Purge old garbage */
