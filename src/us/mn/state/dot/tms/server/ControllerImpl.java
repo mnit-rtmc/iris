@@ -57,9 +57,6 @@ import us.mn.state.dot.tms.server.event.CommEvent;
  */
 public class ControllerImpl extends BaseObjectImpl implements Controller {
 
-	/** Incident cache */
-	static public final IncidentCache inc_cache = new IncidentCache();
-
 	/** Get comm link impl */
 	static private CommLinkImpl commLinkImpl(CommLink cl) {
 		return (cl instanceof CommLinkImpl) ? (CommLinkImpl)cl : null;
@@ -893,7 +890,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		DevicePoller dp = getPoller();
 		if (dp instanceof IncFeedPoller) {
 			IncFeedPoller ifp = (IncFeedPoller) dp;
-			ifp.queryIncidents(this, inc_cache);
+			ifp.queryIncidents(this, IncidentImpl.cache);
 		}
 	}
 

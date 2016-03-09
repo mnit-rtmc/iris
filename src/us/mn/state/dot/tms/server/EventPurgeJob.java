@@ -36,6 +36,6 @@ public class EventPurgeJob extends Job {
 	public void perform() throws TMSException {
 		CommEvent.purgeRecords();
 		MeterEvent.purgeRecords();
-		ControllerImpl.inc_cache.purge();
+		IncidentImpl.cache.purge();
 	}
 }

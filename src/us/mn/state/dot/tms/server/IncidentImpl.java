@@ -46,6 +46,9 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
  */
 public class IncidentImpl extends BaseObjectImpl implements Incident {
 
+	/** Incident cache */
+	static public final IncidentCache cache = new IncidentCache();
+
 	/** Validate an impact code */
 	static private void validateImpact(String imp)
 		throws ChangeVetoException
