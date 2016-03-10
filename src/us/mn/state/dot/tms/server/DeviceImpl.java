@@ -115,22 +115,36 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	/** Set the controller of the device */
 	@Override
 	public void setController(Controller c) {
-		controller = (ControllerImpl)c;
+		controller = (ControllerImpl) c;
 	}
 
 	/** Set the controller of the device */
 	public void doSetController(Controller c) throws TMSException {
 		if (c == controller)
 			return;
+		if (c == null || c instanceof ControllerImpl)
+			doSetControllerImpl((ControllerImpl) c);
+		else
+			throw new ChangeVetoException("Invalid controller");
+	}
+
+	/** Set the controller of the device */
+	private void doSetControllerImpl(ControllerImpl c) throws TMSException {
 		if (c != null && controller != null)
 			throw new ChangeVetoException("Device has controller");
-		if (c != null && !(c instanceof ControllerImpl))
-			throw new ChangeVetoException("Invalid controller");
 		if (pin < 1 || pin > Controller.ALL_PINS)
 			throw new ChangeVetoException("Invalid pin: " + pin);
+		checkControllerPin(pin);
 		store.update(this, "controller", c);
-		updateControllerPin(controller, pin, (ControllerImpl)c, pin);
+		updateControllerPin(controller, pin, c, pin);
 		setController(c);
+	}
+
+	/** Check the controller pin */
+	protected void checkControllerPin(int p) throws TMSException {
+		ControllerImpl c = controller;
+		if (c != null && c.getIO(p) != null)
+			throw new ChangeVetoException("Unavailable pin: " + p);
 	}
 
 	/** Get the controller to which this device is assigned */
