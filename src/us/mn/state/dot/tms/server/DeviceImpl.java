@@ -74,16 +74,18 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	/** Get the failure status */
 	public boolean isFailed() {
 		ControllerImpl c = controller;	// Avoid race
-		if (c == null)
-			return true;
-		else
-			return c.isFailed();
+		return (c == null) || c.isFailed();
 	}
 
 	/** Check if the controller has an error */
 	public boolean hasError() {
+		return isFailed() || hasStatusError();
+	}
+
+	/** Check if the controller has a status error */
+	private boolean hasStatusError() {
 		ControllerImpl c = controller;	// Avoid race
-		return c == null || isFailed() || !c.getStatus().isEmpty();
+		return (c == null) || !c.getStatus().isEmpty();
 	}
 
 	/** Get the device poller */
@@ -111,6 +113,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	}
 
 	/** Set the controller of the device */
+	@Override
 	public void setController(Controller c) {
 		controller = (ControllerImpl)c;
 	}
@@ -131,6 +134,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	}
 
 	/** Get the controller to which this device is assigned */
+	@Override
 	public Controller getController() {
 		return controller;
 	}
@@ -139,6 +143,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	protected int pin = 0;
 
 	/** Set the controller I/O pin number */
+	@Override
 	public void setPin(int p) {
 		pin = p;
 	}
@@ -155,6 +160,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	}
 
 	/** Get the controller I/O pin number */
+	@Override
 	public int getPin() {
 		return pin;
 	}
@@ -227,10 +233,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	@Override
 	public String getOperation() {
 		OpDevice o = owner;
-		if (o == null)
-			return "None";
-		else
-			return o.getOperationDescription();
+		return (o != null) ? o.getOperationDescription() : "None";
 	}
 
 	/** Device operation status. This is updated during the course of an
@@ -268,18 +271,12 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	/** Check if the device is connected to a modem comm link */
 	protected boolean hasModemCommLink() {
 		ControllerImpl c = controller;
-		if (c != null)
-			return c.hasModemCommLink();
-		else
-			return false;
+		return (c != null) && c.hasModemCommLink();
 	}
 
 	/** Check if the device is on a "connected" comm link */
 	protected boolean isConnected() {
 		ControllerImpl c = controller;
-		if (c != null)
-			return c.isConnected();
-		else
-			return false;
+		return (c != null) && c.isConnected();
 	}
 }
