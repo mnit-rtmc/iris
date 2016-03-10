@@ -27,7 +27,6 @@ import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Cabinet;
-import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import static us.mn.state.dot.tms.CommProtocol.MSG_FEED;
@@ -150,7 +149,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	protected void initTransients() throws TMSException {
 		version = "";
 		CommLinkImpl cl = comm_link;
-		if(cl != null)
+		if (cl != null)
 			cl.putController(drop_id, this);
 	}
 
@@ -159,7 +158,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		CommLinkImpl cl = comm_link;
 		StringBuilder b = new StringBuilder();
 		b.append("Link ");
-		if(cl != null)
+		if (cl != null)
 			b.append(cl.getName());
 		else
 			b.append("null");
@@ -172,29 +171,31 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	protected CabinetImpl cabinet;
 
 	/** Set the controller cabinet */
+	@Override
 	public void setCabinet(Cabinet c) {
-		if(c instanceof CabinetImpl)
+		if (c instanceof CabinetImpl)
 			cabinet = (CabinetImpl)c;
 	}
 
 	/** Set the controller cabinet */
 	public void doSetCabinet(Cabinet c) throws TMSException {
-		if(!(c instanceof CabinetImpl))
+		if (!(c instanceof CabinetImpl))
 			return;
-		if(c == cabinet)
+		if (c == cabinet)
 			return;
 		store.update(this, "cabinet", c);
 		setCabinet(c);
 	}
 
 	/** Get the controller cabinet */
+	@Override
 	public Cabinet getCabinet() {
 		return cabinet;
 	}
 
 	/** Put this controller into a comm link */
 	private void putCommLink(int d, CommLinkImpl cl) throws TMSException {
-		if(cl != null) {
+		if (cl != null) {
 			cl.testGateArmDisable("comm_link 0");
 			cl.putController(d, this);
 		}
@@ -202,7 +203,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Pull this controller from a comm link */
 	private void pullCommLink(CommLinkImpl cl) {
-		if(cl != null) {
+		if (cl != null) {
 			cl.testGateArmDisable("comm_link 1");
 			cl.pullController(this);
 		}
@@ -212,6 +213,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	private CommLinkImpl comm_link;
 
 	/** Set the comm link for this controller */
+	@Override
 	public void setCommLink(CommLink c) {
 		comm_link = commLinkImpl(c);
 	}
@@ -219,7 +221,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Set the comm link for this controller */
 	public void doSetCommLink(CommLink c) throws TMSException {
 		CommLinkImpl cl = commLinkImpl(c);
-		if(cl != comm_link) {
+		if (cl != comm_link) {
 			putCommLink(drop_id, cl);
 			store.update(this, "comm_link", cl);
 			pullCommLink(comm_link);
@@ -228,21 +230,23 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get the comm link */
+	@Override
 	public CommLink getCommLink() {
 		return comm_link;
 	}
 
 	/** Drop address */
-	protected short drop_id;
+	private short drop_id;
 
 	/** Set the drop address */
+	@Override
 	public void setDrop(short d) {
 		drop_id = d;
 	}
 
 	/** Set the drop address */
 	public void doSetDrop(short d) throws TMSException {
-		if(d == drop_id)
+		if (d == drop_id)
 			return;
 		putCommLink(d, comm_link);
 		store.update(this, "drop_id", d);
@@ -251,6 +255,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get the drop address */
+	@Override
 	public short getDrop() {
 		return drop_id;
 	}
@@ -258,7 +263,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Test whether gate arm system should be disabled */
 	private void testGateArmDisable(String reason) {
 		CommLinkImpl cl = comm_link;
-		if(cl != null)
+		if (cl != null)
 			cl.testGateArmDisable(reason);
 	}
 
@@ -293,9 +298,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Access password */
-	protected String password;
+	private String password;
 
 	/** Set the access password */
+	@Override
 	public void setPassword(String pwd) {
 		testGateArmDisable("password");
 		password = pwd;
@@ -303,7 +309,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the access password */
 	public void doSetPassword(String pwd) throws TMSException {
-		if(stringEquals(pwd, password))
+		if (stringEquals(pwd, password))
 			return;
 		store.update(this, "password", pwd);
 		setPassword(pwd);
@@ -315,30 +321,32 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Administrator notes for this controller */
-	protected String notes = "";
+	private String notes = "";
 
 	/** Set the administrator notes */
+	@Override
 	public void setNotes(String n) {
 		notes = n;
 	}
 
 	/** Set the administrator notes */
 	public void doSetNotes(String n) throws TMSException {
-		if(n.equals(notes))
+		if (n.equals(notes))
 			return;
 		store.update(this, "notes", n);
 		setNotes(n);
 	}
 
 	/** Get the administrator notes */
+	@Override
 	public String getNotes() {
 		return notes;
 	}
 
 	/** Update styles for associated devices */
 	public synchronized void updateStyles() {
-		for(ControllerIO io: io_pins.values()) {
-			if(io instanceof DeviceImpl) {
+		for (ControllerIO io: io_pins.values()) {
+			if (io instanceof DeviceImpl) {
 				DeviceImpl dev = (DeviceImpl)io;
 				dev.updateStyles();
 			}
@@ -346,7 +354,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Mapping of all controller I/O pins */
-	protected transient HashMap<Integer, ControllerIO> io_pins =
+	private transient HashMap<Integer, ControllerIO> io_pins =
 		new HashMap<Integer, ControllerIO>();
 
 	/** Get controller I/O for one pin */
@@ -356,7 +364,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Assign an IO to the specified controller I/O pin */
 	public synchronized void setIO(int pin, ControllerIO io) {
-		if(io != null)
+		if (io != null)
 			io_pins.put(pin, io);
 		else
 			io_pins.remove(pin);
@@ -385,13 +393,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get a map of pins to detectors */
-	protected synchronized HashMap<Integer, DetectorImpl> getDetectors() {
+	private synchronized HashMap<Integer, DetectorImpl> getDetectors() {
 		HashMap<Integer, DetectorImpl> dets =
 			new HashMap<Integer, DetectorImpl>();
-		for(Integer pin: io_pins.keySet()) {
+		for (Integer pin: io_pins.keySet()) {
 			ControllerIO io = io_pins.get(pin);
-			if(io instanceof DetectorImpl)
-				dets.put(pin, (DetectorImpl)io);
+			if (io instanceof DetectorImpl)
+				dets.put(pin, (DetectorImpl) io);
 		}
 		return dets;
 	}
@@ -399,8 +407,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get a detector by its I/O pin number */
 	public DetectorImpl getDetectorAtPin(int pin) {
 		ControllerIO io = getIO(pin);
-		if(io instanceof DetectorImpl)
-			return (DetectorImpl)io;
+		if (io instanceof DetectorImpl)
+			return (DetectorImpl) io;
 		else
 			return null;
 	}
@@ -419,15 +427,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Find a matching detector for the specified input */
 	public int getSpeedPair(int pin) {
 		DetectorImpl d = getDetectorAtPin(pin);
-		if(d != null && d.isVelocity())
+		if (d != null && d.isVelocity())
 			return getSpeedPair(d);
-		return 0;
+		else
+			return 0;
 	}
 
 	/** Find a matching detector for the specified velocity detector */
-	protected synchronized int getSpeedPair(DetectorImpl v) {
-		for(Map.Entry<Integer, ControllerIO> e: io_pins.entrySet()) {
-			if(v.isSpeedPair(e.getValue()))
+	private synchronized int getSpeedPair(DetectorImpl v) {
+		for (Map.Entry<Integer, ControllerIO> e: io_pins.entrySet()) {
+			if (v.isSpeedPair(e.getValue()))
 				return e.getKey();
 		}
 		return 0;
@@ -436,8 +445,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get an alarm from the controller */
 	public AlarmImpl getAlarm(int pin) {
 		ControllerIO io = getIO(pin);
-		if(io instanceof AlarmImpl)
-			return (AlarmImpl)io;
+		if (io instanceof AlarmImpl)
+			return (AlarmImpl) io;
 		else
 			return null;
 	}
@@ -452,7 +461,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Get a sample value from an array */
 	static private int sampleValue(int[] values, int i) {
-		if(values != null && i >= 0 && i < values.length)
+		if (values != null && i >= 0 && i < values.length)
 			return values[i];
 		else
 			return MISSING_DATA;
@@ -479,11 +488,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		int[] volume, VehLengthClass vc)
 	{
 		HashMap<Integer, DetectorImpl> dets = getDetectors();
-		for(Integer pin: dets.keySet()) {
+		for (Integer pin: dets.keySet()) {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
 			int v = sampleValue(volume, i);
-			if(v >= 0) {
+			if (v >= 0) {
 				det.storeVolume(new PeriodicSample(stamp,
 					period, v), vc);
 			}
@@ -500,11 +509,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		int[] scans, int max_scans)
 	{
 		HashMap<Integer, DetectorImpl> dets = getDetectors();
-		for(Integer pin: dets.keySet()) {
+		for (Integer pin: dets.keySet()) {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
 			int n_scans = sampleValue(scans, i);
-			if(n_scans >= 0) {
+			if (n_scans >= 0) {
 				det.storeOccupancy(new OccupancySample(stamp,
 					period, n_scans, max_scans));
 			}
@@ -520,11 +529,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		int[] speed)
 	{
 		HashMap<Integer, DetectorImpl> dets = getDetectors();
-		for(Integer pin: dets.keySet()) {
+		for (Integer pin: dets.keySet()) {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
 			int s = sampleValue(speed, i);
-			if(s > 0) {
+			if (s > 0) {
 				det.storeSpeed(new PeriodicSample(stamp,
 					period, s));
 			}
@@ -533,34 +542,35 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Bin 30-second sample data */
 	public synchronized void binEventSamples() {
-		for(ControllerIO io: io_pins.values()) {
-			if(io instanceof DetectorImpl)
-				((DetectorImpl)io).binEventSamples();
+		for (ControllerIO io: io_pins.values()) {
+			if (io instanceof DetectorImpl)
+				((DetectorImpl) io).binEventSamples();
 		}
 	}
 
 	/** Controller firmware version */
-	protected transient String version;
+	private transient String version;
 
 	/** Set the controller firmware version */
 	public void setVersion(String v) {
-		if(!v.equals(version)) {
+		if (!v.equals(version)) {
 			version = v;
 			notifyAttribute("version");
 		}
 	}
 
 	/** Get the controller firmware version */
+	@Override
 	public String getVersion() {
 		return version;
 	}
 
 	/** Controller error status */
-	protected transient String errorStatus = "";
+	private transient String errorStatus = "";
 
 	/** Set the controller error status */
 	public void setErrorStatus(String s) {
-		if(!s.equals(errorStatus)) {
+		if (!s.equals(errorStatus)) {
 			errorStatus = s;
 			notifyAttribute("status");
 			updateStyles();
@@ -568,18 +578,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Controller communication status */
-	protected transient String commStatus = Constants.UNKNOWN;
+	private transient String commStatus = Constants.UNKNOWN;
 
 	/** Get the controller error status */
+	@Override
 	public String getStatus() {
-		if(isFailed())
-			return commStatus;
-		else
-			return errorStatus; 
+		return isFailed() ? commStatus : errorStatus;
 	}
 
 	/** Set the controller communication status */
-	protected void setCommStatus(String s) {
+	private void setCommStatus(String s) {
 		// NOTE: the status attribute is set here, but don't notify
 		// clients until communication fails. That happens in the
 		// setFailed method.
@@ -590,18 +598,18 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public void logCommEvent(EventType et, String id, String message) {
 		incrementCommCounter(et);
 		setCommStatus(message);
-		if(!isFailed())
+		if (!isFailed())
 			logCommEvent(et, id);
 	}
 
 	/** Time stamp of most recent comm failure */
-	protected Long failTime = TimeSteward.currentTimeMillis();
+	private Long failTime = TimeSteward.currentTimeMillis();
 
 	/** Set the failed status of the controller */
-	protected void setFailed(boolean f, String id) {
-		if(f == isFailed())
+	private void setFailed(boolean f, String id) {
+		if (f == isFailed())
 			return;
-		if(f) {
+		if (f) {
 			setFailTime(TimeSteward.currentTimeMillis());
 			logCommEvent(EventType.COMM_FAILED, id);
 		} else {
@@ -614,11 +622,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Set the fail time */
-	protected void setFailTime(Long ft) {
+	private void setFailTime(Long ft) {
 		try {
 			store.update(this, "fail_time", asTimestamp(ft));
 		}
-		catch(TMSException e) {
+		catch (TMSException e) {
 			// FIXME: what else can we do with this exception?
 			e.printStackTrace();
 		}
@@ -637,6 +645,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Get the controller fail time, or null if communication is not
 	 * failed.  This time is in milliseconds since the epoch. */
+	@Override
 	public Long getFailTime() {
 		return failTime;
 	}
@@ -644,7 +653,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Get the number of milliseconds the controller has been failed */
 	public long getFailMillis() {
 		Long ft = failTime;
-		if(ft != null)
+		if (ft != null)
 			return TimeSteward.currentTimeMillis() - failTime;
 		else
 			return 0;
@@ -669,64 +678,68 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Timeout error count */
-	protected int timeoutErr;
+	private int timeoutErr;
 
 	/** Get the timeout error count */
+	@Override
 	public int getTimeoutErr() {
 		return timeoutErr;
 	}
 
 	/** Increment the timeout error count */
-	protected void incrementTimeoutErr() {
+	private void incrementTimeoutErr() {
 		timeoutErr++;
 		notifyAttribute("timeoutErr");
 	}
 
 	/** Checksum error count */
-	protected int checksumErr;
+	private int checksumErr;
 
 	/** Get the checksum error count */
+	@Override
 	public int getChecksumErr() {
 		return checksumErr;
 	}
 
 	/** Increment the checksum error count */
-	protected void incrementChecksumErr() {
+	private void incrementChecksumErr() {
 		checksumErr++;
 		notifyAttribute("checksumErr");
 	}
 
 	/** Parsing error count */
-	protected int parsingErr;
+	private int parsingErr;
 
 	/** Get the parsing error count */
+	@Override
 	public int getParsingErr() {
 		return parsingErr;
 	}
 
 	/** Increment the parsing error count */
-	protected void incrementParsingErr() {
+	private void incrementParsingErr() {
 		parsingErr++;
 		notifyAttribute("parsingErr");
 	}
 
 	/** Controller error count */
-	protected int controllerErr;
+	private int controllerErr;
 
 	/** Get the controller error count */
+	@Override
 	public int getControllerErr() {
 		return controllerErr;
 	}
 
 	/** Increment the controller error count */
-	protected void incrementControllerErr() {
+	private void incrementControllerErr() {
 		controllerErr++;
 		notifyAttribute("controllerErr");
 	}
 
 	/** Increment a comm error counter */
-	protected void incrementCommCounter(EventType et) {
-		switch(et) {
+	private void incrementCommCounter(EventType et) {
+		switch (et) {
 		case POLL_TIMEOUT_ERROR:
 			incrementTimeoutErr();
 			break;
@@ -743,58 +756,61 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Successful operations count */
-	protected int successOps;
+	private int successOps;
 
 	/** Get the successful operation count */
+	@Override
 	public int getSuccessOps() {
 		return successOps;
 	}
 
 	/** Increment the successful operation count */
-	protected void incrementSuccessOps() {
+	private void incrementSuccessOps() {
 		successOps++;
 		notifyAttribute("successOps");
 	}
 
 	/** Failed operations count */
-	protected int failedOps;
+	private int failedOps;
 
 	/** Get the failed operation count */
+	@Override
 	public int getFailedOps() {
 		return failedOps;
 	}
 
 	/** Increment the failed operation count */
-	protected void incrementFailedOps() {
+	private void incrementFailedOps() {
 		failedOps++;
 		notifyAttribute("failedOps");
 	}
 
 	/** Clear the counters and error status */
+	@Override
 	public void setCounters(boolean clear) {
 		setMaintNotify("");
 		setErrorStatus("");
-		if(timeoutErr != 0) {
+		if (timeoutErr != 0) {
 			timeoutErr = 0;
 			notifyAttribute("timeoutErr");
 		}
-		if(checksumErr != 0) {
+		if (checksumErr != 0) {
 			checksumErr = 0;
 			notifyAttribute("checksumErr");
 		}
-		if(parsingErr != 0) {
+		if (parsingErr != 0) {
 			parsingErr = 0;
 			notifyAttribute("parsingErr");
 		}
-		if(controllerErr != 0) {
+		if (controllerErr != 0) {
 			controllerErr = 0;
 			notifyAttribute("controllerErr");
 		}
-		if(successOps != 0) {
+		if (successOps != 0) {
 			successOps = 0;
 			notifyAttribute("successOps");
 		}
-		if(failedOps != 0) {
+		if (failedOps != 0) {
 			failedOps = 0;
 			notifyAttribute("failedOps");
 		}
@@ -809,7 +825,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Complete a controller operation */
 	public void completeOperation(String id, boolean success) {
-		if(success)
+		if (success)
 			incrementSuccessOps();
 		else
 			incrementFailedOps();
@@ -846,29 +862,29 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Poll one device */
 	private void pollDevice(ControllerIO io) {
 		if (io instanceof DMSImpl) {
-			DMSImpl dms = (DMSImpl)io;
+			DMSImpl dms = (DMSImpl) io;
 			if (dms.isPeriodicallyQueriable())
 				dms.sendDeviceRequest(QUERY_MESSAGE);
 			// FIXME: perform DMS actions with feed tags now
 		}
 		if (io instanceof GateArmImpl) {
-			GateArmImpl ga = (GateArmImpl)io;
+			GateArmImpl ga = (GateArmImpl) io;
 			ga.sendDeviceRequest(QUERY_STATUS);
 		}
 		if (io instanceof BeaconImpl) {
-			BeaconImpl b = (BeaconImpl)io;
+			BeaconImpl b = (BeaconImpl) io;
 			b.sendDeviceRequest(QUERY_STATUS);
 		}
 		if (io instanceof WeatherSensorImpl) {
-			WeatherSensorImpl ws = (WeatherSensorImpl)io;
+			WeatherSensorImpl ws = (WeatherSensorImpl) io;
 			ws.sendDeviceRequest(QUERY_STATUS);
 		}
 		if (io instanceof AlarmImpl) {
-			AlarmImpl a = (AlarmImpl)io;
+			AlarmImpl a = (AlarmImpl) io;
 			a.sendDeviceRequest(QUERY_STATUS);
 		}
 		if (io instanceof TagReaderImpl) {
-			TagReaderImpl tr = (TagReaderImpl)io;
+			TagReaderImpl tr = (TagReaderImpl) io;
 			tr.sendDeviceRequest(QUERY_STATUS);
 		}
 	}
@@ -904,10 +920,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Perform a controller download (reset) */
+	@Override
 	public void setDownload(boolean reset) {
 		DevicePoller dp = getPoller();
 		if (dp instanceof SamplePoller) {
-			SamplePoller sp = (SamplePoller)dp;
+			SamplePoller sp = (SamplePoller) dp;
 			if (reset)
 				sp.resetController(this);
 			else
@@ -916,7 +933,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if (dp instanceof WeatherPoller) {
 			WeatherSensorImpl ws = getWeatherSensor();
 			if (ws != null) {
-				WeatherPoller wp = (WeatherPoller)dp;
+				WeatherPoller wp = (WeatherPoller) dp;
 				wp.sendSettings(ws);
 			}
 		}
@@ -926,7 +943,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	private synchronized WeatherSensorImpl getWeatherSensor() {
 		for (ControllerIO io: io_pins.values()) {
 			if (io instanceof WeatherSensorImpl)
-				return (WeatherSensorImpl)io;
+				return (WeatherSensorImpl) io;
 		}
 		return null;
 	}
@@ -935,7 +952,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	@Override
 	public void doDestroy() throws TMSException {
 		CommLinkImpl cl = comm_link;
-		if(cl != null) {
+		if (cl != null) {
 			cl.testGateArmDisable("destroy");
 			cl.pullController(this);
 		}
@@ -946,13 +963,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Check if the controller is assigned to a modem comm link */
 	public boolean hasModemCommLink() {
 		CommLinkImpl cl = comm_link;
-		return cl != null ? cl.isModemLink() : false;
+		return (cl != null) && cl.isModemLink();
 	}
 
 	/** Check if the controller comm link is currently connected */
 	public boolean isConnected() {
 		CommLinkImpl cl = comm_link;
-		return cl != null ? cl.isConnected() : false;
+		return (cl != null) && cl.isConnected();
 	}
 
 	/** Write the controller as an XML element */
@@ -962,21 +979,21 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		w.write(createAttribute("condition", condition));
 		w.write(createAttribute("drop", getDrop()));
 		CommLink cl = getCommLink();
-		if(cl != null)
+		if (cl != null)
 			w.write(createAttribute("commlink", cl.getName()));
 		Position pos = ControllerHelper.getPosition(this);
-		if(pos != null) {
+		if (pos != null) {
 			w.write(createAttribute("lon",
 				formatDouble(pos.getLongitude())));
 			w.write(createAttribute("lat",
 				formatDouble(pos.getLatitude())));
 		}
-		w.write(createAttribute("location", 
+		w.write(createAttribute("location",
 			ControllerHelper.getLocation(this)));
 		Cabinet cab = getCabinet();
-		if(cab != null && cab.toString().length() > 0)
+		if (cab != null && cab.toString().length() > 0)
 			w.write(createAttribute("cabinet", getCabinet()));
-		if(getNotes().length() > 0)
+		if (getNotes().length() > 0)
 			w.write(createAttribute("notes", getNotes()));
 		w.write("/>\n");
 	}
