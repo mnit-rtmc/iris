@@ -545,8 +545,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	/** Test if LCS array is available */
 	private boolean isAvailable() {
 		return !isLocked() &&
-		        isActive() &&
-		       !isFailed() &&
+		        isOnline() &&
 		       !isDeployed() &&
 		       !needsMaintenance();
 	}

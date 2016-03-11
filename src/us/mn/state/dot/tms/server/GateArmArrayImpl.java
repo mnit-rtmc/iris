@@ -748,11 +748,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return false;
 	}
 
-	/** Test if gate arm is online (active and not failed) */
-	private boolean isOnline() {
-		return isActive() && !isFailed();
-	}
-
 	/** Test if gate arm is closed */
 	private boolean isClosed() {
 		return isOnline() && arm_state == GateArmState.CLOSED;

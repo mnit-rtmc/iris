@@ -1699,11 +1699,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		    && (n == null || SignMsgSource.isScheduled(n.getSource()));
 	}
 
-	/** Test if DMS is online (active and not failed) */
-	public boolean isOnline() {
-		return isActive() && !isFailed();
-	}
-
 	/** Test if DMS is available */
 	private boolean isAvailable() {
 		return isOnline() && isMsgBlank() && !needsMaintenance();

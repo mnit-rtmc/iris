@@ -755,11 +755,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		       lck == RampMeterLock.MAINTENANCE;
 	}
 
-	/** Test if meter is online (active and not failed) */
-	private boolean isOnline() {
-		return isActive() && !isFailed();
-	}
-
 	/** Test if meter is available */
 	private boolean isAvailable() {
 		return isOnline() && !isMetering() && !needsMaintenance();

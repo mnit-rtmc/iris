@@ -77,6 +77,11 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		return (c == null) || c.isFailed();
 	}
 
+	/** Test if device is online (active and not failed) */
+	public boolean isOnline() {
+		return isActive() && !isFailed();
+	}
+
 	/** Check if the controller has an error */
 	public boolean hasError() {
 		return isFailed() || hasStatusError();
@@ -129,7 +134,9 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	}
 
 	/** Set the controller of the device */
-	private void doSetControllerImpl(ControllerImpl c) throws TMSException {
+	protected void doSetControllerImpl(ControllerImpl c)
+		throws TMSException
+	{
 		if (c != null && controller != null)
 			throw new ChangeVetoException("Device has controller");
 		if (pin < 1 || pin > Controller.ALL_PINS)
