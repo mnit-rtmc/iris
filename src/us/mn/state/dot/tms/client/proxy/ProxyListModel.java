@@ -117,11 +117,17 @@ public class ProxyListModel<T extends SonarObject>
 	}
 
 	/** Remove a proxy from the model */
-	protected int doProxyRemoved(T proxy) {
+	private int doProxyRemoved(T proxy) {
+		checkRemove(proxy);
 		int i = getIndex(proxy);
 		if (i >= 0)
 			list.remove(i);
 		return i;
+	}
+
+	/** Check when proxy is removed */
+	protected void checkRemove(T proxy) {
+		// subclasses can override
 	}
 
 	/** Change a proxy in the list model */

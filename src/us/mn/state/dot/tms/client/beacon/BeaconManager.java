@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Beacon;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
@@ -67,6 +66,8 @@ public class BeaconManager extends ProxyManager<Beacon> {
 	@Override
 	protected ProxyTheme<Beacon> createTheme() {
 		ProxyTheme<Beacon> theme = new ProxyTheme<Beacon>(this, MARKER);
+		theme.addStyle(ItemStyle.MAINTENANCE,
+			ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
@@ -76,31 +77,15 @@ public class BeaconManager extends ProxyManager<Beacon> {
 		return theme;
 	}
 
-	/** Check if a given attribute affects a proxy style */
-	@Override
-	public boolean isStyleAttrib(String a) {
-		// FIXME: should add styles attrib (for FAILED, etc.)
-		return "flashing".equals(a);
-	}
-
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, Beacon proxy) {
-		switch(is) {
-		case DEPLOYED:
-			return proxy.getFlashing();
-		case AVAILABLE:
-			return (!ControllerHelper.isFailed(
-			       proxy.getController())) && !proxy.getFlashing();
-		case FAILED:
-			return ControllerHelper.isFailed(proxy.getController());
-		case NO_CONTROLLER:
-			return proxy.getController() == null;
-		case ALL:
-			return true;
-		default:
-			return false;
+		long styles = proxy.getStyles();
+		for (ItemStyle s: ItemStyle.toStyles(styles)) {
+			if (s == is)
+				return true;
 		}
+		return false;
 	}
 
 	/** Create a properties form for the specified proxy */

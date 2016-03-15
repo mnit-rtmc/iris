@@ -73,7 +73,8 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Device types which can be associated with controller IO */
 	private enum DeviceType {
 		Alarm, Camera, Detector, DMS, Gate_Arm, Lane_Marking,
-		LCSIndication, Ramp_Meter, Beacon, Weather_Sensor, Tag_Reader
+		LCSIndication, Ramp_Meter, Beacon, Beacon_Verify,
+		Weather_Sensor, Tag_Reader
 	}
 
 	/** Types of IO devices */
@@ -90,6 +91,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.LCSIndication);
 		IO_TYPE.add(DeviceType.Ramp_Meter);
 		IO_TYPE.add(DeviceType.Beacon);
+		IO_TYPE.add(DeviceType.Beacon_Verify);
 		IO_TYPE.add(DeviceType.Weather_Sensor);
 		IO_TYPE.add(DeviceType.Tag_Reader);
 	}
@@ -178,6 +180,9 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller IO list for beacons */
 	private final ControllerIOList b_list;
 
+	/** Beacon verify list */
+	private final BeaconVerifyList bv_list;
+
 	/** Controller IO list for weather sensors */
 	private final ControllerIOList wsensor_list;
 
@@ -214,30 +219,49 @@ public class ControllerIOModel extends AbstractTableModel {
 			state.getLcsCache().getLCSIndications());
 		m_list = new ControllerIOList(state.getRampMeters());
 		b_list = new ControllerIOList(state.getBeacons());
+		bv_list = new BeaconVerifyList(state.getBeacons());
 		wsensor_list = new ControllerIOList(state.getWeatherSensors());
 		tr_list = new ControllerIOList(state.getTagReaders());
 	}
 
 	/** Controller IO list model */
-	private class ControllerIOList extends ProxyListModel<ControllerIO> {
-		private final IComboBoxModel<ControllerIO> model;
-		private final CellEditorComboBoxModel<ControllerIO> editor_mdl;
+	private class ControllerIOList<T extends ControllerIO>
+		extends ProxyListModel<T>
+	{
+		private final IComboBoxModel<T> model;
+		private final CellEditorComboBoxModel<T> editor_mdl;
 		@SuppressWarnings("unchecked")
 		private ControllerIOList(TypeCache c) {
 			super(c);
-			model = new IComboBoxModel<ControllerIO>(this);
-			editor_mdl = new CellEditorComboBoxModel<ControllerIO>(
+			model = new IComboBoxModel<T>(this);
+			editor_mdl = new CellEditorComboBoxModel<T>(
 				cell_editor, model);
 		}
 		@Override
-		protected boolean check(ControllerIO p) {
+		protected boolean check(T p) {
 			addIO(p);
 			return p.getController() == null;
 		}
 		@Override
-		protected int doProxyRemoved(ControllerIO p) {
+		protected void checkRemove(T p) {
 			removeIO(p);
-			return super.doProxyRemoved(p);
+		}
+	}
+
+	/** Beacon verify list model */
+	private class BeaconVerifyList extends ControllerIOList<Beacon> {
+		private BeaconVerifyList(TypeCache<Beacon> c) {
+			super(c);
+		}
+		@Override
+		protected boolean check(Beacon b) {
+			addVerifyIO(b);
+			return b.getController() != null
+			    && b.getVerifyPin() == null;
+		}
+		@Override
+		protected void checkRemove(Beacon b) {
+			removeVerifyIO(b);
 		}
 	}
 
@@ -252,6 +276,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		lcsi_list.initialize();
 		m_list.initialize();
 		b_list.initialize();
+		bv_list.initialize();
 		wsensor_list.initialize();
 		tr_list.initialize();
 	}
@@ -267,6 +292,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		lcsi_list.dispose();
 		m_list.dispose();
 		b_list.dispose();
+		bv_list.dispose();
 		wsensor_list.dispose();
 		tr_list.dispose();
 	}
@@ -332,7 +358,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		int pin = row + 1;
 		switch (column) {
 		case COL_TYPE:
-			setDeviceType(pin, (DeviceType)value);
+			setDeviceType(pin, (DeviceType) value);
 			break;
 		case COL_DEVICE:
 			setDevice(pin, value);
@@ -344,9 +370,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	private void setDeviceType(int pin, DeviceType io_type) {
 		int row = pin - 1;
 		if (io_type != types[pin]) {
-			ControllerIO cio = io[pin];
-			if (cio != null)
-				cio.setController(null);
+			clearDevice(pin);
 			types[pin] = io_type;
 			io[pin] = null;
 		}
@@ -354,19 +378,52 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Set the device */
 	private void setDevice(int pin, Object value) {
-		clearDevice(pin);
-		if (value instanceof ControllerIO) {
-			ControllerIO cio = (ControllerIO) value;
-			cio.setPin(pin);
-			cio.setController(controller);
+		DeviceType io_type = types[pin];
+		if (io_type == DeviceType.Beacon_Verify)
+			setBeaconVerifyIO(pin, value);
+		else {
+			clearDevice(pin);
+			if (value instanceof ControllerIO)
+				setDeviceIO(pin, (ControllerIO) value);
 		}
+	}
+
+	/** Set the device IO */
+	private void setDeviceIO(int pin, ControllerIO cio) {
+		cio.setPin(pin);
+		cio.setController(controller);
 	}
 
 	/** Clear the device at the specified pin */
 	private void clearDevice(int pin) {
 		ControllerIO cio = io[pin];
-		if (cio != null)
+		DeviceType io_type = types[pin];
+		if (cio != null && io_type != DeviceType.Beacon_Verify)
 			cio.setController(null);
+		if (cio instanceof Beacon) {
+			Beacon bio = (Beacon) cio;
+			bio.setVerifyPin(null);
+		}
+	}
+
+	/** Set a beacon verify device */
+	private void setBeaconVerifyIO(int pin, Object value) {
+		if (value instanceof Beacon) {
+			Beacon bio = (Beacon) value;
+			bio.setVerifyPin(pin);
+		} else
+			clearVerifies();
+	}
+
+	/** Clear verifies */
+	private void clearVerifies() {
+		for (int pin = 1; pin < io.length; pin++) {
+			ControllerIO cio = io[pin];
+			if (cio instanceof Beacon) {
+				Beacon bio = (Beacon) cio;
+				bio.setVerifyPin(null);
+			}
+		}
 	}
 
 	/** Create the pin column */
@@ -399,6 +456,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	protected class DeviceCellEditor extends AbstractCellEditor
 		implements TableCellEditor
 	{
+		@SuppressWarnings("unchecked")
 		public Component getTableCellEditorComponent(JTable table,
 			Object value, boolean isSelected, int row, int column)
 		{
@@ -436,6 +494,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return m_list;
 		case Beacon:
 			return b_list;
+		case Beacon_Verify:
+			return bv_list;
 		case Weather_Sensor:
 			return wsensor_list;
 		case Tag_Reader:
@@ -478,29 +538,46 @@ public class ControllerIOModel extends AbstractTableModel {
 		return m;
 	}
 
+	/** Update one pin */
+	private void updatePin(int pin, ControllerIO p, DeviceType io_type) {
+		if (pin > 0 && pin < io.length) {
+			io[pin] = p;
+			types[pin] = io_type;
+			int row = pin - 1;
+			fireTableRowsUpdated(row, row);
+		}
+	}
+
 	/** Add an IO to a pin on the controller */
 	private void addIO(ControllerIO p) {
-		if (p.getController() == controller) {
-			int pin = p.getPin();
-			if (pin > 0 && pin < io.length) {
-				io[pin] = p;
-				types[pin] = getType(p);
-				int row = pin - 1;
-				fireTableRowsUpdated(row, row);
-			}
-		}
+		if (p.getController() == controller)
+			updatePin(p.getPin(), p, getType(p));
 	}
 
 	/** Remove an IO from a pin on the controller */
 	private void removeIO(ControllerIO p) {
-		for (int pin = 0; pin < io.length; pin++) {
-			if (io[pin] == p) {
-				io[pin] = null;
-				types[pin] = null;
-				int row = pin - 1;
-				fireTableRowsUpdated(row, row);
-				return;
-			}
+		for (int pin = 1; pin < io.length; pin++) {
+			if (io[pin] == p &&
+			    types[pin] != DeviceType.Beacon_Verify)
+				updatePin(pin, null, null);
+		}
+	}
+
+	/** Add a beacon verify to a pin on the controller */
+	private void addVerifyIO(Beacon b) {
+		if (b.getController() == controller) {
+			Integer vp = b.getVerifyPin();
+			if (vp != null)
+				updatePin(vp, b, DeviceType.Beacon_Verify);
+		}
+	}
+
+	/** Remove a beacon verify from a pin on the controller */
+	private void removeVerifyIO(ControllerIO p) {
+		for (int pin = 1; pin < io.length; pin++) {
+			if (io[pin] == p &&
+			    types[pin] == DeviceType.Beacon_Verify)
+				updatePin(pin, null, null);
 		}
 	}
 }

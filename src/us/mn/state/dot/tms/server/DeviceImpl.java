@@ -141,7 +141,8 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 			throw new ChangeVetoException("Device has controller");
 		if (pin < 1 || pin > Controller.ALL_PINS)
 			throw new ChangeVetoException("Invalid pin: " + pin);
-		checkControllerPin(pin);
+		if (c != null)
+			checkControllerPin(pin);
 		store.update(this, "controller", c);
 		updateControllerPin(controller, pin, c, pin);
 		setController(c);
