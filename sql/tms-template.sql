@@ -417,7 +417,7 @@ CREATE UNIQUE INDEX ctrl_link_drop_idx ON iris.controller
 CREATE TABLE iris._device_io (
 	name VARCHAR(10) PRIMARY KEY,
 	controller VARCHAR(20) REFERENCES iris.controller(name),
-	pin integer NOT NULL
+	pin INTEGER NOT NULL
 );
 
 CREATE UNIQUE INDEX _device_io_ctrl_pin ON iris._device_io
@@ -666,14 +666,16 @@ CREATE TABLE iris._beacon (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes text NOT NULL,
-	message text NOT NULL
+	message text NOT NULL,
+	verify_pin INTEGER -- FIXME: make unique on _device_io_ctrl_pin
 );
 
 ALTER TABLE iris._beacon ADD CONSTRAINT _beacon_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.beacon AS
-	SELECT b.name, geo_loc, controller, pin, notes, message, preset
+	SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin,
+	       preset
 	FROM iris._beacon b
 	JOIN iris._device_io d ON b.name = d.name
 	JOIN iris._device_preset p ON b.name = p.name;
@@ -685,8 +687,9 @@ BEGIN
 	    VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._device_preset (name, preset)
 	    VALUES (NEW.name, NEW.preset);
-	INSERT INTO iris._beacon (name, geo_loc, notes, message)
-	    VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message);
+	INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin)
+	    VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message,
+	            NEW.verify_pin);
 	RETURN NEW;
 END;
 $beacon_insert$ LANGUAGE plpgsql;
@@ -708,7 +711,8 @@ BEGIN
 	UPDATE iris._beacon
 	   SET geo_loc = NEW.geo_loc,
 	       notes = NEW.notes,
-	       message = NEW.message
+	       message = NEW.message,
+	       verify_pin = NEW.verify_pin
 	 WHERE name = OLD.name;
 	RETURN NEW;
 END;
@@ -1890,7 +1894,8 @@ CREATE VIEW beacon_view AS
 	SELECT b.name, b.notes, b.message, p.camera, p.preset_num, b.geo_loc,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.lat, l.lon,
-	       b.controller, b.pin, ctr.comm_link, ctr.drop_id, ctr.condition
+	       b.controller, b.pin, b.verify_pin, ctr.comm_link, ctr.drop_id,
+	       ctr.condition
 	FROM iris.beacon b
 	LEFT JOIN iris.camera_preset p ON b.preset = p.name
 	LEFT JOIN geo_loc_view l ON b.geo_loc = l.name
@@ -2350,7 +2355,7 @@ camera_util_panel_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.33.0
+database_version	4.34.0
 detector_auto_fail_enable	true
 device_op_status_enable	false
 dialup_poll_period_mins	120
