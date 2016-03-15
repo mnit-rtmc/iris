@@ -64,14 +64,44 @@ public class OpChangeBeaconState extends OpDevice<CBWProperty> {
 			CommMessage<CBWProperty> mess) throws IOException
 		{
 			int p = beacon.getPin();
-			if (p < 1 && p > 8) {
-				setErrorStatus("Invalid pin");
-				return null;
-			}
 			CommandProperty prop = new CommandProperty(p, flash);
+			mess.add(prop);
+			mess.storeProps();
+			Integer vp = beacon.getVerifyPin();
+			if (vp != null)
+				return new ChangeVerify(vp);
+			else
+				return null;
+		}
+	}
+
+	/** Phase to change current sensor (verify) circuit */
+	protected class ChangeVerify extends Phase<CBWProperty> {
+
+		/** Verify pin */
+		private final int pin;
+
+		/** Create change verify phase */
+		protected ChangeVerify(int p) {
+			pin = p;
+		}
+
+		/** Enable verify circuit */
+		protected Phase<CBWProperty> poll(
+			CommMessage<CBWProperty> mess) throws IOException
+		{
+			CommandProperty prop = new CommandProperty(pin, flash);
 			mess.add(prop);
 			mess.storeProps();
 			return null;
 		}
+	}
+
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		if (isSuccess())
+			beacon.setFlashingNotify(flash);
+		super.cleanup();
 	}
 }

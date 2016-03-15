@@ -61,19 +61,51 @@ public class OpQueryBeaconState extends OpDevice<CBWProperty> {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		if (isSuccess())
+		if (isSuccess()) {
 			updateBeacon();
+			setMaintStatus(formatMaintStatus());
+		}
 		super.cleanup();
 	}
 
 	/** Update the beacon state */
 	private void updateBeacon() {
-		int p = beacon.getPin();
+		beacon.setFlashingNotify(getRelay(beacon.getPin()));
+	}
+
+	/** Get relay status */
+	private boolean getRelay(int pin) {
 		try {
-			beacon.setFlashingNotify(property.getRelay(p));
+			return property.getRelay(pin);
 		}
 		catch (IndexOutOfBoundsException e) {
 			setErrorStatus("Invalid pin");
+			return false;
 		}
+	}
+
+	/** Get input status */
+	private boolean getInput(int pin) {
+		try {
+			return property.getInput(pin);
+		}
+		catch (IndexOutOfBoundsException e) {
+			setErrorStatus("Invalid pin");
+			return false;
+		}
+	}
+
+	/** Format the new maintenance status */
+	private String formatMaintStatus() {
+		Integer vp = beacon.getVerifyPin();
+		if (vp != null) {
+			boolean f = getRelay(beacon.getPin());
+			boolean v = getInput(vp);
+			if (f && !v)
+				return "Verify failed";
+			if (v && !f)
+				return "Verify stuck";
+		}
+		return "";
 	}
 }

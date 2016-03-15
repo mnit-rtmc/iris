@@ -40,11 +40,19 @@ public class OpSendBeaconState extends Op170Device {
 	/** New "metering rate" for deploying to beacon */
 	private final byte rate;
 
+	/** Beacon device */
+	private final BeaconImpl beacon;
+
+	/** New beacon flashing status */
+	private final boolean flashing;
+
 	/** Create a new send beacon state operation */
 	public OpSendBeaconState(BeaconImpl b, boolean f) {
 		super(PriorityLevel.COMMAND, b);
 		address = meterAddress(Address.OFF_REMOTE_RATE);
 		rate = getDeployedRate(f);
+		beacon = b;
+		flashing = f;
 	}
 
 	/** Operation equality test */
@@ -74,6 +82,7 @@ public class OpSendBeaconState extends Op170Device {
 			MemoryProperty prop = new MemoryProperty(address, data);
 			mess.add(prop);
 			mess.storeProps();
+			beacon.setFlashingNotify(flashing);
 			return null;
 		}
 	}

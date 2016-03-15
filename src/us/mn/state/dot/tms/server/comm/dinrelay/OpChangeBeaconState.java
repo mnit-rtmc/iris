@@ -71,6 +71,7 @@ public class OpChangeBeaconState extends OpDevice<DinRelayProperty> {
 			CommandProperty prop = new CommandProperty(p, flash);
 			mess.add(prop);
 			mess.storeProps();
+			beacon.setFlashingNotify(flash);
 			return null;
 		}
 	}
