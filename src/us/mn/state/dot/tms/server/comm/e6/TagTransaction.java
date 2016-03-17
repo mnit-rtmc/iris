@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ public class TagTransaction extends E6Property {
 	public enum TransactionType {
 		SeGo_streamlined_read	(0x3021, 28),
 		read_verify_page	(0x3022, 20),
-		seen_frame_count	(0x3043, 13),
+		seen_frame_count	(0x3043, 6),
 		ASTM_read		(0x5014, 17);
 		private TransactionType(int c, int l) {
 			code = c;
@@ -236,6 +236,15 @@ public class TagTransaction extends E6Property {
 		}
 	}
 
+	/** Parse a tag type in a seen frame count transaction */
+	private TagType parseSeenTagType() {
+		switch (data[2]) {
+		case 1: return TagType.SeGo;
+		case 3: return TagType.ASTM;
+		default: return null;
+		}
+	}
+
 	/** Get a string representation */
 	@Override
 	public String toString() {
@@ -252,6 +261,14 @@ public class TagTransaction extends E6Property {
 			if (isSeGoMnPass() && !isValidMnPassCRC()) {
 				sb.append(" INVALID CRC: ");
 				sb.append(getSeGoCRC12());
+			}
+		}
+		if (tt == TransactionType.seen_frame_count) {
+			TagType tag = parseSeenTagType();
+			if (tag != null) {
+				sb.append(tag);
+				sb.append(": ");
+				sb.append(parse16(data, 3));
 			}
 		}
 		Long stamp = getStamp();
