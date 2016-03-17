@@ -162,8 +162,13 @@ public class E6Poller extends MessagePoller<E6Property>
 			if (reader != null)
 				tt.logRead(reader);
 			if (E6_LOG.isOpen())
-				E6_LOG.log(tt.toString());
+				E6_LOG.log(readerId() + ": " + tt.toString());
 		}
+	}
+
+	/** Get the reader ID */
+	private String readerId() {
+		return (reader != null) ? reader.getName() : "reader unknown";
 	}
 
 	/** Send a store packet */
