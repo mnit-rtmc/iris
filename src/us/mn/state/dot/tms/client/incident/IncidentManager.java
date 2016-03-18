@@ -96,11 +96,11 @@ public class IncidentManager extends ProxyManager<Incident> {
 	@Override
 	protected IncidentTheme createTheme() {
 		IncidentTheme theme = new IncidentTheme(this);
-		theme.addStyle(ItemStyle.CLEARED, new Color(128, 255, 128));
 		theme.addStyle(ItemStyle.CRASH, new Color(255, 128, 128));
 		theme.addStyle(ItemStyle.STALL, new Color(255, 128, 255));
 		theme.addStyle(ItemStyle.ROADWORK, new Color(255, 208, 128));
 		theme.addStyle(ItemStyle.HAZARD, new Color(255, 255, 128));
+		theme.addStyle(ItemStyle.CLEARED, new Color(128, 255, 128));
 		theme.addStyle(ItemStyle.UNCONFIRMED, new Color(255, 255, 255,
 			128), IncidentTheme.UN_OUTLINE);
 		theme.addStyle(ItemStyle.ALL);
