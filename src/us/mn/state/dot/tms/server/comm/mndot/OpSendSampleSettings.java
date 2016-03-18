@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.server.comm.mndot;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.Cabinet;
-import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DetectorImpl;
@@ -50,43 +48,8 @@ public class OpSendSampleSettings extends Op170 {
 		{
 			mess.add(new SynchronizeProperty());
 			mess.storeProps();
-			return new CheckCabinetType();
-		}
-	}
-
-	/** Phase to check the cabinet type */
-	protected class CheckCabinetType extends Phase<MndotProperty> {
-
-		/** Check the cabinet type */
-		protected Phase<MndotProperty> poll(
-			CommMessage<MndotProperty> mess) throws IOException
-		{
-			byte[] data = new byte[1];
-			MemoryProperty cab_mem = new MemoryProperty(
-				Address.CABINET_TYPE, data);
-			mess.add(cab_mem);
-			mess.queryProps();
-			checkCabinetStyle(data[0]);
 			return new QueryPromVersion();
 		}
-	}
-
-	/** Check the dip switch settings against the selected cabinet style */
-	private void checkCabinetStyle(int dips) {
-		Integer d = lookupDips();
-		if (d != null && d != dips)
-			setMaintStatus("CABINET STYLE " + dips);
-	}
-
-	/** Lookup the correct dip switch setting to the controller */
-	private Integer lookupDips() {
-		Cabinet cab = controller.getCabinet();
-		if (cab != null) {
-			CabinetStyle style = cab.getStyle();
-			if (style != null)
-				return style.getDip();
-		}
-		return null;
 	}
 
 	/** Set the controller firmware version */
