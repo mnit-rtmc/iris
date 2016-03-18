@@ -222,6 +222,12 @@ CREATE TRIGGER font_ck_trig
 	BEFORE INSERT OR UPDATE ON iris.font
 	FOR EACH ROW EXECUTE PROCEDURE iris.font_ck();
 
+CREATE TABLE iris.word (
+	name VARCHAR(24) PRIMARY KEY,
+	abbr VARCHAR(12),
+	allowed BOOLEAN DEFAULT false NOT NULL
+);
+
 CREATE TABLE iris.video_monitor (
 	name VARCHAR(12) PRIMARY KEY,
 	description VARCHAR(32) NOT NULL,
@@ -2342,10 +2348,12 @@ camera_util_panel_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.34.0
+database_version	4.35.0
 detector_auto_fail_enable	true
 device_op_status_enable	false
 dialup_poll_period_mins	120
+dict_allowed_scheme	0
+dict_banned_scheme	0
 dms_aws_enable	false
 dms_brightness_enable	true
 dms_comm_loss_minutes	5
@@ -2498,6 +2506,7 @@ PRV_0023	dms_tab	sign_group(/.*)?	t	f	f	f
 PRV_0024	dms_tab	sign_message(/.*)?	t	f	f	f
 PRV_0025	dms_tab	sign_text(/.*)?	t	f	f	f
 PRV_0026	dms_tab	beacon(/.*)?	t	f	f	f
+prv_dic2	dms_tab	word(/.*)?	t	f	f	f
 PRV_0027	lcs_tab	cabinet(/.*)?	t	f	f	f
 PRV_0028	lcs_tab	controller(/.*)?	t	f	f	f
 PRV_0029	lcs_tab	dms(/.*)?	t	f	f	f
@@ -2575,6 +2584,7 @@ PRV_0095	policy_admin	sign_group/.*	f	t	t	t
 PRV_0096	policy_admin	sign_text/.*	f	t	t	t
 PRV_0097	policy_admin	time_action(/.*)?	t	f	f	f
 PRV_0098	policy_admin	time_action/.*	f	t	t	t
+prv_dic1	policy_admin	word(/.*)?	t	t	t	t
 PRV_0099	device_admin	alarm/.*	f	t	t	t
 PRV_0100	device_admin	cabinet/.*	f	t	t	t
 PRV_0101	device_admin	camera/.*	f	t	t	t
