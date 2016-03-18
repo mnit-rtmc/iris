@@ -35,7 +35,7 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 public class CorridorBase<T extends R_Node> implements Iterable<T> {
 
 	/** Adjustment for r_node milepoints falling on exact same spot */
-	static private float calculateEpsilon(float v) {
+	static protected float calculateEpsilon(float v) {
 		return (v != 0) ? (v * 0.0000001f) : 0.0000001f;
 	}
 
