@@ -249,8 +249,8 @@ public class TagTransaction extends E6Property {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		sb.append("tag transaction: ");
 		TransactionType tt = getTransactionType();
+		sb.append("tag transaction: ");
 		sb.append(tt);
 		if (!isLengthValid()) {
 			sb.append(" INVALID LENGTH: ");
@@ -266,6 +266,7 @@ public class TagTransaction extends E6Property {
 		if (tt == TransactionType.seen_frame_count) {
 			TagType tag = parseSeenTagType();
 			if (tag != null) {
+				sb.append(' ');
 				sb.append(tag);
 				sb.append(": ");
 				sb.append(parse16(data, 3));
