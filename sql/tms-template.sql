@@ -381,12 +381,12 @@ CREATE TABLE iris.modem (
 	name VARCHAR(20) PRIMARY KEY,
 	uri VARCHAR(64) NOT NULL,
 	config VARCHAR(64) NOT NULL,
-	timeout integer NOT NULL
+	timeout INTEGER NOT NULL
 );
 
 CREATE TABLE iris.cabinet_style (
 	name VARCHAR(20) PRIMARY KEY,
-	dip integer
+	dip INTEGER
 );
 
 CREATE TABLE iris.cabinet (
@@ -2241,19 +2241,6 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;
-336	0
-334Z	1
-334D	2
-334Z-94	3
-Drum	4
-334DZ	5
-334	6
-334Z-99	7
-S334Z	9
-Prehistoric	10
-334Z-00	11
-334Z-05	13
-334ZP	15
 \.
 
 COPY iris.condition (id, description) FROM stdin;
