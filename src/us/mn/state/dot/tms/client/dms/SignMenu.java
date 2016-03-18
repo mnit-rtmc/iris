@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,6 +57,9 @@ public class SignMenu extends JMenu {
 		if(item != null)
 			add(item);
 		item = createBeaconItem();
+		if(item != null)
+			add(item);
+		item = createDictionaryItem();
 		if(item != null)
 			add(item);
 	}
@@ -119,6 +123,17 @@ public class SignMenu extends JMenu {
 		return new JMenuItem(new IAction("beacons") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new BeaconForm(session));
+			}
+		});
+	}
+
+	/** Create the dictionary menu item */
+	private JMenuItem createDictionaryItem() {
+		if(!DictionaryForm.isPermitted(session))
+			return null;
+		return new JMenuItem(new IAction("dictionary") {
+			protected void doActionPerformed(ActionEvent e) {
+				desktop.show(new DictionaryForm(session));
 			}
 		});
 	}

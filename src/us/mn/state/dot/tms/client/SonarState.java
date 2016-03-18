@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,6 +55,7 @@ import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.WeatherSensor;
+import us.mn.state.dot.tms.Word;
 import us.mn.state.dot.tms.client.camera.CamCache;
 import us.mn.state.dot.tms.client.comm.ConCache;
 import us.mn.state.dot.tms.client.detector.DetCache;
@@ -429,6 +431,15 @@ public class SonarState extends Client {
 		return meter_actions;
 	}
 
+	/** Cache of words */
+	private final TypeCache<Word> words = 
+		new TypeCache<Word>(Word.class, this);
+
+	/** Get the weather sensor cache */
+	public TypeCache<Word> getWords() {
+		return words;
+	}
+
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ExceptionHandler h)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -510,6 +521,7 @@ public class SonarState extends Client {
 		populate(inc_details);
 		populate(roads);
 		populate(geo_locs);
+		populate(words);
 		con_cache.populate(this);
 		det_cache.populate(this);
 		cam_cache.populate(this);

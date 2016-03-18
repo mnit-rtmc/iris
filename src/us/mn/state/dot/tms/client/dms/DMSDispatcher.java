@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -33,6 +34,7 @@ import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
@@ -150,9 +152,10 @@ public class DMSDispatcher extends JPanel {
 
 	/** Send the currently selected message */
 	public void sendSelectedMessage() {
-		if (shouldSendMessage())
+		if (shouldSendMessage()) {
 			sendMessage();
-		removeInvalidSelections();
+			removeInvalidSelections();
+		}
 	}
 
 	/** Remove all invalid selected DMS */
@@ -160,13 +163,48 @@ public class DMSDispatcher extends JPanel {
 		sel_model.setSelected(getValidSelected());
 	}
 
-	/** If enabled, prompt the user with a send confirmation.
+	/** Determine if the message should be sent, which is a function
+ 	 * of spell checking options and send confirmation options.
 	 * @return True to send the message else false to cancel. */
 	private boolean shouldSendMessage() {
+		if (WordHelper.spellCheckEnabled())
+			if (!checkWords(message))
+				return false;
 		if(SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
 			return showConfirmDialog();
 		else
 			return true;
+	}
+
+	/** Check all the words in the specified MULT string.
+	 * @param multi Multi string to spell check.
+	 * @return True to send the sign message else false to cancel. */
+	private static boolean checkWords(String multi) {
+		String msg = WordHelper.spellCheck(multi);
+		String amsg = WordHelper.abbreviationCheck(multi);
+		if(msg.isEmpty() && amsg.isEmpty()) {
+			return true;
+		} else if (msg.isEmpty()) {
+			Object[] options = {"Send", "Cancel"};
+			int sel = JOptionPane.showOptionDialog(null, msg + amsg, 
+				"Spell Check", JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.QUESTION_MESSAGE, null, 
+				options, options[1]);
+			return (sel == JOptionPane.OK_OPTION);
+		} if (WordHelper.spellCheckEnforced()) {
+			JOptionPane.showMessageDialog(null, msg + amsg, 
+				"Spell Check", JOptionPane.ERROR_MESSAGE);
+			return false;
+		} else if (WordHelper.spellCheckRecommend()) {
+			Object[] options = {"Send", "Cancel"};
+			int sel = JOptionPane.showOptionDialog(null, msg + amsg, 
+				"Spell Check", JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.QUESTION_MESSAGE, null, 
+				options, options[1]);
+			return (sel == JOptionPane.OK_OPTION);
+		} else {
+			return false;
+		}
 	}
 
 	/** Show a message confirmation dialog.
