@@ -33,32 +33,54 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  */
 public class IncidentTheme extends ProxyTheme<Incident> {
 
-	/** Outline for unconfirmed styles */
-	static public final Outline UN_OUTLINE = Outline.createSolid(
-		Color.WHITE, 1);
-
-	/** Unconfirmed crash style */
-	static private final Style UN_CRASH = new Style(
-		ItemStyle.UNCONFIRMED + " " + ItemStyle.CRASH, UN_OUTLINE,
-		new Color(255, 128, 128, 128));
-
-	/** Unconfirmed stall style */
-	static private final Style UN_STALL = new Style(
-		ItemStyle.UNCONFIRMED + " " + ItemStyle.STALL, UN_OUTLINE,
-		new Color(255, 128, 255, 128));
-
-	/** Unconfirmed roadwork style */
-	static private final Style UN_ROADWORK = new Style(
-		ItemStyle.UNCONFIRMED + " " + ItemStyle.ROADWORK, UN_OUTLINE,
-		new Color(255, 208, 128, 128));
-
-	/** Unconfirmed hazard style */
-	static private final Style UN_HAZARD = new Style(
-		ItemStyle.UNCONFIRMED + " " + ItemStyle.HAZARD, UN_OUTLINE,
-		new Color(255, 255, 128, 128));
-
 	/** Incident marker */
 	static private final IncidentMarker MARKER = new IncidentMarker();
+
+	/** Outline for unconfirmed styles */
+	static private final Outline UN_OUTLINE = Outline.createSolid(
+		Color.WHITE, 1);
+
+	/** Color for CRASH incidents */
+	static private final Color CRASH_COLOR = new Color(255, 128, 128);
+
+	/** Color for STALL incidents */
+	static private final Color STALL_COLOR = new Color(255, 128, 255);
+
+	/** Color for ROADWORK incidents */
+	static private final Color ROADWORK_COLOR = new Color(255, 208, 128);
+
+	/** Color for HAZARD incidents */
+	static private final Color HAZARD_COLOR = new Color(255, 255, 128);
+
+	/** Color for CLEARED incidents */
+	static private final Color CLEARED_COLOR = new Color(128, 255, 128);
+
+	/** Create an unconfirmed color */
+	static private Color unconfirmedColor(Color c) {
+		return new Color(c.getRed(), c.getGreen(), c.getBlue(), 128);
+	}
+
+	/** Create an unconfirmed style */
+	static private Style unconfirmed(ItemStyle sty, Color c) {
+		return new Style(ItemStyle.UNCONFIRMED + " " + sty, UN_OUTLINE,
+			unconfirmedColor(c));
+	}
+
+	/** Unconfirmed crash style */
+	static private final Style UN_CRASH = unconfirmed(ItemStyle.CRASH,
+		CRASH_COLOR);
+
+	/** Unconfirmed stall style */
+	static private final Style UN_STALL = unconfirmed(ItemStyle.STALL,
+		STALL_COLOR);
+
+	/** Unconfirmed roadwork style */
+	static private final Style UN_ROADWORK = unconfirmed(ItemStyle.ROADWORK,
+		ROADWORK_COLOR);
+
+	/** Unconfirmed hazard style */
+	static private final Style UN_HAZARD = unconfirmed(ItemStyle.HAZARD,
+		HAZARD_COLOR);
 
 	/** Unconfirmed symbols */
 	private final HashMap<String, Symbol> unconfirmed_syms =
@@ -67,6 +89,14 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 	/** Create a new incident theme */
 	public IncidentTheme(IncidentManager man) {
 		super(man, MARKER);
+		addStyle(ItemStyle.CRASH, CRASH_COLOR);
+		addStyle(ItemStyle.STALL, STALL_COLOR);
+		addStyle(ItemStyle.ROADWORK, ROADWORK_COLOR);
+		addStyle(ItemStyle.HAZARD, HAZARD_COLOR);
+		addStyle(ItemStyle.CLEARED, CLEARED_COLOR);
+		addStyle(ItemStyle.UNCONFIRMED, unconfirmedColor(Color.WHITE),
+			IncidentTheme.UN_OUTLINE);
+		addStyle(ItemStyle.ALL);
 		storeSymbol(UN_CRASH);
 		storeSymbol(UN_STALL);
 		storeSymbol(UN_ROADWORK);
@@ -87,7 +117,7 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 	@Override
 	public Style getStyle(MapObject mo) {
 		if (mo instanceof IncidentGeoLoc) {
-			IncidentGeoLoc loc = (IncidentGeoLoc)mo;
+			IncidentGeoLoc loc = (IncidentGeoLoc) mo;
 			return getStyle(loc.getIncident());
 		}
 		return dstyle;

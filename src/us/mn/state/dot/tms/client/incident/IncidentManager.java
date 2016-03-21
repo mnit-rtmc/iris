@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.util.HashMap;
@@ -95,16 +94,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Create a theme for incidents */
 	@Override
 	protected IncidentTheme createTheme() {
-		IncidentTheme theme = new IncidentTheme(this);
-		theme.addStyle(ItemStyle.CRASH, new Color(255, 128, 128));
-		theme.addStyle(ItemStyle.STALL, new Color(255, 128, 255));
-		theme.addStyle(ItemStyle.ROADWORK, new Color(255, 208, 128));
-		theme.addStyle(ItemStyle.HAZARD, new Color(255, 255, 128));
-		theme.addStyle(ItemStyle.CLEARED, new Color(128, 255, 128));
-		theme.addStyle(ItemStyle.UNCONFIRMED, new Color(255, 255, 255,
-			128), IncidentTheme.UN_OUTLINE);
-		theme.addStyle(ItemStyle.ALL);
-		return theme;
+		return new IncidentTheme(this);
 	}
 
 	/** Create a popup menu for a single incident selection */
