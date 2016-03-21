@@ -150,19 +150,19 @@ public class SignMessageHelper extends BaseHelper {
 	}
 
 	/** Check if a sign message is blank */
-	static public boolean isBlank(SignMessage m) {
-		return isMultiBlank(m) && isBitmapBlank(m);
+	static public boolean isBlank(SignMessage sm) {
+		return (sm == null) || (isMultiBlank(sm) && isBitmapBlank(sm));
 	}
 
 	/** Check if the MULTI string is blank */
-	static public boolean isMultiBlank(SignMessage m) {
-		String ms = m.getMulti();
+	static private boolean isMultiBlank(SignMessage sm) {
+		String ms = sm.getMulti();
 		return ms == null || new MultiString(ms).isBlank();
 	}
 
 	/** Check if the bitmap is blank */
-	static public boolean isBitmapBlank(SignMessage m) {
-		byte[] bmaps = decodeBitmaps(m);
+	static private boolean isBitmapBlank(SignMessage sm) {
+		byte[] bmaps = decodeBitmaps(sm);
 		if (bmaps != null) {
 			for (byte b: bmaps) {
 				if (b != 0)
