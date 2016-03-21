@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.meter;
 
-import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
@@ -43,18 +42,6 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Ramp meter map object marker */
 	static private final MeterMarker MARKER = new MeterMarker();
-
-	/** Color to display available meters */
-	static private final Color COLOR_AVAILABLE = new Color(64, 64, 192);
-
-	/** Color to display warning meters */
-	static private final Color COLOR_WARNING = new Color(192, 96, 0);
-
-	/** Color to display deployed meters */
-	static private final Color COLOR_DEPLOYED = new Color(192, 192, 0);
-
-	/** Color to display metering meters */
-	static public final Color COLOR_METERING = new Color(0, 192, 0);
 
 	/** Create a new meter manager */
 	public MeterManager(Session s, GeoLocManager lm) {
@@ -88,21 +75,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Create a theme for ramp meters */
 	@Override
 	protected ProxyTheme<RampMeter> createTheme() {
-		ProxyTheme<RampMeter> theme = new ProxyTheme<RampMeter>(this,
-			MARKER);
-		theme.addStyle(ItemStyle.AVAILABLE, COLOR_AVAILABLE);
-		theme.addStyle(ItemStyle.QUEUE_FULL, COLOR_WARNING);
-		theme.addStyle(ItemStyle.QUEUE_EXISTS, COLOR_DEPLOYED);
-		theme.addStyle(ItemStyle.METERING, COLOR_METERING);
-		theme.addStyle(ItemStyle.LOCKED, null,
-			ProxyTheme.OUTLINE_LOCKED);
-		theme.addStyle(ItemStyle.MAINTENANCE,
-			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(ItemStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
-			ProxyTheme.OUTLINE_INACTIVE);
-		theme.addStyle(ItemStyle.ALL);
-		return theme;
+		return new MeterTheme(this);
 	}
 
 	/** Check the style of the specified proxy */
