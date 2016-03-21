@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.awt.Component;
-import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.SwingConstants;
@@ -55,18 +54,10 @@ public class IncidentCellRenderer extends ProxyCellRenderer<Incident> {
 			if (value != null) {
 				String dsc = manager.getDescription(value);
 				lbl.setText(dsc + getCamera(value));
-				lbl.setIcon(lookupIcon(value));
+				lbl.setIcon(manager.getIcon(value));
 			}
 		}
 		return c;
-	}
-
-	/** Lookup the icon to use for an incident */
-	private Icon lookupIcon(Incident inc) {
-		if (inc.getCleared())
-			return manager.getIcon(null);
-		else
-			return manager.getIcon(inc);
 	}
 
 	/** Get the incident camera */

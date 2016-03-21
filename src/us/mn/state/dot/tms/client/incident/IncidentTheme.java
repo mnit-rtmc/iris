@@ -55,6 +55,24 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 	/** Color for CLEARED incidents */
 	static private final Color CLEARED_COLOR = new Color(128, 255, 128);
 
+	/** Create a cleared style */
+	static private Style cleared(ItemStyle sty) {
+		return new Style(ItemStyle.CLEARED + " " + sty, OUTLINE,
+			CLEARED_COLOR);
+	}
+
+	/** Cleared crash style */
+	static private final Style CLR_CRASH = cleared(ItemStyle.CRASH);
+
+	/** Cleared stall style */
+	static private final Style CLR_STALL = cleared(ItemStyle.STALL);
+
+	/** Cleared roadwork style */
+	static private final Style CLR_ROADWORK = cleared(ItemStyle.ROADWORK);
+
+	/** Cleared hazard style */
+	static private final Style CLR_HAZARD = cleared(ItemStyle.HAZARD);
+
 	/** Create an unconfirmed color */
 	static private Color unconfirmedColor(Color c) {
 		return new Color(c.getRed(), c.getGreen(), c.getBlue(), 128);
@@ -82,8 +100,8 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 	static private final Style UN_HAZARD = unconfirmed(ItemStyle.HAZARD,
 		HAZARD_COLOR);
 
-	/** Unconfirmed symbols */
-	private final HashMap<String, Symbol> unconfirmed_syms =
+	/** Extra symbols */
+	private final HashMap<String, Symbol> extra_syms =
 		new HashMap<String, Symbol>();
 
 	/** Create a new incident theme */
@@ -97,6 +115,10 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 		addStyle(ItemStyle.UNCONFIRMED, unconfirmedColor(Color.WHITE),
 			IncidentTheme.UN_OUTLINE);
 		addStyle(ItemStyle.ALL);
+		storeSymbol(CLR_CRASH);
+		storeSymbol(CLR_STALL);
+		storeSymbol(CLR_ROADWORK);
+		storeSymbol(CLR_HAZARD);
 		storeSymbol(UN_CRASH);
 		storeSymbol(UN_STALL);
 		storeSymbol(UN_ROADWORK);
@@ -105,7 +127,7 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 
 	/** Store one symbol */
 	private void storeSymbol(Style sty) {
-		unconfirmed_syms.put(sty.getLabel(), createSymbol(sty));
+		extra_syms.put(sty.getLabel(), createSymbol(sty));
 	}
 
 	/** Create a symbol */
@@ -126,9 +148,17 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 	/** Get an appropriate style for the given proxy object */
 	@Override
 	public Style getStyle(Incident inc) {
+		if (manager.checkStyle(ItemStyle.CLEARED, inc)) {
+			if (manager.checkStyle(ItemStyle.CRASH, inc))
+				return CLR_CRASH;
+			if (manager.checkStyle(ItemStyle.STALL, inc))
+				return CLR_STALL;
+			if (manager.checkStyle(ItemStyle.ROADWORK, inc))
+				return CLR_ROADWORK;
+			if (manager.checkStyle(ItemStyle.HAZARD, inc))
+				return CLR_HAZARD;
+		}
 		if (manager.checkStyle(ItemStyle.UNCONFIRMED, inc)) {
-			if (manager.checkStyle(ItemStyle.CLEARED, inc))
-				return super.getStyle(inc);
 			if (manager.checkStyle(ItemStyle.CRASH, inc))
 				return UN_CRASH;
 			if (manager.checkStyle(ItemStyle.STALL, inc))
@@ -144,7 +174,7 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 	/** Get a symbol by label */
 	@Override
 	public Symbol getSymbol(String label) {
-		Symbol sym = unconfirmed_syms.get(label);
+		Symbol sym = extra_syms.get(label);
 		return (sym != null) ? sym : super.getSymbol(label);
 	}
 }
