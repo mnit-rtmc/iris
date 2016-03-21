@@ -136,7 +136,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	@Override
 	public MapGeoLoc findGeoLoc(Incident proxy) {
 		String name = proxy.getName();
-		if(locations.containsKey(name))
+		if (locations.containsKey(name))
 			return locations.get(name);
 		IncidentGeoLoc loc = new IncidentGeoLoc(proxy,
 			getGeoLoc(proxy));
@@ -156,9 +156,9 @@ public class IncidentManager extends ProxyManager<Incident> {
 	protected IncidentLoc getGeoLoc(Incident proxy) {
 		IncidentLoc loc = new IncidentLoc(proxy);
 		CorridorBase cb = lookupCorridor(loc);
-		if(cb != null) {
+		if (cb != null) {
 			R_Node rnd = cb.findNearest(loc);
-			if(rnd != null)
+			if (rnd != null)
 				return new IncidentLoc(proxy, rnd.getGeoLoc());
 		}
 		return loc;
@@ -172,11 +172,11 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Get lane configuration at an incident */
 	public LaneConfiguration laneConfiguration(Incident inc) {
 		LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
-		if(lt.isRamp())
+		if (lt.isRamp())
 			return rampLaneConfiguration(inc);
 		IncidentLoc loc = new IncidentLoc(inc);
 		CorridorBase cb = lookupCorridor(loc);
-		if(cb != null)
+		if (cb != null)
 			return cb.laneConfiguration(getWgs84Position(inc));
 		else
 			return new LaneConfiguration(0, 0);
@@ -205,9 +205,9 @@ public class IncidentManager extends ProxyManager<Incident> {
 	@Override
 	public boolean checkStyle(ItemStyle is, Incident proxy) {
 		EventType et = getEventType(proxy);
-		if(et == null)
+		if (et == null)
 			return false;
-		switch(is) {
+		switch (is) {
 		case CRASH:
 			return et == EventType.INCIDENT_CRASH;
 		case STALL:
@@ -233,7 +233,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 			Integer iet = proxy.getEventType();
 			return iet != null ? EventType.fromId(iet) : null;
 		}
-		catch(NullPointerException e) {
+		catch (NullPointerException e) {
 			// FIXME: there is a sonar bug which throws NPE when
 			//        an incident proxy object is deleted
 			return null;
@@ -244,7 +244,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	@Override
 	public String getDescription(Incident inc) {
 		String td = getTypeDesc(inc);
-		if(td.length() > 0) {
+		if (td.length() > 0) {
 			String loc = getGeoLoc(inc).getDescription();
 			return td + " -- " + loc;
 		} else
@@ -263,7 +263,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Get the lane type description */
 	private String getLaneType(LaneType lt) {
-		switch(lt) {
+		switch (lt) {
 		case MAINLINE:
 		case EXIT:
 		case MERGE:
@@ -279,7 +279,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	 * @param ltd Lane type description (may be null).
 	 * @return Description of incident type. */
 	private String getTypeDesc(String sty, String ltd) {
-		if(ltd != null)
+		if (ltd != null)
 			return sty + " " + I18N.get("incident.on") + " " + ltd;
 		else
 			return sty;
@@ -296,9 +296,9 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Get the icon for an incident */
 	public Icon getIcon(Incident inc) {
-		if(inc != null) {
+		if (inc != null) {
 			Symbol sym = getSymbol(inc);
-			if(sym != null)
+			if (sym != null)
 				return sym.getLegend();
 		}
 		String st = ItemStyle.CLEARED.toString();
