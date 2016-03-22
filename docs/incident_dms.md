@@ -130,10 +130,10 @@ NEAR     | mainline  | !!!!!  | NO      | ROAD CLOSED
 NEAR     | mainline  | ?!!!!  | NO      | USE OTHER ROUTES
 NEAR     | mainline  | !!..?  | NO      | REDUCED TO 2 LANES
 FAR      | mainline  | ,,,,,  | NO      | USE CAUTION
-FAR      | mainine   | ,!;;,  | NO      | EXPECT DELAYS
-FAR      | mainine   | ,;!;,  | NO      | EXPECT DELAYS
-FAR      | mainine   | ,;;!,  | NO      | EXPECT DELAYS
-FAR      | mainine   | ,!!;,  | NO      | MAJOR DELAY
-FAR      | mainine   | ,;!!,  | NO      | MAJOR DELAY
-FAR      | mainine   | ,!!!,  | NO      | MAJOR DELAY
+FAR      | mainline  | ,!;;,  | NO      | EXPECT DELAYS
+FAR      | mainline  | ,;!;,  | NO      | EXPECT DELAYS
+FAR      | mainline  | ,;;!,  | NO      | EXPECT DELAYS
+FAR      | mainline  | ,!!;,  | NO      | MAJOR DELAY
+FAR      | mainline  | ,;!!,  | NO      | MAJOR DELAY
+FAR      | mainline  | ,!!!,  | NO      | MAJOR DELAY
 FAR      | mainline  | any !  | YES     | ALL LANES OPEN
