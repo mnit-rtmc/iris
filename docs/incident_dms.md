@@ -6,11 +6,11 @@ Incidents have a *severity* attribute, with possible values of *MINOR*,
 *NORMAL* or *MAJOR*.  The severity of an incident affects the distance to
 deploy DMS.
 
-Severity | Range  | Miles | Branching | Priority
----------|--------|-------|-----------|--------------
-MINOR    | NEAR   | 1.5   | No        | INCIDENT_LOW
-NORMAL   | MIDDLE | 5.0   | Yes       | INCIDENT_MED
-MAJOR    | FAR    | 10.0  | Yes       | INCIDENT_HIGH
+Severity | Lane Impact     | Range  | Miles | Branching | Priority
+---------|-----------------|--------|-------|-----------|---------------
+MINOR    | Shoulder only   | NEAR   | 1.5   | No        | INCIDENT_LOW
+NORMAL   | Lane(s) blocked | MIDDLE | 5.0   | Yes       | INCIDENT_MED
+MAJOR    | Road closure    | FAR    | 10.0  | Yes       | INCIDENT_HIGH
 
 ## Deployment
 
