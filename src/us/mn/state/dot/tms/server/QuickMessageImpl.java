@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,15 +74,9 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	}
 
 	/** Create a quick message */
-	protected QuickMessageImpl(String n, String sg, String m) {
-		this(n, (SignGroup)namespace.lookupObject(SignGroup.SONAR_TYPE,
-			sg), m);
-	}
-
-	/** Create a quick message */
-	protected QuickMessageImpl(String n, SignGroup sg, String m) {
+	private QuickMessageImpl(String n, String sg, String m) {
 		super(n);
-		sign_group = sg;
+		sign_group = lookupSignGroup(sg);
 		multi = m;
 	}
 

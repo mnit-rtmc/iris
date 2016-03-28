@@ -87,6 +87,9 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		LCSIndicationImpl.loadAll();
 		LaneUseMultiImpl.loadAll();
 		IncidentImpl.loadAll();
+		IncDescriptorImpl.loadAll();
+		IncLocatorImpl.loadAll();
+		IncAdviceImpl.loadAll();
 		HolidayImpl.loadAll();
 		DayPlanImpl.loadAll();
 		PlanPhaseImpl.loadAll();
@@ -96,8 +99,8 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		BeaconActionImpl.loadAll();
 		LaneActionImpl.loadAll();
 		MeterActionImpl.loadAll();
-		DMSImpl.updateAllStyles();
 		WordImpl.loadAll();
+		DMSImpl.updateAllStyles();
 	}
 
 	/** Get the time as a time stamp */
@@ -213,6 +216,21 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return (CameraPresetImpl)so;
 		else
 			return null;
+	}
+
+	/** Lookup a sign group */
+	static protected SignGroupImpl lookupSignGroup(String name) {
+		SonarObject so = lookupObject(SignGroupImpl.SONAR_TYPE, name);
+		return (so instanceof SignGroupImpl) ? (SignGroupImpl)so : null;
+	}
+
+	/** Lookup an incident detail */
+	static protected IncidentDetailImpl lookupIncDetail(String name) {
+		SonarObject so = lookupObject(IncidentDetailImpl.SONAR_TYPE,
+			name);
+		return (so instanceof IncidentDetailImpl)
+		      ? (IncidentDetailImpl) so
+		      : null;
 	}
 
 	/** Get the primary key name */
