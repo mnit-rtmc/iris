@@ -34,6 +34,12 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 public class ReaperJob extends Job {
 
+	/** Get the incident clear time threshold (ms) */
+	static private long getIncidentClearThreshold() {
+		int secs = SystemAttrEnum.INCIDENT_CLEAR_SECS.getInt();
+		return secs * (long) 1000;
+	}
+
 	/** Seconds to offset each poll from start of interval */
 	static private final int OFFSET_SECS = 27;
 
@@ -48,8 +54,8 @@ public class ReaperJob extends Job {
 
 	/** Perform the reaper job */
 	public void perform() {
-		reapIncidents();
 		reapSignMessages();
+		reapIncidents();
 		FeedBucket.purgeExpired();
 	}
 
@@ -65,17 +71,32 @@ public class ReaperJob extends Job {
 
 	/** Reap an incident */
 	private void reapIncident(IncidentImpl inc) {
-		if (inc.getCleared()) {
-			if (inc.getClearTime() + getIncidentClearThreshold() <
-			    TimeSteward.currentTimeMillis())
-				inc.notifyRemove();
-		}
+		if (isReapable(inc))
+			inc.notifyRemove();
 	}
 
-	/** Get the incident clear time threshold (ms) */
-	private long getIncidentClearThreshold() {
-		int secs = SystemAttrEnum.INCIDENT_CLEAR_SECS.getInt();
-		return secs * (long)1000;
+	/** Check if an incident is reapable */
+	private boolean isReapable(IncidentImpl inc) {
+		return inc.getCleared()
+		    && isPastClearThreshold(inc)
+		    && !isReferenced(inc);
+	}
+
+	/** Check if an incident is past the clear threshold */
+	private boolean isPastClearThreshold(IncidentImpl inc) {
+		return inc.getClearTime() + getIncidentClearThreshold() <
+			    TimeSteward.currentTimeMillis();
+	}
+
+	/** Check if an incident is referenced by any sign message */
+	private boolean isReferenced(IncidentImpl inc) {
+		Iterator<SignMessage> it = SignMessageHelper.iterator();
+		while (it.hasNext()) {
+			SignMessage sm = it.next();
+			if (sm.getIncident() == inc)
+				return true;
+		}
+		return false;
 	}
 
 	/** Reap sign messages which have been unused for awhile */
@@ -89,7 +110,7 @@ public class ReaperJob extends Job {
 			findReapableMessages();
 			removeReferencedMessages();
 		} else {
-			for(SignMessageImpl sm: reapable)
+			for (SignMessageImpl sm: reapable)
 				reapMessage(sm);
 			reapable.clear();
 		}
