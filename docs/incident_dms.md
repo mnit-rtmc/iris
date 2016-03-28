@@ -58,9 +58,9 @@ Range  | Branched | Pickable | Multi                  | Example
 -------|----------|----------|------------------------|------------------
 NEAR   | NO       | Y/N      | AHEAD                  | AHEAD
 MIDDLE | NO       | YES      | `[mod] [loc]`          | AT HWY 100
-MIDDLE | NO       | NO       | `[mi]` MILES AHEAD     | 8 MILES AHEAD
+MIDDLE | YES      | Y/N      | ON `[alt]` `[adir]`    | ON 394 EAST
+FAR    | NO       | NO       | `[mi]` MILES AHEAD     | 8 MILES AHEAD
 FAR    | NO       | YES      | `[mod] [loc]`          | AT 494
-MIDDLE | YES      | Y/N      | ON `[alt]`             | ON 394 EAST
 FAR    | YES      | YES      | ON `[alt]` AT `[loc]`  | ON 394 AT HWY 100
 
 Several MULTI-like tags are defined for incident locators.
@@ -71,6 +71,7 @@ Tag      | Description
 `[loc]`  | Road name of node nearest incident
 `[abbr]` | Abbreviated road name of node nearest incident
 `[alt]`  | Alternate freeway text
+`[adir]` | Alternate freeway direction
 `[mi]`   | Miles from DMS to node
 
 Road names are converted to all capital letters.  For the `[loc]` tag, certain
@@ -122,18 +123,17 @@ NEAR     | mainline  | ....?  | NO      | ON RIGHT SHOULDER
 NEAR     | mainline  | ....?  | NO      | ON SHOULDER
 NEAR     | mainline  | ?...?  | NO      | ON BOTH SHOULDERS
 NEAR     | mainline  | ;???;  | NO      | IN ALL LANES
-NEAR     | mainline  | ,,,,,  | YES     | JUST CLEARED
 NEAR     | mainline  | ,!;;,  | NO      | LEFT LANE CLOSED
 NEAR     | mainline  | ,;;!,  | NO      | RIGHT LANE CLOSED
 NEAR     | mainline  | ,;!;,  | NO      | CENTER LANE CLOSED
 NEAR     | mainline  | !!!!!  | NO      | ROAD CLOSED
 NEAR     | mainline  | ?!!!!  | NO      | USE OTHER ROUTES
 NEAR     | mainline  | !!..?  | NO      | REDUCED TO 2 LANES
-FAR      | mainline  | ,,,,,  | NO      | USE CAUTION
+MIDDLE   | mainline  | ,,,,,  | YES     | USE CAUTION
 FAR      | mainline  | ,!;;,  | NO      | EXPECT DELAYS
 FAR      | mainline  | ,;!;,  | NO      | EXPECT DELAYS
 FAR      | mainline  | ,;;!,  | NO      | EXPECT DELAYS
 FAR      | mainline  | ,!!;,  | NO      | MAJOR DELAY
 FAR      | mainline  | ,;!!,  | NO      | MAJOR DELAY
 FAR      | mainline  | ,!!!,  | NO      | MAJOR DELAY
-FAR      | mainline  | any !  | YES     | ALL LANES OPEN
+FAR      | mainline  | ,,,,,  | YES     | ALL LANES OPEN
