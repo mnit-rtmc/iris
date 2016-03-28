@@ -91,7 +91,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Create a new gate arm with a string name */
 	public GateArmImpl(String n) throws TMSException, SonarException {
 		super(n);
-		GateArmSystem.disable(n + ": create");
+		GateArmSystem.disable(n, "create");
 	}
 
 	/** Create a gate arm */
@@ -134,7 +134,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Destroy an object */
 	@Override
 	public void doDestroy() throws TMSException {
-		GateArmSystem.disable(name + ": destroy");
+		GateArmSystem.disable(name, "destroy");
 		super.doDestroy();
 		setArrayIndex(null);
 	}
@@ -166,7 +166,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	protected void updateControllerPin(ControllerImpl oc, int op,
 		ControllerImpl nc, int np)
 	{
-		GateArmSystem.disable("controller/pin");
+		GateArmSystem.disable(name, "controller/pin");
 		super.updateControllerPin(oc, op, nc, np);
 	}
 
@@ -201,7 +201,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Request a device operation */
 	public void sendDeviceRequest(DeviceRequest req) {
 		if (req == DeviceRequest.DISABLE_SYSTEM)
-			GateArmSystem.disable("system disable");
+			GateArmSystem.disable(name, "system disable");
 		else {
 			checkTimeout();
 			GateArmPoller p = getGateArmPoller();

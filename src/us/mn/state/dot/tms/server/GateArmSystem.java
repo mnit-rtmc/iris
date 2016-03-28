@@ -85,13 +85,19 @@ public class GateArmSystem {
 	}
 
 	/** Disable gate arm configuration */
-	static public void disable(String reason) {
+	static public void disable(String name, String reason) {
 		if(isEnabledFile())
 			DELETE_FLAG = CONFIG_ENABLE_FILE.delete();
 		if(ENABLED)
 			setEnabled(false);
-		logStderr(CONFIG_ENABLE_FILE.toString() + ": " + reason +
-			" (DELETE_FLAG: " + DELETE_FLAG + ")");
+		logStderr(CONFIG_ENABLE_FILE.toString() + " " + name + ": " +
+			reason + " " + getAdvice());
+	}
+
+	/** Get advice to log */
+	static private String getAdvice() {
+		return DELETE_FLAG ? "(touch to re-enable)"
+		      : "(check permissions and restart to re-enable)";
 	}
 
 	/** Check if config is enabled (and enable if required) */
@@ -250,7 +256,7 @@ public class GateArmSystem {
 			if(g instanceof GateArmArrayImpl) {
 				GateArmArrayImpl ga = (GateArmArrayImpl)g;
 				if(loc == ga.getGeoLoc()) {
-					disable("geo_loc " + reason);
+					disable(loc.getName(), reason);
 					break;
 				}
 			}

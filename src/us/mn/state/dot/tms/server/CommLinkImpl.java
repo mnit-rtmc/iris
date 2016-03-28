@@ -176,10 +176,12 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return description;
 	}
 
-	/** Test whether gate arm system should be disabled */
-	public void testGateArmDisable(String reason) {
+	/** Test whether gate arm system should be disabled.
+	 * @param name Object name.
+	 * @param reason Reason for disabling. */
+	public void testGateArmDisable(String name, String reason) {
 		if (isGateArm(protocol))
-			GateArmSystem.disable(reason);
+			GateArmSystem.disable(name, reason);
 	}
 
 	/** Remote URI for link */
@@ -188,7 +190,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Set remote URI for link */
 	@Override
 	public void setUri(String u) {
-		testGateArmDisable("URI");
+		testGateArmDisable(name, "URI");
 		uri = u;
 	}
 
@@ -214,10 +216,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Set the communication protocol */
 	@Override
 	public void setProtocol(short p) {
-		testGateArmDisable("protocol 0");
+		testGateArmDisable(name, "protocol 0");
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
 		if (isGateArm(cp))
-			GateArmSystem.disable("protocol 1");
+			GateArmSystem.disable(name, "protocol 1");
 		if (cp != null)
 			protocol = cp;
 	}
@@ -247,7 +249,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Enable or disable polling */
 	@Override
 	public void setPollEnabled(boolean e) {
-		testGateArmDisable("poll_enabled");
+		testGateArmDisable(name, "poll_enabled");
 		poll_enabled = e;
 	}
 
@@ -273,7 +275,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Set poll period (seconds) */
 	@Override
 	public void setPollPeriod(int s) {
-		testGateArmDisable("poll_period");
+		testGateArmDisable(name, "poll_period");
 		poll_period = s;
 		createPollJob(s);
 	}
@@ -309,7 +311,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Set the polling timeout (milliseconds) */
 	@Override
 	public void setTimeout(int t) {
-		testGateArmDisable("timeout");
+		testGateArmDisable(name, "timeout");
 		timeout = t;
 	}
 

@@ -196,7 +196,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Put this controller into a comm link */
 	private void putCommLink(int d, CommLinkImpl cl) throws TMSException {
 		if (cl != null) {
-			cl.testGateArmDisable("comm_link 0");
+			cl.testGateArmDisable(name, "comm_link 0");
 			cl.putController(d, this);
 		}
 	}
@@ -204,7 +204,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	/** Pull this controller from a comm link */
 	private void pullCommLink(CommLinkImpl cl) {
 		if (cl != null) {
-			cl.testGateArmDisable("comm_link 1");
+			cl.testGateArmDisable(name, "comm_link 1");
 			cl.pullController(this);
 		}
 	}
@@ -264,7 +264,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	private void testGateArmDisable(String reason) {
 		CommLinkImpl cl = comm_link;
 		if (cl != null)
-			cl.testGateArmDisable(reason);
+			cl.testGateArmDisable(name, reason);
 	}
 
 	/** Controller condition */
@@ -953,7 +953,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public void doDestroy() throws TMSException {
 		CommLinkImpl cl = comm_link;
 		if (cl != null) {
-			cl.testGateArmDisable("destroy");
+			cl.testGateArmDisable(name, "destroy");
 			cl.pullController(this);
 		}
 		super.doDestroy();

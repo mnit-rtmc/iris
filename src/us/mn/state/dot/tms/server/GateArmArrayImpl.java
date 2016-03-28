@@ -112,7 +112,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		GeoLocImpl g = new GeoLocImpl(name);
 		g.notifyCreate();
 		geo_loc = g;
-		GateArmSystem.disable(n + ": create array");
+		GateArmSystem.disable(n, "create array");
 	}
 
 	/** Create a gate arm array */
@@ -150,7 +150,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
 		geo_loc.notifyRemove();
-		GateArmSystem.disable(name + ": destroy array");
+		GateArmSystem.disable(name, "destroy array");
 	}
 
 	/** Set the controller of the device */
@@ -180,7 +180,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the prerequisite gate arm array */
 	@Override
 	public void setPrereq(String pr) {
-		GateArmSystem.disable(name + ": prereq");
+		GateArmSystem.disable(name, "prereq");
 		prereq = pr;
 	}
 
@@ -209,7 +209,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the verification camera */
 	@Override
 	public void setCamera(Camera c) {
-		GateArmSystem.disable(name + ": camera");
+		GateArmSystem.disable(name, "camera");
 		camera = c;
 	}
 
@@ -233,7 +233,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the approach camera */
 	@Override
 	public void setApproach(Camera c) {
-		GateArmSystem.disable(name + ": approach");
+		GateArmSystem.disable(name, "approach");
 		approach = c;
 	}
 
@@ -257,7 +257,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the DMS for warning */
 	@Override
 	public void setDms(DMS d) {
-		GateArmSystem.disable(name + ": dms");
+		GateArmSystem.disable(name, "dms");
 		dms = d;
 	}
 
@@ -281,7 +281,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the OPEN quick message */
 	@Override
 	public void setOpenMsg(QuickMessage om) {
-		GateArmSystem.disable(name + ": openMsg");
+		GateArmSystem.disable(name, "openMsg");
 		open_msg = om;
 	}
 
@@ -305,7 +305,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Set the CLOSED quick message */
 	@Override
 	public void setClosedMsg(QuickMessage cm) {
-		GateArmSystem.disable(name + ": closedMsg");
+		GateArmSystem.disable(name, "closedMsg");
 		closed_msg = cm;
 	}
 
