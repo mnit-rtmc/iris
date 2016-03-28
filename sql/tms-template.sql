@@ -1489,7 +1489,7 @@ CREATE TABLE iris.meter_action (
 CREATE SEQUENCE event.event_id_seq;
 
 CREATE TABLE event.event_description (
-	event_desc_id integer PRIMARY KEY,
+	event_desc_id INTEGER PRIMARY KEY,
 	description text NOT NULL
 );
 
@@ -1743,6 +1743,41 @@ $incident_update_trig$ LANGUAGE plpgsql;
 CREATE TRIGGER incident_update_trigger
 	AFTER INSERT OR UPDATE ON event.incident
 	FOR EACH ROW EXECUTE PROCEDURE event.incident_update_trig();
+
+CREATE TABLE iris.inc_descriptor (
+	name VARCHAR(10) PRIMARY KEY,
+	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
+	detail VARCHAR(8) REFERENCES event.incident_detail(name),
+	cleared BOOLEAN NOT NULL,
+	multi VARCHAR(64) NOT NULL
+);
+
+CREATE TABLE iris.inc_range (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+CREATE TABLE iris.inc_locator (
+	name VARCHAR(10) PRIMARY KEY,
+	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
+	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
+	branched BOOLEAN NOT NULL,
+	pickable BOOLEAN NOT NULL,
+	multi VARCHAR(64) NOT NULL
+);
+
+CREATE TABLE iris.inc_advice (
+	name VARCHAR(10) PRIMARY KEY,
+	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
+	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
+	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
+	impact VARCHAR(20) NOT NULL,
+	cleared BOOLEAN NOT NULL,
+	multi VARCHAR(64) NOT NULL
+);
 
 --- Views
 
@@ -2488,11 +2523,11 @@ PRV_0006	login	system_attribute(/.*)?	t	f	f	f
 PRV_0007	login	map_extent(/.*)?	t	f	f	f
 PRV_0008	login	road(/.*)?	t	f	f	f
 PRV_0009	login	geo_loc(/.*)?	t	f	f	f
-PRV_0010	login	incident_detail(/.*)?	t	f	f	f
 PRV_0011	camera_tab	camera(/.*)?	t	f	f	f
 PRV_001A	camera_tab	camera_preset(/.*)?	t	f	f	f
 PRV_0012	camera_tab	controller(/.*)?	t	f	f	f
 PRV_0013	camera_tab	video_monitor(/.*)?	t	f	f	f
+PRV_0010	incident_tab	incident_detail(/.*)?	t	f	f	f
 PRV_0014	incident_tab	incident(/.*)?	t	f	f	f
 PRV_0015	dms_tab	cabinet(/.*)?	t	f	f	f
 PRV_0016	dms_tab	controller(/.*)?	t	f	f	f
@@ -2539,6 +2574,9 @@ PRV_0053	dms_control	dms/.*/ownerNext	f	t	f	f
 PRV_0054	dms_control	sign_message/.*	f	t	t	f
 PRV_0055	dms_control	beacon/.*/flashing	f	t	f	f
 PRV_0056	incident_control	incident/.*	f	t	t	t
+prv_inc1	incident_control	inc_descriptor(/.*)?	t	f	f	f
+prv_inc2	incident_control	inc_locator(/.*)?	t	f	f	f
+prv_inc3	incident_control	inc_advice(/.*)?	t	f	f	f
 PRV_0057	lcs_control	lcs_array/.*/indicationsNext	f	t	f	f
 PRV_0058	lcs_control	lcs_array/.*/ownerNext	f	t	f	f
 PRV_0059	lcs_control	lcs_array/.*/lcsLock	f	t	f	f
@@ -2570,6 +2608,9 @@ PRV_0083	policy_admin	dms_sign_group/.*	f	t	t	t
 PRV_0084	policy_admin	holiday(/.*)?	t	f	f	f
 PRV_0085	policy_admin	holiday/.*	f	t	t	t
 PRV_0086	policy_admin	incident_detail/.*	f	t	t	t
+prv_inc4	policy_admin	inc_descriptor/.*	f	t	t	t
+prv_inc5	policy_admin	inc_locator/.*	f	t	t	t
+prv_inc6	policy_admin	inc_advice/.*	f	t	t	t
 PRV_0138	policy_admin	beacon_action(/.*)?	t	f	f	f
 PRV_0139	policy_admin	beacon_action/.*	f	t	t	t
 PRV_0087	policy_admin	lane_action(/.*)?	t	f	f	f
@@ -2674,6 +2715,12 @@ operator	detection
 
 COPY iris.i_user (name, full_name, password, dn, role, enabled) FROM stdin;
 admin	IRIS Administrator	+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=		administrator	t
+\.
+
+COPY iris.inc_range (id, description) FROM stdin;
+0	near
+1	middle
+2	far
 \.
 
 COPY event.event_description (event_desc_id, description) FROM stdin;
