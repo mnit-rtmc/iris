@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,6 +71,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -84,11 +85,13 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -106,7 +109,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		description = d;
 		uri = u;
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
-		if(cp != null)
+		if (cp != null)
 			protocol = cp;
 		poll_enabled = pe;
 		poll_period = pp;
@@ -127,7 +130,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Create a new polling job */
 	private void createPollJob(int s) {
 		PollJob pj = poll_job;
-		if(pj != null)
+		if (pj != null)
 			POLLER.removeJob(poll_job);
 		poll_job = new PollJob(s);
 		POLLER.addJob(poll_job);
@@ -154,26 +157,28 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	protected String description = "<New Link>";
 
 	/** Set text description */
+	@Override
 	public void setDescription(String d) {
 		description = d;
 	}
 
 	/** Set text description */
 	public void doSetDescription(String d) throws TMSException {
-		if(d.equals(description))
+		if (d.equals(description))
 			return;
 		store.update(this, "description", d);
 		setDescription(d);
 	}
 
 	/** Get text description */
+	@Override
 	public String getDescription() {
 		return description;
 	}
 
 	/** Test whether gate arm system should be disabled */
 	public void testGateArmDisable(String reason) {
-		if(isGateArm(protocol))
+		if (isGateArm(protocol))
 			GateArmSystem.disable(reason);
 	}
 
@@ -181,6 +186,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	protected String uri = "";
 
 	/** Set remote URI for link */
+	@Override
 	public void setUri(String u) {
 		testGateArmDisable("URI");
 		uri = u;
@@ -188,7 +194,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set remote URI for link */
 	public void doSetUri(String u) throws TMSException {
-		if(u.equals(uri))
+		if (u.equals(uri))
 			return;
 		store.update(this, "uri", u);
 		setUri(u);
@@ -197,6 +203,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Get remote URI for link */
+	@Override
 	public String getUri() {
 		return uri;
 	}
@@ -205,21 +212,22 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	private CommProtocol protocol = CommProtocol.NTCIP_C;
 
 	/** Set the communication protocol */
+	@Override
 	public void setProtocol(short p) {
 		testGateArmDisable("protocol 0");
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
-		if(isGateArm(cp))
+		if (isGateArm(cp))
 			GateArmSystem.disable("protocol 1");
-		if(cp != null)
+		if (cp != null)
 			protocol = cp;
 	}
 
 	/** Set the communication protocol */
 	public void doSetProtocol(short p) throws TMSException {
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
-		if(cp == null)
+		if (cp == null)
 			throw new ChangeVetoException("Invalid protocol: " + p);
-		if(cp == protocol)
+		if (cp == protocol)
 			return;
 		store.update(this, "protocol", p);
 		setProtocol(p);
@@ -228,6 +236,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Get the communication protocol */
+	@Override
 	public short getProtocol() {
 		return (short)protocol.ordinal();
 	}
@@ -236,6 +245,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	private boolean poll_enabled;
 
 	/** Enable or disable polling */
+	@Override
 	public void setPollEnabled(boolean e) {
 		testGateArmDisable("poll_enabled");
 		poll_enabled = e;
@@ -243,7 +253,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set the poll enabled/disabled flag */
 	public void doSetPollEnabled(boolean e) throws TMSException {
-		if(e == poll_enabled)
+		if (e == poll_enabled)
 			return;
 		store.update(this, "poll_enabled", e);
 		setPollEnabled(e);
@@ -252,6 +262,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Get polling enabled/disabled flag */
+	@Override
 	public boolean getPollEnabled() {
 		return poll_enabled;
 	}
@@ -260,6 +271,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	private int poll_period = 30;
 
 	/** Set poll period (seconds) */
+	@Override
 	public void setPollPeriod(int s) {
 		testGateArmDisable("poll_period");
 		poll_period = s;
@@ -269,8 +281,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Check for valid polling period */
 	private void checkPeriod(int s) throws TMSException {
 		Interval p = new Interval(s);
-		for(Interval per: VALID_PERIODS) {
-			if(per.equals(p))
+		for (Interval per: VALID_PERIODS) {
+			if (per.equals(p))
 				return;
 		}
 		throw new ChangeVetoException("Invalid period: " + s);
@@ -278,7 +290,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set the polling period (seconds) */
 	public void doSetPollPeriod(int s) throws TMSException {
-		if(s == poll_period)
+		if (s == poll_period)
 			return;
 		checkPeriod(s);
 		store.update(this, "poll_period", s);
@@ -286,6 +298,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Get poll period (seconds) */
+	@Override
 	public int getPollPeriod() {
 		return poll_period;
 	}
@@ -294,6 +307,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	protected int timeout = 750;
 
 	/** Set the polling timeout (milliseconds) */
+	@Override
 	public void setTimeout(int t) {
 		testGateArmDisable("timeout");
 		timeout = t;
@@ -310,7 +324,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			if (dp != null)
 				dp.setTimeout(t);
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			throw new TMSException(e);
 		}
 		store.update(this, "timeout", t);
@@ -318,6 +332,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Get the polling timeout (milliseconds) */
+	@Override
 	public int getTimeout() {
 		return timeout;
 	}
@@ -387,6 +402,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Get the communication status */
+	@Override
 	public String getStatus() {
 		return status;
 	}
