@@ -233,6 +233,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		      : null;
 	}
 
+	/** Lookup an incident */
+	static protected IncidentImpl lookupIncident(String name) {
+		SonarObject so = lookupObject(IncidentImpl.SONAR_TYPE, name);
+		return (so instanceof IncidentImpl) ? (IncidentImpl) so : null;
+	}
+
 	/** Get the primary key name */
 	public String getKeyName() {
 		return "name";

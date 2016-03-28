@@ -93,3 +93,6 @@ COPY iris.inc_range (id, description) FROM stdin;
 1	middle
 2	far
 \.
+
+-- Add incident to sign_message
+ALTER TABLE iris.sign_message ADD COLUMN incident VARCHAR(16);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -66,6 +66,7 @@ public class SignMessageXmlWriter extends XmlWriter {
 		w.write("<!ATTLIST sign_message act_priority CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST sign_message scheduled CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST sign_message duration CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST sign_message incident CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST sign_message multi CDATA #REQUIRED>\n");
 		w.write("<!ATTLIST sign_message bitmaps CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST sign_message deploy_time CDATA #IMPLIED>\n");
