@@ -70,7 +70,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Get the incident cache */
 	@Override
 	public TypeCache<Incident> getCache() {
-		return session.getSonarState().getIncidents();
+		return session.getSonarState().getIncCache().getIncidents();
 	}
 
 	/** Create an incident map tab */

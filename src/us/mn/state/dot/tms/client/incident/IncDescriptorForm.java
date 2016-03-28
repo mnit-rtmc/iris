@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,27 +12,28 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.system;
+package us.mn.state.dot.tms.client.incident;
 
-import us.mn.state.dot.tms.IncidentDetail;
+import us.mn.state.dot.tms.IncDescriptor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * A form for displaying and editing incident details.
+ * A form for displaying and editing incident descriptors.
  *
- * @author Douglas Lau
+ * @author Doug Lau
  */
-public class IncidentDetailForm extends ProxyTableForm<IncidentDetail> {
+public class IncDescriptorForm extends ProxyTableForm<IncDescriptor> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.isUpdatePermitted(IncidentDetail.SONAR_TYPE);
+		return s.canRead(IncDescriptor.SONAR_TYPE);
 	}
 
-	/** Create a new incident detail form */
-	public IncidentDetailForm(Session s) {
-		super(I18N.get("incident.details"), new IncidentDetailModel(s));
+	/** Create a new incident descriptor form */
+	public IncDescriptorForm(Session s) {
+		super(I18N.get("incident.descriptors"), new IncDescriptorPanel(
+			new IncDescriptorTableModel(s)));
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.system;
+package us.mn.state.dot.tms.client.incident;
 
 import java.util.ArrayList;
 import us.mn.state.dot.tms.IncidentDetail;
@@ -57,7 +57,7 @@ public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
 
 	/** Create a new incident detail table model */
 	public IncidentDetailModel(Session s) {
-		super(s, s.getSonarState().getIncidentDetails(),
+		super(s, s.getSonarState().getIncCache().getIncidentDetails(),
 		      false,	/* has_properties */
 		      true,	/* has_create_delete */
 		      true);	/* has_name */

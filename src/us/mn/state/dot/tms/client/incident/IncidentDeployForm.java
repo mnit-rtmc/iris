@@ -87,7 +87,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	/** Get the SONAR type cache */
 	@Override
 	protected TypeCache<Incident> getTypeCache() {
-		return state.getIncidents();
+		return state.getIncCache().getIncidents();
 	}
 
 	/** Initialize the widgets on the form */

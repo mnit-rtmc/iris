@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -41,8 +41,6 @@ import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.Holiday;
-import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
@@ -60,6 +58,7 @@ import us.mn.state.dot.tms.client.camera.CamCache;
 import us.mn.state.dot.tms.client.comm.ConCache;
 import us.mn.state.dot.tms.client.detector.DetCache;
 import us.mn.state.dot.tms.client.dms.DmsCache;
+import us.mn.state.dot.tms.client.incident.IncCache;
 import us.mn.state.dot.tms.client.lcs.LcsCache;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
@@ -238,6 +237,14 @@ public class SonarState extends Client {
 		return dms_cache;
 	}
 
+	/** Cache of incident objects */
+	private final IncCache inc_cache;
+
+	/** Get the Incident cache */
+	public IncCache getIncCache() {
+		return inc_cache;
+	}
+
 	/** Cache of LCS objects */
 	private final LcsCache lcs_cache;
 
@@ -314,24 +321,6 @@ public class SonarState extends Client {
 	/** Get the gate arm cache */
 	public TypeCache<GateArm> getGateArms() {
 		return gate_arms;
-	}
-
-	/** Cache of incident details */
-	private final TypeCache<IncidentDetail> inc_details =
-		new TypeCache<IncidentDetail>(IncidentDetail.class, this);
-
-	/** Get the incident details object cache */
-	public TypeCache<IncidentDetail> getIncidentDetails() {
-		return inc_details;
-	}
-
-	/** Cache of incidents */
-	private final TypeCache<Incident> incidents =
-		new TypeCache<Incident>(Incident.class, this);
-
-	/** Get the incident object cache */
-	public TypeCache<Incident> getIncidents() {
-		return incidents;
 	}
 
 	/** Cache of holiday proxies */
@@ -455,6 +444,7 @@ public class SonarState extends Client {
 		con_cache = new ConCache(this);
 		det_cache = new DetCache(this);
 		dms_cache = new DmsCache(this);
+		inc_cache = new IncCache(this);
 		lcs_cache = new LcsCache(this);
 		gate_arm_array_model = new ProxyListModel<GateArmArray>(
 			gate_arm_arrays);
@@ -518,7 +508,6 @@ public class SonarState extends Client {
 		user = users.lookupObject(user_name);
 		populate(system_attributes, true);
 		populate(map_extents);
-		populate(inc_details);
 		populate(roads);
 		populate(geo_locs);
 		populate(words);
@@ -538,6 +527,7 @@ public class SonarState extends Client {
 		}
 		populateReadable(graphics);
 		dms_cache.populate(this);
+		inc_cache.populate(this);
 		lcs_cache.populate(this);
 		populateReadable(lane_markings);
 		if(canRead(LaneMarking.SONAR_TYPE))
@@ -556,7 +546,6 @@ public class SonarState extends Client {
 		populateReadable(gate_arms);
 		if(canRead(GateArm.SONAR_TYPE))
 			gate_arms.ignoreAttribute("operation");
-		populateReadable(incidents);
 		populateReadable(holidays);
 		populateReadable(day_plans);
 		populateReadable(plan_phases);

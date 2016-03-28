@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.client.detector.DetectorForm;
 import us.mn.state.dot.tms.client.detector.StationForm;
 import us.mn.state.dot.tms.client.dms.SignMenu;
 import us.mn.state.dot.tms.client.gate.GateArmArrayForm;
+import us.mn.state.dot.tms.client.incident.IncidentMenu;
 import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
 import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
@@ -63,6 +64,9 @@ public class ViewMenu extends JMenu {
 		SignMenu sgn_menu = new SignMenu(session);
 		if(sgn_menu.getItemCount() > 0)
 			add(sgn_menu);
+		IncidentMenu inc_menu = new IncidentMenu(session);
+		if (inc_menu.getItemCount() > 0)
+			add(inc_menu);
 		LaneUseMenu lu_menu = new LaneUseMenu(session);
 		if(lu_menu.getItemCount() > 0)
 			add(lu_menu);

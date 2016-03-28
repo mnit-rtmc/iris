@@ -58,6 +58,16 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class IncidentCreator extends JPanel {
 
+	/** Create the lane type combo box */
+	static protected JComboBox<LaneType> createLaneTypeCombo() {
+		return new JComboBox<LaneType>(new LaneType[] {
+			LaneType.MAINLINE,
+			LaneType.EXIT,
+			LaneType.MERGE,
+			LaneType.CD_LANE
+		});
+	}
+
 	/** Button to create a "crash" incident */
 	private final JToggleButton crash_btn;
 
@@ -130,16 +140,6 @@ public class IncidentCreator extends JPanel {
 		add(box);
 		setEnabled(false);
 		sel_model.addProxySelectionListener(sel_listener);
-	}
-
-	/** Create the lane type combo box */
-	private JComboBox<LaneType> createLaneTypeCombo() {
-		return new JComboBox<LaneType>(new LaneType[] {
-			LaneType.MAINLINE,
-			LaneType.EXIT,
-			LaneType.MERGE,
-			LaneType.CD_LANE
-		});
 	}
 
 	/** Create a button for creating an incident */

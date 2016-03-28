@@ -15,18 +15,24 @@
 package us.mn.state.dot.tms.client.incident;
 
 import us.mn.state.dot.tms.IncidentDetail;
-import us.mn.state.dot.tms.client.widget.IListCellRenderer;
+import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.ProxyTableForm;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * Cell renderer used for incident detail.
+ * A form for displaying and editing incident details.
  *
  * @author Douglas Lau
  */
-public class IncidentDetailRenderer extends IListCellRenderer<IncidentDetail> {
+public class IncidentDetailForm extends ProxyTableForm<IncidentDetail> {
 
-	/** Convert value to a string */
-	@Override
-	protected String valueToString(IncidentDetail value) {
-		return value.getDescription();
+	/** Check if the user is permitted to use the form */
+	static public boolean isPermitted(Session s) {
+		return s.isUpdatePermitted(IncidentDetail.SONAR_TYPE);
+	}
+
+	/** Create a new incident detail form */
+	public IncidentDetailForm(Session s) {
+		super(I18N.get("incident.details"), new IncidentDetailModel(s));
 	}
 }

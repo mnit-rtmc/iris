@@ -199,9 +199,9 @@ public class IncidentDispatcher extends IPanel
 		manager = man;
 		sel_model = manager.getSelectionModel();
 		creator = ic;
-		cache = s.getSonarState().getIncidents();
+		cache = s.getSonarState().getIncCache().getIncidents();
 		detail_mdl = new ProxyListModel<IncidentDetail>(
-			s.getSonarState().getIncidentDetails());
+			s.getSonarState().getIncCache().getIncidentDetails());
 	}
 
 	/** Initialize the widgets on the panel */
@@ -436,6 +436,7 @@ public class IncidentDispatcher extends IPanel
 	public void dispose() {
 		sel_model.removeProxySelectionListener(sel_listener);
 		cache.removeProxyListener(this);
+		detail_mdl.dispose();
 		clearSelected();
 		super.dispose();
 	}
