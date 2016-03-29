@@ -52,6 +52,21 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class IncidentDeployForm extends SonarObjectForm<Incident> {
 
+	/** Check if a set of indications should be deployed */
+	static private boolean shouldDeploy(Integer[] ind) {
+		for (int i: ind) {
+			LaneUseIndication li = LaneUseIndication.fromOrdinal(i);
+			switch (LaneUseIndication.fromOrdinal(i)) {
+			case DARK:
+			case LANE_OPEN:
+				continue;
+			default:
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Incident manager */
 	private final IncidentManager manager;
 
@@ -166,21 +181,6 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 			}
 		}
 		return upstream;
-	}
-
-	/** Check if a set of indications should be deployed */
-	static private boolean shouldDeploy(Integer[] ind) {
-		for (int i: ind) {
-			LaneUseIndication li = LaneUseIndication.fromOrdinal(i);
-			switch (LaneUseIndication.fromOrdinal(i)) {
-			case DARK:
-			case LANE_OPEN:
-				continue;
-			default:
-				return true;
-			}
-		}
-		return false;
 	}
 
 	/** Create the panel for the form */
