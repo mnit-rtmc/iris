@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms;
 
 /**
- * Abstract MULTI string state adapter.
+ * MULTI string state adapter.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -24,42 +24,30 @@ public class MultiAdapter implements Multi {
 
 	/** Add a page */
 	@Override
-	public void addPage() {
-		// subclass must handle
-	}
+	public void addPage() { }
 
 	/** Set the page times.
 	 * @param pt_on Page on time (deciseconds; null means default)
 	 * @param pt_off Page off time (deciseconds; null means default) */
 	@Override
-	public void setPageTimes(Integer pt_on, Integer pt_off) {
-		// subclass must handle
-	}
+	public void setPageTimes(Integer pt_on, Integer pt_off) { }
 
 	/** Set the page justification */
 	@Override
-	public void setJustificationPage(JustificationPage jp) {
-		// subclass must handle
-	}
+	public void setJustificationPage(JustificationPage jp) { }
 
 	/** Add a new line */
 	@Override
-	public void addLine(Integer spacing) {
-		// subclass must handle
-	}
+	public void addLine(Integer spacing) { }
 
 	/** Set the line justification */
 	@Override
-	public void setJustificationLine(JustificationLine jl) {
-		// subclass must handle
-	}
+	public void setJustificationLine(JustificationLine jl) { }
 
 	/** Set the (deprecated) message background color.
 	 * @param x Background color (0-9; colorClassic value). */
 	@Override
-	public void setColorBackground(int x) {
-		// subclass must handle
-	}
+	public void setColorBackground(int x) { }
 
 	/** Set the page background color for monochrome1bit, monochrome8bit,
 	 * and colorClassic color schemes.
@@ -67,18 +55,14 @@ public class MultiAdapter implements Multi {
 	 *                           (0-255 for monochrome8bit),
 	 *                           (0-9 for colorClassic). */
 	@Override
-	public void setPageBackground(int z) {
-		// subclass must handle
-	}
+	public void setPageBackground(int z) { }
 
 	/** Set the page background color for color24bit color scheme.
 	 * @param r Red component (0-255).
 	 * @param g Green component (0-255).
 	 * @param b Blue component (0-255). */
 	@Override
-	public void setPageBackground(int r, int g, int b) {
-		// subclass must handle
-	}
+	public void setPageBackground(int r, int g, int b) { }
 
 	/** Set the foreground color for monochrome1bit, monochrome8bit, and
 	 * colorClassic color schemes.
@@ -86,18 +70,14 @@ public class MultiAdapter implements Multi {
 	 *                           (0-255 for monochrome8bit),
 	 *                           (0-9 for colorClassic). */
 	@Override
-	public void setColorForeground(int x) {
-		// subclass must handle
-	}
+	public void setColorForeground(int x) { }
 
 	/** Set the foreground color for color24bit color scheme.
 	 * @param r Red component (0-255).
 	 * @param g Green component (0-255).
 	 * @param b Blue component (0-255). */
 	@Override
-	public void setColorForeground(int r, int g, int b) {
-		// subclass must handle
-	}
+	public void setColorForeground(int r, int g, int b) { }
 
 	/** Add a color rectangle for monochrome1bit, monochrome8bit, and
 	 * colorClassic color schemes.
@@ -109,9 +89,7 @@ public class MultiAdapter implements Multi {
 	 *                             (0-255 for monochrome8bit),
 	 *                             (0-9 for colorClassic). */
 	@Override
-	public void addColorRectangle(int x, int y, int w, int h, int z) {
-		// subclass must handle
-	}
+	public void addColorRectangle(int x, int y, int w, int h, int z) { }
 
 	/** Add a color rectangle for color24bit color scheme.
 	 * @param x X pixel position of upper left corner.
@@ -123,55 +101,38 @@ public class MultiAdapter implements Multi {
 	 * @param b Blue component (0-255). */
 	@Override
 	public void addColorRectangle(int x, int y, int w, int h, int r, int g,
-		int b)
-	{
-		// subclass must handle
-	}
+		int b) { }
 
 	/** Set the text rectangle */
 	@Override
-	public void setTextRectangle(int x, int y, int w, int h) {
-		// subclass must handle
-	}
+	public void setTextRectangle(int x, int y, int w, int h) { }
 
 	/** Set the font number.
 	 * @param f_num Font number (1 to 255)
 	 * @param f_id Font version ID (4-digit hex) */
 	@Override
-	public void setFont(int f_num, String f_id) {
-		// subclass must handle
-	}
+	public void setFont(int f_num, String f_id) { }
 
 	/** Set the character spacing.
 	 * @param sc Character spacing (null means use font spacing) */
 	@Override
-	public void setCharSpacing(Integer sc) {
-		// subclass must handle
-	}
+	public void setCharSpacing(Integer sc) { }
 
 	/** Add a span of text */
 	@Override
-	public void addSpan(String span) {
-		// subclass must handle
-	}
+	public void addSpan(String span) { }
 
 	/** Add a graphic */
 	@Override
-	public void addGraphic(int g_num, Integer x, Integer y, String g_id) {
-		// subclass must handle
-	}
+	public void addGraphic(int g_num, Integer x, Integer y, String g_id) { }
 
 	/** Add a travel time destination */
 	@Override
-	public void addTravelTime(String sid) {
-		// subclass must handle
-	}
+	public void addTravelTime(String sid) { }
 
 	/** Add a speed advisory */
 	@Override
-	public void addSpeedAdvisory() {
-		// subclass must handle
-	}
+	public void addSpeedAdvisory() { }
 
 	/** Add a slow traffic warning.
 	 * @param spd Highest speed to activate warning.
@@ -179,19 +140,13 @@ public class MultiAdapter implements Multi {
 	 * @param units Units for speed (mph or kph).
 	 * @param dist If true, replace tag with distance to slow station. */
 	@Override
-	public void addSlowWarning(int spd, int b, String units, boolean dist) {
-		// subclass must handle
-	}
+	public void addSlowWarning(int spd, int b, String units, boolean dist){}
 
 	/** Add a feed message */
 	@Override
-	public void addFeed(String fid) {
-		// subclass must handle
-	}
+	public void addFeed(String fid) { }
 
 	/** Add a tolling message */
 	@Override
-	public void addTolling(String mode, String[] zones) {
-		// subclass must handle
-	}
+	public void addTolling(String mode, String[] zones) { }
 }
