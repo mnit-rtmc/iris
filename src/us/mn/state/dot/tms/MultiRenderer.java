@@ -181,9 +181,9 @@ public class MultiRenderer extends MultiAdapter {
 	@Override
 	public void addPage() {
 		renderText();
-		resetTextRectangle();
 		raster = factory.create();
 		fillBackground();
+		resetTextRectangle();
 	}
 
 	/** Set the (deprecated) message background color.
@@ -322,7 +322,7 @@ public class MultiRenderer extends MultiAdapter {
 				block.render();
 		}
 		catch (InvalidMessageException e) {
-			syntax_err=MultiSyntaxError.characterNotDefined;
+			syntax_err = MultiSyntaxError.characterNotDefined;
 		}
 		catch (IndexOutOfBoundsException e) {
 			syntax_err = MultiSyntaxError.textTooBig;
