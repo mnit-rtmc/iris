@@ -17,9 +17,6 @@ package us.mn.state.dot.tms;
 /**
  * Abstract MULTI string state adapter.
  *
- * Note: Fields in the class use the
- * "ms_" prefix to make it easier to distinguish their origin in subclasses.
- *
  * @author Douglas Lau
  * @author Michael Darter
  */
@@ -57,25 +54,11 @@ public class MultiAdapter implements Multi {
 		// subclass must handle
 	}
 
-	/** Page background color */
-	protected DmsColor ms_background = DmsColor.BLACK;
-
-	/** Get a color for the color scheme.
-	 * @param x Color value.
-	 * @return DmsColor or null for invalid color. */
-	protected DmsColor schemeColor(int x) {
-		// FIXME: add support for monochrome color schemes
-		ColorClassic cc = ColorClassic.fromOrdinal(x);
-		return (cc != null) ? cc.clr : null;
-	}
-
 	/** Set the (deprecated) message background color.
 	 * @param x Background color (0-9; colorClassic value). */
 	@Override
 	public void setColorBackground(int x) {
-		ColorClassic cc = ColorClassic.fromOrdinal(x);
-		if (cc != null)
-			ms_background = cc.clr;
+		// subclass must handle
 	}
 
 	/** Set the page background color for monochrome1bit, monochrome8bit,
@@ -85,9 +68,7 @@ public class MultiAdapter implements Multi {
 	 *                           (0-9 for colorClassic). */
 	@Override
 	public void setPageBackground(int z) {
-		DmsColor clr = schemeColor(z);
-		if (clr != null)
-			ms_background = clr;
+		// subclass must handle
 	}
 
 	/** Set the page background color for color24bit color scheme.
@@ -96,11 +77,8 @@ public class MultiAdapter implements Multi {
 	 * @param b Blue component (0-255). */
 	@Override
 	public void setPageBackground(int r, int g, int b) {
-		ms_background = new DmsColor(r, g, b);
+		// subclass must handle
 	}
-
-	/** Foreground color */
-	protected DmsColor ms_foreground = DmsColor.AMBER;
 
 	/** Set the foreground color for monochrome1bit, monochrome8bit, and
 	 * colorClassic color schemes.
@@ -109,9 +87,7 @@ public class MultiAdapter implements Multi {
 	 *                           (0-9 for colorClassic). */
 	@Override
 	public void setColorForeground(int x) {
-		DmsColor clr = schemeColor(x);
-		if (clr != null)
-			ms_foreground = clr;
+		// subclass must handle
 	}
 
 	/** Set the foreground color for color24bit color scheme.
@@ -120,7 +96,7 @@ public class MultiAdapter implements Multi {
 	 * @param b Blue component (0-255). */
 	@Override
 	public void setColorForeground(int r, int g, int b) {
-		ms_foreground = new DmsColor(r, g, b);
+		// subclass must handle
 	}
 
 	/** Add a color rectangle for monochrome1bit, monochrome8bit, and

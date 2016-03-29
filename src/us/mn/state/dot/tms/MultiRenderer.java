@@ -23,6 +23,15 @@ import java.util.LinkedList;
  */
 public class MultiRenderer extends MultiAdapter {
 
+	/** Get a color for the color scheme.
+	 * @param x Color value.
+	 * @return DmsColor or null for invalid color. */
+	static private DmsColor schemeColor(int x) {
+		// FIXME: add support for monochrome color schemes
+		ColorClassic cc = ColorClassic.fromOrdinal(x);
+		return (cc != null) ? cc.clr : null;
+	}
+
 	/** Raster graphic to render */
 	private final RasterGraphic raster;
 
@@ -69,6 +78,12 @@ public class MultiRenderer extends MultiAdapter {
 
 	/** Current page number */
 	private int n_page = 0;
+
+	/** Page background color */
+	private DmsColor background_clr = DmsColor.BLACK;
+
+	/** Foreground color */
+	private DmsColor foreground_clr = DmsColor.AMBER;
 
 	/**
 	 * Create a new MULTI renderer.
@@ -177,6 +192,16 @@ public class MultiRenderer extends MultiAdapter {
 		fillBackground();
 	}
 
+	/** Set the (deprecated) message background color.
+	 * @param x Background color (0-9; colorClassic value). */
+	@Override
+	public void setColorBackground(int x) {
+		ColorClassic cc = ColorClassic.fromOrdinal(x);
+		if (cc != null)
+			background_clr = cc.clr;
+		fillBackground();
+	}
+
 	/** Set the page background color for monochrome1bit, monochrome8bit,
 	 * and colorClassic color schemes.
 	 * @param z Background color (0-1 for monochrome1bit),
@@ -184,7 +209,9 @@ public class MultiRenderer extends MultiAdapter {
 	 *                           (0-9 for colorClassic). */
 	@Override
 	public void setPageBackground(int z) {
-		super.setPageBackground(z);
+		DmsColor clr = schemeColor(z);
+		if (clr != null)
+			background_clr = clr;
 		fillBackground();
 	}
 
@@ -194,14 +221,35 @@ public class MultiRenderer extends MultiAdapter {
 	 * @param b Blue component (0-255). */
 	@Override
 	public void setPageBackground(int r, int g, int b) {
-		super.setPageBackground(r, g, b);
+		background_clr = new DmsColor(r, g, b);
 		fillBackground();
 	}
 
 	/** Fill the page with the current background color */
 	private void fillBackground() {
 		fillRectangle(1, 1, raster.getWidth(), raster.getHeight(),
-			ms_background);
+			background_clr);
+	}
+
+	/** Set the foreground color for monochrome1bit, monochrome8bit, and
+	 * colorClassic color schemes.
+	 * @param x Foreground color (0-1 for monochrome1bit),
+	 *                           (0-255 for monochrome8bit),
+	 *                           (0-9 for colorClassic). */
+	@Override
+	public void setColorForeground(int x) {
+		DmsColor clr = schemeColor(x);
+		if (clr != null)
+			foreground_clr = clr;
+	}
+
+	/** Set the foreground color for color24bit color scheme.
+	 * @param r Red component (0-255).
+	 * @param g Green component (0-255).
+	 * @param b Blue component (0-255). */
+	@Override
+	public void setColorForeground(int r, int g, int b) {
+		foreground_clr = new DmsColor(r, g, b);
 	}
 
 	/** Add a color rectangle for monochrome1bit, monochrome8bit, and
@@ -304,7 +352,7 @@ public class MultiRenderer extends MultiAdapter {
 		}
 		int x0 = (x != null) ? x : 1;
 		int y0 = (y != null) ? y : 1;
-		renderGraphic(graphic, ms_foreground, x0, y0);
+		renderGraphic(graphic, foreground_clr, x0, y0);
 	}
 
 	/** Render a graphic onto the raster.
@@ -534,7 +582,7 @@ public class MultiRenderer extends MultiAdapter {
 		private Span(String s) {
 			span = s;
 			font = FontHelper.find(font_num);
-			foreground = ms_foreground;
+			foreground = foreground_clr;
 			c_space = getCharSpacing();
 		}
 		int getCharSpacing() {
