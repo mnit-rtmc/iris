@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2015  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,57 @@ import us.mn.state.dot.tms.units.Interval;
  */
 public class MultiString implements Multi {
 
+	/** Return the canonical version of a MULTI string.
+	 * @return A canonical MULTI string with all default tag values
+	 *         included and redundant tags removed. */
+	static public String canonical(String multi) {
+		/* FIXME: include default tag values */
+		return MultiParser.normalize(multi);
+	}
+
+	/** Replace all the page times in a MULTI string.
+	 * If no page time tag exists, then a page time tag is prepended.
+	 * @param multi MULTI string.
+	 * @param pt_on Page on-time in tenths of a second.
+	 * @param pt_off Page off-time in tenths of a second.
+	 * @return The updated MULTI string. */
+	static public String replacePageTime(String multi, final Integer pt_on,
+		final Integer pt_off)
+	{
+		if (multi.indexOf("[pt") < 0) {
+			MultiString ms = new MultiString();
+			ms.setPageTimes(pt_on, pt_off);
+			return ms.toString() + multi;
+		}
+		MultiString ms = new MultiString() {
+			@Override
+			public void setPageTimes(Integer on, Integer off) {
+				super.setPageTimes(pt_on, pt_off);
+			}
+		};
+		MultiParser.parse(multi, ms);
+		return ms.toString();
+	}
+
+	/** Strip all page time tags from a MULTI string */
+	static public String stripPageTime(String multi) {
+		MultiString ms = new MultiString() {
+			@Override
+			public void setPageTimes(Integer on, Integer off) { }
+		};
+		MultiParser.parse(multi, ms);
+		return ms.toString();
+	}
+
+	/**
+	 * Normalize a MULTI string.
+	 * @param ms The MULTI string to normalize.
+	 * @return The normalized MULTI string, never null.
+	 */
+	static public String normalize(String ms) {
+		return MultiParser.normalize(ms);
+	}
+
 	/** MULTI string buffer */
 	protected final StringBuilder multi = new StringBuilder();
 
@@ -46,6 +97,12 @@ public class MultiString implements Multi {
 		}
                 return false;
         }
+
+	/** Get the value of the MULTI string */
+	@Override
+	public String toString() {
+		return multi.toString();
+	}
 
 	/** Calculate a hash code for the MULTI string */
 	@Override
@@ -358,12 +415,6 @@ public class MultiString implements Multi {
 		multi.append("]");
 	}
 
-	/** Get the value of the MULTI string */
-	@Override
-	public String toString() {
-		return multi.toString();
-	}
-
 	/** Validate the MULTI string */
 	public boolean isValid() {
 		return MultiParser.isValid(toString());
@@ -428,14 +479,6 @@ public class MultiString implements Multi {
 		MultiAdapter msa = new MultiAdapter();
 		MultiParser.parse(toString(), msa);
 		return msa.ms_page + 1;
-	}
-
-	/** Return the canonical version of a MULTI string.
-	 * @return A canonical MULTI string with all default tag values
-	 *         included and redundant tags removed. */
-	static public String canonical(String multi) {
-		/* FIXME: include default tag values */
-		return MultiParser.normalize(multi);
 	}
 
 	/** Get an array of font numbers.
@@ -503,40 +546,6 @@ public class MultiString implements Multi {
 		return ptc.pageOffIntervals(dflt);
 	}
 
-	/** Replace all the page times in a MULTI string.
-	 * If no page time tag exists, then a page time tag is prepended.
-	 * @param multi MULTI string.
-	 * @param pt_on Page on-time in tenths of a second.
-	 * @param pt_off Page off-time in tenths of a second.
-	 * @return The updated MULTI string. */
-	static public String replacePageTime(String multi, final Integer pt_on,
-		final Integer pt_off)
-	{
-		if (multi.indexOf("[pt") < 0) {
-			MultiString ms = new MultiString();
-			ms.setPageTimes(pt_on, pt_off);
-			return ms.toString() + multi;
-		}
-		MultiString ms = new MultiString() {
-			@Override
-			public void setPageTimes(Integer on, Integer off) {
-				super.setPageTimes(pt_on, pt_off);
-			}
-		};
-		MultiParser.parse(multi, ms);
-		return ms.toString();
-	}
-
-	/** Strip all page time tags from a MULTI string */
-	static public String stripPageTime(String multi) {
-		MultiString ms = new MultiString() {
-			@Override
-			public void setPageTimes(Integer on, Integer off) { }
-		};
-		MultiParser.parse(multi, ms);
-		return ms.toString();
-	}
-
 	/** Get MULTI string for specified page */
 	public String getPage(int p) {
 		String[] pages = getPages();
@@ -598,15 +607,6 @@ public class MultiString implements Multi {
 			}
 		});
 		return sb.toString().trim();
-	}
-
-	/**
-	 * Normalize a MULTI string.
-	 * @param ms The MULTI string to normalize.
-	 * @return The normalized MULTI string, never null.
-	 */
-	static public String normalize(String ms) {
-		return MultiParser.normalize(ms);
 	}
 
 	/** Get the words in the message as a list.
