@@ -518,8 +518,7 @@ public class MultiString implements Multi {
 	 * @param dflt Default page-on time.
 	 * @return An array of page-on time Intervals, one value per page. */
 	public Interval[] pageOnIntervals(Interval dflt) {
-		int np = getNumPages();
-		PageTimeCounter ptc = new PageTimeCounter(np);
+		PageTimeCounter ptc = new PageTimeCounter();
 		MultiParser.parse(toString(), ptc);
 		return ptc.pageOnIntervals(dflt);
 	}
@@ -538,8 +537,7 @@ public class MultiString implements Multi {
 	 * @param dflt Default page-off time.
 	 * @return An array of page-off time Intervals, one value per page. */
 	public Interval[] pageOffIntervals(Interval dflt) {
-		int np = getNumPages();
-		PageTimeCounter ptc = new PageTimeCounter(np);
+		PageTimeCounter ptc = new PageTimeCounter();
 		MultiParser.parse(toString(), ptc);
 		return ptc.pageOffIntervals(dflt);
 	}
