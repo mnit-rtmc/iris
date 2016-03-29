@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +19,6 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -27,7 +26,6 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
@@ -209,7 +207,7 @@ public class StoreQuickMessageForm extends AbstractForm {
 	 * @return The selected SignGroup, or null if none selected.
 	 */
 	private SignGroup getSignGroup() {
-		return (SignGroup)(group_cbx.getSelectedItem());
+		return (SignGroup) group_cbx.getSelectedItem();
 	}
 
 	/**
@@ -251,4 +249,3 @@ public class StoreQuickMessageForm extends AbstractForm {
 		close(session.getDesktop());
 	}
 }
-
