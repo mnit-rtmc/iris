@@ -43,13 +43,10 @@ public class MultiAdapter implements Multi {
 		// subclass must handle
 	}
 
-	/** Page justification */
-	protected JustificationPage ms_justp;
-
 	/** Set the page justification */
 	@Override
 	public void setJustificationPage(JustificationPage jp) {
-		ms_justp = jp;
+		// subclass must handle
 	}
 
 	/** Line number on page, zero based */
@@ -61,13 +58,10 @@ public class MultiAdapter implements Multi {
 		ms_line++;
 	}
 
-	/** Line justification */
-	protected JustificationLine ms_justl;
-
 	/** Set the line justification */
 	@Override
 	public void setJustificationLine(JustificationLine jl) {
-		ms_justl = jl;
+		// subclass must handle
 	}
 
 	/** Page background color */
@@ -192,9 +186,7 @@ public class MultiAdapter implements Multi {
 	/** Create a new MULTI string adapter */
 	public MultiAdapter() {
 		ms_page = 0;
-		ms_justp = JustificationPage.DEFAULT;
 		ms_line = 0;
-		ms_justl = JustificationLine.DEFAULT;
 		ms_fnum = 1;
 	}
 

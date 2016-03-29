@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,12 @@ public class MultiRenderer extends MultiAdapter {
 	/** List of all blocks within the current text rectangle */
 	private final LinkedList<Block> blocks = new LinkedList<Block>();
 
+	/** Current page justification */
+	private JustificationPage just_page = JustificationPage.DEFAULT;
+
+	/** Current line justification */
+	private JustificationLine just_line = JustificationLine.DEFAULT;
+
 	/**
 	 * Create a new MULTI renderer.
 	 * @param r Raster graphic to render.
@@ -98,13 +104,19 @@ public class MultiRenderer extends MultiAdapter {
 	/** Set the page justification */
 	@Override
 	public void setJustificationPage(JustificationPage jp) {
-		super.setJustificationPage(jp);
+		just_page = jp;
 		Block block = new Block();
 		Block cb = currentBlock();
 		if (block.justp.ordinal() < cb.justp.ordinal())
 			syntax_err = MultiSyntaxError.tagConflict;
 		if (block.justp.ordinal() > cb.justp.ordinal())
 			blocks.addLast(block);
+	}
+
+	/** Set the line justification */
+	@Override
+	public void setJustificationLine(JustificationLine jl) {
+		just_line = jl;
 	}
 
 	/** Set the character spacing.
@@ -305,7 +317,7 @@ public class MultiRenderer extends MultiAdapter {
 	/** A block of text to be rendered */
 	private class Block {
 		private final LinkedList<Line> lines = new LinkedList<Line>();
-		private final JustificationPage justp = ms_justp;
+		private final JustificationPage justp = just_page;
 		void addSpan(Span s) {
 			Line line = currentLine();
 			line.addSpan(s);
@@ -436,7 +448,7 @@ public class MultiRenderer extends MultiAdapter {
 	/** A fragment of text to be rendered */
 	private class Fragment {
 		private final LinkedList<Span> spans = new LinkedList<Span>();
-		private final JustificationLine justl = ms_justl;
+		private final JustificationLine justl = just_line;
 		int getHeight() {
 			int h = 0;
 			for (Span s: spans)
