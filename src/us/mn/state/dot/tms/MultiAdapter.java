@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,19 +35,12 @@ public class MultiAdapter implements Multi {
 		ms_line = 0;
 	}
 
-	/** Page on time (tenths of a second) */
-	protected Integer ms_pt_on;
-
-	/** Page off time (tenths of a second) */
-	protected Integer ms_pt_off;
-
 	/** Set the page times.
 	 * @param pt_on Page on time (deciseconds; null means default)
 	 * @param pt_off Page off time (deciseconds; null means default) */
 	@Override
 	public void setPageTimes(Integer pt_on, Integer pt_off) {
-		ms_pt_on = pt_on;
-		ms_pt_off = pt_off;
+		// subclass must handle
 	}
 
 	/** Page justification */
