@@ -475,9 +475,14 @@ public class MultiString implements Multi {
 
 	/** Get the number of pages in the multistring */
 	public int getNumPages() {
-		MultiAdapter msa = new MultiAdapter();
+		final int[] n_pages = new int[] { 1 };
+		MultiAdapter msa = new MultiAdapter() {
+			@Override public void addPage() {
+				n_pages[0]++;
+			}
+		};
 		MultiParser.parse(toString(), msa);
-		return msa.ms_page + 1;
+		return n_pages[0];
 	}
 
 	/** Get an array of font numbers.

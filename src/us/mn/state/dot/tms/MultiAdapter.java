@@ -25,13 +25,10 @@ package us.mn.state.dot.tms;
  */
 public class MultiAdapter implements Multi {
 
-	/** Page number, zero based */
-	protected int ms_page;
-
 	/** Add a page */
 	@Override
 	public void addPage() {
-		ms_page++;
+		// subclass must handle
 	}
 
 	/** Set the page times.
@@ -174,11 +171,6 @@ public class MultiAdapter implements Multi {
 	@Override
 	public void setCharSpacing(Integer sc) {
 		// subclass must handle
-	}
-
-	/** Create a new MULTI string adapter */
-	public MultiAdapter() {
-		ms_page = 0;
 	}
 
 	/** Add a span of text */

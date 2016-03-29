@@ -67,6 +67,9 @@ public class MultiRenderer extends MultiAdapter {
 	/** Current font number */
 	private int font_num;
 
+	/** Current page number */
+	private int n_page = 0;
+
 	/**
 	 * Create a new MULTI renderer.
 	 * @param r Raster graphic to render.
@@ -140,7 +143,7 @@ public class MultiRenderer extends MultiAdapter {
 	/** Add a span of text */
 	@Override
 	public void addSpan(String span) {
-		if (page == ms_page) {
+		if (page == n_page) {
 			Span s = new Span(span);
 			if (s.font != null) {
 				Block block = currentBlock();
@@ -170,7 +173,7 @@ public class MultiRenderer extends MultiAdapter {
 	public void addPage() {
 		renderText();
 		resetTextRectangle();
-		super.addPage();
+		n_page++;
 		fillBackground();
 	}
 
@@ -234,7 +237,7 @@ public class MultiRenderer extends MultiAdapter {
 
 	/** Fill a rectangle with a specified color */
 	private void fillRectangle(int x, int y, int w, int h, DmsColor clr) {
-		if (page == ms_page) {
+		if (page == n_page) {
 			x--;	/* make X zero-based for raster */
 			y--;	/* make Y zero-based for raster */
 			for (int yy = 0; yy < h; yy++) {
@@ -274,7 +277,7 @@ public class MultiRenderer extends MultiAdapter {
 
 	/** Render the current text rectangle */
 	private void renderText() {
-		if (page == ms_page) {
+		if (page == n_page) {
 			try {
 				for (Block block: blocks)
 					block.render();
@@ -292,7 +295,7 @@ public class MultiRenderer extends MultiAdapter {
 	/** Add a graphic */
 	@Override
 	public void addGraphic(int g_num, Integer x, Integer y, String g_id) {
-		if (page != ms_page)
+		if (page != n_page)
 			return;
 		Graphic graphic = GraphicHelper.find(g_num);
 		if (graphic == null) {
