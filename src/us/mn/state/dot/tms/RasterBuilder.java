@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.ArrayList;
 import java.util.TreeMap;
 
 /**
@@ -138,33 +139,43 @@ public class RasterBuilder {
 	public BitmapGraphic[] createBitmaps(MultiString ms)
 		throws InvalidMessageException
 	{
-		int n_pages = ms.getNumPages();
-		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
-		for (int p = 0; p < n_pages; p++) {
-			bitmaps[p] = new BitmapGraphic(width, height);
-			render(ms, p, bitmaps[p]);
-		}
-		return bitmaps;
+		final ArrayList<BitmapGraphic> bitmaps =
+			new ArrayList<BitmapGraphic>();
+		RasterGraphic.Factory factory = new RasterGraphic.Factory() {
+			public RasterGraphic create() {
+				BitmapGraphic bg = new BitmapGraphic(width,
+					height);
+				bitmaps.add(bg);
+				return bg;
+			}
+		};
+		render(ms, factory);
+		return bitmaps.toArray(new BitmapGraphic[0]);
 	}
 
 	/** Render a PixmapGraphic for each page */
 	public RasterGraphic[] createPixmaps(MultiString ms)
 		throws InvalidMessageException
 	{
-		int n_pages = ms.getNumPages();
-		RasterGraphic[] pixmaps = new RasterGraphic[n_pages];
-		for (int p = 0; p < n_pages; p++) {
-			pixmaps[p] = new PixmapGraphic(width, height);
-			render(ms, p, pixmaps[p]);
-		}
-		return pixmaps;
+		final ArrayList<RasterGraphic> pixmaps =
+			new ArrayList<RasterGraphic>();
+		RasterGraphic.Factory factory = new RasterGraphic.Factory() {
+			public RasterGraphic create() {
+				PixmapGraphic pg = new PixmapGraphic(width,
+					height);
+				pixmaps.add(pg);
+				return pg;
+			}
+		};
+		render(ms, factory);
+		return pixmaps.toArray(new RasterGraphic[0]);
 	}
 
 	/** Render to a RasterGraphic for the specified page number */
-	private void render(MultiString ms, int p, RasterGraphic rg)
+	private void render(MultiString ms, RasterGraphic.Factory factory)
 		throws InvalidMessageException
 	{
-		MultiRenderer mr = new MultiRenderer(rg, p, c_width, c_height,
+		MultiRenderer mr = new MultiRenderer(factory, c_width, c_height,
 			default_font);
 		String multi = DMSHelper.ignoreFilter(ms).toString();
 		MultiParser.parse(multi, mr);

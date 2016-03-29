@@ -32,11 +32,8 @@ public class MultiRenderer extends MultiAdapter {
 		return (cc != null) ? cc.clr : null;
 	}
 
-	/** Raster graphic to render */
-	private final RasterGraphic raster;
-
-	/** Page to render */
-	private final int page;
+	/** Raster graphic factory */
+	private final RasterGraphic.Factory factory;
 
 	/** Character width (pixels) for character-matrix signs.  Set to 1 for
 	 * line-matrix or full-matrix signs. */
@@ -73,11 +70,11 @@ public class MultiRenderer extends MultiAdapter {
 	/** Current line justification */
 	private JustificationLine just_line = JustificationLine.DEFAULT;
 
+	/** Current raster graphic to render */
+	private RasterGraphic raster;
+
 	/** Current font number */
 	private int font_num;
-
-	/** Current page number */
-	private int n_page = 0;
 
 	/** Page background color */
 	private DmsColor background_clr = DmsColor.BLACK;
@@ -87,17 +84,16 @@ public class MultiRenderer extends MultiAdapter {
 
 	/**
 	 * Create a new MULTI renderer.
-	 * @param r Raster graphic to render.
-	 * @param p Page to render.
+	 * @param fct Raster graphic factory.
 	 * @param cw Character width (pixels) for character-matrix signs.
 	 *           Use 0 for line-matrix or full-matrix signs.
 	 * @param ch Character height (pixels) for character- or line-matrix
 	 *           signs.  Use 0 for full-matrix signs.
 	 * @param f Default font number.
 	 */
-	public MultiRenderer(RasterGraphic r, int p, int cw, int ch, int f) {
-		raster = r;
-		page = p;
+	public MultiRenderer(RasterGraphic.Factory fct, int cw, int ch, int f) {
+		factory = fct;
+		raster = factory.create();
 		c_width = (cw > 0) ? cw : 1;
 		c_height = (ch > 0) ? ch : 1;
 		font_num = f;
@@ -158,14 +154,12 @@ public class MultiRenderer extends MultiAdapter {
 	/** Add a span of text */
 	@Override
 	public void addSpan(String span) {
-		if (page == n_page) {
-			Span s = new Span(span);
-			if (s.font != null) {
-				Block block = currentBlock();
-				block.addSpan(s);
-			} else
-				syntax_err = MultiSyntaxError.fontNotDefined;
-		}
+		Span s = new Span(span);
+		if (s.font != null) {
+			Block block = currentBlock();
+			block.addSpan(s);
+		} else
+			syntax_err = MultiSyntaxError.fontNotDefined;
 	}
 
 	/** Add a new line */
@@ -188,7 +182,7 @@ public class MultiRenderer extends MultiAdapter {
 	public void addPage() {
 		renderText();
 		resetTextRectangle();
-		n_page++;
+		raster = factory.create();
 		fillBackground();
 	}
 
@@ -285,13 +279,11 @@ public class MultiRenderer extends MultiAdapter {
 
 	/** Fill a rectangle with a specified color */
 	private void fillRectangle(int x, int y, int w, int h, DmsColor clr) {
-		if (page == n_page) {
-			x--;	/* make X zero-based for raster */
-			y--;	/* make Y zero-based for raster */
-			for (int yy = 0; yy < h; yy++) {
-				for (int xx = 0; xx < w; xx++)
-					raster.setPixel(x + xx, y + yy, clr);
-			}
+		x--;	/* make X zero-based for raster */
+		y--;	/* make Y zero-based for raster */
+		for (int yy = 0; yy < h; yy++) {
+			for (int xx = 0; xx < w; xx++)
+				raster.setPixel(x + xx, y + yy, clr);
 		}
 	}
 
@@ -325,17 +317,15 @@ public class MultiRenderer extends MultiAdapter {
 
 	/** Render the current text rectangle */
 	private void renderText() {
-		if (page == n_page) {
-			try {
-				for (Block block: blocks)
-					block.render();
-			}
-			catch (InvalidMessageException e) {
-				syntax_err=MultiSyntaxError.characterNotDefined;
-			}
-			catch (IndexOutOfBoundsException e) {
-				syntax_err = MultiSyntaxError.textTooBig;
-			}
+		try {
+			for (Block block: blocks)
+				block.render();
+		}
+		catch (InvalidMessageException e) {
+			syntax_err=MultiSyntaxError.characterNotDefined;
+		}
+		catch (IndexOutOfBoundsException e) {
+			syntax_err = MultiSyntaxError.textTooBig;
 		}
 		blocks.clear();
 	}
@@ -343,8 +333,6 @@ public class MultiRenderer extends MultiAdapter {
 	/** Add a graphic */
 	@Override
 	public void addGraphic(int g_num, Integer x, Integer y, String g_id) {
-		if (page != n_page)
-			return;
 		Graphic graphic = GraphicHelper.find(g_num);
 		if (graphic == null) {
 			syntax_err = MultiSyntaxError.graphicNotDefined;

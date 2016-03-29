@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,11 @@ import us.mn.state.dot.tms.utils.Base64;
  * @author Douglas Lau
  */
 abstract public class RasterGraphic {
+
+	/** Factory to create raster graphics */
+	public interface Factory {
+		RasterGraphic create();
+	}
 
 	/** Width of raster graphic */
 	protected final int width;
