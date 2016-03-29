@@ -489,14 +489,17 @@ public class MultiString implements Multi {
 		final ArrayList<Integer> fonts = new ArrayList<Integer>();
 		fonts.add(f_num);
 		MultiAdapter msa = new MultiAdapter() {
+			private int font_num = f_num;
+			@Override public void setFont(int fn, String f_id) {
+				font_num = fn;
+			}
 			@Override public void addPage() {
-				fonts.add(f_num);
+				fonts.add(font_num);
 			}
 			@Override public void addSpan(String span) {
-				fonts.set(fonts.size() - 1, ms_fnum);
+				fonts.set(fonts.size() - 1, font_num);
 			}
 		};
-		msa.setFont(f_num, null);
 		MultiParser.parse(toString(), msa);
 		int[] ret = new int[fonts.size()];
 		for (int i = 0; i < ret.length; i++)

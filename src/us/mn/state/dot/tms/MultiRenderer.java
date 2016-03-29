@@ -64,6 +64,9 @@ public class MultiRenderer extends MultiAdapter {
 	/** Current line justification */
 	private JustificationLine just_line = JustificationLine.DEFAULT;
 
+	/** Current font number */
+	private int font_num;
+
 	/**
 	 * Create a new MULTI renderer.
 	 * @param r Raster graphic to render.
@@ -79,7 +82,7 @@ public class MultiRenderer extends MultiAdapter {
 		page = p;
 		c_width = (cw > 0) ? cw : 1;
 		c_height = (ch > 0) ? ch : 1;
-		ms_fnum = f;
+		font_num = f;
 		resetTextRectangle();
 	}
 
@@ -117,6 +120,14 @@ public class MultiRenderer extends MultiAdapter {
 	@Override
 	public void setJustificationLine(JustificationLine jl) {
 		just_line = jl;
+	}
+
+	/** Set the font number.
+	 * @param f_num Font number (1 to 255)
+	 * @param f_id Font version ID (4-digit hex) */
+	@Override
+	public void setFont(int f_num, String f_id) {
+		font_num = f_num;
 	}
 
 	/** Set the character spacing.
@@ -519,7 +530,7 @@ public class MultiRenderer extends MultiAdapter {
 		private final int c_space;
 		private Span(String s) {
 			span = s;
-			font = FontHelper.find(ms_fnum);
+			font = FontHelper.find(font_num);
 			foreground = ms_foreground;
 			c_space = getCharSpacing();
 		}

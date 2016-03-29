@@ -32,7 +32,6 @@ public class MultiAdapter implements Multi {
 	@Override
 	public void addPage() {
 		ms_page++;
-		ms_line = 0;
 	}
 
 	/** Set the page times.
@@ -49,13 +48,10 @@ public class MultiAdapter implements Multi {
 		// subclass must handle
 	}
 
-	/** Line number on page, zero based */
-	protected int ms_line;
-
 	/** Add a new line */
 	@Override
 	public void addLine(Integer spacing) {
-		ms_line++;
+		// subclass must handle
 	}
 
 	/** Set the line justification */
@@ -165,15 +161,12 @@ public class MultiAdapter implements Multi {
 		// subclass must handle
 	}
 
-	/** Font number */
-	protected int ms_fnum;
-
 	/** Set the font number.
 	 * @param f_num Font number (1 to 255)
 	 * @param f_id Font version ID (4-digit hex) */
 	@Override
 	public void setFont(int f_num, String f_id) {
-		ms_fnum = f_num;
+		// subclass must handle
 	}
 
 	/** Set the character spacing.
@@ -186,8 +179,6 @@ public class MultiAdapter implements Multi {
 	/** Create a new MULTI string adapter */
 	public MultiAdapter() {
 		ms_page = 0;
-		ms_line = 0;
-		ms_fnum = 1;
 	}
 
 	/** Add a span of text */
