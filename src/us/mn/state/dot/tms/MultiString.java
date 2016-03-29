@@ -17,7 +17,6 @@ package us.mn.state.dot.tms;
 
 import java.util.Arrays;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import us.mn.state.dot.tms.units.Interval;
 
@@ -612,9 +611,7 @@ public class MultiString implements Multi {
 	/** Get the words in the message as a list.
 	 * @return A list containing each trimmed word in the message. */
 	public List<String> getWords() {
-		final LinkedList<String> ls = new LinkedList<String>();
-		String astext = asText();
-		String[] words = astext.split(" ");
+		String[] words = asText().split(" ");
 		for (int i = 0; i < words.length; ++i)
 			words[i] = words[i].trim();
 		return Arrays.asList(words);
