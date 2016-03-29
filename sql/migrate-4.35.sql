@@ -38,6 +38,26 @@ CREATE TABLE iris.inc_descriptor (
 	multi VARCHAR(64) NOT NULL
 );
 
+CREATE FUNCTION iris.inc_descriptor_ck() RETURNS TRIGGER AS
+	$inc_descriptor_ck$
+BEGIN
+	-- Only incident event IDs are allowed
+	IF NEW.event_desc_id < 21 OR NEW.event_desc_id > 24 THEN
+		RAISE EXCEPTION 'invalid incident event_desc_id';
+	END IF;
+	-- Only mainline, cd road, merge and exit lane types are allowed
+	IF NEW.lane_type != 1 AND NEW.lane_type != 3 AND
+	   NEW.lane_type != 5 AND NEW.lane_type != 7 THEN
+		RAISE EXCEPTION 'invalid incident lane_type';
+	END IF;
+	RETURN NEW;
+END;
+$inc_descriptor_ck$ LANGUAGE plpgsql;
+
+CREATE TRIGGER inc_descriptor_ck_trig
+	BEFORE INSERT OR UPDATE ON iris.inc_descriptor
+	FOR EACH ROW EXECUTE PROCEDURE iris.inc_descriptor_ck();
+
 -- Create incident range lookup table
 CREATE TABLE iris.inc_range (
 	id INTEGER PRIMARY KEY,
@@ -64,6 +84,22 @@ CREATE TABLE iris.inc_advice (
 	cleared BOOLEAN NOT NULL,
 	multi VARCHAR(64) NOT NULL
 );
+
+CREATE FUNCTION iris.inc_advice_ck() RETURNS TRIGGER AS
+	$inc_advice_ck$
+BEGIN
+	-- Only mainline, cd road, merge and exit lane types are allowed
+	IF NEW.lane_type != 1 AND NEW.lane_type != 3 AND
+	   NEW.lane_type != 5 AND NEW.lane_type != 7 THEN
+		RAISE EXCEPTION 'invalid incident lane_type';
+	END IF;
+	RETURN NEW;
+END;
+$inc_advice_ck$ LANGUAGE plpgsql;
+
+CREATE TRIGGER inc_advice_ck_trig
+	BEFORE INSERT OR UPDATE ON iris.inc_advice
+	FOR EACH ROW EXECUTE PROCEDURE iris.inc_advice_ck();
 
 -- Add incident control privileges
 INSERT INTO iris.privilege (name, capability, pattern, priv_r, priv_w, priv_c,
