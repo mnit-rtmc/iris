@@ -486,22 +486,21 @@ public class MultiString implements Multi {
 	public int[] getFonts(final int f_num) {
 		if (f_num < 1 || f_num > 255)
 			return new int[0];
-		int np = getNumPages();
-		final int[] ret = new int[np]; // font numbers indexed by pg
-		for (int i = 0; i < ret.length; i++)
-			ret[i] = f_num;
+		final ArrayList<Integer> fonts = new ArrayList<Integer>();
+		fonts.add(f_num);
 		MultiAdapter msa = new MultiAdapter() {
-			@Override
-			public void addSpan(String span) {
-				// note: fields in span use ms prefix
-				if (ms_page >= 0 && ms_page < ret.length)
-					ret[ms_page] = ms_fnum;
-				else
-					assert false : "bogus # pages";
+			@Override public void addPage() {
+				fonts.add(f_num);
+			}
+			@Override public void addSpan(String span) {
+				fonts.set(fonts.size() - 1, ms_fnum);
 			}
 		};
 		msa.setFont(f_num, null);
 		MultiParser.parse(toString(), msa);
+		int[] ret = new int[fonts.size()];
+		for (int i = 0; i < ret.length; i++)
+			ret[i] = fonts.get(i);
 		return ret;
 	}
 
