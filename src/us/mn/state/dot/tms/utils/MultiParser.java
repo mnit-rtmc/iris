@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import us.mn.state.dot.tms.Multi;
 
 /**
  * A parser for MULTI (MarkUp Language for Transportation Information), as

@@ -17,8 +17,6 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
-import us.mn.state.dot.tms.Multi.JustificationLine;
-import us.mn.state.dot.tms.Multi.JustificationPage;
 import static us.mn.state.dot.tms.SystemAttrEnum.*;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -34,6 +32,8 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.BadValue;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
+import us.mn.state.dot.tms.utils.Multi.JustificationLine;
+import us.mn.state.dot.tms.utils.Multi.JustificationPage;
 
 /**
  * Operation to send default parameters to a DMS.
