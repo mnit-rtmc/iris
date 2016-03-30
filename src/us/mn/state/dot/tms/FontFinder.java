@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2013  Minnesota Department of Transportation
+ * Copyright (C) 2011-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms;
 
 import java.util.Iterator;
 import java.util.LinkedList;
+import us.mn.state.dot.tms.utils.MultiAdapter;
 
 /**
  * Helper class for finding fonts for DMS.
@@ -32,6 +33,7 @@ public class FontFinder {
 
 	/** MULTI adapter which records font numbers from tags */
 	private final MultiAdapter fontTagFinder = new MultiAdapter() {
+		@Override
 		public void setFont(int f_num, String f_id) {
 			if(!fonts.contains(f_num))
 				fonts.add(f_num);

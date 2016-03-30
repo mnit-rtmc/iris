@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.LinkedList;
+import us.mn.state.dot.tms.utils.MultiAdapter;
 
 /**
  * A MULTI renderer is for rendering MULTI on a raster graphic.
