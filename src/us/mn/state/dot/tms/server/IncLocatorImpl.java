@@ -20,9 +20,9 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.IncLocator;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * An incident locator is part of a message to deploy on a DMS, matching
@@ -201,7 +201,7 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 
 	/** Set the MULTI string */
 	public void doSetMulti(String m) throws TMSException {
-		if (!MultiParser.isValid(m))
+		if (!new MultiString(m).isValid())
 			throw new ChangeVetoException("Invalid MULTI: " + m);
 		if (!m.equals(multi)) {
 			store.update(this, "multi", m);

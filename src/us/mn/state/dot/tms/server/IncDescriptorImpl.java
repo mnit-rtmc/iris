@@ -23,9 +23,9 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IncDescriptor;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * An incident descriptor is part of a message to deploy on a DMS, matching
@@ -258,7 +258,7 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 
 	/** Set the MULTI string */
 	public void doSetMulti(String m) throws TMSException {
-		if (!MultiParser.isValid(m))
+		if (!new MultiString(m).isValid())
 			throw new ChangeVetoException("Invalid MULTI: " + m);
 		if (!m.equals(multi)) {
 			store.update(this, "multi", m);
