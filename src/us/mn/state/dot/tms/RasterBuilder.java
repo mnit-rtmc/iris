@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.utils.MultiRenderer;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.MultiSyntaxError;
 
 /**
  * A raster builder creates raster graphics for DMS display.

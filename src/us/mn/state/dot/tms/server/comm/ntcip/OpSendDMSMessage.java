@@ -22,7 +22,6 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
-import us.mn.state.dot.tms.MultiSyntaxError;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgSource;
@@ -43,6 +42,7 @@ import us.mn.state.dot.tms.server.comm.snmp.GenError;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 import us.mn.state.dot.tms.utils.Base64;
+import us.mn.state.dot.tms.utils.MultiSyntaxError;
 
 /**
  * Operation to send a message to a DMS and activate it.

@@ -21,7 +21,6 @@ import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.MultiSyntaxError;
 import us.mn.state.dot.tms.RasterGraphic;
 
 /**
