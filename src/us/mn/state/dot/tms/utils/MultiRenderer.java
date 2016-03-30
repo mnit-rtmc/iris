@@ -12,10 +12,18 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms;
+package us.mn.state.dot.tms.utils;
 
 import java.util.LinkedList;
-import us.mn.state.dot.tms.utils.MultiAdapter;
+import us.mn.state.dot.tms.ColorClassic;
+import us.mn.state.dot.tms.DmsColor;
+import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
+import us.mn.state.dot.tms.Graphic;
+import us.mn.state.dot.tms.GraphicHelper;
+import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.MultiSyntaxError;
+import us.mn.state.dot.tms.RasterGraphic;
 
 /**
  * A MULTI renderer is for rendering MULTI on a raster graphic.
