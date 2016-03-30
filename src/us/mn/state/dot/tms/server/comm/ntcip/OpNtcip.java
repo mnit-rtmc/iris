@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2015  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.GraphicInfoList;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Object;
 import us.mn.state.dot.tms.utils.HexString;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 
 /**
  * Operation for NTCIP device.
@@ -91,7 +92,7 @@ abstract public class OpNtcip extends OpDevice {
 
 	/** Create a regex which matches any speed advisory values */
 	static private String createRegex(String qm) {
-		MultiString re = new MultiString() {
+		MultiBuilder re = new MultiBuilder() {
 			@Override
 			public void addSpeedAdvisory() {
 				// Add unquoted regex to match 2 digits
@@ -110,7 +111,7 @@ abstract public class OpNtcip extends OpDevice {
 	 * @param ms Original MULTI string.
 	 * @return MULTI string with graphic IDs added. */
 	static protected String parseMulti(String ms) {
-		MultiString multi = new MultiString() {
+		MultiBuilder mb = new MultiBuilder() {
 			@Override
 			public void addGraphic(int g_num, Integer x, Integer y,
 				String g_id)
@@ -125,8 +126,8 @@ abstract public class OpNtcip extends OpDevice {
 				super.addGraphic(g_num, x, y, g_id);
 			}
 		};
-		MultiParser.parse(ms, multi);
-		return multi.toString();
+		MultiParser.parse(ms, mb);
+		return mb.toString();
 	}
 
 	/** Calculate the graphic ID.

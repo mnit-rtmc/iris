@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -182,9 +182,7 @@ public class DMSHelper extends BaseHelper {
 		String s = ms.toString();
 		boolean ignore = s.contains(NOTXT_L1) && s.contains(NOTXT_L2)
 			&& s.contains(NOTXT_L3);
-		if(ignore)
-			ms = new MultiString();
-		return ms;
+		return (ignore) ? new MultiString("") : ms;
 	}
 
 	/**

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import javax.swing.GroupLayout;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
@@ -193,7 +194,7 @@ public class ComposerPagePanel extends JPanel {
 	 * @param prefix MULTI prefix for each page.
 	 * @return MULTI string for the page. */
 	public MultiString getMulti(int n_font, String prefix) {
-		MultiString multi = new MultiString(prefix);
+		MultiBuilder mb = new MultiBuilder(prefix);
 		String[] mess = new String[n_lines];
 		int m = 0;
 		for (int i = 0; i < mess.length; i++) {
@@ -205,12 +206,12 @@ public class ComposerPagePanel extends JPanel {
 			if (i == 0) {
 				int fn = getFontNumber();
 				if (fn != n_font)
-					multi.setFont(fn, null);
+					mb.setFont(fn, null);
 			} else
-				multi.addLine(null);
-			multi.addSpan(mess[i]);
+				mb.addLine(null);
+			mb.addSpan(mess[i]);
 		}
-		return multi;
+		return mb.toMultiString();
 	}
 
 	/** Get the font number for the page */

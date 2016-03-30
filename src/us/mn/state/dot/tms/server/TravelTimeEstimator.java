@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2015  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.util.HashMap;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiParser;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -27,6 +26,7 @@ import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 import us.mn.state.dot.tms.units.Speed;
 import static us.mn.state.dot.tms.units.Speed.Units.MPH;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 
 /**
  * Travel time estimator
@@ -81,8 +81,8 @@ public class TravelTimeEstimator {
 			return null;
 	}
 
-	/** MultiString for replacing travel time tags */
-	private class TravelCallback extends MultiString {
+	/** MultiBuilder for replacing travel time tags */
+	private class TravelCallback extends MultiBuilder {
 
 		/* If all routes are on the same corridor, when the
 		 * "OVER X" form is used, it must be used for all
@@ -96,6 +96,7 @@ public class TravelTimeEstimator {
 		private boolean valid = true;
 
 		/** Add a travel time destination */
+		@Override
 		public void addTravelTime(String sid) {
 			Route r = lookupRoute(sid);
 			if (r != null)

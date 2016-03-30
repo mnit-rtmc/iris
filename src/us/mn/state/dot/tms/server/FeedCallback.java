@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,17 +15,17 @@
 package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignTextHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 
 /**
- * MultiString for replacing feed tags
+ * MultiBuilder for replacing feed tags.
  *
  * @author Douglas Lau
  */
-public class FeedCallback extends MultiString {
+public class FeedCallback extends MultiBuilder {
 
 	/** Check if msg feed verify is enabled */
 	static private boolean isMsgFeedVerifyEnabled() {
@@ -51,16 +51,13 @@ public class FeedCallback extends MultiString {
 		group = sg;
 	}
 
-	/** Add a feed tag */
-	public void addFeed(String fid) {
-		msg = FeedBucket.getMessage(fid, did);
-	}
-
 	/** Get a string representation */
+	@Override
 	public String toString() {
-		if(msg == null)
-			return super.toString();
-		else if(multi.length() == 0)
+		String ms = super.toString();
+		if (msg == null)
+			return ms;
+		else if (ms.isEmpty())
 			return getFeedString();
 		else
 			return "";
@@ -68,7 +65,7 @@ public class FeedCallback extends MultiString {
 
 	/** Get the feed message string */
 	private String getFeedString() {
-		if(!isMsgFeedVerifyEnabled() || isFeedMsgValid())
+		if (!isMsgFeedVerifyEnabled() || isFeedMsgValid())
 			return msg.getMulti().toString();
 		else
 			return "";
@@ -77,8 +74,8 @@ public class FeedCallback extends MultiString {
 	/** Test if the feed message is valid */
 	private boolean isFeedMsgValid() {
 		String[] lines = msg.getMulti().getLines(n_lines);
-		for(int i = 0; i < lines.length; i++) {
-			if(!isValidSignText((short)(i + 1), lines[i]))
+		for (int i = 0; i < lines.length; i++) {
+			if (!isValidSignText((short) (i + 1), lines[i]))
 				return false;
 		}
 		return true;
@@ -88,5 +85,11 @@ public class FeedCallback extends MultiString {
 	private boolean isValidSignText(short line, String ms) {
 		return ms.isEmpty() ||
 		       SignTextHelper.match(group, line, ms);
+	}
+
+	/** Add a feed tag */
+	@Override
+	public void addFeed(String fid) {
+		msg = FeedBucket.getMessage(fid, did);
 	}
 }

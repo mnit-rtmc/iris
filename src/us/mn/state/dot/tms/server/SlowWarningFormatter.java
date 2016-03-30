@@ -17,9 +17,9 @@ package us.mn.state.dot.tms.server;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiParser;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Speed;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 
 /**
  * Slow Warning Formatter
@@ -56,26 +56,27 @@ public class SlowWarningFormatter {
 	public String replaceSlowWarning(String multi) {
 		MultiCallback cb = new MultiCallback();
 		MultiParser.parse(multi, cb);
-		if(cb.valid)
+		if (cb.valid)
 			return cb.toString();
 		else
 			return null;
 	}
 
-	/** MultiString for replacing slow warning tags */
-	private class MultiCallback extends MultiString {
+	/** MultiBuilder for replacing slow warning tags */
+	private class MultiCallback extends MultiBuilder {
 
 		protected boolean valid = true;
 
 		/** Add a slow warning */
-		@Override public void addSlowWarning(int spd, int b,
-			String units, boolean dist)
+		@Override
+		public void addSlowWarning(int spd, int b, String units,
+			boolean dist)
 		{
 			Speed as = createSpeed(spd, units);
 			Distance bd = new Distance(b, as.units.d_units);
 			Distance d = slowWarningDistance(as, bd);
-			if(d != null) {
-				if(dist)
+			if (d != null) {
+				if (dist)
 					addSlowWarning(d);
 			} else
 				valid = false;
@@ -84,7 +85,7 @@ public class SlowWarningFormatter {
 		/** Add a slow warning */
 		private void addSlowWarning(Distance d) {
 			int di = d.round(d.units);
-			if(di > 0)
+			if (di > 0)
 				addSpan(String.valueOf(di));
 			else
 				valid = false;
@@ -96,7 +97,7 @@ public class SlowWarningFormatter {
 	 * @param units Speed units (mph or kph).
 	 * @return Matching speed. */
 	private Speed createSpeed(int v, String units) {
-		if(units.equals("kph"))
+		if (units.equals("kph"))
 			return new Speed(v, Speed.Units.KPH);
 		else
 			return new Speed(v, Speed.Units.MPH);
@@ -108,7 +109,7 @@ public class SlowWarningFormatter {
 	 * @return Distance to backup or null for no backup. */
 	private Distance slowWarningDistance(Speed as, Distance bd) {
 		Corridor cor = lookupCorridor();
-		if(cor != null)
+		if (cor != null)
 			return slowWarningDistance(cor, as, bd);
 		else
 			return null;
@@ -129,9 +130,9 @@ public class SlowWarningFormatter {
 		Distance bd)
 	{
 		Float m = cor.calculateMilePoint(loc);
-		if(isLogging())
+		if (isLogging())
 			log("mp " + m);
-		if(m != null)
+		if (m != null)
 			return slowWarningDistance(cor, as, bd, m);
 		else
 			return null;
@@ -148,7 +149,7 @@ public class SlowWarningFormatter {
 	{
 		BackupFinder backup_finder = new BackupFinder(as, bd, m);
 		cor.findStation(backup_finder);
-		if(isLogging())
+		if (isLogging())
 			backup_finder.debug(this);
 		return backup_finder.backupDistance();
 	}

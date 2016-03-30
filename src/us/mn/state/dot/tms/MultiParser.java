@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2015  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 
 /**
  * A parser for MULTI (MarkUp Language for Transportation Information), as
@@ -348,13 +349,13 @@ public class MultiParser {
 	 * @return A normalized MULTI string with invalid characters and
 	 *         invalid tags removed, etc.  Does not return null. */
 	static public String normalize(String multi) {
-		NormalMultiString ms = new NormalMultiString();
-		parse(multi, ms);
-		return ms.toString();
+		NormalMultiBuilder mb = new NormalMultiBuilder();
+		parse(multi, mb);
+		return mb.toString();
 	}
 
 	/** A MULTI string which is automatically normalized */
-	static private class NormalMultiString extends MultiString {
+	static private class NormalMultiBuilder extends MultiBuilder {
 		@Override
 		public void addSpan(String s) {
 			Matcher m = TEXT_PATTERN.matcher(s);
@@ -366,7 +367,7 @@ public class MultiParser {
 	/** Normalize a single line MULTI string */
 	static public String normalizeLine(String multi) {
 		// Strip tags which don't associate with a line
-		MultiString ms = new NormalMultiString() {
+		MultiBuilder mb = new NormalMultiBuilder() {
 			@Override
 			public void setColorBackground(int x) {}
 			@Override
@@ -403,7 +404,7 @@ public class MultiParser {
 			@Override
 			public void addFeed(String fid) {}
 		};
-		parse(multi, ms);
-		return ms.toString();
+		parse(multi, mb);
+		return mb.toString();
 	}
 }

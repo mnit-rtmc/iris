@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,10 +18,10 @@ import java.text.NumberFormat;
 import java.util.HashMap;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.MultiParser;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 
 /**
  * Tolling Formatter
@@ -86,8 +86,8 @@ public class TollingFormatter {
 			return null;
 	}
 
-	/** MultiString for replacing tolling tags */
-	private class MultiCallback extends MultiString {
+	/** MultiBuilder for replacing tolling tags */
+	private class MultiCallback extends MultiBuilder {
 
 		protected boolean valid = true;
 		protected HashMap<String, Float> prices =

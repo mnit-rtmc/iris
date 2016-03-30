@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2009-2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.client.Session;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 
 /**
  * A sign message composer is GUI for composing DMS messages.  It uses a number
@@ -290,19 +291,19 @@ public class SignMessageComposer extends JPanel {
 	 * @param p Number of non-blank pages.
 	 * @return Combined MULTI string for all pages. */
 	private String combinePages(MultiString[] mess, int p) {
-		MultiString multi = new MultiString();
+		MultiBuilder mb = new MultiBuilder();
 		for (int i = 0; i < p; i++) {
 			if (i == 0) {
 				if (p > 1) {
 					Integer pt = misc_pnl.getPageOnTime();
 					if (pt != null)
-						multi.setPageTimes(pt, null);
+						mb.setPageTimes(pt, null);
 				}
 			} else
-				multi.addPage();
-			multi.append(mess[i]);
+				mb.addPage();
+			mb.append(mess[i]);
 		}
-		return multi.toString();
+		return mb.toString();
 	}
 
 	/** Set the currently selected message */

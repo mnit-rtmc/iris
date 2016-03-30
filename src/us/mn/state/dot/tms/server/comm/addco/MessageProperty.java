@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.utils.HexString;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
@@ -314,13 +315,13 @@ public class MessageProperty extends AddcoProperty {
 
 	/** Get the message MULTI string */
 	public String getMulti() {
-		MultiString ms = new MultiString();
+		MultiBuilder mb = new MultiBuilder();
 		for (int i = 0; i < pages.length; i++) {
 			if (i > 0)
-				ms.addPage();
-			ms.addSpan(pages[i].getMulti());
+				mb.addPage();
+			mb.addSpan(pages[i].getMulti());
 		}
-		return ms.toString();
+		return mb.toString();
 	}
 
 	/** Get the bitmaps for all pages */
