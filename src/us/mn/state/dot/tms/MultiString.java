@@ -31,64 +31,22 @@ import us.mn.state.dot.tms.utils.MultiBuilder;
  */
 public class MultiString {
 
-	/** Return the canonical version of a MULTI string.
-	 * @return A canonical MULTI string with all default tag values
-	 *         included and redundant tags removed. */
-	static public String canonical(String multi) {
-		/* FIXME: include default tag values */
-		return MultiParser.normalize(multi);
-	}
-
-	/** Replace all the page times in a MULTI string.
-	 * If no page time tag exists, then a page time tag is prepended.
-	 * @param multi MULTI string.
-	 * @param pt_on Page on-time in tenths of a second.
-	 * @param pt_off Page off-time in tenths of a second.
-	 * @return The updated MULTI string. */
-	static public String replacePageTime(String multi, final Integer pt_on,
-		final Integer pt_off)
-	{
-		if (multi.indexOf("[pt") < 0) {
-			MultiBuilder mb = new MultiBuilder();
-			mb.setPageTimes(pt_on, pt_off);
-			return mb.toString() + multi;
-		}
-		MultiBuilder mb = new MultiBuilder() {
-			@Override
-			public void setPageTimes(Integer on, Integer off) {
-				super.setPageTimes(pt_on, pt_off);
-			}
-		};
-		MultiParser.parse(multi, mb);
-		return mb.toString();
-	}
-
-	/** Strip all page time tags from a MULTI string */
-	static public String stripPageTime(String multi) {
-		MultiBuilder mb = new MultiBuilder() {
-			@Override
-			public void setPageTimes(Integer on, Integer off) { }
-		};
-		MultiParser.parse(multi, mb);
-		return mb.toString();
-	}
-
-	/**
-	 * Normalize a MULTI string.
-	 * @param ms The MULTI string to normalize.
-	 * @return The normalized MULTI string, never null.
-	 */
-	static public String normalize(String ms) {
-		return MultiParser.normalize(ms);
-	}
-
 	/** MULTI string buffer */
 	private final String multi;
+
+	/** Create a new MULTI string.
+	 * @param m MULTI string, may not be null.
+	 * @throws NullPointerException if m is null. */
+	public MultiString(String m) {
+		if (m == null)
+			throw new NullPointerException();
+		multi = m;
+	}
 
         /** Test if the MULTI string is equal to another MULTI string */
 	@Override
         public boolean equals(Object o) {
-		if (this == o)
+		if (o == this)
 			return true;
 		if (o != null) {
 			String ms = MultiParser.normalize(multi);
@@ -98,25 +56,16 @@ public class MultiString {
                 return false;
         }
 
-	/** Get the value of the MULTI string */
-	@Override
-	public String toString() {
-		return multi;
-	}
-
 	/** Calculate a hash code for the MULTI string */
 	@Override
 	public int hashCode() {
 		return multi.hashCode();
 	}
 
-	/** Create a new MULTI string.
-	 * @param m MULTI string, may not be null.
-	 * @throws NullPointerException if m is null. */
-	public MultiString(String m) {
-		if (m == null)
-			throw new NullPointerException();
-		multi = m;
+	/** Get the value of the MULTI string */
+	@Override
+	public String toString() {
+		return multi;
 	}
 
 	/** Validate the MULTI string */
@@ -154,16 +103,50 @@ public class MultiString {
 		return _b.toString().trim().isEmpty();
 	}
 
-	/** Does the MULTI string have a tolling [tz] tag? */
-	public boolean isTolling() {
-		final StringBuilder _b = new StringBuilder();
-		MultiParser.parse(multi, new MultiAdapter() {
+	/** Normalize a MULTI string.
+	 * @return The normalized MULTI string. */
+	public String normalize() {
+		return MultiParser.normalize(multi);
+	}
+
+	/** Return the canonical version of a MULTI string.
+	 * @return A canonical MULTI string with all default tag values
+	 *         included and redundant tags removed. */
+	public String canonical() {
+		/* FIXME: include default tag values */
+		return MultiParser.normalize(multi);
+	}
+
+	/** Strip all page time tags from a MULTI string */
+	public String stripPageTime() {
+		MultiBuilder mb = new MultiBuilder() {
 			@Override
-			public void addTolling(String mode, String[] zones) {
-				_b.append(mode);
+			public void setPageTimes(Integer on, Integer off) { }
+		};
+		MultiParser.parse(multi, mb);
+		return mb.toString();
+	}
+
+	/** Replace all the page times in a MULTI string.
+	 * If no page time tag exists, then a page time tag is prepended.
+	 * @param pt_on Page on-time in tenths of a second.
+	 * @param pt_off Page off-time in tenths of a second.
+	 * @return The updated MULTI string. */
+	public String replacePageTime(final Integer pt_on, final Integer pt_off)
+	{
+		if (multi.indexOf("[pt") < 0) {
+			MultiBuilder mb = new MultiBuilder();
+			mb.setPageTimes(pt_on, pt_off);
+			return mb.toString() + multi;
+		}
+		MultiBuilder mb = new MultiBuilder() {
+			@Override
+			public void setPageTimes(Integer on, Integer off) {
+				super.setPageTimes(pt_on, pt_off);
 			}
-		});
-		return _b.length() > 0;
+		};
+		MultiParser.parse(multi, mb);
+		return mb.toString();
 	}
 
 	/** Return a value indicating if the message is single or multi-page.
@@ -237,7 +220,7 @@ public class MultiString {
 	public Interval pageOffInterval() {
 		Interval dflt = PageTimeHelper.defaultPageOffInterval();
 		Interval[] pg_off = pageOffIntervals(dflt);
-		// return 1st page off-time read, even if specified per page
+		// return 1st page-off time read, even if specified per page
 		return pg_off[0];
 	}
 
@@ -320,5 +303,17 @@ public class MultiString {
 		for (int i = 0; i < words.length; ++i)
 			words[i] = words[i].trim();
 		return Arrays.asList(words);
+	}
+
+	/** Does the MULTI string have a tolling [tz] tag? */
+	public boolean isTolling() {
+		final StringBuilder _b = new StringBuilder();
+		MultiParser.parse(multi, new MultiAdapter() {
+			@Override
+			public void addTolling(String mode, String[] zones) {
+				_b.append(mode);
+			}
+		});
+		return _b.length() > 0;
 	}
 }

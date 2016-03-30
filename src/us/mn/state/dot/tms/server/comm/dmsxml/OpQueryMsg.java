@@ -248,17 +248,18 @@ class OpQueryMsg extends OpDms {
 			pages, apri, rpri, duration);
 	}
 
-	/** Return a MULTI with an updated page on-time with
-	 *  the value read from controller.
-	 *  @param pt Page on time, used to update returned MultiString.
-	 *  @return MULTI string containing updated page on time. */
+	/** Return a MULTI with an updated page on-time with the value read
+	 * from controller.
+	 * @param multi MULTI string.
+	 * @param pt Page on time, used to update returned MultiString.
+	 * @return MULTI string containing updated page on time. */
 	private String updatePageOnTime(String multi, Interval pt) {
-		int npgs = new MultiString(multi).getNumPages();
+		MultiString m = new MultiString(multi);
+		int npgs = m.getNumPages();
 		// if one page, use page on-time of zero.
 		if (npgs <= 1)
 			pt = new Interval(0);
-		String ret = MultiString.replacePageTime(
-			multi, pt.round(DECISECONDS), null);
+		String ret = m.replacePageTime(pt.round(DECISECONDS), null);
 		LOG.log("OpQueryMsg.updatePageOnTime(): " +
 			"updated multi w/ page display time: " + ret);
 		return ret;

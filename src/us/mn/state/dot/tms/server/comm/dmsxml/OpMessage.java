@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -167,7 +167,8 @@ class OpMessage extends OpDms {
 		xrr.addReq("Address", controller.getDrop());
 
 		// MsgText
-		xrr.addReq("MsgText", MultiString.canonical(m_sm.getMulti()));
+		xrr.addReq("MsgText", new MultiString(m_sm.getMulti())
+			.canonical());
 
 		// UseOnTime, always true
 		xrr.addReq("UseOnTime", true);

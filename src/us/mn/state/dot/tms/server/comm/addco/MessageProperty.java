@@ -190,7 +190,8 @@ public class MessageProperty extends AddcoProperty {
 		pos += t_len;
 		parseCheck2(body, "ZERO", 0, 0);
 		parseCheck2(body, "UNKNOWN7", 0, 65535);
-		String multi = MultiString.replacePageTime(text, p_on, p_off);
+		String multi = new MultiString(text).replacePageTime(p_on,
+			p_off);
 		return new MessagePage(dms, multi);
 	}
 
@@ -237,7 +238,8 @@ public class MessageProperty extends AddcoProperty {
 		BitmapGraphic bmap = parseBitmap(body, width, height);
 		parseCheck2(body, "Z3", 0, 0);
 		parseCheckCrc(body, i_pos);
-		String multi = MultiString.replacePageTime(name, p_on, p_off);
+		String multi = new MultiString(name).replacePageTime(p_on,
+			p_off);
 		return new MessagePage(multi, bmap);
 	}
 

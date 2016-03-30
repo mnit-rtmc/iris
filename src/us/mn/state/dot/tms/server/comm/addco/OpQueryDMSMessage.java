@@ -79,7 +79,7 @@ public class OpQueryDMSMessage extends OpAddco {
 	private String getMulti() {
 		String multi = msg_prop.getMulti();
 		// FIXME: should only strip non-default page times
-		return MultiString.stripPageTime(multi);
+		return new MultiString(multi).stripPageTime();
 	}
 
 	/** Get current multi string on sign */

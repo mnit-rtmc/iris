@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,7 +91,7 @@ public class MessagePage {
 
 	/** Get the name for the page (MULTI string without [pt] tag) */
 	public String getName() {
-		return MultiString.stripPageTime(multi);
+		return new MultiString(multi).stripPageTime();
 	}
 
 	/** Get the MULTI string for the page */

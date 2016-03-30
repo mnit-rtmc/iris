@@ -209,87 +209,54 @@ public class MultiStringTest extends TestCase {
 		assertFalse(new MultiString("XXX").equals(new MultiString("XXY")));
 		// verify normalization used
 		assertTrue(new MultiString("[fo1]abc").equals("[fo1]abc"));
-		assertTrue(new MultiString("[fo1]abc").equals(new MultiString("[fo1]abc")));
+		assertTrue(new MultiString("[fo1]abc").equals(new MultiString(
+			"[fo1]abc")));
 	}
 
 	public void testNormalize() {
-		assertTrue(MultiString.normalize("01234567890").
-			equals("01234567890"));
-		assertTrue(MultiString.normalize("ABC").
-			equals("ABC"));
-		assertTrue(MultiString.normalize("abc").
-			equals("abc"));
-		assertTrue(MultiString.normalize("DON'T").
-			equals("DON'T"));
-		assertTrue(MultiString.normalize("SPACE SPACE").
-			equals("SPACE SPACE"));
-		assertTrue(MultiString.normalize("AB|C").
-			equals("AB|C"));
-		assertTrue(MultiString.normalize("AB|{}{}C{}").
-			equals("AB|{}{}C{}"));
-		assertTrue(MultiString.normalize("!\"#$%&\'()*+,-./").
-			equals("!\"#$%&\'()*+,-./"));
-		assertTrue(MultiString.normalize(":;<=>?@\\^_`{|}~").
-			equals(":;<=>?@\\^_`{|}~"));
-		assertTrue(MultiString.normalize("[]][\t\b\n\r\f").
-			equals(""));
-		assertTrue(MultiString.normalize("ABC_DEF").
-			equals("ABC_DEF"));
-		assertTrue(MultiString.normalize("ABC[bad]DEF").
-			equals("ABCDEF"));
-		assertTrue(MultiString.normalize("ABC[nl]DEF").
-			equals("ABC[nl]DEF"));
-		assertTrue(MultiString.normalize("ABC[nl3]DEF").
-			equals("ABC[nl3]DEF"));
-		assertTrue(MultiString.normalize("ABC[np]DEF").
-			equals("ABC[np]DEF"));
-		assertTrue(MultiString.normalize("ABC[jl4]DEF").
-			equals("ABC[jl4]DEF"));
-		assertTrue(MultiString.normalize("ABC[jl6]DEF").
-			equals("ABCDEF"));
-		assertTrue(MultiString.normalize("ABC[jp4]DEF").
-			equals("ABC[jp4]DEF"));
-		assertTrue(MultiString.normalize("[fo3]ABC DEF").
-			equals("[fo3]ABC DEF"));
-		assertTrue(MultiString.normalize("[fo3,beef]ABC DEF").
-			equals("[fo3,beef]ABC DEF"));
-		assertTrue(MultiString.normalize("[g1]").
-			equals("[g1]"));
-		assertTrue(MultiString.normalize("[g1_]").equals(""));
-		assertTrue(MultiString.normalize("[g1,5,5]").
-			equals("[g1,5,5]"));
-		assertTrue(MultiString.normalize("[g1,5,5,beef]").
-			equals("[g1,5,5,beef]"));
-		assertTrue(MultiString.normalize("[cf255,255,255]").
-			equals("[cf255,255,255]"));
-		assertTrue(MultiString.normalize("[cf0,255,255]").
-			equals("[cf0,255,255]"));
-		assertTrue(MultiString.normalize("[cf0,255,0]").
-			equals("[cf0,255,0]"));
-		assertTrue(MultiString.normalize("[pto]").
-			equals("[pto]"));
-		assertTrue(MultiString.normalize("[pt10o]").
-			equals("[pt10o]"));
-		assertTrue(MultiString.normalize("[pt10o5]").
-			equals("[pt10o5]"));
-		assertTrue(MultiString.normalize("[pto5]").
-			equals("[pto5]"));
-		assertTrue(MultiString.normalize("ABC[sc3]DEF").
-			equals("ABC[sc3]DEF"));
-		assertTrue(MultiString.normalize("ABC[sc3]DEF[/sc]GHI").
-			equals("ABC[sc3]DEF[/sc]GHI"));
-		assertTrue(MultiString.normalize("[tr1,1,40,20]").
-			equals("[tr1,1,40,20]"));
-		assertTrue(MultiString.normalize("[tr1,1,0,0]").
-			equals("[tr1,1,0,0]"));
-		assertTrue(MultiString.normalize("[pb0,128,255]").
-			equals("[pb0,128,255]"));
-		assertTrue(MultiString.normalize("[ttS100]").
-			equals("[ttS100]"));
-		assertTrue(MultiString.normalize("[feedL1]").
-			equals("[feedL1]"));
-		assertTrue(MultiString.normalize("[feedL1_2]").
-			equals("[feedL1_2]"));
+		checkNormalize("01234567890", "01234567890");
+		checkNormalize("ABC", "ABC");
+		checkNormalize("abc", "abc");
+		checkNormalize("DON'T", "DON'T");
+		checkNormalize("SPACE SPACE", "SPACE SPACE");
+		checkNormalize("AB|C", "AB|C");
+		checkNormalize("AB|{}{}C{}", "AB|{}{}C{}");
+		checkNormalize("!\"#$%&\'()*+,-./", "!\"#$%&\'()*+,-./");
+		checkNormalize(":;<=>?@\\^_`{|}~", ":;<=>?@\\^_`{|}~");
+		checkNormalize("[]][\t\b\n\r\f", "");
+		checkNormalize("ABC_DEF", "ABC_DEF");
+		checkNormalize("ABC[bad]DEF", "ABCDEF");
+		checkNormalize("ABC[nl]DEF", "ABC[nl]DEF");
+		checkNormalize("ABC[nl3]DEF", "ABC[nl3]DEF");
+		checkNormalize("ABC[np]DEF", "ABC[np]DEF");
+		checkNormalize("ABC[jl4]DEF", "ABC[jl4]DEF");
+		checkNormalize("ABC[jl6]DEF", "ABCDEF");
+		checkNormalize("ABC[jp4]DEF", "ABC[jp4]DEF");
+		checkNormalize("[fo3]ABC DEF", "[fo3]ABC DEF");
+		checkNormalize("[fo3,beef]ABC DEF", "[fo3,beef]ABC DEF");
+		checkNormalize("[g1]", "[g1]");
+		checkNormalize("[g1_]", "");
+		checkNormalize("[g1,5,5]", "[g1,5,5]");
+		checkNormalize("[g1,5,5,beef]", "[g1,5,5,beef]");
+		checkNormalize("[cf255,255,255]", "[cf255,255,255]");
+		checkNormalize("[cf0,255,255]", "[cf0,255,255]");
+		checkNormalize("[cf0,255,0]", "[cf0,255,0]");
+		checkNormalize("[pto]", "[pto]");
+		checkNormalize("[pt10o]", "[pt10o]");
+		checkNormalize("[pt10o5]", "[pt10o5]");
+		checkNormalize("[pto5]", "[pto5]");
+		checkNormalize("ABC[sc3]DEF", "ABC[sc3]DEF");
+		checkNormalize("ABC[sc3]DEF[/sc]GHI", "ABC[sc3]DEF[/sc]GHI");
+		checkNormalize("[tr1,1,40,20]", "[tr1,1,40,20]");
+		checkNormalize("[tr1,1,0,0]", "[tr1,1,0,0]");
+		checkNormalize("[pb0,128,255]", "[pb0,128,255]");
+		checkNormalize("[ttS100]", "[ttS100]");
+		checkNormalize("[feedL1]", "[feedL1]");
+		checkNormalize("[feedL1_2]", "[feedL1_2]");
+	}
+
+	private void checkNormalize(String m0, String m1) {
+		assertTrue(new MultiString(m0).normalize().equals(m1));
 	}
 
 	public void testPageOnTime() {
@@ -451,8 +418,8 @@ public class MultiStringTest extends TestCase {
 		int pot, Integer pof, int[] intvls)
 	{
 		Interval dflt = new Interval(dflt_ds, DECISECONDS);
-		MultiString ms2 = new MultiString(MultiString.replacePageTime(
-			ms, pot, pof));
+		MultiString ms2 = new MultiString(new MultiString(ms)
+			.replacePageTime(pot, pof));
 		Interval[] t = ms2.pageOnIntervals(dflt);
 		assertTrue(t.length == intvls.length);
 		for (int i = 0; i < t.length; i++) {
