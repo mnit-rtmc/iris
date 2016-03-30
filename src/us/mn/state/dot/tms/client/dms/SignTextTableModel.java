@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2014  Minnesota Department of Transportation
+ * Copyright (C) 2005-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +19,12 @@ import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Table model for sign text.
@@ -38,7 +38,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 
 	/** Format MULTI string */
 	static private String formatMulti(Object value) {
-		return MultiParser.normalize(value.toString().trim());
+		return new MultiString(value.toString()).normalize().trim();
 	}
 
 	/** Cell renderer for this table */

@@ -19,8 +19,8 @@ import java.util.TreeSet;
 import javax.swing.AbstractListModel;
 import javax.swing.ComboBoxModel;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Model for a sign text line combo box.
@@ -105,7 +105,7 @@ public class SignTextComboBoxModel extends AbstractListModel<SignText>
 
 	/** Get or create a sign text for the given string */
 	private SignText getSignText(String s) {
-		String m = MultiParser.normalize(s.trim());
+		String m = new MultiString(s.trim()).normalize();
 		if (m.length() == 0)
 			return BLANK_SIGN_TEXT;
 		SignText st = lookupMessage(m);

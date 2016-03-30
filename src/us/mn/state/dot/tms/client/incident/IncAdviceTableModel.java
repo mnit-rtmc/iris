@@ -23,12 +23,12 @@ import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.IncAdvice;
 import us.mn.state.dot.tms.IncRange;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Table model for incident advices.
@@ -130,8 +130,8 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return canUpdate(adv);
 			}
 			public void setValueAt(IncAdvice adv, Object value){
-				adv.setMulti(MultiParser.normalize(
-					value.toString()));
+				adv.setMulti(new MultiString(value.toString())
+					.normalize());
 			}
 		});
 		return cols;

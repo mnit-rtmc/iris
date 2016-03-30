@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,10 +17,10 @@ package us.mn.state.dot.tms.client.dms;
 import java.util.HashMap;
 import java.util.HashSet;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * This is a utility class to create sign text messages.
@@ -58,9 +58,9 @@ public class SignTextCreator {
 	public void create(SignGroup sg, short line, String multi,
 		short rank)
 	{
-		multi = MultiParser.normalize(multi);
+		multi = new MultiString(multi).normalize();
 		String name = createUniqueSignTextName(sg);
-		if(isAddPermitted(name)) {
+		if (isAddPermitted(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("sign_group", sg);

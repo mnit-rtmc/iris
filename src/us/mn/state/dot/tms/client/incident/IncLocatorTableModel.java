@@ -22,12 +22,12 @@ import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.IncLocator;
 import us.mn.state.dot.tms.IncRange;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Table model for incident locators.
@@ -116,8 +116,8 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 				return canUpdate(loc);
 			}
 			public void setValueAt(IncLocator loc, Object value){
-				loc.setMulti(MultiParser.normalize(
-					value.toString()));
+				loc.setMulti(new MultiString(value.toString())
+					.normalize());
 			}
 		});
 		return cols;

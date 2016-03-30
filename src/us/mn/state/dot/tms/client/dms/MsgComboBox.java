@@ -25,9 +25,9 @@ import java.awt.event.KeyEvent;
 import javax.swing.ComboBoxEditor;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * GUI for composing DMS messages.
@@ -237,7 +237,8 @@ public class MsgComboBox extends JComboBox<SignText> {
 		if (item instanceof SignText)
 			return (SignText) item;
 		else if (item != null) {
-			String txt = MultiParser.normalize(item.toString());
+			String txt = new MultiString(item.toString())
+				.normalize();
 			return new ClientSignText(txt, line, ON_THE_FLY_RANK);
 		} else
 			return BLANK_SIGN_TEXT;

@@ -28,7 +28,6 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IncDescriptor;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -36,6 +35,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Table model for incident descriptors.
@@ -205,8 +205,8 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				return canUpdate(dsc);
 			}
 			public void setValueAt(IncDescriptor dsc, Object value){
-				dsc.setMulti(MultiParser.normalize(
-					value.toString()));
+				dsc.setMulti(new MultiString(value.toString())
+					.normalize());
 			}
 		});
 		return cols;
