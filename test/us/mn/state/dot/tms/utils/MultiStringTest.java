@@ -252,6 +252,32 @@ public class MultiStringTest extends TestCase {
 		assertTrue(new MultiString(m0).normalize().equals(m1));
 	}
 
+	public void testNormalizeLine() {
+		checkNormalizeLine("ABC", "ABC");
+		checkNormalizeLine("[cb1]ABC", "ABC");
+		checkNormalizeLine("[pb2]ABC", "ABC");
+		checkNormalizeLine("[pb255,255,0]ABC", "ABC");
+		checkNormalizeLine("[cf4]ABC", "[cf4]ABC");
+		checkNormalizeLine("[cf128,128,128]ABC", "[cf128,128,128]ABC");
+		checkNormalizeLine("[cr1,1,5,5,3]ABC", "ABC");
+		checkNormalizeLine("[cr1,1,5,5,255,255,0]ABC", "ABC");
+		checkNormalizeLine("[fo1]ABC", "ABC");
+		checkNormalizeLine("[g1]ABC", "ABC");
+		checkNormalizeLine("[jl2]ABC", "[jl2]ABC");
+		checkNormalizeLine("[jp1]ABC", "ABC");
+		checkNormalizeLine("[nl]ABC", "ABC");
+		checkNormalizeLine("[nl2]ABC", "ABC");
+		checkNormalizeLine("[np]ABC", "ABC");
+		checkNormalizeLine("[pt5o2]ABC", "ABC");
+		checkNormalizeLine("[sc4]ABC[/sc]", "[sc4]ABC[/sc]");
+		checkNormalizeLine("[tr1,1,20,20]ABC", "ABC");
+		checkNormalizeLine("[feedF0]ABC", "ABC");
+	}
+
+	private void checkNormalizeLine(String m0, String m1) {
+		assertTrue(new MultiString(m0).normalizeLine().equals(m1));
+	}
+
 	public void testPageOnTime() {
 		Interval df_pgon = PageTimeHelper.defaultPageOnInterval();
 		// test page time specified once for entire message
