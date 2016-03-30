@@ -13,11 +13,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms;
+package us.mn.state.dot.tms.utils;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import us.mn.state.dot.tms.utils.MultiBuilder;
+import us.mn.state.dot.tms.Multi;
 
 /**
  * A parser for MULTI (MarkUp Language for Transportation Information), as
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.utils.MultiBuilder;
  * @author Michael Darter
  * @author Travis Swanston
  */
-public class MultiParser {
+class MultiParser {
 
 	/** Regular expression to locate tags */
 	static private final Pattern TAG = Pattern.compile(
