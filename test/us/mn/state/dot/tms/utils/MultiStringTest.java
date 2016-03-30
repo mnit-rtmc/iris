@@ -32,39 +32,32 @@ public class MultiStringTest extends TestCase {
 	}
 
 	public void testAsText() {
-		assertTrue("ABC DEF".equals(new MultiString(
-			"ABC[fo1]DEF").asText()));
-		assertTrue("ABC DEF".equals(new MultiString(
-			"ABC [fo1]DEF").asText()));
-		assertTrue("ABC DEF".equals(new MultiString(
-			"ABC [sc4]DEF").asText()));
-		assertTrue("ABC DEF".equals(new MultiString(
-			"ABC [sc4]DEF[/sc]").asText()));
-		assertTrue("ABC DEF".equals(new MultiString(
-			"ABC[jl4]DEF").asText()));
-		assertTrue("ABC  DEF".equals(new MultiString(
-			"ABC[nl]DEF").asText()));
-		assertTrue("ABC   DEF".equals(new MultiString(
-			"ABC[nl][nl]DEF").asText()));
-		assertTrue("ABC  DEF".equals(new MultiString(
-			"ABC[np]DEF").asText()));
+		checkAsText("ABC[fo1]DEF", "ABC DEF");
+		checkAsText("ABC [fo1]DEF", "ABC DEF");
+		checkAsText("ABC [sc4]DEF", "ABC DEF");
+		checkAsText("ABC [sc4]DEF[/sc]", "ABC DEF");
+		checkAsText("ABC[jl4]DEF", "ABC DEF");
+		checkAsText("ABC[nl]DEF", "ABC  DEF");
+		checkAsText("ABC[nl][nl]DEF", "ABC   DEF");
+		checkAsText("ABC[np]DEF", "ABC  DEF");
+	}
+
+	private void checkAsText(String m0, String m1) {
+		assertTrue(new MultiString(m0).asText().equals(m1));
 	}
 
 	public void testGetNumPages() {
-		assertTrue(new MultiString("").
-			getNumPages() == 1);
-		assertTrue(new MultiString("ABC").
-			getNumPages() == 1);
-		assertTrue(new MultiString("ABC[nl][nl]").
-			getNumPages() == 1);
-		assertTrue(new MultiString("ABC[nl][nl]").
-			getNumPages() == 1);
-		assertTrue(new MultiString("ABC[nl][np]").
-			getNumPages() == 2);
-		assertTrue(new MultiString("ABC[nl][np]DEF").
-			getNumPages() == 2);
-		assertTrue(new MultiString("ABC[nl][np]DEF[np]").
-			getNumPages() == 3);
+		checkGetNumPages("", 1);
+		checkGetNumPages("ABC", 1);
+		checkGetNumPages("ABC[nl][nl]", 1);
+		checkGetNumPages("ABC[nl][nl]", 1);
+		checkGetNumPages("ABC[nl][np]", 2);
+		checkGetNumPages("ABC[nl][np]DEF", 2);
+		checkGetNumPages("ABC[nl][np]DEF[np]", 3);
+	}
+
+	private void checkGetNumPages(String m, int p) {
+		assertTrue(new MultiString(m).getNumPages() == p);
 	}
 
 	public void testGetLinesSinglePage() {
