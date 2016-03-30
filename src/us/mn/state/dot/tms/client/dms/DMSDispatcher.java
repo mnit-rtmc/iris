@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignMessage;
@@ -40,6 +39,7 @@ import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * The DMSDispatcher is a GUI component for creating and deploying DMS messages.
@@ -324,12 +324,12 @@ public class DMSDispatcher extends JPanel {
 	/** Create bitmap graphics for a MULTI string */
 	private String createBitmaps(String multi) {
 		RasterBuilder b = builder;
-		if(b != null) {
+		if (b != null) {
 			MultiString ms = new MultiString(multi);
 			try {
 				return encodeBitmaps(b.createBitmaps(ms));
 			}
-			catch(InvalidMessageException e) {
+			catch (InvalidMessageException e) {
 				// Message is not valid
 			}
 		}
@@ -469,15 +469,15 @@ public class DMSDispatcher extends JPanel {
 	/** Get raster graphic array for the selected message */
 	public RasterGraphic[] getPixmaps() {
 		RasterBuilder b = builder;
-		if(b != null) {
+		if (b != null) {
 			MultiString multi = new MultiString(message);
 			try {
 				return b.createPixmaps(multi);
 			}
-			catch(IndexOutOfBoundsException e) {
+			catch (IndexOutOfBoundsException e) {
 				// pixmap too small for message
 			}
-			catch(InvalidMessageException e) {
+			catch (InvalidMessageException e) {
 				// most likely a MultiSyntaxError ...
 			}
 		}

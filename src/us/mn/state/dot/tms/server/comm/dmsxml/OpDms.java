@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2015  Minnesota Department of Transportation
+ * Copyright (C) 2002-2016  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -23,18 +23,18 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import us.mn.state.dot.tms.utils.Emailer;
-import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
+import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
+import us.mn.state.dot.tms.utils.Emailer;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
 
 /**

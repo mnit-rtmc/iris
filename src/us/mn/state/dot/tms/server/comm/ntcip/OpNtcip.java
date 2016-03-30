@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.MultiParser;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DeviceImpl;
@@ -34,6 +33,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mib1203.GraphicInfoList;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Object;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.MultiBuilder;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Operation for NTCIP device.

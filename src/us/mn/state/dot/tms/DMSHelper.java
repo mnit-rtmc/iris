@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -160,9 +161,9 @@ public class DMSHelper extends BaseHelper {
 	 * @return Text of message on the DMS. */
 	static public String buildMsgLine(DMS dms) {
 		SignMessage sm = dms.getMessageCurrent();
-		if(sm != null) {
+		if (sm != null) {
 			String multi = sm.getMulti();
-			if(multi != null)
+			if (multi != null)
 				return new MultiString(multi).asText();
 		}
 		return "";

@@ -12,11 +12,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms;
+package us.mn.state.dot.tms.utils;
 
 import java.util.ArrayList;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
+import us.mn.state.dot.tms.MultiAdapter;
 
 /**
  * Counter for DMS page-on and page-off times.

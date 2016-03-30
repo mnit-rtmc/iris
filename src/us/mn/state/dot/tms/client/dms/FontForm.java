@@ -28,7 +28,6 @@ import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
@@ -38,6 +37,7 @@ import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * A form for displaying and editing DMS fonts

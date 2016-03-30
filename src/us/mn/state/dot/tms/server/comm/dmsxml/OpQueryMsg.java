@@ -26,7 +26,6 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IrisUserHelper;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SignMessage;
 import static us.mn.state.dot.tms.SignMsgSource.external;
@@ -34,12 +33,13 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
 import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
-import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.HexString;
-import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
+import us.mn.state.dot.tms.utils.MultiBuilder;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Operation to query the current message on a DMS.

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import static us.mn.state.dot.tms.DMSMessagePriority.*;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import static us.mn.state.dot.tms.SignMsgSource.lcs;
@@ -29,6 +28,7 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Operation to send new indicaitons to a Lane Control Signal array.

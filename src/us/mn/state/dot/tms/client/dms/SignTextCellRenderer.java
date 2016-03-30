@@ -20,8 +20,8 @@ import javax.swing.JList;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Cell renderer used for sign text.

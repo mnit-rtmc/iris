@@ -51,7 +51,6 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -67,6 +66,7 @@ import us.mn.state.dot.tms.server.event.BrightnessSample;
 import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.SignStatusEvent;
 import us.mn.state.dot.tms.utils.Base64;
+import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
 
 /**

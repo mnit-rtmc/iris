@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.InvalidMessageException;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignGroup;
@@ -44,6 +43,7 @@ import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.INCHES;
 import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * PropMessages is a GUI panel for displaying and editing sign messages on a

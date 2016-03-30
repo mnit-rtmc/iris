@@ -18,11 +18,11 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.RasterBuilder;
-import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
+import us.mn.state.dot.tms.utils.MultiBuilder;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * The ComposerPagePanel is a GUI panel for tabbed pages related to the sign

@@ -17,8 +17,9 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import java.util.Iterator;
-import us.mn.state.dot.tms.utils.Base64;
 import static us.mn.state.dot.tms.SignMsgSource.*;
+import us.mn.state.dot.tms.utils.Base64;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Helper for dealing with sign messages.

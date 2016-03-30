@@ -22,16 +22,16 @@ import java.util.GregorianCalendar;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
 import us.mn.state.dot.tms.utils.HexString;
-import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Operation to send a new message to a DMS.

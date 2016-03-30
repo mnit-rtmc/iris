@@ -17,11 +17,11 @@ package us.mn.state.dot.tms.server.comm.addco;
 import java.io.IOException;
 import us.mn.state.dot.tms.BitmapGraphic;
 import static us.mn.state.dot.tms.DMSMessagePriority.*;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Operation to query the current message on an Addco DMS.

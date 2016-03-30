@@ -24,13 +24,13 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.client.Session;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.MultiBuilder;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * A sign message composer is GUI for composing DMS messages.  It uses a number

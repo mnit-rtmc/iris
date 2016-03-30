@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.utils;
 
 import us.mn.state.dot.tms.Multi;
-import us.mn.state.dot.tms.MultiString;
 
 /**
  * MULTI string builder (MarkUp Language for Transportation Information), as
