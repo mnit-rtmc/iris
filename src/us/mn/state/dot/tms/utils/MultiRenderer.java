@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * A MULTI renderer is for rendering MULTI on a raster graphic.
@@ -29,6 +30,18 @@ import us.mn.state.dot.tms.RasterGraphic;
  * @author Douglas Lau
  */
 public class MultiRenderer extends MultiAdapter {
+
+	/** Default line justification */
+	static public JustificationLine defaultJustificationLine() {
+		return JustificationLine.fromOrdinal(SystemAttrEnum
+			.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
+	}
+
+	/** Default page justification */
+	static public JustificationPage defaultJustificationPage() {
+		return JustificationPage.fromOrdinal(SystemAttrEnum
+			.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
+	}
 
 	/** Get a color for the color scheme.
 	 * @param x Color value.
@@ -72,10 +85,10 @@ public class MultiRenderer extends MultiAdapter {
 	private final LinkedList<Block> blocks = new LinkedList<Block>();
 
 	/** Current page justification */
-	private JustificationPage just_page = JustificationPage.DEFAULT;
+	private JustificationPage just_page = defaultJustificationPage();
 
 	/** Current line justification */
-	private JustificationLine just_line = JustificationLine.DEFAULT;
+	private JustificationLine just_line = defaultJustificationLine();
 
 	/** Current raster graphic to render */
 	private RasterGraphic raster;

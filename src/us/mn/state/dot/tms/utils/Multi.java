@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.utils;
 
-import us.mn.state.dot.tms.SystemAttrEnum;
-
 /**
  * MULTI string state interface.
  *
@@ -97,10 +95,6 @@ public interface Multi {
 			else
 				return UNDEFINED;
 		}
-
-		/** Default line justification */
-		static public final JustificationLine DEFAULT = fromOrdinal(
-			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_LINE.getInt());
 	}
 
 	/** Set the line justification */
@@ -117,10 +111,6 @@ public interface Multi {
 			else
 				return UNDEFINED;
 		}
-
-		/** Default page justification */
-		static public final JustificationPage DEFAULT = fromOrdinal(
-			SystemAttrEnum.DMS_DEFAULT_JUSTIFICATION_PAGE.getInt());
 	}
 
 	/** Set the page justification */
