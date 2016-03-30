@@ -119,6 +119,12 @@ public class MultiString {
 		return MultiParser.normalize(multi);
 	}
 
+	/** Normalize a single line MULTI string.
+	 * @return The normalized MULTI string. */
+	public String normalizeLine() {
+		return MultiParser.normalizeLine(multi);
+	}
+
 	/** Strip all page time tags from a MULTI string */
 	public String stripPageTime() {
 		MultiBuilder mb = new MultiBuilder() {

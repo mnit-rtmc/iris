@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2013  Minnesota Department of Transportation
+ * Copyright (C) 2004-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Sign text contains the properties of a single line MULTI string for display
@@ -33,13 +33,13 @@ import us.mn.state.dot.tms.TMSException;
 public class SignTextImpl extends BaseObjectImpl implements SignText {
 
 	/** Validate a MULTI string */
-	static protected void validateMulti(String t)
+	static private void validateMulti(String t)
 		throws ChangeVetoException
 	{
-		String multi = MultiParser.normalizeLine(t);
-		if(!multi.equals(t))
+		String multi = new MultiString(t).normalizeLine();
+		if (!multi.equals(t))
 			throw new ChangeVetoException("Invalid message: " + t);
-		if(multi.length() > 64)
+		if (multi.length() > 64)
 			throw new ChangeVetoException("Message too wide");
 	}
 
