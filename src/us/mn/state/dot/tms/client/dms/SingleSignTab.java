@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.MultiString;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
