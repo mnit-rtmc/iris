@@ -37,9 +37,9 @@ public class MultiStringTest extends TestCase {
 		checkAsText("ABC [sc4]DEF", "ABC DEF");
 		checkAsText("ABC [sc4]DEF[/sc]", "ABC DEF");
 		checkAsText("ABC[jl4]DEF", "ABC DEF");
-		checkAsText("ABC[nl]DEF", "ABC  DEF");
-		checkAsText("ABC[nl][nl]DEF", "ABC   DEF");
-		checkAsText("ABC[np]DEF", "ABC  DEF");
+		checkAsText("ABC[nl]DEF", "ABC DEF");
+		checkAsText("ABC[nl][nl]DEF", "ABC DEF");
+		checkAsText("ABC[np]DEF", "ABC DEF");
 	}
 
 	private void checkAsText(String m0, String m1) {

@@ -287,16 +287,9 @@ public class MultiString {
 		parse(new MultiAdapter() {
 			@Override
 			public void addSpan(String span) {
+				if (sb.length() > 0)
+					sb.append(' ');
 				sb.append(span.trim());
-				sb.append(' ');
-			}
-			@Override
-			public void addLine(Integer s) {
-				sb.append(' ');
-			}
-			@Override
-			public void addPage() {
-				sb.append(' ');
 			}
 		});
 		return sb.toString().trim();
