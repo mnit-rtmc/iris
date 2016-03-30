@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.tms.utils.MultiAdapter;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Helper class for finding fonts for DMS.
@@ -109,6 +110,6 @@ public class FontFinder {
 
 	/** Find font tags in a MULTI string */
 	private void findFontTags(String multi) {
-		MultiParser.parse(multi, fontTagFinder);
+		new MultiString(multi).parse(fontTagFinder);
 	}
 }

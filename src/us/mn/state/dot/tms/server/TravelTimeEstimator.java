@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server;
 import java.util.HashMap;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -27,6 +26,7 @@ import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 import us.mn.state.dot.tms.units.Speed;
 import static us.mn.state.dot.tms.units.Speed.Units.MPH;
 import us.mn.state.dot.tms.utils.MultiBuilder;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Travel time estimator
@@ -69,11 +69,12 @@ public class TravelTimeEstimator {
 
 	/** Replace travel time tags in a MULTI string */
 	public String replaceTravelTimes(String trav) {
+		MultiString multi = new MultiString(trav);
 		TravelCallback cb = new TravelCallback();
-		MultiParser.parse(trav, cb);
+		multi.parse(cb);
 		if (cb.isChanged()) {
 			cb.clear();
-			MultiParser.parse(trav, cb);
+			multi.parse(cb);
 		}
 		if (cb.valid)
 			return cb.toString();

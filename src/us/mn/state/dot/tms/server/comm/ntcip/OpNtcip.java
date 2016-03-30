@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DeviceImpl;
@@ -101,7 +100,7 @@ abstract public class OpNtcip extends OpDevice {
 		};
 		// Start quoting for regex
 		re.addSpan("\\Q");
-		MultiParser.parse(qm, re);
+		new MultiString(qm).parse(re);
 		// End quoting for regex
 		re.addSpan("\\E");
 		return re.toString();
@@ -126,7 +125,7 @@ abstract public class OpNtcip extends OpDevice {
 				super.addGraphic(g_num, x, y, g_id);
 			}
 		};
-		MultiParser.parse(ms, mb);
+		new MultiString(ms).parse(mb);
 		return mb.toString();
 	}
 

@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -58,7 +57,7 @@ public class MultiFormatter {
 		if (qm != null) {
 			FeedCallback fc = new FeedCallback(dms,
 				da.getSignGroup());
-			MultiParser.parse(qm.getMulti(), fc);
+			new MultiString(qm.getMulti()).parse(fc);
 			String m = fc.toString();
 			MultiString multi = new MultiString(m);
 			if (!multi.isBlank())

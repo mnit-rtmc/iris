@@ -17,11 +17,11 @@ package us.mn.state.dot.tms.server;
 import java.text.NumberFormat;
 import java.util.HashMap;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TollZoneHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.MultiBuilder;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Tolling Formatter
@@ -67,7 +67,7 @@ public class TollingFormatter {
 	 * @return MULTI string with tolling tags replaced. */
 	public String replaceTolling(String multi) {
 		MultiCallback cb = new MultiCallback();
-		MultiParser.parse(multi, cb);
+		new MultiString(multi).parse(cb);
 		if (cb.valid)
 			return cb.toString();
 		else
@@ -79,7 +79,7 @@ public class TollingFormatter {
 	 * @return Hash map of toll zones and prices. */
 	public HashMap<String, Float> calculatePrices(String multi) {
 		MultiCallback cb = new MultiCallback();
-		MultiParser.parse(multi, cb);
+		new MultiString(multi).parse(cb);
 		if (cb.valid && cb.prices.size() > 0)
 			return cb.prices;
 		else

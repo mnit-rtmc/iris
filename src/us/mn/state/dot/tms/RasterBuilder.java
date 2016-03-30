@@ -179,7 +179,7 @@ public class RasterBuilder {
 		MultiRenderer mr = new MultiRenderer(factory, c_width, c_height,
 			default_font);
 		String multi = DMSHelper.ignoreFilter(ms).toString();
-		MultiParser.parse(multi, mr);
+		new MultiString(multi).parse(mr);
 		mr.complete();
 		MultiSyntaxError err = mr.getSyntaxError();
 		if (err != MultiSyntaxError.none) {

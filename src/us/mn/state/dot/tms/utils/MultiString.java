@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.utils;
 import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
+import us.mn.state.dot.tms.Multi;
 import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.units.Interval;
@@ -77,7 +78,7 @@ public class MultiString {
 	/** Is the MULTI string blank? */
 	public boolean isBlank() {
 		final StringBuilder _b = new StringBuilder();
-		MultiParser.parse(multi, new MultiAdapter() {
+		parse(new MultiAdapter() {
 			@Override
 			public void addSpan(String span) {
 				_b.append(span);
@@ -124,7 +125,7 @@ public class MultiString {
 			@Override
 			public void setPageTimes(Integer on, Integer off) { }
 		};
-		MultiParser.parse(multi, mb);
+		parse(mb);
 		return mb.toString();
 	}
 
@@ -146,7 +147,7 @@ public class MultiString {
 				super.setPageTimes(pt_on, pt_off);
 			}
 		};
-		MultiParser.parse(multi, mb);
+		parse(mb);
 		return mb.toString();
 	}
 
@@ -165,7 +166,7 @@ public class MultiString {
 				n_pages[0]++;
 			}
 		};
-		MultiParser.parse(multi, msa);
+		parse(msa);
 		return n_pages[0];
 	}
 
@@ -189,7 +190,7 @@ public class MultiString {
 				fonts.set(fonts.size() - 1, font_num);
 			}
 		};
-		MultiParser.parse(multi, msa);
+		parse(msa);
 		int[] ret = new int[fonts.size()];
 		for (int i = 0; i < ret.length; i++)
 			ret[i] = fonts.get(i);
@@ -211,7 +212,7 @@ public class MultiString {
 	 * @return An array of page-on time Intervals, one value per page. */
 	public Interval[] pageOnIntervals(Interval dflt) {
 		PageTimeCounter ptc = new PageTimeCounter();
-		MultiParser.parse(multi, ptc);
+		parse(ptc);
 		return ptc.pageOnIntervals(dflt);
 	}
 
@@ -230,7 +231,7 @@ public class MultiString {
 	 * @return An array of page-off time Intervals, one value per page. */
 	public Interval[] pageOffIntervals(Interval dflt) {
 		PageTimeCounter ptc = new PageTimeCounter();
-		MultiParser.parse(multi, ptc);
+		parse(ptc);
 		return ptc.pageOffIntervals(dflt);
 	}
 
@@ -279,7 +280,7 @@ public class MultiString {
 	/** Get a MULTI string as text only (tags stripped) */
 	public String asText() {
 		final StringBuilder sb = new StringBuilder();
-		MultiParser.parse(multi, new MultiAdapter() {
+		parse(new MultiAdapter() {
 			@Override
 			public void addSpan(String span) {
 				sb.append(span.trim());
@@ -309,12 +310,18 @@ public class MultiString {
 	/** Does the MULTI string have a tolling [tz] tag? */
 	public boolean isTolling() {
 		final StringBuilder _b = new StringBuilder();
-		MultiParser.parse(multi, new MultiAdapter() {
+		parse(new MultiAdapter() {
 			@Override
 			public void addTolling(String mode, String[] zones) {
 				_b.append(mode);
 			}
 		});
 		return _b.length() > 0;
+	}
+
+	/** Parse the MULTI string.
+	 * @param cb A callback which keeps track of the MULTI state. */
+	public void parse(Multi cb) {
+		MultiParser.parse(multi, cb);
 	}
 }

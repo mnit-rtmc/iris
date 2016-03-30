@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.MultiBuilder;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Speed Advisory Calculator
@@ -56,7 +56,7 @@ public class SpeedAdvisoryCalculator {
 	/** Replace speed advisory tags in a MULTI string */
 	public String replaceSpeedAdvisory(String multi) {
 		MultiCallback cb = new MultiCallback();
-		MultiParser.parse(multi, cb);
+		new MultiString(multi).parse(cb);
 		if (cb.valid)
 			return cb.toString();
 		else

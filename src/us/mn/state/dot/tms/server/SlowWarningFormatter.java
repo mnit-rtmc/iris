@@ -16,10 +16,10 @@ package us.mn.state.dot.tms.server;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.MultiParser;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Speed;
 import us.mn.state.dot.tms.utils.MultiBuilder;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Slow Warning Formatter
@@ -55,7 +55,7 @@ public class SlowWarningFormatter {
 	 * @return MULTI string with slow warning tags replaced. */
 	public String replaceSlowWarning(String multi) {
 		MultiCallback cb = new MultiCallback();
-		MultiParser.parse(multi, cb);
+		new MultiString(multi).parse(cb);
 		if (cb.valid)
 			return cb.toString();
 		else
