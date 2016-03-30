@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.utils;
 
 import java.util.LinkedList;
-import us.mn.state.dot.tms.ColorClassic;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
