@@ -37,10 +37,6 @@ public class MultiString {
 	static private final Pattern TAG = Pattern.compile(
 		"\\[([-/A-Za-z,0-9_]*)\\]");
 
-	/** Regular expression to match supported MULTI tags */
-	static private final Pattern TAGS = Pattern.compile("(cb|pb|cf|cr|fo|" +
-		"g|jl|jp|nl|np|pt|sc|/sc|tr|tt|vsa|slow|feed|tz)(.*)");
-
 	/** Regular expression to match text between MULTI tags */
 	static private final Pattern TEXT_PATTERN = Pattern.compile(
 		"[' !#$%&()*+,-./0-9:;<=>?@A-Z^_`a-z{|}\\\\~\"]*");
@@ -65,49 +61,45 @@ public class MultiString {
 
 	/** Parse one MULTI tag */
 	static private void parseTag(String tag, Multi cb) {
-		Matcher mtag = TAGS.matcher(tag);
-		if (mtag.find()) {
-			String tid = mtag.group(1).toLowerCase();
-			String tparam = mtag.group(2);
-			if (tid.equals("cb"))
-				parseColorBackground(tparam, cb);
-			else if (tid.equals("pb"))
-				parsePageBackground(tparam, cb);
-			else if (tid.equals("cf"))
-				parseColorForeground(tparam, cb);
-			else if (tid.equals("cr"))
-				parseColorRectangle(tparam, cb);
-			else if (tid.equals("fo"))
-				parseFont(tparam, cb);
-			else if (tid.equals("g"))
-				parseGraphic(tparam, cb);
-			else if (tid.equals("jl"))
-				parseJustificationLine(tparam, cb);
-			else if (tid.equals("jp"))
-				parseJustificationPage(tparam, cb);
-			else if (tid.equals("nl"))
-				cb.addLine(parseInt(tparam));
-			else if (tid.equals("np"))
-				cb.addPage();
-			else if (tid.equals("pt"))
-				parsePageTimes(tparam, cb);
-			else if (tid.equals("sc"))
-				parseCharSpacing(tparam, cb);
-			else if (tid.equals("/sc"))
-				parseCharSpacing(null, cb);
-			else if (tid.equals("tr"))
-				parseTextRectangle(tparam, cb);
-			else if (tid.equals("tt"))
-				cb.addTravelTime(tparam);
-			else if (tid.equals("vsa"))
-				cb.addSpeedAdvisory();
-			else if (tid.equals("slow"))
-				parseSlowWarning(tparam, cb);
-			else if (tid.equals("feed"))
-				cb.addFeed(tparam);
-			else if (tid.equals("tz"))
-				parseTolling(tparam, cb);
-		}
+		String ltag = tag.toLowerCase();
+		if (ltag.startsWith("cb"))
+			parseColorBackground(tag.substring(2), cb);
+		else if (ltag.startsWith("pb"))
+			parsePageBackground(tag.substring(2), cb);
+		else if (ltag.startsWith("cf"))
+			parseColorForeground(tag.substring(2), cb);
+		else if (ltag.startsWith("cr"))
+			parseColorRectangle(tag.substring(2), cb);
+		else if (ltag.startsWith("fo"))
+			parseFont(tag.substring(2), cb);
+		else if (ltag.startsWith("g"))
+			parseGraphic(tag.substring(1), cb);
+		else if (ltag.startsWith("jl"))
+			parseJustificationLine(tag.substring(2), cb);
+		else if (ltag.startsWith("jp"))
+			parseJustificationPage(tag.substring(2), cb);
+		else if (ltag.startsWith("nl"))
+			cb.addLine(parseInt(tag.substring(2)));
+		else if (ltag.startsWith("np"))
+			cb.addPage();
+		else if (ltag.startsWith("pt"))
+			parsePageTimes(tag.substring(2), cb);
+		else if (ltag.startsWith("sc"))
+			parseCharSpacing(tag.substring(2), cb);
+		else if (ltag.startsWith("/sc"))
+			parseCharSpacing(null, cb);
+		else if (ltag.startsWith("tr"))
+			parseTextRectangle(tag.substring(2), cb);
+		else if (ltag.startsWith("tt"))
+			cb.addTravelTime(tag.substring(2));
+		else if (ltag.startsWith("vsa"))
+			cb.addSpeedAdvisory();
+		else if (ltag.startsWith("slow"))
+			parseSlowWarning(tag.substring(4), cb);
+		else if (ltag.startsWith("feed"))
+			cb.addFeed(tag.substring(4));
+		else if (ltag.startsWith("tz"))
+			parseTolling(tag.substring(2), cb);
 	}
 
 	/** Parse a (deprecated) background color tag */
