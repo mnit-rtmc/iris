@@ -162,12 +162,11 @@ public class MultiString {
 	/** Get the number of pages in the multistring */
 	public int getNumPages() {
 		final int[] n_pages = new int[] { 1 };
-		MultiAdapter msa = new MultiAdapter() {
+		parse(new MultiAdapter() {
 			@Override public void addPage() {
 				n_pages[0]++;
 			}
-		};
-		parse(msa);
+		});
 		return n_pages[0];
 	}
 
@@ -179,7 +178,7 @@ public class MultiString {
 			return new int[0];
 		final ArrayList<Integer> fonts = new ArrayList<Integer>();
 		fonts.add(f_num);
-		MultiAdapter msa = new MultiAdapter() {
+		parse(new MultiAdapter() {
 			private int font_num = f_num;
 			@Override public void setFont(int fn, String f_id) {
 				font_num = fn;
@@ -190,8 +189,7 @@ public class MultiString {
 			@Override public void addSpan(String span) {
 				fonts.set(fonts.size() - 1, font_num);
 			}
-		};
-		parse(msa);
+		});
 		int[] ret = new int[fonts.size()];
 		for (int i = 0; i < ret.length; i++)
 			ret[i] = fonts.get(i);
@@ -282,8 +280,7 @@ public class MultiString {
 	public String asText() {
 		final StringBuilder sb = new StringBuilder();
 		parse(new MultiAdapter() {
-			@Override
-			public void addSpan(String span) {
+			@Override public void addSpan(String span) {
 				if (sb.length() > 0)
 					sb.append(' ');
 				sb.append(span.trim());
@@ -303,14 +300,14 @@ public class MultiString {
 
 	/** Does the MULTI string have a tolling [tz] tag? */
 	public boolean isTolling() {
-		final StringBuilder _b = new StringBuilder();
+		final boolean[] tolling = new boolean[] { false };
 		parse(new MultiAdapter() {
 			@Override
 			public void addTolling(String mode, String[] zones) {
-				_b.append(mode);
+				tolling[0] = true;
 			}
 		});
-		return _b.length() > 0;
+		return tolling[0];
 	}
 
 	/** Parse the MULTI string.
