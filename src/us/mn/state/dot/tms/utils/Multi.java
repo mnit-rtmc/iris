@@ -22,6 +22,9 @@ package us.mn.state.dot.tms.utils;
  */
 public interface Multi {
 
+	/** Handle an unsupported tag */
+	void unsupportedTag(String tag);
+
 	/** Add a span of text */
 	void addSpan(String span);
 

@@ -138,6 +138,12 @@ public class MultiRenderer extends MultiAdapter {
 		tr_height = raster.getHeight();
 	}
 
+	/** Handle an unsupported tag */
+	@Override
+	public void unsupportedTag(String tag) {
+		syntax_err = MultiSyntaxError.unsupportedTag;
+	}
+
 	/** Set the page justification */
 	@Override
 	public void setJustificationPage(JustificationPage jp) {

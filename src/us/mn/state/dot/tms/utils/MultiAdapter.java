@@ -22,6 +22,10 @@ package us.mn.state.dot.tms.utils;
  */
 public class MultiAdapter implements Multi {
 
+	/** Handle an unsupported tag */
+	@Override
+	public void unsupportedTag(String tag) { }
+
 	/** Add a page */
 	@Override
 	public void addPage() { }

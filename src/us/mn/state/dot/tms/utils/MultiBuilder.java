@@ -59,6 +59,12 @@ public class MultiBuilder implements Multi {
 		multi.setLength(0);
 	}
 
+	/** Handle an unsupported tag */
+	@Override
+	public void unsupportedTag(String tag) {
+		// ignore unsupported tags
+	}
+
 	/** Add a span of text */
 	@Override
 	public void addSpan(String s) {

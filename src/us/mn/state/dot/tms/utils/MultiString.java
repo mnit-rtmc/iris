@@ -100,6 +100,8 @@ public class MultiString {
 			cb.addFeed(tag.substring(4));
 		else if (ltag.startsWith("tz"))
 			parseTolling(tag.substring(2), cb);
+		else
+			cb.unsupportedTag(tag);
 	}
 
 	/** Parse a (deprecated) background color tag */
