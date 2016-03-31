@@ -216,7 +216,18 @@ public class MultiStringTest extends TestCase {
 		checkNormalize("AB|{}{}C{}", "AB|{}{}C{}");
 		checkNormalize("!\"#$%&\'()*+,-./", "!\"#$%&\'()*+,-./");
 		checkNormalize(":;<=>?@\\^_`{|}~", ":;<=>?@\\^_`{|}~");
-		checkNormalize("[]][\t\b\n\r\f", "");
+		checkNormalize("\t\b\n\r\f", "");
+		checkNormalize("[[", "[[");
+		checkNormalize("]]", "]]");
+		checkNormalize("[[NOT TAG]]", "[[NOT TAG]]");
+		checkNormalize("[", "");
+		checkNormalize("]", "");
+		checkNormalize("[bad tag", "bad tag");
+		checkNormalize("bad tag]", "bad tag");
+		checkNormalize("bad[tag", "badtag");
+		checkNormalize("bad]tag", "badtag");
+		checkNormalize("bad[ tag[nl]", "bad");
+		checkNormalize("bad ]tag[nl]", "bad tag[nl]");
 		checkNormalize("ABC_DEF", "ABC_DEF");
 		checkNormalize("ABC[bad]DEF", "ABCDEF");
 		checkNormalize("ABC[nl]DEF", "ABC[nl]DEF");
@@ -535,6 +546,12 @@ public class MultiStringTest extends TestCase {
 		assertTrue(new MultiString("ABC[pto1]").isValid());
 		assertTrue(new MultiString("ABC[pto12]").isValid());
 		assertTrue(new MultiString("ABC[pto123]").isValid());
+
+		assertTrue(new MultiString("[[").isValid());
+		assertTrue(new MultiString("]]").isValid());
+
+		assertFalse(new MultiString("[").isValid());
+		assertFalse(new MultiString("]").isValid());
 	}
 
 	public void testBlank() {

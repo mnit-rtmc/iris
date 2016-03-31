@@ -68,8 +68,7 @@ public class MultiBuilder implements Multi {
 	/** Add a span of text */
 	@Override
 	public void addSpan(String s) {
-		if (s.length() > 0)
-			multi.append(s);
+		multi.append(s.replace("[", "[[").replace("]", "]]"));
 	}
 
 	/** Add a new line */

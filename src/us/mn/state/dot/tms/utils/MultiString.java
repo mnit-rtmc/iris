@@ -33,13 +33,9 @@ import us.mn.state.dot.tms.units.Interval;
  */
 public class MultiString {
 
-	/** Regular expression to locate tags */
-	static private final Pattern TAG = Pattern.compile(
-		"\\[([-/A-Za-z,0-9_]*)\\]");
-
-	/** Regular expression to match text between MULTI tags */
-	static private final Pattern TEXT_PATTERN = Pattern.compile(
-		"[' !#$%&()*+,-./0-9:;<=>?@A-Z^_`a-z{|}\\\\~\"]*");
+	/** Regular expression to match text spans between MULTI tags */
+	static private final Pattern SPAN = Pattern.compile(
+		"\\[|\\]|[' !#$%&()*+,-./0-9:;<=>?@A-Z^_`a-z{|}\\\\~\"]*");
 
 	/** Parse an integer value */
 	static private Integer parseInt(String[] args, int n) {
@@ -313,9 +309,6 @@ public class MultiString {
 		return param.equals("dist");
 	}
 
-
-
-
 	/** MULTI string buffer */
 	private final String multi;
 
@@ -355,28 +348,73 @@ public class MultiString {
 
 	/** Validate the MULTI string */
 	public boolean isValid() {
-		for (String t: TAG.split(multi)) {
-			Matcher m = TEXT_PATTERN.matcher(t);
-			if (!m.matches())
-				return false;
-		}
-		return true;
+		final boolean[] valid = new boolean[] { true };
+		parse(new MultiAdapter() {
+			@Override public void unsupportedTag(String t) {
+				valid[0] = false;
+			}
+			@Override public void addSpan(String s) {
+				Matcher m = SPAN.matcher(s);
+				if (!m.matches())
+					valid[0] = false;
+			}
+		});
+		return valid[0];
 	}
 
 	/** Parse the MULTI string.
 	 * @param cb A callback which keeps track of the MULTI state. */
 	public void parse(Multi cb) {
-		int offset = 0;
-		Matcher m = TAG.matcher(multi);
-		while (m.find()) {
-			if (m.start() > offset)
-				cb.addSpan(multi.substring(offset, m.start()));
-			offset = m.end();
-			// m.group(1) strips off tag brackets
-			parseTag(m.group(1), cb);
+		int i = 0;
+		while (i < multi.length()) {
+			int b0 = findBracket('[', i);
+			int b1 = findBracket(']', i);
+			int bx = Math.max(b0, b1);
+			if (bx < 0) {
+				cb.addSpan(filterSpan(multi.substring(i)));
+				break;
+			}
+			assert (b0 >= 0) || (b1 >= 0);
+			int bm = Math.min(b0, b1);
+			int bn = (bm < 0) ? bx : bm;
+			if (bn > i)
+				cb.addSpan(filterSpan(multi.substring(i, bn)));
+			if (b1 < 0) {
+				assert b0 >= 0;
+				i = b0 + 1;
+				cb.unsupportedTag("[");
+			} else if (b0 < 0 || b0 > b1) {
+				i = b1 + 1;
+				cb.unsupportedTag("]");
+			} else {
+				i = bx + 1;
+				assert (b0 >= 0) && (b1 > b0);
+				parseTag(multi.substring(b0 + 1, b1), cb);
+			}
 		}
-		if (offset < multi.length())
-			cb.addSpan(multi.substring(offset));
+	}
+
+	/** Filter brackets in a span of text */
+	static private String filterSpan(String s) {
+		return s.replace("[[", "[").replace("]]", "]");
+	}
+
+	/** Find the next (non-doubled) bracket */
+	private int findBracket(char val, int start) {
+		int end = multi.length() - 1;
+		for (int i = start; i < end; i++) {
+			if (multi.charAt(i) == val) {
+				if (multi.charAt(i + 1) != val)
+					return i;
+				else
+					i++;
+			}
+		}
+		if (start <= end && multi.charAt(end) == val) {
+			if (start == end || multi.charAt(end - 1) != val)
+				return end;
+		}
+		return -1;
 	}
 
 	/** Is the MULTI string blank? */
@@ -418,9 +456,9 @@ public class MultiString {
 	/** A MULTI string which is automatically normalized */
 	static private class NormalMultiBuilder extends MultiBuilder {
 		@Override public void addSpan(String s) {
-			Matcher m = TEXT_PATTERN.matcher(s);
+			Matcher m = SPAN.matcher(s);
 			while (m.find())
-				super.addSpan(m.group());
+				super.addSpan(filterSpan(m.group()));
 		}
 	}
 
@@ -641,7 +679,7 @@ public class MultiString {
 			@Override public void addSpan(String span) {
 				if (sb.length() > 0)
 					sb.append(' ');
-				sb.append(span.trim());
+				sb.append(filterSpan(span.trim()));
 			}
 		});
 		return sb.toString().trim();
