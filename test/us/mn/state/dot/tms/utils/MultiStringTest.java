@@ -549,9 +549,13 @@ public class MultiStringTest extends TestCase {
 
 		assertTrue(new MultiString("[[").isValid());
 		assertTrue(new MultiString("]]").isValid());
+		assertTrue(new MultiString("!\"#$%&\'()*+,-./").isValid());
+		assertTrue(new MultiString(":;<=>?@\\^_`{|}~").isValid());
 
+		assertFalse(new MultiString("ABC[tag]DEF").isValid());
 		assertFalse(new MultiString("[").isValid());
 		assertFalse(new MultiString("]").isValid());
+		assertFalse(new MultiString("\t\b\n\r\f").isValid());
 	}
 
 	public void testBlank() {
