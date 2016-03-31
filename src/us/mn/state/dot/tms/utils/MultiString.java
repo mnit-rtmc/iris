@@ -75,32 +75,29 @@ public class MultiString {
 
 	/** Is the MULTI string blank? */
 	public boolean isBlank() {
-		final StringBuilder _b = new StringBuilder();
+		final boolean[] blank = new boolean[] { true };
 		parse(new MultiAdapter() {
-			@Override
-			public void addSpan(String span) {
-				_b.append(span);
+			@Override public void addSpan(String span) {
+				if (span.trim().length() > 0)
+					blank[0] = false;
 			}
-			@Override
-			public void setPageBackground(int red, int green,
-				int blue)
+			@Override public void setPageBackground(int red,
+				int green, int blue)
 			{
-				_b.append("PB");
+				blank[0] = false;
 			}
-			@Override
-			public void addColorRectangle(int x, int y, int w,
-				int h, int r, int g, int b)
+			@Override public void addColorRectangle(int x, int y,
+				int w, int h, int r, int g, int b)
 			{
-				_b.append("CR");
+				blank[0] = false;
 			}
-			@Override
-			public void addGraphic(int g_num, Integer x, Integer y,
-				String g_id)
+			@Override public void addGraphic(int g_num, Integer x,
+				Integer y, String g_id)
 			{
-				_b.append("GRAPHIC");
+				blank[0] = false;
 			}
 		});
-		return _b.toString().trim().isEmpty();
+		return blank[0];
 	}
 
 	/** Normalize a MULTI string.
