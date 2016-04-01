@@ -168,7 +168,7 @@ class OpMessage extends OpDms {
 
 		// MsgText
 		xrr.addReq("MsgText", new MultiString(m_sm.getMulti())
-			.canonical());
+			.normalize());
 
 		// UseOnTime, always true
 		xrr.addReq("UseOnTime", true);

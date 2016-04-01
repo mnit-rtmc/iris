@@ -462,14 +462,6 @@ public class MultiString {
 		}
 	}
 
-	/** Return the canonical version of a MULTI string.
-	 * @return A canonical MULTI string with all default tag values
-	 *         included and redundant tags removed. */
-	public String canonical() {
-		/* FIXME: include default tag values */
-		return normalize();
-	}
-
 	/** Normalize a single line MULTI string.
 	 * @return The normalized MULTI string. */
 	public String normalizeLine() {
