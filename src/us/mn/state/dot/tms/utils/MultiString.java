@@ -35,7 +35,7 @@ public class MultiString {
 
 	/** Regular expression to match text spans between MULTI tags */
 	static private final Pattern SPAN = Pattern.compile(
-		"\\[|\\]|[' !#$%&()*+,-./0-9:;<=>?@A-Z^_`a-z{|}\\\\~\"]*");
+		"[ !\"#$%&'()*+,-./0-9:;<=>?@A-Z\\[\\\\\\]^_`a-z{|}~]*");
 
 	/** Parse an integer value */
 	static private Integer parseInt(String[] args, int n) {

@@ -523,6 +523,8 @@ public class MultiStringTest extends TestCase {
 
 		assertTrue(new MultiString("").isValid());
 		assertTrue(new MultiString("ABC").isValid());
+		assertTrue(new MultiString("abc").isValid());
+		assertTrue(new MultiString("0123456789").isValid());
 
 		assertTrue(new MultiString("ABC[nl]DEF").isValid());
 		assertTrue(new MultiString("ABC[nl1]DEF").isValid());
