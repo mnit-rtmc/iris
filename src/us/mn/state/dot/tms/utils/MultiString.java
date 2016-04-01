@@ -448,13 +448,13 @@ public class MultiString {
 	 * @return A normalized MULTI string with invalid characters and
 	 *         invalid tags removed. */
 	public String normalize() {
-		NormalMultiBuilder mb = new NormalMultiBuilder();
+		MultiBuilder mb = new MultiNormalizer();
 		parse(mb);
 		return mb.toString();
 	}
 
 	/** A MULTI string which is automatically normalized */
-	static private class NormalMultiBuilder extends MultiBuilder {
+	static private class MultiNormalizer extends MultiBuilder {
 		@Override public void addSpan(String s) {
 			Matcher m = SPAN.matcher(s);
 			while (m.find())
@@ -474,7 +474,7 @@ public class MultiString {
 	 * @return The normalized MULTI string. */
 	public String normalizeLine() {
 		// Strip tags which don't associate with a line
-		MultiBuilder mb = new NormalMultiBuilder() {
+		MultiBuilder mb = new MultiNormalizer() {
 			@Override
 			public void setColorBackground(int x) {}
 			@Override
