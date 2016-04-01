@@ -37,6 +37,20 @@ public class MultiString {
 	static private final Pattern SPAN = Pattern.compile(
 		"[ !\"#$%&'()*+,-./0-9:;<=>?@A-Z\\[\\\\\\]^_`a-z{|}~]*");
 
+	/** A MULTI string which is automatically normalized */
+	static private class MultiNormalizer extends MultiBuilder {
+		@Override public void addSpan(String s) {
+			Matcher m = SPAN.matcher(s);
+			while (m.find())
+				super.addSpan(filterSpan(m.group()));
+		}
+	}
+
+	/** Filter brackets in a span of text */
+	static private String filterSpan(String s) {
+		return s.replace("[[", "[").replace("]]", "]");
+	}
+
 	/** Parse an integer value */
 	static private Integer parseInt(String[] args, int n) {
 		if (n < args.length)
@@ -394,11 +408,6 @@ public class MultiString {
 		}
 	}
 
-	/** Filter brackets in a span of text */
-	static private String filterSpan(String s) {
-		return s.replace("[[", "[").replace("]]", "]");
-	}
-
 	/** Find the next (non-doubled) bracket */
 	private int findBracket(char val, int start) {
 		int end = multi.length() - 1;
@@ -451,15 +460,6 @@ public class MultiString {
 		MultiBuilder mb = new MultiNormalizer();
 		parse(mb);
 		return mb.toString();
-	}
-
-	/** A MULTI string which is automatically normalized */
-	static private class MultiNormalizer extends MultiBuilder {
-		@Override public void addSpan(String s) {
-			Matcher m = SPAN.matcher(s);
-			while (m.find())
-				super.addSpan(filterSpan(m.group()));
-		}
 	}
 
 	/** Normalize a single line MULTI string.
