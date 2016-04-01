@@ -67,7 +67,9 @@ public class TravelTimeEstimator {
 		origin = o;
 	}
 
-	/** Replace travel time tags in a MULTI string */
+	/** Replace travel time tags in a MULTI string.
+	 * @param trav MULTI string to parse.
+	 * @return MULTI string with tags replaced; null on bad route. */
 	public String replaceTravelTimes(String trav) {
 		MultiString multi = new MultiString(trav);
 		TravelCallback cb = new TravelCallback();
