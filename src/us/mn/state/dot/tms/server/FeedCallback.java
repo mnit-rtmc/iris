@@ -73,7 +73,7 @@ public class FeedCallback extends MultiBuilder {
 
 	/** Test if the feed message is valid */
 	private boolean isFeedMsgValid() {
-		String[] lines = msg.getMulti().getLines(n_lines);
+		String[] lines = msg.getMulti().getLines(n_lines, "");
 		for (int i = 0; i < lines.length; i++) {
 			if (!isValidSignText((short) (i + 1), lines[i]))
 				return false;

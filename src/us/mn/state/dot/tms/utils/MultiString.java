@@ -653,16 +653,18 @@ public class MultiString {
 	/** Get message lines as an array of strings (with tags).
 	 * Every n_lines elements in the returned array represent one page.
 	 * @param n_lines Number of lines per page.
+	 * @param prefix Page prefix.
 	 * @return A string array containing text for each line. */
-	public String[] getLines(int n_lines) {
+	public String[] getLines(int n_lines, String prefix) {
 		String[] pages = getPages();
 		int n_total = n_lines * pages.length;
 		String[] lines = new String[n_total];
 		for (int i = 0; i < lines.length; i++)
 			lines[i] = "";
 		for (int i = 0; i < pages.length; i++) {
+			String page = removePrefix(pages[i], prefix);
 			int p = i * n_lines;
-			String[] lns = pages[i].split("\\[nl.?\\]");
+			String[] lns = page.split("\\[nl.?\\]");
 			for (int ln = 0; ln < lns.length; ln++) {
 				int j = p + ln;
 				if (j < n_total) {
@@ -677,6 +679,13 @@ public class MultiString {
 			}
 		}
 		return lines;
+	}
+
+	/** Remove a page prefix */
+	static private String removePrefix(String page, String prefix) {
+		return (page.startsWith(prefix))
+		      ? page.substring(prefix.length())
+		      : page;
 	}
 
 	/** Get a MULTI string as text only (tags stripped) */

@@ -127,7 +127,7 @@ public class MultiStringTest extends TestCase {
 
 	private void checkGetLines(String multi, String[] text) {
 		for (int i = 1; i <= 6; i++) {
-			String[] lns = new MultiString(multi).getLines(i);
+			String[] lns = new MultiString(multi).getLines(i, "");
 			assertTrue(lns.length == i);
 			for (int j = 0; j < i; j++) {
 				if (j < text.length)
@@ -178,7 +178,26 @@ public class MultiStringTest extends TestCase {
 
 	private void checkGetLines(String multi, int n_lines, String[] text) {
 		assertTrue(Arrays.equals(new MultiString(multi).getLines(
-			n_lines), text));
+			n_lines, ""), text));
+	}
+
+	public void testGetLinesPrefix() {
+		checkGetLines("[g1,1,1]ABC", "[g1,1,1]", 1,
+			new String[] { "ABC" });
+		checkGetLines("[g1,1,1]ABC[nl]DEF[np][g1,1,1]GHI[nl]JKL",
+			"[g1,1,1]", 2, new String[] { "ABC", "DEF", "GHI",
+			"JKL" });
+		checkGetLines("ABC[tr10,1,50,50]ABC[nl]DEF[np]" +
+			"ABC[tr10,1,50,50]GHI[nl]JKL",
+			"ABC[tr10,1,50,50]", 2, new String[] { "ABC", "DEF",
+			"GHI", "JKL" });
+	}
+
+	private void checkGetLines(String multi, String prefix, int n_lines,
+		String[] text)
+	{
+		assertTrue(Arrays.equals(new MultiString(multi).getLines(
+			n_lines, prefix), text));
 	}
 
 	public void testEquals() {

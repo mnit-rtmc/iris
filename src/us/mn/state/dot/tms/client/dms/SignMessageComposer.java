@@ -314,9 +314,10 @@ public class SignMessageComposer extends JPanel {
 		// first because the line combobox updates (each) result in 
 		// intermediate preview updates which read the (incorrect) 
 		// font from the font combobox.
+		String prefix = dispatcher.getPagePrefix();
 		MultiString multi = new MultiString(ms);
 		setSelectedFonts(multi);
-		String[] lines = multi.getLines(n_lines);
+		String[] lines = multi.getLines(n_lines, prefix);
 		for (int i = 0; i < pages.length; i++)
 			pages[i].setSelected(lines);
 		adjusting--;
