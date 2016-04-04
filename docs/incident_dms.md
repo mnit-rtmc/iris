@@ -54,28 +54,28 @@ to that node is less than 0.5 miles, it can be used as a *locator*.  If not,
 the nearest non-*pickable* r_node is found.  It can be used if distance is less
 than 0.5 miles.
 
-Range  | Branched | Pickable | Multi                  | Example
--------|----------|----------|------------------------|------------------
-NEAR   | NO       | Y/N      | AHEAD                  | AHEAD
-MIDDLE | NO       | YES      | `[mod] [loc]`          | AT HWY 100
-MIDDLE | YES      | Y/N      | ON `[alt]` `[adir]`    | ON 394 EAST
-FAR    | NO       | NO       | `[mi]` MILES AHEAD     | 8 MILES AHEAD
-FAR    | NO       | YES      | `[mod] [loc]`          | AT 494
-FAR    | YES      | YES      | ON `[alt]` AT `[loc]`  | ON 394 AT HWY 100
+Range  | Branched | Pickable | Multi                     | Example
+-------|----------|----------|---------------------------|------------------
+NEAR   | NO       | Y/N      | AHEAD                     | AHEAD
+MIDDLE | NO       | YES      | `[locmd] [locrn]`         | AT HWY 100
+MIDDLE | YES      | Y/N      | ON `[locbr]` `[locbd]`    | ON 394 EAST
+FAR    | NO       | NO       | `[locmi]` MILES AHEAD     | 8 MILES AHEAD
+FAR    | NO       | YES      | `[locmd] [locrn]`         | AT 494
+FAR    | YES      | YES      | ON `[locbr]` AT `[locrn]` | ON 394 AT HWY 100
 
 Several MULTI-like tags are defined for incident locators.
 
-Tag      | Description
----------|-----------------------------------------------
-`[mod]`  | Location modifier (AT, N OF, S OF, etc.)
-`[loc]`  | Road name of node nearest incident
-`[abbr]` | Abbreviated road name of node nearest incident
-`[alt]`  | Alternate freeway text
-`[adir]` | Alternate freeway direction
-`[mi]`   | Miles from DMS to node
+Tag       | Description
+----------|-----------------------------------------------
+`[locmd]` | Location modifier (AT, N OF, S OF, etc.)
+`[locrn]` | Road name of node nearest incident
+`[locra]` | Abbreviated road name of node nearest incident
+`[locbr]` | Branched road name
+`[locbd]` | Branched road direction
+`[locmi]` | Miles from DMS to node
 
-Road names are converted to all capital letters.  For the `[loc]` tag, certain
-prefixes and suffixes are replaced with other values.  For the `[abbr]` tag,
+Road names are converted to all capital letters.  For the `[locrn]` tag, certain
+prefixes and suffixes are replaced with other values.  For the `[locra]` tag,
 all matching prefixes and suffixes are stripped.
 
 Type   | Value    | Replacement
