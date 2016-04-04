@@ -584,6 +584,7 @@ public class MultiString {
 			private int font_num = f_num;
 			@Override public void setFont(int fn, String f_id) {
 				font_num = fn;
+				fonts.set(fonts.size() - 1, font_num);
 			}
 			@Override public void addPage() {
 				fonts.add(font_num);
