@@ -18,6 +18,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.IncAdvice;
 import us.mn.state.dot.tms.LaneType;
@@ -32,6 +34,18 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  */
 public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
+
+	/** Regular expression to match impact codes */
+	static private final Pattern IMPACT = Pattern.compile("[.?!:;,]*");
+
+	/** Validate an impact code */
+	static private void validateImpact(String imp)
+		throws ChangeVetoException
+	{
+		Matcher m = IMPACT.matcher(imp);
+		if (!m.matches())
+			throw new ChangeVetoException("Invalid impact: " + imp);
+	}
 
 	/** Load all the incident advices */
 	static protected void loadAll() throws TMSException {
@@ -197,7 +211,7 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	/** Set the impact code */
 	public void doSetImpact(String imp) throws TMSException {
 		if (!imp.equals(impact)) {
-// FIXME:		validateImpact(imp);
+			validateImpact(imp);
 			store.update(this, "impact", imp);
 			setImpact(imp);
 		}
