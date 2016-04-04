@@ -1119,9 +1119,9 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
       The limit is used in travel time estimation.
   </dd>
   <dt>pickable</dt>
-  <dd>For traveler information systems, an r_node can be marked pickable if a
-      user is allowed to pick a node as an origin or destination.
-      NOTE: This feature has not been implemented yet.
+  <dd>For deploying <a href="#dms">DMS</a> from <a href="#inc_locator">
+      incidents</a>, an r_node can be marked pickable if the road name should be
+      used on the sign message.
   </dd>
   <dt>above</dt>
   <dd>When rendering the <a href="#traffic_layer">traffic layer</a>, r_nodes are
@@ -2297,12 +2297,151 @@ FIXME
 </p>
 <h4>Deploying Devices</h4>
 <p>
-	<a href="#lcs">Lane-use control signals</a> can be deployed based on
-	the incident impact by pressing the <b>Deploy</b> button.
-	This will bring up a list of suggested devices to deploy for the
-	incident.
+	Devices can be deployed based on the incident impact by pressing the
+	<b>Deploy</b> button.
+	This will bring up a form with a list of suggested devices to deploy for
+	the incident.
+	The list may include <a href="#lcs">Lane-use control signals</a> or
+	<a href="#dms">Dynamic Message Signs</a>.
+	All DMS within the range of the incident are checked.
+	Each of these DMS will be deployed if matching
+	<a href="#inc_descriptor">descriptor</a>, <a href="#inc_locator">locator
+	</a> and <a href="#inc_advice">advice</a> are found.
 </p>
-
+<h5 id="inc_descriptor">Incident Descriptor</h5>
+<p>
+	An incident matches a descriptor only if all the attributes match.
+	Each matching descriptor will be checked to see if the
+	<a href="#multi">MULTI</a> string can be rendered on the DMS.
+	Select the <span class="menu">View ➔ Incident ➔ Incident
+	Descriptor</span> menu item to display the Incident Descriptor form.
+</p>
+<dl>
+	<dt>Sign group<dt>
+	<dd>A group of signs with similar dimensions</dd>
+	<dt>Event Type</dt>
+	<dd>CRASH, STALL, ROAD WORD, HAZARD</dd>
+	<dt>Lane Type</dt>
+	<dd>mainline, exit, merge, CD lane</dd>
+	<dt>Detail</dt>
+	<dd>animal, debris, ice, etc.</dd>
+	<dt>Cleared Flag</dt>
+	<dd>yes / no</dd>
+</dl>
+<h5 id="inc_locator">Incident Locator</h5>
+<p>
+	The incident is associated with the nearest <em>pickable</em>
+	<a href="#r_node">r_node</a>.
+	If the distance to that node is less than 1 mile, it can be used as a
+	<em>locator</em>.
+	If not, the nearest <em>non-pickable</em> r_node is found.
+	It can be used if distance is less than 1 mile.
+	Select the <span class="menu">View ➔ Incident ➔ Incident
+	Locator</span> menu item to display the Incident Locator form.
+</p>
+<p>
+	An incident matches a locator only if all the attributes match.
+	Each matching locator will be checked to see if the
+	<a href="#multi">MULTI</a> string can be rendered on the DMS.
+</p>
+<dl>
+	<dt>Sign group<dt>
+	<dd>A group of signs with similar dimensions</dd>
+	<dt>Range</dt>
+	<dd>near, middle, far</dd>
+	<dt>Branched</dt>
+	<dd>no / yes</dd>
+	<dt>Pickable</dt>
+	<dd>no / yes</dd>
+</dl>
+<p>
+	One MULTI-like tag is defined for incident locators.
+</p>
+<table>
+	<tr>
+		<th>Tag Value</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>[locmd]</td>
+		<td>Location modifier (AT, N OF, S OF, etc.)</td>
+	</tr>
+	<tr>
+		<td>[locrn]</td>
+		<td>Road name of node nearest incident</td>
+	</tr>
+	<tr>
+		<td>[locra]</td>
+		<td>Abbreviated road name of node nearest incident</td>
+	</tr>
+	<tr>
+		<td>[locbr]</td>
+		<td>Branched road name</td>
+	</tr>
+	<tr>
+		<td>[locmi]</td>
+		<td>Miles from DMS to node</td>
+	</tr>
+</table>
+<p>
+	Road names are converted to all capital letters.
+	For the `[locrn]` tag, certain prefixes and suffixes are replaced with
+	other values.
+	For the `[locra]` tag, all matching prefixes and suffixes are stripped.
+</p>
+<h5 id="inc_advice">Incident Advice</h5>
+<p>
+	An incident matches an advice record only if all attributes match.
+	Select the <span class="menu">View ➔ Incident ➔ Incident
+	Advice</span> menu item to display the Incident Advice form.
+</p>
+<dl>
+	<dt>Sign group<dt>
+	<dd>A group of signs with similar dimensions</dd>
+	<dt>Range</dt>
+	<dd>near, middle, far</dd>
+	<dt>Lane Type</dt>
+	<dd>mainline, exit, merge, CD lane</dd>
+	<dt>Impact</dt>
+	<dd>Lane impact code</dd>
+	<dt>Cleared Flag</dt>
+	<dd>yes / no</dd>
+</dl>
+<p>
+	A lane impact code is defined for all lanes plus both shoulders.
+	So, for a two-lane r_node, the impact code would be 4 characters.
+</p>
+<table>
+	<tr>
+		<th>Code</th>
+		<th>Description</th>
+	</tr>
+	<tr>
+		<td>.</td>
+		<td>Not blocked</td>
+	</tr>
+	<tr>
+		<td>?</td>
+		<td>Partially blocked</td>
+	</tr>
+	<tr>
+		<td>!</td>
+		<td>Fully blocked</td>
+	</tr>
+	<tr>
+		<td>:</td>
+		<td>Partially of fully blocked (? or !)</td>
+	</tr>
+	<tr>
+		<td>;</td>
+		<td>Not fully blocked (. or ?)</td>
+	</tr>
+	<tr>
+		<td>,</td>
+		<td>Any (. ? or !)</td>
+	</tr>
+</table>
+<br/>
 <h3 id="action_plans">Action Plans</h3>
 FIXME
 
@@ -2391,21 +2530,21 @@ FIXME
 </p>
 <h3 id="spellchecker">Spell Checker</h3>
 <p>
-	The system attributes <i>dict_allowed_scheme</i> and 
-	<i>dict_banned_scheme</i> enable <a href="#dms">DMS</a>	spell checker 
-	functionality. The <i>dict_allowed_scheme</i> system attribute 
-	corresponds to the Allowed Word List (white-list) defined on the 
-	Dictionary Form. The <i>dict_banned_scheme</i> system attribute 
-	provides similar functionality but for the Banned Word List on the
-	Dictionary Form.
+	The system attributes <i>dict_allowed_scheme</i> and
+	<i>dict_banned_scheme</i> enable <a href="#dms">DMS</a>	spell checker
+	functionality.
+	The <i>dict_allowed_scheme</i> system attribute corresponds to the
+	Allowed Word List (white-list) defined on the Dictionary Form.
+	The <i>dict_banned_scheme</i> system attribute provides similar
+	functionality but for the Banned Word List on the Dictionary Form.
 </p>
 <p>
-	When an operator presses the DMS Send Button, each word in the DMS 
-	message is compared against words defined in the dictionary. A form 
-	appears if the DMS message contains words that don't appear on the 
-	Allowed List or do appear on the Banned List. The system attributes
-	control if these rules are enforced or if IRIS merely provides a 
-	recommendation to not use the word.
+	When an operator presses the DMS Send Button, each word in the DMS
+	message is compared against words defined in the dictionary.
+	A form appears if the DMS message contains words that don't appear on
+	the Allowed List or do appear on the Banned List.
+	The system attributes control if these rules are enforced or if IRIS
+	merely provides a recommendation to not use the word.
 </p>
 
 <h2 id="troubleshooting">Troubleshooting</h2>
