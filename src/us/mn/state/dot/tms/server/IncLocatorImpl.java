@@ -201,6 +201,7 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 
 	/** Set the MULTI string */
 	public void doSetMulti(String m) throws TMSException {
+		// FIXME: allow true MULTI tags plus locator tags
 		if (!new MultiString(m).isValid())
 			throw new ChangeVetoException("Invalid MULTI: " + m);
 		if (!m.equals(multi)) {

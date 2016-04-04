@@ -36,6 +36,7 @@ public class SignTextImpl extends BaseObjectImpl implements SignText {
 	static private void validateMulti(String t)
 		throws ChangeVetoException
 	{
+		// FIXME: only allow true MULTI tags here
 		String multi = new MultiString(t).normalizeLine();
 		if (!multi.equals(t))
 			throw new ChangeVetoException("Invalid message: " + t);

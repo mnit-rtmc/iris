@@ -130,6 +130,7 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 
 	/** Set the MULTI string */
 	public void doSetMulti(String m) throws TMSException {
+		// FIXME: allow true MULTI plus quick message MULTI
 		if (!new MultiString(m).isValid())
 			throw new ChangeVetoException("Invalid MULTI: " + m);
 		if (!m.equals(multi)) {

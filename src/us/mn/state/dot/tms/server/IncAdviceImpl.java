@@ -244,6 +244,7 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 
 	/** Set the MULTI string */
 	public void doSetMulti(String m) throws TMSException {
+		// FIXME: only allow true MULTI tags here
 		if (!new MultiString(m).isValid())
 			throw new ChangeVetoException("Invalid MULTI: " + m);
 		if (!m.equals(multi)) {

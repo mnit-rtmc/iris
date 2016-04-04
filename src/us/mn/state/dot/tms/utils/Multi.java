@@ -138,7 +138,7 @@ public interface Multi {
 	/** Set the text rectangle */
 	void setTextRectangle(int x, int y, int w, int h);
 
-	/* IRIS-specific (not part of MULTI) */
+	/* IRIS-specific quick message tags (not part of MULTI) */
 
 	/** Add a travel time destination */
 	void addTravelTime(String sid);
