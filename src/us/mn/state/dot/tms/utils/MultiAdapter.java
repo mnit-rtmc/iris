@@ -153,4 +153,8 @@ public class MultiAdapter implements Multi {
 	/** Add a tolling message */
 	@Override
 	public void addTolling(String mode, String[] zones) { }
+
+	/** Add an incident locator */
+	@Override
+	public void addLocator(String code) { }
 }

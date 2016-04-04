@@ -350,4 +350,12 @@ public class MultiBuilder implements Multi {
 		}
 		multi.append("]");
 	}
+
+	/** Add an incident locator */
+	@Override
+	public void addLocator(String code) {
+		multi.append("[loc");
+		multi.append(code);
+		multi.append("]");
+	}
 }

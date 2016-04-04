@@ -158,4 +158,7 @@ public interface Multi {
 
 	/** Add a tolling message */
 	void addTolling(String mode, String[] zones);
+
+	/** Add an incident locator */
+	void addLocator(String code);
 }

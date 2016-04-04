@@ -110,6 +110,8 @@ public class MultiString {
 			cb.addFeed(tag.substring(4));
 		else if (ltag.startsWith("tz"))
 			parseTolling(tag.substring(2), cb);
+		else if (ltag.startsWith("loc"))
+			parseLocator(tag.substring(3), cb);
 		else
 			cb.unsupportedTag(tag);
 	}
@@ -282,6 +284,19 @@ public class MultiString {
 			    mode.equals("c"))
 				cb.addTolling(mode, zones);
 		}
+	}
+
+	/** Parse locator tag [loc{md,rn,ra,br,bd,mi}].
+	 * @param code Locator tag code ({md,rn,ra,br,bd,mi}).
+	 * @param cb Callback to set tag. */
+	static private void parseLocator(String code, Multi cb) {
+		if (code.equals("md") ||
+		    code.equals("rn") ||
+		    code.equals("ra") ||
+		    code.equals("br") ||
+		    code.equals("bd") ||
+		    code.equals("mi"))
+			cb.addLocator(code);
 	}
 
 	/** Test if a parsed speed is valid */
