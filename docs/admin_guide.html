@@ -97,7 +97,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">24 Feb 2016</div>
+<div id="stamp">4 Apr 2016</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -1352,10 +1352,11 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	to operate.
 	First, an action plan must be created which associates a DMS action
 	with the message feed.
-	The DMS action must be associated with a quick message that references
-	the message feed, using a special MULTI tag.
+	The DMS action must be associated with a <a href="#quick_msg">quick
+	message</a> that references the message feed, using a special MULTI tag.
 	So, if the message feed is on a Comm Link called "LFEED", then the
-	quick message MULTI string must be "[feedLFEED]".
+	<a href="#quick_msg">quick message</a> MULTI string must be
+	"[feedLFEED]".
 	Also, the action plan must be active and deployed.
 	This requirement allows only administrator-approved DMS to be controlled
 	by the message feed.
@@ -1768,9 +1769,7 @@ FIXME
 	In MULTI, messages are simple ASCII strings, with formatting or other
 	instructions denoted by tags inside square brackets.
 	For example, the tag <code>[nl]</code> indicates a new line.
-	Most of the useful standard MULTI tags are supported, as well as a few
-	which are specific to IRIS.
-	The following table summarizes the tags supported by IRIS.
+	Most of the useful MULTI tags are supported.
 </p>
 <table>
 	<tr>
@@ -1895,30 +1894,47 @@ FIXME
 	    <td>Text rectangle</td>
 	    <td>Yes</td>
 	</tr>
+</table>
+<br/>
+
+<h4 id="quick_msg">Quick Messages</h4>
+<p>
+	A quick message is a fully composed DMS message which can be associated
+	with a sign group.
+	When a DMS is selected, a drop-down list is populated with quick
+	messages from sign groups of which that DMS is a member.
+</p>
+<p>
+	Quick messages can also be used for DMS actions as part of an
+	<a href="#action_plans">action plan</a>.
+	Some additional "MULTI-like" tags are supported in quick messages used
+	in action plans.
+	These tags are replaced by IRIS before sending the message to the DMS.
+</p>
+<table>
+	<tr>
+	    <th>Tag</th>
+	    <th>Description</th>
+	</tr>
 	<tr>
 	    <td>[tt<i>n</i>]</td>
-	    <td>Travel time</td>
-	    <td>IRIS-only</td>
+	    <td><a href="#travel_time">Travel time</a></td>
 	</tr>
 	<tr>
 	    <td>[vsa]</td>
-	    <td>Speed advisory</td>
-	    <td>IRIS-only</td>
+	    <td><a href="#vsa">Speed advisory</a></td>
 	</tr>
 	<tr>
 	    <td>[slow<i>s</i>,<i>b</i>,<i>u</i>,<i>dist</i>]</td>
 	    <td>Slow traffic warning</td>
-	    <td>IRIS-only</td>
 	</tr>
 	<tr>
 	    <td>[feed<i>n</i>]</td>
 	    <td><a href="#msg_feed">Message feed</a></td>
-	    <td>IRIS-only</td>
 	</tr>
 	<tr>
 	    <td>[tz<i>{p,o,c}</i>,<i>{tz0},</i>…<i>{tzn}</i>]</td>
 	    <td><a href="#tolling">Toll Zone</a></td>
-	    <td>IRIS-only</td>
 	</tr>
 </table>
 <br/>
@@ -2942,7 +2958,8 @@ FIXME
 	<li>The new DMS Action should appear in the table</li>
 	<li>Click on the "Quick Message" column in the DMS Action just created
 	</li>
-	<li>Specify the name of an existing quick message to send to the sign
+	<li>Specify the name of an existing <a href="#quick_msg">quick
+	    message</a> to send to the sign
 	</li>
 	<li>Repeat the above DMS Actions steps as many times as desired to send
 	    a message to additional sign groups.</li>
