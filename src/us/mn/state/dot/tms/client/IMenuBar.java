@@ -63,9 +63,11 @@ public class IMenuBar extends JMenuBar {
 		if (in) {
 			view_menu = new ViewMenu(s);
 			add(view_menu, 1);
-		} else
+			session_menu.setUser(s.getUser());
+		} else {
 			view_menu = null;
-		session_menu.setLoggedIn(in);
+			session_menu.setUser(null);
+		}
 		help_menu.setLoggedIn(in);
 		session_menu.setEnabled(true);
 	}

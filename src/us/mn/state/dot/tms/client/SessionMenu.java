@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,13 @@ import java.awt.event.ActionEvent;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.system.ChangePasswordForm;
 import us.mn.state.dot.tms.client.system.LoginForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
+import static us.mn.state.dot.tms.utils.SString.isBlank;
 
 /**
  * The sessoin menu contains menu items for logging in, logging out and exiting
@@ -66,7 +68,7 @@ public class SessionMenu extends JMenu {
 		super(I18N.get("session"));
 		client = ic;
 		desktop = client.getDesktop();
-		setLoggedIn(false);
+		setUser(null);
 		add(new JMenuItem(log_in));
 		add(new JMenuItem(log_out));
 		add(new JSeparator());
@@ -86,10 +88,10 @@ public class SessionMenu extends JMenu {
 			desktop.show(new LoginForm(client, desktop));
 	}
 
-	/** Set the logged-in status */
-	public void setLoggedIn(boolean in) {
-		log_in.setEnabled(!in);
-		log_out.setEnabled(in);
-		pwd_change.setEnabled(in);
+	/** Set the logged-in user */
+	public void setUser(User u) {
+		log_in.setEnabled(u == null);
+		log_out.setEnabled(u != null);
+		pwd_change.setEnabled(u != null && isBlank(u.getDn()));
 	}
 }

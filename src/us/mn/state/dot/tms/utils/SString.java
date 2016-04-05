@@ -396,4 +396,9 @@ public class SString {
 		}
 		return false;
 	}
+
+	/** Check if a string blank or null */
+	static public boolean isBlank(String s) {
+		return s == null || s.isEmpty();
+	}
 }

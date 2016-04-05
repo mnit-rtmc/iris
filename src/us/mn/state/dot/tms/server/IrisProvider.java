@@ -24,6 +24,7 @@ import javax.crypto.spec.PBEKeySpec;
 import us.mn.state.dot.sonar.server.AuthProvider;
 import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.tms.utils.Base64;
+import static us.mn.state.dot.tms.utils.SString.isBlank;
 
 /**
  * Authentication provider for IRIS users.
@@ -40,11 +41,6 @@ public class IrisProvider implements AuthProvider {
 
 	/** Number of bits for key (encoded as 44 chars in Base64) */
 	static private final int KEY_BITS = 256;
-
-	/** Check if a string blank or null */
-	static private boolean isBlank(String dn) {
-		return dn == null || dn.isEmpty();
-	}
 
 	/** Random number generator for creating salt */
 	private final SecureRandom rng;
