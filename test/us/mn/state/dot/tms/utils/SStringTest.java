@@ -31,82 +31,81 @@ public class SStringTest extends TestCase {
 	}
 
 	public void testContainsChar() {
-		assertTrue(!SString.containsChar(null,'x'));
-		assertTrue(!SString.containsChar("",'x'));
-		assertTrue(SString.containsChar("abcdx",'x'));
-		assertTrue(!SString.containsChar("abcd",'x'));
+		assertTrue(!containsChar(null, 'x'));
+		assertTrue(!containsChar("", 'x'));
+		assertTrue(containsChar("abcdx", 'x'));
+		assertTrue(!containsChar("abcd", 'x'));
 	}
 
 	public void testUnion() {
-		assertTrue(SString.union(null,"x")==null);
-		assertTrue(SString.union("abc",null)==null);
-		assertTrue(SString.union("abc","").equals(""));
-		assertTrue(SString.union("abcdefg","aceg").equals("aceg"));
-		assertTrue(SString.union("abcdefg",
-			"0123aceg123").equals("aceg"));
+		assertTrue(union(null, "x") == null);
+		assertTrue(union("abc", null) == null);
+		assertTrue(union("abc", "").equals(""));
+		assertTrue(union("abcdefg", "aceg").equals("aceg"));
+		assertTrue(union("abcdefg", "0123aceg123").equals("aceg"));
 	}
 
 	public void testTruncate() {
-		assertTrue(SString.truncate(null,0).equals(""));
-		assertTrue(SString.truncate(null,5).equals(""));
-		assertTrue(SString.truncate("",0).equals(""));
-		assertTrue(SString.truncate("",3).equals(""));
-		assertTrue(SString.truncate("abcdef",0).equals(""));
-		assertTrue(SString.truncate("abcdef",1).equals("a"));
-		assertTrue(SString.truncate("abcdef",2).equals("ab"));
-		assertTrue(SString.truncate("abcdef",3).equals("abc"));
-		assertTrue(SString.truncate("abcdef",35).equals("abcdef"));
+		assertTrue(truncate(null, 0).equals(""));
+		assertTrue(truncate(null, 5).equals(""));
+		assertTrue(truncate("", 0).equals(""));
+		assertTrue(truncate("", 3).equals(""));
+		assertTrue(truncate("abcdef", 0).equals(""));
+		assertTrue(truncate("abcdef", 1).equals("a"));
+		assertTrue(truncate("abcdef", 2).equals("ab"));
+		assertTrue(truncate("abcdef", 3).equals("abc"));
+		assertTrue(truncate("abcdef", 35).equals("abcdef"));
 	}
 
 	public void testToRightField() {
 		assertTrue((new String("").compareTo(
-			SString.toRightField("", "")) == 0));
+			toRightField("", "")) == 0));
 		assertTrue((new String("1234a").compareTo(
-			SString.toRightField("12345", "a")) == 0));
+			toRightField("12345", "a")) == 0));
 		assertTrue((new String("1abcd").compareTo(
-			SString.toRightField("12345", "abcd")) == 0));
+			toRightField("12345", "abcd")) == 0));
 		assertTrue((new String("12345").compareTo(
-			SString.toRightField("12345", "")) == 0));
+			toRightField("12345", "")) == 0));
 		assertTrue((new String("abcdef").compareTo(
-			SString.toRightField("123456", "abcdef")) == 0));
+			toRightField("123456", "abcdef")) == 0));
 	}
 
 	public void testRemoveEnclosingQuotes() {
 		assertTrue((new String("abcd").compareTo(
-			SString.removeEnclosingQuotes("abcd")) == 0));
+			removeEnclosingQuotes("abcd")) == 0));
 		assertTrue((new String("abcd").compareTo(
-			SString.removeEnclosingQuotes("\"abcd\"")) == 0));
+			removeEnclosingQuotes("\"abcd\"")) == 0));
 		assertTrue((new String("").compareTo(
-			SString.removeEnclosingQuotes("")) == 0));
-		assertTrue((null == SString.removeEnclosingQuotes(null)));
+			removeEnclosingQuotes("")) == 0));
+		assertTrue((null == removeEnclosingQuotes(null)));
 		assertTrue((new String("\"abcd\" ").compareTo(
-			SString.removeEnclosingQuotes("\"abcd\" ")) == 0));
+			removeEnclosingQuotes("\"abcd\" ")) == 0));
 		assertTrue((new String("x").compareTo(
-			SString.removeEnclosingQuotes("\"x\"")) == 0));
+			removeEnclosingQuotes("\"x\"")) == 0));
 	}
 
 	public void testAlphaPrefixLen() {
-		assertTrue(SString.alphaPrefixLen(null, "abcd") == 0);
-		assertTrue(SString.alphaPrefixLen("1234", null) == 0);
-		assertTrue(SString.alphaPrefixLen("", "abcd") == 0);
-		assertTrue(SString.alphaPrefixLen("abcd", "1234") == 0);
-		assertTrue(SString.alphaPrefixLen("abcd", "a1234") == 1);
-		assertTrue(SString.alphaPrefixLen("abc", "abcdef") == 3);
-		assertTrue(SString.alphaPrefixLen("abcdef", "abc") == 3);
-		assertTrue(SString.alphaPrefixLen("abcdef", "abcdef") == 6);
-		assertTrue(SString.alphaPrefixLen("abcdef1234", "abcdef1234") == 6);
-		assertTrue(SString.alphaPrefixLen("!@#$%3", "!@#$%3") == 5);
-		assertTrue(SString.alphaPrefixLen("1234", "1234") == 0);
+		assertTrue(alphaPrefixLen(null, "abcd") == 0);
+		assertTrue(alphaPrefixLen("1234", null) == 0);
+		assertTrue(alphaPrefixLen("", "abcd") == 0);
+		assertTrue(alphaPrefixLen("abcd", "1234") == 0);
+		assertTrue(alphaPrefixLen("abcd", "a1234") == 1);
+		assertTrue(alphaPrefixLen("abc", "abcdef") == 3);
+		assertTrue(alphaPrefixLen("abcdef", "abc") == 3);
+		assertTrue(alphaPrefixLen("abcdef", "abcdef") == 6);
+		assertTrue(alphaPrefixLen("abcdef1234", "abcdef1234") == 6);
+		assertTrue(alphaPrefixLen("!@#$%3", "!@#$%3") == 5);
+		assertTrue(alphaPrefixLen("1234", "1234") == 0);
 	}
 
 	public void testCount() {
-		assertTrue(0 == SString.count(null, null));
-		assertTrue(0 == SString.count("", ""));
-		assertTrue(0 == SString.count("abc", ""));
-		assertTrue(1 == SString.count("abc", "c"));
-		assertTrue(1 == SString.count("abc", "bc"));
-		assertTrue(4 == SString.count("aaaa", "a"));
-		assertTrue(0 == SString.count("abc", "bcd"));
+		assertTrue(0 == count(null, null));
+		assertTrue(0 == count("", ""));
+		assertTrue(0 == count("abc", ""));
+		assertTrue(1 == count("abc", "c"));
+		assertTrue(1 == count("abc", "bc"));
+		assertTrue(4 == count("aaaa", "a"));
+		assertTrue(0 == count("abc", "bcd"));
 	}
 
 	public void testLongestCommonSubstring() {
