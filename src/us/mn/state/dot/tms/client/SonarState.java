@@ -510,7 +510,7 @@ public class SonarState extends Client {
 		populate(map_extents);
 		populate(roads);
 		populate(geo_locs);
-		populate(words);
+		populateReadable(words);
 		con_cache.populate(this);
 		det_cache.populate(this);
 		cam_cache.populate(this);
