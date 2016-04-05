@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2015  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,9 +80,9 @@ public class IrisProvider implements AuthProvider {
 		try {
 			return isBlank(user.getDn()) &&
 			       user instanceof IrisUserImpl &&
-			       check((IrisUserImpl)user, pwd);
+			       check((IrisUserImpl) user, pwd);
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			e.printStackTrace();
 			return false;
 		}
@@ -95,7 +95,7 @@ public class IrisProvider implements AuthProvider {
 		String stored = user.getPassword();
 		int s_len = Base64.numCharacters(SALT_BITS);
 		int k_len = Base64.numCharacters(KEY_BITS);
-		if(stored.length() == s_len + k_len) {
+		if (stored.length() == s_len + k_len) {
 			String s = stored.substring(0, s_len);
 			String p = stored.substring(s_len);
 			String h = generateHash(pwd, Base64.decode(s));
