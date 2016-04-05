@@ -321,7 +321,7 @@ public class MessageProperty extends AddcoProperty {
 		for (int i = 0; i < pages.length; i++) {
 			if (i > 0)
 				mb.addPage();
-			mb.addSpan(pages[i].getMulti());
+			pages[i].getMulti().parse(mb);
 		}
 		return mb.toString();
 	}

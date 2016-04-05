@@ -31,8 +31,13 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class MessagePage {
 
+	/** Lookup the MULTI string for the page */
+	static private MultiString lookupMulti(String ms, int p) {
+		return new MultiString(new MultiString(ms).getPage(p));
+	}
+
 	/** MULTI string for the page */
-	private final String multi;
+	private final MultiString multi;
 
 	/** Bitmap graphic for the page */
 	private final BitmapGraphic bitmap;
@@ -44,11 +49,6 @@ public class MessagePage {
 	public MessagePage(DMSImpl dms, SignMessage sm, int p) {
 		multi = lookupMulti(sm.getMulti(), p);
 		bitmap = lookupBitmap(dms, sm, p);
-	}
-
-	/** Lookup the MULTI string for the page */
-	private String lookupMulti(String multi, int p) {
-		return new MultiString(multi).getPage(p);
 	}
 
 	/** Lookup a bitmap for the page */
@@ -64,7 +64,7 @@ public class MessagePage {
 	 * @param dms DMS for message.
 	 * @param ms MULTI string. */
 	public MessagePage(DMSImpl dms, String ms) {
-		multi = new MultiString(ms).getPage(0);
+		multi = lookupMulti(ms, 0);
 		bitmap = createBitmap(dms, ms);
 	}
 
@@ -72,7 +72,7 @@ public class MessagePage {
 	 * @param ms MULTI string.
 	 * @param bmap Bitmap graphic. */
 	public MessagePage(String ms, BitmapGraphic bmap) {
-		multi = new MultiString(ms).getPage(0);
+		multi = lookupMulti(ms, 0);
 		bitmap = bmap;
 	}
 
@@ -91,11 +91,11 @@ public class MessagePage {
 
 	/** Get the name for the page (MULTI string without [pt] tag) */
 	public String getName() {
-		return new MultiString(multi).stripPageTime();
+		return multi.stripPageTime();
 	}
 
 	/** Get the MULTI string for the page */
-	public String getMulti() {
+	public MultiString getMulti() {
 		return multi;
 	}
 
@@ -106,7 +106,7 @@ public class MessagePage {
 
 	/** Get the page on time (deciseconds) */
 	public int getPageOnTime() {
-		Interval p_on = new MultiString(multi).pageOnInterval();
+		Interval p_on = multi.pageOnInterval();
 		int p = p_on.round(Interval.Units.DECISECONDS);
 		// Zero page-on time is invalid -- use 2.0 seconds
 		return (p > 0) ? p : 20;
@@ -114,7 +114,7 @@ public class MessagePage {
 
 	/** Get the page off time (deciseconds) */
 	public int getPageOffTime() {
-		Interval p_off = new MultiString(multi).pageOffInterval();
+		Interval p_off = multi.pageOffInterval();
 		return p_off.round(Interval.Units.DECISECONDS);
 	}
 }
