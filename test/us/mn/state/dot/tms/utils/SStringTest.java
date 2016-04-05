@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009 - 2011  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,42 +13,39 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.utils;
 
 import junit.framework.TestCase;
 
 /** 
  * SString test cases
+ *
  * @author Michael Darter
- * @created 05/05/09
- * @see SString
+ * @author Douglas Lau
  */
 public class SStringTest extends TestCase {
 
-	/** constructor */
 	public SStringTest(String name) {
 		super(name);
 	}
 
-	/** test cases */
-	public void test() {
-
-		// containsChar
+	public void testContainsChar() {
 		assertTrue(!SString.containsChar(null,'x'));
 		assertTrue(!SString.containsChar("",'x'));
 		assertTrue(SString.containsChar("abcdx",'x'));
 		assertTrue(!SString.containsChar("abcd",'x'));
+	}
 
-		// union
+	public void testUnion() {
 		assertTrue(SString.union(null,"x")==null);
 		assertTrue(SString.union("abc",null)==null);
 		assertTrue(SString.union("abc","").equals(""));
 		assertTrue(SString.union("abcdefg","aceg").equals("aceg"));
 		assertTrue(SString.union("abcdefg",
 			"0123aceg123").equals("aceg"));
+	}
 
-		// truncate
+	public void testTruncate() {
 		assertTrue(SString.truncate(null,0).equals(""));
 		assertTrue(SString.truncate(null,5).equals(""));
 		assertTrue(SString.truncate("",0).equals(""));
@@ -57,8 +55,9 @@ public class SStringTest extends TestCase {
 		assertTrue(SString.truncate("abcdef",2).equals("ab"));
 		assertTrue(SString.truncate("abcdef",3).equals("abc"));
 		assertTrue(SString.truncate("abcdef",35).equals("abcdef"));
+	}
 
-		// toRightField
+	public void testToRightField() {
 		assertTrue((new String("").compareTo(
 			SString.toRightField("", "")) == 0));
 		assertTrue((new String("1234a").compareTo(
@@ -69,8 +68,9 @@ public class SStringTest extends TestCase {
 			SString.toRightField("12345", "")) == 0));
 		assertTrue((new String("abcdef").compareTo(
 			SString.toRightField("123456", "abcdef")) == 0));
+	}
 
-		// removeEnclosingQuotes
+	public void testRemoveEnclosingQuotes() {
 		assertTrue((new String("abcd").compareTo(
 			SString.removeEnclosingQuotes("abcd")) == 0));
 		assertTrue((new String("abcd").compareTo(
@@ -82,8 +82,9 @@ public class SStringTest extends TestCase {
 			SString.removeEnclosingQuotes("\"abcd\" ")) == 0));
 		assertTrue((new String("x").compareTo(
 			SString.removeEnclosingQuotes("\"x\"")) == 0));
+	}
 
-		// alphaPrefixLen
+	public void testAlphaPrefixLen() {
 		assertTrue(SString.alphaPrefixLen(null, "abcd") == 0);
 		assertTrue(SString.alphaPrefixLen("1234", null) == 0);
 		assertTrue(SString.alphaPrefixLen("", "abcd") == 0);
@@ -95,8 +96,9 @@ public class SStringTest extends TestCase {
 		assertTrue(SString.alphaPrefixLen("abcdef1234", "abcdef1234") == 6);
 		assertTrue(SString.alphaPrefixLen("!@#$%3", "!@#$%3") == 5);
 		assertTrue(SString.alphaPrefixLen("1234", "1234") == 0);
+	}
 
-		// count
+	public void testCount() {
 		assertTrue(0 == SString.count(null, null));
 		assertTrue(0 == SString.count("", ""));
 		assertTrue(0 == SString.count("abc", ""));
