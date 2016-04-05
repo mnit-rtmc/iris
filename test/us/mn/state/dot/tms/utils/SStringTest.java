@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.utils;
 
 import junit.framework.TestCase;
+import static us.mn.state.dot.tms.utils.SString.*;
 
 /** 
  * SString test cases
@@ -106,5 +107,21 @@ public class SStringTest extends TestCase {
 		assertTrue(1 == SString.count("abc", "bc"));
 		assertTrue(4 == SString.count("aaaa", "a"));
 		assertTrue(0 == SString.count("abc", "bcd"));
+	}
+
+	public void testLongestCommonSubstring() {
+		assertTrue(longestCommonSubstring("", "").equals(""));
+		assertTrue(longestCommonSubstring("a", "").equals(""));
+		assertTrue(longestCommonSubstring("a", "a").equals("a"));
+		assertTrue(longestCommonSubstring("ab", "a").equals("a"));
+		assertTrue(longestCommonSubstring("ab", "ab").equals("ab"));
+		assertTrue(longestCommonSubstring("abc", "ab").equals("ab"));
+		assertTrue(longestCommonSubstring("abcd", "ab").equals("ab"));
+		assertTrue(longestCommonSubstring("abcd",
+			"abcd").equals("abcd"));
+		assertTrue(longestCommonSubstring("__123__abcd___",
+			"xabcdx").equals("abcd"));
+		assertTrue(longestCommonSubstring("22abcd33",
+			"__123__abcd__").equals("abcd"));
 	}
 }

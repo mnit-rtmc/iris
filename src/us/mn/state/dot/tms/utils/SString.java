@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2011  AHMCT, University of California
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ package us.mn.state.dot.tms.utils;
  * String convenience methods.
  *
  * @author Michael Darter
- * @see SStringTest
+ * @author Douglas Lau
  */
 public class SString {
 
@@ -350,5 +350,32 @@ public class SString {
 		if(s == null || sw == null)
 			return false;
 		return s.toLowerCase().startsWith(sw.toLowerCase());
+	}
+
+	/** Find the longest common substring of two strings */
+	static public String longestCommonSubstring(String s1, String s2) {
+		int[][] len = new int[s1.length() + 1][s2.length() + 1];
+		int start = 0;	// start index of substring in s2
+		int end = 0;	// end index of substring in s2
+
+		for (int i = 0; i < s1.length(); i++) {
+			for (int j = 0; j < s2.length(); j++) {
+				int ln = 0;
+				while (ln <= i && ln <= j &&
+				       s1.charAt(i - ln) == s2.charAt(j - ln))
+				{
+					ln++;
+				}
+				int prev_len = Math.max(len[i][j],
+					Math.max(len[i + 1][j], len[i][j + 1]));
+				if (ln > prev_len) {
+					start = j - ln + 1;
+					end = j + 1;
+					len[i + 1][j + 1] = ln;
+				} else
+					len[i + 1][j + 1] = prev_len;
+			}
+		}
+		return s2.substring(start, end);
 	}
 }
