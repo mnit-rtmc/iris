@@ -378,4 +378,22 @@ public class SString {
 		}
 		return s2.substring(start, end);
 	}
+
+	/** Check if a string contains a digit */
+	static public boolean containsDigit(String s) {
+		for (int i = 0; i < s.length(); i++) {
+			if (Character.isDigit(s.charAt(i)))
+				return true;
+		}
+		return false;
+	}
+
+	/** Check if a string contains a letter */
+	static public boolean containsLetter(String s) {
+		for (int i = 0; i < s.length(); i++) {
+			if (Character.isLetter(s.charAt(i)))
+				return true;
+		}
+		return false;
+	}
 }

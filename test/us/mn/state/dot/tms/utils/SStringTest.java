@@ -123,4 +123,32 @@ public class SStringTest extends TestCase {
 		assertTrue(longestCommonSubstring("22abcd33",
 			"__123__abcd__").equals("abcd"));
 	}
+
+	public void testContainsDigit() {
+		assertFalse(containsDigit(""));
+		assertFalse(containsDigit(" \t[]\\{}|"));
+		assertFalse(containsDigit("!@#$%^&*()_+`~-+,./<>?;':"));
+		assertTrue(containsDigit("1"));
+		assertTrue(containsDigit("234"));
+		assertTrue(containsDigit("567"));
+		assertTrue(containsDigit("890"));
+		assertFalse(containsDigit("abc"));
+		assertFalse(containsDigit("XYZ"));
+		assertFalse(containsDigit("abcdefghijklmnopqrstuvwxyz"));
+		assertFalse(containsDigit("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+	}
+
+	public void testContainsLetter() {
+		assertFalse(containsLetter(""));
+		assertFalse(containsLetter(" \t[]\\{}|"));
+		assertFalse(containsLetter("!@#$%^&*()_+`~-+,./<>?;':"));
+		assertFalse(containsLetter("1"));
+		assertFalse(containsLetter("234"));
+		assertFalse(containsLetter("567"));
+		assertFalse(containsLetter("890"));
+		assertTrue(containsLetter("abc"));
+		assertTrue(containsLetter("XYZ"));
+		assertTrue(containsLetter("abcdefghijklmnopqrstuvwxyz"));
+		assertTrue(containsLetter("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+	}
 }

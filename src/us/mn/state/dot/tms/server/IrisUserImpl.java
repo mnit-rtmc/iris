@@ -24,6 +24,7 @@ import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.UserImpl;
+import static us.mn.state.dot.tms.utils.SString.*;
 
 /**
  * IRIS user
@@ -155,16 +156,20 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Check a password */
 	private void checkPassword(String pwd) throws ChangeVetoException {
-		if (pwd.length() < 6) {
+		if (pwd.length() < 8) {
 			throw new ChangeVetoException(
-				"Password must be at least 6 characters");
+				"Must be at least 8 characters");
 		}
-		if (name.equalsIgnoreCase(pwd)) {
-			throw new ChangeVetoException(
-				"Password must be different than user name");
-		}
-		if ("password".equalsIgnoreCase(pwd))
-			throw new ChangeVetoException("Not funny. Try again.");
+		String lpwd = pwd.toLowerCase();
+		String c = longestCommonSubstring(name.toLowerCase(), lpwd);
+		if (c.length() > 4)
+			throw new ChangeVetoException("Based on user name");
+		if (longestCommonSubstring("password", lpwd).length() > 4)
+			throw new ChangeVetoException("Invalid password");
+		if (!containsDigit(pwd))
+			throw new ChangeVetoException("Must contain digit");
+		if (!containsLetter(pwd))
+			throw new ChangeVetoException("Must contain letter");
 	}
 
 	/** Get the password */
