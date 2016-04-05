@@ -487,7 +487,7 @@ public class SonarState extends Client {
 	public void populateReadable(TypeCache<? extends SonarObject> tc,
 		boolean do_wait)
 	{
-		if(canRead(tc.tname))
+		if (canRead(tc.tname))
 			populate(tc, do_wait);
 		else
 			tc.enumerationComplete();
@@ -517,10 +517,10 @@ public class SonarState extends Client {
 		populateReadable(toll_zones);
 		populateReadable(alarms);
 		populateReadable(beacons);
-		if(canRead(Beacon.SONAR_TYPE))
+		if (canRead(Beacon.SONAR_TYPE))
 			beacons.ignoreAttribute("operation");
 		populateReadable(ramp_meters);
-		if(canRead(RampMeter.SONAR_TYPE)) {
+		if (canRead(RampMeter.SONAR_TYPE)) {
 			ramp_meters.ignoreAttribute("operation");
 			ramp_meters.ignoreAttribute("rate");
 			ramp_meters.ignoreAttribute("queue");
@@ -530,10 +530,10 @@ public class SonarState extends Client {
 		inc_cache.populate(this);
 		lcs_cache.populate(this);
 		populateReadable(lane_markings);
-		if(canRead(LaneMarking.SONAR_TYPE))
+		if (canRead(LaneMarking.SONAR_TYPE))
 			lane_markings.ignoreAttribute("operation");
 		populateReadable(weather_sensors);
-		if(canRead(WeatherSensor.SONAR_TYPE)) {
+		if (canRead(WeatherSensor.SONAR_TYPE)) {
 			weather_sensors.ignoreAttribute("operation");
 			weather_sensors.ignoreAttribute("stamp");
 		}
@@ -541,10 +541,10 @@ public class SonarState extends Client {
 		if (canRead(TagReader.SONAR_TYPE))
 			tag_readers.ignoreAttribute("operation");
 		populateReadable(gate_arm_arrays);
-		if(canRead(GateArmArray.SONAR_TYPE))
+		if (canRead(GateArmArray.SONAR_TYPE))
 			gate_arm_arrays.ignoreAttribute("armState");
 		populateReadable(gate_arms);
-		if(canRead(GateArm.SONAR_TYPE))
+		if (canRead(GateArm.SONAR_TYPE))
 			gate_arms.ignoreAttribute("operation");
 		populateReadable(holidays);
 		populateReadable(day_plans);
