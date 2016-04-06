@@ -111,11 +111,9 @@ public class LcsDeployModel {
 	/** Create proposed indications for an LCS array.
 	 * @param up Distance upstream from incident (miles).
 	 * @param lcs_array LCS array.
-	 * @param shift Lane shift relative to incident.
 	 * @return Array of LaneUseIndication ordinal values, or null. */
-	public Integer[] createIndications(Distance up, LCSArray lcs_array,
-		int shift)
-	{
+	public Integer[] createIndications(Distance up, LCSArray lcs_array) {
+		int shift = lcs_array.getShift() - config.leftShift;
 		int n_lcs = lcs_array.getIndicationsCurrent().length;
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
 		if (n_lcs != lcss.length)

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.incident;
 
 import junit.framework.TestCase;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneUseIndication;
 import static us.mn.state.dot.tms.LaneUseIndication.DARK;
 import static us.mn.state.dot.tms.LaneUseIndication.LANE_OPEN;
@@ -36,29 +37,29 @@ public class LcsDeployModelTest extends TestCase {
 
 	public void testUpstreamShort() {
 		Distance up = new Distance(0.25f, Distance.Units.MILES);
-		LcsDeployModel p = createPolicy("....");
+		LcsDeployModel p = createModel("....");
 		assertTrue(getIndications(p, up, 2, 0)[0] == LANE_OPEN);
 		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_OPEN);
 		assertTrue(getIndications(p, up, 2, 1)[0] == DARK);
 		assertTrue(getIndications(p, up, 2, 1)[1] == LANE_OPEN);
 		assertTrue(getIndications(p, up, 2, -1)[0] == LANE_OPEN);
 		assertTrue(getIndications(p, up, 2, -1)[1] == DARK);
-		p = createPolicy("...!");
+		p = createModel("...!");
 		assertTrue(getIndications(p, up, 2, 0)[0] == USE_CAUTION);
 		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_OPEN);
 		assertTrue(getIndications(p, up, 2, 1)[0] == DARK);
 		assertTrue(getIndications(p, up, 2, -1)[0] == LANE_OPEN);
 		assertTrue(getIndications(p, up, 2, -1)[1] == DARK);
-		p = createPolicy("..?.");
+		p = createModel("..?.");
 		assertTrue(getIndications(p, up, 2, 0)[0] == USE_CAUTION);
 		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_OPEN);
-		p = createPolicy("..!.");
+		p = createModel("..!.");
 		assertTrue(getIndications(p, up, 2, 0)[0] == LANE_CLOSED);
 		assertTrue(getIndications(p, up, 2, 0)[1] == USE_CAUTION);
-		p = createPolicy(".?..");
+		p = createModel(".?..");
 		assertTrue(getIndications(p, up, 2, 0)[0] == LANE_OPEN);
 		assertTrue(getIndications(p, up, 2, 0)[1] == USE_CAUTION);
-		p = createPolicy(".!..");
+		p = createModel(".!..");
 		assertTrue(getIndications(p, up, 2, 0)[0] == USE_CAUTION);
 		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_CLOSED);
 	}
@@ -69,8 +70,9 @@ public class LcsDeployModelTest extends TestCase {
 		return p.createIndications(up, n_lcs, shift);
 	}
 
-	protected LcsDeployModel createPolicy(String impact) {
-		return new LcsDeployModel(createIncident(impact));
+	protected LcsDeployModel createModel(String impact) {
+		LaneConfiguration config = new LaneConfiguration(0, 2);
+		return new LcsDeployModel(createIncident(impact), config);
 	}
 
 	protected ClientIncident createIncident(String impact) {

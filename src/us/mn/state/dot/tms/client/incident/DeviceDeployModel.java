@@ -76,14 +76,12 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		LaneConfiguration config = cb.laneConfiguration(pos);
 		LcsDeployModel lcs_mdl = new LcsDeployModel(inc, config);
 		TreeMap<Distance, Device> devices = findDevices(cb, mp);
-		int shift = config.leftShift;
 		for (Distance up: devices.keySet()) {
 			Device dev = devices.get(up);
 			if (dev instanceof LCSArray) {
 				LCSArray lcs_a = (LCSArray) dev;
-				int l_shift = lcs_a.getShift() - shift;
 				Integer[] ind = lcs_mdl.createIndications(up,
-					lcs_a, l_shift);
+					lcs_a);
 				if (ind != null) {
 					addElement(lcs_a);
 					indications.put(lcs_a.getName(), ind);
