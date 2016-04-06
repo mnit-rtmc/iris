@@ -107,9 +107,9 @@ public class LCSArrayCellRenderer extends JPanel
 	/**
 	 * Get a component configured to render an LCS array.
 	 *
-	 * @param list          JList needing the rendering
+	 * @param list          JList needing rendering.
 	 * @param value         The object to render.
-	 * @param index         The List index of the object to render.
+	 * @param index         The list index of the object to render.
 	 * @param isSelected    Is the object selected?
 	 * @param cellHasFocus  Does the object have focus?
 	 * @return              Component to use for rendering the LCS.

@@ -46,7 +46,7 @@ public class ProposedDeviceCellRenderer implements ListCellRenderer<Device> {
 
 	/** Get component to render a device.
 	 *
-	 * @param list          JList to be renderer.
+	 * @param list          JList to renderer.
 	 * @param value         Device to render.
 	 * @param index         List index of the device.
 	 * @param isSelected    Is the device selected?
