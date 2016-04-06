@@ -46,17 +46,17 @@ public class LcsDeployModel {
 
 	/** Assign a requested indication to an available indication.
 	 * @param lui Requested lane use indication.
-	 * @param available Array of available lane use indications.
+	 * @param avail Array of available lane use indications.
 	 * @return "Best" lane use indication in available array. */
 	static private LaneUseIndication assignIndication(LaneUseIndication lui,
-		LaneUseIndication[] available)
+		LaneUseIndication[] avail)
 	{
-		for (LaneUseIndication a: available) {
+		for (LaneUseIndication a: avail) {
 			if (lui == a)
 				return lui;
 		}
 		LaneUseIndication alt = altIndication(lui);
-		for (LaneUseIndication a: available) {
+		for (LaneUseIndication a: avail) {
 			if (alt == a)
 				return alt;
 		}
@@ -119,9 +119,9 @@ public class LcsDeployModel {
 		LaneUseIndication[] ind = createIndications(up, n_lcs, shift);
 		Integer[] oin = new Integer[ind.length];
 		for (int i = 0; i < ind.length; i++) {
-			LaneUseIndication[] available =
+			LaneUseIndication[] avail =
 				LCSHelper.lookupIndications(lcss[i]);
-			oin[i] = assignIndication(ind[i], available).ordinal();
+			oin[i] = assignIndication(ind[i], avail).ordinal();
 		}
 		return shouldDeploy(oin) ? oin : null;
 	}
