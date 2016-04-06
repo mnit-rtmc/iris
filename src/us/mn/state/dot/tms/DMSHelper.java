@@ -43,11 +43,6 @@ public class DMSHelper extends BaseHelper {
 			DMS.SONAR_TYPE));
 	}
 
-	/** Test if a DMS is active */
-	static public boolean isActive(DMS proxy) {
-		return !ItemStyle.INACTIVE.checkBit(proxy.getStyles());
-	}
-
 	/** Get the maintenance status of a DMS */
 	static public String getMaintenance(DMS proxy) {
 		return ControllerHelper.getMaintenance(proxy.getController());
@@ -73,9 +68,19 @@ public class DMSHelper extends BaseHelper {
 		return ControllerHelper.getStatus(proxy.getController());
 	}
 
+	/** Test if a DMS is active */
+	static public boolean isActive(DMS proxy) {
+		return !ItemStyle.INACTIVE.checkBit(proxy.getStyles());
+	}
+
 	/** Test if a DMS is failed */
 	static public boolean isFailed(DMS proxy) {
 		return ItemStyle.FAILED.checkBit(proxy.getStyles());
+	}
+
+	/** Test if a DMS is hidden */
+	static public boolean isHidden(DMS proxy) {
+		return ItemStyle.HIDDEN.checkBit(proxy.getStyles());
 	}
 
 	/** Get a string that contains all active DMS styles,

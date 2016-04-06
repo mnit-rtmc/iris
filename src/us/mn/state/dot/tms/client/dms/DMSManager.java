@@ -27,6 +27,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -189,7 +190,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Check if a DMS style is visible */
 	@Override
 	protected boolean isStyleVisible(DMS dms) {
-		return !ItemStyle.HIDDEN.checkBit(dms.getStyles());
+		return !DMSHelper.isHidden(dms);
 	}
 
 	/** Create a proxy JList */
