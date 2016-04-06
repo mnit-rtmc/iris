@@ -15,32 +15,19 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.awt.event.ActionEvent;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.TreeMap;
-import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
-import javax.swing.ListModel;
 import javax.swing.SwingConstants;
-import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.CorridorBase;
-import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
-import us.mn.state.dot.tms.LaneConfiguration;
-import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSArray;
-import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
-import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -50,37 +37,14 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class IncidentDeployForm extends SonarObjectForm<Incident> {
 
-	/** Check if a set of indications should be deployed */
-	static private boolean shouldDeploy(Integer[] ind) {
-		for (int i: ind) {
-			LaneUseIndication li = LaneUseIndication.fromOrdinal(i);
-			switch (LaneUseIndication.fromOrdinal(i)) {
-			case DARK:
-			case LANE_OPEN:
-				continue;
-			default:
-				return true;
-			}
-		}
-		return false;
-	}
-
 	/** Incident manager */
 	private final IncidentManager manager;
 
-	/** Incident deployment policy */
-	private final IncidentPolicy policy;
-
-	/** Mapping of LCS array names to proposed indications */
-	private final HashMap<String, Integer []> indications =
-		new HashMap<String, Integer []>();
-
 	/** Model for deployment list */
-	private final DefaultListModel<LCSArray> model =
-		new DefaultListModel<LCSArray>();
+	private final DeviceDeployModel model;
 
 	/** List of deployments for the incident */
-	private final JList<LCSArray> list = new JList<LCSArray>(model);
+	private final JList<LCSArray> list;
 
 	/** Action to send device messages */
 	private final IAction send = new IAction("incident.send") {
@@ -94,7 +58,8 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	public IncidentDeployForm(Session s, Incident inc, IncidentManager man){
 		super(I18N.get("incident") + ": ", s, inc);
 		manager = man;
-		policy = new IncidentPolicy(inc);
+		model = new DeviceDeployModel(man, inc);
+		list = new JList<LCSArray>(model);
 	}
 
 	/** Get the SONAR type cache */
@@ -107,68 +72,9 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	@Override
 	protected void initialize() {
 		list.setCellRenderer(new ProposedLcsCellRenderer(session,
-			indications));
-		populateList();
+			model));
 		add(createPanel());
 		super.initialize();
-	}
-
-	/** Populate the list model with LCS array indications to display */
-	private void populateList() {
-		IncidentLoc loc = new IncidentLoc(proxy);
-		CorridorBase cb = manager.lookupCorridor(loc);
-		if (cb != null) {
-			Float mp = cb.calculateMilePoint(loc);
-			if (mp != null)
-				populateList(cb, mp);
-		}
-	}
-
-	/** Populate the list model with LCS array indications to display */
-	private void populateList(CorridorBase cb, float mp) {
-		TreeMap<Distance, LCSArray> upstream = findUpstream(cb, mp);
-		LaneConfiguration config = cb.laneConfiguration(
-			getWgs84Position());
-		int shift = config.leftShift;
-		for (Distance up: upstream.keySet()) {
-			LCSArray lcs_array = upstream.get(up);
-			int l_shift = lcs_array.getShift() - shift;
-			Integer[] ind = policy.createIndications(up, lcs_array,
-				l_shift, config.getLanes());
-			if (shouldDeploy(ind)) {
-				model.addElement(lcs_array);
-				indications.put(lcs_array.getName(), ind);
-			}
-		}
-	}
-
-	/** Get Position in WGS84 */
-	private Position getWgs84Position() {
-		return new Position(proxy.getLat(), proxy.getLon());
-	}
-
-	/** Find all LCS arrays upstream of a given point on a corridor */
-	private TreeMap<Distance, LCSArray> findUpstream(CorridorBase cb,
-		float mp)
-	{
-		TreeMap<Distance, LCSArray> upstream =
-			new TreeMap<Distance, LCSArray>();
-		Iterator<LCSArray> lit = LCSArrayHelper.iterator();
-		while (lit.hasNext()) {
-			LCSArray lcs_array = lit.next();
-			GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_array);
-			if (loc != null && loc.getRoadway() == cb.getRoadway() &&
-			    loc.getRoadDir() == cb.getRoadDir())
-			{
-				Float lp = cb.calculateMilePoint(loc);
-				if (lp != null && mp > lp) {
-					Distance up = new Distance(mp - lp,
-						Distance.Units.MILES);
-					upstream.put(up, lcs_array);
-				}
-			}
-		}
-		return upstream;
 	}
 
 	/** Create the panel for the form */
@@ -196,7 +102,7 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 
 	/** Send new indications to the specified LCS array */
 	private void sendIndications(LCSArray lcs_array) {
-		Integer[] ind = indications.get(lcs_array.getName());
+		Integer[] ind = model.getIndications(lcs_array.getName());
 		if (ind != null) {
 			lcs_array.setOwnerNext(session.getUser());
 			lcs_array.setIndicationsNext(ind);

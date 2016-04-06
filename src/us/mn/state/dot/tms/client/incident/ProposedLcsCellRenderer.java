@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import java.util.Map;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.Session;
@@ -30,14 +29,14 @@ public class ProposedLcsCellRenderer extends LCSArrayCellRenderer {
 	/** User Session */
 	private final Session session;
 
-	/** Mapping of LCS array names to proposed indications */
-	private final Map<String, Integer []> indications;
+	/** Model for deployment list */
+	private final DeviceDeployModel model;
 
 	/** Create a new proposed LCS array cell renderere */
-	public ProposedLcsCellRenderer(Session s, Map<String, Integer []> ind) {
+	public ProposedLcsCellRenderer(Session s, DeviceDeployModel m) {
 		super(s.getLCSArrayManager());
 		session = s;
-		indications = ind;
+		model = m;
 	}
 
 	/** Get the user name */
@@ -49,6 +48,6 @@ public class ProposedLcsCellRenderer extends LCSArrayCellRenderer {
 	/** Get the indications */
 	@Override
 	protected Integer[] getIndications(LCSArray lcs_array) {
-		return indications.get(lcs_array.getName());
+		return model.getIndications(lcs_array.getName());
 	}
 }
