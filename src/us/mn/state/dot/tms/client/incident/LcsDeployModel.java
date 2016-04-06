@@ -80,6 +80,21 @@ public class LcsDeployModel {
 		}
 	}
 
+	/** Check if a set of indications should be deployed */
+	static private boolean shouldDeploy(Integer[] ind) {
+		for (int i: ind) {
+			LaneUseIndication li = LaneUseIndication.fromOrdinal(i);
+			switch (LaneUseIndication.fromOrdinal(i)) {
+			case DARK:
+			case LANE_OPEN:
+				continue;
+			default:
+				return true;
+			}
+		}
+		return false;
+	}
+
 	/** Incident in question */
 	private final Incident incident;
 
@@ -93,14 +108,14 @@ public class LcsDeployModel {
 	 * @param lcs_array LCS array.
 	 * @param shift Lane shift relative to incident.
 	 * @param n_lanes Number of full lanes at incident.
-	 * @return Array of LaneUseIndication ordinal values. */
+	 * @return Array of LaneUseIndication ordinal values, or null. */
 	public Integer[] createIndications(Distance up, LCSArray lcs_array,
 		int shift, int n_lanes)
 	{
 		int n_lcs = lcs_array.getIndicationsCurrent().length;
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
 		if (n_lcs != lcss.length)
-			return new Integer[0];
+			return null;
 		LaneUseIndication[] ind = createIndications(up, n_lcs, shift);
 		Integer[] oin = new Integer[ind.length];
 		for (int i = 0; i < ind.length; i++) {
@@ -108,7 +123,7 @@ public class LcsDeployModel {
 				LCSHelper.lookupIndications(lcss[i]);
 			oin[i] = assignIndication(ind[i], available).ordinal();
 		}
-		return oin;
+		return shouldDeploy(oin) ? oin : null;
 	}
 
 	/** Create proposed indications for an LCS array.

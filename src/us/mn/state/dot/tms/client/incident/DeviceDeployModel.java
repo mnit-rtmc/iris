@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LaneConfiguration;
-import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.units.Distance;
@@ -35,21 +34,6 @@ import us.mn.state.dot.tms.units.Distance;
  * @author Douglas Lau
  */
 public class DeviceDeployModel extends DefaultListModel<Device> {
-
-	/** Check if a set of indications should be deployed */
-	static private boolean shouldDeploy(Integer[] ind) {
-		for (int i: ind) {
-			LaneUseIndication li = LaneUseIndication.fromOrdinal(i);
-			switch (LaneUseIndication.fromOrdinal(i)) {
-			case DARK:
-			case LANE_OPEN:
-				continue;
-			default:
-				return true;
-			}
-		}
-		return false;
-	}
 
 	/** Mapping of LCS array names to proposed indications */
 	private final HashMap<String, Integer []> indications =
@@ -77,16 +61,16 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	 * @param mp Relative mile point of incident. */
 	private void populateList(Incident inc, CorridorBase cb, float mp) {
 		LcsDeployModel lcs_mdl = new LcsDeployModel(inc);
-		Position position = new Position(inc.getLat(), inc.getLon());
+		Position pos = new Position(inc.getLat(), inc.getLon());
+		LaneConfiguration config = cb.laneConfiguration(pos);
 		TreeMap<Distance, LCSArray> upstream = findUpstream(cb, mp);
-		LaneConfiguration config = cb.laneConfiguration(position);
 		int shift = config.leftShift;
 		for (Distance up: upstream.keySet()) {
 			LCSArray lcs_array = upstream.get(up);
 			int l_shift = lcs_array.getShift() - shift;
 			Integer[] ind = lcs_mdl.createIndications(up, lcs_array,
 				l_shift, config.getLanes());
-			if (shouldDeploy(ind)) {
+			if (ind != null) {
 				addElement(lcs_array);
 				indications.put(lcs_array.getName(), ind);
 			}
