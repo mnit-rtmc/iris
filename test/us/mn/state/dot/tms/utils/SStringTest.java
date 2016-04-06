@@ -30,21 +30,6 @@ public class SStringTest extends TestCase {
 		super(name);
 	}
 
-	public void testContainsChar() {
-		assertTrue(!containsChar(null, 'x'));
-		assertTrue(!containsChar("", 'x'));
-		assertTrue(containsChar("abcdx", 'x'));
-		assertTrue(!containsChar("abcd", 'x'));
-	}
-
-	public void testUnion() {
-		assertTrue(union(null, "x") == null);
-		assertTrue(union("abc", null) == null);
-		assertTrue(union("abc", "").equals(""));
-		assertTrue(union("abcdefg", "aceg").equals("aceg"));
-		assertTrue(union("abcdefg", "0123aceg123").equals("aceg"));
-	}
-
 	public void testTruncate() {
 		assertTrue(truncate(null, 0).equals(""));
 		assertTrue(truncate(null, 5).equals(""));
@@ -55,33 +40,6 @@ public class SStringTest extends TestCase {
 		assertTrue(truncate("abcdef", 2).equals("ab"));
 		assertTrue(truncate("abcdef", 3).equals("abc"));
 		assertTrue(truncate("abcdef", 35).equals("abcdef"));
-	}
-
-	public void testToRightField() {
-		assertTrue((new String("").compareTo(
-			toRightField("", "")) == 0));
-		assertTrue((new String("1234a").compareTo(
-			toRightField("12345", "a")) == 0));
-		assertTrue((new String("1abcd").compareTo(
-			toRightField("12345", "abcd")) == 0));
-		assertTrue((new String("12345").compareTo(
-			toRightField("12345", "")) == 0));
-		assertTrue((new String("abcdef").compareTo(
-			toRightField("123456", "abcdef")) == 0));
-	}
-
-	public void testRemoveEnclosingQuotes() {
-		assertTrue((new String("abcd").compareTo(
-			removeEnclosingQuotes("abcd")) == 0));
-		assertTrue((new String("abcd").compareTo(
-			removeEnclosingQuotes("\"abcd\"")) == 0));
-		assertTrue((new String("").compareTo(
-			removeEnclosingQuotes("")) == 0));
-		assertTrue((null == removeEnclosingQuotes(null)));
-		assertTrue((new String("\"abcd\" ").compareTo(
-			removeEnclosingQuotes("\"abcd\" ")) == 0));
-		assertTrue((new String("x").compareTo(
-			removeEnclosingQuotes("\"x\"")) == 0));
 	}
 
 	public void testAlphaPrefixLen() {
@@ -96,16 +54,6 @@ public class SStringTest extends TestCase {
 		assertTrue(alphaPrefixLen("abcdef1234", "abcdef1234") == 6);
 		assertTrue(alphaPrefixLen("!@#$%3", "!@#$%3") == 5);
 		assertTrue(alphaPrefixLen("1234", "1234") == 0);
-	}
-
-	public void testCount() {
-		assertTrue(0 == count(null, null));
-		assertTrue(0 == count("", ""));
-		assertTrue(0 == count("abc", ""));
-		assertTrue(1 == count("abc", "c"));
-		assertTrue(1 == count("abc", "bc"));
-		assertTrue(4 == count("aaaa", "a"));
-		assertTrue(0 == count("abc", "bcd"));
 	}
 
 	public void testLongestCommonSubstring() {

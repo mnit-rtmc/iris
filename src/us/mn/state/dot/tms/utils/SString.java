@@ -23,80 +23,18 @@ package us.mn.state.dot.tms.utils;
  */
 public class SString {
 
-	/** instance can't be created */
+	/** Instance can't be created */
 	private SString() { }
 
-	/** Count the number of specified characters in the string.
-	 * @param s String to count chars in, may be null. */
-	static public int count(String s, char c) {
-		if (s == null)
-			return 0;
-		int cn = 0;
-		for (int i = 0; i < s.length(); i++) {
-			if (s.charAt(i) == c)
-				cn++;
-		}
-		return cn;
-	}
-
-	/** Count the number of times the specified string occurs
-	 * in another string.
-	 * @param s String to count occurences in, may be null.
-	 * @param c String to count occurences of, may be null.
-	 * @return Number of times c occurs in s. */
-	static public int count(String s, String c) {
-		if (s == null || c == null || s.isEmpty() || c.isEmpty())
-			return 0;
-		int n = 0;
-		for (int i = 0; i < s.length(); i++) {
-			if (s.startsWith(c, i))
-				n++;
-		}
-		return n;
-	}
-
-	/** Does a string contain the specified char?
-	 * @param s String to search, may be null.
-	 * @param c Character to search for.
-	 * @return True if s contains c else false. */
-	static public boolean containsChar(String s,char c) {
-		return count(s, c) > 0;
-	}
-
-	/**
-	 * Return a string that contains the union of characters in two
-	 * strings. This method can be used to validate a string. e.g.
-	 * "abcd" and "1b3d" will return "bd".
-	 * @param str string to validate
-	 * @param valid string that contains valid chars.
-	 * @return Argument str containing only characters found in arg valid.
-	 */
-	static public String union(String str,String valid) {
-		if (str == null || valid == null)
-			return null;
-		if (str.length() <= 0 || valid.length() <= 0)
-			return "";
-		StringBuilder sb = new StringBuilder(str.length());
-		for (int i = 0; i < str.length(); i++) {
-			if (containsChar(valid, str.charAt(i)))
-				sb.append(str.charAt(i));
-		}
-		return sb.toString();
-	}
-
-	/**
-	 * convert byte[] to char[] using specific encoding.
-	 * @returns An empty string on error.
-	 */
+	/** Convert byte[] to char[] using specific encoding.
+	 * @return An empty string on error. */
 	static public String byteArrayToString(byte[] b) {
 		int len = (b == null) ? 0 : b.length;
 		return byteArrayToString(b, len);
 	}
 
-	/**
-	 * convert byte[] to char[] using specific encoding.
-	 * @returns An empty string on error.
-	 */
+	/** Convert byte[] to char[] using specific encoding.
+	 * @return An empty string on error. */
 	static public String byteArrayToString(byte[] b, int len) {
 		if (b == null || b.length <= 0 || len <= 0)
 			return "";
@@ -110,35 +48,16 @@ public class SString {
 		}
 	}
 
-	/**
-	 *  Return a string with the enclosing double quotes removed.
-	 *  This method assumes the first and last chars are \" and
-	 *  if not the string is returned unmodified.
-	 */
-	static public String removeEnclosingQuotes(String s) {
-		if (s == null)
-			return null;
-		if (s.length() >= 2 &&
-		    s.charAt(0) == '\"' &&
-		    s.charAt(s.length() - 1) == '\"')
-		{
-			return s.substring(1, s.length() - 1);
-		}
-		return s;
-	}
-
-	/** return true if the specified string is enclosed by another string */
+	/** Return true if the specified string is enclosed by another string */
 	static public boolean enclosedBy(String s,String e) {
 		if (s == null || e == null)
 			return false;
 		return s.startsWith(e) && s.endsWith(e);
 	}
 
-	/**
-	 * Convert an int to string with the specified number
+	/** Convert an int to string with the specified number
 	 * of digits, prefixing with zeros as necessary.
-	 * e.g. (4,2) returns '04', (666,2) returns 666.
-	 */
+	 * e.g. (4,2) returns '04', (666,2) returns 666. */
 	static public String intToString(int i, int numdigs) {
 		String s = String.valueOf(i);
 		int numzerostoadd = numdigs - s.length();
@@ -159,22 +78,7 @@ public class SString {
 			Math.max(0, maxlen)));
 	}
 
-	/** Given a filled field and string, return a string
-	 * containing the field with the string right justified.
-	 * e.g. ("0000","XY") returns "00XY".  */
-	static public String toRightField(String f, String s) {
-		if (!((f != null) && (s != null)))
-			throw new IllegalArgumentException(
-				"SString.toRightField: arg f or s is null.");
-		if (!(f.length() >= s.length()))
-	    		throw new IllegalArgumentException("SString." +
-				"toRightField: arg length problem:" +
-				f + "," + s);
-		int end = f.length() - s.length();
-		return f.substring(0, end) + s;
-	}
-
-	/** Convert string to int. This method suppresses all number format
+	/** Convert string to int.  This method suppresses all number format
 	 * exceptions, returning 0 if a NumberFormatException is caught. */
 	static public int stringToInt(String s) {
 		if (s == null)
@@ -187,7 +91,7 @@ public class SString {
 		}
 	}
 
-	/** Convert string to long. This method suppresses all number format
+	/** Convert string to long.  This method suppresses all number format
 	 * exceptions, returning 0 if a NumberFormatException is caught. */
 	static public long stringToLong(String s) {
 		if (s == null)
@@ -294,12 +198,6 @@ public class SString {
 		return sb.toString();
 	}
 
-	/** Join two strings with a space and then trim */
-	static public String trimJoin(String a, String b) {
-		String j = a + " " + b;
-		return j.trim();
-	}
-
 	/** Return true if the argument is numeric */
 	static public boolean isNumeric(String s) {
 		if (s == null || s.isEmpty())
@@ -336,13 +234,6 @@ public class SString {
 			return i;
 		}
 		return len;
-	}
-
-	/** String comparison: starts with ignoring case */
-	static public boolean startsWithIgnoreCase(String s,String sw) {
-		if (s == null || sw == null)
-			return false;
-		return s.toLowerCase().startsWith(sw.toLowerCase());
 	}
 
 	/** Find the longest common substring of two strings */
