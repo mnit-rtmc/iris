@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -42,7 +42,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DmsCellRenderer extends JPanel implements ListCellRenderer {
+public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 
 	/** Prototype name */
 	static private final String PROTOTYPE_NAME = "V999W99X";
@@ -177,8 +177,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer {
 
 	/** Get a component configured to render a cell of the list */
 	@Override
-	public Component getListCellRendererComponent(JList list, Object value,
-		int index, boolean isSelected, boolean cellHasFocus)
+	public Component getListCellRendererComponent(JList<? extends DMS> list,
+		DMS value, int index, boolean isSelected, boolean cellHasFocus)
 	{
 		if (isSelected) {
 			Component temp = cell.getListCellRendererComponent(list,
