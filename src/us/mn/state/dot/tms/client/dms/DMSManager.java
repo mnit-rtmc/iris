@@ -18,19 +18,15 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Shape;
-import java.awt.Dimension;
 import java.awt.geom.AffineTransform;
 import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -38,12 +34,10 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapAction;
-import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.StyleSummary;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
@@ -113,12 +107,12 @@ public class DMSManager extends ProxyManager<DMS> {
 		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(ItemStyle.SCHEDULED, ProxyTheme.COLOR_SCHEDULED);
-		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
+		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
 			theme.addStyle(ItemStyle.AWS_DEPLOYED, Color.RED);
 		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
+		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			theme.addStyle(ItemStyle.AWS_CONTROLLED,
 				COLOR_HELIOTROPE);
 		}
@@ -150,10 +144,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Lookup a DMS cell renderer */
 	private DmsCellRenderer lookupRenderer(DMS dms) {
-		if (dms != null)
-			return renderers.get(dms.getName());
-		else
-			return null;
+		return (dms != null) ? renderers.get(dms.getName()) : null;
 	}
 
 	/** Add a proxy to the manager */
@@ -233,9 +224,9 @@ public class DMSManager extends ProxyManager<DMS> {
 		p.addSeparator();
 		p.add(new MapAction<DMS>(desktop.client, dms, dms.getGeoLoc()));
 		p.addSeparator();
-		if(blankAction != null)
+		if (blankAction != null)
 			p.add(blankAction);
-		if(TeslaAction.isConfigured())
+		if (TeslaAction.isConfigured())
 			p.add(new TeslaAction<DMS>(dms));
 		p.add(new PropertiesAction<DMS>(this, dms));
 		return p;
@@ -248,7 +239,7 @@ public class DMSManager extends ProxyManager<DMS> {
 		p.add(new JLabel(I18N.get("dms.title") + ": " +
 			n_selected));
 		p.addSeparator();
-		if(blankAction != null)
+		if (blankAction != null)
 			p.add(blankAction);
 		return p;
 	}
@@ -263,8 +254,8 @@ public class DMSManager extends ProxyManager<DMS> {
 	@Override
 	public boolean checkStyle(ItemStyle is, DMS proxy) {
 		long styles = proxy.getStyles();
-		for(ItemStyle s: ItemStyle.toStyles(styles)) {
-			if(s == is)
+		for (ItemStyle s: ItemStyle.toStyles(styles)) {
+			if (s == is)
 				return true;
 		}
 		return false;
