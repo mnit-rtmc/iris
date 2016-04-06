@@ -26,7 +26,6 @@ import javax.swing.JPanel;
 import javax.swing.ListModel;
 import javax.swing.SwingConstants;
 import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
@@ -37,7 +36,6 @@ import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.lcs.LCSArrayCellRenderer;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -108,18 +106,8 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 	/** Initialize the widgets on the form */
 	@Override
 	protected void initialize() {
-		list.setCellRenderer(new LCSArrayCellRenderer(
-			session.getLCSArrayManager())
-		{
-			@Override protected User getUser(LCSArray lcs_array) {
-				return session.getUser();
-			}
-			@Override protected Integer[] getIndications(
-				LCSArray lcs_array)
-			{
-				return indications.get(lcs_array.getName());
-			}
-		});
+		list.setCellRenderer(new ProposedLcsCellRenderer(session,
+			indications));
 		populateList();
 		add(createPanel());
 		super.initialize();
