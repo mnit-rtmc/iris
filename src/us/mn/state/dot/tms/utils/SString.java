@@ -24,92 +24,90 @@ package us.mn.state.dot.tms.utils;
 public class SString {
 
 	/** instance can't be created */
-	private SString(){}
+	private SString() { }
 
 	/** Count the number of specified characters in the string.
 	 * @param s String to count chars in, may be null. */
-	public static int count(String s, char c) {
-		if(s == null)
+	static public int count(String s, char c) {
+		if (s == null)
 			return 0;
 		int cn = 0;
-		for(int i = 0; i < s.length(); ++i)
-			if(s.charAt(i) == c)
-				++cn;
+		for (int i = 0; i < s.length(); i++) {
+			if (s.charAt(i) == c)
+				cn++;
+		}
 		return cn;
 	}
 
-	/** Count the number of times the specified string occurs 
+	/** Count the number of times the specified string occurs
 	 * in another string.
 	 * @param s String to count occurences in, may be null.
 	 * @param c String to count occurences of, may be null.
 	 * @return Number of times c occurs in s. */
-	public static int count(String s, String c) {
-		if(s == null || c == null || s.isEmpty() || c.isEmpty())
+	static public int count(String s, String c) {
+		if (s == null || c == null || s.isEmpty() || c.isEmpty())
 			return 0;
 		int n = 0;
-		for(int i = 0; i < s.length(); ++i)
-			if(s.startsWith(c, i))
-				++n;
+		for (int i = 0; i < s.length(); i++) {
+			if (s.startsWith(c, i))
+				n++;
+		}
 		return n;
 	}
 
 	/** Does a string contain the specified char?
-	 *  @param s String to search, may be null.
-	 *  @param c Character to search for.
-	 *  @return True if s contains c else false. */
-	public static boolean containsChar(String s,char c) {
+	 * @param s String to search, may be null.
+	 * @param c Character to search for.
+	 * @return True if s contains c else false. */
+	static public boolean containsChar(String s,char c) {
 		return count(s, c) > 0;
 	}
 
 	/**
-	 *  Return a string that contains the union of characters in two
-	 *  strings. This method can be used to validate a string. e.g. 
-	 *  "abcd" and "1b3d" will return "bd".
-	 *  @param str string to validate
-	 *  @param valid string that contains valid chars.
-	 *  @return Argument str containing only characters found in arg valid.
+	 * Return a string that contains the union of characters in two
+	 * strings. This method can be used to validate a string. e.g.
+	 * "abcd" and "1b3d" will return "bd".
+	 * @param str string to validate
+	 * @param valid string that contains valid chars.
+	 * @return Argument str containing only characters found in arg valid.
 	 */
-	public static String union(String str,String valid) {
-		if (str==null || valid==null)
+	static public String union(String str,String valid) {
+		if (str == null || valid == null)
 			return null;
-		if (str.length()<=0 || valid.length()<=0)
+		if (str.length() <= 0 || valid.length() <= 0)
 			return "";
-		StringBuilder ret=new StringBuilder(str.length());
-		for (int i=0; i<str.length(); ++i) {
+		StringBuilder sb = new StringBuilder(str.length());
+		for (int i = 0; i < str.length(); i++) {
 			if (SString.containsChar(valid,str.charAt(i)))
-				ret.append(str.charAt(i));
+				sb.append(str.charAt(i));
 		}
-		return ret.toString();
+		return sb.toString();
 	}
 
 	/**
 	 * convert byte[] to char[] using specific encoding.
 	 * @returns An empty string on error.
 	 */
-	public static String byteArrayToString(byte[] b) {
-		int len=(b==null ? 0 : b.length);
-		return byteArrayToString(b,len);
+	static public String byteArrayToString(byte[] b) {
+		int len = (b == null) ? 0 : b.length;
+		return byteArrayToString(b, len);
 	}
 
 	/**
 	 * convert byte[] to char[] using specific encoding.
 	 * @returns An empty string on error.
 	 */
-	public static String byteArrayToString(byte[] b, int len) {
-
-		// validate args
-		if (b==null || b.length<=0 || len<=0)
+	static public String byteArrayToString(byte[] b, int len) {
+		if (b == null || b.length <= 0 || len <= 0)
 			return "";
-		if (b.length<len)
-			len=b.length;
-
-		String s = "";
+		if (b.length < len)
+			len = b.length;
 		try {
-			s = new String(b, 0, len, "ISO-8859-1");
-		} catch (Exception UnsupportedEncodingException) {
-			s = "";
+			return new String(b, 0, len, "ISO-8859-1");
 		}
-		return s;
+		catch (Exception UnsupportedEncodingException) {
+			return "";
+		}
 	}
 
 	/**
@@ -118,32 +116,36 @@ public class SString {
 	 *  if not the string is returned unmodified.
 	 */
 	static public String removeEnclosingQuotes(String s) {
-		if(s == null)
-			return (null);
-		if((s.length() >= 2) && (s.charAt(0) == '\"')
-			&& (s.charAt(s.length() - 1) == '\"'))
-			return (s.substring(1, s.length() - 1));
-		return (s);
+		if (s == null)
+			return null;
+		if (s.length() >= 2 &&
+		    s.charAt(0) == '\"' &&
+		    s.charAt(s.length() - 1) == '\"')
+		{
+			return s.substring(1, s.length() - 1);
+		}
+		return s;
 	}
 
 	/** return true if the specified string is enclosed by another string */
-	public static boolean enclosedBy(String s,String e) {
-		if (s==null || e==null)
+	static public boolean enclosedBy(String s,String e) {
+		if (s == null || e == null)
 			return false;
 		return s.startsWith(e) && s.endsWith(e);
 	}
 
 	/**
-	 *  Convert an int to string with the specified number
-	 *  of digits, prefixing with zeros as necessary.
-	 *  e.g. (4,2) returns '04', (666,2) returns 666.
+	 * Convert an int to string with the specified number
+	 * of digits, prefixing with zeros as necessary.
+	 * e.g. (4,2) returns '04', (666,2) returns 666.
 	 */
-	public static String intToString(int i, int numdigs) {
+	static public String intToString(int i, int numdigs) {
 		String s = String.valueOf(i);
 		int numzerostoadd = numdigs - s.length();
-		if(numzerostoadd > 0)
-			for(int j = 0; j < numzerostoadd; ++j)
+		if (numzerostoadd > 0) {
+			for (int j = 0; j < numzerostoadd; j++)
 				s = "0" + s;
+		}
 		return (s);
 	}
 
@@ -157,147 +159,143 @@ public class SString {
 			Math.max(0, maxlen)));
 	}
 
-	/**
-	 *  Given a filled field and string, return a string 
-	 *  containing the field with the string right justified.
-	 *  e.g. ("0000","XY") returns "00XY".
-	 */
+	/** Given a filled field and string, return a string
+	 * containing the field with the string right justified.
+	 * e.g. ("0000","XY") returns "00XY".  */
 	static public String toRightField(String f, String s) {
 		if (!((f != null) && (s != null)))
 			throw new IllegalArgumentException(
 				"SString.toRightField: arg f or s is null.");
 		if (!(f.length() >= s.length()))
 	    		throw new IllegalArgumentException("SString." +
-				"toRightField: arg length problem:" + 
+				"toRightField: arg length problem:" +
 				f + "," + s);
 		int end = f.length() - s.length();
-		String ret = f.substring(0, end) + s;
-		return (ret);
+		return f.substring(0, end) + s;
 	}
 
-	/** convert string to int. This method suppresses all number format
-	 *  exceptions, returning 0 if a NumberFormatException is caught. */
-	public static int stringToInt(String s) {
+	/** Convert string to int. This method suppresses all number format
+	 * exceptions, returning 0 if a NumberFormatException is caught. */
+	static public int stringToInt(String s) {
 		if (s == null)
-		    return (0);
-		int i = 0;
+			return 0;
 		try {
-		    i = Integer.parseInt(s);
-		} catch (Exception e) {}
-		return i;
+			return Integer.parseInt(s);
+		}
+		catch (Exception e) {
+			return 0;
+		}
 	}
 
-	/** convert string to long. This method suppresses all number format
-	 *  exceptions, returning 0 if a NumberFormatException is caught. */
-	public static long stringToLong(String s) {
+	/** Convert string to long. This method suppresses all number format
+	 * exceptions, returning 0 if a NumberFormatException is caught. */
+	static public long stringToLong(String s) {
 		if (s == null)
-		    return (0);
-		long i = 0;
+			return 0;
 		try {
-		    i = Long.parseLong(s);
-		} catch (Exception e) {}
-		return i;
+			return Long.parseLong(s);
+		}
+		catch (Exception e) {
+			return 0;
+		}
 	}
 
-	/** convert string to double */
-	public static double stringToDouble(String s) {
+	/** Convert string to double */
+	static public double stringToDouble(String s) {
 		if (s == null)
-		    return (0);
-		double d = 0;
+			return 0;
 		try {
-		    d = Double.parseDouble(s);
-		} catch (Exception e) {}
-		return d;
+			return Double.parseDouble(s);
+		}
+		catch (Exception e) {
+			return 0;
+		}
 	}
 
-	/** convert string to boolean */
-	public static boolean stringToBoolean(String s) {
+	/** Convert string to boolean */
+	static public boolean stringToBoolean(String s) {
 		if (s == null)
-		    return false;
-		boolean b = false;
+			return false;
 		try {
-		    b = Boolean.parseBoolean(s);
-		} catch (Exception e) {}
-		return b;
+			return Boolean.parseBoolean(s);
+		}
+		catch (Exception e) {
+			return false;
+		}
 	}
 
-	/** convert boolean to string */
-	public static String booleanToString(boolean b) {
+	/** Convert boolean to string */
+	static public String booleanToString(boolean b) {
 		return new Boolean(b).toString();
 	}
 
-	/** convert double to string with rounding */
-	public static String doubleToString(double d,int numdecplaces) {
-		String ret="";
-		// full precision
-		if (numdecplaces<0)
-			ret=new Double(d).toString();
-		// zero decimal places
-		else if (numdecplaces==0) {
-			ret=(new Double(Math.round(d))).toString();
+	/** Convert double to string with rounding */
+	static public String doubleToString(double d, int numdecplaces) {
+		if (numdecplaces < 0)
+			return new Double(d).toString();
+		else if (numdecplaces == 0) {
+			String ret = new Double(Math.round(d)).toString();
 			if (ret.endsWith(".0"))
-				ret=ret.replace(".0","");
+				return ret.replace(".0","");
+			else
+				return ret;
 		} else {
-			double mult=Math.pow(10,numdecplaces);
-			ret=new Double(Math.round(d*mult)/mult).toString();
+			double mult = Math.pow(10, numdecplaces);
+			return new Double(Math.round(d * mult) / mult).toString();
 		}
-		return ret;
 	}
 
-	/** convert int to string */
-	public static String intToString(int i) {
+	/** Convert int to string */
+	static public String intToString(int i) {
 		return String.valueOf(i);
 	}
 
-	/** convert int to string */
-	public static String longToString(long i) {
+	/** Convert long to string */
+	static public String longToString(long i) {
 		return String.valueOf(i);
 	}
 
-	/**
-	 *  Does a string contain another string?
-	 *  @return true if string1 contains string2, case insensitive.
-	 */
-	public static boolean containsIgnoreCase(String arg1, String arg2) {
-		if(arg1 == null || arg2 == null)
+	/** Does a string contain another string?
+	 * @return true if string1 contains string2, case insensitive. */
+	static public boolean containsIgnoreCase(String arg1, String arg2) {
+		if (arg1 == null || arg2 == null)
 			return false;
-		if(arg1.length() <= 0 || arg2.length() <= 0)
+		if (arg1.length() <= 0 || arg2.length() <= 0)
 			return false;
 		return arg1.toLowerCase().contains(arg2.toLowerCase());
 	}
 
-	/**
-	 *  If the specified string ends with the specified tail,
-	 *  the string is returned with the tail removed.
-	 */
+	/** If the specified string ends with the specified tail,
+	 * the string is returned with the tail removed. */
 	static public String removeTail(String s, String tail) {
-		if(s == null)
+		if (s == null)
 			return null;
-		if(tail == null || tail.isEmpty())
+		if (tail == null || tail.isEmpty())
 			return s;
-		if((s.endsWith(tail)))
+		if ((s.endsWith(tail)))
 			return s.substring(0, s.length() - tail.length());
 		return s;
 	}
 
 	/** Convert String[] to a comma separated String. Null values are
-	 *  not added to the list, empty strings are. */
-	public static String toString(String[] s) {
-		if(s == null || s.length == 0)
+	 * not added to the list, empty strings are. */
+	static public String toString(String[] s) {
+		if (s == null || s.length == 0)
 			return "";
 		StringBuilder r = new StringBuilder("");
-		for(String x : s)
-			if(x != null)
+		for (String x : s) {
+			if (x != null)
 				r.append(x).append(", ");
+		}
 		return SString.removeTail(r.toString(), ", ");
 	}
 
 	/** Return a comma separated list given an int array. */
-	public static String toString(int[] i) {
-		if(i == null || i.length == 0)
+	static public String toString(int[] i) {
+		if (i == null || i.length == 0)
 			return "";
 		StringBuilder r = new StringBuilder("");
-		for(int x : i)
+		for (int x : i)
 			r.append(x).append(", ");
 		return SString.removeTail(r.toString(), ", ");
 	}
@@ -308,46 +306,47 @@ public class SString {
 		return j.trim();
 	}
 
-	/** return true if the argument is numeric */
+	/** Return true if the argument is numeric */
 	static public boolean isNumeric(String s) {
-		if(s == null || s.isEmpty())
+		if (s == null || s.isEmpty())
 			return false;
 		boolean found_dec = false;
 		boolean found_minus = false;
-		for(int i = 0; i < s.length(); ++i) {
-			if(s.charAt(i) == '.') {
-				if(found_dec)
+		for (int i = 0; i < s.length(); i++) {
+			if (s.charAt(i) == '.') {
+				if (found_dec)
 					return false;
 				found_dec = true;
 				continue;
-			} else if(s.charAt(i) == '-') {
-				if(found_minus)
+			} else if (s.charAt(i) == '-') {
+				if (found_minus)
 					return false;
 				found_minus = true;
 				continue;
-			} else if(!Character.isDigit(s.charAt(i)))
+			} else if (!Character.isDigit(s.charAt(i)))
 				return false;
 		}
 		return true;
 	}
 
-	/** return the number of alpha prefix characters shared by 2 strings */
+	/** Return the number of alpha prefix characters shared by 2 strings */
 	static public int alphaPrefixLen(String a, String b) {
-		if(a == null || b == null)
+		if (a == null || b == null)
 			return 0;
 		int len = Math.min(a.length(), b.length());
-		for(int i = 0; i < len; ++i) {
-			if(a.charAt(i) == b.charAt(i))
-				if(!Character.isDigit(a.charAt(i)))
+		for (int i = 0; i < len; i++) {
+			if (a.charAt(i) == b.charAt(i)) {
+				if (!Character.isDigit(a.charAt(i)))
 					continue;
+			}
 			return i;
 		}
 		return len;
 	}
 
 	/** String comparison: starts with ignoring case */
-	public static boolean startsWithIgnoreCase(String s,String sw) {
-		if(s == null || sw == null)
+	static public boolean startsWithIgnoreCase(String s,String sw) {
+		if (s == null || sw == null)
 			return false;
 		return s.toLowerCase().startsWith(sw.toLowerCase());
 	}
