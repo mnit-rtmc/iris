@@ -78,7 +78,7 @@ public class SString {
 			return "";
 		StringBuilder sb = new StringBuilder(str.length());
 		for (int i = 0; i < str.length(); i++) {
-			if (SString.containsChar(valid,str.charAt(i)))
+			if (containsChar(valid, str.charAt(i)))
 				sb.append(str.charAt(i));
 		}
 		return sb.toString();
@@ -265,39 +265,33 @@ public class SString {
 		return arg1.toLowerCase().contains(arg2.toLowerCase());
 	}
 
-	/** If the specified string ends with the specified tail,
-	 * the string is returned with the tail removed. */
-	static public String removeTail(String s, String tail) {
-		if (s == null)
-			return null;
-		if (tail == null || tail.isEmpty())
-			return s;
-		if ((s.endsWith(tail)))
-			return s.substring(0, s.length() - tail.length());
-		return s;
-	}
-
 	/** Convert String[] to a comma separated String. Null values are
 	 * not added to the list, empty strings are. */
 	static public String toString(String[] s) {
 		if (s == null || s.length == 0)
 			return "";
-		StringBuilder r = new StringBuilder("");
+		StringBuilder sb = new StringBuilder();
 		for (String x : s) {
-			if (x != null)
-				r.append(x).append(", ");
+			if (x != null) {
+				if (sb.length() > 0)
+					sb.append(", ");
+				sb.append(x);
+			}
 		}
-		return SString.removeTail(r.toString(), ", ");
+		return sb.toString();
 	}
 
 	/** Return a comma separated list given an int array. */
 	static public String toString(int[] i) {
 		if (i == null || i.length == 0)
 			return "";
-		StringBuilder r = new StringBuilder("");
-		for (int x : i)
-			r.append(x).append(", ");
-		return SString.removeTail(r.toString(), ", ");
+		StringBuilder sb = new StringBuilder();
+		for (int x : i) {
+			if (sb.length() > 0)
+				sb.append(", ");
+			sb.append(x);
+		}
+		return sb.toString();
 	}
 
 	/** Join two strings with a space and then trim */
