@@ -22,6 +22,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Device;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.Session;
@@ -101,6 +102,8 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 			Device dev = model.getElementAt(i);
 			if (dev instanceof LCSArray)
 				sendIndications((LCSArray) dev);
+			if (dev instanceof DMS)
+				sendSignMessage((DMS) dev);
 		}
 	}
 
@@ -111,6 +114,11 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 			lcs_array.setOwnerNext(session.getUser());
 			lcs_array.setIndicationsNext(ind);
 		}
+	}
+
+	/** Send new sign message to the specified DMS */
+	private void sendSignMessage(DMS dms) {
+		// FIXME
 	}
 
 	/** Update one attribute on the form */

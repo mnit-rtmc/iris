@@ -21,6 +21,8 @@ import javax.swing.DefaultListModel;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Device;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LaneConfiguration;
@@ -35,13 +37,23 @@ import us.mn.state.dot.tms.units.Distance;
  */
 public class DeviceDeployModel extends DefaultListModel<Device> {
 
+	/** Calculate a mile point for a location on a corridor */
+	static private Float calculateMilePoint(CorridorBase cb, GeoLoc loc) {
+		if (loc != null &&
+		    loc.getRoadway() == cb.getRoadway() &&
+		    loc.getRoadDir() == cb.getRoadDir())
+			return cb.calculateMilePoint(loc);
+		else
+			return null;
+	}
+
 	/** Mapping of LCS array names to proposed indications */
 	private final HashMap<String, Integer []> indications =
 		new HashMap<String, Integer []>();
 
 	/** Get the proposed indications for an LCS array */
-	public Integer[] getIndications(String lcs_array) {
-		return indications.get(lcs_array);
+	public Integer[] getIndications(String lcs_a) {
+		return indications.get(lcs_a);
 	}
 
 	/** Create a new device deploy model */
@@ -60,43 +72,63 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	 * @param cb Corridor where incident is located.
 	 * @param mp Relative mile point of incident. */
 	private void populateList(Incident inc, CorridorBase cb, float mp) {
-		LcsDeployModel lcs_mdl = new LcsDeployModel(inc);
 		Position pos = new Position(inc.getLat(), inc.getLon());
 		LaneConfiguration config = cb.laneConfiguration(pos);
-		TreeMap<Distance, LCSArray> devices = findDevices(cb, mp);
+		LcsDeployModel lcs_mdl = new LcsDeployModel(inc, config);
+		TreeMap<Distance, Device> devices = findDevices(cb, mp);
 		int shift = config.leftShift;
 		for (Distance up: devices.keySet()) {
-			LCSArray lcs_array = devices.get(up);
-			int l_shift = lcs_array.getShift() - shift;
-			Integer[] ind = lcs_mdl.createIndications(up, lcs_array,
-				l_shift, config.getLanes());
-			if (ind != null) {
-				addElement(lcs_array);
-				indications.put(lcs_array.getName(), ind);
+			Device dev = devices.get(up);
+			if (dev instanceof LCSArray) {
+				LCSArray lcs_a = (LCSArray) dev;
+				int l_shift = lcs_a.getShift() - shift;
+				Integer[] ind = lcs_mdl.createIndications(up,
+					lcs_a, l_shift);
+				if (ind != null) {
+					addElement(lcs_a);
+					indications.put(lcs_a.getName(), ind);
+				}
+			}
+			if (dev instanceof DMS) {
+				DMS dms = (DMS) dev;
+				System.err.println("dms: " + dms + ", " + up);
+				// FIXME
 			}
 		}
 	}
 
 	/** Find all devices upstream of a given point on a corridor */
-	private TreeMap<Distance, LCSArray> findDevices(CorridorBase cb,
+	private TreeMap<Distance, Device> findDevices(CorridorBase cb,
 		float mp)
 	{
-		TreeMap<Distance, LCSArray> devices =
-			new TreeMap<Distance, LCSArray>();
+		TreeMap<Distance, Device> devices =
+			new TreeMap<Distance, Device>();
+		// Find LCS arrays
 		Iterator<LCSArray> lit = LCSArrayHelper.iterator();
 		while (lit.hasNext()) {
-			LCSArray lcs_array = lit.next();
-			GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_array);
-			if (loc != null &&
-			    loc.getRoadway() == cb.getRoadway() &&
-			    loc.getRoadDir() == cb.getRoadDir())
-			{
-				Float lp = cb.calculateMilePoint(loc);
-				if (lp != null && mp > lp) {
-					Distance up = new Distance(mp - lp,
-						Distance.Units.MILES);
-					devices.put(up, lcs_array);
-				}
+			LCSArray lcs_a = lit.next();
+			GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_a);
+			Float lp = calculateMilePoint(cb, loc);
+			if (lp != null && mp > lp) {
+				Distance up = new Distance(mp - lp,
+					Distance.Units.MILES);
+				devices.put(up, lcs_a);
+			}
+		}
+		// Find DMS
+		Iterator<DMS> dit = DMSHelper.iterator();
+		while (dit.hasNext()) {
+			DMS dms = dit.next();
+			if (DMSHelper.isHidden(dms) ||
+			    DMSHelper.isFailed(dms) ||
+			   !DMSHelper.isActive(dms))
+				continue;
+			GeoLoc loc = dms.getGeoLoc();
+			Float lp = calculateMilePoint(cb, loc);
+			if (lp != null && mp > lp) {
+				Distance up = new Distance(mp - lp,
+					Distance.Units.MILES);
+				devices.put(up, dms);
 			}
 		}
 		return devices;

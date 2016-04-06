@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.IncidentImpact;
 import static us.mn.state.dot.tms.IncidentImpact.FREE_FLOWING;
 import static us.mn.state.dot.tms.IncidentImpact.PARTIALLY_BLOCKED;
 import static us.mn.state.dot.tms.IncidentImpact.BLOCKED;
+import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
@@ -98,19 +99,22 @@ public class LcsDeployModel {
 	/** Incident in question */
 	private final Incident incident;
 
+	/** Lane configuration at incident */
+	private final LaneConfiguration config;
+
 	/** Create a new LCS deploy model */
-	public LcsDeployModel(Incident inc) {
+	public LcsDeployModel(Incident inc, LaneConfiguration conf) {
 		incident = inc;
+		config = conf;
 	}
 
 	/** Create proposed indications for an LCS array.
 	 * @param up Distance upstream from incident (miles).
 	 * @param lcs_array LCS array.
 	 * @param shift Lane shift relative to incident.
-	 * @param n_lanes Number of full lanes at incident.
 	 * @return Array of LaneUseIndication ordinal values, or null. */
 	public Integer[] createIndications(Distance up, LCSArray lcs_array,
-		int shift, int n_lanes)
+		int shift)
 	{
 		int n_lcs = lcs_array.getIndicationsCurrent().length;
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
