@@ -366,9 +366,9 @@ public class IncidentDispatcher extends IPanel
 		inc.setImpact(impact_pnl.getImpact());
 	}
 
-	/** Show the incident deploy form */
+	/** Show the device deploy form */
 	private void showDeployForm(Incident inc) {
-		session.getDesktop().show(new IncidentDeployForm(session, inc,
+		session.getDesktop().show(new DeviceDeployForm(session, inc,
 			manager));
 	}
 

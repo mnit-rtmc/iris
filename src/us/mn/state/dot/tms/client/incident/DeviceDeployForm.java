@@ -31,11 +31,11 @@ import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * IncidentDeployForm is a dialog for deploying devices for an incident.
+ * DeviceDeployForm is a dialog for deploying devices for an incident.
  *
  * @author Douglas Lau
  */
-public class IncidentDeployForm extends SonarObjectForm<Incident> {
+public class DeviceDeployForm extends SonarObjectForm<Incident> {
 
 	/** Incident manager */
 	private final IncidentManager manager;
@@ -54,8 +54,8 @@ public class IncidentDeployForm extends SonarObjectForm<Incident> {
 		}
 	};
 
-	/** Create a new incident deploy form */
-	public IncidentDeployForm(Session s, Incident inc, IncidentManager man){
+	/** Create a new incident device deploy form */
+	public DeviceDeployForm(Session s, Incident inc, IncidentManager man){
 		super(I18N.get("incident") + ": ", s, inc);
 		manager = man;
 		model = new DeviceDeployModel(man, inc);
