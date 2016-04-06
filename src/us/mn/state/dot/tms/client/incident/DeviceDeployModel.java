@@ -63,10 +63,10 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		LcsDeployModel lcs_mdl = new LcsDeployModel(inc);
 		Position pos = new Position(inc.getLat(), inc.getLon());
 		LaneConfiguration config = cb.laneConfiguration(pos);
-		TreeMap<Distance, LCSArray> upstream = findUpstream(cb, mp);
+		TreeMap<Distance, LCSArray> devices = findDevices(cb, mp);
 		int shift = config.leftShift;
-		for (Distance up: upstream.keySet()) {
-			LCSArray lcs_array = upstream.get(up);
+		for (Distance up: devices.keySet()) {
+			LCSArray lcs_array = devices.get(up);
 			int l_shift = lcs_array.getShift() - shift;
 			Integer[] ind = lcs_mdl.createIndications(up, lcs_array,
 				l_shift, config.getLanes());
@@ -77,11 +77,11 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		}
 	}
 
-	/** Find all LCS arrays upstream of a given point on a corridor */
-	private TreeMap<Distance, LCSArray> findUpstream(CorridorBase cb,
+	/** Find all devices upstream of a given point on a corridor */
+	private TreeMap<Distance, LCSArray> findDevices(CorridorBase cb,
 		float mp)
 	{
-		TreeMap<Distance, LCSArray> upstream =
+		TreeMap<Distance, LCSArray> devices =
 			new TreeMap<Distance, LCSArray>();
 		Iterator<LCSArray> lit = LCSArrayHelper.iterator();
 		while (lit.hasNext()) {
@@ -95,10 +95,10 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 				if (lp != null && mp > lp) {
 					Distance up = new Distance(mp - lp,
 						Distance.Units.MILES);
-					upstream.put(up, lcs_array);
+					devices.put(up, lcs_array);
 				}
 			}
 		}
-		return upstream;
+		return devices;
 	}
 }
