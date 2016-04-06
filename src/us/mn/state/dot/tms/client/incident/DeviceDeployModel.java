@@ -20,6 +20,7 @@ import java.util.TreeMap;
 import javax.swing.DefaultListModel;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LaneConfiguration;
@@ -33,7 +34,7 @@ import us.mn.state.dot.tms.units.Distance;
  *
  * @author Douglas Lau
  */
-public class DeviceDeployModel extends DefaultListModel<LCSArray> {
+public class DeviceDeployModel extends DefaultListModel<Device> {
 
 	/** Check if a set of indications should be deployed */
 	static private boolean shouldDeploy(Integer[] ind) {

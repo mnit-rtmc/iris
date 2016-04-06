@@ -21,6 +21,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.SwingConstants;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.Session;
@@ -44,7 +45,7 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	private final DeviceDeployModel model;
 
 	/** List of deployments for the incident */
-	private final JList<LCSArray> list;
+	private final JList<Device> list;
 
 	/** Action to send device messages */
 	private final IAction send = new IAction("incident.send") {
@@ -59,7 +60,7 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 		super(I18N.get("incident") + ": ", s, inc);
 		manager = man;
 		model = new DeviceDeployModel(man, inc);
-		list = new JList<LCSArray>(model);
+		list = new JList<Device>(model);
 	}
 
 	/** Get the SONAR type cache */
@@ -71,7 +72,7 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	/** Initialize the widgets on the form */
 	@Override
 	protected void initialize() {
-		list.setCellRenderer(new ProposedLcsCellRenderer(session,
+		list.setCellRenderer(new ProposedDeviceCellRenderer(session,
 			model));
 		add(createPanel());
 		super.initialize();
@@ -96,8 +97,11 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 
 	/** Deploy proposed messages to devices */
 	private void deployDevices() {
-		for (int i = 0; i < model.getSize(); i++)
-			sendIndications(model.getElementAt(i));
+		for (int i = 0; i < model.getSize(); i++) {
+			Device dev = model.getElementAt(i);
+			if (dev instanceof LCSArray)
+				sendIndications((LCSArray) dev);
+		}
 	}
 
 	/** Send new indications to the specified LCS array */
