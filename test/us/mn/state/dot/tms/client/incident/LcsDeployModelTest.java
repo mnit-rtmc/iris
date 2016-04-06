@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,19 +24,19 @@ import static us.mn.state.dot.tms.LaneUseIndication.USE_CAUTION;
 import us.mn.state.dot.tms.units.Distance;
 
 /** 
- * IncidentPolicy test cases
+ * LcsDeployModel test cases
  *
  * @author Douglas Lau
  */
-public class IncidentPolicyTest extends TestCase {
+public class LcsDeployModelTest extends TestCase {
 
-	public IncidentPolicyTest(String name) {
+	public LcsDeployModelTest(String name) {
 		super(name);
 	}
 
 	public void testUpstreamShort() {
 		Distance up = new Distance(0.25f, Distance.Units.MILES);
-		IncidentPolicy p = createPolicy("....");
+		LcsDeployModel p = createPolicy("....");
 		assertTrue(getIndications(p, up, 2, 0)[0] == LANE_OPEN);
 		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_OPEN);
 		assertTrue(getIndications(p, up, 2, 1)[0] == DARK);
@@ -63,14 +63,14 @@ public class IncidentPolicyTest extends TestCase {
 		assertTrue(getIndications(p, up, 2, 0)[1] == LANE_CLOSED);
 	}
 
-	private LaneUseIndication[] getIndications(IncidentPolicy p,
+	private LaneUseIndication[] getIndications(LcsDeployModel p,
 		Distance up, int n_lcs, int shift)
 	{
 		return p.createIndications(up, n_lcs, shift);
 	}
 
-	protected IncidentPolicy createPolicy(String impact) {
-		return new IncidentPolicy(createIncident(impact));
+	protected LcsDeployModel createPolicy(String impact) {
+		return new LcsDeployModel(createIncident(impact));
 	}
 
 	protected ClientIncident createIncident(String impact) {

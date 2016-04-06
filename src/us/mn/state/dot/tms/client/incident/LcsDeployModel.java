@@ -131,8 +131,7 @@ public class LcsDeployModel {
 	 * @param n_lcs Number of lanes at LCS array.
 	 * @param shift Lane shift relative to incident.
 	 * @return Array of LaneUseIndication values. */
-	private LaneUseIndication[] createIndications(Distance up, int n_lcs,
-		int shift)
+	LaneUseIndication[] createIndications(Distance up, int n_lcs, int shift)
 	{
 		LaneUseIndication[] ind = new LaneUseIndication[n_lcs];
 		for (int i = 0; i < ind.length; i++) {
