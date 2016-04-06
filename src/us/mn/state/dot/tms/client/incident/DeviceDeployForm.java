@@ -49,13 +49,13 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	/** Action to send device messages */
 	private final IAction send = new IAction("incident.send") {
 		protected void doActionPerformed(ActionEvent e) {
-			sendIndications();
+			deployDevices();
 			close(session.getDesktop());
 		}
 	};
 
 	/** Create a new incident device deploy form */
-	public DeviceDeployForm(Session s, Incident inc, IncidentManager man){
+	public DeviceDeployForm(Session s, Incident inc, IncidentManager man) {
 		super(I18N.get("incident") + ": ", s, inc);
 		manager = man;
 		model = new DeviceDeployModel(man, inc);
@@ -94,8 +94,8 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 		return p;
 	}
 
-	/** Send new indications to LCS arrays for the incident */
-	private void sendIndications() {
+	/** Deploy proposed messages to devices */
+	private void deployDevices() {
 		for (int i = 0; i < model.getSize(); i++)
 			sendIndications(model.getElementAt(i));
 	}
