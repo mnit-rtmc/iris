@@ -76,7 +76,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	 * @param cb Corridor where incident is located.
 	 * @param mp Relative mile point of incident. */
 	private void populateList(Incident inc, CorridorBase cb, float mp) {
-		IncidentPolicy policy = new IncidentPolicy(inc);
+		LcsDeployModel lcs_mdl = new LcsDeployModel(inc);
 		Position position = new Position(inc.getLat(), inc.getLon());
 		TreeMap<Distance, LCSArray> upstream = findUpstream(cb, mp);
 		LaneConfiguration config = cb.laneConfiguration(position);
@@ -84,7 +84,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		for (Distance up: upstream.keySet()) {
 			LCSArray lcs_array = upstream.get(up);
 			int l_shift = lcs_array.getShift() - shift;
-			Integer[] ind = policy.createIndications(up, lcs_array,
+			Integer[] ind = lcs_mdl.createIndications(up, lcs_array,
 				l_shift, config.getLanes());
 			if (shouldDeploy(ind)) {
 				addElement(lcs_array);

@@ -29,11 +29,11 @@ import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
 /**
- * IncidentPolicy determines which LCS indications to propose for an incident.
+ * LcsDeployModel determines which LCS indications to propose for an incident.
  *
  * @author Douglas Lau
  */
-public class IncidentPolicy {
+public class LcsDeployModel {
 
 	/** Short distance upstream of incident to deploy devices */
 	static private final Distance DIST_SHORT = new Distance(0.5f, MILES);
@@ -65,7 +65,7 @@ public class IncidentPolicy {
 
 	/** Get alternate indication for "dumb" LCS devices. */
 	static private LaneUseIndication altIndication(LaneUseIndication lui) {
-		switch(lui) {
+		switch (lui) {
 		case LOW_VISIBILITY:
 		case LANE_CLOSED_AHEAD:
 		case MERGE_RIGHT:
@@ -83,8 +83,8 @@ public class IncidentPolicy {
 	/** Incident in question */
 	private final Incident incident;
 
-	/** Create a new incident policy */
-	public IncidentPolicy(Incident inc) {
+	/** Create a new LCS deploy model */
+	public LcsDeployModel(Incident inc) {
 		incident = inc;
 	}
 
@@ -116,7 +116,7 @@ public class IncidentPolicy {
 	 * @param n_lcs Number of lanes at LCS array.
 	 * @param shift Lane shift relative to incident.
 	 * @return Array of LaneUseIndication values. */
-	LaneUseIndication[] createIndications(Distance up, int n_lcs,
+	private LaneUseIndication[] createIndications(Distance up, int n_lcs,
 		int shift)
 	{
 		LaneUseIndication[] ind = new LaneUseIndication[n_lcs];
