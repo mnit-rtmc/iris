@@ -209,7 +209,7 @@ public class ComposerPagePanel extends JPanel {
 					mb.setFont(fn, null);
 			} else
 				mb.addLine(null);
-			mb.addSpan(mess[i]);
+			new MultiString(mess[i]).parse(mb);
 		}
 		return mb.toMultiString();
 	}
