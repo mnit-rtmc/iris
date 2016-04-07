@@ -16,9 +16,7 @@ package us.mn.state.dot.tms.client.incident;
 
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentImpact;
-import static us.mn.state.dot.tms.IncidentImpact.FREE_FLOWING;
-import static us.mn.state.dot.tms.IncidentImpact.PARTIALLY_BLOCKED;
-import static us.mn.state.dot.tms.IncidentImpact.BLOCKED;
+import static us.mn.state.dot.tms.IncidentImpact.*;
 import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
@@ -102,23 +100,28 @@ public class LcsDeployModel {
 	/** Lane configuration at incident */
 	private final LaneConfiguration config;
 
-	/** Create a new LCS deploy model */
+	/** Create a new LCS deploy model.
+	 * @param inc Incident for deployment.
+	 * @param conf Lane configuration at incident location. */
 	public LcsDeployModel(Incident inc, LaneConfiguration conf) {
 		incident = inc;
 		config = conf;
 	}
 
 	/** Create proposed indications for an LCS array.
+	 * @param cfg Lane configuration at LCS array location.
 	 * @param up Distance upstream from incident (miles).
 	 * @param lcs_array LCS array.
 	 * @return Array of LaneUseIndication ordinal values, or null. */
-	public Integer[] createIndications(Distance up, LCSArray lcs_array) {
-		int shift = lcs_array.getShift() - config.leftShift;
+	public Integer[] createIndications(LaneConfiguration cfg, Distance up,
+		LCSArray lcs_array)
+	{
 		int n_lcs = lcs_array.getIndicationsCurrent().length;
 		LCS[] lcss = LCSArrayHelper.lookupLCSs(lcs_array);
 		if (n_lcs != lcss.length)
 			return null;
-		LaneUseIndication[] ind = createIndications(up, n_lcs, shift);
+		LaneUseIndication[] ind = createIndications(cfg, up, n_lcs,
+			lcs_array.getShift());
 		Integer[] oin = new Integer[ind.length];
 		for (int i = 0; i < ind.length; i++) {
 			LaneUseIndication[] avail =
@@ -129,96 +132,103 @@ public class LcsDeployModel {
 	}
 
 	/** Create proposed indications for an LCS array.
+	 * @param cfg Lane configuration at LCS array.
 	 * @param up Distance upstream from incident (miles).
 	 * @param n_lcs Number of lanes at LCS array.
-	 * @param shift Lane shift relative to incident.
+	 * @param lcs_shift Lane shift at LCS array.
 	 * @return Array of LaneUseIndication values. */
-	LaneUseIndication[] createIndications(Distance up, int n_lcs, int shift)
+	LaneUseIndication[] createIndications(LaneConfiguration cfg,
+		Distance up, int n_lcs, int lcs_shift)
 	{
 		LaneUseIndication[] ind = new LaneUseIndication[n_lcs];
 		for (int i = 0; i < ind.length; i++) {
-			int ln = shift + n_lcs - i;
-			ind[i] = createIndication(up, ln);
+			int shift = lcs_shift + n_lcs - i - 1;
+			ind[i] = createIndication(cfg, up, shift);
 		}
 		return ind;
 	}
 
 	/** Create an LCS indication for one lane.
+	 * @param cfg Lane configuration at LCS array.
 	 * @param up Distance upstream from incident.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @param shift Lane shift from left origin.
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication createIndication(Distance up, int ln) {
-		if (isShoulder(ln))
+	private LaneUseIndication createIndication(LaneConfiguration cfg,
+		Distance up, int shift)
+	{
+		if (isShoulder(cfg, shift))
 			return LaneUseIndication.DARK;
 		double m = up.m();
 		if (m < 0)
 			return LaneUseIndication.DARK;
 		if (m < DIST_SHORT.m())
-			return createIndicationShort(ln);
+			return createIndicationShort(cfg, shift);
 		if (m < DIST_MEDIUM.m())
-			return createIndicationMedium(ln);
+			return createIndicationMedium(cfg, shift);
 		if (m < DIST_LONG.m())
-			return createIndicationLong(ln);
+			return createIndicationLong(shift);
 		else
 			return LaneUseIndication.DARK;
 	}
 
+	/** Check if a lane is a shoulder lane.
+	 * @param cfg Lane configuration at LCS array.
+	 * @param shift Lane shift from left origin.
+	 * @return true if lane is a shoulder, false otherwise. */
+	private boolean isShoulder(LaneConfiguration cfg, int shift) {
+		return (shift < cfg.leftShift || shift >= cfg.rightShift);
+	}
+
 	/** Create an LCS indication for one lane within a short distance of
 	 * the incident.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @param cfg Lane configuration at LCS array.
+	 * @param shift Lane shift from left origin.
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication createIndicationShort(int ln) {
-		IncidentImpact ii = getImpact(ln);
+	private LaneUseIndication createIndicationShort(LaneConfiguration cfg,
+		int shift)
+	{
+		IncidentImpact ii = getImpact(shift);
 		if (ii == BLOCKED)
 			return LaneUseIndication.LANE_CLOSED;
-		else if (ii == PARTIALLY_BLOCKED || isAdjacentLaneBlocked(ln))
+		else if (ii == PARTIALLY_BLOCKED ||isAdjacentLaneBlocked(shift))
 			return LaneUseIndication.USE_CAUTION;
 		else
 			return LaneUseIndication.LANE_OPEN;
 	}
 
 	/** Get the impact at the specified lane.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
-	 * @return IcidentImpact for given lane. */
-	private IncidentImpact getImpact(int ln) {
+	 * @param shift Lane shift from left origin.
+	 * @return IncidentImpact for given lane, or null. */
+	private IncidentImpact getImpact(int shift) {
 		String impact = incident.getImpact();
-		// Don't look at the shoulder lanes
-		if (ln <= 0 || ln >= impact.length() - 1)
-			return FREE_FLOWING;
-		else
+		int ln = shift - config.leftShift + 1;
+		if (ln >= 0 && ln < impact.length())
 			return IncidentImpact.fromChar(impact.charAt(ln));
+		else
+			return null;
 	}
 
 	/** Check if an adjacent lane is blocked.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @param shift Lane shift from left origin.
 	 * @return true if an adjacent lane is blocked, false otherwise. */
-	private boolean isAdjacentLaneBlocked(int ln) {
-		IncidentImpact left = getAdjacentImpact(ln - 1, FREE_FLOWING);
-		IncidentImpact right = getAdjacentImpact(ln + 1, FREE_FLOWING);
+	private boolean isAdjacentLaneBlocked(int shift) {
+		IncidentImpact left = getImpact(shift - 1);
+		IncidentImpact right = getImpact(shift + 1);
 		return left == BLOCKED || right == BLOCKED;
-	}
-
-	/** Get the impact at the specified adjacent lane.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
-	 * @param def Default impact for invalid lanes.
-	 * @return IncidentImpact for given adjacent lane. */
-	private IncidentImpact getAdjacentImpact(int ln, IncidentImpact def) {
-		String impact = incident.getImpact();
-		if (ln < 0 || ln >= impact.length())
-			return def;
-		else
-			return IncidentImpact.fromChar(impact.charAt(ln));
 	}
 
 	/** Create an LCS indication for one lane at a medium distance to
 	 * the incident.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @param cfg Lane configuration at LCS array.
+	 * @param shift Lane shift from left origin.
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication createIndicationMedium(int ln) {
-		if (!isLaneBlocked(ln))
+	private LaneUseIndication createIndicationMedium(LaneConfiguration cfg,
+		int shift)
+	{
+		if (getImpact(shift) != BLOCKED)
 			return LaneUseIndication.LANE_OPEN;
-		int n_left = unblockedLeftMainline(ln);
-		int n_right = unblockedRightMainline(ln);
+		int n_left = unblockedLeftMainline(cfg, shift);
+		int n_right = unblockedRightMainline(cfg, shift);
 		if (n_left < n_right)
 			return LaneUseIndication.MERGE_LEFT;
 		else if (n_right < n_left)
@@ -226,65 +236,59 @@ public class LcsDeployModel {
 		else if (n_left < MAX_SHIFT)
 			return LaneUseIndication.MERGE_BOTH;
 		else
-			return indication2MainlineBlocked(ln);
+			return createIndicationMediumBlocked(cfg, shift);
 	}
 
-	/** Check if a lane is blocked.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
-	 * @return true if lane is blocked, false otherwise. */
-	private boolean isLaneBlocked(int ln) {
-		String impact = incident.getImpact();
-		if (ln > 0 && ln < impact.length()) {
-			char c = impact.charAt(ln);
-			IncidentImpact ii = IncidentImpact.fromChar(c);
-			return ii == BLOCKED;
-		} else
-			return true;
+	/** Check if a lane is open.
+	 * @param cfg Lane configuration at LCS array.
+	 * @param shift Lane shift from left origin.
+	 * @return true if lane is open, false otherwise. */
+	private boolean isLaneOpen(LaneConfiguration cfg, int shift) {
+		IncidentImpact ii = getImpact(shift);
+		return (ii == FREE_FLOWING) || (ii == PARTIALLY_BLOCKED);
 	}
 
-	/** Check if a lane is blocked or a shoulder lane.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
-	 * @return true if lane is blocked, false otherwise. */
-	private boolean isLaneBlockedOrShoulder(int ln) {
-		return isShoulder(ln) || isLaneBlocked(ln);
+	/** Check if a lane is open and not a shoulder.
+	 * @param cfg Lane configuration at LCS array.
+	 * @param shift Lane shift from left origin.
+	 * @return true if lane is open, false otherwise. */
+	private boolean isMainlineLaneOpen(LaneConfiguration cfg, int shift) {
+		return isLaneOpen(cfg, shift) && !isShoulder(cfg, shift);
 	}
 
-	/** Check if a lane is a shoulder lane.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
-	 * @return true if lane is a shoulder, false otherwise. */
-	private boolean isShoulder(int ln) {
-		String impact = incident.getImpact();
-		return ln <= 0 || ln >= impact.length() - 1;
-	}
-
-	/** Get number of lanes to the next unblocked mainline lanes left.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	/** Get number of lanes to the next unblocked mainline lane left.
+	 * @param cfg Lane configuration at LCS array.
+	 * @param shift Lane shift from left origin.
 	 * @return Number of lanes to left until a lane is not blocked. */
-	private int unblockedLeftMainline(int ln) {
-		for (int i = 0; i < MAX_SHIFT; i++) {
-			if (!isLaneBlockedOrShoulder(ln - i))
+	private int unblockedLeftMainline(LaneConfiguration cfg, int shift) {
+		for (int i = 1; i <= shift; i++) {
+			if (isMainlineLaneOpen(cfg, shift - i))
 				return i;
 		}
 		return MAX_SHIFT;
 	}
 
 	/** Get number of lanes to the next unblocked mainline lane right.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @param cfg Lane configuration at LCS array.
+	 * @param shift Lane shift from left origin.
 	 * @return Number of lanes to right until a lane is not blocked. */
-	private int unblockedRightMainline(int ln) {
-		for (int i = 0; i < MAX_SHIFT; i++) {
-			if (!isLaneBlockedOrShoulder(ln + i))
+	private int unblockedRightMainline(LaneConfiguration cfg, int shift) {
+		for (int i = 1; i < MAX_SHIFT; i++) {
+			if (isMainlineLaneOpen(cfg, shift + i))
 				return i;
 		}
 		return MAX_SHIFT;
 	}
 
-	/** Get the second indication when all mainline lanes are blocked.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	/** Get a medium distance indication when all lanes are blocked.
+	 * @param cfg Lane configuration at LCS array.
+	 * @param shift Lane shift from left origin.
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication indication2MainlineBlocked(int ln) {
-		int n_left = unblockedLeft(ln);
-		int n_right = unblockedRight(ln);
+	private LaneUseIndication createIndicationMediumBlocked(
+		LaneConfiguration cfg, int shift)
+	{
+		int n_left = unblockedLeftShoulder(cfg, shift);
+		int n_right = unblockedRightShoulder(cfg, shift);
 		if (n_left < n_right)
 			return LaneUseIndication.MERGE_LEFT;
 		else if (n_right < n_left)
@@ -295,34 +299,43 @@ public class LcsDeployModel {
 			return LaneUseIndication.LANE_CLOSED;
 	}
 
-	/** Get number of lanes to the next unblocked lane left.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
-	 * @return Number of lanes to left until a lane is not blocked. */
-	private int unblockedLeft(int ln) {
-		for (int i = 0; i < MAX_SHIFT; i++) {
-			if (!isLaneBlocked(ln - i))
-				return i;
-		}
-		return MAX_SHIFT;
+	/** Get number of lanes to the unblocked left shoulder.
+	 * @param cfg Lane configuration at LCS array.
+	 * @param shift Lane shift from left origin.
+	 * @return Number of lanes to left shoulder, or MAX_SHIFT. */
+	private int unblockedLeftShoulder(LaneConfiguration cfg, int shift) {
+		int shoulder = cfg.leftShift - 1;
+		if (isLaneOpen(cfg, shoulder))
+			return shift - shoulder;
+		else
+			return MAX_SHIFT;
 	}
 
-	/** Get number of lanes to the next unblocked lane right.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
-	 * @return Number of lanes to right until a lane is not blocked. */
-	private int unblockedRight(int ln) {
-		for (int i = 0; i < MAX_SHIFT; i++) {
-			if (!isLaneBlocked(ln + i))
-				return i;
-		}
-		return MAX_SHIFT;
+	/** Get number of lanes to the unblocked right shoulder.
+	 * @param cfg Lane configuration at LCS array.
+	 * @param shift Lane shift from left origin.
+	 * @return Number of lanes to right shoulder, or MAX_SHIFT. */
+	private int unblockedRightShoulder(LaneConfiguration cfg, int shift) {
+		if (isLaneOpen(cfg, cfg.rightShift))
+			return cfg.rightShift - shift;
+		else
+			return MAX_SHIFT;
+	}
+
+	/** Check if a lane is blocked.
+	 * @param shift Lane shift from left origin.
+	 * @return true if lane is blocked, false otherwise. */
+	private boolean isLaneBlocked(int shift) {
+		IncidentImpact ii = getImpact(shift);
+		return (ii == null) || (ii == BLOCKED);
 	}
 
 	/** Create an LCS indication for one lane at a long distance to
 	 * the incident.
-	 * @param ln Lane number (0 for left shoulder, increasing to right).
+	 * @param shift Lane shift from left origin.
 	 * @return LaneUseIndication value. */
-	private LaneUseIndication createIndicationLong(int ln) {
-		if (isLaneBlocked(ln))
+	private LaneUseIndication createIndicationLong(int shift) {
+		if (isLaneBlocked(shift))
 			return LaneUseIndication.LANE_CLOSED_AHEAD;
 		else
 			return LaneUseIndication.LANE_OPEN;

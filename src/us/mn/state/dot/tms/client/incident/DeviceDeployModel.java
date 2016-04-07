@@ -47,6 +47,14 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			return null;
 	}
 
+	/** Get an LCS array position */
+	static private Position getLCSPosition(LCSArray lcs_a) {
+		GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_a);
+		return (loc != null)
+		      ? new Position(loc.getLat(), loc.getLon())
+		      : null;
+	}
+
 	/** Mapping of LCS array names to proposed indications */
 	private final HashMap<String, Integer []> indications =
 		new HashMap<String, Integer []>();
@@ -80,8 +88,12 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			Device dev = devices.get(up);
 			if (dev instanceof LCSArray) {
 				LCSArray lcs_a = (LCSArray) dev;
-				Integer[] ind = lcs_mdl.createIndications(up,
-					lcs_a);
+				Position p = getLCSPosition(lcs_a);
+				LaneConfiguration cfg = (p != null)
+					? cb.laneConfiguration(p)
+				        : config;
+				Integer[] ind = lcs_mdl.createIndications(cfg,
+					up, lcs_a);
 				if (ind != null) {
 					addElement(lcs_a);
 					indications.put(lcs_a.getName(), ind);
