@@ -200,6 +200,7 @@ public class LcsDeployModel {
 	 * @param shift Lane shift from left origin.
 	 * @return IncidentImpact for given lane, or null. */
 	private IncidentImpact getImpact(int shift) {
+		// FIXME: check lane continuity to incident
 		String impact = incident.getImpact();
 		int ln = shift - config.leftShift + 1;
 		if (ln >= 0 && ln < impact.length())
