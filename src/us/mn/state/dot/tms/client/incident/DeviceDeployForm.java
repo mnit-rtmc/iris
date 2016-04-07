@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -48,6 +49,13 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	/** List of deployments for the incident */
 	private final JList<Device> list;
 
+	/** Action to remove selected device */
+	private final IAction remove = new IAction("incident.remove") {
+		protected void doActionPerformed(ActionEvent e) {
+			removeSelectedDevice();
+		}
+	};
+
 	/** Action to send device messages */
 	private final IAction send = new IAction("incident.send") {
 		protected void doActionPerformed(ActionEvent e) {
@@ -62,6 +70,11 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 		manager = man;
 		model = new DeviceDeployModel(man, inc);
 		list = new JList<Device>(model);
+		list.addListSelectionListener(new IListSelectionAdapter() {
+			@Override public void valueChanged() {
+				updateButtons();
+			}
+		});
 	}
 
 	/** Get the SONAR type cache */
@@ -77,6 +90,7 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 			model));
 		add(createPanel());
 		super.initialize();
+		updateButtons();
 	}
 
 	/** Create the panel for the form */
@@ -85,14 +99,12 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 		lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
 		lbl.setText(manager.getDescription(proxy));
 		lbl.setIcon(manager.getIcon(proxy));
-		JButton btn = new JButton(send);
-		send.setEnabled(model.getSize() > 0);
-		btn.setEnabled(model.getSize() > 0);
 		IPanel p = new IPanel();
 		p.add(lbl, Stretch.CENTER);
 		p.add("incident.deploy.proposed");
 		p.add(list, Stretch.FULL);
-		p.add(btn, Stretch.RIGHT);
+		p.add(new JButton(remove));
+		p.add(new JButton(send), Stretch.RIGHT);
 		return p;
 	}
 
@@ -126,5 +138,18 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	protected void doUpdateAttribute(String a) {
 		if ("cleared".equals(a) && proxy.getCleared())
 			close(session.getDesktop());
+	}
+
+	/** Remove the selected device */
+	private void removeSelectedDevice() {
+		int idx = list.getSelectedIndex();
+		if (idx >= 0)
+			model.remove(idx);
+	}
+
+	/** Update the button status */
+	private void updateButtons() {
+		remove.setEnabled(list.getSelectedIndex() >= 0);
+		send.setEnabled(model.getSize() > 0);
 	}
 }
