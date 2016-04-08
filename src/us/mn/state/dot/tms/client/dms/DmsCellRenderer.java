@@ -78,9 +78,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	/** Prototype name */
 	static private final String PROTOTYPE_NAME = "V999W99X";
 
-	/** Sign pixel panel to display sign message */
-	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200,
-		false);
+	/** DMS cell renderer mode */
+	private final DmsRendererMode mode;
 
 	/** List cell renderer (needed for colors) */
 	private final DefaultListCellRenderer cell =
@@ -98,8 +97,9 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	/** The label that displays the sign location */
 	private final JLabel loc_lbl = new JLabel();
 
-	/** DMS cell renderer mode */
-	private final DmsRendererMode mode;
+	/** Sign pixel panel to display sign message */
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200,
+		false);
 
 	/** Create a new DMS cell renderer.
 	 * @param d DMS to render.
