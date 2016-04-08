@@ -158,7 +158,6 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Update one DMS cell renderer */
 	private void updateCellRenderer(DMS dms) {
 		DmsCellRenderer r = new DmsCellRenderer(dms, getCellSize());
-		r.initialize();
 		renderers.put(dms.getName(), r);
 	}
 

@@ -111,6 +111,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		super(new BorderLayout());
 		dms = d;
 		mode = DmsRendererMode.determine(sz);
+		initialize();
 	}
 
 	/** Initialize a small size DMS cell renderer */
@@ -185,7 +186,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	}
 
 	/** Update DMS attributes */
-	public void initialize() {
+	private void initialize() {
 		switch (mode) {
 		case SMALL:
 			initSmall();
