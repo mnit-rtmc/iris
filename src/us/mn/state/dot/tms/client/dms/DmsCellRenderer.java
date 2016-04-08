@@ -74,7 +74,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		SMALL(58, 16, CellRendererSize.SMALL);
 
 		/** Fixed pixel panel size */
-		private final Dimension pixel_panel_size;
+		public final Dimension pixel_panel_size;
 
 		/** Associated style summary cell renderer size */
 		private final CellRendererSize cell_size;
@@ -83,11 +83,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		private DmsRendererMode(int w, int h, CellRendererSize cs) {
 			pixel_panel_size = UI.dimension(w, h);
 			cell_size = cs;
-		}
-
-		/** Get preferred size of the pixel panel */
-		public Dimension pixelPanelSize() {
-			return pixel_panel_size;
 		}
 
 		/** Determine the dms renderer mode, which determines the size
@@ -141,7 +136,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		// This is only needed to get preferred height
 		name_lbl.setText(PROTOTYPE_NAME);
 		Dimension lsz = name_lbl.getPreferredSize();
-		Dimension psz = mode.pixelPanelSize();
+		Dimension psz = mode.pixel_panel_size;
 		setPreferredSize(new Dimension(psz.width,
 			lsz.height + psz.height));
 	}
@@ -164,7 +159,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		// This is only needed to get preferred height
 		name_lbl.setText(PROTOTYPE_NAME);
 		Dimension lsz = name_lbl.getPreferredSize();
-		Dimension psz = mode.pixelPanelSize();
+		Dimension psz = mode.pixel_panel_size;
 		setPreferredSize(new Dimension(psz.width,
 			lsz.height * 2 + psz.height));
 	}
