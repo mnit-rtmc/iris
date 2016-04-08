@@ -159,7 +159,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Update one DMS cell renderer */
 	private void updateCellRenderer(DMS dms) {
 		DmsCellRenderer r = new DmsCellRenderer(getCellSize());
-		r.updateAttr(dms, "messageCurrent");
+		r.updatePixelPanel(dms);
 		renderers.put(dms, r);
 	}
 
@@ -182,9 +182,11 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Called when a proxy attribute has changed */
 	@Override
 	protected void proxyChangedSwing(DMS dms, String a) {
-		DmsCellRenderer r = lookupRenderer(dms);
-		if (r != null)
-			r.updateAttr(dms, a);
+		if ("messageCurrent".equals(a)) {
+			DmsCellRenderer r = lookupRenderer(dms);
+			if (r != null)
+				r.updatePixelPanel(dms);
+		}
 		super.proxyChangedSwing(dms, a);
 	}
 

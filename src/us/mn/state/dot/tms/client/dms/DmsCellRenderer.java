@@ -235,15 +235,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		return IrisUserHelper.getNamePruned(dms.getOwnerCurrent());
 	}
 
-	/** Update a specified attribute on the DMS.
-	 * @param a Attribute to update. */
-	public void updateAttr(DMS dms, String a) {
-		if (a.equals("messageCurrent"))
-			updatePixelPanel(dms);
-	}
-
 	/** Update the pixel panel */
-	private void updatePixelPanel(DMS dms) {
+	public void updatePixelPanel(DMS dms) {
 		switch (mode) {
 		case MEDIUM:
 		case LARGE:
