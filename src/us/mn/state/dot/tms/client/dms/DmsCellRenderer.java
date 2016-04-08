@@ -102,7 +102,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		false);
 
 	/** Create a new DMS cell renderer.
-	 * @param d DMS to render.
 	 * @param sz StyleSummary renderer cell size. */
 	public DmsCellRenderer(CellRendererSize sz) {
 		super(new BorderLayout());
@@ -184,20 +183,20 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	/** Get a component configured to render a cell of the list */
 	@Override
 	public Component getListCellRendererComponent(JList<? extends DMS> list,
-		DMS value, int index, boolean isSelected, boolean cellHasFocus)
+		DMS dms, int index, boolean isSelected, boolean cellHasFocus)
 	{
 		if (isSelected) {
 			Component temp = cell.getListCellRendererComponent(list,
-				value, index, isSelected, cellHasFocus);
+				dms, index, isSelected, cellHasFocus);
 			title.setBackground(temp.getBackground());
 		} else
 			title.setBackground(name_lbl.getBackground());
-		setSign(value);
+		setDMS(dms);
 		return this;
 	}
 
 	/** Set the DMS to render */
-	private void setSign(DMS dms) {
+	private void setDMS(DMS dms) {
 		String name = dms.getName();
 		name_lbl.setText(name);
 		String loc = GeoLocHelper.getDescription(dms.getGeoLoc());
