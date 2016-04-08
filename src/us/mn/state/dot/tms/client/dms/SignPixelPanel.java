@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,9 +51,9 @@ public class SignPixelPanel extends JPanel {
 
 	/** Get the filter color for a DMS */
 	static public Color filterColor(DMS dms) {
-		if(DMSHelper.isFailed(dms))
+		if (DMSHelper.isFailed(dms))
 			return FILTER_FAILED;
-		else if(DMSHelper.getCriticalError(dms).length() > 0)
+		else if (DMSHelper.getCriticalError(dms).length() > 0)
 			return FILTER_ERROR;
 		else
 			return null;
@@ -122,6 +122,7 @@ public class SignPixelPanel extends JPanel {
 		antialias = a;
 		face_color = Color.BLACK;
 		addComponentListener(new ComponentAdapter() {
+			@Override
 			public void componentResized(ComponentEvent e) {
 				dirty = true;
 				repaint();
@@ -169,11 +170,12 @@ public class SignPixelPanel extends JPanel {
 	}
 
 	/** Paint this on the screen */
-	@Override public void paintComponent(Graphics g) {
-		while(dirty)
+	@Override
+	public void paintComponent(Graphics g) {
+		while (dirty)
 			updateBuffer(graphic);
 		BufferedImage b = buffer;	// Avoid NPE race
-		if(b != null)
+		if (b != null)
 			g.drawImage(b, 0, 0, this);
 	}
 
@@ -191,7 +193,7 @@ public class SignPixelPanel extends JPanel {
 		BufferedImage b = buffer;	// Avoid NPE race
 		int w = getWidth();
 		int h = getHeight();
-		if(b == null || w  != b.getWidth() || h != b.getHeight()) {
+		if (b == null || w  != b.getWidth() || h != b.getHeight()) {
 			return new BufferedImage(w, h,
 				BufferedImage.TYPE_INT_RGB);
 		} else
@@ -202,7 +204,7 @@ public class SignPixelPanel extends JPanel {
 	private void rescale() {
 		int wp = getWidth();
 		int hp = getHeight();
-		if(wp > 0 && hp > 0)
+		if (wp > 0 && hp > 0)
 			rescale(wp, hp);
 	}
 
@@ -210,7 +212,7 @@ public class SignPixelPanel extends JPanel {
 	private void rescale(double w, double h) {
 		int w_mm = width_mm;
 		int h_mm = height_mm;
-		if(w_mm > 0 && h_mm > 0) {
+		if (w_mm > 0 && h_mm > 0) {
 			double sx = w / w_mm;
 			double sy = h / h_mm;
 			double scale = Math.min(sx, sy);
@@ -229,14 +231,14 @@ public class SignPixelPanel extends JPanel {
 		g.setColor(getBackground());
 		g.fillRect(0, 0, getWidth(), getHeight());
 		AffineTransform t = transform;
-		if(t != null) {
+		if (t != null) {
 			g.transform(t);
 			g.setColor(face_color);
 			g.fillRect(0, 0, width_mm, height_mm);
-			if(rg != null)
+			if (rg != null)
 				paintPixels(g, rg);
 			Color fc = filter_color;
-			if(fc != null) {
+			if (fc != null) {
 				g.setColor(fc);
 				g.fillRect(0, 0, width_mm, height_mm);
 			}
@@ -245,7 +247,7 @@ public class SignPixelPanel extends JPanel {
 
 	/** Paint the pixels of the sign */
 	private void paintPixels(Graphics2D g, RasterGraphic rg) {
-		if(antialias) {
+		if (antialias) {
 			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 				RenderingHints.VALUE_ANTIALIAS_ON);
 		}
@@ -257,18 +259,18 @@ public class SignPixelPanel extends JPanel {
 
 	/** Paint the unlit pixels */
 	private void paintUnlitPixels(Graphics2D g, RasterGraphic rg) {
-		if(antialias)
+		if (antialias)
 			setBloom(0);
 		else
 			setBloom(1);
 		g.setColor(Color.DARK_GRAY);
 		int px = Math.round(getHorizontalPitch() + getBloomX());
 		int py = Math.round(getVerticalPitch() + getBloomY());
-		for(int y = 0; y < height_pix; y++) {
+		for (int y = 0; y < height_pix; y++) {
 			int yy = Math.round(getPixelY(y));
-			for(int x = 0; x < width_pix; x++) {
+			for (int x = 0; x < width_pix; x++) {
 				int xx = Math.round(getPixelX(x));
-				if(!rg.getPixel(x, y).isLit())
+				if (!rg.getPixel(x, y).isLit())
 					g.fillOval(xx, yy, px, py);
 			}
 		}
@@ -276,18 +278,18 @@ public class SignPixelPanel extends JPanel {
 
 	/** Paint the lit pixels */
 	private void paintLitPixels(Graphics2D g, RasterGraphic rg) {
-		if(antialias)
+		if (antialias)
 			setBloom(0.6f);
 		else
 			setBloom(1);
 		int px = Math.round(getHorizontalPitch() + getBloomX());
 		int py = Math.round(getVerticalPitch() + getBloomY());
-		for(int y = 0; y < height_pix; y++) {
+		for (int y = 0; y < height_pix; y++) {
 			int yy = Math.round(getPixelY(y));
-			for(int x = 0; x < width_pix; x++) {
+			for (int x = 0; x < width_pix; x++) {
 				int xx = Math.round(getPixelX(x));
 				DmsColor clr = rg.getPixel(x, y);
-				if(clr.isLit()) {
+				if (clr.isLit()) {
 					g.setColor(new Color(clr.rgb()));
 					g.fillOval(xx, yy, px, py);
 				}
@@ -313,7 +315,7 @@ public class SignPixelPanel extends JPanel {
 
 	/** Get the character offset (for character-matrix signs only) */
 	private float getCharacterOffset(int x) {
-		if(width_char > 0)
+		if (width_char > 0)
 			return (x / width_char) * calculateCharGap();
 		else
 			return 0;
@@ -324,7 +326,7 @@ public class SignPixelPanel extends JPanel {
 		float excess = width_mm - 2 * getHorizontalBorder() -
 			width_pix * getHorizontalPitch();
 		int gaps = getCharacterGaps();
-		if(excess > 0 && gaps > 0)
+		if (excess > 0 && gaps > 0)
 			return excess / gaps;
 		else
 			return 0;
@@ -365,7 +367,7 @@ public class SignPixelPanel extends JPanel {
 
 	/** Get the line offset (for line- or character-matrix signs) */
 	private float getLineOffset(int y) {
-		if(height_line > 0)
+		if (height_line > 0)
 			return (y / height_line) * calculateLineGap();
 		else
 			return 0;
@@ -376,7 +378,7 @@ public class SignPixelPanel extends JPanel {
 		float excess = height_mm - 2 * getVerticalBorder() -
 			height_pix * getVerticalPitch();
 		int gaps = getLineGaps();
-		if(excess > 0 && gaps > 0)
+		if (excess > 0 && gaps > 0)
 			return excess / gaps;
 		else
 			return 0;
@@ -418,8 +420,8 @@ public class SignPixelPanel extends JPanel {
 		Integer vp = dms.getVerticalPitch();
 		Integer hb = dms.getHorizontalBorder();
 		Integer vb = dms.getVerticalBorder();
-		if(w != null && h != null && hp != null && vp != null &&
-		   hb != null && vb != null)
+		if (w != null && h != null && hp != null && vp != null &&
+		    hb != null && vb != null)
 		{
 			setPhysicalDimensions(w, h, hb, vb, hp, vp);
 		} else
@@ -445,7 +447,7 @@ public class SignPixelPanel extends JPanel {
 		Integer hp = dms.getHeightPixels();
 		Integer cw = dms.getCharWidthPixels();
 		Integer ch = dms.getCharHeightPixels();
-		if(wp != null && hp != null && cw != null && ch != null)
+		if (wp != null && hp != null && cw != null && ch != null)
 			setLogicalDimensions(wp, hp, cw, ch);
 		else
 			setLogicalDimensions(0, 0, 0, 0);
