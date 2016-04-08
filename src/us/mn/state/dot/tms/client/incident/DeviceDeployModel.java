@@ -28,7 +28,9 @@ import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.units.Distance;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * DeviceDeployModel is a model of devices to deploy for an incident.
@@ -82,6 +84,24 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		return indications.get(lcs_a);
 	}
 
+	/** Mapping of DMS names to proposed MULTI strings */
+	private final HashMap<String, MultiString> messages =
+		new HashMap<String, MultiString>();
+
+	/** Get the proposed MULTI for a DMS */
+	public MultiString getMulti(String dms) {
+		return messages.get(dms);
+	}
+
+	/** Mapping of DMS names to proposed page one graphics */
+	private final HashMap<String, RasterGraphic> graphics =
+		new HashMap<String, RasterGraphic>();
+
+	/** Get the proposed graphics for a DMS */
+	public RasterGraphic getGraphic(String dms) {
+		return graphics.get(dms);
+	}
+
 	/** Create a new device deploy model */
 	public DeviceDeployModel(IncidentManager man, Incident inc) {
 		IncidentLoc loc = new IncidentLoc(inc);
@@ -115,8 +135,16 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			}
 			if (dev instanceof DMS) {
 				DMS dms = (DMS) dev;
-				System.err.println("dms: " + dms + ", " + up);
-				// FIXME
+				MultiString ms = createMulti(inc, up, dms);
+				if (ms != null) {
+					RasterGraphic rg = createGraphic(dms,
+						ms);
+					if (rg != null) {
+						addElement(dms);
+						messages.put(dms.getName(), ms);
+						graphics.put(dms.getName(), rg);
+					}
+				}
 			}
 		}
 	}
@@ -156,5 +184,25 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			}
 		}
 		return devices;
+	}
+
+	/** Create the MULTI string for one DMS */
+	private MultiString createMulti(Incident inc, Distance up, DMS dms) {
+		System.err.println("dms: " + dms + ", " + up);
+		// FIXME
+		return new MultiString("TEST");
+	}
+
+	/** Create the page one graphic for a MULTI string */
+	private RasterGraphic createGraphic(DMS dms, MultiString ms) {
+		try {
+			RasterGraphic[] pixmaps = DMSHelper.createPixmaps(dms,
+				ms);
+			return pixmaps[0];
+		}
+		catch (Exception e) {
+			// could be IndexOutOfBounds or InvalidMessage
+			return null;
+		}
 	}
 }

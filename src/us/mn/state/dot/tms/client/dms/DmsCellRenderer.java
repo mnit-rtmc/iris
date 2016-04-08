@@ -28,6 +28,7 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.border.EtchedBorder;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -206,6 +207,16 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		updatePixelPanel(dms);
 	}
 
+	/** Format the owner name */
+	private String formatOwner(DMS dms) {
+		return IrisUserHelper.getNamePruned(getUser(dms));
+	}
+
+	/** Get the user name (may be overridden) */
+	protected User getUser(DMS dms) {
+		return dms.getOwnerCurrent();
+	}
+
 	/** Update tooltip */
 	private void updateToolTip(DMS dms, String name, String loc) {
 		StringBuilder tt = new StringBuilder();
@@ -231,11 +242,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		setToolTipText(tt.toString());
  	}
 
-	/** Format the owner name */
-	private String formatOwner(DMS dms) {
-		return IrisUserHelper.getNamePruned(dms.getOwnerCurrent());
-	}
-
 	/** Update the pixel panel */
 	private void updatePixelPanel(DMS dms) {
 		switch (mode) {
@@ -249,8 +255,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		}
 	}
 
-	/** Get the raster graphic for page one */
-	private RasterGraphic getPageOne(DMS dms) {
+	/** Get the raster graphic for page one (may be overridden) */
+	protected RasterGraphic getPageOne(DMS dms) {
 		RasterGraphic[] rasters = DMSHelper.getRasters(dms);
 		if (rasters != null && rasters.length > 0)
 			return rasters[0];

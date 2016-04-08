@@ -19,6 +19,7 @@ import javax.swing.DefaultListCellRenderer;
 import javax.swing.JList;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.tms.Device;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.client.Session;
 
@@ -36,12 +37,19 @@ public class ProposedDeviceCellRenderer implements ListCellRenderer<Device> {
 	/** List for configuring LCS cell renderer */
 	private final JList<LCSArray> lcs_list = new JList<LCSArray>();
 
+	/** List for configuring DMS cell renderer */
+	private final JList<DMS> dms_list = new JList<DMS>();
+
 	/** LCS array cell renderer */
 	private final ProposedLcsCellRenderer lcs_renderer;
+
+	/** DMS cell renderer */
+	private final ProposedDmsCellRenderer dms_renderer;
 
 	/** Create a new proposed LCS array cell renderere */
 	public ProposedDeviceCellRenderer(Session s, DeviceDeployModel m) {
 		lcs_renderer = new ProposedLcsCellRenderer(s, m);
+		dms_renderer = new ProposedDmsCellRenderer(s, m);
 	}
 
 	/** Get component to render a device.
@@ -61,6 +69,11 @@ public class ProposedDeviceCellRenderer implements ListCellRenderer<Device> {
 			LCSArray lcs = (LCSArray) value;
 			return lcs_renderer.getListCellRendererComponent(
 				lcs_list, lcs, index, isSelected, cellHasFocus);
+		}
+		if (value instanceof DMS) {
+			DMS dms = (DMS) value;
+			return dms_renderer.getListCellRendererComponent(
+				dms_list, dms, index, isSelected, cellHasFocus);
 		}
 		return cell.getListCellRendererComponent(list, value, index,
 			isSelected, cellHasFocus);

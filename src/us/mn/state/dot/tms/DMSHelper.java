@@ -241,6 +241,21 @@ public class DMSHelper extends BaseHelper {
 			return null;
 	}
 
+	/** Create pixmap graphics for a DMS.
+	 * @param dms The sign.
+	 * @param ms Message MULTI string.
+	 * @return Array of bitmap graphics for the sign, or null.
+	 * @throws InvalidMessageException if MULTI string is invalid. */
+	static public RasterGraphic[] createPixmaps(DMS dms, MultiString ms)
+		throws InvalidMessageException
+	{
+		RasterBuilder rb = createRasterBuilder(dms);
+		if (rb != null)
+			return rb.createPixmaps(ms);
+		else
+			return null;
+	}
+
 	/** Get the current raster graphics for all pages of the specified DMS.
 	 * @param dms Sign in question.
 	 * @return RasterGraphic array, one for each page, or null on error.

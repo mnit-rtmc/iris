@@ -15,16 +15,18 @@
 package us.mn.state.dot.tms.client.incident;
 
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.lcs.LCSArrayCellRenderer;
+import us.mn.state.dot.tms.client.dms.DmsCellRenderer;
+import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 
 /**
- * Proposed LCS array cell renderer.
+ * Proposed DMS cell renderer.
  *
  * @author Douglas Lau
  */
-public class ProposedLcsCellRenderer extends LCSArrayCellRenderer {
+public class ProposedDmsCellRenderer extends DmsCellRenderer {
 
 	/** User Session */
 	private final Session session;
@@ -32,22 +34,22 @@ public class ProposedLcsCellRenderer extends LCSArrayCellRenderer {
 	/** Model for deployment list */
 	private final DeviceDeployModel model;
 
-	/** Create a new proposed LCS array cell renderere */
-	public ProposedLcsCellRenderer(Session s, DeviceDeployModel m) {
-		super(s.getLCSArrayManager());
+	/** Create a new proposed DMS cell renderere */
+	public ProposedDmsCellRenderer(Session s, DeviceDeployModel m) {
+		super(CellRendererSize.LARGE);
 		session = s;
 		model = m;
 	}
 
 	/** Get the user name */
 	@Override
-	protected User getUser(LCSArray lcs_array) {
+	protected User getUser(DMS dms) {
 		return session.getUser();
 	}
 
-	/** Get the indications */
+	/** Get the raster graphic for page one */
 	@Override
-	protected Integer[] getIndications(LCSArray lcs_array) {
-		return model.getIndications(lcs_array.getName());
+	protected RasterGraphic getPageOne(DMS dms) {
+		return model.getGraphic(dms.getName());
 	}
 }
