@@ -55,6 +55,24 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		      : null;
 	}
 
+	/** Get an LCS array lane configuration */
+	static private LaneConfiguration laneConfiguration(CorridorBase cb,
+		LCSArray lcs_a)
+	{
+		Position p = getLCSPosition(lcs_a);
+		return (p != null) ? cb.laneConfiguration(p) : null;
+	}
+
+	/** Create indications for an LCS array */
+	static private Integer[] createIndications(CorridorBase cb,
+		LCSArray lcs_a, Distance up, LcsDeployModel lcs_mdl)
+	{
+		LaneConfiguration cfg = laneConfiguration(cb, lcs_a);
+		return (cfg != null)
+		      ? lcs_mdl.createIndications(cfg, up, lcs_a)
+		      : null;
+	}
+
 	/** Mapping of LCS array names to proposed indications */
 	private final HashMap<String, Integer []> indications =
 		new HashMap<String, Integer []>();
@@ -88,12 +106,8 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			Device dev = devices.get(up);
 			if (dev instanceof LCSArray) {
 				LCSArray lcs_a = (LCSArray) dev;
-				Position p = getLCSPosition(lcs_a);
-				LaneConfiguration cfg = (p != null)
-					? cb.laneConfiguration(p)
-				        : config;
-				Integer[] ind = lcs_mdl.createIndications(cfg,
-					up, lcs_a);
+				Integer[] ind = createIndications(cb, lcs_a,
+					up, lcs_mdl);
 				if (ind != null) {
 					addElement(lcs_a);
 					indications.put(lcs_a.getName(), ind);
