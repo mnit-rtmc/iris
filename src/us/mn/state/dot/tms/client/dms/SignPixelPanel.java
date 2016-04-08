@@ -19,10 +19,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
@@ -104,14 +101,8 @@ public class SignPixelPanel extends JPanel {
 	/** Raster graphic to paint */
 	private RasterGraphic graphic;
 
-	/** Buffer for screen display */
-	private BufferedImage buffer;
-
 	/** Bloom size relative to pixel size (0 means no blooming) */
 	private float bloom = 0f;
-
-	/** Flag that determines if buffer needs repainting */
-	private boolean dirty = false;
 
 	/** Create a new sign pixel panel.
 	 * @param h Height of panel.
@@ -121,13 +112,6 @@ public class SignPixelPanel extends JPanel {
 		super(true);
 		antialias = a;
 		face_color = Color.BLACK;
-		addComponentListener(new ComponentAdapter() {
-			@Override
-			public void componentResized(ComponentEvent e) {
-				dirty = true;
-				repaint();
-			}
-		});
 		setSizes(h, w);
 	}
 
@@ -135,7 +119,6 @@ public class SignPixelPanel extends JPanel {
 	 * @param fc Face color of sign. */
 	public void setFaceColor(Color fc) {
 		face_color = fc;
-		dirty = true;
 		repaint();
 	}
 
@@ -143,7 +126,6 @@ public class SignPixelPanel extends JPanel {
 	 * @param fc Filter color of sign. */
 	public void setFilterColor(Color fc) {
 		filter_color = fc;
-		dirty = true;
 		repaint();
 	}
 
@@ -158,46 +140,20 @@ public class SignPixelPanel extends JPanel {
 	public void clear() {
 		setPhysicalDimensions(0, 0, 0, 0, 1, 1);
 		setLogicalDimensions(0, 0, 0, 0);
-		dirty = true;
 		repaint();
 	}
 
 	/** Set the graphic displayed */
 	public void setGraphic(RasterGraphic rg) {
 		graphic = rg;
-		dirty = true;
 		repaint();
 	}
 
 	/** Paint this on the screen */
 	@Override
 	public void paintComponent(Graphics g) {
-		while (dirty)
-			updateBuffer(graphic);
-		BufferedImage b = buffer;	// Avoid NPE race
-		if (b != null)
-			g.drawImage(b, 0, 0, this);
-	}
-
-	/** Update the screen buffer to reflect current sign state */
-	private void updateBuffer(RasterGraphic rg) {
-		dirty = false;
-		BufferedImage b = getBufferedImage();
 		rescale();
-		doPaint(b.createGraphics(), rg);
-		buffer = b;
-	}
-
-	/** Get an appropriate buffered image */
-	private BufferedImage getBufferedImage() {
-		BufferedImage b = buffer;	// Avoid NPE race
-		int w = getWidth();
-		int h = getHeight();
-		if (b == null || w  != b.getWidth() || h != b.getHeight()) {
-			return new BufferedImage(w, h,
-				BufferedImage.TYPE_INT_RGB);
-		} else
-			return b;
+		doPaint((Graphics2D) g, graphic);
 	}
 
 	/** Rescale when the component is resized or the sign changes */
@@ -271,7 +227,7 @@ public class SignPixelPanel extends JPanel {
 			for (int x = 0; x < width_pix; x++) {
 				int xx = Math.round(getPixelX(x));
 				if (!rg.getPixel(x, y).isLit())
-					g.fillOval(xx, yy, px, py);
+					g.fillRect(xx, yy, px, py);
 			}
 		}
 	}
@@ -291,7 +247,7 @@ public class SignPixelPanel extends JPanel {
 				DmsColor clr = rg.getPixel(x, y);
 				if (clr.isLit()) {
 					g.setColor(new Color(clr.rgb()));
-					g.fillOval(xx, yy, px, py);
+					g.fillRect(xx, yy, px, py);
 				}
 			}
 		}
@@ -438,7 +394,6 @@ public class SignPixelPanel extends JPanel {
 		vborder_mm = Math.max(0, vb);
 		hpitch_mm = Math.max(1, hp);
 		vpitch_mm = Math.max(1, vp);
-		dirty = true;
 	}
 
 	/** Set the logical dimensions from a DMS */
@@ -459,6 +414,5 @@ public class SignPixelPanel extends JPanel {
 		height_pix = Math.max(0, h);
 		width_char = Math.max(0, wc);
 		height_line = Math.max(0, hl);
-		dirty = true;
 	}
 }

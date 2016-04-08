@@ -16,12 +16,8 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
-import java.awt.Component;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
@@ -33,7 +29,6 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapAction;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
@@ -57,10 +52,6 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Color definition for AWS controlled style */
 	static private final Color COLOR_HELIOTROPE = new Color(1, 0.5f,0.9f);
-
-	/** Mapping of DMS to cell renderers */
-	private final HashMap<DMS, DmsCellRenderer> renderers =
-		new HashMap<DMS, DmsCellRenderer>();
 
 	/** Action to blank the selected DMS */
 	private BlankDmsAction blankAction;
@@ -128,66 +119,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Create a list cell renderer */
 	@Override
 	public ListCellRenderer<DMS> createCellRenderer() {
-		return new ListCellRenderer<DMS>() {
-			public Component getListCellRendererComponent(
-				JList<? extends DMS> list, DMS value, int index,
-				boolean isSelected, boolean cellHasFocus)
-			{
-				DmsCellRenderer r = lookupRenderer(value);
-				if (r != null) {
-					return r.getListCellRendererComponent(
-						list, value, index, isSelected,
-						cellHasFocus);
-				} else
-					return new JLabel();
-			}
-		};
-	}
-
-	/** Lookup a DMS cell renderer */
-	private DmsCellRenderer lookupRenderer(DMS dms) {
-		return (dms != null) ? renderers.get(dms) : null;
-	}
-
-	/** Add a proxy to the manager */
-	@Override
-	protected void proxyAddedSwing(DMS dms) {
-		updateCellRenderer(dms);
-		super.proxyAddedSwing(dms);
-	}
-
-	/** Update one DMS cell renderer */
-	private void updateCellRenderer(DMS dms) {
-		DmsCellRenderer r = new DmsCellRenderer(getCellSize());
-		r.updatePixelPanel(dms);
-		renderers.put(dms, r);
-	}
-
-	/** Enumeraton complete */
-	@Override
-	protected void enumerationCompleteSwing(Collection<DMS> proxies) {
-		super.enumerationCompleteSwing(proxies);
-		for (DMS dms : proxies)
-			updateCellRenderer(dms);
-	}
-
-	/** Check if an attribute change is interesting */
-	@Override
-	protected boolean checkAttributeChange(String a) {
-		return super.checkAttributeChange(a)
-		    || "messageCurrent".equals(a)
-		    || "ownerCurrent".equals(a);
-	}
-
-	/** Called when a proxy attribute has changed */
-	@Override
-	protected void proxyChangedSwing(DMS dms, String a) {
-		if ("messageCurrent".equals(a)) {
-			DmsCellRenderer r = lookupRenderer(dms);
-			if (r != null)
-				r.updatePixelPanel(dms);
-		}
-		super.proxyChangedSwing(dms, a);
+		return new DmsCellRenderer(getCellSize());
 	}
 
 	/** Check if a DMS style is visible */
@@ -203,16 +135,6 @@ public class DMSManager extends ProxyManager<DMS> {
 		list.setLayoutOrientation(JList.VERTICAL_WRAP);
 		list.setVisibleRowCount(0);
 		return list;
-	}
-
-	/** Set the current cell size */
-	@Override
-	public void setCellSize(CellRendererSize size) {
-		super.setCellSize(size);
-		ArrayList<DMS> signs = new ArrayList<DMS>(renderers.keySet());
-		renderers.clear();
-		for (DMS dms : signs)
-			updateCellRenderer(dms);
 	}
 
 	/** Create a properties form for the specified proxy */

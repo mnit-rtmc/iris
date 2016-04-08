@@ -203,6 +203,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		loc_lbl.setText(loc);
 		updateToolTip(dms, name, loc);
 		user_lbl.setText(formatOwner(dms));
+		updatePixelPanel(dms);
 	}
 
 	/** Update tooltip */
@@ -236,7 +237,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	}
 
 	/** Update the pixel panel */
-	public void updatePixelPanel(DMS dms) {
+	private void updatePixelPanel(DMS dms) {
 		switch (mode) {
 		case MEDIUM:
 		case LARGE:
