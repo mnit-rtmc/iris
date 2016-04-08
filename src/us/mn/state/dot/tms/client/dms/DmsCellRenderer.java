@@ -44,29 +44,6 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  */
 public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 
-	/** Prototype name */
-	static private final String PROTOTYPE_NAME = "V999W99X";
-
-	/** Sign pixel panel to display sign message */
-	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200,
-		false);
-
-	/** List cell renderer (needed for colors) */
-	private final DefaultListCellRenderer cell =
-		new DefaultListCellRenderer();
-
-	/** Title bar */
-	private final JPanel title = new JPanel();
-
-	/** The label that displays the sign ID */
-	private final JLabel name_lbl = new JLabel();
-
-	/** The label for the user */
-	private final JLabel user_lbl = new JLabel();
-
-	/** The label that displays the sign location */
-	private final JLabel loc_lbl = new JLabel();
-
 	/** DMS cell renderer mode */
 	private enum DmsRendererMode {
 		LARGE(160, 48, CellRendererSize.LARGE),
@@ -98,8 +75,28 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		}
 	}
 
-	/** DMS to render */
-	public final DMS dms;
+	/** Prototype name */
+	static private final String PROTOTYPE_NAME = "V999W99X";
+
+	/** Sign pixel panel to display sign message */
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200,
+		false);
+
+	/** List cell renderer (needed for colors) */
+	private final DefaultListCellRenderer cell =
+		new DefaultListCellRenderer();
+
+	/** Title bar */
+	private final JPanel title = new JPanel();
+
+	/** The label that displays the sign ID */
+	private final JLabel name_lbl = new JLabel();
+
+	/** The label for the user */
+	private final JLabel user_lbl = new JLabel();
+
+	/** The label that displays the sign location */
+	private final JLabel loc_lbl = new JLabel();
 
 	/** DMS cell renderer mode */
 	private final DmsRendererMode mode;
@@ -107,11 +104,24 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	/** Create a new DMS cell renderer.
 	 * @param d DMS to render.
 	 * @param sz StyleSummary renderer cell size. */
-	public DmsCellRenderer(DMS d, CellRendererSize sz) {
+	public DmsCellRenderer(CellRendererSize sz) {
 		super(new BorderLayout());
-		dms = d;
 		mode = DmsRendererMode.determine(sz);
 		initialize();
+	}
+
+	/** Initialize the renderer */
+	private void initialize() {
+		switch (mode) {
+		case SMALL:
+			initSmall();
+			break;
+		case MEDIUM:
+			initMedium();
+			break;
+		default:
+			initLarge();
+		}
 	}
 
 	/** Initialize a small size DMS cell renderer */
@@ -182,64 +192,26 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 			title.setBackground(temp.getBackground());
 		} else
 			title.setBackground(name_lbl.getBackground());
+		setSign(value);
 		return this;
 	}
 
-	/** Update DMS attributes */
-	private void initialize() {
-		switch (mode) {
-		case SMALL:
-			initSmall();
-			break;
-		case MEDIUM:
-			initMedium();
-			break;
-		default:
-			initLarge();
-		}
-		updateAttr("messageCurrent");
-		updateAttr("ownerCurrent");
-	}
-
-	/** Update a specified attribute on the DMS.
-	 * @param a Attribute to update. */
-	public void updateAttr(String a) {
-		if (a.equals("messageCurrent")) {
-			String name = dms.getName();
-			name_lbl.setText(name);
-			String loc = GeoLocHelper.getDescription(
-				dms.getGeoLoc());
-			loc_lbl.setText(loc);
-			updatePixelPanel();
-			updateToolTip(name, loc);
-		} else if (a.equals("ownerCurrent"))
-			user_lbl.setText(formatOwner());
-	}
-
-	/** Format the owner name */
-	private String formatOwner() {
-		return IrisUserHelper.getNamePruned(dms.getOwnerCurrent());
-	}
-
-	/** Update the pixel panel */
-	private void updatePixelPanel() {
-		switch (mode) {
-		case MEDIUM:
-		case LARGE:
-			pixel_pnl.setFilterColor(
-				SignPixelPanel.filterColor(dms));
-			pixel_pnl.setDimensions(dms);
-			pixel_pnl.setGraphic(getPageOne());
-			break;
-		}
+	/** Set the DMS to render */
+	private void setSign(DMS dms) {
+		String name = dms.getName();
+		name_lbl.setText(name);
+		String loc = GeoLocHelper.getDescription(dms.getGeoLoc());
+		loc_lbl.setText(loc);
+		updateToolTip(dms, name, loc);
+		user_lbl.setText(formatOwner(dms));
 	}
 
 	/** Update tooltip */
-	private void updateToolTip(String name, String loc) {
+	private void updateToolTip(DMS dms, String name, String loc) {
 		StringBuilder tt = new StringBuilder();
 		switch (mode) {
 		case SMALL:
-			String owner = formatOwner();
+			String owner = formatOwner(dms);
 			tt.append(name);
 			if (!owner.isEmpty()) {
 				tt.append(": ");
@@ -259,8 +231,33 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		setToolTipText(tt.toString());
  	}
 
+	/** Format the owner name */
+	private String formatOwner(DMS dms) {
+		return IrisUserHelper.getNamePruned(dms.getOwnerCurrent());
+	}
+
+	/** Update a specified attribute on the DMS.
+	 * @param a Attribute to update. */
+	public void updateAttr(DMS dms, String a) {
+		if (a.equals("messageCurrent"))
+			updatePixelPanel(dms);
+	}
+
+	/** Update the pixel panel */
+	private void updatePixelPanel(DMS dms) {
+		switch (mode) {
+		case MEDIUM:
+		case LARGE:
+			pixel_pnl.setFilterColor(
+				SignPixelPanel.filterColor(dms));
+			pixel_pnl.setDimensions(dms);
+			pixel_pnl.setGraphic(getPageOne(dms));
+			break;
+		}
+	}
+
 	/** Get the raster graphic for page one */
-	private RasterGraphic getPageOne() {
+	private RasterGraphic getPageOne(DMS dms) {
 		RasterGraphic[] rasters = DMSHelper.getRasters(dms);
 		if (rasters != null && rasters.length > 0)
 			return rasters[0];

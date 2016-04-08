@@ -19,6 +19,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.JLabel;
@@ -57,9 +58,9 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Color definition for AWS controlled style */
 	static private final Color COLOR_HELIOTROPE = new Color(1, 0.5f,0.9f);
 
-	/** Mapping of DMS names to cell renderers */
-	private final HashMap<String, DmsCellRenderer> renderers =
-		new HashMap<String, DmsCellRenderer>();
+	/** Mapping of DMS to cell renderers */
+	private final HashMap<DMS, DmsCellRenderer> renderers =
+		new HashMap<DMS, DmsCellRenderer>();
 
 	/** Action to blank the selected DMS */
 	private BlankDmsAction blankAction;
@@ -145,7 +146,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Lookup a DMS cell renderer */
 	private DmsCellRenderer lookupRenderer(DMS dms) {
-		return (dms != null) ? renderers.get(dms.getName()) : null;
+		return (dms != null) ? renderers.get(dms) : null;
 	}
 
 	/** Add a proxy to the manager */
@@ -157,8 +158,9 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Update one DMS cell renderer */
 	private void updateCellRenderer(DMS dms) {
-		DmsCellRenderer r = new DmsCellRenderer(dms, getCellSize());
-		renderers.put(dms.getName(), r);
+		DmsCellRenderer r = new DmsCellRenderer(getCellSize());
+		r.updateAttr(dms, "messageCurrent");
+		renderers.put(dms, r);
 	}
 
 	/** Enumeraton complete */
@@ -182,7 +184,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	protected void proxyChangedSwing(DMS dms, String a) {
 		DmsCellRenderer r = lookupRenderer(dms);
 		if (r != null)
-			r.updateAttr(a);
+			r.updateAttr(dms, a);
 		super.proxyChangedSwing(dms, a);
 	}
 
@@ -205,8 +207,10 @@ public class DMSManager extends ProxyManager<DMS> {
 	@Override
 	public void setCellSize(CellRendererSize size) {
 		super.setCellSize(size);
-		for (DmsCellRenderer r: renderers.values())
-			updateCellRenderer(r.dms);
+		ArrayList<DMS> signs = new ArrayList<DMS>(renderers.keySet());
+		renderers.clear();
+		for (DMS dms : signs)
+			updateCellRenderer(dms);
 	}
 
 	/** Create a properties form for the specified proxy */
