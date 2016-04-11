@@ -14,7 +14,9 @@
  */
 package us.mn.state.dot.tms;
 
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 /**
  * Helper class for DMS sign groups.
@@ -45,5 +47,17 @@ public class DmsSignGroupHelper extends BaseHelper {
 			}
 		}
 		return false;
+	}
+
+	/** Find all sign groups for a DMS */
+	static public Set<SignGroup> findGroups(DMS dms) {
+		HashSet<SignGroup> groups = new HashSet<SignGroup>();
+		Iterator<DmsSignGroup> it = iterator();
+		while (it.hasNext()) {
+			DmsSignGroup dsg = it.next();
+			if (dsg.getDms() == dms)
+				groups.add(dsg.getSignGroup());
+		}
+		return groups;
 	}
 }

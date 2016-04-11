@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.TreeMap;
 import javax.swing.DefaultListModel;
 import us.mn.state.dot.geokit.Position;
@@ -23,13 +24,23 @@ import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentHelper;
+import us.mn.state.dot.tms.IncDescriptor;
+import us.mn.state.dot.tms.IncDescriptorHelper;
+import us.mn.state.dot.tms.IncLocator;
+import us.mn.state.dot.tms.IncLocatorHelper;
+import us.mn.state.dot.tms.IncRange;
+import us.mn.state.dot.tms.IncSeverity;
 import us.mn.state.dot.tms.LaneConfiguration;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -75,6 +86,53 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		      : null;
 	}
 
+	/** Distance for no range */
+	static private final Distance RANGE_NONE = new Distance(0);
+
+	/** Distance for near range */
+	static private final Distance RANGE_NEAR = new Distance(1.5, MILES);
+
+	/** Distance for middle range */
+	static private final Distance RANGE_MIDDLE = new Distance(5, MILES);
+
+	/** Distance for far range */
+	static private final Distance RANGE_FAR = new Distance(10, MILES);
+
+	/** Get the maximum distance to deploy a DMS */
+	static private Distance maxDistance(IncSeverity svr) {
+		if (svr == null)
+			return RANGE_NONE;
+		switch (svr) {
+		case minor:
+			return RANGE_NEAR;
+		case normal:
+			return RANGE_MIDDLE;
+		case major:
+			return RANGE_FAR;
+		default:
+			return RANGE_NONE;
+		}
+	}
+
+	/** Get the range for a distance to incident */
+	static private IncRange getRange(Distance up) {
+		double m = up.m();
+		if (m > RANGE_FAR.m())
+			return null;
+		if (m > RANGE_MIDDLE.m())
+			return IncRange.far;
+		if (m > RANGE_NEAR.m())
+			return IncRange.middle;
+		else
+			return IncRange.near;
+	}
+
+	/** Incident severity */
+	private final IncSeverity svr;
+
+	/** Maximum distance */
+	private final Distance max_dist;
+
 	/** Mapping of LCS array names to proposed indications */
 	private final HashMap<String, Integer []> indications =
 		new HashMap<String, Integer []>();
@@ -104,6 +162,8 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 
 	/** Create a new device deploy model */
 	public DeviceDeployModel(IncidentManager man, Incident inc) {
+		svr = IncidentHelper.getSeverity(inc);
+		max_dist = maxDistance(svr);
 		IncidentLoc loc = new IncidentLoc(inc);
 		CorridorBase cb = man.lookupCorridor(loc);
 		if (cb != null) {
@@ -162,8 +222,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			GeoLoc loc = LCSArrayHelper.lookupGeoLoc(lcs_a);
 			Float lp = calculateMilePoint(cb, loc);
 			if (lp != null && mp > lp) {
-				Distance up = new Distance(mp - lp,
-					Distance.Units.MILES);
+				Distance up = new Distance(mp - lp, MILES);
 				devices.put(up, lcs_a);
 			}
 		}
@@ -178,8 +237,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			GeoLoc loc = dms.getGeoLoc();
 			Float lp = calculateMilePoint(cb, loc);
 			if (lp != null && mp > lp) {
-				Distance up = new Distance(mp - lp,
-					Distance.Units.MILES);
+				Distance up = new Distance(mp - lp, MILES);
 				devices.put(up, dms);
 			}
 		}
@@ -188,9 +246,24 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 
 	/** Create the MULTI string for one DMS */
 	private MultiString createMulti(Incident inc, Distance up, DMS dms) {
-		System.err.println("dms: " + dms + ", " + up);
+		System.err.println("dms: " + dms + ", " + up + ", " + svr);
+		if (up.m() > max_dist.m())
+			return null;
+		Set<SignGroup> groups = DmsSignGroupHelper.findGroups(dms);
+		IncDescriptor dsc = IncDescriptorHelper.match(inc, groups);
+		if (dsc == null)
+			return null;
+		IncRange rng = getRange(up);
+		if (rng == null)
+			return null;
+
+
+
+//		IncLocator iloc = IncLocatorHelper.match(groups, );
+//		if (iloc == null)
+//			return null;
 		// FIXME
-		return new MultiString("TEST");
+		return new MultiString(dsc.getMulti());
 	}
 
 	/** Create the page one graphic for a MULTI string */
