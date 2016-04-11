@@ -313,11 +313,33 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	}
 
 	/** Find the nearest node to the given location with given type */
-	public T findNearest(Position pos, R_NodeType nt) {
+	private T findNearest(Position pos, R_NodeType nt) {
 		T nearest = null;
 		double n_meters = 0;
 		for (T n: r_nodes) {
 			if (n.getNodeType() != nt.ordinal())
+				continue;
+			Distance m = distanceTo(n.getGeoLoc(), pos);
+			if (m != null && (nearest == null || m.m() < n_meters)) {
+				nearest = n;
+				n_meters = m.m();
+			}
+		}
+		return nearest;
+	}
+
+	/** Find the nearest node to the given location with given type.
+	 * @param pos Location to search.
+	 * @param nt Node type.
+	 * @param pickable Pickable flag.
+	 * @return Nearest matching node. */
+	public T findNearest(Position pos, R_NodeType nt, boolean pickable) {
+		T nearest = null;
+		double n_meters = 0;
+		for (T n: r_nodes) {
+			if (n.getNodeType() != nt.ordinal())
+				continue;
+			if (n.getPickable() != pickable)
 				continue;
 			Distance m = distanceTo(n.getGeoLoc(), pos);
 			if (m != null && (nearest == null || m.m() < n_meters)) {

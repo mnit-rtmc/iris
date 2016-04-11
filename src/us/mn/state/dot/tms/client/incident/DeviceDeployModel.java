@@ -28,6 +28,8 @@ import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
+import us.mn.state.dot.tms.IncAdvice;
+import us.mn.state.dot.tms.IncAdviceHelper;
 import us.mn.state.dot.tms.IncDescriptor;
 import us.mn.state.dot.tms.IncDescriptorHelper;
 import us.mn.state.dot.tms.IncLocator;
@@ -35,9 +37,12 @@ import us.mn.state.dot.tms.IncLocatorHelper;
 import us.mn.state.dot.tms.IncRange;
 import us.mn.state.dot.tms.IncSeverity;
 import us.mn.state.dot.tms.LaneConfiguration;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
@@ -127,6 +132,20 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			return IncRange.near;
 	}
 
+	/** Get the r_node type */
+	static private R_NodeType getNodeType(short lt) {
+		switch (LaneType.fromOrdinal(lt)) {
+		case EXIT:
+			return R_NodeType.EXIT;
+		case MERGE:
+			return R_NodeType.ENTRANCE;
+		case MAINLINE:
+			return R_NodeType.STATION;
+		default:
+			return null;
+		}
+	}
+
 	/** Incident severity */
 	private final IncSeverity svr;
 
@@ -179,6 +198,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	 * @param mp Relative mile point of incident. */
 	private void populateList(Incident inc, CorridorBase cb, float mp) {
 		Position pos = new Position(inc.getLat(), inc.getLon());
+		R_Node n = findNode(cb, mp, pos, inc);
 		LaneConfiguration config = cb.laneConfiguration(pos);
 		LcsDeployModel lcs_mdl = new LcsDeployModel(inc, config);
 		TreeMap<Distance, Device> devices = findDevices(cb, mp);
@@ -195,7 +215,7 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			}
 			if (dev instanceof DMS) {
 				DMS dms = (DMS) dev;
-				MultiString ms = createMulti(inc, up, dms);
+				MultiString ms = createMulti(inc, dms, up, n);
 				if (ms != null) {
 					RasterGraphic rg = createGraphic(dms,
 						ms);
@@ -207,6 +227,28 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 				}
 			}
 		}
+	}
+
+	/** Find a node within 1 mile of incident (prefer pickable) */
+	private R_Node findNode(CorridorBase cb, float mp, Position pos,
+		Incident inc)
+	{
+		R_NodeType rt = getNodeType(inc.getLaneType());
+		if (rt == null)
+			return null;
+		R_Node n = cb.findNearest(pos, rt, true);
+		if (n != null) {
+			Float lp = cb.calculateMilePoint(n.getGeoLoc());
+			if (lp != null && Math.abs(lp - mp) < 1)
+				return n;
+		}
+		n = cb.findNearest(pos, rt, false);
+		if (n != null) {
+			Float lp = cb.calculateMilePoint(n.getGeoLoc());
+			if (lp != null && Math.abs(lp - mp) < 1.5)
+				return n;
+		}
+		return null;
 	}
 
 	/** Find all devices upstream of a given point on a corridor */
@@ -245,8 +287,13 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	}
 
 	/** Create the MULTI string for one DMS */
-	private MultiString createMulti(Incident inc, Distance up, DMS dms) {
-		System.err.println("dms: " + dms + ", " + up + ", " + svr);
+	private MultiString createMulti(Incident inc, DMS dms, Distance up,
+		R_Node n)
+	{
+		System.err.println("dms: " + dms + ", " + up + ", " + svr + ", " + n);
+
+		if (n == null)
+			return null;
 		if (up.m() > max_dist.m())
 			return null;
 		Set<SignGroup> groups = DmsSignGroupHelper.findGroups(dms);
@@ -256,14 +303,15 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		IncRange rng = getRange(up);
 		if (rng == null)
 			return null;
-
-
-
-//		IncLocator iloc = IncLocatorHelper.match(groups, );
-//		if (iloc == null)
-//			return null;
-		// FIXME
-		return new MultiString(dsc.getMulti());
+		IncLocator iloc = IncLocatorHelper.match(groups, rng, false,
+			n.getPickable());
+		if (iloc == null)
+			return null;
+		IncAdvice adv = IncAdviceHelper.match(groups, rng, inc);
+		if (adv == null)
+			return null;
+		return new MultiString(dsc.getMulti() + "[nl]" +
+			iloc.getMulti() + "[nl]" + adv.getMulti());
 	}
 
 	/** Create the page one graphic for a MULTI string */
