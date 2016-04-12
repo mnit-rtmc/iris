@@ -31,11 +31,11 @@ public class LocMultiBuilder extends MultiBuilder {
 	/** Replace affixes */
 	static private String replaceAffixes(String r) {
 		if (r.startsWith("U.S."))
-			return "HWY" + r.substring(4);
+			return "HWY " + r.substring(4);
 		if (r.startsWith("T.H."))
-			return "HWY" + r.substring(4);
+			return "HWY " + r.substring(4);
 		if (r.startsWith("C.S.A.H."))
-			return "CTY" + r.substring(8);
+			return "CTY " + r.substring(8);
 		if (r.startsWith("I-"))
 			return r.substring(2);
 		return r;
