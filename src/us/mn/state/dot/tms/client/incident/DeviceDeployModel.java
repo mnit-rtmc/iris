@@ -293,25 +293,42 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		System.err.println("dms: " + dms + ", " + up + ", " + svr + ", " + n);
 
 		if (n == null)
+{ System.err.println("no node");
 			return null;
+}
 		if (up.m() > max_dist.m())
+{ System.err.println("too far");
 			return null;
+}
 		Set<SignGroup> groups = DmsSignGroupHelper.findGroups(dms);
 		IncDescriptor dsc = IncDescriptorHelper.match(inc, groups);
 		if (dsc == null)
+{ System.err.println("no descriptor");
 			return null;
+}
 		IncRange rng = getRange(up);
 		if (rng == null)
+{ System.err.println("no range");
 			return null;
+}
 		IncLocator iloc = IncLocatorHelper.match(groups, rng, false,
 			n.getPickable());
 		if (iloc == null)
+{ System.err.println("no loc");
 			return null;
+}
 		IncAdvice adv = IncAdviceHelper.match(groups, rng, inc);
 		if (adv == null)
+{ System.err.println("no advice");
 			return null;
-		return new MultiString(dsc.getMulti() + "[nl]" +
-			iloc.getMulti() + "[nl]" + adv.getMulti());
+}
+		LocMultiBuilder lmb = new LocMultiBuilder(n, up);
+		new MultiString(dsc.getMulti()).parse(lmb);
+		lmb.addLine(null);
+		new MultiString(iloc.getMulti()).parse(lmb);
+		lmb.addLine(null);
+		new MultiString(adv.getMulti()).parse(lmb);
+		return lmb.toMultiString();
 	}
 
 	/** Create the page one graphic for a MULTI string */

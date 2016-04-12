@@ -57,25 +57,25 @@ than 0.5 miles.
 Range  | Branched | Pickable | Multi                     | Example
 -------|----------|----------|---------------------------|------------------
 NEAR   | NO       | Y/N      | AHEAD                     | AHEAD
-MIDDLE | NO       | YES      | `[locmd] [locrn]`         | AT HWY 100
-MIDDLE | YES      | Y/N      | ON `[locbr]` `[locbd]`    | ON 394 EAST
+MIDDLE | NO       | YES      | `[locmd] [locxn]`         | AT HWY 100
+MIDDLE | YES      | Y/N      | ON `[locrn]` `[locrd]`    | ON 394 EAST
 FAR    | NO       | NO       | `[locmi]` MILES AHEAD     | 8 MILES AHEAD
-FAR    | NO       | YES      | `[locmd] [locrn]`         | AT 494
-FAR    | YES      | YES      | ON `[locbr]` AT `[locrn]` | ON 394 AT HWY 100
+FAR    | NO       | YES      | `[locmd] [locxn]`         | AT 494
+FAR    | YES      | YES      | ON `[locrn]` AT `[locxn]` | ON 394 AT HWY 100
 
 Several MULTI-like tags are defined for incident locators.
 
 Tag       | Description
-----------|-----------------------------------------------
+----------|-----------------------------------------
+`[locrn]` | Road name
+`[locrd]` | Road direction
 `[locmd]` | Location modifier (AT, N OF, S OF, etc.)
-`[locrn]` | Road name of node nearest incident
-`[locra]` | Abbreviated road name of node nearest incident
-`[locbr]` | Branched road name
-`[locbd]` | Branched road direction
+`[locxn]` | Cross-street name
+`[locxa]` | Abbreviated cross-street name
 `[locmi]` | Miles from DMS to node
 
 Road names are converted to all capital letters.  For the `[locrn]` tag, certain
-prefixes and suffixes are replaced with other values.  For the `[locra]` tag,
+prefixes and suffixes are replaced with other values.  For the `[locxa]` tag,
 all matching prefixes and suffixes are stripped.
 
 Type   | Value    | Replacement
