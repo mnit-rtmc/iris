@@ -16,10 +16,12 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.DMS;
+import static us.mn.state.dot.tms.DmsColor.AMBER;
 import us.mn.state.dot.tms.DMSType;
 import static us.mn.state.dot.tms.SystemAttrEnum.*;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1203.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
@@ -29,6 +31,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.mibskyline.*;
 import static us.mn.state.dot.tms.server.comm.ntcip.mibskyline.MIB.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.BadValue;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
@@ -131,6 +134,35 @@ public class OpSendDMSDefaults extends OpDMS {
 			logStore(on_time);
 			logStore(off_time);
 			mess.storeProps();
+			return new MessageDefaultsV2();
+		}
+	}
+
+	/** Phase to set the V2 message defaults */
+	protected class MessageDefaultsV2 extends Phase {
+
+		/** Set the message defaults */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1OctetString background = new ASN1OctetString(
+				defaultBackgroundRGB.node);
+			ASN1OctetString foreground = new ASN1OctetString(
+				defaultForegroundRGB.node);
+			background.setOctetString(new byte[] { 0, 0, 0 });
+			foreground.setOctetString(new byte[] { (byte) AMBER.red,
+				(byte) AMBER.green, (byte) AMBER.blue });
+			mess.add(background);
+			mess.add(foreground);
+			logStore(background);
+			logStore(foreground);
+			try {
+				mess.storeProps();
+			}
+			catch (ControllerException e) {
+				// NoSuchName: not a v2 sign
+				// GenError: unsupported color
+				// BadValue: who knows?
+			}
 			return new LedstarDefaults();
 		}
 	}
