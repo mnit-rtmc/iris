@@ -174,6 +174,17 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				int c = sg0.getName().compareTo(sg1.getName());
 				if (c != 0)
 					return c;
+				int lt0 = adv0.getLaneType();
+				int lt1 = adv0.getLaneType();
+				if (lt0 != lt1)
+					return lt0 - lt1;
+				String imp0 = adv0.getImpact();
+				String imp1 = adv1.getImpact();
+				if (imp0.length() != imp1.length())
+					return imp0.length() - imp1.length();
+				c = imp0.compareTo(imp1);
+				if (c != 0)
+					return c;
 				int r0 = adv0.getRange();
 				int r1 = adv1.getRange();
 				if (r0 != r1)
