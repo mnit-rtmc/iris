@@ -286,15 +286,15 @@ public class MultiString {
 		}
 	}
 
-	/** Parse locator tag [loc{md,rn,ra,br,bd,mi}].
-	 * @param code Locator tag code ({md,rn,ra,br,bd,mi}).
+	/** Parse locator tag [loc{rn,rd,md,xn,xa,mi}].
+	 * @param code Locator tag code ({rn,rd,md,xn,xa,mi}).
 	 * @param cb Callback to set tag. */
 	static private void parseLocator(String code, Multi cb) {
-		if (code.equals("md") ||
-		    code.equals("rn") ||
-		    code.equals("ra") ||
-		    code.equals("br") ||
-		    code.equals("bd") ||
+		if (code.equals("rn") ||
+		    code.equals("rd") ||
+		    code.equals("md") ||
+		    code.equals("xn") ||
+		    code.equals("xa") ||
 		    code.equals("mi"))
 			cb.addLocator(code);
 	}
