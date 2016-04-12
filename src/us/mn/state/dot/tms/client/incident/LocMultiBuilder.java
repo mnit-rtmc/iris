@@ -96,13 +96,13 @@ public class LocMultiBuilder extends MultiBuilder {
 	static private String modText(LocModifier mod) {
 		switch (mod) {
 		case NORTH_OF:
-			return "N OF";
+			return "NORTH OF";
 		case SOUTH_OF:
-			return "S OF";
+			return "SOUTH OF";
 		case EAST_OF:
-			return "E OF";
+			return "EAST OF";
 		case WEST_OF:
-			return "W OF";
+			return "WEST OF";
 		default:
 			return "AT";
 		}
