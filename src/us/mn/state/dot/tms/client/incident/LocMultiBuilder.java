@@ -43,6 +43,7 @@ public class LocMultiBuilder extends MultiBuilder {
 
 	/** Strip affixes */
 	static private String stripAffixes(String r) {
+		// FIXME: add affix table in database
 		if (r.startsWith("U.S."))
 			return r.substring(4);
 		if (r.startsWith("T.H."))
