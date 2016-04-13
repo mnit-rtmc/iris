@@ -247,7 +247,7 @@ public class SignPixelPanel extends JPanel {
 				DmsColor clr = rg.getPixel(x, y);
 				if (clr.isLit()) {
 					g.setColor(new Color(clr.rgb()));
-					g.fillRect(xx, yy, px, py);
+					g.fillOval(xx, yy, px, py);
 				}
 			}
 		}
