@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,11 +53,13 @@ public class MapSegment implements MapObject {
 		new AffineTransform();
 
 	/** Get the coordinate transform */
+	@Override
 	public AffineTransform getTransform() {
 		return IDENTITY_TRANSFORM;
 	}
 
 	/** Get the inverse coordinate transform */
+	@Override
 	public AffineTransform getInverseTransform() {
 		return IDENTITY_TRANSFORM;
 	}
@@ -77,6 +79,7 @@ public class MapSegment implements MapObject {
 	private final Shape shape;
 
 	/** Get the shape to draw this object */
+	@Override
 	public Shape getShape() {
 		return shape;
 	}
@@ -85,6 +88,7 @@ public class MapSegment implements MapObject {
 	private final Shape outline;
 
 	/** Get the outline to draw this object */
+	@Override
 	public Shape getOutlineShape() {
 		return outline;
 	}
