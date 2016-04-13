@@ -256,6 +256,18 @@ public class DMSHelper extends BaseHelper {
 			return null;
 	}
 
+	/** Get the current raster graphic for page one of the specified DMS.
+	 * @param dms The sign.
+	 * @return RasterGraphic for page one, or null on error.
+	 */
+	static public RasterGraphic getPageOne(DMS dms) {
+		RasterGraphic[] rasters = getRasters(dms);
+		if (rasters != null && rasters.length > 0)
+			return rasters[0];
+		else
+			return null;
+	}
+
 	/** Get the current raster graphics for all pages of the specified DMS.
 	 * @param dms Sign in question.
 	 * @return RasterGraphic array, one for each page, or null on error.

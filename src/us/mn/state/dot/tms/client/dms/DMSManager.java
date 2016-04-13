@@ -18,6 +18,8 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
+import java.util.Collection;
+import java.util.HashMap;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
@@ -27,6 +29,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -52,6 +55,10 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Color definition for AWS controlled style */
 	static private final Color COLOR_HELIOTROPE = new Color(1, 0.5f,0.9f);
+
+	/** Mapping of DMS to page one rasters */
+	private final HashMap<DMS, RasterGraphic> rasters =
+		new HashMap<DMS, RasterGraphic>();
 
 	/** Action to blank the selected DMS */
 	private BlankDmsAction blankAction;
@@ -119,7 +126,46 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Create a list cell renderer */
 	@Override
 	public ListCellRenderer<DMS> createCellRenderer() {
-		return new DmsCellRenderer(getCellSize());
+		return new DmsCellRenderer(getCellSize()) {
+			@Override protected RasterGraphic getPageOne(DMS dms) {
+				return rasters.get(dms);
+			}
+		};
+	}
+
+	/** Add a proxy to the manager */
+	@Override
+	protected void proxyAddedSwing(DMS dms) {
+		updateRaster(dms);
+		super.proxyAddedSwing(dms);
+	}
+
+	/** Update one DMS raster */
+	private void updateRaster(DMS dms) {
+		rasters.put(dms, DMSHelper.getPageOne(dms));
+	}
+
+	/** Enumeration complete */
+	@Override
+	protected void enumerationCompleteSwing(Collection<DMS> proxies) {
+		super.enumerationCompleteSwing(proxies);
+		for (DMS dms : proxies)
+			updateRaster(dms);
+	}
+
+	/** Check if an attribute change is interesting */
+	@Override
+	protected boolean checkAttributeChange(String a) {
+		return super.checkAttributeChange(a)
+		    || "messageCurrent".equals(a);
+	}
+
+	/** Called when a proxy attribute has changed */
+	@Override
+	protected void proxyChangedSwing(DMS dms, String a) {
+		if ("messageCurrent".equals(a))
+			updateRaster(dms);
+		super.proxyChangedSwing(dms, a);
 	}
 
 	/** Check if a DMS style is visible */
