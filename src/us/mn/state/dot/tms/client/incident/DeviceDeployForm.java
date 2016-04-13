@@ -70,6 +70,7 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 		manager = man;
 		model = new DeviceDeployModel(man, inc);
 		list = new JList<Device>(model);
+		list.setVisibleRowCount(model.getSize());
 		list.addListSelectionListener(new IListSelectionAdapter() {
 			@Override public void valueChanged() {
 				updateButtons();
