@@ -122,6 +122,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	}
 
 	/** Get tooltip text for the given map object */
+	@Override
 	public String getTip(MapObject o) {
 		T proxy = manager.findProxy(o);
 		if (proxy != null)
