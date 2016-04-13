@@ -114,7 +114,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	/** Get an appropriate style for the given proxy object */
 	public Style getStyle(T proxy) {
 		for (Style st: styles) {
-			ItemStyle is = ItemStyle.lookupStyle(st.getLabel());
+			ItemStyle is = ItemStyle.lookupStyle(st.toString());
 			if (manager.checkStyle(is, proxy))
 				return st;
 		}

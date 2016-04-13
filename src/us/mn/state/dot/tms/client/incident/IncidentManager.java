@@ -246,7 +246,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 		Style sty = getTheme().getStyle(inc);
 		if (sty != null) {
 			LaneType lt = LaneType.fromOrdinal(inc.getLaneType());
-			return getTypeDesc(sty.getLabel(), getLaneType(lt));
+			return getTypeDesc(sty.toString(), getLaneType(lt));
 		} else
 			return "";
 	}
@@ -279,7 +279,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 	public Symbol getSymbol(Incident inc) {
 		Style sty = getTheme().getStyle(inc);
 		if (sty != null)
-			return getTheme().getSymbol(sty.getLabel());
+			return getTheme().getSymbol(sty.toString());
 		else
 			return null;
 	}

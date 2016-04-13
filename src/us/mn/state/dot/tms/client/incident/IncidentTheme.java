@@ -127,7 +127,7 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 
 	/** Store one symbol */
 	private void storeSymbol(Style sty) {
-		extra_syms.put(sty.getLabel(), createSymbol(sty));
+		extra_syms.put(sty.toString(), createSymbol(sty));
 	}
 
 	/** Create a symbol */
