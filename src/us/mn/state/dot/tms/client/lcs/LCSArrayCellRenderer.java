@@ -20,7 +20,6 @@ import java.awt.Dimension;
 import java.awt.Insets;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
-import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -80,9 +79,7 @@ public class LCSArrayCellRenderer extends JPanel
 	public LCSArrayCellRenderer(LCSArrayManager m) {
 		super(new BorderLayout());
 		manager = m;
-		Border b = BorderFactory.createCompoundBorder(
-		          BorderFactory.createEmptyBorder(1, 1, 1, 1),
-		          BorderFactory.createRaisedBevelBorder());
+		Border b = UI.cellRendererBorder();
 		setBorder(b);
 		Insets bi = b.getBorderInsets(this);
 		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2009-2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -172,5 +172,12 @@ public class Widgets {
 		return BorderFactory.createCompoundBorder(
 		       BorderFactory.createEtchedBorder(EtchedBorder.LOWERED),
 		       BorderFactory.createEmptyBorder(0, hgap, 0, hgap));
+	}
+
+	/** Create a cell renderer border */
+	public Border cellRendererBorder() {
+		return BorderFactory.createCompoundBorder(
+		       BorderFactory.createEmptyBorder(1, 1, 1, 1),
+		       BorderFactory.createRaisedBevelBorder());
 	}
 }

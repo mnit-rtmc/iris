@@ -137,9 +137,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 
 	/** Initialize a medium size DMS cell renderer */
 	private void initMedium() {
-		setBorder(BorderFactory.createCompoundBorder(
-			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
-			  BorderFactory.createRaisedBevelBorder()));
+		setBorder(UI.cellRendererBorder());
 		title.setLayout(new GridLayout(1, 1));
 		title.add(name_lbl);
 		add(title, BorderLayout.NORTH);
@@ -154,9 +152,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 
 	/** Initialize a large size DMS cell renderer */
 	private void initLarge() {
-		setBorder(BorderFactory.createCompoundBorder(
-			  BorderFactory.createEmptyBorder(1, 1, 1, 1),
-			  BorderFactory.createRaisedBevelBorder()));
+		setBorder(UI.cellRendererBorder());
 		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
 		title.add(name_lbl);
 		title.add(Box.createGlue());
