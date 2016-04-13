@@ -70,7 +70,7 @@ public class IncidentHelper extends BaseHelper {
 
 	/** Check if the severity is normal (lane blocked) */
 	static private boolean isNormal(IncidentImpact[] imp) {
-		for (int i = 1; i < imp.length - 1; i++) {
+		for (int i = 0; i < imp.length; i++) {
 			if (imp[i] == IncidentImpact.BLOCKED)
 				return true;
 		}
