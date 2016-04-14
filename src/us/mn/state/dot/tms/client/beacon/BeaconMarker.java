@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.beacon;
 
 import java.awt.geom.Ellipse2D;
-import us.mn.state.dot.tms.client.map.AbstractMarker;
+import us.mn.state.dot.tms.client.map.Marker;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -23,7 +23,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  *
  * @author Douglas Lau
  */
-public class BeaconMarker extends AbstractMarker {
+public class BeaconMarker extends Marker {
 
 	/** Size in pixels to render marker */
 	static private final int MARKER_SIZE_PIX = UI.scaled(20);

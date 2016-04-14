@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.client.weather;
 
-import us.mn.state.dot.tms.client.map.AbstractMarker;
+import us.mn.state.dot.tms.client.map.Marker;
 
 /**
  * Marker used to paint weather sensors.
  *
  * @author Douglas Lau
  */
-public class WeatherSensorMarker extends AbstractMarker {
+public class WeatherSensorMarker extends Marker {
 
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 20;

@@ -15,14 +15,14 @@
 package us.mn.state.dot.tms.client.comm;
 
 import java.awt.geom.Arc2D;
-import us.mn.state.dot.tms.client.map.AbstractMarker;
+import us.mn.state.dot.tms.client.map.Marker;
 
 /**
  * Marker used to paint controllers.
  *
  * @author Douglas Lau
  */
-public class ControllerMarker extends AbstractMarker {
+public class ControllerMarker extends Marker {
 
 	/** Size in pixels to render marker */
 	static protected final int MARKER_SIZE_PIX = 24;

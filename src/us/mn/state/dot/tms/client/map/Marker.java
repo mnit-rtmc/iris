@@ -23,22 +23,22 @@ import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 
 /**
- * An abstract marker which delegates all Shape methods to a general path
+ * A marker which delegates Shape methods to a general path.
  *
  * @author Douglas Lau
  */
-abstract public class AbstractMarker implements Shape {
+abstract public class Marker implements Shape {
 
 	/** Actual shape being delegated */
 	protected final GeneralPath path;
 
-	/** Create a new abstract marker */
-	protected AbstractMarker(GeneralPath p) {
+	/** Create a new marker */
+	protected Marker(GeneralPath p) {
 		path = p;
 	}
 
-	/** Create a new abstract marker */
-	protected AbstractMarker(int c) {
+	/** Create a new marker */
+	protected Marker(int c) {
 		this(new GeneralPath(GeneralPath.WIND_EVEN_ODD, c));
 	}
 

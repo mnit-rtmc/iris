@@ -17,8 +17,8 @@ package us.mn.state.dot.tms.client.proxy;
 import java.awt.Color;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.client.map.AbstractMarker;
 import us.mn.state.dot.tms.client.map.MapObject;
+import us.mn.state.dot.tms.client.map.Marker;
 import us.mn.state.dot.tms.client.map.Outline;
 import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.map.Theme;
@@ -80,7 +80,7 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 	protected Style dstyle;
 
 	/** Create a new SONAR proxy theme */
-	public ProxyTheme(ProxyManager<T> m, AbstractMarker mkr) {
+	public ProxyTheme(ProxyManager<T> m, Marker mkr) {
 		super(I18N.get(m.getSonarType()), new VectorSymbol(mkr, lsize));
 		manager = m;
 	}

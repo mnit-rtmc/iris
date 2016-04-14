@@ -30,8 +30,8 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
-import us.mn.state.dot.tms.client.map.AbstractMarker;
 import us.mn.state.dot.tms.client.map.MapObject;
+import us.mn.state.dot.tms.client.map.Marker;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
@@ -63,7 +63,7 @@ public class ControllerTheme extends ProxyTheme<Controller> {
 	}
 
 	/** Create a new controller theme */
-	public ControllerTheme(ProxyManager<Controller> m, AbstractMarker mkr) {
+	public ControllerTheme(ProxyManager<Controller> m, Marker mkr) {
 		super(m, mkr);
 	}
 

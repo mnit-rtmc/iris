@@ -51,7 +51,7 @@ public class VectorSymbol implements Symbol {
 	}
 
 	/** Marker shape */
-	private final AbstractMarker marker;
+	private final Marker marker;
 
 	/** Scaled shape */
 	private Shape shape;
@@ -68,7 +68,7 @@ public class VectorSymbol implements Symbol {
 	private float scale = 1;
 
 	/** Create a new vector symbol */
-	public VectorSymbol(AbstractMarker m, int sz) {
+	public VectorSymbol(Marker m, int sz) {
 		marker = m;
 		shape = m;
 		lsize = sz;
@@ -81,7 +81,7 @@ public class VectorSymbol implements Symbol {
 	}
 
 	/** Set the map scale */
-	protected final void setScale(float s, AbstractMarker m) {
+	protected final void setScale(float s, Marker m) {
 		scale = s;
 		AffineTransform at = new AffineTransform();
 		at.setToScale(s, s);
