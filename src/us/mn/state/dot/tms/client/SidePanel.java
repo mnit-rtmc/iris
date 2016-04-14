@@ -20,9 +20,9 @@ import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import us.mn.state.dot.map.LayerState;
-import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.client.map.LayerState;
+import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 

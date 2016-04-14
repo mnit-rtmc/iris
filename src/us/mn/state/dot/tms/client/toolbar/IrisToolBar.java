@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,8 @@ import java.awt.Component;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JToolBar;
-import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.map.MapBean;
 
 /**
  * This status bar contains JPanel components such as the real-time map 

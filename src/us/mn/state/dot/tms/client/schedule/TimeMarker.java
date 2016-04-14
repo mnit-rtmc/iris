@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.geom.Arc2D;
 import java.awt.geom.GeneralPath;
-import us.mn.state.dot.map.AbstractMarker;
+import us.mn.state.dot.tms.client.map.AbstractMarker;
 
 /**
  * Marker used to paint time plans.

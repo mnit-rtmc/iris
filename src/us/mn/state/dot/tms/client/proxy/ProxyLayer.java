@@ -16,13 +16,13 @@ package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Rectangle2D;
-import us.mn.state.dot.map.Layer;
-import us.mn.state.dot.map.LayerChange;
-import us.mn.state.dot.map.LayerState;
-import us.mn.state.dot.map.MapBean;
-import us.mn.state.dot.map.MapObject;
-import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.client.map.Layer;
+import us.mn.state.dot.tms.client.map.LayerChange;
+import us.mn.state.dot.tms.client.map.LayerState;
+import us.mn.state.dot.tms.client.map.MapBean;
+import us.mn.state.dot.tms.client.map.MapObject;
+import us.mn.state.dot.tms.client.map.MapSearcher;
 import us.mn.state.dot.tms.client.widget.IWorker;
 import us.mn.state.dot.tms.utils.I18N;
 

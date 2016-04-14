@@ -22,8 +22,6 @@ import java.awt.geom.Line2D;
 import java.util.HashSet;
 import java.util.Iterator;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
-import us.mn.state.dot.map.AbstractMarker;
-import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
@@ -32,6 +30,8 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
+import us.mn.state.dot.tms.client.map.AbstractMarker;
+import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 

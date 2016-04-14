@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.event.MouseEvent;
-import us.mn.state.dot.map.MapBean;
-import us.mn.state.dot.map.MapObject;
-import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.client.map.MapBean;
+import us.mn.state.dot.tms.client.map.MapObject;
+import us.mn.state.dot.tms.client.map.MapSearcher;
 import us.mn.state.dot.tms.client.proxy.ProxyLayer;
 import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
 

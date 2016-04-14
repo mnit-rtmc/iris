@@ -15,9 +15,9 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.Graphics2D;
-import us.mn.state.dot.map.MapObject;
-import us.mn.state.dot.map.Style;
-import us.mn.state.dot.map.VectorSymbol;
+import us.mn.state.dot.tms.client.map.MapObject;
+import us.mn.state.dot.tms.client.map.Style;
+import us.mn.state.dot.tms.client.map.VectorSymbol;
 
 /**
  * Symbol to draw map segments.

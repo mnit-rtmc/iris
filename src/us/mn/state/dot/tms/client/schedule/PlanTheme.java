@@ -16,12 +16,12 @@ package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.Color;
 import javax.swing.Icon;
-import us.mn.state.dot.map.Style;
-import us.mn.state.dot.map.VectorSymbol;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.beacon.BeaconMarker;
 import us.mn.state.dot.tms.client.dms.DmsMarker;
+import us.mn.state.dot.tms.client.map.Style;
+import us.mn.state.dot.tms.client.map.VectorSymbol;
 import us.mn.state.dot.tms.client.meter.MeterMarker;
 import us.mn.state.dot.tms.client.meter.MeterTheme;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;

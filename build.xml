@@ -61,7 +61,6 @@
 		  value="sonar-server-${sonar.version}.jar"/>
 	<property name="sonar.client.jar"
 		  value="sonar-client-${sonar.version}.jar"/>
-	<property name="mapbean.jar" value="mapbean-${mapbean.version}.jar"/>
 	<property name="geokit.jar" value="geokit-${geokit.version}.jar"/>
 	<property name="server.jar" value="${name}-server-${version}.jar"/>
 	<property name="common.jar" value="${name}-common-${version}.jar"/>
@@ -73,7 +72,6 @@
 		<fileset dir="${lib.dir}">
 			<include name="mail.jar"/>
 			<include name="${geokit.jar}"/>
-			<include name="${mapbean.jar}"/>
 			<include name="${scheduler.jar}"/>
 			<include name="${sonar.server.jar}"/>
 			<include name="${sonar.client.jar}"/>
@@ -165,11 +163,6 @@
 			<param name="repo.name" value="geokit"/>
 			<param name="repo.version" value="${geokit.version}"/>
 		</antcall>
-		<antcall target="check-subproject">
-			<param name="file.dep" value="${mapbean.jar}"/>
-			<param name="repo.name" value="mapbean"/>
-			<param name="repo.version" value="${mapbean.version}"/>
-		</antcall>
 	</target>
 
 	<!-- Prepare the build/etc directory -->
@@ -185,8 +178,6 @@
 					value="${sonar.version}"/>
 				<filter token="GEOKIT.VERSION"
 				        value="${geokit.version}"/>
-				<filter token="MAPBEAN.VERSION"
-					value="${mapbean.version}"/>
 				<filter token="BUILD.RPM" value="${build.rpm}"/>
 				<filter token="RPM.URL" value="${rpm.url}"/>
 				<filter token="RPM.RELEASE"
@@ -345,7 +336,6 @@
 				<include name="mail.jar"/>
 				<include name="${scheduler.jar}"/>
 				<include name="${geokit.jar}"/>
-				<include name="${mapbean.jar}"/>
 				<include name="${sonar.client.jar}"/>
 			</fileset>
 			<fileset dir="${build.lib}">
@@ -492,7 +482,6 @@
 			<fileset dir="${lib.dir}">
 				<include name="${scheduler.jar}"/>
 				<include name="${geokit.jar}"/>
-				<include name="${mapbean.jar}"/>
 				<include name="${sonar.client.jar}"/>
 				<include name="${sonar.server.jar}"/>
 			</fileset>

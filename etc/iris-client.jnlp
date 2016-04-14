@@ -20,7 +20,6 @@
 	<jar href="lib/iris-common-@@VERSION@@.jar"/>
 	<jar href="lib/scheduler-@@SCHEDULER.VERSION@@.jar"/>
 	<jar href="lib/sonar-client-@@SONAR.VERSION@@.jar"/>
-	<jar href="lib/mapbean-@@MAPBEAN.VERSION@@.jar"/>
 	<jar href="lib/geokit-@@GEOKIT.VERSION@@.jar"/>
 	<extension name="mail" href="mail.jnlp"/>
     </resources>

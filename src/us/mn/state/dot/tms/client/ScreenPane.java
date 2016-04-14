@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -28,10 +28,10 @@ import javax.swing.border.BevelBorder;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.geokit.ZoomLevel;
-import us.mn.state.dot.map.MapBean;
-import us.mn.state.dot.map.MapToolBar;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.MapExtent;
+import us.mn.state.dot.tms.client.map.MapBean;
+import us.mn.state.dot.tms.client.map.MapToolBar;
 import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
 
 /**

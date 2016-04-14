@@ -15,10 +15,10 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.Color;
-import us.mn.state.dot.map.MapObject;
-import us.mn.state.dot.map.Outline;
-import us.mn.state.dot.map.Style;
-import us.mn.state.dot.map.Theme;
+import us.mn.state.dot.tms.client.map.MapObject;
+import us.mn.state.dot.tms.client.map.Outline;
+import us.mn.state.dot.tms.client.map.Style;
+import us.mn.state.dot.tms.client.map.Theme;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 

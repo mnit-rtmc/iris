@@ -15,11 +15,11 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.awt.Color;
-import us.mn.state.dot.map.MapObject;
-import us.mn.state.dot.map.Outline;
-import us.mn.state.dot.map.Style;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.client.map.MapObject;
+import us.mn.state.dot.tms.client.map.Outline;
+import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**

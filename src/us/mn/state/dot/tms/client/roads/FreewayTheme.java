@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.Color;
-import us.mn.state.dot.map.Style;
+import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**

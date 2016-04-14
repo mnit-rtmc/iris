@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.geom.Arc2D;
-import us.mn.state.dot.map.AbstractMarker;
+import us.mn.state.dot.tms.client.map.AbstractMarker;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**

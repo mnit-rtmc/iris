@@ -16,10 +16,10 @@ package us.mn.state.dot.tms.client;
 
 import java.awt.BorderLayout;
 import javax.swing.JPanel;
-import us.mn.state.dot.map.LayerState;
-import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.client.map.LayerState;
+import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;

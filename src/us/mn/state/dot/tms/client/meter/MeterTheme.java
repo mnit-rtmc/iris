@@ -15,9 +15,9 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
-import us.mn.state.dot.map.Style;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
