@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.Color;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.util.Comparator;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -55,9 +53,6 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class LCSArrayManager extends ProxyManager<LCSArray> {
 
-	/** LCS array map object marker */
-	static private final LcsMarker MARKER = new LcsMarker();
-
 	/** Action to blank the selected LCS array */
 	private BlankLcsAction blankAction;
 
@@ -90,17 +85,11 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return new LcsTab(session, this);
 	}
 
-	/** Get the shape for a given proxy */
-	@Override
-	protected Shape getShape(AffineTransform at) {
-		return MARKER.createTransformedShape(at);
-	}
-
 	/** Create a theme for LCS arrays */
 	@Override
 	protected ProxyTheme<LCSArray> createTheme() {
 		ProxyTheme<LCSArray> theme = new ProxyTheme<LCSArray>(this,
-			MARKER);
+			new LcsMarker());
 		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(ItemStyle.SCHEDULED, ProxyTheme.COLOR_SCHEDULED);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Base class for all SONAR proxy map layer states.
@@ -31,6 +32,21 @@ import us.mn.state.dot.sonar.SonarObject;
  * @author Douglas Lau
  */
 public class ProxyLayerState<T extends SonarObject> extends LayerState {
+
+	/** Get the map icon maximum size scale */
+	static private float getIconSizeScaleMax() {
+		return SystemAttrEnum.MAP_ICON_SIZE_SCALE_MAX.getFloat();
+	}
+
+	/** Limit the map scale based on system attributes.
+	 * @param scale Map scale in user coordinates per pixel.
+	 * @return Adjusted map scale in user coordinates per pixel. */
+	static private float adjustScale(final float scale) {
+		float sc_min = scale / 4.0f;
+		float sc_max = getIconSizeScaleMax();
+		return (sc_max > 0) ?
+			Math.max(Math.min(scale, sc_max), sc_min) : scale;
+	}
 
 	/** Proxy manager */
 	private final ProxyManager<T> manager;
@@ -104,10 +120,15 @@ public class ProxyLayerState<T extends SonarObject> extends LayerState {
 			map.getModel().getZoomLevel().ordinal());
 	}
 
+	/** Get the current map scale */
+	@Override
+	protected float getScale() {
+		return adjustScale(super.getScale());
+	}
+
 	/** Iterate through all shapes in the layer */
 	@Override
 	public MapObject forEach(MapSearcher s) {
-		manager.setShapeScale(getScale());
 		return manager.forEach(s);
 	}
 

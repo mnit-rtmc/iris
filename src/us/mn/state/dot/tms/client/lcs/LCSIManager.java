@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
@@ -51,12 +49,6 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 		return cache.getLCSIndications();
 	}
 
-	/** Get the shape for a given proxy */
-	@Override
-	protected Shape getShape(AffineTransform at) {
-		return null;
-	}
-
 	/** Create a theme for LCS arrays */
 	@Override
 	protected ProxyTheme<LCSIndication> createTheme() {
@@ -71,7 +63,7 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, LCSIndication proxy) {
-		switch(is) {
+		switch (is) {
 		case NO_CONTROLLER:
 			return proxy.getController() == null;
 		case ALL:

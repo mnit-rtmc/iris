@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.Color;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.util.Iterator;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
@@ -69,12 +67,6 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Find the map geo location for a proxy */
 	@Override
 	protected GeoLoc getGeoLoc(ActionPlan proxy) {
-		return null;
-	}
-
-	/** Get a transformed marker shape */
-	@Override
-	protected Shape getShape(AffineTransform at) {
 		return null;
 	}
 

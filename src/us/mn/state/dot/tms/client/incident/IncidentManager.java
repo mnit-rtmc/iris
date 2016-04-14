@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.util.HashMap;
 import javax.swing.Icon;
 import javax.swing.JLabel;
@@ -48,9 +46,6 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class IncidentManager extends ProxyManager<Incident> {
 
-	/** Incident Map object marker */
-	static private final IncidentMarker MARKER = new IncidentMarker();
-
 	/** Location mapping */
 	private final HashMap<String, IncidentGeoLoc> locations =
 		new HashMap<String, IncidentGeoLoc>();
@@ -82,12 +77,6 @@ public class IncidentManager extends ProxyManager<Incident> {
 	@Override
 	public ListCellRenderer<Incident> createCellRenderer() {
 		return new IncidentCellRenderer(this);
-	}
-
-	/** Get the shape for a given proxy */
-	@Override
-	protected Shape getShape(AffineTransform at) {
-		return MARKER.createTransformedShape(at);
 	}
 
 	/** Create a theme for incidents */

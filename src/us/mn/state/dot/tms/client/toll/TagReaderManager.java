@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.client.toll;
 
 import java.awt.Color;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -41,9 +39,6 @@ public class TagReaderManager extends ProxyManager<TagReader> {
 	/** Color to display available readers */
 	static private final Color COLOR_AVAILABLE = new Color(64, 128, 255);
 
-	/** TagReader map object marker */
-	static private final TagReaderMarker MARKER = new TagReaderMarker();
-
 	/** Create a new tag reader manager */
 	public TagReaderManager(Session s, GeoLocManager lm) {
 		super(s, lm);
@@ -61,17 +56,11 @@ public class TagReaderManager extends ProxyManager<TagReader> {
 		return session.getSonarState().getTagReaders();
 	}
 
-	/** Get the shape for a given proxy */
-	@Override
-	protected Shape getShape(AffineTransform at) {
-		return MARKER.createTransformedShape(at);
-	}
-
 	/** Create a theme for tag readers */
 	@Override
 	protected ProxyTheme<TagReader> createTheme() {
 		ProxyTheme<TagReader> theme = new ProxyTheme<TagReader>(this,
-			MARKER);
+			new TagReaderMarker());
 		theme.addStyle(ItemStyle.AVAILABLE, COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(ItemStyle.NO_CONTROLLER,

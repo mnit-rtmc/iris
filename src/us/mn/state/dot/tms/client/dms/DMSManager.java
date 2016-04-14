@@ -16,8 +16,6 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Color;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.JLabel;
@@ -49,9 +47,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  */
 public class DMSManager extends ProxyManager<DMS> {
-
-	/** DMS Map object marker */
-	static private final DmsMarker MARKER = new DmsMarker();
 
 	/** Color definition for AWS controlled style */
 	static private final Color COLOR_HELIOTROPE = new Color(1, 0.5f,0.9f);
@@ -92,18 +87,13 @@ public class DMSManager extends ProxyManager<DMS> {
 		return new DMSTab(session, this);
 	}
 
-	/** Get the shape for a given proxy */
-	@Override
-	protected Shape getShape(AffineTransform at) {
-		return MARKER.createTransformedShape(at);
-	}
-
 	/** Create a theme for DMSs */
 	@Override
 	protected ProxyTheme<DMS> createTheme() {
 		// NOTE: the ordering of themes controls which color is used
 		//       to render the sign icon on the map
-		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this, MARKER);
+		ProxyTheme<DMS> theme = new ProxyTheme<DMS>(this,
+			new DmsMarker());
 		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(ItemStyle.SCHEDULED, ProxyTheme.COLOR_SCHEDULED);

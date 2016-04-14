@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.client.meter;
 
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -40,9 +38,6 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class MeterManager extends ProxyManager<RampMeter> {
 
-	/** Ramp meter map object marker */
-	static private final MeterMarker MARKER = new MeterMarker();
-
 	/** Create a new meter manager */
 	public MeterManager(Session s, GeoLocManager lm) {
 		super(s, lm);
@@ -66,12 +61,6 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return new RampMeterTab(session, this);
 	}
 
-	/** Get the shape for a given proxy */
-	@Override
-	protected Shape getShape(AffineTransform at) {
-		return MARKER.createTransformedShape(at);
-	}
-
 	/** Create a theme for ramp meters */
 	@Override
 	protected ProxyTheme<RampMeter> createTheme() {
@@ -82,8 +71,8 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	@Override
 	public boolean checkStyle(ItemStyle is, RampMeter proxy) {
 		long styles = proxy.getStyles();
-		for(ItemStyle s: ItemStyle.toStyles(styles)) {
-			if(s == is)
+		for (ItemStyle s: ItemStyle.toStyles(styles)) {
+			if (s == is)
 				return true;
 		}
 		return false;

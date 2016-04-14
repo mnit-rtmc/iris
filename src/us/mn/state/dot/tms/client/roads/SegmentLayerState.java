@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.awt.event.MouseEvent;
-import java.awt.geom.Point2D;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
@@ -53,7 +52,6 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 	/** Iterate through the segments in the layer */
 	@Override
 	public MapObject forEach(MapSearcher s) {
-		manager.setShapeScale(getScale());
 		if (isPastLaneZoomThreshold())
 			return forEachLane(s);
 		else
@@ -63,6 +61,13 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 	/** Is the zoom level past the "individual lane" threshold? */
 	private boolean isPastLaneZoomThreshold() {
 		return map.getModel().getZoomLevel().ordinal() >= 14;
+	}
+
+	/** Get the current map scale */
+	@Override
+	protected float getScale() {
+		// Don't adjust scale for segments
+		return (float) map.getScale();
 	}
 
 	/** Iterate through the stations in the layer */
@@ -91,16 +96,6 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 			}
 		}
 		return null;
-	}
-
-	/** Search a layer for a map object containing the given point */
-	@Override
-	public MapObject search(final Point2D p) {
-		return forEach(new MapSearcher() {
-			public boolean next(MapObject mo) {
-				return mo.getShape().contains(p);
-			}
-		});
 	}
 
 	/** Do left-click event processing */

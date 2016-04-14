@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.client.weather;
 
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
@@ -32,10 +30,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  * @author Douglas Lau
  */
 public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
-
-	/** Lane marking map object marker */
-	static protected final WeatherSensorMarker MARKER =
-		new WeatherSensorMarker();
 
 	/** Create a new weather sensor manager */
 	public WeatherSensorManager(Session s, GeoLocManager lm) {
@@ -54,17 +48,11 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 		return session.getSonarState().getWeatherSensors();
 	}
 
-	/** Get the shape for a given proxy */
-	@Override
-	protected Shape getShape(AffineTransform at) {
-		return MARKER.createTransformedShape(at);
-	}
-
 	/** Create a theme for weather sensors */
 	@Override
 	protected ProxyTheme<WeatherSensor> createTheme() {
 		ProxyTheme<WeatherSensor> theme = new ProxyTheme<WeatherSensor>(
-			this, MARKER);
+			this, new WeatherSensorMarker());
 		theme.addStyle(ItemStyle.NO_CONTROLLER,
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(ItemStyle.ALL);

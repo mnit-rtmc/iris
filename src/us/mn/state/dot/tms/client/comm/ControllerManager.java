@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -40,9 +38,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class ControllerManager extends ProxyManager<Controller> {
-
-	/** Controller map object marker */
-	static private final ControllerMarker MARKER = new ControllerMarker();
 
 	/** Create a new controller manager */
 	public ControllerManager(Session s, GeoLocManager lm) {
@@ -74,12 +69,6 @@ public class ControllerManager extends ProxyManager<Controller> {
 		    && session.canRead(CommLink.SONAR_TYPE);
 	}
 
-	/** Get the shape for a given proxy */
-	@Override
-	protected Shape getShape(AffineTransform at) {
-		return MARKER.createTransformedShape(at);
-	}
-
 	/** Get the tangent angle for the given location */
 	@Override
 	public Double getTangentAngle(MapGeoLoc loc) {
@@ -90,7 +79,8 @@ public class ControllerManager extends ProxyManager<Controller> {
 	/** Create a theme for controllers */
 	@Override
 	protected ProxyTheme<Controller> createTheme() {
-		ControllerTheme theme = new ControllerTheme(this, MARKER);
+		ControllerTheme theme = new ControllerTheme(this,
+			new ControllerMarker());
 		theme.addStyle(ItemStyle.ACTIVE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);

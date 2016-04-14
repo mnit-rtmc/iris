@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.client.roads;
 
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
@@ -61,9 +59,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Offset angle for default North map markers */
 	static private final double NORTH_ANGLE = Math.PI / 2;
-
-	/** Marker to draw r_nodes */
-	static private final R_NodeMarker MARKER = new R_NodeMarker();
 
 	/** Maximum distance to snap */
 	static private final Distance MAX_DIST = new Distance(1, MILES);
@@ -351,12 +346,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		};
 	}
 
-	/** Get a transformed marker shape */
-	@Override
-	protected Shape getShape(AffineTransform at) {
-		return MARKER.createTransformedShape(at);
-	}
-
 	/** Create a style list model for the given symbol */
 	@Override
 	protected StyleListModel<R_Node> createStyleListModel(Style sty) {
@@ -367,7 +356,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Create a theme for r_nodes */
 	@Override
 	protected ProxyTheme<R_Node> createTheme() {
-		return new ProxyTheme<R_Node>(this, MARKER);
+		return new ProxyTheme<R_Node>(this, new R_NodeMarker());
 	}
 
 	/** Lookup the corridor for a location */

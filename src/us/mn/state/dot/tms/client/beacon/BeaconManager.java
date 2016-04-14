@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.client.beacon;
 
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -36,9 +34,6 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class BeaconManager extends ProxyManager<Beacon> {
 
-	/** Beacon map object marker */
-	static private final BeaconMarker MARKER = new BeaconMarker();
-
 	/** Create a new beacon manager */
 	public BeaconManager(Session s, GeoLocManager lm) {
 		super(s, lm);
@@ -56,16 +51,11 @@ public class BeaconManager extends ProxyManager<Beacon> {
 		return session.getSonarState().getBeacons();
 	}
 
-	/** Get the shape for a given proxy */
-	@Override
-	protected Shape getShape(AffineTransform at) {
-		return MARKER.createTransformedShape(at);
-	}
-
 	/** Create a theme for beacons */
 	@Override
 	protected ProxyTheme<Beacon> createTheme() {
-		ProxyTheme<Beacon> theme = new ProxyTheme<Beacon>(this, MARKER);
+		ProxyTheme<Beacon> theme = new ProxyTheme<Beacon>(this,
+			new BeaconMarker());
 		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);

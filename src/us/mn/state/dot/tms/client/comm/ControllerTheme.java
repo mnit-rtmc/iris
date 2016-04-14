@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,12 +17,12 @@ package us.mn.state.dot.tms.client.comm;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.util.HashSet;
 import java.util.Iterator;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
+import us.mn.state.dot.map.AbstractMarker;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.Controller;
@@ -63,32 +63,42 @@ public class ControllerTheme extends ProxyTheme<Controller> {
 	}
 
 	/** Create a new controller theme */
-	public ControllerTheme(ProxyManager<Controller> m, Shape s) {
-		super(m, s);
+	public ControllerTheme(ProxyManager<Controller> m, AbstractMarker mkr) {
+		super(m, mkr);
+	}
+
+	/** Map scale */
+	private float scale = 1;
+
+	/** Set the map scale */
+	@Override
+	public void setScale(float s) {
+		scale = s;
+		super.setScale(s);
 	}
 
 	/** Draw a selected map object */
 	@Override
-	public void drawSelected(Graphics2D g, MapObject mo, float scale) {
+	public void drawSelected(Graphics2D g, MapObject mo) {
 		Controller c = manager.findProxy(mo);
-		if(c != null) {
+		if (c != null) {
 			Cabinet cab = c.getCabinet();
-			if(cab != null) {
+			if (cab != null) {
 				GeoLoc loc = cab.getGeoLoc();
-				if(loc != null) {
+				if (loc != null) {
 					SphericalMercatorPosition pos =
 						GeoLocHelper.getPosition(loc);
-					if(pos != null)
-						drawSelected(g, c, pos, scale);
+					if (pos != null)
+						drawSelected(g, c, pos);
 				}
 			}
 		}
-		super.drawSelected(g, mo, scale);
+		super.drawSelected(g, mo);
 	}
 
 	/** Draw a selected controller */
 	private void drawSelected(Graphics2D g, Controller c,
-		SphericalMercatorPosition pos, float scale)
+		SphericalMercatorPosition pos)
 	{
 		HashSet<GeoLoc> locs = new HashSet<GeoLoc>();
 		addRampMeterLocs(c, locs);

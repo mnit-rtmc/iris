@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.client.gate;
 
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -40,9 +38,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class GateArmArrayManager extends ProxyManager<GateArmArray> {
-
-	/** Gate arm map object marker */
-	static private final GateArmMarker MARKER = new GateArmMarker();
 
 	/** Create a new gate arm array manager */
 	public GateArmArrayManager(Session s, GeoLocManager lm) {
@@ -74,17 +69,11 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		    && session.canRead(GateArm.SONAR_TYPE);
 	}
 
-	/** Get the shape for a given proxy */
-	@Override
-	protected Shape getShape(AffineTransform at) {
-		return MARKER.createTransformedShape(at);
-	}
-
 	/** Create a theme for gate arms */
 	@Override
 	protected ProxyTheme<GateArmArray> createTheme() {
 		ProxyTheme<GateArmArray> theme = new ProxyTheme<GateArmArray>(
-			this, MARKER);
+			this, new GateArmMarker());
 		theme.addStyle(ItemStyle.CLOSED, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.MOVING, ProxyTheme.COLOR_SCHEDULED);
 		theme.addStyle(ItemStyle.OPEN, ProxyTheme.COLOR_DEPLOYED);

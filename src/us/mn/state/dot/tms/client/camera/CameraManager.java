@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.Color;
-import java.awt.Shape;
-import java.awt.geom.AffineTransform;
 import java.util.List;
 import java.util.HashSet;
 import javax.swing.JLabel;
@@ -43,9 +41,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class CameraManager extends ProxyManager<Camera> {
-
-	/** Camera map object marker */
-	static private final CameraMarker MARKER = new CameraMarker();
 
 	/** Color for active camera style */
 	static private final Color COLOR_ACTIVE = new Color(0, 192, 255);
@@ -77,16 +72,11 @@ public class CameraManager extends ProxyManager<Camera> {
 		return new CameraTab(session, this);
 	}
 
-	/** Get the shape for a given proxy */
-	@Override
-	protected Shape getShape(AffineTransform at) {
-		return MARKER.createTransformedShape(at);
-	}
-
 	/** Create a theme for cameras */
 	@Override
 	protected ProxyTheme<Camera> createTheme() {
-		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this, MARKER);
+		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this,
+			new CameraMarker());
 		theme.addStyle(ItemStyle.UNPUBLISHED,
 			ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(ItemStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,

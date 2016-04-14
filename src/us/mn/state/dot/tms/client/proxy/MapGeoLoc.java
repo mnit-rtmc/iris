@@ -193,12 +193,12 @@ public class MapGeoLoc implements MapObject {
 	/** Get the map object shape */
 	@Override
 	public Shape getShape() {
-		return (manager != null) ? manager.getShape() : null;
+		return null;
 	}
 
 	/** Get the outline shape */
 	@Override
 	public Shape getOutlineShape() {
-		return getShape();
+		return null;
 	}
 }
