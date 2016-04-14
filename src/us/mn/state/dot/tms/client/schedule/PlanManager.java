@@ -18,7 +18,6 @@ import java.awt.Color;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.util.Iterator;
-import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.BeaconAction;
@@ -29,21 +28,13 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
-import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.MeterActionHelper;
-import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.beacon.BeaconMarker;
-import us.mn.state.dot.tms.client.dms.DmsMarker;
-import us.mn.state.dot.tms.client.meter.MeterMarker;
-import us.mn.state.dot.tms.client.meter.MeterTheme;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
-import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.StyleSummary;
 
 /**
  * A plan manager is a container for SONAR action plan objects.
@@ -51,9 +42,6 @@ import us.mn.state.dot.tms.client.proxy.StyleSummary;
  * @author Douglas Lau
  */
 public class PlanManager extends ProxyManager<ActionPlan> {
-
-	/** Color to display schedule icon */
-	static private final Color COLOR_SCHEDULE = new Color(0, 208, 208);
 
 	/** Create a new action plan manager */
 	public PlanManager(Session s, GeoLocManager lm) {
@@ -93,18 +81,7 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Create a theme for action plans */
 	@Override
 	protected PlanTheme createTheme() {
-		PlanTheme theme = new PlanTheme(this);
-		theme.addStyle(ItemStyle.DMS, new DmsMarker(),
-			PlanTheme.COLOR_SCHEDULED);
-		theme.addStyle(ItemStyle.BEACON, new BeaconMarker(),
-			PlanTheme.COLOR_DEPLOYED);
-		theme.addStyle(ItemStyle.METER, new MeterMarker(),
-			MeterTheme.COLOR_METERING);
-		theme.addStyle(ItemStyle.LANE);
-		theme.addStyle(ItemStyle.TIME, new TimeMarker(),COLOR_SCHEDULE);
-		theme.addStyle(ItemStyle.ACTIVE);
-		theme.addStyle(ItemStyle.ALL);
-		return theme;
+		return new PlanTheme(this);
 	}
 
 	/** Check the style of the specified proxy */

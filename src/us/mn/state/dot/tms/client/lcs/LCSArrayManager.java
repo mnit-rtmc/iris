@@ -23,7 +23,7 @@ import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.map.Style;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.DMS;
@@ -159,8 +159,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Create a style list model for the given symbol */
 	@Override
-	protected StyleListModel<LCSArray> createStyleListModel(Symbol s) {
-		return new StyleListModel<LCSArray>(this, s.getLabel()) {
+	protected StyleListModel<LCSArray> createStyleListModel(Style sty) {
+		return new StyleListModel<LCSArray>(this, sty.toString()) {
 			@Override
 			protected Comparator<LCSArray> comparator() {
 				return lcs_comparator;

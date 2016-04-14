@@ -28,7 +28,7 @@ import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.MapSearcher;
-import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.map.Style;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
@@ -338,12 +338,12 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Create a style list model for the given symbol name */
 	private StyleListModel<T> createStyleListModel(String s) {
-		return createStyleListModel(theme.getSymbol(s));
+		return createStyleListModel(theme.getStyle(s));
 	}
 
 	/** Create a style list model for the given symbol */
-	protected StyleListModel<T> createStyleListModel(Symbol s) {
-		return new StyleListModel<T>(this, s.getLabel());
+	protected StyleListModel<T> createStyleListModel(Style sty) {
+		return new StyleListModel<T>(this, sty.toString());
 	}
 
 	/** Check if a given attribute affects a proxy style */

@@ -31,13 +31,14 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListSelectionModel;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
 import javax.swing.border.TitledBorder;
-import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.map.Style;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.tms.client.widget.IWorker;
@@ -109,18 +110,16 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Widgets for one style */
 	private class StyleWidgets {
-		private final Symbol symbol;
 		private final ItemStyle istyle;
 		private final JRadioButton btn;
 		private final JLabel legend_lbl;
 		private final JLabel count_lbl;
 		private int n_count;
-		private StyleWidgets(Symbol s) {
-			symbol = s;
-			String style = s.getLabel();
+		private StyleWidgets(Style sty, Icon legend) {
+			String style = sty.toString();
 			istyle = ItemStyle.lookupStyle(style);
 			btn = createRadioButton(style);
-			legend_lbl = new JLabel(s.getLegend());
+			legend_lbl = new JLabel(legend);
 			count_lbl = new JLabel();
 			n_count = 0;
 		}
@@ -144,18 +143,19 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		setBorder(border);
 		GridBagConstraints bag = new GridBagConstraints();
 		ProxyTheme<T> theme = manager.getTheme();
-		List<Symbol> symbols = theme.getSymbols();
+		List<Style> styles = theme.getStyles();
 		p_list = manager.createList();
 		p_list.setCellRenderer(manager.createCellRenderer());
 		JScrollPane sp = new JScrollPane(p_list);
-		final int n_rows = (symbols.size() - 1) / STYLE_COLS + 1;
+		final int n_rows = (styles.size() - 1) / STYLE_COLS + 1;
 		// grid is filled top to bottom, left to right
-		for(int i = 0; i < symbols.size() ; i++) {
+		for (int i = 0; i < styles.size() ; i++) {
 			int col = i / n_rows;
 			int row = i % n_rows;
-			Symbol sym = symbols.get(i);
-			String style = sym.getLabel();
-			StyleWidgets sw = new StyleWidgets(sym);
+			Style sty = styles.get(i);
+			String style = sty.toString();
+			StyleWidgets sw = new StyleWidgets(sty,
+				theme.getLegend(sty));
 			widgets.put(style, sw);
 			bag.gridx = col * GRID_COLS;
 			bag.gridy = row;

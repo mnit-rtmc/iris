@@ -68,6 +68,7 @@ public class ControllerTheme extends ProxyTheme<Controller> {
 	}
 
 	/** Draw a selected map object */
+	@Override
 	public void drawSelected(Graphics2D g, MapObject mo, float scale) {
 		Controller c = manager.findProxy(mo);
 		if(c != null) {

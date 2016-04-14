@@ -15,16 +15,12 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.awt.Color;
-import java.util.HashMap;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
-import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.map.VectorSymbol;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Theme for incident objects on the map.
@@ -58,7 +54,7 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 	/** Create a cleared style */
 	static private Style cleared(ItemStyle sty) {
 		return new Style(ItemStyle.CLEARED + " " + sty, OUTLINE,
-			CLEARED_COLOR);
+			CLEARED_COLOR, false);
 	}
 
 	/** Cleared crash style */
@@ -81,7 +77,7 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 	/** Create an unconfirmed style */
 	static private Style unconfirmed(ItemStyle sty, Color c) {
 		return new Style(ItemStyle.UNCONFIRMED + " " + sty, UN_OUTLINE,
-			unconfirmedColor(c));
+			unconfirmedColor(c), false);
 	}
 
 	/** Unconfirmed crash style */
@@ -100,10 +96,6 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 	static private final Style UN_HAZARD = unconfirmed(ItemStyle.HAZARD,
 		HAZARD_COLOR);
 
-	/** Extra symbols */
-	private final HashMap<String, Symbol> extra_syms =
-		new HashMap<String, Symbol>();
-
 	/** Create a new incident theme */
 	public IncidentTheme(IncidentManager man) {
 		super(man, MARKER);
@@ -115,24 +107,14 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 		addStyle(ItemStyle.UNCONFIRMED, unconfirmedColor(Color.WHITE),
 			IncidentTheme.UN_OUTLINE);
 		addStyle(ItemStyle.ALL);
-		storeSymbol(CLR_CRASH);
-		storeSymbol(CLR_STALL);
-		storeSymbol(CLR_ROADWORK);
-		storeSymbol(CLR_HAZARD);
-		storeSymbol(UN_CRASH);
-		storeSymbol(UN_STALL);
-		storeSymbol(UN_ROADWORK);
-		storeSymbol(UN_HAZARD);
-	}
-
-	/** Store one symbol */
-	private void storeSymbol(Style sty) {
-		extra_syms.put(sty.toString(), createSymbol(sty));
-	}
-
-	/** Create a symbol */
-	private Symbol createSymbol(Style sty) {
-		return new VectorSymbol(sty, MARKER, UI.scaled(22));
+		addStyle(CLR_CRASH);
+		addStyle(CLR_STALL);
+		addStyle(CLR_ROADWORK);
+		addStyle(CLR_HAZARD);
+		addStyle(UN_CRASH);
+		addStyle(UN_STALL);
+		addStyle(UN_ROADWORK);
+		addStyle(UN_HAZARD);
 	}
 
 	/** Get an appropriate style for the given map object */
@@ -169,12 +151,5 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 				return UN_HAZARD;
 		}
 		return super.getStyle(inc);
-	}
-
-	/** Get a symbol by label */
-	@Override
-	public Symbol getSymbol(String label) {
-		Symbol sym = extra_syms.get(label);
-		return (sym != null) ? sym : super.getSymbol(label);
 	}
 }

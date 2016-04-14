@@ -19,7 +19,8 @@ import java.awt.Shape;
 import us.mn.state.dot.map.MapObject;
 import us.mn.state.dot.map.Outline;
 import us.mn.state.dot.map.Style;
-import us.mn.state.dot.map.StyledTheme;
+import us.mn.state.dot.map.Theme;
+import us.mn.state.dot.map.VectorSymbol;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.utils.I18N;
@@ -30,7 +31,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  *
  * @author Douglas Lau
  */
-public class ProxyTheme<T extends SonarObject> extends StyledTheme {
+public class ProxyTheme<T extends SonarObject> extends Theme {
 
 	/** Outline color */
 	static protected final Color OUTLINE_COLOR = new Color(0, 0, 0, 128);
@@ -70,7 +71,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 	static public final Color COLOR_SCHEDULED = new Color(240, 128, 0);
 
 	/** Size of legend icons */
-	static private final int lsize = UI.scaled(22);
+	static protected final int lsize = UI.scaled(22);
 
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
@@ -80,7 +81,7 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 
 	/** Create a new SONAR proxy theme */
 	public ProxyTheme(ProxyManager<T> m, Shape s) {
-		super(I18N.get(m.getSonarType()), s, lsize);
+		super(I18N.get(m.getSonarType()), new VectorSymbol(s, lsize));
 		manager = m;
 	}
 
@@ -113,9 +114,9 @@ public class ProxyTheme<T extends SonarObject> extends StyledTheme {
 
 	/** Get an appropriate style for the given proxy object */
 	public Style getStyle(T proxy) {
-		for (Style st: styles) {
+		for (Style st: getStyles()) {
 			ItemStyle is = ItemStyle.lookupStyle(st.toString());
-			if (manager.checkStyle(is, proxy))
+			if (is != null && manager.checkStyle(is, proxy))
 				return st;
 		}
 		return dstyle;

@@ -31,7 +31,7 @@ import org.xml.sax.SAXException;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.LayerState;
 import us.mn.state.dot.map.MapBean;
-import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.map.Style;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Detector;
@@ -359,7 +359,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 
 	/** Create a style list model for the given symbol */
 	@Override
-	protected StyleListModel<R_Node> createStyleListModel(Symbol s) {
+	protected StyleListModel<R_Node> createStyleListModel(Style sty) {
 		// No style list models on roadway tab
 		return null;
 	}

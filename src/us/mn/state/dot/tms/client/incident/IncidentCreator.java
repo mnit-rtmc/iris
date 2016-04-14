@@ -29,7 +29,7 @@ import javax.swing.event.ChangeListener;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.map.PointSelector;
-import us.mn.state.dot.map.Symbol;
+import us.mn.state.dot.map.Style;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
@@ -146,10 +146,10 @@ public class IncidentCreator extends JPanel {
 	private JToggleButton createButton(ItemStyle is, final EventType et,
 		ProxyTheme<Incident> theme)
 	{
-		String sty = is.toString();
-		Symbol sym = theme.getSymbol(sty);
-		final JToggleButton btn = new JToggleButton(sty,
-			sym.getLegend());
+		String s = is.toString();
+		Style sty = theme.getStyle(s);
+		final JToggleButton btn = new JToggleButton(s,
+			theme.getLegend(sty));
 		btn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				buttonChanged(btn, et);

@@ -15,14 +15,10 @@
 package us.mn.state.dot.tms.client.meter;
 
 import java.awt.Color;
-import java.util.HashMap;
 import us.mn.state.dot.map.Style;
-import us.mn.state.dot.map.Symbol;
-import us.mn.state.dot.map.VectorSymbol;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * Meter theme provides styles for ramp meters.
@@ -49,7 +45,7 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 	/** Create a locked style */
 	static private Style locked(ItemStyle sty, Color c) {
 		return new Style(ItemStyle.LOCKED + " " + sty, OUTLINE_LOCKED,
-			c);
+			c, false);
 	}
 
 	/** Locked available style */
@@ -72,10 +68,6 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 	static private final Style LCK_MAINTENANCE = locked(
 		ItemStyle.MAINTENANCE, COLOR_UNAVAILABLE);
 
-	/** Extra symbols */
-	private final HashMap<String, Symbol> extra_syms =
-		new HashMap<String, Symbol>();
-
 	/** Create a new meter theme */
 	public MeterTheme(MeterManager man) {
 		super(man, MARKER);
@@ -89,21 +81,11 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 		addStyle(ItemStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
 			ProxyTheme.OUTLINE_INACTIVE);
 		addStyle(ItemStyle.ALL);
-		storeSymbol(LCK_AVAILABLE);
-		storeSymbol(LCK_QUEUE_FULL);
-		storeSymbol(LCK_QUEUE_EXISTS);
-		storeSymbol(LCK_METERING);
-		storeSymbol(LCK_MAINTENANCE);
-	}
-
-	/** Store one symbol */
-	private void storeSymbol(Style sty) {
-		extra_syms.put(sty.toString(), createSymbol(sty));
-	}
-
-	/** Create a symbol */
-	private Symbol createSymbol(Style sty) {
-		return new VectorSymbol(sty, MARKER, UI.scaled(22));
+		addStyle(LCK_AVAILABLE);
+		addStyle(LCK_QUEUE_FULL);
+		addStyle(LCK_QUEUE_EXISTS);
+		addStyle(LCK_METERING);
+		addStyle(LCK_MAINTENANCE);
 	}
 
 	/** Get an appropriate style */
@@ -122,12 +104,5 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 				return LCK_MAINTENANCE;
 		}
 		return super.getStyle(rm);
-	}
-
-	/** Get a symbol by label */
-	@Override
-	public Symbol getSymbol(String label) {
-		Symbol sym = extra_syms.get(label);
-		return (sym != null) ? sym : super.getSymbol(label);
 	}
 }

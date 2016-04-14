@@ -23,7 +23,6 @@ import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.map.Style;
-import us.mn.state.dot.map.Symbol;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.EventType;
@@ -275,24 +274,20 @@ public class IncidentManager extends ProxyManager<Incident> {
 			return sty;
 	}
 
-	/** Get the symbol for an incident */
-	public Symbol getSymbol(Incident inc) {
-		Style sty = getTheme().getStyle(inc);
-		if (sty != null)
-			return getTheme().getSymbol(sty.toString());
-		else
-			return null;
+	/** Get the style for an incident */
+	public Style getStyle(Incident inc) {
+		return getTheme().getStyle(inc);
 	}
 
 	/** Get the icon for an incident */
 	public Icon getIcon(Incident inc) {
 		if (inc != null) {
-			Symbol sym = getSymbol(inc);
-			if (sym != null)
-				return sym.getLegend();
+			Style sty = getStyle(inc);
+			if (sty != null)
+				return getTheme().getLegend(sty);
 		}
-		String st = ItemStyle.CLEARED.toString();
-		return getTheme().getSymbol(st).getLegend();
+		Style sty = getTheme().getStyle(ItemStyle.CLEARED.toString());
+		return getTheme().getLegend(sty);
 	}
 
 	/** Get the layer zoom visibility threshold */
