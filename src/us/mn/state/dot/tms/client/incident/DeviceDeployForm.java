@@ -70,7 +70,6 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 		manager = man;
 		model = new DeviceDeployModel(man, inc);
 		list = new JList<Device>(model);
-		list.setVisibleRowCount(model.getSize());
 		list.addListSelectionListener(new IListSelectionAdapter() {
 			@Override public void valueChanged() {
 				updateButtons();
@@ -89,6 +88,7 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	protected void initialize() {
 		list.setCellRenderer(new ProposedDeviceCellRenderer(session,
 			model));
+		list.setVisibleRowCount(model.getSize());
 		add(createPanel());
 		super.initialize();
 		updateButtons();
