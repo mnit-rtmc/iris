@@ -36,12 +36,10 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.map.LayerState;
 import us.mn.state.dot.tms.client.map.MapBean;
-import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
 import us.mn.state.dot.tms.client.widget.Invokable;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
@@ -344,13 +342,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			}
 			public void remove() { }
 		};
-	}
-
-	/** Create a style list model for the given symbol */
-	@Override
-	protected StyleListModel<R_Node> createStyleListModel(Style sty) {
-		// No style list models on roadway tab
-		return null;
 	}
 
 	/** Create a theme for r_nodes */

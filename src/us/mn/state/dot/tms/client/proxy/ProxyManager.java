@@ -291,17 +291,13 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Get the specified style list model */
 	public StyleListModel<T> getStyleModel(String s) {
-		StyleListModel<T> slm = createStyleListModel(s);
+		Style sty = theme.getStyle(s);
+		StyleListModel<T> slm = createStyleListModel(sty);
 		if (slm != null) {
 			slm.initialize();
 			return slm;
 		} else
 			return null;
-	}
-
-	/** Create a style list model for the given symbol name */
-	private StyleListModel<T> createStyleListModel(String s) {
-		return createStyleListModel(theme.getStyle(s));
 	}
 
 	/** Create a style list model for the given symbol */
