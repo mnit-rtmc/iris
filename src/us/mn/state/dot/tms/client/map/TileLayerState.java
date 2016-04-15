@@ -38,7 +38,8 @@ public class TileLayerState extends LayerState {
 
 	/** Create a new tile layer state */
 	public TileLayerState(TileLayer layer, MapBean mb, TileCache c) {
-		super(layer, mb, new Theme("Tile", new TileSymbol()));
+		super(layer, mb, new Theme("Tile", new TileSymbol(),
+			new Style("Tile")));
 		cache = c;
 	}
 

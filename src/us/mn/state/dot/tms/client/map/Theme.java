@@ -35,17 +35,19 @@ public class Theme {
 	private final Symbol def_symbol;
 
 	/** Default style */
-	private Style def_style;
+	protected final Style def_style;
 
 	/** List of styles */
 	private final List<Style> styles = new ArrayList<Style>();
 
 	/** Create a new theme.
 	 * @param n Theme name.
-	 * @param sym Default symbol. */
-	public Theme(String n, Symbol sym) {
+	 * @param sym Default symbol.
+	 * @param sty Default style. */
+	public Theme(String n, Symbol sym, Style sty) {
 		name = n;
 		def_symbol = sym;
+		def_style = sty;
 	}
 
 	/** Get a string representation of the theme */
@@ -57,8 +59,6 @@ public class Theme {
 	/** Add a style to the theme */
 	public void addStyle(Style sty) {
 		styles.add(sty);
-		if (def_style == null)
-			def_style = sty;
 	}
 
 	/** Get a style by label */

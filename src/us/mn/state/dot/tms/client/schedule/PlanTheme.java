@@ -67,7 +67,7 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 		addStyle(ItemStyle.LANE, COLOR);
 		addStyle(ItemStyle.TIME, COLOR_SCHEDULE);
 		addStyle(ItemStyle.ACTIVE, COLOR);
-		addStyle(ItemStyle.ALL, COLOR);
+		addStyle(ItemStyle.ALL);
 	}
 
 	/** Get a legend icon for a style */

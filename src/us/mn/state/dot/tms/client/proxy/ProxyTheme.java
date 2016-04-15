@@ -76,12 +76,10 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 
-	/** Default style */
-	protected Style dstyle;
-
 	/** Create a new SONAR proxy theme */
 	public ProxyTheme(ProxyManager<T> m, Marker mkr) {
-		super(I18N.get(m.getSonarType()), new VectorSymbol(mkr, lsize));
+		super(I18N.get(m.getSonarType()), new VectorSymbol(mkr, lsize),
+			new Style(ItemStyle.ALL.toString(), null));
 		manager = m;
 	}
 
@@ -96,10 +94,9 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 		addStyle(is, color, OUTLINE);
 	}
 
-	/** Add a default style to the theme */
+	/** Add a style to the theme */
 	public void addStyle(ItemStyle is) {
-		dstyle = new Style(is.toString(), null, null);
-		addStyle(dstyle);
+		addStyle(is, null);
 	}
 
 	/** Get an appropriate style for the given map object */
@@ -109,7 +106,7 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 		if (proxy != null)
 			return getStyle(proxy);
 		else
-			return dstyle;
+			return def_style;
 	}
 
 	/** Get an appropriate style for the given proxy object */
@@ -119,7 +116,7 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 			if (is != null && manager.checkStyle(is, proxy))
 				return st;
 		}
-		return dstyle;
+		return def_style;
 	}
 
 	/** Get tooltip text for the given map object */

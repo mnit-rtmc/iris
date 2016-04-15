@@ -124,7 +124,7 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 			IncidentGeoLoc loc = (IncidentGeoLoc) mo;
 			return getStyle(loc.getIncident());
 		}
-		return dstyle;
+		return def_style;
 	}
 
 	/** Get an appropriate style for the given proxy object */

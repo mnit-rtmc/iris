@@ -64,8 +64,7 @@ abstract public class SegmentTheme extends Theme {
 
 	/** Create a new segment theme */
 	protected SegmentTheme(String name) {
-		super(name, new SegmentSymbol(lsize));
-		addStyle(DEFAULT_STYLE);
+		super(name, new SegmentSymbol(lsize), DEFAULT_STYLE);
 		addStyle(R_NODE_STYLE);
 	}
 
