@@ -278,15 +278,11 @@ abstract public class ProxyManager<T extends SonarObject> {
 		return s_model;
 	}
 
-	/** Create a new style summary for this proxy type, with no cell
-	 * renderer size buttons. */
-	public StyleSummary<T> createStyleSummary() {
-		return new StyleSummary<T>(this, def_style, false);
-	}
-
-	/** Create a new style summary for this proxy type */
-	public StyleSummary<T> createStyleSummary(boolean enableCellSizeBtns) {
-		return new StyleSummary<T>(this, def_style, enableCellSizeBtns);
+	/** Create a new style summary.
+	 * @param size_btns Enable buttons to change cell size.
+	 * @return A style summary for the proxy type T. */
+	public StyleSummary<T> createStyleSummary(boolean size_btns) {
+		return new StyleSummary<T>(this, def_style, size_btns);
 	}
 
 	/** Get the specified style list model */

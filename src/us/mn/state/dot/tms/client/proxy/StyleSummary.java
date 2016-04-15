@@ -177,7 +177,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		}
 
 		// add optional panel with cell size selection buttons
-		if(enableCellSizeBtns) {
+		if (enableCellSizeBtns) {
 			bag.gridx = 0;
 			bag.gridwidth = 1;
 			bag.gridheight = 1;

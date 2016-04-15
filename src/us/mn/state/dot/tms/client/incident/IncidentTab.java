@@ -44,7 +44,7 @@ public class IncidentTab extends MapTab<Incident> {
 		creator = new IncidentCreator(session, m.getTheme(),
 			m.getSelectionModel());
 		dispatcher = new IncidentDispatcher(session, m, creator);
-		summary = m.createStyleSummary();
+		summary = m.createStyleSummary(false);
 		add(createNorthPanel(), BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);
 	}
