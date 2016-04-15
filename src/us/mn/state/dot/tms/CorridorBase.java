@@ -20,10 +20,10 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 import java.util.TreeMap;
-import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import static us.mn.state.dot.tms.GeoLocHelper.distanceTo;
 import static us.mn.state.dot.tms.GeoLocHelper.segmentDistance;
+import us.mn.state.dot.tms.geo.Position;
+import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 

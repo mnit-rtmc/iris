@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.roads;
 
 import java.util.HashMap;
-import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
@@ -23,6 +22,7 @@ import us.mn.state.dot.tms.R_Node;
 import static us.mn.state.dot.tms.R_Node.MID_SHIFT;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.geo.Position;
 
 /**
  * This is a utility class to create new r_nodes. It creates both a GeoLoc and

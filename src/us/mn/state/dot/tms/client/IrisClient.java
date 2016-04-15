@@ -30,7 +30,6 @@ import javax.swing.JFrame;
 import javax.swing.JLayeredPane;
 import javax.swing.JPopupMenu;
 import javax.swing.ToolTipManager;
-import us.mn.state.dot.geokit.ZoomLevel;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.MapExtent;
@@ -45,6 +44,7 @@ import us.mn.state.dot.tms.client.widget.ScreenLayout;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.client.widget.Widgets;
+import us.mn.state.dot.tms.geo.ZoomLevel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**

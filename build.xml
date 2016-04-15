@@ -61,7 +61,6 @@
 		  value="sonar-server-${sonar.version}.jar"/>
 	<property name="sonar.client.jar"
 		  value="sonar-client-${sonar.version}.jar"/>
-	<property name="geokit.jar" value="geokit-${geokit.version}.jar"/>
 	<property name="server.jar" value="${name}-server-${version}.jar"/>
 	<property name="common.jar" value="${name}-common-${version}.jar"/>
 	<property name="client.jar" value="${name}-client-${version}.jar"/>
@@ -71,7 +70,6 @@
 	<path id="classpath">
 		<fileset dir="${lib.dir}">
 			<include name="mail.jar"/>
-			<include name="${geokit.jar}"/>
 			<include name="${scheduler.jar}"/>
 			<include name="${sonar.server.jar}"/>
 			<include name="${sonar.client.jar}"/>
@@ -158,11 +156,6 @@
 			<param name="repo.name" value="sonar"/>
 			<param name="repo.version" value="${sonar.version}"/>
 		</antcall>
-		<antcall target="check-subproject">
-			<param name="file.dep" value="${geokit.jar}"/>
-			<param name="repo.name" value="geokit"/>
-			<param name="repo.version" value="${geokit.version}"/>
-		</antcall>
 	</target>
 
 	<!-- Prepare the build/etc directory -->
@@ -176,8 +169,6 @@
 				        value="${scheduler.version}"/>
 				<filter token="SONAR.VERSION"
 					value="${sonar.version}"/>
-				<filter token="GEOKIT.VERSION"
-				        value="${geokit.version}"/>
 				<filter token="BUILD.RPM" value="${build.rpm}"/>
 				<filter token="RPM.URL" value="${rpm.url}"/>
 				<filter token="RPM.RELEASE"
@@ -269,7 +260,6 @@
 			<fileset dir="${lib.dir}">
 				<include name="mail.jar"/>
 				<include name="${scheduler.jar}"/>
-				<include name="${geokit.jar}"/>
 				<include name="${sonar.server.jar}"/>
 			</fileset>
 		</copy>
@@ -281,6 +271,8 @@
 		<jar jarfile="${build.lib}/${common.jar}">
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/geo/*.class"/>
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/units/*.class"/>
 			<fileset dir="${build.classes}"
@@ -335,7 +327,6 @@
 			<fileset dir="${lib.dir}">
 				<include name="mail.jar"/>
 				<include name="${scheduler.jar}"/>
-				<include name="${geokit.jar}"/>
 				<include name="${sonar.client.jar}"/>
 			</fileset>
 			<fileset dir="${build.lib}">
@@ -481,7 +472,6 @@
 		<delete>
 			<fileset dir="${lib.dir}">
 				<include name="${scheduler.jar}"/>
-				<include name="${geokit.jar}"/>
 				<include name="${sonar.client.jar}"/>
 				<include name="${sonar.server.jar}"/>
 			</fileset>

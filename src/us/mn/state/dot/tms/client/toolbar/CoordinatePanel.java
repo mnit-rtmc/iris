@@ -18,13 +18,13 @@ package us.mn.state.dot.tms.client.toolbar;
 import java.awt.event.MouseMotionListener;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
-import javax.swing.JLabel;
 import java.text.DecimalFormat;
-import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.geokit.SphericalMercatorPosition;
-import us.mn.state.dot.tms.utils.I18N;
+import javax.swing.JLabel;
 import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.geo.Position;
+import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * A tool panel that contains the map coordinates of the mouse pointer.

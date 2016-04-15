@@ -21,7 +21,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.HashSet;
 import javax.swing.SwingWorker;
-import us.mn.state.dot.geokit.ZoomLevel;
+import us.mn.state.dot.tms.geo.ZoomLevel;
 
 /**
  * A tile layer state for drawing a Google-style tile map.

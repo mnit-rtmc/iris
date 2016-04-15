@@ -25,14 +25,14 @@ import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
-import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.geokit.SphericalMercatorPosition;
-import us.mn.state.dot.geokit.ZoomLevel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.map.MapToolBar;
 import us.mn.state.dot.tms.client.toolbar.IrisToolBar;
+import us.mn.state.dot.tms.geo.Position;
+import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
+import us.mn.state.dot.tms.geo.ZoomLevel;
 
 /**
  * A screen pane is a pane which contains all components for one screen on

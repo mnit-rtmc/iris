@@ -18,8 +18,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Iterator;
-import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.CorridorBase;
@@ -27,12 +25,14 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.IncidentImpact;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.utils.LineReader;
+import us.mn.state.dot.tms.geo.Position;
+import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import static us.mn.state.dot.tms.server.BaseObjectImpl.corridors;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.IncidentCache;
 import us.mn.state.dot.tms.server.IncidentImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.utils.LineReader;
 
 /**
  * Incident feed property.

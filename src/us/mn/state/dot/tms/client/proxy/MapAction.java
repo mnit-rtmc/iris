@@ -16,10 +16,10 @@ package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.event.ActionEvent;
 import javax.swing.Action;
-import us.mn.state.dot.geokit.ZoomLevel;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.client.IrisClient;
+import us.mn.state.dot.tms.geo.ZoomLevel;
 
 /**
  * An action to center the map on a proxy object.

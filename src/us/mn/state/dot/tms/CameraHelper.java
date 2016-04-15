@@ -18,7 +18,7 @@ package us.mn.state.dot.tms;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.TreeMap;
-import us.mn.state.dot.geokit.Position;
+import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.units.Distance;
 
 /**

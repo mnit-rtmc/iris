@@ -21,7 +21,6 @@ import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import java.util.HashSet;
 import java.util.Iterator;
-import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.Detector;
@@ -34,6 +33,7 @@ import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.map.Marker;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
+import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 
 /**
  * A theme for drawing controller markers.

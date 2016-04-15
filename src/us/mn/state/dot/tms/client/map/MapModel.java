@@ -20,7 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.ListIterator;
 import javax.swing.event.EventListenerList;
-import us.mn.state.dot.geokit.ZoomLevel;
+import us.mn.state.dot.tms.geo.ZoomLevel;
 
 /**
  * The map model is a collection of LayerStates and the current extent of the

@@ -18,12 +18,12 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
-import us.mn.state.dot.geokit.SphericalMercatorPosition;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.map.MapObject;
+import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 
 /**
  * Helper for creating location transforms.

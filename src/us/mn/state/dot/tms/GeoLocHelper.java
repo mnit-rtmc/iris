@@ -14,10 +14,10 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.geokit.MapLineSegment;
-import us.mn.state.dot.geokit.MapVector;
-import us.mn.state.dot.geokit.Position;
-import us.mn.state.dot.geokit.SphericalMercatorPosition;
+import us.mn.state.dot.tms.geo.MapLineSegment;
+import us.mn.state.dot.tms.geo.MapVector;
+import us.mn.state.dot.tms.geo.Position;
+import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.units.Distance;
 
 /**

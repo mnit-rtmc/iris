@@ -14,13 +14,13 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import us.mn.state.dot.geokit.Position;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.geo.Position;
 
 /**
  * Client-side incident for use before an incident has been logged.
