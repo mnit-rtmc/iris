@@ -52,7 +52,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Create a new incident manager */
 	public IncidentManager(Session s, GeoLocManager lm) {
-		super(s, lm);
+		super(s, lm, 10);
 	}
 
 	/** Get the sonar type name */
@@ -277,11 +277,5 @@ public class IncidentManager extends ProxyManager<Incident> {
 		}
 		Style sty = getTheme().getStyle(ItemStyle.CLEARED.toString());
 		return getTheme().getLegend(sty);
-	}
-
-	/** Get the layer zoom visibility threshold */
-	@Override
-	protected int getZoomThreshold() {
-		return 10;
 	}
 }

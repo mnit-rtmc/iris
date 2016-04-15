@@ -107,21 +107,36 @@ abstract public class ProxyManager<T extends SonarObject> {
 		return layer;
 	}
 
+	/** Zoom visibility threshold (0 indicates no layer for proxies) */
+	private final int zoom_threshold;
+
 	/** Default style */
 	private final ItemStyle def_style;
 
-	/** Create a new proxy manager */
-	protected ProxyManager(Session s, GeoLocManager lm, ItemStyle ds) {
+	/** Create a new proxy manager.
+	 * @param s Session.
+	 * @param lm Location manager.
+	 * @param zt Zoom threshold.
+	 * @param ds Default item style. */
+	protected ProxyManager(Session s, GeoLocManager lm, int zt,
+		ItemStyle ds)
+	{
 		session = s;
 		loc_manager = lm;
+		zoom_threshold = zt;
 		def_style = ds;
 		theme = createTheme();
 		layer = hasLayer() ? createLayer() : null;
 	}
 
 	/** Create a new proxy manager */
+	protected ProxyManager(Session s, GeoLocManager lm, int zt) {
+		this(s, lm, zt, ItemStyle.ALL);
+	}
+
+	/** Create a new proxy manager */
 	protected ProxyManager(Session s, GeoLocManager lm) {
-		this(s, lm, ItemStyle.ALL);
+		this(s, lm, 0);
 	}
 
 	/** Initialize the proxy manager. This cannot be done in the constructor
@@ -418,17 +433,11 @@ abstract public class ProxyManager<T extends SonarObject> {
 	 * @param zoom Current map zoom level.
 	 * @return True if the layer should be visible. */
 	public boolean isVisible(int zoom) {
-		return zoom >= getZoomThreshold();
-	}
-
-	/** Get the layer zoom visibility threshold */
-	protected int getZoomThreshold() {
-		// Zero indicates no layer for proxies
-		return 0;
+		return zoom >= zoom_threshold;
 	}
 
 	/** Check if manager has a layer to display */
 	public final boolean hasLayer() {
-		return canRead() && (getZoomThreshold() > 0);
+		return canRead() && (zoom_threshold > 0);
 	}
 }

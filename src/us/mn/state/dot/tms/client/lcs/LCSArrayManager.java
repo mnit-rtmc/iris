@@ -63,7 +63,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Create a new LCS array manager */
 	public LCSArrayManager(Session s, GeoLocManager lm) {
-		super(s, lm);
+		super(s, lm, 14);
 	}
 
 	/** Get the sonar type name */
@@ -170,8 +170,8 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	@Override
 	public boolean checkStyle(ItemStyle is, LCSArray proxy) {
 		long styles = proxy.getStyles();
-		for(ItemStyle s: ItemStyle.toStyles(styles)) {
-			if(s == is)
+		for (ItemStyle s: ItemStyle.toStyles(styles)) {
+			if (s == is)
 				return true;
 		}
 		return false;
@@ -229,12 +229,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 				return dms.getGeoLoc();
 		}
 		return null;
-	}
-
-	/** Get the layer zoom visibility threshold */
-	@Override
-	protected int getZoomThreshold() {
-		return 14;
 	}
 
 	/** Get the lane configuration at an LCS array */

@@ -40,7 +40,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Create a new meter manager */
 	public MeterManager(Session s, GeoLocManager lm) {
-		super(s, lm);
+		super(s, lm, 15);
 	}
 
 	/** Get the sonar type name */
@@ -133,11 +133,5 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	public String getDescription(RampMeter proxy) {
 		return proxy.getName() + " - " +
 			GeoLocHelper.getOnRampDescription(getGeoLoc(proxy));
-	}
-
-	/** Get the layer zoom visibility threshold */
-	@Override
-	protected int getZoomThreshold() {
-		return 15;
 	}
 }

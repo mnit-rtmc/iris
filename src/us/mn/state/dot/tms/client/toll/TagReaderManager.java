@@ -41,7 +41,7 @@ public class TagReaderManager extends ProxyManager<TagReader> {
 
 	/** Create a new tag reader manager */
 	public TagReaderManager(Session s, GeoLocManager lm) {
-		super(s, lm);
+		super(s, lm, 14);
 	}
 
 	/** Get the sonar type name */
@@ -117,11 +117,5 @@ public class TagReaderManager extends ProxyManager<TagReader> {
 	@Override
 	protected GeoLoc getGeoLoc(TagReader proxy) {
 		return proxy.getGeoLoc();
-	}
-
-	/** Get the layer zoom visibility threshold */
-	@Override
-	protected int getZoomThreshold() {
-		return 14;
 	}
 }

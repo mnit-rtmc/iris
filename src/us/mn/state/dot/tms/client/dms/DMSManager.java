@@ -65,7 +65,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a new DMS manager */
 	public DMSManager(Session s, GeoLocManager lm) {
-		super(s, lm, ItemStyle.DEPLOYED);
+		super(s, lm, 12, ItemStyle.DEPLOYED);
 		s_model.setAllowMultiple(true);
 	}
 
@@ -220,11 +220,5 @@ public class DMSManager extends ProxyManager<DMS> {
 				return true;
 		}
 		return false;
-	}
-
-	/** Get the layer zoom visibility threshold */
-	@Override
-	protected int getZoomThreshold() {
-		return 12;
 	}
 }

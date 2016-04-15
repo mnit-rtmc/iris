@@ -41,7 +41,7 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 
 	/** Create a new gate arm array manager */
 	public GateArmArrayManager(Session s, GeoLocManager lm) {
-		super(s, lm);
+		super(s, lm, 15);
 	}
 
 	/** Get the sonar type name */
@@ -141,11 +141,5 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	public String getDescription(GateArmArray proxy) {
 		return proxy.getName() + " - " +
 			GeoLocHelper.getDescription(getGeoLoc(proxy));
-	}
-
-	/** Get the layer zoom visibility threshold */
-	@Override
-	protected int getZoomThreshold() {
-		return 15;
 	}
 }

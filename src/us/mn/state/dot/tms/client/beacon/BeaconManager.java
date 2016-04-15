@@ -36,7 +36,7 @@ public class BeaconManager extends ProxyManager<Beacon> {
 
 	/** Create a new beacon manager */
 	public BeaconManager(Session s, GeoLocManager lm) {
-		super(s, lm);
+		super(s, lm, 14);
 	}
 
 	/** Get the sonar type name */
@@ -112,11 +112,5 @@ public class BeaconManager extends ProxyManager<Beacon> {
 	@Override
 	protected GeoLoc getGeoLoc(Beacon proxy) {
 		return proxy.getGeoLoc();
-	}
-
-	/** Get the layer zoom visibility threshold */
-	@Override
-	protected int getZoomThreshold() {
-		return 14;
 	}
 }

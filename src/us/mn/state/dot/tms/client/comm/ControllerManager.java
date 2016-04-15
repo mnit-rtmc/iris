@@ -41,7 +41,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 
 	/** Create a new controller manager */
 	public ControllerManager(Session s, GeoLocManager lm) {
-		super(s, lm);
+		super(s, lm, 16);
 	}
 
 	/** Get the sonar type name */
@@ -148,11 +148,5 @@ public class ControllerManager extends ProxyManager<Controller> {
 		default:
 			return false;
 		}
-	}
-
-	/** Get the layer zoom visibility threshold */
-	@Override
-	protected int getZoomThreshold() {
-		return 16;
 	}
 }

@@ -50,7 +50,7 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a new camera manager */
 	public CameraManager(Session s, GeoLocManager lm) {
-		super(s, lm, ItemStyle.ACTIVE);
+		super(s, lm, 13, ItemStyle.ACTIVE);
 		s_model.setAllowMultiple(true);
 	}
 
@@ -186,11 +186,5 @@ public class CameraManager extends ProxyManager<Camera> {
 	@Override
 	protected GeoLoc getGeoLoc(Camera proxy) {
 		return proxy.getGeoLoc();
-	}
-
-	/** Get the layer zoom visibility threshold */
-	@Override
-	protected int getZoomThreshold() {
-		return 13;
 	}
 }
