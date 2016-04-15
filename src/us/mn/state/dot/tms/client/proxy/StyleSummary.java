@@ -110,21 +110,20 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Widgets for one style */
 	private class StyleWidgets {
-		private final ItemStyle istyle;
+		private final ItemStyle i_style;
 		private final JRadioButton btn;
 		private final JLabel legend_lbl;
 		private final JLabel count_lbl;
 		private int n_count;
 		private StyleWidgets(Style sty, Icon legend) {
-			String style = sty.toString();
-			istyle = ItemStyle.lookupStyle(style);
-			btn = createRadioButton(style);
+			i_style = ItemStyle.lookupStyle(sty.toString());
+			btn = createRadioButton(i_style);
 			legend_lbl = new JLabel(legend);
 			count_lbl = new JLabel();
 			n_count = 0;
 		}
 		private void countProxy(T proxy) {
-			if(manager.checkStyle(istyle, proxy))
+			if (manager.checkStyle(i_style, proxy))
 				n_count++;
 		}
 		private void updateCountLabel() {
@@ -153,10 +152,9 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			int col = i / n_rows;
 			int row = i % n_rows;
 			Style sty = styles.get(i);
-			String style = sty.toString();
 			StyleWidgets sw = new StyleWidgets(sty,
 				theme.getLegend(sty));
-			widgets.put(style, sw);
+			widgets.put(sty.toString(), sw);
 			bag.gridx = col * GRID_COLS;
 			bag.gridy = row;
 			bag.insets = new Insets(0, 0, 0, 2);
@@ -198,8 +196,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 		bag.fill = GridBagConstraints.BOTH;
 		add(sp, bag);
 
-		// select default style
-		setStyle(def_style.toString());
+		setStyle(def_style);
 	}
 
 	/** Initialize the style summary */
@@ -208,12 +205,12 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	}
 
 	/** Create a radio button for the given style list model */
-	private JRadioButton createRadioButton(final String style) {
-		final JRadioButton btn = new JRadioButton(style);
+	private JRadioButton createRadioButton(final ItemStyle i_style) {
+		final JRadioButton btn = new JRadioButton(i_style.toString());
 		r_buttons.add(btn);
 		btn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				setStyleAction(style);
+				setStyleAction(i_style);
 			}
 		});
 		return btn;
@@ -238,10 +235,10 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Update the counts for each style status.  Must be synchronized
 	 * in case multiple IWorkers are created. */
 	private synchronized void doUpdateCounts() {
-		for(StyleWidgets sw: widgets.values())
+		for (StyleWidgets sw: widgets.values())
 			sw.n_count = 0;
-		for(T proxy: manager.getCache()) {
-			for(StyleWidgets sw: widgets.values())
+		for (T proxy: manager.getCache()) {
+			for (StyleWidgets sw: widgets.values())
 				sw.countProxy(proxy);
 		}
 	}
@@ -295,29 +292,29 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Set the selected style, results in action + button selection
 	 * changes. */
-	private void setStyle(String style) {
-		StyleWidgets sw = widgets.get(style);
-		if(sw != null) {
+	private void setStyle(ItemStyle i_style) {
+		StyleWidgets sw = widgets.get(i_style.toString());
+		if (sw != null) {
 			sw.btn.setSelected(true);
-			setStyleAction(style);
+			setStyleAction(i_style);
 		}
 	}
 
 	/** Button click action */
-	private void setStyleAction(String style) {
+	private void setStyleAction(ItemStyle i_style) {
 		String t = I18N.get(manager.getSonarType()) + " " +
-			I18N.get("device.status") + ": " + style;
+			I18N.get("device.status") + ": " + i_style;
 		border.setTitle(t);
 		// Force the border title to be repainted
 		repaint();
 		StyleListModel<T> mdl = model;
-		model = manager.getStyleModel(style);
+		model = manager.getStyleModel(i_style.toString());
 		// JList.setModel clears the selection, so let's use
 		// a dummy selection model temporarily
 		p_list.setSelectionModel(dummy_model);
 		p_list.setModel(model);
 		p_list.setSelectionModel(model.getSelectionModel());
-		if(mdl != null)
+		if (mdl != null)
 			mdl.dispose();
 	}
 
