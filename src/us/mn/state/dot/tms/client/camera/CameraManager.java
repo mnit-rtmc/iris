@@ -79,8 +79,8 @@ public class CameraManager extends ProxyManager<Camera> {
 			new CameraMarker());
 		theme.addStyle(ItemStyle.UNPUBLISHED,
 			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(ItemStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
-			ProxyTheme.OUTLINE_INACTIVE);
+		theme.addStyle(ItemStyle.INACTIVE, ProxyTheme.OUTLINE_INACTIVE,
+			ProxyTheme.COLOR_INACTIVE);
 		theme.addStyle(ItemStyle.PLAYLIST, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(ItemStyle.ACTIVE, COLOR_ACTIVE);
 		theme.addStyle(ItemStyle.ALL);
@@ -96,7 +96,7 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, Camera proxy) {
-		switch(is) {
+		switch (is) {
 		case ACTIVE:
 			return ControllerHelper.isActive(proxy.getController());
 		case INACTIVE:

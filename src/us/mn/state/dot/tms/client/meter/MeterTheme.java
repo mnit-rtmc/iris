@@ -27,9 +27,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  */
 public class MeterTheme extends ProxyTheme<RampMeter> {
 
-	/** Ramp meter map object marker */
-	static private final MeterMarker MARKER = new MeterMarker();
-
 	/** Color to display available meters */
 	static private final Color COLOR_AVAILABLE = new Color(64, 64, 192);
 
@@ -70,16 +67,16 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 
 	/** Create a new meter theme */
 	public MeterTheme(MeterManager man) {
-		super(man, MARKER);
+		super(man, new MeterMarker());
 		addStyle(ItemStyle.AVAILABLE, COLOR_AVAILABLE);
 		addStyle(ItemStyle.QUEUE_FULL, COLOR_WARNING);
 		addStyle(ItemStyle.QUEUE_EXISTS, COLOR_DEPLOYED);
 		addStyle(ItemStyle.METERING, COLOR_METERING);
-		addStyle(ItemStyle.LOCKED, null, ProxyTheme.OUTLINE_LOCKED);
+		addStyle(ItemStyle.LOCKED, ProxyTheme.OUTLINE_LOCKED, null);
 		addStyle(ItemStyle.MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
 		addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		addStyle(ItemStyle.INACTIVE, ProxyTheme.COLOR_INACTIVE,
-			ProxyTheme.OUTLINE_INACTIVE);
+		addStyle(ItemStyle.INACTIVE, ProxyTheme.OUTLINE_INACTIVE,
+			ProxyTheme.COLOR_INACTIVE);
 		addStyle(ItemStyle.ALL);
 		addStyle(LCK_AVAILABLE);
 		addStyle(LCK_QUEUE_FULL);

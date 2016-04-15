@@ -29,9 +29,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  */
 public class IncidentTheme extends ProxyTheme<Incident> {
 
-	/** Incident marker */
-	static private final IncidentMarker MARKER = new IncidentMarker();
-
 	/** Outline for unconfirmed styles */
 	static private final Outline UN_OUTLINE = Outline.createSolid(
 		Color.WHITE, 1);
@@ -98,14 +95,14 @@ public class IncidentTheme extends ProxyTheme<Incident> {
 
 	/** Create a new incident theme */
 	public IncidentTheme(IncidentManager man) {
-		super(man, MARKER);
+		super(man, new IncidentMarker());
 		addStyle(ItemStyle.CRASH, CRASH_COLOR);
 		addStyle(ItemStyle.STALL, STALL_COLOR);
 		addStyle(ItemStyle.ROADWORK, ROADWORK_COLOR);
 		addStyle(ItemStyle.HAZARD, HAZARD_COLOR);
 		addStyle(ItemStyle.CLEARED, CLEARED_COLOR);
-		addStyle(ItemStyle.UNCONFIRMED, unconfirmedColor(Color.WHITE),
-			IncidentTheme.UN_OUTLINE);
+		addStyle(ItemStyle.UNCONFIRMED, IncidentTheme.UN_OUTLINE,
+			unconfirmedColor(Color.WHITE));
 		addStyle(ItemStyle.ALL);
 		addStyle(CLR_CRASH);
 		addStyle(CLR_STALL);

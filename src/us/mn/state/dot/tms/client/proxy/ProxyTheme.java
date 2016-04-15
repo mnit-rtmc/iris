@@ -83,15 +83,17 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 		manager = m;
 	}
 
-	/** Add a style to the theme */
-	public void addStyle(ItemStyle is, Color color, Outline outline) {
-		Style style = new Style(is.toString(), outline, color);
-		addStyle(style);
+	/** Add a style to the theme.
+	 * @param is Item style.
+	 * @param o Outline style.
+	 * @param f Fill color. */
+	public void addStyle(ItemStyle is, Outline o, Color f) {
+		addStyle(new Style(is.toString(), o, f));
 	}
 
 	/** Add a style to the theme */
-	public void addStyle(ItemStyle is, Color color) {
-		addStyle(is, color, OUTLINE);
+	public void addStyle(ItemStyle is, Color f) {
+		addStyle(is, OUTLINE, f);
 	}
 
 	/** Add a style to the theme */

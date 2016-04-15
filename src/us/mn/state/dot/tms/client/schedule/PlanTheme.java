@@ -39,9 +39,6 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 	/** Color to display schedule icon */
 	static private final Color COLOR_SCHEDULE = new Color(0, 208, 208);
 
-	/** Action plan object marker */
-	static private final PlanMarker MARKER = new PlanMarker();
-
 	/** Symbol for DMS */
 	static private final VectorSymbol SYM_DMS = new VectorSymbol(
 		new DmsMarker(), lsize);
@@ -60,7 +57,7 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 
 	/** Create a new plan theme */
 	public PlanTheme(PlanManager man) {
-		super(man, MARKER);
+		super(man, new PlanMarker());
 		addStyle(ItemStyle.DMS, PlanTheme.COLOR_SCHEDULED);
 		addStyle(ItemStyle.BEACON, PlanTheme.COLOR_DEPLOYED);
 		addStyle(ItemStyle.METER, MeterTheme.COLOR_METERING);
