@@ -252,6 +252,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			bg.addGroup(rg);
 		}
 		pg.addGroup(bg);
+		vg.addGap(UI.vgap);
 		vg.addGroup(pg);
 		vg.addGap(UI.vgap);
 		vg.addComponent(s_pane);
