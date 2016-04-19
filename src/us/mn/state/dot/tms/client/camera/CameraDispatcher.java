@@ -392,7 +392,7 @@ public class CameraDispatcher extends JPanel {
 	}
 
 	/** Set the selected camera */
-	public void selectCamera(final Camera camera) {
+	private void selectCamera(final Camera camera) {
 		if (camera == selected)
 			return;
 		if (selected != null)
@@ -405,7 +405,7 @@ public class CameraDispatcher extends JPanel {
 				camera.getGeoLoc()));
 			cache.watchObject(camera);
 			stream_pnl.setCamera(camera);
-			selectMonitorCamera();
+			selectMonitorCamera(camera);
 			updateCamControls();
 		} else
 			clear();
@@ -414,7 +414,7 @@ public class CameraDispatcher extends JPanel {
 	/** Called when a video monitor is selected */
 	private void monitorSelected() {
 		video_monitor = getSelectedMonitor();
-		selectMonitorCamera();
+		selectMonitorCamera(selected);
 	}
 
 	/** Get the selected video monitor */
@@ -424,10 +424,10 @@ public class CameraDispatcher extends JPanel {
 	}
 
 	/** Select a camera on a video monitor */
-	private void selectMonitorCamera() {
+	public void selectMonitorCamera(Camera c) {
 		VideoMonitor vm = video_monitor;
 		if (vm != null)
-			vm.setCamera(selected);
+			vm.setCamera(c);
 	}
 
 	/** Clear all of the fields */

@@ -189,8 +189,8 @@ public class CameraManager extends ProxyManager<Camera> {
 				s_model.setSelected(c);
 			else
 				s_model.clearSelection();
-		} else
-			dispatcher.selectCamera(c);
+		} else if (c != null)
+			dispatcher.selectMonitorCamera(c);
 	}
 
 	/** Select the next camera */

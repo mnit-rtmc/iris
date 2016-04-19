@@ -51,7 +51,7 @@ public class CamSelectPanel extends ToolPanel {
 	private final JLabel lbl = new JLabel();
 
 	/** ID text field */
-	private final JTextField txt = new JTextField(10);
+	private final JTextField txt = new JTextField(8);
 
 	/** Create a new camera select panel */
 	public CamSelectPanel(Session s) {
@@ -92,7 +92,12 @@ public class CamSelectPanel extends ToolPanel {
 
 	/** Update icon from entered camera ID */
 	private void updateIcon() {
-		lbl.setIcon(manager.getIcon(lookupCamera(txt.getText())));
+		String t = txt.getText();
+		if (t.length() > 10) {
+			t = "";
+			txt.setText(t);
+		}
+		lbl.setIcon(manager.getIcon(lookupCamera(t)));
 	}
 
 	/** Lookup a camera by ID */
@@ -145,6 +150,13 @@ public class CamSelectPanel extends ToolPanel {
 			break;
 		case '\n':
 			selectCamera();
+			break;
+		case '.':
+			String t = txt.getText();
+			if (t.length() > 0) {
+				txt.setText(t.substring(0, t.length() - 1));
+				updateIcon();
+			}
 			break;
 		case '-':
 			manager.selectPreviousCamera();
