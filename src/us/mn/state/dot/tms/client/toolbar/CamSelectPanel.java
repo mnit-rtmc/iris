@@ -86,6 +86,7 @@ public class CamSelectPanel extends ToolPanel {
 	/** Select the entered camera */
 	private void selectCamera() {
 		Camera c = lookupCamera(txt.getText());
+		manager.selectCamera(c);
 		txt.setText("");
 	}
 
@@ -112,13 +113,86 @@ public class CamSelectPanel extends ToolPanel {
 				pressed = false;
 				return false;
 			}
-			System.err.println(e.getKeyCode());
-			if (e.getID() == KeyEvent.KEY_PRESSED &&
-			    e.getKeyLocation() == KeyEvent.KEY_LOCATION_NUMPAD)
+			boolean numpad = e.getKeyLocation() ==
+				KeyEvent.KEY_LOCATION_NUMPAD;
+			if (e.getID() == KeyEvent.KEY_PRESSED && numpad)
 				pressed = true;
-			if (e.getID() == KeyEvent.KEY_RELEASED)
+			if (e.getID() == KeyEvent.KEY_RELEASED) {
 				pressed = false;
+				if (numpad)
+					dispatchNumpadEvent(e);
+			}
 			return pressed;
+		}
+	}
+
+	/** Dispatch a numpad key event */
+	private void dispatchNumpadEvent(KeyEvent e) {
+		char c = numpadChar(e.getKeyCode());
+		switch (c) {
+		case '0':
+		case '1':
+		case '2':
+		case '3':
+		case '4':
+		case '5':
+		case '6':
+		case '7':
+		case '8':
+		case '9':
+			txt.setText(txt.getText() + c);
+			updateIcon();
+			break;
+		case '\n':
+			selectCamera();
+			break;
+		case '-':
+			manager.selectPreviousCamera();
+			break;
+		case '+':
+			manager.selectNextCamera();
+			break;
+		}
+	}
+
+	/** Get a character for a numpad keycode */
+	static private char numpadChar(int kc) {
+		switch (kc) {
+		case KeyEvent.VK_INSERT:
+			return '0';
+		case KeyEvent.VK_END:
+			return '1';
+		case KeyEvent.VK_KP_DOWN:
+			return '2';
+		case KeyEvent.VK_PAGE_DOWN:
+			return '3';
+		case KeyEvent.VK_KP_LEFT:
+			return '4';
+		case KeyEvent.VK_BEGIN: /* xorg */
+		case KeyEvent.VK_CLEAR:	/* Windows */
+			return '5';
+		case KeyEvent.VK_KP_RIGHT:
+			return '6';
+		case KeyEvent.VK_HOME:
+			return '7';
+		case KeyEvent.VK_KP_UP:
+			return '8';
+		case KeyEvent.VK_PAGE_UP:
+			return '9';
+		case KeyEvent.VK_DIVIDE:
+			return '/';
+		case KeyEvent.VK_MULTIPLY:
+			return '*';
+		case KeyEvent.VK_SUBTRACT:
+			return '-';
+		case KeyEvent.VK_ADD:
+			return '+';
+		case KeyEvent.VK_DELETE:
+			return '.';
+		case KeyEvent.VK_ENTER:
+			return '\n';
+		default:
+			return 0;
 		}
 	}
 }

@@ -112,4 +112,9 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 		}
 		return null;
 	}
+
+	/** Is this the selected tab? */
+	public boolean isSelectedTab() {
+		return side_pnl.getSelectedTab() == this;
+	}
 }

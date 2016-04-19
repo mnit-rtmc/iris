@@ -77,7 +77,7 @@ public class SidePanel extends JPanel {
 	}
 
 	/** Get the selected map tab */
-	private MapTab<?> getSelectedTab() {
+	public MapTab<?> getSelectedTab() {
 		Component tab = tab_pane.getSelectedComponent();
 		if (tab instanceof MapTab)
 			return (MapTab)tab;

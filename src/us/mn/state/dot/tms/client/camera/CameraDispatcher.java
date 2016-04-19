@@ -359,7 +359,7 @@ public class CameraDispatcher extends JPanel {
 	}
 
 	/** Select the next camera */
-	private void selectNextCamera() {
+	public void selectNextCamera() {
 		int i = model.getIndex(selected);
 		if (i >= 0 && i < model.getSize() - 1) {
 			Camera cam = model.getProxy(i + 1);
@@ -369,7 +369,7 @@ public class CameraDispatcher extends JPanel {
 	}
 
 	/** Select the previous camera */
-	private void selectPreviousCamera() {
+	public void selectPreviousCamera() {
 		int i = model.getIndex(selected);
 		if (i > 0) {
 			Camera cam = model.getProxy(i - 1);
@@ -392,7 +392,7 @@ public class CameraDispatcher extends JPanel {
 	}
 
 	/** Set the selected camera */
-	private void selectCamera(final Camera camera) {
+	public void selectCamera(final Camera camera) {
 		if (camera == selected)
 			return;
 		if (selected != null)

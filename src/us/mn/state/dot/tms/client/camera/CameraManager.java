@@ -43,6 +43,9 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Camera dispatcher */
 	private final CameraDispatcher dispatcher;
 
+	/** Camera tab */
+	private final CameraTab tab;
+
 	/** Set of cameras in the playlist */
 	private final HashSet<Camera> playlist = new HashSet<Camera>();
 
@@ -50,6 +53,7 @@ public class CameraManager extends ProxyManager<Camera> {
 	public CameraManager(Session s, GeoLocManager lm) {
 		super(s, lm, 13, ItemStyle.ACTIVE);
 		dispatcher = new CameraDispatcher(s, this);
+		tab = new CameraTab(s, this, dispatcher);
 		s_model.setAllowMultiple(true);
 	}
 
@@ -68,7 +72,7 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Create a camera map tab */
 	@Override
 	public CameraTab createTab() {
-		return new CameraTab(session, this, dispatcher);
+		return tab;
 	}
 
 	/** Create a theme for cameras */
@@ -176,5 +180,26 @@ public class CameraManager extends ProxyManager<Camera> {
 	@Override
 	protected GeoLoc getGeoLoc(Camera proxy) {
 		return proxy.getGeoLoc();
+	}
+
+	/** Select a camera */
+	public void selectCamera(Camera c) {
+		if (tab.isSelectedTab()) {
+			if (c != null)
+				s_model.setSelected(c);
+			else
+				s_model.clearSelection();
+		} else
+			dispatcher.selectCamera(c);
+	}
+
+	/** Select the next camera */
+	public void selectNextCamera() {
+		dispatcher.selectNextCamera();
+	}
+
+	/** Select the previous camera */
+	public void selectPreviousCamera() {
+		dispatcher.selectPreviousCamera();
 	}
 }
