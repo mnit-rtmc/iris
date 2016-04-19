@@ -128,7 +128,7 @@ public class CameraDispatcher extends JPanel {
 	private final JLabel location_lbl = IPanel.createValueLabel();
 
 	/** Video output selection ComboBox */
-	private final JComboBox output_cbx;
+	private final JComboBox<VideoMonitor> output_cbx;
 
 	/** Selected video monitor output */
 	private VideoMonitor video_monitor;
