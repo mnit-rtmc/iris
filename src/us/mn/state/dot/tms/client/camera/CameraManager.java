@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.Color;
 import java.util.List;
 import java.util.HashSet;
 import javax.swing.JLabel;
@@ -30,7 +29,6 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapAction;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
-import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
@@ -41,9 +39,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class CameraManager extends ProxyManager<Camera> {
-
-	/** Color for active camera style */
-	static private final Color COLOR_ACTIVE = new Color(0, 192, 255);
 
 	/** Set of cameras in the playlist */
 	private final HashSet<Camera> playlist = new HashSet<Camera>();
@@ -74,17 +69,8 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a theme for cameras */
 	@Override
-	protected ProxyTheme<Camera> createTheme() {
-		ProxyTheme<Camera> theme = new ProxyTheme<Camera>(this,
-			new CameraMarker());
-		theme.addStyle(ItemStyle.UNPUBLISHED,
-			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(ItemStyle.INACTIVE, ProxyTheme.OUTLINE_INACTIVE,
-			ProxyTheme.COLOR_INACTIVE);
-		theme.addStyle(ItemStyle.PLAYLIST, ProxyTheme.COLOR_DEPLOYED);
-		theme.addStyle(ItemStyle.ACTIVE, COLOR_ACTIVE);
-		theme.addStyle(ItemStyle.ALL);
-		return theme;
+	protected CameraTheme createTheme() {
+		return new CameraTheme(this);
 	}
 
 	/** Check if a given attribute affects a proxy style */
