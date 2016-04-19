@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.client.map.MapBean;
 public class IrisToolBar extends JToolBar {
 
 	/** Map widget */
-	protected final MapBean map;
+	private final MapBean map;
 
 	/** Create a new IRIS toolbar */
 	public IrisToolBar(MapBean m) {
@@ -42,27 +42,27 @@ public class IrisToolBar extends JToolBar {
 
 	/** Build toolbar components */
 	public void createToolPanels(Session s) {
-		if(ModemPanel.getIEnabled()) {
+		if (ModemPanel.getIEnabled()) {
 			add(new ModemPanel(s));
 			add(Box.createGlue());
 		}
-		if(AwsStatusPanel.getIEnabled()) {
+		if (AwsStatusPanel.getIEnabled()) {
 			add(new AwsStatusPanel(s.getSonarState(),
 				s.getDesktop()));
 			add(Box.createGlue());
 		}
-		if(CoordinatePanel.getIEnabled()) {
+		if (CoordinatePanel.getIEnabled()) {
 			add(new CoordinatePanel(map));
 			add(Box.createGlue());
 		}
-		if(EditModePanel.getIEnabled())
+		if (EditModePanel.getIEnabled())
 			add(new EditModePanel(s));
 	}
 
 	/** Clear the toolbar */
 	public void clear() {
-		for(Component c: getComponents()) {
-			if(c instanceof ToolPanel) {
+		for (Component c: getComponents()) {
+			if (c instanceof ToolPanel) {
 				ToolPanel tp = (ToolPanel)c;
 				tp.dispose();
 			}
