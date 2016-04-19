@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.ModemState;
 import us.mn.state.dot.tms.client.Session;
 
 /**
- * A tool panel that displays the AWS status.
+ * A tool panel that displays modem status.
  *
  * @author Douglas Lau
  */
@@ -76,7 +76,7 @@ public class ModemPanel extends ToolPanel {
 
 	/** Get background color for a modem state */
 	static private Color backgroundColor(ModemState ms) {
-		switch(ms) {
+		switch (ms) {
 		case connecting:
 		case online:
 			return Color.YELLOW;
@@ -90,7 +90,7 @@ public class ModemPanel extends ToolPanel {
 
 	/** Get foreground color for a modem state */
 	static private Color foregroundColor(ModemState ms) {
-		switch(ms) {
+		switch (ms) {
 		case connecting:
 		case online:
 			return Color.BLACK;
