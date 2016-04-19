@@ -41,7 +41,7 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 		OUTLINE_COLOR, 1);
 
 	/** Outline for stroking inactive traffic devices */
-	static public final Outline OUTLINE_INACTIVE = Outline.createSolid(
+	static public final Outline OUTLINE_INACTIVE = Outline.createDashed(
 		OUTLINE_COLOR, 1);
 
 	/** Outline for stroking locked traffic devices */
