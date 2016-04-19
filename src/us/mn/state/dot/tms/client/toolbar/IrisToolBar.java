@@ -42,6 +42,10 @@ public class IrisToolBar extends JToolBar {
 
 	/** Build toolbar components */
 	public void createToolPanels(Session s) {
+		if (CamSelectPanel.getIEnabled()) {
+			add(new CamSelectPanel(s));
+			add(Box.createGlue());
+		}
 		if (ModemPanel.getIEnabled()) {
 			add(new ModemPanel(s));
 			add(Box.createGlue());

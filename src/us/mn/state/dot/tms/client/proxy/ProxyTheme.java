@@ -79,7 +79,7 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 	/** Create a new SONAR proxy theme */
 	public ProxyTheme(ProxyManager<T> m, Marker mkr) {
 		super(I18N.get(m.getSonarType()), new VectorSymbol(mkr, lsize),
-			new Style(ItemStyle.ALL.toString(), null));
+			new Style(ItemStyle.ALL.toString(), OUTLINE, null));
 		manager = m;
 	}
 
@@ -113,10 +113,13 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 
 	/** Get an appropriate style for the given proxy object */
 	public Style getStyle(T proxy) {
-		for (Style st: getStyles()) {
-			ItemStyle is = ItemStyle.lookupStyle(st.toString());
-			if (is != null && manager.checkStyle(is, proxy))
-				return st;
+		if (proxy != null) {
+			for (Style st: getStyles()) {
+				ItemStyle is = ItemStyle.lookupStyle(
+					st.toString());
+				if (is != null && manager.checkStyle(is, proxy))
+					return st;
+			}
 		}
 		return def_style;
 	}

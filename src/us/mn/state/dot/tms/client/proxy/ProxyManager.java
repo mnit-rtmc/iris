@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.client.proxy;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
 import javax.swing.Box;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
@@ -324,6 +325,21 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Check the style of the specified proxy */
 	public boolean checkStyle(ItemStyle is, T proxy) {
 		return false;
+	}
+
+	/** Get the style of a proxy */
+	public Style getStyle(T proxy) {
+		return theme.getStyle(proxy);
+	}
+
+	/** Get a style icon */
+	public Icon getIcon(Style sty) {
+		return theme.getLegend(sty);
+	}
+
+	/** Get an icon for a proxy */
+	public Icon getIcon(T proxy) {
+		return getIcon(getStyle(proxy));
 	}
 
 	/** Show the properties form for the selected proxy */

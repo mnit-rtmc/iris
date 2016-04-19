@@ -413,12 +413,14 @@ public class CameraDispatcher extends JPanel {
 
 	/** Called when a video monitor is selected */
 	private void monitorSelected() {
+		video_monitor = getSelectedMonitor();
+		selectMonitorCamera();
+	}
+
+	/** Get the selected video monitor */
+	private VideoMonitor getSelectedMonitor() {
 		Object o = output_cbx.getSelectedItem();
-		if (o instanceof VideoMonitor) {
-			video_monitor = (VideoMonitor) o;
-			selectMonitorCamera();
-		} else
-			video_monitor = null;
+		return (o instanceof VideoMonitor) ? (VideoMonitor) o : null;
 	}
 
 	/** Select a camera on a video monitor */

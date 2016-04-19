@@ -40,12 +40,16 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class CameraManager extends ProxyManager<Camera> {
 
+	/** Camera dispatcher */
+	private final CameraDispatcher dispatcher;
+
 	/** Set of cameras in the playlist */
 	private final HashSet<Camera> playlist = new HashSet<Camera>();
 
 	/** Create a new camera manager */
 	public CameraManager(Session s, GeoLocManager lm) {
 		super(s, lm, 13, ItemStyle.ACTIVE);
+		dispatcher = new CameraDispatcher(s, this);
 		s_model.setAllowMultiple(true);
 	}
 
@@ -64,7 +68,7 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Create a camera map tab */
 	@Override
 	public CameraTab createTab() {
-		return new CameraTab(session, this);
+		return new CameraTab(session, this, dispatcher);
 	}
 
 	/** Create a theme for cameras */

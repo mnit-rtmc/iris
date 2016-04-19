@@ -34,9 +34,11 @@ public class CameraTab extends MapTab<Camera> {
 	private final StyleSummary<Camera> summary;
 
 	/** Create a new camera tab for the IRIS client */
-	public CameraTab(Session session, CameraManager man) {
+	public CameraTab(Session session, CameraManager man,
+		CameraDispatcher cd)
+	{
 		super(man);
-		dispatcher = new CameraDispatcher(session, man);
+		dispatcher = cd;
 		summary = man.createStyleSummary(false);
 		add(dispatcher, BorderLayout.NORTH);
 		add(summary, BorderLayout.CENTER);

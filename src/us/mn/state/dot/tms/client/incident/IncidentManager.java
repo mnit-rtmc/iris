@@ -263,12 +263,8 @@ public class IncidentManager extends ProxyManager<Incident> {
 			return sty;
 	}
 
-	/** Get the style for an incident */
-	public Style getStyle(Incident inc) {
-		return getTheme().getStyle(inc);
-	}
-
 	/** Get the icon for an incident */
+	@Override
 	public Icon getIcon(Incident inc) {
 		if (inc != null) {
 			Style sty = getStyle(inc);
