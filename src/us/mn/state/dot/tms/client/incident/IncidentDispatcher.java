@@ -552,7 +552,7 @@ public class IncidentDispatcher extends IPanel
 	/** Clear the event type */
 	private void clearEventType() {
 		type_lbl.setText("");
-		type_lbl.setIcon(manager.getIcon(null));
+		type_lbl.setIcon(manager.getIcon((Incident) null));
 	}
 
 	/** Create a combo box model for nearby cameras */
