@@ -215,20 +215,24 @@ public class CamSelectPanel extends ToolPanel {
 			return '0';
 		case KeyEvent.VK_END:
 			return '1';
-		case KeyEvent.VK_KP_DOWN:
+		case KeyEvent.VK_KP_DOWN:	/* xorg */
+		case KeyEvent.VK_DOWN:		/* Windows */
 			return '2';
 		case KeyEvent.VK_PAGE_DOWN:
 			return '3';
-		case KeyEvent.VK_KP_LEFT:
+		case KeyEvent.VK_KP_LEFT:	/* xorg */
+		case KeyEvent.VK_LEFT:		/* Windows */
 			return '4';
-		case KeyEvent.VK_BEGIN: /* xorg */
-		case KeyEvent.VK_CLEAR:	/* Windows */
+		case KeyEvent.VK_BEGIN:		/* xorg */
+		case KeyEvent.VK_CLEAR:		/* Windows */
 			return '5';
-		case KeyEvent.VK_KP_RIGHT:
+		case KeyEvent.VK_KP_RIGHT:	/* xorg */
+		case KeyEvent.VK_RIGHT:		/* Windows */
 			return '6';
 		case KeyEvent.VK_HOME:
 			return '7';
-		case KeyEvent.VK_KP_UP:
+		case KeyEvent.VK_KP_UP:		/* xorg */
+		case KeyEvent.VK_UP:		/* Windows */
 			return '8';
 		case KeyEvent.VK_PAGE_UP:
 			return '9';
