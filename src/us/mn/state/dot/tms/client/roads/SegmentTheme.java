@@ -59,12 +59,9 @@ abstract public class SegmentTheme extends Theme {
 	static private final Style R_NODE_STYLE = new Style(I18N.get("r_node"),
 		OUTLINE, new Color(255, 96, 128, 128));
 
-	/** Size of legend icons */
-	static private final int lsize = UI.scaled(22);
-
 	/** Create a new segment theme */
 	protected SegmentTheme(String name) {
-		super(name, new SegmentSymbol(lsize), DEFAULT_STYLE);
+		super(name, new SegmentSymbol(), DEFAULT_STYLE);
 		addStyle(R_NODE_STYLE);
 	}
 

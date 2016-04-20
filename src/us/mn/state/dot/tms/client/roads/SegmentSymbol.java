@@ -30,8 +30,8 @@ public class SegmentSymbol extends VectorSymbol {
 	private final R_NodeMarker marker = new R_NodeMarker();
 
 	/** Create a new segment symbol */
-	public SegmentSymbol(int lsize) {
-		super(new RectMarker(), lsize);
+	public SegmentSymbol() {
+		super(new RectMarker());
 	}
 
 	/** Set the map scale */

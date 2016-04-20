@@ -25,6 +25,7 @@ import java.awt.geom.Ellipse2D;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import javax.swing.Icon;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A vector symbol is draws a Shape with a specific Style.
@@ -32,6 +33,9 @@ import javax.swing.Icon;
  * @author Douglas Lau
  */
 public class VectorSymbol implements Symbol {
+
+	/** Size of legend icons */
+	static private final int lsize = UI.scaled(22);
 
 	/** Transparent white */
 	static private final Color TRANS_WHITE = new Color(1, 1, 1, 0.4f);
@@ -61,17 +65,13 @@ public class VectorSymbol implements Symbol {
 		return shape;
 	}
 
-	/** Size of legend icon */
-	private final int lsize;
-
 	/** Map scale */
 	private float scale = 1;
 
 	/** Create a new vector symbol */
-	public VectorSymbol(Marker m, int sz) {
+	public VectorSymbol(Marker m) {
 		marker = m;
 		shape = m;
-		lsize = sz;
 	}
 
 	/** Set the map scale */

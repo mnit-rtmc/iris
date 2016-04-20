@@ -41,19 +41,19 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 
 	/** Symbol for DMS */
 	static private final VectorSymbol SYM_DMS = new VectorSymbol(
-		new DmsMarker(), lsize);
+		new DmsMarker());
 
 	/** Symbol for beacons */
 	static private final VectorSymbol SYM_BEACON = new VectorSymbol(
-		new BeaconMarker(), lsize);
+		new BeaconMarker());
 
 	/** Symbol for ramp meters */
 	static private final VectorSymbol SYM_METER = new VectorSymbol(
-		new MeterMarker(), lsize);
+		new MeterMarker());
 
 	/** Symbol for time actions */
 	static private final VectorSymbol SYM_TIME = new VectorSymbol(
-		new TimeMarker(), lsize);
+		new TimeMarker());
 
 	/** Create a new plan theme */
 	public PlanTheme(PlanManager man) {

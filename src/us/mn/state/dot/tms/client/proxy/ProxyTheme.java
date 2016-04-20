@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.client.map.Outline;
 import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.map.Theme;
 import us.mn.state.dot.tms.client.map.VectorSymbol;
-import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -70,15 +69,12 @@ public class ProxyTheme<T extends SonarObject> extends Theme {
 	/** Color to display scheduled devices */
 	static public final Color COLOR_SCHEDULED = new Color(240, 128, 0);
 
-	/** Size of legend icons */
-	static protected final int lsize = UI.scaled(22);
-
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 
 	/** Create a new SONAR proxy theme */
 	public ProxyTheme(ProxyManager<T> m, Marker mkr) {
-		super(I18N.get(m.getSonarType()), new VectorSymbol(mkr, lsize),
+		super(I18N.get(m.getSonarType()), new VectorSymbol(mkr),
 			new Style(ItemStyle.ALL.toString(), OUTLINE, null));
 		manager = m;
 	}
