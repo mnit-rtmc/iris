@@ -14,10 +14,7 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import java.awt.Component;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.SwingConstants;
+import javax.swing.Icon;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.client.proxy.ProxyCellRenderer;
@@ -38,26 +35,10 @@ public class IncidentCellRenderer extends ProxyCellRenderer<Incident> {
 		manager = m;
 	}
 
-	/** Get a list cell renderer component */
+	/** Convert value to a string */
 	@Override
-	public Component getListCellRendererComponent(
-		JList<? extends Incident> list, Incident value, int index,
-		boolean isSelected, boolean cellHasFocus)
-	{
-		Component c = super.getListCellRendererComponent(list,
-			value, index, isSelected, cellHasFocus);
-		if (c instanceof JLabel) {
-			JLabel lbl = (JLabel) c;
-			lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
-			lbl.setText("");
-			lbl.setIcon(null);
-			if (value != null) {
-				String dsc = manager.getDescription(value);
-				lbl.setText(dsc + getCamera(value));
-				lbl.setIcon(manager.getIcon(value));
-			}
-		}
-		return c;
+	protected String valueToString(Incident inc) {
+		return manager.getDescription(inc) + getCamera(inc);
 	}
 
 	/** Get the incident camera */
@@ -67,5 +48,11 @@ public class IncidentCellRenderer extends ProxyCellRenderer<Incident> {
 			return " -- " + cam.getName();
 		else
 			return "";
+	}
+
+	/** Get an icon for a value */
+	@Override
+	protected Icon getIcon(Incident inc) {
+		return manager.getIcon(inc);
 	}
 }

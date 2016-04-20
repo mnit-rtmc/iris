@@ -15,9 +15,11 @@
 package us.mn.state.dot.tms.client.widget;
 
 import java.awt.Component;
+import javax.swing.Icon;
 import javax.swing.JList;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ListCellRenderer;
+import javax.swing.SwingConstants;
 
 /**
  * List cell renderer used for combo boxes.
@@ -33,14 +35,21 @@ public class IListCellRenderer<T> implements ListCellRenderer<T> {
 	private final DefaultListCellRenderer cell =
 		new DefaultListCellRenderer();
 
+	/** Create a new list cell renderer */
+	public IListCellRenderer() {
+		cell.setHorizontalTextPosition(SwingConstants.TRAILING);
+	}
+
 	/** Configure the renderer component */
 	@Override
 	public Component getListCellRendererComponent(
 		JList<? extends T> list, T value, int index, boolean isSelected,
 		boolean hasFocus)
 	{
-		return cell.getListCellRendererComponent(list, asText(value),
-			index, isSelected, hasFocus);
+		cell.getListCellRendererComponent(list, asText(value), index,
+			isSelected, hasFocus);
+		cell.setIcon(getIcon(value));
+		return cell;
 	}
 
 	/** Get a value as string */
@@ -56,5 +65,10 @@ public class IListCellRenderer<T> implements ListCellRenderer<T> {
 	/** Convert value to a string */
 	protected String valueToString(T value) {
 		return value.toString();
+	}
+
+	/** Get an icon for a value */
+	protected Icon getIcon(T value) {
+		return null;
 	}
 }
