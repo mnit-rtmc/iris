@@ -43,51 +43,61 @@ abstract public class Marker implements Shape {
 	}
 
 	/** Check if the marker contains a point */
+	@Override
 	public boolean contains(double x, double y) {
 		return path.contains(x, y);
 	}
 
 	/** Check if the marker contains a rectangle */
+	@Override
 	public boolean contains(double x, double y, double w, double h) {
 		return path.contains(x, y, w, h);
 	}
 
 	/** Check if the marker contains a point */
+	@Override
 	public boolean contains(Point2D p) {
 		return path.contains(p);
 	}
 
 	/** Check if the marker contains a rectangle */
+	@Override
 	public boolean contains(Rectangle2D r) {
 		return path.contains(r);
 	}
 
 	/** Get the marker bounds */
+	@Override
 	public Rectangle getBounds() {
 		return path.getBounds();
 	}
 
 	/** Get the marker bounds */
+	@Override
 	public Rectangle2D getBounds2D() {
 		return path.getBounds2D();
 	}
 
 	/** Get a path iterator */
+	@Override
 	public PathIterator getPathIterator(AffineTransform t) {
 		return path.getPathIterator(t);
 	}
 
 	/** Get a path iterator */
+	@Override
 	public PathIterator getPathIterator(AffineTransform t, double f) {
 		return path.getPathIterator(t, f);
 	}
 
 	/** Check if the marker intersects with a rectangle */
+	@Override
 	public boolean intersects(double x, double y, double w, double h) {
 		return path.intersects(x, y, w, h);
 	}
 
 	/** Check if the marker intersects with a rectangle */
+	@Override
 	public boolean intersects(Rectangle2D r) {
 		return path.intersects(r);
 	}
