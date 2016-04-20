@@ -35,7 +35,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class VectorSymbol implements Symbol {
 
 	/** Size of legend icons */
-	static private final int lsize = UI.scaled(22);
+	static private final int lsize = UI.scaled(20);
 
 	/** Transparent white */
 	static private final Color TRANS_WHITE = new Color(1, 1, 1, 0.4f);
