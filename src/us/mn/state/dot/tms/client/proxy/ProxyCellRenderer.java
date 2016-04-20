@@ -14,11 +14,8 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
-import java.awt.Component;
-import javax.swing.JList;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.ListCellRenderer;
 import us.mn.state.dot.sonar.SonarObject;
+import us.mn.state.dot.tms.client.widget.IListCellRenderer;
 
 /**
  * ListCellRenderer for ProxyJList cells.
@@ -26,12 +23,8 @@ import us.mn.state.dot.sonar.SonarObject;
  * @author Douglas Lau
  */
 public class ProxyCellRenderer<T extends SonarObject>
-	implements ListCellRenderer<T>
+	extends IListCellRenderer<T>
 {
-	/** Default cell renderer */
-	private final DefaultListCellRenderer renderer =
-		new DefaultListCellRenderer();
-
 	/** Proxy manager */
 	protected final ProxyManager<T> manager;
 
@@ -40,15 +33,9 @@ public class ProxyCellRenderer<T extends SonarObject>
 		manager = m;
 	}
 
-	/** Get a list cell renderer component */
+	/** Convert value to a string */
 	@Override
-	public Component getListCellRendererComponent(JList<? extends T> list,
-		T value, int index, boolean isSelected, boolean cellHasFocus)
-	{
-		String v = (value != null)
-		         ? manager.getDescription(value)
-		         : null;
-		return renderer.getListCellRendererComponent(list, v, index,
-			isSelected, cellHasFocus);
+	protected String valueToString(T value) {
+		return manager.getDescription(value);
 	}
 }
