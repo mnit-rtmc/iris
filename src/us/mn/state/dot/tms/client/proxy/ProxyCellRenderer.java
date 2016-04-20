@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import javax.swing.Icon;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.client.widget.IListCellRenderer;
 
@@ -33,9 +34,15 @@ public class ProxyCellRenderer<T extends SonarObject>
 		manager = m;
 	}
 
-	/** Convert value to a string */
+	/** Convert proxy to a string */
 	@Override
-	protected String valueToString(T value) {
-		return manager.getDescription(value);
+	protected String valueToString(T proxy) {
+		return manager.getDescription(proxy);
+	}
+
+	/** Get an icon for a proxy */
+	@Override
+	protected Icon getIcon(T proxy) {
+		return manager.getIcon(proxy);
 	}
 }

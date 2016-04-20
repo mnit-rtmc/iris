@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import javax.swing.Icon;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.client.proxy.ProxyCellRenderer;
@@ -26,19 +25,15 @@ import us.mn.state.dot.tms.client.proxy.ProxyCellRenderer;
  */
 public class IncidentCellRenderer extends ProxyCellRenderer<Incident> {
 
-	/** Incident manager */
-	private final IncidentManager manager;
-
 	/** Create a new incident cell renderer */
 	public IncidentCellRenderer(IncidentManager m) {
 		super(m);
-		manager = m;
 	}
 
 	/** Convert value to a string */
 	@Override
 	protected String valueToString(Incident inc) {
-		return manager.getDescription(inc) + getCamera(inc);
+		return super.valueToString(inc) + getCamera(inc);
 	}
 
 	/** Get the incident camera */
@@ -48,11 +43,5 @@ public class IncidentCellRenderer extends ProxyCellRenderer<Incident> {
 			return " -- " + cam.getName();
 		else
 			return "";
-	}
-
-	/** Get an icon for a value */
-	@Override
-	protected Icon getIcon(Incident inc) {
-		return manager.getIcon(inc);
 	}
 }
