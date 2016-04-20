@@ -20,7 +20,6 @@ import java.awt.KeyEventDispatcher;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
-import javax.swing.Box;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.Camera;
@@ -58,9 +57,9 @@ public class CamSelectPanel extends ToolPanel {
 		manager = s.getCameraManager();
 		lbl.setIcon(manager.getIcon(CameraTheme.ALL));
 		txt.setMaximumSize(txt.getPreferredSize());
-		add(Box.createHorizontalStrut(4));
+		addGap();
 		add(lbl);
-		add(Box.createHorizontalStrut(4));
+		addGap();
 		add(txt);
 		KeyboardFocusManager.getCurrentKeyboardFocusManager()
 			.addKeyEventDispatcher(dispatcher);

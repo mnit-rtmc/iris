@@ -14,8 +14,10 @@
  */
 package us.mn.state.dot.tms.client.toolbar;
 
+import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A panel for use on the toolbar.
@@ -27,6 +29,11 @@ abstract public class ToolPanel extends JPanel {
 	/** Create a new tool panel */
 	public ToolPanel() {
 		setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
+	}
+
+	/** Add a gap between components */
+	protected void addGap() {
+		add(Box.createHorizontalStrut(UI.hgap));
 	}
 
 	/** Dispose of the tool panel */
