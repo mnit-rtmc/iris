@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapAction;
@@ -191,6 +192,11 @@ public class CameraManager extends ProxyManager<Camera> {
 				s_model.clearSelection();
 		} else if (c != null)
 			dispatcher.selectMonitorCamera(c);
+	}
+
+	/** Select a video monitor */
+	public void selectMonitor(VideoMonitor m) {
+		dispatcher.selectMonitor(m);
 	}
 
 	/** Select the next camera */

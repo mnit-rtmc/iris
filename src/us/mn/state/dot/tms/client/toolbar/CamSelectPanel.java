@@ -20,13 +20,18 @@ import java.awt.KeyEventDispatcher;
 import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
+import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTheme;
+import us.mn.state.dot.tms.client.camera.MonitorMarker;
+import us.mn.state.dot.tms.client.map.VectorSymbol;
 
 /**
  * A tool panel for quick camera selection.
@@ -40,6 +45,10 @@ public class CamSelectPanel extends ToolPanel {
 		return true;
 	}
 
+	/** Video monitor symbol */
+	static private final VectorSymbol MONITOR = new VectorSymbol(
+		new MonitorMarker());
+
 	/** Camera manager */
 	private final CameraManager manager;
 
@@ -52,10 +61,12 @@ public class CamSelectPanel extends ToolPanel {
 	/** ID text field */
 	private final JTextField txt = new JTextField(8);
 
+	/** Monitor mode flag */
+	private boolean monitor = false;
+
 	/** Create a new camera select panel */
 	public CamSelectPanel(Session s) {
 		manager = s.getCameraManager();
-		lbl.setIcon(manager.getIcon(CameraTheme.ALL));
 		txt.setMaximumSize(txt.getPreferredSize());
 		addGap();
 		add(lbl);
@@ -66,12 +77,13 @@ public class CamSelectPanel extends ToolPanel {
 		txt.addKeyListener(new KeyAdapter() {
 			@Override public void keyPressed(KeyEvent e) {
 				if (e.getKeyCode() == KeyEvent.VK_ENTER)
-					selectCamera();
+					selectDevice();
 			}
 			@Override public void keyReleased(KeyEvent ke) {
 				updateIcon();
 			}
 		});
+		updateIcon();
 	}
 
 	/** Dispose of the panel */
@@ -82,27 +94,56 @@ public class CamSelectPanel extends ToolPanel {
 		removeAll();
 	}
 
-	/** Select the entered camera */
-	private void selectCamera() {
-		Camera c = lookupCamera(txt.getText());
-		manager.selectCamera(c);
-		txt.setText("");
+	/** Select the entered device */
+	private void selectDevice() {
+		if (monitor) {
+			VideoMonitor m = lookupMonitor(txt.getText());
+			if (m != null)
+				manager.selectMonitor(m);
+		} else {
+			Camera c = lookupCamera(txt.getText());
+			if (c != null)
+				manager.selectCamera(c);
+		}
+		monitor = false;
+		updateText("");
 	}
 
-	/** Update icon from entered camera ID */
+	/** Update icon from entered ID */
 	private void updateIcon() {
 		String t = txt.getText();
 		if (t.length() > 10) {
+			monitor = false;
 			t = "";
 			txt.setText(t);
 		}
-		lbl.setIcon(manager.getIcon(lookupCamera(t)));
+		lbl.setIcon(getIcon(t));
+	}
+
+	/** Get the icon for an ID */
+	private Icon getIcon(String t) {
+		if (monitor)
+			return MONITOR.getLegend(CameraTheme.ACTIVE);
+		else
+			return manager.getIcon(lookupCamera(t));
+	}
+
+	/** Update the text widget */
+	private void updateText(String t) {
+		txt.setText(t);
+		updateIcon();
 	}
 
 	/** Lookup a camera by ID */
 	private Camera lookupCamera(String id) {
 		Camera c = CameraHelper.lookup(id);
 		return (c != null) ? c : CameraHelper.findUID(id);
+	}
+
+	/** Lookup a monitor by ID */
+	private VideoMonitor lookupMonitor(String id) {
+		VideoMonitor m = VideoMonitorHelper.lookup(id);
+		return (m != null) ? m : VideoMonitorHelper.findUID(id);
 	}
 
 	/** Key dispatcher for application-wide numpad hotkeys */
@@ -144,18 +185,19 @@ public class CamSelectPanel extends ToolPanel {
 		case '7':
 		case '8':
 		case '9':
-			txt.setText(txt.getText() + c);
-			updateIcon();
+			updateText(txt.getText() + c);
 			break;
 		case '\n':
-			selectCamera();
+			selectDevice();
 			break;
 		case '.':
 			String t = txt.getText();
-			if (t.length() > 0) {
-				txt.setText(t.substring(0, t.length() - 1));
-				updateIcon();
-			}
+			if (t.length() > 0)
+				updateText(t.substring(0, t.length() - 1));
+			break;
+		case '*':
+			monitor = true;
+			updateText("");
 			break;
 		case '-':
 			manager.selectPreviousCamera();
