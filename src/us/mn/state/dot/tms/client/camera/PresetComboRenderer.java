@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,34 +14,19 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.Component;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.JList;
 import us.mn.state.dot.tms.CameraPreset;
+import us.mn.state.dot.tms.client.widget.IListCellRenderer;
 
 /**
  * Renderer for camera preset combo boxes.
  *
  * @author Douglas Lau
  */
-public class PresetComboRenderer extends DefaultListCellRenderer {
+public class PresetComboRenderer extends IListCellRenderer<CameraPreset> {
 
-	/** Get component to render list cell */
+	/** Convert camera preset to a string */
 	@Override
-	public Component getListCellRendererComponent(JList list,
-		Object value, int index, boolean isSelected,
-		boolean cellHasFocus)
-	{
-		return super.getListCellRendererComponent(list,
-			presetLabel(value), index, isSelected, cellHasFocus);
-	}
-
-	/** Get a label for a camera preset */
-	private Object presetLabel(Object value) {
-		if (value instanceof CameraPreset) {
-			CameraPreset p = (CameraPreset)value;
-			return p.getCamera().getName() + ":" + p.getPresetNum();
-		} else
-			return value;
+	protected String valueToString(CameraPreset cp) {
+		return cp.getCamera().getName() + ":" + cp.getPresetNum();
 	}
 }
