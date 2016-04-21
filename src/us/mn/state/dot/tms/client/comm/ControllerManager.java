@@ -41,7 +41,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 
 	/** Create a new controller manager */
 	public ControllerManager(Session s, GeoLocManager lm) {
-		super(s, lm, 16);
+		super(s, lm, 16, ItemStyle.FAILED);
 	}
 
 	/** Get the sonar type name */
@@ -81,10 +81,10 @@ public class ControllerManager extends ProxyManager<Controller> {
 	protected ProxyTheme<Controller> createTheme() {
 		ControllerTheme theme = new ControllerTheme(this,
 			new ControllerMarker());
-		theme.addStyle(ItemStyle.ACTIVE, ProxyTheme.COLOR_AVAILABLE);
+		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
-		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
+		theme.addStyle(ItemStyle.ACTIVE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
