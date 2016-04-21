@@ -787,9 +787,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			s |= ItemStyle.METERING.bit();
 		if(isLocked())
 			s |= ItemStyle.LOCKED.bit();
-		if(needsMaintenance())
+		if (isOnline() && needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();
-		if(isFailed())
+		if (isActive() && isFailed())
 			s |= ItemStyle.FAILED.bit();
 		if(getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
