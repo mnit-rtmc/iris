@@ -25,13 +25,11 @@ import java.util.LinkedList;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -85,17 +83,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return SystemAttributeHelper.getMeterMaxRelease();
 	}
 
-	/** Calculate the minimum of two (possibly null) integers */
-	static protected Integer minimum(Integer r0, Integer r1) {
-		if(r0 == null)
-			return r1;
-		if(r1 == null)
-			return r0;
-		return Math.min(r0, r1);
-	}
-
 	/** Get the current AM/PM period */
-	static protected int currentPeriod() {
+	static private int currentPeriod() {
 		return TimeSteward.getCalendarInstance().get(Calendar.AM_PM);
 	}
 
@@ -129,6 +118,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -144,17 +134,19 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		map.put("pm_target", pm_target);
 		map.put("beacon", beacon);
 		map.put("preset", preset);
-		if(m_lock != null)
+		if (m_lock != null)
 			map.put("m_lock", m_lock.ordinal());
 		return map;
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -168,7 +160,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Create a ramp meter */
-	protected RampMeterImpl(String n, GeoLocImpl loc, ControllerImpl c,
+	private RampMeterImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, int t, int st, int w, int alg, int at, int pt,
 		Beacon b, CameraPreset cp, Integer lk)
 	{
@@ -188,7 +180,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Create a ramp meter */
-	protected RampMeterImpl(String n, String loc, String c, int p,
+	private RampMeterImpl(String n, String loc, String c, int p,
 		String nt, int t, int st, int w, int alg, int at, int pt,
 		String b, String cp, Integer lk)
 	{
@@ -213,30 +205,33 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Device location */
-	protected GeoLocImpl geo_loc;
+	private GeoLocImpl geo_loc;
 
 	/** Get the device location */
+	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
 	}
 
 	/** Ramp meter type */
-	protected RampMeterType meter_type = RampMeterType.DUAL_ALTERNATE;
+	private RampMeterType meter_type = RampMeterType.DUAL_ALTERNATE;
 
 	/** Set ramp meter type */
+	@Override
 	public void setMeterType(int t) {
 		meter_type = RampMeterType.fromOrdinal(t);
 	}
 
 	/** Set the ramp meter type */
 	public void doSetMeterType(int t) throws TMSException {
-		if(t == meter_type.ordinal())
+		if (t == meter_type.ordinal())
 			return;
 		store.update(this, "meter_type", t);
 		setMeterType(t);
 	}
 
 	/** Get the ramp meter type */
+	@Override
 	public int getMeterType() {
 		return meter_type.ordinal();
 	}
@@ -247,47 +242,51 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Queue storage length (in feet) */
-	protected int storage = 1;
+	private int storage = 1;
 
 	/** Set the queue storage length (in feet) */
+	@Override
 	public void setStorage(int s) {
 		storage = s;
 	}
 
 	/** Set the queue storage length (in feet) */
 	public void doSetStorage(int s) throws TMSException {
-		if(s == storage)
+		if (s == storage)
 			return;
-		if(s < 1)
+		if (s < 1)
 			throw new ChangeVetoException("Storage must be > 0");
 		store.update(this, "storage", s);
 		setStorage(s);
 	}
 
 	/** Get the queue storage length (in feet) */
+	@Override
 	public int getStorage() {
 		return storage;
 	}
 
 	/** Maximum allowed meter wait time (in seconds) */
-	protected int max_wait = DEFAULT_MAX_WAIT;
+	private int max_wait = DEFAULT_MAX_WAIT;
 
 	/** Set the maximum allowed meter wait time (in seconds) */
+	@Override
 	public void setMaxWait(int w) {
 		max_wait = w;
 	}
 
 	/** Set the maximum allowed meter wait time (in seconds) */
 	public void doSetMaxWait(int w) throws TMSException {
-		if(w == max_wait)
+		if (w == max_wait)
 			return;
-		if(w < 1)
+		if (w < 1)
 			throw new ChangeVetoException("Wait must be > 0");
 		store.update(this, "max_wait", w);
 		setMaxWait(w);
 	}
 
 	/** Get the maximum allowed meter wait time (in seconds) */
+	@Override
 	public int getMaxWait() {
 		return max_wait;
 	}
@@ -296,6 +295,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	private int algorithm;
 
 	/** Set the metering algorithm */
+	@Override
 	public void setAlgorithm(int a) {
 		algorithm = a;
 	}
@@ -303,7 +303,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Set the metering algorithm */
 	public void doSetAlgorithm(int a) throws TMSException {
 		int alg = MeterAlgorithm.fromOrdinal(a).ordinal();
-		if(alg == algorithm)
+		if (alg == algorithm)
 			return;
 		store.update(this, "algorithm", alg);
 		setAlgorithm(alg);
@@ -311,6 +311,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Get the metering algorithm */
+	@Override
 	public int getAlgorithm() {
 		return algorithm;
 	}
@@ -319,19 +320,21 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	private int am_target;
 
 	/** Set the AM target rate */
+	@Override
 	public void setAmTarget(int t) {
 		am_target = t;
 	}
 
 	/** Set the AM target rate */
 	public void doSetAmTarget(int t) throws TMSException {
-		if(t == am_target)
+		if (t == am_target)
 			return;
 		store.update(this, "am_target", t);
 		setAmTarget(t);
 	}
 
 	/** Get the AM target rate */
+	@Override
 	public int getAmTarget() {
 		return am_target;
 	}
@@ -340,26 +343,28 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	private int pm_target;
 
 	/** Set the PM target rate */
+	@Override
 	public void setPmTarget(int t) {
 		pm_target = t;
 	}
 
 	/** Set the PM target rate */
 	public void doSetPmTarget(int t) throws TMSException {
-		if(t == pm_target)
+		if (t == pm_target)
 			return;
 		store.update(this, "pm_target", t);
 		setPmTarget(t);
 	}
 
 	/** Get the PM target rate */
+	@Override
 	public int getPmTarget() {
 		return pm_target;
 	}
 
 	/** Get the target rate for current period */
 	public int getTarget() {
-		if(currentPeriod() == Calendar.AM)
+		if (currentPeriod() == Calendar.AM)
 			return getAmTarget();
 		else
 			return getPmTarget();
@@ -397,11 +402,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	private LinkedList<MeterAction> getMeterActions() {
 		LinkedList<MeterAction> act = new LinkedList<MeterAction>();
 		Iterator<MeterAction> it = MeterActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			MeterAction ma = it.next();
-			if(ma.getRampMeter() == this) {
+			if (ma.getRampMeter() == this) {
 				ActionPlan ap = ma.getActionPlan();
-				if(ap.getActive())
+				if (ap.getActive())
 					act.add(ma);
 			}
 		}
@@ -412,10 +417,10 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	private boolean checkTimeAction(TimeAction ta, boolean start,
 		LinkedList<MeterAction> act)
 	{
-		for(MeterAction ma: act) {
-			if(ta.getActionPlan() == ma.getActionPlan()) {
+		for (MeterAction ma: act) {
+			if (ta.getActionPlan() == ma.getActionPlan()) {
 				boolean deploy = ta.getPhase() == ma.getPhase();
-				if(deploy == start)
+				if (deploy == start)
 					return true;
 			}
 		}
@@ -487,7 +492,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Metering rate lock status */
-	protected RampMeterLock m_lock = null;
+	private RampMeterLock m_lock = null;
 
 	/** Set the ramp meter lock status */
 	@Override
@@ -583,8 +588,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Set the algorithm operating state */
 	public void setOperating(boolean o) {
-		if(o) {
-			if(alg_state == null)
+		if (o) {
+			if (alg_state == null)
 				alg_state = createState();
 		} else {
 			alg_state = null;
@@ -599,7 +604,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Create the meter algorithm state */
 	private MeterAlgorithmState createState() {
-		switch(MeterAlgorithm.fromOrdinal(algorithm)) {
+		switch (MeterAlgorithm.fromOrdinal(algorithm)) {
 		case SIMPLE:
 			return new SimpleAlgorithm();
 		case STRATIFIED:
@@ -612,9 +617,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Lookup or create a stratified algorithm state */
-	protected MeterAlgorithmState lookupOrCreateStratified() {
+	private MeterAlgorithmState lookupOrCreateStratified() {
 		Corridor c = getCorridor();
-		if(c != null)
+		if (c != null)
 			return StratifiedAlgorithm.lookupCorridor(c);
 		else
 			return null;
@@ -623,7 +628,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Validate the metering algorithm */
 	public void validateAlgorithm() {
 		MeterAlgorithmState s = alg_state;
-		if(s != null)
+		if (s != null)
 			s.validate(this);
 	}
 
@@ -632,7 +637,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Set the queue status */
 	private void setQueue(RampMeterQueue q) {
-		if(q != queue) {
+		if (q != queue) {
 			queue = q;
 			notifyAttribute("queue");
 			updateStyles();
@@ -651,8 +656,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Determine the queue status */
 	private RampMeterQueue queueStatus(MeterAlgorithmState as) {
-		if(as != null && !isFailed()) {
-			 if(isMetering())
+		if (as != null && !isFailed()) {
+			 if (isMetering())
 				return as.getQueueState(this);
 			else
 				return RampMeterQueue.EMPTY;
@@ -661,7 +666,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Planned next release rate */
-	protected transient Integer ratePlanned = null;
+	private transient Integer ratePlanned = null;
 
 	/** Set the planned next release rate */
 	public void setRatePlanned(Integer r) {
@@ -777,30 +782,30 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	@Override
 	public void updateStyles() {
 		long s = ItemStyle.ALL.bit();
-		if(isAvailable())
+		if (isAvailable())
 			s |= ItemStyle.AVAILABLE.bit();
-		if(isQueueFull())
+		if (isQueueFull())
 			s |= ItemStyle.QUEUE_FULL.bit();
-		if(queueExists())
+		if (queueExists())
 			s |= ItemStyle.QUEUE_EXISTS.bit();
-		if(isOnline() && isMetering())
+		if (isOnline() && isMetering())
 			s |= ItemStyle.METERING.bit();
-		if(isLocked())
+		if (isLocked())
 			s |= ItemStyle.LOCKED.bit();
 		if (isOnline() && needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();
 		if (isActive() && isFailed())
 			s |= ItemStyle.FAILED.bit();
-		if(getController() == null)
+		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
-		if(!isActive())
+		if (!isActive())
 			s |= ItemStyle.INACTIVE.bit();
 		setStyles(s);
 	}
 
 	/** Set the item style bits (and notify clients) */
 	private void setStyles(long s) {
-		if(s != styles) {
+		if (s != styles) {
 			styles = s;
 			notifyAttribute("styles");
 		}
@@ -899,8 +904,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Update the 30-second green count */
 	public void updateGreenCount(long stamp, int g) {
 		DetectorImpl det = green_det;
-		if(det != null) {
-			if(g == 0 && isMetering())
+		if (det != null) {
+			if (g == 0 && isMetering())
 				return;
 			det.storeVolume(new PeriodicSample(stamp, 30, g));
 		} else
@@ -910,7 +915,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Update the 5-minute green count */
 	public void updateGreenCount5(long stamp, int g) {
 		DetectorImpl det = green_det;
-		if(det != null)
+		if (det != null)
 			det.storeVolume(new PeriodicSample(stamp, 300, g));
 		else
 			log("No green det");
@@ -918,7 +923,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Log a message to the meter debug log */
 	private void log(String msg) {
-		if(METER_LOG.isOpen())
+		if (METER_LOG.isOpen())
 			METER_LOG.log(getName() + ": " + msg);
 	}
 
@@ -932,7 +937,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		w.write("<meter");
 		w.write(createAttribute("name", getName()));
 		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
-		if(pos != null) {
+		if (pos != null) {
 			w.write(createAttribute("lon",
 				formatDouble(pos.getLongitude())));
 			w.write(createAttribute("lat",
@@ -940,7 +945,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		}
 		w.write(" storage='" + getStorage() + "'");
 		int mw = getMaxWait();
-		if(mw != DEFAULT_MAX_WAIT)
+		if (mw != DEFAULT_MAX_WAIT)
 			w.write(" max_wait='" + mw + "'");
 		w.write("/>\n");
 	}
@@ -949,9 +954,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	public R_NodeImpl getR_Node() {
 		lookupGreenDetector();
 		DetectorImpl det = green_det;
-		if(det != null) {
+		if (det != null) {
 			R_Node n = det.getR_Node();
-			if(n instanceof R_NodeImpl)
+			if (n instanceof R_NodeImpl)
 				return (R_NodeImpl)n;
 		}
 		return null;
