@@ -43,7 +43,7 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 
 	/** Create a new action plan manager */
 	public PlanManager(Session s, GeoLocManager lm) {
-		super(s, lm);
+		super(s, lm, 0, ItemStyle.ACTIVE);
 	}
 
 	/** Get the sonar type name */

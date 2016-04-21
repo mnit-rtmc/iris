@@ -61,7 +61,6 @@ public class PlanTheme extends ProxyTheme<ActionPlan> {
 		addStyle(ItemStyle.DMS, PlanTheme.COLOR_SCHEDULED);
 		addStyle(ItemStyle.BEACON, PlanTheme.COLOR_DEPLOYED);
 		addStyle(ItemStyle.METER, MeterTheme.COLOR_METERING);
-		addStyle(ItemStyle.LANE, COLOR);
 		addStyle(ItemStyle.TIME, COLOR_SCHEDULE);
 		addStyle(ItemStyle.ACTIVE, COLOR);
 		addStyle(ItemStyle.ALL);
