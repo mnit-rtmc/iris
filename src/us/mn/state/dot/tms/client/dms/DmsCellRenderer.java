@@ -19,7 +19,6 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.DefaultListCellRenderer;
@@ -27,7 +26,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
-import javax.swing.border.EtchedBorder;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -47,9 +45,9 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 
 	/** DMS cell renderer mode */
 	private enum DmsRendererMode {
-		LARGE(160, 48, CellRendererSize.LARGE),
-		MEDIUM(86, 24, CellRendererSize.MEDIUM),
-		SMALL(58, 16, CellRendererSize.SMALL);
+		SMALL(0, 0, 1, CellRendererSize.SMALL),
+		MEDIUM(80, 26, 1, CellRendererSize.MEDIUM),
+		LARGE(160, 52, 2, CellRendererSize.LARGE);
 
 		/** Fixed pixel panel size */
 		public final Dimension pixel_panel_size;
@@ -57,10 +55,16 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		/** Associated style summary cell renderer size */
 		private final CellRendererSize cell_size;
 
+		/** Number of labels above / below pixel panel */
+		private final int n_labels;
+
 		/** Create a new DMS renderer mode */
-		private DmsRendererMode(int w, int h, CellRendererSize cs) {
+		private DmsRendererMode(int w, int h, int nl,
+			CellRendererSize cs)
+		{
 			pixel_panel_size = UI.dimension(w, h);
 			cell_size = cs;
+			n_labels = nl;
 		}
 
 		/** Determine the dms renderer mode, which determines the size
@@ -77,7 +81,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	}
 
 	/** Prototype name */
-	static private final String PROTOTYPE_NAME = "V999W99X";
+	static private final String PROTOTYPE_NAME = "VM999W99X_9";
 
 	/** DMS cell renderer mode */
 	private final DmsRendererMode mode;
@@ -112,6 +116,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 
 	/** Initialize the renderer */
 	private void initialize() {
+		setBorder(UI.cellRendererBorder());
+		setPreferredSize();
 		switch (mode) {
 		case SMALL:
 			initSmall();
@@ -124,35 +130,33 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		}
 	}
 
-	/** Initialize a small size DMS cell renderer */
-	private void initSmall() {
-		setBorder(BorderFactory.createEtchedBorder(
-			EtchedBorder.RAISED));
-		title.setLayout(new GridLayout(1, 1));
-		title.add(name_lbl);
-		add(title);
-		name_lbl.setText(PROTOTYPE_NAME);
-		setPreferredSize(name_lbl.getPreferredSize());
-	}
-
-	/** Initialize a medium size DMS cell renderer */
-	private void initMedium() {
-		setBorder(UI.cellRendererBorder());
-		title.setLayout(new GridLayout(1, 1));
-		title.add(name_lbl);
-		add(title, BorderLayout.NORTH);
-		add(pixel_pnl, BorderLayout.CENTER);
+	/** Set preferred size of renderer */
+	private void setPreferredSize() {
 		// This is only needed to get preferred height
 		name_lbl.setText(PROTOTYPE_NAME);
 		Dimension lsz = name_lbl.getPreferredSize();
 		Dimension psz = mode.pixel_panel_size;
-		setPreferredSize(new Dimension(psz.width,
-			lsz.height + psz.height));
+		setPreferredSize(new Dimension(Math.max(psz.width, lsz.width),
+			lsz.height * mode.n_labels + psz.height));
+	}
+
+	/** Initialize a small size DMS cell renderer */
+	private void initSmall() {
+		title.setLayout(new GridLayout(1, 1));
+		title.add(name_lbl);
+		add(title);
+	}
+
+	/** Initialize a medium size DMS cell renderer */
+	private void initMedium() {
+		title.setLayout(new GridLayout(1, 1));
+		title.add(name_lbl);
+		add(title, BorderLayout.NORTH);
+		add(pixel_pnl, BorderLayout.CENTER);
 	}
 
 	/** Initialize a large size DMS cell renderer */
 	private void initLarge() {
-		setBorder(UI.cellRendererBorder());
 		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
 		title.add(name_lbl);
 		title.add(Box.createGlue());
@@ -163,12 +167,6 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		add(title, BorderLayout.NORTH);
 		add(pixel_pnl, BorderLayout.CENTER);
 		add(box, BorderLayout.SOUTH);
-		// This is only needed to get preferred height
-		name_lbl.setText(PROTOTYPE_NAME);
-		Dimension lsz = name_lbl.getPreferredSize();
-		Dimension psz = mode.pixel_panel_size;
-		setPreferredSize(new Dimension(psz.width,
-			lsz.height * 2 + psz.height));
 	}
 
 	/** Check if the background is opaque */
