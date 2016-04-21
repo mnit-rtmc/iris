@@ -31,6 +31,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTheme;
 import us.mn.state.dot.tms.client.camera.MonitorMarker;
+import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.map.VectorSymbol;
 
 /**
@@ -69,9 +70,9 @@ public class CamSelectPanel extends ToolPanel {
 		manager = s.getCameraManager();
 		txt.setMaximumSize(txt.getPreferredSize());
 		addGap();
-		add(lbl);
-		addGap();
 		add(txt);
+		addGap();
+		add(lbl);
 		KeyboardFocusManager.getCurrentKeyboardFocusManager()
 			.addKeyEventDispatcher(dispatcher);
 		txt.addKeyListener(new KeyAdapter() {
@@ -80,10 +81,10 @@ public class CamSelectPanel extends ToolPanel {
 					selectDevice();
 			}
 			@Override public void keyReleased(KeyEvent ke) {
-				updateIcon();
+				updateLabel();
 			}
 		});
-		updateIcon();
+		updateLabel();
 	}
 
 	/** Dispose of the panel */
@@ -109,8 +110,8 @@ public class CamSelectPanel extends ToolPanel {
 		updateText("");
 	}
 
-	/** Update icon from entered ID */
-	private void updateIcon() {
+	/** Update label from entered ID */
+	private void updateLabel() {
 		String t = txt.getText();
 		if (t.length() > 10) {
 			monitor = false;
@@ -118,20 +119,37 @@ public class CamSelectPanel extends ToolPanel {
 			txt.setText(t);
 		}
 		lbl.setIcon(getIcon(t));
+		lbl.setText(getID(t));
 	}
 
 	/** Get the icon for an ID */
 	private Icon getIcon(String t) {
-		if (monitor)
-			return MONITOR.getLegend(CameraTheme.ACTIVE);
-		else
-			return manager.getIcon(lookupCamera(t));
+		return (monitor)
+		      ? MONITOR.getLegend(getMonitorStyle(t))
+		      : manager.getIcon(lookupCamera(t));
+	}
+
+	/** Get icon style for a monitor */
+	private Style getMonitorStyle(String t) {
+		VideoMonitor m = lookupMonitor(t);
+		return (m != null) ? CameraTheme.ACTIVE : CameraTheme.ALL;
+	}
+
+	/** Get the device ID */
+	private String getID(String t) {
+		if (monitor) {
+			VideoMonitor m = lookupMonitor(t);
+			return (m != null) ? m.getName() : "";
+		} else {
+			Camera c = lookupCamera(t);
+			return (c != null) ? c.getName() : "";
+		}
 	}
 
 	/** Update the text widget */
 	private void updateText(String t) {
 		txt.setText(t);
-		updateIcon();
+		updateLabel();
 	}
 
 	/** Lookup a camera by ID */
