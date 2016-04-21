@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.beacon;
 
-import java.awt.geom.Ellipse2D;
 import us.mn.state.dot.tms.client.map.Marker;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
@@ -26,26 +25,36 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class BeaconMarker extends Marker {
 
 	/** Size in pixels to render marker */
-	static private final int MARKER_SIZE_PIX = UI.scaled(20);
+	static private final int MARKER_SIZE_PIX = UI.scaled(16);
 
 	/** Create a new beacon marker */
 	public BeaconMarker() {
-		super(10);
+		super(22);
 		float size = MARKER_SIZE_PIX;
-		float sixth = size / 6;
-		float third = size / 3;
-		float half = size / 2;
-		path.moveTo(half, half);
-		path.lineTo(half + third, sixth);
-		path.lineTo(half + sixth, sixth);
-		path.lineTo(half + sixth, -half);
-		path.lineTo(half - sixth, -half);
-		path.lineTo(half - sixth, sixth);
-		path.lineTo(half - third, sixth);
+		float half = size * 0.5f;
+		float s2 = size * (float) Math.sqrt(0.5f);
+		float s1 = size * (1 - (float) Math.sqrt(0.5f));
+		path.moveTo(0, -size);
+		path.lineTo(s1, -s2);
+		path.lineTo(s2, -s2);
+		path.lineTo(s2, -s1);
+		path.lineTo(size, 0);
+		path.lineTo(s2, s1);
+		path.lineTo(s2, s2);
+		path.lineTo(s1, s2);
+		path.lineTo(0, size);
+		path.lineTo(-s1, s2);
+		path.lineTo(-s2, s2);
+		path.lineTo(-s2, s1);
+		path.lineTo(-size, 0);
+		path.lineTo(-s2, -s1);
+		path.lineTo(-s2, -s2);
+		path.lineTo(-s1, -s2);
+		path.lineTo(0, -size);
 		path.closePath();
-		path.append(new Ellipse2D.Float(0, -sixth, third, third),
-			false);
-		path.append(new Ellipse2D.Float(half + sixth, -sixth,
-			third, third), false);
+		path.moveTo(0, s2);
+		path.lineTo(s1, -half);
+		path.lineTo(-s1, -half);
+		path.closePath();
 	}
 }
