@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.client.proxy;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ButtonGroup;
 import javax.swing.DefaultListSelectionModel;
@@ -26,12 +27,14 @@ import javax.swing.Icon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JToggleButton;
+import static javax.swing.LayoutStyle.ComponentPlacement.RELATED;
+import javax.swing.SwingConstants;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.ProxyListener;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.widget.IWorker;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
-import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -55,6 +58,7 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			super(is.toString(), legend);
 			setBorder(UI.buttonBorder());
 			setMargin(UI.buttonInsets());
+			setHorizontalAlignment(SwingConstants.LEADING);
 			i_style = is;
 			n_count = 0;
 		}
@@ -207,21 +211,38 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			for (JToggleButton b : sz_btns)
 				sz.addComponent(b);
 			sg.addGroup(sz);
+			gl.linkSize(SwingConstants.HORIZONTAL, sz_btns);
 		}
+		sg.addPreferredGap(RELATED, UI.hgap, Short.MAX_VALUE);
 		int n_rows = (buttons.length - 1) / STYLE_COLS + 1;
 		for (int c = 0; c < STYLE_COLS; c++) {
-			sg.addGap(UI.hgap);
-			GroupLayout.ParallelGroup cg = gl.createParallelGroup();
-			for (int r = 0; r < n_rows; r++) {
-				int i = c * n_rows + r;
-				if (i < buttons.length)
-					cg.addComponent(buttons[i]);
+			StyleButton[] col = createColumn(n_rows, c);
+			if (col.length > 0) {
+				if (c > 0)
+					sg.addGap(UI.hgap);
+				GroupLayout.ParallelGroup cg =
+					gl.createParallelGroup();
+				for (StyleButton b : col)
+					cg.addComponent(b);
+				sg.addGroup(cg);
+				gl.linkSize(SwingConstants.HORIZONTAL, col);
 			}
-			sg.addGroup(cg);
 		}
+		sg.addPreferredGap(RELATED, UI.hgap, Short.MAX_VALUE);
 		hg.addGroup(sg);
 		hg.addComponent(s_pane);
 		return hg;
+	}
+
+	/** Create a column of style buttons */
+	private StyleButton[] createColumn(int n_rows, int c) {
+		ArrayList<StyleButton> col = new ArrayList<StyleButton>();
+		for (int r = 0; r < n_rows; r++) {
+			int i = c * n_rows + r;
+			if (i < buttons.length)
+				col.add(buttons[i]);
+		}
+		return col.toArray(new StyleButton[0]);
 	}
 
 	/** Create the vertical group */
