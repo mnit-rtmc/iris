@@ -272,13 +272,13 @@ public class LcsDeployModelTest extends TestCase {
 	public void testLongLaneBlocked() {
 		Distance up = new Distance(1.25f, Distance.Units.MILES);
 		LaneConfiguration cfg = new LaneConfiguration(4, 7);
-		LcsDeployModel m = createModel("...!.");
+		LcsDeployModel m = createModel("...!.", 4, 7);
 		checkIndications(m, cfg, up, 3, 4, new LaneUseIndication[] {
 			LANE_CLOSED_AHEAD, LANE_OPEN, LANE_OPEN } );
-		m = createModel("..!..");
+		m = createModel("..!..", 4, 7);
 		checkIndications(m, cfg, up, 3, 4, new LaneUseIndication[] {
 			LANE_OPEN, LANE_CLOSED_AHEAD, LANE_OPEN } );
-		m = createModel(".!...");
+		m = createModel(".!...", 4, 7);
 		checkIndications(m, cfg, up, 3, 4, new LaneUseIndication[] {
 			LANE_OPEN, LANE_OPEN, LANE_CLOSED_AHEAD } );
 	}
