@@ -158,6 +158,8 @@ public class LcsDeployModel {
 	{
 		if (isShoulder(cfg, shift))
 			return LaneUseIndication.DARK;
+		if (isShoulder(config, shift))
+			return LaneUseIndication.LANE_OPEN;
 		double m = up.m();
 		if (m < 0)
 			return LaneUseIndication.DARK;

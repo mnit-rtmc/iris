@@ -124,6 +124,23 @@ public class LcsDeployModelTest extends TestCase {
 			USE_CAUTION, LANE_OPEN } );
 		checkIndications(m, cfg, up, 2, 5, new LaneUseIndication[] {
 			DARK, USE_CAUTION } );
+		// three LCS
+		cfg = new LaneConfiguration(4, 7);
+		checkIndications(m, cfg, up, 3, 4, new LaneUseIndication[] {
+			LANE_OPEN, USE_CAUTION, LANE_OPEN } );
+	}
+
+	public void testShortLeftShoulderBlocked() {
+		Distance up = new Distance(0.25f, Distance.Units.MILES);
+		LaneConfiguration cfg = new LaneConfiguration(4, 6);
+		LcsDeployModel m = createModel("!...");
+		// two LCS
+		checkIndications(m, cfg, up, 2, 4, new LaneUseIndication[] {
+			LANE_OPEN, USE_CAUTION } );
+		// three LCS
+		cfg = new LaneConfiguration(3, 6);
+		checkIndications(m, cfg, up, 3, 3, new LaneUseIndication[] {
+			LANE_OPEN, USE_CAUTION, LANE_OPEN } );
 	}
 
 	public void testShortRightLanePartBlocked() {
