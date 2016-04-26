@@ -46,9 +46,6 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 public class R_NodeCellRenderer extends JPanel
 	implements ListCellRenderer<R_NodeModel>
 {
-	/** Background color for nodes with GPS points */
-	static private final Color COLOR_GPS = Color.GREEN;
-
 	/** Background color for nodes with bad locations */
 	static private final Color COLOR_NO_LOC = Color.RED;
 
@@ -124,7 +121,7 @@ public class R_NodeCellRenderer extends JPanel
 			if (GeoLocHelper.isNull(loc))
 				setBackground(COLOR_NO_LOC);
 			else if (r_node.getActive())
-				setBackground(COLOR_GPS);
+				setBackground(null);
 			else
 				setBackground(COLOR_INACTIVE);
 		}
@@ -172,7 +169,7 @@ public class R_NodeCellRenderer extends JPanel
 		String xStreet = GeoLocHelper.getCrossDescription(
 			r_node.getGeoLoc());
 		if (xStreet != null)
-			drawCrossStreet(g2, xStreet, height);
+			drawCrossStreet(g2, xStreet, width, height);
 		if (selected)
 			drawShiftHandle(g2, height);
 	}
@@ -492,14 +489,14 @@ public class R_NodeCellRenderer extends JPanel
 	}
 
 	/** Draw the cross-street label */
-	protected void drawCrossStreet(Graphics2D g, String xStreet,
+	protected void drawCrossStreet(Graphics2D g, String xStreet, int width,
 		int height)
 	{
 		GlyphVector gv = FONT_XSTREET.createGlyphVector(
 			g.getFontRenderContext(), xStreet);
 		Rectangle2D rect = gv.getVisualBounds();
-		int x = WIDTH - (int)rect.getWidth() - 4;
-		int y = (height + (int)rect.getHeight()) / 2;
+		int x = width - (int) rect.getWidth() - UI.hgap * 2;
+		int y = (height + (int) rect.getHeight()) / 2;
 		g.setColor(Color.BLACK);
 		g.drawGlyphVector(gv, x, y);
 	}
