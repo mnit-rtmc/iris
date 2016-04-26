@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2013  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -81,7 +81,8 @@ public class LaneConfigurationPanel extends JPanel {
 	}
 
 	/** Is the component opaque? */
-	@Override public boolean isOpaque() {
+	@Override
+	public boolean isOpaque() {
 		return true;
 	}
 
@@ -97,11 +98,12 @@ public class LaneConfigurationPanel extends JPanel {
 	}
 
 	/** Paint the panel */
+	@Override
 	public void paintComponent(Graphics g) {
 		clearGraphics(g);
 		Graphics g2 = createGraphics(g);
-		if(g2 instanceof Graphics2D)
-			paint2D((Graphics2D)g2);
+		if (g2 instanceof Graphics2D)
+			paint2D((Graphics2D) g2);
 	}
 
 	/** Clear the graphics */
@@ -121,15 +123,15 @@ public class LaneConfigurationPanel extends JPanel {
 	/** Paint the panel */
 	private void paint2D(Graphics2D g) {
 		Dimension d = getSize();
-		int height = (int)d.getHeight();
+		int height = (int) d.getHeight();
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
 			RenderingHints.VALUE_ANTIALIAS_ON);
-		if(config.getLanes() > 0) {
+		if (config.getLanes() > 0) {
 			fillShoulders(g, height);
 			fillLanes(g, height);
 			drawLines(g, height);
 		}
-		if(labels) {
+		if (labels) {
 			drawLeft(g, height);
 			drawRight(g, height);
 		}
@@ -168,7 +170,7 @@ public class LaneConfigurationPanel extends JPanel {
 		x = getX(config.rightShift);
 		g.drawLine(x, 0, x, height);
 		g.setStroke(line_dashed);
-		for(int i = config.leftShift + 1; i < config.rightShift; i++) {
+		for (int i = config.leftShift + 1; i < config.rightShift; i++) {
 			x = getX(i);
 			g.drawLine(x, 0, x, height);
 		}
@@ -187,7 +189,7 @@ public class LaneConfigurationPanel extends JPanel {
 			I18N.get("location.left"));
 		Rectangle2D rect = gv.getVisualBounds();
 		int x = 0;
-		int y = (height + (int)rect.getHeight()) / 2;
+		int y = (height + (int) rect.getHeight()) / 2;
 		g.setColor(Color.BLACK);
 		g.drawGlyphVector(gv, x, y);
 	}
@@ -197,8 +199,8 @@ public class LaneConfigurationPanel extends JPanel {
 		GlyphVector gv = createGlyphVector(g,
 			I18N.get("location.right"));
 		Rectangle2D rect = gv.getVisualBounds();
-		int x = getWidth() - (int)rect.getWidth() - 4;
-		int y = (height + (int)rect.getHeight()) / 2;
+		int x = getWidth() - (int) rect.getWidth() - 4;
+		int y = (height + (int) rect.getHeight()) / 2;
 		g.setColor(Color.BLACK);
 		g.drawGlyphVector(gv, x, y);
 	}
