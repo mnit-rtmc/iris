@@ -67,7 +67,7 @@ public class R_NodeCellRenderer extends JPanel
 
 	/** Dashed stroke line */
 	static protected final BasicStroke LINE_DASHED = new BasicStroke(4,
-		BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1,
+		BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1,
 		new float[]{ LANE_HEIGHT / 3, 2 * LANE_HEIGHT / 3 },
 		2 * LANE_HEIGHT / 3
 	);

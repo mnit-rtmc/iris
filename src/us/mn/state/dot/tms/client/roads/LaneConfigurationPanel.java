@@ -52,7 +52,7 @@ public class LaneConfigurationPanel extends JPanel {
 
 	/** Solid stroke line */
 	static private final BasicStroke LINE_SOLID = new BasicStroke(
-		UI.scaled(2), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
+		UI.scaled(2), BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
 
 	/** Dashed stroke line */
 	private final Stroke line_dashed;
@@ -75,7 +75,7 @@ public class LaneConfigurationPanel extends JPanel {
 		labels = l;
 		float s = w / 3.0f;
 		line_dashed = new BasicStroke(UI.scaled(2),
-			BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 1,
+			BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1,
 			new float[] { s, 2 * s }, 2 * s);
 		clear();
 	}

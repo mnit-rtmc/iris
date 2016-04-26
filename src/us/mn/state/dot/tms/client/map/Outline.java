@@ -29,7 +29,7 @@ public class Outline {
 	static private final int CAP = BasicStroke.CAP_ROUND;
 
 	/** Join to render line joins */
-	static private final int JOIN = BasicStroke.JOIN_MITER;
+	static private final int JOIN = BasicStroke.JOIN_BEVEL;
 
 	/** Create a solid outline */
 	static public Outline createSolid(Color c, float w) {
@@ -83,7 +83,7 @@ public class Outline {
 			float[] d = new float[dash.length];
 			for (int i = 0; i < d.length; i++)
 				d[i] = dash[i] * scale;
-			return new BasicStroke(w, CAP, JOIN, w, d, 0);
+			return new BasicStroke(w, CAP, JOIN, 1, d, 0);
 		} else
 			return new BasicStroke(w, CAP, JOIN);
 	}
