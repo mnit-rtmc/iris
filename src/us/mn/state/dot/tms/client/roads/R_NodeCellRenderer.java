@@ -454,42 +454,39 @@ public class R_NodeCellRenderer extends JPanel
 	}
 
 	/** Draw a detector */
-	protected void drawDetector(Graphics2D g, int x, int y, String label) {
+	private void drawDetector(Graphics2D g, int x, int y, String label) {
+		drawText(g, x, y, label, Color.DARK_GRAY, Color.WHITE);
+	}
+
+	/** Draw a text label */
+	private void drawText(Graphics2D g, int x, int y, String label,
+		Color bg, Color fg)
+	{
 		GlyphVector gv = FONT_XSTREET.createGlyphVector(
 			g.getFontRenderContext(), label);
 		Rectangle2D rect = gv.getVisualBounds();
-		Rectangle2D detector = new Rectangle2D.Double(x, y,
+		Rectangle2D face = new Rectangle2D.Double(x, y,
 			rect.getWidth() + UI.hgap * 2,
 			rect.getHeight() + UI.vgap * 2);
-		g.setColor(Color.DARK_GRAY);
-		g.fill(detector);
-		g.setColor(Color.WHITE);
-		int tx = UI.hgap;
-		int ty = 1 + (int)rect.getHeight() + UI.vgap;
+		g.setColor(bg);
+		g.fill(face);
+		g.setColor(Color.BLACK);
+		g.setStroke(LINE_BASIC);
+		g.draw(face);
+		g.setColor(fg);
+		int tx = UI.hgap - 1;
+		int ty = UI.vgap + (int) rect.getHeight() + 1;
 		g.drawGlyphVector(gv, x + tx, y + ty);
 	}
 
 	/** Draw the speed limit */
-	protected void drawSpeedLimit(Graphics2D g, int height) {
+	private void drawSpeedLimit(Graphics2D g, int height) {
 		switch (node_type) {
 		case STATION:
 			int x = getDownstreamLine(false) + LANE_WIDTH;
 			int y = 2;
 			String slim = String.valueOf(r_node.getSpeedLimit());
-			GlyphVector gv = FONT_XSTREET.createGlyphVector(
-				g.getFontRenderContext(), slim);
-			Rectangle2D rect = gv.getVisualBounds();
-			Rectangle2D face = new Rectangle2D.Double(x, y,
-				rect.getWidth() + UI.hgap * 2,
-				rect.getHeight() + UI.vgap * 2);
-			g.setColor(Color.WHITE);
-			g.fill(face);
-			g.setColor(Color.BLACK);
-			g.setStroke(LINE_BASIC);
-			g.draw(face);
-			int tx = UI.hgap;
-			int ty = 1 + (int)rect.getHeight() + UI.vgap;
-			g.drawGlyphVector(gv, x + tx, y + ty);
+			drawText(g, x, y, slim, Color.WHITE, Color.BLACK);
 			break;
 		}
 	}
