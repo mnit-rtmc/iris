@@ -14,27 +14,31 @@
  */
 package us.mn.state.dot.tms.client.schedule;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
 import java.awt.event.ActionEvent;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import javax.swing.GroupLayout;
 import javax.swing.JButton;
-import javax.swing.JComboBox;
+import javax.swing.JList;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import static javax.swing.ListSelectionModel.SINGLE_SELECTION;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
 import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.CalendarWidget;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ILabel;
+import us.mn.state.dot.tms.client.widget.IListSelectionAdapter;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * A panel for editing day plans.
@@ -57,6 +61,18 @@ public class DayPlanPanel extends JPanel {
 	static private final SimpleDateFormat YEAR_LBL =
 		new SimpleDateFormat("yyyy");
 
+	/** Create a calendar button */
+	static private JButton createCalButton(IAction a) {
+		JButton btn = new JButton(a);
+		btn.setContentAreaFilled(false);
+		btn.setRolloverEnabled(true);
+		btn.setBorderPainted(false);
+		return btn;
+	}
+
+	/** User session */
+	private final Session session;
+
 	/** Cache of day plans */
 	private final TypeCache<DayPlan> cache;
 
@@ -76,15 +92,27 @@ public class DayPlanPanel extends JPanel {
 		}
 	};
 
-	/** Action for day plans */
-	private final IAction day = new IAction("action.plan.day") {
+	/** Day plan label */
+	private final ILabel day_lbl = new ILabel("action.plan.day");
+
+	/** List for day plans */
+	private final JList<DayPlan> day_lst = new JList<DayPlan>();
+
+	/** Scroll pane for day list */
+	private final JScrollPane day_scrl = new JScrollPane(day_lst);
+
+	/** Day plan add text field */
+	private final JTextField add_txt = new JTextField(10);
+
+	/** Action to create a day plan */
+	private final IAction add_plan = new IAction("action.plan.day.add") {
 		protected void doActionPerformed(ActionEvent e) {
-			selectDayPlan();
+			createDayPlan();
 		}
 	};
 
-	/** Combo box for day plans */
-	private final JComboBox<DayPlan> day_cbx = new JComboBox<DayPlan>();
+	/** Button to create a day plan */
+	private final JButton add_btn = new JButton(add_plan);
 
 	/** Action to delete the selected day plan */
 	private final IAction del_plan = new IAction("action.plan.day.delete") {
@@ -92,6 +120,9 @@ public class DayPlanPanel extends JPanel {
 			deleteSelectedPlan();
 		}
 	};
+
+	/** Button to delete the selected day plan */
+	private final JButton del_btn = new JButton(del_plan);
 
 	/** Month to display on calendar widget */
 	private final Calendar month = Calendar.getInstance();
@@ -104,6 +135,9 @@ public class DayPlanPanel extends JPanel {
 		}
 	};
 
+	/** Previous month button */
+	private final JButton prev_month_btn = createCalButton(prev_month);
+
 	/** Month label */
 	private final JLabel month_lbl = new JLabel();
 
@@ -115,6 +149,9 @@ public class DayPlanPanel extends JPanel {
 		}
 	};
 
+	/** Next month button */
+	private final JButton next_month_btn = createCalButton(next_month);
+
 	/** Action to select previous year */
 	private final IAction prev_year = new IAction("action.plan.year.prev") {
 		protected void doActionPerformed(ActionEvent e) {
@@ -122,6 +159,9 @@ public class DayPlanPanel extends JPanel {
 			updateCalendarWidget();
 		}
 	};
+
+	/** Previous year button */
+	private final JButton prev_year_btn = createCalButton(prev_year);
 
 	/** Year label */
 	private final JLabel year_lbl = new JLabel();
@@ -134,86 +174,141 @@ public class DayPlanPanel extends JPanel {
 		}
 	};
 
+	/** Next year button */
+	private final JButton next_year_btn = createCalButton(next_year);
+
 	/** Calendar widget */
 	private final CalendarWidget cal_widget = new CalendarWidget();
 
 	/** Holiday table panel */
 	private final ProxyTablePanel<Holiday> hol_pnl;
 
-	/** User session */
-	private final Session session;
+	/** Edit mode listener */
+	private final EditModeListener edit_lsnr = new EditModeListener() {
+		public void editModeChanged() {
+			updateButtonPanel();
+		}
+	};
 
 	/** Create a new day plan panel */
 	public DayPlanPanel(Session s) {
-		super(new GridBagLayout());
 		session = s;
 		cache = s.getSonarState().getDayPlans();
 		watcher = new ProxyWatcher<DayPlan>(cache, view, false);
 		hol_pnl = new ProxyTablePanel<Holiday>(new HolidayModel(s,
 			null));
-		day_cbx.setAction(day);
-		day_cbx.setModel(new IComboBoxModel<DayPlan>(
-			s.getSonarState().getDayModel()));
-		day_cbx.setEditable(canAdd());
-		GridBagConstraints bag = new GridBagConstraints();
-		bag.insets.top = 2;
-		bag.insets.bottom = 2;
-		bag.insets.left = 2;
-		bag.insets.right = 2;
-		add(new ILabel("action.plan.day"), bag);
-		add(day_cbx, bag);
-		bag.gridx = 0;
-		bag.gridy = 1;
-		bag.gridwidth = 2;
-		add(new JButton(del_plan), bag);
-		bag.gridx = 2;
-		bag.gridy = 0;
-		bag.gridwidth = 1;
-		bag.gridheight = 1;
-		add(createCalButton(prev_month), bag);
-		bag.gridx = 3;
-		setMonthLabel();
-		add(month_lbl, bag);
-		bag.gridx = 4;
-		add(createCalButton(next_month), bag);
-		bag.gridx = 5;
-		add(createCalButton(prev_year), bag);
-		bag.gridx = 6;
-		setYearLabel();
-		add(year_lbl, bag);
-		bag.gridx = 7;
-		add(createCalButton(next_year), bag);
-		bag.gridx = 2;
-		bag.gridy = 1;
-		bag.gridwidth = 6;
-		bag.gridheight = 1;
-		add(cal_widget, bag);
-		bag.gridx = 0;
-		bag.gridy = 2;
-		bag.gridwidth = 9;
-		bag.gridheight = 1;
-		add(hol_pnl, bag);
-		del_plan.setEnabled(false);
-	}
-
-	/** Create a calendar button */
-	private JButton createCalButton(IAction a) {
-		JButton btn = new JButton(a);
-		btn.setContentAreaFilled(false);
-		btn.setRolloverEnabled(true);
-		btn.setBorderPainted(false);
-		return btn;
+		day_lst.setModel(s.getSonarState().getDayModel());
+		day_lst.setSelectionMode(SINGLE_SELECTION);
+		day_lst.addListSelectionListener(new IListSelectionAdapter() {
+			@Override
+			public void valueChanged() {
+				selectDayPlan();
+			}
+		});
 	}
 
 	/** Initialize the panel */
 	public void initialize() {
+		setBorder(UI.border);
 		hol_pnl.initialize();
 		watcher.initialize();
 		createWidgetJobs();
+		add_txt.setMaximumSize(add_txt.getPreferredSize());
+		layoutPanel();
+		selectDayPlan();
+		session.addEditModeListener(edit_lsnr);
+	}
+
+	/** Layout the panel */
+	private void layoutPanel() {
+		GroupLayout gl = new GroupLayout(this);
+		gl.setHonorsVisibility(false);
+		gl.setAutoCreateGaps(false);
+		gl.setAutoCreateContainerGaps(false);
+		gl.setHorizontalGroup(createHorizontalGroup(gl));
+		gl.setVerticalGroup(createVerticalGroup(gl));
+		setLayout(gl);
+	}
+
+	/** Create the horizontal group */
+	private GroupLayout.Group createHorizontalGroup(GroupLayout gl) {
+		GroupLayout.ParallelGroup hg = gl.createParallelGroup();
+		GroupLayout.SequentialGroup s1 = gl.createSequentialGroup();
+		GroupLayout.ParallelGroup p1 = gl.createParallelGroup();
+		GroupLayout.SequentialGroup s2 = gl.createSequentialGroup();
+		s2.addComponent(day_lbl);
+		s2.addGap(UI.hgap);
+		s2.addComponent(day_scrl);
+		GroupLayout.SequentialGroup s3 = gl.createSequentialGroup();
+		s3.addComponent(add_txt);
+		s3.addGap(UI.hgap);
+		s3.addComponent(add_btn);
+		s3.addGap(UI.hgap);
+		s3.addComponent(del_btn);
+		p1.addGroup(s2);
+		p1.addGroup(s3);
+		GroupLayout.ParallelGroup p2 = gl.createParallelGroup();
+		GroupLayout.SequentialGroup s4 = gl.createSequentialGroup();
+		s4.addComponent(prev_month_btn);
+		s4.addGap(UI.hgap);
+		s4.addComponent(month_lbl);
+		s4.addGap(UI.hgap);
+		s4.addComponent(next_month_btn);
+		s4.addGap(UI.hgap);
+		s4.addComponent(prev_year_btn);
+		s4.addGap(UI.hgap);
+		s4.addComponent(year_lbl);
+		s4.addGap(UI.hgap);
+		s4.addComponent(next_year_btn);
+		p2.addGroup(s4);
+		p2.addComponent(cal_widget);
+		s1.addGroup(p1);
+		s1.addGap(UI.hgap);
+		s1.addGroup(p2);
+		hg.addGroup(s1);
+		hg.addComponent(hol_pnl);
+		return hg;
+	}
+
+	/** Create the vertical group */
+	private GroupLayout.Group createVerticalGroup(GroupLayout gl) {
+		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
+		GroupLayout.ParallelGroup p1 = gl.createParallelGroup();
+		GroupLayout.SequentialGroup s1 = gl.createSequentialGroup();
+		GroupLayout.ParallelGroup p2 = gl.createParallelGroup();
+		p2.addComponent(day_lbl);
+		p2.addComponent(day_scrl);
+		GroupLayout.ParallelGroup p3 = gl.createParallelGroup(
+			GroupLayout.Alignment.BASELINE);
+		p3.addComponent(add_txt);
+		p3.addComponent(add_btn);
+		p3.addComponent(del_btn);
+		s1.addGroup(p2);
+		s1.addGap(UI.vgap);
+		s1.addGroup(p3);
+		GroupLayout.SequentialGroup s2 = gl.createSequentialGroup();
+		GroupLayout.ParallelGroup p4 = gl.createParallelGroup(
+			GroupLayout.Alignment.BASELINE);
+		p4.addComponent(prev_month_btn);
+		p4.addComponent(month_lbl);
+		p4.addComponent(next_month_btn);
+		p4.addComponent(prev_year_btn);
+		p4.addComponent(year_lbl);
+		p4.addComponent(next_year_btn);
+		s2.addGroup(p4);
+		s2.addGap(UI.vgap);
+		s2.addComponent(cal_widget);
+		p1.addGroup(s1);
+		p1.addGroup(s2);
+		vg.addGroup(p1);
+		vg.addGap(UI.vgap);
+		vg.addComponent(hol_pnl);
+		return vg;
 	}
 
 	/** Dispose of the panel */
 	public void dispose() {
+		session.removeEditModeListener(edit_lsnr);
 		watcher.dispose();
 		hol_pnl.dispose();
 	}
@@ -222,7 +317,7 @@ public class DayPlanPanel extends JPanel {
 	private void createWidgetJobs() {
 		cal_widget.setHighlighter(new CalendarWidget.Highlighter() {
 			public boolean isHighlighted(Calendar cal) {
-				DayPlan dp = getSelectedPlan();
+				DayPlan dp = day_lst.getSelectedValue();
 				if (dp != null)
 					return DayPlanHelper.isHoliday(dp, cal);
 				else
@@ -231,67 +326,44 @@ public class DayPlanPanel extends JPanel {
 		});
 	}
 
+	/** Update the button panel */
+	private void updateButtonPanel() {
+		add_plan.setEnabled(canAdd());
+		del_plan.setEnabled(canRemove(day_lst.getSelectedValue()));
+	}
+
 	/** Update the calendar widget */
 	private void updateCalendarWidget() {
-		setMonthLabel();
-		setYearLabel();
+		month_lbl.setText(MONTH_LBL.format(month.getTime()));
+		year_lbl.setText(YEAR_LBL.format(month.getTime()));
 		cal_widget.setMonth(month);
 		cal_widget.revalidate();
 		prev_month.setEnabled(true);
 		next_month.setEnabled(true);
 	}
 
-	/** Set the month label */
-	private void setMonthLabel() {
-		month_lbl.setText(MONTH_LBL.format(month.getTime()));
-	}
-
-	/** Set the year label */
-	private void setYearLabel() {
-		year_lbl.setText(YEAR_LBL.format(month.getTime()));
-	}
-
 	/** Select a day plan */
 	private void selectDayPlan() {
-		Object item = day_cbx.getSelectedItem();
-		if (item != null) {
-			DayPlan dp = getSelectedPlan();
-			hol_pnl.setModel(new HolidayModel(session, dp));
-			watcher.setProxy(dp);
-			del_plan.setEnabled(canRemove(dp));
-			if (dp == null) {
-				day_cbx.setSelectedItem(null);
-				String name = item.toString().trim();
-				if (name.length() > 0 && canAdd(name))
-					cache.createObject(name);
-			}
-		} else {
-			hol_pnl.setModel(new HolidayModel(session, null));
-			watcher.setProxy(null);
-			del_plan.setEnabled(false);
-		}
+		DayPlan dp = day_lst.getSelectedValue();
+		hol_pnl.setModel(new HolidayModel(session, dp));
+		watcher.setProxy(dp);
 		updateCalendarWidget();
+		updateButtonPanel();
 	}
 
-	/** Get the selected day plan */
-	private DayPlan getSelectedPlan() {
-		Object item = day_cbx.getSelectedItem();
-		if (item != null)
-			return DayPlanHelper.lookup(item.toString().trim());
-		else
-			return null;
+	/** Create a new day plan */
+	private void createDayPlan() {
+		String name = add_txt.getText().trim();
+		add_txt.setText("");
+		if (name.length() > 0 && canAdd(name))
+			cache.createObject(name);
 	}
 
 	/** Delete the selected day plan */
 	private void deleteSelectedPlan() {
-		Object item = day_cbx.getSelectedItem();
-		if (item != null) {
-			String name = item.toString();
-			DayPlan dp = DayPlanHelper.lookup(name);
-			if (dp != null)
-				dp.destroy();
-			day_cbx.setSelectedItem(null);
-		}
+		DayPlan dp = day_lst.getSelectedValue();
+		if (dp != null)
+			dp.destroy();
 	}
 
 	/** Check if the user can add */
