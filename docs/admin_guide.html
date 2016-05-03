@@ -1369,8 +1369,9 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	In some circumstances, it may be appropriate to disable this checking.
 	For example, if the message feed host is fully trusted and there is no
 	possibility of man-in-the-middle attacks between IRIS and the feed host.
-	In this case the "msg_feed_verify" <a href="#system_attributes">system
-	attribute</a> can be set to "false" to disable this check.
+	In this case the <code>msg_feed_verify</code>
+	<a href="#system_attributes">system attribute</a> can be set to
+	<code>false</code> to disable this check.
 </p>
 
 <h4 id="din_relay">DIN Relay</h4>
@@ -2159,10 +2160,26 @@ FIXME
 
 <h3 id="gate_arms">Gate Arms</h3>
 <p>
-	Gate Arms are traffic control devices which restrict access to a
+	Gate arms are traffic control devices which restrict access to a
 	section of roadway.
 	They can be used, for example, for reversible lanes which can be changed
 	by time of day.
+</p>
+<p>
+	Gate arms are controlled as arrays of 1-8 gate arms.
+	Opening or closing an array will control all gate arms in the array.
+</p>
+<p>
+	Up to two <a href="#cameras">cameras</a> can be associated with a gate
+	arm array.
+	This allows operators to verify the status and check traffic conditions
+	before opening or closing a gate arm array.
+</p>
+<p>
+	A <a href="#dms">DMS</a> can be associated with a gate arm array, to
+	inform motirists.
+	Two <a href="#quick_msg">quick messages</a>, for <em>open</em> and
+	<em>closed</em> will be automatically sent to the DMS.
 </p>
 <h4 id="interlocks">Interlocks</h4>
 <p>
@@ -2186,6 +2203,26 @@ FIXME
 	Once a gate arm and its prerequisite are both open, the prerequisite
 	gate arm will have a <em>close interlock</em> until the other gate arm
 	is closed.
+</p>
+<p>
+	If communication is lost to a gate arm, the state will be unknown by
+	IRIS.
+	After 90 seconds, it will be treated as <em>possibly open</em>, causing
+	interlocks to be checked.
+	Also, an email will be sent to the address in the
+	<code>email_recipient_gate_arm</code>
+	<a href="#system_attributes">system attribute</a>.
+</p>
+<h4 id="gate_conflict">Conflicts</h4>
+<p>
+	If a <em>conflict</em> is detected, an <em>alert</em> email will be sent
+	to the address in the <code>email_recipient_gate_arm</code>
+	<a href="#system_attributes">system attribute</a>.
+	An <em>open conflict</em> exists when an <em>open interlock</em>
+	constraint is broken.
+	Similarly, a <em>close conflict</em> exists for <em>close interlock</em>
+	constraints.
+	IRIS will not automatically try to resolve conflicts.
 </p>
 <h4 id="gate_security">Gate Arm Security</h4>
 <p>
@@ -2550,7 +2587,8 @@ FIXME
 	with the calculated price, for example "2.75".
 	It will be the sum of prices for all specified toll zones.
 	Two <a href="#system_attributes">system attributes</a>,
-	toll_min_price and toll_max_price, limit the calculated price.
+	<code>toll_min_price</code> and <code>toll_max_price</code>, limit the
+	calculated price.
 </p>
 <p>
 	For <i>open</i> and <i>closed</i> modes, the MULTI tag will be replaced
