@@ -72,7 +72,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		}
 		@Override
 		protected void doUpdateSelected() {
-			comm_link_mdl.setSelectedItem(proxy.getCommLink());
+			updateCommLink();
 		}
 	};
 
@@ -388,7 +388,7 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	@Override
 	protected void doUpdateAttribute(String a) {
 		if (a == null || a.equals("commLink")) {
-			comm_link_act.updateSelected();
+			updateCommLink();
 			drop_model = new DropNumberModel(
 				proxy.getCommLink(), getTypeCache(),
 				proxy.getDrop());
@@ -439,5 +439,10 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		}
 		if (a == null || a.equals("style"))
 			cab_style_act.updateSelected();
+	}
+
+	/** Update the comm link */
+	private void updateCommLink() {
+		comm_link_mdl.setSelectedItem(proxy.getCommLink());
 	}
 }
