@@ -80,6 +80,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private final JComboBox<CommLink> comm_link_cbx =
 		new JComboBox<CommLink>();
 
+	/** Comm link URI label */
+	private final JLabel uri_lbl = new JLabel();
+
 	/** Model for drop address spinner */
 	private DropNumberModel drop_model;
 
@@ -256,7 +259,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		condition_cbx.setAction(condition_act);
 		IPanel p = new IPanel();
 		p.add("comm.link");
-		p.add(comm_link_cbx, Stretch.LAST);
+		p.add(comm_link_cbx);
+		p.add(uri_lbl, Stretch.LAST);
 		p.add("controller.drop");
 		p.add(drop_spn, Stretch.LAST);
 		p.add("controller.password");
@@ -443,6 +447,8 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 
 	/** Update the comm link */
 	private void updateCommLink() {
-		comm_link_mdl.setSelectedItem(proxy.getCommLink());
+		CommLink cl = proxy.getCommLink();
+		comm_link_mdl.setSelectedItem(cl);
+		uri_lbl.setText(cl.getUri());
 	}
 }
