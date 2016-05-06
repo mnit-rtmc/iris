@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public class GlyphEditor extends JPanel {
 	/** Mouse listener */
 	private final MouseListener m_list = new MouseAdapter() {
 		@Override public void mousePressed(MouseEvent e) {
-			if(e.getButton() == MouseEvent.BUTTON1)
+			if (e.getButton() == MouseEvent.BUTTON1)
 				color = DmsColor.AMBER;
 			else
 				color = DmsColor.BLACK;
@@ -60,16 +60,16 @@ public class GlyphEditor extends JPanel {
 	private void setPixel(MouseEvent e) {
 		BitmapGraphic bg = bmap;
 		float pitch = calculatePitch(bg);
-		int p = (int)pitch;
-		if(p > 0) {
+		int p = (int) pitch;
+		if (p > 0) {
 			int left = calculateLeft(bg, pitch);
 			int top = calculateTop(bg, pitch);
 			int x = (e.getX() - left) / p;
 			int y = (e.getY() - top) / p;
-			if(x >= 0 && x < bg.getWidth() &&
-			   y >= 0 && y < bg.getHeight())
+			if (x >= 0 && x < bg.getWidth() &&
+			    y >= 0 && y < bg.getHeight())
 			{
-				if(bg.getPixel(x, y) != color) {
+				if (bg.getPixel(x, y) != color) {
 					bg.setPixel(x, y, color);
 					repaint();
 				}
@@ -96,6 +96,7 @@ public class GlyphEditor extends JPanel {
 	}
 
 	/** Paint the glyph */
+	@Override
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
 		paintPixels(g, bmap);
@@ -107,10 +108,10 @@ public class GlyphEditor extends JPanel {
 		int left = calculateLeft(bg, pitch);
 		int top = calculateTop(bg, pitch);
 		int yy = top;
-		int p = Math.max((int)pitch - 1, 1);
-		for(int y = 0; y < bg.getHeight(); y++, yy += pitch) {
+		int p = Math.max((int) pitch - 1, 1);
+		for (int y = 0; y < bg.getHeight(); y++, yy += pitch) {
 			int xx = left;
-			for(int x = 0; x < bg.getWidth(); x++, xx += pitch) {
+			for (int x = 0; x < bg.getWidth(); x++, xx += pitch) {
 				g.setColor(bg.getPixel(x, y).color);
 				g.fillRect(xx, yy, p, p);
 			}
@@ -119,7 +120,7 @@ public class GlyphEditor extends JPanel {
 
 	/** Calculate the pitch for the glyph */
 	private float calculatePitch(BitmapGraphic bg) {
-		if(bg.getHeight() > 0)
+		if (bg.getHeight() > 0)
 			return getHeight() / bg.getHeight();
 		else
 			return 0;
@@ -127,11 +128,11 @@ public class GlyphEditor extends JPanel {
 
 	/** Calculate the left side of the glyph */
 	private int calculateLeft(BitmapGraphic bg, float pitch) {
-		return (int)((getWidth() - bg.getWidth() * pitch) / 2);
+		return (int) ((getWidth() - bg.getWidth() * pitch) / 2);
 	}
 
 	/** Calculate the top of the glyph */
 	private int calculateTop(BitmapGraphic bg, float pitch) {
-		return (int)((getHeight() - bg.getHeight() * pitch) / 2);
+		return (int) ((getHeight() - bg.getHeight() * pitch) / 2);
 	}
 }
