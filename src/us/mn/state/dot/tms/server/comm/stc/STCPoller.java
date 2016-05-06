@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,13 +38,6 @@ public class STCPoller extends MessagePoller<STCProperty>
 	/** Create a new STC poller */
 	public STCPoller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		// Drop address 254 is reserved for broadcast
-		return drop >= 1 && drop <= 99;
 	}
 
 	/** Send a device request */

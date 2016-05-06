@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,12 +35,6 @@ public class DR500Poller extends MessagePoller<DR500Property>
 	/** Create a new DR500 poller */
 	public DR500Poller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return 1 == drop;
 	}
 
 	/** Perform a controller download */

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 
 /**
  * Pelco D Property
@@ -26,6 +27,14 @@ import us.mn.state.dot.tms.server.comm.ControllerProperty;
  * @author Douglas Lau
  */
 abstract public class PelcoDProperty extends ControllerProperty {
+
+	/** Highest allowed address for Pelco D protocol */
+	static public final int ADDRESS_MAX = 254;
+
+	/** Check if a drop address is valid */
+	static private boolean isAddressValid(int drop) {
+		return drop >= 1 && drop <= ADDRESS_MAX;
+	}
 
 	/** Get the command bits (in the 2 LSBs) */
 	abstract protected int getCommand();
@@ -37,7 +46,9 @@ abstract public class PelcoDProperty extends ControllerProperty {
 	abstract protected int getParam2();
 
 	/** Create Pelco D packet */
-	private byte[] createPacket(int drop) {
+	private byte[] createPacket(int drop) throws IOException {
+		if (!isAddressValid(drop))
+			throw new InvalidAddressException(drop);
 		int cmd = getCommand();
 		byte[] pkt = new byte[7];
 		pkt[0] = (byte)0xFF;

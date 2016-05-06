@@ -38,12 +38,6 @@ public class CBWPoller extends MessagePoller<CBWProperty>
 		super(n, m);
 	}
 
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return true;
-	}
-
 	/** Send a device request */
 	@Override
 	public void sendRequest(BeaconImpl b, DeviceRequest r) {

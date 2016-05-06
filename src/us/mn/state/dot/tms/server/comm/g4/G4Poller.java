@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2012  Iteris Inc.
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,12 +36,6 @@ public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 	/** Create a new G4 poller */
 	public G4Poller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Check if a sensor id is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return drop >= 0 && drop < 65536;
 	}
 
 	/** Perform a controller reset */

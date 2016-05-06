@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,25 +35,9 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 	/** Canoga debug log */
 	static protected final DebugLog CANOGA_LOG = new DebugLog("canoga");
 
-	/** Maximum address allowed for backplane addressing */
-	static protected final int ADDRESS_MAX_BACKPLANE = 15;
-
-	/** Minimum address allowed for EEPROM programmable */
-	static protected final int ADDRESS_MIN_EEPROM = 128;
-
-	/** Wildcard address */
-	static protected final int ADDRESS_WILDCARD = 255;
-
 	/** Create a new Canoga poller */
 	public CanogaPoller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return (drop >= 0 && drop <= ADDRESS_MAX_BACKPLANE) ||
-		       (drop >= ADDRESS_MIN_EEPROM && drop <= ADDRESS_WILDCARD);
 	}
 
 	/** Perform a controller download */

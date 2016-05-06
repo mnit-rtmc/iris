@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.CRC;
+import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
@@ -65,6 +66,11 @@ abstract public class SS125Property extends ControllerProperty {
 
 	/** CRC calculator */
 	static private final CRC crc = new CRC(8, 0x1C, 0x00, false);
+
+	/** Check if a drop address is valid */
+	static private boolean isAddressValid(int drop) {
+		return drop > 0 && drop < 65536;
+	}
 
 	/** Calculate the CRC for a buffer */
 	static private int calculate(byte[] buf) {
@@ -214,7 +220,9 @@ abstract public class SS125Property extends ControllerProperty {
 	 * @param body Body of message to send.
 	 * @param drop Destination ID (drop address).
 	 * @return Header appropriate for polling message. */
-	protected byte[] formatHeader(byte[] body, int drop) {
+	protected byte[] formatHeader(byte[] body, int drop) throws IOException{
+		if (!isAddressValid(drop))
+			throw new InvalidAddressException(drop);
 		assert (body.length - 1) <= MAX_BODY_OCTETS;
 		byte[] header = new byte[11];
 		header[OFF_SENTINEL] = 'Z';

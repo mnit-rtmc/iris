@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,8 +22,8 @@ import java.io.FilterOutputStream;
 import java.io.InputStream;
 import java.io.FilterInputStream;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
+import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
-import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * This is an implementation of the ISO/IEC standard 3309 High-level Data
@@ -260,14 +260,16 @@ abstract public class HDLC {
 	/** Mask for last byte of the address field */
 	static protected final byte ADDRESS_LAST = 0x01;
 
-	/** Create an HDLC address buffer */
-	static private byte[] createAddress(int address)
-		throws ProtocolException
+	/** Check for a valid address */
+	static private void checkAddress(int address)
+		throws InvalidAddressException
 	{
-		if (address < 1 || address > NTCIP_MAX_ADDRESS) {
-			throw new ProtocolException("INVALID HDLC ADDRESS: " +
-				address);
-		}
+		if (address < 1 || address > NTCIP_MAX_ADDRESS)
+			throw new InvalidAddressException(address);
+	}
+
+	/** Create an HDLC address buffer */
+	static private byte[] createAddress(int address) {
 		if (address < 64)
 			return create1ByteAddress(address);
 		else
@@ -327,9 +329,10 @@ abstract public class HDLC {
 
 		/** Create an HDLC addressed output stream */
 		public AddressedOutputStream(OutputStream out, int address)
-			throws ProtocolException
+			throws InvalidAddressException
 		{
 			super(out);
+			checkAddress(address);
 			add_buf = createAddress(address);
 		}
 
@@ -371,9 +374,12 @@ abstract public class HDLC {
 		protected final InputStream in;
 
 		/** Create an HDLC addressed input stream */
-		public AddressedInputStream(InputStream in, int address) {
+		public AddressedInputStream(InputStream in, int address)
+			throws InvalidAddressException
+		{
 			this.in = in;
 			this.address = address;
+			checkAddress(address);
 		}
 
 		/** Parse the HDLC "header" (address, control, IPI) */

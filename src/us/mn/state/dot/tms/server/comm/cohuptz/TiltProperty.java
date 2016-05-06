@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +54,7 @@ public class TiltProperty extends CohuPTZProperty {
 			cmd[1] = getPanTiltSpeedByte(value);
 		}
 
-		byte[] msg = new byte[5];
+		byte[] msg = createPacket(c.getDrop());
 		msg[0] = (byte)0xf8;
 		msg[1] = (byte)c.getDrop();
 		msg[2] = cmd[0];

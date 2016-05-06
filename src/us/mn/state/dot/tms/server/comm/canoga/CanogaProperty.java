@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -89,8 +90,27 @@ abstract public class CanogaProperty extends ControllerProperty {
 		return xsum;
 	}
 
+	/** Maximum address allowed for backplane addressing */
+	static private final int ADDRESS_MAX_BACKPLANE = 15;
+
+	/** Minimum address allowed for EEPROM programmable */
+	static private final int ADDRESS_MIN_EEPROM = 128;
+
+	/** Wildcard address */
+	static private final int ADDRESS_WILDCARD = 255;
+
+	/** Check if a drop address is valid */
+	static private boolean isAddressValid(int drop) {
+		return (drop >= 0 && drop <= ADDRESS_MAX_BACKPLANE) ||
+		       (drop >= ADDRESS_MIN_EEPROM && drop <= ADDRESS_WILDCARD);
+	}
+
 	/** Format a request message */
-	static private byte[] formatRequest(int drop, byte[] payload) {
+	static private byte[] formatRequest(int drop, byte[] payload)
+		throws IOException
+	{
+		if (!isAddressValid(drop))
+			throw new InvalidAddressException(drop);
 		byte len = (byte)(payload.length + 7);
 		byte[] req = new byte[len];
 		req[OFF_HEADER] = '<';

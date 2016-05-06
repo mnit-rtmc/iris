@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2015  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,6 +22,7 @@ import java.util.TimeZone;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -53,10 +54,17 @@ abstract public class G4Property extends ControllerProperty {
 		return c;
 	}
 
+	/** Check if a sensor id is valid */
+	static private boolean isAddressValid(int drop) {
+		return drop >= 0 && drop < 65536;
+	}
+
 	/** Format a request frame */
 	static protected final byte[] formatRequest(QualCode qual, int drop,
-		byte[] data)
+		byte[] data) throws IOException
 	{
+		if (!isAddressValid(drop))
+			throw new InvalidAddressException(drop);
 		byte[] req = new byte[OFF_DATA + data.length + 2];
 		format16(req, OFF_SENTINEL, SENTINEL);
 		format8(req, OFF_QUAL, qual.code);

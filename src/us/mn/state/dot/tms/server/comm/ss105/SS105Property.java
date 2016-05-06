@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2015  Minnesota Department of Transportation
+ * Copyright (C) 2004-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
@@ -63,10 +64,17 @@ abstract public class SS105Property extends ControllerProperty {
 			throw new ChecksumException();
 	}
 
+	/** Check if a drop address is valid */
+	static public boolean isAddressValid(int drop) {
+		return drop >= 0 && drop <= 9999;
+	}
+
 	/** Format a request header */
-	static private String formatHeader(int drop) {
+	static private String formatHeader(int drop) throws IOException {
 		StringBuilder sb = new StringBuilder();
-		if(MULTIDROP) {
+		if (MULTIDROP) {
+			if (!isAddressValid(drop))
+				throw new InvalidAddressException(drop);
 			sb.append("Z0");
 			sb.append(Integer.toString(drop));
 			while(sb.length() < 6)

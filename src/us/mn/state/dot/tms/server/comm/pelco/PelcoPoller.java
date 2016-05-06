@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,18 +34,9 @@ public class PelcoPoller extends MessagePoller<PelcoProperty>
 	/** Pelco debug log */
 	static protected final DebugLog PELCO_LOG = new DebugLog("pelco");
 
-	/** Dummy drop value for creating addressed messages */
-	static private final int PELCO_DROP = 1;
-
 	/** Create a new Pelco line */
 	public PelcoPoller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return drop == PELCO_DROP;
 	}
 
 	/** Set the camera to display on the specified monitor */

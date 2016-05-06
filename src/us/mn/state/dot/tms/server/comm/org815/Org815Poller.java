@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,12 +36,6 @@ public class Org815Poller extends MessagePoller<Org815Property>
 	/** Create a new ORG-815 poller */
 	public Org815Poller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return true;
 	}
 
 	/** Send a device request */

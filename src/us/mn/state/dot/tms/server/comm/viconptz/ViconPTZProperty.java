@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 
 /**
  * Vicon Property
@@ -30,8 +31,18 @@ abstract public class ViconPTZProperty extends ControllerProperty {
 	/** Mask for command requests (second byte) */
 	static private final byte CMD = 0x10;
 
+	/** Highest allowed address for Vicon protocol */
+	static private final int ADDRESS_MAX = 254;
+
+	/** Check if a drop address is valid */
+	static private boolean isAddressValid(int drop) {
+		return drop >= 1 && drop <= ADDRESS_MAX;
+	}
+
 	/** Create basic Vicon packet */
-	protected byte[] createPacket(int drop) {
+	protected byte[] createPacket(int drop) throws IOException {
+		if (!isAddressValid(drop))
+			throw new InvalidAddressException(drop);
 		byte[] pkt = new byte[6];
 		pkt[0] = (byte)(0x80 | (drop >> 4));
 		pkt[1] = (byte)((0x0f & drop) | CMD);

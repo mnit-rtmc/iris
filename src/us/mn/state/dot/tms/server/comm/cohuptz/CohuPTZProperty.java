@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,10 +13,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
+import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 
 /**
  * Cohu PTZ Property
@@ -29,6 +31,23 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 	 * PTZ vectors below this value will be considered as stop commands.
 	 */
 	static protected final float PTZ_THRESH = 0.001F;
+
+	/** Cohu camera address range constants */
+	static private final int ADDR_MIN = 1;
+	static private final int ADDR_MAX = 223;
+
+	/** Check drop address validity */
+	static private boolean isAddressValid(int drop) {
+		return ((drop >= ADDR_MIN) && (drop <= ADDR_MAX));
+	}
+
+	/** Create a Cohu packet */
+	protected byte[] createPacket(int drop) throws IOException {
+		if (!isAddressValid(drop))
+			throw new InvalidAddressException(drop);
+		byte[] pkt = new byte[5];
+		return pkt;
+	}
 
 	/**
 	 * Calculate the XOR-based checksum of the given Cohu message.
@@ -48,9 +67,8 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 		if (last >= message.length) return null;
 
 		byte runningXor = 0;
-		for(int i = first; i <= last; ++i) {
+		for (int i = first; i <= last; ++i)
 			runningXor ^= message[i];
-			}
 		return (byte) (0x80 + ((runningXor & (byte)0x0f)));
 	}
 
@@ -129,5 +147,4 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 		byte byteval = (byte) (0x30 + mapInt);
 		return byteval;
 	}
-
 }

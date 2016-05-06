@@ -206,12 +206,6 @@ public class E6Poller extends MessagePoller<E6Property>
 		p.parseQuery(resp);
 	}
 
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return true;
-	}
-
 	/** Send a device request message to the tag reader */
 	@Override
 	public void sendRequest(TagReaderImpl tr, DeviceRequest r) {

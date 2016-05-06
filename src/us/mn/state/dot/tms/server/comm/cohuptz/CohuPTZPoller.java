@@ -18,21 +18,17 @@ package us.mn.state.dot.tms.server.comm.cohuptz;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.TransientPoller;
 
 /**
  * Poller for the Cohu PTZ protocol
  *
  * @author Travis Swanston
  */
-public class CohuPTZPoller extends MessagePoller<CohuPTZProperty>
+public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 	implements CameraPoller
 {
-	/** Cohu camera address range constants */
-	static public final int ADDR_MIN = 1;
-	static public final int ADDR_MAX = 223;
-
 	/** Timestamp of most recent transaction with the device. */
 	protected long lastCmdTime = 0;
 
@@ -48,12 +44,6 @@ public class CohuPTZPoller extends MessagePoller<CohuPTZProperty>
 	/** Create a new Cohu PTZ poller */
 	public CohuPTZPoller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Check drop address validity */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return ((drop >= ADDR_MIN) && (drop <= ADDR_MAX));
 	}
 
 	/** Send a "PTZ camera move" command */

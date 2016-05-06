@@ -41,12 +41,6 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 		super(n, m);
 	}
 
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return true;
-	}
-
 	/** Query the outlet status */
 	public void queryOutlets(ControllerImpl c, OutletProperty op) {
 		addOperation(new OpQueryOutlets(c, op));

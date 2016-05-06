@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.io.UnsupportedEncodingException;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -79,6 +80,12 @@ abstract public class STCProperty extends ControllerProperty {
 		buf[pos] = (byte)(v ? '1' : '0');
 	}
 
+	/** Check if a drop address is valid */
+	static private boolean isAddressValid(int drop) {
+		// Drop address 254 is reserved for broadcast
+		return drop >= 1 && drop <= 99;
+	}
+
 	/** Controller password */
 	private final byte[] password;
 
@@ -88,7 +95,11 @@ abstract public class STCProperty extends ControllerProperty {
 	}
 
 	/** Format a request frame */
-	protected final byte[] formatRequest(int drop, byte[] data) {
+	protected final byte[] formatRequest(int drop, byte[] data)
+		throws IOException
+	{
+		if (!isAddressValid(drop))
+			throw new InvalidAddressException(drop);
 		int ppos = OFF_MESSAGE + data.length;
 		int dplen = ppos + password.length;
 		byte[] req = new byte[dplen + 1];

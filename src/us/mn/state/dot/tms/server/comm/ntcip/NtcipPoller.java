@@ -56,13 +56,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 			messenger.getInputStream("", c), c.getPassword());
 	}
 
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		// FIXME: this doesn't belong here
-		return drop > 0 && drop <= HDLC.NTCIP_MAX_ADDRESS;
-	}
-
 	/** Send a device request message to the sign */
 	@SuppressWarnings("unchecked")
 	@Override

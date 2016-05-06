@@ -46,10 +46,6 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 	/** Debug log */
 	static protected final DebugLog LOG = new DebugLog("dmsxml");
 
-	/** valid address range (inclusive) */
-	static public final int MAX_ADDRESS = 255;
-	static public final int MIN_ADDRESS = 1;
-
 	/** Create a new dmsxml poller */
 	public DmsXmlPoller(String n, Messenger m) {
 		super(n, m);
@@ -71,12 +67,6 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 		ControllerImpl c = o.getController();
 		return new Message(messenger.getOutputStream(c),
 				   messenger.getInputStream("", c));
-	}
-
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return ((drop >= MIN_ADDRESS) && (drop <= MAX_ADDRESS));
 	}
 
 	/** Send a new message to the sign. Called by DMSImpl.

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 
 /**
  * A manchester property.
@@ -58,8 +59,18 @@ abstract public class ManchesterProperty extends ControllerProperty {
 		return (byte)(((Math.abs(v) - 1) << 1) & 0x0E);
 	}
 
+	/** Highest allowed address for Manchester protocol */
+	static private final int ADDRESS_MAX = 1024;
+
+	/** Check if a drop address is valid */
+	static private boolean isAddressValid(int drop) {
+		return drop >= 1 && drop <= ADDRESS_MAX;
+	}
+
 	/** Create manchester packet */
-	private byte[] createPacket(int drop) {
+	private byte[] createPacket(int drop) throws IOException {
+		if (!isAddressValid(drop))
+			throw new InvalidAddressException(drop);
 		byte[] pkt = new byte[3];
 		pkt[0] = (byte)(0x80 | (drop >> 6));
 		pkt[1] = (byte)((drop >> 5) & 0x01);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.DownloadRequestException;
+import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -61,7 +62,7 @@ abstract public class MndotProperty extends ControllerProperty {
 	 * @param n_bytes Number of additional bytes.
 	 * @return Request packet. */
 	static protected final byte[] createRequest(ControllerImpl c,
-		CatCode cat, int n_bytes)
+		CatCode cat, int n_bytes) throws IOException
 	{
 		byte[] pkt = new byte[3 + n_bytes];
 		pkt[OFF_DROP_CAT] = dropCat(c, cat);
@@ -73,13 +74,20 @@ abstract public class MndotProperty extends ControllerProperty {
 	 * @param c Controller.
 	 * @param cat Category code.
 	 * @return Combined drop/category byte. */
-	static private byte dropCat(ControllerImpl c, CatCode cat) {
+	static private byte dropCat(ControllerImpl c, CatCode cat)
+		throws IOException
+	{
 		int drop = c.getDrop();
 		CommProtocol cp = c.getProtocol();
-		if (cp == CommProtocol.MNDOT_5)
-			return (byte)(drop << 3 | cat.ordinal());
-		else
-			return (byte)(drop << 4 | cat.ordinal());
+		if (cp == CommProtocol.MNDOT_5) {
+			if (drop < 1 || drop > 31)
+				throw new InvalidAddressException(drop);
+			return (byte) (drop << 3 | cat.ordinal());
+		} else {
+			if (drop < 1 || drop > 15)
+				throw new InvalidAddressException(drop);
+			return (byte) (drop << 4 | cat.ordinal());
+		}
 	}
 
 	/** Calculate the checksum for a request packet */

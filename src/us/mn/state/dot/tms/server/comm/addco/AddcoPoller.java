@@ -40,12 +40,6 @@ public class AddcoPoller extends MessagePoller<AddcoProperty>
 		super(n, m);
 	}
 
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return true;
-	}
-
 	/** Send a device request message to the sign */
 	@Override
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {

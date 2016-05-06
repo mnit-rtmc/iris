@@ -61,16 +61,6 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 		protocol = p;
 	}
 
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		if (drop < 1 || drop > 31)
-			return false;
-		if (drop > 15 && protocol != CommProtocol.MNDOT_5)
-			return false;
-		return true;
-	}
-
 	/** Respond to a download request from a controller */
 	@Override
 	protected void download(ControllerImpl c, PriorityLevel p) {

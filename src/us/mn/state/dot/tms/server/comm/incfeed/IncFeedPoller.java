@@ -45,12 +45,6 @@ public class IncFeedPoller extends MessagePoller<IncFeedProperty> {
 		feed_id = n;
 	}
 
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return true;
-	}
-
 	/** Query incident feed */
 	public void queryIncidents(ControllerImpl c, IncidentCache cache) {
 		addOperation(new OpReadIncFeed(c, feed_id, cache));

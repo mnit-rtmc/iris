@@ -49,12 +49,6 @@ public class SsiPoller extends MessagePoller<SsiProperty>
 		super(n, m);
 	}
 
-	/** Drop address is always valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return true;
-	}
-
 	/** Send a device request */
 	@Override
 	public void sendRequest(WeatherSensorImpl ws, DeviceRequest r) {

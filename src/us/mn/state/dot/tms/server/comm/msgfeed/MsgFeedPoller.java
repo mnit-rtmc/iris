@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,12 +43,6 @@ public class MsgFeedPoller extends MessagePoller<MsgFeedProperty> {
 	public MsgFeedPoller(String n, Messenger m) {
 		super(n, m);
 		feed_id = n;
-	}
-
-	/** Check if a drop address is valid */
-	@Override
-	public boolean isAddressValid(int drop) {
-		return true;
 	}
 
 	/** Query message feed */

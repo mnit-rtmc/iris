@@ -326,9 +326,6 @@ abstract public class MessagePoller<T extends ControllerProperty>
 		return TimeSteward.currentTimeMillis() - start;
 	}
 
-	/** Check if a drop address is valid */
-	abstract public boolean isAddressValid(int drop);
-
 	/** Create a message for the specified operation.
 	 * @param o The operation.
 	 * @return New comm message. */

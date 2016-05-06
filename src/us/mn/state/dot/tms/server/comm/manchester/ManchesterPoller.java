@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -36,17 +36,9 @@ public class ManchesterPoller extends TransientPoller<ManchesterProperty>
 	static private final DebugLog MANCHESTER_LOG =
 		new DebugLog("manchester");
 
-	/** Highest allowed address for Manchester protocol */
-	static protected final int ADDRESS_MAX = 1024;
-
 	/** Create a new Manchester poller */
 	public ManchesterPoller(String n, Messenger m) {
 		super(n, m);
-	}
-
-	/** Check if a drop address is valid */
-	public boolean isAddressValid(int drop) {
-		return drop >= 1 && drop <= ADDRESS_MAX;
 	}
 
 	/** Send a PTZ camera move command */
