@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,18 @@ import java.io.PrintStream;
  * @author Douglas Lau
  */
 public final class OperationQueue<T extends ControllerProperty> {
+
+	/** Inner class for nodes in the queue */
+	static private final class Node<T extends ControllerProperty> {
+		final Operation<T> operation;
+		final PriorityLevel priority;
+		Node<T> next;
+		Node(Operation<T> op, Node<T> n) {
+			operation = op;
+			priority = op.getPriority();
+			next = n;
+		}
+	}
 
 	/** Front node in the queue */
 	private Node<T> front = null;
@@ -73,14 +85,14 @@ public final class OperationQueue<T extends ControllerProperty> {
 		PriorityLevel priority = op.getPriority();
 		Node<T> prev = null;
 		Node<T> node = front;
-		while(node != null) {
-			if(priority.ordinal() < node.priority.ordinal())
+		while (node != null) {
+			if (priority.ordinal() < node.priority.ordinal())
 				break;
 			prev = node;
 			node = node.next;
 		}
 		node = new Node<T>(op, node);
-		if(prev == null)
+		if (prev == null)
 			front = node;
 		else
 			prev.next = node;
@@ -89,7 +101,7 @@ public final class OperationQueue<T extends ControllerProperty> {
 
 	/** Requeue an in-progress operation */
 	public synchronized boolean requeue(Operation<T> op) {
-		if((remove(op) == op) && !closing) {
+		if ((remove(op) == op) && !closing) {
 			add(op);
 			return true;
 		} else
@@ -98,15 +110,15 @@ public final class OperationQueue<T extends ControllerProperty> {
 
 	/** Remove an operation from the queue */
 	private Operation<T> remove(Operation<T> op) {
-		if(op == work) {
+		if (op == work) {
 			work = null;
 			return op;
 		}
 		Node<T> prev = null;
 		Node<T> node = front;
-		while(node != null) {
-			if(node.operation == op) {
-				if(prev == null)
+		while (node != null) {
+			if (node.operation == op) {
+				if (prev == null)
 					front = node;
 				else
 					prev.next = node;
@@ -134,35 +146,23 @@ public final class OperationQueue<T extends ControllerProperty> {
 
 	/** Wait for an operation to be added to the queue */
 	private synchronized void waitOp() {
-		while(!hasNext()) {
+		while (!hasNext()) {
 			try {
 				wait();
 			}
-			catch(InterruptedException e) {
+			catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-		}
-	}
-
-	/** Inner class for nodes in the queue */
-	static private final class Node<T extends ControllerProperty> {
-		final Operation<T> operation;
-		final PriorityLevel priority;
-		Node<T> next;
-		Node(Operation<T> op, Node<T> n) {
-			operation = op;
-			priority = op.getPriority();
-			next = n;
 		}
 	}
 
 	/** Do something to each operation in the queue */
 	public synchronized void forEach(OperationHandler<T> handler) {
 		Operation<T> w = work;
-		if(w != null)
+		if (w != null)
 			handler.handle(w.getPriority(), w);
 		Node<T> node = front;
-		while(node != null) {
+		while (node != null) {
 			handler.handle(node.priority, node.operation);
 			node = node.next;
 		}
