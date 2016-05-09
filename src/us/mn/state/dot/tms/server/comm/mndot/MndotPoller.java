@@ -46,7 +46,7 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	BeaconPoller, LaneMarkingPoller
 {
 	/** MnDOT 170 debug log */
-	static protected final DebugLog MNDOT_LOG = new DebugLog("mndot170");
+	static private final DebugLog MNDOT_LOG = new DebugLog("mndot170");
 
 	/** Create a new MnDOT 170 poller.
 	 * @param n Comm link name.

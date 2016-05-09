@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -120,6 +120,12 @@ class Message implements CommMessage
 	/** Log a property store */
 	@Override
 	public void logStore(ControllerProperty prop) {
+		// not implemented
+	}
+
+	/** Log an error */
+	@Override
+	public void logError(String m) {
 		// not implemented
 	}
 

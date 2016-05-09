@@ -21,7 +21,6 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import static us.mn.state.dot.tms.server.comm.mndot.MndotPoller.MNDOT_LOG;
 
 /**
  * 170 Controller operation
@@ -105,12 +104,6 @@ abstract public class Op170 extends OpController<MndotProperty> {
 			return g / 2;
 		} else
 			return g;
-	}
-
-	/** Log an error msg */
-	protected void logError(String msg) {
-		if (MNDOT_LOG.isOpen())
-			MNDOT_LOG.log(controller.getName() + "! " + msg);
 	}
 
 	/** Create a new 170 operation */

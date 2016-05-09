@@ -89,13 +89,8 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 		}
 
 		/** Test if the timestamp is out of the valid range */
-		private boolean isStampBad() {
-			long s = getStamp();
-			if (s < oldest || s > newest) {
-				logError("BAD TIMESTAMP: " + new Date(s));
-				return true;
-			} else
-				return false;
+		private boolean isStampBad(long s) {
+			return (s < oldest || s > newest);
 		}
 
 		/** Collect 5-minute data from the controller */
@@ -106,7 +101,10 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 			int recs = 0;
 			try {
 				recs = tryNextRecord(mess);
-				if (isStampBad()) {
+				long s = getStamp();
+				if (isStampBad(s)) {
+					mess.logError("BAD TIMESTAMP: " +
+						new Date(s));
 					if (++n_bad > MAX_BAD_RECORDS)
 						return null;
 					else

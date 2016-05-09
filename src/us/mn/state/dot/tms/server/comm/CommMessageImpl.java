@@ -118,4 +118,11 @@ public class CommMessageImpl<T extends ControllerProperty>
 		if (p_log != null && p_log.isOpen())
 			p_log.log(op + ":= " + prop);
 	}
+
+	/** Log an error */
+	@Override
+	public void logError(String m) {
+		if (p_log != null && p_log.isOpen())
+			p_log.log(op + " ! " + m);
+	}
 }

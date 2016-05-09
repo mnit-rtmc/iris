@@ -28,6 +28,18 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendSampleSettings extends Op170 {
 
+	/** Set the controller firmware version */
+	static private String formatVersion(int major, int minor) {
+		return Integer.toString(major) + "." + Integer.toString(minor);
+	}
+
+	/** Check for buggy 170 firmware version */
+	static private boolean isVersionBuggy(int major, int minor) {
+		return (major < 4)
+		    || (major == 4 && minor < 2)
+		    || (major == 5 && minor < 4);
+	}
+
 	/** Create a new send sample settings operation */
 	public OpSendSampleSettings(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
@@ -57,19 +69,6 @@ public class OpSendSampleSettings extends Op170 {
 		}
 	}
 
-	/** Set the controller firmware version */
-	private void setVersion(int major, int minor) {
-		String v = Integer.toString(major) + "." +
-			Integer.toString(minor);
-		controller.setVersion(v);
-		if ((major < 4)
-		 || (major == 4 && minor < 2)
-		 || (major == 5 && minor < 4))
-		{
-			logError("BUGGY 170 firmware! (version " + v + ")");
-		}
-	}
-
 	/** Phase to query the prom version */
 	protected class QueryPromVersion extends Phase<MndotProperty> {
 
@@ -82,7 +81,10 @@ public class OpSendSampleSettings extends Op170 {
 				Address.PROM_VERSION, data);
 			mess.add(ver_mem);
 			mess.queryProps();
-			setVersion(data[0], data[1]);
+			String v = formatVersion(data[0], data[1]);
+			controller.setVersion(v);
+			if (isVersionBuggy(data[0], data[1]))
+				mess.logError("BUGGY 170 firmware! (" + v +")");
 			return new QueueBitmap();
 		}
 	}

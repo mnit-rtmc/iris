@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2012  Minnesota Department of Transportation
+ * Copyright (C) 2002-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,4 +42,7 @@ public interface CommMessage<T extends ControllerProperty> {
 
 	/** Log a property store */
 	void logStore(T prop);
+
+	/** Log an error */
+	void logError(String m);
 }
