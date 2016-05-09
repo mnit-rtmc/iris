@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2014  Minnesota Department of Transportation
+ * Copyright (C) 2004-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,20 +28,27 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpSendSensorSettings extends OpSS105 {
 
 	/** Time interval for data binning */
-	static protected final int BINNING_INTERVAL = 30;
+	static private final int BINNING_INTERVAL = 30;
 
 	/** Flag to perform a controller restart */
-	protected final boolean restart;
+	private final boolean restart;
+
+	/** Create a new operation to send settings to a sensor */
+	public OpSendSensorSettings(PriorityLevel p, ControllerImpl c,
+		boolean r)
+	{
+		super(p, c);
+		restart = r;
+	}
 
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c, boolean r) {
-		super(PriorityLevel.DOWNLOAD, c);
-		restart = r;
+		this(PriorityLevel.DOWNLOAD, c, r);
 	}
 
 	/** Create the first phase of the operation */
 	protected Phase<SS105Property> phaseOne() {
-		if(restart)
+		if (restart)
 			return new GetTimeInterval();
 		else
 			return new QueryVersion();
@@ -123,7 +130,7 @@ public class OpSendSensorSettings extends OpSS105 {
 				mess.queryProps();
 				controller.setVersion(vr.getVersion());
 			}
-			catch(SocketTimeoutException e) {
+			catch (SocketTimeoutException e) {
 				controller.setVersion("unknown (HD?)");
 			}
 			return new SynchronizeClock();

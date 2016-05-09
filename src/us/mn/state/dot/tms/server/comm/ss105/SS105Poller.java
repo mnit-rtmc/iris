@@ -41,12 +41,8 @@ public class SS105Poller extends MessagePoller<SS105Property>
 	/** Perform a controller download */
 	@Override
 	protected void download(ControllerImpl c, PriorityLevel p) {
-		if (c.isActive()) {
-			OpSendSensorSettings o =
-				new OpSendSensorSettings(c, true);
-			o.setPriority(p);
-			addOp(o);
-		}
+		if (c.isActive())
+			addOp(new OpSendSensorSettings(p, c, true));
 	}
 
 	/** Perform a controller reset */
