@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.CRC;
 import us.mn.state.dot.tms.server.comm.ParsingException;
-import static us.mn.state.dot.tms.server.comm.addco.AddcoPoller.ADDCO_LOG;
 
 /**
  * Addco Message Property.
@@ -56,12 +55,6 @@ public class MessageProperty extends AddcoProperty {
 	/** Calculate the number of bytes in a bitmap */
 	static private int bitmapBytes(int width, int height) {
 		return height * bitmapStride(width);
-	}
-
-	/** Log an error msg */
-	private void logError(String msg) {
-		if (ADDCO_LOG.isOpen())
-			ADDCO_LOG.log(dms.getName() + "! " + msg);
 	}
 
 	/** DMS for message */
@@ -173,7 +166,6 @@ public class MessageProperty extends AddcoProperty {
 
 	/** Parse a blank page */
 	private MessagePage parseBlankPage(byte[] body) throws IOException {
-		logError("BLANK PAGE: " + HexString.format(body, ':'));
 		return new MessagePage(dms, "");
 	}
 

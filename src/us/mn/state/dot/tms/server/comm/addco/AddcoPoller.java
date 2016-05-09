@@ -33,7 +33,7 @@ public class AddcoPoller extends MessagePoller<AddcoProperty>
 	implements DMSPoller
 {
 	/** Addco debug log */
-	static protected final DebugLog ADDCO_LOG = new DebugLog("addco");
+	static private final DebugLog ADDCO_LOG = new DebugLog("addco");
 
 	/** Create a new ADDCO poller */
 	public AddcoPoller(String n, Messenger m) {
