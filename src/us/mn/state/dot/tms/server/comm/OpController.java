@@ -29,9 +29,8 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * @author Michael Darter
  * @author Travis Swanston
  */
-abstract public class OpController<T extends ControllerProperty>
-	extends Operation<T>
-{
+abstract public class OpController<T extends ControllerProperty> {
+
 	/** Get the error retry threshold */
 	static private int systemRetryThreshold() {
 		return SystemAttrEnum.OPERATION_RETRY_THRESHOLD.getInt();
@@ -137,7 +136,6 @@ abstract public class OpController<T extends ControllerProperty>
 	}
 
 	/** Set the operation to succeeded */
-	@Override
 	public synchronized final void setSucceeded() {
 		setSuccess(true);
 		phase = null;
@@ -233,7 +231,6 @@ abstract public class OpController<T extends ControllerProperty>
 	}
 
 	/** Handle a communication error */
-	@Override
 	public void handleCommError(EventType et, String msg) {
 		logComm(et, msg);
 		controller.logCommEvent(et, id, filterMsg(msg));
@@ -264,7 +261,6 @@ abstract public class OpController<T extends ControllerProperty>
 	/** Cleanup the operation.  The operation gets cleaned up after
 	 * processing is complete and it is removed from the queue.  This method
 	 * may get called more than once after the operation is done. */
-	@Override
 	public void cleanup() {
 		updateMaintStatus();
 		updateErrorStatus();
