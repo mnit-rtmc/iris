@@ -84,11 +84,16 @@ public class OpSendMeterSettings extends Op170Device {
 	private final int[] table_stop = {AM_MID_TIME, PM_MID_TIME};
 
 	/** Create a new meter settings operation */
-	public OpSendMeterSettings(RampMeterImpl m) {
-		super(PriorityLevel.DOWNLOAD, m);
+	public OpSendMeterSettings(PriorityLevel p, RampMeterImpl m) {
+		super(p, m);
 		meter = m;
 		if (meter.getAlgorithm() != MeterAlgorithm.NONE.ordinal())
 			updateTimingTable();
+	}
+
+	/** Create a new meter settings operation */
+	public OpSendMeterSettings(RampMeterImpl m) {
+		this(PriorityLevel.DOWNLOAD, m);
 	}
 
 	/** Update the timing table with active timing plans */

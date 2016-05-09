@@ -69,17 +69,11 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 			addOp(s);
 		}
 		RampMeterImpl meter1 = Op170.lookupMeter1(c);
-		if (meter1 != null) {
-			OpSendMeterSettings s = new OpSendMeterSettings(meter1);
-			s.setPriority(p);
-			addOp(s);
-		}
+		if (meter1 != null)
+			addOp(new OpSendMeterSettings(p, meter1));
 		RampMeterImpl meter2 = Op170.lookupMeter2(c);
-		if (meter2 != null) {
-			OpSendMeterSettings s = new OpSendMeterSettings(meter2);
-			s.setPriority(p);
-			addOp(s);
-		}
+		if (meter2 != null)
+			addOp(new OpSendMeterSettings(p, meter2));
 	}
 
 	/** Perform a controller reset */
