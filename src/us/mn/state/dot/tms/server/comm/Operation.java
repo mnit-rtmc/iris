@@ -31,21 +31,6 @@ abstract public class Operation<T extends ControllerProperty> {
 		return (i >= 0) ? v.substring(i + 1) : v;
 	}
 
-	/** Priority of the operation */
-	private PriorityLevel priority;
-
-	/** Get the priority of the operation.
-	 * @return Priority of the operation (@see PriorityLevel) */
-	public final PriorityLevel getPriority() {
-		return priority;
-	}
-
-	/** Set the priority of the operation */
-	public final void setPriority(PriorityLevel p) {
-		if (p.ordinal() < priority.ordinal())
-			priority = p;
-	}
-
 	/** Base class for operation phases */
 	abstract protected class Phase<T extends ControllerProperty> {
 
@@ -57,11 +42,6 @@ abstract public class Operation<T extends ControllerProperty> {
 
 	/** Current phase of the operation, or null if done */
 	private Phase<T> phase;
-
-	/** Create a new operation */
-	public Operation(PriorityLevel prio) {
-		priority = prio;
-	}
 
 	/** Begin the operation.  The operation begins when it is queued for
 	 * processing. */

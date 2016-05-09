@@ -154,11 +154,16 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Add an operation to the message poller */
+	@SuppressWarnings("unchecked")
 	protected void addOperation(Operation<T> op) {
-		if (queue.enqueue(op))
-			ensureStarted();
-		else
-			plog("DROPPING " + op);
+		if (op instanceof OpController) {
+			OpController opc = (OpController) op;
+			if (queue.enqueue(opc)) {
+				ensureStarted();
+				return;
+			}
+		}
+		plog("DROPPING " + op);
 	}
 
 	/** Ensure the thread is started */
@@ -292,14 +297,14 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	/** Handle device contention.  Another operation has the device lock.
 	 * Ensure that we don't have a priority inversion problem. */
 	@SuppressWarnings("unchecked")
-	private void handleContention(Operation<T> op,
+	private void handleContention(OpController<T> op,
 		DeviceContentionException e)
 	{
 		handleContention(op, e.operation);
 	}
 
 	/** Handle device contention */
-	private void handleContention(Operation<T> op, Operation<T> oc) {
+	private void handleContention(OpController<T> op, OpController<T> oc) {
 		if (oc.getPriority().ordinal() > op.getPriority().ordinal()) {
 			if (PRIO_LOG.isOpen()) {
 				PRIO_LOG.log("BUMPING " + oc + " from " +
@@ -317,7 +322,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Requeue an in-progress operation */
-	private boolean requeueOperation(Operation<T> op) {
+	private boolean requeueOperation(OpController<T> op) {
 		if (queue.requeue(op))
 			return true;
 		else {

@@ -26,10 +26,10 @@ public final class OpQueue<T extends ControllerProperty> {
 
 	/** Inner class for nodes in the queue */
 	static private final class Node<T extends ControllerProperty> {
-		final Operation<T> operation;
+		final OpController<T> operation;
 		final PriorityLevel priority;
 		Node<T> next;
-		Node(Operation<T> op, Node<T> n) {
+		Node(OpController<T> op, Node<T> n) {
 			operation = op;
 			priority = op.getPriority();
 			next = n;
@@ -41,7 +41,7 @@ public final class OpQueue<T extends ControllerProperty> {
 
 	/** Current working operation.  This is needed so that an "equal"
 	 * operation cannot be added while work is in progress. */
-	private Operation<T> work = null;
+	private OpController<T> work = null;
 
 	/** Flag to tell when the poller is closing */
 	private boolean closing = false;
@@ -57,7 +57,7 @@ public final class OpQueue<T extends ControllerProperty> {
 	}
 
 	/** Enqueue a new operation */
-	public synchronized boolean enqueue(Operation<T> op) {
+	public synchronized boolean enqueue(OpController<T> op) {
 		if (shouldAdd(op)) {
 			op.begin();
 			add(op);
@@ -67,17 +67,17 @@ public final class OpQueue<T extends ControllerProperty> {
 	}
 
 	/** Check if an operation should be added to the queue */
-	private boolean shouldAdd(Operation<T> op) {
+	private boolean shouldAdd(OpController<T> op) {
 		return isOpen() && !contains(op);
 	}
 
 	/** Check if the queue contains a given operation */
-	private boolean contains(Operation<T> op) {
+	private boolean contains(OpController<T> op) {
 		if (op.equals(work) && !work.isDone())
 			return true;
 		Node<T> node = front;
 		while (node != null) {
-			Operation<T> nop = node.operation;
+			OpController<T> nop = node.operation;
 			if (op.equals(nop) && !nop.isDone())
 				return true;
 			node = node.next;
@@ -86,7 +86,7 @@ public final class OpQueue<T extends ControllerProperty> {
 	}
 
 	/** Add an operation to the queue */
-	private void add(Operation<T> op) {
+	private void add(OpController<T> op) {
 		PriorityLevel priority = op.getPriority();
 		Node<T> prev = null;
 		Node<T> node = front;
@@ -105,7 +105,7 @@ public final class OpQueue<T extends ControllerProperty> {
 	}
 
 	/** Requeue an in-progress operation */
-	public synchronized boolean requeue(Operation<T> op) {
+	public synchronized boolean requeue(OpController<T> op) {
 		if ((remove(op) == op) && isOpen()) {
 			add(op);
 			return true;
@@ -114,7 +114,7 @@ public final class OpQueue<T extends ControllerProperty> {
 	}
 
 	/** Remove an operation from the queue */
-	private Operation<T> remove(Operation<T> op) {
+	private OpController<T> remove(OpController<T> op) {
 		if (op == work) {
 			work = null;
 			return op;
@@ -136,7 +136,7 @@ public final class OpQueue<T extends ControllerProperty> {
 	}
 
 	/** Get the next operation from the queue (and remove it) */
-	public synchronized Operation<T> next() throws InterruptedException {
+	public synchronized OpController<T> next() throws InterruptedException {
 		work = null;
 		while (null == front)
 			wait();
@@ -147,7 +147,7 @@ public final class OpQueue<T extends ControllerProperty> {
 
 	/** Do something to each operation in the queue */
 	public synchronized void forEach(OperationHandler<T> handler) {
-		Operation<T> w = work;
+		OpController<T> w = work;
 		if (w != null)
 			handler.handle(w.getPriority(), w);
 		Node<T> node = front;

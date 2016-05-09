@@ -54,6 +54,21 @@ abstract public class OpController<T extends ControllerProperty>
 		return (a.length() > 0) ? (a + ", " + b) : b;
 	}
 
+	/** Priority of the operation */
+	private PriorityLevel priority;
+
+	/** Get the priority of the operation.
+	 * @return Priority of the operation (@see PriorityLevel) */
+	public final PriorityLevel getPriority() {
+		return priority;
+	}
+
+	/** Set the priority of the operation */
+	public final void setPriority(PriorityLevel p) {
+		if (p.ordinal() < priority.ordinal())
+			priority = p;
+	}
+
 	/** Controller to be polled */
 	protected final ControllerImpl controller;
 
@@ -90,8 +105,9 @@ abstract public class OpController<T extends ControllerProperty>
 
 	/** Create a new controller operation */
 	protected OpController(PriorityLevel p, ControllerImpl c, String i) {
-		super(p);
+		assert p != null;
 		assert c != null;
+		priority = p;
 		controller = c;
 		id = i;
 	}

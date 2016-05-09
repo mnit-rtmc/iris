@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2009  Minnesota Department of Transportation
+ * Copyright (C) 2005-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,10 +23,10 @@ package us.mn.state.dot.tms.server.comm;
 public class DeviceContentionException extends Exception {
 
 	/** Operation which owns the device lock */
-	public final Operation operation;
+	public final OpController operation;
 
 	/** Create a new device contention exception */
-	public DeviceContentionException(Operation o) {
+	public DeviceContentionException(OpController o) {
 		super("DEVICE CONTENTION ERROR");
 		operation = o;
 	}
