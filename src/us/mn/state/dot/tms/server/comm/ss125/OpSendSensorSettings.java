@@ -52,9 +52,16 @@ public class OpSendSensorSettings extends OpSS125 {
 	private boolean config_updated = false;
 
 	/** Create a new operation to send settings to a sensor */
-	public OpSendSensorSettings(ControllerImpl c, boolean r) {
+	public OpSendSensorSettings(PriorityLevel p, ControllerImpl c,
+		boolean r)
+	{
 		super(PriorityLevel.DOWNLOAD, c);
 		restart = r;
+	}
+
+	/** Create a new operation to send settings to a sensor */
+	public OpSendSensorSettings(ControllerImpl c, boolean r) {
+		this(PriorityLevel.DOWNLOAD, c, r);
 	}
 
 	/** Create the first phase of the operation */
