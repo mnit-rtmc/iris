@@ -41,9 +41,9 @@ public class Org815Poller extends MessagePoller<Org815Property>
 	/** Send a device request */
 	@Override
 	public void sendRequest(WeatherSensorImpl ws, DeviceRequest r) {
-		switch(r) {
+		switch (r) {
 		case QUERY_STATUS:
-			addOperation(new OpQueryConditions(ws));
+			addOp(new OpQueryConditions(ws));
 			break;
 		default:
 			// Ignore other requests
@@ -54,7 +54,7 @@ public class Org815Poller extends MessagePoller<Org815Property>
 	/** Send settings to a weather sensor */
 	@Override
 	public void sendSettings(WeatherSensorImpl ws) {
-		addOperation(new OpQuerySettings(ws));
+		addOp(new OpQuerySettings(ws));
 	}
 
 	/** Get the protocol debug log */

@@ -47,7 +47,7 @@ public class IncFeedPoller extends MessagePoller<IncFeedProperty> {
 
 	/** Query incident feed */
 	public void queryIncidents(ControllerImpl c, IncidentCache cache) {
-		addOperation(new OpReadIncFeed(c, feed_id, cache));
+		addOp(new OpReadIncFeed(c, feed_id, cache));
 	}
 
 	/** Get the protocol debug log */

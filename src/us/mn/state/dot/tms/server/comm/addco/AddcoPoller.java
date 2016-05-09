@@ -45,13 +45,13 @@ public class AddcoPoller extends MessagePoller<AddcoProperty>
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {
 		switch (r) {
 		case QUERY_CONFIGURATION:
-			addOperation(new OpQueryDMSConfiguration(dms));
+			addOp(new OpQueryDMSConfiguration(dms));
 			break;
 		case QUERY_MESSAGE:
-			addOperation(new OpQueryDMSMessage(dms));
+			addOp(new OpQueryDMSMessage(dms));
 			break;
 		case QUERY_STATUS:
-			addOperation(new OpQueryDMSStatus(dms));
+			addOp(new OpQueryDMSStatus(dms));
 			break;
 		default:
 			// Ignore other requests
@@ -64,7 +64,7 @@ public class AddcoPoller extends MessagePoller<AddcoProperty>
 	public void sendMessage(DMSImpl dms, SignMessage sm, User o)
 		throws InvalidMessageException
 	{
-		addOperation(new OpSendDMSMessage(dms, sm, o));
+		addOp(new OpSendDMSMessage(dms, sm, o));
 	}
 
 	/** Get the protocol debug log */

@@ -43,20 +43,20 @@ public class DR500Poller extends MessagePoller<DR500Property>
 		if (c.isActive()) {
 			OpSendSensorSettings o = new OpSendSensorSettings(c);
 			o.setPriority(p);
-			addOperation(o);
+			addOp(o);
 		}
 	}
 
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		addOperation(new OpSendSensorSettings(c));
+		addOp(new OpSendSensorSettings(c));
 	}
 
 	/** Send sample settings to a controller */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		addOperation(new OpSendSensorSettings(c));
+		addOp(new OpSendSensorSettings(c));
 	}
 
 	/** Query sample data.
@@ -65,7 +65,7 @@ public class DR500Poller extends MessagePoller<DR500Property>
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
 		if (p == 30)
-			addOperation(new OpQuerySpeed(c, p));
+			addOp(new OpQuerySpeed(c, p));
 	}
 
 	/** Get the protocol debug log */

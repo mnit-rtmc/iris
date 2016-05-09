@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.AlarmImpl;
@@ -49,16 +48,11 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	/** MnDOT 170 debug log */
 	static protected final DebugLog MNDOT_LOG = new DebugLog("mndot170");
 
-	/** CommProtocol (4-bit or 5-bit) */
-	private final CommProtocol protocol;
-
 	/** Create a new MnDOT 170 poller.
 	 * @param n Comm link name.
-	 * @param m Messenger for communication.
-	 * @param p Communication protocol. */
-	public MndotPoller(String n, Messenger m, CommProtocol p) {
+	 * @param m Messenger for communication. */
+	public MndotPoller(String n, Messenger m) {
 		super(n, m);
-		protocol = p;
 	}
 
 	/** Respond to a download request from a controller */
@@ -66,38 +60,38 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	protected void download(ControllerImpl c, PriorityLevel p) {
 		OpSendSampleSettings ss = new OpSendSampleSettings(c);
 		ss.setPriority(p);
-		addOperation(ss);
+		addOp(ss);
 		BeaconImpl beacon = c.getActiveBeacon();
 		if (beacon != null) {
 			OpSendBeaconSettings s =
 				new OpSendBeaconSettings(beacon);
 			s.setPriority(p);
-			addOperation(s);
+			addOp(s);
 		}
 		RampMeterImpl meter1 = Op170.lookupMeter1(c);
 		if (meter1 != null) {
 			OpSendMeterSettings s = new OpSendMeterSettings(meter1);
 			s.setPriority(p);
-			addOperation(s);
+			addOp(s);
 		}
 		RampMeterImpl meter2 = Op170.lookupMeter2(c);
 		if (meter2 != null) {
 			OpSendMeterSettings s = new OpSendMeterSettings(meter2);
 			s.setPriority(p);
-			addOperation(s);
+			addOp(s);
 		}
 	}
 
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		addOperation(new OpReset170(c));
+		addOp(new OpReset170(c));
 	}
 
 	/** Send sample settings to a controller */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		addOperation(new OpSendSampleSettings(c));
+		addOp(new OpSendSampleSettings(c));
 	}
 
 	/** Query sample data.
@@ -107,10 +101,10 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	public void querySamples(ControllerImpl c, int p) {
 		switch (p) {
 		case OpQuerySamples30Sec.SAMPLE_PERIOD_SEC:
-			addOperation(new OpQuerySamples30Sec(c));
+			addOp(new OpQuerySamples30Sec(c));
 			break;
 		case OpQuerySamples5Min.SAMPLE_PERIOD_SEC:
-			addOperation(new OpQuerySamples5Min(c));
+			addOp(new OpQuerySamples5Min(c));
 			break;
 		}
 	}
@@ -120,10 +114,10 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	public void sendRequest(RampMeterImpl meter, DeviceRequest r) {
 		switch (r) {
 		case SEND_SETTINGS:
-			addOperation(new OpSendMeterSettings(meter));
+			addOp(new OpSendMeterSettings(meter));
 			break;
 		case QUERY_STATUS:
-			addOperation(new OpQueryMeterStatus(meter));
+			addOp(new OpQueryMeterStatus(meter));
 			break;
 		default:
 			// Ignore other requests
@@ -134,7 +128,7 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	/** Send a new release rate to a ramp meter */
 	@Override
 	public void sendReleaseRate(RampMeterImpl meter, Integer rate) {
-		addOperation(new OpSendMeterRate(meter, rate));
+		addOp(new OpSendMeterRate(meter, rate));
 	}
 
 	/** Send a device request to a beacon */
@@ -142,10 +136,10 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	public void sendRequest(BeaconImpl beacon, DeviceRequest r) {
 		switch (r) {
 		case SEND_SETTINGS:
-			addOperation(new OpSendBeaconSettings(beacon));
+			addOp(new OpSendBeaconSettings(beacon));
 			break;
 		case QUERY_STATUS:
-			addOperation(new OpQueryBeaconState(beacon));
+			addOp(new OpQueryBeaconState(beacon));
 			break;
 		default:
 			// Ignore other requests
@@ -156,7 +150,7 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	/** Set the flashing state of a beacon */
 	@Override
 	public void setFlashing(BeaconImpl b, boolean f) {
-		addOperation(new OpSendBeaconState(b, f));
+		addOp(new OpSendBeaconState(b, f));
 	}
 
 	/** Send a device request to an LCS array */
@@ -164,10 +158,10 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch (r) {
 		case SEND_SETTINGS:
-			addOperation(new OpSendLCSSettings(lcs_array));
+			addOp(new OpSendLCSSettings(lcs_array));
 			break;
 		case QUERY_MESSAGE:
-			addOperation(new OpQueryLCSIndications(lcs_array));
+			addOp(new OpQueryLCSIndications(lcs_array));
 			break;
 		default:
 			// Ignore other requests
@@ -178,7 +172,7 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	/** Set the deployed status of a lane marking */
 	@Override
 	public void setDeployed(LaneMarkingImpl dev, boolean d) {
-		addOperation(new OpDeployLaneMarking(dev, d));
+		addOp(new OpDeployLaneMarking(dev, d));
 	}
 
 	/** Send new indications to an LCS array.
@@ -189,7 +183,7 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)
 	{
-		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
+		addOp(new OpSendLCSIndications(lcs_array, ind, o));
 	}
 
 	/** Send a device request to an alarm */
@@ -199,8 +193,8 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 		case QUERY_STATUS:
 			Controller c = alarm.getController();
 			if (c instanceof ControllerImpl) {
-				ControllerImpl ci = (ControllerImpl)c;
-				addOperation(new OpQueryAlarms(ci));
+				ControllerImpl ci = (ControllerImpl) c;
+				addOp(new OpQueryAlarms(ci));
 			}
 			break;
 		default:

@@ -154,7 +154,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Add an operation to the message poller */
-	protected void addOperation(OpController<T> op) {
+	protected void addOp(OpController<T> op) {
 		if (queue.enqueue(op))
 			ensureStarted();
 		else

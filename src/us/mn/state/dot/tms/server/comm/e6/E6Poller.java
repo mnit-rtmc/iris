@@ -214,10 +214,10 @@ public class E6Poller extends MessagePoller<E6Property>
 			reader = tr;
 		switch (r) {
 		case SEND_SETTINGS:
-			addOperation(new OpSendSettings(tr, this));
+			addOp(new OpSendSettings(tr, this));
 			break;
 		case QUERY_STATUS:
-			addOperation(new OpQueryStatus(tr, this));
+			addOp(new OpQueryStatus(tr, this));
 			break;
 		default:
 			// Ignore other requests

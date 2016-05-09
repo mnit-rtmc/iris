@@ -41,13 +41,13 @@ public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		addOperation(new OpSendSensorSettings(c, true));
+		addOp(new OpSendSensorSettings(c, true));
 	}
 
 	/** Send sample settings to a controller. */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		addOperation(new OpSendSensorSettings(c, false));
+		addOp(new OpSendSensorSettings(c, false));
 	}
 
 	/** Query sample data.
@@ -56,7 +56,7 @@ public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
 		if (p == 30)
-			addOperation(new OpQueryStats(c, p));
+			addOp(new OpQueryStats(c, p));
 	}
 
 	/** Get the protocol debug log */

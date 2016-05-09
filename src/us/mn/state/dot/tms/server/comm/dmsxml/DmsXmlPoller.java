@@ -81,12 +81,12 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 	{
 		LOG.log("DmsXmlPoller.sendMessage(" + dms + ", " +
 			m + ", " + o+ ") called.");
-		if(dms == null || m == null)
+		if (dms == null || m == null)
 			return;
-		if(SignMessageHelper.isBlank(m))
-			addOperation(new OpBlank(dms, m, o));
+		if (SignMessageHelper.isBlank(m))
+			addOp(new OpBlank(dms, m, o));
 		else
-			addOperation(new OpMessage(dms, m, o));
+			addOp(new OpMessage(dms, m, o));
 	}
 
 	/** Send a device request message to the sign, no user specified */
@@ -122,16 +122,16 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 	private void _sendRequest(DMSImpl dms, DeviceRequest r, User u,
 		boolean startup)
 	{
-		if(dms == null)
+		if (dms == null)
 			return;
 		// handle requests
-		if(r == DeviceRequest.QUERY_CONFIGURATION) {
-			addOperation(new OpQueryConfig(dms, u));
-		} else if(r == DeviceRequest.QUERY_MESSAGE) {
-			addOperation(new OpQueryMsg(dms, u, r, startup));
-		} else if(r == DeviceRequest.RESET_DEVICE) {
-			addOperation(new OpReset(dms, u));
-		} else if(r == DeviceRequest.QUERY_STATUS) {
+		if (r == DeviceRequest.QUERY_CONFIGURATION)
+			addOp(new OpQueryConfig(dms, u));
+		else if (r == DeviceRequest.QUERY_MESSAGE)
+			addOp(new OpQueryMsg(dms, u, r, startup));
+		else if (r == DeviceRequest.RESET_DEVICE)
+			addOp(new OpReset(dms, u));
+		else if (r == DeviceRequest.QUERY_STATUS) {
 			// ignore
 		} else if(r == DeviceRequest.SEND_SETTINGS) {
 			// ignore

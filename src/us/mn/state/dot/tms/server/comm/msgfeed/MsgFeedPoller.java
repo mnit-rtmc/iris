@@ -48,7 +48,7 @@ public class MsgFeedPoller extends MessagePoller<MsgFeedProperty> {
 	/** Query message feed */
 	public void queryMessages(ControllerImpl c) {
 		log("creating OpReadMsgFeed: " + c);
-		addOperation(new OpReadMsgFeed(c, feed_id));
+		addOp(new OpReadMsgFeed(c, feed_id));
 	}
 
 	/** Get the protocol debug log */

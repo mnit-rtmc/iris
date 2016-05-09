@@ -252,8 +252,7 @@ public class DevicePollerFactory {
 
 	/** Create a MnDOT poller */
 	private DevicePoller createMndotPoller() throws IOException {
-		return new MndotPoller(name, createSocketMessenger(TCP),
-			protocol);
+		return new MndotPoller(name, createSocketMessenger(TCP));
 	}
 
 	/** Create an SS105 poller */

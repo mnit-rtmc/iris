@@ -62,41 +62,41 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {
 		switch (r) {
 		case RESET_DEVICE:
-			addOperation(new OpResetDMS(dms));
+			addOp(new OpResetDMS(dms));
 			break;
 		case SEND_SETTINGS:
-			addOperation(new OpSendDMSFonts(dms));
-			addOperation(new OpSendDMSDefaults(dms));
+			addOp(new OpSendDMSFonts(dms));
+			addOp(new OpSendDMSDefaults(dms));
 			break;
 		case QUERY_CONFIGURATION:
-			addOperation(new OpQueryDMSConfiguration(dms));
+			addOp(new OpQueryDMSConfiguration(dms));
 			break;
 		case QUERY_MESSAGE:
-			addOperation(new OpQueryDMSMessage(dms));
+			addOp(new OpQueryDMSMessage(dms));
 			break;
 		case QUERY_STATUS:
-			addOperation(new OpQueryDMSStatus(dms));
+			addOp(new OpQueryDMSStatus(dms));
 			break;
 		case QUERY_PIXEL_FAILURES:
-			addOperation(new OpTestDMSPixels(dms, false));
+			addOp(new OpTestDMSPixels(dms, false));
 			break;
 		case TEST_PIXELS:
-			addOperation(new OpTestDMSPixels(dms, true));
+			addOp(new OpTestDMSPixels(dms, true));
 			break;
 		case BRIGHTNESS_TOO_DIM:
-			addOperation(new OpUpdateDMSBrightness(dms,
+			addOp(new OpUpdateDMSBrightness(dms,
 				EventType.DMS_BRIGHT_LOW));
 			break;
 		case BRIGHTNESS_GOOD:
-			addOperation(new OpUpdateDMSBrightness(dms,
+			addOp(new OpUpdateDMSBrightness(dms,
 				EventType.DMS_BRIGHT_GOOD));
 			break;
 		case BRIGHTNESS_TOO_BRIGHT:
-			addOperation(new OpUpdateDMSBrightness(dms,
+			addOp(new OpUpdateDMSBrightness(dms,
 				EventType.DMS_BRIGHT_HIGH));
 			break;
 		case SEND_LEDSTAR_SETTINGS:
-			addOperation(new OpSendDMSLedstar(dms));
+			addOp(new OpSendDMSLedstar(dms));
 			break;
 		default:
 			// Ignore other requests
@@ -111,9 +111,9 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 		throws InvalidMessageException
 	{
 		if (dms.isMessageCurrentEquivalent(sm))
-			addOperation(new OpUpdateDMSDuration(dms, sm));
+			addOp(new OpUpdateDMSDuration(dms, sm));
 		else
-			addOperation(new OpSendDMSMessage(dms, sm, o));
+			addOp(new OpSendDMSMessage(dms, sm, o));
 	}
 
 	/** Send a device request message to an LCS array */
@@ -122,10 +122,10 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch (r) {
 		case SEND_SETTINGS:
-			addOperation(new OpSendLCSSettings(lcs_array));
+			addOp(new OpSendLCSSettings(lcs_array));
 			break;
 		case QUERY_MESSAGE:
-			addOperation(new OpQueryLCSIndications(lcs_array));
+			addOp(new OpQueryLCSIndications(lcs_array));
 			break;
 		default:
 			// Ignore other requests
@@ -142,6 +142,6 @@ public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)
 	{
-		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
+		addOp(new OpSendLCSIndications(lcs_array, ind, o));
 	}
 }

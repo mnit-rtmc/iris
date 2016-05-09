@@ -43,7 +43,7 @@ public class CBWPoller extends MessagePoller<CBWProperty>
 	public void sendRequest(BeaconImpl b, DeviceRequest r) {
 		switch (r) {
 		case QUERY_STATUS:
-			addOperation(new OpQueryBeaconState(b));
+			addOp(new OpQueryBeaconState(b));
 			break;
 		default:
 			// Ignore other requests
@@ -54,7 +54,7 @@ public class CBWPoller extends MessagePoller<CBWProperty>
 	/** Set the flashing state of a beacon */
 	@Override
 	public void setFlashing(BeaconImpl b, boolean f) {
-		addOperation(new OpChangeBeaconState(b, f));
+		addOp(new OpChangeBeaconState(b, f));
 	}
 
 	/** Get the protocol debug log */

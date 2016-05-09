@@ -30,16 +30,16 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 	implements CameraPoller
 {
 	/** Timestamp of most recent transaction with the device. */
-	protected long lastCmdTime = 0;
+	private long lastCmdTime = 0;
 
 	/** Current pan value */
-	protected float curPan  = 0.0F;
+	private float curPan  = 0.0F;
 
 	/** Current tilt value */
-	protected float curTilt = 0.0F;
+	private float curTilt = 0.0F;
 
 	/** Current zoom value */
-	protected float curZoom = 0.0F;
+	private float curZoom = 0.0F;
 
 	/** Create a new Cohu PTZ poller */
 	public CohuPTZPoller(String n, Messenger m) {
@@ -65,20 +65,19 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 			zoom = Float.valueOf(z);
 			curZoom = z;
 		}
-
-		addOperation(new OpPTZCamera(c, this, pan, tilt, zoom));
+		addOp(new OpPTZCamera(c, this, pan, tilt, zoom));
 	}
 
 	/** Send a "store camera preset" command */
 	@Override
 	public void sendStorePreset(CameraImpl c, int preset) {
-		addOperation(new OpStorePreset(c, this, preset));
+		addOp(new OpStorePreset(c, this, preset));
 	}
 
 	/** Send a "recall camera preset" command */
 	@Override
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		addOperation(new OpRecallPreset(c, this, preset));
+		addOp(new OpRecallPreset(c, this, preset));
 	}
 
 	/**
@@ -111,26 +110,26 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 		case CAMERA_FOCUS_STOP:
 		case CAMERA_FOCUS_NEAR:
 		case CAMERA_FOCUS_FAR:
-			addOperation(new OpMoveFocus(c, this, r));
+			addOp(new OpMoveFocus(c, this, r));
 			break;
 		case CAMERA_FOCUS_MANUAL:
 		case CAMERA_FOCUS_AUTO:
-			addOperation(new OpSetAFMode(c, this, r));
+			addOp(new OpSetAFMode(c, this, r));
 			break;
 		case CAMERA_IRIS_STOP:
 		case CAMERA_IRIS_CLOSE:
 		case CAMERA_IRIS_OPEN:
-			addOperation(new OpMoveIris(c, this, r));
+			addOp(new OpMoveIris(c, this, r));
 			break;
 		case CAMERA_IRIS_MANUAL:
 		case CAMERA_IRIS_AUTO:
-			addOperation(new OpSetAIMode(c, this, r));
+			addOp(new OpSetAIMode(c, this, r));
 			break;
 		case CAMERA_WIPER_ONESHOT:
 			// FIXME: not yet implemented
 			break;
 		case RESET_DEVICE:
-			addOperation(new OpResetCamera(c, this));
+			addOp(new OpResetCamera(c, this));
 			break;
 		default:
 			break;

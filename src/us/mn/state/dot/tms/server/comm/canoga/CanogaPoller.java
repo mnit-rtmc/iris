@@ -46,7 +46,7 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 		if (c.isActive()) {
 			OpQueryConfig o = new OpQueryConfig(c);
 			o.setPriority(p);
-			addOperation(o);
+			addOp(o);
 		}
 	}
 
@@ -57,12 +57,12 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 	/** Find an existing event collector operation */
 	private OpQueryEventSamples findEventCollector(final ControllerImpl c) {
 		Iterator<OpQueryEventSamples> it = collectors.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			OpQueryEventSamples qes = it.next();
-			if(qes.isDone()) {
+			if (qes.isDone()) {
 				qes.updateCounters();
 				it.remove();
-			} else if(qes.getController() == c)
+			} else if (qes.getController() == c)
 				return qes;
 		}
 		return null;
@@ -71,13 +71,13 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 	/** Get an event collector operation */
 	private OpQueryEventSamples getEventCollector(final ControllerImpl c) {
 		OpQueryEventSamples qes = findEventCollector(c);
-		if(qes != null) {
+		if (qes != null) {
 			qes.updateCounters();
 			return qes;
 		} else {
 			qes = new OpQueryEventSamples(c);
 			collectors.add(qes);
-			addOperation(qes);
+			addOp(qes);
 			return qes;
 		}
 	}
@@ -85,13 +85,13 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		addOperation(new OpQueryConfig(c));
+		addOp(new OpQueryConfig(c));
 	}
 
 	/** Send sample settings to a controller */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		addOperation(new OpQueryConfig(c));
+		addOp(new OpQueryConfig(c));
 	}
 
 	/** Query sample data.

@@ -45,13 +45,13 @@ public class STCPoller extends MessagePoller<STCProperty>
 	public void sendRequest(GateArmImpl ga, DeviceRequest r) {
 		switch(r) {
 		case SEND_SETTINGS:
-			addOperation(new OpControlGate(ga));
+			addOp(new OpControlGate(ga));
 			break;
 		case RESET_DEVICE:
-			addOperation(new OpResetGate(ga));
+			addOp(new OpResetGate(ga));
 			break;
 		case QUERY_STATUS:
-			addOperation(new OpQueryGateStatus(ga));
+			addOp(new OpQueryGateStatus(ga));
 			break;
 		default:
 			// Ignore other requests
@@ -62,13 +62,13 @@ public class STCPoller extends MessagePoller<STCProperty>
 	/** Open the gate arm */
 	@Override
 	public void openGate(GateArmImpl ga, User o) {
-		addOperation(new OpControlGate(ga, o, GateArmState.OPENING));
+		addOp(new OpControlGate(ga, o, GateArmState.OPENING));
 	}
 
 	/** Close the gate arm */
 	@Override
 	public void closeGate(GateArmImpl ga, User o) {
-		addOperation(new OpControlGate(ga, o, GateArmState.CLOSING));
+		addOp(new OpControlGate(ga, o, GateArmState.CLOSING));
 	}
 
 	/** Get the protocol debug log */

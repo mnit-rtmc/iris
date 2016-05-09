@@ -43,14 +43,14 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 
 	/** Query the outlet status */
 	public void queryOutlets(ControllerImpl c, OutletProperty op) {
-		addOperation(new OpQueryOutlets(c, op));
+		addOp(new OpQueryOutlets(c, op));
 	}
 
 	/** Command the outlet status */
 	public void commandOutlets(ControllerImpl c, boolean[] outlets,
 		OutletProperty op)
 	{
-		addOperation(new OpCommandOutlets(c, outlets, op));
+		addOp(new OpCommandOutlets(c, outlets, op));
 	}
 
 	/** Send a device request */
@@ -58,10 +58,10 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	public void sendRequest(LCSArrayImpl lcs_array, DeviceRequest r) {
 		switch (r) {
 		case SEND_SETTINGS:
-			addOperation(new OpSendLCSSettings(lcs_array));
+			addOp(new OpSendLCSSettings(lcs_array));
 			break;
 		case QUERY_MESSAGE:
-			addOperation(new OpQueryLCSIndications(lcs_array));
+			addOp(new OpQueryLCSIndications(lcs_array));
 			break;
 		default:
 			// Ignore other requests
@@ -77,7 +77,7 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	public void sendIndications(LCSArrayImpl lcs_array, Integer[] ind,
 		User o)
 	{
-		addOperation(new OpSendLCSIndications(lcs_array, ind, o));
+		addOp(new OpSendLCSIndications(lcs_array, ind, o));
 	}
 
 	/** Send a device request */
@@ -85,7 +85,7 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	public void sendRequest(BeaconImpl b, DeviceRequest r) {
 		switch (r) {
 		case QUERY_STATUS:
-			addOperation(new OpQueryBeaconState(b));
+			addOp(new OpQueryBeaconState(b));
 			break;
 		default:
 			// Ignore other requests
@@ -96,8 +96,8 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	/** Set the flashing state of a beacon */
 	@Override
 	public void setFlashing(BeaconImpl b, boolean f) {
-		addOperation(new OpChangeBeaconState(b, f));
-		addOperation(new OpQueryBeaconState(b));
+		addOp(new OpChangeBeaconState(b, f));
+		addOp(new OpQueryBeaconState(b));
 	}
 
 	/** Get the protocol debug log */

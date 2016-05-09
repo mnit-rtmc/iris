@@ -44,7 +44,7 @@ public class PelcoPoller extends MessagePoller<PelcoProperty>
 	public void setMonitorCamera(ControllerImpl c, VideoMonitor m,
 		String cam)
 	{
-		addOperation(new OpSelectMonitorCamera(c, m, cam));
+		addOp(new OpSelectMonitorCamera(c, m, cam));
 	}
 
 	/** Get the protocol debug log */

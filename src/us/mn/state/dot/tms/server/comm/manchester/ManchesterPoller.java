@@ -44,19 +44,19 @@ public class ManchesterPoller extends TransientPoller<ManchesterProperty>
 	/** Send a PTZ camera move command */
 	@Override
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		addOperation(new OpMoveCamera(c, p, t, z));
+		addOp(new OpMoveCamera(c, p, t, z));
 	}
 
 	/** Send a store camera preset command */
 	@Override
 	public void sendStorePreset(CameraImpl c, int preset) {
-		addOperation(new OpPreset(c, true, preset));
+		addOp(new OpPreset(c, true, preset));
 	}
 
 	/** Send a recall camera preset command */
 	@Override
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		addOperation(new OpPreset(c, false, preset));
+		addOp(new OpPreset(c, false, preset));
 	}
 
 	/** Send a device request
@@ -64,7 +64,7 @@ public class ManchesterPoller extends TransientPoller<ManchesterProperty>
 	 * @param r The desired DeviceRequest. */
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest r) {
-		addOperation(new OpDeviceRequest(c, r));
+		addOp(new OpDeviceRequest(c, r));
 	}
 
 	/** Get the protocol debug log */

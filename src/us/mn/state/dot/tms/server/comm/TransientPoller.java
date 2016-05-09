@@ -31,13 +31,13 @@ abstract public class TransientPoller<T extends ControllerProperty>
 
 	/** Add an operation to the transient poller */
 	@Override
-	protected void addOperation(final OpController<T> op) {
+	protected void addOp(final OpController<T> op) {
 		queue.forEach(new OpHandler<T>() {
 			public void handle(PriorityLevel p, OpController<T> o) {
 				if (o.equals(op))
 					o.setSucceeded();
 			}
 		});
-		super.addOperation(op);
+		super.addOp(op);
 	}
 }

@@ -54,7 +54,7 @@ public class SsiPoller extends MessagePoller<SsiProperty>
 	public void sendRequest(WeatherSensorImpl ws, DeviceRequest r) {
 		switch (r) {
 		case QUERY_STATUS:
-			addOperation(new OpRead(ws, records));
+			addOp(new OpRead(ws, records));
 			break;
 		default:
 			// Ignore other requests

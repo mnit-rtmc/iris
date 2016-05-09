@@ -45,20 +45,20 @@ public class SS125Poller extends MessagePoller<SS125Property>
 			OpSendSensorSettings o =
 				new OpSendSensorSettings(c, true);
 			o.setPriority(p);
-			addOperation(o);
+			addOp(o);
 		}
 	}
 
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
-		addOperation(new OpSendSensorSettings(c, true));
+		addOp(new OpSendSensorSettings(c, true));
 	}
 
 	/** Send sample settings to a controller */
 	@Override
 	public void sendSettings(ControllerImpl c) {
-		addOperation(new OpSendSensorSettings(c, false));
+		addOp(new OpSendSensorSettings(c, false));
 	}
 
 	/** Query sample data.
@@ -67,7 +67,7 @@ public class SS125Poller extends MessagePoller<SS125Property>
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
 		if (p == 30)
-			addOperation(new OpQuerySamples(c, p));
+			addOp(new OpQuerySamples(c, p));
 	}
 
 	/** Get the protocol debug log */
