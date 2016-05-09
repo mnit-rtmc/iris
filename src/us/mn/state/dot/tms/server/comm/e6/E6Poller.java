@@ -40,7 +40,7 @@ public class E6Poller extends MessagePoller<E6Property>
 	static private final ThreadGroup RECV = new ThreadGroup("Recv");
 
 	/** E6 debug log */
-	static public final DebugLog E6_LOG = new DebugLog("e6");
+	static private final DebugLog E6_LOG = new DebugLog("e6");
 
 	/** Packet messenger */
 	private final PacketMessenger pkt_mess;
