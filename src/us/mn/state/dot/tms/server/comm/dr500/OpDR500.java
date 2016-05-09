@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.dr500;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import static us.mn.state.dot.tms.server.comm.dr500.DR500Poller.DR500_LOG;
 
 /**
  * Operation for DR-500 device.
@@ -25,12 +24,6 @@ import static us.mn.state.dot.tms.server.comm.dr500.DR500Poller.DR500_LOG;
  * @author Douglas Lau
  */
 abstract public class OpDR500 extends OpController<DR500Property> {
-
-	/** Log an error msg */
-	protected void logError(String msg) {
-		if (DR500_LOG.isOpen())
-			DR500_LOG.log(controller.getName() + "! " + msg);
-	}
 
 	/** Create a new DR500 operation */
 	protected OpDR500(PriorityLevel p, ControllerImpl c) {

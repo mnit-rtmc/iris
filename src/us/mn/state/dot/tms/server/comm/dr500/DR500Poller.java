@@ -30,7 +30,7 @@ public class DR500Poller extends MessagePoller<DR500Property>
 	implements SamplePoller
 {
 	/** DR500 debug log */
-	static final DebugLog DR500_LOG = new DebugLog("dr500");
+	static private final DebugLog DR500_LOG = new DebugLog("dr500");
 
 	/** Create a new DR500 poller */
 	public DR500Poller(String n, Messenger m) {
