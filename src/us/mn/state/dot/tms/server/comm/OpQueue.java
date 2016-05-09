@@ -146,7 +146,7 @@ public final class OpQueue<T extends ControllerProperty> {
 	}
 
 	/** Do something to each operation in the queue */
-	public synchronized void forEach(OperationHandler<T> handler) {
+	public synchronized void forEach(OpHandler<T> handler) {
 		OpController<T> w = work;
 		if (w != null)
 			handler.handle(w.getPriority(), w);

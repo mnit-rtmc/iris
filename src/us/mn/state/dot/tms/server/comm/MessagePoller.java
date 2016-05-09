@@ -154,16 +154,11 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Add an operation to the message poller */
-	@SuppressWarnings("unchecked")
-	protected void addOperation(Operation<T> op) {
-		if (op instanceof OpController) {
-			OpController opc = (OpController) op;
-			if (queue.enqueue(opc)) {
-				ensureStarted();
-				return;
-			}
-		}
-		plog("DROPPING " + op);
+	protected void addOperation(OpController<T> op) {
+		if (queue.enqueue(op))
+			ensureStarted();
+		else
+			plog("DROPPING " + op);
 	}
 
 	/** Ensure the thread is started */
@@ -230,8 +225,10 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	/** Drain the poll queue */
 	private void drainQueue() {
 		final String s = getStatus();
-		queue.forEach(new OperationHandler<T>() {
-			public void handle(PriorityLevel prio, Operation<T> o) {
+		queue.forEach(new OpHandler<T>() {
+			public void handle(PriorityLevel prio,
+				OpController<T> o)
+			{
 				o.handleCommError(EventType.QUEUE_DRAINED, s);
 				if (hung_up)
 					o.setSucceeded();
@@ -244,11 +241,8 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	private void performOperations() throws IOException,
 		InterruptedException
 	{
-		while (queue.isOpen()) {
-			Operation<T> o = queue.next();
-			if (o instanceof OpController)
-				doPoll((OpController<T>)o);
-		}
+		while (queue.isOpen())
+			doPoll(queue.next());
 	}
 
 	/** Perform one poll for an operation */
