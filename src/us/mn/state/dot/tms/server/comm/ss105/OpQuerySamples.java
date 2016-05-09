@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2014  Minnesota Department of Transportation
+ * Copyright (C) 2004-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,8 +80,9 @@ public class OpQuerySamples extends OpSS105 {
 			mess.add(samples);
 			mess.queryProps();
 			stamp = samples.timestamp.getTime();
-			if(stamp < oldest || stamp > newest) {
-				logError("BAD TIMESTAMP: " + new Date(stamp));
+			if (stamp < oldest || stamp > newest) {
+				mess.logError("BAD TIMESTAMP: " +
+					new Date(stamp));
 				setFailed();
 				throw new DownloadRequestException(
 					controller.toString());
@@ -99,7 +100,7 @@ public class OpQuerySamples extends OpSS105 {
 			samples.getScans(), BinnedSampleProperty.MAX_PERCENT);
 		controller.storeSpeed(stamp, period, START_PIN,
 			samples.getSpeed());
-		for(VehLengthClass vc: VehLengthClass.values()) {
+		for (VehLengthClass vc: VehLengthClass.values()) {
 			controller.storeVolume(stamp, period, START_PIN,
 				samples.getVolume(vc), vc);
 		}
