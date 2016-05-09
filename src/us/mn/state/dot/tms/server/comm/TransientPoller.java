@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import us.mn.state.dot.sched.DebugLog;
+
 /**
  * TransientPoller is a MessagePoller which causes equal operations to be
  * replaced instead of rejected.  It is useful for PTZ pollers (which consist
@@ -25,8 +27,8 @@ abstract public class TransientPoller<T extends ControllerProperty>
 	extends MessagePoller<T>
 {
 	/** Create a new transient poller */
-	protected TransientPoller(String name, Messenger m) {
-		super(name, m);
+	protected TransientPoller(String name, Messenger m, DebugLog l) {
+		super(name, m, l);
 	}
 
 	/** Add an operation to the transient poller */

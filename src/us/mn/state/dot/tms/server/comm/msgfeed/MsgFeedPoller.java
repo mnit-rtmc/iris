@@ -41,7 +41,7 @@ public class MsgFeedPoller extends MessagePoller<MsgFeedProperty> {
 
 	/** Create a new poller */
 	public MsgFeedPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, FEED_LOG);
 		feed_id = n;
 	}
 
@@ -49,11 +49,5 @@ public class MsgFeedPoller extends MessagePoller<MsgFeedProperty> {
 	public void queryMessages(ControllerImpl c) {
 		log("creating OpReadMsgFeed: " + c);
 		addOp(new OpReadMsgFeed(c, feed_id));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return FEED_LOG;
 	}
 }

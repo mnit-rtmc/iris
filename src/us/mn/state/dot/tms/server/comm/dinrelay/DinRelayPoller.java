@@ -38,7 +38,7 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 
 	/** Create a new DIN relay poller */
 	public DinRelayPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, DIN_LOG);
 	}
 
 	/** Query the outlet status */
@@ -98,11 +98,5 @@ public class DinRelayPoller extends MessagePoller<DinRelayProperty>
 	public void setFlashing(BeaconImpl b, boolean f) {
 		addOp(new OpChangeBeaconState(b, f));
 		addOp(new OpQueryBeaconState(b));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return DIN_LOG;
 	}
 }

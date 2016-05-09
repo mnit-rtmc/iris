@@ -35,7 +35,7 @@ public class CBWPoller extends MessagePoller<CBWProperty>
 
 	/** Create a new CBW relay poller */
 	public CBWPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, CBW_LOG);
 	}
 
 	/** Send a device request */
@@ -55,11 +55,5 @@ public class CBWPoller extends MessagePoller<CBWProperty>
 	@Override
 	public void setFlashing(BeaconImpl b, boolean f) {
 		addOp(new OpChangeBeaconState(b, f));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return CBW_LOG;
 	}
 }

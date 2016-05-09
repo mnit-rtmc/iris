@@ -37,7 +37,7 @@ public class ViconPTZPoller extends TransientPoller<ViconPTZProperty>
 
 	/** Create a new Vicon poller */
 	public ViconPTZPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, VICON_LOG);
 	}
 
 	/** Send a PTZ camera move command */
@@ -64,11 +64,5 @@ public class ViconPTZPoller extends TransientPoller<ViconPTZProperty>
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest r) {
 		addOp(new OpDeviceRequest(c, r));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return VICON_LOG;
 	}
 }

@@ -73,6 +73,9 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	/** Messenger for poll/response streams */
 	protected final Messenger messenger;
 
+	/** Protocol logger */
+	private final DebugLog logger;
+
 	/** Thread state */
 	private ThreadState state = ThreadState.NOT_STARTED;
 
@@ -135,7 +138,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	}
 
 	/** Create a new message poller */
-	protected MessagePoller(String name, Messenger m) {
+	protected MessagePoller(String name, Messenger m, DebugLog l) {
  		thread = new Thread(GROUP, "Poller: " + name) {
 			@Override
 			public void run() {
@@ -145,6 +148,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 		thread.setDaemon(true);
 		setThreadState(ThreadState.NOT_STARTED);
 		messenger = m;
+		logger = l;
 	}
 
 	/** Set the receive timeout */
@@ -336,12 +340,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	protected CommMessage<T> createCommMessage(OpController<T> o)
 		throws IOException
 	{
-		return new CommMessageImpl<T>(messenger, o, protocolLog());
-	}
-
-	/** Get the protocol debug log */
-	protected DebugLog protocolLog() {
-		return null;
+		return new CommMessageImpl<T>(messenger, o, logger);
 	}
 
 	/** Respond to a download request from a controller */

@@ -48,7 +48,7 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 
 	/** Create a new dmsxml poller */
 	public DmsXmlPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, LOG);
 		assert m instanceof StreamMessenger;
 	}
 

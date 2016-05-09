@@ -37,7 +37,7 @@ public class PelcoDPoller extends TransientPoller<PelcoDProperty>
 
 	/** Create a new Pelco poller */
 	public PelcoDPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, PELCOD_LOG);
 	}
 
 	/** Send a PTZ camera move command */
@@ -64,11 +64,5 @@ public class PelcoDPoller extends TransientPoller<PelcoDProperty>
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest r) {
 		addOp(new OpDeviceRequest(c, r));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return PELCOD_LOG;
 	}
 }

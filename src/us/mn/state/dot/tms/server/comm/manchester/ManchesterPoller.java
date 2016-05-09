@@ -38,7 +38,7 @@ public class ManchesterPoller extends TransientPoller<ManchesterProperty>
 
 	/** Create a new Manchester poller */
 	public ManchesterPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, MANCHESTER_LOG);
 	}
 
 	/** Send a PTZ camera move command */
@@ -65,11 +65,5 @@ public class ManchesterPoller extends TransientPoller<ManchesterProperty>
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest r) {
 		addOp(new OpDeviceRequest(c, r));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return MANCHESTER_LOG;
 	}
 }

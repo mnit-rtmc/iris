@@ -37,7 +37,7 @@ public class AddcoPoller extends MessagePoller<AddcoProperty>
 
 	/** Create a new ADDCO poller */
 	public AddcoPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, ADDCO_LOG);
 	}
 
 	/** Send a device request message to the sign */
@@ -65,11 +65,5 @@ public class AddcoPoller extends MessagePoller<AddcoProperty>
 		throws InvalidMessageException
 	{
 		addOp(new OpSendDMSMessage(dms, sm, o));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return ADDCO_LOG;
 	}
 }

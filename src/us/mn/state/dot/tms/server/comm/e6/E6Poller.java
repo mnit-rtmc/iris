@@ -70,7 +70,7 @@ public class E6Poller extends MessagePoller<E6Property>
 
 	/** Create a new E6 poller */
 	public E6Poller(String n, PacketMessenger m) {
-		super(n, m);
+		super(n, m, E6_LOG);
 		name = n;
 		pkt_mess = m;
 		DatagramSocket s = m.getSocket();
@@ -223,11 +223,5 @@ public class E6Poller extends MessagePoller<E6Property>
 			// Ignore other requests
 			break;
 		}
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return E6_LOG;
 	}
 }

@@ -33,11 +33,11 @@ public class SsiPoller extends MessagePoller<SsiProperty>
 	implements WeatherPoller
 {
 	/** SSI logger */
-	static private final DebugLog LOG = new DebugLog("ssi");
+	static private final DebugLog SSI_LOG = new DebugLog("ssi");
 
 	/** Log an SSI message */
 	static public void log(String msg) {
-		LOG.log(msg);
+		SSI_LOG.log(msg);
 	}
 
 	/** Mapping of site_id to most recent RWIS records */
@@ -46,7 +46,7 @@ public class SsiPoller extends MessagePoller<SsiProperty>
 
 	/** Create a new poller */
 	public SsiPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, SSI_LOG);
 	}
 
 	/** Send a device request */

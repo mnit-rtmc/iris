@@ -37,7 +37,7 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 
 	/** Create a new Canoga poller */
 	public CanogaPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, CANOGA_LOG);
 	}
 
 	/** Perform a controller download */
@@ -99,11 +99,5 @@ public class CanogaPoller extends MessagePoller<CanogaProperty>
 		OpQueryEventSamples qes = getEventCollector(c);
 		if (p == 30)
 			qes.binSamples();
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return CANOGA_LOG;
 	}
 }

@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
@@ -38,12 +39,15 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  */
 public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
 
+	/** NTCIP debug log */
+	static private final DebugLog NTCIP_LOG = new DebugLog("ntcip2");
+
 	/** SNMP message protocol */
 	private final SNMP snmp = new SNMP();
 
 	/** Create a new Ntcip poller */
 	public NtcipPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, NTCIP_LOG);
 	}
 
 	/** Create a new message for the specified operation */

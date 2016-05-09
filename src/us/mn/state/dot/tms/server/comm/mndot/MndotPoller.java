@@ -52,7 +52,7 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	 * @param n Comm link name.
 	 * @param m Messenger for communication. */
 	public MndotPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, MNDOT_LOG);
 	}
 
 	/** Respond to a download request from a controller */
@@ -189,11 +189,5 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 			// Ignore other requests
 			break;
 		}
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return MNDOT_LOG;
 	}
 }

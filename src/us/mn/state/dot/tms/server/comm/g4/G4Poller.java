@@ -35,7 +35,7 @@ public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 
 	/** Create a new G4 poller */
 	public G4Poller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, G4_LOG);
 	}
 
 	/** Perform a controller reset */
@@ -57,11 +57,5 @@ public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 	public void querySamples(ControllerImpl c, int p) {
 		if (p == 30)
 			addOp(new OpQueryStats(c, p));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return G4_LOG;
 	}
 }

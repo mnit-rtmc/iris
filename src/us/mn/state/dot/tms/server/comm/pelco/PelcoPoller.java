@@ -36,7 +36,7 @@ public class PelcoPoller extends MessagePoller<PelcoProperty>
 
 	/** Create a new Pelco line */
 	public PelcoPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, PELCO_LOG);
 	}
 
 	/** Set the camera to display on the specified monitor */
@@ -45,11 +45,5 @@ public class PelcoPoller extends MessagePoller<PelcoProperty>
 		String cam)
 	{
 		addOp(new OpSelectMonitorCamera(c, m, cam));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return PELCO_LOG;
 	}
 }

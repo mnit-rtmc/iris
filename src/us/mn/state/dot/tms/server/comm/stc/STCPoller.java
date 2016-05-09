@@ -37,7 +37,7 @@ public class STCPoller extends MessagePoller<STCProperty>
 
 	/** Create a new STC poller */
 	public STCPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, STC_LOG);
 	}
 
 	/** Send a device request */
@@ -69,11 +69,5 @@ public class STCPoller extends MessagePoller<STCProperty>
 	@Override
 	public void closeGate(GateArmImpl ga, User o) {
 		addOp(new OpControlGate(ga, o, GateArmState.CLOSING));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return STC_LOG;
 	}
 }

@@ -35,7 +35,7 @@ public class SS105Poller extends MessagePoller<SS105Property>
 
 	/** Create a new SS105 poller */
 	public SS105Poller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, SS105_LOG);
 	}
 
 	/** Perform a controller download */
@@ -64,11 +64,5 @@ public class SS105Poller extends MessagePoller<SS105Property>
 	public void querySamples(ControllerImpl c, int p) {
 		if (p == 30)
 			addOp(new OpQuerySamples(c, p));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return SS105_LOG;
 	}
 }

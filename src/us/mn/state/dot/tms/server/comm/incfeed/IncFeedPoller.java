@@ -41,18 +41,12 @@ public class IncFeedPoller extends MessagePoller<IncFeedProperty> {
 
 	/** Create a new poller */
 	public IncFeedPoller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, INC_LOG);
 		feed_id = n;
 	}
 
 	/** Query incident feed */
 	public void queryIncidents(ControllerImpl c, IncidentCache cache) {
 		addOp(new OpReadIncFeed(c, feed_id, cache));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return INC_LOG;
 	}
 }

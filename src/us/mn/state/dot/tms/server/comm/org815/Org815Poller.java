@@ -35,7 +35,7 @@ public class Org815Poller extends MessagePoller<Org815Property>
 
 	/** Create a new ORG-815 poller */
 	public Org815Poller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, ORG815_LOG);
 	}
 
 	/** Send a device request */
@@ -55,11 +55,5 @@ public class Org815Poller extends MessagePoller<Org815Property>
 	@Override
 	public void sendSettings(WeatherSensorImpl ws) {
 		addOp(new OpQuerySettings(ws));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return ORG815_LOG;
 	}
 }

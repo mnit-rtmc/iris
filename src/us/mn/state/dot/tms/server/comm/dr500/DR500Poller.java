@@ -34,7 +34,7 @@ public class DR500Poller extends MessagePoller<DR500Property>
 
 	/** Create a new DR500 poller */
 	public DR500Poller(String n, Messenger m) {
-		super(n, m);
+		super(n, m, DR500_LOG);
 	}
 
 	/** Perform a controller download */
@@ -63,11 +63,5 @@ public class DR500Poller extends MessagePoller<DR500Property>
 	public void querySamples(ControllerImpl c, int p) {
 		if (p == 30)
 			addOp(new OpQuerySpeed(c, p));
-	}
-
-	/** Get the protocol debug log */
-	@Override
-	protected DebugLog protocolLog() {
-		return DR500_LOG;
 	}
 }
