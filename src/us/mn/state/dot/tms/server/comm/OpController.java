@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2014  Minnesota Department of Transportation
+ * Copyright (C) 2005-2016  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
@@ -62,9 +62,6 @@ abstract public class OpController<T extends ControllerProperty>
 		return controller;
 	}
 
-	/** Drop address of the controller to be polled */
-	protected final int drop;
-
 	/** Device ID */
 	protected final String id;
 
@@ -96,7 +93,6 @@ abstract public class OpController<T extends ControllerProperty>
 		super(p);
 		assert c != null;
 		controller = c;
-		drop = controller.getDrop();
 		id = i;
 	}
 
