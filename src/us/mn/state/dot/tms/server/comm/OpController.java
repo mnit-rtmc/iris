@@ -54,6 +54,12 @@ abstract public class OpController<T extends ControllerProperty>
 		return (a.length() > 0) ? (a + ", " + b) : b;
 	}
 
+	/** Strip all characters up to the last dot */
+	static private String stripToLastDot(String v) {
+		int i = v.lastIndexOf('.');
+		return (i >= 0) ? v.substring(i + 1) : v;
+	}
+
 	/** Priority of the operation */
 	private PriorityLevel priority;
 
@@ -128,7 +134,23 @@ abstract public class OpController<T extends ControllerProperty>
 	/** Get a string description of the operation */
 	@Override
 	public final String toString() {
-		return super.toString() + " (" + id + ")";
+		return stripToLastDot(phaseClass().getName()) + " (" + id + ")";
+	}
+
+	/** Get the phase class */
+	private Class phaseClass() {
+		Phase<T> p = phase;
+		return (p != null) ? p.getClass() : getClass();
+	}
+
+	/** Get the operation name */
+	protected final String getOpName() {
+		return stripToLastDot(getClass().getName());
+	}
+
+	/** Get a description of the operation */
+	public String getOperationDescription() {
+		return getOpName();
 	}
 
 	/** Handle a communication error */

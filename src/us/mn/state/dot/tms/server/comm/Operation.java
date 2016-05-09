@@ -25,12 +25,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
  */
 abstract public class Operation<T extends ControllerProperty> {
 
-	/** Strip all characters up to the last dot */
-	static private String stripToLastDot(String v) {
-		int i = v.lastIndexOf('.');
-		return (i >= 0) ? v.substring(i + 1) : v;
-	}
-
 	/** Base class for operation phases */
 	abstract protected class Phase<T extends ControllerProperty> {
 
@@ -41,7 +35,7 @@ abstract public class Operation<T extends ControllerProperty> {
 	}
 
 	/** Current phase of the operation, or null if done */
-	private Phase<T> phase;
+	protected Phase<T> phase;
 
 	/** Begin the operation.  The operation begins when it is queued for
 	 * processing. */
@@ -128,31 +122,9 @@ abstract public class Operation<T extends ControllerProperty> {
 		return SystemAttrEnum.OPERATION_RETRY_THRESHOLD.getInt();
 	}
 
-	/** Get a description of the operation */
-	public String getOperationDescription() {
-		return getOpName();
-	}
-
-	/** Get the operation name */
-	protected final String getOpName() {
-		return stripToLastDot(getClass().getName());
-	}
-
 	/** Operation equality test */
 	@Override
 	public boolean equals(Object o) {
 		return this == o;
-	}
-
-	/** Get a string description of the operation */
-	@Override
-	public String toString() {
-		return stripToLastDot(phaseClass().getName());
-	}
-
-	/** Get the phase class */
-	private Class phaseClass() {
-		Phase<T> p = phase;
-		return (p != null) ? p.getClass() : getClass();
 	}
 }
