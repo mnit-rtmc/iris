@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,8 +34,13 @@ public class OpQueryConfig extends OpCanoga {
 	private final VersionProperty version = new VersionProperty();
 
 	/** Create an operation to query the Canoga configuration */
+	public OpQueryConfig(PriorityLevel p, ControllerImpl c) {
+		super(p, c);
+	}
+
+	/** Create an operation to query the Canoga configuration */
 	public OpQueryConfig(ControllerImpl c) {
-		super(PriorityLevel.DOWNLOAD, c);
+		this(PriorityLevel.DOWNLOAD, c);
 	}
 
 	/** Create the first phase of the operation */
