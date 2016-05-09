@@ -60,7 +60,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Write a message to the polling log */
 	private void plog(String msg) {
-		if(POLL_LOG.isOpen())
+		if (POLL_LOG.isOpen())
 			POLL_LOG.log(thread.getName() + " " + msg);
 	}
 
@@ -103,7 +103,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	/** Check if ready for operation */
 	@Override
 	public synchronized boolean isReady() {
-		switch(state) {
+		switch (state) {
 		case NOT_STARTED:
 		case STARTING:
 		case RUNNING:
@@ -116,7 +116,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	/** Check if poller is connected */
 	@Override
 	public synchronized boolean isConnected() {
-		switch(state) {
+		switch (state) {
 		case STARTING:
 		case RUNNING:
 			return true;
@@ -155,7 +155,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Add an operation to the message poller */
 	protected void addOperation(Operation<T> op) {
-		if(queue.enqueue(op))
+		if (queue.enqueue(op))
 			ensureStarted();
 		else
 			plog("DROPPING " + op);
@@ -221,10 +221,10 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	/** Drain the poll queue */
 	private void drainQueue() {
 		queue.close();
-		while(queue.hasNext()) {
+		while (queue.hasNext()) {
 			Operation<T> o = queue.next();
 			o.handleCommError(EventType.QUEUE_DRAINED, getStatus());
-			if(hung_up)
+			if (hung_up)
 				o.setSucceeded();
 			o.cleanup();
 		}
@@ -232,11 +232,11 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Perform operations on the poll queue */
 	private void performOperations() throws IOException {
-		while(true) {
+		while (true) {
 			Operation<T> o = queue.next();
-			if(o instanceof KillThread)
+			if (o instanceof KillThread)
 				break;
-			if(o instanceof OpController)
+			if (o instanceof OpController)
 				doPoll((OpController<T>)o);
 		}
 	}
@@ -248,36 +248,36 @@ abstract public class MessagePoller<T extends ControllerProperty>
 		try {
 			o.poll(createCommMessage(o));
 		}
-		catch(DeviceContentionException e) {
+		catch (DeviceContentionException e) {
 			handleContention(o, e);
 		}
-		catch(DownloadRequestException e) {
+		catch (DownloadRequestException e) {
 			download(o.getController(), o.getPriority());
 		}
-		catch(ChecksumException e) {
+		catch (ChecksumException e) {
 			o.handleCommError(EventType.CHECKSUM_ERROR,
 				exceptionMessage(e));
 			messenger.drain();
 		}
-		catch(ParsingException e) {
+		catch (ParsingException e) {
 			o.handleCommError(EventType.PARSING_ERROR,
 				exceptionMessage(e));
 			messenger.drain();
 		}
-		catch(ControllerException e) {
+		catch (ControllerException e) {
 			o.handleCommError(EventType.CONTROLLER_ERROR,
 				exceptionMessage(e));
 			o.setFailed();
 			o.setMaintStatus(exceptionMessage(e));
 		}
-		catch(SocketTimeoutException e) {
+		catch (SocketTimeoutException e) {
 			o.handleCommError(EventType.POLL_TIMEOUT_ERROR,
 				exceptionMessage(e));
 		}
 		finally {
-			if(o.isDone() || !requeueOperation(o))
+			if (o.isDone() || !requeueOperation(o))
 				o.cleanup();
-			if(POLL_LOG.isOpen()) {
+			if (POLL_LOG.isOpen()) {
 				plog(oname + " elapsed: " +
 					calculate_elapsed(start));
 			}
@@ -313,7 +313,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Requeue an in-progress operation */
 	private boolean requeueOperation(Operation<T> op) {
-		if(queue.requeue(op))
+		if (queue.requeue(op))
 			return true;
 		else {
 			plog("DROPPING " + op);
