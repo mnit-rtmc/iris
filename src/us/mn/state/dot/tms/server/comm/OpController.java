@@ -19,10 +19,11 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
- * An operation which is performed on a field controller.
+ * An operation is a sequence of phases to be performed on a field controller.
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -31,6 +32,11 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 abstract public class OpController<T extends ControllerProperty>
 	extends Operation<T>
 {
+	/** Get the error retry threshold */
+	static private int systemRetryThreshold() {
+		return SystemAttrEnum.OPERATION_RETRY_THRESHOLD.getInt();
+	}
+
 	/** Comm error log */
 	static private final DebugLog COMM_LOG = new DebugLog("comm");
 
@@ -60,6 +66,29 @@ abstract public class OpController<T extends ControllerProperty>
 		return (i >= 0) ? v.substring(i + 1) : v;
 	}
 
+	/** Base class for operation phases */
+	abstract protected class Phase<T extends ControllerProperty> {
+
+		/** Perform a poll.
+		 * @return The next phase of the operation, or null */
+		abstract protected Phase<T> poll(CommMessage<T> mess)
+			throws IOException, DeviceContentionException;
+	}
+
+	/** Current phase of the operation, or null if done */
+	private Phase<T> phase;
+
+	/** Begin the operation.  The operation begins when it is queued for
+	 * processing. */
+	public final void begin() {
+		phase = phaseOne();
+	}
+
+	/** Create the first phase of the operation.  This method cannot be
+	 * called in the Operation constructor, because the object may not
+	 * have been fully constructed yet (subclass initialization). */
+	abstract protected Phase<T> phaseOne();
+
 	/** Priority of the operation */
 	private PriorityLevel priority;
 
@@ -85,6 +114,34 @@ abstract public class OpController<T extends ControllerProperty>
 
 	/** Device ID */
 	protected final String id;
+
+	/** Success or failure of operation */
+	private boolean success = true;
+
+	/** Check if the operation succeeded */
+	public boolean isSuccess() {
+		return success;
+	}
+
+	/** Set the success flag.  This will clear the error counter if true. */
+	protected final void setSuccess(boolean s) {
+		success = s;
+		if (s)
+			error_cnt = 0;
+	}
+
+	/** Set the operation to failed */
+	public synchronized final void setFailed() {
+		setSuccess(false);
+		phase = null;
+	}
+
+	/** Set the operation to succeeded */
+	@Override
+	public synchronized final void setSucceeded() {
+		setSuccess(true);
+		phase = null;
+	}
 
 	/** Maint status message */
 	private String maintStatus = null;
@@ -153,18 +210,65 @@ abstract public class OpController<T extends ControllerProperty>
 		return getOpName();
 	}
 
+	/** Perform a poll with the current phase.
+	 * @param mess Message to use for polling. */
+	public final void poll(CommMessage<T> mess) throws IOException,
+		DeviceContentionException
+	{
+		Phase<T> p = phase;
+		if (p != null)
+			updatePhase(p.poll(mess));
+	}
+
+	/** Update the phase of the operation */
+	private synchronized void updatePhase(Phase<T> p) {
+		// Need to synchronize against setFailed / setSucceeded
+		if (!isDone())
+			phase = p;
+	}
+
+	/** Check if the operation is done */
+	public final boolean isDone() {
+		return phase == null;
+	}
+
 	/** Handle a communication error */
 	@Override
 	public void handleCommError(EventType et, String msg) {
 		logComm(et, msg);
 		controller.logCommEvent(et, id, filterMsg(msg));
-		super.handleCommError(et, msg);
+		if (!retry())
+			setFailed();
 	}
 
 	/** Log a comm error to debug log */
 	private void logComm(EventType et, String msg) {
 		if (COMM_LOG.isOpen())
 			COMM_LOG.log(id + " " + et + ", " + msg);
+	}
+
+	/** Operation error counter */
+	private int error_cnt = 0;
+
+	/** Check if the operation should be retried */
+	private boolean retry() {
+		++error_cnt;
+		return error_cnt < getRetryThreshold();
+	}
+
+	/** Get the error retry threshold */
+	public int getRetryThreshold() {
+		return (controller.isFailed()) ? 0 : systemRetryThreshold();
+	}
+
+	/** Cleanup the operation.  The operation gets cleaned up after
+	 * processing is complete and it is removed from the queue.  This method
+	 * may get called more than once after the operation is done. */
+	@Override
+	public void cleanup() {
+		updateMaintStatus();
+		updateErrorStatus();
+		controller.completeOperation(id, isSuccess());
 	}
 
 	/** Update controller maintenance status */
@@ -183,20 +287,5 @@ abstract public class OpController<T extends ControllerProperty>
 			controller.setErrorStatus(filterMsg(s));
 			err_status = null;
 		}
-	}
-
-	/** Cleanup the operation */
-	@Override
-	public void cleanup() {
-		updateMaintStatus();
-		updateErrorStatus();
-		controller.completeOperation(id, isSuccess());
-		super.cleanup();
-	}
-
-	/** Get the error retry threshold */
-	@Override
-	public int getRetryThreshold() {
-		return (controller.isFailed()) ? 0 : super.getRetryThreshold();
 	}
 }
