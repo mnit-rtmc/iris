@@ -40,11 +40,8 @@ public class DR500Poller extends MessagePoller<DR500Property>
 	/** Perform a controller download */
 	@Override
 	protected void download(ControllerImpl c, PriorityLevel p) {
-		if (c.isActive()) {
-			OpSendSensorSettings o = new OpSendSensorSettings(c);
-			o.setPriority(p);
-			addOp(o);
-		}
+		if (c.isActive())
+			addOp(new OpSendSensorSettings(p, c));
 	}
 
 	/** Perform a controller reset */

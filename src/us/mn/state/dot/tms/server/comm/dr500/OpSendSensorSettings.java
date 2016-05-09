@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,8 +49,13 @@ public class OpSendSensorSettings extends OpDR500 {
 	                              | ModeFlag.RAIN_FILTER.flag;
 
 	/** Create a new operation to send settings to a sensor */
+	public OpSendSensorSettings(PriorityLevel p, ControllerImpl c) {
+		super(p, c);
+	}
+
+	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c) {
-		super(PriorityLevel.DOWNLOAD, c);
+		this(PriorityLevel.DOWNLOAD, c);
 	}
 
 	/** Create the first phase of the operation */
