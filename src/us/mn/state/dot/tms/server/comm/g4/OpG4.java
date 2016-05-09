@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2012  Iteris Inc.
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server.comm.g4;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import static us.mn.state.dot.tms.server.comm.g4.G4Poller.G4_LOG;
 
 /**
  * Operation for G4 device
@@ -27,12 +26,6 @@ import static us.mn.state.dot.tms.server.comm.g4.G4Poller.G4_LOG;
  * @author Douglas Lau
  */
 abstract public class OpG4 extends OpController<G4Property> {
-
-	/** Log an error msg */
-	protected void logError(String msg) {
-		if (G4_LOG.isOpen())
-			G4_LOG.log(controller.getName() + "! " + msg);
-	}
 
 	/** Create a new G4 operation */
 	protected OpG4(PriorityLevel p, ControllerImpl c) {

@@ -31,7 +31,7 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
 public class G4Poller extends MessagePoller<G4Property> implements SamplePoller{
 
 	/** Debug log */
-	static protected final DebugLog G4_LOG = new DebugLog("g4");
+	static private final DebugLog G4_LOG = new DebugLog("g4");
 
 	/** Create a new G4 poller */
 	public G4Poller(String n, Messenger m) {
