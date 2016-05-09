@@ -18,11 +18,11 @@ import java.io.PrintStream;
 
 /**
  * A prioritized queue which sorts Operation objects by their priority
- * class. Operations with the same priority are sorted FIFO.
+ * class.  Operations with the same priority are sorted FIFO.
  *
  * @author Douglas Lau
  */
-public final class OperationQueue<T extends ControllerProperty> {
+public final class OpQueue<T extends ControllerProperty> {
 
 	/** Inner class for nodes in the queue */
 	static private final class Node<T extends ControllerProperty> {

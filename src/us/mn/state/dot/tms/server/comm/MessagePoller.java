@@ -68,7 +68,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	private final Thread thread;
 
 	/** Operation queue */
-	protected final OperationQueue<T> queue = new OperationQueue<T>();
+	protected final OpQueue<T> queue = new OpQueue<T>();
 
 	/** Messenger for poll/response streams */
 	protected final Messenger messenger;
