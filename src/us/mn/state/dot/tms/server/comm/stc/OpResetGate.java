@@ -77,7 +77,8 @@ public class OpResetGate extends OpSTC {
 				// Controller must still be offline
 			}
 			if (TimeSteward.currentTimeMillis() > expire) {
-				logError("reset timeout expired -- giving up");
+				mess.logError("reset timeout expired -- " +
+					"giving up");
 				return null;
 			} else
 				return this;

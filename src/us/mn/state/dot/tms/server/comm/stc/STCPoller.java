@@ -33,7 +33,7 @@ public class STCPoller extends MessagePoller<STCProperty>
 	implements GateArmPoller
 {
 	/** Debug log */
-	static protected final DebugLog STC_LOG = new DebugLog("stc");
+	static private final DebugLog STC_LOG = new DebugLog("stc");
 
 	/** Create a new STC poller */
 	public STCPoller(String n, Messenger m) {

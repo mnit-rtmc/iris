@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.stc;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
-import static us.mn.state.dot.tms.server.comm.stc.STCPoller.STC_LOG;
 
 /**
  * Operation for STC device
@@ -25,12 +24,6 @@ import static us.mn.state.dot.tms.server.comm.stc.STCPoller.STC_LOG;
  * @author Douglas Lau
  */
 abstract public class OpSTC extends OpDevice<STCProperty> {
-
-	/** Log an error msg */
-	protected void logError(String msg) {
-		if (STC_LOG.isOpen())
-			STC_LOG.log(controller.getName() + "! " + msg);
-	}
 
 	/** Gate arm device */
 	protected final GateArmImpl gate_arm;
