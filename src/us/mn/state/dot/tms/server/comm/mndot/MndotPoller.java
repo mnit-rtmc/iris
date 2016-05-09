@@ -58,16 +58,10 @@ public class MndotPoller extends MessagePoller<MndotProperty>
 	/** Respond to a download request from a controller */
 	@Override
 	protected void download(ControllerImpl c, PriorityLevel p) {
-		OpSendSampleSettings ss = new OpSendSampleSettings(c);
-		ss.setPriority(p);
-		addOp(ss);
+		addOp(new OpSendSampleSettings(p, c));
 		BeaconImpl beacon = c.getActiveBeacon();
-		if (beacon != null) {
-			OpSendBeaconSettings s =
-				new OpSendBeaconSettings(beacon);
-			s.setPriority(p);
-			addOp(s);
-		}
+		if (beacon != null)
+			addOp(new OpSendBeaconSettings(p, beacon));
 		RampMeterImpl meter1 = Op170.lookupMeter1(c);
 		if (meter1 != null)
 			addOp(new OpSendMeterSettings(p, meter1));

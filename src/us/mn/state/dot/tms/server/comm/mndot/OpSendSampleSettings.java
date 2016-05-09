@@ -29,8 +29,13 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpSendSampleSettings extends Op170 {
 
 	/** Create a new send sample settings operation */
+	public OpSendSampleSettings(PriorityLevel p, ControllerImpl c) {
+		super(p, c);
+	}
+
+	/** Create a new send sample settings operation */
 	public OpSendSampleSettings(ControllerImpl c) {
-		super(PriorityLevel.DOWNLOAD, c);
+		this(PriorityLevel.DOWNLOAD, c);
 	}
 
 	/** Create the first phase of the operation */

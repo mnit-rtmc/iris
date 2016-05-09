@@ -31,9 +31,14 @@ public class OpSendBeaconSettings extends Op170Device {
 	private final BeaconImpl beacon;
 
 	/** Create a new send beacon settings operation */
-	public OpSendBeaconSettings(BeaconImpl b) {
-		super(PriorityLevel.DOWNLOAD, b);
+	public OpSendBeaconSettings(PriorityLevel p, BeaconImpl b) {
+		super(p, b);
 		beacon = b;
+	}
+
+	/** Create a new send beacon settings operation */
+	public OpSendBeaconSettings(BeaconImpl b) {
+		this(PriorityLevel.DOWNLOAD, b);
 	}
 
 	/** Create the second phase of the operation */
