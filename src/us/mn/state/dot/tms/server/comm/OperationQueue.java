@@ -51,6 +51,11 @@ public final class OperationQueue<T extends ControllerProperty> {
 		closing = true;
 	}
 
+	/** Check if the queue is open */
+	public boolean isOpen() {
+		return !closing;
+	}
+
 	/** Enqueue a new operation */
 	public synchronized boolean enqueue(Operation<T> op) {
 		if (shouldAdd(op)) {
@@ -63,7 +68,7 @@ public final class OperationQueue<T extends ControllerProperty> {
 
 	/** Check if an operation should be added to the queue */
 	private boolean shouldAdd(Operation<T> op) {
-		return !closing && !contains(op);
+		return isOpen() && !contains(op);
 	}
 
 	/** Check if the queue contains a given operation */
@@ -101,7 +106,7 @@ public final class OperationQueue<T extends ControllerProperty> {
 
 	/** Requeue an in-progress operation */
 	public synchronized boolean requeue(Operation<T> op) {
-		if ((remove(op) == op) && !closing) {
+		if ((remove(op) == op) && isOpen()) {
 			add(op);
 			return true;
 		} else
@@ -130,30 +135,14 @@ public final class OperationQueue<T extends ControllerProperty> {
 		return null;
 	}
 
-	/** Does the queue have any elements? */
-	public synchronized boolean hasNext() {
-		return front != null;
-	}
-
 	/** Get the next operation from the queue (and remove it) */
-	public synchronized Operation<T> next() {
+	public synchronized Operation<T> next() throws InterruptedException {
 		work = null;
-		waitOp();
+		while (null == front)
+			wait();
 		work = front.operation;
 		front = front.next;
 		return work;
-	}
-
-	/** Wait for an operation to be added to the queue */
-	private synchronized void waitOp() {
-		while (!hasNext()) {
-			try {
-				wait();
-			}
-			catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
 	}
 
 	/** Do something to each operation in the queue */

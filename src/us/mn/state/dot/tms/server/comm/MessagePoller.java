@@ -183,7 +183,8 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Stop polling */
 	protected void stopPolling() {
-		addOperation(new KillThread<T>());
+		queue.close();
+		thread.interrupt();
 	}
 
 	/** Destroy the poller */
@@ -208,6 +209,9 @@ abstract public class MessagePoller<T extends ControllerProperty>
 		catch (IOException e) {
 			setStatus(exceptionMessage(e));
 		}
+		catch (InterruptedException e) {
+			// from stopPolling
+		}
 		catch (RuntimeException e) {
 			e.printStackTrace();
 		}
@@ -220,22 +224,23 @@ abstract public class MessagePoller<T extends ControllerProperty>
 
 	/** Drain the poll queue */
 	private void drainQueue() {
-		queue.close();
-		while (queue.hasNext()) {
-			Operation<T> o = queue.next();
-			o.handleCommError(EventType.QUEUE_DRAINED, getStatus());
-			if (hung_up)
-				o.setSucceeded();
-			o.cleanup();
-		}
+		final String s = getStatus();
+		queue.forEach(new OperationHandler<T>() {
+			public void handle(PriorityLevel prio, Operation<T> o) {
+				o.handleCommError(EventType.QUEUE_DRAINED, s);
+				if (hung_up)
+					o.setSucceeded();
+				o.cleanup();
+			}
+		});
 	}
 
 	/** Perform operations on the poll queue */
-	private void performOperations() throws IOException {
-		while (true) {
+	private void performOperations() throws IOException,
+		InterruptedException
+	{
+		while (queue.isOpen()) {
 			Operation<T> o = queue.next();
-			if (o instanceof KillThread)
-				break;
 			if (o instanceof OpController)
 				doPoll((OpController<T>)o);
 		}
