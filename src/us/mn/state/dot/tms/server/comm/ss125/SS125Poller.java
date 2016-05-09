@@ -31,7 +31,7 @@ public class SS125Poller extends MessagePoller<SS125Property>
 	implements SamplePoller
 {
 	/** SS 125 debug log */
-	static protected final DebugLog SS125_LOG = new DebugLog("ss125");
+	static private final DebugLog SS125_LOG = new DebugLog("ss125");
 
 	/** Create a new SS125 poller */
 	public SS125Poller(String n, Messenger m) {
