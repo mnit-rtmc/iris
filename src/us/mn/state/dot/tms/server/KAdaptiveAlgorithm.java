@@ -294,6 +294,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		MeterState ms = getMeterState(meter);
 		if (ms != null) {
 			ms.validate();
+			if (ALG_LOG.isOpen())
+				log(ms.toString());
 			if (MeterEvent.getMeterEventPurgeDays() > 0)
 				ms.logMeterEvent();
 		}
@@ -1427,6 +1429,15 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				limit_control.ordinal(), min_rate, release_rate,
 				max_rate, dns, seg_den);
 			BaseObjectImpl.logEvent(ev);
+		}
+
+		/** Get a string representation of a meter state */
+		@Override
+		public String toString() {
+			Double sd = getSegmentDensity();
+			float seg_den = (sd != null) ? sd.floatValue() : 0;
+			return "meter:" + meter.getName() + " phase:" + phase +
+			       " seg_den:" + seg_den;
 		}
 	}
 }
