@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * A property to tilt a camera
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class TiltProperty extends CohuPTZProperty {
 
@@ -59,5 +60,11 @@ public class TiltProperty extends CohuPTZProperty {
 		msg[3] = cmd[1];
 		msg[4] = calculateChecksum(msg, 1, 3);
 		os.write(msg);
+	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "tilt: " + value;
 	}
 }

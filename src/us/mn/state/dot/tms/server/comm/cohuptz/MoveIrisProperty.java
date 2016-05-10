@@ -24,10 +24,12 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * This class creates a Cohu PTZ request to initiate an iris movement.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class MoveIrisProperty extends CohuPTZProperty {
 
-	protected final DeviceRequest devReq;
+	/** Device request */
+	private final DeviceRequest devReq;
 
 	/** Create the property. */
 	public MoveIrisProperty(DeviceRequest dr) {
@@ -39,32 +41,35 @@ public class MoveIrisProperty extends CohuPTZProperty {
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] message = createPacket(c.getDrop());
+		byte[] pkt = createPacket(c.getDrop());
 		int i = 0;
-		message[i++] = (byte)0xf8;
-		message[i++] = (byte)c.getDrop();
+		pkt[i++] = (byte) 0xf8;
+		pkt[i++] = (byte) c.getDrop();
 
-		boolean validRequest = true;
 		switch (devReq) {
-			case CAMERA_IRIS_STOP:
-				message[i++] = (byte)0x49;
-				message[i++] = (byte)0x53;
-				break;
-			case CAMERA_IRIS_CLOSE:
-				message[i++] = (byte)0x49;
-				message[i++] = (byte)0x43;
-				break;
-			case CAMERA_IRIS_OPEN:
-				message[i++] = (byte)0x49;
-				message[i++] = (byte)0x4f;
-				break;
-			default:
-				validRequest = false;
-				break;
+		case CAMERA_IRIS_STOP:
+			pkt[i++] = (byte) 0x49;
+			pkt[i++] = (byte) 0x53;
+			break;
+		case CAMERA_IRIS_CLOSE:
+			pkt[i++] = (byte) 0x49;
+			pkt[i++] = (byte) 0x43;
+			break;
+		case CAMERA_IRIS_OPEN:
+			pkt[i++] = (byte) 0x49;
+			pkt[i++] = (byte) 0x4f;
+			break;
+		default:
+			// Invalid device request
+			return;
 		}
-		if (validRequest) {
-			message[i] = calculateChecksum(message, 1, i - 1);
-			os.write(message);
-		}
+		pkt[i] = calculateChecksum(pkt, 1, i - 1);
+		os.write(pkt);
+	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "iris: " + devReq;
 	}
 }

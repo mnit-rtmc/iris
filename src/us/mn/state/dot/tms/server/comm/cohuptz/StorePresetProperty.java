@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * to store the current state to a specified preset.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class StorePresetProperty extends CohuPTZProperty {
 
@@ -45,12 +46,18 @@ public class StorePresetProperty extends CohuPTZProperty {
 			return;
 		byte pb = presetByte.byteValue();
 
-		byte[] message = createPacket(c.getDrop());
-		message[0] = (byte)0xf8;
-		message[1] = (byte)c.getDrop();
-		message[2] = (byte)0x50;
-		message[3] = pb;
-		message[4] = calculateChecksum(message, 1, 3);
-		os.write(message);
+		byte[] pkt = createPacket(c.getDrop());
+		pkt[0] = (byte) 0xf8;
+		pkt[1] = (byte) c.getDrop();
+		pkt[2] = (byte) 0x50;
+		pkt[3] = pb;
+		pkt[4] = calculateChecksum(pkt, 1, 3);
+		os.write(pkt);
+	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "store preset: " + preset;
 	}
 }

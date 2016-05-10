@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * A property to zoom a camera
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class ZoomProperty extends CohuPTZProperty {
 
@@ -64,5 +66,11 @@ public class ZoomProperty extends CohuPTZProperty {
 			msg[i++] = b;
 		msg[i] = calculateChecksum(msg, 1, cmd.length + 1);
 		os.write(msg);
+	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "zoom: " + value;
 	}
 }

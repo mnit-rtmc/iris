@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,10 +25,12 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * This class creates a Cohu PTZ request to change auto-focus mode.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class SetAFModeProperty extends CohuPTZProperty {
 
-	protected final DeviceRequest devReq;
+	/** Device request */
+	private final DeviceRequest devReq;
 
 	/** Create the property. */
 	public SetAFModeProperty(DeviceRequest dr) {
@@ -39,30 +42,33 @@ public class SetAFModeProperty extends CohuPTZProperty {
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] message = new byte[6];		// max. msg size of 6
+		byte[] pkt = new byte[6];		// max. msg size of 6
 		int i = 0;
-		message[i++] = (byte)0xf8;
-		message[i++] = (byte)c.getDrop();
+		pkt[i++] = (byte) 0xf8;
+		pkt[i++] = (byte) c.getDrop();
 
-		boolean validRequest = true;
 		switch (devReq) {
-			case CAMERA_FOCUS_MANUAL:
-				message[i++] = (byte)0x63;
-				message[i++] = (byte)0x46;
-				message[i++] = (byte)0x4d;
-				break;
-			case CAMERA_FOCUS_AUTO:
-				message[i++] = (byte)0x63;
-				message[i++] = (byte)0x46;
-				message[i++] = (byte)0x41;
-				break;
-			default:
-				validRequest = false;
-				break;
+		case CAMERA_FOCUS_MANUAL:
+			pkt[i++] = (byte) 0x63;
+			pkt[i++] = (byte) 0x46;
+			pkt[i++] = (byte) 0x4d;
+			break;
+		case CAMERA_FOCUS_AUTO:
+			pkt[i++] = (byte) 0x63;
+			pkt[i++] = (byte) 0x46;
+			pkt[i++] = (byte) 0x41;
+			break;
+		default:
+			// Invalid device request
+			return;
 		}
-		if (validRequest) {
-			message[i] = calculateChecksum(message, 1, i - 1);
-			os.write(Arrays.copyOf(message, i + 1));
-		}
+		pkt[i] = calculateChecksum(pkt, 1, i - 1);
+		os.write(Arrays.copyOf(pkt, i + 1));
+	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "auto-focus mode: " + devReq;
 	}
 }

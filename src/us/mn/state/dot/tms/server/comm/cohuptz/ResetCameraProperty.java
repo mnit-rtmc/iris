@@ -24,24 +24,27 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * to reset.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class ResetCameraProperty extends CohuPTZProperty {
-
-	/** Create the property. */
-	public ResetCameraProperty() {
-	}
 
 	/** Encode a STORE request */
 	@Override
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] message = createPacket(c.getDrop());
-		message[0] = (byte)0xf8;
-		message[1] = (byte)c.getDrop();
-		message[2] = (byte)0x72;
-		message[3] = (byte)0x73;
-		message[4] = calculateChecksum(message, 1, 3);
-		os.write(message);
+		byte[] pkt = createPacket(c.getDrop());
+		pkt[0] = (byte) 0xf8;
+		pkt[1] = (byte) c.getDrop();
+		pkt[2] = (byte) 0x72;
+		pkt[3] = (byte) 0x73;
+		pkt[4] = calculateChecksum(pkt, 1, 3);
+		os.write(pkt);
+	}
+
+	/** Get a string representation of the property */
+	@Override
+	public String toString() {
+		return "reset camera";
 	}
 }
