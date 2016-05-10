@@ -75,7 +75,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	static private final int K_JAM_RAMP = 140;
 
 	/** Ramp queue jam density (vehicles per foot) */
-	static private final float JAM_VPF = (float)K_JAM_RAMP / FEET_PER_MILE;
+	static private final float JAM_VPF = (float) K_JAM_RAMP / FEET_PER_MILE;
 
 	/** Seconds to average segment density for start metering check */
 	static private final int START_SECS = 120;
@@ -158,10 +158,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	 * @param vol Volume to convert (number of vehicles)
 	 * @return Flow rate (vehicles / hour), or null for missing data. */
 	static private Double flowRate(float vol) {
-		if (vol >= 0)
-			return vol * STEP_HOUR;
-		else
-			return null;
+		return (vol >= 0) ? (vol * STEP_HOUR) : null;
 	}
 
 	/** Convert flow rate to volume for a given period.
@@ -213,7 +210,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			ALL_ALGS.values().iterator();
 		while (it.hasNext()) {
 			KAdaptiveAlgorithm alg = it.next();
-			alg.processInterval();
+			alg.updateStations();
 			if (alg.isDone()) {
 				alg.log("isDone: removing");
 				it.remove();
@@ -262,15 +259,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Create one node */
 	private Node createNode(R_NodeImpl rnode, Node prev) {
 		Float mile = corridor.getMilePoint(rnode);
-		if (mile != null)
-			return createNode(rnode, mile, prev);
-		else
-			return null;
+		return (mile != null) ? createNode(rnode, mile, prev) : null;
 	}
 
 	/** Create one node */
 	private Node createNode(R_NodeImpl rnode, float mile, Node prev) {
-		switch(R_NodeType.fromOrdinal(rnode.getNodeType())) {
+		switch (R_NodeType.fromOrdinal(rnode.getNodeType())) {
 		case ENTRANCE:
 			return new EntranceNode(rnode, mile, prev);
 		case STATION:
@@ -309,10 +303,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	@Override
 	public RampMeterQueue getQueueState(RampMeterImpl meter) {
 		MeterState ms = getMeterState(meter);
-		if (ms != null)
-			return ms.getQueueState();
-		else
-			return RampMeterQueue.UNKNOWN;
+		return (ms != null)
+		      ? ms.getQueueState()
+		      : RampMeterQueue.UNKNOWN;
 	}
 
 	/** Get the meter state for a given ramp meter */
@@ -353,12 +346,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		return null;
 	}
 
-	/** Process the algorithm for the one interval */
-	private void processInterval() {
-		updateStations();
-	}
-
-	/** Update the station nodes */
+	/** Update the station nodes for the current interval */
 	private void updateStations() {
 		for (StationNode sn = firstStation(); sn != null;
 		    sn = sn.downstreamStation())
@@ -489,13 +477,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Get the current station density */
 		private Double getStationDensity() {
 			float d = station.getDensity();
-			return d >= 0 ? (double)d : null;
+			return (d >= 0) ? (double) d : null;
 		}
 
 		/** Get the current station speed */
 		private Double getStationSpeed() {
 			float s = station.getSpeed();
-			return s >= 0 ? (double)s : null;
+			return (s >= 0) ? (double) s : null;
 		}
 
 		/** Get average density of a mainline segment beginning at the
@@ -534,20 +522,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return average 1 min density; missing data returns 0. */
 		public double getDensity() {
 			Double avg = density_hist.average(0, steps(60));
-			if (avg != null)
-				return avg;
-			else
-				return 0;
+			return (avg != null) ? avg : 0;
 		}
 
 		/** Get 1 minute speed at current time step.
 		 * @return Average 1 min speed; missing data returns 0. */
 		private double getSpeed() {
 			Double avg = speed_hist.average(0, steps(60));
-			if (avg != null)
-				return avg;
-			else
-				return 0;
+			return (avg != null) ? avg : 0;
 		}
 
 		/** Find downstream segment station node.  This is the station
@@ -747,10 +729,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return Cumulative demand at specified time. */
 		private float cumulativeDemand(int step) {
 			Double d = demand_accum_hist.get(step);
-			if (d != null)
-				return d.floatValue();
-			else
-				return 0;
+			return (d != null) ? d.floatValue() : 0;
 		}
 
 		/** Validate meter state.
@@ -836,7 +815,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			demand_hist.push(flowRate(adjusted_dem));
 			// Recalculate demand with adjustment
 			demand_accum = da + adjusted_dem;
-			demand_accum_hist.push((double)demand_accum);
+			demand_accum_hist.push((double) demand_accum);
 			tracking_demand = trackingDemand();
 		}
 
@@ -918,10 +897,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * @return Tracking demand flow rate (vehicles / hour) */
 		private int trackingDemand() {
 			Double d = demand_hist.average();
-			if (d != null)
-				return (int)Math.round(d);
-			else
-				return getDefaultTarget();
+			return (d != null)
+			      ?	(int) Math.round(d)
+			      : getDefaultTarget();
 		}
 
 		/** Get the default target metering rate (vehicles / hour) */
@@ -1185,7 +1163,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Check metering phase transitions.
 		 * @return New metering phase. */
 		private MeteringPhase checkMeterPhase() {
-			switch(phase) {
+			switch (phase) {
 			case not_started:
 				return checkStart();
 			case metering:
@@ -1308,7 +1286,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 * before setting rate.
 		 * @param rn Next metering rate. */
 		private void setRate(double rn) {
-			release_rate = (int)Math.round(limitRate(rn));
+			release_rate = (int) Math.round(limitRate(rn));
 			meter.setRatePlanned(release_rate);
 		}
 
@@ -1353,10 +1331,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			if (phase == MeteringPhase.flushing)
 				return getMaximumRate();
 			double rate = limitRate(getRate());
-			if (k <= K_DES)
-				return lerpBelow(rate, k);
-			else
-				return lerpAbove(rate, k);
+			return (k <= K_DES)
+			      ?	lerpBelow(rate, k)
+			      : lerpAbove(rate, k);
 		}
 
 		/** Get current metering rate.
@@ -1367,10 +1344,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				return r;
 			else {
 				Double p = getPassage(0, 90);
-				if (p != null)
-					return p;
-				else
-					return getMaxRelease();
+				return (p != null) ? p : getMaxRelease();
 			}
 		}
 
