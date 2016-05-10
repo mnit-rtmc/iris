@@ -48,7 +48,7 @@ public class PanProperty extends CohuPTZProperty {
 		} else if (value < 0) {
 			cmd[0] = (byte) 0x6c;
 			cmd[1] = getPanTiltSpeedByte(value);
-		} else if (value > 0) {
+		} else {
 			cmd[0] = (byte) 0x72;
 			cmd[1] = getPanTiltSpeedByte(value);
 		}

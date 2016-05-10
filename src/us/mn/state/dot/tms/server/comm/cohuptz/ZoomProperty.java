@@ -51,7 +51,7 @@ public class ZoomProperty extends CohuPTZProperty {
 			cmd[0] = (byte) 0x63;
 			cmd[1] = (byte) 0x7a;
 			cmd[2] = getZoomSpeedByte(value);
-		} else if (value > 0) {
+		} else {
 			cmd = new byte[3];
 			cmd[0] = (byte) 0x63;
 			cmd[1] = (byte) 0x5a;

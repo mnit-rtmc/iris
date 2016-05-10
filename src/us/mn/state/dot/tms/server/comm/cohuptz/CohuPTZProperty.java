@@ -76,21 +76,18 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 	 * Presets [1..47] correspond to preset bytes [0x10..0x3e], and
 	 * presets [48..64] correspond to preset bytes [0x60..0x70].
 	 *
-	 * @param presetNum The preset number, [1..64].
+	 * @param p The preset number, [1..64].
 	 * @return The preset byte corresponding to the given preset number,
 	 *         or null if the given preset number is invalid.
 	 */
-	protected Byte getPresetByte(int presetNum) {
-		if (presetNum < 1) return null;
-		if (presetNum > 64) return null;
-
-		byte presetByte = 0x00;
-
-		if (presetNum <= 47)
-			presetByte = (byte) (0x10 + (presetNum - 1));
-		else
-			presetByte = (byte) (0x60 + (presetNum - 1));
-		return Byte.valueOf(presetByte);
+	protected Byte getPresetByte(int p) {
+		if (p < 1 || p > 64)
+			return null;
+		else {
+			return (p <= 47)
+			      ? (byte) (0x10 + (p - 1))
+			      : (byte) (0x60 + (p - 1));
+		}
 	}
 
 	/**
@@ -117,8 +114,7 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 		if (mapInt > scale)
 			mapInt = scale;
 
-		byte byteval = (byte) (0x31 + mapInt);
-		return byteval;
+		return (byte) (0x31 + mapInt);
 	}
 
 	/**
@@ -142,7 +138,6 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 		if (mapInt > scale)
 			mapInt = scale;
 
-		byte byteval = (byte) (0x30 + mapInt);
-		return byteval;
+		return (byte) (0x30 + mapInt);
 	}
 }

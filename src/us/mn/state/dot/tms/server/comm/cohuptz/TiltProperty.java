@@ -48,7 +48,7 @@ public class TiltProperty extends CohuPTZProperty {
 		} else if (value < 0) {
 			cmd[0] = (byte) 0x64;
 			cmd[1] = getPanTiltSpeedByte(value);
-		} else if (value > 0) {
+		} else {
 			cmd[0] = (byte) 0x75;
 			cmd[1] = getPanTiltSpeedByte(value);
 		}
