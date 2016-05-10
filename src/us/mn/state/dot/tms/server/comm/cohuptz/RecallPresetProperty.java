@@ -41,18 +41,13 @@ public class RecallPresetProperty extends CohuPTZProperty {
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		Byte presetByte = getPresetByte(preset);
-		if (presetByte == null)
-			return;
-		byte pb = presetByte.byteValue();
-
-		byte[] pkt = createPacket(c.getDrop());
-		pkt[0] = (byte) 0xf8;
-		pkt[1] = (byte) c.getDrop();
-		pkt[2] = (byte) 0x48;
-		pkt[3] = pb;
-		pkt[4] = calculateChecksum(pkt, 1, 3);
-		os.write(pkt);
+		Byte p = getPresetByte(preset);
+		if (p != null) {
+			byte[] cmd = new byte[2];
+			cmd[0] = (byte) 0x48;
+			cmd[1] = p;
+			os.write(createPacket(c.getDrop(), cmd));
+		}
 	}
 
 	/** Get a string representation of the property */

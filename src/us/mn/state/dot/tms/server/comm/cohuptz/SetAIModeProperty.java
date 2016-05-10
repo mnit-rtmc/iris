@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
@@ -42,28 +41,23 @@ public class SetAIModeProperty extends CohuPTZProperty {
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] pkt = new byte[6];		// max. msg size of 6
-		int i = 0;
-		pkt[i++] = (byte) 0xf8;
-		pkt[i++] = (byte) c.getDrop();
-
+		byte[] cmd = new byte[3];
 		switch (devReq) {
 		case CAMERA_IRIS_MANUAL:
-			pkt[i++] = (byte) 0x63;
-			pkt[i++] = (byte) 0x49;
-			pkt[i++] = (byte) 0x4d;
+			cmd[0] = (byte) 0x63;
+			cmd[1] = (byte) 0x49;
+			cmd[2] = (byte) 0x4d;
 			break;
 		case CAMERA_IRIS_AUTO:
-			pkt[i++] = (byte) 0x63;
-			pkt[i++] = (byte) 0x49;
-			pkt[i++] = (byte) 0x41;
+			cmd[0] = (byte) 0x63;
+			cmd[1] = (byte) 0x49;
+			cmd[2] = (byte) 0x41;
 			break;
 		default:
 			// Invalid device request
 			return;
 		}
-		pkt[i] = calculateChecksum(pkt, 1, i - 1);
-		os.write(Arrays.copyOf(pkt, i + 1));
+		os.write(createPacket(c.getDrop(), cmd));
 	}
 
 	/** Get a string representation of the property */

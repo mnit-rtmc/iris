@@ -33,13 +33,10 @@ public class ResetCameraProperty extends CohuPTZProperty {
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] pkt = createPacket(c.getDrop());
-		pkt[0] = (byte) 0xf8;
-		pkt[1] = (byte) c.getDrop();
-		pkt[2] = (byte) 0x72;
-		pkt[3] = (byte) 0x73;
-		pkt[4] = calculateChecksum(pkt, 1, 3);
-		os.write(pkt);
+		byte[] cmd = new byte[2];
+		cmd[0] = (byte) 0x72;
+		cmd[1] = (byte) 0x73;
+		os.write(createPacket(c.getDrop(), cmd));
 	}
 
 	/** Get a string representation of the property */

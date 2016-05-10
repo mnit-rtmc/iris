@@ -41,30 +41,25 @@ public class MoveIrisProperty extends CohuPTZProperty {
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] pkt = createPacket(c.getDrop());
-		int i = 0;
-		pkt[i++] = (byte) 0xf8;
-		pkt[i++] = (byte) c.getDrop();
-
+		byte[] cmd = new byte[2];
 		switch (devReq) {
 		case CAMERA_IRIS_STOP:
-			pkt[i++] = (byte) 0x49;
-			pkt[i++] = (byte) 0x53;
+			cmd[0] = (byte) 0x49;
+			cmd[1] = (byte) 0x53;
 			break;
 		case CAMERA_IRIS_CLOSE:
-			pkt[i++] = (byte) 0x49;
-			pkt[i++] = (byte) 0x43;
+			cmd[0] = (byte) 0x49;
+			cmd[1] = (byte) 0x43;
 			break;
 		case CAMERA_IRIS_OPEN:
-			pkt[i++] = (byte) 0x49;
-			pkt[i++] = (byte) 0x4f;
+			cmd[0] = (byte) 0x49;
+			cmd[1] = (byte) 0x4f;
 			break;
 		default:
 			// Invalid device request
 			return;
 		}
-		pkt[i] = calculateChecksum(pkt, 1, i - 1);
-		os.write(pkt);
+		os.write(createPacket(c.getDrop(), cmd));
 	}
 
 	/** Get a string representation of the property */

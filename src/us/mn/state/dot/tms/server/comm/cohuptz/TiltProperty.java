@@ -41,7 +41,6 @@ public class TiltProperty extends CohuPTZProperty {
 		throws IOException
 	{
 		byte[] cmd = new byte[2];
-
 		if (Math.abs(value) < PTZ_THRESH) {
 			cmd[0] = (byte) 0x54;
 			cmd[1] = (byte) 0x53;
@@ -52,14 +51,7 @@ public class TiltProperty extends CohuPTZProperty {
 			cmd[0] = (byte) 0x75;
 			cmd[1] = getPanTiltSpeedByte(value);
 		}
-
-		byte[] msg = createPacket(c.getDrop());
-		msg[0] = (byte) 0xf8;
-		msg[1] = (byte) c.getDrop();
-		msg[2] = cmd[0];
-		msg[3] = cmd[1];
-		msg[4] = calculateChecksum(msg, 1, 3);
-		os.write(msg);
+		os.write(createPacket(c.getDrop(), cmd));
 	}
 
 	/** Get a string representation of the property */

@@ -41,7 +41,6 @@ public class ZoomProperty extends CohuPTZProperty {
 		throws IOException
 	{
 		byte[] cmd;
-
 		if (Math.abs(value) < PTZ_THRESH) {
 			cmd = new byte[2];
 			cmd[0] = (byte) 0x5a;
@@ -57,15 +56,7 @@ public class ZoomProperty extends CohuPTZProperty {
 			cmd[1] = (byte) 0x5a;
 			cmd[2] = getZoomSpeedByte(value);
 		}
-
-		byte[] msg = new byte[3 + cmd.length];
-		msg[0] = (byte) 0xf8;
-		msg[1] = (byte) c.getDrop();
-		int i = 2;
-		for (byte b : cmd)
-			msg[i++] = b;
-		msg[i] = calculateChecksum(msg, 1, cmd.length + 1);
-		os.write(msg);
+		os.write(createPacket(c.getDrop(), cmd));
 	}
 
 	/** Get a string representation of the property */

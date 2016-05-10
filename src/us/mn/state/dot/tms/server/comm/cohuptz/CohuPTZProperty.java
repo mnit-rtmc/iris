@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.server.comm.InvalidAddressException;
  * Cohu PTZ Property
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 abstract public class CohuPTZProperty extends ControllerProperty {
 
@@ -41,33 +42,29 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 		return ((drop >= ADDR_MIN) && (drop <= ADDR_MAX));
 	}
 
-	/** Create a Cohu packet */
-	protected byte[] createPacket(int drop) throws IOException {
-		if (!isAddressValid(drop))
-			throw new InvalidAddressException(drop);
-		return new byte[5];
+	/**
+	 * Calculate the XOR-based checksum of a Cohu packet.
+	 *
+	 * @param pkt The packet for which to calculate the checksum.
+	 * @return Packet checksum.
+	 */
+	static private byte checksum(byte[] pkt) {
+		byte xor = 0;
+		for (int i = 1; i < pkt.length; i++)
+			xor ^= pkt[i];
+		return (byte) (0x80 + ((xor & (byte) 0x0f)));
 	}
 
-	/**
-	 * Calculate the XOR-based checksum of the given Cohu message.
-	 *
-	 * @param message The message for which to calculate the checksum.
-	 * @param first The index of the first byte in the checksum range.
-	 * @param last The index of the last byte in the checksum range.
-	 * @return A Byte representing the checksum for the message,
-	 *         or null on error.
-	 */
-	protected Byte calculateChecksum(byte[] message, int first, int last) {
-		if (message.length < 1) return null;
-		if (first < 0) return null;
-		if (last < 0) return null;
-		if (first > last) return null;
-		if (last >= message.length) return null;
-
-		byte runningXor = 0;
-		for (int i = first; i <= last; ++i)
-			runningXor ^= message[i];
-		return (byte) (0x80 + ((runningXor & (byte) 0x0f)));
+	/** Create a Cohu packet */
+	protected byte[] createPacket(int drop, byte[] cmd) throws IOException {
+		if (!isAddressValid(drop))
+			throw new InvalidAddressException(drop);
+		byte[] pkt = new byte[3 + cmd.length];
+		pkt[0] = (byte) 0xf8;
+		pkt[1] = (byte) drop;
+		System.arraycopy(cmd, 0, pkt, 2, cmd.length);
+		pkt[pkt.length - 1] = checksum(pkt);
+		return pkt;
 	}
 
 	/**
