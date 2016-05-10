@@ -40,7 +40,7 @@ public class ZoomProperty extends CohuPTZProperty {
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		byte[] cmd = new byte[0];
+		byte[] cmd;
 
 		if (Math.abs(value) < PTZ_THRESH) {
 			cmd = new byte[2];
