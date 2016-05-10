@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
@@ -24,11 +24,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * Cohu PTZ operation to initiate a camera reset.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class OpResetCamera extends OpCohuPTZ {
-
-	/** Op description */
-	static private final String OP_DESC = "reset";
 
 	/**
 	 * Create the operation.
@@ -36,16 +34,16 @@ public class OpResetCamera extends OpCohuPTZ {
 	 * @param cp the CohuPTZPoller instance
 	 */
 	public OpResetCamera(CameraImpl c, CohuPTZPoller cp) {
-		super(PriorityLevel.COMMAND, c, cp, OP_DESC);
+		super(PriorityLevel.COMMAND, c, cp);
 	}
 
-	/** Begin the operation. */
+	/** Begin the operation */
 	@Override
 	protected Phase<CohuPTZProperty> phaseTwo() {
 		return new ResetCamera();
 	}
 
-	/** Main phase. */
+	/** Phase to reset the camera */
 	protected class ResetCamera extends Phase<CohuPTZProperty> {
 		protected Phase<CohuPTZProperty> poll(
 			CommMessage<CohuPTZProperty> mess)
@@ -53,9 +51,7 @@ public class OpResetCamera extends OpCohuPTZ {
 		{
 			mess.add(new ResetCameraProperty());
 			doStoreProps(mess);
-			updateOpStatus("cmd sent");
 			return null;
 		}
 	}
-
 }

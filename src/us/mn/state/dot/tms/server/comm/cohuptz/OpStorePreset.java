@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
@@ -24,13 +24,11 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * Cohu PTZ operation to store a camera preset.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class OpStorePreset extends OpCohuPTZ {
 
-	/** Op description */
-	static private final String OP_DESC = "store";
-
-	/** The camera preset to store */
+	/** Preset number */
 	private final int preset;
 
 	/**
@@ -39,9 +37,8 @@ public class OpStorePreset extends OpCohuPTZ {
 	 * @param cp the CohuPTZPoller instance
 	 * @param p the preset number to store
 	 */
-
 	public OpStorePreset(CameraImpl c, CohuPTZPoller cp, int p) {
-		super(PriorityLevel.COMMAND, c, cp, OP_DESC);
+		super(PriorityLevel.COMMAND, c, cp);
 		preset = p;
 	}
 
@@ -53,16 +50,13 @@ public class OpStorePreset extends OpCohuPTZ {
 
 	/** Phase to store a camera preset */
 	protected class StorePreset extends Phase<CohuPTZProperty> {
-		/** Command controller to store the camera preset */
 		protected Phase<CohuPTZProperty> poll(
 			CommMessage<CohuPTZProperty> mess)
 			throws IOException
 		{
 			mess.add(new StorePresetProperty(preset));
 			doStoreProps(mess);
-			updateOpStatus("cmd sent");
 			return null;
 		}
 	}
-
 }

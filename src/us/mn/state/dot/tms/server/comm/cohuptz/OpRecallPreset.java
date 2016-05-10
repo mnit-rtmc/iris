@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
@@ -24,13 +24,11 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * Cohu PTZ operation to recall a camera preset.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class OpRecallPreset extends OpCohuPTZ {
 
-	/** Op description */
-	static private final String OP_DESC = "recall";
-
-	/** The camera preset to recall */
+	/** Preset number */
 	private final int preset;
 
 	/**
@@ -40,7 +38,7 @@ public class OpRecallPreset extends OpCohuPTZ {
 	 * @param p the preset number to recall
 	 */
 	public OpRecallPreset(CameraImpl c, CohuPTZPoller cp, int p) {
-		super(PriorityLevel.COMMAND, c, cp, OP_DESC);
+		super(PriorityLevel.COMMAND, c, cp);
 		preset = p;
 	}
 
@@ -52,16 +50,13 @@ public class OpRecallPreset extends OpCohuPTZ {
 
 	/** Phase to recall a camera preset */
 	protected class RecallPreset extends Phase<CohuPTZProperty> {
-		/** Command controller to set the camera preset */
 		protected Phase<CohuPTZProperty> poll(
 			CommMessage<CohuPTZProperty> mess)
 			throws IOException
 		{
 			mess.add(new RecallPresetProperty(preset));
 			doStoreProps(mess);
-			updateOpStatus("cmd sent");
 			return null;
 		}
 	}
-
 }

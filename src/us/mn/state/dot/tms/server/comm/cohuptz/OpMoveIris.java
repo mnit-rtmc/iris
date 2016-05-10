@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
@@ -28,10 +28,8 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpMoveIris extends OpCohuPTZ {
 
-	/** Op description */
-	static private final String OP_DESC = "iris";
-
-	protected final DeviceRequest devReq;
+	/** Device request */
+	private final DeviceRequest devReq;
 
 	/**
 	 * Create the operation.
@@ -40,17 +38,17 @@ public class OpMoveIris extends OpCohuPTZ {
 	 * @param dr the DeviceRequest representing the desired op
 	 */
 	public OpMoveIris(CameraImpl c, CohuPTZPoller cp, DeviceRequest dr) {
-		super(PriorityLevel.COMMAND, c, cp, OP_DESC);
+		super(PriorityLevel.COMMAND, c, cp);
 		devReq = dr;
 	}
 
-	/** Begin the operation. */
+	/** Begin the operation */
 	@Override
 	protected Phase<CohuPTZProperty> phaseTwo() {
 		return new MoveIris();
 	}
 
-	/** Main phase. */
+	/** Phase to move the iris */
 	protected class MoveIris extends Phase<CohuPTZProperty> {
 		protected Phase<CohuPTZProperty> poll(
 			CommMessage<CohuPTZProperty> mess)
@@ -58,9 +56,7 @@ public class OpMoveIris extends OpCohuPTZ {
 		{
 			mess.add(new MoveIrisProperty(devReq));
 			doStoreProps(mess);
-			updateOpStatus("cmd sent");
 			return null;
 		}
 	}
-
 }

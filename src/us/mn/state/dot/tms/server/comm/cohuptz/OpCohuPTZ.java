@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * Cohu PTZ operation.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 abstract public class OpCohuPTZ extends OpDevice<CohuPTZProperty> {
 
@@ -35,9 +36,6 @@ abstract public class OpCohuPTZ extends OpDevice<CohuPTZProperty> {
 	/** Poller */
 	protected final CohuPTZPoller poller;
 
-	/** Operation description */
-	private final String op_desc;
-
 	/**
 	 * Create the operation.
 	 * @param pl the operation's PriorityLevel
@@ -45,32 +43,9 @@ abstract public class OpCohuPTZ extends OpDevice<CohuPTZProperty> {
 	 * @param c the CohuPTZPoller instance
 	 * @param d the op description
 	 */
-	public OpCohuPTZ(PriorityLevel pl, CameraImpl ci, CohuPTZPoller cp,
-		String d)
-	{
+	public OpCohuPTZ(PriorityLevel pl, CameraImpl ci, CohuPTZPoller cp) {
 		super(pl, ci);
 		poller = cp;
-		op_desc = d;
-		device.setOpStatus("sending cmd");
-	}
-
-	/** Return operation description */
-	@Override
-	public String getOperationDescription() {
-		return (op_desc == null ? "" : op_desc);
-	}
-
-	/**
-	 * Update device op status.
-	 * We bundle the operation description into the status because camera
-	 * ops are generally so short that, as far as I can tell, by the time
-	 * the client gets the SONAR "operation" notification and requests the
-	 * op's description via SONAR, the device has already been released,
-	 * and thus Device.getOperation() returns "None".
-	 */
-	protected void updateOpStatus(String stat) {
-		String s = getOperationDescription() + ": " + stat;
-		device.setOpStatus(s);
 	}
 
 	/**

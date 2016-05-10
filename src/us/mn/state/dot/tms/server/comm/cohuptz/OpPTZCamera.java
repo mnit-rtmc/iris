@@ -24,19 +24,17 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * Cohu PTZ operation to pan/tilt/zoom a camera.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class OpPTZCamera extends OpCohuPTZ {
 
-	/** Op description */
-	static private final String OP_DESC = "PTZ";
-
-	/** pan vector */
+	/** Pan vector */
 	private final Float pan;
 
-	/** tilt vector */
+	/** Tilt vector */
 	private final Float tilt;
 
-	/** zoom vector */
+	/** Zoom vector */
 	private final Float zoom;
 
 	/**
@@ -50,19 +48,19 @@ public class OpPTZCamera extends OpCohuPTZ {
 	public OpPTZCamera(CameraImpl c, CohuPTZPoller cp, Float p, Float t,
 		Float z)
 	{
-		super(PriorityLevel.COMMAND, c, cp, OP_DESC);
+		super(PriorityLevel.COMMAND, c, cp);
 		pan  = p;
 		tilt = t;
 		zoom = z;
 	}
 
-	/** Begin the operation. */
+	/** Begin the operation */
 	@Override
 	protected Phase<CohuPTZProperty> phaseTwo() {
 		return new PanPhase();
 	}
 
-	/** pan phase, 1/3 */
+	/** Pan phase, 1/3 */
 	protected class PanPhase extends Phase<CohuPTZProperty> {
 		protected Phase<CohuPTZProperty> poll(
 			CommMessage<CohuPTZProperty> mess) throws IOException
@@ -70,13 +68,12 @@ public class OpPTZCamera extends OpCohuPTZ {
 			if (pan != null) {
 				mess.add(new PanProperty(pan.floatValue()));
 				doStoreProps(mess);
-				updateOpStatus("pan sent");
 			}
 			return new TiltPhase();
 		}
 	}
 
-	/** tilt phase, 2/3 */
+	/** Tilt phase, 2/3 */
 	protected class TiltPhase extends Phase<CohuPTZProperty> {
 		protected Phase<CohuPTZProperty> poll(
 			CommMessage<CohuPTZProperty> mess) throws IOException
@@ -84,13 +81,12 @@ public class OpPTZCamera extends OpCohuPTZ {
 			if (tilt != null) {
 				mess.add(new TiltProperty(tilt.floatValue()));
 				doStoreProps(mess);
-				updateOpStatus("tilt sent");
 			}
 			return new ZoomPhase();
 		}
 	}
 
-	/** zoom phase, 3/3 */
+	/** Zoom phase, 3/3 */
 	protected class ZoomPhase extends Phase<CohuPTZProperty> {
 		protected Phase<CohuPTZProperty> poll(
 			CommMessage<CohuPTZProperty> mess) throws IOException
@@ -98,7 +94,6 @@ public class OpPTZCamera extends OpCohuPTZ {
 			if (zoom != null) {
 				mess.add(new ZoomProperty(zoom.floatValue()));
 				doStoreProps(mess);
-				updateOpStatus("zoom sent");
 			}
 			return null;
 		}
