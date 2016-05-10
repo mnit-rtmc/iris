@@ -236,8 +236,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		corridor = c;
 		head = createNodes();
 		tail = head.tailNode();
-		if (ALG_LOG.isOpen())
-			debug();
+		debug();
 	}
 
 	/** Create nodes from corridor structure */
@@ -285,7 +284,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Log one message */
 	private void log(String msg) {
-		ALG_LOG.log(corridor.getName() + ": " + msg);
+		if (ALG_LOG.isOpen())
+			ALG_LOG.log(corridor.getName() + ": " + msg);
 	}
 
 	/** Validate algorithm state for a meter */
