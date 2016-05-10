@@ -222,7 +222,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	private final Corridor corridor;
 
 	/** Hash map of ramp meter states */
-	private final HashMap<String, MeterState> meterStates =
+	private final HashMap<String, MeterState> meter_states =
 		new HashMap<String, MeterState>();
 
 	/** Head (furthest upstream) node on corridor */
@@ -311,11 +311,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Get the meter state for a given ramp meter */
 	private MeterState getMeterState(RampMeterImpl meter) {
 		if (meter.getCorridor() == corridor)
-			return meterStates.get(meter.getName());
+			return meter_states.get(meter.getName());
 		else {
 			// Meter must have been changed to a different
 			// corridor; throw away old meter state
-			meterStates.remove(meter.getName());
+			meter_states.remove(meter.getName());
 			return null;
 		}
 	}
@@ -325,7 +325,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		EntranceNode en = findEntranceNode(meter);
 		if (en != null) {
 			MeterState ms = new MeterState(meter, en);
-			meterStates.put(meter.getName(), ms);
+			meter_states.put(meter.getName(), ms);
 			return true;
 		} else
 			return false;
@@ -375,7 +375,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Is this KAdaptiveAlgorithm done? */
 	private boolean isDone() {
-		for (MeterState ms : meterStates.values()) {
+		for (MeterState ms : meter_states.values()) {
 			if (ms.meter.isOperating())
 				return false;
 		}
