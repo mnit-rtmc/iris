@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 public class TiltProperty extends CohuPTZProperty {
 
 	/** Requested vector [-1..1] */
-	protected final float value;
+	private final float value;
 
 	/** Create the property */
 	public TiltProperty(float v) {
@@ -42,21 +42,19 @@ public class TiltProperty extends CohuPTZProperty {
 		byte[] cmd = new byte[2];
 
 		if (Math.abs(value) < PTZ_THRESH) {
-			cmd[0] = (byte)0x54;
-			cmd[1] = (byte)0x53;
-		}
-		else if (value < 0) {
-			cmd[0] = (byte)0x64;
+			cmd[0] = (byte) 0x54;
+			cmd[1] = (byte) 0x53;
+		} else if (value < 0) {
+			cmd[0] = (byte) 0x64;
 			cmd[1] = getPanTiltSpeedByte(value);
-		}
-		else if (value > 0) {
-			cmd[0] = (byte)0x75;
+		} else if (value > 0) {
+			cmd[0] = (byte) 0x75;
 			cmd[1] = getPanTiltSpeedByte(value);
 		}
 
 		byte[] msg = createPacket(c.getDrop());
-		msg[0] = (byte)0xf8;
-		msg[1] = (byte)c.getDrop();
+		msg[0] = (byte) 0xf8;
+		msg[1] = (byte) c.getDrop();
 		msg[2] = cmd[0];
 		msg[3] = cmd[1];
 		msg[4] = calculateChecksum(msg, 1, 3);

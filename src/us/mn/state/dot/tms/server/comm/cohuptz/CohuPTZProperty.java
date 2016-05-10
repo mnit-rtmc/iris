@@ -45,8 +45,7 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 	protected byte[] createPacket(int drop) throws IOException {
 		if (!isAddressValid(drop))
 			throw new InvalidAddressException(drop);
-		byte[] pkt = new byte[5];
-		return pkt;
+		return new byte[5];
 	}
 
 	/**
@@ -57,7 +56,6 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 	 * @param last The index of the last byte in the checksum range.
 	 * @return A Byte representing the checksum for the message,
 	 *         or null on error.
-	 *
 	 */
 	protected Byte calculateChecksum(byte[] message, int first, int last) {
 		if (message.length < 1) return null;
@@ -69,7 +67,7 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 		byte runningXor = 0;
 		for (int i = first; i <= last; ++i)
 			runningXor ^= message[i];
-		return (byte) (0x80 + ((runningXor & (byte)0x0f)));
+		return (byte) (0x80 + ((runningXor & (byte) 0x0f)));
 	}
 
 	/**
@@ -88,12 +86,10 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 
 		byte presetByte = 0x00;
 
-		if (presetNum <= 47) {
-			presetByte = (byte) (0x10 + (presetNum-1));
-		}
-		else {
-			presetByte = (byte) (0x60 + (presetNum-1));
-		}
+		if (presetNum <= 47)
+			presetByte = (byte) (0x10 + (presetNum - 1));
+		else
+			presetByte = (byte) (0x60 + (presetNum - 1));
 		return Byte.valueOf(presetByte);
 	}
 
@@ -118,7 +114,8 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 		int mapInt = Math.round(mapped);
 
 		// sanity check for floating point gotchas
-		if (mapInt > scale) mapInt = scale;
+		if (mapInt > scale)
+			mapInt = scale;
 
 		byte byteval = (byte) (0x31 + mapInt);
 		return byteval;
@@ -142,7 +139,8 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 		int mapInt = Math.round(mapped);
 
 		// sanity check for floating point gotchas
-		if (mapInt > scale) mapInt = scale;
+		if (mapInt > scale)
+			mapInt = scale;
 
 		byte byteval = (byte) (0x30 + mapInt);
 		return byteval;

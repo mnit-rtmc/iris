@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,11 +13,9 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
-import java.lang.Float;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -32,13 +31,13 @@ public class OpPTZCamera extends OpCohuPTZ {
 	static private final String OP_DESC = "PTZ";
 
 	/** pan vector */
-	protected final Float pan;
+	private final Float pan;
 
 	/** tilt vector */
-	protected final Float tilt;
+	private final Float tilt;
 
 	/** zoom vector */
-	protected final Float zoom;
+	private final Float zoom;
 
 	/**
 	 * Create the operation.
@@ -48,7 +47,9 @@ public class OpPTZCamera extends OpCohuPTZ {
 	 * @param t the tilt vector [-1..1] or null for NOP
 	 * @param z the zoom vector [-1..1] or null for NOP
 	 */
-	public OpPTZCamera(CameraImpl c, CohuPTZPoller cp, Float p, Float t, Float z) {
+	public OpPTZCamera(CameraImpl c, CohuPTZPoller cp, Float p, Float t,
+		Float z)
+	{
 		super(PriorityLevel.COMMAND, c, cp, OP_DESC);
 		pan  = p;
 		tilt = t;
@@ -64,9 +65,8 @@ public class OpPTZCamera extends OpCohuPTZ {
 	/** pan phase, 1/3 */
 	protected class PanPhase extends Phase<CohuPTZProperty> {
 		protected Phase<CohuPTZProperty> poll(
-				CommMessage<CohuPTZProperty> mess)
-				throws IOException
-			{
+			CommMessage<CohuPTZProperty> mess) throws IOException
+		{
 			if (pan != null) {
 				mess.add(new PanProperty(pan.floatValue()));
 				doStoreProps(mess);
@@ -79,8 +79,7 @@ public class OpPTZCamera extends OpCohuPTZ {
 	/** tilt phase, 2/3 */
 	protected class TiltPhase extends Phase<CohuPTZProperty> {
 		protected Phase<CohuPTZProperty> poll(
-			CommMessage<CohuPTZProperty> mess)
-			throws IOException
+			CommMessage<CohuPTZProperty> mess) throws IOException
 		{
 			if (tilt != null) {
 				mess.add(new TiltProperty(tilt.floatValue()));
@@ -94,8 +93,7 @@ public class OpPTZCamera extends OpCohuPTZ {
 	/** zoom phase, 3/3 */
 	protected class ZoomPhase extends Phase<CohuPTZProperty> {
 		protected Phase<CohuPTZProperty> poll(
-			CommMessage<CohuPTZProperty> mess)
-			throws IOException
+			CommMessage<CohuPTZProperty> mess) throws IOException
 		{
 			if (zoom != null) {
 				mess.add(new ZoomProperty(zoom.floatValue()));
@@ -105,5 +103,4 @@ public class OpPTZCamera extends OpCohuPTZ {
 			return null;
 		}
 	}
-
 }

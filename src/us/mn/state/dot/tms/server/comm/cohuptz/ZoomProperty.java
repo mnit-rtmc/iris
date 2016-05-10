@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 public class ZoomProperty extends CohuPTZProperty {
 
 	/** Requested vector [-1..1] */
-	protected final float value;
+	private final float value;
 
 	/** Create the property */
 	public ZoomProperty(float v) {
@@ -42,25 +42,23 @@ public class ZoomProperty extends CohuPTZProperty {
 
 		if (Math.abs(value) < PTZ_THRESH) {
 			cmd = new byte[2];
-			cmd[0] = (byte)0x5a;
-			cmd[1] = (byte)0x53;
-		}
-		else if (value < 0) {
+			cmd[0] = (byte) 0x5a;
+			cmd[1] = (byte) 0x53;
+		} else if (value < 0) {
 			cmd = new byte[3];
-			cmd[0] = (byte)0x63;
-			cmd[1] = (byte)0x7a;
+			cmd[0] = (byte) 0x63;
+			cmd[1] = (byte) 0x7a;
 			cmd[2] = getZoomSpeedByte(value);
-		}
-		else if (value > 0) {
+		} else if (value > 0) {
 			cmd = new byte[3];
-			cmd[0] = (byte)0x63;
-			cmd[1] = (byte)0x5a;
+			cmd[0] = (byte) 0x63;
+			cmd[1] = (byte) 0x5a;
 			cmd[2] = getZoomSpeedByte(value);
 		}
 
 		byte[] msg = new byte[3 + cmd.length];
-		msg[0] = (byte)0xf8;
-		msg[1] = (byte)c.getDrop();
+		msg[0] = (byte) 0xf8;
+		msg[1] = (byte) c.getDrop();
 		int i = 2;
 		for (byte b : cmd)
 			msg[i++] = b;

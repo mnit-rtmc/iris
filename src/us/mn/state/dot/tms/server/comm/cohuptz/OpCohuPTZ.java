@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
@@ -30,9 +30,10 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 abstract public class OpCohuPTZ extends OpDevice<CohuPTZProperty> {
 
 	/** Minimum time interval (ms) to enforce between Cohu commands */
-	static protected final int MIN_CMD_INTERVAL_MS = 25;
+	static private final int MIN_CMD_INTERVAL_MS = 25;
 
-	CohuPTZPoller poller;
+	/** Poller */
+	protected final CohuPTZPoller poller;
 
 	/** Operation description */
 	private final String op_desc;
@@ -88,7 +89,9 @@ abstract public class OpCohuPTZ extends OpDevice<CohuPTZProperty> {
 	 * transaction with the device (Cohu devices require a short delay
 	 * between commands).
 	 */
-	protected void doStoreProps(CommMessage<CohuPTZProperty> mess) throws IOException {
+	protected void doStoreProps(CommMessage<CohuPTZProperty> mess)
+		throws IOException
+	{
 		pauseIfNeeded();
 		mess.storeProps();
 		poller.setLastCmdTime(System.currentTimeMillis());
@@ -98,12 +101,11 @@ abstract public class OpCohuPTZ extends OpDevice<CohuPTZProperty> {
 	 * If CohuPTZPoller.MIN_CMD_INTERVAL_MS milliseconds have not passed
 	 * since the previous device transaction, sleep until they have.
 	 */
-	protected void pauseIfNeeded() {
+	private void pauseIfNeeded() {
 		long lastCmdTime = poller.getLastCmdTime();
 		long curTime = System.currentTimeMillis();
 		long delta = curTime - lastCmdTime;
 		if (delta < MIN_CMD_INTERVAL_MS)
 			TimeSteward.sleep_well(MIN_CMD_INTERVAL_MS - delta);
 	}
-
 }
