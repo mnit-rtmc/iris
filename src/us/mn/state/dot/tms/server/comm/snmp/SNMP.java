@@ -21,7 +21,6 @@ import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -88,7 +87,7 @@ public class SNMP extends BER {
 	}
 
 	/** SNMP message class */
-	public class Message implements CommMessage {
+	public class Message implements CommMessage<ASN1Object> {
 
 		/** Output stream for this message */
 		private final OutputStream os;
@@ -117,9 +116,8 @@ public class SNMP extends BER {
 		}
 
 		/** Add a controller property */
-		public void add(ControllerProperty cp) {
-			if (cp instanceof ASN1Object)
-				mos.add((ASN1Object)cp);
+		public void add(ASN1Object prop) {
+			mos.add(prop);
 		}
 
 		/** Query the controller properties.  This is accomplished with
@@ -141,13 +139,13 @@ public class SNMP extends BER {
 
 		/** Log a property query */
 		@Override
-		public void logQuery(ControllerProperty prop) {
+		public void logQuery(ASN1Object prop) {
 			// not implemented
 		}
 
 		/** Log a property store */
 		@Override
-		public void logStore(ControllerProperty prop) {
+		public void logStore(ASN1Object prop) {
 			// not implemented
 		}
 
