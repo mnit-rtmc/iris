@@ -90,9 +90,6 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Displays the current operation of the DMS */
 	private final JLabel operation_lbl = createValueLabel();
 
-	/** Displays the controller operation status (optional) */
-	private final JLabel op_status_lbl = createValueLabel();
-
 	/** Client session */
 	private final Session session;
 
@@ -179,10 +176,6 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		add(status_lbl, Stretch.LAST);
 		add("device.operation");
 		add(operation_lbl, Stretch.LAST);
-		if (SystemAttrEnum.DEVICE_OP_STATUS_ENABLE.getBoolean()) {
-			add("device.op.status");
-			add(op_status_lbl, Stretch.LAST);
-		}
 		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			aws_control_chk.setHorizontalTextPosition(
 				SwingConstants.LEFT);
@@ -301,7 +294,6 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		status_lbl.setForeground(null);
 		status_lbl.setBackground(null);
 		operation_lbl.setText("");
-		op_status_lbl.setText("");
 	}
 
 	/** Set the camera preset action */
@@ -344,8 +336,6 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		}
 		if(a == null || a.equals("awsControlled"))
 			aws_control_chk.setSelected(dms.getAwsControlled());
-		if(a == null || a.equals("opStatus"))
-			op_status_lbl.setText(dms.getOpStatus());
 	}
 
 	/** Update the status widgets */
@@ -358,7 +348,6 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		} else
 			updateCritical(dms);
 		operation_lbl.setText(dms.getOperation());
-		op_status_lbl.setText(dms.getOpStatus());
 	}
 
 	/** Update the critical error status */
