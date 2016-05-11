@@ -27,6 +27,11 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  */
 public class DeviceReqProperty extends CohuPTZProperty {
 
+	/** Reset camera command */
+	static private final byte[] CMD_RESET_CAMERA = new byte[] {
+		(byte) 0x72, (byte) 0x73
+	};
+
 	/** Focus stop command */
 	static private final byte[] CMD_FOCUS_STOP = new byte[] {
 		(byte) 0x46, (byte) 0x53
@@ -96,6 +101,8 @@ public class DeviceReqProperty extends CohuPTZProperty {
 	/** Create the device request command */
 	private byte[] createCmd() throws ProtocolException {
 		switch (req) {
+		case RESET_DEVICE:
+			return CMD_RESET_CAMERA;
 		case CAMERA_IRIS_STOP:
 			return CMD_IRIS_STOP;
 		case CAMERA_IRIS_CLOSE:

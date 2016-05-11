@@ -112,6 +112,7 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest dr) {
 		switch (dr) {
+		case RESET_DEVICE:
 		case CAMERA_FOCUS_STOP:
 		case CAMERA_FOCUS_NEAR:
 		case CAMERA_FOCUS_FAR:
@@ -126,9 +127,6 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 			break;
 		case CAMERA_WIPER_ONESHOT:
 			// FIXME: not yet implemented
-			break;
-		case RESET_DEVICE:
-			addOp(new OpResetCamera(c, this));
 			break;
 		default:
 			break;
