@@ -40,15 +40,12 @@ public class OpPTZCamera extends OpCohuPTZ {
 	/**
 	 * Create the operation.
 	 * @param c the CameraImpl instance
-	 * @param cp the CohuPTZPoller instance
 	 * @param p the pan vector [-1..1] or null for NOP
 	 * @param t the tilt vector [-1..1] or null for NOP
 	 * @param z the zoom vector [-1..1] or null for NOP
 	 */
-	public OpPTZCamera(CameraImpl c, CohuPTZPoller cp, Float p, Float t,
-		Float z)
-	{
-		super(PriorityLevel.COMMAND, c, cp);
+	public OpPTZCamera(CameraImpl c, Float p, Float t, Float z) {
+		super(PriorityLevel.COMMAND, c);
 		pan  = p;
 		tilt = t;
 		zoom = z;
@@ -67,7 +64,7 @@ public class OpPTZCamera extends OpCohuPTZ {
 		{
 			if (pan != null) {
 				mess.add(new PanProperty(pan));
-				doStoreProps(mess);
+				mess.storeProps();
 			}
 			return new TiltPhase();
 		}
@@ -80,7 +77,7 @@ public class OpPTZCamera extends OpCohuPTZ {
 		{
 			if (tilt != null) {
 				mess.add(new TiltProperty(tilt));
-				doStoreProps(mess);
+				mess.storeProps();
 			}
 			return new ZoomPhase();
 		}
@@ -93,7 +90,7 @@ public class OpPTZCamera extends OpCohuPTZ {
 		{
 			if (zoom != null) {
 				mess.add(new ZoomProperty(zoom));
-				doStoreProps(mess);
+				mess.storeProps();
 			}
 			return null;
 		}

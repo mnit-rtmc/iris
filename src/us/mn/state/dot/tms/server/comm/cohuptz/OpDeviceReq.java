@@ -31,8 +31,8 @@ public class OpDeviceReq extends OpCohuPTZ {
 	private final DeviceRequest dev_req;
 
 	/** Create device request operation */
-	public OpDeviceReq(CameraImpl c, CohuPTZPoller cp, DeviceRequest dr) {
-		super(PriorityLevel.COMMAND, c, cp);
+	public OpDeviceReq(CameraImpl c, DeviceRequest dr) {
+		super(PriorityLevel.COMMAND, c);
 		dev_req = dr;
 	}
 
@@ -49,7 +49,7 @@ public class OpDeviceReq extends OpCohuPTZ {
 			throws IOException
 		{
 			mess.add(new DeviceReqProperty(dev_req));
-			doStoreProps(mess);
+			mess.storeProps();
 			return null;
 		}
 	}

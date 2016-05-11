@@ -37,8 +37,8 @@ public class OpStorePreset extends OpCohuPTZ {
 	 * @param cp the CohuPTZPoller instance
 	 * @param p the preset number to store
 	 */
-	public OpStorePreset(CameraImpl c, CohuPTZPoller cp, int p) {
-		super(PriorityLevel.COMMAND, c, cp);
+	public OpStorePreset(CameraImpl c, int p) {
+		super(PriorityLevel.COMMAND, c);
 		preset = p;
 	}
 
@@ -55,7 +55,7 @@ public class OpStorePreset extends OpCohuPTZ {
 			throws IOException
 		{
 			mess.add(new StorePresetProperty(preset));
-			doStoreProps(mess);
+			mess.storeProps();
 			return null;
 		}
 	}

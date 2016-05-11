@@ -34,9 +34,6 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 	/** Cohu debug log */
 	static private final DebugLog COHU_LOG = new DebugLog("cohu");
 
-	/** Timestamp of most recent transaction with the device. */
-	private long lastCmdTime = 0;
-
 	/** Create a new Cohu PTZ poller */
 	public CohuPTZPoller(String n, Messenger m) {
 		super(n, m, COHU_LOG);
@@ -45,40 +42,19 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 	/** Send a "PTZ camera move" command */
 	@Override
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		addOp(new OpPTZCamera(c, this, p, t, z));
+		addOp(new OpPTZCamera(c, p, t, z));
 	}
 
 	/** Send a "store camera preset" command */
 	@Override
 	public void sendStorePreset(CameraImpl c, int preset) {
-		addOp(new OpStorePreset(c, this, preset));
+		addOp(new OpStorePreset(c, preset));
 	}
 
 	/** Send a "recall camera preset" command */
 	@Override
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		addOp(new OpRecallPreset(c, this, preset));
-	}
-
-	/**
-	 * Get the timestamp of the last command issued to the device.
-	 * This value, stored in CohuPTZPoller, is updated by OpCohuPTZ
-	 * operations via the CohuPTZPoller.setLastCmdTime method.
-	 * @return The timestamp of the last command issued to the device,
-	 *         or 0 if no commands have yet been issued.
-	 */
-	protected long getLastCmdTime() {
-		return lastCmdTime;
-	}
-
-	/**
-	 * Set the timestamp of the last command issued to the device.
-	 * This value, stored in CohuPTZPoller, is updated by OpCohuPTZ
-	 * operations.
-	 * @param time The desired timestamp value to set.
-	 */
-	protected void setLastCmdTime(long time) {
-		lastCmdTime = time;
+		addOp(new OpRecallPreset(c, preset));
 	}
 
 	/** Send a device request.
@@ -98,7 +74,7 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 		case CAMERA_IRIS_OPEN:
 		case CAMERA_IRIS_MANUAL:
 		case CAMERA_IRIS_AUTO:
-			addOp(new OpDeviceReq(c, this, dr));
+			addOp(new OpDeviceReq(c, dr));
 			break;
 		case CAMERA_WIPER_ONESHOT:
 			// FIXME: not yet implemented

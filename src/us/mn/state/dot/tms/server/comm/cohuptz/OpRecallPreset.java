@@ -31,14 +31,11 @@ public class OpRecallPreset extends OpCohuPTZ {
 	/** Preset number */
 	private final int preset;
 
-	/**
-	 * Create a new operation to recall a camera preset.
-	 * @param c the CameraImpl instance
-	 * @param cp the CohuPTZPoller instance
-	 * @param p the preset number to recall
-	 */
-	public OpRecallPreset(CameraImpl c, CohuPTZPoller cp, int p) {
-		super(PriorityLevel.COMMAND, c, cp);
+	/** Create a new operation to recall a camera preset.
+	 * @param c the CameraImpl instance.
+	 * @param p the preset number to recall. */
+	public OpRecallPreset(CameraImpl c, int p) {
+		super(PriorityLevel.COMMAND, c);
 		preset = p;
 	}
 
@@ -55,7 +52,7 @@ public class OpRecallPreset extends OpCohuPTZ {
 			throws IOException
 		{
 			mess.add(new RecallPresetProperty(preset));
-			doStoreProps(mess);
+			mess.storeProps();
 			return null;
 		}
 	}
