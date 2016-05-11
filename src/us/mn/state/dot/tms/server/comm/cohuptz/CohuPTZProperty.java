@@ -16,6 +16,8 @@
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
+import java.io.InputStream;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 
@@ -136,5 +138,13 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 			mapInt = scale;
 
 		return (byte) (0x30 + mapInt);
+	}
+
+	/** Decode a STORE response */
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is)
+		throws IOException
+	{
+		// FIXME ?
 	}
 }
