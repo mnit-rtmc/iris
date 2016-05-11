@@ -54,7 +54,7 @@ public class OpMoveIris extends OpCohuPTZ {
 			CommMessage<CohuPTZProperty> mess)
 			throws IOException
 		{
-			mess.add(new MoveIrisProperty(devReq));
+			mess.add(new DeviceReqProperty(devReq));
 			doStoreProps(mess);
 			return null;
 		}

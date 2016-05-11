@@ -55,7 +55,7 @@ public class OpSetAIMode extends OpCohuPTZ {
 			CommMessage<CohuPTZProperty> mess)
 			throws IOException
 		{
-			mess.add(new SetAIModeProperty(devReq));
+			mess.add(new DeviceReqProperty(devReq));
 			doStoreProps(mess);
 			return null;
 		}

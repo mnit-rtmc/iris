@@ -55,7 +55,7 @@ public class OpSetAFMode extends OpCohuPTZ {
 			CommMessage<CohuPTZProperty> mess)
 			throws IOException
 		{
-			mess.add(new SetAFModeProperty(devReq));
+			mess.add(new DeviceReqProperty(devReq));
 			doStoreProps(mess);
 			return null;
 		}

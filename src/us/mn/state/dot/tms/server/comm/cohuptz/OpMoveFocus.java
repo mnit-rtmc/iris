@@ -55,7 +55,7 @@ public class OpMoveFocus extends OpCohuPTZ {
 			CommMessage<CohuPTZProperty> mess)
 			throws IOException
 		{
-			mess.add(new MoveFocusProperty(devReq));
+			mess.add(new DeviceReqProperty(devReq));
 			doStoreProps(mess);
 			return null;
 		}
