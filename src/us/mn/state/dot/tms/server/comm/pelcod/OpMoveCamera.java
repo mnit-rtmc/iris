@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,9 +27,6 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  */
 public class OpMoveCamera extends OpPelcoD {
 
-	/** Op description */
-	static private final String OP_DESC = "PTZ";
-
 	/** Range of PTZ values */
 	static private final int PTZ_RANGE = 64;
 
@@ -48,7 +45,7 @@ public class OpMoveCamera extends OpPelcoD {
 
 	/** Create a new operation to move a camera */
 	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
-		super(c, OP_DESC);
+		super(c);
 		int pan = map_float(p, PTZ_RANGE);
 		int tilt = map_float(t, PTZ_RANGE);
 		int zoom = map_float(z, PTZ_RANGE);
@@ -73,7 +70,6 @@ public class OpMoveCamera extends OpPelcoD {
 			mess.add(prop);
 			mess.storeProps();
 			n_sent++;
-			updateOpStatus("cmd sent");
 			return shouldResend() ? this : null;
 		}
 

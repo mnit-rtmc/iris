@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,6 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  */
 public class OpPreset extends OpPelcoD {
 
-	/** Op description */
-	static private final String OP_DESC = "preset";
-
 	/** Get recall or store property command.
 	 * @param s Store or recall.
 	 * @return Extended property command. */
@@ -41,7 +38,7 @@ public class OpPreset extends OpPelcoD {
 
 	/** Create a new operation for a camera preset */
 	public OpPreset(CameraImpl c, boolean s, int p) {
-		super(c, OP_DESC);
+		super(c);
 		prop = new ExtendedProperty(getCommand(s), p);
 	}
 
@@ -59,7 +56,6 @@ public class OpPreset extends OpPelcoD {
 		{
 			mess.add(prop);
 			mess.storeProps();
-			updateOpStatus("cmd sent");
 			return null;
 		}
 	}

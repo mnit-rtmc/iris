@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2015  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,37 +27,8 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 abstract public class OpPelcoD extends OpDevice<PelcoDProperty> {
 
-	/** Operation description */
-	private final String op_desc;
-
-	/**
-	 * Create a new Pelco D operation.
-	 * @param c the CameraImpl instance
-	 * @param d the op description
-	 */
-	protected OpPelcoD(CameraImpl c, String d) {
+	/** Create a new Pelco D operation */
+	protected OpPelcoD(CameraImpl c) {
 		super(PriorityLevel.COMMAND, c);
-		assert d != null;
-		op_desc = d;
-		device.setOpStatus("sending cmd");
-	}
-
-	/** Return operation description */
-	@Override
-	public String getOperationDescription() {
-		return op_desc;
-	}
-
-	/**
-	 * Update device op status.
-	 * We bundle the operation description into the status because camera
-	 * ops are generally so short that, as far as I can tell, by the time
-	 * the client gets the SONAR "operation" notification and requests the
-	 * op's description via SONAR, the device has already been released,
-	 * and thus Device.getOperation() returns "None".
-	*/
-	protected void updateOpStatus(String stat) {
-		String s = getOperationDescription() + ": " + stat;
-		device.setOpStatus(s);
 	}
 }
