@@ -373,6 +373,12 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
+			if (status.getEnum() == FontStatus.modifyReq) {
+				// Daktronics DMS returns modifyReq
+				// instead of modifyting here ...
+				logError("invalid state: modifyReq");
+				return nextFontPhase();
+			}
 			if (status.getEnum() != FontStatus.modifying) {
 				abortUpload("Expected modifying, was " +
 					status.getEnum());
