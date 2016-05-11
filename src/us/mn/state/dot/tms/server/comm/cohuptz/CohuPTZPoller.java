@@ -37,15 +37,6 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 	/** Timestamp of most recent transaction with the device. */
 	private long lastCmdTime = 0;
 
-	/** Current pan value */
-	private float curPan  = 0.0F;
-
-	/** Current tilt value */
-	private float curTilt = 0.0F;
-
-	/** Current zoom value */
-	private float curZoom = 0.0F;
-
 	/** Create a new Cohu PTZ poller */
 	public CohuPTZPoller(String n, Messenger m) {
 		super(n, m, COHU_LOG);
@@ -54,23 +45,7 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 	/** Send a "PTZ camera move" command */
 	@Override
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		Float pan  = null;
-		Float tilt = null;
-		Float zoom = null;
-
-		if (p != curPan) {
-			pan = Float.valueOf(p);
-			curPan = p;
-		}
-		if (t != curTilt) {
-			tilt = Float.valueOf(t);
-			curTilt = t;
-		}
-		if (z != curZoom) {
-			zoom = Float.valueOf(z);
-			curZoom = z;
-		}
-		addOp(new OpPTZCamera(c, this, pan, tilt, zoom));
+		addOp(new OpPTZCamera(c, this, p, t, z));
 	}
 
 	/** Send a "store camera preset" command */
