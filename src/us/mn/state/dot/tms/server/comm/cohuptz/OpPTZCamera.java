@@ -29,22 +29,22 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpPTZCamera extends OpCohuPTZ {
 
 	/** Pan vector */
-	private final Float pan;
+	private final float pan;
 
 	/** Tilt vector */
-	private final Float tilt;
+	private final float tilt;
 
 	/** Zoom vector */
-	private final Float zoom;
+	private final float zoom;
 
 	/**
 	 * Create the operation.
 	 * @param c the CameraImpl instance
-	 * @param p the pan vector [-1..1] or null for NOP
-	 * @param t the tilt vector [-1..1] or null for NOP
-	 * @param z the zoom vector [-1..1] or null for NOP
+	 * @param p the pan vector [-1..1]
+	 * @param t the tilt vector [-1..1]
+	 * @param z the zoom vector [-1..1]
 	 */
-	public OpPTZCamera(CameraImpl c, Float p, Float t, Float z) {
+	public OpPTZCamera(CameraImpl c, float p, float t, float z) {
 		super(PriorityLevel.COMMAND, c);
 		pan  = p;
 		tilt = t;
@@ -62,10 +62,8 @@ public class OpPTZCamera extends OpCohuPTZ {
 		protected Phase<CohuPTZProperty> poll(
 			CommMessage<CohuPTZProperty> mess) throws IOException
 		{
-			if (pan != null) {
-				mess.add(new PanProperty(pan));
-				mess.storeProps();
-			}
+			mess.add(new PanProperty(pan));
+			mess.storeProps();
 			return new TiltPhase();
 		}
 	}
@@ -75,10 +73,8 @@ public class OpPTZCamera extends OpCohuPTZ {
 		protected Phase<CohuPTZProperty> poll(
 			CommMessage<CohuPTZProperty> mess) throws IOException
 		{
-			if (tilt != null) {
-				mess.add(new TiltProperty(tilt));
-				mess.storeProps();
-			}
+			mess.add(new TiltProperty(tilt));
+			mess.storeProps();
 			return new ZoomPhase();
 		}
 	}
@@ -88,10 +84,8 @@ public class OpPTZCamera extends OpCohuPTZ {
 		protected Phase<CohuPTZProperty> poll(
 			CommMessage<CohuPTZProperty> mess) throws IOException
 		{
-			if (zoom != null) {
-				mess.add(new ZoomProperty(zoom));
-				mess.storeProps();
-			}
+			mess.add(new ZoomProperty(zoom));
+			mess.storeProps();
 			return null;
 		}
 	}
