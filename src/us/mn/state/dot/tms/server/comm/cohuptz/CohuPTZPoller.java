@@ -16,16 +16,17 @@
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import us.mn.state.dot.sched.DebugLog;
-import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.TransientPoller;
 
 /**
- * Poller for the Cohu PTZ protocol
+ * Poller for the Cohu PTZ protocol.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 	implements CameraPoller
@@ -105,29 +106,23 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 		lastCmdTime = time;
 	}
 
-	/** Send a device request
+	/** Send a device request.
 	 * @param c The CameraImpl object.
-	 * @param r The desired DeviceRequest. */
+	 * @param dr Device request to send. */
 	@Override
-	public void sendRequest(CameraImpl c, DeviceRequest r) {
-		switch (r) {
+	public void sendRequest(CameraImpl c, DeviceRequest dr) {
+		switch (dr) {
 		case CAMERA_FOCUS_STOP:
 		case CAMERA_FOCUS_NEAR:
 		case CAMERA_FOCUS_FAR:
-			addOp(new OpMoveFocus(c, this, r));
-			break;
 		case CAMERA_FOCUS_MANUAL:
 		case CAMERA_FOCUS_AUTO:
-			addOp(new OpSetAFMode(c, this, r));
-			break;
 		case CAMERA_IRIS_STOP:
 		case CAMERA_IRIS_CLOSE:
 		case CAMERA_IRIS_OPEN:
-			addOp(new OpMoveIris(c, this, r));
-			break;
 		case CAMERA_IRIS_MANUAL:
 		case CAMERA_IRIS_AUTO:
-			addOp(new OpSetAIMode(c, this, r));
+			addOp(new OpDeviceReq(c, this, dr));
 			break;
 		case CAMERA_WIPER_ONESHOT:
 			// FIXME: not yet implemented

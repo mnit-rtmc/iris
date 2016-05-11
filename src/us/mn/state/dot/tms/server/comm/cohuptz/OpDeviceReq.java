@@ -1,6 +1,5 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2015  AHMCT, University of California
  * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,40 +21,34 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
- * Cohu PTZ operation to change auto-iris mode.
+ * Operation to send a Cohu device request Cohu.
  *
- * @author Travis Swanston
  * @author Douglas Lau
  */
-public class OpSetAIMode extends OpCohuPTZ {
+public class OpDeviceReq extends OpCohuPTZ {
 
 	/** Device request */
-	private final DeviceRequest devReq;
+	private final DeviceRequest dev_req;
 
-	/**
-	 * Create the operation.
-	 * @param c the CameraImpl instance
-	 * @param cp the CohuPTZPoller instance
-	 * @param dr the DeviceRequest representing the desired op
-	 */
-	public OpSetAIMode(CameraImpl c, CohuPTZPoller cp, DeviceRequest dr) {
+	/** Create device request operation */
+	public OpDeviceReq(CameraImpl c, CohuPTZPoller cp, DeviceRequest dr) {
 		super(PriorityLevel.COMMAND, c, cp);
-		devReq = dr;
+		dev_req = dr;
 	}
 
-	/** Begin the operation */
+	/** Create the second phase of the operation */
 	@Override
 	protected Phase<CohuPTZProperty> phaseTwo() {
-		return new SetAIMode();
+		return new SendDeviceReq();
 	}
 
-	/** Phase to set auto-iris mode */
-	protected class SetAIMode extends Phase<CohuPTZProperty> {
+	/** Phase to send the device request */
+	protected class SendDeviceReq extends Phase<CohuPTZProperty> {
 		protected Phase<CohuPTZProperty> poll(
 			CommMessage<CohuPTZProperty> mess)
 			throws IOException
 		{
-			mess.add(new DeviceReqProperty(devReq));
+			mess.add(new DeviceReqProperty(dev_req));
 			doStoreProps(mess);
 			return null;
 		}
