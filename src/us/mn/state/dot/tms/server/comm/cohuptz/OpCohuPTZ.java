@@ -53,7 +53,9 @@ abstract public class OpCohuPTZ extends OpDevice<CohuPTZProperty> {
 	 * transaction with the device (Cohu devices require a short delay
 	 * between commands).
 	 */
-	protected void doQueryProps(CommMessage mess) throws IOException {
+	protected void doQueryProps(CommMessage<CohuPTZProperty> mess)
+		throws IOException
+	{
 		pauseIfNeeded();
 		mess.queryProps();
 		poller.setLastCmdTime(System.currentTimeMillis());
