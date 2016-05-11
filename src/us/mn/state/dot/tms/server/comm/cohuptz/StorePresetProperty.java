@@ -44,7 +44,7 @@ public class StorePresetProperty extends CohuPTZProperty {
 		Byte p = getPresetByte(preset);
 		if (p != null) {
 			byte[] cmd = new byte[2];
-			cmd[0] = (byte) 0x50;
+			cmd[0] = (byte) 'P';
 			cmd[1] = p;
 			os.write(createPacket(c.getDrop(), cmd));
 		}

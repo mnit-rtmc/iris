@@ -44,7 +44,7 @@ public class RecallPresetProperty extends CohuPTZProperty {
 		Byte p = getPresetByte(preset);
 		if (p != null) {
 			byte[] cmd = new byte[2];
-			cmd[0] = (byte) 0x48;
+			cmd[0] = (byte) 'H';
 			cmd[1] = p;
 			os.write(createPacket(c.getDrop(), cmd));
 		}

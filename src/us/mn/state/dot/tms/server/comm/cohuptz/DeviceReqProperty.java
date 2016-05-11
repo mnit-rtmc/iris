@@ -29,57 +29,57 @@ public class DeviceReqProperty extends CohuPTZProperty {
 
 	/** Reset camera command */
 	static private final byte[] CMD_RESET_CAMERA = new byte[] {
-		(byte) 0x72, (byte) 0x73
+		(byte) 'r', (byte) 's'
 	};
 
 	/** Focus stop command */
 	static private final byte[] CMD_FOCUS_STOP = new byte[] {
-		(byte) 0x46, (byte) 0x53
+		(byte) 'F', (byte) 'S'
 	};
 
 	/** Focus near command */
 	static private final byte[] CMD_FOCUS_NEAR = new byte[] {
-		(byte) 0x46, (byte) 0x4e
+		(byte) 'F', (byte) 'N'
 	};
 
 	/** Focus far command */
 	static private final byte[] CMD_FOCUS_FAR = new byte[] {
-		(byte) 0x46, (byte) 0x46
+		(byte) 'F', (byte) 'F'
 	};
 
 	/** Manual focus command */
 	static private final byte[] CMD_FOCUS_MANUAL = new byte[] {
-		(byte) 0x63, (byte) 0x46, (byte) 0x4d
+		(byte) 'c', (byte) 'F', (byte) 'M'
 	};
 
 	/** Auto focus command */
 	static private final byte[] CMD_FOCUS_AUTO = new byte[] {
-		(byte) 0x63, (byte) 0x46, (byte) 0x41
+		(byte) 'c', (byte) 'F', (byte) 'A'
 	};
 
 	/** Iris stop command */
 	static private final byte[] CMD_IRIS_STOP = new byte[] {
-		(byte) 0x49, (byte) 0x53
+		(byte) 'I', (byte) 'S'
 	};
 
 	/** Iris close command */
 	static private final byte[] CMD_IRIS_CLOSE = new byte[] {
-		(byte) 0x49, (byte) 0x43
+		(byte) 'I', (byte) 'C'
 	};
 
 	/** Iris open command */
 	static private final byte[] CMD_IRIS_OPEN = new byte[] {
-		(byte) 0x49, (byte) 0x4f
+		(byte) 'I', (byte) 'O'
 	};
 
 	/** Manual iris command */
 	static private final byte[] CMD_IRIS_MANUAL = new byte[] {
-		(byte) 0x63, (byte) 0x49, (byte) 0x4d
+		(byte) 'c', (byte) 'I', (byte) 'M'
 	};
 
 	/** Auto iris command */
 	static private final byte[] CMD_IRIS_AUTO = new byte[] {
-		(byte) 0x63, (byte) 0x49, (byte) 0x41
+		(byte) 'c', (byte) 'I', (byte) 'A'
 	};
 
 	/** Device request */

@@ -42,13 +42,13 @@ public class PanProperty extends CohuPTZProperty {
 	{
 		byte[] cmd = new byte[2];
 		if (Math.abs(value) < PTZ_THRESH) {
-			cmd[0] = (byte) 0x50;
-			cmd[1] = (byte) 0x53;
+			cmd[0] = (byte) 'P';	// pan
+			cmd[1] = (byte) 'S';	// stop
 		} else if (value < 0) {
-			cmd[0] = (byte) 0x6c;
+			cmd[0] = (byte) 'l';	// left
 			cmd[1] = getPanTiltSpeedByte(value);
 		} else {
-			cmd[0] = (byte) 0x72;
+			cmd[0] = (byte) 'r';	// right
 			cmd[1] = getPanTiltSpeedByte(value);
 		}
 		os.write(createPacket(c.getDrop(), cmd));

@@ -43,17 +43,17 @@ public class ZoomProperty extends CohuPTZProperty {
 		byte[] cmd;
 		if (Math.abs(value) < PTZ_THRESH) {
 			cmd = new byte[2];
-			cmd[0] = (byte) 0x5a;
-			cmd[1] = (byte) 0x53;
+			cmd[0] = (byte) 'Z';	// zoom
+			cmd[1] = (byte) 'S';	// stop
 		} else if (value < 0) {
 			cmd = new byte[3];
-			cmd[0] = (byte) 0x63;
-			cmd[1] = (byte) 0x7a;
+			cmd[0] = (byte) 'c';
+			cmd[1] = (byte) 'z';	// zoom wide
 			cmd[2] = getZoomSpeedByte(value);
 		} else {
 			cmd = new byte[3];
-			cmd[0] = (byte) 0x63;
-			cmd[1] = (byte) 0x5a;
+			cmd[0] = (byte) 'c';
+			cmd[1] = (byte) 'Z';	// zoom tele
 			cmd[2] = getZoomSpeedByte(value);
 		}
 		os.write(createPacket(c.getDrop(), cmd));
