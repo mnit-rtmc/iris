@@ -77,4 +77,10 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	protected GeoLoc getGeoLoc(LaneMarking proxy) {
 		return proxy.getGeoLoc();
 	}
+
+	/** Create a properties form for the specified proxy */
+	@Override
+	protected LaneMarkingProperties createPropertiesForm(LaneMarking proxy){
+		return new LaneMarkingProperties(session, proxy);
+	}
 }

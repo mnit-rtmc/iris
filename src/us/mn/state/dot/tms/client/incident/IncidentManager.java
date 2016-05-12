@@ -84,21 +84,6 @@ public class IncidentManager extends ProxyManager<Incident> {
 		return new IncidentTheme(this);
 	}
 
-	/** Create a popup menu for a single incident selection */
-	@Override
-	protected JPopupMenu createPopupSingle(Incident proxy) {
-		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(proxy)));
-		if (s_pane != null) {
-			p.addSeparator();
-			p.add(new MapAction<Incident>(s_pane, proxy,
-				proxy.getLat(), proxy.getLon()));
-		}
-		p.addSeparator();
-		// FIXME: add menu item to clear incident
-		return p;
-	}
-
 	/** Create a popup menu for multiple objects */
 	@Override
 	protected JPopupMenu createPopupMulti(int n_selected) {

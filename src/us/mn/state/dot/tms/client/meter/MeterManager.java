@@ -83,32 +83,22 @@ public class MeterManager extends ProxyManager<RampMeter> {
 		return new RampMeterProperties(session, meter);
 	}
 
-	/** Create a popup menu for a single ramp meter selection */
+	/** Fill single selection popup */
 	@Override
-	protected JPopupMenu createPopupSingle(RampMeter meter) {
-		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(meter)));
-		if (s_pane != null) {
-			p.addSeparator();
-			p.add(new MapAction<RampMeter>(s_pane, meter,
-				meter.getGeoLoc()));
-		}
+	protected void fillPopupSingle(JPopupMenu p, RampMeter meter) {
 		if (session.isUpdatePermitted(meter)) {
-			p.addSeparator();
 			if (meter.getRate() != null) {
 				p.add(new ShrinkQueueAction(meter, true));
 				p.add(new GrowQueueAction(meter, true));
 				p.add(new TurnOffAction(meter, true));
 			} else
 				p.add(new TurnOnAction(meter, true));
+			p.addSeparator();
 		}
 		if (TeslaAction.isConfigured()) {
-			p.addSeparator();
 			p.add(new TeslaAction<RampMeter>(meter));
+			p.addSeparator();
 		}
-		p.addSeparator();
-		p.add(new PropertiesAction<RampMeter>(this, meter));
-		return p;
 	}
 
 	/** Create a popup menu for multiple objects */

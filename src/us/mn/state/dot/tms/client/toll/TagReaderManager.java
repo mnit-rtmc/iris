@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
+import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -93,14 +94,13 @@ public class TagReaderManager extends ProxyManager<TagReader> {
 		return new TagReaderProperties(session, tr);
 	}
 
-	/** Create a popup menu for a single selection */
+	/** Fill single selection popup */
 	@Override
-	protected JPopupMenu createPopupSingle(TagReader tr) {
-		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(tr)));
-		p.addSeparator();
-		p.add(new PropertiesAction<TagReader>(this, tr));
-		return p;
+	protected void fillPopupSingle(JPopupMenu p, TagReader tr) {
+		if (TeslaAction.isConfigured()) {
+			p.add(new TeslaAction<TagReader>(tr));
+			p.addSeparator();
+		}
 	}
 
 	/** Create a popup menu for multiple objects */

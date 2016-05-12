@@ -95,16 +95,13 @@ public class ControllerManager extends ProxyManager<Controller> {
 		return new ControllerForm(session, ctrl);
 	}
 
-	/** Create a popup menu for a single controller selection */
+	/** Fill single selection popup */
 	@Override
-	protected JPopupMenu createPopupSingle(Controller ctrl) {
-		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(ctrl)));
-		p.addSeparator();
-		if(TeslaAction.isConfigured())
+	protected void fillPopupSingle(JPopupMenu p, Controller ctrl) {
+		if (TeslaAction.isConfigured()) {
 			p.add(new TeslaAction<Controller>(ctrl));
-		p.add(new PropertiesAction<Controller>(this, ctrl));
-		return p;
+			p.addSeparator();
+		}
 	}
 
 	/** Create a popup menu for multiple objects */

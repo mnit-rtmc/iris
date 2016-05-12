@@ -390,9 +390,23 @@ abstract public class ProxyManager<T extends SonarObject> {
 		}
 	}
 
-	/** Create a popup menu for a single object */
+	/** Create a popup menu for a single selection */
 	protected JPopupMenu createPopupSingle(T proxy) {
-		return null;
+		JPopupMenu p = new JPopupMenu();
+		p.add(makeMenuLabel(getDescription(proxy)));
+		p.addSeparator();
+		if (s_pane != null) {
+			p.add(new MapAction<T>(s_pane, proxy,getGeoLoc(proxy)));
+			p.addSeparator();
+		}
+		fillPopupSingle(p, proxy);
+		p.add(new PropertiesAction<T>(this, proxy));
+		return p;
+	}
+
+	/** Fill single selection popup */
+	protected void fillPopupSingle(JPopupMenu p, T proxy) {
+		// subclasses may override
 	}
 
 	/** Create a popup menu for multiple objects */

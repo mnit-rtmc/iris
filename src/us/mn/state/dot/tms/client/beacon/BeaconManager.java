@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
+import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -84,17 +85,16 @@ public class BeaconManager extends ProxyManager<Beacon> {
 		return new BeaconProperties(session, b);
 	}
 
-	/** Create a popup menu for a single selection */
+	/** Fill single selection popup */
 	@Override
-	protected JPopupMenu createPopupSingle(Beacon b) {
-		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(b)));
-		p.addSeparator();
+	protected void fillPopupSingle(JPopupMenu p, Beacon b) {
 		p.add(new DeployAction(s_model));
 		p.add(new UndeployAction(s_model));
 		p.addSeparator();
-		p.add(new PropertiesAction<Beacon>(this, b));
-		return p;
+		if (TeslaAction.isConfigured()) {
+			p.add(new TeslaAction<Beacon>(b));
+			p.addSeparator();
+		}
 	}
 
 	/** Create a popup menu for multiple objects */

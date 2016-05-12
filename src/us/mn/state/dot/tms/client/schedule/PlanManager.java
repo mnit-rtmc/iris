@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.schedule;
 
 import java.awt.Color;
 import java.util.Iterator;
+import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.BeaconAction;
@@ -164,5 +165,11 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 	/** Get the description of an action plan */
 	public String getDescription(ActionPlan plan) {
 		return plan.getName() + " -- " + plan.getDescription();
+	}
+
+	/** Create a popup menu for a single selection */
+	@Override
+	protected JPopupMenu createPopupSingle(ActionPlan plan) {
+		return null;
 	}
 }

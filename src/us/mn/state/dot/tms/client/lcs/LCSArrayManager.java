@@ -182,30 +182,21 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		return new LCSArrayProperties(session, la);
 	}
 
-	/** Create a popup menu for a single LCS array selection */
+	/** Fill single selection popup */
 	@Override
-	protected JPopupMenu createPopupSingle(LCSArray la) {
-		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(la)));
-		if (s_pane != null) {
-			p.addSeparator();
-			p.add(new MapAction<LCSArray>(s_pane, la,
-				LCSArrayHelper.lookupGeoLoc(la)));
-		}
-		p.addSeparator();
-		if(LCSArrayHelper.isDeployed(la) && blankAction != null)
+	protected void fillPopupSingle(JPopupMenu p, LCSArray la) {
+		if (LCSArrayHelper.isDeployed(la) && blankAction != null) {
 			p.add(blankAction);
-		if(TeslaAction.isConfigured()) {
 			p.addSeparator();
-			for(int i = 1; i <= MAX_LANES; i++) {
+		}
+		if (TeslaAction.isConfigured()) {
+			for (int i = 1; i <= MAX_LANES; i++) {
 				DMS dms = LCSArrayHelper.lookupDMS(la, i);
-				if(dms != null)
+				if (dms != null)
 					p.add(new TeslaAction<DMS>(dms));
 			}
+			p.addSeparator();
 		}
-		p.addSeparator();
-		p.add(new PropertiesAction<LCSArray>(this, la));
-		return p;
 	}
 
 	/** Create a popup menu for multiple objects */

@@ -115,28 +115,21 @@ public class CameraManager extends ProxyManager<Camera> {
 		return new CameraProperties(session, cam);
 	}
 
-	/** Create a popup menu for a single camera selection */
+	/** Fill single selection popup */
 	@Override
-	protected JPopupMenu createPopupSingle(Camera c) {
-		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(c)));
-		p.addSeparator();
-		if (s_pane != null) {
-			p.add(new MapAction<Camera>(s_pane, c, c.getGeoLoc()));
-			p.addSeparator();
-		}
+	protected void fillPopupSingle(JPopupMenu p, Camera c) {
 		p.add(new PublishAction(s_model));
 		p.add(new UnpublishAction(s_model));
 		p.addSeparator();
-		if(inPlaylist(c))
+		if (inPlaylist(c))
 			p.add(new RemovePlaylistAction(this, s_model));
 		else
 			p.add(new AddPlaylistAction(this, s_model));
 		p.addSeparator();
-		if(TeslaAction.isConfigured())
+		if (TeslaAction.isConfigured()) {
 			p.add(new TeslaAction<Camera>(c));
-		p.add(new PropertiesAction<Camera>(this, c));
-		return p;
+			p.addSeparator();
+		}
 	}
 
 	/** Create a popup menu for multiple objects */

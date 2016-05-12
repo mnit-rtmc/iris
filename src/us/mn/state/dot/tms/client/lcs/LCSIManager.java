@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;

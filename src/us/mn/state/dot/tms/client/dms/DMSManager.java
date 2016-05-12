@@ -175,22 +175,17 @@ public class DMSManager extends ProxyManager<DMS> {
 		return new DMSProperties(session, dms);
 	}
 
-	/** Create a popup menu for a single DMS selection */
+	/** Fill single selection popup */
 	@Override
-	protected JPopupMenu createPopupSingle(DMS dms) {
-		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(dms)));
-		p.addSeparator();
-		if (s_pane != null) {
-			p.add(new MapAction<DMS>(s_pane, dms, dms.getGeoLoc()));
+	protected void fillPopupSingle(JPopupMenu p, DMS dms) {
+		if (blankAction != null) {
+			p.add(blankAction);
 			p.addSeparator();
 		}
-		if (blankAction != null)
-			p.add(blankAction);
-		if (TeslaAction.isConfigured())
+		if (TeslaAction.isConfigured()) {
 			p.add(new TeslaAction<DMS>(dms));
-		p.add(new PropertiesAction<DMS>(this, dms));
-		return p;
+			p.addSeparator();
+		}
 	}
 
 	/** Create a popup menu for multiple objects */

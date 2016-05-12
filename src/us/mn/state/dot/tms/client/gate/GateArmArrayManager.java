@@ -100,24 +100,13 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 		return new GateArmArrayProperties(session, ga);
 	}
 
-	/** Create a popup menu for a single gate arm selection */
+	/** Fill single selection popup */
 	@Override
-	protected JPopupMenu createPopupSingle(GateArmArray ga) {
-		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(ga)));
-		if (s_pane != null) {
-			p.addSeparator();
-			p.add(new MapAction<GateArmArray>(s_pane, ga,
-				ga.getGeoLoc()));
-		}
-		p.addSeparator();
+	protected void fillPopupSingle(JPopupMenu p, GateArmArray ga) {
 		if (TeslaAction.isConfigured()) {
-			p.addSeparator();
 			p.add(new TeslaAction<GateArmArray>(ga));
+			p.addSeparator();
 		}
-		p.addSeparator();
-		p.add(new PropertiesAction<GateArmArray>(this, ga));
-		return p;
 	}
 
 	/** Create a popup menu for multiple objects */
