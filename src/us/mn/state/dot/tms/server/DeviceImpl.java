@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Device;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -301,4 +302,13 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		ControllerImpl c = controller;
 		return (c != null) && c.isConnected();
 	}
+
+	/** Request a device operation */
+	@Override
+	public void setDeviceRequest(int r) {
+		sendDeviceRequest(DeviceRequest.fromOrdinal(r));
+	}
+
+	/** Send a device request operation */
+	abstract protected void sendDeviceRequest(DeviceRequest dr);
 }

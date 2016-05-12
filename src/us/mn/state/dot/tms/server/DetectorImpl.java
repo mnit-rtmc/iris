@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -497,9 +498,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return fake;
 	}
 
-	/** Request a device operation */
+	/** Send a device request operation */
 	@Override
-	public void setDeviceRequest(int r) {
+	protected void sendDeviceRequest(DeviceRequest dr) {
 		// no detector device requests
 	}
 

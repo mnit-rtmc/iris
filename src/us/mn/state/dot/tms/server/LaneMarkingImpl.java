@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.TMSException;
@@ -145,8 +146,9 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 		return null;
 	}
 
-	/** Request a device operation */
-	public void setDeviceRequest(int r) {
+	/** Send a device request operation */
+	@Override
+	protected void sendDeviceRequest(DeviceRequest dr) {
 		// no device requests are currently supported
 	}
 }

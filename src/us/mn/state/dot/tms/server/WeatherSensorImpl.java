@@ -312,17 +312,12 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		return null;
 	}
 
-	/** Request a device operation */
+	/** Send a device request operation */
 	@Override
-	public void setDeviceRequest(int r) {
-		// no device requests from clients are supported
-	}
-
-	/** Send a device request */
-	public void sendDeviceRequest(DeviceRequest req) {
+	protected void sendDeviceRequest(DeviceRequest dr) {
 		WeatherPoller p = getWeatherPoller();
 		if (p != null)
-			p.sendRequest(this, req);
+			p.sendRequest(this, dr);
 	}
 
 	/** Flush buffered sample data to disk */

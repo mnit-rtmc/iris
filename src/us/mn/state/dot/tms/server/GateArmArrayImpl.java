@@ -24,6 +24,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import static us.mn.state.dot.tms.DMSMessagePriority.PSA;
 import us.mn.state.dot.tms.GateArmArray;
@@ -345,13 +346,13 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		arms[idx] = ga;
 	}
 
-	/** Request a device operation */
+	/** Send a device request operation */
 	@Override
-	public void setDeviceRequest(int r) {
+	protected void sendDeviceRequest(DeviceRequest dr) {
 		for (int i = 0; i < MAX_ARMS; i++) {
 			GateArmImpl ga = arms[i];
 			if (ga != null)
-				ga.setDeviceRequest(r);
+				ga.sendDeviceRequest(dr);
 		}
 	}
 

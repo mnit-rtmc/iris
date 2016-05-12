@@ -206,14 +206,9 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		return dmss;
 	}
 
-	/** Request a device operation */
+	/** Send a device request operation */
 	@Override
-	public void setDeviceRequest(int r) {
-		sendDeviceRequest(DeviceRequest.fromOrdinal(r));
-	}
-
-	/** Request a device operation */
-	public void sendDeviceRequest(DeviceRequest dr) {
+	protected void sendDeviceRequest(DeviceRequest dr) {
 		TagReaderPoller p = getTagReaderPoller();
 		if (p != null)
 			p.sendRequest(this, dr);

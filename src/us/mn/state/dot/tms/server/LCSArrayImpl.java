@@ -415,11 +415,12 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		return null;
 	}
 
-	/** Request a device operation */
-	public void setDeviceRequest(int r) {
+	/** Send a device request operation */
+	@Override
+	protected void sendDeviceRequest(DeviceRequest dr) {
 		LCSPoller p = getLCSPoller();
-		if(p != null)
-			p.sendRequest(this, DeviceRequest.fromOrdinal(r));
+		if (p != null)
+			p.sendRequest(this, dr);
 	}
 
 	/** Get an array of the DMS */

@@ -894,17 +894,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return photocellStatus;
 	}
 
-	/** Request a device operation (query message, test pixels, etc.) */
-	public void sendDeviceRequest(DeviceRequest dr) {
+	/** Send a device request operation */
+	@Override
+	protected void sendDeviceRequest(DeviceRequest dr) {
 		DMSPoller p = getDMSPoller();
 		if (p != null)
 			p.sendRequest(this, dr);
-	}
-
-	/** Request a device operation (query message, test pixels, etc.) */
-	@Override
-	public void setDeviceRequest(int r) {
-		sendDeviceRequest(DeviceRequest.fromOrdinal(r));
 	}
 
 	/** The owner of the next message to be displayed.  This is a write-only

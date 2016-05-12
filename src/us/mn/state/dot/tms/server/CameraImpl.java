@@ -258,14 +258,12 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return null;
 	}
 
-	/**
-	 * Request a device operation (e.g., focus/iris ops, wiper, reset)
-	 * @param r The ordinal representation of the DeviceRequest.
-	 */
-	public void setDeviceRequest(int r) {
+	/** Send a device request operation */
+	@Override
+	protected void sendDeviceRequest(DeviceRequest dr) {
 		CameraPoller cp = getCameraPoller();
-		if(cp != null)
-			cp.sendRequest(this, DeviceRequest.fromOrdinal(r));
+		if (cp != null)
+			cp.sendRequest(this, dr);
 	}
 
 	/** Command the camera pan, tilt or zoom */

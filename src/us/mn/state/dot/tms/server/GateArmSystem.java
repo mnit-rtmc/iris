@@ -112,17 +112,17 @@ public class GateArmSystem {
 	}
 
 	/** Check a device request for valid gate arm requests */
-	static public DeviceRequest checkRequest(int r) {
+	static public DeviceRequest checkRequest(DeviceRequest dr) {
+		// NOTE: always call checkEnabled
 		boolean e = checkEnabled();
-		DeviceRequest req = DeviceRequest.fromOrdinal(r);
-		switch(req) {
+		switch (dr) {
 		case QUERY_STATUS:
 			// Allow querying status even when system disabled
-			return req;
+			return dr;
 		case SEND_SETTINGS:
 		case RESET_DEVICE:
 		case DISABLE_SYSTEM:
-			return e ? req : null;
+			return e ? dr : null;
 		default:
 			return null;
 		}
