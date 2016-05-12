@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.weather;
 
-import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
@@ -23,7 +22,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.TeslaAction;
 
 /**
  * A weather sensor manager is a container for SONAR weather sensor objects.
@@ -34,7 +32,7 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 
 	/** Create a new weather sensor manager */
 	public WeatherSensorManager(Session s, GeoLocManager lm) {
-		super(s, lm);
+		super(s, lm, true, 0);
 	}
 
 	/** Get the sonar type name */
@@ -77,15 +75,6 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 	@Override
 	protected GeoLoc getGeoLoc(WeatherSensor proxy) {
 		return proxy.getGeoLoc();
-	}
-
-	/** Fill single selection popup */
-	@Override
-	protected void fillPopupSingle(JPopupMenu p, WeatherSensor ws) {
-		if (TeslaAction.isConfigured()) {
-			p.add(new TeslaAction<WeatherSensor>(ws));
-			p.addSeparator();
-		}
 	}
 
 	/** Create a properties form for the specified proxy */

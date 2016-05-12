@@ -32,7 +32,7 @@ public class LCSIManager extends ProxyManager<LCSIndication> {
 
 	/** Create a new LCS indicaiton manager */
 	public LCSIManager(Session s, GeoLocManager lm) {
-		super(s, lm);
+		super(s, lm, false, 0);
 	}
 
 	/** Get the sonar type name */

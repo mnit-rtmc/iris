@@ -34,7 +34,6 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -62,7 +61,7 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a new DMS manager */
 	public DMSManager(Session s, GeoLocManager lm) {
-		super(s, lm, 12, ItemStyle.DEPLOYED);
+		super(s, lm, true, 12, ItemStyle.DEPLOYED);
 		s_model.setAllowMultiple(true);
 	}
 
@@ -178,10 +177,6 @@ public class DMSManager extends ProxyManager<DMS> {
 	protected void fillPopupSingle(JPopupMenu p, DMS dms) {
 		if (blankAction != null) {
 			p.add(blankAction);
-			p.addSeparator();
-		}
-		if (TeslaAction.isConfigured()) {
-			p.add(new TeslaAction<DMS>(dms));
 			p.addSeparator();
 		}
 	}

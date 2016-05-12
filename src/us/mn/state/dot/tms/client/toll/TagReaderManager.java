@@ -26,7 +26,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -41,7 +40,7 @@ public class TagReaderManager extends ProxyManager<TagReader> {
 
 	/** Create a new tag reader manager */
 	public TagReaderManager(Session s, GeoLocManager lm) {
-		super(s, lm, 14);
+		super(s, lm, true, 14);
 	}
 
 	/** Get the sonar type name */
@@ -91,15 +90,6 @@ public class TagReaderManager extends ProxyManager<TagReader> {
 	@Override
 	protected TagReaderProperties createPropertiesForm(TagReader tr) {
 		return new TagReaderProperties(session, tr);
-	}
-
-	/** Fill single selection popup */
-	@Override
-	protected void fillPopupSingle(JPopupMenu p, TagReader tr) {
-		if (TeslaAction.isConfigured()) {
-			p.add(new TeslaAction<TagReader>(tr));
-			p.addSeparator();
-		}
 	}
 
 	/** Create a popup menu for multiple objects */

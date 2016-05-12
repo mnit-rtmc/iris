@@ -115,6 +115,9 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Default style */
 	private final ItemStyle def_style;
 
+	/** Has properties flag */
+	private final boolean has_properties;
+
 	/** Screen pane */
 	protected ScreenPane s_pane;
 
@@ -126,27 +129,24 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Create a new proxy manager.
 	 * @param s Session.
 	 * @param lm Location manager.
+	 * @param p Flag for has properties.
 	 * @param zt Zoom threshold.
 	 * @param ds Default item style. */
-	protected ProxyManager(Session s, GeoLocManager lm, int zt,
+	protected ProxyManager(Session s, GeoLocManager lm, boolean p, int zt,
 		ItemStyle ds)
 	{
 		session = s;
 		loc_manager = lm;
 		zoom_threshold = zt;
 		def_style = ds;
+		has_properties = p;
 		theme = createTheme();
 		layer = hasLayer() ? createLayer() : null;
 	}
 
 	/** Create a new proxy manager */
-	protected ProxyManager(Session s, GeoLocManager lm, int zt) {
-		this(s, lm, zt, ItemStyle.ALL);
-	}
-
-	/** Create a new proxy manager */
-	protected ProxyManager(Session s, GeoLocManager lm) {
-		this(s, lm, 0);
+	protected ProxyManager(Session s, GeoLocManager lm, boolean p, int zt) {
+		this(s, lm, p, zt, ItemStyle.ALL);
 	}
 
 	/** Initialize the proxy manager. This cannot be done in the constructor
@@ -400,7 +400,13 @@ abstract public class ProxyManager<T extends SonarObject> {
 			p.addSeparator();
 		}
 		fillPopupSingle(p, proxy);
-		p.add(new PropertiesAction<T>(this, proxy));
+		if (has_properties) {
+			if (TeslaAction.isConfigured()) {
+				p.add(new TeslaAction<T>(proxy));
+				p.addSeparator();
+			}
+			p.add(new PropertiesAction<T>(this, proxy));
+		}
 		return p;
 	}
 

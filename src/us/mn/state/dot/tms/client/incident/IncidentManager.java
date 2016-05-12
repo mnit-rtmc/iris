@@ -50,7 +50,7 @@ public class IncidentManager extends ProxyManager<Incident> {
 
 	/** Create a new incident manager */
 	public IncidentManager(Session s, GeoLocManager lm) {
-		super(s, lm, 10);
+		super(s, lm, false, 10);
 	}
 
 	/** Get the sonar type name */

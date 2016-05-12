@@ -26,7 +26,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -38,7 +37,7 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 
 	/** Create a new gate arm array manager */
 	public GateArmArrayManager(Session s, GeoLocManager lm) {
-		super(s, lm, 15);
+		super(s, lm, true, 15);
 	}
 
 	/** Get the sonar type name */
@@ -96,15 +95,6 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	@Override
 	protected GateArmArrayProperties createPropertiesForm(GateArmArray ga) {
 		return new GateArmArrayProperties(session, ga);
-	}
-
-	/** Fill single selection popup */
-	@Override
-	protected void fillPopupSingle(JPopupMenu p, GateArmArray ga) {
-		if (TeslaAction.isConfigured()) {
-			p.add(new TeslaAction<GateArmArray>(ga));
-			p.addSeparator();
-		}
 	}
 
 	/** Create a popup menu for multiple objects */

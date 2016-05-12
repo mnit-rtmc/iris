@@ -108,7 +108,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	public R_NodeManager(Session s, GeoLocManager lm, Properties p)
 		throws IOException, SAXException, ParserConfigurationException
 	{
-		super(s, lm, 10);
+		super(s, lm, false, 10);
 		builder = canRead()
 		       ? new SegmentBuilder(session, this, p)
 		       : null;

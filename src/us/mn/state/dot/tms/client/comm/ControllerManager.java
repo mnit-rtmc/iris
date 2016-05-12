@@ -28,7 +28,6 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -40,7 +39,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 
 	/** Create a new controller manager */
 	public ControllerManager(Session s, GeoLocManager lm) {
-		super(s, lm, 16, ItemStyle.FAILED);
+		super(s, lm, true, 16, ItemStyle.FAILED);
 	}
 
 	/** Get the sonar type name */
@@ -92,15 +91,6 @@ public class ControllerManager extends ProxyManager<Controller> {
 	@Override
 	protected ControllerForm createPropertiesForm(Controller ctrl) {
 		return new ControllerForm(session, ctrl);
-	}
-
-	/** Fill single selection popup */
-	@Override
-	protected void fillPopupSingle(JPopupMenu p, Controller ctrl) {
-		if (TeslaAction.isConfigured()) {
-			p.add(new TeslaAction<Controller>(ctrl));
-			p.addSeparator();
-		}
 	}
 
 	/** Create a popup menu for multiple objects */

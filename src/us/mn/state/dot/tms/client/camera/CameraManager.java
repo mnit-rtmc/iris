@@ -28,7 +28,6 @@ import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
-import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -49,7 +48,7 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a new camera manager */
 	public CameraManager(Session s, GeoLocManager lm) {
-		super(s, lm, 13, ItemStyle.ACTIVE);
+		super(s, lm, true, 13, ItemStyle.ACTIVE);
 		dispatcher = new CameraDispatcher(s, this);
 		tab = new CameraTab(s, this, dispatcher);
 		s_model.setAllowMultiple(true);
@@ -124,10 +123,6 @@ public class CameraManager extends ProxyManager<Camera> {
 		else
 			p.add(new AddPlaylistAction(this, s_model));
 		p.addSeparator();
-		if (TeslaAction.isConfigured()) {
-			p.add(new TeslaAction<Camera>(c));
-			p.addSeparator();
-		}
 	}
 
 	/** Create a popup menu for multiple objects */

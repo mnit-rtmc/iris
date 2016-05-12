@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.proxy.TeslaAction;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -36,7 +35,7 @@ public class BeaconManager extends ProxyManager<Beacon> {
 
 	/** Create a new beacon manager */
 	public BeaconManager(Session s, GeoLocManager lm) {
-		super(s, lm, 14);
+		super(s, lm, true, 14);
 	}
 
 	/** Get the sonar type name */
@@ -90,10 +89,6 @@ public class BeaconManager extends ProxyManager<Beacon> {
 		p.add(new DeployAction(s_model));
 		p.add(new UndeployAction(s_model));
 		p.addSeparator();
-		if (TeslaAction.isConfigured()) {
-			p.add(new TeslaAction<Beacon>(b));
-			p.addSeparator();
-		}
 	}
 
 	/** Create a popup menu for multiple objects */
