@@ -18,7 +18,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.Action;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.client.IrisClient;
+import us.mn.state.dot.tms.client.ScreenPane;
 import us.mn.state.dot.tms.geo.ZoomLevel;
 
 /**
@@ -28,8 +28,8 @@ import us.mn.state.dot.tms.geo.ZoomLevel;
  */
 public class MapAction<T extends SonarObject> extends ProxyAction<T> {
 
-	/** IRIS client */
-	private final IrisClient client;
+	/** Screen pane */
+	private final ScreenPane s_pane;
 
 	/** Latitude */
 	private final Double lat;
@@ -38,15 +38,15 @@ public class MapAction<T extends SonarObject> extends ProxyAction<T> {
 	private final Double lon;
 
 	/** Create a new map action */
-	public MapAction(IrisClient ic, T p, GeoLoc gl) {
-		this(ic, p, gl != null ? gl.getLat() : null,
+	public MapAction(ScreenPane sp, T p, GeoLoc gl) {
+		this(sp, p, gl != null ? gl.getLat() : null,
 		            gl != null ? gl.getLon() : null);
 	}
 
 	/** Create a new map action */
-	public MapAction(IrisClient ic, T p, Double lat, Double lon) {
+	public MapAction(ScreenPane sp, T p, Double lat, Double lon) {
 		super("location.map.center", p);
-		client = ic;
+		s_pane = sp;
 		this.lat = lat;
 		this.lon = lon;
 	}
@@ -55,9 +55,9 @@ public class MapAction<T extends SonarObject> extends ProxyAction<T> {
 	@Override
 	protected void doActionPerformed(ActionEvent e) {
 		if (lat != null && lon != null) {
-			// FIXME: only set extent on current ScreenPane
-			client.setMapExtent(ZoomLevel.FIFTEEN, lat.floatValue(),
-				lon.floatValue());
+			s_pane.setMapExtent(ZoomLevel.FIFTEEN,
+			                    lat.floatValue(),
+			                    lon.floatValue());
 		}
 	}
 }

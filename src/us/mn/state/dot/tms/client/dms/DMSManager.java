@@ -37,7 +37,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -179,12 +178,13 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Create a popup menu for a single DMS selection */
 	@Override
 	protected JPopupMenu createPopupSingle(DMS dms) {
-		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(dms)));
 		p.addSeparator();
-		p.add(new MapAction<DMS>(desktop.client, dms, dms.getGeoLoc()));
-		p.addSeparator();
+		if (s_pane != null) {
+			p.add(new MapAction<DMS>(s_pane, dms, dms.getGeoLoc()));
+			p.addSeparator();
+		}
 		if (blankAction != null)
 			p.add(blankAction);
 		if (TeslaAction.isConfigured())

@@ -42,7 +42,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -186,12 +185,13 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 	/** Create a popup menu for a single LCS array selection */
 	@Override
 	protected JPopupMenu createPopupSingle(LCSArray la) {
-		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(la)));
-		p.addSeparator();
-		p.add(new MapAction<LCSArray>(desktop.client, la,
-			LCSArrayHelper.lookupGeoLoc(la)));
+		if (s_pane != null) {
+			p.addSeparator();
+			p.add(new MapAction<LCSArray>(s_pane, la,
+				LCSArrayHelper.lookupGeoLoc(la)));
+		}
 		p.addSeparator();
 		if(LCSArrayHelper.isDeployed(la) && blankAction != null)
 			p.add(blankAction);

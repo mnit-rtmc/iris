@@ -100,6 +100,7 @@ public class ScreenPane extends JPanel {
 
 	/** Add a tab to the screen pane */
 	public void addTab(MapTab mt) {
+		mt.setScreenPane(this);
 		side_panel.addTab(mt);
 	}
 

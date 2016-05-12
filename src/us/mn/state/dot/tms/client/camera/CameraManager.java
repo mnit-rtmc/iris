@@ -31,7 +31,6 @@ import us.mn.state.dot.tms.client.proxy.MapAction;
 import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -119,12 +118,13 @@ public class CameraManager extends ProxyManager<Camera> {
 	/** Create a popup menu for a single camera selection */
 	@Override
 	protected JPopupMenu createPopupSingle(Camera c) {
-		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(c)));
 		p.addSeparator();
-		p.add(new MapAction<Camera>(desktop.client, c, c.getGeoLoc()));
-		p.addSeparator();
+		if (s_pane != null) {
+			p.add(new MapAction<Camera>(s_pane, c, c.getGeoLoc()));
+			p.addSeparator();
+		}
 		p.add(new PublishAction(s_model));
 		p.add(new UnpublishAction(s_model));
 		p.addSeparator();

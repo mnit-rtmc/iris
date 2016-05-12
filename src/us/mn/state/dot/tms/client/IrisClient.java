@@ -385,15 +385,6 @@ public class IrisClient extends JFrame {
 		}
  	}
 
-	/** Set the map extent.
-	 * @param zoom Zoom level.
-	 * @param lat Latitude coordinate.
-	 * @param lon Longitude coordinate. */
-	public void setMapExtent(ZoomLevel zoom, float lat, float lon) {
-		for (ScreenPane sp: s_panes)
-			sp.setMapExtent(zoom, lat, lon);
-	}
-
 	/** Create a new map model */
 	private MapModel createMapModel(MapBean mb, Session s) {
 		MapModel mm = new MapModel();

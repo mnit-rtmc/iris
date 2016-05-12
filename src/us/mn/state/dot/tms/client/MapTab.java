@@ -96,6 +96,11 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 		side_pnl = p;
 	}
 
+	/** Set the screen pane */
+	public void setScreenPane(ScreenPane sp) {
+		manager.setScreenPane(sp);
+	}
+
 	/** Get the home layer for the tab */
 	public LayerState getHomeLayer(MapBean m) {
 		for (LayerState ls: m.getLayers()) {

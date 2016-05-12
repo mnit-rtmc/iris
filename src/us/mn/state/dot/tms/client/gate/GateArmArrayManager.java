@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -104,12 +103,13 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 	/** Create a popup menu for a single gate arm selection */
 	@Override
 	protected JPopupMenu createPopupSingle(GateArmArray ga) {
-		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(ga)));
-		p.addSeparator();
-		p.add(new MapAction<GateArmArray>(desktop.client, ga,
-			ga.getGeoLoc()));
+		if (s_pane != null) {
+			p.addSeparator();
+			p.add(new MapAction<GateArmArray>(s_pane, ga,
+				ga.getGeoLoc()));
+		}
 		p.addSeparator();
 		if (TeslaAction.isConfigured()) {
 			p.addSeparator();

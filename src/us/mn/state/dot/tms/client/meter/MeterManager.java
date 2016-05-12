@@ -28,7 +28,6 @@ import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -87,12 +86,13 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	/** Create a popup menu for a single ramp meter selection */
 	@Override
 	protected JPopupMenu createPopupSingle(RampMeter meter) {
-		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(meter)));
-		p.addSeparator();
-		p.add(new MapAction<RampMeter>(desktop.client, meter,
-			meter.getGeoLoc()));
+		if (s_pane != null) {
+			p.addSeparator();
+			p.add(new MapAction<RampMeter>(s_pane, meter,
+				meter.getGeoLoc()));
+		}
 		if (session.isUpdatePermitted(meter)) {
 			p.addSeparator();
 			if (meter.getRate() != null) {

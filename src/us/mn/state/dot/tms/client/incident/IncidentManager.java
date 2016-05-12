@@ -35,7 +35,6 @@ import us.mn.state.dot.tms.client.proxy.MapAction;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -88,12 +87,13 @@ public class IncidentManager extends ProxyManager<Incident> {
 	/** Create a popup menu for a single incident selection */
 	@Override
 	protected JPopupMenu createPopupSingle(Incident proxy) {
-		SmartDesktop desktop = session.getDesktop();
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
-		p.addSeparator();
-		p.add(new MapAction<Incident>(desktop.client, proxy,
-			proxy.getLat(), proxy.getLon()));
+		if (s_pane != null) {
+			p.addSeparator();
+			p.add(new MapAction<Incident>(s_pane, proxy,
+				proxy.getLat(), proxy.getLon()));
+		}
 		p.addSeparator();
 		// FIXME: add menu item to clear incident
 		return p;

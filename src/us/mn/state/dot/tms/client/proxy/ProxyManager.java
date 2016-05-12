@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.MapTab;
+import us.mn.state.dot.tms.client.ScreenPane;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.map.Layer;
 import us.mn.state.dot.tms.client.map.LayerState;
@@ -113,6 +114,14 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Default style */
 	private final ItemStyle def_style;
+
+	/** Screen pane */
+	protected ScreenPane s_pane;
+
+	/** Set the screen pane */
+	public void setScreenPane(ScreenPane sp) {
+		s_pane = sp;
+	}
 
 	/** Create a new proxy manager.
 	 * @param s Session.
