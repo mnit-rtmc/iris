@@ -31,7 +31,6 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
-import us.mn.state.dot.tms.client.proxy.MapAction;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;

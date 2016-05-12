@@ -24,8 +24,6 @@ import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
-import us.mn.state.dot.tms.client.proxy.MapAction;
-import us.mn.state.dot.tms.client.proxy.PropertiesAction;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.TeslaAction;
