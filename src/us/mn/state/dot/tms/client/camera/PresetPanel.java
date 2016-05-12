@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,23 +15,30 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
+import java.util.Iterator;
+import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
+import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.BeaconHelper;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.CameraPreset;
+import us.mn.state.dot.tms.CameraPresetHelper;
+import static us.mn.state.dot.tms.CameraPreset.MAX_PRESET;
+import us.mn.state.dot.tms.Device;
+import us.mn.state.dot.tms.Direction;
+import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.IAction;
-import us.mn.state.dot.tms.client.widget.Widgets;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -42,94 +49,116 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class PresetPanel extends JPanel {
 
-	/** Tooltip for "store" button when store mode is inactive */
-	static private final String TOOLTIP_STORE_INACTIVE
-		= I18N.get("camera.preset.store.inactive.tooltip");
+	/** Get tooltip text for the preset buttons.
+	 * @param state Store button state. */
+	static private String presetButtonTooltip(int state) {
+		return (state == ItemEvent.SELECTED)
+		      ? I18N.get("camera.preset.store.tooltip")
+		      : I18N.get("camera.preset.recall.tooltip");
+	}
 
-	/** Tooltip for "store" button when store mode is active */
-	static private final String TOOLTIP_STORE_ACTIVE
-		= I18N.get("camera.preset.store.active.tooltip");
-
-	/** Number of preset buttons to display in preset grid */
-	static private final int NUM_PRESET_BTNS =
-		SystemAttrEnum.CAMERA_NUM_PRESET_BTNS.getInt();
-
-	/** Number of columns to use in the preset grid */
-	static private final int PRESET_GRID_COLUMNS =
-		SystemAttrEnum.CAMERA_PRESET_PANEL_COLUMNS.getInt();
-
-	/** Array of buttons used to select presets */
-	private final JButton[] preset_btn = new JButton[NUM_PRESET_BTNS];
-
-	/** Button used to store presets */
-	private final JToggleButton store_btn;
-
-	/** Button preferred size */
-	private final Dimension btn_dim;
-
-	/** Button font */
-	private final Font btn_font;
+	/** Get tooltip text for the store button.
+	 * @param state Store button state. */
+	static private String storeButtonTooltip(int state) {
+		return (state == ItemEvent.SELECTED)
+		      ? I18N.get("camera.preset.store.active.tooltip")
+		      : I18N.get("camera.preset.store.inactive.tooltip");
+	}
 
 	/** Camera PTZ */
 	private final CameraPTZ cam_ptz;
 
+	/** Array of buttons used to select presets */
+	private final JButton[] preset_btn = new JButton[MAX_PRESET];
+
+	/** Button used to store presets */
+	private final JToggleButton store_btn;
+
 	/** Create a preset panel */
 	public PresetPanel(CameraPTZ cptz) {
-		super(new GridBagLayout());
 		cam_ptz = cptz;
-		btn_dim = Widgets.UI.dimension(24, 24);
-		btn_font = new Font(Font.SANS_SERIF, Font.BOLD,
-			Widgets.UI.scaled(10));
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.anchor = GridBagConstraints.CENTER;
-		gbc.fill = GridBagConstraints.NONE;
-		gbc.gridheight = 1;
-		gbc.gridwidth = 1;
-		gbc.insets = Widgets.UI.insets();
-		gbc.ipadx = 0;
-		gbc.ipady = 0;
-		gbc.weightx = 0.5;
-		gbc.weighty = 0.5;
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		add(buildGridPanel(), gbc);
-
+		for (int i = 0; i < preset_btn.length; i++)
+			preset_btn[i] = createPresetButton(i + 1);
 		store_btn = createStoreButton();
-		if (SystemAttrEnum.CAMERA_PRESET_STORE_ENABLE.getBoolean()) {
-			gbc.gridx = 1;
-			gbc.gridy = 0;
-			add(store_btn, gbc);
-		}
+		layoutPanel();
 	}
 
-	/**
-	 * Create the preset array panel.
-	 * @return The preset array panel.
-	 */
-	private JPanel buildGridPanel() {
-		GridBagLayout gbl = new GridBagLayout();
-		JPanel jp = new JPanel(gbl);
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.anchor = GridBagConstraints.CENTER;
-		gbc.fill = GridBagConstraints.NONE;
-		gbc.gridheight = 1;
-		gbc.gridwidth = 1;
-		gbc.insets = new Insets(0, 0, 0, 0);
-		gbc.ipadx = 0;
-		gbc.ipady = 0;
-		gbc.weightx = 0.0;
-		gbc.weighty = 0.0;
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-		for (int i=0; i < NUM_PRESET_BTNS; i++) {
-			preset_btn[i] = createPresetButton(i + 1);
-			jp.add(preset_btn[i], gbc);
-			if (++gbc.gridx % PRESET_GRID_COLUMNS == 0) {
-				gbc.gridx=0;
-				gbc.gridy++;
-			}
-		}
-		return jp;
+	/** Layout the panel */
+	private void layoutPanel() {
+		GroupLayout gl = new GroupLayout(this);
+		gl.setHonorsVisibility(false);
+		gl.setAutoCreateGaps(false);
+		gl.setAutoCreateContainerGaps(true);
+		gl.setHorizontalGroup(createHorizontalGroup(gl));
+		gl.setVerticalGroup(createVerticalGroup(gl));
+		gl.linkSize(preset_btn[0], preset_btn[1], preset_btn[2],
+		            preset_btn[3]);
+		gl.linkSize(preset_btn[4], preset_btn[5], preset_btn[6],
+		            preset_btn[7]);
+		gl.linkSize(preset_btn[8], preset_btn[9], preset_btn[10],
+		            preset_btn[11]);
+		setLayout(gl);
+	}
+
+	/** Create the horizontal group */
+	private GroupLayout.Group createHorizontalGroup(GroupLayout gl) {
+		GroupLayout.SequentialGroup hg = gl.createSequentialGroup();
+		GroupLayout.ParallelGroup g0 = gl.createParallelGroup(
+			GroupLayout.Alignment.CENTER);
+		g0.addComponent(preset_btn[0]);
+		g0.addComponent(preset_btn[1]);
+		g0.addComponent(preset_btn[2]);
+		g0.addComponent(preset_btn[3]);
+		hg.addGroup(g0);
+		hg.addGap(UI.hgap);
+		GroupLayout.ParallelGroup g1 = gl.createParallelGroup(
+			GroupLayout.Alignment.CENTER);
+		g1.addComponent(preset_btn[4]);
+		g1.addComponent(preset_btn[5]);
+		g1.addComponent(preset_btn[6]);
+		g1.addComponent(preset_btn[7]);
+		hg.addGroup(g1);
+		hg.addGap(UI.hgap);
+		GroupLayout.ParallelGroup g2 = gl.createParallelGroup(
+			GroupLayout.Alignment.CENTER);
+		g2.addComponent(preset_btn[8]);
+		g2.addComponent(preset_btn[9]);
+		g2.addComponent(preset_btn[10]);
+		g2.addComponent(preset_btn[11]);
+		hg.addGroup(g2);
+		hg.addGap(UI.hgap);
+		hg.addComponent(store_btn);
+		return hg;
+	}
+
+	/** Create the vertical group */
+	private GroupLayout.Group createVerticalGroup(GroupLayout gl) {
+		GroupLayout.SequentialGroup vg = gl.createSequentialGroup();
+		GroupLayout.ParallelGroup g0 = gl.createParallelGroup();
+		g0.addComponent(preset_btn[0]);
+		g0.addComponent(preset_btn[4]);
+		g0.addComponent(preset_btn[8]);
+		vg.addGroup(g0);
+		vg.addGap(UI.vgap);
+		GroupLayout.ParallelGroup g1 = gl.createParallelGroup();
+		g1.addComponent(preset_btn[1]);
+		g1.addComponent(preset_btn[5]);
+		g1.addComponent(preset_btn[9]);
+		g1.addComponent(store_btn);
+		vg.addGroup(g1);
+		vg.addGap(UI.vgap);
+		GroupLayout.ParallelGroup g2 = gl.createParallelGroup();
+		g2.addComponent(preset_btn[2]);
+		g2.addComponent(preset_btn[6]);
+		g2.addComponent(preset_btn[10]);
+		vg.addGroup(g2);
+		vg.addGap(UI.vgap);
+		GroupLayout.ParallelGroup g3 = gl.createParallelGroup();
+		g3.addComponent(preset_btn[3]);
+		g3.addComponent(preset_btn[7]);
+		g3.addComponent(preset_btn[11]);
+		vg.addGroup(g3);
+		return vg;
 	}
 
 	/** Create a preset button */
@@ -139,12 +168,9 @@ public class PresetPanel extends JPanel {
 				handlePresetBtnPress(num);
 			}
 		});
-		btn.setPreferredSize(btn_dim);
-		btn.setMinimumSize(btn_dim);
-		btn.setFont(btn_font);
-		btn.setMargin(new Insets(0, 0, 0, 0));
+		btn.setMargin(UI.buttonInsets());
 		btn.setText(Integer.toString(num));
-		btn.setFocusPainted(false);
+		btn.setToolTipText(presetButtonTooltip(ItemEvent.DESELECTED));
 		return btn;
 	}
 
@@ -160,40 +186,122 @@ public class PresetPanel extends JPanel {
 	/** Create the store button */
 	private JToggleButton createStoreButton() {
 		JToggleButton btn = new JToggleButton();
-		btn.setPreferredSize(btn_dim);
-		btn.setMinimumSize(btn_dim);
-		btn.setFont(btn_font);
-		btn.setMargin(new Insets(0, 0, 0, 0));
 		ImageIcon icon = Icons.getIcon("camera_preset_store_inactive");
 		ImageIcon iconSel = Icons.getIcon("camera_preset_store_active");
 		if (icon != null && iconSel != null) {
 			btn.setIcon(icon);
 			btn.setSelectedIcon(iconSel);
 		} else
-			btn.setText("ST");
-		btn.setToolTipText(TOOLTIP_STORE_INACTIVE);
-		btn.setFocusPainted(false);
+			btn.setText(I18N.get("camera.preset.store"));
+		btn.setMargin(UI.buttonInsets());
+		btn.setToolTipText(storeButtonTooltip(ItemEvent.DESELECTED));
 		btn.addItemListener(new ItemListener() {
 			public void itemStateChanged(ItemEvent ie) {
-				int state = ie.getStateChange();
-				if (state == ItemEvent.SELECTED) {
-					store_btn.setToolTipText(
-						TOOLTIP_STORE_ACTIVE);
-				} else {
-					store_btn.setToolTipText(
-						TOOLTIP_STORE_INACTIVE);
-				}
+				toggleStoreButton(ie);
 			}
 		});
 		return btn;
 	}
 
-	/** Set enabled status for PresetPanel and its components. */
+	/** Toggle the store button state */
+	private void toggleStoreButton(ItemEvent ie) {
+		int state = ie.getStateChange();
+		String tt = presetButtonTooltip(state);
+		for (JButton btn: preset_btn)
+			btn.setToolTipText(tt);
+		store_btn.setToolTipText(storeButtonTooltip(state));
+	}
+
+	/** Set enabled status */
 	@Override
 	public void setEnabled(boolean e) {
 		super.setEnabled(e);
-		for(JButton b: preset_btn)
-			b.setEnabled(e && cam_ptz.canRecallPreset());
+		store_btn.setEnabled(false);
+		store_btn.setSelected(false);
+		updatePresetButtons(cam_ptz.getCamera());
+		for (JButton btn: preset_btn)
+			btn.setEnabled(e && cam_ptz.canRecallPreset());
 		store_btn.setEnabled(e && cam_ptz.canStorePreset());
+	}
+
+	/** Update preset button text */
+	private void updatePresetButtons(Camera c) {
+		for (int i = 0; i < preset_btn.length; i++)
+			updatePresetButton(preset_btn[i], c, i + 1);
+	}
+
+	/** Update preset button text */
+	private void updatePresetButton(JButton btn, Camera c, int pn) {
+		btn.setText(presetText(c, pn));
+	}
+
+	/** Get preset button text */
+	private String presetText(Camera c, int pn) {
+		if (c != null) {
+			CameraPreset cp = CameraPresetHelper.lookup(c, pn);
+			if (cp != null)
+				return presetText(cp);
+		}
+		return "<html><font color=#aaaaaa>" + Integer.toString(pn) +
+			"</html>";
+	}
+
+	/** Get preset button text */
+	private String presetText(CameraPreset cp) {
+		Device d = devicePreset(cp);
+		if (d != null)
+			return d.getName();
+		Direction dir = Direction.fromOrdinal(cp.getDirection());
+		if (dir != Direction.UNKNOWN)
+			return dir.det_dir;
+		else
+			return Integer.toString(cp.getPresetNum());
+	}
+
+	/** Get a device associated with a preset */
+	private Device devicePreset(CameraPreset cp) {
+		Device d = beaconPreset(cp);
+		if (d != null)
+			return d;
+		d = dmsPreset(cp);
+		if (d != null)
+			return d;
+		d = meterPreset(cp);
+		if (d != null)
+			return d;
+		return null;
+	}
+
+	/** Get a beacon associated with a preset */
+	private Device beaconPreset(CameraPreset cp) {
+		Iterator<Beacon> it = BeaconHelper.iterator();
+		while (it.hasNext()) {
+			Beacon b = it.next();
+			if (b.getPreset() == cp)
+				return b;
+		}
+		return null;
+	}
+
+	/** Get a DMS associated with a preset */
+	private Device dmsPreset(CameraPreset cp) {
+		Iterator<DMS> it = DMSHelper.iterator();
+		while (it.hasNext()) {
+			DMS d = it.next();
+			if (d.getPreset() == cp)
+				return d;
+		}
+		return null;
+	}
+
+	/** Get a ramp meter associated with a preset */
+	private Device meterPreset(CameraPreset cp) {
+		Iterator<RampMeter> it = RampMeterHelper.iterator();
+		while (it.hasNext()) {
+			RampMeter m = it.next();
+			if (m.getPreset() == cp)
+				return m;
+		}
+		return null;
 	}
 }
