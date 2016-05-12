@@ -23,7 +23,6 @@ import java.util.TreeMap;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
-import javax.swing.JPopupMenu;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import us.mn.state.dot.sonar.client.TypeCache;
@@ -46,7 +45,6 @@ import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * R_Node manager provides proxies for roadway nodes.
@@ -357,23 +355,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			return corridors.get(cid);
 		else
 			return null;
-	}
-
-	/** Create a popup menu for a single selection */
-	@Override
-	protected JPopupMenu createPopupSingle(R_Node proxy) {
-		JPopupMenu p = new JPopupMenu();
-		p.add(makeMenuLabel(getDescription(proxy)));
-		return p;
-	}
-
-	/** Create a popup menu for multiple objects */
-	@Override
-	protected JPopupMenu createPopupMulti(int n_selected) {
-		JPopupMenu p = new JPopupMenu();
-		p.add(new JLabel(I18N.get("r_node.title") + ": " +
-			n_selected));
-		return p;
 	}
 
 	/** Get the GeoLoc for the specified proxy */

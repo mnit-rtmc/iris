@@ -48,7 +48,7 @@ import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
 abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Make a menu label */
-	static protected Box makeMenuLabel(String id) {
+	static private Box makeMenuLabel(String id) {
 		Box b = Box.createHorizontalBox();
 		b.add(Box.createHorizontalStrut(6));
 		b.add(Box.createHorizontalGlue());
