@@ -507,7 +507,7 @@ public class SonarState extends Client {
 		populate(connections, true);
 		user = users.lookupObject(user_name);
 		populate(system_attributes, true);
-		populate(map_extents);
+		populate(map_extents, true);
 		populate(roads);
 		populate(geo_locs);
 		populateReadable(words);
