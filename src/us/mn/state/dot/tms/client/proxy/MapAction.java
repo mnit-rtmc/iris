@@ -55,6 +55,7 @@ public class MapAction<T extends SonarObject> extends ProxyAction<T> {
 	@Override
 	protected void doActionPerformed(ActionEvent e) {
 		if (lat != null && lon != null) {
+			// FIXME: only set extent on current ScreenPane
 			client.setMapExtent(ZoomLevel.FIFTEEN, lat.floatValue(),
 				lon.floatValue());
 		}
