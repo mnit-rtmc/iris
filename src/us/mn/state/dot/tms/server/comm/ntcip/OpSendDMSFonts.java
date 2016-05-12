@@ -55,6 +55,12 @@ public class OpSendDMSFonts extends OpDMS {
 			fontStatus.node, row);
 	}
 
+	/** Time in seconds to allow for verifying font status */
+	static private final int VERIFY_STATUS_SECS = 5;
+
+	/** Time in seconds to allow for calculating font ID */
+	static private final int CALCULATING_ID_SECS = 15;
+
 	/** Number of fonts supported */
 	private final ASN1Integer num_fonts = numFonts.makeInt();
 
@@ -332,6 +338,10 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Phase to verify the font status is "notUsed" */
 	protected class VerifyStatusNotUsed extends Phase {
 
+		/** Time to stop checking if the status has updated */
+		private final long expire = TimeSteward.currentTimeMillis() +
+			VERIFY_STATUS_SECS * 1000;
+
 		/** Verify the font status is "notUsed" */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -339,6 +349,12 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
+			if (status.getEnum() == FontStatus.notUsedReq) {
+				// Daktronics DMS return notUsedReq instead of
+				// notUsed for a short time; try again
+				if (TimeSteward.currentTimeMillis() < expire)
+					return this;
+			}
 			if (status.getEnum() != FontStatus.notUsed) {
 				abortUpload("Expected notUsed, was "
 					+ status.getEnum());
@@ -366,6 +382,10 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Phase to verify the font status is modifying */
 	protected class VerifyStatusModifying extends Phase {
 
+		/** Time to stop checking if the status has updated */
+		private final long expire = TimeSteward.currentTimeMillis() +
+			VERIFY_STATUS_SECS * 1000;
+
 		/** Verify the font status is modifying */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -374,10 +394,10 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.queryProps();
 			logQuery(status);
 			if (status.getEnum() == FontStatus.modifyReq) {
-				// Daktronics DMS returns modifyReq
-				// instead of modifyting here ...
-				logError("invalid state: modifyReq");
-				return nextFontPhase();
+				// Daktronics DMS return modifyReq instead of
+				// modifying for a short time; try again
+				if (TimeSteward.currentTimeMillis() < expire)
+					return this;
 			}
 			if (status.getEnum() != FontStatus.modifying) {
 				abortUpload("Expected modifying, was " +
@@ -534,11 +554,8 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Phase to verify the font status is ready for use */
 	protected class VerifyStatusReadyForUse extends Phase {
 
-		/** Time in seconds to allow for calculating font ID */
-		static private final int CALCULATING_ID_SECS = 15;
-
 		/** Time to stop checking if the font is ready for use */
-		private final long expire = TimeSteward.currentTimeMillis() + 
+		private final long expire = TimeSteward.currentTimeMillis() +
 			CALCULATING_ID_SECS * 1000;
 
 		/** Verify the font status is ready for use */
