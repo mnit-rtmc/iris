@@ -131,7 +131,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	private void createPollJob(int s) {
 		PollJob pj = poll_job;
 		if (pj != null)
-			POLLER.removeJob(poll_job);
+			POLLER.removeJob(pj);
 		poll_job = new PollJob(s);
 		POLLER.addJob(poll_job);
 	}
