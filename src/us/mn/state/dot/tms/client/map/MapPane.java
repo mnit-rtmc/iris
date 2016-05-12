@@ -31,36 +31,32 @@ import java.awt.image.BufferedImage;
  * @author Erik Engstrom
  * @author Douglas Lau
  */
-class MapPane implements LayerChangeListener {
+public class MapPane implements LayerChangeListener {
 
 	/** Minimum width/height of map pane */
-	static protected final int MIN_SIZE = 1;
+	static private final int MIN_SIZE = 1;
 
 	/** Buffer for map */
-	protected BufferedImage screenBuffer;
+	private BufferedImage screenBuffer;
 
 	/** Dirty flag */
 	private boolean dirty = true;
 
 	/** Transform from world to screen coordinates */
-	protected final AffineTransform transform = new AffineTransform();
+	private final AffineTransform transform = new AffineTransform();
 
 	/** Transform from screen to world coordinates */
-	protected AffineTransform inverseTransform = new AffineTransform();
+	private AffineTransform inverseTransform = new AffineTransform();
 
 	/** Background color of map */
-	protected Color background = Color.GRAY;
+	private Color background = Color.GRAY;
 
 	/** Map bean */
-	protected final MapBean mapbean;
-
-	/** Draw map antialiased */
-	public final boolean antialiased;
+	private final MapBean mapbean;
 
 	/** Create a new map pane */
-	public MapPane(MapBean b, boolean a) {
+	public MapPane(MapBean b) {
 		mapbean = b;
-		antialiased = a;
 		setSize(new Dimension(MIN_SIZE, MIN_SIZE));
 	}
 
@@ -72,7 +68,7 @@ class MapPane implements LayerChangeListener {
 	}
 
 	/** Create a buffered image of the specified size */
-	protected BufferedImage createImage(int width, int height) {
+	private BufferedImage createImage(int width, int height) {
 		return new BufferedImage(
 			Math.max(width, MIN_SIZE),
 			Math.max(height, MIN_SIZE),
@@ -87,10 +83,11 @@ class MapPane implements LayerChangeListener {
 
 	/** Dispose of the map pane */
 	public void dispose() {
+		// nothing to do
 	}
 
 	/** Change the scale of the map panel */
-	protected void rescale() {
+	private void rescale() {
 		BufferedImage bi = screenBuffer;	// Avoid race
 		int height = bi.getHeight();
 		int width = bi.getWidth();
@@ -105,7 +102,7 @@ class MapPane implements LayerChangeListener {
 		try {
 			inverseTransform = transform.createInverse();
 		}
-		catch(NoninvertibleTransformException e) {
+		catch (NoninvertibleTransformException e) {
 			e.printStackTrace();
 		}
 	}
@@ -118,7 +115,7 @@ class MapPane implements LayerChangeListener {
 	/** Get the current image for the map panel */
 	public BufferedImage getImage() {
 		BufferedImage bi = screenBuffer;
-		if(dirty) {
+		if (dirty) {
 			drawImage(bi);
 			dirty = false;
 		}
@@ -131,11 +128,9 @@ class MapPane implements LayerChangeListener {
 		g.setBackground(background);
 		g.clearRect(0, 0, bi.getWidth(), bi.getHeight());
 		g.transform(transform);
-		if(antialiased) {
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		}
-		for(LayerState s: mapbean.getLayers())
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+			RenderingHints.VALUE_ANTIALIAS_ON);
+		for (LayerState s: mapbean.getLayers())
 			s.paint(g);
 		g.dispose();
 	}
@@ -148,7 +143,7 @@ class MapPane implements LayerChangeListener {
 	/** Map model has changed */
 	@Override
 	public void layerChanged(LayerChangeEvent ev) {
-		switch(ev.getReason()) {
+		switch (ev.getReason()) {
 		case selection:
 			return;
 		case model:

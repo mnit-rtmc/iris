@@ -78,10 +78,10 @@ public class MapBean extends JComponent {
 	/** Notify all listeners of a layer change */
 	private void fireLayerChanged(LayerChangeEvent e) {
 		Object[] list = listeners.getListenerList();
-		for(int i = list.length - 1; i >= 0; i -= 2) {
+		for (int i = list.length - 1; i >= 0; i -= 2) {
 			Object l = list[i];
-			if(l instanceof LayerChangeListener)
-				((LayerChangeListener)l).layerChanged(e);
+			if (l instanceof LayerChangeListener)
+				((LayerChangeListener) l).layerChanged(e);
 		}
 	}
 
@@ -129,7 +129,7 @@ public class MapBean extends JComponent {
 	/** Create a new map */
 	public MapBean(boolean a) {
 		map = this;
-		mapPane = new MapPane(this, a);
+		mapPane = new MapPane(this);
 		mapPane.setBackground(getBackground());
 		model.addLayerChangeListener(listener);
 		setOpaque(true);
@@ -145,7 +145,7 @@ public class MapBean extends JComponent {
 				doMouseClicked(e);
 			}
 			public void mousePressed(MouseEvent e) {
-				if(SwingUtilities.isLeftMouseButton(e))
+				if (SwingUtilities.isLeftMouseButton(e))
 					startPan(e.getPoint());
 			}
 			public void mouseReleased(MouseEvent e) {
@@ -160,7 +160,7 @@ public class MapBean extends JComponent {
 		addMouseWheelListener(new MouseWheelListener() {
 			public void mouseWheelMoved(MouseWheelEvent e) {
 				Point2D p = transformPoint(e.getPoint());
-				if(e.getWheelRotation() < 0)
+				if (e.getWheelRotation() < 0)
 					zoomIn(p);
 				else
 					zoomOut(p);
@@ -178,7 +178,7 @@ public class MapBean extends JComponent {
 	 * @param ps New point selector (null for none). */
 	public void setPointSelector(PointSelector ps) {
 		final PointSelector ops = pselect;
-		pselect = ps != null ? ps : new NullPointSelector();
+		pselect = (ps != null) ? ps : new NullPointSelector();
 		ops.finish();
 		setCursor();
 	}
@@ -192,7 +192,7 @@ public class MapBean extends JComponent {
 
 	/** Set the mouse cursor */
 	private void setCursor() {
-		if(pselect instanceof NullPointSelector)
+		if (pselect instanceof NullPointSelector)
 			setCursor(null);
 		else
 			setCursor(Cursor.getPredefinedCursor(
@@ -203,12 +203,12 @@ public class MapBean extends JComponent {
 	private void doMouseClicked(MouseEvent e) {
 		boolean consumed = false;
 		Point2D p = transformPoint(e.getPoint());
-		if(selectPoint(p))
+		if (selectPoint(p))
 			return;
 		ListIterator<LayerState> it = model.getLayerIterator();
-		while(it.hasPrevious()) {
+		while (it.hasPrevious()) {
 			LayerState s = it.previous();
-			if(consumed)
+			if (consumed)
 				s.clearSelections();
 			else
 				consumed = s.doMouseClicked(e, p);
@@ -223,7 +223,7 @@ public class MapBean extends JComponent {
 	/** Transform a point from screen to world coordinates */
 	public Point2D transformPoint(Point p) {
 		PanState ps = pan;
-		if(ps != null)
+		if (ps != null)
 			p = ps.start;
 		AffineTransform t = mapPane.getInverseTransform();
 		return t.transform(p, null);
@@ -238,10 +238,10 @@ public class MapBean extends JComponent {
 	public String getToolTipText(MouseEvent e) {
 		Point2D p = transformPoint(e.getPoint());
 		ListIterator<LayerState> it = model.getLayerIterator();
-		while(it.hasPrevious()) {
+		while (it.hasPrevious()) {
 			LayerState t = it.previous();
 			String tip = t.getTip(p);
-			if(tip != null)
+			if (tip != null)
 				return tip;
 		}
 		return null;
@@ -285,13 +285,13 @@ public class MapBean extends JComponent {
 
 		/** Set the X and Y pan values */
 		private void setPan(Point2D end) {
-			xpan = (int)(end.getX() - start.getX());
-			ypan = (int)(end.getY() - start.getY());
+			xpan = (int) (end.getX() - start.getX());
+			ypan = (int) (end.getY() - start.getY());
 		}
 
 		/** Drag the map pan */
 		private void drag(Point p) {
-			if(!isStarted())
+			if (!isStarted())
 				initialize();
 			setPan(p);
 			repaint();
@@ -302,13 +302,13 @@ public class MapBean extends JComponent {
 			Rectangle bounds = getBounds();
 			g.drawImage(buffer, xpan, ypan, map);
 			g.setColor(getBackground());
-			if(xpan >= 0)
+			if (xpan >= 0)
 				g.fillRect(0, 0, xpan, bounds.height);
 			else { 
 				g.fillRect(bounds.width + xpan, 0,
 					-xpan, bounds.height);
 			}
-			if(ypan >= 0)
+			if (ypan >= 0)
 				g.fillRect(0, 0, bounds.width, ypan);
 			else { 
 				g.fillRect(0, bounds.height + ypan,
@@ -323,7 +323,7 @@ public class MapBean extends JComponent {
 			try {
 				transform.inverseTransform(p, p);
 			}
-			catch(NoninvertibleTransformException e) {
+			catch (NoninvertibleTransformException e) {
 				e.printStackTrace();
 			}
 			setCursor();
@@ -340,14 +340,14 @@ public class MapBean extends JComponent {
 
 	/** Pan the map */
 	private void doPan(Point p) {
-		if(pan != null)
+		if (pan != null)
 			pan.drag(p);
 	}
 
 	/** Finish panning the map */
 	private void finishPan(Point2D end) {
-		if(pan != null) {
-			if(pan.isStarted())
+		if (pan != null) {
+			if (pan.isStarted())
 				pan.finish(end);
 			pan = null;
 		}
@@ -356,7 +356,7 @@ public class MapBean extends JComponent {
 	/** Zoom in or out from the current extent. */
 	public void zoom(boolean zoomin) {
 		Point2D center = model.getCenter();
-		if(zoomin)
+		if (zoomin)
 			zoomIn(center);
 		else
 			zoomOut(center);
@@ -377,14 +377,14 @@ public class MapBean extends JComponent {
 	/** Called when the map is resized or the extent is changed */
 	private void rescale() {
 		mapPane.setSize(getSize());
-		if(isShowing())
+		if (isShowing())
 			repaint();
 	}
 
 	/** Render the map */
 	private void renderMap(Graphics2D g) {
 		Image image = mapPane.getImage();
-		if(image != null)
+		if (image != null)
 			g.drawImage(image, 0, 0, this);
 		paintSelections(g);
 	}
@@ -392,18 +392,16 @@ public class MapBean extends JComponent {
 	/** Paint the current selections */
 	private void paintSelections(Graphics2D g) {
 		g.transform(mapPane.getTransform());
-		if(mapPane.antialiased) {
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		}
+		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
+			RenderingHints.VALUE_ANTIALIAS_ON);
 		ListIterator<LayerState> li = model.getLayerIterator();
-		while(li.hasPrevious())
+		while (li.hasPrevious())
 			li.previous().paintSelections(g);
 	}
 
 	/** Paint the map component */
 	public void paintComponent(Graphics g) {
-		if(pan != null && pan.isStarted())
+		if (pan != null && pan.isStarted())
 			pan.renderMap((Graphics2D)g);
 		else
 			renderMap((Graphics2D)g);
