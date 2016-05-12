@@ -359,10 +359,14 @@ public class DevicePollerFactory {
 
 	/** Create a TransCore E6 poller */
 	private DevicePoller createE6Poller() throws IOException {
+		return new E6Poller(name, createPacketMessenger());
+	}
+
+	/** Create a packet messenger */
+	private PacketMessenger createPacketMessenger() throws IOException {
 		try {
 			URI u = createURI(UDP);
-			return new E6Poller(name, new PacketMessenger(
-				createSocketAddress(u)));
+			return new PacketMessenger(createSocketAddress(u));
 		}
 		catch (URISyntaxException e) {
 			throw new IOException("INVALID URI");
