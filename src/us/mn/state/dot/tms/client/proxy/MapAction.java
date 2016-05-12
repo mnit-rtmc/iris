@@ -38,17 +38,16 @@ public class MapAction<T extends SonarObject> extends ProxyAction<T> {
 	private final Double lon;
 
 	/** Create a new map action */
-	public MapAction(ScreenPane sp, T p, GeoLoc gl) {
-		this(sp, p, gl != null ? gl.getLat() : null,
-		            gl != null ? gl.getLon() : null);
-	}
-
-	/** Create a new map action */
-	public MapAction(ScreenPane sp, T p, Double lat, Double lon) {
+	private MapAction(ScreenPane sp, T p, Double lat, Double lon) {
 		super("location.map.center", p);
 		s_pane = sp;
 		this.lat = lat;
 		this.lon = lon;
+	}
+
+	/** Create a new map action */
+	public MapAction(ScreenPane sp, T p, GeoLoc gl) {
+		this(sp, p, gl.getLat(), gl.getLon());
 	}
 
 	/** Actually perform the action */

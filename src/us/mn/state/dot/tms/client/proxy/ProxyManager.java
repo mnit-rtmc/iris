@@ -396,8 +396,11 @@ abstract public class ProxyManager<T extends SonarObject> {
 		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
 		if (s_pane != null) {
-			p.add(new MapAction<T>(s_pane, proxy,getGeoLoc(proxy)));
-			p.addSeparator();
+			GeoLoc loc = getGeoLoc(proxy);
+			if (loc != null) {
+				p.add(new MapAction<T>(s_pane, proxy, loc));
+				p.addSeparator();
+			}
 		}
 		fillPopupSingle(p, proxy);
 		if (has_properties) {
