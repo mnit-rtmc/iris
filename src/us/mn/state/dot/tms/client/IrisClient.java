@@ -148,7 +148,7 @@ public class IrisClient extends JFrame {
 			UserProperty.store(props);
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			handler.handle(e);
 		}
 		System.exit(0);
 	}
@@ -162,16 +162,16 @@ public class IrisClient extends JFrame {
 	/** Get the currently selected tabs in each screen pane */
 	public String[] getSelectedTabs() {
 		String[] st = new String[s_panes.length];
-		for(int i = 0; i < st.length; i++)
+		for (int i = 0; i < st.length; i++)
 			st[i] = s_panes[i].getSelectedTabId();
 		return st;
 	}
 
 	/** Initialize the screen panes */
 	private void initializeScreenPanes() {
-		for(int s = 0; s < s_panes.length; s++)
+		for (int s = 0; s < s_panes.length; s++)
 			s_panes[s] = new ScreenPane();
-		for(ScreenPane sp: s_panes) {
+		for (ScreenPane sp: s_panes) {
 			sp.addComponentListener(new ComponentAdapter() {
 				public void componentHidden(ComponentEvent e) {
 					arrangeTabs();
@@ -282,11 +282,11 @@ public class IrisClient extends JFrame {
 	/** Arrange the tabs on the visible screen panes */
 	private void arrangeTabs(Session s) {
 		LinkedList<ScreenPane> visible = getVisiblePanes();
-		if(visible.isEmpty())
+		if (visible.isEmpty())
 			return;
 		Iterator<ScreenPane> it = visible.iterator();
-		for(MapTab mt: s.getTabs()) {
-			if(!it.hasNext())
+		for (MapTab mt: s.getTabs()) {
+			if (!it.hasNext())
 				it = visible.iterator();
 			ScreenPane sp = it.next();
 			sp.addTab(mt);
@@ -318,7 +318,7 @@ public class IrisClient extends JFrame {
 			@Override
 			public void done() {
 				session = getResult();
-				for(int i = 0; i < pwd.length; ++i)
+				for (int i = 0; i < pwd.length; ++i)
 					pwd[i] = ' ';
 				menu_bar.setSession(session);
 				updateMaps(session);
@@ -361,10 +361,10 @@ public class IrisClient extends JFrame {
 
 	/** Update the maps on all screen panes */
 	private void updateMaps(Session s) {
-		for(ScreenPane sp: s_panes) {
+		for (ScreenPane sp: s_panes) {
 			MapBean mb = sp.getMap();
 			mb.setModel(createMapModel(mb, s));
-			if(s != null)
+			if (s != null)
 				sp.createToolPanels(s);
 			else
 				sp.clearToolPanels();
@@ -390,21 +390,21 @@ public class IrisClient extends JFrame {
 	 * @param lat Latitude coordinate.
 	 * @param lon Longitude coordinate. */
 	public void setMapExtent(ZoomLevel zoom, float lat, float lon) {
-		for(ScreenPane sp: s_panes)
+		for (ScreenPane sp: s_panes)
 			sp.setMapExtent(zoom, lat, lon);
 	}
 
 	/** Create a new map model */
 	private MapModel createMapModel(MapBean mb, Session s) {
 		MapModel mm = new MapModel();
-		if(s != null)
+		if (s != null)
 			s.createLayers(mb, mm);
 		return mm;
 	}
 
 	/** Get the map model for the first screen pane */
 	public MapModel getMapModel() {
-		for(ScreenPane sp: s_panes)
+		for (ScreenPane sp: s_panes)
 			return sp.getMap().getModel();
 		return null;
 	}
@@ -423,20 +423,20 @@ public class IrisClient extends JFrame {
 	/** Close the session */
 	private void closeSession() {
 		Session s = session;
-		if(s != null)
+		if (s != null)
 			s.dispose();
 		session = null;
 	}
 
 	/** Removed all the tabs */
 	private void removeTabs() {
-		for(ScreenPane sp: s_panes)
+		for (ScreenPane sp: s_panes)
 			sp.removeTabs();
 	}
 
 	/** Set the point selector for all map beans */
 	public void setPointSelector(PointSelector ps) {
-		for(ScreenPane sp: getVisiblePanes())
+		for (ScreenPane sp: getVisiblePanes())
 			sp.getMap().setPointSelector(ps);
 	}
 }

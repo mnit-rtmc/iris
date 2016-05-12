@@ -130,7 +130,7 @@ public class ScreenPane extends JPanel {
 	public void createToolPanels(Session s) {
 		map_bar.addMenu();
 		TreeMap<String, MapExtent> extents = buildExtents(s);
-		for(String n: extents.keySet()) {
+		for (String n: extents.keySet()) {
 			MapExtent me = extents.get(n);
 			map_bar.addButton(createMapButton(me));
 		}
@@ -142,7 +142,7 @@ public class ScreenPane extends JPanel {
 		TypeCache<MapExtent> tc = s.getSonarState().getMapExtents();
 		TreeMap<String, MapExtent> extents =
 			new TreeMap<String, MapExtent>();
-		for(MapExtent me: tc)
+		for (MapExtent me: tc)
 			extents.put(me.getName(), me);
 		return extents;
 	}
@@ -161,7 +161,7 @@ public class ScreenPane extends JPanel {
 	/** Set the map extent */
 	public void setMapExtent(MapExtent me) {
 		ZoomLevel zoom = ZoomLevel.fromOrdinal(me.getZoom());
-		if(zoom != null)
+		if (zoom != null)
 			setMapExtent(zoom, me.getLat(), me.getLon());
 	}
 
