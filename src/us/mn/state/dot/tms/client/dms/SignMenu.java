@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,7 +21,6 @@ import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.beacon.BeaconForm;
-import us.mn.state.dot.tms.client.widget.AbstractForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 import us.mn.state.dot.tms.utils.I18N;
@@ -66,21 +65,13 @@ public class SignMenu extends JMenu {
 
 	/** Create the DMS menu item */
 	private JMenuItem createDmsItem() {
-		if(!DMSForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("dms") {
+		return DMSForm.isPermitted(session) ?
+		        new JMenuItem(new IAction("dms")
+		{
 			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(createDMSForm());
+				desktop.show(new DMSForm(session));
 			}
-		});
-	}
-
-	/** Create the DMS form */
-	private AbstractForm createDMSForm() {
-		if(SystemAttrEnum.DMS_FORM.getInt() == 2)
-			return new DMSForm2(session);
-		else
-			return new DMSForm(session);
+		}) : null;
 	}
 
 	/** Create the font menu item */

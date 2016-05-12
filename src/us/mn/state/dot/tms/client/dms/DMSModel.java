@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,16 +15,20 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.ArrayList;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
- * Table model for Dynamic Message Signs.
+ * Table model for DMS table form.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class DMSModel extends ProxyTableModel<DMS> {
 
@@ -32,16 +36,52 @@ public class DMSModel extends ProxyTableModel<DMS> {
 	@Override
 	protected ArrayList<ProxyColumn<DMS>> createColumns() {
 		ArrayList<ProxyColumn<DMS>> cols =
-			new ArrayList<ProxyColumn<DMS>>(2);
-		cols.add(new ProxyColumn<DMS>("dms", 200) {
+			new ArrayList<ProxyColumn<DMS>>(9);
+		cols.add(new ProxyColumn<DMS>("dms", 120) {
 			public Object getValueAt(DMS d) {
 				return d.getName();
 			}
 		});
-		cols.add(new ProxyColumn<DMS>("location", 300) {
+		cols.add(new ProxyColumn<DMS>("location", 240) {
 			public Object getValueAt(DMS d) {
 				return GeoLocHelper.getDescription(
 					d.getGeoLoc());
+			}
+		});
+		cols.add(new ProxyColumn<DMS>("location.dir", 32) {
+			public Object getValueAt(DMS d) {
+				return DMSHelper.getRoadDir(d);
+			}
+		});
+		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
+			cols.add(new ProxyColumn<DMS>("dms.aws.allowed", 80,
+				Boolean.class)
+			{
+				public Object getValueAt(DMS d) {
+					return d.getAwsAllowed();
+				}
+			});
+			cols.add(new ProxyColumn<DMS>(
+				"item.style.aws.controlled", 80, Boolean.class)
+			{
+				public Object getValueAt(DMS d) {
+					return d.getAwsControlled();
+				}
+			});
+		}
+		cols.add(new ProxyColumn<DMS>("device.status", 160) {
+			public Object getValueAt(DMS d) {
+				return DMSHelper.getAllStyles(d);
+			}
+		});
+		cols.add(new ProxyColumn<DMS>("dms.model", 100) {
+			public Object getValueAt(DMS d) {
+				return d.getModel();
+			}
+		});
+		cols.add(new ProxyColumn<DMS>("dms.access", 140) {
+			public Object getValueAt(DMS d) {
+				return d.getSignAccess();
 			}
 		});
 		return cols;
@@ -59,12 +99,6 @@ public class DMSModel extends ProxyTableModel<DMS> {
 	@Override
 	protected String getSonarType() {
 		return DMS.SONAR_TYPE;
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
 	}
 
 	/** Create a properties form for one proxy */
