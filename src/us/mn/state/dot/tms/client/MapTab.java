@@ -96,14 +96,6 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 		side_pnl = p;
 	}
 
-	/** Current map for this tab */
-	private MapBean map;
-
-	/** Set the map for this tab */
-	public void setMap(MapBean m) {
-		map = m;
-	}
-
 	/** Get the home layer for the tab */
 	public LayerState getHomeLayer(MapBean m) {
 		for (LayerState ls: m.getLayers()) {

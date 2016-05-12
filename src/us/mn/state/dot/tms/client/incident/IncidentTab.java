@@ -19,7 +19,7 @@ import javax.swing.JPanel;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.client.MapTab;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.map.MapBean;
+import us.mn.state.dot.tms.client.SidePanel;
 import us.mn.state.dot.tms.client.proxy.StyleSummary;
 
 /**
@@ -74,11 +74,10 @@ public class IncidentTab extends MapTab<Incident> {
 		creator.dispose();
 	}
 
-	/** Set the map for this tab */
+	/** Set the side panel */
 	@Override
-	public void setMap(MapBean m) {
-		assert m != null;
-		super.setMap(m);
+	public void setSidePanel(SidePanel p) {
+		super.setSidePanel(p);
 		creator.setEnabled(isAddPermitted());
 	}
 

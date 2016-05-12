@@ -107,7 +107,6 @@ public class SidePanel extends JPanel {
 	/** Add a tab to the screen pane */
 	public void addTab(MapTab<?> mt) {
 		tab_pane.addTab(mt.getName(), null, mt, mt.getTip());
-		mt.setMap(map);
 		mt.setSidePanel(this);
 		ProxyLayerState pls = getHomeProxyLayerState(mt);
 		if (pls != null) {
