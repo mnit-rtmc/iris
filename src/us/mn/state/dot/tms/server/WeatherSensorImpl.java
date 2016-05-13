@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2015  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.ResultSet;
-import us.mn.state.dot.sonar.Namespace;
+import java.sql.SQLException;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -38,10 +38,18 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
 public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
 	/** Sample period for weather sensors (seconds) */
-	static protected final int SAMPLE_PERIOD_SEC = 60;
+	static private final int SAMPLE_PERIOD_SEC = 60;
 
 	/** Sample period for weather sensors (ms) */
-	static protected final int SAMPLE_PERIOD_MS = SAMPLE_PERIOD_SEC * 1000;
+	static private final int SAMPLE_PERIOD_MS = SAMPLE_PERIOD_SEC * 1000;
+
+	/** Round an integer to the nearest 45 */
+	static private Integer round45(Integer d) {
+		if (d != null)
+			return 45 * Math.round(d / 45.0f);
+		else
+			return null;
+	}
 
 	/** Load all the weather sensors */
 	static protected void loadAll() throws TMSException {
@@ -50,19 +58,13 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new WeatherSensorImpl(
-					namespace,
-					row.getString(1),	// name
-					row.getString(2),	// geo_loc
-					row.getString(3),	// controller
-					row.getInt(4),		// pin
-					row.getString(5)	// notes
-				));
+				namespace.addObject(new WeatherSensorImpl(row));
 			}
 		});
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -74,19 +76,41 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
 
-	/** Create a new weather sensor with a string name */
-	public WeatherSensorImpl(String n) 
-		throws TMSException, SonarException 
+	/** Create a weather sensor */
+	private WeatherSensorImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),		// name
+		     row.getString(2),		// geo_loc
+		     row.getString(3),		// controller
+		     row.getInt(4),		// pin
+		     row.getString(5)		// notes
+		);
+	}
+
+	/** Create a weather sensor */
+	private WeatherSensorImpl(String n, String l, String c, int p,
+		String nt)
 	{
+		super(n, lookupController(c), p, nt);
+		geo_loc = lookupGeoLoc(l);
+		cache = new PeriodicSampleCache(PeriodicSampleType.PRECIP_RATE);
+		pt_cache = new PeriodicSampleCache(
+			PeriodicSampleType.PRECIP_TYPE);
+		initTransients();
+	}
+
+	/** Create a new weather sensor with a string name */
+	public WeatherSensorImpl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
 		g.notifyCreate();
@@ -94,27 +118,6 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		cache = new PeriodicSampleCache(PeriodicSampleType.PRECIP_RATE);
 		pt_cache = new PeriodicSampleCache(
 			PeriodicSampleType.PRECIP_TYPE);
-	}
-
-	/** Create a weather sensor */
-	protected WeatherSensorImpl(String n, GeoLocImpl l, ControllerImpl c,
-		int p, String nt)
-	{
-		super(n, c, p, nt);
-		geo_loc = l;
-		cache = new PeriodicSampleCache(PeriodicSampleType.PRECIP_RATE);
-		pt_cache = new PeriodicSampleCache(
-			PeriodicSampleType.PRECIP_TYPE);
-		initTransients();
-	}
-
-	/** Create a weather sensor */
-	protected WeatherSensorImpl(Namespace ns, String n, String l, String c,
-		int p, String nt)
-	{
-		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, l),
-		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
-		     p, nt);
 	}
 
 	/** Destroy an object */
@@ -125,9 +128,10 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Device location */
-	protected GeoLocImpl geo_loc;
+	private GeoLocImpl geo_loc;
 
 	/** Get the device location */
+	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
 	}
@@ -136,6 +140,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	private transient Integer air_temp;
 
 	/** Get the air temp in C (null if missing) */
+	@Override
 	public Integer getAirTemp() {
 		return air_temp;
 	}
@@ -143,7 +148,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Set the air temperature.
 	 * @param at Air temperature in Celsius (null for missing) */
 	public void setAirTempNotify(Integer at) {
-		if(!integerEquals(at, air_temp)) {
+		if (!integerEquals(at, air_temp)) {
 			air_temp = at;
 			notifyAttribute("airTemp");
 		}
@@ -153,13 +158,14 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	private transient Integer wind_speed;
 
 	/** Get the wind speed in KPH (null if missing) */
+	@Override
 	public Integer getWindSpeed() {
 		return wind_speed;
 	}
 
 	/** Set the wind speed in KPH */
 	public void setWindSpeedNotify(Integer ws) {
-		if(!integerEquals(ws, wind_speed)) {
+		if (!integerEquals(ws, wind_speed)) {
 			wind_speed = ws;
 			notifyAttribute("windSpeed");
 		}
@@ -170,24 +176,17 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
 	/** Get the average wind direction.
 	 * @return Wind direction in degrees (null for missing) */
+	@Override
 	public Integer getWindDir() {
 		return wind_dir;
 	}
 
-	/** Round an integer to the nearest 45 */
-	static private Integer round45(Integer d) {
-		if(d != null)
-			return 45 * Math.round(d / 45.0f);
-		else
-			return null;
-	}
-
 	/** Set the wind direction.
-	 * @param wd Wind direction in degrees (null for missing). This 
+	 * @param wd Wind direction in degrees (null for missing). This
 	 *	  angle is rounded to the nearest 45 degrees. */
 	public void setWindDirNotify(Integer wd) {
 		Integer a = round45(wd);
-		if(!integerEquals(a, wind_dir)) {
+		if (!integerEquals(a, wind_dir)) {
 			wind_dir = a;
 			notifyAttribute("windDir");
 		}
@@ -206,16 +205,16 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	public void updateAccumulation(Integer a, long st) {
 		int period = calculatePeriod(st);
 		int value = calculatePrecipValue(a);
-		if(period > 0 && value >= 0) {
+		if (period > 0 && value >= 0) {
 			cache.add(new PeriodicSample(st, period, value));
 			float period_h = 3600f / period;// periods per hour
 			float umph = value * period_h;	// micrometers per hour
 			float mmph = umph / 1000;	// millimeters per hour
 			setPrecipRateNotify(Math.round(mmph));
 		}
-		if(value < 0)
+		if (value < 0)
 			setPrecipRateNotify(null);
-		if(period > 0 || value < 0)
+		if (period > 0 || value < 0)
 			accumulation = a != null ? a : MISSING_DATA;
 	}
 
@@ -228,9 +227,9 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	 * communication is interrupted, this will allow accumulated
 	 * precipitation to be spread out over the appropriate samples. */
 	private int calculatePeriod(long now) {
-		if(stamp > 0 && now >= stamp) {
-			int n = (int)(now / SAMPLE_PERIOD_MS);
-			int s = (int)(stamp / SAMPLE_PERIOD_MS);
+		if (stamp > 0 && now >= stamp) {
+			int n = (int) (now / SAMPLE_PERIOD_MS);
+			int s = (int) (stamp / SAMPLE_PERIOD_MS);
 			return (n - s) * SAMPLE_PERIOD_SEC;
 		} else
 			return 0;
@@ -239,9 +238,9 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Calculate the precipitation since the last recorded sample.
 	 * @param a New accumulated precipitation. */
 	private int calculatePrecipValue(Integer a) {
-		if(a != null && accumulation >= 0) {
+		if (a != null && accumulation >= 0) {
 			int val = a - accumulation;
-			if(val >= 0)
+			if (val >= 0)
 				return val;
 		}
 		return MISSING_DATA;
@@ -251,13 +250,14 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	private transient Integer precip_rate;
 
 	/** Get precipitation rate in mm/hr (null for missing) */
+	@Override
 	public Integer getPrecipRate() {
 		return precip_rate;
 	}
 
 	/** Set precipitation rate in mm/hr (null for missing) */
 	private void setPrecipRateNotify(Integer pr) {
-		if(!integerEquals(pr, precip_rate)) {
+		if (!integerEquals(pr, precip_rate)) {
 			precip_rate = pr;
 			notifyAttribute("precipRate");
 		}
@@ -273,13 +273,14 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	private transient Integer visibility_m;
 
 	/** Get visibility in meters (null for missing) */
+	@Override
 	public Integer getVisibility() {
 		return visibility_m;
 	}
 
 	/** Set visibility in meters (null for missing) */
 	public void setVisibilityNotify(Integer v) {
-		if(!integerEquals(v, visibility_m)) {
+		if (!integerEquals(v, visibility_m)) {
 			visibility_m = v;
 			notifyAttribute("visibility");
 		}
@@ -290,13 +291,14 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
 	/** Get the time stamp from the last sample.
 	 * @return Time as long */
+	@Override
 	public long getStamp() {
 		return stamp;
 	}
 
 	/** Set the time stamp for the current sample */
 	public void setStampNotify(long s) {
-		if(s > 0 && s != stamp) {
+		if (s > 0 && s != stamp) {
 			stamp = s;
 			notifyAttribute("stamp");
 		}
@@ -307,7 +309,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		if (isActive()) {
 			DevicePoller dp = getPoller();
 			if (dp instanceof WeatherPoller)
-				return (WeatherPoller)dp;
+				return (WeatherPoller) dp;
 		}
 		return null;
 	}
