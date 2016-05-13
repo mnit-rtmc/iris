@@ -50,8 +50,41 @@ import us.mn.state.dot.tms.server.event.SignStatusEvent;
 public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Ordinal value for lock "OFF" */
-	static protected final Integer OFF_ORDINAL =
+	static private final Integer OFF_ORDINAL =
 		new Integer(LCSArrayLock.OFF.ordinal());
+
+	/** Create a message to log LCS sign status event */
+	static private String createLogText(Integer[] ind) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = ind.length - 1; i >= 0; i--) {
+			Integer li = ind[i];
+			if (li != null)
+				sb.append(LaneUseIndication.fromOrdinal(li));
+			else
+				sb.append("UNKNOWN");
+			sb.append(' ');
+		}
+		return sb.toString().trim();
+	}
+
+	/** Test if all indications are DARK */
+	static private boolean areAllDark(Integer[] ind) {
+		for (Integer i: ind) {
+			if (i == null || i != DARK.ordinal())
+				return false;
+		}
+		return true;
+	}
+
+	/** Get the highest lane number */
+	static private int getMaxLane(LCS[] lns) {
+		int lane = 0;
+		for (int i = 0; i < lns.length; i++) {
+			if (lns[i] != null)
+				lane = i + 1;
+		}
+		return lane;
+	}
 
 	/** Load all the LCS arrays */
 	static protected void loadAll() throws TMSException {
@@ -74,6 +107,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -82,17 +116,19 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		map.put("notes", notes);
 		map.put("shift", shift);
 		LCSArrayLock lock = lcs_lock;
-		if(lock != null)
+		if (lock != null)
 			map.put("lcs_lock", lock.ordinal());
 		return map;
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -103,16 +139,15 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	}
 
 	/** Create an LCS array */
-	public LCSArrayImpl(Namespace ns, String n, String c, int p, String nt,
+	private LCSArrayImpl(Namespace ns, String n, String c, int p, String nt,
 		int s, Integer lk)
 	{
-		this(n, (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,
-		     c), p, nt, s, lk);
+		this(n, lookupController(c), p, nt, s, lk);
 	}
 
 	/** Create an LCS array */
-	public LCSArrayImpl(String n, ControllerImpl c, int p, String nt, int s,
-		Integer lk)
+	private LCSArrayImpl(String n, ControllerImpl c, int p, String nt,
+		int s, Integer lk)
 	{
 		super(n, c, p, nt);
 		shift = s;
@@ -127,11 +162,11 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	/** Get the controller for an LCS array */
 	public synchronized Controller getController() {
 		// Get the controller for the DMS in lane 1
-		if(lanes.length > 0) {
+		if (lanes.length > 0) {
 			LCS lcs = lanes[0];
-			if(lcs != null) {
+			if (lcs != null) {
 				DMS dms = DMSHelper.lookup(lcs.getName());
-				if(dms != null)
+				if (dms != null)
 					return dms.getController();
 			}
 		}
@@ -144,41 +179,44 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	}
 
 	/** Lane shift of left lane */
-	protected int shift;
+	private int shift;
 
 	/** Set the lane shift of left lane */
+	@Override
 	public void setShift(int s) {
 		shift = s;
 	}
 
 	/** Set the lane shift of left lane */
 	public void doSetShift(int s) throws TMSException {
-		if(s == shift)
+		if (s == shift)
 			return;
-		if(s < 0)
+		if (s < 0)
 			throw new ChangeVetoException("Negative shift");
 		store.update(this, "shift", s);
 		setShift(s);
 	}
 
 	/** Get the lane shift of left lane */
+	@Override
 	public int getShift() {
 		return shift;
 	}
 
 	/** Lock status */
-	protected LCSArrayLock lcs_lock = null;
+	private LCSArrayLock lcs_lock = null;
 
 	/** Set the lock status */
+	@Override
 	public void setLcsLock(Integer l) {
 		lcs_lock = LCSArrayLock.fromOrdinal(l);
 	}
 
 	/** Set the lock (update) */
-	protected void setLcsLock(LCSArrayLock l) throws TMSException {
-		if(l == lcs_lock)
+	private void setLcsLock(LCSArrayLock l) throws TMSException {
+		if (l == lcs_lock)
 			return;
-		if(l != null)
+		if (l != null)
 			store.update(this, "lcs_lock", l.ordinal());
 		else
 			store.update(this, "lcs_lock", null);
@@ -188,21 +226,23 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Set the lock status */
 	public void doSetLcsLock(Integer l) throws TMSException {
-		if(OFF_ORDINAL.equals(l))
+		if (OFF_ORDINAL.equals(l))
 			throw new ChangeVetoException("Invalid lock value");
 		setLcsLock(LCSArrayLock.fromOrdinal(l));
 	}
 
 	/** Get the lock status */
+	@Override
 	public Integer getLcsLock() {
 		LCSArrayLock lock = lcs_lock;
-		return lock != null ? lock.ordinal() : null;
+		return (lock != null) ? lock.ordinal() : null;
 	}
 
 	/** Next indications owner */
-	protected transient User ownerNext;
+	private transient User ownerNext;
 
 	/** Set the next indications owner */
+	@Override
 	public synchronized void setOwnerNext(User o) {
 		if (ownerNext != null && o != null) {
 			logError("OWNER CONFLICT: " + ownerNext.getName() +
@@ -213,9 +253,10 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	}
 
 	/** Next indications to be displayed */
-	protected transient Integer[] indicationsNext;
+	private transient Integer[] indicationsNext;
 
 	/** Set the next indications */
+	@Override
 	public void setIndicationsNext(Integer[] ind) {
 		indicationsNext = ind;
 	}
@@ -232,16 +273,16 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	}
 
 	/** Set the next indications */
-	protected synchronized void doSetIndicationsNext(Integer[] ind, User o)
+	private synchronized void doSetIndicationsNext(Integer[] ind, User o)
 		throws TMSException
 	{
-		if(ind.length != lanes.length)
+		if (ind.length != lanes.length)
 			throw new ChangeVetoException("Wrong lane count");
 		final LCSPoller p = getLCSPoller();
-		if(p == null)
+		if (p == null)
 			throw new ChangeVetoException("No active poller");
-		for(Integer i: ind) {
-			if(LaneUseIndication.fromOrdinal(i) == null)
+		for (Integer i: ind) {
+			if (LaneUseIndication.fromOrdinal(i) == null)
 				throw new ChangeVetoException(
 					"Invalid indication: " + i);
 		}
@@ -254,7 +295,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	}
 
 	/** Time after which indications are allowed to be queried */
-	protected long allow_query_time = TimeSteward.currentTimeMillis();
+	private long allow_query_time = TimeSteward.currentTimeMillis();
 
 	/** Is indication query allowed? */
 	public boolean isQueryAllowed() {
@@ -262,31 +303,32 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	}
 
 	/** Owner of current indications */
-	protected transient User ownerCurrent;
+	private transient User ownerCurrent;
 
 	/** Get the owner of the current indications.
 	 * @return User who deployed the current indications. */
+	@Override
 	public User getOwnerCurrent() {
 		return ownerCurrent;
 	}
 
 	/** Current indications (Shall not be null) */
-	protected transient Integer[] indicationsCurrent =
+	private transient Integer[] indicationsCurrent =
 		createDarkIndications(0);
 
 	/** Create an array of DARK indications */
-	protected Integer[] createDarkIndications(int n_lanes) {
+	private Integer[] createDarkIndications(int n_lanes) {
 		Integer[] ind = new Integer[n_lanes];
-		for(int i = 0; i < n_lanes; i++)
+		for (int i = 0; i < n_lanes; i++)
 			ind[i] = DARK.ordinal();
 		return ind;
 	}
 
 	/** Set the current indications */
 	public synchronized void setIndicationsCurrent(Integer[] ind, User o) {
-		if(ind.length != lanes.length)
+		if (ind.length != lanes.length)
 			return;
-		if(!Arrays.equals(ind, indicationsCurrent)) {
+		if (!Arrays.equals(ind, indicationsCurrent)) {
 			logIndications(ind, o);
 			indicationsCurrent = ind;
 			notifyAttribute("indicationsCurrent");
@@ -300,7 +342,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	}
 
 	/** Log indications in event db */
-	protected void logIndications(Integer[] ind, User o) {
+	private void logIndications(Integer[] ind, User o) {
 		EventType et = EventType.LCS_DEPLOYED;
 		String text = createLogText(ind);
 		if (areAllDark(ind)) {
@@ -311,39 +353,17 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 		logEvent(new SignStatusEvent(et, name, text, owner));
 	}
 
-	/** Create a message to log LCS sign status event */
-	static protected String createLogText(Integer[] ind) {
-		StringBuilder sb = new StringBuilder();
-		for(int i = ind.length - 1; i >= 0; i--) {
-			Integer li = ind[i];
-			if(li != null)
-				sb.append(LaneUseIndication.fromOrdinal(li));
-			else
-				sb.append("UNKNOWN");
-			sb.append(' ');
-		}
-		return sb.toString().trim();
-	}
-
-	/** Test if all indications are DARK */
-	static protected boolean areAllDark(Integer[] ind) {
-		for(Integer i: ind) {
-			if(i == null || i != DARK.ordinal())
-				return false;
-		}
-		return true;
-	}
-
 	/** Get the current lane-use indications.
 	 * @return Array of currently active indications, one for each lane.
 	 *         These are ordinal values of the LaneUseIndication enum.
 	 *         A null indicates the indication for that lane is unknown. */
+	@Override
 	public Integer[] getIndicationsCurrent() {
 		return indicationsCurrent;
 	}
 
 	/** Array of all LCS lanes (right-to-left) */
-	protected transient LCSImpl[] lanes = new LCSImpl[0];
+	private transient LCSImpl[] lanes = new LCSImpl[0];
 
 	/** Get the LCS for all lanes (right-to-left) */
 	private synchronized LCSImpl[] getLanes() {
@@ -363,7 +383,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	{
 		lanes = createLanes(lane, lcs);
 		Integer[] ind = Arrays.copyOf(indicationsCurrent, lanes.length);
-		if(lane <= ind.length)
+		if (lane <= ind.length)
 			ind[lane - 1] = null;	// Unknown indication
 		indicationsCurrent = ind;
 		notifyAttribute("indicationsCurrent");
@@ -376,41 +396,31 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	private LCSImpl[] createLanes(int lane, LCS lcs)
 		throws ChangeVetoException
 	{
-		if(lane < 1 || lane > MAX_LANES)
+		if (lane < 1 || lane > MAX_LANES)
 			throw new ChangeVetoException("Invalid lane number");
 		int n_lanes = Math.max(lanes.length, lane);
 		LCSImpl[] lns = Arrays.copyOf(lanes, n_lanes);
-		if(lcs != null && lns[lane - 1] != null)
+		if (lcs != null && lns[lane - 1] != null)
 			throw new ChangeVetoException("Lane already assigned");
-		lns[lane - 1] = (LCSImpl)lcs;
+		lns[lane - 1] = (LCSImpl) lcs;
 		return Arrays.copyOf(lns, getMaxLane(lns));
-	}
-
-	/** Get the highest lane number */
-	static private int getMaxLane(LCS[] lns) {
-		int lane = 0;
-		for(int i = 0; i < lns.length; i++) {
-			if(lns[i] != null)
-				lane = i + 1;
-		}
-		return lane;
 	}
 
 	/** Get an LCS poller for the array */
 	public LCSPoller getLCSPoller() {
 		DMSImpl[] signs = getDMSArray();
 		// Make sure all signs have LCS pollers
-		for(DMSImpl dms: signs) {
-			if(dms == null)
+		for (DMSImpl dms: signs) {
+			if (dms == null)
 				return null;
-			if(!(dms.getPoller() instanceof LCSPoller))
+			if (!(dms.getPoller() instanceof LCSPoller))
 				return null;
 		}
 		// Just grab the first poller we find ...
 		for (DMSImpl dms: signs) {
 			DevicePoller dp = dms.getPoller();
 			if (dp instanceof LCSPoller)
-				return (LCSPoller)dp;
+				return (LCSPoller) dp;
 		}
 		return null;
 	}
@@ -427,12 +437,12 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	protected DMSImpl[] getDMSArray() {
 		LCSImpl[] lns = getLanes();
 		DMSImpl[] signs = new DMSImpl[lns.length];
-		for(int i = 0; i < lns.length; i++) {
+		for (int i = 0; i < lns.length; i++) {
 			LCS lcs = lns[i];
-			if(lcs != null) {
+			if (lcs != null) {
 				DMSImpl dms = (DMSImpl)namespace.lookupObject(
 					DMS.SONAR_TYPE, lcs.getName());
-				if(dms.isActive())
+				if (dms.isActive())
 					signs[i] = dms;
 			}
 		}
@@ -458,14 +468,14 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 			ind = getIndicationsCurrent();
 		}
 		int n_lns = Math.min(lns.length, ind.length);
-		for(int i = 0; i < n_lns; i++) {
+		for (int i = 0; i < n_lns; i++) {
 			LCSImpl lcs = lns[i];
-			if(lcs != null) {
+			if (lcs != null) {
 				DMS dms = DMSHelper.lookup(lcs.getName());
-				if(dms instanceof DMSImpl) {
-					DMSImpl d = (DMSImpl)dms;
-					if(chk.check(d, LaneUseIndication.
-					   fromOrdinal(ind[i])))
+				if (dms instanceof DMSImpl) {
+					DMSImpl d = (DMSImpl) dms;
+					if (chk.check(d, LaneUseIndication.
+					    fromOrdinal(ind[i])))
 					{
 						return d;
 					}
@@ -534,7 +544,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	/** Test if LCS array needs maintenance */
 	private boolean needsMaintenance() {
 		LCSArrayLock lock = lcs_lock;
-		if(lock == LCSArrayLock.MAINTENANCE)
+		if (lock == LCSArrayLock.MAINTENANCE)
 			return true;
 		return forEachDMS(new DMSChecker() {
 			public boolean check(DMSImpl dms, LaneUseIndication u) {
@@ -558,28 +568,29 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	@Override
 	public void updateStyles() {
 		long s = ItemStyle.ALL.bit();
-		if(isAvailable())
+		if (isAvailable())
 			s |= ItemStyle.AVAILABLE.bit();
-		if(isUserDeployed())
+		if (isUserDeployed())
 			s |= ItemStyle.DEPLOYED.bit();
-		if(isScheduleDeployed())
+		if (isScheduleDeployed())
 			s |= ItemStyle.SCHEDULED.bit();
-		if(needsMaintenance())
+		if (needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();
-		if(isActive() && isFailed())
+		if (isActive() && isFailed())
 			s |= ItemStyle.FAILED.bit();
 		setStyles(s);
 	}
 
 	/** Set the item style bits (and notify clients) */
 	private void setStyles(long s) {
-		if(s != styles) {
+		if (s != styles) {
 			styles = s;
 			notifyAttribute("styles");
 		}
 	}
 
 	/** Get item style bits */
+	@Override
 	public long getStyles() {
 		return styles;
 	}
