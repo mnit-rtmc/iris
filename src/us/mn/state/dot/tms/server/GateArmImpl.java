@@ -271,7 +271,7 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	/** Get the gate arm poller */
 	private GateArmPoller getGateArmPoller() {
 		DevicePoller dp = getPoller();
-		return (dp instanceof GateArmPoller) ? (GateArmPoller)dp : null;
+		return (dp instanceof GateArmPoller) ? (GateArmPoller) dp :null;
 	}
 
 	/** Update the gate arm styles.  This is called by the controller

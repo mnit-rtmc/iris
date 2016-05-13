@@ -1276,7 +1276,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Get the DMS poller */
 	private DMSPoller getDMSPoller() {
 		DevicePoller dp = getPoller();
-		return (dp instanceof DMSPoller) ? (DMSPoller)dp : null;
+		return (dp instanceof DMSPoller) ? (DMSPoller) dp : null;
 	}
 
 	/** LDC pot base (Ledstar-specific value) */
