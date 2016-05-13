@@ -306,12 +306,11 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
 	/** Get a weather sensor poller */
 	public WeatherPoller getWeatherPoller() {
-		if (isActive()) {
-			DevicePoller dp = getPoller();
-			if (dp instanceof WeatherPoller)
-				return (WeatherPoller) dp;
-		}
-		return null;
+		DevicePoller dp = getPoller();
+		if (dp instanceof WeatherPoller)
+			return (WeatherPoller) dp;
+		else
+			return null;
 	}
 
 	/** Send a device request operation */
