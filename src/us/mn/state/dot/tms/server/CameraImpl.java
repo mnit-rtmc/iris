@@ -262,12 +262,8 @@ public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Get the camera poller */
 	private CameraPoller getCameraPoller() {
-		if (isActive()) {
-			DevicePoller dp = getPoller();
-			if (dp instanceof CameraPoller)
-				return (CameraPoller)dp;
-		}
-		return null;
+		DevicePoller dp = getPoller();
+		return (dp instanceof CameraPoller) ? (CameraPoller) dp : null;
 	}
 
 	/** Send a device request operation */
