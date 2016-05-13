@@ -41,6 +41,9 @@ import us.mn.state.dot.tms.units.Interval;
  */
 public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
+	/** Seconds to offset each poll from start of interval */
+	static private final int OFFSET_SECS = 2;
+
 	/** Poller scheduler for repeating jobs */
 	static private final Scheduler POLLER = new Scheduler("poller");
 
@@ -139,9 +142,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Job for polling a comm link */
 	private class PollJob extends Job {
 		private PollJob(int s) {
-			super(Calendar.SECOND, s);
+			super(Calendar.SECOND, s, Calendar.SECOND, OFFSET_SECS);
 		}
-		public void perform() {
+		@Override public void perform() {
 			pollControllers();
 		}
 	}
