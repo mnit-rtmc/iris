@@ -342,12 +342,8 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 
 	/** Get a beacon poller */
 	private BeaconPoller getBeaconPoller() {
-		if (isActive()) {
-			DevicePoller dp = getPoller();
-			if (dp instanceof BeaconPoller)
-				return (BeaconPoller)dp;
-		}
-		return null;
+		DevicePoller dp = getPoller();
+		return (dp instanceof BeaconPoller) ? (BeaconPoller) dp : null;
 	}
 
 	/** Send a device request operation */
