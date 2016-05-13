@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ public class MeteringJob extends Job {
 	}
 
 	/** Perform the metering job */
+	@Override
 	public void perform() {
 		try {
 			station_manager.calculateData();
@@ -65,19 +66,19 @@ public class MeteringJob extends Job {
 	private void validateMetering() {
 		KAdaptiveAlgorithm.processAllStates();
 		Iterator<RampMeter> it = RampMeterHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			RampMeter rm = it.next();
-			if(rm instanceof RampMeterImpl) {
+			if (rm instanceof RampMeterImpl) {
 				RampMeterImpl meter = (RampMeterImpl)rm;
 				meter.validateAlgorithm();
 			}
 		}
 		StratifiedAlgorithm.processAllStates();
 		it = RampMeterHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			RampMeter rm = it.next();
-			if(rm instanceof RampMeterImpl) {
-				RampMeterImpl meter = (RampMeterImpl)rm;
+			if (rm instanceof RampMeterImpl) {
+				RampMeterImpl meter = (RampMeterImpl) rm;
 				meter.updateQueueState();
 				meter.updateRatePlanned();
 			}
