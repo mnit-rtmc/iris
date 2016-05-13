@@ -253,13 +253,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return publish;
 	}
 
-	/** Clear the camera failed status */
-	public void clearFailed() {
-		ControllerImpl ctl = controller;
-		if (ctl != null)
-			ctl.setFailed(false);
-	}
-
 	/** Get the camera poller */
 	private CameraPoller getCameraPoller() {
 		DevicePoller dp = getPoller();
@@ -277,7 +270,16 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	/** Perform a periodic poll */
 	@Override
 	public void periodicPoll() {
+		// make sure controller is not failed
+		clearFailed();
 		// no periodic polling
+	}
+
+	/** Clear the camera failed status */
+	private void clearFailed() {
+		ControllerImpl ctl = controller;
+		if (ctl != null)
+			ctl.setFailed(false);
 	}
 
 	/** Command the camera pan, tilt or zoom */
