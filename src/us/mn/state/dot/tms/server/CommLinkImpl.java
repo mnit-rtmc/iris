@@ -145,7 +145,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			super(Calendar.SECOND, s, Calendar.SECOND, OFFSET_SECS);
 		}
 		@Override public void perform() {
-			pollControllers();
+			if (poll_enabled)
+				pollControllers();
 		}
 	}
 
