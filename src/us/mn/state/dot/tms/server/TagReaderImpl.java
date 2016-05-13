@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2015  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeSet;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -54,14 +55,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new TagReaderImpl(
-					row.getString(1),	// name
-					row.getString(2),	// geo_loc
-					row.getString(3),	// controller
-					row.getInt(4),		// pin
-					row.getString(5),	// notes
-					row.getString(6)	// toll_zone
-				));
+				namespace.addObject(new TagReaderImpl(row));
 			}
 		});
 	}
@@ -91,16 +85,27 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		return SONAR_TYPE;
 	}
 
-	/** Create a new tag reader with a string name */
-	public TagReaderImpl(String n) throws TMSException, SonarException {
-		super(n);
-		GeoLocImpl g = new GeoLocImpl(name);
-		g.notifyCreate();
-		geo_loc = g;
+	/** Create a tag reader */
+	private TagReaderImpl(ResultSet row) throws SQLException, TMSException {
+		this(row.getString(1),		// name
+		     row.getString(2),		// geo_loc
+		     row.getString(3),		// controller
+		     row.getInt(4),		// pin
+		     row.getString(5),		// notes
+		     row.getString(6)		// toll_zone
+		);
 	}
 
 	/** Create a tag reader */
-	protected TagReaderImpl(String n, GeoLocImpl l, ControllerImpl c,
+	private TagReaderImpl(String n, String l, String c, int p, String nt,
+		String tz) throws TMSException
+	{
+		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
+		     lookupTollZone(tz));
+	}
+
+	/** Create a tag reader */
+	private TagReaderImpl(String n, GeoLocImpl l, ControllerImpl c,
 		int p, String nt, TollZone tz) throws TMSException
 	{
 		super(n, c, p, nt);
@@ -110,12 +115,12 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		initTransients();
 	}
 
-	/** Create a tag reader */
-	protected TagReaderImpl(String n, String l, String c, int p, String nt,
-		String tz) throws TMSException
-	{
-		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
-		     lookupTollZone(tz));
+	/** Create a new tag reader with a string name */
+	public TagReaderImpl(String n) throws TMSException, SonarException {
+		super(n);
+		GeoLocImpl g = new GeoLocImpl(name);
+		g.notifyCreate();
+		geo_loc = g;
 	}
 
 	/** Lookup mapping of DMS */
@@ -218,8 +223,8 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	private TagReaderPoller getTagReaderPoller() {
 		DevicePoller dp = getPoller();
 		return (dp instanceof TagReaderPoller)
-		     ? (TagReaderPoller)dp
-		     : null;
+		      ? (TagReaderPoller) dp
+		      : null;
 	}
 
 	/** Log a tag (transponder) read event.
