@@ -567,12 +567,10 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Get the meter poller */
 	private MeterPoller getMeterPoller() {
-		if (isActive()) {
-			DevicePoller dp = getPoller();
-			if (dp instanceof MeterPoller)
-				return (MeterPoller)dp;
-		}
-		return null;
+		DevicePoller dp = getPoller();
+		return (dp instanceof MeterPoller)
+		      ? (MeterPoller) dp
+		      : null;
 	}
 
 	/** Send a device request operation */
