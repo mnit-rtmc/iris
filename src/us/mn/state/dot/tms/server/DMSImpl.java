@@ -894,14 +894,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return photocellStatus;
 	}
 
-	/** Send a device request operation */
-	@Override
-	protected void sendDeviceRequest(DeviceRequest dr) {
-		DMSPoller p = getDMSPoller();
-		if (p != null)
-			p.sendRequest(this, dr);
-	}
-
 	/** The owner of the next message to be displayed.  This is a write-only
 	 * SONAR attribute. */
 	private transient User ownerNext;
@@ -1271,12 +1263,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public long getDeployTime() {
 		return deployTime;
-	}
-
-	/** Get the DMS poller */
-	private DMSPoller getDMSPoller() {
-		DevicePoller dp = getPoller();
-		return (dp instanceof DMSPoller) ? (DMSPoller) dp : null;
 	}
 
 	/** LDC pot base (Ledstar-specific value) */
@@ -1863,5 +1849,27 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		//        in this manner. This is an agency-specific hack
 		//        (Caltrans).
 		return SString.containsIgnoreCase(getSignAccess(), "dialup");
+	}
+
+	/** Get the DMS poller */
+	private DMSPoller getDMSPoller() {
+		DevicePoller dp = getPoller();
+		return (dp instanceof DMSPoller) ? (DMSPoller) dp : null;
+	}
+
+	/** Send a device request operation */
+	@Override
+	protected void sendDeviceRequest(DeviceRequest dr) {
+		DMSPoller p = getDMSPoller();
+		if (p != null)
+			p.sendRequest(this, dr);
+	}
+
+	/** Perform a periodic poll */
+	@Override
+	public void periodicPoll() {
+		if (isPeriodicallyQueriable())
+			sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
+		// FIXME: perform DMS actions with feed tags now
 	}
 }

@@ -33,8 +33,6 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.CtrlCondition;
-import static us.mn.state.dot.tms.DeviceRequest.QUERY_MESSAGE;
-import static us.mn.state.dot.tms.DeviceRequest.QUERY_STATUS;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
@@ -861,35 +859,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Poll one device */
 	private void pollDevice(ControllerIO io) {
-		if (io instanceof DMSImpl) {
-			DMSImpl dms = (DMSImpl) io;
-			if (dms.isPeriodicallyQueriable())
-				dms.sendDeviceRequest(QUERY_MESSAGE);
-			// FIXME: perform DMS actions with feed tags now
-		}
-		if (io instanceof GateArmImpl) {
-			GateArmImpl ga = (GateArmImpl) io;
-			ga.sendDeviceRequest(QUERY_STATUS);
-		}
-		if (io instanceof BeaconImpl) {
-			BeaconImpl b = (BeaconImpl) io;
-			b.sendDeviceRequest(QUERY_STATUS);
-		}
-		if (io instanceof WeatherSensorImpl) {
-			WeatherSensorImpl ws = (WeatherSensorImpl) io;
-			ws.sendDeviceRequest(QUERY_STATUS);
+		if (io instanceof DeviceImpl) {
+			DeviceImpl dev = (DeviceImpl) io;
+			dev.periodicPoll();
 		}
 		if (io instanceof AlarmImpl) {
 			AlarmImpl a = (AlarmImpl) io;
-			a.sendDeviceRequest(QUERY_STATUS);
-		}
-		if (io instanceof TagReaderImpl) {
-			TagReaderImpl tr = (TagReaderImpl) io;
-			tr.sendDeviceRequest(QUERY_STATUS);
-		}
-		if (io instanceof RampMeterImpl) {
-			RampMeterImpl rm = (RampMeterImpl) io;
-			rm.sendDeviceRequest(QUERY_STATUS);
+			a.periodicPoll();
 		}
 	}
 

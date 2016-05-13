@@ -504,6 +504,12 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		// no detector device requests
 	}
 
+	/** Perform a periodic poll */
+	@Override
+	public void periodicPoll() {
+		// no periodic polling
+	}
+
 	/** Accumulator for number of seconds with no hits (volume) */
 	private transient int no_hits = 0;
 

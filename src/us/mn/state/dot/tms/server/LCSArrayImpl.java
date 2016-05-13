@@ -433,6 +433,12 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 			p.sendRequest(this, dr);
 	}
 
+	/** Perform a periodic poll */
+	@Override
+	public void periodicPoll() {
+		// no periodic polling
+	}
+
 	/** Get an array of the DMS */
 	protected DMSImpl[] getDMSArray() {
 		LCSImpl[] lns = getLanes();

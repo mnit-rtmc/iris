@@ -296,4 +296,9 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		ControllerImpl c = controller;	// Avoid race
 		return (c != null) ? c.getPoller() : null;
 	}
+
+	/** Perform a periodic poll */
+	public void periodicPoll() {
+		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
+	}
 }

@@ -311,4 +311,9 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 
 	/** Send a device request operation */
 	abstract protected void sendDeviceRequest(DeviceRequest dr);
+
+	/** Perform a periodic poll */
+	public void periodicPoll() {
+		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
+	}
 }

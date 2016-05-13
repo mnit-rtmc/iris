@@ -274,6 +274,12 @@ public class CameraImpl extends DeviceImpl implements Camera {
 			cp.sendRequest(this, dr);
 	}
 
+	/** Perform a periodic poll */
+	@Override
+	public void periodicPoll() {
+		// no periodic polling
+	}
+
 	/** Command the camera pan, tilt or zoom */
 	@Override
 	public void setPtz(Float[] ptz) {

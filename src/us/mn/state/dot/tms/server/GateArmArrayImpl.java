@@ -346,16 +346,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		arms[idx] = ga;
 	}
 
-	/** Send a device request operation */
-	@Override
-	protected void sendDeviceRequest(DeviceRequest dr) {
-		for (int i = 0; i < MAX_ARMS; i++) {
-			GateArmImpl ga = arms[i];
-			if (ga != null)
-				ga.sendDeviceRequest(dr);
-		}
-	}
-
 	/** The owner of the next state to be requested.  This is a write-only
 	 * SONAR attribute. */
 	private transient User ownerNext;
@@ -792,5 +782,21 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override
 	public long getStyles() {
 		return styles;
+	}
+
+	/** Send a device request operation */
+	@Override
+	protected void sendDeviceRequest(DeviceRequest dr) {
+		for (int i = 0; i < MAX_ARMS; i++) {
+			GateArmImpl ga = arms[i];
+			if (ga != null)
+				ga.sendDeviceRequest(dr);
+		}
+	}
+
+	/** Perform a periodic poll */
+	@Override
+	public void periodicPoll() {
+		// handled by individual gate arms
 	}
 }
