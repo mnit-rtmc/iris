@@ -182,7 +182,6 @@ public class MainServer {
 		TIMER.addJob(new DmsQueryStatusJob());
 		TIMER.addJob(new DmsQueryDialupJob());
 		TIMER.addJob(new MeteringJob(FLUSH));
-		TIMER.addJob(new SampleQuery30SecJob());
 		TIMER.addJob(new SampleQuery5MinJob());
 		TIMER.addJob(new ActionPlanJob());
 		TIMER.addJob(new CameraWiperJob());

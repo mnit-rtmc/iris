@@ -844,29 +844,14 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Poll controller devices */
-	public void pollDevices() {
+	public void pollDevices(int period) {
 		// Feed are not associated with devices
 		queryFeeds();
 		// Must call getDevices so we don't hold the lock
 		for (ControllerIO io: getDevices())
 			pollDevice(io);
-	}
-
-	/** Get a list of all devices on controller */
-	private synchronized Set<ControllerIO> getDevices() {
-		return new HashSet<ControllerIO>(io_pins.values());
-	}
-
-	/** Poll one device */
-	private void pollDevice(ControllerIO io) {
-		if (io instanceof DeviceImpl) {
-			DeviceImpl dev = (DeviceImpl) io;
-			dev.periodicPoll();
-		}
-		if (io instanceof AlarmImpl) {
-			AlarmImpl a = (AlarmImpl) io;
-			a.periodicPoll();
-		}
+		if (hasActiveDetector())
+			pollDetectors(period);
 	}
 
 	/** Query feeds */
@@ -899,24 +884,58 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
+	/** Get a list of all devices on controller */
+	private synchronized Set<ControllerIO> getDevices() {
+		return new HashSet<ControllerIO>(io_pins.values());
+	}
+
+	/** Poll one device */
+	private void pollDevice(ControllerIO io) {
+		if (io instanceof DeviceImpl) {
+			DeviceImpl dev = (DeviceImpl) io;
+			dev.periodicPoll();
+		}
+		if (io instanceof AlarmImpl) {
+			AlarmImpl a = (AlarmImpl) io;
+			a.periodicPoll();
+		}
+	}
+
+	/** Poll all detectors */
+	private void pollDetectors(int period) {
+		SamplePoller p = getSamplePoller();
+		if (p != null)
+			p.querySamples(this, period);
+	}
+
+	/** Get a sample poller */
+	private SamplePoller getSamplePoller() {
+		DevicePoller dp = getPoller();
+		return (dp instanceof SamplePoller) ? (SamplePoller) dp : null;
+	}
+
 	/** Perform a controller download (reset) */
 	@Override
 	public void setDownload(boolean reset) {
-		DevicePoller dp = getPoller();
-		if (dp instanceof SamplePoller) {
-			SamplePoller sp = (SamplePoller) dp;
+		SamplePoller sp = getSamplePoller();
+		if (sp != null) {
 			if (reset)
 				sp.resetController(this);
 			else
 				sp.sendSettings(this);
 		}
-		if (dp instanceof WeatherPoller) {
+		WeatherPoller wp = getWeatherPoller();
+		if (wp != null) {
 			WeatherSensorImpl ws = getWeatherSensor();
-			if (ws != null) {
-				WeatherPoller wp = (WeatherPoller) dp;
+			if (ws != null)
 				wp.sendSettings(ws);
-			}
 		}
+	}
+
+	/** Get a weather sensor poller */
+	private WeatherPoller getWeatherPoller() {
+		DevicePoller dp = getPoller();
+		return (dp instanceof WeatherPoller) ? (WeatherPoller) dp :null;
 	}
 
 	/** Get a weather sensor for the controller */

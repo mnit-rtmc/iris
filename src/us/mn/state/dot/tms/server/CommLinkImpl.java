@@ -392,7 +392,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	private synchronized void pollControllers() {
 		for (ControllerImpl c: controllers.values()) {
 			if (c.isActive())
-				c.pollDevices();
+				c.pollDevices(poll_period);
 		}
 	}
 
