@@ -30,7 +30,6 @@ import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.BaseEvent;
 import us.mn.state.dot.tms.utils.HTTPProxySelector;
@@ -180,9 +179,6 @@ public class MainServer {
 
 	/** Schedule jobs on TIMER thread */
 	static private void scheduleTimerJobs() {
-		int secs = SystemAttrEnum.LCS_POLL_PERIOD_SECS.getInt();
-		if (secs > 5)
-			TIMER.addJob(new LcsQueryMsgJob(secs));
 		TIMER.addJob(new DmsQueryStatusJob());
 		TIMER.addJob(new DmsQueryDialupJob());
 		TIMER.addJob(new MeteringJob(FLUSH));

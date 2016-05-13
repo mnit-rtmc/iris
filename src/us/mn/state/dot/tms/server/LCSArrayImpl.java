@@ -436,7 +436,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	/** Perform a periodic poll */
 	@Override
 	public void periodicPoll() {
-		// no periodic polling
+		sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
 	}
 
 	/** Get an array of the DMS */
