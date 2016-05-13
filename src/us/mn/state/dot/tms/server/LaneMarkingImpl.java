@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.ResultSet;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -43,7 +42,6 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new LaneMarkingImpl(
-					namespace,
 					row.getString(1),	// name
 					row.getString(2),	// geo_loc
 					row.getString(3),	// controller
@@ -55,6 +53,7 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -66,11 +65,13 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -84,8 +85,8 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 	}
 
 	/** Create a lane marking */
-	protected LaneMarkingImpl(String n, GeoLocImpl l, ControllerImpl c,
-		int p, String nt)
+	private LaneMarkingImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
+		String nt)
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
@@ -93,57 +94,55 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 	}
 
 	/** Create a lane marking */
-	protected LaneMarkingImpl(Namespace ns, String n, String l, String c,
-		int p, String nt)
-	{
-		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, l),
-		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
-		     p, nt);
+	private LaneMarkingImpl(String n, String l, String c, int p, String nt){
+		this(n, lookupGeoLoc(l), lookupController(c), p, nt);
 	}
 
 	/** Destroy an object */
+	@Override
 	public void doDestroy() throws TMSException {
 		super.doDestroy();
 		geo_loc.notifyRemove();
 	}
 
 	/** Device location */
-	protected GeoLocImpl geo_loc;
+	private GeoLocImpl geo_loc;
 
 	/** Get the device location */
+	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
 	}
 
 	/** Flag for deployed status */
-	protected boolean deployed;
+	private boolean deployed;
 
 	/** Set the deployed status of the sign */
+	@Override
 	public void setDeployed(boolean d) {
 		LaneMarkingPoller p = getLaneMarkingPoller();
-		if(p != null)
+		if (p != null)
 			p.setDeployed(this, d);
 	}
 
 	/** Check if the lane marking is deployed */
+	@Override
 	public boolean getDeployed() {
 		return deployed;
 	}
 
 	/** Set the actual deployed status from the controller */
 	public void setDeployedStatus(boolean d) {
-		if(d != deployed)
+		if (d != deployed)
 			deployed = d;
 	}
 
 	/** Get a lane marking poller */
 	private LaneMarkingPoller getLaneMarkingPoller() {
-		if (isActive()) {
-			DevicePoller dp = getPoller();
-			if (dp instanceof LaneMarkingPoller)
-				return (LaneMarkingPoller)dp;
-		}
-		return null;
+		DevicePoller dp = getPoller();
+		return (dp instanceof LaneMarkingPoller)
+		      ?	(LaneMarkingPoller) dp
+		      : null;
 	}
 
 	/** Send a device request operation */
