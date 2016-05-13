@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,8 +29,8 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendSensorSettings extends OpG4 {
 
-	/** Time period for data binning */
-	static private final int BINNING_PERIOD = 30;
+	/** Binning interval (seconds) */
+	private final int interval;
 
 	/** Error threshold for setting date / time */
 	static private final int TIME_THRESHOLD = 5000;
@@ -53,6 +53,7 @@ public class OpSendSensorSettings extends OpG4 {
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(ControllerImpl c, boolean r) {
 		super(PriorityLevel.DOWNLOAD, c);
+		interval = c.getPollPeriod();
 		restart = r;
 	}
 
@@ -113,7 +114,7 @@ public class OpSendSensorSettings extends OpG4 {
 
 	/** Check if period is wrong */
 	private boolean isPeriodWrong() {
-		return setup_info.getPeriod() != BINNING_PERIOD;
+		return setup_info.getPeriod() != interval;
 	}
 
 	/** Check if msg composition is wrong */
@@ -134,7 +135,7 @@ public class OpSendSensorSettings extends OpG4 {
 	private void updateSetupInfo() {
 		setup_info.setPort1(updatePortConfig(setup_info.getPort1()));
 		setup_info.setPort2(updatePortConfig(setup_info.getPort2()));
-		setup_info.setPeriod(BINNING_PERIOD);
+		setup_info.setPeriod(interval);
 		setup_info.setComp(new StatComposition(false, false, false, 4));
 		StatusFlags f = setup_info.getStatusFlags();
 		setup_info.setStatusFlags(new StatusFlags(true, f.isDualLoop(),
