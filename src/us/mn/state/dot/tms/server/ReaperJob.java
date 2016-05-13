@@ -53,6 +53,7 @@ public class ReaperJob extends Job {
 	}
 
 	/** Perform the reaper job */
+	@Override
 	public void perform() {
 		reapSignMessages();
 		reapIncidents();
