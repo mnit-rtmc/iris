@@ -571,6 +571,9 @@ public class OpSendDMSFonts extends OpDMS {
 					return new SetDefaultFont();
 				else
 					return nextFontPhase();
+			case readyForUseReq:
+				// Daktronics DMS return readyForUseReq instead
+				// of calculatingID for a short time; try again
 			case calculatingID:
 				if (TimeSteward.currentTimeMillis() > expire) {
 					abortUpload("Still calculatingID, " +
