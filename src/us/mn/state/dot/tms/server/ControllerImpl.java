@@ -887,6 +887,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			TagReaderImpl tr = (TagReaderImpl) io;
 			tr.sendDeviceRequest(QUERY_STATUS);
 		}
+		if (io instanceof RampMeterImpl) {
+			RampMeterImpl rm = (RampMeterImpl) io;
+			rm.sendDeviceRequest(QUERY_STATUS);
+		}
 	}
 
 	/** Query feeds */
