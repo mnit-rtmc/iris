@@ -27,8 +27,8 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendSensorSettings extends OpSS105 {
 
-	/** Time interval for data binning */
-	static private final int BINNING_INTERVAL = 30;
+	/** Binning interval (seconds) */
+	private final int interval;
 
 	/** Flag to perform a controller restart */
 	private final boolean restart;
@@ -38,6 +38,7 @@ public class OpSendSensorSettings extends OpSS105 {
 		boolean r)
 	{
 		super(p, c);
+		interval = c.getPollPeriod();
 		restart = r;
 	}
 
@@ -64,7 +65,7 @@ public class OpSendSensorSettings extends OpSS105 {
 			TimeIntervalProperty ti = new TimeIntervalProperty();
 			mess.add(ti);
 			mess.queryProps();
-			if (ti.value == BINNING_INTERVAL)
+			if (ti.value == interval)
 				return new GetClassification();
 			else
 				return new SetTimeInterval();
@@ -79,7 +80,7 @@ public class OpSendSensorSettings extends OpSS105 {
 			CommMessage<SS105Property> mess) throws IOException
 		{
 			TimeIntervalProperty ti = new TimeIntervalProperty(
-				BINNING_INTERVAL);
+				interval);
 			mess.add(ti);
 			mess.storeProps();
 			return new GetClassification();
