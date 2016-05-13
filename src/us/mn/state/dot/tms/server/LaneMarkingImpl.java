@@ -150,10 +150,4 @@ public class LaneMarkingImpl extends DeviceImpl implements LaneMarking {
 	protected void sendDeviceRequest(DeviceRequest dr) {
 		// no device requests are currently supported
 	}
-
-	/** Perform a periodic poll */
-	@Override
-	public void periodicPoll() {
-		// no periodic polling
-	}
 }
