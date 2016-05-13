@@ -305,7 +305,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Get a weather sensor poller */
-	public WeatherPoller getWeatherPoller() {
+	private WeatherPoller getWeatherPoller() {
 		DevicePoller dp = getPoller();
 		return (dp instanceof WeatherPoller) ? (WeatherPoller) dp :null;
 	}

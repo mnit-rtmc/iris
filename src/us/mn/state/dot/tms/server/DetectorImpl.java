@@ -498,12 +498,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return fake;
 	}
 
-	/** Send a device request operation */
-	@Override
-	protected void sendDeviceRequest(DeviceRequest dr) {
-		// no detector device requests
-	}
-
 	/** Accumulator for number of seconds with no hits (volume) */
 	private transient int no_hits = 0;
 
@@ -887,5 +881,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		if (occ >= 0)
 			w.write(createAttribute("occ", formatFloat(occ, 2)));
 		w.write("/>\n");
+	}
+
+	/** Send a device request operation */
+	@Override
+	protected void sendDeviceRequest(DeviceRequest dr) {
+		// no detector device requests
 	}
 }
