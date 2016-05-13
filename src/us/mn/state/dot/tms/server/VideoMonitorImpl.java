@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -34,6 +35,11 @@ import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
  */
 public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 
+	/** Check if the camera video should be published */
+	static private boolean isCameraPublished(Camera c) {
+		return c != null && c.getPublish();
+	}
+
 	/** Load all the video monitors */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
@@ -41,16 +47,13 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new VideoMonitorImpl(
-					row.getString(1),	// name
-					row.getString(2),	// description
-					row.getBoolean(3)	// restricted
-				));
+				namespace.addObject(new VideoMonitorImpl(row));
 			}
 		});
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -60,13 +63,30 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
+	}
+
+	/** Create a new video monitor */
+	private VideoMonitorImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),		// name
+		     row.getString(2),		// description
+		     row.getBoolean(3)		// restricted
+		);
+	}
+
+	/** Create a new video monitor */
+	private VideoMonitorImpl(String n, String d, boolean r) {
+		this(n);
+		description = d;
+		restricted = r;
 	}
 
 	/** Create a new video monitor */
@@ -74,71 +94,69 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 		super(n);
 	}
 
-	/** Create a new video monitor */
-	protected VideoMonitorImpl(String n, String d, boolean r) {
-		this(n);
-		description = d;
-		restricted = r;
-	}
-
 	/** Description of video monitor */
-	protected String description = "";
+	private String description = "";
 
 	/** Set the video monitor description */
+	@Override
 	public void setDescription(String d) {
 		description = d;
 	}
 
 	/** Set the video monitor description */
 	public void doSetDescription(String d) throws TMSException {
-		if(d.equals(description))
+		if (d.equals(description))
 			return;
 		store.update(this, "description", d);
 		setDescription(d);
 	}
 
 	/** Get the video monitor description */
+	@Override
 	public String getDescription() {
 		return description;
 	}
 
 	/** Flag to restrict publishing camera images */
-	protected boolean restricted;
+	private boolean restricted;
 
 	/** Set flag to restrict publishing camera images */
+	@Override
 	public void setRestricted(boolean r) {
 		restricted = r;
 	}
 
 	/** Set flag to restrict publishing camera images */
 	public void doSetRestricted(boolean r) throws TMSException {
-		if(r == restricted)
+		if (r == restricted)
 			return;
 		store.update(this, "restricted", r);
 		setRestricted(r);
-		if(r && !isCameraPublished(camera))
+		if (r && !isCameraPublished(camera))
 			setCameraNotify(null);
 	}
 
 	/** Get flag to restrict publishing camera images */
+	@Override
 	public boolean getRestricted() {
 		return restricted;
 	}
 
 	/** Camera displayed on the video monitor */
-	protected transient Camera camera;
+	private transient Camera camera;
 
 	/** Set the camera displayed on the monitor */
+	@Override
 	public void setCamera(Camera c) {
 		camera = c;
 	}
 
 	/** Set the camera displayed on the monitor */
 	public void doSetCamera(Camera c) {
-		if(restricted && !isCameraPublished(c))
+		if (restricted && !isCameraPublished(c))
 			c = null;
 		setCamera(c);
-		if(c == null)
+		if (c == null)
 			selectBlankCamera();
 		else
 			selectCamera(c.getName());
@@ -151,13 +169,9 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	}
 
 	/** Get the camera displayed on the monitor */
+	@Override
 	public Camera getCamera() {
 		return camera;
-	}
-
-	/** Check if the camera video should be published */
-	static protected boolean isCameraPublished(Camera c) {
-		return c != null && c.getPublish();
 	}
 
 	/** Select a blank camera for the video monitor */
@@ -168,10 +182,10 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	/** Select a camera for the video monitor */
 	private void selectCamera(String cam) {
 		Iterator<Controller> it = ControllerHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Controller c = it.next();
-			if(c instanceof ControllerImpl)
-				selectCamera((ControllerImpl)c, cam);
+			if (c instanceof ControllerImpl)
+				selectCamera((ControllerImpl) c, cam);
 		}
 	}
 
@@ -179,7 +193,7 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	private void selectCamera(ControllerImpl c, String cam) {
 		DevicePoller dp = c.getPoller();
 		if (dp instanceof VideoMonitorPoller) {
-			VideoMonitorPoller vmp = (VideoMonitorPoller)dp;
+			VideoMonitorPoller vmp = (VideoMonitorPoller) dp;
 			vmp.setMonitorCamera(c, this, cam);
 		}
 	}
