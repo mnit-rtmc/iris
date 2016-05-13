@@ -28,11 +28,11 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpSendSensorSettings extends OpSS125 {
 
-	/** Time interval for data binning */
-	static private final int BINNING_INTERVAL = 30;
-
 	/** Error threshold for setting date / time */
 	static private final int TIME_THRESHOLD = 5000;
+
+	/** Binning interval (seconds) */
+	private final int interval;
 
 	/** Flag to perform a controller restart */
 	private final boolean restart;
@@ -57,6 +57,7 @@ public class OpSendSensorSettings extends OpSS125 {
 	{
 		super(PriorityLevel.DOWNLOAD, c);
 		restart = r;
+		interval = c.getPollPeriod();
 	}
 
 	/** Create a new operation to send settings to a sensor */
@@ -93,7 +94,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		{
 			mess.add(gen_config);
 			mess.queryProps();
-			if(shouldUpdateGenConfig())
+			if (shouldUpdateGenConfig())
 				return new StoreGenConfig();
 			else
 				return new QueryDataConfig();
@@ -103,7 +104,7 @@ public class OpSendSensorSettings extends OpSS125 {
 	/** Check if the general config should be updated */
 	private boolean shouldUpdateGenConfig() {
 		String loc = ControllerHelper.getLocation(controller);
-		if(!loc.equals(gen_config.getLocation()))
+		if (!loc.equals(gen_config.getLocation()))
 			return true;
 		return gen_config.isMetric();
 	}
@@ -143,16 +144,16 @@ public class OpSendSensorSettings extends OpSS125 {
 
 	/** Check if the data config should be updated */
 	private boolean shouldUpdateDataConfig() {
-		if(data_config.getInterval() != BINNING_INTERVAL)
+		if (data_config.getInterval() != interval)
 			return true;
-		if(data_config.getMode() !=
-		   DataConfigProperty.StorageMode.CIRCULAR)
+		if (data_config.getMode() !=
+		    DataConfigProperty.StorageMode.CIRCULAR)
 			return true;
-		if(data_config.getEventPush().getEnable())
+		if (data_config.getEventPush().getEnable())
 			return true;
-		if(data_config.getIntervalPush().getEnable())
+		if (data_config.getIntervalPush().getEnable())
 			return true;
-		if(data_config.getPresencePush().getEnable())
+		if (data_config.getPresencePush().getEnable())
 			return true;
 		return false;
 	}
@@ -164,7 +165,7 @@ public class OpSendSensorSettings extends OpSS125 {
 		protected Phase<SS125Property> poll(
 			CommMessage<SS125Property> mess) throws IOException
 		{
-			data_config.setInterval(BINNING_INTERVAL);
+			data_config.setInterval(interval);
 			data_config.setMode(
 				DataConfigProperty.StorageMode.CIRCULAR);
 			data_config.getEventPush().setEnable(false);
@@ -195,9 +196,9 @@ public class OpSendSensorSettings extends OpSS125 {
 
 	/** Check if the vehicle class config should be updated */
 	private boolean shouldUpdateClassConfig() {
-		for(SS125VehClass vc: SS125VehClass.values()) {
-			if(!vc.v_class.upper_bound.equals(
-			    class_config.getClassLen(vc)))
+		for (SS125VehClass vc: SS125VehClass.values()) {
+			if (!vc.v_class.upper_bound.equals(
+			     class_config.getClassLen(vc)))
 				return true;
 		}
 		return false;
@@ -220,7 +221,7 @@ public class OpSendSensorSettings extends OpSS125 {
 
 	/** Update the vehicle class config bounds */
 	private void updateClassConfig() {
-		for(SS125VehClass vc: SS125VehClass.values())
+		for (SS125VehClass vc: SS125VehClass.values())
 			class_config.setClassLen(vc, vc.v_class.upper_bound);
 	}
 

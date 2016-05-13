@@ -233,6 +233,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return comm_link;
 	}
 
+	/** Time interval for data binning */
+	public int getPollPeriod() {
+		CommLinkImpl cl = comm_link;
+		return (cl != null) ? cl.getPollPeriod() : 30;
+	}
+
 	/** Drop address */
 	private short drop_id;
 

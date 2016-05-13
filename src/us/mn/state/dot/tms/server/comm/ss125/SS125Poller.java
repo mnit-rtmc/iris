@@ -62,7 +62,6 @@ public class SS125Poller extends MessagePoller<SS125Property>
  	 * @param p Sample period in seconds. */
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
-		if (p == 30)
-			addOp(new OpQuerySamples(c, p));
+		addOp(new OpQuerySamples(c, p));
 	}
 }
