@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
 public class SampleQuery5MinJob extends Job {
 
 	/** Seconds to offset each poll from start of interval */
-	static protected final int OFFSET_SECS = 12;
+	static private final int OFFSET_SECS = 12;
 
 	/** Create a new 5-minute timer job */
 	public SampleQuery5MinJob() {
@@ -38,6 +38,7 @@ public class SampleQuery5MinJob extends Job {
 	}
 
 	/** Perform the 5-minute timer job */
+	@Override
 	public void perform() {
 		querySample5Min();
 	}
@@ -45,10 +46,10 @@ public class SampleQuery5MinJob extends Job {
 	/** Poll all controllers 5 minute interval */
 	private void querySample5Min() {
 		Iterator<Controller> it = ControllerHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Controller c = it.next();
-			if(c instanceof ControllerImpl)
-				querySample5Min((ControllerImpl)c);
+			if (c instanceof ControllerImpl)
+				querySample5Min((ControllerImpl) c);
 		}
 	}
 
@@ -58,7 +59,7 @@ public class SampleQuery5MinJob extends Job {
 		if (c.hasActiveDetector() || c.hasActiveMeter()) {
 			DevicePoller dp = c.getPoller();
 			if (dp instanceof SamplePoller) {
-				SamplePoller sp = (SamplePoller)dp;
+				SamplePoller sp = (SamplePoller) dp;
 				sp.querySamples(c, 300);
 			}
 		}

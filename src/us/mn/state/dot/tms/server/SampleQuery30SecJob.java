@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@ public class SampleQuery30SecJob extends Job {
 	}
 
 	/** Perform the 30-second timer job */
+	@Override
 	public void perform() {
 		querySample30Sec();
 	}
@@ -45,10 +46,10 @@ public class SampleQuery30SecJob extends Job {
 	/** Poll all sampling controllers 30-second interval */
 	private void querySample30Sec() {
 		Iterator<Controller> it = ControllerHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Controller c = it.next();
-			if(c instanceof ControllerImpl)
-				querySample30Sec((ControllerImpl)c);
+			if (c instanceof ControllerImpl)
+				querySample30Sec((ControllerImpl) c);
 		}
 	}
 
@@ -57,7 +58,7 @@ public class SampleQuery30SecJob extends Job {
 		if (c.hasActiveDetector()) {
 			DevicePoller dp = c.getPoller();
 			if (dp instanceof SamplePoller) {
-				SamplePoller sp = (SamplePoller)dp;
+				SamplePoller sp = (SamplePoller) dp;
 				sp.querySamples(c, 30);
 			}
 		}
