@@ -280,30 +280,20 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 
 	/** Request a device operation */
 	public void sendDeviceRequest(DeviceRequest req) {
-		AlarmPoller p = getPoller();
+		AlarmPoller p = getAlarmPoller();
 		if (p != null)
 			p.sendRequest(this, req);
 	}
 
 	/** Get an alarm poller */
-	private AlarmPoller getPoller() {
-		if (isActive()) {
-			ControllerImpl c = controller;	// Avoid race
-			if (c != null) {
-				DevicePoller dp = c.getPoller();
-				if (dp instanceof AlarmPoller)
-					return (AlarmPoller) dp;
-			}
-		}
-		return null;
+	private AlarmPoller getAlarmPoller() {
+		DevicePoller dp = getPoller();
+		return (dp instanceof AlarmPoller) ? (AlarmPoller) dp : null;
 	}
 
-	/** Get the active status */
-	public boolean isActive() {
+	/** Get the device poller */
+	private DevicePoller getPoller() {
 		ControllerImpl c = controller;	// Avoid race
-		if (c == null)
-			return false;
-		else
-			return c.isActive();
+		return (c != null) ? c.getPoller() : null;
 	}
 }
