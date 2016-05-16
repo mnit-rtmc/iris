@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.msgfeed;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
 
 /**
@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class MsgFeedPoller extends MessagePoller<MsgFeedProperty> {
+public class MsgFeedPoller extends CommThread<MsgFeedProperty> {
 
 	/** Feed debug log */
 	static private final DebugLog FEED_LOG = new DebugLog("feed");

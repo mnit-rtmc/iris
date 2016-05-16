@@ -25,9 +25,9 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
@@ -37,7 +37,7 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  *
  * @author Douglas Lau
  */
-public class NtcipPoller extends MessagePoller implements DMSPoller, LCSPoller {
+public class NtcipPoller extends CommThread implements DMSPoller, LCSPoller {
 
 	/** NTCIP debug log */
 	static private final DebugLog NTCIP_LOG = new DebugLog("ntcip2");

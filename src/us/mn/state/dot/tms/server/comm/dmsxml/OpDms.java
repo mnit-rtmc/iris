@@ -78,9 +78,10 @@ abstract class OpDms extends OpDevice {
 		m_user = user;
 	}
 
-	/** Cleanup the operation. Called by MessagePoller.doPoll(). */
+	/** Cleanup the operation. Called by CommThread.doPoll(). */
+	@Override
 	public void cleanup() {
-		if(isSuccess()) {
+		if (isSuccess()) {
 			m_dms.requestConfigure();
 		} else {
 			// flag dms not configured
@@ -582,7 +583,7 @@ abstract class OpDms extends OpDevice {
 		 * operations if the DMS configuration has not been requested.
 		 * Note, the type of exception throw here determines
 		 * if the messenger reopens the connection on failure.
-		 * @see MessagePoller#doPoll()
+		 * @see CommThread#doPoll()
 		 * @see Messenger#handleCommError()
 		 * @see Messenger#shouldReopen()
 		 */

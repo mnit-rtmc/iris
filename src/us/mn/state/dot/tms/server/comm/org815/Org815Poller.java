@@ -18,7 +18,7 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
 
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  *
  * @author Douglas Lau
  */
-public class Org815Poller extends MessagePoller<Org815Property>
+public class Org815Poller extends CommThread<Org815Property>
 	implements WeatherPoller
 {
 	/** ORG-815 debug log */

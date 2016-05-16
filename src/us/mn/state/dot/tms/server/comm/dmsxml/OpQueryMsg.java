@@ -489,7 +489,7 @@ class OpQueryMsg extends OpDms {
 	 * Note, the type of exception throw here determines
 	 * if the messenger reopens the connection on failure.
 	 *
-	 * @see MessagePoller#doPoll()
+	 * @see CommThread#doPoll()
 	 * @see Messenger#handleCommError()
 	 * @see Messenger#shouldReopen()
 	 */

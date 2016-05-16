@@ -19,7 +19,7 @@ import java.util.HashMap;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
 
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class SsiPoller extends MessagePoller<SsiProperty>
+public class SsiPoller extends CommThread<SsiProperty>
 	implements WeatherPoller
 {
 	/** SSI logger */

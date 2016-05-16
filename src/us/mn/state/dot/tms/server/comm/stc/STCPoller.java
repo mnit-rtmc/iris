@@ -20,8 +20,8 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.GateArmImpl;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 
 /**
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  *
  * @author Douglas Lau
  */
-public class STCPoller extends MessagePoller<STCProperty>
+public class STCPoller extends CommThread<STCProperty>
 	implements GateArmPoller
 {
 	/** Debug log */

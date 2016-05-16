@@ -294,7 +294,7 @@ class OpMessage extends OpDms {
 	 * here determines if the messenger reopens the connection on 
 	 * failure.
 	 *
-	 * @see MessagePoller#doPoll()
+	 * @see CommThread#doPoll()
 	 * @see Messenger#handleCommError()
 	 * @see Messenger#shouldReopen()
 	 */
@@ -333,7 +333,8 @@ class OpMessage extends OpDms {
 		}
 	}
 
-	/** Cleanup the operation. Called by MessagePoller.doPoll(). */
+	/** Cleanup the operation. Called by CommThread.doPoll(). */
+	@Override
 	public void cleanup() {
 		m_dms.setMessageNext(null);
 		super.cleanup();

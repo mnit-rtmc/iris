@@ -25,8 +25,8 @@ import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.StreamMessenger;
@@ -41,7 +41,7 @@ import us.mn.state.dot.tms.server.comm.StreamMessenger;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DmsXmlPoller extends MessagePoller implements DMSPoller {
+public class DmsXmlPoller extends CommThread implements DMSPoller {
 
 	/** Debug log */
 	static protected final DebugLog LOG = new DebugLog("dmsxml");
@@ -54,7 +54,7 @@ public class DmsXmlPoller extends MessagePoller implements DMSPoller {
 
 	/**
 	 * Create a new message for the specified operation.
-	 * @see MessagePoller.doPoll().
+	 * @see CommThread.doPoll().
 	 *
 	 * @param o The controller operation.
 	 * @return A newly created Message.

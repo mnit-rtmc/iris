@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -156,7 +156,7 @@ class OpBlank extends OpDms
 	 * Note, the type of exception throw here determines
 	 * if the messenger reopens the connection on failure.
 	 *
-	 * @see MessagePoller#doPoll()
+	 * @see CommThread#doPoll()
 	 * @see Messenger#handleCommError()
 	 * @see Messenger#shouldReopen()
 	 */
@@ -192,7 +192,8 @@ class OpBlank extends OpDms
 		}
 	}
 
-	/** Cleanup the operation. Called by MessagePoller.doPoll(). */
+	/** Cleanup the operation. Called by CommThread.doPoll(). */
+	@Override
 	public void cleanup() {
 		m_dms.setMessageNext(null);
 		super.cleanup();

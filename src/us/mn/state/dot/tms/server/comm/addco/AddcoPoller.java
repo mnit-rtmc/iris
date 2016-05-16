@@ -20,8 +20,8 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 
 /**
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  *
  * @author Douglas Lau
  */
-public class AddcoPoller extends MessagePoller<AddcoProperty>
+public class AddcoPoller extends CommThread<AddcoProperty>
 	implements DMSPoller
 {
 	/** Addco debug log */

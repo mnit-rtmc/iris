@@ -18,7 +18,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  *
  * @author Douglas Lau
  */
-public class CanogaPoller extends MessagePoller<CanogaProperty>
+public class CanogaPoller extends CommThread<CanogaProperty>
 	implements SamplePoller
 {
 	/** Canoga debug log */

@@ -23,12 +23,12 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
- * MessagePoller is an abstract class which represents a communication channel 
+ * CommThread is an abstract class which represents a communication channel 
  * with priority-queued polling.  Subclasses are MndotPoller, NtcipPoller, etc.
  *
  * @author Douglas Lau
  */
-abstract public class MessagePoller<T extends ControllerProperty>
+abstract public class CommThread<T extends ControllerProperty>
 	implements DevicePoller
 {
 	/** Get a message describing an IO exception */
@@ -46,7 +46,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 	/** Priority change log */
 	static private final DebugLog PRIO_LOG = new DebugLog("prio");
 
-	/** Thread group for all message poller threads */
+	/** Thread group for all comm threads */
 	static private final ThreadGroup GROUP = new ThreadGroup("Poller");
 
 	/** Thread state */
@@ -137,8 +137,8 @@ abstract public class MessagePoller<T extends ControllerProperty>
 		return hung_up;
 	}
 
-	/** Create a new message poller */
-	protected MessagePoller(String name, Messenger m, DebugLog l) {
+	/** Create a new comm thread */
+	protected CommThread(String name, Messenger m, DebugLog l) {
  		thread = new Thread(GROUP, "Poller: " + name) {
 			@Override
 			public void run() {
@@ -157,7 +157,7 @@ abstract public class MessagePoller<T extends ControllerProperty>
 		messenger.setTimeout(t);
 	}
 
-	/** Add an operation to the message poller */
+	/** Add an operation to the comm thread */
 	protected void addOp(OpController<T> op) {
 		if (queue.enqueue(op))
 			ensureStarted();

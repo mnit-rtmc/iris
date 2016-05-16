@@ -17,14 +17,14 @@ package us.mn.state.dot.tms.server.comm;
 import us.mn.state.dot.sched.DebugLog;
 
 /**
- * TransientPoller is a MessagePoller which causes equal operations to be
+ * TransientPoller is a CommThread which causes equal operations to be
  * replaced instead of rejected.  It is useful for PTZ pollers (which consist
  * of transient PTZ commands only).
  *
  * @author Douglas Lau
  */
 abstract public class TransientPoller<T extends ControllerProperty>
-	extends MessagePoller<T>
+	extends CommThread<T>
 {
 	/** Create a new transient poller */
 	protected TransientPoller(String name, Messenger m, DebugLog l) {

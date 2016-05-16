@@ -20,7 +20,7 @@ import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.PacketMessenger;
 import us.mn.state.dot.tms.server.comm.TagReaderPoller;
 
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.server.comm.TagReaderPoller;
  *
  * @author Douglas Lau
  */
-public class E6Poller extends MessagePoller<E6Property>
+public class E6Poller extends CommThread<E6Property>
 	implements TagReaderPoller
 {
 	/** Tag response */

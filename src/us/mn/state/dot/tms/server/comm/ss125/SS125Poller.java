@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.ss125;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  *
  * @author Douglas Lau
  */
-public class SS125Poller extends MessagePoller<SS125Property>
+public class SS125Poller extends CommThread<SS125Property>
 	implements SamplePoller
 {
 	/** SS 125 debug log */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -148,7 +148,7 @@ class OpReset extends OpDms
 	 * Note, the type of exception thrown here determines
 	 * if the messenger reopens the connection on failure.
 	 *
-	 * @see MessagePoller#doPoll()
+	 * @see CommThread#doPoll()
 	 * @see Messenger#handleCommError()
 	 * @see Messenger#shouldReopen()
 	 */

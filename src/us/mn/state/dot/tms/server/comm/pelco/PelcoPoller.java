@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.pelco;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
 
@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
  * @author Timothy Johnson
  * @author Douglas Lau
  */
-public class PelcoPoller extends MessagePoller<PelcoProperty>
+public class PelcoPoller extends CommThread<PelcoProperty>
 	implements VideoMonitorPoller
 {
 	/** Pelco debug log */

@@ -21,8 +21,8 @@ import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
-import us.mn.state.dot.tms.server.comm.MessagePoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 
 /**
@@ -30,7 +30,7 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  *
  * @author Douglas Lau
  */
-public class DinRelayPoller extends MessagePoller<DinRelayProperty>
+public class DinRelayPoller extends CommThread<DinRelayProperty>
 	implements LCSPoller, BeaconPoller
 {
 	/** DIN relay debug log */
