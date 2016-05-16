@@ -50,6 +50,9 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.LCS;
+import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -1870,6 +1873,20 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void periodicPoll() {
 		if (isPeriodicallyQueriable())
 			sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
+		LCSArrayImpl la = lookupLCSArray();
+		if (la != null)
+			la.periodicPoll();
 		// FIXME: perform DMS actions with feed tags now
+	}
+
+	/** Lookup LCS array if this DMS is lane one */
+	private LCSArrayImpl lookupLCSArray() {
+		LCS lcs = LCSHelper.lookup(name);
+		if (lcs != null && lcs.getLane() == 1) {
+			LCSArray la = lcs.getArray();
+			if (la instanceof LCSArrayImpl)
+				return (LCSArrayImpl) la;
+		}
+		return null;
 	}
 }
