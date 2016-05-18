@@ -36,11 +36,11 @@ public class InfinovaPoller extends TransientPoller<PelcoDProperty>
 	implements CameraPoller
 {
 	/** Infinova debug log */
-	static private final DebugLog INFINOVA_LOG = new DebugLog("infinova");
+	static public final DebugLog INF_LOG = new DebugLog("infinova");
 
 	/** Create a new infinova poller */
 	public InfinovaPoller(String n) {
-		super(n, TCP, INFINOVA_LOG);
+		super(n, TCP, INF_LOG);
 	}
 
 	/** Create a comm thread */
