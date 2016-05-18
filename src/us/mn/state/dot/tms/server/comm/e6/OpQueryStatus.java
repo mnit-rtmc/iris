@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,8 @@ public class OpQueryStatus extends OpE6 {
 	private final DiagStatusProp stat = new DiagStatusProp();
 
 	/** Create a new "query status" operation */
-	public OpQueryStatus(TagReaderImpl tr, E6Poller ep) {
-		super(PriorityLevel.DEVICE_DATA, tr, ep);
+	public OpQueryStatus(TagReaderImpl tr) {
+		super(PriorityLevel.DEVICE_DATA, tr);
 	}
 
 	/** Create the second phase of the operation */
@@ -47,7 +47,7 @@ public class OpQueryStatus extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			poller.sendQuery(stat);
+			sendQuery(mess, stat);
 			mess.logQuery(stat);
 			return new QueryBufferingMode();
 		}
@@ -61,7 +61,7 @@ public class OpQueryStatus extends OpE6 {
 			throws IOException
 		{
 			BufferingModeProp mode = new BufferingModeProp();
-			poller.sendQuery(mode);
+			sendQuery(mess, mode);
 			mess.logQuery(mode);
 			if (mode.isEnabled())
 				return new StoreBufferingMode();
@@ -79,7 +79,7 @@ public class OpQueryStatus extends OpE6 {
 		{
 			BufferingModeProp mode = new BufferingModeProp(false);
 			mess.logStore(mode);
-			poller.sendStore(mode);
+			sendStore(mess, mode);
 			return new QueryBufferedCount();
 		}
 	}
@@ -92,7 +92,7 @@ public class OpQueryStatus extends OpE6 {
 			throws IOException
 		{
 			BufferedCountProp count = new BufferedCountProp();
-			poller.sendQuery(count);
+			sendQuery(mess, count);
 			mess.logQuery(count);
 			int n = count.getCount();
 			if (n > 0)
@@ -117,7 +117,7 @@ public class OpQueryStatus extends OpE6 {
 		{
 			BufferedTransactionProp trans =
 				new BufferedTransactionProp(n_curr);
-			poller.sendQuery(trans);
+			sendQuery(mess, trans);
 			mess.logQuery(trans);
 			TagTransaction tt = trans.getTransaction();
 			if (tt != null)
@@ -139,7 +139,7 @@ public class OpQueryStatus extends OpE6 {
 		{
 			BufferedCountProp count = new BufferedCountProp();
 			mess.logStore(count);
-			poller.sendStore(count);
+			sendStore(mess, count);
 			return null;
 		}
 	}

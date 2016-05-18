@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
- * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,30 +12,32 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.pelcod;
+package us.mn.state.dot.tms.server.comm.infinova;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.TransientPoller;
+import us.mn.state.dot.tms.server.comm.pelcod.OpDeviceRequest;
+import us.mn.state.dot.tms.server.comm.pelcod.OpMoveCamera;
+import us.mn.state.dot.tms.server.comm.pelcod.OpPreset;
+import us.mn.state.dot.tms.server.comm.pelcod.PelcoDProperty;
 
 /**
- * PelcoDPoller is a java implementation of the Pelco D camera control
- * communication protocol
+ * Infinova poller
  *
  * @author Douglas Lau
- * @author Travis Swanston
  */
-public class PelcoDPoller extends TransientPoller<PelcoDProperty>
+public class InfinovaPoller extends TransientPoller<PelcoDProperty>
 	implements CameraPoller
 {
-	/** Pelco D debug log */
-	static private final DebugLog PELCOD_LOG = new DebugLog("pelcod");
+	/** Infinova debug log */
+	static private final DebugLog INFINOVA_LOG = new DebugLog("infinova");
 
-	/** Create a new Pelco poller */
-	public PelcoDPoller(String n) {
-		super(n, UDP, PELCOD_LOG);
+	/** Create a new infinova poller */
+	public InfinovaPoller(String n) {
+		super(n, TCP, INFINOVA_LOG);
 	}
 
 	/** Send a PTZ camera move command */

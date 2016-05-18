@@ -16,8 +16,7 @@ package us.mn.state.dot.tms.server.comm.msgfeed;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.CommThread;
-import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 
 /**
  * Msg feed poller, which periodically retrieves DMS messages
@@ -26,28 +25,24 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class MsgFeedPoller extends CommThread<MsgFeedProperty> {
+public class MsgFeedPoller extends DevicePoller<MsgFeedProperty> {
 
 	/** Feed debug log */
 	static private final DebugLog FEED_LOG = new DebugLog("feed");
 
 	/** Log a message to the debug log */
-	static public void log(String msg) {
+	static public void slog(String msg) {
 		FEED_LOG.log(msg);
 	}
 
-	/** Feed ID */
-	private final String feed_id;
-
 	/** Create a new poller */
-	public MsgFeedPoller(String n, Messenger m) {
-		super(n, m, FEED_LOG);
-		feed_id = n;
+	public MsgFeedPoller(String n) {
+		super(n, HTTP, FEED_LOG);
 	}
 
 	/** Query message feed */
 	public void queryMessages(ControllerImpl c) {
-		log("creating OpReadMsgFeed: " + c);
-		addOp(new OpReadMsgFeed(c, feed_id));
+		slog("creating OpReadMsgFeed: " + c);
+		addOp(new OpReadMsgFeed(c, name));
 	}
 }

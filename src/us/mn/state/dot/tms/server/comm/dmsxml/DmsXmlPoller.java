@@ -22,14 +22,10 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.CommThread;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
-import us.mn.state.dot.tms.server.comm.OpController;
-import us.mn.state.dot.tms.server.comm.StreamMessenger;
 
 /**
  * This class provides a DMS Poller that communicates with
@@ -41,32 +37,23 @@ import us.mn.state.dot.tms.server.comm.StreamMessenger;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DmsXmlPoller extends CommThread implements DMSPoller {
+public class DmsXmlPoller extends DevicePoller implements DMSPoller {
 
 	/** Debug log */
 	static protected final DebugLog LOG = new DebugLog("dmsxml");
 
 	/** Create a new dmsxml poller */
-	public DmsXmlPoller(String n, Messenger m) {
-		super(n, m, LOG);
-		assert m instanceof StreamMessenger;
+	public DmsXmlPoller(String n) {
+		super(n, TCP, LOG);
 	}
 
-	/**
-	 * Create a new message for the specified operation.
-	 * @see CommThread.doPoll().
-	 *
-	 * @param o The controller operation.
-	 * @return A newly created Message.
-	 * @throws IOException
-	 */
+	/** Create a comm thread */
 	@Override
-	protected CommMessage createCommMessage(OpController o)
+	public DmsXmlThread createCommThread(String uri, int timeout)
 		throws IOException
 	{
-		ControllerImpl c = o.getController();
-		return new Message(messenger.getOutputStream(c),
-				   messenger.getInputStream("", c));
+		return new DmsXmlThread(this, queue, Messenger.create(d_uri,
+			uri, timeout));
 	}
 
 	/** Send a new message to the sign. Called by DMSImpl.

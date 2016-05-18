@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.RampMeterImpl;
  *
  * @author Douglas Lau
  */
-public interface MeterPoller extends DevicePoller {
+public interface MeterPoller {
 
 	/** Threshold to fail communication (minutes) */
 	int COMM_FAIL_THRESHOLD = 3;

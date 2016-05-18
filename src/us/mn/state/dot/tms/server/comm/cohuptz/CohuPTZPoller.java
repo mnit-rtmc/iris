@@ -19,7 +19,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
-import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.TransientPoller;
 
 /**
@@ -35,8 +34,8 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 	static private final DebugLog COHU_LOG = new DebugLog("cohu");
 
 	/** Create a new Cohu PTZ poller */
-	public CohuPTZPoller(String n, Messenger m) {
-		super(n, m, COHU_LOG);
+	public CohuPTZPoller(String n) {
+		super(n, TCP, COHU_LOG);
 	}
 
 	/** Send a "PTZ camera move" command */

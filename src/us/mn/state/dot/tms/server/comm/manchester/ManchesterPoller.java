@@ -37,8 +37,8 @@ public class ManchesterPoller extends TransientPoller<ManchesterProperty>
 		new DebugLog("manchester");
 
 	/** Create a new Manchester poller */
-	public ManchesterPoller(String n, Messenger m) {
-		super(n, m, MANCHESTER_LOG);
+	public ManchesterPoller(String n) {
+		super(n, UDP, MANCHESTER_LOG);
 	}
 
 	/** Send a PTZ camera move command */

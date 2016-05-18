@@ -19,23 +19,22 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
-import us.mn.state.dot.tms.server.comm.CommThread;
-import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 
 /**
  * Poller to control Control By Web Relay devices.
  *
  * @author Douglas Lau
  */
-public class CBWPoller extends CommThread<CBWProperty>
+public class CBWPoller extends DevicePoller<CBWProperty>
 	implements BeaconPoller
 {
 	/** Control-By-Web debug log */
 	static final DebugLog CBW_LOG = new DebugLog("cbw");
 
 	/** Create a new CBW relay poller */
-	public CBWPoller(String n, Messenger m) {
-		super(n, m, CBW_LOG);
+	public CBWPoller(String n) {
+		super(n, HTTP, CBW_LOG);
 	}
 
 	/** Send a device request */

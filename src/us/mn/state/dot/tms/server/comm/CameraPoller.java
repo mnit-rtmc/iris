@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.CameraImpl;
  * @author Douglas Lau
  * @author Travis Swanston
  */
-public interface CameraPoller extends DevicePoller {
+public interface CameraPoller {
 
 	/** Send a PTZ camera move command */
 	void sendPTZ(CameraImpl c, float p, float t, float z);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.BeaconImpl;
  *
  * @author Douglas Lau
  */
-public interface BeaconPoller extends DevicePoller {
+public interface BeaconPoller {
 
 	/** Send a device request */
 	void sendRequest(BeaconImpl b, DeviceRequest r);

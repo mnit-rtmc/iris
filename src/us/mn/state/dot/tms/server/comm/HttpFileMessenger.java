@@ -36,6 +36,9 @@ public class HttpFileMessenger extends Messenger {
 	/** URL to read */
 	private final URL url;
 
+	/** Receive timeout (ms) */
+	private final int timeout;
+
 	/** Relative path */
 	private String path;
 
@@ -47,37 +50,21 @@ public class HttpFileMessenger extends Messenger {
 			return url;
 	}
 
-	/** Receive timeout (ms) */
-	private int timeout = 2000;
-
 	/** URL connection */
 	private URLConnection connection = null;
 
 	/** Create a new HTTP file messenger.
-	 * @param url The URL of the file to read. */
-	public HttpFileMessenger(URL url) {
+	 * @param url The URL of the file to read.
+	 * @param rt Read timeout (ms). */
+	public HttpFileMessenger(URL url, int rt) {
 		this.url = url;
+		timeout = rt;
 		input = null;
 		output = null;
 	}
 
-	/** Set the receive timeout */
-	public void setTimeout(int t) throws IOException {
-		timeout = t;
-		URLConnection c = connection;
-		if(c != null) {
-			c.setConnectTimeout(timeout);
-			c.setReadTimeout(timeout);
-		}
-	}
-
-	/** Get the receive timeout */
-	@Override
-	public int getTimeout() {
-		return timeout;
-	}
-
 	/** Open the messenger */
+	@Override
 	public void open() throws IOException {
 		open(null);
 	}
@@ -102,6 +89,7 @@ public class HttpFileMessenger extends Messenger {
 	}
 
 	/** Close the messenger */
+	@Override
 	public void close() {
 		InputStream in = input;
 		if (in != null) {

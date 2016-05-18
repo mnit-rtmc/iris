@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.GateArmImpl;
  *
  * @author Douglas Lau
  */
-public interface GateArmPoller extends DevicePoller {
+public interface GateArmPoller {
 
 	/** Send a device request */
 	void sendRequest(GateArmImpl ga, DeviceRequest r);

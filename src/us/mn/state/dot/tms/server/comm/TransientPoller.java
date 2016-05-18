@@ -23,12 +23,12 @@ import us.mn.state.dot.sched.DebugLog;
  *
  * @author Douglas Lau
  */
-abstract public class TransientPoller<T extends ControllerProperty>
-	extends CommThread<T>
+public class TransientPoller<T extends ControllerProperty>
+	extends DevicePoller<T>
 {
 	/** Create a new transient poller */
-	protected TransientPoller(String name, Messenger m, DebugLog l) {
-		super(name, m, l);
+	protected TransientPoller(String name, String du, DebugLog l) {
+		super(name, du, l);
 	}
 
 	/** Add an operation to the transient poller */

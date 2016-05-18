@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -67,9 +67,6 @@ public class ModemMessenger extends Messenger {
 	/** Phone number to dial */
 	protected final String phone_number;
 
-	/** Read timeout (ms) */
-	protected int timeout = 750;
-
 	/** Log a message to debug log */
 	private void log(String msg) {
 		if(MODEM_LOG.isOpen())
@@ -82,20 +79,6 @@ public class ModemMessenger extends Messenger {
 		modem = mdm;
 		phone_number = phone.replace("p", ",");
 		log("created ModemMessenger");
-	}
-
-	/** Set the messenger timeout */
-	@Override
-	public void setTimeout(int t) throws IOException {
-		log("set timeout to " + t + " ms");
-		wrapped.setTimeout(t);
-		timeout = t;
-	}
-
-	/** Get the receive timeout */
-	@Override
-	public int getTimeout() {
-		return timeout;
 	}
 
 	/** Open the messenger */
@@ -191,13 +174,7 @@ public class ModemMessenger extends Messenger {
 		log("dial: " + phone_number);
 		w.write("ATDT" + phone_number + "\r\n\n");
 		w.flush();
-		try {
-			wrapped.setTimeout(modem.getTimeout());
-			waitForConnect(isr);
-		}
-		finally {
-			wrapped.setTimeout(timeout);
-		}
+		waitForConnect(isr);
 	}
 
 	/** Wait for successful connection */

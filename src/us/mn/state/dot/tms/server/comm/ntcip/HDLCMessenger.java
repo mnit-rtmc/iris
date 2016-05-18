@@ -36,18 +36,6 @@ public class HDLCMessenger extends Messenger {
 		wrapped = m;
 	}
 
-	/** Set the messenger timeout */
-	@Override
-	public void setTimeout(int t) throws IOException {
-		wrapped.setTimeout(t);
-	}
-
-	/** Get the receive timeout */
-	@Override
-	public int getTimeout() {
-		return wrapped.getTimeout();
-	}
-
 	/** Open the messenger */
 	@Override
 	public void open() throws IOException {
@@ -70,7 +58,7 @@ public class HDLCMessenger extends Messenger {
 		throws IOException
 	{
 		InputStream _input = input;	// Avoid races
-		if(_input != null) {
+		if (_input != null) {
 			int drop = c.getDrop();
 			return new HDLC.AddressedInputStream(_input, drop);
 		} else

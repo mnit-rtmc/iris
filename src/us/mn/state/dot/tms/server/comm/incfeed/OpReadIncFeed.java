@@ -29,23 +29,13 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 public class OpReadIncFeed extends OpController<IncFeedProperty> {
 
-	/** Feed name */
-	private final String feed;
-
 	/** Incident cache */
 	private final IncidentCache cache;
 
-	/** Log a message */
-	private void logMsg(String msg) {
-		IncFeedPoller.log(feed + ": " + msg);
-	}
-
 	/** Create a new operation to read incident feed */
-	protected OpReadIncFeed(ControllerImpl c, String fid, IncidentCache ic){
+	protected OpReadIncFeed(ControllerImpl c, IncidentCache ic) {
 		super(PriorityLevel.DATA_30_SEC, c);
-		feed = fid;
 		cache = ic;
-		logMsg("Polling feed");
 	}
 
 	/** Create the first phase of the operation */
@@ -65,19 +55,5 @@ public class OpReadIncFeed extends OpController<IncFeedProperty> {
 			mess.queryProps();
 			return null;
 		}
-	}
-
-	/** Handle a communication error */
-	@Override
-	public void handleCommError(EventType et, String msg) {
-		logMsg("ERROR: " + msg);
-		super.handleCommError(et, msg);
-	}
-
-	/** Cleanup the operation */
-	@Override
-	public void cleanup() {
-		logMsg("Finished feed");
-		super.cleanup();
 	}
 }

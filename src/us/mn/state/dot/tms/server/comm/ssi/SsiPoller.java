@@ -19,8 +19,7 @@ import java.util.HashMap;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
-import us.mn.state.dot.tms.server.comm.CommThread;
-import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
 
 /**
@@ -29,14 +28,14 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class SsiPoller extends CommThread<SsiProperty>
+public class SsiPoller extends DevicePoller<SsiProperty>
 	implements WeatherPoller
 {
 	/** SSI logger */
 	static private final DebugLog SSI_LOG = new DebugLog("ssi");
 
 	/** Log an SSI message */
-	static public void log(String msg) {
+	static public void slog(String msg) {
 		SSI_LOG.log(msg);
 	}
 
@@ -45,8 +44,8 @@ public class SsiPoller extends CommThread<SsiProperty>
 		new HashMap<String, RwisRec>();
 
 	/** Create a new poller */
-	public SsiPoller(String n, Messenger m) {
-		super(n, m, SSI_LOG);
+	public SsiPoller(String n) {
+		super(n, HTTP, SSI_LOG);
 	}
 
 	/** Send a device request */

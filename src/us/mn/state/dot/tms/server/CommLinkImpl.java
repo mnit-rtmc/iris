@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
+import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DevicePollerFactory;
 import us.mn.state.dot.tms.units.Interval;
@@ -117,7 +118,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		poll_enabled = pe;
 		poll_period = pp;
 		timeout = t;
-		poller = null;
+		createPoller();
+		c_thread = null;
 		initTransients();
 	}
 
@@ -153,7 +155,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Destroy an object */
 	@Override
 	public void doDestroy() throws TMSException {
-		closePoller();
+		destroyPoller();
 		super.doDestroy();
 	}
 
@@ -204,7 +206,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return;
 		store.update(this, "uri", u);
 		setUri(u);
-		closePoller();
+		destroyCommThread();
 		setStatusNotify(Constants.UNKNOWN);
 	}
 
@@ -237,7 +239,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return;
 		store.update(this, "protocol", p);
 		setProtocol(p);
-		closePoller();
+		recreatePoller();
 		setStatusNotify(Constants.UNKNOWN);
 	}
 
@@ -263,7 +265,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return;
 		store.update(this, "poll_enabled", e);
 		setPollEnabled(e);
-		closePoller();
+		destroyCommThread();
 		setStatusNotify(Constants.UNKNOWN);
 	}
 
@@ -325,16 +327,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return;
 		if (t < 0 || t > MAX_TIMEOUT_MS)
 			throw new ChangeVetoException("Bad timeout: " + t);
-		try {
-			DevicePoller dp = poller;
-			if (dp != null)
-				dp.setTimeout(t);
-		}
-		catch (IOException e) {
-			throw new TMSException(e);
-		}
 		store.update(this, "timeout", t);
 		setTimeout(t);
+		destroyCommThread();
+		setStatusNotify(Constants.UNKNOWN);
 	}
 
 	/** Get the polling timeout (milliseconds) */
@@ -343,43 +339,69 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return timeout;
 	}
 
-	/** Device poller for communication */
+	/** Device poller */
 	private transient DevicePoller poller;
 
-	/** Get the device poller.  This must be synchronized to protect
-	 * access to the poller member variable. */
+	/** Comm thread (may be null) */
+	private transient CommThread c_thread;
+
+	/** Get the device poller */
 	public synchronized DevicePoller getPoller() {
-		if (poller != null) {
-			setStatusNotify(poller.getStatus());
-			if (poller.isReady())
-				return poller;
-			else
-				closePoller();
+		if (poll_enabled) {
+			setStatusNotify(getThreadStatus());
+			if (!isConnected()) {
+				destroyCommThread();
+				if (poller != null)
+					createCommThread();
+			}
+			return poller;
 		}
-		return poll_enabled ? openPoller() : null;
+		return null;
 	}
 
-	/** Open the device poller.  Poller must be null prior to calling. */
-	private synchronized DevicePoller openPoller() {
-		assert poller == null;
+	/** Get the comm thread status */
+	private synchronized String getThreadStatus() {
+		return (c_thread != null) ? c_thread.getStatus() : null;
+	}
+
+	/** Create the device poller */
+	private synchronized void createPoller() {
+		poller = DevicePollerFactory.create(name, protocol);
+	}
+
+	/** Destroy the device poller */
+	private synchronized void destroyPoller() {
+		destroyCommThread();
+		if (poller != null)
+			poller.destroy();
+	}
+
+	/** Recreate the device poller */
+	private synchronized void recreatePoller() {
+		destroyPoller();
+		createPoller();
+	}
+
+	/** Create the comm thread */
+	private synchronized void createCommThread() {
+		assert poller != null;
 		try {
-			poller = DevicePollerFactory.create(name, protocol,uri);
-			poller.setTimeout(timeout);
+			c_thread = poller.createCommThread(uri, timeout);
+			c_thread.start();
 		}
 		catch (IOException e) {
-			closePoller();
+			c_thread = null;
 			setStatusNotify("I/O error: " + e.getMessage());
 		}
-		return poller;
 	}
 
-	/** Close the message poller */
-	private synchronized void closePoller() {
-		if (poller != null && !poller.wasHungUp()) {
+	/** Destroy the comm thread */
+	private synchronized void destroyCommThread() {
+		if (c_thread != null) {
 			failControllers();
-			poller.destroy();
+			c_thread.destroy();
 		}
-		poller = null;
+		c_thread = null;
 	}
 
 	/** Set all controllers to a failed status */
@@ -401,10 +423,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set the communication status */
 	private void setStatusNotify(String s) {
-		if (s == null || s.equals(status))
-			return;
-		status = s;
-		notifyAttribute("status");
+		if (s != null && !s.equals(status)) {
+			status = s;
+			notifyAttribute("status");
+		}
 	}
 
 	/** Get the communication status */
@@ -439,8 +461,8 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Check if the comm link is currently connected */
 	public boolean isConnected() {
-		DevicePoller dp = poller;
-		return (dp != null) && dp.isConnected();
+		CommThread ct = c_thread;
+		return (ct != null) && ct.isAlive();
 	}
 
 	/** Write the comm link as an XML element */

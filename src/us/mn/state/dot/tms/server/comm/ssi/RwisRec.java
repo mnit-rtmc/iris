@@ -265,7 +265,7 @@ public class RwisRec {
 		updateAccumulation(ws);
 		updateVisibility(ws);
 		ws.setStampNotify(create_time);
-		SsiPoller.log("stored rec=" + this);
+		SsiPoller.slog("stored rec=" + this);
 	}
 
 	/** Update the air temp */

@@ -18,8 +18,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.CommThread;
-import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
@@ -29,22 +28,15 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  *
  * @author Douglas Lau
  */
-public class CanogaPoller extends CommThread<CanogaProperty>
+public class CanogaPoller extends DevicePoller<CanogaProperty>
 	implements SamplePoller
 {
 	/** Canoga debug log */
 	static protected final DebugLog CANOGA_LOG = new DebugLog("canoga");
 
 	/** Create a new Canoga poller */
-	public CanogaPoller(String n, Messenger m) {
-		super(n, m, CANOGA_LOG);
-	}
-
-	/** Perform a controller download */
-	@Override
-	public void download(ControllerImpl c, PriorityLevel p) {
-		if (c.isActive())
-			addOp(new OpQueryConfig(p, c));
+	public CanogaPoller(String n) {
+		super(n, TCP, CANOGA_LOG);
 	}
 
 	/** List of all event data collectors on line */
@@ -89,6 +81,12 @@ public class CanogaPoller extends CommThread<CanogaProperty>
 	@Override
 	public void sendSettings(ControllerImpl c) {
 		addOp(new OpQueryConfig(c));
+	}
+
+	/** Send settings to a controller */
+	@Override
+	public void sendSettings(ControllerImpl c, PriorityLevel p) {
+		addOp(new OpQueryConfig(p, c));
 	}
 
 	/** Query sample data.

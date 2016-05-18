@@ -17,8 +17,7 @@ package us.mn.state.dot.tms.server.comm.pelco;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.CommThread;
-import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
 
 /**
@@ -28,15 +27,15 @@ import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
  * @author Timothy Johnson
  * @author Douglas Lau
  */
-public class PelcoPoller extends CommThread<PelcoProperty>
+public class PelcoPoller extends DevicePoller<PelcoProperty>
 	implements VideoMonitorPoller
 {
 	/** Pelco debug log */
 	static protected final DebugLog PELCO_LOG = new DebugLog("pelco");
 
 	/** Create a new Pelco line */
-	public PelcoPoller(String n, Messenger m) {
-		super(n, m, PELCO_LOG);
+	public PelcoPoller(String n) {
+		super(n, TCP, PELCO_LOG);
 	}
 
 	/** Set the camera to display on the specified monitor */

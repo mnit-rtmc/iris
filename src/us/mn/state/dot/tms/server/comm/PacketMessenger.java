@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,9 @@ public class PacketMessenger extends Messenger {
 	/** Remote address to connect */
 	private final SocketAddress remote;
 
+	/** Receive timeout (ms) */
+	private final int timeout;
+
 	/** UDP socket */
 	private final DatagramSocket socket;
 
@@ -37,26 +40,12 @@ public class PacketMessenger extends Messenger {
 		return socket;
 	}
 
-	/** Receive timeout (ms) */
-	private int timeout = 750;
-
-	/** Set the receive timeout */
-	@Override
-	public void setTimeout(int t) throws IOException {
-		timeout = t;
-		socket.setSoTimeout(t);
-	}
-
-	/** Get the receive timeout */
-	@Override
-	public int getTimeout() {
-		return timeout;
-	}
-
 	/** Create a new datagram packet messenger.
-	 * @param ra Remote socket address. */
-	public PacketMessenger(SocketAddress ra) throws IOException {
+	 * @param ra Remote socket address.
+	 * @param rt Read timeout (ms). */
+	public PacketMessenger(SocketAddress ra, int rt) throws IOException {
 		remote = ra;
+		timeout = rt;
 		socket = new DatagramSocket();
 		socket.setSoTimeout(timeout);
 		socket.connect(remote);

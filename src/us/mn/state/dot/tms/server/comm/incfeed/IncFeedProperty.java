@@ -61,7 +61,6 @@ public class IncFeedProperty extends ControllerProperty {
 		String line = lr.readLine();
 		while (line != null) {
 			ParsedIncident inc = new ParsedIncident(line);
-			IncFeedPoller.log("parsed " + inc);
 			if (inc.isValid())
 				checkIncident(inc);
 			line = lr.readLine();
@@ -88,7 +87,6 @@ public class IncFeedProperty extends ControllerProperty {
 
 	/** Create an incident */
 	private IncidentImpl createIncident(ParsedIncident inc, GeoLoc loc) {
-		IncFeedPoller.log("loc: " + GeoLocHelper.getCorridorName(loc));
 		int n_lanes = getLaneCount(LaneType.MAINLINE, loc);
 		if (n_lanes > 0) {
 			Camera cam = lookupCamera(inc);

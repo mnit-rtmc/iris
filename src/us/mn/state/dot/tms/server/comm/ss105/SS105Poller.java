@@ -16,8 +16,7 @@ package us.mn.state.dot.tms.server.comm.ss105;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.CommThread;
-import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
@@ -27,22 +26,15 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  *
  * @author Douglas Lau
  */
-public class SS105Poller extends CommThread<SS105Property>
+public class SS105Poller extends DevicePoller<SS105Property>
 	implements SamplePoller
 {
 	/** SS 105 debug log */
 	static protected final DebugLog SS105_LOG = new DebugLog("ss105");
 
 	/** Create a new SS105 poller */
-	public SS105Poller(String n, Messenger m) {
-		super(n, m, SS105_LOG);
-	}
-
-	/** Perform a controller download */
-	@Override
-	protected void download(ControllerImpl c, PriorityLevel p) {
-		if (c.isActive())
-			addOp(new OpSendSensorSettings(p, c, true));
+	public SS105Poller(String n) {
+		super(n, TCP, SS105_LOG);
 	}
 
 	/** Perform a controller reset */
@@ -55,6 +47,12 @@ public class SS105Poller extends CommThread<SS105Property>
 	@Override
 	public void sendSettings(ControllerImpl c) {
 		addOp(new OpSendSensorSettings(c, false));
+	}
+
+	/** Send sample settings to a controller */
+	@Override
+	public void sendSettings(ControllerImpl c, PriorityLevel p) {
+		addOp(new OpSendSensorSettings(p, c, true));
 	}
 
 	/** Query sample data.

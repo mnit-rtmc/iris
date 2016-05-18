@@ -21,24 +21,23 @@ import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
-import us.mn.state.dot.tms.server.comm.CommThread;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
-import us.mn.state.dot.tms.server.comm.Messenger;
 
 /**
  * Poller to control Digital Loggers Inc DIN Relay devices.
  *
  * @author Douglas Lau
  */
-public class DinRelayPoller extends CommThread<DinRelayProperty>
+public class DinRelayPoller extends DevicePoller<DinRelayProperty>
 	implements LCSPoller, BeaconPoller
 {
 	/** DIN relay debug log */
 	static final DebugLog DIN_LOG = new DebugLog("dinrelay");
 
 	/** Create a new DIN relay poller */
-	public DinRelayPoller(String n, Messenger m) {
-		super(n, m, DIN_LOG);
+	public DinRelayPoller(String n) {
+		super(n, HTTP, DIN_LOG);
 	}
 
 	/** Query the outlet status */

@@ -18,8 +18,7 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
-import us.mn.state.dot.tms.server.comm.CommThread;
-import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
 
 /**
@@ -27,15 +26,15 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
  *
  * @author Douglas Lau
  */
-public class Org815Poller extends CommThread<Org815Property>
+public class Org815Poller extends DevicePoller<Org815Property>
 	implements WeatherPoller
 {
 	/** ORG-815 debug log */
 	static private final DebugLog ORG815_LOG = new DebugLog("org815");
 
 	/** Create a new ORG-815 poller */
-	public Org815Poller(String n, Messenger m) {
-		super(n, m, ORG815_LOG);
+	public Org815Poller(String n) {
+		super(n, TCP, ORG815_LOG);
 	}
 
 	/** Send a device request */

@@ -17,47 +17,63 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
-import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.CommThread;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
-import us.mn.state.dot.tms.server.comm.OpController;
-import us.mn.state.dot.tms.server.comm.snmp.SNMP;
 
 /**
- * NtcipPoller
+ * NTCIP Poller
  *
  * @author Douglas Lau
  */
-public class NtcipPoller extends CommThread implements DMSPoller, LCSPoller {
+public class NtcipPoller extends DevicePoller implements DMSPoller, LCSPoller {
+
+	/** Get the default URI for a comm protocol */
+	static private String default_uri(CommProtocol cp) {
+		if (cp == CommProtocol.NTCIP_A)
+			return UDP;
+		else
+			return TCP;
+	}
 
 	/** NTCIP debug log */
 	static private final DebugLog NTCIP_LOG = new DebugLog("ntcip2");
 
-	/** SNMP message protocol */
-	private final SNMP snmp = new SNMP();
+	/** Communication protocol */
+	private final CommProtocol protocol;
 
 	/** Create a new Ntcip poller */
-	public NtcipPoller(String n, Messenger m) {
-		super(n, m, NTCIP_LOG);
+	public NtcipPoller(String n, CommProtocol cp) {
+		super(n, default_uri(cp), NTCIP_LOG);
+		protocol = cp;
 	}
 
-	/** Create a new message for the specified operation */
+	/** Create a comm thread */
 	@Override
-	protected CommMessage createCommMessage(OpController o)
+	public NtcipThread createCommThread(String uri, int timeout)
 		throws IOException
 	{
-		ControllerImpl c = o.getController();
-		return snmp.new Message(messenger.getOutputStream(c),
-			messenger.getInputStream("", c), c.getPassword());
+		return new NtcipThread(this, queue, createMessenger(uri,
+			timeout));
+	}
+
+	/** Create a messenger */
+	private Messenger createMessenger(String uri, int timeout)
+		throws IOException
+	{
+		Messenger m = Messenger.create(d_uri, uri, timeout);
+		if (protocol == CommProtocol.NTCIP_B)
+			return new HDLCMessenger(m);
+		else
+			return m;
 	}
 
 	/** Send a device request message to the sign */

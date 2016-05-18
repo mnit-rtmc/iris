@@ -16,8 +16,7 @@ package us.mn.state.dot.tms.server.comm.dr500;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.CommThread;
-import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 
@@ -26,22 +25,15 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  *
  * @author Douglas Lau
  */
-public class DR500Poller extends CommThread<DR500Property>
+public class DR500Poller extends DevicePoller<DR500Property>
 	implements SamplePoller
 {
 	/** DR500 debug log */
 	static private final DebugLog DR500_LOG = new DebugLog("dr500");
 
 	/** Create a new DR500 poller */
-	public DR500Poller(String n, Messenger m) {
-		super(n, m, DR500_LOG);
-	}
-
-	/** Perform a controller download */
-	@Override
-	protected void download(ControllerImpl c, PriorityLevel p) {
-		if (c.isActive())
-			addOp(new OpSendSensorSettings(p, c));
+	public DR500Poller(String n) {
+		super(n, TCP, DR500_LOG);
 	}
 
 	/** Perform a controller reset */
@@ -54,6 +46,12 @@ public class DR500Poller extends CommThread<DR500Property>
 	@Override
 	public void sendSettings(ControllerImpl c) {
 		addOp(new OpSendSensorSettings(c));
+	}
+
+	/** Send settings to a controller */
+	@Override
+	public void sendSettings(ControllerImpl c, PriorityLevel p) {
+		addOp(new OpSendSensorSettings(p, c));
 	}
 
 	/** Query sample data.

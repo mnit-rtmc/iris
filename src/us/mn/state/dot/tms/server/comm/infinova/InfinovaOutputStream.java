@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2014  Minnesota Department of Transportation
+ * Copyright (C) 2011-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@ import us.mn.state.dot.sched.DebugLog;
 public class InfinovaOutputStream extends OutputStream {
 
 	/** Debug log */
-	static private final DebugLog INF_LOG = new DebugLog("infinova");
+	static private final DebugLog INF_LOG = new DebugLog("infinova2");
 
 	/** Maximum message size */
 	static private final int MAX_MESSAGE = 256;

@@ -56,9 +56,9 @@ public class SsiProperty extends ControllerProperty {
 		RwisHeader header = readHeader(lr);
 		String line = lr.readLine();
 		for (int i = 0; line != null && i < MAX_RECORDS; i++) {
-			SsiPoller.log("parsing " + line);
+			SsiPoller.slog("parsing " + line);
 			RwisRec rec = new RwisRec(line, header);
-			SsiPoller.log("parsed rec=" + rec);
+			SsiPoller.slog("parsed rec=" + rec);
 			String site_id = rec.getSiteId();
 			// Only save record if site_id is in mapping
 			if (site_id != null && records.containsKey(site_id))

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,7 @@ import us.mn.state.dot.tms.server.TagReaderImpl;
  *
  * @author Douglas Lau
  */
-public interface TagReaderPoller extends DevicePoller {
+public interface TagReaderPoller {
 
 	/** Send a device request */
 	void sendRequest(TagReaderImpl tr, DeviceRequest r);

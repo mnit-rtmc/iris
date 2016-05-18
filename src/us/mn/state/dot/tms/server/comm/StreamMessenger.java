@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,32 +27,18 @@ import java.net.Socket;
 public class StreamMessenger extends Messenger {
 
 	/** Address to connect */
-	protected final SocketAddress address;
-
-	/** TCP socket */
-	protected Socket socket;
+	private final SocketAddress address;
 
 	/** Receive timeout (ms) */
-	protected int timeout = 750;
+	private final int timeout;
 
-	/** Set the receive timeout */
-	@Override
-	public void setTimeout(int t) throws IOException {
-		timeout = t;
-		Socket s = socket;
-		if(s != null)
-			s.setSoTimeout(t);
-	}
-
-	/** Get the receive timeout */
-	@Override
-	public int getTimeout() {
-		return timeout;
-	}
+	/** TCP socket */
+	private Socket socket;
 
 	/** Create a new stream messenger */
-	public StreamMessenger(SocketAddress a) {
+	public StreamMessenger(SocketAddress a, int rt) {
 		address = a;
+		timeout = rt;
 	}
 
 	/** Open the stream messenger */

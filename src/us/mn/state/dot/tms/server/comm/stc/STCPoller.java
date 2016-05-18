@@ -20,30 +20,29 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.GateArmImpl;
-import us.mn.state.dot.tms.server.comm.CommThread;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
-import us.mn.state.dot.tms.server.comm.Messenger;
 
 /**
  * STCPoller is a java implementation of the Hysecurity STC protocol.
  *
  * @author Douglas Lau
  */
-public class STCPoller extends CommThread<STCProperty>
+public class STCPoller extends DevicePoller<STCProperty>
 	implements GateArmPoller
 {
 	/** Debug log */
 	static private final DebugLog STC_LOG = new DebugLog("stc");
 
 	/** Create a new STC poller */
-	public STCPoller(String n, Messenger m) {
-		super(n, m, STC_LOG);
+	public STCPoller(String n) {
+		super(n, TCP, STC_LOG);
 	}
 
 	/** Send a device request */
 	@Override
 	public void sendRequest(GateArmImpl ga, DeviceRequest r) {
-		switch(r) {
+		switch (r) {
 		case SEND_SETTINGS:
 			addOp(new OpControlGate(ga));
 			break;

@@ -23,14 +23,12 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
- * CommThread is an abstract class which represents a communication channel 
- * with priority-queued polling.  Subclasses are MndotPoller, NtcipPoller, etc.
+ * CommThread represents a communication channel with priority-queued polling.
  *
  * @author Douglas Lau
  */
-abstract public class CommThread<T extends ControllerProperty>
-	implements DevicePoller
-{
+public class CommThread<T extends ControllerProperty> {
+
 	/** Get a message describing an IO exception */
 	static protected String exceptionMessage(IOException e) {
 		String m = e.getMessage();
@@ -43,20 +41,8 @@ abstract public class CommThread<T extends ControllerProperty>
 	/** Message polling log */
 	static private final DebugLog POLL_LOG = new DebugLog("polling");
 
-	/** Priority change log */
-	static private final DebugLog PRIO_LOG = new DebugLog("prio");
-
 	/** Thread group for all comm threads */
-	static private final ThreadGroup GROUP = new ThreadGroup("Poller");
-
-	/** Thread state */
-	static private enum ThreadState {
-		NOT_STARTED,
-		STARTING,
-		RUNNING,
-		CLOSING,
-		STOPPED;
-	}
+	static private final ThreadGroup GROUP = new ThreadGroup("Comm");
 
 	/** Write a message to the polling log */
 	private void plog(String msg) {
@@ -64,189 +50,88 @@ abstract public class CommThread<T extends ControllerProperty>
 			POLL_LOG.log(thread.getName() + " " + msg);
 	}
 
+	/** Device poller */
+	protected final DevicePoller<T> poller;
+
 	/** Thread to poll operations */
 	private final Thread thread;
 
 	/** Operation queue */
-	protected final OpQueue<T> queue = new OpQueue<T>();
+	protected final OpQueue<T> queue;
 
 	/** Messenger for poll/response streams */
 	protected final Messenger messenger;
 
-	/** Protocol logger */
-	private final DebugLog logger;
+	/** Thread status */
+	private String status = "STARTING";
 
-	/** Thread state */
-	private ThreadState state = ThreadState.NOT_STARTED;
-
-	/** Set the thread state */
-	private synchronized void setThreadState(ThreadState st) {
-		state = st;
-		plog("state: " + st);
-	}
-
-	/** Poller status */
-	private String status = null;
-
-	/** Set the poller status */
+	/** Set the thread status */
 	protected void setStatus(String s) {
 		status = s;
 	}
 
-	/** Get the poller status */
-	@Override
+	/** Get the thread status */
 	public String getStatus() {
-		String s = status;
-		if (s != null)
-			return s;
-		ThreadState ts = state;
-		return (ts == ThreadState.RUNNING) ? "" : ts.toString();
-	}
-
-	/** Check if ready for operation */
-	@Override
-	public synchronized boolean isReady() {
-		switch (state) {
-		case NOT_STARTED:
-		case STARTING:
-		case RUNNING:
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	/** Check if poller is connected */
-	@Override
-	public synchronized boolean isConnected() {
-		switch (state) {
-		case STARTING:
-		case RUNNING:
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	/** Hung up flag */
-	private boolean hung_up = false;
-
-	/** Check if the messenger was hung up on */
-	@Override
-	public final boolean wasHungUp() {
-		return hung_up;
+		return status;
 	}
 
 	/** Create a new comm thread */
-	protected CommThread(String name, Messenger m, DebugLog l) {
- 		thread = new Thread(GROUP, "Poller: " + name) {
+	public CommThread(DevicePoller<T> dp, OpQueue<T> q, Messenger m) {
+		poller = dp;
+ 		thread = new Thread(GROUP, "Comm: " + poller.name) {
 			@Override
 			public void run() {
 				operationLoop();
 			}
 		};
 		thread.setDaemon(true);
-		setThreadState(ThreadState.NOT_STARTED);
+		queue = q;
 		messenger = m;
-		logger = l;
 	}
 
-	/** Set the receive timeout */
-	@Override
-	public final void setTimeout(int t) throws IOException {
-		messenger.setTimeout(t);
-	}
-
-	/** Add an operation to the comm thread */
-	protected void addOp(OpController<T> op) {
-		if (queue.enqueue(op))
-			ensureStarted();
-		else
-			plog("DROPPING " + op);
-	}
-
-	/** Ensure the thread is started */
-	private void ensureStarted() {
-		if (shouldStart())
-			startPolling();
-	}
-
-	/** Should the thread be started? */
-	private synchronized boolean shouldStart() {
-		if (state == ThreadState.NOT_STARTED) {
-			setThreadState(ThreadState.STARTING);
-			return true;
-		} else
-			return false;
-	}
-
-	/** Start polling */
-	protected void startPolling() {
+	/** Start the thread */
+	public void start() {
 		thread.start();
 	}
 
-	/** Stop polling */
-	protected void stopPolling() {
-		queue.close();
-		thread.interrupt();
+	/** Check if the thread is alive */
+	public boolean isAlive() {
+		return thread.isAlive();
 	}
 
-	/** Destroy the poller */
-	@Override
-	public final void destroy() {
-		if (isConnected())
-			stopPolling();
+	/** Destroy the comm thread */
+	public void destroy() {
+		thread.interrupt();
 	}
 
 	/** Open messenger and perform operations */
 	private void operationLoop() {
 		try {
 			messenger.open();
-			setThreadState(ThreadState.RUNNING);
 			performOperations();
-			setThreadState(ThreadState.CLOSING);
 		}
-		catch (HangUpException e) {
-			setStatus(exceptionMessage(e));
-			hung_up = true;
+		catch (InterruptedException e) {
+			// from destroy
 		}
 		catch (IOException e) {
 			setStatus(exceptionMessage(e));
-		}
-		catch (InterruptedException e) {
-			// from stopPolling
 		}
 		catch (RuntimeException e) {
 			e.printStackTrace();
 		}
 		finally {
 			messenger.close();
-			drainQueue();
-			setThreadState(ThreadState.STOPPED);
 		}
-	}
-
-	/** Drain the poll queue */
-	private void drainQueue() {
-		final String s = getStatus();
-		queue.forEach(new OpHandler<T>() {
-			public void handle(PriorityLevel prio,
-				OpController<T> o)
-			{
-				o.handleCommError(EventType.QUEUE_DRAINED, s);
-				if (hung_up)
-					o.setSucceeded();
-				o.cleanup();
-			}
-		});
 	}
 
 	/** Perform operations on the poll queue */
 	private void performOperations() throws IOException,
 		InterruptedException
 	{
-		while (queue.isOpen())
+		while (queue.isOpen()) {
 			doPoll(queue.next());
+			setStatus("");
+		}
 	}
 
 	/** Perform one poll for an operation */
@@ -260,7 +145,7 @@ abstract public class CommThread<T extends ControllerProperty>
 			handleContention(o, e);
 		}
 		catch (DownloadRequestException e) {
-			download(o.getController(), o.getPriority());
+			sendSettings(o.getController(), o.getPriority());
 		}
 		catch (ChecksumException e) {
 			o.handleCommError(EventType.CHECKSUM_ERROR,
@@ -304,11 +189,8 @@ abstract public class CommThread<T extends ControllerProperty>
 	/** Handle device contention */
 	private void handleContention(OpController<T> op, OpController<T> oc) {
 		if (oc.getPriority().ordinal() > op.getPriority().ordinal()) {
-			if (PRIO_LOG.isOpen()) {
-				PRIO_LOG.log("BUMPING " + oc + " from " +
-					oc.getPriority() + " to " +
-					op.getPriority());
-			}
+			poller.log("BUMPING " + oc + " from " + oc.getPriority()
+				+ " to " + op.getPriority());
 			oc.setPriority(op.getPriority());
 			// If, for some crazy reason, the operation is
 			// not on our queue, it will not be requeued.
@@ -324,7 +206,7 @@ abstract public class CommThread<T extends ControllerProperty>
 		if (queue.requeue(op))
 			return true;
 		else {
-			plog("DROPPING " + op);
+			poller.log("DROPPING " + op);
 			return false;
 		}
 	}
@@ -340,11 +222,12 @@ abstract public class CommThread<T extends ControllerProperty>
 	protected CommMessage<T> createCommMessage(OpController<T> o)
 		throws IOException
 	{
-		return new CommMessageImpl<T>(messenger, o, logger);
+		return new CommMessageImpl<T>(messenger, o, poller.logger);
 	}
 
-	/** Respond to a download request from a controller */
-	protected void download(ControllerImpl c, PriorityLevel p) {
-		// Subclasses should override this if necessary
+	/** Respond to a settings request from a controller */
+	private void sendSettings(ControllerImpl c, PriorityLevel p) {
+		if (c.isActive())
+			poller.sendSettings(c, p);
 	}
 }

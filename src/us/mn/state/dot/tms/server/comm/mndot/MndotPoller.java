@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.mndot;
 import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.AlarmImpl;
@@ -27,10 +28,9 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
-import us.mn.state.dot.tms.server.comm.CommThread;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.LaneMarkingPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
-import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
@@ -41,33 +41,21 @@ import us.mn.state.dot.tms.server.comm.SamplePoller;
  *
  * @author Douglas Lau
  */
-public class MndotPoller extends CommThread<MndotProperty>
+public class MndotPoller extends DevicePoller<MndotProperty>
 	implements LCSPoller, AlarmPoller, MeterPoller, SamplePoller,
 	BeaconPoller, LaneMarkingPoller
 {
 	/** MnDOT 170 debug log */
 	static private final DebugLog MNDOT_LOG = new DebugLog("mndot170");
 
-	/** Create a new MnDOT 170 poller.
-	 * @param n Comm link name.
-	 * @param m Messenger for communication. */
-	public MndotPoller(String n, Messenger m) {
-		super(n, m, MNDOT_LOG);
-	}
+	/** Communication protocol */
+	private final CommProtocol protocol;
 
-	/** Respond to a download request from a controller */
-	@Override
-	protected void download(ControllerImpl c, PriorityLevel p) {
-		addOp(new OpSendSampleSettings(p, c));
-		BeaconImpl beacon = c.getActiveBeacon();
-		if (beacon != null)
-			addOp(new OpSendBeaconSettings(p, beacon));
-		RampMeterImpl meter1 = Op170.lookupMeter1(c);
-		if (meter1 != null)
-			addOp(new OpSendMeterSettings(p, meter1));
-		RampMeterImpl meter2 = Op170.lookupMeter2(c);
-		if (meter2 != null)
-			addOp(new OpSendMeterSettings(p, meter2));
+	/** Create a new MnDOT 170 poller.
+	 * @param n Comm link name. */
+	public MndotPoller(String n, CommProtocol cp) {
+		super(n, TCP, MNDOT_LOG);
+		protocol = cp;
 	}
 
 	/** Perform a controller reset */
@@ -80,6 +68,21 @@ public class MndotPoller extends CommThread<MndotProperty>
 	@Override
 	public void sendSettings(ControllerImpl c) {
 		addOp(new OpSendSampleSettings(c));
+	}
+
+	/** Respond to a download request from a controller */
+	@Override
+	public void sendSettings(ControllerImpl c, PriorityLevel p) {
+		addOp(new OpSendSampleSettings(p, c));
+		BeaconImpl beacon = c.getActiveBeacon();
+		if (beacon != null)
+			addOp(new OpSendBeaconSettings(p, beacon));
+		RampMeterImpl meter1 = Op170.lookupMeter1(c);
+		if (meter1 != null)
+			addOp(new OpSendMeterSettings(p, meter1));
+		RampMeterImpl meter2 = Op170.lookupMeter2(c);
+		if (meter2 != null)
+			addOp(new OpSendMeterSettings(p, meter2));
 	}
 
 	/** Query sample data.

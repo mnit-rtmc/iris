@@ -1836,22 +1836,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Check if the sign is an active dialup sign */
 	public boolean isActiveDialup() {
-		return isActive() && (isDmsXMLDialup() || hasModemCommLink());
+		return isActive() && hasModemCommLink();
 	}
 
 	/** Check if the sign is periodically queriable */
 	public boolean isPeriodicallyQueriable() {
-		return (!isDmsXMLDialup()) &&
-		       ((!hasModemCommLink()) || isConnected());
-	}
-
-	/** Check if the sign is a DMSXML dialup sign */
-	private boolean isDmsXMLDialup() {
-		// FIXME: signAccess is supposed to indicate the *physical*
-		//        access of the DMS.  It was never intended to be used
-		//        in this manner. This is an agency-specific hack
-		//        (Caltrans).
-		return SString.containsIgnoreCase(getSignAccess(), "dialup");
+		return isConnected() || !hasModemCommLink();
 	}
 
 	/** Get the DMS poller */

@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.addco;
 
+import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -21,6 +22,7 @@ import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommThread;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
 
@@ -29,15 +31,31 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  *
  * @author Douglas Lau
  */
-public class AddcoPoller extends CommThread<AddcoProperty>
+public class AddcoPoller extends DevicePoller<AddcoProperty>
 	implements DMSPoller
 {
 	/** Addco debug log */
 	static private final DebugLog ADDCO_LOG = new DebugLog("addco");
 
 	/** Create a new ADDCO poller */
-	public AddcoPoller(String n, Messenger m) {
-		super(n, m, ADDCO_LOG);
+	public AddcoPoller(String n) {
+		super(n, TCP, ADDCO_LOG);
+	}
+
+	/** Create a comm thread */
+	@Override
+	public CommThread<AddcoProperty> createCommThread(String uri,
+		int timeout) throws IOException
+	{
+		return new CommThread<AddcoProperty>(this, queue,
+			createMessenger(uri, timeout));
+	}
+
+	/** Create a messenger */
+	private Messenger createMessenger(String uri, int timeout)
+		throws IOException
+	{
+		return new AddcoMessenger(Messenger.create(d_uri, uri,timeout));
 	}
 
 	/** Send a device request message to the sign */

@@ -17,8 +17,7 @@ package us.mn.state.dot.tms.server.comm.incfeed;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.IncidentCache;
-import us.mn.state.dot.tms.server.comm.CommThread;
-import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.DevicePoller;
 
 /**
  * Incident feed poller, which periodically retrieves incidents
@@ -26,27 +25,18 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  *
  * @author Douglas Lau
  */
-public class IncFeedPoller extends CommThread<IncFeedProperty> {
+public class IncFeedPoller extends DevicePoller<IncFeedProperty> {
 
 	/** Incident feed debug log */
 	static private final DebugLog INC_LOG = new DebugLog("inc_feed");
 
-	/** Log a message to the debug log */
-	static public void log(String msg) {
-		INC_LOG.log(msg);
-	}
-
-	/** Feed ID */
-	private final String feed_id;
-
 	/** Create a new poller */
-	public IncFeedPoller(String n, Messenger m) {
-		super(n, m, INC_LOG);
-		feed_id = n;
+	public IncFeedPoller(String n) {
+		super(n, HTTP, INC_LOG);
 	}
 
 	/** Query incident feed */
 	public void queryIncidents(ControllerImpl c, IncidentCache cache) {
-		addOp(new OpReadIncFeed(c, feed_id, cache));
+		addOp(new OpReadIncFeed(c, cache));
 	}
 }
