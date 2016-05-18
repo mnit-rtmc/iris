@@ -45,6 +45,9 @@ public class InfinovaOutputStream extends OutputStream {
 	/** Authentication message */
 	static private final byte[] AUTH = new byte[AUTH_SZ + 2];
 
+	/** Size of PTZ header */
+	static private final int PTZ_SZ = 12;
+
 	/** Log a message */
 	static private void log(String m) {
 		if (INF_LOG.isOpen())
@@ -74,7 +77,7 @@ public class InfinovaOutputStream extends OutputStream {
 	public void write(byte[] b, int off, int len) throws IOException {
 		if (needs_auth)
 			writeAuthentication();
-		writeHeader(MsgId.ptz, AUTH_SZ + len);
+		writeHeader(MsgId.ptz, PTZ_SZ + len);
 		writePtzHeader(len);
 		log("write: " + len);
 		out.write(b, off, len);
@@ -88,7 +91,6 @@ public class InfinovaOutputStream extends OutputStream {
 
 	/** Write an authentication message */
 	private void writeAuthentication() throws IOException {
-		log("writeAuthentication");
 		writeHeader(MsgId.auth, AUTH_SZ);
 		out.write(AUTH);
 		needs_auth = false;
@@ -96,7 +98,7 @@ public class InfinovaOutputStream extends OutputStream {
 
 	/** Write an infinova header */
 	private void writeHeader(MsgId msg, int len) throws IOException {
-		log("writeHeader: " + msg);
+		log("writeHeader: " + msg + ", len: " + len);
 		byte[] header = new byte[] {
 			'I', 'N', 'F', 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		};
@@ -105,16 +107,15 @@ public class InfinovaOutputStream extends OutputStream {
 			header[5] = 1;
 			header[7] = 1;
 		}
-		header[11] = (byte)len;
+		header[11] = (byte) len;
 		out.write(header);
 	}
 
 	/** Write a PTZ header */
 	private void writePtzHeader(int len) throws IOException {
-		log("writePtzHeader");
-		byte[] header = new byte[12];
+		byte[] header = new byte[PTZ_SZ];
 		header[0] = 1;
-		header[7] = (byte)len;
+		header[7] = (byte) len;
 		out.write(header);
 	}
 
