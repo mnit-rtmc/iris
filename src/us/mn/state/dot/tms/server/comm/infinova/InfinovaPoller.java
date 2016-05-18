@@ -14,10 +14,13 @@
  */
 package us.mn.state.dot.tms.server.comm.infinova;
 
+import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
+import us.mn.state.dot.tms.server.comm.CommThread;
+import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.TransientPoller;
 import us.mn.state.dot.tms.server.comm.pelcod.OpDeviceRequest;
 import us.mn.state.dot.tms.server.comm.pelcod.OpMoveCamera;
@@ -38,6 +41,23 @@ public class InfinovaPoller extends TransientPoller<PelcoDProperty>
 	/** Create a new infinova poller */
 	public InfinovaPoller(String n) {
 		super(n, TCP, INFINOVA_LOG);
+	}
+
+	/** Create a comm thread */
+	@Override
+	public CommThread<PelcoDProperty> createCommThread(String uri,
+		int timeout) throws IOException
+	{
+		return new CommThread<PelcoDProperty>(this, queue,
+			createMessenger(uri, timeout));
+	}
+
+	/** Create a messenger */
+	private Messenger createMessenger(String uri, int timeout)
+		throws IOException
+	{
+		return new InfinovaMessenger(Messenger.create(d_uri, uri,
+			timeout));
 	}
 
 	/** Send a PTZ camera move command */
