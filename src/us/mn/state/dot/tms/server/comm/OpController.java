@@ -36,9 +36,6 @@ abstract public class OpController<T extends ControllerProperty> {
 		return SystemAttrEnum.OPERATION_RETRY_THRESHOLD.getInt();
 	}
 
-	/** Comm error log */
-	static private final DebugLog COMM_LOG = new DebugLog("comm");
-
 	/** Maximum message length */
 	static private final int MAX_MSG_LEN = 64;
 
@@ -232,16 +229,9 @@ abstract public class OpController<T extends ControllerProperty> {
 
 	/** Handle a communication error */
 	public void handleCommError(EventType et, String msg) {
-		logComm(et, msg);
 		controller.logCommEvent(et, id, filterMsg(msg));
 		if (!retry())
 			setFailed();
-	}
-
-	/** Log a comm error to debug log */
-	private void logComm(EventType et, String msg) {
-		if (COMM_LOG.isOpen())
-			COMM_LOG.log(id + " " + et + ", " + msg);
 	}
 
 	/** Operation error counter */

@@ -29,8 +29,8 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  */
 public class CommThread<T extends ControllerProperty> {
 
-	/** Get a message describing an IO exception */
-	static protected String exceptionMessage(IOException e) {
+	/** Get a message describing an exception */
+	static private String exceptionMessage(Exception e) {
 		String m = e.getMessage();
 		if (m != null && m.length() > 0)
 			return m;
@@ -38,16 +38,25 @@ public class CommThread<T extends ControllerProperty> {
 			return e.getClass().getSimpleName();
 	}
 
+	/** Thread group for all comm threads */
+	static private final ThreadGroup GROUP = new ThreadGroup("Comm");
+
 	/** Message polling log */
 	static private final DebugLog POLL_LOG = new DebugLog("polling");
 
-	/** Thread group for all comm threads */
-	static private final ThreadGroup GROUP = new ThreadGroup("Comm");
+	/** Comm error log */
+	static private final DebugLog COMM_LOG = new DebugLog("comm");
 
 	/** Write a message to the polling log */
 	private void plog(String msg) {
 		if (POLL_LOG.isOpen())
 			POLL_LOG.log(thread.getName() + " " + msg);
+	}
+
+	/** Write a message to the comm log */
+	private void clog(String msg) {
+		if (COMM_LOG.isOpen())
+			COMM_LOG.log(thread.getName() + " " + msg);
 	}
 
 	/** Device poller */
@@ -111,10 +120,10 @@ public class CommThread<T extends ControllerProperty> {
 			performOperations();
 		}
 		catch (InterruptedException e) {
-			// from destroy
+			setStatus(getMessage(e));
 		}
 		catch (IOException e) {
-			setStatus(exceptionMessage(e));
+			setStatus(getMessage(e));
 		}
 		catch (RuntimeException e) {
 			e.printStackTrace();
@@ -122,6 +131,13 @@ public class CommThread<T extends ControllerProperty> {
 		finally {
 			messenger.close();
 		}
+	}
+
+	/** Get an exception message */
+	protected String getMessage(Exception e) {
+		String msg = exceptionMessage(e);
+		clog(msg);
+		return msg;
 	}
 
 	/** Perform operations on the poll queue */
@@ -148,24 +164,24 @@ public class CommThread<T extends ControllerProperty> {
 			sendSettings(o.getController(), o.getPriority());
 		}
 		catch (ChecksumException e) {
-			o.handleCommError(EventType.CHECKSUM_ERROR,
-				exceptionMessage(e));
+			String msg = getMessage(e);
+			o.handleCommError(EventType.CHECKSUM_ERROR, msg);
 			messenger.drain();
 		}
 		catch (ParsingException e) {
-			o.handleCommError(EventType.PARSING_ERROR,
-				exceptionMessage(e));
+			String msg = getMessage(e);
+			o.handleCommError(EventType.PARSING_ERROR, msg);
 			messenger.drain();
 		}
 		catch (ControllerException e) {
-			o.handleCommError(EventType.CONTROLLER_ERROR,
-				exceptionMessage(e));
+			String msg = getMessage(e);
+			o.handleCommError(EventType.CONTROLLER_ERROR, msg);
 			o.setFailed();
-			o.setMaintStatus(exceptionMessage(e));
+			o.setMaintStatus(msg);
 		}
 		catch (SocketTimeoutException e) {
-			o.handleCommError(EventType.POLL_TIMEOUT_ERROR,
-				exceptionMessage(e));
+			String msg = getMessage(e);
+			o.handleCommError(EventType.POLL_TIMEOUT_ERROR, msg);
 		}
 		finally {
 			if (o.isDone() || !requeueOperation(o))

@@ -120,7 +120,7 @@ public class E6Thread extends CommThread<E6Property> {
 			}
 		}
 		catch (IOException e) {
-			setStatus(exceptionMessage(e));
+			setStatus(getMessage(e));
 		}
 		finally {
 			destroy();
