@@ -58,7 +58,7 @@ public class NtcipPoller extends DevicePoller implements DMSPoller, LCSPoller {
 
 	/** Create a comm thread */
 	@Override
-	public NtcipThread createCommThread(String uri, int timeout)
+	protected NtcipThread createCommThread(String uri, int timeout)
 		throws IOException
 	{
 		return new NtcipThread(this, queue, createMessenger(uri,

@@ -44,7 +44,7 @@ public class AddcoPoller extends DevicePoller<AddcoProperty>
 
 	/** Create a comm thread */
 	@Override
-	public CommThread<AddcoProperty> createCommThread(String uri,
+	protected CommThread<AddcoProperty> createCommThread(String uri,
 		int timeout) throws IOException
 	{
 		return new CommThread<AddcoProperty>(this, queue,

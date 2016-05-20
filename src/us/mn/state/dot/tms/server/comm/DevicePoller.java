@@ -63,6 +63,7 @@ public class DevicePoller<T extends ControllerProperty> {
 
 	/** Destroy the poller */
 	public void destroy() {
+		destroyCommThread();
 		queue.close();
 		drainQueue();
 		log("DESTROYED");
@@ -83,6 +84,10 @@ public class DevicePoller<T extends ControllerProperty> {
 
 	/** Add an operation to the device poller */
 	protected void addOp(OpController<T> op) {
+		if (!isConnected()) {
+			destroyCommThread();
+			createCommThread();
+		}
 		if (!queue.enqueue(op))
 			log("DROPPING " + op);
 	}
@@ -92,11 +97,73 @@ public class DevicePoller<T extends ControllerProperty> {
 		// Subclasses should override this if necessary
 	}
 
-	/** Create a comm thread */
-	public CommThread<T> createCommThread(String uri, int timeout)
+
+	/** Remote URI */
+	private String uri = "";
+
+	/** Set the remote URI */
+	public synchronized void setUri(String u) {
+		uri = u;
+		destroyCommThread();
+	}
+
+	/** Receive timeout (ms) */
+	private int timeout;
+
+	/** Set the receive timeout (ms) */
+	public synchronized void setTimeout(int rt) {
+		timeout = rt;
+		destroyCommThread();
+	}
+
+	/** Comm thread (may be null) */
+	private CommThread c_thread;
+
+	/** Poller status when no comm thread exists */
+	private String status = "INIT";
+
+	/** Get the poller status */
+	public String getStatus() {
+		CommThread ct = c_thread;
+		return (ct != null) ? ct.getStatus() : status;
+	}
+
+	/** Set the poller status */
+	private void setStatus(String s) {
+		status = s;
+	}
+
+	/** Check if the poller is currently connected */
+	public boolean isConnected() {
+		CommThread ct = c_thread;
+		return (ct != null) && ct.isAlive();
+	}
+
+	/** Create the comm thread */
+	private synchronized void createCommThread() {
+		try {
+			c_thread = createCommThread(uri, timeout);
+			c_thread.start();
+		}
+		catch (IOException e) {
+			setStatus("I/O error: " + e.getMessage());
+			c_thread = null;
+		}
+	}
+
+	/** Create a new comm thread */
+	protected CommThread<T> createCommThread(String uri, int timeout)
 		throws IOException
 	{
 		return new CommThread<T>(this, queue, Messenger.create(d_uri,
 			uri, timeout));
+	}
+
+	/** Destroy the comm thread */
+	private synchronized void destroyCommThread() {
+		setStatus("STOPPED");
+		if (c_thread != null)
+			c_thread.destroy();
+		c_thread = null;
 	}
 }

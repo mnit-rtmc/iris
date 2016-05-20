@@ -49,7 +49,7 @@ public class DmsXmlPoller extends DevicePoller implements DMSPoller {
 
 	/** Create a comm thread */
 	@Override
-	public DmsXmlThread createCommThread(String uri, int timeout)
+	protected DmsXmlThread createCommThread(String uri, int timeout)
 		throws IOException
 	{
 		return new DmsXmlThread(this, queue, Messenger.create(d_uri,

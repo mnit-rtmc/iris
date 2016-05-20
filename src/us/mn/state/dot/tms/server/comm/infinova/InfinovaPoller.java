@@ -45,7 +45,7 @@ public class InfinovaPoller extends TransientPoller<PelcoDProperty>
 
 	/** Create a comm thread */
 	@Override
-	public CommThread<PelcoDProperty> createCommThread(String uri,
+	protected CommThread<PelcoDProperty> createCommThread(String uri,
 		int timeout) throws IOException
 	{
 		return new CommThread<PelcoDProperty>(this, queue,
