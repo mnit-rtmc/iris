@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public class Profiler {
 
 	/** Debug memory profiling information */
 	public void debugMemory() {
-		if(PROFILE_LOG.isOpen()) {
+		if (PROFILE_LOG.isOpen()) {
 			long free = jvm.freeMemory();
 			long total = jvm.totalMemory();
 			PROFILE_LOG.log("Free memory: " + formatMem(free));
@@ -75,9 +75,9 @@ public class Profiler {
 
 	/** Debug thread profiling information for all threads */
 	public void debugThreads() {
-		if(PROFILE_LOG.isOpen()) {
+		if (PROFILE_LOG.isOpen()) {
 			ThreadGroup g = Thread.currentThread().getThreadGroup();
-			while(g.getParent() != null)
+			while (g.getParent() != null)
 				g = g.getParent();
 			debugThreads(g, 0);
 		}
@@ -89,7 +89,7 @@ public class Profiler {
 		ThreadGroup[] groups =
 			new ThreadGroup[group.activeGroupCount() + 1];
 		int count = group.enumerate(groups, false);
-		for(int i = 0; i < count; i++)
+		for (int i = 0; i < count; i++)
 			debugThreads(groups[i], deep + 2);
 	}
 
