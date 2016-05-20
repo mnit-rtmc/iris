@@ -42,17 +42,8 @@ public class CommThread<T extends ControllerProperty> {
 	/** Thread group for all comm threads */
 	static private final ThreadGroup GROUP = new ThreadGroup("Comm");
 
-	/** Message polling log */
-	static private final DebugLog POLL_LOG = new DebugLog("polling");
-
 	/** Comm error log */
 	static private final DebugLog COMM_LOG = new DebugLog("comm");
-
-	/** Write a message to the polling log */
-	private void plog(String msg) {
-		if (POLL_LOG.isOpen())
-			POLL_LOG.log(thread.getName() + " " + msg);
-	}
 
 	/** Write a message to the comm log */
 	private void clog(String msg) {
@@ -193,8 +184,8 @@ public class CommThread<T extends ControllerProperty> {
 		finally {
 			if (o.isDone() || !requeueOperation(o))
 				o.cleanup();
-			if (POLL_LOG.isOpen()) {
-				plog(oname + " elapsed: " +
+			if (COMM_LOG.isOpen()) {
+				clog(oname + " elapsed: " +
 					calculate_elapsed(start));
 			}
 		}
