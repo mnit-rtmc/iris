@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
@@ -182,6 +183,12 @@ public class CommThread<T extends ControllerProperty> {
 		catch (SocketTimeoutException e) {
 			String msg = getMessage(e);
 			o.handleCommError(EventType.POLL_TIMEOUT_ERROR, msg);
+		}
+		catch (SocketException e) {
+			String msg = getMessage(e);
+			o.handleCommError(EventType.COMM_ERROR, msg);
+			messenger.close();
+			messenger.open();
 		}
 		finally {
 			if (o.isDone() || !requeueOperation(o))
