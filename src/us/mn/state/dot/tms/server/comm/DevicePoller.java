@@ -160,7 +160,7 @@ public class DevicePoller<T extends ControllerProperty> {
 	}
 
 	/** Destroy the comm thread */
-	private synchronized void destroyCommThread() {
+	public synchronized void destroyCommThread() {
 		setStatus("STOPPED");
 		if (c_thread != null)
 			c_thread.destroy();

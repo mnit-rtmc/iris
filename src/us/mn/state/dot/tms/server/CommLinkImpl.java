@@ -205,7 +205,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		store.update(this, "uri", u);
 		setUri(u);
 		failControllers();
-		updateStatus();
 	}
 
 	/** Get remote URI for link */
@@ -264,7 +263,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		store.update(this, "poll_enabled", e);
 		setPollEnabled(e);
 		failControllers();
-		updateStatus();
 	}
 
 	/** Get polling enabled/disabled flag */
@@ -328,7 +326,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		store.update(this, "timeout", t);
 		setTimeout(t);
 		failControllers();
-		updateStatus();
 	}
 
 	/** Get the polling timeout (milliseconds) */
@@ -370,8 +367,11 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set all controllers to a failed status */
 	private synchronized void failControllers() {
+		if (poller != null)
+			poller.destroyCommThread();
 		for (ControllerImpl c: controllers.values())
 			c.setFailed(true);
+		updateStatus();
 	}
 
 	/** Poll all controllers */
