@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.BufferedOutputStream;
 import us.mn.state.dot.sched.DebugLog;
+import static us.mn.state.dot.sched.TimeSteward.sleep_well;
 import static us.mn.state.dot.tms.server.comm.infinova.InfinovaPoller.INF_LOG;
 
 /**
@@ -94,6 +95,7 @@ public class InfinovaOutputStream extends OutputStream {
 		writeHeader(MsgId.auth, AUTH_SZ);
 		out.write(AUTH);
 		needs_auth = false;
+		flush();
 	}
 
 	/** Write an infinova header */
@@ -124,6 +126,9 @@ public class InfinovaOutputStream extends OutputStream {
 	public void flush() throws IOException {
 		log("flush");
 		out.flush();
+		// NOTE: Infinova cameras will ignore any message received
+		//       less than 180 ms after the previous message
+		sleep_well(180);
 	}
 
 	/** Close the output stream */
