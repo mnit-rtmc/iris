@@ -97,7 +97,6 @@ public class DevicePoller<T extends ControllerProperty> {
 		// Subclasses should override this if necessary
 	}
 
-
 	/** Remote URI */
 	private String uri = "";
 

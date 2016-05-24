@@ -204,6 +204,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return;
 		store.update(this, "uri", u);
 		setUri(u);
+		DevicePoller dp = poller;
+		if (dp != null)
+			dp.setUri(u);
 		failControllers();
 	}
 
@@ -262,6 +265,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return;
 		store.update(this, "poll_enabled", e);
 		setPollEnabled(e);
+		DevicePoller dp = poller;
+		if (dp != null)
+			dp.destroyCommThread();
 		failControllers();
 	}
 
@@ -325,6 +331,9 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			throw new ChangeVetoException("Bad timeout: " + t);
 		store.update(this, "timeout", t);
 		setTimeout(t);
+		DevicePoller dp = poller;
+		if (dp != null)
+			dp.setTimeout(t);
 		failControllers();
 	}
 
@@ -367,8 +376,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set all controllers to a failed status */
 	private synchronized void failControllers() {
-		if (poller != null)
-			poller.destroyCommThread();
 		for (ControllerImpl c: controllers.values())
 			c.setFailed(true);
 		updateStatus();
