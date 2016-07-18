@@ -358,8 +358,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Create the device poller */
 	private synchronized void createPoller() {
 		poller = DevicePollerFactory.create(name, protocol);
-		poller.setUri(uri);
-		poller.setTimeout(timeout);
+		if (poller != null) {
+			poller.setUri(uri);
+			poller.setTimeout(timeout);
+		}
 	}
 
 	/** Destroy the device poller */
