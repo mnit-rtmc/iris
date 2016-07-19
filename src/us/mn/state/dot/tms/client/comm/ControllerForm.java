@@ -449,6 +449,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	private void updateCommLink() {
 		CommLink cl = proxy.getCommLink();
 		comm_link_mdl.setSelectedItem(cl);
-		uri_lbl.setText(cl.getUri());
+		if (cl != null)
+			uri_lbl.setText(cl.getUri());
+		else
+			uri_lbl.setText("");
 	}
 }
