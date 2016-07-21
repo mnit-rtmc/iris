@@ -155,6 +155,11 @@ public class CommThread<T extends ControllerProperty> {
 		catch (DownloadRequestException e) {
 			sendSettings(o.getController(), o.getPriority());
 		}
+		catch (ProtocolException e) {
+			String msg = getMessage(e);
+			o.setFailed();
+			o.setMaintStatus(msg);
+		}
 		catch (ChecksumException e) {
 			String msg = getMessage(e);
 			o.handleCommError(EventType.CHECKSUM_ERROR, msg);
