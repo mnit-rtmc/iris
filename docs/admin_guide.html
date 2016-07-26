@@ -60,10 +60,11 @@
     <h3><a href="#incident_management">Incident Management</a></h3>
     <h3><a href="#action_plans">Action Plans</a></h3>
     <h3><a href="#schedules">Date/Time Schedules</a></h3>
-    <h3><a href="#metering_strategies">Ramp Metering Strategies</a></h3>
     <h3><a href="#travel_time">Travel Time Estimation</a></h3>
     <h3><a href="#vsa">Variable Speed Advisory</a></h3>
+    <h3><a href="#slow">Slow Traffic Warning</a></h3>
     <h3><a href="#tolling">Tolling</a></h3>
+    <h3><a href="#metering_strategies">Ramp Metering Strategies</a></h3>
     <h3><a href="#spellchecker">Spell Checker</a></h3>
   </div>
   <h2><a id="troubleshooting_link" href="#troubleshooting">Troubleshooting</a></h2>
@@ -97,7 +98,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">3 May 2016</div>
+<div id="stamp">26 July 2016</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -1350,13 +1351,14 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 <p>
 	There are a couple of other required steps to enable a message feed
 	to operate.
-	First, an action plan must be created which associates a DMS action
-	with the message feed.
+	First, an <a href="#action_plans">action plan</a> must be created which
+	associates a <a href="#dms_actions">DMS action</a> with the message
+	feed.
 	The DMS action must be associated with a <a href="#quick_msg">quick
-	message</a> that references the message feed, using a special MULTI tag.
+	message</a> that references the message feed, using a <b>feed</b>
+	<a href="#action_tag">action tag</a>.
 	So, if the message feed is on a Comm Link called "LFEED", then the
-	<a href="#quick_msg">quick message</a> MULTI string must be
-	"[feedLFEED]".
+	quick message MULTI string must be "[feedLFEED]".
 	Also, the action plan must be active and deployed.
 	This requirement allows only administrator-approved DMS to be controlled
 	by the message feed.
@@ -1904,41 +1906,10 @@ FIXME
 	with a sign group.
 	When a DMS is selected, a drop-down list is populated with quick
 	messages from sign groups of which that DMS is a member.
+	Quick messages are also be used for <a href="#dms_actions">DMS
+	actions</a> as part of an <a href="#action_plans">action plan</a>.
+	For these messages, it is best to leave the sign group blank.
 </p>
-<p>
-	Quick messages can also be used for DMS actions as part of an
-	<a href="#action_plans">action plan</a>.
-	Some additional "MULTI-like" tags are supported in quick messages used
-	in action plans.
-	These tags are replaced by IRIS before sending the message to the DMS.
-</p>
-<table>
-	<tr>
-	    <th>Tag</th>
-	    <th>Description</th>
-	</tr>
-	<tr>
-	    <td>[tt<i>n</i>]</td>
-	    <td><a href="#travel_time">Travel time</a></td>
-	</tr>
-	<tr>
-	    <td>[vsa]</td>
-	    <td><a href="#vsa">Speed advisory</a></td>
-	</tr>
-	<tr>
-	    <td>[slow<i>s</i>,<i>b</i>,<i>u</i>,<i>dist</i>]</td>
-	    <td>Slow traffic warning</td>
-	</tr>
-	<tr>
-	    <td>[feed<i>n</i>]</td>
-	    <td><a href="#msg_feed">Message feed</a></td>
-	</tr>
-	<tr>
-	    <td>[tz<i>{p,o,c}</i>,<i>{tz0},</i>…<i>{tzn}</i>]</td>
-	    <td><a href="#tolling">Toll Zone</a></td>
-	</tr>
-</table>
-<br/>
 
 <h3 id="cameras">Cameras</h3>
 <p>
@@ -2437,7 +2408,8 @@ FIXME
 	<dd>no / yes</dd>
 </dl>
 <p>
-	One MULTI-like tag is defined for incident locators.
+	One "<a href="#multi">MULTI</a>-like" tag is defined for incident
+	locators.
 </p>
 <table>
 	<tr>
@@ -2529,12 +2501,68 @@ FIXME
 </table>
 <br/>
 <h3 id="action_plans">Action Plans</h3>
-FIXME
+<p>
+	Action plans provide a way to coördinate many related actions
+	at the same time.
+	Select the <span class="menu">View ➔ Plans and Schedules</span> menu
+	item to display the Plans and Schedules form.
+	Possible actions include displaying <a href="#dms">DMS</a> messages,
+	activating <a href="#beacons">beacons</a> and operating
+	<a href="#ramp_meters">ramp meters</a>.
+	Simple action plans can have just two phases: deployed or undeployed.
+	More advanced plans can have many phases, each with separate actions.
+	If the <b>Sync Actions</b> box is checked, the phase can only be changed
+	if all associated devices are online.
+	If the <b>Sticky</b> box is checked, DMS messages will be configured to
+	remain even if communication or power is lost.
+</p>
+<h4 id="dms_actions">DMS actions</h4>
+<p>
+	DMS actions have an associated sign group to determine which signs are
+	affected by the action.
+	The action happens when the action plan phase matches the <b>phase</b>
+	of the DMS action.
+	The <a href="#quick_msg">quick message</a> indicates which message is
+	activated by the plan.
+	<b>Activation</b> and <b>run-time priorities</b> determine which of
+	multiple actions will take precedence.
+</p>
+<h4 id="action_tag">DMS Action Tags</h4>
+<p>
+	Some "<a href="#multi">MULTI</a>-like" tags are supported in
+	<a href="#quick_msg">quick messages</a> used by DMS actions.
+	These tags are interpreted by IRIS before sending the message to the
+	DMS.
+</p>
+<table>
+	<tr>
+	    <th>Tag</th>
+	    <th>Description</th>
+	</tr>
+	<tr>
+	    <td>[feed<i>n</i>]</td>
+	    <td><a href="#msg_feed">Message feed</a></td>
+	</tr>
+	<tr>
+	    <td>[tt<i>n</i>]</td>
+	    <td><a href="#travel_time">Travel time</a></td>
+	</tr>
+	<tr>
+	    <td>[vsa]</td>
+	    <td><a href="#vsa">Speed advisory</a></td>
+	</tr>
+	<tr>
+	    <td>[slow<i>s</i>,<i>b</i>,<i>u</i>,<i>dist</i>]</td>
+	    <td><a href="#slow">Slow traffic warning</a></td>
+	</tr>
+	<tr>
+	    <td>[tz<i>{p,o,c}</i>,<i>{tz0},</i>…<i>{tzn}</i>]</td>
+	    <td><a href="#tolling">Toll Zone</a></td>
+	</tr>
+</table>
+<br/>
 
 <h3 id="schedules">Date/Time Schedules</h3>
-FIXME
-
-<h3 id="metering_strategies">Ramp Metering Strategies</h3>
 FIXME
 
 <h3 id="travel_time">Travel Time Estimation</h3>
@@ -2542,6 +2570,12 @@ FIXME
 
 <h3 id="vsa">Variable Speed Advisory</h3>
 FIXME
+
+<h3 id="slow">Slow Traffic Warning</h3>
+<p>
+	A <b>slow</b> <a href="#action_tag">action tag</a> allows warnings to be
+	displayed on DMS when traffic is slow.
+</p>
 
 <h3 id="tolling">Tolling</h3>
 <p>
@@ -2571,8 +2605,8 @@ FIXME
 <h4>Pricing on DMS</h4>
 <p>
 	A DMS can display pricing information for toll zones.
-	This is accomplished using an IRIS-specific <a href="#multi">MULTI</a>
-	tag.
+	This is accomplished using a <b>tz</b> <a href="#action_tag">action
+	tag</a>.
 	The tag has two or more parameters, separated by commas.
 	The first parameter is the tolling mode, and must be "<i>p</i>",
 	"<i>o</i>" or "<i>c</i>".
@@ -2583,18 +2617,18 @@ FIXME
 	provided after the first.
 </p>
 <p>
-	If the tolling mode is <i>priced</i>, the MULTI tag will be replaced
-	with the calculated price, for example "2.75".
+	If the tolling mode is <i>priced</i>, the tag will be replaced with the
+	calculated price, for example "2.75".
 	It will be the sum of prices for all specified toll zones.
 	Two <a href="#system_attributes">system attributes</a>,
 	<code>toll_min_price</code> and <code>toll_max_price</code>, limit the
 	calculated price.
 </p>
 <p>
-	For <i>open</i> and <i>closed</i> modes, the MULTI tag will be replaced
-	with an empty string.
+	For <i>open</i> and <i>closed</i> modes, the tag will be replaced with
+	an empty string.
 	If required, a message such as "OPEN" or "CLOSED" may be appended after
-	the MULTI tag.
+	the tag.
 </p>
 <p>
 	Price events are logged when a message is sent to a DMS, and again when
@@ -2602,7 +2636,7 @@ FIXME
 	The price event includes the date and time, toll zone, tolling mode
 	(<i>priced</i>, <i>open</i>, <i>closed</i>), price, sent / verified
 	status and next downstream tag reader.
-	The logged toll zone is the last zone specified in the MULTI tag.
+	The logged toll zone is the last zone specified in the tag.
 	In <i>priced</i> mode, the displayed price is logged.
 	For <i>open</i> or <i>closed</i>, a price of 0 is logged.
 </p>
@@ -2615,6 +2649,9 @@ FIXME
 	to build a list of trips for each tag ID.
 	This information can be used to bill customers.
 </p>
+<h3 id="metering_strategies">Ramp Metering Strategies</h3>
+FIXME
+
 <h3 id="spellchecker">Spell Checker</h3>
 <p>
 	The system attributes <i>dict_allowed_scheme</i> and
@@ -2809,7 +2846,7 @@ FIXME
 	</tr>
 	<tr>
 	    <td>slow</td>
-	    <td>DMS slow warning system log</td>
+	    <td>DMS <a href="#slow">slow warning</a> system log</td>
 	</tr>
 	<tr>
 	    <td>snmp</td>
