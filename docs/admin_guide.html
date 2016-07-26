@@ -2502,7 +2502,7 @@ FIXME
 <br/>
 <h3 id="action_plans">Action Plans</h3>
 <p>
-	Action plans provide a way to coördinate many related actions
+	Action plans provide a way to coördinate multiple related actions
 	at the same time.
 	Select the <span class="menu">View ➔ Plans and Schedules</span> menu
 	item to display the Plans and Schedules form.
@@ -2516,7 +2516,7 @@ FIXME
 	If the <b>Sticky</b> box is checked, DMS messages will be configured to
 	remain even if communication or power is lost.
 </p>
-<h4 id="dms_actions">DMS actions</h4>
+<h4 id="dms_actions">DMS Actions</h4>
 <p>
 	DMS actions have an associated sign group to determine which signs are
 	affected by the action.
@@ -2575,6 +2575,29 @@ FIXME
 <p>
 	A <b>slow</b> <a href="#action_tag">action tag</a> allows warnings to be
 	displayed on DMS when traffic is slow.
+	The tag has three parameters, separated by commas.
+</p>
+<ol>
+	<li>Highest speed to activate the warning, in mph.</li>
+	<li>Distance (tenths of mile) to search for slow traffic, relative to
+	    the DMS location.</li>
+	<li>Tag replacement mode (<b>none</b> if omitted)
+	    <ul>
+	        <li><b>none</b>: a blank string</li>
+	        <li><b>dist</b>: distance rounded to nearest mile</li>
+	        <li><b>speed</b>: speed rounded to nearest 5 mph</li>
+	    </ul>
+	</li>
+</ol>
+<dl>
+	<dt>[slow35, 10]SLOW[nl]TRAFFIC[nl]AHEAD</dt>
+	<dd>Displays if traffic slower than 35 mph within 1 mile</dd>
+	<dt>SLOW TRAFFIC[nl][slow40,60,dist] MILES[nl]USE CAUTION</dt>
+	<dd>Displays if traffic slower than 40 mph within 6 miles</dd>
+	<dt>[slow45,5,speed] MPH[nl]1/2 MILE[nl]AHEAD</dt>
+	<dd>Displays if traffic slower than 45 mph within 0.5 miles</dd>
+</dl>
+<p>
 </p>
 
 <h3 id="tolling">Tolling</h3>
