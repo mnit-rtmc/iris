@@ -120,6 +120,12 @@ td.bottom {
 dt {
 	font-weight: bold;
 }
+aside {
+	float: right;
+	padding: 8px;
+	background: #ece;
+	border: 1px solid gray;
+}
 .left {
 	float: left;
 	padding-right: 8px;

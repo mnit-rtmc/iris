@@ -610,11 +610,13 @@
 </p>
 
 <h3 id="system_attributes">System Attributes</h3>
+<aside>
+	Select <span class="menu">View ➔ System ➔ System Attributes</span> menu
+	item
+</aside>
 <p>
 	A <b>system attribute</b> is a configurable value which can be used to
 	customize an IRIS system.
-	Select the <span class="menu">View ➔ System ➔ System Attributes</span>
-	menu item to display the System Attributes form.
 	Each system attribute has a corresponding type: string, boolean,
 	integer or floating point number.
 	String values are limited to 64 characters or less.
@@ -639,6 +641,10 @@
 </p>
 
 <h3 id="users_and_roles">Users and Roles</h3>
+<aside>
+	Select <span class="menu">View ➔ System ➔ Users and Roles</span>
+	menu item
+</aside>
 <p>
 	When a user logs into the IRIS system, the user is checked for validity.
 	The user account must be enabled, and be assigned to an enabled
@@ -647,8 +653,6 @@
 	performed using <a href="#sonar_config">LDAP</a>.
 	Otherwise, IRIS checks the password against the stored password hash
 	for that user account.
-	Select the <span class="menu">View ➔ System ➔ Users and Roles</span>
-	menu item to display the <b>Users and Roles</b> form.
 </p>
 <p>
 	The template SQL database contains one administrator role, called
@@ -874,9 +878,10 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 </pre>
 
 <h4>Create Map Extents in IRIS database</h4>
+<aside>
+	Select <span class="menu">View ➔ System ➔ Map Extents</span> menu item
+</aside>
 <p>
-	In the IRIS client, select the <span class="menu">View ➔ System ➔
-	Map Extents</span> menu item to bring up the Map Extents form.
 	This form enables the creation of map extents, which are buttons
 	allowing quick selection of a map location and zoom level.
 	Each map extent will be displayed as a button on the upper right area
@@ -940,10 +945,11 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	Northbound road A.
 </p>
 <h4>Road Setup</h4>
+<aside>
+	Select <span class="menu">View ➔ System ➔ Roads</span> menu item
+</aside>
 <p>
 	Before creating r_nodes, some roads must be created.
-	Select the <span class="menu">View ➔ System ➔ Roads</span> menu item to
-	bring up the Roads form.
 	With <a href="#edit_mode">edit mode</a> <b>ON</b>, enter the road name
 	into the text box at the bottom of the form and press the <b>Create</b>
 	button.
@@ -1149,12 +1155,14 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 </p>
 
 <h3 id="comm_links">Comm Links</h3>
+<aside>
+	Select <span class="menu">View ➔ Maintenance ➔ Comm Links</span> menu
+	item
+</aside>
 <p>
 	A <b>comm link</b> is a network connection to an external device or
 	system.
 	IRIS is capable of supporting hundreds of simultaneous comm links.
-	The comm link interface is found on the <span class="menu">View ➔
-	Maintenance ➔ Comm Links</span> menu item.
 	Each comm link has a number of attributes, including URI and protocol.
 </p>
 <p>
@@ -1416,11 +1424,13 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 </p>
 
 <h3 id="controllers">Controllers</h3>
+<aside>
+	Select <span class="menu">View ➔ Maintenance ➔ Comm Links</span> menu
+	item
+</aside>
 <p>
 	A <b>controller</b> is an end-point for a <a href="#comm_links">comm
 	link</a>.
-	They are managed with the comm link interface (found at
-	<span class="menu">View ➔ Maintenance ➔ Comm Links</span> in the menu).
 	Each controller can have one or more associated <a href="#devices">
 	devices</a>, depending on the protocol.
 	Sometimes a controller represents a separate physical "box", which is
@@ -1535,6 +1545,10 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 <br/>
 
 <h3 id="fonts">Fonts</h3>
+<aside>
+	Select <span class="menu">View ➔ Message Signs ➔ DMS Fonts</span> menu
+	item
+</aside>
 <p>
 	A font is a set of bitmapped glyphs for displaying text on a dynamic
 	message sign (DMS).
@@ -1713,8 +1727,6 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 <p>
 	The IRIS client also contains a font editor which can be used to design
 	new DMS fonts.
-	The font interface is found on the <span class="menu">View ➔
-	Message Signs ➔ DMS Fonts</span> menu item.
 </p>
 
 <h2 id="devices">Devices</h2>
@@ -1743,6 +1755,9 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 </p>
 
 <h3 id="dms">Dynamic Message Signs (DMS)</h3>
+<aside>
+	Select <span class="menu">View ➔ Message Signs ➔ DMS</span> menu item
+</aside>
 <p>
 	A dynamic message sign (DMS) is a sign which is capable of changing the
 	message displayed to motorists.
@@ -1912,6 +1927,9 @@ FIXME
 </p>
 
 <h3 id="cameras">Cameras</h3>
+<aside>
+	Select <span class="menu">View ➔ Video ➔ Cameras</span> menu item
+</aside>
 <p>
 	Closed-circuit television cameras are commonly used to monitor traffic
 	conditions.
@@ -2081,6 +2099,9 @@ FIXME
 </p>
 
 <h3 id="lcs">Lane-use Control Signs (LCS)</h3>
+<aside>
+	Select <span class="menu">View ➔ Lane Use ➔ LCS</span> menu item
+</aside>
 <p>
 	A lane-use control sign (LCS) is a sign which is mounted over a single
 	lane of traffic (typically one for each lane).
@@ -2111,6 +2132,9 @@ FIXME
 </p>
 
 <h3 id="ramp_meters">Ramp Meters</h3>
+<aside>
+	Select <span class="menu">View ➔ Ramp Meters</span> menu item
+</aside>
 <p>
 	A ramp meter is a traffic signal at an on-ramp which controls the rate
 	of vehicles entering a freeway.
@@ -2130,6 +2154,9 @@ FIXME
 </ul>
 
 <h3 id="gate_arms">Gate Arms</h3>
+<aside>
+	Select <span class="menu">View ➔ Gate Arm Arrays</span> menu item
+</aside>
 <p>
 	Gate arms are traffic control devices which restrict access to a
 	section of roadway.
@@ -2219,10 +2246,11 @@ FIXME
 </p>
 
 <h3 id="tag_readers">Tag Readers</h3>
+<aside>
+	Select <span class="menu">View ➔ Lane Use ➔ Tag Readers</span> menu item
+</aside>
 <p>
 	A tag reader is a sensor for in-vehicle transponders (tags).
-	Select the <span class="menu">View ➔ Lane Use ➔ Tag Readers</span>
-	menu item to display the Tag Reader form.
 	When a tag is read, an event is logged in the database.
 	The event includes the date and time, tag ID, toll zone and tollway.
 	This information can be used for <a href="#tolling">tolling</a>
@@ -2230,6 +2258,10 @@ FIXME
 </p>
 
 <h3 id="beacons">Beacons</h3>
+<aside>
+	Select <span class="menu">View ➔ Message Signs ➔ Beacons</span> menu
+	item
+</aside>
 <p>
 	A beacon is a light or set of lights that flashes toward oncoming
 	traffic.
@@ -2244,6 +2276,9 @@ FIXME
 </p>
 
 <h3 id="alarms">Alarms</h3>
+<aside>
+	Select <span class="menu">View ➔ Maintenance ➔ Alarms</span> menu item
+</aside>
 <p>
 	An alarm is a simple device triggered by an event.
 	The event might be an equipment failure, high temperature, or low
@@ -2256,16 +2291,23 @@ FIXME
 	Triggered.
 	Alarms are created using the Alarm Form and can only be created for
 	controllers using a protocol driver that generate alarms.
-	For example, the Mn/DOT ramp meter drivers.
+	For example, the MnDOT ramp meter drivers.
 </p>
 
 <h3 id="rwis">Road Weather Information Systems</h3>
+<aside>
+	Select <span class="menu">View ➔ Weather Sensors</span> menu item
+</aside>
 <p>
 	Road Weather Information Systems (RWIS) can sense data such as
 	precipitation rate, road surface temperature, wind speed, etc.
 </p>
 
 <h3 id="lane_marking">Lane Marking</h3>
+<aside>
+	Select <span class="menu">View ➔ Lane Use ➔ Lane Markings</span> menu
+	item
+</aside>
 <p>
 	A lane marking device is also called <b>in-road lighting</b>.  It allows
 	the lane striping to be changed dynamically, by turning on and off
@@ -2362,12 +2404,14 @@ FIXME
 	</a> and <a href="#inc_advice">advice</a> are found.
 </p>
 <h5 id="inc_descriptor">Incident Descriptor</h5>
+<aside>
+	Select <span class="menu">View ➔ Incident ➔ Incident Descriptor</span>
+	menu item
+</aside>
 <p>
 	An incident matches a descriptor only if all the attributes match.
 	Each matching descriptor will be checked to see if the
 	<a href="#multi">MULTI</a> string can be rendered on the DMS.
-	Select the <span class="menu">View ➔ Incident ➔ Incident
-	Descriptor</span> menu item to display the Incident Descriptor form.
 </p>
 <dl>
 	<dt>Sign group<dt>
@@ -2382,6 +2426,10 @@ FIXME
 	<dd>yes / no</dd>
 </dl>
 <h5 id="inc_locator">Incident Locator</h5>
+<aside>
+	Select <span class="menu">View ➔ Incident ➔ Incident Locator</span> menu
+	item
+</aside>
 <p>
 	The incident is associated with the nearest <em>pickable</em>
 	<a href="#r_node">r_node</a>.
@@ -2389,8 +2437,6 @@ FIXME
 	<em>locator</em>.
 	If not, the nearest <em>non-pickable</em> r_node is found.
 	It can be used if distance is less than 1 mile.
-	Select the <span class="menu">View ➔ Incident ➔ Incident
-	Locator</span> menu item to display the Incident Locator form.
 </p>
 <p>
 	An incident matches a locator only if all the attributes match.
@@ -2448,10 +2494,12 @@ FIXME
 	For the `[locxa]` tag, all matching prefixes and suffixes are stripped.
 </p>
 <h5 id="inc_advice">Incident Advice</h5>
+<aside>
+	Select <span class="menu">View ➔ Incident ➔ Incident Advice</span> menu
+	item
+</aside>
 <p>
 	An incident matches an advice record only if all attributes match.
-	Select the <span class="menu">View ➔ Incident ➔ Incident
-	Advice</span> menu item to display the Incident Advice form.
 </p>
 <dl>
 	<dt>Sign group<dt>
@@ -2501,11 +2549,12 @@ FIXME
 </table>
 <br/>
 <h3 id="action_plans">Action Plans</h3>
+<aside>
+	Select <span class="menu">View ➔ Plans and Schedules</span> menu item
+</aside>
 <p>
 	Action plans provide a way to coördinate multiple related actions
 	at the same time.
-	Select the <span class="menu">View ➔ Plans and Schedules</span> menu
-	item to display the Plans and Schedules form.
 	Possible actions include displaying <a href="#dms">DMS</a> messages,
 	activating <a href="#beacons">beacons</a> and operating
 	<a href="#ramp_meters">ramp meters</a>.
@@ -2610,10 +2659,11 @@ FIXME
 	be provided by an external system.
 </p>
 <h4>Toll Zones</h4>
+<aside>
+	Select <span class="menu">View ➔ Lane Use ➔ Toll Zones</span> menu item
+</aside>
 <p>
 	A toll zone is a segment of roadway between two stations.
-	Select the <span class="menu">View ➔ Lane Use ➔ Toll Zones</span>
-	menu item to display the Toll Zone form.
 	All HOT lane detectors between the starting station and ending station
 	can be used to calculate the toll.
 	Every 3 minutes, tolls are calculated using data from the most recent 6
