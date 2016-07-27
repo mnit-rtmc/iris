@@ -53,10 +53,11 @@ public class BackupFinder implements Corridor.StationFinder {
 	 * @param m Milepoint of station.
 	 * @param s Station to check.
 	 * @return true to stop checking (never). */
-	@Override public boolean check(Float m, StationImpl s) {
-		if(back_mp == null && isNearSearch(m)) {
+	@Override
+	public boolean check(Float m, StationImpl s) {
+		if (back_mp == null && isNearSearch(m)) {
 			float spd = s.getRollingAverageSpeed();
-			if(spd > 0 && spd < spd_thresh.round(MPH))
+			if (spd > 0 && spd < spd_thresh.round(MPH))
 				back_mp = m;
 		}
 		return false;
@@ -66,9 +67,9 @@ public class BackupFinder implements Corridor.StationFinder {
 	 * @param m Milepoint of location.
 	 * @return true if location is near search point. */
 	private boolean isNearSearch(Float m) {
-		if(m != null) {
+		if (m != null) {
 			float d = m - ma;
-			if(blimit_mi > 0)
+			if (blimit_mi > 0)
 				return d > 0 && d < blimit_mi;
 			else
 				return d < 0 && d > blimit_mi;
@@ -79,7 +80,7 @@ public class BackupFinder implements Corridor.StationFinder {
 	/** Calculate the distance to mainline backup.
 	 * @return Distance to end of backup, or null for no backup. */
 	public Distance backupDistance() {
-		if(back_mp != null) {
+		if (back_mp != null) {
 			float d = back_mp - ma;
 			return new Distance(d, MILES);
 		} else
