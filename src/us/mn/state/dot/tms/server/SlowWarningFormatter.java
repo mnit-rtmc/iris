@@ -150,7 +150,7 @@ public class SlowWarningFormatter {
 		BackupFinder backup_finder = new BackupFinder(as, bd, m);
 		cor.findStation(backup_finder);
 		if (isLogging())
-			backup_finder.debug(this);
+			backup_finder.debug(SLOW_LOG);
 		return backup_finder.backupDistance();
 	}
 }

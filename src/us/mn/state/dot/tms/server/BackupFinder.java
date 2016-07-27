@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import us.mn.state.dot.tms.units.Speed;
@@ -86,10 +87,10 @@ public class BackupFinder implements Corridor.StationFinder {
 	}
 
 	/** Debug the finder */
-	public void debug(SlowWarningFormatter f) {
-		f.log("spd_thresh: " + spd_thresh +
-		      ", blimit_mi: " + blimit_mi +
-		      ", ma: " + ma +
-		      ", backup: " + backupDistance());
+	public void debug(DebugLog slog) {
+		slog.log("spd_thresh: " + spd_thresh +
+		         ", blimit_mi: " + blimit_mi +
+		         ", ma: " + ma +
+		         ", backup: " + backupDistance());
 	}
 }
