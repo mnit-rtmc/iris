@@ -85,7 +85,7 @@ sub {
 	font-size: xx-small;
 }
 .menu {
-	background: #ccc;
+	background: #cca;
 	font-family: monospace;
 }
 body {
@@ -123,7 +123,7 @@ dt {
 aside {
 	float: right;
 	padding: 8px;
-	background: #ece;
+	background: #ffd;
 	border: 1px solid gray;
 }
 .left {
