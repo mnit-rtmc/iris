@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011  Minnesota Department of Transportation
+ * Copyright (C) 2011-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -69,44 +69,51 @@ public class ModemInputStream extends InputStream {
 	}
 
 	/** Close the input stream */
+	@Override
 	public void close() throws IOException {
 		wrapped.close();
 	}
 
 	/** Get the number of available bytes */
+	@Override
 	public int available() throws IOException {
 		return wrapped.available();
 	}
 
 	/** Mark the position in the input stream */
+	@Override
 	public void mark(int readlimit) {
 		wrapped.mark(readlimit);
 	}
 
 	/** Test if marks are supported */
+	@Override
 	public boolean markSupported() {
 		return wrapped.markSupported();
 	}
 
 	/** Reset to last mark position */
+	@Override
 	public void reset() throws IOException {
 		wrapped.reset();
 	}
 
 	/** Skip all data currently in the stream */
+	@Override
 	public long skip(long n) throws IOException {
 		return wrapped.skip(n);
 	}
 
 	/** Read the next byte */
+	@Override
 	public int read() throws IOException {
 		try {
 			int n_byte = wrapped.read();
-			if(n_byte >= 0)
+			if (n_byte >= 0)
 				handleRead(1);
 			return n_byte;
 		}
-		catch(SocketTimeoutException e) {
+		catch (SocketTimeoutException e) {
 			handleTimeout(e);
 			return -1;
 		}
@@ -115,33 +122,35 @@ public class ModemInputStream extends InputStream {
 	/** Handle a socket timeout exception */
 	private void handleTimeout(SocketTimeoutException e) throws IOException{
 		n_timeout++;
-		if(n_timeout < getRetryThreshold())
+		if (n_timeout < getRetryThreshold())
 			throw e;
 		else
 			throw eof;
 	}
 
 	/** Read a buffer of data */
+	@Override
 	public int read(byte[] b) throws IOException {
 		try {
 			int n_bytes = wrapped.read(b);
 			handleRead(n_bytes);
 			return n_bytes;
 		}
-		catch(SocketTimeoutException e) {
+		catch (SocketTimeoutException e) {
 			handleTimeout(e);
 			return -1;
 		}
 	}
 
 	/** Read a buffer of data */
+	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
 		try {
 			int n_bytes = wrapped.read(b, off, len);
 			handleRead(n_bytes);
 			return n_bytes;
 		}
-		catch(SocketTimeoutException e) {
+		catch (SocketTimeoutException e) {
 			handleTimeout(e);
 			return -1;
 		}
@@ -149,9 +158,9 @@ public class ModemInputStream extends InputStream {
 
 	/** Handle a data read event */
 	private void handleRead(int n_bytes) {
-		if(n_bytes > 0) {
+		if (n_bytes > 0) {
 			n_timeout = 0;
-			if(connected)
+			if (connected)
 				eof = HUNG_UP;
 		}
 	}
