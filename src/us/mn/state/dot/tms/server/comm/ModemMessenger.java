@@ -94,9 +94,13 @@ public class ModemMessenger extends Messenger {
 			throw e;
 		}
 		output = wrapped.getOutputStream();
-		input = new ModemInputStream(wrapped.getInputStream(""));
+		ModemInputStream mis = new ModemInputStream(
+			wrapped.getInputStream(""));
+		input = mis;
 		try {
 			connectModemRetry();
+			mis.setConnected();
+			log("connected");
 			setState(ModemState.online);
 		}
 		catch (IOException e) {
@@ -145,7 +149,6 @@ public class ModemMessenger extends Messenger {
 			configureModem(osw, isr, config);
 		if (phone_number != null && phone_number.length() > 0)
 			dialModem(osw, isr);
-		setConnected();
     	}
 
 	/** Configure the modem */
@@ -194,14 +197,5 @@ public class ModemMessenger extends Messenger {
 		if (n_chars < 0)
 			throw new EOFException("END OF STREAM");
 		return new String(buf, 0, n_chars);
-	}
-
-	/** Set the modem to connected state */
-	private void setConnected() {
-		if (input instanceof ModemInputStream) {
-			ModemInputStream mis = (ModemInputStream) input;
-			mis.setConnected();
-		}
-		log("connected");
 	}
 }
