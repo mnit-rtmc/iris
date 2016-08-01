@@ -41,11 +41,11 @@ public class ModemMessenger extends Messenger {
 	/** Get the first available modem */
 	static public ModemImpl getModem() {
 		Iterator<Modem> it = ModemHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Modem m = it.next();
-			if(m instanceof ModemImpl) {
-				ModemImpl mdm = (ModemImpl)m;
-				if(mdm.acquire())
+			if (m instanceof ModemImpl) {
+				ModemImpl mdm = (ModemImpl) m;
+				if (mdm.acquire())
 					return mdm;
 			}
 		}
@@ -53,10 +53,10 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Wrapped messenger */
-	protected final Messenger wrapped;
+	private final Messenger wrapped;
 
 	/** Modem to dial */
-	protected final ModemImpl modem;
+	private final ModemImpl modem;
 
 	/** Set the modem state */
 	private void setState(ModemState ms) {
@@ -65,11 +65,11 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Phone number to dial */
-	protected final String phone_number;
+	private final String phone_number;
 
 	/** Log a message to debug log */
 	private void log(String msg) {
-		if(MODEM_LOG.isOpen())
+		if (MODEM_LOG.isOpen())
 			MODEM_LOG.log(modem.getName() + ": " + msg);
 	}
 
@@ -89,7 +89,7 @@ public class ModemMessenger extends Messenger {
 			wrapped.open();
 			setState(ModemState.connecting);
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			setState(ModemState.open_error);
 			throw e;
 		}
@@ -99,7 +99,7 @@ public class ModemMessenger extends Messenger {
 			connectModemRetry();
 			setState(ModemState.online);
 		}
-		catch(IOException e) {
+		catch (IOException e) {
 			setState(ModemState.connect_error);
 			throw e;
 		}
@@ -112,7 +112,7 @@ public class ModemMessenger extends Messenger {
 		wrapped.close();
 		output = null;
 		input = null;
-		if(!ModemState.isError(modem.getState()))
+		if (!ModemState.isError(modem.getState()))
 			setState(ModemState.offline);
 		modem.release();
 	}
@@ -120,14 +120,14 @@ public class ModemMessenger extends Messenger {
 	/** Connect the modem with up to three tries */
 	private void connectModemRetry() throws IOException {
 		int i = 0;
-		while(true) {
+		while (true) {
 			try {
 				input.skip(input.available());
 				connectModem();
 				return;
 			}
-			catch(ModemException e) {
-				if(i >= 3)
+			catch (ModemException e) {
+				if (i >= 3)
 					throw e;
 			}
 			i++;
@@ -136,14 +136,14 @@ public class ModemMessenger extends Messenger {
 	}
 
     	/** Connect the modem to the specified phone number */
-	protected void connectModem() throws IOException {
+	private void connectModem() throws IOException {
 		OutputStreamWriter osw = new OutputStreamWriter(output,
 			"US-ASCII");
 		InputStreamReader isr = new InputStreamReader(input,"US-ASCII");
 		String config = modem.getConfig();
-		if(config != null && config.length() > 0)
+		if (config != null && config.length() > 0)
 			configureModem(osw, isr, config);
-		if(phone_number != null && phone_number.length() > 0)
+		if (phone_number != null && phone_number.length() > 0)
 			dialModem(osw, isr);
 		setConnected();
     	}
@@ -157,12 +157,12 @@ public class ModemMessenger extends Messenger {
 		w.flush();
 		try {
 			String resp = readResponse(isr).trim();
-			if(!resp.toUpperCase().contains("OK")) {
+			if (!resp.toUpperCase().contains("OK")) {
 				log("config error: " + resp);
 				throw new ModemException("config " + resp);
 			}
 		}
-		catch(SocketTimeoutException e) {
+		catch (SocketTimeoutException e) {
 			throw new ModemException("config no response");
 		}
 	}
@@ -178,30 +178,28 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Wait for successful connection */
-	protected void waitForConnect(InputStreamReader isr)
-		throws IOException
-	{
+	private void waitForConnect(InputStreamReader isr) throws IOException {
 		log("wait for CONNECT");
 		String resp = readResponse(isr).trim();
-		if(!resp.toUpperCase().contains("CONNECT")) {
+		if (!resp.toUpperCase().contains("CONNECT")) {
 			log("connect error: " + resp);
 			throw new ModemException("connect " + resp);
 		}
 	}
 
 	/** Read a reaponse from the modem */
-	protected String readResponse(InputStreamReader isr) throws IOException{
+	private String readResponse(InputStreamReader isr) throws IOException {
 		char[] buf = new char[64];
 		int n_chars = isr.read(buf, 0, 64);
-		if(n_chars < 0)
+		if (n_chars < 0)
 			throw new EOFException("END OF STREAM");
 		return new String(buf, 0, n_chars);
 	}
 
 	/** Set the modem to connected state */
 	private void setConnected() {
-		if(input instanceof ModemInputStream) {
-			ModemInputStream mis = (ModemInputStream)input;
+		if (input instanceof ModemInputStream) {
+			ModemInputStream mis = (ModemInputStream) input;
 			mis.setConnected();
 		}
 		log("connected");
