@@ -15,8 +15,9 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
-import java.net.SocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
+import java.net.SocketException;
 
 /**
  * A StreamMessenger is a class which can poll a field controller and get the
@@ -30,23 +31,34 @@ public class StreamMessenger extends Messenger {
 	private final SocketAddress address;
 
 	/** Receive timeout (ms) */
-	private final int timeout;
+	private final int recv_timeout;
+
+	/** Connect timeout (ms) */
+	private final int conn_timeout;
 
 	/** TCP socket */
 	private Socket socket;
 
+	/** Create a new stream messenger.
+	 * NOTE: must call setConnected to switch from conn_timeout to
+	 *       recv_timeout. */
+	public StreamMessenger(SocketAddress a, int rt, int ct) {
+		address = a;
+		recv_timeout = rt;
+		conn_timeout = ct;
+	}
+
 	/** Create a new stream messenger */
 	public StreamMessenger(SocketAddress a, int rt) {
-		address = a;
-		timeout = rt;
+		this(a, rt, rt);
 	}
 
 	/** Open the stream messenger */
 	@Override
 	public void open() throws IOException {
 		Socket s = new Socket();
-		s.setSoTimeout(timeout);
-		s.connect(address, timeout);
+		s.setSoTimeout(conn_timeout);
+		s.connect(address, conn_timeout);
 		input = s.getInputStream();
 		output = s.getOutputStream();
 		socket = s;
@@ -72,5 +84,12 @@ public class StreamMessenger extends Messenger {
 			}
 		}
 		socket = null;
+	}
+
+	/** Set the messenger to a connected state */
+	public void setConnected() throws SocketException {
+		Socket s = socket;
+		if (s != null)
+			s.setSoTimeout(recv_timeout);
 	}
 }

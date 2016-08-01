@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
@@ -52,8 +53,8 @@ public class ModemMessenger extends Messenger {
 		return null;
 	}
 
-	/** Wrapped messenger */
-	private final Messenger wrapped;
+	/** Wrapped stream messenger */
+	private final StreamMessenger wrapped;
 
 	/** Modem to dial */
 	private final ModemImpl modem;
@@ -74,8 +75,10 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Create a new modem messenger */
-	public ModemMessenger(Messenger m, ModemImpl mdm, String phone) {
-		wrapped = m;
+	public ModemMessenger(SocketAddress a, int rt, ModemImpl mdm,
+		String phone) throws IOException
+	{
+		wrapped = new StreamMessenger(a, rt, mdm.getTimeout());
 		modem = mdm;
 		phone_number = phone.replace("p", ",");
 		log("created ModemMessenger");
@@ -100,6 +103,7 @@ public class ModemMessenger extends Messenger {
 		try {
 			connectModemRetry();
 			mis.setConnected();
+			wrapped.setConnected();
 			log("connected");
 			setState(ModemState.online);
 		}

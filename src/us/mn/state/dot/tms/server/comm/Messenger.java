@@ -118,10 +118,9 @@ abstract public class Messenger {
 	{
 		ModemImpl modem = ModemMessenger.getModem();
 		if (modem != null) {
-			StreamMessenger sm = new StreamMessenger(
-				createSocketAddress(createModemURI(modem)),
-				timeout);
-			return new ModemMessenger(sm, modem, u.getHost());
+			return new ModemMessenger(createSocketAddress(
+				createModemURI(modem)), timeout, modem,
+				u.getHost());
 		} else
 			throw new IOException("No modem available");
 	}
