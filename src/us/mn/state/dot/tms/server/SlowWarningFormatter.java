@@ -31,6 +31,12 @@ public class SlowWarningFormatter {
 	/** SLOW debug log */
 	static private final DebugLog SLOW_LOG = new DebugLog("slow");
 
+	/** Round speed to the nearest 5 mph */
+	static private int nearest5Mph(Speed s) {
+		float sf = s.asFloat(Speed.Units.MPH);
+		return Math.round(sf / 5) * 5;
+	}
+
 	/** Check if debug log is open */
 	private boolean isLogging() {
 		return SLOW_LOG.isOpen();
@@ -144,8 +150,7 @@ public class SlowWarningFormatter {
 	private String slowWarningSpanSpeed(Speed spd, Distance dist) {
 		Speed s = slowWarningSpeed(spd, dist);
 		if (s != null) {
-			// FIXME: round to nearest 5 mph
-			int si = s.round(s.units);
+			int si = nearest5Mph(s);
 			if (si > 0)
 				return String.valueOf(si);
 		}
