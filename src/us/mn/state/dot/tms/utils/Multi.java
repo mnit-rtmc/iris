@@ -148,10 +148,9 @@ public interface Multi {
 
 	/** Add a slow traffic warning.
 	 * @param spd Highest speed to activate warning.
-	 * @param b Distance to end of backup (negative indicates upstream).
-	 * @param units Units for speed (mph or kph).
-	 * @param dist If true, replace tag with distance to slow station. */
-	void addSlowWarning(int spd, int b, String units, boolean dist);
+	 * @param dist Distance to search for slow traffic (1/10 mile).
+	 * @param mode Tag replacement mode (none, dist or speed). */
+	void addSlowWarning(int spd, int dist, String mode);
 
 	/** Add a feed message */
 	void addFeed(String fid);

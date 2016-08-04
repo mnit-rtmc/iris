@@ -67,26 +67,15 @@ public class SlowWarningFormatter {
 
 		protected boolean valid = true;
 
-		/** Add a slow warning */
-		@Override
-		public void addSlowWarning(int spd, int b, String units,
-			boolean dist)
-		{
-			Speed as = createSpeed(spd, units);
-			Distance bd = new Distance(b, as.units.d_units);
-			Distance d = slowWarningDistance(as, bd);
-			if (d != null) {
-				if (dist)
-					addSlowWarning(d);
-			} else
-				valid = false;
-		}
-
-		/** Add a slow warning */
-		private void addSlowWarning(Distance d) {
-			int di = d.round(d.units);
-			if (di > 0)
-				addSpan(String.valueOf(di));
+		/** Add a slow traffic warning.
+		 * @param spd Highest speed to activate warning.
+		 * @param dist Distance to search for slow traffic (1/10 mile).
+		 * @param mode Tag replacement mode (none, dist or speed). */
+		public void addSlowWarning(int spd, int dist, String mode) {
+			String span = slowWarningSpan(createSpeed(spd),
+				createDist(dist), mode);
+			if (span != null)
+				addSpan(span);
 			else
 				valid = false;
 		}
@@ -94,25 +83,91 @@ public class SlowWarningFormatter {
 
 	/** Create a speed.
 	 * @param v Speed value.
-	 * @param units Speed units (mph or kph).
 	 * @return Matching speed. */
-	private Speed createSpeed(int v, String units) {
-		if (units.equals("kph"))
-			return new Speed(v, Speed.Units.KPH);
-		else
-			return new Speed(v, Speed.Units.MPH);
+	private Speed createSpeed(int v) {
+		// FIXME: use system attribute for units
+		return new Speed(v, Speed.Units.MPH);
+	}
+
+	/** Create a distance.
+	 * @param v Distance value.
+	 * @return Matching distance. */
+	private Distance createDist(int v) {
+		// FIXME: use system attribute for units
+		int m = Math.max(v, 0);
+		return new Distance(m * 0.1f, Distance.Units.MILES);
+	}
+
+	/** Calculate slow warning text span.
+	 * @param spd Highest speed to activate warning.
+	 * @param dist Distance to search for slow traffic.
+	 * @param mode Tag replacement mode (none, dist or speed).
+	 * @return Tag replacement span, or null for no warning. */
+	private String slowWarningSpan(Speed spd, Distance dist, String mode) {
+		if ("dist".equals(mode))
+			return slowWarningSpanDist(spd, dist);
+		else if ("speed".equals(mode))
+			return slowWarningSpanSpeed(spd, dist);
+		else {
+			Distance d = slowWarningDistance(spd, dist);
+			return (d != null) ? "" : null;
+		}
+	}
+
+	/** Calculate slow warning text span as distance.
+	 * @param spd Highest speed to activate warning.
+	 * @param dist Distance to search for slow traffic.
+	 * @return Span of distance to slow traffic (in miles) or null. */
+	private String slowWarningSpanDist(Speed spd, Distance dist) {
+		Distance d = slowWarningDistance(spd, dist);
+		if (d != null) {
+			int di = d.round(d.units);
+			if (di > 0)
+				return String.valueOf(di);
+		}
+		return null;
 	}
 
 	/** Calculate the slow warning distance.
 	 * @param as Speed to activate slow warning.
-	 * @param bd Distance limit to backup (negative indicates upstream).
+	 * @param bd Distance limit to backup.
 	 * @return Distance to backup or null for no backup. */
 	private Distance slowWarningDistance(Speed as, Distance bd) {
+		BackupFinder bf = slowWarningBackup(as, bd);
+		return (bf != null) ? bf.distance() : null;
+	}
+
+	/** Calculate slow warning text span as speed.
+	 * @param spd Highest speed to activate warning.
+	 * @param dist Distance to search for slow traffic.
+	 * @return Span of speed of slow traffic (in mph) or null. */
+	private String slowWarningSpanSpeed(Speed spd, Distance dist) {
+		Speed s = slowWarningSpeed(spd, dist);
+		if (s != null) {
+			// FIXME: round to nearest 5 mph
+			int si = s.round(s.units);
+			if (si > 0)
+				return String.valueOf(si);
+		}
+		return null;
+	}
+
+	/** Calculate the slow warning speed.
+	 * @param as Speed to activate slow warning.
+	 * @param bd Distance limit to backup.
+	 * @return Speed at backup or null for no backup. */
+	private Speed slowWarningSpeed(Speed as, Distance bd) {
+		BackupFinder bf = slowWarningBackup(as, bd);
+		return (bf != null) ? bf.speed() : null;
+	}
+
+	/** Create a slow warning backup finder.
+	 * @param as Speed to activate slow warning.
+	 * @param bd Distance limit to backup.
+	 * @return Backup finder or null for no backup. */
+	private BackupFinder slowWarningBackup(Speed as, Distance bd) {
 		Corridor cor = lookupCorridor();
-		if (cor != null)
-			return slowWarningDistance(cor, as, bd);
-		else
-			return null;
+		return (cor != null) ? slowWarningBackup(cor, as, bd) : null;
 	}
 
 	/** Lookup the corridor for the given location.
@@ -121,36 +176,24 @@ public class SlowWarningFormatter {
 		return BaseObjectImpl.corridors.getCorridor(loc);
 	}
 
-	/** Estimate the slow warning distance.
+	/** Create a slow warning backup finder.
 	 * @param cor Freeway corridor.
 	 * @param as Speed to activate slow warning.
-	 * @param bd Distance limit to backup (negative indicates upstream).
-	 * @return Distance to backup or null for no backup. */
-	private Distance slowWarningDistance(Corridor cor, Speed as,
+	 * @param bd Distance limit to backup.
+	 * @return Backup finder or null for no backup. */
+	private BackupFinder slowWarningBackup(Corridor cor, Speed as,
 		Distance bd)
 	{
 		Float m = cor.calculateMilePoint(loc);
 		if (isLogging())
 			log("mp " + m);
-		if (m != null)
-			return slowWarningDistance(cor, as, bd, m);
-		else
+		if (m != null) {
+			BackupFinder bf = new BackupFinder(as, bd, m);
+			cor.findStation(bf);
+			if (isLogging())
+				bf.debug(SLOW_LOG);
+			return bf;
+		} else
 			return null;
-	}
-
-	/** Estimate the distance to backup.
-	 * @param cor Freeway corridor.
-	 * @param as Speed to activate slow warning.
-	 * @param bd Distance limit to backup (negative indicates upstream).
-	 * @param m Milepoint to start from.
-	 * @return Distance to congestion backup, or null. */
-	private Distance slowWarningDistance(Corridor cor, Speed as,
-		Distance bd, float m)
-	{
-		BackupFinder backup_finder = new BackupFinder(as, bd, m);
-		cor.findStation(backup_finder);
-		if (isLogging())
-			backup_finder.debug(SLOW_LOG);
-		return backup_finder.backupDistance();
 	}
 }
