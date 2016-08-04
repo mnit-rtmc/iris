@@ -46,10 +46,6 @@ public class IrisToolBar extends JToolBar {
 			add(new CamSelectPanel(s));
 			add(Box.createGlue());
 		}
-		if (ModemPanel.getIEnabled()) {
-			add(new ModemPanel(s));
-			add(Box.createGlue());
-		}
 		if (AwsStatusPanel.getIEnabled()) {
 			add(new AwsStatusPanel(s.getSonarState(),
 				s.getDesktop()));
