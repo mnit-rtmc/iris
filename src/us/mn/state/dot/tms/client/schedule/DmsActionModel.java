@@ -15,11 +15,16 @@
 package us.mn.state.dot.tms.client.schedule;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.JOptionPane;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DMSMessagePriority;
@@ -29,6 +34,7 @@ import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -200,6 +206,25 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	@Override
 	protected boolean check(DmsAction proxy) {
 		return proxy.getActionPlan() == action_plan;
+	}
+
+	/** Get a table row sorter */
+	@Override
+	public RowSorter<ProxyTableModel<DmsAction>> createSorter() {
+		TableRowSorter<ProxyTableModel<DmsAction>> sorter =
+			new TableRowSorter<ProxyTableModel<DmsAction>>(this)
+		{
+			@Override public boolean isSortable(int c) {
+				return c == 0;
+			}
+		};
+		sorter.setComparator(0,new NumericAlphaComparator<SignGroup>());
+		sorter.setSortsOnUpdates(true);
+		LinkedList<RowSorter.SortKey> keys =
+			new LinkedList<RowSorter.SortKey>();
+		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+		sorter.setSortKeys(keys);
+		return sorter;
 	}
 
 	/** Check if the user can add a proxy */

@@ -161,6 +161,7 @@ public class ProxyTablePanel<T extends SonarObject> extends JPanel {
 		m.initialize();
 		model = m;
 		table.setModel(m);
+		updateSortFilter();
 		if (om != null)
 			om.dispose();
 		updateButtonPanel();
