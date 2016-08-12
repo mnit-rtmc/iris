@@ -112,6 +112,7 @@ public class ModemMessenger extends Messenger {
 			throw e;
 		}
 		output = wrapped.getOutputStream();
+		writer = new OutputStreamWriter(output, "US-ASCII");
 		ModemInputStream mis = new ModemInputStream(
 			wrapped.getInputStream(""));
 		input = mis;
@@ -133,6 +134,7 @@ public class ModemMessenger extends Messenger {
 	public void close() {
 		log("close");
 		wrapped.close();
+		writer = null;
 		output = null;
 		input = null;
 		if (!ModemState.isError(modem.getState()))
@@ -160,23 +162,32 @@ public class ModemMessenger extends Messenger {
 
     	/** Connect the modem to the specified phone number */
 	private void connectModem() throws IOException {
-		OutputStreamWriter osw = new OutputStreamWriter(output,
-			"US-ASCII");
 		InputStreamReader isr = new InputStreamReader(input,"US-ASCII");
 		String config = modem.getConfig();
 		if (config != null && config.length() > 0)
-			configureModem(osw, isr, config);
+			configureModem(isr, config);
 		if (phone_number != null && phone_number.length() > 0)
-			dialModem(osw, isr);
+			dialModem(isr);
     	}
 
+	/** Writer to send modem commands */
+	private Writer writer;
+
+	/** Write some text */
+	private void write(String s) throws IOException {
+		Writer w = writer;
+		if (w != null) {
+			w.write(s);
+			w.flush();
+		}
+	}
+
 	/** Configure the modem */
-	private void configureModem(Writer w, InputStreamReader isr,
-		String config) throws IOException
+	private void configureModem(InputStreamReader isr, String config)
+		throws IOException
 	{
 		log("configure: " + config);
-		w.write(config + "\r\n");
-		w.flush();
+		write(config + "\r\n");
 		try {
 			String resp = readResponse(isr).trim();
 			if (!resp.toUpperCase().contains("OK")) {
@@ -190,12 +201,9 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Dial the modem */
-	private void dialModem(Writer w, InputStreamReader isr)
-		throws IOException
-	{
+	private void dialModem(InputStreamReader isr) throws IOException {
 		log("dial: " + phone_number);
-		w.write("ATDT" + phone_number + "\r\n\n");
-		w.flush();
+		write("ATDT" + phone_number + "\r\n\n");
 		waitForConnect(isr);
 	}
 
@@ -228,15 +236,11 @@ public class ModemMessenger extends Messenger {
 
 	/** Disconnect (hang up) the modem */
 	public void disconnectModem() throws IOException {
-		OutputStreamWriter w = new OutputStreamWriter(output,
-			"US-ASCII");
 		log("disconnect");
-		w.write("+++");
-		w.flush();
+		write("+++");
 		// Must wait 1 second after escape sequence (before too)
 		TimeSteward.sleep_well(1000);
 		// Send hang-up command
-		w.write("ATH0;\r\n\n");
-		w.flush();
+		write("ATH0;\r\n\n");
     	}
 }
