@@ -121,9 +121,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 
 	/** Config string.  The default value sets the "Disconnect activity
 	 * timer" (S30) to 10 seconds.  This has been tested with a StarComm
-	 * modem -- who knows if it works for other brands.  The disconnect
-	 * after timeout feature is necessary for proper operation, since IRIS
-	 * will never tell the modem to hang up. */
+	 * modem -- who knows if it works for other brands. */
 	private String config = "ATS30=1";
 
 	/** Set config string */
@@ -197,7 +195,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	/** Acquire ownership of the modem */
 	public boolean acquire() {
 		// Name used for unique acquire/release lock
-		synchronized(name) {
+		synchronized (name) {
 			if (owned || !enabled)
 				return false;
 			else {
