@@ -36,7 +36,7 @@ public enum SystemAttrEnum {
 	CAMERA_WIPER_PRECIP_MM_HR(8, 1, 100),
 	CLIENT_UNITS_SI(true),
 	COMM_EVENT_PURGE_DAYS(14, 0, 1000),
-	DATABASE_VERSION(String.class, Change.RESTART_SERVER),
+	DATABASE_VERSION(String.class),
 	DETECTOR_AUTO_FAIL_ENABLE(true),
 	DIALUP_POLL_PERIOD_MINS(60, 2, 1440),
 	DICT_ALLOWED_SCHEME(0, 0, 2),
@@ -120,7 +120,6 @@ public enum SystemAttrEnum {
 	/** Change action, which indicates what action the admin must
 	 *  take after changing a system attribute. */
 	enum Change {
-		RESTART_SERVER("Restart the server after changing."),
 		RESTART_CLIENT("Restart the client after changing."),
 		NONE("A change takes effect immediately.");
 
