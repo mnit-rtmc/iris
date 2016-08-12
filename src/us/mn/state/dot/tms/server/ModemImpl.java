@@ -49,6 +49,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -59,11 +60,13 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -85,6 +88,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	protected String uri = "";
 
 	/** Set remote URI for modem */
+	@Override
 	public void setUri(String u) {
 		uri = u;
 	}
@@ -98,6 +102,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	}
 
 	/** Get remote URI for modem */
+	@Override
 	public String getUri() {
 		return uri;
 	}
@@ -122,6 +127,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	protected String config = "ATS30=1";
 
 	/** Set config string */
+	@Override
 	public void setConfig(String c) {
 		config = c;
 	}
@@ -135,6 +141,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	}
 
 	/** Get config string */
+	@Override
 	public String getConfig() {
 		return config;
 	}
@@ -143,6 +150,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	protected int timeout = 30000;
 
 	/** Set the connect timeout (milliseconds) */
+	@Override
 	public void setTimeout(int t) {
 		timeout = t;
 	}
@@ -156,6 +164,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	}
 
 	/** Get the connect timeout (milliseconds) */
+	@Override
 	public int getTimeout() {
 		return timeout;
 	}
@@ -172,6 +181,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	}
 
 	/** Get the modem state (ordinal of ModemState) */
+	@Override
 	public int getState() {
 		return state.ordinal();
 	}
@@ -209,11 +219,13 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	private transient boolean enabled = true;
 
 	/** Set the modem enabled boolean */
+	@Override
 	public void setEnabled(boolean b) {
 		enabled = b;
 	}
 
 	/** Get the modem enabled boolean */
+	@Override
 	public boolean getEnabled() {
 		return enabled;
 	}
