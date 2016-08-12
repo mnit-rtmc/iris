@@ -2434,7 +2434,6 @@ dms_default_justification_line	3
 dms_default_justification_page	2
 dms_duration_enable	true
 dms_font_selection_enable	false
-dms_form	1
 dms_high_temp_cutoff	60
 dms_lamp_test_timeout_secs	30
 dms_manufacturer_enable	true

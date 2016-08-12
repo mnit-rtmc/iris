@@ -16,5 +16,6 @@ CREATE OR REPLACE VIEW modem_view AS
 	FROM iris.modem;
 GRANT SELECT ON modem_view TO PUBLIC;
 
--- delete device_op_status_enable system attribute
+-- delete old system attributes
 DELETE FROM iris.system_attribute WHERE name = 'device_op_status_enable';
+DELETE FROM iris.system_attribute WHERE name = 'dms_form';
