@@ -85,7 +85,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	}
 
 	/** Remote URI for modem */
-	protected String uri = "";
+	private String uri = "";
 
 	/** Set remote URI for modem */
 	@Override
@@ -95,10 +95,10 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 
 	/** Set remote URI for modem */
 	public void doSetUri(String u) throws TMSException {
-		if(u.equals(uri))
-			return;
-		store.update(this, "uri", u);
-		setUri(u);
+		if (!u.equals(uri)) {
+			store.update(this, "uri", u);
+			setUri(u);
+		}
 	}
 
 	/** Get remote URI for modem */
@@ -112,7 +112,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 		try {
 			return new URI(uri);
 		}
-		catch(URISyntaxException e) {
+		catch (URISyntaxException e) {
 			// If the URI begins with a host IP address,
 			// we need to prepend a couple of slashes
 			return new URI("//" + uri);
@@ -124,7 +124,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	 * modem -- who knows if it works for other brands.  The disconnect
 	 * after timeout feature is necessary for proper operation, since IRIS
 	 * will never tell the modem to hang up. */
-	protected String config = "ATS30=1";
+	private String config = "ATS30=1";
 
 	/** Set config string */
 	@Override
@@ -134,10 +134,10 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 
 	/** Set config string */
 	public void doSetConfig(String c) throws TMSException {
-		if(c.equals(config))
-			return;
-		store.update(this, "config", c);
-		setConfig(c);
+		if (!c.equals(config)) {
+			store.update(this, "config", c);
+			setConfig(c);
+		}
 	}
 
 	/** Get config string */
@@ -147,7 +147,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	}
 
 	/** Connect timeout (milliseconds) */
-	protected int timeout = 30000;
+	private int timeout = 30000;
 
 	/** Set the connect timeout (milliseconds) */
 	@Override
@@ -157,10 +157,10 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 
 	/** Set the connect timeout (milliseconds) */
 	public void doSetTimeout(int t) throws TMSException {
-		if(t == timeout)
-			return;
-		store.update(this, "timeout", t);
-		setTimeout(t);
+		if (t != timeout) {
+			store.update(this, "timeout", t);
+			setTimeout(t);
+		}
 	}
 
 	/** Get the connect timeout (milliseconds) */
@@ -174,7 +174,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 
 	/** Set the modem state */
 	public void setStateNotify(ModemState ms) {
-		if(ms != state) {
+		if (ms != state) {
 			state = ms;
 			notifyAttribute("state");
 		}
@@ -210,7 +210,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	/** Release ownership of the modem */
 	public void release() {
 		// Name used for unique acquire/release lock
-		synchronized(name) {
+		synchronized (name) {
 			owned = false;
 		}
 	}
