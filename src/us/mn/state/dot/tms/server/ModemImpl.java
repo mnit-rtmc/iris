@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -34,16 +35,11 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	/** Load all the modems */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, ModemImpl.class);
-		store.query("SELECT name, uri, config, timeout FROM iris." +
-			SONAR_TYPE  + ";", new ResultFactory()
+		store.query("SELECT name, uri, config, timeout, enabled " +
+			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new ModemImpl(
-					row.getString(1),	// name
-					row.getString(2),	// uri
-					row.getString(3),	// config
-					row.getInt(4)		// timeout
-				));
+				namespace.addObject(new ModemImpl(row));
 			}
 		});
 	}
@@ -56,6 +52,7 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 		map.put("uri", uri);
 		map.put("config", config);
 		map.put("timeout", timeout);
+		map.put("enabled", enabled);
 		return map;
 	}
 
@@ -72,16 +69,27 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	}
 
 	/** Create a new modem */
-	public ModemImpl(String n) {
-		super(n);
+	private ModemImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),		// name
+		     row.getString(2),		// uri
+		     row.getString(3),		// config
+		     row.getInt(4),		// timeout
+		     row.getBoolean(5)		// enabled
+		);
 	}
 
 	/** Create a new modem */
-	public ModemImpl(String n, String u, String c, int t) {
+	private ModemImpl(String n, String u, String c, int t, boolean e) {
 		super(n);
 		uri = u;
 		config = c;
 		timeout = t;
+		enabled = e;
+	}
+
+	/** Create a new modem */
+	public ModemImpl(String n) {
+		super(n);
 	}
 
 	/** Remote URI for modem */
@@ -167,6 +175,29 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 		return timeout;
 	}
 
+	/** Modem enabled boolean */
+	private boolean enabled = true;
+
+	/** Set the modem enabled boolean */
+	@Override
+	public void setEnabled(boolean e) {
+		enabled = e;
+	}
+
+	/** Set the modem enabled boolean */
+	public void doSetEnabled(boolean e) throws TMSException {
+		if (e != enabled) {
+			store.update(this, "enabled", e);
+			setEnabled(e);
+		}
+	}
+
+	/** Get the modem enabled boolean */
+	@Override
+	public boolean getEnabled() {
+		return enabled;
+	}
+
 	/** Current modem state */
 	private transient ModemState state = ModemState.offline;
 
@@ -211,20 +242,5 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 		synchronized (name) {
 			owned = false;
 		}
-	}
-
-	/** Modem enabled boolean */
-	private transient boolean enabled = true;
-
-	/** Set the modem enabled boolean */
-	@Override
-	public void setEnabled(boolean b) {
-		enabled = b;
-	}
-
-	/** Get the modem enabled boolean */
-	@Override
-	public boolean getEnabled() {
-		return enabled;
 	}
 }

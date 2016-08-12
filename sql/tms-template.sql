@@ -387,7 +387,8 @@ CREATE TABLE iris.modem (
 	name VARCHAR(20) PRIMARY KEY,
 	uri VARCHAR(64) NOT NULL,
 	config VARCHAR(64) NOT NULL,
-	timeout INTEGER NOT NULL
+	timeout INTEGER NOT NULL,
+	enabled BOOLEAN NOT NULL
 );
 
 CREATE TABLE iris.cabinet_style (
@@ -2176,7 +2177,7 @@ CREATE VIEW comm_link_view AS
 GRANT SELECT ON comm_link_view TO PUBLIC;
 
 CREATE VIEW modem_view AS
-	SELECT name, uri, config, timeout
+	SELECT name, uri, config, timeout, enabled
 	FROM iris.modem;
 GRANT SELECT ON modem_view TO PUBLIC;
 
@@ -2420,7 +2421,7 @@ camera_util_panel_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.35.0
+database_version	4.36.0
 detector_auto_fail_enable	true
 device_op_status_enable	false
 dialup_poll_period_mins	120
