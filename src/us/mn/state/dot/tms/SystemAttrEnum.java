@@ -138,19 +138,19 @@ public enum SystemAttrEnum {
 	}
 
 	/** System attribute class */
-	protected final Class atype;
+	private final Class atype;
 
 	/** Default value */
-	protected final Object def_value;
+	private final Object def_value;
 
 	/** Change action */
-	protected final Change change_action;
+	private final Change change_action;
 
 	/** Minimum value for number attributes */
-	protected final Number min_value;
+	private final Number min_value;
 
 	/** Maximum value for number attributes */
-	protected final Number max_value;
+	private final Number max_value;
 
 	/** Create a String attribute with the given default value */
 	private SystemAttrEnum(String d) {
@@ -275,7 +275,7 @@ public enum SystemAttrEnum {
 	}
 
 	/** Set of all system attributes */
-	static protected final HashMap<String, SystemAttrEnum> ALL_ATTRIBUTES =
+	static private final HashMap<String, SystemAttrEnum> ALL_ATTRIBUTES =
 		new HashMap<String, SystemAttrEnum>();
 	static {
 		for (SystemAttrEnum sa: SystemAttrEnum.values())
@@ -326,7 +326,7 @@ public enum SystemAttrEnum {
 	 * Get the value of the attribute.
 	 * @return The value of the attribute, never null.
 	 */
-	protected Object get() {
+	private Object get() {
 		return getValue(SystemAttributeHelper.get(aname()));
 	}
 
@@ -363,7 +363,7 @@ public enum SystemAttrEnum {
 	 * @param v Attribute value, may be null.
 	 * @return The parsed value or null on error.
 	 */
-	protected Object parse(String v) {
+	private Object parse(String v) {
 		if (atype == String.class)
 			return v;
 		if (atype == Boolean.class)
@@ -377,7 +377,7 @@ public enum SystemAttrEnum {
 	}
 
 	/** Parse a boolean attribute value */
-	protected Boolean parseBoolean(String v) {
+	private Boolean parseBoolean(String v) {
 		try {
 			return Boolean.parseBoolean(v);
 		}
@@ -387,7 +387,7 @@ public enum SystemAttrEnum {
 	}
 
 	/** Parse an integer attribute value */
-	protected Integer parseInteger(String v) {
+	private Integer parseInteger(String v) {
 		int i;
 		try {
 			i = Integer.parseInt(v);
@@ -413,7 +413,7 @@ public enum SystemAttrEnum {
 	}
 
 	/** Parse a float attribute value */
-	protected Float parseFloat(String v) {
+	private Float parseFloat(String v) {
 		float f;
 		try {
 			f = Float.parseFloat(v);
@@ -439,26 +439,26 @@ public enum SystemAttrEnum {
 	}
 
 	/** Create a 'missing system attribute' warning message */
-	protected String warningDefault() {
+	private String warningDefault() {
 		return "Warning: " + toString() + " system attribute was not " +
 		       "found; using a default value (" + def_value + ").";
 	}
 
 	/** Create a parsing warning message */
-	protected String warningParse() {
+	private String warningParse() {
 		return "Warning: " + toString() + " system attribute could " +
 		       "not be parsed; using a default value (" +
 			def_value + ").";
 	}
 
 	/** Create a minimum value warning message */
-	protected String warningMinimum() {
+	private String warningMinimum() {
 		return "Warning: " + toString() + " system attribute was too " +
 		       "low; using a minimum value (" + min_value + ").";
 	}
 
 	/** Create a maximum value warning message */
-	protected String warningMaximum() {
+	private String warningMaximum() {
 		return "Warning: " + toString() + " system attribute was too " +
 		       "high; using a maximum value (" + max_value + ").";
 	}
