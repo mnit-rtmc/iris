@@ -229,7 +229,7 @@ public enum SystemAttrEnum {
 	public static String getDesc(String aname) {
 		String ret = I18N.get(aname);
 		SystemAttrEnum sae = lookup(aname);
-		if(sae != null)
+		if (sae != null)
 			ret += " " + sae.change_action.getMessage();
 		return ret;
 	}
@@ -278,7 +278,7 @@ public enum SystemAttrEnum {
 	static protected final HashMap<String, SystemAttrEnum> ALL_ATTRIBUTES =
 		new HashMap<String, SystemAttrEnum>();
 	static {
-		for(SystemAttrEnum sa: SystemAttrEnum.values())
+		for (SystemAttrEnum sa: SystemAttrEnum.values())
 			ALL_ATTRIBUTES.put(sa.aname(), sa);
 	}
 
@@ -293,12 +293,12 @@ public enum SystemAttrEnum {
 	 */
 	public String getString() {
 		assert atype == String.class;
-		return (String)get();
+		return (String) get();
 	}
 
 	/** Get the default value as a String. */
 	public String getDefault() {
-		if(def_value != null)
+		if (def_value != null)
 			return def_value.toString();
 		else
 			return "";
@@ -307,19 +307,19 @@ public enum SystemAttrEnum {
 	/** Get the value of the attribute as a boolean */
 	public boolean getBoolean() {
 		assert atype == Boolean.class;
-		return (Boolean)get();
+		return (Boolean) get();
 	}
 
 	/** Get the value of the attribute as an int */
 	public int getInt() {
 		assert atype == Integer.class;
-		return (Integer)get();
+		return (Integer) get();
 	}
 
 	/** Get the value of the attribute as a float */
 	public float getFloat() {
 		assert atype == Float.class;
-		return (Float)get();
+		return (Float) get();
 	}
 
 	/**
@@ -337,7 +337,7 @@ public enum SystemAttrEnum {
 	 *         Null is never returned.
 	 */
 	private Object getValue(SystemAttribute attr) {
-		if(attr == null) {
+		if (attr == null) {
 			System.err.println(warningDefault());
 			return def_value;
 		}
@@ -351,7 +351,7 @@ public enum SystemAttrEnum {
 	 */
 	public Object parseValue(String v) {
 		Object value = parse(v);
-		if(value == null) {
+		if (value == null) {
 			System.err.println(warningParse());
 			return def_value;
 		}
@@ -364,13 +364,13 @@ public enum SystemAttrEnum {
 	 * @return The parsed value or null on error.
 	 */
 	protected Object parse(String v) {
-		if(atype == String.class)
+		if (atype == String.class)
 			return v;
-		if(atype == Boolean.class)
+		if (atype == Boolean.class)
 			return parseBoolean(v);
-		if(atype == Integer.class)
+		if (atype == Integer.class)
 			return parseInteger(v);
-		if(atype == Float.class)
+		if (atype == Float.class)
 			return parseFloat(v);
 		assert false;
 		return null;
@@ -381,7 +381,7 @@ public enum SystemAttrEnum {
 		try {
 			return Boolean.parseBoolean(v);
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			return null;
 		}
 	}
@@ -392,19 +392,19 @@ public enum SystemAttrEnum {
 		try {
 			i = Integer.parseInt(v);
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			return null;
 		}
-		if(min_value != null) {
+		if (min_value != null) {
 			int m = min_value.intValue();
-			if(i < m) {
+			if (i < m) {
 				System.err.println(warningMinimum());
 				return m;
 			}
 		}
-		if(max_value != null) {
+		if (max_value != null) {
 			int m = max_value.intValue();
-			if(i > m) {
+			if (i > m) {
 				System.err.println(warningMaximum());
 				return m;
 			}
@@ -418,19 +418,19 @@ public enum SystemAttrEnum {
 		try {
 			f = Float.parseFloat(v);
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			return null;
 		}
-		if(min_value != null) {
+		if (min_value != null) {
 			float m = min_value.floatValue();
-			if(f < m) {
+			if (f < m) {
 				System.err.println(warningMinimum());
 				return m;
 			}
 		}
-		if(max_value != null) {
+		if (max_value != null) {
 			float m = max_value.floatValue();
-			if(f > m) {
+			if (f > m) {
 				System.err.println(warningMaximum());
 				return m;
 			}
