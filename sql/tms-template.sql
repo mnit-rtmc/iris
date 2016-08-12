@@ -2410,8 +2410,6 @@ COPY iris.encoder_type (id, description) FROM stdin;
 COPY iris.system_attribute (name, value) FROM stdin;
 camera_autoplay	true
 camera_id_blank	
-camera_preset_panel_columns	6
-camera_preset_panel_enable	false
 camera_preset_store_enable	false
 camera_ptz_blind	true
 camera_stream_controls_enable	false

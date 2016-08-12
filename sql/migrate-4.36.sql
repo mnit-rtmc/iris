@@ -22,3 +22,5 @@ DELETE FROM iris.system_attribute WHERE name = 'dms_form';
 DELETE FROM iris.system_attribute WHERE name = 'camera_ptz_panel_enable';
 DELETE FROM iris.system_attribute WHERE name = 'camera_util_panel_enable';
 DELETE FROM iris.system_attribute WHERE name = 'camera_num_preset_btns';
+DELETE FROM iris.system_attribute WHERE name = 'camera_preset_panel_columns';
+DELETE FROM iris.system_attribute WHERE name = 'camera_preset_panel_enable';
