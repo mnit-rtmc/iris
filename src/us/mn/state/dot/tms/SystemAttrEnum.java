@@ -44,7 +44,7 @@ public enum SystemAttrEnum {
 	DMS_AWS_ENABLE(false),
 	DMS_BRIGHTNESS_ENABLE(true, Change.RESTART_CLIENT),
 	DMS_COMM_LOSS_MINUTES(5, 0, 65535),
-	DMS_COMPOSER_EDIT_MODE(1, 0, 2, Change.RESTART_CLIENT), 
+	DMS_COMPOSER_EDIT_MODE(1, 0, 2, Change.RESTART_CLIENT),
 	DMS_DEFAULT_JUSTIFICATION_LINE(3, 2, 5, Change.RESTART_CLIENT),
 	DMS_DEFAULT_JUSTIFICATION_PAGE(2, 2, 4, Change.RESTART_CLIENT),
 	DMS_DURATION_ENABLE(true),
@@ -120,8 +120,8 @@ public enum SystemAttrEnum {
 	/** Change action, which indicates what action the admin must
 	 *  take after changing a system attribute. */
 	enum Change {
-		RESTART_SERVER("Restart the server after changing."), 
-		RESTART_CLIENT("Restart the client after changing."), 
+		RESTART_SERVER("Restart the server after changing."),
+		RESTART_CLIENT("Restart the client after changing."),
 		NONE("A change takes effect immediately.");
 
 		/** Change message for user. */
@@ -214,8 +214,8 @@ public enum SystemAttrEnum {
 	}
 
 	/** Create a system attribute */
-	private SystemAttrEnum(Class c, Object d, Number mn, Number mx, 
-		Change ca) 
+	private SystemAttrEnum(Class c, Object d, Number mn, Number mx,
+		Change ca)
 	{
 		atype = c;
 		def_value = d;
@@ -448,7 +448,7 @@ public enum SystemAttrEnum {
 	/** Create a parsing warning message */
 	protected String warningParse() {
 		return "Warning: " + toString() + " system attribute could " +
-		       "not be parsed; using a default value (" + 
+		       "not be parsed; using a default value (" +
 			def_value + ").";
 	}
 
