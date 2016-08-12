@@ -2415,7 +2415,6 @@ camera_preset_panel_columns	6
 camera_preset_panel_enable	false
 camera_preset_store_enable	false
 camera_ptz_blind	true
-camera_ptz_panel_enable	false
 camera_stream_controls_enable	false
 camera_util_panel_enable	false
 camera_wiper_precip_mm_hr	8
