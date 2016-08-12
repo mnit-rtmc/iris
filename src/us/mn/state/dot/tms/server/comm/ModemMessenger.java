@@ -23,6 +23,7 @@ import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.ModemHelper;
 import us.mn.state.dot.tms.ModemState;
@@ -65,8 +66,21 @@ public class ModemMessenger extends Messenger {
 		log("state: " + ms.toString());
 	}
 
+	/** Get the modem state */
+	public ModemState getState() {
+		return ModemState.fromOrdinal(modem.getState());
+	}
+
 	/** Phone number to dial */
 	private final String phone_number;
+
+	/** Time stamp of last activity */
+	private long activity;
+
+	/** Get last activity time stamp */
+	public long getActivity() {
+		return activity;
+	}
 
 	/** Log a message to debug log */
 	private void log(String msg) {
@@ -81,6 +95,7 @@ public class ModemMessenger extends Messenger {
 		wrapped = new StreamMessenger(a, rt, mdm.getTimeout());
 		modem = mdm;
 		phone_number = phone.replace("p", ",");
+		activity = TimeSteward.currentTimeMillis();
 		log("created ModemMessenger");
 	}
 
@@ -202,4 +217,26 @@ public class ModemMessenger extends Messenger {
 			throw new EOFException("END OF STREAM");
 		return new String(buf, 0, n_chars);
 	}
+
+	/** Drain any bytes from the input stream */
+	@Override
+	public void drain() throws IOException {
+		// Update last activity timestamp
+		activity = TimeSteward.currentTimeMillis();
+		super.drain();
+	}
+
+	/** Disconnect (hang up) the modem */
+	public void disconnectModem() throws IOException {
+		OutputStreamWriter w = new OutputStreamWriter(output,
+			"US-ASCII");
+		log("disconnect");
+		w.write("+++");
+		w.flush();
+		// Must wait 1 second after escape sequence (before too)
+		TimeSteward.sleep_well(1000);
+		// Send hang-up command
+		w.write("ATH0;\r\n\n");
+		w.flush();
+    	}
 }

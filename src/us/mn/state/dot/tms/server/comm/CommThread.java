@@ -144,6 +144,10 @@ public class CommThread<T extends ControllerProperty> {
 
 	/** Perform one poll for an operation */
 	private void doPoll(final OpController<T> o) throws IOException {
+		if (messenger instanceof ModemMessenger) {
+			ModemMessenger mm = (ModemMessenger) messenger;
+			queue.enqueue(new OpHangUp<T>(o.controller, mm));
+		}
 		final String oname = o.toString();
 		long start = TimeSteward.currentTimeMillis();
 		try {
