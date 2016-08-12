@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.EOFException;
 import java.io.InputStreamReader;
 import java.io.IOException;
+import java.io.Reader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.net.SocketAddress;
@@ -116,6 +117,7 @@ public class ModemMessenger extends Messenger {
 		ModemInputStream mis = new ModemInputStream(
 			wrapped.getInputStream(""));
 		input = mis;
+		reader = new InputStreamReader(input, "US-ASCII");
 		try {
 			connectModemRetry();
 			mis.setConnected();
@@ -136,6 +138,7 @@ public class ModemMessenger extends Messenger {
 		wrapped.close();
 		writer = null;
 		output = null;
+		reader = null;
 		input = null;
 		if (!ModemState.isError(modem.getState()))
 			setState(ModemState.offline);
@@ -162,12 +165,11 @@ public class ModemMessenger extends Messenger {
 
     	/** Connect the modem to the specified phone number */
 	private void connectModem() throws IOException {
-		InputStreamReader isr = new InputStreamReader(input,"US-ASCII");
 		String config = modem.getConfig();
 		if (config != null && config.length() > 0)
-			configureModem(isr, config);
+			configureModem(config);
 		if (phone_number != null && phone_number.length() > 0)
-			dialModem(isr);
+			dialModem();
     	}
 
 	/** Writer to send modem commands */
@@ -182,14 +184,15 @@ public class ModemMessenger extends Messenger {
 		}
 	}
 
+	/** Reader to read modem responsess */
+	private Reader reader;
+
 	/** Configure the modem */
-	private void configureModem(InputStreamReader isr, String config)
-		throws IOException
-	{
+	private void configureModem(String config) throws IOException {
 		log("configure: " + config);
 		write(config + "\r\n");
 		try {
-			String resp = readResponse(isr).trim();
+			String resp = readResponse();
 			if (!resp.toUpperCase().contains("OK")) {
 				log("config error: " + resp);
 				throw new ModemException("config " + resp);
@@ -201,16 +204,16 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Dial the modem */
-	private void dialModem(InputStreamReader isr) throws IOException {
+	private void dialModem() throws IOException {
 		log("dial: " + phone_number);
 		write("ATDT" + phone_number + "\r\n\n");
-		waitForConnect(isr);
+		waitForConnect();
 	}
 
 	/** Wait for successful connection */
-	private void waitForConnect(InputStreamReader isr) throws IOException {
+	private void waitForConnect() throws IOException {
 		log("wait for CONNECT");
-		String resp = readResponse(isr).trim();
+		String resp = readResponse();
 		if (!resp.toUpperCase().contains("CONNECT")) {
 			log("connect error: " + resp);
 			throw new ModemException("connect " + resp);
@@ -218,12 +221,15 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Read a reaponse from the modem */
-	private String readResponse(InputStreamReader isr) throws IOException {
+	private String readResponse() throws IOException {
+		Reader r = reader;
+		if (r == null)
+			throw new EOFException();
 		char[] buf = new char[64];
-		int n_chars = isr.read(buf, 0, 64);
+		int n_chars = r.read(buf, 0, 64);
 		if (n_chars < 0)
 			throw new EOFException("END OF STREAM");
-		return new String(buf, 0, n_chars);
+		return new String(buf, 0, n_chars).trim();
 	}
 
 	/** Drain any bytes from the input stream */
