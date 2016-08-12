@@ -2460,7 +2460,6 @@ gate_arm_alert_timeout_secs	90
 help_trouble_ticket_enable	false
 help_trouble_ticket_url	
 incident_clear_secs	600
-lcs_poll_period_secs	30
 map_extent_name_initial	Home
 map_icon_size_scale_max	30
 map_segment_max_meters	2000
