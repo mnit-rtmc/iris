@@ -229,7 +229,10 @@ public class ModemMessenger extends Messenger {
 		int n_chars = r.read(buf, 0, 64);
 		if (n_chars < 0)
 			throw new EOFException("END OF STREAM");
-		return new String(buf, 0, n_chars).trim();
+		String resp = new String(buf, 0, n_chars).trim();
+		if (resp.contains("NO CARRIER"))
+			throw new HangUpException();
+		return resp;
 	}
 
 	/** Drain any bytes from the input stream */
@@ -237,7 +240,8 @@ public class ModemMessenger extends Messenger {
 	public void drain() throws IOException {
 		// Update last activity timestamp
 		activity = TimeSteward.currentTimeMillis();
-		super.drain();
+		while (input.available() > 0)
+			readResponse();
 	}
 
 	/** Disconnect (hang up) the modem */
