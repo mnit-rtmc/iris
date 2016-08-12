@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2014  Minnesota Department of Transportation
+ * Copyright (C) 2011-2016  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -30,8 +30,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class ModemModel extends ProxyTableModel<Modem> {
-	
-	static private final int MAX_MODEM_TIMEOUT = 90000; // Max timeout of 90 seconds
+
+	/** Maximum modem timeout (ms) */
+	static private final int MAX_MODEM_TIMEOUT = 90000;
 
 	/** Create the columns in the model */
 	@Override
@@ -74,13 +75,13 @@ public class ModemModel extends ProxyTableModel<Modem> {
 			}
 			public void setValueAt(Modem m, Object value) {
 				if (value instanceof Integer)
-					m.setTimeout((Integer)value);
+					m.setTimeout((Integer) value);
 			}
 			protected TableCellEditor createCellEditor() {
-				return new TimeoutCellEditor(MAX_MODEM_TIMEOUT); 
+				return new TimeoutCellEditor(MAX_MODEM_TIMEOUT);
 			}
 		});
-		cols.add(new ProxyColumn<Modem>("modem.status", 80) { // Modem status field
+		cols.add(new ProxyColumn<Modem>("modem.status", 80) {
 			public Object getValueAt(Modem m) {
 				return ModemState.fromOrdinal(m.getState());
 			}
@@ -92,19 +93,19 @@ public class ModemModel extends ProxyTableModel<Modem> {
 			}
 		});
 		cols.add(new ProxyColumn<Modem>("modem.enable", 75,
-				Boolean.class)
-			{
-				public Object getValueAt(Modem m) {
-					return m.getEnabled();
-				}
-				public boolean isEditable(Modem m) {
-					return canUpdate(m, "enable");
-				}
-				public void setValueAt(Modem m, Object value) {
-					if (value instanceof Boolean)
-						m.setEnabled((Boolean)value);
-				}
-			});
+			Boolean.class)
+		{
+			public Object getValueAt(Modem m) {
+				return m.getEnabled();
+			}
+			public boolean isEditable(Modem m) {
+				return canUpdate(m, "enable");
+			}
+			public void setValueAt(Modem m, Object value) {
+				if (value instanceof Boolean)
+					m.setEnabled((Boolean) value);
+			}
+		});
 		return cols;
 	}
 

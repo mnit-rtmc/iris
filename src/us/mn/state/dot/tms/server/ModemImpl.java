@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2016  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -183,12 +183,12 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 	public boolean isOwned() {
 		return owned;
 	}
-	
+
 	/** Acquire ownership of the modem */
 	public boolean acquire() {
 		// Name used for unique acquire/release lock
 		synchronized(name) {
-			if(owned || !enabled)
+			if (owned || !enabled)
 				return false;
 			else {
 				owned = true;
@@ -205,12 +205,15 @@ public class ModemImpl extends BaseObjectImpl implements Modem {
 		}
 	}
 
+	/** Modem enabled boolean */
 	private transient boolean enabled = true;
 
+	/** Set the modem enabled boolean */
 	public void setEnabled(boolean b) {
 		enabled = b;
 	}
 
+	/** Get the modem enabled boolean */
 	public boolean getEnabled() {
 		return enabled;
 	}

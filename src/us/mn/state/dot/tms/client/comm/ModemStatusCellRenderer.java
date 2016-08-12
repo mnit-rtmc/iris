@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,44 +17,57 @@ package us.mn.state.dot.tms.client.comm;
 
 import java.awt.Color;
 import java.awt.Component;
-
-import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableCellRenderer;
-
 import us.mn.state.dot.tms.ModemState;
 
 /**
  * Renderer for modem status status in a table cell.
  *
  * @author Michael Janson
+ * @author Douglas Lau
  */
 public class ModemStatusCellRenderer extends DefaultTableCellRenderer {
 
-	/** Get the renderer component using same modem status
-	 * color coding as in task bar */
+	/** Get the background color for a modem state */
+	static private Color modemBackground(ModemState ms) {
+		switch (ms) {
+		case connecting:
+			return Color.ORANGE;
+		case online:
+			return Color.YELLOW;
+		case offline:
+			return Color.BLUE;
+		default:
+			return Color.GRAY;
+		}
+	}
+
+	/** Get the foreground color for a modem state */
+	static private Color modemForeground(ModemState ms) {
+		switch (ms) {
+		case connecting:
+		case online:
+			return Color.BLACK;
+		default:
+			return Color.WHITE;
+		}
+	}
+
+	/** Get cell renderer component with modem status color coding */
 	@Override
 	public Component getTableCellRendererComponent(JTable table,
 		Object value, boolean isSelected, boolean hasFocus,
 		int row, int column)
 	{
-		JLabel label = (JLabel)super.getTableCellRendererComponent(
-			table, "", isSelected, hasFocus, row, column);
-		
-		label.setForeground(Color.WHITE);
-		label.setText(value.toString());
-		
-		if (value == ModemState.online || value == ModemState.connecting){
-			label.setBackground(Color.YELLOW);
-			label.setForeground(Color.BLACK);
+		JLabel lbl = (JLabel) super.getTableCellRendererComponent(
+			table, value, isSelected, hasFocus, row, column);
+		if (value instanceof ModemState) {
+			ModemState ms = (ModemState) value;
+			lbl.setBackground(modemBackground(ms));
+			lbl.setForeground(modemForeground(ms));
 		}
-		else if (value == ModemState.offline)
-			label.setBackground(Color.BLUE);
-		else
-			label.setBackground(Color.GRAY);
-		
-		return label;
+		return lbl;
 	}
-	
 }
