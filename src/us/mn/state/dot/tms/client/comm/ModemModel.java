@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2011-2014  Minnesota Department of Transportation
+ * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +17,9 @@ package us.mn.state.dot.tms.client.comm;
 
 import java.util.ArrayList;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.Modem;
+import us.mn.state.dot.tms.ModemState;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
@@ -27,6 +30,8 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class ModemModel extends ProxyTableModel<Modem> {
+	
+	static private final int MAX_MODEM_TIMEOUT = 90000; // Max timeout of 90 seconds
 
 	/** Create the columns in the model */
 	@Override
@@ -72,9 +77,34 @@ public class ModemModel extends ProxyTableModel<Modem> {
 					m.setTimeout((Integer)value);
 			}
 			protected TableCellEditor createCellEditor() {
-				return new TimeoutCellEditor(60000);
+				return new TimeoutCellEditor(MAX_MODEM_TIMEOUT); 
 			}
 		});
+		cols.add(new ProxyColumn<Modem>("modem.status", 80) { // Modem status field
+			public Object getValueAt(Modem m) {
+				return ModemState.fromOrdinal(m.getState());
+			}
+			public boolean isEditable(Modem m) {
+				return false;
+			}
+			protected TableCellRenderer createCellRenderer(){
+				return new ModemStatusCellRenderer();
+			}
+		});
+		cols.add(new ProxyColumn<Modem>("modem.enable", 75,
+				Boolean.class)
+			{
+				public Object getValueAt(Modem m) {
+					return m.getEnabled();
+				}
+				public boolean isEditable(Modem m) {
+					return canUpdate(m, "enable");
+				}
+				public void setValueAt(Modem m, Object value) {
+					if (value instanceof Boolean)
+						m.setEnabled((Boolean)value);
+				}
+			});
 		return cols;
 	}
 
