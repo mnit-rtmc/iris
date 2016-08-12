@@ -15,3 +15,6 @@ CREATE OR REPLACE VIEW modem_view AS
 	SELECT name, uri, config, timeout, enabled
 	FROM iris.modem;
 GRANT SELECT ON modem_view TO PUBLIC;
+
+-- delete device_op_status_enable system attribute
+DELETE FROM iris.system_attribute WHERE name = 'device_op_status_enable';

@@ -2423,7 +2423,6 @@ client_units_si	true
 comm_event_purge_days	14
 database_version	4.36.0
 detector_auto_fail_enable	true
-device_op_status_enable	false
 dialup_poll_period_mins	120
 dict_allowed_scheme	0
 dict_banned_scheme	0
