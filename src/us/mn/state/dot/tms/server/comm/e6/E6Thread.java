@@ -103,13 +103,14 @@ public class E6Thread extends CommThread<E6Property> {
 	}
 
 	/** Create a message for the specified operation.
+	 * @param m The messenger.
 	 * @param o The operation.
 	 * @return New comm message. */
 	@Override
-	protected E6Message createCommMessage(OpController<E6Property> o)
-		throws IOException
+	protected E6Message createCommMessage(Messenger m,
+		OpController<E6Property> o) throws IOException
 	{
-		return new E6Message(messenger, o, poller.logger, this);
+		return new E6Message(m, o, poller.logger, this);
 	}
 
 	/** Receive packets */

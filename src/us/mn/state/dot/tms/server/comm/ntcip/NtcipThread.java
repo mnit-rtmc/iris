@@ -39,13 +39,16 @@ public class NtcipThread extends CommThread {
 		super(p, q, m);
 	}
 
-	/** Create a new message for the specified operation */
+	/** Create a message for the specified operation.
+	 * @param m The messenger.
+	 * @param o The operation.
+	 * @return New comm message. */
 	@Override
-	protected CommMessage createCommMessage(OpController o)
+	protected CommMessage createCommMessage(Messenger m, OpController o)
 		throws IOException
 	{
 		ControllerImpl c = o.getController();
-		return snmp.new Message(messenger.getOutputStream(c),
-			messenger.getInputStream("", c), c.getPassword());
+		return snmp.new Message(m.getOutputStream(c),
+			m.getInputStream("", c), c.getPassword());
 	}
 }

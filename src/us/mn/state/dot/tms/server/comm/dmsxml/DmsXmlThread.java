@@ -39,16 +39,17 @@ public class DmsXmlThread extends CommThread {
 	 * Create a new message for the specified operation.
 	 * @see CommThread.doPoll().
 	 *
+	 * @param m The messenger.
 	 * @param o The controller operation.
 	 * @return A newly created Message.
 	 * @throws IOException
 	 */
 	@Override
-	protected CommMessage createCommMessage(OpController o)
+	protected CommMessage createCommMessage(Messenger m, OpController o)
 		throws IOException
 	{
 		ControllerImpl c = o.getController();
-		return new Message(messenger.getOutputStream(c),
-				   messenger.getInputStream("", c));
+		return new Message(m.getOutputStream(c),
+				   m.getInputStream("", c));
 	}
 }

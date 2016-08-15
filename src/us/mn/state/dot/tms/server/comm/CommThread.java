@@ -61,7 +61,7 @@ public class CommThread<T extends ControllerProperty> {
 	protected final OpQueue<T> queue;
 
 	/** Messenger for poll/response streams */
-	protected final Messenger messenger;
+	private final Messenger messenger;
 
 	/** Thread status */
 	private String status = "STARTING";
@@ -159,7 +159,7 @@ public class CommThread<T extends ControllerProperty> {
 		final String oname = o.toString();
 		long start = TimeSteward.currentTimeMillis();
 		try {
-			o.poll(createCommMessage(o));
+			o.poll(createCommMessage(messenger, o));
 		}
 		catch (DeviceContentionException e) {
 			handleContention(o, e);
@@ -247,12 +247,13 @@ public class CommThread<T extends ControllerProperty> {
 	}
 
 	/** Create a message for the specified operation.
+	 * @param m The messenger.
 	 * @param o The operation.
 	 * @return New comm message. */
-	protected CommMessage<T> createCommMessage(OpController<T> o)
-		throws IOException
+	protected CommMessage<T> createCommMessage(Messenger m,
+		OpController<T> o) throws IOException
 	{
-		return new CommMessageImpl<T>(messenger, o, poller.logger);
+		return new CommMessageImpl<T>(m, o, poller.logger);
 	}
 
 	/** Respond to a settings request from a controller */
