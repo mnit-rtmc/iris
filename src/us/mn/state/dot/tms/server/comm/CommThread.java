@@ -108,34 +108,42 @@ public class CommThread<T extends ControllerProperty> {
 	/** Open messenger and perform operations */
 	private void operationLoop() {
 		try {
-			messenger.open();
 			performOperations();
 		}
 		catch (InterruptedException e) {
 			setStatus(getMessage(e));
 		}
-		catch (IOException e) {
-			setStatus(getMessage(e));
-		}
 		catch (RuntimeException e) {
 			e.printStackTrace();
-		}
-		finally {
-			messenger.close();
 		}
 	}
 
 	/** Get an exception message */
 	protected String getMessage(Exception e) {
 		String msg = exceptionMessage(e);
-		clog(msg);
+		clog("Exception -- " + msg);
 		return msg;
 	}
 
 	/** Perform operations on the poll queue */
-	private void performOperations() throws IOException,
-		InterruptedException
-	{
+	private void performOperations() throws InterruptedException {
+		do {
+			try {
+				messenger.open();
+				pollQueue();
+			}
+			catch (IOException e) {
+				setStatus(getMessage(e));
+			}
+			finally {
+				messenger.close();
+			}
+			TimeSteward.sleep_well(200);
+		} while (queue.isOpen() && !queue.isEmpty());
+	}
+
+	/** Poll the operation queue and perform operations */
+	private void pollQueue() throws InterruptedException, IOException {
 		while (queue.isOpen()) {
 			doPoll(queue.next());
 			setStatus("");
@@ -187,8 +195,7 @@ public class CommThread<T extends ControllerProperty> {
 		catch (SocketException e) {
 			String msg = getMessage(e);
 			o.handleCommError(EventType.COMM_ERROR, msg);
-			messenger.close();
-			messenger.open();
+			throw e;
 		}
 		finally {
 			if (o.isDone() || !requeueOperation(o))

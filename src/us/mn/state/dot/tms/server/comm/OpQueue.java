@@ -56,6 +56,11 @@ public final class OpQueue<T extends ControllerProperty> {
 		return !closing;
 	}
 
+	/** Check if the queue is empty */
+	public synchronized boolean isEmpty() {
+		return (work == null) && (front == null);
+	}
+
 	/** Enqueue a new operation */
 	public synchronized boolean enqueue(OpController<T> op) {
 		if (shouldAdd(op)) {
