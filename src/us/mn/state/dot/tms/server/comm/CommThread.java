@@ -149,6 +149,10 @@ public class CommThread<T extends ControllerProperty> {
 			{
 				pollQueue(m);
 			}
+			catch (NoModemException e) {
+				// Keep looping until modem is available
+				setStatus(getMessage(e));
+			}
 			catch (IOException e) {
 				setStatus(getMessage(e));
 			}

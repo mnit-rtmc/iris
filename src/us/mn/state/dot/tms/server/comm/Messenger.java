@@ -38,8 +38,7 @@ abstract public class Messenger implements Closeable {
 		new MessengerException("INVALID URI SCHEME");
 
 	/** Exception thrown for no modem */
-	static private final MessengerException NO_MODEM =
-		new MessengerException("NO MODEM AVAILABLE");
+	static private final NoModemException NO_MODEM = new NoModemException();
 
 	/** Create a messenger */
 	static public Messenger create(String d_uri, String uri, int timeout)
