@@ -51,6 +51,13 @@ public class CommThread<T extends ControllerProperty> {
 			COMM_LOG.log(thread.getName() + " " + msg);
 	}
 
+	/** Get an exception message */
+	protected String getMessage(Exception e) {
+		String msg = exceptionMessage(e);
+		clog("Exception -- " + msg);
+		return msg;
+	}
+
 	/** Device poller */
 	protected final DevicePoller<T> poller;
 
@@ -60,8 +67,14 @@ public class CommThread<T extends ControllerProperty> {
 	/** Operation queue */
 	protected final OpQueue<T> queue;
 
-	/** Messenger for poll/response streams */
-	private final Messenger messenger;
+	/** Default URI scheme */
+	private final String d_uri;
+
+	/** Remote URI */
+	private final String uri;
+
+	/** Receive timeout (ms) */
+	private final int timeout;
 
 	/** Thread status */
 	private String status = "STARTING";
@@ -76,8 +89,15 @@ public class CommThread<T extends ControllerProperty> {
 		return status;
 	}
 
-	/** Create a new comm thread */
-	public CommThread(DevicePoller<T> dp, OpQueue<T> q, Messenger m) {
+	/** Create a new comm thread.
+	 * @param dp The device poller.
+	 * @param q The operation queue.
+	 * @param du Default URI.
+	 * @param u The URI.
+	 * @param rt Receive timeout (ms) */
+	public CommThread(DevicePoller<T> dp, OpQueue<T> q, String du, String u,
+		int rt)
+	{
 		poller = dp;
  		thread = new Thread(GROUP, "Comm: " + poller.name) {
 			@Override
@@ -87,7 +107,9 @@ public class CommThread<T extends ControllerProperty> {
 		};
 		thread.setDaemon(true);
 		queue = q;
-		messenger = m;
+		d_uri = du;
+		uri = u;
+		timeout = rt;
 	}
 
 	/** Start the thread */
@@ -105,12 +127,12 @@ public class CommThread<T extends ControllerProperty> {
 		thread.interrupt();
 	}
 
-	/** Open messenger and perform operations */
+	/** Loop to perform operations */
 	private void operationLoop() {
 		try {
 			performOperations();
 		}
-		catch (InterruptedException e) {
+		catch (InterruptedException | MessengerException e) {
 			setStatus(getMessage(e));
 		}
 		catch (RuntimeException e) {
@@ -118,48 +140,56 @@ public class CommThread<T extends ControllerProperty> {
 		}
 	}
 
-	/** Get an exception message */
-	protected String getMessage(Exception e) {
-		String msg = exceptionMessage(e);
-		clog("Exception -- " + msg);
-		return msg;
-	}
-
-	/** Perform operations on the poll queue */
-	private void performOperations() throws InterruptedException {
+	/** Create messenger and perform operations from the poll queue */
+	private void performOperations() throws InterruptedException,
+		MessengerException
+	{
 		do {
-			try {
-				messenger.open();
-				pollQueue();
+			try (Messenger m = createMessenger(d_uri, uri, timeout))
+			{
+				pollQueue(m);
 			}
 			catch (IOException e) {
 				setStatus(getMessage(e));
-			}
-			finally {
-				messenger.close();
 			}
 			TimeSteward.sleep_well(200);
 		} while (queue.isOpen() && !queue.isEmpty());
 	}
 
+	/** Create a messenger.
+	 * @param du Default URI scheme.
+	 * @param u The URI.
+	 * @param rt Receive timeout (ms).
+	 * @return The new messenger.
+	 * @throws MessengerException if the messenger could not be created. */
+	protected Messenger createMessenger(String du, String u, int rt)
+		throws MessengerException
+	{
+		return Messenger.create(d_uri, uri, timeout);
+	}
+
 	/** Poll the operation queue and perform operations */
-	private void pollQueue() throws InterruptedException, IOException {
+	private void pollQueue(Messenger m) throws InterruptedException,
+		IOException
+	{
 		while (queue.isOpen()) {
-			doPoll(queue.next());
+			doPoll(m, queue.next());
 			setStatus("");
 		}
 	}
 
 	/** Perform one poll for an operation */
-	private void doPoll(final OpController<T> o) throws IOException {
-		if (messenger instanceof ModemMessenger) {
-			ModemMessenger mm = (ModemMessenger) messenger;
+	private void doPoll(Messenger m, final OpController<T> o)
+		throws IOException
+	{
+		if (m instanceof ModemMessenger) {
+			ModemMessenger mm = (ModemMessenger) m;
 			queue.enqueue(new OpHangUp<T>(o.controller, mm));
 		}
 		final String oname = o.toString();
 		long start = TimeSteward.currentTimeMillis();
 		try {
-			o.poll(createCommMessage(messenger, o));
+			o.poll(createCommMessage(m, o));
 		}
 		catch (DeviceContentionException e) {
 			handleContention(o, e);
@@ -175,12 +205,12 @@ public class CommThread<T extends ControllerProperty> {
 		catch (ChecksumException e) {
 			String msg = getMessage(e);
 			o.handleCommError(EventType.CHECKSUM_ERROR, msg);
-			messenger.drain();
+			m.drain();
 		}
 		catch (ParsingException e) {
 			String msg = getMessage(e);
 			o.handleCommError(EventType.PARSING_ERROR, msg);
-			messenger.drain();
+			m.drain();
 		}
 		catch (ControllerException e) {
 			String msg = getMessage(e);

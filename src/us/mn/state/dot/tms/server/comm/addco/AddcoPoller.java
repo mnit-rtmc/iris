@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.MessengerException;
 
 /**
  * A Poller to communicate with ADDCO signs (NodeComm).
@@ -47,15 +48,7 @@ public class AddcoPoller extends DevicePoller<AddcoProperty>
 	protected CommThread<AddcoProperty> createCommThread(String uri,
 		int timeout) throws IOException
 	{
-		return new CommThread<AddcoProperty>(this, queue,
-			createMessenger(uri, timeout));
-	}
-
-	/** Create a messenger */
-	private Messenger createMessenger(String uri, int timeout)
-		throws IOException
-	{
-		return new AddcoMessenger(Messenger.create(d_uri, uri,timeout));
+		return new AddcoThread(this, queue, d_uri, uri, timeout);
 	}
 
 	/** Send a device request message to the sign */

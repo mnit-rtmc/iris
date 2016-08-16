@@ -50,27 +50,38 @@ public class HttpFileMessenger extends Messenger {
 			return url;
 	}
 
-	/** URL connection */
-	private URLConnection connection = null;
-
 	/** Create a new HTTP file messenger.
 	 * @param url The URL of the file to read.
 	 * @param rt Read timeout (ms). */
 	public HttpFileMessenger(URL url, int rt) {
 		this.url = url;
 		timeout = rt;
-		input = null;
-		output = null;
 	}
 
-	/** Open the messenger */
+	/** Close the messenger */
 	@Override
-	public void open() throws IOException {
-		open(null);
+	public void close() {
+		// nothing to do
 	}
 
-	/** Open the messenger */
-	private void open(String upass) throws IOException {
+	/** Get the input stream */
+	@Override
+	public InputStream getInputStream(String p) throws IOException {
+		return createInputStream(p, null);
+	}
+
+	/** Get an input stream for the specified controller */
+	@Override
+	public InputStream getInputStream(String p, ControllerImpl c)
+		throws IOException
+	{
+		return createInputStream(p, c.getPassword());
+	}
+
+	/** Create an HTTP input stream */
+	private InputStream createInputStream(String path, String upass)
+		throws IOException
+	{
 		URLConnection c = getUrl().openConnection();
 		if (upass != null) {
 			String auth = "Basic " + new String(Base64.encode(
@@ -84,52 +95,19 @@ public class HttpFileMessenger extends Messenger {
 			if (hc.getResponseCode() == HTTP_UNAUTHORIZED)
 				throw new ControllerException("UNAUTHORIZED");
 		}
-		input = c.getInputStream();
-		connection = c;
+		return c.getInputStream();
 	}
 
-	/** Close the messenger */
-	@Override
-	public void close() {
-		InputStream in = input;
-		if (in != null) {
-			try {
-				in.close();
-			}
-			catch (IOException e) {
-				// Ignore
-			}
-		}
-		input = null;
-		connection = null;
-	}
-
-	/** Get the input stream */
-	@Override
-	public InputStream getInputStream(String p) throws IOException {
-		path = p;
-		// make a new HTTP connection each time called
-		close();
-		open();
-		return input;
-	}
-
-	/** Get an input stream for the specified controller */
-	@Override
-	public InputStream getInputStream(String p, ControllerImpl c)
-		throws IOException
-	{
-		path = p;
-		// make a new HTTP connection each time called
-		close();
-		open(c.getPassword());
-		return input;
-	}
-
-	/** Get an output stream for the specified controller */
+	/** Get the output stream */
 	@Override
 	public OutputStream getOutputStream(ControllerImpl c) {
 		// HTTP messengers don't have output streams
 		return null;
+	}
+
+	/** Drain any bytes from the input stream */
+	@Override
+	public void drain() {
+		// not needed
 	}
 }

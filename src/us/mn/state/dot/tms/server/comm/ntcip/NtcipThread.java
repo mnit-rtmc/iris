@@ -15,10 +15,12 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.MessengerException;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.OpQueue;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
@@ -30,13 +32,36 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  */
 public class NtcipThread extends CommThread {
 
+	/** Communication protocol */
+	private final CommProtocol protocol;
+
 	/** SNMP message protocol */
 	private final SNMP snmp = new SNMP();
 
 	/** Create a new Ntcip thread */
 	@SuppressWarnings("unchecked")
-	public NtcipThread(NtcipPoller p, OpQueue q, Messenger m) {
-		super(p, q, m);
+	public NtcipThread(NtcipPoller p, OpQueue q, String du, String u,
+		int rt, CommProtocol cp)
+	{
+		super(p, q, du, u, rt);
+		protocol = cp;
+	}
+
+	/** Create a messenger */
+	@Override
+	protected Messenger createMessenger(String du, String u, int rt)
+		throws MessengerException
+	{
+		Messenger m = Messenger.create(du, u, rt);
+		if (protocol == CommProtocol.NTCIP_B) {
+			try {
+				return new HDLCMessenger(m);
+			}
+			catch (IOException e) {
+				throw new MessengerException(e);
+			}
+		} else
+			return m;
 	}
 
 	/** Create a message for the specified operation.

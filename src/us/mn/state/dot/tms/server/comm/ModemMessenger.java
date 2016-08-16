@@ -15,10 +15,12 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.EOFException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
-import java.io.Reader;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.Reader;
 import java.io.Writer;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
@@ -28,6 +30,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.ModemHelper;
 import us.mn.state.dot.tms.ModemState;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.ModemImpl;
 
 /**
@@ -61,6 +64,21 @@ public class ModemMessenger extends Messenger {
 	/** Modem to dial */
 	private final ModemImpl modem;
 
+	/** Phone number to dial */
+	private final String phone_number;
+
+	/** Writer to send modem commands */
+	private final Writer writer;
+
+	/** Reader to read modem responsess */
+	private final Reader reader;
+
+	/** Log a message to debug log */
+	private void log(String msg) {
+		if (MODEM_LOG.isOpen())
+			MODEM_LOG.log(modem.getName() + ": " + msg);
+	}
+
 	/** Set the modem state */
 	private void setState(ModemState ms) {
 		modem.setStateNotify(ms);
@@ -72,9 +90,6 @@ public class ModemMessenger extends Messenger {
 		return ModemState.fromOrdinal(modem.getState());
 	}
 
-	/** Phone number to dial */
-	private final String phone_number;
-
 	/** Time stamp of last activity */
 	private long activity;
 
@@ -83,41 +98,25 @@ public class ModemMessenger extends Messenger {
 		return activity;
 	}
 
-	/** Log a message to debug log */
-	private void log(String msg) {
-		if (MODEM_LOG.isOpen())
-			MODEM_LOG.log(modem.getName() + ": " + msg);
-	}
-
 	/** Create a new modem messenger */
 	public ModemMessenger(SocketAddress a, int rt, ModemImpl mdm,
 		String phone) throws IOException
 	{
-		wrapped = new StreamMessenger(a, rt, mdm.getTimeout());
 		modem = mdm;
 		phone_number = phone.replace("p", ",");
-		activity = TimeSteward.currentTimeMillis();
-		log("created ModemMessenger");
-	}
-
-	/** Open the messenger */
-	@Override
-	public void open() throws IOException {
-		log("open");
+		log("create");
 		try {
-			wrapped.open();
-			setState(ModemState.connecting);
+			wrapped = new StreamMessenger(a, rt, mdm.getTimeout());
 		}
 		catch (IOException e) {
 			setState(ModemState.open_error);
 			throw e;
 		}
-		output = wrapped.getOutputStream();
-		writer = new OutputStreamWriter(output, "US-ASCII");
-		ModemInputStream mis = new ModemInputStream(
-			wrapped.getInputStream(""));
-		input = mis;
-		reader = new InputStreamReader(input, "US-ASCII");
+		setState(ModemState.connecting);
+		activity = TimeSteward.currentTimeMillis();
+		writer = new OutputStreamWriter(getOutputStream(), "US-ASCII");
+		ModemInputStream mis = new ModemInputStream(getInputStream(""));
+		reader = new InputStreamReader(mis, "US-ASCII");
 		try {
 			connectModemRetry();
 			mis.setConnected();
@@ -131,26 +130,12 @@ public class ModemMessenger extends Messenger {
 		}
 	}
 
-	/** Close the messenger */
-	@Override
-	public void close() {
-		log("close");
-		wrapped.close();
-		writer = null;
-		output = null;
-		reader = null;
-		input = null;
-		if (!ModemState.isError(modem.getState()))
-			setState(ModemState.offline);
-		modem.release();
-	}
-
 	/** Connect the modem with up to three tries */
 	private void connectModemRetry() throws IOException {
 		int i = 0;
 		while (true) {
 			try {
-				input.skip(input.available());
+				drain();
 				connectModem();
 				return;
 			}
@@ -172,20 +157,11 @@ public class ModemMessenger extends Messenger {
 			dialModem();
     	}
 
-	/** Writer to send modem commands */
-	private Writer writer;
-
 	/** Write some text */
 	private void write(String s) throws IOException {
-		Writer w = writer;
-		if (w != null) {
-			w.write(s);
-			w.flush();
-		}
+		writer.write(s);
+		writer.flush();
 	}
-
-	/** Reader to read modem responsess */
-	private Reader reader;
 
 	/** Configure the modem */
 	private void configureModem(String config) throws IOException {
@@ -222,11 +198,8 @@ public class ModemMessenger extends Messenger {
 
 	/** Read a reaponse from the modem */
 	private String readResponse() throws IOException {
-		Reader r = reader;
-		if (r == null)
-			throw new EOFException();
 		char[] buf = new char[64];
-		int n_chars = r.read(buf, 0, 64);
+		int n_chars = reader.read(buf, 0, 64);
 		if (n_chars < 0)
 			throw new EOFException("END OF STREAM");
 		String resp = new String(buf, 0, n_chars).trim();
@@ -235,12 +208,41 @@ public class ModemMessenger extends Messenger {
 		return resp;
 	}
 
+	/** Get the input stream.
+	 * @param path Relative path name.
+	 * @return An input stream for reading from the messenger. */
+	@Override
+	public InputStream getInputStream(String path) {
+		return wrapped.getInputStream(path);
+	}
+
+	/** Get the output stream */
+	@Override
+	public OutputStream getOutputStream(ControllerImpl c) {
+		return wrapped.getOutputStream(c);
+	}
+
+	/** Close the messenger */
+	@Override
+	public void close() throws IOException {
+		log("close");
+		try {
+			wrapped.close();
+		}
+		finally {
+			if (!ModemState.isError(modem.getState()))
+				setState(ModemState.offline);
+			// FIXME: this is a leak ...
+			modem.release();
+		}
+	}
+
 	/** Drain any bytes from the input stream */
 	@Override
 	public void drain() throws IOException {
 		// Update last activity timestamp
 		activity = TimeSteward.currentTimeMillis();
-		while (input.available() > 0)
+		while (getInputStream("").available() > 0)
 			readResponse();
 	}
 

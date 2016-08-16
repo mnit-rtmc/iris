@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import java.io.Closeable;
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,15 +31,19 @@ import us.mn.state.dot.tms.server.ModemImpl;
  *
  * @author Douglas Lau
  */
-abstract public class Messenger {
+abstract public class Messenger implements Closeable {
 
-	/** Exception thrown when messenger is closed */
-	static private final EOFException CLOSED = new EOFException(
-		"MESSENGER CLOSED");
+	/** Exception thrown for invalid URI scheme */
+	static private final MessengerException INVALID_URI_SCHEME =
+		new MessengerException("INVALID URI SCHEME");
+
+	/** Exception thrown for no modem */
+	static private final MessengerException NO_MODEM =
+		new MessengerException("NO MODEM AVAILABLE");
 
 	/** Create a messenger */
 	static public Messenger create(String d_uri, String uri, int timeout)
-		throws IOException
+		throws MessengerException
 	{
 		try {
 			URI u = createURI(d_uri, uri);
@@ -51,49 +56,54 @@ abstract public class Messenger {
 			else if ("modem".equals(u.getScheme()))
 				return createModemMessenger(u, timeout);
 			else
-				throw new IOException("INVALID URI SCHEME");
+				throw INVALID_URI_SCHEME;
 		}
-		catch (URISyntaxException e) {
-			throw new IOException("INVALID URI");
+		catch (IOException e) {
+			throw new MessengerException(e);
 		}
 	}
 
 	/** Create the URI with a default URI scheme */
 	static private URI createURI(String d_uri, String uri)
-		throws URISyntaxException
+		throws MessengerException
 	{
 		return URI.create(d_uri).resolve(createURI(uri));
 	}
 
 	/** Create the URI */
-	static private URI createURI(String uri) throws URISyntaxException {
+	static private URI createURI(String uri) throws MessengerException {
 		try {
 			return new URI(uri);
 		}
 		catch (URISyntaxException e) {
 			// If the URI begins with a host IP address,
 			// we need to prepend a couple of slashes
-			return new URI("//" + uri);
+			try {
+				return new URI("//" + uri);
+			}
+			catch (URISyntaxException e2) {
+				throw new MessengerException(e2);
+			}
 		}
 	}
 
 	/** Create a UDP datagram messenger */
 	static private Messenger createDatagramMessenger(URI u, int timeout)
-		throws IOException
+		throws MessengerException, IOException
 	{
 		return new DatagramMessenger(createSocketAddress(u), timeout);
 	}
 
 	/** Create a TCP stream messenger */
 	static private Messenger createStreamMessenger(URI u, int timeout)
-		throws IOException
+		throws MessengerException, IOException
 	{
 		return new StreamMessenger(createSocketAddress(u), timeout);
 	}
 
 	/** Create an inet socket address */
 	static private InetSocketAddress createSocketAddress(URI u)
-		throws IOException
+		throws MessengerException
 	{
 		String host = u.getHost();
 		int p = u.getPort();
@@ -101,7 +111,7 @@ abstract public class Messenger {
 			return new InetSocketAddress(host, p);
 		}
 		catch (IllegalArgumentException e) {
-			throw new IOException(e.getMessage());
+			throw new MessengerException(e);
 		}
 	}
 
@@ -114,69 +124,51 @@ abstract public class Messenger {
 
 	/** Create a modem messenger */
 	static private Messenger createModemMessenger(URI u, int timeout)
-		throws IOException
+		throws MessengerException, IOException
 	{
 		ModemImpl modem = ModemMessenger.getModem();
 		if (modem != null) {
 			return new ModemMessenger(createSocketAddress(
-				createModemURI(modem)), timeout, modem,
+				createURI(modem.getUri())), timeout, modem,
 				u.getHost());
 		} else
-			throw new IOException("No modem available");
-	}
-
-	/** Create a URI for the modem */
-	static private URI createModemURI(ModemImpl modem) throws IOException {
-		try {
-			return modem.createURI();
-		}
-		catch (URISyntaxException e) {
-			throw new IOException("INVALID MODEM URI");
-		}
+			throw NO_MODEM;
 	}
 
 	/** Create a packet messenger */
 	static public PacketMessenger createPkt(String uri, int timeout)
-		throws IOException
+		throws MessengerException
 	{
-		try {
-			URI u = createURI("udp:/", uri);
-			if ("udp".equals(u.getScheme()))
-				return createPacketMessenger(u, timeout);
-			else
-				throw new IOException("INVALID URI SCHEME");
-		}
-		catch (URISyntaxException e) {
-			throw new IOException("INVALID URI");
-		}
+		URI u = createURI("udp:/", uri);
+		if ("udp".equals(u.getScheme()))
+			return createPacketMessenger(u, timeout);
+		else
+			throw INVALID_URI_SCHEME;
 	}
 
 	/** Create a packet datagram messenger */
 	static private PacketMessenger createPacketMessenger(URI u, int timeout)
-		throws IOException
+		throws MessengerException
 	{
-		return new PacketMessenger(createSocketAddress(u), timeout);
+		try {
+			return new PacketMessenger(createSocketAddress(u),
+				timeout);
+		}
+		catch (IOException e) {
+			throw new MessengerException(e);
+		}
 	}
 
-	/** Input stream */
-	protected InputStream input;
-
-	/** Output stream */
-	protected OutputStream output;
-
-	/** Open the messenger */
-	abstract public void open() throws IOException;
-
 	/** Close the messenger */
-	abstract public void close();
+	@Override
+	abstract public void close() throws IOException;
 
 	/** Get the input stream.
 	 * @param path Relative path name.  Only needed for protocols which
 	 *             require it, such as HTTP.
 	 * @return An input stream for reading from the messenger. */
-	public InputStream getInputStream(String path) throws IOException {
-		return input;
-	}
+	abstract public InputStream getInputStream(String path)
+		throws IOException;
 
 	/** Get an input stream for the specified controller.
 	 * @param path Relative path name.  Only needed for protocols which
@@ -186,64 +178,18 @@ abstract public class Messenger {
 	public InputStream getInputStream(String path, ControllerImpl c)
 		throws IOException
 	{
-		InputStream is = getInputStream(path);
-		if (is == null)
-			throw CLOSED;
-		else
-			return input;
-	}
-
-	/** Close the input stream */
-	protected final void closeInput() {
-		InputStream is = input;
-		if (is != null) {
-			try {
-				is.close();
-			}
-			catch (IOException e) {
-				// Ignore
-			}
-		}
-		input = null;
+		return getInputStream(path);
 	}
 
 	/** Get the output stream */
-	public OutputStream getOutputStream() {
-		return output;
+	public final OutputStream getOutputStream() throws IOException {
+		return getOutputStream(null);
 	}
 
 	/** Get an output stream for the specified controller */
-	public OutputStream getOutputStream(ControllerImpl c)
-		throws IOException
-	{
-		OutputStream os = getOutputStream();
-		if (os == null)
-			throw CLOSED;
-		else
-			return os;
-	}
-
-	/** Close the output stream */
-	protected final void closeOutput() {
-		OutputStream os = output;
-		if (os != null) {
-			try {
-				os.close();
-			}
-			catch (IOException e) {
-				// Ignore
-			}
-		}
-		output = null;
-	}
+	abstract public OutputStream getOutputStream(ControllerImpl c)
+		throws IOException;
 
 	/** Drain any bytes from the input stream */
-	public void drain() throws IOException {
-		InputStream is = input;
-		if (is != null) {
-			int a = is.available();
-			if (a > 0)
-				is.skip(a);
-		}
-	}
+	abstract public void drain() throws IOException;
 }

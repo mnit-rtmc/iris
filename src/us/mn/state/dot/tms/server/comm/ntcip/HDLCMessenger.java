@@ -14,12 +14,12 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip;
 
-import java.io.EOFException;
-import java.io.IOException;
 import java.io.InputStream;
+import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * HDLC Messenger
@@ -28,28 +28,37 @@ import us.mn.state.dot.tms.server.comm.Messenger;
  */
 public class HDLCMessenger extends Messenger {
 
+	/** Exception for null controller */
+	static private final ProtocolException NULL_CONTROLLER =
+		new ProtocolException("NULL CONTROLLER");
+
 	/** Wrapped messenger */
-	protected final Messenger wrapped;
+	private final Messenger wrapped;
+
+	/** Input stream */
+	private final HDLC.FrameInputStream input;
+
+	/** Output stream */
+	private final HDLC.FrameOutputStream output;
 
 	/** Create a new HDLC messenger */
-	public HDLCMessenger(Messenger m) {
+	public HDLCMessenger(Messenger m) throws IOException {
 		wrapped = m;
-	}
-
-	/** Open the messenger */
-	@Override
-	public void open() throws IOException {
-		wrapped.open();
-		output = new HDLC.FrameOutputStream(wrapped.getOutputStream());
 		input = new HDLC.FrameInputStream(wrapped.getInputStream(""));
+		output = new HDLC.FrameOutputStream(wrapped.getOutputStream());
 	}
 
 	/** Close the messenger */
 	@Override
-	public void close() {
+	public void close() throws IOException {
 		wrapped.close();
-		output = null;
-		input = null;
+	}
+
+	/** Get the input stream.
+	 * @param path Relative path name.
+	 * @return An input stream for reading from the messenger. */
+	public InputStream getInputStream(String path) throws IOException {
+		throw NULL_CONTROLLER;
 	}
 
 	/** Get an input stream for the specified controller */
@@ -57,12 +66,11 @@ public class HDLCMessenger extends Messenger {
 	public InputStream getInputStream(String path, ControllerImpl c)
 		throws IOException
 	{
-		InputStream _input = input;	// Avoid races
-		if (_input != null) {
+		if (c != null) {
 			int drop = c.getDrop();
-			return new HDLC.AddressedInputStream(_input, drop);
+			return new HDLC.AddressedInputStream(input, drop);
 		} else
-			throw new EOFException("MESSENGER CLOSED");
+			throw NULL_CONTROLLER;
 	}
 
 	/** Get an output stream for the specified controller */
@@ -70,11 +78,18 @@ public class HDLCMessenger extends Messenger {
 	public OutputStream getOutputStream(ControllerImpl c)
 		throws IOException
 	{
-		OutputStream _output = output;	// Avoid races
-		if (_output != null) {
+		if (c != null) {
 			int drop = c.getDrop();
-			return new HDLC.AddressedOutputStream(_output, drop);
+			return new HDLC.AddressedOutputStream(output, drop);
 		} else
-			throw new EOFException("MESSENGER CLOSED");
+			throw NULL_CONTROLLER;
+	}
+
+	/** Drain any bytes from the input stream */
+	@Override
+	public void drain() throws IOException {
+		int a = input.available();
+		if (a > 0)
+			input.skip(a);
 	}
 }

@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
-import us.mn.state.dot.tms.server.comm.Messenger;
 
 /**
  * This class provides a DMS Poller that communicates with
@@ -52,8 +51,7 @@ public class DmsXmlPoller extends DevicePoller implements DMSPoller {
 	protected DmsXmlThread createCommThread(String uri, int timeout)
 		throws IOException
 	{
-		return new DmsXmlThread(this, queue, Messenger.create(d_uri,
-			uri, timeout));
+		return new DmsXmlThread(this, queue, d_uri, uri, timeout);
 	}
 
 	/** Send a new message to the sign. Called by DMSImpl.

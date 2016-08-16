@@ -23,6 +23,7 @@ import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * A DatagramMessenger is a class which can poll a field controller and get the
@@ -42,33 +43,36 @@ public class DatagramMessenger extends Messenger {
 	private final int timeout;
 
 	/** UDP socket */
-	private DatagramSocket socket;
+	private final DatagramSocket socket;
+
+	/** Input stream */
+	private final DatagramInputStream input;
+
+	/** Output stream */
+	private final DatagramOutputStream output;
 
 	/** Create a new datagram messenger.
 	 * @param p Local port (null for any).
 	 * @param ra Remote socket address.
 	 * @param rt Read timeout (ms). */
-	public DatagramMessenger(Integer p, SocketAddress ra, int rt) {
+	public DatagramMessenger(Integer p, SocketAddress ra, int rt)
+		throws IOException
+	{
 		port = p;
 		remote = ra;
 		timeout = rt;
-	}
-
-	/** Create a new datagram messenger.
-	 * @param ra Remote socket address.
-	 * @param rt Read timeout (ms). */
-	public DatagramMessenger(SocketAddress ra, int rt) {
-		this(null, ra, rt);
-	}
-
-	/** Open the datagram messenger */
-	@Override
-	public void open() throws IOException {
 		socket = createSocket();
 		socket.setSoTimeout(timeout);
 		socket.connect(remote);
 		input = new DatagramInputStream();
 		output = new DatagramOutputStream();
+	}
+
+	/** Create a new datagram messenger.
+	 * @param ra Remote socket address.
+	 * @param rt Read timeout (ms). */
+	public DatagramMessenger(SocketAddress ra, int rt) throws IOException {
+		this(null, ra, rt);
 	}
 
 	/** Create the socket */
@@ -78,17 +82,33 @@ public class DatagramMessenger extends Messenger {
 		      : new DatagramSocket();
 	}
 
+	/** Get the input stream.
+	 * @param path Relative path name.
+	 * @return An input stream for reading from the messenger. */
+	@Override
+	public InputStream getInputStream(String path) {
+		return input;
+	}
+
+	/** Get the output stream */
+	@Override
+	public OutputStream getOutputStream(ControllerImpl c) {
+		return output;
+	}
+
+	/** Drain any bytes from the input stream */
+	@Override
+	public void drain() throws IOException {
+		int a = input.available();
+		if (a > 0)
+			input.skip(a);
+	}
+
 	/** Close the datagram messenger */
 	@Override
 	public void close() {
-		DatagramSocket s = socket;
-		if (s != null) {
-			s.disconnect();
-			s.close();
-			socket = null;
-		}
-		input = null;
-		output = null;
+		socket.disconnect();
+		socket.close();
 	}
 
 	/** Output stream for sending datagrams */
@@ -112,9 +132,7 @@ public class DatagramMessenger extends Messenger {
 		public void flush() throws IOException {
 			packet.setLength(buffer.position());
 			buffer.clear();
-			DatagramSocket s = socket;
-			if (s != null)
-				s.send(packet);
+			socket.send(packet);
 		}
 	}
 
@@ -153,13 +171,10 @@ public class DatagramMessenger extends Messenger {
 
 		/** Recvie and buffer a datagram */
 		private void receivePacket() throws IOException {
-			DatagramSocket s = socket;
-			if (s != null) {
-				packet.setLength(1024);
-				s.receive(packet);
-				buffer.position(0);
-				buffer.limit(packet.getLength());
-			}
+			packet.setLength(1024);
+			socket.receive(packet);
+			buffer.position(0);
+			buffer.limit(packet.getLength());
 		}
 
 		/** Get the number of available bytes */

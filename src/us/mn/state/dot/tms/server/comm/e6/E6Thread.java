@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.MessengerException;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.OpQueue;
 import us.mn.state.dot.tms.server.comm.PacketMessenger;
@@ -56,29 +57,25 @@ public class E6Thread extends CommThread<E6Property> {
 	/** Thread to receive packets */
 	private final Thread rx_thread;
 
-	/** Transmit Packet */
-	private final E6Packet tx_pkt;
-
-	/** Receive Packet */
-	private final E6Packet rx_pkt;
-
-	/** Response Packet */
-	private final E6Packet resp_pkt;
-
 	/** E6 poller */
 	private final E6Poller poller;
 
+	/** Transmit Packet */
+	private E6Packet tx_pkt;
+
+	/** Receive Packet */
+	private E6Packet rx_pkt;
+
+	/** Response Packet */
+	private E6Packet resp_pkt;
+
 	/** Create a new E6 thread */
-	public E6Thread(E6Poller dp, OpQueue<E6Property> q, PacketMessenger m,
+	public E6Thread(E6Poller dp, OpQueue<E6Property> q, String du, String u,
 		int rt)
 	{
-		super(dp, q, m);
+		super(dp, q, du, u, rt);
 		poller = dp;
 		timeout = rt;
-		DatagramSocket s = m.getSocket();
-		tx_pkt = new E6Packet(s, false);
-		rx_pkt = new E6Packet(s, true);
-		resp_pkt = new E6Packet(s, true);
  		rx_thread = new Thread(RECV, "Recv: " + dp.name) {
 			@Override
 			public void run() {
@@ -100,6 +97,24 @@ public class E6Thread extends CommThread<E6Property> {
 	public void destroy() {
 		rx_thread.interrupt();
 		super.destroy();
+	}
+
+	/** Create a messenger.
+	 * @param du Default URI scheme.
+	 * @param u The URI.
+	 * @param rt Receive timeout (ms).
+	 * @return The new messenger.
+	 * @throws MessengerException if the messenger could not be created. */
+	@Override
+	protected Messenger createMessenger(String du, String u, int rt)
+		throws MessengerException
+	{
+		PacketMessenger m = Messenger.createPkt(u, rt);
+		DatagramSocket s = m.getSocket();
+		tx_pkt = new E6Packet(s, false);
+		rx_pkt = new E6Packet(s, true);
+		resp_pkt = new E6Packet(s, true);
+		return m;
 	}
 
 	/** Create a message for the specified operation.
@@ -130,8 +145,12 @@ public class E6Thread extends CommThread<E6Property> {
 
 	/** Receive one packet */
 	private void receivePacket() throws IOException {
+		E6Packet rx = rx_pkt;
+		E6Packet tx = tx_pkt;
+		E6Packet rp = resp_pkt;
 		try {
-			doReceivePacket();
+			if (rx != null && tx != null && rp != null)
+				doReceivePacket(rx, tx, rp);
 		}
 		catch (SocketTimeoutException e) {
 			// we expect lots of timeouts
@@ -139,36 +158,40 @@ public class E6Thread extends CommThread<E6Property> {
 	}
 
 	/** Receive one packet */
-	private void doReceivePacket() throws IOException {
-		rx_pkt.receive();
-		Command cmd = rx_pkt.parseCommand();
+	private void doReceivePacket(E6Packet rx, E6Packet tx, E6Packet rp)
+		throws IOException
+	{
+		rx.receive();
+		Command cmd = rx.parseCommand();
 		if (cmd.acknowledge)
 			return;
 		else
-			sendAck(cmd, rx_pkt.parseMsn());
-		rx_pkt.advanceMsn();
-		if (resp_pkt.checkResponse(rx_pkt))
+			sendAck(rx, tx, cmd);
+		rx.advanceMsn();
+		if (rp.checkResponse(rx))
 			return;
 		if (cmd.equals(TAG_RESPONSE)) {
-			Response rsp = rx_pkt.parseResponse();
+			Response rsp = rx.parseResponse();
 			if (rsp == Response.COMMAND_COMPLETE)
-				logTagTransaction();
+				logTagTransaction(rx);
 		}
 	}
 
 	/** Send an ack packet */
-	private void sendAck(Command cmd, byte msn) throws IOException {
+	private void sendAck(E6Packet rx, E6Packet tx, Command cmd)
+		throws IOException
+	{
 		Command c = new Command(cmd.group, false, true);
 		byte[] data = new byte[3];
 		data[0] = (byte) (Response.ACK.bits() >> 8);
 		data[1] = (byte) (Response.ACK.bits() >> 0);
-		data[2] = rx_pkt.parseMsn();
-		tx_pkt.send(c, data);
+		data[2] = rx.parseMsn();
+		tx.send(c, data);
 	}
 
 	/** Log a real-time tag transaction */
-	private void logTagTransaction() throws IOException {
-		byte[] data = rx_pkt.parseData();
+	private void logTagTransaction(E6Packet rx) throws IOException {
+		byte[] data = rx.parseData();
 		if (data.length > 2) {
 			TagTransaction tt = new TagTransaction(data, 2,
 				data.length - 2);
@@ -188,17 +211,21 @@ public class E6Thread extends CommThread<E6Property> {
 
 	/** Send a store packet */
 	public void sendStore(E6Property p) throws IOException {
-		byte[] data = p.storeData();
-		PendingCommand pc = sendPacket(p.command(), data);
-		byte[] resp = resp_pkt.waitData(getTimeout(), pc);
-		p.parseStore(resp);
+		E6Packet rp = resp_pkt;
+		E6Packet tx = tx_pkt;
+		if (rp != null && tx != null) {
+			byte[] data = p.storeData();
+			PendingCommand pc = sendPacket(tx, p.command(), data);
+			byte[] resp = rp.waitData(getTimeout(), pc);
+			p.parseStore(resp);
+		}
 	}
 
 	/** Send a packet */
-	private PendingCommand sendPacket(Command cmd, byte[] data)
+	private PendingCommand sendPacket(E6Packet tx, Command cmd, byte[] data)
 		throws IOException
 	{
-		tx_pkt.send(cmd, data);
+		tx.send(cmd, data);
 		return new PendingCommand(cmd, getSubCmd(cmd, data));
 	}
 
@@ -215,9 +242,13 @@ public class E6Thread extends CommThread<E6Property> {
 
 	/** Send a query packet */
 	public void sendQuery(E6Property p) throws IOException {
-		byte[] data = p.queryData();
-		PendingCommand pc = sendPacket(p.command(), data);
-		byte[] resp = resp_pkt.waitData(getTimeout(), pc);
-		p.parseQuery(resp);
+		E6Packet rp = resp_pkt;
+		E6Packet tx = tx_pkt;
+		if (rp != null && tx != null) {
+			byte[] data = p.queryData();
+			PendingCommand pc = sendPacket(tx, p.command(), data);
+			byte[] resp = rp.waitData(getTimeout(), pc);
+			p.parseQuery(resp);
+		}
 	}
 }

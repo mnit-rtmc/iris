@@ -154,8 +154,7 @@ public class DevicePoller<T extends ControllerProperty> {
 	protected CommThread<T> createCommThread(String uri, int timeout)
 		throws IOException
 	{
-		return new CommThread<T>(this, queue, Messenger.create(d_uri,
-			uri, timeout));
+		return new CommThread<T>(this, queue, d_uri, uri, timeout);
 	}
 
 	/** Destroy the comm thread */

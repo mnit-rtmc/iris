@@ -31,19 +31,19 @@ public class DmsXmlThread extends CommThread {
 
 	/** Create a new dmsxml thread */
 	@SuppressWarnings("unchecked")
-	public DmsXmlThread(DmsXmlPoller p, OpQueue q, Messenger m) {
-		super(p, q, m);
+	public DmsXmlThread(DmsXmlPoller p, OpQueue q, String du, String u,
+		int rt)
+	{
+		super(p, q, du, u, rt);
 	}
 
-	/**
-	 * Create a new message for the specified operation.
+	/** Create a new message for the specified operation.
 	 * @see CommThread.doPoll().
 	 *
 	 * @param m The messenger.
 	 * @param o The controller operation.
 	 * @return A newly created Message.
-	 * @throws IOException
-	 */
+	 * @throws IOException */
 	@Override
 	protected CommMessage createCommMessage(Messenger m, OpController o)
 		throws IOException

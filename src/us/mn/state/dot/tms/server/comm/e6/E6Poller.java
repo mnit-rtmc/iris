@@ -21,8 +21,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
-import us.mn.state.dot.tms.server.comm.Messenger;
-import us.mn.state.dot.tms.server.comm.PacketMessenger;
 import us.mn.state.dot.tms.server.comm.TagReaderPoller;
 
 /**
@@ -46,8 +44,7 @@ public class E6Poller extends DevicePoller<E6Property>
 	public E6Thread createCommThread(String uri, int timeout)
 		throws IOException
 	{
-		return new E6Thread(this, queue, Messenger.createPkt(uri,
-			timeout), timeout);
+		return new E6Thread(this, queue, d_uri, uri, timeout);
 	}
 
 	/** Tag reader */

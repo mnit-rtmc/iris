@@ -14,10 +14,13 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * A StreamMessenger is a class which can poll a field controller and get the
@@ -37,59 +40,65 @@ public class StreamMessenger extends Messenger {
 	private final int conn_timeout;
 
 	/** TCP socket */
-	private Socket socket;
+	private final Socket socket;
+
+	/** Input stream */
+	private final InputStream input;
+
+	/** Output stream */
+	private final OutputStream output;
 
 	/** Create a new stream messenger.
 	 * NOTE: must call setConnected to switch from conn_timeout to
 	 *       recv_timeout. */
-	public StreamMessenger(SocketAddress a, int rt, int ct) {
+	public StreamMessenger(SocketAddress a, int rt, int ct)
+		throws IOException
+	{
 		address = a;
 		recv_timeout = rt;
 		conn_timeout = ct;
+		socket = new Socket();
+		socket.setSoTimeout(conn_timeout);
+		socket.connect(address, conn_timeout);
+		input = socket.getInputStream();
+		output = socket.getOutputStream();
 	}
 
 	/** Create a new stream messenger */
-	public StreamMessenger(SocketAddress a, int rt) {
+	public StreamMessenger(SocketAddress a, int rt) throws IOException {
 		this(a, rt, rt);
 	}
 
-	/** Open the stream messenger */
+	/** Get the input stream.
+	 * @param path Relative path name.
+	 * @return An input stream for reading from the messenger. */
 	@Override
-	public void open() throws IOException {
-		Socket s = new Socket();
-		s.setSoTimeout(conn_timeout);
-		s.connect(address, conn_timeout);
-		input = s.getInputStream();
-		output = s.getOutputStream();
-		socket = s;
+	public InputStream getInputStream(String path) {
+		return input;
+	}
+
+	/** Get the output stream */
+	@Override
+	public OutputStream getOutputStream(ControllerImpl c) {
+		return output;
+	}
+
+	/** Drain any bytes from the input stream */
+	@Override
+	public void drain() throws IOException {
+		int a = input.available();
+		if (a > 0)
+			input.skip(a);
 	}
 
 	/** Close the stream messenger */
 	@Override
-	public void close() {
-		closeInput();
-		closeOutput();
-		closeSocket();
-	}
-
-	/** Close the socket */
-	private void closeSocket() {
-		Socket s = socket;
-		if (s != null) {
-			try {
-				s.close();
-			}
-			catch (IOException e) {
-				// Ignore
-			}
-		}
-		socket = null;
+	public void close() throws IOException {
+		socket.close();
 	}
 
 	/** Set the messenger to a connected state */
 	public void setConnected() throws SocketException {
-		Socket s = socket;
-		if (s != null)
-			s.setSoTimeout(recv_timeout);
+		socket.setSoTimeout(recv_timeout);
 	}
 }

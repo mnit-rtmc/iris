@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
+import us.mn.state.dot.tms.server.comm.MessengerException;
 import us.mn.state.dot.tms.server.comm.TransientPoller;
 import us.mn.state.dot.tms.server.comm.pelcod.OpDeviceRequest;
 import us.mn.state.dot.tms.server.comm.pelcod.OpMoveCamera;
@@ -48,16 +49,7 @@ public class InfinovaPoller extends TransientPoller<PelcoDProperty>
 	protected CommThread<PelcoDProperty> createCommThread(String uri,
 		int timeout) throws IOException
 	{
-		return new CommThread<PelcoDProperty>(this, queue,
-			createMessenger(uri, timeout));
-	}
-
-	/** Create a messenger */
-	private Messenger createMessenger(String uri, int timeout)
-		throws IOException
-	{
-		return new InfinovaMessenger(Messenger.create(d_uri, uri,
-			timeout));
+		return new InfinovaThread(this, queue, d_uri, uri, timeout);
 	}
 
 	/** Send a PTZ camera move command */

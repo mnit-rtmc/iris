@@ -14,9 +14,12 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import java.io.InputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
+import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * A PacketMessenger is a class which can poll a field controller and get the
@@ -25,6 +28,10 @@ import java.net.SocketAddress;
  * @author Douglas Lau
  */
 public class PacketMessenger extends Messenger {
+
+	/** Exception for input / output streams */
+	static private final ProtocolException PKT_STREAM =
+		new ProtocolException("NO STREAM");
 
 	/** Remote address to connect */
 	private final SocketAddress remote;
@@ -51,10 +58,20 @@ public class PacketMessenger extends Messenger {
 		socket.connect(remote);
 	}
 
-	/** Open the messenger */
+	/** Get the input stream.
+	 * @param path Relative path name.
+	 * @return An input stream for reading from the messenger. */
 	@Override
-	public void open() {
-		// need to open in constructor due to async receive
+	public InputStream getInputStream(String path) throws IOException {
+		throw PKT_STREAM;
+	}
+
+	/** Get the output stream */
+	@Override
+	public OutputStream getOutputStream(ControllerImpl c)
+		throws IOException
+	{
+		throw PKT_STREAM;
 	}
 
 	/** Close the datagram packet messenger */
@@ -62,5 +79,11 @@ public class PacketMessenger extends Messenger {
 	public void close() {
 		socket.disconnect();
 		socket.close();
+	}
+
+	/** Drain any bytes from the input stream */
+	@Override
+	public void drain() {
+		// nothing to do
 	}
 }

@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
-import us.mn.state.dot.tms.server.comm.Messenger;
 
 /**
  * NTCIP Poller
@@ -61,19 +60,8 @@ public class NtcipPoller extends DevicePoller implements DMSPoller, LCSPoller {
 	protected NtcipThread createCommThread(String uri, int timeout)
 		throws IOException
 	{
-		return new NtcipThread(this, queue, createMessenger(uri,
-			timeout));
-	}
-
-	/** Create a messenger */
-	private Messenger createMessenger(String uri, int timeout)
-		throws IOException
-	{
-		Messenger m = Messenger.create(d_uri, uri, timeout);
-		if (protocol == CommProtocol.NTCIP_B)
-			return new HDLCMessenger(m);
-		else
-			return m;
+		return new NtcipThread(this, queue, d_uri, uri, timeout,
+			protocol);
 	}
 
 	/** Send a device request message to the sign */
