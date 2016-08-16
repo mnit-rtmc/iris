@@ -1861,8 +1861,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Perform a periodic poll */
 	@Override
 	public void periodicPoll() {
-		if (isPeriodicallyQueriable())
-			sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
+		if (isPeriodLong())
+			sendDeviceRequest(DeviceRequest.QUERY_STATUS);
+		sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
 		LCSArrayImpl la = lookupLCSArray();
 		if (la != null)
 			la.periodicPoll();
