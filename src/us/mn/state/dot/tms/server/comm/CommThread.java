@@ -183,10 +183,6 @@ public class CommThread<T extends ControllerProperty> {
 	private void doPoll(Messenger m, final OpController<T> o)
 		throws IOException
 	{
-		if (m instanceof ModemMessenger) {
-			ModemMessenger mm = (ModemMessenger) m;
-			queue.enqueue(new OpHangUp<T>(o.controller, mm));
-		}
 		final String oname = o.toString();
 		long start = TimeSteward.currentTimeMillis();
 		try {

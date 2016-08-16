@@ -125,6 +125,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	@Override
 	protected void initTransients() {
 		createPollJob(poll_period);
+		updateHangUpJob();
 	}
 
 	/** Polling job */
@@ -147,6 +148,33 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		@Override public void perform() {
 			if (poll_enabled)
 				pollControllers();
+		}
+	}
+
+	/** Modem hang-up job */
+	private transient HangUpJob hang_up_job;
+
+	/** Update modem hang-up job */
+	private void updateHangUpJob() {
+		HangUpJob hj = hang_up_job;
+		if (hj != null)
+			POLLER.removeJob(hj);
+		if (isModemLink()) {
+			hang_up_job = new HangUpJob();
+			POLLER.addJob(hang_up_job);
+		} else
+			hang_up_job = null;
+	}
+
+	/** Job for hanging up modem links */
+	private class HangUpJob extends Job {
+		private HangUpJob() {
+			super(Calendar.SECOND, 20);
+		}
+		@Override public void perform() {
+			DevicePoller dp = poller;
+			if (dp != null)
+				dp.destroyIfIdle();
 		}
 	}
 
@@ -208,6 +236,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		if (dp != null)
 			dp.setUri(u);
 		failControllers();
+		updateHangUpJob();
 	}
 
 	/** Get remote URI for link */

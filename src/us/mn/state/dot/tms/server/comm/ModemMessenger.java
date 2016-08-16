@@ -89,14 +89,6 @@ public class ModemMessenger extends Messenger {
 		return ModemState.fromOrdinal(modem.getState());
 	}
 
-	/** Time stamp of last activity */
-	private long activity;
-
-	/** Get last activity time stamp */
-	public long getActivity() {
-		return activity;
-	}
-
 	/** Create a new modem messenger */
 	public ModemMessenger(SocketAddress a, int rt, ModemImpl mdm,
 		String phone) throws IOException
@@ -112,7 +104,6 @@ public class ModemMessenger extends Messenger {
 			throw e;
 		}
 		setState(ModemState.connecting);
-		activity = TimeSteward.currentTimeMillis();
 		try {
 			reader = new InputStreamReader(getInputStream(""),
 				"US-ASCII");
@@ -249,8 +240,6 @@ public class ModemMessenger extends Messenger {
 	/** Drain any bytes from the input stream */
 	@Override
 	public void drain() throws IOException {
-		// Update last activity timestamp
-		activity = TimeSteward.currentTimeMillis();
 		while (getInputStream("").available() > 0)
 			readResponse();
 	}

@@ -69,6 +69,12 @@ public class DevicePoller<T extends ControllerProperty> {
 		log("DESTROYED");
 	}
 
+	/** Destroy the poller if idle */
+	public void destroyIfIdle() {
+		if (queue.isEmpty())
+			destroy();
+	}
+
 	/** Drain the operation queue */
 	private void drainQueue() {
 		queue.forEach(new OpHandler<T>() {
