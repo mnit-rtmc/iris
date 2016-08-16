@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
-import java.io.EOFException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
@@ -201,7 +200,7 @@ public class ModemMessenger extends Messenger {
 		char[] buf = new char[64];
 		int n_chars = reader.read(buf, 0, 64);
 		if (n_chars < 0)
-			throw new EOFException("END OF STREAM");
+			throw new HangUpException();
 		String resp = new String(buf, 0, n_chars).trim();
 		if (resp.contains("NO CARRIER"))
 			throw new HangUpException();
