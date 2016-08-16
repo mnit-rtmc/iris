@@ -117,6 +117,13 @@ public class ModemMessenger extends Messenger {
 		writer = new OutputStreamWriter(getOutputStream(), "US-ASCII");
 		ModemInputStream mis = new ModemInputStream(getInputStream(""));
 		reader = new InputStreamReader(mis, "US-ASCII");
+		doConnectModemRetry(mis);
+	}
+
+	/** Connect the modem and update state */
+	private void doConnectModemRetry(ModemInputStream mis)
+		throws IOException
+	{
 		try {
 			connectModemRetry();
 			mis.setConnected();
@@ -232,7 +239,6 @@ public class ModemMessenger extends Messenger {
 		finally {
 			if (!ModemState.isError(modem.getState()))
 				setState(ModemState.offline);
-			// FIXME: this is a leak ...
 			modem.release();
 		}
 	}
