@@ -67,11 +67,14 @@ public class ModemMessenger extends Messenger {
 	/** Phone number to dial */
 	private final String phone_number;
 
-	/** Writer to send modem commands */
-	private final Writer writer;
+	/** Modem input stream */
+	private final ModemInputStream input;
 
 	/** Reader to read modem responsess */
 	private final Reader reader;
+
+	/** Writer to send modem commands */
+	private final Writer writer;
 
 	/** Log a message to debug log */
 	private void log(String msg) {
@@ -114,19 +117,17 @@ public class ModemMessenger extends Messenger {
 		}
 		setState(ModemState.connecting);
 		activity = TimeSteward.currentTimeMillis();
+		input = new ModemInputStream(wrapped.getInputStream(""));
+		reader = new InputStreamReader(input, "US-ASCII");
 		writer = new OutputStreamWriter(getOutputStream(), "US-ASCII");
-		ModemInputStream mis = new ModemInputStream(getInputStream(""));
-		reader = new InputStreamReader(mis, "US-ASCII");
-		doConnectModemRetry(mis);
+		doConnectModemRetry();
 	}
 
 	/** Connect the modem and update state */
-	private void doConnectModemRetry(ModemInputStream mis)
-		throws IOException
-	{
+	private void doConnectModemRetry() throws IOException {
 		try {
 			connectModemRetry();
-			mis.setConnected();
+			input.setConnected();
 			wrapped.setConnected();
 			log("connected");
 			setState(ModemState.online);
@@ -220,7 +221,7 @@ public class ModemMessenger extends Messenger {
 	 * @return An input stream for reading from the messenger. */
 	@Override
 	public InputStream getInputStream(String path) {
-		return wrapped.getInputStream(path);
+		return input;
 	}
 
 	/** Get the output stream */
@@ -248,7 +249,7 @@ public class ModemMessenger extends Messenger {
 	public void drain() throws IOException {
 		// Update last activity timestamp
 		activity = TimeSteward.currentTimeMillis();
-		while (getInputStream("").available() > 0)
+		while (input.available() > 0)
 			readResponse();
 	}
 
