@@ -127,12 +127,25 @@ abstract public class Messenger implements Closeable {
 		throws MessengerException, IOException
 	{
 		ModemImpl modem = ModemMessenger.getModem();
-		if (modem != null) {
+		if (modem != null)
+			return createModemMessenger(modem, u, timeout);
+		else
+			throw NO_MODEM;
+	}
+
+	/** Create a modem messenger */
+	static private Messenger createModemMessenger(ModemImpl modem, URI u,
+		int timeout) throws MessengerException, IOException
+	{
+		try {
 			return new ModemMessenger(createSocketAddress(
 				createURI(modem.getUri())), timeout, modem,
 				u.getHost());
-		} else
-			throw NO_MODEM;
+		}
+		catch (MessengerException | IOException e) {
+			modem.release();
+			throw e;
+		}
 	}
 
 	/** Create a packet messenger */

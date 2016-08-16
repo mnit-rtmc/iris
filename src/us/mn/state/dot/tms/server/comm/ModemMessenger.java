@@ -118,24 +118,20 @@ public class ModemMessenger extends Messenger {
 		setState(ModemState.connecting);
 		activity = TimeSteward.currentTimeMillis();
 		input = new ModemInputStream(wrapped.getInputStream(""));
-		reader = new InputStreamReader(input, "US-ASCII");
-		writer = new OutputStreamWriter(getOutputStream(), "US-ASCII");
-		doConnectModemRetry();
-	}
-
-	/** Connect the modem and update state */
-	private void doConnectModemRetry() throws IOException {
 		try {
+			reader = new InputStreamReader(input, "US-ASCII");
+			writer = new OutputStreamWriter(getOutputStream(),
+				"US-ASCII");
 			connectModemRetry();
-			input.setConnected();
-			wrapped.setConnected();
-			log("connected");
-			setState(ModemState.online);
 		}
 		catch (IOException e) {
 			setState(ModemState.connect_error);
 			throw e;
 		}
+		input.setConnected();
+		wrapped.setConnected();
+		log("connected");
+		setState(ModemState.online);
 	}
 
 	/** Connect the modem with up to three tries */
