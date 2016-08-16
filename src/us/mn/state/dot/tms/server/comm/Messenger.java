@@ -137,6 +137,8 @@ abstract public class Messenger implements Closeable {
 	static private Messenger createModemMessenger(ModemImpl modem, URI u,
 		int timeout) throws MessengerException, IOException
 	{
+		// NOTE: we have acquired the modem, so we must release it
+		//       if the ModemMessenger isn't fully constructed
 		try {
 			return new ModemMessenger(createSocketAddress(
 				createURI(modem.getUri())), timeout, modem,
