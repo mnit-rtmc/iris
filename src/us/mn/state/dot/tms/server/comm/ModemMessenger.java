@@ -224,16 +224,27 @@ public class ModemMessenger extends Messenger {
 	/** Close the messenger */
 	@Override
 	public void close() throws IOException {
-		log("close");
 		try {
-			wrapped.close();
+			disconnect();
 		}
 		finally {
+			log("close");
+			modem.release();
 			if (!ModemState.isError(modem.getState()))
 				setState(ModemState.offline);
-			modem.release();
+			wrapped.close();
 		}
 	}
+
+	/** Disconnect (hang up) the modem */
+	private void disconnect() throws IOException {
+		log("disconnect");
+		write("+++");
+		// Must wait 1 second after escape sequence (before too)
+		TimeSteward.sleep_well(1000);
+		// Send hang-up command
+		write("ATH0;\r\n\n");
+    	}
 
 	/** Drain any bytes from the input stream */
 	@Override
@@ -243,14 +254,4 @@ public class ModemMessenger extends Messenger {
 		while (getInputStream("").available() > 0)
 			readResponse();
 	}
-
-	/** Disconnect (hang up) the modem */
-	public void disconnectModem() throws IOException {
-		log("disconnect");
-		write("+++");
-		// Must wait 1 second after escape sequence (before too)
-		TimeSteward.sleep_well(1000);
-		// Send hang-up command
-		write("ATH0;\r\n\n");
-    	}
 }

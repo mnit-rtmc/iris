@@ -56,10 +56,8 @@ public class OpHangUp<T extends ControllerProperty> extends OpController<T> {
 		protected Phase<T> poll(CommMessage<T> mess) throws IOException{
 			switch (messenger.getState()) {
 			case online:
-				if (isQuiescent()) {
-					messenger.disconnectModem();
+				if (isQuiescent())
 					throw new HangUpException();
-				}
 				// else fall through ...
 			case connecting:
 				TimeSteward.sleep_well(200);
