@@ -221,6 +221,10 @@ public class CommThread<T extends ControllerProperty> {
 		catch (SocketTimeoutException e) {
 			String msg = getMessage(e);
 			o.handleCommError(EventType.POLL_TIMEOUT_ERROR, msg);
+			if (m instanceof ModemMessenger && !o.isSuccess()) {
+				// Force modem to reconnect
+				throw e;
+			}
 		}
 		catch (SocketException e) {
 			String msg = getMessage(e);

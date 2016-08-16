@@ -67,9 +67,6 @@ public class ModemMessenger extends Messenger {
 	/** Phone number to dial */
 	private final String phone_number;
 
-	/** Modem input stream */
-	private final ModemInputStream input;
-
 	/** Reader to read modem responsess */
 	private final Reader reader;
 
@@ -117,9 +114,9 @@ public class ModemMessenger extends Messenger {
 		}
 		setState(ModemState.connecting);
 		activity = TimeSteward.currentTimeMillis();
-		input = new ModemInputStream(wrapped.getInputStream(""));
 		try {
-			reader = new InputStreamReader(input, "US-ASCII");
+			reader = new InputStreamReader(getInputStream(""),
+				"US-ASCII");
 			writer = new OutputStreamWriter(getOutputStream(),
 				"US-ASCII");
 			connectModemRetry();
@@ -128,7 +125,6 @@ public class ModemMessenger extends Messenger {
 			setState(ModemState.connect_error);
 			throw e;
 		}
-		input.setConnected();
 		wrapped.setConnected();
 		log("connected");
 		setState(ModemState.online);
@@ -217,7 +213,7 @@ public class ModemMessenger extends Messenger {
 	 * @return An input stream for reading from the messenger. */
 	@Override
 	public InputStream getInputStream(String path) {
-		return input;
+		return wrapped.getInputStream(path);
 	}
 
 	/** Get the output stream */
@@ -245,7 +241,7 @@ public class ModemMessenger extends Messenger {
 	public void drain() throws IOException {
 		// Update last activity timestamp
 		activity = TimeSteward.currentTimeMillis();
-		while (input.available() > 0)
+		while (getInputStream("").available() > 0)
 			readResponse();
 	}
 
