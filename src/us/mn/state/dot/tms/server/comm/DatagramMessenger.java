@@ -21,6 +21,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -32,6 +33,15 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * @author Douglas Lau
  */
 public class DatagramMessenger extends Messenger {
+
+	/** Create a UDP datagram messenger.
+	 * @param u URI of remote host.
+	 * @param rt Receive timeout (ms). */
+	static protected DatagramMessenger create(URI u, int rt)
+		throws MessengerException, IOException
+	{
+		return new DatagramMessenger(createSocketAddress(u), rt);
+	}
 
 	/** Local port to bind */
 	private final Integer port;
@@ -55,7 +65,7 @@ public class DatagramMessenger extends Messenger {
 	 * @param p Local port (null for any).
 	 * @param ra Remote socket address.
 	 * @param rt Read timeout (ms). */
-	public DatagramMessenger(Integer p, SocketAddress ra, int rt)
+	private DatagramMessenger(Integer p, SocketAddress ra, int rt)
 		throws IOException
 	{
 		port = p;

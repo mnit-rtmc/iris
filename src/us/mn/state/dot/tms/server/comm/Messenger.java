@@ -46,7 +46,7 @@ abstract public class Messenger implements Closeable {
 		try {
 			URI u = createURI(d_uri, uri);
 			if ("udp".equals(u.getScheme()))
-				return createDatagramMessenger(u, timeout);
+				return DatagramMessenger.create(u, timeout);
 			else if ("tcp".equals(u.getScheme()))
 				return createStreamMessenger(u, timeout);
 			else if ("http".equals(u.getScheme()))
@@ -85,13 +85,6 @@ abstract public class Messenger implements Closeable {
 		}
 	}
 
-	/** Create a UDP datagram messenger */
-	static private Messenger createDatagramMessenger(URI u, int timeout)
-		throws MessengerException, IOException
-	{
-		return new DatagramMessenger(createSocketAddress(u), timeout);
-	}
-
 	/** Create a TCP stream messenger */
 	static private Messenger createStreamMessenger(URI u, int timeout)
 		throws MessengerException, IOException
@@ -100,7 +93,7 @@ abstract public class Messenger implements Closeable {
 	}
 
 	/** Create an inet socket address */
-	static private InetSocketAddress createSocketAddress(URI u)
+	static protected InetSocketAddress createSocketAddress(URI u)
 		throws MessengerException
 	{
 		String host = u.getHost();
