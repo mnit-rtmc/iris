@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.Closeable;
-import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -139,9 +138,9 @@ abstract public class Messenger implements Closeable {
 		// NOTE: we have acquired the modem, so we must release it
 		//       if the ModemMessenger isn't fully constructed
 		try {
-			return new ModemMessenger(createSocketAddress(
-				createURI(modem.getUri())), timeout, modem,
-				u.getHost());
+			URI um = createURI(modem.getUri());
+			return new ModemMessenger(createSocketAddress(um),
+				timeout, modem, u.getHost());
 		}
 		catch (MessengerException | IOException e) {
 			modem.release();
