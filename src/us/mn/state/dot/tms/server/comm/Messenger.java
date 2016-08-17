@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * A Messenger is a class which can poll a field controller and get the
- * response. Subclasses are StreamMessenger, HDLCMessenger, etc.
+ * response.  Subclasses are DatagramMessenger, StreamMessenger, etc.
  *
  * @author Douglas Lau
  */
