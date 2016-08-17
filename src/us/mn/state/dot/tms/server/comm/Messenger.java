@@ -39,20 +39,24 @@ abstract public class Messenger implements Closeable {
 	/** Exception thrown for no modem */
 	static private final NoModemException NO_MODEM = new NoModemException();
 
-	/** Create a messenger */
-	static public Messenger create(String d_uri, String uri, int timeout)
+	/** Create a messenger.
+	 * @param d_uri Default URI scheme.
+	 * @param uri URI of remote host.
+	 * @param rt Receive timeout.
+	 * @throws MessengerException if the messenger could not be created. */
+	static public Messenger create(String d_uri, String uri, int rt)
 		throws MessengerException
 	{
 		try {
 			URI u = createURI(d_uri, uri);
 			if ("udp".equals(u.getScheme()))
-				return DatagramMessenger.create(u, timeout);
+				return DatagramMessenger.create(u, rt);
 			else if ("tcp".equals(u.getScheme()))
-				return createStreamMessenger(u, timeout);
+				return createStreamMessenger(u, rt);
 			else if ("http".equals(u.getScheme()))
-				return createHttpFileMessenger(u, timeout);
+				return createHttpFileMessenger(u, rt);
 			else if ("modem".equals(u.getScheme()))
-				return createModemMessenger(u, timeout);
+				return createModemMessenger(u, rt);
 			else
 				throw INVALID_URI_SCHEME;
 		}
