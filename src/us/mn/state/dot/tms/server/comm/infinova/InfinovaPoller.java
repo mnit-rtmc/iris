@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.CommThread;
-import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.MessengerException;
 import us.mn.state.dot.tms.server.comm.TransientPoller;
 import us.mn.state.dot.tms.server.comm.pelcod.OpDeviceRequest;

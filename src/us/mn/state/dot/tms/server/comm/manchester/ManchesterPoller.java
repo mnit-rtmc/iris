@@ -19,7 +19,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
-import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.TransientPoller;
 
 /**
