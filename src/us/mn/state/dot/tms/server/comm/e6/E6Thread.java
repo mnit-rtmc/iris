@@ -109,7 +109,7 @@ public class E6Thread extends CommThread<E6Property> {
 	protected Messenger createMessenger(String du, String u, int rt)
 		throws MessengerException
 	{
-		PacketMessenger m = Messenger.createPkt(u, rt);
+		PacketMessenger m = PacketMessenger.create(u, rt);
 		DatagramSocket s = m.getSocket();
 		tx_pkt = new E6Packet(s, false);
 		rx_pkt = new E6Packet(s, true);

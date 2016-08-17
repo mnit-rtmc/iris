@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
+import java.net.URI;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -28,6 +29,31 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * @author Douglas Lau
  */
 public class PacketMessenger extends Messenger {
+
+	/** Create a packet messenger.
+	 * @param uri URI of remote host.
+	 * @param rt Receive timeout (ms). */
+	static public PacketMessenger create(String uri, int rt)
+		throws MessengerException
+	{
+		URI u = createURI("udp:/", uri);
+		if ("udp".equals(u.getScheme()))
+			return createPacketMessenger(u, rt);
+		else
+			throw INVALID_URI_SCHEME;
+	}
+
+	/** Create a packet datagram messenger */
+	static private PacketMessenger createPacketMessenger(URI u, int rt)
+		throws MessengerException
+	{
+		try {
+			return new PacketMessenger(createSocketAddress(u), rt);
+		}
+		catch (IOException e) {
+			throw new MessengerException(e);
+		}
+	}
 
 	/** Exception for input / output streams */
 	static private final ProtocolException PKT_STREAM =

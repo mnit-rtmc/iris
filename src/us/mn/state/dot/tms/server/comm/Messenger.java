@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 abstract public class Messenger implements Closeable {
 
 	/** Exception thrown for invalid URI scheme */
-	static private final MessengerException INVALID_URI_SCHEME =
+	static protected final MessengerException INVALID_URI_SCHEME =
 		new MessengerException("INVALID URI SCHEME");
 
 	/** Create a messenger.
@@ -62,7 +62,7 @@ abstract public class Messenger implements Closeable {
 	}
 
 	/** Create the URI with a default URI scheme */
-	static private URI createURI(String d_uri, String uri)
+	static protected URI createURI(String d_uri, String uri)
 		throws MessengerException
 	{
 		return URI.create(d_uri).resolve(createURI(uri));
@@ -95,30 +95,6 @@ abstract public class Messenger implements Closeable {
 			return new InetSocketAddress(host, p);
 		}
 		catch (IllegalArgumentException e) {
-			throw new MessengerException(e);
-		}
-	}
-
-	/** Create a packet messenger */
-	static public PacketMessenger createPkt(String uri, int timeout)
-		throws MessengerException
-	{
-		URI u = createURI("udp:/", uri);
-		if ("udp".equals(u.getScheme()))
-			return createPacketMessenger(u, timeout);
-		else
-			throw INVALID_URI_SCHEME;
-	}
-
-	/** Create a packet datagram messenger */
-	static private PacketMessenger createPacketMessenger(URI u, int timeout)
-		throws MessengerException
-	{
-		try {
-			return new PacketMessenger(createSocketAddress(u),
-				timeout);
-		}
-		catch (IOException e) {
 			throw new MessengerException(e);
 		}
 	}
