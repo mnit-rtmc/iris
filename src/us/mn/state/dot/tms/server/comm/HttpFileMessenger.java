@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import static java.net.HttpURLConnection.HTTP_UNAUTHORIZED;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -32,6 +33,15 @@ import us.mn.state.dot.tms.utils.Base64;
  * @author Michael Darter
  */
 public class HttpFileMessenger extends Messenger {
+
+	/** Create an HTTP file messenger.
+	 * @param u URI of remote host.
+	 * @param rt Receive timeout (ms). */
+	static protected HttpFileMessenger create(URI u, int rt)
+		throws IOException
+	{
+		return new HttpFileMessenger(u.toURL(), rt);
+	}
 
 	/** URL to read */
 	private final URL url;
@@ -53,7 +63,7 @@ public class HttpFileMessenger extends Messenger {
 	/** Create a new HTTP file messenger.
 	 * @param url The URL of the file to read.
 	 * @param rt Read timeout (ms). */
-	public HttpFileMessenger(URL url, int rt) {
+	private HttpFileMessenger(URL url, int rt) {
 		this.url = url;
 		timeout = rt;
 	}

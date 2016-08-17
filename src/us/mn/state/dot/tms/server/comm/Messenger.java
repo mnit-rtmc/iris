@@ -50,7 +50,7 @@ abstract public class Messenger implements Closeable {
 			else if ("tcp".equals(u.getScheme()))
 				return StreamMessenger.create(u, rt, rt);
 			else if ("http".equals(u.getScheme()))
-				return createHttpFileMessenger(u, rt);
+				return HttpFileMessenger.create(u, rt);
 			else if ("modem".equals(u.getScheme()))
 				return ModemMessenger.create(u, rt);
 			else
@@ -97,13 +97,6 @@ abstract public class Messenger implements Closeable {
 		catch (IllegalArgumentException e) {
 			throw new MessengerException(e);
 		}
-	}
-
-	/** Create an HTTP file messenger */
-	static private HttpFileMessenger createHttpFileMessenger(URI u,
-		int timeout) throws IOException
-	{
-		return new HttpFileMessenger(u.toURL(), timeout);
 	}
 
 	/** Create a packet messenger */
