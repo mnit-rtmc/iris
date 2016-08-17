@@ -172,7 +172,7 @@ public class CommThread<T extends ControllerProperty> {
 	protected Messenger createMessenger(String du, String u, int rt)
 		throws MessengerException
 	{
-		return Messenger.create(d_uri, uri, timeout);
+		return Messenger.create(du, u, rt);
 	}
 
 	/** Poll the operation queue and perform operations.
