@@ -70,10 +70,10 @@ public class E6Thread extends CommThread<E6Property> {
 	private E6Packet resp_pkt;
 
 	/** Create a new E6 thread */
-	public E6Thread(E6Poller dp, OpQueue<E6Property> q, String du, String u,
+	public E6Thread(E6Poller dp, OpQueue<E6Property> q, URI s, String u,
 		int rt)
 	{
-		super(dp, q, du, u, rt);
+		super(dp, q, s, u, rt);
 		poller = dp;
 		timeout = rt;
  		rx_thread = new Thread(RECV, "Recv: " + dp.name) {
@@ -100,20 +100,20 @@ public class E6Thread extends CommThread<E6Property> {
 	}
 
 	/** Create a messenger.
-	 * @param du Default URI scheme.
+	 * @param s Default URI scheme.
 	 * @param u The URI.
 	 * @param rt Receive timeout (ms).
 	 * @return The new messenger.
 	 * @throws MessengerException if the messenger could not be created. */
 	@Override
-	protected Messenger createMessenger(String du, String u, int rt)
+	protected Messenger createMessenger(URI s, String u, int rt)
 		throws MessengerException
 	{
 		PacketMessenger m = PacketMessenger.create(u, rt);
-		DatagramSocket s = m.getSocket();
-		tx_pkt = new E6Packet(s, false);
-		rx_pkt = new E6Packet(s, true);
-		resp_pkt = new E6Packet(s, true);
+		DatagramSocket ds = m.getSocket();
+		tx_pkt = new E6Packet(ds, false);
+		rx_pkt = new E6Packet(ds, true);
+		resp_pkt = new E6Packet(ds, true);
 		return m;
 	}
 

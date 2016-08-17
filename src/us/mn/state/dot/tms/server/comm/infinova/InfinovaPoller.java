@@ -49,7 +49,7 @@ public class InfinovaPoller extends TransientPoller<PelcoDProperty>
 	protected CommThread<PelcoDProperty> createCommThread(String uri,
 		int timeout) throws IOException
 	{
-		return new InfinovaThread(this, queue, d_uri, uri, timeout);
+		return new InfinovaThread(this, queue, scheme, uri, timeout);
 	}
 
 	/** Send a PTZ camera move command */

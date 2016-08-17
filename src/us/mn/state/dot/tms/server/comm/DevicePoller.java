@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
+import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -27,13 +28,13 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 public class DevicePoller<T extends ControllerProperty> {
 
 	/** Default URI for UDP sockets */
-	static protected final String UDP = "udp:/";
+	static protected final URI UDP = URI.create("udp:/");
 
 	/** Default URI for TCP sockets */
-	static protected final String TCP = "tcp:/";
+	static protected final URI TCP = URI.create("tcp:/");
 
 	/** Default URI for HTTP sockets */
-	static protected final String HTTP = "http:/";
+	static protected final URI HTTP = URI.create("http:/");
 
 	/** Operation queue */
 	protected final OpQueue<T> queue = new OpQueue<T>();
@@ -42,7 +43,7 @@ public class DevicePoller<T extends ControllerProperty> {
 	public final String name;
 
 	/** Default URI scheme */
-	public final String d_uri;
+	public final URI scheme;
 
 	/** Protocol logger */
 	public final DebugLog logger;
@@ -54,9 +55,9 @@ public class DevicePoller<T extends ControllerProperty> {
 	}
 
 	/** Create a device poller */
-	protected DevicePoller(String n, String du, DebugLog l) {
+	protected DevicePoller(String n, URI s, DebugLog l) {
 		name = n;
-		d_uri = du;
+		scheme = s;
 		logger = l;
 		log("CREATED");
 	}
@@ -160,7 +161,7 @@ public class DevicePoller<T extends ControllerProperty> {
 	protected CommThread<T> createCommThread(String uri, int timeout)
 		throws IOException
 	{
-		return new CommThread<T>(this, queue, d_uri, uri, timeout);
+		return new CommThread<T>(this, queue, scheme, uri, timeout);
 	}
 
 	/** Destroy the comm thread */

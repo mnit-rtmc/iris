@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
@@ -36,7 +37,7 @@ import us.mn.state.dot.tms.server.comm.LCSPoller;
 public class NtcipPoller extends DevicePoller implements DMSPoller, LCSPoller {
 
 	/** Get the default URI for a comm protocol */
-	static private String default_uri(CommProtocol cp) {
+	static private URI default_uri(CommProtocol cp) {
 		if (cp == CommProtocol.NTCIP_A)
 			return UDP;
 		else
@@ -60,7 +61,7 @@ public class NtcipPoller extends DevicePoller implements DMSPoller, LCSPoller {
 	protected NtcipThread createCommThread(String uri, int timeout)
 		throws IOException
 	{
-		return new NtcipThread(this, queue, d_uri, uri, timeout,
+		return new NtcipThread(this, queue, scheme, uri, timeout,
 			protocol);
 	}
 

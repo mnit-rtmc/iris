@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.addco;
 
 import java.io.IOException;
+import java.net.URI;
 import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.MessengerException;
@@ -29,17 +30,17 @@ public class AddcoThread extends CommThread<AddcoProperty> {
 
 	/** Create a new Addco thread */
 	public AddcoThread(AddcoPoller p, OpQueue<AddcoProperty> q,
-		String du, String u, int rt)
+		URI s, String u, int rt)
 	{
-		super(p, q, du, u, rt);
+		super(p, q, s, u, rt);
 	}
 
 	/** Create a messenger */
 	@Override
-	protected Messenger createMessenger(String du, String u, int rt)
+	protected Messenger createMessenger(URI s, String u, int rt)
 		throws MessengerException
 	{
-		Messenger m = Messenger.create(du, u, rt);
+		Messenger m = Messenger.create(s, u, rt);
 		try {
 			return new AddcoMessenger(m);
 		}

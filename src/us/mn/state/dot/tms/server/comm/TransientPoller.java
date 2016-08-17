@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
 
 /**
@@ -27,8 +28,8 @@ public class TransientPoller<T extends ControllerProperty>
 	extends DevicePoller<T>
 {
 	/** Create a new transient poller */
-	protected TransientPoller(String name, String du, DebugLog l) {
-		super(name, du, l);
+	protected TransientPoller(String name, URI s, DebugLog l) {
+		super(name, s, l);
 	}
 
 	/** Add an operation to the transient poller */

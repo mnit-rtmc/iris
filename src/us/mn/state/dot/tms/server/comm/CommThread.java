@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.IOException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.CommProtocol;
@@ -68,7 +69,7 @@ public class CommThread<T extends ControllerProperty> {
 	protected final OpQueue<T> queue;
 
 	/** Default URI scheme */
-	private final String d_uri;
+	private final URI scheme;
 
 	/** Remote URI */
 	private final String uri;
@@ -92,10 +93,10 @@ public class CommThread<T extends ControllerProperty> {
 	/** Create a new comm thread.
 	 * @param dp The device poller.
 	 * @param q The operation queue.
-	 * @param du Default URI.
+	 * @param s Default URI scheme.
 	 * @param u The URI.
 	 * @param rt Receive timeout (ms) */
-	public CommThread(DevicePoller<T> dp, OpQueue<T> q, String du, String u,
+	public CommThread(DevicePoller<T> dp, OpQueue<T> q, URI s, String u,
 		int rt)
 	{
 		poller = dp;
@@ -107,7 +108,7 @@ public class CommThread<T extends ControllerProperty> {
 		};
 		thread.setDaemon(true);
 		queue = q;
-		d_uri = du;
+		scheme = s;
 		uri = u;
 		timeout = rt;
 	}
@@ -147,7 +148,7 @@ public class CommThread<T extends ControllerProperty> {
 		MessengerException
 	{
 		do {
-			try (Messenger m = createMessenger(d_uri, uri, timeout))
+			try (Messenger m = createMessenger(scheme, uri,timeout))
 			{
 				pollQueue(m);
 			}
@@ -164,15 +165,15 @@ public class CommThread<T extends ControllerProperty> {
 	}
 
 	/** Create a messenger.
-	 * @param du Default URI scheme.
+	 * @param s Default URI scheme.
 	 * @param u The URI.
 	 * @param rt Receive timeout (ms).
 	 * @return The new messenger.
 	 * @throws MessengerException if the messenger could not be created. */
-	protected Messenger createMessenger(String du, String u, int rt)
+	protected Messenger createMessenger(URI s, String u, int rt)
 		throws MessengerException
 	{
-		return Messenger.create(du, u, rt);
+		return Messenger.create(s, u, rt);
 	}
 
 	/** Poll the operation queue and perform operations.

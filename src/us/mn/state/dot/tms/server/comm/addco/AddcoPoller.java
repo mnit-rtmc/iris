@@ -48,7 +48,7 @@ public class AddcoPoller extends DevicePoller<AddcoProperty>
 	protected CommThread<AddcoProperty> createCommThread(String uri,
 		int timeout) throws IOException
 	{
-		return new AddcoThread(this, queue, d_uri, uri, timeout);
+		return new AddcoThread(this, queue, scheme, uri, timeout);
 	}
 
 	/** Send a device request message to the sign */

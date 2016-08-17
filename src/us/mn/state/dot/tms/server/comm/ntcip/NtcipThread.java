@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import java.net.URI;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -40,19 +41,19 @@ public class NtcipThread extends CommThread {
 
 	/** Create a new Ntcip thread */
 	@SuppressWarnings("unchecked")
-	public NtcipThread(NtcipPoller p, OpQueue q, String du, String u,
+	public NtcipThread(NtcipPoller p, OpQueue q, URI s, String u,
 		int rt, CommProtocol cp)
 	{
-		super(p, q, du, u, rt);
+		super(p, q, s, u, rt);
 		protocol = cp;
 	}
 
 	/** Create a messenger */
 	@Override
-	protected Messenger createMessenger(String du, String u, int rt)
+	protected Messenger createMessenger(URI s, String u, int rt)
 		throws MessengerException
 	{
-		Messenger m = Messenger.create(du, u, rt);
+		Messenger m = Messenger.create(s, u, rt);
 		if (protocol == CommProtocol.NTCIP_B) {
 			try {
 				return new HDLCMessenger(m);

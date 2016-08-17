@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
@@ -44,7 +42,7 @@ public class E6Poller extends DevicePoller<E6Property>
 	public E6Thread createCommThread(String uri, int timeout)
 		throws IOException
 	{
-		return new E6Thread(this, queue, d_uri, uri, timeout);
+		return new E6Thread(this, queue, scheme, uri, timeout);
 	}
 
 	/** Tag reader */

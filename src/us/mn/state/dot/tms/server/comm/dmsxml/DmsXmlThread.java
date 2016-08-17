@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
+import java.net.URI;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.CommThread;
@@ -31,10 +32,10 @@ public class DmsXmlThread extends CommThread {
 
 	/** Create a new dmsxml thread */
 	@SuppressWarnings("unchecked")
-	public DmsXmlThread(DmsXmlPoller p, OpQueue q, String du, String u,
+	public DmsXmlThread(DmsXmlPoller p, OpQueue q, URI s, String u,
 		int rt)
 	{
-		super(p, q, du, u, rt);
+		super(p, q, s, u, rt);
 	}
 
 	/** Create a new message for the specified operation.

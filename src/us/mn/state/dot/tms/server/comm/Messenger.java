@@ -36,15 +36,15 @@ abstract public class Messenger implements Closeable {
 		new MessengerException("INVALID URI SCHEME");
 
 	/** Create a messenger.
-	 * @param d_uri Default URI scheme.
+	 * @param scheme Default URI scheme.
 	 * @param uri URI of remote host.
 	 * @param rt Receive timeout.
 	 * @throws MessengerException if the messenger could not be created. */
-	static public Messenger create(String d_uri, String uri, int rt)
+	static public Messenger create(URI scheme, String uri, int rt)
 		throws MessengerException
 	{
 		try {
-			URI u = createURI(d_uri, uri);
+			URI u = createURI(scheme, uri);
 			if ("udp".equals(u.getScheme()))
 				return DatagramMessenger.create(u, rt);
 			else if ("tcp".equals(u.getScheme()))
@@ -62,10 +62,10 @@ abstract public class Messenger implements Closeable {
 	}
 
 	/** Create the URI with a default URI scheme */
-	static protected URI createURI(String d_uri, String uri)
+	static protected URI createURI(URI scheme, String uri)
 		throws MessengerException
 	{
-		return URI.create(d_uri).resolve(createURI(uri));
+		return scheme.resolve(createURI(uri));
 	}
 
 	/** Create the URI */

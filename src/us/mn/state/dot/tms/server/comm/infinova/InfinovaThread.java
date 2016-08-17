@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.infinova;
 
 import java.io.IOException;
+import java.net.URI;
 import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.Messenger;
 import us.mn.state.dot.tms.server.comm.MessengerException;
@@ -30,17 +31,17 @@ public class InfinovaThread extends CommThread<PelcoDProperty> {
 
 	/** Create a new Infinova thread */
 	public InfinovaThread(InfinovaPoller p, OpQueue<PelcoDProperty> q,
-		String du, String u, int rt)
+		URI s, String u, int rt)
 	{
-		super(p, q, du, u, rt);
+		super(p, q, s, u, rt);
 	}
 
 	/** Create a messenger */
 	@Override
-	protected Messenger createMessenger(String du, String u, int rt)
+	protected Messenger createMessenger(URI s, String u, int rt)
 		throws MessengerException
 	{
-		Messenger m = Messenger.create(du, u, rt);
+		Messenger m = Messenger.create(s, u, rt);
 		try {
 			return new InfinovaMessenger(m);
 		}

@@ -36,7 +36,7 @@ public class PacketMessenger extends Messenger {
 	static public PacketMessenger create(String uri, int rt)
 		throws MessengerException
 	{
-		URI u = createURI("udp:/", uri);
+		URI u = createURI(URI.create("udp:/"), uri);
 		if ("udp".equals(u.getScheme()))
 			return createPacketMessenger(u, rt);
 		else

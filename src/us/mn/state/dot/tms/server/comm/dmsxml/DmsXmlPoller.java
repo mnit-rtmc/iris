@@ -51,7 +51,7 @@ public class DmsXmlPoller extends DevicePoller implements DMSPoller {
 	protected DmsXmlThread createCommThread(String uri, int timeout)
 		throws IOException
 	{
-		return new DmsXmlThread(this, queue, d_uri, uri, timeout);
+		return new DmsXmlThread(this, queue, scheme, uri, timeout);
 	}
 
 	/** Send a new message to the sign. Called by DMSImpl.
