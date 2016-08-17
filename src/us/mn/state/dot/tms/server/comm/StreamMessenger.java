@@ -20,6 +20,7 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.net.URI;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -29,6 +30,16 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * @author Douglas Lau
  */
 public class StreamMessenger extends Messenger {
+
+	/** Create a TCP stream messenger.
+	 * @param u URI of remote host.
+	 * @param rt Receive timeout (ms).
+	 * @param ct Connect timeout (ms). */
+	static protected StreamMessenger create(URI u, int rt, int ct)
+		throws MessengerException, IOException
+	{
+		return new StreamMessenger(createSocketAddress(u), rt, ct);
+	}
 
 	/** Address to connect */
 	private final SocketAddress address;
@@ -51,7 +62,7 @@ public class StreamMessenger extends Messenger {
 	/** Create a new stream messenger.
 	 * NOTE: must call setConnected to switch from conn_timeout to
 	 *       recv_timeout. */
-	public StreamMessenger(SocketAddress a, int rt, int ct)
+	private StreamMessenger(SocketAddress a, int rt, int ct)
 		throws IOException
 	{
 		address = a;
@@ -62,11 +73,6 @@ public class StreamMessenger extends Messenger {
 		socket.connect(address, conn_timeout);
 		input = socket.getInputStream();
 		output = socket.getOutputStream();
-	}
-
-	/** Create a new stream messenger */
-	public StreamMessenger(SocketAddress a, int rt) throws IOException {
-		this(a, rt, rt);
 	}
 
 	/** Get the input stream.

@@ -23,6 +23,7 @@ import java.io.Reader;
 import java.io.Writer;
 import java.net.SocketAddress;
 import java.net.SocketTimeoutException;
+import java.net.URI;
 import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
@@ -40,11 +41,25 @@ import us.mn.state.dot.tms.server.ModemImpl;
  */
 public class ModemMessenger extends Messenger {
 
+	/** Exception thrown for no modem */
+	static private final NoModemException NO_MODEM = new NoModemException();
+
 	/** Modem debug log */
 	static private final DebugLog MODEM_LOG = new DebugLog("modem");
 
-	/** Get the first available modem */
-	static public ModemImpl getModem() {
+	/** Create a modem messenger */
+	static protected ModemMessenger create(URI u, int rt)
+		throws MessengerException, IOException
+	{
+		ModemImpl modem = acquireModem();
+		if (modem != null)
+			return create(modem, u, rt);
+		else
+			throw NO_MODEM;
+	}
+
+	/** Acquire the first available modem */
+	static private ModemImpl acquireModem() {
 		Iterator<Modem> it = ModemHelper.iterator();
 		while (it.hasNext()) {
 			Modem m = it.next();
@@ -55,6 +70,22 @@ public class ModemMessenger extends Messenger {
 			}
 		}
 		return null;
+	}
+
+	/** Create a modem messenger */
+	static private ModemMessenger create(ModemImpl modem, URI u, int rt)
+		throws MessengerException, IOException
+	{
+		// NOTE: we have acquired the modem, so we must release it
+		//       if the ModemMessenger isn't fully constructed
+		try {
+			URI um = createURI(modem.getUri());
+			return new ModemMessenger(um, rt, modem, u.getHost());
+		}
+		catch (MessengerException | IOException e) {
+			modem.release();
+			throw e;
+		}
 	}
 
 	/** Wrapped stream messenger */
@@ -90,14 +121,15 @@ public class ModemMessenger extends Messenger {
 	}
 
 	/** Create a new modem messenger */
-	public ModemMessenger(SocketAddress a, int rt, ModemImpl mdm,
-		String phone) throws IOException
+	private ModemMessenger(URI um, int rt, ModemImpl mdm,
+		String phone) throws MessengerException, IOException
 	{
 		modem = mdm;
 		phone_number = phone.replace("p", ",");
 		log("create");
 		try {
-			wrapped = new StreamMessenger(a, rt, mdm.getTimeout());
+			int ct = mdm.getTimeout();
+			wrapped = StreamMessenger.create(um, rt, ct);
 		}
 		catch (IOException e) {
 			setState(ModemState.open_error);

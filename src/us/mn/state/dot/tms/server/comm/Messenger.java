@@ -22,7 +22,6 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.ModemImpl;
 
 /**
  * A Messenger is a class which can poll a field controller and get the
@@ -35,9 +34,6 @@ abstract public class Messenger implements Closeable {
 	/** Exception thrown for invalid URI scheme */
 	static private final MessengerException INVALID_URI_SCHEME =
 		new MessengerException("INVALID URI SCHEME");
-
-	/** Exception thrown for no modem */
-	static private final NoModemException NO_MODEM = new NoModemException();
 
 	/** Create a messenger.
 	 * @param d_uri Default URI scheme.
@@ -52,11 +48,11 @@ abstract public class Messenger implements Closeable {
 			if ("udp".equals(u.getScheme()))
 				return DatagramMessenger.create(u, rt);
 			else if ("tcp".equals(u.getScheme()))
-				return createStreamMessenger(u, rt);
+				return StreamMessenger.create(u, rt, rt);
 			else if ("http".equals(u.getScheme()))
 				return createHttpFileMessenger(u, rt);
 			else if ("modem".equals(u.getScheme()))
-				return createModemMessenger(u, rt);
+				return ModemMessenger.create(u, rt);
 			else
 				throw INVALID_URI_SCHEME;
 		}
@@ -73,7 +69,7 @@ abstract public class Messenger implements Closeable {
 	}
 
 	/** Create the URI */
-	static private URI createURI(String uri) throws MessengerException {
+	static protected URI createURI(String uri) throws MessengerException {
 		try {
 			return new URI(uri);
 		}
@@ -87,13 +83,6 @@ abstract public class Messenger implements Closeable {
 				throw new MessengerException(e2);
 			}
 		}
-	}
-
-	/** Create a TCP stream messenger */
-	static private Messenger createStreamMessenger(URI u, int timeout)
-		throws MessengerException, IOException
-	{
-		return new StreamMessenger(createSocketAddress(u), timeout);
 	}
 
 	/** Create an inet socket address */
@@ -115,34 +104,6 @@ abstract public class Messenger implements Closeable {
 		int timeout) throws IOException
 	{
 		return new HttpFileMessenger(u.toURL(), timeout);
-	}
-
-	/** Create a modem messenger */
-	static private Messenger createModemMessenger(URI u, int timeout)
-		throws MessengerException, IOException
-	{
-		ModemImpl modem = ModemMessenger.getModem();
-		if (modem != null)
-			return createModemMessenger(modem, u, timeout);
-		else
-			throw NO_MODEM;
-	}
-
-	/** Create a modem messenger */
-	static private Messenger createModemMessenger(ModemImpl modem, URI u,
-		int timeout) throws MessengerException, IOException
-	{
-		// NOTE: we have acquired the modem, so we must release it
-		//       if the ModemMessenger isn't fully constructed
-		try {
-			URI um = createURI(modem.getUri());
-			return new ModemMessenger(createSocketAddress(um),
-				timeout, modem, u.getHost());
-		}
-		catch (MessengerException | IOException e) {
-			modem.release();
-			throw e;
-		}
 	}
 
 	/** Create a packet messenger */
