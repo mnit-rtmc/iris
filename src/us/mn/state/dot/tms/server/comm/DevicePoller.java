@@ -70,12 +70,6 @@ public class DevicePoller<T extends ControllerProperty> {
 		log("DESTROYED");
 	}
 
-	/** Destroy the poller if idle */
-	public void destroyIfIdle() {
-		if (queue.isEmpty())
-			destroy();
-	}
-
 	/** Drain the operation queue */
 	private void drainQueue() {
 		queue.forEach(new OpHandler<T>() {
@@ -170,5 +164,11 @@ public class DevicePoller<T extends ControllerProperty> {
 		if (c_thread != null)
 			c_thread.destroy();
 		c_thread = null;
+	}
+
+	/** Destroy the comm thread if idle */
+	public void destroyIdleCommThread() {
+		if (queue.isEmpty())
+			destroyCommThread();
 	}
 }
