@@ -102,7 +102,7 @@ public class CommThread<T extends ControllerProperty> {
  		thread = new Thread(GROUP, "Comm: " + poller.name) {
 			@Override
 			public void run() {
-				operationLoop();
+				doRun();
 			}
 		};
 		thread.setDaemon(true);
@@ -127,8 +127,8 @@ public class CommThread<T extends ControllerProperty> {
 		thread.interrupt();
 	}
 
-	/** Loop to perform operations */
-	private void operationLoop() {
+	/** Run comm thread operations */
+	private void doRun() {
 		try {
 			performOperations();
 		}
@@ -140,7 +140,9 @@ public class CommThread<T extends ControllerProperty> {
 		}
 	}
 
-	/** Create messenger and perform operations from the poll queue */
+	/** Create messenger and perform operations from the poll queue.
+	 * @throws MessengerException if the messenger could not be created.
+	 * @throws InterruptedException when thread is destroyed. */
 	private void performOperations() throws InterruptedException,
 		MessengerException
 	{
@@ -173,7 +175,9 @@ public class CommThread<T extends ControllerProperty> {
 		return Messenger.create(d_uri, uri, timeout);
 	}
 
-	/** Poll the operation queue and perform operations */
+	/** Poll the operation queue and perform operations.
+	 * @throws IOException if an unrecoverable IO error happens.
+	 * @throws InterruptedException when thread is destroyed. */
 	private void pollQueue(Messenger m) throws InterruptedException,
 		IOException
 	{
@@ -183,7 +187,10 @@ public class CommThread<T extends ControllerProperty> {
 		}
 	}
 
-	/** Perform one poll for an operation */
+	/** Perform one poll for an operation.
+	 * @param m Messenger to communicate with controller.
+	 * @param o Operation to poll.
+	 * @throws IOException if an unrecoverable IO error happens. */
 	private void doPoll(Messenger m, final OpController<T> o)
 		throws IOException
 	{
