@@ -3,6 +3,7 @@
  * Copyright (C) 2009-2016  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +29,8 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Travis Swanston
  */
 public enum SystemAttrEnum {
+	CAMERA_AUTH_USERNAME(""),
+	CAMERA_AUTH_PASSWORD(""),
 	CAMERA_AUTOPLAY(true, Change.RESTART_CLIENT),
 	CAMERA_ID_BLANK(""),
 	CAMERA_PRESET_STORE_ENABLE(false, Change.RESTART_CLIENT),

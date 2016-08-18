@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2003-2015  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +24,9 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.StreamType;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.MainClient;
+import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.URIUtils;
 
 /**
@@ -170,28 +173,42 @@ public class VideoRequest {
 		int chan = cam.getEncoderChannel();
 		String ip;
 
+		String auth = "";
+		if (!SystemAttrEnum.CAMERA_AUTH_USERNAME.getString().equals("")){
+			auth = SystemAttrEnum.CAMERA_AUTH_USERNAME.getString() + ":" + SystemAttrEnum.CAMERA_AUTH_PASSWORD.getString();
+		}	
 		switch (CameraHelper.getEncoderType(cam)) {
 		case AXIS_MJPEG:
 			ip = parseEncoderIp(cam);	// throws IOE
 			/* showlength parameter needed to force ancient (2401)
 			 * servers to provide Content-Length headers */
-			return "http://" + ip + "/axis-cgi/mjpg/video.cgi" +
+			return "http://" +
+			 		( (!auth.equals("")) ? (new String(new Base64().encode(auth.getBytes())) + "@") : "") + 
+			 		ip + "/axis-cgi/mjpg/video.cgi" +
 				"?camera=" + chan +
 				"&resolution=" + size.getResolution() +
 				"&showlength=1";
 		case AXIS_MPEG4:
-			ip = parseEncoderIp(cam);	// throws IOE
-			return "rtsp://" + ip + "/mpeg4/" + chan +
-				"/media.amp";
+			ip = parseEncoderIp(cam);
+			return "rtsp://" + 
+					getCameraAuthString(auth) +
+					ip + "/mpeg4/" + chan +
+					"/media.amp";
 		case INFINOVA_MPEG4:
 			ip = parseEncoderIp(cam);	// throws IOE
-			return "rtsp://" + ip + "/1.AMP";
+			return "rtsp://" + 
+					getCameraAuthString(auth) +
+					ip + "/1.AMP";
 		case AXIS_MP4_AXRTSP:
-			return "axrtsp://" + enc + "/mpeg4/" + chan +
-				"/media.amp";
+			return "axrtsp://" + 
+					getCameraAuthString(auth) +
+					enc + "/mpeg4/" + chan +
+					"/media.amp";
 		case AXIS_MP4_AXRTSPHTTP:
-			return "axrtsphttp://" + enc + "/mpeg4/" + chan +
-				"/media.amp";
+			return "axrtsphttp://" + 
+					getCameraAuthString(auth) +
+					enc + "/mpeg4/" + chan +
+					"/media.amp";
 		case GENERIC_MMS:
 			if (!URIUtils.checkScheme(enc, "mms"))
 				throw new IOException("Invalid encoder field");
@@ -200,6 +217,10 @@ public class VideoRequest {
 		default:
 			throw new IOException("Unsupported Encoder");
 		}
+	}
+	
+	private String getCameraAuthString(String auth){
+		return ( (!auth.equals("")) ? (auth + "@") : "");
 	}
 
 	/**

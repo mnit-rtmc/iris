@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2003-2013  Minnesota Department of Transportation
+ * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +29,8 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.StreamType;
+import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.utils.Base64;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -81,6 +84,11 @@ public class MJPEGStream implements VideoStream {
 	/** Create an input stream from an HTTP connection */
 	protected InputStream createInputStream() throws IOException {
 		HttpURLConnection c = (HttpURLConnection)url.openConnection();
+		if (!SystemAttrEnum.CAMERA_AUTH_USERNAME.getString().equals("")){
+			String userauth = SystemAttrEnum.CAMERA_AUTH_USERNAME.getString() + ":" + SystemAttrEnum.CAMERA_AUTH_PASSWORD.getString();
+			String basicAuth = "Basic " + new String(new Base64().encode(userauth.getBytes()));
+			c.setRequestProperty ("Authorization", basicAuth);
+		}
 		HttpURLConnection.setFollowRedirects(true);
 		c.setConnectTimeout(TIMEOUT_DIRECT);
 		c.setReadTimeout(TIMEOUT_DIRECT);
