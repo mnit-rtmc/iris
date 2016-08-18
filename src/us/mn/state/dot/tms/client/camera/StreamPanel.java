@@ -82,8 +82,14 @@ public class StreamPanel extends JPanel {
 
 	/** Stream controls panel and its components */
 	private final JPanel control_pnl;
+
+	/** Stop button */
 	private JButton stop_button;
+
+	/** Play button */
 	private JButton play_button;
+
+	/** Play external button */
 	private JButton playext_button;
 
 	/** JLabel for displaying the stream details (codec, size, framerate) */
@@ -128,9 +134,9 @@ public class StreamPanel extends JPanel {
 	static private MousePTZ createMousePTZ(CameraPTZ cam_ptz, Dimension sz,
 		JPanel screen_pnl)
 	{
-		return cam_ptz != null
-		     ? new MousePTZ(cam_ptz, sz, screen_pnl)
-		     : null;
+		return (cam_ptz != null)
+		      ? new MousePTZ(cam_ptz, sz, screen_pnl)
+		      : null;
 	}
 
 	/** Stream status listeners to notify on stream status change events */
@@ -243,7 +249,6 @@ public class StreamPanel extends JPanel {
 				handleControlBtn(sc);
 			}
 		};
-
 		btn = new JButton(ia);
 		btn.setPreferredSize(UI.dimension(40, 28));
 		btn.setMinimumSize(UI.dimension(28, 28));
@@ -257,6 +262,7 @@ public class StreamPanel extends JPanel {
 		return btn;
 	}
 
+	/** Handle control button press */
 	private void handleControlBtn(StreamCommand sc) {
 		if (sc == StreamCommand.STOP) {
 			STREAMER.addJob(new Job() {
@@ -272,9 +278,8 @@ public class StreamPanel extends JPanel {
 				}
 			});
 		}
-		else if (sc == StreamCommand.PLAY_EXTERNAL) {
+		else if (sc == StreamCommand.PLAY_EXTERNAL)
 			launchExternalViewer(camera);
-		}
 	}
 
 	/**
@@ -305,7 +310,7 @@ public class StreamPanel extends JPanel {
 		STREAMER.addJob(new Job() {
 			public void perform() {
 				VideoStream vs = stream;
-				if(vs != null && vs.isPlaying())
+				if (vs != null && vs.isPlaying())
 					setStatusText(vs.getStatus());
 				else
 					clearStream();
@@ -364,7 +369,7 @@ public class StreamPanel extends JPanel {
 		screen_pnl.removeAll();
 		screen_pnl.repaint();
 		VideoStream vs = stream;
-		if(vs != null) {
+		if (vs != null) {
 			vs.dispose();
 			stream = null;
 		}
@@ -375,7 +380,7 @@ public class StreamPanel extends JPanel {
 	/** Dispose of the stream panel */
 	public final void dispose() {
 		clearStream();
-		if(mouse_ptz != null)
+		if (mouse_ptz != null)
 			mouse_ptz.dispose();
 	}
 
@@ -386,7 +391,7 @@ public class StreamPanel extends JPanel {
 
 	/** Are we currently streaming? */
 	public boolean isStreaming() {
-		return (stream!=null) ? true : false;
+		return stream != null;
 	}
 
 	/**
@@ -428,18 +433,16 @@ public class StreamPanel extends JPanel {
 	 * Bind a StreamStatusListener to this StreamPanel.
 	 */
 	public void bindStreamStatusListener(StreamStatusListener ssl) {
-		if (ssl == null)
-			return;
-		ssl_set.add(ssl);
+		if (ssl != null)
+			ssl_set.add(ssl);
 	}
 
 	/**
 	 * Unbind a StreamStatusListener from this StreamPanel.
 	 */
 	public void unbindStreamStatusListener(StreamStatusListener ssl) {
-		if (ssl == null)
-			return;
-		ssl_set.remove(ssl);
+		if (ssl != null)
+			ssl_set.remove(ssl);
 	}
 
 	/** Launch the external viewer for a Camera. */
@@ -447,6 +450,7 @@ public class StreamPanel extends JPanel {
 		if (c == null)
 			return;
 		if (external_viewer == null) {
+			// FIXME: i18n
 			setStatusText("Error: no external viewer defined.");
 			return;
 		}
@@ -454,11 +458,13 @@ public class StreamPanel extends JPanel {
 		try {
 			url = video_req.getCameraUrl(c);
 		}
-		catch(IOException e) {
+		catch (IOException e) {
+			// FIXME: i18n
 			setStatusText("Error: " + e.getMessage());
 			return;
 		}
 		if (url == null) {
+			// FIXME: i18n
 			setStatusText("Error: cannot determine URL.");
 			return;
 		}
@@ -469,6 +475,7 @@ public class StreamPanel extends JPanel {
 			cmd.add(f);
 		cmd.add(url);
 		OSUtils.spawnProcess(cmd);
+		// FIXME: i18n
 		setStatusText("External viewer launched.");
 		return;
 	}
