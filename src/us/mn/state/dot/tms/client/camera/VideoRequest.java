@@ -26,7 +26,6 @@ import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.MainClient;
-import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.URIUtils;
 
 /**

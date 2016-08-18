@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.nio.charset.UnmappableCharacterException;
 
 /**
- * Simple Base64 encoder/decoder
+ * Simple static Base64 encoder/decoder.
  *
  * @author Douglas Lau
  */
@@ -156,4 +156,7 @@ public class Base64 {
 		int n_chunks = (n_bytes + 2) / 3;
 		return n_chunks * 4;
 	}
+
+	/** Don't allow instantiation */
+	private Base64() { }
 }
