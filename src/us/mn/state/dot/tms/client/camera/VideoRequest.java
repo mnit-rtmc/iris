@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.client.MainClient;
 import us.mn.state.dot.tms.utils.URIUtils;
 
 /**
@@ -36,6 +35,14 @@ import us.mn.state.dot.tms.utils.URIUtils;
  * @author Travis Swanston
  */
 public class VideoRequest {
+
+	/** Get basic authentication string */
+	static private String getAuth() {
+		String user = SystemAttrEnum.CAMERA_AUTH_USERNAME.getString();
+		String pass = SystemAttrEnum.CAMERA_AUTH_PASSWORD.getString();
+		return (user.length() > 0 && pass.length() > 0)
+		      ? user + ':' + pass + '@' : "";
+	}
 
 	/** Servlet type enum */
 	static public enum ServletType {
@@ -171,55 +178,37 @@ public class VideoRequest {
 		String enc = cam.getEncoder();
 		int chan = cam.getEncoderChannel();
 		String ip;
-
-		String auth = "";
-		if (!SystemAttrEnum.CAMERA_AUTH_USERNAME.getString().equals("")){
-			auth = SystemAttrEnum.CAMERA_AUTH_USERNAME.getString() + ":" + SystemAttrEnum.CAMERA_AUTH_PASSWORD.getString();
-		}	
+		String auth = getAuth();
 		switch (CameraHelper.getEncoderType(cam)) {
 		case AXIS_MJPEG:
 			ip = parseEncoderIp(cam);	// throws IOE
 			/* showlength parameter needed to force ancient (2401)
 			 * servers to provide Content-Length headers */
-			return "http://" +
-			 		getCameraAuthString(auth) +
-			 		ip + "/axis-cgi/mjpg/video.cgi" +
-				"?camera=" + chan +
-				"&resolution=" + size.getResolution() +
-				"&showlength=1";
+			return "http://" + auth + ip +
+			       "/axis-cgi/mjpg/video.cgi" +
+			       "?camera=" + chan +
+			       "&resolution=" + size.getResolution() +
+			       "&showlength=1";
 		case AXIS_MPEG4:
 			ip = parseEncoderIp(cam);
-			return "rtsp://" + 
-					getCameraAuthString(auth) +
-					ip + "/mpeg4/" + chan +
-					"/media.amp";
+			return "rtsp://" + auth + ip +
+			       "/mpeg4/" + chan + "/media.amp";
 		case INFINOVA_MPEG4:
 			ip = parseEncoderIp(cam);	// throws IOE
-			return "rtsp://" + 
-					getCameraAuthString(auth) +
-					ip + "/1.AMP";
+			return "rtsp://" + auth + ip + "/1.AMP";
 		case AXIS_MP4_AXRTSP:
-			return "axrtsp://" + 
-					getCameraAuthString(auth) +
-					enc + "/mpeg4/" + chan +
-					"/media.amp";
+			return "axrtsp://" + auth + enc +
+			       "/mpeg4/" + chan + "/media.amp";
 		case AXIS_MP4_AXRTSPHTTP:
-			return "axrtsphttp://" + 
-					getCameraAuthString(auth) +
-					enc + "/mpeg4/" + chan +
-					"/media.amp";
+			return "axrtsphttp://" + auth + enc +
+			       "/mpeg4/" + chan + "/media.amp";
 		case GENERIC_MMS:
 			if (!URIUtils.checkScheme(enc, "mms"))
 				throw new IOException("Invalid encoder field");
 			return enc;
-		case AXIS_JPEG:
 		default:
 			throw new IOException("Unsupported Encoder");
 		}
-	}
-	
-	private String getCameraAuthString(String auth){
-		return ( (!auth.equals("")) ? (auth + "@") : "");
 	}
 
 	/**
