@@ -183,7 +183,7 @@ public class VideoRequest {
 			/* showlength parameter needed to force ancient (2401)
 			 * servers to provide Content-Length headers */
 			return "http://" +
-			 		( (!auth.equals("")) ? (new String(new Base64().encode(auth.getBytes())) + "@") : "") + 
+			 		getCameraAuthString(auth) +
 			 		ip + "/axis-cgi/mjpg/video.cgi" +
 				"?camera=" + chan +
 				"&resolution=" + size.getResolution() +

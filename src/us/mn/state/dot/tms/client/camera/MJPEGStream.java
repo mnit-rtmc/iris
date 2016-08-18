@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2013  Minnesota Department of Transportation
+ * Copyright (C) 2003-2016  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -21,6 +21,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.Calendar;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
@@ -29,7 +30,6 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.StreamType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.Base64;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
@@ -83,18 +83,19 @@ public class MJPEGStream implements VideoStream {
 
 	/** Create an input stream from an HTTP connection */
 	protected InputStream createInputStream() throws IOException {
-		HttpURLConnection c = (HttpURLConnection)url.openConnection();
-		if (!SystemAttrEnum.CAMERA_AUTH_USERNAME.getString().equals("")){
-			String userauth = SystemAttrEnum.CAMERA_AUTH_USERNAME.getString() + ":" + SystemAttrEnum.CAMERA_AUTH_PASSWORD.getString();
-			String basicAuth = "Basic " + new String(new Base64().encode(userauth.getBytes()));
-			c.setRequestProperty ("Authorization", basicAuth);
+		URLConnection c = url.openConnection();
+		String upass = url.getUserInfo();
+		if (upass != null) {
+			String auth = "Basic " + new String(Base64.encode(
+				upass.getBytes()));
+			c.setRequestProperty("Authorization", auth);
 		}
-		HttpURLConnection.setFollowRedirects(true);
 		c.setConnectTimeout(TIMEOUT_DIRECT);
 		c.setReadTimeout(TIMEOUT_DIRECT);
-		int resp = c.getResponseCode();
-		if (resp != HttpURLConnection.HTTP_OK) {
-			throw new IOException(c.getResponseMessage());
+		if (c instanceof HttpURLConnection) {
+			HttpURLConnection hc = (HttpURLConnection) c;
+			if (hc.getResponseCode() != HttpURLConnection.HTTP_OK)
+				throw new IOException(hc.getResponseMessage());
 		}
 		return c.getInputStream();
 	}
