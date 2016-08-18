@@ -2408,6 +2408,8 @@ COPY iris.encoder_type (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
+camera_auth_password	
+camera_auth_username	
 camera_autoplay	true
 camera_id_blank	
 camera_preset_store_enable	false
@@ -2416,7 +2418,7 @@ camera_stream_controls_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.36.0
+database_version	4.37.0
 detector_auto_fail_enable	true
 dialup_poll_period_mins	120
 dict_allowed_scheme	0
