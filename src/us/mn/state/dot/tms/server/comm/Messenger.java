@@ -71,17 +71,22 @@ abstract public class Messenger implements Closeable {
 	/** Create the URI */
 	static protected URI createURI(String uri) throws MessengerException {
 		try {
-			return new URI(uri);
+			// If the URI contains a colon, parse
+			// assuming a scheme is defined
+			if (uri.indexOf(':') >= 0) {
+				try {
+					return new URI(uri);
+				}
+				catch (URISyntaxException e) {
+					// the colon was proabaly for
+					// a tcp or udp port number
+				}
+			}
+			// Force the scheme to be null
+			return new URI("//" + uri);
 		}
-		catch (URISyntaxException e) {
-			// If the URI begins with a host IP address,
-			// we need to prepend a couple of slashes
-			try {
-				return new URI("//" + uri);
-			}
-			catch (URISyntaxException e2) {
-				throw new MessengerException(e2);
-			}
+		catch (URISyntaxException e2) {
+			throw new MessengerException(e2);
 		}
 	}
 
