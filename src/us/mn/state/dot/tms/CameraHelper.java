@@ -51,15 +51,6 @@ public class CameraHelper extends BaseHelper {
 		return EncoderType.fromOrdinal(cam.getEncoderType());
 	}
 
-	/** Get the host ip for the camera's encoder */
-	static public String parseEncoderIp(Camera cam) {
-		String enc = cam.getEncoder();
-		if(enc != null && enc.indexOf(':') >= 0)
-			return enc.substring(0, enc.indexOf(':'));
-		else
-			return enc.trim();
-	}
-
 	/** Find the nearest cameras to a position */
 	static public Collection<Camera> findNearest(Position pos, int n_count){
 		TreeMap<Double, Camera> cams = new TreeMap<Double, Camera>();

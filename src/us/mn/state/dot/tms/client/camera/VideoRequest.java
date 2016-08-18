@@ -177,25 +177,21 @@ public class VideoRequest {
 	public String getCameraUrl(Camera cam) throws IOException {
 		String enc = cam.getEncoder();
 		int chan = cam.getEncoderChannel();
-		String ip;
 		String auth = getAuth();
 		switch (CameraHelper.getEncoderType(cam)) {
 		case AXIS_MJPEG:
-			ip = parseEncoderIp(cam);	// throws IOE
 			/* showlength parameter needed to force ancient (2401)
 			 * servers to provide Content-Length headers */
-			return "http://" + auth + ip +
+			return "http://" + auth + enc +
 			       "/axis-cgi/mjpg/video.cgi" +
 			       "?camera=" + chan +
 			       "&resolution=" + size.getResolution() +
 			       "&showlength=1";
 		case AXIS_MPEG4:
-			ip = parseEncoderIp(cam);
-			return "rtsp://" + auth + ip +
+			return "rtsp://" + auth + enc +
 			       "/mpeg4/" + chan + "/media.amp";
 		case INFINOVA_MPEG4:
-			ip = parseEncoderIp(cam);	// throws IOE
-			return "rtsp://" + auth + ip + "/1.AMP";
+			return "rtsp://" + auth + enc + "/1.AMP";
 		case AXIS_MP4_AXRTSP:
 			return "axrtsp://" + auth + enc +
 			       "/mpeg4/" + chan + "/media.amp";
@@ -209,20 +205,6 @@ public class VideoRequest {
 		default:
 			throw new IOException("Unsupported Encoder");
 		}
-	}
-
-	/**
-	 * Parse an IP(:port) from a Camera's encoder field.
-	 *
-	 * @param cam The Camera whose encoder field to parse
-	 * @return A String containing the parsed IP(:port)
-	 * @throws IOException upon parsing failure
-	 */
-	private String parseEncoderIp(Camera cam) throws IOException {
-		String ip = CameraHelper.parseEncoderIp(cam);
-		if (ip.length() < 1)
-			throw new IOException("Invalid encoder field");
-		return ip;
 	}
 
 	/** Get the stream type for a camera */
