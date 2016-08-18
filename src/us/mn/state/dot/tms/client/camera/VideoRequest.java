@@ -207,18 +207,21 @@ public class VideoRequest {
 		}
 	}
 
-	/** Get the stream type for a camera */
-	public StreamType getStreamType(Camera c) {
-		EncoderType et = CameraHelper.getEncoderType(c);
-		return (base_url != null)
-		      ? et.indirect_stream
-		      : et.direct_stream;
-	}
-
 	/** Check if stream type is MJPEG.
 	 * @param c Camera.
 	 * @return true if stream type is motion JPEG. */
 	public boolean hasMJPEG(Camera c) {
 		return (c != null) && (getStreamType(c) == StreamType.MJPEG);
+	}
+
+	/** Get the stream type for a camera */
+	private StreamType getStreamType(Camera c) {
+		EncoderType et = CameraHelper.getEncoderType(c);
+		if (et != EncoderType.NONE) {
+			return (base_url != null)
+			      ? StreamType.MJPEG
+			      : et.direct_stream;
+		} else
+			return StreamType.NONE;
 	}
 }

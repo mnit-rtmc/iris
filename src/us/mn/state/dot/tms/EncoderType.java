@@ -25,38 +25,35 @@ package us.mn.state.dot.tms;
 public enum EncoderType {
 
 	/** Undefined encoder type (0) */
-	NONE(" ", StreamType.NONE, StreamType.NONE),
+	NONE(" ", StreamType.NONE),
 
 	/** Axis MJPEG (1) */
-	AXIS_MJPEG("Axis MJPEG", StreamType.MJPEG, StreamType.MJPEG),
+	AXIS_MJPEG("Axis MJPEG", StreamType.MJPEG),
 
 	/** Axis MPEG4 (2) */
-	AXIS_MPEG4("Axis MPEG4", StreamType.MPEG4, StreamType.MJPEG),
+	AXIS_MPEG4("Axis MPEG4", StreamType.MPEG4),
 
 	/** Infinova MPEG4 (3) */
-	INFINOVA_MPEG4("Infinova MPEG4", StreamType.MPEG4, StreamType.MJPEG),
+	INFINOVA_MPEG4("Infinova MPEG4", StreamType.MPEG4),
 
 	/** Axis MPEG4 RTP over RTSP (4) */
-	AXIS_MP4_AXRTSP("Axis MP4 axrtsp", StreamType.MPEG4, StreamType.NONE),
+	AXIS_MP4_AXRTSP("Axis MP4 axrtsp", StreamType.MPEG4),
 
 	/** Axis MPEG4 RTP over RTSP over HTTP (5) */
-	AXIS_MP4_AXRTSPHTTP("Axis MP4 axrtsphttp", StreamType.MPEG4,
-	                    StreamType.NONE),
+	AXIS_MP4_AXRTSPHTTP("Axis MP4 axrtsphttp", StreamType.MPEG4),
 
 	/** Generic MMS (6) */
-	GENERIC_MMS("Generic MMS", StreamType.MMS, StreamType.NONE),
+	GENERIC_MMS("Generic MMS", StreamType.MMS),
 
 	/** Axis JPEG (7) */
-	AXIS_JPEG("Axis JPEG", StreamType.NONE, StreamType.MJPEG);
+	AXIS_JPEG("Axis JPEG", StreamType.NONE);
 
 	/** Create a new encoder type.
 	 * @param d Description.
-	 * @param dst Stream type of direct stream.
-	 * @param ist Stream type of indirect stream (using video servlet). */
-	private EncoderType(String d, StreamType dst, StreamType ist) {
+	 * @param dst Stream type of direct stream. */
+	private EncoderType(String d, StreamType dst) {
 		description = d;
 		direct_stream = dst;
-		indirect_stream = ist;
 	}
 
 	/** Description */
@@ -64,9 +61,6 @@ public enum EncoderType {
 
 	/** Direct stream type */
 	public final StreamType direct_stream;
-
-	/** Indirect stream type (using video servlet) */
-	public final StreamType indirect_stream;
 
 	/** Get the string representation */
 	@Override

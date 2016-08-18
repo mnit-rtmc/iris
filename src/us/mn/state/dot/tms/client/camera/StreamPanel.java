@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2015  Minnesota Department of Transportation
+ * Copyright (C) 2002-2016  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -352,12 +352,10 @@ public class StreamPanel extends JPanel {
 
 	/** Create a new video stream */
 	private VideoStream createStream(Camera c) throws IOException {
-		switch (video_req.getStreamType(c)) {
-		case MJPEG:
+		if (video_req.hasMJPEG(c))
 			return new MJPEGStream(STREAMER, video_req, c);
-		default:
+		else
 			throw new IOException("Unable to stream");
-		}
 	}
 
 	/** Clear the video stream */
