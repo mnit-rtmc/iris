@@ -49,11 +49,8 @@ public class HttpFileMessenger extends Messenger {
 	/** Receive timeout (ms) */
 	private final int timeout;
 
-	/** Relative path */
-	private String path;
-
-	/** Get the URL */
-	private URL getUrl() throws MalformedURLException {
+	/** Get the URL with path appended */
+	private URL getUrl(String path) throws MalformedURLException {
 		if (path != null && path.length() > 0)
 			return new URL(url, path);
 		else
@@ -92,7 +89,7 @@ public class HttpFileMessenger extends Messenger {
 	private InputStream createInputStream(String path, String upass)
 		throws IOException
 	{
-		URLConnection c = getUrl().openConnection();
+		URLConnection c = getUrl(path).openConnection();
 		if (upass != null) {
 			String auth = "Basic " + new String(Base64.encode(
 				upass.getBytes()));
