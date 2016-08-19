@@ -52,7 +52,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CameraImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"encoder_type, encoder, enc_multi, encoder_channel, " +
+			"encoder_type, encoder, enc_mcast, encoder_channel, " +
 			"stream_type, publish FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
@@ -73,7 +73,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		map.put("notes", notes);
 		map.put("encoder_type", encoder_type.ordinal());
 		map.put("encoder", encoder);
-		map.put("enc_multi", enc_multi);
+		map.put("enc_mcast", enc_mcast);
 		map.put("encoder_channel", encoder_channel);
 		map.put("stream_type", stream_type.ordinal());
 		map.put("publish", publish);
@@ -109,7 +109,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		     row.getString(5),		// notes
 		     row.getInt(6),		// encoder_type
 		     row.getString(7),		// encoder
-		     row.getString(8),		// enc_multi
+		     row.getString(8),		// enc_mcast
 		     row.getInt(9),		// encoder_channel
 		     row.getInt(10),		// stream_type
 		     row.getBoolean(11)		// publish
@@ -133,7 +133,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		geo_loc = l;
 		encoder_type = EncoderType.fromOrdinal(et);
 		encoder = e;
-		enc_multi = em;
+		enc_mcast = em;
 		encoder_channel = ec;
 		stream_type = StreamType.fromOrdinal(st);
 		publish = pb;
@@ -204,26 +204,26 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	}
 
 	/** Encoder multicast URI */
-	private String enc_multi = "";
+	private String enc_mcast = "";
 
 	/** Set the encoder multicast URI */
 	@Override
-	public void setEncMulti(String em) {
-		enc_multi = em;
+	public void setEncMulticast(String em) {
+		enc_mcast = em;
 	}
 
 	/** Set the encoder multicast URI */
-	public void doSetEncMulti(String em) throws TMSException {
-		if (!em.equals(enc_multi)) {
-			store.update(this, "enc_multi", em);
-			setEncMulti(em);
+	public void doSetEncMulticast(String em) throws TMSException {
+		if (!em.equals(enc_mcast)) {
+			store.update(this, "enc_mcast", em);
+			setEncMulticast(em);
 		}
 	}
 
 	/** Get the encoder multicast URI */
 	@Override
-	public String getEncMulti() {
-		return enc_multi;
+	public String getEncMulticast() {
+		return enc_mcast;
 	}
 
 	/** Input channel for video stream on encoder */

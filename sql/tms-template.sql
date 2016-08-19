@@ -591,7 +591,7 @@ CREATE TABLE iris._camera (
 	notes text NOT NULL,
 	encoder_type INTEGER NOT NULL REFERENCES iris.encoder_type,
 	encoder text NOT NULL,
-	enc_multi VARCHAR(64) NOT NULL,
+	enc_mcast VARCHAR(64) NOT NULL,
 	encoder_channel INTEGER NOT NULL,
 	stream_type INTEGER NOT NULL REFERENCES iris.stream_type,
 	publish boolean NOT NULL
@@ -602,7 +602,7 @@ ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
 
 CREATE VIEW iris.camera AS SELECT
 	c.name, geo_loc, controller, pin, notes, encoder_type, encoder,
-		enc_multi, encoder_channel, stream_type, publish
+		enc_mcast, encoder_channel, stream_type, publish
 	FROM iris._camera c JOIN iris._device_io d ON c.name = d.name;
 
 CREATE FUNCTION iris.camera_insert() RETURNS TRIGGER AS
@@ -611,9 +611,9 @@ BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._camera (name, geo_loc, notes, encoder_type, encoder,
-	            enc_multi, encoder_channel, stream_type, publish)
+	            enc_mcast, encoder_channel, stream_type, publish)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.encoder_type,
-	             NEW.encoder, NEW.enc_multi, NEW.encoder_channel,
+	             NEW.encoder, NEW.enc_mcast, NEW.encoder_channel,
 	             NEW.stream_type, NEW.publish);
 	RETURN NEW;
 END;
@@ -635,7 +635,7 @@ BEGIN
 	       notes = NEW.notes,
 	       encoder_type = NEW.encoder_type,
 	       encoder = NEW.encoder,
-	       enc_multi = NEW.enc_multi,
+	       enc_mcast = NEW.enc_mcast,
 	       encoder_channel = NEW.encoder_channel,
 	       stream_type = NEW.stream_type,
 	       publish = NEW.publish
@@ -1964,7 +1964,7 @@ GRANT SELECT ON encoder_type_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
 	SELECT c.name, c.notes, et.description AS encoder_type, c.encoder,
-	       c.enc_multi, c.encoder_channel, st.description AS stream_type,
+	       c.enc_mcast, c.encoder_channel, st.description AS stream_type,
 	       c.publish, c.geo_loc, l.roadway,
 	       l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,l.lat,l.lon,
 	       c.controller, ctr.comm_link, ctr.drop_id, ctr.condition

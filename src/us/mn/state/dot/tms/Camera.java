@@ -40,10 +40,10 @@ public interface Camera extends Device {
 	String getEncoder();
 
 	/** Set the encoder multicast URI */
-	void setEncMulti(String em);
+	void setEncMulticast(String em);
 
 	/** Get the encoder multicast URI */
-	String getEncMulti();
+	String getEncMulticast();
 
 	/** Set the encoder input channel */
 	void setEncoderChannel(int c);

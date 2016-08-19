@@ -24,10 +24,10 @@ COPY iris.stream_type (id, description) FROM stdin;
 4	H265
 \.
 
--- Add enc_multi column to camera table
-ALTER TABLE iris._camera ADD COLUMN enc_multi VARCHAR(64);
-UPDATE iris._camera SET enc_multi = '';
-ALTER TABLE iris._camera ALTER COLUMN enc_multi SET NOT NULL;
+-- Add enc_mcast column to camera table
+ALTER TABLE iris._camera ADD COLUMN enc_mcast VARCHAR(64);
+UPDATE iris._camera SET enc_mcast = '';
+ALTER TABLE iris._camera ALTER COLUMN enc_mcast SET NOT NULL;
 
 -- Add stream_type column to camera table
 ALTER TABLE iris._camera ADD COLUMN stream_type INTEGER REFERENCES
@@ -73,7 +73,7 @@ DROP VIEW iris.camera;
 
 CREATE VIEW iris.camera AS SELECT
 	c.name, geo_loc, controller, pin, notes, encoder_type, encoder,
-		enc_multi, encoder_channel, stream_type, publish
+		enc_mcast, encoder_channel, stream_type, publish
 	FROM iris._camera c JOIN iris._device_io d ON c.name = d.name;
 
 CREATE OR REPLACE FUNCTION iris.camera_insert() RETURNS TRIGGER AS
@@ -82,9 +82,9 @@ BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._camera (name, geo_loc, notes, encoder_type, encoder,
-	            enc_multi, encoder_channel, stream_type, publish)
+	            enc_mcast, encoder_channel, stream_type, publish)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.encoder_type,
-	             NEW.encoder, NEW.enc_multi, NEW.encoder_channel,
+	             NEW.encoder, NEW.enc_mcast, NEW.encoder_channel,
 	             NEW.stream_type, NEW.publish);
 	RETURN NEW;
 END;
@@ -106,7 +106,7 @@ BEGIN
 	       notes = NEW.notes,
 	       encoder_type = NEW.encoder_type,
 	       encoder = NEW.encoder,
-	       enc_multi = NEW.enc_multi,
+	       enc_mcast = NEW.enc_mcast,
 	       encoder_channel = NEW.encoder_channel,
 	       stream_type = NEW.stream_type,
 	       publish = NEW.publish
@@ -137,7 +137,7 @@ CREATE TRIGGER camera_delete_trig
 
 CREATE VIEW camera_view AS
 	SELECT c.name, c.notes, et.description AS encoder_type, c.encoder,
-	       c.enc_multi, c.encoder_channel, st.description AS stream_type,
+	       c.enc_mcast, c.encoder_channel, st.description AS stream_type,
 	       c.publish, c.geo_loc, l.roadway,
 	       l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,l.lat,l.lon,
 	       c.controller, ctr.comm_link, ctr.drop_id, ctr.condition
