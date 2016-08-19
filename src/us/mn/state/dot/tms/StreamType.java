@@ -21,11 +21,11 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  */
 public enum StreamType {
-	UNKNOWN,	/* use for MMS or other weird protocols */
-	MJPEG,		/* motion JPEG */
-	MPEG4,
-	H264,
-	H265;
+	UNKNOWN,	/* 0: use for MMS or other weird protocols */
+	MJPEG,		/* 1: motion JPEG */
+	MPEG4,		/* 2 */
+	H264,		/* 3 */
+	H265;		/* 4 */
 
 	/** Get a stream type from an ordinal value */
 	static public StreamType fromOrdinal(int o) {
