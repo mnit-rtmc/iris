@@ -35,8 +35,8 @@ import us.mn.state.dot.tms.units.Distance;
  */
 public class CameraHelper extends BaseHelper {
 
-	/** Get basic authentication string */
-	static private String getAuth() {
+	/** Get default basic authentication string */
+	static private String getDefaultAuth() {
 		String user = SystemAttrEnum.CAMERA_AUTH_USERNAME.getString();
 		String pass = SystemAttrEnum.CAMERA_AUTH_PASSWORD.getString();
 		return (user.length() > 0 && pass.length() > 0)
@@ -113,6 +113,12 @@ public class CameraHelper extends BaseHelper {
 		return v.substring(i);
 	}
 
+	/** Get authentication for a camera */
+	static private String getAuth(Camera c) {
+		// FIXME: use controller password if set
+		return getDefaultAuth();
+	}
+
 	/** Create a camera encoder URI */
 	static public URI encoderUri(Camera c, String opt) {
 		if (c != null) {
@@ -131,7 +137,7 @@ public class CameraHelper extends BaseHelper {
 
 	/** Create a URI for a generic encoder */
 	static private URI genericUri(Camera c) {
-		String auth = getAuth();
+		String auth = getAuth(c);
 		String enc = c.getEncoder();
 		switch (StreamType.fromOrdinal(c.getStreamType())) {
 		case MJPEG:
@@ -146,7 +152,7 @@ public class CameraHelper extends BaseHelper {
 
 	/** Create a URI for an Axis encoder */
 	static private URI axisUri(Camera c, String opt) {
-		String auth = getAuth();
+		String auth = getAuth(c);
 		String enc = c.getEncoder();
 		int chan = c.getEncoderChannel();
 		switch (StreamType.fromOrdinal(c.getStreamType())) {
@@ -170,7 +176,7 @@ public class CameraHelper extends BaseHelper {
 
 	/** Create a URI for an Infinova encoder */
 	static private URI infinovaUri(Camera c) {
-		String auth = getAuth();
+		String auth = getAuth(c);
 		String enc = c.getEncoder();
 		switch (StreamType.fromOrdinal(c.getStreamType())) {
 		case MPEG4:
