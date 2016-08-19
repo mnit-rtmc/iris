@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2015  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -312,7 +312,6 @@ public class GateArmDispatcher extends IPanel
 	private StreamPanel createStreamPanel(VideoRequest.Size sz) {
 		VideoRequest vr = new VideoRequest(session.getProperties(), sz);
 		vr.setSonarSessionId(session.getSessionId());
-		vr.setRate(30);
 		return new StreamPanel(vr);
 	}
 

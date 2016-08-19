@@ -128,19 +128,6 @@ public class VideoRequest {
 		sonarSessionId = ssid;
 	}
 
-	/** Frame rate (per second) */
-	private int rate = 30;
-
-	/** Get the frame rate (per second) */
-	public int getRate() {
-		return rate;
-	}
-
-	/** Set the frame rate (per second) */
-	public void setRate(int rt) {
-		rate = rt;
-	}
-
 	/** Stream size */
 	private final Size size;
 
