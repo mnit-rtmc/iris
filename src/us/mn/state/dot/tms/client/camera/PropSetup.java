@@ -26,6 +26,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.EncoderType;
+import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -37,16 +38,6 @@ import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
  * @author Douglas Lau
  */
 public class PropSetup extends IPanel {
-
-	/** Video stream encoder host (and port) */
-	private final JTextField encoder_txt = new JTextField("", 20);
-
-	/** Model for encoder channel spinner */
-	private final SpinnerNumberModel num_model =
-		new SpinnerNumberModel(1, 0, 10, 1);
-
-	/** Encoder channel spinner */
-	private final JSpinner enc_chn_spn = new JSpinner(num_model);
 
 	/** Encoder type combobox */
 	private final JComboBox<EncoderType> enc_type_cbx =
@@ -60,6 +51,34 @@ public class PropSetup extends IPanel {
 		@Override
 		protected void doUpdateSelected() {
 			enc_type_cbx.setSelectedIndex(camera.getEncoderType());
+		}
+	};
+
+	/** Encoder stream URI */
+	private final JTextField encoder_txt = new JTextField("", 32);
+
+	/** Encoder multicast URI */
+	private final JTextField enc_mcast_txt = new JTextField("", 32);
+
+	/** Model for encoder channel spinner */
+	private final SpinnerNumberModel num_model =
+		new SpinnerNumberModel(1, 0, 10, 1);
+
+	/** Encoder channel spinner */
+	private final JSpinner enc_chn_spn = new JSpinner(num_model);
+
+	/** Stream type combobox */
+	private final JComboBox<StreamType> str_type_cbx =
+		new JComboBox<StreamType>(StreamType.values());
+
+	/** Stream type action */
+	private final IAction str_type_act = new IAction("camera.stream.type") {
+		protected void doActionPerformed(ActionEvent e) {
+		      camera.setStreamType(str_type_cbx.getSelectedIndex());
+		}
+		@Override
+		protected void doUpdateSelected() {
+			str_type_cbx.setSelectedIndex(camera.getStreamType());
 		}
 	};
 
@@ -87,12 +106,17 @@ public class PropSetup extends IPanel {
 	public void initialize() {
 		super.initialize();
 		enc_type_cbx.setAction(enc_type_act);
-		add("camera.encoder");
-		add(encoder_txt, Stretch.LAST);
-		add("camera.encoder.channel");
-		add(enc_chn_spn, Stretch.LAST);
+		str_type_cbx.setAction(str_type_act);
 		add("camera.encoder.type");
 		add(enc_type_cbx, Stretch.LAST);
+		add("camera.encoder");
+		add(encoder_txt, Stretch.LAST);
+		add("camera.enc_mcast");
+		add(enc_mcast_txt, Stretch.LAST);
+		add("camera.encoder.channel");
+		add(enc_chn_spn, Stretch.LAST);
+		add("camera.stream.type");
+		add(str_type_cbx, Stretch.LAST);
 		add("camera.publish");
 		add(publish_chk, Stretch.LAST);
 		createJobs();
@@ -105,6 +129,11 @@ public class PropSetup extends IPanel {
 			    camera.setEncoder(encoder_txt.getText());
 			}
 		});
+		enc_mcast_txt.addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) {
+			    camera.setEncMulticast(enc_mcast_txt.getText());
+			}
+		});
 		enc_chn_spn.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 			    Number c = (Number)enc_chn_spn.getValue();
@@ -115,20 +144,26 @@ public class PropSetup extends IPanel {
 
 	/** Update the edit mode */
 	public void updateEditMode() {
-		encoder_txt.setEnabled(canUpdate("encoder"));
-		enc_chn_spn.setEnabled(canUpdate("encoderChannel"));
 		enc_type_act.setEnabled(canUpdate("encoderType"));
+		encoder_txt.setEnabled(canUpdate("encoder"));
+		enc_mcast_txt.setEnabled(canUpdate("encMulticast"));
+		enc_chn_spn.setEnabled(canUpdate("encoderChannel"));
+		str_type_act.setEnabled(canUpdate("streamType"));
 		publish_chk.setEnabled(canUpdate("publish"));
 	}
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
-		if (a == null || a.equals("encoder"))
-			encoder_txt.setText(camera.getEncoder());
-		if (a == null || a.equals("encoderChannel"))
-			enc_chn_spn.setValue(camera.getEncoderChannel());
 		if (a == null || a.equals("encoderType"))
 			enc_type_act.updateSelected();
+		if (a == null || a.equals("encoder"))
+			encoder_txt.setText(camera.getEncoder());
+		if (a == null || a.equals("encMulticast"))
+			enc_mcast_txt.setText(camera.getEncMulticast());
+		if (a == null || a.equals("encoderChannel"))
+			enc_chn_spn.setValue(camera.getEncoderChannel());
+		if (a == null || a.equals("streamType"))
+			str_type_act.updateSelected();
 		if (a == null || a.equals("publish"))
 			publish_chk.setSelected(camera.getPublish());
 	}
