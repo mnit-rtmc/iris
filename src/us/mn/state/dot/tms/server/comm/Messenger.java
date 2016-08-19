@@ -22,6 +22,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.utils.URIUtils;
 
 /**
  * A Messenger is a class which can poll a field controller and get the
@@ -71,22 +72,10 @@ abstract public class Messenger implements Closeable {
 	/** Create the URI */
 	static protected URI createURI(String uri) throws MessengerException {
 		try {
-			// If the URI contains a colon, parse
-			// assuming a scheme is defined
-			if (uri.indexOf(':') >= 0) {
-				try {
-					return new URI(uri);
-				}
-				catch (URISyntaxException e) {
-					// the colon was proabaly for
-					// a tcp or udp port number
-				}
-			}
-			// Force the scheme to be null
-			return new URI("//" + uri);
+			return URIUtils.create(uri);
 		}
-		catch (URISyntaxException e2) {
-			throw new MessengerException(e2);
+		catch (URISyntaxException e) {
+			throw new MessengerException(e);
 		}
 	}
 

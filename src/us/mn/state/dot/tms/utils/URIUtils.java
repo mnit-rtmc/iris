@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,42 +14,32 @@
  */
 package us.mn.state.dot.tms.utils;
 
-import java.lang.IllegalArgumentException;
 import java.net.URI;
-
+import java.net.URISyntaxException;
 
 /**
- * Misc. URI/URL utilities
+ * Miscellaneous URI functions.
  *
- * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class URIUtils {
 
-	/**
-	 * Check that the scheme of a given URI matches the given String.
-	 * @param uri a String representation of the URI
-	 * @param scheme the scheme to match against
-	 * @return Returns false if either argument is null, false if uri
-	 *         violates RFC 2396 or has an undefined scheme,
-	 *         otherwise returns whether uri string-matches scheme.
-	 */
-	static public boolean checkScheme(String uri, String scheme) {
-		if ( (uri == null) || (scheme == null) )
-			return false;
-		URI uriObj;
-		try {
-			uriObj = URI.create(uri);
+	/** Create a URI from a string.
+	 * @param uri String specifier.
+	 * @return Specified URI, or null if invalid. */
+	static public URI create(String uri) throws URISyntaxException {
+		// If the URI contains a colon, parse
+		// assuming a scheme is defined
+		if (uri.indexOf(':') >= 0) {
+			try {
+				return new URI(uri);
+			}
+			catch (URISyntaxException e) {
+				// the colon was proabaly for
+				// a tcp or udp port number
+			}
 		}
-		catch (IllegalArgumentException e) {
-			/* RFC 2396 violation */
-			return false;
-		}
-		String uriScheme = uriObj.getScheme();
-		if (uriScheme == null)
-			/* scheme undefined */
-			return false;
-		return (uriScheme.equals(scheme));
+		// Force the scheme to be null
+		return new URI("//" + uri);
 	}
-
 }
-
