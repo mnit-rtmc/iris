@@ -29,6 +29,14 @@ import us.mn.state.dot.tms.units.Distance;
  */
 public class CameraHelper extends BaseHelper {
 
+	/** Get basic authentication string */
+	static private String getAuth() {
+		String user = SystemAttrEnum.CAMERA_AUTH_USERNAME.getString();
+		String pass = SystemAttrEnum.CAMERA_AUTH_PASSWORD.getString();
+		return (user.length() > 0 && pass.length() > 0)
+		      ? user + ':' + pass + '@' : "";
+	}
+
 	/** Don't allow instances to be created */
 	private CameraHelper() {
 		assert false;
@@ -44,11 +52,6 @@ public class CameraHelper extends BaseHelper {
 	static public Iterator<Camera> iterator() {
 		return new IteratorWrapper<Camera>(namespace.iterator(
 			Camera.SONAR_TYPE));
-	}
-
-	/** Get the encoder type for a camera */
-	static public EncoderType getEncoderType(Camera cam) {
-		return EncoderType.fromOrdinal(cam.getEncoderType());
 	}
 
 	/** Find the nearest cameras to a position */
@@ -102,5 +105,48 @@ public class CameraHelper extends BaseHelper {
 				break;
 		}
 		return v.substring(i);
+	}
+
+	/** Create a camera encoder URI */
+	static public String encoderUri(Camera c, String opt) {
+		if (c != null) {
+			switch (EncoderType.fromOrdinal(c.getEncoderType())) {
+			case AXIS:
+				return axisUri(c, opt);
+			case INFINOVA:
+				return infinovaUri(c);
+			default:
+				return c.getEncoder();
+			}
+		} else
+			return "";
+	}
+
+	/** Create a URI for an Axis encoder */
+	static private String axisUri(Camera c, String opt) {
+		String auth = getAuth();
+		String enc = c.getEncoder();
+		int chan = c.getEncoderChannel();
+		switch (StreamType.fromOrdinal(c.getStreamType())) {
+		case MJPEG:
+			/* showlength parameter needed to force ancient (2401)
+			 * servers to provide Content-Length headers */
+			return "http://" + auth + enc +
+			       "/axis-cgi/mjpg/video.cgi" +
+			       "?camera=" + chan +
+			       opt + "&showlength=1";
+		case MPEG4:
+			return "rtsp://" + auth + enc +
+			       "/mpeg4/" + chan + "/media.amp";
+		default:
+			return "";
+		}
+	}
+
+	/** Create a URI for an Infinova encoder */
+	static private String infinovaUri(Camera c) {
+		String auth = getAuth();
+		String enc = c.getEncoder();
+		return "rtsp://" + auth + enc + "/1.AMP";
 	}
 }

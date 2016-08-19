@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,6 +30,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
@@ -41,7 +43,7 @@ import us.mn.state.dot.tms.server.comm.DevicePoller;
  * CameraImpl represents a single CCTV camera.
  *
  * @author Douglas Lau
- * @author <a href="mailto:timothy.a.johnson@dot.state.mn.us">Tim Johnson</a>
+ * @author Tim Johnson
  * @author Travis Swanston
  */
 public class CameraImpl extends DeviceImpl implements Camera {
@@ -50,21 +52,12 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CameraImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"encoder, encoder_channel, encoder_type, publish " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"encoder_type, encoder, enc_multi, encoder_channel, " +
+			"stream_type, publish FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new CameraImpl(
-					row.getString(1),	// name
-					row.getString(2),	// geo_loc
-					row.getString(3),	// controller
-					row.getInt(4),		// pin
-					row.getString(5),	// notes
-					row.getString(6),	// encoder
-					row.getInt(7),	// encoder_channel
-					row.getInt(8),		// encoder_type
-					row.getBoolean(9)	// publish
-				));
+				namespace.addObject(new CameraImpl(row));
 			}
 		});
 	}
@@ -78,9 +71,11 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
-		map.put("encoder", encoder);
-		map.put("encoder_channel", encoder_channel);
 		map.put("encoder_type", encoder_type.ordinal());
+		map.put("encoder", encoder);
+		map.put("enc_multi", enc_multi);
+		map.put("encoder_channel", encoder_channel);
+		map.put("stream_type", stream_type.ordinal());
 		map.put("publish", publish);
 		return map;
 	}
@@ -106,24 +101,43 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	}
 
 	/** Create a camera */
-	private CameraImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
-		String nt, String e, int ec, int et, boolean pb)
-	{
-		super(n, c, p, nt);
-		geo_loc = l;
-		encoder = e;
-		encoder_channel = ec;
-		encoder_type = EncoderType.fromOrdinal(et);
-		publish = pb;
-		initTransients();
+	private CameraImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),		// name
+		     row.getString(2),		// geo_loc
+		     row.getString(3),		// controller
+		     row.getInt(4),		// pin
+		     row.getString(5),		// notes
+		     row.getInt(6),		// encoder_type
+		     row.getString(7),		// encoder
+		     row.getString(8),		// enc_multi
+		     row.getInt(9),		// encoder_channel
+		     row.getInt(10),		// stream_type
+		     row.getBoolean(11)		// publish
+		);
 	}
 
 	/** Create a camera */
-	private CameraImpl(String n, String l, String c,
-		int p, String nt, String e, int ec, int et, boolean pb)
+	private CameraImpl(String n, String l, String c, int p, String nt,
+		int et, String e, String em, int ec, int st, boolean pb)
 	{
-		this(n, lookupGeoLoc(l), lookupController(c), p, nt, e, ec, et,
-		     pb);
+		this(n, lookupGeoLoc(l), lookupController(c), p, nt, et, e, em,
+		     ec, st, pb);
+	}
+
+	/** Create a camera */
+	private CameraImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
+		String nt, int et, String e, String em, int ec, int st,
+	        boolean pb)
+	{
+		super(n, c, p, nt);
+		geo_loc = l;
+		encoder_type = EncoderType.fromOrdinal(et);
+		encoder = e;
+		enc_multi = em;
+		encoder_channel = ec;
+		stream_type = StreamType.fromOrdinal(st);
+		publish = pb;
+		initTransients();
 	}
 
 	/** Destroy an object */
@@ -142,27 +156,74 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return geo_loc;
 	}
 
-	/** Host (and port) of encoder for digital video stream */
+	/** Encoder type */
+	private EncoderType encoder_type = EncoderType.GENERIC;
+
+	/** Set the encoder type */
+	@Override
+	public void setEncoderType(int et) {
+		encoder_type = EncoderType.fromOrdinal(et);
+	}
+
+	/** Set the encoder type */
+	public void doSetEncoderType(int t) throws TMSException {
+		EncoderType et = EncoderType.fromOrdinal(t);
+		if (et != encoder_type) {
+			store.update(this, "encoder_type", t);
+			setEncoderType(t);
+		}
+	}
+
+	/** Get the encoder type */
+	@Override
+	public int getEncoderType() {
+		return encoder_type.ordinal();
+	}
+
+	/** Encoder stream URI */
 	private String encoder = "";
 
-	/** Set the video encoder host name (and port) */
+	/** Set the encoder stream URI */
 	@Override
 	public void setEncoder(String enc) {
 		encoder = enc;
 	}
 
-	/** Set the video encoder host name (and port) */
+	/** Set the encoder stream URI */
 	public void doSetEncoder(String enc) throws TMSException {
-		if (enc.equals(encoder))
-			return;
-		store.update(this, "encoder", enc);
-		setEncoder(enc);
+		if (!enc.equals(encoder)) {
+			store.update(this, "encoder", enc);
+			setEncoder(enc);
+		}
 	}
 
-	/** Get the video encoder host name (and port) */
+	/** Get the encoder stream URI */
 	@Override
 	public String getEncoder() {
 		return encoder;
+	}
+
+	/** Encoder multicast URI */
+	private String enc_multi = "";
+
+	/** Set the encoder multicast URI */
+	@Override
+	public void setEncMulti(String em) {
+		enc_multi = em;
+	}
+
+	/** Set the encoder multicast URI */
+	public void doSetEncMulti(String em) throws TMSException {
+		if (!em.equals(enc_multi)) {
+			store.update(this, "enc_multi", em);
+			setEncMulti(em);
+		}
+	}
+
+	/** Get the encoder multicast URI */
+	@Override
+	public String getEncMulti() {
+		return enc_multi;
 	}
 
 	/** Input channel for video stream on encoder */
@@ -188,28 +249,28 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return encoder_channel;
 	}
 
-	/** Encoder type */
-	private EncoderType encoder_type = EncoderType.NONE;
+	/** Stream type */
+	private StreamType stream_type = StreamType.UNKNOWN;
 
-	/** Set the encoder type */
+	/** Set the stream type */
 	@Override
-	public void setEncoderType(int et) {
-		encoder_type = EncoderType.fromOrdinal(et);
+	public void setStreamType(int st) {
+		stream_type = StreamType.fromOrdinal(st);
 	}
 
-	/** Set the encoder type */
-	public void doSetEncoderType(int t) throws TMSException {
-		EncoderType et = EncoderType.fromOrdinal(t);
-		if (et == encoder_type)
-			return;
-		store.update(this, "encoder_type", t);
-		setEncoderType(t);
+	/** Set the stream type */
+	public void doSetStreamType(int t) throws TMSException {
+		StreamType st = StreamType.fromOrdinal(t);
+		if (st != stream_type) {
+			store.update(this, "stream_type", t);
+			setStreamType(t);
+		}
 	}
 
-	/** Get the encoder type */
+	/** Get the stream type */
 	@Override
-	public int getEncoderType() {
-		return encoder_type.ordinal();
+	public int getStreamType() {
+		return stream_type.ordinal();
 	}
 
 	/** Flag to allow publishing camera images */

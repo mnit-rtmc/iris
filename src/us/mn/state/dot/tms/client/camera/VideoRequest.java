@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2015  Minnesota Department of Transportation
+ * Copyright (C) 2003-2016  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  * Copyright (C) 2015  SRF Consulting Group
  *
@@ -16,7 +16,6 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.Properties;
@@ -24,8 +23,6 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.StreamType;
-import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.URIUtils;
 
 /**
  * The video stream request parameter wrapper.
@@ -35,14 +32,6 @@ import us.mn.state.dot.tms.utils.URIUtils;
  * @author Travis Swanston
  */
 public class VideoRequest {
-
-	/** Get basic authentication string */
-	static private String getAuth() {
-		String user = SystemAttrEnum.CAMERA_AUTH_USERNAME.getString();
-		String pass = SystemAttrEnum.CAMERA_AUTH_PASSWORD.getString();
-		return (user.length() > 0 && pass.length() > 0)
-		      ? user + ':' + pass + '@' : "";
-	}
 
 	/** Servlet type enum */
 	static public enum ServletType {
@@ -159,11 +148,11 @@ public class VideoRequest {
 	}
 
 	/** Create a URL for a stream */
-	public String getUrl(Camera c) throws IOException {
+	public String getUrl(Camera c) {
 		return (base_url != null) ? getServletUrl(c) : getCameraUrl(c);
 	}
 
-	/** Create a video servlet URL */
+	/** Create a video servlet URI */
 	private String getServletUrl(Camera cam) {
 		return new String("http://" + base_url +
 			"/video/" + servlet_type.servlet +
@@ -173,38 +162,10 @@ public class VideoRequest {
 			"&ssid=" + sonarSessionId);
 	}
 
-	/** Create a camera encoder URL */
-	public String getCameraUrl(Camera cam) throws IOException {
-		String enc = cam.getEncoder();
-		int chan = cam.getEncoderChannel();
-		String auth = getAuth();
-		switch (CameraHelper.getEncoderType(cam)) {
-		case AXIS_MJPEG:
-			/* showlength parameter needed to force ancient (2401)
-			 * servers to provide Content-Length headers */
-			return "http://" + auth + enc +
-			       "/axis-cgi/mjpg/video.cgi" +
-			       "?camera=" + chan +
-			       "&resolution=" + size.getResolution() +
-			       "&showlength=1";
-		case AXIS_MPEG4:
-			return "rtsp://" + auth + enc +
-			       "/mpeg4/" + chan + "/media.amp";
-		case INFINOVA_MPEG4:
-			return "rtsp://" + auth + enc + "/1.AMP";
-		case AXIS_MP4_AXRTSP:
-			return "axrtsp://" + auth + enc +
-			       "/mpeg4/" + chan + "/media.amp";
-		case AXIS_MP4_AXRTSPHTTP:
-			return "axrtsphttp://" + auth + enc +
-			       "/mpeg4/" + chan + "/media.amp";
-		case GENERIC_MMS:
-			if (!URIUtils.checkScheme(enc, "mms"))
-				throw new IOException("Invalid encoder field");
-			return enc;
-		default:
-			throw new IOException("Unsupported Encoder");
-		}
+	/** Create a camera encoder URI */
+	public String getCameraUrl(Camera cam) {
+		String opt = "&resolution=" + size.getResolution();
+		return CameraHelper.encoderUri(cam, opt);
 	}
 
 	/** Check if stream type is MJPEG.
@@ -216,12 +177,10 @@ public class VideoRequest {
 
 	/** Get the stream type for a camera */
 	private StreamType getStreamType(Camera c) {
-		EncoderType et = CameraHelper.getEncoderType(c);
-		if (et != EncoderType.NONE) {
-			return (base_url != null)
-			      ? StreamType.MJPEG
-			      : et.direct_stream;
-		} else
+		StreamType st = StreamType.fromOrdinal(c.getStreamType());
+		if (st != StreamType.UNKNOWN)
+			return (base_url != null) ? StreamType.MJPEG : st;
+		else
 			return StreamType.UNKNOWN;
 	}
 }

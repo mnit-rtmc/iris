@@ -454,15 +454,7 @@ public class StreamPanel extends JPanel {
 			setStatusText("Error: no external viewer defined.");
 			return;
 		}
-		String url = null;
-		try {
-			url = video_req.getCameraUrl(c);
-		}
-		catch (IOException e) {
-			// FIXME: i18n
-			setStatusText("Error: " + e.getMessage());
-			return;
-		}
+		String url = video_req.getCameraUrl(c);
 		if (url == null) {
 			// FIXME: i18n
 			setStatusText("Error: cannot determine URL.");
