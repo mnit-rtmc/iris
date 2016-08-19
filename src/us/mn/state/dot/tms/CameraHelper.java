@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.geo.Position;
+import static us.mn.state.dot.tms.utils.URIUtil.*;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
@@ -30,15 +31,6 @@ import us.mn.state.dot.tms.units.Distance;
  * @author Travis Swanston
  */
 public class CameraHelper extends BaseHelper {
-
-	/** Empty URI */
-	static private final URI EMPTY_URI = URI.create("");
-
-	/** Default URI for HTTP sockets */
-	static private final URI HTTP = URI.create("http:/");
-
-	/** Default URI for RTSP sockets */
-	static private final URI RTSP = URI.create("rtsp:/");
 
 	/** Get basic authentication string */
 	static private String getAuth() {
@@ -124,7 +116,7 @@ public class CameraHelper extends BaseHelper {
 			int et = c.getEncoderType();
 			switch (EncoderType.fromOrdinal(et)) {
 			case GENERIC:
-				return createURI(c.getEncoder());
+				return genericUri(c);
 			case AXIS:
 				return axisUri(c, opt);
 			case INFINOVA:
@@ -134,12 +126,17 @@ public class CameraHelper extends BaseHelper {
 		return EMPTY_URI;
 	}
 
-	/** Create a URI */
-	static private URI createURI(String u) {
-		try {
-			return new URI(u);
-		}
-		catch (URISyntaxException e) {
+	/** Create a URI for a generic encoder */
+	static private URI genericUri(Camera c) {
+		String auth = getAuth();
+		String enc = c.getEncoder();
+		switch (StreamType.fromOrdinal(c.getStreamType())) {
+		case MJPEG:
+			return create(HTTP, auth + enc);
+		case MPEG4:
+		case H264:
+			return create(RTSP, auth + enc);
+		default:
 			return EMPTY_URI;
 		}
 	}
@@ -153,16 +150,16 @@ public class CameraHelper extends BaseHelper {
 		case MJPEG:
 			/* showlength parameter needed to force ancient (2401)
 			 * servers to provide Content-Length headers */
-			return HTTP.resolve(auth + enc +
-			                    "/axis-cgi/mjpg/video.cgi" +
-			                    "?camera=" + chan +
-			                    opt + "&showlength=1");
+			return create(HTTP, auth + enc +
+			              "/axis-cgi/mjpg/video.cgi" +
+			              "?camera=" + chan +
+			              opt + "&showlength=1");
 		case MPEG4:
-			return RTSP.resolve(auth + enc +
-			                    "/mpeg4/" + chan + "/media.amp");
+			return create(RTSP, auth + enc +
+			              "/mpeg4/" + chan + "/media.amp");
 		case H264:
-			return RTSP.resolve(auth + enc +
-			                    "/axis-media/media.amp");
+			return create(RTSP, auth + enc +
+			              "/axis-media/media.amp");
 		default:
 			return EMPTY_URI;
 		}
@@ -174,9 +171,9 @@ public class CameraHelper extends BaseHelper {
 		String enc = c.getEncoder();
 		switch (StreamType.fromOrdinal(c.getStreamType())) {
 		case MPEG4:
-			return RTSP.resolve(auth + enc + "/1.AMP");
+			return create(RTSP, auth + enc + "/1.AMP");
 		case H264:
-			return RTSP.resolve(auth + enc + "/1/h264major");
+			return create(RTSP, auth + enc + "/1/h264major");
 		default:
 			return EMPTY_URI;
 		}

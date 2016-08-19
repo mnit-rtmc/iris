@@ -22,7 +22,7 @@ import java.net.InetSocketAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.utils.URIUtils;
+import us.mn.state.dot.tms.utils.URIUtil;
 
 /**
  * A Messenger is a class which can poll a field controller and get the
@@ -72,7 +72,7 @@ abstract public class Messenger implements Closeable {
 	/** Create the URI */
 	static protected URI createURI(String uri) throws MessengerException {
 		try {
-			return URIUtils.create(uri);
+			return URIUtil.create(uri);
 		}
 		catch (URISyntaxException e) {
 			throw new MessengerException(e);

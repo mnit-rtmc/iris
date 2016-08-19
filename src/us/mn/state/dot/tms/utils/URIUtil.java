@@ -22,11 +22,20 @@ import java.net.URISyntaxException;
  *
  * @author Douglas Lau
  */
-public class URIUtils {
+public class URIUtil {
+
+	/** Empty URI */
+	static public final URI EMPTY_URI = URI.create("");
+
+	/** Default scheme for HTTP uri */
+	static public final URI HTTP = URI.create("http:/");
+
+	/** Default scheme for RTSP uri */
+	static public final URI RTSP = URI.create("rtsp:/");
 
 	/** Create a URI from a string.
 	 * @param uri String specifier.
-	 * @return Specified URI, or null if invalid. */
+	 * @return Specified URI */
 	static public URI create(String uri) throws URISyntaxException {
 		// If the URI contains a colon, parse
 		// assuming a scheme is defined
@@ -41,5 +50,23 @@ public class URIUtils {
 		}
 		// Force the scheme to be null
 		return new URI("//" + uri);
+	}
+
+	/** Create a URI with a default scheme.
+	 * @param scheme Default scheme.
+	 * @param uri String specifier.
+	 * @return Specified URI. */
+	static public URI create(URI scheme, String u) {
+		return scheme.resolve(createOrEmpty(u));
+	}
+
+	/** Create a URI */
+	static private URI createOrEmpty(String u) {
+		try {
+			return create(u);
+		}
+		catch (URISyntaxException e) {
+			return EMPTY_URI;
+		}
 	}
 }
