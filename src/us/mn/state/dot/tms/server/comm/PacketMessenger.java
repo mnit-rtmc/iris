@@ -30,13 +30,16 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  */
 public class PacketMessenger extends Messenger {
 
+	/** Default URI for UDP sockets */
+	static private final URI UDP = URI.create("udp:/");
+
 	/** Create a packet messenger.
 	 * @param uri URI of remote host.
 	 * @param rt Receive timeout (ms). */
 	static public PacketMessenger create(String uri, int rt)
 		throws MessengerException
 	{
-		URI u = createURI(URI.create("udp:/"), uri);
+		URI u = createURI(UDP, uri);
 		if ("udp".equals(u.getScheme()))
 			return createPacketMessenger(u, rt);
 		else
