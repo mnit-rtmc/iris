@@ -21,7 +21,10 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.geo.Position;
-import static us.mn.state.dot.tms.utils.URIUtil.*;
+import static us.mn.state.dot.tms.utils.URIUtil.create;
+import static us.mn.state.dot.tms.utils.URIUtil.EMPTY_URI;
+import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
+import static us.mn.state.dot.tms.utils.URIUtil.RTSP;
 import us.mn.state.dot.tms.units.Distance;
 
 /**

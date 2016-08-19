@@ -25,6 +25,8 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.StreamType;
+import static us.mn.state.dot.tms.utils.URIUtil.create;
+import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 
 /**
  * The video stream request parameter wrapper.
@@ -34,22 +36,6 @@ import us.mn.state.dot.tms.StreamType;
  * @author Travis Swanston
  */
 public class VideoRequest {
-
-	/** Empty URI */
-	static private final URI EMPTY_URI = URI.create("");
-
-	/** Default URI for HTTP sockets */
-	static private final URI HTTP = URI.create("http:/");
-
-	/** Create a URI */
-	static private URI createURI(String u) {
-		try {
-			return new URI(u);
-		}
-		catch (URISyntaxException e) {
-			return EMPTY_URI;
-		}
-	}
 
 	/** Servlet type enum */
 	static public enum ServletType {
@@ -159,13 +145,12 @@ public class VideoRequest {
 
 	/** Create a video servlet URI */
 	private URI getServletUri(Camera cam) {
-		URI uri = createURI(base_url +
+		return create(HTTP, base_url +
 		                    "/video/" + servlet_type.servlet +
 		                    "/" + district +
 		                    "/" + cam.getName() +
 		                    "?size=" + size.code +
 		                    "&ssid=" + sonarSessionId);
-		return HTTP.resolve(uri);
 	}
 
 	/** Create a camera encoder URI */
