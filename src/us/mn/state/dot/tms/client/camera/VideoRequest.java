@@ -18,6 +18,8 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Properties;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
@@ -32,6 +34,22 @@ import us.mn.state.dot.tms.StreamType;
  * @author Travis Swanston
  */
 public class VideoRequest {
+
+	/** Empty URI */
+	static private final URI EMPTY_URI = URI.create("");
+
+	/** Default URI for HTTP sockets */
+	static private final URI HTTP = URI.create("http:/");
+
+	/** Create a URI */
+	static private URI createURI(String u) {
+		try {
+			return new URI(u);
+		}
+		catch (URISyntaxException e) {
+			return EMPTY_URI;
+		}
+	}
 
 	/** Servlet type enum */
 	static public enum ServletType {
@@ -147,23 +165,24 @@ public class VideoRequest {
 		size = sz;
 	}
 
-	/** Create a URL for a stream */
-	public String getUrl(Camera c) {
-		return (base_url != null) ? getServletUrl(c) : getCameraUrl(c);
+	/** Create a URI for a stream */
+	public URI getUri(Camera c) {
+		return (base_url != null) ? getServletUri(c) : getCameraUri(c);
 	}
 
 	/** Create a video servlet URI */
-	private String getServletUrl(Camera cam) {
-		return new String("http://" + base_url +
-			"/video/" + servlet_type.servlet +
-			"/" + district +
-			"/" + cam.getName() +
-			"?size=" + size.code +
-			"&ssid=" + sonarSessionId);
+	private URI getServletUri(Camera cam) {
+		URI uri = createURI(base_url +
+		                    "/video/" + servlet_type.servlet +
+		                    "/" + district +
+		                    "/" + cam.getName() +
+		                    "?size=" + size.code +
+		                    "&ssid=" + sonarSessionId);
+		return HTTP.resolve(uri);
 	}
 
 	/** Create a camera encoder URI */
-	public String getCameraUrl(Camera cam) {
+	public URI getCameraUri(Camera cam) {
 		String opt = "&resolution=" + size.getResolution();
 		return CameraHelper.encoderUri(cam, opt);
 	}

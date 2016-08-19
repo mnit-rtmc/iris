@@ -15,6 +15,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -28,6 +30,15 @@ import us.mn.state.dot.tms.units.Distance;
  * @author Travis Swanston
  */
 public class CameraHelper extends BaseHelper {
+
+	/** Empty URI */
+	static private final URI EMPTY_URI = URI.create("");
+
+	/** Default URI for HTTP sockets */
+	static private final URI HTTP = URI.create("http:/");
+
+	/** Default URI for RTSP sockets */
+	static private final URI RTSP = URI.create("rtsp:/");
 
 	/** Get basic authentication string */
 	static private String getAuth() {
@@ -108,22 +119,33 @@ public class CameraHelper extends BaseHelper {
 	}
 
 	/** Create a camera encoder URI */
-	static public String encoderUri(Camera c, String opt) {
+	static public URI encoderUri(Camera c, String opt) {
 		if (c != null) {
-			switch (EncoderType.fromOrdinal(c.getEncoderType())) {
+			int et = c.getEncoderType();
+			switch (EncoderType.fromOrdinal(et)) {
+			case GENERIC:
+				return createURI(c.getEncoder());
 			case AXIS:
 				return axisUri(c, opt);
 			case INFINOVA:
 				return infinovaUri(c);
-			default:
-				return c.getEncoder();
 			}
-		} else
-			return "";
+		}
+		return EMPTY_URI;
+	}
+
+	/** Create a URI */
+	static private URI createURI(String u) {
+		try {
+			return new URI(u);
+		}
+		catch (URISyntaxException e) {
+			return EMPTY_URI;
+		}
 	}
 
 	/** Create a URI for an Axis encoder */
-	static private String axisUri(Camera c, String opt) {
+	static private URI axisUri(Camera c, String opt) {
 		String auth = getAuth();
 		String enc = c.getEncoder();
 		int chan = c.getEncoderChannel();
@@ -131,22 +153,22 @@ public class CameraHelper extends BaseHelper {
 		case MJPEG:
 			/* showlength parameter needed to force ancient (2401)
 			 * servers to provide Content-Length headers */
-			return "http://" + auth + enc +
-			       "/axis-cgi/mjpg/video.cgi" +
-			       "?camera=" + chan +
-			       opt + "&showlength=1";
+			return HTTP.resolve(auth + enc +
+			                    "/axis-cgi/mjpg/video.cgi" +
+			                    "?camera=" + chan +
+			                    opt + "&showlength=1");
 		case MPEG4:
-			return "rtsp://" + auth + enc +
-			       "/mpeg4/" + chan + "/media.amp";
+			return RTSP.resolve(auth + enc +
+			                    "/mpeg4/" + chan + "/media.amp");
 		default:
-			return "";
+			return EMPTY_URI;
 		}
 	}
 
 	/** Create a URI for an Infinova encoder */
-	static private String infinovaUri(Camera c) {
+	static private URI infinovaUri(Camera c) {
 		String auth = getAuth();
 		String enc = c.getEncoder();
-		return "rtsp://" + auth + enc + "/1.AMP";
+		return RTSP.resolve(auth + enc + "/1.AMP");
 	}
 }
