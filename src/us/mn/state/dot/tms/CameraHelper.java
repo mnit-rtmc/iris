@@ -160,6 +160,9 @@ public class CameraHelper extends BaseHelper {
 		case MPEG4:
 			return RTSP.resolve(auth + enc +
 			                    "/mpeg4/" + chan + "/media.amp");
+		case H264:
+			return RTSP.resolve(auth + enc +
+			                    "/axis-media/media.amp");
 		default:
 			return EMPTY_URI;
 		}
@@ -169,6 +172,13 @@ public class CameraHelper extends BaseHelper {
 	static private URI infinovaUri(Camera c) {
 		String auth = getAuth();
 		String enc = c.getEncoder();
-		return RTSP.resolve(auth + enc + "/1.AMP");
+		switch (StreamType.fromOrdinal(c.getStreamType())) {
+		case MPEG4:
+			return RTSP.resolve(auth + enc + "/1.AMP");
+		case H264:
+			return RTSP.resolve(auth + enc + "/1/h264major");
+		default:
+			return EMPTY_URI;
+		}
 	}
 }
