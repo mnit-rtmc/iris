@@ -575,6 +575,11 @@ CREATE TRIGGER detector_delete_trig
     INSTEAD OF DELETE ON iris.detector
     FOR EACH ROW EXECUTE PROCEDURE iris.detector_delete();
 
+CREATE TABLE iris.stream_type (
+	id integer PRIMARY KEY,
+	description VARCHAR(20) NOT NULL
+);
+
 CREATE TABLE iris.encoder_type (
 	id integer PRIMARY KEY,
 	description VARCHAR(20) NOT NULL
@@ -2394,6 +2399,14 @@ COPY iris.meter_lock (id, description) FROM stdin;
 4	Testing
 5	Police panel
 6	Manual mode
+\.
+
+COPY iris.stream_type (id, description) FROM stdin;
+0	UNKNOWN
+1	MJPEG
+2	MPEG4
+3	H264
+4	H265
 \.
 
 COPY iris.encoder_type (id, description) FROM stdin;

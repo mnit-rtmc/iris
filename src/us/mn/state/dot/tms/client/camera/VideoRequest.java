@@ -222,6 +222,6 @@ public class VideoRequest {
 			      ? StreamType.MJPEG
 			      : et.direct_stream;
 		} else
-			return StreamType.NONE;
+			return StreamType.UNKNOWN;
 	}
 }

@@ -25,7 +25,7 @@ package us.mn.state.dot.tms;
 public enum EncoderType {
 
 	/** Undefined encoder type (0) */
-	NONE(" ", StreamType.NONE),
+	NONE(" ", StreamType.UNKNOWN),
 
 	/** Axis MJPEG (1) */
 	AXIS_MJPEG("Axis MJPEG", StreamType.MJPEG),
@@ -43,10 +43,10 @@ public enum EncoderType {
 	AXIS_MP4_AXRTSPHTTP("Axis MP4 axrtsphttp", StreamType.MPEG4),
 
 	/** Generic MMS (6) */
-	GENERIC_MMS("Generic MMS", StreamType.MMS),
+	GENERIC_MMS("Generic MMS", StreamType.UNKNOWN),
 
 	/** Axis JPEG (7) */
-	AXIS_JPEG("Axis JPEG", StreamType.NONE);
+	AXIS_JPEG("Axis JPEG", StreamType.UNKNOWN);
 
 	/** Create a new encoder type.
 	 * @param d Description.
