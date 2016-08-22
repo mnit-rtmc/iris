@@ -14,10 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
-import us.mn.state.dot.tms.server.ControllerImpl;
-
 /**
- * ThreadedPoller is a class polling devices using a CommThread.
+ * Device poller interface.
  *
  * @author Douglas Lau
  */
