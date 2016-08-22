@@ -19,7 +19,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
-import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.MessengerException;
 import us.mn.state.dot.tms.server.comm.TransientPoller;
 import us.mn.state.dot.tms.server.comm.pelcod.OpDeviceRequest;
@@ -45,8 +44,8 @@ public class InfinovaPoller extends TransientPoller<PelcoDProperty>
 
 	/** Create a comm thread */
 	@Override
-	protected CommThread<PelcoDProperty> createCommThread(String uri,
-		int timeout) throws IOException
+	protected InfinovaThread createCommThread(String uri, int timeout)
+		throws IOException
 	{
 		return new InfinovaThread(this, queue, scheme, uri, timeout);
 	}

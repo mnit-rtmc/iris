@@ -21,7 +21,6 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.CommThread;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.MessengerException;
@@ -44,8 +43,8 @@ public class AddcoPoller extends DevicePoller<AddcoProperty>
 
 	/** Create a comm thread */
 	@Override
-	protected CommThread<AddcoProperty> createCommThread(String uri,
-		int timeout) throws IOException
+	protected AddcoThread createCommThread(String uri, int timeout)
+		throws IOException
 	{
 		return new AddcoThread(this, queue, scheme, uri, timeout);
 	}

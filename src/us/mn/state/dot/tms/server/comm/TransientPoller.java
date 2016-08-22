@@ -18,7 +18,7 @@ import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
 
 /**
- * TransientPoller is a CommThread which causes equal operations to be
+ * TransientPoller is a DevicePoller which causes equal operations to be
  * replaced instead of rejected.  It is useful for PTZ pollers (which consist
  * of transient PTZ commands only).
  *
