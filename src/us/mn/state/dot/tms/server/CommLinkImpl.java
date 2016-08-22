@@ -174,7 +174,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		@Override public void perform() {
 			DevicePoller dp = poller;
 			if (dp != null)
-				dp.destroyIdleCommThread();
+				dp.stopPollingIfIdle();
 		}
 	}
 
@@ -296,7 +296,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		setPollEnabled(e);
 		DevicePoller dp = poller;
 		if (dp != null)
-			dp.destroyCommThread();
+			dp.stopPolling();
 		failControllers();
 	}
 

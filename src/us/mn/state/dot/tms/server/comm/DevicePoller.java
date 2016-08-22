@@ -64,7 +64,7 @@ public class DevicePoller<T extends ControllerProperty> {
 
 	/** Destroy the poller */
 	public void destroy() {
-		destroyCommThread();
+		stopPolling();
 		queue.close();
 		drainQueue();
 		log("DESTROYED");
@@ -102,7 +102,7 @@ public class DevicePoller<T extends ControllerProperty> {
 	/** Set the remote URI */
 	public synchronized void setUri(String u) {
 		uri = u;
-		destroyCommThread();
+		stopPolling();
 	}
 
 	/** Receive timeout (ms) */
@@ -111,7 +111,7 @@ public class DevicePoller<T extends ControllerProperty> {
 	/** Set the receive timeout (ms) */
 	public synchronized void setTimeout(int rt) {
 		timeout = rt;
-		destroyCommThread();
+		stopPolling();
 	}
 
 	/** Comm thread (may be null) */
@@ -161,17 +161,17 @@ public class DevicePoller<T extends ControllerProperty> {
 		return new CommThread<T>(this, queue, scheme, uri, timeout);
 	}
 
-	/** Destroy the comm thread */
-	public synchronized void destroyCommThread() {
+	/** Stop polling */
+	public synchronized void stopPolling() {
 		setStatus("STOPPED");
 		if (c_thread != null)
 			c_thread.destroy();
 		c_thread = null;
 	}
 
-	/** Destroy the comm thread if idle */
-	public void destroyIdleCommThread() {
+	/** Stop polling if idle */
+	public void stopPollingIfIdle() {
 		if (queue.isEmpty())
-			destroyCommThread();
+			stopPolling();
 	}
 }
