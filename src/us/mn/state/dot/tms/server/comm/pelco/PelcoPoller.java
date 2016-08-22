@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.pelco;
 
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
@@ -44,5 +45,13 @@ public class PelcoPoller extends DevicePoller<PelcoProperty>
 		String cam)
 	{
 		addOp(new OpSelectMonitorCamera(c, m, cam));
+	}
+
+	/** Send a device request
+	 * @param vm The VideoMonitor object.
+	 * @param r The desired DeviceRequest. */
+	@Override
+	public void sendRequest(VideoMonitor vm, DeviceRequest r) {
+		// No supported requests
 	}
 }

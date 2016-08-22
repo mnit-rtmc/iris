@@ -19,21 +19,23 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
-import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
 
 /**
- * A video monitor output from a video switch
+ * A video monitor device.
  *
  * @author Douglas Lau
  */
-public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
+public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Check if the camera video should be published */
 	static private boolean isCameraPublished(Camera c) {
@@ -43,7 +45,7 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	/** Load all the video monitors */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
-		store.query("SELECT name, description, restricted " +
+		store.query("SELECT name, controller, pin, notes, restricted " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -57,7 +59,9 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("description", description);
+		map.put("controller", controller);
+		map.put("pin", pin);
+		map.put("notes", notes);
 		map.put("restricted", restricted);
 		return map;
 	}
@@ -74,47 +78,34 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 		return SONAR_TYPE;
 	}
 
-	/** Create a new video monitor */
+	/** Create a video monitor */
 	private VideoMonitorImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),		// name
-		     row.getString(2),		// description
-		     row.getBoolean(3)		// restricted
+		     row.getString(2),		// controller
+		     row.getInt(3),		// pin
+		     row.getString(4),		// notes
+		     row.getBoolean(5)		// restricted
 		);
 	}
 
-	/** Create a new video monitor */
-	private VideoMonitorImpl(String n, String d, boolean r) {
-		this(n);
-		description = d;
+	/** Create a video monitor */
+	private VideoMonitorImpl(String n, String c, int p, String nt,
+		boolean r)
+	{
+		this(n, lookupController(c), p, nt, r);
+	}
+
+	/** Create a video monitor */
+	private VideoMonitorImpl(String n, ControllerImpl c, int p, String nt,
+		boolean r)
+	{
+		super(n, c, p, nt);
 		restricted = r;
 	}
 
 	/** Create a new video monitor */
-	public VideoMonitorImpl(String n) {
+	public VideoMonitorImpl(String n) throws TMSException, SonarException {
 		super(n);
-	}
-
-	/** Description of video monitor */
-	private String description = "";
-
-	/** Set the video monitor description */
-	@Override
-	public void setDescription(String d) {
-		description = d;
-	}
-
-	/** Set the video monitor description */
-	public void doSetDescription(String d) throws TMSException {
-		if (d.equals(description))
-			return;
-		store.update(this, "description", d);
-		setDescription(d);
-	}
-
-	/** Get the video monitor description */
-	@Override
-	public String getDescription() {
-		return description;
 	}
 
 	/** Flag to restrict publishing camera images */
@@ -174,6 +165,22 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 		return camera;
 	}
 
+	/** Get the video monitor poller */
+	private VideoMonitorPoller getVideoMonitorPoller() {
+		DevicePoller dp = getPoller();
+		return (dp instanceof VideoMonitorPoller)
+		      ? (VideoMonitorPoller) dp
+		      : null;
+	}
+
+	/** Send a device request operation */
+	@Override
+	protected void sendDeviceRequest(DeviceRequest dr) {
+		VideoMonitorPoller vmp = getVideoMonitorPoller();
+		if (vmp != null)
+			vmp.sendRequest(this, dr);
+	}
+
 	/** Select a blank camera for the video monitor */
 	private void selectBlankCamera() {
 		selectCamera(SystemAttrEnum.CAMERA_ID_BLANK.getString());
@@ -181,6 +188,15 @@ public class VideoMonitorImpl extends BaseObjectImpl implements VideoMonitor {
 
 	/** Select a camera for the video monitor */
 	private void selectCamera(String cam) {
+		Controller c = getController();
+		if (c instanceof ControllerImpl)
+			selectCamera((ControllerImpl) c, cam);
+		else
+			selectCameraWithSwitcher(cam);
+	}
+
+	/** Select a camera for the video monitor with a switcher */
+	private void selectCameraWithSwitcher(String cam) {
 		Iterator<Controller> it = ControllerHelper.iterator();
 		while (it.hasNext()) {
 			Controller c = it.next();

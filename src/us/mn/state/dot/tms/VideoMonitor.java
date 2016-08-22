@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2008  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,23 +14,15 @@
  */
 package us.mn.state.dot.tms;
 
-import us.mn.state.dot.sonar.SonarObject;
-
 /**
- * A video monitor output from a video switch
+ * A video monitor device.
  *
  * @author Douglas Lau
  */
-public interface VideoMonitor extends SonarObject {
+public interface VideoMonitor extends Device {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "video_monitor";
-
-	/** Set the video monitor description */
-	void setDescription(String d);
-
-	/** Get the video monitor description */
-	String getDescription();
 
 	/** Set flag to restrict publishing camera images */
 	void setRestricted(boolean r);

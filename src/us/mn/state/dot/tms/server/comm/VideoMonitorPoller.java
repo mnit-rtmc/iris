@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
@@ -27,4 +28,9 @@ public interface VideoMonitorPoller {
 
 	/** Set the camera to display on the specified monitor */
 	void setMonitorCamera(ControllerImpl c, VideoMonitor m, String cam);
+
+	/** Send a device request
+	 * @param vm The VideoMonitor object.
+	 * @param r The desired DeviceRequest. */
+	void sendRequest(VideoMonitor vm, DeviceRequest r);
 }
