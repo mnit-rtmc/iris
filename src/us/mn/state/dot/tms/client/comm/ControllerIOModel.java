@@ -43,6 +43,7 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.TagReader;
+import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
@@ -74,7 +75,7 @@ public class ControllerIOModel extends AbstractTableModel {
 	private enum DeviceType {
 		Alarm, Camera, Detector, DMS, Gate_Arm, Lane_Marking,
 		LCSIndication, Ramp_Meter, Beacon, Beacon_Verify,
-		Weather_Sensor, Tag_Reader
+		Video_Monitor, Weather_Sensor, Tag_Reader
 	}
 
 	/** Types of IO devices */
@@ -92,6 +93,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.Ramp_Meter);
 		IO_TYPE.add(DeviceType.Beacon);
 		IO_TYPE.add(DeviceType.Beacon_Verify);
+		IO_TYPE.add(DeviceType.Video_Monitor);
 		IO_TYPE.add(DeviceType.Weather_Sensor);
 		IO_TYPE.add(DeviceType.Tag_Reader);
 	}
@@ -116,6 +118,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return DeviceType.Ramp_Meter;
 		else if (cio instanceof Beacon)
 			return DeviceType.Beacon;
+		else if (cio instanceof VideoMonitor)
+			return DeviceType.Video_Monitor;
 		else if (cio instanceof WeatherSensor)
 			return DeviceType.Weather_Sensor;
 		else if (cio instanceof TagReader)
@@ -177,6 +181,9 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller IO list for ramp meters */
 	private final ControllerIOList m_list;
 
+	/** Controller IO list for video monitors */
+	private final ControllerIOList v_list;
+
 	/** Controller IO list for beacons */
 	private final ControllerIOList b_list;
 
@@ -218,6 +225,8 @@ public class ControllerIOModel extends AbstractTableModel {
 		lcsi_list = new ControllerIOList(
 			state.getLcsCache().getLCSIndications());
 		m_list = new ControllerIOList(state.getRampMeters());
+		v_list = new ControllerIOList(
+			state.getCamCache().getVideoMonitors());
 		b_list = new ControllerIOList(state.getBeacons());
 		bv_list = new BeaconVerifyList(state.getBeacons());
 		wsensor_list = new ControllerIOList(state.getWeatherSensors());
@@ -275,6 +284,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		lmark_list.initialize();
 		lcsi_list.initialize();
 		m_list.initialize();
+		v_list.initialize();
 		b_list.initialize();
 		bv_list.initialize();
 		wsensor_list.initialize();
@@ -291,6 +301,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		lmark_list.dispose();
 		lcsi_list.dispose();
 		m_list.dispose();
+		v_list.dispose();
 		b_list.dispose();
 		bv_list.dispose();
 		wsensor_list.dispose();
@@ -492,6 +503,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return lcsi_list;
 		case Ramp_Meter:
 			return m_list;
+		case Video_Monitor:
+			return v_list;
 		case Beacon:
 			return b_list;
 		case Beacon_Verify:
