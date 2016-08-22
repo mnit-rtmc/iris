@@ -19,6 +19,7 @@ import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.CommThread;
@@ -130,9 +131,7 @@ public class E6Thread extends CommThread<E6Property> {
 	/** Receive packets */
 	private void receivePackets() {
 		try {
-			while (!rx_thread.isInterrupted()) {
-				receivePacket();
-			}
+			while (receivePacket());
 		}
 		catch (IOException e) {
 			setStatus(getMessage(e));
@@ -143,17 +142,23 @@ public class E6Thread extends CommThread<E6Property> {
 	}
 
 	/** Receive one packet */
-	private void receivePacket() throws IOException {
+	private boolean receivePacket() throws IOException {
+		if (rx_thread.isInterrupted())
+			return false;
 		E6Packet rx = rx_pkt;
 		E6Packet tx = tx_pkt;
 		E6Packet rp = resp_pkt;
+		if (rx == null || tx == null || rp == null) {
+			TimeSteward.sleep_well(200);
+			return true;
+		}
 		try {
-			if (rx != null && tx != null && rp != null)
-				doReceivePacket(rx, tx, rp);
+			doReceivePacket(rx, tx, rp);
 		}
 		catch (SocketTimeoutException e) {
 			// we expect lots of timeouts
 		}
+		return true;
 	}
 
 	/** Receive one packet */
