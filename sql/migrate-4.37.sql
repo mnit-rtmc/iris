@@ -227,3 +227,6 @@ CREATE VIEW video_monitor_view AS
 	FROM iris.video_monitor m
 	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
 GRANT SELECT ON video_monitor_view TO PUBLIC;
+
+-- Reserve MonStream comm protocol value
+INSERT INTO iris.comm_protocol (id, description) VALUES (35, 'MonStream');

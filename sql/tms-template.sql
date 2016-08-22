@@ -2393,6 +2393,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 32	TransCore E6
 33	Control By Web
 34	Incident Feed
+35	MonStream
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;

@@ -127,7 +127,10 @@ public enum CommProtocol {
 	CBW("CBW"),
 
 	/** Incident feed (34) */
-	INC_FEED("Incident Feed");
+	INC_FEED("Incident Feed"),
+
+	/** MonStream video switching (35) */
+	MON_STREAM("MonStream");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {

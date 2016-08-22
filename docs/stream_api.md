@@ -1,4 +1,4 @@
-# Stream Switching Protocol (needs a snappy name)
+# MonStream Protocol
 
 ## UDP command
 
