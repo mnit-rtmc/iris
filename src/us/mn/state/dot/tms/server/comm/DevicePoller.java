@@ -85,10 +85,8 @@ public class DevicePoller<T extends ControllerProperty> {
 
 	/** Add an operation to the device poller */
 	protected void addOp(OpController<T> op) {
-		if (!isConnected()) {
-			destroyCommThread();
+		if (!isStarted())
 			createCommThread();
-		}
 		if (!queue.enqueue(op))
 			log("DROPPING " + op);
 	}
@@ -119,11 +117,16 @@ public class DevicePoller<T extends ControllerProperty> {
 	/** Comm thread (may be null) */
 	private CommThread c_thread;
 
+	/** Check if the comm thread has started */
+	private synchronized boolean isStarted() {
+		return c_thread != null;
+	}
+
 	/** Poller status when no comm thread exists */
 	private String status = "INIT";
 
 	/** Get the poller status */
-	public String getStatus() {
+	public synchronized String getStatus() {
 		CommThread ct = c_thread;
 		return (ct != null) ? ct.getStatus() : status;
 	}
@@ -134,7 +137,7 @@ public class DevicePoller<T extends ControllerProperty> {
 	}
 
 	/** Check if the poller is currently connected */
-	public boolean isConnected() {
+	public synchronized boolean isConnected() {
 		CommThread ct = c_thread;
 		return (ct != null) && ct.isAlive();
 	}
