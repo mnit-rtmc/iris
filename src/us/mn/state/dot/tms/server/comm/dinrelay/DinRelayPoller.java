@@ -21,8 +21,8 @@ import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
-import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
+import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 
 /**
@@ -30,7 +30,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
  *
  * @author Douglas Lau
  */
-public class DinRelayPoller extends DevicePoller<DinRelayProperty>
+public class DinRelayPoller extends ThreadedPoller<DinRelayProperty>
 	implements LCSPoller, BeaconPoller
 {
 	/** DIN relay debug log */

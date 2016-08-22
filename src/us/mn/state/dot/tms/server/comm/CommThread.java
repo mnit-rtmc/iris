@@ -59,8 +59,8 @@ public class CommThread<T extends ControllerProperty> {
 		return msg;
 	}
 
-	/** Device poller */
-	protected final DevicePoller<T> poller;
+	/** Threaded poller */
+	protected final ThreadedPoller<T> poller;
 
 	/** Thread to poll operations */
 	private final Thread thread;
@@ -96,7 +96,7 @@ public class CommThread<T extends ControllerProperty> {
 	 * @param s Default URI scheme.
 	 * @param u The URI.
 	 * @param rt Receive timeout (ms) */
-	public CommThread(DevicePoller<T> dp, OpQueue<T> q, URI s, String u,
+	public CommThread(ThreadedPoller<T> dp, OpQueue<T> q, URI s, String u,
 		int rt)
 	{
 		poller = dp;

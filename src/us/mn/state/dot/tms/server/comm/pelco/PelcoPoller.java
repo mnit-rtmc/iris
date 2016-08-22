@@ -18,7 +18,7 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.DevicePoller;
+import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
@@ -29,7 +29,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
  * @author Timothy Johnson
  * @author Douglas Lau
  */
-public class PelcoPoller extends DevicePoller<PelcoProperty>
+public class PelcoPoller extends ThreadedPoller<PelcoProperty>
 	implements VideoMonitorPoller
 {
 	/** Pelco debug log */

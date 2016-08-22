@@ -16,9 +16,9 @@ package us.mn.state.dot.tms.server.comm.dr500;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
+import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
@@ -26,7 +26,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
  *
  * @author Douglas Lau
  */
-public class DR500Poller extends DevicePoller<DR500Property>
+public class DR500Poller extends ThreadedPoller<DR500Property>
 	implements SamplePoller
 {
 	/** DR500 debug log */

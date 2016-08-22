@@ -18,8 +18,8 @@ package us.mn.state.dot.tms.server.comm.g4;
 import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
+import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
@@ -28,8 +28,9 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
  * @author Michael Darter
  * @author Douglas Lau
  */
-public class G4Poller extends DevicePoller<G4Property> implements SamplePoller {
-
+public class G4Poller extends ThreadedPoller<G4Property>
+	implements SamplePoller
+{
 	/** Debug log */
 	static private final DebugLog G4_LOG = new DebugLog("g4");
 

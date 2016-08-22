@@ -18,8 +18,8 @@ import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
-import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.TagReaderPoller;
+import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.UDP;
 
 /**
@@ -27,7 +27,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.UDP;
  *
  * @author Douglas Lau
  */
-public class E6Poller extends DevicePoller<E6Property>
+public class E6Poller extends ThreadedPoller<E6Property>
 	implements TagReaderPoller
 {
 	/** E6 debug log */

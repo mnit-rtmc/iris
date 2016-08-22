@@ -17,7 +17,7 @@ package us.mn.state.dot.tms.server.comm.incfeed;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.IncidentCache;
-import us.mn.state.dot.tms.server.comm.DevicePoller;
+import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 
 /**
@@ -26,7 +26,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
  *
  * @author Douglas Lau
  */
-public class IncFeedPoller extends DevicePoller<IncFeedProperty> {
+public class IncFeedPoller extends ThreadedPoller<IncFeedProperty> {
 
 	/** Incident feed debug log */
 	static private final DebugLog INC_LOG = new DebugLog("inc_feed");

@@ -18,14 +18,14 @@ import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
 
 /**
- * TransientPoller is a DevicePoller which causes equal operations to be
+ * TransientPoller is a ThreadedPoller which causes equal operations to be
  * replaced instead of rejected.  It is useful for PTZ pollers (which consist
  * of transient PTZ commands only).
  *
  * @author Douglas Lau
  */
 public class TransientPoller<T extends ControllerProperty>
-	extends DevicePoller<T>
+	extends ThreadedPoller<T>
 {
 	/** Create a new transient poller */
 	protected TransientPoller(String name, URI s, DebugLog l) {

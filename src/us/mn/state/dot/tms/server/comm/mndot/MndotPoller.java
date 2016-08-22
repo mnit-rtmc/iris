@@ -28,12 +28,12 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.RampMeterImpl;
 import us.mn.state.dot.tms.server.comm.AlarmPoller;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
-import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.LaneMarkingPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
+import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
@@ -42,7 +42,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
  *
  * @author Douglas Lau
  */
-public class MndotPoller extends DevicePoller<MndotProperty>
+public class MndotPoller extends ThreadedPoller<MndotProperty>
 	implements LCSPoller, AlarmPoller, MeterPoller, SamplePoller,
 	BeaconPoller, LaneMarkingPoller
 {

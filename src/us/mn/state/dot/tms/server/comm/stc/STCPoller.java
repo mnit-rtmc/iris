@@ -20,8 +20,8 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.GateArmImpl;
-import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
+import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
@@ -29,7 +29,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
  *
  * @author Douglas Lau
  */
-public class STCPoller extends DevicePoller<STCProperty>
+public class STCPoller extends ThreadedPoller<STCProperty>
 	implements GateArmPoller
 {
 	/** Debug log */

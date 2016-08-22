@@ -19,7 +19,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
-import us.mn.state.dot.tms.server.comm.DevicePoller;
+import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 
 /**
@@ -27,7 +27,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
  *
  * @author Douglas Lau
  */
-public class CBWPoller extends DevicePoller<CBWProperty>
+public class CBWPoller extends ThreadedPoller<CBWProperty>
 	implements BeaconPoller
 {
 	/** Control-By-Web debug log */

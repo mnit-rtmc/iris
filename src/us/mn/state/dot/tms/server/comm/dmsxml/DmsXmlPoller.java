@@ -23,8 +23,8 @@ import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
+import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
@@ -37,7 +37,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DmsXmlPoller extends DevicePoller implements DMSPoller {
+public class DmsXmlPoller extends ThreadedPoller implements DMSPoller {
 
 	/** Debug log */
 	static protected final DebugLog LOG = new DebugLog("dmsxml");

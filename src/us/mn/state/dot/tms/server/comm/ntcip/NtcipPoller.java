@@ -25,9 +25,9 @@ import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
-import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
+import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import us.mn.state.dot.tms.utils.URIUtil;
 
 /**
@@ -35,8 +35,8 @@ import us.mn.state.dot.tms.utils.URIUtil;
  *
  * @author Douglas Lau
  */
-public class NtcipPoller extends DevicePoller implements DMSPoller, LCSPoller {
-
+public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller
+{
 	/** Get the default URI for a comm protocol */
 	static private URI default_uri(CommProtocol cp) {
 		if (cp == CommProtocol.NTCIP_A)

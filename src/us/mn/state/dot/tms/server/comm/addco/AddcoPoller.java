@@ -21,9 +21,9 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
-import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.MessengerException;
+import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
@@ -31,7 +31,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
  *
  * @author Douglas Lau
  */
-public class AddcoPoller extends DevicePoller<AddcoProperty>
+public class AddcoPoller extends ThreadedPoller<AddcoProperty>
 	implements DMSPoller
 {
 	/** Addco debug log */
