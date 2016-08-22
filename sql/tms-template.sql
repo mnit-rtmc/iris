@@ -228,12 +228,6 @@ CREATE TABLE iris.word (
 	allowed BOOLEAN DEFAULT false NOT NULL
 );
 
-CREATE TABLE iris.video_monitor (
-	name VARCHAR(12) PRIMARY KEY,
-	description VARCHAR(32) NOT NULL,
-	restricted boolean NOT NULL
-);
-
 CREATE TABLE iris.holiday (
 	name VARCHAR(32) PRIMARY KEY,
 	month INTEGER NOT NULL,
@@ -574,6 +568,69 @@ $detector_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER detector_delete_trig
     INSTEAD OF DELETE ON iris.detector
     FOR EACH ROW EXECUTE PROCEDURE iris.detector_delete();
+
+CREATE TABLE iris._video_monitor (
+	name VARCHAR(12) PRIMARY KEY,
+	notes VARCHAR(32) NOT NULL,
+	restricted BOOLEAN NOT NULL
+);
+
+ALTER TABLE iris._video_monitor ADD CONSTRAINT _video_monitor_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.video_monitor AS SELECT
+	m.name, controller, pin, notes, restricted
+	FROM iris._video_monitor m JOIN iris._device_io d ON m.name = d.name;
+
+CREATE FUNCTION iris.video_monitor_insert() RETURNS TRIGGER AS
+	$video_monitor_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._video_monitor (name, notes, restricted)
+	     VALUES (NEW.name, NEW.notes, NEW.restricted);
+	RETURN NEW;
+END;
+$video_monitor_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER video_monitor_insert_trig
+    INSTEAD OF INSERT ON iris.video_monitor
+    FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_insert();
+
+CREATE FUNCTION iris.video_monitor_update() RETURNS TRIGGER AS
+	$video_monitor_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._video_monitor
+	   SET notes = NEW.notes,
+	       restricted = NEW.restricted
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$video_monitor_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER video_monitor_update_trig
+    INSTEAD OF UPDATE ON iris.video_monitor
+    FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_update();
+
+CREATE FUNCTION iris.video_monitor_delete() RETURNS TRIGGER AS
+	$video_monitor_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$video_monitor_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER video_monitor_delete_trig
+    INSTEAD OF DELETE ON iris.video_monitor
+    FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_delete();
 
 CREATE TABLE iris.stream_type (
 	id integer PRIMARY KEY,
@@ -1957,6 +2014,13 @@ CREATE VIEW ramp_meter_view AS
 	LEFT JOIN iris.meter_lock ml ON m.m_lock = ml.id
 	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
+
+CREATE VIEW video_monitor_view AS
+	SELECT m.name, m.notes, restricted, m.controller,
+	       ctr.condition, ctr.comm_link
+	FROM iris.video_monitor m
+	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
+GRANT SELECT ON video_monitor_view TO PUBLIC;
 
 CREATE VIEW encoder_type_view AS
 	SELECT id, description FROM iris.encoder_type;
