@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
+import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
  * CanogaPoller is a java implementation of the Canoga (tm) Traffic Sensing

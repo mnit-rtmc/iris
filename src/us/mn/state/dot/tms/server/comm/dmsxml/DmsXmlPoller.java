@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
+import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
  * This class provides a DMS Poller that communicates with

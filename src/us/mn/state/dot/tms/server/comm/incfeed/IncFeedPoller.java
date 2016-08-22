@@ -18,6 +18,7 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.IncidentCache;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
+import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 
 /**
  * Incident feed poller, which periodically retrieves incidents

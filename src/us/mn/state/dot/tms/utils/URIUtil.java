@@ -27,10 +27,16 @@ public class URIUtil {
 	/** Empty URI */
 	static public final URI EMPTY_URI = URI.create("");
 
-	/** Default scheme for HTTP uri */
+	/** Default scheme for UDP */
+	static public final URI UDP = URI.create("udp:/");
+
+	/** Default scheme for TCP */
+	static public final URI TCP = URI.create("tcp:/");
+
+	/** Default scheme for HTTP */
 	static public final URI HTTP = URI.create("http:/");
 
-	/** Default scheme for RTSP uri */
+	/** Default scheme for RTSP */
 	static public final URI RTSP = URI.create("rtsp:/");
 
 	/** Create a URI from a string.

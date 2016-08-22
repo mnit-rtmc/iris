@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
+import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
  * SS105Poller is a java implementation of the Wavetronix SmartSensor 105

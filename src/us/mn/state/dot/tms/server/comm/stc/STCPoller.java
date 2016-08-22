@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.GateArmImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.GateArmPoller;
+import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
  * STCPoller is a java implementation of the Hysecurity STC protocol.

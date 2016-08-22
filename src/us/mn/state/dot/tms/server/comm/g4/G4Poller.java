@@ -20,6 +20,7 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
+import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
  * G4Poller is a java implementation of the RTMS G4 VDS protocol.

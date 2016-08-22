@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.MessengerException;
+import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
  * A Poller to communicate with ADDCO signs (NodeComm).

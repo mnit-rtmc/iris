@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
+import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 
 /**
  * Poller to control Digital Loggers Inc DIN Relay devices.

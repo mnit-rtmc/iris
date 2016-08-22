@@ -27,15 +27,6 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  */
 public class DevicePoller<T extends ControllerProperty> {
 
-	/** Default URI for UDP sockets */
-	static protected final URI UDP = URI.create("udp:/");
-
-	/** Default URI for TCP sockets */
-	static protected final URI TCP = URI.create("tcp:/");
-
-	/** Default URI for HTTP sockets */
-	static protected final URI HTTP = URI.create("http:/");
-
 	/** Operation queue */
 	protected final OpQueue<T> queue = new OpQueue<T>();
 

@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
+import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
  * PecloPoller is a java implementation of the Pelco Video Switch serial

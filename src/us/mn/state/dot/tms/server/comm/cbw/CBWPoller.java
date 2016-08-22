@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.server.BeaconImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.BeaconPoller;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
+import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 
 /**
  * Poller to control Control By Web Relay devices.

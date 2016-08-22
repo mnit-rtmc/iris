@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.TagReaderPoller;
+import static us.mn.state.dot.tms.utils.URIUtil.UDP;
 
 /**
  * A Poller to communicate with TransCore E6 tag readers.

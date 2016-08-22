@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
+import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
  * Org815Poller is a weather poller for the Optical Scientific ORG-815 sensor.

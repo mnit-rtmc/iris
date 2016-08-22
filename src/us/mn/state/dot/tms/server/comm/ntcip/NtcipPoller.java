@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
+import us.mn.state.dot.tms.utils.URIUtil;
 
 /**
  * NTCIP Poller
@@ -39,9 +40,9 @@ public class NtcipPoller extends DevicePoller implements DMSPoller, LCSPoller {
 	/** Get the default URI for a comm protocol */
 	static private URI default_uri(CommProtocol cp) {
 		if (cp == CommProtocol.NTCIP_A)
-			return UDP;
+			return URIUtil.UDP;
 		else
-			return TCP;
+			return URIUtil.TCP;
 	}
 
 	/** NTCIP debug log */

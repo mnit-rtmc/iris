@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.msgfeed;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
+import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 
 /**
  * Msg feed poller, which periodically retrieves DMS messages

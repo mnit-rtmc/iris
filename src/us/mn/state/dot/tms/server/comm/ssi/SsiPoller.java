@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
+import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 
 /**
  * SSI RWIS poller, which periodically reads SSI data via http.

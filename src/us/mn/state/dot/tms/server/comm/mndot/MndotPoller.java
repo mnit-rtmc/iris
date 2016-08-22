@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.MeterPoller;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
+import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
  * MndotPoller is a poller for the MnDOT 170 communication protocol,

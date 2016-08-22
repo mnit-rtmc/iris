@@ -21,6 +21,7 @@ import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.net.URI;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import static us.mn.state.dot.tms.utils.URIUtil.UDP;
 
 /**
  * A PacketMessenger is a class which can poll a field controller and get the
@@ -29,9 +30,6 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * @author Douglas Lau
  */
 public class PacketMessenger extends Messenger {
-
-	/** Default URI for UDP sockets */
-	static private final URI UDP = URI.create("udp:/");
 
 	/** Create a packet messenger.
 	 * @param uri URI of remote host.

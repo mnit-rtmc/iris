@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.server.comm.pelcod.OpDeviceRequest;
 import us.mn.state.dot.tms.server.comm.pelcod.OpMoveCamera;
 import us.mn.state.dot.tms.server.comm.pelcod.OpPreset;
 import us.mn.state.dot.tms.server.comm.pelcod.PelcoDProperty;
+import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
  * Infinova poller
