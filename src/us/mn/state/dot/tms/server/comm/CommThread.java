@@ -60,7 +60,7 @@ public class CommThread<T extends ControllerProperty> {
 	}
 
 	/** Threaded poller */
-	protected final ThreadedPoller<T> poller;
+	private final ThreadedPoller<T> poller;
 
 	/** Thread to poll operations */
 	private final Thread thread;
