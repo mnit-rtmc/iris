@@ -2500,7 +2500,6 @@ client_units_si	true
 comm_event_purge_days	14
 database_version	4.37.0
 detector_auto_fail_enable	true
-dialup_poll_period_mins	120
 dict_allowed_scheme	0
 dict_banned_scheme	0
 dms_aws_enable	false

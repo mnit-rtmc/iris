@@ -230,3 +230,6 @@ GRANT SELECT ON video_monitor_view TO PUBLIC;
 
 -- Reserve MonStream comm protocol value
 INSERT INTO iris.comm_protocol (id, description) VALUES (35, 'MonStream');
+
+-- delete old system attributes
+DELETE FROM iris.system_attribute WHERE name = 'dialup_poll_period_mins';
