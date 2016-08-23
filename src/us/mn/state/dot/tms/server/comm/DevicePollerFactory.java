@@ -102,4 +102,7 @@ public class DevicePollerFactory {
 			return null;
 		}
 	}
+
+	/** Don't allow instantiation */
+	private DevicePollerFactory() { }
 }
