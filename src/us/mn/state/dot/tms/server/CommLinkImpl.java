@@ -269,7 +269,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		store.update(this, "protocol", p);
 		setProtocol(p);
 		recreatePoller();
-		updateStatus();
 	}
 
 	/** Get the communication protocol */
@@ -294,9 +293,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return;
 		store.update(this, "poll_enabled", e);
 		setPollEnabled(e);
-		DevicePoller dp = poller;
-		if (dp != null)
-			dp.stopPolling();
+		destroyPoller();
 		failControllers();
 	}
 
@@ -403,6 +400,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	private synchronized void recreatePoller() {
 		destroyPoller();
 		createPoller();
+		updateStatus();
 	}
 
 	/** Set all controllers to a failed status */
@@ -424,9 +422,10 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	private transient String status = Constants.UNKNOWN;
 
 	/** Update the comm link status */
-	private synchronized void updateStatus() {
-		if (poller != null)
-			setStatusNotify(poller.getStatus());
+	private void updateStatus() {
+		DevicePoller dp = poller;
+		if (dp != null)
+			setStatusNotify(dp.getStatus());
 		else
 			setStatusNotify(Constants.UNKNOWN);
 	}

@@ -57,8 +57,8 @@ public class ThreadedPoller<T extends ControllerProperty>
 	/** Destroy the poller */
 	@Override
 	public void destroy() {
-		stopPolling();
 		queue.close();
+		stopPolling();
 		drainQueue();
 		log("DESTROYED");
 	}
@@ -159,8 +159,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	}
 
 	/** Stop polling */
-	@Override
-	public synchronized void stopPolling() {
+	private synchronized void stopPolling() {
 		setStatus("STOPPED");
 		if (c_thread != null)
 			c_thread.destroy();

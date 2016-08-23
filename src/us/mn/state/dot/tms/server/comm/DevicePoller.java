@@ -33,9 +33,6 @@ public interface DevicePoller {
 	/** Check if the poller is currently connected */
 	boolean isConnected();
 
-	/** Stop polling */
-	void stopPolling();
-
 	/** Stop polling if idle */
 	void stopPollingIfIdle();
 
