@@ -161,7 +161,7 @@ public class CommThread<T extends ControllerProperty> {
 			}
 			// Rest a bit before trying again
 			TimeSteward.sleep_well(200);
-		} while (queue.isOpen() && !queue.isEmpty());
+		} while (queue.isOpen());
 	}
 
 	/** Create a messenger.
