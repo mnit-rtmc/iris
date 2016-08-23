@@ -35,7 +35,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	public final String name;
 
 	/** Default URI scheme */
-	public final URI scheme;
+	protected final URI scheme;
 
 	/** Protocol logger */
 	public final DebugLog logger;
