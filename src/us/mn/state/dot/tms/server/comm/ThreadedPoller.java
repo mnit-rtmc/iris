@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * @author Douglas Lau
  */
 public class ThreadedPoller<T extends ControllerProperty>
-	implements DevicePoller<T>
+	implements DevicePoller
 {
 	/** Operation queue */
 	protected final OpQueue<T> queue = new OpQueue<T>();

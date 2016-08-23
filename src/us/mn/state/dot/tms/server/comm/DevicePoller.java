@@ -19,7 +19,7 @@ package us.mn.state.dot.tms.server.comm;
  *
  * @author Douglas Lau
  */
-public interface DevicePoller<T extends ControllerProperty> {
+public interface DevicePoller {
 
 	/** Set the remote URI */
 	void setUri(String u);
