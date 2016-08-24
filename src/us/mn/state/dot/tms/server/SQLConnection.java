@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2012  Minnesota Department of Transportation
+ * Copyright (C) 2005-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,8 +64,8 @@ public class SQLConnection {
 	}
 
 	/** Escape a string constant value for SQL */
-	static private String escapeValue(Object value) {   
-		return value.toString().replace("'", "''").replace("\\","\\\\");
+	static private String escapeValue(Object value) {
+		return value.toString().replace("'", "''");
 	}
 
 	/** Location of database server */
