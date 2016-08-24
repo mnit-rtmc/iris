@@ -42,24 +42,19 @@ abstract public class Messenger implements Closeable {
 	 * @param rt Receive timeout.
 	 * @throws MessengerException if the messenger could not be created. */
 	static public Messenger create(URI scheme, String uri, int rt)
-		throws MessengerException
+		throws MessengerException, IOException
 	{
-		try {
-			URI u = createURI(scheme, uri);
-			if ("udp".equals(u.getScheme()))
-				return DatagramMessenger.create(u, rt);
-			else if ("tcp".equals(u.getScheme()))
-				return StreamMessenger.create(u, rt, rt);
-			else if ("http".equals(u.getScheme()))
-				return HttpFileMessenger.create(u, rt);
-			else if ("modem".equals(u.getScheme()))
-				return ModemMessenger.create(u, rt);
-			else
-				throw INVALID_URI_SCHEME;
-		}
-		catch (IOException e) {
-			throw new MessengerException(e);
-		}
+		URI u = createURI(scheme, uri);
+		if ("udp".equals(u.getScheme()))
+			return DatagramMessenger.create(u, rt);
+		else if ("tcp".equals(u.getScheme()))
+			return StreamMessenger.create(u, rt, rt);
+		else if ("http".equals(u.getScheme()))
+			return HttpFileMessenger.create(u, rt);
+		else if ("modem".equals(u.getScheme()))
+			return ModemMessenger.create(u, rt);
+		else
+			throw INVALID_URI_SCHEME;
 	}
 
 	/** Create the URI with a default URI scheme */

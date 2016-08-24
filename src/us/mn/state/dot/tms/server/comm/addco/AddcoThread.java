@@ -38,14 +38,9 @@ public class AddcoThread extends CommThread<AddcoProperty> {
 	/** Create a messenger */
 	@Override
 	protected Messenger createMessenger(URI s, String u, int rt)
-		throws MessengerException
+		throws MessengerException, IOException
 	{
 		Messenger m = Messenger.create(s, u, rt);
-		try {
-			return new AddcoMessenger(m);
-		}
-		catch (IOException e) {
-			throw new MessengerException(e);
-		}
+		return new AddcoMessenger(m);
 	}
 }

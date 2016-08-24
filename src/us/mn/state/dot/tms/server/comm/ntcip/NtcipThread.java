@@ -51,17 +51,12 @@ public class NtcipThread extends CommThread {
 	/** Create a messenger */
 	@Override
 	protected Messenger createMessenger(URI s, String u, int rt)
-		throws MessengerException
+		throws MessengerException, IOException
 	{
 		Messenger m = Messenger.create(s, u, rt);
-		if (protocol == CommProtocol.NTCIP_B) {
-			try {
-				return new HDLCMessenger(m);
-			}
-			catch (IOException e) {
-				throw new MessengerException(e);
-			}
-		} else
+		if (protocol == CommProtocol.NTCIP_B)
+			return new HDLCMessenger(m);
+		else
 			return m;
 	}
 

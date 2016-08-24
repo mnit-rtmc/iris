@@ -171,7 +171,7 @@ public class CommThread<T extends ControllerProperty> {
 	 * @return The new messenger.
 	 * @throws MessengerException if the messenger could not be created. */
 	protected Messenger createMessenger(URI s, String u, int rt)
-		throws MessengerException
+		throws MessengerException, IOException
 	{
 		return Messenger.create(s, u, rt);
 	}
