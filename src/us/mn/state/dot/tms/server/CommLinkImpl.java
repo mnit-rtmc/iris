@@ -117,7 +117,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		poll_enabled = pe;
 		poll_period = pp;
 		timeout = t;
-		createPoller();
+		recreatePoller();
 		initTransients();
 	}
 
@@ -293,7 +293,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			return;
 		store.update(this, "poll_enabled", e);
 		setPollEnabled(e);
-		destroyPoller();
+		recreatePoller();
 		failControllers();
 	}
 
@@ -381,6 +381,22 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		return null;
 	}
 
+	/** Recreate the device poller */
+	private synchronized void recreatePoller() {
+		destroyPoller();
+		if (poll_enabled)
+			createPoller();
+		updateStatus();
+	}
+
+	/** Destroy the device poller */
+	private synchronized void destroyPoller() {
+		if (poller != null) {
+			poller.destroy();
+			poller = null;
+		}
+	}
+
 	/** Create the device poller */
 	private synchronized void createPoller() {
 		poller = DevicePollerFactory.create(name, protocol);
@@ -388,19 +404,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 			poller.setUri(uri);
 			poller.setTimeout(timeout);
 		}
-	}
-
-	/** Destroy the device poller */
-	private synchronized void destroyPoller() {
-		if (poller != null)
-			poller.destroy();
-	}
-
-	/** Recreate the device poller */
-	private synchronized void recreatePoller() {
-		destroyPoller();
-		createPoller();
-		updateStatus();
 	}
 
 	/** Set all controllers to a failed status */
