@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip;
 
-import java.io.IOException;
 import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
@@ -59,9 +58,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller
 
 	/** Create a comm thread */
 	@Override
-	protected NtcipThread createCommThread(String uri, int timeout)
-		throws IOException
-	{
+	protected NtcipThread createCommThread(String uri, int timeout) {
 		return new NtcipThread(this, queue, scheme, uri, timeout,
 			protocol);
 	}

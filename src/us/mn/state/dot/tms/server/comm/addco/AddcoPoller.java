@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.addco;
 
-import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -44,9 +43,7 @@ public class AddcoPoller extends ThreadedPoller<AddcoProperty>
 
 	/** Create a comm thread */
 	@Override
-	protected AddcoThread createCommThread(String uri, int timeout)
-		throws IOException
-	{
+	protected AddcoThread createCommThread(String uri, int timeout) {
 		return new AddcoThread(this, queue, scheme, uri, timeout);
 	}
 

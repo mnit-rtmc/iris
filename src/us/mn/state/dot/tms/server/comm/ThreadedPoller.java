@@ -141,20 +141,12 @@ public class ThreadedPoller<T extends ControllerProperty>
 
 	/** Create the comm thread */
 	private synchronized void createCommThread() {
-		try {
-			c_thread = createCommThread(uri, timeout);
-			c_thread.start();
-		}
-		catch (IOException e) {
-			setStatus("I/O error: " + e.getMessage());
-			c_thread = null;
-		}
+		c_thread = createCommThread(uri, timeout);
+		c_thread.start();
 	}
 
 	/** Create a new comm thread */
-	protected CommThread<T> createCommThread(String uri, int timeout)
-		throws IOException
-	{
+	protected CommThread<T> createCommThread(String uri, int timeout) {
 		return new CommThread<T>(this, queue, scheme, uri, timeout);
 	}
 

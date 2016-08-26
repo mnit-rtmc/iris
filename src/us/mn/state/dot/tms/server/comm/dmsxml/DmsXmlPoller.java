@@ -15,7 +15,6 @@
  */
 package us.mn.state.dot.tms.server.comm.dmsxml;
 
-import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -49,9 +48,7 @@ public class DmsXmlPoller extends ThreadedPoller implements DMSPoller {
 
 	/** Create a comm thread */
 	@Override
-	protected DmsXmlThread createCommThread(String uri, int timeout)
-		throws IOException
-	{
+	protected DmsXmlThread createCommThread(String uri, int timeout) {
 		return new DmsXmlThread(this, queue, scheme, uri, timeout);
 	}
 

@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.e6;
 
-import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.TagReaderImpl;
@@ -40,9 +39,7 @@ public class E6Poller extends ThreadedPoller<E6Property>
 
 	/** Create a comm thread */
 	@Override
-	public E6Thread createCommThread(String uri, int timeout)
-		throws IOException
-	{
+	public E6Thread createCommThread(String uri, int timeout) {
 		return new E6Thread(this, queue, scheme, uri, timeout);
 	}
 
