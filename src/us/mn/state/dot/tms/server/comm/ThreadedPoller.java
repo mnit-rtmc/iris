@@ -117,19 +117,11 @@ public class ThreadedPoller<T extends ControllerProperty>
 		return c_thread != null;
 	}
 
-	/** Poller status when no comm thread exists */
-	private String status = "INIT";
-
 	/** Get the poller status */
 	@Override
 	public synchronized String getStatus() {
 		CommThread ct = c_thread;
-		return (ct != null) ? ct.getStatus() : status;
-	}
-
-	/** Set the poller status */
-	private void setStatus(String s) {
-		status = s;
+		return (ct != null) ? ct.getStatus() : "STOPPED";
 	}
 
 	/** Check if the poller is currently connected */
@@ -152,7 +144,6 @@ public class ThreadedPoller<T extends ControllerProperty>
 
 	/** Stop polling */
 	private synchronized void stopPolling() {
-		setStatus("STOPPED");
 		if (c_thread != null)
 			c_thread.destroy();
 		c_thread = null;
