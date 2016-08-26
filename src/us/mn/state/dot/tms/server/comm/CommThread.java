@@ -182,6 +182,7 @@ public class CommThread<T extends ControllerProperty> {
 	private void pollQueue(Messenger m) throws InterruptedException,
 		IOException
 	{
+		setStatus("");
 		while (queue.isOpen()) {
 			doPoll(m, queue.next());
 			setStatus("");
