@@ -30,6 +30,7 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
+import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.Iterator;
 
 /**
@@ -66,6 +67,9 @@ public class CommSelector implements Closeable {
 		while (it.hasNext()) {
 			handleReady(it.next());
 			it.remove();
+		}
+		synchronized (this) {
+			// NOTE: this prevents deadlock in register
 		}
 	}
 
@@ -205,7 +209,7 @@ public class CommSelector implements Closeable {
 		DatagramChannel dc = DatagramChannel.open();
 		dc.configureBlocking(false);
 		dc.connect(remote);
-		return dc.register(selector, 0, bp);
+		return register(dc, 0, bp);
 	}
 
 	/** Create a socket channel */
@@ -215,6 +219,16 @@ public class CommSelector implements Closeable {
 		SocketChannel sc = SocketChannel.open();
 		sc.configureBlocking(false);
 		sc.connect(remote);
-		return sc.register(selector, SelectionKey.OP_CONNECT, bp);
+		return register(sc, SelectionKey.OP_CONNECT, bp);
+	}
+
+	/** Register a channel with the selector */
+	private synchronized SelectionKey register(AbstractSelectableChannel ch,
+		int ops, BasePoller bp) throws IOException
+	{
+		// NOTE: must wake up the selector because locking
+		//       on this is really screwy
+		selector.wakeup();
+		return ch.register(selector, ops, bp);
 	}
 }
