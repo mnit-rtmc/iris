@@ -22,20 +22,33 @@ import java.nio.ByteBuffer;
  *
  * @author Douglas Lau
  */
-public interface OpStep {
+abstract public class OpStep {
+
+	/** Polling required */
+	private boolean polling = true;
 
 	/** Check if polling is required */
-	boolean isPolling();
+	public boolean isPolling() {
+		return polling;
+	}
 
 	/** Set polling */
-	void setPolling(boolean p);
+	public void setPolling(boolean p) {
+		polling = p;
+	}
 
 	/** Poll the controller */
-	void poll(Operation op, ByteBuffer tx_buf) throws IOException;
+	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
+		// subclasses may override
+	}
 
 	/** Parse response from controller */
-	void resp(Operation op, ByteBuffer rx_buf) throws IOException;
+	public void resp(Operation op, ByteBuffer rx_buf) throws IOException {
+		// subclasses may override
+	}
 
 	/** Get the next step */
-	OpStep next();
+	public OpStep next() {
+		return null;
+	}
 }
