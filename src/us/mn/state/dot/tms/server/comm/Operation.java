@@ -70,6 +70,11 @@ public final class Operation implements Comparable<Operation> {
 		return controller;
 	}
 
+	/** Get the controller drop address */
+	public int getDrop() {
+		return controller.getDrop();
+	}
+
 	/** Device ID */
 	private final DeviceImpl device;
 
@@ -85,12 +90,11 @@ public final class Operation implements Comparable<Operation> {
 	 * @param c Controller.
 	 * @param d Device.
 	 * @param s First step. */
-	public Operation(String n, ControllerImpl c, DeviceImpl d, OpStep s) {
+	private Operation(String n, ControllerImpl c, DeviceImpl d, OpStep s) {
 		name = n;
 		controller = c;
 		device = d;
 		step = s;
-		// FIXME: acquire device lock before first step
 	}
 
 	/** Create a new operation.
@@ -99,6 +103,15 @@ public final class Operation implements Comparable<Operation> {
 	 * @param s First step. */
 	public Operation(String n, ControllerImpl c, OpStep s) {
 		this(n, c, null, s);
+	}
+
+	/** Create a new operation.
+	 * @param n Operation name.
+	 * @param d Device.
+	 * @param s First step. */
+	public Operation(String n, DeviceImpl d, OpStep s) {
+		this(n, (ControllerImpl) d.getController(), d, s);
+		// FIXME: acquire device lock before first step
 	}
 
 	/** Get a string description */
