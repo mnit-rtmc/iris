@@ -43,20 +43,21 @@ public class ViconPTZPoller extends BasePoller implements CameraPoller {
 	/** Send a PTZ camera move command */
 	@Override
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		addOp(new Operation("send PTZ", c, new OpMoveCamera(p, t, z)));
+		addOp(new Operation("camera.op.send.ptz", c,
+			new OpMoveCamera(p, t, z)));
 	}
 
 	/** Send a store camera preset command */
 	@Override
 	public void sendStorePreset(CameraImpl c, int preset) {
-		addOp(new Operation("store preset", c,
+		addOp(new Operation("camera.op.store.preset", c,
 			new OpPreset(true, preset)));
 	}
 
 	/** Send a recall camera preset command */
 	@Override
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		addOp(new Operation("recall preset", c,
+		addOp(new Operation("camera.op.recall.preset", c,
 			new OpPreset(false, preset)));
 	}
 
@@ -65,7 +66,7 @@ public class ViconPTZPoller extends BasePoller implements CameraPoller {
 	 * @param dr The desired DeviceRequest. */
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest dr) {
-		addOp(new Operation("device request", c,
+		addOp(new Operation("device.op.request", c,
 			new OpDeviceRequest(dr)));
 	}
 }

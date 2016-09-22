@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DeviceImpl;
+import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * An operation is a sequence of steps to be performed on a field controller.
@@ -57,9 +58,9 @@ public final class Operation implements Comparable<Operation> {
 	/** Operation name */
 	private final String name;
 
-	/** Get the operation name */
+	/** Get the internationalized operation name */
 	public String getName() {
-		return name;
+		return I18N.get(name);
 	}
 
 	/** Controller to be polled */
@@ -117,7 +118,7 @@ public final class Operation implements Comparable<Operation> {
 	/** Get a string description */
 	@Override
 	public String toString() {
-		return name + " (" + getId() + ")";
+		return getName() + " (" + getId() + ")";
 	}
 
 	/** Operation equality test */
