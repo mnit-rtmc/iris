@@ -15,8 +15,9 @@
 package us.mn.state.dot.tms.server.comm.viconptz;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.CameraImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
+import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Vicon operation to recall or store a camera preset.
@@ -24,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  * @author Douglas Lau
  * @author Stephen Donecker
  */
-public class OpPreset extends OpViconPTZ {
+public class OpPreset extends OpStep {
 
 	/** Special preset for on-screen menu (store) */
 	static private final int PRESET_MENU = 8;
@@ -45,30 +46,23 @@ public class OpPreset extends OpViconPTZ {
 		      : p - PRESET_MENU + PRESET_EXT;
 	}
 
-	/** Property for request */
-	private final ViconPTZProperty prop;
+	/** Store / recall flag */
+	private final boolean store;
+
+	/** Preset number */
+	private final int preset;
 
 	/** Create a new operation to recall or store a camera preset */
-	public OpPreset(CameraImpl c, boolean s, int p) {
-		super(c);
-		prop = new ExPresetProperty(s, adjustPreset(p));
+	public OpPreset(boolean s, int p) {
+		store = s;
+		preset = p;
 	}
 
-	/** Create the second phase of the operation */
-	protected Phase<ViconPTZProperty> phaseTwo() {
-		return new CommandPreset();
-	}
-
-	/** Phase to recall or store a camera preset */
-	protected class CommandPreset extends Phase<ViconPTZProperty> {
-
-		/** Command controller to recall or store a preset */
-		protected Phase<ViconPTZProperty> poll(
-			CommMessage<ViconPTZProperty> mess) throws IOException
-		{
-			mess.add(prop);
-			mess.storeProps();
-			return null;
-		}
+	/** Poll the controller */
+	@Override
+	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
+		ExPresetProp prop = new ExPresetProp(op.getDrop(), store,
+			adjustPreset(preset));
+		prop.encodeStore(tx_buf);
 	}
 }

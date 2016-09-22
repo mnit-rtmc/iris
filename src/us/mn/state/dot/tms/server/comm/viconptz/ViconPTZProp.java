@@ -14,11 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
-import java.io.InputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.InvalidAddressException;
 
 /**
@@ -26,7 +24,7 @@ import us.mn.state.dot.tms.server.comm.InvalidAddressException;
  *
  * @author Douglas Lau
  */
-abstract public class ViconPTZProperty extends ControllerProperty {
+abstract public class ViconPTZProp extends ControllerProp {
 
 	/** Mask for command requests (second byte) */
 	static private final byte CMD = 0x10;
@@ -39,18 +37,14 @@ abstract public class ViconPTZProperty extends ControllerProperty {
 		return drop >= 1 && drop <= ADDRESS_MAX;
 	}
 
-	/** Create basic Vicon packet */
-	protected byte[] createPacket(int drop) throws IOException {
-		if (!isAddressValid(drop))
-			throw new InvalidAddressException(drop);
-		byte[] pkt = new byte[6];
-		pkt[0] = (byte)(0x80 | (drop >> 4));
-		pkt[1] = (byte)((0x0f & drop) | CMD);
-		pkt[2] = panTiltFlags();
-		pkt[3] = lensFlags();
-		pkt[4] = auxBits();
-		pkt[5] = presetBits();
-		return pkt;
+	/** Drop address */
+	protected final int drop;
+
+	/** Create a new Vicon PTZ property */
+	protected ViconPTZProp(int d) throws IOException {
+		if (!isAddressValid(d))
+			throw new InvalidAddressException(d);
+		drop = d;
 	}
 
 	/** Get the pan/tilt flags */
@@ -75,15 +69,13 @@ abstract public class ViconPTZProperty extends ControllerProperty {
 
 	/** Encode a STORE request */
 	@Override
-	public void encodeStore(ControllerImpl c, OutputStream os)
-		throws IOException
-	{
-		os.write(createPacket(c.getDrop()));
-	}
-
-	/** Decode a STORE response */
-	@Override
-	public void decodeStore(ControllerImpl c, InputStream is) {
-		// do not expect any response
+	public void encodeStore(ByteBuffer tx_buf) {
+		// Command packets contain 6 bytes
+		tx_buf.put((byte) (0x80 | (drop >> 4)));
+		tx_buf.put((byte) ((0x0f & drop) | CMD));
+		tx_buf.put(panTiltFlags());
+		tx_buf.put(lensFlags());
+		tx_buf.put(auxBits());
+		tx_buf.put(presetBits());
 	}
 }

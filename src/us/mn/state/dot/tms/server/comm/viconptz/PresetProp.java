@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
+import java.io.IOException;
+
 /**
  * Vicon property to recall or store a preset (1-15).  Note: for newer Vicon
  * receivers, this command has no effect.  The extended preset command must be
@@ -21,7 +23,7 @@ package us.mn.state.dot.tms.server.comm.viconptz;
  *
  * @author Douglas Lau
  */
-public class PresetProperty extends ViconPTZProperty {
+public class PresetProp extends ViconPTZProp {
 
 	/** Maximum preset number for this property */
 	static public final int MAX_PRESET = 15;
@@ -33,7 +35,8 @@ public class PresetProperty extends ViconPTZProperty {
 	private final int preset;
 
 	/** Create a new preset property */
-	public PresetProperty(boolean s, int p) {
+	public PresetProp(int d, boolean s, int p) throws IOException {
+		super(d);
 		store = s;
 		preset = p;
 	}
@@ -47,7 +50,7 @@ public class PresetProperty extends ViconPTZProperty {
 	/** Get the preset bits */
 	@Override
 	protected byte presetBits() {
-		return (byte)(recallOrStore() | (preset & 0x0f));
+		return (byte) (recallOrStore() | (preset & 0x0f));
 	}
 
 	/** Get recall or store bit */

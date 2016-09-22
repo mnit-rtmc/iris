@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,13 +14,15 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
+import java.io.IOException;
+
 /**
  * Vicon property to recall or store an extended preset (greater than 15).
  * This command replaces PresetProperty for newer receivers.
  *
  * @author Douglas Lau
  */
-public class ExPresetProperty extends ExtendedProperty {
+public class ExPresetProp extends ExtendedProp {
 
 	/** Special preset for camera reset (store) */
 	static public final int SOFT_RESET = 97;
@@ -38,7 +40,8 @@ public class ExPresetProperty extends ExtendedProperty {
 	private final int preset;
 
 	/** Create a new extended preset property */
-	public ExPresetProperty(boolean s, int p) {
+	public ExPresetProp(int d, boolean s, int p) throws IOException {
+		super(d);
 		store = s;
 		preset = p;
 	}

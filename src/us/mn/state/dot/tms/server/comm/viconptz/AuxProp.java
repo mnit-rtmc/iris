@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,18 +14,21 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
+import java.io.IOException;
+
 /**
  * Vicon property to control aux.
  *
  * @author Douglas Lau
  */
-public class AuxProperty extends ViconPTZProperty {
+public class AuxProp extends ViconPTZProp {
 
 	/** Aux number */
 	private final int aux;
 
 	/** Create a new aux property */
-	public AuxProperty(int a) {
+	public AuxProp(int d, int a) throws IOException {
+		super(d);
 		aux = a;
 	}
 
@@ -38,6 +41,6 @@ public class AuxProperty extends ViconPTZProperty {
 	/** Get the aux bits */
 	@Override
 	protected byte auxBits() {
-		return (byte)((1 << (7 - aux)) & 0x7E);
+		return (byte) ((1 << (7 - aux)) & 0x7E);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +15,16 @@
 package us.mn.state.dot.tms.server.comm.viconptz;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.CameraImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
+import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Vicon operation to move a camera.
  *
  * @author Douglas Lau
  */
-public class OpMoveCamera extends OpViconPTZ {
+public class OpMoveCamera extends OpStep {
 
 	/** Range of PTZ values */
 	static private final int PTZ_RANGE = 2048;
@@ -38,42 +39,47 @@ public class OpMoveCamera extends OpViconPTZ {
 		return Math.round(clamp_float(value) * (range - 1));
 	}
 
-	/** Command property */
-	private final CommandProperty prop;
+	/** Pan value */
+	private final int pan;
+
+	/** Tilt value */
+	private final int tilt;
+
+	/** Zoom value */
+	private final int zoom;
 
 	/** Create a new operation to move a camera */
-	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
-		super(c);
-		int pan = map_float(p, PTZ_RANGE);
-		int tilt = map_float(t, PTZ_RANGE);
-		int zoom = map_float(z, PTZ_RANGE);
-		prop = new CommandProperty(pan, tilt, zoom, 0, 0);
+	public OpMoveCamera(float p, float t, float z) {
+		pan = map_float(p, PTZ_RANGE);
+		tilt = map_float(t, PTZ_RANGE);
+		zoom = map_float(z, PTZ_RANGE);
 	}
 
-	/** Create the second phase of the operation */
-	protected Phase<ViconPTZProperty> phaseTwo() {
-		return new Move();
+	/** Number of times this request was sent */
+	private int n_sent = 0;
+
+	/** Poll the controller */
+	@Override
+	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
+		CommandProp prop = new CommandProp(op.getDrop(), pan, tilt,
+			zoom, 0, 0);
+		prop.encodeStore(tx_buf);
+		n_sent++;
 	}
 
-	/** Phase to move the camera */
-	protected class Move extends Phase<ViconPTZProperty> {
+	/** Get the next step */
+	@Override
+	public OpStep next() {
+		return shouldResend() ? this : null;
+	}
 
-		/** Number of times this request was sent */
-		private int n_sent = 0;
+	/** Should we resend the property? */
+	private boolean shouldResend() {
+		return isStop() && (n_sent < 2);
+	}
 
-		/** Command controller to move the camera */
-		protected Phase<ViconPTZProperty> poll(
-			CommMessage<ViconPTZProperty> mess) throws IOException
-		{
-			mess.add(prop);
-			mess.storeProps();
-			n_sent++;
-			return shouldResend() ? this : null;
-		}
-
-		/** Should we resend the property? */
-		private boolean shouldResend() {
-			return prop.isStop() && (n_sent < 2);
-		}
+	/** Is this a stop command? */
+	private boolean isStop() {
+		return (pan == 0) && (tilt == 0) && (zoom == 0);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,109 +15,82 @@
 package us.mn.state.dot.tms.server.comm.viconptz;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.server.CameraImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Vicon operation to handle DeviceRequest requests.
  *
  * @author Douglas Lau
  */
-public class OpDeviceRequest extends OpViconPTZ {
+public class OpDeviceRequest extends OpStep {
 
-	/** Get property associated with a device request.
+	/** Create property associated with a device request.
 	 * @param dr Device request.
 	 * @return Associated property. */
-	static private ViconPTZProperty getProperty(DeviceRequest dr) {
+	static private ViconPTZProp createProp(int d, DeviceRequest dr,
+		int n_sent) throws IOException
+	{
 		switch (dr) {
 		case CAMERA_FOCUS_NEAR:
-			return new CommandProperty(0, 0, 0, -1, 0);
+			return new CommandProp(d, 0, 0, 0, -1, 0);
 		case CAMERA_FOCUS_FAR:
-			return new CommandProperty(0, 0, 0, 1, 0);
+			return new CommandProp(d, 0, 0, 0, 1, 0);
 		case CAMERA_FOCUS_STOP:
-			return new CommandProperty(0, 0, 0, 0, 0);
+			return new CommandProp(d, 0, 0, 0, 0, 0);
 		case CAMERA_IRIS_CLOSE:
-			return new CommandProperty(0, 0, 0, 0, -1);
+			return new CommandProp(d, 0, 0, 0, 0, -1);
 		case CAMERA_IRIS_OPEN:
-			return new CommandProperty(0, 0, 0, 0, 1);
+			return new CommandProp(d, 0, 0, 0, 0, 1);
 		case CAMERA_IRIS_STOP:
-			return new CommandProperty(0, 0, 0, 0, 0);
+			return new CommandProp(d, 0, 0, 0, 0, 0);
 		case RESET_DEVICE:
-			return new ExPresetProperty(true,
-				ExPresetProperty.SOFT_RESET);
+			return new ExPresetProp(d, true,
+				ExPresetProp.SOFT_RESET);
 		case CAMERA_WIPER_ONESHOT:
-			// For actual Vicon cameras, this should be AUX 6, but
-			// Pelco cameras require AUX 1 here.
-			return new AuxProperty(1);
+			if (n_sent < 3) {
+				// For Vicon cameras, this should be AUX 6, but
+				// Pelco cameras require AUX 1 here.
+				return new AuxProp(d, 1);
+			} else
+				return new AuxProp(d, 0);
 		default:
 			return null;
 		}
 	}
 
-	/** Property for request */
-	private final ViconPTZProperty prop;
+	/** Device request */
+	private final DeviceRequest req;
 
 	/** Create a new device request operation.
-	 * @param c CameraImpl instance.
 	 * @param dr Device request. */
-	public OpDeviceRequest(CameraImpl c, DeviceRequest dr) {
-		super(c);
-		prop = getProperty(dr);
+	public OpDeviceRequest(DeviceRequest dr) {
+		req = dr;
 	}
 
-	/** Create the second phase of the operation */
+	/** Number of times this request was sent */
+	private int n_sent = 0;
+
+	/** Poll the controller */
 	@Override
-	protected Phase<ViconPTZProperty> phaseTwo() {
-		if (prop instanceof AuxProperty)
-			return new AuxSetPhase();
-		else if (prop != null)
-			return new DeviceRequestPhase();
-		else
-			return null;
+	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
+		ViconPTZProp prop = createProp(op.getDrop(), req, n_sent);
+		if (prop != null)
+			prop.encodeStore(tx_buf);
+		n_sent++;
 	}
 
-	/** Phase to make device request */
-	protected class DeviceRequestPhase extends Phase<ViconPTZProperty> {
-
-		/** Make device request */
-		protected Phase<ViconPTZProperty> poll(
-			CommMessage<ViconPTZProperty> mess) throws IOException
-		{
-			mess.add(prop);
-			mess.storeProps();
-			return null;
-		}
+	/** Get the next step */
+	@Override
+	public OpStep next() {
+		return shouldResend() ? this : null;
 	}
 
-	/** Phase to set AUX device request */
-	protected class AuxSetPhase extends Phase<ViconPTZProperty> {
-
-		/** Number of times this request was sent */
-		private int n_sent = 0;
-
-		/** Set AUX property */
-		protected Phase<ViconPTZProperty> poll(
-			CommMessage<ViconPTZProperty> mess) throws IOException
-		{
-			mess.add(prop);
-			mess.storeProps();
-			n_sent++;
-			return (n_sent < 2) ? this : new AuxClearPhase();
-		}
-	}
-
-	/** Phase to clear AUX device request */
-	protected class AuxClearPhase extends Phase<ViconPTZProperty> {
-
-		/** Clear AUX property */
-		protected Phase<ViconPTZProperty> poll(
-			CommMessage<ViconPTZProperty> mess) throws IOException
-		{
-			AuxProperty p = new AuxProperty(0);
-			mess.add(p);
-			mess.storeProps();
-			return null;
-		}
+	/** Should we resend the property? */
+	private boolean shouldResend() {
+		return (req == DeviceRequest.CAMERA_WIPER_ONESHOT)
+		    && (n_sent < 4);
 	}
 }

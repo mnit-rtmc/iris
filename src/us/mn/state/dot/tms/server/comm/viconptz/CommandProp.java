@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,12 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
+import java.io.IOException;
+
 /**
  * A property to command a camera.
  *
  * @author Douglas Lau
  */
-public class CommandProperty extends ExtendedProperty {
+public class CommandProp extends ExtendedProp {
 
 	/** P/T flag to command a tilt down */
 	static private final byte TILT_DOWN = 1 << 3;
@@ -67,7 +69,10 @@ public class CommandProperty extends ExtendedProperty {
 	private final int iris;
 
 	/** Create a new command property */
-	public CommandProperty(int p, int t, int z, int f, int i) {
+	public CommandProp(int d, int p, int t, int z, int f, int i)
+		throws IOException
+	{
+		super(d);
 		pan = p;
 		tilt = t;
 		zoom = z;
@@ -82,16 +87,10 @@ public class CommandProperty extends ExtendedProperty {
 			focus + " iris:" + iris;
 	}
 
-	/** Is this a stop command? */
-	public boolean isStop() {
-		return pan == 0 && tilt == 0 && zoom == 0
-		    && focus == 0 && iris == 0;
-	}
-
 	/** Get pan/tilt flags */
 	@Override
 	protected byte panTiltFlags() {
-		return (byte)(panFlags() | tiltFlags());
+		return (byte) (panFlags() | tiltFlags());
 	}
 
 	/** Get bit flags to control panning */
@@ -117,7 +116,7 @@ public class CommandProperty extends ExtendedProperty {
 	/** Get bit flags to control lens */
 	@Override
 	protected byte lensFlags() {
-		return (byte)(irisFlags() | focusFlags() | zoomFlags());
+		return (byte) (irisFlags() | focusFlags() | zoomFlags());
 	}
 
 	/** Get lens flags to control iris */
