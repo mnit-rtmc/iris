@@ -21,6 +21,8 @@ import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.BasePoller;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.comm.OpStep;
+import static us.mn.state.dot.tms.server.comm.PriorityLevel.COMMAND;
 import static us.mn.state.dot.tms.utils.URIUtil.UDP;
 
 /**
@@ -40,25 +42,31 @@ public class ViconPTZPoller extends BasePoller implements CameraPoller {
 		super(n, UDP, VICON_LOG);
 	}
 
+	/** Create an operation */
+	private void createOp(String n, CameraImpl c, OpStep s) {
+		Operation op = new Operation(n, c, s);
+		op.setPriority(COMMAND);
+		addOp(op);
+	}
+
 	/** Send a PTZ camera move command */
 	@Override
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		addOp(new Operation("camera.op.send.ptz", c,
-			new OpMoveCamera(p, t, z)));
+		createOp("camera.op.send.ptz", c, new OpMoveCamera(p, t, z));
 	}
 
 	/** Send a store camera preset command */
 	@Override
 	public void sendStorePreset(CameraImpl c, int preset) {
-		addOp(new Operation("camera.op.store.preset", c,
-			new OpPreset(true, preset)));
+		createOp("camera.op.store.preset", c,
+			new OpPreset(true, preset));
 	}
 
 	/** Send a recall camera preset command */
 	@Override
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		addOp(new Operation("camera.op.recall.preset", c,
-			new OpPreset(false, preset)));
+		createOp("camera.op.recall.preset", c,
+			new OpPreset(false, preset));
 	}
 
 	/** Send a device request
@@ -66,7 +74,6 @@ public class ViconPTZPoller extends BasePoller implements CameraPoller {
 	 * @param dr The desired DeviceRequest. */
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest dr) {
-		addOp(new Operation("device.op.request", c,
-			new OpDeviceRequest(dr)));
+		createOp("device.op.request", c, new OpDeviceRequest(dr));
 	}
 }
