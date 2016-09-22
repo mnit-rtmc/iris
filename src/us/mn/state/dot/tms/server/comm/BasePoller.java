@@ -90,10 +90,10 @@ public class BasePoller implements DevicePoller {
 	private boolean destroyed = false;
 
 	/** Create a base poller */
-	protected BasePoller(String n, URI s, DebugLog l) {
+	protected BasePoller(String n, URI s) {
 		name = n;
 		scheme = s;
-		logger = l;
+		logger = new DebugLog(n + ".log");
 		tx_buf = ByteBuffer.allocateDirect(BUF_SZ);
 		rx_buf = ByteBuffer.allocateDirect(BUF_SZ);
 		log("CREATED");

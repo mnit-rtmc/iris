@@ -15,7 +15,6 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.BasePoller;
@@ -34,12 +33,9 @@ import static us.mn.state.dot.tms.utils.URIUtil.UDP;
  */
 public class ViconPTZPoller extends BasePoller implements CameraPoller {
 
-	/** Vicon PTZ debug log */
-	static private final DebugLog VICON_LOG = new DebugLog("viconptz");
-
 	/** Create a new Vicon poller */
 	public ViconPTZPoller(String n) {
-		super(n, UDP, VICON_LOG);
+		super(n, UDP);
 	}
 
 	/** Create an operation */
