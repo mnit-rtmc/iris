@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.e6;
 import java.util.Date;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.TagType;
-import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.server.comm.CRC;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
