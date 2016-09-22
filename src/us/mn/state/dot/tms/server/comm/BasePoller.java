@@ -24,6 +24,7 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.URIUtil;
 
 /**
@@ -94,8 +95,8 @@ public class BasePoller implements DevicePoller {
 		name = n;
 		scheme = s;
 		logger = new DebugLog(n + ".log");
-		tx_buf = ByteBuffer.allocateDirect(BUF_SZ);
-		rx_buf = ByteBuffer.allocateDirect(BUF_SZ);
+		tx_buf = ByteBuffer.allocate(BUF_SZ);
+		rx_buf = ByteBuffer.allocate(BUF_SZ);
 		log("CREATED");
 	}
 
@@ -312,6 +313,8 @@ public class BasePoller implements DevicePoller {
 	private void pollOperation(Operation op) {
 		try {
 			op.poll(tx_buf);
+			if (logger.isOpen())
+				log("SEND " + formatBuf(tx_buf));
 		}
 		catch (ProtocolException e) {
 			op.setFailed();
@@ -322,6 +325,15 @@ public class BasePoller implements DevicePoller {
 			closeChannel();
 		}
 		addOp(op);
+	}
+
+	/** Format the contents of a buffer */
+	private String formatBuf(ByteBuffer buf) {
+		synchronized (buf) {
+			return HexString.format(buf.array(),
+			                        buf.position(),
+			                        ':');
+		}
 	}
 
 	/** Get the interest ops */
