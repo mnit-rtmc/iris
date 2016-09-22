@@ -222,7 +222,7 @@ public class BasePoller implements DevicePoller {
 	/** Open the channel */
 	private synchronized void openChannel() {
 		try {
-			CommSelector sel = SelectorThread.TASK;
+			CommSelector sel = SelectorThread.getSelector();
 			skey = sel.createChannel(this, createURI());
 			clearTxBuf();
 			clearRxBuf();

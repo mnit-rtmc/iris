@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import us.mn.state.dot.sched.TimeSteward;
+
 /**
  * The selector thread performs non-blocking I/O on a set of channels.
  *
@@ -22,10 +24,15 @@ package us.mn.state.dot.tms.server.comm;
 public final class SelectorThread {
 
 	/** Singleton comm selector */
-	static public CommSelector TASK;
+	static private CommSelector TASK;
 
 	/** Thread group for selector thread */
 	static private final ThreadGroup GROUP = new ThreadGroup("Selector");
+
+	/** Create the selector thread */
+	static {
+		new SelectorThread();
+	}
 
 	/** Thread to run select loop */
 	private final Thread thread;
@@ -50,5 +57,12 @@ public final class SelectorThread {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	/** Get the comm selector */
+	static public CommSelector getSelector() {
+		while (null == TASK)
+			TimeSteward.sleep_well(200);
+		return TASK;
 	}
 }
