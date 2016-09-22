@@ -312,9 +312,11 @@ public class BasePoller implements DevicePoller {
 	/** Poll one operation */
 	private void pollOperation(Operation op) {
 		try {
-			op.poll(tx_buf);
-			if (logger.isOpen())
-				log("SEND " + formatBuf(tx_buf));
+			synchronized (tx_buf) {
+				op.poll(tx_buf);
+				if (logger.isOpen())
+					log("SEND " + formatBuf(tx_buf));
+			}
 		}
 		catch (ProtocolException e) {
 			op.setFailed();
@@ -352,8 +354,10 @@ public class BasePoller implements DevicePoller {
 
 	/** Update interest ops */
 	private synchronized void updateInterest(int ops) {
-		if (skey != null)
+		if (skey != null) {
 			skey.interestOps(ops);
+			skey.selector().wakeup();
+		}
 	}
 
 	/** Schedule timeout of operation */
