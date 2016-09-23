@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.server.comm.pelco;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
@@ -42,17 +42,17 @@ public class PelcoPoller extends ThreadedPoller<PelcoProperty>
 
 	/** Set the camera to display on the specified monitor */
 	@Override
-	public void setMonitorCamera(ControllerImpl c, VideoMonitor m,
+	public void setMonitorCamera(ControllerImpl c, VideoMonitorImpl vm,
 		String cam)
 	{
-		addOp(new OpSelectMonitorCamera(c, m, cam));
+		addOp(new OpSelectMonitorCamera(c, vm, cam));
 	}
 
 	/** Send a device request
 	 * @param vm The VideoMonitor object.
 	 * @param r The desired DeviceRequest. */
 	@Override
-	public void sendRequest(VideoMonitor vm, DeviceRequest r) {
+	public void sendRequest(VideoMonitorImpl vm, DeviceRequest r) {
 		// No supported requests
 	}
 }
