@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,15 +51,16 @@ public final class HexString {
 	}
 
 	/** Format a byte array as a hexadecimal string.
-	 * @param data Array of bytes to format.
-	 * @param len Length of array.
+	 * @param data Byte array.
+	 * @param off Offset in array.
+	 * @param len Number of bytes to format.
 	 * @param delim Delimeter between each byte.
 	 * @return Formatted hexadecimal string. */
-	static public String format(byte[] data, int len, char delim) {
+	static public String format(byte[] data, int off, int len, char delim) {
 		StringBuilder sb = new StringBuilder();
 		if (data != null) {
-			for (int i = 0; i < len; i++) {
-				if (i > 0)
+			for (int i = off; i < off + len; i++) {
+				if (sb.length() > 0)
 					sb.append(delim);
 				append(sb, data[i]);
 			}
@@ -69,10 +70,19 @@ public final class HexString {
 
 	/** Format a byte array as a hexadecimal string.
 	 * @param data Array of bytes to format.
+	 * @param len Length of array.
+	 * @param delim Delimeter between each byte.
+	 * @return Formatted hexadecimal string. */
+	static public String format(byte[] data, int len, char delim) {
+		return format(data, 0, len, delim);
+	}
+
+	/** Format a byte array as a hexadecimal string.
+	 * @param data Array of bytes to format.
 	 * @param delim Delimeter between each byte.
 	 * @return Formatted hexadecimal string. */
 	static public String format(byte[] data, char delim) {
-		return format(data, data.length, delim);
+		return format(data, 0, data.length, delim);
 	}
 
 	/** Format an integer as a hexadecimal string.

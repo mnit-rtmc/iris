@@ -348,9 +348,10 @@ public class BasePoller implements DevicePoller {
 	private void pollOperation(Operation op) {
 		try {
 			synchronized (tx_buf) {
+				int off = tx_buf.position();
 				op.poll(tx_buf);
 				if (logger.isOpen())
-					log("SEND " + formatBuf(tx_buf));
+					log("SEND " + formatBuf(tx_buf, off));
 			}
 		}
 		catch (ProtocolException e) {
@@ -365,10 +366,10 @@ public class BasePoller implements DevicePoller {
 	}
 
 	/** Format the contents of a buffer */
-	private String formatBuf(ByteBuffer buf) {
+	private String formatBuf(ByteBuffer buf, int off) {
 		synchronized (buf) {
-			return HexString.format(buf.array(),
-			                        buf.position(),
+			return HexString.format(buf.array(), off,
+			                        buf.position() - off,
 			                        ':');
 		}
 	}
