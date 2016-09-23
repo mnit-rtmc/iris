@@ -199,6 +199,13 @@ public class BasePoller implements DevicePoller {
 
 	/** Add an operation to the device poller */
 	protected final void addOp(Operation op) {
+		if (logger.isOpen())
+			log("ADDING " + op);
+		doAddOp(op);
+	}
+
+	/** Add an operation to the device poller */
+	private void doAddOp(Operation op) {
 		if (addQueue(op)) {
 			if (op.isPolling())
 				schedulePoll();
@@ -362,7 +369,7 @@ public class BasePoller implements DevicePoller {
 			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
 			closeChannel();
 		}
-		addOp(op);
+		doAddOp(op);
 	}
 
 	/** Format the contents of a buffer */
@@ -414,7 +421,7 @@ public class BasePoller implements DevicePoller {
 		long rt = op.getRemaining();
 		if (rt <= 0 && removeResp(op)) {
 			op.handleEvent(EventType.POLL_TIMEOUT_ERROR, TIMEOUT);
-			addOp(op);
+			doAddOp(op);
 		}
 	}
 
@@ -474,7 +481,7 @@ public class BasePoller implements DevicePoller {
 			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
 			closeChannel();
 		}
-		addOp(op);
+		doAddOp(op);
 	}
 
 	/** Stop polling if idle */
