@@ -125,20 +125,7 @@ public final class Operation implements Comparable<Operation> {
 	@Override
 	public boolean equals(Object other) {
 		return (other instanceof Operation) &&
-		       (compareFinal((Operation) other) == 0);
-	}
-
-	/** Compare final values */
-	private int compareFinal(Operation other) {
-		// NOTE: if the name and ID match, the operations should be
-		//       treated as "equal" -- only one at a time in a queue
-		int c = name.compareTo(other.name);
-		if (c != 0)
-			return c;
-		c = getId().compareTo(other.getId());
-		if (c != 0)
-			return c;
-		return 0;
+		       (compareTo((Operation) other) == 0);
 	}
 
 	/** Compare to another operation */
@@ -146,34 +133,11 @@ public final class Operation implements Comparable<Operation> {
 	public int compareTo(Operation other) {
 		if (this == other)
 			return 0;
-		// NOTE: this ordering is used in a PriorityQueue -- mutable
-		//       values should never change when operation is in queue
-		if (isPolling())
-			return comparePoll(other);
+		int c = name.compareTo(other.name);
+		if (c != 0)
+			return c;
 		else
-			return compareResp(other);
-	}
-
-	/** Compare to another polling operation */
-	private int comparePoll(Operation other) {
-		if (priority.ordinal() < other.priority.ordinal())
-			return -1;	// before
-		if (priority.ordinal() > other.priority.ordinal())
-			return 1;	// after
-		if (n_runs < other.n_runs)
-			return -1;	// before
-		if (n_runs > other.n_runs)
-			return 1;	// after
-		return compareFinal(other);
-	}
-
-	/** Compare to another response operation */
-	private int compareResp(Operation other) {
-		if (expire < other.expire)
-			return -1;	// before
-		if (expire > other.expire)
-			return 1;	// after
-		return compareFinal(other);
+			return getId().compareTo(other.getId());
 	}
 
 	/** Current step */
@@ -219,8 +183,18 @@ public final class Operation implements Comparable<Operation> {
 	/** Number of runs -- used for fair queueing */
 	private int n_runs = 0;
 
+	/** Get the number of runs */
+	public int getRuns() {
+		return n_runs;
+	}
+
 	/** Expiration time */
 	private long expire = 0;
+
+	/** Get expiration time */
+	public long getExpire() {
+		return expire;
+	}
 
 	/** Set the remaining time (ms) */
 	public void setRemaining(int rt) {
@@ -229,10 +203,7 @@ public final class Operation implements Comparable<Operation> {
 
 	/** Get the remaining time (ms) */
 	public long getRemaining() {
-		if (isPolling())
-			return Integer.MAX_VALUE;	// never expire
-		else
-			return expire - TimeSteward.currentTimeMillis();
+		return expire - TimeSteward.currentTimeMillis();
 	}
 
 	/** Success or failure of operation */

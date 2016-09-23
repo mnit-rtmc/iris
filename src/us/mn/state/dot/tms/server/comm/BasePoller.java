@@ -19,6 +19,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
+import java.util.Comparator;
 import java.util.PriorityQueue;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
@@ -75,11 +76,45 @@ public class BasePoller implements DevicePoller {
 
 	/** Polling queue */
 	private final PriorityQueue<Operation> p_queue =
-		new PriorityQueue<Operation>();
+		new PriorityQueue<Operation>(11, new Comparator<Operation>()
+	{
+		@Override public int compare(Operation a, Operation b) {
+			// NOTE: don't allow duplicates of "equal" operations
+			int cc = a.compareTo(b);
+			if (0 == cc)
+				return 0;
+			// NOTE: these mutable values should never change
+			//       while the operations are in the queue
+			int c = Integer.signum(a.getPriority().ordinal()
+			                     - b.getPriority().ordinal());
+			if (c != 0)
+				return c;
+			c = Integer.signum(a.getRuns() - b.getRuns());
+			if (c != 0)
+				return c;
+			else
+				return cc;
+		}
+	});
 
 	/** Response queue */
 	private final PriorityQueue<Operation> r_queue =
-		new PriorityQueue<Operation>();
+		new PriorityQueue<Operation>(11, new Comparator<Operation>()
+	{
+		@Override public int compare(Operation a, Operation b) {
+			// NOTE: don't allow duplicates of "equal" operations
+			int cc = a.compareTo(b);
+			if (0 == cc)
+				return 0;
+			// NOTE: the expire time should not change
+			//       while the operations are in the queue
+			int c = Long.signum(a.getExpire() - b.getExpire());
+			if (c != 0)
+				return c;
+			else
+				return cc;
+		}
+	});
 
 	/** Transmit buffer */
 	private final ByteBuffer tx_buf;
