@@ -147,10 +147,10 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		if (restricted && !isCameraPublished(c))
 			c = null;
 		setCamera(c);
-		if (c == null)
-			selectBlankCamera();
+		if (c instanceof CameraImpl)
+			selectCamera((CameraImpl) c);
 		else
-			selectCamera(c.getName());
+			selectCamera(null);
 	}
 
 	/** Set the camera and notify clients of the change */
@@ -181,13 +181,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 			vmp.sendRequest(this, dr);
 	}
 
-	/** Select a blank camera for the video monitor */
-	private void selectBlankCamera() {
-		selectCamera(SystemAttrEnum.CAMERA_ID_BLANK.getString());
-	}
-
 	/** Select a camera for the video monitor */
-	private void selectCamera(String cam) {
+	private void selectCamera(CameraImpl cam) {
 		Controller c = getController();
 		if (c instanceof ControllerImpl)
 			selectCamera((ControllerImpl) c, cam);
@@ -196,7 +191,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Select a camera for the video monitor with a switcher */
-	private void selectCameraWithSwitcher(String cam) {
+	private void selectCameraWithSwitcher(CameraImpl cam) {
 		Iterator<Controller> it = ControllerHelper.iterator();
 		while (it.hasNext()) {
 			Controller c = it.next();
@@ -206,11 +201,11 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Select a camera for the video monitor */
-	private void selectCamera(ControllerImpl c, String cam) {
+	private void selectCamera(ControllerImpl c, CameraImpl cam) {
 		DevicePoller dp = c.getPoller();
 		if (dp instanceof VideoMonitorPoller) {
 			VideoMonitorPoller vmp = (VideoMonitorPoller) dp;
-			vmp.setMonitorCamera(c, this, cam);
+			vmp.switchCamera(c, this, cam);
 		}
 	}
 }

@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.pelco;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
@@ -43,7 +44,7 @@ public class OpSelectMonitorCamera extends OpPelco {
 
 	/** Create a new select monitor camera operation */
 	public OpSelectMonitorCamera(ControllerImpl c, VideoMonitor m,
-		String cam)
+		CameraImpl cam)
 	{
 		super(c, m, cam);
 	}
