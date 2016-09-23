@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.server.comm.incfeed.IncFeedPoller;
 import us.mn.state.dot.tms.server.comm.infinova.InfinovaPoller;
 import us.mn.state.dot.tms.server.comm.manchester.ManchesterPoller;
 import us.mn.state.dot.tms.server.comm.mndot.MndotPoller;
+import us.mn.state.dot.tms.server.comm.monstream.MonStreamPoller;
 import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
 import us.mn.state.dot.tms.server.comm.ntcip.NtcipPoller;
 import us.mn.state.dot.tms.server.comm.org815.Org815Poller;
@@ -74,6 +75,8 @@ public class DevicePollerFactory {
 		case MNDOT_4:
 		case MNDOT_5:
 			return new MndotPoller(name, protocol);
+		case MON_STREAM:
+			return new MonStreamPoller(name);
 		case MSG_FEED:
 			return new MsgFeedPoller(name);
 		case NTCIP_A:
