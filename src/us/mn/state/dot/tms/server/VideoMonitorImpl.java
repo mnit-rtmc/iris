@@ -24,7 +24,6 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
