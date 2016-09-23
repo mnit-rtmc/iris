@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
-import java.io.IOException;
-
 /**
  * A property to command a camera.
  *
@@ -69,10 +67,7 @@ public class CommandProp extends ExtendedProp {
 	private final int iris;
 
 	/** Create a new command property */
-	public CommandProp(int d, int p, int t, int z, int f, int i)
-		throws IOException
-	{
-		super(d);
+	public CommandProp(int p, int t, int z, int f, int i) {
 		pan = p;
 		tilt = t;
 		zoom = z;
@@ -159,5 +154,14 @@ public class CommandProp extends ExtendedProp {
 	@Override
 	protected int getParam2() {
 		return Math.abs(tilt);
+	}
+
+	/** Is this a stop command? */
+	public boolean isStop() {
+		return (0 == pan)
+		    && (0 == tilt)
+		    && (0 == zoom)
+		    && (0 == focus)
+		    && (0 == iris);
 	}
 }

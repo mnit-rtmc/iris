@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
-import java.io.IOException;
-
 /**
  * Vicon property to control aux.
  *
@@ -27,8 +25,7 @@ public class AuxProp extends ViconPTZProp {
 	private final int aux;
 
 	/** Create a new aux property */
-	public AuxProp(int d, int a) throws IOException {
-		super(d);
+	public AuxProp(int a) {
 		aux = a;
 	}
 

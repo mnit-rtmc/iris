@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.viconptz;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.server.comm.Operation;
 
 /**
  * Extended Vicon property.
@@ -27,11 +28,6 @@ abstract public class ExtendedProp extends ViconPTZProp {
 	/** Mask for extended command requests (second byte) */
 	static private final byte EXTENDED_CMD = 0x50;
 
-	/** Create a new extended property */
-	protected ExtendedProp(int d) throws IOException {
-		super(d);
-	}
-
 	/** Get command parameter 1 */
 	abstract protected int getParam1();
 
@@ -40,12 +36,15 @@ abstract public class ExtendedProp extends ViconPTZProp {
 
 	/** Encode a STORE request */
 	@Override
-	public void encodeStore(ByteBuffer tx_buf) {
+	public void encodeStore(Operation op, ByteBuffer tx_buf)
+		throws IOException
+	{
+		int d = getDrop(op);
 		int p1 = getParam1();
 		int p2 = getParam2();
 		// Extended packets contain 10 bytes
-		tx_buf.put((byte) (0x80 | (drop >> 4)));
-		tx_buf.put((byte) ((0x0f & drop) | EXTENDED_CMD));
+		tx_buf.put((byte) (0x80 | (d >> 4)));
+		tx_buf.put((byte) ((0x0f & d) | EXTENDED_CMD));
 		tx_buf.put(panTiltFlags());
 		tx_buf.put(lensFlags());
 		tx_buf.put(auxBits());

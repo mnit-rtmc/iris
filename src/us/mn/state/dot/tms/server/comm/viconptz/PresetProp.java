@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
-import java.io.IOException;
-
 /**
  * Vicon property to recall or store a preset (1-15).  Note: for newer Vicon
  * receivers, this command has no effect.  The extended preset command must be
@@ -35,8 +33,7 @@ public class PresetProp extends ViconPTZProp {
 	private final int preset;
 
 	/** Create a new preset property */
-	public PresetProp(int d, boolean s, int p) throws IOException {
-		super(d);
+	public PresetProp(boolean s, int p) {
 		store = s;
 		preset = p;
 	}

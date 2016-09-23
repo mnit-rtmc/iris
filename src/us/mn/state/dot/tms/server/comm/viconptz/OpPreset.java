@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,23 +46,17 @@ public class OpPreset extends OpStep {
 		      : p - PRESET_MENU + PRESET_EXT;
 	}
 
-	/** Store / recall flag */
-	private final boolean store;
-
-	/** Preset number */
-	private final int preset;
+	/** Preset property */
+	private final ExPresetProp prop;
 
 	/** Create a new operation to recall or store a camera preset */
 	public OpPreset(boolean s, int p) {
-		store = s;
-		preset = p;
+		prop = new ExPresetProp(s, adjustPreset(p));
 	}
 
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
-		ExPresetProp prop = new ExPresetProp(op.getDrop(), store,
-			adjustPreset(preset));
-		prop.encodeStore(tx_buf);
+		prop.encodeStore(op, tx_buf);
 	}
 }

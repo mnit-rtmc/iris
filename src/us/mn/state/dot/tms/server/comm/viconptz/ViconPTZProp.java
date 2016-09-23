@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.InvalidAddressException;
+import us.mn.state.dot.tms.server.comm.Operation;
 
 /**
  * Vicon Property
@@ -37,14 +38,13 @@ abstract public class ViconPTZProp extends ControllerProp {
 		return drop >= 1 && drop <= ADDRESS_MAX;
 	}
 
-	/** Drop address */
-	protected final int drop;
-
-	/** Create a new Vicon PTZ property */
-	protected ViconPTZProp(int d) throws IOException {
-		if (!isAddressValid(d))
+	/** Get an operation drop address */
+	static protected int getDrop(Operation op) throws IOException {
+		int d = op.getDrop();
+		if (isAddressValid(d))
+			return d;
+		else
 			throw new InvalidAddressException(d);
-		drop = d;
 	}
 
 	/** Get the pan/tilt flags */
@@ -69,10 +69,13 @@ abstract public class ViconPTZProp extends ControllerProp {
 
 	/** Encode a STORE request */
 	@Override
-	public void encodeStore(ByteBuffer tx_buf) {
+	public void encodeStore(Operation op, ByteBuffer tx_buf)
+		throws IOException
+	{
+		int d = getDrop(op);
 		// Command packets contain 6 bytes
-		tx_buf.put((byte) (0x80 | (drop >> 4)));
-		tx_buf.put((byte) ((0x0f & drop) | CMD));
+		tx_buf.put((byte) (0x80 | (d >> 4)));
+		tx_buf.put((byte) ((0x0f & d) | CMD));
 		tx_buf.put(panTiltFlags());
 		tx_buf.put(lensFlags());
 		tx_buf.put(auxBits());

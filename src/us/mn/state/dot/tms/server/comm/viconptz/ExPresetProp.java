@@ -14,8 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm.viconptz;
 
-import java.io.IOException;
-
 /**
  * Vicon property to recall or store an extended preset (greater than 15).
  * This command replaces PresetProperty for newer receivers.
@@ -40,8 +38,7 @@ public class ExPresetProp extends ExtendedProp {
 	private final int preset;
 
 	/** Create a new extended preset property */
-	public ExPresetProp(int d, boolean s, int p) throws IOException {
-		super(d);
+	public ExPresetProp(boolean s, int p) {
 		store = s;
 		preset = p;
 	}

@@ -188,22 +188,30 @@ abstract public class ControllerProp {
 	}
 
 	/** Encode a QUERY request */
-	public void encodeQuery(ByteBuffer tx_buf) throws IOException {
+	public void encodeQuery(Operation op, ByteBuffer tx_buf)
+		throws IOException
+	{
 		throw new ProtocolException("QUERY not supported");
 	}
 
 	/** Decode a QUERY response */
-	public void decodeQuery(ByteBuffer rx_buf) throws IOException {
+	public void decodeQuery(Operation op, ByteBuffer rx_buf)
+		throws IOException
+	{
 		throw new ProtocolException("QUERY not supported");
 	}
 
 	/** Encode a STORE request */
-	public void encodeStore(ByteBuffer tx_buf) throws IOException {
+	public void encodeStore(Operation op, ByteBuffer tx_buf)
+		throws IOException
+	{
 		throw new ProtocolException("STORE not supported");
 	}
 
 	/** Decode a STORE response */
-	public void decodeStore(ByteBuffer rx_buf) throws IOException {
+	public void decodeStore(Operation op, ByteBuffer rx_buf)
+		throws IOException
+	{
 		throw new ProtocolException("STORE not supported");
 	}
 }

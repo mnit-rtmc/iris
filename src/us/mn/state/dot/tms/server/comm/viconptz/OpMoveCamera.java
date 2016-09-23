@@ -39,20 +39,15 @@ public class OpMoveCamera extends OpStep {
 		return Math.round(clamp_float(value) * (range - 1));
 	}
 
-	/** Pan value */
-	private final int pan;
-
-	/** Tilt value */
-	private final int tilt;
-
-	/** Zoom value */
-	private final int zoom;
+	/** Command property */
+	private final CommandProp prop;
 
 	/** Create a new operation to move a camera */
 	public OpMoveCamera(float p, float t, float z) {
-		pan = map_float(p, PTZ_RANGE);
-		tilt = map_float(t, PTZ_RANGE);
-		zoom = map_float(z, PTZ_RANGE);
+		int pan = map_float(p, PTZ_RANGE);
+		int tilt = map_float(t, PTZ_RANGE);
+		int zoom = map_float(z, PTZ_RANGE);
+		prop = new CommandProp(pan, tilt, zoom, 0, 0);
 	}
 
 	/** Number of times this request was sent */
@@ -61,9 +56,7 @@ public class OpMoveCamera extends OpStep {
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
-		CommandProp prop = new CommandProp(op.getDrop(), pan, tilt,
-			zoom, 0, 0);
-		prop.encodeStore(tx_buf);
+		prop.encodeStore(op, tx_buf);
 		n_sent++;
 	}
 
@@ -75,11 +68,6 @@ public class OpMoveCamera extends OpStep {
 
 	/** Should we resend the property? */
 	private boolean shouldResend() {
-		return isStop() && (n_sent < 2);
-	}
-
-	/** Is this a stop command? */
-	private boolean isStop() {
-		return (pan == 0) && (tilt == 0) && (zoom == 0);
+		return prop.isStop() && (n_sent < 2);
 	}
 }

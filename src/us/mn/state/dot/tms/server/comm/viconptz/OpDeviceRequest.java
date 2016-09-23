@@ -30,32 +30,31 @@ public class OpDeviceRequest extends OpStep {
 	/** Create property associated with a device request.
 	 * @param dr Device request.
 	 * @return Associated property. */
-	static private ViconPTZProp createProp(int d, DeviceRequest dr,
-		int n_sent) throws IOException
+	static private ViconPTZProp createProp(DeviceRequest dr, int n_sent)
+		throws IOException
 	{
 		switch (dr) {
 		case CAMERA_FOCUS_NEAR:
-			return new CommandProp(d, 0, 0, 0, -1, 0);
+			return new CommandProp(0, 0, 0, -1, 0);
 		case CAMERA_FOCUS_FAR:
-			return new CommandProp(d, 0, 0, 0, 1, 0);
+			return new CommandProp(0, 0, 0, 1, 0);
 		case CAMERA_FOCUS_STOP:
-			return new CommandProp(d, 0, 0, 0, 0, 0);
+			return new CommandProp(0, 0, 0, 0, 0);
 		case CAMERA_IRIS_CLOSE:
-			return new CommandProp(d, 0, 0, 0, 0, -1);
+			return new CommandProp(0, 0, 0, 0, -1);
 		case CAMERA_IRIS_OPEN:
-			return new CommandProp(d, 0, 0, 0, 0, 1);
+			return new CommandProp(0, 0, 0, 0, 1);
 		case CAMERA_IRIS_STOP:
-			return new CommandProp(d, 0, 0, 0, 0, 0);
+			return new CommandProp(0, 0, 0, 0, 0);
 		case RESET_DEVICE:
-			return new ExPresetProp(d, true,
-				ExPresetProp.SOFT_RESET);
+			return new ExPresetProp(true, ExPresetProp.SOFT_RESET);
 		case CAMERA_WIPER_ONESHOT:
 			if (n_sent < 3) {
 				// For Vicon cameras, this should be AUX 6, but
 				// Pelco cameras require AUX 1 here.
-				return new AuxProp(d, 1);
+				return new AuxProp(1);
 			} else
-				return new AuxProp(d, 0);
+				return new AuxProp(0);
 		default:
 			return null;
 		}
@@ -76,9 +75,9 @@ public class OpDeviceRequest extends OpStep {
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
-		ViconPTZProp prop = createProp(op.getDrop(), req, n_sent);
+		ViconPTZProp prop = createProp(req, n_sent);
 		if (prop != null)
-			prop.encodeStore(tx_buf);
+			prop.encodeStore(op, tx_buf);
 		n_sent++;
 	}
 
