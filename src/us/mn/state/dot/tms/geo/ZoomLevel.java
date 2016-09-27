@@ -49,8 +49,8 @@ public enum ZoomLevel {
 
 	/** Get a zoom level from an ordinal value */
 	static public ZoomLevel fromOrdinal(int o) {
-		for(ZoomLevel zl: values()) {
-			if(zl.ordinal() == o)
+		for (ZoomLevel zl: values()) {
+			if (zl.ordinal() == o)
 				return zl;
 		}
 		return null;
@@ -58,8 +58,8 @@ public enum ZoomLevel {
 
 	/** Lookup a zoom level for the given scale */
 	static public ZoomLevel lookup(double sc) {
-		for(ZoomLevel zl: values()) {
-			if(zl.scale < sc)
+		for (ZoomLevel zl: values()) {
+			if (zl.scale < sc)
 				return zl;
 		}
 		return values()[values().length - 1];
