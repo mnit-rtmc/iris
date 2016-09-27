@@ -23,7 +23,7 @@ package us.mn.state.dot.tms.geo;
 public class GeodeticDatum {
 
 	/** Radius at the equator (in meters) */
-	protected final double equatorial_radius;
+	private final double equatorial_radius;
 
 	/** Get the equatorial radius (meters) */
 	public double getEquatorialRadius() {
@@ -31,7 +31,7 @@ public class GeodeticDatum {
 	}
 
 	/** Radius at the poles (in meters) */
-	protected final double polar_radius;
+	private final double polar_radius;
 
 	/** Get the polar radius */
 	public double getPolarRadius() {
@@ -39,7 +39,7 @@ public class GeodeticDatum {
 	}
 
 	/** Square of elliptic eccentricity */
-	protected final double e2;
+	private final double e2;
 
 	/** Get the square of elliptic eccentricity */
 	public double getEccentricitySquared() {
@@ -47,7 +47,7 @@ public class GeodeticDatum {
 	}
 
 	/** Create a new geodetic datum */
-	protected GeodeticDatum(double er, double pr) {
+	private GeodeticDatum(double er, double pr) {
 		equatorial_radius = er;
 		polar_radius = pr;
 		e2 = 1 - Math.pow(pr, 2) / Math.pow(er, 2);
@@ -60,34 +60,34 @@ public class GeodeticDatum {
 	}
 
 	/** Term 1 for calculating the meridional arc */
-	protected final double term1;
+	private final double term1;
 
 	/** Term 2 for calculating the meridional arc */
-	protected final double term2;
+	private final double term2;
 
 	/** Term 3 for calculating the meridional arc */
-	protected final double term3;
+	private final double term3;
 
 	/** Term 4 for calculating the meridional arc */
-	protected final double term4;
+	private final double term4;
 
 	/** Calculate the first term for meridional arc */
-	protected double calculateTerm1(double e4, double e6) {
+	private double calculateTerm1(double e4, double e6) {
 		return 1 - e2 / 4 - 3 * e4 / 64 - 5 * e6 / 256;
 	}
 
 	/** Calculate the second term for meridonal arc */
-	protected double calculateTerm2(double e4, double e6) {
+	private double calculateTerm2(double e4, double e6) {
 		return 3 * e2 / 8 + 3 * e4 / 32 + 45 * e6 / 1024;
 	}
 
 	/** Calculate the third term for meridonal arc */
-	protected double calculateTerm3(double e4, double e6) {
+	private double calculateTerm3(double e4, double e6) {
 		return 15 * e4 / 256 + 45 * e6 / 1024;
 	}
 
 	/** Calculate the fourth term for meridonal arc */
-	protected double calculateTerm4(double e6) {
+	private double calculateTerm4(double e6) {
 		return 35 * e6 / 3072;
 	}
 
