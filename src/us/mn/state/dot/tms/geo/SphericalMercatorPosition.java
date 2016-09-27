@@ -22,10 +22,10 @@ package us.mn.state.dot.tms.geo;
 public class SphericalMercatorPosition {
 
 	/** Largest absolute value of latitude */
-	static protected final double MAX_LATITUDE = 85.05112878;
+	static private final double MAX_LATITUDE = 85.05112878;
 
 	/** Clip latitude to valid range */
-	static protected double clipLatitude(double lat) {
+	static private double clipLatitude(double lat) {
 		return Math.max(Math.min(lat, MAX_LATITUDE), -MAX_LATITUDE);
 	}
 
@@ -40,7 +40,7 @@ public class SphericalMercatorPosition {
 	}
 
 	/** X (meters) from origin */
-	protected final double x;
+	private final double x;
 
 	/** Get the X coordinate (meters) */
 	public double getX() {
@@ -48,7 +48,7 @@ public class SphericalMercatorPosition {
 	}
 
 	/** Y (meters) from origin */
-	protected final double y;
+	private final double y;
 
 	/** Get the Y coordinate (meters) */
 	public double getY() {
@@ -62,6 +62,7 @@ public class SphericalMercatorPosition {
 	}
 
 	/** Get a string representation of the position */
+	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append(x);
