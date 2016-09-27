@@ -305,7 +305,7 @@ public final class Operation implements Comparable<Operation> {
 	/** Destroy the operation.  The operation gets destroyed after
 	 * processing is complete and it is removed from the queue. */
 	public void destroy() {
-		if (n_runs > 0) {
+		if (n_runs > 0 && controller != null) {
 			// FIXME: release device lock
 			updateMaintStatus();
 			updateErrorStatus();
