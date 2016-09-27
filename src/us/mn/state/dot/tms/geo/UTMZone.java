@@ -23,12 +23,12 @@ package us.mn.state.dot.tms.geo;
 public class UTMZone {
 
 	/** Get the zone number from longitude degrees */
-	static protected int lon_zone(double lon) {
-		return 1 + (int)(Math.floor(lon + 180) / 6);
+	static private int lon_zone(double lon) {
+		return 1 + (int) (Math.floor(lon + 180) / 6);
 	}
 
 	/** Zone number */
-	protected final int number;
+	private final int number;
 
 	/** Get the zone number */
 	public int getNumber() {
@@ -36,7 +36,7 @@ public class UTMZone {
 	}
 
 	/** Northern hemisphere */
-	protected final boolean hemisphere;
+	private final boolean hemisphere;
 
 	/** Is the zone in the Northern hemisphere? */
 	public boolean isNorthernHemisphere() {
@@ -45,7 +45,7 @@ public class UTMZone {
 
 	/** Create a UTM zone */
 	public UTMZone(int n, boolean h) {
-		if(n < 1 || n > 60) {
+		if (n < 1 || n > 60) {
 			throw new IllegalArgumentException(
 				"Invalid zone number:" + n);
 		}
@@ -59,10 +59,11 @@ public class UTMZone {
 	}
 
 	/** Get a string representation of the zone */
+	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append(number);
-		if(hemisphere)
+		if (hemisphere)
 			b.append('N');
 		else
 			b.append('S');
@@ -70,9 +71,10 @@ public class UTMZone {
 	}
 
 	/** Test for object equality */
+	@Override
 	public boolean equals(Object o) {
-		if(o instanceof UTMZone) {
-			UTMZone oz = (UTMZone)o;
+		if (o instanceof UTMZone) {
+			UTMZone oz = (UTMZone) o;
 			return number == oz.number &&
 			       hemisphere == oz.hemisphere;
 		}
@@ -80,6 +82,7 @@ public class UTMZone {
 	}
 
 	/** Get the hash code */
+	@Override
 	public int hashCode() {
 		return toString().hashCode();
 	}
