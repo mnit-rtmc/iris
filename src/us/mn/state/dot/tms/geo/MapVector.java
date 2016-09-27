@@ -34,14 +34,16 @@ public class MapVector {
 	}
 
 	/** Get the string representation of the vector */
+	@Override
 	public String toString() {
 		return "" + x + "," + y;
 	}
 
 	/** Test for equality */
+	@Override
 	public boolean equals(Object o) {
-		if(o instanceof MapVector) {
-			MapVector other = (MapVector)o;
+		if (o instanceof MapVector) {
+			MapVector other = (MapVector) o;
 			return x == other.x && y == other.y;
 		} else
 			return false;
@@ -55,7 +57,7 @@ public class MapVector {
 	/** Get the vector angle (radians) */
 	public double getAngle() {
 		double a = Math.acos(x / getMagnitude());
-		if(y > 0)
+		if (y > 0)
 			return a;
 		else
 			return -a;
