@@ -1556,11 +1556,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void performAction(DmsAction da) {
 		SignMessage sm = createMsgSched(da);
 		if (sm != null) {
+			if (SCHED_LOG.isOpen()) {
+				logSched("created sched message: " +
+					sm.getMulti());
+			}
 			if (shouldReplaceScheduled(sm)) {
 				setMessageSched(sm);
 				sched_action = da;
 			}
-		}
+		} else if (SCHED_LOG.isOpen())
+			logSched("no message created for " + da.getName());
 	}
 
 	/** Test if a message should replace the current scheduled message.
