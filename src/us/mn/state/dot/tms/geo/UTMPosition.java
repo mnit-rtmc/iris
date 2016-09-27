@@ -22,13 +22,13 @@ package us.mn.state.dot.tms.geo;
 public class UTMPosition {
 
 	/** False Easting is at central meridian of zone */
-	static protected final int FALSE_EASTING = 500000;
+	static private final int FALSE_EASTING = 500000;
 
 	/** False Northing of 10,000 Km is used for the Southern hemisphere */
-	static protected final int FALSE_NORTHING = 10000000;
+	static private final int FALSE_NORTHING = 10000000;
 
 	/** Scale at meridian */
-	static protected final double K0 = 0.9996;
+	static private final double K0 = 0.9996;
 
 	/** Convert a (lat/lon) position to UTM */
 	static public UTMPosition convert(GeodeticDatum gd, Position pos) {
@@ -63,13 +63,13 @@ public class UTMPosition {
 			* Math.pow(A, 6) / 720
 		));
 		// In Southern hemisphere, start from the South pole
-		if(pos.getLatitude() < 0)
+		if (pos.getLatitude() < 0)
 			northing += FALSE_NORTHING;
 		return new UTMPosition(zone, easting, northing);
 	}
 
 	/** UTM zone */
-	protected final UTMZone zone;
+	private final UTMZone zone;
 
 	/** Get the UTM zone */
 	public UTMZone getZone() {
@@ -77,7 +77,7 @@ public class UTMPosition {
 	}
 
 	/** Easting (meters) */
-	protected final double easting;
+	private final double easting;
 
 	/** Get the easting (meters) */
 	public double getEasting() {
@@ -85,7 +85,7 @@ public class UTMPosition {
 	}
 
 	/** Northing (meters) */
-	protected final double northing;
+	private final double northing;
 
 	/** Get the northing (meters) */
 	public double getNorthing() {
@@ -100,6 +100,7 @@ public class UTMPosition {
 	}
 
 	/** Get a string representation of the UTM position */
+	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
 		b.append(zone.toString());
@@ -118,7 +119,7 @@ public class UTMPosition {
 		double e1 = (1 - Math.sqrt(1 - e2)) / (1 + Math.sqrt(1 - e2));
 		double x = easting - FALSE_EASTING;
 		double y = northing;
-		if(!zone.isNorthernHemisphere())
+		if (!zone.isNorthernHemisphere())
 			y -= FALSE_NORTHING;
 		double M = y / K0;
 		// FIXME: some of this could be done by the Geodetic Datum
