@@ -22,16 +22,16 @@ package us.mn.state.dot.tms.geo;
 public class MapLine {
 
 	/** X-coordinate of point A */
-	protected final double ax;
+	private final double ax;
 
 	/** Y-coordinate of point A */
-	protected final double ay;
+	private final double ay;
 
 	/** X-coordinate of point B */
-	protected final double bx;
+	private final double bx;
 
 	/** Y-coordinate of point B */
-	protected final double by;
+	private final double by;
 
 	/** Create a new map line */
 	public MapLine(double x0, double y0, double x1, double y1) {
@@ -49,7 +49,7 @@ public class MapLine {
 	}
 
 	/** Get the direction vector */
-	protected MapVector vector() {
+	private MapVector vector() {
 		return new MapVector(bx - ax, by - ay);
 	}
 
@@ -58,7 +58,7 @@ public class MapLine {
 		MapVector ab = vector();
 		MapVector cd = other.vector();
 		double den = ab.cross(cd);
-		if(den == 0)
+		if (den == 0)
 			return null;
 		MapVector ca = new MapVector(ax - other.ax, ay - other.ay);
 		double num = cd.cross(ca);
