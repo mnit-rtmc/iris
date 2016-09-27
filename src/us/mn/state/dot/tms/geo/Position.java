@@ -26,7 +26,7 @@ public class Position {
 	static private final double MEAN_RADIUS = 6371009.0;
 
 	/** Latitude (degrees) */
-	protected final double latitude;
+	private final double latitude;
 
 	/** Get the latitude (degrees) */
 	public double getLatitude() {
@@ -34,7 +34,7 @@ public class Position {
 	}
 
 	/** Longitude (degrees) */
-	protected final double longitude;
+	private final double longitude;
 
 	/** Get the longitude (degrees) */
 	public double getLongitude() {
@@ -43,9 +43,9 @@ public class Position {
 
 	/** Create a new position */
 	public Position(double lat, double lon) {
-		if(lat < -180 || lat > 180)
+		if (lat < -180 || lat > 180)
 			throw new IllegalArgumentException("Invalid latitude");
-		if(lon < -180 || lon > 180)
+		if (lon < -180 || lon > 180)
 			throw new IllegalArgumentException("Invalid longitude");
 		latitude = lat;
 		longitude = lon;
