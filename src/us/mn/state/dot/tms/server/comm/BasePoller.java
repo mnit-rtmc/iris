@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.util.Comparator;
@@ -366,6 +367,11 @@ public class BasePoller implements DevicePoller {
 			op.setMaintStatus(ex_msg(e));
 		}
 		catch (IOException e) {
+			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
+			closeChannel();
+		}
+		catch (BufferOverflowException e) {
+			op.setFailed();
 			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
 			closeChannel();
 		}
