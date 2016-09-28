@@ -54,7 +54,6 @@ public class PlanTab extends MapTab<ActionPlan> {
 	@Override
 	public void dispose() {
 		super.dispose();
-		manager.getSelectionModel().clearSelection();
 		dispatcher.dispose();
 		summary.dispose();
 	}

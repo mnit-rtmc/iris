@@ -54,7 +54,6 @@ public class RampMeterTab extends MapTab<RampMeter> {
 	@Override
 	public void dispose() {
 		super.dispose();
-		manager.getSelectionModel().clearSelection();
 		summary.dispose();
 		dispatcher.dispose();
 	}

@@ -53,7 +53,6 @@ public class GateArmTab extends MapTab<GateArmArray> {
 	@Override
 	public void dispose() {
 		super.dispose();
-		manager.getSelectionModel().clearSelection();
 		summary.dispose();
 		dispatcher.dispose();
 	}

@@ -55,7 +55,6 @@ public class CommTab extends MapTab<Controller> {
 	@Override
 	public void dispose() {
 		super.dispose();
-		manager.getSelectionModel().clearSelection();
 		summary.dispose();
 	}
 

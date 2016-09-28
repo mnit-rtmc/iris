@@ -68,7 +68,6 @@ public class IncidentTab extends MapTab<Incident> {
 	@Override
 	public void dispose() {
 		super.dispose();
-		manager.getSelectionModel().clearSelection();
 		summary.dispose();
 		dispatcher.dispose();
 		creator.dispose();

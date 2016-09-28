@@ -86,7 +86,9 @@ abstract public class MapTab<T extends SonarObject> extends JPanel {
 
 	/** Perform any clean up necessary */
 	public void dispose() {
-		getSelectionModel().removeProxySelectionListener(listener);
+		ProxySelectionModel<T> mdl = getSelectionModel();
+		mdl.removeProxySelectionListener(listener);
+		mdl.clearSelection();
 		removeAll();
 	}
 
