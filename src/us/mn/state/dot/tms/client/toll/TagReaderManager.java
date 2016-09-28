@@ -38,9 +38,13 @@ public class TagReaderManager extends ProxyManager<TagReader> {
 	/** Color to display available readers */
 	static private final Color COLOR_AVAILABLE = new Color(64, 128, 255);
 
+	/** Tag reader tab */
+	private final TagReaderTab tab;
+
 	/** Create a new tag reader manager */
 	public TagReaderManager(Session s, GeoLocManager lm) {
 		super(s, lm, true, 14);
+		tab = new TagReaderTab(s, this);
 	}
 
 	/** Get the sonar type name */
@@ -53,6 +57,12 @@ public class TagReaderManager extends ProxyManager<TagReader> {
 	@Override
 	public TypeCache<TagReader> getCache() {
 		return session.getSonarState().getTagReaders();
+	}
+
+	/** Create the map tab */
+	@Override
+	public TagReaderTab createTab() {
+		return tab;
 	}
 
 	/** Create a theme for tag readers */
