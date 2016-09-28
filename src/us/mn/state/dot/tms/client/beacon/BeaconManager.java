@@ -33,9 +33,13 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class BeaconManager extends ProxyManager<Beacon> {
 
+	/** Beacon tab */
+	private final BeaconTab tab;
+
 	/** Create a new beacon manager */
 	public BeaconManager(Session s, GeoLocManager lm) {
 		super(s, lm, true, 14);
+		tab = new BeaconTab(s, this);
 	}
 
 	/** Get the sonar type name */
@@ -48,6 +52,12 @@ public class BeaconManager extends ProxyManager<Beacon> {
 	@Override
 	public TypeCache<Beacon> getCache() {
 		return session.getSonarState().getBeacons();
+	}
+
+	/** Create the map tab */
+	@Override
+	public BeaconTab createTab() {
+		return tab;
 	}
 
 	/** Create a theme for beacons */
