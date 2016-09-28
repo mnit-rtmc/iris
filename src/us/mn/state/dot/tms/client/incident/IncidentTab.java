@@ -85,10 +85,4 @@ public class IncidentTab extends MapTab<Incident> {
 	private boolean isAddPermitted() {
 		return dispatcher.isAddPermitted("oname");
 	}
-
-	/** Get the tab ID */
-	@Override
-	public String getTabId() {
-		return "incident";
-	}
 }

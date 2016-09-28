@@ -58,10 +58,4 @@ public class CameraTab extends MapTab<Camera> {
 		dispatcher.dispose();
 		summary.dispose();
 	}
-
-	/** Get the tab ID */
-	@Override
-	public String getTabId() {
-		return "camera";
-	}
 }

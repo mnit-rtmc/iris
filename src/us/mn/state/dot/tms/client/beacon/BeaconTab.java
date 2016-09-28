@@ -49,10 +49,4 @@ public class BeaconTab extends MapTab<Beacon> {
 		super.dispose();
 		summary.dispose();
 	}
-
-	/** Get the tab ID */
-	@Override
-	public String getTabId() {
-		return "beacon";
-	}
 }
