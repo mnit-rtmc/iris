@@ -39,8 +39,8 @@ public class CameraHelper extends BaseHelper {
 	static private String getDefaultAuth() {
 		String user = SystemAttrEnum.CAMERA_AUTH_USERNAME.getString();
 		String pass = SystemAttrEnum.CAMERA_AUTH_PASSWORD.getString();
-		return (user.length() > 0 && pass.length() > 0)
-		      ? user + ':' + pass + '@' : "";
+		return (user.length() > 0 || pass.length() > 0)
+		      ? "//" + user + ':' + pass + '@' : "";
 	}
 
 	/** Don't allow instances to be created */
