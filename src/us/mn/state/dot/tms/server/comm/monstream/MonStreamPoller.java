@@ -49,7 +49,11 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 	public void switchCamera(ControllerImpl c, VideoMonitorImpl vm,
 		CameraImpl cam)
 	{
-		createOp("video.monitor.op.switch", vm,new OpSwitchCamera(cam));
+		// Make sure the controller is not a video switcher
+		if (c == vm.getController()) {
+			createOp("video.monitor.op.switch", vm,
+				new OpSwitchCamera(cam));
+		}
 	}
 
 	/** Send a device request
