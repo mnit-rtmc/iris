@@ -2594,8 +2594,8 @@ FIXME
 <p>
 	Action plans provide a way to coördinate multiple related actions
 	at the same time.
-	Each action plan can have multiple <a href="#plan_phase">phases</a>,
-	the simplest being <b>deployed</b> and <b>undeployed</b>.
+	Each action plan has a <a href="#plan_phase">phase</a>, which can be
+	changed at any time.
 	Each phase can be associated with any number of <a href="#dms_action">
 	DMS</a>, <a href="#beacon_action">beacon</a> or <a href="#meter_action">
 	ramp meter</a> actions.
@@ -2609,7 +2609,7 @@ FIXME
 <p>
 	A day plan is a set of days which can be used for scheduling.
 	All days which are not assigned holidays are included in a day plan.
-	Holidays are specified including <b>Month</b>, <b>Day</b>, <b>Week</b>,
+	Holidays are specified by <b>Month</b>, <b>Day</b>, <b>Week</b> and
 	<b>Weekday</b>.
 	Any day which matches <b>all</b> specified fields will be a holiday.
 	<b>Shift</b> is only required for days like Black Friday (Fourth
@@ -2617,8 +2617,9 @@ FIXME
 </p>
 <h4 id="plan_phase">Plan Phases</h4>
 <p>
-	Additional action plan phases can be added on the <b>Plan Phases</b>
-	tab.
+	The basic phases of an action plan are <b>deployed</b> and
+	<b>undeployed</b>.
+	Additional phases can be added on the <b>Plan Phases</b> tab.
 	Each phase must have a unique name.
 	A transient phase can automatically advance to the <b>Next Phase</b>
 	after a specified <b>Hold Time</b>.
@@ -2631,8 +2632,8 @@ FIXME
 	These events can be scheduled using either a <a href="#day_plan">day
 	plan</a> or a specific date (but not both).
 	A time of day must also be specified (HH:MM in 24-hour format).
-	Whenever the scheduled time occurs, the phase of the action plan will
-	be changed to the specified phase.
+	Whenever the scheduled time occurs, the action plan will be changed to
+	the specified phase.
 </p>
 <h4 id="dms_action">DMS Actions</h4>
 <p>
