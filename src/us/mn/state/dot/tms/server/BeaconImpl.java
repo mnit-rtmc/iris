@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.ResultSet;
-import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
