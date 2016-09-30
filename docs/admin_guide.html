@@ -58,8 +58,7 @@
   <div id="features_div">
     <h3><a href="#traffic_layer">Traffic Map Layer</a></h3>
     <h3><a href="#incident_management">Incident Management</a></h3>
-    <h3><a href="#action_plans">Action Plans</a></h3>
-    <h3><a href="#schedules">Date/Time Schedules</a></h3>
+    <h3><a href="#plan_schedule">Plans and Schedules</a></h3>
     <h3><a href="#travel_time">Travel Time Estimation</a></h3>
     <h3><a href="#vsa">Variable Speed Advisory</a></h3>
     <h3><a href="#slow">Slow Traffic Warning</a></h3>
@@ -98,7 +97,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">19 August 2016</div>
+<div id="stamp">30 September 2016</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -1368,8 +1367,8 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 <p>
 	There are a couple of other required steps to enable a message feed
 	to operate.
-	First, an <a href="#action_plans">action plan</a> must be created which
-	associates a <a href="#dms_actions">DMS action</a> with the message
+	First, an <a href="#action_plan">action plan</a> must be created which
+	associates a <a href="#dms_action">DMS action</a> with the message
 	feed.
 	The DMS action must be associated with a <a href="#quick_msg">quick
 	message</a> that references the message feed, using a <b>feed</b>
@@ -1930,8 +1929,8 @@ FIXME
 	with a sign group.
 	When a DMS is selected, a drop-down list is populated with quick
 	messages from sign groups of which that DMS is a member.
-	Quick messages are also be used for <a href="#dms_actions">DMS
-	actions</a> as part of an <a href="#action_plans">action plan</a>.
+	Quick messages are also be used for <a href="#dms_action">DMS
+	actions</a> as part of an <a href="#action_plan">action plan</a>.
 	For these messages, it is best to leave the sign group blank.
 </p>
 
@@ -2586,27 +2585,59 @@ FIXME
 	</tr>
 </table>
 <br/>
-<h3 id="action_plans">Action Plans</h3>
+
+<h3 id="plan_schedule">Plans and Schedules</h3>
 <aside>
 	Select <span class="menu">View ➔ Plans and Schedules</span> menu item
 </aside>
+<h4 id="action_plan">Action Plans</h4>
 <p>
 	Action plans provide a way to coördinate multiple related actions
 	at the same time.
-	Possible actions include displaying <a href="#dms">DMS</a> messages,
-	activating <a href="#beacons">beacons</a> and operating
-	<a href="#ramp_meters">ramp meters</a>.
-	Simple action plans can have just two phases: deployed or undeployed.
+	Each action plan can have multiple <a href="#plan_phase">phases</a>,
+	the simplest being <b>deployed</b> and <b>undeployed</b>.
+	Each phase can be associated with any number of <a href="#dms_action">
+	DMS</a>, <a href="#beacon_action">beacon</a> or <a href="#meter_action">
+	ramp meter</a> actions.
 	More advanced plans can have many phases, each with separate actions.
 	If the <b>Sync Actions</b> box is checked, the phase can only be changed
 	if all associated devices are online.
-	If the <b>Sticky</b> box is checked, DMS messages will be configured to
-	remain even if communication or power is lost.
+	If the <b>Sticky</b> box is checked, messages sent with DMS actions will
+	be configured to persist even if communication or power is lost.
 </p>
-<h4 id="dms_actions">DMS Actions</h4>
+<h4 id="day_plan">Day Plans</h4>
 <p>
-	DMS actions have an associated sign group to determine which signs are
-	affected by the action.
+	A day plan is a set of days which can be used for scheduling.
+	All days which are not assigned holidays are included in a day plan.
+	Holidays are specified including <b>Month</b>, <b>Day</b>, <b>Week</b>,
+	<b>Weekday</b>.
+	Any day which matches <b>all</b> specified fields will be a holiday.
+	<b>Shift</b> is only required for days like Black Friday (Fourth
+	Thursday of November <b>+1</b>).
+</p>
+<h4 id="plan_phase">Plan Phases</h4>
+<p>
+	Additional action plan phases can be added on the <b>Plan Phases</b>
+	tab.
+	Each phase must have a unique name.
+	A transient phase can automatically advance to the <b>Next Phase</b>
+	after a specified <b>Hold Time</b>.
+	Currently, this must be a multiple of 30 seconds.
+</p>
+<h4 id="schedule">Schedules</h4>
+<p>
+	An action plan schedule can automatically change the phase at specified
+	dates and times.
+	These events can be scheduled using either a <a href="#day_plan">day
+	plan</a> or a specific date (but not both).
+	A time of day must also be specified (HH:MM in 24-hour format).
+	Whenever the scheduled time occurs, the phase of the action plan will
+	be changed to the specified phase.
+</p>
+<h4 id="dms_action">DMS Actions</h4>
+<p>
+	<a href="#dms">DMS</a> actions have an associated sign group to
+	determine which signs are affected by the action.
 	The action happens when the action plan phase matches the <b>phase</b>
 	of the DMS action.
 	The <a href="#quick_msg">quick message</a> indicates which message is
@@ -2648,9 +2679,18 @@ FIXME
 	</tr>
 </table>
 <br/>
-
-<h3 id="schedules">Date/Time Schedules</h3>
-FIXME
+<h4 id="beacon_action">Beacon Actions</h4>
+<p>
+	A <a href="#beacons">beacon</a> action can cause a beacon to be deployed
+	when the action plan is set to the specified <b>phase</b>.
+	When the plan is set to any other phase, the beacon will shut off.
+</p>
+<h4 id="meter_action">Meter Actions</h4>
+<p>
+	A <a href="#ramp_meters">meter</a> action can cause a ramp meter to
+	begin metering at the specified <b>phase</b>.
+	When the plan is set to any other phase, the meter will shut off.
+</p>
 
 <h3 id="travel_time">Travel Time Estimation</h3>
 FIXME
