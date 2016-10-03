@@ -91,6 +91,9 @@ public class VideoRequest {
 	/** Create a url for connecting to the video server */
 	private String createBaseUrl(String host, String port) {
 		try {
+			// FIXME: Don't fall back to direct access when DNS
+			//        lookup fails -- after video servlet is
+			//        available to field network.
 			String ip =InetAddress.getByName(host).getHostAddress();
 			return (port != null) ? (ip + ":" + port) : ip;
 		}
