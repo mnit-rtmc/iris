@@ -647,6 +647,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return failTime != null;
 	}
 
+	/** Test if controller is online (active and not failed) */
+	public boolean isOnline() {
+		return isActive() && isConnected() && !isFailed();
+	}
+
 	/** Get the controller fail time, or null if communication is not
 	 * failed.  This time is in milliseconds since the epoch. */
 	@Override

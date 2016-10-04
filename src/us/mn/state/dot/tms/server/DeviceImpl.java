@@ -75,12 +75,13 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	/** Get the failure status */
 	public boolean isFailed() {
 		ControllerImpl c = controller;	// Avoid race
-		return (c == null) || c.isFailed();
+		return (c == null) || c.isFailed() || !c.isConnected();
 	}
 
 	/** Test if device is online (active and not failed) */
 	public boolean isOnline() {
-		return isActive() && !isFailed();
+		ControllerImpl c = controller;	// Avoid race
+		return (c != null) && c.isOnline();
 	}
 
 	/** Check if the controller has an error */
