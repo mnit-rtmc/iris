@@ -14,7 +14,9 @@
  */
 package us.mn.state.dot.tms.client.beacon;
 
+import java.awt.Color;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Beacon;
@@ -96,6 +98,12 @@ public class BeaconManager extends ProxyManager<Beacon> {
 	/** Fill single selection popup */
 	@Override
 	protected void fillPopupSingle(JPopupMenu p, Beacon b) {
+		for (String m: b.getMessage().split("\n")) {
+			JPanel pnl = makeMenuLabel(m);
+			pnl.setBackground(Color.WHITE);
+			p.add(pnl);
+		}
+		p.addSeparator();
 		p.add(new DeployAction(s_model));
 		p.add(new UndeployAction(s_model));
 		p.addSeparator();
