@@ -2541,6 +2541,7 @@ dms_querymsg_enable	false
 dms_quickmsg_store_enable	false
 dms_reset_enable	false
 dms_send_confirmation_enable	false
+dms_update_font_table	true
 dmsxml_modem_op_timeout_secs	305
 dmsxml_op_timeout_secs	65
 dmsxml_reinit_detect	false

@@ -114,3 +114,7 @@ GRANT SELECT ON role_privilege_view TO PUBLIC;
 -- rename tesla_host sys attr to work_request_url
 UPDATE iris.system_attribute SET name = 'work_request_url'
 	WHERE name = 'tesla_host';
+
+-- Add dms_update_font_table system attribute
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('dms_update_font_table', true);
