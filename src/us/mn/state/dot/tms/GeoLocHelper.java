@@ -71,7 +71,8 @@ public class GeoLocHelper extends BaseHelper {
 		}
 		String c = getCrossDescription(l, connect);
 		if (c != null) {
-			b.append(' ');
+			if (b.length() > 0)
+				b.append(' ');
 			b.append(c);
 		}
 		return (b.length() > 0) ? b.toString() : "Unknown location";
