@@ -15,11 +15,12 @@
  */
 package us.mn.state.dot.tms.client.proxy;
 
+import java.awt.FlowLayout;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
-import javax.swing.Box;
 import javax.swing.Icon;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.sonar.SonarObject;
@@ -48,14 +49,11 @@ import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
 abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Make a menu label */
-	static private Box makeMenuLabel(String id) {
-		Box b = Box.createHorizontalBox();
-		b.add(Box.createHorizontalStrut(6));
-		b.add(Box.createHorizontalGlue());
-		b.add(new JLabel(id));
-		b.add(Box.createHorizontalGlue());
-		b.add(Box.createHorizontalStrut(6));
-		return b;
+	static protected JPanel makeMenuLabel(String t) {
+		JPanel pnl = new JPanel(new FlowLayout(FlowLayout.CENTER));
+		pnl.setOpaque(true);
+		pnl.add(new JLabel(t));
+		return pnl;
 	}
 
 	/** Check if the location is set */
@@ -395,21 +393,20 @@ abstract public class ProxyManager<T extends SonarObject> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
-		if (s_pane != null) {
-			GeoLoc loc = getGeoLoc(proxy);
-			if (loc != null) {
-				p.add(new MapAction<T>(s_pane, proxy, loc));
-				p.addSeparator();
-			}
-		}
 		fillPopupSingle(p, proxy);
 		if (has_properties) {
 			if (TeslaAction.isConfigured()) {
 				p.add(new TeslaAction<T>(proxy));
 				p.addSeparator();
 			}
-			p.add(new PropertiesAction<T>(this, proxy));
 		}
+		if (s_pane != null) {
+			GeoLoc loc = getGeoLoc(proxy);
+			if (loc != null)
+				p.add(new MapAction<T>(s_pane, proxy, loc));
+		}
+		if (has_properties)
+			p.add(new PropertiesAction<T>(this, proxy));
 		return p;
 	}
 
