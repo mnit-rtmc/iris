@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2015  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ abstract public class IAction extends AbstractAction {
 	 * @param sa Boolean attribute to determine if the action is enabled. */
 	protected IAction(String text_id, SystemAttrEnum sa) {
 		attr = sa;
-		String name = text_id != null ? I18N.get(text_id) : "";
+		String name = (text_id != null) ? I18N.get(text_id) : "";
 		putValue(Action.NAME, name);
 		int m = I18N.getKeyEvent(text_id);
 		if (m != 0)
