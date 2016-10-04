@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
@@ -72,7 +74,8 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller
 			addOp(new OpResetDMS(dms));
 			break;
 		case SEND_SETTINGS:
-			addOp(new OpSendDMSFonts(dms));
+			if (SystemAttrEnum.DMS_UPDATE_FONT_TABLE.getBoolean())
+				addOp(new OpSendDMSFonts(dms));
 			addOp(new OpSendDMSDefaults(dms));
 			break;
 		case QUERY_CONFIGURATION:
