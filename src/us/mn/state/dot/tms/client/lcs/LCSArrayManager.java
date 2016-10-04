@@ -39,7 +39,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
-import us.mn.state.dot.tms.client.proxy.TeslaAction;
+import us.mn.state.dot.tms.client.proxy.WorkRequestAction;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -187,11 +187,13 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 			p.add(blankAction);
 			p.addSeparator();
 		}
-		if (TeslaAction.isConfigured()) {
+		if (WorkRequestAction.isConfigured()) {
 			for (int i = 1; i <= MAX_LANES; i++) {
 				DMS dms = LCSArrayHelper.lookupDMS(la, i);
-				if (dms != null)
-					p.add(new TeslaAction<DMS>(dms));
+				if (dms != null) {
+					p.add(new WorkRequestAction<DMS>(dms,
+						dms.getGeoLoc()));
+				}
 			}
 			p.addSeparator();
 		}

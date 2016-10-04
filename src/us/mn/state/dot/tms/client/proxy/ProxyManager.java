@@ -390,21 +390,19 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Create a popup menu for a single selection */
 	protected JPopupMenu createPopupSingle(T proxy) {
+		GeoLoc loc = getGeoLoc(proxy);
 		JPopupMenu p = new JPopupMenu();
 		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
 		fillPopupSingle(p, proxy);
 		if (has_properties) {
-			if (TeslaAction.isConfigured()) {
-				p.add(new TeslaAction<T>(proxy));
+			if (WorkRequestAction.isConfigured()) {
+				p.add(new WorkRequestAction<T>(proxy, loc));
 				p.addSeparator();
 			}
 		}
-		if (s_pane != null) {
-			GeoLoc loc = getGeoLoc(proxy);
-			if (loc != null)
-				p.add(new MapAction<T>(s_pane, proxy, loc));
-		}
+		if (s_pane != null && loc != null)
+			p.add(new MapAction<T>(s_pane, proxy, loc));
 		if (has_properties)
 			p.add(new PropertiesAction<T>(this, proxy));
 		return p;

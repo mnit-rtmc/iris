@@ -2573,7 +2573,6 @@ sample_archive_enable	true
 speed_limit_min_mph	45
 speed_limit_default_mph	55
 speed_limit_max_mph	75
-tesla_host	
 toll_min_price	0.25
 toll_max_price	8
 travel_time_min_mph	15
@@ -2588,6 +2587,7 @@ vsa_start_intervals	3
 vsa_start_threshold	-1500
 vsa_stop_threshold	-750
 window_title	IRIS: 
+work_request_url	
 \.
 
 COPY iris.r_node_type (n_type, name) FROM stdin;

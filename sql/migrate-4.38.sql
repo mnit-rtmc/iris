@@ -110,3 +110,7 @@ CREATE VIEW role_privilege_view AS
 	JOIN iris.privilege ON privilege.capability = role_capability.capability
 	WHERE role.enabled = 't' AND capability.enabled = 't';
 GRANT SELECT ON role_privilege_view TO PUBLIC;
+
+-- rename tesla_host sys attr to work_request_url
+UPDATE iris.system_attribute SET name = 'work_request_url'
+	WHERE name = 'tesla_host';

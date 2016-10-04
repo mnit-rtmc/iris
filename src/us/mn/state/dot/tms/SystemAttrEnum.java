@@ -103,7 +103,6 @@ public enum SystemAttrEnum {
 	SPEED_LIMIT_MIN_MPH(45, 0, 100),
 	SPEED_LIMIT_DEFAULT_MPH(55, 0, 100),
 	SPEED_LIMIT_MAX_MPH(75, 0, 100),
-	TESLA_HOST(String.class),
 	TOLL_MIN_PRICE(0.25f, 0f, 100f),
 	TOLL_MAX_PRICE(8f, 1f, 100f),
 	TRAVEL_TIME_MIN_MPH(15, 1, 50),
@@ -117,7 +116,8 @@ public enum SystemAttrEnum {
 	VSA_START_INTERVALS(3, 0, 10),
 	VSA_START_THRESHOLD(-1500, -5000, -200),
 	VSA_STOP_THRESHOLD(-750, -5000, -200),
-	WINDOW_TITLE("IRIS: ", Change.RESTART_CLIENT);
+	WINDOW_TITLE("IRIS: ", Change.RESTART_CLIENT),
+	WORK_REQUEST_URL(String.class);
 
 	/** Change action, which indicates what action the admin must
 	 *  take after changing a system attribute. */
