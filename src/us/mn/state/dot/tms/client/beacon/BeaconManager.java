@@ -117,4 +117,17 @@ public class BeaconManager extends ProxyManager<Beacon> {
 	protected GeoLoc getGeoLoc(Beacon proxy) {
 		return proxy.getGeoLoc();
 	}
+
+	/** Get the description of a beacon */
+	@Override
+	public String getDescription(Beacon proxy) {
+		String d = super.getDescription(proxy);
+		GeoLoc l = getGeoLoc(proxy);
+		String n = proxy.getNotes();
+		if (l != null && l.getCrossStreet() == null &&
+		    !"".equals(n.trim()))
+			return d + " (" + n + ")";
+		else
+			return d;
+	}
 }
