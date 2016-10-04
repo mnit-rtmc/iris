@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.system;
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
 import us.mn.state.dot.sonar.Capability;
-import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -36,7 +35,7 @@ public class CapabilityPanel extends JPanel {
 	private final ProxyTablePanel<Capability> cap_pnl;
 
 	/** Privilege table panel */
-	private final ProxyTablePanel<Privilege> priv_pnl;
+	private final PrivilegePanel priv_pnl;
 
 	/** Create a new capability panel */
 	public CapabilityPanel(Session s) {
@@ -50,8 +49,7 @@ public class CapabilityPanel extends JPanel {
 				super.selectProxy();
 			}
 		};
-		priv_pnl = new ProxyTablePanel<Privilege>(
-			new PrivilegeModel(s, null));
+		priv_pnl = new PrivilegePanel(new PrivilegeModel(s, null));
 	}
 
 	/** Initializze the panel */

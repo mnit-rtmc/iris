@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2015  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,7 +71,7 @@ public class WhitelistNamespace extends ServerNamespace {
 	 * @param a Inet address of connection.
 	 * @return true if update is allowed; false otherwise. */
 	@Override
-	public boolean canUpdate(Name n, User u, InetAddress a) {
-		return checkList(n, a) && canUpdate(n, u);
+	public boolean canWrite(Name n, User u, InetAddress a) {
+		return checkList(n, a) && canWrite(n, u);
 	}
 }

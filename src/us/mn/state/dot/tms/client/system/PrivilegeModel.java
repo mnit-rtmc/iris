@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,15 @@ package us.mn.state.dot.tms.client.system;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import static us.mn.state.dot.tms.client.system.PrivilegePanel.ALL_TYPES;
 
 /**
  * Table model for IRIS privileges.
@@ -33,73 +37,58 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	@Override
 	protected ArrayList<ProxyColumn<Privilege>> createColumns() {
 		ArrayList<ProxyColumn<Privilege>> cols =
-			new ArrayList<ProxyColumn<Privilege>>(5);
-		cols.add(new ProxyColumn<Privilege>("privilege.pattern", 300) {
+			new ArrayList<ProxyColumn<Privilege>>(4);
+		cols.add(new ProxyColumn<Privilege>("privilege.type", 140) {
 			public Object getValueAt(Privilege p) {
-				return p.getPattern();
+				return p.getTypeN();
+			}
+			public boolean isEditable(Privilege p) {
+				return canUpdate(p);
+			}
+			public void setValueAt(Privilege p, Object value) {
+				p.setTypeN(value.toString().trim());
+			}
+			protected TableCellEditor createCellEditor() {
+				return new DefaultCellEditor(new JComboBox
+					<String>(ALL_TYPES));
+			}
+		});
+		cols.add(new ProxyColumn<Privilege>("privilege.obj", 140) {
+			public Object getValueAt(Privilege p) {
+				return p.getObjN();
 			}
 			public boolean isEditable(Privilege p) {
 				return canUpdate(p);
 			}
 			public void setValueAt(Privilege p, Object value) {
 				String v = value.toString().trim();
-				p.setPattern(v);
+				p.setObjN(v);
 			}
 		});
-		cols.add(new ProxyColumn<Privilege>("privilege.read", 60,
-			Boolean.class)
-		{
+		cols.add(new ProxyColumn<Privilege>("privilege.attr", 120) {
 			public Object getValueAt(Privilege p) {
-				return p.getPrivR();
+				return p.getAttrN();
 			}
 			public boolean isEditable(Privilege p) {
 				return canUpdate(p);
 			}
 			public void setValueAt(Privilege p, Object value) {
-				if(value instanceof Boolean)
-					p.setPrivR((Boolean)value);
+				String v = value.toString().trim();
+				p.setAttrN(v);
 			}
 		});
 		cols.add(new ProxyColumn<Privilege>("privilege.write", 60,
 			Boolean.class)
 		{
 			public Object getValueAt(Privilege p) {
-				return p.getPrivW();
+				return p.getWrite();
 			}
 			public boolean isEditable(Privilege p) {
 				return canUpdate(p);
 			}
 			public void setValueAt(Privilege p, Object value) {
-				if(value instanceof Boolean)
-					p.setPrivW((Boolean)value);
-			}
-		});
-		cols.add(new ProxyColumn<Privilege>("privilege.create", 60,
-			Boolean.class)
-		{
-			public Object getValueAt(Privilege p) {
-				return p.getPrivC();
-			}
-			public boolean isEditable(Privilege p) {
-				return canUpdate(p);
-			}
-			public void setValueAt(Privilege p, Object value) {
-				if(value instanceof Boolean)
-					p.setPrivC((Boolean)value);
-			}
-		});
-		cols.add(new ProxyColumn<Privilege>("privilege.del", 60,
-			Boolean.class)
-		{
-			public Object getValueAt(Privilege p) {
-				return p.getPrivD();
-			}
-			public boolean isEditable(Privilege p) {
-				return canUpdate(p);
-			}
-			public void setValueAt(Privilege p, Object value) {
-				if(value instanceof Boolean)
-					p.setPrivD((Boolean)value);
+				if (value instanceof Boolean)
+					p.setWrite((Boolean) value);
 			}
 		});
 		return cols;
@@ -129,15 +118,16 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 		return proxy.getCapability() == capability;
 	}
 
-	/** Create an object with the given name */
+	/** Create an object with the given name.
+	 * @param tn Type name. */
 	@Override
-	public void createObject(String n) {
+	public void createObject(String tn) {
 		String name = createUniqueName();
 		if (name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("capability", capability);
-			attrs.put("pattern", "");
+			attrs.put("typeN", tn);
 			cache.createObject(name, attrs);
 		}
 	}

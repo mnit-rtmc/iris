@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2010  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.TMSException;
@@ -33,41 +34,33 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 	implements Comparable<IrisPrivilegeImpl>, Storable
 {
 	/** SQL connection to database */
-	static protected SQLConnection store;
+	static private SQLConnection store;
 
 	/** Lookup all the privileges */
 	static public void lookup(SQLConnection c, final ServerNamespace ns)
 		throws TMSException
 	{
 		store = c;
-		store.query("SELECT name, capability, pattern, priv_r, " +
-			"priv_w, priv_c, priv_d FROM iris.privilege;",
+		store.query("SELECT name, capability, type_n, obj_n, " +
+			"attr_n, write FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.addObject(new IrisPrivilegeImpl(ns,
-					row.getString(1),  // name
-					row.getString(2),  // capability
-					row.getString(3),  // pattern
-					row.getBoolean(4), // priv_r
-					row.getBoolean(5), // priv_w
-					row.getBoolean(6), // priv_c
-					row.getBoolean(7)  // priv_d
-				));
+				ns.addObject(new IrisPrivilegeImpl(row, ns));
 			}
 		});
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
-		map.put("name", name);
-		map.put("capability", capability);
-		map.put("pattern", pattern);
-		map.put("priv_r", priv_r);
-		map.put("priv_w", priv_w);
-		map.put("priv_c", priv_c);
-		map.put("priv_d", priv_d);
+		map.put("name", getName());
+		map.put("capability", getCapability());
+		map.put("type_n", getTypeN());
+		map.put("obj_n", getObjN());
+		map.put("attr_n", getAttrN());
+		map.put("write", getWrite());
 		return map;
 	}
 
@@ -77,6 +70,7 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris.privilege";
 	}
@@ -84,61 +78,79 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 	/** Create a new IRIS privilege */
 	public IrisPrivilegeImpl(String n) {
 		super(n);
-		pattern = "";
+	}
+
+	/** Create an IRIS privilege */
+	private IrisPrivilegeImpl(ResultSet row, Namespace ns)
+		throws SQLException
+	{
+		this(ns,
+		     row.getString(1),	// name
+		     row.getString(2),	// capability
+		     row.getString(3),	// typeN
+		     row.getString(4),	// objN
+		     row.getString(5),	// attrN
+		     row.getBoolean(6)	// write
+		);
 	}
 
 	/** Create an IRIS privilege from database lookup */
-	protected IrisPrivilegeImpl(Namespace ns, String n, String cap,
-		String p, boolean r, boolean w, boolean c, boolean d)
+	private IrisPrivilegeImpl(Namespace ns, String n, String c, String tn,
+		String on, String an, boolean w)
 	{
-		this(n, (Capability)ns.lookupObject(Capability.SONAR_TYPE, cap),
-		     p, r, w, c, d);
+		this(n, (Capability) ns.lookupObject(Capability.SONAR_TYPE, c),
+		     tn, on, an, w);
 	}
 
 	/** Create an IRIS privilege from database lookup */
-	protected IrisPrivilegeImpl(String n, Capability cap, String p,
-		boolean r, boolean w, boolean c, boolean d)
+	private IrisPrivilegeImpl(String n, Capability c, String tn,
+		String on, String an, boolean w)
 	{
-		this(n);
-		capability = cap;
-		pattern = p;
-		priv_r = r;
-		priv_w = w;
-		priv_c = c;
-		priv_d = d;
+		super(n, c);
+		setTypeN(tn);
+		setObjN(on);
+		setAttrN(an);
+		setWrite(w);
 	}
 
 	/** Compare to another privilege */
+	@Override
 	public int compareTo(IrisPrivilegeImpl o) {
-		return name.compareTo(o.name);
+		return getName().compareTo(o.getName());
 	}
 
 	/** Test if the privilege equals another privilege */
+	@Override
 	public boolean equals(Object o) {
-		if(o instanceof IrisPrivilegeImpl)
-			return name.equals(((IrisPrivilegeImpl)o).name);
-		else
+		if (o instanceof IrisPrivilegeImpl) {
+			IrisPrivilegeImpl other = (IrisPrivilegeImpl) o;
+			return getName().equals(other.getName());
+		} else
 			return false;
 	}
 
 	/** Calculate a hash code */
+	@Override
 	public int hashCode() {
-		return name.hashCode();
+		return getName().hashCode();
 	}
 
 	/** Get the primary key name */
+	@Override
 	public String getKeyName() {
 		return "name";
 	}
 
 	/** Get the primary key */
+	@Override
 	public String getKey() {
-		return name;
+		return getName();
 	}
 
 	/** Get a string representation of the object */
+	@Override
 	public String toString() {
-		return name;
+		return getName();
 	}
 
 	/** Destroy an IRIS privilege */
@@ -146,44 +158,41 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 		store.destroy(this);
 	}
 
-	/** Set the namespace pattern */
-	public void doSetPattern(String p) throws TMSException, NamespaceError {
-		if(p.equals(pattern))
-			return;
-		checkPattern(p);
-		store.update(this, "pattern", p);
-		super.setPattern(p);
+	/** Set the type name */
+	@Override
+	public void doSetTypeN(String n) throws TMSException, NamespaceError {
+		if (!n.equals(getTypeN())) {
+			checkPattern(TYPE_ATTR_PATTERN, n);
+			store.update(this, "type_n", n);
+			setTypeN(n);
+		}
 	}
 
-	/** Set the read privilege */
-	public void doSetPrivR(boolean p) throws TMSException {
-		if(p == priv_r)
-			return;
-		store.update(this, "priv_r", p);
-		super.setPrivR(p);
+	/** Set the object name */
+	@Override
+	public void doSetObjN(String n) throws TMSException, NamespaceError {
+		if (!n.equals(getObjN())) {
+			checkPattern(OBJ_PATTERN, n);
+			store.update(this, "obj_n", n);
+			setObjN(n);
+		}
+	}
+
+	/** Set the attribute name */
+	@Override
+	public void doSetAttrN(String n) throws TMSException, NamespaceError {
+		if (!n.equals(getAttrN())) {
+			checkPattern(TYPE_ATTR_PATTERN, n);
+			store.update(this, "attr_n", n);
+			setAttrN(n);
+		}
 	}
 
 	/** Set the write privilege */
-	public void doSetPrivW(boolean p) throws TMSException {
-		if(p == priv_w)
-			return;
-		store.update(this, "priv_w", p);
-		super.setPrivW(p);
-	}
-
-	/** Set the create privilege */
-	public void doSetPrivC(boolean p) throws TMSException {
-		if(p == priv_c)
-			return;
-		store.update(this, "priv_c", p);
-		super.setPrivC(p);
-	}
-
-	/** Set the delete privilege */
-	public void doSetPrivD(boolean p) throws TMSException {
-		if(p == priv_d)
-			return;
-		store.update(this, "priv_d", p);
-		super.setPrivD(p);
+	public void doSetWrite(boolean w) throws TMSException {
+		if (w != getWrite()) {
+			store.update(this, "write", w);
+			setWrite(w);
+		}
 	}
 }

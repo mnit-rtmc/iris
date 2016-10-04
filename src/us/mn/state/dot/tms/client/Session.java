@@ -250,7 +250,7 @@ public class Session {
 	 * @param can_edit Flag to allow editing.
 	 * @return true if user can add the object */
 	private boolean canAdd(Name name, boolean can_edit) {
-		return can_edit && namespace.canAdd(name, user);
+		return can_edit && namespace.canWrite(name, user);
 	}
 
 	/** Check if the user can add an object.
@@ -259,7 +259,8 @@ public class Session {
 	 * @param can_edit Flag to allow editing.
 	 * @return true if user can add the object */
 	private boolean canAdd(String tname, String oname, boolean can_edit) {
-		return oname != null && canAdd(new Name(tname,oname), can_edit);
+		return oname != null &&
+		       canAdd(new Name(tname, oname), can_edit);
 	}
 
 	/** Check if the user can add an object.
@@ -304,7 +305,7 @@ public class Session {
 	 * @param can_edit Flag to allow editing.
 	 * @return true if user can update the attribute */
 	private boolean canUpdate(Name name, boolean can_edit) {
-		return can_edit && namespace.canUpdate(name, user);
+		return can_edit && namespace.canWrite(name, user);
 	}
 
 	/** Check if the user can update an attribute.
@@ -410,7 +411,7 @@ public class Session {
 
 	/** Check if the user can remove a proxy */
 	private boolean canRemove(Name name, boolean can_edit) {
-		return can_edit && namespace.canRemove(name, user);
+		return can_edit && namespace.canWrite(name, user);
 	}
 
 	/** Check if the user can remove a proxy */
