@@ -178,7 +178,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 			s |= ItemStyle.FAILED.bit();
 		if (isAvailable())
 			s |= ItemStyle.AVAILABLE.bit();
-		if (getFlashing())
+		if (isDeployed())
 			s |= ItemStyle.DEPLOYED.bit();
 		setStyles(s);
 	}
@@ -200,6 +200,11 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	/** Test if beacon is available */
 	private boolean isAvailable() {
 		return isOnline() && !needsMaintenance() && !getFlashing();
+	}
+
+	/** Test if beacon is deployed */
+	private boolean isDeployed() {
+		return isOnline() && getFlashing();
 	}
 
 	/** Test if beacon needs maintenance */
