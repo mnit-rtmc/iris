@@ -637,12 +637,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		failTime = ft;
 	}
 
-	/** Set the failed status of the controller */
+	/** Set the controller failed status */
 	public void setFailed(boolean f) {
 		setFailed(f, null);
 	}
 
-	/** Get the failure status */
+	/** Get the controller failed status */
 	public boolean isFailed() {
 		return failTime != null;
 	}
