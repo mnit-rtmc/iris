@@ -279,4 +279,12 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	public void updateStyles() {
 		ga_array.updateStyles();
 	}
+
+	/** Get the failure status */
+	@Override
+	public boolean isFailed() {
+		ControllerImpl c = controller;	// Avoid race
+		// FIXME: don't override -- style update problem
+		return (c == null) || c.isFailed();
+	}
 }
