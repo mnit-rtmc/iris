@@ -717,13 +717,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			setInterlockNotify();
 	}
 
-	/** Test if device is online (active and not failed) */
-	@Override
-	public boolean isOnline() {
-		// FIXME: don't override -- style update problem
-		return isActive() && !isFailed();
-	}
-
 	/** Get the active status */
 	@Override
 	public boolean isActive() {
