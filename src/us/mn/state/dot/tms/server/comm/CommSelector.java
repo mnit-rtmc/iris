@@ -111,8 +111,10 @@ public class CommSelector implements Closeable {
 		SelectableChannel chan = key.channel();
 		if (chan instanceof SocketChannel) {
 			SocketChannel sc = (SocketChannel) chan;
-			if (sc.finishConnect())
+			if (sc.finishConnect()) {
+				key.interestOps(SelectionKey.OP_READ);
 				return;
+			}
 		}
 		throw new EOFException("connect FAILED");
 	}
