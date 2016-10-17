@@ -231,12 +231,18 @@ public class BasePoller implements DevicePoller {
 			return false;
 		if (op.isPolling()) {
 			synchronized (p_queue) {
-				return p_queue.add(op);
+				if (p_queue.contains(op))
+					return false;
+				else
+					return p_queue.add(op);
 			}
 		} else {
 			op.setRemaining(timeout);
 			synchronized (r_queue) {
-				return r_queue.add(op);
+				if (r_queue.contains(op))
+					return false;
+				else
+					return r_queue.add(op);
 			}
 		}
 	}
@@ -465,7 +471,13 @@ public class BasePoller implements DevicePoller {
 	/** Parse response data */
 	private void respOperation(Operation op) {
 		try {
-			op.resp(rx_buf);
+			synchronized (rx_buf) {
+				if (logger.isOpen())
+					log("RESP " + formatBuf(rx_buf, 0));
+				rx_buf.flip();
+				op.resp(rx_buf);
+				rx_buf.compact();
+			}
 		}
 		catch (ProtocolException e) {
 			op.setFailed();
