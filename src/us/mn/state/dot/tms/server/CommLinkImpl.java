@@ -105,7 +105,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	}
 
 	/** Create a new comm link */
-	public CommLinkImpl(String n, String d, String u, short p, boolean pe,
+	private CommLinkImpl(String n, String d, String u, short p, boolean pe,
 		int pp, int t)
 	{
 		super(n);
