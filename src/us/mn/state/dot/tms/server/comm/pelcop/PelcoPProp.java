@@ -33,7 +33,7 @@ abstract public class PelcoPProp extends ControllerProp {
 	static private final int ETX = 0xAF;
 
 	/** Parse a valid packet */
-	static public PelcoPProp parse(ByteBuffer rx_buf)
+	static public PelcoPProp parse(ByteBuffer rx_buf, boolean logged_in)
 		throws ParsingException
 	{
 		scanPkt(rx_buf);
@@ -41,8 +41,12 @@ abstract public class PelcoPProp extends ControllerProp {
 			throw new ParsingException("STX");
 		int mc = parse8(rx_buf);
 		switch (mc) {
+		case AliveProp.REQ_CODE:
+			return new AliveProp();
+		case LoginProp.REQ_CODE:
+			return new LoginProp();
 		case MonStatusProp.REQ_CODE:
-			return new MonStatusProp();
+			return new MonStatusProp(logged_in);
 		default:
 			throw new ParsingException("Unknown msg code: " + mc);
 		}
@@ -95,5 +99,10 @@ abstract public class PelcoPProp extends ControllerProp {
 				break;
 		}
 		tx_buf.put((byte) xsum);
+	}
+
+	/** Get the next property to send */
+	public PelcoPProp next() {
+		return null;
 	}
 }

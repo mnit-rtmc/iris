@@ -42,17 +42,20 @@ public class VideoMonitorHelper extends BaseHelper {
 	}
 
 	/** Find a video monitor with the specific UID */
-	static public VideoMonitor findUID(String uid) {
-		Integer id = parseUID(uid);
-		if (id != null) {
-			Iterator<VideoMonitor> it = iterator();
-			while (it.hasNext()) {
-				VideoMonitor mon = it.next();
-				Integer mid = parseUID(mon.getName());
-				if (id.equals(mid))
-					return mon;
-			}
+	static public VideoMonitor findUID(int uid) {
+		Iterator<VideoMonitor> it = iterator();
+		while (it.hasNext()) {
+			VideoMonitor mon = it.next();
+			Integer mid = parseUID(mon.getName());
+			if (mid != null && mid.equals(uid))
+				return mon;
 		}
 		return null;
+	}
+
+	/** Find a video monitor with the specific UID */
+	static public VideoMonitor findUID(String uid) {
+		Integer id = parseUID(uid);
+		return (id != null) ? findUID(id) : null;
 	}
 }

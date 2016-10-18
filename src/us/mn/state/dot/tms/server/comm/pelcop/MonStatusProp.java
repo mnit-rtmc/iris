@@ -14,7 +14,12 @@
  */
 package us.mn.state.dot.tms.server.comm.pelcop;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -33,8 +38,16 @@ public class MonStatusProp extends PelcoPProp {
 	/** Monitor status response code */
 	static public final int RESP_CODE = 0xB1;
 
+	/** Logged in flag */
+	private final boolean logged_in;
+
 	/** Video monitor number */
 	private int monitor;
+
+	/** Create a new monitor status property */
+	public MonStatusProp(boolean l) {
+		logged_in = l;
+	}
 
 	/** Decode a QUERY request from keyboard */
 	@Override
@@ -50,9 +63,42 @@ public class MonStatusProp extends PelcoPProp {
 
 	/** Encode a QUERY response to keyboard */
 	@Override
-	public void encodeQuery(Operation op, ByteBuffer tx_buf) {
+	public void encodeQuery(Operation op, ByteBuffer tx_buf)
+		throws IOException
+	{
 		format8(tx_buf, RESP_CODE);
-		format8(tx_buf, 0);
-		format8(tx_buf, 0);
+		if (logged_in) {
+			int cam = lookupCamera();
+			int chi = cam / 100;
+			int clo = cam % 100;
+			int mhi = monitor / 100;
+			int mlo = monitor % 100;
+			formatBCD2(tx_buf, mlo);
+			format8(tx_buf, 0x40);	// ???
+			format8(tx_buf, 0);
+			formatBCD2(tx_buf, chi);
+			formatBCD2(tx_buf, clo);
+			format32(tx_buf, 0);
+			format8(tx_buf, 0);
+			formatBCD2(tx_buf, chi);
+			formatBCD2(tx_buf, clo);
+			format16(tx_buf, 0);
+			format8(tx_buf, 0);
+			formatBCD2(tx_buf, mhi);
+		} else {
+			format8(tx_buf, 0);
+			format8(tx_buf, 0);
+		}
+	}
+
+	/** Lookup current camera ID on the selected video monitor */
+	private int lookupCamera() {
+		VideoMonitor vm = VideoMonitorHelper.findUID(monitor);
+		if (vm != null) {
+			Camera c = vm.getCamera();
+			if (c != null)
+				return CameraHelper.parseUID(c.getName());
+		}
+		return 0;
 	}
 }

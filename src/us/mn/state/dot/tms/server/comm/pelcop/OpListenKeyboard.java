@@ -28,6 +28,9 @@ import us.mn.state.dot.tms.server.comm.OpStep;
  */
 public class OpListenKeyboard extends OpStep {
 
+	/** Keyboard logged in flag */
+	private boolean logged_in = false;
+
 	/** Most recent property request */
 	private PelcoPProp prop;
 
@@ -39,16 +42,16 @@ public class OpListenKeyboard extends OpStep {
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
-		if (prop != null) {
+		while (prop != null) {
 			try {
 				doPoll(op, tx_buf);
 			}
 			catch (InvalidMarkException e) {
 				// dumb exception
 			}
-			prop = null;
+			prop = prop.next();
 		}
-		setPolling(false);
+		setPolling(prop != null);
 	}
 
 	/** Poll the controller with one packeet */
@@ -72,7 +75,7 @@ public class OpListenKeyboard extends OpStep {
 	/** Parse received data */
 	private void doRecv(Operation op, ByteBuffer rx_buf) throws IOException{
 		try {
-			prop = PelcoPProp.parse(rx_buf);
+			prop = PelcoPProp.parse(rx_buf, logged_in);
 			prop.decodeQuery(op, rx_buf);
 			prop.parseTail(rx_buf);
 			setPolling(true);
