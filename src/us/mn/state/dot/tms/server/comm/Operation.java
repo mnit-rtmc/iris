@@ -268,13 +268,13 @@ public final class Operation implements Comparable<Operation> {
 		}
 	}
 
-	/** Decode response data.
+	/** Decode received data.
 	 * @param rx_buf Receive buffer. */
-	public void resp(ByteBuffer rx_buf) throws IOException {
+	public void recv(ByteBuffer rx_buf) throws IOException {
 		n_runs++;
 		OpStep s = step;
 		if (s != null) {
-			s.resp(this, rx_buf);
+			s.recv(this, rx_buf);
 			if (!isDone())
 				setStep(s.next());
 		}

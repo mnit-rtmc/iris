@@ -165,7 +165,7 @@ public class CommSelector implements Closeable {
 			n_bytes = chan.read(rx_buf);
 		}
 		if (n_bytes > 0)
-			bp.checkResponse();
+			bp.checkReceive();
 		else if (n_bytes < 0)
 			throw new EOFException();
 	}

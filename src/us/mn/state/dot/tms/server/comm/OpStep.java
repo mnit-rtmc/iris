@@ -42,8 +42,8 @@ abstract public class OpStep {
 		// subclasses may override
 	}
 
-	/** Parse response from controller */
-	public void resp(Operation op, ByteBuffer rx_buf) throws IOException {
+	/** Parse data received from controller */
+	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		// subclasses may override
 	}
 

@@ -98,7 +98,7 @@ public class BasePoller implements DevicePoller {
 		}
 	});
 
-	/** Response queue */
+	/** Receive queue */
 	private final PriorityQueue<Operation> r_queue =
 		new PriorityQueue<Operation>(11, new Comparator<Operation>()
 	{
@@ -431,51 +431,51 @@ public class BasePoller implements DevicePoller {
 	/** Check if an operation has timed out */
 	private void checkTimeout(Operation op) {
 		long rt = op.getRemaining();
-		if (rt <= 0 && removeResp(op)) {
+		if (rt <= 0 && removeRecv(op)) {
 			op.handleEvent(EventType.POLL_TIMEOUT_ERROR, TIMEOUT);
 			doAddOp(op);
 		}
 	}
 
-	/** Remove an operation from the response queue */
-	private boolean removeResp(Operation op) {
+	/** Remove an operation from the receive queue */
+	private boolean removeRecv(Operation op) {
 		synchronized (r_queue) {
 			return r_queue.remove(op);
 		}
 	}
 
-	/** Check for response in receive buffer */
-	public void checkResponse() {
+	/** Check for data in receive buffer */
+	public void checkReceive() {
 		COMM.addJob(new Job() {
 			@Override public void perform() {
-				parseResponse();
+				parseReceive();
 			}
 		});
 	}
 
-	/** Parse response in receive buffer */
-	private void parseResponse() {
-		Operation op = respQueue();
+	/** Parse data in receive buffer */
+	private void parseReceive() {
+		Operation op = recvQueue();
 		if (op != null)
-			respOperation(op);
+			recvOperation(op);
 		clearRxBuf();
 	}
 
-	/** Get the first operation on the response queue */
-	private Operation respQueue() {
+	/** Get the first operation on the receive queue */
+	private Operation recvQueue() {
 		synchronized (r_queue) {
 			return r_queue.poll();
 		}
 	}
 
-	/** Parse response data */
-	private void respOperation(Operation op) {
+	/** Parse received data */
+	private void recvOperation(Operation op) {
 		try {
 			synchronized (rx_buf) {
 				if (logger.isOpen())
-					log("RESP " + formatBuf(rx_buf, 0));
+					log("RECV " + formatBuf(rx_buf, 0));
 				rx_buf.flip();
-				op.resp(rx_buf);
+				op.recv(rx_buf);
 				rx_buf.compact();
 			}
 		}
@@ -505,7 +505,7 @@ public class BasePoller implements DevicePoller {
 	/** Stop polling if idle */
 	@Override
 	public void stopPollingIfIdle() {
-		if (isPollEmpty() && isRespEmpty())
+		if (isPollEmpty() && isRecvEmpty())
 			closeChannel();
 	}
 
@@ -516,8 +516,8 @@ public class BasePoller implements DevicePoller {
 		}
 	}
 
-	/** Check if the resp queue is empty */
-	private boolean isRespEmpty() {
+	/** Check if the recv queue is empty */
+	private boolean isRecvEmpty() {
 		synchronized (r_queue) {
 			return r_queue.isEmpty();
 		}

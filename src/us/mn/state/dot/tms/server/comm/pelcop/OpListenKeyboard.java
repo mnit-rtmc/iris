@@ -31,9 +31,9 @@ public class OpListenKeyboard extends OpStep {
 		setPolling(false);
 	}
 
-	/** Parse response from controller */
+	/** Parse data received from controller */
 	@Override
-	public void resp(Operation op, ByteBuffer rx_buf) throws IOException {
+	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		// parse data from keyboard
 	}
 
