@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.InvalidMarkException;
-import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
@@ -54,19 +53,9 @@ public class OpListenKeyboard extends OpStep {
 
 	/** Poll the controller with one packeet */
 	private void doPoll(Operation op, ByteBuffer tx_buf) throws IOException{
-		tx_buf.put((byte) PelcoPProp.STX);
-		tx_buf.mark();
+		PelcoPProp.formatHead(tx_buf);
 		prop.encodeQuery(op, tx_buf);
-		tx_buf.put((byte) PelcoPProp.ETX);
-		tx_buf.reset();
-		int xsum = PelcoPProp.STX;
-		while (true) {
-			int b = tx_buf.get() & 0xFF;
-			xsum ^= b;
-			if (b == PelcoPProp.ETX)
-				break;
-		}
-		tx_buf.put((byte) xsum);
+		PelcoPProp.formatTail(tx_buf);
 	}
 
 	/** Parse data received from controller */
@@ -83,7 +72,6 @@ public class OpListenKeyboard extends OpStep {
 	/** Parse received data */
 	private void doRecv(Operation op, ByteBuffer rx_buf) throws IOException{
 		try {
-			scanRecv(rx_buf);
 			prop = PelcoPProp.parse(rx_buf);
 			prop.decodeQuery(op, rx_buf);
 			prop.parseTail(rx_buf);
@@ -91,27 +79,6 @@ public class OpListenKeyboard extends OpStep {
 		}
 		catch (BufferUnderflowException e) {
 			rx_buf.reset();
-		}
-	}
-
-	/** Scan received data for a valid packet */
-	private void scanRecv(ByteBuffer rx_buf) throws ChecksumException {
-		rx_buf.mark();
-		while ((rx_buf.get() & 0xFF) != PelcoPProp.STX)
-			rx_buf.mark();
-		int xsum = PelcoPProp.STX;
-		while (true) {
-			int b = rx_buf.get() & 0xFF;
-			xsum ^= b;
-			if (b == PelcoPProp.ETX)
-				break;
-		}
-		int c = rx_buf.get() & 0xFF;
-		if (c == xsum)
-			rx_buf.reset();
-		else {
-			rx_buf.mark();
-			throw new ChecksumException();
 		}
 	}
 
