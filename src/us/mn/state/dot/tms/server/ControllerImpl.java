@@ -33,12 +33,14 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.CtrlCondition;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
+import us.mn.state.dot.tms.server.comm.CamKeyboardPoller;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
@@ -856,8 +858,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Poll controller devices */
 	public void pollDevices(int period) {
-		// Feed are not associated with devices
-		queryFeeds();
+		pollController();
 		// Must call getDevices so we don't hold the lock
 		for (ControllerIO io: getDevices())
 			pollDevice(io);
@@ -865,16 +866,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			pollDetectors(period);
 	}
 
-	/** Query feeds */
-	private void queryFeeds() {
-		switch (getProtocol()) {
-		case INC_FEED:
-			queryIncFeed();
-			break;
-		case MSG_FEED:
-			queryMsgFeed();
-			break;
-		}
+	/** Poll controller for protocols with no devices */
+	private void pollController() {
+		queryIncFeed();
+		queryMsgFeed();
+		queryCamKeyboard();
 	}
 
 	/** Query incident feed */
@@ -892,6 +888,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if (dp instanceof MsgFeedPoller) {
 			MsgFeedPoller mfp = (MsgFeedPoller) dp;
 			mfp.queryMessages(this);
+		}
+	}
+
+	/** Query camera keyboard */
+	private void queryCamKeyboard() {
+		DevicePoller dp = getPoller();
+		if (dp instanceof CamKeyboardPoller) {
+			CamKeyboardPoller ckp = (CamKeyboardPoller) dp;
+			// Listen for keyboard messages
+			ckp.sendRequest(this, DeviceRequest.QUERY_STATUS);
 		}
 	}
 
