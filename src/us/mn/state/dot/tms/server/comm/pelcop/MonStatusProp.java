@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -94,11 +95,17 @@ public class MonStatusProp extends PelcoPProp {
 	/** Lookup current camera ID on the selected video monitor */
 	private int lookupCamera() {
 		VideoMonitor vm = VideoMonitorHelper.findUID(monitor);
-		if (vm != null) {
-			Camera c = vm.getCamera();
-			if (c != null)
-				return CameraHelper.parseUID(c.getName());
-		}
-		return 0;
+		if (vm != null)
+			return CameraHelper.parseUID(getCamId(vm));
+		else
+			return 0;
+	}
+
+	/** Get camera ID */
+	static private String getCamId(VideoMonitor vm) {
+		Camera c = vm.getCamera();
+		return (c != null)
+		      ? c.getName()
+		      : SystemAttrEnum.CAMERA_ID_BLANK.getString();
 	}
 }

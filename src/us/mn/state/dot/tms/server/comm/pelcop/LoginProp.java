@@ -53,16 +53,22 @@ public class LoginProp extends PelcoPProp {
 		throws IOException
 	{
 		format8(tx_buf, RESP_CODE);
-		// FIXME: check pin here
-		if (true) {
+		if (isSuccess()) {
 			format8(tx_buf, 1);
 			format8(tx_buf, 0x17);		// kbd ID
 		} else
 			format8(tx_buf, 0);
 	}
 
+	/** Is login successful? */
+	public boolean isSuccess() {
+		// FIXME: check pin here
+		return true;
+	}
+
 	/** Get the next property to send */
+	@Override
 	public PelcoPProp next() {
-		return new DateTimeProp();
+		return isSuccess() ? new DateTimeProp() : null;
 	}
 }

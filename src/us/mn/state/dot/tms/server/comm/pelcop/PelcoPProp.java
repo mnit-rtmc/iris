@@ -46,6 +46,7 @@ abstract public class PelcoPProp extends ControllerProp {
 		case LoginProp.REQ_CODE:
 			return new LoginProp();
 		case MonStatusProp.REQ_CODE:
+		case MonStatusProp.RESP_CODE:
 			return new MonStatusProp(logged_in);
 		default:
 			throw new ParsingException("Unknown msg code: " + mc);

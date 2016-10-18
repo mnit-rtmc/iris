@@ -49,6 +49,10 @@ public class OpListenKeyboard extends OpStep {
 			catch (InvalidMarkException e) {
 				// dumb exception
 			}
+			if (prop instanceof LoginProp) {
+				LoginProp lp = (LoginProp) prop;
+				logged_in = lp.isSuccess();
+			}
 			prop = prop.next();
 		}
 		setPolling(prop != null);
