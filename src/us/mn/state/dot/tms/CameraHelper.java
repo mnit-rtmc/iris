@@ -78,18 +78,21 @@ public class CameraHelper extends BaseHelper {
 	}
 
 	/** Find a camera with the specific UID */
-	static public Camera findUID(String uid) {
-		Integer id = parseUID(uid);
-		if (id != null) {
-			Iterator<Camera> it = iterator();
-			while (it.hasNext()) {
-				Camera cam = it.next();
-				Integer cid = parseUID(cam.getName());
-				if (id.equals(cid))
-					return cam;
-			}
+	static public Camera findUID(int uid) {
+		Iterator<Camera> it = iterator();
+		while (it.hasNext()) {
+			Camera cam = it.next();
+			Integer cid = parseUID(cam.getName());
+			if (cid != null && cid.equals(uid))
+				return cam;
 		}
 		return null;
+	}
+
+	/** Find a camera with the specific UID */
+	static public Camera findUID(String uid) {
+		Integer id = parseUID(uid);
+		return (id != null) ? findUID(id) : null;
 	}
 
 	/** Parse the integer ID of a camera */

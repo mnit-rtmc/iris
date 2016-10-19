@@ -43,7 +43,7 @@ public class MonStatusProp extends PelcoPProp {
 	private final boolean logged_in;
 
 	/** Video monitor number */
-	private int monitor;
+	protected int monitor;
 
 	/** Create a new monitor status property */
 	public MonStatusProp(boolean l) {
@@ -94,6 +94,7 @@ public class MonStatusProp extends PelcoPProp {
 
 	/** Lookup current camera ID on the selected video monitor */
 	private int lookupCamera() {
+		// FIXME: this is a linear search
 		VideoMonitor vm = VideoMonitorHelper.findUID(monitor);
 		if (vm != null)
 			return CameraHelper.parseUID(getCamId(vm));
