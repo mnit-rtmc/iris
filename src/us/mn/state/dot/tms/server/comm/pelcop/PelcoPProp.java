@@ -48,6 +48,8 @@ abstract public class PelcoPProp extends ControllerProp {
 		case MonStatusProp.REQ_CODE:
 		case MonStatusProp.RESP_CODE:
 			return new MonStatusProp(logged_in);
+		case MonCycleProp.REQ_CODE:
+			return new MonCycleProp(logged_in);
 		case CamSelectProp.REQ_CODE:
 			return new CamSelectProp(logged_in);
 		case CamPrevProp.REQ_CODE:

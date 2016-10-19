@@ -58,4 +58,40 @@ public class VideoMonitorHelper extends BaseHelper {
 		Integer id = parseUID(uid);
 		return (id != null) ? findUID(id) : null;
 	}
+
+	/** Find previous video monitor below a given UID */
+	static public VideoMonitor findPrev(int uid) {
+		VideoMonitor pm = null;
+		int pid = 0;
+		Iterator<VideoMonitor> it = iterator();
+		while (it.hasNext()) {
+			VideoMonitor mon = it.next();
+			Integer mid = parseUID(mon.getName());
+			if (mid != null && mid < uid) {
+				if (pid == 0 || pid < mid) {
+					pm = mon;
+					pid = mid;
+				}
+			}
+		}
+		return pm;
+	}
+
+	/** Find next video monitor above a given UID */
+	static public VideoMonitor findNext(int uid) {
+		VideoMonitor nm = null;
+		int nid = 0;
+		Iterator<VideoMonitor> it = iterator();
+		while (it.hasNext()) {
+			VideoMonitor mon = it.next();
+			Integer mid = parseUID(mon.getName());
+			if (mid != null && mid > uid) {
+				if (nid == 0 || nid > mid) {
+					nm = mon;
+					nid = mid;
+				}
+			}
+		}
+		return nm;
+	}
 }
