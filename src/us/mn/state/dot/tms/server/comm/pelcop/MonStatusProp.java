@@ -47,6 +47,12 @@ public class MonStatusProp extends PelcoPProp {
 		      : SystemAttrEnum.CAMERA_ID_BLANK.getString();
 	}
 
+	/** Flag for monitor online status */
+	static private final int BIT_ONLINE = 0x40;
+
+	/** Flag for monitor locked status */
+	static private final int BIT_LOCKED = 0x10;
+
 	/** Logged in flag */
 	private final boolean logged_in;
 
@@ -83,7 +89,7 @@ public class MonStatusProp extends PelcoPProp {
 			int mhi = monitor / 100;
 			int mlo = monitor % 100;
 			formatBCD2(tx_buf, mlo);
-			format8(tx_buf, 0x40);	// ???
+			format8(tx_buf, BIT_ONLINE);
 			format8(tx_buf, 0);
 			formatBCD2(tx_buf, chi);
 			formatBCD2(tx_buf, clo);
