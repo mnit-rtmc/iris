@@ -307,10 +307,15 @@ public final class Operation implements Comparable<Operation> {
 	public void destroy() {
 		if (n_runs > 0 && controller != null) {
 			// FIXME: release device lock
-			updateMaintStatus();
-			updateErrorStatus();
-			controller.completeOperation(getId(), isSuccess());
+			updateStatus();
 		}
+	}
+
+	/** Update status when done or for long-lived operations */
+	public void updateStatus() {
+		updateMaintStatus();
+		updateErrorStatus();
+		controller.completeOperation(getId(), isSuccess());
 	}
 
 	/** Update controller maintenance status */

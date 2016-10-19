@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.InvalidMarkException;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
@@ -28,11 +29,17 @@ import us.mn.state.dot.tms.server.comm.OpStep;
  */
 public class OpListenKeyboard extends OpStep {
 
+	/** Interval to update operation status */
+	static private final long OP_STATUS_INTERVAL_MS = 30 * 1000;
+
 	/** Keyboard logged in flag */
 	private boolean logged_in = false;
 
 	/** Most recent property request */
 	private PelcoPProp prop;
+
+	/** Time to update operation status */
+	private long op_time = TimeSteward.currentTimeMillis();
 
 	/** Create a new listen keyboard step */
 	public OpListenKeyboard() {
@@ -74,6 +81,15 @@ public class OpListenKeyboard extends OpStep {
 		catch (InvalidMarkException e) {
 			// what a stupid exception
 		}
+		if (shouldUpdateOpStatus()) {
+			op.updateStatus();
+			op_time += OP_STATUS_INTERVAL_MS;
+		}
+	}
+
+	/** Check if we should update the operation status */
+	private boolean shouldUpdateOpStatus() {
+		return TimeSteward.currentTimeMillis() >= op_time;
 	}
 
 	/** Parse received data */
