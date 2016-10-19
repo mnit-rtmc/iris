@@ -50,6 +50,10 @@ abstract public class PelcoPProp extends ControllerProp {
 			return new MonStatusProp(logged_in);
 		case CamSelectProp.REQ_CODE:
 			return new CamSelectProp(logged_in);
+		case CamPrevProp.REQ_CODE:
+			return new CamPrevProp(logged_in);
+		case CamNextProp.REQ_CODE:
+			return new CamNextProp(logged_in);
 		default:
 			throw new ParsingException("Unknown msg code: " + mc);
 		}

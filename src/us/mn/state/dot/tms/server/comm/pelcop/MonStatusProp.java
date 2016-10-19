@@ -39,6 +39,14 @@ public class MonStatusProp extends PelcoPProp {
 	/** Monitor status response code */
 	static public final int RESP_CODE = 0xB1;
 
+	/** Get camera ID */
+	static protected String getCamId(VideoMonitor vm) {
+		Camera c = vm.getCamera();
+		return (c != null)
+		      ? c.getName()
+		      : SystemAttrEnum.CAMERA_ID_BLANK.getString();
+	}
+
 	/** Logged in flag */
 	private final boolean logged_in;
 
@@ -100,13 +108,5 @@ public class MonStatusProp extends PelcoPProp {
 			return CameraHelper.parseUID(getCamId(vm));
 		else
 			return 0;
-	}
-
-	/** Get camera ID */
-	static private String getCamId(VideoMonitor vm) {
-		Camera c = vm.getCamera();
-		return (c != null)
-		      ? c.getName()
-		      : SystemAttrEnum.CAMERA_ID_BLANK.getString();
 	}
 }

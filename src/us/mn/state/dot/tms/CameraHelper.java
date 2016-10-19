@@ -116,6 +116,42 @@ public class CameraHelper extends BaseHelper {
 		return v.substring(i);
 	}
 
+	/** Find previous camera below a given UID */
+	static public Camera findPrev(int uid) {
+		Camera pc = null;
+		int pid = 0;
+		Iterator<Camera> it = iterator();
+		while (it.hasNext()) {
+			Camera cam = it.next();
+			Integer cid = parseUID(cam.getName());
+			if (cid != null && cid < uid) {
+				if (pid == 0 || pid < cid) {
+					pc = cam;
+					pid = cid;
+				}
+			}
+		}
+		return pc;
+	}
+
+	/** Find next camera above a given UID */
+	static public Camera findNext(int uid) {
+		Camera nc = null;
+		int nid = 0;
+		Iterator<Camera> it = iterator();
+		while (it.hasNext()) {
+			Camera cam = it.next();
+			Integer cid = parseUID(cam.getName());
+			if (cid != null && cid > uid) {
+				if (nid == 0 || nid > cid) {
+					nc = cam;
+					nid = cid;
+				}
+			}
+		}
+		return nc;
+	}
+
 	/** Get authentication for a camera */
 	static private String getAuth(Camera c) {
 		// FIXME: use controller password if set
