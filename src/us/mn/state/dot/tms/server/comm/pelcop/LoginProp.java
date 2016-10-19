@@ -32,8 +32,8 @@ public class LoginProp extends PelcoPProp {
 	/** Login response code */
 	static public final int RESP_CODE = 0xD3;
 
-	/** Login PIN */
-	private int pin;
+	/** Login success flag */
+	private boolean success = false;
 
 	/** Decode a QUERY request from keyboard */
 	@Override
@@ -42,9 +42,16 @@ public class LoginProp extends PelcoPProp {
 	{
 		if (parse8(rx_buf) != 1)
 			throw new ParsingException("LOGIN A");
-		pin = parseBCD4(rx_buf);
+		int pin = parseBCD4(rx_buf);
 		if (parse8(rx_buf) != 1)
 			throw new ParsingException("LOGIN B");
+		success = checkPin(op, pin);
+	}
+
+	/** Check received PIN against controller password */
+	private boolean checkPin(Operation op, int pin) {
+		String pwd = op.getController().getPassword();
+		return (pwd == null) || pwd.equals(Integer.toString(pin));
 	}
 
 	/** Encode a QUERY response to keyboard */
@@ -54,16 +61,17 @@ public class LoginProp extends PelcoPProp {
 	{
 		format8(tx_buf, RESP_CODE);
 		if (isSuccess()) {
+			// use controller drop for keyboard ID
+			int drop = op.getController().getDrop();
 			format8(tx_buf, 1);
-			format8(tx_buf, 0x17);		// kbd ID
+			formatBCD2(tx_buf, drop);
 		} else
 			format8(tx_buf, 0);
 	}
 
 	/** Is login successful? */
 	public boolean isSuccess() {
-		// FIXME: check pin here
-		return true;
+		return success;
 	}
 
 	/** Get the next property to send */
