@@ -67,9 +67,9 @@ public class OpListenKeyboard extends OpStep {
 
 	/** Poll the controller with one packeet */
 	private void doPoll(Operation op, ByteBuffer tx_buf) throws IOException{
-		PelcoPProp.formatHead(tx_buf);
+		prop.formatHead(tx_buf);
 		prop.encodeQuery(op, tx_buf);
-		PelcoPProp.formatTail(tx_buf);
+		prop.formatTail(tx_buf);
 	}
 
 	/** Parse data received from controller */

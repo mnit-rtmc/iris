@@ -32,6 +32,9 @@ abstract public class PelcoPProp extends ControllerProp {
 	/** End transmission byte */
 	static private final int ETX = 0xAF;
 
+	/** Acknowledge byte */
+	static protected final int ACK = 0xA2;
+
 	/** Parse a valid packet */
 	static public PelcoPProp parse(ByteBuffer rx_buf, boolean logged_in)
 		throws ParsingException
@@ -45,6 +48,8 @@ abstract public class PelcoPProp extends ControllerProp {
 			return new AliveProp();
 		case LoginProp.REQ_CODE:
 			return new LoginProp();
+		case ReleaseProp.REQ_CODE:
+			return new ReleaseProp();
 		case MonStatusProp.REQ_CODE:
 		case MonStatusProp.RESP_CODE:
 			return new MonStatusProp(logged_in);
@@ -60,6 +65,8 @@ abstract public class PelcoPProp extends ControllerProp {
 			return new CamLockProp(logged_in);
 		case CamUnlockProp.REQ_CODE:
 			return new CamUnlockProp(logged_in);
+		case CamControlProp.REQ_CODE:
+			return new CamControlProp(logged_in);
 		default:
 			throw new ParsingException("Unknown msg code: " + mc);
 		}
@@ -95,13 +102,13 @@ abstract public class PelcoPProp extends ControllerProp {
 	}
 
 	/** Format the head of a packet */
-	static public void formatHead(ByteBuffer tx_buf) {
+	public void formatHead(ByteBuffer tx_buf) {
 		tx_buf.put((byte) STX);
 		tx_buf.mark();
 	}
 
 	/** Format the tail of a packet */
-	static public void formatTail(ByteBuffer tx_buf) {
+	public void formatTail(ByteBuffer tx_buf) {
 		tx_buf.put((byte) ETX);
 		tx_buf.reset();
 		int xsum = STX;
