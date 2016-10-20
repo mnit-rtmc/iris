@@ -19,7 +19,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.InvalidMarkException;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
@@ -43,7 +43,7 @@ public class OpListenKeyboard extends OpStep {
 	private PelcoPProp prop;
 
 	/** Cached video monitor */
-	private VideoMonitor mon;
+	private VideoMonitorImpl mon;
 
 	/** Create a new listen keyboard step */
 	public OpListenKeyboard() {

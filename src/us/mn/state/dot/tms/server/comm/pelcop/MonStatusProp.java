@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
+import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -40,7 +41,7 @@ public class MonStatusProp extends PelcoPProp {
 	static public final int RESP_CODE = 0xB1;
 
 	/** Get camera ID */
-	static protected String getCamId(VideoMonitor vm) {
+	static protected String getCamId(VideoMonitorImpl vm) {
 		Camera c = vm.getCamera();
 		return (c != null)
 		      ? c.getName()
@@ -62,10 +63,10 @@ public class MonStatusProp extends PelcoPProp {
 	private final boolean logged_in;
 
 	/** Video monitor */
-	private VideoMonitor monitor;
+	private VideoMonitorImpl monitor;
 
 	/** Create a new monitor status property */
-	public MonStatusProp(boolean l, VideoMonitor vm) {
+	public MonStatusProp(boolean l, VideoMonitorImpl vm) {
 		logged_in = l;
 		monitor = vm;
 	}
@@ -115,7 +116,7 @@ public class MonStatusProp extends PelcoPProp {
 
 	/** Get current camera ID on the selected video monitor */
 	protected int getCamNumber() {
-		VideoMonitor vm = getMonitor();
+		VideoMonitorImpl vm = getMonitor();
 		if (vm != null)
 			return parseUID(getCamId(vm));
 		else
@@ -134,7 +135,7 @@ public class MonStatusProp extends PelcoPProp {
 
 	/** Get the video monitor number */
 	protected Integer getMonNumber() {
-		VideoMonitor vm = getMonitor();
+		VideoMonitorImpl vm = getMonitor();
 		if (vm != null)
 			return parseUID(vm.getName());
 		else
@@ -143,11 +144,12 @@ public class MonStatusProp extends PelcoPProp {
 
 	/** Set the video monitor */
 	protected void setMonitor(VideoMonitor vm) {
-		monitor = vm;
+		if (vm instanceof VideoMonitorImpl)
+			monitor = (VideoMonitorImpl) vm;
 	}
 
 	/** Get the video monitor */
-	public VideoMonitor getMonitor() {
+	public VideoMonitorImpl getMonitor() {
 		return monitor;
 	}
 }

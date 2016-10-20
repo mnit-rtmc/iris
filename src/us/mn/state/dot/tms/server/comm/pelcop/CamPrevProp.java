@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.pelcop;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
-import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -33,7 +32,7 @@ public class CamPrevProp extends MonStatusProp {
 	static public final int REQ_CODE = 0xB7;
 
 	/** Create a new camera previous property */
-	public CamPrevProp(boolean l, VideoMonitor vm) {
+	public CamPrevProp(boolean l, VideoMonitorImpl vm) {
 		super(l, vm);
 	}
 
@@ -50,14 +49,13 @@ public class CamPrevProp extends MonStatusProp {
 
 	/** Select previous camera on a video monitor */
 	private void selectPrevCamera() {
-		VideoMonitor vm = getMonitor();
-		if (vm instanceof VideoMonitorImpl) {
-			VideoMonitorImpl mon = (VideoMonitorImpl) vm;
+		VideoMonitorImpl vm = getMonitor();
+		if (vm != null) {
 			Integer uid = parseUID(getCamId(vm));
 			if (uid != null) {
 				Camera c = CameraHelper.findPrev(uid);
 				if (c != null)
-					mon.setCameraNotify(c);
+					vm.setCameraNotify(c);
 			}
 		}
 	}

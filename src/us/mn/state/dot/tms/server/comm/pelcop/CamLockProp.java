@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -30,7 +30,7 @@ public class CamLockProp extends MonStatusProp {
 	static public final int REQ_CODE = 0xBB;
 
 	/** Create a new camera lock property */
-	public CamLockProp(boolean l, VideoMonitor vm) {
+	public CamLockProp(boolean l, VideoMonitorImpl vm) {
 		super(l, vm);
 	}
 

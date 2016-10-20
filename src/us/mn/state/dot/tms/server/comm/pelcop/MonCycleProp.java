@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
+import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -31,7 +31,7 @@ public class MonCycleProp extends MonStatusProp {
 	static public final int REQ_CODE = 0xC9;
 
 	/** Create a new monitor cycle property */
-	public MonCycleProp(boolean l, VideoMonitor vm) {
+	public MonCycleProp(boolean l, VideoMonitorImpl vm) {
 		super(l, vm);
 	}
 

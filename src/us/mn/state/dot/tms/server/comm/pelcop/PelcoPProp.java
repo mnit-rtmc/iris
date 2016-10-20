@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -38,7 +38,7 @@ abstract public class PelcoPProp extends ControllerProp {
 
 	/** Parse a valid packet */
 	static public PelcoPProp parse(ByteBuffer rx_buf, boolean logged_in,
-		VideoMonitor vm) throws ParsingException
+		VideoMonitorImpl vm) throws ParsingException
 	{
 		scanPkt(rx_buf);
 		if (parse8(rx_buf) != STX)
