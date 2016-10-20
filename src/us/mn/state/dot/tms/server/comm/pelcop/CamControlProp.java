@@ -65,6 +65,29 @@ public class CamControlProp extends MonStatusProp {
 	/** Zoom out flag */
 	static private final int BIT_ZOOM_OUT = 1 << 6;
 
+	/** Dead zone for joystick slop */
+	static private final int DEAD_ZONE = 6;
+
+	/** Maximum pan value */
+	static private final int MAX_PAN = 64;
+
+	/** Maximum tilt value */
+	static private final int MAX_TILT = 63;
+
+	/** Map a pan value to [0, 1] range */
+	static private float pan_range(int p) {
+		return (p > DEAD_ZONE)
+		      ? (p - DEAD_ZONE) / (float) (MAX_PAN - DEAD_ZONE)
+		      : 0;
+	}
+
+	/** Map a tilt value to [0, 1] range */
+	static private float tilt_range(int p) {
+		return (p > DEAD_ZONE)
+		      ? (p - DEAD_ZONE) / (float) (MAX_TILT - DEAD_ZONE)
+		      : 0;
+	}
+
 	/** Create a new camera control property */
 	public CamControlProp(boolean l) {
 		super(l);
@@ -153,9 +176,9 @@ public class CamControlProp extends MonStatusProp {
 		case 0:
 			return 0;
 		case BIT_PAN_RIGHT:
-			return c2 / 64f;
+			return pan_range(c2);
 		case BIT_PAN_LEFT:
-			return c2 / -64f;
+			return -pan_range(c2);
 		default:
 			throw new ParsingException("PAN");
 		}
@@ -167,9 +190,9 @@ public class CamControlProp extends MonStatusProp {
 		case 0:
 			return 0;
 		case BIT_TILT_UP:
-			return c3 / 63f;
+			return tilt_range(c3);
 		case BIT_TILT_DOWN:
-			return c3 / -63f;
+			return -tilt_range(c3);
 		default:
 			throw new ParsingException("TILT");
 		}
