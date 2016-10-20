@@ -53,6 +53,28 @@ public class MonStatusProp extends PelcoPProp {
 		return CameraHelper.parseUID(uid);
 	}
 
+	/** Find a camera by UID */
+	static protected Camera findCam(int cam) {
+		// First, lookup a guessed name for camera
+		Camera c = CameraHelper.lookup(buildCamName(cam));
+		if (c != null)
+			return c;
+		else {
+			// Guess not correct, do linear search
+			return CameraHelper.findUID(cam);
+		}
+	}
+
+	/** Build a camera name guess */
+	static private String buildCamName(int cam) {
+		StringBuilder sb = new StringBuilder();
+		sb.append('C');
+		sb.append(cam);
+		while (sb.length() < 4)
+			sb.insert(1, '0');
+		return sb.toString();
+	}
+
 	/** Flag for monitor online status */
 	static private final int BIT_ONLINE = 0x40;
 
@@ -127,7 +149,7 @@ public class MonStatusProp extends PelcoPProp {
 	protected void setMonNumber(int m) {
 		// First, compare with cached monitor
 		Integer mon = getMonNumber();
-		if (m != mon) {
+		if (mon == null || mon != m) {
 			// No match, must do linear search
 			setMonitor(VideoMonitorHelper.findUID(m));
 		}

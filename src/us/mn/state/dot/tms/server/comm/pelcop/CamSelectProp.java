@@ -16,8 +16,6 @@ package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CameraHelper;
-import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -55,7 +53,7 @@ public class CamSelectProp extends MonStatusProp {
 	private void selectCamera(int cam) {
 		VideoMonitorImpl vm = getMonitor();
 		if (vm != null) {
-			Camera c = CameraHelper.findUID(cam);
+			Camera c = findCam(cam);
 			if (c != null)
 				vm.setCameraNotify(c);
 		}

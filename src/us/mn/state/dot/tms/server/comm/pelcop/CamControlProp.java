@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CameraHelper;
 import static us.mn.state.dot.tms.DeviceRequest.*;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
@@ -116,8 +115,7 @@ public class CamControlProp extends MonStatusProp {
 	private void sendControl(int cam, int c0, int c1, int c2, int c3)
 		throws ParsingException
 	{
-		// FIXME: this is a linear search
-		Camera c = CameraHelper.findUID(cam);
+		Camera c = findCam(cam);
 		if (c instanceof CameraImpl) {
 			CameraImpl ci = (CameraImpl) c;
 			if (c0 != 0) {
