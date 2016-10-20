@@ -47,6 +47,11 @@ public class MonStatusProp extends PelcoPProp {
 		      : SystemAttrEnum.CAMERA_ID_BLANK.getString();
 	}
 
+	/** Parse a device UID */
+	static protected Integer parseUID(String uid) {
+		return CameraHelper.parseUID(uid);
+	}
+
 	/** Flag for monitor online status */
 	static private final int BIT_ONLINE = 0x40;
 
@@ -112,7 +117,7 @@ public class MonStatusProp extends PelcoPProp {
 	protected int getCamNumber() {
 		VideoMonitor vm = getMonitor();
 		if (vm != null)
-			return CameraHelper.parseUID(getCamId(vm));
+			return parseUID(getCamId(vm));
 		else
 			return 0;
 	}
@@ -131,7 +136,7 @@ public class MonStatusProp extends PelcoPProp {
 	protected Integer getMonNumber() {
 		VideoMonitor vm = getMonitor();
 		if (vm != null)
-			return CameraHelper.parseUID(vm.getName());
+			return parseUID(vm.getName());
 		else
 			return null;
 	}

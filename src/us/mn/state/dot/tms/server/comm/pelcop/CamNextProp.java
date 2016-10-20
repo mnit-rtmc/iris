@@ -53,7 +53,7 @@ public class CamNextProp extends MonStatusProp {
 		VideoMonitor vm = getMonitor();
 		if (vm instanceof VideoMonitorImpl) {
 			VideoMonitorImpl mon = (VideoMonitorImpl) vm;
-			Integer uid = CameraHelper.parseUID(getCamId(vm));
+			Integer uid = parseUID(getCamId(vm));
 			if (uid != null) {
 				Camera c = CameraHelper.findNext(uid);
 				if (c != null)

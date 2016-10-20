@@ -53,7 +53,7 @@ public class CamPrevProp extends MonStatusProp {
 		VideoMonitor vm = getMonitor();
 		if (vm instanceof VideoMonitorImpl) {
 			VideoMonitorImpl mon = (VideoMonitorImpl) vm;
-			Integer uid = CameraHelper.parseUID(getCamId(vm));
+			Integer uid = parseUID(getCamId(vm));
 			if (uid != null) {
 				Camera c = CameraHelper.findPrev(uid);
 				if (c != null)
