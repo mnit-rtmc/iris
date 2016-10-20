@@ -34,8 +34,8 @@ public class CamSelectProp extends MonStatusProp {
 	static public final int REQ_CODE = 0xB2;
 
 	/** Create a new camera select property */
-	public CamSelectProp(boolean l) {
-		super(l);
+	public CamSelectProp(boolean l, VideoMonitor vm) {
+		super(l, vm);
 	}
 
 	/** Decode a QUERY request from keyboard */

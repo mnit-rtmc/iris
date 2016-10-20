@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -36,8 +37,8 @@ abstract public class PelcoPProp extends ControllerProp {
 	static protected final int ACK = 0xA2;
 
 	/** Parse a valid packet */
-	static public PelcoPProp parse(ByteBuffer rx_buf, boolean logged_in)
-		throws ParsingException
+	static public PelcoPProp parse(ByteBuffer rx_buf, boolean logged_in,
+		VideoMonitor vm) throws ParsingException
 	{
 		scanPkt(rx_buf);
 		if (parse8(rx_buf) != STX)
@@ -52,21 +53,21 @@ abstract public class PelcoPProp extends ControllerProp {
 			return new ReleaseProp();
 		case MonStatusProp.REQ_CODE:
 		case MonStatusProp.RESP_CODE:
-			return new MonStatusProp(logged_in);
+			return new MonStatusProp(logged_in, vm);
 		case MonCycleProp.REQ_CODE:
-			return new MonCycleProp(logged_in);
+			return new MonCycleProp(logged_in, vm);
 		case CamSelectProp.REQ_CODE:
-			return new CamSelectProp(logged_in);
+			return new CamSelectProp(logged_in, vm);
 		case CamPrevProp.REQ_CODE:
-			return new CamPrevProp(logged_in);
+			return new CamPrevProp(logged_in, vm);
 		case CamNextProp.REQ_CODE:
-			return new CamNextProp(logged_in);
+			return new CamNextProp(logged_in, vm);
 		case CamLockProp.REQ_CODE:
-			return new CamLockProp(logged_in);
+			return new CamLockProp(logged_in, vm);
 		case CamUnlockProp.REQ_CODE:
-			return new CamUnlockProp(logged_in);
+			return new CamUnlockProp(logged_in, vm);
 		case CamControlProp.REQ_CODE:
-			return new CamControlProp(logged_in);
+			return new CamControlProp(logged_in, vm);
 		default:
 			throw new ParsingException("Unknown msg code: " + mc);
 		}

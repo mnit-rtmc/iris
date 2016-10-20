@@ -31,8 +31,8 @@ public class MonCycleProp extends MonStatusProp {
 	static public final int REQ_CODE = 0xC9;
 
 	/** Create a new monitor cycle property */
-	public MonCycleProp(boolean l) {
-		super(l);
+	public MonCycleProp(boolean l, VideoMonitor vm) {
+		super(l, vm);
 	}
 
 	/** Decode a QUERY request from keyboard */

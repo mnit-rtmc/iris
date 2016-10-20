@@ -33,8 +33,8 @@ public class CamPrevProp extends MonStatusProp {
 	static public final int REQ_CODE = 0xB7;
 
 	/** Create a new camera previous property */
-	public CamPrevProp(boolean l) {
-		super(l);
+	public CamPrevProp(boolean l, VideoMonitor vm) {
+		super(l, vm);
 	}
 
 	/** Decode a QUERY request from keyboard */

@@ -19,6 +19,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.InvalidMarkException;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
@@ -32,14 +33,17 @@ public class OpListenKeyboard extends OpStep {
 	/** Interval to update operation status */
 	static private final long OP_STATUS_INTERVAL_MS = 30 * 1000;
 
+	/** Time to update operation status */
+	private long op_time = TimeSteward.currentTimeMillis();
+
 	/** Keyboard logged in flag */
 	private boolean logged_in = false;
 
 	/** Most recent property request */
 	private PelcoPProp prop;
 
-	/** Time to update operation status */
-	private long op_time = TimeSteward.currentTimeMillis();
+	/** Cached video monitor */
+	private VideoMonitor mon;
 
 	/** Create a new listen keyboard step */
 	public OpListenKeyboard() {
@@ -95,10 +99,14 @@ public class OpListenKeyboard extends OpStep {
 	/** Parse received data */
 	private void doRecv(Operation op, ByteBuffer rx_buf) throws IOException{
 		try {
-			prop = PelcoPProp.parse(rx_buf, logged_in);
+			prop = PelcoPProp.parse(rx_buf, logged_in, mon);
 			prop.decodeQuery(op, rx_buf);
 			prop.parseTail(rx_buf);
 			setPolling(true);
+			if (prop instanceof MonStatusProp) {
+				MonStatusProp stat = (MonStatusProp) prop;
+				mon = stat.getMonitor();
+			}
 		}
 		catch (BufferUnderflowException e) {
 			rx_buf.reset();

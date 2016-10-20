@@ -33,8 +33,8 @@ public class CamNextProp extends MonStatusProp {
 	static public final int REQ_CODE = 0xB6;
 
 	/** Create a new camera next property */
-	public CamNextProp(boolean l) {
-		super(l);
+	public CamNextProp(boolean l, VideoMonitor vm) {
+		super(l, vm);
 	}
 
 	/** Decode a QUERY request from keyboard */

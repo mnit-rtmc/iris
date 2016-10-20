@@ -60,8 +60,9 @@ public class MonStatusProp extends PelcoPProp {
 	private VideoMonitor monitor;
 
 	/** Create a new monitor status property */
-	public MonStatusProp(boolean l) {
+	public MonStatusProp(boolean l, VideoMonitor vm) {
 		logged_in = l;
+		monitor = vm;
 	}
 
 	/** Decode a QUERY request from keyboard */

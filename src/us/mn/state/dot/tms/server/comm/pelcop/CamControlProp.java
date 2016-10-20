@@ -18,6 +18,7 @@ import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import static us.mn.state.dot.tms.DeviceRequest.*;
+import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -89,8 +90,8 @@ public class CamControlProp extends MonStatusProp {
 	}
 
 	/** Create a new camera control property */
-	public CamControlProp(boolean l) {
-		super(l);
+	public CamControlProp(boolean l, VideoMonitor vm) {
+		super(l, vm);
 	}
 
 	/** Decode a QUERY request from keyboard */
