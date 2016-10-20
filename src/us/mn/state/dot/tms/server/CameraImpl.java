@@ -345,17 +345,21 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	/** Command the camera pan, tilt or zoom */
 	@Override
 	public void setPtz(Float[] ptz) {
-		if (checkPtz(ptz)) {
-			CameraPoller cp = getCameraPoller();
-			if (cp != null)
-				cp.sendPTZ(this, ptz[0], ptz[1], ptz[2]);
-		}
+		if (checkPtz(ptz))
+			sendPTZ(ptz[0], ptz[1], ptz[2]);
 	}
 
 	/** Check for valid PTZ parameters */
 	private boolean checkPtz(Float[] ptz) {
 		return (ptz != null) && (ptz.length == 3)
 		    && (ptz[0] != null) && (ptz[1] != null) && (ptz[2] != null);
+	}
+
+	/** Send pan, tilt, zoom command */
+	public void sendPTZ(float p, float t, float z) {
+		CameraPoller cp = getCameraPoller();
+		if (cp != null)
+			cp.sendPTZ(this, p, t, z);
 	}
 
 	/** Command the camera to store a preset */
