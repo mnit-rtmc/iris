@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * Monitor status property.  The CM9760-KBD sends this request to the matrix
- * about every 0.75 seconds.  The matrix should send a monitor status response
+ * a few times per second.  The matrix should send a monitor status response
  * back.  If logon is required, an empty monitor status response is sent.
  *
  * @author Douglas Lau
