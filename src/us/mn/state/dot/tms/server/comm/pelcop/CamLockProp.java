@@ -43,7 +43,7 @@ public class CamLockProp extends MonStatusProp {
 		int mhi = parseBCD2(rx_buf);
 		if (parse8(rx_buf) != 0)
 			throw new ParsingException("LOCK");
-		monitor = (100 * mhi) + mlo;
+		setMonNumber((100 * mhi) + mlo);
 		// FIXME: set monitor locked status
 	}
 }

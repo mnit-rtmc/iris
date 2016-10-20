@@ -56,8 +56,8 @@ public class MonStatusProp extends PelcoPProp {
 	/** Logged in flag */
 	private final boolean logged_in;
 
-	/** Video monitor number */
-	protected int monitor;
+	/** Video monitor */
+	private VideoMonitor monitor;
 
 	/** Create a new monitor status property */
 	public MonStatusProp(boolean l) {
@@ -73,7 +73,7 @@ public class MonStatusProp extends PelcoPProp {
 		if (parse8(rx_buf) != 1)
 			throw new ParsingException("MON EXT");
 		int mhi = parseBCD2(rx_buf);
-		monitor = (100 * mhi) + mlo;
+		setMonNumber((100 * mhi) + mlo);
 	}
 
 	/** Encode a QUERY response to keyboard */
@@ -82,12 +82,13 @@ public class MonStatusProp extends PelcoPProp {
 		throws IOException
 	{
 		format8(tx_buf, RESP_CODE);
-		if (logged_in) {
-			int cam = lookupCamera();
+		Integer mon = getMonNumber();
+		if (logged_in && mon != null) {
+			int cam = getCamNumber();
 			int chi = cam / 100;
 			int clo = cam % 100;
-			int mhi = monitor / 100;
-			int mlo = monitor % 100;
+			int mhi = mon / 100;
+			int mlo = mon % 100;
 			formatBCD2(tx_buf, mlo);
 			format8(tx_buf, BIT_ONLINE);
 			format8(tx_buf, 0);
@@ -106,13 +107,41 @@ public class MonStatusProp extends PelcoPProp {
 		}
 	}
 
-	/** Lookup current camera ID on the selected video monitor */
-	private int lookupCamera() {
-		// FIXME: this is a linear search
-		VideoMonitor vm = VideoMonitorHelper.findUID(monitor);
+	/** Get current camera ID on the selected video monitor */
+	protected int getCamNumber() {
+		VideoMonitor vm = getMonitor();
 		if (vm != null)
 			return CameraHelper.parseUID(getCamId(vm));
 		else
 			return 0;
+	}
+
+	/** Set the video monitor number */
+	protected void setMonNumber(int m) {
+		// First, compare with cached monitor
+		Integer mon = getMonNumber();
+		if (m != mon) {
+			// No match, must do linear search
+			setMonitor(VideoMonitorHelper.findUID(m));
+		}
+	}
+
+	/** Get the video monitor number */
+	protected Integer getMonNumber() {
+		VideoMonitor vm = getMonitor();
+		if (vm != null)
+			return CameraHelper.parseUID(vm.getName());
+		else
+			return null;
+	}
+
+	/** Set the video monitor */
+	protected void setMonitor(VideoMonitor vm) {
+		monitor = vm;
+	}
+
+	/** Get the video monitor */
+	public VideoMonitor getMonitor() {
+		return monitor;
 	}
 }

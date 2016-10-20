@@ -45,7 +45,7 @@ public class CamUnlockProp extends MonStatusProp {
 		int mhi = parseBCD2(rx_buf);
 		if (parse8(rx_buf) != 0)
 			throw new ParsingException("UNLOCK B");
-		monitor = (100 * mhi) + mlo;
+		setMonNumber((100 * mhi) + mlo);
 		// FIXME: clear monitor locked status
 	}
 }

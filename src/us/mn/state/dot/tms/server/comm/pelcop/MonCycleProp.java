@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -48,31 +47,20 @@ public class MonCycleProp extends MonStatusProp {
 			throw new ParsingException("DIR");
 		int mlo = parseBCD2(rx_buf);
 		int mhi = parseBCD2(rx_buf);
-		monitor = (100 * mhi) + mlo;
+		int mon = (100 * mhi) + mlo;
 		if (dir == 1)
-			selectNextMonitor();
+			selectNextMonitor(mon);
 		else
-			selectPrevMonitor();
+			selectPrevMonitor(mon);
 	}
 
 	/** Select next video monitor */
-	private void selectNextMonitor() {
-		// FIXME: this is a linear search
-		selectMonitor(VideoMonitorHelper.findNext(monitor));
+	private void selectNextMonitor(int mon) {
+		setMonitor(VideoMonitorHelper.findNext(mon));
 	}
 
 	/** Select previous video monitor */
-	private void selectPrevMonitor() {
-		// FIXME: this is a linear search
-		selectMonitor(VideoMonitorHelper.findPrev(monitor));
-	}
-
-	/** Select a video monitor */
-	private void selectMonitor(VideoMonitor vm) {
-		if (vm != null) {
-			Integer mid = CameraHelper.parseUID(vm.getName());
-			if (mid != null)
-				monitor = mid;
-		}
+	private void selectPrevMonitor(int mon) {
+		setMonitor(VideoMonitorHelper.findPrev(mon));
 	}
 }

@@ -48,17 +48,15 @@ public class CamSelectProp extends MonStatusProp {
 		int mhi = parseBCD2(rx_buf);
 		if (parse8(rx_buf) != 0)
 			throw new ParsingException("CAM EXT");
-		monitor = (100 * mhi) + mlo;
+		setMonNumber((100 * mhi) + mlo);
 		selectCamera(cam);
 	}
 
 	/** Select camera on a video monitor */
 	private void selectCamera(int cam) {
-		// FIXME: this is a linear search
-		VideoMonitor vm = VideoMonitorHelper.findUID(monitor);
+		VideoMonitor vm = getMonitor();
 		if (vm instanceof VideoMonitorImpl) {
 			VideoMonitorImpl mon = (VideoMonitorImpl) vm;
-			// FIXME: this is another linear search
 			Camera c = CameraHelper.findUID(cam);
 			if (c != null)
 				mon.setCameraNotify(c);

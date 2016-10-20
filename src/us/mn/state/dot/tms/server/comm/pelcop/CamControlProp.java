@@ -107,7 +107,7 @@ public class CamControlProp extends MonStatusProp {
 		int mhi = parseBCD2(rx_buf);
 		if (parse8(rx_buf) != 0)
 			throw new ParsingException("PTZ");
-		monitor = (100 * mhi) + mlo;
+		setMonNumber((100 * mhi) + mlo);
 		sendControl(cam, c0, c1, c2, c3);
 	}
 
@@ -115,7 +115,7 @@ public class CamControlProp extends MonStatusProp {
 	private void sendControl(int cam, int c0, int c1, int c2, int c3)
 		throws ParsingException
 	{
-		// FIXME: this is another linear search
+		// FIXME: this is a linear search
 		Camera c = CameraHelper.findUID(cam);
 		if (c instanceof CameraImpl) {
 			CameraImpl ci = (CameraImpl) c;
