@@ -133,13 +133,13 @@ public class TransGeoLoc implements GeoLoc {
 		return lon;
 	}
 
-	/** Set the milepoint */
+	/** Set the landmark */
 	@Override
-	public void setMilepoint(String m) { }
+	public void setLandmark(String lm) { }
 
-	/** Get the milepoint */
+	/** Get the landmark */
 	@Override
-	public String getMilepoint() {
+	public String getLandmark() {
 		return null;
 	}
 }

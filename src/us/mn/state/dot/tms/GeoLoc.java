@@ -70,9 +70,9 @@ public interface GeoLoc extends SonarObject {
 	/** Get the longitude */
 	Double getLon();
 
-	/** Set the milepoint */
-	void setMilepoint(String m);
+	/** Set the landmark */
+	void setLandmark(String lm);
 
-	/** Get the milepoint */
-	String getMilepoint();
+	/** Get the landmark */
+	String getLandmark();
 }

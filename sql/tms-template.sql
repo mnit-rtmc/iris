@@ -258,7 +258,7 @@ CREATE TABLE iris.geo_loc (
 	cross_mod smallint REFERENCES iris.road_modifier(id),
 	lat double precision,
 	lon double precision,
-	milepoint VARCHAR(16)
+	landmark VARCHAR(16)
 );
 
 CREATE TABLE iris.map_extent (
@@ -1938,7 +1938,7 @@ CREATE VIEW geo_loc_view AS
 	r_dir.direction AS road_dir, r_dir.dir AS rdir,
 	m.modifier AS cross_mod, m.mod AS xmod, c.abbrev as xst,
 	l.cross_street, c_dir.direction AS cross_dir,
-	l.lat, l.lon, l.milepoint
+	l.lat, l.lon, l.landmark
 	FROM iris.geo_loc l
 	LEFT JOIN iris.road r ON l.roadway = r.name
 	LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
@@ -2283,7 +2283,7 @@ CREATE VIEW controller_device_view AS
 GRANT SELECT ON controller_device_view TO PUBLIC;
 
 CREATE VIEW controller_report AS
-	SELECT c.name, c.comm_link, c.drop_id, l.milepoint, cab.geo_loc,
+	SELECT c.name, c.comm_link, c.drop_id, l.landmark, cab.geo_loc,
 	trim(l.roadway || ' ' || l.road_dir) || ' ' || l.cross_mod || ' ' ||
 		trim(l.cross_street || ' ' || l.cross_dir) AS "location",
 	cab.style AS "type", d.name AS device, d.pin,

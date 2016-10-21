@@ -187,8 +187,8 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	/** Longitude field */
 	private final JTextField lon_txt = new JTextField();
 
-	/** Milepoint field */
-	private final JTextField milepoint_txt = new JTextField();
+	/** Landmark field */
+	private final JTextField landmark_txt = new JTextField();
 
 	/** Point selector */
 	private final PointSelector point_sel = new PointSelector() {
@@ -248,8 +248,8 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		add("location.longitude");
 		add(lon_txt, Stretch.WIDE);
 		add(new JLabel(), Stretch.LEFT);
-		add("location.milepoint");
-		add(milepoint_txt, Stretch.WIDE);
+		add("location.landmark");
+		add(landmark_txt, Stretch.WIDE);
 		add(new JLabel(), Stretch.LEFT);
 		createJobs();
 		watcher.initialize();
@@ -276,11 +276,11 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 				setLon(getTextDouble(lon_txt));
 			}
 		});
-		milepoint_txt.addFocusListener(new FocusAdapter() {
+		landmark_txt.addFocusListener(new FocusAdapter() {
 			@Override
 			public void focusLost(FocusEvent e) {
-				String mp = milepoint_txt.getText();
-				setMilepoint(mp.trim());
+				String lm = landmark_txt.getText();
+				setLandmark(lm.trim());
 			}
 		});
 	}
@@ -306,11 +306,11 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 			l.setLon(ln);
 	}
 
-	/** Set the milepoint */
-	private void setMilepoint(String mp) {
+	/** Set the landmark */
+	private void setLandmark(String lm) {
 		GeoLoc l = loc;
 		if (l != null)
-			l.setMilepoint(("".equals(mp)) ? null : mp);
+			l.setLandmark(("".equals(lm)) ? null : lm);
 	}
 
 	/** Update the edit mode */
@@ -325,7 +325,7 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		lon_txt.setEnabled(canUpdate(l, "lon"));
 		select_pt.setEnabled(canUpdate(l, "lat")
 		                  && canUpdate(l, "lon"));
-		milepoint_txt.setEnabled(canUpdate(l, "milepoint"));
+		landmark_txt.setEnabled(canUpdate(l, "landmark"));
 	}
 
 	/** Update one attribute (from ProxyView). */
@@ -349,9 +349,9 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 			lat_txt.setText(asText(l.getLat()));
 		if (a == null || a.equals("lon"))
 			lon_txt.setText(asText(l.getLon()));
-		if (a == null || a.equals("milepoint")) {
-			String mp = l.getMilepoint();
-			milepoint_txt.setText((mp != null) ? mp : "");
+		if (a == null || a.equals("landmark")) {
+			String lm = l.getLandmark();
+			landmark_txt.setText((lm != null) ? lm : "");
 		}
 		// NOTE: this was needed to fix a problem where a combo box
 		//       displays the wrong entry after call to setSelectedItem
@@ -381,8 +381,8 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		lat_txt.setText("");
 		lon_txt.setEnabled(false);
 		lon_txt.setText("");
-		milepoint_txt.setEnabled(false);
-		milepoint_txt.setText("");
+		landmark_txt.setEnabled(false);
+		landmark_txt.setText("");
 		select_pt.setEnabled(false);
 	}
 }
