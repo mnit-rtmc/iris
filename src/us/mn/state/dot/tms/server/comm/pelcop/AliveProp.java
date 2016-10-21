@@ -18,7 +18,8 @@ import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.server.comm.Operation;
 
 /**
- * Alive property.
+ * Alive property.  This message is sent after logging in but before selecting
+ * a monitor.
  *
  * @author Douglas Lau
  */

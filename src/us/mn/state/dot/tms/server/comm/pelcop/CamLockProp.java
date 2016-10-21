@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Camera lock property.
+ * Camera lock property.  This message locks a camera to the selected monitor.
  *
  * @author Douglas Lau
  */

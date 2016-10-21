@@ -21,7 +21,8 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Monitor cycle property.
+ * Monitor cycle property.  This message is sent to cycle forward / reverse
+ * through the monitor list.
  *
  * @author Douglas Lau
  */

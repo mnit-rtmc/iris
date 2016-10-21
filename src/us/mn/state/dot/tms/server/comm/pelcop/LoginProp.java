@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Login property.
+ * Login property.  This message is sent when a login request is made.
  *
  * @author Douglas Lau
  */

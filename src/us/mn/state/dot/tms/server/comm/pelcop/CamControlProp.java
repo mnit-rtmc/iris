@@ -23,7 +23,8 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Camera control property.
+ * Camera control property.  This message is sent by the keyboard to control
+ * the selected camera.
  *
  * @author Douglas Lau
  */

@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Camera unlock property.
+ * Camera unlock property.  This message unlocks a camera on a monitor.
  *
  * @author Douglas Lau
  */

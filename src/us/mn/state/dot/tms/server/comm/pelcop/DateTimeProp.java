@@ -20,7 +20,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.comm.Operation;
 
 /**
- * Date / time property.
+ * Date / time property.  This message sends the date / time to the keyboard.
  *
  * @author Douglas Lau
  */

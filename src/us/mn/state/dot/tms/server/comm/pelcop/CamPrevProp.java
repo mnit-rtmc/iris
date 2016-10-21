@@ -22,7 +22,8 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Camera previous select property.
+ * Camera previous select property.  This message selects the previous (lower-
+ * numbered) camera on a monitor.
  *
  * @author Douglas Lau
  */

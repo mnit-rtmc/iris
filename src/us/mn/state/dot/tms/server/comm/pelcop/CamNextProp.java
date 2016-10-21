@@ -22,7 +22,8 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Camera next select property.
+ * Camera next select property.  This message selects the next (higher-numbered)
+ * camera on a monitor.
  *
  * @author Douglas Lau
  */
