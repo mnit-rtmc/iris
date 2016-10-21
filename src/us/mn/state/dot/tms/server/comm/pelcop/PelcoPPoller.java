@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 import static us.mn.state.dot.tms.server.comm.PriorityLevel.COMMAND;
 import static us.mn.state.dot.tms.server.comm.PriorityLevel.DEVICE_DATA;
-import static us.mn.state.dot.tms.utils.URIUtil.UDP;
+import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
  * PelcoPPoller is a java implementation of the Pelco P camera control
@@ -34,7 +34,7 @@ public class PelcoPPoller extends BasePoller implements CamKeyboardPoller {
 
 	/** Create a new Pelco P poller */
 	public PelcoPPoller(String n) {
-		super(n, UDP);
+		super(n, TCP);
 	}
 
 	/** Create an operation */
