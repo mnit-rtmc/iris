@@ -64,6 +64,7 @@ DROP VIEW geo_loc_view;
 
 -- Rename geo_loc milepoint to landmark
 ALTER TABLE iris.geo_loc RENAME COLUMN milepoint TO landmark;
+ALTER TABLE iris.geo_loc ALTER COLUMN landmark TYPE VARCHAR(24);
 
 CREATE VIEW geo_loc_view AS
 	SELECT l.name, r.abbrev AS rd, l.roadway,

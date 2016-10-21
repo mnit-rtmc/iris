@@ -258,7 +258,7 @@ CREATE TABLE iris.geo_loc (
 	cross_mod smallint REFERENCES iris.road_modifier(id),
 	lat double precision,
 	lon double precision,
-	landmark VARCHAR(16)
+	landmark VARCHAR(24)
 );
 
 CREATE TABLE iris.map_extent (
