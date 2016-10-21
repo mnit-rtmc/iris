@@ -279,7 +279,6 @@ public class BasePoller implements DevicePoller {
 
 	/** Add an operation to the receive queue */
 	private void addRecvQueue(Operation op) {
-		op.setRemaining(timeout);
 		synchronized (r_queue) {
 			if (!r_queue.add(op)) {
 				// This should never happen
@@ -452,15 +451,12 @@ public class BasePoller implements DevicePoller {
 
 	/** Schedule timeout of operation */
 	private void scheduleTimeout(final Operation op) {
-		long rt = op.getRemaining();
-		if (rt <= timeout) {
-			int t = (rt > 0) ? (int) rt : 0;
-			COMM.addJob(new Job(t) {
-				@Override public void perform() {
-					checkTimeout(op);
-				}
-			});
-		}
+		op.setRemaining(timeout);
+		COMM.addJob(new Job(timeout) {
+			@Override public void perform() {
+				checkTimeout(op);
+			}
+		});
 	}
 
 	/** Check if an operation has timed out */
