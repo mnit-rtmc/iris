@@ -121,9 +121,10 @@ public class CamControlProp extends MonStatusProp {
 			if (c0 != 0) {
 				sendFocusControl(c, c0);
 				sendIrisControl(c, c0);
+			} else {
+				if ((c1 & BIT_EXTENDED) == 0)
+					sendPTZ(ci, c1, c2, c3);
 			}
-			if ((c1 & BIT_EXTENDED) == 0)
-				sendPTZ(ci, c1, c2, c3);
 		}
 	}
 
