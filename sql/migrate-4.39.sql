@@ -38,3 +38,6 @@ CREATE OR REPLACE VIEW dms_toll_zone_view AS
     JOIN iris.quick_message_toll_zone
     ON dms_action_view.quick_message = quick_message_toll_zone.quick_message;
 GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
+
+-- Rename CBW protocol to match CommProtocol enum
+UPDATE iris.comm_protocol SET description = 'CBW' WHERE id = 33;

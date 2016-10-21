@@ -2440,7 +2440,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 30	DR-500
 31	ADDCO
 32	TransCore E6
-33	Control By Web
+33	CBW
 34	Incident Feed
 35	MonStream
 \.
