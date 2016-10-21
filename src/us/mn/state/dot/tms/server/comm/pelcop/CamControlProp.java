@@ -89,6 +89,18 @@ public class CamControlProp extends MonStatusProp {
 		      : 0;
 	}
 
+	/** Mask for valid extended packets */
+	static private final int EXT_MASK = 0xC1;
+
+	/** Extended store preset code */
+	static private final int EXT_STORE_PRESET = 3;
+
+	/** Extended clear preset code */
+	static private final int EXT_CLEAR_PRESET = 5;
+
+	/** Extended recall preset code */
+	static private final int EXT_RECALL_PRESET = 7;
+
 	/** Create a new camera control property */
 	public CamControlProp(boolean l, VideoMonitorImpl vm) {
 		super(l, vm);
@@ -125,6 +137,8 @@ public class CamControlProp extends MonStatusProp {
 			} else {
 				if ((c1 & BIT_EXTENDED) == 0)
 					sendPTZ(ci, c1, c2, c3);
+				else
+					sendExtended(ci, c1, c3);
 			}
 		}
 	}
@@ -210,6 +224,22 @@ public class CamControlProp extends MonStatusProp {
 			return -1;
 		default:
 			throw new ParsingException("ZOOM");
+		}
+	}
+
+	/** Send extended commands */
+	private void sendExtended(CameraImpl c, int c1, int c3)
+		throws ParsingException
+	{
+		if ((c1 & EXT_MASK) != BIT_EXTENDED)
+			throw new ParsingException("EXT");
+		switch (c1) {
+		case EXT_STORE_PRESET:
+			c.setStorePreset(c3);
+			break;
+		case EXT_RECALL_PRESET:
+			c.setRecallPreset(c3);
+			break;
 		}
 	}
 }
