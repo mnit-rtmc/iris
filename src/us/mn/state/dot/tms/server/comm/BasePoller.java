@@ -21,6 +21,7 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.PriorityQueue;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
@@ -74,6 +75,9 @@ public class BasePoller implements DevicePoller {
 
 	/** Protocol logger */
 	private final DebugLog logger;
+
+	/** Set of owned operations */
+	private final HashSet<Operation> op_set = new HashSet<Operation>();
 
 	/** Polling queue */
 	private final PriorityQueue<Operation> p_queue =
@@ -153,6 +157,9 @@ public class BasePoller implements DevicePoller {
 		synchronized (r_queue) {
 			drainQueue(r_queue);
 		}
+		synchronized (op_set) {
+			op_set.clear();
+		}
 	}
 
 	/** Get the transmit buffer */
@@ -200,51 +207,37 @@ public class BasePoller implements DevicePoller {
 
 	/** Add an operation to the device poller */
 	protected final void addOp(Operation op) {
-		if (logger.isOpen())
-			log("ADDING " + op);
-		doAddOp(op);
-	}
-
-	/** Add an operation to the device poller */
-	private void doAddOp(Operation op) {
-		if (addQueue(op)) {
-			if (op.isPolling())
-				schedulePoll();
-			else
-				scheduleTimeout(op);
-		}
-	}
-
-	/** Add an operation to a queue */
-	private boolean addQueue(Operation op) {
-		boolean r = doAddQueue(op);
-		if (r)
-			ensureOpen();
-		else
-			drop(op);
-		return r;
-	}
-
-	/** Add an operation to a queue */
-	private boolean doAddQueue(Operation op) {
-		if (destroyed || op.isDone())
-			return false;
-		if (op.isPolling()) {
-			synchronized (p_queue) {
-				if (p_queue.contains(op))
-					return false;
-				else
-					return p_queue.add(op);
-			}
+		if (addWorking(op)) {
+			if (logger.isOpen())
+				log("ADDING " + op);
+			addQueue(op);
 		} else {
-			op.setRemaining(timeout);
-			synchronized (r_queue) {
-				if (r_queue.contains(op))
-					return false;
-				else
-					return r_queue.add(op);
-			}
+			if (logger.isOpen())
+				log("SKIPPING " + op);
+			op.destroy();
 		}
+	}
+
+	/** Add an operation to the working set */
+	private boolean addWorking(Operation op) {
+		synchronized (op_set) {
+			return op_set.add(op);
+		}
+	}
+
+	/** Add an operation to a queue */
+	private void addQueue(Operation op) {
+		if (shouldDrop(op))
+			drop(op);
+		else {
+			doAddQueue(op);
+			ensureOpen();
+		}
+	}
+
+	/** Check if an operation should be dropped */
+	private boolean shouldDrop(Operation op) {
+		return destroyed || op.isDone();
 	}
 
 	/** Drop an operation */
@@ -252,6 +245,48 @@ public class BasePoller implements DevicePoller {
 		if (logger.isOpen())
 			log("DROPPING " + op);
 		op.destroy();
+		removeWorking(op);
+	}
+
+	/** Remove an operation from the working set */
+	private void removeWorking(Operation op) {
+		synchronized (op_set) {
+			if (!op_set.remove(op)) {
+				// This should never happen
+				log("ERR SET " + op);
+			}
+		}
+	}
+
+	/** Add an operation to a queue */
+	private void doAddQueue(Operation op) {
+		if (op.isPolling())
+			addPollQueue(op);
+		else
+			addRecvQueue(op);
+	}
+
+	/** Add an operation to the poll queue */
+	private void addPollQueue(Operation op) {
+		synchronized (p_queue) {
+			if (!p_queue.add(op)) {
+				// This should never happen
+				log("ERR POLL " + op);
+			}
+		}
+		schedulePoll();
+	}
+
+	/** Add an operation to the receive queue */
+	private void addRecvQueue(Operation op) {
+		op.setRemaining(timeout);
+		synchronized (r_queue) {
+			if (!r_queue.add(op)) {
+				// This should never happen
+				log("ERR RECV " + op);
+			}
+		}
+		scheduleTimeout(op);
 	}
 
 	/** Ensure that the channel is open */
@@ -381,7 +416,7 @@ public class BasePoller implements DevicePoller {
 			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
 			closeChannel();
 		}
-		doAddOp(op);
+		addQueue(op);
 	}
 
 	/** Format the contents of a buffer */
@@ -433,7 +468,7 @@ public class BasePoller implements DevicePoller {
 		long rt = op.getRemaining();
 		if (rt <= 0 && removeRecv(op)) {
 			op.handleEvent(EventType.POLL_TIMEOUT_ERROR, TIMEOUT);
-			doAddOp(op);
+			addQueue(op);
 		}
 	}
 
@@ -499,7 +534,7 @@ public class BasePoller implements DevicePoller {
 			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
 			closeChannel();
 		}
-		doAddOp(op);
+		addQueue(op);
 	}
 
 	/** Stop polling if idle */

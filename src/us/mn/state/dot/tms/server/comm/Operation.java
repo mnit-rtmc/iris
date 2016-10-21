@@ -140,6 +140,12 @@ public final class Operation implements Comparable<Operation> {
 			return getId().compareTo(other.getId());
 	}
 
+	/** Get the operation hash code */
+	@Override
+	public int hashCode() {
+		return name.hashCode() ^ getId().hashCode();
+	}
+
 	/** Current step */
 	private OpStep step;
 
