@@ -66,7 +66,7 @@ public class OpListenKeyboard extends OpStep {
 			}
 			prop = prop.next();
 		}
-		setPolling(prop != null);
+		setPolling(false);
 	}
 
 	/** Poll the controller with one packeet */
