@@ -74,6 +74,13 @@ public class GeoLocHelper extends BaseHelper {
 			if (b.length() > 0)
 				b.append(' ');
 			b.append(c);
+		} else if (connect == null || connect.length() == 0) {
+			String lm = getLandmark(l);
+			if (lm != null) {
+				if (b.length() > 0)
+					b.append(' ');
+				b.append(lm);
+			}
 		}
 		return (b.length() > 0) ? b.toString() : "Unknown location";
 	}
@@ -109,6 +116,16 @@ public class GeoLocHelper extends BaseHelper {
 		return (l != null)
 		      ? LocModifier.fromOrdinal(l.getCrossMod()).description
 		      : null;
+	}
+
+	/** Get the location landmark */
+	static private String getLandmark(GeoLoc l) {
+		if (l != null) {
+			String lm = l.getLandmark();
+			if (lm != null && lm.length() > 0)
+				return '(' + lm + ')';
+		}
+		return null;
 	}
 
 	/** Filter for alternate directions on a North-South road.
