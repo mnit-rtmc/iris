@@ -44,8 +44,9 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Load all the video monitors */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
-		store.query("SELECT name, controller, pin, notes, restricted " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, controller, pin, notes, restricted," +
+			" camera FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new VideoMonitorImpl(row));
@@ -62,6 +63,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		map.put("pin", pin);
 		map.put("notes", notes);
 		map.put("restricted", restricted);
+		map.put("camera", camera);
 		return map;
 	}
 
@@ -83,23 +85,25 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		     row.getString(2),		// controller
 		     row.getInt(3),		// pin
 		     row.getString(4),		// notes
-		     row.getBoolean(5)		// restricted
+		     row.getBoolean(5),		// restricted
+		     row.getString(6)		// camera
 		);
 	}
 
 	/** Create a video monitor */
 	private VideoMonitorImpl(String n, String c, int p, String nt,
-		boolean r)
+		boolean r, String cam)
 	{
-		this(n, lookupController(c), p, nt, r);
+		this(n, lookupController(c), p, nt, r, lookupCamera(cam));
 	}
 
 	/** Create a video monitor */
 	private VideoMonitorImpl(String n, ControllerImpl c, int p, String nt,
-		boolean r)
+		boolean r, Camera cam)
 	{
 		super(n, c, p, nt);
 		restricted = r;
+		camera = cam;
 	}
 
 	/** Create a new video monitor */
@@ -133,7 +137,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Camera displayed on the video monitor */
-	private transient Camera camera;
+	private Camera camera;
 
 	/** Set the camera displayed on the monitor */
 	@Override
@@ -142,20 +146,28 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Set the camera displayed on the monitor */
-	public void doSetCamera(Camera c) {
+	public void doSetCamera(Camera c) throws TMSException {
 		if (restricted && !isCameraPublished(c))
 			c = null;
-		setCamera(c);
-		if (c instanceof CameraImpl)
-			selectCamera((CameraImpl) c);
-		else
-			selectCamera(null);
+		if (c != camera) {
+			store.update(this, "camera", c);
+			setCamera(c);
+			if (c instanceof CameraImpl)
+				selectCamera((CameraImpl) c);
+			else
+				selectCamera(null);
+		}
 	}
 
 	/** Set the camera and notify clients of the change */
 	public void setCameraNotify(Camera c) {
-		doSetCamera(c);
-		notifyAttribute("camera");
+		try {
+			doSetCamera(c);
+			notifyAttribute("camera");
+		}
+		catch (TMSException e) {
+			e.printStackTrace();
+		}
 	}
 
 	/** Get the camera displayed on the monitor */

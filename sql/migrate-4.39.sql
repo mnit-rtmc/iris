@@ -260,3 +260,73 @@ CREATE VIEW detector_event_view AS
 	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
 	JOIN detector_label_view dl ON e.device_id = dl.det_id;
 GRANT SELECT ON detector_event_view TO PUBLIC;
+
+-- Drop video monitor views
+DROP VIEW video_monitor_view;
+DROP VIEW iris.video_monitor;
+
+-- Add camera column to video_monitor table
+ALTER TABLE iris._video_monitor
+	ADD COLUMN camera VARCHAR(10) REFERENCES iris._camera;
+
+CREATE VIEW iris.video_monitor AS SELECT
+	m.name, controller, pin, notes, restricted, camera
+	FROM iris._video_monitor m JOIN iris._device_io d ON m.name = d.name;
+
+CREATE OR REPLACE FUNCTION iris.video_monitor_insert() RETURNS TRIGGER AS
+	$video_monitor_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._video_monitor (name, notes, restricted, camera)
+	     VALUES (NEW.name, NEW.notes, NEW.restricted, NEW.camera);
+	RETURN NEW;
+END;
+$video_monitor_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER video_monitor_insert_trig
+    INSTEAD OF INSERT ON iris.video_monitor
+    FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_insert();
+
+CREATE OR REPLACE FUNCTION iris.video_monitor_update() RETURNS TRIGGER AS
+	$video_monitor_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._video_monitor
+	   SET notes = NEW.notes,
+	       restricted = NEW.restricted,
+	       camera = NEW.camera
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$video_monitor_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER video_monitor_update_trig
+    INSTEAD OF UPDATE ON iris.video_monitor
+    FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_update();
+
+CREATE OR REPLACE FUNCTION iris.video_monitor_delete() RETURNS TRIGGER AS
+	$video_monitor_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$video_monitor_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER video_monitor_delete_trig
+    INSTEAD OF DELETE ON iris.video_monitor
+    FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_delete();
+
+CREATE VIEW video_monitor_view AS
+	SELECT m.name, m.notes, restricted, m.controller,
+	       ctr.condition, ctr.comm_link, camera
+	FROM iris.video_monitor m
+	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
+GRANT SELECT ON video_monitor_view TO PUBLIC;

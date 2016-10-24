@@ -51,7 +51,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		GraphicImpl.loadAll();
 		FontImpl.loadAll();
 		GlyphImpl.loadAll();
-		VideoMonitorImpl.loadAll();
 		RoadImpl.loadAll();
 		GeoLocImpl.loadAll();
 		MapExtentImpl.loadAll();
@@ -69,6 +68,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		TollZoneImpl.loadAll();
 		CameraImpl.loadAll();
 		CameraPresetImpl.loadAll();
+		VideoMonitorImpl.loadAll();
 		BeaconImpl.loadAll();
 		WeatherSensorImpl.loadAll();
 		RampMeterImpl.loadAll();
