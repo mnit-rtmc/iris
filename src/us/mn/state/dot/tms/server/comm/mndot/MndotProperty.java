@@ -203,7 +203,7 @@ abstract public class MndotProperty extends ControllerProperty {
 		case MESSAGE_SIZE:
 			throw new ParsingException("MESSAGE SIZE");
 		case NO_DATA:
-			throw new ControllerException("NO SAMPLE DATA");
+			throw new SampleException();
 		case NO_RAM:
 			throw new ControllerException("NO RAM");
 		default:
