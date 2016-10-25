@@ -309,7 +309,7 @@ public class BasePoller implements DevicePoller {
 			skey = sel.createChannel(this, createURI());
 			clearTxBuf();
 			clearRxBuf();
-			setStatus("OPEN");
+			setStatus("");
 		}
 		catch (IOException | URISyntaxException e) {
 			handleException(e);
