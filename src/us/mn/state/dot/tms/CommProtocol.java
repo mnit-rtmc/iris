@@ -46,7 +46,7 @@ public enum CommProtocol {
 	PELCO_D_PTZ("Pelco D PTZ"),
 
 	/** NTCIP Class C (7) */
-	NTCIP_C("NTCIP Class C"),
+	NTCIP_C("NTCIP Class C", false),
 
 	/** Manchester camera control (8) */
 	MANCHESTER_PTZ("Manchester PTZ"),
@@ -55,13 +55,13 @@ public enum CommProtocol {
 	DMSXML("DMS XML"),
 
 	/** Msg Feed (10) */
-	MSG_FEED("MSG_FEED"),
+	MSG_FEED("MSG_FEED", false),
 
 	/** NTCIP Class A (11) */
-	NTCIP_A("NTCIP Class A"),
+	NTCIP_A("NTCIP Class A", false),
 
 	/** Pelco video matrix switcher (12) */
-	PELCO_SWITCHER("Pelco Switcher"),
+	PELCO_SWITCHER("Pelco Switcher", false),
 
 	/** Vicon camera control (13) */
 	VICON_PTZ("Vicon PTZ"),
@@ -70,7 +70,7 @@ public enum CommProtocol {
 	SS_125("SmartSensor 125 HD"),
 
 	/** Optical Scientific ORG-815 Precipitation Sensor (15) */
-	ORG_815("OSi ORG-815"),
+	ORG_815("OSi ORG-815", false),
 
 	/** Infinova wrapping Pelco D camera control (16) */
 	INFINOVA_D_PTZ("Infinova D PTZ"),
@@ -88,19 +88,19 @@ public enum CommProtocol {
 	SENSYS("Sensys"),
 
 	/** PeMS (21) */
-	PEMS("PeMS"),
+	PEMS("PeMS", false),
 
 	/** SSI (22) */
-	SSI("SSI"),
+	SSI("SSI", false),
 
 	/** CHP Incidents (23) */
-	CHP_INCIDENTS("CHP Incidents"),
+	CHP_INCIDENTS("CHP Incidents", false),
 
 	/** URMS (24) */
 	URMS("URMS"),
 
 	/** Digital Loggers Inc DIN Relay (25) */
-	DIN_RELAY("DLI DIN Relay"),
+	DIN_RELAY("DLI DIN Relay", false),
 
 	/** Axis 292 Video Decoder (26) */
 	AXIS_292("Axis 292"),
@@ -115,30 +115,39 @@ public enum CommProtocol {
 	COHU_PTZ("Cohu PTZ"),
 
 	/** DR-500 doppler radar (30) */
-	DR_500("DR-500"),
+	DR_500("DR-500", false),
 
 	/** ADDCO NodeComm sign control (31) */
 	ADDCO("ADDCO"),
 
 	/** TransCore E6 tag reader (32) */
-	TRANSCORE_E6("TransCore E6"),
+	TRANSCORE_E6("TransCore E6", false),
 
 	/** Control By Web (33) */
-	CBW("CBW"),
+	CBW("CBW", false),
 
 	/** Incident feed (34) */
-	INC_FEED("Incident Feed"),
+	INC_FEED("Incident Feed", false),
 
 	/** MonStream video switching (35) */
-	MON_STREAM("MonStream");
+	MON_STREAM("MonStream", false);
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
+		this(d, true);
+	}
+
+	/** Create a new comm protocol value */
+	private CommProtocol(String d, boolean ud) {
 		description = d;
+		uses_drop = ud;
 	}
 
 	/** Protocol description */
 	public final String description;
+
+	/** Flag whether drop is used */
+	public final boolean uses_drop;
 
 	/** Get the string representation */
 	@Override
