@@ -31,6 +31,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.CommLink;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.CtrlCondition;
@@ -56,6 +57,19 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 			return CommState.INACTIVE;
 	}
 
+	/** Check if drop address is used for a controller */
+	static private boolean isDropUsed(Controller c) {
+		CommProtocol cp = getProtocol(c.getCommLink());
+		return (cp == null) || cp.uses_drop;
+	}
+
+	/** Get the selected comm protocol */
+	static private CommProtocol getProtocol(CommLink cl) {
+		return (cl != null)
+		      ? CommProtocol.fromOrdinal(cl.getProtocol())
+		      : null;
+	}
+
 	/** Create the columns in the model */
 	@Override
 	protected ArrayList<ProxyColumn<Controller>> createColumns() {
@@ -70,10 +84,10 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 			Short.class)
 		{
 			public Object getValueAt(Controller c) {
-				return c.getDrop();
+				return isDropUsed(c) ? c.getDrop() : 0;
 			}
 			public boolean isEditable(Controller c) {
-				return canUpdate(c);
+				return canUpdate(c, "drop") && isDropUsed(c);
 			}
 			public void setValueAt(Controller c, Object value) {
 				if (value instanceof Number)
