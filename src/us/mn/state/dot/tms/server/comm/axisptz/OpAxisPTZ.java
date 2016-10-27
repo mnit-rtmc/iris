@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014-2015  AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +16,6 @@
 package us.mn.state.dot.tms.server.comm.axisptz;
 
 import java.io.IOException;
-import java.lang.Math;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -25,60 +25,36 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * Axis VAPIX PTZ operation.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
-public class OpAxisPTZ extends OpDevice<AxisPTZProperty> {
+public class OpAxisPTZ extends OpDevice<AxisProp> {
 
-	/** Op property */
-	private final AxisPTZProperty prop;
+	/** Axis property */
+	private final AxisProp prop;
 
-	/** Operation description */
-	private final String op_desc;
-
-	/**
-	 * Create a new operation.
-	 * @param c the CameraImpl instance
+	/** Create a new operation.
+	 *
+	 * @param c CameraImpl instance.
+	 * @param p Axis property.
 	 */
-	protected OpAxisPTZ(CameraImpl c, AxisPTZProperty p) {
+	protected OpAxisPTZ(CameraImpl c, AxisProp p) {
 		super(PriorityLevel.COMMAND, c);
 		prop = p;
-		op_desc = p.getDesc();
-		device.setOpStatus("sending cmd");
 	}
 
 	/** Create the second phase of the operation */
-	protected Phase<AxisPTZProperty> phaseTwo() {
-		return new PhaseTwo();
+	protected Phase<AxisProp> phaseTwo() {
+		return new SendProp();
 	}
 
-	protected class PhaseTwo extends Phase<AxisPTZProperty> {
-		protected Phase<AxisPTZProperty> poll(
-			CommMessage<AxisPTZProperty> mess) throws IOException
+	/** Send property */
+	private class SendProp extends Phase<AxisProp> {
+		protected Phase<AxisProp> poll(CommMessage<AxisProp> mess)
+			throws IOException
 		{
 			mess.add(prop);
 			mess.storeProps();
-			updateOpStatus("cmd sent");
 			return null;
 		}
 	}
-
-	/** Return operation description */
-	@Override
-	public String getOperationDescription() {
-		return (op_desc == null ? "Unnamed operation" : op_desc);
-	}
-
-	/**
-	 * Update device op status.
-	 * We bundle the operation description into the status because camera
-	 * ops are generally so short that, as far as I can tell, by the time
-	 * the client gets the SONAR "operation" notification and requests the
-	 * op's description via SONAR, the device has already been released,
-	 * and thus Device.getOperation() returns "None".
-	*/
-	protected void updateOpStatus(String stat) {
-		String s = getOperationDescription() + ": " + stat;
-		device.setOpStatus(s);
-	}
-
 }
-
