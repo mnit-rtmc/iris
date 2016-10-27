@@ -22,7 +22,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommLinkHelper;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
 import static us.mn.state.dot.tms.server.comm.MessagePoller.ConnMode;
@@ -186,30 +185,10 @@ public class AxisPTZPoller extends TransientPoller<AxisPTZProperty>
 	 * @param dr Device request.
 	 * @return the SerialWriteProperty
 	 */
-	static private AxisPTZProperty getSerialWriteProperty(DeviceRequest r)
-	{
-		int port = SystemAttrEnum.CAMERA_PTZ_AXIS_COMPORT.getInt();
-		String byteString = null;
-		switch (r) {
-		case RESET_DEVICE:
-			byteString = SystemAttrEnum.CAMERA_PTZ_AXIS_RESET
-				.getString();
-			break;
-		case CAMERA_WIPER_ONESHOT:
-			byteString = SystemAttrEnum.CAMERA_PTZ_AXIS_WIPE
-				.getString();
-			break;
-		default:
-			byteString = "";
-			break;
-		}
-		byte[] data = null;
-		try {
-			data = HexString.parse(byteString);
-		}
-		catch (Exception e) {
-			data = new byte[0];
-		}
+	static private AxisPTZProperty getSerialWriteProperty(DeviceRequest r) {
+		// FIXME: create packet for RESET_DEVICE / CAMERA_WIPER_ONESHOT
+		int port = 1;
+		byte[] data = new byte[0];
 		return new SerialWriteProperty(port, data);
 	}
 
