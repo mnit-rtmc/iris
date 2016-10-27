@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.comm;
 
+import java.awt.Color;
 import java.awt.Component;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -27,6 +28,7 @@ import javax.swing.JTable;
 import javax.swing.RowFilter;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
@@ -57,6 +59,9 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 			return CommState.INACTIVE;
 	}
 
+	/** Special value for unused drop */
+	static private final short DROP_UNUSED = -2;
+
 	/** Check if drop address is used for a controller */
 	static private boolean isDropUsed(Controller c) {
 		CommProtocol cp = getProtocol(c.getCommLink());
@@ -84,7 +89,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 			Short.class)
 		{
 			public Object getValueAt(Controller c) {
-				return isDropUsed(c) ? c.getDrop() : 0;
+				return isDropUsed(c) ? c.getDrop() :DROP_UNUSED;
 			}
 			public boolean isEditable(Controller c) {
 				return canUpdate(c, "drop") && isDropUsed(c);
@@ -92,6 +97,9 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 			public void setValueAt(Controller c, Object value) {
 				if (value instanceof Number)
 					c.setDrop(((Number)value).shortValue());
+			}
+			protected TableCellRenderer createCellRenderer() {
+				return new DropCellRenderer();
 			}
 			protected TableCellEditor createCellEditor() {
 				return new DropCellEditor();
@@ -322,6 +330,25 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 		attrs.put("drop_id", m.getNextAvailable());
 		attrs.put("notes", "");
 		return attrs;
+	}
+
+	/** Renderer for drop addresses in a table cell */
+	private class DropCellRenderer extends DefaultTableCellRenderer {
+		@Override
+		public Component getTableCellRendererComponent(JTable table,
+			Object value, boolean isSelected, boolean hasFocus,
+			int row, int col)
+		{
+			setBackground(null);
+			super.getTableCellRendererComponent(table, value,
+				isSelected, hasFocus, row, col);
+			if (value.equals(DROP_UNUSED)) {
+				setText("---");
+				setBackground(getBackground().darker());
+				setOpaque(true);
+			}
+			return this;
+		}
 	}
 
 	/** Editor for drop addresses in a table cell */
