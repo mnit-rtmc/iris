@@ -1194,40 +1194,47 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <th>Protocol</th>
 	    <th>Description</th>
 	    <th>Default Scheme</th>
+	    <th>Multidrop</th>
 	</tr>
 	<tr>
-	    <td>NTCIP Class A</td>
+	    <td>NTCIP A</td>
 	    <td><a href="#dms">DMS</a> control,
 	        <a href="#ilcs">ILCS</a> (no HDLC)
 	    </td>
 	    <td>UDP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
-	    <td>NTCIP Class B</td>
+	    <td>NTCIP B</td>
 	    <td><a href="#dms">DMS</a> control,
 	        <a href="#ilcs">ILCS</a> over serial (HDLC)</td>
 	    <td>TCP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
-	    <td>NTCIP Class C</td>
+	    <td>NTCIP C</td>
 	    <td><a href="#dms">DMS</a> control,
 	        <a href="#ilcs">ILCS</a> (no HDLC)</td>
 	    <td>TCP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>DMS XML</td>
 	    <td><a href="#dms">DMS</a> control to external system</td>
 	    <td>TCP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
-	    <td>Addco NodeComm</td>
-	    <td><a href="#dms">DMS</a> control</td>
+	    <td>Addco</td>
+	    <td><a href="#dms">DMS</a> control (NodeComm)</td>
 	    <td>TCP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>Msg feed</td>
 	    <td><a href="#msg_feed">DMS messages</a> from external system</td>
 	    <td>HTTP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>MnDOT 170 4</td>
@@ -1238,6 +1245,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 		<a href="#alarms">alarms</a>
 	    </td>
 	    <td>TCP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>MnDOT 170 5</td>
@@ -1248,73 +1256,87 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 		<a href="#alarms">alarms</a>
 	    </td>
 	    <td>TCP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>Canoga</td>
 	    <td><a href="#vds">VDS</a> (GTT Canoga Traffic Sensing System)</td>
 	    <td>TCP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>SS105</td>
 	    <td><a href="#vds">VDS</a> (original Wavetronix SmartSensor)</td>
 	    <td>TCP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>SS125</td>
 	    <td><a href="#vds">VDS</a> (Wavetronix SmartSensor HD)</td>
 	    <td>TCP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>RTMS G4</td>
 	    <td><a href="#vds">VDS</a> (RTMS G4 sensor)</td>
 	    <td>TCP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>DR-500</td>
 	    <td><a href="#vds">VDS</a> (Houston Radar DR-500 doppler)</td>
 	    <td>TCP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>Axis PTZ</td>
 	    <td><a href="#ptz">PTZ</a> for Axis cameras</td>
 	    <td>HTTP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>Pelco D</td>
 	    <td><a href="#ptz">PTZ</a> for Pelco cameras</td>
 	    <td>UDP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>Manchester</td>
 	    <td><a href="#ptz">PTZ</a> for AD cameras</td>
 	    <td>UDP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>Vicon</td>
 	    <td><a href="#ptz">PTZ</a> for Vicon cameras</td>
 	    <td>UDP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>Infinova</td>
 	    <td><a href="#ptz">PTZ</a> for Infinova cameras</td>
 	    <td>TCP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>Cohu</td>
 	    <td><a href="#ptz">PTZ</a> for Cohu cameras</td>
 	    <td>TCP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
-	    <td>Pelco P Keyboard</td>
+	    <td>Pelco P KBD</td>
 	    <td><a href="#video">Video switching</a> and <a href="#ptz">PTZ</a>
 	        input
 	    </td>
 	    <td>TCP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>Pelco Switcher</td>
 	    <td><a href="#video">Video switching</a> for Pelco</td>
 	    <td>TCP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>MonStream</td>
@@ -1322,6 +1344,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	        decoders
 	    </td>
 	    <td>UDP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>STC</td>
@@ -1329,36 +1352,43 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	        SmartTouch Controllers
 	    </td>
 	    <td>TCP</td>
+	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>E6</td>
 	    <td><a href="#tag_readers">Tag Reader</a> (Transcore E6)</td>
 	    <td>UDP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>Org 815</td>
 	    <td><a href="#rwis">RWIS</a> (ORG 815 sensor)</td>
 	    <td>TCP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>SSI</td>
 	    <td><a href="#rwis">RWIS</a> (SSI RWIS sensor)</td>
 	    <td>HTTP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
 	    <td><a href="#din_relay">DLI DIN Relay</a></td>
 	    <td><a href="#dlcs">DLCS</a>, <a href="#beacons">beacons</a></td>
 	    <td>HTTP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
-	    <td><a href="#cbw">Control By Web</a></td>
-	    <td><a href="#beacons">beacons</a></td>
+	    <td><a href="#cbw">CBW</a></td>
+	    <td><a href="#beacons">beacons</a> (Control by Web)</td>
 	    <td>HTTP</td>
+	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>Incident feed</td>
 	    <td><a href="#inc_feed">Incidents</a> from external system</td>
 	    <td>HTTP</td>
+	    <td>No</td>
 	</tr>
 </table>
 <p/>
