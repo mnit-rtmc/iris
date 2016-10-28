@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms.server.comm.axisptz;
 
+import java.io.InputStream;
+import java.io.OutputStream;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 
 /**
@@ -53,5 +56,17 @@ abstract public class AxisProp extends ControllerProperty {
 		param.append(n);
 		param.append('=');
 		param.append(v);
+	}
+
+	/** Encode a STORE request */
+	@Override
+	public void encodeStore(ControllerImpl c, OutputStream os) {
+		// nothing to do -- params encoded in path
+	}
+
+	/** Decode a STORE response */
+	@Override
+	public void decodeStore(ControllerImpl c, InputStream is) {
+		// nothing to do -- decoded from HTTP result code
 	}
 }
