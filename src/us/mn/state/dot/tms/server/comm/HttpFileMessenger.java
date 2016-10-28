@@ -95,6 +95,7 @@ public class HttpFileMessenger extends Messenger {
 				upass.getBytes()));
 			c.setRequestProperty("Authorization", auth);
 		}
+		c.setUseCaches(false);
 		c.setConnectTimeout(timeout);
 		c.setReadTimeout(timeout);
 		if (c instanceof HttpURLConnection) {
