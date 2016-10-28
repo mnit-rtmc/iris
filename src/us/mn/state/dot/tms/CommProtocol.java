@@ -138,16 +138,16 @@ public enum CommProtocol {
 	}
 
 	/** Create a new comm protocol value */
-	private CommProtocol(String d, boolean ud) {
+	private CommProtocol(String d, boolean md) {
 		description = d;
-		uses_drop = ud;
+		multidrop = md;
 	}
 
 	/** Protocol description */
 	public final String description;
 
-	/** Flag whether drop is used */
-	public final boolean uses_drop;
+	/** Flag for multidrop */
+	public final boolean multidrop;
 
 	/** Get the string representation */
 	@Override

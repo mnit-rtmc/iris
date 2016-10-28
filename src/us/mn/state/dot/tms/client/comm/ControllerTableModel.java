@@ -65,7 +65,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 	/** Check if drop address is used for a controller */
 	static private boolean isDropUsed(Controller c) {
 		CommProtocol cp = getProtocol(c.getCommLink());
-		return (cp == null) || cp.uses_drop;
+		return (cp == null) || cp.multidrop;
 	}
 
 	/** Get the selected comm protocol */
