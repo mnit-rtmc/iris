@@ -778,6 +778,10 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	@Override
 	public void updateStyles() {
 		long s = ItemStyle.ALL.bit();
+		if (isActive())
+			s |= ItemStyle.ACTIVE.bit();
+		else
+			s |= ItemStyle.INACTIVE.bit();
 		if (isAvailable())
 			s |= ItemStyle.AVAILABLE.bit();
 		if (isQueueFull())
@@ -794,8 +798,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			s |= ItemStyle.FAILED.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
-		if (!isActive())
-			s |= ItemStyle.INACTIVE.bit();
 		setStyles(s);
 	}
 

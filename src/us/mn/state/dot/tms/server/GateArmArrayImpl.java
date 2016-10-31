@@ -557,6 +557,10 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Calculate item styles */
 	private long calculateStyles() {
 		long s = ItemStyle.ALL.bit();
+		if (isActive())
+			s |= ItemStyle.ACTIVE.bit();
+		else
+			s |= ItemStyle.INACTIVE.bit();
 		if (isClosed())
 			s |= ItemStyle.CLOSED.bit();
 		if (isOpen())
@@ -567,8 +571,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			s |= ItemStyle.MAINTENANCE.bit();
 		if (isFailed())
 			s |= ItemStyle.FAILED.bit();
-		if (!isActive())
-			s |= ItemStyle.INACTIVE.bit();
 		return s;
 	}
 

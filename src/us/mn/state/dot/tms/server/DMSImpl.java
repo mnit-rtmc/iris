@@ -1774,7 +1774,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		long s = ItemStyle.ALL.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
-		if (!isActive())
+		if (isActive())
+			s |= ItemStyle.ACTIVE.bit();
+		else
 			s |= ItemStyle.INACTIVE.bit();
 		if (hidden)
 			s |= ItemStyle.HIDDEN.bit();

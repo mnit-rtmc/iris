@@ -170,7 +170,9 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 		long s = ItemStyle.ALL.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
-		if (!isActive())
+		if (isActive())
+			s |= ItemStyle.ACTIVE.bit();
+		else
 			s |= ItemStyle.INACTIVE.bit();
 		if (needsMaintenance())
 			s |= ItemStyle.MAINTENANCE.bit();
