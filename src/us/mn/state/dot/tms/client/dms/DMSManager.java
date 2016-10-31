@@ -154,7 +154,7 @@ public class DMSManager extends ProxyManager<DMS> {
 	/** Check if a DMS style is visible */
 	@Override
 	protected boolean isStyleVisible(DMS dms) {
-		return !DMSHelper.isHidden(dms);
+		return super.isStyleVisible(dms) && !DMSHelper.isHidden(dms);
 	}
 
 	/** Create a proxy JList */
