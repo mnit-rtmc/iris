@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,8 +18,6 @@ import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.TMSException;
@@ -45,9 +43,6 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 					row.getInt(3)		// lane
 				);
 				namespace.addObject(lcs);
-				// call this after adding to namespace, since
-				// matching DMS needs to look it up.
-				lcs.updateStyles();
 			}
 		});
 	}
@@ -105,15 +100,6 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 		}
 	}
 
-	/** Update DMS styles */
-	private void updateStyles() {
-		DMS d = DMSHelper.lookup(name);
-		if(d instanceof DMSImpl) {
-			DMSImpl dms = (DMSImpl)d;
-			dms.updateStyles();
-		}
-	}
-
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
 		if(lcsArray instanceof LCSArrayImpl) {
@@ -121,7 +107,6 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 			la.setLane(lane, null);
 		}
 		super.doDestroy();
-		updateStyles();
 	}
 
 	/** LCS array containing this LCS */
