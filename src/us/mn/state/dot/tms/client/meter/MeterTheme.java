@@ -75,8 +75,6 @@ public class MeterTheme extends ProxyTheme<RampMeter> {
 		addStyle(ItemStyle.LOCKED, ProxyTheme.OUTLINE_LOCKED, null);
 		addStyle(ItemStyle.MAINTENANCE, ProxyTheme.COLOR_UNAVAILABLE);
 		addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		addStyle(ItemStyle.INACTIVE, ProxyTheme.OUTLINE_INACTIVE,
-			ProxyTheme.COLOR_INACTIVE);
 		addStyle(ItemStyle.ALL);
 		addStyle(LCK_AVAILABLE);
 		addStyle(LCK_QUEUE_FULL);
