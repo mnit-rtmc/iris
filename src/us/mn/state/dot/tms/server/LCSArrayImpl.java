@@ -574,6 +574,8 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	@Override
 	public void updateStyles() {
 		long s = ItemStyle.ALL.bit();
+		if (isActive())
+			s |= ItemStyle.ACTIVE.bit();
 		if (isAvailable())
 			s |= ItemStyle.AVAILABLE.bit();
 		if (isUserDeployed())
