@@ -37,17 +37,17 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				LCSImpl lcs = new LCSImpl(namespace,
+				namespace.addObject(new LCSImpl(namespace,
 					row.getString(1),	// name
 					row.getString(2),	// lcs_array
 					row.getInt(3)		// lane
-				);
-				namespace.addObject(lcs);
+				));
 			}
 		});
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -57,11 +57,13 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -72,13 +74,13 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 	}
 
 	/** Create an LCS */
-	protected LCSImpl(Namespace ns, String n, String a, int l) {
-		this(n, (LCSArrayImpl)ns.lookupObject(LCSArray.SONAR_TYPE, a),
+	private LCSImpl(Namespace ns, String n, String a, int l) {
+		this(n, (LCSArrayImpl) ns.lookupObject(LCSArray.SONAR_TYPE, a),
 		     l);
 	}
 
 	/** Create an LCS */
-	protected LCSImpl(String n, LCSArray a, int l) {
+	private LCSImpl(String n, LCSArray a, int l) {
 		this(n);
 		lcsArray = a;
 		lane = l;
@@ -86,14 +88,15 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 	}
 
 	/** Initialize the LCS array */
+	@Override
 	public void initTransients() {
 		try {
-			if(lcsArray instanceof LCSArrayImpl) {
-				LCSArrayImpl la = (LCSArrayImpl)lcsArray;
+			if (lcsArray instanceof LCSArrayImpl) {
+				LCSArrayImpl la = (LCSArrayImpl) lcsArray;
 				la.setLane(lane, this);
 			}
 		}
-		catch(TMSException e) {
+		catch (TMSException e) {
 			System.err.println("LCS " + getName() +
 				" initialization error");
 			e.printStackTrace();
@@ -102,25 +105,27 @@ public class LCSImpl extends BaseObjectImpl implements LCS {
 
 	/** Destroy an object */
 	public void doDestroy() throws TMSException {
-		if(lcsArray instanceof LCSArrayImpl) {
-			LCSArrayImpl la = (LCSArrayImpl)lcsArray;
+		if (lcsArray instanceof LCSArrayImpl) {
+			LCSArrayImpl la = (LCSArrayImpl) lcsArray;
 			la.setLane(lane, null);
 		}
 		super.doDestroy();
 	}
 
 	/** LCS array containing this LCS */
-	protected LCSArray lcsArray;
+	private LCSArray lcsArray;
 
 	/** Get the LCS array */
+	@Override
 	public LCSArray getArray() {
 		return lcsArray;
 	}
 
 	/** Lane number */
-	protected int lane;
+	private int lane;
 
 	/** Get the lane number (starting from right lane as 1) */
+	@Override
 	public int getLane() {
 		return lane;
 	}
