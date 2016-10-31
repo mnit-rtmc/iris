@@ -50,7 +50,4 @@ public interface Beacon extends Device {
 
 	/** Check if the beacon is flashing */
 	boolean getFlashing();
-
-	/** Get item style bits */
-	long getStyles();
 }

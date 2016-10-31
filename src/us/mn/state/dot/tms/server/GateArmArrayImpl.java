@@ -551,11 +551,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return arm_state.ordinal();
 	}
 
-	/** Item style bits */
-	private transient long styles = calculateStyles();
-
 	/** Calculate item styles */
-	private long calculateStyles() {
+	@Override
+	protected long calculateStyles() {
 		long s = ItemStyle.ALL.bit();
 		if (isActive())
 			s |= ItemStyle.ACTIVE.bit();
@@ -577,21 +575,13 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Update the item styles */
 	@Override
 	public void updateStyles() {
-		setStyles(calculateStyles());
+		super.updateStyles();
 		GateArmSystem.checkInterlocks(getRoad());
 		GateArmSystem.updateDependants();
 		setSystemEnable(checkEnabled());
 		setOpenConflict(lock_state.isOpenDenied() &&
 			(isOpen() || isTimeout()));
 		setCloseConflict(lock_state.isCloseDenied() && isClosed());
-	}
-
-	/** Set the item style bits (and notify clients) */
-	private void setStyles(long s) {
-		if (s != styles) {
-			styles = s;
-			notifyAttribute("styles");
-		}
 	}
 
 	/** Lock state */
@@ -778,12 +768,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Test if gate arm needs maintenance */
 	private boolean needsMaintenance() {
 		return isOnline() && arm_state == GateArmState.FAULT;
-	}
-
-	/** Get item style bits */
-	@Override
-	public long getStyles() {
-		return styles;
 	}
 
 	/** Send a device request operation */

@@ -183,9 +183,6 @@ public interface DMS extends Device {
 	 * @see java.lang.System.currentTimeMillis */
 	long getDeployTime();
 
-	/** Get item style bits */
-	long getStyles();
-
 	/* Manufacturer-specific attributes */
 
 	/* LEDSTAR attributes */

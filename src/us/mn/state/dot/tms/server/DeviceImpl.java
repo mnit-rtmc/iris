@@ -190,11 +190,6 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		return pin;
 	}
 
-	/** Update the item styles */
-	public void updateStyles() {
-		// Sub-classes should override
-	}
-
 	/** Administrator notes for this device */
 	protected String notes;
 
@@ -277,6 +272,33 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 			return;
 		opStatus = s;
 		notifyAttribute("opStatus");
+	}
+
+	/** Update the device item styles */
+	public void updateStyles() {
+		setStyles(calculateStyles());
+	}
+
+	/** Item style bits */
+	private transient long styles = calculateStyles();
+
+	/** Calculate the item styles */
+	protected long calculateStyles() {
+		return 0;
+	}
+
+	/** Set the item style bits (and notify clients) */
+	private final void setStyles(long s) {
+		if (s != styles) {
+			styles = s;
+			notifyAttribute("styles");
+		}
+	}
+
+	/** Get item style bits */
+	@Override
+	public long getStyles() {
+		return styles;
 	}
 
 	/** Destroy an object */

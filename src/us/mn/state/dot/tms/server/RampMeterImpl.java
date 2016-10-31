@@ -771,12 +771,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return isOnline() && queue == RampMeterQueue.EXISTS;
 	}
 
-	/** Item style bits */
-	private transient long styles = 0;
-
-	/** Update the ramp meter styles */
+	/** Calculate the item styles */
 	@Override
-	public void updateStyles() {
+	protected long calculateStyles() {
 		long s = ItemStyle.ALL.bit();
 		if (isActive())
 			s |= ItemStyle.ACTIVE.bit();
@@ -798,20 +795,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			s |= ItemStyle.FAILED.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
-		setStyles(s);
-	}
-
-	/** Set the item style bits (and notify clients) */
-	private void setStyles(long s) {
-		if (s != styles) {
-			styles = s;
-			notifyAttribute("styles");
-		}
-	}
-
-	/** Get item style bits */
-	public long getStyles() {
-		return styles;
+		return s;
 	}
 
 	/** Get the detector set associated with the ramp meter */

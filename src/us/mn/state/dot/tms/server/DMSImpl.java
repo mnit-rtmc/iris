@@ -1764,12 +1764,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return !DMSHelper.getCriticalError(this).isEmpty();
 	}
 
-	/** Item style bits */
-	private transient long styles = 0;
-
-	/** Update the DMS styles */
+	/** Calculate the item styles */
 	@Override
-	public void updateStyles() {
+	protected long calculateStyles() {
 		boolean hidden = DmsSignGroupHelper.isHidden(this);
 		long s = ItemStyle.ALL.bit();
 		if (getController() == null)
@@ -1798,21 +1795,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			if (isAwsControlled())
 				s |= ItemStyle.AWS_CONTROLLED.bit();
 		}
-		setStyles(s);
-	}
-
-	/** Set the item style bits (and notify clients) */
-	private void setStyles(long s) {
-		if (s != styles) {
-			styles = s;
-			notifyAttribute("styles");
-		}
-	}
-
-	/** Get item style bits */
-	@Override
-	public long getStyles() {
-		return styles;
+		return s;
 	}
 
 	/** Write DMS as an XML element */

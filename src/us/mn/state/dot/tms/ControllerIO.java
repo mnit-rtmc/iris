@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,4 +34,7 @@ public interface ControllerIO extends SonarObject {
 
 	/** Get the controller I/O pin number */
 	int getPin();
+
+	/** Get item style bits */
+	long getStyles();
 }

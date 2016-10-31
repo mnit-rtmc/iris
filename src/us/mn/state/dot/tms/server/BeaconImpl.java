@@ -161,12 +161,9 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 			nc.setIO(np, this);
 	}
 
-	/** Item style bits */
-	private transient long styles = 0;
-
-	/** Update the beacon styles */
+	/** Calculate the item styles */
 	@Override
-	public void updateStyles() {
+	protected long calculateStyles() {
 		long s = ItemStyle.ALL.bit();
 		if (getController() == null)
 			s |= ItemStyle.NO_CONTROLLER.bit();
@@ -182,21 +179,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 			s |= ItemStyle.AVAILABLE.bit();
 		if (isDeployed())
 			s |= ItemStyle.DEPLOYED.bit();
-		setStyles(s);
-	}
-
-	/** Set the item style bits (and notify clients) */
-	private void setStyles(long s) {
-		if (s != styles) {
-			styles = s;
-			notifyAttribute("styles");
-		}
-	}
-
-	/** Get item style bits */
-	@Override
-	public long getStyles() {
-		return styles;
+		return s;
 	}
 
 	/** Test if beacon is available */

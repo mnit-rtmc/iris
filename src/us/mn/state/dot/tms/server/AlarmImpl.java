@@ -263,6 +263,12 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 		return triggerTime;
 	}
 
+	/** Get item style bits */
+	@Override
+	public long getStyles() {
+		return 0;
+	}
+
 	/** Destroy an alarm */
 	@Override
 	public void doDestroy() throws TMSException {
