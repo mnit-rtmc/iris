@@ -22,7 +22,6 @@ import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
@@ -164,42 +163,21 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 	/** Calculate the item styles */
 	@Override
 	protected long calculateStyles() {
-		long s = ItemStyle.ALL.bit();
-		if (getController() == null)
-			s |= ItemStyle.NO_CONTROLLER.bit();
-		if (isActive())
-			s |= ItemStyle.ACTIVE.bit();
-		else
-			s |= ItemStyle.INACTIVE.bit();
-		if (needsMaintenance())
-			s |= ItemStyle.MAINTENANCE.bit();
-		if (isActive() && isFailed())
-			s |= ItemStyle.FAILED.bit();
-		if (isAvailable())
-			s |= ItemStyle.AVAILABLE.bit();
+		long s = super.calculateStyles();
 		if (isDeployed())
 			s |= ItemStyle.DEPLOYED.bit();
 		return s;
 	}
 
 	/** Test if beacon is available */
-	private boolean isAvailable() {
-		return isOnline() && !needsMaintenance() && !getFlashing();
+	@Override
+	protected boolean isAvailable() {
+		return super.isAvailable() && !getFlashing();
 	}
 
 	/** Test if beacon is deployed */
 	private boolean isDeployed() {
 		return isOnline() && getFlashing();
-	}
-
-	/** Test if beacon needs maintenance */
-	private boolean needsMaintenance() {
-		return isOnline() && !getMaintenance().isEmpty();
-	}
-
-	/** Get maintenance status */
-	private String getMaintenance() {
-		return ControllerHelper.getMaintenance(getController());
 	}
 
 	/** Device location */

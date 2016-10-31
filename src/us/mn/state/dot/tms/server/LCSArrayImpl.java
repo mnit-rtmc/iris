@@ -548,7 +548,8 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	}
 
 	/** Test if LCS array needs maintenance */
-	private boolean needsMaintenance() {
+	@Override
+	protected boolean needsMaintenance() {
 		LCSArrayLock lock = lcs_lock;
 		if (lock == LCSArrayLock.MAINTENANCE)
 			return true;
@@ -560,46 +561,22 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	}
 
 	/** Test if LCS array is available */
-	private boolean isAvailable() {
+	@Override
+	protected boolean isAvailable() {
 		return !isLocked() &&
 		        isOnline() &&
 		       !isDeployed() &&
 		       !needsMaintenance();
 	}
 
-	/** Item style bits */
-	private transient long styles = 0;
-
-	/** Update the LCS array styles */
+	/** Calculate the item styles */
 	@Override
-	public void updateStyles() {
-		long s = ItemStyle.ALL.bit();
-		if (isActive())
-			s |= ItemStyle.ACTIVE.bit();
-		if (isAvailable())
-			s |= ItemStyle.AVAILABLE.bit();
+	protected long calculateStyles() {
+		long s = super.calculateStyles();
 		if (isUserDeployed())
 			s |= ItemStyle.DEPLOYED.bit();
 		if (isScheduleDeployed())
 			s |= ItemStyle.SCHEDULED.bit();
-		if (needsMaintenance())
-			s |= ItemStyle.MAINTENANCE.bit();
-		if (isActive() && isFailed())
-			s |= ItemStyle.FAILED.bit();
-		setStyles(s);
-	}
-
-	/** Set the item style bits (and notify clients) */
-	private void setStyles(long s) {
-		if (s != styles) {
-			styles = s;
-			notifyAttribute("styles");
-		}
-	}
-
-	/** Get item style bits */
-	@Override
-	public long getStyles() {
-		return styles;
+		return s;
 	}
 }

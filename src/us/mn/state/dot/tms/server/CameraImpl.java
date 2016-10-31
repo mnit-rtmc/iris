@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VideoMonitor;
@@ -376,6 +377,15 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		CameraPoller cp = getCameraPoller();
 		if (cp != null)
 			cp.sendRecallPreset(this, preset);
+	}
+
+	/** Calculate the item styles */
+	@Override
+	protected long calculateStyles() {
+		long s = super.calculateStyles();
+		if (!getPublish())
+			s |= ItemStyle.UNPUBLISHED.bit();
+		return s;
 	}
 
 	/** Print camera as an XML element */

@@ -750,15 +750,19 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Test if a meter needs maintenance */
-	private boolean needsMaintenance() {
+	@Override
+	protected boolean needsMaintenance() {
+		if (super.needsMaintenance())
+			return true;
 		RampMeterLock lck = m_lock;
 		return lck == RampMeterLock.POLICE_PANEL ||
 		       lck == RampMeterLock.MAINTENANCE;
 	}
 
 	/** Test if meter is available */
-	private boolean isAvailable() {
-		return isOnline() && !isMetering() && !needsMaintenance();
+	@Override
+	protected boolean isAvailable() {
+		return super.isAvailable() && !isMetering();
 	}
 
 	/** Test if meter has a full queue */
@@ -774,13 +778,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Calculate the item styles */
 	@Override
 	protected long calculateStyles() {
-		long s = ItemStyle.ALL.bit();
-		if (isActive())
-			s |= ItemStyle.ACTIVE.bit();
-		else
-			s |= ItemStyle.INACTIVE.bit();
-		if (isAvailable())
-			s |= ItemStyle.AVAILABLE.bit();
+		long s = super.calculateStyles();
 		if (isQueueFull())
 			s |= ItemStyle.QUEUE_FULL.bit();
 		if (queueExists())
@@ -789,12 +787,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			s |= ItemStyle.METERING.bit();
 		if (isLocked())
 			s |= ItemStyle.LOCKED.bit();
-		if (isOnline() && needsMaintenance())
-			s |= ItemStyle.MAINTENANCE.bit();
-		if (isActive() && isFailed())
-			s |= ItemStyle.FAILED.bit();
-		if (getController() == null)
-			s |= ItemStyle.NO_CONTROLLER.bit();
 		return s;
 	}
 

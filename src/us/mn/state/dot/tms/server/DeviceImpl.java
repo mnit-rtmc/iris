@@ -18,9 +18,11 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -64,36 +66,6 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		if (c != null)
 			c.setIO(pin, this);
 		updateStyles();
-	}
-
-	/** Get the active status */
-	public boolean isActive() {
-		ControllerImpl c = controller;	// Avoid race
-		return (c != null) && c.isActive();
-	}
-
-	/** Get the failure status */
-	public boolean isFailed() {
-		ControllerImpl c = controller;	// Avoid race
-		// FIXME: check if comm link connected
-		//        needs status update to work properly
-		return (c == null) || c.isFailed();
-	}
-
-	/** Test if device is online (active and not failed) */
-	public boolean isOnline() {
-		return isActive() && !isFailed();
-	}
-
-	/** Check if the controller has an error */
-	public boolean hasError() {
-		return isFailed() || hasStatusError();
-	}
-
-	/** Check if the controller has a status error */
-	private boolean hasStatusError() {
-		ControllerImpl c = controller;	// Avoid race
-		return (c == null) || !c.getStatus().isEmpty();
 	}
 
 	/** Get the device poller */
@@ -274,17 +246,13 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		notifyAttribute("opStatus");
 	}
 
-	/** Update the device item styles */
-	public void updateStyles() {
-		setStyles(calculateStyles());
-	}
-
 	/** Item style bits */
 	private transient long styles = calculateStyles();
 
-	/** Calculate the item styles */
-	protected long calculateStyles() {
-		return 0;
+	/** Get item style bits */
+	@Override
+	public long getStyles() {
+		return styles;
 	}
 
 	/** Set the item style bits (and notify clients) */
@@ -295,10 +263,72 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		}
 	}
 
-	/** Get item style bits */
-	@Override
-	public long getStyles() {
-		return styles;
+	/** Update the device item styles */
+	public void updateStyles() {
+		setStyles(calculateStyles());
+	}
+
+	/** Calculate the item styles */
+	protected long calculateStyles() {
+		long s = ItemStyle.ALL.bit();
+		if (isActive())
+			s |= ItemStyle.ACTIVE.bit();
+		else
+			s |= ItemStyle.INACTIVE.bit();
+		if (isAvailable())
+			s |= ItemStyle.AVAILABLE.bit();
+		if (isOnline() && needsMaintenance())
+			s |= ItemStyle.MAINTENANCE.bit();
+		if (isActive() && isFailed())
+			s |= ItemStyle.FAILED.bit();
+		if (getController() == null)
+			s |= ItemStyle.NO_CONTROLLER.bit();
+		return s;
+	}
+
+	/** Get the active status */
+	public boolean isActive() {
+		ControllerImpl c = controller;	// Avoid race
+		return (c != null) && c.isActive();
+	}
+
+	/** Get the failure status */
+	public boolean isFailed() {
+		ControllerImpl c = controller;	// Avoid race
+		// FIXME: check if comm link connected
+		//        needs status update to work properly
+		return (c == null) || c.isFailed();
+	}
+
+	/** Test if device is online (active and not failed) */
+	public boolean isOnline() {
+		return isActive() && !isFailed();
+	}
+
+	/** Test if device is available */
+	protected boolean isAvailable() {
+		return isOnline() && !needsMaintenance();
+	}
+
+	/** Test if a device needs maintenance */
+	protected boolean needsMaintenance() {
+		return !getMaintenance().isEmpty();
+	}
+
+	/** Get maintenance status */
+	private String getMaintenance() {
+		return ControllerHelper.getMaintenance(getController());
+	}
+
+	/** Check if the controller has an error */
+	public boolean hasError() {
+		return isFailed() || hasStatusError();
+	}
+
+	/** Check if the controller has a status error */
+	private boolean hasStatusError() {
+		ControllerImpl c = controller;	// Avoid race
+		return (c == null) || !c.getStatus().isEmpty();
 	}
 
 	/** Destroy an object */

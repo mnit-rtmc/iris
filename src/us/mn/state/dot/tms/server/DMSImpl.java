@@ -1688,8 +1688,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Test if DMS is available */
-	private boolean isAvailable() {
-		return isOnline() && isMsgBlank() && !needsMaintenance();
+	@Override
+	protected boolean isAvailable() {
+		return super.isAvailable() && isMsgBlank();
 	}
 
 	/** Test if current message is blank */
@@ -1751,12 +1752,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Test if DMS needs maintenance */
-	public boolean needsMaintenance() {
-		if (!isOnline())
-			return false;
-		if (hasCriticalError())
-			return true;
-		return !DMSHelper.getMaintenance(this).isEmpty();
+	@Override
+	protected boolean needsMaintenance() {
+		return super.needsMaintenance() || hasCriticalError();
 	}
 
 	/** Test if DMS has a critical error */
@@ -1778,7 +1776,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (hidden)
 			s |= ItemStyle.HIDDEN.bit();
 		else {
-			if (needsMaintenance())
+			if (isOnline() && needsMaintenance())
 				s |= ItemStyle.MAINTENANCE.bit();
 			if (isActive() && isFailed())
 				s |= ItemStyle.FAILED.bit();
