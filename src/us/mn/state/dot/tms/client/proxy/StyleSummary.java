@@ -47,17 +47,17 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class StyleSummary<T extends SonarObject> extends JPanel {
 
-	/** Style button columns */
-	static private final int STYLE_COLS = 3;
+	/** Style button rows */
+	static private final int STYLE_ROWS = 2;
 
 	/** Get the count of style rows */
 	static private int rowCount(int n_buttons) {
-		return Math.min(n_buttons, (n_buttons - 1) / STYLE_COLS + 1);
+		return Math.min(n_buttons, STYLE_ROWS);
 	}
 
 	/** Get the count of style columns */
 	static private int colCount(int n_buttons) {
-		return Math.min(n_buttons, STYLE_COLS);
+		return Math.min(n_buttons, (n_buttons - 1) / STYLE_ROWS + 1);
 	}
 
 	/** Style button */
