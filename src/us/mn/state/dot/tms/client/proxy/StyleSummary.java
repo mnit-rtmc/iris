@@ -50,6 +50,16 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 	/** Style button columns */
 	static private final int STYLE_COLS = 3;
 
+	/** Get the count of style rows */
+	static private int rowCount(int n_buttons) {
+		return Math.min(n_buttons, (n_buttons - 1) / STYLE_COLS + 1);
+	}
+
+	/** Get the count of style columns */
+	static private int colCount(int n_buttons) {
+		return Math.min(n_buttons, STYLE_COLS);
+	}
+
 	/** Style button */
 	static private class StyleButton extends JToggleButton {
 		private final ItemStyle i_style;
@@ -214,8 +224,8 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			gl.linkSize(SwingConstants.HORIZONTAL, sz_btns);
 		}
 		sg.addPreferredGap(RELATED, UI.hgap, Short.MAX_VALUE);
-		int n_rows = (buttons.length - 1) / STYLE_COLS + 1;
-		for (int c = 0; c < STYLE_COLS; c++) {
+		int n_rows = rowCount(buttons.length);
+		for (int c = 0; c < colCount(buttons.length); c++) {
 			StyleButton[] col = createColumn(n_rows, c);
 			if (col.length > 0) {
 				if (c > 0)
@@ -260,12 +270,12 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 			pg.addGroup(sz);
 		}
 		GroupLayout.SequentialGroup bg = gl.createSequentialGroup();
-		int n_rows = (buttons.length - 1) / STYLE_COLS + 1;
+		int n_rows = rowCount(buttons.length);
 		for (int r = 0; r < n_rows; r++) {
 			if (r > 0)
 				bg.addGap(UI.vgap);
 			GroupLayout.ParallelGroup rg = gl.createParallelGroup();
-			for (int c = 0; c < STYLE_COLS; c++) {
+			for (int c = 0; c < colCount(buttons.length); c++) {
 				int i = c * n_rows + r;
 				if (i < buttons.length)
 					rg.addComponent(buttons[i]);
