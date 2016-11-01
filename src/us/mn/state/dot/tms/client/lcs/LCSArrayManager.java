@@ -60,13 +60,7 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 
 	/** Create a new LCS array manager */
 	public LCSArrayManager(Session s, GeoLocManager lm) {
-		super(s, lm, true, 14);
-	}
-
-	/** Get the sonar type name */
-	@Override
-	public String getSonarType() {
-		return LCSArray.SONAR_TYPE;
+		super(s, lm, LCSArray.SONAR_TYPE, true, 14);
 	}
 
 	/** Get the LCS array cache */

@@ -36,13 +36,7 @@ public class MeterManager extends ProxyManager<RampMeter> {
 
 	/** Create a new meter manager */
 	public MeterManager(Session s, GeoLocManager lm) {
-		super(s, lm, true, 15);
-	}
-
-	/** Get the sonar type name */
-	@Override
-	public String getSonarType() {
-		return RampMeter.SONAR_TYPE;
+		super(s, lm, RampMeter.SONAR_TYPE, true, 15);
 	}
 
 	/** Get the ramp meter cache */

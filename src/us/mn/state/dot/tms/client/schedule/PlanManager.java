@@ -44,13 +44,7 @@ public class PlanManager extends ProxyManager<ActionPlan> {
 
 	/** Create a new action plan manager */
 	public PlanManager(Session s, GeoLocManager lm) {
-		super(s, lm, false, 0, ItemStyle.ACTIVE);
-	}
-
-	/** Get the sonar type name */
-	@Override
-	public String getSonarType() {
-		return ActionPlan.SONAR_TYPE;
+		super(s, lm, ActionPlan.SONAR_TYPE, false, 0, ItemStyle.ACTIVE);
 	}
 
 	/** Get the action plan cache */

@@ -40,14 +40,8 @@ public class BeaconManager extends ProxyManager<Beacon> {
 
 	/** Create a new beacon manager */
 	public BeaconManager(Session s, GeoLocManager lm) {
-		super(s, lm, true, 14);
+		super(s, lm, Beacon.SONAR_TYPE, true, 14);
 		tab = new BeaconTab(s, this);
-	}
-
-	/** Get the sonar type name */
-	@Override
-	public String getSonarType() {
-		return Beacon.SONAR_TYPE;
 	}
 
 	/** Get the beacon cache */

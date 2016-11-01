@@ -42,14 +42,8 @@ public class TagReaderManager extends ProxyManager<TagReader> {
 
 	/** Create a new tag reader manager */
 	public TagReaderManager(Session s, GeoLocManager lm) {
-		super(s, lm, true, 14);
+		super(s, lm, TagReader.SONAR_TYPE, true, 14);
 		tab = new TagReaderTab(s, this);
-	}
-
-	/** Get the sonar type name */
-	@Override
-	public String getSonarType() {
-		return TagReader.SONAR_TYPE;
 	}
 
 	/** Get the tag reader cache */

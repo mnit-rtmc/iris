@@ -61,14 +61,8 @@ public class DMSManager extends ProxyManager<DMS> {
 
 	/** Create a new DMS manager */
 	public DMSManager(Session s, GeoLocManager lm) {
-		super(s, lm, true, 12, ItemStyle.DEPLOYED);
+		super(s, lm, DMS.SONAR_TYPE, true, 12, ItemStyle.DEPLOYED);
 		s_model.setAllowMultiple(true);
-	}
-
-	/** Get the sonar type name */
-	@Override
-	public String getSonarType() {
-		return DMS.SONAR_TYPE;
 	}
 
 	/** Get the DMS cache */

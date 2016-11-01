@@ -32,13 +32,7 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 
 	/** Create a new weather sensor manager */
 	public WeatherSensorManager(Session s, GeoLocManager lm) {
-		super(s, lm, true, 0);
-	}
-
-	/** Get the sonar type name */
-	@Override
-	public String getSonarType() {
-		return WeatherSensor.SONAR_TYPE;
+		super(s, lm, WeatherSensor.SONAR_TYPE, true, 0);
 	}
 
 	/** Get the weather sensor cache */

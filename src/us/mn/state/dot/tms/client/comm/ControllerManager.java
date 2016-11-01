@@ -39,13 +39,7 @@ public class ControllerManager extends ProxyManager<Controller> {
 
 	/** Create a new controller manager */
 	public ControllerManager(Session s, GeoLocManager lm) {
-		super(s, lm, true, 16, ItemStyle.FAILED);
-	}
-
-	/** Get the sonar type name */
-	@Override
-	public String getSonarType() {
-		return Controller.SONAR_TYPE;
+		super(s, lm, Controller.SONAR_TYPE, true, 16, ItemStyle.FAILED);
 	}
 
 	/** Get the controller cache */

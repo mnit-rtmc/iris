@@ -67,6 +67,14 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Geo location manager */
 	private final GeoLocManager loc_manager;
 
+	/** Sonar type name */
+	private final String sonar_type;
+
+	/** Get the sonar type name */
+	public final String getSonarType() {
+		return sonar_type;
+	}
+
 	/** Listener for proxy events */
 	private final SwingProxyAdapter<T> listener =
 		new SwingProxyAdapter<T>()
@@ -127,14 +135,16 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Create a new proxy manager.
 	 * @param s Session.
 	 * @param lm Location manager.
+	 * @param st Sonar type name.
 	 * @param p Flag for has properties.
 	 * @param zt Zoom threshold.
 	 * @param ds Default item style. */
-	protected ProxyManager(Session s, GeoLocManager lm, boolean p, int zt,
-		ItemStyle ds)
+	protected ProxyManager(Session s, GeoLocManager lm, String st,
+		boolean p, int zt, ItemStyle ds)
 	{
 		session = s;
 		loc_manager = lm;
+		sonar_type = st;
 		zoom_threshold = zt;
 		def_style = ds;
 		has_properties = p;
@@ -143,8 +153,10 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Create a new proxy manager */
-	protected ProxyManager(Session s, GeoLocManager lm, boolean p, int zt) {
-		this(s, lm, p, zt, ItemStyle.ALL);
+	protected ProxyManager(Session s, GeoLocManager lm, String st,
+		boolean p, int zt)
+	{
+		this(s, lm, st, p, zt, ItemStyle.ALL);
 	}
 
 	/** Initialize the proxy manager. This cannot be done in the constructor
@@ -238,9 +250,6 @@ abstract public class ProxyManager<T extends SonarObject> {
 	public Double getTangentAngle(MapGeoLoc loc) {
 		return loc_manager.getTangentAngle(loc);
 	}
-
-	/** Get the sonar type name */
-	abstract public String getSonarType();
 
 	/** Get the proxy type cache */
 	abstract public TypeCache<T> getCache();

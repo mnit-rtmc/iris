@@ -33,13 +33,7 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 
 	/** Create a new lane marking manager */
 	public LaneMarkingManager(Session s, GeoLocManager lm) {
-		super(s, lm, true, 0);
-	}
-
-	/** Get the sonar type name */
-	@Override
-	public String getSonarType() {
-		return LaneMarking.SONAR_TYPE;
+		super(s, lm, LaneMarking.SONAR_TYPE, true, 0);
 	}
 
 	/** Get the lane marking cache */

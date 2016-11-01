@@ -37,13 +37,7 @@ public class GateArmArrayManager extends ProxyManager<GateArmArray> {
 
 	/** Create a new gate arm array manager */
 	public GateArmArrayManager(Session s, GeoLocManager lm) {
-		super(s, lm, true, 15);
-	}
-
-	/** Get the sonar type name */
-	@Override
-	public String getSonarType() {
-		return GateArmArray.SONAR_TYPE;
+		super(s, lm, GateArmArray.SONAR_TYPE, true, 15);
 	}
 
 	/** Get the gate arm array cache */

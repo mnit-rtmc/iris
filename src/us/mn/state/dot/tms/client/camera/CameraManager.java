@@ -48,16 +48,10 @@ public class CameraManager extends ProxyManager<Camera> {
 
 	/** Create a new camera manager */
 	public CameraManager(Session s, GeoLocManager lm) {
-		super(s, lm, true, 13, ItemStyle.ACTIVE);
+		super(s, lm, Camera.SONAR_TYPE, true, 13, ItemStyle.ACTIVE);
 		dispatcher = new CameraDispatcher(s, this);
 		tab = new CameraTab(s, this, dispatcher);
 		s_model.setAllowMultiple(true);
-	}
-
-	/** Get the sonar type name */
-	@Override
-	public String getSonarType() {
-		return Camera.SONAR_TYPE;
 	}
 
 	/** Get the camera cache */
