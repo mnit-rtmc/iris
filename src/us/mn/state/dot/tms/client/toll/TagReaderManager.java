@@ -18,7 +18,6 @@ import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.TagReader;
@@ -81,19 +80,12 @@ public class TagReaderManager extends ProxyManager<TagReader> {
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, TagReader proxy) {
-		switch(is) {
-		case AVAILABLE:
-			return !ControllerHelper.isFailed(
-			       proxy.getController());
-		case FAILED:
-			return ControllerHelper.isFailed(proxy.getController());
-		case NO_CONTROLLER:
-			return proxy.getController() == null;
-		case ALL:
-			return true;
-		default:
-			return false;
+		long styles = proxy.getStyles();
+		for (ItemStyle s: ItemStyle.toStyles(styles)) {
+			if (s == is)
+				return true;
 		}
+		return false;
 	}
 
 	/** Create a properties form for the specified proxy */

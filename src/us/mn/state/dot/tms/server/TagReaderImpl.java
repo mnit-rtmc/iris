@@ -211,6 +211,14 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		return dmss;
 	}
 
+	/** Test if device is available */
+	@Override
+	protected boolean isAvailable() {
+		// Don't check maintenance status because it
+		// always contains Error_log_entries
+		return isOnline();
+	}
+
 	/** Send a device request operation */
 	@Override
 	protected void sendDeviceRequest(DeviceRequest dr) {
