@@ -22,8 +22,8 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
-import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class MeterManager extends ProxyManager<RampMeter> {
+public class MeterManager extends DeviceManager<RampMeter> {
 
 	/** Create a new meter manager */
 	public MeterManager(Session s, GeoLocManager lm) {
@@ -55,17 +55,6 @@ public class MeterManager extends ProxyManager<RampMeter> {
 	@Override
 	protected ProxyTheme<RampMeter> createTheme() {
 		return new MeterTheme(this);
-	}
-
-	/** Check the style of the specified proxy */
-	@Override
-	public boolean checkStyle(ItemStyle is, RampMeter proxy) {
-		long styles = proxy.getStyles();
-		for (ItemStyle s: ItemStyle.toStyles(styles)) {
-			if (s == is)
-				return true;
-		}
-		return false;
 	}
 
 	/** Create a properties form for the specified proxy */

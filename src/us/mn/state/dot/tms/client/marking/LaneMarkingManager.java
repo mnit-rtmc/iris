@@ -20,8 +20,8 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
-import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
@@ -29,7 +29,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  *
  * @author Douglas Lau
  */
-public class LaneMarkingManager extends ProxyManager<LaneMarking> {
+public class LaneMarkingManager extends DeviceManager<LaneMarking> {
 
 	/** Create a new lane marking manager */
 	public LaneMarkingManager(Session s, GeoLocManager lm) {
@@ -51,17 +51,6 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
-	}
-
-	/** Check the style of the specified proxy */
-	@Override
-	public boolean checkStyle(ItemStyle is, LaneMarking proxy) {
-		long styles = proxy.getStyles();
-		for (ItemStyle s: ItemStyle.toStyles(styles)) {
-			if (s == is)
-				return true;
-		}
-		return false;
 	}
 
 	/** Find the map geo location for a proxy */

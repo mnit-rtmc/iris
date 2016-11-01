@@ -30,9 +30,9 @@ import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
-import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -42,7 +42,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class DMSManager extends ProxyManager<DMS> {
+public class DMSManager extends DeviceManager<DMS> {
 
 	/** Color definition for AWS controlled style */
 	static private final Color COLOR_HELIOTROPE = new Color(1, 0.5f,0.9f);
@@ -191,16 +191,5 @@ public class DMSManager extends ProxyManager<DMS> {
 	@Override
 	protected GeoLoc getGeoLoc(DMS proxy) {
 		return proxy.getGeoLoc();
-	}
-
-	/** Check the style of the specified proxy */
-	@Override
-	public boolean checkStyle(ItemStyle is, DMS proxy) {
-		long styles = proxy.getStyles();
-		for (ItemStyle s: ItemStyle.toStyles(styles)) {
-			if (s == is)
-				return true;
-		}
-		return false;
 	}
 }

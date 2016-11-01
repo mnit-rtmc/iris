@@ -22,8 +22,8 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
-import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class TagReaderManager extends ProxyManager<TagReader> {
+public class TagReaderManager extends DeviceManager<TagReader> {
 
 	/** Color to display available readers */
 	static private final Color COLOR_AVAILABLE = new Color(64, 128, 255);
@@ -69,17 +69,6 @@ public class TagReaderManager extends ProxyManager<TagReader> {
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
-	}
-
-	/** Check the style of the specified proxy */
-	@Override
-	public boolean checkStyle(ItemStyle is, TagReader proxy) {
-		long styles = proxy.getStyles();
-		for (ItemStyle s: ItemStyle.toStyles(styles)) {
-			if (s == is)
-				return true;
-		}
-		return false;
 	}
 
 	/** Create a properties form for the specified proxy */

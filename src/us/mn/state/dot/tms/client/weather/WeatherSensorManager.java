@@ -19,8 +19,8 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
-import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  *
  * @author Douglas Lau
  */
-public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
+public class WeatherSensorManager extends DeviceManager<WeatherSensor> {
 
 	/** Create a new weather sensor manager */
 	public WeatherSensorManager(Session s, GeoLocManager lm) {
@@ -50,17 +50,6 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
-	}
-
-	/** Check the style of the specified proxy */
-	@Override
-	public boolean checkStyle(ItemStyle is, WeatherSensor proxy) {
-		long styles = proxy.getStyles();
-		for (ItemStyle s: ItemStyle.toStyles(styles)) {
-			if (s == is)
-				return true;
-		}
-		return false;
 	}
 
 	/** Find the map geo location for a proxy */

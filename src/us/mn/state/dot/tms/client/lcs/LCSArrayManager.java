@@ -34,9 +34,9 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 import static us.mn.state.dot.tms.R_Node.MAX_LANES;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.map.Style;
+import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
-import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.client.proxy.WorkRequestAction;
@@ -48,7 +48,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class LCSArrayManager extends ProxyManager<LCSArray> {
+public class LCSArrayManager extends DeviceManager<LCSArray> {
 
 	/** Action to blank the selected LCS array */
 	private BlankLcsAction blankAction;
@@ -155,17 +155,6 @@ public class LCSArrayManager extends ProxyManager<LCSArray> {
 		list.setLayoutOrientation(JList.VERTICAL_WRAP);
 		list.setVisibleRowCount(0);
 		return list;
-	}
-
-	/** Check the style of the specified proxy */
-	@Override
-	public boolean checkStyle(ItemStyle is, LCSArray proxy) {
-		long styles = proxy.getStyles();
-		for (ItemStyle s: ItemStyle.toStyles(styles)) {
-			if (s == is)
-				return true;
-		}
-		return false;
 	}
 
 	/** Create a properties form for the specified proxy */

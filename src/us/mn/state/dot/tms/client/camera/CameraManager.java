@@ -26,8 +26,8 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
-import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.utils.I18N;
  *
  * @author Douglas Lau
  */
-public class CameraManager extends ProxyManager<Camera> {
+public class CameraManager extends DeviceManager<Camera> {
 
 	/** Camera dispatcher */
 	private final CameraDispatcher dispatcher;
@@ -77,12 +77,8 @@ public class CameraManager extends ProxyManager<Camera> {
 	public boolean checkStyle(ItemStyle is, Camera proxy) {
 		if (is == ItemStyle.PLAYLIST)
 			return inPlaylist(proxy);
-		long styles = proxy.getStyles();
-		for (ItemStyle s: ItemStyle.toStyles(styles)) {
-			if (s == is)
-				return true;
-		}
-		return false;
+		else
+			return super.checkStyle(is, proxy);
 	}
 
 	/** Create a properties form for the specified proxy */
