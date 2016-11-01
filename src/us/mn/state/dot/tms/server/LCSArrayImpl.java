@@ -367,7 +367,9 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 
 	/** Get the LCS for all lanes (right-to-left) */
 	private synchronized LCSImpl[] getLanes() {
-		return Arrays.copyOf(lanes, lanes.length);
+		return (lanes != null)
+		      ? Arrays.copyOf(lanes, lanes.length)
+		      : new LCSImpl[0];
 	}
 
 	/** Get the count of lanes in the LCS array */
