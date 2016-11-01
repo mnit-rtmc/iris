@@ -61,14 +61,12 @@ public class WeatherSensorManager extends ProxyManager<WeatherSensor> {
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, WeatherSensor proxy) {
-		switch(is) {
-		case NO_CONTROLLER:
-			return proxy.getController() == null;
-		case ALL:
-			return true;
-		default:
-			return false;
+		long styles = proxy.getStyles();
+		for (ItemStyle s: ItemStyle.toStyles(styles)) {
+			if (s == is)
+				return true;
 		}
+		return false;
 	}
 
 	/** Find the map geo location for a proxy */
