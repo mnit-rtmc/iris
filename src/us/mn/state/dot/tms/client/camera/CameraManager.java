@@ -78,32 +78,17 @@ public class CameraManager extends ProxyManager<Camera> {
 		return new CameraTheme(this);
 	}
 
-	/** Check if a given attribute affects a proxy style */
-	@Override
-	public boolean isStyleAttrib(String a) {
-		return "publish".equals(a);
-	}
-
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, Camera proxy) {
-		switch (is) {
-		case ACTIVE:
-			return ControllerHelper.isActive(proxy.getController());
-		case INACTIVE:
-			return !ControllerHelper.isActive(
-				proxy.getController());
-		case UNPUBLISHED:
-			return !proxy.getPublish();
-		case NO_CONTROLLER:
-			return proxy.getController() == null;
-		case PLAYLIST:
+		if (is == ItemStyle.PLAYLIST)
 			return inPlaylist(proxy);
-		case ALL:
-			return true;
-		default:
-			return false;
+		long styles = proxy.getStyles();
+		for (ItemStyle s: ItemStyle.toStyles(styles)) {
+			if (s == is)
+				return true;
 		}
+		return false;
 	}
 
 	/** Create a properties form for the specified proxy */
