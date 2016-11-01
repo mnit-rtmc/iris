@@ -45,6 +45,13 @@ import us.mn.state.dot.tms.utils.Multi.JustificationPage;
  */
 public class OpSendDMSDefaults extends OpDMS {
 
+	/** Minimum threshold for comm loss.  Some Ledstar firmware
+	 * behaves strangely when dmsTimeCommLoss.0 is 1 minute. */
+	static private final int COMM_LOSS_MINIMUM_MINS = 2;
+
+	/** Number of missed polling periods for comm loss threshold */
+	static private final int COMM_LOSS_PERIODS = 10;
+
 	/** Create a new operation to send DMS default parameters */
 	public OpSendDMSDefaults(DMSImpl d) {
 		super(PriorityLevel.DOWNLOAD, d);
@@ -85,7 +92,12 @@ public class OpSendDMSDefaults extends OpDMS {
 	/** Get the comm loss threshold */
 	private int getCommLossMinutes() {
 		return isCommLossBlacklisted() ? 0
-		      : Math.max(1, 10 * controller.getPollPeriod() / 60);
+		      : Math.max(COMM_LOSS_MINIMUM_MINS, getLinkCommLossMins());
+	}
+
+	/** Get the comm loss threshold for the comm link */
+	private int getLinkCommLossMins() {
+		return controller.getPollPeriod() * COMM_LOSS_PERIODS / 60;
 	}
 
 	/** Is the controller blacklisted for comm loss setting */
