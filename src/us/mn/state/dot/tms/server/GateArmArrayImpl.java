@@ -327,6 +327,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Array of all gate arms */
 	private transient final GateArmImpl[] arms = new GateArmImpl[MAX_ARMS];
 
+	/** Get one gate arm */
+	private GateArmImpl getArm(int i) {
+		GateArmImpl[] a = arms;
+		return (a != null) ? a[i] : null;
+	}
+
 	/** Get array of gate arms */
 	public synchronized GateArmImpl[] getArms() {
 		return Arrays.copyOf(arms, MAX_ARMS);
@@ -441,7 +447,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			return;
 		}
 		for (int i = 0; i < MAX_ARMS; i++) {
-			GateArmImpl ga = arms[i];
+			GateArmImpl ga = getArm(i);
 			if (ga != null)
 				ga.requestArmState(rs, o);
 		}
@@ -500,7 +506,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		boolean closed = false;
 		boolean timeout = false;
 		for (int i = 0; i < MAX_ARMS; i++) {
-			GateArmImpl ga = arms[i];
+			GateArmImpl ga = getArm(i);
 			if (ga != null && ga.isActive()) {
 				GateArmState gas = ga.getArmStateEnum();
 				switch (gas) {
@@ -588,7 +594,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Send gate arm interlock settings */
 	private void sendInterlocks() {
 		for (int i = 0; i < MAX_ARMS; i++) {
-			GateArmImpl ga = arms[i];
+			GateArmImpl ga = getArm(i);
 			if (ga != null)
 				ga.sendInterlocks();
 		}
@@ -705,7 +711,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override
 	public boolean isActive() {
 		for (int i = 0; i < MAX_ARMS; i++) {
-			GateArmImpl ga = arms[i];
+			GateArmImpl ga = getArm(i);
 			if (ga != null && ga.isActive())
 				return true;
 		}
@@ -716,7 +722,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override
 	public boolean isFailed() {
 		for (int i = 0; i < MAX_ARMS; i++) {
-			GateArmImpl ga = arms[i];
+			GateArmImpl ga = getArm(i);
 			if (ga != null && ga.isActive() && ga.isFailed())
 				return true;
 		}
@@ -767,7 +773,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	@Override
 	protected void sendDeviceRequest(DeviceRequest dr) {
 		for (int i = 0; i < MAX_ARMS; i++) {
-			GateArmImpl ga = arms[i];
+			GateArmImpl ga = getArm(i);
 			if (ga != null)
 				ga.sendDeviceRequest(dr);
 		}
