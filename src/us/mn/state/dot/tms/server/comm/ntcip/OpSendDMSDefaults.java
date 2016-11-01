@@ -85,7 +85,7 @@ public class OpSendDMSDefaults extends OpDMS {
 	/** Get the comm loss threshold */
 	private int getCommLossMinutes() {
 		return isCommLossBlacklisted() ? 0
-		      : Math.min(1, 10 * controller.getPollPeriod() / 60);
+		      : Math.max(1, 10 * controller.getPollPeriod() / 60);
 	}
 
 	/** Is the controller blacklisted for comm loss setting */
