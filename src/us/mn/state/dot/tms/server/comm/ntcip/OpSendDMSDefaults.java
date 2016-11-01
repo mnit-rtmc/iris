@@ -67,7 +67,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			MessageIDCode end_msg = new MessageIDCode(
 				dmsEndDurationMessage.node);
 			power_time.setInteger(0);
-			comm_time.setInteger(DMS_COMM_LOSS_MINUTES.getInt());
+			comm_time.setInteger(getCommLossMinutes());
 			end_msg.setMemoryType(DmsMessageMemoryType.blank);
 			end_msg.setNumber(1);
 			end_msg.setCrc(0);
@@ -80,6 +80,20 @@ public class OpSendDMSDefaults extends OpDMS {
 			mess.storeProps();
 			return new PixelService();
 		}
+	}
+
+	/** Get the comm loss threshold */
+	private int getCommLossMinutes() {
+		return isCommLossBlacklisted() ? 0
+		      : Math.min(1, 10 * controller.getPollPeriod() / 60);
+	}
+
+	/** Is the controller blacklisted for comm loss setting */
+	private boolean isCommLossBlacklisted() {
+		// Certain Ledstar firmware versions can lock up with
+		// a CTO error if this is set to a non-zero value
+		// FIXME: add list here
+		return false;
 	}
 
 	/** Phase to set the pixel service schedule */
