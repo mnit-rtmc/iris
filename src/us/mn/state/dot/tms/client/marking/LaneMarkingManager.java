@@ -62,14 +62,12 @@ public class LaneMarkingManager extends ProxyManager<LaneMarking> {
 	/** Check the style of the specified proxy */
 	@Override
 	public boolean checkStyle(ItemStyle is, LaneMarking proxy) {
-		switch(is) {
-		case NO_CONTROLLER:
-			return proxy.getController() == null;
-		case ALL:
-			return true;
-		default:
-			return false;
+		long styles = proxy.getStyles();
+		for (ItemStyle s: ItemStyle.toStyles(styles)) {
+			if (s == is)
+				return true;
 		}
+		return false;
 	}
 
 	/** Find the map geo location for a proxy */
