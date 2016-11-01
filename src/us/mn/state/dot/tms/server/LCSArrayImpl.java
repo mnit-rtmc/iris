@@ -162,7 +162,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	/** Get the controller for an LCS array */
 	public synchronized Controller getController() {
 		// Get the controller for the DMS in lane 1
-		if (lanes.length > 0) {
+		if (lanes != null && lanes.length > 0) {
 			LCS lcs = lanes[0];
 			if (lcs != null) {
 				DMS dms = DMSHelper.lookup(lcs.getName());
