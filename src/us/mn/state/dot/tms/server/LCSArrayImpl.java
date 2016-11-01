@@ -475,6 +475,9 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 			lns = getLanes();
 			ind = getIndicationsCurrent();
 		}
+		// If called before transients init
+		if (ind == null)
+			return null;
 		int n_lns = Math.min(lns.length, ind.length);
 		for (int i = 0; i < n_lns; i++) {
 			LCSImpl lcs = lns[i];
