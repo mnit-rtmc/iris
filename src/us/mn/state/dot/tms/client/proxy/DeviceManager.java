@@ -30,17 +30,17 @@ abstract public class DeviceManager<T extends Device>
 	extends ProxyManager<T>
 {
 	/** Create a new device manager */
-	protected DeviceManager(Session s, GeoLocManager lm, String st,
-		boolean p, int zt, ItemStyle ds)
+	protected DeviceManager(Session s, GeoLocManager lm,
+		ProxyDescriptor<T> pd, int zt, ItemStyle ds)
 	{
-		super(s, lm, st, p, zt, ds);
+		super(s, lm, pd, zt, ds);
 	}
 
 	/** Create a new device manager */
-	protected DeviceManager(Session s, GeoLocManager lm, String st,
-		boolean p, int zt)
+	protected DeviceManager(Session s, GeoLocManager lm,
+		ProxyDescriptor<T> pd, int zt)
 	{
-		super(s, lm, st, p, zt);
+		super(s, lm, pd, zt);
 	}
 
 	/** Check the style of the specified proxy */

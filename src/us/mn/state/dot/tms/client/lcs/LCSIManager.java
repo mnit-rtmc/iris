@@ -14,12 +14,12 @@
  */
 package us.mn.state.dot.tms.client.lcs;
 
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCSIndication;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
@@ -30,16 +30,17 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  */
 public class LCSIManager extends ProxyManager<LCSIndication> {
 
-	/** Create a new LCS indicaiton manager */
-	public LCSIManager(Session s, GeoLocManager lm) {
-		super(s, lm, LCSIndication.SONAR_TYPE, false, 0);
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<LCSIndication> descriptor(Session s) {
+		return new ProxyDescriptor<LCSIndication>(
+			s.getSonarState().getLcsCache().getLCSIndications(),
+			false
+		);
 	}
 
-	/** Get the LCS indication cache */
-	@Override
-	public TypeCache<LCSIndication> getCache() {
-		LcsCache cache = session.getSonarState().getLcsCache();
-		return cache.getLCSIndications();
+	/** Create a new LCS indicaiton manager */
+	public LCSIManager(Session s, GeoLocManager lm) {
+		super(s, lm, descriptor(s), 0);
 	}
 
 	/** Create a theme for LCS arrays */

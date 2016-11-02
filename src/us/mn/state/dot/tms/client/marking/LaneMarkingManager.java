@@ -15,13 +15,13 @@
 package us.mn.state.dot.tms.client.marking;
 
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
@@ -31,15 +31,23 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  */
 public class LaneMarkingManager extends DeviceManager<LaneMarking> {
 
-	/** Create a new lane marking manager */
-	public LaneMarkingManager(Session s, GeoLocManager lm) {
-		super(s, lm, LaneMarking.SONAR_TYPE, true, 0);
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<LaneMarking> descriptor(final Session s){
+		return new ProxyDescriptor<LaneMarking>(
+			s.getSonarState().getLaneMarkings(), true
+		) {
+			@Override
+			public LaneMarkingProperties createPropertiesForm(
+				LaneMarking proxy)
+			{
+				return new LaneMarkingProperties(s, proxy);
+			}
+		};
 	}
 
-	/** Get the lane marking cache */
-	@Override
-	public TypeCache<LaneMarking> getCache() {
-		return session.getSonarState().getLaneMarkings();
+	/** Create a new lane marking manager */
+	public LaneMarkingManager(Session s, GeoLocManager lm) {
+		super(s, lm, descriptor(s), 0);
 	}
 
 	/** Create a theme for lane markings */
@@ -57,11 +65,5 @@ public class LaneMarkingManager extends DeviceManager<LaneMarking> {
 	@Override
 	protected GeoLoc getGeoLoc(LaneMarking proxy) {
 		return proxy.getGeoLoc();
-	}
-
-	/** Create a properties form for the specified proxy */
-	@Override
-	protected LaneMarkingProperties createPropertiesForm(LaneMarking proxy){
-		return new LaneMarkingProperties(session, proxy);
 	}
 }

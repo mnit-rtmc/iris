@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.meter;
 
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
@@ -24,6 +23,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -34,15 +34,23 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class MeterManager extends DeviceManager<RampMeter> {
 
-	/** Create a new meter manager */
-	public MeterManager(Session s, GeoLocManager lm) {
-		super(s, lm, RampMeter.SONAR_TYPE, true, 15);
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<RampMeter> descriptor(final Session s) {
+		return new ProxyDescriptor<RampMeter>(
+			s.getSonarState().getRampMeters(), true
+		) {
+			@Override
+			public RampMeterProperties createPropertiesForm(
+				RampMeter meter)
+			{
+				return new RampMeterProperties(s, meter);
+			}
+		};
 	}
 
-	/** Get the ramp meter cache */
-	@Override
-	public TypeCache<RampMeter> getCache() {
-		return session.getSonarState().getRampMeters();
+	/** Create a new meter manager */
+	public MeterManager(Session s, GeoLocManager lm) {
+		super(s, lm, descriptor(s), 15);
 	}
 
 	/** Create a ramp meter map tab */
@@ -55,12 +63,6 @@ public class MeterManager extends DeviceManager<RampMeter> {
 	@Override
 	protected ProxyTheme<RampMeter> createTheme() {
 		return new MeterTheme(this);
-	}
-
-	/** Create a properties form for the specified proxy */
-	@Override
-	protected RampMeterProperties createPropertiesForm(RampMeter meter) {
-		return new RampMeterProperties(session, meter);
 	}
 
 	/** Fill single selection popup */

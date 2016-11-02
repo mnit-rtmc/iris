@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.schedule;
 import java.awt.Color;
 import java.util.Iterator;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.BeaconAction;
 import us.mn.state.dot.tms.BeaconActionHelper;
@@ -33,6 +32,7 @@ import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.TimeActionHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 
 /**
@@ -42,15 +42,16 @@ import us.mn.state.dot.tms.client.proxy.ProxyManager;
  */
 public class PlanManager extends ProxyManager<ActionPlan> {
 
-	/** Create a new action plan manager */
-	public PlanManager(Session s, GeoLocManager lm) {
-		super(s, lm, ActionPlan.SONAR_TYPE, false, 0, ItemStyle.ACTIVE);
+	/** Create a descriptor for action plans */
+	static private ProxyDescriptor<ActionPlan> descriptor(Session s) {
+		return new ProxyDescriptor<ActionPlan>(
+			s.getSonarState().getActionPlans(), false
+		);
 	}
 
-	/** Get the action plan cache */
-	@Override
-	public TypeCache<ActionPlan> getCache() {
-		return session.getSonarState().getActionPlans();
+	/** Create a new action plan manager */
+	public PlanManager(Session s, GeoLocManager lm) {
+		super(s, lm, descriptor(s), 0, ItemStyle.ACTIVE);
 	}
 
 	/** Create a plan map tab */

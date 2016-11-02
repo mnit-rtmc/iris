@@ -67,12 +67,17 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Geo location manager */
 	private final GeoLocManager loc_manager;
 
-	/** Sonar type name */
-	private final String sonar_type;
+	/** Proxy descriptor */
+	private final ProxyDescriptor<T> descriptor;
 
 	/** Get the sonar type name */
 	public final String getSonarType() {
-		return sonar_type;
+		return descriptor.tname;
+	}
+
+	/** Get the proxy type cache */
+	public final TypeCache<T> getCache() {
+		return descriptor.cache;
 	}
 
 	/** Listener for proxy events */
@@ -121,9 +126,6 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Default style */
 	private final ItemStyle def_style;
 
-	/** Has properties flag */
-	private final boolean has_properties;
-
 	/** Screen pane */
 	protected ScreenPane s_pane;
 
@@ -135,28 +137,26 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Create a new proxy manager.
 	 * @param s Session.
 	 * @param lm Location manager.
-	 * @param st Sonar type name.
-	 * @param p Flag for has properties.
+	 * @param pd Proxy descriptor.
 	 * @param zt Zoom threshold.
 	 * @param ds Default item style. */
-	protected ProxyManager(Session s, GeoLocManager lm, String st,
-		boolean p, int zt, ItemStyle ds)
+	protected ProxyManager(Session s, GeoLocManager lm,
+		ProxyDescriptor<T> pd, int zt, ItemStyle ds)
 	{
 		session = s;
 		loc_manager = lm;
-		sonar_type = st;
+		descriptor = pd;
 		zoom_threshold = zt;
 		def_style = ds;
-		has_properties = p;
 		theme = createTheme();
 		layer = hasLayer() ? createLayer() : null;
 	}
 
 	/** Create a new proxy manager */
-	protected ProxyManager(Session s, GeoLocManager lm, String st,
-		boolean p, int zt)
+	protected ProxyManager(Session s, GeoLocManager lm,
+		ProxyDescriptor<T> pd, int zt)
 	{
-		this(s, lm, st, p, zt, ItemStyle.ALL);
+		this(s, lm, pd, zt, ItemStyle.ALL);
 	}
 
 	/** Initialize the proxy manager. This cannot be done in the constructor
@@ -250,9 +250,6 @@ abstract public class ProxyManager<T extends SonarObject> {
 	public Double getTangentAngle(MapGeoLoc loc) {
 		return loc_manager.getTangentAngle(loc);
 	}
-
-	/** Get the proxy type cache */
-	abstract public TypeCache<T> getCache();
 
 	/** Create a map tab for the managed proxies */
 	public MapTab<T> createTab() {
@@ -404,7 +401,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 		p.add(makeMenuLabel(getDescription(proxy)));
 		p.addSeparator();
 		fillPopupSingle(p, proxy);
-		if (has_properties) {
+		if (descriptor.has_properties) {
 			if (WorkRequestAction.isConfigured()) {
 				p.add(new WorkRequestAction<T>(proxy, loc));
 				p.addSeparator();
@@ -412,7 +409,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 		}
 		if (s_pane != null && loc != null)
 			p.add(new MapAction<T>(s_pane, proxy, loc));
-		if (has_properties)
+		if (descriptor.has_properties)
 			p.add(new PropertiesAction<T>(this, proxy));
 		return p;
 	}

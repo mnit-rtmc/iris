@@ -19,7 +19,6 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
@@ -32,6 +31,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.geo.Position;
@@ -44,19 +44,21 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class IncidentManager extends ProxyManager<Incident> {
 
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<Incident> descriptor(Session s) {
+		return new ProxyDescriptor<Incident>(
+			s.getSonarState().getIncCache().getIncidents(),
+			false
+		);
+	}
+
 	/** Location mapping */
 	private final HashMap<String, IncidentGeoLoc> locations =
 		new HashMap<String, IncidentGeoLoc>();
 
 	/** Create a new incident manager */
 	public IncidentManager(Session s, GeoLocManager lm) {
-		super(s, lm, Incident.SONAR_TYPE, false, 10);
-	}
-
-	/** Get the incident cache */
-	@Override
-	public TypeCache<Incident> getCache() {
-		return session.getSonarState().getIncCache().getIncidents();
+		super(s, lm, descriptor(s), 10);
 	}
 
 	/** Create an incident map tab */

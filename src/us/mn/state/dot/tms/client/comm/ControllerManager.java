@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.comm;
 
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
@@ -26,6 +25,7 @@ import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.utils.I18N;
@@ -37,16 +37,25 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class ControllerManager extends ProxyManager<Controller> {
 
-	/** Create a new controller manager */
-	public ControllerManager(Session s, GeoLocManager lm) {
-		super(s, lm, Controller.SONAR_TYPE, true, 16, ItemStyle.FAILED);
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<Controller> descriptor(final Session s) {
+		return new ProxyDescriptor<Controller>(
+			s.getSonarState().getConCache().getControllers(), true
+		) {
+			@Override
+			public ControllerForm createPropertiesForm(
+				Controller ctrl)
+			{
+				return new ControllerForm(s, ctrl);
+			}
+		};
 	}
 
-	/** Get the controller cache */
-	@Override
-	public TypeCache<Controller> getCache() {
-		return session.getSonarState().getConCache().getControllers();
+	/** Create a new controller manager */
+	public ControllerManager(Session s, GeoLocManager lm) {
+		super(s, lm, descriptor(s), 16, ItemStyle.FAILED);
 	}
+
 
 	/** Create a comm map tab */
 	@Override
@@ -79,12 +88,6 @@ public class ControllerManager extends ProxyManager<Controller> {
 		theme.addStyle(ItemStyle.ACTIVE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
-	}
-
-	/** Create a properties form for the specified proxy */
-	@Override
-	protected ControllerForm createPropertiesForm(Controller ctrl) {
-		return new ControllerForm(session, ctrl);
 	}
 
 	/** Create a popup menu for multiple objects */

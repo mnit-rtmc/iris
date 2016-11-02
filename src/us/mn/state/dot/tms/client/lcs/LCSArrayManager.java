@@ -20,7 +20,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -36,6 +35,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.StyleListModel;
@@ -50,6 +50,20 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class LCSArrayManager extends DeviceManager<LCSArray> {
 
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<LCSArray> descriptor(final Session s) {
+		return new ProxyDescriptor<LCSArray>(
+			s.getSonarState().getLcsCache().getLCSArrays(), true
+		) {
+			@Override
+			public LCSArrayProperties createPropertiesForm(
+				LCSArray la)
+			{
+				return new LCSArrayProperties(s, la);
+			}
+		};
+	}
+
 	/** Action to blank the selected LCS array */
 	private BlankLcsAction blankAction;
 
@@ -60,14 +74,7 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 
 	/** Create a new LCS array manager */
 	public LCSArrayManager(Session s, GeoLocManager lm) {
-		super(s, lm, LCSArray.SONAR_TYPE, true, 14);
-	}
-
-	/** Get the LCS array cache */
-	@Override
-	public TypeCache<LCSArray> getCache() {
-		LcsCache cache = session.getSonarState().getLcsCache();
-		return cache.getLCSArrays();
+		super(s, lm, descriptor(s), 14);
 	}
 
 	/** Create an LCS map tab */
@@ -155,12 +162,6 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 		list.setLayoutOrientation(JList.VERTICAL_WRAP);
 		list.setVisibleRowCount(0);
 		return list;
-	}
-
-	/** Create a properties form for the specified proxy */
-	@Override
-	protected LCSArrayProperties createPropertiesForm(LCSArray la) {
-		return new LCSArrayProperties(session, la);
 	}
 
 	/** Fill single selection popup */

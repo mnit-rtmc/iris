@@ -14,13 +14,13 @@
  */
 package us.mn.state.dot.tms.client.weather;
 
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 
 /**
@@ -30,15 +30,25 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  */
 public class WeatherSensorManager extends DeviceManager<WeatherSensor> {
 
-	/** Create a new weather sensor manager */
-	public WeatherSensorManager(Session s, GeoLocManager lm) {
-		super(s, lm, WeatherSensor.SONAR_TYPE, true, 0);
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<WeatherSensor> descriptor(
+		final Session s)
+	{
+		return new ProxyDescriptor<WeatherSensor>(
+			s.getSonarState().getWeatherSensors(), true
+		) {
+			@Override
+			public WeatherSensorProperties createPropertiesForm(
+				WeatherSensor ws)
+			{
+				return new WeatherSensorProperties(s, ws);
+			}
+		};
 	}
 
-	/** Get the weather sensor cache */
-	@Override
-	public TypeCache<WeatherSensor> getCache() {
-		return session.getSonarState().getWeatherSensors();
+	/** Create a new weather sensor manager */
+	public WeatherSensorManager(Session s, GeoLocManager lm) {
+		super(s, lm, descriptor(s), 0);
 	}
 
 	/** Create a theme for weather sensors */
@@ -56,13 +66,5 @@ public class WeatherSensorManager extends DeviceManager<WeatherSensor> {
 	@Override
 	protected GeoLoc getGeoLoc(WeatherSensor proxy) {
 		return proxy.getGeoLoc();
-	}
-
-	/** Create a properties form for the specified proxy */
-	@Override
-	protected WeatherSensorProperties createPropertiesForm(
-		WeatherSensor ws)
-	{
-		return new WeatherSensorProperties(session, ws);
 	}
 }

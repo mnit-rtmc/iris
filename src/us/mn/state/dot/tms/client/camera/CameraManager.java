@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.HashSet;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
@@ -28,6 +27,7 @@ import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -36,6 +36,20 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class CameraManager extends DeviceManager<Camera> {
+
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<Camera> descriptor(final Session s) {
+		return new ProxyDescriptor<Camera>(
+			s.getSonarState().getCamCache().getCameras(), true
+		) {
+			@Override
+			public CameraProperties createPropertiesForm(
+				Camera cam)
+			{
+				return new CameraProperties(s, cam);
+			}
+		};
+	}
 
 	/** Camera dispatcher */
 	private final CameraDispatcher dispatcher;
@@ -48,16 +62,10 @@ public class CameraManager extends DeviceManager<Camera> {
 
 	/** Create a new camera manager */
 	public CameraManager(Session s, GeoLocManager lm) {
-		super(s, lm, Camera.SONAR_TYPE, true, 13, ItemStyle.ACTIVE);
+		super(s, lm, descriptor(s), 13, ItemStyle.ACTIVE);
 		dispatcher = new CameraDispatcher(s, this);
 		tab = new CameraTab(s, this, dispatcher);
 		s_model.setAllowMultiple(true);
-	}
-
-	/** Get the camera cache */
-	@Override
-	public TypeCache<Camera> getCache() {
-		return session.getSonarState().getCamCache().getCameras();
 	}
 
 	/** Create a camera map tab */
@@ -79,12 +87,6 @@ public class CameraManager extends DeviceManager<Camera> {
 			return inPlaylist(proxy);
 		else
 			return super.checkStyle(is, proxy);
-	}
-
-	/** Create a properties form for the specified proxy */
-	@Override
-	protected CameraProperties createPropertiesForm(Camera cam) {
-		return new CameraProperties(session, cam);
 	}
 
 	/** Fill single selection popup */

@@ -18,13 +18,13 @@ import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -35,15 +35,21 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class BeaconManager extends DeviceManager<Beacon> {
 
-	/** Create a new beacon manager */
-	public BeaconManager(Session s, GeoLocManager lm) {
-		super(s, lm, Beacon.SONAR_TYPE, true, 14);
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<Beacon> descriptor(final Session s) {
+		return new ProxyDescriptor<Beacon>(
+			s.getSonarState().getBeacons(), true
+		) {
+			@Override
+			public BeaconProperties createPropertiesForm(Beacon b) {
+				return new BeaconProperties(s, b);
+			}
+		};
 	}
 
-	/** Get the beacon cache */
-	@Override
-	public TypeCache<Beacon> getCache() {
-		return session.getSonarState().getBeacons();
+	/** Create a new beacon manager */
+	public BeaconManager(Session s, GeoLocManager lm) {
+		super(s, lm, descriptor(s), 14);
 	}
 
 	/** Create the map tab */
@@ -66,12 +72,6 @@ public class BeaconManager extends DeviceManager<Beacon> {
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
-	}
-
-	/** Create a properties form for the specified proxy */
-	@Override
-	protected BeaconProperties createPropertiesForm(Beacon b) {
-		return new BeaconProperties(session, b);
 	}
 
 	/** Fill single selection popup */

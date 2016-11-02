@@ -17,13 +17,13 @@ package us.mn.state.dot.tms.client.toll;
 import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -37,15 +37,23 @@ public class TagReaderManager extends DeviceManager<TagReader> {
 	/** Color to display available readers */
 	static private final Color COLOR_AVAILABLE = new Color(64, 128, 255);
 
-	/** Create a new tag reader manager */
-	public TagReaderManager(Session s, GeoLocManager lm) {
-		super(s, lm, TagReader.SONAR_TYPE, true, 14);
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<TagReader> descriptor(final Session s) {
+		return new ProxyDescriptor<TagReader>(
+			s.getSonarState().getTagReaders(), true
+		) {
+			@Override
+			public TagReaderProperties createPropertiesForm(
+				TagReader tr)
+			{
+				return new TagReaderProperties(s, tr);
+			}
+		};
 	}
 
-	/** Get the tag reader cache */
-	@Override
-	public TypeCache<TagReader> getCache() {
-		return session.getSonarState().getTagReaders();
+	/** Create a new tag reader manager */
+	public TagReaderManager(Session s, GeoLocManager lm) {
+		super(s, lm, descriptor(s), 14);
 	}
 
 	/** Create the map tab */
@@ -65,12 +73,6 @@ public class TagReaderManager extends DeviceManager<TagReader> {
 			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
-	}
-
-	/** Create a properties form for the specified proxy */
-	@Override
-	protected TagReaderProperties createPropertiesForm(TagReader tr) {
-		return new TagReaderProperties(session, tr);
 	}
 
 	/** Create a popup menu for multiple objects */

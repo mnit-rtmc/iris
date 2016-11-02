@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.gate;
 
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
@@ -25,6 +24,7 @@ import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -35,15 +35,25 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class GateArmArrayManager extends DeviceManager<GateArmArray> {
 
-	/** Create a new gate arm array manager */
-	public GateArmArrayManager(Session s, GeoLocManager lm) {
-		super(s, lm, GateArmArray.SONAR_TYPE, true, 15);
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<GateArmArray> descriptor(
+		final Session s)
+	{
+		return new ProxyDescriptor<GateArmArray>(
+			s.getSonarState().getGateArmArrays(), true
+		) {
+			@Override
+			public GateArmArrayProperties createPropertiesForm(
+				GateArmArray ga)
+			{
+				return new GateArmArrayProperties(s, ga);
+			}
+		};
 	}
 
-	/** Get the gate arm array cache */
-	@Override
-	public TypeCache<GateArmArray> getCache() {
-		return session.getSonarState().getGateArmArrays();
+	/** Create a new gate arm array manager */
+	public GateArmArrayManager(Session s, GeoLocManager lm) {
+		super(s, lm, descriptor(s), 15);
 	}
 
 	/** Create a gate arm map tab */
@@ -72,12 +82,6 @@ public class GateArmArrayManager extends DeviceManager<GateArmArray> {
 		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
-	}
-
-	/** Create a properties form for the specified proxy */
-	@Override
-	protected GateArmArrayProperties createPropertiesForm(GateArmArray ga) {
-		return new GateArmArrayProperties(session, ga);
 	}
 
 	/** Create a popup menu for multiple objects */

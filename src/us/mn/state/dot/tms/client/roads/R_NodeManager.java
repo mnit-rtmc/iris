@@ -37,6 +37,7 @@ import us.mn.state.dot.tms.client.map.LayerState;
 import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
@@ -52,6 +53,14 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
  * @author Douglas Lau
  */
 public class R_NodeManager extends ProxyManager<R_Node> {
+
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<R_Node> descriptor(Session s) {
+		return new ProxyDescriptor<R_Node>(
+			s.getSonarState().getDetCache().getR_Nodes(),
+			false
+		);
+	}
 
 	/** Offset angle for default North map markers */
 	static private final double NORTH_ANGLE = Math.PI / 2;
@@ -106,7 +115,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	public R_NodeManager(Session s, GeoLocManager lm, Properties p)
 		throws IOException, SAXException, ParserConfigurationException
 	{
-		super(s, lm, R_Node.SONAR_TYPE, false, 10);
+		super(s, lm, descriptor(s), 10);
 		builder = canRead()
 		       ? new SegmentBuilder(session, this, p)
 		       : null;
@@ -132,12 +141,6 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 			builder.dispose();
 		}
 		super.dispose();
-	}
-
-	/** Get the r_node cache */
-	@Override
-	public TypeCache<R_Node> getCache() {
-		return session.getSonarState().getDetCache().getR_Nodes();
 	}
 
 	/** Create an r_node map tab */

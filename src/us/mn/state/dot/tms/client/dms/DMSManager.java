@@ -22,7 +22,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
@@ -32,6 +31,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyJList;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.utils.I18N;
@@ -43,6 +43,20 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  */
 public class DMSManager extends DeviceManager<DMS> {
+
+	/** Create a proxy descriptor */
+	static private ProxyDescriptor<DMS> descriptor(final Session s) {
+		return new ProxyDescriptor<DMS>(
+			s.getSonarState().getDmsCache().getDMSs(), true
+		) {
+			@Override
+			public DMSProperties createPropertiesForm(
+				DMS dms)
+			{
+				return new DMSProperties(s, dms);
+			}
+		};
+	}
 
 	/** Color definition for AWS controlled style */
 	static private final Color COLOR_HELIOTROPE = new Color(1, 0.5f, 0.9f);
@@ -61,14 +75,8 @@ public class DMSManager extends DeviceManager<DMS> {
 
 	/** Create a new DMS manager */
 	public DMSManager(Session s, GeoLocManager lm) {
-		super(s, lm, DMS.SONAR_TYPE, true, 12, ItemStyle.DEPLOYED);
+		super(s, lm, descriptor(s), 12, ItemStyle.DEPLOYED);
 		s_model.setAllowMultiple(true);
-	}
-
-	/** Get the DMS cache */
-	@Override
-	public TypeCache<DMS> getCache() {
-		return session.getSonarState().getDmsCache().getDMSs();
 	}
 
 	/** Create a DMS map tab */
@@ -158,12 +166,6 @@ public class DMSManager extends DeviceManager<DMS> {
 		list.setLayoutOrientation(JList.VERTICAL_WRAP);
 		list.setVisibleRowCount(0);
 		return list;
-	}
-
-	/** Create a properties form for the specified proxy */
-	@Override
-	protected DMSProperties createPropertiesForm(DMS dms) {
-		return new DMSProperties(session, dms);
 	}
 
 	/** Fill single selection popup */
