@@ -449,7 +449,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Check if a proxy style is visible */
 	protected boolean isStyleVisible(T proxy) {
-		return !checkStyle(ItemStyle.INACTIVE, proxy);
+		return checkStyle(ItemStyle.ACTIVE, proxy);
 	}
 
 	/** Find the map geo location for a proxy */

@@ -70,7 +70,7 @@ public class DMSHelper extends BaseHelper {
 
 	/** Test if a DMS is active */
 	static public boolean isActive(DMS proxy) {
-		return !ItemStyle.INACTIVE.checkBit(proxy.getStyles());
+		return ItemStyle.ACTIVE.checkBit(proxy.getStyles());
 	}
 
 	/** Test if a DMS is failed */
