@@ -37,13 +37,9 @@ public class TagReaderManager extends DeviceManager<TagReader> {
 	/** Color to display available readers */
 	static private final Color COLOR_AVAILABLE = new Color(64, 128, 255);
 
-	/** Tag reader tab */
-	private final TagReaderTab tab;
-
 	/** Create a new tag reader manager */
 	public TagReaderManager(Session s, GeoLocManager lm) {
 		super(s, lm, TagReader.SONAR_TYPE, true, 14);
-		tab = new TagReaderTab(s, this);
 	}
 
 	/** Get the tag reader cache */
@@ -55,7 +51,7 @@ public class TagReaderManager extends DeviceManager<TagReader> {
 	/** Create the map tab */
 	@Override
 	public TagReaderTab createTab() {
-		return tab;
+		return new TagReaderTab(session, this);
 	}
 
 	/** Create a theme for tag readers */
