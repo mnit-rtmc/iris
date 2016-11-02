@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
@@ -32,6 +33,13 @@ import us.mn.state.dot.tms.geo.ZoomLevel;
  * @author Douglas Lau
  */
 public class MapExtentModel extends ProxyTableModel<MapExtent> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<MapExtent> descriptor(Session s) {
+		return new ProxyDescriptor<MapExtent>(
+			s.getSonarState().getMapExtents(), false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -93,17 +101,10 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 
 	/** Create a new map extent table model */
 	public MapExtentModel(Session s, IrisClient ic) {
-		super(s, s.getSonarState().getMapExtents(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		client = ic;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return MapExtent.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */
@@ -117,7 +118,7 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 	public void createObject(String name) {
 		String n = name.trim();
 		if (n.length() > 0)
-			cache.createObject(n, createAttrs());
+			descriptor.cache.createObject(n, createAttrs());
 	}
 
 	/** Create attrs for a new map extent */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,21 +49,8 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 
 	/** Create a new ramp meter table model */
 	public RampMeterModel(Session s) {
-		super(s, s.getSonarState().getRampMeters(),
-		      true,	/* has_properties */
+		super(s, MeterManager.descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return RampMeter.SONAR_TYPE;
-	}
-
-	/** Create a properties form for one proxy */
-	@Override
-	protected RampMeterProperties createPropertiesForm(RampMeter proxy) {
-		return new RampMeterProperties(session, proxy);
 	}
 }

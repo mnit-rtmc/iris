@@ -38,7 +38,7 @@ public class TagReaderManager extends DeviceManager<TagReader> {
 	static private final Color COLOR_AVAILABLE = new Color(64, 128, 255);
 
 	/** Create a proxy descriptor */
-	static private ProxyDescriptor<TagReader> descriptor(final Session s) {
+	static public ProxyDescriptor<TagReader> descriptor(final Session s) {
 		return new ProxyDescriptor<TagReader>(
 			s.getSonarState().getTagReaders(), true
 		) {

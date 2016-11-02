@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,21 +48,8 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 
 	/** Create a new LCS array table model */
 	public LCSArrayModel(Session s) {
-		super(s, s.getSonarState().getLcsCache().getLCSArrays(),
-		      true,	/* has_properties */
+		super(s, LCSArrayManager.descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return LCSArray.SONAR_TYPE;
-	}
-
-	/** Create a properties form for one proxy */
-	@Override
-	protected LCSArrayProperties createPropertiesForm(LCSArray proxy) {
-		return new LCSArrayProperties(session, proxy);
 	}
 }

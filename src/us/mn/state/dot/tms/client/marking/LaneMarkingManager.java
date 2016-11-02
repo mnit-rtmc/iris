@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 public class LaneMarkingManager extends DeviceManager<LaneMarking> {
 
 	/** Create a proxy descriptor */
-	static private ProxyDescriptor<LaneMarking> descriptor(final Session s){
+	static public ProxyDescriptor<LaneMarking> descriptor(final Session s) {
 		return new ProxyDescriptor<LaneMarking>(
 			s.getSonarState().getLaneMarkings(), true
 		) {

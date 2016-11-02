@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.CabinetStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -32,6 +33,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<CabinetStyle> descriptor(Session s) {
+		return new ProxyDescriptor<CabinetStyle>(
+			s.getSonarState().getConCache().getCabinetStyles(),
+			false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -63,8 +72,7 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 
 	/** Create a new cabinet style table model */
 	public CabinetStyleModel(Session s) {
-		super(s, s.getSonarState().getConCache().getCabinetStyles(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 	}
@@ -86,12 +94,6 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 		public Object getCellEditorValue() {
 			return spinner.getValue();
 		}
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return CabinetStyle.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */

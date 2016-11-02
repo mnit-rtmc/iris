@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -27,6 +28,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class DetectorModel extends ProxyTableModel<Detector> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<Detector> descriptor(Session s) {
+		return new ProxyDescriptor<Detector>(
+			s.getSonarState().getDetCache().getDetectors(),
+			false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -48,16 +57,9 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 
 	/** Create a new detector table model */
 	public DetectorModel(Session s) {
-		super(s, s.getSonarState().getDetCache().getDetectors(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      false,	/* has_create_delete */
 		      false);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Detector.SONAR_TYPE;
 	}
 
 	/** Get the row height */

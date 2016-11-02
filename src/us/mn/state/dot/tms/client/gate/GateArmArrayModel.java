@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,8 +30,7 @@ public class GateArmArrayModel extends ProxyTableModel<GateArmArray> {
 
 	/** Create the columns in the model */
 	@Override
-	protected ArrayList<ProxyColumn<GateArmArray>> createColumns()
-	{
+	protected ArrayList<ProxyColumn<GateArmArray>> createColumns() {
 		ArrayList<ProxyColumn<GateArmArray>> cols =
 			new ArrayList<ProxyColumn<GateArmArray>>(2);
 		cols.add(new ProxyColumn<GateArmArray>("gate_arm_array", 200) {
@@ -50,23 +49,8 @@ public class GateArmArrayModel extends ProxyTableModel<GateArmArray> {
 
 	/** Create a new gate arm array table model */
 	public GateArmArrayModel(Session s) {
-		super(s, s.getSonarState().getGateArmArrays(),
-		      true,	/* has_properties */
+		super(s, GateArmArrayManager.descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return GateArmArray.SONAR_TYPE;
-	}
-
-	/** Create a properties form for one proxy */
-	@Override
-	protected GateArmArrayProperties createPropertiesForm(
-		GateArmArray proxy)
-	{
-		return new GateArmArrayProperties(session, proxy);
 	}
 }

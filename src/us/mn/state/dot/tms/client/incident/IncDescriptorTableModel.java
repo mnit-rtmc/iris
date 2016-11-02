@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
@@ -43,6 +44,14 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  */
 public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<IncDescriptor> descriptor(Session s) {
+		return new ProxyDescriptor<IncDescriptor>(
+			s.getSonarState().getIncCache().getIncDescriptors(),
+			false
+		);
+	}
 
 	/** Renderer for event types names in a table cell */
 	static private class EventTypeCellRenderer
@@ -218,8 +227,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	/** Create a new table model.
 	 * @param s Session */
 	public IncDescriptorTableModel(Session s) {
-		super(s, s.getSonarState().getIncCache().getIncDescriptors(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      false);	/* has_name */
 		detail_mdl = new ProxyListModel<IncidentDetail>(
@@ -238,12 +246,6 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	public void dispose() {
 		detail_mdl.dispose();
 		super.dispose();
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return IncDescriptor.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */
@@ -291,7 +293,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				new HashMap<String, Object>();
 			attrs.put("sign_group", sg);
 			attrs.put("event_desc_id", et.id);
-			cache.createObject(name, attrs);
+			descriptor.cache.createObject(name, attrs);
 		}
 	}
 
@@ -299,7 +301,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	private String createUniqueName() {
 		for (int uid = 1; uid <= 99999; uid++) {
 			String n = String.format("idsc_%05d", uid);
-			if (cache.lookupObject(n) == null)
+			if (descriptor.cache.lookupObject(n) == null)
 				return n;
 		}
 		return null;

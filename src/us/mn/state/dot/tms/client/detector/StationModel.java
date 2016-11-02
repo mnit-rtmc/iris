@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
@@ -29,6 +30,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class StationModel extends ProxyTableModel<Station> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<Station> descriptor(Session s) {
+		return new ProxyDescriptor<Station>(
+			s.getSonarState().getDetCache().getStations(),
+			true
+		);
+	}
 
 	/** R_Node selection model */
 	private final ProxySelectionModel<R_Node> sel_model;
@@ -53,17 +62,10 @@ public class StationModel extends ProxyTableModel<Station> {
 
 	/** Create a new station table model */
 	public StationModel(Session s) {
-		super(s, s.getSonarState().getDetCache().getStations(),
-		      true,	/* has_properties */
+		super(s, descriptor(s),
 		      false,	/* has_create_delete */
 		      false);	/* has_name */
 		sel_model = s.getR_NodeManager().getSelectionModel();
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Station.SONAR_TYPE;
 	}
 
 	/** Show the properties form */

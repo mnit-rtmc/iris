@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class GateArmArrayManager extends DeviceManager<GateArmArray> {
 
 	/** Create a proxy descriptor */
-	static private ProxyDescriptor<GateArmArray> descriptor(
+	static public ProxyDescriptor<GateArmArray> descriptor(
 		final Session s)
 	{
 		return new ProxyDescriptor<GateArmArray>(

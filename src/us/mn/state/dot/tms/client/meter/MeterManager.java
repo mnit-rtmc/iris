@@ -35,7 +35,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class MeterManager extends DeviceManager<RampMeter> {
 
 	/** Create a proxy descriptor */
-	static private ProxyDescriptor<RampMeter> descriptor(final Session s) {
+	static public ProxyDescriptor<RampMeter> descriptor(final Session s) {
 		return new ProxyDescriptor<RampMeter>(
 			s.getSonarState().getRampMeters(), true
 		) {

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.PixmapGraphic;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.Invokable;
 import us.mn.state.dot.tms.client.widget.SwingRunner;
@@ -45,6 +46,14 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class GraphicModel extends ProxyTableModel<Graphic> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<Graphic> descriptor(Session s) {
+		return new ProxyDescriptor<Graphic>(
+			s.getSonarState().getGraphics(),
+			false
+		);
+	}
 
 	/** Filename extension filter */
 	static private final FileNameExtensionFilter FILTER =
@@ -157,16 +166,9 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 
 	/** Create a new graphic table model */
 	public GraphicModel(Session s) {
-		super(s, s.getSonarState().getGraphics(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      false);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Graphic.SONAR_TYPE;
 	}
 
 	/** Check if a proxy is included in the list */
@@ -220,7 +222,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 		attrs.put("width", im.getWidth());
 		attrs.put("height", im.getHeight());
 		attrs.put("pixels", rg.getEncodedPixels());
-		cache.createObject(name, attrs);
+		descriptor.cache.createObject(name, attrs);
 	}
 
 	/** Create a unique Graphic name */

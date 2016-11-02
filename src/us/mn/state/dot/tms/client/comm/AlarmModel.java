@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -34,6 +35,13 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class AlarmModel extends ProxyTableModel<Alarm> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<Alarm> descriptor(Session s) {
+		return new ProxyDescriptor<Alarm>(
+			s.getSonarState().getAlarms(), false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -68,7 +76,7 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 		cols.add(new ProxyColumn<Alarm>("alarm.trigger_time", 200) {
 			public Object getValueAt(Alarm a) {
 				Long tt = a.getTriggerTime();
-				if(tt != null)
+				if (tt != null)
 					return new Date(tt);
 				else
 					return "";
@@ -89,8 +97,7 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 
 	/** Create a new alarm table model */
 	public AlarmModel(Session s) {
-		super(s, s.getSonarState().getAlarms(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 	}
@@ -124,11 +131,5 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 			}
 			return label;
 		}
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Alarm.SONAR_TYPE;
 	}
 }

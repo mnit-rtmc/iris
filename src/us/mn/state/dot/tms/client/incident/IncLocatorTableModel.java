@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -35,6 +36,14 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  */
 public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<IncLocator> descriptor(Session s) {
+		return new ProxyDescriptor<IncLocator>(
+			s.getSonarState().getIncCache().getIncLocators(),
+			false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -126,16 +135,9 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 	/** Create a new table model.
 	 * @param s Session */
 	public IncLocatorTableModel(Session s) {
-		super(s, s.getSonarState().getIncCache().getIncLocators(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      false);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return IncLocator.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */
@@ -176,7 +178,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("sign_group", sg);
-			cache.createObject(name, attrs);
+			descriptor.cache.createObject(name, attrs);
 		}
 	}
 
@@ -184,7 +186,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 	private String createUniqueName() {
 		for (int uid = 1; uid <= 99999; uid++) {
 			String n = String.format("iloc_%05d", uid);
-			if (cache.lookupObject(n) == null)
+			if (descriptor.cache.lookupObject(n) == null)
 				return n;
 		}
 		return null;

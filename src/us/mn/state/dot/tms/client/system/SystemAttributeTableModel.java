@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2014  Minnesota Department of Transportation
+ * Copyright (C) 2005-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -37,6 +38,13 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  */
 public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 {
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<SystemAttribute> descriptor(Session s) {
+		return new ProxyDescriptor<SystemAttribute>(
+			s.getSonarState().getSystemAttributes(), false
+		);
+	}
+
 	/** Check if a system attribute value is default */
 	static private boolean isValueDefault(SystemAttribute sa) {
 		if (sa == null)
@@ -86,16 +94,9 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 
 	/** Create a new table model */
 	public SystemAttributeTableModel(Session s) {
-		super(s, s.getSonarState().getSystemAttributes(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return SystemAttribute.SONAR_TYPE;
 	}
 
 	/** Create an object with the given name */
@@ -103,7 +104,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 	public void createObject(String name) {
 		String n = name.replace(" ","").toLowerCase();
 		if (n.length() > 0)
-			cache.createObject(n, createAttrs(n));
+			descriptor.cache.createObject(n, createAttrs(n));
 	}
 
 	/** Create attrs for a new system attribute */

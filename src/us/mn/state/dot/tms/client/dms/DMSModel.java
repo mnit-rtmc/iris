@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.ArrayList;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
@@ -89,21 +88,8 @@ public class DMSModel extends ProxyTableModel<DMS> {
 
 	/** Create a new DMS table model */
 	public DMSModel(Session s) {
-		super(s, s.getSonarState().getDmsCache().getDMSs(),
-		      true,	/* has_properties */
+		super(s, DMSManager.descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return DMS.SONAR_TYPE;
-	}
-
-	/** Create a properties form for one proxy */
-	@Override
-	protected DMSProperties createPropertiesForm(DMS proxy) {
-		return new DMSProperties(session, proxy);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@ import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -28,6 +29,13 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class RoleCapabilityModel extends ProxyTableModel<Capability> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<Capability> descriptor(Session s) {
+		return new ProxyDescriptor<Capability>(
+			s.getSonarState().getCapabilities(), false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -83,8 +91,7 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Create a new role-capability table model */
 	public RoleCapabilityModel(Session s, Role r) {
-		super(s, s.getSonarState().getCapabilities(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      false,	/* has_create_delete */
 		      false);	/* has_name */
 		role = r;

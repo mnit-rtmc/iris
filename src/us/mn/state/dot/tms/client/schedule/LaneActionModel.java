@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.LaneMarkingHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
@@ -36,6 +37,13 @@ import us.mn.state.dot.tms.client.widget.IComboBoxModel;
  * @author Douglas Lau
  */
 public class LaneActionModel extends ProxyTableModel<LaneAction> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<LaneAction> descriptor(Session s) {
+		return new ProxyDescriptor<LaneAction>(
+			s.getSonarState().getLaneActions(), false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -77,18 +85,11 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 
 	/** Create a new lane action table model */
 	public LaneActionModel(Session s, ActionPlan ap) {
-		super(s, s.getSonarState().getLaneActions(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return LaneAction.SONAR_TYPE;
 	}
 
 	/** Check if a proxy is included in the list */
@@ -120,7 +121,7 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 			attrs.put("action_plan", action_plan);
 			attrs.put("lane_marking", lm);
 			attrs.put("phase", action_plan.getDefaultPhase());
-			cache.createObject(name, attrs);
+			descriptor.cache.createObject(name, attrs);
 		}
 	}
 
@@ -128,7 +129,7 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 	private String createUniqueName() {
 		for (int uid = 1; uid <= 999; uid++) {
 			String n = action_plan.getName() + "_" + uid;
-			if (cache.lookupObject(n) == null)
+			if (descriptor.cache.lookupObject(n) == null)
 				return n;
 		}
 		return null;

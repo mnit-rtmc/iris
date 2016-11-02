@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -33,8 +34,16 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class SignTextTableModel extends ProxyTableModel<SignText> {
 
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<SignText> descriptor(Session s) {
+		return new ProxyDescriptor<SignText>(
+			s.getSonarState().getDmsCache().getSignText(),
+			false
+		);
+	}
+
 	/** Default rank */
-	static private final short DEF_RANK = (short)50;
+	static private final short DEF_RANK = (short) 50;
 
 	/** Format MULTI string */
 	static private String formatMulti(Object value) {
@@ -111,18 +120,11 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 
 	/** Create a new sign text table model */
 	public SignTextTableModel(Session s, SignGroup g) {
-		super(s, s.getSonarState().getDmsCache().getSignText(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		group = g;
 		creator = new SignTextCreator(s);
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return SignText.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */

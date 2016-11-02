@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class BeaconManager extends DeviceManager<Beacon> {
 
 	/** Create a proxy descriptor */
-	static private ProxyDescriptor<Beacon> descriptor(final Session s) {
+	static public ProxyDescriptor<Beacon> descriptor(final Session s) {
 		return new ProxyDescriptor<Beacon>(
 			s.getSonarState().getBeacons(), true
 		) {

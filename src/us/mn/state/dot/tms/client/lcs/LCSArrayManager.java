@@ -51,7 +51,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class LCSArrayManager extends DeviceManager<LCSArray> {
 
 	/** Create a proxy descriptor */
-	static private ProxyDescriptor<LCSArray> descriptor(final Session s) {
+	static public ProxyDescriptor<LCSArray> descriptor(final Session s) {
 		return new ProxyDescriptor<LCSArray>(
 			s.getSonarState().getLcsCache().getLCSArrays(), true
 		) {

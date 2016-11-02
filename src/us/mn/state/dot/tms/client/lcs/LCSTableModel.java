@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -30,6 +31,13 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class LCSTableModel extends ProxyTableModel<LCS> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<LCS> descriptor(final Session s) {
+		return new ProxyDescriptor<LCS>(
+			s.getSonarState().getLcsCache().getLCSs(), true
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -54,17 +62,10 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 
 	/** Create a new LCS table model */
 	public LCSTableModel(Session s, LCSArray la) {
-		super(s, s.getSonarState().getLcsCache().getLCSs(),
-		      true,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		lcs_array = la;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return LCS.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */
@@ -94,7 +95,7 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("lcsArray", lcs_array);
 		attrs.put("lane", new Integer(lane));
-		cache.createObject(name, attrs);
+		descriptor.cache.createObject(name, attrs);
 	}
 
 	/** Check if the user can remove a proxy */

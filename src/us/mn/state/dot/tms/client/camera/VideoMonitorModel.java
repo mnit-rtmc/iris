@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -26,6 +27,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<VideoMonitor> descriptor(Session s) {
+		return new ProxyDescriptor<VideoMonitor>(
+			s.getSonarState().getCamCache().getVideoMonitors(),
+			false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -67,15 +76,8 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 
 	/** Create a new video monitor table model */
 	public VideoMonitorModel(Session s) {
-		super(s, s.getSonarState().getCamCache().getVideoMonitors(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return VideoMonitor.SONAR_TYPE;
 	}
 }

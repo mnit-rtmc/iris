@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,27 +63,14 @@ public class CameraModel extends ProxyTableModel<Camera> {
 
 	/** Create a new camera table model */
 	public CameraModel(Session s) {
-		super(s, s.getSonarState().getCamCache().getCameras(),
-		      true,	/* has_properties */
+		super(s, CameraManager.descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Camera.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */
 	@Override
 	public int getVisibleRowCount() {
 		return 12;
-	}
-
-	/** Create a properties form for one proxy */
-	@Override
-	protected CameraProperties createPropertiesForm(Camera proxy) {
-		return new CameraProperties(session, proxy);
 	}
 }

@@ -21,6 +21,7 @@ import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
@@ -31,6 +32,13 @@ import us.mn.state.dot.tms.client.widget.IComboBoxModel;
  * @author Douglas Lau
  */
 public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<PlanPhase> descriptor(Session s) {
+		return new ProxyDescriptor<PlanPhase>(
+			s.getSonarState().getPlanPhases(), false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -89,16 +97,9 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 
 	/** Create a new plan phase table model */
 	public PlanPhaseModel(Session s) {
-		super(s, s.getSonarState().getPlanPhases(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		phase_mdl = s.getSonarState().getPhaseModel();
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return PlanPhase.SONAR_TYPE;
 	}
 }

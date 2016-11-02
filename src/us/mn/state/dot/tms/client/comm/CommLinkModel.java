@@ -24,6 +24,7 @@ import static us.mn.state.dot.tms.CommLink.MAX_TIMEOUT_MS;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.units.Interval;
 
@@ -33,6 +34,14 @@ import us.mn.state.dot.tms.units.Interval;
  * @author Douglas Lau
  */
 public class CommLinkModel extends ProxyTableModel<CommLink> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<CommLink> descriptor(Session s) {
+		return new ProxyDescriptor<CommLink>(
+			s.getSonarState().getConCache().getCommLinks(),
+			false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -152,16 +161,9 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 
 	/** Create a new comm link table model */
 	public CommLinkModel(Session s) {
-		super(s, s.getSonarState().getConCache().getCommLinks(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return CommLink.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */

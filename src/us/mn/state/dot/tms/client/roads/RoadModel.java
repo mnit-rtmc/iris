@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -31,6 +32,13 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class RoadModel extends ProxyTableModel<Road> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<Road> descriptor(Session s) {
+		return new ProxyDescriptor<Road>(
+			s.getSonarState().getRoads(), false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -115,16 +123,9 @@ public class RoadModel extends ProxyTableModel<Road> {
 
 	/** Create a new road table model */
 	public RoadModel(Session s) {
-		super(s, s.getSonarState().getRoads(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Road.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */

@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.BeaconHelper;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
@@ -36,6 +37,13 @@ import us.mn.state.dot.tms.client.widget.IComboBoxModel;
  * @author Douglas Lau
  */
 public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<BeaconAction> descriptor(Session s) {
+		return new ProxyDescriptor<BeaconAction>(
+			s.getSonarState().getBeaconActions(), false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -77,18 +85,11 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 
 	/** Create a new beacon action table model */
 	public BeaconActionModel(Session s, ActionPlan ap) {
-		super(s, s.getSonarState().getBeaconActions(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return BeaconAction.SONAR_TYPE;
 	}
 
 	/** Check if a proxy is included in the list */
@@ -120,7 +121,7 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 			attrs.put("action_plan", action_plan);
 			attrs.put("beacon", b);
 			attrs.put("phase", action_plan.getDefaultPhase());
-			cache.createObject(name, attrs);
+			descriptor.cache.createObject(name, attrs);
 		}
 	}
 
@@ -128,7 +129,7 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 	private String createUniqueName() {
 		for (int uid = 1; uid <= 999; uid++) {
 			String n = action_plan.getName() + "_" + uid;
-			if (cache.lookupObject(n) == null)
+			if (descriptor.cache.lookupObject(n) == null)
 				return n;
 		}
 		return null;

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,29 +49,14 @@ public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
 
 	/** Create a new weather sensor table model */
 	public WeatherSensorModel(Session s) {
-		super(s, s.getSonarState().getWeatherSensors(),
-		      true,	/* has_properties */
+		super(s, WeatherSensorManager.descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return WeatherSensor.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */
 	@Override
 	public int getVisibleRowCount() {
 		return 12;
-	}
-
-	/** Create a properties form for one proxy */
-	@Override
-	protected WeatherSensorProperties createPropertiesForm(
-		WeatherSensor proxy)
-	{
-		return new WeatherSensorProperties(session, proxy);
 	}
 }

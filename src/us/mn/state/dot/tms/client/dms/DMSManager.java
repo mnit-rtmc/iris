@@ -45,7 +45,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class DMSManager extends DeviceManager<DMS> {
 
 	/** Create a proxy descriptor */
-	static private ProxyDescriptor<DMS> descriptor(final Session s) {
+	static public ProxyDescriptor<DMS> descriptor(final Session s) {
 		return new ProxyDescriptor<DMS>(
 			s.getSonarState().getDmsCache().getDMSs(), true
 		) {

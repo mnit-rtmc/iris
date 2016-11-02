@@ -31,8 +31,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 public class WeatherSensorManager extends DeviceManager<WeatherSensor> {
 
 	/** Create a proxy descriptor */
-	static private ProxyDescriptor<WeatherSensor> descriptor(
-		final Session s)
+	static public ProxyDescriptor<WeatherSensor> descriptor(final Session s)
 	{
 		return new ProxyDescriptor<WeatherSensor>(
 			s.getSonarState().getWeatherSensors(), true

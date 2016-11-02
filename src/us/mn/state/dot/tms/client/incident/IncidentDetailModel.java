@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -26,6 +27,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<IncidentDetail> descriptor(Session s) {
+		return new ProxyDescriptor<IncidentDetail>(
+			s.getSonarState().getIncCache().getIncidentDetails(),
+			false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -57,16 +66,9 @@ public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
 
 	/** Create a new incident detail table model */
 	public IncidentDetailModel(Session s) {
-		super(s, s.getSonarState().getIncCache().getIncidentDetails(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return IncidentDetail.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */

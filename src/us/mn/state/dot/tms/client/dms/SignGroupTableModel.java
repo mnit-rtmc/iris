@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2015  Minnesota Department of Transportation
+ * Copyright (C) 2005-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
 
@@ -32,6 +33,14 @@ import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
  * @author Douglas Lau
  */
 public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<SignGroup> descriptor(Session s) {
+		return new ProxyDescriptor<SignGroup>(
+			s.getSonarState().getDmsCache().getSignGroups(),
+			false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -108,8 +117,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	 * @param dms DMS proxy object.
 	 */
 	public SignGroupTableModel(Session s, DMS proxy) {
-		super(s, s.getSonarState().getDmsCache().getSignGroups(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		dms = proxy;
@@ -129,12 +137,6 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	public void dispose() {
 		dms_sign_groups.removeProxyListener(listener);
 		super.dispose();
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return SignGroup.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */
@@ -193,7 +195,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 		boolean local = name.equals(dms.getName());
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("local", local);
-		cache.createObject(name, attrs);
+		descriptor.cache.createObject(name, attrs);
 	}
 
 	/** Create a new DMS sign group */

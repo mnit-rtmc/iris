@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
@@ -36,6 +37,13 @@ import us.mn.state.dot.tms.client.widget.IComboBoxModel;
  * @author Douglas Lau
  */
 public class MeterActionModel extends ProxyTableModel<MeterAction> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<MeterAction> descriptor(Session s) {
+		return new ProxyDescriptor<MeterAction>(
+			s.getSonarState().getMeterActions(), false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -56,7 +64,7 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 			}
 			public void setValueAt(MeterAction ma, Object value) {
 				if (value instanceof PlanPhase)
-					ma.setPhase((PlanPhase)value);
+					ma.setPhase((PlanPhase) value);
 			}
 			protected TableCellEditor createCellEditor() {
 				JComboBox<PlanPhase> cbx = new JComboBox
@@ -77,18 +85,11 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 
 	/** Create a new meter action table model */
 	public MeterActionModel(Session s, ActionPlan ap) {
-		super(s, s.getSonarState().getMeterActions(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return MeterAction.SONAR_TYPE;
 	}
 
 	/** Check if a proxy is included in the list */
@@ -120,7 +121,7 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 			attrs.put("action_plan", action_plan);
 			attrs.put("ramp_meter", rm);
 			attrs.put("phase", action_plan.getDefaultPhase());
-			cache.createObject(name, attrs);
+			descriptor.cache.createObject(name, attrs);
 		}
 	}
 
@@ -128,7 +129,7 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 	private String createUniqueName() {
 		for (int uid = 1; uid <= 999; uid++) {
 			String n = action_plan.getName() + "_" + uid;
-			if (cache.lookupObject(n) == null)
+			if (descriptor.cache.lookupObject(n) == null)
 				return n;
 		}
 		return null;

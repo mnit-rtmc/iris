@@ -20,14 +20,22 @@ import us.mn.state.dot.tms.Word;
 import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
  * Table model for dictionary words.
  * @author Michael Darter
  */
-public class DictTableModel extends ProxyTableModel<Word>
-{
+public class DictTableModel extends ProxyTableModel<Word> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<Word> descriptor(Session s) {
+		return new ProxyDescriptor<Word>(
+			s.getSonarState().getWords(), false
+		);
+	}
+
 	/** Table model is for allowed or banned words */
 	private final boolean allowed_words;
 
@@ -36,16 +44,12 @@ public class DictTableModel extends ProxyTableModel<Word>
 	protected ArrayList<ProxyColumn<Word>> createColumns() {
 		ArrayList<ProxyColumn<Word>> cols =
 			new ArrayList<ProxyColumn<Word>>(2);
-		cols.add(new ProxyColumn<Word>(
-			"dictionary.word", 140)
-		{
+		cols.add(new ProxyColumn<Word>("dictionary.word", 140) {
 			public Object getValueAt(Word wo) {
 				return WordHelper.decode(wo.getName());
 			}
 		});
-		cols.add(new ProxyColumn<Word>(
-			"dictionary.abbr", 80)
-		{
+		cols.add(new ProxyColumn<Word>("dictionary.abbr", 80) {
 			public Object getValueAt(Word wo) {
 				return wo.getAbbr();
 			}
@@ -66,17 +70,10 @@ public class DictTableModel extends ProxyTableModel<Word>
 	 * @param allowed True if table model is for allowed words else 
 	 * 		  false for banned */
 	public DictTableModel(Session s, boolean allowed) {
-		super(s, s.getSonarState().getWords(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		allowed_words = allowed;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Word.SONAR_TYPE;
 	}
 
 	/** Check if a proxy is included in the list. This is used 
@@ -95,7 +92,7 @@ public class DictTableModel extends ProxyTableModel<Word>
 	public void createObject(String name) {
 		if (name.length() > 0) {
 			String en = WordHelper.encode(name);
-			cache.createObject(en, createAttrs(name));
+			descriptor.cache.createObject(en, createAttrs(name));
 		}
 	}
 

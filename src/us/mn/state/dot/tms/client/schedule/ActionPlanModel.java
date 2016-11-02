@@ -23,6 +23,7 @@ import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
@@ -33,6 +34,13 @@ import us.mn.state.dot.tms.client.widget.IComboBoxModel;
  * @author Douglas Lau
  */
 public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<ActionPlan> descriptor(Session s) {
+		return new ProxyDescriptor<ActionPlan>(
+			s.getSonarState().getActionPlans(), false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -129,17 +137,10 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 
 	/** Create a new action plan table model */
 	public ActionPlanModel(Session s) {
-		super(s, s.getSonarState().getActionPlans(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		phase_mdl = s.getSonarState().getPhaseModel();
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return ActionPlan.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */
@@ -153,6 +154,6 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("default_phase", p);
 		attrs.put("phase", p);
-		cache.createObject(name, attrs);
+		descriptor.cache.createObject(name, attrs);
 	}
 }

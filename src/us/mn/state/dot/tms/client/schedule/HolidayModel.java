@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -35,6 +36,13 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class HolidayModel extends ProxyTableModel<Holiday> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<Holiday> descriptor(Session s) {
+		return new ProxyDescriptor<Holiday>(
+			s.getSonarState().getHolidays(), false
+		);
+	}
 
 	/** Date format symbols */
 	static private final DateFormatSymbols SYMBOLS =
@@ -207,17 +215,10 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 
 	/** Create a new holiday table model */
 	public HolidayModel(Session s, DayPlan dp) {
-		super(s, s.getSonarState().getHolidays(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		day_plan = dp;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Holiday.SONAR_TYPE;
 	}
 
 	/** Check if the day is blank for the specified holiday */

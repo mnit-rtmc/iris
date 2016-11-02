@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.Modem;
 import us.mn.state.dot.tms.ModemState;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -30,6 +31,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class ModemModel extends ProxyTableModel<Modem> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<Modem> descriptor(Session s) {
+		return new ProxyDescriptor<Modem>(
+			s.getSonarState().getConCache().getModems(),
+			false
+		);
+	}
 
 	/** Maximum modem timeout (ms) */
 	static private final int MAX_MODEM_TIMEOUT = 90000;
@@ -111,15 +120,8 @@ public class ModemModel extends ProxyTableModel<Modem> {
 
 	/** Create a new modem table model */
 	public ModemModel(Session s) {
-		super(s, s.getSonarState().getConCache().getModems(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Modem.SONAR_TYPE;
 	}
 }

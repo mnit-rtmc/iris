@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -34,6 +35,14 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<LaneUseMulti> descriptor(Session s) {
+		return new ProxyDescriptor<LaneUseMulti>(
+			s.getSonarState().getLcsCache().getLaneUseMultis(),
+			false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -130,8 +139,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 
 	/** Create a new graphic table model */
 	public LaneUseMultiModel(Session s) {
-		super(s, s.getSonarState().getLcsCache().getLaneUseMultis(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      false);	/* has_name */
 	}
@@ -142,7 +150,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 		// Ignore name given to us
 		String name = createUniqueName();
 		if (name != null)
-			cache.createObject(name);
+			descriptor.cache.createObject(name);
 	}
 
 	/** Create a unique LaneUseMulti name */
@@ -154,12 +162,6 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 		}
 		assert false;
 		return null;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return LaneUseMulti.SONAR_TYPE;
 	}
 
 	/** Get the row height */

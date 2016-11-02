@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -30,6 +31,14 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  */
 public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<QuickMessage> descriptor(Session s) {
+		return new ProxyDescriptor<QuickMessage>(
+			s.getSonarState().getDmsCache().getQuickMessages(),
+			false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -75,16 +84,9 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	/** Create a new table model.
 	 * @param s Session */
 	public QuickMessageTableModel(Session s) {
-		super(s, s.getSonarState().getDmsCache().getQuickMessages(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return QuickMessage.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */

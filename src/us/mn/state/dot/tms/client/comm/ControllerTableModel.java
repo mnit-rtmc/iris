@@ -40,6 +40,7 @@ import us.mn.state.dot.tms.CtrlCondition;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
@@ -48,6 +49,20 @@ import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
  * @author Douglas Lau
  */
 public class ControllerTableModel extends ProxyTableModel<Controller> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<Controller> descriptor(final Session s) {
+		return new ProxyDescriptor<Controller>(
+			s.getSonarState().getConCache().getControllers(), true
+		) {
+			@Override
+			public ControllerForm createPropertiesForm(
+				Controller proxy)
+			{
+				return new ControllerForm(s, proxy);
+			}
+		};
+	}
 
 	/** Get a controller comm state */
 	static private CommState getCommState(Controller c) {
@@ -210,22 +225,9 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 
 	/** Create a new controller table model */
 	public ControllerTableModel(Session s) {
-		super(s, s.getSonarState().getConCache().getControllers(),
-		      true,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      false);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Controller.SONAR_TYPE;
-	}
-
-	/** Create a properties form for one proxy */
-	@Override
-	protected ControllerForm createPropertiesForm(Controller proxy) {
-		return new ControllerForm(session, proxy);
 	}
 
 	/** Get the visible row count */
@@ -308,14 +310,14 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 	public void createObject(String n) {
 		String name = createUniqueName();
 		if (name != null && comm_link != null)
-			cache.createObject(name, createAttrs());
+			descriptor.cache.createObject(name, createAttrs());
 	}
 
 	/** Create a unique controller name */
 	private String createUniqueName() {
 		for (int uid = 1; uid <= 99999; uid++) {
 			String n = "ctl_" + uid;
-			if (cache.lookupObject(n) == null)
+			if (descriptor.cache.lookupObject(n) == null)
 				return n;
 		}
 		assert false;
@@ -325,7 +327,8 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 	/** Create a mapping of attributes */
 	private HashMap<String, Object> createAttrs() {
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
-		DropNumberModel m = new DropNumberModel(comm_link, cache, 1);
+		DropNumberModel m = new DropNumberModel(comm_link,
+			descriptor.cache, 1);
 		attrs.put("comm_link", comm_link);
 		attrs.put("drop_id", m.getNextAvailable());
 		attrs.put("notes", "");
@@ -356,7 +359,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 		implements TableCellEditor
 	{
 		protected final DropNumberModel model =
-			new DropNumberModel(comm_link, cache, 1);
+			new DropNumberModel(comm_link, descriptor.cache, 1);
 		protected final JSpinner spinner = new JSpinner(model);
 
 		public Component getTableCellEditorComponent(JTable table,

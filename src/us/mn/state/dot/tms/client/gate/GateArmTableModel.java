@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,7 @@ import static us.mn.state.dot.tms.GateArmArray.MAX_ARMS;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 
@@ -34,6 +35,13 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
  * @author Douglas Lau
  */
 public class GateArmTableModel extends ProxyTableModel<GateArm> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<GateArm> descriptor(Session s) {
+		return new ProxyDescriptor<GateArm>(
+			s.getSonarState().getGateArms(), true
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -82,17 +90,10 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 
 	/** Create a new gate arm table model */
 	public GateArmTableModel(Session s, GateArmArray ga) {
-		super(s, s.getSonarState().getGateArms(),
-		      true,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
 		ga_array = ga;
-	}
-
-	/** Get the SONAR type name. */
- 	@Override
-	protected String getSonarType() {
-		return GateArm.SONAR_TYPE;
 	}
 
 	/** Get a proxy comparator */
@@ -144,7 +145,7 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 				new HashMap<String, Object>();
 			attrs.put("ga_array", ga_array);
 			attrs.put("idx", new Integer(idx));
-			cache.createObject(name, attrs);
+			descriptor.cache.createObject(name, attrs);
 		}
 	}
 

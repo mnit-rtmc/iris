@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.TimeAction;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
@@ -35,6 +36,13 @@ import us.mn.state.dot.tms.client.widget.IComboBoxModel;
  * @author Douglas Lau
  */
 public class TimeActionModel extends ProxyTableModel<TimeAction> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<TimeAction> descriptor(Session s) {
+		return new ProxyDescriptor<TimeAction>(
+			s.getSonarState().getTimeActions(), false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -86,18 +94,11 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 
 	/** Create a new time action table model */
 	public TimeActionModel(Session s, ActionPlan ap) {
-		super(s, s.getSonarState().getTimeActions(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      false);	/* has_name */
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return TimeAction.SONAR_TYPE;
 	}
 
 	/** Check if a proxy is included in the list */
@@ -130,7 +131,7 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	private String createUniqueName() {
 		for (int uid = 1; uid <= 999; uid++) {
 			String n = action_plan.getName() + "_" + uid;
-			if (cache.lookupObject(n) == null)
+			if (descriptor.cache.lookupObject(n) == null)
 				return n;
 		}
 		return null;
@@ -146,6 +147,6 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 			attrs.put("sched_date", sd);
 		attrs.put("time_of_day", tod);
 		attrs.put("phase", action_plan.getDefaultPhase());
-		cache.createObject(name, attrs);
+		descriptor.cache.createObject(name, attrs);
 	}
 }

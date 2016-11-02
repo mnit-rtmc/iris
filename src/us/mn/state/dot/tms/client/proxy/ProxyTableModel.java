@@ -23,7 +23,6 @@ import javax.swing.table.DefaultTableColumnModel;
 import javax.swing.table.TableColumn;
 import javax.swing.table.TableColumnModel;
 import us.mn.state.dot.sonar.SonarObject;
-import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.ITableModel;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
@@ -45,11 +44,8 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		return session;
 	}
 
-	/** Proxy type cache */
-	protected final TypeCache<T> cache;
-
-	/** Flag to show properties button */
-	private final boolean has_properties;
+	/** Proxy descriptor */
+	protected final ProxyDescriptor<T> descriptor;
 
 	/** Flag to show create and delete buttons */
 	private final boolean has_create_delete;
@@ -106,16 +102,14 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Create a new proxy table model.
 	 * @param s User session.
-	 * @param c Proxy type cache.
-	 * @param hp Flag to add properties button.
+	 * @param d Proxy descriptor.
 	 * @param hcd Flag to add create and delete buttons.
 	 * @param hn Flag to add name text field. */
-	public ProxyTableModel(Session s, TypeCache<T> c, boolean hp,
-		boolean hcd, boolean hn)
+	public ProxyTableModel(Session s, ProxyDescriptor<T> d, boolean hcd,
+		boolean hn)
 	{
 		session = s;
-		cache = c;
-		has_properties = hp;
+		descriptor = d;
 		has_create_delete = hcd;
 		has_name = hn;
 		columns = createColumns();
@@ -125,12 +119,12 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Initialize the proxy table model. This cannot be done in the
 	 * constructor because subclasses may not be fully constructed. */
 	public void initialize() {
-		cache.addProxyListener(listener);
+		descriptor.cache.addProxyListener(listener);
 	}
 
 	/** Dispose of the proxy table model */
 	public void dispose() {
-		cache.removeProxyListener(listener);
+		descriptor.cache.removeProxyListener(listener);
 	}
 
 	/** Create the columns in the model via method, which is called
@@ -290,19 +284,15 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Determine if a properties form is available */
 	public final boolean hasProperties() {
-		return has_properties;
+		return descriptor.has_properties;
 	}
 
 	/** Show the properties form for a proxy */
 	public void showPropertiesForm(T proxy) {
-		SonarObjectForm<T> prop = createPropertiesForm(proxy);
+		SonarObjectForm<T> prop = descriptor.createPropertiesForm(
+			proxy);
 		if (prop != null)
 			session.getDesktop().show(prop);
-	}
-
-	/** Create a properties form for one proxy */
-	protected SonarObjectForm<T> createPropertiesForm(T proxy) {
-		return null;
 	}
 
 	/** Determine if create and delete buttons are available */
@@ -314,7 +304,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	public void createObject(String name) {
 		String n = name.trim();
 		if (n.length() > 0)
-			cache.createObject(n);
+			descriptor.cache.createObject(n);
 	}
 
 	/** Determine if name text field is available */
@@ -322,15 +312,9 @@ abstract public class ProxyTableModel<T extends SonarObject>
 		return has_name;
 	}
 
-	/** Get the SONAR type name.  Subclasses must override this to allow
-	 * canAdd permission checking to work correctly. */
-	protected String getSonarType() {
-		return null;
-	}
-
 	/** Check if the user can add a proxy */
 	public boolean canAdd(String n) {
-		String tname = getSonarType();
+		String tname = descriptor.tname;
 		if (tname != null)
 			return session.canAdd(tname, n);
 		else

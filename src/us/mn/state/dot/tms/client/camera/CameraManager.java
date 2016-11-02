@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class CameraManager extends DeviceManager<Camera> {
 
 	/** Create a proxy descriptor */
-	static private ProxyDescriptor<Camera> descriptor(final Session s) {
+	static public ProxyDescriptor<Camera> descriptor(final Session s) {
 		return new ProxyDescriptor<Camera>(
 			s.getSonarState().getCamCache().getCameras(), true
 		) {

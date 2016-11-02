@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,27 +49,14 @@ public class TagReaderModel extends ProxyTableModel<TagReader> {
 
 	/** Create a new tag reader table model */
 	public TagReaderModel(Session s) {
-		super(s, s.getSonarState().getTagReaders(),
-		      true,	/* has_properties */
+		super(s, TagReaderManager.descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return TagReader.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */
 	@Override
 	public int getVisibleRowCount() {
 		return 12;
-	}
-
-	/** Create a properties form for one proxy */
-	@Override
-	protected TagReaderProperties createPropertiesForm(TagReader proxy) {
-		return new TagReaderProperties(session, proxy);
 	}
 }

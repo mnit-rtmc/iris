@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,27 +49,14 @@ public class BeaconModel extends ProxyTableModel<Beacon> {
 
 	/** Create a new beacon table model */
 	public BeaconModel(Session s) {
-		super(s, s.getSonarState().getBeacons(),
-		      true,	/* has_properties */
+		super(s, BeaconManager.descriptor(s),
 		      true,	/* has_create_delete */
 		      true);	/* has_name */
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Beacon.SONAR_TYPE;
 	}
 
 	/** Get the visible row count */
 	@Override
 	public int getVisibleRowCount() {
 		return 12;
-	}
-
-	/** Create a properties form for one proxy */
-	@Override
-	protected BeaconProperties createPropertiesForm(Beacon proxy) {
-		return new BeaconProperties(session, proxy);
 	}
 }

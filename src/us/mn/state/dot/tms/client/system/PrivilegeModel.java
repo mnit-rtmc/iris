@@ -23,6 +23,7 @@ import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
+import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import static us.mn.state.dot.tms.client.system.PrivilegePanel.ALL_TYPES;
 
@@ -32,6 +33,13 @@ import static us.mn.state.dot.tms.client.system.PrivilegePanel.ALL_TYPES;
  * @author Douglas Lau
  */
 public class PrivilegeModel extends ProxyTableModel<Privilege> {
+
+	/** Create a proxy descriptor */
+	static public ProxyDescriptor<Privilege> descriptor(Session s) {
+		return new ProxyDescriptor<Privilege>(
+			s.getSonarState().getPrivileges(), false
+		);
+	}
 
 	/** Create the columns in the model */
 	@Override
@@ -99,17 +107,10 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 
 	/** Create a new privilege table model */
 	public PrivilegeModel(Session s, Capability c) {
-		super(s, s.getSonarState().getPrivileges(),
-		      false,	/* has_properties */
+		super(s, descriptor(s),
 		      true,	/* has_create_delete */
 		      false);	/* has_name */
 		capability = c;
-	}
-
-	/** Get the SONAR type name */
-	@Override
-	protected String getSonarType() {
-		return Privilege.SONAR_TYPE;
 	}
 
 	/** Check if a proxy is included in the list */
@@ -128,7 +129,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 				new HashMap<String, Object>();
 			attrs.put("capability", capability);
 			attrs.put("typeN", tn);
-			cache.createObject(name, attrs);
+			descriptor.cache.createObject(name, attrs);
 		}
 	}
 
@@ -136,7 +137,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	private String createUniqueName() {
 		for (int uid = 1; uid <= 9999; uid++) {
 			String n = "PRV_" + uid;
-			if (cache.lookupObject(n) == null)
+			if (descriptor.cache.lookupObject(n) == null)
 				return n;
 		}
 		assert false;
