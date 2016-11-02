@@ -45,7 +45,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class DMSManager extends DeviceManager<DMS> {
 
 	/** Color definition for AWS controlled style */
-	static private final Color COLOR_HELIOTROPE = new Color(1, 0.5f,0.9f);
+	static private final Color COLOR_HELIOTROPE = new Color(1, 0.5f, 0.9f);
 
 	/** Mapping of DMS to page one rasters */
 	private final HashMap<DMS, RasterGraphic> rasters =
