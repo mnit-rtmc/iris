@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashSet;
 import us.mn.state.dot.tms.DMS;
 import static us.mn.state.dot.tms.DmsColor.AMBER;
 import us.mn.state.dot.tms.DMSType;
@@ -51,6 +53,13 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Number of missed polling periods for comm loss threshold */
 	static private final int COMM_LOSS_PERIODS = 10;
+
+	/** Certain Ledstar firmware versions can lock up with
+	 * a CTO error if dmsTimeCommLoss is set to a non-zero value */
+	static private final HashSet<String> CTO_BLACKLIST =
+		new HashSet<String>(Arrays.asList(
+		"VMS-MN2A-27x105 V2.6 Apr 20,2011"
+	));
 
 	/** Create a new operation to send DMS default parameters */
 	public OpSendDMSDefaults(DMSImpl d) {
@@ -102,10 +111,7 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Is the controller blacklisted for comm loss setting */
 	private boolean isCommLossBlacklisted() {
-		// Certain Ledstar firmware versions can lock up with
-		// a CTO error if this is set to a non-zero value
-		// FIXME: add list here
-		return false;
+		return CTO_BLACKLIST.contains(controller.getVersion());
 	}
 
 	/** Phase to set the pixel service schedule */
