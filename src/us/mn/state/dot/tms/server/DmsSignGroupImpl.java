@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,6 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DmsSignGroupImpl(
-					namespace,
 					row.getString(1),	// name
 					row.getString(2),	// dms
 					row.getString(3)	// sign_group
@@ -49,6 +48,7 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -58,11 +58,13 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -73,32 +75,31 @@ public class DmsSignGroupImpl extends BaseObjectImpl implements DmsSignGroup {
 	}
 
 	/** Create a new DMS sign group */
-	public DmsSignGroupImpl(String n, DMS d, SignGroup g) {
+	private DmsSignGroupImpl(String n, DMS d, SignGroup g) {
 		super(n);
 		dms = d;
 		sign_group = g;
 	}
 
 	/** Create a new DMS sign group */
-	protected DmsSignGroupImpl(ServerNamespace ns, String n, String d,
-		String g)
-	{
-		this(n, (DMS)ns.lookupObject(DMS.SONAR_TYPE, d),
-		     (SignGroup)ns.lookupObject(SignGroup.SONAR_TYPE, g));
+	private DmsSignGroupImpl(String n, String d, String g) {
+		this(n, lookupDMS(d), lookupSignGroup(g));
 	}
 
 	/** DMS name */
-	protected DMS dms;
+	private DMS dms;
 
 	/** Get the DMS ID */
+	@Override
 	public DMS getDms() {
 		return dms;
 	}
 
 	/** Sign group */
-	protected SignGroup sign_group;
+	private SignGroup sign_group;
 
 	/** Get the sign group name */
+	@Override
 	public SignGroup getSignGroup() {
 		return sign_group;
 	}

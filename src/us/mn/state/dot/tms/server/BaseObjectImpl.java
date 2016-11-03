@@ -218,6 +218,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return null;
 	}
 
+	/** Lookup a DMS */
+	static protected DMSImpl lookupDMS(String name) {
+		SonarObject so = lookupObject(DMSImpl.SONAR_TYPE, name);
+		return (so instanceof DMSImpl) ? (DMSImpl) so : null;
+	}
+
 	/** Lookup a sign group */
 	static protected SignGroupImpl lookupSignGroup(String name) {
 		SonarObject so = lookupObject(SignGroupImpl.SONAR_TYPE, name);
