@@ -69,8 +69,6 @@ public class TagReaderManager extends DeviceManager<TagReader> {
 			new TagReaderMarker());
 		theme.addStyle(ItemStyle.AVAILABLE, COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		theme.addStyle(ItemStyle.NO_CONTROLLER,
-			ProxyTheme.COLOR_NO_CONTROLLER);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}
