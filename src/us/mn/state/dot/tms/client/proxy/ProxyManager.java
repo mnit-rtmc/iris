@@ -370,8 +370,8 @@ abstract public class ProxyManager<T extends SonarObject> {
 	}
 
 	/** Create a properties form for the specified proxy */
-	protected SonarObjectForm<T> createPropertiesForm(T proxy) {
-		return null;
+	private SonarObjectForm<T> createPropertiesForm(T proxy) {
+		return descriptor.createPropertiesForm(proxy);
 	}
 
 	/** Show the popup menu for the selected proxy or proxies */
