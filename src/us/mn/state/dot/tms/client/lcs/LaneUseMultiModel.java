@@ -173,6 +173,6 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	/** Get the visible row count */
 	@Override
 	public int getVisibleRowCount() {
-		return 10;
+		return 12;
 	}
 }

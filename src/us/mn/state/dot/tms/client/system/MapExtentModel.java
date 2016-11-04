@@ -105,12 +105,6 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 		client = ic;
 	}
 
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 20;
-	}
-
 	/** Create an object with the given name */
 	@Override
 	public void createObject(String name) {

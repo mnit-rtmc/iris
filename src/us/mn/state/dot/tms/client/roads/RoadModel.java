@@ -125,10 +125,4 @@ public class RoadModel extends ProxyTableModel<Road> {
 	public RoadModel(Session s) {
 		super(s, descriptor(s));
 	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 20;
-	}
 }
