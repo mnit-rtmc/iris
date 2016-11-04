@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -74,16 +75,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			SONAR_TYPE  +";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new ControllerImpl(
-					row.getString(1),	// name
-					row.getString(2),	// cabinet
-					row.getString(3),	// comm_link
-					row.getShort(4),	// drop_id
-					row.getInt(5),		// condition
-					row.getString(6),	// password
-					row.getString(7),	// notes
-					row.getTimestamp(8)	// failTime
-				));
+				namespace.addObject(new ControllerImpl(row));
 			}
 		});
 	}
@@ -104,11 +96,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -122,7 +116,27 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		condition = CtrlCondition.PLANNED;
 	}
 
-	/** Create a new controller */
+	/** Create a controller */
+	private ControllerImpl(ResultSet row) throws SQLException, TMSException{
+		this(row.getString(1),		// name
+		     row.getString(2),		// cabinet
+		     row.getString(3),		// comm_link
+		     row.getShort(4),		// drop_id
+		     row.getInt(5),		// condition
+		     row.getString(6),		// password
+		     row.getString(7),		// notes
+		     row.getTimestamp(8)	// failTime
+		);
+	}
+
+	/** Create a controller */
+	private ControllerImpl(String n, String c, String cl, short d,
+		int cnd, String p, String nt, Date ft) throws TMSException
+	{
+		this(n, lookupCabinet(c), lookupCommLink(cl), d, cnd, p, nt,ft);
+	}
+
+	/** Create a controller */
 	private ControllerImpl(String n, CabinetImpl c, CommLink cl, short d,
 		int cnd, String p, String nt, Date ft) throws TMSException
 	{
@@ -135,13 +149,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		notes = nt;
 		failTime = stampMillis(ft);
 		initTransients();
-	}
-
-	/** Create a new controller */
-	private ControllerImpl(String n, String c, String cl, short d,
-		int cnd, String p, String nt, Date ft) throws TMSException
-	{
-		this(n, lookupCabinet(c), lookupCommLink(cl), d, cnd, p, nt,ft);
 	}
 
 	/** Initialize the transient fields */
