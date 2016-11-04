@@ -85,9 +85,7 @@ public class BeaconActionModel extends ProxyTableModel<BeaconAction> {
 
 	/** Create a new beacon action table model */
 	public BeaconActionModel(Session s, ActionPlan ap) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
 	}

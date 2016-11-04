@@ -94,9 +94,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 
 	/** Create a new table model */
 	public SystemAttributeTableModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Create an object with the given name */

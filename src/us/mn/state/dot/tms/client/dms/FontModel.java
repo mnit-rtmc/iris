@@ -128,9 +128,7 @@ public class FontModel extends ProxyTableModel<Font> {
 
 	/** Create a new font table model */
 	public FontModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Get the visible row count */

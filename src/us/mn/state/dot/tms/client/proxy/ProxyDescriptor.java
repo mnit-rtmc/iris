@@ -33,11 +33,26 @@ public class ProxyDescriptor<T extends SonarObject> {
 	/** Flag to enable properties button */
 	public final boolean has_properties;
 
+	/** Flag to enable create / delete buttons */
+	public final boolean has_create_delete;
+
+	/** Flag to enable name entry widget */
+	public final boolean has_name;
+
 	/** Create a new proxy descriptor */
-	public ProxyDescriptor(TypeCache<T> c, boolean hp) {
+	public ProxyDescriptor(TypeCache<T> c, boolean hp, boolean hcd,
+		boolean hn)
+	{
 		cache = c;
 		tname = cache.tname;
 		has_properties = hp;
+		has_create_delete = hcd;
+		has_name = hn;
+	}
+
+	/** Create a new proxy descriptor */
+	public ProxyDescriptor(TypeCache<T> c, boolean hp) {
+		this(c, hp, true, true);
 	}
 
 	/** Create a properties form for a proxy */

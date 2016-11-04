@@ -84,9 +84,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	/** Create a new table model.
 	 * @param s Session */
 	public QuickMessageTableModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Get the visible row count */

@@ -86,9 +86,7 @@ public class TollZoneModel extends ProxyTableModel<TollZone> {
 
 	/** Create a new toll zone table model */
 	public TollZoneModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Get the visible row count */

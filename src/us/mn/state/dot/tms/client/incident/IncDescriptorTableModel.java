@@ -49,7 +49,9 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	static public ProxyDescriptor<IncDescriptor> descriptor(Session s) {
 		return new ProxyDescriptor<IncDescriptor>(
 			s.getSonarState().getIncCache().getIncDescriptors(),
-			false
+			false,	/* has_properties */
+			true,	/* has_create_delete */
+			false	/* has_name */
 		);
 	}
 
@@ -227,9 +229,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	/** Create a new table model.
 	 * @param s Session */
 	public IncDescriptorTableModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      false);	/* has_name */
+		super(s, descriptor(s));
 		detail_mdl = new ProxyListModel<IncidentDetail>(
 			s.getSonarState().getIncCache().getIncidentDetails());
 	}

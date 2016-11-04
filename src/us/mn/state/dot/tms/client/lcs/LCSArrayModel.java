@@ -48,8 +48,6 @@ public class LCSArrayModel extends ProxyTableModel<LCSArray> {
 
 	/** Create a new LCS array table model */
 	public LCSArrayModel(Session s) {
-		super(s, LCSArrayManager.descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, LCSArrayManager.descriptor(s));
 	}
 }

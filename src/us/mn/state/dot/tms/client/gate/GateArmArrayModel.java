@@ -49,8 +49,6 @@ public class GateArmArrayModel extends ProxyTableModel<GateArmArray> {
 
 	/** Create a new gate arm array table model */
 	public GateArmArrayModel(Session s) {
-		super(s, GateArmArrayManager.descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, GateArmArrayManager.descriptor(s));
 	}
 }

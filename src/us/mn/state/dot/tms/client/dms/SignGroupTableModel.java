@@ -117,9 +117,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	 * @param dms DMS proxy object.
 	 */
 	public SignGroupTableModel(Session s, DMS proxy) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 		dms = proxy;
 		dms_sign_groups =
 			s.getSonarState().getDmsCache().getDmsSignGroups();

@@ -64,8 +64,6 @@ public class CapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Create a new capability table model */
 	public CapabilityModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 	}
 }

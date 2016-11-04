@@ -53,7 +53,10 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 	/** Create a proxy descriptor */
 	static public ProxyDescriptor<Controller> descriptor(final Session s) {
 		return new ProxyDescriptor<Controller>(
-			s.getSonarState().getConCache().getControllers(), true
+			s.getSonarState().getConCache().getControllers(),
+			true,	/* has_properties */
+			true,	/* has_create_delete */
+			false	/* has_name */
 		) {
 			@Override
 			public ControllerForm createPropertiesForm(
@@ -225,9 +228,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 
 	/** Create a new controller table model */
 	public ControllerTableModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      false);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Get the visible row count */

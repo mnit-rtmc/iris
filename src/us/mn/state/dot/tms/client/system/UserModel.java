@@ -50,8 +50,6 @@ public class UserModel extends ProxyTableModel<User> {
 
 	/** Create a new user table model */
 	public UserModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 	}
 }

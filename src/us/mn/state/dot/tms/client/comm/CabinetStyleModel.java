@@ -72,9 +72,7 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 
 	/** Create a new cabinet style table model */
 	public CabinetStyleModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Editor for dip values in a table cell */

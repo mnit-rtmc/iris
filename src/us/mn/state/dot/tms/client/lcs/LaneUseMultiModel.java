@@ -40,7 +40,9 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 	static public ProxyDescriptor<LaneUseMulti> descriptor(Session s) {
 		return new ProxyDescriptor<LaneUseMulti>(
 			s.getSonarState().getLcsCache().getLaneUseMultis(),
-			false
+			false,	/* has_properties */
+			true,	/* has_create_delete */
+			false	/* has_name */
 		);
 	}
 
@@ -139,9 +141,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 
 	/** Create a new graphic table model */
 	public LaneUseMultiModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      false);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Create a new lane-use MULTI */

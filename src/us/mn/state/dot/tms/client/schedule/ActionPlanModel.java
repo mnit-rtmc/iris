@@ -137,9 +137,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 
 	/** Create a new action plan table model */
 	public ActionPlanModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 		phase_mdl = s.getSonarState().getPhaseModel();
 	}
 

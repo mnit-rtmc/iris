@@ -120,9 +120,7 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 
 	/** Create a new sign text table model */
 	public SignTextTableModel(Session s, SignGroup g) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 		group = g;
 		creator = new SignTextCreator(s);
 	}

@@ -33,7 +33,10 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 	/** Create a proxy descriptor */
 	static public ProxyDescriptor<Capability> descriptor(Session s) {
 		return new ProxyDescriptor<Capability>(
-			s.getSonarState().getCapabilities(), false
+			s.getSonarState().getCapabilities(),
+			false,	/* has_properties */
+			false,	/* has_create_delete */
+			false	/* has_name */
 		);
 	}
 
@@ -91,9 +94,7 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Create a new role-capability table model */
 	public RoleCapabilityModel(Session s, Role r) {
-		super(s, descriptor(s),
-		      false,	/* has_create_delete */
-		      false);	/* has_name */
+		super(s, descriptor(s));
 		role = r;
 	}
 

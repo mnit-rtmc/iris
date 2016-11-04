@@ -33,7 +33,9 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 	static public ProxyDescriptor<Detector> descriptor(Session s) {
 		return new ProxyDescriptor<Detector>(
 			s.getSonarState().getDetCache().getDetectors(),
-			false
+			false,	/* has_properties */
+			false,	/* has_create_delete */
+			false	/* has_name */
 		);
 	}
 
@@ -57,9 +59,7 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 
 	/** Create a new detector table model */
 	public DetectorModel(Session s) {
-		super(s, descriptor(s),
-		      false,	/* has_create_delete */
-		      false);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Get the row height */

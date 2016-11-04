@@ -61,9 +61,7 @@ public class R_NodeDetectorModel extends ProxyTableModel<Detector> {
 
 	/** Create a new r_node detector table model */
 	public R_NodeDetectorModel(Session s, R_Node n) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 		r_node = n;
 	}
 

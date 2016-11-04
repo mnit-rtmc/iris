@@ -161,9 +161,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 
 	/** Create a new comm link table model */
 	public CommLinkModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Get the visible row count */

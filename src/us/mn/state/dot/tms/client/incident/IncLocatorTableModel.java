@@ -41,7 +41,9 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 	static public ProxyDescriptor<IncLocator> descriptor(Session s) {
 		return new ProxyDescriptor<IncLocator>(
 			s.getSonarState().getIncCache().getIncLocators(),
-			false
+			false,	/* has_properties */
+			true,	/* has_create_delete */
+			false	/* has_name */
 		);
 	}
 
@@ -135,9 +137,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 	/** Create a new table model.
 	 * @param s Session */
 	public IncLocatorTableModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      false);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Get the visible row count */

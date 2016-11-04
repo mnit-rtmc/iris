@@ -88,8 +88,6 @@ public class DMSModel extends ProxyTableModel<DMS> {
 
 	/** Create a new DMS table model */
 	public DMSModel(Session s) {
-		super(s, DMSManager.descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, DMSManager.descriptor(s));
 	}
 }

@@ -35,7 +35,9 @@ public class StationModel extends ProxyTableModel<Station> {
 	static public ProxyDescriptor<Station> descriptor(Session s) {
 		return new ProxyDescriptor<Station>(
 			s.getSonarState().getDetCache().getStations(),
-			true
+			true,	/* has_properties */
+			false,	/* has_create_delete */
+			false	/* has_name */
 		);
 	}
 
@@ -62,9 +64,7 @@ public class StationModel extends ProxyTableModel<Station> {
 
 	/** Create a new station table model */
 	public StationModel(Session s) {
-		super(s, descriptor(s),
-		      false,	/* has_create_delete */
-		      false);	/* has_name */
+		super(s, descriptor(s));
 		sel_model = s.getR_NodeManager().getSelectionModel();
 	}
 

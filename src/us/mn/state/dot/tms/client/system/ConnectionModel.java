@@ -32,7 +32,10 @@ public class ConnectionModel extends ProxyTableModel<Connection> {
 	/** Create a proxy descriptor */
 	static public ProxyDescriptor<Connection> descriptor(Session s) {
 		return new ProxyDescriptor<Connection>(
-			s.getSonarState().getConnections(), false
+			s.getSonarState().getConnections(),
+			false,	/* has_properties */
+			false,	/* has_create_delete */
+			false	/* has_name */
 		);
 	}
 
@@ -60,8 +63,6 @@ public class ConnectionModel extends ProxyTableModel<Connection> {
 
 	/** Create a new connection table model */
 	public ConnectionModel(Session s) {
-		super(s, descriptor(s),
-		      false,	/* has_create_delete */
-		      false);	/* has_name */
+		super(s, descriptor(s));
 	}
 }

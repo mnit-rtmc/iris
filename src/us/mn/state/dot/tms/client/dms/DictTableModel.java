@@ -70,9 +70,7 @@ public class DictTableModel extends ProxyTableModel<Word> {
 	 * @param allowed True if table model is for allowed words else 
 	 * 		  false for banned */
 	public DictTableModel(Session s, boolean allowed) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 		allowed_words = allowed;
 	}
 

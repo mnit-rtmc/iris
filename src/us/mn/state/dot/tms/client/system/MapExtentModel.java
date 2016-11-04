@@ -101,9 +101,7 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 
 	/** Create a new map extent table model */
 	public MapExtentModel(Session s, IrisClient ic) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 		client = ic;
 	}
 

@@ -85,9 +85,7 @@ public class LaneActionModel extends ProxyTableModel<LaneAction> {
 
 	/** Create a new lane action table model */
 	public LaneActionModel(Session s, ActionPlan ap) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
 	}

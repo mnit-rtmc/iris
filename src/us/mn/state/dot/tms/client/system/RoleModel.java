@@ -64,9 +64,7 @@ public class RoleModel extends ProxyTableModel<Role> {
 
 	/** Create a new role table model */
 	public RoleModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Check if the user can remove a role */

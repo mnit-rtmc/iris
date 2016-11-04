@@ -49,9 +49,7 @@ public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 
 	/** Create a new lane marking table model */
 	public LaneMarkingModel(Session s) {
-		super(s, LaneMarkingManager.descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, LaneMarkingManager.descriptor(s));
 	}
 
 	/** Get the visible row count */

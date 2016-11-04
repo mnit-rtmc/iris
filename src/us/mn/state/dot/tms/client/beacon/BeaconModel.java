@@ -49,9 +49,7 @@ public class BeaconModel extends ProxyTableModel<Beacon> {
 
 	/** Create a new beacon table model */
 	public BeaconModel(Session s) {
-		super(s, BeaconManager.descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, BeaconManager.descriptor(s));
 	}
 
 	/** Get the visible row count */

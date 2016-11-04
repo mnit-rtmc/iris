@@ -37,7 +37,10 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	/** Create a proxy descriptor */
 	static public ProxyDescriptor<Privilege> descriptor(Session s) {
 		return new ProxyDescriptor<Privilege>(
-			s.getSonarState().getPrivileges(), false
+			s.getSonarState().getPrivileges(),
+			false,	/* has_properties */
+			true,	/* has_create_delete */
+			false	/* has_name */
 		);
 	}
 
@@ -107,9 +110,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 
 	/** Create a new privilege table model */
 	public PrivilegeModel(Session s, Capability c) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      false);	/* has_name */
+		super(s, descriptor(s));
 		capability = c;
 	}
 

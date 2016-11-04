@@ -47,12 +47,6 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Proxy descriptor */
 	protected final ProxyDescriptor<T> descriptor;
 
-	/** Flag to show create and delete buttons */
-	private final boolean has_create_delete;
-
-	/** Flag to show name text field */
-	private final boolean has_name;
-
 	/** Proxy columns */
 	private final ArrayList<ProxyColumn<T>> columns;
 
@@ -102,16 +96,10 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Create a new proxy table model.
 	 * @param s User session.
-	 * @param d Proxy descriptor.
-	 * @param hcd Flag to add create and delete buttons.
-	 * @param hn Flag to add name text field. */
-	public ProxyTableModel(Session s, ProxyDescriptor<T> d, boolean hcd,
-		boolean hn)
-	{
+	 * @param d Proxy descriptor. */
+	public ProxyTableModel(Session s, ProxyDescriptor<T> d) {
 		session = s;
 		descriptor = d;
-		has_create_delete = hcd;
-		has_name = hn;
 		columns = createColumns();
 		list = new ArrayList<T>();
 	}
@@ -297,7 +285,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Determine if create and delete buttons are available */
 	public final boolean hasCreateDelete() {
-		return has_create_delete;
+		return descriptor.has_create_delete;
 	}
 
 	/** Create an object with the given name */
@@ -309,7 +297,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Determine if name text field is available */
 	public final boolean hasName() {
-		return has_name;
+		return descriptor.has_name;
 	}
 
 	/** Check if the user can add a proxy */

@@ -215,9 +215,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 
 	/** Create a new holiday table model */
 	public HolidayModel(Session s, DayPlan dp) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 		day_plan = dp;
 	}
 

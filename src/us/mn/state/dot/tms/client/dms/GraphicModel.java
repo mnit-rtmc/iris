@@ -51,7 +51,9 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	static public ProxyDescriptor<Graphic> descriptor(Session s) {
 		return new ProxyDescriptor<Graphic>(
 			s.getSonarState().getGraphics(),
-			false
+			false,	/* has_properties */
+			true,	/* has_create_delete */
+			false	/* has_name */
 		);
 	}
 
@@ -166,9 +168,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 
 	/** Create a new graphic table model */
 	public GraphicModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      false);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Check if a proxy is included in the list */

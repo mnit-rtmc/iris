@@ -49,9 +49,7 @@ public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
 
 	/** Create a new weather sensor table model */
 	public WeatherSensorModel(Session s) {
-		super(s, WeatherSensorManager.descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, WeatherSensorManager.descriptor(s));
 	}
 
 	/** Get the visible row count */

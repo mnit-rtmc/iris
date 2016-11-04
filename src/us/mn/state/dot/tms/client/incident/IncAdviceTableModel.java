@@ -42,7 +42,9 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 	static public ProxyDescriptor<IncAdvice> descriptor(Session s) {
 		return new ProxyDescriptor<IncAdvice>(
 			s.getSonarState().getIncCache().getIncAdvices(),
-			false
+			false,	/* has_properties */
+			true,	/* has_create_delete */
+			false	/* has_name */
 		);
 	}
 
@@ -149,9 +151,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 	/** Create a new table model.
 	 * @param s Session */
 	public IncAdviceTableModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      false);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Get the visible row count */

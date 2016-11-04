@@ -49,9 +49,7 @@ public class TagReaderModel extends ProxyTableModel<TagReader> {
 
 	/** Create a new tag reader table model */
 	public TagReaderModel(Session s) {
-		super(s, TagReaderManager.descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, TagReaderManager.descriptor(s));
 	}
 
 	/** Get the visible row count */

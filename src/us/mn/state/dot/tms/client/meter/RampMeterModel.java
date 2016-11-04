@@ -49,8 +49,6 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 
 	/** Create a new ramp meter table model */
 	public RampMeterModel(Session s) {
-		super(s, MeterManager.descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, MeterManager.descriptor(s));
 	}
 }

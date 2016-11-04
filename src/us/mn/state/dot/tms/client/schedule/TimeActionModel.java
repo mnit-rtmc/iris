@@ -40,7 +40,10 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 	/** Create a proxy descriptor */
 	static public ProxyDescriptor<TimeAction> descriptor(Session s) {
 		return new ProxyDescriptor<TimeAction>(
-			s.getSonarState().getTimeActions(), false
+			s.getSonarState().getTimeActions(),
+			false,	/* has_properties */
+			true,	/* has_create_delete */
+			false	/* has_name */
 		);
 	}
 
@@ -94,9 +97,7 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 
 	/** Create a new time action table model */
 	public TimeActionModel(Session s, ActionPlan ap) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      false);	/* has_name */
+		super(s, descriptor(s));
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
 	}

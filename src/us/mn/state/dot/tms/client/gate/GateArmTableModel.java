@@ -90,9 +90,7 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 
 	/** Create a new gate arm table model */
 	public GateArmTableModel(Session s, GateArmArray ga) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 		ga_array = ga;
 	}
 

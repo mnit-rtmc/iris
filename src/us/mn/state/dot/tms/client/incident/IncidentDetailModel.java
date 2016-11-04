@@ -66,9 +66,7 @@ public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
 
 	/** Create a new incident detail table model */
 	public IncidentDetailModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Get the visible row count */

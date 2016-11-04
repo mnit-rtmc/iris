@@ -123,9 +123,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 
 	/** Create a new road table model */
 	public RoadModel(Session s) {
-		super(s, descriptor(s),
-		      true,	/* has_create_delete */
-		      true);	/* has_name */
+		super(s, descriptor(s));
 	}
 
 	/** Get the visible row count */
