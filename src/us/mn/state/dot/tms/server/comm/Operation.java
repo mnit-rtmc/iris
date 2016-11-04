@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DeviceImpl;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * An operation is a sequence of steps to be performed on a field controller.
@@ -38,16 +39,9 @@ public final class Operation implements Comparable<Operation> {
 	/** Maximum message length */
 	static private final int MAX_MSG_LEN = 64;
 
-	/** Truncate a message */
-	static private String truncateMsg(String m) {
-		return (m.length() <= MAX_MSG_LEN)
-		      ? m
-		      : m.substring(0, MAX_MSG_LEN);
-	}
-
 	/** Filter a message */
 	static private String filterMsg(String m) {
-		return (m != null) ? truncateMsg(m) : "";
+		return SString.truncate(m, MAX_MSG_LEN);
 	}
 
 	/** Append a status string */

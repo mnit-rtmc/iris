@@ -73,9 +73,11 @@ public class SString {
 	 * @param maxlen Maximum length of string (characters).
 	 * @return Truncated string. */
 	static public String truncate(String arg, int maxlen) {
-		arg = (arg == null) ? "" : arg;
-		return arg.substring(0, Math.min(arg.length(),
-			Math.max(0, maxlen)));
+		arg = (arg != null) ? arg : "";
+		maxlen = Math.max(0, maxlen);
+		return (arg.length() <= maxlen)
+		      ? arg
+		      : arg.substring(0, maxlen);
 	}
 
 	/** Convert string to int.  This method suppresses all number format
