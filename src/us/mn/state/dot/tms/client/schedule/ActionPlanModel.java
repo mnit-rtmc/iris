@@ -137,14 +137,8 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 
 	/** Create a new action plan table model */
 	public ActionPlanModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 8);
 		phase_mdl = s.getSonarState().getPhaseModel();
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 8;
 	}
 
 	/** Create a new action plan */

@@ -70,7 +70,7 @@ public class DictTableModel extends ProxyTableModel<Word> {
 	 * @param allowed True if table model is for allowed words else 
 	 * 		  false for banned */
 	public DictTableModel(Session s, boolean allowed) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 20, 20);
 		allowed_words = allowed;
 	}
 
@@ -105,17 +105,5 @@ public class DictTableModel extends ProxyTableModel<Word> {
 		attrs.put("abbr", abbr);
 		attrs.put("allowed", aw);
 		return attrs;
-	}
-
-	/** Get the row height */
-	@Override
-	public int getRowHeight() {
-		return 20;
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 20;
 	}
 }

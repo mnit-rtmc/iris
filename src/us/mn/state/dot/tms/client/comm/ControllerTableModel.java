@@ -228,19 +228,7 @@ public class ControllerTableModel extends ProxyTableModel<Controller> {
 
 	/** Create a new controller table model */
 	public ControllerTableModel(Session s) {
-		super(s, descriptor(s));
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 10;
-	}
-
-	/** Get the row height */
-	@Override
-	public int getRowHeight() {
-		return 24;
+		super(s, descriptor(s), 10, 24);
 	}
 
 	/** Get a table row sorter */

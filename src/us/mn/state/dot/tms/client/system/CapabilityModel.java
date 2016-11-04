@@ -64,6 +64,6 @@ public class CapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Create a new capability table model */
 	public CapabilityModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 	}
 }

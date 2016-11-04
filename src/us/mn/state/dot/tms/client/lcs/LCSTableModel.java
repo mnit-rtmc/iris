@@ -62,14 +62,8 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 
 	/** Create a new LCS table model */
 	public LCSTableModel(Session s, LCSArray la) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 12);
 		lcs_array = la;
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
 	}
 
 	/** Check if a proxy is included in the list */

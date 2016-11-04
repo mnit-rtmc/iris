@@ -97,7 +97,7 @@ public class AlarmModel extends ProxyTableModel<Alarm> {
 
 	/** Create a new alarm table model */
 	public AlarmModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 	}
 
 	/** Renderer for state in a table cell */

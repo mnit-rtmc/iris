@@ -161,18 +161,6 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 
 	/** Create a new comm link table model */
 	public CommLinkModel(Session s) {
-		super(s, descriptor(s));
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 8;
-	}
-
-	/** Get the row height */
-	@Override
-	public int getRowHeight() {
-		return 24;
+		super(s, descriptor(s), 8, 24);
 	}
 }

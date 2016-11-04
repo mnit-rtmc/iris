@@ -120,15 +120,9 @@ public class SignTextTableModel extends ProxyTableModel<SignText> {
 
 	/** Create a new sign text table model */
 	public SignTextTableModel(Session s, SignGroup g) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 12);
 		group = g;
 		creator = new SignTextCreator(s);
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
 	}
 
 	/** Get a proxy comparator */

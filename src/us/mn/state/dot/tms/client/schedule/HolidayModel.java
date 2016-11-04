@@ -215,7 +215,7 @@ public class HolidayModel extends ProxyTableModel<Holiday> {
 
 	/** Create a new holiday table model */
 	public HolidayModel(Session s, DayPlan dp) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 		day_plan = dp;
 	}
 

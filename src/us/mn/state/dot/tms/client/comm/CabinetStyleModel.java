@@ -72,7 +72,7 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 
 	/** Create a new cabinet style table model */
 	public CabinetStyleModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 12);
 	}
 
 	/** Editor for dip values in a table cell */
@@ -92,11 +92,5 @@ public class CabinetStyleModel extends ProxyTableModel<CabinetStyle> {
 		public Object getCellEditorValue() {
 			return spinner.getValue();
 		}
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
 	}
 }

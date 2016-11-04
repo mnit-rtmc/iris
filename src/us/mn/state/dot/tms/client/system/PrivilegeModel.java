@@ -110,7 +110,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 
 	/** Create a new privilege table model */
 	public PrivilegeModel(Session s, Capability c) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 		capability = c;
 	}
 

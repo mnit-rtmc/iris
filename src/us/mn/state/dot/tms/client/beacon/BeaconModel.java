@@ -49,12 +49,6 @@ public class BeaconModel extends ProxyTableModel<Beacon> {
 
 	/** Create a new beacon table model */
 	public BeaconModel(Session s) {
-		super(s, BeaconManager.descriptor(s));
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
+		super(s, BeaconManager.descriptor(s), 12);
 	}
 }

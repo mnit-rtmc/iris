@@ -49,12 +49,6 @@ public class WeatherSensorModel extends ProxyTableModel<WeatherSensor> {
 
 	/** Create a new weather sensor table model */
 	public WeatherSensorModel(Session s) {
-		super(s, WeatherSensorManager.descriptor(s));
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
+		super(s, WeatherSensorManager.descriptor(s), 12);
 	}
 }

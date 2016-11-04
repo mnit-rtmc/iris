@@ -50,6 +50,6 @@ public class UserModel extends ProxyTableModel<User> {
 
 	/** Create a new user table model */
 	public UserModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 	}
 }

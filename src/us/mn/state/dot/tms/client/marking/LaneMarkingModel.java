@@ -49,12 +49,6 @@ public class LaneMarkingModel extends ProxyTableModel<LaneMarking> {
 
 	/** Create a new lane marking table model */
 	public LaneMarkingModel(Session s) {
-		super(s, LaneMarkingManager.descriptor(s));
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
+		super(s, LaneMarkingManager.descriptor(s), 12);
 	}
 }

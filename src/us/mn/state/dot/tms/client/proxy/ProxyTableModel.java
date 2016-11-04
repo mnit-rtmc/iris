@@ -47,6 +47,12 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	/** Proxy descriptor */
 	protected final ProxyDescriptor<T> descriptor;
 
+	/** Visible row count */
+	private final int visible_row_count;
+
+	/** Row height */
+	private final int row_height;
+
 	/** Proxy columns */
 	private final ArrayList<ProxyColumn<T>> columns;
 
@@ -96,12 +102,25 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Create a new proxy table model.
 	 * @param s User session.
-	 * @param d Proxy descriptor. */
-	public ProxyTableModel(Session s, ProxyDescriptor<T> d) {
+	 * @param d Proxy descriptor.
+	 * @param vrc Visible row count.
+	 * @param rh Row height. */
+	public ProxyTableModel(Session s, ProxyDescriptor<T> d, int vrc, int rh)
+	{
 		session = s;
 		descriptor = d;
+		visible_row_count = vrc;
+		row_height = rh;
 		columns = createColumns();
 		list = new ArrayList<T>();
+	}
+
+	/** Create a new proxy table model.
+	 * @param s User session.
+	 * @param d Proxy descriptor.
+	 * @param vrc Visible row count. */
+	public ProxyTableModel(Session s, ProxyDescriptor<T> d, int vrc) {
+		this(s, d, vrc, 18);
 	}
 
 	/** Initialize the proxy table model. This cannot be done in the
@@ -256,13 +275,13 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	}
 
 	/** Get the visible row count */
-	public int getVisibleRowCount() {
-		return 16;
+	public final int getVisibleRowCount() {
+		return visible_row_count;
 	}
 
 	/** Get the row height */
-	public int getRowHeight() {
-		return 18;
+	public final int getRowHeight() {
+		return row_height;
 	}
 
 	/** Get a table row sorter */

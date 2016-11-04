@@ -90,7 +90,7 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 
 	/** Create a new gate arm table model */
 	public GateArmTableModel(Session s, GateArmArray ga) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), MAX_ARMS);
 		ga_array = ga;
 	}
 
@@ -110,12 +110,6 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 					return c;
 			}
 		};
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return MAX_ARMS;
 	}
 
 	/** Check if a proxy is included in the list */

@@ -196,7 +196,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Create a new DMS action table model */
 	public DmsActionModel(Session s, ActionPlan ap) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
 	}

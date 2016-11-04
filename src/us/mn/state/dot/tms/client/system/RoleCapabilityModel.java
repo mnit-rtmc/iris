@@ -94,7 +94,7 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 
 	/** Create a new role-capability table model */
 	public RoleCapabilityModel(Session s, Role r) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 		role = r;
 	}
 

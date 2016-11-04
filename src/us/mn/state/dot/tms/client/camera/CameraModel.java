@@ -63,12 +63,6 @@ public class CameraModel extends ProxyTableModel<Camera> {
 
 	/** Create a new camera table model */
 	public CameraModel(Session s) {
-		super(s, CameraManager.descriptor(s));
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
+		super(s, CameraManager.descriptor(s), 12);
 	}
 }

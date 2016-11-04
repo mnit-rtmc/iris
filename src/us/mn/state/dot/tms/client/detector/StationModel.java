@@ -64,7 +64,7 @@ public class StationModel extends ProxyTableModel<Station> {
 
 	/** Create a new station table model */
 	public StationModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16, 20);
 		sel_model = s.getR_NodeManager().getSelectionModel();
 	}
 
@@ -72,11 +72,5 @@ public class StationModel extends ProxyTableModel<Station> {
 	@Override
 	public void showPropertiesForm(Station proxy) {
 		sel_model.setSelected(proxy.getR_Node());
-	}
-
-	/** Get the row height */
-	@Override
-	public int getRowHeight() {
-		return 20;
 	}
 }

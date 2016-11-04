@@ -120,6 +120,6 @@ public class ModemModel extends ProxyTableModel<Modem> {
 
 	/** Create a new modem table model */
 	public ModemModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 	}
 }

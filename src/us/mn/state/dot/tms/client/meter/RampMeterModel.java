@@ -49,6 +49,6 @@ public class RampMeterModel extends ProxyTableModel<RampMeter> {
 
 	/** Create a new ramp meter table model */
 	public RampMeterModel(Session s) {
-		super(s, MeterManager.descriptor(s));
+		super(s, MeterManager.descriptor(s), 16);
 	}
 }

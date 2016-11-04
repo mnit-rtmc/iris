@@ -168,25 +168,13 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 
 	/** Create a new graphic table model */
 	public GraphicModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 5, MAX_GRAPHIC_HEIGHT / 2);
 	}
 
 	/** Check if a proxy is included in the list */
 	@Override
 	protected boolean check(Graphic proxy) {
 		return proxy.getGNumber() != null;
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 5;
-	}
-
-	/** Get the row height */
-	@Override
-	public int getRowHeight() {
-		return MAX_GRAPHIC_HEIGHT / 2;
 	}
 
 	/** Create an object with the given name */

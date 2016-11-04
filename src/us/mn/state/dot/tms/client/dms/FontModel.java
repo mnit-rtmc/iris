@@ -128,12 +128,6 @@ public class FontModel extends ProxyTableModel<Font> {
 
 	/** Create a new font table model */
 	public FontModel(Session s) {
-		super(s, descriptor(s));
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 6;
+		super(s, descriptor(s), 6);
 	}
 }

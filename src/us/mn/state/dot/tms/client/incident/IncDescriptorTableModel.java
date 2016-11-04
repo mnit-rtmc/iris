@@ -229,7 +229,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	/** Create a new table model.
 	 * @param s Session */
 	public IncDescriptorTableModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 12, 20);
 		detail_mdl = new ProxyListModel<IncidentDetail>(
 			s.getSonarState().getIncCache().getIncidentDetails());
 	}
@@ -246,18 +246,6 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	public void dispose() {
 		detail_mdl.dispose();
 		super.dispose();
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
-	}
-
-	/** Get the row height */
-	@Override
-	public int getRowHeight() {
-		return 20;
 	}
 
 	/** Get a proxy comparator */

@@ -117,7 +117,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	 * @param dms DMS proxy object.
 	 */
 	public SignGroupTableModel(Session s, DMS proxy) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 12);
 		dms = proxy;
 		dms_sign_groups =
 			s.getSonarState().getDmsCache().getDmsSignGroups();
@@ -135,12 +135,6 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 	public void dispose() {
 		dms_sign_groups.removeProxyListener(listener);
 		super.dispose();
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
 	}
 
 	/** Check if a proxy is included in the list */

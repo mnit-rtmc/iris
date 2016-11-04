@@ -141,7 +141,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 
 	/** Create a new graphic table model */
 	public LaneUseMultiModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 12, 22);
 	}
 
 	/** Create a new lane-use MULTI */
@@ -162,17 +162,5 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 		}
 		assert false;
 		return null;
-	}
-
-	/** Get the row height */
-	@Override
-	public int getRowHeight() {
-		return 22;
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
 	}
 }

@@ -123,6 +123,6 @@ public class RoadModel extends ProxyTableModel<Road> {
 
 	/** Create a new road table model */
 	public RoadModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 	}
 }

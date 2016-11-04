@@ -76,6 +76,6 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 
 	/** Create a new video monitor table model */
 	public VideoMonitorModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 	}
 }

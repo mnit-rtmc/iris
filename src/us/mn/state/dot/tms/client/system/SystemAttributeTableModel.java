@@ -94,7 +94,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 
 	/** Create a new table model */
 	public SystemAttributeTableModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 12, 20);
 	}
 
 	/** Create an object with the given name */
@@ -161,17 +161,5 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 		return (sa != null)
 		      ? SystemAttrEnum.getDesc(sa.getName())
 		      : null;
-	}
-
-	/** Get the row height */
-	@Override
-	public int getRowHeight() {
-		return 20;
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
 	}
 }

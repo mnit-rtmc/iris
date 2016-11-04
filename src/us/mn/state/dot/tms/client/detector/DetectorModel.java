@@ -59,12 +59,6 @@ public class DetectorModel extends ProxyTableModel<Detector> {
 
 	/** Create a new detector table model */
 	public DetectorModel(Session s) {
-		super(s, descriptor(s));
-	}
-
-	/** Get the row height */
-	@Override
-	public int getRowHeight() {
-		return 20;
+		super(s, descriptor(s), 16, 20);
 	}
 }

@@ -97,7 +97,7 @@ public class TimeActionModel extends ProxyTableModel<TimeAction> {
 
 	/** Create a new time action table model */
 	public TimeActionModel(Session s, ActionPlan ap) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 		action_plan = ap;
 		phase_mdl = s.getSonarState().getPhaseModel();
 	}

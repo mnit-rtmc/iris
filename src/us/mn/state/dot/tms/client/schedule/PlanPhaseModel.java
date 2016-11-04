@@ -97,7 +97,7 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 
 	/** Create a new plan phase table model */
 	public PlanPhaseModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 		phase_mdl = s.getSonarState().getPhaseModel();
 	}
 }

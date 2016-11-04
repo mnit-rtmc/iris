@@ -86,12 +86,6 @@ public class TollZoneModel extends ProxyTableModel<TollZone> {
 
 	/** Create a new toll zone table model */
 	public TollZoneModel(Session s) {
-		super(s, descriptor(s));
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
+		super(s, descriptor(s), 12);
 	}
 }

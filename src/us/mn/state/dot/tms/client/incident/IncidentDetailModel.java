@@ -66,12 +66,6 @@ public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
 
 	/** Create a new incident detail table model */
 	public IncidentDetailModel(Session s) {
-		super(s, descriptor(s));
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
+		super(s, descriptor(s), 12);
 	}
 }

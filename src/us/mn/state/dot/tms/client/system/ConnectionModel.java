@@ -63,6 +63,6 @@ public class ConnectionModel extends ProxyTableModel<Connection> {
 
 	/** Create a new connection table model */
 	public ConnectionModel(Session s) {
-		super(s, descriptor(s));
+		super(s, descriptor(s), 16);
 	}
 }

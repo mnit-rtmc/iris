@@ -84,18 +84,6 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	/** Create a new table model.
 	 * @param s Session */
 	public QuickMessageTableModel(Session s) {
-		super(s, descriptor(s));
-	}
-
-	/** Get the visible row count */
-	@Override
-	public int getVisibleRowCount() {
-		return 12;
-	}
-
-	/** Get the row height */
-	@Override
-	public int getRowHeight() {
-		return 20;
+		super(s, descriptor(s), 12, 20);
 	}
 }
