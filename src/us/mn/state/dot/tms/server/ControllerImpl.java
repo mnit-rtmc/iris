@@ -123,7 +123,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Create a new controller */
-	protected ControllerImpl(String n, CabinetImpl c, CommLink cl, short d,
+	private ControllerImpl(String n, CabinetImpl c, CommLink cl, short d,
 		int cnd, String p, String nt, Date ft) throws TMSException
 	{
 		super(n);
@@ -138,7 +138,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Create a new controller */
-	protected ControllerImpl(String n, String c, String cl, short d,
+	private ControllerImpl(String n, String c, String cl, short d,
 		int cnd, String p, String nt, Date ft) throws TMSException
 	{
 		this(n, lookupCabinet(c), lookupCommLink(cl), d, cnd, p, nt,ft);
@@ -168,23 +168,21 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Controller cabinet */
-	protected CabinetImpl cabinet;
+	private CabinetImpl cabinet;
 
 	/** Set the controller cabinet */
 	@Override
 	public void setCabinet(Cabinet c) {
 		if (c instanceof CabinetImpl)
-			cabinet = (CabinetImpl)c;
+			cabinet = (CabinetImpl) c;
 	}
 
 	/** Set the controller cabinet */
 	public void doSetCabinet(Cabinet c) throws TMSException {
-		if (!(c instanceof CabinetImpl))
-			return;
-		if (c == cabinet)
-			return;
-		store.update(this, "cabinet", c);
-		setCabinet(c);
+		if ((c instanceof CabinetImpl) && (c != cabinet)) {
+			store.update(this, "cabinet", c);
+			setCabinet(c);
+		}
 	}
 
 	/** Get the controller cabinet */
@@ -252,12 +250,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the drop address */
 	public void doSetDrop(short d) throws TMSException {
-		if (d == drop_id)
-			return;
-		putCommLink(d, comm_link);
-		store.update(this, "drop_id", d);
-		pullCommLink(comm_link);
-		setDrop(d);
+		if (d != drop_id) {
+			putCommLink(d, comm_link);
+			store.update(this, "drop_id", d);
+			pullCommLink(comm_link);
+			setDrop(d);
+		}
 	}
 
 	/** Get the drop address */
@@ -315,10 +313,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the access password */
 	public void doSetPassword(String pwd) throws TMSException {
-		if (stringEquals(pwd, password))
-			return;
-		store.update(this, "password", pwd);
-		setPassword(pwd);
+		if (!stringEquals(pwd, password)) {
+			store.update(this, "password", pwd);
+			setPassword(pwd);
+		}
 	}
 
 	/** Get the access password */
@@ -337,10 +335,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the administrator notes */
 	public void doSetNotes(String n) throws TMSException {
-		if (n.equals(notes))
-			return;
-		store.update(this, "notes", n);
-		setNotes(n);
+		if (!n.equals(notes)) {
+			store.update(this, "notes", n);
+			setNotes(n);
+		}
 	}
 
 	/** Get the administrator notes */
@@ -353,7 +351,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public synchronized void updateStyles() {
 		for (ControllerIO io: io_pins.values()) {
 			if (io instanceof DeviceImpl) {
-				DeviceImpl dev = (DeviceImpl)io;
+				DeviceImpl dev = (DeviceImpl) io;
 				dev.updateStyles();
 			}
 		}
@@ -392,7 +390,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		if (isActive()) {
 			for (ControllerIO io: io_pins.values()) {
 				if (io instanceof BeaconImpl)
-					return (BeaconImpl)io;
+					return (BeaconImpl) io;
 			}
 		}
 		return null;
