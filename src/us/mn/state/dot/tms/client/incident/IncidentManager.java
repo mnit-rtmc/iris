@@ -185,6 +185,12 @@ public class IncidentManager extends ProxyManager<Incident> {
 		}
 	}
 
+	/** Check if an incident style is visible */
+	@Override
+	protected boolean isStyleVisible(Incident inc) {
+		return true;
+	}
+
 	/** Get the event type of an incident */
 	static private EventType getEventType(Incident proxy) {
 		try {
