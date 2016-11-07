@@ -49,6 +49,9 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 	/** Count of records with "BAD TIMESTAMP" errors */
 	protected int n_bad = 0;
 
+	/** Maintenance status */
+	private String maint = "";
+
 	/** Create a new 5-minute data operation */
 	public OpQuerySamples5Min(ControllerImpl c) {
 		super(PriorityLevel.DATA_5_MIN, c);
@@ -113,7 +116,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 			}
 			catch (ControllerException e) {
 				if (!(e instanceof SampleException))
-					setMaintStatus(e.getMessage());
+					maint = e.getMessage();
 				rec = new byte[75];
 				MemoryProperty rec_mem = new MemoryProperty(
 					Address.DATA_BUFFER_5_MINUTE, rec);
@@ -143,5 +146,13 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 			meter.updateGreenCount5(getStamp(),
 				adjustGreenCount(meter, g));
 		}
+	}
+
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		if (isSuccess())
+			setMaintStatus(maint);
+		super.cleanup();
 	}
 }
