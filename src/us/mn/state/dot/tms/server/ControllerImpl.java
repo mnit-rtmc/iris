@@ -48,6 +48,7 @@ import us.mn.state.dot.tms.server.comm.WeatherPoller;
 import us.mn.state.dot.tms.server.comm.incfeed.IncFeedPoller;
 import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
 import us.mn.state.dot.tms.server.event.CommEvent;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * A controller represents a field device controller.
@@ -71,8 +72,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, ControllerImpl.class);
 		store.query("SELECT name, cabinet, comm_link, drop_id, " +
-			"condition, password, notes, fail_time FROM iris." +
-			SONAR_TYPE  +";", new ResultFactory()
+			"condition, password, notes, fail_time, version " +
+			"FROM iris." + SONAR_TYPE  +";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ControllerImpl(row));
@@ -92,6 +93,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		map.put("password", password);
 		map.put("notes", notes);
 		map.put("fail_time", asTimestamp(failTime));
+		map.put("version", version);
 		return map;
 	}
 
@@ -125,20 +127,24 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		     row.getInt(5),		// condition
 		     row.getString(6),		// password
 		     row.getString(7),		// notes
-		     row.getTimestamp(8)	// failTime
+		     row.getTimestamp(8),	// failTime
+		     row.getString(9)		// version
 		);
 	}
 
 	/** Create a controller */
 	private ControllerImpl(String n, String c, String cl, short d,
-		int cnd, String p, String nt, Date ft) throws TMSException
+		int cnd, String p, String nt, Date ft, String v)
+		throws TMSException
 	{
-		this(n, lookupCabinet(c), lookupCommLink(cl), d, cnd, p, nt,ft);
+		this(n, lookupCabinet(c), lookupCommLink(cl), d, cnd, p, nt,
+		     ft, v);
 	}
 
 	/** Create a controller */
 	private ControllerImpl(String n, CabinetImpl c, CommLink cl, short d,
-		int cnd, String p, String nt, Date ft) throws TMSException
+		int cnd, String p, String nt, Date ft, String v)
+		throws TMSException
 	{
 		super(n);
 		cabinet = c;
@@ -148,13 +154,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		password = p;
 		notes = nt;
 		failTime = stampMillis(ft);
+		version = v;
 		initTransients();
 	}
 
 	/** Initialize the transient fields */
 	@Override
 	protected void initTransients() throws TMSException {
-		version = "";
 		CommLinkImpl cl = comm_link;
 		if (cl != null)
 			cl.putController(drop_id, this);
@@ -560,11 +566,22 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Controller firmware version */
-	private transient String version;
+	private String version;
 
-	/** Set the controller firmware version */
-	public void setVersion(String v) {
-		if (!v.equals(version)) {
+	/** Set the firmware version in DB */
+	private void storeVersion(String v) {
+		try {
+			store.update(this, "version", v);
+		}
+		catch (TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Set the firmware version and notify clients of the change */
+	public void setVersionNotify(String v) {
+		if (!stringEquals(v, version)) {
+			storeVersion(SString.truncate(v, 64));
 			version = v;
 			notifyAttribute("version");
 		}

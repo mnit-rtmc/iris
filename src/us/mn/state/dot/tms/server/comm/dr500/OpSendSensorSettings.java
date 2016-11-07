@@ -74,7 +74,7 @@ public class OpSendSensorSettings extends OpDR500 {
 			SysInfoProperty si = new SysInfoProperty();
 			mess.add(si);
 			mess.queryProps();
-			controller.setVersion(si.getVersion());
+			controller.setVersionNotify(si.getVersion());
 			return new StoreDateTime();
 		}
 	}

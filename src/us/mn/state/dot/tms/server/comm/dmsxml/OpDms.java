@@ -534,7 +534,7 @@ abstract class OpDms extends OpDevice {
 				m_dms.setModel(model);
 				m_dms.setSignAccess(signAccess); // ip or dialup
 				m_dms.setMake(make);
-				m_dms.setVersion(version);
+				m_dms.setVersionNotify(version);
 				m_dms.setDmsType(type);
 				m_dms.setHorizontalBorder(horizBorder);// in mm
 				m_dms.setVerticalBorder(vertBorder);   // in mm

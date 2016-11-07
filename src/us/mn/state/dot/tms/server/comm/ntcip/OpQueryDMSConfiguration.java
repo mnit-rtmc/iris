@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -106,7 +106,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			if (m_type.getEnum() == ModuleType.software) {
 				dms.setMake(make.getValue());
 				dms.setModel(model.getValue());
-				dms.setVersion(version.getValue());
+				dms.setVersionNotify(version.getValue());
 			}
 			mod += 1;
 			if (mod < count)

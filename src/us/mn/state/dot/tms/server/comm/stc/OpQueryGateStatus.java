@@ -61,7 +61,7 @@ public class OpQueryGateStatus extends OpSTC {
 			VersionProperty v = new VersionProperty(password());
 			mess.add(v);
 			mess.queryProps();
-			gate_arm.setVersion(v.getVersion());
+			gate_arm.setVersionNotify(v.getVersion());
 			return new QueryStatus();
 		}
 	}

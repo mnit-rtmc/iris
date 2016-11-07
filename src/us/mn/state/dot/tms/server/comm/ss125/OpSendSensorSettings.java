@@ -80,7 +80,7 @@ public class OpSendSensorSettings extends OpSS125 {
 			VersionProperty vr = new VersionProperty();
 			mess.add(vr);
 			mess.queryProps();
-			controller.setVersion(vr.getVersion());
+			controller.setVersionNotify(vr.getVersion());
 			return new QueryGenConfig();
 		}
 	}

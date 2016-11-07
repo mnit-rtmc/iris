@@ -174,13 +174,13 @@ public class GateArmImpl extends DeviceImpl implements GateArm {
 	private transient String version;
 
 	/** Set the version */
-	public void setVersion(String v) {
+	public void setVersionNotify(String v) {
+		ControllerImpl c = (ControllerImpl) getController();
+		if (c != null)
+			c.setVersionNotify(v);
 		if (!v.equals(version)) {
 			version = v;
 			notifyAttribute("version");
-			ControllerImpl c = (ControllerImpl)getController();
-			if (c != null)
-				c.setVersion(version);
 		}
 	}
 

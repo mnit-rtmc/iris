@@ -70,7 +70,7 @@ public class OpResetGate extends OpSTC {
 			mess.add(v);
 			try {
 				mess.queryProps();
-				gate_arm.setVersion(v.getVersion());
+				gate_arm.setVersionNotify(v.getVersion());
 				return null;
 			}
 			catch (SocketTimeoutException e) {

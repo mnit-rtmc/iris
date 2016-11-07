@@ -82,7 +82,7 @@ public class OpSendSampleSettings extends Op170 {
 			mess.add(ver_mem);
 			mess.queryProps();
 			String v = formatVersion(data[0], data[1]);
-			controller.setVersion(v);
+			controller.setVersionNotify(v);
 			if (isVersionBuggy(data[0], data[1]))
 				mess.logError("BUGGY 170 firmware! (" + v +")");
 			return new QueueBitmap();

@@ -129,10 +129,10 @@ public class OpSendSensorSettings extends OpSS105 {
 			mess.add(vr);
 			try {
 				mess.queryProps();
-				controller.setVersion(vr.getVersion());
+				controller.setVersionNotify(vr.getVersion());
 			}
 			catch (SocketTimeoutException e) {
-				controller.setVersion("unknown (HD?)");
+				controller.setVersionNotify("unknown (HD?)");
 			}
 			return new SynchronizeClock();
 		}
