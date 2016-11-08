@@ -55,6 +55,20 @@ public class HTTPProxySelector extends ProxySelector {
 		return false;
 	}
 
+	/** Create a proxy from a URL */
+	static private Proxy createProxy(String u) {
+		URI uri = URIUtil.create(URIUtil.HTTP, u);
+		String h = uri.getHost();
+		int p = uri.getPort();
+		return createProxy(h, (p >= 0) ? p : 80);
+	}
+
+	/** Create a proxy from host and port */
+	static private Proxy createProxy(String host, int port) {
+		SocketAddress sa = new InetSocketAddress(host, port);
+		return new Proxy(Proxy.Type.HTTP, sa);
+	}
+
 	/** List of proxies */
 	private final List<Proxy> proxies;
 
@@ -70,12 +84,13 @@ public class HTTPProxySelector extends ProxySelector {
 	/** Create a Proxy list from a set of properties */
 	private List<Proxy> createProxyList(Properties props) {
 		ArrayList<Proxy> plist = new ArrayList<Proxy>();
-		String h = props.getProperty("proxy.host");
-		String p = props.getProperty("proxy.port");
-		if (h != null && p != null) {
-			SocketAddress sa = new InetSocketAddress(h,
-				Integer.valueOf(p));
-			plist.add(new Proxy(Proxy.Type.HTTP, sa));
+		String hps = props.getProperty("http.proxy");
+		if (hps != null) {
+			for (String u: hps.split("[ \t,]+")) {
+				Proxy px = createProxy(u);
+				if (px != null)
+					plist.add(px);
+			}
 		}
 		return plist;
 	}

@@ -47,7 +47,9 @@ public class URIUtil {
 		// assuming a scheme is defined
 		if (uri.indexOf(':') >= 0) {
 			try {
-				return new URI(uri);
+				URI u = new URI(uri);
+				if (u.getHost() != null)
+					return u;
 			}
 			catch (URISyntaxException e) {
 				// the colon was proabaly for
