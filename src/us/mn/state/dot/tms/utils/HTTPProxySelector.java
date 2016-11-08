@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2012  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,24 +35,24 @@ import java.util.Properties;
 public class HTTPProxySelector extends ProxySelector {
 
 	/** Ports to be proxied */
-	static protected final int[] PROXY_PORTS = {80, 8080};
+	static private final int[] PROXY_PORTS = {80, 8080};
 
 	/** Check if the port of a URI should be proxied */
-	static protected boolean isProxyPort(int p) {
-		if(p == -1)
+	static private boolean isProxyPort(int p) {
+		if (p == -1)
 			return true;
-		for(int i: PROXY_PORTS) {
-			if(p == i)
+		for (int i: PROXY_PORTS) {
+			if (p == i)
 				return true;
 		}
 		return false;
 	}
 
 	/** List of proxies */
-	protected final List<Proxy> proxies;
+	private final List<Proxy> proxies;
 
 	/** Array of hosts to skip proxy */
-	protected final String[] no_proxy_hosts;
+	private final String[] no_proxy_hosts;
 
 	/** Create a new HTTP proxy selector */
 	public HTTPProxySelector(Properties props) {
@@ -61,11 +61,11 @@ public class HTTPProxySelector extends ProxySelector {
 	}
 
 	/** Create a Proxy list from a set of properties */
-	protected List<Proxy> createProxyList(Properties props) {
+	private List<Proxy> createProxyList(Properties props) {
 		LinkedList<Proxy> plist = new LinkedList<Proxy>();
 		String h = props.getProperty("proxy.host");
 		String p = props.getProperty("proxy.port");
-		if(h != null && p != null) {
+		if (h != null && p != null) {
 			SocketAddress sa = new InetSocketAddress(h,
 				Integer.valueOf(p));
 			plist.add(new Proxy(Proxy.Type.HTTP, sa));
@@ -74,22 +74,24 @@ public class HTTPProxySelector extends ProxySelector {
 	}
 
 	/** Create an array of hosts to skip proxy */
-	protected String[] createNoProxyHosts(Properties props) {
+	private String[] createNoProxyHosts(Properties props) {
 		String hosts = props.getProperty("no.proxy.hosts");
-		if(hosts != null)
+		if (hosts != null)
 			return hosts.split(",");
 		else
 			return new String[0];
 	}
 
 	/** Handle a failed connection to a proxy server */
+	@Override
 	public void connectFailed(URI uri, SocketAddress sa, IOException ioe) {
 		// FIXME: implement this method
 	}
 
 	/** Select available proxy servers based on a URI */
+	@Override
 	public List<Proxy> select(URI uri) {
-		if(uri != null && shouldUseProxy(uri))
+		if (uri != null && shouldUseProxy(uri))
 			return proxies;
 		else {
 			LinkedList<Proxy> pl = new LinkedList<Proxy>();
@@ -99,18 +101,18 @@ public class HTTPProxySelector extends ProxySelector {
 	}
 
 	/** Check if a proxy server should be used for a URI */
-	protected boolean shouldUseProxy(URI uri) {
+	private boolean shouldUseProxy(URI uri) {
 		String host = uri.getHost();
 		try {
 			InetAddress addr = InetAddress.getByName(host);
 			String hip = addr.getHostAddress();
-			for(String h: no_proxy_hosts) {
-				if(hip.startsWith(h))
+			for (String h: no_proxy_hosts) {
+				if (hip.startsWith(h))
 					return false;
 			}
 			return isProxyPort(uri.getPort());
 		}
-		catch(UnknownHostException uhe) {
+		catch (UnknownHostException uhe) {
 			return true;
 		}
 	}
