@@ -22,7 +22,7 @@ import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
@@ -33,6 +33,13 @@ import java.util.Properties;
  * @author Douglas Lau
  */
 public class HTTPProxySelector extends ProxySelector {
+
+	/** No proxy list */
+	static private final ArrayList<Proxy> NO_PROXIES =
+		new ArrayList<Proxy>();
+	static {
+		NO_PROXIES.add(Proxy.NO_PROXY);
+	}
 
 	/** Ports to be proxied */
 	static private final int[] PROXY_PORTS = {80, 8080};
@@ -62,7 +69,7 @@ public class HTTPProxySelector extends ProxySelector {
 
 	/** Create a Proxy list from a set of properties */
 	private List<Proxy> createProxyList(Properties props) {
-		LinkedList<Proxy> plist = new LinkedList<Proxy>();
+		ArrayList<Proxy> plist = new ArrayList<Proxy>();
 		String h = props.getProperty("proxy.host");
 		String p = props.getProperty("proxy.port");
 		if (h != null && p != null) {
@@ -93,11 +100,8 @@ public class HTTPProxySelector extends ProxySelector {
 	public List<Proxy> select(URI uri) {
 		if (uri != null && shouldUseProxy(uri))
 			return proxies;
-		else {
-			LinkedList<Proxy> pl = new LinkedList<Proxy>();
-			pl.add(Proxy.NO_PROXY);
-			return pl;
-		}
+		else
+			return NO_PROXIES;
 	}
 
 	/** Check if a proxy server should be used for a URI */
