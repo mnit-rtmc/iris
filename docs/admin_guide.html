@@ -521,10 +521,11 @@ systemctl status iris</pre>
 		List of HTTP proxy settings (used for downloading map tiles,
 		XML files, etc.)
 	</dd>
-	<dt>no.proxy.hosts</dt>
+	<dt>http.proxy.whitelist</dt>
 	<dd>
-		A comma-separated list of host IPs/subnets to exclude from proxy
-		use.
+		A list of addresses to bypass using proxy server.
+		Addresses are in CIDR notation (exact IP, or ranges specified
+		such as 192.168.1.0/24).
 	</dd>
 	<dt>keystore.file</dt>
 	<dd>

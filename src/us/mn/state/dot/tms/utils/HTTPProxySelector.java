@@ -72,13 +72,13 @@ public class HTTPProxySelector extends ProxySelector {
 	/** List of proxies */
 	private final List<Proxy> proxies;
 
-	/** Array of hosts to skip proxy */
-	private final String[] no_proxy_hosts;
+	/** Whitelist of CIDR addresses to skip proxy */
+	private final List<CIDRAddress> whitelist;
 
 	/** Create a new HTTP proxy selector */
 	public HTTPProxySelector(Properties props) {
 		proxies = createProxyList(props);
-		no_proxy_hosts = createNoProxyHosts(props);
+		whitelist = createProxyWhitelist(props);
 	}
 
 	/** Create a Proxy list from a set of properties */
@@ -95,13 +95,22 @@ public class HTTPProxySelector extends ProxySelector {
 		return plist;
 	}
 
-	/** Create an array of hosts to skip proxy */
-	private String[] createNoProxyHosts(Properties props) {
-		String hosts = props.getProperty("no.proxy.hosts");
-		if (hosts != null)
-			return hosts.split(",");
-		else
-			return new String[0];
+	/** Create a whitelist of CIDR addresses to skip proxy */
+	private List<CIDRAddress> createProxyWhitelist(Properties props) {
+		ArrayList<CIDRAddress> wl = new ArrayList<CIDRAddress>();
+		String p = props.getProperty("http.proxy.whitelist");
+		if (p != null) {
+			for (String c: p.split("[ \t,]+")) {
+				try {
+					wl.add(new CIDRAddress(c));
+				}
+				catch (UnknownHostException e) {
+					// don't let DNS failure bring us down
+					e.printStackTrace();
+				}
+			}
+		}
+		return wl;
 	}
 
 	/** Handle a failed connection to a proxy server */
@@ -124,9 +133,8 @@ public class HTTPProxySelector extends ProxySelector {
 		String host = uri.getHost();
 		try {
 			InetAddress addr = InetAddress.getByName(host);
-			String hip = addr.getHostAddress();
-			for (String h: no_proxy_hosts) {
-				if (hip.startsWith(h))
+			for (CIDRAddress cidr: whitelist) {
+				if (cidr.matches(addr))
 					return false;
 			}
 			return isProxyPort(uri.getPort());
