@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,10 +41,10 @@ public class CIDRAddress {
 		NumberFormatException
 	{
 		String[] p = a.split("/");
-		if(p.length > 2)
-			throw new UnknownHostException("Invalid CIDR");
+		if (p.length > 2)
+			throw new IllegalArgumentException("Invalid CIDR");
 		address = InetAddress.getByName(p[0]).getAddress();
-		prefix = p.length > 1 ? Integer.parseInt(p[1]) : bits();
+		prefix = (p.length > 1) ? Integer.parseInt(p[1]) : bits();
 		mask = makeMask();
 		n_bytes = prefix / 8;
 	}
@@ -57,7 +57,7 @@ public class CIDRAddress {
 	/** Make bit mask for final byte */
 	private int makeMask() {
 		int m = 0;
-		for(int b = 0; b < prefix % 8; b++) {
+		for (int b = 0; b < prefix % 8; b++) {
 			m >>= 1;
 			m |= 0x80;
 		}
@@ -67,11 +67,11 @@ public class CIDRAddress {
 	/** Test if an inet address matches */
 	public boolean matches(InetAddress a) {
 		byte[] ad = a.getAddress();
-		if(ad.length != address.length)
+		if (ad.length != address.length)
 			return false;
 		// Test full bytes in address
-		for(int b = 0; b < n_bytes; b++) {
-			if(ad[b] != address[b])
+		for (int b = 0; b < n_bytes; b++) {
+			if (ad[b] != address[b])
 				return false;
 		}
 		// Test trailing bits in address
