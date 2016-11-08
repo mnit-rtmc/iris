@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import java.util.Properties;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Scheduler;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
-import us.mn.state.dot.tms.utils.HTTPProxySelector;
+import us.mn.state.dot.tms.utils.HttpProxySelector;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;
 
@@ -95,7 +95,7 @@ public class MainClient {
 
 	/** Update the proxy selector with the given property set */
 	static private void updateProxySelector(Properties props) {
-		HTTPProxySelector ps = new HTTPProxySelector(props);
+		HttpProxySelector ps = new HttpProxySelector(props);
 		if (ps.hasProxies())
 			ProxySelector.setDefault(ps);
 	}

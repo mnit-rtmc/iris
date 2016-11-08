@@ -32,7 +32,7 @@ import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.BaseEvent;
-import us.mn.state.dot.tms.utils.HTTPProxySelector;
+import us.mn.state.dot.tms.utils.HttpProxySelector;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;
 
@@ -150,8 +150,8 @@ public class MainServer {
 
 	/** Initialize the proxy selector */
 	static private void initProxySelector(Properties props) {
-		HTTPProxySelector ps = new HTTPProxySelector(props);
-		if(ps.hasProxies())
+		HttpProxySelector ps = new HttpProxySelector(props);
+		if (ps.hasProxies())
 			ProxySelector.setDefault(ps);
 	}
 

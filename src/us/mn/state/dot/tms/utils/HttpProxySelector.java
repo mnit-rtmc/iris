@@ -27,12 +27,12 @@ import java.util.List;
 import java.util.Properties;
 
 /**
- * Proxy selector for HTTP clients
+ * Proxy selector for HTTP clients.
  *
  * @author Tim Johnson
  * @author Douglas Lau
  */
-public class HTTPProxySelector extends ProxySelector {
+public class HttpProxySelector extends ProxySelector {
 
 	/** No proxy list */
 	static private final ArrayList<Proxy> NO_PROXIES =
@@ -76,7 +76,7 @@ public class HTTPProxySelector extends ProxySelector {
 	private final List<CIDRAddress> whitelist;
 
 	/** Create a new HTTP proxy selector */
-	public HTTPProxySelector(Properties props) {
+	public HttpProxySelector(Properties props) {
 		proxies = createProxyList(props);
 		whitelist = createProxyWhitelist(props);
 	}
