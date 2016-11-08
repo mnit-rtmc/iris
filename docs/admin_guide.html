@@ -97,7 +97,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">28 October 2016</div>
+<div id="stamp">8 November 2016</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -1458,10 +1458,12 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	It can be used to control <a href="#beacons">beacon</a> devices.
 </p>
 <p>
-	HTTP Basic Authentication can be used to connect with the controller
-	if enabled on the setup page of the device (setup.html).
-	To allow IRIS to authenticate, the password field of the controller
-	in IRIS must have <i>none:</i> prepended to the actual password.
+	HTTP Basic Authentication can be used to connect with the
+	<a href="#controllers">controller</a> if enabled on the setup page of the
+	device (setup.html).
+	To allow IRIS to authenticate, the <a href="#ctrl_pwd">password</a>
+	field must have <i>none:</i> prepended to the actual password (user name
+	"none").
 </p>
 
 <h4 id="inc_feed">Incident Feed Protocol</h4>
@@ -1512,6 +1514,19 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	Each controller is assigned a unique (to the comm link) drop address,
 	which is used to route all messages sent to the controller.
 	For single-drop protocols, the drop address is ignored.
+</p>
+
+<h4 id="ctrl_pwd">Controller Password</h4>
+<p>
+	Some protocols allow or require authentication.
+	The controller <b>Password</b> field is used to enter this
+	authentication data.
+	For example, NTCIP requires the use of an SNMP "community" name.
+	If no controller password is selected, IRIS will use "Public" for the
+	community name.
+	Web-based devices may require HTTP Basic Authentication.
+	For these types of devices, the password field should contain both the
+	user name and password, separated by a colon (<i>user:password</i>).
 </p>
 
 <h4 id="io_pins">I/O Pins</h4>
@@ -2326,8 +2341,8 @@ FIXME
 <p>
 	Another gate arm security feature causes the entire "gate arm system"
 	to be disabled whenever any configuration change is made to a gate arm.
-	This includes any changes to a gate arm array, controller or associated
-	comm link.
+	This includes any changes to a gate arm array, <a href="#controllers">
+	controller</a> or associated <a href="#comm_links">comm link</a>.
 	IRIS will not send any command to open or close any gate arm in this
 	state.
 	The only way to re-enable gate arm control is to create a file at
@@ -2357,11 +2372,12 @@ FIXME
 	Its purpose is to draw attention to a <a href="#dms">DMS</a> or static
 	sign.
 	Sometimes, they are called <b>flashers</b> or <b>wig-wags</b>.
-	Internal and external beacons are supported. Internal beacons are
-	controlled through the DMS controller, are activated through the
-	NTCIP DMS protocol and are considered part of the DMS. External
-	beacons use dedicated controllers and protocols (e.g. MNDOT 170 4,
-	MNDOT 170 5).
+	Internal and external beacons are supported.
+	Internal beacons are controlled through the DMS controller, are
+	activated through the NTCIP DMS protocol and are considered part of the
+	DMS.
+	External beacons use dedicated controllers and protocols (e.g. MnDOT
+	170 4, MnDOT 170 5).
 </p>
 
 <h3 id="alarms">Alarms</h3>
