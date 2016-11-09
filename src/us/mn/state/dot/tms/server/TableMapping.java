@@ -21,7 +21,7 @@ import java.util.Set;
 import us.mn.state.dot.tms.TMSException;
 
 /**
- * A database mapping for a many-to-many table relation.
+ * A database mapping for an associative (many-to-many) table relation.
  *
  * @author Douglas Lau
  */
@@ -75,7 +75,7 @@ public class TableMapping {
 	/** Create the start of an SQL insert statement */
 	private String createInsertStart(String key) {
 		return "INSERT INTO " + name + "(" + table0 + "," + table1 +")"+
-		      " VALUES ('" + key +"','";
+		      " VALUES ('" + key + "','";
 	}
 
 	/** Update the relation from one table to a set in the other */
