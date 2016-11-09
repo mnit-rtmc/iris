@@ -49,7 +49,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, TagReaderImpl.class);
 		mapping = new TableMapping(store, "iris", SONAR_TYPE,
-			"dms");
+			DMS.SONAR_TYPE);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"toll_zone FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()

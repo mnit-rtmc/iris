@@ -43,9 +43,10 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		throws TMSException
 	{
 		store = c;
-		mapping = new TableMapping(store, "iris", "role", "capability");
-		store.query("SELECT name, enabled FROM iris.role;",
-			new ResultFactory()
+		mapping = new TableMapping(store, "iris", SONAR_TYPE,
+			Capability.SONAR_TYPE);
+		store.query("SELECT name, enabled FROM iris." + SONAR_TYPE +
+			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				ns.addObject(new IrisRoleImpl(ns,
@@ -89,7 +90,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		enabled = e;
 		TreeSet<IrisCapabilityImpl> caps =
 			new TreeSet<IrisCapabilityImpl>();
-		for (String o: mapping.lookup("role", this)) {
+		for (String o: mapping.lookup(SONAR_TYPE, this)) {
 			Object c = ns.lookupObject("capability", o);
 			if (c instanceof IrisCapabilityImpl)
 				caps.add((IrisCapabilityImpl) c);
