@@ -151,7 +151,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 			else
 				throw new ChangeVetoException("Bad capability");
 		}
-		mapping.update("role", this, cset);
+		mapping.update(this, cset);
 		setCapabilities(caps);
 	}
 

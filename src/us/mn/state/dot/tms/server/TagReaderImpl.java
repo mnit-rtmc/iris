@@ -201,7 +201,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 			else
 				throw new ChangeVetoException("Invalid DMS");
 		}
-		mapping.update(SONAR_TYPE, this, d_set);
+		mapping.update(this, d_set);
 		setSigns(ds);
 	}
 

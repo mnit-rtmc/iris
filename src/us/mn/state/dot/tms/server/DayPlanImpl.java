@@ -111,7 +111,7 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 			else
 				throw new ChangeVetoException("Invalid hday");
 		}
-		mapping.update(SONAR_TYPE, this, hset);
+		mapping.update(this, hset);
 		setHolidays(hs);
 	}
 

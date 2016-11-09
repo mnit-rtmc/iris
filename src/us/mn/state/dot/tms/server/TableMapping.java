@@ -47,18 +47,8 @@ public class TableMapping {
 		table1 = t1;
 	}
 
-	/** Given one of the tables in the mapping, get the other one */
-	private String getOtherTable(String table) throws TMSException {
-		if (table.equals(table0))
-			return table1;
-		else if (table.equals(table1))
-			return table0;
-		else
-			throw new TMSException("INVALID TABLE " + table);
-	}
-
 	/** Create an SQL lookup query */
-	private String createLookup(String key) throws TMSException {
+	private String createLookup(String key) {
 		return "SELECT " + table1 +
 		      " FROM " + name +
 		      " WHERE " + table0 + " = '" + key + "';";
@@ -77,32 +67,30 @@ public class TableMapping {
 	}
 
 	/** Create an SQL delete statement */
-	private String createDelete(String table, String key) {
-		return "DELETE FROM " + name + " WHERE " +
-			table + " = '" + key + "';";
+	private String createDelete(String key) {
+		return "DELETE FROM " + name +
+		      " WHERE " + table0 + " = '" + key + "';";
 	}
 
 	/** Create the start of an SQL insert statement */
-	private String createInsertStart(String table, String key)
-		throws TMSException
-	{
-		return "INSERT INTO " + name + "(" + table +
-			"," + getOtherTable(table) + ") VALUES ('" + key +"','";
+	private String createInsertStart(String key) {
+		return "INSERT INTO " + name + "(" + table0 + "," + table1 +")"+
+		      " VALUES ('" + key +"','";
 	}
 
 	/** Update the relation from one table to a set in the other */
-	public void update(final String table, Storable owner,
-		Set<Storable> values) throws TMSException
+	public void update(Storable owner, Set<Storable> values)
+		throws TMSException
 	{
 		final String key = owner.getKey();
-		final String insert = createInsertStart(table, key);
+		final String insert = createInsertStart(key);
 		final Iterator<Storable> it = values.iterator();
 		store.batch(new BatchFactory() {
 			private boolean first = true;
 			public String next() {
 				if (first) {
 					first = false;
-					return createDelete(table, key);
+					return createDelete(key);
 				} else if (it.hasNext()) {
 					Storable v = it.next();
 					return insert + v.getKey() + "');";
@@ -110,15 +98,5 @@ public class TableMapping {
 					return null;
 			}
 		});
-	}
-
-	/** Update the relation from one table to an array in the other */
-	public void update(String table, Storable owner, Storable[] values)
-		throws TMSException
-	{
-		HashSet<Storable> set = new HashSet<Storable>(values.length);
-		for (Storable s: values)
-			set.add(s);
-		update(table, owner, set);
 	}
 }
