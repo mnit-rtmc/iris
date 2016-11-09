@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ import us.mn.state.dot.tms.TMSException;
 public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 
 	/** DayPlan / Holiday table mapping */
-	static protected TableMapping mapping;
+	static private TableMapping mapping;
 
 	/** Load all the day plans */
 	static public void loadAll() throws TMSException {
@@ -51,6 +51,7 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -58,11 +59,13 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -73,7 +76,7 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 	}
 
 	/** Create a day plan from database lookup */
-	protected DayPlanImpl(Namespace ns, String n) throws TMSException {
+	private DayPlanImpl(Namespace ns, String n) throws TMSException {
 		this(n);
 		TreeSet<HolidayImpl> hset = new TreeSet<HolidayImpl>();
 		for (String o: mapping.lookup(SONAR_TYPE, this)) {
@@ -85,14 +88,15 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 	}
 
 	/** Holidays for the day plan */
-	protected HolidayImpl[] holidays = new HolidayImpl[0];
+	private HolidayImpl[] holidays = new HolidayImpl[0];
 
 	/** Set the holidays assigned to the day plan */
+	@Override
 	public void setHolidays(Holiday[] hs) {
 		HolidayImpl[] _hs = new HolidayImpl[hs.length];
-		for(int i = 0; i < hs.length; i++) {
-			if(hs[i] instanceof HolidayImpl)
-				_hs[i] = (HolidayImpl)hs[i];
+		for (int i = 0; i < hs.length; i++) {
+			if (hs[i] instanceof HolidayImpl)
+				_hs[i] = (HolidayImpl) hs[i];
 		}
 		holidays = _hs;
 	}
@@ -100,9 +104,9 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 	/** Set the holidays assigned to the day plan */
 	public void doSetHolidays(Holiday[] hs) throws TMSException {
 		TreeSet<Storable> hset = new TreeSet<Storable>();
-		for(Holiday h: hs) {
-			if(h instanceof HolidayImpl)
-				hset.add((HolidayImpl)h);
+		for (Holiday h: hs) {
+			if (h instanceof HolidayImpl)
+				hset.add((HolidayImpl) h);
 			else
 				throw new ChangeVetoException("Invalid hday");
 		}
@@ -111,6 +115,7 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 	}
 
 	/** Get the holidays assigned to the day plan */
+	@Override
 	public Holiday[] getHolidays() {
 		return holidays;
 	}
