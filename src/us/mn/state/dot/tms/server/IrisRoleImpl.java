@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,10 +33,10 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	Storable
 {
 	/** SQL connection to database */
-	static protected SQLConnection store;
+	static private SQLConnection store;
 
 	/** Role/Capability table mapping */
-	static protected TableMapping mapping;
+	static private TableMapping mapping;
 
 	/** Lookup all the roles */
 	static public void lookup(SQLConnection c, final ServerNamespace ns)
@@ -57,6 +57,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -70,8 +71,9 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
-		return "iris.role";
+		return "iris." + SONAR_TYPE;
 	}
 
 	/** Create a new IRIS role */
@@ -80,7 +82,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	}
 
 	/** Create an IRIS role from database lookup */
-	protected IrisRoleImpl(ServerNamespace ns, String n, boolean e)
+	private IrisRoleImpl(ServerNamespace ns, String n, boolean e)
 		throws TMSException
 	{
 		this(n);
@@ -96,34 +98,40 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	}
 
 	/** Compare to another role */
+	@Override
 	public int compareTo(IrisRoleImpl o) {
 		return name.compareTo(o.name);
 	}
 
 	/** Test if the role equals another role */
+	@Override
 	public boolean equals(Object o) {
-		if(o instanceof IrisRoleImpl)
-			return name.equals(((IrisRoleImpl)o).name);
+		if (o instanceof IrisRoleImpl)
+			return name.equals(((IrisRoleImpl) o).name);
 		else
 			return false;
 	}
 
 	/** Calculate a hash code */
+	@Override
 	public int hashCode() {
 		return name.hashCode();
 	}
 
 	/** Get the primary key name */
+	@Override
 	public String getKeyName() {
 		return "name";
 	}
 
 	/** Get the primary key */
+	@Override
 	public String getKey() {
 		return name;
 	}
 
 	/** Get a string representation of the object */
+	@Override
 	public String toString() {
 		return name;
 	}
@@ -136,21 +144,21 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 	/** Set the capabilities assigned to the role */
 	public void doSetCapabilities(Capability[] caps) throws TMSException {
 		TreeSet<Storable> cset = new TreeSet<Storable>();
-		for(Capability c: caps) {
-			if(c instanceof IrisCapabilityImpl)
-				cset.add((IrisCapabilityImpl)c);
+		for (Capability c: caps) {
+			if (c instanceof IrisCapabilityImpl)
+				cset.add((IrisCapabilityImpl) c);
 			else
 				throw new ChangeVetoException("Bad capability");
 		}
 		mapping.update("role", this, cset);
-		super.setCapabilities(caps);
+		setCapabilities(caps);
 	}
 
 	/** Set the enabled flag */
 	public void doSetEnabled(boolean e) throws TMSException {
-		if(e == enabled)
-			return;
-		store.update(this, "enabled", e);
-		super.setEnabled(e);
+		if (e != enabled) {
+			store.update(this, "enabled", e);
+			setEnabled(e);
+		}
 	}
 }
