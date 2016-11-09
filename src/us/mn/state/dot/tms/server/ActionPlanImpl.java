@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		namespace.registerType(SONAR_TYPE, ActionPlanImpl.class);
 		store.query("SELECT name, description, sync_actions, " +
 			"sticky, active, default_phase, phase FROM iris." +
-			SONAR_TYPE  + ";", new ResultFactory()
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ActionPlanImpl(
@@ -70,6 +70,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -83,11 +84,13 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -103,8 +106,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		boolean st, boolean a, String dp, String p)
 	{
 		this(n, dsc, sa, st, a,
-		     (PlanPhase)ns.lookupObject(PlanPhase.SONAR_TYPE, dp),
-		     (PlanPhase)ns.lookupObject(PlanPhase.SONAR_TYPE, p));
+		     (PlanPhase) ns.lookupObject(PlanPhase.SONAR_TYPE, dp),
+		     (PlanPhase) ns.lookupObject(PlanPhase.SONAR_TYPE, p));
 	}
 
 	/** Create a new action plan */
@@ -121,72 +124,79 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Plan description */
-	protected String description;
+	private String description;
 
 	/** Set the description */
+	@Override
 	public void setDescription(String d) {
 		description = d;
 	}
 
 	/** Set the description */
 	public void doSetDescription(String d) throws TMSException {
-		if(d.equals(description))
-			return;
-		store.update(this, "description", d);
-		setDescription(d);
+		if (!d.equals(description)) {
+			store.update(this, "description", d);
+			setDescription(d);
+		}
 	}
 
 	/** Get the description */
+	@Override
 	public String getDescription() {
 		return description;
 	}
 
 	/** Sync actions flag */
-	protected boolean sync_actions;
+	private boolean sync_actions;
 
 	/** Set the sync actions flag */
+	@Override
 	public void setSyncActions(boolean s) {
 		sync_actions = s;
 	}
 
 	/** Set the sync actions flag */
 	public void doSetSyncActions(boolean s) throws TMSException {
-		if(s == sync_actions)
-			return;
-		store.update(this, "sync_actions", s);
-		setSyncActions(s);
+		if (s != sync_actions) {
+			store.update(this, "sync_actions", s);
+			setSyncActions(s);
+		}
 	}
 
 	/** Get the sync actions flag */
+	@Override
 	public boolean getSyncActions() {
 		return sync_actions;
 	}
 
 	/** Sticky flag */
-	protected boolean sticky;
+	private boolean sticky;
 
 	/** Set the sticky flag */
+	@Override
 	public void setSticky(boolean s) {
 		sticky = s;
 	}
 
 	/** Set the sticky flag */
 	public void doSetSticky(boolean s) throws TMSException {
-		if(s == sticky)
-			return;
-		store.update(this, "sticky", s);
-		setSticky(s);
+		if (s != sticky) {
+			store.update(this, "sticky", s);
+			setSticky(s);
+		}
 	}
 
 	/** Get the sticky flag */
+	@Override
 	public boolean getSticky() {
 		return sticky;
 	}
 
 	/** Active status */
-	protected boolean active;
+	private boolean active;
 
 	/** Set the active status */
+	@Override
 	public void setActive(boolean a) {
 		active = a;
 	}
@@ -202,6 +212,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Get the active status */
+	@Override
 	public boolean getActive() {
 		return active;
 	}
@@ -210,19 +221,21 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	private PlanPhase default_phase;
 
 	/** Set the default phase */
+	@Override
 	public void setDefaultPhase(PlanPhase dp) {
 		default_phase = dp;
 	}
 
 	/** Set the default phase */
 	public void doSetDefaultPhase(PlanPhase dp) throws TMSException {
-		if(dp == default_phase)
-			return;
-		store.update(this, "default_phase", dp);
-		setDefaultPhase(dp);
+		if (dp != default_phase) {
+			store.update(this, "default_phase", dp);
+			setDefaultPhase(dp);
+		}
 	}
 
 	/** Get the default phase */
+	@Override
 	public PlanPhase getDefaultPhase() {
 		return default_phase;
 	}
@@ -234,6 +247,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	private long phase_time = TimeSteward.currentTimeMillis();
 
 	/** Set the phase */
+	@Override
 	public void setPhase(PlanPhase p) {
 		phase = p;
 		phase_time = TimeSteward.currentTimeMillis();
@@ -244,26 +258,27 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	 * only if all dms, beacon, lane, and meter actions are valid.
 	 */
 	public void doSetPhase(PlanPhase p) throws TMSException {
-		if(p == phase)
-			return;
-		if(getSyncActions()) {
-			validateDmsActions();    // throws exception
-			validateBeaconActions(); // throws exception
-			validateLaneActions();   // throws exception
-			validateMeterActions();  // throws exception
+		if (p != phase) {
+			if (getSyncActions()) {
+				validateDmsActions();    // throws exception
+				validateBeaconActions(); // throws exception
+				validateLaneActions();   // throws exception
+				validateMeterActions();  // throws exception
+			}
+			store.update(this, "phase", p);
+			setPhase(p);
 		}
-		store.update(this, "phase", p);
-		setPhase(p);
 	}
 
 	/** Get the phase */
+	@Override
 	public PlanPhase getPhase() {
 		return phase;
 	}
 
 	/** Set the deployed phase (and notify clients) */
 	public void setPhaseNotify(PlanPhase p) throws TMSException {
-		if(p != phase)
+		if (p != phase)
 			doSetPhaseNotify(p);
 	}
 
@@ -280,9 +295,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	 */
 	private void validateDmsActions() throws ChangeVetoException {
 		Iterator<DmsAction> it = DmsActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			DmsAction da = it.next();
-			if(da.getActionPlan() == this && !isDeployable(da)) {
+			if (da.getActionPlan() == this && !isDeployable(da)) {
 				throw new ChangeVetoException("DMS action " +
 					da.getName() + " not deployable");
 			}
@@ -293,12 +308,12 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	private boolean isDeployable(DmsAction da) {
 		SignGroup sg = da.getSignGroup();
 		Iterator<DmsSignGroup> it = DmsSignGroupHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			DmsSignGroup dsg = it.next();
-			if(dsg.getSignGroup() == sg) {
+			if (dsg.getSignGroup() == sg) {
 				DMS dms = dsg.getDms();
-				if(dms instanceof DMSImpl) {
-					if(!((DMSImpl)dms).isDeployable(da))
+				if (dms instanceof DMSImpl) {
+					if (!((DMSImpl) dms).isDeployable(da))
 						return false;
 				}
 			}
@@ -312,9 +327,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	 */
 	private void validateBeaconActions() throws ChangeVetoException {
 		Iterator<BeaconAction> it = BeaconActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			BeaconAction ba = it.next();
-			if(ba.getActionPlan() == this && !isDeployable(ba)) {
+			if (ba.getActionPlan() == this && !isDeployable(ba)) {
 				throw new ChangeVetoException("Beacon action " +
 					ba.getName() + " not deployable");
 			}
@@ -324,8 +339,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Check if a beacon action is deployable */
 	private boolean isDeployable(BeaconAction ba) {
 		Beacon b = ba.getBeacon();
-		if(b instanceof BeaconImpl)
-			return !((BeaconImpl)b).isFailed();
+		if (b instanceof BeaconImpl)
+			return !((BeaconImpl) b).isFailed();
 		else
 			return false;
 	}
@@ -337,9 +352,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	 */
 	private void validateLaneActions() throws ChangeVetoException {
 		Iterator<LaneAction> it = LaneActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			LaneAction la = it.next();
-			if(la.getActionPlan() == this && !isDeployable(la)) {
+			if (la.getActionPlan() == this && !isDeployable(la)) {
 				throw new ChangeVetoException("Lane action " +
 					la.getName() + " not deployable");
 			}
@@ -349,8 +364,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Check if a lane action is deployable */
 	private boolean isDeployable(LaneAction la) {
 		LaneMarking lm = la.getLaneMarking();
-		if(lm instanceof LaneMarkingImpl)
-			return !((LaneMarkingImpl)lm).isFailed();
+		if (lm instanceof LaneMarkingImpl)
+			return !((LaneMarkingImpl) lm).isFailed();
 		else
 			return false;
 	}
@@ -361,9 +376,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	 */
 	private void validateMeterActions() throws ChangeVetoException {
 		Iterator<MeterAction> it = MeterActionHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			MeterAction ma = it.next();
-			if(ma.getActionPlan() == this && !isDeployable(ma)) {
+			if (ma.getActionPlan() == this && !isDeployable(ma)) {
 				throw new ChangeVetoException("Meter action " +
 					ma.getName() + " not deployable");
 			}
@@ -373,8 +388,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Check if a meter action is deployable */
 	private boolean isDeployable(MeterAction ma) {
 		RampMeter rm = ma.getRampMeter();
-		if(rm instanceof RampMeterImpl)
-			return !((RampMeterImpl)rm).isFailed();
+		if (rm instanceof RampMeterImpl)
+			return !((RampMeterImpl) rm).isFailed();
 		else
 			return false;
 	}
@@ -382,9 +397,9 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Update the plan phase */
 	public void updatePhase() throws TMSException {
 		PlanPhase p = phase;
-		if(p != null) {
+		if (p != null) {
 			PlanPhase np = p.getNextPhase();
-			if(np != null && phaseSecs() >= p.getHoldTime())
+			if (np != null && phaseSecs() >= p.getHoldTime())
 				setPhaseNotify(np);
 		}
 	}
@@ -392,6 +407,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	/** Get the number of seconds in the current phase */
 	private int phaseSecs() {
 		long elapsed = TimeSteward.currentTimeMillis() - phase_time;
-		return (int)(elapsed / 1000);
+		return (int) (elapsed / 1000);
 	}
 }
