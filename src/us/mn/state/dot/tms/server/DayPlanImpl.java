@@ -80,7 +80,7 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 	private DayPlanImpl(Namespace ns, String n) throws TMSException {
 		this(n);
 		TreeSet<HolidayImpl> hset = new TreeSet<HolidayImpl>();
-		for (String o: mapping.lookup(SONAR_TYPE, this)) {
+		for (String o: mapping.lookup(this)) {
 			Holiday h = HolidayHelper.lookup(o);
 			if (h instanceof HolidayImpl)
 				hset.add((HolidayImpl) h);

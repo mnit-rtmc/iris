@@ -90,7 +90,7 @@ public class IrisRoleImpl extends RoleImpl implements Comparable<IrisRoleImpl>,
 		enabled = e;
 		TreeSet<IrisCapabilityImpl> caps =
 			new TreeSet<IrisCapabilityImpl>();
-		for (String o: mapping.lookup(SONAR_TYPE, this)) {
+		for (String o: mapping.lookup(this)) {
 			Object c = ns.lookupObject("capability", o);
 			if (c instanceof IrisCapabilityImpl)
 				caps.add((IrisCapabilityImpl) c);

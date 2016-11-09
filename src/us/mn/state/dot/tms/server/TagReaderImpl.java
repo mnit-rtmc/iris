@@ -126,7 +126,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	/** Lookup mapping of DMS */
 	private DMSImpl[] lookupDMSMapping() throws TMSException {
 		TreeSet<DMSImpl> d_set = new TreeSet<DMSImpl>();
-		for (String o: mapping.lookup(SONAR_TYPE, this)) {
+		for (String o: mapping.lookup(this)) {
 			DMS dms = DMSHelper.lookup(o);
 			if (dms instanceof DMSImpl)
 				d_set.add((DMSImpl) dms);

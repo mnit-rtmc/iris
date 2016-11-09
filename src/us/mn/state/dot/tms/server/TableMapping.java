@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2015  Minnesota Department of Transportation
+ * Copyright (C) 2006-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,9 +30,6 @@ public class TableMapping {
 	/** Connection to SQL database */
 	private final SQLConnection store;
 
-	/** Schema name */
-	private final String schema;
-
 	/** Name of mapping table */
 	private final String name;
 
@@ -45,8 +42,7 @@ public class TableMapping {
 	/** Create a new database table mapping */
 	public TableMapping(SQLConnection s, String sch, String t0, String t1) {
 		store = s;
-		schema = sch;
-		name = t0 + "_" + t1;
+		name = sch + '.' + t0 + '_' + t1;
 		table0 = t0;
 		table1 = t1;
 	}
@@ -62,20 +58,17 @@ public class TableMapping {
 	}
 
 	/** Create an SQL lookup query */
-	private String createLookup(String table, String key)
-		throws TMSException
-	{
-		return "SELECT " + getOtherTable(table) + " FROM " + schema +
-			"." + name + " WHERE " + table + " = '" + key + "';";
+	private String createLookup(String key) throws TMSException {
+		return "SELECT " + table1 +
+		      " FROM " + name +
+		      " WHERE " + table0 + " = '" + key + "';";
 	}
 
 	/** Lookup related objects from the given table/key pair */
-	public Set<String> lookup(String table, Storable owner)
-		throws TMSException
-	{
+	public Set<String> lookup(Storable owner) throws TMSException {
 		final String key = owner.getKey();
 		final HashSet<String> set = new HashSet<String>();
-		store.query(createLookup(table, key), new ResultFactory() {
+		store.query(createLookup(key), new ResultFactory() {
 			public void create(ResultSet row) throws Exception {
 				set.add(row.getString(1));
 			}
@@ -85,7 +78,7 @@ public class TableMapping {
 
 	/** Create an SQL delete statement */
 	private String createDelete(String table, String key) {
-		return "DELETE FROM " + schema + "." + name + " WHERE " +
+		return "DELETE FROM " + name + " WHERE " +
 			table + " = '" + key + "';";
 	}
 
@@ -93,7 +86,7 @@ public class TableMapping {
 	private String createInsertStart(String table, String key)
 		throws TMSException
 	{
-		return "INSERT INTO " + schema + "." + name + "(" + table +
+		return "INSERT INTO " + name + "(" + table +
 			"," + getOtherTable(table) + ") VALUES ('" + key +"','";
 	}
 
