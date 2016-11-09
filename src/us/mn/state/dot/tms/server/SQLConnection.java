@@ -46,7 +46,7 @@ public class SQLConnection {
 		throws ChangeVetoException
 	{
 		Matcher m = SQL_IDENTIFIER.matcher(sql);
-		if(!m.matches()) {
+		if (!m.matches()) {
 			throw new ChangeVetoException("Invalid SQL identifier: "
 				+ sql);
 		}
@@ -59,7 +59,7 @@ public class SQLConnection {
 	/** Validate a SQL string constant value */
 	static private void validateValue(String v) throws ChangeVetoException {
 		Matcher m = SQL_VALUE.matcher(v);
-		if(!m.matches())
+		if (!m.matches())
 			throw new ChangeVetoException("Invalid SQL value: " +v);
 	}
 
@@ -69,19 +69,19 @@ public class SQLConnection {
 	}
 
 	/** Location of database server */
-	protected final String location;
+	private final String location;
 
 	/** User to log into database server */
-	protected final String user;
+	private final String user;
 
 	/** Password to log into database server */
-	protected final String password;
+	private final String password;
 
 	/** Connection to the SQL database */
-	protected Connection connection = null;
+	private Connection connection = null;
 
 	/** Available SQL statements */
-	protected final LinkedList<Statement> statements =
+	private final LinkedList<Statement> statements =
 		new LinkedList<Statement>();
 
 	/** Create a new SQL connection */
@@ -91,7 +91,7 @@ public class SQLConnection {
 		try {
 			Class.forName("org.postgresql.Driver");
 		}
-		catch(ClassNotFoundException e) {
+		catch (ClassNotFoundException e) {
 			throw new TMSException(e);
 		}
 		location = url;
@@ -100,9 +100,9 @@ public class SQLConnection {
 	}
 
 	/** Close the current database connection */
-	protected void close() throws SQLException {
+	private void close() throws SQLException {
 		statements.clear();
-		if(connection != null) {
+		if (connection != null) {
 			try {
 				connection.close();
 			}
@@ -113,31 +113,31 @@ public class SQLConnection {
 	}
 
 	/** Open a new database connection */
-	protected void open() throws SQLException {
+	private void open() throws SQLException {
 		connection = DriverManager.getConnection(location, user,
 			password);
 		connection.setAutoCommit(true);
 	}
 
 	/** Create a database statement */
-	protected Statement _createStatement() throws SQLException {
-		if(connection == null)
+	private Statement _createStatement() throws SQLException {
+		if (connection == null)
 			open();
 		return connection.createStatement();
 	}
 
 	/** Create a database statement */
-	protected Statement createStatement() throws TMSException {
+	private Statement createStatement() throws TMSException {
 		try {
 			return _createStatement();
 		}
-		catch(SQLException e) {
+		catch (SQLException e) {
 			SQL_LOG.log("createStatement -> " + e);
 			try {
 				close();
 				return _createStatement();
 			}
-			catch(SQLException e2) {
+			catch (SQLException e2) {
 				SQL_LOG.log("createStatement.2 -> " + e2);
 				throw new TMSException(e2);
 			}
@@ -145,15 +145,15 @@ public class SQLConnection {
 	}
 
 	/** Get an available statement */
-	protected synchronized Statement getStatement() throws TMSException {
-		if(statements.isEmpty())
+	private synchronized Statement getStatement() throws TMSException {
+		if (statements.isEmpty())
 			return createStatement();
 		else
 			return statements.removeLast();
 	}
 
 	/** Put a statement back after using it */
-	protected synchronized void putStatement(Statement s) {
+	private synchronized void putStatement(Statement s) {
 		statements.add(s);
 	}
 
@@ -165,7 +165,7 @@ public class SQLConnection {
 		try {
 			ResultSet set = s.executeQuery(sql);
 			try {
-				while(set.next())
+				while (set.next())
 					factory.create(set);
 			}
 			finally {
@@ -173,7 +173,7 @@ public class SQLConnection {
 			}
 			putStatement(s);
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			throw new TMSException(e);
 		}
 	}
@@ -185,7 +185,7 @@ public class SQLConnection {
 			s.executeUpdate(sql);
 			putStatement(s);
 		}
-		catch(SQLException e) {
+		catch (SQLException e) {
 			SQL_LOG.log(sql + " -> " + e);
 			throw new TMSException(e);
 		}
@@ -198,24 +198,24 @@ public class SQLConnection {
 		validateIdentifier(field);
 		String key = escapeValue(s.getKey());
 		validateValue(key);
-		if(value == null) {
+		if (value == null) {
 			updateNull(s, field, key);
 			return;
 		}
 		String v = escapeValue(value);
 		validateValue(v);
-		update("UPDATE " + s.getTable() + " SET " + field +
-			" = '" + v + "' WHERE " + s.getKeyName() +
-			" = '" + key + "';");
+		update("UPDATE " + s.getTable() +
+		      " SET " + field + " = '" + v + "'" +
+		      " WHERE " + s.getKeyName() + " = '" + key + "';");
 	}
 
 	/** Update one field with a NULL value */
 	private void updateNull(Storable s, String field, String key)
 		throws TMSException
 	{
-		update("UPDATE " + s.getTable() + " SET " + field +
-			" = NULL WHERE " + s.getKeyName() + " = '" +
-			key + "';");
+		update("UPDATE " + s.getTable() +
+		      " SET " + field + " = NULL" +
+		      " WHERE " + s.getKeyName() + " = '" + key + "';");
 	}
 
 	/** Create one storable record */
@@ -223,9 +223,9 @@ public class SQLConnection {
 		Map<String, Object> columns = s.getColumns();
 		StringBuilder keys = new StringBuilder();
 		StringBuilder values = new StringBuilder();
-		for(Map.Entry<String, Object> e: columns.entrySet()) {
+		for (Map.Entry<String, Object> e: columns.entrySet()) {
 			Object value = e.getValue();
-			if(value != null) {
+			if (value != null) {
 				String field = e.getKey();
 				validateIdentifier(field);
 				keys.append(field);
@@ -248,17 +248,17 @@ public class SQLConnection {
 	public void destroy(Storable s) throws TMSException {
 		String val = escapeValue(s.getKey());
 		validateValue(val);
-		update("DELETE FROM " + s.getTable() + " WHERE " +
-			s.getKeyName() + " = '" + val + "';");
+		update("DELETE FROM " + s.getTable() +
+		      " WHERE " + s.getKeyName() + " = '" + val + "';");
 	}
 
 	/** Update the database with a batch of SQL commands */
 	public void batch(BatchFactory f) throws TMSException {
 		Statement s = getStatement();
 		try {
-			while(true) {
+			while (true) {
 				String sql = f.next();
-				if(sql == null)
+				if (sql == null)
 					break;
 				s.addBatch(sql);
 			}
@@ -266,7 +266,7 @@ public class SQLConnection {
 			s.clearBatch();
 			putStatement(s);
 		}
-		catch(SQLException e) {
+		catch (SQLException e) {
 			SQL_LOG.log("batch -> " + e);
 			throw new TMSException(e);
 		}
