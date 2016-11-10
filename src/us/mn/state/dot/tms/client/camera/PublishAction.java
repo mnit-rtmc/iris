@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,18 +27,19 @@ import us.mn.state.dot.tms.client.widget.IAction;
 public class PublishAction extends IAction {
 
 	/** Proxy selection model */
-	private final ProxySelectionModel<Camera> sel_model;
+	private final ProxySelectionModel<Camera> sel_mdl;
 
 	/** Create a new publish action */
 	public PublishAction(ProxySelectionModel<Camera> s) {
 		super("camera.publish");
-		sel_model = s;
+		sel_mdl = s;
 	}
 
 	/** Publish the selected cameras */
+	@Override
 	protected void doActionPerformed(ActionEvent e) {
-		for(Camera c: sel_model.getSelected())
+		for (Camera c: sel_mdl.getSelected())
 			c.setPublish(true);
-		sel_model.clearSelection();
+		sel_mdl.clearSelection();
 	}
 }

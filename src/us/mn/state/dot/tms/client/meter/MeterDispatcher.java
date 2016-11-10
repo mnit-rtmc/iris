@@ -55,14 +55,14 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	private final MeterManager manager;
 
 	/** Selection model */
-	private final ProxySelectionModel<RampMeter> sel_model;
+	private final ProxySelectionModel<RampMeter> sel_mdl;
 
 	/** Selection listener */
 	private final ProxySelectionListener sel_listener =
 		new ProxySelectionListener()
 	{
 		public void selectionChanged() {
-			setSelected(sel_model.getSingleSelection());
+			setSelected(sel_mdl.getSingleSelection());
 		}
 	};
 
@@ -112,7 +112,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	public MeterDispatcher(Session s, MeterManager m) {
 		session = s;
 		manager = m;
-		sel_model = manager.getSelectionModel();
+		sel_mdl = manager.getSelectionModel();
 		TypeCache<RampMeter> cache =
 			session.getSonarState().getRampMeters();
 		watcher = new ProxyWatcher<RampMeter>(cache, this, true);
@@ -154,14 +154,14 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		add(b_pnl, Stretch.LAST);
 		watcher.initialize();
 		clear();
-		sel_model.addProxySelectionListener(sel_listener);
+		sel_mdl.addProxySelectionListener(sel_listener);
 	}
 
 	/** Dispose of the panel */
 	@Override
 	public void dispose() {
 		watcher.dispose();
-		sel_model.removeProxySelectionListener(sel_listener);
+		sel_mdl.removeProxySelectionListener(sel_listener);
 		clear();
 		super.dispose();
 	}

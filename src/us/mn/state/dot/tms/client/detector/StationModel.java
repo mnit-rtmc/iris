@@ -42,7 +42,7 @@ public class StationModel extends ProxyTableModel<Station> {
 	}
 
 	/** R_Node selection model */
-	private final ProxySelectionModel<R_Node> sel_model;
+	private final ProxySelectionModel<R_Node> sel_mdl;
 
 	/** Create the columns in the model */
 	@Override
@@ -65,12 +65,12 @@ public class StationModel extends ProxyTableModel<Station> {
 	/** Create a new station table model */
 	public StationModel(Session s) {
 		super(s, descriptor(s), 16, 20);
-		sel_model = s.getR_NodeManager().getSelectionModel();
+		sel_mdl = s.getR_NodeManager().getSelectionModel();
 	}
 
 	/** Show the properties form */
 	@Override
 	public void showPropertiesForm(Station proxy) {
-		sel_model.setSelected(proxy.getR_Node());
+		sel_mdl.setSelected(proxy.getR_Node());
 	}
 }

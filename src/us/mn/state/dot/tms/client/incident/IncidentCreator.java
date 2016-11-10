@@ -84,7 +84,7 @@ public class IncidentCreator extends JPanel {
 	private final JComboBox<LaneType> ltype_cbx;
 
 	/** Incident selection model */
-	private final ProxySelectionModel<Incident> sel_model;
+	private final ProxySelectionModel<Incident> sel_mdl;
 
 	/** R_Node manager */
 	private final R_NodeManager r_node_manager;
@@ -97,7 +97,7 @@ public class IncidentCreator extends JPanel {
 		new ProxySelectionListener()
 	{
 		public void selectionChanged() {
-			if (sel_model.getSelectedCount() > 0)
+			if (sel_mdl.getSelectedCount() > 0)
 				clearWidgets();
 		}
 	};
@@ -107,7 +107,7 @@ public class IncidentCreator extends JPanel {
 		ProxySelectionModel<Incident> sm)
 	{
 		setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
-		sel_model = sm;
+		sel_mdl = sm;
 		r_node_manager = s.getR_NodeManager();
 		client = s.getDesktop().client;
 		setBorder(BorderFactory.createTitledBorder(
@@ -139,7 +139,7 @@ public class IncidentCreator extends JPanel {
 		box.add(Box.createHorizontalGlue());
 		add(box);
 		setEnabled(false);
-		sel_model.addProxySelectionListener(sel_listener);
+		sel_mdl.addProxySelectionListener(sel_listener);
 	}
 
 	/** Create a button for creating an incident */
@@ -167,7 +167,7 @@ public class IncidentCreator extends JPanel {
 	/** Handler for button changed events */
 	private void buttonChanged(JToggleButton btn, EventType et) {
 		if (btn.isSelected()) {
-			sel_model.clearSelection();
+			sel_mdl.clearSelection();
 			// NOTE: cannot use ButtonGroup for this because it
 			// will not let the user deselect a button by clicking
 			// on it once it has been selected.  Arrgh!
@@ -267,7 +267,7 @@ public class IncidentCreator extends JPanel {
 				(float) pos.getLatitude(),
 				(float) pos.getLongitude(),
 				IncidentImpact.fromLanes(n_lanes));
-			sel_model.setSelected(ci);
+			sel_mdl.setSelected(ci);
 		}
 	}
 
@@ -315,7 +315,7 @@ public class IncidentCreator extends JPanel {
 
 	/** Dispose of the incident creator */
 	public void dispose() {
-		sel_model.removeProxySelectionListener(sel_listener);
+		sel_mdl.removeProxySelectionListener(sel_listener);
 		removeAll();
 	}
 }

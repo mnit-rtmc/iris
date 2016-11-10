@@ -62,7 +62,7 @@ public class MultipleSignTab extends JPanel {
 	private final JList<SignGroup> group_list;
 
 	/** Selection model */
-	private final ProxySelectionModel<DMS> sel_model;
+	private final ProxySelectionModel<DMS> sel_mdl;
 
 	/** Selection listener */
 	private final ProxySelectionListener sel_listener =
@@ -92,14 +92,14 @@ public class MultipleSignTab extends JPanel {
 				selectGroup();
 			}
 		});
-		sel_model = sm;
+		sel_mdl = sm;
 	}
 
 	/** Initialize the sign tab */
 	public void initialize() {
 		sign_group_model.initialize();
 		layoutPanel();
-		sel_model.addProxySelectionListener(sel_listener);
+		sel_mdl.addProxySelectionListener(sel_listener);
 	}
 
 	/** Layout the panel */
@@ -132,14 +132,14 @@ public class MultipleSignTab extends JPanel {
 
 	/** Dispose of the sign tab */
 	public void dispose() {
-		sel_model.removeProxySelectionListener(sel_listener);
+		sel_mdl.removeProxySelectionListener(sel_listener);
 		sign_group_model.dispose();
 	}
 
 	/** Select a new sign group */
 	protected void selectGroup() {
 		SignGroup group = getSelectedGroup();
-		sel_model.setSelected(createGroupList(group));
+		sel_mdl.setSelected(createGroupList(group));
 	}
 
 	/** Get the selected sign group */
@@ -152,7 +152,7 @@ public class MultipleSignTab extends JPanel {
 	private void doSelectionChanged() {
 		sign_mdl.clear();
 		SignGroup group = getSelectedGroup();
-		for (DMS dms : sel_model.getSelected()) {
+		for (DMS dms : sel_mdl.getSelected()) {
 			sign_mdl.addElement(dms);
 			if (group != null && !isGroupMember(dms, group)) {
 				group_list.clearSelection();
@@ -165,7 +165,7 @@ public class MultipleSignTab extends JPanel {
 	/** Update the selected count label */
 	private void updateSelectedLabel() {
 		sel_lbl.setText(I18N.get("dms.selected") + ": " +
-			sel_model.getSelectedCount());
+			sel_mdl.getSelectedCount());
 	}
 
 	/** Check if a sign is a member of the specified group */

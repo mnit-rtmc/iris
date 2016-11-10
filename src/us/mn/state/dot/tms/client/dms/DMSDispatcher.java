@@ -59,7 +59,7 @@ public class DMSDispatcher extends JPanel {
 	private final User user;
 
 	/** Selection model */
-	private final ProxySelectionModel<DMS> sel_model;
+	private final ProxySelectionModel<DMS> sel_mdl;
 
 	/** Selection listener */
 	private final ProxySelectionListener sel_listener =
@@ -98,9 +98,9 @@ public class DMSDispatcher extends JPanel {
 		DmsCache dms_cache = session.getSonarState().getDmsCache();
 		user = session.getUser();
 		creator = new SignMessageCreator(s, user);
-		sel_model = manager.getSelectionModel();
+		sel_mdl = manager.getSelectionModel();
 		singleTab = new SingleSignTab(session, this);
-		multipleTab = new MultipleSignTab(dms_cache, sel_model);
+		multipleTab = new MultipleSignTab(dms_cache, sel_mdl);
 		composer = new SignMessageComposer(session, this, manager);
 		tabPane.addTab(I18N.get("dms.single"), singleTab);
 		tabPane.addTab(I18N.get("dms.multiple"), multipleTab);
@@ -112,13 +112,13 @@ public class DMSDispatcher extends JPanel {
 	public void initialize() {
 		singleTab.initialize();
 		multipleTab.initialize();
-		sel_model.addProxySelectionListener(sel_listener);
+		sel_mdl.addProxySelectionListener(sel_listener);
 		clearSelected();
 	}
 
 	/** Dispose of the dispatcher */
 	public void dispose() {
-		sel_model.removeProxySelectionListener(sel_listener);
+		sel_mdl.removeProxySelectionListener(sel_listener);
 		clearSelected();
 		removeAll();
 		singleTab.dispose();
@@ -128,7 +128,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Get a list of the selected DMS */
 	private Set<DMS> getValidSelected() {
-		Set<DMS> sel = sel_model.getSelected();
+		Set<DMS> sel = sel_mdl.getSelected();
 		Iterator<DMS> it = sel.iterator();
 		while (it.hasNext()) {
 			DMS dms = it.next();
@@ -160,7 +160,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Remove all invalid selected DMS */
 	private void removeInvalidSelections() {
-		sel_model.setSelected(getValidSelected());
+		sel_mdl.setSelected(getValidSelected());
 	}
 
 	/** Determine if the message should be sent, which is a function
@@ -246,7 +246,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Get page prefix MULTI string from scheduled message (if any) */
 	public String getPagePrefix() {
-		DMS dms = sel_model.getSingleSelection();
+		DMS dms = sel_mdl.getSingleSelection();
 		if (dms != null) {
 			SignMessage sm = dms.getMessageSched();
 			if(sm != null && sm.getActivationPriority() ==
@@ -297,7 +297,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Blank the select DMS */
 	public void sendBlankMessage() {
-		Set<DMS> sel = sel_model.getSelected();
+		Set<DMS> sel = sel_mdl.getSelected();
 		if (sel.size() > 0) {
 			SignMessage sm = createBlankMessage();
 			if(sm != null) {
@@ -349,7 +349,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Query the current message on all selected signs */
 	public void queryMessage() {
-		for (DMS dms: sel_model.getSelected()) {
+		for (DMS dms: sel_mdl.getSelected()) {
 			dms.setDeviceRequest(
 				DeviceRequest.QUERY_MESSAGE.ordinal());
 		}
@@ -360,7 +360,7 @@ public class DMSDispatcher extends JPanel {
 	private void doSelectionChanged() {
 		if (!areBuilderAndComposerValid()) {
 			builder = null;
-			for (DMS s: sel_model.getSelected()) {
+			for (DMS s: sel_mdl.getSelected()) {
 				createBuilder(s);
 				break;
 			}
@@ -370,7 +370,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Check if the builder is valid for at least one selected DMS */
 	private boolean areBuilderAndComposerValid() {
-		Set<DMS> sel = sel_model.getSelected();
+		Set<DMS> sel = sel_mdl.getSelected();
 		// If there is only one DMS selected, then the
 		// composer needs to be updated for that sign.
 		if (sel.size() > 1) {
@@ -390,7 +390,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Update the selected sign(s) */
 	private void updateSelected() {
-		Set<DMS> sel = sel_model.getSelected();
+		Set<DMS> sel = sel_mdl.getSelected();
 		if (sel.size() == 0)
 			clearSelected();
 		else if (sel.size() == 1) {
@@ -510,7 +510,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Can a device request be sent to all selected DMS? */
 	public boolean canRequest() {
-		Set<DMS> sel = sel_model.getSelected();
+		Set<DMS> sel = sel_mdl.getSelected();
 		if (sel.isEmpty())
 			return false;
 		for (DMS dms: sel) {

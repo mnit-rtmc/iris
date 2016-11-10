@@ -84,14 +84,14 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	private final PlanManager manager;
 
 	/** Selection model */
-	private final ProxySelectionModel<ActionPlan> sel_model;
+	private final ProxySelectionModel<ActionPlan> sel_mdl;
 
 	/** Selection listener */
 	private final ProxySelectionListener sel_listener =
 		new ProxySelectionListener()
 	{
 		public void selectionChanged() {
-			setSelected(sel_model.getSingleSelection());
+			setSelected(sel_mdl.getSingleSelection());
 		}
 	};
 
@@ -102,7 +102,7 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	public PlanDispatcher(Session s, PlanManager m) {
 		session = s;
 		manager = m;
-		sel_model = manager.getSelectionModel();
+		sel_mdl = manager.getSelectionModel();
 		TypeCache<ActionPlan> cache =s.getSonarState().getActionPlans();
 		watcher = new ProxyWatcher<ActionPlan>(cache, this, true);
 	}
@@ -128,14 +128,14 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		add(phase_cbx, Stretch.LAST);
 		watcher.initialize();
 		clear();
-		sel_model.addProxySelectionListener(sel_listener);
+		sel_mdl.addProxySelectionListener(sel_listener);
 	}
 
 	/** Dispose of the panel */
 	@Override
 	public void dispose() {
 		watcher.dispose();
-		sel_model.removeProxySelectionListener(sel_listener);
+		sel_mdl.removeProxySelectionListener(sel_listener);
 		clear();
 		super.dispose();
 	}

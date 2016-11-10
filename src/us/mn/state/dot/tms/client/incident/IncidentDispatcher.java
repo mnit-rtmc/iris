@@ -83,7 +83,7 @@ public class IncidentDispatcher extends IPanel
 	private final IncidentManager manager;
 
 	/** Selection model */
-	private final ProxySelectionModel<Incident> sel_model;
+	private final ProxySelectionModel<Incident> sel_mdl;
 
 	/** Selection listener */
 	private final ProxySelectionListener sel_listener =
@@ -135,7 +135,7 @@ public class IncidentDispatcher extends IPanel
 	/** Action to log an incident change */
 	private final IAction log_inc = new IAction("incident.log") {
 		protected void doActionPerformed(ActionEvent e) {
-			Incident inc = sel_model.getSingleSelection();
+			Incident inc = sel_mdl.getSingleSelection();
 			if (inc instanceof ClientIncident)
 				create((ClientIncident) inc);
 			else if (inc != null)
@@ -146,7 +146,7 @@ public class IncidentDispatcher extends IPanel
 	/** Action to deploy devices */
 	private final IAction deploy_inc = new IAction("incident.deploy") {
 		protected void doActionPerformed(ActionEvent e) {
-			Incident inc = sel_model.getSingleSelection();
+			Incident inc = sel_mdl.getSingleSelection();
 			if (inc != null &&
 			  !(inc instanceof ClientIncident))
 				showDeployForm(inc);
@@ -156,7 +156,7 @@ public class IncidentDispatcher extends IPanel
 	/** Action to clear an incident */
 	private final IAction clear_inc = new IAction("incident.clear") {
 		protected void doActionPerformed(ActionEvent e) {
-			Incident inc = sel_model.getSingleSelection();
+			Incident inc = sel_mdl.getSingleSelection();
 			if (inc != null) {
 				boolean c = clear_btn.isSelected();
 				inc.setCleared(c);
@@ -172,7 +172,7 @@ public class IncidentDispatcher extends IPanel
 	/** Action to edit incident */
 	private final IAction edit_inc = new IAction("incident.edit") {
 		protected void doActionPerformed(ActionEvent e) {
-			Incident inc = sel_model.getSingleSelection();
+			Incident inc = sel_mdl.getSingleSelection();
 			if (inc != null)
 				editIncident(inc);
 		}
@@ -197,7 +197,7 @@ public class IncidentDispatcher extends IPanel
 	{
 		session = s;
 		manager = man;
-		sel_model = manager.getSelectionModel();
+		sel_mdl = manager.getSelectionModel();
 		creator = ic;
 		cache = s.getSonarState().getIncCache().getIncidents();
 		detail_mdl = new ProxyListModel<IncidentDetail>(
@@ -231,7 +231,7 @@ public class IncidentDispatcher extends IPanel
 		createButtonJobs();
 		cache.addProxyListener(this);
 		clearSelected();
-		sel_model.addProxySelectionListener(sel_listener);
+		sel_mdl.addProxySelectionListener(sel_listener);
 	}
 
 	/** Build the impact box */
@@ -272,7 +272,7 @@ public class IncidentDispatcher extends IPanel
 			inc.getEventType(), inc.getDetail(), inc.getLaneType(),
 			inc.getRoad(), inc.getDir(), inc.getLat(),
 			inc.getLon(), inc.getImpact());
-		sel_model.setSelected(ci);
+		sel_mdl.setSelected(ci);
 		creator.replaceIncident(inc);
 	}
 
@@ -306,9 +306,9 @@ public class IncidentDispatcher extends IPanel
 			cache.createObject(name, attrs);
 			Incident proxy = getProxy(name);
 			if (proxy != null)
-				sel_model.setSelected(proxy);
+				sel_mdl.setSelected(proxy);
 			else
-				sel_model.clearSelection();
+				sel_mdl.clearSelection();
 		}
 	}
 
@@ -417,7 +417,7 @@ public class IncidentDispatcher extends IPanel
 	/** A proxy has been changed */
 	@Override
 	public void proxyChanged(Incident proxy, String a) {
-		if (proxy == sel_model.getSingleSelection())
+		if (proxy == sel_mdl.getSingleSelection())
 			updateAttribute(proxy, a);
 	}
 
@@ -434,7 +434,7 @@ public class IncidentDispatcher extends IPanel
 	/** Dispose of the dispatcher */
 	@Override
 	public void dispose() {
-		sel_model.removeProxySelectionListener(sel_listener);
+		sel_mdl.removeProxySelectionListener(sel_listener);
 		cache.removeProxyListener(this);
 		detail_mdl.dispose();
 		clearSelected();
@@ -443,7 +443,7 @@ public class IncidentDispatcher extends IPanel
 
 	/** Update the selected object(s) */
 	private void updateSelected() {
-		Incident inc = sel_model.getSingleSelection();
+		Incident inc = sel_mdl.getSingleSelection();
 		if (inc != null)
 			setSelected(inc);
 		else

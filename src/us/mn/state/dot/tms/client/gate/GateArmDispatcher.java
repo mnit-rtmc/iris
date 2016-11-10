@@ -72,7 +72,7 @@ public class GateArmDispatcher extends IPanel
 	private final Session session;
 
 	/** Selection model */
-	private final ProxySelectionModel<GateArmArray> sel_model;
+	private final ProxySelectionModel<GateArmArray> sel_mdl;
 
 	/** DMS Proxy view */
 	private final ProxyView<DMS> dms_view = new ProxyView<DMS>() {
@@ -176,7 +176,7 @@ public class GateArmDispatcher extends IPanel
 		new ProxySelectionListener()
 	{
 		public void selectionChanged() {
-			setSelected(sel_model.getSingleSelection());
+			setSelected(sel_mdl.getSingleSelection());
 		}
 	};
 
@@ -195,7 +195,7 @@ public class GateArmDispatcher extends IPanel
 		TypeCache<DMS> dms_cache =
 			s.getSonarState().getDmsCache().getDMSs();
 		dms_watcher = new ProxyWatcher<DMS>(dms_cache, dms_view, false);
-		sel_model = manager.getSelectionModel();
+		sel_mdl = manager.getSelectionModel();
 		stream_pnl = createStreamPanel(MEDIUM);
 		thumb_pnl = createStreamPanel(THUMBNAIL);
 		for(int i = 0; i < MAX_ARMS; i++) {
@@ -263,7 +263,7 @@ public class GateArmDispatcher extends IPanel
 		watcher.initialize();
 		dms_watcher.initialize();
 		clear();
-		sel_model.addProxySelectionListener(sel_listener);
+		sel_mdl.addProxySelectionListener(sel_listener);
 	}
 
 	/** Select a camera stream */
@@ -332,7 +332,7 @@ public class GateArmDispatcher extends IPanel
 		dms_watcher.dispose();
 		watcher.dispose();
 		setPager(null);
-		sel_model.removeProxySelectionListener(sel_listener);
+		sel_mdl.removeProxySelectionListener(sel_listener);
 		stream_pnl.dispose();
 		thumb_pnl.dispose();
 		clear();

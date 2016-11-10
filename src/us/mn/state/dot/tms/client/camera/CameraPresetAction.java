@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,13 +34,13 @@ public class CameraPresetAction extends ProxyAction<CameraPreset> {
 	private final Session session;
 
 	/** Camera selection model */
-	private final ProxySelectionModel<Camera> sel_model;
+	private final ProxySelectionModel<Camera> sel_mdl;
 
 	/** Create a new action to select a camera preset */
 	public CameraPresetAction(Session s, CameraPreset cp) {
 		super("camera.select", cp);
 		session = s;
-		sel_model = s.getCameraManager().getSelectionModel();
+		sel_mdl = s.getCameraManager().getSelectionModel();
 		if (cp != null)
 			putValue(Action.NAME, cp.getCamera().getName());
 		else
@@ -59,7 +59,7 @@ public class CameraPresetAction extends ProxyAction<CameraPreset> {
 
 	/** Select the camera */
 	private void selectCamera(Camera c) {
-		sel_model.setSelected(c);
+		sel_mdl.setSelected(c);
 		if (canRecallPreset(c))
 			c.setRecallPreset(proxy.getPresetNum());
 	}

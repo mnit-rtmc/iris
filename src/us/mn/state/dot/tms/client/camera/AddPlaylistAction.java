@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,20 +30,21 @@ public class AddPlaylistAction extends IAction {
 	private final CameraManager manager;
 
 	/** Proxy selection model */
-	private final ProxySelectionModel<Camera> sel_model;
+	private final ProxySelectionModel<Camera> sel_mdl;
 
 	/** Create a new add playlist action */
 	public AddPlaylistAction(CameraManager m, ProxySelectionModel<Camera> s)
 	{
 		super("camera.playlist.add");
 		manager = m;
-		sel_model = s;
+		sel_mdl = s;
 	}
 
 	/** Add the selected cameras to the playlist */
+	@Override
 	protected void doActionPerformed(ActionEvent e) {
-		for(Camera c: sel_model.getSelected())
+		for (Camera c: sel_mdl.getSelected())
 			manager.addPlaylist(c);
-		sel_model.clearSelection();
+		sel_mdl.clearSelection();
 	}
 }

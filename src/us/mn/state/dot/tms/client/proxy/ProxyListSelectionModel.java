@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public class ProxyListSelectionModel<T extends SonarObject>
 	private final ProxyListModel<T> model;
 
 	/** Proxy selection model */
-	private final ProxySelectionModel<T> sel_model;
+	private final ProxySelectionModel<T> sel_mdl;
 
 	/** Listener for proxy selection events */
 	private final ProxySelectionListener listener =
@@ -51,7 +51,7 @@ public class ProxyListSelectionModel<T extends SonarObject>
 	private void doSelectionChanged() {
 		adjusting++;
 		clearSelection();
-		for (T proxy : sel_model.getSelected()) {
+		for (T proxy : sel_mdl.getSelected()) {
 			int i = model.getIndex(proxy);
 			if (i >= 0)
 				super.addSelectionInterval(i, i);
@@ -64,15 +64,15 @@ public class ProxyListSelectionModel<T extends SonarObject>
 		ProxySelectionModel<T> s)
 	{
 		model = m;
-		sel_model = s;
-		if (!sel_model.getAllowMultiple())
+		sel_mdl = s;
+		if (!sel_mdl.getAllowMultiple())
 			setSelectionMode(SINGLE_SELECTION);
-		sel_model.addProxySelectionListener(listener);
+		sel_mdl.addProxySelectionListener(listener);
 	}
 
 	/** Dispose of the proxy list selection model */
 	public void dispose() {
-		sel_model.removeProxySelectionListener(listener);
+		sel_mdl.removeProxySelectionListener(listener);
 	}
 
 	/** Insert an interval into the model */
@@ -83,7 +83,7 @@ public class ProxyListSelectionModel<T extends SonarObject>
 		//       we need to add them to this selection model
 		for (int i = index; i < index + length; i++) {
 			T proxy = model.getProxy(i);
-			if (proxy != null && sel_model.isSelected(proxy))
+			if (proxy != null && sel_mdl.isSelected(proxy))
 				super.addSelectionInterval(i, i);
 		}
 	}
@@ -92,7 +92,7 @@ public class ProxyListSelectionModel<T extends SonarObject>
 	@Override
 	public void addSelectionInterval(int index0, int index1) {
 		super.addSelectionInterval(index0, index1);
-		Set<T> proxies = sel_model.getSelected();
+		Set<T> proxies = sel_mdl.getSelected();
 		for (int i = index0; i <= index1; i++) {
 			T proxy = model.getProxy(i);
 			if (proxy != null)
@@ -105,7 +105,7 @@ public class ProxyListSelectionModel<T extends SonarObject>
 	@Override
 	public void removeSelectionInterval(int index0, int index1) {
 		super.removeSelectionInterval(index0, index1);
-		Set<T> proxies = sel_model.getSelected();
+		Set<T> proxies = sel_mdl.getSelected();
 		for (int i = index0; i <= index1; i++) {
 			T proxy = model.getProxy(i);
 			if (proxy != null)
@@ -130,7 +130,7 @@ public class ProxyListSelectionModel<T extends SonarObject>
 	/** Set the selected proxies */
 	private void setSelected(Set<T> proxies) {
 		adjusting++;
-		sel_model.setSelected(proxies);
+		sel_mdl.setSelected(proxies);
 		adjusting--;
 	}
 }

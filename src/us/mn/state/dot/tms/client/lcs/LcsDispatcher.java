@@ -61,14 +61,14 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	private final LCSArrayManager manager;
 
 	/** Selection model */
-	private final ProxySelectionModel<LCSArray> sel_model;
+	private final ProxySelectionModel<LCSArray> sel_mdl;
 
 	/** Selection listener */
 	private final ProxySelectionListener sel_listener =
 		new ProxySelectionListener()
 	{
 		public void selectionChanged() {
-			setSelected(sel_model.getSingleSelection());
+			setSelected(sel_mdl.getSingleSelection());
 		}
 	};
 
@@ -129,8 +129,8 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		session = s;
 		manager = m;
 		user = session.getUser();
-		sel_model = manager.getSelectionModel();
-		blank = new BlankLcsAction(sel_model, user);
+		sel_mdl = manager.getSelectionModel();
+		blank = new BlankLcsAction(sel_mdl, user);
 		blank_btn.setAction(blank);
 		manager.setBlankAction(blank);
 		TypeCache<LCSArray> cache =
@@ -163,7 +163,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		add(createButtonPanel(), Stretch.RIGHT);
 		watcher.initialize();
 		clear();
-		sel_model.addProxySelectionListener(sel_listener);
+		sel_mdl.addProxySelectionListener(sel_listener);
 	}
 
 	/** Build the indication selector */
@@ -189,7 +189,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	@Override
 	public void dispose() {
 		watcher.dispose();
-		sel_model.removeProxySelectionListener(sel_listener);
+		sel_mdl.removeProxySelectionListener(sel_listener);
 		ind_selector.dispose();
 		clear();
 		super.dispose();

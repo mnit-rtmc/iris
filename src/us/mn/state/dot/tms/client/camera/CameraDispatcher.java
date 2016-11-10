@@ -79,14 +79,14 @@ public class CameraDispatcher extends JPanel {
 	private final VideoRequest video_req;
 
 	/** Selection model */
-	private final ProxySelectionModel<Camera> sel_model;
+	private final ProxySelectionModel<Camera> sel_mdl;
 
 	/** Selection listener */
 	private final ProxySelectionListener sel_listener =
 		new ProxySelectionListener()
 	{
 		public void selectionChanged() {
-			selectCamera(sel_model.getSingleSelection());
+			selectCamera(sel_mdl.getSingleSelection());
 		}
 	};
 
@@ -137,7 +137,7 @@ public class CameraDispatcher extends JPanel {
 		video_req = new VideoRequest(client_props, SIZE);
 		video_req.setSonarSessionId(session.getSessionId());
 		setLayout(new BorderLayout());
-		sel_model = manager.getSelectionModel();
+		sel_mdl = manager.getSelectionModel();
 		model = session.getSonarState().getCamCache().getCameraModel();
 		cam_ptz = new CameraPTZ(s);
 		joy_ptz = new JoystickPTZ(cam_ptz);
@@ -290,7 +290,7 @@ public class CameraDispatcher extends JPanel {
 		add(stream_pnl, BorderLayout.CENTER);
 		add(control_pnl, BorderLayout.SOUTH);
 		clear();
-		sel_model.addProxySelectionListener(sel_listener);
+		sel_mdl.addProxySelectionListener(sel_listener);
 	}
 
 	/** Set the title */
@@ -314,7 +314,7 @@ public class CameraDispatcher extends JPanel {
 		if (i >= 0 && i < model.getSize() - 1) {
 			Camera cam = model.getProxy(i + 1);
 			if (cam != null)
-				sel_model.setSelected(cam);
+				sel_mdl.setSelected(cam);
 		}
 	}
 
@@ -324,14 +324,14 @@ public class CameraDispatcher extends JPanel {
 		if (i > 0) {
 			Camera cam = model.getProxy(i - 1);
 			if (cam != null)
-				sel_model.setSelected(cam);
+				sel_mdl.setSelected(cam);
 		}
 	}
 
 	/** Dispose of the camera viewer */
 	public void dispose() {
 		stream_pnl.unbindStreamStatusListener(ss_listener);
-		sel_model.removeProxySelectionListener(sel_listener);
+		sel_mdl.removeProxySelectionListener(sel_listener);
 		joy_ptz.dispose();
 		cam_ptz.setCamera(null);
 		stream_pnl.dispose();
