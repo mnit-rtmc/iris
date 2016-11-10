@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.client.Session;
@@ -273,7 +274,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Compose a MULTI string using the contents of the widgets */
 	private String composeMessage() {
-		String prefix = dispatcher.getPagePrefix();
+		String prefix = getPagePrefix();
 		MultiString[] mess = new MultiString[n_pages];
 		int fn = default_font;
 		int p = 0;
@@ -284,6 +285,18 @@ public class SignMessageComposer extends JPanel {
 			fn = pages[i].getFontNumber();
 		}
 		return combinePages(mess, p);
+	}
+
+	/** Get page prefix MULTI string from scheduled message (if any) */
+	private String getPagePrefix() {
+		DMS dms = dispatcher.getSingleSelection();
+		if (dms != null) {
+			SignMessage sm = dms.getMessageSched();
+			if (sm != null && sm.getActivationPriority() ==
+			    DMSMessagePriority.PREFIX_PAGE.ordinal())
+				return sm.getMulti();
+		}
+		return "";
 	}
 
 	/** Build a MULTI string from an array of page strings.
@@ -314,7 +327,7 @@ public class SignMessageComposer extends JPanel {
 		// first because the line combobox updates (each) result in 
 		// intermediate preview updates which read the (incorrect) 
 		// font from the font combobox.
-		String prefix = dispatcher.getPagePrefix();
+		String prefix = getPagePrefix();
 		MultiString multi = new MultiString(ms);
 		setSelectedFonts(multi);
 		String[] lines = multi.getLines(n_lines, prefix);
