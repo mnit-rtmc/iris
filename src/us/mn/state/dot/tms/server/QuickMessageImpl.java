@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignGroup;
@@ -84,7 +83,7 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	}
 
 	/** Sign group */
-	protected SignGroup sign_group;
+	private SignGroup sign_group;
 
 	/** Get the sign group associated with the quick message.
 	 * @return Sign group for quick message; null for no group. */
@@ -103,14 +102,14 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	/** Set the sign group associated with the quick message.
 	 * @param sg Sign group to associate; null for no group. */
 	public void doSetSignGroup(SignGroup sg) throws TMSException {
-		if(sg == sign_group)
-			return;
-		store.update(this, "sign_group", sg);
-		setSignGroup(sg);
+		if (sg != sign_group) {
+			store.update(this, "sign_group", sg);
+			setSignGroup(sg);
+		}
 	}
 
 	/** Message MULTI string, contains message text for all pages */
-	protected String multi = "";
+	private String multi = "";
 
 	/** Get the message MULTI string.
 	 * @return Message text in MULTI markup.
