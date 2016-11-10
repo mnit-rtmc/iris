@@ -103,7 +103,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	};
 
 	/** Selection model */
-	protected final ProxySelectionModel<T> s_model =
+	private final ProxySelectionModel<T> sel_mdl =
 		new ProxySelectionModel<T>();
 
 	/** Theme for drawing objects on a map layer */
@@ -167,7 +167,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Dispose of the proxy manager */
 	public void dispose() {
-		s_model.dispose();
+		sel_mdl.dispose();
 		map_cache.dispose();
 		getCache().removeProxyListener(listener);
 	}
@@ -208,7 +208,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Remove a proxy from the manager */
 	protected void proxyRemovedSwing(T proxy) {
-		s_model.removeSelected(proxy);
+		sel_mdl.removeSelected(proxy);
 		map_cache.remove(proxy);
 		updateGeometry();
 	}
@@ -304,7 +304,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Get the proxy selection model */
 	public ProxySelectionModel<T> getSelectionModel() {
-		return s_model;
+		return sel_mdl;
 	}
 
 	/** Create a new style summary.
@@ -357,7 +357,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Show the properties form for the selected proxy */
 	public final void showPropertiesForm() {
-		T proxy = s_model.getSingleSelection();
+		T proxy = sel_mdl.getSingleSelection();
 		if (proxy != null)
 			showPropertiesForm(proxy);
 	}
@@ -385,11 +385,11 @@ abstract public class ProxyManager<T extends SonarObject> {
 
 	/** Create a popup menu for the selected proxy object(s) */
 	private JPopupMenu createPopup() {
-		T proxy = s_model.getSingleSelection();
+		T proxy = sel_mdl.getSingleSelection();
 		if (proxy != null)
 			return createPopupSingle(proxy);
 		else {
-			int n_sel = s_model.getSelectedCount();
+			int n_sel = sel_mdl.getSelectedCount();
 			return (n_sel > 1) ? createPopupMulti(n_sel) : null;
 		}
 	}
@@ -444,7 +444,7 @@ abstract public class ProxyManager<T extends SonarObject> {
 	private boolean isStyleVisible(MapGeoLoc loc) {
 		T proxy = findProxy(loc);
 		return (proxy != null) &&
-		       (isStyleVisible(proxy) || s_model.isSelected(proxy));
+		       (isStyleVisible(proxy) || sel_mdl.isSelected(proxy));
 	}
 
 	/** Check if a proxy style is visible */

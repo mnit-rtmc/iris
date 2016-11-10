@@ -83,8 +83,8 @@ public class BeaconManager extends DeviceManager<Beacon> {
 			p.add(pnl);
 		}
 		p.addSeparator();
-		p.add(new DeployAction(s_model));
-		p.add(new UndeployAction(s_model));
+		p.add(new DeployAction(getSelectionModel()));
+		p.add(new UndeployAction(getSelectionModel()));
 		p.addSeparator();
 	}
 
@@ -94,8 +94,8 @@ public class BeaconManager extends DeviceManager<Beacon> {
 		JPopupMenu p = new JPopupMenu();
 		p.add(new JLabel("" + n_selected + " " + I18N.get("beacons")));
 		p.addSeparator();
-		p.add(new DeployAction(s_model));
-		p.add(new UndeployAction(s_model));
+		p.add(new DeployAction(getSelectionModel()));
+		p.add(new UndeployAction(getSelectionModel()));
 		return p;
 	}
 

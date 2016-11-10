@@ -76,7 +76,7 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Create a new DMS manager */
 	public DMSManager(Session s, GeoLocManager lm) {
 		super(s, lm, descriptor(s), 12, ItemStyle.DEPLOYED);
-		s_model.setAllowMultiple(true);
+		getSelectionModel().setAllowMultiple(true);
 	}
 
 	/** Create a DMS map tab */

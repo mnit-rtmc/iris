@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
+import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -65,7 +66,7 @@ public class CameraManager extends DeviceManager<Camera> {
 		super(s, lm, descriptor(s), 13, ItemStyle.ACTIVE);
 		dispatcher = new CameraDispatcher(s, this);
 		tab = new CameraTab(s, this, dispatcher);
-		s_model.setAllowMultiple(true);
+		getSelectionModel().setAllowMultiple(true);
 	}
 
 	/** Create a camera map tab */
@@ -92,28 +93,30 @@ public class CameraManager extends DeviceManager<Camera> {
 	/** Fill single selection popup */
 	@Override
 	protected void fillPopupSingle(JPopupMenu p, Camera c) {
-		p.add(new PublishAction(s_model));
-		p.add(new UnpublishAction(s_model));
+		ProxySelectionModel<Camera> sel_model = getSelectionModel();
+		p.add(new PublishAction(sel_model));
+		p.add(new UnpublishAction(sel_model));
 		p.addSeparator();
 		if (inPlaylist(c))
-			p.add(new RemovePlaylistAction(this, s_model));
+			p.add(new RemovePlaylistAction(this, sel_model));
 		else
-			p.add(new AddPlaylistAction(this, s_model));
+			p.add(new AddPlaylistAction(this, sel_model));
 		p.addSeparator();
 	}
 
 	/** Create a popup menu for multiple objects */
 	@Override
 	protected JPopupMenu createPopupMulti(int n_selected) {
+		ProxySelectionModel<Camera> sel_model = getSelectionModel();
 		JPopupMenu p = new JPopupMenu();
 		p.add(new JLabel(I18N.get("camera.title") + ": " +
 			n_selected));
 		p.addSeparator();
-		p.add(new PublishAction(s_model));
-		p.add(new UnpublishAction(s_model));
+		p.add(new PublishAction(sel_model));
+		p.add(new UnpublishAction(sel_model));
 		p.addSeparator();
-		p.add(new AddPlaylistAction(this, s_model));
-		p.add(new RemovePlaylistAction(this, s_model));
+		p.add(new AddPlaylistAction(this, sel_model));
+		p.add(new RemovePlaylistAction(this, sel_model));
 		return p;
 	}
 
@@ -150,9 +153,9 @@ public class CameraManager extends DeviceManager<Camera> {
 	public void selectCamera(Camera c) {
 		if (tab.isSelectedTab()) {
 			if (c != null)
-				s_model.setSelected(c);
+				getSelectionModel().setSelected(c);
 			else
-				s_model.clearSelection();
+				getSelectionModel().clearSelection();
 		} else if (c != null)
 			dispatcher.selectMonitorCamera(c);
 	}
