@@ -9,6 +9,21 @@
 <body>
 <h1>MnDOT IRIS 4.x Release Notes</h1>
 <dl>
+	<dt>4.42.0 (14 November 2016)</dt>
+	<dd><ul>
+		<li>
+			Added "owner" field to sign_message table, cleaning up
+			procedure to deploy a DMS message.
+		</li>
+		<li>
+			Replaced proxy.host and proxy.port with http.proxy
+			property in server/client properties files.
+		</li>
+		<li>
+			Replaced no.proxy.hosts property with
+			http.proxy.whitelist.
+		</li>
+	</ul></dd>
 	<dt>4.41.0 (7 November 2016)</dt>
 	<dd><ul>
 		<li>
