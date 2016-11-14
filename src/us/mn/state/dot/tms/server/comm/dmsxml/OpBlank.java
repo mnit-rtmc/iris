@@ -74,8 +74,7 @@ class OpBlank extends OpDms
 			m_sm.getActivationPriority());
 		xrr.addReq("RunPriority", 
 			m_sm.getRunTimePriority());
-		xrr.addReq("Owner", 
-			m_user != null ? m_user.getName() : "");
+		xrr.addReq("Owner", (m_user != null) ? m_user.getName() : "");
 
 		// response
 		xrr.addRes("Id");
@@ -124,9 +123,9 @@ class OpBlank extends OpDms
 
 		// update dms
 		updateMaintStatus("");
-		if(valid) {
-			m_dms.setMessageCurrent(m_sm, m_user);
-		} else {
+		if (valid)
+			m_dms.setMessageCurrent(m_sm);
+		else {
 			LOG.log(
 				"OpBlank: response from SensorServer " +
 				"received, ignored because Xml valid " +

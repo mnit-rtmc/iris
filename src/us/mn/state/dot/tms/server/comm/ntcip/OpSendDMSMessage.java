@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSMessagePriority;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
@@ -111,9 +110,6 @@ public class OpSendDMSMessage extends OpDMS {
 	/** Message CRC */
 	private final int message_crc;
 
-	/** User who deployed the message */
-	private final User owner;
-
 	/** Communication loss message */
 	private final MessageIDCode comm_msg = new MessageIDCode(
 		dmsCommunicationsLossMessage.node);
@@ -148,11 +144,10 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Create a new send DMS message operation */
-	public OpSendDMSMessage(DMSImpl d, SignMessage sm, User o) {
+	public OpSendDMSMessage(DMSImpl d, SignMessage sm) {
 		super(PriorityLevel.COMMAND, d);
 		message = sm;
 		multi = parseMulti(sm.getMulti());
-		owner = o;
 		msg_num = lookupMsgNum(multi);
 		message_crc = DmsMessageCRC.calculate(multi,
 			sm.getBeaconEnabled(), 0);
@@ -211,7 +206,7 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
-			dms.setMessageCurrent(message, owner);
+			dms.setMessageCurrent(message);
 			return new SetLossMsgs();
 		}
 	}
@@ -428,7 +423,7 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
-			dms.setMessageCurrent(message, owner);
+			dms.setMessageCurrent(message);
 			return new SetLossMsgs();
 		}
 	}

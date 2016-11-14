@@ -199,8 +199,7 @@ class OpMessage extends OpDms {
 			m_sm.getRunTimePriority());
 
 		// Owner
-		xrr.addReq("Owner", 
-			m_user != null ? m_user.getName() : "");
+		xrr.addReq("Owner", (m_user != null) ? m_user.getName() : "");
 
 		// bitmap
 		xrr.addReq("Bitmap", m_bitmaps);
@@ -248,9 +247,9 @@ class OpMessage extends OpDms {
 
 		// parse rest of response
 		updateMaintStatus("");
-		if(valid) {
+		if (valid) {
 			setErrorStatus("");
-			m_dms.setMessageCurrent(m_sm, m_user);
+			m_dms.setMessageCurrent(m_sm);
 		} else {
 			LOG.log("OpMessage.parseResponse(): response " +
 				"from SensorServer received, ignored " +

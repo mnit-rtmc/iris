@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.addco;
 
 import java.io.IOException;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -32,17 +31,13 @@ public class OpSendDMSMessage extends OpAddco {
 	/** Sign message */
 	private final SignMessage message;
 
-	/** User who deployed the message */
-	private final User owner;
-
 	/** DMS message property */
 	private final MessageProperty msg_prop;
 
 	/** Create a new send DMS message operation */
-	public OpSendDMSMessage(DMSImpl d, SignMessage sm, User o) {
+	public OpSendDMSMessage(DMSImpl d, SignMessage sm) {
 		super(PriorityLevel.COMMAND, d);
 		message = sm;
-		owner = o;
 		msg_prop = new MessageProperty(d, sm);
 	}
 
@@ -81,7 +76,7 @@ public class OpSendDMSMessage extends OpAddco {
 	@Override
 	public void cleanup() {
 		if (isSuccess())
-			dms.setMessageCurrent(message, owner);
+			dms.setMessageCurrent(message);
 		dms.setMessageNext(null);
 		super.cleanup();
 	}

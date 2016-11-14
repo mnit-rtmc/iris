@@ -117,13 +117,13 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller
 	/** Send a new message to the sign */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void sendMessage(DMSImpl dms, SignMessage sm, User o)
+	public void sendMessage(DMSImpl dms, SignMessage sm)
 		throws InvalidMessageException
 	{
 		if (dms.isMessageCurrentEquivalent(sm))
 			addOp(new OpUpdateDMSDuration(dms, sm));
 		else
-			addOp(new OpSendDMSMessage(dms, sm, o));
+			addOp(new OpSendDMSMessage(dms, sm));
 	}
 
 	/** Send a device request message to an LCS array */

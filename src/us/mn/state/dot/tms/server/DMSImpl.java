@@ -203,7 +203,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public SignMessage createMsgBlank(DMSMessagePriority ap) {
 		String bmaps = Base64.encode(new byte[0]);
 		return findOrCreateMsg("", false, bmaps, ap, BLANK, operator,
-			null);
+			null, null);
 	}
 
 	/** Destroy an object */
@@ -896,25 +896,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return photocellStatus;
 	}
 
-	/** The owner of the next message to be displayed.  This is a write-only
-	 * SONAR attribute. */
-	private transient User ownerNext;
-
-	/** Set the message owner.  When a user sends a new message to the DMS,
-	 * two attributes must be set: ownerNext and messageNext.  There can be
-	 * a race between two clients setting these attributes.  If ownerNext
-	 * is non-null when being set, then a race has been detected, meaning
-	 * two clients are trying to send a message at the same time. */
-	@Override
-	public synchronized void setOwnerNext(User o) {
-		if (ownerNext != null && o != null) {
-			logError("OWNER CONFLICT: " + ownerNext.getName() +
-			         " vs. " + o.getName());
-			ownerNext = null;
-		} else
-			ownerNext = o;
-	}
-
 	/** The next message to be displayed.  This is a write-only SONAR
 	 * attribute.  It is checked to prevent a lower priority message from
 	 * getting queued during the time when a message gets queued and it
@@ -935,54 +916,32 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Set the next sign message.  This is called by SONAR when the
-	 * messageNext attribute is set.  The ownerNext attribute should have
-	 * been set by the client prior to setting this attribute. */
-	public synchronized void doSetMessageNext(SignMessage sm)
-		throws TMSException
-	{
-		try {
-			if (ownerNext != null)
-				doSetMessageNext(sm, ownerNext);
-			else
-				throw new ChangeVetoException("OWNER CONFLICT");
-		}
-		finally {
-			// ownerNext is only valid for one message, clear it
-			ownerNext = null;
-		}
-	}
-
-	/** Set the next sign message and owner */
-	public synchronized void doSetMessageNext(SignMessage sm, User o)
-		throws TMSException
-	{
+	 * messageNext attribute is set. */
+	public void doSetMessageNext(SignMessage sm) throws TMSException {
 		DMSPoller p = getDMSPoller();
-		if (p == null) {
+		if (null == p) {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
 		if (shouldActivate(sm))
-			doSetMessageNext(sm, o, p);
+			doSetMessageNext(sm, p);
 	}
 
 	/**
 	 * Set the next sign message.
 	 * @param sm Sign message, may not be null.
-	 * @param o User sending message, may be null.
 	 * @param p DMS poller, may not be null.
 	 */
-	private void doSetMessageNext(SignMessage sm, User o, DMSPoller p)
+	private void doSetMessageNext(SignMessage sm, DMSPoller p)
 		throws TMSException
 	{
 		SignMessage smn = validateMessage(sm);
-		if (smn != sm)
-			o = null;
 		// FIXME: there should be a better way to clear cached routes
 		//        in travel time estimator
 		int ap = smn.getActivationPriority();
 		if (ap == OVERRIDE.ordinal())
 			formatter.clear();
-		p.sendMessage(this, smn, o);
+		p.sendMessage(this, smn);
 	}
 
 	/** Check if the sign has a reference to a sign message */
@@ -1167,10 +1126,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	{
 		if (getMessageCurrent().getMulti().equals(m))
 			return;
-		SignMessage sm = createMsg(m, be, ap, rp, src, null);
+		SignMessage sm = createMsg(m, be, ap, rp, src, null, null);
 		try {
 			if (!isMessageCurrentEquivalent(sm))
-				doSetMessageNext(sm, null);
+				doSetMessageNext(sm);
 		}
 		catch (TMSException e) {
 			logError(e.getMessage());
@@ -1181,18 +1140,15 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private transient SignMessage messageCurrent = createMsgBlank();
 
 	/** Set the current message.
-	 * @param sm Sign message.
-	 * @param o Sign message owner, or null. */
-	public void setMessageCurrent(SignMessage sm, User o) {
+	 * @param sm Sign message. */
+	public void setMessageCurrent(SignMessage sm) {
 		if (sm.getSource() == tolling.ordinal())
 			logPriceMessages(EventType.PRICE_VERIFIED);
 		if (!isMessageCurrentEquivalent(sm)) {
-			logMessage(sm, o);
+			logMessage(sm);
 			setDeployTime();
 			messageCurrent = sm;
 			notifyAttribute("messageCurrent");
-			ownerCurrent = o;
-			notifyAttribute("ownerCurrent");
 			updateStyles();
 		}
 		updateBeacon();
@@ -1210,29 +1166,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return SignMessageHelper.isEquivalent(messageCurrent, sm);
 	}
 
-	/** Owner of current message */
-	private transient User ownerCurrent;
-
-	/** Get the current message owner.
-	 * @return User who deployed the current message. */
-	@Override
-	public User getOwnerCurrent() {
-		return ownerCurrent;
-	}
-
 	/** Log a message.
-	 * @param sm Sign message.
-	 * @param o Sign message owner, or null. */
-	private void logMessage(SignMessage sm, User o) {
+	 * @param sm Sign message. */
+	private void logMessage(SignMessage sm) {
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = sm.getMulti();
 		if (SignMessageHelper.isBlank(sm)) {
 			et = EventType.DMS_CLEARED;
 			text = null;
 		}
-		String owner = null;
-		if (o != null)
-			owner = o.getName();
+		String owner = sm.getOwner();
 		logEvent(new SignStatusEvent(et, name, text, owner));
 	}
 
@@ -1382,9 +1325,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		DMSMessagePriority rp, Integer d)
 	{
 		String bmaps = encodeAdjustedBitmaps(pages);
-		if (bmaps != null)
-			return findOrCreateMsg(m, be, bmaps, ap, rp,external,d);
-		else
+		if (bmaps != null) {
+			return findOrCreateMsg(m, be, bmaps, ap, rp, external,
+				null, d);
+		} else
 			return null;
 	}
 
@@ -1394,15 +1338,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param src Message source.
+	 * @param o Owner name.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	public SignMessage createMsg(String m, boolean be,
 		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
-		Integer d)
+		String o, Integer d)
 	{
 		String bmaps = renderBitmaps(m);
 		if (bmaps != null)
-			return findOrCreateMsg(m, be, bmaps, ap, rp, src, d);
+			return findOrCreateMsg(m, be, bmaps, ap, rp, src, o, d);
 		else
 			return null;
 	}
@@ -1468,17 +1413,19 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param src Message source.
+	 * @param o Owner name.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage findOrCreateMsg(String m, boolean be, String bmaps,
 		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
-		Integer d)
+		String o, Integer d)
 	{
-		SignMessage esm = SignMessageHelper.find(m, bmaps, ap,rp,src,d);
+		SignMessage esm = SignMessageHelper.find(m, bmaps, ap, rp, src,
+			o, d);
 		if (esm != null)
 			return esm;
 		else
-			return createMsgNotify(m, be, bmaps, ap, rp, src, d);
+			return createMsgNotify(m, be, bmaps, ap, rp, src, o, d);
 	}
 
 	/** Create a new sign message and notify clients.
@@ -1488,14 +1435,15 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param src Message source.
+	 * @param o Owner name.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMsgNotify(String m, boolean be, String bmaps,
 		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
-		Integer d)
+		String o, Integer d)
 	{
 		SignMessageImpl sm = new SignMessageImpl(m, be, bmaps, ap, rp,
-			src, d);
+			src, o, d);
 		try {
 			sm.notifyCreate();
 			return sm;
@@ -1592,7 +1540,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			                  ? tolling
 			                  : schedule;
 			Integer d = getDuration(da);
-			return createMsg(m, be, ap, rp, src, d);
+			return createMsg(m, be, ap, rp, src, null, d);
 		} else
 			return null;
 	}
@@ -1657,7 +1605,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				logSched("set message to " + sm.getMulti());
 				if (sm.getSource() == tolling.ordinal())
 				    logPriceMessages(EventType.PRICE_DEPLOYED);
-				doSetMessageNext(sm, null);
+				doSetMessageNext(sm);
 			}
 			catch (TMSException e) {
 				logSched(e.getMessage());

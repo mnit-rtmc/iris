@@ -105,7 +105,7 @@ public class OpQueryDMSMessage extends OpAddco {
 	/** Set the current message on the sign */
 	private void setCurrentMessage(SignMessage sm) {
 		if (sm != null)
-			dms.setMessageCurrent(sm, null);
+			dms.setMessageCurrent(sm);
 		else
 			setErrorStatus("MSG RENDER FAILED");
 	}

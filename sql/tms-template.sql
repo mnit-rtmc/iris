@@ -1482,6 +1482,7 @@ CREATE TABLE iris.sign_message (
 	a_priority INTEGER NOT NULL,
 	r_priority INTEGER NOT NULL,
 	source INTEGER NOT NULL,
+	owner VARCHAR(15),
 	duration INTEGER
 );
 
@@ -2551,7 +2552,7 @@ camera_stream_controls_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.41.0
+database_version	4.42.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
@@ -2804,7 +2805,6 @@ PRV_0049	dms_admin	font			t
 PRV_0050	dms_admin	glyph			t
 PRV_0051	dms_admin	graphic			t
 PRV_0052	dms_control	dms		messageNext	t
-PRV_0053	dms_control	dms		ownerNext	t
 PRV_0054	dms_control	dms		deviceRequest	t
 PRV_0055	dms_control	sign_message			t
 PRV_0056	dms_policy	dms_sign_group			t

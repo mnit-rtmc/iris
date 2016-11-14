@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
@@ -34,8 +33,7 @@ public interface DMSPoller {
 	/** Send a message to the sign. If the message is already deployed on
 	 * the sign, restart the time remaining.
 	 * @param dms Sign to send message.
-	 * @param m Message to send.
-	 * @param o User who deployed message. */
-	void sendMessage(DMSImpl dms, SignMessage m, User o)
+	 * @param m Message to send. */
+	void sendMessage(DMSImpl dms, SignMessage m)
 		throws InvalidMessageException;
 }

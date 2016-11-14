@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.addco;
 
 import us.mn.state.dot.sched.DebugLog;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
@@ -68,9 +67,9 @@ public class AddcoPoller extends ThreadedPoller<AddcoProperty>
 
 	/** Send a new message to the sign */
 	@Override
-	public void sendMessage(DMSImpl dms, SignMessage sm, User o)
+	public void sendMessage(DMSImpl dms, SignMessage sm)
 		throws InvalidMessageException
 	{
-		addOp(new OpSendDMSMessage(dms, sm, o));
+		addOp(new OpSendDMSMessage(dms, sm));
 	}
 }

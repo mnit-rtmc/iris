@@ -395,20 +395,19 @@ class OpQueryMsg extends OpDms {
 		// update
 		complete(mess);
 
-		// user who created the message retrieved from the DMS
-		User irisUser = null;
-
 		// process response
 		if(valid) {
 			setErrorStatus("");
 			if (updateMaintStatus(owner))
 				sendMaintenanceEmail();
 
+			String iuser = null;
+
 			// get user name via owner
-			if(owner != null) {
-				irisUser = IrisUserHelper.lookup(owner);
-				String iuser = (irisUser == null ?
-					"null" : irisUser.getName());
+			if (owner != null) {
+				User irisUser = IrisUserHelper.lookup(owner);
+				iuser = (irisUser == null) ?
+					null : irisUser.getName();
 				LOG.log("OpQueryMsg: owner read from " +
 					"sensorserver=" + owner +
 					", Iris user lookup=" + iuser);
@@ -438,9 +437,9 @@ class OpQueryMsg extends OpDms {
 				msgtext = updatePageOnTime(msgtext, pgOnTime);
 				SignMessageImpl sm = (SignMessageImpl)
 					m_dms.createMsg(msgtext, false, apri,
-					rpri, external, duramins);
+					rpri, external, iuser, duramins);
 				if (sm != null)
-					m_dms.setMessageCurrent(sm, irisUser);
+					m_dms.setMessageCurrent(sm);
 
 			// don't have text
 			} else {
@@ -450,19 +449,15 @@ class OpQueryMsg extends OpDms {
 					sm = createSignMessageWithBitmap(
 						bitmap, duramins, pgOnTime,
 						apri, rpri);
-					if(sm != null) {
-						m_dms.setMessageCurrent(sm,
-							irisUser);
-					}
+					if (sm != null)
+						m_dms.setMessageCurrent(sm);
 				}
 				if(sm == null) {
 					sm = (SignMessageImpl)m_dms.
 						createMsg("", false, apri, rpri,
-						external, null);
-					if (sm != null) {
-						m_dms.setMessageCurrent(sm,
-							irisUser);
-					}
+						external, iuser, null);
+					if (sm != null)
+						m_dms.setMessageCurrent(sm);
 				}
 			}
 

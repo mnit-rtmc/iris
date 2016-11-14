@@ -171,13 +171,13 @@ public class OpQueryDMSMessage extends OpDMS {
 		                  ? SignMsgSource.schedule
 		                  : SignMsgSource.external;
 		setCurrentMessage(dms.createMsg(multi, (be == 1), p, p, src,
-			duration));
+			null, duration));
 	}
 
 	/** Set the current message on the sign */
 	private void setCurrentMessage(SignMessage sm) {
 		if (sm != null)
-			dms.setMessageCurrent(sm, null);
+			dms.setMessageCurrent(sm);
 		else
 			setErrorStatus("MSG RENDER FAILED");
 	}

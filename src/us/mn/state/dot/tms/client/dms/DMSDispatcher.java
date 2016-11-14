@@ -255,10 +255,8 @@ public class DMSDispatcher extends JPanel {
 		if (sel.size() > 0) {
 			SignMessage sm = createMessage();
 			if (sm != null) {
-				for (DMS dms: sel) {
-					dms.setOwnerNext(user);
+				for (DMS dms: sel)
 					dms.setMessageNext(sm);
-				}
 			}
 			if (sel.size() == 1)
 				composer.updateMessageLibrary();
@@ -279,11 +277,12 @@ public class DMSDispatcher extends JPanel {
 	/** Create a new message using the specified MULTI */
 	private SignMessage createMessage(String multi) {
 		String bitmaps = createBitmaps(multi);
-		if(bitmaps != null) {
+		if (bitmaps != null) {
 			boolean be = composer.isBeaconEnabled();
 			DMSMessagePriority p = composer.getPriority();
+			String u = user.getName();
 			Integer d = composer.getDuration();
-			return creator.create(multi, be, bitmaps, p, p, d);
+			return creator.create(multi, be, bitmaps, p, p, u, d);
 		} else
 			return null;
 	}
@@ -293,11 +292,9 @@ public class DMSDispatcher extends JPanel {
 		Set<DMS> sel = sel_mdl.getSelected();
 		if (sel.size() > 0) {
 			SignMessage sm = createBlankMessage();
-			if(sm != null) {
-				for(DMS dms: sel) {
-					dms.setOwnerNext(user);
+			if (sm != null) {
+				for (DMS dms: sel)
 					dms.setMessageNext(sm);
-				}
 			}
 		}
 	}
@@ -306,10 +303,10 @@ public class DMSDispatcher extends JPanel {
 	private SignMessage createBlankMessage() {
 		String multi = "";
 		String bitmaps = createBitmaps(multi);
-		if(bitmaps != null) {
+		if (bitmaps != null) {
 			return creator.create(multi, false, bitmaps,
 			       DMSMessagePriority.OVERRIDE,
-			       DMSMessagePriority.BLANK, null);
+			       DMSMessagePriority.BLANK, null, null);
 		} else
 			return null;
 	}
@@ -492,7 +489,6 @@ public class DMSDispatcher extends JPanel {
 	/** Can a message be sent to the specified DMS? */
 	public boolean canSend(DMS dms) {
 		return creator.canCreate() &&
-		       isUpdatePermitted(dms, "ownerNext") &&
 		       isUpdatePermitted(dms, "messageNext");
 	}
 

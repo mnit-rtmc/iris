@@ -62,8 +62,9 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
 		store.query("SELECT name, incident, multi, beacon_enabled, " +
-			"bitmaps, a_priority, r_priority, source, duration " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"bitmaps, a_priority, r_priority, source, owner, " +
+			"duration FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignMessageImpl(row));
@@ -83,6 +84,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		map.put("a_priority", activationPriority);
 		map.put("r_priority", runTimePriority);
 		map.put("source", source);
+		map.put("owner", owner);
 		map.put("duration", duration);
 		return map;
 	}
@@ -114,13 +116,14 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		     row.getInt(6),		// a_priority
 		     row.getInt(7),		// r_priority
 		     row.getInt(8),		// source
-		     (Integer) row.getObject(9) // duration
+		     row.getString(9),		// owner
+		     (Integer) row.getObject(10) // duration
 		);
 	}
 
 	/** Create a sign message */
 	private SignMessageImpl(String n, String inc, String m, boolean be,
-		String b, int ap, int rp, int s, Integer d)
+		String b, int ap, int rp, int s, String o, Integer d)
 	{
 		super(n);
 		incident = lookupIncident(inc);
@@ -130,13 +133,14 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		activationPriority = ap;
 		runTimePriority = rp;
 		source = s;
+		owner = o;
 		duration = d;		
 	}
 
 	/** Create a new sign message (by IRIS) */
 	public SignMessageImpl(String m, boolean be, String b,
 		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource s,
-		Integer d)
+		String o, Integer d)
 	{
 		super(createUniqueName());
 		multi = m;
@@ -145,6 +149,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		activationPriority = ap.ordinal();
 		runTimePriority = rp.ordinal();
 		source = s.ordinal();
+		owner = o;
 		duration = d;
 	}
 
@@ -219,6 +224,16 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	@Override
 	public int getSource() {
 		return source;
+	}
+
+	/** Owner of current message */
+	private String owner;
+
+	/** Get the sign message owner.
+	 * @return User who deployed the message. */
+	@Override
+	public String getOwner() {
+		return owner;
 	}
 
 	/** Duration of this message (minutes) */

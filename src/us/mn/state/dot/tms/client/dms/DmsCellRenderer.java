@@ -30,7 +30,6 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.proxy.CellRendererSize;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -197,18 +196,13 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		String loc = GeoLocHelper.getDescription(dms.getGeoLoc());
 		loc_lbl.setText(loc);
 		updateToolTip(dms, name, loc);
-		user_lbl.setText(formatOwner(dms));
+		user_lbl.setText(getOwner(dms));
 		updatePixelPanel(dms);
 	}
 
-	/** Format the owner name */
-	private String formatOwner(DMS dms) {
-		return IrisUserHelper.getNamePruned(getUser(dms));
-	}
-
-	/** Get the user name (may be overridden) */
-	protected User getUser(DMS dms) {
-		return dms.getOwnerCurrent();
+	/** Get the owner user name (may be overridden) */
+	protected String getOwner(DMS dms) {
+		return DMSHelper.getOwner(dms);
 	}
 
 	/** Update tooltip */
@@ -216,7 +210,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		StringBuilder tt = new StringBuilder();
 		switch (mode) {
 		case SMALL:
-			String owner = formatOwner(dms);
+			String owner = getOwner(dms);
 			tt.append(name);
 			if (!owner.isEmpty()) {
 				tt.append(": ");

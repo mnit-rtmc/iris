@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,8 +13,6 @@
  * GNU General Public License for more details.
  */
 package us.mn.state.dot.tms;
-
-import us.mn.state.dot.sonar.User;
 
 /**
  * DMS -- Dynamic Message Sign
@@ -162,15 +160,8 @@ public interface DMS extends Device {
 	 *         fields are: description, status, and current reading. */
 	String[] getPhotocellStatus();
 
-	/** Set the next message owner */
-	void setOwnerNext(User o);
-
 	/** Set the next sign message */
 	void setMessageNext(SignMessage m);
-
-	/** Get the owner of the current message.
-	 * @return User who deployed the message. */
-	User getOwnerCurrent();
 
 	/** Get the current sign message */
 	SignMessage getMessageCurrent();

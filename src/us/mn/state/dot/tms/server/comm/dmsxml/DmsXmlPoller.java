@@ -19,6 +19,7 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -55,17 +56,17 @@ public class DmsXmlPoller extends ThreadedPoller implements DMSPoller {
 	/** Send a new message to the sign. Called by DMSImpl.
 	 *  @param dms May be null.
 	 *  @param m Sign message to send, may be null.
-	 *  @param o User sending message, may be null.
 	 *  @throws InvalidMessageException
 	 *  @see DMSImpl, DMS */
 	@SuppressWarnings("unchecked")
-	public void sendMessage(DMSImpl dms, SignMessage m, User o)
+	public void sendMessage(DMSImpl dms, SignMessage m)
 		throws InvalidMessageException
 	{
-		LOG.log("DmsXmlPoller.sendMessage(" + dms + ", " +
-			m + ", " + o+ ") called.");
+		LOG.log("DmsXmlPoller.sendMessage(" + dms + ", " + m +
+		        ") called.");
 		if (dms == null || m == null)
 			return;
+		User o = IrisUserHelper.lookup(m.getOwner());
 		if (SignMessageHelper.isBlank(m))
 			addOp(new OpBlank(dms, m, o));
 		else

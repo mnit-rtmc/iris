@@ -116,8 +116,10 @@ public class OpSendLCSIndications extends OpLCS {
 		MultiString multi = new MultiString(ms);
 		if (multi.isBlank())
 			return dms.createMsgBlank(ap);
-		else
-			return dms.createMsg(ms, false, ap, OPERATOR, lcs,null);
+		else {
+			return dms.createMsg(ms, false, ap, OPERATOR, lcs,
+				user.getName(), null);
+		}
 	}
 
 	/** Create a MULTI string for a lane use indication */
@@ -160,10 +162,10 @@ public class OpSendLCSIndications extends OpLCS {
 	protected void sendIndication(int lane, DMSImpl dms) {
 		SignMessage sm = msgs[lane];
 		try {
-			dms.doSetMessageNext(sm, user);
+			dms.doSetMessageNext(sm);
 			ind_after[lane] = indications[lane];
 		}
-		catch(TMSException e) {
+		catch (TMSException e) {
 			logError("OpSendLCSIndications.sendIndication: " +
 				dms.getName() + ", " + e.getMessage());
 		}

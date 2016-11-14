@@ -348,4 +348,10 @@ public class DMSHelper extends BaseHelper {
 		}
 		return true;
 	}
+
+	/** Get the owner of the current message */
+	static public String getOwner(DMS dms) {
+		SignMessage sm = dms.getMessageCurrent();
+		return (sm != null) ? sm.getOwner() : "";
+	}
 }

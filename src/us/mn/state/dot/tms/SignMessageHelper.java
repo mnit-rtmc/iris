@@ -55,11 +55,12 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param src Message source.
+	 * @param owner Use name (null for any).
 	 * @param d Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
 	static public SignMessage find(String multi, String bitmaps,
 		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
-		Integer d)
+		String owner, Integer d)
 	{
 		int api = ap.ordinal();
 		int rpi = rp.ordinal();
@@ -71,7 +72,9 @@ public class SignMessageHelper extends BaseHelper {
 			    api == sm.getActivationPriority() &&
 			    rpi == sm.getRunTimePriority() &&
 			    checkSource(src, sm) &&
-			    integerEquals(d, sm.getDuration()))
+			    (objectEquals(owner, sm.getOwner()) ||
+			     (owner == null)) &&
+			    objectEquals(d, sm.getDuration()))
 				return sm;
 		}
 		return null;
@@ -85,14 +88,6 @@ public class SignMessageHelper extends BaseHelper {
 		SignMsgSource sms = SignMsgSource.fromOrdinal(sm.getSource());
 		return (src == sms) ||
 		       (src == schedule) && (sms == tolling);
-	}
-
-	/** Compare two (possibly-null) integers for equality */
-	static private boolean integerEquals(Integer i0, Integer i1) {
-		if (i0 == null)
-			return i1 == null;
-		else
-			return i0.equals(i1);
 	}
 
 	/** Compare the attributes of 2 sign messages.
@@ -111,12 +106,11 @@ public class SignMessageHelper extends BaseHelper {
 			return false;
 		if (sm1.getRunTimePriority() != sm2.getRunTimePriority())
 			return false;
+		if (!objectEquals(sm1.getOwner(), sm2.getOwner()))
+			return false;
 		final String bm1 = sm1.getBitmaps();
 		final String bm2 = sm2.getBitmaps();
-		if (bm1 == null)
-			return bm2 == null;
-		else
-			return bm1.equals(bm2);
+		return objectEquals(bm1, bm2);
 	}
 
 	/** Return an array of font names in a message.

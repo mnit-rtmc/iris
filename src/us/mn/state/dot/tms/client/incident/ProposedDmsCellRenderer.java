@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
@@ -41,10 +40,10 @@ public class ProposedDmsCellRenderer extends DmsCellRenderer {
 		model = m;
 	}
 
-	/** Get the user name */
+	/** Get the owner user name */
 	@Override
-	protected User getUser(DMS dms) {
-		return session.getUser();
+	protected String getOwner(DMS dms) {
+		return session.getUser().getName();
 	}
 
 	/** Get the raster graphic for page one */
