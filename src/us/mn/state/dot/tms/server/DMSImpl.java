@@ -20,7 +20,6 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -28,7 +27,6 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.CameraPreset;
@@ -69,7 +67,6 @@ import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.SignStatusEvent;
 import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.MultiString;
-import us.mn.state.dot.tms.utils.SString;
 
 /**
  * Dynamic Message Sign
