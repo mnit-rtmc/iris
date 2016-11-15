@@ -1479,7 +1479,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set the scheduled sign message.
 	 * @param sm New scheduled sign message */
-	private void setMsgSched(SignMessage sm) {
+	private void setMsgSchedNotify(SignMessage sm) {
 		if (!SignMessageHelper.isEquivalent(msg_sched, sm)) {
 			msg_sched = sm;
 			notifyAttribute("msgSched");
@@ -1511,7 +1511,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 					sm.getMulti());
 			}
 			if (shouldReplaceScheduled(sm)) {
-				setMsgSched(sm);
+				setMsgSchedNotify(sm);
 				sched_action = da;
 			}
 		} else if (SCHED_LOG.isOpen())
@@ -1591,7 +1591,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void updateScheduledMsg() {
 		if (null == sched_action) {
 			logSched("no message scheduled");
-			setMsgSched(createBlankScheduledMsg());
+			setMsgSchedNotify(createBlankScheduledMsg());
 		}
 		setPrices(sched_action);
 		SignMessage sm = msg_sched;
