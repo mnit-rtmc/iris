@@ -538,7 +538,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set height of sign face (mm) */
 	public void setFaceHeight(Integer h) {
-		if (!integerEquals(h, faceHeight)) {
+		if (!objectEquals(h, faceHeight)) {
 			faceHeight = h;
 			notifyAttribute("faceHeight");
 			updateStyles();
@@ -556,7 +556,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set width of sign face (mm) */
 	public void setFaceWidth(Integer w) {
-		if (!integerEquals(w, faceWidth)) {
+		if (!objectEquals(w, faceWidth)) {
 			faceWidth = w;
 			notifyAttribute("faceWidth");
 			updateStyles();
@@ -574,7 +574,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set horizontal border (mm) */
 	public void setHorizontalBorder(Integer b) {
-		if (!integerEquals(b, horizontalBorder)) {
+		if (!objectEquals(b, horizontalBorder)) {
 			horizontalBorder = b;
 			notifyAttribute("horizontalBorder");
 		}
@@ -591,7 +591,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set vertical border (mm) */
 	public void setVerticalBorder(Integer b) {
-		if (!integerEquals(b, verticalBorder)) {
+		if (!objectEquals(b, verticalBorder)) {
 			verticalBorder = b;
 			notifyAttribute("verticalBorder");
 		}
@@ -608,7 +608,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set horizontal pitch (mm) */
 	public void setHorizontalPitch(Integer p) {
-		if (!integerEquals(p, horizontalPitch)) {
+		if (!objectEquals(p, horizontalPitch)) {
 			horizontalPitch = p;
 			notifyAttribute("horizontalPitch");
 		}
@@ -625,7 +625,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set vertical pitch (mm) */
 	public void setVerticalPitch(Integer p) {
-		if (!integerEquals(p, verticalPitch)) {
+		if (!objectEquals(p, verticalPitch)) {
 			verticalPitch = p;
 			notifyAttribute("verticalPitch");
 		}
@@ -642,7 +642,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set sign height (pixels) */
 	public void setHeightPixels(Integer h) {
-		if (!integerEquals(h, heightPixels)) {
+		if (!objectEquals(h, heightPixels)) {
 			heightPixels = h;
 			// FIXME: update bitmap graphics plus stuck on/off
 			notifyAttribute("heightPixels");
@@ -660,7 +660,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set sign width (pixels) */
 	public void setWidthPixels(Integer w) {
-		if (!integerEquals(w, widthPixels)) {
+		if (!objectEquals(w, widthPixels)) {
 			widthPixels = w;
 			// FIXME: update bitmap graphics plus stuck on/off
 			notifyAttribute("widthPixels");
@@ -683,7 +683,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		//       mistake here ... uggh
 		if (h == 0 && DMSType.isFixedHeight(dms_type))
 			h = estimateLineHeight();
-		if (!integerEquals(h, charHeightPixels)) {
+		if (!objectEquals(h, charHeightPixels)) {
 			charHeightPixels = h;
 			notifyAttribute("charHeightPixels");
 		}
@@ -713,7 +713,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set character width (pixels) */
 	public void setCharWidthPixels(Integer w) {
-		if (!integerEquals(w, charWidthPixels)) {
+		if (!objectEquals(w, charWidthPixels)) {
 			charWidthPixels = w;
 			notifyAttribute("charWidthPixels");
 		}
@@ -736,7 +736,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set the minimum cabinet temperature */
 	public void setMinCabinetTemp(Integer t) {
-		if (!integerEquals(t, minCabinetTemp)) {
+		if (!objectEquals(t, minCabinetTemp)) {
 			minCabinetTemp = t;
 			notifyAttribute("minCabinetTemp");
 		}
@@ -753,7 +753,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set the maximum cabinet temperature */
 	public void setMaxCabinetTemp(Integer t) {
-		if (!integerEquals(t, maxCabinetTemp)) {
+		if (!objectEquals(t, maxCabinetTemp)) {
 			maxCabinetTemp = t;
 			notifyAttribute("maxCabinetTemp");
 		}
@@ -770,7 +770,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set the minimum ambient temperature */
 	public void setMinAmbientTemp(Integer t) {
-		if (!integerEquals(t, minAmbientTemp)) {
+		if (!objectEquals(t, minAmbientTemp)) {
 			minAmbientTemp = t;
 			notifyAttribute("minAmbientTemp");
 		}
@@ -787,7 +787,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set the maximum ambient temperature */
 	public void setMaxAmbientTemp(Integer t) {
-		if (!integerEquals(t, maxAmbientTemp)) {
+		if (!objectEquals(t, maxAmbientTemp)) {
 			maxAmbientTemp = t;
 			notifyAttribute("maxAmbientTemp");
 		}
@@ -804,7 +804,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set the minimum housing temperature */
 	public void setMinHousingTemp(Integer t) {
-		if (!integerEquals(t, minHousingTemp)) {
+		if (!objectEquals(t, minHousingTemp)) {
 			minHousingTemp = t;
 			notifyAttribute("minHousingTemp");
 		}
@@ -821,7 +821,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set the maximum housing temperature */
 	public void setMaxHousingTemp(Integer t) {
-		if (!integerEquals(t, maxHousingTemp)) {
+		if (!objectEquals(t, maxHousingTemp)) {
 			maxHousingTemp = t;
 			notifyAttribute("maxHousingTemp");
 		}
@@ -838,7 +838,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set the light output of the sign (percentage) */
 	public void setLightOutput(Integer l) {
-		if (!integerEquals(l, lightOutput)) {
+		if (!objectEquals(l, lightOutput)) {
 			lightOutput = l;
 			notifyAttribute("lightOutput");
 		}
@@ -1541,7 +1541,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Set the LDC pot base */
 	@Override
 	public void setLdcPotBase(Integer base) {
-		if (!integerEquals(base, ldcPotBase)) {
+		if (!objectEquals(base, ldcPotBase)) {
 			ldcPotBase = base;
 			notifyAttribute("ldcPotBase");
 		}
@@ -1559,7 +1559,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Set the pixel low curent threshold */
 	@Override
 	public void setPixelCurrentLow(Integer low) {
-		if (!integerEquals(low, pixelCurrentLow)) {
+		if (!objectEquals(low, pixelCurrentLow)) {
 			pixelCurrentLow = low;
 			notifyAttribute("pixelCurrentLow");
 		}
@@ -1577,7 +1577,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Set the pixel high curent threshold */
 	@Override
 	public void setPixelCurrentHigh(Integer high) {
-		if (!integerEquals(high, pixelCurrentHigh)) {
+		if (!objectEquals(high, pixelCurrentHigh)) {
 			pixelCurrentHigh = high;
 			notifyAttribute("pixelCurrentHigh");
 		}

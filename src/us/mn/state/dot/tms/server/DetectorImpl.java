@@ -485,7 +485,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 				f = null;
 			}
 		}
-		if (!stringEquals(f, fake)) {
+		if (!objectEquals(f, fake)) {
 			store.update(this, "fake", f);
 			fake_det = fd;
 			setFake(f);

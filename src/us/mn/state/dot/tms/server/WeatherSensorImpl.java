@@ -148,7 +148,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	/** Set the air temperature.
 	 * @param at Air temperature in Celsius (null for missing) */
 	public void setAirTempNotify(Integer at) {
-		if (!integerEquals(at, air_temp)) {
+		if (!objectEquals(at, air_temp)) {
 			air_temp = at;
 			notifyAttribute("airTemp");
 		}
@@ -165,7 +165,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
 	/** Set the wind speed in KPH */
 	public void setWindSpeedNotify(Integer ws) {
-		if (!integerEquals(ws, wind_speed)) {
+		if (!objectEquals(ws, wind_speed)) {
 			wind_speed = ws;
 			notifyAttribute("windSpeed");
 		}
@@ -186,7 +186,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	 *	  angle is rounded to the nearest 45 degrees. */
 	public void setWindDirNotify(Integer wd) {
 		Integer a = round45(wd);
-		if (!integerEquals(a, wind_dir)) {
+		if (!objectEquals(a, wind_dir)) {
 			wind_dir = a;
 			notifyAttribute("windDir");
 		}
@@ -257,7 +257,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
 	/** Set precipitation rate in mm/hr (null for missing) */
 	private void setPrecipRateNotify(Integer pr) {
-		if (!integerEquals(pr, precip_rate)) {
+		if (!objectEquals(pr, precip_rate)) {
 			precip_rate = pr;
 			notifyAttribute("precipRate");
 		}
@@ -280,7 +280,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
 	/** Set visibility in meters (null for missing) */
 	public void setVisibilityNotify(Integer v) {
-		if (!integerEquals(v, visibility_m)) {
+		if (!objectEquals(v, visibility_m)) {
 			visibility_m = v;
 			notifyAttribute("visibility");
 		}

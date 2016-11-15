@@ -469,7 +469,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Set the station ID */
 	public void doSetStationID(String s) throws TMSException {
-		if (stringEquals(s, station_id))
+		if (objectEquals(s, station_id))
 			return;
 		if (s != null && s.equals(""))
 			throw new ChangeVetoException("Invalid Station ID");

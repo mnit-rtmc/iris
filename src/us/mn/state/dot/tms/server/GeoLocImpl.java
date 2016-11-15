@@ -319,7 +319,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
 	/** Set the landmark */
 	public void doSetLandmark(String lm) throws TMSException {
-		if (!stringEquals(lm, landmark)) {
+		if (!objectEquals(lm, landmark)) {
 			store.update(this, "landmark", lm);
 			setLandmark(lm);
 		}

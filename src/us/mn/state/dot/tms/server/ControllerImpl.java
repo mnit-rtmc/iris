@@ -326,7 +326,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the access password */
 	public void doSetPassword(String pwd) throws TMSException {
-		if (!stringEquals(pwd, password)) {
+		if (!objectEquals(pwd, password)) {
 			store.update(this, "password", pwd);
 			setPassword(pwd);
 		}
@@ -580,7 +580,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the firmware version and notify clients of the change */
 	public void setVersionNotify(String v) {
-		if (!stringEquals(v, version)) {
+		if (!objectEquals(v, version)) {
 			storeVersion(SString.truncate(v, 64));
 			version = v;
 			notifyAttribute("version");

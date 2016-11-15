@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,10 +134,10 @@ public class LaneUseMultiImpl extends BaseObjectImpl implements LaneUseMulti {
 
 	/** Set the message number */
 	public void doSetMsgNum(Integer n) throws TMSException {
-		if(integerEquals(n, msg_num))
-			return;
-		store.update(this, "msg_num", n);
-		setMsgNum(n);
+		if (!objectEquals(n, msg_num)) {
+			store.update(this, "msg_num", n);
+			setMsgNum(n);
+		}
 	}
 
 	/** Get the message number */

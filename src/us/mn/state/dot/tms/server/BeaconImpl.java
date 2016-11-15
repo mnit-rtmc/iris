@@ -255,7 +255,7 @@ public class BeaconImpl extends DeviceImpl implements Beacon {
 
 	/** Set the controller I/O verify pin number */
 	public void doSetVerifyPin(Integer p) throws TMSException {
-		if (integerEquals(p, verify_pin))
+		if (objectEquals(p, verify_pin))
 			return;
 		if (p != null && (p < 1 || p > Controller.ALL_PINS))
 			throw new ChangeVetoException("Invalid pin: " + p);

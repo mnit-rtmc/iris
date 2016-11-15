@@ -119,20 +119,9 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return null;
 	}
 
-	/** Compare two (possibly-null) integers for equality */
-	static protected boolean integerEquals(Integer i0, Integer i1) {
-		if(i0 == null)
-			return i1 == null;
-		else
-			return i0.equals(i1);
-	}
-
-	/** Compare two (possibly-null) strings for equality */
-	static protected boolean stringEquals(String s0, String s1) {
-		if(s0 == null)
-			return s1 == null;
-		else
-			return s0.equals(s1);
+	/** Compare two (possibly-null) objects for equality */
+	static protected boolean objectEquals(Object o0, Object o1) {
+		return (o0 != null) ? o0.equals(o1) : o1 == null;
 	}
 
 	/** Lookup a sonar object */

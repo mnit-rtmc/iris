@@ -109,7 +109,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 
 	/** Set the starting station ID */
 	public void doSetStartID(String sid) throws TMSException {
-		if (!stringEquals(sid, start_id)) {
+		if (!objectEquals(sid, start_id)) {
 			store.update(this, "start_id", sid);
 			setStartID(sid);
 		}
@@ -132,7 +132,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 
 	/** Set the ending station ID */
 	public void doSetEndID(String eid) throws TMSException {
-		if (!stringEquals(eid, end_id)) {
+		if (!objectEquals(eid, end_id)) {
 			store.update(this, "end_id", eid);
 			setEndID(eid);
 		}
@@ -155,7 +155,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 
 	/** Set the tollway ID */
 	public void doSetTollway(String tw) throws TMSException {
-		if (!stringEquals(tw, tollway)) {
+		if (!objectEquals(tw, tollway)) {
 			store.update(this, "tollway", tw);
 			setTollway(tw);
 		}
