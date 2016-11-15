@@ -68,7 +68,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		/* The sign is blank.  If IRIS thinks there is a message on it,
 		 * that's wrong and needs to be updated. */
 		if (!dms.isMsgBlank())
-			setCurrentMessage(dms.createMsgBlank());
+			setMsgCurrent(dms.createMsgBlank());
 		return null;
 	}
 
@@ -80,14 +80,14 @@ public class OpQueryDMSMessage extends OpDMS {
 			return new QueryCurrentMessage();
 		/* Compare the CRC of the message on the sign to the
 		 * CRC of the message IRIS knows about */
-		SignMessage sm = dms.getMessageCurrent();
+		SignMessage sm = dms.getMsgCurrent();
 		String multi = parseMulti(sm.getMulti());
 		int crc = DmsMessageCRC.calculate(multi, sm.getBeaconEnabled(),
 			0);
 		if (crc != source.getCrc())
 			return new QueryCurrentMessage();
 		else {
-			setCurrentMessage(sm);
+			setMsgCurrent(sm);
 			return null;
 		}
 	}
@@ -153,7 +153,7 @@ public class OpQueryDMSMessage extends OpDMS {
 				/* If it's null, IRIS didn't send it ... */
 				if (rp == null)
 					rp = DMSMessagePriority.OTHER_SYSTEM;
-				setCurrentMessage(ms.getValue(),
+				setMsgCurrent(ms.getValue(),
 					beacon.getInteger(), rp, d);
 			} else {
 				logError("INVALID STATUS");
@@ -164,20 +164,20 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Set the current message on the sign */
-	private void setCurrentMessage(String multi, int be,
-		DMSMessagePriority p, Integer duration)
+	private void setMsgCurrent(String multi, int be, DMSMessagePriority p,
+		Integer duration)
 	{
 		SignMsgSource src = DMSMessagePriority.isScheduled(p)
 		                  ? SignMsgSource.schedule
 		                  : SignMsgSource.external;
-		setCurrentMessage(dms.createMsg(multi, (be == 1), p, p, src,
-			null, duration));
+		setMsgCurrent(dms.createMsg(multi, (be == 1), p, p, src, null,
+			duration));
 	}
 
 	/** Set the current message on the sign */
-	private void setCurrentMessage(SignMessage sm) {
+	private void setMsgCurrent(SignMessage sm) {
 		if (sm != null)
-			dms.setMessageCurrent(sm);
+			dms.setMsgCurrent(sm);
 		else
 			setErrorStatus("MSG RENDER FAILED");
 	}

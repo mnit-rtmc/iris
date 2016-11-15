@@ -55,7 +55,7 @@ public class OpSendDMSMessage extends OpAddco {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<AddcoProperty> phaseTwo() {
-		dms.setMessageNext(message);
+		dms.setMsgNext(message);
 		return new SendMsg();
 	}
 
@@ -76,8 +76,8 @@ public class OpSendDMSMessage extends OpAddco {
 	@Override
 	public void cleanup() {
 		if (isSuccess())
-			dms.setMessageCurrent(message);
-		dms.setMessageNext(null);
+			dms.setMsgCurrent(message);
+		dms.setMsgNext(null);
 		super.cleanup();
 	}
 }

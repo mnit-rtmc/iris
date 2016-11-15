@@ -291,7 +291,7 @@ public class SignMessageComposer extends JPanel {
 	private String getPagePrefix() {
 		DMS dms = dispatcher.getSingleSelection();
 		if (dms != null) {
-			SignMessage sm = dms.getMessageSched();
+			SignMessage sm = dms.getMsgSched();
 			if (sm != null && sm.getActivationPriority() ==
 			    DMSMessagePriority.PREFIX_PAGE.ordinal())
 				return sm.getMulti();

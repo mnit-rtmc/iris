@@ -120,7 +120,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller
 	public void sendMessage(DMSImpl dms, SignMessage sm)
 		throws InvalidMessageException
 	{
-		if (dms.isMessageCurrentEquivalent(sm))
+		if (dms.isMsgCurrentEquivalent(sm))
 			addOp(new OpUpdateDMSDuration(dms, sm));
 		else
 			addOp(new OpSendDMSMessage(dms, sm));

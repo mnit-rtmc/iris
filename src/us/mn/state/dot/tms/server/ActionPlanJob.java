@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -131,11 +131,11 @@ public class ActionPlanJob extends Job {
 	/** Update the DMS messages */
 	private void updateDmsMessages() {
 		Iterator<DMS> it = DMSHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			DMS dms = it.next();
-			if(dms instanceof DMSImpl) {
-				DMSImpl dmsi = (DMSImpl)dms;
-				dmsi.updateScheduledMessage();
+			if (dms instanceof DMSImpl) {
+				DMSImpl dmsi = (DMSImpl) dms;
+				dmsi.updateScheduledMsg();
 			}
 		}
 	}

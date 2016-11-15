@@ -168,7 +168,7 @@ public class OpSendDMSMessage extends OpDMS {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase phaseTwo() {
-		dms.setMessageNext(message);
+		dms.setMsgNext(message);
 		if (SignMessageHelper.isBlank(message))
 			return new ActivateBlankMsg();
 		else if (msg_num > 1)
@@ -206,7 +206,7 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
-			dms.setMessageCurrent(message);
+			dms.setMsgCurrent(message);
 			return new SetLossMsgs();
 		}
 	}
@@ -423,7 +423,7 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
-			dms.setMessageCurrent(message);
+			dms.setMsgCurrent(message);
 			return new SetLossMsgs();
 		}
 	}
@@ -624,7 +624,7 @@ public class OpSendDMSMessage extends OpDMS {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		dms.setMessageNext(null);
+		dms.setMsgNext(null);
 		super.cleanup();
 	}
 

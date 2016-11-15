@@ -116,7 +116,7 @@ public class DMSHelper extends BaseHelper {
 	 * @param dms DMS to lookup. */
 	static public String getMultiString(DMS dms) {
 		if (dms != null) {
-			SignMessage sm = dms.getMessageCurrent();
+			SignMessage sm = dms.getMsgCurrent();
 			if (sm != null)
 				return sm.getMulti();
 		}
@@ -166,7 +166,7 @@ public class DMSHelper extends BaseHelper {
 	 * @param dms The DMS containing the message.
 	 * @return Text of message on the DMS. */
 	static public String buildMsgLine(DMS dms) {
-		SignMessage sm = dms.getMessageCurrent();
+		SignMessage sm = dms.getMsgCurrent();
 		if (sm != null) {
 			String multi = sm.getMulti();
 			if (multi != null)
@@ -210,7 +210,7 @@ public class DMSHelper extends BaseHelper {
 	 * @return Array of bitmaps, one for each page, or null on error. */
 	static public BitmapGraphic[] getBitmaps(DMS dms) {
 		if (dms != null) {
-			SignMessage sm = dms.getMessageCurrent();
+			SignMessage sm = dms.getMsgCurrent();
 			return SignMessageHelper.getBitmaps(sm, dms);
 		} else
 			return null;
@@ -274,7 +274,7 @@ public class DMSHelper extends BaseHelper {
 	 */
 	static public RasterGraphic[] getRasters(DMS dms) {
 		if (dms != null) {
-			SignMessage sm = dms.getMessageCurrent();
+			SignMessage sm = dms.getMsgCurrent();
 			if (sm != null)
 				return getRasters(dms, sm);
 		}
@@ -351,7 +351,7 @@ public class DMSHelper extends BaseHelper {
 
 	/** Get the owner of the current message */
 	static public String getOwner(DMS dms) {
-		SignMessage sm = dms.getMessageCurrent();
+		SignMessage sm = dms.getMsgCurrent();
 		return (sm != null) ? sm.getOwner() : "";
 	}
 }

@@ -935,20 +935,20 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * a sign.
 	 * @see DeviceImpl.acquire */
 	@Override
-	public void setMessageNext(SignMessage sm) {
+	public void setMsgNext(SignMessage sm) {
 		msg_next = sm;
 	}
 
 	/** Set the next sign message.  This is called by SONAR when the
 	 * messageNext attribute is set. */
-	public void doSetMessageNext(SignMessage sm) throws TMSException {
+	public void doSetMsgNext(SignMessage sm) throws TMSException {
 		DMSPoller p = getDMSPoller();
 		if (null == p) {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
 		if (shouldActivate(sm))
-			doSetMessageNext(sm, p);
+			doSetMsgNext(sm, p);
 	}
 
 	/**
@@ -956,10 +956,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param sm Sign message, may not be null.
 	 * @param p DMS poller, may not be null.
 	 */
-	private void doSetMessageNext(SignMessage sm, DMSPoller p)
+	private void doSetMsgNext(SignMessage sm, DMSPoller p)
 		throws TMSException
 	{
-		SignMessage smn = validateMessage(sm);
+		SignMessage smn = validateMsg(sm);
 		// FIXME: there should be a better way to clear cached routes
 		//        in travel time estimator
 		int ap = smn.getActivationPriority();
@@ -978,7 +978,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Validate a sign message to send.
 	 * @param sm Sign message to validate.
 	 * @return The sign message to send (may be a scheduled message). */
-	private SignMessage validateMessage(SignMessage sm) throws TMSException{
+	private SignMessage validateMsg(SignMessage sm) throws TMSException{
 		MultiString multi = new MultiString(sm.getMulti());
 		SignMessage sched = msg_sched;	// Avoid race
 		if (sched != null && multi.isBlank()) {
@@ -1132,12 +1132,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void deployMsg(String m, boolean be, DMSMessagePriority ap,
 		DMSMessagePriority rp, SignMsgSource src)
 	{
-		if (getMessageCurrent().getMulti().equals(m))
+		if (getMsgCurrent().getMulti().equals(m))
 			return;
 		SignMessage sm = createMsg(m, be, ap, rp, src, null, null);
 		try {
-			if (!isMessageCurrentEquivalent(sm))
-				doSetMessageNext(sm);
+			if (!isMsgCurrentEquivalent(sm))
+				doSetMsgNext(sm);
 		}
 		catch (TMSException e) {
 			logError(e.getMessage());
@@ -1149,14 +1149,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set the current message.
 	 * @param sm Sign message. */
-	public void setMessageCurrent(SignMessage sm) {
+	public void setMsgCurrent(SignMessage sm) {
 		if (sm.getSource() == tolling.ordinal())
 			logPriceMessages(EventType.PRICE_VERIFIED);
-		if (!isMessageCurrentEquivalent(sm)) {
-			logMessage(sm);
+		if (!isMsgCurrentEquivalent(sm)) {
+			logMsg(sm);
 			setDeployTime();
 			msg_current = sm;
-			notifyAttribute("messageCurrent");
+			notifyAttribute("msgCurrent");
 			updateStyles();
 		}
 		updateBeacon();
@@ -1165,18 +1165,18 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Get the current messasge.
 	 * @return Currently active message (cannot be null) */
 	@Override
-	public SignMessage getMessageCurrent() {
+	public SignMessage getMsgCurrent() {
 		return msg_current;
 	}
 
 	/** Test if the current message is equivalent to a sign message */
-	public boolean isMessageCurrentEquivalent(SignMessage sm) {
+	public boolean isMsgCurrentEquivalent(SignMessage sm) {
 		return SignMessageHelper.isEquivalent(msg_current, sm);
 	}
 
 	/** Log a message.
 	 * @param sm Sign message. */
-	private void logMessage(SignMessage sm) {
+	private void logMsg(SignMessage sm) {
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = sm.getMulti();
 		if (SignMessageHelper.isBlank(sm)) {
@@ -1473,16 +1473,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Get the scheduled sign messasge.
 	 * @return Scheduled sign message */
 	@Override
-	public SignMessage getMessageSched() {
+	public SignMessage getMsgSched() {
 		return msg_sched;
 	}
 
 	/** Set the scheduled sign message.
 	 * @param sm New scheduled sign message */
-	private void setMessageSched(SignMessage sm) {
+	private void setMsgSched(SignMessage sm) {
 		if (!SignMessageHelper.isEquivalent(msg_sched, sm)) {
 			msg_sched = sm;
-			notifyAttribute("messageSched");
+			notifyAttribute("msgSched");
 		}
 	}
 
@@ -1494,7 +1494,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			return false;
 		SignMessage sm = createMsgSched(da);
 		try {
-			return sm == validateMessage(sm);
+			return sm == validateMsg(sm);
 		}
 		catch (TMSException e) {
 			return false;
@@ -1511,7 +1511,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 					sm.getMulti());
 			}
 			if (shouldReplaceScheduled(sm)) {
-				setMessageSched(sm);
+				setMsgSched(sm);
 				sched_action = da;
 			}
 		} else if (SCHED_LOG.isOpen())
@@ -1588,27 +1588,27 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Update the scheduled message on the sign */
-	public void updateScheduledMessage() {
+	public void updateScheduledMsg() {
 		if (null == sched_action) {
 			logSched("no message scheduled");
-			setMessageSched(createBlankScheduledMessage());
+			setMsgSched(createBlankScheduledMsg());
 		}
 		setPrices(sched_action);
 		SignMessage sm = msg_sched;
 		if (sm != null)
-			updateScheduledMessage(sm);
+			updateScheduledMsg(sm);
 		sched_action = null;
 	}
 
 	/** Update the scheduled message on the sign */
-	private void updateScheduledMessage(SignMessage sm) {
+	private void updateScheduledMsg(SignMessage sm) {
 		// NOTE: use schedule for source even for blank messages
 		if (shouldActivate(sm, schedule.ordinal())) {
 			try {
 				logSched("set message to " + sm.getMulti());
 				if (sm.getSource() == tolling.ordinal())
 				    logPriceMessages(EventType.PRICE_DEPLOYED);
-				doSetMessageNext(sm);
+				doSetMsgNext(sm);
 			}
 			catch (TMSException e) {
 				logSched(e.getMessage());
@@ -1621,7 +1621,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Create a blank scheduled message */
-	private SignMessage createBlankScheduledMessage() {
+	private SignMessage createBlankScheduledMsg() {
 		return isCurrentScheduled() ? createMsgBlank() : null;
 	}
 
@@ -1649,23 +1649,23 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Test if the current message is "scheduled" */
 	private boolean isMsgScheduled() {
 		return SignMsgSource.isScheduled(
-			getMessageCurrent().getSource());
+			getMsgCurrent().getSource());
 	}
 
 	/** Test if the current message has beacon enabled */
 	private boolean isMsgBeacon() {
-		return getMessageCurrent().getBeaconEnabled();
+		return getMsgCurrent().getBeaconEnabled();
 	}
 
 	/** Test if the current message is a travel time */
 	private boolean isMsgTravelTime() {
-		SignMessage sm = getMessageCurrent();
+		SignMessage sm = getMsgCurrent();
 		return sm.getRunTimePriority() == TRAVEL_TIME.ordinal();
 	}
 
 	/** Test if the current message is AWS */
 	private boolean isMsgAws() {
-		SignMessage sm = getMessageCurrent();
+		SignMessage sm = getMsgCurrent();
 		return sm.getRunTimePriority() == AWS.ordinal();
 	}
 
@@ -1764,7 +1764,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Write the sign message as xml */
 	public void writeSignMessageXml(Writer w) throws IOException {
-		SignMessage msg = getMessageCurrent();
+		SignMessage msg = getMsgCurrent();
 		if (msg instanceof SignMessageImpl)
 			((SignMessageImpl) msg).writeXml(w, this);
 	}

@@ -84,7 +84,7 @@ public class OpQueryDMSMessage extends OpAddco {
 
 	/** Get current multi string on sign */
 	private String getMultiCurrent() {
-		return dms.getMessageCurrent().getMulti();
+		return dms.getMsgCurrent().getMulti();
 	}
 
 	/** Create a sign message for the sign */
@@ -105,7 +105,7 @@ public class OpQueryDMSMessage extends OpAddco {
 	/** Set the current message on the sign */
 	private void setCurrentMessage(SignMessage sm) {
 		if (sm != null)
-			dms.setMessageCurrent(sm);
+			dms.setMsgCurrent(sm);
 		else
 			setErrorStatus("MSG RENDER FAILED");
 	}

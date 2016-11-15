@@ -161,13 +161,13 @@ public interface DMS extends Device {
 	String[] getPhotocellStatus();
 
 	/** Set the next sign message */
-	void setMessageNext(SignMessage m);
+	void setMsgNext(SignMessage m);
 
 	/** Get the current sign message */
-	SignMessage getMessageCurrent();
+	SignMessage getMsgCurrent();
 
 	/** Get the scheduled sign message */
-	SignMessage getMessageSched();
+	SignMessage getMsgSched();
 
 	/** Get the message deploy time.
 	 * @return Time message was deployed (ms since epoch).

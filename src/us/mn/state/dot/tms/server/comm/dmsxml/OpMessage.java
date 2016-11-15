@@ -92,7 +92,7 @@ class OpMessage extends OpDms {
 
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
-		m_dms.setMessageNext(m_sm);
+		m_dms.setMsgNext(m_sm);
 
 		// dms is configured
 		if(dmsConfigured())
@@ -249,7 +249,7 @@ class OpMessage extends OpDms {
 		updateMaintStatus("");
 		if (valid) {
 			setErrorStatus("");
-			m_dms.setMessageCurrent(m_sm);
+			m_dms.setMsgCurrent(m_sm);
 		} else {
 			LOG.log("OpMessage.parseResponse(): response " +
 				"from SensorServer received, ignored " +
@@ -335,7 +335,7 @@ class OpMessage extends OpDms {
 	/** Cleanup the operation. Called by CommThread.doPoll(). */
 	@Override
 	public void cleanup() {
-		m_dms.setMessageNext(null);
+		m_dms.setMsgNext(null);
 		super.cleanup();
 	}
 }

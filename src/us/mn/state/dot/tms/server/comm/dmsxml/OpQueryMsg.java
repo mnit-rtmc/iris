@@ -439,7 +439,7 @@ class OpQueryMsg extends OpDms {
 					m_dms.createMsg(msgtext, false, apri,
 					rpri, external, iuser, duramins);
 				if (sm != null)
-					m_dms.setMessageCurrent(sm);
+					m_dms.setMsgCurrent(sm);
 
 			// don't have text
 			} else {
@@ -450,14 +450,14 @@ class OpQueryMsg extends OpDms {
 						bitmap, duramins, pgOnTime,
 						apri, rpri);
 					if (sm != null)
-						m_dms.setMessageCurrent(sm);
+						m_dms.setMsgCurrent(sm);
 				}
 				if(sm == null) {
 					sm = (SignMessageImpl)m_dms.
 						createMsg("", false, apri, rpri,
 						external, iuser, null);
 					if (sm != null)
-						m_dms.setMessageCurrent(sm);
+						m_dms.setMsgCurrent(sm);
 				}
 			}
 

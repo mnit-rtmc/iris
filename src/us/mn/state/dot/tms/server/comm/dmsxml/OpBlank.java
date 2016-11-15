@@ -45,8 +45,8 @@ class OpBlank extends OpDms
 
 	/** Create the second phase of the operation */
 	protected Phase phaseTwo() {
-		m_dms.setMessageNext(m_sm);
-		if(dmsConfigured())
+		m_dms.setMsgNext(m_sm);
+		if (dmsConfigured())
 			return new PhaseSetBlank();
 
 		// dms not configured
@@ -124,7 +124,7 @@ class OpBlank extends OpDms
 		// update dms
 		updateMaintStatus("");
 		if (valid)
-			m_dms.setMessageCurrent(m_sm);
+			m_dms.setMsgCurrent(m_sm);
 		else {
 			LOG.log(
 				"OpBlank: response from SensorServer " +
@@ -194,7 +194,7 @@ class OpBlank extends OpDms
 	/** Cleanup the operation. Called by CommThread.doPoll(). */
 	@Override
 	public void cleanup() {
-		m_dms.setMessageNext(null);
+		m_dms.setMsgNext(null);
 		super.cleanup();
 	}
 }

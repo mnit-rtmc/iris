@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -136,7 +136,7 @@ public class PropBrightness extends IPanel {
 	/** Update the feedback buttons */
 	private void updateFeedback() {
 		boolean enable = canRequest() && !SignMessageHelper.isBlank(
-			dms.getMessageCurrent());
+			dms.getMsgCurrent());
 		bright_low.setEnabled(enable);
 		bright_good.setEnabled(enable);
 		bright_high.setEnabled(enable);

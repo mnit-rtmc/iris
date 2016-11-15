@@ -162,7 +162,7 @@ public class OpSendLCSIndications extends OpLCS {
 	protected void sendIndication(int lane, DMSImpl dms) {
 		SignMessage sm = msgs[lane];
 		try {
-			dms.doSetMessageNext(sm);
+			dms.doSetMsgNext(sm);
 			ind_after[lane] = indications[lane];
 		}
 		catch (TMSException e) {

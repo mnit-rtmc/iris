@@ -256,7 +256,7 @@ public class DMSDispatcher extends JPanel {
 			SignMessage sm = createMessage();
 			if (sm != null) {
 				for (DMS dms: sel)
-					dms.setMessageNext(sm);
+					dms.setMsgNext(sm);
 			}
 			if (sel.size() == 1)
 				composer.updateMessageLibrary();
@@ -294,7 +294,7 @@ public class DMSDispatcher extends JPanel {
 			SignMessage sm = createBlankMessage();
 			if (sm != null) {
 				for (DMS dms: sel)
-					dms.setMessageNext(sm);
+					dms.setMsgNext(sm);
 			}
 		}
 	}
@@ -404,10 +404,10 @@ public class DMSDispatcher extends JPanel {
 
 	/** Set a single selected DMS */
 	private void setSelected(DMS dms) {
-		if(DMSHelper.isActive(dms)) {
+		if (DMSHelper.isActive(dms)) {
 			setEnabled(true);
-			SignMessage sm = dms.getMessageCurrent();
-			if(sm != null)
+			SignMessage sm = dms.getMsgCurrent();
+			if (sm != null)
 				setMessage(sm.getMulti());
 		} else
 			setEnabled(false);
