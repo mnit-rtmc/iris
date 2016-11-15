@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm;
 
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 
@@ -34,6 +33,5 @@ public interface DMSPoller {
 	 * the sign, restart the time remaining.
 	 * @param dms Sign to send message.
 	 * @param m Message to send. */
-	void sendMessage(DMSImpl dms, SignMessage m)
-		throws InvalidMessageException;
+	void sendMessage(DMSImpl dms, SignMessage m);
 }

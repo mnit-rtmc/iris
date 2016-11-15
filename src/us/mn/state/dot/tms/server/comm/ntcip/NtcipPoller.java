@@ -21,7 +21,6 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -117,9 +116,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller
 	/** Send a new message to the sign */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void sendMessage(DMSImpl dms, SignMessage sm)
-		throws InvalidMessageException
-	{
+	public void sendMessage(DMSImpl dms, SignMessage sm) {
 		if (dms.isMsgCurrentEquivalent(sm))
 			addOp(new OpUpdateDMSDuration(dms, sm));
 		else

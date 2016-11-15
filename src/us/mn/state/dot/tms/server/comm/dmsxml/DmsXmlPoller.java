@@ -18,7 +18,6 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.IrisUserHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -56,12 +55,9 @@ public class DmsXmlPoller extends ThreadedPoller implements DMSPoller {
 	/** Send a new message to the sign. Called by DMSImpl.
 	 *  @param dms May be null.
 	 *  @param m Sign message to send, may be null.
-	 *  @throws InvalidMessageException
 	 *  @see DMSImpl, DMS */
 	@SuppressWarnings("unchecked")
-	public void sendMessage(DMSImpl dms, SignMessage m)
-		throws InvalidMessageException
-	{
+	public void sendMessage(DMSImpl dms, SignMessage m) {
 		LOG.log("DmsXmlPoller.sendMessage(" + dms + ", " + m +
 		        ") called.");
 		if (dms == null || m == null)
