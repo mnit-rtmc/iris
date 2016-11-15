@@ -1156,7 +1156,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		// FIXME: there should be a better way to clear cached routes
 		//        in travel time estimator
 		int ap = smn.getActivationPriority();
-		if (ap == OVERRIDE.ordinal())
+		if (OVERRIDE.ordinal() == ap)
 			formatter.clear();
 		p.sendMessage(this, smn);
 	}
@@ -1376,7 +1376,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			return false;
 		SignMessage sm = createMsgSched(da);
 		try {
-			return sm == validateMsg(sm);
+			return validateMsg(sm) == sm;
 		}
 		catch (TMSException e) {
 			return false;
