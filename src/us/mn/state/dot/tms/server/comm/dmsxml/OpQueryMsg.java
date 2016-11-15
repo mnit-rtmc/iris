@@ -439,25 +439,25 @@ class OpQueryMsg extends OpDms {
 					m_dms.createMsg(msgtext, false, apri,
 					rpri, external, iuser, duramins);
 				if (sm != null)
-					m_dms.setMsgCurrent(sm);
+					m_dms.setMsgCurrentNotify(sm);
 
 			// don't have text
 			} else {
 
 				SignMessageImpl sm = null;
-				if(usebitmap) {
+				if (usebitmap) {
 					sm = createSignMessageWithBitmap(
 						bitmap, duramins, pgOnTime,
 						apri, rpri);
 					if (sm != null)
-						m_dms.setMsgCurrent(sm);
+						m_dms.setMsgCurrentNotify(sm);
 				}
-				if(sm == null) {
-					sm = (SignMessageImpl)m_dms.
+				if (sm == null) {
+					sm = (SignMessageImpl) m_dms.
 						createMsg("", false, apri, rpri,
 						external, iuser, null);
 					if (sm != null)
-						m_dms.setMsgCurrent(sm);
+						m_dms.setMsgCurrentNotify(sm);
 				}
 			}
 

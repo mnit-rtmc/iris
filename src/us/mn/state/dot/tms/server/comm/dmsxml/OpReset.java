@@ -125,7 +125,7 @@ class OpReset extends OpDms
 			setErrorStatus("");
 			SignMessage sm = m_dms.createMsgBlank();
 			if (sm != null)
-                		m_dms.setMsgCurrent(sm);
+                		m_dms.setMsgCurrentNotify(sm);
 
 		// valid flag is false
 		} else {

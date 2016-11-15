@@ -124,7 +124,7 @@ class OpBlank extends OpDms
 		// update dms
 		updateMaintStatus("");
 		if (valid)
-			m_dms.setMsgCurrent(m_sm);
+			m_dms.setMsgCurrentNotify(m_sm);
 		else {
 			LOG.log(
 				"OpBlank: response from SensorServer " +

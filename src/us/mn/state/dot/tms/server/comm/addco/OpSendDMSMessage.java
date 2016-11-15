@@ -76,7 +76,7 @@ public class OpSendDMSMessage extends OpAddco {
 	@Override
 	public void cleanup() {
 		if (isSuccess())
-			dms.setMsgCurrent(message);
+			dms.setMsgCurrentNotify(message);
 		dms.setMsgNext(null);
 		super.cleanup();
 	}

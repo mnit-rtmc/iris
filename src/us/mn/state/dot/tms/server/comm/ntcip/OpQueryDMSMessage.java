@@ -177,7 +177,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	/** Set the current message on the sign */
 	private void setMsgCurrent(SignMessage sm) {
 		if (sm != null)
-			dms.setMsgCurrent(sm);
+			dms.setMsgCurrentNotify(sm);
 		else
 			setErrorStatus("MSG RENDER FAILED");
 	}

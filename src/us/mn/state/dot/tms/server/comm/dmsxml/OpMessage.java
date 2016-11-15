@@ -249,7 +249,7 @@ class OpMessage extends OpDms {
 		updateMaintStatus("");
 		if (valid) {
 			setErrorStatus("");
-			m_dms.setMsgCurrent(m_sm);
+			m_dms.setMsgCurrentNotify(m_sm);
 		} else {
 			LOG.log("OpMessage.parseResponse(): response " +
 				"from SensorServer received, ignored " +
