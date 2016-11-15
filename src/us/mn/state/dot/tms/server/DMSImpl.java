@@ -79,8 +79,29 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
+	/** Interface for handling brightness samples */
+	static public interface BrightnessHandler {
+		void feedback(EventType et, int photo, int output);
+	}
+
 	/** DMS schedule debug log */
 	static private final DebugLog SCHED_LOG = new DebugLog("sched");
+
+	/** Test if a sign message should be activated.
+	 * @param existing Message existing on DMS.
+	 * @param ap Activation priority.
+	 * @param src Message source.
+	 * @return True if message should be activated; false otherwise. */
+	static private boolean shouldActivate(SignMessage existing,
+		DMSMessagePriority ap, int src)
+	{
+		if (null == existing)
+			return true;
+		if (SignMsgSource.isScheduled(existing.getSource()) &&
+		    SignMsgSource.isScheduled(src))
+			return true;
+		return ap.ordinal() >= existing.getRunTimePriority();
+	}
 
 	/** Load all the DMS */
 	static protected void loadAll() throws TMSException {
@@ -120,6 +141,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -136,11 +158,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -292,22 +316,22 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void setPreset(CameraPreset cp) {
 		final CameraPreset ocp = preset;
 		if (cp instanceof CameraPresetImpl) {
-			CameraPresetImpl cpi = (CameraPresetImpl)cp;
+			CameraPresetImpl cpi = (CameraPresetImpl) cp;
 			cpi.setAssignedNotify(true);
 		}
 		preset = cp;
 		if (ocp instanceof CameraPresetImpl) {
-			CameraPresetImpl ocpi = (CameraPresetImpl)ocp;
+			CameraPresetImpl ocpi = (CameraPresetImpl) ocp;
 			ocpi.setAssignedNotify(false);
 		}
 	}
 
 	/** Set the verification camera preset */
 	public void doSetPreset(CameraPreset cp) throws TMSException {
-		if (cp == preset)
-			return;
-		store.update(this, "preset", cp);
-		setPreset(cp);
+		if (cp != preset) {
+			store.update(this, "preset", cp);
+			setPreset(cp);
+		}
 	}
 
 	/** Get verification camera preset */
@@ -1099,22 +1123,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		       shouldActivate(messageNext, ap, src);
 	}
 
-	/** Test if a sign message should be activated.
-	 * @param existing Message existing on DMS.
-	 * @param ap Activation priority.
-	 * @param src Message source.
-	 * @return True if message should be activated; false otherwise. */
-	static private boolean shouldActivate(SignMessage existing,
-		DMSMessagePriority ap, int src)
-	{
-		if (existing == null)
-			return true;
-		if (SignMsgSource.isScheduled(existing.getSource()) &&
-		    SignMsgSource.isScheduled(src))
-			return true;
-		return ap.ordinal() >= existing.getRunTimePriority();
-	}
-
 	/** Deploy (create and send) a sign message.
 	 * @param m MULTI string.
 	 * @param be Beacon enabled.
@@ -1307,11 +1315,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Interface for handling brightness samples */
-	static public interface BrightnessHandler {
-		void feedback(EventType et, int photo, int output);
-	}
-
 	/** Create a pre-rendered message for the sign (ADDCO, DMSXML).
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
@@ -1381,9 +1384,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private BitmapGraphic[] copyBitmaps(BitmapGraphic[] pages) {
 		Integer w = widthPixels;
 		Integer h = heightPixels;
-		if (w == null || w < 1)
+		if (null == w || w < 1)
 			return null;
-		if (h == null || h < 1)
+		if (null == h || h < 1)
 			return null;
 		BitmapGraphic[] p = new BitmapGraphic[pages.length];
 		for (int i = 0; i < p.length; i++) {
@@ -1520,7 +1523,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @return true if scheduled message should be replaced. */
 	private boolean shouldReplaceScheduled(SignMessage sm) {
 		SignMessage s = messageSched;	// Avoid NPE
-		return s == null ||
+		return null == s ||
 		       sm.getActivationPriority() > s.getActivationPriority() ||
 		       sm.getRunTimePriority() >= s.getRunTimePriority();
 	}
@@ -1586,7 +1589,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Update the scheduled message on the sign */
 	public void updateScheduledMessage() {
-		if (sched_action == null) {
+		if (null == sched_action) {
 			logSched("no message scheduled");
 			setMessageSched(createBlankScheduledMessage());
 		}
@@ -1619,10 +1622,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Create a blank scheduled message */
 	private SignMessage createBlankScheduledMessage() {
-		if (isCurrentScheduled())
-			return createMsgBlank();
-		else
-			return null;
+		return isCurrentScheduled() ? createMsgBlank() : null;
 	}
 
 	/** Test if the current message is scheduled */
@@ -1631,8 +1631,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		// then we won't consider the message scheduled
 		SignMessage c = messageCurrent;
 		SignMessage n = messageNext;
-		return (c == null || SignMsgSource.isScheduled(c.getSource()))
-		    && (n == null || SignMsgSource.isScheduled(n.getSource()));
+		return (null == c || SignMsgSource.isScheduled(c.getSource()))
+		    && (null == n || SignMsgSource.isScheduled(n.getSource()));
 	}
 
 	/** Test if DMS is available */
@@ -1766,7 +1766,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void writeSignMessageXml(Writer w) throws IOException {
 		SignMessage msg = getMessageCurrent();
 		if (msg instanceof SignMessageImpl)
-			((SignMessageImpl)msg).writeXml(w, this);
+			((SignMessageImpl) msg).writeXml(w, this);
 	}
 
 	/** Check if the sign is an active dialup sign */
