@@ -21,7 +21,7 @@ import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -224,9 +224,9 @@ public class ComposerMiscPanel extends JPanel {
 	}
 
 	/** Get the selected message priority */
-	public DMSMessagePriority getPriority() {
+	public DmsMsgPriority getPriority() {
 		return alert_chx.isSelected()
-		     ? DMSMessagePriority.ALERT
-		     : DMSMessagePriority.OPERATOR;
+		     ? DmsMsgPriority.ALERT
+		     : DmsMsgPriority.OPERATOR;
 	}
 }

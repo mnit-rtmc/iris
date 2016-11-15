@@ -15,15 +15,15 @@
 package us.mn.state.dot.tms;
 
 /**
- * DMS message priority levels. This enum is designed so that the ordinal
- * values can be used for NTCIP activation and run-time priority. NTCIP
+ * DMS message priority levels.  This enum is designed so that the ordinal
+ * values can be used for NTCIP activation and run-time priority.  NTCIP
  * priority values can range from 1 to 255, with higher numbers indicating
- * higher priority. The enum is also ordered from low to high priority.
+ * higher priority.  The enum is also ordered from low to high priority.
  *
  * @author Michael Darter
  * @author Douglas Lau
  */
-public enum DMSMessagePriority {
+public enum DmsMsgPriority {
 	INVALID,	/* 0: invalid priority */
 	BLANK,		/* 1: blank message run-time priority */
 	PREFIX_PAGE,	/* 2: prefix page combining (activation only) */
@@ -40,16 +40,19 @@ public enum DMSMessagePriority {
 	AWS,		/* 13: automated warning system */
 	OVERRIDE;	/* 14: override priority */
 
-	/** Get a DMSMessagePriority from an ordinal value */
-	public static DMSMessagePriority fromOrdinal(int o) {
-		if (o >= 0 && o < values().length)
-			return values()[o];
+	/** Values array */
+	static private final DmsMsgPriority[] VALUES = values();
+
+	/** Get a DmsMsgPriority from an ordinal value */
+	public static DmsMsgPriority fromOrdinal(int o) {
+		if (o >= 0 && o < VALUES.length)
+			return VALUES[o];
 		else
 			return INVALID;
 	}
 
 	/** Test if a run-time priority was "scheduled" */
-	static public boolean isScheduled(DMSMessagePriority p) {
+	static public boolean isScheduled(DmsMsgPriority p) {
 		switch (p) {
 		case INVALID:
 		case BLANK:

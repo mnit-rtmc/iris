@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -127,8 +127,8 @@ public class OpQueryDMSMessage extends OpDMS {
 				.ordinal(), 1);
 			ASN1Integer beacon = dmsMessageBeacon.makeInt(
 				DmsMessageMemoryType.currentBuffer, 1);
-			ASN1Enum<DMSMessagePriority> prior = new ASN1Enum<
-				DMSMessagePriority>(DMSMessagePriority.class,
+			ASN1Enum<DmsMsgPriority> prior = new ASN1Enum<
+				DmsMsgPriority>(DmsMsgPriority.class,
 				dmsMessageRunTimePriority.node,
 				DmsMessageMemoryType.currentBuffer.ordinal(),1);
 			ASN1Enum<DmsMessageStatus> status = new ASN1Enum<
@@ -149,10 +149,10 @@ public class OpQueryDMSMessage extends OpDMS {
 			logQuery(time);
 			if (status.getEnum() == DmsMessageStatus.valid) {
 				Integer d = parseDuration(time.getInteger());
-				DMSMessagePriority rp = prior.getEnum();
+				DmsMsgPriority rp = prior.getEnum();
 				/* If it's null, IRIS didn't send it ... */
 				if (rp == null)
-					rp = DMSMessagePriority.OTHER_SYSTEM;
+					rp = DmsMsgPriority.OTHER_SYSTEM;
 				setMsgCurrent(ms.getValue(),
 					beacon.getInteger(), rp, d);
 			} else {
@@ -164,10 +164,10 @@ public class OpQueryDMSMessage extends OpDMS {
 	}
 
 	/** Set the current message on the sign */
-	private void setMsgCurrent(String multi, int be, DMSMessagePriority p,
+	private void setMsgCurrent(String multi, int be, DmsMsgPriority p,
 		Integer duration)
 	{
-		SignMsgSource src = DMSMessagePriority.isScheduled(p)
+		SignMsgSource src = DmsMsgPriority.isScheduled(p)
 		                  ? SignMsgSource.schedule
 		                  : SignMsgSource.external;
 		setMsgCurrent(dms.createMsg(multi, (be == 1), p, p, src, null,

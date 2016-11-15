@@ -59,7 +59,7 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param d Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
 	static public SignMessage find(String multi, String bitmaps,
-		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
+		DmsMsgPriority ap, DmsMsgPriority rp, SignMsgSource src,
 		String owner, Integer d)
 	{
 		int api = ap.ordinal();

@@ -15,8 +15,8 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DMSMessagePriority;
-import static us.mn.state.dot.tms.DMSMessagePriority.*;
+import us.mn.state.dot.tms.DmsMsgPriority;
+import static us.mn.state.dot.tms.DmsMsgPriority.*;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
@@ -38,7 +38,7 @@ import us.mn.state.dot.tms.utils.MultiString;
 public class OpSendLCSIndications extends OpLCS {
 
 	/** Get the activation priority for the specified indication */
-	static protected DMSMessagePriority getActivationPriority(int ind) {
+	static protected DmsMsgPriority getActivationPriority(int ind) {
 		switch(LaneUseIndication.fromOrdinal(ind)) {
 		case LANE_CLOSED:
 			return INCIDENT_HIGH;
@@ -112,7 +112,7 @@ public class OpSendLCSIndications extends OpLCS {
 	 * SONAR task processor thread, which might have a queue of tasks
 	 * already pending. */
 	private SignMessage createSignMessage(DMSImpl dms, String ms, int ind) {
-		DMSMessagePriority ap = getActivationPriority(ind);
+		DmsMsgPriority ap = getActivationPriority(ind);
 		MultiString multi = new MultiString(ms);
 		if (multi.isBlank())
 			return dms.createMsgBlank(ap);

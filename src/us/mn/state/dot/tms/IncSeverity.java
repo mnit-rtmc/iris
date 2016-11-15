@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms;
 
-import static us.mn.state.dot.tms.DMSMessagePriority.*;
+import static us.mn.state.dot.tms.DmsMsgPriority.*;
 import static us.mn.state.dot.tms.IncRange.*;
 
 /**
@@ -34,10 +34,10 @@ public enum IncSeverity {
 	public final boolean branching;
 
 	/** Message priority */
-	public final DMSMessagePriority priority;
+	public final DmsMsgPriority priority;
 
 	/** Create an incident severity value */
-	private IncSeverity(IncRange r, boolean b, DMSMessagePriority p) {
+	private IncSeverity(IncRange r, boolean b, DmsMsgPriority p) {
 		range = r;
 		branching = b;
 		priority = p;

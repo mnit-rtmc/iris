@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.SignMessage;
@@ -284,8 +284,8 @@ public class OpSendDMSMessage extends OpDMS {
 				DmsMessageMemoryType.changeable, msg_num);
 			ASN1Integer srv = dmsMessagePixelService.makeInt(
 				DmsMessageMemoryType.changeable, msg_num);
-			ASN1Enum<DMSMessagePriority> prior = new ASN1Enum<
-				DMSMessagePriority>(DMSMessagePriority.class,
+			ASN1Enum<DmsMsgPriority> prior = new ASN1Enum<
+				DmsMsgPriority>(DmsMsgPriority.class,
 				dmsMessageRunTimePriority.node,
 				DmsMessageMemoryType.changeable.ordinal(),
 				msg_num);

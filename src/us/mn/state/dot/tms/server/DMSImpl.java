@@ -37,8 +37,8 @@ import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DMSMessagePriority;
-import static us.mn.state.dot.tms.DMSMessagePriority.*;
+import us.mn.state.dot.tms.DmsMsgPriority;
+import static us.mn.state.dot.tms.DmsMsgPriority.*;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Font;
@@ -90,7 +90,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param src Message source.
 	 * @return True if message should be activated; false otherwise. */
 	static private boolean shouldActivate(SignMessage existing,
-		DMSMessagePriority ap, int src)
+		DmsMsgPriority ap, int src)
 	{
 		if (null == existing)
 			return true;
@@ -911,7 +911,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Create a blank message for the sign */
-	public SignMessage createMsgBlank(DMSMessagePriority ap) {
+	public SignMessage createMsgBlank(DmsMsgPriority ap) {
 		String bmaps = Base64.encode(new byte[0]);
 		return findOrCreateMsg("", false, bmaps, ap, BLANK, operator,
 			null, null);
@@ -927,7 +927,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	public SignMessage createMsg(String m, boolean be,
-		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
+		DmsMsgPriority ap, DmsMsgPriority rp, SignMsgSource src,
 		String o, Integer d)
 	{
 		String bmaps = renderBitmaps(m);
@@ -976,7 +976,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage findOrCreateMsg(String m, boolean be, String bmaps,
-		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
+		DmsMsgPriority ap, DmsMsgPriority rp, SignMsgSource src,
 		String o, Integer d)
 	{
 		SignMessage esm = SignMessageHelper.find(m, bmaps, ap, rp, src,
@@ -998,7 +998,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMsgNotify(String m, boolean be, String bmaps,
-		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
+		DmsMsgPriority ap, DmsMsgPriority rp, SignMsgSource src,
 		String o, Integer d)
 	{
 		SignMessageImpl sm = new SignMessageImpl(m, be, bmaps, ap, rp,
@@ -1026,8 +1026,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	public SignMessage createMsgRendered(String m, boolean be,
-		BitmapGraphic[] pages, DMSMessagePriority ap,
-		DMSMessagePriority rp, Integer d)
+		BitmapGraphic[] pages, DmsMsgPriority ap,
+		DmsMsgPriority rp, Integer d)
 	{
 		String bmaps = encodeAdjustedBitmaps(pages);
 		if (bmaps != null) {
@@ -1070,9 +1070,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		String m = formatter.createMulti(da);
 		if (m != null) {
 			boolean be = da.getBeaconEnabled();
-			DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
+			DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
 				da.getActivationPriority());
-			DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
+			DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
 				da.getRunTimePriority());
 			SignMsgSource src = formatter.isTolling(da)
 			                  ? tolling
@@ -1129,7 +1129,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @return true If priority is high enough to deploy. */
 	private boolean shouldActivate(SignMessage sm, int src) {
 		assert sm != null;
-		DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
+		DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
 		       sm.getActivationPriority());
 		return shouldActivate(ap, src) &&
 		       SignMessageHelper.lookup(sm.getName()) == sm;
@@ -1139,7 +1139,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param ap Activation priority.
 	 * @param src Message source.
 	 * @return True if message should be activated; false otherwise. */
-	private boolean shouldActivate(DMSMessagePriority ap, int src) {
+	private boolean shouldActivate(DmsMsgPriority ap, int src) {
 		return shouldActivate(msg_current, ap, src) &&
 		       shouldActivate(msg_next, ap, src);
 	}
@@ -1292,8 +1292,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param src Message source. */
-	public void deployMsg(String m, boolean be, DMSMessagePriority ap,
-		DMSMessagePriority rp, SignMsgSource src)
+	public void deployMsg(String m, boolean be, DmsMsgPriority ap,
+		DmsMsgPriority rp, SignMsgSource src)
 	{
 		if (getMsgCurrent().getMulti().equals(m))
 			return;

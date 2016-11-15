@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import static us.mn.state.dot.tms.SignMsgSource.operator;
@@ -67,7 +67,7 @@ public class SignMessageCreator {
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	public SignMessage create(String multi, boolean be, String bitmaps,
-		DMSMessagePriority ap, DMSMessagePriority rp, String owner,
+		DmsMsgPriority ap, DmsMsgPriority rp, String owner,
 		Integer duration)
 	{
 		SignMessage sm = SignMessageHelper.find(multi, bitmaps, ap, rp,
@@ -95,7 +95,7 @@ public class SignMessageCreator {
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(String name, String multi, boolean be,
-		String bitmaps, DMSMessagePriority ap, DMSMessagePriority rp,
+		String bitmaps, DmsMsgPriority ap, DmsMsgPriority rp,
 		String owner, Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();

@@ -21,7 +21,7 @@ import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.RasterBuilder;
@@ -293,7 +293,7 @@ public class SignMessageComposer extends JPanel {
 		if (dms != null) {
 			SignMessage sm = dms.getMsgSched();
 			if (sm != null && sm.getActivationPriority() ==
-			    DMSMessagePriority.PREFIX_PAGE.ordinal())
+			    DmsMsgPriority.PREFIX_PAGE.ordinal())
 				return sm.getMulti();
 		}
 		return "";
@@ -348,7 +348,7 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Get the selected priority */
-	public DMSMessagePriority getPriority() {
+	public DmsMsgPriority getPriority() {
 		return misc_pnl.getPriority();
 	}
 

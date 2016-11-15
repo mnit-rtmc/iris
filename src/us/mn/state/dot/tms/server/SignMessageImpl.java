@@ -21,7 +21,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
@@ -139,7 +139,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Create a new sign message (by IRIS) */
 	public SignMessageImpl(String m, boolean be, String b,
-		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource s,
+		DmsMsgPriority ap, DmsMsgPriority rp, SignMsgSource s,
 		String o, Integer d)
 	{
 		super(createUniqueName());
@@ -198,7 +198,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Get the activation priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DMSMessagePriority */
+	 * @see us.mn.state.dot.tms.DmsMsgPriority */
 	@Override
 	public int getActivationPriority() {
 		return activationPriority;
@@ -209,7 +209,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Get the run-time priority.
 	 * @return Run-time priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DMSMessagePriority */
+	 * @see us.mn.state.dot.tms.DmsMsgPriority */
 	@Override
 	public int getRunTimePriority() {
 		return runTimePriority;

@@ -27,7 +27,7 @@ import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.DmsAction;
-import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.QuickMessageHelper;
@@ -57,28 +57,28 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	}
 
 	/** Allowed activation priorities */
-	static private final DMSMessagePriority[] A_PRIORITIES = {
-		DMSMessagePriority.PREFIX_PAGE,
-		DMSMessagePriority.PSA,
-		DMSMessagePriority.TRAVEL_TIME,
-		DMSMessagePriority.SPEED_LIMIT,
-		DMSMessagePriority.SCHEDULED,
-		DMSMessagePriority.OTHER_SYSTEM,
-		DMSMessagePriority.INCIDENT_LOW,
-		DMSMessagePriority.INCIDENT_MED,
-		DMSMessagePriority.INCIDENT_HIGH
+	static private final DmsMsgPriority[] A_PRIORITIES = {
+		DmsMsgPriority.PREFIX_PAGE,
+		DmsMsgPriority.PSA,
+		DmsMsgPriority.TRAVEL_TIME,
+		DmsMsgPriority.SPEED_LIMIT,
+		DmsMsgPriority.SCHEDULED,
+		DmsMsgPriority.OTHER_SYSTEM,
+		DmsMsgPriority.INCIDENT_LOW,
+		DmsMsgPriority.INCIDENT_MED,
+		DmsMsgPriority.INCIDENT_HIGH
 	};
 
 	/** Allowed run-time priorities */
-	static private final DMSMessagePriority[] R_PRIORITIES = {
-		DMSMessagePriority.PSA,
-		DMSMessagePriority.TRAVEL_TIME,
-		DMSMessagePriority.SPEED_LIMIT,
-		DMSMessagePriority.SCHEDULED,
-		DMSMessagePriority.OTHER_SYSTEM,
-		DMSMessagePriority.INCIDENT_LOW,
-		DMSMessagePriority.INCIDENT_MED,
-		DMSMessagePriority.INCIDENT_HIGH
+	static private final DmsMsgPriority[] R_PRIORITIES = {
+		DmsMsgPriority.PSA,
+		DmsMsgPriority.TRAVEL_TIME,
+		DmsMsgPriority.SPEED_LIMIT,
+		DmsMsgPriority.SCHEDULED,
+		DmsMsgPriority.OTHER_SYSTEM,
+		DmsMsgPriority.INCIDENT_LOW,
+		DmsMsgPriority.INCIDENT_MED,
+		DmsMsgPriority.INCIDENT_HIGH
 	};
 
 	/** Create the columns in the model */
@@ -143,22 +143,22 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			120)
 		{
 			public Object getValueAt(DmsAction da) {
-				return DMSMessagePriority.fromOrdinal(
+				return DmsMsgPriority.fromOrdinal(
 				       da.getActivationPriority());
 			}
 			public boolean isEditable(DmsAction da) {
 				return canUpdate(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
-				if (value instanceof DMSMessagePriority) {
-					DMSMessagePriority p =
-						(DMSMessagePriority)value;
+				if (value instanceof DmsMsgPriority) {
+					DmsMsgPriority p =
+						(DmsMsgPriority) value;
 					da.setActivationPriority(p.ordinal());
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox<DMSMessagePriority> cbx =new JComboBox
-					<DMSMessagePriority>(A_PRIORITIES);
+				JComboBox<DmsMsgPriority> cbx = new JComboBox
+					<DmsMsgPriority>(A_PRIORITIES);
 				return new DefaultCellEditor(cbx);
 			}
 		});
@@ -166,22 +166,22 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			120)
 		{
 			public Object getValueAt(DmsAction da) {
-				return DMSMessagePriority.fromOrdinal(
+				return DmsMsgPriority.fromOrdinal(
 				       da.getRunTimePriority());
 			}
 			public boolean isEditable(DmsAction da) {
 				return canUpdate(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
-				if (value instanceof DMSMessagePriority) {
-					DMSMessagePriority p =
-						(DMSMessagePriority)value;
+				if (value instanceof DmsMsgPriority) {
+					DmsMsgPriority p =
+						(DmsMsgPriority) value;
 					da.setRunTimePriority(p.ordinal());
 				}
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox<DMSMessagePriority> cbx =new JComboBox
-					<DMSMessagePriority>(R_PRIORITIES);
+				JComboBox<DmsMsgPriority> cbx = new JComboBox
+					<DmsMsgPriority>(R_PRIORITIES);
 				return new DefaultCellEditor(cbx);
 			}
 		});
@@ -254,9 +254,9 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			attrs.put("sign_group", sg);
 			attrs.put("phase", lookupPlanPhase());
 			attrs.put("a_priority",
-				DMSMessagePriority.SCHEDULED.ordinal());
+				DmsMsgPriority.SCHEDULED.ordinal());
 			attrs.put("r_priority",
-				DMSMessagePriority.SCHEDULED.ordinal());
+				DmsMsgPriority.SCHEDULED.ordinal());
 			descriptor.cache.createObject(name, attrs);
 		}
 	}

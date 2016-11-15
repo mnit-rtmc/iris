@@ -23,7 +23,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IrisUserHelper;
 import static us.mn.state.dot.tms.SignMsgSource.external;
@@ -199,8 +199,8 @@ class OpQueryMsg extends OpDms {
 	 * @return A SignMessage that contains the text of the message and
 	 *         a rendered bitmap. */
 	private SignMessageImpl createSignMessageWithBitmap(String sbitmap,
-		Integer duration, Interval pgOnTime, DMSMessagePriority apri,
-		DMSMessagePriority rpri)
+		Integer duration, Interval pgOnTime, DmsMsgPriority apri,
+		DmsMsgPriority rpri)
 	{
 		if(sbitmap == null)
 			return null;
@@ -237,10 +237,10 @@ class OpQueryMsg extends OpDms {
 			"multistring=" + multi);
 
 		// priority is invalid, as expected
-		if(apri == DMSMessagePriority.INVALID)
-			apri = DMSMessagePriority.OTHER_SYSTEM;
-		if(rpri == DMSMessagePriority.INVALID)
-			rpri = DMSMessagePriority.OTHER_SYSTEM;
+		if (apri == DmsMsgPriority.INVALID)
+			apri = DmsMsgPriority.OTHER_SYSTEM;
+		if (rpri == DmsMsgPriority.INVALID)
+			rpri = DmsMsgPriority.OTHER_SYSTEM;
 
 		return (SignMessageImpl) m_dms.createMsgRendered(multi, false,
 			pages, apri, rpri, duration);
@@ -304,8 +304,8 @@ class OpQueryMsg extends OpDms {
 		String errmsg = "";
 		boolean txtavail = false;
 		String msgtext = "";
-		DMSMessagePriority apri = DMSMessagePriority.INVALID;
-		DMSMessagePriority rpri = DMSMessagePriority.INVALID;
+		DmsMsgPriority apri = DmsMsgPriority.INVALID;
+		DmsMsgPriority rpri = DmsMsgPriority.INVALID;
 		String owner = "";
 		boolean useont = false;
 		Calendar ont = new GregorianCalendar();
@@ -337,16 +337,16 @@ class OpQueryMsg extends OpDms {
 				msgtext = xrr.getResString("MsgText");
 
 				// activation priority
-				apri = DMSMessagePriority.fromOrdinal(
+				apri = DmsMsgPriority.fromOrdinal(
 					xrr.getResInt("ActPriority"));
-				apri = (apri == DMSMessagePriority.INVALID ?
-					DMSMessagePriority.OPERATOR : apri);
+				apri = (apri == DmsMsgPriority.INVALID) ?
+					DmsMsgPriority.OPERATOR : apri;
 
 				// runtime priority
-				rpri = DMSMessagePriority.fromOrdinal(
+				rpri = DmsMsgPriority.fromOrdinal(
 					xrr.getResInt("RunPriority"));
-				rpri = (rpri == DMSMessagePriority.INVALID ?
-					DMSMessagePriority.BLANK : rpri);
+				rpri = (rpri == DmsMsgPriority.INVALID) ?
+					DmsMsgPriority.BLANK : rpri;
 
 				// owner
 				owner = xrr.getResString("Owner");

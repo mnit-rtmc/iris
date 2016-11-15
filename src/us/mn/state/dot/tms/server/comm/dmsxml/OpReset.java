@@ -18,7 +18,7 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -67,12 +67,9 @@ class OpReset extends OpDms
 		// request
 		xrr.addReq("Id", generateId());
 		xrr.addReq("Address", controller.getDrop());
-		xrr.addReq("ActPriority", 
-			DMSMessagePriority.OVERRIDE.ordinal());
-		xrr.addReq("RunPriority", 
-			DMSMessagePriority.BLANK.ordinal());
-		xrr.addReq("Owner", 
-			m_user != null ? m_user.getName() : "");
+		xrr.addReq("ActPriority", DmsMsgPriority.OVERRIDE.ordinal());
+		xrr.addReq("RunPriority", DmsMsgPriority.BLANK.ordinal());
+		xrr.addReq("Owner", (m_user != null) ? m_user.getName() : "");
 
 		// responses
 		xrr.addRes("Id");

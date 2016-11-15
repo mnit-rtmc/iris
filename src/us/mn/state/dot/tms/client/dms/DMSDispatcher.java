@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DMSMessagePriority;
+import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.InvalidMessageException;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
@@ -279,7 +279,7 @@ public class DMSDispatcher extends JPanel {
 		String bitmaps = createBitmaps(multi);
 		if (bitmaps != null) {
 			boolean be = composer.isBeaconEnabled();
-			DMSMessagePriority p = composer.getPriority();
+			DmsMsgPriority p = composer.getPriority();
 			String u = user.getName();
 			Integer d = composer.getDuration();
 			return creator.create(multi, be, bitmaps, p, p, u, d);
@@ -305,8 +305,8 @@ public class DMSDispatcher extends JPanel {
 		String bitmaps = createBitmaps(multi);
 		if (bitmaps != null) {
 			return creator.create(multi, false, bitmaps,
-			       DMSMessagePriority.OVERRIDE,
-			       DMSMessagePriority.BLANK, null, null);
+			       DmsMsgPriority.OVERRIDE,
+			       DmsMsgPriority.BLANK, null, null);
 		} else
 			return null;
 	}

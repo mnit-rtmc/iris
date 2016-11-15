@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,21 +52,21 @@ public interface DmsAction extends SonarObject {
 
 	/** Set the activation priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DMSMessagePriority */
+	 * @see us.mn.state.dot.tms.DmsMsgPriority */
 	void setActivationPriority(int p);
 
 	/** Get the activation priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DMSMessagePriority */
+	 * @see us.mn.state.dot.tms.DmsMsgPriority */
 	int getActivationPriority();
 
 	/** Set the run-time priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DMSMessagePriority */
+	 * @see us.mn.state.dot.tms.DmsMsgPriority */
 	void setRunTimePriority(int p);
 
 	/** Get the run-time priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DMSMessagePriority */
+	 * @see us.mn.state.dot.tms.DmsMsgPriority */
 	int getRunTimePriority();
 }

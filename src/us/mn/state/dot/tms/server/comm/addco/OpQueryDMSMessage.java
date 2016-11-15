@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.addco;
 
 import java.io.IOException;
 import us.mn.state.dot.tms.BitmapGraphic;
-import static us.mn.state.dot.tms.DMSMessagePriority.*;
+import static us.mn.state.dot.tms.DmsMsgPriority.*;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
