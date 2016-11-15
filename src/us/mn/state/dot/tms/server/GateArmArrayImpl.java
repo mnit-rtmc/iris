@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.SignMessage;
 import static us.mn.state.dot.tms.SignMsgSource.gate_arm;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.GateArmSystem.checkEnabled;
@@ -443,7 +444,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	{
 		if (rs == GateArmState.WARN_CLOSE) {
 			setArmState(rs);
-			updateDmsMessage();
+			updateDmsMsg();
 			return;
 		}
 		for (int i = 0; i < MAX_ARMS; i++) {
@@ -465,17 +466,40 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Update the message displayed on the DMS */
-	private void updateDmsMessage() {
+	private void updateDmsMsg() {
 		DMS d = dms;
 		if (d instanceof DMSImpl)
-			updateDmsMessage((DMSImpl)d);
+			updateDmsMsg((DMSImpl) d);
 	}
 
 	/** Update the message on the specified DMS */
-	private void updateDmsMessage(DMSImpl d) {
+	private void updateDmsMsg(DMSImpl d) {
 		QuickMessage qm = isMsgOpen() ? getOpenMsg() : getClosedMsg();
 		if (qm != null)
-			d.deployMsg(qm.getMulti(), false, PSA, PSA, gate_arm);
+			updateDmsMsg(d, qm.getMulti());
+	}
+
+	/** Update the message on the specified DMS */
+	private void updateDmsMsg(DMSImpl d, String ms) {
+		if (!d.getMsgCurrent().getMulti().equals(ms)) {
+			SignMessage sm = d.createMsg(ms, false, PSA, PSA,
+				gate_arm, null, null);
+			if (sm != null)
+				updateDmsMsg(d, sm);
+			else
+				logError("Could not create msg: " + ms);
+		}
+	}
+
+	/** Update the message on the specified DMS */
+	private void updateDmsMsg(DMSImpl d, SignMessage sm) {
+		try {
+			if (!d.isMsgCurrentEquivalent(sm))
+				d.doSetMsgNext(sm);
+		}
+		catch (TMSException e) {
+			logError(e.getMessage());
+		}
 	}
 
 	/** Test if message should be open */
@@ -493,7 +517,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			setArmState(gas);
 		else
 			checkEnabled();
-		updateDmsMessage();
+		updateDmsMsg();
 	}
 
 	/** Get the aggregate arm state for all arms in the array */

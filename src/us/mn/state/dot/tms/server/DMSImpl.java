@@ -1286,27 +1286,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			throw new ChangeVetoException("Width/height is null");
 	}
 
-	/** Deploy (create and send) a sign message.
-	 * @param m MULTI string.
-	 * @param be Beacon enabled.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
-	 * @param src Message source. */
-	public void deployMsg(String m, boolean be, DmsMsgPriority ap,
-		DmsMsgPriority rp, SignMsgSource src)
-	{
-		if (getMsgCurrent().getMulti().equals(m))
-			return;
-		SignMessage sm = createMsg(m, be, ap, rp, src, null, null);
-		try {
-			if (!isMsgCurrentEquivalent(sm))
-				doSetMsgNext(sm);
-		}
-		catch (TMSException e) {
-			logError(e.getMessage());
-		}
-	}
-
 	/** Current message (Shall not be null) */
 	private transient SignMessage msg_current = createMsgBlank();
 
