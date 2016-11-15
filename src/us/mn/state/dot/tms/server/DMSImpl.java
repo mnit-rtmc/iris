@@ -925,7 +925,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * getting queued during the time when a message gets queued and it
 	 * becomes activated.
 	 * @see DMSImpl#shouldActivate */
-	private transient SignMessage messageNext;
+	private transient SignMessage msg_next;
 
 	/** Set the next sign message.  This method is not called by SONAR
 	 * automatically; instead, it must be called by operations after
@@ -936,7 +936,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @see DeviceImpl.acquire */
 	@Override
 	public void setMessageNext(SignMessage sm) {
-		messageNext = sm;
+		msg_next = sm;
 	}
 
 	/** Set the next sign message.  This is called by SONAR when the
@@ -970,9 +970,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Check if the sign has a reference to a sign message */
 	public boolean hasReference(SignMessage sm) {
-		return sm == messageCurrent ||
-		       sm == messageSched ||
-		       sm == messageNext;
+		return sm == msg_current ||
+		       sm == msg_sched ||
+		       sm == msg_next;
 	}
 
 	/** Validate a sign message to send.
@@ -980,7 +980,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @return The sign message to send (may be a scheduled message). */
 	private SignMessage validateMessage(SignMessage sm) throws TMSException{
 		MultiString multi = new MultiString(sm.getMulti());
-		SignMessage sched = messageSched;	// Avoid race
+		SignMessage sched = msg_sched;	// Avoid race
 		if (sched != null && multi.isBlank()) {
 			// Don't blank the sign if there's a scheduled message
 			// -- send the scheduled message instead.
@@ -1119,8 +1119,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param src Message source.
 	 * @return True if message should be activated; false otherwise. */
 	private boolean shouldActivate(DMSMessagePriority ap, int src) {
-		return shouldActivate(messageCurrent, ap, src) &&
-		       shouldActivate(messageNext, ap, src);
+		return shouldActivate(msg_current, ap, src) &&
+		       shouldActivate(msg_next, ap, src);
 	}
 
 	/** Deploy (create and send) a sign message.
@@ -1145,7 +1145,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Current message (Shall not be null) */
-	private transient SignMessage messageCurrent = createMsgBlank();
+	private transient SignMessage msg_current = createMsgBlank();
 
 	/** Set the current message.
 	 * @param sm Sign message. */
@@ -1155,7 +1155,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (!isMessageCurrentEquivalent(sm)) {
 			logMessage(sm);
 			setDeployTime();
-			messageCurrent = sm;
+			msg_current = sm;
 			notifyAttribute("messageCurrent");
 			updateStyles();
 		}
@@ -1166,12 +1166,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @return Currently active message (cannot be null) */
 	@Override
 	public SignMessage getMessageCurrent() {
-		return messageCurrent;
+		return msg_current;
 	}
 
 	/** Test if the current message is equivalent to a sign message */
 	public boolean isMessageCurrentEquivalent(SignMessage sm) {
-		return SignMessageHelper.isEquivalent(messageCurrent, sm);
+		return SignMessageHelper.isEquivalent(msg_current, sm);
 	}
 
 	/** Log a message.
@@ -1468,20 +1468,20 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private transient DmsAction sched_action;
 
 	/** Current scheduled message */
-	private transient SignMessage messageSched = null;
+	private transient SignMessage msg_sched = null;
 
 	/** Get the scheduled sign messasge.
 	 * @return Scheduled sign message */
 	@Override
 	public SignMessage getMessageSched() {
-		return messageSched;
+		return msg_sched;
 	}
 
 	/** Set the scheduled sign message.
 	 * @param sm New scheduled sign message */
 	private void setMessageSched(SignMessage sm) {
-		if (!SignMessageHelper.isEquivalent(messageSched, sm)) {
-			messageSched = sm;
+		if (!SignMessageHelper.isEquivalent(msg_sched, sm)) {
+			msg_sched = sm;
 			notifyAttribute("messageSched");
 		}
 	}
@@ -1522,7 +1522,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param sm SignMessage to test.
 	 * @return true if scheduled message should be replaced. */
 	private boolean shouldReplaceScheduled(SignMessage sm) {
-		SignMessage s = messageSched;	// Avoid NPE
+		SignMessage s = msg_sched;	// Avoid NPE
 		return null == s ||
 		       sm.getActivationPriority() > s.getActivationPriority() ||
 		       sm.getRunTimePriority() >= s.getRunTimePriority();
@@ -1594,7 +1594,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			setMessageSched(createBlankScheduledMessage());
 		}
 		setPrices(sched_action);
-		SignMessage sm = messageSched;
+		SignMessage sm = msg_sched;
 		if (sm != null)
 			updateScheduledMessage(sm);
 		sched_action = null;
@@ -1615,8 +1615,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			}
 		} else if (SCHED_LOG.isOpen()) {
 			logSched("sched msg " + sm.getName() + " not sent " +
-				sm.getMulti() + ", curr: " + messageCurrent +
-			        ", next: " + messageNext);
+				sm.getMulti() + ", curr: " + msg_current +
+			        ", next: " + msg_next);
 		}
 	}
 
@@ -1629,8 +1629,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private boolean isCurrentScheduled() {
 		// If either the current or next message is not scheduled,
 		// then we won't consider the message scheduled
-		SignMessage c = messageCurrent;
-		SignMessage n = messageNext;
+		SignMessage c = msg_current;
+		SignMessage n = msg_next;
 		return (null == c || SignMsgSource.isScheduled(c.getSource()))
 		    && (null == n || SignMsgSource.isScheduled(n.getSource()));
 	}
@@ -1643,7 +1643,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Test if current message is blank */
 	public boolean isMsgBlank() {
-		return SignMessageHelper.isBlank(messageCurrent);
+		return SignMessageHelper.isBlank(msg_current);
 	}
 
 	/** Test if the current message is "scheduled" */
