@@ -215,18 +215,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     FontHelper.lookup(df));
 	}
 
-	/** Create a blank message for the sign */
-	public SignMessage createMsgBlank() {
-		return createMsgBlank(OVERRIDE);
-	}
-
-	/** Create a blank message for the sign */
-	public SignMessage createMsgBlank(DMSMessagePriority ap) {
-		String bmaps = Base64.encode(new byte[0]);
-		return findOrCreateMsg("", false, bmaps, ap, BLANK, operator,
-			null, null);
-	}
-
 	/** Destroy an object */
 	@Override
 	public void doDestroy() throws TMSException {
@@ -917,6 +905,184 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return photocellStatus;
 	}
 
+	/** Create a blank message for the sign */
+	public SignMessage createMsgBlank() {
+		return createMsgBlank(OVERRIDE);
+	}
+
+	/** Create a blank message for the sign */
+	public SignMessage createMsgBlank(DMSMessagePriority ap) {
+		String bmaps = Base64.encode(new byte[0]);
+		return findOrCreateMsg("", false, bmaps, ap, BLANK, operator,
+			null, null);
+	}
+
+	/** Create a message for the sign.
+	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
+	 * @param src Message source.
+	 * @param o Owner name.
+	 * @param d Duration in minutes; null means indefinite.
+	 * @return New sign message, or null on error. */
+	public SignMessage createMsg(String m, boolean be,
+		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
+		String o, Integer d)
+	{
+		String bmaps = renderBitmaps(m);
+		if (bmaps != null)
+			return findOrCreateMsg(m, be, bmaps, ap, rp, src, o, d);
+		else
+			return null;
+	}
+
+	/** Render bitmaps for all pages of a message.
+	 * @param m MULTI string for message.
+	 * @return Base64-encoded bitmaps, or null on error. */
+	private String renderBitmaps(String m) {
+		try {
+			BitmapGraphic[] pages = DMSHelper.createBitmaps(this,m);
+			if (pages != null)
+				return encodeBitmaps(pages);
+		}
+		catch (InvalidMessageException e) {
+			logError("invalid msg: " + e.getMessage());
+		}
+		return null;
+	}
+
+	/** Encode bitmaps to Base64.
+	 * @param pages Bitmap graphics for all pages.
+	 * @return Base64-encoded bitmaps. */
+	private String encodeBitmaps(BitmapGraphic[] pages) {
+		int blen = pages[0].length();
+		byte[] b_data = new byte[pages.length * blen];
+		for (int i = 0; i < pages.length; i++) {
+			byte[] page = pages[i].getPixelData();
+			System.arraycopy(page, 0, b_data, i * blen, blen);
+		}
+		return Base64.encode(b_data);
+	}
+
+	/** Find or create a sign message.
+	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
+	 * @param bmaps Message bitmaps (Base64).
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
+	 * @param src Message source.
+	 * @param o Owner name.
+	 * @param d Duration in minutes; null means indefinite.
+	 * @return New sign message, or null on error. */
+	private SignMessage findOrCreateMsg(String m, boolean be, String bmaps,
+		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
+		String o, Integer d)
+	{
+		SignMessage esm = SignMessageHelper.find(m, bmaps, ap, rp, src,
+			o, d);
+		if (esm != null)
+			return esm;
+		else
+			return createMsgNotify(m, be, bmaps, ap, rp, src, o, d);
+	}
+
+	/** Create a new sign message and notify clients.
+	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
+	 * @param bmaps Message bitmaps (Base64).
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
+	 * @param src Message source.
+	 * @param o Owner name.
+	 * @param d Duration in minutes; null means indefinite.
+	 * @return New sign message, or null on error. */
+	private SignMessage createMsgNotify(String m, boolean be, String bmaps,
+		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
+		String o, Integer d)
+	{
+		SignMessageImpl sm = new SignMessageImpl(m, be, bmaps, ap, rp,
+			src, o, d);
+		try {
+			sm.notifyCreate();
+			return sm;
+		}
+		catch (SonarException e) {
+			// This can pretty much only happen when the SONAR task
+			// processor does not store the sign message within 30
+			// seconds.  It *shouldn't* happen, but there may be
+			// a rare bug which triggers it.
+			logError("createMsgNotify: " + e.getMessage());
+			return null;
+		}
+	}
+
+	/** Create a pre-rendered message for the sign (ADDCO, DMSXML).
+	 * @param m MULTI string for message.
+	 * @param be Beacon enabled flag.
+	 * @param pages Pre-rendered graphics for all pages.
+	 * @param ap Activation priority.
+	 * @param rp Run-time priority.
+	 * @param d Duration in minutes; null means indefinite.
+	 * @return New sign message, or null on error. */
+	public SignMessage createMsgRendered(String m, boolean be,
+		BitmapGraphic[] pages, DMSMessagePriority ap,
+		DMSMessagePriority rp, Integer d)
+	{
+		String bmaps = encodeAdjustedBitmaps(pages);
+		if (bmaps != null) {
+			return findOrCreateMsg(m, be, bmaps, ap, rp, external,
+				null, d);
+		} else
+			return null;
+	}
+
+	/** Encode bitmaps to Base64 after adjusting dimensions.
+	 * @param pages Bitmap graphics for all pages.
+	 * @return Base64-encoded bitmaps, or null on error. */
+	private String encodeAdjustedBitmaps(BitmapGraphic[] pages) {
+		BitmapGraphic[] p = copyBitmaps(pages);
+		return (p != null) ? encodeBitmaps(p) : null;
+	}
+
+	/** Copy an array of bitmaps into the DMS dimensions.
+	 * @param pages Array of bitmap graphics.
+	 * @return Bitmap graphics with same dimensions as DMS, or null. */
+	private BitmapGraphic[] copyBitmaps(BitmapGraphic[] pages) {
+		Integer w = widthPixels;
+		Integer h = heightPixels;
+		if (null == w || w < 1)
+			return null;
+		if (null == h || h < 1)
+			return null;
+		BitmapGraphic[] p = new BitmapGraphic[pages.length];
+		for (int i = 0; i < p.length; i++) {
+			p[i] = new BitmapGraphic(w, h);
+			p[i].copy(pages[i]);
+		}
+		return p;
+	}
+
+	/** Create a scheduled message.
+	 * @param da DMS action
+	 * @return New sign message, or null on error */
+	private SignMessage createMsgSched(DmsAction da) {
+		String m = formatter.createMulti(da);
+		if (m != null) {
+			boolean be = da.getBeaconEnabled();
+			DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
+				da.getActivationPriority());
+			DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
+				da.getRunTimePriority());
+			SignMsgSource src = formatter.isTolling(da)
+			                  ? tolling
+			                  : schedule;
+			Integer d = getDuration(da);
+			return createMsg(m, be, ap, rp, src, null, d);
+		} else
+			return null;
+	}
+
 	/** The next message to be displayed.  This is a write-only SONAR
 	 * attribute.  It is checked to prevent a lower priority message from
 	 * getting queued during the time when a message gets queued and it
@@ -946,6 +1112,36 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 		if (shouldActivate(sm))
 			doSetMsgNext(sm, p);
+	}
+
+	/** Check if a message should be activated based on priority.
+	 * @param sm SignMessage being activated.
+	 * @return true If priority is high enough to deploy. */
+	public boolean shouldActivate(SignMessage sm) {
+		return (sm != null)
+		      ? shouldActivate(sm, sm.getSource())
+		      : false;
+	}
+
+	/** Check if a message should be activated based on priority.
+	 * @param sm SignMessage being activated.
+	 * @param src Message source.
+	 * @return true If priority is high enough to deploy. */
+	private boolean shouldActivate(SignMessage sm, int src) {
+		assert sm != null;
+		DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
+		       sm.getActivationPriority());
+		return shouldActivate(ap, src) &&
+		       SignMessageHelper.lookup(sm.getName()) == sm;
+	}
+
+	/** Test if a message should be activated.
+	 * @param ap Activation priority.
+	 * @param src Message source.
+	 * @return True if message should be activated; false otherwise. */
+	private boolean shouldActivate(DMSMessagePriority ap, int src) {
+		return shouldActivate(msg_current, ap, src) &&
+		       shouldActivate(msg_next, ap, src);
 	}
 
 	/**
@@ -1090,36 +1286,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			throw new ChangeVetoException("Width/height is null");
 	}
 
-	/** Check if a message should be activated based on priority.
-	 * @param sm SignMessage being activated.
-	 * @return true If priority is high enough to deploy. */
-	public boolean shouldActivate(SignMessage sm) {
-		return (sm != null)
-		      ? shouldActivate(sm, sm.getSource())
-		      : false;
-	}
-
-	/** Check if a message should be activated based on priority.
-	 * @param sm SignMessage being activated.
-	 * @param src Message source.
-	 * @return true If priority is high enough to deploy. */
-	private boolean shouldActivate(SignMessage sm, int src) {
-		assert sm != null;
-		DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
-		       sm.getActivationPriority());
-		return shouldActivate(ap, src) &&
-		       SignMessageHelper.lookup(sm.getName()) == sm;
-	}
-
-	/** Test if a message should be activated.
-	 * @param ap Activation priority.
-	 * @param src Message source.
-	 * @return True if message should be activated; false otherwise. */
-	private boolean shouldActivate(DMSMessagePriority ap, int src) {
-		return shouldActivate(msg_current, ap, src) &&
-		       shouldActivate(msg_next, ap, src);
-	}
-
 	/** Deploy (create and send) a sign message.
 	 * @param m MULTI string.
 	 * @param be Beacon enabled.
@@ -1196,6 +1362,160 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				                               price));
 			}
 		}
+	}
+
+	/** Current scheduled action.  This is used to guarantee that
+	 * performAction is called at least once between each call to
+	 * updateScheduledMessage.  If not, then the scheduled message is
+	 * cleared. */
+	private transient DmsAction sched_action;
+
+	/** Current scheduled message */
+	private transient SignMessage msg_sched = null;
+
+	/** Get the scheduled sign messasge.
+	 * @return Scheduled sign message */
+	@Override
+	public SignMessage getMsgSched() {
+		return msg_sched;
+	}
+
+	/** Set the scheduled sign message.
+	 * @param sm New scheduled sign message */
+	private void setMsgSchedNotify(SignMessage sm) {
+		if (!SignMessageHelper.isEquivalent(msg_sched, sm)) {
+			msg_sched = sm;
+			notifyAttribute("msgSched");
+		}
+	}
+
+	/** Check if a DMS action is deployable.
+	 * @param da DMS action.
+	 * @return true if action is deployable. */
+	public boolean isDeployable(DmsAction da) {
+		if (hasError())
+			return false;
+		SignMessage sm = createMsgSched(da);
+		try {
+			return sm == validateMsg(sm);
+		}
+		catch (TMSException e) {
+			return false;
+		}
+	}
+
+	/** Perform a DMS action.
+	 * @param ds DMS action. */
+	public void performAction(DmsAction da) {
+		SignMessage sm = createMsgSched(da);
+		if (sm != null) {
+			if (SCHED_LOG.isOpen()) {
+				logSched("created sched message: " +
+					sm.getMulti());
+			}
+			if (shouldReplaceScheduled(sm)) {
+				setMsgSchedNotify(sm);
+				sched_action = da;
+			}
+		} else if (SCHED_LOG.isOpen())
+			logSched("no message created for " + da.getName());
+	}
+
+	/** Test if a message should replace the current scheduled message.
+	 * @param sm SignMessage to test.
+	 * @return true if scheduled message should be replaced. */
+	private boolean shouldReplaceScheduled(SignMessage sm) {
+		SignMessage s = msg_sched;	// Avoid NPE
+		return null == s ||
+		       sm.getActivationPriority() > s.getActivationPriority() ||
+		       sm.getRunTimePriority() >= s.getRunTimePriority();
+	}
+
+	/** Tolling prices */
+	private transient HashMap<String, Float> prices;
+
+	/** Set tolling prices */
+	private void setPrices(DmsAction da) {
+		prices = (da != null) ? calculatePrices(da) : null;
+	}
+
+	/** Calculate prices for a tolling message */
+	private HashMap<String, Float> calculatePrices(DmsAction da) {
+		QuickMessage qm = da.getQuickMessage();
+		if (qm != null)
+			return toll_formatter.calculatePrices(qm.getMulti());
+		else
+			return null;
+	}
+
+	/** Get the duration of a DMS action.
+	 * @param da DMS action.
+	 * @return Duration (minutes), or null for indefinite. */
+	private Integer getDuration(DmsAction da) {
+		return da.getActionPlan().getSticky()
+		     ? null
+		     : getUnstickyDuration();
+	}
+
+	/** Get the duration of an unsticky action */
+	private int getUnstickyDuration() {
+		/** FIXME: this should be twice the polling period for the
+		 *         sign.  Modem signs should have a longer duration. */
+		return 1;
+	}
+
+	/** Log a schedule message */
+	private void logSched(String msg) {
+		if (SCHED_LOG.isOpen())
+			SCHED_LOG.log(getName() + ": " + msg);
+	}
+
+	/** Update the scheduled message on the sign */
+	public void updateScheduledMsg() {
+		if (null == sched_action) {
+			logSched("no message scheduled");
+			setMsgSchedNotify(createBlankScheduledMsg());
+		}
+		setPrices(sched_action);
+		SignMessage sm = msg_sched;
+		if (sm != null)
+			updateScheduledMsg(sm);
+		sched_action = null;
+	}
+
+	/** Update the scheduled message on the sign */
+	private void updateScheduledMsg(SignMessage sm) {
+		// NOTE: use schedule for source even for blank messages
+		if (shouldActivate(sm, schedule.ordinal())) {
+			try {
+				logSched("set message to " + sm.getMulti());
+				if (sm.getSource() == tolling.ordinal())
+				    logPriceMessages(EventType.PRICE_DEPLOYED);
+				doSetMsgNext(sm);
+			}
+			catch (TMSException e) {
+				logSched(e.getMessage());
+			}
+		} else if (SCHED_LOG.isOpen()) {
+			logSched("sched msg " + sm.getName() + " not sent " +
+				sm.getMulti() + ", curr: " + msg_current +
+			        ", next: " + msg_next);
+		}
+	}
+
+	/** Create a blank scheduled message */
+	private SignMessage createBlankScheduledMsg() {
+		return isCurrentScheduled() ? createMsgBlank() : null;
+	}
+
+	/** Test if the current message is scheduled */
+	private boolean isCurrentScheduled() {
+		// If either the current or next message is not scheduled,
+		// then we won't consider the message scheduled
+		SignMessage c = msg_current;
+		SignMessage n = msg_next;
+		return (null == c || SignMsgSource.isScheduled(c.getSource()))
+		    && (null == n || SignMsgSource.isScheduled(n.getSource()));
 	}
 
 	/** Message deploy time */
@@ -1310,326 +1630,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		catch (TMSException e) {
 			logError("brightness feedback: " + e.getMessage());
 		}
-	}
-
-	/** Create a pre-rendered message for the sign (ADDCO, DMSXML).
-	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
-	 * @param pages Pre-rendered graphics for all pages.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
-	 * @param d Duration in minutes; null means indefinite.
-	 * @return New sign message, or null on error. */
-	public SignMessage createMsgRendered(String m, boolean be,
-		BitmapGraphic[] pages, DMSMessagePriority ap,
-		DMSMessagePriority rp, Integer d)
-	{
-		String bmaps = encodeAdjustedBitmaps(pages);
-		if (bmaps != null) {
-			return findOrCreateMsg(m, be, bmaps, ap, rp, external,
-				null, d);
-		} else
-			return null;
-	}
-
-	/** Create a message for the sign.
-	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
-	 * @param src Message source.
-	 * @param o Owner name.
-	 * @param d Duration in minutes; null means indefinite.
-	 * @return New sign message, or null on error. */
-	public SignMessage createMsg(String m, boolean be,
-		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
-		String o, Integer d)
-	{
-		String bmaps = renderBitmaps(m);
-		if (bmaps != null)
-			return findOrCreateMsg(m, be, bmaps, ap, rp, src, o, d);
-		else
-			return null;
-	}
-
-	/** Render bitmaps for all pages of a message.
-	 * @param m MULTI string for message.
-	 * @return Base64-encoded bitmaps, or null on error. */
-	private String renderBitmaps(String m) {
-		try {
-			BitmapGraphic[] pages = DMSHelper.createBitmaps(this,m);
-			if (pages != null)
-				return encodeBitmaps(pages);
-		}
-		catch (InvalidMessageException e) {
-			logError("invalid msg: " + e.getMessage());
-		}
-		return null;
-	}
-
-	/** Encode bitmaps to Base64 after adjusting dimensions.
-	 * @param pages Bitmap graphics for all pages.
-	 * @return Base64-encoded bitmaps, or null on error. */
-	private String encodeAdjustedBitmaps(BitmapGraphic[] pages) {
-		BitmapGraphic[] p = copyBitmaps(pages);
-		return (p != null) ? encodeBitmaps(p) : null;
-	}
-
-	/** Copy an array of bitmaps into the DMS dimensions.
-	 * @param pages Array of bitmap graphics.
-	 * @return Bitmap graphics with same dimensions as DMS, or null. */
-	private BitmapGraphic[] copyBitmaps(BitmapGraphic[] pages) {
-		Integer w = widthPixels;
-		Integer h = heightPixels;
-		if (null == w || w < 1)
-			return null;
-		if (null == h || h < 1)
-			return null;
-		BitmapGraphic[] p = new BitmapGraphic[pages.length];
-		for (int i = 0; i < p.length; i++) {
-			p[i] = new BitmapGraphic(w, h);
-			p[i].copy(pages[i]);
-		}
-		return p;
-	}
-
-	/** Encode bitmaps to Base64.
-	 * @param pages Bitmap graphics for all pages.
-	 * @return Base64-encoded bitmaps. */
-	private String encodeBitmaps(BitmapGraphic[] pages) {
-		int blen = pages[0].length();
-		byte[] b_data = new byte[pages.length * blen];
-		for (int i = 0; i < pages.length; i++) {
-			byte[] page = pages[i].getPixelData();
-			System.arraycopy(page, 0, b_data, i * blen, blen);
-		}
-		return Base64.encode(b_data);
-	}
-
-	/** Find or create a sign message.
-	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
-	 * @param bmaps Message bitmaps (Base64).
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
-	 * @param src Message source.
-	 * @param o Owner name.
-	 * @param d Duration in minutes; null means indefinite.
-	 * @return New sign message, or null on error. */
-	private SignMessage findOrCreateMsg(String m, boolean be, String bmaps,
-		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
-		String o, Integer d)
-	{
-		SignMessage esm = SignMessageHelper.find(m, bmaps, ap, rp, src,
-			o, d);
-		if (esm != null)
-			return esm;
-		else
-			return createMsgNotify(m, be, bmaps, ap, rp, src, o, d);
-	}
-
-	/** Create a new sign message and notify clients.
-	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
-	 * @param bmaps Message bitmaps (Base64).
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
-	 * @param src Message source.
-	 * @param o Owner name.
-	 * @param d Duration in minutes; null means indefinite.
-	 * @return New sign message, or null on error. */
-	private SignMessage createMsgNotify(String m, boolean be, String bmaps,
-		DMSMessagePriority ap, DMSMessagePriority rp, SignMsgSource src,
-		String o, Integer d)
-	{
-		SignMessageImpl sm = new SignMessageImpl(m, be, bmaps, ap, rp,
-			src, o, d);
-		try {
-			sm.notifyCreate();
-			return sm;
-		}
-		catch (SonarException e) {
-			// This can pretty much only happen when the SONAR task
-			// processor does not store the sign message within 30
-			// seconds.  It *shouldn't* happen, but there may be
-			// a rare bug which triggers it.
-			logError("createMsgNotify: " + e.getMessage());
-			return null;
-		}
-	}
-
-	/** Current scheduled action.  This is used to guarantee that
-	 * performAction is called at least once between each call to
-	 * updateScheduledMessage.  If not, then the scheduled message is
-	 * cleared. */
-	private transient DmsAction sched_action;
-
-	/** Current scheduled message */
-	private transient SignMessage msg_sched = null;
-
-	/** Get the scheduled sign messasge.
-	 * @return Scheduled sign message */
-	@Override
-	public SignMessage getMsgSched() {
-		return msg_sched;
-	}
-
-	/** Set the scheduled sign message.
-	 * @param sm New scheduled sign message */
-	private void setMsgSchedNotify(SignMessage sm) {
-		if (!SignMessageHelper.isEquivalent(msg_sched, sm)) {
-			msg_sched = sm;
-			notifyAttribute("msgSched");
-		}
-	}
-
-	/** Check if a DMS action is deployable.
-	 * @param da DMS action.
-	 * @return true if action is deployable. */
-	public boolean isDeployable(DmsAction da) {
-		if (hasError())
-			return false;
-		SignMessage sm = createMsgSched(da);
-		try {
-			return sm == validateMsg(sm);
-		}
-		catch (TMSException e) {
-			return false;
-		}
-	}
-
-	/** Perform a DMS action.
-	 * @param ds DMS action. */
-	public void performAction(DmsAction da) {
-		SignMessage sm = createMsgSched(da);
-		if (sm != null) {
-			if (SCHED_LOG.isOpen()) {
-				logSched("created sched message: " +
-					sm.getMulti());
-			}
-			if (shouldReplaceScheduled(sm)) {
-				setMsgSchedNotify(sm);
-				sched_action = da;
-			}
-		} else if (SCHED_LOG.isOpen())
-			logSched("no message created for " + da.getName());
-	}
-
-	/** Test if a message should replace the current scheduled message.
-	 * @param sm SignMessage to test.
-	 * @return true if scheduled message should be replaced. */
-	private boolean shouldReplaceScheduled(SignMessage sm) {
-		SignMessage s = msg_sched;	// Avoid NPE
-		return null == s ||
-		       sm.getActivationPriority() > s.getActivationPriority() ||
-		       sm.getRunTimePriority() >= s.getRunTimePriority();
-	}
-
-	/** Create a scheduled message.
-	 * @param da DMS action
-	 * @return New sign message, or null on error */
-	private SignMessage createMsgSched(DmsAction da) {
-		String m = formatter.createMulti(da);
-		if (m != null) {
-			boolean be = da.getBeaconEnabled();
-			DMSMessagePriority ap = DMSMessagePriority.fromOrdinal(
-				da.getActivationPriority());
-			DMSMessagePriority rp = DMSMessagePriority.fromOrdinal(
-				da.getRunTimePriority());
-			SignMsgSource src = formatter.isTolling(da)
-			                  ? tolling
-			                  : schedule;
-			Integer d = getDuration(da);
-			return createMsg(m, be, ap, rp, src, null, d);
-		} else
-			return null;
-	}
-
-	/** Tolling prices */
-	private transient HashMap<String, Float> prices;
-
-	/** Set tolling prices */
-	private void setPrices(DmsAction da) {
-		prices = (da != null) ? calculatePrices(da) : null;
-	}
-
-	/** Calculate prices for a tolling message */
-	private HashMap<String, Float> calculatePrices(DmsAction da) {
-		QuickMessage qm = da.getQuickMessage();
-		if (qm != null)
-			return toll_formatter.calculatePrices(qm.getMulti());
-		else
-			return null;
-	}
-
-	/** Get the duration of a DMS action.
-	 * @param da DMS action.
-	 * @return Duration (minutes), or null for indefinite. */
-	private Integer getDuration(DmsAction da) {
-		return da.getActionPlan().getSticky()
-		     ? null
-		     : getUnstickyDuration();
-	}
-
-	/** Get the duration of an unsticky action */
-	private int getUnstickyDuration() {
-		/** FIXME: this should be twice the polling period for the
-		 *         sign.  Modem signs should have a longer duration. */
-		return 1;
-	}
-
-	/** Log a schedule message */
-	private void logSched(String msg) {
-		if (SCHED_LOG.isOpen())
-			SCHED_LOG.log(getName() + ": " + msg);
-	}
-
-	/** Update the scheduled message on the sign */
-	public void updateScheduledMsg() {
-		if (null == sched_action) {
-			logSched("no message scheduled");
-			setMsgSchedNotify(createBlankScheduledMsg());
-		}
-		setPrices(sched_action);
-		SignMessage sm = msg_sched;
-		if (sm != null)
-			updateScheduledMsg(sm);
-		sched_action = null;
-	}
-
-	/** Update the scheduled message on the sign */
-	private void updateScheduledMsg(SignMessage sm) {
-		// NOTE: use schedule for source even for blank messages
-		if (shouldActivate(sm, schedule.ordinal())) {
-			try {
-				logSched("set message to " + sm.getMulti());
-				if (sm.getSource() == tolling.ordinal())
-				    logPriceMessages(EventType.PRICE_DEPLOYED);
-				doSetMsgNext(sm);
-			}
-			catch (TMSException e) {
-				logSched(e.getMessage());
-			}
-		} else if (SCHED_LOG.isOpen()) {
-			logSched("sched msg " + sm.getName() + " not sent " +
-				sm.getMulti() + ", curr: " + msg_current +
-			        ", next: " + msg_next);
-		}
-	}
-
-	/** Create a blank scheduled message */
-	private SignMessage createBlankScheduledMsg() {
-		return isCurrentScheduled() ? createMsgBlank() : null;
-	}
-
-	/** Test if the current message is scheduled */
-	private boolean isCurrentScheduled() {
-		// If either the current or next message is not scheduled,
-		// then we won't consider the message scheduled
-		SignMessage c = msg_current;
-		SignMessage n = msg_next;
-		return (null == c || SignMsgSource.isScheduled(c.getSource()))
-		    && (null == n || SignMsgSource.isScheduled(n.getSource()));
 	}
 
 	/** Test if DMS is available */
