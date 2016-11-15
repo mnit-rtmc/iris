@@ -160,14 +160,14 @@ public interface DMS extends Device {
 	 *         fields are: description, status, and current reading. */
 	String[] getPhotocellStatus();
 
-	/** Set the next sign message */
-	void setMsgNext(SignMessage m);
+	/** Get the scheduled sign message */
+	SignMessage getMsgSched();
 
 	/** Get the current sign message */
 	SignMessage getMsgCurrent();
 
-	/** Get the scheduled sign message */
-	SignMessage getMsgSched();
+	/** Set the next sign message */
+	void setMsgNext(SignMessage sm);
 
 	/** Get the message deploy time.
 	 * @return Time message was deployed (ms since epoch).

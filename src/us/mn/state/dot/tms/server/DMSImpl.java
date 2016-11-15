@@ -1083,266 +1083,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			return null;
 	}
 
-	/** The next message to be displayed.  This is a write-only SONAR
-	 * attribute.  It is checked to prevent a lower priority message from
-	 * getting queued during the time when a message gets queued and it
-	 * becomes activated.
-	 * @see DMSImpl#shouldActivate */
-	private transient SignMessage msg_next;
-
-	/** Set the next sign message.  This method is not called by SONAR
-	 * automatically; instead, it must be called by operations after
-	 * getting exclusive device ownership.  It must be set back to null
-	 * after the operation completes.  This is necessary to prevent the
-	 * ReaperJob from destroying a SignMessage before it has been sent to
-	 * a sign.
-	 * @see DeviceImpl.acquire */
-	@Override
-	public void setMsgNext(SignMessage sm) {
-		msg_next = sm;
-	}
-
-	/** Set the next sign message.  This is called by SONAR when the
-	 * messageNext attribute is set. */
-	public void doSetMsgNext(SignMessage sm) throws TMSException {
-		DMSPoller p = getDMSPoller();
-		if (null == p) {
-			throw new ChangeVetoException(name +
-				": NO ACTIVE POLLER");
-		}
-		if (shouldActivate(sm))
-			doSetMsgNext(sm, p);
-	}
-
-	/** Check if a message should be activated based on priority.
-	 * @param sm SignMessage being activated.
-	 * @return true If priority is high enough to deploy. */
-	public boolean shouldActivate(SignMessage sm) {
-		return (sm != null)
-		      ? shouldActivate(sm, sm.getSource())
-		      : false;
-	}
-
-	/** Check if a message should be activated based on priority.
-	 * @param sm SignMessage being activated.
-	 * @param src Message source.
-	 * @return true If priority is high enough to deploy. */
-	private boolean shouldActivate(SignMessage sm, int src) {
-		assert sm != null;
-		DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
-		       sm.getActivationPriority());
-		return shouldActivate(ap, src) &&
-		       SignMessageHelper.lookup(sm.getName()) == sm;
-	}
-
-	/** Test if a message should be activated.
-	 * @param ap Activation priority.
-	 * @param src Message source.
-	 * @return True if message should be activated; false otherwise. */
-	private boolean shouldActivate(DmsMsgPriority ap, int src) {
-		return shouldActivate(msg_current, ap, src) &&
-		       shouldActivate(msg_next, ap, src);
-	}
-
-	/**
-	 * Set the next sign message.
-	 * @param sm Sign message, may not be null.
-	 * @param p DMS poller, may not be null.
-	 */
-	private void doSetMsgNext(SignMessage sm, DMSPoller p)
-		throws TMSException
-	{
-		SignMessage smn = validateMsg(sm);
-		// FIXME: there should be a better way to clear cached routes
-		//        in travel time estimator
-		int ap = smn.getActivationPriority();
-		if (OVERRIDE.ordinal() == ap)
-			formatter.clear();
-		p.sendMessage(this, smn);
-	}
-
-	/** Check if the sign has a reference to a sign message */
-	public boolean hasReference(SignMessage sm) {
-		return sm == msg_current ||
-		       sm == msg_sched ||
-		       sm == msg_next;
-	}
-
-	/** Validate a sign message to send.
-	 * @param sm Sign message to validate.
-	 * @return The sign message to send (may be a scheduled message). */
-	private SignMessage validateMsg(SignMessage sm) throws TMSException{
-		MultiString multi = new MultiString(sm.getMulti());
-		SignMessage sched = msg_sched;	// Avoid race
-		if (sched != null && multi.isBlank()) {
-			// Don't blank the sign if there's a scheduled message
-			// -- send the scheduled message instead.
-			try {
-				validateBitmaps(sched,
-					new MultiString(sched.getMulti()));
-				return sched;
-			}
-			catch (TMSException e) {
-				logSched("sched msg not valid: " +
-					e.getMessage());
-				// Ok, go ahead and blank the sign
-			}
-		}
-		validateBitmaps(sm, multi);
-		return sm;
-	}
-
-	/** Validate the message bitmaps */
-	private void validateBitmaps(SignMessage sm, MultiString multi)
-		throws TMSException
-	{
-		if (!multi.isValid()) {
-			throw new InvalidMessageException(name +
-				": INVALID MESSAGE, " + sm.getMulti());
-		}
-		try {
-			validateBitmaps(sm.getBitmaps(), multi);
-		}
-		catch (IOException e) {
-			throw new ChangeVetoException("Base64 decode error");
-		}
-		catch (IndexOutOfBoundsException e) {
-			throw new ChangeVetoException(e.getMessage());
-		}
-	}
-
-	/** Validate message bitmaps.
-	 * @param bmaps Base64-encoded bitmaps.
-	 * @param multi Message MULTI string.
-	 * @throws IOException, ChangeVetoException. */
-	private void validateBitmaps(String bmaps, MultiString multi)
-		throws IOException, ChangeVetoException
-	{
-		byte[] b_data = Base64.decode(bmaps);
-		BitmapGraphic bg = createBlankBitmap();
-		int blen = bg.length();
-		if (blen == 0)
-			throw new ChangeVetoException("Invalid sign size");
-		if (b_data.length % blen != 0)
-			throw new ChangeVetoException("Invalid bitmap length");
-		if (!multi.isBlank()) {
-			String[] pixels = pixelStatus;	// Avoid races
-			if (pixels != null && pixels.length == 2)
-				validateBitmaps(b_data, pixels, bg);
-		}
-	}
-
-	/** Validate the message bitmaps.
-	 * @param b_data Decoded bitmap data.
-	 * @param pixels Pixel status bitmaps (stuck off and stuck on).
-	 * @param bg Temporary bitmap graphic.
-	 * @throws IOException, ChangeVetoException. */
-	private void validateBitmaps(byte[] b_data, String[] pixels,
-		BitmapGraphic bg) throws IOException, ChangeVetoException
-	{
-		int blen = bg.length();
-		int off_limit = SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt();
-		int on_limit = SystemAttrEnum.DMS_PIXEL_ON_LIMIT.getInt();
-		BitmapGraphic stuckOff = bg.createBlankCopy();
-		BitmapGraphic stuckOn = bg.createBlankCopy();
-		byte[] b_off = Base64.decode(pixels[STUCK_OFF_BITMAP]);
-		byte[] b_on = Base64.decode(pixels[STUCK_ON_BITMAP]);
-		// Don't validate if the sign dimensions have changed
-		if (b_off.length != blen || b_on.length != blen)
-			return;
-		stuckOff.setPixelData(b_off);
-		stuckOn.setPixelData(b_on);
-		int n_pages = b_data.length / blen;
-		byte[] bd = new byte[blen];
-		for (int p = 0; p < n_pages; p++) {
-			System.arraycopy(b_data, p * blen, bd, 0, blen);
-			bg.setPixelData(bd);
-			bg.union(stuckOff);
-			int n_lit = bg.getLitCount();
-			if (n_lit > off_limit) {
-				throw new ChangeVetoException(
-					"Too many stuck off pixels: " + n_lit);
-			}
-			bg.setPixelData(bd);
-			bg.outline();
-			bg.union(stuckOn);
-			n_lit = bg.getLitCount();
-			if (n_lit > on_limit) {
-				throw new ChangeVetoException(
-					"Too many stuck on pixels: " + n_lit);
-			}
-		}
-	}
-
-	/** Create a blank bitmap */
-	private BitmapGraphic createBlankBitmap()
-		throws ChangeVetoException
-	{
-		Integer w = widthPixels;	// Avoid race
-		Integer h = heightPixels;	// Avoid race
-		if (w != null && h != null)
-			return new BitmapGraphic(w, h);
-		else
-			throw new ChangeVetoException("Width/height is null");
-	}
-
-	/** Current message (Shall not be null) */
-	private transient SignMessage msg_current = createMsgBlank();
-
-	/** Set the current message.
-	 * @param sm Sign message. */
-	public void setMsgCurrentNotify(SignMessage sm) {
-		if (sm.getSource() == tolling.ordinal())
-			logPriceMessages(EventType.PRICE_VERIFIED);
-		if (!isMsgCurrentEquivalent(sm)) {
-			logMsg(sm);
-			setDeployTime();
-			msg_current = sm;
-			notifyAttribute("msgCurrent");
-			updateStyles();
-		}
-		updateBeacon();
-	}
-
-	/** Get the current messasge.
-	 * @return Currently active message (cannot be null) */
-	@Override
-	public SignMessage getMsgCurrent() {
-		return msg_current;
-	}
-
-	/** Test if the current message is equivalent to a sign message */
-	public boolean isMsgCurrentEquivalent(SignMessage sm) {
-		return SignMessageHelper.isEquivalent(msg_current, sm);
-	}
-
-	/** Log a message.
-	 * @param sm Sign message. */
-	private void logMsg(SignMessage sm) {
-		EventType et = EventType.DMS_DEPLOYED;
-		String text = sm.getMulti();
-		if (SignMessageHelper.isBlank(sm)) {
-			et = EventType.DMS_CLEARED;
-			text = null;
-		}
-		String owner = sm.getOwner();
-		logEvent(new SignStatusEvent(et, name, text, owner));
-	}
-
-	/** Log price (tolling) messages.
-	 * @param et Event type. */
-	private void logPriceMessages(EventType et) {
-		HashMap<String, Float> p = prices;
-		if (p != null) {
-			for (Map.Entry<String, Float> ent: p.entrySet()) {
-				String tz = ent.getKey();
-				Float price = ent.getValue();
-				logEvent(new PriceMessageEvent(et, name, tz,
-				                               price));
-			}
-		}
-	}
-
 	/** Current scheduled action.  This is used to guarantee that
 	 * performAction is called at least once between each call to
 	 * updateScheduledMessage.  If not, then the scheduled message is
@@ -1482,6 +1222,20 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
+	/** Log price (tolling) messages.
+	 * @param et Event type. */
+	private void logPriceMessages(EventType et) {
+		HashMap<String, Float> p = prices;
+		if (p != null) {
+			for (Map.Entry<String, Float> ent: p.entrySet()) {
+				String tz = ent.getKey();
+				Float price = ent.getValue();
+				logEvent(new PriceMessageEvent(et, name, tz,
+				                               price));
+			}
+		}
+	}
+
 	/** Create a blank scheduled message */
 	private SignMessage createBlankScheduledMsg() {
 		return isCurrentScheduled() ? createMsgBlank() : null;
@@ -1495,6 +1249,252 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		SignMessage n = msg_next;
 		return (null == c || SignMsgSource.isScheduled(c.getSource()))
 		    && (null == n || SignMsgSource.isScheduled(n.getSource()));
+	}
+
+	/** Current message (Shall not be null) */
+	private transient SignMessage msg_current = createMsgBlank();
+
+	/** Set the current message.
+	 * @param sm Sign message. */
+	public void setMsgCurrentNotify(SignMessage sm) {
+		if (sm.getSource() == tolling.ordinal())
+			logPriceMessages(EventType.PRICE_VERIFIED);
+		if (!isMsgCurrentEquivalent(sm)) {
+			logMsg(sm);
+			setDeployTime();
+			msg_current = sm;
+			notifyAttribute("msgCurrent");
+			updateStyles();
+		}
+		updateBeacon();
+	}
+
+	/** Get the current messasge.
+	 * @return Currently active message (cannot be null) */
+	@Override
+	public SignMessage getMsgCurrent() {
+		return msg_current;
+	}
+
+	/** Test if the current message is equivalent to a sign message */
+	public boolean isMsgCurrentEquivalent(SignMessage sm) {
+		return SignMessageHelper.isEquivalent(msg_current, sm);
+	}
+
+	/** Log a message.
+	 * @param sm Sign message. */
+	private void logMsg(SignMessage sm) {
+		EventType et = EventType.DMS_DEPLOYED;
+		String text = sm.getMulti();
+		if (SignMessageHelper.isBlank(sm)) {
+			et = EventType.DMS_CLEARED;
+			text = null;
+		}
+		String owner = sm.getOwner();
+		logEvent(new SignStatusEvent(et, name, text, owner));
+	}
+
+	/** The next message to be displayed.  This is a write-only SONAR
+	 * attribute.  It is checked to prevent a lower priority message from
+	 * getting queued during the time when a message gets queued and it
+	 * becomes activated.
+	 * @see DMSImpl#shouldActivate */
+	private transient SignMessage msg_next;
+
+	/** Set the next sign message.  This method is not called by SONAR
+	 * automatically; instead, it must be called by operations after
+	 * getting exclusive device ownership.  It must be set back to null
+	 * after the operation completes.  This is necessary to prevent the
+	 * ReaperJob from destroying a SignMessage before it has been sent to
+	 * a sign.
+	 * @see DeviceImpl.acquire */
+	@Override
+	public void setMsgNext(SignMessage sm) {
+		msg_next = sm;
+	}
+
+	/** Set the next sign message.  This is called by SONAR when the
+	 * messageNext attribute is set. */
+	public void doSetMsgNext(SignMessage sm) throws TMSException {
+		DMSPoller p = getDMSPoller();
+		if (null == p) {
+			throw new ChangeVetoException(name +
+				": NO ACTIVE POLLER");
+		}
+		if (shouldActivate(sm))
+			doSetMsgNext(sm, p);
+	}
+
+	/** Check if a message should be activated based on priority.
+	 * @param sm SignMessage being activated.
+	 * @return true If priority is high enough to deploy. */
+	public boolean shouldActivate(SignMessage sm) {
+		return (sm != null)
+		      ? shouldActivate(sm, sm.getSource())
+		      : false;
+	}
+
+	/** Check if a message should be activated based on priority.
+	 * @param sm SignMessage being activated.
+	 * @param src Message source.
+	 * @return true If priority is high enough to deploy. */
+	private boolean shouldActivate(SignMessage sm, int src) {
+		assert sm != null;
+		DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
+		       sm.getActivationPriority());
+		return shouldActivate(ap, src) &&
+		       SignMessageHelper.lookup(sm.getName()) == sm;
+	}
+
+	/** Test if a message should be activated.
+	 * @param ap Activation priority.
+	 * @param src Message source.
+	 * @return True if message should be activated; false otherwise. */
+	private boolean shouldActivate(DmsMsgPriority ap, int src) {
+		return shouldActivate(msg_current, ap, src) &&
+		       shouldActivate(msg_next, ap, src);
+	}
+
+	/**
+	 * Set the next sign message.
+	 * @param sm Sign message, may not be null.
+	 * @param p DMS poller, may not be null.
+	 */
+	private void doSetMsgNext(SignMessage sm, DMSPoller p)
+		throws TMSException
+	{
+		SignMessage smn = validateMsg(sm);
+		// FIXME: there should be a better way to clear cached routes
+		//        in travel time estimator
+		int ap = smn.getActivationPriority();
+		if (OVERRIDE.ordinal() == ap)
+			formatter.clear();
+		p.sendMessage(this, smn);
+	}
+
+	/** Validate a sign message to send.
+	 * @param sm Sign message to validate.
+	 * @return The sign message to send (may be a scheduled message). */
+	private SignMessage validateMsg(SignMessage sm) throws TMSException{
+		MultiString multi = new MultiString(sm.getMulti());
+		SignMessage sched = msg_sched;	// Avoid race
+		if (sched != null && multi.isBlank()) {
+			// Don't blank the sign if there's a scheduled message
+			// -- send the scheduled message instead.
+			try {
+				validateBitmaps(sched,
+					new MultiString(sched.getMulti()));
+				return sched;
+			}
+			catch (TMSException e) {
+				logSched("sched msg not valid: " +
+					e.getMessage());
+				// Ok, go ahead and blank the sign
+			}
+		}
+		validateBitmaps(sm, multi);
+		return sm;
+	}
+
+	/** Validate the message bitmaps */
+	private void validateBitmaps(SignMessage sm, MultiString multi)
+		throws TMSException
+	{
+		if (!multi.isValid()) {
+			throw new InvalidMessageException(name +
+				": INVALID MESSAGE, " + sm.getMulti());
+		}
+		try {
+			validateBitmaps(sm.getBitmaps(), multi);
+		}
+		catch (IOException e) {
+			throw new ChangeVetoException("Base64 decode error");
+		}
+		catch (IndexOutOfBoundsException e) {
+			throw new ChangeVetoException(e.getMessage());
+		}
+	}
+
+	/** Validate message bitmaps.
+	 * @param bmaps Base64-encoded bitmaps.
+	 * @param multi Message MULTI string.
+	 * @throws IOException, ChangeVetoException. */
+	private void validateBitmaps(String bmaps, MultiString multi)
+		throws IOException, ChangeVetoException
+	{
+		byte[] b_data = Base64.decode(bmaps);
+		BitmapGraphic bg = createBlankBitmap();
+		int blen = bg.length();
+		if (blen == 0)
+			throw new ChangeVetoException("Invalid sign size");
+		if (b_data.length % blen != 0)
+			throw new ChangeVetoException("Invalid bitmap length");
+		if (!multi.isBlank()) {
+			String[] pixels = pixelStatus;	// Avoid races
+			if (pixels != null && pixels.length == 2)
+				validateBitmaps(b_data, pixels, bg);
+		}
+	}
+
+	/** Validate the message bitmaps.
+	 * @param b_data Decoded bitmap data.
+	 * @param pixels Pixel status bitmaps (stuck off and stuck on).
+	 * @param bg Temporary bitmap graphic.
+	 * @throws IOException, ChangeVetoException. */
+	private void validateBitmaps(byte[] b_data, String[] pixels,
+		BitmapGraphic bg) throws IOException, ChangeVetoException
+	{
+		int blen = bg.length();
+		int off_limit = SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt();
+		int on_limit = SystemAttrEnum.DMS_PIXEL_ON_LIMIT.getInt();
+		BitmapGraphic stuckOff = bg.createBlankCopy();
+		BitmapGraphic stuckOn = bg.createBlankCopy();
+		byte[] b_off = Base64.decode(pixels[STUCK_OFF_BITMAP]);
+		byte[] b_on = Base64.decode(pixels[STUCK_ON_BITMAP]);
+		// Don't validate if the sign dimensions have changed
+		if (b_off.length != blen || b_on.length != blen)
+			return;
+		stuckOff.setPixelData(b_off);
+		stuckOn.setPixelData(b_on);
+		int n_pages = b_data.length / blen;
+		byte[] bd = new byte[blen];
+		for (int p = 0; p < n_pages; p++) {
+			System.arraycopy(b_data, p * blen, bd, 0, blen);
+			bg.setPixelData(bd);
+			bg.union(stuckOff);
+			int n_lit = bg.getLitCount();
+			if (n_lit > off_limit) {
+				throw new ChangeVetoException(
+					"Too many stuck off pixels: " + n_lit);
+			}
+			bg.setPixelData(bd);
+			bg.outline();
+			bg.union(stuckOn);
+			n_lit = bg.getLitCount();
+			if (n_lit > on_limit) {
+				throw new ChangeVetoException(
+					"Too many stuck on pixels: " + n_lit);
+			}
+		}
+	}
+
+	/** Create a blank bitmap */
+	private BitmapGraphic createBlankBitmap()
+		throws ChangeVetoException
+	{
+		Integer w = widthPixels;	// Avoid race
+		Integer h = heightPixels;	// Avoid race
+		if (w != null && h != null)
+			return new BitmapGraphic(w, h);
+		else
+			throw new ChangeVetoException("Width/height is null");
+	}
+
+	/** Check if the sign has a reference to a sign message */
+	public boolean hasReference(final SignMessage sm) {
+		return sm == msg_sched ||
+		       sm == msg_current ||
+		       sm == msg_next;
 	}
 
 	/** Message deploy time */
