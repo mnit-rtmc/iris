@@ -256,7 +256,7 @@ public class DMSDispatcher extends JPanel {
 			SignMessage sm = createMessage();
 			if (sm != null) {
 				for (DMS dms: sel)
-					dms.setMsgNext(sm);
+					dms.setMsgUser(sm);
 			}
 			if (sel.size() == 1)
 				composer.updateMessageLibrary();
@@ -294,7 +294,7 @@ public class DMSDispatcher extends JPanel {
 			SignMessage sm = createBlankMessage();
 			if (sm != null) {
 				for (DMS dms: sel)
-					dms.setMsgNext(sm);
+					dms.setMsgUser(sm);
 			}
 		}
 	}

@@ -1083,13 +1083,28 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			return null;
 	}
 
+	/** User selected sign message */
+	private transient SignMessage msg_user = null;
+
+	/** Set the user selected sign message */
+	@Override
+	public void setMsgUser(SignMessage sm) {
+		msg_user = sm;
+		try {
+			sendMsg(sm);
+		}
+		catch (TMSException e) {
+			logError("sendMsg: " + e.getMessage());
+		}
+	}
+
 	/** Current scheduled action.  This is used to guarantee that
 	 * performAction is called at least once between each call to
 	 * updateScheduledMessage.  If not, then the scheduled message is
 	 * cleared. */
 	private transient DmsAction sched_action;
 
-	/** Current scheduled message */
+	/** Scheduled sign message */
 	private transient SignMessage msg_sched = null;
 
 	/** Get the scheduled sign messasge.
@@ -1210,7 +1225,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				logSched("set message to " + sm.getMulti());
 				if (sm.getSource() == tolling.ordinal())
 				    logPriceMessages(EventType.PRICE_DEPLOYED);
-				doSetMsgNext(sm);
+				sendMsg(sm);
 			}
 			catch (TMSException e) {
 				logSched(e.getMessage());
@@ -1294,35 +1309,33 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		logEvent(new SignStatusEvent(et, name, text, owner));
 	}
 
-	/** The next message to be displayed.  This is a write-only SONAR
-	 * attribute.  It is checked to prevent a lower priority message from
+	/** Next sign message (sending in process).
+	 * It is checked to prevent a lower priority message from
 	 * getting queued during the time when a message gets queued and it
 	 * becomes activated.
 	 * @see DMSImpl#shouldActivate */
 	private transient SignMessage msg_next;
 
-	/** Set the next sign message.  This method is not called by SONAR
-	 * automatically; instead, it must be called by operations after
+	/** Set the next sign message.  This must be called by operations after
 	 * getting exclusive device ownership.  It must be set back to null
 	 * after the operation completes.  This is necessary to prevent the
 	 * ReaperJob from destroying a SignMessage before it has been sent to
 	 * a sign.
 	 * @see DeviceImpl.acquire */
-	@Override
 	public void setMsgNext(SignMessage sm) {
 		msg_next = sm;
 	}
 
-	/** Set the next sign message.  This is called by SONAR when the
-	 * messageNext attribute is set. */
-	public void doSetMsgNext(SignMessage sm) throws TMSException {
+	/** Set the sign message */
+	private void sendMsg(SignMessage sm) throws TMSException {
 		DMSPoller p = getDMSPoller();
 		if (null == p) {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
+		// FIXME: create composite msg
 		if (shouldActivate(sm))
-			doSetMsgNext(sm, p);
+			sendMsg(sm, p);
 	}
 
 	/** Check if a message should be activated based on priority.
@@ -1360,7 +1373,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param sm Sign message, may not be null.
 	 * @param p DMS poller, may not be null.
 	 */
-	private void doSetMsgNext(SignMessage sm, DMSPoller p)
+	private void sendMsg(SignMessage sm, DMSPoller p)
 		throws TMSException
 	{
 		SignMessage smn = validateMsg(sm);
@@ -1375,7 +1388,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Validate a sign message to send.
 	 * @param sm Sign message to validate.
 	 * @return The sign message to send (may be a scheduled message). */
-	private SignMessage validateMsg(SignMessage sm) throws TMSException{
+	private SignMessage validateMsg(SignMessage sm) throws TMSException {
 		MultiString multi = new MultiString(sm.getMulti());
 		SignMessage sched = msg_sched;	// Avoid race
 		if (sched != null && multi.isBlank()) {
@@ -1492,7 +1505,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Check if the sign has a reference to a sign message */
 	public boolean hasReference(final SignMessage sm) {
-		return sm == msg_sched ||
+		return sm == msg_user ||
+		       sm == msg_sched ||
 		       sm == msg_current ||
 		       sm == msg_next;
 	}

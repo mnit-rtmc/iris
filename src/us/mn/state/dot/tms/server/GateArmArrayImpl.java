@@ -493,13 +493,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Update the message on the specified DMS */
 	private void updateDmsMsg(DMSImpl d, SignMessage sm) {
-		try {
-			if (!d.isMsgCurrentEquivalent(sm))
-				d.doSetMsgNext(sm);
-		}
-		catch (TMSException e) {
-			logError(e.getMessage());
-		}
+		if (!d.isMsgCurrentEquivalent(sm))
+			d.setMsgUser(sm);
 	}
 
 	/** Test if message should be open */

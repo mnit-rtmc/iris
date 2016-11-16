@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import static us.mn.state.dot.tms.SignMsgSource.lcs;
-import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -159,15 +158,8 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Send an indication to a DMS */
-	protected void sendIndication(int lane, DMSImpl dms) {
-		SignMessage sm = msgs[lane];
-		try {
-			dms.doSetMsgNext(sm);
-			ind_after[lane] = indications[lane];
-		}
-		catch (TMSException e) {
-			logError("OpSendLCSIndications.sendIndication: " +
-				dms.getName() + ", " + e.getMessage());
-		}
+	private void sendIndication(int lane, DMSImpl dms) {
+		dms.setMsgUser(msgs[lane]);
+		ind_after[lane] = indications[lane];
 	}
 }
