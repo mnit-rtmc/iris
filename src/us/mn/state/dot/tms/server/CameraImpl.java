@@ -284,12 +284,13 @@ public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Set flag to allow publishing camera images */
 	public void doSetPublish(boolean p) throws TMSException {
-		if (p == publish)
-			return;
-		store.update(this, "publish", p);
-		setPublish(p);
-		if (!p)
-			blankRestrictedMonitors();
+		if (p != publish) {
+			store.update(this, "publish", p);
+			setPublish(p);
+			if (!p)
+				blankRestrictedMonitors();
+			updateStyles();
+		}
 	}
 
 	/** Blank restricted video monitors viewing the camera */
