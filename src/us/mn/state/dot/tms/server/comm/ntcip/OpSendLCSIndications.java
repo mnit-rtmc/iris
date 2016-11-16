@@ -37,8 +37,8 @@ import us.mn.state.dot.tms.utils.MultiString;
 public class OpSendLCSIndications extends OpLCS {
 
 	/** Get the activation priority for the specified indication */
-	static protected DmsMsgPriority getActivationPriority(int ind) {
-		switch(LaneUseIndication.fromOrdinal(ind)) {
+	static private DmsMsgPriority getActivationPriority(int ind) {
+		switch (LaneUseIndication.fromOrdinal(ind)) {
 		case LANE_CLOSED:
 			return INCIDENT_HIGH;
 		case LANE_CLOSED_AHEAD:
@@ -56,10 +56,10 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Indications to send */
-	protected final Integer[] indications;
+	private final Integer[] indications;
 
 	/** Sign messages for each DMS in the LCS array */
-	protected final SignMessage[] msgs;
+	private final SignMessage[] msgs;
 
 	/** Create a new operation to send LCS indications */
 	public OpSendLCSIndications(LCSArrayImpl l, Integer[] ind, User u) {
@@ -69,6 +69,7 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase phaseTwo() {
 		return new CreateSignMessages();
 	}
@@ -77,11 +78,11 @@ public class OpSendLCSIndications extends OpLCS {
 	protected class CreateSignMessages extends Phase {
 
 		/** Lane of DMS for sign message */
-		protected int lane = 0;
+		private int lane = 0;
 
 		/** Create a sign message */
 		protected Phase poll(CommMessage mess) {
-			if(lane < msgs.length) {
+			if (lane < msgs.length) {
 				msgs[lane] = createSignMessage(lane);
 				lane++;
 				return this;
@@ -91,7 +92,7 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Create a sign message */
-	protected SignMessage createSignMessage(int lane) {
+	private SignMessage createSignMessage(int lane) {
 		int ind = indications[lane];
 		DMSImpl dms = dmss[lane];
 		if (dms != null) {
@@ -122,16 +123,15 @@ public class OpSendLCSIndications extends OpLCS {
 	}
 
 	/** Create a MULTI string for a lane use indication */
-	protected String createIndicationMulti(int ind, int w, int h) {
+	private String createIndicationMulti(int ind, int w, int h) {
 		String m = "";
 		LaneUseMulti lum = LaneUseMultiHelper.find(ind, w, h);
-		if(lum != null) {
+		if (lum != null) {
 			QuickMessage qm = lum.getQuickMessage();
-			if(qm != null)
+			if (qm != null)
 				m = qm.getMulti();
 		}
-		if(m.length() > 0 ||
-		   LaneUseIndication.fromOrdinal(ind) == LaneUseIndication.DARK)
+		if (m.length() > 0 || LaneUseIndication.DARK.ordinal() == ind)
 			return m;
 		else
 			return null;
@@ -142,24 +142,24 @@ public class OpSendLCSIndications extends OpLCS {
 
 		/** Send sign messages */
 		protected Phase poll(CommMessage mess) {
-			for(int lane = 0; lane < msgs.length; lane++)
+			for (int lane = 0; lane < msgs.length; lane++)
 				sendIndication(lane);
 			return null;
 		}
 	}
 
 	/** Send an indication to a DMS */
-	protected void sendIndication(int lane) {
+	private void sendIndication(int lane) {
 		DMSImpl dms = dmss[lane];
-		if(dms != null) {
-			if(dms.shouldActivate(msgs[lane]))
-				sendIndication(lane, dms);
-		}
+		if (dms != null)
+			sendIndication(lane, dms);
 	}
 
 	/** Send an indication to a DMS */
 	private void sendIndication(int lane, DMSImpl dms) {
-		dms.setMsgUser(msgs[lane]);
-		ind_after[lane] = indications[lane];
+		if (dms.shouldActivate(msgs[lane])) {
+			dms.setMsgUser(msgs[lane]);
+			ind_after[lane] = indications[lane];
+		}
 	}
 }
