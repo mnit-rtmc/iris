@@ -1123,21 +1123,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Check if a DMS action is deployable.
-	 * @param da DMS action.
-	 * @return true if action is deployable. */
-	public boolean isDeployable(DmsAction da) {
-		if (hasError())
-			return false;
-		SignMessage sm = createMsgSched(da);
-		try {
-			return validateMsg(sm) == sm;
-		}
-		catch (TMSException e) {
-			return false;
-		}
-	}
-
 	/** Perform a DMS action.
 	 * @param ds DMS action. */
 	public void performAction(DmsAction da) {

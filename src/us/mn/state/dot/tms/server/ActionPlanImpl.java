@@ -313,7 +313,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 			if (dsg.getSignGroup() == sg) {
 				DMS dms = dsg.getDms();
 				if (dms instanceof DMSImpl) {
-					if (!((DMSImpl) dms).isDeployable(da))
+					if (((DMSImpl) dms).hasError())
 						return false;
 				}
 			}
