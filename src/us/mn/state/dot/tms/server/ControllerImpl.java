@@ -246,7 +246,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return comm_link;
 	}
 
-	/** Time interval for data binning */
+	/** Get the polling period */
 	public int getPollPeriod() {
 		CommLinkImpl cl = comm_link;
 		return (cl != null) ? cl.getPollPeriod() : 30;

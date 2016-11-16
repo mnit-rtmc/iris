@@ -351,10 +351,15 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		return (c != null) && c.hasModemCommLink();
 	}
 
+	/** Get the polling period */
+	protected int getPollPeriod() {
+		ControllerImpl c = controller;	// Avoid race
+		return (c != null) ? c.getPollPeriod() : 30;
+	}
+
 	/** Check if the polling period is long (more than 30 seconds) */
 	protected boolean isPeriodLong() {
-		ControllerImpl c = controller;
-		return (c != null) && (c.getPollPeriod() > 30);
+		return getPollPeriod() > 30;
 	}
 
 	/** Check if the device is on a "connected" comm link */

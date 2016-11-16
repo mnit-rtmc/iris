@@ -76,6 +76,12 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
+	/** Minimum duration of a DMS action (minutes) */
+	static private final int DURATION_MINIMUM_MINS = 1;
+
+	/** Number of polling periods for DMS action duration */
+	static private final int DURATION_PERIODS = 3;
+
 	/** Interface for handling brightness samples */
 	static public interface BrightnessHandler {
 		void feedback(EventType et, int photo, int output);
@@ -1174,14 +1180,17 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private Integer getDuration(DmsAction da) {
 		return da.getActionPlan().getSticky()
 		     ? null
-		     : getUnstickyDuration();
+		     : getUnstickyDurationMins();
 	}
 
 	/** Get the duration of an unsticky action */
-	private int getUnstickyDuration() {
-		/** FIXME: this should be twice the polling period for the
-		 *         sign.  Modem signs should have a longer duration. */
-		return 1;
+	private int getUnstickyDurationMins() {
+		return Math.max(DURATION_MINIMUM_MINS, getDurationMins());
+	}
+
+	/** Get the duration of a DMS action */
+	private int getDurationMins() {
+		return getPollPeriod() * DURATION_PERIODS / 60;
 	}
 
 	/** Log a schedule message */
