@@ -20,7 +20,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
-import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
@@ -347,7 +347,7 @@ public class MultiRenderer extends MultiAdapter {
 			for (Block block: blocks)
 				block.render();
 		}
-		catch (InvalidMessageException e) {
+		catch (InvalidMsgException e) {
 			syntax_err = MultiSyntaxError.characterNotDefined;
 		}
 		catch (IndexOutOfBoundsException e) {
@@ -414,7 +414,7 @@ public class MultiRenderer extends MultiAdapter {
 				lines.addLast(new Line(null));
 			return lines.peekLast();
 		}
-		void render() throws InvalidMessageException {
+		void render() throws InvalidMsgException {
 			int ex = getExtraHeight();
 			if (ex < 0) {
 				syntax_err = MultiSyntaxError.textTooBig;
@@ -515,7 +515,7 @@ public class MultiRenderer extends MultiAdapter {
 				fragments.addLast(new Fragment());
 			return fragments.peekLast();
 		}
-		void render(int base) throws InvalidMessageException {
+		void render(int base) throws InvalidMsgException {
 			for (Fragment f: fragments)
 				f.render(base);
 		}
@@ -540,7 +540,7 @@ public class MultiRenderer extends MultiAdapter {
 		void addSpan(Span s) {
 			spans.add(s);
 		}
-		void render(int base) throws InvalidMessageException {
+		void render(int base) throws InvalidMsgException {
 			int ex = getExtraWidth();
 			if (ex < 0) {
 				syntax_err = MultiSyntaxError.textTooBig;
@@ -629,7 +629,7 @@ public class MultiRenderer extends MultiAdapter {
 				return FontHelper.calculateWidth(font, span,
 					c_space);
 			}
-			catch (InvalidMessageException e) {
+			catch (InvalidMsgException e) {
 				syntax_err=MultiSyntaxError.characterNotDefined;
 				return 0;
 			}
@@ -638,7 +638,7 @@ public class MultiRenderer extends MultiAdapter {
 			assert font != null;
 			return (font != null) ? font.getLineSpacing() : 0;
 		}
-		void render(int x, int base) throws InvalidMessageException {
+		void render(int x, int base) throws InvalidMsgException {
 			int y = base - getHeight();
 			for (int i = 0; i < span.length(); i++) {
 				int cp = span.charAt(i);

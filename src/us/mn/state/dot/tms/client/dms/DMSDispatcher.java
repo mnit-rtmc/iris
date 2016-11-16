@@ -28,7 +28,7 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
-import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignMessage;
@@ -319,7 +319,7 @@ public class DMSDispatcher extends JPanel {
 			try {
 				return encodeBitmaps(b.createBitmaps(ms));
 			}
-			catch (InvalidMessageException e) {
+			catch (InvalidMsgException e) {
 				// Message is not valid
 			}
 		}
@@ -467,7 +467,7 @@ public class DMSDispatcher extends JPanel {
 			catch (IndexOutOfBoundsException e) {
 				// pixmap too small for message
 			}
-			catch (InvalidMessageException e) {
+			catch (InvalidMsgException e) {
 				// most likely a MultiSyntaxError ...
 			}
 		}

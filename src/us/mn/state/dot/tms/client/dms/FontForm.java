@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
@@ -336,7 +336,7 @@ public class FontForm extends AbstractForm {
 		try {
 			return b.createPixmaps(ms);
 		}
-		catch (InvalidMessageException e) {
+		catch (InvalidMsgException e) {
 			return null;
 		}
 	}

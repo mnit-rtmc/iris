@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2007  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,15 +15,15 @@
 package us.mn.state.dot.tms;
 
 /**
- * InvalidMessageException indicates that a sign is not able to display the
+ * InvalidMsgException indicates that a sign is not able to display the
  * specified message.
  *
  * @author Douglas Lau
  */
-public class InvalidMessageException extends TMSException {
+public class InvalidMsgException extends TMSException {
 
 	/** Create a new invalid message exception */
-	public InvalidMessageException(String msg) {
+	public InvalidMsgException(String msg) {
 		super(msg);
 	}
 }

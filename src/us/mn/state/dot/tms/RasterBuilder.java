@@ -140,7 +140,7 @@ public class RasterBuilder {
 
 	/** Render a BitmapGraphic for each page */
 	public BitmapGraphic[] createBitmaps(MultiString ms)
-		throws InvalidMessageException
+		throws InvalidMsgException
 	{
 		final ArrayList<BitmapGraphic> bitmaps =
 			new ArrayList<BitmapGraphic>();
@@ -158,7 +158,7 @@ public class RasterBuilder {
 
 	/** Render a PixmapGraphic for each page */
 	public RasterGraphic[] createPixmaps(MultiString ms)
-		throws InvalidMessageException
+		throws InvalidMsgException
 	{
 		final ArrayList<RasterGraphic> pixmaps =
 			new ArrayList<RasterGraphic>();
@@ -176,7 +176,7 @@ public class RasterBuilder {
 
 	/** Render to a RasterGraphic for the specified page number */
 	private void render(MultiString ms, RasterGraphic.Factory factory)
-		throws InvalidMessageException
+		throws InvalidMsgException
 	{
 		MultiRenderer mr = new MultiRenderer(factory, c_width, c_height,
 			default_font);
@@ -185,7 +185,7 @@ public class RasterBuilder {
 		mr.complete();
 		MultiSyntaxError err = mr.getSyntaxError();
 		if (err != MultiSyntaxError.none) {
-			throw new InvalidMessageException(err.toString() +
+			throw new InvalidMsgException(err.toString() +
 				": \"" + ms + '"');
 		}
 	}

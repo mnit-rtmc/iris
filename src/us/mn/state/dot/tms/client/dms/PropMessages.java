@@ -26,7 +26,7 @@ import javax.swing.JPanel;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignGroup;
@@ -295,7 +295,7 @@ public class PropMessages extends JPanel {
 		try {
 			return b.createPixmaps(ms);
 		}
-		catch (InvalidMessageException e) {
+		catch (InvalidMsgException e) {
 			return null;
 		}
 	}

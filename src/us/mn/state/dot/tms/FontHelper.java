@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2013  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -100,7 +100,7 @@ public class FontHelper extends BaseHelper {
 
 	/** Look up a code point in the specified font */
 	static public Graphic lookupGraphic(Font font, int cp)
-		throws InvalidMessageException
+		throws InvalidMsgException
 	{
 		Glyph g = lookupGlyph(font, cp);
 		if(g != null) {
@@ -108,16 +108,16 @@ public class FontHelper extends BaseHelper {
 			if(gr != null)
 				return gr;
 		}
-		throw new InvalidMessageException("Invalid code point:" + cp);
+		throw new InvalidMsgException("Invalid code point:" + cp);
 	}
 
 	/** Calculate the width of a span of text.
 	 * @param font Font to use for text
 	 * @param t Text to calculate
 	 * @return Width in pixels of text
-	 * @throws InvalidMessageException if the font is missing a character */
+	 * @throws InvalidMsgException if the font is missing a character */
 	static public int calculateWidth(Font font, String t)
-		throws InvalidMessageException
+		throws InvalidMsgException
 	{
 		return calculateWidth(font, t, font.getCharSpacing());
 	}
@@ -127,9 +127,9 @@ public class FontHelper extends BaseHelper {
 	 * @param t Text to calculate.
 	 * @param cs Character spacing.
 	 * @return Width in pixels of text.
-	 * @throws InvalidMessageException if the font is missing a character */
+	 * @throws InvalidMsgException if the font is missing a character */
 	static public int calculateWidth(Font font, String t, int cs)
-		throws InvalidMessageException
+		throws InvalidMsgException
 	{
 		int w = 0;
 		for(int i = 0; i < t.length(); i++) {

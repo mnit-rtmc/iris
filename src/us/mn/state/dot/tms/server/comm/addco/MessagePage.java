@@ -16,7 +16,7 @@ package us.mn.state.dot.tms.server.comm.addco;
 
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -83,7 +83,7 @@ public class MessagePage {
 			if (bmaps != null && bmaps.length > 0)
 				return bmaps[0];
 		}
-		catch (InvalidMessageException e) {
+		catch (InvalidMsgException e) {
 			// fall thru
 		}
 		return DMSHelper.createBitmapGraphic(dms);

@@ -230,9 +230,9 @@ public class DMSHelper extends BaseHelper {
 	 * @param dms The sign.
 	 * @param ms Message MULTI string.
 	 * @return Array of bitmap graphics for the sign, or null.
-	 * @throws InvalidMessageException if MULTI string is invalid. */
+	 * @throws InvalidMsgException if MULTI string is invalid. */
 	static public BitmapGraphic[] createBitmaps(DMS dms, String ms)
-		throws InvalidMessageException
+		throws InvalidMsgException
 	{
 		RasterBuilder rb = createRasterBuilder(dms);
 		if (rb != null)
@@ -245,9 +245,9 @@ public class DMSHelper extends BaseHelper {
 	 * @param dms The sign.
 	 * @param ms Message MULTI string.
 	 * @return Array of bitmap graphics for the sign, or null.
-	 * @throws InvalidMessageException if MULTI string is invalid. */
+	 * @throws InvalidMsgException if MULTI string is invalid. */
 	static public RasterGraphic[] createPixmaps(DMS dms, MultiString ms)
-		throws InvalidMessageException
+		throws InvalidMsgException
 	{
 		RasterBuilder rb = createRasterBuilder(dms);
 		if (rb != null)
@@ -321,7 +321,7 @@ public class DMSHelper extends BaseHelper {
 		try {
 			return rb.createPixmaps(new MultiString(multi));
 		}
-		catch (InvalidMessageException e) {
+		catch (InvalidMsgException e) {
 			return null;
 		}
 	}

@@ -44,7 +44,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
@@ -948,7 +948,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			if (pages != null)
 				return encodeBitmaps(pages);
 		}
-		catch (InvalidMessageException e) {
+		catch (InvalidMsgException e) {
 			logError("invalid msg: " + e.getMessage());
 		}
 		return null;
@@ -1335,7 +1335,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private void validateMsg(SignMessage sm) throws TMSException {
 		MultiString multi = new MultiString(sm.getMulti());
 		if (!multi.isValid()) {
-			throw new InvalidMessageException(name +
+			throw new InvalidMsgException(name +
 				": INVALID MESSAGE, " + sm.getMulti());
 		}
 		try {

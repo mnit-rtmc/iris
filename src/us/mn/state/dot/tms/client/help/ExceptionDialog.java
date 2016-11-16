@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.client.SonarShowException;
 import us.mn.state.dot.sonar.client.PermissionException;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.InvalidMessageException;
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.client.IrisClient;
 import us.mn.state.dot.tms.client.widget.Screen;
@@ -134,7 +134,7 @@ public class ExceptionDialog extends JDialog {
 			p.addSpacing();
 			p.addText(I18N.get("help.exception.number.advice"));
 		}
-		else if (e instanceof InvalidMessageException) {
+		else if (e instanceof InvalidMsgException) {
 			p.addText(I18N.get("help.exception.invalid.msg"));
 			p.addSpacing();
 			p.addText(e.getMessage());
