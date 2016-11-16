@@ -18,6 +18,7 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.ActionPlan;
@@ -53,6 +54,13 @@ public class ActionPlanJob extends Job {
 	/** Seconds to offset each poll from start of interval */
 	static private final int OFFSET_SECS = 29;
 
+	/** Schedule debug log */
+	static private final DebugLog SCHED_LOG = new DebugLog("sched");
+
+	/** Mapping of DMS actions */
+	private final HashMap<DMSImpl, DmsAction> dms_actions =
+		new HashMap<DMSImpl, DmsAction>();
+
 	/** Mapping of ramp meter operating states */
 	private final HashMap<RampMeterImpl, Boolean> meters =
 		new HashMap<RampMeterImpl, Boolean>();
@@ -68,7 +76,6 @@ public class ActionPlanJob extends Job {
 		updateActionPlanPhases();
 		performTimeActions();
 		performDmsActions();
-		updateDmsMessages();
 		performBeaconActions();
 		performLaneActions();
 		performMeterActions();
@@ -100,8 +107,15 @@ public class ActionPlanJob extends Job {
 		}
 	}
 
+	/** Log a DMS schedule message */
+	private void logSched(DMS dms, String msg) {
+		if (SCHED_LOG.isOpen())
+			SCHED_LOG.log(dms.getName() + ": " + msg);
+	}
+
 	/** Perform DMS actions */
 	private void performDmsActions() {
+		dms_actions.clear();
 		Iterator<DmsAction> it = DmsActionHelper.iterator();
 		while (it.hasNext()) {
 			DmsAction da = it.next();
@@ -111,6 +125,8 @@ public class ActionPlanJob extends Job {
 					performDmsAction(da);
 			}
 		}
+		updateDmsMessages();
+		dms_actions.clear();
 	}
 
 	/** Perform a DMS action */
@@ -121,12 +137,26 @@ public class ActionPlanJob extends Job {
 			DmsSignGroup dsg = it.next();
 			if (dsg.getSignGroup() == sg) {
 				DMS dms = dsg.getDms();
-				if (dms instanceof DMSImpl) {
-					DMSImpl dmsi = (DMSImpl) dms;
-					dmsi.performAction(da);
-				}
+				if (dms instanceof DMSImpl)
+					checkAction(da, (DMSImpl) dms);
 			}
 		}
+	}
+
+	/** Check an action for one DMS */
+	private void checkAction(DmsAction da, DMSImpl dms) {
+		if (SCHED_LOG.isOpen())
+			logSched(dms, "checking " + da);
+		if (shouldReplace(da, dms) && dms.checkAction(da))
+			dms_actions.put(dms, da);
+	}
+
+	/** Check if an action should replace the current DMS action */
+	private boolean shouldReplace(DmsAction da, DMSImpl dms) {
+		DmsAction o = dms_actions.get(dms);
+		return (null == o) ||
+		       da.getActivationPriority() > o.getActivationPriority() ||
+		       da.getRunTimePriority() >= o.getRunTimePriority();
 	}
 
 	/** Update the DMS messages */
@@ -136,7 +166,10 @@ public class ActionPlanJob extends Job {
 			DMS dms = it.next();
 			if (dms instanceof DMSImpl) {
 				DMSImpl dmsi = (DMSImpl) dms;
-				dmsi.updateScheduledMsg();
+				DmsAction da = dms_actions.get(dmsi);
+				if (SCHED_LOG.isOpen())
+					logSched(dms, "scheduling " + da);
+				dmsi.setScheduledAction(da);
 			}
 		}
 	}

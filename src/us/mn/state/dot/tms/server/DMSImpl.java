@@ -23,7 +23,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
@@ -86,9 +85,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	static public interface BrightnessHandler {
 		void feedback(EventType et, int photo, int output);
 	}
-
-	/** DMS schedule debug log */
-	static private final DebugLog SCHED_LOG = new DebugLog("sched");
 
 	/** Test if a sign message should be activated.
 	 * @param existing Message existing on DMS.
@@ -1089,91 +1085,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			return null;
 	}
 
-	/** User selected sign message */
-	private transient SignMessage msg_user = createMsgBlank();
-
-	/** Set the user selected sign message */
-	@Override
-	public void setMsgUser(SignMessage sm) {
-		msg_user = sm;
-	}
-
-	/** Set the user selected sign message.  Called by SONAR. */
-	public void doSetMsgUser(SignMessage sm) throws TMSException {
-		validateMsg(sm);
-		setMsgUser(sm);
-		sendMsg(sm);
-	}
-
-	/** Current scheduled action.  This is used to guarantee that
-	 * performAction is called at least once between each call to
-	 * updateScheduledMessage.  If not, then the scheduled message is
-	 * cleared. */
-	private transient DmsAction sched_action;
-
-	/** Scheduled sign message */
-	private transient SignMessage msg_sched = null;
-
-	/** Get the scheduled sign messasge.
-	 * @return Scheduled sign message */
-	@Override
-	public SignMessage getMsgSched() {
-		return msg_sched;
-	}
-
-	/** Set the scheduled sign message.
-	 * @param sm New scheduled sign message */
-	private void setMsgSchedNotify(SignMessage sm) {
-		if (!SignMessageHelper.isEquivalent(msg_sched, sm)) {
-			msg_sched = sm;
-			notifyAttribute("msgSched");
-		}
-	}
-
-	/** Perform a DMS action.
-	 * @param ds DMS action. */
-	public void performAction(DmsAction da) {
-		SignMessage sm = createMsgSched(da);
-		if (sm != null) {
-			if (SCHED_LOG.isOpen()) {
-				logSched("created sched message: " +
-					sm.getMulti());
-			}
-			if (shouldReplaceScheduled(sm)) {
-				setMsgSchedNotify(sm);
-				sched_action = da;
-			}
-		} else if (SCHED_LOG.isOpen())
-			logSched("no message created for " + da.getName());
-	}
-
-	/** Test if a message should replace the current scheduled message.
-	 * @param sm SignMessage to test.
-	 * @return true if scheduled message should be replaced. */
-	private boolean shouldReplaceScheduled(SignMessage sm) {
-		SignMessage s = msg_sched;	// Avoid NPE
-		return null == s ||
-		       sm.getActivationPriority() > s.getActivationPriority() ||
-		       sm.getRunTimePriority() >= s.getRunTimePriority();
-	}
-
-	/** Tolling prices */
-	private transient HashMap<String, Float> prices;
-
-	/** Set tolling prices */
-	private void setPrices(DmsAction da) {
-		prices = (da != null) ? calculatePrices(da) : null;
-	}
-
-	/** Calculate prices for a tolling message */
-	private HashMap<String, Float> calculatePrices(DmsAction da) {
-		QuickMessage qm = da.getQuickMessage();
-		if (qm != null)
-			return toll_formatter.calculatePrices(qm.getMulti());
-		else
-			return null;
-	}
-
 	/** Get the duration of a DMS action.
 	 * @param da DMS action.
 	 * @return Duration (minutes), or null for indefinite. */
@@ -1193,23 +1104,73 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return getPollPeriod() * DURATION_PERIODS / 60;
 	}
 
-	/** Log a schedule message */
-	private void logSched(String msg) {
-		if (SCHED_LOG.isOpen())
-			SCHED_LOG.log(getName() + ": " + msg);
+	/** User selected sign message */
+	private transient SignMessage msg_user = createMsgBlank();
+
+	/** Set the user selected sign message */
+	@Override
+	public void setMsgUser(SignMessage sm) {
+		msg_user = sm;
 	}
 
-	/** Update the scheduled message on the sign */
-	public void updateScheduledMsg() {
-		if (null == sched_action) {
-			logSched("no message scheduled");
-			setMsgSchedNotify(createBlankScheduledMsg());
+	/** Set the user selected sign message.  Called by SONAR. */
+	public void doSetMsgUser(SignMessage sm) throws TMSException {
+		validateMsg(sm);
+		setMsgUser(sm);
+		sendMsg(sm);
+	}
+
+	/** Scheduled sign message */
+	private transient SignMessage msg_sched = createMsgBlank();
+
+	/** Get the scheduled sign messasge.
+	 * @return Scheduled sign message */
+	@Override
+	public SignMessage getMsgSched() {
+		return msg_sched;
+	}
+
+	/** Check a DMS action.
+	 * @param da DMS action.
+	 * @return true if action is valid. */
+	public boolean checkAction(DmsAction da) {
+		return createMsgSched(da) != null;
+	}
+
+	/** Set the scheduled DMS action */
+	public void setScheduledAction(DmsAction da) {
+		SignMessage sm = (da != null) ? createMsgSched(da) : null;
+		if (null == sm)
+			sm = createMsgBlank();
+		setMsgSchedNotify(sm);
+		setPrices(da);
+		updateScheduledMsg(sm);
+	}
+
+	/** Set the scheduled sign message.
+	 * @param sm New scheduled sign message */
+	private void setMsgSchedNotify(SignMessage sm) {
+		if (!SignMessageHelper.isEquivalent(msg_sched, sm)) {
+			msg_sched = sm;
+			notifyAttribute("msgSched");
 		}
-		setPrices(sched_action);
-		SignMessage sm = msg_sched;
-		if (sm != null)
-			updateScheduledMsg(sm);
-		sched_action = null;
+	}
+
+	/** Tolling prices */
+	private transient HashMap<String, Float> prices;
+
+	/** Set tolling prices */
+	private void setPrices(DmsAction da) {
+		prices = (da != null) ? calculatePrices(da) : null;
+	}
+
+	/** Calculate prices for a tolling message */
+	private HashMap<String, Float> calculatePrices(DmsAction da) {
+		QuickMessage qm = da.getQuickMessage();
+		if (qm != null)
+			return toll_formatter.calculatePrices(qm.getMulti());
+		else
+			return null;
 	}
 
 	/** Update the scheduled message on the sign */
@@ -1217,18 +1178,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		// NOTE: use schedule for source even for blank messages
 		if (shouldActivate(sm, schedule.ordinal())) {
 			try {
-				logSched("set message to " + sm.getMulti());
 				if (sm.getSource() == tolling.ordinal())
 				    logPriceMessages(EventType.PRICE_DEPLOYED);
 				sendMsg(sm);
 			}
 			catch (TMSException e) {
-				logSched(e.getMessage());
+				logError(e.getMessage());
 			}
-		} else if (SCHED_LOG.isOpen()) {
-			logSched("sched msg " + sm.getName() + " not sent " +
-				sm.getMulti() + ", curr: " + msg_current +
-			        ", next: " + msg_next);
 		}
 	}
 
@@ -1244,21 +1200,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				                               price));
 			}
 		}
-	}
-
-	/** Create a blank scheduled message */
-	private SignMessage createBlankScheduledMsg() {
-		return isCurrentScheduled() ? createMsgBlank() : null;
-	}
-
-	/** Test if the current message is scheduled */
-	private boolean isCurrentScheduled() {
-		// If either the current or next message is not scheduled,
-		// then we won't consider the message scheduled
-		SignMessage c = msg_current;
-		SignMessage n = msg_next;
-		return (null == c || SignMsgSource.isScheduled(c.getSource()))
-		    && (null == n || SignMsgSource.isScheduled(n.getSource()));
 	}
 
 	/** Current message (Shall not be null) */
@@ -1393,7 +1334,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				return sched;
 			}
 			catch (TMSException e) {
-				logSched("sched msg not valid: " +
+				logError("sched msg not valid: " +
 					e.getMessage());
 				// Ok, go ahead and blank the sign
 			}
@@ -1630,8 +1571,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Test if the current message is "scheduled" */
 	private boolean isMsgScheduled() {
-		return SignMsgSource.isScheduled(
-			getMsgCurrent().getSource());
+		return SignMsgSource.isScheduled(getMsgCurrent().getSource());
 	}
 
 	/** Test if the current message has beacon enabled */
