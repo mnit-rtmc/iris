@@ -1090,12 +1090,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public void setMsgUser(SignMessage sm) {
 		msg_user = sm;
-		try {
-			sendMsg(sm);
-		}
-		catch (TMSException e) {
-			logError("sendMsg: " + e.getMessage());
-		}
+	}
+
+	/** Set the user selected sign message.  Called by SONAR. */
+	public void doSetMsgUser(SignMessage sm) throws TMSException {
+		validateMsg(sm);
+		setMsgUser(sm);
+		sendMsg(sm);
 	}
 
 	/** Current scheduled action.  This is used to guarantee that
@@ -1318,7 +1319,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
-		// FIXME: create composite msg
 		if (shouldActivate(sm))
 			sendMsg(sm, p);
 	}
@@ -1361,27 +1361,26 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private void sendMsg(SignMessage sm, DMSPoller p)
 		throws TMSException
 	{
-		SignMessage smn = validateMsg(sm);
+		SignMessage csm = compositeMsg(sm);
 		// FIXME: there should be a better way to clear cached routes
 		//        in travel time estimator
-		int ap = smn.getActivationPriority();
+		int ap = csm.getActivationPriority();
 		if (OVERRIDE.ordinal() == ap)
 			formatter.clear();
-		p.sendMessage(this, smn);
+		p.sendMessage(this, csm);
 	}
 
-	/** Validate a sign message to send.
-	 * @param sm Sign message to validate.
-	 * @return The sign message to send (may be a scheduled message). */
-	private SignMessage validateMsg(SignMessage sm) throws TMSException {
+	/** Get a composite sign message to send.
+	 * @param sm Sign message.
+	 * @return The composite sign message. */
+	private SignMessage compositeMsg(SignMessage sm) throws TMSException {
 		MultiString multi = new MultiString(sm.getMulti());
 		SignMessage sched = msg_sched;	// Avoid race
 		if (sched != null && multi.isBlank()) {
 			// Don't blank the sign if there's a scheduled message
 			// -- send the scheduled message instead.
 			try {
-				validateBitmaps(sched,
-					new MultiString(sched.getMulti()));
+				validateMsg(sched);
 				return sched;
 			}
 			catch (TMSException e) {
@@ -1390,14 +1389,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				// Ok, go ahead and blank the sign
 			}
 		}
-		validateBitmaps(sm, multi);
+		validateMsg(sm);
 		return sm;
 	}
 
 	/** Validate the message bitmaps */
-	private void validateBitmaps(SignMessage sm, MultiString multi)
-		throws TMSException
-	{
+	private void validateMsg(SignMessage sm) throws TMSException {
+		MultiString multi = new MultiString(sm.getMulti());
 		if (!multi.isValid()) {
 			throw new InvalidMessageException(name +
 				": INVALID MESSAGE, " + sm.getMulti());
