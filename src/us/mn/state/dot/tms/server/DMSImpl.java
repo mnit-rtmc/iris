@@ -1342,27 +1342,27 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			validateBitmaps(sm.getBitmaps(), multi);
 		}
 		catch (IOException e) {
-			throw new ChangeVetoException("Base64 decode error");
+			throw new InvalidMsgException("Base64 decode error");
 		}
 		catch (IndexOutOfBoundsException e) {
-			throw new ChangeVetoException(e.getMessage());
+			throw new InvalidMsgException(e.getMessage());
 		}
 	}
 
 	/** Validate message bitmaps.
 	 * @param bmaps Base64-encoded bitmaps.
 	 * @param multi Message MULTI string.
-	 * @throws IOException, ChangeVetoException. */
+	 * @throws IOException, InvalidMsgException. */
 	private void validateBitmaps(String bmaps, MultiString multi)
-		throws IOException, ChangeVetoException
+		throws IOException, InvalidMsgException
 	{
 		byte[] b_data = Base64.decode(bmaps);
 		BitmapGraphic bg = createBlankBitmap();
 		int blen = bg.length();
 		if (blen == 0)
-			throw new ChangeVetoException("Invalid sign size");
+			throw new InvalidMsgException("sign size");
 		if (b_data.length % blen != 0)
-			throw new ChangeVetoException("Invalid bitmap length");
+			throw new InvalidMsgException("bitmap length");
 		if (!multi.isBlank()) {
 			String[] pixels = pixelStatus;	// Avoid races
 			if (pixels != null && pixels.length == 2)
@@ -1374,9 +1374,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param b_data Decoded bitmap data.
 	 * @param pixels Pixel status bitmaps (stuck off and stuck on).
 	 * @param bg Temporary bitmap graphic.
-	 * @throws IOException, ChangeVetoException. */
+	 * @throws IOException, InvalidMsgException. */
 	private void validateBitmaps(byte[] b_data, String[] pixels,
-		BitmapGraphic bg) throws IOException, ChangeVetoException
+		BitmapGraphic bg) throws IOException, InvalidMsgException
 	{
 		int blen = bg.length();
 		int off_limit = SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt();
@@ -1398,7 +1398,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			bg.union(stuckOff);
 			int n_lit = bg.getLitCount();
 			if (n_lit > off_limit) {
-				throw new ChangeVetoException(
+				throw new InvalidMsgException(
 					"Too many stuck off pixels: " + n_lit);
 			}
 			bg.setPixelData(bd);
@@ -1406,7 +1406,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			bg.union(stuckOn);
 			n_lit = bg.getLitCount();
 			if (n_lit > on_limit) {
-				throw new ChangeVetoException(
+				throw new InvalidMsgException(
 					"Too many stuck on pixels: " + n_lit);
 			}
 		}
@@ -1414,14 +1414,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Create a blank bitmap */
 	private BitmapGraphic createBlankBitmap()
-		throws ChangeVetoException
+		throws InvalidMsgException
 	{
 		Integer w = widthPixels;	// Avoid race
 		Integer h = heightPixels;	// Avoid race
 		if (w != null && h != null)
 			return new BitmapGraphic(w, h);
 		else
-			throw new ChangeVetoException("Width/height is null");
+			throw new InvalidMsgException("Width/height is null");
 	}
 
 	/** Check if the sign has a reference to a sign message */
