@@ -949,7 +949,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				return encodeBitmaps(pages);
 		}
 		catch (InvalidMsgException e) {
-			logError("invalid msg: " + e.getMessage());
+			logError(e.getMessage());
 		}
 		return null;
 	}
@@ -1335,8 +1335,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private void validateMsg(SignMessage sm) throws TMSException {
 		MultiString multi = new MultiString(sm.getMulti());
 		if (!multi.isValid()) {
-			throw new InvalidMsgException(name +
-				": INVALID MESSAGE, " + sm.getMulti());
+			throw new InvalidMsgException(name + ", " +
+				sm.getMulti());
 		}
 		try {
 			validateBitmaps(sm.getBitmaps(), multi);

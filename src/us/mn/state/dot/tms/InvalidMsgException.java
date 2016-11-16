@@ -24,6 +24,6 @@ public class InvalidMsgException extends TMSException {
 
 	/** Create a new invalid message exception */
 	public InvalidMsgException(String msg) {
-		super(msg);
+		super("INVALID MSG: " + msg);
 	}
 }
