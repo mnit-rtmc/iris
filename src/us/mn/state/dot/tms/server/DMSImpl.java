@@ -1117,7 +1117,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void doSetMsgUser(SignMessage sm) throws TMSException {
 		validateMsg(sm);
 		setMsgUser(sm);
-		sendMsg(sm);
+		sendMsg();
 	}
 
 	/** Scheduled sign message */
@@ -1144,7 +1144,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			sm = createMsgBlank();
 		setMsgSchedNotify(sm);
 		setPrices(da);
-		updateScheduledMsg(sm);
+		try {
+			sendMsg();
+		}
+		catch (TMSException e) {
+			logError("sendMsg: " + e.getMessage());
+		}
 	}
 
 	/** Set the scheduled sign message.
@@ -1171,21 +1176,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			return toll_formatter.calculatePrices(qm.getMulti());
 		else
 			return null;
-	}
-
-	/** Update the scheduled message on the sign */
-	private void updateScheduledMsg(SignMessage sm) {
-		// NOTE: use schedule for source even for blank messages
-		if (shouldActivate(sm, schedule.ordinal())) {
-			try {
-				if (sm.getSource() == tolling.ordinal())
-				    logPriceMessages(EventType.PRICE_DEPLOYED);
-				sendMsg(sm);
-			}
-			catch (TMSException e) {
-				logError(e.getMessage());
-			}
-		}
 	}
 
 	/** Log price (tolling) messages.
@@ -1262,15 +1252,39 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		msg_next = sm;
 	}
 
-	/** Set the sign message */
-	private void sendMsg(SignMessage sm) throws TMSException {
+	/** Send message to DMS */
+	private void sendMsg() throws TMSException {
 		DMSPoller p = getDMSPoller();
 		if (null == p) {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
+		SignMessage sm = getMsgUserSched();
+		validateMsg(sm);
 		if (shouldActivate(sm))
-			sendMsg(sm, p);
+			sendMsg(p, sm);
+	}
+
+	/** Get user/scheduled composite sign message.
+	 * @return The composite sign message. */
+	private SignMessage getMsgUserSched() throws TMSException {
+		SignMessage user = msg_user;	// Avoid race
+		SignMessage sched = msg_sched;	// Avoid race
+		if (SignMessageHelper.isBlank(user) && isMsgValid(sched))
+			return sched;
+		return user;
+	}
+
+	/** Check if a sign message is valid */
+	private boolean isMsgValid(SignMessage sm) {
+		try {
+			validateMsg(sm);
+			return true;
+		}
+		catch (TMSException e) {
+			logError("msg invalid: " + e.getMessage());
+			return false;
+		}
 	}
 
 	/** Check if a message should be activated based on priority.
@@ -1303,44 +1317,18 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		       shouldActivate(msg_next, ap, src);
 	}
 
-	/**
-	 * Set the next sign message.
-	 * @param sm Sign message, may not be null.
-	 * @param p DMS poller, may not be null.
-	 */
-	private void sendMsg(SignMessage sm, DMSPoller p)
-		throws TMSException
-	{
-		SignMessage csm = compositeMsg(sm);
+	/** Set the next sign message.
+	 * @param p DMS poller.
+	 * @param sm Sign message. */
+	private void sendMsg(DMSPoller p, SignMessage sm) {
+		if (sm.getSource() == tolling.ordinal())
+		    logPriceMessages(EventType.PRICE_DEPLOYED);
 		// FIXME: there should be a better way to clear cached routes
 		//        in travel time estimator
-		int ap = csm.getActivationPriority();
+		int ap = sm.getActivationPriority();
 		if (OVERRIDE.ordinal() == ap)
 			formatter.clear();
-		p.sendMessage(this, csm);
-	}
-
-	/** Get a composite sign message to send.
-	 * @param sm Sign message.
-	 * @return The composite sign message. */
-	private SignMessage compositeMsg(SignMessage sm) throws TMSException {
-		MultiString multi = new MultiString(sm.getMulti());
-		SignMessage sched = msg_sched;	// Avoid race
-		if (sched != null && multi.isBlank()) {
-			// Don't blank the sign if there's a scheduled message
-			// -- send the scheduled message instead.
-			try {
-				validateMsg(sched);
-				return sched;
-			}
-			catch (TMSException e) {
-				logError("sched msg not valid: " +
-					e.getMessage());
-				// Ok, go ahead and blank the sign
-			}
-		}
-		validateMsg(sm);
-		return sm;
+		p.sendMessage(this, sm);
 	}
 
 	/** Validate the message bitmaps */
