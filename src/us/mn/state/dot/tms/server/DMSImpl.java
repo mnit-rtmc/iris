@@ -1084,7 +1084,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** User selected sign message */
-	private transient SignMessage msg_user = null;
+	private transient SignMessage msg_user = createMsgBlank();
 
 	/** Set the user selected sign message */
 	@Override
