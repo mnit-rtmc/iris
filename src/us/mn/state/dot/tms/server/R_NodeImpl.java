@@ -174,6 +174,13 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		}
 	}
 
+	/** Destroy an r_node */
+	@Override
+	public void doDestroy() throws TMSException {
+		updateStation(station, null);
+		super.doDestroy();
+	}
+
 	/** Node location */
 	private GeoLocImpl geo_loc;
 
