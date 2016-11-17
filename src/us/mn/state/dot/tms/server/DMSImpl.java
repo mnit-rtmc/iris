@@ -86,22 +86,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		void feedback(EventType et, int photo, int output);
 	}
 
-	/** Test if a sign message should be activated.
-	 * @param existing Message existing on DMS.
-	 * @param ap Activation priority.
-	 * @param src Message source.
-	 * @return True if message should be activated; false otherwise. */
-	static private boolean shouldActivate(SignMessage existing,
-		DmsMsgPriority ap, int src)
-	{
-		if (null == existing)
-			return true;
-		if (SignMsgSource.isScheduled(existing.getSource()) &&
-		    SignMsgSource.isScheduled(src))
-			return true;
-		return ap.ordinal() >= existing.getRunTimePriority();
-	}
-
 	/** Load all the DMS */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
@@ -1235,11 +1219,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		logEvent(new SignStatusEvent(et, name, text, owner));
 	}
 
-	/** Next sign message (sending in process).
-	 * It is checked to prevent a lower priority message from
-	 * getting queued during the time when a message gets queued and it
-	 * becomes activated.
-	 * @see DMSImpl#shouldActivate */
+	/** Next sign message (sending in process) */
 	private transient SignMessage msg_next;
 
 	/** Set the next sign message.  This must be called by operations after
@@ -1261,8 +1241,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 		SignMessage sm = getMsgUserSched();
 		validateMsg(sm);
-		if (shouldActivate(sm))
-			sendMsg(p, sm);
+		sendMsg(p, sm);
 	}
 
 	/** Get user/scheduled composite sign message.
@@ -1286,36 +1265,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			logError("msg invalid: " + e.getMessage());
 			return false;
 		}
-	}
-
-	/** Check if a message should be activated based on priority.
-	 * @param sm SignMessage being activated.
-	 * @return true If priority is high enough to deploy. */
-	public boolean shouldActivate(SignMessage sm) {
-		return (sm != null)
-		      ? shouldActivate(sm, sm.getSource())
-		      : false;
-	}
-
-	/** Check if a message should be activated based on priority.
-	 * @param sm SignMessage being activated.
-	 * @param src Message source.
-	 * @return true If priority is high enough to deploy. */
-	private boolean shouldActivate(SignMessage sm, int src) {
-		assert sm != null;
-		DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
-		       sm.getActivationPriority());
-		return shouldActivate(ap, src) &&
-		       SignMessageHelper.lookup(sm.getName()) == sm;
-	}
-
-	/** Test if a message should be activated.
-	 * @param ap Activation priority.
-	 * @param src Message source.
-	 * @return True if message should be activated; false otherwise. */
-	private boolean shouldActivate(DmsMsgPriority ap, int src) {
-		return shouldActivate(msg_current, ap, src) &&
-		       shouldActivate(msg_next, ap, src);
 	}
 
 	/** Set the next sign message.
