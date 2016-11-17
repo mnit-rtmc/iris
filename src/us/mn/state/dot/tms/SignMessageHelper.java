@@ -211,7 +211,10 @@ public class SignMessageHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Validate a sign message for a DMS */
+	/** Validate a sign message for a DMS.
+	 * @param sm SignMessage to validate.
+	 * @param dms Sign to validate message on.
+	 * @throws InvalidMsgException if message is not valid. */
 	static public void validate(SignMessage sm, DMS dms)
 		throws InvalidMsgException
 	{
@@ -229,9 +232,10 @@ public class SignMessageHelper extends BaseHelper {
 		}
 	}
 
-	/** Validate message bitmaps.
+	/** Validate sign message bitmaps.
 	 * @param bmaps Base64-encoded bitmaps.
 	 * @param multi Message MULTI string.
+	 * @param dms Sign to check.
 	 * @throws IOException, InvalidMsgException. */
 	static private void validateBitmaps(String bmaps, MultiString multi,
 		DMS dms) throws IOException, InvalidMsgException
@@ -263,21 +267,21 @@ public class SignMessageHelper extends BaseHelper {
 		int blen = bg.length();
 		int off_limit = SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt();
 		int on_limit = SystemAttrEnum.DMS_PIXEL_ON_LIMIT.getInt();
-		BitmapGraphic stuckOff = bg.createBlankCopy();
-		BitmapGraphic stuckOn = bg.createBlankCopy();
+		BitmapGraphic stuck_off = bg.createBlankCopy();
+		BitmapGraphic stuck_on = bg.createBlankCopy();
 		byte[] b_off = Base64.decode(pixels[DMS.STUCK_OFF_BITMAP]);
 		byte[] b_on = Base64.decode(pixels[DMS.STUCK_ON_BITMAP]);
 		// Don't validate if the sign dimensions have changed
 		if (b_off.length != blen || b_on.length != blen)
 			return;
-		stuckOff.setPixelData(b_off);
-		stuckOn.setPixelData(b_on);
+		stuck_off.setPixelData(b_off);
+		stuck_on.setPixelData(b_on);
 		int n_pages = b_data.length / blen;
 		byte[] bd = new byte[blen];
 		for (int p = 0; p < n_pages; p++) {
 			System.arraycopy(b_data, p * blen, bd, 0, blen);
 			bg.setPixelData(bd);
-			bg.union(stuckOff);
+			bg.union(stuck_off);
 			int n_lit = bg.getLitCount();
 			if (n_lit > off_limit) {
 				throw new InvalidMsgException(
@@ -285,7 +289,7 @@ public class SignMessageHelper extends BaseHelper {
 			}
 			bg.setPixelData(bd);
 			bg.outline();
-			bg.union(stuckOn);
+			bg.union(stuck_on);
 			n_lit = bg.getLitCount();
 			if (n_lit > on_limit) {
 				throw new InvalidMsgException(
