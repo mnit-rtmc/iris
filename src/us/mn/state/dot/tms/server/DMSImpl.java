@@ -1282,12 +1282,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Validate the message bitmaps */
-	private void validateMsg(SignMessage sm) throws TMSException {
+	private void validateMsg(SignMessage sm) throws InvalidMsgException {
 		MultiString multi = new MultiString(sm.getMulti());
-		if (!multi.isValid()) {
-			throw new InvalidMsgException(name + ", " +
-				sm.getMulti());
-		}
+		if (!multi.isValid())
+			throw new InvalidMsgException("MULTI " + sm.getMulti());
 		try {
 			validateBitmaps(sm.getBitmaps(), multi);
 		}
