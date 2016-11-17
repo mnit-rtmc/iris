@@ -1272,6 +1272,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		SignMessage sched = msg_sched;	// Avoid race
 		if (SignMessageHelper.isBlank(user) && isMsgValid(sched))
 			return sched;
+		// FIXME: deal with PREFIX_PAGE
 		return user;
 	}
 
