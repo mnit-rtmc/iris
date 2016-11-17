@@ -205,17 +205,6 @@ public class DMSHelper extends BaseHelper {
 		return SString.enclosedBy(line, "_");
 	}
 
-	/** Get the current bitmap graphic for all pages of the specified DMS.
-	 * @param DMS with the graphic.
-	 * @return Array of bitmaps, one for each page, or null on error. */
-	static public BitmapGraphic[] getBitmaps(DMS dms) {
-		if (dms != null) {
-			SignMessage sm = dms.getMsgCurrent();
-			return SignMessageHelper.getBitmaps(sm, dms);
-		} else
-			return null;
-	}
-
 	/** Create a bitmap graphic for the specified DMS */
 	static public BitmapGraphic createBitmapGraphic(DMS dms) {
 		Integer wp = dms.getWidthPixels();
