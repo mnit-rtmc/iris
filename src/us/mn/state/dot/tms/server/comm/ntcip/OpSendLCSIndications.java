@@ -159,8 +159,10 @@ public class OpSendLCSIndications extends OpLCS {
 	/** Send an indication to a DMS */
 	private void sendIndication(int lane, DMSImpl dms) {
 		SignMessage sm = msgs[lane];
-		if (dms.shouldActivate(sm))
+		if (sm != null)
 			sendIndication(lane, dms, sm);
+		else
+			logError("sendIndication: no indication, lane " + lane);
 	}
 
 	/** Send an indication to a DMS */
@@ -170,8 +172,7 @@ public class OpSendLCSIndications extends OpLCS {
 			ind_after[lane] = indications[lane];
 		}
 		catch (TMSException e) {
-			logError("OpSendLCSIndications.sendIndication: " +
-			         dms.getName() + ", " + e.getMessage());
+			logError("sendIndication: " + e.getMessage());
 		}
 	}
 }
