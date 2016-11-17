@@ -1275,8 +1275,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		    logPriceMessages(EventType.PRICE_DEPLOYED);
 		// FIXME: there should be a better way to clear cached routes
 		//        in travel time estimator
-		int ap = sm.getActivationPriority();
-		if (OVERRIDE.ordinal() == ap)
+		if (OVERRIDE.ordinal() == sm.getActivationPriority())
 			formatter.clear();
 		p.sendMessage(this, sm);
 	}
