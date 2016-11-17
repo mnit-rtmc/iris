@@ -237,9 +237,11 @@ public class SignMessageHelper extends BaseHelper {
 		DMS dms) throws IOException, InvalidMsgException
 	{
 		byte[] b_data = Base64.decode(bmaps);
-		BitmapGraphic bg = createBlankBitmap(dms);
+		BitmapGraphic bg = DMSHelper.createBitmapGraphic(dms);
+		if (null == bg)
+			throw new InvalidMsgException("Width/height is null");
 		int blen = bg.length();
-		if (blen == 0)
+		if (0 == blen)
 			throw new InvalidMsgException("sign size");
 		if (b_data.length % blen != 0)
 			throw new InvalidMsgException("bitmap length");
@@ -248,18 +250,6 @@ public class SignMessageHelper extends BaseHelper {
 			if (pixels != null && pixels.length == 2)
 				validateBitmaps(b_data, pixels, bg);
 		}
-	}
-
-	/** Create a blank bitmap */
-	static private BitmapGraphic createBlankBitmap(DMS dms)
-		throws InvalidMsgException
-	{
-		Integer w = dms.getWidthPixels();
-		Integer h = dms.getHeightPixels();
-		if (w != null && h != null)
-			return new BitmapGraphic(w, h);
-		else
-			throw new InvalidMsgException("Width/height is null");
 	}
 
 	/** Validate the message bitmaps.
