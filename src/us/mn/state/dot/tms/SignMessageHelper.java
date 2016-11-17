@@ -210,4 +210,97 @@ public class SignMessageHelper extends BaseHelper {
 		}
 		return null;
 	}
+
+	/** Validate a sign message for a DMS */
+	static public void validate(SignMessage sm, DMS dms)
+		throws InvalidMsgException
+	{
+		MultiString multi = new MultiString(sm.getMulti());
+		if (!multi.isValid())
+			throw new InvalidMsgException("MULTI " + sm.getMulti());
+		try {
+			validateBitmaps(sm.getBitmaps(), multi, dms);
+		}
+		catch (IOException e) {
+			throw new InvalidMsgException("Base64 decode error");
+		}
+		catch (IndexOutOfBoundsException e) {
+			throw new InvalidMsgException(e.getMessage());
+		}
+	}
+
+	/** Validate message bitmaps.
+	 * @param bmaps Base64-encoded bitmaps.
+	 * @param multi Message MULTI string.
+	 * @throws IOException, InvalidMsgException. */
+	static private void validateBitmaps(String bmaps, MultiString multi,
+		DMS dms) throws IOException, InvalidMsgException
+	{
+		byte[] b_data = Base64.decode(bmaps);
+		BitmapGraphic bg = createBlankBitmap(dms);
+		int blen = bg.length();
+		if (blen == 0)
+			throw new InvalidMsgException("sign size");
+		if (b_data.length % blen != 0)
+			throw new InvalidMsgException("bitmap length");
+		if (!multi.isBlank()) {
+			String[] pixels = dms.getPixelStatus();
+			if (pixels != null && pixels.length == 2)
+				validateBitmaps(b_data, pixels, bg);
+		}
+	}
+
+	/** Create a blank bitmap */
+	static private BitmapGraphic createBlankBitmap(DMS dms)
+		throws InvalidMsgException
+	{
+		Integer w = dms.getWidthPixels();
+		Integer h = dms.getHeightPixels();
+		if (w != null && h != null)
+			return new BitmapGraphic(w, h);
+		else
+			throw new InvalidMsgException("Width/height is null");
+	}
+
+	/** Validate the message bitmaps.
+	 * @param b_data Decoded bitmap data.
+	 * @param pixels Pixel status bitmaps (stuck off and stuck on).
+	 * @param bg Temporary bitmap graphic.
+	 * @throws IOException, InvalidMsgException. */
+	static private void validateBitmaps(byte[] b_data, String[] pixels,
+		BitmapGraphic bg) throws IOException, InvalidMsgException
+	{
+		int blen = bg.length();
+		int off_limit = SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt();
+		int on_limit = SystemAttrEnum.DMS_PIXEL_ON_LIMIT.getInt();
+		BitmapGraphic stuckOff = bg.createBlankCopy();
+		BitmapGraphic stuckOn = bg.createBlankCopy();
+		byte[] b_off = Base64.decode(pixels[DMS.STUCK_OFF_BITMAP]);
+		byte[] b_on = Base64.decode(pixels[DMS.STUCK_ON_BITMAP]);
+		// Don't validate if the sign dimensions have changed
+		if (b_off.length != blen || b_on.length != blen)
+			return;
+		stuckOff.setPixelData(b_off);
+		stuckOn.setPixelData(b_on);
+		int n_pages = b_data.length / blen;
+		byte[] bd = new byte[blen];
+		for (int p = 0; p < n_pages; p++) {
+			System.arraycopy(b_data, p * blen, bd, 0, blen);
+			bg.setPixelData(bd);
+			bg.union(stuckOff);
+			int n_lit = bg.getLitCount();
+			if (n_lit > off_limit) {
+				throw new InvalidMsgException(
+					"Too many stuck off pixels: " + n_lit);
+			}
+			bg.setPixelData(bd);
+			bg.outline();
+			bg.union(stuckOn);
+			n_lit = bg.getLitCount();
+			if (n_lit > on_limit) {
+				throw new InvalidMsgException(
+					"Too many stuck on pixels: " + n_lit);
+			}
+		}
+	}
 }
