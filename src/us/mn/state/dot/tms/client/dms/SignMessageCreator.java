@@ -71,7 +71,7 @@ public class SignMessageCreator {
 		Integer duration)
 	{
 		SignMessage sm = SignMessageHelper.find(multi, bitmaps, ap, rp,
-			operator, owner, duration);
+			operator.ordinal(), owner, duration);
 		if (sm != null)
 			return sm;
 		String name = createName();

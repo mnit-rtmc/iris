@@ -59,8 +59,8 @@ public class SignMessageHelper extends BaseHelper {
 	 * @param d Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
 	static public SignMessage find(String multi, String bitmaps,
-		DmsMsgPriority ap, DmsMsgPriority rp, SignMsgSource src,
-		String owner, Integer d)
+		DmsMsgPriority ap, DmsMsgPriority rp, int src, String owner,
+		Integer d)
 	{
 		int api = ap.ordinal();
 		int rpi = rp.ordinal();
@@ -71,7 +71,7 @@ public class SignMessageHelper extends BaseHelper {
 			    bitmaps.equals(sm.getBitmaps()) &&
 			    api == sm.getActivationPriority() &&
 			    rpi == sm.getRunTimePriority() &&
-			    checkSource(src, sm) &&
+			    sourceEquals(src, sm) &&
 			    (objectEquals(owner, sm.getOwner()) ||
 			     (owner == null)) &&
 			    objectEquals(d, sm.getDuration()))
@@ -80,20 +80,25 @@ public class SignMessageHelper extends BaseHelper {
 		return null;
 	}
 
+	/** Tolling / external */
+	static private final int TOLL_EXT = SignMsgSource.toBits(
+		SignMsgSource.tolling, SignMsgSource.external);
+
 	/** Check sign message source.
 	 * @param src Message source.
 	 * @param sm Sign message to check.
 	 * @return true if source matches. */
-	static private boolean checkSource(SignMsgSource src, SignMessage sm) {
-		SignMsgSource sms = SignMsgSource.fromOrdinal(sm.getSource());
-		return (src == sms) ||
-		       (src == schedule) && (sms == tolling);
+	static private boolean sourceEquals(int src, SignMessage sm) {
+		// ignore tolling and external bits for comparison
+		int srct = src           | TOLL_EXT;
+		int sms = sm.getSource() | TOLL_EXT;
+		return srct == sms;
 	}
 
 	/** Compare the attributes of 2 sign messages.
 	 * @param sm1 SignMessage which may be null.
 	 * @param sm2 SignMessage which may be null.
-	 * @return True if sm1 and sm2 have equal MULTIs, priorities, 
+	 * @return True if sm1 and sm2 have equal MULTIs, priorities,
 	 *         and bitmaps. */
 	static public boolean isEquivalent(SignMessage sm1, SignMessage sm2) {
 		if (sm1 == null && sm2 == null)
@@ -115,7 +120,7 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Return an array of font names in a message.
 	 * @param f_num Default font number, one based.
-	 * @return A string array with length equal to the number 
+	 * @return A string array with length equal to the number
 	 *	    of pages in the message */
 	static public String[] getFontNames(SignMessage sm, int f_num) {
 		int[] fn = getFonts(sm, f_num);

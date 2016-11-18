@@ -597,8 +597,10 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** Check if the message is scheduled and has indefinite duration */
 	private boolean isScheduledIndefinite() {
-		return SignMsgSource.isScheduled(message.getSource()) &&
-		       message.getDuration() == null;
+		int src = message.getSource();
+		return SignMsgSource.schedule.checkBit(src) &&
+		      (message.getDuration() == null) &&
+		      !SignMsgSource.operator.checkBit(src);
 	}
 
 	/** Set the comm loss and power recovery msgs */

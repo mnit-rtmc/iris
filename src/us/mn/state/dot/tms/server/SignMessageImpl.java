@@ -139,8 +139,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Create a new sign message (by IRIS) */
 	public SignMessageImpl(String m, boolean be, String b,
-		DmsMsgPriority ap, DmsMsgPriority rp, SignMsgSource s,
-		String o, Integer d)
+		DmsMsgPriority ap, DmsMsgPriority rp, int s, String o,
+		Integer d)
 	{
 		super(createUniqueName());
 		multi = m;
@@ -148,7 +148,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		bitmaps = b;
 		activationPriority = ap.ordinal();
 		runTimePriority = rp.ordinal();
-		source = s.ordinal();
+		source = s;
 		owner = o;
 		duration = d;
 	}

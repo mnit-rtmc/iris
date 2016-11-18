@@ -53,7 +53,6 @@ import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgSource;
-import static us.mn.state.dot.tms.SignMsgSource.*;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
@@ -74,6 +73,10 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Michael Darter
  */
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
+
+	/** External operator source */
+	static private final int EXT_OPER = SignMsgSource.toBits(
+		SignMsgSource.external, SignMsgSource.operator);
 
 	/** Minimum duration of a DMS action (minutes) */
 	static private final int DURATION_MINIMUM_MINS = 1;
@@ -899,8 +902,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Create a blank message for the sign */
 	public SignMessage createMsgBlank(DmsMsgPriority ap) {
 		String bmaps = Base64.encode(new byte[0]);
-		return findOrCreateMsg("", false, bmaps, ap, BLANK, operator,
-			null, null);
+		return findOrCreateMsg("", false, bmaps, ap, BLANK,
+			SignMsgSource.blank.ordinal(), null, null);
 	}
 
 	/** Create a message for the sign.
@@ -912,9 +915,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param o Owner name.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	public SignMessage createMsg(String m, boolean be,
-		DmsMsgPriority ap, DmsMsgPriority rp, SignMsgSource src,
-		String o, Integer d)
+	public SignMessage createMsg(String m, boolean be, DmsMsgPriority ap,
+		DmsMsgPriority rp, int src, String o, Integer d)
 	{
 		String bmaps = renderBitmaps(m);
 		if (bmaps != null)
@@ -962,8 +964,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage findOrCreateMsg(String m, boolean be, String bmaps,
-		DmsMsgPriority ap, DmsMsgPriority rp, SignMsgSource src,
-		String o, Integer d)
+		DmsMsgPriority ap, DmsMsgPriority rp, int src, String o,
+		Integer d)
 	{
 		SignMessage esm = SignMessageHelper.find(m, bmaps, ap, rp, src,
 			o, d);
@@ -984,8 +986,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMsgNotify(String m, boolean be, String bmaps,
-		DmsMsgPriority ap, DmsMsgPriority rp, SignMsgSource src,
-		String o, Integer d)
+		DmsMsgPriority ap, DmsMsgPriority rp, int src, String o,
+		Integer d)
 	{
 		SignMessageImpl sm = new SignMessageImpl(m, be, bmaps, ap, rp,
 			src, o, d);
@@ -1017,8 +1019,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	{
 		String bmaps = encodeAdjustedBitmaps(pages);
 		if (bmaps != null) {
-			return findOrCreateMsg(m, be, bmaps, ap, rp, external,
-				null, d);
+			return findOrCreateMsg(m, be, bmaps, ap, rp, EXT_OPER,
+			                       null, d);
 		} else
 			return null;
 	}
@@ -1060,9 +1062,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				da.getActivationPriority());
 			DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
 				da.getRunTimePriority());
-			SignMsgSource src = formatter.isTolling(da)
-			                  ? tolling
-			                  : schedule;
+			int src = SignMsgSource.schedule.ordinal();
+			if (formatter.isTolling(da))
+				src |= SignMsgSource.tolling.ordinal();
 			Integer d = getDuration(da);
 			return createMsg(m, be, ap, rp, src, null, d);
 		} else
@@ -1182,7 +1184,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Set the current message.
 	 * @param sm Sign message. */
 	public void setMsgCurrentNotify(SignMessage sm) {
-		if (sm.getSource() == tolling.ordinal())
+		if (SignMsgSource.tolling.checkBit(sm.getSource()))
 			logPriceMessages(EventType.PRICE_VERIFIED);
 		if (!isMsgCurrentEquivalent(sm)) {
 			logMsg(sm);
@@ -1259,8 +1261,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				user.getActivationPriority());
 			DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
 				user.getRunTimePriority());
-			SignMsgSource src = SignMsgSource.fromOrdinal(
-				user.getSource());
+			int src = user.getSource() | sched.getSource();
 			String o = user.getOwner();
 			Integer d = user.getDuration();
 			SignMessage sm = createMsg(ms, be, ap, rp, src, o, d);
@@ -1292,7 +1293,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param p DMS poller.
 	 * @param sm Sign message. */
 	private void sendMsg(DMSPoller p, SignMessage sm) {
-		if (sm.getSource() == tolling.ordinal())
+		if (SignMsgSource.tolling.checkBit(sm.getSource()))
 		    logPriceMessages(EventType.PRICE_DEPLOYED);
 		// FIXME: there should be a better way to clear cached routes
 		//        in travel time estimator
@@ -1434,9 +1435,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return SignMessageHelper.isBlank(msg_current);
 	}
 
-	/** Test if the current message is "scheduled" */
+	/** Test if the current message source contains "operator" */
+	private boolean isMsgOperator() {
+		int src = getMsgCurrent().getSource();
+		return SignMsgSource.operator.checkBit(src);
+	}
+
+	/** Test if the current message source contains "scheduled" */
 	private boolean isMsgScheduled() {
-		return SignMsgSource.isScheduled(getMsgCurrent().getSource());
+		int src = getMsgCurrent().getSource();
+		return SignMsgSource.schedule.checkBit(src);
 	}
 
 	/** Test if the current message has beacon enabled */
@@ -1463,7 +1471,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Test if a DMS has been deployed by a user */
 	public boolean isUserDeployed() {
-		return isMsgDeployed() && !isMsgScheduled() && !isMsgAws();
+		return isMsgDeployed() && !isMsgOperator() && !isMsgAws();
 	}
 
 	/** Test if a DMS has been deployed by schedule */

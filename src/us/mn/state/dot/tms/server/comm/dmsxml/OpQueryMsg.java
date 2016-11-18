@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IrisUserHelper;
-import static us.mn.state.dot.tms.SignMsgSource.external;
+import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignMessageImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -47,6 +47,10 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Travis Swanston
  */
 class OpQueryMsg extends OpDms {
+
+	/** External operator source */
+	static private final int EXT_OPER = SignMsgSource.toBits(
+		SignMsgSource.external, SignMsgSource.operator);
 
 	/** device request */
 	private DeviceRequest m_req;
@@ -437,7 +441,7 @@ class OpQueryMsg extends OpDms {
 				msgtext = updatePageOnTime(msgtext, pgOnTime);
 				SignMessageImpl sm = (SignMessageImpl)
 					m_dms.createMsg(msgtext, false, apri,
-					rpri, external, iuser, duramins);
+					rpri, EXT_OPER, iuser, duramins);
 				if (sm != null)
 					m_dms.setMsgCurrentNotify(sm);
 
@@ -455,7 +459,7 @@ class OpQueryMsg extends OpDms {
 				if (sm == null) {
 					sm = (SignMessageImpl) m_dms.
 						createMsg("", false, apri, rpri,
-						external, iuser, null);
+						EXT_OPER, iuser, null);
 					if (sm != null)
 						m_dms.setMsgCurrentNotify(sm);
 				}
