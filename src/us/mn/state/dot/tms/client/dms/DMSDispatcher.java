@@ -53,11 +53,11 @@ import us.mn.state.dot.tms.utils.MultiString;
 public class DMSDispatcher extends JPanel {
 
 	/** Check all the words in the specified MULT string.
-	 * @param multi Multi string to spell check.
+	 * @param ms Multi string to spell check.
 	 * @return True to send the sign message else false to cancel. */
-	static private boolean checkWords(String multi) {
-		String msg = WordHelper.spellCheck(multi);
-		String amsg = WordHelper.abbreviationCheck(multi);
+	static private boolean checkWords(String ms) {
+		String msg = WordHelper.spellCheck(ms);
+		String amsg = WordHelper.abbreviationCheck(ms);
 		if (msg.isEmpty() && amsg.isEmpty())
 			return true;
 		if (msg.isEmpty())
@@ -257,22 +257,22 @@ public class DMSDispatcher extends JPanel {
 	/** Create a new message from the widgets.
 	 * @return A newly created SignMessage else null. */
 	private SignMessage createMessage() {
-		String multi = message;	// Avoid races
-		if (multi.isEmpty())
+		String ms = message;	// Avoid races
+		if (ms.isEmpty())
 			return null;
 		else
-			return createMessage(multi);
+			return createMessage(ms);
 	}
 
 	/** Create a new message using the specified MULTI */
-	private SignMessage createMessage(String multi) {
-		String bitmaps = createBitmaps(multi);
+	private SignMessage createMessage(String ms) {
+		String bitmaps = createBitmaps(ms);
 		if (bitmaps != null) {
 			boolean be = composer.isBeaconEnabled();
 			DmsMsgPriority p = composer.getPriority();
 			String u = user.getName();
 			Integer d = composer.getDuration();
-			return creator.create(multi, be, bitmaps, p, p, u, d);
+			return creator.create(ms, be, bitmaps, p, p, u, d);
 		} else
 			return null;
 	}
@@ -291,10 +291,9 @@ public class DMSDispatcher extends JPanel {
 
 	/** Create a new blank message */
 	private SignMessage createBlankMessage() {
-		String multi = "";
-		String bitmaps = createBitmaps(multi);
+		String bitmaps = createBitmaps("");
 		if (bitmaps != null) {
-			return creator.create(multi, false, bitmaps,
+			return creator.create("", false, bitmaps,
 			       DmsMsgPriority.OVERRIDE,
 			       DmsMsgPriority.BLANK, null, null);
 		} else
@@ -302,12 +301,12 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Create bitmap graphics for a MULTI string */
-	private String createBitmaps(String multi) {
+	private String createBitmaps(String ms) {
 		RasterBuilder b = builder;
 		if (b != null) {
-			MultiString ms = new MultiString(multi);
 			try {
-				return encodeBitmaps(b.createBitmaps(ms));
+				return encodeBitmaps(b.createBitmaps(
+					new MultiString(ms)));
 			}
 			catch (InvalidMsgException e) {
 				// Message is not valid
@@ -450,9 +449,8 @@ public class DMSDispatcher extends JPanel {
 	public RasterGraphic[] getPixmaps() {
 		RasterBuilder b = builder;
 		if (b != null) {
-			MultiString multi = new MultiString(message);
 			try {
-				return b.createPixmaps(multi);
+			       return b.createPixmaps(new MultiString(message));
 			}
 			catch (IndexOutOfBoundsException e) {
 				// pixmap too small for message
