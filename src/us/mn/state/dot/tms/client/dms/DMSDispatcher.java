@@ -230,13 +230,11 @@ public class DMSDispatcher extends JPanel {
 
 	/** Build a string of selected DMS */
 	private String buildSelectedList() {
-		boolean first = true;
 		StringBuilder sb = new StringBuilder();
 		for (DMS dms: getValidSelected()) {
-			if (!first)
+			if (sb.length() > 0)
 				sb.append(", ");
 			sb.append(dms.getName());
-			first = false;
 		}
 		return sb.toString();
 	}
