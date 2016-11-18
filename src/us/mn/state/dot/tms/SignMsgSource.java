@@ -26,7 +26,8 @@ public enum SignMsgSource {
 	tolling,	// 3  DMS action with [tz...] tag
 	gate_arm,	// 4  gate arm system
 	lcs,		// 5  lane-use control signal
-	external;	// 6  external system
+	aws,		// 6  automated warning system
+	external;	// 7  external system
 
 	/** Get the bit for a source */
 	public int bit() {

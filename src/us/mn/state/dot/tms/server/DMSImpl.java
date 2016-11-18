@@ -1460,6 +1460,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Test if the current message is AWS */
 	private boolean isMsgAws() {
+		// FIXME: use SignMsgSource.aws
 		SignMessage sm = getMsgCurrent();
 		return sm.getRunTimePriority() == AWS.ordinal();
 	}
