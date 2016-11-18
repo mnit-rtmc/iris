@@ -2552,12 +2552,13 @@ camera_stream_controls_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.42.0
+database_version	4.43.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
 dms_aws_enable	false
 dms_brightness_enable	true
+dms_comm_loss_enable	true
 dms_composer_edit_mode	1
 dms_default_justification_line	3
 dms_default_justification_page	2

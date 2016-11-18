@@ -100,18 +100,24 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Get the comm loss threshold */
 	private int getCommLossMinutes() {
-		return isCommLossBlacklisted() ? 0
-		      : Math.max(COMM_LOSS_MINIMUM_MINS, getLinkCommLossMins());
+		return (isCommLossEnabled() && !isCommLossBlacklisted())
+		     ? Math.max(COMM_LOSS_MINIMUM_MINS, getLinkCommLossMins())
+		     : 0;
 	}
 
-	/** Get the comm loss threshold for the comm link */
-	private int getLinkCommLossMins() {
-		return controller.getPollPeriod() * COMM_LOSS_PERIODS / 60;
+	/** Is DMS comm loss enabled? */
+	private boolean isCommLossEnabled() {
+		return DMS_COMM_LOSS_ENABLE.getBoolean();
 	}
 
 	/** Is the controller blacklisted for comm loss setting */
 	private boolean isCommLossBlacklisted() {
 		return CTO_BLACKLIST.contains(controller.getVersion());
+	}
+
+	/** Get the comm loss threshold for the comm link */
+	private int getLinkCommLossMins() {
+		return controller.getPollPeriod() * COMM_LOSS_PERIODS / 60;
 	}
 
 	/** Phase to set the pixel service schedule */
