@@ -77,7 +77,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	{
 		protected void doActionPerformed(ActionEvent e) {
 			DMS proxy = watching;
-			if(proxy != null) {
+			if (proxy != null) {
 				proxy.setAwsControlled(
 					aws_control_chk.isSelected());
 			}
@@ -131,10 +131,10 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Watch a DMS */
 	private void watch(final DMS nw) {
 		final DMS ow = watching;
-		if(ow != null)
+		if (ow != null)
 			cache.ignoreObject(ow);
 		watching = nw;
-		if(nw != null)
+		if (nw != null)
 			cache.watchObject(nw);
 	}
 
@@ -164,7 +164,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 
 		add("device.name");
 		add(name_lbl);
-		if(SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
+		if (SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
 			add("dms.brightness");
 			add(brightness_lbl);
 		}
@@ -176,7 +176,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		add(status_lbl, Stretch.LAST);
 		add("device.operation");
 		add(operation_lbl, Stretch.LAST);
-		if(SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
+		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			aws_control_chk.setHorizontalTextPosition(
 				SwingConstants.LEFT);
 			add(aws_control_chk, Stretch.LEFT);
@@ -193,9 +193,9 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		tab.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				selectPreview(!preview);
-				if((adjusting == 0) && !preview) {
+				if ((0 == adjusting) && !preview) {
 					DMS dms = watching;
-					if(dms != null)
+					if (dms != null)
 						updateMessageCurrent(dms);
 				}
 			}
@@ -206,7 +206,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 
 	/** Process a popup menu event */
 	private void doPopup(MouseEvent me) {
-		if(me.isPopupTrigger())
+		if (me.isPopupTrigger())
 			session.getDMSManager().showPopupMenu(me);
 	}
 
@@ -222,24 +222,28 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	}
 
 	/** A new proxy has been added */
+	@Override
 	public void proxyAdded(DMS proxy) {
 		// we're not interested
 	}
 
 	/** Enumeration of the proxy type has completed */
+	@Override
 	public void enumerationComplete() {
 		// we're not interested
 	}
 
 	/** A proxy has been removed */
+	@Override
 	public void proxyRemoved(DMS proxy) {
 		// Note: the DMSManager will remove the proxy from the
 		//       ProxySelectionModel, so we can ignore this.
 	}
 
 	/** A proxy has been changed */
+	@Override
 	public void proxyChanged(final DMS proxy, final String a) {
-		if(proxy == watching) {
+		if (proxy == watching) {
 			runSwing(new Runnable() {
 				public void run() {
 					updateAttribute(proxy, a);
@@ -250,7 +254,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 
 	/** Select the preview (or current) tab */
 	public void selectPreview(boolean p) {
-		if(adjusting == 0) {
+		if (0 == adjusting) {
 			preview = p;
 			adjusting++;
 			setMessage();
@@ -260,7 +264,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 
 	/** Set the displayed message */
 	public void setMessage() {
-		if(preview) {
+		if (preview) {
 			updatePreviewPanel(watching);
 			tab.setSelectedComponent(preview_pnl);
 		} else {
@@ -272,7 +276,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Set a single selected DMS */
 	public void setSelected(DMS dms) {
 		watch(dms);
-		if(dms != null)
+		if (dms != null)
 			updateAttribute(dms, null);
 		else
 			clearSelected();
@@ -306,11 +310,11 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	 * @param dms The newly selected DMS. May not be null.
 	 * @param a Attribute to update, null for all attributes. */
 	private void updateAttribute(DMS dms, String a) {
-		if(a == null || a.equals("name"))
+		if (a == null || a.equals("name"))
 			name_lbl.setText(dms.getName());
-		if(a == null || a.equals("lightOutput")) {
+		if (a == null || a.equals("lightOutput")) {
 			Integer o = dms.getLightOutput();
-			if(o != null)
+			if (o != null)
 				brightness_lbl.setText("" + o + "%");
 			else
 				brightness_lbl.setText("");
@@ -318,30 +322,30 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		if (a == null || a.equals("preset"))
 			setPresetAction(dms);
 		// FIXME: this won't update when geoLoc attributes change
-		if(a == null || a.equals("geoLoc")) {
+		if (a == null || a.equals("geoLoc")) {
 			location_lbl.setText(GeoLocHelper.getDescription(
 				dms.getGeoLoc()));
 		}
-		if(a == null || a.equals("operation"))
+		if (a == null || a.equals("operation"))
 			updateStatus(dms);
-		if(a == null || a.equals("messageCurrent")) {
-			if(!preview) {
+		if (a == null || a.equals("messageCurrent")) {
+			if (!preview) {
 				updateCurrentPanel(dms);
 				updateMessageCurrent(dms);
 			}
 		}
-		if(a == null || a.equals("awsAllowed")) {
+		if (a == null || a.equals("awsAllowed")) {
 			aws_control_chk.setEnabled(
 				dispatcher.isAwsPermitted(dms));
 		}
-		if(a == null || a.equals("awsControlled"))
+		if (a == null || a.equals("awsControlled"))
 			aws_control_chk.setSelected(dms.getAwsControlled());
 	}
 
 	/** Update the status widgets */
 	private void updateStatus(DMS dms) {
 		current_pnl.setFilterColor(SignPixelPanel.filterColor(dms));
-		if(DMSHelper.isFailed(dms)) {
+		if (DMSHelper.isFailed(dms)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
 			status_lbl.setText(DMSHelper.getStatus(dms));
@@ -353,7 +357,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Update the critical error status */
 	private void updateCritical(DMS dms) {
 		String critical = DMSHelper.getCriticalError(dms);
-		if(critical.isEmpty())
+		if (critical.isEmpty())
 			updateMaintenance(dms);
 		else {
 			status_lbl.setForeground(Color.WHITE);
@@ -365,7 +369,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Update the maintenance error status */
 	private void updateMaintenance(DMS dms) {
 		String maintenance = DMSHelper.getMaintenance(dms);
-		if(maintenance.isEmpty()) {
+		if (maintenance.isEmpty()) {
 			status_lbl.setForeground(null);
 			status_lbl.setBackground(null);
 			status_lbl.setText("");
@@ -379,7 +383,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Update the current panel */
 	private void updateCurrentPanel(DMS dms) {
 		RasterGraphic[] rg = DMSHelper.getRasters(dms);
-		if(rg != null) {
+		if (rg != null) {
 			String ms = DMSHelper.getMultiString(dms);
 			current_pnl.setDimensions(dms);
 			setPager(new DMSPanelPager(current_pnl, rg, ms));
@@ -399,7 +403,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Update the preview panel */
 	private void updatePreviewPanel(DMS dms) {
 		DMSPanelPager p = createPreviewPager();
-		if(p != null && dms != null) {
+		if (p != null && dms != null) {
 			preview_pnl.setDimensions(dms);
 			setPager(p);
 		} else {
@@ -411,7 +415,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Create a preview panel pager */
 	private DMSPanelPager createPreviewPager() {
 		RasterGraphic[] rg = dispatcher.getPixmaps();
-		if(rg != null) {
+		if (rg != null) {
 			String ms = dispatcher.getMessage();
 			return new DMSPanelPager(preview_pnl, rg, ms);
 		} else
@@ -421,7 +425,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Set the DMS panel pager */
 	private void setPager(DMSPanelPager p) {
 		DMSPanelPager pager = pnlPager;
-		if(pager != null)
+		if (pager != null)
 			pager.dispose();
 		pnlPager = p;
 	}
