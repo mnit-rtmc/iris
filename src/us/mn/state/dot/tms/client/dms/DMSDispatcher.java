@@ -119,7 +119,7 @@ public class DMSDispatcher extends JPanel {
 	private RasterBuilder builder;
 
 	/** Selected message MULTI string */
-	private String message = "";
+	private String multi = "";
 
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(Session s, DMSManager manager) {
@@ -202,7 +202,7 @@ public class DMSDispatcher extends JPanel {
  	 * of spell checking options and send confirmation options.
 	 * @return True to send the message else false to cancel. */
 	private boolean shouldSendMessage() {
-		if (WordHelper.spellCheckEnabled() && !checkWords(message))
+		if (WordHelper.spellCheckEnabled() && !checkWords(multi))
 			return false;
 		if (SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
 			return showConfirmDialog();
@@ -257,7 +257,7 @@ public class DMSDispatcher extends JPanel {
 	/** Create a new message from the widgets.
 	 * @return A newly created SignMessage else null. */
 	private SignMessage createMessage() {
-		String ms = message;	// Avoid races
+		String ms = multi;	// Avoid races
 		if (ms.isEmpty())
 			return null;
 		else
@@ -429,7 +429,7 @@ public class DMSDispatcher extends JPanel {
 	 * on the dispatcher with the specified message. */
 	public void setMessage(String ms) {
 		if (ms != null) {
-			message = ms;
+			multi = ms;
 			singleTab.setMessage();
 			composer.setMessage(ms);
 		}
@@ -437,7 +437,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Get the selected message */
 	public String getMessage() {
-		return message;
+		return multi;
 	}
 
 	/** Select the preview mode */
@@ -450,7 +450,7 @@ public class DMSDispatcher extends JPanel {
 		RasterBuilder b = builder;
 		if (b != null) {
 			try {
-			       return b.createPixmaps(new MultiString(message));
+				return b.createPixmaps(new MultiString(multi));
 			}
 			catch (IndexOutOfBoundsException e) {
 				// pixmap too small for message
