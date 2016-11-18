@@ -1251,8 +1251,29 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		SignMessage sched = msg_sched;	// Avoid race
 		if (SignMessageHelper.isBlank(user) && isMsgValid(sched))
 			return sched;
-		// FIXME: deal with PREFIX_PAGE
+		if (isPrefixPage(sched)) {
+			MultiString multi = new MultiString(user.getMulti());
+			String ms = multi.addPagePrefix(sched.getMulti());
+			boolean be = user.getBeaconEnabled();
+			DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
+				user.getActivationPriority());
+			DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
+				user.getRunTimePriority());
+			SignMsgSource src = SignMsgSource.fromOrdinal(
+				user.getSource());
+			String o = user.getOwner();
+			Integer d = user.getDuration();
+			SignMessage sm = createMsg(ms, be, ap, rp, src, o, d);
+			if (sm != null && isMsgValid(sm))
+				return sm;
+		}
 		return user;
+	}
+
+	/** Is scheduled message using PREFIX_PAGE? */
+	private boolean isPrefixPage(SignMessage sm) {
+		return sm.getActivationPriority() ==
+		       DmsMsgPriority.PREFIX_PAGE.ordinal();
 	}
 
 	/** Check if a sign message is valid */
