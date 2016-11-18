@@ -19,7 +19,6 @@ import java.awt.BorderLayout;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.User;
@@ -37,6 +36,7 @@ import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.widget.IOptionPane;
 import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -58,29 +58,28 @@ public class DMSDispatcher extends JPanel {
 	static private boolean checkWords(String multi) {
 		String msg = WordHelper.spellCheck(multi);
 		String amsg = WordHelper.abbreviationCheck(multi);
-		if (msg.isEmpty() && amsg.isEmpty()) {
+		if (msg.isEmpty() && amsg.isEmpty())
 			return true;
-		} else if (msg.isEmpty()) {
-			Object[] options = {"Send", "Cancel"};
-			int sel = JOptionPane.showOptionDialog(null, msg + amsg,
-				"Spell Check", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.QUESTION_MESSAGE, null,
-				options, options[1]);
-			return (sel == JOptionPane.OK_OPTION);
-		} if (WordHelper.spellCheckEnforced()) {
-			JOptionPane.showMessageDialog(null, msg + amsg,
-				"Spell Check", JOptionPane.ERROR_MESSAGE);
+		if (msg.isEmpty())
+			return confirmSend(amsg);
+		String imsg = msg + amsg;
+		if (WordHelper.spellCheckEnforced()) {
+			IOptionPane.showError("dictionary.form", imsg);
 			return false;
-		} else if (WordHelper.spellCheckRecommend()) {
-			Object[] options = {"Send", "Cancel"};
-			int sel = JOptionPane.showOptionDialog(null, msg + amsg,
-				"Spell Check", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.QUESTION_MESSAGE, null,
-				options, options[1]);
-			return (sel == JOptionPane.OK_OPTION);
-		} else {
+		} else if (WordHelper.spellCheckRecommend())
+			return confirmSend(imsg);
+		else
 			return false;
-		}
+	}
+
+	/** Confirm sending message */
+	static private boolean confirmSend(String imsg) {
+		Object[] options = {
+			I18N.get("dms.send.confirmation.ok"),
+			I18N.get("dms.send.confirmation.cancel")
+		};
+		return IOptionPane.showOption("dms.send.confirmation.title",
+			imsg, options);
 	}
 
 	/** User session */
@@ -215,12 +214,7 @@ public class DMSDispatcher extends JPanel {
 	 * @return True if message should be sent. */
 	private boolean showConfirmDialog() {
 		String m = buildConfirmMsg();
-		if (!m.isEmpty()) {
-			return 0 == JOptionPane.showConfirmDialog(null, m,
-				I18N.get("dms.send.confirmation.title"),
-				JOptionPane.OK_CANCEL_OPTION);
-		} else
-			return false;
+		return m.isEmpty() || confirmSend(m);
 	}
 
 	/** Build a confirmation message containing all selected DMS.

@@ -20,7 +20,6 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
-import javax.swing.JOptionPane;
 import javax.swing.RowSorter;
 import javax.swing.SortOrder;
 import javax.swing.table.TableCellEditor;
@@ -33,7 +32,6 @@ import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
-import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -41,6 +39,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IOptionPane;
 
 /**
  * Table model for DMS actions assigned to action plans
@@ -238,10 +237,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		SignGroup sg = SignGroupHelper.lookup(name.trim());
 		if (sg != null && action_plan != null)
 			create(sg);
-		else {
-			JOptionPane.showMessageDialog(null, 
-				I18N.get("action.plan.dms.hint"));
-		}
+		else
+			IOptionPane.showHint("action.plan.dms.hint");
 	}
 
 	/** Create a new DMS action */
