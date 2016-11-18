@@ -52,6 +52,37 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class DMSDispatcher extends JPanel {
 
+	/** Check all the words in the specified MULT string.
+	 * @param multi Multi string to spell check.
+	 * @return True to send the sign message else false to cancel. */
+	static private boolean checkWords(String multi) {
+		String msg = WordHelper.spellCheck(multi);
+		String amsg = WordHelper.abbreviationCheck(multi);
+		if (msg.isEmpty() && amsg.isEmpty()) {
+			return true;
+		} else if (msg.isEmpty()) {
+			Object[] options = {"Send", "Cancel"};
+			int sel = JOptionPane.showOptionDialog(null, msg + amsg,
+				"Spell Check", JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.QUESTION_MESSAGE, null,
+				options, options[1]);
+			return (sel == JOptionPane.OK_OPTION);
+		} if (WordHelper.spellCheckEnforced()) {
+			JOptionPane.showMessageDialog(null, msg + amsg,
+				"Spell Check", JOptionPane.ERROR_MESSAGE);
+			return false;
+		} else if (WordHelper.spellCheckRecommend()) {
+			Object[] options = {"Send", "Cancel"};
+			int sel = JOptionPane.showOptionDialog(null, msg + amsg,
+				"Spell Check", JOptionPane.OK_CANCEL_OPTION,
+				JOptionPane.QUESTION_MESSAGE, null,
+				options, options[1]);
+			return (sel == JOptionPane.OK_OPTION);
+		} else {
+			return false;
+		}
+	}
+
 	/** User session */
 	private final Session session;
 
@@ -146,10 +177,10 @@ public class DMSDispatcher extends JPanel {
 	/** Check the dimensions of a sign against the pixel map builder */
 	private boolean checkDimensions(DMS dms) {
 		RasterBuilder b = builder;
-		if(b != null) {
+		if (b != null) {
 			Integer w = dms.getWidthPixels();
 			Integer h = dms.getHeightPixels();
-			if(w != null && h != null)
+			if (w != null && h != null)
 				return b.width == w && b.height == h;
 		}
 		return false;
@@ -172,52 +203,20 @@ public class DMSDispatcher extends JPanel {
  	 * of spell checking options and send confirmation options.
 	 * @return True to send the message else false to cancel. */
 	private boolean shouldSendMessage() {
-		if (WordHelper.spellCheckEnabled())
-			if (!checkWords(message))
-				return false;
-		if(SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
+		if (WordHelper.spellCheckEnabled() && !checkWords(message))
+			return false;
+		if (SystemAttrEnum.DMS_SEND_CONFIRMATION_ENABLE.getBoolean())
 			return showConfirmDialog();
 		else
 			return true;
-	}
-
-	/** Check all the words in the specified MULT string.
-	 * @param multi Multi string to spell check.
-	 * @return True to send the sign message else false to cancel. */
-	private static boolean checkWords(String multi) {
-		String msg = WordHelper.spellCheck(multi);
-		String amsg = WordHelper.abbreviationCheck(multi);
-		if(msg.isEmpty() && amsg.isEmpty()) {
-			return true;
-		} else if (msg.isEmpty()) {
-			Object[] options = {"Send", "Cancel"};
-			int sel = JOptionPane.showOptionDialog(null, msg + amsg, 
-				"Spell Check", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.QUESTION_MESSAGE, null, 
-				options, options[1]);
-			return (sel == JOptionPane.OK_OPTION);
-		} if (WordHelper.spellCheckEnforced()) {
-			JOptionPane.showMessageDialog(null, msg + amsg, 
-				"Spell Check", JOptionPane.ERROR_MESSAGE);
-			return false;
-		} else if (WordHelper.spellCheckRecommend()) {
-			Object[] options = {"Send", "Cancel"};
-			int sel = JOptionPane.showOptionDialog(null, msg + amsg, 
-				"Spell Check", JOptionPane.OK_CANCEL_OPTION,
-				JOptionPane.QUESTION_MESSAGE, null, 
-				options, options[1]);
-			return (sel == JOptionPane.OK_OPTION);
-		} else {
-			return false;
-		}
 	}
 
 	/** Show a message confirmation dialog.
 	 * @return True if message should be sent. */
 	private boolean showConfirmDialog() {
 		String m = buildConfirmMsg();
-		if(!m.isEmpty()) {
-			return 0 == JOptionPane.showConfirmDialog(null, m, 
+		if (!m.isEmpty()) {
+			return 0 == JOptionPane.showConfirmDialog(null, m,
 				I18N.get("dms.send.confirmation.title"),
 				JOptionPane.OK_CANCEL_OPTION);
 		} else
@@ -225,15 +224,14 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Build a confirmation message containing all selected DMS.
-	 * @return An empty string if no DMS selected else the message. */
+	 * @return Confirmation message, or empty string if no selection. */
 	private String buildConfirmMsg() {
 		String sel = buildSelectedList();
-		if(sel.isEmpty())
-			return sel;
-		else {
+		if (!sel.isEmpty()) {
 			return I18N.get("dms.send.confirmation.msg") + " " +
 				sel + "?";
-		}
+		} else
+			return "";
 	}
 
 	/** Build a string of selected DMS */
@@ -268,7 +266,7 @@ public class DMSDispatcher extends JPanel {
 	 * @return A newly created SignMessage else null. */
 	private SignMessage createMessage() {
 		String multi = message;	// Avoid races
-		if(multi.isEmpty())
+		if (multi.isEmpty())
 			return null;
 		else
 			return createMessage(multi);
@@ -330,7 +328,7 @@ public class DMSDispatcher extends JPanel {
 	private String encodeBitmaps(BitmapGraphic[] bmaps) {
 		int blen = bmaps[0].length();
 		byte[] bitmaps = new byte[bmaps.length * blen];
-		for(int i = 0; i < bmaps.length; i++) {
+		for (int i = 0; i < bmaps.length; i++) {
 			byte[] pix = bmaps[i].getPixelData();
 			System.arraycopy(pix, 0, bitmaps, i * blen, blen);
 		}
@@ -417,14 +415,14 @@ public class DMSDispatcher extends JPanel {
 
 	/** Select the single selection tab */
 	private void selectSingleTab() {
-		if(tabPane.getSelectedComponent() != singleTab)
+		if (tabPane.getSelectedComponent() != singleTab)
 			tabPane.setSelectedComponent(singleTab);
 		composer.setMultiple(false);
 	}
 
 	/** Select the multiple selection tab */
 	private void selectMultipleTab() {
-		if(tabPane.getSelectedComponent() != multipleTab)
+		if (tabPane.getSelectedComponent() != multipleTab)
 			tabPane.setSelectedComponent(multipleTab);
 		composer.setMultiple(true);
 	}
@@ -432,14 +430,14 @@ public class DMSDispatcher extends JPanel {
 	/** Set the enabled status of the dispatcher */
 	public void setEnabled(boolean e) {
 		composer.setEnabled(e && canSend());
-		if(e)
+		if (e)
 			selectPreview(false);
 	}
 
 	/** Set the fully composed message.  This will update all the widgets
 	 * on the dispatcher with the specified message. */
 	public void setMessage(String ms) {
-		if(ms != null) {
+		if (ms != null) {
 			message = ms;
 			singleTab.setMessage();
 			composer.setMessage(ms);
