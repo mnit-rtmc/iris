@@ -156,8 +156,20 @@ public class DMSDispatcher extends JPanel {
 		composer.dispose();
 	}
 
+	/** Get page prefix MULTI string from scheduled message (if any) */
+	public String getPagePrefix() {
+		DMS dms = getSingleSelection();
+		if (dms != null) {
+			SignMessage sm = dms.getMsgSched();
+			if (sm != null && sm.getActivationPriority() ==
+			    DmsMsgPriority.PREFIX_PAGE.ordinal())
+				return sm.getMulti();
+		}
+		return "";
+	}
+
 	/** Get the single selected DMS */
-	public DMS getSingleSelection() {
+	private DMS getSingleSelection() {
 		return sel_mdl.getSingleSelection();
 	}
 

@@ -191,10 +191,9 @@ public class ComposerPagePanel extends JPanel {
 
 	/** Get a MULTI string for the page.
 	 * @param n_font Current font number.
-	 * @param prefix MULTI prefix for each page.
 	 * @return MULTI string for the page. */
-	public MultiString getMulti(int n_font, String prefix) {
-		MultiBuilder mb = new MultiBuilder(prefix);
+	public MultiString getMulti(int n_font) {
+		MultiBuilder mb = new MultiBuilder();
 		String[] mess = new String[n_lines];
 		int m = 0;
 		for (int i = 0; i < mess.length; i++) {

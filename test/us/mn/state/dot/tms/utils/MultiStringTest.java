@@ -478,6 +478,21 @@ public class MultiStringTest extends TestCase {
 		assertTrue(cms.equals(ms2.toString()));
 	}
 
+	public void testPagePrefix() {
+		checkPrefix("", "", "");
+		checkPrefix("", "PREFIX", "PREFIX");
+		checkPrefix("AAA", "PREFIX", "PREFIXAAA");
+		checkPrefix("[np]", "PREFIX", "PREFIX[np]PREFIX");
+		checkPrefix("AAA[np]BBB", "PREFIX", "PREFIXAAA[np]PREFIXBBB");
+		checkPrefix("[np][np]", "PREFIX", "PREFIX[np]PREFIX[np]PREFIX");
+		checkPrefix("A[np]B[np]C", "PF", "PFA[np]PFB[np]PFC");
+	}
+
+	private void checkPrefix(String ms, String pf, String rs) {
+		assertTrue(new MultiString(ms).addPagePrefix(pf).toString()
+		          .equals(rs));
+	}
+
 	public void testGetFonts() {
 		// bogus default font numbers
 		assertTrue(new MultiString("").getFonts(-10).length == 0);

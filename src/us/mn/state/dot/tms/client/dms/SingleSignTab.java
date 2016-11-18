@@ -47,6 +47,7 @@ import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.units.Interval;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * A SingleSignTab is a GUI component for displaying the status of a single
@@ -415,11 +416,20 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Create a preview panel pager */
 	private DMSPanelPager createPreviewPager() {
 		RasterGraphic[] rg = dispatcher.getPixmaps();
-		if (rg != null) {
-			String ms = dispatcher.getMessage();
-			return new DMSPanelPager(preview_pnl, rg, ms);
-		} else
+		if (rg != null)
+			return new DMSPanelPager(preview_pnl, rg, getMulti());
+		else
 			return null;
+	}
+
+	/** Get the preview MULTI string */
+	private String getMulti() {
+		String ms = dispatcher.getMessage();
+		String prefix = dispatcher.getPagePrefix();
+		if (prefix.isEmpty())
+			return ms;
+		else
+			return new MultiString(ms).addPagePrefix(prefix);
 	}
 
 	/** Set the DMS panel pager */

@@ -636,6 +636,20 @@ public class MultiString {
 		return multi.split("\\[np\\]");
 	}
 
+	/** Add a prefix to each page of a MULTI string */
+	public String addPagePrefix(String prefix) {
+		final MultiString pf = new MultiString(prefix);
+		MultiBuilder mb = new MultiBuilder(prefix) {
+			@Override
+			public void addPage() {
+				super.addPage();
+				append(pf);
+			}
+		};
+		parse(mb);
+		return mb.toString();
+	}
+
 	/** Get message lines as an array of strings (with tags).
 	 * Every n_lines elements in the returned array represent one page.
 	 * @param n_lines Number of lines per page.

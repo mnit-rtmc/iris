@@ -274,29 +274,16 @@ public class SignMessageComposer extends JPanel {
 
 	/** Compose a MULTI string using the contents of the widgets */
 	private String composeMessage() {
-		String prefix = getPagePrefix();
 		MultiString[] mess = new MultiString[n_pages];
 		int fn = default_font;
 		int p = 0;
 		for (int i = 0; i < n_pages; i++) {
-			mess[i] = pages[i].getMulti(fn, prefix);
+			mess[i] = pages[i].getMulti(fn);
 			if (!mess[i].isBlank())
 				p = i + 1;
 			fn = pages[i].getFontNumber();
 		}
 		return combinePages(mess, p);
-	}
-
-	/** Get page prefix MULTI string from scheduled message (if any) */
-	private String getPagePrefix() {
-		DMS dms = dispatcher.getSingleSelection();
-		if (dms != null) {
-			SignMessage sm = dms.getMsgSched();
-			if (sm != null && sm.getActivationPriority() ==
-			    DmsMsgPriority.PREFIX_PAGE.ordinal())
-				return sm.getMulti();
-		}
-		return "";
 	}
 
 	/** Build a MULTI string from an array of page strings.
@@ -327,7 +314,7 @@ public class SignMessageComposer extends JPanel {
 		// first because the line combobox updates (each) result in 
 		// intermediate preview updates which read the (incorrect) 
 		// font from the font combobox.
-		String prefix = getPagePrefix();
+		String prefix = dispatcher.getPagePrefix();
 		MultiString multi = new MultiString(ms);
 		setSelectedFonts(multi);
 		String[] lines = multi.getLines(n_lines, prefix);
