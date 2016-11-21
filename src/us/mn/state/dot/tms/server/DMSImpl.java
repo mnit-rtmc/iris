@@ -903,7 +903,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public SignMessage createMsgBlank(DmsMsgPriority ap) {
 		String bmaps = Base64.encode(new byte[0]);
 		return findOrCreateMsg("", false, bmaps, ap, BLANK,
-			SignMsgSource.blank.ordinal(), null, null);
+			SignMsgSource.blank.bit(), null, null);
 	}
 
 	/** Create a message for the sign.
@@ -1062,9 +1062,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				da.getActivationPriority());
 			DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
 				da.getRunTimePriority());
-			int src = SignMsgSource.schedule.ordinal();
+			int src = SignMsgSource.schedule.bit();
 			if (formatter.isTolling(da))
-				src |= SignMsgSource.tolling.ordinal();
+				src |= SignMsgSource.tolling.bit();
 			Integer d = getDuration(da);
 			return createMsg(m, be, ap, rp, src, null, d);
 		} else
@@ -1472,7 +1472,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Test if a DMS has been deployed by a user */
 	public boolean isUserDeployed() {
-		return isMsgDeployed() && !isMsgOperator() && !isMsgAws();
+		return isMsgDeployed() && isMsgOperator() && !isMsgAws();
 	}
 
 	/** Test if a DMS has been deployed by schedule */

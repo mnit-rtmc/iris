@@ -483,7 +483,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private void updateDmsMsg(DMSImpl d, String ms) {
 		if (!d.getMsgCurrent().getMulti().equals(ms)) {
 			SignMessage sm = d.createMsg(ms, false, PSA, PSA,
-				gate_arm.ordinal(), null, null);
+				gate_arm.bit(), null, null);
 			if (sm != null)
 				updateDmsMsg(d, sm);
 			else

@@ -119,7 +119,7 @@ public class OpSendLCSIndications extends OpLCS {
 			return dms.createMsgBlank(ap);
 		else {
 			return dms.createMsg(ms, false, ap, OPERATOR,
-				lcs.ordinal(), user.getName(), null);
+				lcs.bit(), user.getName(), null);
 		}
 	}
 

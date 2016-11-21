@@ -168,7 +168,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		Integer duration)
 	{
 		int src = DmsMsgPriority.isScheduled(p)
-		        ? SignMsgSource.schedule.ordinal()
+		        ? SignMsgSource.schedule.bit()
 		        : SignMsgSource.toBits(SignMsgSource.external,
 			                       SignMsgSource.operator);
 		setMsgCurrent(dms.createMsg(multi, (be == 1), p, p, src, null,

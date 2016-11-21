@@ -71,7 +71,7 @@ public class SignMessageCreator {
 		Integer duration)
 	{
 		SignMessage sm = SignMessageHelper.find(multi, bitmaps, ap, rp,
-			operator.ordinal(), owner, duration);
+			operator.bit(), owner, duration);
 		if (sm != null)
 			return sm;
 		String name = createName();
@@ -104,7 +104,7 @@ public class SignMessageCreator {
 		attrs.put("bitmaps", bitmaps);
 		attrs.put("activationPriority", new Integer(ap.ordinal()));
 		attrs.put("runTimePriority", new Integer(rp.ordinal()));
-		attrs.put("source", new Integer(operator.ordinal()));
+		attrs.put("source", new Integer(operator.bit()));
 		if (owner != null)
 			attrs.put("owner", owner);
 		if (duration != null)
