@@ -156,6 +156,16 @@ public class DMSDispatcher extends JPanel {
 		composer.dispose();
 	}
 
+	/** Get the preview MULTI string */
+	public String getMulti() {
+		String ms = getMessage();
+		String prefix = getPagePrefix();
+		if (prefix.isEmpty())
+			return ms;
+		else
+			return new MultiString(ms).addPagePrefix(prefix);
+	}
+
 	/** Get page prefix MULTI string from scheduled message (if any) */
 	public String getPagePrefix() {
 		DMS dms = getSingleSelection();
@@ -462,7 +472,8 @@ public class DMSDispatcher extends JPanel {
 		RasterBuilder b = builder;
 		if (b != null) {
 			try {
-				return b.createPixmaps(new MultiString(multi));
+				String ms = getMulti();
+				return b.createPixmaps(new MultiString(ms));
 			}
 			catch (IndexOutOfBoundsException e) {
 				// pixmap too small for message
