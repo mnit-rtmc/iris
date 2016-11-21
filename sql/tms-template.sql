@@ -2805,7 +2805,7 @@ PRV_0048	dms_admin	dms			t
 PRV_0049	dms_admin	font			t
 PRV_0050	dms_admin	glyph			t
 PRV_0051	dms_admin	graphic			t
-PRV_0052	dms_control	dms		messageNext	t
+PRV_0052	dms_control	dms		msgUser	t
 PRV_0054	dms_control	dms		deviceRequest	t
 PRV_0055	dms_control	sign_message			t
 PRV_0056	dms_policy	dms_sign_group			t
