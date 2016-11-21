@@ -154,7 +154,7 @@ public class DmsCache {
 			dmss.ignoreAttribute("powerStatus");
 			// We can't ignore msgCurrent because
 			// DmsCellRenderer lists need the updates
-			dmss.ignoreAttribute("messageSched");
+			dmss.ignoreAttribute("msgSched");
 			dmss.ignoreAttribute("deployTime");
 			dmss.ignoreAttribute("heatTapeStatus");
 		}
