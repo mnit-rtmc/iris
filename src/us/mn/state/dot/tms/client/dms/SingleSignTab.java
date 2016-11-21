@@ -329,7 +329,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		}
 		if (a == null || a.equals("operation"))
 			updateStatus(dms);
-		if (a == null || a.equals("messageCurrent")) {
+		if (a == null || a.equals("msgCurrent")) {
 			if (!preview) {
 				updateCurrentPanel(dms);
 				updateMessageCurrent(dms);

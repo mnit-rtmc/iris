@@ -489,7 +489,7 @@ public class DMSDispatcher extends JPanel {
 	/** Can a message be sent to the specified DMS? */
 	public boolean canSend(DMS dms) {
 		return creator.canCreate() &&
-		       isUpdatePermitted(dms, "messageNext");
+		       isUpdatePermitted(dms, "msgUser");
 	}
 
 	/** Is DMS attribute update permitted? */

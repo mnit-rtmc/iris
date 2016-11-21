@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,10 +116,10 @@ public class PropPixels extends IPanel {
 
 	/** Update one attribute on the panel */
 	public void updateAttribute(String a) {
-		// NOTE: messageCurrent attribute changes after all sign
+		// NOTE: msgCurrent attribute changes after all sign
 		//       dimension attributes are updated.
 		if (a == null || a.equals("pixelStatus") ||
-		    a.equals("messageCurrent"))
+		    a.equals("msgCurrent"))
 			updatePixelStatus();
 		if (a == null) {
 			boolean r = canRequest();

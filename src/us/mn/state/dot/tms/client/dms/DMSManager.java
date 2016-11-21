@@ -141,14 +141,13 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Check if an attribute change is interesting */
 	@Override
 	protected boolean checkAttributeChange(String a) {
-		return super.checkAttributeChange(a)
-		    || "messageCurrent".equals(a);
+		return super.checkAttributeChange(a) || "msgCurrent".equals(a);
 	}
 
 	/** Called when a proxy attribute has changed */
 	@Override
 	protected void proxyChangedSwing(DMS dms, String a) {
-		if ("messageCurrent".equals(a))
+		if ("msgCurrent".equals(a))
 			updateRaster(dms);
 		super.proxyChangedSwing(dms, a);
 	}

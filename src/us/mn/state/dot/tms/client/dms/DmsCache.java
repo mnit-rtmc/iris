@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -152,8 +152,8 @@ public class DmsCache {
 			dmss.ignoreAttribute("lightOutput");
 			dmss.ignoreAttribute("photocellStatus");
 			dmss.ignoreAttribute("powerStatus");
-			// We can't ignore messageCurrent and ownerCurrent,
-			// because DmsCellRenderer lists need the updates
+			// We can't ignore msgCurrent because
+			// DmsCellRenderer lists need the updates
 			dmss.ignoreAttribute("messageSched");
 			dmss.ignoreAttribute("deployTime");
 			dmss.ignoreAttribute("heatTapeStatus");

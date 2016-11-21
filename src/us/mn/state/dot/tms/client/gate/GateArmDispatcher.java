@@ -77,9 +77,9 @@ public class GateArmDispatcher extends IPanel
 	/** DMS Proxy view */
 	private final ProxyView<DMS> dms_view = new ProxyView<DMS>() {
 		public void update(DMS d, String a) {
-			if(a == null ||
-			   "styles".equals(a) ||
-			   "messageCurrent".equals(a))
+			if (a == null ||
+			    "styles".equals(a) ||
+			    "msgCurrent".equals(a))
 				updateDms(d);
 		}
 		public void clear() {

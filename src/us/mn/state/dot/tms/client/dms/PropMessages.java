@@ -318,9 +318,9 @@ public class PropMessages extends JPanel {
 			aws_allowed_chk.setSelected(proxy.getAwsAllowed());
 		if (a == null || a.equals("awsControlled"))
 			aws_control_chk.setSelected(proxy.getAwsControlled());
-		// NOTE: messageCurrent attribute changes after all sign
+		// NOTE: msgCurrent attribute changes after all sign
 		//       dimension attributes are updated.
-		if (a == null || a.equals("messageCurrent"))
+		if (a == null || a.equals("msgCurrent"))
 			selectSignText();
 	}
 

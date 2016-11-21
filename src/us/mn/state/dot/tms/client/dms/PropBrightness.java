@@ -111,8 +111,8 @@ public class PropBrightness extends IPanel {
 	public void updateAttribute(String a) {
 		if(a == null || a.equals("photocellStatus"))
 			updatePhotocellStatus();
-		if(a == null || a.equals("lightOutput") ||
-		   a.equals("messageCurrent"))
+		if (a == null || a.equals("lightOutput") ||
+		    a.equals("msgCurrent"))
 		{
 			Integer o = dms.getLightOutput();
 			if(o != null)
