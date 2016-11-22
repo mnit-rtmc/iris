@@ -52,14 +52,12 @@ public class OpSendDMSFonts extends OpDMS {
 	static private class FontRow {
 		private final int row;
 		private final int f_num;
-		private final FontStatus status;
 		private final Font font;
 
 		/** Create a new font row */
-		private FontRow(int r, int fn, FontStatus st, Font f) {
+		private FontRow(int r, int fn, Font f) {
 			row = r;
 			f_num = fn;
-			status = st;
 			font = f;
 		}
 
@@ -67,27 +65,12 @@ public class OpSendDMSFonts extends OpDMS {
 		private FontRow(Font f) {
 			row = 0;
 			f_num = f.getNumber();
-			status = FontStatus.undefined;
 			font = f;
-		}
-
-		/** Check if the row can be updated */
-		private boolean isUpdatable() {
-			switch (status) {
-			case notUsed:
-			case modifying:
-			case readyForUse:
-			case calculatingID:
-			case unmanaged:
-				return true;
-			default:
-				return false;
-			}
 		}
 
 		/** Check if the row is valid */
 		private boolean isValid() {
-			return font != null && isUpdatable();
+			return font != null;
 		}
 	}
 
@@ -175,14 +158,11 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Row to query */
 		private int row = 1;
 
-		/** Query the font number for one font */
+		/** Query the font number for one row in font table */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer number = fontNumber.makeInt(row);
-			ASN1Enum<FontStatus> status = makeStatus(row);
 			mess.add(number);
-			if (version2)
-				mess.add(status);
 			try {
 				mess.queryProps();
 			}
@@ -192,11 +172,7 @@ public class OpSendDMSFonts extends OpDMS {
 				return firstFontPhase();
 			}
 			logQuery(number);
-			if (version2)
-				logQuery(status);
-			else
-				status.setEnum(FontStatus.unmanaged);
-			addRow(row, number.getInteger(), status.getEnum());
+			addRow(row, number.getInteger());
 			if (row < num_fonts.getInteger()) {
 				row++;
 				return this;
@@ -207,10 +183,9 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Add a row to font rows mapping.
 	 * @param row Row number in font table.
-	 * @param f_num Font number in font table.
-	 * @param status Status of row in font table. */
-	private void addRow(int row, int f_num, FontStatus status) {
-		rows.put(row, new FontRow(row, f_num, status, findFont(f_num)));
+	 * @param f_num Font number in font table. */
+	private void addRow(int row, int f_num) {
+		rows.put(row, new FontRow(row, f_num, findFont(f_num)));
 	}
 
 	/** Find and remove matching font */
@@ -252,7 +227,7 @@ public class OpSendDMSFonts extends OpDMS {
 			return fr;
 		else {
 			Font f = fonts.pollFirst();
-			return new FontRow(fr.row, fontNum(fr,f), fr.status, f);
+			return new FontRow(fr.row, fontNum(fr,f), f);
 		}
 	}
 
@@ -282,8 +257,6 @@ public class OpSendDMSFonts extends OpDMS {
 				FontRow fr = ent.getValue();
 				if (fr.isValid())
 					return new VerifyFont(fr);
-				else if (fr.font != null)
-					abortUpload(fr, fr.status.toString());
 			} else
 				break;
 		}
