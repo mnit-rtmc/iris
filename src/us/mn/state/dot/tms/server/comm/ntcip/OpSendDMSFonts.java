@@ -18,9 +18,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.SortedMap;
+import java.util.Map;
 import java.util.TreeMap;
-import java.util.TreeSet;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Font;
@@ -49,6 +48,49 @@ import us.mn.state.dot.tms.utils.Base64;
  */
 public class OpSendDMSFonts extends OpDMS {
 
+	/** Font row values */
+	static private class FontRow {
+		private final int row;
+		private final int f_num;
+		private final FontStatus status;
+		private final Font font;
+
+		/** Create a new font row */
+		private FontRow(int r, int fn, FontStatus st, Font f) {
+			row = r;
+			f_num = fn;
+			status = st;
+			font = f;
+		}
+
+		/** Create a new font row */
+		private FontRow(Font f) {
+			row = 0;
+			f_num = f.getNumber();
+			status = FontStatus.undefined;
+			font = f;
+		}
+
+		/** Check if the row can be updated */
+		private boolean isUpdatable() {
+			switch (status) {
+			case notUsed:
+			case modifying:
+			case readyForUse:
+			case calculatingID:
+			case unmanaged:
+				return true;
+			default:
+				return false;
+			}
+		}
+
+		/** Check if the row is valid */
+		private boolean isValid() {
+			return font != null && isUpdatable();
+		}
+	}
+
 	/** Make a font status object */
 	static private ASN1Enum<FontStatus> makeStatus(int row) {
 		return new ASN1Enum<FontStatus>(FontStatus.class,
@@ -67,21 +109,12 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Maximum number of characters in a font */
 	private final ASN1Integer max_characters = maxFontCharacters.makeInt();
 
-	/** Mapping of font numbers to row in font table */
-	private final TreeMap<Integer, Integer> num_2_row =
-		new TreeMap<Integer, Integer>();
+	/** List of matching fonts */
+	private final LinkedList<Font> fonts;
 
-	/** Set of open rows in the font table */
-	private final TreeSet<Integer> open_rows = new TreeSet<Integer>();
-
-	/** Iterator of fonts to be sent to the sign */
-	private final Iterator<Font> font_iterator;
-
-	/** Current font */
-	private Font font;
-
-	/** Current row in font table */
-	private int row;
+	/** Mapping of rows to font values in font table */
+	private final TreeMap<Integer, FontRow> rows =
+		new TreeMap<Integer, FontRow>();
 
 	/** Flag for version 2 controller (with support for fontStatus) */
 	private boolean version2;
@@ -90,10 +123,7 @@ public class OpSendDMSFonts extends OpDMS {
 	public OpSendDMSFonts(DMSImpl d) {
 		super(PriorityLevel.DOWNLOAD, d);
 		FontFinder ff = new FontFinder(d);
-		LinkedList<Font> fonts = ff.getFonts();
-		for (Font f: fonts)
-			num_2_row.put(f.getNumber(), null);
-		font_iterator = fonts.iterator();
+		fonts = ff.getFonts();
 	}
 
 	/** Create the second phase of the operation */
@@ -103,7 +133,7 @@ public class OpSendDMSFonts extends OpDMS {
 	}
 
 	/** Phase to determine the version of NTCIP 1203 (1 or 2) */
-	protected class Query1203Version extends Phase {
+	private class Query1203Version extends Phase {
 
 		/** Query the maximum character size (v2 only) */
 		@SuppressWarnings("unchecked")
@@ -125,7 +155,7 @@ public class OpSendDMSFonts extends OpDMS {
 	}
 
 	/** Phase to query the number of supported fonts */
-	protected class QueryNumFonts extends Phase {
+	private class QueryNumFonts extends Phase {
 
 		/** Query the number of supported fonts */
 		@SuppressWarnings("unchecked")
@@ -135,15 +165,15 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.queryProps();
 			logQuery(num_fonts);
 			logQuery(max_characters);
-			for (row = 1; row <= num_fonts.getInteger(); row++)
-				open_rows.add(row);
-			row = 1;
 			return new QueryFontNumbers();
 		}
 	}
 
 	/** Phase to query all font numbers */
-	protected class QueryFontNumbers extends Phase {
+	private class QueryFontNumbers extends Phase {
+
+		/** Row to query */
+		private int row = 1;
 
 		/** Query the font number for one font */
 		@SuppressWarnings("unchecked")
@@ -159,98 +189,124 @@ public class OpSendDMSFonts extends OpDMS {
 			catch (NoSuchName e) {
 				// Note: some vendors respond with NoSuchName
 				//       if the font is not valid
-				populateNum2Row();
-				return nextFontPhase();
+				return firstFontPhase();
 			}
 			logQuery(number);
 			if (version2)
 				logQuery(status);
 			else
 				status.setEnum(FontStatus.unmanaged);
-			updateRow(number.getInteger(), status.getEnum());
+			addRow(row, number.getInteger(), status.getEnum());
 			if (row < num_fonts.getInteger()) {
 				row++;
 				return this;
-			} else {
-				populateNum2Row();
-				return nextFontPhase();
+			} else
+				return firstFontPhase();
+		}
+	}
+
+	/** Add a row to font rows mapping.
+	 * @param row Row number in font table.
+	 * @param f_num Font number in font table.
+	 * @param status Status of row in font table. */
+	private void addRow(int row, int f_num, FontStatus status) {
+		rows.put(row, new FontRow(row, f_num, status, findFont(f_num)));
+	}
+
+	/** Find and remove matching font */
+	private Font findFont(int f_num) {
+		Iterator<Font> it = fonts.iterator();
+		while (it.hasNext()) {
+			Font f = it.next();
+			if (f.getNumber() == f_num) {
+				it.remove();
+				return f;
 			}
 		}
+		return null;
 	}
 
-	/** Update one row of the font table */
-	private void updateRow(Integer f_num, FontStatus status) {
-		if (num_2_row.containsKey(f_num)) {
-			if (isUpdatable(status))
-				num_2_row.put(f_num, row);
-			open_rows.remove(row);
+	/** Get the first phase of the first font */
+	private Phase firstFontPhase() {
+		populateRows();
+		warnTableFull();
+		return nextFontPhase();
+	}
+
+	/** Populate the rows mapping */
+	private void populateRows() {
+		// Start at the last row in the table -- some old firmwares
+		// treat the first row or two as special permanent fonts.
+		for (int row = num_fonts.getInteger(); row > 0; row--) {
+			if (fonts.size() < 1)
+				break;
+			if (rows.containsKey(row))
+				rows.put(row, populateRow(rows.remove(row)));
 		}
 	}
 
-	/** Check if the font can be updated */
-	private boolean isUpdatable(FontStatus status) {
-		switch (status) {
-		case notUsed:
-		case modifying:
-		case readyForUse:
-		case unmanaged:
-			return true;
-		default:
-			return false;
+	/** Populate a FontRow with an unassigned font */
+	private FontRow populateRow(FontRow fr) {
+		assert fonts.size() > 0;
+		if (fr.font != null)
+			return fr;
+		else {
+			Font f = fonts.pollFirst();
+			return new FontRow(fr.row, fontNum(fr,f), fr.status, f);
 		}
 	}
 
-	/** Populate the num_2_row mapping */
-	private void populateNum2Row() {
-		// The f_nums linked list is needed to avoid a
-		// ConcurrentModificationException on num_2_row TreeMap
-		LinkedList<Integer> f_nums = new LinkedList<Integer>();
-		f_nums.addAll(num_2_row.keySet());
-		for (Integer f_num: f_nums)
-			populateNum2Row(f_num);
+	/** Get the font number for a specified row and font */
+	private int fontNum(FontRow fr, Font f) {
+		return isAddco() ? fr.f_num : f.getNumber();
 	}
 
-	/** Populate one font number in mapping */
-	private void populateNum2Row(Integer f_num) {
-		if (num_2_row.get(f_num) == null) {
-			Integer r = open_rows.pollLast();
-			if (r != null)
-				num_2_row.put(f_num, r);
-			else
-				num_2_row.remove(f_num);
-		}
+	/** Check if DMS make is ADDCO.  Some ADDCO signs flake out if
+	 * the font *number* is greater than numFonts (typically 4). */
+	private boolean isAddco() {
+		String make = dms.getMake();
+		return make != null && make.startsWith("ADDCO");
+	}
+
+	/** Print warning if unable to send fonts */
+	private void warnTableFull() {
+		for (Font f : fonts)
+			abortUpload(new FontRow(f), "Table full");
 	}
 
 	/** Get the first phase of the next font */
-	protected Phase nextFontPhase() {
-		while (font_iterator.hasNext()) {
-			font = font_iterator.next();
-			Integer f_num = font.getNumber();
-			if (num_2_row.containsKey(f_num)) {
-				row = num_2_row.get(f_num);
-				return new VerifyFont();
-			}
-			abortUpload("Table full");
+	private Phase nextFontPhase() {
+		while (true) {
+			Map.Entry<Integer, FontRow> ent = rows.pollFirstEntry();
+			if (ent != null) {
+				FontRow fr = ent.getValue();
+				if (fr.isValid())
+					return new VerifyFont(fr);
+				else if (fr.font != null)
+					abortUpload(fr, fr.status.toString());
+			} else
+				break;
 		}
 		return null;
 	}
 
 	/** Abort upload of the current font */
-	private void abortUpload(String msg) {
-		Font f = font;
-		if (f != null) {
-			String s = "Font " + f.getNumber() + " aborted -- "+msg;
-			setErrorStatus(s);
-		}
+	private void abortUpload(FontRow frow, String msg) {
+		setErrorStatus("Font " + frow.font.getName() + " aborted -- " +
+		               msg);
 	}
 
 	/** Phase to verify a font */
 	protected class VerifyFont extends Phase {
+		private final FontRow frow;
+		private VerifyFont(FontRow fr) {
+			frow = fr;
+		}
 
 		/** Verify a font */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer version = fontVersionID.makeInt(row);
+			ASN1Integer version = fontVersionID.makeInt(frow.row);
 			mess.add(version);
 			try {
 				mess.queryProps();
@@ -264,56 +320,64 @@ public class OpSendDMSFonts extends OpDMS {
 			logQuery(version);
 			if (isVersionIDCorrect(v)) {
 				logError("Font is valid");
-				if (font == dms.getDefaultFont())
-					return new SetDefaultFont();
+				if (dms.getDefaultFont() == frow.font)
+					return new SetDefaultFont(frow);
 				else
 					return nextFontPhase();
 			} else {
 				if (version2)
-					return new QueryInitialStatus();
+					return new QueryInitialStatus(frow);
 				else
-					return new InvalidateFont();
+					return new InvalidateFont(frow);
 			}
+		}
+
+		/** Compare the font version ID */
+		private boolean isVersionIDCorrect(int v) throws IOException {
+			return isManualVersionIDCorrect(v) ||
+			       isAutoVersionIDCorrect(v);
+		}
+
+		/** Check if font version ID matches manually specified ID */
+		private boolean isManualVersionIDCorrect(int v) {
+			int fvid = frow.font.getVersionID();
+			return fvid != 0 && v == fvid;
+		}
+
+		/** Check if font version ID matches the automatic ID */
+		private boolean isAutoVersionIDCorrect(int v)
+			throws IOException
+		{
+			FontVersionByteStream fv = new FontVersionByteStream(
+				frow.font, frow.f_num);
+			return v == fv.getCrcSwapped();
 		}
 	}
 
-	/** Compare the font version ID */
-	private boolean isVersionIDCorrect(int v) throws IOException {
-		return isManualVersionIDCorrect(v) || isAutoVersionIDCorrect(v);
-	}
-
-	/** Check if a font version ID matches the manually specified ID */
-	private boolean isManualVersionIDCorrect(int v) {
-		int fvid = font.getVersionID();
-		return fvid != 0 && v == fvid;
-	}
-
-	/** Check if a font version ID matches the automatic ID */
-	private boolean isAutoVersionIDCorrect(int v) throws IOException {
-		FontVersionByteStream fv = new FontVersionByteStream(font);
-		return v == fv.getCrcSwapped();
-	}
-
 	/** Phase to query the initial font status */
-	protected class QueryInitialStatus extends Phase {
+	private class QueryInitialStatus extends Phase {
+		private final FontRow frow;
+		private QueryInitialStatus(FontRow fr) {
+			frow = fr;
+		}
 
 		/** Query the initial font status */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = makeStatus(row);
+			ASN1Enum<FontStatus> status = makeStatus(frow.row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
 			switch (status.getEnum()) {
 			case notUsed:
-				return new RequestStatusModify();
+				return new RequestStatusModify(frow);
 			case modifying:
 			case calculatingID:
 			case readyForUse:
 			case unmanaged:
-				return new RequestStatusNotUsed();
+				return new RequestStatusNotUsed(frow);
 			default:
-				abortUpload("Initial status: " +
+				abortUpload(frow, "Initial status: " +
 					status.getEnum());
 				return nextFontPhase();
 			}
@@ -321,22 +385,30 @@ public class OpSendDMSFonts extends OpDMS {
 	}
 
 	/** Phase to request the font status be "notUsed" */
-	protected class RequestStatusNotUsed extends Phase {
+	private class RequestStatusNotUsed extends Phase {
+		private final FontRow frow;
+		private RequestStatusNotUsed(FontRow fr) {
+			frow = fr;
+		}
 
 		/** Request the font status be "notUsed" */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = makeStatus(row);
+			ASN1Enum<FontStatus> status = makeStatus(frow.row);
 			status.setEnum(FontStatus.notUsedReq);
 			mess.add(status);
 			logStore(status);
 			mess.storeProps();
-			return new VerifyStatusNotUsed();
+			return new VerifyStatusNotUsed(frow);
 		}
 	}
 
 	/** Phase to verify the font status is "notUsed" */
-	protected class VerifyStatusNotUsed extends Phase {
+	private class VerifyStatusNotUsed extends Phase {
+		private final FontRow frow;
+		private VerifyStatusNotUsed(FontRow fr) {
+			frow = fr;
+		}
 
 		/** Time to stop checking if the status has updated */
 		private final long expire = TimeSteward.currentTimeMillis() +
@@ -345,7 +417,7 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Verify the font status is "notUsed" */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = makeStatus(row);
+			ASN1Enum<FontStatus> status = makeStatus(frow.row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
@@ -356,31 +428,39 @@ public class OpSendDMSFonts extends OpDMS {
 					return this;
 			}
 			if (status.getEnum() != FontStatus.notUsed) {
-				abortUpload("Expected notUsed, was "
+				abortUpload(frow, "Expected notUsed, was "
 					+ status.getEnum());
 				return nextFontPhase();
 			}
-			return new RequestStatusModify();
+			return new RequestStatusModify(frow);
 		}
 	}
 
 	/** Phase to request the font status to "modifying" */
-	protected class RequestStatusModify extends Phase {
+	private class RequestStatusModify extends Phase {
+		private final FontRow frow;
+		private RequestStatusModify(FontRow fr) {
+			frow = fr;
+		}
 
 		/** Set the font status to modifying */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = makeStatus(row);
+			ASN1Enum<FontStatus> status = makeStatus(frow.row);
 			status.setEnum(FontStatus.modifyReq);
 			mess.add(status);
 			logStore(status);
 			mess.storeProps();
-			return new VerifyStatusModifying();
+			return new VerifyStatusModifying(frow);
 		}
 	}
 
 	/** Phase to verify the font status is modifying */
-	protected class VerifyStatusModifying extends Phase {
+	private class VerifyStatusModifying extends Phase {
+		private final FontRow frow;
+		private VerifyStatusModifying(FontRow fr) {
+			frow = fr;
+		}
 
 		/** Time to stop checking if the status has updated */
 		private final long expire = TimeSteward.currentTimeMillis() +
@@ -389,7 +469,7 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Verify the font status is modifying */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = makeStatus(row);
+			ASN1Enum<FontStatus> status = makeStatus(frow.row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
@@ -400,21 +480,25 @@ public class OpSendDMSFonts extends OpDMS {
 					return this;
 			}
 			if (status.getEnum() != FontStatus.modifying) {
-				abortUpload("Expected modifying, was " +
+				abortUpload(frow, "Expected modifying, was " +
 					status.getEnum());
 				return nextFontPhase();
 			}
-			return new InvalidateFont();
+			return new InvalidateFont(frow);
 		}
 	}
 
 	/** Invalidate the font */
-	protected class InvalidateFont extends Phase {
+	private class InvalidateFont extends Phase {
+		private final FontRow frow;
+		private InvalidateFont(FontRow fr) {
+			frow = fr;
+		}
 
 		/** Invalidate a font entry in the font table */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer height = fontHeight.makeInt(row);
+			ASN1Integer height = fontHeight.makeInt(frow.row);
 			mess.add(height);
 			logStore(height);
 			try {
@@ -424,26 +508,31 @@ public class OpSendDMSFonts extends OpDMS {
 				// Some vendors (Skyline) respond with GenError
 				// if the font is not currently valid
 			}
-			return new CreateFont();
+			return new CreateFont(frow);
 		}
 	}
 
 	/** Create the font */
 	protected class CreateFont extends Phase {
+		private final FontRow frow;
+		private CreateFont(FontRow fr) {
+			frow = fr;
+		}
 
 		/** Create a new font in the font table */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
+			int row = frow.row;
 			ASN1Integer number = fontNumber.makeInt(row);
 			ASN1String name = new ASN1String(fontName.node, row);
 			ASN1Integer height = fontHeight.makeInt(row);
 			ASN1Integer char_spacing = fontCharSpacing.makeInt(row);
 			ASN1Integer line_spacing = fontLineSpacing.makeInt(row);
-			number.setInteger(font.getNumber());
-			name.setString(font.getName());
-			height.setInteger(font.getHeight());
-			char_spacing.setInteger(font.getCharSpacing());
-			line_spacing.setInteger(font.getLineSpacing());
+			number.setInteger(frow.f_num);
+			name.setString(frow.font.getName());
+			height.setInteger(frow.font.getHeight());
+			char_spacing.setInteger(frow.font.getCharSpacing());
+			line_spacing.setInteger(frow.font.getLineSpacing());
 			mess.add(number);
 			mess.add(name);
 			mess.add(height);
@@ -455,31 +544,35 @@ public class OpSendDMSFonts extends OpDMS {
 			logStore(char_spacing);
 			logStore(line_spacing);
 			mess.storeProps();
-			Collection<Glyph> glyphs =FontHelper.lookupGlyphs(font);
+			Collection<Glyph> glyphs =
+				FontHelper.lookupGlyphs(frow.font);
 			if (glyphs.isEmpty()) {
 				if (version2)
-					return new ValidateFontV2();
+					return new ValidateFontV2(frow);
 				else
-					return new ValidateFontV1();
+					return new ValidateFontV1(frow);
 			} else
-				return new AddCharacter(glyphs);
+				return new AddCharacter(frow, glyphs);
 		}
 	}
 
 	/** Add a character to the font table */
-	protected class AddCharacter extends Phase {
+	private class AddCharacter extends Phase {
+
+		private final FontRow frow;
 
 		/** Iterator for remaining glyphs */
-		protected final Iterator<Glyph> chars;
+		private final Iterator<Glyph> chars;
 
 		/** Current glyph */
-		protected Glyph glyph;
+		private Glyph glyph;
 
 		/** Count of characters added */
-		protected int count = 0;
+		private int count = 0;
 
 		/** Create a new add character phase */
-		public AddCharacter(Collection<Glyph> c) {
+		public AddCharacter(FontRow fr, Collection<Glyph> c) {
+			frow = fr;
 			chars = c.iterator();
 			if (chars.hasNext())
 				glyph = chars.next();
@@ -488,6 +581,7 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Add a character to the font table */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
+			int row = frow.row;
 			int code_point = glyph.getCodePoint();
 			Graphic graphic = glyph.getGraphic();
 			byte[] pixels = Base64.decode(graphic.getPixels());
@@ -510,49 +604,61 @@ public class OpSendDMSFonts extends OpDMS {
 				return this;
 			} else {
 				if (version2)
-					return new ValidateFontV2();
+					return new ValidateFontV2(frow);
 				else
-					return new ValidateFontV1();
+					return new ValidateFontV1(frow);
 			}
 		}
 	}
 
 	/** Validate the font. This forces a fontVersionID update on some signs
 	 * which implement 1203 version 1 (LedStar). */
-	protected class ValidateFontV1 extends Phase {
+	private class ValidateFontV1 extends Phase {
+		private final FontRow frow;
+		private ValidateFontV1(FontRow fr) {
+			frow = fr;
+		}
 
 		/** Validate a font entry in the font table */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer height = fontHeight.makeInt(row);
-			height.setInteger(font.getHeight());
+			ASN1Integer height = fontHeight.makeInt(frow.row);
+			height.setInteger(frow.font.getHeight());
 			mess.add(height);
 			logStore(height);
 			mess.storeProps();
-			if (font == dms.getDefaultFont())
-				return new SetDefaultFont();
+			if (dms.getDefaultFont() == frow.font)
+				return new SetDefaultFont(frow);
 			else
 				return nextFontPhase();
 		}
 	}
 
 	/** Validate the font on a 1203 version 2 sign. */
-	protected class ValidateFontV2 extends Phase {
+	private class ValidateFontV2 extends Phase {
+		private final FontRow frow;
+		private ValidateFontV2(FontRow fr) {
+			frow = fr;
+		}
 
 		/** Validate a font entry in the font table */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = makeStatus(row);
+			ASN1Enum<FontStatus> status = makeStatus(frow.row);
 			status.setEnum(FontStatus.readyForUseReq);
 			mess.add(status);
 			logStore(status);
 			mess.storeProps();
-			return new VerifyStatusReadyForUse();
+			return new VerifyStatusReadyForUse(frow);
 		}
 	}
 
 	/** Phase to verify the font status is ready for use */
-	protected class VerifyStatusReadyForUse extends Phase {
+	private class VerifyStatusReadyForUse extends Phase {
+		private final FontRow frow;
+		private VerifyStatusReadyForUse(FontRow fr) {
+			frow = fr;
+		}
 
 		/** Time to stop checking if the font is ready for use */
 		private final long expire = TimeSteward.currentTimeMillis() +
@@ -561,14 +667,14 @@ public class OpSendDMSFonts extends OpDMS {
 		/** Verify the font status is ready for use */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<FontStatus> status = makeStatus(row);
+			ASN1Enum<FontStatus> status = makeStatus(frow.row);
 			mess.add(status);
 			mess.queryProps();
 			logQuery(status);
 			switch (status.getEnum()) {
 			case readyForUse:
-				if (font == dms.getDefaultFont())
-					return new SetDefaultFont();
+				if (dms.getDefaultFont() == frow.font)
+					return new SetDefaultFont(frow);
 				else
 					return nextFontPhase();
 			case readyForUseReq:
@@ -576,15 +682,15 @@ public class OpSendDMSFonts extends OpDMS {
 				// of calculatingID for a short time; try again
 			case calculatingID:
 				if (TimeSteward.currentTimeMillis() > expire) {
-					abortUpload("Still calculatingID, " +
+					abortUpload(frow, "calculatingID, " +
 						CALCULATING_ID_SECS +" seconds"+
 						" after readyForUseReq");
 					return nextFontPhase();
 				} else
 					return this;
 			default:
-				abortUpload("Invalid state readyForUseReq -> " +
-					status.getEnum());
+				abortUpload(frow, "Invalid state " +
+					"readyForUseReq -> " +status.getEnum());
 				return nextFontPhase();
 			}
 		}
@@ -592,12 +698,16 @@ public class OpSendDMSFonts extends OpDMS {
 
 	/** Set the default font number for message text */
 	protected class SetDefaultFont extends Phase {
+		private final FontRow frow;
+		private SetDefaultFont(FontRow fr) {
+			frow = fr;
+		}
 
 		/** Set the default font numbmer */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer dfont = defaultFont.makeInt();
-			dfont.setInteger(font.getNumber());
+			dfont.setInteger(frow.f_num);
 			mess.add(dfont);
 			logStore(dfont);
 			mess.storeProps();
