@@ -78,6 +78,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	static private final int EXT_OPER = SignMsgSource.toBits(
 		SignMsgSource.external, SignMsgSource.operator);
 
+	/** Test if a sign message source contains "scheduled" */
+	static private boolean isMsgScheduled(SignMessage sm) {
+		return SignMsgSource.schedule.checkBit(sm.getSource());
+	}
+
 	/** Minimum duration of a DMS action (minutes) */
 	static private final int DURATION_MINIMUM_MINS = 1;
 
@@ -1236,14 +1241,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Send message to DMS */
 	private void sendMsg() throws TMSException {
-		DMSPoller p = getDMSPoller();
-		if (null == p) {
-			throw new ChangeVetoException(name +
-				": NO ACTIVE POLLER");
-		}
 		SignMessage sm = getMsgUserSched();
 		SignMessageHelper.validate(sm, this);
-		sendMsg(p, sm);
+		if (shouldSend(sm)) {
+			DMSPoller p = getDMSPoller();
+			if (null == p) {
+				throw new ChangeVetoException(name +
+					": NO ACTIVE POLLER");
+			}
+			sendMsg(p, sm);
+		}
 	}
 
 	/** Get user/scheduled composite sign message.
@@ -1287,6 +1294,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			logError("msg invalid: " + e.getMessage());
 			return false;
 		}
+	}
+
+	/** Check if a sign message should be sent.  This check is needed
+	 * to prevent excess data use on slow comm links (modem, etc). */
+	private boolean shouldSend(SignMessage sm) {
+		return isMsgScheduled(sm) ||
+		      !isMsgCurrentEquivalent(sm);
 	}
 
 	/** Set the next sign message.
@@ -1443,8 +1457,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Test if the current message source contains "scheduled" */
 	private boolean isMsgScheduled() {
-		int src = getMsgCurrent().getSource();
-		return SignMsgSource.schedule.checkBit(src);
+		return isMsgScheduled(getMsgCurrent());
 	}
 
 	/** Test if the current message has beacon enabled */
