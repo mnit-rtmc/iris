@@ -98,8 +98,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		 * observed in old Skyline signs after being powered down for
 		 * extended periods of time.  It can be cleared up by sending
 		 * settings operation. */
-		logError("INVALID SOURCE");
-		setErrorStatus(source.toString());
+		setErrorStatus("INVALID SOURCE: " + source);
 		return null;
 	}
 
@@ -155,10 +154,8 @@ public class OpQueryDMSMessage extends OpDMS {
 					rp = DmsMsgPriority.OTHER_SYSTEM;
 				setMsgCurrent(ms.getValue(),
 					beacon.getInteger(), rp, d);
-			} else {
-				logError("INVALID STATUS");
-				setErrorStatus(status.toString());
-			}
+			} else
+				setErrorStatus("INVALID STATUS: " + status);
 			return null;
 		}
 	}
