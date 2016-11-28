@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.BorderLayout;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DMS;
@@ -30,6 +31,9 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Michael Darter
  */
 public class DMSProperties extends SonarObjectForm<DMS> {
+
+	/** Operation panel */
+	private final PropOp op_pnl;
 
 	/** Location panel */
 	private final PropLocation location_pnl;
@@ -56,6 +60,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	public DMSProperties(Session s, DMS sign) {
 		super(I18N.get("dms") + ": ", s, sign);
 		setHelpPageName("help.dmsproperties");
+		op_pnl = new PropOp(sign);
 		location_pnl = new PropLocation(s, sign);
 		messages_pnl = new PropMessages(s, sign);
 		config_pnl = new PropConfiguration(s, sign);
@@ -74,6 +79,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Initialize the widgets on the form */
 	@Override
 	protected void initialize() {
+		op_pnl.initialize();
 		location_pnl.initialize();
 		messages_pnl.initialize();
 		config_pnl.initialize();
@@ -93,6 +99,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		if(SystemAttrEnum.DMS_MANUFACTURER_ENABLE.getBoolean())
 			tab.add(I18N.get("dms.manufacturer"), manufacturer_pnl);
 		add(tab);
+		add(op_pnl, BorderLayout.SOUTH);
 		super.initialize();
 	}
 
@@ -101,6 +108,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	protected void dispose() {
 		location_pnl.dispose();
 		messages_pnl.dispose();
+		op_pnl.dispose();
 		super.dispose();
 	}
 
@@ -114,6 +122,7 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Update one attribute on the form */
 	@Override
 	protected void doUpdateAttribute(String a) {
+		op_pnl.updateAttribute(a);
 		location_pnl.updateAttribute(a);
 		messages_pnl.updateAttribute(a);
 		config_pnl.updateAttribute(a);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -91,9 +90,6 @@ public class PropStatus extends IPanel {
 	/** Power supply status table */
 	private final ZTable power_tbl = new ZTable();
 
-	/** Operation description label */
-	private final JLabel operation_lbl = createValueLabel();
-
 	/** Query message action */
 	private final IAction query_msg = new IAction("dms.query.msg",
 		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
@@ -156,8 +152,6 @@ public class PropStatus extends IPanel {
 		add(temp_housing_lbl, Stretch.LAST);
 		add("dms.power.supplies");
 		add(power_tbl, Stretch.FULL);
-		add("device.operation");
-		add(operation_lbl, Stretch.LAST);
 		add(buildButtonBox(), Stretch.RIGHT);
 		updateAttribute(null);
 	}
@@ -204,8 +198,6 @@ public class PropStatus extends IPanel {
 		}
 		if(a == null || a.equals("powerStatus"))
 			updatePowerStatus();
-		if(a == null || a.equals("operation"))
-			operation_lbl.setText(dms.getOperation());
 		if(a == null) {
 			boolean r = canRequest();
 			query_msg.setEnabled(r);
