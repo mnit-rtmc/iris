@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,9 @@ import us.mn.state.dot.tms.client.widget.SmartDesktop;
 abstract public class SonarObjectForm<T extends SonarObject>
 	extends AbstractForm implements ProxyView<T>
 {
+	/** Lighter gray for background */
+	static public final Color LIGHTER_GRAY = new Color(208, 208, 208);
+
 	/** SONAR object proxy */
 	protected final T proxy;
 
@@ -61,7 +64,7 @@ abstract public class SonarObjectForm<T extends SonarObject>
 		state = s.getSonarState();
 		watcher = new ProxyWatcher<T>(getTypeCache(), this, true);
 		setLayout(new BorderLayout());
-		setBackground(Color.LIGHT_GRAY);
+		setBackground(LIGHTER_GRAY);
 	}
 
 	/** Initialize the widgets on the form */

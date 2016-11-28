@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ public class IPanel extends JPanel {
 	}
 
 	/** Color for value label text */
-	static protected final Color DARK_BLUE = new Color(0, 0, 128);
+	static protected final Color DARK_BLUE = new Color(0, 0, 96);
 
 	/** Create a value label */
 	static public JLabel createValueLabel() {
