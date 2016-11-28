@@ -1254,6 +1254,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage getMsgUserSched() {
 		SignMessage user = msg_user;	// Avoid race
 		SignMessage sched = msg_sched;	// Avoid race
+		SignMessage curr = getMsgCurrent();
+		if (sched.getActivationPriority() < curr.getRunTimePriority())
+			return user;
 		if (SignMessageHelper.isBlank(user) && isMsgValid(sched))
 			return sched;
 		if (isPrefixPage(sched)) {
