@@ -1108,7 +1108,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void doSetMsgUser(SignMessage sm) throws TMSException {
 		SignMessageHelper.validate(sm, this);
 		setMsgUser(sm);
-		sendMsg();
+		sendMsg(getMsgValidated());
 	}
 
 	/** Scheduled sign message */
@@ -1136,7 +1136,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		setMsgSchedNotify(sm);
 		setPrices(da);
 		try {
-			sendMsg();
+			SignMessage usm = getMsgValidated();
+			if (isMsgScheduled(usm))
+				sendMsg(usm);
 		}
 		catch (TMSException e) {
 			logError("sendMsg: " + e.getMessage());
@@ -1239,23 +1241,17 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		msg_next = sm;
 	}
 
-	/** Send message to DMS */
-	private void sendMsg() throws TMSException {
+	/** Get validated user/scheduled sign message.
+	 * @return Validated sign message. */
+	private SignMessage getMsgValidated() throws TMSException {
 		SignMessage sm = getMsgUserSched();
 		SignMessageHelper.validate(sm, this);
-		if (shouldSend(sm)) {
-			DMSPoller p = getDMSPoller();
-			if (null == p) {
-				throw new ChangeVetoException(name +
-					": NO ACTIVE POLLER");
-			}
-			sendMsg(p, sm);
-		}
+		return sm;
 	}
 
 	/** Get user/scheduled composite sign message.
 	 * @return The composite sign message. */
-	private SignMessage getMsgUserSched() throws TMSException {
+	private SignMessage getMsgUserSched() {
 		SignMessage user = msg_user;	// Avoid race
 		SignMessage sched = msg_sched;	// Avoid race
 		if (SignMessageHelper.isBlank(user) && isMsgValid(sched))
@@ -1296,11 +1292,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Check if a sign message should be sent.  This check is needed
-	 * to prevent excess data use on slow comm links (modem, etc). */
-	private boolean shouldSend(SignMessage sm) {
-		return isMsgScheduled(sm) ||
-		      !isMsgCurrentEquivalent(sm);
+	/** Send message to DMS */
+	private void sendMsg(SignMessage sm) throws TMSException {
+		DMSPoller p = getDMSPoller();
+		if (null == p) {
+			throw new ChangeVetoException(name +
+				": NO ACTIVE POLLER");
+		}
+		sendMsg(p, sm);
 	}
 
 	/** Set the next sign message.
