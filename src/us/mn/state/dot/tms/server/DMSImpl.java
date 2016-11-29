@@ -83,6 +83,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return SignMsgSource.schedule.checkBit(sm.getSource());
 	}
 
+	/** Check if a sign message should be activated */
+	static private boolean shouldActivate(SignMessage sm, SignMessage ex) {
+		return null == ex ||
+		       sm.getActivationPriority() >= ex.getRunTimePriority();
+	}
+
 	/** Minimum duration of a DMS action (minutes) */
 	static private final int DURATION_MINIMUM_MINS = 1;
 
@@ -1254,12 +1260,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage getMsgUserSched() {
 		SignMessage user = msg_user;	// Avoid race
 		SignMessage sched = msg_sched;	// Avoid race
-		SignMessage curr = getMsgCurrent();
-		if (sched.getActivationPriority() < curr.getRunTimePriority())
-			return user;
-		if (SignMessageHelper.isBlank(user) && isMsgValid(sched))
-			return sched;
-		if (isPrefixPage(sched)) {
+		boolean is_blank = SignMessageHelper.isBlank(user);
+		if (isPrefixPage(sched) && !is_blank) {
 			MultiString multi = new MultiString(user.getMulti());
 			String ms = multi.addPagePrefix(sched.getMulti());
 			boolean be = user.getBeaconEnabled();
@@ -1274,7 +1276,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			if (sm != null && isMsgValid(sm))
 				return sm;
 		}
-		return user;
+		if (is_blank && shouldActivate(sched) && isMsgValid(sched))
+			return sched;
+		else
+			return user;
 	}
 
 	/** Is scheduled message using PREFIX_PAGE? */
@@ -1293,6 +1298,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			logError("msg invalid: " + e.getMessage());
 			return false;
 		}
+	}
+
+	/** Check if a sign message should be activated */
+	private boolean shouldActivate(SignMessage sm) {
+		return shouldActivate(sm, msg_current) &&
+		       shouldActivate(sm, msg_next);
 	}
 
 	/** Send message to DMS */
