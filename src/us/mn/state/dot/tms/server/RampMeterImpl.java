@@ -819,11 +819,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		return dets;
 	}
 
-	/** Get the set of non-abandoned detectors */
-	public DetectorSet getDetectorSet() {
-		return new DetectorSet(toDets(getSamplerSet()));
-	}
-
 	/** Detector finder */
 	private class DetFinder implements Corridor.NodeFinder {
 		private final ArrayList<VehicleSampler> samplers =

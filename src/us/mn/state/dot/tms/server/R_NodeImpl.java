@@ -574,7 +574,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		return notes;
 	}
 
-	/** Node detectors */
+	/** Node detectors (ordered by lane number) */
 	private transient DetectorSet detectors = new DetectorSet();
 
 	/** Add a detector to the r_node */
@@ -590,16 +590,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Get an array of all node detectors */
 	public DetectorImpl[] getDetectors() {
 		return detectors.toArray();
-	}
-
-	/** Get the (active) detector set for the r_node */
-	public DetectorSet getDetectorSet() {
-		DetectorSet set = new DetectorSet();
-		for (DetectorImpl d: detectors.toArray()) {
-			if (!d.getAbandoned())
-				set.addDetector(d);
-		}
-		return set;
 	}
 
 	/** Get the sampler set */

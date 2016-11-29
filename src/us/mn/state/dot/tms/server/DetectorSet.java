@@ -15,34 +15,16 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.TreeSet;
-import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.Road;
-import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
- * A detector set is a logical grouping of detectors.
- * Tied to obsolete StratifiedAlgorithm code.
+ * A detector set is a logical grouping of detectors, ordered by lane number.
  *
  * @author Douglas Lau
  */
 public class DetectorSet {
-
-	/** Estimated sustainable capacity of mainline right lanes */
-	static private final int CAP_RIGHT_LANE = 1800;
-
-	/** Estimated sustainable capacity of other lanes */
-	static private final int CAP_OTHER_LANE = 2100;
-
-	/** Threshold for a drop in density to indicate an incident */
-	static private final int DENSITY_DROP_THRESHOLD = 50;
-
-	/** Density considered "full" for space capacity calculation */
-	static private final int FULL_DENSITY = 32;
 
 	/** Detector comparator */
 	static private final Comparator<DetectorImpl> COMPARATOR =
@@ -67,11 +49,6 @@ public class DetectorSet {
 	/** Create an empty detector set */
 	public DetectorSet() { }
 
-	/** Create a new detector set */
-	public DetectorSet(Collection<DetectorImpl> dets) {
-		detectors.addAll(dets);
-	}
-
 	/** Get all detectors */
 	public ArrayList<DetectorImpl> getAll() {
 		return new ArrayList<DetectorImpl>(detectors);
@@ -85,185 +62,6 @@ public class DetectorSet {
 	/** Remove a detector from the detector set */
 	public void removeDetector(DetectorImpl det) {
 		detectors.remove(det);
-	}
-
-	/** Remove all detectors from the detector set */
-	public void clear() {
-		detectors.clear();
-	}
-
-	/** Get the number of detectors in the detector set */
-	public int size() {
-		return detectors.size();
-	}
-
-	/** Check if another detector set equals this */
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof DetectorSet) {
-			DetectorSet ds = (DetectorSet) obj;
-			return detectors.equals(ds.detectors);
-		} else
-			return false;
-	}
-
-	/** Add all the detectors from another detector set */
-	public void addDetectors(DetectorSet other) {
-		if (other == null)
-			return;
-		for (DetectorImpl det: other.detectors)
-			detectors.add(det);
-	}
-
-	/** Add the detectors of the given type from another detector set */
-	public void addDetectors(DetectorSet other, LaneType lt) {
-		for (DetectorImpl d: other.detectors) {
-			if (lt.ordinal() == d.getLaneType())
-				addDetector(d);
-		}
-	}
-
-	/** Remove all the detectors from another detector set */
-	public boolean removeDetectors(DetectorSet other) {
-		boolean match = false;
-		for (DetectorImpl det: other.detectors) {
-			if (detectors.remove(det))
-				match = true;
-		}
-		return match;
-	}
-
-	/** Test if the detector set is defined */
-	public boolean isDefined() {
-		for (DetectorImpl det: detectors) {
-			if (det.isActive())
-				return true;
-		}
-		return false;
-	}
-
-	/** Test if the detector set is (defined and) good */
-	public boolean isGood() {
-		return isDefined() && isNotBad();
-	}
-
-	/** Test if the detector set is not bad */
-	public boolean isNotBad() {
-		for (DetectorImpl det: detectors) {
-			if (det.getFlow() == MISSING_DATA)
-				return false;
-		}
-		return true;
-	}
-
-	/** Test if the detector set is (defined and) sampling "real" data */
-	public boolean isPerfect() {
-		for (DetectorImpl det: detectors) {
-			if (!det.isSampling())
-				return false;
-		}
-		return isDefined();
-	}
-
-	/** Get the current total flow rate */
-	public int getFlow() {
-		boolean defined = false;
-		int flow = 0;
-		for (DetectorImpl det: detectors) {
-			int f = det.getFlow();
-			if (f < 0)
-				return MISSING_DATA;
-			flow += f;
-			defined = true;
-		}
-		return defined ? flow : MISSING_DATA;
-	}
-
-	/** Check if a detector is in the set */
-	public boolean hasDetector(DetectorImpl det) {
-		return detectors.contains(det);
-	}
-
-	/** Get the maximum occupancy for the detector set */
-	public float getMaxOccupancy() {
-		float occ = 0;
-		for (DetectorImpl det: detectors)
-			occ = Math.max(det.getOccupancy(), occ);
-		return occ;
-	}
-
-	/** Get the "sustainable" capacity (mainline station) */
-	public int getCapacity() {
-		return CAP_RIGHT_LANE + CAP_OTHER_LANE * (detectors.size() - 1);
-	}
-
-	/** Calculate the upstream (one lane) capacity for a mainline zone */
-	public float getUpstreamCapacity() {
-		float max_density = MISSING_DATA;
-		float speed = MISSING_DATA;
-		for (DetectorImpl det: detectors) {
-			float d = det.getDensity();
-			float s = det.getSpeed();
-			if (d > max_density && s != MISSING_DATA) {
-				max_density = d;
-				speed = s;
-			}
-		}
-		if (max_density < 0)
-			return MISSING_DATA;
-		float spare_density = FULL_DENSITY - max_density;
-		if (spare_density <= 0)
-			return 0;
-		else
-			return spare_density * speed;
-	}
-
-	/** Check if (mainline detector set) is flowing */
-	public boolean isFlowing() {
-		float d_this = 0;
-		float d_last = 0;
-		Road xStreet = null;
-		for (DetectorImpl det: detectors) {
-			float d = det.getDensity();
-			if (d < 0)
-				continue;
-			GeoLoc loc = det.lookupGeoLoc();
-			if (xStreet != null &&
-			    xStreet == loc.getCrossStreet())
-			{
-				d_this = Math.max(d_this, d);
-			} else {
-				d_last = d_this;
-				d_this = d;
-				xStreet = loc.getCrossStreet();
-			}
-			if (d_this < d_last - DENSITY_DROP_THRESHOLD)
-				return false;
-		}
-		return true;
-	}
-
-	/** Get a string representation (for debugging) */
-	@Override
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append('\'');
-		for (DetectorImpl det: detectors) {
-			sb.append(det.getName());
-			sb.append(' ');
-		}
-		if (detectors.size() == 0)
-			sb.append('\'');
-		else
-			sb.setCharAt(sb.length() - 1, '\'');
-		return sb.toString();
-	}
-
-	/** Get the detector set for the given lane type */
-	public DetectorSet getDetectorSet(LaneType lt) {
-		DetectorSet set = new DetectorSet();
-		set.addDetectors(this, lt);
-		return set;
 	}
 
 	/** Convert a detector set to an array of detectors */
