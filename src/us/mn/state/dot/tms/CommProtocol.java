@@ -130,7 +130,29 @@ public enum CommProtocol {
 	INC_FEED("Incident Feed", false),
 
 	/** MonStream video switching (35) */
-	MON_STREAM("MonStream", false);
+	MON_STREAM("MonStream", false),
+	
+	/** GPS using TAIP protocol over TCP (36) */
+	GPS_TAIP_TCP("GPS TAIP-TCP"),
+
+	/** GPS using TAIP protocol over UDP (37) */
+	GPS_TAIP_UDP("GPS TAIP-UDP"),
+
+	/** GPS using NMEA protocol over TCP (38) */
+	GPS_NMEA_TCP("GPS NMEA-TCP"),
+
+	/** GPS using NMEA protocol over UDP (39) */
+	GPS_NMEA_UDP("GPS NMEA-UDP"),
+
+	/** GPS using RedLion AT+BMDIAG command via TCP (40) */
+	GPS_REDLION_TCP("GPS RedLion-TCP"),
+
+	/** GPS using RedLion AT+BMDIAG command via UDP (41) */
+	GPS_REDLION_UDP("GPS RedLion-UDP"),
+	
+	/** (Nebraska Department of Roads) NDOR GateArm v5 via TCP (42) */
+	GATE_NDOR5_TCP("GATE NDORv5-TCP");
+
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
@@ -154,12 +176,13 @@ public enum CommProtocol {
 	public String toString() {
 		return description;
 	}
+	
+	private static final CommProtocol[] VALS = values();
 
 	/** Get a comm protocol from an ordinal value */
 	static public CommProtocol fromOrdinal(short o) {
-		if (o >= 0 && o < values().length)
-			return values()[o];
-		else
-			return null;
+		if ((o >= 0) && (o < VALS.length))
+			return VALS[o];
+		return null;
 	}
 }
