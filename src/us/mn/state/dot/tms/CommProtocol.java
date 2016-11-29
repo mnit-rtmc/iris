@@ -131,7 +131,7 @@ public enum CommProtocol {
 
 	/** MonStream video switching (35) */
 	MON_STREAM("MonStream", false),
-	
+
 	/** GPS using TAIP protocol over TCP (36) */
 	GPS_TAIP_TCP("GPS TAIP-TCP"),
 
@@ -149,10 +149,9 @@ public enum CommProtocol {
 
 	/** GPS using RedLion AT+BMDIAG command via UDP (41) */
 	GPS_REDLION_UDP("GPS RedLion-UDP"),
-	
+
 	/** (Nebraska Department of Roads) NDOR GateArm v5 via TCP (42) */
 	GATE_NDOR5_TCP("GATE NDORv5-TCP");
-
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {
@@ -176,13 +175,15 @@ public enum CommProtocol {
 	public String toString() {
 		return description;
 	}
-	
-	private static final CommProtocol[] VALS = values();
+
+	/** Values array */
+	static private final CommProtocol[] VALUES = values();
 
 	/** Get a comm protocol from an ordinal value */
 	static public CommProtocol fromOrdinal(short o) {
-		if ((o >= 0) && (o < VALS.length))
-			return VALS[o];
-		return null;
+		if (o >= 0 && o < VALUES.length)
+			return VALUES[o];
+		else
+			return null;
 	}
 }

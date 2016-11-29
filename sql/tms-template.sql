@@ -2448,6 +2448,13 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 33	CBW
 34	Incident Feed
 35	MonStream
+36	GPS TAIP-TCP
+37	GPS TAIP-UDP
+38	GPS NMEA-TCP
+39	GPS NMEA-UDP
+40	GPS RedLion-TCP
+41	GPS RedLion-UDP
+42	Gate NDORv5-TCP
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;
