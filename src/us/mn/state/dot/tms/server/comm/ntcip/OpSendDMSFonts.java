@@ -227,13 +227,13 @@ public class OpSendDMSFonts extends OpDMS {
 			return fr;
 		else {
 			Font f = fonts.pollFirst();
-			return new FontRow(fr.row, fontNum(fr,f), f);
+			return new FontRow(fr.row, fontNum(fr, f), f);
 		}
 	}
 
 	/** Get the font number for a specified row and font */
 	private int fontNum(FontRow fr, Font f) {
-		return isAddco() ? fr.f_num : f.getNumber();
+		return isAddco() ? fr.row : f.getNumber();
 	}
 
 	/** Check if DMS make is ADDCO.  Some ADDCO signs flake out if
