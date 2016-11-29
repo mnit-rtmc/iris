@@ -603,22 +603,11 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		switch (MeterAlgorithm.fromOrdinal(algorithm)) {
 		case SIMPLE:
 			return new SimpleAlgorithm();
-		case STRATIFIED:
-			return lookupOrCreateStratified();
 		case K_ADAPTIVE:
 			return KAdaptiveAlgorithm.meterState(this);
 		default:
 			return null;
 		}
-	}
-
-	/** Lookup or create a stratified algorithm state */
-	private MeterAlgorithmState lookupOrCreateStratified() {
-		Corridor c = getCorridor();
-		if (c != null)
-			return StratifiedAlgorithm.lookupCorridor(c);
-		else
-			return null;
 	}
 
 	/** Validate the metering algorithm */

@@ -73,7 +73,6 @@ public class MeteringJob extends Job {
 				meter.validateAlgorithm();
 			}
 		}
-		StratifiedAlgorithm.processAllStates();
 		it = RampMeterHelper.iterator();
 		while (it.hasNext()) {
 			RampMeter rm = it.next();
