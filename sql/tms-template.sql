@@ -2514,7 +2514,7 @@ COPY iris.meter_type (id, description, lanes) FROM stdin;
 COPY iris.meter_algorithm (id, description) FROM stdin;
 0	No Metering
 1	Simple Metering
-2	Stratified Metering
+2	SZM (obsolete)
 3	K Adaptive Metering
 \.
 
@@ -2552,7 +2552,7 @@ camera_stream_controls_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.43.0
+database_version	4.44.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0

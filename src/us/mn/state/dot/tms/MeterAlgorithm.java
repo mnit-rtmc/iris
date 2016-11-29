@@ -28,7 +28,7 @@ public enum MeterAlgorithm {
 	SIMPLE("Simple Metering"),
 
 	/** Stratified metering algorithm */
-	STRATIFIED("Stratified Metering"),
+	STRATIFIED("SZM (obsolete)"),
 
 	/** Density (K) Adaptive metering algorithm */
 	K_ADAPTIVE("K Adaptive Metering");
