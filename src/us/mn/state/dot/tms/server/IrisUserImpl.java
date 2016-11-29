@@ -21,7 +21,6 @@ import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.sonar.Role;
-import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.UserImpl;
 import static us.mn.state.dot.tms.utils.SString.*;
