@@ -47,6 +47,56 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	private final Counter available_memory = new Counter(
 		availableGraphicMemory.node);
 
+	/** Sign access */
+	private final ASN1Flags<DmsSignAccess> access = new ASN1Flags<
+		DmsSignAccess>(DmsSignAccess.class, dmsSignAccess.node);
+
+	/** Sign type */
+	private final DmsSignType type = new DmsSignType();
+
+	/** Face width */
+	private final ASN1Integer face_width = dmsSignWidth.makeInt();
+
+	/** Face height */
+	private final ASN1Integer face_height = dmsSignHeight.makeInt();
+
+	/** Horizontal border */
+	private final ASN1Integer h_border = dmsHorizontalBorder.makeInt();
+
+	/** Vertical border */
+	private final ASN1Integer v_border = dmsVerticalBorder.makeInt();
+
+	/** Legend */
+	private final ASN1Enum<DmsLegend> legend = new ASN1Enum<DmsLegend>(
+		DmsLegend.class, dmsLegend.node);
+
+	/** Beacon */
+	private final ASN1Enum<DmsBeaconType> beacon = new ASN1Enum<
+		DmsBeaconType>(DmsBeaconType.class, dmsBeaconType.node);
+
+	/** Sign technology */
+	private final ASN1Flags<DmsSignTechnology> tech = new ASN1Flags<
+		DmsSignTechnology>(DmsSignTechnology.class,
+		dmsSignTechnology.node);
+
+	/** Sign pixel height */
+	private final ASN1Integer s_height = vmsSignHeightPixels.makeInt();
+
+	/** Sign pixel width */
+	private final ASN1Integer s_width = vmsSignWidthPixels.makeInt();
+
+	/** Horizontal pitch */
+	private final ASN1Integer h_pitch = vmsHorizontalPitch.makeInt();
+
+	/** Vertical pitch */
+	private final ASN1Integer v_pitch = vmsVerticalPitch.makeInt();
+
+	/** Character height */
+	private final ASN1Integer c_height = vmsCharacterHeightPixels.makeInt();
+
+	/** Character width */
+	private final ASN1Integer c_width = vmsCharacterWidthPixels.makeInt();
+
 	/** Create a new DMS query configuration object */
 	public OpQueryDMSConfiguration(DMSImpl d) {
 		super(PriorityLevel.DOWNLOAD, d);
@@ -122,26 +172,10 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		/** Query the DMS information */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Flags<DmsSignAccess> access = new ASN1Flags<
-				DmsSignAccess>(DmsSignAccess.class,
-				dmsSignAccess.node);
-			DmsSignType type = new DmsSignType();
-			ASN1Integer height = dmsSignHeight.makeInt();
-			ASN1Integer width = dmsSignWidth.makeInt();
-			ASN1Integer h_border = dmsHorizontalBorder.makeInt();
-			ASN1Integer v_border = dmsVerticalBorder.makeInt();
-			ASN1Enum<DmsLegend> legend = new ASN1Enum<DmsLegend>(
-				DmsLegend.class, dmsLegend.node);
-			ASN1Enum<DmsBeaconType> beacon = new ASN1Enum<
-				DmsBeaconType>(DmsBeaconType.class,
-				dmsBeaconType.node);
-			ASN1Flags<DmsSignTechnology> tech = new ASN1Flags<
-				DmsSignTechnology>(DmsSignTechnology.class,
-				dmsSignTechnology.node);
 			mess.add(access);
 			mess.add(type);
-			mess.add(height);
-			mess.add(width);
+			mess.add(face_height);
+			mess.add(face_width);
 			mess.add(h_border);
 			mess.add(v_border);
 			mess.add(legend);
@@ -150,22 +184,13 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.queryProps();
 			logQuery(access);
 			logQuery(type);
-			logQuery(height);
-			logQuery(width);
+			logQuery(face_height);
+			logQuery(face_width);
 			logQuery(h_border);
 			logQuery(v_border);
 			logQuery(legend);
 			logQuery(beacon);
 			logQuery(tech);
-			dms.setSignAccess(access.getValue());
-			dms.setDmsType(type.getValueEnum());
-			dms.setFaceHeight(height.getInteger());
-			dms.setFaceWidth(width.getInteger());
-			dms.setHorizontalBorder(h_border.getInteger());
-			dms.setVerticalBorder(v_border.getInteger());
-			dms.setLegend(legend.getValue());
-			dms.setBeaconType(beacon.getValue());
-			dms.setTechnology(tech.getValue());
 			return new QueryVmsInfo();
 		}
 	}
@@ -176,13 +201,6 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		/** Query the VMS information */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer s_height = vmsSignHeightPixels.makeInt();
-			ASN1Integer s_width = vmsSignWidthPixels.makeInt();
-			ASN1Integer h_pitch = vmsHorizontalPitch.makeInt();
-			ASN1Integer v_pitch = vmsVerticalPitch.makeInt();
-			ASN1Integer c_height =
-				vmsCharacterHeightPixels.makeInt();
-			ASN1Integer c_width = vmsCharacterWidthPixels.makeInt();
 			mess.add(s_height);
 			mess.add(s_width);
 			mess.add(h_pitch);
@@ -196,13 +214,6 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			logQuery(v_pitch);
 			logQuery(c_height);
 			logQuery(c_width);
-			dms.setHeightPixels(s_height.getInteger());
-			dms.setWidthPixels(s_width.getInteger());
-			dms.setHorizontalPitch(h_pitch.getInteger());
-			dms.setVerticalPitch(v_pitch.getInteger());
-			// NOTE: these must be set last
-			dms.setCharHeightPixels(c_height.getInteger());
-			dms.setCharWidthPixels(c_width.getInteger());
 			return new QueryV2();
 		}
 	}
@@ -268,6 +279,24 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	@Override
 	public void cleanup() {
 		dms.setConfigure(isSuccess());
+		if (isSuccess()) {
+			dms.setSignAccess(access.getValue());
+			dms.setDmsType(type.getValueEnum());
+			dms.setFaceHeight(face_height.getInteger());
+			dms.setFaceWidth(face_width.getInteger());
+			dms.setHorizontalBorder(h_border.getInteger());
+			dms.setVerticalBorder(v_border.getInteger());
+			dms.setLegend(legend.getValue());
+			dms.setBeaconType(beacon.getValue());
+			dms.setTechnology(tech.getValue());
+			dms.setHeightPixels(s_height.getInteger());
+			dms.setWidthPixels(s_width.getInteger());
+			dms.setHorizontalPitch(h_pitch.getInteger());
+			dms.setVerticalPitch(v_pitch.getInteger());
+			// NOTE: these must be set last
+			dms.setCharHeightPixels(c_height.getInteger());
+			dms.setCharWidthPixels(c_width.getInteger());
+		}
 		super.cleanup();
 	}
 }
