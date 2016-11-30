@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.SignConfigImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -557,6 +558,17 @@ abstract class OpDms extends OpDevice {
 					characterHeightPixels);
 				m_dms.setCharWidthPixels(
 					characterWidthPixels);
+		
+				int dt = type.ordinal();
+				SignConfigImpl sc = SignConfigImpl.findOrCreate(
+					dt, false, "OTHER", signAccess, "other",
+					"other", signWidth, signHeight,
+					horizBorder, vertBorder,
+					horizPitch, vertPitch,
+					signWidthPixels, signHeightPixels,
+					characterWidthPixels,
+					characterHeightPixels);
+				// FIXME: set sign config on DMS
 
 			// failure
 			} else {
