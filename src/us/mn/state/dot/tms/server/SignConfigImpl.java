@@ -18,6 +18,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
@@ -31,6 +32,55 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
+
+	/** Find existing or create a new sign config.
+	 * @param dt DMS type.
+	 * @param p Portable flag.
+	 * @param t Sign technology.
+	 * @param sa Sign access.
+	 * @param l Sign legend.
+	 * @param bt Beacon type.
+	 * @param fw Face width (mm).
+	 * @param fh Face height (mm).
+	 * @param bh Border -- horizontal (mm).
+	 * @param bv Border -- vertical (mm).
+	 * @param ph Pitch -- horizontal (mm).
+	 * @param pv Pitch -- vertical (mm).
+	 * @param pxw Pixel width.
+	 * @param pxh Pixel height.
+	 * @param cw Character width (0 means variable).
+	 * @param ch Character height (0 means variable).
+	 * @return Matching existing, or new sign config.
+	 */
+	static public SignConfigImpl findOrCreate(int dt, boolean p, String t,
+		String sa, String l, String bt, int fw, int fh, int bh, int bv,
+		int ph, int pv, int pxw, int pxh, int cw, int ch)
+	{
+		SignConfig sc = SignConfigHelper.find(DMSType.fromOrdinal(dt),
+			p, t, sa, l, bt, fw, fh, bh, bv, ph, pv, pxw, pxh, cw,
+			ch);
+		if (sc instanceof SignConfigImpl)
+			return (SignConfigImpl) sc;
+		else {
+			String n = createUniqueName();
+			SignConfigImpl sci = new SignConfigImpl(n, dt, p, t, sa,
+				l, bt, fw, fh, bh, bv, ph, pv, pxw, pxh, cw,
+				ch, "");
+			return createNotify(sci);
+		}
+	}
+
+	/** Notify clients of the new sign config */
+	static private SignConfigImpl createNotify(SignConfigImpl sc) {
+		try {
+			sc.notifyCreate();
+			return sc;
+		}
+		catch (SonarException e) {
+			System.err.println("createNotify: " + e.getMessage());
+			return null;
+		}
+	}
 
 	/** Last allocated sign config ID */
 	static private int last_id = 0;
@@ -151,15 +201,6 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		char_width = cw;
 		char_height = ch;
 		default_font = FontHelper.lookup(df);
-	}
-
-	/** Create a new sign config (by IRIS) */
-	public SignConfigImpl(int dt, boolean p, String t, String sa, String l,
-		String bt, int fw, int fh, int bh, int bv, int ph, int pv,
-		int pxw, int pxh, int cw, int ch, String df)
-	{
-		this(createUniqueName(), dt, p, t, sa, l, bt, fw, fh, bh, bv,
-		     ph, pv, pxw, pxh, cw, ch, df);
 	}
 
 	/** DMS type enum value */

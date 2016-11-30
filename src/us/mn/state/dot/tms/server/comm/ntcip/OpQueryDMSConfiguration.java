@@ -15,7 +15,10 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.DMSType;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.SignConfigImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.*;
@@ -296,7 +299,43 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			// NOTE: these must be set last
 			dms.setCharHeightPixels(c_height.getInteger());
 			dms.setCharWidthPixels(c_width.getInteger());
+
+			int dt = type.getValueEnum().ordinal();
+			boolean p = type.isPortable();
+			SignConfigImpl sc = SignConfigImpl.findOrCreate(dt, p,
+				tech.getValue(), access.getValue(),
+				legend.getValue(), beacon.getValue(),
+				face_width.getInteger(),
+				face_height.getInteger(),
+				h_border.getInteger(), v_border.getInteger(),
+				h_pitch.getInteger(), v_pitch.getInteger(),
+				s_width.getInteger(), s_height.getInteger(),
+				c_width.getInteger(), getCharHeight());
+			// FIXME: set sign config on DMS
 		}
 		super.cleanup();
+	}
+
+	/** Get character height */
+	private int getCharHeight() {
+		// NOTE: some crazy vendors think line-matrix signs should have
+		//       a variable character height, so we have to fix their
+		//       mistake here ... uggh
+		int h = c_height.getInteger();
+		if (h == 0 && DMSType.isFixedHeight(type.getValueEnum()))
+			return estimateLineHeight();
+		else
+			return h;
+	}
+
+	/** Estimate the line height (pixels) */
+	private int estimateLineHeight() {
+		int h = s_height.getInteger();
+		int m = SystemAttrEnum.DMS_MAX_LINES.getInt();
+		for (int i = m; i > 0; i--) {
+			if (0 == h % i)
+				return h / i;
+		}
+		return 0;
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ public class DmsSignType extends ASN1Integer {
 	@Override
 	public String getValue() {
 		StringBuilder b = new StringBuilder();
-		if ((getInteger() & 0x80) != 0)
+		if (isPortable())
 			b.append("Portable ");
 		b.append(getValueEnum().description);
 		return b.toString();
@@ -42,5 +42,10 @@ public class DmsSignType extends ASN1Integer {
 	/** Get the object value as a DMSType */
 	public DMSType getValueEnum() {
 		return DMSType.fromOrdinal(getInteger() & 0x7f);
+	}
+
+	/** Is the type portable? */
+	public boolean isPortable() {
+		return (getInteger() & 0x80) != 0;
 	}
 }
