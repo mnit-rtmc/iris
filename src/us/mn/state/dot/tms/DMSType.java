@@ -27,13 +27,13 @@ public enum DMSType {
 	UNKNOWN("???"),
 
 	/** Other sign type */
-	OTHER("Other sign type"),
+	OTHER("Other"),
 
 	/** Blank out sign */
-	BOS("Blank-out sign"),
+	BOS("BOS (blank-out sign)"),
 
 	/** CMS (Changeable message sign) */
-	CMS("Changeable Message Sign"),
+	CMS("CMS (changeable message sign)"),
 
 	/** VMS Character-matrix */
 	VMS_CHAR("VMS Character-matrix"),
