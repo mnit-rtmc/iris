@@ -100,13 +100,11 @@ public class PropStatus extends IPanel {
 		}
 	};
 
-	/** Reset DMS action */
-	private final IAction reset = new IAction("dms.reset",
-		SystemAttrEnum.DMS_RESET_ENABLE)
-	{
+	/** Button to query configuration */
+	private final IAction config = new IAction("dms.query.config") {
 		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
-				RESET_DEVICE.ordinal());
+				QUERY_CONFIGURATION.ordinal());
 		}
 	};
 
@@ -123,6 +121,16 @@ public class PropStatus extends IPanel {
 		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());
+		}
+	};
+
+	/** Reset DMS action */
+	private final IAction reset = new IAction("dms.reset",
+		SystemAttrEnum.DMS_RESET_ENABLE)
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			dms.setDeviceRequest(DeviceRequest.
+				RESET_DEVICE.ordinal());
 		}
 	};
 
@@ -163,6 +171,8 @@ public class PropStatus extends IPanel {
 			box.add(new JButton(query_msg));
 			box.add(Box.createHorizontalStrut(UI.hgap));
 		}
+		box.add(new JButton(config));
+		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(query_status));
 		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(settings));
@@ -198,12 +208,13 @@ public class PropStatus extends IPanel {
 		}
 		if(a == null || a.equals("powerStatus"))
 			updatePowerStatus();
-		if(a == null) {
+		if (null == a) {
 			boolean r = canRequest();
 			query_msg.setEnabled(r);
-			reset.setEnabled(r);
+			config.setEnabled(r);
 			query_status.setEnabled(r);
 			settings.setEnabled(r);
+			reset.setEnabled(r);
 		}
 	}
 

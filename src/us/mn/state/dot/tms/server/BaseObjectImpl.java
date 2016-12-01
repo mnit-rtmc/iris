@@ -60,6 +60,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		CabinetStyleImpl.loadAll();
 		CabinetImpl.loadAll();
 		ControllerImpl.loadAll();
+		SignConfigImpl.loadAll();
 		R_NodeImpl.loadAll();
 		/* NOTE: must happen after r_nodes are loaded */
 		corridors.createCorridors();

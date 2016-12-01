@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import static us.mn.state.dot.tms.SignMsgSource.lcs;
 import us.mn.state.dot.tms.TMSException;
@@ -97,10 +98,11 @@ public class OpSendLCSIndications extends OpLCS {
 		int ind = indications[lane];
 		DMSImpl dms = dmss[lane];
 		if (dms != null) {
-			Integer w = dms.getWidthPixels();
-			Integer h = dms.getHeightPixels();
-			if (w == null || h == null)
+			SignConfig sc = dms.getSignConfig();
+			if (null == sc)
 				return null;
+			int w = sc.getPixelWidth();
+			int h = sc.getPixelHeight();
 			String ms = createIndicationMulti(ind, w, h);
 			if (ms != null)
 				return createSignMessage(dms, ms, ind);

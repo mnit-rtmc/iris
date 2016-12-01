@@ -24,6 +24,7 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.PageTimeHelper;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignConfigImpl;
@@ -136,11 +137,12 @@ abstract class OpDms extends OpDevice {
 
 		/** Return DMS sign access */
 		static SignAccess get(DMSImpl d) {
-			assert d != null;
-			if(d == null)
-				return UNKNOWN;
-			else
-				return parse(d.getSignAccess());
+			if (d != null) {
+				SignConfig sc = d.getSignConfig();
+				if (sc != null)
+					return parse(sc.getSignAccess());
+			}
+			return UNKNOWN;
 		}
 	};
 
@@ -532,32 +534,9 @@ abstract class OpDms extends OpDevice {
 			// the DMS dialog, Configuration tab
 			if(valid) {
 				setErrorStatus("");
-				m_dms.setModel(model);
-				m_dms.setSignAccess(signAccess); // ip or dialup
 				m_dms.setMake(make);
+				m_dms.setModel(model);
 				m_dms.setVersionNotify(version);
-				m_dms.setDmsType(type);
-				m_dms.setHorizontalBorder(horizBorder);// in mm
-				m_dms.setVerticalBorder(vertBorder);   // in mm
-				m_dms.setHorizontalPitch(horizPitch);
-				m_dms.setVerticalPitch(vertPitch);
-
-				// values not set for these
-				m_dms.setLegend("sign legend");
-				m_dms.setBeaconType("beacon type");
-				m_dms.setTechnology("sign technology");
-
-				// note, these must be defined for comboboxes
-				// in the "Compose message" control to appear
-				m_dms.setFaceHeight(signHeight);    // mm
-				m_dms.setFaceWidth(signWidth);      // mm
-				m_dms.setHeightPixels(signHeightPixels);
-				m_dms.setWidthPixels(signWidthPixels);
-				// NOTE: these must be set last
-				m_dms.setCharHeightPixels(
-					characterHeightPixels);
-				m_dms.setCharWidthPixels(
-					characterWidthPixels);
 		
 				int dt = type.ordinal();
 				SignConfigImpl sc = SignConfigImpl.findOrCreate(
@@ -568,7 +547,8 @@ abstract class OpDms extends OpDevice {
 					signWidthPixels, signHeightPixels,
 					characterWidthPixels,
 					characterHeightPixels);
-				// FIXME: set sign config on DMS
+				if (sc != null)
+					m_dms.setSignConfigNotify(sc);
 
 			// failure
 			} else {

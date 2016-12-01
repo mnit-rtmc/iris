@@ -56,6 +56,9 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		String sa, String l, String bt, int fw, int fh, int bh, int bv,
 		int ph, int pv, int pxw, int pxh, int cw, int ch)
 	{
+		if (fw <= 0 || fh <= 0 || bh < 0 || bv < 0 || ph <= 0 ||
+		    pv <= 0 || pxw <= 0 || pxh <= 0 || cw < 0 || ch < 0)
+			return null;
 		SignConfig sc = SignConfigHelper.find(DMSType.fromOrdinal(dt),
 			p, t, sa, l, bt, fw, fh, bh, bv, ph, pv, pxw, pxh, cw,
 			ch);
@@ -80,6 +83,13 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 			System.err.println("createNotify: " + e.getMessage());
 			return null;
 		}
+	}
+
+	/** Find or create LCS sign config */
+	static public SignConfigImpl findOrCreateLCS() {
+		return findOrCreate(DMSType.OTHER.ordinal(), false, "DLCS",
+			"FRONT", "NONE", "NONE", 600, 600, 1, 1, 1, 1, 1, 1,
+			0, 0);
 	}
 
 	/** Last allocated sign config ID */

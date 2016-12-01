@@ -25,6 +25,7 @@ import javax.swing.JPanel;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -168,11 +169,12 @@ public class PropPixels extends IPanel {
 
 	/** Create a blank bitmap */
 	private BitmapGraphic createBlankBitmap() {
-		Integer w = dms.getWidthPixels();	// Avoid race
-		Integer h = dms.getHeightPixels();	// Avoid race
-		if (w != null && h != null)
+		SignConfig sc = dms.getSignConfig();
+		if (sc != null) {
+			int w = sc.getPixelWidth();
+			int h = sc.getPixelHeight();
 			return new BitmapGraphic(w, h);
-		else
+		} else
 			return null;
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.addco;
 import java.io.IOException;
 import static us.mn.state.dot.tms.DMSType.VMS_FULL;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.SignConfigImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
@@ -49,30 +50,19 @@ public class OpQueryDMSConfiguration extends OpAddco {
 		}
 	}
 
-	/** Set hardcoded values for addco brick signs */
-	private void setHardcodedValues() {
-		dms.setSignAccess("FRONT");
-		dms.setDmsType(VMS_FULL);
-		dms.setFaceHeight(500);
-		dms.setFaceWidth(1620);
-		dms.setHorizontalBorder(75);
-		dms.setVerticalBorder(75);
-		dms.setLegend("noLegend");
-		dms.setBeaconType("none");
-		dms.setTechnology("LED");
-		dms.setHeightPixels(8);		// FIXME
-		dms.setWidthPixels(36);		// FIXME
-		dms.setHorizontalPitch(41);
-		dms.setVerticalPitch(44);
-		// NOTE: these must be set last
-		dms.setCharHeightPixels(0);
-		dms.setCharWidthPixels(0);
+	/** Set sign config for addco brick signs */
+	private void setSignConfig() {
+		SignConfigImpl sc = SignConfigImpl.findOrCreate(
+			VMS_FULL.ordinal(), false, "LED", "FRONT", "noLegend",
+			"none", 1620, 500, 75, 75, 41, 44, 36, 8, 0, 0);
+		if (sc != null)
+			dms.setSignConfigNotify(sc);
 	}
 
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		setHardcodedValues();
+		setSignConfig();
 		dms.setConfigure(isSuccess());
 		super.cleanup();
 	}

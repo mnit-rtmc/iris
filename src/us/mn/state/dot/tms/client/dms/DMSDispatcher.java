@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WordHelper;
@@ -199,10 +200,12 @@ public class DMSDispatcher extends JPanel {
 	private boolean checkDimensions(DMS dms) {
 		RasterBuilder b = builder;
 		if (b != null) {
-			Integer w = dms.getWidthPixels();
-			Integer h = dms.getHeightPixels();
-			if (w != null && h != null)
+			SignConfig sc = dms.getSignConfig();
+			if (sc != null) {
+				int w = sc.getPixelWidth();
+				int h = sc.getPixelHeight();
 				return b.width == w && b.height == h;
+			}
 		}
 		return false;
 	}

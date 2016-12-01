@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.DmsSignGroup;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignText;
@@ -55,6 +56,14 @@ public class DmsCache {
 	/** Get the glyph type cache */
 	public TypeCache<Glyph> getGlyphs() {
 		return glyphs;
+	}
+
+	/** Cache of sign configs */
+	private final TypeCache<SignConfig> sign_configs;
+
+	/** Get the sign configs */
+	public TypeCache<SignConfig> getSignConfigs() {
+		return sign_configs;
 	}
 
 	/** Cache of sign messages */
@@ -121,6 +130,8 @@ public class DmsCache {
 		font_model = new ProxyListModel<Font>(fonts);
 		font_model.initialize();
 		glyphs = new TypeCache<Glyph>(Glyph.class, client);
+		sign_configs = new TypeCache<SignConfig>(SignConfig.class,
+			client);
 		sign_messages = new TypeCache<SignMessage>(SignMessage.class,
 			client);
 		quick_messages = new TypeCache<QuickMessage>(QuickMessage.class,
@@ -138,6 +149,7 @@ public class DmsCache {
 	public void populate(SonarState client) {
 		client.populateReadable(fonts);
 		client.populateReadable(glyphs);
+		client.populateReadable(sign_configs);
 		client.populateReadable(sign_messages);
 		client.populateReadable(dmss);
 		if(client.canRead(DMS.SONAR_TYPE)) {

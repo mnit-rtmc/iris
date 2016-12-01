@@ -20,6 +20,7 @@ import java.util.HashSet;
 import us.mn.state.dot.tms.DMS;
 import static us.mn.state.dot.tms.DmsColor.AMBER;
 import us.mn.state.dot.tms.DMSType;
+import us.mn.state.dot.tms.SignConfig;
 import static us.mn.state.dot.tms.SystemAttrEnum.*;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -282,13 +283,15 @@ public class OpSendDMSDefaults extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			// ADDCO brick signs have these dimensions
 			String make = dms.getMake();
+			SignConfig sc = dms.getSignConfig();
 			// NOTE: setting these objects requires use of the
 			//       "administrator" community name.  We need to
 			//       check that the password is not null before
 			//       attempting to set them.
 			if (make != null &&
 			    make.startsWith("ADDCO") &&
-			    dms.getDmsType() == DMSType.VMS_CHAR.ordinal() &&
+			    sc != null &&
+			    sc.getDmsType() == DMSType.VMS_CHAR.ordinal() &&
 			    controller.getPassword() != null)
 			{
 				ASN1Integer h_border =

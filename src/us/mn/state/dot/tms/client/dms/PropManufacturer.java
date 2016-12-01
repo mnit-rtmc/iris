@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.CardLayout;
+import java.awt.event.ActionEvent;
+import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
@@ -22,7 +24,9 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -84,6 +88,22 @@ public class PropManufacturer extends IPanel {
 	/** Heat tape status label */
 	private final JLabel heat_tape_lbl = createValueLabel();
 
+	/** Config action */
+	private final IAction config = new IAction("dms.config") {
+		protected void doActionPerformed(ActionEvent e) {
+			configPressed();
+		}
+	};
+
+	/** Sign config button pressed */
+	private void configPressed() {
+		SignConfig sc = dms.getSignConfig();
+		if (sc != null) {
+			session.getDesktop().show(new SignConfigForm(session,
+				sc));
+		}
+	}
+
 	/** User session */
 	private final Session session;
 
@@ -110,6 +130,7 @@ public class PropManufacturer extends IPanel {
 		card_pnl.add(createGenericPanel(), MAKE_GENERIC);
 		card_pnl.add(createLedstarPanel(), MAKE_LEDSTAR);
 		card_pnl.add(createSkylinePanel(), MAKE_SKYLINE);
+		add(new JButton(config), Stretch.RIGHT);
 		createUpdateJobs();
 		updateAttribute(null);
 	}
@@ -201,6 +222,8 @@ public class PropManufacturer extends IPanel {
 		}
 		if(a == null || a.equals("heatTapeStatus"))
 			heat_tape_lbl.setText(dms.getHeatTapeStatus());
+		if (null == a || a.equals("signConfig"))
+			config.setEnabled(dms.getSignConfig() != null);
 	}
 
 	/** Select card on manufacturer panel for the given make */

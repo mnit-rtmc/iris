@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.dinrelay;
 
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.SignConfigImpl;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -33,16 +34,13 @@ public class OpSendLCSSettings extends OpLCS {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<DinRelayProperty> phaseTwo() {
-		for(DMSImpl dms: dmss) {
-			if(dms != null)
-				setSignDimensions(dms);
+		SignConfigImpl sc = SignConfigImpl.findOrCreateLCS();
+		if (sc != null) {
+			for (DMSImpl dms: dmss) {
+				if (dms != null)
+					dms.setSignConfigNotify(sc);
+			}
 		}
 		return null;
-	}
-
-	/** Set the DMS dimensions */
-	private void setSignDimensions(DMSImpl dms) {
-		dms.setFaceHeight(600);
-		dms.setFaceWidth(600);
 	}
 }

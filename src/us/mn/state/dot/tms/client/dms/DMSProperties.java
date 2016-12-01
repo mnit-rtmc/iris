@@ -41,9 +41,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 	/** Messages panel */
 	private final PropMessages messages_pnl;
 
-	/** Configuration panel */
-	private final PropConfiguration config_pnl;
-
 	/** Status panel */
 	private final PropStatus status_pnl;
 
@@ -63,7 +60,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		op_pnl = new PropOp(sign);
 		location_pnl = new PropLocation(s, sign);
 		messages_pnl = new PropMessages(s, sign);
-		config_pnl = new PropConfiguration(s, sign);
 		status_pnl = new PropStatus(s, sign);
 		pixel_pnl = new PropPixels(s, sign);
 		bright_pnl = new PropBrightness(s, sign);
@@ -82,7 +78,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		op_pnl.initialize();
 		location_pnl.initialize();
 		messages_pnl.initialize();
-		config_pnl.initialize();
 		status_pnl.initialize();
 		pixel_pnl.initialize();
 		bright_pnl.initialize();
@@ -90,7 +85,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		JTabbedPane tab = new JTabbedPane();
 		tab.add(I18N.get("location"), location_pnl);
 		tab.add(I18N.get("dms.messages"), messages_pnl);
-		tab.add(I18N.get("dms.config"), config_pnl);
 		tab.add(I18N.get("device.status"), status_pnl);
 		if(SystemAttrEnum.DMS_PIXEL_STATUS_ENABLE.getBoolean())
 			tab.add(I18N.get("dms.pixels"), pixel_pnl);
@@ -125,7 +119,6 @@ public class DMSProperties extends SonarObjectForm<DMS> {
 		op_pnl.updateAttribute(a);
 		location_pnl.updateAttribute(a);
 		messages_pnl.updateAttribute(a);
-		config_pnl.updateAttribute(a);
 		status_pnl.updateAttribute(a);
 		pixel_pnl.updateAttribute(a);
 		bright_pnl.updateAttribute(a);

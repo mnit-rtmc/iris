@@ -21,6 +21,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgSource;
@@ -676,10 +677,11 @@ public class OpSendDMSMessage extends OpDMS {
 		int bpp = color_scheme.getEnum().bpp;
 		if (g.getBpp() != 1 && g.getBpp() != bpp)
 			return "Invalid graphic depth";
-		Integer w = dms.getWidthPixels();
-		Integer h = dms.getHeightPixels();
-		if (null == w || null == h)
+		SignConfig sc = dms.getSignConfig();
+		if (null == sc)
 			return "Unknown DMS dimensions";
+		int w = sc.getPixelWidth();
+		int h = sc.getPixelHeight();
 		if (g.getWidth() > w || g.getHeight() > h)
 			return "Invalid graphic size";
 		return null;

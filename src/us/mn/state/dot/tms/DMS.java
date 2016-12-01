@@ -51,11 +51,8 @@ public interface DMS extends Device {
 	/** Is sign controlled by Automated Warning System? */
 	boolean getAwsControlled();
 
-	/** Set the default font */
-	void setDefaultFont(Font f);
-
-	/** Get the default font */
-	Font getDefaultFont();
+	/** Get the sign configuration */
+	SignConfig getSignConfig();
 
 	/* Transient attributes (not stored in database) */
 
@@ -67,51 +64,6 @@ public interface DMS extends Device {
 
 	/** Get the version */
 	String getVersion();
-
-	/** Get sign access description */
-	String getSignAccess();
-
-	/** Get DMS type */
-	int getDmsType();
-
-	/** Get sign legend */
-	String getLegend();
-
-	/** Get beacon type description */
-	String getBeaconType();
-
-	/** Get sign technology description */
-	String getTechnology();
-
-	/** Get height of the sign face (mm) */
-	Integer getFaceHeight();
-
-	/** Get width of the sign face (mm) */
-	Integer getFaceWidth();
-
-	/** Get horizontal border (mm) */
-	Integer getHorizontalBorder();
-
-	/** Get vertical border (mm) */
-	Integer getVerticalBorder();
-
-	/** Get horizontal pitch (mm) */
-	Integer getHorizontalPitch();
-
-	/** Get vertical pitch (mm) */
-	Integer getVerticalPitch();
-
-	/** Get sign height (pixels) */
-	Integer getHeightPixels();
-
-	/** Get sign width (pixels) */
-	Integer getWidthPixels();
-
-	/** Get character height (pixels) */
-	Integer getCharHeightPixels();
-
-	/** Get character width (pixels) */
-	Integer getCharWidthPixels();
 
 	/** Get the minimum cabinet temperature (Celsius) */
 	Integer getMinCabinetTemp();

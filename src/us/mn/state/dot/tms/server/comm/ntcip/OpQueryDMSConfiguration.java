@@ -283,23 +283,6 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	public void cleanup() {
 		dms.setConfigure(isSuccess());
 		if (isSuccess()) {
-			dms.setSignAccess(access.getValue());
-			dms.setDmsType(type.getValueEnum());
-			dms.setFaceHeight(face_height.getInteger());
-			dms.setFaceWidth(face_width.getInteger());
-			dms.setHorizontalBorder(h_border.getInteger());
-			dms.setVerticalBorder(v_border.getInteger());
-			dms.setLegend(legend.getValue());
-			dms.setBeaconType(beacon.getValue());
-			dms.setTechnology(tech.getValue());
-			dms.setHeightPixels(s_height.getInteger());
-			dms.setWidthPixels(s_width.getInteger());
-			dms.setHorizontalPitch(h_pitch.getInteger());
-			dms.setVerticalPitch(v_pitch.getInteger());
-			// NOTE: these must be set last
-			dms.setCharHeightPixels(c_height.getInteger());
-			dms.setCharWidthPixels(c_width.getInteger());
-
 			int dt = type.getValueEnum().ordinal();
 			boolean p = type.isPortable();
 			SignConfigImpl sc = SignConfigImpl.findOrCreate(dt, p,
@@ -311,7 +294,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				h_pitch.getInteger(), v_pitch.getInteger(),
 				s_width.getInteger(), s_height.getInteger(),
 				c_width.getInteger(), getCharHeight());
-			// FIXME: set sign config on DMS
+			if (sc != null)
+				dms.setSignConfigNotify(sc);
 		}
 		super.cleanup();
 	}

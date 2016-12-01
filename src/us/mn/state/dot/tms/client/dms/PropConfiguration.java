@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,30 +15,41 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.event.ActionEvent;
-import javax.swing.JButton;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
-import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSType;
+import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
+import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.INCHES;
+import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * PropConfiguration is a GUI panel for displaying configuration data on a DMS
- * properties form.
+ * PropConfiguration is a GUI panel for displaying sign configuration on a
+ * form.
  *
  * @author Douglas Lau
  */
 public class PropConfiguration extends IPanel {
+
+	/** Get tiny distance units to use for display */
+	static private Distance.Units distUnitsTiny() {
+		return SystemAttrEnum.CLIENT_UNITS_SI.getBoolean()
+		     ? Distance.Units.CENTIMETERS : INCHES;
+	}
 
 	/** Unknown value string */
 	static private final String UNKNOWN = "???";
 
 	/** Format a string field */
 	static private String formatString(String s) {
-		if(s != null && s.length() > 0)
+		if (s != null && s.length() > 0)
 			return s;
 		else
 			return UNKNOWN;
@@ -46,7 +57,7 @@ public class PropConfiguration extends IPanel {
 
 	/** Format millimeter units for display */
 	static private String formatMM(Integer i) {
-		if(i != null && i > 0)
+		if (i != null && i > 0)
 			return i + " " + I18N.get("units.mm");
 		else
 			return UNKNOWN;
@@ -54,10 +65,10 @@ public class PropConfiguration extends IPanel {
 
 	/** Format pixel units for display */
 	static private String formatPixels(Integer i) {
-		if(i != null) {
-			if(i > 0)
+		if (i != null) {
+			if (i > 0)
 				return i + " " + I18N.get("units.pixels");
-			else if(i == 0)
+			else if (0 == i)
 				return I18N.get("units.pixels.variable");
 		}
 		return UNKNOWN;
@@ -108,24 +119,22 @@ public class PropConfiguration extends IPanel {
 	/** Character height label */
 	private final JLabel c_height_lbl = createValueLabel();
 
-	/** Button to query configuration */
-	private final IAction config = new IAction("dms.query.config") {
-		protected void doActionPerformed(ActionEvent e) {
-			dms.setDeviceRequest(DeviceRequest.
-				QUERY_CONFIGURATION.ordinal());
-		}
-	};
+	/** Default font combo box */
+	private final JComboBox<Font> font_cbx = new JComboBox<Font>();
+
+	/** Font height label */
+	private final JLabel font_height_lbl = IPanel.createValueLabel();
 
 	/** User session */
 	private final Session session;
 
-	/** DMS to display */
-	private final DMS dms;
+	/** Sing configuration */
+	private final SignConfig config;
 
-	/** Create a new DMS properties configuration panel */
-	public PropConfiguration(Session s, DMS sign) {
+	/** Create a new sign configuration panel */
+	public PropConfiguration(Session s, SignConfig sc) {
 		session = s;
-		dms = sign;
+		config = sc;
 	}
 
 	/** Initialize the widgets on the form */
@@ -162,63 +171,77 @@ public class PropConfiguration extends IPanel {
 		add(c_width_lbl, Stretch.LAST);
 		add("dms.char.height");
 		add(c_height_lbl, Stretch.LAST);
-		add(new JButton(config), Stretch.RIGHT);
+		add("dms.font.default");
+		add(font_cbx, Stretch.LAST);
+		add("dms.font.height");
+		add(font_height_lbl, Stretch.LAST);
+		font_cbx.setAction(new IAction("font") {
+			protected void doActionPerformed(ActionEvent e) {
+				config.setDefaultFont(
+					(Font) font_cbx.getSelectedItem());
+			}
+		});
+		font_cbx.setModel(new IComboBoxModel<Font>(
+			session.getSonarState().getDmsCache().getFontModel()));
 		updateAttribute(null);
+	}
+
+	/** Update the edit mode */
+	public void updateEditMode() {
+		font_cbx.setEnabled(canUpdate("defaultFont"));
 	}
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
-		if(a == null || a.equals("dmsType")) {
-			DMSType t = DMSType.fromOrdinal(dms.getDmsType());
+		SignConfig sc = config;
+		if (null == a) {
+			DMSType t = DMSType.fromOrdinal(sc.getDmsType());
 			type_lbl.setText(t.description);
+			tech_lbl.setText(formatString(sc.getTechnology()));
+			access_lbl.setText(formatString(sc.getSignAccess()));
+			legend_lbl.setText(formatString(sc.getLegend()));
+			beacon_lbl.setText(formatString(sc.getBeaconType()));
+			f_width_lbl.setText(formatMM(sc.getFaceWidth()));
+			f_height_lbl.setText(formatMM(sc.getFaceHeight()));
+			h_border_lbl.setText(formatMM(sc.getBorderHoriz()));
+			v_border_lbl.setText(formatMM(sc.getBorderVert()));
+			h_pitch_lbl.setText(formatMM(sc.getPitchHoriz()));
+			v_pitch_lbl.setText(formatMM(sc.getPitchVert()));
+			p_width_lbl.setText(formatPixels(sc.getPixelWidth()));
+			p_height_lbl.setText(formatPixels(sc.getPixelHeight()));
+			c_width_lbl.setText(formatPixels(sc.getCharWidth()));
+			c_height_lbl.setText(formatPixels(sc.getCharHeight()));
 		}
-		if(a == null || a.equals("technology"))
-			tech_lbl.setText(formatString(dms.getTechnology()));
-		if(a == null || a.equals("signAccess"))
-			access_lbl.setText(formatString(dms.getSignAccess()));
-		if(a == null || a.equals("legend"))
-			legend_lbl.setText(formatString(dms.getLegend()));
-		if(a == null || a.equals("beaconType"))
-			beacon_lbl.setText(formatString(dms.getBeaconType()));
-		if(a == null || a.equals("faceWidth"))
-			f_width_lbl.setText(formatMM(dms.getFaceWidth()));
-		if(a == null || a.equals("faceHeight"))
-			f_height_lbl.setText(formatMM(dms.getFaceHeight()));
-		if(a == null || a.equals("horizontalBorder")) {
-			h_border_lbl.setText(formatMM(
-				dms.getHorizontalBorder()));
+		if (null == a || a.equals("defaultFont")) {
+			font_cbx.setSelectedItem(sc.getDefaultFont());
+			font_height_lbl.setText(calculateFontHeight());
 		}
-		if(a == null || a.equals("verticalBorder"))
-			v_border_lbl.setText(formatMM(dms.getVerticalBorder()));
-		if(a == null || a.equals("horizontalPitch"))
-			h_pitch_lbl.setText(formatMM(dms.getHorizontalPitch()));
-		if(a == null || a.equals("verticalPitch"))
-			v_pitch_lbl.setText(formatMM(dms.getVerticalPitch()));
-		if(a == null || a.equals("widthPixels"))
-			p_width_lbl.setText(formatPixels(dms.getWidthPixels()));
-		if(a == null || a.equals("heightPixels")) {
-			p_height_lbl.setText(formatPixels(
-				dms.getHeightPixels()));
-		}
-		if(a == null || a.equals("charWidthPixels")) {
-			c_width_lbl.setText(formatPixels(
-				dms.getCharWidthPixels()));
-		}
-		if(a == null || a.equals("charHeightPixels")) {
-			c_height_lbl.setText(formatPixels(
-				dms.getCharHeightPixels()));
-		}
-		if(a == null)
-			config.setEnabled(canRequest());
 	}
 
-	/** Check if the user is permitted to update an attribute */
-	private boolean isUpdatePermitted(String aname) {
-		return session.isUpdatePermitted(dms, aname);
+	/** Calculate the height of the default font on the sign */
+	private String calculateFontHeight() {
+		SignConfig sc = config;
+		Font f = sc.getDefaultFont();
+		if (f != null) {
+			int pv = sc.getPitchVert();
+			int h = f.getHeight();
+			if (h > 0 && pv > 0) {
+				float mm = (h - 0.5f) * pv;
+				Distance fh = new Distance(mm, MILLIMETERS);
+				return formatFontHeight(fh);
+			}
+		}
+		return UNKNOWN;
 	}
 
-	/** Check if the user can make device requests */
-	private boolean canRequest() {
-		return isUpdatePermitted("deviceRequest");
+	/** Format the font height for display */
+	private String formatFontHeight(Distance fh) {
+		Distance.Formatter df = new Distance.Formatter(1);
+		return df.format(fh.convert(distUnitsTiny()));
+	}
+
+	/** Check if the user can update an attribute */
+	private boolean canUpdate(String aname) {
+		return session.canUpdate(config, aname);
 	}
 }

@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.SignConfig;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -370,16 +371,15 @@ public class SignPixelPanel extends JPanel {
 
 	/** Set the physical dimensions from a DMS */
 	private void setPhysicalDimensions(DMS dms) {
-		Integer w = dms.getFaceWidth();
-		Integer h = dms.getFaceHeight();
-		Integer hp = dms.getHorizontalPitch();
-		Integer vp = dms.getVerticalPitch();
-		Integer hb = dms.getHorizontalBorder();
-		Integer vb = dms.getVerticalBorder();
-		if (w != null && h != null && hp != null && vp != null &&
-		    hb != null && vb != null)
-		{
-			setPhysicalDimensions(w, h, hb, vb, hp, vp);
+		SignConfig sc = dms.getSignConfig();
+		if (sc != null) {
+			int w = sc.getFaceWidth();
+			int h = sc.getFaceHeight();
+			int ph = sc.getPitchHoriz();
+			int pv = sc.getPitchVert();
+			int bh = sc.getBorderHoriz();
+			int bv = sc.getBorderVert();
+			setPhysicalDimensions(w, h, bh, bv, ph, pv);
 		} else
 			setPhysicalDimensions(0, 0, 0, 0, 0, 0);
 	}
@@ -398,13 +398,14 @@ public class SignPixelPanel extends JPanel {
 
 	/** Set the logical dimensions from a DMS */
 	private void setLogicalDimensions(DMS dms) {
-		Integer wp = dms.getWidthPixels();
-		Integer hp = dms.getHeightPixels();
-		Integer cw = dms.getCharWidthPixels();
-		Integer ch = dms.getCharHeightPixels();
-		if (wp != null && hp != null && cw != null && ch != null)
-			setLogicalDimensions(wp, hp, cw, ch);
-		else
+		SignConfig sc = dms.getSignConfig();
+		if (sc != null) {
+			int pw = sc.getPixelWidth();
+			int ph = sc.getPixelHeight();
+			int cw = sc.getCharWidth();
+			int ch = sc.getCharHeight();
+			setLogicalDimensions(pw, ph, cw, ch);
+		} else
 			setLogicalDimensions(0, 0, 0, 0);
 	}
 

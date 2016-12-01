@@ -19,6 +19,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsColor;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -67,12 +68,9 @@ public class OpTestDMSPixels extends OpDMS {
 	public OpTestDMSPixels(DMSImpl d, boolean p) {
 		super(PriorityLevel.DEVICE_DATA, d);
 		perform_test = p;
-		Integer w = d.getWidthPixels();
-		Integer h = d.getHeightPixels();
-		if (w == null)
-			w = 0;
-		if (h == null)
-			h = 0;
+		SignConfig sc = d.getSignConfig();
+		int w = (sc != null) ? sc.getPixelWidth() : 0;
+		int h = (sc != null) ? sc.getPixelHeight() : 0;
 		stuck_on = new BitmapGraphic(w, h);
 		stuck_off = new BitmapGraphic(w, h);
 	}

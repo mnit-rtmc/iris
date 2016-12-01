@@ -43,9 +43,12 @@ public class FontFinder {
 
 	/** Create a font finder for a DMS */
 	public FontFinder(DMS dms) {
-		Font df = dms.getDefaultFont();
-		if(df != null)
-			fonts.add(df.getNumber());
+		SignConfig sc = dms.getSignConfig();
+		if (sc != null) {
+			Font df = sc.getDefaultFont();
+			if (df != null)
+				fonts.add(df.getNumber());
+		}
 		groups = findGroups(dms);
 		findQuickMessageTags();
 		findSignTextTags();

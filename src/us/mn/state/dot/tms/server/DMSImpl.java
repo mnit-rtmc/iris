@@ -41,7 +41,6 @@ import static us.mn.state.dot.tms.DmsMsgPriority.*;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMsgException;
@@ -50,6 +49,8 @@ import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgSource;
@@ -105,7 +106,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"beacon, preset, aws_allowed, aws_controlled, " +
-			"default_font FROM iris." + SONAR_TYPE  + ";",
+			"sign_config FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -119,7 +120,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 					row.getString(7),	// preset
 					row.getBoolean(8),	// aws_allowed
 					row.getBoolean(9),     // aws_controlled
-					row.getString(10)	// default_font
+					row.getString(10)	// sign_config
 				));
 			}
 		});
@@ -150,7 +151,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("preset", preset);
 		map.put("aws_allowed", awsAllowed);
 		map.put("aws_controlled", awsControlled);
-		map.put("default_font", default_font);
+		map.put("sign_config", sign_config);
 		return map;
 	}
 
@@ -191,7 +192,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, Beacon b, CameraPreset cp, boolean aa,
-		boolean ac, Font df)
+		boolean ac, SignConfig sc)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -199,7 +200,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		setPreset(cp);
 		awsAllowed = aa;
 		awsControlled = ac;
-		default_font = df;
+		sign_config = sc;
 		toll_formatter = new TollingFormatter(n, loc);
 		formatter = new MultiFormatter(this, toll_formatter);
 		initTransients();
@@ -208,11 +209,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c,
 		int p, String nt, String b, String cp, boolean aa, boolean ac,
-		String df)
+		String sc)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
 		     lookupBeacon(b), lookupPreset(cp), aa, ac,
-		     FontHelper.lookup(df));
+		     SignConfigHelper.lookup(sc));
 	}
 
 	/** Destroy an object */
@@ -371,27 +372,36 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return awsControlled;
 	}
 
-	/** Default font */
-	private Font default_font;
+	/** Sign configuration */
+	private SignConfig sign_config;
 
-	/** Set the default font */
+	/** Get the sign configuration */
 	@Override
-	public void setDefaultFont(Font f) {
-		default_font = f;
+	public SignConfig getSignConfig() {
+		return sign_config;
 	}
 
-	/** Set the default font */
-	public void doSetDefaultFont(Font f) throws TMSException {
-		if (f != default_font) {
-			store.update(this, "default_font", f);
-			setDefaultFont(f);
+	/** Set the sign config */
+	public void setSignConfigNotify(SignConfigImpl sc) {
+		if (!objectEquals(sc, sign_config)) {
+			try {
+				store.update(this, "sign_config", sc);
+			}
+			catch (TMSException e) {
+				logError("sign_config: " + e.getMessage());
+				return;
+			}
+			sign_config = sc;
+			notifyAttribute("signConfig");
+			// FIXME: update bitmap graphics plus stuck on/off
+			updateStyles();
 		}
 	}
 
 	/** Get the default font */
-	@Override
 	public Font getDefaultFont() {
-		return default_font;
+		SignConfig sc = getSignConfig();
+		return (sc != null) ? sc.getDefaultFont() : null;
 	}
 
 	/** Make (manufacturer) */
@@ -446,289 +456,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public String getVersion() {
 		return version;
-	}
-
-	/** Sign access description */
-	private transient String signAccess;
-
-	/** Set sign access description */
-	public void setSignAccess(String a) {
-		if (!a.equals(signAccess)) {
-			signAccess = a;
-			notifyAttribute("signAccess");
-		}
-	}
-
-	/** Get sign access description */
-	@Override
-	public String getSignAccess() {
-		return signAccess;
-	}
-
-	/** Sign type enum value */
-	private transient DMSType dms_type = DMSType.UNKNOWN;
-
-	/** Set sign type */
-	public void setDmsType(DMSType t) {
-		if (t != dms_type) {
-			dms_type = t;
-			notifyAttribute("dmsType");
-		}
-	}
-
-	/** Get sign type as an int (via enum) */
-	@Override
-	public int getDmsType() {
-		return dms_type.ordinal();
-	}
-
-	/** Sign legend string */
-	private transient String legend;
-
-	/** Set sign legend */
-	public void setLegend(String l) {
-		if (!l.equals(legend)) {
-			legend = l;
-			notifyAttribute("legend");
-		}
-	}
-
-	/** Get sign legend */
-	@Override
-	public String getLegend() {
-		return legend;
-	}
-
-	/** Beacon type description */
-	private transient String beaconType;
-
-	/** Set beacon type description */
-	public void setBeaconType(String t) {
-		if (!t.equals(beaconType)) {
-			beaconType = t;
-			notifyAttribute("beaconType");
-		}
-	}
-
-	/** Get beacon type description */
-	@Override
-	public String getBeaconType() {
-		return beaconType;
-	}
-
-	/** Sign technology description */
-	private transient String technology;
-
-	/** Set sign technology description */
-	public void setTechnology(String t) {
-		if (!t.equals(technology)) {
-			technology = t;
-			notifyAttribute("technology");
-		}
-	}
-
-	/** Get sign technology description */
-	@Override
-	public String getTechnology() {
-		return technology;
-	}
-
-	/** Height of sign face (mm) */
-	private transient Integer faceHeight;
-
-	/** Set height of sign face (mm) */
-	public void setFaceHeight(Integer h) {
-		if (!objectEquals(h, faceHeight)) {
-			faceHeight = h;
-			notifyAttribute("faceHeight");
-			updateStyles();
-		}
-	}
-
-	/** Get height of the sign face (mm) */
-	@Override
-	public Integer getFaceHeight() {
-		return faceHeight;
-	}
-
-	/** Width of the sign face (mm) */
-	private transient Integer faceWidth;
-
-	/** Set width of sign face (mm) */
-	public void setFaceWidth(Integer w) {
-		if (!objectEquals(w, faceWidth)) {
-			faceWidth = w;
-			notifyAttribute("faceWidth");
-			updateStyles();
-		}
-	}
-
-	/** Get width of the sign face (mm) */
-	@Override
-	public Integer getFaceWidth() {
-		return faceWidth;
-	}
-
-	/** Horizontal border (mm) */
-	private transient Integer horizontalBorder;
-
-	/** Set horizontal border (mm) */
-	public void setHorizontalBorder(Integer b) {
-		if (!objectEquals(b, horizontalBorder)) {
-			horizontalBorder = b;
-			notifyAttribute("horizontalBorder");
-		}
-	}
-
-	/** Get horizontal border (mm) */
-	@Override
-	public Integer getHorizontalBorder() {
-		return horizontalBorder;
-	}
-
-	/** Vertical border (mm) */
-	private transient Integer verticalBorder;
-
-	/** Set vertical border (mm) */
-	public void setVerticalBorder(Integer b) {
-		if (!objectEquals(b, verticalBorder)) {
-			verticalBorder = b;
-			notifyAttribute("verticalBorder");
-		}
-	}
-
-	/** Get vertical border (mm) */
-	@Override
-	public Integer getVerticalBorder() {
-		return verticalBorder;
-	}
-
-	/** Horizontal pitch (mm) */
-	private transient Integer horizontalPitch;
-
-	/** Set horizontal pitch (mm) */
-	public void setHorizontalPitch(Integer p) {
-		if (!objectEquals(p, horizontalPitch)) {
-			horizontalPitch = p;
-			notifyAttribute("horizontalPitch");
-		}
-	}
-
-	/** Get horizontal pitch (mm) */
-	@Override
-	public Integer getHorizontalPitch() {
-		return horizontalPitch;
-	}
-
-	/** Vertical pitch (mm) */
-	private transient Integer verticalPitch;
-
-	/** Set vertical pitch (mm) */
-	public void setVerticalPitch(Integer p) {
-		if (!objectEquals(p, verticalPitch)) {
-			verticalPitch = p;
-			notifyAttribute("verticalPitch");
-		}
-	}
-
-	/** Get vertical pitch (mm) */
-	@Override
-	public Integer getVerticalPitch() {
-		return verticalPitch;
-	}
-
-	/** Sign height (pixels) */
-	private transient Integer heightPixels;
-
-	/** Set sign height (pixels) */
-	public void setHeightPixels(Integer h) {
-		if (!objectEquals(h, heightPixels)) {
-			heightPixels = h;
-			// FIXME: update bitmap graphics plus stuck on/off
-			notifyAttribute("heightPixels");
-		}
-	}
-
-	/** Get sign height (pixels) */
-	@Override
-	public Integer getHeightPixels() {
-		return heightPixels;
-	}
-
-	/** Sign width in pixels */
-	private transient Integer widthPixels;
-
-	/** Set sign width (pixels) */
-	public void setWidthPixels(Integer w) {
-		if (!objectEquals(w, widthPixels)) {
-			widthPixels = w;
-			// FIXME: update bitmap graphics plus stuck on/off
-			notifyAttribute("widthPixels");
-		}
-	}
-
-	/** Get sign width (pixels) */
-	@Override
-	public Integer getWidthPixels() {
-		return widthPixels;
-	}
-
-	/** Character height (pixels; 0 means variable) */
-	private transient Integer charHeightPixels;
-
-	/** Set character height (pixels) */
-	public void setCharHeightPixels(Integer h) {
-		// NOTE: some crazy vendors think line-matrix signs should have
-		//       a variable character height, so we have to fix their
-		//       mistake here ... uggh
-		if (h == 0 && DMSType.isFixedHeight(dms_type))
-			h = estimateLineHeight();
-		if (!objectEquals(h, charHeightPixels)) {
-			charHeightPixels = h;
-			notifyAttribute("charHeightPixels");
-		}
-	}
-
-	/** Estimate the line height (pixels) */
-	private Integer estimateLineHeight() {
-		Integer h = heightPixels;
-		if (h != null) {
-			int m = SystemAttrEnum.DMS_MAX_LINES.getInt();
-			for (int i = m; i > 0; i--) {
-				if (h % i == 0)
-					return h / i;
-			}
-		}
-		return null;
-	}
-
-	/** Get character height (pixels) */
-	@Override
-	public Integer getCharHeightPixels() {
-		return charHeightPixels;
-	}
-
-	/** Character width (pixels; 0 means variable) */
-	private transient Integer charWidthPixels;
-
-	/** Set character width (pixels) */
-	public void setCharWidthPixels(Integer w) {
-		if (!objectEquals(w, charWidthPixels)) {
-			charWidthPixels = w;
-			notifyAttribute("charWidthPixels");
-		}
-	}
-
-	/** Get character width (pixels) */
-	@Override
-	public Integer getCharWidthPixels() {
-		return charWidthPixels;
-	}
-
-	/** Does the sign have proportional fonts? */
-	public boolean hasProportionalFonts() {
-		Integer w = charWidthPixels;
-		return w != null && w == 0;
 	}
 
 	/** Minimum cabinet temperature */
@@ -1048,12 +775,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param pages Array of bitmap graphics.
 	 * @return Bitmap graphics with same dimensions as DMS, or null. */
 	private BitmapGraphic[] copyBitmaps(BitmapGraphic[] pages) {
-		Integer w = widthPixels;
-		Integer h = heightPixels;
-		if (null == w || w < 1)
+		SignConfig sc = sign_config;
+		if (null == sc)
 			return null;
-		if (null == h || h < 1)
-			return null;
+		int w = sc.getPixelWidth();
+		int h = sc.getPixelHeight();
 		BitmapGraphic[] p = new BitmapGraphic[pages.length];
 		for (int i = 0; i < p.length; i++) {
 			p[i] = new BitmapGraphic(w, h);
@@ -1579,8 +1305,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			w.write(createAttribute("lat",
 				formatDouble(pos.getLatitude())));
 		}
-		w.write(createAttribute("width_pixels", getWidthPixels()));
-		w.write(createAttribute("height_pixels", getHeightPixels()));
+		SignConfig sc = sign_config;
+		if (sc != null) {
+			w.write(createAttribute("width_pixels",
+				sc.getPixelWidth()));
+			w.write(createAttribute("height_pixels",
+				sc.getPixelHeight()));
+		}
 		w.write("/>\n");
 	}
 

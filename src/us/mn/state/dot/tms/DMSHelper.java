@@ -55,9 +55,10 @@ public class DMSHelper extends BaseHelper {
 
 	/** Get the DMS critical error */
 	static public String getCriticalError(DMS proxy) {
-		Integer h = proxy.getFaceHeight();
-		Integer w = proxy.getFaceWidth();
-		if (h == null || w == null || h <= 0 || w <= 0)
+		SignConfig sc = proxy.getSignConfig();
+		if (null == sc ||
+		    sc.getFaceWidth() <= 0 ||
+		    sc.getFaceHeight() <= 0)
 			return "Invalid dimensions";
 		else
 			return getStatus(proxy);
@@ -126,9 +127,12 @@ public class DMSHelper extends BaseHelper {
 	/** Get the default font number for a DMS */
 	static public int getDefaultFontNumber(DMS dms) {
 		if (dms != null) {
-			Font f = dms.getDefaultFont();
-			if (f != null)
-				return f.getNumber();
+			SignConfig sc = dms.getSignConfig();
+			if (sc != null) {
+				Font f = sc.getDefaultFont();
+				if (f != null)
+					return f.getNumber();
+			}
 		}
 		return FontHelper.DEFAULT_FONT_NUM;
 	}
@@ -149,14 +153,15 @@ public class DMSHelper extends BaseHelper {
 	 * @param dms DMS with proper dimensions for the builder.
 	 * @return A pixel map builder, or null is dimensions are invalid. */
 	static public RasterBuilder createRasterBuilder(DMS dms) {
-		Integer w = dms.getWidthPixels();
-		Integer h = dms.getHeightPixels();
-		Integer cw = dms.getCharWidthPixels();
-		Integer ch = dms.getCharHeightPixels();
-		int df = getDefaultFontNumber(dms);
-		if (w != null && h != null && cw != null && ch != null)
+		SignConfig sc = dms.getSignConfig();
+		if (sc != null) {
+			int w = sc.getPixelWidth();
+			int h = sc.getPixelHeight();
+			int cw = sc.getCharWidth();
+			int ch = sc.getCharHeight();
+			int df = getDefaultFontNumber(dms);
 			return new RasterBuilder(w, h, cw, ch, df);
-		else
+		} else
 			return null;
 	}
 
@@ -207,11 +212,12 @@ public class DMSHelper extends BaseHelper {
 
 	/** Create a bitmap graphic for the specified DMS */
 	static public BitmapGraphic createBitmapGraphic(DMS dms) {
-		Integer wp = dms.getWidthPixels();
-		Integer hp = dms.getHeightPixels();
-		if (wp != null && hp != null)
-			return new BitmapGraphic(wp, hp);
-		else
+		SignConfig sc = dms.getSignConfig();
+		if (sc != null) {
+			int pw = sc.getPixelWidth();
+			int ph = sc.getPixelHeight();
+			return new BitmapGraphic(pw, ph);
+		} else
 			return null;
 	}
 
