@@ -99,8 +99,8 @@ public class PropManufacturer extends IPanel {
 	private void configPressed() {
 		SignConfig sc = dms.getSignConfig();
 		if (sc != null) {
-			session.getDesktop().show(new SignConfigForm(session,
-				sc));
+			session.getDesktop().show(new SignConfigProperties(
+				session, sc));
 		}
 	}
 

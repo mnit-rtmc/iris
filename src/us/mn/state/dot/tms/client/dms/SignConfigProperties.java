@@ -21,17 +21,17 @@ import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * This is a form for viewing sign configurations.
+ * This is a form for viewing sign configuration properties.
  *
  * @author Douglas Lau
  */
-public class SignConfigForm extends SonarObjectForm<SignConfig> {
+public class SignConfigProperties extends SonarObjectForm<SignConfig> {
 
 	/** Configuration panel */
 	private final PropConfiguration config_pnl;
 
-	/** Create a new sign configuration form */
-	public SignConfigForm(Session s, SignConfig sc) {
+	/** Create a new sign configuration properties form */
+	public SignConfigProperties(Session s, SignConfig sc) {
 		super(I18N.get("dms.config") + ": ", s, sc);
 		config_pnl = new PropConfiguration(s, sc);
 	}
