@@ -1028,8 +1028,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Check if a sign message should be activated */
 	private boolean shouldActivate(SignMessage sm) {
-		return shouldActivate(sm, msg_current) &&
-		       shouldActivate(sm, msg_next);
+		return isMsgCurrentEquivalent(sm) ||
+		       shouldActivate(sm, msg_current);
 	}
 
 	/** Send message to DMS */
