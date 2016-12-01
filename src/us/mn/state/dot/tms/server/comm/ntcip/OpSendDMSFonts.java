@@ -172,13 +172,25 @@ public class OpSendDMSFonts extends OpDMS {
 				return firstFontPhase();
 			}
 			logQuery(number);
-			addRow(row, number.getInteger());
+			addRow(row, fontNum(row, number.getInteger()));
 			if (row < num_fonts.getInteger()) {
 				row++;
 				return this;
 			} else
 				return firstFontPhase();
 		}
+	}
+
+	/** Get the font number for a specified row and number */
+	private int fontNum(int row, int f_num) {
+		return isAddco() ? row : f_num;
+	}
+
+	/** Check if DMS make is ADDCO.  Some ADDCO signs flake out if
+	 * the font *number* is greater than numFonts (typically 4). */
+	private boolean isAddco() {
+		String make = dms.getMake();
+		return make != null && make.startsWith("ADDCO");
 	}
 
 	/** Add a row to font rows mapping.
@@ -227,20 +239,9 @@ public class OpSendDMSFonts extends OpDMS {
 			return fr;
 		else {
 			Font f = fonts.pollFirst();
-			return new FontRow(fr.row, fontNum(fr, f), f);
+			int f_num = fontNum(fr.row, f.getNumber());
+			return new FontRow(fr.row, f_num, f);
 		}
-	}
-
-	/** Get the font number for a specified row and font */
-	private int fontNum(FontRow fr, Font f) {
-		return isAddco() ? fr.row : f.getNumber();
-	}
-
-	/** Check if DMS make is ADDCO.  Some ADDCO signs flake out if
-	 * the font *number* is greater than numFonts (typically 4). */
-	private boolean isAddco() {
-		String make = dms.getMake();
-		return make != null && make.startsWith("ADDCO");
 	}
 
 	/** Print warning if unable to send fonts */
