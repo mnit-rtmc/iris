@@ -46,6 +46,9 @@ public class SignMenu extends JMenu {
 		JMenuItem item = createDmsItem();
 		if(item != null)
 			add(item);
+		item = createSignConfigItem();
+		if (item != null)
+			add(item);
 		item = createFontItem();
 		if(item != null)
 			add(item);
@@ -70,6 +73,17 @@ public class SignMenu extends JMenu {
 		{
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new DMSForm(session));
+			}
+		}) : null;
+	}
+
+	/** Create the sign config menu item */
+	private JMenuItem createSignConfigItem() {
+		return SignConfigForm.isPermitted(session) ?
+		        new JMenuItem(new IAction("dms.config")
+		{
+			protected void doActionPerformed(ActionEvent e) {
+				desktop.show(new SignConfigForm(session));
 			}
 		}) : null;
 	}
