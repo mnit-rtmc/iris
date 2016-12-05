@@ -59,6 +59,9 @@ public class MainServer {
 	/** Timer thread for repeating jobs */
 	static private final Scheduler TIMER = new Scheduler("timer");
 
+	/** Second timer thread for repeating jobs */
+	static private final Scheduler TIMER2 = new Scheduler("timer2");
+
 	/** Flush thread for disk writing jobs */
 	static public final Scheduler FLUSH = new Scheduler("flush");
 
@@ -182,12 +185,12 @@ public class MainServer {
 		TIMER.addJob(new DmsQueryStatusJob());
 		TIMER.addJob(new MeteringJob(FLUSH));
 		TIMER.addJob(new SampleQuery5MinJob());
-		TIMER.addJob(new ActionPlanJob());
 		TIMER.addJob(new CameraWiperJob());
 		TIMER.addJob(new SendSettingsJob());
 		TIMER.addJob(new SendSettingsJob(500));
 		TIMER.addJob(new TollZoneJob());
 		TIMER.addJob(new ReaperJob());
+		TIMER2.addJob(new ActionPlanJob());
 	}
 
 	/** Schedule jobs on FLUSH thread */
