@@ -139,10 +139,12 @@ public class MonStatusProp extends PelcoPProp {
 	/** Get current camera ID on the selected video monitor */
 	protected int getCamNumber() {
 		VideoMonitorImpl vm = getMonitor();
-		if (vm != null)
-			return parseUID(getCamId(vm));
-		else
-			return 0;
+		if (vm != null) {
+			Integer uid = parseUID(getCamId(vm));
+			if (uid != null)
+				return uid;
+		}
+		return 0;
 	}
 
 	/** Set the video monitor number */
