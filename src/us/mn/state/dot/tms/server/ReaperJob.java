@@ -124,8 +124,10 @@ public class ReaperJob extends Job {
 		// This is needed because objects are removed
 		// asynchronously from the namespace.
 		SignMessage m = SignMessageHelper.lookup(sm.getName());
-		if ((m == sm) && !isReferenced(m))
+		if ((m == sm) && !isReferenced(m)) {
 			sm.notifyRemove();
+			sm.logMsg("removed (reaper)");
+		}
 	}
 
 	/** Find all reapable sign messages */

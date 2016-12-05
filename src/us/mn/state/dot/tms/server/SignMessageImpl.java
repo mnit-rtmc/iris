@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
@@ -37,6 +38,9 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
  * @author Douglas Lau
  */
 public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
+
+	/** Sign msg debug log */
+	static private final DebugLog MSG_LOG = new DebugLog("sign_msg");
 
 	/** Last allocated system message ID */
 	static private int last_id = 0;
@@ -104,6 +108,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	/** Create a new sign message (by SONAR clients) */
 	public SignMessageImpl(String n) {
 		super(n);
+		logMsg("created (client)");
 	}
 
 	/** Create a sign message */
@@ -151,6 +156,13 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		source = s;
 		owner = o;
 		duration = d;
+		logMsg("created (server)");
+	}
+
+	/** Log a message */
+	void logMsg(String msg) {
+		if (MSG_LOG.isOpen())
+			MSG_LOG.log(getName() + ": " + msg);
 	}
 
 	/** Associated incident */
