@@ -37,7 +37,11 @@ import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
-import static us.mn.state.dot.tms.DmsMsgPriority.*;
+import static us.mn.state.dot.tms.DmsMsgPriority.AWS;
+import static us.mn.state.dot.tms.DmsMsgPriority.BLANK;
+import static us.mn.state.dot.tms.DmsMsgPriority.OVERRIDE;
+import static us.mn.state.dot.tms.DmsMsgPriority.PREFIX_PAGE;
+import static us.mn.state.dot.tms.DmsMsgPriority.TRAVEL_TIME;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Font;
@@ -844,7 +848,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Scheduled sign message */
-	private transient SignMessage msg_sched = createMsgBlank();
+	private transient SignMessage msg_sched;
 
 	/** Get the scheduled sign messasge.
 	 * @return Scheduled sign message */
@@ -863,8 +867,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Set the scheduled DMS action */
 	public void setScheduledAction(DmsAction da) {
 		SignMessage sm = (da != null) ? createMsgSched(da) : null;
-		if (null == sm)
-			sm = createMsgBlank();
 		setMsgSchedNotify(sm);
 		setPrices(da);
 		try {
@@ -1010,12 +1012,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Is scheduled message using PREFIX_PAGE? */
 	private boolean isPrefixPage(SignMessage sm) {
-		return sm.getActivationPriority() ==
-		       DmsMsgPriority.PREFIX_PAGE.ordinal();
+		return (sm != null) &&
+		       (sm.getActivationPriority() == PREFIX_PAGE.ordinal());
 	}
 
 	/** Check if a sign message is valid */
 	private boolean isMsgValid(SignMessage sm) {
+		if (null == sm)
+			return false;
 		try {
 			SignMessageHelper.validate(sm, this);
 			return true;
