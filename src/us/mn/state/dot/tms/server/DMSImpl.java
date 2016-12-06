@@ -861,7 +861,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param da DMS action.
 	 * @return true if action is valid. */
 	public boolean checkAction(DmsAction da) {
-		return createMsgSched(da) != null;
+		assert (da != null);
+		return formatter.createMulti(da) != null;
 	}
 
 	/** Set the scheduled DMS action */
