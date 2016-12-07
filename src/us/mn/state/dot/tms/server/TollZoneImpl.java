@@ -265,7 +265,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	private void removeHistoryMappings(SamplerSet ss) {
 		Iterator<VehicleSampler> it = k_hist.keySet().iterator();
 		while (it.hasNext()) {
-			if (!ss.hasDetector(it.next()))
+			if (!ss.contains(it.next()))
 				it.remove();
 		}
 	}
@@ -299,7 +299,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		for (Map.Entry<VehicleSampler, DensityHist> e:
 		     k_hist.entrySet())
 		{
-			if (ss.hasDetector(e.getKey())) {
+			if (ss.contains(e.getKey())) {
 				Double k = e.getValue().density;
 				if (k_hot == null || (k != null && k > k_hot))
 					k_hot = k;

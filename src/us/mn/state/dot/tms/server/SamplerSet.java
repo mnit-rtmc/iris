@@ -93,8 +93,8 @@ public class SamplerSet implements VehicleSampler {
 			return false;
 	}
 
-	/** Check if a vehicle sampler is in the set */
-	public boolean hasDetector(VehicleSampler vs) {
+	/** Check if the set contains a vehicle sampler */
+	public boolean contains(VehicleSampler vs) {
 		return samplers.contains(vs);
 	}
 
