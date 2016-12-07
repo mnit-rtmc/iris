@@ -594,7 +594,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Get the sampler set */
 	public SamplerSet getSamplerSet() {
-		return new SamplerSet(detectors.getAll());
+		return detectors.getSamplerSet();
 	}
 
 	/** Downstream roadway nodes */

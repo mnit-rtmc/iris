@@ -14,7 +14,6 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TreeSet;
 import us.mn.state.dot.tms.utils.NumericAlphaComparator;
@@ -49,9 +48,9 @@ public class DetectorSet {
 	/** Create an empty detector set */
 	public DetectorSet() { }
 
-	/** Get all detectors */
-	public ArrayList<DetectorImpl> getAll() {
-		return new ArrayList<DetectorImpl>(detectors);
+	/** Get a sampler set */
+	public SamplerSet getSamplerSet() {
+		return new SamplerSet(detectors);
 	}
 
 	/** Add a detector to the detector set */
