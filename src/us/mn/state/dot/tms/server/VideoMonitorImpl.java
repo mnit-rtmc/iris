@@ -194,11 +194,10 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Select a camera for the video monitor */
 	private void selectCamera(CameraImpl cam) {
-		Controller c = getController();
-		if (c instanceof ControllerImpl)
-			selectCamera((ControllerImpl) c, cam);
-		else
-			selectCameraWithSwitcher(cam);
+		// NOTE: we need to iterate through all controllers to support
+		//       Pelco switcher protocol.  Otherwise, we could just
+		//       call getController here.
+		selectCameraWithSwitcher(cam);
 	}
 
 	/** Select a camera for the video monitor with a switcher */
