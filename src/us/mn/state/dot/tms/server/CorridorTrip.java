@@ -85,20 +85,10 @@ public class CorridorTrip {
 
 	/** Lookup the samplers for one station and lane type */
 	private ArrayList<VehicleSampler> lookupSamplers(StationImpl s,
-		final LaneType lt)
+		LaneType lt)
 	{
 		SamplerSet ss = lookupSamplers(s);
-		ArrayList<VehicleSampler> dets = ss.filter(
-			new SamplerSet.Filter()
-		{
-			public boolean check(VehicleSampler vs) {
-				if (vs instanceof DetectorImpl) {
-					DetectorImpl d = (DetectorImpl) vs;
-					return lt.ordinal() == d.getLaneType();
-				} else
-					return false;
-			}
-		});
+		ArrayList<VehicleSampler> dets = ss.filter(lt);
 		// Create sampler set combining all detectors in station.
 		// This is needed to average densities over multiple HOT lanes.
 		ArrayList<VehicleSampler> arr = new ArrayList<VehicleSampler>();
