@@ -245,37 +245,20 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Update density.
 	 * @param np New pricing period (if true). */
 	public synchronized void updateDensity(boolean np) {
+		updateDensityHistory();
 		for (Map.Entry<VehicleSampler,DensityHist> e:k_hist.entrySet()){
 			double k = e.getKey().getDensity();
 			e.getValue().updateDensity(np, k);
 		}
 	}
 
-	/** Get the current toll zone price.
-	 * @param lbl Sign label for logging.
-	 * @param o Origin (location of DMS).
-	 * @return Price (dollars). */
-	public float getPrice(String lbl, GeoLoc o) {
-		updateDensityHistory(lbl);
-		SamplerSet ss = lookupDetectors(buildRoute(o));
-		if (isLogging())
-			log(lbl + " use detectors: " + ss);
-		Double k_hot = findMaxDensity(ss);
-		float price = calculatePricing(k_hot);
-		if (isLogging())
-			log(lbl + " k_hot: " + k_hot + ", price: $" + price);
-		return price;
-	}
-
 	/** Update density history for all detectors in the toll zone */
-	private void updateDensityHistory(String lbl) {
+	private void updateDensityHistory() {
 		SamplerSet ss = lookupDetectors(buildRoute());
 		if (isLogging())
-			log(lbl + " all detectors: " + ss);
-		synchronized (this) {
-			removeHistoryMappings(ss);
-			addHistoryMappings(ss);
-		}
+			log("all detectors: " + ss);
+		removeHistoryMappings(ss);
+		addHistoryMappings(ss);
 	}
 
 	/** Remove mappings from k_hist if not in sampler set */
@@ -293,6 +276,21 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 			if (!k_hist.containsKey(vs))
 				k_hist.put(vs, new DensityHist());
 		}
+	}
+
+	/** Get the current toll zone price.
+	 * @param lbl Sign label for logging.
+	 * @param o Origin (location of DMS).
+	 * @return Price (dollars). */
+	public float getPrice(String lbl, GeoLoc o) {
+		SamplerSet ss = lookupDetectors(buildRoute(o));
+		if (isLogging())
+			log(lbl + " use detectors: " + ss);
+		Double k_hot = findMaxDensity(ss);
+		float price = calculatePricing(k_hot);
+		if (isLogging())
+			log(lbl + " k_hot: " + k_hot + ", price: $" + price);
+		return price;
 	}
 
 	/** Find the max density within a sampler set */
