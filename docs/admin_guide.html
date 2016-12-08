@@ -2848,7 +2848,7 @@ FIXME
 	speeds are calculated from all valid detectors in the station.
 	If a speed higher than the <a href="#speed_limit">speed limit</a> is
 	recorded, the speed limit is used instead.
-	The sample interval used increases as the speed becomes lower.
+	The sample interval used increases as the speed becomes lower:
 </p>
 <ul>
     <li>Normally 2 minutes</li>
@@ -2865,12 +2865,12 @@ FIXME
 	be reliable, so the process is aborted.
 	The links which are adjacent to a station are assigned speed from that
 	station.
-	The "middle" links are assigned an average speed of the immediate
-	upstream and downstream stations.
-	The running average speed is normally used.
+	"Middle" links are assigned an average of the immediate upstream and
+	downstream station speeds.
+	Normally, the running average speed is used.
 	If the link is less than 1 mile from the corridor destination, the
 	running minimum is used instead.
-	Travel time for each link is estimated by dividing the length by the
+	Travel time for each link is estimated by dividing its length by the
 	assigned speed.
 	If the route branches, each branch adds a 1 minute <b>turning delay</b>.
 </p>
