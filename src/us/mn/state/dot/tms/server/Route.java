@@ -15,11 +15,9 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.ArrayList;
-import java.util.LinkedList;
-import us.mn.state.dot.sched.DebugLog;
+import java.util.List;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.units.Distance;
-import us.mn.state.dot.tms.units.Interval;
 
 /**
  * A route is a list of "corridor trips" from an origin to a destination on a
@@ -32,25 +30,15 @@ public class Route implements Comparable<Route> {
 	/** Penalty (in goodness) for each trip in a route */
 	static private final float TRIP_PENALTY = 0.25f;
 
-	/** Debug log */
-	private final DebugLog dlog;
-
-	/** Name for route debugging */
-	private final String name;
-
 	/** List of corridor trips */
-	private final LinkedList<CorridorTrip> trips =
-		new LinkedList<CorridorTrip>();
+	private final List<CorridorTrip> trips = new ArrayList<CorridorTrip>();
 
 	/** Number of turns in route */
 	private int turns;
 
 	/** Create a new route.
-	 * @param dl Debug log.
 	 * @param n Name (for debugging). */
-	public Route(DebugLog dl, String n) {
-		dlog = dl;
-		name = n;
+	public Route() {
 		turns = 0;
 	}
 
@@ -61,6 +49,11 @@ public class Route implements Comparable<Route> {
 			turns++;
 	}
 
+	/** Get list of trips in route */
+	public List<CorridorTrip> getTrips() {
+		return trips;
+	}
+
 	/** Get the number of turns in the route */
 	public int getTurns() {
 		return turns;
@@ -69,7 +62,7 @@ public class Route implements Comparable<Route> {
 	/** Get the "only" corridor (if the route is just a single corridor) */
 	public Corridor getOnlyCorridor() {
 		if (trips.size() == 1)
-			return trips.getFirst().corridor;
+			return trips.get(0).corridor;
 		else
 			return null;
 	}
@@ -87,33 +80,6 @@ public class Route implements Comparable<Route> {
 	public float getGoodness() {
 		return getDistance().asFloat(Distance.Units.MILES) +
 			TRIP_PENALTY * trips.size();
-	}
-
-	/** Get the current travel time */
-	public Interval getTravelTime(boolean final_dest)
-		throws BadRouteException
-	{
-		if (trips.isEmpty())
-			throw new BadRouteException("Route is empty");
-		Interval t = new Interval(turns, Interval.Units.MINUTES);
-		for (CorridorTrip trip: trips) {
-			TripTimer tt = new TripTimer(dlog, name, trip,
-				final_dest);
-			t = t.add(tt.calculate());
-		}
-		if (isLogging())
-			log("TRAVEL TIME " + t);
-		return t;
-	}
-
-	/** Check if we're logging */
-	private boolean isLogging() {
-		return dlog.isOpen();
-	}
-
-	/** Log a message */
-	private void log(String m) {
-		dlog.log(name + ": " + m);
 	}
 
 	/** Get a set of vehicle samplers on route */

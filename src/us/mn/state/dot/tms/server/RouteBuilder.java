@@ -130,7 +130,7 @@ public class RouteBuilder {
 	 * @param odf Origin / destination pair.
 	 * @throws BadRouteException on route error. */
 	private void buildRoute(ODPair odf) throws BadRouteException {
-		Route r = new Route(dlog, name);
+		Route r = new Route();
 		for (ODPair od: path)
 			r.addTrip(createTrip(od), od.hasTurn());
 		r.addTrip(createTrip(odf), false);

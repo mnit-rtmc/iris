@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.HashMap;
+import java.util.List;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Station;
@@ -230,11 +231,29 @@ public class TravelTimeEstimator {
 	}
 
 	/** Calculate the travel time for the given route */
-	private int calculateTravelTime(Route route, boolean final_dest)
+	private int calculateTravelTime(Route r, boolean final_dest)
 		throws BadRouteException
 	{
-		int m = route.getTravelTime(final_dest).floor(MINUTES);
+		int m = getTravelTime(r, final_dest).floor(MINUTES);
 		return m + 1;
+	}
+
+	/** Get the current travel time */
+	private Interval getTravelTime(Route r, boolean final_dest)
+		throws BadRouteException
+	{
+		List<CorridorTrip> trips = r.getTrips();
+		if (trips.isEmpty())
+			throw new BadRouteException("Route is empty");
+		Interval t = new Interval(r.getTurns(), Interval.Units.MINUTES);
+		for (CorridorTrip trip: trips) {
+			TripTimer tt = new TripTimer(TRAVEL_LOG, name, trip,
+				final_dest);
+			t = t.add(tt.calculate());
+		}
+		if (TRAVEL_LOG.isOpen())
+			logTravel("TRAVEL TIME " + t);
+		return t;
 	}
 
 	/** Are all the routes confined to the same single corridor */
