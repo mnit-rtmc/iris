@@ -183,9 +183,7 @@ public class MultiString {
 	static private void parseFont(String f, Multi cb) {
 		String[] args = f.split(",", 2);
 		Integer f_num = parseInt(args, 0);
-		String f_id = null;
-		if (args.length > 1)
-			f_id = args[1];
+		String f_id = (args.length > 1) ? args[1] : null;
 		if (f_num != null)
 			cb.setFont(f_num, f_id);
 	}
@@ -198,9 +196,7 @@ public class MultiString {
 		Integer g_num = parseInt(args, 0);
 		Integer x = parseInt(args, 1);
 		Integer y = parseInt(args, 2);
-		String g_id = null;
-		if (args.length > 3)
-			g_id = args[3];
+		String g_id = (args.length > 3) ? args[3] : null;
 		if (g_num != null)
 			cb.addGraphic(g_num, x, y, g_id);
 	}
@@ -309,18 +305,14 @@ public class MultiString {
 
 	/** Parse a slow mode value */
 	static private String parseSlowMode(String[] args, int n) {
-		if (n < args.length)
-			return parseSlowMode(args[n]);
-		else
-			return null;
+		return (n < args.length) ? parseSlowMode(args[n]) : null;
 	}
 
 	/** Parse a slow mode value */
 	static private String parseSlowMode(String param) {
-		if ("dist".equals(param) || "speed".equals(param))
-			return param;
-		else
-			return null;
+		return ("dist".equals(param) || "speed".equals(param))
+		      ? param
+		      : null;
 	}
 
 	/** MULTI string buffer */
