@@ -76,6 +76,91 @@ public class RouteBuilder {
 		corridors = c;
 	}
 
+	/** Find the best route from an origin to a destination.
+	 * @param o Route origin.
+	 * @param d Route destination.
+	 * @return Best route found. */
+	public Route findBestRoute(GeoLoc o, GeoLoc d) {
+		routes.clear();
+		path.clear();
+		findPaths(0, o, d);
+		if (routes.size() > 0)
+			return routes.first();
+		else
+			return null;
+	}
+
+	/** Find all paths from an origin to a destination.
+	 * @param distance Distance.
+	 * @param origin Route origin.
+	 * @param destination Route destination. */
+	private void findPaths(float distance, final GeoLoc origin,
+		final GeoLoc destination)
+	{
+		ODPair od = new ODPair(origin, destination, false);
+		Corridor c = corridors.getCorridor(od);
+		if (c != null) {
+			try {
+				float d = c.calculateDistance(od);
+				if (distance + d < max_mi)
+					buildRoute(od);
+			}
+			catch (BadRouteException e) {
+				debugRouteException(e);
+			}
+		}
+		if (path.size() < legs) {
+			try {
+				searchCorridor(distance, origin, destination);
+			}
+			catch (BadRouteException e) {
+				debugRouteException(e);
+			}
+		}
+	}
+
+	/** Debug a route exception.
+	 * @param e Bad route exception. */
+	private void debugRouteException(BadRouteException e) {
+		if (isLogging())
+			log("BAD ROUTE: " + e.getMessage());
+	}
+
+	/** Build a route from the current path.
+	 * @param odf Origin / destination pair.
+	 * @throws BadRouteException on route error. */
+	private void buildRoute(ODPair odf) throws BadRouteException {
+		Route r = new Route(dlog, name);
+		int turns = 0;
+		for (ODPair od: path) {
+			r.addTrip(createTrip(od));
+			if (od.hasTurn())
+				turns++;
+		}
+		r.setTurns(turns);
+		r.addTrip(createTrip(odf));
+		routes.add(r);
+		// NOTE: this optimisation will prevent us from finding some
+		// secondary routes; we're only interested in the best route.
+		max_mi = Math.min(max_mi, r.getGoodness());
+		if (isLogging()) {
+			GeoLoc dest = odf.getDestination();
+			log("FOUND ROUTE TO " + GeoLocHelper.getDescription(
+			    dest) + ", " + r);
+			if (max_mi == r.getGoodness())
+				log("LOWERED MAX DIST TO " + max_mi);
+		}
+	}
+
+	/** Create one corridor trip */
+	private CorridorTrip createTrip(ODPair od) throws BadRouteException {
+		Corridor c = corridors.getCorridor(od);
+		if (c != null)
+			return new CorridorTrip(c, od);
+		else
+			throw new BadRouteException("MISSING CORRIDOR");
+	}
+
 	/** Search a corridor for branching paths to a destination.
 	 * @param distance Distance.
 	 * @param origin Route origin.
@@ -154,90 +239,5 @@ public class RouteBuilder {
 			}
 		}
 		return next;
-	}
-
-	/** Debug a route exception.
-	 * @param e Bad route exception. */
-	private void debugRouteException(BadRouteException e) {
-		if (isLogging())
-			log("BAD ROUTE: " + e.getMessage());
-	}
-
-	/** Find all paths from an origin to a destination.
-	 * @param distance Distance.
-	 * @param origin Route origin.
-	 * @param destination Route destination. */
-	private void findPaths(float distance, final GeoLoc origin,
-		final GeoLoc destination)
-	{
-		ODPair od = new ODPair(origin, destination, false);
-		Corridor c = corridors.getCorridor(od);
-		if (c != null) {
-			try {
-				float d = c.calculateDistance(od);
-				if (distance + d < max_mi)
-					buildRoute(od);
-			}
-			catch (BadRouteException e) {
-				debugRouteException(e);
-			}
-		}
-		if (path.size() < legs) {
-			try {
-				searchCorridor(distance, origin, destination);
-			}
-			catch (BadRouteException e) {
-				debugRouteException(e);
-			}
-		}
-	}
-
-	/** Build a route from the current path.
-	 * @param odf Origin / destination pair.
-	 * @throws BadRouteException on route error. */
-	private void buildRoute(ODPair odf) throws BadRouteException {
-		Route r = new Route(dlog, name);
-		int turns = 0;
-		for (ODPair od: path) {
-			r.addTrip(createTrip(od));
-			if (od.hasTurn())
-				turns++;
-		}
-		r.setTurns(turns);
-		r.addTrip(createTrip(odf));
-		routes.add(r);
-		// NOTE: this optimisation will prevent us from finding some
-		// secondary routes; we're only interested in the best route.
-		max_mi = Math.min(max_mi, r.getGoodness());
-		if (isLogging()) {
-			GeoLoc dest = odf.getDestination();
-			log("FOUND ROUTE TO " + GeoLocHelper.getDescription(
-			    dest) + ", " + r);
-			if (max_mi == r.getGoodness())
-				log("LOWERED MAX DIST TO " + max_mi);
-		}
-	}
-
-	/** Create one corridor trip */
-	private CorridorTrip createTrip(ODPair od) throws BadRouteException {
-		Corridor c = corridors.getCorridor(od);
-		if (c != null)
-			return new CorridorTrip(c, od);
-		else
-			throw new BadRouteException("MISSING CORRIDOR");
-	}
-
-	/** Find the best route from an origin to a destination.
-	 * @param o Route origin.
-	 * @param d Route destination.
-	 * @return Best route found. */
-	public Route findBestRoute(GeoLoc o, GeoLoc d) {
-		routes.clear();
-		path.clear();
-		findPaths(0, o, d);
-		if (routes.size() > 0)
-			return routes.first();
-		else
-			return null;
 	}
 }
