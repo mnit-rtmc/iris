@@ -92,7 +92,7 @@ public class RouteBuilder {
 
 	/** Find all paths from an origin to a destination.
 	 * @param distance Distance.
-	 * @param origin Route origin.
+	 * @param origin Corridor origin.
 	 * @param destination Route destination. */
 	private void findPaths(float distance, final GeoLoc origin,
 		final GeoLoc destination)

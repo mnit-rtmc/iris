@@ -36,8 +36,7 @@ public class Route implements Comparable<Route> {
 	/** Number of turns in route */
 	private int turns;
 
-	/** Create a new route.
-	 * @param n Name (for debugging). */
+	/** Create a new route */
 	public Route() {
 		turns = 0;
 	}
@@ -93,7 +92,7 @@ public class Route implements Comparable<Route> {
 	/** Compare to another route (for sorting) */
 	@Override
 	public int compareTo(Route o) {
-		return (int)Math.signum(getGoodness() - o.getGoodness());
+		return (int) Math.signum(getGoodness() - o.getGoodness());
 	}
 
 	/** Get a string representation of the route */
