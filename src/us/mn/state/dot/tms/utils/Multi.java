@@ -140,8 +140,16 @@ public interface Multi {
 
 	/* IRIS-specific quick message tags (not part of MULTI) */
 
-	/** Add a travel time destination */
-	void addTravelTime(String sid);
+	/** Modes for travel time over limit handling */
+	enum OverLimitMode {
+		blank, prepend, append
+	};
+
+	/** Add a travel time destination.
+	 * @param stat_id Destination station ID.
+	 * @param mode Over limit mode.
+	 * @param o_txt Over limit text. */
+	void addTravelTime(String sid, OverLimitMode mode, String o_txt);
 
 	/** Add a speed advisory */
 	void addSpeedAdvisory();

@@ -100,10 +100,12 @@ public class TravelTimeEstimator {
 
 		/** Add a travel time destination */
 		@Override
-		public void addTravelTime(String sid) {
+		public void addTravelTime(String sid, OverLimitMode mode,
+			String o_txt)
+		{
 			Route r = lookupRoute(sid);
 			if (r != null)
-				addTravelTime(r);
+				addTravelTime(r, mode, o_txt);
 			else {
 				logTravel("NO ROUTE TO " + sid);
 				valid = false;
@@ -111,12 +113,14 @@ public class TravelTimeEstimator {
 		}
 
 		/** Add a travel time for a route */
-		private void addTravelTime(Route r) {
+		private void addTravelTime(Route r, OverLimitMode mode,
+			String o_txt)
+		{
 			boolean final_dest = isFinalDest(r);
 			try {
 				int mn = calculateTravelTime(r, final_dest);
 				int slow = maximumTripMinutes(r.getDistance());
-				addTravelTime(mn, slow);
+				addTravelTime(mn, slow, mode, o_txt);
 			}
 			catch (BadRouteException e) {
 				logTravel("BAD ROUTE, " + e.getMessage());
@@ -125,17 +129,36 @@ public class TravelTimeEstimator {
 		}
 
 		/** Add a travel time */
-		private void addTravelTime(int mn, int slow) {
+		private void addTravelTime(int mn, int slow, OverLimitMode mode,
+			String o_txt)
+		{
 			boolean over = mn > slow;
 			if (over) {
 				any_over = true;
 				mn = slow;
 			}
-			if (over || all_over) {
-				mn = roundUp5Min(mn);
-				addSpan("OVER " + String.valueOf(mn));
-			} else
+			if (over || all_over)
+				addOverLimit(mn, mode, o_txt);
+			else
 				addSpan(String.valueOf(mn));
+		}
+
+		/** Add over limit travel time */
+		private void addOverLimit(int mn, OverLimitMode mode,
+			String o_txt)
+		{
+			String lim = String.valueOf(roundUp5Min(mn));
+			switch (mode) {
+			case prepend:
+				addSpan(o_txt + lim);
+				break;
+			case append:
+				addSpan(lim + o_txt);
+				break;
+			default:
+				valid = false;
+				break;
+			}
 		}
 
 		/** Check if the callback has changed formatting mode */

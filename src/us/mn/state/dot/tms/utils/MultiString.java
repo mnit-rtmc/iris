@@ -22,6 +22,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.units.Interval;
+import us.mn.state.dot.tms.utils.Multi.OverLimitMode;
 
 /**
  * MULTI String (MarkUp Language for Transportation Information), as specified
@@ -101,7 +102,7 @@ public class MultiString {
 		else if (ltag.startsWith("tr"))
 			parseTextRectangle(tag.substring(2), cb);
 		else if (ltag.startsWith("tt"))
-			cb.addTravelTime(tag.substring(2));
+			parseTravelTime(tag.substring(2), cb);
 		else if (ltag.startsWith("vsa"))
 			cb.addSpeedAdvisory();
 		else if (ltag.startsWith("slow"))
@@ -253,6 +254,29 @@ public class MultiString {
 			cb.setTextRectangle(x, y, w, h);
 	}
 
+	/** Parse travel time from a [tts], [tts,m] or [tts,m,t] tag.
+	 * @param v Travel time tag value (s or s,m or s,m,t from tag).
+	 * @param cb Callback to set travel time. */
+	static private void parseTravelTime(String v, Multi cb) {
+		String[] args = v.split(",", 3);
+		String sid = (args.length > 0) ? args[0] : null;
+		OverLimitMode mode = (args.length > 1)
+		                   ? parseOverMode(args[1])
+		                   : OverLimitMode.prepend;
+		String o_txt = (args.length > 2) ? args[2] : "OVER ";
+		if (sid != null)
+			cb.addTravelTime(sid, mode, o_txt);
+	}
+
+	/** Parse a over limit mode value */
+	static private OverLimitMode parseOverMode(String mode) {
+		for (OverLimitMode m : OverLimitMode.values()) {
+			if (mode.equals(m.toString()))
+				return m;
+		}
+		return OverLimitMode.prepend;
+	}
+
 	/** Parse slow traffic warning from a [slows,d] or [slows,d,m] tag.
 	 * @param v Slow traffic tag value (s,d or s,d,m from tag).
 	 * @param cb Callback to set slow warning. */
@@ -260,7 +284,7 @@ public class MultiString {
 		String[] args = v.split(",", 3);
 		Integer spd = parseInt(args, 0);
 		Integer dist = parseInt(args, 1);
-		String mode = parseSlowMode(args, 2);
+		String mode = (args.length > 2) ? parseSlowMode(args[2]) : null;
 		if (isSpeedValid(spd) && isDistValid(dist))
 			cb.addSlowWarning(spd, dist, mode);
 	}
@@ -301,11 +325,6 @@ public class MultiString {
 	/** Test if a parsed distance is valid (1/10 mile units) */
 	static private boolean isDistValid(Integer d) {
 		return d != null && d > 0 && d <= 160;
-	}
-
-	/** Parse a slow mode value */
-	static private String parseSlowMode(String[] args, int n) {
-		return (n < args.length) ? parseSlowMode(args[n]) : null;
 	}
 
 	/** Parse a slow mode value */
