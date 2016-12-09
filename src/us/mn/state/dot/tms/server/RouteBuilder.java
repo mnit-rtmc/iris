@@ -131,14 +131,9 @@ public class RouteBuilder {
 	 * @throws BadRouteException on route error. */
 	private void buildRoute(ODPair odf) throws BadRouteException {
 		Route r = new Route(dlog, name);
-		int turns = 0;
-		for (ODPair od: path) {
-			r.addTrip(createTrip(od));
-			if (od.hasTurn())
-				turns++;
-		}
-		r.setTurns(turns);
-		r.addTrip(createTrip(odf));
+		for (ODPair od: path)
+			r.addTrip(createTrip(od), od.hasTurn());
+		r.addTrip(createTrip(odf), false);
 		routes.add(r);
 		// NOTE: this optimisation will prevent us from finding some
 		// secondary routes; we're only interested in the best route.

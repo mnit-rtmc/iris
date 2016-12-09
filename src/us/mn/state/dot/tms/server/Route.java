@@ -55,13 +55,10 @@ public class Route implements Comparable<Route> {
 	}
 
 	/** Add a corridor trip to the route */
-	public void addTrip(CorridorTrip trip) {
+	public void addTrip(CorridorTrip trip, boolean is_turn) {
 		trips.add(trip);
-	}
-
-	/** Set the number of turns in the route */
-	public void setTurns(int t) {
-		turns = t;
+		if (is_turn)
+			turns++;
 	}
 
 	/** Get the number of turns in the route */
