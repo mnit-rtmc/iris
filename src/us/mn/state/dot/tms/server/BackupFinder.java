@@ -63,8 +63,7 @@ public class BackupFinder implements Corridor.StationFinder {
 	 * @param s Station to check.
 	 * @return true to stop checking (never). */
 	@Override
-	public boolean check(Float m, StationImpl s) {
-		assert m != null;
+	public boolean check(float m, StationImpl s) {
 		float spd = s.getRollingAverageSpeed();
 		if (spd > 0 && spd < spd_thresh.round(MPH)) {
 			if (isNearUpstream(m))

@@ -69,7 +69,7 @@ public class CorridorTrip {
 		final ArrayList<VehicleSampler> samplers =
 			new ArrayList<VehicleSampler>();
 		corridor.findStation(new Corridor.StationFinder() {
-			public boolean check(Float m, StationImpl s) {
+			public boolean check(float m, StationImpl s) {
 				if (isWithinTrip(m))
 					samplers.addAll(lookupSamplers(s, lt));
 				return false;

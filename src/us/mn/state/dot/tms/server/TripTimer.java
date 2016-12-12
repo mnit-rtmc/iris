@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -128,7 +128,7 @@ public class TripTimer {
 		final TreeMap<Float, StationData> s_data =
 			new TreeMap<Float, StationData>();
 		trip.corridor.findStation(new Corridor.StationFinder() {
-			public boolean check(Float m, StationImpl s) {
+			public boolean check(float m, StationImpl s) {
 				if (isWithinTrip(m)) {
 					float a = s.getSmoothedAverageSpeed();
 					float l = s.getSmoothedLowSpeed();

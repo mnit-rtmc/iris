@@ -78,7 +78,7 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 
 	/** Interface to find a station on the corridor */
 	static public interface StationFinder {
-		public boolean check(Float m, StationImpl s);
+		public boolean check(float m, StationImpl s);
 	}
 
 	/** Find a station using a station finder callback interface */
@@ -100,7 +100,7 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 		final TreeMap<Float, StationImpl> stations =
 			new TreeMap<Float, StationImpl>();
 		findStation(new StationFinder() {
-			public boolean check(Float m, StationImpl s) {
+			public boolean check(float m, StationImpl s) {
 				stations.put(m, s);
 				return false;
 			}
@@ -165,7 +165,7 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 		final TreeMap<Float, StationImpl> upstream =
 			new TreeMap<Float, StationImpl>();
 		findStation(new StationFinder() {
-			public boolean check(Float m, StationImpl s) {
+			public boolean check(float m, StationImpl s) {
 				if (s.getRollingAverageSpeed() > 0) {
 					s.calculateBottleneck(m, upstream);
 					upstream.put(m, s);

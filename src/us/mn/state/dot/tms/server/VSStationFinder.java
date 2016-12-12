@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2013  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,8 +59,9 @@ public class VSStationFinder implements Corridor.StationFinder {
 	 * @param m Milepoint of station.
 	 * @param s Station to check.
 	 * @return true to stop checking (never). */
-	@Override public boolean check(Float m, StationImpl s) {
-		if(m < ma) {
+	@Override
+	public boolean check(float m, StationImpl s) {
+		if (m < ma) {
 			su = s;
 			mu = m;
 		} else if(md == null || md > m) {
