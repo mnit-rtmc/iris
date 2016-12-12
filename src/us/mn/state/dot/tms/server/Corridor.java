@@ -133,15 +133,6 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 		throw new BadRouteException("No downstream nodes");
 	}
 
-	/** Find an active node using a node finder callback (reverse order) */
-	public R_NodeImpl findActiveNodeReverse(NodeFinder finder) {
-		for (R_NodeImpl n: n_points.descendingMap().values()) {
-			if (n.getActive() && finder.check(n))
-				return n;
-		}
-		return null;
-	}
-
 	/** Get the IDs of all linked CD roads */
 	public Iterator<String> getLinkedCDRoads() {
 		HashSet<String> cds = new HashSet<String>();
