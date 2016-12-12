@@ -336,10 +336,15 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Check if this r_node should impose a "turn" penalty */
 	public boolean hasTurnPenalty() {
-		return (transition == R_NodeTransition.LOOP) ||
-			(transition == R_NodeTransition.LEG) ||
-			(transition == R_NodeTransition.HOV) ||
-			(transition == R_NodeTransition.FLYOVER);
+		switch (transition) {
+		case LOOP:
+		case LEG:
+		case HOV:
+		case FLYOVER:
+			return true;
+		default:
+			return false;
+		}
 	}
 
 	/** Number of lanes */
