@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,19 +25,19 @@ import us.mn.state.dot.tms.GeoLocHelper;
 public class ODPair {
 
 	/** Origin location */
-	private final GeoLoc origin;
+	private final GeoLoc orig;
 
 	/** Get the origin location */
 	public GeoLoc getOrigin() {
-		return origin;
+		return orig;
 	}
 
 	/** Destination location */
-	private final GeoLoc destination;
+	private final GeoLoc dest;
 
 	/** Get the destination location */
 	public GeoLoc getDestination() {
-		return destination;
+		return dest;
 	}
 
 	/** Is the destination a "turn" */
@@ -50,23 +50,27 @@ public class ODPair {
 
 	/** Create a new O/D pair */
 	public ODPair(GeoLoc o, GeoLoc d, boolean t) {
-		origin = o;
-		destination = d;
+		orig = o;
+		dest = d;
 		turn = t;
+	}
+
+	/** Create a new O/D pair */
+	public ODPair(GeoLoc o, GeoLoc d) {
+		this(o, d, false);
 	}
 
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "o: " + GeoLocHelper.getDescription(origin) + ", d: " +
-			GeoLocHelper.getDescription(destination);
+		return "o: " + GeoLocHelper.getDescription(orig) +
+		     ", d: " + GeoLocHelper.getDescription(dest);
 	}
 
 	/** Get the corridor name (if O/D on same corridor) */
 	public String getCorridorName() {
-		if (GeoLocHelper.isSameCorridor(origin, destination))
-			return GeoLocHelper.getCorridorName(origin);
-		else
-			return null;
+		return GeoLocHelper.isSameCorridor(orig, dest)
+		     ? GeoLocHelper.getCorridorName(orig)
+		     : null;
 	}
 }
