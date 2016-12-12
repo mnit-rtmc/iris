@@ -242,13 +242,13 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Test if this r_node type can be linked in a corridor */
 	public boolean isCorridorType() {
 		switch (node_type) {
-			case STATION:
-			case ENTRANCE:
-			case EXIT:
-			case INTERSECTION:
-				return true;
-			default:
-				return false;
+		case STATION:
+		case ENTRANCE:
+		case EXIT:
+		case INTERSECTION:
+			return true;
+		default:
+			return false;
 		}
 	}
 
@@ -325,7 +325,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Check if this r_node is an exit to a common section */
-	private boolean isCommonExit() {
+	public boolean isCommonExit() {
 		return isExit() && (transition == R_NodeTransition.COMMON);
 	}
 
