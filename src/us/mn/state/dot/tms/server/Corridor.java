@@ -25,6 +25,8 @@ import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_NodeHelper;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
 /**
  * A corridor is a collection of all R_Node objects for one roadway corridor.
@@ -121,6 +123,17 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 		return destination - origin;
 	}
 
+	/** Calculate the distance to the nearest node */
+	public Distance distanceTo(GeoLoc loc) {
+		Float m = calculateMilePoint(loc);
+		if (m != null) {
+			Float mile = findDownstreamPoint(m);
+			if (mile != null)
+				return new Distance(mile - m, MILES);
+		}
+		return null;
+	}
+
 	/** Find the nearest node downstream from the given location */
 	public R_NodeImpl findDownstreamNode(GeoLoc loc)
 		throws BadRouteException
@@ -128,11 +141,19 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 		Float m = calculateMilePoint(loc);
 		if (m == null)
 			throw new BadRouteException("No nodes on corridor");
+		Float mile = findDownstreamPoint(m);
+		if (mile != null)
+			return n_points.get(mile);
+		throw new BadRouteException("No downstream nodes");
+	}
+
+	/** Find the nearest milepoint downstream from the given milepoint */
+	private Float findDownstreamPoint(float m) {
 		for (Float mile: n_points.keySet()) {
 			if (mile > m)
-				return n_points.get(mile);
+				return mile;
 		}
-		throw new BadRouteException("No downstream nodes");
+		return null;
 	}
 
 	/** Get the IDs of all linked CD roads */
