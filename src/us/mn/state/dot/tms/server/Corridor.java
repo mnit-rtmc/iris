@@ -62,13 +62,15 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 
 	/** Interface to find a node on the corridor */
 	static public interface NodeFinder {
-		public boolean check(R_NodeImpl r_node);
+		public boolean check(float m, R_NodeImpl r_node);
 	}
 
 	/** Find an active node using a node finder callback interface */
 	public R_NodeImpl findActiveNode(NodeFinder finder) {
-		for (R_NodeImpl n: n_points.values()) {
-			if (n.getActive() && finder.check(n))
+		for (Float m: n_points.keySet()) {
+			assert m != null;
+			R_NodeImpl n = n_points.get(m);
+			if (n.getActive() && finder.check(m, n))
 				return n;
 		}
 		return null;

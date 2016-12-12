@@ -241,24 +241,23 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Create nodes from corridor structure */
 	private Node createNodes() {
-		Node first = null;
-		Node prev = null;
-		Iterator<R_NodeImpl> itr = corridor.iterator();
-		while (itr.hasNext()) {
-			R_NodeImpl rnode = itr.next();
-			Node n = createNode(rnode, prev);
-			if (n != null)
-				prev = n;
-			if (first == null)
-				first = prev;
-		}
-		return first;
+		NFinder finder = new NFinder();
+		corridor.findActiveNode(finder);
+		return finder.first;
 	}
 
-	/** Create one node */
-	private Node createNode(R_NodeImpl rnode, Node prev) {
-		Float mile = corridor.getMilePoint(rnode);
-		return (mile != null) ? createNode(rnode, mile, prev) : null;
+	/** Node finder */
+	private class NFinder implements Corridor.NodeFinder {
+		private Node first = null;
+		private Node prev = null;
+		public boolean check(float m, R_NodeImpl rnode) {
+			Node n = createNode(rnode, m, prev);
+			if (n != null)
+				prev = n;
+			if (null == first)
+				first = prev;
+			return false;
+		}
 	}
 
 	/** Create one node */

@@ -827,7 +827,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		private DetFinder(SamplerSet.Filter f) {
 			filter = f;
 		}
-		public boolean check(R_NodeImpl n) {
+		public boolean check(float m, R_NodeImpl n) {
 			if (n.getNodeType() == R_NodeType.ENTRANCE.ordinal()) {
 				GeoLoc l = n.getGeoLoc();
 				if (GeoLocHelper.matchesRoot(l, geo_loc)) {
