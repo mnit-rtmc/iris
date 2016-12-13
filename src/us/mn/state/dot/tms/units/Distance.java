@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2015  Minnesota Department of Transportation
+ * Copyright (C) 2012-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -91,9 +91,9 @@ public final class Distance implements Comparable<Distance> {
 	 * @return Distance as a float value. */
 	public float asFloat(Units u) {
 		if (u == units)
-			return (float)value;
+			return (float) value;
 		else
-			return (float)(m() / u.meters);
+			return (float) (m() / u.meters);
 	}
 
 	/** Round a distance to nearest whole unit.
@@ -101,9 +101,9 @@ public final class Distance implements Comparable<Distance> {
 	 * @return Distance rounded to nearest whole unit. */
 	public int round(Units u) {
 		if (u == units)
-			return (int)Math.round(value);
+			return (int) Math.round(value);
 		else
-			return (int)Math.round(m() / u.meters);
+			return (int) Math.round(m() / u.meters);
 	}
 
 	/** Add another distance.
@@ -116,11 +116,21 @@ public final class Distance implements Comparable<Distance> {
 			return new Distance(m() + d.m());
 	}
 
+	/** Subtract another distance.
+	 * @param d Other distance.
+	 * @return Result. */
+	public Distance sub(Distance d) {
+		if (d.units == units)
+			return new Distance(value - d.value, units);
+		else
+			return new Distance(m() - d.m());
+	}
+
 	/** Compare for equality */
 	@Override
 	public boolean equals(Object other) {
 		if (other instanceof Distance) {
-			Distance o = (Distance)other;
+			Distance o = (Distance) other;
 			if (units == o.units)
 				return value == o.value;
 			else
