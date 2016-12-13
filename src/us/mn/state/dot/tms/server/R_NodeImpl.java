@@ -628,7 +628,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Get a list of nodes forked from here */
-	private List<R_NodeImpl> getForks() {
+	public List<R_NodeImpl> getForks() {
 		LinkedList<R_NodeImpl> forks = new LinkedList<R_NodeImpl>();
 		for (R_NodeImpl d: getDownstream()) {
 			if (!isSameCorridor(geo_loc, d.geo_loc))

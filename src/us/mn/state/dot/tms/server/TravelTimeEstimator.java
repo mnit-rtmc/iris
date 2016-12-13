@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.util.HashMap;
 import java.util.List;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
@@ -171,12 +172,29 @@ public class TravelTimeEstimator {
 
 	/** Lookup a route by station ID */
 	private Route lookupRoute(String sid) {
-		if (!s_routes.containsKey(sid)) {
-			Route r = createRoute(sid);
-			if (r != null)
-				s_routes.put(sid, r);
+		if (!s_routes.containsKey(sid))
+			cacheRoute(sid);
+		Route r = s_routes.get(sid);
+		if (TRAVEL_LOG.isOpen()) {
+			long st = TimeSteward.currentTimeMillis();
+			Route2 r2 = findRoute(sid);
+			if (r2 != null) {
+				long e = TimeSteward.currentTimeMillis() - st;
+				logTravel("ROUTE TO " + sid + " FOUND IN " + e);
+				if (r2.matches(r))
+					logTravel("MATCHES!  YAY!!!");
+				else
+					logTravel("DOES NOT MATCH!  BOO!!!");
+			}
 		}
-		return s_routes.get(sid);
+		return r;
+	}
+
+	/** Cache a route */
+	private void cacheRoute(String sid) {
+		Route r = createRoute(sid);
+		if (r != null)
+			s_routes.put(sid, r);
 	}
 
 	/** Create one route to a travel time destination */
@@ -199,6 +217,23 @@ public class TravelTimeEstimator {
 		RouteBuilder builder = new RouteBuilder(TRAVEL_LOG, name,
 			BaseObjectImpl.corridors);
 		return builder.findBestRoute(origin, dest);
+	}
+
+	/** Find a route to a travel time destination */
+	private Route2 findRoute(String sid) {
+		Station s = StationHelper.lookup(sid);
+		return (s != null) ? findRoute(s) : null;
+	}
+
+	/** Find a route to a travel time destination */
+	private Route2 findRoute(Station s) {
+		return findRoute(s.getR_Node().getGeoLoc());
+	}
+
+	/** Find a route to a travel time destination */
+	private Route2 findRoute(GeoLoc dest) {
+		RouteFinder rf = new RouteFinder(BaseObjectImpl.corridors);
+		return rf.findRoute(origin, dest);
 	}
 
 	/** Log a travel time error */

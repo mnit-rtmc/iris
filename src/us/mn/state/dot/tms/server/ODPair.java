@@ -55,11 +55,6 @@ public class ODPair {
 		turn = t;
 	}
 
-	/** Create a new O/D pair */
-	public ODPair(GeoLoc o, GeoLoc d) {
-		this(o, d, false);
-	}
-
 	/** Get a string representation */
 	@Override
 	public String toString() {
