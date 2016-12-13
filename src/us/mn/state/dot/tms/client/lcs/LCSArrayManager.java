@@ -171,16 +171,19 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 			p.add(blankAction);
 			p.addSeparator();
 		}
-		if (WorkRequestAction.isConfigured()) {
-			for (int i = 1; i <= MAX_LANES; i++) {
-				DMS dms = LCSArrayHelper.lookupDMS(la, i);
-				if (dms != null) {
-					p.add(new WorkRequestAction<DMS>(dms,
-						dms.getGeoLoc()));
-				}
+	}
+
+	/** Fill single selection work request popup */
+	@Override
+	protected void fillPopupWorkReq(JPopupMenu p, LCSArray la) {
+		for (int i = 1; i <= MAX_LANES; i++) {
+			DMS dms = LCSArrayHelper.lookupDMS(la, i);
+			if (dms != null) {
+				p.add(new WorkRequestAction<DMS>(dms,
+					dms.getGeoLoc()));
 			}
-			p.addSeparator();
 		}
+		p.addSeparator();
 	}
 
 	/** Create a popup menu for multiple objects */

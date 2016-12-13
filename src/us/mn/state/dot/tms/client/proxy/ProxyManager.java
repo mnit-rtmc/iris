@@ -402,10 +402,8 @@ abstract public class ProxyManager<T extends SonarObject> {
 		p.addSeparator();
 		fillPopupSingle(p, proxy);
 		if (descriptor.has_properties) {
-			if (WorkRequestAction.isConfigured()) {
-				p.add(new WorkRequestAction<T>(proxy, loc));
-				p.addSeparator();
-			}
+			if (WorkRequestAction.isConfigured())
+				fillPopupWorkReq(p, proxy);
 		}
 		if (s_pane != null && loc != null)
 			p.add(new MapAction<T>(s_pane, proxy, loc));
@@ -417,6 +415,13 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Fill single selection popup */
 	protected void fillPopupSingle(JPopupMenu p, T proxy) {
 		// subclasses may override
+	}
+
+	/** Fill single selection work request popup */
+	protected void fillPopupWorkReq(JPopupMenu p, T proxy) {
+		GeoLoc loc = getGeoLoc(proxy);
+		p.add(new WorkRequestAction<T>(proxy, loc));
+		p.addSeparator();
 	}
 
 	/** Create a popup menu for multiple objects */
