@@ -91,9 +91,4 @@ public class MultiFormatter {
 		else
 			return false;
 	}
-
-	/** Clear the current routes */
-	public void clear() {
-		travel_est.clear();
-	}
 }

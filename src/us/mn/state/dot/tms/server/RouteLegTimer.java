@@ -22,13 +22,13 @@ import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Interval;
 
 /**
- * A trip timer calculates travel times for a corridor trip.
+ * A route leg timer calculates travel times for one leg of a route.
  *
  * @author Douglas Lau
  */
-public class TripTimer {
+public class RouteLegTimer {
 
-	/** Distance to use low station speed at end of trip (miles) */
+	/** Distance to use low station speed at end of route (miles) */
 	static private final float LOW_SPEED_DISTANCE = 1.0f;
 
 	/** Maximum allowed length of a travel time link (miles) */
@@ -82,36 +82,34 @@ public class TripTimer {
 	/** Name to use for debugging purposes */
 	private final String name;
 
-	/** Corridor trip */
-	private final CorridorTrip trip;
+	/** Route leg */
+	private final RouteLeg leg;
 
 	/** Milepoint after which to use low station speed */
-	private final float low_mile;
+	private final float low_mi;
 
-	/** Create a new trip timer.
+	/** Create a new route leg timer.
 	 * @param dl Debug log.
 	 * @param n Name (for debugging).
-	 * @param ct Corridor trip.
+	 * @param lg Route leg.
 	 * @param fd Final destination flag. */
-	public TripTimer(DebugLog dl, String n, CorridorTrip ct, boolean fd) {
+	public RouteLegTimer(DebugLog dl, String n, RouteLeg lg, boolean fd) {
 		dlog = dl;
 		name = n;
-		trip = ct;
-		low_mile = (fd)
-		          ? trip.destination - LOW_SPEED_DISTANCE
-		          : trip.destination;
+		leg = lg;
+		low_mi = (fd) ? leg.d_mi - LOW_SPEED_DISTANCE : leg.d_mi;
 	}
 
-	/** Calculate the current trip time.
+	/** Calculate the current travel time.
 	 * @return Travel time interval. */
-	public Interval calculate() throws BadRouteException {
+	public Interval calculateTime() throws BadRouteException {
 		float hours = 0;
 		StationData pd = null;	// previous station data
 		for (StationData sd: lookupStationData()) {
 			if (pd != null) {
 				if (isSegmentTooLong(pd.mile, sd.mile)) {
 					float llen = sd.mile - pd.mile;
-					trip.throwException("Link too long (" +
+					throwException("Link too long (" +
 						llen + ") " + sd.station);
 				}
 				hours += sd.timeFrom(pd);
@@ -121,13 +119,13 @@ public class TripTimer {
 		return new Interval(hours, Interval.Units.HOURS);
 	}
 
-	/** Lookup station data for the trip */
+	/** Lookup station data for the route leg */
 	private Collection<StationData> lookupStationData()
 		throws BadRouteException
 	{
 		final TreeMap<Float, StationData> s_data =
 			new TreeMap<Float, StationData>();
-		trip.corridor.findStation(new Corridor.StationFinder() {
+		leg.corridor.findStation(new Corridor.StationFinder() {
 			public boolean check(float m, StationImpl s) {
 				if (isWithinTrip(m)) {
 					float a = s.getSmoothedAverageSpeed();
@@ -140,35 +138,47 @@ public class TripTimer {
 				return false;
 			}
 		});
+		return extendStationData(s_data);
+	}
+
+	/** Add station data for beginning / end of leg */
+	private Collection<StationData> extendStationData(
+		TreeMap<Float, StationData> s_data) throws BadRouteException
+	{
 		if (s_data.size() > 0) {
 			Map.Entry<Float, StationData> me = s_data.firstEntry();
-			if (me.getKey() > trip.origin) {
+			if (me.getKey() > leg.o_mi) {
 				StationData sd = me.getValue();
 				float mm = sd.mile - MAX_LINK_LENGTH;
-				if (mm > trip.origin)
-					trip.throwException("Start > origin");
+				if (mm > leg.o_mi)
+					throwException("Start > origin");
 				s_data.put(mm, new StationData(sd.station, mm,
 				           sd.avg, sd.low));
 			}
 			me = s_data.lastEntry();
-			if (me.getKey() < trip.destination) {
+			if (me.getKey() < leg.d_mi) {
 				StationData sd = me.getValue();
 				float mm = sd.mile + MAX_LINK_LENGTH;
-				if (mm < trip.destination)
-					trip.throwException("End < destin");
+				if (mm < leg.d_mi)
+					throwException("End < destin");
 				s_data.put(mm, new StationData(sd.station, mm,
 				           sd.avg, sd.low));
 			}
 		} else
-			trip.throwException("No speed data");
+			throwException("No speed data");
 		return s_data.values();
 	}
 
-	/** Check if a milepoint is within the trip "bounds" */
+	/** Throw a BadRouteException with the specified message */
+	private void throwException(String msg) throws BadRouteException {
+		throw new BadRouteException(msg + " (" + leg + ")");
+	}
+
+	/** Check if a milepoint is within the leg "bounds" */
 	private boolean isWithinTrip(float m) {
 		// NOTE: isSegmentTooLong never returns true if start > end
-		return !(isSegmentTooLong(m, trip.origin) ||
-		         isSegmentTooLong(trip.destination, m));
+		return !(isSegmentTooLong(m, leg.o_mi) ||
+		         isSegmentTooLong(leg.d_mi, m));
 	}
 
 	/** Station data */
@@ -193,12 +203,12 @@ public class TripTimer {
 			return hours;
 		}
 		private float timeFromAvg(StationData pd) {
-			return time_segment(trip.origin, low_mile,
-			                    pd.mile, mile, pd.avg, avg);
+			return time_segment(leg.o_mi, low_mi, pd.mile, mile,
+			                    pd.avg, avg);
 		}
 		private float timeFromLow(StationData pd) {
-			return time_segment(low_mile, trip.destination,
-			                    pd.mile, mile, pd.low, low);
+			return time_segment(low_mi, leg.d_mi, pd.mile, mile,
+			                    pd.low, low);
 		}
 	}
 }

@@ -53,6 +53,11 @@ public class TravelTimeEstimator {
 		return ((min - 1) / 5 + 1) * 5;
 	}
 
+	/** Get a debugging "NOT" string */
+	static private String strNot(Route2 r) {
+		return (r != null) ? " " : " NOT ";
+	}
+
 	/** Name to use for debugging */
 	private final String name;
 
@@ -60,8 +65,8 @@ public class TravelTimeEstimator {
 	private final GeoLoc origin;
 
 	/** Mapping of station IDs to routes */
-	private final HashMap<String, Route> s_routes =
-		new HashMap<String, Route>();
+	private final HashMap<String, Route2> s_routes =
+		new HashMap<String, Route2>();
 
 	/** Create a new travel time estimator */
 	public TravelTimeEstimator(String n, GeoLoc o) {
@@ -73,6 +78,7 @@ public class TravelTimeEstimator {
 	 * @param trav MULTI string to parse.
 	 * @return MULTI string with tags replaced; null on bad route. */
 	public String replaceTravelTimes(String trav) {
+		s_routes.clear();
 		MultiString multi = new MultiString(trav);
 		TravelCallback cb = new TravelCallback();
 		multi.parse(cb);
@@ -80,10 +86,7 @@ public class TravelTimeEstimator {
 			cb.clear();
 			multi.parse(cb);
 		}
-		if (cb.valid)
-			return cb.toString();
-		else
-			return null;
+		return (cb.valid) ? cb.toString() : null;
 	}
 
 	/** MultiBuilder for replacing travel time tags */
@@ -105,7 +108,7 @@ public class TravelTimeEstimator {
 		public void addTravelTime(String sid, OverLimitMode mode,
 			String o_txt)
 		{
-			Route r = lookupRoute(sid);
+			Route2 r = lookupRoute(sid);
 			if (r != null)
 				addTravelTime(r, mode, o_txt);
 			else {
@@ -115,7 +118,7 @@ public class TravelTimeEstimator {
 		}
 
 		/** Add a travel time for a route */
-		private void addTravelTime(Route r, OverLimitMode mode,
+		private void addTravelTime(Route2 r, OverLimitMode mode,
 			String o_txt)
 		{
 			boolean final_dest = isFinalDest(r);
@@ -171,55 +174,22 @@ public class TravelTimeEstimator {
 	}
 
 	/** Lookup a route by station ID */
-	private Route lookupRoute(String sid) {
+	private Route2 lookupRoute(String sid) {
 		if (!s_routes.containsKey(sid))
 			cacheRoute(sid);
-		Route r = s_routes.get(sid);
-		if (TRAVEL_LOG.isOpen()) {
-			long st = TimeSteward.currentTimeMillis();
-			Route2 r2 = findRoute(sid);
-			if (r2 != null) {
-				long e = TimeSteward.currentTimeMillis() - st;
-				logTravel("ROUTE TO " + sid + " FOUND IN " + e);
-				if (r2.matches(r))
-					logTravel("MATCHES!  YAY!!!");
-				else {
-					logTravel("DOES NOT MATCH!  BOO!!!");
-					logTravel("ROUTE: " + r);
-					logTravel("ROUTE2: " + r2);
-				}
-			}
-		}
-		return r;
+		return s_routes.get(sid);
 	}
 
 	/** Cache a route */
 	private void cacheRoute(String sid) {
-		Route r = createRoute(sid);
+		long st = TimeSteward.currentTimeMillis();
+		Route2 r = findRoute(sid);
+		if (TRAVEL_LOG.isOpen()) {
+			long e = TimeSteward.currentTimeMillis() - st;
+			logTravel("ROUTE TO " + sid + strNot(r) + "FOUND: " +e);
+		}
 		if (r != null)
 			s_routes.put(sid, r);
-	}
-
-	/** Create one route to a travel time destination */
-	private Route createRoute(String sid) {
-		Station s = StationHelper.lookup(sid);
-		if (s != null)
-			return createRoute(s);
-		else
-			return null;
-	}
-
-	/** Create one route to a travel time destination */
-	private Route createRoute(Station s) {
-		GeoLoc dest = s.getR_Node().getGeoLoc();
-		return createRoute(dest);
-	}
-
-	/** Create one route to a travel time destination */
-	private Route createRoute(GeoLoc dest) {
-		RouteBuilder builder = new RouteBuilder(TRAVEL_LOG, name,
-			BaseObjectImpl.corridors);
-		return builder.findBestRoute(origin, dest);
 	}
 
 	/** Find a route to a travel time destination */
@@ -246,10 +216,10 @@ public class TravelTimeEstimator {
 	}
 
 	/** Check if the given route is a final destination */
-	private boolean isFinalDest(Route r) {
-		for (Route ro: s_routes.values()) {
+	private boolean isFinalDest(Route2 r) {
+		for (Route2 ro: s_routes.values()) {
 			if (ro != r && isSameCorridor(r, ro) &&
-				r.getDistance().m() < ro.getDistance().m())
+			   (r.getDistance().m() < ro.getDistance().m()))
 			{
 				return false;
 			}
@@ -258,7 +228,7 @@ public class TravelTimeEstimator {
 	}
 
 	/** Are two routes confined to the same single corridor */
-	private boolean isSameCorridor(Route r1, Route r2) {
+	private boolean isSameCorridor(Route2 r1, Route2 r2) {
 		if (r1 != null && r2 != null) {
 			Corridor c1 = r1.getOnlyCorridor();
 			Corridor c2 = r2.getOnlyCorridor();
@@ -269,25 +239,26 @@ public class TravelTimeEstimator {
 	}
 
 	/** Calculate the travel time for the given route */
-	private int calculateTravelTime(Route r, boolean final_dest)
+	private int calculateTravelTime(Route2 r, boolean final_dest)
 		throws BadRouteException
 	{
-		int m = getTravelTime(r, final_dest).floor(MINUTES);
-		return m + 1;
+		return getTravelTime(r, final_dest).floor(MINUTES) +
+		      (r.getTurns() + 1);
 	}
 
 	/** Get the current travel time */
-	private Interval getTravelTime(Route r, boolean final_dest)
+	private Interval getTravelTime(Route2 r, boolean final_dest)
 		throws BadRouteException
 	{
-		List<CorridorTrip> trips = r.getTrips();
-		if (trips.isEmpty())
+		RouteLeg leg = r.leg;
+		if (null == leg)
 			throw new BadRouteException("Route is empty");
-		Interval t = new Interval(r.getTurns(), Interval.Units.MINUTES);
-		for (CorridorTrip trip: trips) {
-			TripTimer tt = new TripTimer(TRAVEL_LOG, name, trip,
-				final_dest);
-			t = t.add(tt.calculate());
+		Interval t = new Interval(0);
+		while (leg != null) {
+			RouteLegTimer rlt = new RouteLegTimer(TRAVEL_LOG, name,
+				leg, final_dest);
+			t = t.add(rlt.calculateTime());
+			leg = leg.prev;
 		}
 		if (TRAVEL_LOG.isOpen())
 			logTravel("TRAVEL TIME " + t);
@@ -297,20 +268,15 @@ public class TravelTimeEstimator {
 	/** Are all the routes confined to the same single corridor */
 	private boolean isSingleCorridor() {
 		Corridor cor = null;
-		for (Route r: s_routes.values()) {
+		for (Route2 r: s_routes.values()) {
 			Corridor c = r.getOnlyCorridor();
-			if (c == null)
+			if (null == c)
 				return false;
-			if (cor == null)
+			if (null == cor)
 				cor = c;
 			else if (c != cor)
 				return false;
 		}
 		return cor != null;
-	}
-
-	/** Clear the current routes */
-	public void clear() {
-		s_routes.clear();
 	}
 }

@@ -1054,10 +1054,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private void sendMsg(DMSPoller p, SignMessage sm) {
 		if (SignMsgSource.tolling.checkBit(sm.getSource()))
 		    logPriceMessages(EventType.PRICE_DEPLOYED);
-		// FIXME: there should be a better way to clear cached routes
-		//        in travel time estimator
-		if (OVERRIDE.ordinal() == sm.getActivationPriority())
-			formatter.clear();
 		p.sendMessage(this, sm);
 	}
 

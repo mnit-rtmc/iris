@@ -26,17 +26,20 @@ public class RouteLeg {
 	/** Maximum distance from origin to a corridor node (in meters) */
 	static private final float MAX_ORIGIN_M = 1000;
 
+	/** Corridor for route leg */
+	public final Corridor corridor;
+
 	/** O/D pair */
-	private final ODPair od_pair;
+	public final ODPair od_pair;
 
 	/** Previous leg */
 	public final RouteLeg prev;
 
 	/** Leg origin milepoint */
-	private final Float o_mi;
+	public final Float o_mi;
 
 	/** Leg destination milepoint */
-	private final Float d_mi;
+	public final Float d_mi;
 
 	/** Valid flag */
 	private final boolean valid;
@@ -46,6 +49,7 @@ public class RouteLeg {
 	 * @param od Origin-destination pair.
 	 * @param pr Previous leg. */
 	public RouteLeg(Corridor c, ODPair od, RouteLeg pr) {
+		corridor = c;
 		od_pair = od;
 		prev = pr;
 		o_mi = c.calculateMilePoint(od.getOrigin());

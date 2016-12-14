@@ -32,7 +32,7 @@ public class Route2 {
 	private final GeoLoc dest;
 
 	/** Final leg of route */
-	private final RouteLeg leg;
+	public final RouteLeg leg;
 
 	/** Create a new route */
 	private Route2(GeoLoc dst, RouteLeg lg) {
@@ -75,6 +75,11 @@ public class Route2 {
 				t++;
 		}
 		return t;
+	}
+
+	/** Get the "only" corridor (if the route is just a single corridor) */
+	public Corridor getOnlyCorridor() {
+		return (legCount() == 1) ? leg.corridor : null;
 	}
 
 	/** Get the route distance.
