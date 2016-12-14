@@ -294,7 +294,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		store.update(this, "poll_enabled", e);
 		setPollEnabled(e);
 		recreatePoller();
-		failControllers();
 	}
 
 	/** Get polling enabled/disabled flag */
@@ -410,7 +409,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	private synchronized void failControllers() {
 		for (ControllerImpl c: controllers.values())
 			c.setFailed(true);
-		updateStatus();
 	}
 
 	/** Poll all controllers */
@@ -435,9 +433,12 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 
 	/** Set the communication status */
 	private void setStatusNotify(String s) {
-		if (s != null && !s.equals(status)) {
+		assert s != null;
+		if (!s.equals(status)) {
 			status = s;
 			notifyAttribute("status");
+			if (!s.isEmpty())
+				failControllers();
 		}
 	}
 
