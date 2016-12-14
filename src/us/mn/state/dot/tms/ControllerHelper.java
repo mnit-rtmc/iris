@@ -73,14 +73,14 @@ public class ControllerHelper extends BaseHelper {
 	/** Test if a controller is active */
 	static public boolean isActive(Controller ctrl) {
 		return (ctrl != null)
-		    && (ctrl.getCondition() == CtrlCondition.ACTIVE.ordinal());
+		    && (ctrl.getCondition() == CtrlCondition.ACTIVE.ordinal())
+		    && CommLinkHelper.getPollEnabled(ctrl.getCommLink());
 	}
 
 	/** Check if a controller is failed */
 	static public boolean isFailed(Controller ctrl) {
 		return isActive(ctrl)
-		    && ctrl.getFailTime() != null
-		    && CommLinkHelper.getPollEnabled(ctrl.getCommLink());
+		    && ctrl.getFailTime() != null;
 	}
 
 	/** Check if a controller needs maintenance */
