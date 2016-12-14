@@ -183,8 +183,11 @@ public class TravelTimeEstimator {
 				logTravel("ROUTE TO " + sid + " FOUND IN " + e);
 				if (r2.matches(r))
 					logTravel("MATCHES!  YAY!!!");
-				else
+				else {
 					logTravel("DOES NOT MATCH!  BOO!!!");
+					logTravel("ROUTE: " + r);
+					logTravel("ROUTE2: " + r2);
+				}
 			}
 		}
 		return r;

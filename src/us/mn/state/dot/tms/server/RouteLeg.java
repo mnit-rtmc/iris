@@ -101,4 +101,17 @@ public class RouteLeg {
 	public boolean hasTurn() {
 		return od_pair.hasTurn();
 	}
+
+	/** Get a string representation */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("leg: ");
+		sb.append(od_pair);
+		sb.append(", o_mi: ");
+		sb.append(o_mi);
+		sb.append(", d_mi: ");
+		sb.append(d_mi);
+		return sb.toString();
+	}
 }

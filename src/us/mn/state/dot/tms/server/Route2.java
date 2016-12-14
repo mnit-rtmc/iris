@@ -98,4 +98,19 @@ public class Route2 {
 		    && (legCount() == r.getTrips().size())
 		    && (getGoodness() == r.getGoodness());
 	}
+
+	/** Get a string representation of the route */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getDistance());
+		sb.append(", ");
+		sb.append(getTurns());
+		sb.append(" turns, ");
+		sb.append(getGoodness());
+		sb.append(" goodness, ");
+		for (RouteLeg lg = leg; lg != null; lg = lg.prev)
+			sb.append(lg.toString());
+		return sb.toString();
+	}
 }
