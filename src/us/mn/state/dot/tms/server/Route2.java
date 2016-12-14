@@ -108,9 +108,11 @@ public class Route2 {
 		sb.append(getTurns());
 		sb.append(" turns, ");
 		sb.append(getGoodness());
-		sb.append(" goodness, ");
-		for (RouteLeg lg = leg; lg != null; lg = lg.prev)
+		sb.append(" goodness,");
+		for (RouteLeg lg = leg; lg != null; lg = lg.prev) {
+			sb.append(' ');
 			sb.append(lg.toString());
+		}
 		return sb.toString();
 	}
 }
