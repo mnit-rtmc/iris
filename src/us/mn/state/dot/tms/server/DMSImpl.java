@@ -88,12 +88,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return SignMsgSource.schedule.checkBit(sm.getSource());
 	}
 
-	/** Check if a sign message should be activated */
-	static private boolean shouldActivate(SignMessage sm, SignMessage ex) {
-		return null == ex ||
-		       sm.getActivationPriority() >= ex.getRunTimePriority();
-	}
-
 	/** Minimum duration of a DMS action (minutes) */
 	static private final int DURATION_MINIMUM_MINS = 1;
 
@@ -1005,7 +999,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			if (sm != null && isMsgValid(sm))
 				return sm;
 		}
-		if (is_blank && shouldActivate(sched) && isMsgValid(sched))
+		if (is_blank && isMsgValid(sched))
 			return sched;
 		else
 			return user;
@@ -1029,13 +1023,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			logError("msg invalid: " + e.getMessage());
 			return false;
 		}
-	}
-
-	/** Check if a sign message should be activated */
-	private boolean shouldActivate(SignMessage sm) {
-		return (sm != null) &&
-		       (isMsgCurrentEquivalent(sm) ||
-		        shouldActivate(sm, msg_current));
 	}
 
 	/** Send message to DMS */
