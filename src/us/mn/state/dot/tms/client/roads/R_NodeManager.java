@@ -130,7 +130,13 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		if (builder != null) {
 			builder.initialize();
 			det_cache.addProxyListener(det_listener);
-		}
+		} else
+			logErr("NO SegmentBuilder!");
+	}
+
+	/** Log an error to stderr */
+	private void logErr(String msg) {
+		System.err.println("R_NodeManager " + msg);
 	}
 
 	/** Dispose of the r_node manager */
