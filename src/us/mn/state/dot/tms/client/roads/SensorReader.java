@@ -124,17 +124,24 @@ public class SensorReader {
 			parse();
 		}
 		catch (Exception e) {
-			System.err.println("" + new Date() +
-				" SensorReader.readXmlFile: " + e.getMessage());
+			logErr(e.getMessage());
 		}
 		finally {
 			long now = System.currentTimeMillis();
 			if (time_changed) {
 				receive_stamp = now;
 				builder.completeSamples();
-			} else if (now - receive_stamp > SAMPLE_VALID_MS)
-				builder.clearSamples();
+			} else {
+				logErr("lastStamp: " + last_stamp);
+				if (now - receive_stamp > SAMPLE_VALID_MS)
+					builder.clearSamples();
+			}
 		}
+	}
+
+	/** Log an error to stderr */
+	private void logErr(String msg) {
+		System.err.println("" + new Date() + " SensorReader " + msg);
 	}
 
 	/** Parse the XML document and notify clients */
