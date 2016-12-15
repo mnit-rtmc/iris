@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.StationHelper;
@@ -237,9 +238,30 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	 * @param d Destination geo location.
 	 * @return Route from origin to destination, or null */
 	private Route buildRoute(GeoLoc o, GeoLoc d) {
-		RouteBuilder builder = new RouteBuilder(TOLL_LOG, name,
+		long st = TimeSteward.currentTimeMillis();
+		RouteBuilder rb = new RouteBuilder(TOLL_LOG, name,
 			BaseObjectImpl.corridors);
-		return builder.findBestRoute(o, d);
+		Route r = rb.findBestRoute(o, d);
+		if (isLogging()) {
+			long e = TimeSteward.currentTimeMillis() - st;
+			log("ROUTE TO " + end_id + strNot(r) + "FOUND: " + e);
+			st = TimeSteward.currentTimeMillis();
+			RouteFinder rf = new RouteFinder(
+				BaseObjectImpl.corridors);
+			Route2 r2 = rf.findRoute(o, d);
+			e = TimeSteward.currentTimeMillis() - st;
+			log("ROUTE2 TO " + end_id + strNot(r2) + "FOUND: " + e);
+			if (r2.matches(r))
+				log("MATCHES!  YAY!!!");
+			else
+				log("DOES NOT MATCH!  BOO!!!");
+		}
+		return r;
+	}
+
+	/** Get a debugging "NOT" string */
+	static private String strNot(Object r) {
+		return (r != null) ? " " : " NOT ";
 	}
 
 	/** Update density.
