@@ -978,24 +978,14 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return sm;
 	}
 
-	/** Get user/scheduled composite sign message.
-	 * @return The composite sign message. */
+	/** Get user and/or scheduled sign message.
+	 * @return The appropriate sign message. */
 	private SignMessage getMsgUserSched() {
 		SignMessage user = msg_user;	// Avoid race
 		SignMessage sched = msg_sched;	// Avoid race
 		boolean is_blank = SignMessageHelper.isBlank(user);
 		if (isPrefixPage(sched) && !is_blank) {
-			MultiString multi = new MultiString(user.getMulti());
-			String ms = multi.addPagePrefix(sched.getMulti());
-			boolean be = user.getBeaconEnabled();
-			DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
-				user.getActivationPriority());
-			DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
-				user.getRunTimePriority());
-			int src = user.getSource() | sched.getSource();
-			String o = user.getOwner();
-			Integer d = user.getDuration();
-			SignMessage sm = createMsg(ms, be, ap, rp, src, o, d);
+			SignMessage sm = createMsgUserSched(user, sched);
 			if (sm != null && isMsgValid(sm))
 				return sm;
 		}
@@ -1009,6 +999,23 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private boolean isPrefixPage(SignMessage sm) {
 		return (sm != null) &&
 		       (sm.getActivationPriority() == PREFIX_PAGE.ordinal());
+	}
+
+	/** Create a user/scheduled composite sign message. */
+	private SignMessage createMsgUserSched(SignMessage user,
+		SignMessage sched)
+	{
+		MultiString multi = new MultiString(user.getMulti());
+		String ms = multi.addPagePrefix(sched.getMulti());
+		boolean be = user.getBeaconEnabled();
+		DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
+			user.getActivationPriority());
+		DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
+			user.getRunTimePriority());
+		int src = user.getSource() | sched.getSource();
+		String o = user.getOwner();
+		Integer d = user.getDuration();
+		return createMsg(ms, be, ap, rp, src, o, d);
 	}
 
 	/** Check if a sign message is valid */
