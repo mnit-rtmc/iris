@@ -164,19 +164,18 @@ public class OpQueryDMSMessage extends OpDMS {
 	private void setMsgCurrent(String multi, int be, DmsMsgPriority p,
 		Integer duration)
 	{
-		int src = DmsMsgPriority.isScheduled(p)
-		        ? SignMsgSource.schedule.bit()
-		        : SignMsgSource.toBits(SignMsgSource.external,
-			                       SignMsgSource.operator);
+		int src = p.getSource();
 		setMsgCurrent(dms.createMsg(multi, (be == 1), p, p, src, null,
 			duration));
 	}
 
 	/** Set the current message on the sign */
 	private void setMsgCurrent(SignMessage sm) {
-		if (sm != null)
+		if (sm != null) {
 			dms.setMsgCurrentNotify(sm);
-		else
+			if (sm.getSource() == SignMsgSource.operator.bit())
+				dms.setMsgUser(sm);
+		} else
 			setErrorStatus("MSG RENDER FAILED");
 	}
 }

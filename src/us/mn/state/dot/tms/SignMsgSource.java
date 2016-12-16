@@ -28,6 +28,7 @@ public enum SignMsgSource {
 	lcs,		// 5  lane-use control signal
 	aws,		// 6  automated warning system
 	external;	// 7  external system
+			// FIXME: add incident source
 
 	/** Get the bit for a source */
 	public int bit() {

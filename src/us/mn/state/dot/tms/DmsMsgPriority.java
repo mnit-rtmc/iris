@@ -31,7 +31,9 @@ public enum DmsMsgPriority {
 	TRAVEL_TIME,	/* 4: travel time priority */
 	SPEED_LIMIT,	/* 5: variable speed limit priority */
 	SCHEDULED,	/* 6: scheduled priority (planned events) */
+			/* FIXME: add 3 more SCHEDULED */
 	OTHER_SYSTEM,	/* 7: other system priority */
+			/* FIXME: add LCS priorities */
 	ALERT,		/* 8: alert priority (AMBER alerts, etc.) */
 	OPERATOR,	/* 9: operator priority */
 	INCIDENT_LOW,	/* 10: low-priority incident */
@@ -44,25 +46,35 @@ public enum DmsMsgPriority {
 	static private final DmsMsgPriority[] VALUES = values();
 
 	/** Get a DmsMsgPriority from an ordinal value */
-	public static DmsMsgPriority fromOrdinal(int o) {
+	static public DmsMsgPriority fromOrdinal(int o) {
 		if (o >= 0 && o < VALUES.length)
 			return VALUES[o];
 		else
 			return INVALID;
 	}
 
-	/** Test if a run-time priority was "scheduled" */
-	static public boolean isScheduled(DmsMsgPriority p) {
-		switch (p) {
-		case INVALID:
+	/** Get SignMsgSource for a run-time priority */
+	public int getSource() {
+		switch (this) {
 		case BLANK:
-		case OTHER_SYSTEM:
+			return SignMsgSource.blank.bit();
+		case PSA:
+		case TRAVEL_TIME:
+		case SPEED_LIMIT:
+		case SCHEDULED:
+			return SignMsgSource.schedule.bit();
 		case ALERT:
 		case OPERATOR:
-		case OVERRIDE:
-			return false;
+			return SignMsgSource.operator.bit();
+		case INCIDENT_LOW:
+		case INCIDENT_MED:
+		case INCIDENT_HIGH:
+			// FIXME: add incident source
+			return SignMsgSource.schedule.bit();
+		case AWS:
+			return SignMsgSource.aws.bit();
 		default:
-			return true;
+			return SignMsgSource.external.bit();
 		}
 	}
 }

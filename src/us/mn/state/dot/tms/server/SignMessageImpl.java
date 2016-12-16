@@ -26,7 +26,6 @@ import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 
