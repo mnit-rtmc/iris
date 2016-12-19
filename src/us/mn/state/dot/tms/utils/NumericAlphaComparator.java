@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009 AHMCT, University of California
+ * Copyright (C) 2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,40 +28,41 @@ import us.mn.state.dot.tms.utils.SString;
  */
 public class NumericAlphaComparator<T> implements Comparator<T> {
 
-	/** Compare two objects */
-	public int compare(T a, T b) {
-		return compareStrings(a == null ? null : a.toString(), 
-			b == null ? null : b.toString());
-	}
-
 	/** Compare two strings */
-	public static int compareStrings(String arg_a, String arg_b) {
-		String a = (arg_a == null ? "null" : arg_a);
-		String b = (arg_b == null ? "null" : arg_b);
-		if(SString.isNumeric(a) && SString.isNumeric(b)) {
-			int diff = SString.stringToInt(a) - 
-				SString.stringToInt(b);
-			// if numerically equal, compare as strings
-			if(diff == 0)
-				return a.compareTo(b);
-			return diff;
+	static public int compareStrings(String arg_a, String arg_b) {
+		String a = (arg_a != null) ? arg_a : "null";
+		String b = (arg_b != null) ? arg_b : "null";
+		if (SString.isNumeric(a) && SString.isNumeric(b)) {
+			int d = SString.stringToInt(a) -
+			        SString.stringToInt(b);
+			return (d != 0) ? d : a.compareTo(b);
 		}
 		// ignore common alpha prefix
 		int pl = SString.alphaPrefixLen(a, b);
-		if(pl > 0) {
-			a = (pl >= a.length() ? "" : a.substring(pl));
-			b = (pl >= b.length() ? "" : b.substring(pl));
+		if (pl > 0) {
+			a = (pl < a.length()) ? a.substring(pl) : "";
+			b = (pl < b.length()) ? b.substring(pl) : "";
 			return compareStrings(a, b);	// recursive
 		}
 		return a.compareTo(b);
 	}
 
+	/** Compare two objects */
+	@Override
+	public int compare(T a, T b) {
+		String sa = (a != null) ? a.toString() : null;
+		String sb = (b != null) ? b.toString() : null;
+		return compareStrings(sa, sb);
+	}
+
 	/** Check equality */
+	@Override
 	public boolean equals(Object o) {
-		return o == this;
+		return this == o;
 	}
 
 	/** hashCode */
+	@Override
 	public int hashCode() {
 		return super.hashCode();
 	}
