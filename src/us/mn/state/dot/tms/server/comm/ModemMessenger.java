@@ -41,9 +41,6 @@ import us.mn.state.dot.tms.server.ModemImpl;
  */
 public class ModemMessenger extends Messenger {
 
-	/** Exception thrown for no modem */
-	static private final NoModemException NO_MODEM = new NoModemException();
-
 	/** Modem debug log */
 	static private final DebugLog MODEM_LOG = new DebugLog("modem");
 
@@ -55,7 +52,7 @@ public class ModemMessenger extends Messenger {
 		if (modem != null)
 			return create(modem, u, rt);
 		else
-			throw NO_MODEM;
+			throw new NoModemException();
 	}
 
 	/** Acquire the first available modem */
