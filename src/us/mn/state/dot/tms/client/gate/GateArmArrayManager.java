@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.client.gate;
 
+import java.util.Iterator;
+import java.util.TreeSet;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.GeoLoc;
@@ -21,12 +23,15 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
+import us.mn.state.dot.tms.GateArmHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
+import us.mn.state.dot.tms.client.proxy.WorkRequestAction;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * The GateArmArrayManager class provides proxies for GateArmArray objects.
@@ -82,6 +87,27 @@ public class GateArmArrayManager extends DeviceManager<GateArmArray> {
 		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
+	}
+
+	/** Fill single selection work request popup */
+	@Override
+	protected void fillPopupWorkReq(JPopupMenu p, GateArmArray ga) {
+		for (GateArm g : lookupArms(ga))
+			p.add(new WorkRequestAction<GateArm>(g,ga.getGeoLoc()));
+		p.addSeparator();
+	}
+
+	/** Lookup all gate arms in an array */
+	private TreeSet<GateArm> lookupArms(GateArmArray ga) {
+		TreeSet<GateArm> set = new TreeSet<GateArm>(
+			new NumericAlphaComparator<GateArm>());
+		Iterator<GateArm> it = GateArmHelper.iterator();
+		while (it.hasNext()) {
+			GateArm g = it.next();
+			if (g.getGaArray() == ga)
+				set.add(g);
+		}
+		return set;
 	}
 
 	/** Create a popup menu for multiple objects */

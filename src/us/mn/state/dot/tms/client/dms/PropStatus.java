@@ -91,7 +91,7 @@ public class PropStatus extends IPanel {
 	private final ZTable power_tbl = new ZTable();
 
 	/** Query message action */
-	private final IAction query_msg = new IAction("dms.query.msg",
+	private final IAction query_msg = new IAction("dms.query.msg", "",
 		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
 	{
 		protected void doActionPerformed(ActionEvent e) {
@@ -125,7 +125,7 @@ public class PropStatus extends IPanel {
 	};
 
 	/** Reset DMS action */
-	private final IAction reset = new IAction("dms.reset",
+	private final IAction reset = new IAction("dms.reset", "",
 		SystemAttrEnum.DMS_RESET_ENABLE)
 	{
 		protected void doActionPerformed(ActionEvent e) {

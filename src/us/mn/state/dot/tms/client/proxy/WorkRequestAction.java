@@ -20,6 +20,7 @@ import java.net.URL;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.WebBrowser;
 
 /**
@@ -27,7 +28,7 @@ import us.mn.state.dot.tms.client.widget.WebBrowser;
  *
  * @author Douglas Lau
  */
-public class WorkRequestAction<T extends SonarObject> extends ProxyAction<T> {
+public class WorkRequestAction<T extends SonarObject> extends IAction {
 
 	/** Get the work request URL */
 	static private String getUrl() {
@@ -40,13 +41,18 @@ public class WorkRequestAction<T extends SonarObject> extends ProxyAction<T> {
 		return url != null && url.trim().length() > 0;
 	}
 
+	/** Sonar proxy */
+	private final T proxy;
+
 	/** Proxy location */
 	private final GeoLoc loc;
 
 	/** Create a new work request action */
 	public WorkRequestAction(T p, GeoLoc l) {
-		super("device.work.request", p);
+		super("device.work.request", p.getName());
+		proxy = p;
 		loc = l;
+		setEnabled(p != null);
 	}
 
 	/** Actually perform the action */

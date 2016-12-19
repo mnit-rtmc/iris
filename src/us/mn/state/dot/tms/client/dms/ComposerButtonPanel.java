@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -52,7 +52,7 @@ public class ComposerButtonPanel extends JPanel {
 	private final JButton clear_btn = new JButton(clear);
 
 	/** Action to store as quick-message */
-	private final IAction store = new IAction("dms.quick.message.store",
+	private final IAction store = new IAction("dms.quick.message.store", "",
 		SystemAttrEnum.DMS_QUICKMSG_STORE_ENABLE)
 	{
 		protected void doActionPerformed(ActionEvent e) {
@@ -80,7 +80,7 @@ public class ComposerButtonPanel extends JPanel {
 	private final JButton blank_btn;
 
 	/** Action to query the DMS message (optional) */
-	private final IAction query_msg = new IAction("dms.query.msg",
+	private final IAction query_msg = new IAction("dms.query.msg", "",
 		SystemAttrEnum.DMS_QUERYMSG_ENABLE)
 	{
 		protected void doActionPerformed(ActionEvent e) {

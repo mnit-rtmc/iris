@@ -50,11 +50,14 @@ abstract public class IAction extends AbstractAction {
 
 	/** Create a new action.
 	 * @param text_id Text ID of I18N string.
+	 * @param n Name to append.
 	 * @param sa Boolean attribute to determine if the action is enabled. */
-	protected IAction(String text_id, SystemAttrEnum sa) {
+	protected IAction(String text_id, String n, SystemAttrEnum sa) {
 		attr = sa;
-		String name = (text_id != null) ? I18N.get(text_id) : "";
-		putValue(Action.NAME, name);
+		String name = (text_id != null)
+		            ? I18N.get(text_id) + ' ' + n
+		            : n;
+		putValue(Action.NAME, name.trim());
 		int m = I18N.getKeyEvent(text_id);
 		if (m != 0)
 			putValue(Action.MNEMONIC_KEY, m);
@@ -69,9 +72,16 @@ abstract public class IAction extends AbstractAction {
 	}
 
 	/** Create a new action.
+	 * @param text_id Text ID of I18N string.
+	 * @param n Name to append. */
+	protected IAction(String text_id, String n) {
+		this(text_id, n, null);
+	}
+
+	/** Create a new action.
 	 * @param text_id Text ID of I18N string. */
 	protected IAction(String text_id) {
-		this(text_id, null);
+		this(text_id, "");
 	}
 
 	/** Is the action enabled by system attribute? */
