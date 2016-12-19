@@ -253,8 +253,10 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 			log("ROUTE2 TO " + end_id + strNot(r2) + "FOUND: " + e);
 			if (r2.matches(r))
 				log("MATCHES!  YAY!!!");
-			else
+			else {
 				log("DOES NOT MATCH!  BOO!!!");
+				log("ROUTE: " + r + ", ROUTE2: " + r2);
+			}
 		}
 		return r;
 	}
