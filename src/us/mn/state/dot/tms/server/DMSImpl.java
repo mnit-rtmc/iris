@@ -1318,11 +1318,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			((SignMessageImpl) msg).writeXml(w, this);
 	}
 
-	/** Check if the sign is an active dialup sign */
-	public boolean isActiveDialup() {
-		return isActive() && hasModemCommLink();
-	}
-
 	/** Check if the sign is periodically queriable */
 	public boolean isPeriodicallyQueriable() {
 		return isConnected() || !hasModemCommLink();
