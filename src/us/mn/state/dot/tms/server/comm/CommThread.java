@@ -78,7 +78,7 @@ public class CommThread<T extends ControllerProperty> {
 	private final int timeout;
 
 	/** Thread status */
-	private String status = "STARTING";
+	private String status = "";
 
 	/** Set the thread status */
 	protected void setStatus(String s) {

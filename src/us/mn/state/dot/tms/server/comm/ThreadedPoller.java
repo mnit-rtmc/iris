@@ -120,15 +120,13 @@ public class ThreadedPoller<T extends ControllerProperty>
 	/** Get the poller status */
 	@Override
 	public synchronized String getStatus() {
-		CommThread ct = c_thread;
-		return (ct != null) ? ct.getStatus() : "STOPPED";
+		return (c_thread != null) ? c_thread.getStatus() : "";
 	}
 
 	/** Check if the poller is currently connected */
 	@Override
 	public synchronized boolean isConnected() {
-		CommThread ct = c_thread;
-		return (ct != null) && ct.isAlive();
+		return (c_thread != null) && c_thread.isAlive();
 	}
 
 	/** Create the comm thread */
