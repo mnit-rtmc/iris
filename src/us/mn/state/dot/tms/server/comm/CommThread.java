@@ -156,6 +156,9 @@ public class CommThread<T extends ControllerProperty> {
 				// Keep looping until modem is available
 				setStatus(getMessage(e));
 			}
+			catch (HangUpException e) {
+				setStatus("");
+			}
 			catch (IOException e) {
 				setStatus(getMessage(e));
 			}
@@ -233,7 +236,7 @@ public class CommThread<T extends ControllerProperty> {
 			o.handleCommError(EventType.POLL_TIMEOUT_ERROR, msg);
 			if (m instanceof ModemMessenger && !o.isSuccess()) {
 				// Force modem to reconnect
-				throw e;
+				throw new HangUpException();
 			}
 		}
 		catch (SocketException e) {
