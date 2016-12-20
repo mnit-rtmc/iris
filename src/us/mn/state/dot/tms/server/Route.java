@@ -104,9 +104,11 @@ public class Route implements Comparable<Route> {
 		sb.append(getTurns());
 		sb.append(" turns, ");
 		sb.append(getGoodness());
-		sb.append(" goodness, ");
-		for (CorridorTrip trip: trips)
+		sb.append(" goodness,");
+		for (CorridorTrip trip: trips) {
+			sb.append(' ');
 			sb.append(trip.toString());
+		}
 		return sb.toString();
 	}
 }

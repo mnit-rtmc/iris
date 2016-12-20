@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.TreeMap;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -41,6 +42,12 @@ public class RouteFinder {
 		}
 	}
 
+	/** Debug log */
+	private final DebugLog dlog;
+
+	/** Name to use for debugging purposes */
+	private final String name;
+
 	/** Maximum route distance */
 	private final Distance dist_max = new Distance(
 		SystemAttrEnum.ROUTE_MAX_MILES.getInt(), MILES);
@@ -51,9 +58,18 @@ public class RouteFinder {
 	/** Corridor manager */
 	private final CorridorManager corridors;
 
+	/** Log a message to the debug log */
+	private void log(String msg) {
+		dlog.log(name + ": " + msg);
+	}
+
 	/** Create a new route finder.
+	 * @param dl Debug log.
+	 * @param n Name (for debugging).
 	 * @param c Corridor manager. */
-	public RouteFinder(CorridorManager c) {
+	public RouteFinder(DebugLog dl, String n, CorridorManager c) {
+		dlog = dl;
+		name = n;
 		corridors = c;
 	}
 
@@ -77,8 +93,11 @@ public class RouteFinder {
 		Corridor c = corridors.getCorridor(od);
 		if (c != null) {
 			Route2 re = r.createExtended(c, od);
-			if (re != null)
+			if (re != null) {
+				if (dlog.isOpen())
+					log("TENTATIVE ROUTE: " + re);
 				return re;
+			}
 		}
 		if (r.legCount() < legs_max)
 			return findBranching(orig, r);
