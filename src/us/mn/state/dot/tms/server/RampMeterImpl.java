@@ -61,6 +61,9 @@ import us.mn.state.dot.tms.server.comm.MeterPoller;
  */
 public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
+	/** Occupancy to determine merge backup */
+	static private final int MERGE_BACKUP_OCC = 30;
+
 	/** Default maximum wait time (in seconds) */
 	static public final int DEFAULT_MAX_WAIT = 240;
 
@@ -465,7 +468,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	private void updateBeacon() {
 		Beacon b = beacon;
 		if (b != null) {
-			boolean f = isOnline() && isMetering();
+			boolean f = (isOnline() && isMetering())
+			          || isMergeBackedUp();
 			b.setFlashing(f);
 		}
 	}
@@ -840,12 +844,22 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		}
 	}
 
+	/** Merge detector */
+	private transient SamplerSet merge_set = new SamplerSet();
+
+	/** Check if traffic is backed up over merge detector */
+	private boolean isMergeBackedUp() {
+		return merge_set.isPerfect()
+		   && (merge_set.getMaxOccupancy() >= MERGE_BACKUP_OCC);
+	}
+
 	/** Green count detector */
 	private transient DetectorImpl green_det = null;
 
 	/** Lookup the associated detectors */
 	private void lookupDetectors() {
 		SamplerSet ss = getSamplerSet();
+		merge_set = new SamplerSet(ss.filter(LaneType.MERGE));
 		green_det = lookupGreen(ss);
 	}
 
