@@ -27,10 +27,9 @@ import java.awt.font.GlyphVector;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JLabel;
 import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.ListCellRenderer;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
@@ -43,9 +42,8 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  *
  * @author Douglas Lau
  */
-public class R_NodeCellRenderer extends JPanel
-	implements ListCellRenderer<R_NodeModel>
-{
+public class R_NodeCellRenderer extends DefaultListCellRenderer {
+
 	/** Background color for nodes with bad locations */
 	static private final Color COLOR_NO_LOC = Color.RED;
 
@@ -99,13 +97,17 @@ public class R_NodeCellRenderer extends JPanel
 
 	/** Configure the renderer component */
 	@Override
-	public Component getListCellRendererComponent(
-		JList<? extends R_NodeModel> list, R_NodeModel mdl, int index,
-		boolean isSelected, boolean cellHasFocus)
+	public Component getListCellRendererComponent(JList<?> list,
+		Object value, int index, boolean isSelected,
+		boolean cellHasFocus)
 	{
-		setModel(mdl);
+		setBackground(null);
+		Component c = super.getListCellRendererComponent(list, value,
+			index, isSelected, cellHasFocus);
+		if (value instanceof R_NodeModel)
+			setModel((R_NodeModel) value);
 		setSelected(isSelected);
-		return this;
+		return c;
 	}
 
 	/** Selected status */
@@ -114,15 +116,11 @@ public class R_NodeCellRenderer extends JPanel
 	/** Set the selected status of the component */
 	private void setSelected(boolean sel) {
 		selected = sel;
-		if (sel)
-			setBackground(Color.LIGHT_GRAY);
-		else {
+		if (!sel) {
 			GeoLoc loc = r_node.getGeoLoc();
 			if (GeoLocHelper.isNull(loc))
 				setBackground(COLOR_NO_LOC);
-			else if (r_node.getActive())
-				setBackground(null);
-			else
+			else if (!r_node.getActive())
 				setBackground(COLOR_INACTIVE);
 		}
 	}
@@ -178,8 +176,9 @@ public class R_NodeCellRenderer extends JPanel
 	protected void fillBackground(Graphics2D g, int width, int height) {
 		g.setColor(getBackground());
 		g.fillRect(0, 0, width, height);
-		g.setColor(Color.BLACK);
+		g.setColor(Color.LIGHT_GRAY);
 		g.drawLine(0, 0, width, 0);
+		g.drawLine(0, height, width, height);
 	}
 
 	/** Draw the yellow lines */
