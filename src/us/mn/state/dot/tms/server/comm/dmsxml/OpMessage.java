@@ -309,7 +309,6 @@ class OpMessage extends OpDms {
 		protected Phase poll(CommMessage argmess)
 			throws IOException 
 		{
-			updateInterStatus("Starting operation", false);
 			LOG.log("PhaseSendMessage.poll(msg) called.");
 
 			Message mess = (Message) argmess;

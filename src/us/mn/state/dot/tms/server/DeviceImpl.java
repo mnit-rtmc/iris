@@ -228,24 +228,6 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		return (o != null) ? o.getOperationDescription() : "None";
 	}
 
-	/** Device operation status. This is updated during the course of an
-	 * operation to indicate the real-time status. */
-	private transient String opStatus = "";
-
-	/** Get the device operoption status */
-	@Override
-	public String getOpStatus() {
-		return opStatus;
-	}
-
-	/** Set the device operation status */
-	public void setOpStatus(String s) {
-		if (s == null || s.equals(opStatus))
-			return;
-		opStatus = s;
-		notifyAttribute("opStatus");
-	}
-
 	/** Item style bits */
 	private transient long styles = calculateStyles();
 

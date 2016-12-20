@@ -502,7 +502,6 @@ class OpQueryMsg extends OpDms {
 			if(m_startup && !m_dms.isPeriodicallyQueriable())
 				return null;
 
-			updateInterStatus("Starting operation", false);
 			LOG.log("OpQueryMsg.PhaseQueryMsg.poll(msg) " +
 				"called, dms=" + m_dms.getName());
 

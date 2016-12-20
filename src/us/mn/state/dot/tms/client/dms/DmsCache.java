@@ -152,9 +152,8 @@ public class DmsCache {
 		client.populateReadable(sign_configs);
 		client.populateReadable(sign_messages);
 		client.populateReadable(dmss);
-		if(client.canRead(DMS.SONAR_TYPE)) {
+		if (client.canRead(DMS.SONAR_TYPE)) {
 			dmss.ignoreAttribute("operation");
-			dmss.ignoreAttribute("opStatus");
 			dmss.ignoreAttribute("minCabinetTemp");
 			dmss.ignoreAttribute("maxCabinetTemp");
 			dmss.ignoreAttribute("minAmbientTemp");

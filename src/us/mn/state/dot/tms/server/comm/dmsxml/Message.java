@@ -137,18 +137,6 @@ class Message implements CommMessage
 		m_xelems.add((XmlElem)xmlrr);
 	}
 
-	/** Update intermediate status */
-	private void updateInterStatus(String[] m) {
-		if(m_opdms != null)
-			m_opdms.updateInterStatus(m);
-	}
-
-	/** Update intermediate status */
-	private void updateInterStatus(String m) {
-		if(m_opdms != null)
-			m_opdms.updateInterStatus(m, false);
-	}
-
 	/** Set the associated operation */
 	public void setOperation(OpDms op) {
 		m_opdms = op;
@@ -172,7 +160,6 @@ class Message implements CommMessage
 		byte[] array = buildReqMsg();
 
 		// send message
-		updateInterStatus("Sending request to sensorserver.");
 		long starttime=TimeSteward.currentTimeMillis();
 		LOG.log("queryProps(): Writing " + array.length + 
 			" bytes to SensorServer: " + 
@@ -195,7 +182,6 @@ class Message implements CommMessage
 		/** The intermediate status is updated in finally block. */
 		String[] istatus = new String[0];
 		long startms = TimeSteward.currentTimeMillis();
-		updateInterStatus("Waiting for sensorserver.");
 		do {
 			String token = null;
 			try {
@@ -227,10 +213,6 @@ class Message implements CommMessage
 					{"Unexpected problem: " + ex};
 				handleAwsFailure(istatus[0]);
 				throw new IOException(istatus[0]);
-
-			// update intermediate status when leaving method
-			} finally {
-				updateInterStatus(istatus);
 			}
 
 			// timed out?
@@ -246,7 +228,6 @@ class Message implements CommMessage
 				LOG.log(err);
 				istatus = new String[] {"Timed out waiting " +
 					"for sensorserver."};
-				updateInterStatus(istatus);
 				throw new IOException("Timed out waiting " +
 					"for " + dmsid);
 			}
@@ -255,21 +236,15 @@ class Message implements CommMessage
 			LOG.log("dmsxml.Message.queryProps(): " +
 				"found complete token:" + token);
 
-			try {
-				// can throw IOException
-				istatus = new String[] {"Parse error"};
-				// sets 'was read' flag for each XML element
-				m_xelems.parseResponse(Message.DMSXMLMSGTAG, 
-					Message.ISTATUSTAG, token);
+			// can throw IOException
+			istatus = new String[] {"Parse error"};
+			// sets 'was read' flag for each XML element
+			m_xelems.parseResponse(Message.DMSXMLMSGTAG,
+				Message.ISTATUSTAG, token);
 
-				// Either a completed response element or an
-				// intermediate status update was read.
-				istatus = getInterStatusMsgs();
-
-			} finally {
-				updateInterStatus(istatus);
-			}
-
+			// Either a completed response element or an
+			// intermediate status update was read.
+			istatus = getInterStatusMsgs();
 		} while(!m_xelems.readDone());
 	}
 

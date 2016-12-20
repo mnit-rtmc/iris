@@ -204,23 +204,6 @@ abstract class OpDms extends OpDevice {
 
 	/** update iris status, called after operation complete */
 	void complete(Message m) {
-		updateInterStatus(buildOpStatusCompletionNote(m), true);
-	}
-
-	/** Build operation status completion note. */
-	private String buildOpStatusCompletionNote(Message m) {
-		StringBuilder note = new StringBuilder();
-		note.append("Last message at " +
-			STime.getCurTimeShortString());
-		String delta = SString.doubleToString((
-			((double)m.getCompletionTimeMS()) / 1000), 2);
-		note.append(" (").append(delta).append(" secs)");
-		note.append(".");
-		if(m_retry > 0) {
-			note.append(String.valueOf(m_retry + 1));
-			note.append(" attempts.");
-		}
-		return note.toString();
 	}
 
 	/** return description of operation */
@@ -255,28 +238,6 @@ abstract class OpDms extends OpDevice {
 		return (single)
 		      ? new Interval(0)
 		      : PageTimeHelper.defaultPageOnInterval();
-	}
-
-	/** Update operation intermediate status in the client.
-	 *  @param is Strings to display, may be null. */
-	void updateInterStatus(String[] is) {
-		if(is == null || is.length <= 0)
-			return;
-		for(int i = 0; i < is.length; ++i)
-			updateInterStatus(is[i], false);
-	}
-
-	/** Update operation intermediate status in the client.
-	 *  @param is String to display, may be null.
-	 *  @param last True for completion message else false. */
-	void updateInterStatus(String is, boolean last) {
-		if(is == null || is.isEmpty())
-			return;
-		// prepend attempt number so user knows this is a retry
-		if(m_retry > 0 && !last)
-			is = "(attempt " + String.valueOf(m_retry + 1) + 
-				") " + is;
-		m_dms.setOpStatus(is);
 	}
 
 	/** Return an intermediate status XML element */

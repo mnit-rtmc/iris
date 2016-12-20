@@ -155,8 +155,6 @@ class OpReset extends OpDms
 		protected Phase poll(CommMessage argmess) 
 			throws IOException 
 		{
-			updateInterStatus("Starting operation", false);
-
 			LOG.log(
 			    "OpReset.PhaseResetDms.poll(msg) called.");
 

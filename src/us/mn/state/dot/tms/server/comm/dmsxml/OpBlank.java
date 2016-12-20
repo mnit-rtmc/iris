@@ -165,8 +165,6 @@ class OpBlank extends OpDms
 		protected Phase poll(CommMessage argmess)
 			throws IOException 
 		{
-			updateInterStatus("Starting operation", false);
-
 			if(m_sm == null)
 				return null;
 			assert argmess instanceof Message :
