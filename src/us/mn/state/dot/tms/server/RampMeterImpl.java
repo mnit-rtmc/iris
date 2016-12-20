@@ -67,6 +67,17 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Meter debug log */
 	static private final DebugLog METER_LOG = new DebugLog("meter");
 
+	/** Lookup a single green detector in a sampler set */
+	static private DetectorImpl lookupGreen(SamplerSet ss) {
+		ArrayList<VehicleSampler> greens = ss.filter(LaneType.GREEN);
+		if (1 == greens.size()) {
+			VehicleSampler vs = greens.get(0);
+			if (vs instanceof DetectorImpl)
+				return (DetectorImpl) vs;
+		}
+		return null;
+	}
+
 	/** Filter a releae rate for valid range */
 	static public int filterRate(int r) {
 		r = Math.max(r, getMinRelease());
@@ -192,7 +203,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	@Override
 	public void initTransients() {
 		super.initTransients();
-		lookupGreenDetector();
+		lookupDetectors();
 		updateStyles();
 	}
 
@@ -809,16 +820,6 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 		});
 	}
 
-	/** Get an array of detectors */
-	static private ArrayList<DetectorImpl> toDets(SamplerSet ss) {
-		ArrayList<DetectorImpl> dets = new ArrayList<DetectorImpl>();
-		for (VehicleSampler vs: ss.getAll()) {
-			if (vs instanceof DetectorImpl)
-				dets.add((DetectorImpl) vs);
-		}
-		return dets;
-	}
-
 	/** Detector finder */
 	private class DetFinder implements Corridor.NodeFinder {
 		private final ArrayList<VehicleSampler> samplers =
@@ -842,21 +843,10 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Green count detector */
 	private transient DetectorImpl green_det = null;
 
-	/** Lookup the green count detector */
-	private void lookupGreenDetector() {
-		final int GREEN = LaneType.GREEN.ordinal();
-		SamplerSet ss = getSamplerSet(new SamplerSet.Filter() {
-			public boolean check(VehicleSampler vs) {
-				if (vs instanceof DetectorImpl) {
-					DetectorImpl d = (DetectorImpl) vs;
-					return (GREEN == d.getLaneType()) &&
-					       !d.getAbandoned();
-				} else
-					return false;
-			}
-		});
-		ArrayList<DetectorImpl> dets = toDets(ss);
-		green_det = (dets.size() > 0) ? dets.get(0) : null;
+	/** Lookup the associated detectors */
+	private void lookupDetectors() {
+		SamplerSet ss = getSamplerSet();
+		green_det = lookupGreen(ss);
 	}
 
 	/** Update the 30-second green count */
@@ -910,7 +900,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Get the r_node associated with the ramp meter */
 	public R_NodeImpl getR_Node() {
-		lookupGreenDetector();
+		lookupDetectors();
 		DetectorImpl det = green_det;
 		if (det != null) {
 			R_Node n = det.getR_Node();
