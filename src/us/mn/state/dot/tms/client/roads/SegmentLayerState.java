@@ -108,4 +108,15 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 			super.doLeftClick(e, mo);
 		}
 	}
+
+	/** Do right-click event processing */
+	@Override
+	protected void doRightClick(MouseEvent e, MapObject o) {
+		if (o instanceof MapSegment) {
+			MapSegment ms = (MapSegment) o;
+			R_Node n = ms.getR_Node();
+			MapObject mo = builder.findGeoLoc(n);
+			super.doRightClick(e, mo);
+		}
+	}
 }

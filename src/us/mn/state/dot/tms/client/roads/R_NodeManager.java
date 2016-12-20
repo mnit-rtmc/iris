@@ -20,14 +20,17 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JLabel;
+import javax.swing.JPopupMenu;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Detector;
+import us.mn.state.dot.tms.DetectorHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneType;
@@ -41,11 +44,13 @@ import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
 import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
+import us.mn.state.dot.tms.client.proxy.WorkRequestAction;
 import us.mn.state.dot.tms.client.widget.Invokable;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * R_Node manager provides proxies for roadway nodes.
@@ -384,5 +389,26 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	@Override
 	public boolean canRead() {
 		return super.canRead() && session.canRead(Detector.SONAR_TYPE);
+	}
+
+	/** Fill single selection popup */
+	@Override
+	protected void fillPopupSingle(JPopupMenu p, R_Node n) {
+		for (Detector d : lookupDets(n))
+			p.add(new WorkRequestAction<Detector>(d,n.getGeoLoc()));
+		p.addSeparator();
+	}
+
+	/** Lookup all detectors in an r_node */
+	private TreeSet<Detector> lookupDets(R_Node n) {
+		TreeSet<Detector> set = new TreeSet<Detector>(
+			new NumericAlphaComparator<Detector>());
+		Iterator<Detector> it = DetectorHelper.iterator();
+		while (it.hasNext()) {
+			Detector d = it.next();
+			if (d.getR_Node() == n)
+				set.add(d);
+		}
+		return set;
 	}
 }
