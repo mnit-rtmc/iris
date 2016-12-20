@@ -14,7 +14,9 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.sonar.User;
 
 /**
  * Base helper class for client/server interfaces.
@@ -32,8 +34,17 @@ abstract public class BaseHelper {
 	 * for client code this is set in SonarState. */
 	static public Namespace namespace;
 
+	/** SONAR user.  For server code this is null. */
+	static public User user;
+
 	/** Prevent object creation */
 	protected BaseHelper() {
 		assert false;
+	}
+
+	/** Check if a type can be read */
+	static protected boolean canRead(String tname) {
+		return (user != null)
+		    && namespace.canRead(new Name(tname), user);
 	}
 }

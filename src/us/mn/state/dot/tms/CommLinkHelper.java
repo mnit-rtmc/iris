@@ -37,6 +37,9 @@ public class CommLinkHelper extends BaseHelper {
 
 	/** Get the polling enabled flag */
 	static public boolean getPollEnabled(CommLink cl) {
-		return cl != null && cl.getPollEnabled();
+		// If the user doesn't have permission to read CommLink stuff,
+		// just pretend that polling is enabled
+		return (cl != null && cl.getPollEnabled())
+		    || !canRead(CommLink.SONAR_TYPE);
 	}
 }

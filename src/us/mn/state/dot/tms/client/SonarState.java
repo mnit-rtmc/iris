@@ -506,6 +506,8 @@ public class SonarState extends Client {
 		populate(users);
 		populate(connections, true);
 		user = users.lookupObject(user_name);
+		// FIXME: this is a hack ...
+		BaseHelper.user = user;
 		populate(system_attributes, true);
 		populate(map_extents, true);
 		populate(roads);
