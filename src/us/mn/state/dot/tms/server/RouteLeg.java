@@ -83,7 +83,8 @@ public class RouteLeg {
 
 	/** Check if a milepoint is within the trip */
 	private boolean isWithinTrip(float m) {
-		return (m > o_mi) && (m <= d_mi);
+		// Cannot include d_mi -- it might be a common exit
+		return (m > o_mi) && (m < d_mi);
 	}
 
 	/** Check if the route leg is valid */
