@@ -636,7 +636,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Create a blank message for the sign */
-	public SignMessage createMsgBlank(DmsMsgPriority ap) {
+	private SignMessage createMsgBlank(DmsMsgPriority ap) {
 		String bmaps = Base64.encode(new byte[0]);
 		return findOrCreateMsg("", false, bmaps, ap, BLANK,
 			SignMsgSource.blank.bit(), null, null);
@@ -798,6 +798,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
 				da.getRunTimePriority());
 			int src = SignMsgSource.schedule.bit();
+			if (formatter.isTravelTime(da))
+				src |= SignMsgSource.travel_time.bit();
 			if (formatter.isTolling(da))
 				src |= SignMsgSource.tolling.bit();
 			Integer d = getDuration(da);
@@ -1200,12 +1202,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return getMsgCurrent().getBeaconEnabled();
 	}
 
-	/** Test if the current message is a travel time */
-	private boolean isMsgTravelTime() {
-		SignMessage sm = getMsgCurrent();
-		return sm.getRunTimePriority() == TRAVEL_TIME.ordinal();
-	}
-
 	/** Test if the current message is AWS */
 	private boolean isMsgAws() {
 		// FIXME: use SignMsgSource.aws
@@ -1226,11 +1222,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Test if a DMS has been deployed by schedule */
 	public boolean isScheduleDeployed() {
 		return isMsgDeployed() && isMsgScheduled();
-	}
-
-	/** Test if a DMS has been deployed by travel time */
-	private boolean isTravelTimeDeployed() {
-		return isMsgDeployed() && isMsgTravelTime();
 	}
 
 	/** Test if a DMS is active, not failed and deployed by AWS */
@@ -1276,8 +1267,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				s |= ItemStyle.AVAILABLE.bit();
 			if (isUserDeployed())
 				s |= ItemStyle.DEPLOYED.bit();
-			if (isTravelTimeDeployed())
-				s |= ItemStyle.TRAVEL_TIME.bit();
 			if (isScheduleDeployed())
 				s |= ItemStyle.SCHEDULED.bit();
 			if (isAwsDeployed())

@@ -27,8 +27,9 @@ public enum SignMsgSource {
 	gate_arm,	// 4  gate arm system
 	lcs,		// 5  lane-use control signal
 	aws,		// 6  automated warning system
-	external;	// 7  external system
-			// FIXME: add incident source
+	external,	// 7  external system
+	travel_time,	// 8  DMS action with [tt...] tag
+	incident;	// 9  deployed incident
 
 	/** Get the bit for a source */
 	public int bit() {

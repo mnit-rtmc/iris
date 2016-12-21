@@ -30,17 +30,22 @@ public enum DmsMsgPriority {
 	PSA,		/* 3: public service announcement */
 	TRAVEL_TIME,	/* 4: travel time priority */
 	SPEED_LIMIT,	/* 5: variable speed limit priority */
-	SCHEDULED,	/* 6: scheduled priority (planned events) */
-			/* FIXME: add 3 more SCHEDULED */
-	OTHER_SYSTEM,	/* 7: other system priority */
-			/* FIXME: add LCS priorities */
-	ALERT,		/* 8: alert priority (AMBER alerts, etc.) */
-	OPERATOR,	/* 9: operator priority */
-	INCIDENT_LOW,	/* 10: low-priority incident */
-	INCIDENT_MED,	/* 11: medium-priority incident */
-	INCIDENT_HIGH,	/* 12: high-priority incident */
-	AWS,		/* 13: automated warning system */
-	OVERRIDE;	/* 14: override priority */
+	SCHED_A,	/* 6: scheduled priority A (planned events) */
+	SCHED_B,	/* 7: scheduled priority B */
+	SCHED_C,	/* 8: scheduled priority C */
+	SCHED_D,	/* 9: scheduled priority D */
+	OTHER_SYSTEM,	/* 10: other system priority */
+	ALERT,		/* 11: alert priority (AMBER alerts, etc.) */
+	OPERATOR,	/* 12: operator priority */
+	GATE_ARM,	/* 13: gate-arm priority */
+	LCS_LOW,	/* 14: low-priority LCS */
+	LCS_MED,	/* 15: medium-priority LCS */
+	LCS_HIGH,	/* 16: high-priority LCS */
+	INCIDENT_LOW,	/* 17: low-priority incident */
+	INCIDENT_MED,	/* 18: medium-priority incident */
+	INCIDENT_HIGH,	/* 19: high-priority incident */
+	AWS,		/* 20: automated warning system */
+	OVERRIDE;	/* 21: override priority */
 
 	/** Values array */
 	static private final DmsMsgPriority[] VALUES = values();
@@ -57,20 +62,31 @@ public enum DmsMsgPriority {
 	public int getSource() {
 		switch (this) {
 		case BLANK:
+		case OVERRIDE:
 			return SignMsgSource.blank.bit();
-		case PSA:
 		case TRAVEL_TIME:
+			return SignMsgSource.toBits(SignMsgSource.schedule,
+			                            SignMsgSource.travel_time);
+		case PSA:
 		case SPEED_LIMIT:
-		case SCHEDULED:
+		case SCHED_A:
+		case SCHED_B:
+		case SCHED_C:
+		case SCHED_D:
 			return SignMsgSource.schedule.bit();
 		case ALERT:
 		case OPERATOR:
 			return SignMsgSource.operator.bit();
+		case GATE_ARM:
+			return SignMsgSource.gate_arm.bit();
+		case LCS_LOW:
+		case LCS_MED:
+		case LCS_HIGH:
+			return SignMsgSource.lcs.bit();
 		case INCIDENT_LOW:
 		case INCIDENT_MED:
 		case INCIDENT_HIGH:
-			// FIXME: add incident source
-			return SignMsgSource.schedule.bit();
+			return SignMsgSource.incident.bit();
 		case AWS:
 			return SignMsgSource.aws.bit();
 		default:

@@ -61,11 +61,10 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		DmsMsgPriority.PSA,
 		DmsMsgPriority.TRAVEL_TIME,
 		DmsMsgPriority.SPEED_LIMIT,
-		DmsMsgPriority.SCHEDULED,
-		DmsMsgPriority.OTHER_SYSTEM,
-		DmsMsgPriority.INCIDENT_LOW,
-		DmsMsgPriority.INCIDENT_MED,
-		DmsMsgPriority.INCIDENT_HIGH
+		DmsMsgPriority.SCHED_A,
+		DmsMsgPriority.SCHED_B,
+		DmsMsgPriority.SCHED_C,
+		DmsMsgPriority.SCHED_D
 	};
 
 	/** Allowed run-time priorities */
@@ -73,11 +72,10 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		DmsMsgPriority.PSA,
 		DmsMsgPriority.TRAVEL_TIME,
 		DmsMsgPriority.SPEED_LIMIT,
-		DmsMsgPriority.SCHEDULED,
-		DmsMsgPriority.OTHER_SYSTEM,
-		DmsMsgPriority.INCIDENT_LOW,
-		DmsMsgPriority.INCIDENT_MED,
-		DmsMsgPriority.INCIDENT_HIGH
+		DmsMsgPriority.SCHED_A,
+		DmsMsgPriority.SCHED_B,
+		DmsMsgPriority.SCHED_C,
+		DmsMsgPriority.SCHED_D
 	};
 
 	/** Create the columns in the model */
@@ -251,9 +249,9 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			attrs.put("sign_group", sg);
 			attrs.put("phase", lookupPlanPhase());
 			attrs.put("a_priority",
-				DmsMsgPriority.SCHEDULED.ordinal());
+				DmsMsgPriority.SCHED_A.ordinal());
 			attrs.put("r_priority",
-				DmsMsgPriority.SCHEDULED.ordinal());
+				DmsMsgPriority.SCHED_A.ordinal());
 			descriptor.cache.createObject(name, attrs);
 		}
 	}

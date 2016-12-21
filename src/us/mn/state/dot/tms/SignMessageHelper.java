@@ -80,9 +80,12 @@ public class SignMessageHelper extends BaseHelper {
 		return null;
 	}
 
-	/** Tolling / external */
-	static private final int TOLL_EXT = SignMsgSource.toBits(
-		SignMsgSource.tolling, SignMsgSource.external);
+	/** Sign msg source bits to ignore */
+	static private final int SRC_IGNORE = SignMsgSource.toBits(
+		SignMsgSource.tolling,
+		SignMsgSource.travel_time,
+		SignMsgSource.external
+	);
 
 	/** Check sign message source.
 	 * @param src Message source.
@@ -90,8 +93,8 @@ public class SignMessageHelper extends BaseHelper {
 	 * @return true if source matches. */
 	static private boolean sourceEquals(int src, SignMessage sm) {
 		// ignore tolling and external bits for comparison
-		int srct = src           | TOLL_EXT;
-		int sms = sm.getSource() | TOLL_EXT;
+		int srct = src           | SRC_IGNORE;
+		int sms = sm.getSource() | SRC_IGNORE;
 		return srct == sms;
 	}
 

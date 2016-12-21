@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
-import static us.mn.state.dot.tms.DmsMsgPriority.PSA;
+import static us.mn.state.dot.tms.DmsMsgPriority.GATE_ARM;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
@@ -482,8 +482,8 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Update the message on the specified DMS */
 	private void updateDmsMsg(DMSImpl d, String ms) {
 		if (!d.getMsgCurrent().getMulti().equals(ms)) {
-			SignMessage sm = d.createMsg(ms, false, PSA, PSA,
-				gate_arm.bit(), null, null);
+			SignMessage sm = d.createMsg(ms, false, GATE_ARM,
+				GATE_ARM, gate_arm.bit(), null, null);
 			if (sm != null)
 				updateDmsMsg(d, sm);
 			else

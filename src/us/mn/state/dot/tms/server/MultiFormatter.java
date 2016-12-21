@@ -83,6 +83,15 @@ public class MultiFormatter {
 		return null;
 	}
 
+	/** Check if DMS action is travel time */
+	public boolean isTravelTime(DmsAction da) {
+		QuickMessage qm = da.getQuickMessage();
+		if (qm != null)
+			return new MultiString(qm.getMulti()).isTravelTime();
+		else
+			return false;
+	}
+
 	/** Check if DMS action is tolling */
 	public boolean isTolling(DmsAction da) {
 		QuickMessage qm = da.getQuickMessage();

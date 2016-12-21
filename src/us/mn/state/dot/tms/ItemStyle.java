@@ -44,7 +44,6 @@ public enum ItemStyle {
 	UNCONFIRMED,
 	/* DMS styles */
 	SCHEDULED,
-	TRAVEL_TIME,
 	AWS_CONTROLLED,
 	AWS_DEPLOYED,
 	/* Camera styles */

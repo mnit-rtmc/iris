@@ -16,7 +16,9 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DmsMsgPriority;
-import static us.mn.state.dot.tms.DmsMsgPriority.*;
+import static us.mn.state.dot.tms.DmsMsgPriority.LCS_LOW;
+import static us.mn.state.dot.tms.DmsMsgPriority.LCS_MED;
+import static us.mn.state.dot.tms.DmsMsgPriority.LCS_HIGH;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
@@ -38,22 +40,20 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class OpSendLCSIndications extends OpLCS {
 
-	/** Get the activation priority for the specified indication */
-	static private DmsMsgPriority getActivationPriority(int ind) {
+	/** Get the priority for the specified indication */
+	static private DmsMsgPriority getPriority(int ind) {
 		switch (LaneUseIndication.fromOrdinal(ind)) {
 		case LANE_CLOSED:
-			return INCIDENT_HIGH;
+			return LCS_HIGH;
 		case LANE_CLOSED_AHEAD:
 		case MERGE_RIGHT:
 		case MERGE_LEFT:
 		case MERGE_BOTH:
 		case MUST_EXIT_RIGHT:
 		case MUST_EXIT_LEFT:
-			return INCIDENT_MED;
-		case USE_CAUTION:
-			return INCIDENT_LOW;
+			return LCS_MED;
 		default:
-			return OPERATOR;
+			return LCS_LOW;
 		}
 	}
 
@@ -115,13 +115,13 @@ public class OpSendLCSIndications extends OpLCS {
 	 * SONAR task processor thread, which might have a queue of tasks
 	 * already pending. */
 	private SignMessage createSignMessage(DMSImpl dms, String ms, int ind) {
-		DmsMsgPriority ap = getActivationPriority(ind);
+		DmsMsgPriority p = getPriority(ind);
 		MultiString multi = new MultiString(ms);
 		if (multi.isBlank())
-			return dms.createMsgBlank(ap);
+			return dms.createMsgBlank();
 		else {
-			return dms.createMsg(ms, false, ap, OPERATOR,
-				lcs.bit(), user.getName(), null);
+			return dms.createMsg(ms, false, p, p, lcs.bit(),
+			                     user.getName(), null);
 		}
 	}
 

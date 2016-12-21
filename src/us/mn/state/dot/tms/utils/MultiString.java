@@ -721,6 +721,20 @@ public class MultiString {
 		return Arrays.asList(words);
 	}
 
+	/** Does the MULTI string have a travel time [tt] tag? */
+	public boolean isTravelTime() {
+		final boolean[] travel = new boolean[] { false };
+		parse(new MultiAdapter() {
+			@Override
+			public void addTravelTime(String sid,
+				OverLimitMode mode, String o_txt)
+			{
+				travel[0] = true;
+			}
+		});
+		return travel[0];
+	}
+
 	/** Does the MULTI string have a tolling [tz] tag? */
 	public boolean isTolling() {
 		final boolean[] tolling = new boolean[] { false };
