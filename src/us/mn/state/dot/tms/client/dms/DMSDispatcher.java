@@ -32,6 +32,8 @@ import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
+import static us.mn.state.dot.tms.SignMsgSource.blank;
+import static us.mn.state.dot.tms.SignMsgSource.operator;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -295,9 +297,10 @@ public class DMSDispatcher extends JPanel {
 		if (bitmaps != null) {
 			boolean be = composer.isBeaconEnabled();
 			DmsMsgPriority p = composer.getPriority();
+			int src = operator.bit();
 			String u = user.getName();
 			Integer d = composer.getDuration();
-			return creator.create(ms, be, bitmaps, p, p, u, d);
+			return creator.create(ms, be, bitmaps, p, p, src, u, d);
 		} else
 			return null;
 	}
@@ -319,8 +322,9 @@ public class DMSDispatcher extends JPanel {
 		String bitmaps = createBitmaps("");
 		if (bitmaps != null) {
 			return creator.create("", false, bitmaps,
-			       DmsMsgPriority.OVERRIDE,
-			       DmsMsgPriority.BLANK, null, null);
+			                      DmsMsgPriority.OVERRIDE,
+			                      DmsMsgPriority.BLANK, blank.bit(),
+			                      null, null);
 		} else
 			return null;
 	}
