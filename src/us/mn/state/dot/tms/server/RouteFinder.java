@@ -30,7 +30,7 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 public class RouteFinder {
 
 	/** Determine the best of two routes */
-	static private Route2 bestRoute(Route2 r1, Route2 r2) {
+	static private Route bestRoute(Route r1, Route r2) {
 		if (null == r1)
 			return r2;
 		else if (null == r2)
@@ -62,8 +62,8 @@ public class RouteFinder {
 	 * @param orig Route origin.
 	 * @param dest Route destination.
 	 * @return Best route found, or null. */
-	public Route2 findRoute(GeoLoc orig, GeoLoc dest) {
-		Route2 r = findRoute(orig, new Route2(dest));
+	public Route findRoute(GeoLoc orig, GeoLoc dest) {
+		Route r = findRoute(orig, new Route(dest));
 		return (r != null && r.getDistance().compareTo(dist_max) < 0)
 		      ? r
 		      : null;
@@ -73,11 +73,11 @@ public class RouteFinder {
 	 * @param orig Corridor origin.
 	 * @param r Partial route.
 	 * @return Completed route, or null if none found. */
-	private Route2 findRoute(GeoLoc orig, Route2 r) {
+	private Route findRoute(GeoLoc orig, Route r) {
 		ODPair od = new ODPair(orig, r.getDestination(), false);
 		Corridor c = corridors.getCorridor(od);
 		if (c != null) {
-			Route2 re = r.createExtended(c, od);
+			Route re = r.createExtended(c, od);
 			if (re != null)
 				return re;
 		}
@@ -91,7 +91,7 @@ public class RouteFinder {
 	 * @param orig Corridor origin.
 	 * @param r Partial route.
 	 * @return Completed route, or null if none found. */
-	private Route2 findBranching(GeoLoc orig, Route2 r) {
+	private Route findBranching(GeoLoc orig, Route r) {
 		Corridor c = corridors.getCorridor(orig);
 		if (null == c)
 			return null;
@@ -101,14 +101,14 @@ public class RouteFinder {
 		Distance rd = dist_max.sub(r.getDistance());
 		BranchFinder bf = new BranchFinder(o_mi, r.getDestination(),rd);
 		c.findActiveNode(bf);
-		Route2 rb = null;	// best route
+		Route rb = null;	// best route
 		for (R_NodeImpl rn: bf.branches.values()) {
 			GeoLoc cd = rn.getGeoLoc();
 			for (R_NodeImpl f: rn.getForks()) {
 				boolean turn = rn.hasTurnPenalty()
 				             && f.hasTurnPenalty();
 				ODPair od = new ODPair(orig, cd, turn);
-				Route2 re = r.createExtended(c, od);
+				Route re = r.createExtended(c, od);
 				if (re != null) {
 					GeoLoc o = f.getGeoLoc();
 					rb = bestRoute(rb, findRoute(o, re));

@@ -195,14 +195,14 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Lookup all HOT detectors in a route.
 	 * @param r The route.
 	 * @return Set of all HOT detectors in the route. */
-	private SamplerSet lookupDetectors(Route2 r) {
+	private SamplerSet lookupDetectors(Route r) {
 		return (r != null)
 		      ? r.getSamplerSet(LaneType.HOT)
 		      : new SamplerSet();
 	}
 
 	/** Build the route for the whole toll zone */
-	private Route2 buildRoute() {
+	private Route buildRoute() {
 		GeoLoc o = StationHelper.lookupGeoLoc(start_id);
 		if (o != null)
 			return buildRoute(o);
@@ -216,7 +216,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Build the route from an origin.
 	 * @param o Origin geo location.
 	 * @return Route from origin to end of zone, or null */
-	private Route2 buildRoute(GeoLoc o) {
+	private Route buildRoute(GeoLoc o) {
 		GeoLoc d = StationHelper.lookupGeoLoc(end_id);
 		if (d != null)
 			return buildRoute(o, d);
@@ -231,10 +231,10 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	 * @param o Origin geo location.
 	 * @param d Destination geo location.
 	 * @return Route from origin to destination, or null */
-	private Route2 buildRoute(GeoLoc o, GeoLoc d) {
+	private Route buildRoute(GeoLoc o, GeoLoc d) {
 		long st = TimeSteward.currentTimeMillis();
 		RouteFinder rf = new RouteFinder(BaseObjectImpl.corridors);
-		Route2 r = rf.findRoute(o, d);
+		Route r = rf.findRoute(o, d);
 		if (isLogging()) {
 			long e = TimeSteward.currentTimeMillis() - st;
 			log("ROUTE TO " + end_id + strNot(r) + "FOUND: " + e);
@@ -243,7 +243,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	}
 
 	/** Get a debugging "NOT" string */
-	static private String strNot(Object r) {
+	static private String strNot(Route r) {
 		return (r != null) ? " " : " NOT ";
 	}
 

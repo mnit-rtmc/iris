@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.units.Distance;
  *
  * @author Douglas Lau
  */
-public class Route2 {
+public class Route {
 
 	/** Penalty (in goodness) for each leg in a route */
 	static private final float LEG_PENALTY = 0.25f;
@@ -37,13 +37,13 @@ public class Route2 {
 	public final RouteLeg leg;
 
 	/** Create a new route */
-	private Route2(GeoLoc dst, RouteLeg lg) {
+	private Route(GeoLoc dst, RouteLeg lg) {
 		dest = dst;
 		leg = lg;
 	}
 
 	/** Create a new route */
-	public Route2(GeoLoc dst) {
+	public Route(GeoLoc dst) {
 		this(dst, null);
 	}
 
@@ -51,9 +51,9 @@ public class Route2 {
 	 * @param c Corridor of leg.
 	 * @param od O/D pair of leg.
 	 * @return Extended route with new leg. */
-	public Route2 createExtended(Corridor c, ODPair od) {
+	public Route createExtended(Corridor c, ODPair od) {
 		RouteLeg lg = new RouteLeg(c, od, leg);
-		return lg.isValid() ? new Route2(dest, lg) : null;
+		return lg.isValid() ? new Route(dest, lg) : null;
 	}
 
 	/** Get the destination */
