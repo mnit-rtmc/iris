@@ -42,12 +42,6 @@ public class RouteFinder {
 		}
 	}
 
-	/** Debug log */
-	private final DebugLog dlog;
-
-	/** Name to use for debugging purposes */
-	private final String name;
-
 	/** Maximum route distance */
 	private final Distance dist_max = new Distance(
 		SystemAttrEnum.ROUTE_MAX_MILES.getInt(), MILES);
@@ -58,18 +52,9 @@ public class RouteFinder {
 	/** Corridor manager */
 	private final CorridorManager corridors;
 
-	/** Log a message to the debug log */
-	private void log(String msg) {
-		dlog.log(name + ": " + msg);
-	}
-
 	/** Create a new route finder.
-	 * @param dl Debug log.
-	 * @param n Name (for debugging).
 	 * @param c Corridor manager. */
-	public RouteFinder(DebugLog dl, String n, CorridorManager c) {
-		dlog = dl;
-		name = n;
+	public RouteFinder(CorridorManager c) {
 		corridors = c;
 	}
 
@@ -93,11 +78,8 @@ public class RouteFinder {
 		Corridor c = corridors.getCorridor(od);
 		if (c != null) {
 			Route2 re = r.createExtended(c, od);
-			if (re != null) {
-				if (dlog.isOpen())
-					log("TENTATIVE ROUTE: " + re);
+			if (re != null)
 				return re;
-			}
 		}
 		if (r.legCount() < legs_max)
 			return findBranching(orig, r);
@@ -122,10 +104,6 @@ public class RouteFinder {
 		Route2 rb = null;	// best route
 		for (R_NodeImpl rn: bf.branches.values()) {
 			GeoLoc cd = rn.getGeoLoc();
-			if (dlog.isOpen()) {
-				log("BRANCH ROUTE: " + r + " @ " +
-					GeoLocHelper.getDescription(cd));
-			}
 			for (R_NodeImpl f: rn.getForks()) {
 				boolean turn = rn.hasTurnPenalty()
 				             && f.hasTurnPenalty();

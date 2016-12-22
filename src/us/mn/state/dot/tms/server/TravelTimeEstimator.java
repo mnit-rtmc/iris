@@ -205,8 +205,7 @@ public class TravelTimeEstimator {
 
 	/** Find a route to a travel time destination */
 	private Route2 findRoute(GeoLoc dest) {
-		RouteFinder rf = new RouteFinder(TRAVEL_LOG, name,
-			BaseObjectImpl.corridors);
+		RouteFinder rf = new RouteFinder(BaseObjectImpl.corridors);
 		return rf.findRoute(origin, dest);
 	}
 

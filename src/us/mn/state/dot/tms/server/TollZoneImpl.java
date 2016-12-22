@@ -246,7 +246,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 			long e = TimeSteward.currentTimeMillis() - st;
 			log("ROUTE TO " + end_id + strNot(r) + "FOUND: " + e);
 			st = TimeSteward.currentTimeMillis();
-			RouteFinder rf = new RouteFinder(TOLL_LOG, name,
+			RouteFinder rf = new RouteFinder(
 				BaseObjectImpl.corridors);
 			Route2 r2 = rf.findRoute(o, d);
 			e = TimeSteward.currentTimeMillis() - st;
