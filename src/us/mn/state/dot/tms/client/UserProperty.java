@@ -24,6 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Properties;
 import javax.swing.JFrame;
+import us.mn.state.dot.tms.VideoMonitor;
 
 /**
  * A user property is workstation-specific, such as window placement, selected
@@ -45,7 +46,8 @@ public enum UserProperty {
 	TAB_SEL_3	("tab.selected.3"),
 	TAB_LIST	("tab.list"),
 	SCALE		("scale"),
-	VIDEO_EXTVIEWER	("video.extviewer");
+	VIDEO_EXTVIEWER	("video.extviewer"),
+	VIDEO_MONITOR	("video.monitor");
 
 	/** Property name */
 	public final String name;
@@ -184,8 +186,8 @@ public enum UserProperty {
 		return st.toArray(new String[0]);
 	}
 
-	/** Update user properties associated with JFrame */
-	static public void setWindowProperties(Properties p, IrisClient frame) {
+	/** Update user properties */
+	static public void updateProperties(Properties p, IrisClient frame) {
 		int es = frame.getExtendedState();
 		setProp(p, WIN_EXT_STATE, es);
 		Rectangle r = frame.getBounds();
@@ -202,6 +204,11 @@ public enum UserProperty {
 			setProp(p, TAB_SEL_2, st[2]);
 		if (st.length > 3)
 			setProp(p, TAB_SEL_3, st[3]);
+		Session s = frame.getSession();
+		VideoMonitor vm = (s != null)
+		                ? s.getCameraManager().getSelectedMonitor()
+		                : null;
+		setProp(p, VIDEO_MONITOR, (vm != null) ? vm.toString() : "");
 	}
 
 	/** Get the user interface scale factor */
@@ -242,5 +249,11 @@ public enum UserProperty {
 		if ("".equals(ev))
 			return null;
 		return ev;
+	}
+
+	/** Get the video monitor string */
+	static public String getVideoMonitor(Properties p) {
+		String vm = getProp(p, VIDEO_MONITOR);
+		return (!vm.isEmpty()) ? vm : null;
 	}
 }

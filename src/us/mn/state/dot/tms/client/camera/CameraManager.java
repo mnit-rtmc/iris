@@ -156,7 +156,7 @@ public class CameraManager extends DeviceManager<Camera> {
 				getSelectionModel().setSelected(c);
 			else
 				getSelectionModel().clearSelection();
-		} else if (c != null)
+		} else
 			dispatcher.selectMonitorCamera(c);
 	}
 
@@ -173,5 +173,10 @@ public class CameraManager extends DeviceManager<Camera> {
 	/** Select the previous camera */
 	public void selectPreviousCamera() {
 		dispatcher.selectPreviousCamera();
+	}
+
+	/** Get the selected video monitor */
+	public VideoMonitor getSelectedMonitor() {
+		return dispatcher.getSelectedMonitor();
 	}
 }

@@ -21,6 +21,7 @@ import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.Collection;
 import java.util.Properties;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -36,10 +37,13 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.UserProperty;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -73,7 +77,7 @@ public class CameraDispatcher extends JPanel {
 	private final CameraManager manager;
 
 	/** Client properties */
-	private final Properties client_props;
+	private final Properties props;
 
 	/** VideoRequest object */
 	private final VideoRequest video_req;
@@ -92,6 +96,9 @@ public class CameraDispatcher extends JPanel {
 
 	/** Cache of Camera proxy objects */
 	private final TypeCache<Camera> cache;
+
+	/** Cache of video monitor objects */
+	private final TypeCache<VideoMonitor> vm_cache;
 
 	/** Stream status listener */
 	private final StreamStatusListener ss_listener;
@@ -133,8 +140,8 @@ public class CameraDispatcher extends JPanel {
 	public CameraDispatcher(Session s, CameraManager man) {
 		session = s;
 		manager = man;
-		client_props = session.getProperties();
-		video_req = new VideoRequest(client_props, SIZE);
+		props = session.getProperties();
+		video_req = new VideoRequest(props, SIZE);
 		video_req.setSonarSessionId(session.getSessionId());
 		setLayout(new BorderLayout());
 		sel_mdl = manager.getSelectionModel();
@@ -146,6 +153,8 @@ public class CameraDispatcher extends JPanel {
 		stream_pnl = createStreamPanel();
 		control_pnl = new CamControlPanel(cam_ptz);
 		cache = session.getSonarState().getCamCache().getCameras();
+		vm_cache = session.getSonarState().getCamCache()
+		                  .getVideoMonitors();
 		ss_listener = createStreamStatusListener();
 	}
 
@@ -291,7 +300,24 @@ public class CameraDispatcher extends JPanel {
 		add(control_pnl, BorderLayout.SOUTH);
 		clear();
 		sel_mdl.addProxySelectionListener(sel_listener);
+		vm_cache.addProxyListener(vm_listener);
 	}
+
+	/** Video monitor proxy listener */
+	private final SwingProxyAdapter<VideoMonitor> vm_listener =
+		new SwingProxyAdapter<VideoMonitor>()
+	{
+		protected void enumerationCompleteSwing(
+			Collection<VideoMonitor> proxies)
+		{
+			String vms = UserProperty.getVideoMonitor(props);
+			if (vms != null) {
+				VideoMonitor vm = VideoMonitorHelper.lookup(vms);
+				if (vm != null)
+					selectMonitor(vm);
+			}
+		}
+	};
 
 	/** Set the title */
 	public void setTitle(String t) {
@@ -330,6 +356,7 @@ public class CameraDispatcher extends JPanel {
 
 	/** Dispose of the camera viewer */
 	public void dispose() {
+		vm_cache.removeProxyListener(vm_listener);
 		stream_pnl.unbindStreamStatusListener(ss_listener);
 		sel_mdl.removeProxySelectionListener(sel_listener);
 		joy_ptz.dispose();
@@ -372,16 +399,18 @@ public class CameraDispatcher extends JPanel {
 	}
 
 	/** Get the selected video monitor */
-	private VideoMonitor getSelectedMonitor() {
+	public VideoMonitor getSelectedMonitor() {
 		Object o = output_cbx.getSelectedItem();
 		return (o instanceof VideoMonitor) ? (VideoMonitor) o : null;
 	}
 
-	/** Select a camera on a video monitor */
+	/** Select a camera on the selected video monitor */
 	public void selectMonitorCamera(Camera c) {
-		VideoMonitor vm = video_monitor;
-		if (vm != null)
-			vm.setCamera(c);
+		if (c != null) {
+			VideoMonitor vm = video_monitor;
+			if (vm != null)
+				vm.setCamera(c);
+		}
 	}
 
 	/** Clear all of the fields */

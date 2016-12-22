@@ -143,7 +143,7 @@ public class IrisClient extends JFrame {
 
 	/** Quit the IRIS client application */
 	private void doQuit() {
-		UserProperty.setWindowProperties(props, this);
+		UserProperty.updateProperties(props, this);
 		try {
 			UserProperty.store(props);
 		}
@@ -402,7 +402,7 @@ public class IrisClient extends JFrame {
 
 	/** Logout of the current session */
 	public void logout() {
-		UserProperty.setWindowProperties(props, this);
+		UserProperty.updateProperties(props, this);
 		menu_bar.setSession(null);
 		removeTabs();
 		closeSession();
