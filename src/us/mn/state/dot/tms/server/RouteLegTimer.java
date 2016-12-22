@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Interval;
 
@@ -76,12 +75,6 @@ public class RouteLegTimer {
 		return (link > 0) ? (link / sp) : 0;
 	}
 
-	/** Debug log */
-	private final DebugLog dlog;
-
-	/** Name to use for debugging purposes */
-	private final String name;
-
 	/** Route leg */
 	private final RouteLeg leg;
 
@@ -89,13 +82,9 @@ public class RouteLegTimer {
 	private final float low_mi;
 
 	/** Create a new route leg timer.
-	 * @param dl Debug log.
-	 * @param n Name (for debugging).
 	 * @param lg Route leg.
 	 * @param fd Final destination flag. */
-	public RouteLegTimer(DebugLog dl, String n, RouteLeg lg, boolean fd) {
-		dlog = dl;
-		name = n;
+	public RouteLegTimer(RouteLeg lg, boolean fd) {
 		leg = lg;
 		low_mi = (fd) ? leg.d_mi - LOW_SPEED_DISTANCE : leg.d_mi;
 	}
@@ -195,12 +184,7 @@ public class RouteLegTimer {
 		}
 		private float timeFrom(StationData pd) {
 			assert mile > pd.mile;
-			float hours = timeFromAvg(pd) + timeFromLow(pd);
-			if (dlog.isOpen()) {
-				dlog.log(name + " st: " + mile + ", " + avg +
-				         ", " + low + ", h: " + hours);
-			}
-			return hours;
+			return timeFromAvg(pd) + timeFromLow(pd);
 		}
 		private float timeFromAvg(StationData pd) {
 			return time_segment(leg.o_mi, low_mi, pd.mile, mile,

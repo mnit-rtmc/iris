@@ -255,8 +255,7 @@ public class TravelTimeEstimator {
 			throw new BadRouteException("Route is empty");
 		Interval t = new Interval(0);
 		while (leg != null) {
-			RouteLegTimer rlt = new RouteLegTimer(TRAVEL_LOG, name,
-				leg, final_dest);
+			RouteLegTimer rlt = new RouteLegTimer(leg, final_dest);
 			t = t.add(rlt.calculateTime());
 			leg = leg.prev;
 		}
