@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.util.ArrayList;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
@@ -105,6 +107,34 @@ public class RouteLeg {
 	/** Check if the leg ends in a "turn" */
 	public boolean hasTurn() {
 		return od_pair.hasTurn();
+	}
+
+	/** Lookup samplers on a corridor trip */
+	public ArrayList<VehicleSampler> lookupSamplers(final LaneType lt) {
+		final ArrayList<VehicleSampler> samplers =
+			new ArrayList<VehicleSampler>();
+		corridor.findStation(new Corridor.StationFinder() {
+			public boolean check(float m, StationImpl s) {
+				if (isWithinTrip(m))
+					samplers.addAll(lookupSamplers(s, lt));
+				return false;
+			}
+		});
+		return samplers;
+	}
+
+	/** Lookup the samplers for one station and lane type */
+	private ArrayList<VehicleSampler> lookupSamplers(StationImpl s,
+		LaneType lt)
+	{
+		SamplerSet ss = s.getSamplerSet();
+		ArrayList<VehicleSampler> dets = ss.filter(lt);
+		// Create sampler set combining all detectors in station.
+		// This is needed to average densities over multiple HOT lanes.
+		ArrayList<VehicleSampler> arr = new ArrayList<VehicleSampler>();
+		if (dets.size() > 0)
+			arr.add(new SamplerSet(dets));
+		return arr;
 	}
 
 	/** Get a string representation */

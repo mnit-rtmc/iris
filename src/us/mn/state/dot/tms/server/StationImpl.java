@@ -673,4 +673,9 @@ public class StationImpl implements Station, VehicleSampler {
 		if(s != null)
 			s.removeObject(this);
 	}
+
+	/** Lookup the samplers */
+	public SamplerSet getSamplerSet() {
+		return r_node.getSamplerSet();
+	}
 }

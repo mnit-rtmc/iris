@@ -195,20 +195,14 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Lookup all HOT detectors in a route.
 	 * @param r The route.
 	 * @return Set of all HOT detectors in the route. */
-	private SamplerSet lookupDetectors(Route r) {
-		if (r != null)
-			return r.getSamplerSet(LaneType.HOT);
-		else {
-			if (isLogging()) {
-				log("No route from " + start_id + " to " +
-				    end_id);
-			}
-		      	return new SamplerSet();
-		}
+	private SamplerSet lookupDetectors(Route2 r) {
+		return (r != null)
+		      ? r.getSamplerSet(LaneType.HOT)
+		      : new SamplerSet();
 	}
 
 	/** Build the route for the whole toll zone */
-	private Route buildRoute() {
+	private Route2 buildRoute() {
 		GeoLoc o = StationHelper.lookupGeoLoc(start_id);
 		if (o != null)
 			return buildRoute(o);
@@ -222,7 +216,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Build the route from an origin.
 	 * @param o Origin geo location.
 	 * @return Route from origin to end of zone, or null */
-	private Route buildRoute(GeoLoc o) {
+	private Route2 buildRoute(GeoLoc o) {
 		GeoLoc d = StationHelper.lookupGeoLoc(end_id);
 		if (d != null)
 			return buildRoute(o, d);
@@ -237,27 +231,13 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	 * @param o Origin geo location.
 	 * @param d Destination geo location.
 	 * @return Route from origin to destination, or null */
-	private Route buildRoute(GeoLoc o, GeoLoc d) {
+	private Route2 buildRoute(GeoLoc o, GeoLoc d) {
 		long st = TimeSteward.currentTimeMillis();
-		RouteBuilder rb = new RouteBuilder(TOLL_LOG, name,
-			BaseObjectImpl.corridors);
-		Route r = rb.findBestRoute(o, d);
+		RouteFinder rf = new RouteFinder(BaseObjectImpl.corridors);
+		Route2 r = rf.findRoute(o, d);
 		if (isLogging()) {
 			long e = TimeSteward.currentTimeMillis() - st;
 			log("ROUTE TO " + end_id + strNot(r) + "FOUND: " + e);
-			st = TimeSteward.currentTimeMillis();
-			RouteFinder rf = new RouteFinder(
-				BaseObjectImpl.corridors);
-			Route2 r2 = rf.findRoute(o, d);
-			e = TimeSteward.currentTimeMillis() - st;
-			log("ROUTE2 TO " + end_id + strNot(r2) + "FOUND: " + e);
-			if (r2.matches(r))
-				log("MATCHES!  YAY!!!");
-			else {
-				log("DOES NOT MATCH!  BOO!!!");
-				log("ROUTE: " + r);
-				log("ROUTE2: " + r2);
-			}
 		}
 		return r;
 	}

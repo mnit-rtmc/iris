@@ -14,7 +14,9 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.util.ArrayList;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
@@ -97,11 +99,12 @@ public class Route2 {
 		       legCount() * LEG_PENALTY;
 	}
 
-	/** Check if the route matches an older-style route */
-	public boolean matches(Route r) {
-		return (r != null)
-		    && (legCount() == r.getTrips().size())
-		    && (getGoodness() == r.getGoodness());
+	/** Get a set of vehicle samplers on route */
+	public SamplerSet getSamplerSet(LaneType lt) {
+		ArrayList<VehicleSampler> vs = new ArrayList<VehicleSampler>();
+		for (RouteLeg lg = leg; lg != null; lg = lg.prev)
+			vs.addAll(lg.lookupSamplers(lt));
+		return new SamplerSet(vs);
 	}
 
 	/** Get a string representation of the route */
