@@ -1727,6 +1727,21 @@ CREATE VIEW beacon_event_view AS
 	ON beacon_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON beacon_event_view TO PUBLIC;
 
+CREATE TABLE event.travel_time_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date timestamp WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	device_id VARCHAR(10)
+);
+
+CREATE VIEW travel_time_event_view AS
+	SELECT event_id, event_date, event_description.description, device_id
+	FROM event.travel_time_event
+	JOIN event.event_description
+	ON travel_time_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON travel_time_event_view TO PUBLIC;
+
 CREATE TABLE event.tag_type (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(16) NOT NULL
@@ -2605,7 +2620,7 @@ camera_stream_controls_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.45.0
+database_version	4.46.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
@@ -3069,6 +3084,11 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 601	Tag Read
 651	Price DEPLOYED
 652	Price VERIFIED
+701	TT Link too long
+702	TT No data
+703	TT No destination data
+704	TT No origin data
+705	TT No route
 \.
 
 COPY event.incident_detail (name, description) FROM stdin;

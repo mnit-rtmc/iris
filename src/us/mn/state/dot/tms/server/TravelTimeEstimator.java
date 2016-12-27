@@ -17,11 +17,16 @@ package us.mn.state.dot.tms.server;
 import java.util.HashMap;
 import java.util.List;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.MainServer.FLUSH;
+import us.mn.state.dot.tms.server.event.TravelTimeEvent;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
@@ -56,6 +61,16 @@ public class TravelTimeEstimator {
 	/** Get a debugging "NOT" string */
 	static private String strNot(Route r) {
 		return (r != null) ? " " : " NOT ";
+	}
+
+	/** Log an event */
+	static public void logEvent(EventType et, String d) {
+		final TravelTimeEvent ev = new TravelTimeEvent(et, d);
+		FLUSH.addJob(new Job() {
+			public void perform() throws TMSException {
+				ev.doStore();
+			}
+		});
 	}
 
 	/** Name to use for debugging */
@@ -112,7 +127,7 @@ public class TravelTimeEstimator {
 			if (r != null)
 				addTravelTime(r, mode, o_txt);
 			else {
-				logTravel("NO ROUTE TO " + sid);
+				logEvent(EventType.TT_NO_ROUTE, name);
 				valid = false;
 			}
 		}
@@ -128,6 +143,7 @@ public class TravelTimeEstimator {
 				addTravelTime(mn, slow, mode, o_txt);
 			}
 			catch (BadRouteException e) {
+				logEvent(e.event_type, name);
 				logTravel("BAD ROUTE, " + e.getMessage());
 				valid = false;
 			}
@@ -251,8 +267,10 @@ public class TravelTimeEstimator {
 		throws BadRouteException
 	{
 		RouteLeg leg = r.leg;
-		if (null == leg)
-			throw new BadRouteException("Route is empty");
+		if (null == leg) {
+			throw new BadRouteException(EventType.TT_NO_ROUTE,
+			                            "ROUTE EMPTY");
+		}
 		Interval t = new Interval(0);
 		while (leg != null) {
 			RouteLegTimer rlt = new RouteLegTimer(leg, final_dest);

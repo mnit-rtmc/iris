@@ -17,6 +17,11 @@ package us.mn.state.dot.tms.server;
 import java.util.Collection;
 import java.util.Map;
 import java.util.TreeMap;
+import us.mn.state.dot.tms.EventType;
+import static us.mn.state.dot.tms.EventType.TT_LINK_TOO_LONG;
+import static us.mn.state.dot.tms.EventType.TT_NO_DATA;
+import static us.mn.state.dot.tms.EventType.TT_NO_DESTINATION_DATA;
+import static us.mn.state.dot.tms.EventType.TT_NO_ORIGIN_DATA;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Interval;
 
@@ -98,8 +103,7 @@ public class RouteLegTimer {
 			if (pd != null) {
 				if (isSegmentTooLong(pd.mile, sd.mile)) {
 					float llen = sd.mile - pd.mile;
-					throwException("Link too long (" +
-						llen + ") " + sd.station);
+					throwException(TT_LINK_TOO_LONG);
 				}
 				hours += sd.timeFrom(pd);
 			}
@@ -140,7 +144,7 @@ public class RouteLegTimer {
 				StationData sd = me.getValue();
 				float mm = sd.mile - MAX_LINK_LENGTH;
 				if (mm > leg.o_mi)
-					throwException("Start > origin");
+					throwException(TT_NO_ORIGIN_DATA);
 				s_data.put(mm, new StationData(sd.station, mm,
 				           sd.avg, sd.low));
 			}
@@ -149,18 +153,18 @@ public class RouteLegTimer {
 				StationData sd = me.getValue();
 				float mm = sd.mile + MAX_LINK_LENGTH;
 				if (mm < leg.d_mi)
-					throwException("End < destin");
+					throwException(TT_NO_DESTINATION_DATA);
 				s_data.put(mm, new StationData(sd.station, mm,
 				           sd.avg, sd.low));
 			}
 		} else
-			throwException("No speed data");
+			throwException(TT_NO_DATA);
 		return s_data.values();
 	}
 
 	/** Throw a BadRouteException with the specified message */
-	private void throwException(String msg) throws BadRouteException {
-		throw new BadRouteException(msg + " (" + leg + ")");
+	private void throwException(EventType et) throws BadRouteException {
+		throw new BadRouteException(et, leg.toString());
 	}
 
 	/** Check if a milepoint is within the leg "bounds" */

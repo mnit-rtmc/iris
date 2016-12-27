@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,7 +38,9 @@ public enum EventType {
 	METER_EVENT(401),
 	BEACON_ON_EVENT(501), BEACON_OFF_EVENT(502),
 	TAG_READ(601),
-	PRICE_DEPLOYED(651), PRICE_VERIFIED(652);
+	PRICE_DEPLOYED(651), PRICE_VERIFIED(652),
+	TT_LINK_TOO_LONG(701), TT_NO_DATA(702), TT_NO_DESTINATION_DATA(703),
+	TT_NO_ORIGIN_DATA(704), TT_NO_ROUTE(705);
 
 	/** Event type ID */
 	public final int id;

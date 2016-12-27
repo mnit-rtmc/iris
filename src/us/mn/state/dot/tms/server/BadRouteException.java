@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2009  Minnesota Department of Transportation
+ * Copyright (C) 2007-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server;
 
+import us.mn.state.dot.tms.EventType;
+
 /**
  * A bad route exception indicates a problem with a travel time route
  *
@@ -21,8 +23,12 @@ package us.mn.state.dot.tms.server;
  */
 public class BadRouteException extends Exception {
 
+	/** Event type for logging */
+	public final EventType event_type;
+
 	/** Create a new bad route exception */
-	public BadRouteException(String msg) {
+	public BadRouteException(EventType et, String msg) {
 		super(msg);
+		event_type = et;
 	}
 }

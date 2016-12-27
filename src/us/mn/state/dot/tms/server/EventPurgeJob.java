@@ -19,6 +19,7 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.CommEvent;
 import us.mn.state.dot.tms.server.event.MeterEvent;
+import us.mn.state.dot.tms.server.event.TravelTimeEvent;
 
 /**
  * Job to periodically purge database event records.
@@ -36,6 +37,7 @@ public class EventPurgeJob extends Job {
 	public void perform() throws TMSException {
 		CommEvent.purgeRecords();
 		MeterEvent.purgeRecords();
+		TravelTimeEvent.purgeRecords();
 		IncidentImpl.cache.purge();
 	}
 }
