@@ -621,7 +621,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Get a list of the downstream nodes */
-	public List<R_NodeImpl> getDownstream() {
+	private List<R_NodeImpl> getDownstream() {
 		synchronized (downstream) {
 			return new LinkedList<R_NodeImpl>(downstream);
 		}
@@ -642,6 +642,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	 * @param gl GeoLoc of corridor.
 	 * @return R_Node entrance to corridor (or null). */
 	public R_NodeImpl findEntrance(final GeoLoc gl) {
+		// FIXME: use Corridor iterator instead of relying on downstream
+		//        links.  Maybe we can get rid of downstream list?
 		if (isSameCorridor(gl, geo_loc))
 			return this;
 		R_NodeImpl n = this;
