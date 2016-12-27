@@ -110,19 +110,6 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 		return stations;
 	}
 
-	/** Calculate the distance for the given O/D pair (miles) */
-	public float calculateDistance(ODPair od) throws BadRouteException {
-		Float origin = calculateMilePoint(od.getOrigin());
-		Float destination = calculateMilePoint(od.getDestination());
-		if (origin == null || destination == null)
-			throw new BadRouteException("No nodes on corridor");
-		if (origin > destination) {
-			throw new BadRouteException("Origin (" + origin +
-				") > destin (" + destination + "), " + od);
-		}
-		return destination - origin;
-	}
-
 	/** Calculate the distance to the nearest node */
 	public Distance distanceTo(GeoLoc loc) {
 		Float m = calculateMilePoint(loc);
@@ -132,19 +119,6 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 				return new Distance(mile - m, MILES);
 		}
 		return null;
-	}
-
-	/** Find the nearest node downstream from the given location */
-	public R_NodeImpl findDownstreamNode(GeoLoc loc)
-		throws BadRouteException
-	{
-		Float m = calculateMilePoint(loc);
-		if (m == null)
-			throw new BadRouteException("No nodes on corridor");
-		Float mile = findDownstreamPoint(m);
-		if (mile != null)
-			return n_points.get(mile);
-		throw new BadRouteException("No downstream nodes");
 	}
 
 	/** Find the nearest milepoint downstream from the given milepoint */
