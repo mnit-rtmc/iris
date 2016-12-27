@@ -84,7 +84,7 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 	}
 
 	/** Find a station using a station finder callback interface */
-	protected StationImpl findStation(StationFinder finder) {
+	public StationImpl findStation(StationFinder finder) {
 		for (Float m: n_points.keySet()) {
 			assert m != null;
 			R_NodeImpl n = n_points.get(m);
@@ -95,19 +95,6 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 			}
 		}
 		return null;
-	}
-
-	/** Create a mapping from mile points to stations */
-	public TreeMap<Float, StationImpl> createStationMap() {
-		final TreeMap<Float, StationImpl> stations =
-			new TreeMap<Float, StationImpl>();
-		findStation(new StationFinder() {
-			public boolean check(float m, StationImpl s) {
-				stations.put(m, s);
-				return false;
-			}
-		});
-		return stations;
 	}
 
 	/** Calculate the distance to the nearest node */
