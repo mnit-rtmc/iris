@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import java.awt.event.MouseEvent;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.LaneUseIndication;
-import us.mn.state.dot.tms.LCSArray;
 import static us.mn.state.dot.tms.R_Node.MAX_SHIFT;
 
 /**
@@ -58,7 +57,7 @@ public class LCSArrayPanel extends JPanel {
 			addMouseListener(new MouseAdapter() {
 				public void mouseClicked(MouseEvent e) {
 					Integer ln = lane;
-					if(ln != null)
+					if (ln != null)
 						doClick(ln);
 				}
 			});
@@ -79,7 +78,7 @@ public class LCSArrayPanel extends JPanel {
 	/** Process a click on an LCS panel */
 	private void doClick(int ln) {
 		ClickHandler ch = handler;
-		if(ch != null)
+		if (ch != null)
 			ch.handleClick(ln);
 	}
 
@@ -93,7 +92,7 @@ public class LCSArrayPanel extends JPanel {
 		int w = getX(MAX_SHIFT + 1);
 		setMinimumSize(new Dimension(w, pixels));
 		setPreferredSize(new Dimension(w, pixels));
-		for(int i = 0; i < lcs_pnl.length; i++) {
+		for (int i = 0; i < lcs_pnl.length; i++) {
 			lcs_pnl[i] = new LCSPanel();
 			add(lcs_pnl[i]);
 			lcs_pnl[i].setBounds(getX(i), 0, pixels, pixels);
@@ -111,9 +110,9 @@ public class LCSArrayPanel extends JPanel {
 	/** Set new indications */
 	public void setIndications(Integer[] ind, int shift) {
 		int ilen = ind != null ? ind.length : 0;
-		for(int i = 0; i < lcs_pnl.length; i++) {
+		for (int i = 0; i < lcs_pnl.length; i++) {
 			int ln = shift + ilen - 1 - i;
-			if(ln >= 0 && ln < ilen)
+			if (ln >= 0 && ln < ilen)
 				lcs_pnl[i].setIndication(ln, ind[ln]);
 			else
 				lcs_pnl[i].clearIndication();
