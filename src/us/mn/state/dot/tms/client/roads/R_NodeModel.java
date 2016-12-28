@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2013  Minnesota Department of Transportation
+ * Copyright (C) 2010-2016  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,8 +47,8 @@ public class R_NodeModel {
 	 * @return Shift for the given side upstream of the node. */
 	public int getUpstreamLane(boolean side) {
 		R_NodeModel up = upstream;
-		while(up != null) {
-			if(up.isSideDefined(side))
+		while (up != null) {
+			if (up.isSideDefined(side))
 				return up.getFogLane(side);
 			else
 				up = up.upstream;
@@ -60,7 +60,7 @@ public class R_NodeModel {
 	 * @param side True for left side, false for right side.
 	 * @return Shift for the given side at the node. */
 	public int getDownstreamLane(boolean side) {
-		if(isSideDefined(side))
+		if (isSideDefined(side))
 			return getFogLane(side);
 		else
 			return getUpstreamLane(side);
@@ -89,8 +89,8 @@ public class R_NodeModel {
 	 * @return Shift for fog line. */
 	private int getFogLane(boolean side) {
 		int line = r_node.getShift();
-		if(side != r_node.getAttachSide()) {
-			if(side)
+		if (side != r_node.getAttachSide()) {
+			if (side)
 				return line - r_node.getLanes();
 			else
 				return line + r_node.getLanes();
@@ -101,7 +101,7 @@ public class R_NodeModel {
 	/** Get the shift from an upstream node to this model node */
 	public int getShift(R_Node up) {
 		R_NodeModel other = getUpstreamModel(up);
-		if(other != null) {
+		if (other != null) {
 			return getDownstreamLane(false) -
 			       other.getDownstreamLane(false);
 		} else
@@ -111,8 +111,8 @@ public class R_NodeModel {
 	/** Get a model for an upstream r_node */
 	private R_NodeModel getUpstreamModel(R_Node up) {
 		R_NodeModel other = upstream;
-		while(other != null) {
-			if(other.r_node == up)
+		while (other != null) {
+			if (other.r_node == up)
 				return other;
 			other = other.upstream;
 		}
