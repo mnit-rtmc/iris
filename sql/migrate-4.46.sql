@@ -33,3 +33,27 @@ INSERT INTO event.event_description (event_desc_id, description)
 	VALUES (704, 'TT No origin data');
 INSERT INTO event.event_description (event_desc_id, description)
 	VALUES (705, 'TT No route');
+
+-- Add camera switch event table
+CREATE TABLE event.camera_switch_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date timestamp WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	monitor_id VARCHAR(12),
+	camera_id VARCHAR(10),
+	source VARCHAR(20)
+);
+
+-- Add camera switch event view
+CREATE VIEW camera_switch_event_view AS
+	SELECT event_id, event_date, event_description.description, monitor_id,
+	       camera_id, source
+	FROM event.camera_switch_event
+	JOIN event.event_description
+	ON camera_switch_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON camera_switch_event_view TO PUBLIC;
+
+-- Add camera switched event description
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (801, 'Camera SWITCHED');

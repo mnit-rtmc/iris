@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
+import us.mn.state.dot.tms.server.event.CameraSwitchEvent;
 
 /**
  * A video monitor device.
@@ -127,7 +128,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		store.update(this, "restricted", r);
 		setRestricted(r);
 		if (r && !isCameraPublished(camera))
-			setCameraNotify(null);
+			setCameraNotify(null, "RESTRICTED");
 	}
 
 	/** Get flag to restrict publishing camera images */
@@ -147,22 +148,25 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Set the camera displayed on the monitor */
 	public void doSetCamera(Camera c) throws TMSException {
+		doSetCam((c instanceof CameraImpl) ? (CameraImpl) c : null,
+		         "IRIS user");
+	}
+
+	/** Set the camera displayed on the monitor */
+	private void doSetCam(CameraImpl c, String src) throws TMSException {
 		if (restricted && !isCameraPublished(c))
 			c = null;
 		if (c != camera) {
 			store.update(this, "camera", c);
 			setCamera(c);
-			if (c instanceof CameraImpl)
-				selectCamera((CameraImpl) c);
-			else
-				selectCamera(null);
+			selectCamera(c, src);
 		}
 	}
 
 	/** Set the camera and notify clients of the change */
-	public void setCameraNotify(Camera c) {
+	public void setCameraNotify(CameraImpl c, String src) {
 		try {
-			doSetCamera(c);
+			doSetCam(c, src);
 			notifyAttribute("camera");
 		}
 		catch (TMSException e) {
@@ -193,11 +197,13 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Select a camera for the video monitor */
-	private void selectCamera(CameraImpl cam) {
+	private void selectCamera(CameraImpl cam, String src) {
 		// NOTE: we need to iterate through all controllers to support
 		//       Pelco switcher protocol.  Otherwise, we could just
 		//       call getController here.
 		selectCameraWithSwitcher(cam);
+		String cid = (cam != null) ? cam.getName() : "";
+		logEvent(new CameraSwitchEvent(getName(), cid, src));
 	}
 
 	/** Select a camera for the video monitor with a switcher */

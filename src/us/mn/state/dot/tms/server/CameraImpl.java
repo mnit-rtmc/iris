@@ -302,8 +302,10 @@ public class CameraImpl extends DeviceImpl implements Camera {
 				VideoMonitorImpl vm = (VideoMonitorImpl) m;
 				if (vm.getRestricted()) {
 					Camera c = vm.getCamera();
-					if (c == this || c == null)
-						vm.setCameraNotify(null);
+					if (c == this || c == null) {
+						vm.setCameraNotify(null,
+						                   "UNPUBLISH");
+					}
 				}
 			}
 		}

@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.pelcop;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -45,18 +46,20 @@ public class CamPrevProp extends MonStatusProp {
 		int mlo = parseBCD2(rx_buf);
 		int mhi = parseBCD2(rx_buf);
 		setMonNumber((100 * mhi) + mlo);
-		selectPrevCamera();
+		selectPrevCamera(op);
 	}
 
 	/** Select previous camera on a video monitor */
-	private void selectPrevCamera() {
+	private void selectPrevCamera(Operation op) {
 		VideoMonitorImpl vm = getMonitor();
 		if (vm != null) {
 			Integer uid = parseUID(getCamId(vm));
 			if (uid != null) {
 				Camera c = CameraHelper.findPrev(uid);
-				if (c != null)
-					vm.setCameraNotify(c);
+				if (c instanceof CameraImpl) {
+					vm.setCameraNotify((CameraImpl) c,
+					                   "PREV " + op);
+				}
 			}
 		}
 	}

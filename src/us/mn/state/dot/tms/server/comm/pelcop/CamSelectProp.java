@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -46,16 +47,18 @@ public class CamSelectProp extends MonStatusProp {
 		if (parse8(rx_buf) != 0)
 			throw new ParsingException("CAM EXT");
 		setMonNumber((100 * mhi) + mlo);
-		selectCamera(cam);
+		selectCamera(op, cam);
 	}
 
 	/** Select camera on a video monitor */
-	private void selectCamera(int cam) {
+	private void selectCamera(Operation op, int cam) {
 		VideoMonitorImpl vm = getMonitor();
 		if (vm != null) {
 			Camera c = findCam(cam);
-			if (c != null)
-				vm.setCameraNotify(c);
+			if (c instanceof CameraImpl) {
+				vm.setCameraNotify((CameraImpl) c,
+				                   "SELECT " + op);
+			}
 		}
 	}
 }
