@@ -88,21 +88,25 @@ public class IncFeedProperty extends ControllerProperty {
 	/** Create an incident */
 	private IncidentImpl createIncident(ParsedIncident inc, GeoLoc loc) {
 		int n_lanes = getLaneCount(LaneType.MAINLINE, loc);
-		if (n_lanes > 0) {
-			Camera cam = lookupCamera(inc);
-			return IncidentImpl.createNotify("_" + inc.id,
-				inc.inc_type.ordinal(), inc.detail,
-				(short) LaneType.MAINLINE.ordinal(),
-				loc.getRoadway(), loc.getRoadDir(), inc.lat,
-				inc.lon, cam,IncidentImpact.fromLanes(n_lanes));
-		} else
-			return null;
+		return (n_lanes > 0) ? createIncident(inc, loc, n_lanes) : null;
 	}
 
 	/** Get the lane count at the incident location */
 	private int getLaneCount(LaneType lt, GeoLoc loc) {
 		CorridorBase cb = corridors.getCorridor(loc);
 		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
+	}
+
+	/** Create an incident */
+	private IncidentImpl createIncident(ParsedIncident inc, GeoLoc loc,
+		int n_lanes)
+	{
+		Camera cam = lookupCamera(inc);
+		return IncidentImpl.createNotify("_" + inc.id,
+			inc.inc_type.ordinal(), inc.detail,
+			(short) LaneType.MAINLINE.ordinal(),
+			loc.getRoadway(), loc.getRoadDir(), inc.lat,
+			inc.lon, cam, IncidentImpact.fromLanes(n_lanes));
 	}
 
 	/** Lookup the camera */
