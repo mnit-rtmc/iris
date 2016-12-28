@@ -44,34 +44,6 @@ public class CanogaPoller extends ThreadedPoller<CanogaProperty>
 	private final LinkedList<OpQueryEventSamples> collectors =
 		new LinkedList<OpQueryEventSamples>();
 
-	/** Find an existing event collector operation */
-	private OpQueryEventSamples findEventCollector(final ControllerImpl c) {
-		Iterator<OpQueryEventSamples> it = collectors.iterator();
-		while (it.hasNext()) {
-			OpQueryEventSamples qes = it.next();
-			if (qes.isDone()) {
-				qes.updateCounters();
-				it.remove();
-			} else if (qes.getController() == c)
-				return qes;
-		}
-		return null;
-	}
-
-	/** Get an event collector operation */
-	private OpQueryEventSamples getEventCollector(final ControllerImpl c) {
-		OpQueryEventSamples qes = findEventCollector(c);
-		if (qes != null) {
-			qes.updateCounters();
-			return qes;
-		} else {
-			qes = new OpQueryEventSamples(c);
-			collectors.add(qes);
-			addOp(qes);
-			return qes;
-		}
-	}
-
 	/** Perform a controller reset */
 	@Override
 	public void resetController(ControllerImpl c) {
@@ -98,5 +70,33 @@ public class CanogaPoller extends ThreadedPoller<CanogaProperty>
 		OpQueryEventSamples qes = getEventCollector(c);
 		if (p == 30)
 			qes.binSamples();
+	}
+
+	/** Get an event collector operation */
+	private OpQueryEventSamples getEventCollector(final ControllerImpl c) {
+		OpQueryEventSamples qes = findEventCollector(c);
+		if (qes != null) {
+			qes.updateCounters();
+			return qes;
+		} else {
+			qes = new OpQueryEventSamples(c);
+			collectors.add(qes);
+			addOp(qes);
+			return qes;
+		}
+	}
+
+	/** Find an existing event collector operation */
+	private OpQueryEventSamples findEventCollector(final ControllerImpl c) {
+		Iterator<OpQueryEventSamples> it = collectors.iterator();
+		while (it.hasNext()) {
+			OpQueryEventSamples qes = it.next();
+			if (qes.isDone()) {
+				qes.updateCounters();
+				it.remove();
+			} else if (qes.getController() == c)
+				return qes;
+		}
+		return null;
 	}
 }
