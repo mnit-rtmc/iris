@@ -48,7 +48,10 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	static private final Color COLOR_NO_LOC = Color.RED;
 
 	/** Background color for inactive nodes */
-	static private final Color COLOR_INACTIVE = Color.GRAY;
+	static private final Color COLOR_INACTIVE = Color.LIGHT_GRAY;
+
+	/** Color of lanes */
+	static private final Color LANE_COLOR = Color.GRAY;
 
 	/** Width of one lane */
 	static private final int LANE_WIDTH = UI.scaled(20);
@@ -227,7 +230,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 
 	/** Fill the roadway area */
 	private void fillRoadway(Graphics2D g, int height) {
-		g.setColor(Color.BLACK);
+		g.setColor(LANE_COLOR);
 		if (model.hasMainline())
 			g.fill(createMainRoadway(height));
 		switch (node_type) {
@@ -502,7 +505,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 
 	/** Draw the shift handle */
 	private void drawShiftHandle(Graphics2D g, int height) {
-		g.setColor(Color.GRAY);
+		g.setColor(Color.DARK_GRAY);
 		Shape path = createShiftHandle(height);
 		g.fill(path);
 		g.setColor(Color.WHITE);
