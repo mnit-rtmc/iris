@@ -204,17 +204,17 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	@Override
 	public void update(final LCSArray la, String a) {
 		lcs_array = la;
-		if(a == null)
+		if (a == null)
 			updateConfig(la);
-		if(a == null || a.equals("name"))
+		if (a == null || a.equals("name"))
 			name_lbl.setText(la.getName());
 		if (a == null || a.equals("preset"))
 			setPresetAction(la);
 		// FIXME: this won't update when geoLoc attributes change
 		//        plus, geoLoc is not an LCSArray attribute
-		if(a == null || a.equals("geoLoc"))
+		if (a == null || a.equals("geoLoc"))
 			location_lbl.setText(LCSArrayHelper.lookupLocation(la));
-		if(a == null || a.equals("operation")) {
+		if (a == null || a.equals("operation")) {
 			updateStatus(la);
 			String op = la.getOperation();
 			operation_lbl.setText(op);
@@ -268,7 +268,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 
 	/** Update the status widgets */
 	private void updateStatus(LCSArray la) {
-		if(LCSArrayHelper.isFailed(la)) {
+		if (LCSArrayHelper.isFailed(la)) {
 			status_lbl.setForeground(Color.WHITE);
 			status_lbl.setBackground(Color.GRAY);
 			status_lbl.setText(LCSArrayHelper.getStatus(la));
@@ -279,7 +279,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	/** Update the critical error status */
 	private void updateCritical(LCSArray la) {
 		String critical = LCSArrayHelper.getCriticalError(la);
-		if(critical.isEmpty())
+		if (critical.isEmpty())
 			updateMaintenance(la);
 		else {
 			status_lbl.setForeground(Color.WHITE);
@@ -291,7 +291,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	/** Update the maintenance error status */
 	private void updateMaintenance(LCSArray la) {
 		String maintenance = LCSArrayHelper.getMaintenance(la);
-		if(maintenance.isEmpty()) {
+		if (maintenance.isEmpty()) {
 			status_lbl.setForeground(null);
 			status_lbl.setBackground(null);
 		} else {
@@ -304,9 +304,9 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	/** Select the DMS for the specified lane */
 	private void selectDMS(LCSArray la, int lane) {
 		LCS lcs = LCSArrayHelper.lookupLCS(la, lane);
-		if(lcs != null) {
+		if (lcs != null) {
 			DMS dms = DMSHelper.lookup(lcs.getName());
-			if(dms != null) {
+			if (dms != null) {
 				session.getDMSManager().getSelectionModel().
 					setSelected(dms);
 			}
@@ -336,14 +336,14 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	/** Send new indications to the selected LCS array */
 	private void sendIndications() {
 		LCSArray la = lcs_array;
-		if(la != null)
+		if (la != null)
 			sendIndications(la);
 	}
 
 	/** Send new indications to the specified LCS array */
 	private void sendIndications(LCSArray la) {
 		Integer[] indications = ind_selector.getIndications();
-		if(indications != null) {
+		if (indications != null) {
 			la.setOwnerNext(user);
 			la.setIndicationsNext(indications);
 		}
