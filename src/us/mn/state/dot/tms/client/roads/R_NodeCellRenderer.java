@@ -57,34 +57,41 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	static private final int LANE_HEIGHT = UI.scaled(18);
 
 	/** Total width of roadway node renderers */
-	static protected final int WIDTH = LANE_WIDTH * 22;
+	static private final int WIDTH = LANE_WIDTH * 22;
 
 	/** Solid stroke line */
-	static protected final BasicStroke LINE_SOLID = new BasicStroke(8,
+	static private final BasicStroke LINE_SOLID = new BasicStroke(8,
 		BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND);
 
 	/** Dashed stroke line */
-	static protected final BasicStroke LINE_DASHED = new BasicStroke(4,
+	static private final BasicStroke LINE_DASHED = new BasicStroke(4,
 		BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 1,
-		new float[]{ LANE_HEIGHT / 3, 2 * LANE_HEIGHT / 3 },
+		new float[] { LANE_HEIGHT / 3, 2 * LANE_HEIGHT / 3 },
 		2 * LANE_HEIGHT / 3
 	);
 
 	/** Basic stroke line */
-	static protected final BasicStroke LINE_BASIC = new BasicStroke(1);
-	static protected final BasicStroke LINE_BASIC2 = new BasicStroke(2);
+	static private final BasicStroke LINE_BASIC = new BasicStroke(1);
+	static private final BasicStroke LINE_BASIC2 = new BasicStroke(2);
 
 	/** Font for cross-street labels */
 	static private final Font FONT_XSTREET = new JLabel().getFont();
 
+	/** Get the X-coordinate for the given shift.
+	 * @param shift Shift index (0-12).
+	 * @return X-coordinate to draw line. */
+	static private int getShiftX(int shift) {
+		return LANE_WIDTH * (2 + shift);
+	}
+
 	/** R_node model */
-	protected R_NodeModel model;
+	private R_NodeModel model;
 
 	/** R_Node */
-	protected R_Node r_node;
+	private R_Node r_node;
 
 	/** R_Node type */
-	protected R_NodeType node_type;
+	private R_NodeType node_type;
 
 	/** Set the r_node model */
 	private void setModel(R_NodeModel m) {
@@ -125,25 +132,18 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 		}
 	}
 
-	/** Get the X-coordinate for the given shift.
-	 * @param shift Shift index (0-12).
-	 * @return X-coordinate to draw line. */
-	static protected int getShiftX(int shift) {
-		return LANE_WIDTH * (2 + shift);
-	}
-
 	/** Get the upstream line on the given side of the road */
-	protected int getUpstreamLine(boolean side) {
+	private int getUpstreamLine(boolean side) {
 		return getShiftX(model.getUpstreamLane(side));
 	}
 
 	/** Get the downstream line on the given side of the road */
-	protected int getDownstreamLine(boolean side) {
+	private int getDownstreamLine(boolean side) {
 		return getShiftX(model.getDownstreamLane(side));
 	}
 
 	/** Allow for subclasses to modify cross-street label */
-	protected String streetString(String street) {
+	private String streetString(String street) {
 		return street;
 	}
 
@@ -151,11 +151,11 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	@Override
 	public void paintComponent(Graphics g) {
 		Dimension d = getSize();
-		int width = (int)d.getWidth();
-		int height = (int)d.getHeight();
-		Graphics2D g2 = (Graphics2D)g;
+		int width =  (int) d.getWidth();
+		int height = (int) d.getHeight();
+		Graphics2D g2 = (Graphics2D) g;
 		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-			RenderingHints.VALUE_ANTIALIAS_ON);
+		                    RenderingHints.VALUE_ANTIALIAS_ON);
 		fillBackground(g2, width, height);
 		g2.setStroke(LINE_SOLID);
 		drawYellowLines(g2, height);
@@ -173,7 +173,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Fill the background */
-	protected void fillBackground(Graphics2D g, int width, int height) {
+	private void fillBackground(Graphics2D g, int width, int height) {
 		g.setColor(getBackground());
 		g.fillRect(0, 0, width, height);
 		g.setColor(Color.LIGHT_GRAY);
@@ -182,7 +182,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Draw the yellow lines */
-	protected void drawYellowLines(Graphics2D g, int height) {
+	private void drawYellowLines(Graphics2D g, int height) {
 		g.setColor(Color.YELLOW);
 		if (model.hasMainline())
 			g.draw(createYellowMainLine(height));
@@ -197,14 +197,14 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Create the yellow main line */
-	protected Shape createYellowMainLine(int height) {
+	private Shape createYellowMainLine(int height) {
 		int y0 = getDownstreamLine(true);
 		int y1 = getUpstreamLine(true);
 		return new Line2D.Double(y0, 0, y1, height);
 	}
 
 	/** Draw the white lines */
-	protected void drawWhiteLines(Graphics2D g, int height) {
+	private void drawWhiteLines(Graphics2D g, int height) {
 		g.setColor(Color.WHITE);
 		if (model.hasMainline())
 			g.draw(createWhiteMainLine(height));
@@ -219,14 +219,14 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Create the white main line */
-	protected Shape createWhiteMainLine(int height) {
+	private Shape createWhiteMainLine(int height) {
 		int w0 = getDownstreamLine(false);
 		int w1 = getUpstreamLine(false);
 		return new Line2D.Double(w1, height, w0, 0);
 	}
 
 	/** Fill the roadway area */
-	protected void fillRoadway(Graphics2D g, int height) {
+	private void fillRoadway(Graphics2D g, int height) {
 		g.setColor(Color.BLACK);
 		if (model.hasMainline())
 			g.fill(createMainRoadway(height));
@@ -241,7 +241,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Create the mainline roadway area */
-	protected Shape createMainRoadway(int height) {
+	private Shape createMainRoadway(int height) {
 		GeneralPath path =new GeneralPath(createYellowMainLine(height));
 		path.append(createWhiteMainLine(height), true);
 		path.closePath();
@@ -249,7 +249,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Draw the skip stripes */
-	protected void drawSkipStripes(Graphics2D g, int height) {
+	private void drawSkipStripes(Graphics2D g, int height) {
 		g.setColor(Color.WHITE);
 		g.setStroke(LINE_DASHED);
 		if (model.hasMainline())
@@ -267,7 +267,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Draw the mainline skip stripes */
-	protected void drawMainlineSkipStripes(Graphics2D g, int height) {
+	private void drawMainlineSkipStripes(Graphics2D g, int height) {
 		int left0 = getDownstreamLine(true);
 		int left1 = getUpstreamLine(true);
 		int right0 = getDownstreamLine(false);
@@ -284,7 +284,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 
 	/** Create a ramp curve for the specified lane
 	 * @param lane Number of lanes from the outside lane */
-	protected Shape createRamp(int lane, boolean reverse, int x, int y0,
+	private Shape createRamp(int lane, boolean reverse, int x, int y0,
 		int y1, int y2, int y3)
 	{
 		int x1, x2, x3;
@@ -321,14 +321,14 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Get the y-position of the specified ramp lane */
-	protected int getRampLaneY(int lane) {
-		return LANE_HEIGHT / 2 + LANE_HEIGHT * (r_node.getLanes()
-			- lane);
+	private int getRampLaneY(int lane) {
+		return LANE_HEIGHT * (r_node.getLanes() - lane)
+		     + LANE_HEIGHT / 2;
 	}
 
 	/** Create a ramp curve for the specified lane
 	 * @param lane Number of lanes from the outside lane */
-	protected Shape createEntranceRamp(int lane, boolean reverse) {
+	private Shape createEntranceRamp(int lane, boolean reverse) {
 		int x = getDownstreamLine(r_node.getAttachSide());
 		int y = getPreferredHeight() - getRampLaneY(lane);
 		int y0 = y + LANE_HEIGHT;
@@ -339,7 +339,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Create the yellow (left side) fog line for an entrance ramp */
-	protected Shape createEntranceYellow() {
+	private Shape createEntranceYellow() {
 		if (r_node.getAttachSide())
 			return createEntranceRamp(0, false);
 		else
@@ -347,7 +347,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Create the white (right side) fog line for an entrance ramp */
-	protected Shape createEntranceWhite() {
+	private Shape createEntranceWhite() {
 		if (r_node.getAttachSide())
 			return createEntranceRamp(r_node.getLanes(), true);
 		else
@@ -355,7 +355,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Create an entrance roadway area */
-	protected Shape createEntranceRoadway() {
+	private Shape createEntranceRoadway() {
 		GeneralPath path = new GeneralPath(createEntranceYellow());
 		path.append(createEntranceWhite(), true);
 		path.closePath();
@@ -364,7 +364,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 
 	/** Create a ramp curve for the specified lane
 	 * @param lane Number of lanes from the outside lane */
-	protected Shape createExitRamp(int lane, boolean reverse) {
+	private Shape createExitRamp(int lane, boolean reverse) {
 		int x = getUpstreamLine(r_node.getAttachSide());
 		int y = getRampLaneY(lane);
 		int y0 = y - LANE_HEIGHT;
@@ -375,7 +375,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Create the yellow (left side) fog line for an exit ramp */
-	protected Shape createExitYellow() {
+	private Shape createExitYellow() {
 		if (r_node.getAttachSide())
 			return createExitRamp(0, false);
 		else
@@ -383,7 +383,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Create the white (right side) fog line for an exit ramp */
-	protected Shape createExitWhite() {
+	private Shape createExitWhite() {
 		if (r_node.getAttachSide())
 			return createExitRamp(r_node.getLanes(), true);
 		else
@@ -391,7 +391,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Create an exit roadway area */
-	protected Shape createExitRoadway() {
+	private Shape createExitRoadway() {
 		GeneralPath path = new GeneralPath(createExitRamp(0, false));
 		path.append(createExitRamp(r_node.getLanes(), true), true);
 		path.closePath();
@@ -399,7 +399,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Draw the detector locations */
-	protected void drawDetectors(Graphics2D g, int height) {
+	private void drawDetectors(Graphics2D g, int height) {
 		g.setStroke(LINE_BASIC);
 		switch (node_type) {
 		case STATION:
@@ -412,7 +412,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Draw station detector locations */
-	protected void drawStationDetectors(Graphics2D g) {
+	private void drawStationDetectors(Graphics2D g) {
 		final int y = 2;
 		int r = getDownstreamLine(false) - LANE_WIDTH + 4;
 		for (int i = 0; i < r_node.getLanes(); i++) {
@@ -422,7 +422,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Get X position to draw an HOV diamond */
-	protected int getHovDiamondX() {
+	private int getHovDiamondX() {
 		boolean side = r_node.getAttachSide();
 		int x = getDownstreamLine(side);
 		if (side)
@@ -432,7 +432,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Draw entrance detectors stuff */
-	protected void drawEntranceDetectors(Graphics2D g, int height) {
+	private void drawEntranceDetectors(Graphics2D g, int height) {
 		R_NodeTransition nt = R_NodeTransition.fromOrdinal(
 			r_node.getTransition());
 		if (nt == R_NodeTransition.HOV) {
@@ -488,7 +488,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Draw the cross-street label */
-	protected void drawCrossStreet(Graphics2D g, String xStreet, int width,
+	private void drawCrossStreet(Graphics2D g, String xStreet, int width,
 		int height)
 	{
 		GlyphVector gv = FONT_XSTREET.createGlyphVector(
@@ -501,7 +501,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Draw the shift handle */
-	protected void drawShiftHandle(Graphics2D g, int height) {
+	private void drawShiftHandle(Graphics2D g, int height) {
 		g.setColor(Color.GRAY);
 		Shape path = createShiftHandle(height);
 		g.fill(path);
@@ -511,7 +511,7 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Create an exit roadway area */
-	protected Shape createShiftHandle(int height) {
+	private Shape createShiftHandle(int height) {
 		int x = getShiftX(r_node.getShift());
 		int w = LANE_WIDTH / 3;
 		int h = LANE_HEIGHT / 2;
@@ -524,21 +524,21 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 	}
 
 	/** Get the preferred height of a station node */
-	protected int getPreferredStationHeight() {
+	private int getPreferredStationHeight() {
 		int delta = Math.max(getFogLaneDelta(false),
-			getFogLaneDelta(true));
+		                     getFogLaneDelta(true));
 		return LANE_HEIGHT * (delta + 1);
 	}
 
 	/** Get the absolute change in the fog line lane for the given side */
-	protected int getFogLaneDelta(boolean side) {
-		int up = model.getUpstreamLane(side);
+	private int getFogLaneDelta(boolean side) {
+		int up   = model.getUpstreamLane(side);
 		int down = model.getDownstreamLane(side);
 		return Math.abs(up - down);
 	}
 
 	/** Get the preferred height */
-	protected int getPreferredHeight() {
+	private int getPreferredHeight() {
 		switch (node_type) {
 		case ENTRANCE:
 		case EXIT:
