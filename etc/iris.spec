@@ -65,6 +65,10 @@ fi
 # post-install or upgrade
 %post
 %systemd_post iris.service
+# Workaround bug 1358476
+# Cause: Bad interaction between SELinux and rpath (used to locate libjli)
+# Symptom: IRIS server process inactive (dead) with an exit status of 127
+ln -sf /usr/lib/jvm/jre-openjdk/lib/amd64/jli/libjli.so /usr/lib64
 
 # pre-uninstall
 %preun

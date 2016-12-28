@@ -97,7 +97,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">9 December 2016</div>
+<div id="stamp">28 December 2016</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -461,12 +461,7 @@
 systemctl status iris</pre>
 <p>
 	This should indicate that IRIS is active and running.
-	If the process is inactive (dead) with an exit status of 127, there
-	may be a packaging problem with OpenJDK (seen on Fedora 24).
-	The following command (followed by restarting IRIS) may work around this
-	problem:
 </p>
-<pre class="code">ln -s /usr/lib/jvm/java-1.8.0/lib/amd64/jli/libjli.so /usr/lib64/</pre>
 
 <h3 id="initial_login">Initial Login</h3>
 <p>
