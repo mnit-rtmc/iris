@@ -2086,6 +2086,10 @@ CREATE VIEW controller_loc_view AS
 	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name;
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
+CREATE VIEW quick_message_view AS
+	SELECT name, sign_group, multi FROM iris.quick_message;
+GRANT SELECT ON quick_message_view TO PUBLIC;
+
 CREATE VIEW sign_config_view AS
 	SELECT name, description AS dms_type, portable, technology, sign_access,
 	       legend, beacon_type, face_width, face_height, border_horiz,

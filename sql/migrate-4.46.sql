@@ -57,3 +57,8 @@ GRANT SELECT ON camera_switch_event_view TO PUBLIC;
 -- Add camera switched event description
 INSERT INTO event.event_description (event_desc_id, description)
 	VALUES (801, 'Camera SWITCHED');
+
+-- Add quick_message_view
+CREATE VIEW quick_message_view AS
+	SELECT name, sign_group, multi FROM iris.quick_message;
+GRANT SELECT ON quick_message_view TO PUBLIC;
