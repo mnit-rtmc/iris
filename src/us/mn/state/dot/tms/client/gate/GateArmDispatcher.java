@@ -65,7 +65,7 @@ public class GateArmDispatcher extends IPanel
 {
 	/** Get the filter color for a DMS */
 	static private Color filterColor(DMS dms) {
-		return dms != null ? SignPixelPanel.filterColor(dms) : null;
+		return (dms != null) ? SignPixelPanel.filterColor(dms) : null;
 	}
 
 	/** SONAR session */
@@ -77,7 +77,7 @@ public class GateArmDispatcher extends IPanel
 	/** DMS Proxy view */
 	private final ProxyView<DMS> dms_view = new ProxyView<DMS>() {
 		public void update(DMS d, String a) {
-			if (a == null ||
+			if (null == a ||
 			    "styles".equals(a) ||
 			    "msgCurrent".equals(a))
 				updateDms(d);
@@ -107,7 +107,7 @@ public class GateArmDispatcher extends IPanel
 		protected void doActionPerformed(ActionEvent e) {
 			swap_streams = !swap_streams;
 			GateArmArray ga = ga_array;
-			if(ga != null) {
+			if (ga != null) {
 				updateCameraStream(ga);
 				updateApproachStream(ga);
 			}
@@ -159,7 +159,7 @@ public class GateArmDispatcher extends IPanel
 	/** Request a gate arm state change */
 	private void requestState(GateArmState gas) {
 		GateArmArray ga = ga_array;
-		if(ga != null) {
+		if (ga != null) {
 			ga.setOwnerNext(session.getUser());
 			ga.setArmStateNext(gas.ordinal());
 		}
@@ -198,7 +198,7 @@ public class GateArmDispatcher extends IPanel
 		sel_mdl = manager.getSelectionModel();
 		stream_pnl = createStreamPanel(MEDIUM);
 		thumb_pnl = createStreamPanel(THUMBNAIL);
-		for(int i = 0; i < MAX_ARMS; i++) {
+		for (int i = 0; i < MAX_ARMS; i++) {
 			gate_lbl[i] = new JLabel();
 			state_lbl[i] = createValueLabel();
 			// Make label opaque to allow setting background color
@@ -269,9 +269,9 @@ public class GateArmDispatcher extends IPanel
 	/** Select a camera stream */
 	private void selectStream(boolean swap) {
 		GateArmArray ga = ga_array;
-		if(ga != null) {
+		if (ga != null) {
 			Camera c = swap ? ga.getApproach() : ga.getCamera();
-			if(c != null)
+			if (c != null)
 				selectCamera(c);
 		}
 	}
@@ -284,7 +284,7 @@ public class GateArmDispatcher extends IPanel
 	/** Select the DMS */
 	private void selectDms() {
 		DMS d = dms;
-		if(d != null) {
+		if (d != null) {
 			dms_watcher.setProxy(null);
 			session.getDMSManager().getSelectionModel().
 				setSelected(d);
@@ -350,24 +350,24 @@ public class GateArmDispatcher extends IPanel
 	@Override
 	public void update(GateArmArray ga, String a) {
 		ga_array = ga;
-		if(a == null)
+		if (null == a)
 			swap_streams = false;
-		if(a == null || a.equals("name"))
+		if (null == a || a.equals("name"))
 			name_lbl.setText(ga.getName());
-		if(a == null || a.equals("geoLoc")) {
+		if (null == a || a.equals("geoLoc")) {
 			location_lbl.setText(GeoLocHelper.getDescription(
 				ga.getGeoLoc()));
 		}
-		if(a == null || a.equals("camera"))
+		if (null == a || a.equals("camera"))
 			updateCameraStream(ga);
-		if(a == null || a.equals("approach"))
+		if (null == a || a.equals("approach"))
 			updateApproachStream(ga);
-		if(a == null || a.equals("dms"))
+		if (null == a || a.equals("dms"))
 			dms_watcher.setProxy(ga.getDms());
-		if(a == null || a.equals("camera") || a.equals("approach"))
+		if (null == a || a.equals("camera") || a.equals("approach"))
 			updateSwapButton(ga);
-		if(a == null || a.equals("styles")) {
-			if(ItemStyle.FAILED.checkBit(ga.getStyles())) {
+		if (null == a || a.equals("styles")) {
+			if (ItemStyle.FAILED.checkBit(ga.getStyles())) {
 				arm_state_lbl.setForeground(Color.WHITE);
 				arm_state_lbl.setBackground(Color.GRAY);
 			} else {
@@ -376,20 +376,20 @@ public class GateArmDispatcher extends IPanel
 			}
 			updateGateArms(ga);
 		}
-		if(a == null || a.equals("armState")) {
+		if (null == a || a.equals("armState")) {
 			arm_state_lbl.setText(" " + GateArmState.fromOrdinal(
 				ga.getArmState()).toString() + " ");
 		}
-		if(a == null || a.equals("interlock"))
+		if (null == a || a.equals("interlock"))
 			updateInterlock(ga);
-		if(a == null || a.equals("armState") || a.equals("interlock"))
+		if (null == a || a.equals("armState") || a.equals("interlock"))
 			updateButtons(ga);
 	}
 
 	/** Update camera stream */
 	private void updateCameraStream(GateArmArray ga) {
 		Camera c = ga.getCamera();
-		if(swap_streams)
+		if (swap_streams)
 			thumb_pnl.setCamera(c);
 		else
 			stream_pnl.setCamera(c);
@@ -398,7 +398,7 @@ public class GateArmDispatcher extends IPanel
 	/** Update approach stream */
 	private void updateApproachStream(GateArmArray ga) {
 		Camera c = ga.getApproach();
-		if(swap_streams)
+		if (swap_streams)
 			stream_pnl.setCamera(c);
 		else
 			thumb_pnl.setCamera(c);
@@ -409,7 +409,7 @@ public class GateArmDispatcher extends IPanel
 		dms = d;
 		current_pnl.setFilterColor(filterColor(d));
 		RasterGraphic[] rg = DMSHelper.getRasters(d);
-		if(rg != null) {
+		if (rg != null) {
 			String ms = DMSHelper.getMultiString(d);
 			current_pnl.setDimensions(d);
 			setPager(new DMSPanelPager(current_pnl, rg, ms));
@@ -427,14 +427,14 @@ public class GateArmDispatcher extends IPanel
 	/** Set the DMS panel pager */
 	private void setPager(DMSPanelPager p) {
 		DMSPanelPager op = dms_pager;
-		if(op != null)
+		if (op != null)
 			op.dispose();
 		dms_pager = p;
 	}
 
 	/** Update the interlock label */
 	private void updateInterlock(GateArmArray ga) {
-		switch(GateArmInterlock.fromOrdinal(ga.getInterlock())) {
+		switch (GateArmInterlock.fromOrdinal(ga.getInterlock())) {
 		case NONE:
 			interlock_lbl.setForeground(Color.BLACK);
 			interlock_lbl.setBackground(Color.GREEN);
@@ -488,7 +488,7 @@ public class GateArmDispatcher extends IPanel
 
 	/** Check if gate arm open is allowed */
 	private boolean isOpenAllowed(GateArmArray ga) {
-		switch(GateArmInterlock.fromOrdinal(ga.getInterlock())) {
+		switch (GateArmInterlock.fromOrdinal(ga.getInterlock())) {
 		case DENY_OPEN:
 		case DENY_ALL:
 		case SYSTEM_DISABLE:
@@ -500,7 +500,7 @@ public class GateArmDispatcher extends IPanel
 
 	/** Check if gate arm close is allowed */
 	private boolean isCloseAllowed(GateArmArray ga) {
-		switch(GateArmInterlock.fromOrdinal(ga.getInterlock())) {
+		switch (GateArmInterlock.fromOrdinal(ga.getInterlock())) {
 		case DENY_CLOSE:
 		case DENY_ALL:
 		case SYSTEM_DISABLE:
@@ -512,7 +512,7 @@ public class GateArmDispatcher extends IPanel
 
 	/** Check if gate arm close is possible */
 	private boolean isClosePossible(GateArmState gas) {
-		switch(gas) {
+		switch (gas) {
 		case FAULT:
 		case WARN_CLOSE:
 			return true;
@@ -546,7 +546,7 @@ public class GateArmDispatcher extends IPanel
 
 	/** Clear gate arms */
 	private void clearArms() {
-		for(int i = 0; i < MAX_ARMS; i++) {
+		for (int i = 0; i < MAX_ARMS; i++) {
 			gate_lbl[i].setText(" ");
 			state_lbl[i].setText(" ");
 			state_lbl[i].setForeground(DARK_BLUE);
@@ -558,9 +558,9 @@ public class GateArmDispatcher extends IPanel
 	private void updateGateArms(GateArmArray ga) {
 		clearArms();
 		Iterator<GateArm> it = GateArmHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			GateArm g = it.next();
-			if(g.getGaArray() == ga)
+			if (g.getGaArray() == ga)
 				updateArmState(g);
 		}
 	}
@@ -569,7 +569,7 @@ public class GateArmDispatcher extends IPanel
 	 * @param ga The gate arm.  May not be null. */
 	private void updateArmState(GateArm ga) {
 		int i = ga.getIdx() - 1;
-		if(i >= 0 && i < MAX_ARMS) {
+		if (i >= 0 && i < MAX_ARMS) {
 			gate_lbl[i].setText(ga.getName());
 			state_lbl[i].setText(trim(getArmState(ga), 12));
 			updateStateColor(ga, i);
@@ -578,17 +578,17 @@ public class GateArmDispatcher extends IPanel
 
 	/** Trim string to a maximum length */
 	static private String trim(String s, int len) {
-		assert(len >= 0);
+		assert (len >= 0);
 		return s.substring(0, Math.min(s.length(), len));
 	}
 
 	/** Get one gate arm state */
 	private String getArmState(GateArm ga) {
 		String cs = ControllerHelper.getStatus(ga.getController());
-		if(cs.length() > 0)
+		if (cs.length() > 0)
 			return cs;
 		String ms = ControllerHelper.getMaintenance(ga.getController());
-		if(ms.length() > 0)
+		if (ms.length() > 0)
 			return ms;
 		return GateArmState.fromOrdinal(ga.getArmState()).toString();
 	}
@@ -596,13 +596,13 @@ public class GateArmDispatcher extends IPanel
 	/** Update the status widgets */
 	private void updateStateColor(GateArm ga, int i) {
 		Controller c = ga.getController();
-		if(ControllerHelper.isFailed(c)) {
+		if (ControllerHelper.isFailed(c)) {
 			state_lbl[i].setForeground(Color.WHITE);
 			state_lbl[i].setBackground(Color.GRAY);
-		} else if(ControllerHelper.getStatus(c).length() > 0) {
+		} else if (ControllerHelper.getStatus(c).length() > 0) {
 			state_lbl[i].setForeground(Color.WHITE);
 			state_lbl[i].setBackground(Color.BLACK);
-		} else if(ControllerHelper.getMaintenance(c).length() > 0) {
+		} else if (ControllerHelper.getMaintenance(c).length() > 0) {
 			state_lbl[i].setForeground(Color.BLACK);
 			state_lbl[i].setBackground(Color.YELLOW);
 		} else {
