@@ -142,10 +142,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** Lookup a geo location */
 	static protected GeoLocImpl lookupGeoLoc(String name) {
 		SonarObject so = lookupObject(GeoLocImpl.SONAR_TYPE, name);
-		if (so instanceof GeoLocImpl)
-			return (GeoLocImpl)so;
-		else
-			return null;
+		return (so instanceof GeoLocImpl) ? (GeoLocImpl) so : null;
 	}
 
 	/** Lookup a cabinet */
@@ -169,10 +166,9 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** Lookup a controller */
 	static protected ControllerImpl lookupController(String name) {
 		SonarObject so = lookupObject(ControllerImpl.SONAR_TYPE, name);
-		if (so instanceof ControllerImpl)
-			return (ControllerImpl)so;
-		else
-			return null;
+		return (so instanceof ControllerImpl)
+		      ? (ControllerImpl) so
+		      : null;
 	}
 
 	/** Lookup a toll zone */
@@ -218,6 +214,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	static protected SignGroupImpl lookupSignGroup(String name) {
 		SonarObject so = lookupObject(SignGroupImpl.SONAR_TYPE, name);
 		return (so instanceof SignGroupImpl) ? (SignGroupImpl)so : null;
+	}
+
+	/** Lookup a quick message */
+	static protected QuickMessageImpl lookupQuickMessage(String name) {
+		SonarObject so = lookupObject(QuickMessageImpl.SONAR_TYPE,name);
+		return (so instanceof QuickMessageImpl)
+		      ? (QuickMessageImpl) so
+		      : null;
 	}
 
 	/** Lookup an incident detail */

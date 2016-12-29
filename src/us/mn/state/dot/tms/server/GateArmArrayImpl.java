@@ -61,7 +61,6 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GateArmArrayImpl(
-					namespace,
 					row.getString(1),	// name
 					row.getString(2),	// geo_loc
 					row.getString(3),	// controller
@@ -134,17 +133,13 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Create a gate arm array */
-	private GateArmArrayImpl(Namespace ns, String n, String loc, String c,
-		int p, String nt, String pr, String cam, String ap, String d,
+	private GateArmArrayImpl(String n, String loc, String c, int p,
+		String nt, String pr, String cam, String ap, String d,
 		String om, String cm)
 	{
-		this(n, (GeoLocImpl)ns.lookupObject(GeoLoc.SONAR_TYPE, loc),
-		     (ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE, c),
-		     p, nt, pr, (Camera)ns.lookupObject(Camera.SONAR_TYPE, cam),
-		     (Camera)ns.lookupObject(Camera.SONAR_TYPE, ap),
-		     (DMS)ns.lookupObject(DMS.SONAR_TYPE, d),
-		     (QuickMessage)ns.lookupObject(QuickMessage.SONAR_TYPE, om),
-		     (QuickMessage)ns.lookupObject(QuickMessage.SONAR_TYPE,cm));
+		this(n, lookupGeoLoc(loc), lookupController(c), p, nt, pr,
+		     lookupCamera(cam), lookupCamera(ap), lookupDMS(d),
+		     lookupQuickMessage(om), lookupQuickMessage(cm));
 	}
 
 	/** Destroy an object */
@@ -202,7 +197,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Get prerequisite gate arm array */
 	private GateArmArrayImpl getPrerequisite() {
-		return (GateArmArrayImpl)GateArmArrayHelper.lookup(prereq);
+		return (GateArmArrayImpl) GateArmArrayHelper.lookup(prereq);
 	}
 
 	/** Camera from which this can be seen */
@@ -709,14 +704,14 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	/** Get gate arm road */
 	public Road getRoad() {
 		GeoLoc gl = getGeoLoc();
-		return gl != null ? gl.getRoadway() : null;
+		return (gl != null) ? gl.getRoadway() : null;
 	}
 
 	/** Get gate arm road direction.
 	 * @return Index of road direction, or 0 for unknown */
 	public int getRoadDir() {
 		GeoLoc gl = getGeoLoc();
-		return gl != null ? gl.getRoadDir() : 0;
+		return (gl != null) ? gl.getRoadDir() : 0;
 	}
 
 	/** Set the valid open direction for road.
