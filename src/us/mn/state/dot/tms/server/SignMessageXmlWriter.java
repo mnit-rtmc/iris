@@ -64,7 +64,7 @@ public class SignMessageXmlWriter extends XmlWriter {
 		w.write("<!ATTLIST sign_message status CDATA #REQUIRED>\n");
 		w.write("<!ATTLIST sign_message run_priority CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST sign_message act_priority CDATA #IMPLIED>\n");
-		w.write("<!ATTLIST sign_message scheduled CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST sign_message source CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST sign_message duration CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST sign_message incident CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST sign_message multi CDATA #REQUIRED>\n");
