@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2015  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.pelco;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -29,17 +30,13 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  */
 public class OpSelectMonitorCamera extends OpPelco {
 
-	/** Parse the integer ID of a monitor or camera */
+	/** Parse the integer ID of a camera */
 	static private int parseUID(String name) throws ProtocolException {
-		String id = name;
-		while (id.length() > 0 && !Character.isDigit(id.charAt(0)))
-			id = id.substring(1);
-		try {
-			return Integer.parseInt(id);
-		}
-		catch (NumberFormatException e) {
+		Integer uid = CameraHelper.parseUID(name);
+		if (uid != null)
+			return uid;
+		else
 			throw new ProtocolException("BAD UID: " + name);
-		}
 	}
 
 	/** Create a new select monitor camera operation */
@@ -73,8 +70,8 @@ public class OpSelectMonitorCamera extends OpPelco {
 		protected Phase<PelcoProperty> poll(
 			CommMessage<PelcoProperty> mess) throws IOException
 		{
-			mess.add(new SelectMonitorProperty(parseUID(
-				monitor.getName())));
+			mess.add(new SelectMonitorProperty(
+				monitor.getMonNum()));
 			mess.add(new SelectCameraProperty(parseUID(camera)));
 			mess.storeProps();
 			return null;

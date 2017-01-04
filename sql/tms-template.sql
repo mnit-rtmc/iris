@@ -691,6 +691,8 @@ CREATE TRIGGER camera_delete_trig
 CREATE TABLE iris._video_monitor (
 	name VARCHAR(12) PRIMARY KEY,
 	notes VARCHAR(32) NOT NULL,
+	mon_num INTEGER NOT NULL,
+	direct BOOLEAN NOT NULL,
 	restricted BOOLEAN NOT NULL,
 	camera VARCHAR(10) REFERENCES iris._camera
 );
@@ -699,7 +701,7 @@ ALTER TABLE iris._video_monitor ADD CONSTRAINT _video_monitor_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.video_monitor AS SELECT
-	m.name, controller, pin, notes, restricted, camera
+	m.name, controller, pin, notes, mon_num, direct, restricted, camera
 	FROM iris._video_monitor m JOIN iris._device_io d ON m.name = d.name;
 
 CREATE FUNCTION iris.video_monitor_insert() RETURNS TRIGGER AS
@@ -707,8 +709,10 @@ CREATE FUNCTION iris.video_monitor_insert() RETURNS TRIGGER AS
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._video_monitor (name, notes, restricted, camera)
-	     VALUES (NEW.name, NEW.notes, NEW.restricted, NEW.camera);
+	INSERT INTO iris._video_monitor (name, notes, mon_num, direct,
+	                                 restricted, camera)
+	     VALUES (NEW.name, NEW.notes, NEW.mon_num, NEW.direct,
+	             NEW.restricted, NEW.camera);
 	RETURN NEW;
 END;
 $video_monitor_insert$ LANGUAGE plpgsql;
@@ -726,6 +730,8 @@ BEGIN
 	 WHERE name = OLD.name;
 	UPDATE iris._video_monitor
 	   SET notes = NEW.notes,
+	       mon_num = NEW.mon_num,
+	       direct = NEW.direct,
 	       restricted = NEW.restricted,
 	       camera = NEW.camera
 	 WHERE name = OLD.name;
@@ -2143,7 +2149,7 @@ CREATE VIEW ramp_meter_view AS
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE VIEW video_monitor_view AS
-	SELECT m.name, m.notes, restricted, m.controller,
+	SELECT m.name, m.notes, mon_num, direct, restricted, m.controller,
 	       ctr.condition, ctr.comm_link, camera
 	FROM iris.video_monitor m
 	LEFT JOIN controller_view ctr ON m.controller = ctr.name;

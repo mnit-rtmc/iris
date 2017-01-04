@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import static us.mn.state.dot.tms.CameraHelper.parseUID;
 
 /**
  * Video monitor helper methods.
@@ -42,56 +41,43 @@ public class VideoMonitorHelper extends BaseHelper {
 	}
 
 	/** Find a video monitor with the specific UID */
-	static public VideoMonitor findUID(int uid) {
+	static public VideoMonitor findUID(final int uid) {
 		Iterator<VideoMonitor> it = iterator();
 		while (it.hasNext()) {
-			VideoMonitor mon = it.next();
-			Integer mid = parseUID(mon.getName());
-			if (mid != null && mid.equals(uid))
-				return mon;
+			VideoMonitor vm = it.next();
+			if (vm.getMonNum() == uid)
+				return vm;
 		}
 		return null;
 	}
 
 	/** Find a video monitor with the specific UID */
 	static public VideoMonitor findUID(String uid) {
-		Integer id = parseUID(uid);
+		Integer id = CameraHelper.parseUID(uid);
 		return (id != null) ? findUID(id) : null;
 	}
 
-	/** Find previous video monitor below a given UID */
-	static public VideoMonitor findPrev(int uid) {
-		VideoMonitor pm = null;
+	/** Find previous valid video monitor number */
+	static public int findPrev(int uid) {
 		int pid = 0;
 		Iterator<VideoMonitor> it = iterator();
 		while (it.hasNext()) {
-			VideoMonitor mon = it.next();
-			Integer mid = parseUID(mon.getName());
-			if (mid != null && mid < uid) {
-				if (pid == 0 || pid < mid) {
-					pm = mon;
-					pid = mid;
-				}
-			}
+			int mid = it.next().getMonNum();
+			if ((mid < uid) && (0 == pid || pid < mid))
+				pid = mid;
 		}
-		return pm;
+		return pid;
 	}
 
-	/** Find next video monitor above a given UID */
-	static public VideoMonitor findNext(int uid) {
-		VideoMonitor nm = null;
+	/** Find next valid video monitor number */
+	static public int findNext(int uid) {
 		int nid = 0;
 		Iterator<VideoMonitor> it = iterator();
 		while (it.hasNext()) {
-			VideoMonitor mon = it.next();
-			Integer mid = parseUID(mon.getName());
-			if (mid != null && mid > uid) {
-				if (nid == 0 || nid > mid) {
-					nm = mon;
-					nid = mid;
-				}
-			}
+			int mid = it.next().getMonNum();
+			if ((mid > uid) && (0 == nid || nid > mid))
+				nid = mid;
 		}
-		return nm;
+		return nid;
 	}
 }

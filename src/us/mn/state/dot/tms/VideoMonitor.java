@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,18 @@ public interface VideoMonitor extends Device {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "video_monitor";
+
+	/** Set the monitor number */
+	void setMonNum(int mn);
+
+	/** Get the monitor number */
+	int getMonNum();
+
+	/** Set flag to connect direct to camera */
+	void setDirect(boolean d);
+
+	/** Get flag to connect directo to camera */
+	boolean getDirect();
 
 	/** Set flag to restrict publishing camera images */
 	void setRestricted(boolean r);

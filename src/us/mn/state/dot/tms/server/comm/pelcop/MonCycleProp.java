@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.VideoMonitorHelper;
-import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -32,8 +31,8 @@ public class MonCycleProp extends MonStatusProp {
 	static public final int REQ_CODE = 0xC9;
 
 	/** Create a new monitor cycle property */
-	public MonCycleProp(boolean l, VideoMonitorImpl vm) {
-		super(l, vm);
+	public MonCycleProp(boolean l, int mn) {
+		super(l, mn);
 	}
 
 	/** Decode a QUERY request from keyboard */
@@ -57,11 +56,11 @@ public class MonCycleProp extends MonStatusProp {
 
 	/** Select next video monitor */
 	private void selectNextMonitor(int mon) {
-		setMonitor(VideoMonitorHelper.findNext(mon));
+		setMonNumber(VideoMonitorHelper.findNext(mon));
 	}
 
 	/** Select previous video monitor */
 	private void selectPrevMonitor(int mon) {
-		setMonitor(VideoMonitorHelper.findPrev(mon));
+		setMonNumber(VideoMonitorHelper.findPrev(mon));
 	}
 }

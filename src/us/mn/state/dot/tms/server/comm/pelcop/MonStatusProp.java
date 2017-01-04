@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
-import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -41,7 +40,7 @@ public class MonStatusProp extends PelcoPProp {
 	static public final int RESP_CODE = 0xB1;
 
 	/** Get camera ID */
-	static protected String getCamId(VideoMonitorImpl vm) {
+	static protected String getCamId(VideoMonitor vm) {
 		Camera c = vm.getCamera();
 		return (c != null)
 		      ? c.getName()
@@ -84,13 +83,13 @@ public class MonStatusProp extends PelcoPProp {
 	/** Logged in flag */
 	private final boolean logged_in;
 
-	/** Video monitor */
-	private VideoMonitorImpl monitor;
+	/** Video monitor number */
+	private int mon_num;
 
 	/** Create a new monitor status property */
-	public MonStatusProp(boolean l, VideoMonitorImpl vm) {
+	public MonStatusProp(boolean l, int mn) {
 		logged_in = l;
-		monitor = vm;
+		mon_num = mn;
 	}
 
 	/** Decode a QUERY request from keyboard */
@@ -111,8 +110,8 @@ public class MonStatusProp extends PelcoPProp {
 		throws IOException
 	{
 		format8(tx_buf, RESP_CODE);
-		Integer mon = getMonNumber();
-		if (logged_in && mon != null) {
+		int mon = getMonNumber();
+		if (logged_in && mon > 0) {
 			int cam = getCamNumber();
 			int chi = cam / 100;
 			int clo = cam % 100;
@@ -138,7 +137,7 @@ public class MonStatusProp extends PelcoPProp {
 
 	/** Get current camera ID on the selected video monitor */
 	protected int getCamNumber() {
-		VideoMonitorImpl vm = getMonitor();
+		VideoMonitor vm = VideoMonitorHelper.findUID(mon_num);
 		if (vm != null) {
 			Integer uid = parseUID(getCamId(vm));
 			if (uid != null)
@@ -149,31 +148,11 @@ public class MonStatusProp extends PelcoPProp {
 
 	/** Set the video monitor number */
 	protected void setMonNumber(int m) {
-		// First, compare with cached monitor
-		Integer mon = getMonNumber();
-		if (mon == null || mon != m) {
-			// No match, must do linear search
-			setMonitor(VideoMonitorHelper.findUID(m));
-		}
+		mon_num = m;
 	}
 
 	/** Get the video monitor number */
-	protected Integer getMonNumber() {
-		VideoMonitorImpl vm = getMonitor();
-		if (vm != null)
-			return parseUID(vm.getName());
-		else
-			return null;
-	}
-
-	/** Set the video monitor */
-	protected void setMonitor(VideoMonitor vm) {
-		if (vm instanceof VideoMonitorImpl)
-			monitor = (VideoMonitorImpl) vm;
-	}
-
-	/** Get the video monitor */
-	public VideoMonitorImpl getMonitor() {
-		return monitor;
+	protected int getMonNumber() {
+		return mon_num;
 	}
 }

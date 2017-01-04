@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,6 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
@@ -32,8 +31,6 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.VideoMonitor;
-import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
@@ -288,26 +285,8 @@ public class CameraImpl extends DeviceImpl implements Camera {
 			store.update(this, "publish", p);
 			setPublish(p);
 			if (!p)
-				blankRestrictedMonitors();
+				VideoMonitorImpl.blankRestrictedMonitors(this);
 			updateStyles();
-		}
-	}
-
-	/** Blank restricted video monitors viewing the camera */
-	private void blankRestrictedMonitors() throws TMSException {
-		Iterator<VideoMonitor> it = VideoMonitorHelper.iterator();
-		while (it.hasNext()) {
-			VideoMonitor m = it.next();
-			if (m instanceof VideoMonitorImpl) {
-				VideoMonitorImpl vm = (VideoMonitorImpl) m;
-				if (vm.getRestricted()) {
-					Camera c = vm.getCamera();
-					if (c == this || c == null) {
-						vm.setCameraNotify(null,
-						                   "UNPUBLISH");
-					}
-				}
-			}
 		}
 	}
 

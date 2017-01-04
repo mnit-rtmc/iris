@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.InvalidMarkException;
 import us.mn.state.dot.sched.TimeSteward;
-import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
@@ -42,8 +41,8 @@ public class OpListenKeyboard extends OpStep {
 	/** Most recent property request */
 	private PelcoPProp prop;
 
-	/** Cached video monitor */
-	private VideoMonitorImpl mon;
+	/** Selected video monitor */
+	private int mon_num;
 
 	/** Create a new listen keyboard step */
 	public OpListenKeyboard() {
@@ -99,13 +98,13 @@ public class OpListenKeyboard extends OpStep {
 	/** Parse received data */
 	private void doRecv(Operation op, ByteBuffer rx_buf) throws IOException{
 		try {
-			prop = PelcoPProp.parse(rx_buf, logged_in, mon);
+			prop = PelcoPProp.parse(rx_buf, logged_in, mon_num);
 			prop.decodeQuery(op, rx_buf);
 			prop.parseTail(rx_buf);
 			setPolling(true);
 			if (prop instanceof MonStatusProp) {
 				MonStatusProp stat = (MonStatusProp) prop;
-				mon = stat.getMonitor();
+				mon_num = stat.getMonNumber();
 			}
 		}
 		catch (BufferUnderflowException e) {

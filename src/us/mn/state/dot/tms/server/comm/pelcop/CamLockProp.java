@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -30,8 +29,8 @@ public class CamLockProp extends MonStatusProp {
 	static public final int REQ_CODE = 0xBB;
 
 	/** Create a new camera lock property */
-	public CamLockProp(boolean l, VideoMonitorImpl vm) {
-		super(l, vm);
+	public CamLockProp(boolean l, int mn) {
+		super(l, mn);
 	}
 
 	/** Decode a QUERY request from keyboard */

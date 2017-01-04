@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,8 +32,8 @@ public class CamSelectProp extends MonStatusProp {
 	static public final int REQ_CODE = 0xB2;
 
 	/** Create a new camera select property */
-	public CamSelectProp(boolean l, VideoMonitorImpl vm) {
-		super(l, vm);
+	public CamSelectProp(boolean l, int mn) {
+		super(l, mn);
 	}
 
 	/** Decode a QUERY request from keyboard */
@@ -52,13 +52,10 @@ public class CamSelectProp extends MonStatusProp {
 
 	/** Select camera on a video monitor */
 	private void selectCamera(Operation op, int cam) {
-		VideoMonitorImpl vm = getMonitor();
-		if (vm != null) {
-			Camera c = findCam(cam);
-			if (c instanceof CameraImpl) {
-				vm.setCameraNotify((CameraImpl) c,
-				                   "SELECT " + op);
-			}
+		Camera c = findCam(cam);
+		if (c instanceof CameraImpl) {
+			VideoMonitorImpl.setCameraNotify(getMonNumber(),
+				(CameraImpl) c, "SELECT " + op);
 		}
 	}
 }

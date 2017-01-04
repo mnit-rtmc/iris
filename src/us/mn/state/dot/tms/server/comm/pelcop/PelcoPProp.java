@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -38,7 +37,7 @@ abstract public class PelcoPProp extends ControllerProp {
 
 	/** Parse a valid packet */
 	static public PelcoPProp parse(ByteBuffer rx_buf, boolean logged_in,
-		VideoMonitorImpl vm) throws ParsingException
+		int mon_num) throws ParsingException
 	{
 		scanPkt(rx_buf);
 		if (parse8(rx_buf) != STX)
@@ -53,21 +52,21 @@ abstract public class PelcoPProp extends ControllerProp {
 			return new ReleaseProp();
 		case MonStatusProp.REQ_CODE:
 		case MonStatusProp.RESP_CODE:
-			return new MonStatusProp(logged_in, vm);
+			return new MonStatusProp(logged_in, mon_num);
 		case MonCycleProp.REQ_CODE:
-			return new MonCycleProp(logged_in, vm);
+			return new MonCycleProp(logged_in, mon_num);
 		case CamSelectProp.REQ_CODE:
-			return new CamSelectProp(logged_in, vm);
+			return new CamSelectProp(logged_in, mon_num);
 		case CamPrevProp.REQ_CODE:
-			return new CamPrevProp(logged_in, vm);
+			return new CamPrevProp(logged_in, mon_num);
 		case CamNextProp.REQ_CODE:
-			return new CamNextProp(logged_in, vm);
+			return new CamNextProp(logged_in, mon_num);
 		case CamLockProp.REQ_CODE:
-			return new CamLockProp(logged_in, vm);
+			return new CamLockProp(logged_in, mon_num);
 		case CamUnlockProp.REQ_CODE:
-			return new CamUnlockProp(logged_in, vm);
+			return new CamUnlockProp(logged_in, mon_num);
 		case CamControlProp.REQ_CODE:
-			return new CamControlProp(logged_in, vm);
+			return new CamControlProp(logged_in, mon_num);
 		default:
 			throw new ParsingException("Unknown msg code: " + mc);
 		}

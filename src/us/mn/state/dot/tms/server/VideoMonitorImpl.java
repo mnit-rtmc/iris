@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.VideoMonitorPoller;
 import us.mn.state.dot.tms.server.event.CameraSwitchEvent;
@@ -42,12 +43,59 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		return c != null && c.getPublish();
 	}
 
+	/** Cast a camera to an impl or null */
+	static private CameraImpl toCameraImpl(Camera c) {
+		return (c instanceof CameraImpl) ? (CameraImpl) c : null;
+	}
+
+	/** Set camera on all video monitors with a given number */
+	static public void setCameraNotify(int mn, CameraImpl c, String src) {
+		setCameraNotify(null, mn, c, src);
+	}
+
+	/** Set camera on all video monitors with a given number.
+	 * @param svm Video monitor to skip.
+	 * @param mn Monitor number.
+	 * @param c Camera to display.
+	 * @param src Source of command. */
+	static private void setCameraNotify(VideoMonitorImpl svm, int mn,
+		CameraImpl c, String src)
+	{
+		Iterator<VideoMonitor> it = VideoMonitorHelper.iterator();
+		while (it.hasNext()) {
+			VideoMonitor m = it.next();
+			if (svm != m && (m instanceof VideoMonitorImpl)) {
+				VideoMonitorImpl vm = (VideoMonitorImpl) m;
+				if (vm.getMonNum() == mn)
+					vm.setCameraNotify(c, src);
+			}
+		}
+	}
+
+	/** Blank restricted video monitors viewing a camera */
+	static public void blankRestrictedMonitors(final CameraImpl c) {
+		Iterator<VideoMonitor> it = VideoMonitorHelper.iterator();
+		while (it.hasNext()) {
+			VideoMonitor m = it.next();
+			if (m instanceof VideoMonitorImpl) {
+				VideoMonitorImpl vm = (VideoMonitorImpl) m;
+				if (vm.getRestricted()) {
+					Camera cm = vm.getCamera();
+					if (c == cm || null == cm) {
+						vm.setCameraNotify(null,
+						                   "UNPUBLISH");
+					}
+				}
+			}
+		}
+	}
+
 	/** Load all the video monitors */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
-		store.query("SELECT name, controller, pin, notes, restricted," +
-			" camera FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+		store.query("SELECT name, controller, pin, notes, mon_num, " +
+		            "direct, restricted, camera FROM iris." +
+		            SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new VideoMonitorImpl(row));
@@ -63,6 +111,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("mon_num", mon_num);
+		map.put("direct", direct);
 		map.put("restricted", restricted);
 		map.put("camera", camera);
 		return map;
@@ -86,23 +136,27 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		     row.getString(2),		// controller
 		     row.getInt(3),		// pin
 		     row.getString(4),		// notes
-		     row.getBoolean(5),		// restricted
-		     row.getString(6)		// camera
+		     row.getInt(5),		// mon_num
+		     row.getBoolean(6),		// direct
+		     row.getBoolean(7),		// restricted
+		     row.getString(8)		// camera
 		);
 	}
 
 	/** Create a video monitor */
-	private VideoMonitorImpl(String n, String c, int p, String nt,
-		boolean r, String cam)
+	private VideoMonitorImpl(String n, String c, int p, String nt, int mn,
+		boolean d, boolean r, String cam)
 	{
-		this(n, lookupController(c), p, nt, r, lookupCamera(cam));
+		this(n, lookupController(c), p, nt, mn, d, r,lookupCamera(cam));
 	}
 
 	/** Create a video monitor */
 	private VideoMonitorImpl(String n, ControllerImpl c, int p, String nt,
-		boolean r, Camera cam)
+		int mn, boolean d, boolean r, Camera cam)
 	{
 		super(n, c, p, nt);
+		mon_num = mn;
+		direct = d;
 		restricted = r;
 		camera = cam;
 	}
@@ -110,6 +164,52 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Create a new video monitor */
 	public VideoMonitorImpl(String n) throws TMSException, SonarException {
 		super(n);
+	}
+
+	/** Monitor number */
+	private int mon_num;
+
+	/** Set the monitor number */
+	@Override
+	public void setMonNum(int mn) {
+		mon_num = mn;
+	}
+
+	/** Set the monitor number */
+	public void doSetMonNum(int mn) throws TMSException {
+		if (mn != mon_num) {
+			store.update(this, "mon_num", mn);
+			setMonNum(mn);
+		}
+	}
+
+	/** Get the monitor number */
+	@Override
+	public int getMonNum() {
+		return mon_num;
+	}
+
+	/** Flag to connect direct to camera */
+	private boolean direct;
+
+	/** Set flag to connect direct to camera */
+	@Override
+	public void setDirect(boolean d) {
+		direct = d;
+	}
+
+	/** Set flag to connect direct to camera */
+	public void doSetDirect(boolean d) throws TMSException {
+		if (d != direct) {
+			store.update(this, "direct", d);
+			setDirect(d);
+		}
+	}
+
+	/** Get flag to connect directo to camera */
+	@Override
+	public boolean getDirect() {
+		return direct;
 	}
 
 	/** Flag to restrict publishing camera images */
@@ -148,8 +248,9 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Set the camera displayed on the monitor */
 	public void doSetCamera(Camera c) throws TMSException {
-		doSetCam((c instanceof CameraImpl) ? (CameraImpl) c : null,
-		         "IRIS user");
+		CameraImpl cam = toCameraImpl(c);
+		doSetCam(cam, "IRIS user");
+		setCameraNotify(this, mon_num, cam, "IRIS user");
 	}
 
 	/** Set the camera displayed on the monitor */
@@ -164,7 +265,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Set the camera and notify clients of the change */
-	public void setCameraNotify(CameraImpl c, String src) {
+	private void setCameraNotify(CameraImpl c, String src) {
 		try {
 			doSetCam(c, src);
 			notifyAttribute("camera");
