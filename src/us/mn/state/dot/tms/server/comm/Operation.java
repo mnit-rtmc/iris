@@ -74,7 +74,7 @@ public final class Operation implements Comparable<Operation> {
 	private final DeviceImpl device;
 
 	/** Get the device ID */
-	private String getId() {
+	public String getId() {
 		return (device != null)
 		      ? device.toString()
 		      : controller.toString();

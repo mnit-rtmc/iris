@@ -56,8 +56,7 @@ public class CamPrevProp extends MonStatusProp {
 			Camera c = CameraHelper.findPrev(uid);
 			if (c instanceof CameraImpl) {
 				VideoMonitorImpl.setCameraNotify(getMonNumber(),
-					(CameraImpl) c,
-					"PREV " + op);
+					(CameraImpl) c, "PREV " + op.getId());
 			}
 		}
 	}

@@ -56,8 +56,7 @@ public class CamNextProp extends MonStatusProp {
 			Camera c = CameraHelper.findNext(uid);
 			if (c instanceof CameraImpl) {
 				VideoMonitorImpl.setCameraNotify(getMonNumber(),
-					(CameraImpl) c,
-					"NEXT " + op);
+					(CameraImpl) c, "NEXT " + op.getId());
 			}
 		}
 	}

@@ -55,7 +55,7 @@ public class CamSelectProp extends MonStatusProp {
 		Camera c = findCam(cam);
 		if (c instanceof CameraImpl) {
 			VideoMonitorImpl.setCameraNotify(getMonNumber(),
-				(CameraImpl) c, "SELECT " + op);
+				(CameraImpl) c, "SELECT " + op.getId());
 		}
 	}
 }

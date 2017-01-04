@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.event;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * This is a class for logging camera switching events to a database.
@@ -39,7 +40,7 @@ public class CameraSwitchEvent extends BaseEvent {
 		super(EventType.CAMERA_SWITCHED);
 		monitor_id = m;
 		camera_id = c;
-		source = s;
+		source = SString.truncate(s, 20);
 	}
 
 	/** Get the database table name */
