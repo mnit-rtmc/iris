@@ -1438,6 +1438,15 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<a href="#system_attributes">system attribute</a> can be set to
 	<code>false</code> to disable this check.
 </p>
+<p>
+	To control DMS beacon activation through a message feed,
+	configure 2 message feeds. One message feed is for DMS 
+	containing messages with activated beacons and the other
+	for messages with deactivated beacons. There is no way to 
+	control which message feed is executed first, so each
+	message feed must list each DMS and at least one of the 
+	message feeds must contain a blank MULTI for each DMS. 
+</p>
 
 <h4 id="din_relay">DIN Relay</h4>
 <p>
