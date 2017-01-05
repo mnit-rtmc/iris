@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -303,6 +303,17 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** Initialize the transient fields */
 	protected void initTransients() throws TMSException {
 		// Override this to initialize new objects
+	}
+
+	/** Get user for current SONAR message processing */
+	public String getProcUser() {
+		Server s = MainServer.server;
+		if (s != null) {
+			String u = s.getProcUser();
+			if (u != null)
+				return u;
+		}
+		return "IRIS user";
 	}
 
 	/** Notify SONAR clients of an object created */

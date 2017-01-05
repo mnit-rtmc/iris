@@ -249,8 +249,9 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Set the camera displayed on the monitor */
 	public void doSetCamera(Camera c) throws TMSException {
 		CameraImpl cam = toCameraImpl(c);
-		doSetCam(cam, "IRIS user");
-		setCameraNotify(this, mon_num, cam, "IRIS user");
+		String u = getProcUser();
+		doSetCam(cam, u);
+		setCameraNotify(this, mon_num, cam, u);
 	}
 
 	/** Set the camera displayed on the monitor */
