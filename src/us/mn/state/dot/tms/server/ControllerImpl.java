@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -178,6 +178,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		b.append(" drop ");
 		b.append(drop_id);
 		return b.toString();
+	}
+
+	/** Get controller label */
+	public String getLbl() {
+		return "" + comm_link + ":" + drop_id;
 	}
 
 	/** Controller cabinet */
