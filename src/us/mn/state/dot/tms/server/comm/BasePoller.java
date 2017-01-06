@@ -481,6 +481,11 @@ public class BasePoller implements DevicePoller {
 		Operation op = recvQueue();
 		if (op != null)
 			recvOperation(op);
+		else if (logger.isOpen()) {
+			synchronized (rx_buf) {
+				log("RECV (no op) " + formatBuf(rx_buf, 0));
+			}
+		}
 		clearRxBuf();
 	}
 
