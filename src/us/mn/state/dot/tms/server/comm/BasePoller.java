@@ -84,10 +84,6 @@ public class BasePoller implements DevicePoller {
 		new PriorityQueue<Operation>(11, new Comparator<Operation>()
 	{
 		@Override public int compare(Operation a, Operation b) {
-			// NOTE: don't allow duplicates of "equal" operations
-			int cc = a.compareTo(b);
-			if (0 == cc)
-				return 0;
 			// NOTE: these mutable values should never change
 			//       while the operations are in the queue
 			int c = Integer.signum(a.getPriority().ordinal()
@@ -98,7 +94,7 @@ public class BasePoller implements DevicePoller {
 			if (c != 0)
 				return c;
 			else
-				return cc;
+				return a.compareTo(b);
 		}
 	});
 
@@ -107,17 +103,13 @@ public class BasePoller implements DevicePoller {
 		new PriorityQueue<Operation>(11, new Comparator<Operation>()
 	{
 		@Override public int compare(Operation a, Operation b) {
-			// NOTE: don't allow duplicates of "equal" operations
-			int cc = a.compareTo(b);
-			if (0 == cc)
-				return 0;
 			// NOTE: the expire time should not change
 			//       while the operations are in the queue
 			int c = Long.signum(a.getExpire() - b.getExpire());
 			if (c != 0)
 				return c;
 			else
-				return cc;
+				return a.compareTo(b);
 		}
 	});
 
