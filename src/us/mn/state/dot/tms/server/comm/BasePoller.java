@@ -194,7 +194,16 @@ public class BasePoller implements DevicePoller {
 	}
 
 	/** Add an operation to the device poller */
-	protected final void addOp(Operation op) {
+	protected final void addOp(final Operation op) {
+		COMM.addJob(new Job() {
+			@Override public void perform() {
+				doAddOp(op);
+			}
+		});
+	}
+
+	/** Add an operation to the device poller (on comm thread) */
+	private void doAddOp(Operation op) {
 		if (addWorking(op)) {
 			if (logger.isOpen())
 				log("ADDING " + op);
@@ -459,7 +468,9 @@ public class BasePoller implements DevicePoller {
 		}
 	}
 
-	/** Remove an operation from the receive queue */
+	/** Remove an operation from the receive queue.
+	 * @param op Operation to remove.
+	 * @return true if operation was in queue. */
 	private boolean removeRecv(Operation op) {
 		synchronized (op_set) {
 			return r_queue.remove(op);
