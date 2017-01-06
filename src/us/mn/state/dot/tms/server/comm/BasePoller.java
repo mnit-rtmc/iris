@@ -434,7 +434,9 @@ public class BasePoller implements DevicePoller {
 			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
 			closeChannel();
 		}
-		addQueue(op);
+		finally {
+			addQueue(op);
+		}
 	}
 
 	/** Format the contents of a buffer */
@@ -537,7 +539,9 @@ public class BasePoller implements DevicePoller {
 			op.handleEvent(EventType.COMM_ERROR, ex_msg(e));
 			closeChannel();
 		}
-		addQueue(op);
+		finally {
+			addQueue(op);
+		}
 	}
 
 	/** Stop polling if idle */
