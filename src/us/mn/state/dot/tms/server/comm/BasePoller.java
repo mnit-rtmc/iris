@@ -271,6 +271,8 @@ public class BasePoller implements DevicePoller {
 
 	/** Add an operation to the receive queue */
 	private void addRecvQueue(Operation op) {
+		// r_queue is sorted by expire time
+		op.setRemaining(timeout);
 		synchronized (r_queue) {
 			if (!r_queue.add(op)) {
 				// This should never happen
@@ -278,6 +280,24 @@ public class BasePoller implements DevicePoller {
 			}
 		}
 		scheduleTimeout(op);
+	}
+
+	/** Schedule timeout of operation */
+	private void scheduleTimeout(final Operation op) {
+		COMM.addJob(new Job(timeout) {
+			@Override public void perform() {
+				checkTimeout(op);
+			}
+		});
+	}
+
+	/** Check if an operation has timed out */
+	private void checkTimeout(Operation op) {
+		long rt = op.getRemaining();
+		if (rt <= 0 && removeRecv(op)) {
+			op.handleEvent(EventType.POLL_TIMEOUT_ERROR, TIMEOUT);
+			addQueue(op);
+		}
 	}
 
 	/** Ensure that the channel is open */
@@ -438,25 +458,6 @@ public class BasePoller implements DevicePoller {
 		if (skey != null) {
 			skey.interestOps(ops);
 			skey.selector().wakeup();
-		}
-	}
-
-	/** Schedule timeout of operation */
-	private void scheduleTimeout(final Operation op) {
-		op.setRemaining(timeout);
-		COMM.addJob(new Job(timeout) {
-			@Override public void perform() {
-				checkTimeout(op);
-			}
-		});
-	}
-
-	/** Check if an operation has timed out */
-	private void checkTimeout(Operation op) {
-		long rt = op.getRemaining();
-		if (rt <= 0 && removeRecv(op)) {
-			op.handleEvent(EventType.POLL_TIMEOUT_ERROR, TIMEOUT);
-			addQueue(op);
 		}
 	}
 
