@@ -76,10 +76,10 @@ public class BasePoller implements DevicePoller {
 	/** Protocol logger */
 	private final DebugLog logger;
 
-	/** Set of owned operations */
+	/** Set of owned operations.  All access must be synchronized. */
 	private final HashSet<Operation> op_set = new HashSet<Operation>();
 
-	/** Polling queue */
+	/** Polling queue.  All access must be guarded by the op_set lock. */
 	private final PriorityQueue<Operation> p_queue =
 		new PriorityQueue<Operation>(11, new Comparator<Operation>()
 	{
@@ -98,7 +98,7 @@ public class BasePoller implements DevicePoller {
 		}
 	});
 
-	/** Receive queue */
+	/** Receive queue.  All access must be guarded by the op_set lock. */
 	private final PriorityQueue<Operation> r_queue =
 		new PriorityQueue<Operation>(11, new Comparator<Operation>()
 	{
@@ -143,13 +143,9 @@ public class BasePoller implements DevicePoller {
 
 	/** Drain the queues */
 	private void drainQueues() {
-		synchronized (p_queue) {
-			drainQueue(p_queue);
-		}
-		synchronized (r_queue) {
-			drainQueue(r_queue);
-		}
 		synchronized (op_set) {
+			drainQueue(p_queue);
+			drainQueue(r_queue);
 			op_set.clear();
 		}
 	}
@@ -243,6 +239,8 @@ public class BasePoller implements DevicePoller {
 	/** Remove an operation from the working set */
 	private void removeWorking(Operation op) {
 		synchronized (op_set) {
+			p_queue.remove(op);
+			r_queue.remove(op);
 			if (!op_set.remove(op)) {
 				// This should never happen
 				log("ERR SET " + op);
@@ -260,7 +258,7 @@ public class BasePoller implements DevicePoller {
 
 	/** Add an operation to the poll queue */
 	private void addPollQueue(Operation op) {
-		synchronized (p_queue) {
+		synchronized (op_set) {
 			if (!p_queue.add(op)) {
 				// This should never happen
 				log("ERR POLL " + op);
@@ -273,7 +271,7 @@ public class BasePoller implements DevicePoller {
 	private void addRecvQueue(Operation op) {
 		// r_queue is sorted by expire time
 		op.setRemaining(timeout);
-		synchronized (r_queue) {
+		synchronized (op_set) {
 			if (!r_queue.add(op)) {
 				// This should never happen
 				log("ERR RECV " + op);
@@ -399,7 +397,7 @@ public class BasePoller implements DevicePoller {
 
 	/** Get the first operation on the poll queue */
 	private Operation pollQueue() {
-		synchronized (p_queue) {
+		synchronized (op_set) {
 			return p_queue.poll();
 		}
 	}
@@ -463,7 +461,7 @@ public class BasePoller implements DevicePoller {
 
 	/** Remove an operation from the receive queue */
 	private boolean removeRecv(Operation op) {
-		synchronized (r_queue) {
+		synchronized (op_set) {
 			return r_queue.remove(op);
 		}
 	}
@@ -492,7 +490,7 @@ public class BasePoller implements DevicePoller {
 
 	/** Get the first operation on the receive queue */
 	private Operation recvQueue() {
-		synchronized (r_queue) {
+		synchronized (op_set) {
 			return r_queue.poll();
 		}
 	}
@@ -540,14 +538,14 @@ public class BasePoller implements DevicePoller {
 
 	/** Check if the poll queue is empty */
 	private boolean isPollEmpty() {
-		synchronized (p_queue) {
+		synchronized (op_set) {
 			return p_queue.isEmpty();
 		}
 	}
 
 	/** Check if the recv queue is empty */
 	private boolean isRecvEmpty() {
-		synchronized (r_queue) {
+		synchronized (op_set) {
 			return r_queue.isEmpty();
 		}
 	}
