@@ -215,7 +215,7 @@ public final class Operation implements Comparable<Operation> {
 	}
 
 	/** Set the success flag.  This will clear the error counter if true. */
-	private void setSuccess(boolean s) {
+	public final void setSuccess(boolean s) {
 		success = s;
 		if (s)
 			error_cnt = 0;

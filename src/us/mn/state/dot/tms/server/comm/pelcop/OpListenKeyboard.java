@@ -101,11 +101,12 @@ public class OpListenKeyboard extends OpStep {
 			prop = PelcoPProp.parse(rx_buf, logged_in, mon_num);
 			prop.decodeQuery(op, rx_buf);
 			prop.parseTail(rx_buf);
-			setPolling(true);
 			if (prop instanceof MonStatusProp) {
 				MonStatusProp stat = (MonStatusProp) prop;
 				mon_num = stat.getMonNumber();
 			}
+			op.setSuccess(true);	// clear error_cnt
+			setPolling(true);
 		}
 		catch (BufferUnderflowException e) {
 			rx_buf.reset();
