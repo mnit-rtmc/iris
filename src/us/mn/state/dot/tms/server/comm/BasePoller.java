@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.EventType;
@@ -61,8 +62,18 @@ public class BasePoller implements DevicePoller {
 	/** Buffer size */
 	static private final int BUF_SZ = 1 << 12;
 
+	/** Poll error logger */
+	static private final DebugLog POLL_ERR = new DebugLog("poll_err");
+
 	/** Scheduler for processing comm operations */
-	static private final Scheduler COMM = new Scheduler("comm");
+	static private final Scheduler COMM = new Scheduler("commx",
+		new ExceptionHandler()
+	{
+		public boolean handle(Exception e) {
+			POLL_ERR.log("Exception: " + e.getMessage());
+			return true;
+		}
+	});
 
 	/** Scheduler for logging to debug logs */
 	static private final Scheduler LOGGER = new Scheduler("logger");
@@ -252,7 +263,7 @@ public class BasePoller implements DevicePoller {
 			r_queue.remove(op);
 			if (!op_set.remove(op)) {
 				// This should never happen
-				log("ERR SET " + op);
+				elog("ERR SET " + op);
 			}
 		}
 	}
@@ -270,7 +281,7 @@ public class BasePoller implements DevicePoller {
 		synchronized (op_set) {
 			if (!p_queue.add(op)) {
 				// This should never happen
-				log("ERR POLL " + op);
+				elog("ERR POLL " + op);
 			}
 		}
 		schedulePoll();
@@ -283,7 +294,7 @@ public class BasePoller implements DevicePoller {
 		synchronized (op_set) {
 			if (!r_queue.add(op)) {
 				// This should never happen
-				log("ERR RECV " + op);
+				elog("ERR RECV " + op);
 			}
 		}
 		scheduleTimeout(op);
@@ -367,6 +378,17 @@ public class BasePoller implements DevicePoller {
 			LOGGER.addJob(new Job() {
 				@Override public void perform() {
 					logger.log(name + " " + msg);
+				}
+			});
+		}
+	}
+
+	/** Write a message to the error log */
+	private void elog(final String msg) {
+		if (POLL_ERR.isOpen()) {
+			LOGGER.addJob(new Job() {
+				@Override public void perform() {
+					POLL_ERR.log(name + " " + msg);
 				}
 			});
 		}
