@@ -61,6 +61,8 @@ abstract public class PelcoPProp extends ControllerProp {
 			return new CamPrevProp(logged_in, mon_num);
 		case CamNextProp.REQ_CODE:
 			return new CamNextProp(logged_in, mon_num);
+		case AuxProp.REQ_CODE:
+			return new AuxProp(logged_in, mon_num);
 		case CamLockProp.REQ_CODE:
 			return new CamLockProp(logged_in, mon_num);
 		case CamUnlockProp.REQ_CODE:

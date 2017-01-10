@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
+import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -53,7 +54,7 @@ public class MonStatusProp extends PelcoPProp {
 	}
 
 	/** Find a camera by UID */
-	static protected Camera findCam(int cam) {
+	static private Camera findCam(int cam) {
 		// First, lookup a guessed name for camera
 		Camera c = CameraHelper.lookup(buildCamName(cam));
 		if (c != null)
@@ -62,6 +63,12 @@ public class MonStatusProp extends PelcoPProp {
 			// Guess not correct, do linear search
 			return CameraHelper.findUID(cam);
 		}
+	}
+
+	/** Find a camera by UID */
+	static protected CameraImpl findCamera(int cam) {
+		Camera c = findCam(cam);
+		return (c instanceof CameraImpl) ? (CameraImpl) c : null;
 	}
 
 	/** Build a camera name guess */

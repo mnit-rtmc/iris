@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.Camera;
 import static us.mn.state.dot.tms.DeviceRequest.*;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -127,23 +126,24 @@ public class CamControlProp extends MonStatusProp {
 	private void sendControl(int cam, int c0, int c1, int c2, int c3)
 		throws ParsingException
 	{
-		Camera c = findCam(cam);
-		if (c instanceof CameraImpl) {
-			CameraImpl ci = (CameraImpl) c;
+		CameraImpl c = findCamera(cam);
+		if (c != null) {
 			if (c0 != 0) {
 				sendFocusControl(c, c0);
 				sendIrisControl(c, c0);
 			} else {
 				if ((c1 & BIT_EXTENDED) == 0)
-					sendPTZ(ci, c1, c2, c3);
+					sendPTZ(c, c1, c2, c3);
 				else
-					sendExtended(ci, c1, c3);
+					sendExtended(c, c1, c3);
 			}
 		}
 	}
 
 	/** Send focus control */
-	private void sendFocusControl(Camera c, int c0) throws ParsingException{
+	private void sendFocusControl(CameraImpl c, int c0)
+		throws ParsingException
+	{
 		switch (c0 & (BIT_FOCUS_FAR | BIT_FOCUS_NEAR)) {
 		case 0:
 			break;
@@ -159,7 +159,9 @@ public class CamControlProp extends MonStatusProp {
 	}
 
 	/** Send iris control */
-	private void sendIrisControl(Camera c, int c0) throws ParsingException {
+	private void sendIrisControl(CameraImpl c, int c0)
+		throws ParsingException
+	{
 		switch (c0 & (BIT_IRIS_OPEN | BIT_IRIS_CLOSE)) {
 		case 0:
 			break;
