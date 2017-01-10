@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -154,10 +154,10 @@ public final class OpQueue<T extends ControllerProperty> {
 	public synchronized void forEach(OpHandler<T> handler) {
 		OpController<T> w = work;
 		if (w != null)
-			handler.handle(w.getPriority(), w);
+			handler.handle(w);
 		Node<T> node = front;
 		while (node != null) {
-			handler.handle(node.priority, node.operation);
+			handler.handle(node.operation);
 			node = node.next;
 		}
 	}

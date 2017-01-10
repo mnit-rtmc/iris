@@ -66,9 +66,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	/** Drain the operation queue */
 	private void drainQueue() {
 		queue.forEach(new OpHandler<T>() {
-			public void handle(PriorityLevel prio,
-				OpController<T> o)
-			{
+			public void handle(OpController<T> o) {
 				o.handleCommError(EventType.QUEUE_DRAINED,
 					"DRAINED");
 				o.cleanup();
@@ -79,9 +77,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	/** Handle error for all operations in queue */
 	public void handleError(final EventType et, final String msg) {
 		queue.forEach(new OpHandler<T>() {
-			public void handle(PriorityLevel prio,
-				OpController<T> o)
-			{
+			public void handle(OpController<T> o) {
 				o.handleCommError(et, msg);
 				if (o.isDone())
 					o.cleanup();
