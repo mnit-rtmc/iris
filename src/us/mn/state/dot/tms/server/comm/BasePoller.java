@@ -84,6 +84,9 @@ public class BasePoller implements DevicePoller {
 	/** Default URI scheme */
 	private final URI scheme;
 
+	/** Flag to close channel on timeout */
+	private final boolean close_on_timeout;
+
 	/** Protocol logger */
 	private final DebugLog logger;
 
@@ -134,13 +137,19 @@ public class BasePoller implements DevicePoller {
 	private boolean destroyed = false;
 
 	/** Create a base poller */
-	protected BasePoller(String n, URI s) {
+	protected BasePoller(String n, URI s, boolean cot) {
 		name = n;
 		scheme = s;
+		close_on_timeout = cot;
 		logger = new DebugLog(n + ".log");
 		tx_buf = ByteBuffer.allocate(BUF_SZ);
 		rx_buf = ByteBuffer.allocate(BUF_SZ);
 		log("CREATED");
+	}
+
+	/** Create a base poller */
+	protected BasePoller(String n, URI s) {
+		this(n, s, false);
 	}
 
 	/** Destroy the poller */
@@ -315,6 +324,8 @@ public class BasePoller implements DevicePoller {
 		if (rt <= 0 && removeRecv(op)) {
 			op.handleEvent(EventType.POLL_TIMEOUT_ERROR, TIMEOUT);
 			addQueue(op);
+			if (close_on_timeout)
+				closeChannel();
 		}
 	}
 
