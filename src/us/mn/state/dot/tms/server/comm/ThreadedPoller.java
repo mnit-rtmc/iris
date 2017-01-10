@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2016  Minnesota Department of Transportation
+ * Copyright (C) 2014-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,6 +72,19 @@ public class ThreadedPoller<T extends ControllerProperty>
 				o.handleCommError(EventType.QUEUE_DRAINED,
 					"DRAINED");
 				o.cleanup();
+			}
+		});
+	}
+
+	/** Handle error for all operations in queue */
+	public void handleError(final EventType et, final String msg) {
+		queue.forEach(new OpHandler<T>() {
+			public void handle(PriorityLevel prio,
+				OpController<T> o)
+			{
+				o.handleCommError(et, msg);
+				if (o.isDone())
+					o.cleanup();
 			}
 		});
 	}
