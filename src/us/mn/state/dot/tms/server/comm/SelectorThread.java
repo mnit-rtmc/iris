@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,12 +57,21 @@ public final class SelectorThread {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+		// CommSelector will auto-close, so don't use it
+		finally {
+			TASK = null;
+		}
 	}
 
 	/** Get the comm selector */
 	static public CommSelector getSelector() {
-		while (null == TASK)
+		// Loop for 4 seconds to allow for race at startup
+		for (int i = 0; i < 20; i++) {
+			CommSelector task = TASK;
+			if (task != null)
+				return task;
 			TimeSteward.sleep_well(200);
+		}
 		return TASK;
 	}
 }

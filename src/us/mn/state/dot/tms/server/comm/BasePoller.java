@@ -345,9 +345,17 @@ public class BasePoller implements DevicePoller {
 	}
 
 	/** Open the channel */
-	private synchronized void openChannel() {
+	private void openChannel() {
+		CommSelector sel = SelectorThread.getSelector();
+		if (sel != null)
+			openChannel(sel);
+		else
+			elog("No CommSelector");
+	}
+
+	/** Open the channel */
+	private synchronized void openChannel(CommSelector sel) {
 		try {
-			CommSelector sel = SelectorThread.getSelector();
 			skey = sel.createChannel(this, createURI());
 			clearTxBuf();
 			clearRxBuf();
