@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,7 +92,11 @@ public class CommSelector implements Closeable {
 			if (key.isReadable())
 				handleRead(key, bp);
 		}
-		catch (IOException e) {
+		catch (Exception e) {
+			// 1. java.io.IOException is most common here
+			// 2. java.nio.channels.NotYetConnectedException has
+			//    been observed (from ReadableByteChannel.read) when
+			//    the VM is running out of memory
 			bp.handleException(e);
 			handleDisconnect(key);
 		}
