@@ -70,8 +70,8 @@ public class BasePoller implements DevicePoller {
 		new ExceptionHandler()
 	{
 		public boolean handle(Exception e) {
+			e.printStackTrace();
 			POLL_ERR.log("Exception: " + ex_msg(e));
-e.printStackTrace();
 			return true;
 		}
 	});
