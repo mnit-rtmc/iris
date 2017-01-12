@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,7 +113,9 @@ public class ControllerManager extends ProxyManager<Controller> {
 	/** Check if a given attribute affects a proxy style */
 	@Override
 	public boolean isStyleAttrib(String a) {
-		return "failTime".equals(a) || "maint".equals(a);
+		return "failTime".equals(a)
+		    || "maint".equals(a)
+		    || "status".equals(a);
 	}
 
 	/** Check the style of the specified proxy */
