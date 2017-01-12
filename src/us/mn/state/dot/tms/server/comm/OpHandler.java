@@ -22,5 +22,5 @@ package us.mn.state.dot.tms.server.comm;
 public interface OpHandler<T extends ControllerProperty> {
 
 	/** Do something with one of the operations */
-	void handle(OpController<T> o);
+	boolean handle(OpController<T> o);
 }

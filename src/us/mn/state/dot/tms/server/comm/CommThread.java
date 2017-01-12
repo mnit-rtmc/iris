@@ -22,6 +22,7 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.EventType;
+import static us.mn.state.dot.tms.EventType.COMM_ERROR;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -159,7 +160,8 @@ public class CommThread<T extends ControllerProperty> {
 			catch (IOException e) {
 				String msg = getMessage(e);
 				setStatus(msg);
-				poller.handleError(EventType.COMM_ERROR, msg);
+				if (poller.handleError(COMM_ERROR, msg))
+					break;
 			}
 			// Rest a second before trying again
 			TimeSteward.sleep_well(1000);

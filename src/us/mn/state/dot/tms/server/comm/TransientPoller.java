@@ -36,9 +36,10 @@ public class TransientPoller<T extends ControllerProperty>
 	@Override
 	protected void addOp(final OpController<T> op) {
 		queue.forEach(new OpHandler<T>() {
-			public void handle(OpController<T> o) {
+			public boolean handle(OpController<T> o) {
 				if (o.equals(op))
 					o.setSucceeded();
+				return false;
 			}
 		});
 		super.addOp(op);

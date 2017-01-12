@@ -66,21 +66,23 @@ public class ThreadedPoller<T extends ControllerProperty>
 	/** Drain the operation queue */
 	private void drainQueue() {
 		queue.forEach(new OpHandler<T>() {
-			public void handle(OpController<T> o) {
+			public boolean handle(OpController<T> o) {
 				o.handleCommError(EventType.QUEUE_DRAINED,
 					"DRAINED");
 				o.cleanup();
+				return true;
 			}
 		});
 	}
 
 	/** Handle error for all operations in queue */
-	public void handleError(final EventType et, final String msg) {
-		queue.forEach(new OpHandler<T>() {
-			public void handle(OpController<T> o) {
+	public boolean handleError(final EventType et, final String msg) {
+		return queue.forEach(new OpHandler<T>() {
+			public boolean handle(OpController<T> o) {
 				o.handleCommError(et, msg);
 				if (o.isDone())
 					o.cleanup();
+				return o.isDone();
 			}
 		});
 	}
