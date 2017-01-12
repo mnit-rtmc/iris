@@ -227,12 +227,6 @@ public final class Operation implements Comparable<Operation> {
 		setStep(null);
 	}
 
-	/** Set the operation to succeeded */
-	public void setSucceeded() {
-		setSuccess(true);
-		setStep(null);
-	}
-
 	/** Maint status message */
 	private String maintStatus = null;
 
