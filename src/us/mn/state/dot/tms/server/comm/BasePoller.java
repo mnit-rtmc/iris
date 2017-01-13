@@ -27,6 +27,8 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
+import us.mn.state.dot.sched.Work;
+import us.mn.state.dot.sched.Worker;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.URIUtil;
@@ -65,19 +67,20 @@ abstract public class BasePoller implements DevicePoller {
 	/** Poll error logger */
 	static private final DebugLog POLL_ERR = new DebugLog("poll_err");
 
-	/** Scheduler for processing comm operations */
-	static private final Scheduler COMM = new Scheduler("commx",
-		new ExceptionHandler()
-	{
-		public boolean handle(Exception e) {
+	/** Exception handler */
+	static private final ExceptionHandler HANDLER = new ExceptionHandler() {
+		@Override public boolean handle(Exception e) {
 			e.printStackTrace();
 			POLL_ERR.log("Exception: " + ex_msg(e));
 			return true;
 		}
-	});
+	};
 
-	/** Scheduler for logging to debug logs */
-	static private final Scheduler LOGGER = new Scheduler("logger");
+	/** Scheduler for processing comm operations */
+	static private final Scheduler COMM = new Scheduler("commx", HANDLER);
+
+	/** Worker for logging to debug logs */
+	static private final Worker LOGGER = new Worker("logger", HANDLER);
 
 	/** Poller (comm link) name */
 	private final String name;
@@ -395,7 +398,7 @@ abstract public class BasePoller implements DevicePoller {
 	/** Write a message to the protocol log */
 	public void log(final String msg) {
 		if (logger.isOpen()) {
-			LOGGER.addJob(new Job() {
+			LOGGER.addWork(new Work() {
 				@Override public void perform() {
 					logger.log(name + " " + msg);
 				}
@@ -406,7 +409,7 @@ abstract public class BasePoller implements DevicePoller {
 	/** Write a message to the error log */
 	private void elog(final String msg) {
 		if (POLL_ERR.isOpen()) {
-			LOGGER.addJob(new Job() {
+			LOGGER.addWork(new Work() {
 				@Override public void perform() {
 					POLL_ERR.log(name + " " + msg);
 				}
