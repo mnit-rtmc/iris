@@ -36,7 +36,7 @@ import us.mn.state.dot.tms.utils.URIUtil;
  *
  * @author Douglas Lau
  */
-public class BasePoller implements DevicePoller {
+abstract public class BasePoller implements DevicePoller {
 
 	/** Read timed out message */
 	static private final String TIMEOUT = "READ TIMED OUT";
@@ -420,12 +420,15 @@ public class BasePoller implements DevicePoller {
 	/** Close the channel */
 	private synchronized void closeChannel() {
 		setStatus("CLOSED");
-		if ((skey != null) && skey.isValid()) {
+		if (skey != null) {
 			// Tell selector to close the channel
 			skey.attach(null);
-			skey.interestOps(SelectionKey.OP_WRITE);
-			skey.selector().wakeup();
-		}
+			if (skey.isValid())
+				updateInterest(SelectionKey.OP_WRITE);
+			else
+				elog("SELECTION KEY IS INVALID");
+		} else
+			elog("SELECTION KEY IS NULL");
 		skey = null;
 	}
 
