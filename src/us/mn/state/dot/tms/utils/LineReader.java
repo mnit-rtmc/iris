@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,27 +28,28 @@ import java.io.Reader;
  *
  * @author Douglas Lau
  */
+
 public class LineReader {
 
 	/** Charset name for ASCII */
 	static private final String ASCII = "US-ASCII";
 
 	/** Test if a character is a line seperator */
-	static private boolean isLineSeperator(char c) {
+	static protected boolean isLineSeperator(char c) {
 		return c == '\r' || c == '\n';
 	}
 
 	/** Underlying reader */
-	private final Reader reader;
+	protected final Reader reader;
 
 	/** Buffer to read text */
-	private final char[] buffer;
+	protected final char[] buffer;
 
 	/** Number of chars in buffer */
-	private int n_chars = 0;
+	protected int n_chars = 0;
 
 	/** Seperator char for most recent line */
-	private char sep = 0;
+	protected char sep = 0;
 
 	/** Create a new line reader.
 	 * @param r Reader to read.
@@ -87,7 +89,7 @@ public class LineReader {
 	}
 
 	/** Find the next end of line character */
-	private int endOfLine() {
+	protected int endOfLine() {
 		for(int i = crlf(0); i < n_chars; i++) {
 			if(isLineSeperator(buffer[i]))
 				return i;
@@ -96,7 +98,7 @@ public class LineReader {
 	}
 
 	/** Get the next buffered line of text */
-	private String bufferedLine(int eol) {
+	protected String bufferedLine(int eol) {
 		assert n_chars >= eol;
 		int off = crlf(0);
 		String line = new String(buffer, off, eol - off);
@@ -108,7 +110,7 @@ public class LineReader {
 	}
 
 	/** Get index to first character in next line */
-	private int nextLine(int pos) {
+	protected int nextLine(int pos) {
 		if(n_chars > pos && isLineSeperator(buffer[pos])) {
 			sep = buffer[pos];
 			pos++;
@@ -119,7 +121,7 @@ public class LineReader {
 	}
 
 	/** Skip Windows-style line seperators */
-	private int crlf(int pos) {
+	protected int crlf(int pos) {
 		if(sep == '\r' && n_chars > pos && buffer[pos] == '\n')
 			return pos + 1;
 		else
