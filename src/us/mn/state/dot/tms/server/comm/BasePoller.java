@@ -428,10 +428,16 @@ abstract public class BasePoller implements DevicePoller {
 			skey.attach(null);
 			if (skey.isValid())
 				updateInterest(SelectionKey.OP_WRITE);
-			else
-				elog("SELECTION KEY IS INVALID");
-		} else
-			elog("SELECTION KEY IS NULL");
+			else {
+				elog("SELECTION KEY INVALID");
+				try {
+					skey.channel().close();
+				}
+				catch (IOException e) {
+					elog("CLOSE: " + ex_msg(e));
+				}
+			}
+		}
 		skey = null;
 	}
 
