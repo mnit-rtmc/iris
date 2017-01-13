@@ -182,7 +182,9 @@ public class CommSelector implements Closeable {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-		key.cancel();
+		finally {
+			key.cancel();
+		}
 	}
 
 	/** Create a channel */
