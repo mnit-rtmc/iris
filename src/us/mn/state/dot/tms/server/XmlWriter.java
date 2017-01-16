@@ -21,6 +21,10 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -110,10 +114,37 @@ abstract public class XmlWriter {
 		finally {
 			os.close();
 		}
-		if(!temp.renameTo(file))
+
+		if (!atomicFileMove(temp.toPath(), file.toPath()))
 			throw new IOException("Rename failed: " + file);
 	}
 
+	/** Atomic file-mover method - uses a newer Java file-moving api
+	 * (Added 2016-06-17)
+	 * 
+	 * @author John L. Stanley - SRF Consulting
+	 */
+	public static boolean atomicFileMove(Path sourcePath, Path targetPath) {
+		try {
+			try {
+				// use atomic file-move if it's supported
+				Files.move(sourcePath, targetPath, 
+						StandardCopyOption.REPLACE_EXISTING, 
+						StandardCopyOption.ATOMIC_MOVE);
+				return true;
+			}
+			catch (AtomicMoveNotSupportedException ex) {
+				// use non-atomic move if atomic isn't supported
+				Files.move(sourcePath, targetPath, 
+						StandardCopyOption.REPLACE_EXISTING);
+				return true;
+			}
+		}
+		catch (IOException ex) {
+			return false;
+		}
+	}
+			
 	/** Write the XML to a writer */
 	abstract protected void write(Writer w) throws IOException;
 }
