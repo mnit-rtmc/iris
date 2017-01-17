@@ -79,7 +79,7 @@ public class CommSelector implements Closeable {
 		if (bp != null)
 			handleReady(key, bp);
 		else
-			handleDisconnect(key);
+			handleDisconnect(key, null);
 	}
 
 	/** Handle ready events on a selection key with poller */
@@ -98,7 +98,7 @@ public class CommSelector implements Closeable {
 			//    been observed (from ReadableByteChannel.read) when
 			//    the VM is running out of memory
 			bp.handleException(e);
-			handleDisconnect(key);
+			handleDisconnect(key, bp);
 		}
 	}
 
@@ -175,12 +175,15 @@ public class CommSelector implements Closeable {
 	}
 
 	/** Handle disconnect on a selectin key */
-	private void handleDisconnect(SelectionKey key) {
+	private void handleDisconnect(SelectionKey key, BasePoller bp) {
 		try {
 			key.channel().close();
 		}
 		catch (IOException e) {
-			e.printStackTrace();
+			if (bp != null)
+				bp.handleException(e);
+			else
+				e.printStackTrace();
 		}
 		finally {
 			key.cancel();

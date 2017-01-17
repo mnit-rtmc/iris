@@ -393,6 +393,8 @@ abstract public class BasePoller implements DevicePoller {
 	public void handleException(Exception e) {
 		if (logger.isOpen())
 			log("Exception -- " + ex_msg(e));
+		if (POLL_ERR.isOpen())
+			elog("Exception -- " + ex_msg(e));
 	}
 
 	/** Write a message to the protocol log */
