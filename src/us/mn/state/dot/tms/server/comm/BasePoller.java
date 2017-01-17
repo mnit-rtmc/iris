@@ -358,17 +358,25 @@ abstract public class BasePoller implements DevicePoller {
 	}
 
 	/** Open the channel */
-	private synchronized void openChannel(CommSelector sel) {
-		try {
-			skey = sel.createChannel(this, createURI());
-			clearTxBuf();
-			clearRxBuf();
-			setStatus("");
+	private void openChannel(CommSelector sel) {
+		synchronized (tx_buf) {
+			try {
+				URI uri = createURI();
+				openChannel(sel, uri);
+			}
+			catch (IOException | URISyntaxException e) {
+				handleException(e);
+				skey = null;
+			}
 		}
-		catch (IOException | URISyntaxException e) {
-			handleException(e);
-			skey = null;
-		}
+	}
+
+	/** Open the channel */
+	private void openChannel(CommSelector sel, URI uri) throws IOException {
+		skey = sel.createChannel(this, uri);
+		clearTxBuf();
+		clearRxBuf();
+		setStatus("");
 	}
 
 	/** Clear the transmit buffer */
@@ -420,28 +428,35 @@ abstract public class BasePoller implements DevicePoller {
 		}
 	}
 
-	/** Selection key for channel */
+	/** Selection key for channel.  Access synchronized on tx_buf. */
 	private SelectionKey skey;
 
 	/** Close the channel */
-	private synchronized void closeChannel() {
+	private void closeChannel() {
 		setStatus("CLOSED");
-		if (skey != null) {
-			// Tell selector to close the channel
-			skey.attach(null);
-			if (skey.isValid())
-				updateInterest(SelectionKey.OP_WRITE);
-			else {
-				elog("SELECTION KEY INVALID");
-				try {
-					skey.channel().close();
-				}
-				catch (IOException e) {
-					elog("CLOSE: " + ex_msg(e));
-				}
+		synchronized (tx_buf) {
+			if (skey != null) {
+				closeChannel(skey);
+				skey = null;
 			}
 		}
-		skey = null;
+	}
+
+	/** Close the channel */
+	private void closeChannel(SelectionKey sk) {
+		// Tell selector to close the channel
+		sk.attach(null);
+		if (sk.isValid())
+			updateInterest(SelectionKey.OP_WRITE);
+		else {
+			elog("SELECTION KEY INVALID");
+			try {
+				sk.channel().close();
+			}
+			catch (IOException e) {
+				elog("CLOSE: " + ex_msg(e));
+			}
+		}
 	}
 
 	/** Schedule poll of operation */
@@ -521,11 +536,10 @@ abstract public class BasePoller implements DevicePoller {
 
 	/** Update interest ops */
 	private void updateInterest(int ops) {
-		SelectionKey sk = skey;
-		if (sk != null) {
-			synchronized (tx_buf) {
-				sk.interestOps(ops);
-				sk.selector().wakeup();
+		synchronized (tx_buf) {
+			if (skey != null) {
+				skey.interestOps(ops);
+				skey.selector().wakeup();
 			}
 		}
 	}
