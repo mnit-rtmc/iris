@@ -363,6 +363,7 @@ abstract public class BasePoller implements DevicePoller {
 	/** Open the channel */
 	private void openChannel(CommSelector sel) {
 		synchronized (tx_buf) {
+			closeChannel();
 			try {
 				URI uri = createURI();
 				openChannel(sel, uri);
@@ -436,7 +437,6 @@ abstract public class BasePoller implements DevicePoller {
 
 	/** Close the channel */
 	private void closeChannel() {
-		setStatus("CLOSED");
 		synchronized (tx_buf) {
 			if (skey != null) {
 				closeChannel(skey);
@@ -447,6 +447,7 @@ abstract public class BasePoller implements DevicePoller {
 
 	/** Close the channel */
 	private void closeChannel(SelectionKey sk) {
+		setStatus("CLOSED");
 		// Tell selector to close the channel
 		sk.attach(null);
 		if (sk.isValid())
