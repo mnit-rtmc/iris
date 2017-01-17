@@ -328,8 +328,11 @@ abstract public class BasePoller implements DevicePoller {
 		if (rt <= 0 && removeRecv(op)) {
 			op.handleEvent(EventType.POLL_TIMEOUT_ERROR, TIMEOUT);
 			addQueue(op);
-			if (close_on_timeout)
+			// FIXME: check op.isDone first
+			if (close_on_timeout) {
+				elog("CLOSE DUE TO TIMEOUT");
 				closeChannel();
+			}
 		}
 	}
 
@@ -449,7 +452,6 @@ abstract public class BasePoller implements DevicePoller {
 		if (sk.isValid())
 			updateInterest(SelectionKey.OP_WRITE);
 		else {
-			elog("SELECTION KEY INVALID");
 			try {
 				sk.channel().close();
 			}
