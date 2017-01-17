@@ -327,12 +327,12 @@ abstract public class BasePoller implements DevicePoller {
 		long rt = op.getRemaining();
 		if (rt <= 0 && removeRecv(op)) {
 			op.handleEvent(EventType.POLL_TIMEOUT_ERROR, TIMEOUT);
-			addQueue(op);
 			// FIXME: check op.isDone first
 			if (close_on_timeout) {
 				elog("CLOSE DUE TO TIMEOUT");
 				closeChannel();
 			}
+			addQueue(op);
 		}
 	}
 
