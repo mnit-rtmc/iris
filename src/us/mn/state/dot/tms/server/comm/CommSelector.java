@@ -95,8 +95,7 @@ public class CommSelector implements Closeable {
 		catch (Exception e) {
 			// 1. java.io.IOException is most common here
 			// 2. java.nio.channels.NotYetConnectedException has
-			//    been observed (from ReadableByteChannel.read) when
-			//    the VM is running out of memory
+			//    been observed (from ReadableByteChannel.read)
 			bp.handleException(e);
 			handleDisconnect(skey, bp);
 		}
