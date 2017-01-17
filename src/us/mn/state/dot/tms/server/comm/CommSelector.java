@@ -74,23 +74,23 @@ public class CommSelector implements Closeable {
 	}
 
 	/** Handle ready events on a selection key */
-	private void handleReady(SelectionKey key) {
-		BasePoller bp = attachedPoller(key);
+	private void handleReady(SelectionKey skey) {
+		BasePoller bp = attachedPoller(skey);
 		if (bp != null)
-			handleReady(key, bp);
+			handleReady(skey, bp);
 		else
-			handleDisconnect(key, null);
+			handleDisconnect(skey, null);
 	}
 
 	/** Handle ready events on a selection key with poller */
-	private void handleReady(SelectionKey key, BasePoller bp) {
+	private void handleReady(SelectionKey skey, BasePoller bp) {
 		try {
-			if (key.isConnectable())
-				handleConnect(key, bp);
-			if (key.isWritable())
-				handleWrite(key, bp);
-			if (key.isReadable())
-				handleRead(key, bp);
+			if (skey.isConnectable())
+				handleConnect(skey, bp);
+			if (skey.isWritable())
+				handleWrite(skey, bp);
+			if (skey.isReadable())
+				handleRead(skey, bp);
 		}
 		catch (Exception e) {
 			// 1. java.io.IOException is most common here
@@ -98,25 +98,25 @@ public class CommSelector implements Closeable {
 			//    been observed (from ReadableByteChannel.read) when
 			//    the VM is running out of memory
 			bp.handleException(e);
-			handleDisconnect(key, bp);
+			handleDisconnect(skey, bp);
 		}
 	}
 
 	/** Get the attached poller */
-	private BasePoller attachedPoller(SelectionKey key) {
-		Object a = key.attachment();
+	private BasePoller attachedPoller(SelectionKey skey) {
+		Object a = skey.attachment();
 		return (a instanceof BasePoller) ? (BasePoller) a : null;
 	}
 
 	/** Handle connect event on a selection key */
-	private void handleConnect(SelectionKey key, BasePoller bp)
+	private void handleConnect(SelectionKey skey, BasePoller bp)
 		throws IOException
 	{
-		SelectableChannel chan = key.channel();
+		SelectableChannel chan = skey.channel();
 		if (chan instanceof SocketChannel) {
 			SocketChannel sc = (SocketChannel) chan;
 			if (sc.finishConnect()) {
-				key.interestOps(SelectionKey.OP_READ);
+				skey.interestOps(SelectionKey.OP_READ);
 				return;
 			}
 		}
@@ -124,18 +124,18 @@ public class CommSelector implements Closeable {
 	}
 
 	/** Handle write event on a selection key */
-	private void handleWrite(SelectionKey key, BasePoller bp)
+	private void handleWrite(SelectionKey skey, BasePoller bp)
 		throws IOException
 	{
-		SelectableChannel c = key.channel();
+		SelectableChannel c = skey.channel();
 		if (c instanceof WritableByteChannel)
-			handleWrite(key, (WritableByteChannel) c, bp);
+			handleWrite(skey, (WritableByteChannel) c, bp);
 		else
 			throw new EOFException("write FAILED");
 	}
 
 	/** Handle write event on a selection key */
-	private void handleWrite(SelectionKey key, WritableByteChannel chan,
+	private void handleWrite(SelectionKey skey, WritableByteChannel chan,
 		BasePoller bp) throws IOException
 	{
 		ByteBuffer tx_buf = bp.getTxBuffer();
@@ -143,16 +143,16 @@ public class CommSelector implements Closeable {
 			tx_buf.flip();
 			chan.write(tx_buf);
 			if (!tx_buf.hasRemaining())
-				key.interestOps(SelectionKey.OP_READ);
+				skey.interestOps(SelectionKey.OP_READ);
 			tx_buf.compact();
 		}
 	}
 
 	/** Handle read event on a selection key */
-	private void handleRead(SelectionKey key, BasePoller bp)
+	private void handleRead(SelectionKey skey, BasePoller bp)
 		throws IOException
 	{
-		SelectableChannel c = key.channel();
+		SelectableChannel c = skey.channel();
 		if (c instanceof ReadableByteChannel)
 			handleRead((ReadableByteChannel) c, bp);
 		else
@@ -175,9 +175,9 @@ public class CommSelector implements Closeable {
 	}
 
 	/** Handle disconnect on a selectin key */
-	private void handleDisconnect(SelectionKey key, BasePoller bp) {
+	private void handleDisconnect(SelectionKey skey, BasePoller bp) {
 		try {
-			key.channel().close();
+			skey.channel().close();
 		}
 		catch (IOException e) {
 			if (bp != null)
@@ -186,7 +186,7 @@ public class CommSelector implements Closeable {
 				e.printStackTrace();
 		}
 		finally {
-			key.cancel();
+			skey.cancel();
 		}
 	}
 
