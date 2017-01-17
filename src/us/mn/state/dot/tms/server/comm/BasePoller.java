@@ -189,7 +189,7 @@ abstract public class BasePoller implements DevicePoller {
 
 	/** Set the remote URI */
 	@Override
-	public synchronized void setUri(String u) {
+	public void setUri(String u) {
 		uri = u;
 		closeChannel();
 	}
@@ -334,17 +334,18 @@ abstract public class BasePoller implements DevicePoller {
 	}
 
 	/** Ensure that the channel is open */
-	private synchronized void ensureOpen() {
+	private void ensureOpen() {
 		if (!isConnected())
 			openChannel();
 	}
 
 	/** Check if the poller is currently connected */
 	@Override
-	public synchronized boolean isConnected() {
-		return (skey != null)
-		    && (skey.isValid())
-		    && (skey.channel().isOpen());
+	public boolean isConnected() {
+		SelectionKey sk = skey;
+		return (sk != null)
+		    && (sk.isValid())
+		    && (sk.channel().isOpen());
 	}
 
 	/** Open the channel */
@@ -519,10 +520,13 @@ abstract public class BasePoller implements DevicePoller {
 	}
 
 	/** Update interest ops */
-	private synchronized void updateInterest(int ops) {
-		if (skey != null) {
-			skey.interestOps(ops);
-			skey.selector().wakeup();
+	private void updateInterest(int ops) {
+		SelectionKey sk = skey;
+		if (sk != null) {
+			synchronized (tx_buf) {
+				sk.interestOps(ops);
+				sk.selector().wakeup();
+			}
 		}
 	}
 
