@@ -93,9 +93,6 @@ public class CommSelector implements Closeable {
 				handleRead(skey, bp);
 		}
 		catch (Exception e) {
-			// 1. java.io.IOException is most common here
-			// 2. java.nio.channels.NotYetConnectedException has
-			//    been observed (from ReadableByteChannel.read)
 			bp.handleException(e);
 			handleDisconnect(skey, bp);
 		}
