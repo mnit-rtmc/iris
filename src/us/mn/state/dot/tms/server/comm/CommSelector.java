@@ -32,6 +32,7 @@ import java.nio.channels.SocketChannel;
 import java.nio.channels.WritableByteChannel;
 import java.nio.channels.spi.AbstractSelectableChannel;
 import java.util.Iterator;
+import us.mn.state.dot.sched.DebugLog;
 
 /**
  * A comm selector performs non-blocking I/O on a set of channels.
@@ -39,6 +40,25 @@ import java.util.Iterator;
  * @author Douglas Lau
  */
 public class CommSelector implements Closeable {
+
+	/** Comm selector logger */
+	static private final DebugLog COMM_SEL = new DebugLog("comm_sel");
+
+	/** Write statistics to the log */
+	private void log_stats() {
+		if (COMM_SEL.isOpen()) {
+			COMM_SEL.log("n_ready: " + n_ready +
+			            " n_connect: " + n_connect +
+			            " n_write: " + n_write +
+			            " n_read: " + n_read);
+		}
+	}
+
+	/** Statistics counters */
+	private long n_ready = 0;
+	private long n_connect = 0;
+	private long n_write = 0;
+	private long n_read = 0;
 
 	/** Selector for non-blocking I/O */
 	private final Selector selector;
@@ -75,6 +95,9 @@ public class CommSelector implements Closeable {
 
 	/** Handle ready events on a selection key */
 	private void handleReady(SelectionKey skey) {
+		n_ready++;
+		if (n_ready % 100 == 0)
+			log_stats();
 		BasePoller bp = attachedPoller(skey);
 		if (bp != null)
 			handleReady(skey, bp);
@@ -108,6 +131,7 @@ public class CommSelector implements Closeable {
 	private void handleConnect(SelectionKey skey, BasePoller bp)
 		throws IOException
 	{
+		n_connect++;
 		SelectableChannel chan = skey.channel();
 		if (chan instanceof SocketChannel) {
 			SocketChannel sc = (SocketChannel) chan;
@@ -123,6 +147,7 @@ public class CommSelector implements Closeable {
 	private void handleWrite(SelectionKey skey, BasePoller bp)
 		throws IOException
 	{
+		n_write++;
 		SelectableChannel c = skey.channel();
 		if (c instanceof WritableByteChannel)
 			handleWrite(skey, (WritableByteChannel) c, bp);
@@ -147,6 +172,7 @@ public class CommSelector implements Closeable {
 	private void handleRead(SelectionKey skey, BasePoller bp)
 		throws IOException
 	{
+		n_read++;
 		SelectableChannel c = skey.channel();
 		if (c instanceof ReadableByteChannel)
 			handleRead((ReadableByteChannel) c, bp);
