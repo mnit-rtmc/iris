@@ -115,7 +115,7 @@ public class CommSelector implements Closeable {
 		if (chan instanceof SocketChannel) {
 			SocketChannel sc = (SocketChannel) chan;
 			if (sc.finishConnect()) {
-				skey.interestOps(SelectionKey.OP_READ);
+				skey.interestOps(bp.getInterest());
 				return;
 			}
 		}
@@ -141,9 +141,8 @@ public class CommSelector implements Closeable {
 		synchronized (tx_buf) {
 			tx_buf.flip();
 			chan.write(tx_buf);
-			if (!tx_buf.hasRemaining())
-				skey.interestOps(SelectionKey.OP_READ);
 			tx_buf.compact();
+			skey.interestOps(bp.getInterest());
 		}
 	}
 

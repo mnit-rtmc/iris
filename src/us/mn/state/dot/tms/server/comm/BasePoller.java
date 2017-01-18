@@ -409,7 +409,10 @@ abstract public class BasePoller implements DevicePoller {
 			elog("Exception -- " + ex_msg(e));
 		synchronized (tx_buf) {
 			// Don't need to close in this case
-			skey = null;
+			if (skey != null) {
+				skey.attach(null);
+				skey = null;
+			}
 		}
 	}
 
@@ -527,7 +530,7 @@ abstract public class BasePoller implements DevicePoller {
 	}
 
 	/** Get the interest ops */
-	private int getInterest() {
+	public int getInterest() {
 		return needsWrite()
 		     ? SelectionKey.OP_READ | SelectionKey.OP_WRITE
 		     : SelectionKey.OP_READ;
@@ -544,10 +547,16 @@ abstract public class BasePoller implements DevicePoller {
 	private void updateInterest(int ops) {
 		synchronized (tx_buf) {
 			if (skey != null) {
-				skey.interestOps(ops);
+				if (!isConnecting())
+					skey.interestOps(ops);
 				skey.selector().wakeup();
 			}
 		}
+	}
+
+	/** Test if the socket is connecting */
+	private boolean isConnecting() {
+		return (skey.interestOps() & SelectionKey.OP_CONNECT) != 0;
 	}
 
 	/** Remove an operation from the receive queue.
