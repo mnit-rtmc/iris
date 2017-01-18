@@ -276,6 +276,7 @@ public final class Operation implements Comparable<Operation> {
 
 	/** Handle an IO event */
 	public void handleEvent(EventType et, String msg) {
+		// Poll failed -- try again
 		setPolling(true);
 		controller.logCommEvent(et, getId(), filterMsg(msg));
 		if (!retry())
