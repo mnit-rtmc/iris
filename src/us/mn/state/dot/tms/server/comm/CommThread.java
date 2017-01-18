@@ -149,9 +149,8 @@ public class CommThread<T extends ControllerProperty> {
 		MessengerException
 	{
 		do {
-			try (Messenger m = createMessenger(scheme, uri,timeout))
-			{
-				pollQueue(m);
+			try {
+				performOps();
 			}
 			catch (NoModemException e) {
 				// Keep looping until modem is available
@@ -166,6 +165,22 @@ public class CommThread<T extends ControllerProperty> {
 			// Rest a second before trying again
 			TimeSteward.sleep_well(1000);
 		} while (queue.isOpen());
+	}
+
+	/** Create a messenger and perform operations on it. */
+	private void performOps() throws InterruptedException,
+		MessengerException, IOException
+	{
+		// We *should* be able to use try-with-resources here, but there
+		// is a strange interaction which can cause the close method to
+		// be deferred while another thread is spinning.
+		Messenger m = createMessenger(scheme, uri, timeout);
+		try {
+			pollQueue(m);
+		}
+		finally {
+			m.close();
+		}
 	}
 
 	/** Create a messenger.
