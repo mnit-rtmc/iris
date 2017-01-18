@@ -370,7 +370,6 @@ abstract public class BasePoller implements DevicePoller {
 			}
 			catch (IOException | URISyntaxException e) {
 				handleException(e);
-				skey = null;
 			}
 		}
 	}
@@ -408,6 +407,10 @@ abstract public class BasePoller implements DevicePoller {
 			log("Exception -- " + ex_msg(e));
 		if (POLL_ERR.isOpen())
 			elog("Exception -- " + ex_msg(e));
+		synchronized (tx_buf) {
+			// Don't need to close in this case
+			skey = null;
+		}
 	}
 
 	/** Write a message to the protocol log */
