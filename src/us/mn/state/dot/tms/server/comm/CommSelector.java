@@ -50,7 +50,8 @@ public class CommSelector implements Closeable {
 			COMM_SEL.log("n_ready: " + n_ready +
 			            " n_connect: " + n_connect +
 			            " n_write: " + n_write +
-			            " n_read: " + n_read);
+			            " n_read: " + n_read +
+			            " n_not_r: " + n_not_r);
 		}
 	}
 
@@ -59,6 +60,7 @@ public class CommSelector implements Closeable {
 	private long n_connect = 0;
 	private long n_write = 0;
 	private long n_read = 0;
+	private long n_not_r = 0;
 
 	/** Selector for non-blocking I/O */
 	private final Selector selector;
@@ -108,6 +110,11 @@ public class CommSelector implements Closeable {
 	/** Handle ready events on a selection key with poller */
 	private void handleReady(SelectionKey skey, BasePoller bp) {
 		try {
+			if (!isReallyReady(skey)) {
+				n_not_r++;
+				handleDisconnect(skey, bp);
+				return;
+			}
 			if (skey.isConnectable())
 				handleConnect(skey, bp);
 			if (skey.isWritable())
@@ -119,6 +126,13 @@ public class CommSelector implements Closeable {
 			bp.handleException(e);
 			handleDisconnect(skey, bp);
 		}
+	}
+
+	/** Check that a selection key is really ready */
+	private boolean isReallyReady(SelectionKey skey) {
+		return skey.isConnectable() ||
+		       skey.isWritable() ||
+		       skey.isReadable();
 	}
 
 	/** Get the attached poller */
