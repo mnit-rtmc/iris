@@ -89,8 +89,10 @@ public class ThreadedPoller<T extends ControllerProperty>
 
 	/** Add an operation to the device poller */
 	protected void addOp(OpController<T> op) {
-		if (!isStarted())
+		if (!isConnected()) {
+			stopPolling();
 			createCommThread();
+		}
 		if (!queue.enqueue(op))
 			log("DROPPING " + op);
 	}
@@ -122,11 +124,6 @@ public class ThreadedPoller<T extends ControllerProperty>
 
 	/** Comm thread (may be null) */
 	private CommThread c_thread;
-
-	/** Check if the comm thread has started */
-	private synchronized boolean isStarted() {
-		return c_thread != null;
-	}
 
 	/** Get the poller status */
 	@Override
