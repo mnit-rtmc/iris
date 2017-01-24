@@ -131,6 +131,7 @@ public class CommThread<T extends ControllerProperty> {
 
 	/** Run comm thread operations */
 	private void doRun() {
+		clog("STARTING");
 		try {
 			performOperations();
 		}
@@ -139,6 +140,9 @@ public class CommThread<T extends ControllerProperty> {
 		}
 		catch (RuntimeException e) {
 			e.printStackTrace();
+		}
+		finally {
+			clog("STOPPING");
 		}
 	}
 
