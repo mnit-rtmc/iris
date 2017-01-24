@@ -201,7 +201,6 @@ public class CommThread<T extends ControllerProperty> {
 		throws IOException
 	{
 		final String oname = o.toString();
-		long start = TimeSteward.currentTimeMillis();
 		try {
 			o.poll(createCommMessage(m, o));
 		}
@@ -248,10 +247,6 @@ public class CommThread<T extends ControllerProperty> {
 		finally {
 			if (o.isDone() || !requeueOperation(o))
 				o.cleanup();
-			if (COMM_LOG.isOpen()) {
-				clog(oname + " elapsed: " +
-					calculate_elapsed(start));
-			}
 		}
 	}
 
@@ -287,11 +282,6 @@ public class CommThread<T extends ControllerProperty> {
 			poller.log("DROPPING " + op);
 			return false;
 		}
-	}
-
-	/** Calculate the elapsed time */
-	private long calculate_elapsed(long start) {
-		return TimeSteward.currentTimeMillis() - start;
 	}
 
 	/** Create a message for the specified operation.
