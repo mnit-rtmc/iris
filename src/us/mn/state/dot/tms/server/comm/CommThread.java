@@ -129,6 +129,11 @@ public class CommThread<T extends ControllerProperty> {
 		thread.interrupt();
 	}
 
+	/** Check if the comm thread should continue */
+	private boolean shouldContinue() {
+		return queue.isOpen() && !thread.isInterrupted();
+	}
+
 	/** Run comm thread operations */
 	private void doRun() {
 		clog("STARTING");
@@ -152,7 +157,7 @@ public class CommThread<T extends ControllerProperty> {
 	private void performOperations() throws InterruptedException,
 		MessengerException
 	{
-		do {
+		while (shouldContinue()) {
 			try (Messenger m = createMessenger(scheme, uri,timeout))
 			{
 				pollQueue(m);
@@ -169,7 +174,7 @@ public class CommThread<T extends ControllerProperty> {
 			}
 			// Rest a second before trying again
 			TimeSteward.sleep_well(1000);
-		} while (queue.isOpen());
+		}
 	}
 
 	/** Create a messenger.
@@ -191,7 +196,7 @@ public class CommThread<T extends ControllerProperty> {
 		IOException
 	{
 		setStatus("");
-		while (queue.isOpen()) {
+		while (shouldContinue()) {
 			doPoll(m, queue.next());
 			setStatus("");
 		}
