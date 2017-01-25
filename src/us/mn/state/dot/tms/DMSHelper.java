@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -347,6 +347,6 @@ public class DMSHelper extends BaseHelper {
 	/** Get the owner of the current message */
 	static public String getOwner(DMS dms) {
 		SignMessage sm = dms.getMsgCurrent();
-		return (sm != null) ? sm.getOwner() : "";
+		return (sm != null) ? sm.getOwner() : null;
 	}
 }

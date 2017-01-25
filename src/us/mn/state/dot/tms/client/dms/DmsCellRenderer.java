@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -202,7 +202,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 
 	/** Get the owner user name (may be overridden) */
 	protected String getOwner(DMS dms) {
-		return DMSHelper.getOwner(dms);
+		String o = DMSHelper.getOwner(dms);
+		return (o != null) ? o : "";
 	}
 
 	/** Update tooltip */
