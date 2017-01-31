@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.client.help;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.EOFException;
 import java.net.ConnectException;
 import java.text.ParseException;
@@ -65,11 +67,17 @@ public class ExceptionDialog extends JDialog {
 		public void actionPerformed(ActionEvent a) {
 			setVisible(false);
 			dispose();
-			if (client != null)
-				client.logout();
-			System.exit(-1);
+			closeClient();
 		}
 	};
+
+	/** Close the IRIS client */
+	private void closeClient() {
+		if (client != null)
+			client.logout();
+		System.exit(-1);
+	}
+
 
 	/** Create a new exception dialog without an owner */
 	public ExceptionDialog() {
@@ -163,6 +171,14 @@ public class ExceptionDialog extends JDialog {
 		p.addSpacing();
 		setTitle(detail);
 		p.add(createButtonBox(e, fatal, detail));
+		if (fatal) {
+			addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosed(WindowEvent we) {
+					closeClient();
+				}
+			});
+		}
 		return p;
 	}
 
