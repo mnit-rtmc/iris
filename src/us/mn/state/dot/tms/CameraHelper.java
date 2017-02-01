@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -159,14 +159,14 @@ public class CameraHelper extends BaseHelper {
 	}
 
 	/** Create a camera encoder URI */
-	static public URI encoderUri(Camera c, String opt) {
+	static public URI encoderUri(Camera c, String query) {
 		if (c != null) {
 			int et = c.getEncoderType();
 			switch (EncoderType.fromOrdinal(et)) {
 			case GENERIC:
 				return genericUri(c);
 			case AXIS:
-				return axisUri(c, opt);
+				return axisUri(c, query);
 			case INFINOVA:
 				return infinovaUri(c);
 			}
@@ -190,18 +190,14 @@ public class CameraHelper extends BaseHelper {
 	}
 
 	/** Create a URI for an Axis encoder */
-	static private URI axisUri(Camera c, String opt) {
+	static private URI axisUri(Camera c, String query) {
 		String auth = getAuth(c);
 		String enc = c.getEncoder();
 		int chan = c.getEncoderChannel();
 		switch (StreamType.fromOrdinal(c.getStreamType())) {
 		case MJPEG:
-			/* showlength parameter needed to force ancient (2401)
-			 * servers to provide Content-Length headers */
 			return create(HTTP, auth + enc +
-			              "/axis-cgi/mjpg/video.cgi" +
-			              "?camera=" + chan +
-			              opt + "&showlength=1");
+			              "/axis-cgi/mjpg/video.cgi" + query);
 		case MPEG4:
 			return create(RTSP, auth + enc +
 			              "/mpeg4/" + chan + "/media.amp");
