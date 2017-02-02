@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2016  Minnesota Department of Transportation
+ * Copyright (C) 2002-2017  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -426,7 +426,7 @@ public class StreamPanel extends JPanel {
 		boolean mjpeg = video_req.hasMJPEG(camera);
 		stop_button.setEnabled(mjpeg && streaming);
 		play_button.setEnabled(mjpeg && !streaming);
-		playext_button.setEnabled(!mjpeg);
+		playext_button.setEnabled(true);
 	}
 
 	/**
@@ -454,7 +454,7 @@ public class StreamPanel extends JPanel {
 			setStatusText("Error: no external viewer defined.");
 			return;
 		}
-		String uri = video_req.getCameraUri(c).toString();
+		String uri = video_req.getUri(c).toString();
 		if (uri.length() == 0) {
 			// FIXME: i18n
 			setStatusText("Error: cannot determine URL.");
