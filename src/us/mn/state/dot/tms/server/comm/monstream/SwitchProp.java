@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,9 +17,11 @@ package us.mn.state.dot.tms.server.comm.monstream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.server.CameraImpl;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.Operation;
 
@@ -56,17 +58,30 @@ public class SwitchProp extends ControllerProp {
 
 	/** Format a play request */
 	private String formatPlay() {
+		assert camera != null;
 		StringBuilder sb = new StringBuilder();
 		sb.append("play");
 		sb.append(UNIT_SEP);
 		sb.append(camera.getName());
 		sb.append(UNIT_SEP);
-		sb.append(CameraHelper.encoderUri(camera, "").toString());
+		sb.append(CameraHelper.encoderUri(camera, getAuth(),
+		          "").toString());
 		sb.append(UNIT_SEP);
 		sb.append(StreamType.fromOrdinal(camera.getStreamType()));
 		sb.append(UNIT_SEP);
 		sb.append(GeoLocHelper.getDescription(camera.getGeoLoc()));
 		return sb.toString();
+	}
+
+	/** Get camera encoder auth string */
+	private String getAuth() {
+		assert camera != null;
+		Controller c = camera.getController();
+		if (c instanceof ControllerImpl) {
+			String pwd = ((ControllerImpl) c).getPassword();
+			return (pwd.length() > 0) ? "//" + pwd + '@' : "";
+		} else
+			return "";
 	}
 
 	/** Format a stop request */

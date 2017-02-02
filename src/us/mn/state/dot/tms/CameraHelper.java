@@ -35,14 +35,6 @@ import us.mn.state.dot.tms.units.Distance;
  */
 public class CameraHelper extends BaseHelper {
 
-	/** Get default basic authentication string */
-	static private String getDefaultAuth() {
-		String user = SystemAttrEnum.CAMERA_AUTH_USERNAME.getString();
-		String pass = SystemAttrEnum.CAMERA_AUTH_PASSWORD.getString();
-		return (user.length() > 0 || pass.length() > 0)
-		      ? "//" + user + ':' + pass + '@' : "";
-	}
-
 	/** Don't allow instances to be created */
 	private CameraHelper() {
 		assert false;
@@ -152,31 +144,24 @@ public class CameraHelper extends BaseHelper {
 		return nc;
 	}
 
-	/** Get authentication for a camera */
-	static private String getAuth(Camera c) {
-		// FIXME: use controller password if set
-		return getDefaultAuth();
-	}
-
 	/** Create a camera encoder URI */
-	static public URI encoderUri(Camera c, String query) {
+	static public URI encoderUri(Camera c, String auth, String query) {
 		if (c != null) {
 			int et = c.getEncoderType();
 			switch (EncoderType.fromOrdinal(et)) {
 			case GENERIC:
-				return genericUri(c);
+				return genericUri(c, auth);
 			case AXIS:
-				return axisUri(c, query);
+				return axisUri(c, auth, query);
 			case INFINOVA:
-				return infinovaUri(c);
+				return infinovaUri(c, auth);
 			}
 		}
 		return EMPTY_URI;
 	}
 
 	/** Create a URI for a generic encoder */
-	static private URI genericUri(Camera c) {
-		String auth = getAuth(c);
+	static private URI genericUri(Camera c, String auth) {
 		String enc = c.getEncoder();
 		switch (StreamType.fromOrdinal(c.getStreamType())) {
 		case MJPEG:
@@ -190,8 +175,7 @@ public class CameraHelper extends BaseHelper {
 	}
 
 	/** Create a URI for an Axis encoder */
-	static private URI axisUri(Camera c, String query) {
-		String auth = getAuth(c);
+	static private URI axisUri(Camera c, String auth, String query) {
 		String enc = c.getEncoder();
 		int chan = c.getEncoderChannel();
 		switch (StreamType.fromOrdinal(c.getStreamType())) {
@@ -210,8 +194,7 @@ public class CameraHelper extends BaseHelper {
 	}
 
 	/** Create a URI for an Infinova encoder */
-	static private URI infinovaUri(Camera c) {
-		String auth = getAuth(c);
+	static private URI infinovaUri(Camera c, String auth) {
 		String enc = c.getEncoder();
 		switch (StreamType.fromOrdinal(c.getStreamType())) {
 		case MPEG4:
