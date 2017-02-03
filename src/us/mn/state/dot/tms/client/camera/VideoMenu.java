@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,17 +40,35 @@ public class VideoMenu extends JMenu {
 		super(I18N.get("video"));
 		session = s;
 		desktop = s.getDesktop();
-		JMenuItem item = createCameraItem();
-		if(item != null)
+		JMenuItem item = createEncoderTypeItem();
+		if (item != null)
+			add(item);
+		item = createCameraItem();
+		if (item != null)
 			add(item);
 		item = createVideoMonitorItem();
-		if(item != null)
+		if (item != null)
 			add(item);
+	}
+
+	/** Create the encoder type menu item */
+	private JMenuItem createEncoderTypeItem() {
+		if (EncoderTypeForm.isPermitted(session)) {
+			return new JMenuItem(new IAction(
+				"camera.encoder.type.plural")
+			{
+				protected void doActionPerformed(ActionEvent e){
+					desktop.show(new EncoderTypeForm(
+						session));
+				}
+			});
+		} else
+			return null;
 	}
 
 	/** Create the camera menu item */
 	private JMenuItem createCameraItem() {
-		if(!CameraForm.isPermitted(session))
+		if (!CameraForm.isPermitted(session))
 			return null;
 		return new JMenuItem(new IAction("camera.title") {
 			protected void doActionPerformed(ActionEvent e) {
@@ -61,7 +79,7 @@ public class VideoMenu extends JMenu {
 
 	/** Create the video monitor menu item */
 	private JMenuItem createVideoMonitorItem() {
-		if(!VideoMonitorForm.isPermitted(session))
+		if (!VideoMonitorForm.isPermitted(session))
 			return null;
 		return new JMenuItem(new IAction("video.monitor") {
 			protected void doActionPerformed(ActionEvent e) {

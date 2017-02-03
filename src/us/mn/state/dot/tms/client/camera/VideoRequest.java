@@ -164,7 +164,7 @@ public class VideoRequest {
 	/** Create camera encoder URI query part */
 	private String getQuery(Camera cam) {
 		/* NOTE: query only required for older Axis encoders */
-		if (cam.getEncoderType() == EncoderType.AXIS.ordinal()) {
+		if (isAxisEncoder(cam)) {
 			/* NOTE: showlength needed to force ancient (2401)
 			 *       servers to provide Content-Length headers */
 			return "?camera=" + cam.getEncoderChannel()
@@ -172,6 +172,14 @@ public class VideoRequest {
 			     + "&showlength=1";
 		} else
 			return "";
+	}
+
+	/** Check if encoder type is AXIS */
+	private boolean isAxisEncoder(Camera cam) {
+		EncoderType et = cam.getEncoderType();
+		return (et != null)
+		      ? et.getName().toUpperCase().contains("AXIS")
+		      : false;
 	}
 
 	/** Check if stream type is MJPEG.

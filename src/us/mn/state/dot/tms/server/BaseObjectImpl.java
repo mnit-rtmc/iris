@@ -67,6 +67,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		AlarmImpl.loadAll();
 		DetectorImpl.loadAll();
 		TollZoneImpl.loadAll();
+		EncoderTypeImpl.loadAll();
 		CameraImpl.loadAll();
 		CameraPresetImpl.loadAll();
 		VideoMonitorImpl.loadAll();
@@ -187,6 +188,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return (BeaconImpl)so;
 		else
 			return null;
+	}
+
+	/** Lookup an encoder type */
+	static protected EncoderTypeImpl lookupEncoderType(String name) {
+		SonarObject so = lookupObject(EncoderTypeImpl.SONAR_TYPE, name);
+		return (so instanceof EncoderTypeImpl)
+		      ? (EncoderTypeImpl) so
+		      :	null;
 	}
 
 	/** Lookup a camera */

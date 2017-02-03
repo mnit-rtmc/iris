@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Direction;
+import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -33,6 +34,22 @@ public class CamCache {
 	static private boolean isAvailable(CameraPreset cp) {
 		return (Direction.fromOrdinal(cp.getDirection())
 			== Direction.UNKNOWN) && !cp.getAssigned();
+	}
+
+	/** Cache of encoder types */
+	private final TypeCache<EncoderType> encoder_types;
+
+	/** Get the encoder types object cache */
+	public TypeCache<EncoderType> getEncoderTypes() {
+		return encoder_types;
+	}
+
+	/** Encoder type model */
+	private final ProxyListModel<EncoderType> enc_type_mdl;
+
+	/** Get the encoder type model */
+	public ProxyListModel<EncoderType> getEncoderTypeModel() {
+		return enc_type_mdl;
 	}
 
 	/** Cache of cameras */
@@ -87,6 +104,10 @@ public class CamCache {
 	public CamCache(SonarState client) throws IllegalAccessException,
 		NoSuchFieldException
 	{
+		encoder_types = new TypeCache<EncoderType>(EncoderType.class,
+			client);
+		enc_type_mdl = new ProxyListModel<EncoderType>(encoder_types);
+		enc_type_mdl.initialize();
 		cameras = new TypeCache<Camera>(Camera.class, client);
 		camera_model = new ProxyListModel<Camera>(cameras);
 		camera_model.initialize();
@@ -107,6 +128,7 @@ public class CamCache {
 
 	/** Populate the type caches */
 	public void populate(SonarState client) {
+		client.populateReadable(encoder_types);
 		client.populateReadable(cameras);
 		if (client.canRead(Camera.SONAR_TYPE))
 			cameras.ignoreAttribute("operation");

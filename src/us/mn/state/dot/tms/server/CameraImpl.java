@@ -68,7 +68,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
-		map.put("encoder_type", encoder_type.ordinal());
+		map.put("encoder_type", encoder_type);
 		map.put("encoder", encoder);
 		map.put("enc_mcast", enc_mcast);
 		map.put("encoder_channel", encoder_channel);
@@ -104,7 +104,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		     row.getString(3),		// controller
 		     row.getInt(4),		// pin
 		     row.getString(5),		// notes
-		     row.getInt(6),		// encoder_type
+		     row.getString(6),		// encoder_type
 		     row.getString(7),		// encoder
 		     row.getString(8),		// enc_mcast
 		     row.getInt(9),		// encoder_channel
@@ -115,20 +115,20 @@ public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Create a camera */
 	private CameraImpl(String n, String l, String c, int p, String nt,
-		int et, String e, String em, int ec, int st, boolean pb)
+		String et, String e, String em, int ec, int st, boolean pb)
 	{
-		this(n, lookupGeoLoc(l), lookupController(c), p, nt, et, e, em,
-		     ec, st, pb);
+		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
+		     lookupEncoderType(et), e, em, ec, st, pb);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
-		String nt, int et, String e, String em, int ec, int st,
+		String nt, EncoderType et, String e, String em, int ec, int st,
 	        boolean pb)
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
-		encoder_type = EncoderType.fromOrdinal(et);
+		encoder_type = et;
 		encoder = e;
 		enc_mcast = em;
 		encoder_channel = ec;
@@ -154,27 +154,26 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	}
 
 	/** Encoder type */
-	private EncoderType encoder_type = EncoderType.GENERIC;
+	private EncoderType encoder_type;
 
 	/** Set the encoder type */
 	@Override
-	public void setEncoderType(int et) {
-		encoder_type = EncoderType.fromOrdinal(et);
+	public void setEncoderType(EncoderType et) {
+		encoder_type = et;
 	}
 
 	/** Set the encoder type */
-	public void doSetEncoderType(int t) throws TMSException {
-		EncoderType et = EncoderType.fromOrdinal(t);
+	public void doSetEncoderType(EncoderType et) throws TMSException {
 		if (et != encoder_type) {
-			store.update(this, "encoder_type", t);
-			setEncoderType(t);
+			store.update(this, "encoder_type", et);
+			setEncoderType(et);
 		}
 	}
 
 	/** Get the encoder type */
 	@Override
-	public int getEncoderType() {
-		return encoder_type.ordinal();
+	public EncoderType getEncoderType() {
+		return encoder_type;
 	}
 
 	/** Encoder stream URI */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,22 +14,27 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.SonarObject;
+
 /**
- * Encoder type enumeration.   The ordinal values correspond to the records
- * in the iris.encoder_type look-up table.
+ * Video encoder type.
  *
  * @author Douglas Lau
  */
-public enum EncoderType {
-	GENERIC,	/* 0 */
-	AXIS,		/* 1 */
-	INFINOVA;	/* 2 */
+public interface EncoderType extends SonarObject {
 
-	/** Get a encoder type from an ordinal value */
-	static public EncoderType fromOrdinal(int o) {
-		if (o >= 0 && o < values().length)
-			return values()[o];
-		else
-			return GENERIC;
-	}
+	/** SONAR type name */
+	String SONAR_TYPE = "encoder_type";
+
+	/** Set the HTTP path */
+	void setHttpPath(String p);
+
+	/** Get the HTTP path*/
+	String getHttpPath();
+
+	/** Set the RTSP path */
+	void setRtspPath(String p);
+
+	/** Get the RTSP path*/
+	String getRtspPath();
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2016  Minnesota Department of Transportation
+ * Copyright (C) 2014-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 
@@ -41,18 +42,24 @@ public class PropSetup extends IPanel {
 
 	/** Encoder type combobox */
 	private final JComboBox<EncoderType> enc_type_cbx =
-		new JComboBox<EncoderType>(EncoderType.values());
+		new JComboBox<EncoderType>();
 
 	/** Encoder type action */
 	private final IAction enc_type_act = new IAction("camera.encoder.type"){
 		protected void doActionPerformed(ActionEvent e) {
-		      camera.setEncoderType(enc_type_cbx.getSelectedIndex());
+		      camera.setEncoderType(getSelectedEncoderType());
 		}
 		@Override
 		protected void doUpdateSelected() {
-			enc_type_cbx.setSelectedIndex(camera.getEncoderType());
+			enc_type_cbx.setSelectedItem(camera.getEncoderType());
 		}
 	};
+
+	/** Get the selected encoder type */
+	private EncoderType getSelectedEncoderType() {
+		Object et = enc_type_cbx.getSelectedItem();
+		return (et instanceof EncoderType) ? (EncoderType) et : null;
+	}
 
 	/** Encoder stream URI */
 	private final JTextField encoder_txt = new JTextField("", 32);
@@ -105,6 +112,8 @@ public class PropSetup extends IPanel {
 	@Override
 	public void initialize() {
 		super.initialize();
+		enc_type_cbx.setModel(new IComboBoxModel<EncoderType>(session
+			.getSonarState().getCamCache().getEncoderTypeModel()));
 		enc_type_cbx.setAction(enc_type_act);
 		str_type_cbx.setAction(str_type_act);
 		add("camera.encoder.type");

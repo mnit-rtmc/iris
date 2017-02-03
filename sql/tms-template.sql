@@ -605,16 +605,17 @@ CREATE TABLE iris.stream_type (
 );
 
 CREATE TABLE iris.encoder_type (
-	id integer PRIMARY KEY,
-	description VARCHAR(20) NOT NULL
+	name VARCHAR(24) PRIMARY KEY,
+	http_path VARCHAR(64) NOT NULL,
+	rtsp_path VARCHAR(64) NOT NULL
 );
 
 CREATE TABLE iris._camera (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes text NOT NULL,
-	encoder_type INTEGER NOT NULL REFERENCES iris.encoder_type,
-	encoder text NOT NULL,
+	encoder_type VARCHAR(24) REFERENCES iris.encoder_type,
+	encoder VARCHAR(64) NOT NULL,
 	enc_mcast VARCHAR(64) NOT NULL,
 	encoder_channel INTEGER NOT NULL,
 	stream_type INTEGER NOT NULL REFERENCES iris.stream_type,
@@ -2156,17 +2157,16 @@ CREATE VIEW video_monitor_view AS
 GRANT SELECT ON video_monitor_view TO PUBLIC;
 
 CREATE VIEW encoder_type_view AS
-	SELECT id, description FROM iris.encoder_type;
+	SELECT name, http_path, rtsp_path FROM iris.encoder_type;
 GRANT SELECT ON encoder_type_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
-	SELECT c.name, c.notes, et.description AS encoder_type, c.encoder,
-	       c.enc_mcast, c.encoder_channel, st.description AS stream_type,
+	SELECT c.name, c.notes, encoder_type, c.encoder, c.enc_mcast,
+	       c.encoder_channel, st.description AS stream_type,
 	       c.publish, c.geo_loc, l.roadway,
 	       l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,l.lat,l.lon,
 	       c.controller, ctr.comm_link, ctr.drop_id, ctr.condition
 	FROM iris.camera c
-	LEFT JOIN iris.encoder_type et ON c.encoder_type = et.id
 	LEFT JOIN iris.stream_type st ON c.stream_type = st.id
 	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
 	LEFT JOIN controller_view ctr ON c.controller = ctr.name;
@@ -2631,12 +2631,6 @@ COPY iris.stream_type (id, description) FROM stdin;
 4	H265
 \.
 
-COPY iris.encoder_type (id, description) FROM stdin;
-0	Generic
-1	Axis
-2	Infinova
-\.
-
 COPY iris.system_attribute (name, value) FROM stdin;
 camera_autoplay	true
 camera_id_blank	
@@ -2805,6 +2799,7 @@ detector
 dms
 dms_action
 dms_sign_group
+encoder_type
 font
 gate_arm
 gate_arm_array
@@ -2873,6 +2868,7 @@ PRV_0021	beacon_admin	beacon			t
 PRV_0022	beacon_control	beacon		flashing	t
 PRV_0023	beacon_tab	beacon			f
 PRV_0024	camera_admin	camera			t
+PRV_002A	camera_admin	encoder_type			t
 PRV_0025	camera_admin	camera_preset			t
 PRV_0026	camera_admin	video_monitor			t
 PRV_0027	camera_control	camera		ptz	t
@@ -2880,6 +2876,7 @@ PRV_0028	camera_control	camera		recallPreset	t
 PRV_0029	camera_control	camera		deviceRequest	t
 PRV_0030	camera_policy	camera		publish	t
 PRV_0031	camera_policy	camera		storePreset	t
+PRV_003A	camera_tab	encoder_type			f
 PRV_0032	camera_tab	camera			f
 PRV_0033	camera_tab	camera_preset			f
 PRV_0034	camera_tab	video_monitor			f

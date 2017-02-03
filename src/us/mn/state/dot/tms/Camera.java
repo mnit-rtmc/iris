@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,10 +28,10 @@ public interface Camera extends Device {
 	GeoLoc getGeoLoc();
 
 	/** Set the encoder type */
-	void setEncoderType(int et);
+	void setEncoderType(EncoderType et);
 
 	/** Get the encoder type */
-	int getEncoderType();
+	EncoderType getEncoderType();
 
 	/** Set the encoder stream URI */
 	void setEncoder(String enc);

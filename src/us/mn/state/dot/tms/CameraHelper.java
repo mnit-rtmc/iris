@@ -147,62 +147,34 @@ public class CameraHelper extends BaseHelper {
 	/** Create a camera encoder URI */
 	static public URI encoderUri(Camera c, String auth, String query) {
 		if (c != null) {
-			int et = c.getEncoderType();
-			switch (EncoderType.fromOrdinal(et)) {
-			case GENERIC:
-				return genericUri(c, auth);
-			case AXIS:
-				return axisUri(c, auth, query);
-			case INFINOVA:
-				return infinovaUri(c, auth);
-			}
+			EncoderType et = c.getEncoderType();
+			if (et != null)
+				return encoderUri(c, et, auth, query);
 		}
 		return EMPTY_URI;
 	}
 
-	/** Create a URI for a generic encoder */
-	static private URI genericUri(Camera c, String auth) {
-		String enc = c.getEncoder();
-		switch (StreamType.fromOrdinal(c.getStreamType())) {
-		case MJPEG:
-			return create(HTTP, auth + enc);
-		case MPEG4:
-		case H264:
-			return create(RTSP, auth + enc);
-		default:
-			return EMPTY_URI;
-		}
-	}
-
-	/** Create a URI for an Axis encoder */
-	static private URI axisUri(Camera c, String auth, String query) {
+	/** Create a camera encoder URI */
+	static private URI encoderUri(Camera c, EncoderType et, String auth,
+		String query)
+	{
 		String enc = c.getEncoder();
 		int chan = c.getEncoderChannel();
 		switch (StreamType.fromOrdinal(c.getStreamType())) {
 		case MJPEG:
-			return create(HTTP, auth + enc +
-			              "/axis-cgi/mjpg/video.cgi" + query);
+			return create(HTTP, auth + enc + buildPath(
+			       et.getHttpPath(), chan) + query);
 		case MPEG4:
-			return create(RTSP, auth + enc +
-			              "/mpeg4/" + chan + "/media.amp");
 		case H264:
-			return create(RTSP, auth + enc +
-			              "/axis-media/media.amp");
+			return create(RTSP, auth + enc + buildPath(
+			       et.getRtspPath(), chan) + query);
 		default:
-			return EMPTY_URI;
+			return create(HTTP, enc);
 		}
 	}
 
-	/** Create a URI for an Infinova encoder */
-	static private URI infinovaUri(Camera c, String auth) {
-		String enc = c.getEncoder();
-		switch (StreamType.fromOrdinal(c.getStreamType())) {
-		case MPEG4:
-			return create(RTSP, auth + enc + "/1.AMP");
-		case H264:
-			return create(RTSP, auth + enc + "/1/h264major");
-		default:
-			return EMPTY_URI;
-		}
+	/** Build URI path */
+	static private String buildPath(String path, int chan) {
+		return path.replace("{chan}", Integer.toString(chan));
 	}
 }
