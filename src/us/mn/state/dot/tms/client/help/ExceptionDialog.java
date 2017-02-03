@@ -174,7 +174,7 @@ public class ExceptionDialog extends JDialog {
 		if (fatal) {
 			addWindowListener(new WindowAdapter() {
 				@Override
-				public void windowClosed(WindowEvent we) {
+				public void windowClosing(WindowEvent we) {
 					closeClient();
 				}
 			});
