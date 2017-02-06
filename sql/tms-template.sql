@@ -2924,6 +2924,8 @@ PRV_0074	gate_arm_control	gate_arm_array		ownerNext	t
 PRV_0075	gate_arm_control	gate_arm_array		deviceRequest	t
 PRV_0076	gate_arm_tab	gate_arm			f
 PRV_0077	gate_arm_tab	gate_arm_array			f
+PRV_007A	gate_arm_tab	camera			f
+PRV_007B	gate_arm_tab	encoder_type			f
 PRV_0078	incident_admin	incident_detail			t
 PRV_0079	incident_admin	inc_descriptor			t
 PRV_0080	incident_admin	inc_locator			t
