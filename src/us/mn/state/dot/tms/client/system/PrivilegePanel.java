@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"dms",
 		"dms_action",
 		"dms_sign_group",
+		"encoder_type",
 		"font",
 		"gate_arm",
 		"gate_arm_array",
