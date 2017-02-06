@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2016  Minnesota Department of Transportation
+ * Copyright (C) 2003-2017  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,7 +75,13 @@ public class MJPEGStream implements VideoStream {
 	public MJPEGStream(Scheduler s, VideoRequest req, Camera c)
 		throws IOException
 	{
-		url = req.getUri(c).toURL();
+		try {
+			url = req.getUri(c).toURL();
+		}
+		catch (IllegalArgumentException e) {
+			// "URI is not absolute" thrown if scheme is null
+			throw new IOException(e);
+		}
 		size = UI.dimension(req.getSize().width, req.getSize().height);
 		stream = createInputStream();
 		s.addJob(job);
