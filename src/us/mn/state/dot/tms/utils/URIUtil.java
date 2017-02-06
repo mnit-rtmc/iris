@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@ import java.net.URISyntaxException;
 public class URIUtil {
 
 	/** Empty URI */
-	static public final URI EMPTY_URI = URI.create("");
+	static private final URI EMPTY_URI = URI.create("");
 
 	/** Default scheme for UDP */
 	static public final URI UDP = URI.create("udp:/");

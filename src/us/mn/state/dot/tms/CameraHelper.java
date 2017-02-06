@@ -22,7 +22,6 @@ import java.util.Iterator;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.utils.URIUtil.create;
-import static us.mn.state.dot.tms.utils.URIUtil.EMPTY_URI;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 import static us.mn.state.dot.tms.utils.URIUtil.RTSP;
 import us.mn.state.dot.tms.units.Distance;
@@ -151,7 +150,8 @@ public class CameraHelper extends BaseHelper {
 			if (et != null)
 				return encoderUri(c, et, auth, query);
 		}
-		return EMPTY_URI;
+		// URI.toURL throws IllegalArgumentException with empty scheme
+		return HTTP;
 	}
 
 	/** Create a camera encoder URI */
