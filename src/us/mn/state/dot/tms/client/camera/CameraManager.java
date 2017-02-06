@@ -69,6 +69,13 @@ public class CameraManager extends DeviceManager<Camera> {
 		getSelectionModel().setAllowMultiple(true);
 	}
 
+	/** Check if user can read cameras / video_monitors */
+	@Override
+	public boolean canRead() {
+		return super.canRead() &&
+		       session.canRead(VideoMonitor.SONAR_TYPE);
+	}
+
 	/** Create a camera map tab */
 	@Override
 	public CameraTab createTab() {
