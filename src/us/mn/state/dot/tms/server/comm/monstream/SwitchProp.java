@@ -79,7 +79,9 @@ public class SwitchProp extends ControllerProp {
 		Controller c = camera.getController();
 		if (c instanceof ControllerImpl) {
 			String pwd = ((ControllerImpl) c).getPassword();
-			return (pwd.length() > 0) ? "//" + pwd + '@' : "";
+			return (pwd != null && pwd.length() > 0)
+			      ? "//" + pwd + '@'
+			      : "";
 		} else
 			return "";
 	}
