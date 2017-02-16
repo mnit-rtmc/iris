@@ -3,7 +3,7 @@ Description=IRIS Advanced Traffic Management System (ATMS)
 After=postgresql.service
 
 [Service]
-ExecStart=/usr/bin/java -server -Xmx1024m -jar /usr/share/java/iris-server/iris-server.jar
+ExecStart=/usr/bin/java -server -Xmx1024m -XX:+UseG1GC -jar /usr/share/java/iris-server/iris-server.jar
 Type=simple
 Restart=always
 User=tms
