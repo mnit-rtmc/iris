@@ -2,7 +2,7 @@
 
 SET SESSION AUTHORIZATION 'tms';
 
-UPDATE iris.system_attribute SET value = '4.47.0'
+UPDATE iris.system_attribute SET value = '4.48.0'
 	WHERE name = 'database_version';
 
 -- change controller password to VARCHAR(32)
