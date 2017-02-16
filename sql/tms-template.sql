@@ -410,7 +410,7 @@ CREATE TABLE iris.controller (
 	comm_link VARCHAR(20) NOT NULL REFERENCES iris.comm_link(name),
 	cabinet VARCHAR(20) NOT NULL REFERENCES iris.cabinet(name),
 	condition INTEGER NOT NULL REFERENCES iris.condition,
-	password VARCHAR(16),
+	password VARCHAR(32),
 	notes VARCHAR(128) NOT NULL,
 	fail_time timestamp WITH time zone,
 	version VARCHAR(64)
@@ -2640,7 +2640,7 @@ camera_stream_controls_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.47.0
+database_version	4.48.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
