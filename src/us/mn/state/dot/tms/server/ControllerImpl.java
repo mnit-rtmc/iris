@@ -379,6 +379,16 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	private transient HashMap<Integer, ControllerIO> io_pins =
 		new HashMap<Integer, ControllerIO>();
 
+	/** Get the max assigned device pin */
+	public synchronized int getMaxPin() {
+		int p = 0;
+		for (Integer pin: io_pins.keySet()) {
+			if (pin != null && pin > p)
+				p = pin;
+		}
+		return p;
+	}
+
 	/** Get controller I/O for one pin */
 	public synchronized ControllerIO getIO(int pin) {
 		return io_pins.get(pin);

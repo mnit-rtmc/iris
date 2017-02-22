@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,6 @@ public class VideoMonitorForm extends ProxyTableForm<VideoMonitor> {
 
 	/** Create a new video monitor form */
 	public VideoMonitorForm(Session s) {
-		super(I18N.get("video.monitors"), new VideoMonitorModel(s));
+		super(I18N.get("video.monitors"), new VideoMonitorPanel(s));
 	}
 }

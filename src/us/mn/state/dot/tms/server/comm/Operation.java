@@ -73,6 +73,11 @@ public final class Operation implements Comparable<Operation> {
 	/** Device ID */
 	private final DeviceImpl device;
 
+	/** Get the operation device */
+	public DeviceImpl getDevice() {
+		return device;
+	}
+
 	/** Get the device ID */
 	public String getId() {
 		return (device != null)

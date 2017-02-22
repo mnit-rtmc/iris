@@ -48,19 +48,22 @@ public class SwitchProp extends ControllerProp {
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		tx_buf.put(formatReq().getBytes("UTF8"));
+		int pin = op.getDevice().getPin();
+		tx_buf.put(formatReq(pin).getBytes("UTF8"));
 	}
 
 	/** Format a switch request */
-	private String formatReq() {
-		return (camera != null) ? formatPlay() : formatStop();
+	private String formatReq(int pin) {
+		return (camera != null) ? formatPlay(pin) : formatStop(pin);
 	}
 
 	/** Format a play request */
-	private String formatPlay() {
+	private String formatPlay(int pin) {
 		assert camera != null;
 		StringBuilder sb = new StringBuilder();
 		sb.append("play");
+		sb.append(UNIT_SEP);
+		sb.append(pin - 1);
 		sb.append(UNIT_SEP);
 		sb.append(camera.getName());
 		sb.append(UNIT_SEP);
@@ -87,13 +90,15 @@ public class SwitchProp extends ControllerProp {
 	}
 
 	/** Format a stop request */
-	private String formatStop() {
+	private String formatStop(int pin) {
 		StringBuilder sb = new StringBuilder();
 		sb.append("stop");
 		sb.append(UNIT_SEP);
+		sb.append(pin - 1);
 		sb.append(UNIT_SEP);
+		sb.append("Stopped");
 		sb.append(UNIT_SEP);
-		sb.append(UNIT_SEP);
+		// FIXME: add color
 		return sb.toString();
 	}
 
