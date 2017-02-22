@@ -159,6 +159,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		direct = d;
 		restricted = r;
 		camera = cam;
+		initTransients();
 	}
 
 	/** Create a new video monitor */
