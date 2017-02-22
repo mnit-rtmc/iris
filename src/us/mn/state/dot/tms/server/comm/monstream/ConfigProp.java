@@ -26,6 +26,9 @@ import us.mn.state.dot.tms.server.comm.Operation;
  */
 public class ConfigProp extends ControllerProp {
 
+	/** ASCII record separator */
+	static private final char RECORD_SEP = 30;
+
 	/** ASCII unit separator */
 	static private final char UNIT_SEP = 31;
 
@@ -44,6 +47,7 @@ public class ConfigProp extends ControllerProp {
 		sb.append("config");
 		sb.append(UNIT_SEP);
 		sb.append(pin);
+		sb.append(RECORD_SEP);
 		return sb.toString();
 	}
 

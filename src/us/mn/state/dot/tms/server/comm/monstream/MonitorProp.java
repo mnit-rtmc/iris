@@ -28,6 +28,9 @@ import us.mn.state.dot.tms.server.comm.Operation;
  */
 public class MonitorProp extends ControllerProp {
 
+	/** ASCII record separator */
+	static private final char RECORD_SEP = 30;
+
 	/** ASCII unit separator */
 	static private final char UNIT_SEP = 31;
 
@@ -69,6 +72,7 @@ public class MonitorProp extends ControllerProp {
 			sb.append(mon.getName());
 		sb.append(UNIT_SEP);
 		sb.append("804040");	// FIXME
+		sb.append(RECORD_SEP);
 		return sb.toString();
 	}
 

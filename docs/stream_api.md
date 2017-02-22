@@ -2,7 +2,8 @@
 
 ## UDP command
 
-Fields are separated by ASCII unit separator (31)
+Fields are separated by ASCII unit separator (31).
+Commands are separated by ASCII record separator (30).
 
 ### Config command
 

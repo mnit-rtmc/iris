@@ -32,6 +32,9 @@ import us.mn.state.dot.tms.server.comm.Operation;
  */
 public class SwitchProp extends ControllerProp {
 
+	/** ASCII record separator */
+	static private final char RECORD_SEP = 30;
+
 	/** ASCII unit separator */
 	static private final char UNIT_SEP = 31;
 
@@ -73,6 +76,7 @@ public class SwitchProp extends ControllerProp {
 		sb.append(StreamType.fromOrdinal(camera.getStreamType()));
 		sb.append(UNIT_SEP);
 		sb.append(GeoLocHelper.getDescription(camera.getGeoLoc()));
+		sb.append(RECORD_SEP);
 		return sb.toString();
 	}
 
@@ -99,6 +103,7 @@ public class SwitchProp extends ControllerProp {
 		sb.append("Stopped");
 		sb.append(UNIT_SEP);
 		// FIXME: add color
+		sb.append(RECORD_SEP);
 		return sb.toString();
 	}
 
