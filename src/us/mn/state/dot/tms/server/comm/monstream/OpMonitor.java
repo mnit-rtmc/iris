@@ -39,6 +39,6 @@ public class OpMonitor extends OpStep {
 	/** Get the next step */
 	@Override
 	public OpStep next() {
-		return prop.hasMore() ? this : null;
+		return prop.hasMore() ? this : new OpConfig();
 	}
 }

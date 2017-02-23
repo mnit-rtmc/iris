@@ -63,7 +63,8 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 	public void sendRequest(VideoMonitorImpl vm, DeviceRequest dr) {
 		switch (dr) {
 		case SEND_SETTINGS:
-			createOp("video.monitor.op.config", vm, new OpConfig());
+			createOp("video.monitor.op.config", vm,
+				new OpMonitor());
 			break;
 		default:
 			// Ignore other requests

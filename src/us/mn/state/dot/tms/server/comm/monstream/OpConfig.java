@@ -31,10 +31,4 @@ public class OpConfig extends OpStep {
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
 		new ConfigProp().encodeStore(op, tx_buf);
 	}
-
-	/** Get the next step */
-	@Override
-	public OpStep next() {
-		return new OpMonitor();
-	}
 }
