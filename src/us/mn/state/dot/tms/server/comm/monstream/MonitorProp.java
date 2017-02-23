@@ -68,8 +68,13 @@ public class MonitorProp extends ControllerProp {
 		sb.append(UNIT_SEP);
 		sb.append(pin - 1);
 		sb.append(UNIT_SEP);
-		if (mon != null)
-			sb.append(mon.getName());
+		if (mon != null) {
+			int n = mon.getMonNum();
+			if (n > 0)
+				sb.append(n);
+			else
+				sb.append(mon.getName());
+		}
 		sb.append(UNIT_SEP);
 		sb.append("804040");	// FIXME
 		sb.append(RECORD_SEP);
