@@ -90,18 +90,7 @@ public class VideoRequest {
 
 	/** Create a url for connecting to the video server */
 	private String createBaseUrl(String host, String port) {
-		try {
-			// FIXME: Don't fall back to direct access when DNS
-			//        lookup fails -- after video servlet is
-			//        available to field network.
-			String ip =InetAddress.getByName(host).getHostAddress();
-			return (port != null) ? (ip + ":" + port) : ip;
-		}
-		catch (UnknownHostException e) {
-			System.out.println("Invalid video server " +
-				e.getMessage());
-			return null;
-		}
+		return (port != null) ? (host + ":" + port) : host;
 	}
 
 	/** Sonar session identifier for authenticating to the video system */
@@ -143,7 +132,12 @@ public class VideoRequest {
 
 	/** Create a URI for a stream */
 	public URI getUri(Camera c) {
-		return (base_url != null) ? getServletUri(c) : getCameraUri(c);
+		return useServlet() ? getServletUri(c) : getCameraUri(c);
+	}
+
+	/** Test if servlet should be used */
+	private boolean useServlet() {
+		return base_url != null;
 	}
 
 	/** Create a video servlet URI */
@@ -192,9 +186,9 @@ public class VideoRequest {
 	/** Get the stream type for a camera */
 	private StreamType getStreamType(Camera c) {
 		StreamType st = StreamType.fromOrdinal(c.getStreamType());
-		if (st != StreamType.UNKNOWN)
-			return (base_url != null) ? StreamType.MJPEG : st;
+		if (st != StreamType.UNKNOWN && useServlet())
+			return StreamType.MJPEG;
 		else
-			return StreamType.UNKNOWN;
+			return st;
 	}
 }
