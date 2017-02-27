@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,9 @@ public class PelcoPoller extends ThreadedPoller<PelcoProperty>
 	/** Pelco debug log */
 	static protected final DebugLog PELCO_LOG = new DebugLog("pelco");
 
+	/** Maximum monitor number allowed by Pelco switch */
+	static private final int MAX_MONITOR_NUM = 255;
+
 	/** Create a new Pelco line */
 	public PelcoPoller(String n) {
 		super(n, TCP, PELCO_LOG);
@@ -46,7 +49,10 @@ public class PelcoPoller extends ThreadedPoller<PelcoProperty>
 	public void switchCamera(ControllerImpl c, VideoMonitorImpl vm,
 		CameraImpl cam)
 	{
-		addOp(new OpSelectMonitorCamera(c, vm, cam));
+		if (vm.getMonNum() <= MAX_MONITOR_NUM)
+			addOp(new OpSelectMonitorCamera(c, vm, cam));
+		else if (PELCO_LOG.isOpen())
+			PELCO_LOG.log("Invalid monitor: " + vm.getMonNum());
 	}
 
 	/** Send a device request
