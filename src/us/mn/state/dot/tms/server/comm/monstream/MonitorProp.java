@@ -76,7 +76,7 @@ public class MonitorProp extends ControllerProp {
 				sb.append(mon.getName());
 		}
 		sb.append(UNIT_SEP);
-		sb.append("406040");	// FIXME
+		sb.append("608060");	// FIXME
 		sb.append(RECORD_SEP);
 		return sb.toString();
 	}
