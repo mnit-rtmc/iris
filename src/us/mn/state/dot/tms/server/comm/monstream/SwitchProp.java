@@ -57,27 +57,40 @@ public class SwitchProp extends ControllerProp {
 
 	/** Format a switch request */
 	private String formatReq(int pin) {
-		return (camera != null) ? formatPlay(pin) : formatStop(pin);
-	}
-
-	/** Format a play request */
-	private String formatPlay(int pin) {
-		assert camera != null;
 		StringBuilder sb = new StringBuilder();
 		sb.append("play");
 		sb.append(UNIT_SEP);
 		sb.append(pin - 1);
 		sb.append(UNIT_SEP);
-		sb.append(camera.getName());
+		sb.append(getCamNum());
 		sb.append(UNIT_SEP);
-		sb.append(CameraHelper.encoderUri(camera, getAuth(),
-		          "").toString());
+		sb.append(getUri());
 		sb.append(UNIT_SEP);
-		sb.append(StreamType.fromOrdinal(camera.getStreamType()));
+		sb.append(getStreamType());
 		sb.append(UNIT_SEP);
-		sb.append(GeoLocHelper.getDescription(camera.getGeoLoc()));
+		sb.append(getDescription());
 		sb.append(RECORD_SEP);
 		return sb.toString();
+	}
+
+	/** Get camera number */
+	private String getCamNum() {
+		if (camera != null) {
+			Integer cam_num = camera.getCamNum();
+			return (cam_num != null)
+			      ? cam_num.toString()
+			      : camera.getName();
+		}
+		return "";
+	}
+
+	/** Get the stream URI */
+	private String getUri() {
+		if (camera != null) {
+			return CameraHelper.encoderUri(camera, getAuth(),
+				"").toString();
+		} else
+			return "";
 	}
 
 	/** Get camera encoder auth string */
@@ -93,18 +106,18 @@ public class SwitchProp extends ControllerProp {
 			return "";
 	}
 
-	/** Format a stop request */
-	private String formatStop(int pin) {
-		StringBuilder sb = new StringBuilder();
-		sb.append("stop");
-		sb.append(UNIT_SEP);
-		sb.append(pin - 1);
-		sb.append(UNIT_SEP);
-		sb.append("Stopped");
-		sb.append(UNIT_SEP);
-		// FIXME: add color
-		sb.append(RECORD_SEP);
-		return sb.toString();
+	/** Get the stream type */
+	private String getStreamType() {
+		return (camera != null)
+		      ? StreamType.fromOrdinal(camera.getStreamType()).toString()
+		      :	"STILL";
+	}
+
+	/** Get the stream description */
+	private String getDescription() {
+		return (camera != null)
+		      ? GeoLocHelper.getDescription(camera.getGeoLoc())
+		      : "";
 	}
 
 	/** Get a string representation of the property */

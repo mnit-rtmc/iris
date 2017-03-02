@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,18 +29,31 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  */
 abstract public class OpPelco extends OpController<PelcoProperty> {
 
+	/** Get the "blank" camera number */
+	static private int cameraNumBlank() {
+		return SystemAttrEnum.CAMERA_NUM_BLANK.getInt();
+	}
+
+	/** Get a camera number */
+	static private int getCamNumber(CameraImpl c) {
+		if (c != null) {
+			Integer cn = c.getCamNum();
+			if (cn != null)
+				return cn;
+		}
+		return cameraNumBlank();
+	}
+
 	/** Video monitor to select camera on */
 	protected final VideoMonitor monitor;
 
 	/** Camera to perform operation on */
-	protected final String camera;
+	protected final int cam_num;
 
 	/** Create a new Pelco operation */
 	public OpPelco(ControllerImpl c, VideoMonitor m, CameraImpl cam) {
 		super(PriorityLevel.COMMAND, c);
 		monitor = m;
-		camera = (cam != null)
-		       ? cam.getName()
-		       : SystemAttrEnum.CAMERA_ID_BLANK.getString();
+		cam_num = getCamNumber(cam);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,12 +29,12 @@ public class SelectCameraProperty extends PelcoProperty {
 	/** Command to select a new camera */
 	static private final String CODE = "#a";
 
-	/** Camera to select */
-	private final int camera;
+	/** Camera number to select */
+	private final int cam_num;
 
 	/** Create a new select camera property */
 	public SelectCameraProperty(int c) {
-		camera = c;
+		cam_num = c;
 	}
 
 	/** Encode a STORE request */
@@ -42,12 +42,12 @@ public class SelectCameraProperty extends PelcoProperty {
 	public void encodeStore(ControllerImpl c, OutputStream os)
 		throws IOException
 	{
-		os.write(new String(camera + CODE).getBytes());
+		os.write(new String(cam_num + CODE).getBytes());
 	}
 
 	/** Get a string representation of the property */
 	@Override
 	public String toString() {
-		return "select camera " + camera;
+		return "select camera " + cam_num;
 	}
 }

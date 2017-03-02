@@ -40,6 +40,19 @@ import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
  */
 public class PropSetup extends IPanel {
 
+	/** Parse an integer */
+	static private Integer parseInt(String t) {
+		try {
+			return Integer.parseInt(t);
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
+	}
+
+	/** Camera number text */
+	private final JTextField cam_num_txt = new JTextField("", 8);
+
 	/** Encoder type combobox */
 	private final JComboBox<EncoderType> enc_type_cbx =
 		new JComboBox<EncoderType>();
@@ -116,6 +129,8 @@ public class PropSetup extends IPanel {
 			.getSonarState().getCamCache().getEncoderTypeModel()));
 		enc_type_cbx.setAction(enc_type_act);
 		str_type_cbx.setAction(str_type_act);
+		add("camera.num");
+		add(cam_num_txt, Stretch.LAST);
 		add("camera.encoder.type");
 		add(enc_type_cbx, Stretch.LAST);
 		add("camera.encoder");
@@ -133,6 +148,15 @@ public class PropSetup extends IPanel {
 
 	/** Create jobs */
 	private void createJobs() {
+		cam_num_txt.addFocusListener(new FocusAdapter() {
+			public void focusLost(FocusEvent e) {
+			    Integer cn = parseInt(cam_num_txt.getText());
+			    cam_num_txt.setText((cn != null)
+			                        ? cn.toString()
+			                        : "");
+			    camera.setCamNum(cn);
+			}
+		});
 		encoder_txt.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
 			    camera.setEncoder(encoder_txt.getText());
@@ -153,6 +177,7 @@ public class PropSetup extends IPanel {
 
 	/** Update the edit mode */
 	public void updateEditMode() {
+		cam_num_txt.setEnabled(canUpdate("camNum"));
 		enc_type_act.setEnabled(canUpdate("encoderType"));
 		encoder_txt.setEnabled(canUpdate("encoder"));
 		enc_mcast_txt.setEnabled(canUpdate("encMulticast"));
@@ -163,6 +188,10 @@ public class PropSetup extends IPanel {
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
+		if (a == null || a.equals("camNum")) {
+			Integer cn = camera.getCamNum();
+			cam_num_txt.setText((cn != null) ? cn.toString() : "");
+		}
 		if (a == null || a.equals("encoderType"))
 			enc_type_act.updateSelected();
 		if (a == null || a.equals("encoder"))

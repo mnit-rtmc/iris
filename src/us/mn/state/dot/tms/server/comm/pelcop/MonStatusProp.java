@@ -40,42 +40,47 @@ public class MonStatusProp extends PelcoPProp {
 	/** Monitor status response code */
 	static public final int RESP_CODE = 0xB1;
 
-	/** Get camera ID */
-	static protected String getCamId(VideoMonitor vm) {
-		Camera c = vm.getCamera();
-		return (c != null)
-		      ? c.getName()
-		      : SystemAttrEnum.CAMERA_ID_BLANK.getString();
+	/** Get the "blank" camera number */
+	static private int cameraNumBlank() {
+		return SystemAttrEnum.CAMERA_NUM_BLANK.getInt();
 	}
 
-	/** Parse a device UID */
-	static protected Integer parseUID(String uid) {
-		return CameraHelper.parseUID(uid);
+	/** Get camera number */
+	static private int getCamNum(VideoMonitor vm) {
+		if (vm != null) {
+			Camera c = vm.getCamera();
+			if (c != null) {
+				Integer cn = c.getCamNum();
+				if (cn != null)
+					return cn;
+			}
+		}
+		return cameraNumBlank();
 	}
 
-	/** Find a camera by UID */
-	static private Camera findCam(int cam) {
+	/** Find a camera by number */
+	static private Camera findCam(int cam_num) {
 		// First, lookup a guessed name for camera
-		Camera c = CameraHelper.lookup(buildCamName(cam));
+		Camera c = CameraHelper.lookup(buildCamName(cam_num));
 		if (c != null)
 			return c;
 		else {
 			// Guess not correct, do linear search
-			return CameraHelper.findUID(cam);
+			return CameraHelper.findUID(cam_num);
 		}
 	}
 
 	/** Find a camera by UID */
-	static protected CameraImpl findCamera(int cam) {
-		Camera c = findCam(cam);
+	static protected CameraImpl findCamera(int cam_num) {
+		Camera c = findCam(cam_num);
 		return (c instanceof CameraImpl) ? (CameraImpl) c : null;
 	}
 
 	/** Build a camera name guess */
-	static private String buildCamName(int cam) {
+	static private String buildCamName(int cam_num) {
 		StringBuilder sb = new StringBuilder();
 		sb.append('C');
-		sb.append(cam);
+		sb.append(cam_num);
 		while (sb.length() < 4)
 			sb.insert(1, '0');
 		return sb.toString();
@@ -142,15 +147,9 @@ public class MonStatusProp extends PelcoPProp {
 		}
 	}
 
-	/** Get current camera ID on the selected video monitor */
+	/** Get current camera number on the selected video monitor */
 	protected int getCamNumber() {
-		VideoMonitor vm = VideoMonitorHelper.findUID(mon_num);
-		if (vm != null) {
-			Integer uid = parseUID(getCamId(vm));
-			if (uid != null)
-				return uid;
-		}
-		return 0;
+		return getCamNum(VideoMonitorHelper.findUID(mon_num));
 	}
 
 	/** Set the video monitor number */

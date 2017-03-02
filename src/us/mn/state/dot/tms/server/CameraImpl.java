@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EncoderType;
@@ -49,9 +50,9 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CameraImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"encoder_type, encoder, enc_mcast, encoder_channel, " +
-			"stream_type, publish FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"cam_num, encoder_type, encoder, enc_mcast, " +
+			"encoder_channel, stream_type, publish FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new CameraImpl(row));
@@ -68,6 +69,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("cam_num", cam_num);
 		map.put("encoder_type", encoder_type);
 		map.put("encoder", encoder);
 		map.put("enc_mcast", enc_mcast);
@@ -95,6 +97,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		GeoLocImpl g = new GeoLocImpl(name);
 		g.notifyCreate();
 		geo_loc = g;
+		cam_num = null;
 	}
 
 	/** Create a camera */
@@ -104,30 +107,33 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		     row.getString(3),		// controller
 		     row.getInt(4),		// pin
 		     row.getString(5),		// notes
-		     row.getString(6),		// encoder_type
-		     row.getString(7),		// encoder
-		     row.getString(8),		// enc_mcast
-		     row.getInt(9),		// encoder_channel
-		     row.getInt(10),		// stream_type
-		     row.getBoolean(11)		// publish
+		     (Integer) row.getObject(6),// cam_num
+		     row.getString(7),		// encoder_type
+		     row.getString(8),		// encoder
+		     row.getString(9),		// enc_mcast
+		     row.getInt(10),		// encoder_channel
+		     row.getInt(11),		// stream_type
+		     row.getBoolean(12)		// publish
 		);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, String l, String c, int p, String nt,
-		String et, String e, String em, int ec, int st, boolean pb)
+		Integer cn, String et, String e, String em, int ec, int st,
+		boolean pb)
 	{
-		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
+		this(n, lookupGeoLoc(l), lookupController(c), p, nt, cn,
 		     lookupEncoderType(et), e, em, ec, st, pb);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
-		String nt, EncoderType et, String e, String em, int ec, int st,
-	        boolean pb)
+		String nt, Integer cn, EncoderType et, String e, String em,
+		int ec, int st, boolean pb)
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
+		cam_num = cn;
 		encoder_type = et;
 		encoder = e;
 		enc_mcast = em;
@@ -151,6 +157,31 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
+	}
+
+	/** Camera number */
+	private Integer cam_num;
+
+	/** Set the camera number */
+	@Override
+	public void setCamNum(Integer cn) {
+		cam_num = cn;
+	}
+
+	/** Set the camera number */
+	public void doSetCamNum(Integer cn) throws TMSException {
+		if (cn != cam_num) {
+			if (cn != null && (cn < CAM_NUM_MIN || cn > CAM_NUM_MAX))
+				throw new ChangeVetoException("Invalid cam_num");
+			store.update(this, "cam_num", cn);
+			setCamNum(cn);
+		}
+	}
+
+	/** Get the camera number */
+	@Override
+	public Integer getCamNum() {
+		return cam_num;
 	}
 
 	/** Encoder type */

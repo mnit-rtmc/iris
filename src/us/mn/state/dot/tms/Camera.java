@@ -21,11 +21,23 @@ package us.mn.state.dot.tms;
  */
 public interface Camera extends Device {
 
+	/** Minimum camera number */
+	int CAM_NUM_MIN = 1;
+
+	/** Maximum camera number */
+	int CAM_NUM_MAX = 9999;
+
 	/** SONAR type name */
 	String SONAR_TYPE = "camera";
 
 	/** Get the device location */
 	GeoLoc getGeoLoc();
+
+	/** Set the camera number */
+	void setCamNum(Integer cn);
+
+	/** Get the camera number */
+	Integer getCamNum();
 
 	/** Set the encoder type */
 	void setEncoderType(EncoderType et);

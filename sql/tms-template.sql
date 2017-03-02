@@ -614,6 +614,7 @@ CREATE TABLE iris._camera (
 	name VARCHAR(10) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes text NOT NULL,
+	cam_num INTEGER UNIQUE,
 	encoder_type VARCHAR(24) REFERENCES iris.encoder_type,
 	encoder VARCHAR(64) NOT NULL,
 	enc_mcast VARCHAR(64) NOT NULL,
@@ -626,7 +627,7 @@ ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.camera AS SELECT
-	c.name, geo_loc, controller, pin, notes, encoder_type, encoder,
+	c.name, geo_loc, controller, pin, notes, cam_num, encoder_type, encoder,
 		enc_mcast, encoder_channel, stream_type, publish
 	FROM iris._camera c JOIN iris._device_io d ON c.name = d.name;
 
@@ -635,11 +636,11 @@ CREATE FUNCTION iris.camera_insert() RETURNS TRIGGER AS
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._camera (name, geo_loc, notes, encoder_type, encoder,
-	            enc_mcast, encoder_channel, stream_type, publish)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.encoder_type,
-	             NEW.encoder, NEW.enc_mcast, NEW.encoder_channel,
-	             NEW.stream_type, NEW.publish);
+	INSERT INTO iris._camera (name, geo_loc, notes, cam_num, encoder_type,
+	            encoder, enc_mcast, encoder_channel, stream_type, publish)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.cam_num,
+	             NEW.encoder_type, NEW.encoder, NEW.enc_mcast,
+	             NEW.encoder_channel, NEW.stream_type, NEW.publish);
 	RETURN NEW;
 END;
 $camera_insert$ LANGUAGE plpgsql;
@@ -658,6 +659,7 @@ BEGIN
 	UPDATE iris._camera
 	   SET geo_loc = NEW.geo_loc,
 	       notes = NEW.notes,
+	       cam_num = NEW.cam_num,
 	       encoder_type = NEW.encoder_type,
 	       encoder = NEW.encoder,
 	       enc_mcast = NEW.enc_mcast,
@@ -2161,7 +2163,7 @@ CREATE VIEW encoder_type_view AS
 GRANT SELECT ON encoder_type_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
-	SELECT c.name, c.notes, encoder_type, c.encoder, c.enc_mcast,
+	SELECT c.name, c.notes, cam_num, encoder_type, c.encoder, c.enc_mcast,
 	       c.encoder_channel, st.description AS stream_type,
 	       c.publish, c.geo_loc, l.roadway,
 	       l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,l.lat,l.lon,
@@ -2633,14 +2635,14 @@ COPY iris.stream_type (id, description) FROM stdin;
 
 COPY iris.system_attribute (name, value) FROM stdin;
 camera_autoplay	true
-camera_id_blank	
+camera_num_blank	999
 camera_preset_store_enable	false
 camera_ptz_blind	true
 camera_stream_controls_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.48.0
+database_version	4.49.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0

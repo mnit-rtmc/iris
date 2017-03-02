@@ -68,13 +68,13 @@ public class CameraHelper extends BaseHelper {
 		return cams.values();
 	}
 
-	/** Find a camera with the specific UID */
+	/** Find a camera with the specific number */
 	static public Camera findUID(int uid) {
 		Iterator<Camera> it = iterator();
 		while (it.hasNext()) {
 			Camera cam = it.next();
-			Integer cid = parseUID(cam.getName());
-			if (cid != null && cid.equals(uid))
+			Integer cn = cam.getCamNum();
+			if (cn != null && cn.equals(uid))
 				return cam;
 		}
 		return null;
@@ -107,36 +107,36 @@ public class CameraHelper extends BaseHelper {
 		return v.substring(i);
 	}
 
-	/** Find previous camera below a given UID */
-	static public Camera findPrev(int uid) {
+	/** Find previous camera below a given number */
+	static public Camera findPrev(int cam_num) {
 		Camera pc = null;
-		int pid = 0;
+		int pn = 0;	// previous camera number
 		Iterator<Camera> it = iterator();
 		while (it.hasNext()) {
 			Camera cam = it.next();
-			Integer cid = parseUID(cam.getName());
-			if (cid != null && cid < uid) {
-				if (pid == 0 || pid < cid) {
+			Integer cn = cam.getCamNum();
+			if (cn != null && cn < cam_num) {
+				if (pn == 0 || pn < cn) {
 					pc = cam;
-					pid = cid;
+					pn = cn;
 				}
 			}
 		}
 		return pc;
 	}
 
-	/** Find next camera above a given UID */
-	static public Camera findNext(int uid) {
+	/** Find next camera above a given number */
+	static public Camera findNext(int cam_num) {
 		Camera nc = null;
-		int nid = 0;
+		int nn = 0;	// next camera number
 		Iterator<Camera> it = iterator();
 		while (it.hasNext()) {
 			Camera cam = it.next();
-			Integer cid = parseUID(cam.getName());
-			if (cid != null && cid > uid) {
-				if (nid == 0 || nid > cid) {
+			Integer cn = cam.getCamNum();
+			if (cn != null && cn > nn) {
+				if (nn == 0 || nn > cn) {
 					nc = cam;
-					nid = cid;
+					nn = cn;
 				}
 			}
 		}

@@ -15,12 +15,10 @@
 package us.mn.state.dot.tms.server.comm.pelco;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * Pelco operation to select the camera for one monitor.
@@ -29,15 +27,6 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  * @author Timothy Johnson
  */
 public class OpSelectMonitorCamera extends OpPelco {
-
-	/** Parse the integer ID of a camera */
-	static private int parseUID(String name) throws ProtocolException {
-		Integer uid = CameraHelper.parseUID(name);
-		if (uid != null)
-			return uid;
-		else
-			throw new ProtocolException("BAD UID: " + name);
-	}
 
 	/** Create a new select monitor camera operation */
 	public OpSelectMonitorCamera(ControllerImpl c, VideoMonitor m,
@@ -50,9 +39,9 @@ public class OpSelectMonitorCamera extends OpPelco {
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof OpSelectMonitorCamera) {
-			OpSelectMonitorCamera op = (OpSelectMonitorCamera)o;
+			OpSelectMonitorCamera op = (OpSelectMonitorCamera) o;
 			return monitor == op.monitor &&
-			       camera.equals(op.camera);
+			       cam_num == op.cam_num;
 		} else
 			return false;
 	}
@@ -72,7 +61,7 @@ public class OpSelectMonitorCamera extends OpPelco {
 		{
 			mess.add(new SelectMonitorProperty(
 				monitor.getMonNum()));
-			mess.add(new SelectCameraProperty(parseUID(camera)));
+			mess.add(new SelectCameraProperty(cam_num));
 			mess.storeProps();
 			return null;
 		}
