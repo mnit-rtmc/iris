@@ -73,19 +73,13 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Blank restricted video monitors viewing a camera */
-	static public void blankRestrictedMonitors(final CameraImpl c) {
+	static public void blankRestrictedMonitors() {
 		Iterator<VideoMonitor> it = VideoMonitorHelper.iterator();
 		while (it.hasNext()) {
 			VideoMonitor m = it.next();
 			if (m instanceof VideoMonitorImpl) {
 				VideoMonitorImpl vm = (VideoMonitorImpl) m;
-				if (vm.getRestricted()) {
-					Camera cm = vm.getCamera();
-					if (c == cm || null == cm) {
-						vm.setCameraNotify(null,
-						                   "UNPUBLISH");
-					}
-				}
+				vm.blankRestricted();
 			}
 		}
 	}
@@ -228,7 +222,12 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 			return;
 		store.update(this, "restricted", r);
 		setRestricted(r);
-		if (r && !isCameraPublished(camera))
+		blankRestricted();
+	}
+
+	/** Blank restricted monitor */
+	private void blankRestricted() {
+		if (getRestricted() && !isCameraPublished(getCamera()))
 			setCameraNotify(null, "RESTRICTED");
 	}
 

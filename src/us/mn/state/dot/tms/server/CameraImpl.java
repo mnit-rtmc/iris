@@ -284,7 +284,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 			store.update(this, "publish", p);
 			setPublish(p);
 			if (!p)
-				VideoMonitorImpl.blankRestrictedMonitors(this);
+				VideoMonitorImpl.blankRestrictedMonitors();
 			updateStyles();
 		}
 	}
