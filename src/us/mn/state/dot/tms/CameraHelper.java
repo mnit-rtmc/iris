@@ -109,38 +109,38 @@ public class CameraHelper extends BaseHelper {
 
 	/** Find previous camera below a given number */
 	static public Camera findPrev(int cam_num) {
-		Camera pc = null;
-		int pn = 0;	// previous camera number
+		Camera cam = null;
+		int n = 0;	// previous camera number
 		Iterator<Camera> it = iterator();
 		while (it.hasNext()) {
-			Camera cam = it.next();
-			Integer cn = cam.getCamNum();
+			Camera c = it.next();
+			Integer cn = c.getCamNum();
 			if (cn != null && cn < cam_num) {
-				if (pn == 0 || pn < cn) {
-					pc = cam;
-					pn = cn;
+				if (0 == n || n < cn) {
+					cam = c;
+					n = cn;
 				}
 			}
 		}
-		return pc;
+		return cam;
 	}
 
 	/** Find next camera above a given number */
 	static public Camera findNext(int cam_num) {
-		Camera nc = null;
-		int nn = 0;	// next camera number
+		Camera cam = null;
+		int n = 0;	// next camera number
 		Iterator<Camera> it = iterator();
 		while (it.hasNext()) {
-			Camera cam = it.next();
-			Integer cn = cam.getCamNum();
+			Camera c = it.next();
+			Integer cn = c.getCamNum();
 			if (cn != null && cn > cam_num) {
-				if (nn == 0 || nn > cn) {
-					nc = cam;
-					nn = cn;
+				if (0 == n || n > cn) {
+					cam = c;
+					n = cn;
 				}
 			}
 		}
-		return nc;
+		return cam;
 	}
 
 	/** Create a camera encoder URI */
