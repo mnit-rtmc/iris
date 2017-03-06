@@ -55,13 +55,13 @@ public class CameraHelper extends BaseHelper {
 	static public Collection<Camera> findNearest(Position pos, int n_count){
 		TreeMap<Double, Camera> cams = new TreeMap<Double, Camera>();
 		Iterator<Camera> it = iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Camera cam = it.next();
 			GeoLoc loc = cam.getGeoLoc();
 			Distance d = GeoLocHelper.distanceTo(loc, pos);
-			if(d != null) {
+			if (d != null) {
 				cams.put(d.m(), cam);
-				while(cams.size() > n_count)
+				while (cams.size() > n_count)
 					cams.pollLastEntry();
 			}
 		}
