@@ -250,19 +250,28 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	public void doSetCamera(Camera c) throws TMSException {
 		CameraImpl cam = toCameraImpl(c);
 		String u = getProcUser();
-		doSetCam(cam, u);
-		setCameraNotify(this, mon_num, cam, u);
+		if (doSetCam(cam, u)) {
+			// Switch all other monitors with same mon_num
+			setCameraNotify(this, mon_num, cam, u);
+		}
 	}
 
-	/** Set the camera displayed on the monitor */
-	private void doSetCam(CameraImpl c, String src) throws TMSException {
-		if (restricted && !isCameraPublished(c))
+	/** Set the camera displayed on the monitor.
+	 * @param c Camera to display.
+	 * @param src Source of request.
+	 * @return true if switch was permitted. */
+	private boolean doSetCam(CameraImpl c, String src)
+		throws TMSException
+	{
+		boolean r = restricted && !isCameraPublished(c);
+		if (r)
 			c = null;
 		if (c != camera) {
 			store.update(this, "camera", c);
 			setCamera(c);
 			selectCamera(c, src);
 		}
+		return !r;
 	}
 
 	/** Set the camera and notify clients of the change */
