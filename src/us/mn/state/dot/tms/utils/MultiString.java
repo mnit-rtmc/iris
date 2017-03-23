@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -477,6 +477,8 @@ public class MultiString {
 	 * @return The normalized MULTI string. */
 	public String normalizeLine() {
 		// Strip tags which don't associate with a line
+		// NOTE: including font tags in line text could interfere
+		//       with font interface in SignMessageComposer (page)
 		MultiBuilder mb = new MultiNormalizer() {
 			@Override
 			public void setColorBackground(int x) {}
@@ -493,12 +495,6 @@ public class MultiString {
 			@Override
 			public void addGraphic(int g_num, Integer x, Integer y,
 				String g_id) {}
-			@Override
-			public void setFont(int f_num, String f_id) {
-				// including font tags in line text interferes
-				// with the font-per-page interface in
-				// SignMessageComposer, so strip them
-			}
 			@Override
 			public void setJustificationPage(
 				Multi.JustificationPage jp) {}

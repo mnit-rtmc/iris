@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -98,7 +98,7 @@ public class MultiStringTest extends TestCase {
 		checkGetLines("[cb8]ABC", new String[] { "ABC" });
 		checkGetLines("[pb0,0,0]ABC", new String[] { "ABC" });
 		checkGetLines("[cr255,0,0]ABC", new String[] { "ABC" });
-		checkGetLines("[fo1]ABC", new String[] { "ABC" });
+		checkGetLines("[fo1]ABC", new String[] { "[fo1]ABC" });
 		checkGetLines("[g1,0,0]ABC", new String[] { "ABC" });
 		checkGetLines("[jp3]ABC", new String[] { "ABC" });
 		checkGetLines("[pt50o0]ABC", new String[] { "ABC" });
@@ -108,7 +108,8 @@ public class MultiStringTest extends TestCase {
 			new String[] { "ABC", "DEF" });
 		checkGetLines("ABC[nl][cr255,0,0]DEF",
 			new String[] { "ABC", "DEF" });
-		checkGetLines("ABC[nl][fo1]DEF", new String[] { "ABC", "DEF" });
+		checkGetLines("ABC[nl][fo1]DEF",
+			new String[] { "ABC", "[fo1]DEF" });
 		checkGetLines("ABC[nl][g1,0,0]DEF",
 			new String[] { "ABC", "DEF" });
 		checkGetLines("ABC[nl][jp3]DEF", new String[] { "ABC", "DEF" });
@@ -273,7 +274,7 @@ public class MultiStringTest extends TestCase {
 		checkNormalize("[tr1,1,40,20]", "[tr1,1,40,20]");
 		checkNormalize("[tr1,1,0,0]", "[tr1,1,0,0]");
 		checkNormalize("[pb0,128,255]", "[pb0,128,255]");
-		checkNormalize("[ttS100]", "[ttS100]");
+		checkNormalize("[ttS100]", "[ttS100,prepend,OVER ]");
 		checkNormalize("[feedL1]", "[feedL1]");
 		checkNormalize("[feedL1_2]", "[feedL1_2]");
 	}
@@ -291,7 +292,7 @@ public class MultiStringTest extends TestCase {
 		checkNormalizeLine("[cf128,128,128]ABC", "[cf128,128,128]ABC");
 		checkNormalizeLine("[cr1,1,5,5,3]ABC", "ABC");
 		checkNormalizeLine("[cr1,1,5,5,255,255,0]ABC", "ABC");
-		checkNormalizeLine("[fo1]ABC", "ABC");
+		checkNormalizeLine("[fo1]ABC", "[fo1]ABC");
 		checkNormalizeLine("[g1]ABC", "ABC");
 		checkNormalizeLine("[jl2]ABC", "[jl2]ABC");
 		checkNormalizeLine("[jp1]ABC", "ABC");
