@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
+import us.mn.state.dot.tms.CtrlCondition;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.server.CameraImpl;
@@ -87,10 +88,40 @@ public class SwitchProp extends ControllerProp {
 	/** Get the stream URI */
 	private String getUri() {
 		if (camera != null) {
+			String cond = getConditionUri();
+			if (cond != null)
+				return cond;
 			return CameraHelper.encoderUri(camera, getAuth(),
 				"").toString();
 		} else
 			return "";
+	}
+
+	/** Get the condition URI */
+	private String getConditionUri() {
+		switch (getCondition()) {
+		case CONSTRUCTION:
+			// FIXME
+			return "http://tms-iris/monstream/construction.png";
+		case PLANNED:
+		case REMOVED:
+			// FIXME
+			return "http://tms-iris/monstream/service.png";
+		default:
+			return null;
+		}
+	}
+
+	/** Get the camera condition */
+	private CtrlCondition getCondition() {
+		if (camera != null) {
+			Controller c = camera.getController();
+			if (c instanceof ControllerImpl) {
+				return CtrlCondition.fromOrdinal(
+					c.getCondition());
+			}
+		}
+		return CtrlCondition.REMOVED;
 	}
 
 	/** Get camera encoder auth string */
@@ -108,9 +139,13 @@ public class SwitchProp extends ControllerProp {
 
 	/** Get the stream type */
 	private String getStreamType() {
-		return (camera != null)
-		      ? StreamType.fromOrdinal(camera.getStreamType()).toString()
-		      :	"STILL";
+		if (CtrlCondition.ACTIVE == getCondition()) {
+			if (camera != null) {
+				return StreamType.fromOrdinal(
+					camera.getStreamType()).toString();
+			}
+		}
+		return "PNG";
 	}
 
 	/** Get the stream description */
