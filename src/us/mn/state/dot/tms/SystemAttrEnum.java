@@ -30,7 +30,9 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public enum SystemAttrEnum {
 	CAMERA_AUTOPLAY(true, Change.RESTART_CLIENT),
+	CAMERA_CONSTRUCTION_URL(String.class),
 	CAMERA_NUM_BLANK(999, 0, 9999),
+	CAMERA_OUT_OF_SERVICE_URL(String.class),
 	CAMERA_PRESET_STORE_ENABLE(false, Change.RESTART_CLIENT),
 	CAMERA_PTZ_BLIND(true),
 	CAMERA_STREAM_CONTROLS_ENABLE(false, Change.RESTART_CLIENT),

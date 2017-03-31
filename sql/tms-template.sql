@@ -2635,14 +2635,16 @@ COPY iris.stream_type (id, description) FROM stdin;
 
 COPY iris.system_attribute (name, value) FROM stdin;
 camera_autoplay	true
+camera_construction_url	
 camera_num_blank	999
+camera_out_of_service_url	
 camera_preset_store_enable	false
 camera_ptz_blind	true
 camera_stream_controls_enable	false
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-database_version	4.49.0
+database_version	4.50.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0

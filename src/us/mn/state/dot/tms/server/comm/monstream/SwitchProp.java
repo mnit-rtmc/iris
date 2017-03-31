@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.CtrlCondition;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.StreamType;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProp;
@@ -32,6 +33,16 @@ import us.mn.state.dot.tms.server.comm.Operation;
  * @author Douglas Lau
  */
 public class SwitchProp extends ControllerProp {
+
+	/** Get the construction URL */
+	static private String getConstructionUrl() {
+		return SystemAttrEnum.CAMERA_CONSTRUCTION_URL.getString();
+	}
+
+	/** Get the out-of-service URL */
+	static private String getOutOfServiceUrl() {
+		return SystemAttrEnum.CAMERA_OUT_OF_SERVICE_URL.getString();
+	}
 
 	/** ASCII record separator */
 	static private final char RECORD_SEP = 30;
@@ -101,12 +112,10 @@ public class SwitchProp extends ControllerProp {
 	private String getConditionUri() {
 		switch (getCondition()) {
 		case CONSTRUCTION:
-			// FIXME
-			return "http://tms-iris/monstream/construction.png";
+			return getConstructionUrl();
 		case PLANNED:
 		case REMOVED:
-			// FIXME
-			return "http://tms-iris/monstream/service.png";
+			return getOutOfServiceUrl();
 		default:
 			return null;
 		}
