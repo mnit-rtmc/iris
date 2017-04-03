@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2016  Minnesota Department of Transportation
+ * Copyright (C) 2005-2017  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,15 +16,11 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collection;
 import java.util.Properties;
 import javax.swing.BorderFactory;
-import javax.swing.Box;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -109,6 +105,9 @@ public class CameraDispatcher extends JPanel {
 	/** Camera name label */
 	private final JLabel name_lbl = IPanel.createValueLabel();
 
+	/** Camera number label */
+	private final JLabel number_lbl = IPanel.createValueLabel();
+
 	/** Camera location label */
 	private final JLabel location_lbl = IPanel.createValueLabel();
 
@@ -160,40 +159,15 @@ public class CameraDispatcher extends JPanel {
 
 	/** Create camera information panel */
 	private JPanel createInfoPanel() {
-		JPanel p = new JPanel(new GridBagLayout());
-
-		GridBagConstraints gbc = new GridBagConstraints();
-		gbc.anchor = GridBagConstraints.CENTER;
-		gbc.fill = GridBagConstraints.BOTH;
-		gbc.gridheight = 1;
-		gbc.gridwidth = 1;
-		gbc.insets = new Insets(4, 4, 4, 4);
-		gbc.ipadx = 0;
-		gbc.ipady = 0;
-		gbc.weightx = 0.0;
-		gbc.weighty = 0.0;
-		gbc.gridx = 0;
-		gbc.gridy = 0;
-
-		p.add(new ILabel("device.name"), gbc);
-		gbc.gridx = 1;
-		p.add(name_lbl, gbc);
-		gbc.gridx = 2;
-
-		gbc.weightx = 0.1;
-		p.add(Box.createHorizontalGlue(), gbc);
-
-		gbc.gridx = 3;
-		gbc.weightx = 0.0;
-		p.add(new ILabel("camera.output"), gbc);
-		gbc.gridx = 4;
-		p.add(output_cbx, gbc);
-
-		gbc.gridx = 0;
-		gbc.gridy = 1;
-		p.add(new ILabel("location"), gbc);
-		gbc.gridx = 1;
-		p.add(location_lbl, gbc);
+		IPanel p = new IPanel();
+		p.add("device.name");
+		p.add(name_lbl, IPanel.Stretch.SOME);
+		p.add("camera.num");
+		p.add(number_lbl, IPanel.Stretch.SOME);
+		p.add("camera.output");
+		p.add(output_cbx, IPanel.Stretch.END);
+		p.add("location");
+		p.add(location_lbl, IPanel.Stretch.FULL);
 		return p;
 	}
 
@@ -377,6 +351,8 @@ public class CameraDispatcher extends JPanel {
 		selected = camera;
 		if (camera != null) {
 			name_lbl.setText(camera.getName());
+			Integer num = camera.getCamNum();
+			number_lbl.setText(num != null ? num.toString() : "  ");
 			location_lbl.setText(GeoLocHelper.getDescription(
 				camera.getGeoLoc()));
 			cache.watchObject(camera);
@@ -416,6 +392,7 @@ public class CameraDispatcher extends JPanel {
 	/** Clear all of the fields */
 	private void clear() {
 		name_lbl.setText("");
+		number_lbl.setText("");
 		location_lbl.setText("");
 		stream_pnl.setCamera(null);
 		control_pnl.setEnabled(false);
