@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California
  * Copyright (C) 2012  Iteris Inc.
  *
@@ -165,7 +165,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return SONAR_TYPE;
 	}
 
-	/** Compare to another holiday */
+	/** Compare to another DMS */
 	@Override
 	public int compareTo(DMSImpl o) {
 		return name.compareTo(o.name);

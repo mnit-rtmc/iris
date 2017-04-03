@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2016  Minnesota Department of Transportation
+ * Copyright (C) 2003-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,32 +19,34 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.DayMatcher;
 import us.mn.state.dot.tms.TMSException;
 
 /**
- * A holiday is a date which ramp meters (and travel times) are not deployed.
+ * A day matcher represents a day or days to be included or excluded from a
+ * day plan schedule.
  *
  * @author Douglas Lau
  */
-public class HolidayImpl extends BaseObjectImpl implements Holiday,
-	Comparable<HolidayImpl>
+public class DayMatcherImpl extends BaseObjectImpl implements DayMatcher,
+	Comparable<DayMatcherImpl>
 {
-	/** Load all the holidays */
+	/** Load all the day matchers */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, HolidayImpl.class);
-		store.query("SELECT name, month, day, week, weekday, " +
-			"shift FROM iris." + SONAR_TYPE  + ";",
+		namespace.registerType(SONAR_TYPE, DayMatcherImpl.class);
+		store.query("SELECT name, holiday, month, day, week, " +
+			"weekday, shift FROM iris." + SONAR_TYPE  + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new HolidayImpl(
+				namespace.addObject(new DayMatcherImpl(
 					row.getString(1),	// name
-					row.getInt(2),		// month
-					row.getInt(3),		// day
-					row.getInt(4),		// week
-					row.getInt(5),		// weekday
-					row.getInt(6)		// shift
+					row.getBoolean(2),	// holiday
+					row.getInt(3),		// month
+					row.getInt(4),		// day
+					row.getInt(5),		// week
+					row.getInt(6),		// weekday
+					row.getInt(7)		// shift
 				));
 			}
 		});
@@ -55,6 +57,7 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		map.put("holiday", holiday);
 		map.put("month", month);
 		map.put("day", day);
 		map.put("week", week);
@@ -75,14 +78,17 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 		return SONAR_TYPE;
 	}
 
-	/** Create a new holiday */
-	public HolidayImpl(String n) {
+	/** Create a new day matcher */
+	public DayMatcherImpl(String n) {
 		super(n);
 	}
 
-	/** Create a new holiday */
-	private HolidayImpl(String n, int m, int d, int w, int wd, int s) {
+	/** Create a new day matcher */
+	private DayMatcherImpl(String n, boolean h, int m, int d, int w, int wd,
+		int s)
+	{
 		this(n);
+		holiday = h;
 		month = m;
 		day = d;
 		week = w;
@@ -90,17 +96,17 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 		shift = s;
 	}
 
-	/** Compare to another holiday */
+	/** Compare to another day matcher */
 	@Override
-	public int compareTo(HolidayImpl o) {
+	public int compareTo(DayMatcherImpl o) {
 		return name.compareTo(o.name);
 	}
 
-	/** Test if the holiday equals another holiday */
+	/** Test if the day matcher equals another day matcher */
 	@Override
 	public boolean equals(Object o) {
-		if (o instanceof HolidayImpl)
-			return name.equals(((HolidayImpl) o).name);
+		if (o instanceof DayMatcherImpl)
+			return name.equals(((DayMatcherImpl) o).name);
 		else
 			return false;
 	}
@@ -111,6 +117,29 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 	{
 		if (d != ANY_DAY && (w != ANY_WEEK || s != 0))
 			throw new ChangeVetoException("Invalid selection");
+	}
+
+	/** Holiday flag */
+	private boolean holiday = true;
+
+	/** Set the holiday flag */
+	@Override
+	public void setHoliday(boolean h) {
+		holiday = h;
+	}
+
+	/** Set the holiday flag */
+	public void doSetHoliday(boolean h) throws TMSException {
+		if (h != holiday) {
+			store.update(this, "holiday", h);
+			setHoliday(h);
+		}
+	}
+
+	/** Get the holiday flag */
+	@Override
+	public boolean getHoliday() {
+		return holiday;
 	}
 
 	/** Month of year */
@@ -244,16 +273,16 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 		return weekday;
 	}
 
-	/** Shift (in days) from actual "holiday" (for Shopping day, etc) */
+	/** Shift (in days) from actual match (for Shopping day, etc) */
 	private int shift = 0;
 
-	/** Set the shift from the actual holiday */
+	/** Set the shift from the actual day */
 	@Override
 	public void setShift(int s) {
 		shift = s;
 	}
 
-	/** Set the shift from the actual holiday */
+	/** Set the shift from the actual day */
 	public void doSetShift(int s) throws TMSException {
 		if (s != shift) {
 			validateShift(s);
@@ -270,7 +299,7 @@ public class HolidayImpl extends BaseObjectImpl implements Holiday,
 			checkSelection(day, week, s);
 	}
 
-	/** Get the shift from the actual holiday */
+	/** Get the shift from the actual day */
 	@Override
 	public int getShift() {
 		return shift;

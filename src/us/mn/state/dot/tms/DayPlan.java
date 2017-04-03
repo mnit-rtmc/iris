@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,9 +26,9 @@ public interface DayPlan extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "day_plan";
 
-	/** Get the holidays for the day plan */
-	Holiday[] getHolidays();
+	/** Get the day matchers for the day plan */
+	DayMatcher[] getDayMatchers();
 
-	/** Set the holidays for the day plan */
-	void setHolidays(Holiday[] h);
+	/** Set the day matchers for the day plan */
+	void setDayMatchers(DayMatcher[] dms);
 }

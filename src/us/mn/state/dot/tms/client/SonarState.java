@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -34,13 +34,13 @@ import us.mn.state.dot.tms.Alarm;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Beacon;
 import us.mn.state.dot.tms.BeaconAction;
+import us.mn.state.dot.tms.DayMatcher;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.Holiday;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
@@ -323,13 +323,13 @@ public class SonarState extends Client {
 		return gate_arms;
 	}
 
-	/** Cache of holiday proxies */
-	private final TypeCache<Holiday> holidays =
-		new TypeCache<Holiday>(Holiday.class, this);
+	/** Cache of day matcher proxies */
+	private final TypeCache<DayMatcher> day_matchers =
+		new TypeCache<DayMatcher>(DayMatcher.class, this);
 
-	/** Get the holiday type cache */
-	public TypeCache<Holiday> getHolidays() {
-		return holidays;
+	/** Get the day matcher type cache */
+	public TypeCache<DayMatcher> getDayMatchers() {
+		return day_matchers;
 	}
 
 	/** Cache of day plans */
@@ -548,7 +548,7 @@ public class SonarState extends Client {
 		populateReadable(gate_arms);
 		if (canRead(GateArm.SONAR_TYPE))
 			gate_arms.ignoreAttribute("operation");
-		populateReadable(holidays);
+		populateReadable(day_matchers);
 		populateReadable(day_plans);
 		populateReadable(plan_phases);
 		// Populate a second time to resolve nextPhase self-references

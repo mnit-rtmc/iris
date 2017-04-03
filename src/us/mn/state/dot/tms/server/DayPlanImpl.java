@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,9 +20,9 @@ import java.util.Map;
 import java.util.TreeSet;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.DayMatcher;
+import us.mn.state.dot.tms.DayMatcherHelper;
 import us.mn.state.dot.tms.DayPlan;
-import us.mn.state.dot.tms.Holiday;
-import us.mn.state.dot.tms.HolidayHelper;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -32,14 +32,14 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 
-	/** DayPlan / Holiday table mapping */
+	/** DayPlan / DayMatcher table mapping */
 	static private TableMapping mapping;
 
 	/** Load all the day plans */
 	static public void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DayPlanImpl.class);
 		mapping = new TableMapping(store, "iris", SONAR_TYPE,
-			Holiday.SONAR_TYPE);
+			DayMatcher.SONAR_TYPE);
 		store.query("SELECT name FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
@@ -79,45 +79,47 @@ public class DayPlanImpl extends BaseObjectImpl implements DayPlan {
 	/** Create a day plan from database lookup */
 	private DayPlanImpl(Namespace ns, String n) throws TMSException {
 		this(n);
-		TreeSet<HolidayImpl> hset = new TreeSet<HolidayImpl>();
+		TreeSet<DayMatcherImpl> dm_set = new TreeSet<DayMatcherImpl>();
 		for (String o: mapping.lookup(this)) {
-			Holiday h = HolidayHelper.lookup(o);
-			if (h instanceof HolidayImpl)
-				hset.add((HolidayImpl) h);
+			DayMatcher dm = DayMatcherHelper.lookup(o);
+			if (dm instanceof DayMatcherImpl)
+				dm_set.add((DayMatcherImpl) dm);
 		}
-		holidays = hset.toArray(new HolidayImpl[0]);
+		day_matchers = dm_set.toArray(new DayMatcherImpl[0]);
 	}
 
-	/** Holidays for the day plan */
-	private HolidayImpl[] holidays = new HolidayImpl[0];
+	/** DayMatchers for the day plan */
+	private DayMatcherImpl[] day_matchers = new DayMatcherImpl[0];
 
-	/** Set the holidays assigned to the day plan */
+	/** Set the day matchers assigned to the day plan */
 	@Override
-	public void setHolidays(Holiday[] hs) {
-		HolidayImpl[] _hs = new HolidayImpl[hs.length];
-		for (int i = 0; i < hs.length; i++) {
-			if (hs[i] instanceof HolidayImpl)
-				_hs[i] = (HolidayImpl) hs[i];
+	public void setDayMatchers(DayMatcher[] dms) {
+		DayMatcherImpl[] _dms = new DayMatcherImpl[dms.length];
+		for (int i = 0; i < dms.length; i++) {
+			if (dms[i] instanceof DayMatcherImpl)
+				_dms[i] = (DayMatcherImpl) dms[i];
 		}
-		holidays = _hs;
+		day_matchers = _dms;
 	}
 
-	/** Set the holidays assigned to the day plan */
-	public void doSetHolidays(Holiday[] hs) throws TMSException {
-		TreeSet<Storable> hset = new TreeSet<Storable>();
-		for (Holiday h: hs) {
-			if (h instanceof HolidayImpl)
-				hset.add((HolidayImpl) h);
-			else
-				throw new ChangeVetoException("Invalid hday");
+	/** Set the day matchers assigned to the day plan */
+	public void doSetDayMatchers(DayMatcher[] dms) throws TMSException {
+		TreeSet<Storable> dm_set = new TreeSet<Storable>();
+		for (DayMatcher dm: dms) {
+			if (dm instanceof DayMatcherImpl)
+				dm_set.add((DayMatcherImpl) dm);
+			else {
+				throw new ChangeVetoException(
+					"Invalid day matcher");
+			}
 		}
-		mapping.update(this, hset);
-		setHolidays(hs);
+		mapping.update(this, dm_set);
+		setDayMatchers(dms);
 	}
 
-	/** Get the holidays assigned to the day plan */
+	/** Get the day matchers assigned to the day plan */
 	@Override
-	public Holiday[] getHolidays() {
-		return holidays;
+	public DayMatcher[] getDayMatchers() {
+		return day_matchers;
 	}
 }

@@ -231,8 +231,9 @@ CREATE TABLE iris.word (
 	allowed BOOLEAN DEFAULT false NOT NULL
 );
 
-CREATE TABLE iris.holiday (
+CREATE TABLE iris.day_matcher (
 	name VARCHAR(32) PRIMARY KEY,
+	holiday BOOLEAN NOT NULL,
 	month INTEGER NOT NULL,
 	day INTEGER NOT NULL,
 	week INTEGER NOT NULL,
@@ -244,9 +245,9 @@ CREATE TABLE iris.day_plan (
 	name VARCHAR(10) PRIMARY KEY
 );
 
-CREATE TABLE iris.day_plan_holiday (
+CREATE TABLE iris.day_plan_day_matcher (
 	day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
-	holiday VARCHAR(32) NOT NULL REFERENCES iris.holiday
+	day_matcher VARCHAR(32) NOT NULL REFERENCES iris.day_matcher
 );
 
 CREATE TABLE iris.geo_loc (
@@ -2798,6 +2799,7 @@ capability
 comm_link
 connection
 controller
+day_matcher
 day_plan
 detector
 dms
@@ -2810,7 +2812,6 @@ gate_arm_array
 geo_loc
 glyph
 graphic
-holiday
 inc_advice
 inc_descriptor
 incident
@@ -2963,7 +2964,7 @@ PRV_0107	meter_control	ramp_meter		deviceRequest	t
 PRV_0108	meter_tab	ramp_meter			f
 PRV_0109	plan_admin	action_plan			t
 PRV_0110	plan_admin	day_plan			t
-PRV_0111	plan_admin	holiday			t
+PRV_0111	plan_admin	day_matcher			t
 PRV_0112	plan_admin	plan_phase			t
 PRV_0113	plan_admin	time_action			t
 PRV_0114	plan_admin	dms_action			t
@@ -2973,7 +2974,7 @@ PRV_0117	plan_admin	meter_action			t
 PRV_0118	plan_control	action_plan		phase	t
 PRV_0119	plan_tab	action_plan			f
 PRV_0120	plan_tab	day_plan			f
-PRV_0121	plan_tab	holiday			f
+PRV_0121	plan_tab	day_matcher			f
 PRV_0122	plan_tab	plan_phase			f
 PRV_0123	plan_tab	time_action			f
 PRV_0124	plan_tab	dms_action			f

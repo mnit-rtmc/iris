@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@ import static javax.swing.ListSelectionModel.SINGLE_SELECTION;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DayPlan;
 import us.mn.state.dot.tms.DayPlanHelper;
-import us.mn.state.dot.tms.Holiday;
+import us.mn.state.dot.tms.DayMatcher;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
@@ -50,7 +50,7 @@ public class DayPlanPanel extends JPanel {
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
 		return s.canRead(DayPlan.SONAR_TYPE) &&
-		       s.canRead(Holiday.SONAR_TYPE);
+		       s.canRead(DayMatcher.SONAR_TYPE);
 	}
 
 	/** Formatter for month labels */
@@ -82,13 +82,13 @@ public class DayPlanPanel extends JPanel {
 	/** Proxy view for selected day plan */
 	private final ProxyView<DayPlan> view = new ProxyView<DayPlan>() {
 		public void update(DayPlan dp, String a) {
-			if ("holidays".equals(a)) {
+			if ("dayMatchers".equals(a)) {
 				updateCalendarWidget();
-				hol_pnl.repaint();
+				dm_pnl.repaint();
 			}
 		}
 		public void clear() {
-			hol_pnl.repaint();
+			dm_pnl.repaint();
 		}
 	};
 
@@ -180,8 +180,8 @@ public class DayPlanPanel extends JPanel {
 	/** Calendar widget */
 	private final CalendarWidget cal_widget = new CalendarWidget();
 
-	/** Holiday table panel */
-	private final ProxyTablePanel<Holiday> hol_pnl;
+	/** Day matcher table panel */
+	private final ProxyTablePanel<DayMatcher> dm_pnl;
 
 	/** Edit mode listener */
 	private final EditModeListener edit_lsnr = new EditModeListener() {
@@ -195,7 +195,7 @@ public class DayPlanPanel extends JPanel {
 		session = s;
 		cache = s.getSonarState().getDayPlans();
 		watcher = new ProxyWatcher<DayPlan>(cache, view, false);
-		hol_pnl = new ProxyTablePanel<Holiday>(new HolidayModel(s,
+		dm_pnl = new ProxyTablePanel<DayMatcher>(new DayMatcherModel(s,
 			null));
 		day_lst.setModel(s.getSonarState().getDayModel());
 		day_lst.setSelectionMode(SINGLE_SELECTION);
@@ -210,7 +210,7 @@ public class DayPlanPanel extends JPanel {
 	/** Initialize the panel */
 	public void initialize() {
 		setBorder(UI.border);
-		hol_pnl.initialize();
+		dm_pnl.initialize();
 		watcher.initialize();
 		createWidgetJobs();
 		add_txt.setMaximumSize(add_txt.getPreferredSize());
@@ -266,7 +266,7 @@ public class DayPlanPanel extends JPanel {
 		s1.addGap(UI.hgap);
 		s1.addGroup(p2);
 		hg.addGroup(s1);
-		hg.addComponent(hol_pnl);
+		hg.addComponent(dm_pnl);
 		return hg;
 	}
 
@@ -302,7 +302,7 @@ public class DayPlanPanel extends JPanel {
 		p1.addGroup(s2);
 		vg.addGroup(p1);
 		vg.addGap(UI.vgap);
-		vg.addComponent(hol_pnl);
+		vg.addComponent(dm_pnl);
 		return vg;
 	}
 
@@ -310,7 +310,7 @@ public class DayPlanPanel extends JPanel {
 	public void dispose() {
 		session.removeEditModeListener(edit_lsnr);
 		watcher.dispose();
-		hol_pnl.dispose();
+		dm_pnl.dispose();
 	}
 
 	/** Create jobs for widget actions */
@@ -345,7 +345,7 @@ public class DayPlanPanel extends JPanel {
 	/** Select a day plan */
 	private void selectDayPlan() {
 		DayPlan dp = day_lst.getSelectedValue();
-		hol_pnl.setModel(new HolidayModel(session, dp));
+		dm_pnl.setModel(new DayMatcherModel(session, dp));
 		watcher.setProxy(dp);
 		updateCalendarWidget();
 		updateButtonPanel();

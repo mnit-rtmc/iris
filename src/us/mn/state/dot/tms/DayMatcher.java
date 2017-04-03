@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2003-2011  Minnesota Department of Transportation
+ * Copyright (C) 2003-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,16 +17,23 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * A holiday is a date which ramp meters (and travel times) are not deployed.
+ * A day matcher represents a day or days to be included or excluded from a
+ * day plan schedule.
  *
  * @author Douglas Lau
  */
-public interface Holiday extends SonarObject {
+public interface DayMatcher extends SonarObject {
 
 	/** SONAR type name */
-	String SONAR_TYPE = "holiday";
+	String SONAR_TYPE = "day_matcher";
 
-	/** Constant for holidays not determined by month */
+	/** Set the holiday flag */
+	void setHoliday(boolean h);
+
+	/** Get the holiday flag */
+	boolean getHoliday();
+
+	/** Constant for days not matched by month */
 	int ANY_MONTH = -1;
 
 	/** Set the month */
@@ -35,7 +42,7 @@ public interface Holiday extends SonarObject {
 	/** Get the month */
 	int getMonth();
 
-	/** Constant for holidays not determined by day-of-month */
+	/** Constant for days not matched by day-of-month */
 	int ANY_DAY = 0;
 
 	/** Set the day-of-month */
@@ -44,7 +51,7 @@ public interface Holiday extends SonarObject {
 	/** Get the day-of-month */
 	int getDay();
 
-	/** Constant for holidays not determined by week-of-month */
+	/** Constant for days not matched by week-of-month */
 	int ANY_WEEK = 0;
 
 	/** Set the week-of-month */
@@ -53,7 +60,7 @@ public interface Holiday extends SonarObject {
 	/** Get the week-of-month */
 	int getWeek();
 
-	/** Constant for holidays not determined by day-of-week */
+	/** Constant for days not matched by day-of-week */
 	int ANY_WEEKDAY = 0;
 
 	/** Set the day-of-week */
@@ -62,12 +69,9 @@ public interface Holiday extends SonarObject {
 	/** Get the day-of-week */
 	int getWeekday();
 
-	/** Set the shift from the actual holiday */
+	/** Set the shift from the actual day */
 	void setShift(int s);
 
-	/** Get the shift from the actual holiday */
+	/** Get the shift from the actual day */
 	int getShift();
-
-	/** Constant for holidays not determined by period */
-	int ANY_PERIOD = -1;
 }
