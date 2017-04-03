@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
@@ -185,5 +186,16 @@ public class CameraManager extends DeviceManager<Camera> {
 	/** Get the selected video monitor */
 	public VideoMonitor getSelectedMonitor() {
 		return dispatcher.getSelectedMonitor();
+	}
+
+	/** Get the description of a proxy */
+	@Override
+	public String getDescription(Camera proxy) {
+		Integer num = proxy.getCamNum();
+		if (num != null) {
+			return proxy.getName() + " - #" + num + " - " +
+				GeoLocHelper.getDescription(getGeoLoc(proxy));
+		} else
+			return super.getDescription(proxy);
 	}
 }
