@@ -19,6 +19,7 @@ import us.mn.state.dot.sonar.SonarObject;
 /**
  * A day matcher represents a day or days to be included or excluded from a
  * day plan schedule.
+ * FIXME: should be immutable after creation.
  *
  * @author Douglas Lau
  */
@@ -54,7 +55,7 @@ public interface DayMatcher extends SonarObject {
 	/** Constant for days not matched by week-of-month */
 	int ANY_WEEK = 0;
 
-	/** Set the week-of-month */
+	/** Set the week-of-month (1-4; 0 for any; -1 for last) */
 	void setWeek(int w);
 
 	/** Get the week-of-month */

@@ -112,10 +112,18 @@ public class DayMatcherImpl extends BaseObjectImpl implements DayMatcher,
 	}
 
 	/** Check if a selection of properties is valid */
-	private void checkSelection(int d, int w, int s)
+	private void checkSelection(int d, int w, int wd, int s)
 		throws ChangeVetoException
 	{
+		/* Invalid matchers:
+		 *   - Day of month + week
+		 *   - Day of month + shift
+		 *   - Shift + "any" week
+		 *   - Shift + "any" weekday
+		 */
 		if (d != ANY_DAY && (w != ANY_WEEK || s != 0))
+			throw new ChangeVetoException("Invalid selection");
+		if (s != 0 && (w == ANY_WEEK || wd == ANY_WEEKDAY))
 			throw new ChangeVetoException("Invalid selection");
 	}
 
@@ -196,7 +204,7 @@ public class DayMatcherImpl extends BaseObjectImpl implements DayMatcher,
 		if (d != ANY_DAY) {
 			if (d < 1 || d > 31)
 				throw new ChangeVetoException("Invalid day:"+d);
-			checkSelection(d, week, shift);
+			checkSelection(d, week, weekday, shift);
 		}
 	}
 
@@ -227,9 +235,10 @@ public class DayMatcherImpl extends BaseObjectImpl implements DayMatcher,
 	/** Validate the week-of-month */
 	private void validateWeek(int w) throws ChangeVetoException {
 		if (w != ANY_WEEK) {
-			if (w < -1 || w > 5)
+			// -1 is last week in month
+			if (w < -1 || w > 4)
 			       throw new ChangeVetoException("Invalid week:"+w);
-			checkSelection(day, w, shift);
+			checkSelection(day, w, weekday, shift);
 		}
 	}
 
@@ -264,6 +273,7 @@ public class DayMatcherImpl extends BaseObjectImpl implements DayMatcher,
 				throw new ChangeVetoException(
 					"Invalid weekday:" + wd);
 			}
+			checkSelection(day, week, wd, shift);
 		}
 	}
 
@@ -293,10 +303,10 @@ public class DayMatcherImpl extends BaseObjectImpl implements DayMatcher,
 
 	/** Validate the shift days */
 	private void validateShift(int s) throws ChangeVetoException {
-		if (s < -6 || s > 6)
+		if (s < -2 || s > 2)
 			throw new ChangeVetoException("Invalid shift:" + s);
 		if (s != 0)
-			checkSelection(day, week, s);
+			checkSelection(day, week, weekday, s);
 	}
 
 	/** Get the shift from the actual day */
