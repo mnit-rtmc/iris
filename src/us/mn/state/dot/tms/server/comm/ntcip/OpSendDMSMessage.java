@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,6 +75,7 @@ import us.mn.state.dot.tms.utils.MultiSyntaxError;
  * </pre>
  *
  * @author Douglas Lau
+ * @author John L. Stanley
  */
 public class OpSendDMSMessage extends OpDMS {
 
@@ -318,12 +320,16 @@ public class OpSendDMSMessage extends OpDMS {
 			srv.setInteger(0);
 			prior.setInteger(message.getRunTimePriority());
 			mess.add(ms);
-			mess.add(beacon);
-			mess.add(srv);
+			if (dms.supportsBeacon())
+				mess.add(beacon);
+			if (dms.supportsPixelService())
+				mess.add(srv);
 			mess.add(prior);
 			logStore(ms);
-			logStore(beacon);
-			logStore(srv);
+			if (dms.supportsBeacon())
+				logStore(beacon);
+			if (dms.supportsPixelService())
+				logStore(srv);
 			logStore(prior);
 			mess.storeProps();
 			return new MsgValidateReq();

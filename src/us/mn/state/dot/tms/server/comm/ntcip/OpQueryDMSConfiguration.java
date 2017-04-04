@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +38,7 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  * Operation to query the configuration of a DMS.
  *
  * @author Douglas Lau
+ * @author John L. Stanley
  */
 public class OpQueryDMSConfiguration extends OpDMS {
 
@@ -74,7 +76,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		DmsLegend.class, dmsLegend.node);
 
 	/** Beacon */
-	private final ASN1Enum<DmsBeaconType> beacon = new ASN1Enum<
+	private final ASN1Enum<DmsBeaconType> beaconType = new ASN1Enum<
 		DmsBeaconType>(DmsBeaconType.class, dmsBeaconType.node);
 
 	/** Sign technology */
@@ -182,7 +184,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(h_border);
 			mess.add(v_border);
 			mess.add(legend);
-			mess.add(beacon);
+			mess.add(beaconType);
 			mess.add(tech);
 			mess.queryProps();
 			logQuery(access);
@@ -192,7 +194,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			logQuery(h_border);
 			logQuery(v_border);
 			logQuery(legend);
-			logQuery(beacon);
+			logQuery(beaconType);
 			logQuery(tech);
 			return new QueryVmsInfo();
 		}
@@ -217,6 +219,72 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			logQuery(v_pitch);
 			logQuery(c_height);
 			logQuery(c_width);
+			return new QuerySupportsBeacon();
+		}
+	}
+
+	/** Phase to check for beacon support */
+	private class QuerySupportsBeacon extends Phase {
+
+		/** Query dmsMessageBeacon object */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+
+			// If there are no beacons, skip to next phase.
+			if (beaconType.getEnum().equals(DmsBeaconType.none)) {
+				dms.setSupportsBeacon(false);
+				return new QuerySupportsPixelService();
+			}
+
+			// Verify beacon support by reading
+			// dmsMessageBeacon from the
+			// changeable.1 message slot.
+			ASN1Integer beacon = dmsMessageBeacon.makeInt(
+					DmsMessageMemoryType.changeable, 1);
+			mess.add(beacon);
+			try {
+				mess.queryProps();
+				if (isSuccess())
+					dms.setSupportsBeacon(true);
+			}
+			catch (NoSuchName e) {
+				dms.setSupportsBeacon(false);
+			}
+			return new QuerySupportsPixelService();
+		}
+	}
+
+	/** Phase to check for pixelService support */
+	private class QuerySupportsPixelService extends Phase {
+
+		/** Query dmsMessagePixelService object */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+
+			// PixelService is only valid for signs using
+			// flipdisk, fiber, or shutter technology...
+			int st = tech.getInteger();
+			if (!DmsSignTechnology.FLIP_DISK.isSet(st)
+			 && !DmsSignTechnology.FIBER_OPTIC.isSet(st)
+			 && !DmsSignTechnology.SHUTTERED.isSet(st)) {
+				dms.setSupportsPixelService(false);
+				return new QueryV2();
+			}
+
+			// Verify pixelService support by reading
+			// dmsMessagePixelService from the
+			// changeable.1 message slot.
+			ASN1Integer srv = dmsMessagePixelService.makeInt(
+				DmsMessageMemoryType.changeable, 1);
+			mess.add(srv);
+			try {
+				mess.queryProps();
+				if (isSuccess())
+					dms.setSupportsPixelService(true);
+			}
+			catch (NoSuchName e) {
+				dms.setSupportsPixelService(false);
+			}
 			return new QueryV2();
 		}
 	}
@@ -287,7 +355,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			boolean p = type.isPortable();
 			SignConfigImpl sc = SignConfigImpl.findOrCreate(dt, p,
 				tech.getValue(), access.getValue(),
-				legend.getValue(), beacon.getValue(),
+				legend.getValue(), beaconType.getValue(),
 				face_width.getInteger(),
 				face_height.getInteger(),
 				h_border.getInteger(), v_border.getInteger(),

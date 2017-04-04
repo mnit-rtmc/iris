@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server.comm.ntcip.mib1203;
  * Enumeration of sign technology flags.
  *
  * @author Douglas Lau
+ * @author John L. Stanley
  */
 public enum DmsSignTechnology {
 	OTHER,
@@ -27,4 +28,14 @@ public enum DmsSignTechnology {
 	SHUTTERED,
 	LAMP,
 	DRUM;
+
+	/** Get the bit flag */
+	public int bit() {
+		return 1 << ordinal();
+	}
+
+	/** Test if the flag is set */
+	public boolean isSet(int v) {
+		return (v & bit()) != 0;
+	}
 }

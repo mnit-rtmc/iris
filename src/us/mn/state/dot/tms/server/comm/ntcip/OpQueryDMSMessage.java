@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +32,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
  * Operation to query the current message on a DMS.
  *
  * @author Douglas Lau
+ * @author John L. Stanley
  */
 public class OpQueryDMSMessage extends OpDMS {
 
@@ -136,13 +138,17 @@ public class OpQueryDMSMessage extends OpDMS {
 				DmsMessageMemoryType.currentBuffer.ordinal(),1);
 			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 			mess.add(ms);
-			mess.add(beacon);
+			if (dms.supportsBeacon())
+				mess.add(beacon);
+			else
+				beacon.setInteger(0);
 			mess.add(prior);
 			mess.add(status);
 			mess.add(time);
 			mess.queryProps();
 			logQuery(ms);
-			logQuery(beacon);
+			if (dms.supportsBeacon())
+				logQuery(beacon);
 			logQuery(prior);
 			logQuery(status);
 			logQuery(time);

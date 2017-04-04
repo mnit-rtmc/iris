@@ -127,19 +127,21 @@ public class OpSendDMSDefaults extends OpDMS {
 		/** Set the pixel service schedule */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer dur = vmsPixelServiceDuration.makeInt();
-			ASN1Integer freq = vmsPixelServiceFrequency.makeInt();
-			ASN1Integer time = vmsPixelServiceTime.makeInt();
-			dur.setInteger(10);
-			freq.setInteger(1440);
-			time.setInteger(180);
-			mess.add(dur);
-			mess.add(freq);
-			mess.add(time);
-			logStore(dur);
-			logStore(freq);
-			logStore(time);
-			mess.storeProps();
+			if (dms.supportsPixelService()) {
+				ASN1Integer dur = vmsPixelServiceDuration.makeInt();
+				ASN1Integer freq = vmsPixelServiceFrequency.makeInt();
+				ASN1Integer time = vmsPixelServiceTime.makeInt();
+				dur.setInteger(10);
+				freq.setInteger(1440);
+				time.setInteger(180);
+				mess.add(dur);
+				mess.add(freq);
+				mess.add(time);
+				logStore(dur);
+				logStore(freq);
+				logStore(time);
+				mess.storeProps();
+			}
 			return new MessageDefaults();
 		}
 	}

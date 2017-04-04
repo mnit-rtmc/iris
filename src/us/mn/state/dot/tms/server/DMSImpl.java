@@ -1,8 +1,9 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2017  Minnesota Department of Transportation
- * Copyright (C) 2010 AHMCT, University of California
- * Copyright (C) 2012  Iteris Inc.
+ * Copyright (C) 2010       AHMCT, University of California
+ * Copyright (C) 2012       Iteris Inc.
+ * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -76,6 +77,7 @@ import us.mn.state.dot.tms.utils.MultiString;
  *
  * @author Douglas Lau
  * @author Michael Darter
+ * @author John L. Stanley
  */
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
@@ -1347,5 +1349,27 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				return (LCSArrayImpl) la;
 		}
 		return null;
+	}
+	
+	/** Does sign have beacon support? */
+	private boolean bSupportsBeacon = false;
+	
+	public void setSupportsBeacon(boolean val) {
+		bSupportsBeacon = val;
+	}
+	
+	public boolean supportsBeacon() {
+		return bSupportsBeacon;
+	}
+	
+	/** Does sign have PixelService support? */
+	private boolean bSupportsPixelService = false;
+	
+	public void setSupportsPixelService(boolean val) {
+		bSupportsPixelService = val;
+	}
+	
+	public boolean supportsPixelService() {
+		return bSupportsPixelService;
 	}
 }
