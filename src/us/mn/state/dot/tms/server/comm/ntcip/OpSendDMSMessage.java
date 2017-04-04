@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,6 +111,9 @@ public class OpSendDMSMessage extends OpDMS {
 	/** Message CRC */
 	private final int message_crc;
 
+	/** Message status */
+	private final ASN1Enum<DmsMessageStatus> status;
+
 	/** Communication loss message */
 	private final MessageIDCode comm_msg = new MessageIDCode(
 		dmsCommunicationsLossMessage.node);
@@ -152,6 +155,7 @@ public class OpSendDMSMessage extends OpDMS {
 		msg_num = lookupMsgNum(multi);
 		message_crc = DmsMessageCRC.calculate(multi,
 			sm.getBeaconEnabled(), 0);
+		status = makeStatus(DmsMessageMemoryType.changeable, msg_num);
 		graphics = GraphicHelper.lookupMulti(multi);
 	}
 
@@ -218,8 +222,6 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Set message status to modify request */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<DmsMessageStatus> status = makeStatus(
-				DmsMessageMemoryType.changeable, msg_num);
 			status.setEnum(DmsMessageStatus.modifyReq);
 			mess.add(status);
 			try {
@@ -249,8 +251,6 @@ public class OpSendDMSMessage extends OpDMS {
 			ASN1Enum<DmsControlMode> mode = new ASN1Enum<
 				DmsControlMode>(DmsControlMode.class,
 				dmsControlMode.node);
-			ASN1Enum<DmsMessageStatus> status = makeStatus(
-				DmsMessageMemoryType.changeable, msg_num);
 			mess.add(mode);
 			mess.add(status);
 			mess.queryProps();
@@ -313,8 +313,6 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Set message status to validate request */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<DmsMessageStatus> status = makeStatus(
-				DmsMessageMemoryType.changeable, msg_num);
 			status.setEnum(DmsMessageStatus.validateReq);
 			mess.add(status);
 			try {
@@ -322,7 +320,7 @@ public class OpSendDMSMessage extends OpDMS {
 				mess.storeProps();
 			}
 			catch (GenError e) {
-				return new QueryValidateMsgErr(status);
+				return new QueryValidateMsgErr();
 			}
 			return new ChkMsgValid();
 		}
@@ -334,8 +332,6 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Query the message validity */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<DmsMessageStatus> status = makeStatus(
-				DmsMessageMemoryType.changeable, msg_num);
 			ASN1Integer crc = dmsMessageCRC.makeInt(
 				DmsMessageMemoryType.changeable, msg_num);
 			mess.add(status);
@@ -344,7 +340,7 @@ public class OpSendDMSMessage extends OpDMS {
 			logQuery(status);
 			logQuery(crc);
 			if (status.getEnum() != DmsMessageStatus.valid)
-				return new QueryValidateMsgErr(status);
+				return new QueryValidateMsgErr();
 			if (message_crc != crc.getInteger()) {
 				String ms = "Message CRC: " +
 					Integer.toHexString(message_crc) + ", "+
@@ -359,14 +355,6 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** Phase to query a validate message error */
 	protected class QueryValidateMsgErr extends Phase {
-
-		/** Status code which triggered validate error */
-		private final ASN1Enum<DmsMessageStatus> status;
-
-		/** Create a query validate message error phase */
-		protected QueryValidateMsgErr(ASN1Enum<DmsMessageStatus> s) {
-			status = s;
-		}
 
 		/** Query a validate message error */
 		@SuppressWarnings("unchecked")
@@ -765,16 +753,16 @@ public class OpSendDMSMessage extends OpDMS {
 				return null;
 			}
 			ASN1Integer number = dmsGraphicNumber.makeInt(row);
-			ASN1Enum<DmsGraphicStatus> status = makeGStatus(row);
+			ASN1Enum<DmsGraphicStatus> gst = makeGStatus(row);
 			mess.add(number);
-			mess.add(status);
+			mess.add(gst);
 			mess.queryProps();
 			logQuery(number);
-			logQuery(status);
+			logQuery(gst);
 			int gn = number.getInteger();
 			if (gn == g_num)
-				return new CheckGraphic(graphic, row, status);
-			setGraphicStatus(row, status.getEnum());
+				return new CheckGraphic(graphic, row, gst);
+			setGraphicStatus(row, gst.getEnum());
 			// Check previous row
 			row = grow(row - 1);
 			if (row != grow(g_num))
@@ -796,13 +784,13 @@ public class OpSendDMSMessage extends OpDMS {
 	private class CheckGraphic extends Phase {
 		private final Graphic graphic;
 		private final int row;
-		private final ASN1Enum<DmsGraphicStatus> status;
+		private final ASN1Enum<DmsGraphicStatus> gst;
 		private CheckGraphic(Graphic g, int r,
 			ASN1Enum<DmsGraphicStatus> s)
 		{
 			graphic = g;
 			row = r;
-			status = s;
+			gst = s;
 		}
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
@@ -812,7 +800,7 @@ public class OpSendDMSMessage extends OpDMS {
 			logQuery(gid);
 			if (isIDCorrect(graphic, gid.getInteger()))
 				return nextGraphicPhase();
-			switch (status.getEnum()) {
+			switch (gst.getEnum()) {
 			case modifying:
 			case calculatingID:
 			case readyForUse:
@@ -820,7 +808,7 @@ public class OpSendDMSMessage extends OpDMS {
 			case notUsed:
 				return new SetGraphicModifying(graphic, row);
 			default:
-				setErrorStatus(status.toString());
+				setErrorStatus(gst.toString());
 				return null;
 			}
 		}
@@ -836,10 +824,10 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<DmsGraphicStatus> status = makeGStatus(row);
-			status.setEnum(DmsGraphicStatus.notUsedReq);
-			mess.add(status);
-			logStore(status);
+			ASN1Enum<DmsGraphicStatus> gst = makeGStatus(row);
+			gst.setEnum(DmsGraphicStatus.notUsedReq);
+			mess.add(gst);
+			logStore(gst);
 			mess.storeProps();
 			return new SetGraphicModifying(graphic, row);
 		}
@@ -855,10 +843,10 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<DmsGraphicStatus> status = makeGStatus(row);
-			status.setEnum(DmsGraphicStatus.modifyReq);
-			mess.add(status);
-			logStore(status);
+			ASN1Enum<DmsGraphicStatus> gst = makeGStatus(row);
+			gst.setEnum(DmsGraphicStatus.modifyReq);
+			mess.add(gst);
+			logStore(gst);
 			mess.storeProps();
 			return new VerifyGraphicModifying(graphic, row);
 		}
@@ -874,12 +862,12 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<DmsGraphicStatus> status = makeGStatus(row);
-			mess.add(status);
+			ASN1Enum<DmsGraphicStatus> gst = makeGStatus(row);
+			mess.add(gst);
 			mess.queryProps();
-			logQuery(status);
-			if (status.getEnum() != DmsGraphicStatus.modifying) {
-				setErrorStatus(status.toString());
+			logQuery(gst);
+			if (gst.getEnum() != DmsGraphicStatus.modifying) {
+				setErrorStatus(gst.toString());
 				return null;
 			}
 			return new CreateGraphic(graphic, row);
@@ -992,10 +980,10 @@ public class OpSendDMSMessage extends OpDMS {
 		}
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<DmsGraphicStatus> status = makeGStatus(row);
-			status.setEnum(DmsGraphicStatus.readyForUseReq);
-			mess.add(status);
-			logStore(status);
+			ASN1Enum<DmsGraphicStatus> gst = makeGStatus(row);
+			gst.setEnum(DmsGraphicStatus.readyForUseReq);
+			mess.add(gst);
+			logStore(gst);
 			mess.storeProps();
 			return new VerifyGraphicReady(graphic, row);
 		}
@@ -1018,16 +1006,16 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Verify the graphic status is ready for use */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Enum<DmsGraphicStatus> status = makeGStatus(row);
-			mess.add(status);
+			ASN1Enum<DmsGraphicStatus> gst = makeGStatus(row);
+			mess.add(gst);
 			mess.queryProps();
-			logQuery(status);
-			if (status.getEnum() == DmsGraphicStatus.readyForUse)
+			logQuery(gst);
+			if (gst.getEnum() == DmsGraphicStatus.readyForUse)
 				return new VerifyGraphicID(graphic, row);
 			if (TimeSteward.currentTimeMillis() < expire)
 				return this;
 			else {
-				setErrorStatus("Graphic not ready: " + status);
+				setErrorStatus("Graphic not ready: " + gst);
 				return null;
 			}
 		}
