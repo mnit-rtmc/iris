@@ -53,9 +53,9 @@ import us.mn.state.dot.tms.utils.MultiSyntaxError;
  * |            .-----------------------------------------------------------.
  * |            +                                                           |
  * |--+ MsgModifyReq ----+ ChkMsgModifying         + QueryGraphicsConfig    |
- * |                         |                     | FindGraphicNumber      |
- * |                         |                     | CheckGraphic           |
- * |      ModifyMsg +--------'                     |   SetGraphicNotUsed    |
+ * |                        /       |              | FindGraphicNumber      |
+ * |                       /        +              | CheckGraphic           |
+ * |      ModifyMsg +--------- SetCentralMode      |   SetGraphicNotUsed    |
  * |         |                                     | SetGraphicModifying    |
  * |         +                                     | VerifyGraphicModifying |
  * |      MsgValidateReq --+ QueryValidateMsgErr   | CreateGraphic          |
@@ -256,19 +256,42 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.queryProps();
 			logQuery(mode);
 			logQuery(status);
-			if (mode.getEnum() != DmsControlMode.central) {
+			if (status.getEnum() != DmsMessageStatus.modifying) {
+				setErrorStatus(status.toString());
+				return null;
+			}
+			switch (mode.getEnum()) {
+			case central:
+			case centralOverride:
+				break;
+			case local:
 				// If we modify a message when the sign is in
 				// 'local' mode, we will get a GEN error.
 				// It's better if we don't even try.
 				setErrorStatus(mode.toString());
 				return null;
+			default:
+				// All other modes are retired in V2
+				return new SetCentralMode();
 			}
-			if (status.getEnum() == DmsMessageStatus.modifying)
-				return new ModifyMsg();
-			else {
-				setErrorStatus(status.toString());
-				return null;
-			}
+			return new ModifyMsg();
+		}
+	}
+
+	/** Phase to set control mode to 'central' */
+	protected class SetCentralMode extends Phase {
+
+		/** Set the control mode to 'central' */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Enum<DmsControlMode> mode = new ASN1Enum<
+				DmsControlMode>(DmsControlMode.class,
+				dmsControlMode.node);
+			mode.setEnum(DmsControlMode.central);
+			mess.add(mode);
+			mess.storeProps();
+			logStore(mode);
+			return new ModifyMsg();
 		}
 	}
 
