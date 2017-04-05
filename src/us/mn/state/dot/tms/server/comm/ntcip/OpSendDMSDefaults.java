@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,7 +95,10 @@ public class OpSendDMSDefaults extends OpDMS {
 			logStore(comm_time);
 			logStore(end_msg);
 			mess.storeProps();
-			return new PixelService();
+			if (dms.supportsPixelService())
+				return new PixelService();
+			else
+				return new MessageDefaults();
 		}
 	}
 
@@ -127,21 +130,19 @@ public class OpSendDMSDefaults extends OpDMS {
 		/** Set the pixel service schedule */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			if (dms.supportsPixelService()) {
-				ASN1Integer dur = vmsPixelServiceDuration.makeInt();
-				ASN1Integer freq = vmsPixelServiceFrequency.makeInt();
-				ASN1Integer time = vmsPixelServiceTime.makeInt();
-				dur.setInteger(10);
-				freq.setInteger(1440);
-				time.setInteger(180);
-				mess.add(dur);
-				mess.add(freq);
-				mess.add(time);
-				logStore(dur);
-				logStore(freq);
-				logStore(time);
-				mess.storeProps();
-			}
+			ASN1Integer dur = vmsPixelServiceDuration.makeInt();
+			ASN1Integer freq = vmsPixelServiceFrequency.makeInt();
+			ASN1Integer time = vmsPixelServiceTime.makeInt();
+			dur.setInteger(10);
+			freq.setInteger(1440);
+			time.setInteger(180);
+			mess.add(dur);
+			mess.add(freq);
+			mess.add(time);
+			logStore(dur);
+			logStore(freq);
+			logStore(time);
+			mess.storeProps();
 			return new MessageDefaults();
 		}
 	}
