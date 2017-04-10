@@ -49,7 +49,8 @@ public class PelcoPoller extends ThreadedPoller<PelcoProperty>
 	public void switchCamera(ControllerImpl c, VideoMonitorImpl vm,
 		CameraImpl cam)
 	{
-		if (vm.getMonNum() <= MAX_MONITOR_NUM)
+		int mn = vm.getMonNum();
+		if (mn > 0 && mn <= MAX_MONITOR_NUM)
 			addOp(new OpSelectMonitorCamera(c, vm, cam));
 		else if (PELCO_LOG.isOpen())
 			PELCO_LOG.log("Invalid monitor: " + vm.getMonNum());
