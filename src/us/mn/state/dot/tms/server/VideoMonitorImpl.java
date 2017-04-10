@@ -252,7 +252,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		String u = getProcUser();
 		if (doSetCam(cam, u)) {
 			// Switch all other monitors with same mon_num
-			setCameraNotify(this, mon_num, cam, u);
+			if (mon_num > 0)
+				setCameraNotify(this, mon_num, cam, u);
 		}
 	}
 
