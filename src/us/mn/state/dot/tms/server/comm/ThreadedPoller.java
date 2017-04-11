@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.ArrayList;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -75,16 +76,26 @@ public class ThreadedPoller<T extends ControllerProperty>
 		});
 	}
 
-	/** Handle error for all operations in queue */
-	public boolean handleError(final EventType et, final String msg) {
-		return queue.forEach(new OpHandler<T>() {
-			public boolean handle(OpController<T> o) {
-				o.handleCommError(et, msg);
-				if (o.isDone())
-					o.cleanup();
-				return o.isDone();
-			}
-		});
+	/** Handle error for all operations in queue.
+	 * @param et Event type.
+	 * @param msg Error message.
+	 * @return true If all operations are done. */
+	public boolean handleError(final EventType et, final String msg)
+		throws InterruptedException
+	{
+		ArrayList<OpController<T>> not_done =
+			new ArrayList<OpController<T>>();
+		while (!queue.isEmpty()) {
+			OpController<T> o = queue.next();
+			o.handleCommError(et, msg);
+			if (o.isDone())
+				o.cleanup();
+			else
+				not_done.add(o);
+		}
+		for (OpController<T> o : not_done)
+			queue.enqueue(o);
+		return not_done.isEmpty();
 	}
 
 	/** Add an operation to the device poller */
