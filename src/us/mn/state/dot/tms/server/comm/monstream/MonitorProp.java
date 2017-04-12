@@ -76,7 +76,9 @@ public class MonitorProp extends ControllerProp {
 				sb.append(mon.getName());
 		}
 		sb.append(UNIT_SEP);
-		sb.append("608060");	// FIXME
+		sb.append("608060");	// FIXME: accent color
+		sb.append(UNIT_SEP);
+		sb.append("0");		// FIXME: force-aspect-ratio
 		sb.append(RECORD_SEP);
 		return sb.toString();
 	}
