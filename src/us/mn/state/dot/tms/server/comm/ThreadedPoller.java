@@ -103,6 +103,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 		if (!isConnected()) {
 			stopPolling();
 			createCommThread();
+			log("STARTED THREAD");
 		}
 		if (!queue.enqueue(op))
 			log("DROPPING " + op);
@@ -164,6 +165,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 		if (c_thread != null)
 			c_thread.destroy();
 		c_thread = null;
+		log("STOPPED THREAD");
 	}
 
 	/** Stop polling if idle */
