@@ -78,6 +78,9 @@ public class CommThread<T extends ControllerProperty> {
 	/** Receive timeout (ms) */
 	private final int timeout;
 
+	/** Connected status */
+	private boolean connected;
+
 	/** Thread status */
 	private String status = "";
 
@@ -112,6 +115,7 @@ public class CommThread<T extends ControllerProperty> {
 		scheme = s;
 		uri = u;
 		timeout = rt;
+		connected = false;
 	}
 
 	/** Start the thread */
@@ -119,9 +123,12 @@ public class CommThread<T extends ControllerProperty> {
 		thread.start();
 	}
 
-	/** Check if the thread is alive */
-	public boolean isAlive() {
-		return thread.isAlive();
+	/** Check if the thread is connected */
+	public boolean isConnected() {
+		/* NOTE: in theory, we should be able to use thread.isAlive for
+		 *       this.  Unfortunately, it continues to return true even
+		 *       after the run method has completed.  */
+		return connected;
 	}
 
 	/** Destroy the comm thread */
@@ -137,6 +144,7 @@ public class CommThread<T extends ControllerProperty> {
 	/** Run comm thread operations */
 	private void doRun() {
 		clog("STARTING");
+		connected = true;
 		try {
 			performOperations();
 		}
@@ -147,6 +155,7 @@ public class CommThread<T extends ControllerProperty> {
 			e.printStackTrace();
 		}
 		finally {
+			connected = false;
 			clog("STOPPING");
 		}
 	}
