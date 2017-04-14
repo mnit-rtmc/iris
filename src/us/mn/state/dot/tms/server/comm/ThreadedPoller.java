@@ -86,8 +86,10 @@ public class ThreadedPoller<T extends ControllerProperty>
 		log("HANDLING " + msg);
 		ArrayList<OpController<T>> not_done =
 			new ArrayList<OpController<T>>();
-		while (!queue.isEmpty()) {
-			OpController<T> o = queue.next();
+		while (true) {
+			OpController<T> o = queue.tryNext();
+			if (null == o)
+				break;
 			o.handleCommError(et, msg);
 			if (o.isDone())
 				o.cleanup();

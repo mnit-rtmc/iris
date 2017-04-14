@@ -150,6 +150,17 @@ public final class OpQueue<T extends ControllerProperty> {
 		return work;
 	}
 
+	/** Try the get the next operation (without blocking) */
+	public synchronized OpController<T> tryNext() {
+		work = null;
+		if (front != null) {
+			work = front.operation;
+			front = front.next;
+			return work;
+		} else
+			return null;
+	}
+
 	/** Do something to each operation in the queue */
 	public synchronized boolean forEach(OpHandler<T> handler) {
 		OpController<T> w = work;
