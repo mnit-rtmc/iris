@@ -26,6 +26,9 @@ public interface EncoderType extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "encoder_type";
 
+	/** Default buffering latency */
+	int DEFAULT_LATENCY_MS = 50;
+
 	/** Set the HTTP path */
 	void setHttpPath(String p);
 
@@ -37,4 +40,6 @@ public interface EncoderType extends SonarObject {
 
 	/** Get the RTSP path*/
 	String getRtspPath();
+
+	// FIXME: add setLatency / getLatency
 }

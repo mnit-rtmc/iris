@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.CtrlCondition;
+import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -81,6 +82,8 @@ public class SwitchProp extends ControllerProp {
 		sb.append(getStreamType());
 		sb.append(UNIT_SEP);
 		sb.append(getDescription());
+		sb.append(UNIT_SEP);
+		sb.append(getLatency());
 		sb.append(RECORD_SEP);
 		return sb.toString();
 	}
@@ -162,6 +165,17 @@ public class SwitchProp extends ControllerProp {
 		return (camera != null)
 		      ? GeoLocHelper.getDescription(camera.getGeoLoc())
 		      : "";
+	}
+
+	/** Get the stream latency (ms) */
+	private int getLatency() {
+		if (camera != null) {
+			EncoderType et = camera.getEncoderType();
+			// FIXME: add EncoderType.getLatency
+			if (et.getName() == "CoHu HD Rise")
+				return 100;
+		}
+		return EncoderType.DEFAULT_LATENCY_MS;
 	}
 
 	/** Get a string representation of the property */
