@@ -83,6 +83,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	public boolean handleError(final EventType et, final String msg)
 		throws InterruptedException
 	{
+		log("HANDLING " + msg);
 		ArrayList<OpController<T>> not_done =
 			new ArrayList<OpController<T>>();
 		while (!queue.isEmpty()) {
@@ -95,6 +96,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 		}
 		for (OpController<T> o : not_done)
 			queue.enqueue(o);
+		log("DONE HANDLING " + msg);
 		return not_done.isEmpty();
 	}
 
