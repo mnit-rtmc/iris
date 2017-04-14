@@ -126,9 +126,6 @@ public class CommThread<T extends ControllerProperty> {
 
 	/** Check if the thread is connected */
 	public boolean isConnected() {
-		/* NOTE: in theory, we should be able to use thread.isAlive for
-		 *       this.  Unfortunately, it continues to return true even
-		 *       after the run method has completed.  */
 		return connected;
 	}
 
