@@ -39,7 +39,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	protected final URI scheme;
 
 	/** Protocol logger */
-	public final DebugLog logger;
+	protected final DebugLog logger;
 
 	/** Write a message to the protocol log */
 	public void log(String msg) {
@@ -104,7 +104,9 @@ public class ThreadedPoller<T extends ControllerProperty>
 			stopPolling();
 			createCommThread();
 		}
-		if (!queue.enqueue(op))
+		if (queue.enqueue(op))
+			log("ADDING " + op);
+		else
 			log("DROPPING " + op);
 	}
 
@@ -157,7 +159,8 @@ public class ThreadedPoller<T extends ControllerProperty>
 
 	/** Create a new comm thread */
 	protected CommThread<T> createCommThread(String uri, int timeout) {
-		return new CommThread<T>(this, queue, scheme, uri, timeout);
+		return new CommThread<T>(this, queue, scheme, uri, timeout,
+			logger);
 	}
 
 	/** Stop polling */

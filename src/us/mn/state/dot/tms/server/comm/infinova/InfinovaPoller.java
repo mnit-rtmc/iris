@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,7 +45,8 @@ public class InfinovaPoller extends TransientPoller<PelcoDProperty>
 	/** Create a comm thread */
 	@Override
 	protected InfinovaThread createCommThread(String uri, int timeout) {
-		return new InfinovaThread(this, queue, scheme, uri, timeout);
+		return new InfinovaThread(this, queue, scheme, uri, timeout,
+			INF_LOG);
 	}
 
 	/** Send a PTZ camera move command */

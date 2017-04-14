@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -49,7 +49,7 @@ public class DmsXmlPoller extends ThreadedPoller implements DMSPoller {
 	/** Create a comm thread */
 	@Override
 	protected DmsXmlThread createCommThread(String uri, int timeout) {
-		return new DmsXmlThread(this, queue, scheme, uri, timeout);
+		return new DmsXmlThread(this, queue, scheme, uri, timeout, LOG);
 	}
 
 	/** Send a new message to the sign. Called by DMSImpl.

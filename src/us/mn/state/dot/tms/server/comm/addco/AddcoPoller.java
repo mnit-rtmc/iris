@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,7 +42,8 @@ public class AddcoPoller extends ThreadedPoller<AddcoProperty>
 	/** Create a comm thread */
 	@Override
 	protected AddcoThread createCommThread(String uri, int timeout) {
-		return new AddcoThread(this, queue, scheme, uri, timeout);
+		return new AddcoThread(this, queue, scheme, uri, timeout,
+			ADDCO_LOG);
 	}
 
 	/** Send a device request message to the sign */

@@ -44,13 +44,10 @@ public class CommThread<T extends ControllerProperty> {
 	/** Thread group for all comm threads */
 	static private final ThreadGroup GROUP = new ThreadGroup("Comm");
 
-	/** Comm error log */
-	static private final DebugLog COMM_LOG = new DebugLog("comm");
-
 	/** Write a message to the comm log */
 	private void clog(String msg) {
-		if (COMM_LOG.isOpen())
-			COMM_LOG.log(thread.getName() + " " + msg);
+		if (logger.isOpen())
+			logger.log(thread.getName() + " " + msg);
 	}
 
 	/** Get an exception message */
@@ -78,6 +75,9 @@ public class CommThread<T extends ControllerProperty> {
 	/** Receive timeout (ms) */
 	private final int timeout;
 
+	/** Debug log */
+	private final DebugLog logger;
+
 	/** Connected status */
 	private boolean connected;
 
@@ -101,7 +101,7 @@ public class CommThread<T extends ControllerProperty> {
 	 * @param u The URI.
 	 * @param rt Receive timeout (ms) */
 	public CommThread(ThreadedPoller<T> dp, OpQueue<T> q, URI s, String u,
-		int rt)
+		int rt, DebugLog log)
 	{
 		poller = dp;
  		thread = new Thread(GROUP, "Comm: " + poller.name) {
@@ -115,6 +115,7 @@ public class CommThread<T extends ControllerProperty> {
 		scheme = s;
 		uri = u;
 		timeout = rt;
+		logger = log;
 		connected = false;
 	}
 
@@ -309,7 +310,7 @@ public class CommThread<T extends ControllerProperty> {
 	protected CommMessage<T> createCommMessage(Messenger m,
 		OpController<T> o) throws IOException
 	{
-		return new CommMessageImpl<T>(m, o, poller.logger);
+		return new CommMessageImpl<T>(m, o, logger);
 	}
 
 	/** Respond to a settings request from a controller */

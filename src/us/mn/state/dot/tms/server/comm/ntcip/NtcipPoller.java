@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2015-2016  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -61,7 +61,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller
 	@Override
 	protected NtcipThread createCommThread(String uri, int timeout) {
 		return new NtcipThread(this, queue, scheme, uri, timeout,
-			protocol);
+			NTCIP_LOG, protocol);
 	}
 
 	/** Send a device request message to the sign */

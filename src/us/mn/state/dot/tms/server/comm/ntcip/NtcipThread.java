@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import java.net.URI;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -42,9 +43,9 @@ public class NtcipThread extends CommThread {
 	/** Create a new Ntcip thread */
 	@SuppressWarnings("unchecked")
 	public NtcipThread(NtcipPoller p, OpQueue q, URI s, String u,
-		int rt, CommProtocol cp)
+		int rt, DebugLog log, CommProtocol cp)
 	{
-		super(p, q, s, u, rt);
+		super(p, q, s, u, rt, log);
 		protocol = cp;
 	}
 
