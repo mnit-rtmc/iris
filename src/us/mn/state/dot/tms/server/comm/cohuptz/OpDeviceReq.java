@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,42 +15,29 @@
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.server.CameraImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Operation to send a Cohu device request Cohu.
  *
  * @author Douglas Lau
  */
-public class OpDeviceReq extends OpCohuPTZ {
+public class OpDeviceReq extends OpStep {
 
-	/** Device request */
-	private final DeviceRequest dev_req;
+	/** Device request property */
+	private final DeviceReqProp prop;
 
 	/** Create device request operation */
-	public OpDeviceReq(CameraImpl c, DeviceRequest dr) {
-		super(PriorityLevel.COMMAND, c);
-		dev_req = dr;
+	public OpDeviceReq(DeviceRequest dr) {
+		prop = new DeviceReqProp(dr);
 	}
 
-	/** Create the second phase of the operation */
+	/** Poll the controller */
 	@Override
-	protected Phase<CohuPTZProperty> phaseTwo() {
-		return new SendDeviceReq();
-	}
-
-	/** Phase to send the device request */
-	protected class SendDeviceReq extends Phase<CohuPTZProperty> {
-		protected Phase<CohuPTZProperty> poll(
-			CommMessage<CohuPTZProperty> mess)
-			throws IOException
-		{
-			mess.add(new DeviceReqProperty(dev_req));
-			mess.storeProps();
-			return null;
-		}
+	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
+		prop.encodeStore(op, tx_buf);
 	}
 }

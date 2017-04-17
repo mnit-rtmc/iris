@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,10 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
@@ -25,7 +22,7 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  *
  * @author Douglas Lau
  */
-public class DeviceReqProperty extends CohuPTZProperty {
+public class DeviceReqProp extends CohuPTZProp {
 
 	/** Reset camera command */
 	static private final byte[] CMD_RESET_CAMERA = new byte[] {
@@ -86,20 +83,13 @@ public class DeviceReqProperty extends CohuPTZProperty {
 	private final DeviceRequest req;
 
 	/** Create the property */
-	public DeviceReqProperty(DeviceRequest dr) {
+	public DeviceReqProp(DeviceRequest dr) {
 		req = dr;
 	}
 
-	/** Encode a STORE request */
+	/** Get the property comand */
 	@Override
-	public void encodeStore(ControllerImpl c, OutputStream os)
-		throws IOException
-	{
-		os.write(createPacket(c.getDrop(), createCmd()));
-	}
-
-	/** Create the device request command */
-	private byte[] createCmd() throws ProtocolException {
+	protected byte[] getCommand() throws ProtocolException {
 		switch (req) {
 		case RESET_DEVICE:
 			return CMD_RESET_CAMERA;

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +15,13 @@
  */
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
-import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
+import us.mn.state.dot.tms.server.comm.BasePoller;
 import us.mn.state.dot.tms.server.comm.CameraPoller;
-import us.mn.state.dot.tms.server.comm.TransientPoller;
+import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.comm.OpStep;
+import static us.mn.state.dot.tms.server.comm.PriorityLevel.COMMAND;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
 /**
@@ -28,33 +30,38 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
  * @author Travis Swanston
  * @author Douglas Lau
  */
-public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
-	implements CameraPoller
-{
-	/** Cohu debug log */
-	static private final DebugLog COHU_LOG = new DebugLog("cohu");
+public class CohuPTZPoller extends BasePoller implements CameraPoller {
 
 	/** Create a new Cohu PTZ poller */
 	public CohuPTZPoller(String n) {
-		super(n, TCP, COHU_LOG);
+		super(n, TCP);
+	}
+
+	/** Create an operation */
+	private void createOp(String n, CameraImpl c, OpStep s) {
+		Operation op = new Operation(n, c, s);
+		op.setPriority(COMMAND);
+		addOp(op);
 	}
 
 	/** Send a "PTZ camera move" command */
 	@Override
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		addOp(new OpPTZCamera(c, p, t, z));
+		createOp("camera.op.send.ptz", c, new OpPTZCamera(p, t, z));
 	}
 
 	/** Send a "store camera preset" command */
 	@Override
 	public void sendStorePreset(CameraImpl c, int preset) {
-		addOp(new OpStorePreset(c, preset));
+		createOp("camera.op.store.preset", c,
+			new OpStorePreset(preset));
 	}
 
 	/** Send a "recall camera preset" command */
 	@Override
 	public void sendRecallPreset(CameraImpl c, int preset) {
-		addOp(new OpRecallPreset(c, preset));
+		createOp("camera.op.recall.preset", c,
+			new OpRecallPreset(preset));
 	}
 
 	/** Send a device request.
@@ -74,7 +81,7 @@ public class CohuPTZPoller extends TransientPoller<CohuPTZProperty>
 		case CAMERA_IRIS_OPEN:
 		case CAMERA_IRIS_MANUAL:
 		case CAMERA_IRIS_AUTO:
-			addOp(new OpDeviceReq(c, dr));
+			createOp("device.op.request", c, new OpDeviceReq(dr));
 			break;
 		case CAMERA_WIPER_ONESHOT:
 			// FIXME: not yet implemented

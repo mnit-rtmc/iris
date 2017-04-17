@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * This class creates a Cohu PTZ request to instruct the camera
@@ -26,28 +24,23 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * @author Travis Swanston
  * @author Douglas Lau
  */
-public class RecallPresetProperty extends CohuPTZProperty {
+public class RecallPresetProp extends CohuPTZProp {
 
 	/** Requested preset to recall */
 	private final int preset;
 
 	/** Create a new recall preset property */
-	public RecallPresetProperty(int p) {
+	public RecallPresetProp(int p) {
 		preset = p;
 	}
 
-	/** Encode a STORE request */
+	/** Get the property comand */
 	@Override
-	public void encodeStore(ControllerImpl c, OutputStream os)
-		throws IOException
-	{
-		Byte p = getPresetByte(preset);
-		if (p != null) {
-			byte[] cmd = new byte[2];
-			cmd[0] = (byte) 'H';
-			cmd[1] = p;
-			os.write(createPacket(c.getDrop(), cmd));
-		}
+	protected byte[] getCommand() throws ProtocolException {
+		byte[] cmd = new byte[2];
+		cmd[0] = (byte) 'H';
+		cmd[1] = getPresetByte(preset);
+		return cmd;
 	}
 
 	/** Get a string representation of the property */

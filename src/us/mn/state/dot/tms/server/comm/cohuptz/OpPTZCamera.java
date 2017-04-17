@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014-2015  AHMCT, University of California
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.CameraImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Cohu PTZ operation to pan/tilt/zoom a camera.
@@ -26,67 +26,34 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Travis Swanston
  * @author Douglas Lau
  */
-public class OpPTZCamera extends OpCohuPTZ {
+public class OpPTZCamera extends OpStep {
 
-	/** Pan vector */
-	private final float pan;
+	/** Pan property */
+	private final PanProp pan;
 
-	/** Tilt vector */
-	private final float tilt;
+	/** Tilt property */
+	private final TiltProp tilt;
 
-	/** Zoom vector */
-	private final float zoom;
+	/** Zoom property */
+	private final ZoomProp zoom;
 
 	/**
 	 * Create the operation.
-	 * @param c the CameraImpl instance
 	 * @param p the pan vector [-1..1]
 	 * @param t the tilt vector [-1..1]
 	 * @param z the zoom vector [-1..1]
 	 */
-	public OpPTZCamera(CameraImpl c, float p, float t, float z) {
-		super(PriorityLevel.COMMAND, c);
-		pan  = p;
-		tilt = t;
-		zoom = z;
+	public OpPTZCamera(float p, float t, float z) {
+		pan  = new PanProp(p);
+		tilt = new TiltProp(t);
+		zoom = new ZoomProp(z);
 	}
 
-	/** Begin the operation */
+	/** Poll the controller */
 	@Override
-	protected Phase<CohuPTZProperty> phaseTwo() {
-		return new PanPhase();
-	}
-
-	/** Pan phase, 1/3 */
-	protected class PanPhase extends Phase<CohuPTZProperty> {
-		protected Phase<CohuPTZProperty> poll(
-			CommMessage<CohuPTZProperty> mess) throws IOException
-		{
-			mess.add(new PanProperty(pan));
-			mess.storeProps();
-			return new TiltPhase();
-		}
-	}
-
-	/** Tilt phase, 2/3 */
-	protected class TiltPhase extends Phase<CohuPTZProperty> {
-		protected Phase<CohuPTZProperty> poll(
-			CommMessage<CohuPTZProperty> mess) throws IOException
-		{
-			mess.add(new TiltProperty(tilt));
-			mess.storeProps();
-			return new ZoomPhase();
-		}
-	}
-
-	/** Zoom phase, 3/3 */
-	protected class ZoomPhase extends Phase<CohuPTZProperty> {
-		protected Phase<CohuPTZProperty> poll(
-			CommMessage<CohuPTZProperty> mess) throws IOException
-		{
-			mess.add(new ZoomProperty(zoom));
-			mess.storeProps();
-			return null;
-		}
+	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
+		pan.encodeStore(op, tx_buf);
+		tilt.encodeStore(op, tx_buf);
+		zoom.encodeStore(op, tx_buf);
 	}
 }

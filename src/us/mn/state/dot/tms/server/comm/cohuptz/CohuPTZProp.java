@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,11 @@
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
-import java.io.InputStream;
-import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.ControllerProperty;
+import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.InvalidAddressException;
+import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.comm.ProtocolException;
 
 /**
  * Cohu PTZ Property
@@ -27,13 +28,13 @@ import us.mn.state.dot.tms.server.comm.InvalidAddressException;
  * @author Travis Swanston
  * @author Douglas Lau
  */
-abstract public class CohuPTZProperty extends ControllerProperty {
+abstract public class CohuPTZProp extends ControllerProp {
 
 	/**
 	 * Absolute value of PTZ movement threshold.
 	 * PTZ vectors below this value will be considered as stop commands.
 	 */
-	static protected final float PTZ_THRESH = 0.001F;
+	static protected final float PTZ_THRESH = 0.001f;
 
 	/** Cohu camera address range constants */
 	static private final int ADDR_MIN = 1;
@@ -41,53 +42,47 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 
 	/** Check drop address validity */
 	static private boolean isAddressValid(int drop) {
-		return ((drop >= ADDR_MIN) && (drop <= ADDR_MAX));
+		return (drop >= ADDR_MIN) && (drop <= ADDR_MAX);
+	}
+
+	/** Get an operation drop address */
+	static private int getDrop(Operation op) throws IOException {
+		int d = op.getDrop();
+		if (isAddressValid(d))
+			return d;
+		else
+			throw new InvalidAddressException(d);
 	}
 
 	/**
 	 * Calculate the XOR-based checksum of a Cohu packet.
 	 *
+	 * @param drop The drop address.
 	 * @param pkt The packet for which to calculate the checksum.
 	 * @return Packet checksum.
 	 */
-	static private byte checksum(byte[] pkt) {
-		byte xor = 0;
-		for (int i = 1; i < pkt.length; i++)
+	static private byte checksum(int drop, byte[] pkt) {
+		byte xor = (byte) drop;
+		for (int i = 0; i < pkt.length; i++)
 			xor ^= pkt[i];
 		return (byte) (0x80 + ((xor & (byte) 0x0f)));
 	}
 
-	/** Create a Cohu packet */
-	protected byte[] createPacket(int drop, byte[] cmd) throws IOException {
-		if (!isAddressValid(drop))
-			throw new InvalidAddressException(drop);
-		byte[] pkt = new byte[3 + cmd.length];
-		pkt[0] = (byte) 0xf8;
-		pkt[1] = (byte) drop;
-		System.arraycopy(cmd, 0, pkt, 2, cmd.length);
-		pkt[pkt.length - 1] = checksum(pkt);
-		return pkt;
+	/** Encode a STORE request */
+	@Override
+	public void encodeStore(Operation op, ByteBuffer tx_buf)
+		throws IOException
+	{
+		int d = getDrop(op);
+		byte[] cmd = getCommand();
+		tx_buf.put((byte) 0xf8);
+		tx_buf.put((byte) d);
+		tx_buf.put(cmd);
+		tx_buf.put(checksum(d, cmd));
 	}
 
-	/**
-	 * Calculate the "preset byte" that corresponds to the given preset
-	 * number.
-	 * Presets [1..47] correspond to preset bytes [0x10..0x3e], and
-	 * presets [48..64] correspond to preset bytes [0x60..0x70].
-	 *
-	 * @param p The preset number, [1..64].
-	 * @return The preset byte corresponding to the given preset number,
-	 *         or null if the given preset number is invalid.
-	 */
-	protected Byte getPresetByte(int p) {
-		if (p < 1 || p > 64)
-			return null;
-		else {
-			return (p <= 47)
-			      ? (byte) (0x10 + (p - 1))
-			      : (byte) (0x60 + (p - 1));
-		}
-	}
+	/** Get the property comand */
+	abstract protected byte[] getCommand() throws IOException;
 
 	/**
 	 * Calculate the pan/tilt "speed byte" that corresponds to the given
@@ -140,11 +135,23 @@ abstract public class CohuPTZProperty extends ControllerProperty {
 		return (byte) (0x30 + mapInt);
 	}
 
-	/** Decode a STORE response */
-	@Override
-	public void decodeStore(ControllerImpl c, InputStream is)
-		throws IOException
-	{
-		// FIXME ?
+	/**
+	 * Calculate the "preset byte" that corresponds to the given preset
+	 * number.
+	 * Presets [1..47] correspond to preset bytes [0x10..0x3e], and
+	 * presets [48..64] correspond to preset bytes [0x60..0x70].
+	 *
+	 * @param p The preset number, [1..64].
+	 * @return The preset byte corresponding to the given preset number.
+	 * @throws ProtocolException if the given preset number is invalid.
+	 */
+	protected byte getPresetByte(int p) throws ProtocolException {
+		if (p < 1 || p > 64)
+			throw new ProtocolException("Invalid preset: " + p);
+		else {
+			return (p <= 47)
+			      ? (byte) (0x10 + (p - 1))
+			      : (byte) (0x60 + (p - 1));
+		}
 	}
 }

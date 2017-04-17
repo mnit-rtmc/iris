@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014-2015  AHMCT, University of California
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.CameraImpl;
-import us.mn.state.dot.tms.server.comm.CommMessage;
-import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
  * Cohu PTZ operation to recall a camera preset.
@@ -26,34 +26,20 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Travis Swanston
  * @author Douglas Lau
  */
-public class OpRecallPreset extends OpCohuPTZ {
+public class OpRecallPreset extends OpStep {
 
-	/** Preset number */
-	private final int preset;
+	/** Recall preset property */
+	private final RecallPresetProp preset;
 
 	/** Create a new operation to recall a camera preset.
-	 * @param c the CameraImpl instance.
 	 * @param p the preset number to recall. */
-	public OpRecallPreset(CameraImpl c, int p) {
-		super(PriorityLevel.COMMAND, c);
-		preset = p;
+	public OpRecallPreset(int p) {
+		preset = new RecallPresetProp(p);
 	}
 
-	/** Begin the operation */
+	/** Poll the controller */
 	@Override
-	protected Phase<CohuPTZProperty> phaseTwo() {
-		return new RecallPreset();
-	}
-
-	/** Phase to recall a camera preset */
-	protected class RecallPreset extends Phase<CohuPTZProperty> {
-		protected Phase<CohuPTZProperty> poll(
-			CommMessage<CohuPTZProperty> mess)
-			throws IOException
-		{
-			mess.add(new RecallPresetProperty(preset));
-			mess.storeProps();
-			return null;
-		}
+	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
+		preset.encodeStore(op, tx_buf);
 	}
 }

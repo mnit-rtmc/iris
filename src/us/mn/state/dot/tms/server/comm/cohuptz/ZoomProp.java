@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,48 +15,43 @@
  */
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import us.mn.state.dot.tms.server.ControllerImpl;
-
 /**
  * A property to zoom a camera
  *
  * @author Travis Swanston
  * @author Douglas Lau
  */
-public class ZoomProperty extends CohuPTZProperty {
+public class ZoomProp extends CohuPTZProp {
 
 	/** Requested vector [-1..1] */
 	private final float value;
 
 	/** Create the property */
-	public ZoomProperty(float v) {
+	public ZoomProp(float v) {
 		value = v;
 	}
 
-	/** Encode a STORE request */
+	/** Get the property comand */
 	@Override
-	public void encodeStore(ControllerImpl c, OutputStream os)
-		throws IOException
-	{
-		byte[] cmd;
+	protected byte[] getCommand() {
 		if (Math.abs(value) < PTZ_THRESH) {
-			cmd = new byte[2];
+			byte[] cmd = new byte[2];
 			cmd[0] = (byte) 'Z';	// zoom
 			cmd[1] = (byte) 'S';	// stop
+			return cmd;
 		} else if (value < 0) {
-			cmd = new byte[3];
+			byte[] cmd = new byte[3];
 			cmd[0] = (byte) 'c';
 			cmd[1] = (byte) 'z';	// zoom wide
 			cmd[2] = getZoomSpeedByte(value);
+			return cmd;
 		} else {
-			cmd = new byte[3];
+			byte[] cmd = new byte[3];
 			cmd[0] = (byte) 'c';
 			cmd[1] = (byte) 'Z';	// zoom tele
 			cmd[2] = getZoomSpeedByte(value);
+			return cmd;
 		}
-		os.write(createPacket(c.getDrop(), cmd));
 	}
 
 	/** Get a string representation of the property */
