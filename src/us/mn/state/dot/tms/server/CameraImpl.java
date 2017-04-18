@@ -345,7 +345,11 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	public void periodicPoll() {
 		// make sure controller is not failed
 		clearFailed();
-		// no periodic polling
+		// NOTE: Firewalls will drop a TCP connection with no traffic,
+		//       so send something as a keep-alive.  This is a
+		//       workaround for a Cohu bug, which never cleans up
+		//       dropped TCP connections and eventually flakes out.
+		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 	}
 
 	/** Clear the camera failed status */

@@ -24,6 +24,11 @@ import us.mn.state.dot.tms.server.comm.ProtocolException;
  */
 public class DeviceReqProp extends CohuPTZProp {
 
+	/** Query latch status command */
+	static private final byte[] CMD_QUERY_LATCH_STATUS = new byte[] {
+		(byte) 'L', (byte) '?'
+	};
+
 	/** Reset camera command */
 	static private final byte[] CMD_RESET_CAMERA = new byte[] {
 		(byte) 'r', (byte) 's'
@@ -96,6 +101,8 @@ public class DeviceReqProp extends CohuPTZProp {
 	@Override
 	protected byte[] getCommand() throws ProtocolException {
 		switch (req) {
+		case QUERY_STATUS:
+			return CMD_QUERY_LATCH_STATUS;
 		case RESET_DEVICE:
 			return CMD_RESET_CAMERA;
 		case CAMERA_IRIS_STOP:
