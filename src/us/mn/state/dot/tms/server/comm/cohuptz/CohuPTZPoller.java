@@ -69,25 +69,6 @@ public class CohuPTZPoller extends BasePoller implements CameraPoller {
 	 * @param dr Device request to send. */
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest dr) {
-		switch (dr) {
-		case RESET_DEVICE:
-		case CAMERA_FOCUS_STOP:
-		case CAMERA_FOCUS_NEAR:
-		case CAMERA_FOCUS_FAR:
-		case CAMERA_FOCUS_MANUAL:
-		case CAMERA_FOCUS_AUTO:
-		case CAMERA_IRIS_STOP:
-		case CAMERA_IRIS_CLOSE:
-		case CAMERA_IRIS_OPEN:
-		case CAMERA_IRIS_MANUAL:
-		case CAMERA_IRIS_AUTO:
-			createOp("device.op.request", c, new OpDeviceReq(dr));
-			break;
-		case CAMERA_WIPER_ONESHOT:
-			// FIXME: not yet implemented
-			break;
-		default:
-			break;
-		}
+		createOp("device.op.request", c, new OpDeviceReq(dr));
 	}
 }

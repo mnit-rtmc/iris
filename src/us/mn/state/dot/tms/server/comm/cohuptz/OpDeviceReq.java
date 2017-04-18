@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
- * Operation to send a Cohu device request Cohu.
+ * Operation to send a Cohu device request.
  *
  * @author Douglas Lau
  */

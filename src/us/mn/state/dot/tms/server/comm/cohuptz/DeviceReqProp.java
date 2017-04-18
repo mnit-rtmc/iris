@@ -79,6 +79,11 @@ public class DeviceReqProp extends CohuPTZProp {
 		(byte) 'c', (byte) 'I', (byte) 'A'
 	};
 
+	/** Toggle wiper latch command */
+	static private final byte[] CMD_WIPER_TOGGLE = new byte[] {
+		(byte) 'L', (byte) '3'
+	};
+
 	/** Device request */
 	private final DeviceRequest req;
 
@@ -113,6 +118,8 @@ public class DeviceReqProp extends CohuPTZProp {
 			return CMD_FOCUS_MANUAL;
 		case CAMERA_FOCUS_AUTO:
 			return CMD_FOCUS_AUTO;
+		case CAMERA_WIPER_ONESHOT:
+			return CMD_WIPER_TOGGLE;
 		default:
 			throw new ProtocolException("INVALID DEVICE REQ");
 		}
