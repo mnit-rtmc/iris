@@ -158,16 +158,22 @@ abstract public class ControllerProp {
 	}
 
 	/** Parse a 2-digit BCD value.
-	 * @param buf Buffer to parse.
+	 * @param bcd BCD value to parse.
 	 * @return Parsed value. */
-	static protected int parseBCD2(ByteBuffer buf) throws ParsingException {
-		int bcd = parse8(buf);
+	static protected int parseBCD2(int bcd) throws ParsingException {
 		int d1 = (bcd >> 0) & 0x0F;
 		int d2 = (bcd >> 4) & 0x0F;
 		if (d1 < 10 && d2 < 10)
 			return d2 * 10 + d1;
 		else
 			throw new ParsingException("INVALID BCD.2: " + bcd);
+	}
+
+	/** Parse a 2-digit BCD value.
+	 * @param buf Buffer to parse.
+	 * @return Parsed value. */
+	static protected int parseBCD2(ByteBuffer buf) throws ParsingException {
+		return parseBCD2(parse8(buf));
 	}
 
 	/** Parse a 4-digit BCD value.

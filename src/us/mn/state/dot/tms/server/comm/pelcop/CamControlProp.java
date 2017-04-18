@@ -234,12 +234,13 @@ public class CamControlProp extends MonStatusProp {
 	{
 		if ((c1 & EXT_MASK) != BIT_EXTENDED)
 			throw new ParsingException("EXT");
+		int preset = parseBCD2(c3);
 		switch (c1) {
 		case EXT_STORE_PRESET:
-			c.setStorePreset(c3);
+			c.setStorePreset(preset);
 			break;
 		case EXT_RECALL_PRESET:
-			c.setRecallPreset(c3);
+			c.setRecallPreset(preset);
 			break;
 		}
 	}
