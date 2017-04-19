@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,7 +41,7 @@ public class OpPreset extends OpStep {
 	 * @param p Preset number.
 	 * @return Actual preset number to send to camera. */
 	static private int adjustPreset(int p) {
-		return (p < PRESET_MENU)
+		return (p < PRESET_MENU) || (p >= PRESET_EXT)
 		      ? p
 		      : p - PRESET_MENU + PRESET_EXT;
 	}
