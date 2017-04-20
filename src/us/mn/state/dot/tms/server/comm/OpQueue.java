@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +22,7 @@ import java.io.PrintStream;
  * class.  Operations with the same priority are sorted FIFO.
  *
  * @author Douglas Lau
+ * @author John L. Stanley
  */
 public final class OpQueue<T extends ControllerProperty> {
 
@@ -140,7 +142,11 @@ public final class OpQueue<T extends ControllerProperty> {
 		return null;
 	}
 
-	/** Get the next operation from the queue (and remove it) */
+	/** Get the next operation from the queue (and remove it).
+	 * If there's no op in the queue, enters a wait state.  Waits
+	 * until an op is added (at which point that op is returned)
+	 * -or- until some other event causes this method to throw
+	 * an exception. */
 	public synchronized OpController<T> next() throws InterruptedException {
 		work = null;
 		while (null == front)
@@ -150,15 +156,15 @@ public final class OpQueue<T extends ControllerProperty> {
 		return work;
 	}
 
-	/** Try the get the next operation (without blocking) */
+	/** Get the next operation from the queue (and remove it).
+	 * If there's no op in the queue, immediately returns null. */
 	public synchronized OpController<T> tryNext() {
 		work = null;
 		if (front != null) {
 			work = front.operation;
 			front = front.next;
-			return work;
-		} else
-			return null;
+		}
+		return work;
 	}
 
 	/** Do something to each operation in the queue */

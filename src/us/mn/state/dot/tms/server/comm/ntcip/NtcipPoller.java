@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2017  Minnesota Department of Transportation
- * Copyright (C) 2015-2016  SRF Consulting Group
+ * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,7 @@ import us.mn.state.dot.tms.utils.URIUtil;
  * NTCIP Poller
  *
  * @author Douglas Lau
+ * @author John L. Stanley
  */
 public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller
 {
@@ -55,6 +56,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller
 	public NtcipPoller(String n, CommProtocol cp) {
 		super(n, default_uri(cp), NTCIP_LOG);
 		protocol = cp;
+		attrCommIdleDisconnect = SystemAttrEnum.COMM_IDLE_DISCONNECT_DMS_SEC;
 	}
 
 	/** Create a comm thread */

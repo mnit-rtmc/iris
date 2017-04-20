@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014-2017  Minnesota Department of Transportation
+ * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,12 +20,14 @@ import java.net.URI;
 import java.util.ArrayList;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
  * ThreadedPoller is a class polling devices using a CommThread.
  *
  * @author Douglas Lau
+ * @author John L. Stanley
  */
 public class ThreadedPoller<T extends ControllerProperty>
 	implements DevicePoller
@@ -59,7 +62,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	@Override
 	public void destroy() {
 		queue.close();
-		stopPolling();
+		disconnect();
 		drainQueue();
 		log("DESTROYED");
 	}
@@ -105,7 +108,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	/** Add an operation to the device poller */
 	protected void addOp(OpController<T> op) {
 		if (!isConnected()) {
-			stopPolling();
+			disconnect();
 			createCommThread();
 		}
 		if (queue.enqueue(op))
@@ -126,7 +129,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	@Override
 	public synchronized void setUri(String u) {
 		uri = u;
-		stopPolling();
+		disconnect();
 	}
 
 	/** Receive timeout (ms) */
@@ -136,7 +139,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	@Override
 	public synchronized void setTimeout(int rt) {
 		timeout = rt;
-		stopPolling();
+		disconnect();
 	}
 
 	/** Comm thread (may be null) */
@@ -154,6 +157,19 @@ public class ThreadedPoller<T extends ControllerProperty>
 		return (c_thread != null) && c_thread.isConnected();
 	}
 
+	/** COMM_IDLE_DISCONNECT IRIS-system-attribute for this poller
+	 * (Change value in constructor of subclasses as needed) */
+	protected SystemAttrEnum attrCommIdleDisconnect = null;
+	
+	/** Get max seconds an idle (non-modem)
+	 *  connection should be left open
+	 *  (-1 == infinite) */
+	public int getPollerIdleDisconnectSec() {
+		return (attrCommIdleDisconnect == null)
+		     ? -1
+		     : attrCommIdleDisconnect.getInt();
+	}
+	
 	/** Create the comm thread */
 	private synchronized void createCommThread() {
 		c_thread = createCommThread(uri, timeout);
@@ -167,18 +183,18 @@ public class ThreadedPoller<T extends ControllerProperty>
 			logger);
 	}
 
-	/** Stop polling */
-	private synchronized void stopPolling() {
+	/** Disconnect */
+	private synchronized void disconnect() {
 		if (c_thread != null)
 			c_thread.destroy();
 		c_thread = null;
 		log("THREAD STOP");
 	}
 
-	/** Stop polling if idle */
+	/** Disconnect if idle */
 	@Override
-	public void stopPollingIfIdle() {
+	public void disconnectIfIdle() {
 		if (queue.isEmpty())
-			stopPolling();
+			disconnect();
 	}
 }

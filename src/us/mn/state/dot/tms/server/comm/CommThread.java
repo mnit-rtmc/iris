@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,9 +20,12 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.EventType.COMM_ERROR;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
@@ -29,6 +33,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
  * CommThread represents a communication channel with priority-queued polling.
  *
  * @author Douglas Lau
+ * @author John L. Stanley
  */
 public class CommThread<T extends ControllerProperty> {
 
@@ -204,7 +209,13 @@ public class CommThread<T extends ControllerProperty> {
 	{
 		setStatus("");
 		while (shouldContinue()) {
-			doPoll(m, queue.next());
+			OpController<T> op = queue.tryNext();
+			if (op == null) {
+				startIdleDisconnectTimer();
+				op = queue.next();
+				stopIdleDisconnectTimer();
+			}
+			doPoll(m, op);
 			setStatus("");
 		}
 	}
@@ -314,5 +325,70 @@ public class CommThread<T extends ControllerProperty> {
 	private void sendSettings(ControllerImpl c, PriorityLevel p) {
 		if (c.isActive())
 			poller.sendSettings(c, p);
+	}
+
+	//----- IdleDisconnect code --------------------
+
+	/** Scheduler for idle-disconnect jobs */
+	static private final Scheduler IDLEDISCONNECT = new Scheduler("idledisconnect");
+
+	/** Current idle-disconnect job for this CommThread */
+	private transient IdleDisconnectJob idle_disconnect_job = null;
+
+	/** Stop the idle-disconnect timer */
+	private void stopIdleDisconnectTimer() {
+		IdleDisconnectJob hj = idle_disconnect_job;
+		if (hj != null) {
+			IDLEDISCONNECT.removeJob(hj);
+			idle_disconnect_job = null;
+		}
+	}
+
+	/** Start the idle-disconnect timer
+	 * (if appropriate for this connection) */
+	private void startIdleDisconnectTimer() {
+		stopIdleDisconnectTimer();
+		int delaysec = getCommIdleDisconnectSec();
+		if (delaysec != -1) {
+			// Set minimum (non-infinite) idle delay to 1 sec
+			// to avoid a race condition between the disconnect
+			// timer and the op processing thread...
+			if (delaysec == 0)
+				delaysec = 1;
+			idle_disconnect_job = new IdleDisconnectJob(delaysec);
+			IDLEDISCONNECT.addJob(idle_disconnect_job);
+		}
+	}
+
+	/** Get max seconds an idle connection
+	 *  should be left open (-1 == infinite) */
+	int getCommIdleDisconnectSec() {
+		if (isModemLink())
+			return SystemAttrEnum.COMM_IDLE_DISCONNECT_MODEM_SEC.getInt();
+		DevicePoller p = poller;
+		return (p == null)
+		      ? -1 // == Infinite
+		      : p.getPollerIdleDisconnectSec();
+	}
+	
+	/** Check if a modem is required for the link */
+	public boolean isModemLink() {
+		return uri.startsWith("modem:");
+	}
+
+	/** Job that disconnects an idle connection */
+	private class IdleDisconnectJob extends Job {
+		private IdleDisconnectJob(int delaysec) {
+			super(delaysec * 1000); // seconds -> milliseconds
+		}
+
+		@Override 
+		public void perform() {
+			if (idle_disconnect_job != this)
+				return; // only process current disconnect-job
+			DevicePoller dp = poller;
+			if (dp != null)
+				dp.disconnectIfIdle();
+		}
 	}
 }

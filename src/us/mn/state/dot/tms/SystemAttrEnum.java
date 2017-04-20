@@ -1,9 +1,9 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2017  Minnesota Department of Transportation
- * Copyright (C) 2012  Iteris Inc.
- * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2015  SRF Consulting Group
+ * Copyright (C) 2012       Iteris Inc.
+ * Copyright (C) 2014       AHMCT, University of California
+ * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  * @author Michael Darter
  * @author Travis Swanston
+ * @author John L. Stanley
  */
 public enum SystemAttrEnum {
 	CAMERA_AUTOPLAY(true, Change.RESTART_CLIENT),
@@ -39,6 +40,8 @@ public enum SystemAttrEnum {
 	CAMERA_WIPER_PRECIP_MM_HR(8, 1, 100),
 	CLIENT_UNITS_SI(true),
 	COMM_EVENT_PURGE_DAYS(14, 0, 1000),
+	COMM_IDLE_DISCONNECT_DMS_SEC(-1,-1,32767), // -1 = Infinite
+	COMM_IDLE_DISCONNECT_MODEM_SEC(20,5,32767),
 	DATABASE_VERSION(String.class),
 	DETECTOR_AUTO_FAIL_ENABLE(true),
 	DICT_ALLOWED_SCHEME(0, 0, 2),

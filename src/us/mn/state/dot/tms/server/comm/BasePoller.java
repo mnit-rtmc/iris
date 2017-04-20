@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +31,7 @@ import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.Work;
 import us.mn.state.dot.sched.Worker;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.URIUtil;
 
@@ -37,6 +39,7 @@ import us.mn.state.dot.tms.utils.URIUtil;
  * BasePoller is a class polling devices using a selector.
  *
  * @author Douglas Lau
+ * @author John L. Stanley
  */
 abstract public class BasePoller implements DevicePoller {
 
@@ -350,6 +353,19 @@ abstract public class BasePoller implements DevicePoller {
 		    && (sk.channel().isOpen());
 	}
 
+	/** COMM_IDLE_DISCONNECT IRIS-system-attribute for this poller
+	 * (Change value in constructor of subclasses as needed) */
+	protected SystemAttrEnum attrCommIdleDisconnect = null;
+	
+	/** Get max seconds an idle (non-modem)
+	 *  connection should be left open
+	 *  (-1 == infinite) */
+	public int getPollerIdleDisconnectSec() {
+		return (attrCommIdleDisconnect == null)
+		     ? -1
+		     : attrCommIdleDisconnect.getInt();
+	}
+
 	/** Open the channel */
 	private void openChannel() {
 		CommSelector sel = SelectorThread.getSelector();
@@ -632,9 +648,9 @@ abstract public class BasePoller implements DevicePoller {
 		}
 	}
 
-	/** Stop polling if idle */
+	/** Disconnect if idle */
 	@Override
-	public void stopPollingIfIdle() {
+	public void disconnectIfIdle() {
 		if (isPollEmpty() && isRecvEmpty())
 			closeChannel();
 	}
