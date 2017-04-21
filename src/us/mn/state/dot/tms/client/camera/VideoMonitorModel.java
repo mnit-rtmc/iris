@@ -40,7 +40,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 	@Override
 	protected ArrayList<ProxyColumn<VideoMonitor>> createColumns() {
 		ArrayList<ProxyColumn<VideoMonitor>> cols =
-			new ArrayList<ProxyColumn<VideoMonitor>>(3);
+			new ArrayList<ProxyColumn<VideoMonitor>>(5);
 		cols.add(new ProxyColumn<VideoMonitor>("video.monitor", 140) {
 			public Object getValueAt(VideoMonitor vm) {
 				return vm.getName();
@@ -78,11 +78,25 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 				return vm.getRestricted();
 			}
 			public boolean isEditable(VideoMonitor vm) {
-				return canUpdate(vm);
+				return canUpdate(vm, "restricted");
 			}
 			public void setValueAt(VideoMonitor vm, Object value) {
 				if (value instanceof Boolean)
-					vm.setRestricted((Boolean)value);
+					vm.setRestricted((Boolean) value);
+			}
+		});
+		cols.add(new ProxyColumn<VideoMonitor>("video.force.aspect",120,
+			Boolean.class)
+		{
+			public Object getValueAt(VideoMonitor vm) {
+				return vm.getForceAspect();
+			}
+			public boolean isEditable(VideoMonitor vm) {
+				return canUpdate(vm, "forceAspect");
+			}
+			public void setValueAt(VideoMonitor vm, Object value) {
+				if (value instanceof Boolean)
+					vm.setForceAspect((Boolean) value);
 			}
 		});
 		return cols;

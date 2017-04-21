@@ -88,8 +88,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
 		store.query("SELECT name, controller, pin, notes, mon_num, " +
-		            "direct, restricted, camera FROM iris." +
-		            SONAR_TYPE + ";", new ResultFactory()
+		            "direct, restricted, force_aspect, camera " +
+		            "FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new VideoMonitorImpl(row));
@@ -108,6 +108,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		map.put("mon_num", mon_num);
 		map.put("direct", direct);
 		map.put("restricted", restricted);
+		map.put("force_aspect", force_aspect);
 		map.put("camera", camera);
 		return map;
 	}
@@ -133,25 +134,28 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		     row.getInt(5),		// mon_num
 		     row.getBoolean(6),		// direct
 		     row.getBoolean(7),		// restricted
-		     row.getString(8)		// camera
+		     row.getBoolean(8),		// force_aspect
+		     row.getString(9)		// camera
 		);
 	}
 
 	/** Create a video monitor */
 	private VideoMonitorImpl(String n, String c, int p, String nt, int mn,
-		boolean d, boolean r, String cam)
+		boolean d, boolean r, boolean fa, String cam)
 	{
-		this(n, lookupController(c), p, nt, mn, d, r,lookupCamera(cam));
+		this(n, lookupController(c), p, nt, mn, d, r, fa,
+		     lookupCamera(cam));
 	}
 
 	/** Create a video monitor */
 	private VideoMonitorImpl(String n, ControllerImpl c, int p, String nt,
-		int mn, boolean d, boolean r, Camera cam)
+		int mn, boolean d, boolean r, boolean fa, Camera cam)
 	{
 		super(n, c, p, nt);
 		mon_num = mn;
 		direct = d;
 		restricted = r;
+		force_aspect = fa;
 		camera = cam;
 		initTransients();
 	}
@@ -235,6 +239,29 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	@Override
 	public boolean getRestricted() {
 		return restricted;
+	}
+
+	/** Force-aspect ratio flag */
+	private boolean force_aspect;
+
+	/** Set force-aspect ratio flag */
+	@Override
+	public void setForceAspect(boolean fa) {
+		force_aspect = fa;
+	}
+
+	/** Set force-aspect ratio flag */
+	public void doSetForceAspect(boolean fa) throws TMSException {
+		if (fa == force_aspect)
+			return;
+		store.update(this, "force_aspect", fa);
+		setForceAspect(fa);
+	}
+
+	/** Get force-aspect ratio flag */
+	@Override
+	public boolean getForceAspect() {
+		return force_aspect;
 	}
 
 	/** Camera displayed on the video monitor */

@@ -72,7 +72,7 @@ public class MonitorProp extends ControllerProp {
 		sb.append(UNIT_SEP);
 		sb.append("608060");	// FIXME: accent color
 		sb.append(UNIT_SEP);
-		sb.append("0");		// FIXME: force-aspect-ratio
+		sb.append(getForceAspect(mon));
 		sb.append(RECORD_SEP);
 		return sb.toString();
 	}
@@ -87,6 +87,11 @@ public class MonitorProp extends ControllerProp {
 				return mon.getName();
 		}
 		return "";
+	}
+
+	/** Get force-aspect as a string */
+	private String getForceAspect(VideoMonitorImpl mon) {
+		return (mon != null && mon.getForceAspect()) ? "1" : "0";
 	}
 
 	/** Get a string representation of the property */

@@ -42,6 +42,12 @@ public interface VideoMonitor extends Device {
 	/** Get flag to restrict publishing camera images */
 	boolean getRestricted();
 
+	/** Set force-aspect ratio flag */
+	void setForceAspect(boolean fa);
+
+	/** Get force-aspect ratio flag */
+	boolean getForceAspect();
+
 	/** Set the camera displayed on the monitor */
 	void setCamera(Camera c);
 
