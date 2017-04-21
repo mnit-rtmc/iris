@@ -35,6 +35,12 @@ import us.mn.state.dot.tms.server.comm.Operation;
  */
 public class SwitchProp extends ControllerProp {
 
+	/** Get the blank URL */
+	static private String getBlankUrl() {
+		// FIXME: add CAMERA_BLANK_URL
+		return "http://tms-iris.dot.state.mn.us/monstream/blank.png";
+	}
+
 	/** Get the construction URL */
 	static private String getConstructionUrl() {
 		return SystemAttrEnum.CAMERA_CONSTRUCTION_URL.getString();
@@ -43,6 +49,11 @@ public class SwitchProp extends ControllerProp {
 	/** Get the out-of-service URL */
 	static private String getOutOfServiceUrl() {
 		return SystemAttrEnum.CAMERA_OUT_OF_SERVICE_URL.getString();
+	}
+
+	/** Get the "blank" camera number */
+	static private int cameraNumBlank() {
+		return SystemAttrEnum.CAMERA_NUM_BLANK.getInt();
 	}
 
 	/** ASCII record separator */
@@ -99,8 +110,19 @@ public class SwitchProp extends ControllerProp {
 		return "";
 	}
 
+	/** Check if the camera is blank */
+	private boolean isCameraBlank() {
+		if (camera != null) {
+			Integer cn = camera.getCamNum();
+			return (cn != null) && (cn == cameraNumBlank());
+		} else
+			return true;
+	}
+
 	/** Get the stream URI */
 	private String getUri() {
+		if (isCameraBlank())
+			return getBlankUrl();
 		if (camera != null) {
 			String cond = getConditionUri();
 			if (cond != null)
@@ -152,19 +174,18 @@ public class SwitchProp extends ControllerProp {
 	/** Get the stream type */
 	private String getStreamType() {
 		if (CtrlCondition.ACTIVE == getCondition()) {
-			if (camera != null) {
-				return StreamType.fromOrdinal(
-					camera.getStreamType()).toString();
-			}
+			assert camera != null;
+			return StreamType.fromOrdinal(
+				camera.getStreamType()).toString();
 		}
 		return "PNG";
 	}
 
 	/** Get the stream description */
 	private String getDescription() {
-		return (camera != null)
-		      ? GeoLocHelper.getDescription(camera.getGeoLoc())
-		      : "";
+		return isCameraBlank()
+		      ? ""
+		      : GeoLocHelper.getDescription(camera.getGeoLoc());
 	}
 
 	/** Get the stream latency (ms) */
