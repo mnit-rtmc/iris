@@ -68,19 +68,25 @@ public class MonitorProp extends ControllerProp {
 		sb.append(UNIT_SEP);
 		sb.append(pin - 1);
 		sb.append(UNIT_SEP);
-		if (mon != null) {
-			int n = mon.getMonNum();
-			if (n > 0)
-				sb.append(n);
-			else
-				sb.append(mon.getName());
-		}
+		sb.append(getMonLabel(mon));
 		sb.append(UNIT_SEP);
 		sb.append("608060");	// FIXME: accent color
 		sb.append(UNIT_SEP);
 		sb.append("0");		// FIXME: force-aspect-ratio
 		sb.append(RECORD_SEP);
 		return sb.toString();
+	}
+
+	/** Get monitor label as a string */
+	private String getMonLabel(VideoMonitorImpl mon) {
+		if (mon != null) {
+			int n = mon.getMonNum();
+			if (n > 0)
+				return Integer.toString(n);
+			else
+				return mon.getName();
+		}
+		return "";
 	}
 
 	/** Get a string representation of the property */
