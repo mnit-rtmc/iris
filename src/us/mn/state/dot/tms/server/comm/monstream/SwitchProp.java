@@ -37,8 +37,7 @@ public class SwitchProp extends ControllerProp {
 
 	/** Get the blank URL */
 	static private String getBlankUrl() {
-		// FIXME: add CAMERA_BLANK_URL
-		return "http://tms-iris.dot.state.mn.us/monstream/blank.png";
+		return SystemAttrEnum.CAMERA_BLANK_URL.getString();
 	}
 
 	/** Get the construction URL */
