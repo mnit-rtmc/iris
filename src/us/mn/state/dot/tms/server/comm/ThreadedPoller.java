@@ -164,6 +164,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	/** Get max seconds an idle (non-modem)
 	 *  connection should be left open
 	 *  (-1 == infinite) */
+	@Override
 	public int getPollerIdleDisconnectSec() {
 		return (attrCommIdleDisconnect == null)
 		     ? -1
