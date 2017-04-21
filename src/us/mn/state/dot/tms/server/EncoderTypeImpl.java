@@ -31,8 +31,8 @@ public class EncoderTypeImpl extends BaseObjectImpl implements EncoderType {
 	/** Load all the encoder types */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, EncoderTypeImpl.class);
-		store.query("SELECT name, http_path, rtsp_path FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, http_path, rtsp_path, latency " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new EncoderTypeImpl(row));
@@ -47,6 +47,7 @@ public class EncoderTypeImpl extends BaseObjectImpl implements EncoderType {
 		map.put("name", name);
 		map.put("http_path", http_path);
 		map.put("rtsp_path", rtsp_path);
+		map.put("latency", latency);
 		return map;
 	}
 
@@ -67,21 +68,24 @@ public class EncoderTypeImpl extends BaseObjectImpl implements EncoderType {
 		super(n);
 		http_path = "";
 		rtsp_path = "";
+		latency = DEFAULT_LATENCY_MS;
 	}
 
 	/** Create an encoder type */
 	private EncoderTypeImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),		// name
 		     row.getString(2),		// http_path
-		     row.getString(3)		// rtsp_path
+		     row.getString(3),		// rtsp_path
+		     row.getInt(4)		// latency
 		);
 	}
 
 	/** Create a new encoder type */
-	private EncoderTypeImpl(String n, String hp, String rp) {
+	private EncoderTypeImpl(String n, String hp, String rp, int l) {
 		this(n);
 		http_path = hp;
 		rtsp_path = rp;
+		latency = l;
 	}
 
 	/** HTTP path */
@@ -128,5 +132,28 @@ public class EncoderTypeImpl extends BaseObjectImpl implements EncoderType {
 	@Override
 	public String getRtspPath() {
 		return rtsp_path;
+	}
+
+	/** Stream latency */
+	private int latency;
+
+	/** Set the stream latency (ms) */
+	@Override
+	public void setLatency(int l) {
+		latency = l;
+	}
+
+	/** Set the stream latency (ms) */
+	public void doSetLatency(int l) throws TMSException {
+		if (l != latency) {
+			store.update(this, "latency", l);
+			setLatency(l);
+		}
+	}
+
+	/** Get the stream latency (ms) */
+	@Override
+	public int getLatency() {
+		return latency;
 	}
 }

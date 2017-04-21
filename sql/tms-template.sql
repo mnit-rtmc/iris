@@ -608,7 +608,8 @@ CREATE TABLE iris.stream_type (
 CREATE TABLE iris.encoder_type (
 	name VARCHAR(24) PRIMARY KEY,
 	http_path VARCHAR(64) NOT NULL,
-	rtsp_path VARCHAR(64) NOT NULL
+	rtsp_path VARCHAR(64) NOT NULL,
+	latency INTEGER NOT NULL
 );
 
 CREATE TABLE iris._camera (
@@ -2160,7 +2161,7 @@ CREATE VIEW video_monitor_view AS
 GRANT SELECT ON video_monitor_view TO PUBLIC;
 
 CREATE VIEW encoder_type_view AS
-	SELECT name, http_path, rtsp_path FROM iris.encoder_type;
+	SELECT name, http_path, rtsp_path, latency FROM iris.encoder_type;
 GRANT SELECT ON encoder_type_view TO PUBLIC;
 
 CREATE VIEW camera_view AS

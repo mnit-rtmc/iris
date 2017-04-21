@@ -14,3 +14,12 @@ INSERT INTO iris.system_attribute (name, value)
 -- Add blank camera URLs
 INSERT INTO iris.system_attribute (name, value)
 	VALUES ('camera_blank_url', '');
+
+-- Add latency to encoder_type and encoder_type_view
+ALTER TABLE encoder_type ADD COLUMN latency INTEGER;
+UPDATE encoder_type SET latency = 50;
+ALTER TABLE encoder_type ALTER COLUMN latency SET NOT NULL;
+DROP VIEW encoder_type_view;
+CREATE VIEW encoder_type_view AS
+	SELECT name, http_path, rtsp_path, latency FROM iris.encoder_type;
+GRANT SELECT ON encoder_type_view TO PUBLIC;

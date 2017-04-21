@@ -40,7 +40,7 @@ public class EncoderTypeModel extends ProxyTableModel<EncoderType> {
 	@Override
 	protected ArrayList<ProxyColumn<EncoderType>> createColumns() {
 		ArrayList<ProxyColumn<EncoderType>> cols =
-			new ArrayList<ProxyColumn<EncoderType>>(3);
+			new ArrayList<ProxyColumn<EncoderType>>(4);
 		cols.add(new ProxyColumn<EncoderType>("camera.encoder.type",
 			120)
 		{
@@ -72,6 +72,20 @@ public class EncoderTypeModel extends ProxyTableModel<EncoderType> {
 			}
 			public void setValueAt(EncoderType et, Object value) {
 				et.setRtspPath(value.toString());
+			}
+		});
+		cols.add(new ProxyColumn<EncoderType>("camera.encoder.latency",
+			90, Integer.class)
+		{
+			public Object getValueAt(EncoderType et) {
+				return et.getLatency();
+			}
+			public boolean isEditable(EncoderType et) {
+				return canUpdate(et, "latency");
+			}
+			public void setValueAt(EncoderType et, Object value) {
+				if (value instanceof Integer)
+					et.setLatency((Integer) value);
 			}
 		});
 		return cols;

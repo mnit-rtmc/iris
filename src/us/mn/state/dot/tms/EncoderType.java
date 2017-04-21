@@ -41,5 +41,9 @@ public interface EncoderType extends SonarObject {
 	/** Get the RTSP path*/
 	String getRtspPath();
 
-	// FIXME: add setLatency / getLatency
+	/** Set stream latency (ms) */
+	void setLatency(int l);
+
+	/** Get stream latency (ms) */
+	int getLatency();
 }

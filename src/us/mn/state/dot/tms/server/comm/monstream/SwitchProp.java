@@ -191,11 +191,8 @@ public class SwitchProp extends ControllerProp {
 	private int getLatency() {
 		if (camera != null) {
 			EncoderType et = camera.getEncoderType();
-			if (et != null) {
-				// FIXME: add EncoderType.getLatency
-				if ("CoHu HD Rise".equals(et.getName()))
-					return 100;
-			}
+			if (et != null)
+				return et.getLatency();
 		}
 		return EncoderType.DEFAULT_LATENCY_MS;
 	}
