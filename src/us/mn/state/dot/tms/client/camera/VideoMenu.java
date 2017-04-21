@@ -46,6 +46,9 @@ public class VideoMenu extends JMenu {
 		item = createCameraItem();
 		if (item != null)
 			add(item);
+		item = createMonitorStyleItem();
+		if (item != null)
+			add(item);
 		item = createVideoMonitorItem();
 		if (item != null)
 			add(item);
@@ -75,6 +78,20 @@ public class VideoMenu extends JMenu {
 				desktop.show(new CameraForm(session));
 			}
 		});
+	}
+
+	/** Create the monitor style menu item */
+	private JMenuItem createMonitorStyleItem() {
+		if (MonitorStyleForm.isPermitted(session)) {
+			return new JMenuItem(new IAction("monitor.style.plural")
+			{
+				protected void doActionPerformed(ActionEvent e){
+					desktop.show(new MonitorStyleForm(
+						session));
+				}
+			});
+		} else
+			return null;
 	}
 
 	/** Create the video monitor menu item */

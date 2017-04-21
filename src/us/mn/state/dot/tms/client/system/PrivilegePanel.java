@@ -71,6 +71,7 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"map_extent",
 		"meter_action",
 		"modem",
+		"monitor_style",
 		"plan_phase",
 		"privilege",
 		"quick_message",

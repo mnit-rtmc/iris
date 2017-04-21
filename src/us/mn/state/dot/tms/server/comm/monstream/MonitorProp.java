@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.monstream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.MonitorStyle;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -27,6 +28,27 @@ import us.mn.state.dot.tms.server.comm.Operation;
  * @author Douglas Lau
  */
 public class MonitorProp extends ControllerProp {
+
+	/** Get a monitor style */
+	static private MonitorStyle monitorStyle(VideoMonitorImpl mon) {
+		return (mon != null)
+		      ? mon.getMonitorStyle()
+		      : null;
+	}
+
+	/** Get force-aspect as a string */
+	static private String getForceAspect(VideoMonitorImpl mon) {
+		MonitorStyle ms = monitorStyle(mon);
+		return (ms != null && ms.getForceAspect()) ? "1" : "0";
+	}
+
+	/** Get monitor accent color */
+	static private String getAccent(VideoMonitorImpl mon) {
+		MonitorStyle ms = monitorStyle(mon);
+		return (ms != null)
+		      ? ms.getAccent()
+		      : MonitorStyle.DEFAULT_ACCENT;
+	}
 
 	/** ASCII record separator */
 	static private final char RECORD_SEP = 30;
@@ -70,7 +92,7 @@ public class MonitorProp extends ControllerProp {
 		sb.append(UNIT_SEP);
 		sb.append(getMonLabel(mon));
 		sb.append(UNIT_SEP);
-		sb.append("608060");	// FIXME: accent color
+		sb.append(getAccent(mon));
 		sb.append(UNIT_SEP);
 		sb.append(getForceAspect(mon));
 		sb.append(RECORD_SEP);
@@ -87,11 +109,6 @@ public class MonitorProp extends ControllerProp {
 				return mon.getName();
 		}
 		return "";
-	}
-
-	/** Get force-aspect as a string */
-	private String getForceAspect(VideoMonitorImpl mon) {
-		return (mon != null && mon.getForceAspect()) ? "1" : "0";
 	}
 
 	/** Get a string representation of the property */

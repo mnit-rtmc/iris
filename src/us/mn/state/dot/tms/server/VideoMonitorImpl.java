@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.MonitorStyle;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
@@ -88,7 +89,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
 		store.query("SELECT name, controller, pin, notes, mon_num, " +
-		            "direct, restricted, force_aspect, camera " +
+		            "direct, restricted, monitor_style, camera " +
 		            "FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -108,7 +109,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		map.put("mon_num", mon_num);
 		map.put("direct", direct);
 		map.put("restricted", restricted);
-		map.put("force_aspect", force_aspect);
+		map.put("monitor_style", monitor_style);
 		map.put("camera", camera);
 		return map;
 	}
@@ -134,28 +135,28 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		     row.getInt(5),		// mon_num
 		     row.getBoolean(6),		// direct
 		     row.getBoolean(7),		// restricted
-		     row.getBoolean(8),		// force_aspect
+		     row.getString(8),		// monitor_style
 		     row.getString(9)		// camera
 		);
 	}
 
 	/** Create a video monitor */
 	private VideoMonitorImpl(String n, String c, int p, String nt, int mn,
-		boolean d, boolean r, boolean fa, String cam)
+		boolean d, boolean r, String ms, String cam)
 	{
-		this(n, lookupController(c), p, nt, mn, d, r, fa,
-		     lookupCamera(cam));
+		this(n, lookupController(c), p, nt, mn, d, r,
+		     lookupMonitorStyle(ms), lookupCamera(cam));
 	}
 
 	/** Create a video monitor */
 	private VideoMonitorImpl(String n, ControllerImpl c, int p, String nt,
-		int mn, boolean d, boolean r, boolean fa, Camera cam)
+		int mn, boolean d, boolean r, MonitorStyle ms, Camera cam)
 	{
 		super(n, c, p, nt);
 		mon_num = mn;
 		direct = d;
 		restricted = r;
-		force_aspect = fa;
+		monitor_style = ms;
 		camera = cam;
 		initTransients();
 	}
@@ -241,28 +242,30 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		return restricted;
 	}
 
-	/** Force-aspect ratio flag */
-	private boolean force_aspect;
+	/** Monitor style */
+	private MonitorStyle monitor_style;
 
-	/** Set force-aspect ratio flag */
+	/** Set the monitor style */
 	@Override
-	public void setForceAspect(boolean fa) {
-		force_aspect = fa;
+	public void setMonitorStyle(MonitorStyle ms) {
+		monitor_style = ms;
 	}
 
-	/** Set force-aspect ratio flag */
-	public void doSetForceAspect(boolean fa) throws TMSException {
-		if (fa == force_aspect)
-			return;
-		store.update(this, "force_aspect", fa);
-		setForceAspect(fa);
+	/** Set the monitor style */
+	public void doSetMonitorStyle(MonitorStyle ms) throws TMSException {
+		if (ms != monitor_style) {
+			store.update(this, "monitor_style", ms);
+			setMonitorStyle(ms);
+		}
 	}
 
-	/** Get force-aspect ratio flag */
+	/** Get the monitor style */
 	@Override
-	public boolean getForceAspect() {
-		return force_aspect;
+	public MonitorStyle getMonitorStyle() {
+		return monitor_style;
 	}
+
+
 
 	/** Camera displayed on the video monitor */
 	private Camera camera;

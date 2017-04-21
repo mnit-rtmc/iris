@@ -693,13 +693,19 @@ CREATE TRIGGER camera_delete_trig
     INSTEAD OF DELETE ON iris.camera
     FOR EACH ROW EXECUTE PROCEDURE iris.camera_delete();
 
+CREATE TABLE iris.monitor_style (
+	name VARCHAR(24) PRIMARY KEY,
+	force_aspect BOOLEAN NOT NULL,
+	accent VARCHAR(8) NOT NULL
+);
+
 CREATE TABLE iris._video_monitor (
 	name VARCHAR(12) PRIMARY KEY,
 	notes VARCHAR(32) NOT NULL,
 	mon_num INTEGER NOT NULL,
 	direct BOOLEAN NOT NULL,
 	restricted BOOLEAN NOT NULL,
-	force_aspect BOOLEAN NOT NULL,
+	monitor_style VARCHAR(24) REFERENCES iris.monitor_style,
 	camera VARCHAR(10) REFERENCES iris._camera
 );
 
@@ -708,7 +714,7 @@ ALTER TABLE iris._video_monitor ADD CONSTRAINT _video_monitor_fkey
 
 CREATE VIEW iris.video_monitor AS SELECT
 	m.name, controller, pin, notes, mon_num, direct, restricted,
-	force_aspect, camera
+	monitor_style, camera
 	FROM iris._video_monitor m JOIN iris._device_io d ON m.name = d.name;
 
 CREATE FUNCTION iris.video_monitor_insert() RETURNS TRIGGER AS
@@ -717,9 +723,9 @@ BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._video_monitor (name, notes, mon_num, direct,
-	                                 restricted, force_aspect, camera)
+	                                 restricted, monitor_style, camera)
 	     VALUES (NEW.name, NEW.notes, NEW.mon_num, NEW.direct,
-	             NEW.restricted, NEW.force_aspect, NEW.camera);
+	             NEW.restricted, NEW.monitor_style, NEW.camera);
 	RETURN NEW;
 END;
 $video_monitor_insert$ LANGUAGE plpgsql;
@@ -740,7 +746,7 @@ BEGIN
 	       mon_num = NEW.mon_num,
 	       direct = NEW.direct,
 	       restricted = NEW.restricted,
-	       force_aspect = NEW.force_aspect,
+	       monitor_style = NEW.monitor_style,
 	       camera = NEW.camera
 	 WHERE name = OLD.name;
 	RETURN NEW;
@@ -2156,8 +2162,12 @@ CREATE VIEW ramp_meter_view AS
 	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
+CREATE VIEW monitor_style_view AS
+	SELECT name, force_aspect, accent FROM iris.monitor_style;
+GRANT SELECT ON monitor_style_view TO PUBLIC;
+
 CREATE VIEW video_monitor_view AS
-	SELECT m.name, m.notes, mon_num, direct, restricted, force_aspect,
+	SELECT m.name, m.notes, mon_num, direct, restricted, monitor_style,
 	       m.controller, ctr.condition, ctr.comm_link, camera
 	FROM iris.video_monitor m
 	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
@@ -2833,6 +2843,7 @@ lcs_indication
 map_extent
 meter_action
 modem
+monitor_style
 plan_phase
 privilege
 quick_message
@@ -2883,6 +2894,7 @@ PRV_0024	camera_admin	camera			t
 PRV_002A	camera_admin	encoder_type			t
 PRV_0025	camera_admin	camera_preset			t
 PRV_0026	camera_admin	video_monitor			t
+PRV_002B	camera_admin	monitor_style			t
 PRV_0027	camera_control	camera		ptz	t
 PRV_0028	camera_control	camera		recallPreset	t
 PRV_0029	camera_control	camera		deviceRequest	t
@@ -2892,6 +2904,7 @@ PRV_003A	camera_tab	encoder_type			f
 PRV_0032	camera_tab	camera			f
 PRV_0033	camera_tab	camera_preset			f
 PRV_0034	camera_tab	video_monitor			f
+PRV_003B	camera_tab	monitor_style			f
 PRV_0035	comm_admin	comm_link			t
 PRV_0036	comm_admin	modem			t
 PRV_0037	comm_admin	cabinet_style			t

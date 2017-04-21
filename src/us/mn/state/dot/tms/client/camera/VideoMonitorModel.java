@@ -15,11 +15,17 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.util.ArrayList;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.table.TableCellEditor;
+import us.mn.state.dot.tms.MonitorStyle;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 
 /**
  * Table model for video monitors
@@ -85,25 +91,51 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 					vm.setRestricted((Boolean) value);
 			}
 		});
-		cols.add(new ProxyColumn<VideoMonitor>("video.force.aspect",120,
-			Boolean.class)
-		{
+		cols.add(new ProxyColumn<VideoMonitor>("monitor.style", 160) {
 			public Object getValueAt(VideoMonitor vm) {
-				return vm.getForceAspect();
+				return vm.getMonitorStyle();
 			}
 			public boolean isEditable(VideoMonitor vm) {
-				return canUpdate(vm, "forceAspect");
+				return canUpdate(vm, "monitorStyle");
 			}
 			public void setValueAt(VideoMonitor vm, Object value) {
-				if (value instanceof Boolean)
-					vm.setForceAspect((Boolean) value);
+				if (value instanceof MonitorStyle)
+					vm.setMonitorStyle((MonitorStyle)value);
+				else
+					vm.setMonitorStyle(null);
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox<MonitorStyle> cbx =
+					new JComboBox<MonitorStyle>();
+				cbx.setModel(new IComboBoxModel<MonitorStyle>(
+					style_mdl));
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		return cols;
 	}
 
+	/** Monitor style proxy list model */
+	private final ProxyListModel<MonitorStyle> style_mdl;
+
 	/** Create a new video monitor table model */
 	public VideoMonitorModel(Session s) {
 		super(s, descriptor(s), 16);
+		style_mdl = new ProxyListModel<MonitorStyle>(
+			s.getSonarState().getCamCache().getMonitorStyles());
+	}
+
+	/** Initialize the model */
+	@Override
+	public void initialize() {
+		super.initialize();
+		style_mdl.initialize();
+	}
+
+	/** Dispose of the model */
+	@Override
+	public void dispose() {
+		style_mdl.dispose();
+		super.dispose();
 	}
 }

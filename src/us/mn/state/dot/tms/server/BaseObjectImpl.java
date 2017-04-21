@@ -70,6 +70,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		EncoderTypeImpl.loadAll();
 		CameraImpl.loadAll();
 		CameraPresetImpl.loadAll();
+		MonitorStyleImpl.loadAll();
 		VideoMonitorImpl.loadAll();
 		BeaconImpl.loadAll();
 		WeatherSensorImpl.loadAll();
@@ -195,6 +196,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		SonarObject so = lookupObject(EncoderTypeImpl.SONAR_TYPE, name);
 		return (so instanceof EncoderTypeImpl)
 		      ? (EncoderTypeImpl) so
+		      :	null;
+	}
+
+	/** Lookup a monitor style */
+	static protected MonitorStyleImpl lookupMonitorStyle(String name) {
+		SonarObject so = lookupObject(MonitorStyleImpl.SONAR_TYPE,name);
+		return (so instanceof MonitorStyleImpl)
+		      ? (MonitorStyleImpl) so
 		      :	null;
 	}
 
