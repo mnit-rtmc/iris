@@ -31,7 +31,7 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 	/** Load all the monitor styles */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, MonitorStyleImpl.class);
-		store.query("SELECT name, force_aspect, accent " +
+		store.query("SELECT name, force_aspect, accent, font_sz " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -47,6 +47,7 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 		map.put("name", name);
 		map.put("force_aspect", force_aspect);
 		map.put("accent", accent);
+		map.put("font_sz", font_sz);
 		return map;
 	}
 
@@ -67,21 +68,24 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 		super(n);
 		force_aspect = false;
 		accent = DEFAULT_ACCENT;
+		font_sz = DEFAULT_FONT_SZ;
 	}
 
 	/** Create a monitor style */
 	private MonitorStyleImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),		// name
 		     row.getBoolean(2),		// force_aspect
-		     row.getString(3)		// accent
+		     row.getString(3),		// accent
+		     row.getInt(4)		// font_sz
 		);
 	}
 
 	/** Create a new monitor style */
-	private MonitorStyleImpl(String n, boolean fa, String a) {
+	private MonitorStyleImpl(String n, boolean fa, String a, int fs) {
 		this(n);
 		force_aspect = fa;
 		accent = a;
+		font_sz = fs;
 	}
 
 	/** Force-aspect ratio flag */
@@ -128,5 +132,28 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 	@Override
 	public String getAccent() {
 		return accent;
+	}
+
+	/** Font size (pt) */
+	private int font_sz;
+
+	/** Set the font size (pt) */
+	@Override
+	public void setFontSz(int fs) {
+		font_sz = fs;
+	}
+
+	/** Set the font size (pt) */
+	public void doSetFontSz(int fs) throws TMSException {
+		if (fs != font_sz) {
+			store.update(this, "font_sz", fs);
+			setFontSz(fs);
+		}
+	}
+
+	/** Get the font size (pt) */
+	@Override
+	public int getFontSz() {
+		return font_sz;
 	}
 }

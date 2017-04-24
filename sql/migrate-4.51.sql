@@ -28,10 +28,11 @@ GRANT SELECT ON encoder_type_view TO PUBLIC;
 CREATE TABLE iris.monitor_style (
 	name VARCHAR(24) PRIMARY KEY,
 	force_aspect BOOLEAN NOT NULL,
-	accent VARCHAR(8) NOT NULL
+	accent VARCHAR(8) NOT NULL,
+	font_sz INTEGER NOT NULL
 );
 CREATE VIEW monitor_style_view AS
-	SELECT name, force_aspect, accent FROM iris.monitor_style;
+	SELECT name, force_aspect, accent, font_sz FROM iris.monitor_style;
 GRANT SELECT ON monitor_style_view TO PUBLIC;
 
 -- Add monitor_style to sonar_type table

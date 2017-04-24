@@ -29,6 +29,9 @@ public interface MonitorStyle extends SonarObject {
 	/** Default accent color */
 	String DEFAULT_ACCENT = "608060";
 
+	/** Default font size (pt) */
+	int DEFAULT_FONT_SZ = 32;
+
 	/** Set force-aspect ratio flag */
 	void setForceAspect(boolean fa);
 
@@ -36,8 +39,14 @@ public interface MonitorStyle extends SonarObject {
 	boolean getForceAspect();
 
 	/** Set the accent color (hex: RRGGBB) */
-	public void setAccent(String a);
+	void setAccent(String a);
 
 	/** Get the accent color (hex: RRGGBB) */
-	public String getAccent();
+	String getAccent();
+
+	/** Set the font size (pt) */
+	void setFontSz(int fs);
+
+	/** Get the font size (pt) */
+	int getFontSz();
 }

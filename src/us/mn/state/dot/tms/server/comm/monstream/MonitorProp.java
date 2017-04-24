@@ -50,6 +50,14 @@ public class MonitorProp extends ControllerProp {
 		      : MonitorStyle.DEFAULT_ACCENT;
 	}
 
+	/** Get the monitor font size */
+	static private int getFontSz(VideoMonitorImpl mon) {
+		MonitorStyle ms = monitorStyle(mon);
+		return (ms != null)
+		      ? ms.getFontSz()
+		      : MonitorStyle.DEFAULT_FONT_SZ;
+	}
+
 	/** ASCII record separator */
 	static private final char RECORD_SEP = 30;
 
@@ -95,6 +103,8 @@ public class MonitorProp extends ControllerProp {
 		sb.append(getAccent(mon));
 		sb.append(UNIT_SEP);
 		sb.append(getForceAspect(mon));
+		sb.append(UNIT_SEP);
+		sb.append(Integer.toString(getFontSz(mon)));
 		sb.append(RECORD_SEP);
 		return sb.toString();
 	}

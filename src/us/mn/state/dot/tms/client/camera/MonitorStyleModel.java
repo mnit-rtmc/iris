@@ -40,7 +40,7 @@ public class MonitorStyleModel extends ProxyTableModel<MonitorStyle> {
 	@Override
 	protected ArrayList<ProxyColumn<MonitorStyle>> createColumns() {
 		ArrayList<ProxyColumn<MonitorStyle>> cols =
-			new ArrayList<ProxyColumn<MonitorStyle>>(3);
+			new ArrayList<ProxyColumn<MonitorStyle>>(4);
 		cols.add(new ProxyColumn<MonitorStyle>("monitor.style",
 			120)
 		{
@@ -71,6 +71,20 @@ public class MonitorStyleModel extends ProxyTableModel<MonitorStyle> {
 			}
 			public void setValueAt(MonitorStyle ms, Object value) {
 				ms.setAccent(value.toString());
+			}
+		});
+		cols.add(new ProxyColumn<MonitorStyle>("monitor.font.sz", 90,
+			Integer.class)
+		{
+			public Object getValueAt(MonitorStyle ms) {
+				return ms.getFontSz();
+			}
+			public boolean isEditable(MonitorStyle ms) {
+				return canUpdate(ms, "fontSz");
+			}
+			public void setValueAt(MonitorStyle ms, Object value) {
+				if (value instanceof Integer)
+					ms.setFontSz((Integer) value);
 			}
 		});
 		return cols;
