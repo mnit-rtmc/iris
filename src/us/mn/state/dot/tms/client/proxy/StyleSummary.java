@@ -47,6 +47,11 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class StyleSummary<T extends SonarObject> extends JPanel {
 
+	/** Button update state */
+	private enum ButtonUpdateState {
+		starting, working, done
+	}
+
 	/** Style button rows */
 	static private final int STYLE_ROWS = 2;
 
@@ -292,39 +297,86 @@ public class StyleSummary<T extends SonarObject> extends JPanel {
 
 	/** Update the count labels for each style status */
 	private void updateCounts() {
-		IWorker<Void> worker = new IWorker<Void>() {
-			@Override
-			public Void doInBackground() {
-				doUpdateCounts();
-				return null;
-			}
-			@Override
-			public void done() {
-				updateCountLabels();
-			}
-		};
-		worker.execute();
+		if (startButtonUpdate()) {
+			IWorker<Void> worker = new IWorker<Void>() {
+				@Override
+				public Void doInBackground() {
+					doUpdateCounts();
+					return null;
+				}
+				@Override
+				public void done() {
+					updateCountLabels();
+				}
+			};
+			worker.execute();
+		}
 	}
 
-	/** Update the counts for each style status.  Must be synchronized
-	 * in case multiple IWorkers are created. */
-	private synchronized void doUpdateCounts() {
-		for (StyleButton btn : buttons)
-			btn.n_count = 0;
-		for (T proxy : manager.getCache()) {
-			for (StyleButton btn : buttons) {
-				if (manager.checkStyle(btn.i_style, proxy))
-					btn.n_count++;
+	/** Flag to indicate button update in progress */
+	private ButtonUpdateState update_state = ButtonUpdateState.done;
+
+	/** Start button update.
+	 * @return true If new worker needs to be created. */
+	private boolean startButtonUpdate() {
+		synchronized (buttons) {
+			boolean b = (ButtonUpdateState.done == update_state);
+			update_state = ButtonUpdateState.starting;
+			for (StyleButton btn : buttons)
+				btn.n_count = 0;
+			return b;
+		}
+	}
+
+	/** Update the counts for each style status */
+	private void doUpdateCounts() {
+		while (checkUpdateStatus())
+			tryUpdateCounts();
+	}
+
+	/** Check button update status.  If "starting", switch to "working" and
+	 * return true.  Else, switch to "done" and return false. */
+	private boolean checkUpdateStatus() {
+		synchronized (buttons) {
+			if (ButtonUpdateState.starting == update_state) {
+				update_state = ButtonUpdateState.working;
+				return true;
+			} else {
+				update_state = ButtonUpdateState.done;
+				return false;
 			}
 		}
 	}
 
-	/** Update the count labels.  Must be synchronized in case multiple
-	 * IWorkers are created. */
-	private synchronized void updateCountLabels() {
+	/** Try to update the counts for each style status */
+	private void tryUpdateCounts() {
+		for (T proxy : manager.getCache()) {
+			if (updateCount(proxy))
+				break;
+		}
+	}
+
+	/** Update the style button counts for one proxy */
+	private boolean updateCount(T proxy) {
 		for (StyleButton btn : buttons) {
-			btn.setText(Integer.toString(btn.n_count) + ' ' +
-				btn.i_style);
+			if (manager.checkStyle(btn.i_style, proxy)) {
+				synchronized (buttons) {
+					btn.n_count++;
+				}
+			}
+		}
+		synchronized (buttons) {
+			return update_state != ButtonUpdateState.working;
+		}
+	}
+
+	/** Update the count labels */
+	private void updateCountLabels() {
+		synchronized (buttons) {
+			for (StyleButton btn : buttons) {
+				btn.setText(Integer.toString(btn.n_count) +
+					' ' + btn.i_style);
+			}
 		}
 	}
 
