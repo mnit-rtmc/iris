@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -60,9 +60,10 @@ public class PelcoDPoller extends TransientPoller<PelcoDProperty>
 
 	/** Send a device request
 	 * @param c The CameraImpl object.
-	 * @param r The desired DeviceRequest. */
+	 * @param dr The desired DeviceRequest. */
 	@Override
-	public void sendRequest(CameraImpl c, DeviceRequest r) {
-		addOp(new OpDeviceRequest(c, r));
+	public void sendRequest(CameraImpl c, DeviceRequest dr) {
+		if (DeviceRequest.QUERY_STATUS != dr)
+			addOp(new OpDeviceRequest(c, dr));
 	}
 }
