@@ -49,6 +49,19 @@ public class CommThread<T extends ControllerProperty> {
 	/** Thread group for all comm threads */
 	static private final ThreadGroup GROUP = new ThreadGroup("Comm");
 
+	/** Check if messenger needs reconnect after read timeout failure.
+	 * For a modem link, read timeout should be handled by reconnecting
+	 * the modem.  For a datagram messenger (UDP), a reconnect may be
+	 * required if a network error caused the information cached during
+	 * the connect call to become stale.  This condition was observed when
+	 * a router malfunctioned, causing all connected UDP sockets to always
+	 * throw SocketTimeoutException until the socket was torn down and
+	 * re-established.  Crazy.  2017-04-25. */
+	static private boolean needsReconnect(Messenger m) {
+		return (m instanceof ModemMessenger) ||
+		       (m instanceof DatagramMessenger);
+	}
+
 	/** Write a message to the comm log */
 	private void clog(String msg) {
 		if (logger.isOpen())
@@ -174,6 +187,9 @@ public class CommThread<T extends ControllerProperty> {
 			{
 				pollQueue(m);
 			}
+			catch (ReconnectException e) {
+				continue;
+			}
 			catch (NoModemException e) {
 				// Keep looping until modem is available
 				setStatus(getMessage(e));
@@ -261,15 +277,13 @@ public class CommThread<T extends ControllerProperty> {
 		catch (SocketTimeoutException e) {
 			String msg = getMessage(e);
 			o.handleCommError(EventType.POLL_TIMEOUT_ERROR, msg);
-			if (m instanceof ModemMessenger && !o.isSuccess()) {
-				// Force modem to reconnect
-				throw e;
-			}
+			if ((!o.isSuccess()) && needsReconnect(m))
+				throw new ReconnectException();
 		}
 		catch (SocketException e) {
 			String msg = getMessage(e);
 			o.handleCommError(EventType.COMM_ERROR, msg);
-			throw e;
+			throw new ReconnectException();
 		}
 		finally {
 			if (o.isDone() || !requeueOperation(o))
