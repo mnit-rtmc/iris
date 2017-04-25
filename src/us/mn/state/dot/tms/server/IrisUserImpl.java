@@ -23,7 +23,10 @@ import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.TMSException;
-import static us.mn.state.dot.tms.utils.SString.*;
+import static us.mn.state.dot.tms.utils.SString.containsDigit;
+import static us.mn.state.dot.tms.utils.SString.containsLetter;
+import static us.mn.state.dot.tms.utils.SString.isDisplayable;
+import static us.mn.state.dot.tms.utils.SString.longestCommonSubstring;
 
 /**
  * IRIS user
@@ -158,6 +161,10 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		if (pwd.length() < 8) {
 			throw new ChangeVetoException(
 				"Must be at least 8 characters");
+		}
+		if (!isDisplayable(pwd)) {
+			throw new ChangeVetoException(
+				"All characters must be displayable");
 		}
 		String lpwd = pwd.toLowerCase();
 		String c = longestCommonSubstring(name.toLowerCase(), lpwd);

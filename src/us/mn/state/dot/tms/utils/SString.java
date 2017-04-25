@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2011  AHMCT, University of California
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -286,5 +286,26 @@ public class SString {
 	/** Check if a string blank or null */
 	static public boolean isBlank(String s) {
 		return s == null || s.isEmpty();
+	}
+
+	/** Check if a character is displayable */
+	static private boolean isDisplayable(char c) {
+		return isDisplayableBlock(c) &&
+		      !Character.isISOControl(c);
+	}
+
+	/** Check if a character is in a displayable unicode block */
+	static private boolean isDisplayableBlock(char c) {
+		Character.UnicodeBlock b = Character.UnicodeBlock.of(c);
+		return (b != null) && (b != Character.UnicodeBlock.SPECIALS);
+	}
+
+	/** Check if all characters in a string are displayable */
+	static public boolean isDisplayable(String s) {
+		for (int i = 0; i < s.length(); i++) {
+			if (!isDisplayable(s.charAt(i)))
+				return false;
+		}
+		return true;
 	}
 }
