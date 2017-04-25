@@ -30,6 +30,12 @@ public class MonCycleProp extends MonStatusProp {
 	/** Monitor cycle request code */
 	static public final int REQ_CODE = 0xC9;
 
+	/** Sub-request code for alternate camera */
+	static private final int SUB_ALT_CAM = 2;
+
+	/** Sub-request code for cycle monitor */
+	static private final int SUB_CYCLE_MON = 3;
+
 	/** Create a new monitor cycle property */
 	public MonCycleProp(boolean l, int mn) {
 		super(l, mn);
@@ -40,8 +46,14 @@ public class MonCycleProp extends MonStatusProp {
 	public void decodeQuery(Operation op, ByteBuffer rx_buf)
 		throws ParsingException
 	{
-		if (parse8(rx_buf) != 3)
-			throw new ParsingException("CYCLE");
+		int sub = parse8(rx_buf);
+		if (sub == SUB_ALT_CAM) {
+			// FIXME: send the proper message back to display
+			//        "NO ALT. CAM. message on keyboard"
+			return;
+		}
+		if (sub != SUB_CYCLE_MON)
+			throw new ParsingException("SUB");
 		int dir = parse8(rx_buf);
 		if (dir != 1 && dir != 2)
 			throw new ParsingException("DIR");
