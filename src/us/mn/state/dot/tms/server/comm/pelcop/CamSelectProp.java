@@ -45,8 +45,15 @@ public class CamSelectProp extends MonStatusProp {
 		int mhi = parseBCD2(rx_buf);
 		if (parse8(rx_buf) != 0)
 			throw new ParsingException("CAM EXT");
-		setMonNumber((100 * mhi) + mlo);
-		selectCamera(op, cam);
+		// Pressing "Ret" just after logon causes this msg to be sent
+		// with monitor 0 and camera 0.  After a new camera has been
+		// selected, the keyboard will handle "Ret" without sending this
+		// message.  If IRIS ever starts keeping track of previous
+		// camera, we could select that here.
+		if (mlo > 0 || mhi > 0 || cam > 0) {
+			setMonNumber((100 * mhi) + mlo);
+			selectCamera(op, cam);
+		}
 	}
 
 	/** Select camera on a video monitor */
