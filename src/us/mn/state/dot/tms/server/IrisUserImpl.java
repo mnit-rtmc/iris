@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +18,11 @@ import java.security.spec.InvalidKeySpecException;
 import java.sql.ResultSet;
 import java.util.HashMap;
 import java.util.Map;
-import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.UserImpl;
+import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.utils.SString.*;
 
 /**
@@ -83,7 +83,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	/** Create a new IRIS user */
 	public IrisUserImpl(String n) {
 		super(n);
-		// FIXME: validate for SQL injections
+		// FIXME: convert user name to lower case
 		fullName = "";
 		password = "";
 		dn = "";
@@ -92,15 +92,15 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	}
 
 	/** Create an IRIS user from database lookup */
-	protected IrisUserImpl(ServerNamespace ns, String n, String fn,
+	private IrisUserImpl(ServerNamespace ns, String n, String fn,
 		String pwd, String d, String r, boolean e) throws TMSException
 	{
 		this(n, fn, pwd, d,
-		     (IrisRoleImpl)ns.lookupObject(Role.SONAR_TYPE,r), e);
+		     (IrisRoleImpl) ns.lookupObject(Role.SONAR_TYPE, r), e);
 	}
 
 	/** Create an IRIS user from database lookup */
-	protected IrisUserImpl(String n, String fn, String pwd, String d,
+	private IrisUserImpl(String n, String fn, String pwd, String d,
 		IrisRoleImpl r, boolean e)
 	{
 		super(n);
