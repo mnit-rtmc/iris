@@ -23,8 +23,8 @@ import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.TMSException;
-import static us.mn.state.dot.tms.utils.SString.containsDigit;
-import static us.mn.state.dot.tms.utils.SString.containsLetter;
+import static us.mn.state.dot.tms.utils.SString.countLetters;
+import static us.mn.state.dot.tms.utils.SString.countUnique;
 import static us.mn.state.dot.tms.utils.SString.isDisplayable;
 import static us.mn.state.dot.tms.utils.SString.longestCommonSubstring;
 
@@ -34,6 +34,11 @@ import static us.mn.state.dot.tms.utils.SString.longestCommonSubstring;
  * @author Douglas lau
  */
 public class IrisUserImpl extends UserImpl implements Storable {
+
+	/** Get required number of unique characters for a password length */
+	static private int uniqueRequirement(int plen) {
+		return (plen < 20) ? (plen / 2) : 10;
+	}
 
 	/** SQL connection to database */
 	static private SQLConnection store;
@@ -158,7 +163,8 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Check a password */
 	private void checkPassword(String pwd) throws ChangeVetoException {
-		if (pwd.length() < 8) {
+		final int plen = pwd.length();
+		if (plen < 8) {
 			throw new ChangeVetoException(
 				"Must be at least 8 characters");
 		}
@@ -172,10 +178,14 @@ public class IrisUserImpl extends UserImpl implements Storable {
 			throw new ChangeVetoException("Based on user name");
 		if (longestCommonSubstring("password", lpwd).length() > 4)
 			throw new ChangeVetoException("Invalid password");
-		if (!containsDigit(pwd))
-			throw new ChangeVetoException("Must contain digit");
-		if (!containsLetter(pwd))
-			throw new ChangeVetoException("Must contain letter");
+		if (countLetters(pwd) == plen) {
+			throw new ChangeVetoException(
+				"Must contain non-letters");
+		}
+		if (countUnique(pwd) < uniqueRequirement(plen)) {
+			throw new ChangeVetoException(
+				"Must contain more unique characters");
+		}
 	}
 
 	/** Get the password */

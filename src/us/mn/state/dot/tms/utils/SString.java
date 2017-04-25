@@ -15,6 +15,8 @@
  */
 package us.mn.state.dot.tms.utils;
 
+import java.util.Arrays;
+
 /**
  * String convenience methods.
  *
@@ -265,22 +267,28 @@ public class SString {
 		return s2.substring(start, end);
 	}
 
-	/** Check if a string contains a digit */
-	static public boolean containsDigit(String s) {
-		for (int i = 0; i < s.length(); i++) {
-			if (Character.isDigit(s.charAt(i)))
-				return true;
-		}
-		return false;
-	}
-
-	/** Check if a string contains a letter */
-	static public boolean containsLetter(String s) {
+	/** Count the number of letters in a string */
+	static public int countLetters(String s) {
+		int n = 0;
 		for (int i = 0; i < s.length(); i++) {
 			if (Character.isLetter(s.charAt(i)))
-				return true;
+				n++;
 		}
-		return false;
+		return n;
+	}
+
+	/** Count the number of unique characters in a string */
+	static public int countUnique(String s) {
+		char[] u = s.toCharArray();
+		char prev = '\0';
+		int n = 0;
+		Arrays.sort(u);
+		for (char c : u) {
+			if (c != prev)
+				n++;
+			prev = c;
+		}
+		return n;
 	}
 
 	/** Check if a string blank or null */

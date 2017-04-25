@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009 - 2011  AHMCT, University of California
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,31 +72,39 @@ public class SStringTest extends TestCase {
 			"__123__abcd__").equals("abcd"));
 	}
 
-	public void testContainsDigit() {
-		assertFalse(containsDigit(""));
-		assertFalse(containsDigit(" \t[]\\{}|"));
-		assertFalse(containsDigit("!@#$%^&*()_+`~-+,./<>?;':"));
-		assertTrue(containsDigit("1"));
-		assertTrue(containsDigit("234"));
-		assertTrue(containsDigit("567"));
-		assertTrue(containsDigit("890"));
-		assertFalse(containsDigit("abc"));
-		assertFalse(containsDigit("XYZ"));
-		assertFalse(containsDigit("abcdefghijklmnopqrstuvwxyz"));
-		assertFalse(containsDigit("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+	public void testCountLetters() {
+		assertTrue(countLetters("") == 0);
+		assertTrue(countLetters(" \t[]\\{}|") == 0);
+		assertTrue(countLetters("!@#$%^&*()_`~-+,./<>?;':") == 0);
+		assertTrue(countLetters("1") == 0);
+		assertTrue(countLetters("234") == 0);
+		assertTrue(countLetters("567") == 0);
+		assertTrue(countLetters("890") == 0);
+		assertTrue(countLetters("abc") == 3);
+		assertTrue(countLetters("XYZ") == 3);
+		assertTrue(countLetters("abcdefghijklmnopqrstuvwxyz") == 26);
+		assertTrue(countLetters("ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 26);
 	}
 
-	public void testContainsLetter() {
-		assertFalse(containsLetter(""));
-		assertFalse(containsLetter(" \t[]\\{}|"));
-		assertFalse(containsLetter("!@#$%^&*()_+`~-+,./<>?;':"));
-		assertFalse(containsLetter("1"));
-		assertFalse(containsLetter("234"));
-		assertFalse(containsLetter("567"));
-		assertFalse(containsLetter("890"));
-		assertTrue(containsLetter("abc"));
-		assertTrue(containsLetter("XYZ"));
-		assertTrue(containsLetter("abcdefghijklmnopqrstuvwxyz"));
-		assertTrue(containsLetter("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
+	public void testCountUnique() {
+		assertTrue(countUnique("") == 0);
+		assertTrue(countUnique(" ") == 1);
+		assertTrue(countUnique("      ") == 1);
+		assertTrue(countUnique("!@#$%^&*()_`~-+,./<>?;':") == 24);
+		assertTrue(countUnique("abcdefghijklmnopqrstuvwxyz") == 26);
+		assertTrue(countUnique("ABCDEFGHIJKLMNOPQRSTUVWXYZ") == 26);
+		assertTrue(countUnique("123123123123") == 3);
+		assertTrue(countUnique("AAAABBBBCCCCDDDD") == 4);
+		assertTrue(countUnique("good gooey glue") == 8);
+	}
+
+	public void testDisplayable() {
+		assertTrue(isDisplayable(""));
+		assertFalse(isDisplayable("\t"));
+		assertFalse(isDisplayable("\n"));
+		assertTrue(isDisplayable("!@#$%^&*()_`~-+,./<>?;':"));
+		assertTrue(isDisplayable("1234567890"));
+		assertTrue(isDisplayable("abcdefghijklmnopqrstuvwxyz"));
+		assertTrue(isDisplayable("ABCDEFGHIJKLMNOPQRSTUVWXYZ"));
 	}
 }
