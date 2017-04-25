@@ -37,7 +37,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Get required number of unique characters for a password length */
 	static private int uniqueRequirement(int plen) {
-		return (plen < 20) ? (plen / 2) : 10;
+		return (plen < 24) ? (plen / 2) : 12;
 	}
 
 	/** SQL connection to database */
@@ -178,7 +178,10 @@ public class IrisUserImpl extends UserImpl implements Storable {
 			throw new ChangeVetoException("Based on user name");
 		if (longestCommonSubstring("password", lpwd).length() > 4)
 			throw new ChangeVetoException("Invalid password");
-		if (countLetters(pwd) == plen) {
+		int n_let = countLetters(pwd);
+		if (0 == n_let)
+			throw new ChangeVetoException("Must contain letters");
+		if (plen < 20 && plen == n_let) {
 			throw new ChangeVetoException(
 				"Must contain non-letters");
 		}
