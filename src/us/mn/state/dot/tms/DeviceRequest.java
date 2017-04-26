@@ -22,89 +22,33 @@ package us.mn.state.dot.tms;
  * @author Travis Swanston
  */
 public enum DeviceRequest {
-
-	/** No request */
 	NO_REQUEST,
-
-	/** Query device configuration */
 	QUERY_CONFIGURATION,
-
-	/** Send device settings */
 	SEND_SETTINGS,
-
-	/** Query current message */
 	QUERY_MESSAGE,
-
-	/** Query device status */
 	QUERY_STATUS,
-
-	/** Query sign pixel failures */
 	QUERY_PIXEL_FAILURES,
-
-	/** Activate pixel test */
 	TEST_PIXELS,
-
-	/** Activate fan test */
 	TEST_FANS,
-
-	/** Activate lamp test */
 	TEST_LAMPS,
-
-	/** Sign brightness feedback "good" */
 	BRIGHTNESS_GOOD,
-
-	/** Sign brightness feedback "too dim" */
 	BRIGHTNESS_TOO_DIM,
-
-	/** Sign brightness feedback "too bright" */
 	BRIGHTNESS_TOO_BRIGHT,
-
-	/** Reset device */
 	RESET_DEVICE,
-
-	/** Reset modem */
 	RESET_MODEM,
-
-	/** Send LEDSTAR sign settings */
 	SEND_LEDSTAR_SETTINGS,
-
-	/** Query LEDSTAR sign settings */
 	QUERY_LEDSTAR_SETTINGS,
-
-	/** Disable (gate arm) system */
 	DISABLE_SYSTEM,
-
-	/** CAMERA: stop focus */
 	CAMERA_FOCUS_STOP,
-
-	/** CAMERA: focus near */
 	CAMERA_FOCUS_NEAR,
-
-	/** CAMERA: focus far */
 	CAMERA_FOCUS_FAR,
-
-	/** CAMERA: manual-focus */
 	CAMERA_FOCUS_MANUAL,
-
-	/** CAMERA: auto-focus */
 	CAMERA_FOCUS_AUTO,
-
-	/** CAMERA: stop iris */
 	CAMERA_IRIS_STOP,
-
-	/** CAMERA: close iris */
 	CAMERA_IRIS_CLOSE,
-
-	/** CAMERA: open iris */
 	CAMERA_IRIS_OPEN,
-
-	/** CAMERA: manual-iris */
 	CAMERA_IRIS_MANUAL,
-
-	/** CAMERA: auto-iris */
 	CAMERA_IRIS_AUTO,
-
-	/** CAMERA: wiper one-shot */
 	CAMERA_WIPER_ONESHOT;
 
 	/** Cached values array */
