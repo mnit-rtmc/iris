@@ -99,6 +99,15 @@ public class CamControlProp extends MonStatusProp {
 	/** Extended recall preset code */
 	static private final int EXT_RECALL_PRESET = 7;
 
+	/** Special preset number for menu open */
+	static private final int MENU_OPEN_PRESET = 77;
+
+	/** Special preset number for menu enter */
+	static private final int MENU_ENTER_PRESET = 78;
+
+	/** Special preset number for menu cancel */
+	static private final int MENU_CANCEL_PRESET = 79;
+
 	/** Create a new camera control property */
 	public CamControlProp(boolean l, int mn) {
 		super(l, mn);
@@ -237,10 +246,28 @@ public class CamControlProp extends MonStatusProp {
 		int preset = parseBCD2(c3);
 		switch (c1) {
 		case EXT_STORE_PRESET:
-			c.setStorePreset(preset);
+			storePreset(c, preset);
 			break;
 		case EXT_RECALL_PRESET:
 			c.setRecallPreset(preset);
+			break;
+		}
+	}
+
+	/** Store a preset */
+	private void storePreset(CameraImpl c, int preset) {
+		switch (preset) {
+		case MENU_OPEN_PRESET:
+			c.setDeviceRequest(CAMERA_MENU_OPEN.ordinal());
+			break;
+		case MENU_ENTER_PRESET:
+			c.setDeviceRequest(CAMERA_MENU_ENTER.ordinal());
+			break;
+		case MENU_CANCEL_PRESET:
+			c.setDeviceRequest(CAMERA_MENU_CANCEL.ordinal());
+			break;
+		default:
+			c.setStorePreset(preset);
 			break;
 		}
 	}
