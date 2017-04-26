@@ -33,6 +33,18 @@ public class CamNextProp extends MonStatusProp {
 	/** Camera next request code */
 	static public final int REQ_CODE = 0xB6;
 
+	/** Find next camera */
+	static private CameraImpl findNext(int uid) {
+		Camera c = CameraHelper.findNext(uid);
+		if (c instanceof CameraImpl)
+			return (CameraImpl) c;
+		c = CameraHelper.findFirst();
+		if (c instanceof CameraImpl)
+			return (CameraImpl) c;
+		else
+			return null;
+	}
+
 	/** Create a new camera next property */
 	public CamNextProp(boolean l, int mn) {
 		super(l, mn);
@@ -53,10 +65,10 @@ public class CamNextProp extends MonStatusProp {
 	private void selectNextCamera(Operation op) {
 		int uid = getCamNumber();
 		if (uid > 0) {
-			Camera c = CameraHelper.findNext(uid);
-			if (c instanceof CameraImpl) {
+			CameraImpl c = findNext(uid);
+			if (c != null) {
 				VideoMonitorImpl.setCameraNotify(getMonNumber(),
-					(CameraImpl) c, "NEXT " + op.getId());
+					c, "NEXT " + op.getId());
 			}
 		}
 	}

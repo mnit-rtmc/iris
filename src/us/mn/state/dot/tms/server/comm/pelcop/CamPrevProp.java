@@ -33,6 +33,18 @@ public class CamPrevProp extends MonStatusProp {
 	/** Camera previous request code */
 	static public final int REQ_CODE = 0xB7;
 
+	/** Find previous camera */
+	static private CameraImpl findPrev(int uid) {
+		Camera c = CameraHelper.findPrev(uid);
+		if (c instanceof CameraImpl)
+			return (CameraImpl) c;
+		c = CameraHelper.findLast();
+		if (c instanceof CameraImpl)
+			return (CameraImpl) c;
+		else
+			return null;
+	}
+
 	/** Create a new camera previous property */
 	public CamPrevProp(boolean l, int mn) {
 		super(l, mn);
@@ -53,10 +65,10 @@ public class CamPrevProp extends MonStatusProp {
 	private void selectPrevCamera(Operation op) {
 		int uid = getCamNumber();
 		if (uid > 0) {
-			Camera c = CameraHelper.findPrev(uid);
-			if (c instanceof CameraImpl) {
+			CameraImpl c = findPrev(uid);
+			if (c != null) {
 				VideoMonitorImpl.setCameraNotify(getMonNumber(),
-					(CameraImpl) c, "PREV " + op.getId());
+					c, "PREV " + op.getId());
 			}
 		}
 	}

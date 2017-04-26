@@ -125,6 +125,38 @@ public class CameraHelper extends BaseHelper {
 		return cam;
 	}
 
+	/** Find camera with lowest number */
+	static public Camera findFirst() {
+		Camera cam = null;
+		Integer n = null;	// lowest camera number
+		Iterator<Camera> it = iterator();
+		while (it.hasNext()) {
+			Camera c = it.next();
+			Integer cn = c.getCamNum();
+			if (cn != null && n != null && cn < n) {
+				cam = c;
+				n = cn;
+			}
+		}
+		return cam;
+	}
+
+	/** Find camera with highest number */
+	static public Camera findLast() {
+		Camera cam = null;
+		int n = 0;	// highest camera number
+		Iterator<Camera> it = iterator();
+		while (it.hasNext()) {
+			Camera c = it.next();
+			Integer cn = c.getCamNum();
+			if (cn != null && cn > n) {
+				cam = c;
+				n = cn;
+			}
+		}
+		return cam;
+	}
+
 	/** Find next camera above a given number */
 	static public Camera findNext(int cam_num) {
 		Camera cam = null;
