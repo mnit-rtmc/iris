@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2016  Minnesota Department of Transportation
+ * Copyright (C) 2014-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,12 +27,15 @@ import us.mn.state.dot.tms.server.comm.OpStep;
  */
 public class OpDeviceRequest extends OpStep {
 
+	/** Check if a device request is implemented */
+	static public boolean isImplemented(DeviceRequest dr) {
+		return createProp(dr, 0) != null;
+	}
+
 	/** Create property associated with a device request.
 	 * @param dr Device request.
 	 * @return Associated property. */
-	static private ViconPTZProp createProp(DeviceRequest dr, int n_sent)
-		throws IOException
-	{
+	static private ViconPTZProp createProp(DeviceRequest dr, int n_sent) {
 		switch (dr) {
 		case CAMERA_FOCUS_NEAR:
 			return new CommandProp(0, 0, 0, -1, 0);
@@ -55,6 +58,9 @@ public class OpDeviceRequest extends OpStep {
 				return new AuxProp(1);
 			} else
 				return new AuxProp(0);
+		case CAMERA_MENU_ENTER:
+		case CAMERA_MENU_CANCEL:
+			return new MenuProp(dr);
 		default:
 			return null;
 		}

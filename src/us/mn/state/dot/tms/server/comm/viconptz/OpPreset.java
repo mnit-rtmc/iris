@@ -23,12 +23,14 @@ import us.mn.state.dot.tms.server.comm.OpStep;
  * Vicon operation to recall or store a camera preset.
  *
  * @author Douglas Lau
- * @author Stephen Donecker
  */
 public class OpPreset extends OpStep {
 
 	/** Special preset for on-screen menu (store) */
-	static private final int PRESET_MENU = 8;
+	static public final int MENU_OPEN = 94;
+
+	/** First preset intercepted by TXB-V translator board */
+	static private final int PRESET_TXB = 8;
 
 	/** Beginning of extended preset block */
 	static private final int PRESET_EXT = 21;
@@ -41,9 +43,9 @@ public class OpPreset extends OpStep {
 	 * @param p Preset number.
 	 * @return Actual preset number to send to camera. */
 	static private int adjustPreset(int p) {
-		return (p < PRESET_MENU) || (p >= PRESET_EXT)
+		return (p < PRESET_TXB) || (p >= PRESET_EXT)
 		      ? p
-		      : p - PRESET_MENU + PRESET_EXT;
+		      : p - PRESET_TXB + PRESET_EXT;
 	}
 
 	/** Preset property */

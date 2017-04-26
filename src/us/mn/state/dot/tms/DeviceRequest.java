@@ -49,7 +49,10 @@ public enum DeviceRequest {
 	CAMERA_IRIS_OPEN,
 	CAMERA_IRIS_MANUAL,
 	CAMERA_IRIS_AUTO,
-	CAMERA_WIPER_ONESHOT;
+	CAMERA_WIPER_ONESHOT,
+	CAMERA_MENU_OPEN,
+	CAMERA_MENU_ENTER,
+	CAMERA_MENU_CANCEL;
 
 	/** Cached values array */
 	static private final DeviceRequest[] VALUES = values();

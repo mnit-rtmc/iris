@@ -70,9 +70,16 @@ public class ViconPTZPoller extends BasePoller implements CameraPoller {
 	 * @param dr The desired DeviceRequest. */
 	@Override
 	public void sendRequest(CameraImpl c, DeviceRequest dr) {
-		if (DeviceRequest.QUERY_STATUS != dr) {
-			createOp("device.op.request", c,
-				new OpDeviceRequest(dr));
+		switch (dr) {
+		case CAMERA_MENU_OPEN:
+			sendStorePreset(c, OpPreset.MENU_OPEN);
+			break;
+		default:
+			if (OpDeviceRequest.isImplemented(dr)) {
+				createOp("device.op.request", c,
+					new OpDeviceRequest(dr));
+			}
+			break;
 		}
 	}
 }
