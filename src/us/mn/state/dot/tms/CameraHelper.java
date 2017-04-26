@@ -133,9 +133,11 @@ public class CameraHelper extends BaseHelper {
 		while (it.hasNext()) {
 			Camera c = it.next();
 			Integer cn = c.getCamNum();
-			if (cn != null && n != null && cn < n) {
-				cam = c;
-				n = cn;
+			if (cn != null) {
+				if ((null == n) || cn < n) {
+					cam = c;
+					n = cn;
+				}
 			}
 		}
 		return cam;
