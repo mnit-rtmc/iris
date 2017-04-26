@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -107,11 +107,11 @@ public enum DeviceRequest {
 	/** CAMERA: wiper one-shot */
 	CAMERA_WIPER_ONESHOT;
 
+	/** Cached values array */
+	static private final DeviceRequest[] VALUES = values();
+
 	/** Get device request from an ordinal value */
 	static public DeviceRequest fromOrdinal(int o) {
-		if (o >= 0 && o < values().length)
-			return values()[o];
-		else
-			return NO_REQUEST;
+		return (o >= 0 && o < VALUES.length) ? VALUES[o] : NO_REQUEST;
 	}
 }
