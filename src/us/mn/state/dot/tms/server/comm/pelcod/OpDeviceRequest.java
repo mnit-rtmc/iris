@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2014-2016  Minnesota Department of Transportation
+ * Copyright (C) 2014-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.pelcod.ExtendedProperty.Command;
 
 /**
  * Pelco D operation to handle DeviceRequest requests.
@@ -31,7 +32,7 @@ public class OpDeviceRequest extends OpPelcoD {
 	/** Get property associated with a device request.
 	 * @param dr Device request.
 	 * @return Associated property. */
-	static private PelcoDProperty getProperty(DeviceRequest dr) {
+	static private PelcoDProperty createProp(DeviceRequest dr, int n_sent) {
 		switch (dr) {
 		case CAMERA_FOCUS_NEAR:
 			return new CommandProperty(0, 0, 0, -1, 0);
@@ -46,30 +47,26 @@ public class OpDeviceRequest extends OpPelcoD {
 		case CAMERA_IRIS_STOP:
 			return new CommandProperty(0, 0, 0, 0, 0);
 		case CAMERA_FOCUS_MANUAL:
-			return new ExtendedProperty(ExtendedProperty.
-				Command.AUTO_FOCUS, 1);
+			return new ExtendedProperty(Command.AUTO_FOCUS, 1);
 		case CAMERA_FOCUS_AUTO:
-			return new ExtendedProperty(ExtendedProperty.
-				Command.AUTO_FOCUS, 0);
+			return new ExtendedProperty(Command.AUTO_FOCUS, 0);
 		case CAMERA_IRIS_MANUAL:
-			return new ExtendedProperty(ExtendedProperty.
-				Command.AUTO_IRIS, 1);
+			return new ExtendedProperty(Command.AUTO_IRIS, 1);
 		case CAMERA_IRIS_AUTO:
-			return new ExtendedProperty(ExtendedProperty.
-				Command.AUTO_IRIS, 0);
+			return new ExtendedProperty(Command.AUTO_IRIS, 0);
 		case RESET_DEVICE:
-			return new ExtendedProperty(ExtendedProperty.
-				Command.REMOTE_RESET);
+			return new ExtendedProperty(Command.REMOTE_RESET);
 		case CAMERA_WIPER_ONESHOT:
-			return new ExtendedProperty(ExtendedProperty.
-				Command.SET_AUX, 1);
+			return (n_sent < 1)
+			      ? new ExtendedProperty(Command.SET_AUX, 1)
+			      :	new ExtendedProperty(Command.CLEAR_AUX, 1);
 		default:
 			return null;
 		}
 	}
 
-	/** Property for request */
-	private final PelcoDProperty prop;
+	/** Device request */
+	private final DeviceRequest req;
 
 	/**
 	 * Create the operation.
@@ -78,13 +75,16 @@ public class OpDeviceRequest extends OpPelcoD {
 	 */
 	public OpDeviceRequest(CameraImpl c, DeviceRequest dr) {
 		super(c);
-		prop = getProperty(dr);
+		req = dr;
 	}
+
+	/** Number of times this request was sent */
+	private int n_sent = 0;
 
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<PelcoDProperty> phaseTwo() {
-		return (prop != null) ? new DeviceRequestPhase() : null;
+		return new DeviceRequestPhase();
 	}
 
 	/** Main phase. */
@@ -92,9 +92,19 @@ public class OpDeviceRequest extends OpPelcoD {
 		protected Phase<PelcoDProperty> poll(
 			CommMessage<PelcoDProperty> mess) throws IOException
 		{
-			mess.add(prop);
-			mess.storeProps();
-			return null;
+			PelcoDProperty prop = createProp(req, n_sent);
+			if (prop != null) {
+				mess.add(prop);
+				mess.storeProps();
+			}
+			n_sent++;
+			return shouldResend() ? this : null;
 		}
+	}
+
+	/** Should we resend the property? */
+	private boolean shouldResend() {
+		return (req == DeviceRequest.CAMERA_WIPER_ONESHOT)
+		    && (n_sent < 2);
 	}
 }
