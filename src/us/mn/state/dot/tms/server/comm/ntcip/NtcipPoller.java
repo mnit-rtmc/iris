@@ -23,10 +23,12 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
+import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import us.mn.state.dot.tms.utils.URIUtil;
 
@@ -36,7 +38,8 @@ import us.mn.state.dot.tms.utils.URIUtil;
  * @author Douglas Lau
  * @author John L. Stanley
  */
-public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller
+public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
+	SamplePoller
 {
 	/** Get the default URI for a comm protocol */
 	static private URI default_uri(CommProtocol cp) {
@@ -152,5 +155,28 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller
 		User o)
 	{
 		addOp(new OpSendLCSIndications(lcs_array, ind, o));
+	}
+
+	/** Reset controller.
+	 * @param c Controller to poll. */
+	@Override
+	public void resetController(ControllerImpl c) {
+		// FIXME
+	}
+
+	/** Send sample settings to a controller.
+	 * @param c Controller to poll. */
+	@Override
+	public void sendSettings(ControllerImpl c) {
+		// FIXME
+	}
+
+	/** Query sample data.
+ 	 * @param c Controller to poll.
+ 	 * @param p Sample period in seconds. */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void querySamples(ControllerImpl c, int p) {
+		addOp(new OpQuerySamples(c, p));
 	}
 }
