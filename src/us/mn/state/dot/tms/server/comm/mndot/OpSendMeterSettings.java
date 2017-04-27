@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,8 +87,14 @@ public class OpSendMeterSettings extends Op170Device {
 	public OpSendMeterSettings(PriorityLevel p, RampMeterImpl m) {
 		super(p, m);
 		meter = m;
-		if (meter.getAlgorithm() != MeterAlgorithm.NONE.ordinal())
+		if (shouldUpdateTimingTable())
 			updateTimingTable();
+	}
+
+	/** Check if timing table should be updated */
+	private boolean shouldUpdateTimingTable() {
+		return (meter.getAlgorithm() != MeterAlgorithm.NONE.ordinal())
+		    && !meter.isLocked();
 	}
 
 	/** Create a new meter settings operation */
