@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -737,10 +737,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Test if the release rate has changed */
 	private boolean rateChanged(Integer r) {
-		if (r == null)
-			return rate != null;
-		else
-			return !r.equals(rate);
+		return !objectEquals(r, rate);
 	}
 
 	/** Get the release rate (vehciels per hour) */
