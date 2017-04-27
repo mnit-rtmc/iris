@@ -57,10 +57,50 @@ public class OpQuerySamples extends OpController {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer max_det = maxVehicleDetectors.makeInt();
+			ASN1Integer seq = volumeOccupancySequence.makeInt();
+			ASN1Integer vo_per = volumeOccupancyPeriod.makeInt();
+			ASN1Integer n_dets = activeVolumeOccupancyDetectors
+			                    .makeInt();
 			mess.add(max_det);
+			mess.add(seq);
+			mess.add(vo_per);
+			mess.add(n_dets);
 			mess.queryProps();
 			logQuery(max_det);
-			return null;
+			logQuery(seq);
+			logQuery(vo_per);
+			logQuery(n_dets);
+			int n = n_dets.getInteger();
+			return (n > 0) ? new QueryVolOcc(n) : null;
+		}
+	}
+
+	/** Query volume and occupancy data */
+	private class QueryVolOcc extends Phase {
+
+		/** Count of detectors */
+		private final int n_dets;
+
+		/** Current row in volumeOccupancyTable */
+		private int row = 0;
+
+		/** Create a new phase to query volume / occupancy data */
+		public QueryVolOcc(int n) {
+			n_dets = n;
+		}
+
+		/** Query one row of data */
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Integer vol = detectorVolume.makeInt(row + 1);
+			ASN1Integer occ = detectorOccupancy.makeInt(row + 1);
+			mess.add(vol);
+			mess.add(occ);
+			mess.queryProps();
+			logQuery(vol);
+			logQuery(occ);
+			row++;
+			return (row < n_dets) ? this : null;
 		}
 	}
 
