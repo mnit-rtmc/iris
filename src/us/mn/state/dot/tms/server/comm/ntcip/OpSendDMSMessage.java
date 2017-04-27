@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
-import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -598,7 +597,7 @@ public class OpSendDMSMessage extends OpDMS {
 			//       stupid sign bug.  It may no longer be needed.
 			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 			time.setInteger(getDuration());
-			if (isScheduledIndefinite())
+			if (SignMessageHelper.isScheduledIndefinite(message))
 				setCommAndPower();
 			else
 				setCommAndPowerBlank();
@@ -611,14 +610,6 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.storeProps();
 			return null;
 		}
-	}
-
-	/** Check if the message is scheduled and has indefinite duration */
-	private boolean isScheduledIndefinite() {
-		int src = message.getSource();
-		return SignMsgSource.schedule.checkBit(src) &&
-		      (message.getDuration() == null) &&
-		      !SignMsgSource.operator.checkBit(src);
 	}
 
 	/** Set the comm loss and power recovery msgs */

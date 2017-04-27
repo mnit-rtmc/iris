@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms;
 
 import java.io.IOException;
 import java.util.Iterator;
-import static us.mn.state.dot.tms.SignMsgSource.*;
 import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -304,5 +303,14 @@ public class SignMessageHelper extends BaseHelper {
 					"Too many stuck on pixels: " + n_lit);
 			}
 		}
+	}
+
+	/** Check if a message is scheduled and has indefinite duration.
+	 * @param sm The sign message. */
+	static public boolean isScheduledIndefinite(SignMessage sm) {
+		int src = sm.getSource();
+		return SignMsgSource.schedule.checkBit(src) &&
+		      (sm.getDuration() == null) &&
+		      !SignMsgSource.operator.checkBit(src);
 	}
 }
