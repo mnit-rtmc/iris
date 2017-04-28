@@ -71,7 +71,8 @@ public class OpQuerySamples extends OpController {
 			logQuery(vo_per);
 			logQuery(n_dets);
 			int n = n_dets.getInteger();
-			return (n > 0) ? new QueryVolOcc(n) : null;
+			int r = nextDetRow(n, 0);
+			return (r <= n) ? new QueryVolOcc(n, r) : null;
 		}
 	}
 
@@ -82,26 +83,37 @@ public class OpQuerySamples extends OpController {
 		private final int n_dets;
 
 		/** Current row in volumeOccupancyTable */
-		private int row = 0;
+		private int row;
 
 		/** Create a new phase to query volume / occupancy data */
-		public QueryVolOcc(int n) {
+		public QueryVolOcc(int n, int r) {
 			n_dets = n;
+			row = r;
 		}
 
 		/** Query one row of data */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer vol = detectorVolume.makeInt(row + 1);
-			ASN1Integer occ = detectorOccupancy.makeInt(row + 1);
+			ASN1Integer vol = detectorVolume.makeInt(row);
+			ASN1Integer occ = detectorOccupancy.makeInt(row);
 			mess.add(vol);
 			mess.add(occ);
 			mess.queryProps();
 			logQuery(vol);
 			logQuery(occ);
-			row++;
-			return (row < n_dets) ? this : null;
+			row = nextDetRow(n_dets, row);
+			return (row <= n_dets) ? this : null;
 		}
+	}
+
+	/** Get the next assigned detector */
+	private int nextDetRow(int n_dets, int row) {
+		while (row < n_dets) {
+			row++;
+			if (controller.getDetectorAtPin(row) != null)
+				return row;
+		}
+		return n_dets + 1;
 	}
 
 	/** Log a property query */
