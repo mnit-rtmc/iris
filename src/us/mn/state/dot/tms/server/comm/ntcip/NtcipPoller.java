@@ -179,6 +179,8 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 	@SuppressWarnings("unchecked")
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
-		addOp(new OpQuerySamples(c, p));
+		// Don't query samples on 5 minute poll
+		if (c.getPollPeriod() == p)
+			addOp(new OpQuerySamples(c, p));
 	}
 }
