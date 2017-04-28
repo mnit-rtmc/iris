@@ -52,12 +52,7 @@ public class OpDeviceRequest extends OpStep {
 		case RESET_DEVICE:
 			return new ExPresetProp(true, ExPresetProp.SOFT_RESET);
 		case CAMERA_WIPER_ONESHOT:
-			if (n_sent < 3) {
-				// For Vicon cameras, this should be AUX 6, but
-				// Pelco cameras require AUX 1 here.
-				return new AuxProp(1);
-			} else
-				return new AuxProp(0);
+			return AuxProp.wiper(n_sent);
 		case CAMERA_MENU_ENTER:
 		case CAMERA_MENU_CANCEL:
 			return new MenuProp(dr);
@@ -96,6 +91,6 @@ public class OpDeviceRequest extends OpStep {
 	/** Should we resend the property? */
 	private boolean shouldResend() {
 		return (req == DeviceRequest.CAMERA_WIPER_ONESHOT)
-		    && (n_sent < 4);
+		    && (n_sent < 3);
 	}
 }

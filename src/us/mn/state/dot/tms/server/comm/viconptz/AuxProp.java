@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2016  Minnesota Department of Transportation
+ * Copyright (C) 2014-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +20,20 @@ package us.mn.state.dot.tms.server.comm.viconptz;
  * @author Douglas Lau
  */
 public class AuxProp extends ViconPTZProp {
+
+	/** Pelco cameras with TXB-V translator board */
+	static private final int WIPER_PELCO = 1;
+	static private final int WIPER = 6;
+	static private final int NONE = 0;
+
+	/** Get a wiper aux value */
+	static public AuxProp wiper(int n_sent) {
+		switch (n_sent) {
+		case 0:  return new AuxProp(WIPER);
+		case 1:  return new AuxProp(WIPER_PELCO);
+		default: return new AuxProp(NONE);
+		}
+	}
 
 	/** Aux number */
 	private final int aux;
