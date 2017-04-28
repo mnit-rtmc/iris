@@ -16,6 +16,9 @@ package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.server.CameraImpl;
+import static us.mn.state.dot.tms.DeviceRequest.CAMERA_POWER_OFF;
+import static us.mn.state.dot.tms.DeviceRequest.CAMERA_POWER_ON;
+import static us.mn.state.dot.tms.DeviceRequest.CAMERA_WASHER;
 import static us.mn.state.dot.tms.DeviceRequest.CAMERA_WIPER_ONESHOT;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -41,6 +44,9 @@ public class AuxProp extends MonStatusProp {
 
 	/** Aux value for Cam ON */
 	static private final int AUX_CAM_ON = 0x08;
+
+	/** Aux value for washer */
+	static private final int AUX_WASHER = 0x0A;
 
 	/** Aux value for Cam OFF */
 	static private final int AUX_CAM_OFF = 0x0E;
@@ -76,9 +82,17 @@ public class AuxProp extends MonStatusProp {
 				c.setDeviceRequest(
 					CAMERA_WIPER_ONESHOT.ordinal());
 				return;
+			case AUX_WASHER:
+				c.setDeviceRequest(
+					CAMERA_WASHER.ordinal());
+				return;
 			case AUX_CAM_ON:
+				c.setDeviceRequest(
+					CAMERA_POWER_ON.ordinal());
+				return;
 			case AUX_CAM_OFF:
-				// FIXME
+				c.setDeviceRequest(
+					CAMERA_POWER_OFF.ordinal());
 				return;
 			default:
 				throw new ParsingException("AUX");
