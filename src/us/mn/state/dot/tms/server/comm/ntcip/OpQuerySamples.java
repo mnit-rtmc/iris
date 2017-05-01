@@ -16,7 +16,11 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
 import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.server.ControllerImpl;
+import us.mn.state.dot.tms.server.DetectorImpl;
+import us.mn.state.dot.tms.server.OccupancySample;
+import us.mn.state.dot.tms.server.PeriodicSample;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -34,6 +38,12 @@ public class OpQuerySamples extends OpController {
 
 	/** NTCIP debug log */
 	static private final DebugLog MIB1202_LOG = new DebugLog("mib1202");
+
+	/** Volume overflow code */
+	static private final int VOL_OVERFLOW = 255;
+
+	/** Maximum occupancy value (100%) */
+	static private final int MAX_OCC = 200;
 
 	/** Poll period */
 	private final int period;
@@ -79,6 +89,9 @@ public class OpQuerySamples extends OpController {
 	/** Query volume and occupancy data */
 	private class QueryVolOcc extends Phase {
 
+		/** Sample timestamp */
+		private final long stamp;
+
 		/** Count of detectors */
 		private final int n_dets;
 
@@ -87,6 +100,7 @@ public class OpQuerySamples extends OpController {
 
 		/** Create a new phase to query volume / occupancy data */
 		public QueryVolOcc(int n, int r) {
+			stamp = TimeSteward.currentTimeMillis();
 			n_dets = n;
 			row = r;
 		}
@@ -101,8 +115,31 @@ public class OpQuerySamples extends OpController {
 			mess.queryProps();
 			logQuery(vol);
 			logQuery(occ);
+			storeVolOcc(vol, occ);
 			row = nextDetRow(n_dets, row);
 			return (row <= n_dets) ? this : null;
+		}
+
+		/** Store vol/occ sample data */
+		private void storeVolOcc(ASN1Integer vol, ASN1Integer occ) {
+			DetectorImpl det = controller.getDetectorAtPin(row);
+			if (det != null) {
+				storeVolOcc(det, vol.getInteger(),
+					occ.getInteger());
+			}
+		}
+
+		/** Store vol/occ sample data */
+		private void storeVolOcc(DetectorImpl det, int vol, int occ) {
+			if (vol < VOL_OVERFLOW) {
+				det.storeVolume(new PeriodicSample(stamp,
+					period, vol));
+			}
+			if (occ <= MAX_OCC) {
+				det.storeOccupancy(new OccupancySample(stamp,
+					period, occ, MAX_OCC));
+			}
+			// FIXME: deal with detector fault codes
 		}
 	}
 
