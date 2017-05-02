@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.utils.URIUtil;
 
 /**
  * A property to switch a camera.
@@ -126,6 +127,9 @@ public class SwitchProp extends ControllerProp {
 			String cond = getConditionUri();
 			if (cond != null)
 				return cond;
+			String mcast = getMulticastUri();
+			if (mcast != null)
+				return mcast;
 			return CameraHelper.encoderUri(camera, getAuth(),
 				"").toString();
 		} else
@@ -155,6 +159,16 @@ public class SwitchProp extends ControllerProp {
 			}
 		}
 		return CtrlCondition.REMOVED;
+	}
+
+	/** Get camera multicast URI */
+	private String getMulticastUri() {
+		assert camera != null;
+		String mcast = camera.getEncMulticast();
+		if (mcast != null && mcast.length() > 0)
+			return URIUtil.create(URIUtil.UDP, mcast).toString();
+		else
+			return null;
 	}
 
 	/** Get camera encoder auth string */
