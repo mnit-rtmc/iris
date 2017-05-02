@@ -137,6 +137,7 @@ public class PropSetup extends IPanel {
 		add(encoder_txt, Stretch.LAST);
 		add("camera.enc_mcast");
 		add(enc_mcast_txt, Stretch.LAST);
+		add("camera.encoder.note", Stretch.END);
 		add("camera.encoder.channel");
 		add(enc_chn_spn, Stretch.LAST);
 		add("camera.stream.type");
