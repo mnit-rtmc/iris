@@ -81,6 +81,9 @@ public class OpSendDMSMessage extends OpDMS {
 	/** Maximum message priority */
 	static private final int MAX_MESSAGE_PRIORITY = 255;
 
+	/** Pixel service disabled while message is deployed */
+	static private final int PIXEL_SERVICE_DISABLED = 0;
+
 	/** Make a new DmsMessageStatus enum */
 	static private ASN1Enum<DmsMessageStatus> makeStatus(
 		DmsMessageMemoryType mem, int n)
@@ -155,7 +158,7 @@ public class OpSendDMSMessage extends OpDMS {
 		multi = parseMulti(sm.getMulti());
 		msg_num = lookupMsgNum(multi);
 		message_crc = DmsMessageCRC.calculate(multi,
-			sm.getBeaconEnabled(), 0);
+			sm.getBeaconEnabled(), PIXEL_SERVICE_DISABLED);
 		status = makeStatus(DmsMessageMemoryType.changeable, msg_num);
 		graphics = GraphicHelper.lookupMulti(multi);
 	}
@@ -316,18 +319,21 @@ public class OpSendDMSMessage extends OpDMS {
 				msg_num);
 			ms.setString(multi);
 			beacon.setInteger(message.getBeaconEnabled() ? 1 : 0);
-			srv.setInteger(0);
+			srv.setInteger(PIXEL_SERVICE_DISABLED);
 			prior.setInteger(message.getRunTimePriority());
 			mess.add(ms);
-			if (dms.supportsBeacon())
+			// NOTE: If dmsMessageBeacon and dmsMessagePixelService
+			//       objects exist, they must be set, since they are
+			//       used when calculating dmsMessageCRC
+			if (dms.getBeaconObject())
 				mess.add(beacon);
-			if (dms.supportsPixelService())
+			if (dms.getPixelServiceObject())
 				mess.add(srv);
 			mess.add(prior);
 			logStore(ms);
-			if (dms.supportsBeacon())
+			if (dms.getBeaconObject())
 				logStore(beacon);
-			if (dms.supportsPixelService())
+			if (dms.getPixelServiceObject())
 				logStore(srv);
 			logStore(prior);
 			mess.storeProps();

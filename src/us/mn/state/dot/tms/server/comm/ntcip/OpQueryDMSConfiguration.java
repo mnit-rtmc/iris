@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -230,12 +230,6 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 
-			// If there are no beacons, skip to next phase.
-			if (beaconType.getEnum().equals(DmsBeaconType.none)) {
-				dms.setSupportsBeacon(false);
-				return new QuerySupportsPixelService();
-			}
-
 			// Verify beacon support by reading
 			// dmsMessageBeacon from the
 			// changeable.1 message slot.
@@ -244,11 +238,10 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(beacon);
 			try {
 				mess.queryProps();
-				if (isSuccess())
-					dms.setSupportsBeacon(true);
+				dms.setBeaconObject(true);
 			}
 			catch (NoSuchName e) {
-				dms.setSupportsBeacon(false);
+				dms.setBeaconObject(false);
 			}
 			return new QuerySupportsPixelService();
 		}
@@ -261,16 +254,6 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 
-			// PixelService is only valid for signs using
-			// flipdisk, fiber, or shutter technology...
-			int st = tech.getInteger();
-			if (!DmsSignTechnology.FLIP_DISK.isSet(st)
-			 && !DmsSignTechnology.FIBER_OPTIC.isSet(st)
-			 && !DmsSignTechnology.SHUTTERED.isSet(st)) {
-				dms.setSupportsPixelService(false);
-				return new QueryV2();
-			}
-
 			// Verify pixelService support by reading
 			// dmsMessagePixelService from the
 			// changeable.1 message slot.
@@ -279,11 +262,10 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(srv);
 			try {
 				mess.queryProps();
-				if (isSuccess())
-					dms.setSupportsPixelService(true);
+				dms.setPixelServiceObject(true);
 			}
 			catch (NoSuchName e) {
-				dms.setSupportsPixelService(false);
+				dms.setPixelServiceObject(false);
 			}
 			return new QueryV2();
 		}
