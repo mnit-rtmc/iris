@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,23 +15,24 @@
 package us.mn.state.dot.tms;
 
 /**
- * Stream type enumeration.  The ordinal values correspond to the records
- * in the iris.stream_type look-up table.
+ * Encoding enumeration.  The ordinal values correspond to the records
+ * in the iris.encoding look-up table.
  *
  * @author Douglas Lau
  */
-public enum StreamType {
+public enum Encoding {
 	UNKNOWN,	/* 0: use for MMS or other weird protocols */
 	MJPEG,		/* 1: motion JPEG */
-	MPEG4,		/* 2 */
-	H264,		/* 3 */
-	H265;		/* 4 */
+	MPEG2,		/* 2 */
+	MPEG4,		/* 3 */
+	H264,		/* 4 */
+	H265;		/* 5 */
 
-	/** Get a stream type from an ordinal value */
-	static public StreamType fromOrdinal(int o) {
-		if (o >= 0 && o < values().length)
-			return values()[o];
-		else
-			return UNKNOWN;
+	/** Cached values array */
+	static private final Encoding[] VALUES = values();
+
+	/** Get an encoding from an ordinal value */
+	static public Encoding fromOrdinal(int o) {
+		return (o >= 0 && o < VALUES.length) ? VALUES[o] : UNKNOWN;
 	}
 }

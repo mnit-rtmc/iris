@@ -63,12 +63,6 @@ public interface Camera extends Device {
 	/** Get the encoder input channel */
 	int getEncoderChannel();
 
-	/** Set the stream type */
-	void setStreamType(int st);
-
-	/** Get the stream type */
-	int getStreamType();
-
 	/** Set flag to allow publishing camera images */
 	void setPublish(boolean p);
 

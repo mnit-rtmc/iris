@@ -29,7 +29,7 @@ import javax.swing.JLabel;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.StreamType;
+import us.mn.state.dot.tms.Encoding;
 import us.mn.state.dot.tms.utils.Base64;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
@@ -209,10 +209,7 @@ public class MJPEGStream implements VideoStream {
 	/** Get the status of the stream */
 	public String getStatus() {
 		String e = error_msg;
-		if(e != null)
-			return e;
-		else
-			return StreamType.MJPEG.toString();
+		return (e != null) ? e : Encoding.MJPEG.toString();
 	}
 
 	/** Test if the video is playing */

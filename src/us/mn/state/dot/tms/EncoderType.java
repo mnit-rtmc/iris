@@ -29,17 +29,23 @@ public interface EncoderType extends SonarObject {
 	/** Default buffering latency */
 	int DEFAULT_LATENCY_MS = 50;
 
-	/** Set the HTTP path */
-	void setHttpPath(String p);
+	/** Set the encoding ordinal */
+	void setEncoding(int e);
 
-	/** Get the HTTP path*/
-	String getHttpPath();
+	/** Get the encoding ordinal */
+	int getEncoding();
 
-	/** Set the RTSP path */
-	void setRtspPath(String p);
+	/** Set the URI scheme */
+	void setUriScheme(String s);
 
-	/** Get the RTSP path*/
-	String getRtspPath();
+	/** Get the URI scheme */
+	String getUriScheme();
+
+	/** Set the URI path */
+	void setUriPath(String p);
+
+	/** Get the URI path*/
+	String getUriPath();
 
 	/** Set stream latency (ms) */
 	void setLatency(int l);

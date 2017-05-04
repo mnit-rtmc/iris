@@ -30,7 +30,6 @@ import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
@@ -51,7 +50,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		namespace.registerType(SONAR_TYPE, CameraImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"cam_num, encoder_type, encoder, enc_mcast, " +
-			"encoder_channel, stream_type, publish FROM iris." +
+			"encoder_channel, publish FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -74,7 +73,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		map.put("encoder", encoder);
 		map.put("enc_mcast", enc_mcast);
 		map.put("encoder_channel", encoder_channel);
-		map.put("stream_type", stream_type.ordinal());
 		map.put("publish", publish);
 		return map;
 	}
@@ -112,24 +110,22 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		     row.getString(8),		// encoder
 		     row.getString(9),		// enc_mcast
 		     row.getInt(10),		// encoder_channel
-		     row.getInt(11),		// stream_type
-		     row.getBoolean(12)		// publish
+		     row.getBoolean(11)		// publish
 		);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, String l, String c, int p, String nt,
-		Integer cn, String et, String e, String em, int ec, int st,
-		boolean pb)
+		Integer cn, String et, String e, String em, int ec, boolean pb)
 	{
 		this(n, lookupGeoLoc(l), lookupController(c), p, nt, cn,
-		     lookupEncoderType(et), e, em, ec, st, pb);
+		     lookupEncoderType(et), e, em, ec, pb);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
 		String nt, Integer cn, EncoderType et, String e, String em,
-		int ec, int st, boolean pb)
+		int ec, boolean pb)
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
@@ -138,7 +134,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		encoder = e;
 		enc_mcast = em;
 		encoder_channel = ec;
-		stream_type = StreamType.fromOrdinal(st);
 		publish = pb;
 		initTransients();
 	}
@@ -274,30 +269,6 @@ public class CameraImpl extends DeviceImpl implements Camera {
 	@Override
 	public int getEncoderChannel() {
 		return encoder_channel;
-	}
-
-	/** Stream type */
-	private StreamType stream_type = StreamType.UNKNOWN;
-
-	/** Set the stream type */
-	@Override
-	public void setStreamType(int st) {
-		stream_type = StreamType.fromOrdinal(st);
-	}
-
-	/** Set the stream type */
-	public void doSetStreamType(int t) throws TMSException {
-		StreamType st = StreamType.fromOrdinal(t);
-		if (st != stream_type) {
-			store.update(this, "stream_type", t);
-			setStreamType(t);
-		}
-	}
-
-	/** Get the stream type */
-	@Override
-	public int getStreamType() {
-		return stream_type.ordinal();
 	}
 
 	/** Flag to allow publishing camera images */

@@ -15,7 +15,11 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.util.ArrayList;
+import javax.swing.JComboBox;
+import javax.swing.DefaultCellEditor;
+import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.EncoderType;
+import us.mn.state.dot.tms.Encoding;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -40,7 +44,7 @@ public class EncoderTypeModel extends ProxyTableModel<EncoderType> {
 	@Override
 	protected ArrayList<ProxyColumn<EncoderType>> createColumns() {
 		ArrayList<ProxyColumn<EncoderType>> cols =
-			new ArrayList<ProxyColumn<EncoderType>>(4);
+			new ArrayList<ProxyColumn<EncoderType>>(5);
 		cols.add(new ProxyColumn<EncoderType>("camera.encoder.type",
 			120)
 		{
@@ -48,30 +52,50 @@ public class EncoderTypeModel extends ProxyTableModel<EncoderType> {
 				return et.getName();
 			}
 		});
-		cols.add(new ProxyColumn<EncoderType>(
-			"camera.encoder.http.path", 200)
+		cols.add(new ProxyColumn<EncoderType>("camera.encoder.encoding",
+			96)
 		{
 			public Object getValueAt(EncoderType et) {
-				return et.getHttpPath();
+				return Encoding.fromOrdinal(et.getEncoding());
 			}
 			public boolean isEditable(EncoderType et) {
-				return canUpdate(et, "httpPath");
+				return canUpdate(et, "encoding");
 			}
 			public void setValueAt(EncoderType et, Object value) {
-				et.setHttpPath(value.toString());
+				if (value instanceof Encoding) {
+					Encoding e = (Encoding) value;
+					et.setEncoding(e.ordinal());
+				}
+			}
+			protected TableCellEditor createCellEditor() {
+				return new DefaultCellEditor(new JComboBox
+					<Encoding>(Encoding.values()));
 			}
 		});
 		cols.add(new ProxyColumn<EncoderType>(
-			"camera.encoder.rtsp.path", 200)
+			"camera.encoder.uri.scheme", 100)
 		{
 			public Object getValueAt(EncoderType et) {
-				return et.getRtspPath();
+				return et.getUriScheme();
 			}
 			public boolean isEditable(EncoderType et) {
-				return canUpdate(et, "rtspPath");
+				return canUpdate(et, "uriScheme");
 			}
 			public void setValueAt(EncoderType et, Object value) {
-				et.setRtspPath(value.toString());
+				et.setUriScheme(value.toString());
+			}
+		});
+		cols.add(new ProxyColumn<EncoderType>(
+			"camera.encoder.uri.path", 200)
+		{
+			public Object getValueAt(EncoderType et) {
+				return et.getUriPath();
+			}
+			public boolean isEditable(EncoderType et) {
+				return canUpdate(et, "uriPath");
+			}
+			public void setValueAt(EncoderType et, Object value) {
+				et.setUriPath(value.toString());
 			}
 		});
 		cols.add(new ProxyColumn<EncoderType>("camera.encoder.latency",

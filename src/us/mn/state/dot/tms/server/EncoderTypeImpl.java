@@ -19,6 +19,7 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EncoderType;
+import us.mn.state.dot.tms.Encoding;
 import us.mn.state.dot.tms.TMSException;
 
 /**
@@ -31,8 +32,9 @@ public class EncoderTypeImpl extends BaseObjectImpl implements EncoderType {
 	/** Load all the encoder types */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, EncoderTypeImpl.class);
-		store.query("SELECT name, http_path, rtsp_path, latency " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, encoding, uri_scheme, uri_path, " +
+			"latency FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new EncoderTypeImpl(row));
@@ -45,8 +47,9 @@ public class EncoderTypeImpl extends BaseObjectImpl implements EncoderType {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("http_path", http_path);
-		map.put("rtsp_path", rtsp_path);
+		map.put("encoding", encoding);
+		map.put("uri_scheme", uri_scheme);
+		map.put("uri_path", uri_path);
 		map.put("latency", latency);
 		return map;
 	}
@@ -66,72 +69,98 @@ public class EncoderTypeImpl extends BaseObjectImpl implements EncoderType {
 	/** Create a new encoder type */
 	public EncoderTypeImpl(String n) {
 		super(n);
-		http_path = "";
-		rtsp_path = "";
+		encoding = Encoding.UNKNOWN.ordinal();
+		uri_scheme = "";
+		uri_path = "";
 		latency = DEFAULT_LATENCY_MS;
 	}
 
 	/** Create an encoder type */
 	private EncoderTypeImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),		// name
-		     row.getString(2),		// http_path
-		     row.getString(3),		// rtsp_path
-		     row.getInt(4)		// latency
+		     row.getInt(2),		// encoding
+		     row.getString(3),		// uri_scheme
+		     row.getString(4),		// uri_path
+		     row.getInt(5)		// latency
 		);
 	}
 
 	/** Create a new encoder type */
-	private EncoderTypeImpl(String n, String hp, String rp, int l) {
+	private EncoderTypeImpl(String n, int e, String s, String p, int l) {
 		this(n);
-		http_path = hp;
-		rtsp_path = rp;
+		encoding = e;
+		uri_scheme = s;
+		uri_path = p;
 		latency = l;
 	}
 
-	/** HTTP path */
-	private String http_path;
+	/** Encoding ordinal */
+	private int encoding;
 
-	/** Set the HTTP path */
+	/** Set the encoding ordinal */
 	@Override
-	public void setHttpPath(String p) {
-		http_path = p;
+	public void setEncoding(int e) {
+		encoding = e;
 	}
 
-	/** Set the HTTP path */
-	public void doSetHttpPath(String p) throws TMSException {
-		if (!p.equals(http_path)) {
-			store.update(this, "http_path", p);
-			setHttpPath(p);
+	/** Set the encoding ordinal */
+	public void doSetEncoding(int e) throws TMSException {
+		if (e != encoding) {
+			store.update(this, "encoding", e);
+			setEncoding(e);
 		}
 	}
 
-	/** Get the HTTP path */
+	/** Get the encoding ordinal */
 	@Override
-	public String getHttpPath() {
-		return http_path;
+	public int getEncoding() {
+		return encoding;
 	}
 
-	/** RTSP path */
-	private String rtsp_path;
+	/** URI scheme */
+	private String uri_scheme;
 
-	/** Set the RTSP path */
+	/** Set the URI scheme */
 	@Override
-	public void setRtspPath(String p) {
-		rtsp_path = p;
+	public void setUriScheme(String s) {
+		uri_scheme = s;
 	}
 
-	/** Set the RTSP path */
-	public void doSetRtspPath(String p) throws TMSException {
-		if (!p.equals(rtsp_path)) {
-			store.update(this, "rtsp_path", p);
-			setRtspPath(p);
+	/** Set the URI scheme */
+	public void doSetUriScheme(String s) throws TMSException {
+		if (!s.equals(uri_scheme)) {
+			store.update(this, "uri_scheme", s);
+			setUriScheme(s);
 		}
 	}
 
-	/** Get the RTSP path */
+	/** Get the URI scheme */
 	@Override
-	public String getRtspPath() {
-		return rtsp_path;
+	public String getUriScheme() {
+		return uri_scheme;
+	}
+
+	/** URI path */
+	private String uri_path;
+
+	/** Set the URI path */
+	@Override
+	public void setUriPath(String p) {
+		uri_path = p;
+	}
+
+	/** Set the URI path */
+	public void doSetUriPath(String p) throws TMSException {
+		if (!p.equals(uri_path)) {
+			store.update(this, "uri_path", p);
+			setUriPath(p);
+		}
+	}
+
+	/** Get the URI path */
+	@Override
+	public String getUriPath() {
+		return uri_path;
 	}
 
 	/** Stream latency */

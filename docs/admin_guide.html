@@ -97,7 +97,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">14 April 2017</div>
+<div id="stamp">4 May 2017</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -2029,20 +2029,18 @@ FIXME
 </p>
 <dl>
     <dt>encoder_type</dt>
-    <dd>The type of encoder for the video stream: GENERIC, AXIS or INFINOVA</dd>
+    <dd>The type of encoder for the video stream.</dd>
     <dt>encoder</dt>
     <dd>The encoder stream URI.
         Usually, only the host name (or ip address) is needed here.
         For GENERIC encoder types, the path is also required.
-        The default URI scheme is determined by the stream type, but can be
+        The default URI scheme is determined by the encoder type, but can be
         overridden here (for example "mms://" or "axrtsp://").
     </dd>
     <dt>enc_mcast</dt>
     <dd>Multicast stream URI.</dd>
     <dt>encoder_channel</dt>
     <dd>For encoders with more than 1 channel.</dd>
-    <dt>stream_type</dt>
-    <dd>The video stream type: UNKNOWN, MJPEG, MPEG4, H264, H265</dd>
     <dt>publish</dt>
     <dd>Flag to allow stream to be published.</dd>
 </dl>

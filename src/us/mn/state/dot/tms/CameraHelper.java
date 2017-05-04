@@ -21,9 +21,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.geo.Position;
-import static us.mn.state.dot.tms.utils.URIUtil.create;
-import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
-import static us.mn.state.dot.tms.utils.URIUtil.RTSP;
+import us.mn.state.dot.tms.utils.URIUtil;
 import us.mn.state.dot.tms.units.Distance;
 
 /**
@@ -185,7 +183,7 @@ public class CameraHelper extends BaseHelper {
 				return encoderUri(c, et, auth, query);
 		}
 		// URI.toURL throws IllegalArgumentException with empty scheme
-		return HTTP;
+		return URIUtil.HTTP;
 	}
 
 	/** Create a camera encoder URI */
@@ -194,17 +192,9 @@ public class CameraHelper extends BaseHelper {
 	{
 		String enc = c.getEncoder();
 		int chan = c.getEncoderChannel();
-		switch (StreamType.fromOrdinal(c.getStreamType())) {
-		case MJPEG:
-			return create(HTTP, auth + enc + buildPath(
-			       et.getHttpPath(), chan) + query);
-		case MPEG4:
-		case H264:
-			return create(RTSP, auth + enc + buildPath(
-			       et.getRtspPath(), chan) + query);
-		default:
-			return create(HTTP, enc);
-		}
+		URI scheme = URIUtil.createScheme(et.getUriScheme());
+		return URIUtil.create(scheme, auth + enc + buildPath(
+			et.getUriPath(), chan) + query);
 	}
 
 	/** Build URI path */

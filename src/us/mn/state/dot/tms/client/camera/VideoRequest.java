@@ -24,7 +24,7 @@ import java.util.Properties;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.EncoderType;
-import us.mn.state.dot.tms.StreamType;
+import us.mn.state.dot.tms.Encoding;
 import static us.mn.state.dot.tms.utils.URIUtil.create;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 
@@ -176,19 +176,26 @@ public class VideoRequest {
 		      : false;
 	}
 
-	/** Check if stream type is MJPEG.
+	/** Check if encoding is MJPEG.
 	 * @param c Camera.
-	 * @return true if stream type is motion JPEG. */
+	 * @return true if encoding is motion JPEG. */
 	public boolean hasMJPEG(Camera c) {
-		return (c != null) && (getStreamType(c) == StreamType.MJPEG);
+		return (c != null) && (getEncoding(c) == Encoding.MJPEG);
 	}
 
-	/** Get the stream type for a camera */
-	private StreamType getStreamType(Camera c) {
-		StreamType st = StreamType.fromOrdinal(c.getStreamType());
-		if (st != StreamType.UNKNOWN && useServlet())
-			return StreamType.MJPEG;
+	/** Get the encoding for a camera */
+	private Encoding getEncoding(Camera c) {
+		Encoding enc = getEncoding(c.getEncoderType());
+		if (enc != Encoding.UNKNOWN && useServlet())
+			return Encoding.MJPEG;
 		else
-			return st;
+			return enc;
+	}
+
+	/** Get the encoding for an encoder type */
+	private Encoding getEncoding(EncoderType et) {
+		return (et != null)
+		      ? Encoding.fromOrdinal(et.getEncoding())
+		      : Encoding.UNKNOWN;
 	}
 }

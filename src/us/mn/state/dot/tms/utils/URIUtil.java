@@ -28,16 +28,21 @@ public class URIUtil {
 	static private final URI EMPTY_URI = URI.create("");
 
 	/** Default scheme for UDP */
-	static public final URI UDP = URI.create("udp:/");
+	static public final URI UDP = createScheme("udp");
 
 	/** Default scheme for TCP */
-	static public final URI TCP = URI.create("tcp:/");
+	static public final URI TCP = createScheme("tcp");
 
 	/** Default scheme for HTTP */
-	static public final URI HTTP = URI.create("http:/");
+	static public final URI HTTP = createScheme("http");
 
 	/** Default scheme for RTSP */
-	static public final URI RTSP = URI.create("rtsp:/");
+	static public final URI RTSP = createScheme("rtsp");
+
+	/** Create a scheme URI */
+	static public URI createScheme(String scheme) {
+		return URI.create(scheme + ":/");
+	}
 
 	/** Create a URI from a string.
 	 * @param uri String specifier.

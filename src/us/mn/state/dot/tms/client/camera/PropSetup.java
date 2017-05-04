@@ -26,7 +26,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.EncoderType;
-import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
@@ -87,21 +86,6 @@ public class PropSetup extends IPanel {
 	/** Encoder channel spinner */
 	private final JSpinner enc_chn_spn = new JSpinner(num_model);
 
-	/** Stream type combobox */
-	private final JComboBox<StreamType> str_type_cbx =
-		new JComboBox<StreamType>(StreamType.values());
-
-	/** Stream type action */
-	private final IAction str_type_act = new IAction("camera.stream.type") {
-		protected void doActionPerformed(ActionEvent e) {
-		      camera.setStreamType(str_type_cbx.getSelectedIndex());
-		}
-		@Override
-		protected void doUpdateSelected() {
-			str_type_cbx.setSelectedIndex(camera.getStreamType());
-		}
-	};
-
 	/** Checkbox to allow publishing camera images */
 	private final JCheckBox publish_chk = new JCheckBox(new IAction(null) {
 		protected void doActionPerformed(ActionEvent e) {
@@ -128,7 +112,6 @@ public class PropSetup extends IPanel {
 		enc_type_cbx.setModel(new IComboBoxModel<EncoderType>(session
 			.getSonarState().getCamCache().getEncoderTypeModel()));
 		enc_type_cbx.setAction(enc_type_act);
-		str_type_cbx.setAction(str_type_act);
 		add("camera.num");
 		add(cam_num_txt, Stretch.LAST);
 		add("camera.encoder.type");
@@ -140,8 +123,6 @@ public class PropSetup extends IPanel {
 		add("camera.encoder.note", Stretch.END);
 		add("camera.encoder.channel");
 		add(enc_chn_spn, Stretch.LAST);
-		add("camera.stream.type");
-		add(str_type_cbx, Stretch.LAST);
 		add("camera.publish");
 		add(publish_chk, Stretch.LAST);
 		createJobs();
@@ -183,7 +164,6 @@ public class PropSetup extends IPanel {
 		encoder_txt.setEnabled(canUpdate("encoder"));
 		enc_mcast_txt.setEnabled(canUpdate("encMulticast"));
 		enc_chn_spn.setEnabled(canUpdate("encoderChannel"));
-		str_type_act.setEnabled(canUpdate("streamType"));
 		publish_chk.setEnabled(canUpdate("publish"));
 	}
 
@@ -201,8 +181,6 @@ public class PropSetup extends IPanel {
 			enc_mcast_txt.setText(camera.getEncMulticast());
 		if (a == null || a.equals("encoderChannel"))
 			enc_chn_spn.setValue(camera.getEncoderChannel());
-		if (a == null || a.equals("streamType"))
-			str_type_act.updateSelected();
 		if (a == null || a.equals("publish"))
 			publish_chk.setSelected(camera.getPublish());
 	}

@@ -600,15 +600,16 @@ CREATE TRIGGER detector_delete_trig
     INSTEAD OF DELETE ON iris.detector
     FOR EACH ROW EXECUTE PROCEDURE iris.detector_delete();
 
-CREATE TABLE iris.stream_type (
+CREATE TABLE iris.encoding (
 	id integer PRIMARY KEY,
 	description VARCHAR(20) NOT NULL
 );
 
 CREATE TABLE iris.encoder_type (
 	name VARCHAR(24) PRIMARY KEY,
-	http_path VARCHAR(64) NOT NULL,
-	rtsp_path VARCHAR(64) NOT NULL,
+	encoding INTEGER NOT NULL REFERENCES iris.encoding,
+	uri_scheme VARCHAR(8) NOT NULL,
+	uri_path VARCHAR(64) NOT NULL,
 	latency INTEGER NOT NULL
 );
 
@@ -621,7 +622,6 @@ CREATE TABLE iris._camera (
 	encoder VARCHAR(64) NOT NULL,
 	enc_mcast VARCHAR(64) NOT NULL,
 	encoder_channel INTEGER NOT NULL,
-	stream_type INTEGER NOT NULL REFERENCES iris.stream_type,
 	publish boolean NOT NULL
 );
 
@@ -630,7 +630,7 @@ ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
 
 CREATE VIEW iris.camera AS SELECT
 	c.name, geo_loc, controller, pin, notes, cam_num, encoder_type, encoder,
-		enc_mcast, encoder_channel, stream_type, publish
+		enc_mcast, encoder_channel, publish
 	FROM iris._camera c JOIN iris._device_io d ON c.name = d.name;
 
 CREATE FUNCTION iris.camera_insert() RETURNS TRIGGER AS
@@ -639,10 +639,10 @@ BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._camera (name, geo_loc, notes, cam_num, encoder_type,
-	            encoder, enc_mcast, encoder_channel, stream_type, publish)
+	            encoder, enc_mcast, encoder_channel, publish)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.cam_num,
 	             NEW.encoder_type, NEW.encoder, NEW.enc_mcast,
-	             NEW.encoder_channel, NEW.stream_type, NEW.publish);
+	             NEW.encoder_channel, NEW.publish);
 	RETURN NEW;
 END;
 $camera_insert$ LANGUAGE plpgsql;
@@ -666,7 +666,6 @@ BEGIN
 	       encoder = NEW.encoder,
 	       enc_mcast = NEW.enc_mcast,
 	       encoder_channel = NEW.encoder_channel,
-	       stream_type = NEW.stream_type,
 	       publish = NEW.publish
 	 WHERE name = OLD.name;
 	RETURN NEW;
@@ -2175,17 +2174,18 @@ CREATE VIEW video_monitor_view AS
 GRANT SELECT ON video_monitor_view TO PUBLIC;
 
 CREATE VIEW encoder_type_view AS
-	SELECT name, http_path, rtsp_path, latency FROM iris.encoder_type;
+	SELECT name, enc.description AS encoding, uri_scheme, uri_path, latency
+	FROM iris.encoder_type et
+	LEFT JOIN iris.encoding enc ON et.encoding = enc.id;
 GRANT SELECT ON encoder_type_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
 	SELECT c.name, c.notes, cam_num, encoder_type, c.encoder, c.enc_mcast,
-	       c.encoder_channel, st.description AS stream_type,
-	       c.publish, c.geo_loc, l.roadway,
-	       l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,l.lat,l.lon,
+	       c.encoder_channel, c.publish, c.geo_loc,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.lat, l.lon,
 	       c.controller, ctr.comm_link, ctr.drop_id, ctr.condition
 	FROM iris.camera c
-	LEFT JOIN iris.stream_type st ON c.stream_type = st.id
 	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
 	LEFT JOIN controller_view ctr ON c.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;
@@ -2641,12 +2641,13 @@ COPY iris.meter_lock (id, description) FROM stdin;
 6	Manual mode
 \.
 
-COPY iris.stream_type (id, description) FROM stdin;
+COPY iris.encoding (id, description) FROM stdin;
 0	UNKNOWN
 1	MJPEG
-2	MPEG4
-3	H264
-4	H265
+2	MPEG2
+3	MPEG4
+4	H264
+5	H265
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
@@ -2663,7 +2664,7 @@ client_units_si	true
 comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_modem_sec	20
-database_version	4.51.0
+database_version	4.52.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0

@@ -20,8 +20,8 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.CtrlCondition;
 import us.mn.state.dot.tms.EncoderType;
+import us.mn.state.dot.tms.Encoding;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.StreamType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -90,7 +90,7 @@ public class SwitchProp extends ControllerProp {
 		sb.append(UNIT_SEP);
 		sb.append(getUri());
 		sb.append(UNIT_SEP);
-		sb.append(getStreamType());
+		sb.append(getEncoding());
 		sb.append(UNIT_SEP);
 		sb.append(getDescription());
 		sb.append(UNIT_SEP);
@@ -184,12 +184,15 @@ public class SwitchProp extends ControllerProp {
 			return "";
 	}
 
-	/** Get the stream type */
-	private String getStreamType() {
+	/** Get the encoding */
+	private String getEncoding() {
 		if (CtrlCondition.ACTIVE == getCondition()) {
 			assert camera != null;
-			return StreamType.fromOrdinal(
-				camera.getStreamType()).toString();
+			EncoderType et = camera.getEncoderType();
+			if (et != null) {
+				return Encoding.fromOrdinal(et.getEncoding())
+				               .toString();
+			}
 		}
 		return "PNG";
 	}
