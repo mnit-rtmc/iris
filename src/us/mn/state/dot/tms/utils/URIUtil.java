@@ -41,7 +41,12 @@ public class URIUtil {
 
 	/** Create a scheme URI */
 	static public URI createScheme(String scheme) {
-		return URI.create(scheme + ":/");
+		try {
+			return URI.create(scheme + ":/");
+		}
+		catch (IllegalArgumentException e) {
+			return EMPTY_URI;
+		}
 	}
 
 	/** Create a URI from a string.
