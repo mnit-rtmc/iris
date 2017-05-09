@@ -138,7 +138,7 @@ public class OpQueryDMSMessage extends OpDMS {
 				DmsMessageMemoryType.currentBuffer.ordinal(),1);
 			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 			mess.add(ms);
-			if (dms.getBeaconObject())
+			if (dms.getSupportsBeaconObject())
 				mess.add(beacon);
 			else
 				beacon.setInteger(0);
@@ -147,7 +147,7 @@ public class OpQueryDMSMessage extends OpDMS {
 			mess.add(time);
 			mess.queryProps();
 			logQuery(ms);
-			if (dms.getBeaconObject())
+			if (dms.getSupportsBeaconObject())
 				logQuery(beacon);
 			logQuery(prior);
 			logQuery(status);

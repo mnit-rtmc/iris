@@ -95,7 +95,7 @@ public class OpSendDMSDefaults extends OpDMS {
 			logStore(comm_time);
 			logStore(end_msg);
 			mess.storeProps();
-			if (dms.getPixelServiceObject())
+			if (dms.getSupportsPixelServiceObject())
 				return new PixelService();
 			else
 				return new MessageDefaults();

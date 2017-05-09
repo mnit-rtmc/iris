@@ -1352,28 +1352,28 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Flag to indicate beacon object supported */
-	private transient boolean beacon_object = false;
+	private transient boolean supports_beacon_object = false;
 
 	/** Set flag to indicate beacon object supported */
-	public void setBeaconObject(boolean b) {
-		beacon_object = b;
+	public void setSupportsBeaconObject(boolean b) {
+		supports_beacon_object = b;
 	}
 
 	/** Does sign have beacon object support? */
-	public boolean getBeaconObject() {
-		return beacon_object;
+	public boolean getSupportsBeaconObject() {
+		return supports_beacon_object;
 	}
 
 	/** Flag to indicate pixel service object supported */
-	private transient boolean pixel_service_object = false;
+	private transient boolean supports_pixel_service_object = false;
 
 	/** Set flag to indicate pixel service object supported */
-	public void setPixelServiceObject(boolean p) {
-		pixel_service_object = p;
+	public void setSupportsPixelServiceObject(boolean p) {
+		supports_pixel_service_object = p;
 	}
 
 	/** Does sign have pixel service object support? */
-	public boolean getPixelServiceObject() {
-		return pixel_service_object;
+	public boolean getSupportsPixelServiceObject() {
+		return supports_pixel_service_object;
 	}
 }

@@ -238,10 +238,10 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(beacon);
 			try {
 				mess.queryProps();
-				dms.setBeaconObject(true);
+				dms.setSupportsBeaconObject(true);
 			}
 			catch (NoSuchName e) {
-				dms.setBeaconObject(false);
+				dms.setSupportsBeaconObject(false);
 			}
 			return new QuerySupportsPixelService();
 		}
@@ -262,10 +262,10 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			mess.add(srv);
 			try {
 				mess.queryProps();
-				dms.setPixelServiceObject(true);
+				dms.setSupportsPixelServiceObject(true);
 			}
 			catch (NoSuchName e) {
-				dms.setPixelServiceObject(false);
+				dms.setSupportsPixelServiceObject(false);
 			}
 			return new QueryV2();
 		}

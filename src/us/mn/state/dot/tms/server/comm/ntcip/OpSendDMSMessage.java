@@ -325,15 +325,15 @@ public class OpSendDMSMessage extends OpDMS {
 			// NOTE: If dmsMessageBeacon and dmsMessagePixelService
 			//       objects exist, they must be set, since they are
 			//       used when calculating dmsMessageCRC
-			if (dms.getBeaconObject())
+			if (dms.getSupportsBeaconObject())
 				mess.add(beacon);
-			if (dms.getPixelServiceObject())
+			if (dms.getSupportsPixelServiceObject())
 				mess.add(srv);
 			mess.add(prior);
 			logStore(ms);
-			if (dms.getBeaconObject())
+			if (dms.getSupportsBeaconObject())
 				logStore(beacon);
-			if (dms.getPixelServiceObject())
+			if (dms.getSupportsPixelServiceObject())
 				logStore(srv);
 			logStore(prior);
 			mess.storeProps();
