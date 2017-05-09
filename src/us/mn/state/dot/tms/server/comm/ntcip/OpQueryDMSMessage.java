@@ -36,6 +36,27 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
  */
 public class OpQueryDMSMessage extends OpDMS {
 
+	/** MULTI string for current buffer */
+	private final ASN1String ms = new ASN1String(dmsMessageMultiString
+		.node, DmsMessageMemoryType.currentBuffer.ordinal(), 1);
+
+	/** Beacon setting for current buffer */
+	private final ASN1Integer beacon = dmsMessageBeacon.makeInt(
+		DmsMessageMemoryType.currentBuffer, 1);
+
+	/** Message priority for current buffer */
+	private final ASN1Enum<DmsMsgPriority> prior = new ASN1Enum<
+		DmsMsgPriority>(DmsMsgPriority.class, dmsMessageRunTimePriority
+		.node, DmsMessageMemoryType.currentBuffer.ordinal(), 1);
+
+	/** Message status for current buffer */
+	private final ASN1Enum<DmsMessageStatus> status = new ASN1Enum<
+		DmsMessageStatus>(DmsMessageStatus.class, dmsMessageStatus.node,
+		DmsMessageMemoryType.currentBuffer.ordinal(), 1);
+
+	/** Message time remaining */
+	private final ASN1Integer time = dmsMessageTimeRemaining.makeInt();
+
 	/** Create a new DMS query status object */
 	public OpQueryDMSMessage(DMSImpl d) {
 		super(PriorityLevel.DEVICE_DATA, d);
@@ -123,20 +144,6 @@ public class OpQueryDMSMessage extends OpDMS {
 		/** Query the current message */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1String ms = new ASN1String(dmsMessageMultiString
-				.node, DmsMessageMemoryType.currentBuffer
-				.ordinal(), 1);
-			ASN1Integer beacon = dmsMessageBeacon.makeInt(
-				DmsMessageMemoryType.currentBuffer, 1);
-			ASN1Enum<DmsMsgPriority> prior = new ASN1Enum<
-				DmsMsgPriority>(DmsMsgPriority.class,
-				dmsMessageRunTimePriority.node,
-				DmsMessageMemoryType.currentBuffer.ordinal(),1);
-			ASN1Enum<DmsMessageStatus> status = new ASN1Enum<
-				DmsMessageStatus>(DmsMessageStatus.class,
-				dmsMessageStatus.node,
-				DmsMessageMemoryType.currentBuffer.ordinal(),1);
-			ASN1Integer time = dmsMessageTimeRemaining.makeInt();
 			mess.add(ms);
 			if (dms.getSupportsBeaconObject())
 				mess.add(beacon);
@@ -152,18 +159,22 @@ public class OpQueryDMSMessage extends OpDMS {
 			logQuery(prior);
 			logQuery(status);
 			logQuery(time);
-			if (status.getEnum() == DmsMessageStatus.valid) {
-				Integer d = parseDuration(time.getInteger());
-				DmsMsgPriority rp = prior.getEnum();
-				/* If it's null, IRIS didn't send it ... */
-				if (rp == null)
-					rp = DmsMsgPriority.OTHER_SYSTEM;
-				setMsgCurrent(ms.getValue(),
-					beacon.getInteger(), rp, d);
-			} else
-				setErrorStatus("INVALID STATUS: " + status);
+			setMsgCurrent();
 			return null;
 		}
+	}
+
+	/** Set the current message on the sign */
+	private void setMsgCurrent() {
+		if (status.getEnum() == DmsMessageStatus.valid) {
+			Integer d = parseDuration(time.getInteger());
+			DmsMsgPriority rp = prior.getEnum();
+			/* If it's null, IRIS didn't send it ... */
+			if (null == rp)
+				rp = DmsMsgPriority.OTHER_SYSTEM;
+			setMsgCurrent(ms.getValue(), beacon.getInteger(), rp,d);
+		} else
+			setErrorStatus("INVALID STATUS: " + status);
 	}
 
 	/** Set the current message on the sign */
