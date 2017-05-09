@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,8 +61,10 @@ public class OpQueryDMSMessage extends OpAddco {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		if (isSuccess())
+		if (isSuccess()) {
 			setCurrentMessage();
+			dms.msgQueried();
+		}
 		super.cleanup();
 	}
 

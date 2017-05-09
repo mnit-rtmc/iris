@@ -195,4 +195,12 @@ public class OpQueryDMSMessage extends OpDMS {
 		} else
 			setErrorStatus("MSG RENDER FAILED");
 	}
+
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		if (isSuccess())
+			dms.msgQueried();
+		super.cleanup();
+	}
 }

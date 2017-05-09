@@ -986,6 +986,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @return The appropriate sign message. */
 	private SignMessage getMsgUserSched() {
 		SignMessage user = msg_user;	// Avoid race
+		if (!msg_queried)
+			return user;
 		SignMessage sched = msg_sched;	// Avoid race
 		boolean is_blank = SignMessageHelper.isBlank(user);
 		if (isPrefixPage(sched) && !is_blank) {
@@ -1375,5 +1377,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Does sign have pixel service object support? */
 	public boolean getSupportsPixelServiceObject() {
 		return supports_pixel_service_object;
+	}
+
+	/** Was message queried since startup? */
+	private transient boolean msg_queried = false;
+
+	/** Message was queried since startup */
+	public void msgQueried() {
+		msg_queried = true;
 	}
 }
