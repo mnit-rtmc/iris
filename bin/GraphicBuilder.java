@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,6 @@
  */
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.FontFormatException;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.geom.RoundRectangle2D;
@@ -31,34 +30,16 @@ import javax.imageio.ImageIO;
 public class GraphicBuilder {
 	static private final Color BG = new Color(0, 40, 0);
 	static private final Color FG = Color.WHITE;
-	static private final String HOME_DIR = System.getProperty("user.home");
-	static private final File FONT_PATH = new File(HOME_DIR,
-		"highway_gothic");
+	static private final int FONT_HEIGHT = 12;
+	static private final int width = 100;
+	static private final int height = FONT_HEIGHT * 2 + 4;
 
-	private final int width = 100;
-	private final int height = 28;
-	private final Font hwy_a;
-	private final Font hwy_b;
-	private final Font hwy_c;
-	private final Font hwy_d;
-	private final Font hwy_e;
 	private final BufferedImage buffer = new BufferedImage(width, height,
 		BufferedImage.TYPE_INT_RGB);
 	private final Graphics2D g = buffer.createGraphics();
 
-	private Font createFont(String fn) throws FontFormatException,
-		IOException
-	{
-		return Font.createFont(Font.TRUETYPE_FONT,
-			new File(FONT_PATH, fn));
-	}
-
-	private GraphicBuilder() throws FontFormatException, IOException {
-		hwy_a = createFont("HWYGCOND.TTF");
-		hwy_b = createFont("HWYGNRRW.TTF");
-		hwy_c = createFont("HWYGOTH.TTF");
-		hwy_d = createFont("HWYGWDE.TTF");
-		hwy_e = createFont("HWYGEXPD.TTF");
+	private Font createFont(int size) {
+		return new Font("Overpass", Font.PLAIN, size);
 	}
 
 	private void render() {
@@ -67,18 +48,17 @@ public class GraphicBuilder {
 		g.setColor(Color.BLACK);
 		g.fillRect(0, 0, width, height);
 		g.setColor(BG);
-		renderPanel(0, 0, 100, 28);
+		renderPanel(0, 0, width, height);
 		g.setColor(FG);
-		g.setFont(hwy_c.deriveFont(14f));
-		g.drawString("Lindau Ln OR", 12, 12);
-		g.setFont(hwy_d.deriveFont(14f));
-		g.drawString("Killebrew Dr", 14, 25);
+		g.setFont(createFont(FONT_HEIGHT));
+		g.drawString("Lindau Ln OR", 12, (FONT_HEIGHT + 2) * 1 - 4);
+		g.setFont(createFont(FONT_HEIGHT));
+		g.drawString("Killebrew Dr", 14, (FONT_HEIGHT + 2) * 2 - 4);
 	}
 
 	private void renderPanel(int x, int y, int w, int h) {
 		g.fillRect(x, y, w, h);
 		g.setColor(FG);
-//		g.draw(new RoundRectangle2D.Float(x, y, w - 1, h - 1, 4, 4));
 	}
 
 	private void write(String fn) throws IOException {
