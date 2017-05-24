@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,9 @@ public interface Controller extends SonarObject {
 
 	/** Set the access password */
 	void setPassword(String pwd);
+
+	/** Get the access password */
+	String getPassword();
 
 	/** Set the administrator notes */
 	void setNotes(String n);

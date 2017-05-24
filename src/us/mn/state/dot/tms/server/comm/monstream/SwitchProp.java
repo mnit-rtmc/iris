@@ -130,8 +130,7 @@ public class SwitchProp extends ControllerProp {
 			String mcast = getMulticastUri();
 			if (mcast != null)
 				return mcast;
-			return CameraHelper.encoderUri(camera, getAuth(),
-				"").toString();
+			return CameraHelper.encoderUri(camera, "").toString();
 		} else
 			return "";
 	}
@@ -169,19 +168,6 @@ public class SwitchProp extends ControllerProp {
 			return URIUtil.create(URIUtil.UDP, mcast).toString();
 		else
 			return null;
-	}
-
-	/** Get camera encoder auth string */
-	private String getAuth() {
-		assert camera != null;
-		Controller c = camera.getController();
-		if (c instanceof ControllerImpl) {
-			String pwd = ((ControllerImpl) c).getPassword();
-			return (pwd != null && pwd.length() > 0)
-			      ? "//" + pwd + '@'
-			      : "";
-		} else
-			return "";
 	}
 
 	/** Get the encoding */

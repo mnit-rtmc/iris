@@ -152,7 +152,7 @@ public class VideoRequest {
 
 	/** Create a camera encoder URI */
 	public URI getCameraUri(Camera cam) {
-		return CameraHelper.encoderUri(cam, "", getQuery(cam));
+		return CameraHelper.encoderUri(cam, getQuery(cam));
 	}
 
 	/** Create camera encoder URI query part */

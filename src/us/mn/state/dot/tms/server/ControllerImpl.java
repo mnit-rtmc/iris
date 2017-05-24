@@ -338,6 +338,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Get the access password */
+	@Override
 	public String getPassword() {
 		return password;
 	}

@@ -176,25 +176,37 @@ public class CameraHelper extends BaseHelper {
 	}
 
 	/** Create a camera encoder URI */
-	static public URI encoderUri(Camera c, String auth, String query) {
+	static public URI encoderUri(Camera c, String query) {
 		if (c != null) {
 			EncoderType et = c.getEncoderType();
 			if (et != null)
-				return encoderUri(c, et, auth, query);
+				return encoderUri(c, et, query);
 		}
 		// URI.toURL throws IllegalArgumentException with empty scheme
 		return URIUtil.HTTP;
 	}
 
 	/** Create a camera encoder URI */
-	static private URI encoderUri(Camera c, EncoderType et, String auth,
-		String query)
-	{
+	static private URI encoderUri(Camera c, EncoderType et, String query) {
+		assert c != null;
 		String enc = c.getEncoder();
 		int chan = c.getEncoderChannel();
 		URI scheme = URIUtil.createScheme(et.getUriScheme());
+		String auth = getAuth(c);
 		return URIUtil.create(scheme, auth + enc + buildPath(
 			et.getUriPath(), chan) + query);
+	}
+
+	/** Get camera encoder auth string */
+	static private String getAuth(Camera c) {
+		assert c != null;
+		Controller ctrl = c.getController();
+		if (ctrl != null) {
+			String pwd = ctrl.getPassword();
+			if (pwd != null && pwd.length() > 0)
+				return "//" + pwd + '@';
+		}
+		return "";
 	}
 
 	/** Build URI path */
