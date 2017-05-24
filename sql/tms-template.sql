@@ -447,7 +447,7 @@ CREATE TABLE iris.sign_config (
 );
 
 CREATE TABLE iris._device_io (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	controller VARCHAR(20) REFERENCES iris.controller(name),
 	pin INTEGER NOT NULL
 );
@@ -456,7 +456,7 @@ CREATE UNIQUE INDEX _device_io_ctrl_pin ON iris._device_io
 	USING btree (controller, pin);
 
 CREATE TABLE iris._alarm (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	description VARCHAR(24) NOT NULL,
 	state BOOLEAN NOT NULL,
 	trigger_time timestamp WITH time zone
@@ -521,7 +521,7 @@ CREATE TRIGGER alarm_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.alarm_delete();
 
 CREATE TABLE iris._detector (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	r_node VARCHAR(10) NOT NULL REFERENCES iris.r_node(name),
 	lane_type smallint NOT NULL REFERENCES iris.lane_type(id),
 	lane_number smallint NOT NULL,
@@ -614,7 +614,7 @@ CREATE TABLE iris.encoder_type (
 );
 
 CREATE TABLE iris._camera (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes text NOT NULL,
 	cam_num INTEGER UNIQUE,
@@ -706,7 +706,7 @@ CREATE TABLE iris._video_monitor (
 	direct BOOLEAN NOT NULL,
 	restricted BOOLEAN NOT NULL,
 	monitor_style VARCHAR(24) REFERENCES iris.monitor_style,
-	camera VARCHAR(10) REFERENCES iris._camera
+	camera VARCHAR(20) REFERENCES iris._camera
 );
 
 ALTER TABLE iris._video_monitor ADD CONSTRAINT _video_monitor_fkey
@@ -774,8 +774,8 @@ CREATE TRIGGER video_monitor_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_delete();
 
 CREATE TABLE iris.camera_preset (
-	name VARCHAR(10) PRIMARY KEY,
-	camera VARCHAR(10) NOT NULL REFERENCES iris._camera,
+	name VARCHAR(20) PRIMARY KEY,
+	camera VARCHAR(20) NOT NULL REFERENCES iris._camera,
 	preset_num INTEGER NOT NULL CHECK (preset_num > 0 AND preset_num <= 12),
 	direction SMALLINT REFERENCES iris.direction(id),
 	UNIQUE(camera, preset_num)
@@ -784,12 +784,12 @@ CREATE TABLE iris.camera_preset (
 -- Ideally, _device_preset would be combined with _device_io,
 -- but that would create a circular dependency.
 CREATE TABLE iris._device_preset (
-	name VARCHAR(10) PRIMARY KEY,
-	preset VARCHAR(10) UNIQUE REFERENCES iris.camera_preset(name)
+	name VARCHAR(20) PRIMARY KEY,
+	preset VARCHAR(20) UNIQUE REFERENCES iris.camera_preset(name)
 );
 
 CREATE TABLE iris._beacon (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes text NOT NULL,
 	message text NOT NULL,
@@ -882,7 +882,7 @@ CREATE TABLE iris.meter_lock (
 );
 
 CREATE TABLE iris._ramp_meter (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes text NOT NULL,
 	meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
@@ -891,7 +891,7 @@ CREATE TABLE iris._ramp_meter (
 	algorithm INTEGER NOT NULL REFERENCES iris.meter_algorithm,
 	am_target INTEGER NOT NULL,
 	pm_target INTEGER NOT NULL,
-	beacon VARCHAR(10) REFERENCES iris._beacon,
+	beacon VARCHAR(20) REFERENCES iris._beacon,
 	m_lock INTEGER REFERENCES iris.meter_lock(id)
 );
 
@@ -974,10 +974,10 @@ CREATE TRIGGER ramp_meter_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_delete();
 
 CREATE TABLE iris._dms (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
 	notes text NOT NULL,
-	beacon VARCHAR(10) REFERENCES iris._beacon,
+	beacon VARCHAR(20) REFERENCES iris._beacon,
 	aws_allowed BOOLEAN NOT NULL,
 	aws_controlled BOOLEAN NOT NULL,
 	sign_config VARCHAR(12) REFERENCES iris.sign_config
@@ -1056,7 +1056,7 @@ CREATE TRIGGER dms_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.dms_delete();
 
 CREATE TABLE iris._lane_marking (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes VARCHAR(64) NOT NULL
 );
@@ -1119,7 +1119,7 @@ CREATE TRIGGER lane_marking_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_delete();
 
 CREATE TABLE iris._weather_sensor (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes VARCHAR(64) NOT NULL
 );
@@ -1182,7 +1182,7 @@ CREATE TRIGGER weather_sensor_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_delete();
 
 CREATE TABLE iris._tag_reader (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes VARCHAR(64) NOT NULL,
 	toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name)
@@ -1247,8 +1247,8 @@ CREATE TRIGGER tag_reader_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_delete();
 
 CREATE TABLE iris.tag_reader_dms (
-	tag_reader VARCHAR(10) NOT NULL REFERENCES iris._tag_reader,
-	dms VARCHAR(10) NOT NULL REFERENCES iris._dms
+	tag_reader VARCHAR(20) NOT NULL REFERENCES iris._tag_reader,
+	dms VARCHAR(20) NOT NULL REFERENCES iris._dms
 );
 
 CREATE TABLE iris.lcs_lock (
@@ -1257,7 +1257,7 @@ CREATE TABLE iris.lcs_lock (
 );
 
 CREATE TABLE iris._lcs_array (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	notes text NOT NULL,
 	shift INTEGER NOT NULL,
 	lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
@@ -1322,8 +1322,8 @@ CREATE TRIGGER lcs_array_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_delete();
 
 CREATE TABLE iris.lcs (
-	name VARCHAR(10) PRIMARY KEY REFERENCES iris._dms,
-	lcs_array VARCHAR(10) NOT NULL REFERENCES iris._lcs_array,
+	name VARCHAR(20) PRIMARY KEY REFERENCES iris._dms,
+	lcs_array VARCHAR(20) NOT NULL REFERENCES iris._lcs_array,
 	lane INTEGER NOT NULL
 );
 
@@ -1335,8 +1335,8 @@ CREATE TABLE iris.lane_use_indication (
 );
 
 CREATE TABLE iris._lcs_indication (
-	name VARCHAR(10) PRIMARY KEY,
-	lcs VARCHAR(10) NOT NULL REFERENCES iris.lcs,
+	name VARCHAR(20) PRIMARY KEY,
+	lcs VARCHAR(20) NOT NULL REFERENCES iris.lcs,
 	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication
 );
 
@@ -1398,13 +1398,13 @@ CREATE TRIGGER lcs_indication_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_delete();
 
 CREATE TABLE iris._gate_arm_array (
-	name VARCHAR(10) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
 	notes VARCHAR(64) NOT NULL,
-	prereq VARCHAR(10) REFERENCES iris._gate_arm_array,
-	camera VARCHAR(10) REFERENCES iris._camera,
-	approach VARCHAR(10) REFERENCES iris._camera,
-	dms VARCHAR(10) REFERENCES iris._dms,
+	prereq VARCHAR(20) REFERENCES iris._gate_arm_array,
+	camera VARCHAR(20) REFERENCES iris._camera,
+	approach VARCHAR(20) REFERENCES iris._camera,
+	dms VARCHAR(20) REFERENCES iris._dms,
 	open_msg VARCHAR(20) REFERENCES iris.quick_message,
 	closed_msg VARCHAR(20) REFERENCES iris.quick_message
 );
@@ -1455,8 +1455,8 @@ CREATE TRIGGER gate_arm_array_update_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_array_update();
 
 CREATE TABLE iris._gate_arm (
-	name VARCHAR(10) PRIMARY KEY,
-	ga_array VARCHAR(10) NOT NULL REFERENCES iris._gate_arm_array,
+	name VARCHAR(20) PRIMARY KEY,
+	ga_array VARCHAR(20) NOT NULL REFERENCES iris._gate_arm_array,
 	idx INTEGER NOT NULL,
 	notes VARCHAR(32) NOT NULL
 );
@@ -1505,7 +1505,7 @@ CREATE TRIGGER gate_arm_update_trig
 
 CREATE TABLE iris.dms_sign_group (
 	name VARCHAR(28) PRIMARY KEY,
-	dms VARCHAR(10) NOT NULL REFERENCES iris._dms,
+	dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
 	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group
 );
 
@@ -1564,7 +1564,7 @@ CREATE TABLE iris.action_plan (
 );
 
 CREATE TABLE iris.time_action (
-	name VARCHAR(20) PRIMARY KEY,
+	name VARCHAR(30) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
 	day_plan VARCHAR(10) REFERENCES iris.day_plan,
 	sched_date DATE,
@@ -1577,7 +1577,7 @@ CREATE TABLE iris.time_action (
 );
 
 CREATE TABLE iris.dms_action (
-	name VARCHAR(20) PRIMARY KEY,
+	name VARCHAR(30) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
 	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
@@ -1588,23 +1588,23 @@ CREATE TABLE iris.dms_action (
 );
 
 CREATE TABLE iris.beacon_action (
-	name VARCHAR(20) PRIMARY KEY,
+	name VARCHAR(30) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	beacon VARCHAR(10) NOT NULL REFERENCES iris._beacon,
+	beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon,
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE TABLE iris.lane_action (
-	name VARCHAR(20) PRIMARY KEY,
+	name VARCHAR(30) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	lane_marking VARCHAR(10) NOT NULL REFERENCES iris._lane_marking,
+	lane_marking VARCHAR(20) NOT NULL REFERENCES iris._lane_marking,
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE TABLE iris.meter_action (
-	name VARCHAR(20) PRIMARY KEY,
+	name VARCHAR(30) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	ramp_meter VARCHAR(10) NOT NULL REFERENCES iris._ramp_meter,
+	ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter,
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
@@ -1620,7 +1620,7 @@ CREATE TABLE event.alarm_event (
 	event_date timestamp with time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
-	alarm VARCHAR(10) NOT NULL REFERENCES iris._alarm(name)
+	alarm VARCHAR(20) NOT NULL REFERENCES iris._alarm(name)
 		ON DELETE CASCADE
 );
 
@@ -1629,7 +1629,7 @@ CREATE TABLE event.brightness_sample (
 	event_date timestamp with time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
-	dms VARCHAR(10) NOT NULL REFERENCES iris._dms(name)
+	dms VARCHAR(20) NOT NULL REFERENCES iris._dms(name)
 		ON DELETE CASCADE,
 	photocell integer NOT NULL,
 	output integer NOT NULL
@@ -1650,7 +1650,7 @@ CREATE TABLE event.detector_event (
 	event_date timestamp with time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(10) REFERENCES iris._detector(name)
+	device_id VARCHAR(20) REFERENCES iris._detector(name)
 		ON DELETE CASCADE
 );
 
@@ -1702,7 +1702,7 @@ CREATE TABLE event.meter_event (
 	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
-	ramp_meter VARCHAR(10) NOT NULL REFERENCES iris._ramp_meter
+	ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter
 		ON DELETE CASCADE,
 	phase INTEGER NOT NULL REFERENCES event.meter_phase,
 	q_state INTEGER NOT NULL REFERENCES event.meter_queue_state,
@@ -1736,7 +1736,7 @@ CREATE TABLE event.beacon_event (
 	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
-	beacon VARCHAR(10) NOT NULL REFERENCES iris._beacon
+	beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon
 		ON DELETE CASCADE
 );
 
@@ -1752,7 +1752,7 @@ CREATE TABLE event.travel_time_event (
 	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(10)
+	device_id VARCHAR(20)
 );
 
 CREATE VIEW travel_time_event_view AS
@@ -1768,7 +1768,7 @@ CREATE TABLE event.camera_switch_event (
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	monitor_id VARCHAR(12),
-	camera_id VARCHAR(10),
+	camera_id VARCHAR(20),
 	source VARCHAR(20)
 );
 
@@ -1793,7 +1793,7 @@ CREATE TABLE event.tag_read_event (
 	tag_type INTEGER NOT NULL REFERENCES event.tag_type,
 	agency INTEGER,
 	tag_id INTEGER NOT NULL,
-	tag_reader VARCHAR(10) NOT NULL,
+	tag_reader VARCHAR(20) NOT NULL,
 	hov BOOLEAN NOT NULL,
 	trip_id INTEGER
 );
@@ -1870,7 +1870,7 @@ CREATE TABLE event.incident (
 	dir SMALLINT NOT NULL REFERENCES iris.direction(id),
 	lat double precision NOT NULL,
 	lon double precision NOT NULL,
-	camera VARCHAR(10),
+	camera VARCHAR(20),
 	impact VARCHAR(20) NOT NULL,
 	cleared BOOLEAN NOT NULL,
 	confirmed BOOLEAN NOT NULL
@@ -2664,7 +2664,7 @@ client_units_si	true
 comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_modem_sec	20
-database_version	4.52.0
+database_version	4.53.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
