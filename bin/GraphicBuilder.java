@@ -14,9 +14,11 @@
  */
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
-import java.awt.geom.RoundRectangle2D;
+import java.awt.font.GlyphVector;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -34,13 +36,14 @@ public class GraphicBuilder {
 	static private final int width = 100;
 	static private final int height = FONT_HEIGHT * 2 + 4;
 
+	static private Font createFont(int size) {
+		return new Font("Overpass", Font.PLAIN, size);
+	}
+
 	private final BufferedImage buffer = new BufferedImage(width, height,
 		BufferedImage.TYPE_INT_RGB);
 	private final Graphics2D g = buffer.createGraphics();
-
-	private Font createFont(int size) {
-		return new Font("Overpass", Font.PLAIN, size);
-	}
+	private final Font font = createFont(FONT_HEIGHT);
 
 	private void render() {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
@@ -49,11 +52,22 @@ public class GraphicBuilder {
 		g.fillRect(0, 0, width, height);
 		g.setColor(BG);
 		renderPanel(0, 0, width, height);
+		System.out.println("Font: " + font.getFontName());
+		g.setFont(font);
 		g.setColor(FG);
-		g.setFont(createFont(FONT_HEIGHT));
-		g.drawString("Lindau Ln OR", 12, (FONT_HEIGHT + 2) * 1 - 4);
-		g.setFont(createFont(FONT_HEIGHT));
-		g.drawString("Killebrew Dr", 14, (FONT_HEIGHT + 2) * 2 - 4);
+		renderString("Lindau Ln OR", 0);
+		renderString("Killebrew Dr", height / 2);
+	}
+
+	private void renderString(String s, float y) {
+		GlyphVector gv = font.createGlyphVector(
+			g.getFontRenderContext(), s);
+		Rectangle2D r = gv.getVisualBounds();
+		System.out.println("Text: " + s);
+		System.out.println("Width: " + r.getWidth());
+		System.out.println("Height: " + r.getHeight());
+		float x = (width - (float) r.getWidth()) / 2;
+		g.drawString(s, x, y + (float) r.getHeight() + 2);
 	}
 
 	private void renderPanel(int x, int y, int w, int h) {
