@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ public class Position {
 		double coslat = Math.cos(lat1) * Math.cos(lat2);
 		double sdlon2 = Math.sin(dlon / 2.0);
 		double a = sdlat2 * sdlat2 + coslat * sdlon2 * sdlon2;
-		double c = 2.0 * Math.atan2(Math.sqrt(a), Math.sqrt(1.0 - a));
+		double c = 2.0 * Math.asin(Math.sqrt(a));
 		return MEAN_RADIUS * c;
 	}
 }
