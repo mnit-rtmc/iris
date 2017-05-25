@@ -23,7 +23,8 @@ package us.mn.state.dot.tms.geo;
 public class Position {
 
 	/** Mean radius of Earth (in meters) */
-	static private final double MEAN_RADIUS = 6371009.0;
+	static private final double MEAN_RADIUS =
+		GeodeticDatum.WGS_84.getMeanRadius();
 
 	/** Latitude (degrees) */
 	private final double latitude;

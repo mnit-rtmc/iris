@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,11 +17,11 @@ package us.mn.state.dot.tms.geo;
 import junit.framework.TestCase;
 
 /**
- * Position test cases.
+ * GeodeticDatum test cases.
  *
  * @author Doug Lau
  */
-public class PositionTest extends TestCase {
+public class GeodeticDatumTest extends TestCase {
 
 	static private final double EPSILON = 0.000000002;	// 2 nm
 
@@ -30,28 +30,12 @@ public class PositionTest extends TestCase {
 		    && (v0 + EPSILON >= v1);
 	}
 
-	static final double[][] COORDS = {
-		{ 45.0, -93.1,  7862.678992510984 },
-		{ 44.9, -93.1, 13622.518673490680 },
-		{ 44.9, -93.0, 11119.507973463069 },
-		{ 45.1, -93.0, 11119.507973463777 }
-	};
-
-	public PositionTest(String name) {
+	public GeodeticDatumTest(String name) {
 		super(name);
 	}
 
-	public void test() {
-		Position p = new Position(45, -93);
-		for(double[] coord: COORDS) {
-			Position p2 = new Position(coord[0], coord[1]);
-			testDistance(p, p2, coord[2]);
-		}
-	}
-
-	private void testDistance(Position p, Position p2, double dist) {
-		double dh = p.distanceHaversine(p2);
-		System.err.println("distance: " + dist + ", " + dh);
-		assertTrue(near(dist, dh));
+	public void testMeanRadius() {
+		assertTrue(near(GeodeticDatum.WGS_84.getMeanRadius(),
+		                6371008.771415));
 	}
 }

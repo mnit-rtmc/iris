@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,6 +36,11 @@ public class GeodeticDatum {
 	/** Get the polar radius */
 	public double getPolarRadius() {
 		return polar_radius;
+	}
+
+	/** Get the mean radius */
+	public double getMeanRadius() {
+		return (2 * equatorial_radius + polar_radius) / 3;
 	}
 
 	/** Square of elliptic eccentricity */
