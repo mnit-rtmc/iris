@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -278,6 +278,8 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 	{
 		if (ind.length != lanes.length)
 			throw new ChangeVetoException("Wrong lane count");
+		if (null == o)
+			throw new ChangeVetoException("Owner cannot be null");
 		final LCSPoller p = getLCSPoller();
 		if (p == null)
 			throw new ChangeVetoException("No active poller");
