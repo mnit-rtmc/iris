@@ -57,9 +57,6 @@ public class SignPixelPanel extends JPanel {
 			return null;
 	}
 
-	/** Flag to turn on antialiasing */
-	private final boolean antialias;
-
 	/** Color of sign face */
 	private Color face_color;
 
@@ -111,7 +108,6 @@ public class SignPixelPanel extends JPanel {
 	 * @param a If true, render with antialiasing. */
 	public SignPixelPanel(int h, int w, boolean a) {
 		super(true);
-		antialias = a;
 		face_color = Color.BLACK;
 		setSizes(h, w);
 	}
@@ -204,10 +200,6 @@ public class SignPixelPanel extends JPanel {
 
 	/** Paint the pixels of the sign */
 	private void paintPixels(Graphics2D g, RasterGraphic rg) {
-		if (antialias) {
-			g.setRenderingHint(RenderingHints.KEY_ANTIALIASING,
-				RenderingHints.VALUE_ANTIALIAS_ON);
-		}
 		// NOTE: unlit pixels are drawn first to allow blooming to
 		//       overdraw for lit pixels
 		paintUnlitPixels(g, rg);
@@ -216,10 +208,7 @@ public class SignPixelPanel extends JPanel {
 
 	/** Paint the unlit pixels */
 	private void paintUnlitPixels(Graphics2D g, RasterGraphic rg) {
-		if (antialias)
-			setBloom(0);
-		else
-			setBloom(1);
+		setBloom(0);
 		g.setColor(Color.DARK_GRAY);
 		int px = Math.round(getHorizontalPitch() + getBloomX());
 		int py = Math.round(getVerticalPitch() + getBloomY());
@@ -235,10 +224,7 @@ public class SignPixelPanel extends JPanel {
 
 	/** Paint the lit pixels */
 	private void paintLitPixels(Graphics2D g, RasterGraphic rg) {
-		if (antialias)
-			setBloom(0.6f);
-		else
-			setBloom(1);
+		setBloom(1);
 		int px = Math.round(getHorizontalPitch() + getBloomX());
 		int py = Math.round(getVerticalPitch() + getBloomY());
 		for (int y = 0; y < height_pix; y++) {
