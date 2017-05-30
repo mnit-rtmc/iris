@@ -99,9 +99,6 @@ public class SignPixelPanel extends JPanel {
 	/** Raster graphic to paint */
 	private RasterGraphic graphic;
 
-	/** Bloom size relative to pixel size (0 means no blooming) */
-	private float bloom = 0f;
-
 	/** Create a new sign pixel panel.
 	 * @param h Height of panel.
 	 * @param w Width of panel.
@@ -208,10 +205,9 @@ public class SignPixelPanel extends JPanel {
 
 	/** Paint the unlit pixels */
 	private void paintUnlitPixels(Graphics2D g, RasterGraphic rg) {
-		setBloom(0);
 		g.setColor(Color.DARK_GRAY);
-		int px = Math.round(getHorizontalPitch() + getBloomX());
-		int py = Math.round(getVerticalPitch() + getBloomY());
+		int px = Math.round(getHorizontalPitch());
+		int py = Math.round(getVerticalPitch());
 		for (int y = 0; y < height_pix; y++) {
 			int yy = Math.round(getPixelY(y));
 			for (int x = 0; x < width_pix; x++) {
@@ -224,13 +220,14 @@ public class SignPixelPanel extends JPanel {
 
 	/** Paint the lit pixels */
 	private void paintLitPixels(Graphics2D g, RasterGraphic rg) {
-		setBloom(1);
-		int px = Math.round(getHorizontalPitch() + getBloomX());
-		int py = Math.round(getVerticalPitch() + getBloomY());
+		float bx = getBloomX();
+		float by = getBloomY();
+		int px = Math.round(getHorizontalPitch() + bx);
+		int py = Math.round(getVerticalPitch() + by);
 		for (int y = 0; y < height_pix; y++) {
-			int yy = Math.round(getPixelY(y));
+			int yy = Math.round(getPixelY(y) - by / 2);
 			for (int x = 0; x < width_pix; x++) {
-				int xx = Math.round(getPixelX(x));
+				int xx = Math.round(getPixelX(x) - bx / 2);
 				DmsColor clr = rg.getPixel(x, y);
 				if (clr.isLit()) {
 					g.setColor(clr.color);
@@ -240,20 +237,15 @@ public class SignPixelPanel extends JPanel {
 		}
 	}
 
-	/** Set the bloom factor */
-	private void setBloom(float b) {
-		bloom = b;
-	}
-
 	/** Get the bloom in the x-direction */
 	private float getBloomX() {
-		return getHorizontalPitch() * bloom / 2;
+		return getHorizontalPitch() / 2;
 	}
 
 	/** Get the x-distance to the given pixel */
 	private float getPixelX(int x) {
 		return getHorizontalBorder() + getCharacterOffset(x) +
-			getHorizontalPitch() * x - getBloomX() / 2;
+		       getHorizontalPitch() * x;
 	}
 
 	/** Get the character offset (for character-matrix signs only) */
@@ -299,13 +291,13 @@ public class SignPixelPanel extends JPanel {
 
 	/** Get the bloom in the y-direction */
 	private float getBloomY() {
-		return getVerticalPitch() * bloom / 2;
+		return getVerticalPitch() / 2;
 	}
 
 	/** Get the y-distance to the given pixel */
 	private float getPixelY(int y) {
 		return getVerticalBorder() + getLineOffset(y) +
-			getVerticalPitch() * y - getBloomY() / 2;
+		       getVerticalPitch() * y;
 	}
 
 	/** Get the line offset (for line- or character-matrix signs) */
