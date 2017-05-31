@@ -44,7 +44,7 @@ public class Position {
 
 	/** Create a new position */
 	public Position(double lat, double lon) {
-		if (lat < -180 || lat > 180)
+		if (lat < -90 || lat > 90)
 			throw new IllegalArgumentException("Invalid latitude");
 		if (lon < -180 || lon > 180)
 			throw new IllegalArgumentException("Invalid longitude");
