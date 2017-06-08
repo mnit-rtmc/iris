@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,6 @@ import java.io.InputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
  * Version property reads the controller version.
@@ -51,10 +50,11 @@ public class VersionProperty extends STCProperty {
 	}
 
 	/** Parse a received message */
-	@Override protected void parseMessage(byte[] msg, int len)
+	@Override
+	protected void parseMessage(byte[] msg, int len)
 		throws IOException
 	{
-		if(msg[0] != 'V')
+		if (msg[0] != 'V')
 			super.parseMessage(msg, len);
 		version = new String(msg, 1, len - 1, ASCII).trim();
 	}
@@ -68,6 +68,7 @@ public class VersionProperty extends STCProperty {
 	}
 
 	/** Get a string representation */
+	@Override
 	public String toString() {
 		return "Version: " + version;
 	}
