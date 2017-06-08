@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ public enum Expiration {
 
 	INDEFINITE("", null),
 	_5_MINUTES("5 Min", 5),
+	_10_MINUTES("10 Min", 10),
 	_15_MINUTES("15 Min", 15),
 	_30_MINUTES("30 Min", 30),
 	_45_MINUTES("45 Min", 45),
@@ -37,11 +38,8 @@ public enum Expiration {
 	_8_HOURS("8 Hours", 480),
 	_9_HOURS("9 Hours", 540),
 	_10_HOURS("10 Hours", 600),
-	_11_HOURS("11 Hours", 660),
 	_12_HOURS("12 Hours", 720),
-	_13_HOURS("13 Hours", 780),
 	_14_HOURS("14 Hours", 840),
-	_15_HOURS("15 Hours", 900),
 	_16_HOURS("16 Hours", 960);
 
 	public final String label;
@@ -60,6 +58,7 @@ public enum Expiration {
 	}
 
 	/** Get a string representation of the expiration */
+	@Override
 	public String toString() {
 		return label;
 	}
