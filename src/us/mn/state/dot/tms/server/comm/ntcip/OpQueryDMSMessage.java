@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 import java.io.IOException;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -90,8 +91,16 @@ public class OpQueryDMSMessage extends OpDMS {
 	private Phase processMessageBlank() {
 		/* The sign is blank.  If IRIS thinks there is a message on it,
 		 * that's wrong and needs to be updated. */
-		if (!dms.isMsgBlank())
-			setMsgCurrent(dms.createMsgBlank());
+		if (!dms.isMsgBlank()) {
+			/* Maybe the current msg just expired */
+			boolean oper_expire = SignMessageHelper
+				.isOperatorExpiring(dms.getMsgCurrent());
+			SignMessage sm = dms.createMsgBlank();
+			setMsgCurrent(sm);
+			/* User msg just expired -- set it to blank */
+			if (oper_expire)
+				dms.setMsgUser(sm);
+		}
 		return null;
 	}
 
@@ -190,6 +199,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	private void setMsgCurrent(SignMessage sm) {
 		if (sm != null) {
 			dms.setMsgCurrentNotify(sm);
+			/* IRIS may have restarted -- recover user msg */
 			if (sm.getSource() == SignMsgSource.operator.bit())
 				dms.setMsgUser(sm);
 		} else
