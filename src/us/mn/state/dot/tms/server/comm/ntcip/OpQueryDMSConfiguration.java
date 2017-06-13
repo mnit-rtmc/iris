@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
+ * Copyright (C) 2017  	    Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +40,7 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  *
  * @author Douglas Lau
  * @author John L. Stanley
+ * @author Michael Darter
  */
 public class OpQueryDMSConfiguration extends OpDMS {
 
@@ -164,7 +166,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				dms.setVersionNotify(version.getValue());
 			}
 			mod += 1;
-			if (mod < count)
+			if (mod <= count)
 				return this;
 			else
 				return new QueryDmsInfo();
