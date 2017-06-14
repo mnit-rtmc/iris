@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
+ * Copyright (C) 2017	    Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,52 +35,47 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  *  Object Definitions for Environmental Sensor Stations (ESS)
  *  
  * @author John L. Stanley - SRF Consulting
+ * @author Michael Darter
  */
 
 public enum MIB1204 {
-	ess	(MIB1201.devices, 5),
+	ess					(MIB1201.devices, 5),
+	  essBufr				(ess, 1),
+	    essBufrInstrumentation		(essBufr, 2),
+	      essTypeofStation			(essBufrInstrumentation, 1),
+	    essBufrLocationVertical		(essBufr, 7),
+	      essAtmosphericPressure		(essBufrLocationVertical, 4),
+	    essBufrWind				(essBufr, 11),
+	      essAvgWindSpeed			(essBufrWind, 2),
+	      essMaxWindGustSpeed		(essBufrWind, 41),
+	  essNtcip				(ess, 2),
+	    essNtcipIdentification		(essNtcip, 1),
+	      essNtcipCategory			(essNtcipIdentification, 1),
+	      essNtcipSiteDescription		(essNtcipIdentification, 2),
+	    essNtcipLocation			(essNtcip, 2),
+	      essLatitude			(essNtcipLocation, 1),
+	      essLongitude			(essNtcipLocation, 2),
+	      essVehicleSpeed			(essNtcipLocation, 3),
+	      essVehicleBearing			(essNtcipLocation, 4),
+	      essOdometer			(essNtcipLocation, 5),
+	    essNtcipHeight			(essNtcip, 3),
+	      essReferenceHeight		(essNtcipHeight, 1),
+	      essPressureHeight			(essNtcipHeight, 2),
+	      essWindSensorHeight		(essNtcipHeight, 3),
+	    essNtcipWind			(essNtcip, 4),
+	      essSpotWindSpeed			(essNtcipWind, 2),
+	      essWindSituation			(essNtcipWind, 3),
+	      windSensorAvgDirectionV2		(essNtcipWind, 4),
+	      windSensorSpotDirectionV2		(essNtcipWind, 5),
+	      windSensorGustDirectionV2		(essNtcipWind, 6),
+	    essNtcipTemperature			(essNtcip, 5),
+	      essNumTemperatureSensors		(essNtcipTemperature, 1),
+	      essTemperatureSensorTable		(essNtcipTemperature, 2),
+	    essNtcipInstrumentation		(essNtcip, 15),
+	      essDoorStatus			(essNtcipInstrumentation, 1),
+	      essBatteryStatus			(essNtcipInstrumentation, 2),
+	      essLineVolts			(essNtcipInstrumentation, 3);
 
-		essBufr	(ess, 1),
-			essBufrInstrumentation (essBufr, 2),
-				essTypeofStation (essBufrInstrumentation, 1),
-			essBufrLocationVertical (essBufr, 7),
-				essAtmosphericPressure (essBufrLocationVertical, 4),
-			essBufrWind (essBufr, 11),
-				essAvgWindSpeed (essBufrWind, 2),
-				essMaxWindGustSpeed (essBufrWind, 41),
-	
-		essNtcip (ess, 2),
-			essNtcipIdentification (essNtcip, 1),
-				essNtcipCategory (essNtcipIdentification, 1),
-				essNtcipSiteDescription (essNtcipIdentification, 2),
-			essNtcipLocation (essNtcip, 2),
-				essLatitude (essNtcipLocation, 1),
-				essLongitude (essNtcipLocation, 2),
-				essVehicleSpeed (essNtcipLocation, 3),
-				essVehicleBearing (essNtcipLocation, 4),
-				essOdometer (essNtcipLocation, 5),
-			essNtcipHeight (essNtcip, 3),
-				essReferenceHeight (essNtcipHeight, 1),
-				essPressureHeight (essNtcipHeight, 2),
-				essWindSensorHeight (essNtcipHeight, 3),
-			essNtcipWind (essNtcip, 4),
-				essSpotWindSpeed (essNtcipWind, 2),
-				essWindSituation (essNtcipWind, 3),
-				windSensorAvgDirectionV2 (essNtcipWind, 4),
-				windSensorSpotDirectionV2 (essNtcipWind, 5),
-				windSensorGustDirectionV2 (essNtcipWind, 6),
-			essNtcipTemperature (essNtcip, 5),
-				essNumTemperatureSensors (essNtcipTemperature, 1),
-				essTemperatureSensorTable (essNtcipTemperature, 2),
-					/* omitted table element class for now... */
-			essNtcipInstrumentation (essNtcip, 15),
-				essDoorStatus (essNtcipInstrumentation, 1),
-				essBatteryStatus (essNtcipInstrumentation, 2),
-				essLineVolts (essNtcipInstrumentation, 3),
-
-	; // end of node definitions
-	//==============================================
-	
 	/** MIB node */
 	public final MIBNode node;
 
@@ -108,4 +104,3 @@ public enum MIB1204 {
 		return new ASN1Integer(node, r, s);
 	}
 }
-
