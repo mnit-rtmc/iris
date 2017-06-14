@@ -14,16 +14,6 @@
  * GNU General Public License for more details.
  */
 
-////////////////////////////////////////////////////////////////
-// NOTE-NOTE-NOTE:
-//
-//   This is a VERY rudimentary MIB.  It was added on short
-//   notice to get access to the essLatitude and essLognitude
-//   nodes.  A small handful of other fields were added at
-//   the same time, but THIS_MIB_IS_INCOMPLETE!
-//
-////////////////////////////////////////////////////////////////
-
 package us.mn.state.dot.tms.server.comm.ntcip.mib1204;
 
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201;
@@ -39,6 +29,13 @@ import us.mn.state.dot.tms.server.comm.snmp.MIBNode;
  */
 
 public enum MIB1204 {
+	system					(new int[] {1,3,6,1,2,1,1}),
+	  sysDescr				(system, 1),
+	  sysObjectID				(system, 2),
+	  sysUpTime				(system, 3),
+	  sysContact				(system, 4),
+	  sysName				(system, 5),
+	  sysLocation				(system, 6),
 	ess					(MIB1201.devices, 5),
 	  essBufr				(ess, 1),
 	    essBufrInstrumentation		(essBufr, 2),
@@ -46,8 +43,20 @@ public enum MIB1204 {
 	    essBufrLocationVertical		(essBufr, 7),
 	      essAtmosphericPressure		(essBufrLocationVertical, 4),
 	    essBufrWind				(essBufr, 11),
+	      essAvgWindDirection		(essBufrWind, 1),
 	      essAvgWindSpeed			(essBufrWind, 2),
 	      essMaxWindGustSpeed		(essBufrWind, 41),
+	      essMaxWindGustDir			(essBufrWind, 43),
+	    essBufrPrecip			(essBufr, 13),
+	      essRelativeHumidity		(essBufrPrecip, 3),
+	      essPrecipRate			(essBufrPrecip, 14),
+	      essSnowfallAccumRate		(essBufrPrecip, 15),
+	      essPrecipitationOneHour		(essBufrPrecip, 19),
+	      essPrecipitationThreeHours	(essBufrPrecip, 20),
+	      essPrecipitationSixHours		(essBufrPrecip, 21),
+	      essPrecipitationTwelveHours	(essBufrPrecip, 22),
+	      essPrecipitation24Hours		(essBufrPrecip, 23),
+	    essBufrRadiation			(essBufr, 14),
 	  essNtcip				(ess, 2),
 	    essNtcipIdentification		(essNtcip, 1),
 	      essNtcipCategory			(essNtcipIdentification, 1),
@@ -71,6 +80,21 @@ public enum MIB1204 {
 	    essNtcipTemperature			(essNtcip, 5),
 	      essNumTemperatureSensors		(essNtcipTemperature, 1),
 	      essTemperatureSensorTable		(essNtcipTemperature, 2),
+	        essTemperatureSensorEntry	(essTemperatureSensorTable, 1),
+	          essTemperatureSensorIndex	(essTemperatureSensorEntry, 1),
+	          essTemperatureSensorHeight	(essTemperatureSensorEntry, 2),
+	          essAirTemperature		(essTemperatureSensorEntry, 3),
+	      essWetbulbTemp			(essNtcipTemperature, 3),
+	      essDewpointTemp			(essNtcipTemperature, 4),
+	      essMaxTemp			(essNtcipTemperature, 5),
+	      essMinTemp			(essNtcipTemperature, 6),
+	    essNtcipPrecip			(essNtcip, 6),
+	    essNtcipRadiation			(essNtcip, 7),
+	    essNtcipVisibility			(essNtcip, 8),
+	      essVisibility			(essNtcipVisibility, 1),
+	      essVisibilitySituation		(essNtcipVisibility, 3),
+	    essNtcipPavement			(essNtcip, 9),
+	    essNtcipMobile			(essNtcip, 10),
 	    essNtcipInstrumentation		(essNtcip, 15),
 	      essDoorStatus			(essNtcipInstrumentation, 1),
 	      essBatteryStatus			(essNtcipInstrumentation, 2),
@@ -78,6 +102,11 @@ public enum MIB1204 {
 
 	/** MIB node */
 	public final MIBNode node;
+
+	/** Create a root node */
+	private MIB1204(int[] n) {
+		node = MIBNode.root(n, toString());
+	}
 
 	/** Create a node with MIB1201 parent */
 	private MIB1204(MIB1201 p, int n) {
