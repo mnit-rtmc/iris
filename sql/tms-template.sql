@@ -363,7 +363,7 @@ CREATE TABLE iris.sign_group (
 CREATE TABLE iris.quick_message (
 	name VARCHAR(20) PRIMARY KEY,
 	sign_group VARCHAR(16) REFERENCES iris.sign_group,
-	multi VARCHAR(256) NOT NULL
+	multi VARCHAR(1024) NOT NULL
 );
 
 CREATE TABLE iris.comm_protocol (
@@ -1522,7 +1522,7 @@ CREATE TABLE iris.sign_text (
 CREATE TABLE iris.sign_message (
 	name VARCHAR(20) PRIMARY KEY,
 	incident VARCHAR(16),
-	multi VARCHAR(512) NOT NULL,
+	multi VARCHAR(1024) NOT NULL,
 	beacon_enabled BOOLEAN NOT NULL,
 	bitmaps text NOT NULL,
 	a_priority INTEGER NOT NULL,
