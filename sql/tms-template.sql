@@ -2168,7 +2168,7 @@ GRANT SELECT ON monitor_style_view TO PUBLIC;
 
 CREATE VIEW video_monitor_view AS
 	SELECT m.name, m.notes, mon_num, direct, restricted, monitor_style,
-	       m.controller, ctr.condition, ctr.comm_link, camera
+	       m.controller, m.pin, ctr.condition, ctr.comm_link, camera
 	FROM iris.video_monitor m
 	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
 GRANT SELECT ON video_monitor_view TO PUBLIC;
@@ -2664,7 +2664,7 @@ client_units_si	true
 comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_modem_sec	20
-database_version	4.53.0
+database_version	4.54.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
