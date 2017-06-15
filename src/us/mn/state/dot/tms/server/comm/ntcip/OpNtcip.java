@@ -147,6 +147,12 @@ abstract public class OpNtcip extends OpDevice {
 		return null;
 	}
 
+	/** Log a msg */
+	protected void log(String msg) {
+		if (NTCIP_LOG.isOpen())
+			NTCIP_LOG.log(device.getName() + ": " + msg);
+	}
+
 	/** Log an error msg */
 	protected void logError(String msg) {
 		if (NTCIP_LOG.isOpen())

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,11 +31,14 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TagReaderHelper;
+import us.mn.state.dot.tms.WeatherSensor;
+import us.mn.state.dot.tms.WeatherSensorHelper;
 
 /**
  * Job to send settings to all field controllers.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class SendSettingsJob extends Job {
 
@@ -66,6 +70,7 @@ public class SendSettingsJob extends Job {
 		requestRampMeters(DeviceRequest.SEND_SETTINGS);
 		requestBeacons(DeviceRequest.SEND_SETTINGS);
 		requestTagReaders(DeviceRequest.SEND_SETTINGS);
+		requestWeatherSensors(DeviceRequest.SEND_SETTINGS);
 	}
 
 	/** Send a request to all DMS */
@@ -110,6 +115,15 @@ public class SendSettingsJob extends Job {
 		while (it.hasNext()) {
 			TagReader tr = it.next();
 			tr.setDeviceRequest(req.ordinal());
+		}
+	}
+
+	/** Send a request to all weather sensors */
+	private void requestWeatherSensors(DeviceRequest req) {
+		Iterator<WeatherSensor> it = WeatherSensorHelper.iterator();
+		while (it.hasNext()) {
+			WeatherSensor ws = it.next();
+			ws.setDeviceRequest(req.ordinal());
 		}
 	}
 }

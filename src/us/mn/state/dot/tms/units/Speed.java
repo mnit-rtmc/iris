@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2015  Minnesota Department of Transportation
+ * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +17,18 @@ package us.mn.state.dot.tms.units;
 
 import java.text.NumberFormat;
 import static us.mn.state.dot.tms.units.Distance.Units.FEET;
+import static us.mn.state.dot.tms.units.Distance.Units.METERS;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 import static us.mn.state.dot.tms.units.Distance.Units.KILOMETERS;
 import static us.mn.state.dot.tms.units.Interval.Units.SECONDS;
 import static us.mn.state.dot.tms.units.Interval.Units.HOURS;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Speed of travel units.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public final class Speed {
 
@@ -51,11 +55,17 @@ public final class Speed {
 		return (u != null) ? u : Units.KPH;
 	}
 
+        /** Get system units */
+        static private boolean useSi() {
+                return SystemAttrEnum.CLIENT_UNITS_SI.getBoolean();
+        }
+
 	/** Enumeration of speed units */
 	public enum Units {
 		FPS(1.097280, "fps", FEET, SECONDS),
 		MPH(1.609344, "mph", MILES, HOURS),
-		KPH(1.000000, "kph", KILOMETERS, HOURS);
+		KPH(1.000000, "kph", KILOMETERS, HOURS),
+		MPS(3.600000, "mps", METERS, SECONDS);
 
 		/** Conversion rate to kilometers per hour*/
 		public final double kph;
@@ -90,6 +100,20 @@ public final class Speed {
 			}
 			return null;
 		}
+	}
+
+	/** Factory to create a new quantity with the null case handled.
+	 * @param v Value in units u or null.
+	 * @param u Units for arg v.
+	 * @return A new quantity in system units or null */
+	static public Speed create(Integer v, Units u) {
+		Speed s = null;
+		if (v != null) {
+			s = new Speed(v, u);
+			if (!useSi())
+				s = s.convert(Units.MPH);
+		}
+		return s;
 	}
 
 	/** Speed value */

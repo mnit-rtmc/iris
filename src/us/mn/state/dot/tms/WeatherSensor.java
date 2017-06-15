@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010-2012  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
+ * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,11 +34,30 @@ public interface WeatherSensor extends Device {
 	/** Get air temp in C (null for missing) */
 	Integer getAirTemp();
 
+	/** Get dew point temp in C (null for missing) */
+	Integer getDewPointTemp();
+
+	/** Get max temp in C (null for missing) */
+	Integer getMaxTemp();
+
+	/** Get min temp in C (null for missing) */
+	Integer getMinTemp();
+
 	/** Get wind speed in KPH (null for missing) */
 	Integer getWindSpeed();
 
-	/** Get average wind direction in degrees (null for missing) */
+	/** Get average wind direction in degrees (null for missing).
+	 * Wind direction is the direction the wind is blowing measured 
+	 * clockwise from true North, as defined by NTCIP 1204. */
 	Integer getWindDir();
+
+	/** Get wind gust speed in KPH (null for missing) */
+	Integer getWindGustSpeed();
+
+	/** Get wind gust direction in degrees (null for missing).
+	 * Wind direction is the direction the wind is blowing measured 
+	 * clockwise from true North, as defined by NTCIP 1204. */
+	Integer getWindGustDir();
 
 	/** Get precipitation rate in mm/hr (null for missing) */
 	Integer getPrecipRate();
@@ -45,6 +65,12 @@ public interface WeatherSensor extends Device {
 	/** Get visibility in meters (null for missing) */
 	Integer getVisibility();
 
+	/** Get relative humidity as a percent (null for missing) */
+	Integer getHumidity();
+
+	/** Get the atmospheric pressure in pascals (null for missing) */
+	Integer getPressure();
+
 	/** Get the latest sample time stamp */
-	long getStamp();
+	Long getStamp();
 }

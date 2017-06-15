@@ -286,7 +286,7 @@ public class RwisRec {
 
 	/** Update the wind dir */
 	private void updateWindDir(WeatherSensorImpl ws) {
-		ws.setWindDirNotify(wind_dir_avg);
+		ws.setWindDirRoundNotify(wind_dir_avg);
 	}
 
 	/** Update the weather sensor precip accumulation */

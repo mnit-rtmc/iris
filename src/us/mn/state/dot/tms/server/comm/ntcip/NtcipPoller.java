@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
+ * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +28,12 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
+import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
+import us.mn.state.dot.tms.server.comm.WeatherPoller;
 import us.mn.state.dot.tms.utils.URIUtil;
 
 /**
@@ -38,9 +41,10 @@ import us.mn.state.dot.tms.utils.URIUtil;
  *
  * @author Douglas Lau
  * @author John L. Stanley
+ * @author Michael Darter
  */
 public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
-	SamplePoller
+	SamplePoller, WeatherPoller
 {
 	/** Get the default URI for a comm protocol */
 	static private URI default_uri(CommProtocol cp) {
@@ -182,5 +186,26 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 		// Don't query samples on 5 minute poll
 		if (c.getPollPeriod() == p)
 			addOp(new OpQuerySamples(c, p));
+	}
+
+	/** Send a device request to a weather sensor */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void sendRequest(WeatherSensorImpl ws, DeviceRequest r) {
+		switch (r) {
+		case QUERY_STATUS:
+			addOp(new OpQueryEssStatus(ws));
+			break;
+		default:
+			// Ignore other requests
+			break;
+		}
+	}
+
+	/** Send settings to a weather sensor */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void sendSettings(WeatherSensorImpl ws) {
+		addOp(new OpQueryEssSettings(ws));
 	}
 }

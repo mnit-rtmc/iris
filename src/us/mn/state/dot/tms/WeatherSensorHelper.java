@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010-2015  Minnesota Department of Transportation
  * Copyright (C) 2011  AHMCT, University of California
+ * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +23,7 @@ import us.mn.state.dot.sched.TimeSteward;
  * Helper class for weather sensors.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class WeatherSensorHelper extends BaseHelper {
 
@@ -88,8 +90,14 @@ public class WeatherSensorHelper extends BaseHelper {
 
 	/** Check if the sample data has expired */
 	static public boolean isSampleExpired(WeatherSensor ws) {
-		return ws.getStamp() + getObsAgeLimitSecs() * 1000 <
-			TimeSteward.currentTimeMillis();
+		if (ws != null) {
+			Long st = ws.getStamp();
+			if (st == null)
+				return false;
+			return st + getObsAgeLimitSecs() * 1000 <
+				TimeSteward.currentTimeMillis();
+		} else
+			return false;
 	}
 
 	/** Get the sensor observation age limit (secs).

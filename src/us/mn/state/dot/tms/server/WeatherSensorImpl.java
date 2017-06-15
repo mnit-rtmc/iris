@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2010-2016  Minnesota Department of Transportation
+ * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +16,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.ResultSet;
@@ -23,17 +25,28 @@ import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WeatherSensor;
+import us.mn.state.dot.tms.geo.Position;
+import us.mn.state.dot.tms.utils.SString;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
+import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.WeatherPoller;
 
 /**
- * A weather sensor is a device for sampling weather data, such as precipitation
- * rates, visibility and wind speed.
+ * A weather sensor is a device for sampling weather data, such as 
+ * precipitation rates, visibility, wind speed, etc. Weather sensor
+ * drivers support:
+ *   Optical Scientific ORG-815 optical rain gauge
+ *   SSI CSV file interface
+ *   Campbell Scientific CR1000 V27.05
+ *   Vaisala dmc586 2.4.16
+ *   QTT LX-RPU Elite Model Version 1.23
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 
@@ -154,6 +167,78 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		}
 	}
 
+	/** Humidity as a percentage (null for missing) */
+	private transient Integer humidity;
+
+	/** Get the humidity as a percentage (null if missing) */
+	@Override
+	public Integer getHumidity() {
+		return humidity;
+	}
+
+	/** Set the humidity.
+	 * @param hu Humidity as a percentage or null for missing */
+	public void setHumidityNotify(Integer hu) {
+		if (!objectEquals(hu, humidity)) {
+			humidity = hu;
+			notifyAttribute("humidity");
+		}
+	}
+
+	/** Dew point temperature in C (null for missing) */
+	private transient Integer dew_point_temp;
+
+	/** Get the dew point temp in C (null if missing) */
+	@Override
+	public Integer getDewPointTemp() {
+		return dew_point_temp;
+	}
+
+	/** Set the dew point temp in C.
+	 * @param dpt Dew point temperature in C (null for missing) */
+	public void setDewPointTempNotify(Integer dp) {
+		if (!objectEquals(dp, dew_point_temp)) {
+			dew_point_temp = dp;
+			notifyAttribute("dewPointTemp");
+		}
+	}
+
+	/** Max temperature in C (null for missing) */
+	private transient Integer max_temp;
+
+	/** Get the max temperature in C (null if missing) */
+	@Override
+	public Integer getMaxTemp() {
+		return max_temp;
+	}
+
+	/** Set the max temperature in C
+	 * @param mt Max temperature in C (null for missing) */
+	public void setMaxTempNotify(Integer mt) {
+		if (!objectEquals(mt, max_temp)) {
+			max_temp = mt;
+			notifyAttribute("maxTemp");
+		}
+	}
+
+	/** Min temperature in C (null for missing) */
+	private transient Integer min_temp;
+
+	/** Get the min temperature in C (null if missing) */
+	@Override
+	public Integer getMinTemp() {
+		return min_temp;
+	}
+
+	/** Set the min temperature in C
+	 * @param mt Min temperature in C (null for missing) */
+	public void setMinTempNotify(Integer mt) {
+		if (!objectEquals(mt, min_temp)) {
+			min_temp = mt;
+			notifyAttribute("minTemp");
+		}
+	}
+
 	/** Wind speed in KPH (null if missing) */
 	private transient Integer wind_speed;
 
@@ -163,11 +248,48 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		return wind_speed;
 	}
 
-	/** Set the wind speed in KPH */
+	/** Set the average wind speed in KPH
+	 * @param ws Wind speed in KPH or null if missing */
 	public void setWindSpeedNotify(Integer ws) {
 		if (!objectEquals(ws, wind_speed)) {
 			wind_speed = ws;
 			notifyAttribute("windSpeed");
+		}
+	}
+
+	/** Wind gust speed in KPH (null if missing) */
+	private transient Integer wind_gust_speed;
+
+	/** Get the wind gust speed in KPH (null if missing) */
+	@Override
+	public Integer getWindGustSpeed() {
+		return wind_gust_speed;
+	}
+
+	/** Set the wind gust speed in KPH
+	 * @param ws Wind gust speed in KPH or null if missing */
+	public void setWindGustSpeedNotify(Integer ws) {
+		if (!objectEquals(ws, wind_gust_speed)) {
+			wind_gust_speed = ws;
+			notifyAttribute("windGustSpeed");
+		}
+	}
+
+	/** Wind gust direction in degress (null if missing) */
+	private transient Integer wind_gust_dir;
+
+	/** Get the wind gust direction in degrees (null if missing) */
+	@Override
+	public Integer getWindGustDir() {
+		return wind_gust_dir;
+	}
+
+	/** Set the wind gust direction in degrees
+	 * @param ws Wind gust direction in degress or null if missing */
+	public void setWindGustDirNotify(Integer wgd) {
+		if (!objectEquals(wgd, wind_gust_dir)) {
+			wind_gust_dir = wgd;
+			notifyAttribute("windGustDir");
 		}
 	}
 
@@ -181,15 +303,19 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		return wind_dir;
 	}
 
-	/** Set the wind direction.
-	 * @param wd Wind direction in degrees (null for missing). This
-	 *	  angle is rounded to the nearest 45 degrees. */
+	/** Set the average wind direction.
+	 * @param wd Wind direction in degrees (null for missing) */
 	public void setWindDirNotify(Integer wd) {
-		Integer a = round45(wd);
-		if (!objectEquals(a, wind_dir)) {
-			wind_dir = a;
+		if (!objectEquals(wd, wind_dir)) {
+			wind_dir = wd;
 			notifyAttribute("windDir");
 		}
+	}
+
+	/** Set the average wind direction and round to the nearest 45 degs.
+	 * @param wd Wind direction in degrees (null for missing) */
+	public void setWindDirRoundNotify(Integer wd) {
+		setWindDirNotify(round45(wd));
 	}
 
 	/** Cache for precipitation samples */
@@ -256,7 +382,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	}
 
 	/** Set precipitation rate in mm/hr (null for missing) */
-	private void setPrecipRateNotify(Integer pr) {
+	public void setPrecipRateNotify(Integer pr) {
 		if (!objectEquals(pr, precip_rate)) {
 			precip_rate = pr;
 			notifyAttribute("precipRate");
@@ -286,22 +412,37 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		}
 	}
 
+	/** Atmospheric pressure in pascals (null for missing) */
+	private transient Integer pressure;
+
+	/** Get atmospheric pressure in pascals (null for missing) */
+	@Override
+	public Integer getPressure() {
+		return pressure;
+	}
+
+	/** Set atmospheric pressure in pascals (null for missing) */
+	public void setPressureNotify(Integer v) {
+		if (!objectEquals(v, pressure)) {
+			pressure = v;
+			notifyAttribute("pressure");
+		}
+	}
+
 	/** Time stamp from the last sample */
-	private transient long stamp = 0;
+	private transient Long stamp;
 
 	/** Get the time stamp from the last sample.
 	 * @return Time as long */
 	@Override
-	public long getStamp() {
+	public Long getStamp() {
 		return stamp;
 	}
 
 	/** Set the time stamp for the current sample */
-	public void setStampNotify(long s) {
-		if (s > 0 && s != stamp) {
-			stamp = s;
-			notifyAttribute("stamp");
-		}
+	public void setStampNotify(Long s) {
+		stamp = s;
+		notifyAttribute("stamp");
 	}
 
 	/** Get a weather sensor poller */
@@ -328,5 +469,59 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	public void purge(long before) {
 		cache.purge(before);
 		pt_cache.purge(before);
+	}
+
+	/** Check if the sign is periodically queriable */
+	public boolean isPeriodicallyQueriable() {
+		return isConnected() || !hasModemCommLink();
+	}
+
+	/** Get a string representation of the object */
+	public String toStringDebug() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("(WeatherSensor: name=").append(name);
+		sb.append(" avgWindSpeed_kph=").append(getWindSpeed());
+		sb.append(" avgWindDir_degs=").append(getWindDir());
+		sb.append(" windGustSpeed_kph=").append(getWindGustSpeed());
+		sb.append(" windGustDir_degs=").append(getWindGustDir());
+		sb.append(" dewPointTemp_c=").append(getDewPointTemp());
+		sb.append(" maxTemp_c=").append(getMaxTemp());
+		sb.append(" minTemp_c=").append(getMinTemp());
+		sb.append(" airTemp_c=").append(getAirTemp());
+		sb.append(" humidity_perc=").append(getHumidity());
+		sb.append(" atmos_pressure_pa=").append(getPressure());
+		sb.append(" visibility_m=").append(getVisibility());
+		sb.append(")");
+		return sb.toString();
+	}
+
+	/** Write object as xml */
+	public void writeWeatherSensorXml(Writer w) throws IOException {
+		w.write("<weather_sensor");
+		w.write(createAttribute("name", getName()));
+		w.write(createAttribute("description",
+			GeoLocHelper.getDescription(geo_loc)));
+		Position pos = GeoLocHelper.getWgs84Position(geo_loc);
+		if (pos != null) {
+			w.write(createAttribute("lon",
+				formatDouble(pos.getLongitude())));
+			w.write(createAttribute("lat",
+				formatDouble(pos.getLatitude())));
+		}
+		w.write(createAttribute("avg_wind_speed_kph", getWindSpeed()));
+		w.write(createAttribute("avg_wind_dir_degs", getWindDir()));
+		w.write(createAttribute("wind_gust_speed_kph", 
+			getWindGustSpeed()));
+		w.write(createAttribute("wind_gust_dir_degs", 
+			getWindGustDir()));
+		w.write(createAttribute("dew_point_temp_c", 
+			getDewPointTemp()));
+		w.write(createAttribute("max_temp_c", getMaxTemp()));
+		w.write(createAttribute("min_temp_c", getMinTemp()));
+		w.write(createAttribute("air_temp_c", getAirTemp()));
+		w.write(createAttribute("humidity_perc", getHumidity()));
+		w.write(createAttribute("atmos_pressure_pa", getPressure()));
+		w.write(createAttribute("visibility_m", getVisibility()));
+		w.write("/>\n");
 	}
 }
