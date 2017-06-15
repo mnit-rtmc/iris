@@ -353,7 +353,7 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	 * communication is interrupted, this will allow accumulated
 	 * precipitation to be spread out over the appropriate samples. */
 	private int calculatePeriod(long now) {
-		if (stamp > 0 && now >= stamp) {
+		if (stamp != null && now >= stamp) {
 			int n = (int) (now / SAMPLE_PERIOD_MS);
 			int s = (int) (stamp / SAMPLE_PERIOD_MS);
 			return (n - s) * SAMPLE_PERIOD_SEC;
