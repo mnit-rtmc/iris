@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.monstream;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.Operation;
 
 /**
@@ -24,13 +23,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
  *
  * @author Douglas Lau
  */
-public class ConfigProp extends ControllerProp {
-
-	/** ASCII record separator */
-	static private final char RECORD_SEP = 30;
-
-	/** ASCII unit separator */
-	static private final char UNIT_SEP = 31;
+public class ConfigProp extends MonProp {
 
 	/** Encode a STORE request */
 	@Override

@@ -19,7 +19,6 @@ import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.MonitorStyle;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
-import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.Operation;
 
 /**
@@ -27,7 +26,7 @@ import us.mn.state.dot.tms.server.comm.Operation;
  *
  * @author Douglas Lau
  */
-public class MonitorProp extends ControllerProp {
+public class MonitorProp extends MonProp {
 
 	/** Get a monitor style */
 	static private MonitorStyle monitorStyle(VideoMonitorImpl mon) {
@@ -57,12 +56,6 @@ public class MonitorProp extends ControllerProp {
 		      ? ms.getFontSz()
 		      : MonitorStyle.DEFAULT_FONT_SZ;
 	}
-
-	/** ASCII record separator */
-	static private final char RECORD_SEP = 30;
-
-	/** ASCII unit separator */
-	static private final char UNIT_SEP = 31;
 
 	/** Current controller pin */
 	private int pin = 1;

@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.utils.URIUtil;
 
@@ -34,7 +33,7 @@ import us.mn.state.dot.tms.utils.URIUtil;
  *
  * @author Douglas Lau
  */
-public class SwitchProp extends ControllerProp {
+public class SwitchProp extends MonProp {
 
 	/** Get the blank URL */
 	static private String getBlankUrl() {
@@ -55,12 +54,6 @@ public class SwitchProp extends ControllerProp {
 	static private int cameraNumBlank() {
 		return SystemAttrEnum.CAMERA_NUM_BLANK.getInt();
 	}
-
-	/** ASCII record separator */
-	static private final char RECORD_SEP = 30;
-
-	/** ASCII unit separator */
-	static private final char UNIT_SEP = 31;
 
 	/** Camera to display */
 	private final CameraImpl camera;

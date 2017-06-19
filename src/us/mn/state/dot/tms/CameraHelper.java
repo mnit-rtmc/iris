@@ -66,6 +66,12 @@ public class CameraHelper extends BaseHelper {
 		return cams.values();
 	}
 
+	/** Find a camera with the specified name or number */
+	static public Camera find(String cam) {
+		Camera c = lookup(cam);
+		return (c != null) ? c : findUID(cam);
+	}
+
 	/** Find a camera with the specific number */
 	static public Camera findUID(int uid) {
 		Iterator<Camera> it = iterator();

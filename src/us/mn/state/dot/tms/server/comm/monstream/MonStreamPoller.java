@@ -66,6 +66,11 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 			createOp("video.monitor.op.config", vm,
 				new OpMonitor());
 			break;
+		case QUERY_STATUS:
+			addOp(new Operation("video.monitor.op.query",
+				(ControllerImpl) vm.getController(),
+				new OpStatus()));
+			break;
 		default:
 			// Ignore other requests
 			break;

@@ -265,8 +265,6 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		return monitor_style;
 	}
 
-
-
 	/** Camera displayed on the video monitor */
 	private Camera camera;
 
@@ -306,7 +304,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Set the camera and notify clients of the change */
-	private void setCameraNotify(CameraImpl c, String src) {
+	public void setCameraNotify(CameraImpl c, String src) {
 		try {
 			doSetCam(c, src);
 			notifyAttribute("camera");
@@ -365,5 +363,11 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 			VideoMonitorPoller vmp = (VideoMonitorPoller) dp;
 			vmp.switchCamera(c, this, cam);
 		}
+	}
+
+	/** Perform a periodic poll */
+	@Override
+	public void periodicPoll() {
+		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 	}
 }
