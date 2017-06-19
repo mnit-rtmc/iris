@@ -49,6 +49,13 @@ public class OpStatus extends OpStep {
 		setPolling(false);
 	}
 
+	/** Set polling */
+	@Override
+	public void setPolling(boolean p) {
+		// No polling -- just wait for status messages
+		super.setPolling(false);
+	}
+
 	/** Parse data received from controller */
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
