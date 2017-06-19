@@ -115,7 +115,7 @@ public class OpStatus extends OpStep {
 		throws IOException
 	{
 		vm.setCameraNotify(c, "MONSTREAM");
-		// FIXME: update camera status
+		c.setVideoLossNotify(stat.length() > 0);
 	}
 
 	/** Get the next step */

@@ -622,7 +622,8 @@ CREATE TABLE iris._camera (
 	encoder VARCHAR(64) NOT NULL,
 	enc_mcast VARCHAR(64) NOT NULL,
 	encoder_channel INTEGER NOT NULL,
-	publish boolean NOT NULL
+	publish BOOLEAN NOT NULL,
+	video_loss BOOLEAN NOT NULL
 );
 
 ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
@@ -630,7 +631,7 @@ ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
 
 CREATE VIEW iris.camera AS SELECT
 	c.name, geo_loc, controller, pin, notes, cam_num, encoder_type, encoder,
-		enc_mcast, encoder_channel, publish
+		enc_mcast, encoder_channel, publish, video_loss
 	FROM iris._camera c JOIN iris._device_io d ON c.name = d.name;
 
 CREATE FUNCTION iris.camera_insert() RETURNS TRIGGER AS
@@ -639,10 +640,10 @@ BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._camera (name, geo_loc, notes, cam_num, encoder_type,
-	            encoder, enc_mcast, encoder_channel, publish)
+	            encoder, enc_mcast, encoder_channel, publish, video_loss)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.cam_num,
 	             NEW.encoder_type, NEW.encoder, NEW.enc_mcast,
-	             NEW.encoder_channel, NEW.publish);
+	             NEW.encoder_channel, NEW.publish, NEW.video_loss);
 	RETURN NEW;
 END;
 $camera_insert$ LANGUAGE plpgsql;
@@ -666,7 +667,8 @@ BEGIN
 	       encoder = NEW.encoder,
 	       enc_mcast = NEW.enc_mcast,
 	       encoder_channel = NEW.encoder_channel,
-	       publish = NEW.publish
+	       publish = NEW.publish,
+	       video_loss = NEW.video_loss
 	 WHERE name = OLD.name;
 	RETURN NEW;
 END;
@@ -2181,7 +2183,7 @@ GRANT SELECT ON encoder_type_view TO PUBLIC;
 
 CREATE VIEW camera_view AS
 	SELECT c.name, c.notes, cam_num, encoder_type, c.encoder, c.enc_mcast,
-	       c.encoder_channel, c.publish, c.geo_loc,
+	       c.encoder_channel, c.publish, c.video_loss, c.geo_loc,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.lat, l.lon,
 	       c.controller, ctr.comm_link, ctr.drop_id, ctr.condition
@@ -2664,7 +2666,7 @@ client_units_si	true
 comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_modem_sec	20
-database_version	4.54.0
+database_version	4.55.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0

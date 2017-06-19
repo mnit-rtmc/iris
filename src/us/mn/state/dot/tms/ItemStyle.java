@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2016  Minnesota Department of Transportation
+ * Copyright (C) 2012-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ public enum ItemStyle {
 	/* Camera styles */
 	PLAYLIST,
 	UNPUBLISHED,
+	VIDEO_LOSS,
 	/* Ramp meter styles */
 	LOCKED,
 	METERING,
@@ -88,7 +89,7 @@ public enum ItemStyle {
 
 	/** Initialize hash map of all styles */
 	static {
-		for(ItemStyle is: ItemStyle.values())
+		for (ItemStyle is: ItemStyle.values())
 			ALL_STYLES.put(is.toString(), is);
 	}
 
@@ -100,8 +101,8 @@ public enum ItemStyle {
 	/** Get an array of item styles from a bit set */
 	static public ItemStyle[] toStyles(long bits) {
 		LinkedList<ItemStyle> styles = new LinkedList<ItemStyle>();
-		for(ItemStyle is: ItemStyle.values()) {
-			if(is.checkBit(bits))
+		for (ItemStyle is: ItemStyle.values()) {
+			if (is.checkBit(bits))
 				styles.add(is);
 		}
 		return styles.toArray(new ItemStyle[0]);
@@ -110,7 +111,7 @@ public enum ItemStyle {
 	/** Get the bits for a set of styles */
 	static public long toBits(ItemStyle... styles) {
 		long bits = 0;
-		for(ItemStyle is: styles)
+		for (ItemStyle is: styles)
 			bits |= is.bit();
 		return bits;
 	}

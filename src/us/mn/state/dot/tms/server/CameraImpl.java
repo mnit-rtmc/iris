@@ -21,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -45,12 +46,20 @@ import us.mn.state.dot.tms.server.comm.DevicePoller;
  */
 public class CameraImpl extends DeviceImpl implements Camera {
 
+	/** Duration of video good/loss report "freshness" */
+	static private final long VIDEO_REPORT_MS = 5000;
+
+	/** Check if video report is stale */
+	static private boolean isReportStale(long stamp, long now) {
+		return stamp + VIDEO_REPORT_MS < now;
+	}
+
 	/** Load all the cameras */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CameraImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"cam_num, encoder_type, encoder, enc_mcast, " +
-			"encoder_channel, publish FROM iris." +
+			"encoder_channel, publish, video_loss FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -74,6 +83,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		map.put("enc_mcast", enc_mcast);
 		map.put("encoder_channel", encoder_channel);
 		map.put("publish", publish);
+		map.put("video_loss", video_loss);
 		return map;
 	}
 
@@ -110,22 +120,24 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		     row.getString(8),		// encoder
 		     row.getString(9),		// enc_mcast
 		     row.getInt(10),		// encoder_channel
-		     row.getBoolean(11)		// publish
+		     row.getBoolean(11),	// publish
+		     row.getBoolean(12)		// video_loss
 		);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, String l, String c, int p, String nt,
-		Integer cn, String et, String e, String em, int ec, boolean pb)
+		Integer cn, String et, String e, String em, int ec, boolean pb,
+		boolean vl)
 	{
 		this(n, lookupGeoLoc(l), lookupController(c), p, nt, cn,
-		     lookupEncoderType(et), e, em, ec, pb);
+		     lookupEncoderType(et), e, em, ec, pb, vl);
 	}
 
 	/** Create a camera */
 	private CameraImpl(String n, GeoLocImpl l, ControllerImpl c, int p,
 		String nt, Integer cn, EncoderType et, String e, String em,
-		int ec, boolean pb)
+		int ec, boolean pb, boolean vl)
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
@@ -135,6 +147,7 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		enc_mcast = em;
 		encoder_channel = ec;
 		publish = pb;
+		video_loss = vl;
 		initTransients();
 	}
 
@@ -297,6 +310,53 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		return publish;
 	}
 
+	/** Flag to indicate video loss */
+	private boolean video_loss;
+
+	/** Time stamp of most recent video loss report */
+	private transient long video_loss_report = 0;
+
+	/** Time stamp of most recent video good report */
+	private transient long video_good_report = 0;
+
+	/** Set flag to indicate video loss */
+	private void setVideoLoss(boolean vl) {
+		try {
+			store.update(this, "video_loss", vl);
+			video_loss = vl;
+			updateStyles();
+		}
+		catch (TMSException e) {
+			e.printStackTrace();
+		}
+	}
+
+	/** Set flag to indicate video loss */
+	public void setVideoLossNotify(boolean vl) {
+		long now = TimeSteward.currentTimeMillis();
+		if (vl != video_loss && shouldUpdateVideoLoss(vl, now))
+			setVideoLoss(vl);
+		if (vl)
+			video_loss_report = now;
+		else
+			video_good_report = now;
+	}
+
+	/** Check if video loss flag should be updated */
+	private boolean shouldUpdateVideoLoss(boolean vl, long now) {
+		if (vl) {
+			return isReportStale(video_good_report, now)
+			   && !isReportStale(video_loss_report, now);
+		} else
+			return true;
+	}
+
+	/** Get flag to indicate video loss */
+	@Override
+	public boolean getVideoLoss() {
+		return video_loss;
+	}
+
 	/** Get the camera poller */
 	private CameraPoller getCameraPoller() {
 		DevicePoller dp = getPoller();
@@ -372,6 +432,8 @@ public class CameraImpl extends DeviceImpl implements Camera {
 		long s = super.calculateStyles();
 		if (!getPublish())
 			s |= ItemStyle.UNPUBLISHED.bit();
+		if (video_loss)
+			s |= ItemStyle.VIDEO_LOSS.bit();
 		return s;
 	}
 

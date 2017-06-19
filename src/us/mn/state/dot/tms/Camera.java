@@ -69,6 +69,9 @@ public interface Camera extends Device {
 	/** Get flag to allow publishing camera images */
 	boolean getPublish();
 
+	/** Get flag to indicate video loss */
+	boolean getVideoLoss();
+
 	/** Command the camera to pan, tilt or zoom */
 	void setPtz(Float[] ptz);
 
