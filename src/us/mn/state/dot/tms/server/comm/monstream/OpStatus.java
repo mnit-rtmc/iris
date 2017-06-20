@@ -79,7 +79,7 @@ public class OpStatus extends OpStep {
 			String cam = (par.length > 2) ? par[2] : "";
 			String stat = (par.length > 3) ? par[3] : "";
 			if ("status".equals(cod))
-				parseStatus(ctrl, par[1], par[2], par[3]);
+				parseStatus(ctrl, mon, cam, stat);
 			else if (cod.length() > 0)
 				throw new ParsingException("INVALID MSG");
 		}
