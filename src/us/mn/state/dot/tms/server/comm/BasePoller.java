@@ -223,6 +223,9 @@ abstract public class BasePoller implements DevicePoller {
 	/** Add an operation to the device poller */
 	protected final void addOp(final Operation op) {
 		COMM.addJob(new Job() {
+			@Override public String getName() {
+				return "addOp";
+			}
 			@Override public void perform() {
 				doAddOp(op);
 			}
@@ -319,6 +322,9 @@ abstract public class BasePoller implements DevicePoller {
 	/** Schedule timeout of operation */
 	private void scheduleTimeout(final Operation op) {
 		COMM.addJob(new Job(timeout) {
+			@Override public String getName() {
+				return "scheduleTimeout";
+			}
 			@Override public void perform() {
 				checkTimeout(op);
 			}
@@ -487,6 +493,9 @@ abstract public class BasePoller implements DevicePoller {
 	/** Schedule poll of operation */
 	private void schedulePoll() {
 		COMM.addJob(new Job() {
+			@Override public String getName() {
+				return "schedulePoll";
+			}
 			@Override public void perform() {
 				pollOperation();
 			}
@@ -587,6 +596,9 @@ abstract public class BasePoller implements DevicePoller {
 	/** Check for data in receive buffer */
 	public void checkReceive() {
 		COMM.addJob(new Job() {
+			@Override public String getName() {
+				return "checkReceive";
+			}
 			@Override public void perform() {
 				parseReceive();
 			}
