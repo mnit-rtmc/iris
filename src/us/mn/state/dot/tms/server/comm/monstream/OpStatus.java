@@ -77,7 +77,7 @@ public class OpStatus extends OpStep {
 			String[] par = msg.split(UNIT_SEP);
 			if (par.length == 4 && "status".equals(par[0]))
 				parseStatus(ctrl, par[1], par[2], par[3]);
-			else if (par.length == 0)
+			else if (par.length == 1 && par[0].length() == 0)
 				continue;
 			else
 				throw new ParsingException("INVALID MSG");
