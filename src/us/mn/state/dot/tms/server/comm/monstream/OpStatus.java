@@ -74,11 +74,13 @@ public class OpStatus extends OpStep {
 	private void doRecv(ControllerImpl ctrl, String msgs)throws IOException{
 		for (String msg : msgs.split(RECORD_SEP)) {
 			String[] par = msg.split(UNIT_SEP);
-			if (par.length == 4 && "status".equals(par[0]))
+			String cod = (par.length > 0) ? par[0] : "";
+			String mon = (par.length > 1) ? par[1] : "";
+			String cam = (par.length > 2) ? par[2] : "";
+			String stat = (par.length > 3) ? par[3] : "";
+			if ("status".equals(cod))
 				parseStatus(ctrl, par[1], par[2], par[3]);
-			else if (par.length == 1 && par[0].length() == 0)
-				continue;
-			else
+			else if (cod.length() > 0)
 				throw new ParsingException("INVALID MSG");
 		}
 	}
