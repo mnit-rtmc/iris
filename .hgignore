@@ -6,3 +6,4 @@
 (^|/)iris-client-*
 (^|/)*.rej
 (^|/)*.orig
+(^|/)*.swp
