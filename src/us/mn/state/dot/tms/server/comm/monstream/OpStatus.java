@@ -60,7 +60,6 @@ public class OpStatus extends OpStep {
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		doRecv(op, rx_buf);
-		rx_buf.reset();
 	}
 
 	/** Parse received data */
