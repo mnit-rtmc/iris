@@ -27,6 +27,9 @@ import us.mn.state.dot.tms.client.proxy.ProxyTheme;
  */
 public class CameraTheme extends ProxyTheme<Camera> {
 
+	/** Color for video loss camera style */
+	static private final Color COLOR_VIDEO_LOSS = new Color(128, 64, 255);
+
 	/** Color for active camera style */
 	static private final Color COLOR_ACTIVE = new Color(0, 192, 255);
 
@@ -42,6 +45,10 @@ public class CameraTheme extends ProxyTheme<Camera> {
 	static public final Style PLAYLIST = new Style(
 		ItemStyle.PLAYLIST.toString(), OUTLINE, COLOR_DEPLOYED);
 
+	/** Video loss style */
+	static public final Style VIDEO_LOSS = new Style(
+		ItemStyle.VIDEO_LOSS.toString(), OUTLINE, COLOR_VIDEO_LOSS);
+
 	/** Active style */
 	static public final Style ACTIVE = new Style(
 		ItemStyle.ACTIVE.toString(), OUTLINE, COLOR_ACTIVE);
@@ -56,6 +63,7 @@ public class CameraTheme extends ProxyTheme<Camera> {
 		addStyle(UNPUBLISHED);
 		addStyle(INACTIVE);
 		addStyle(PLAYLIST);
+		addStyle(VIDEO_LOSS);
 		addStyle(ACTIVE);
 		addStyle(ALL);
 	}
