@@ -333,6 +333,8 @@ public class CameraImpl extends DeviceImpl implements Camera {
 
 	/** Set flag to indicate video loss */
 	public void setVideoLossNotify(boolean vl) {
+		if (!isEncoderConfigured())
+			return;
 		long now = TimeSteward.currentTimeMillis();
 		if (vl != video_loss && shouldUpdateVideoLoss(vl, now))
 			setVideoLoss(vl);
@@ -340,6 +342,12 @@ public class CameraImpl extends DeviceImpl implements Camera {
 			video_loss_report = now;
 		else
 			video_good_report = now;
+	}
+
+	/** Check if encoder is configured */
+	private boolean isEncoderConfigured() {
+		return (getEncMulticast().length() > 0)
+		    || (getEncoder().length() > 0);
 	}
 
 	/** Check if video loss flag should be updated */
