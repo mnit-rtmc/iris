@@ -116,7 +116,8 @@ public class SwitchProp extends MonProp {
 	private String getUri() {
 		if (isCameraBlank())
 			return getBlankUrl();
-		if (camera != null) {
+		else {
+			assert camera != null;
 			String cond = getConditionUri();
 			if (cond != null)
 				return cond;
@@ -124,8 +125,7 @@ public class SwitchProp extends MonProp {
 			if (mcast != null)
 				return mcast;
 			return CameraHelper.encoderUri(camera, "").toString();
-		} else
-			return "";
+		}
 	}
 
 	/** Get the condition URI */
@@ -169,8 +169,10 @@ public class SwitchProp extends MonProp {
 			assert camera != null;
 			EncoderType et = camera.getEncoderType();
 			if (et != null) {
-				return Encoding.fromOrdinal(et.getEncoding())
-				               .toString();
+				Encoding enc = Encoding.fromOrdinal(
+					et.getEncoding());
+				if (enc != Encoding.UNKNOWN)
+					return enc.toString();
 			}
 		}
 		return "PNG";
