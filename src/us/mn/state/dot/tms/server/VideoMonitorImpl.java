@@ -68,7 +68,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 			if (svm != m && (m instanceof VideoMonitorImpl)) {
 				VideoMonitorImpl vm = (VideoMonitorImpl) m;
 				if (vm.getMonNum() == mn)
-					vm.setCameraNotify(c, src);
+					vm.setCameraNotify(c, src, true);
 			}
 		}
 	}
@@ -233,7 +233,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Blank restricted monitor */
 	private void blankRestricted() {
 		if (getRestricted() && !isCameraPublished(getCamera()))
-			setCameraNotify(null, "RESTRICTED");
+			setCameraNotify(null, "RESTRICTED", false);
 	}
 
 	/** Get flag to restrict publishing camera images */
@@ -278,7 +278,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	public void doSetCamera(Camera c) throws TMSException {
 		CameraImpl cam = toCameraImpl(c);
 		String u = getProcUser();
-		if (doSetCam(cam, u)) {
+		if (doSetCam(cam, u, true)) {
 			// Switch all other monitors with same mon_num
 			if (mon_num > 0)
 				setCameraNotify(this, mon_num, cam, u);
@@ -288,8 +288,9 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Set the camera displayed on the monitor.
 	 * @param c Camera to display.
 	 * @param src Source of request.
+	 * @param select Was source a new camera selection.
 	 * @return true if switch was permitted. */
-	private boolean doSetCam(CameraImpl c, String src)
+	private boolean doSetCam(CameraImpl c, String src, boolean select)
 		throws TMSException
 	{
 		boolean r = restricted && !isCameraPublished(c);
@@ -298,15 +299,16 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		if (c != camera) {
 			store.update(this, "camera", c);
 			setCamera(c);
-			selectCamera(c, src);
+			if (select || r)
+				selectCamera(c, src);
 		}
 		return !r;
 	}
 
 	/** Set the camera and notify clients of the change */
-	public void setCameraNotify(CameraImpl c, String src) {
+	public void setCameraNotify(CameraImpl c, String src, boolean select) {
 		try {
-			doSetCam(c, src);
+			doSetCam(c, src, select);
 			notifyAttribute("camera");
 		}
 		catch (TMSException e) {

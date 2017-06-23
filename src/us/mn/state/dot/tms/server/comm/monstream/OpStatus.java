@@ -117,7 +117,7 @@ public class OpStatus extends OpStep {
 	private void parseStatus(VideoMonitorImpl vm, CameraImpl c, String stat)
 		throws IOException
 	{
-		vm.setCameraNotify(c, "MONSTREAM");
+		vm.setCameraNotify(c, "MONSTREAM", false);
 		c.setVideoLossNotify(stat.length() > 0);
 	}
 
