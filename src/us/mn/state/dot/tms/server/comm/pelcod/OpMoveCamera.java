@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -27,8 +27,11 @@ import us.mn.state.dot.tms.server.comm.CommMessage;
  */
 public class OpMoveCamera extends OpPelcoD {
 
-	/** Range of PTZ values */
-	static private final int PTZ_RANGE = 64;
+	/** Range of pan values (includes "turbo" values of 64) */
+	static private final int PAN_RANGE = 65;
+
+	/** Range of Tilt/Zoom values */
+	static private final int TZ_RANGE = 64;
 
 	/** Clamp a float value to the range of (-1, 1) */
 	static private float clamp_float(float value) {
@@ -46,13 +49,14 @@ public class OpMoveCamera extends OpPelcoD {
 	/** Create a new operation to move a camera */
 	public OpMoveCamera(CameraImpl c, float p, float t, float z) {
 		super(c);
-		int pan = map_float(p, PTZ_RANGE);
-		int tilt = map_float(t, PTZ_RANGE);
-		int zoom = map_float(z, PTZ_RANGE);
+		int pan = map_float(p, PAN_RANGE);
+		int tilt = map_float(t, TZ_RANGE);
+		int zoom = map_float(z, TZ_RANGE);
 		prop = new CommandProperty(pan, tilt, zoom, 0, 0);
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase<PelcoDProperty> phaseTwo() {
 		return new Move();
 	}
