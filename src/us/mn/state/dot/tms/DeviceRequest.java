@@ -1,7 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2017  Minnesota Department of Transportation
- * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2014       AHMCT, University of California
+ * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,6 +21,7 @@ package us.mn.state.dot.tms;
  *
  * @author Douglas Lau
  * @author Travis Swanston
+ * @author John L. Stanley - SRF Consulting
  */
 public enum DeviceRequest {
 	NO_REQUEST,
@@ -28,6 +30,8 @@ public enum DeviceRequest {
 	QUERY_MESSAGE,
 	QUERY_STATUS,
 	QUERY_PIXEL_FAILURES,
+	QUERY_GPS_LOCATION,
+	QUERY_GPS_LOCATION_FORCE,
 	TEST_PIXELS,
 	TEST_FANS,
 	TEST_LAMPS,

@@ -65,6 +65,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		/* NOTE: must happen after r_nodes are loaded */
 		corridors.createCorridors();
 		AlarmImpl.loadAll();
+		GpsImpl.loadAll();
 		DetectorImpl.loadAll();
 		TollZoneImpl.loadAll();
 		EncoderTypeImpl.loadAll();

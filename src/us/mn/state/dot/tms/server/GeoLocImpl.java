@@ -1,7 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2005-2016  Minnesota Department of Transportation
- * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2014       AHMCT, University of California
+ * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,17 +21,28 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LocModifier;
+import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.TransGeoLoc;
+import us.mn.state.dot.tms.geo.Position;
+import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 
 /**
  * GeoLoc contains attributes necessary to describe a map location.
  *
  * @author Douglas Lau
  * @author Travis Swanston
+ * @author Michael Janson
+ * @author John L. Stanley
  */
 public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
@@ -140,6 +152,31 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		this(n, lookupRoad(r), rd, lookupRoad(x), xd, xm, lt, ln, lm);
 	}
 
+	//-----------------------------------------
+
+	/** Given a device name, lookup the associated GeoLocImpl (if there is one)
+	 * 
+	 * @param devname - Name of device
+	 * @return Returns the associated GeoLocImpl or null.
+	 */
+	public static GeoLocImpl lookupGeoLocImplForDevice(String devname) {
+		GeoLoc proxy = GeoLocHelper.lookup(devname);
+		if ((proxy != null) && (proxy instanceof GeoLocImpl))
+			return (GeoLocImpl)proxy;
+		return null;
+	}
+	
+	/** Given a device, lookup the associated GeoLocImpl (if there is one)
+	 * 
+	 * @param dev - Device reference
+	 * @return Returns the associated GeoLocImpl or null.
+	 */
+	public static GeoLocImpl lookupGeoLocImplForDevice(Device dev) {
+		return lookupGeoLocImplForDevice(dev.getName());
+	}
+
+	//------------------------------
+	
 	/** Roadway road */
 	private Road roadway;
 
@@ -155,15 +192,18 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		if (r != roadway) {
 			store.update(this, "roadway", r);
 			setRoadway(r);
+			notifyAttribute("roadway");
 		}
 	}
 
-	/** Get the roadway locaiton */
+	/** Get the roadway location */
 	@Override
 	public Road getRoadway() {
 		return roadway;
 	}
 
+	//------------------------------
+	
 	/** Roadway direction */
 	private short road_dir;
 
@@ -180,6 +220,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 			checkDir(d);
 			store.update(this, "road_dir", d);
 			setRoadDir(d);
+			notifyAttribute("roadDir");
 		}
 	}
 
@@ -189,6 +230,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return road_dir;
 	}
 
+	//------------------------------
+	
 	/** Nearest cross-street */
 	private Road cross_street;
 
@@ -203,6 +246,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		if (x != cross_street) {
 			store.update(this, "cross_street", x);
 			setCrossStreet(x);
+			notifyAttribute("crossStreet");
 		}
 	}
 
@@ -212,6 +256,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return cross_street;
 	}
 
+	//------------------------------
+	
 	/** Cross street direction */
 	private short cross_dir;
 
@@ -227,6 +273,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 			checkDir(d);
 			store.update(this, "cross_dir", d);
 			setCrossDir(d);
+			notifyAttribute("crossDir");
 		}
 	}
 
@@ -236,6 +283,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return cross_dir;
 	}
 
+	//------------------------------
+	
 	/** Cross street modifier */
 	private short cross_mod;
 
@@ -251,6 +300,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 			checkMod(m);
 			store.update(this, "cross_mod", m);
 			setCrossMod(m);
+			notifyAttribute("crossMod");
 		}
 	}
 
@@ -260,6 +310,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return cross_mod;
 	}
 
+	//------------------------------
+	
 	/** Latitude */
 	private Double lat;
 
@@ -275,6 +327,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 			checkLat(lt);
 			store.update(this, "lat", lt);
 			setLat(lt);
+			notifyAttribute("lat");
 		}
 	}
 
@@ -284,6 +337,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return lat;
 	}
 
+	//------------------------------
+	
 	/** Longitude */
 	private Double lon;
 
@@ -299,6 +354,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 			checkLon(ln);
 			store.update(this, "lon", ln);
 			setLon(ln);
+			notifyAttribute("lon");
 		}
 	}
 
@@ -308,6 +364,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return lon;
 	}
 
+	//------------------------------
+	
 	/** Landmark */
 	private String landmark;
 
@@ -322,6 +380,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		if (!objectEquals(lm, landmark)) {
 			store.update(this, "landmark", lm);
 			setLandmark(lm);
+			notifyAttribute("landmark");
 		}
 	}
 
@@ -329,5 +388,128 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	@Override
 	public String getLandmark() {
 		return landmark;
+	}
+	
+	//-----------------------------------------------------------------------
+	// Following code uses lat/long to calculate GIS roadway/milepost/etc. info
+	// (Sections of this code were borrowed from R_NodeManager.java)
+	//-----------------------------------------------------------------------
+	
+	/** Get the corridor containing the ramp meter */
+	private Corridor getCorridor(GeoLoc geo_loc) {
+		String cid = GeoLocHelper.getCorridorName(geo_loc);
+		return corridors.getCorridor(cid);
+	}
+
+	/** Create a GeoLoc snapped to nearest corridor */
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private GeoLoc createGeoLoc(SphericalMercatorPosition smp)
+	{
+		final int roadclass_CD = RoadClass.CD_ROAD.ordinal();
+		GeoLoc loc = null;
+		double distance = Double.POSITIVE_INFINITY;
+		for (CorridorBase c: corridors.corridors.values()) {
+			if (c.getRoadway().getRClass() == roadclass_CD)
+				continue;
+			TransGeoLoc l = createGeoLoc(c, smp);
+			if ((l != null) && (l.getDistance() < distance)) {
+				loc = l;
+				distance = l.getDistance();
+			}
+		}
+		return loc;
+	}
+
+	/** Create the nearest GeoLoc for the given corridor.
+	 * @param c Corridor to search.
+	 * @param smp Selected point (spherical mercator position).
+	 * @return ClientGeoLoc snapped to corridor, or null if not found. */
+	private TransGeoLoc createGeoLoc(CorridorBase<R_Node> c, SphericalMercatorPosition smp)
+	{
+		R_Node n0 = null;
+		R_Node n1 = null;
+		R_Node n_prev = null;
+		double n_meters = Double.POSITIVE_INFINITY;
+		for (R_Node n: c) {
+			if (R_NodeHelper.isContinuityBreak(n)) {
+				n_prev = null;
+				continue;
+			}
+			if (n_prev != null) {
+				double m = calcDistance(n_prev, n, smp);
+				if (m < n_meters) {
+					n0 = n_prev;
+					n1 = n;
+					n_meters = m;
+				}
+			}
+			n_prev = n;
+		}
+		if (n0 != null)
+			return createGeoLoc(n0, n1, smp, n_meters);
+		else
+			return null;
+	}
+
+	/** Calculate the distance from a point to the given line segment.
+	 * @param n0 First r_node
+	 * @param n1 Second (adjacent) r_node.
+	 * @param smp Selected point (spherical mercator position).
+	 * @return Distance (spherical mercator "meters") from segment to
+	 *         selected point. */
+	private double calcDistance(R_Node n0, R_Node n1,
+		SphericalMercatorPosition smp)
+	{
+		GeoLoc l0 = n0.getGeoLoc();
+		GeoLoc l1 = n1.getGeoLoc();
+		return GeoLocHelper.segmentDistance(l0, l1, smp);
+	}
+
+	/** Create a GeoLoc projected onto the line between two nodes.
+	 * @param n0 First node.
+	 * @param n1 Second (adjacent) node.
+	 * @param smp Selected point (spherical mercator position).
+	 * @param d Distance (meters).
+	 * @return ClientGeoLoc snapped to corridor, or null if not found. */
+	private TransGeoLoc createGeoLoc(R_Node n0, R_Node n1,
+		SphericalMercatorPosition smp, double dist)
+	{
+		GeoLoc l0 = n0.getGeoLoc();
+		GeoLoc l1 = n1.getGeoLoc();
+		GeoLoc pos = GeoLocHelper.snapSegment(l0, l1, smp);
+		if (pos != null)
+			return new TransGeoLoc(l0.getRoadway(), l0.getRoadDir(),
+			                       pos.getLat().floatValue(),
+			                       pos.getLon().floatValue(), dist);
+		else
+			return null;
+	}
+	
+	/** Create a spherical mercator position */
+	static private SphericalMercatorPosition getPosition(double latitude, double longitude) {
+		Position pos = new Position(latitude, longitude);
+		return SphericalMercatorPosition.convert(pos);
+	}
+
+	/** Calculate nearest roadway, direction, cross-street,
+	 *  and landmark for current lat/lon location. */
+	public void doCalculateGIS() {
+		// Assign device to nearest roadway and direction
+		// Populate milepost and cross street if available on nearest r-node
+		SphericalMercatorPosition smp = getPosition(lat, lon);
+		GeoLoc loc = createGeoLoc(smp);
+		Corridor cb = getCorridor(loc);
+		R_Node rn = cb.findNearest(loc);
+		GeoLoc rn_geo_loc = rn.getGeoLoc();
+		// Use one try/catch frame on the assumption that whatever
+		// effects one of them will probably effect all of them...
+		try {
+			doSetRoadway(loc.getRoadway());
+			doSetRoadDir(loc.getRoadDir());
+			doSetCrossStreet(rn_geo_loc.getCrossStreet());
+			doSetLandmark(rn_geo_loc.getLandmark());
+		} catch (TMSException e) {
+			e.printStackTrace();
+		}
 	}
 }
