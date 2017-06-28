@@ -236,19 +236,26 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 				return value.abbrev;
 			}
 		});
+		lon_txt.setColumns(15);
 		add("location.roadway");
 		add(roadway_cbx);
-		add(road_dir_cbx, Stretch.LAST);
+		add(road_dir_cbx, Stretch.SOME);
+		// Following line tricks IPanel into putting
+		// road_dir_cbx and cross_cbx in right place
+		// for DMS PropLocation tab and has no negative
+		// effects on other LocationPanels.
+		add(new JLabel(), Stretch.LAST);
 		add(cross_mod_cbx, Stretch.NONE);
 		add(cross_cbx);
 		add(cross_dir_cbx, Stretch.LAST);
 		add("location.latitude");
-		add(lat_txt, Stretch.WIDE);
+		lat_txt.setColumns(15);
+		add(lat_txt, Stretch.LEFT);
 		add(new JButton(select_pt), Stretch.TALL);
 		add("location.longitude");
-		add(lon_txt, Stretch.WIDE);
-		add(new JLabel(), Stretch.LEFT);
+		add(lon_txt, Stretch.LEFT);
 		add("location.landmark");
+		landmark_txt.setColumns(24);
 		add(landmark_txt, Stretch.WIDE);
 		add(new JLabel(), Stretch.LEFT);
 		createJobs();

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,6 +38,7 @@ import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.GateArm;
+import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LCS;
@@ -56,6 +58,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * Special table model for Controller I/O pins.
  *
  * @author Douglas Lau
+ * @author John L. Stanley
  */
 public class ControllerIOModel extends AbstractTableModel {
 
@@ -73,9 +76,10 @@ public class ControllerIOModel extends AbstractTableModel {
 
 	/** Device types which can be associated with controller IO */
 	private enum DeviceType {
-		Alarm, Camera, Detector, DMS, Gate_Arm, Lane_Marking,
-		LCSIndication, Ramp_Meter, Beacon, Beacon_Verify,
-		Video_Monitor, Weather_Sensor, Tag_Reader
+		Alarm, Camera, Detector, DMS, Gate_Arm, Gps,
+		Lane_Marking, LCSIndication, Ramp_Meter, Beacon,
+		Beacon_Verify, Video_Monitor, Weather_Sensor,
+		Tag_Reader
 	}
 
 	/** Types of IO devices */
@@ -88,6 +92,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		IO_TYPE.add(DeviceType.Detector);
 		IO_TYPE.add(DeviceType.DMS);
 		IO_TYPE.add(DeviceType.Gate_Arm);
+		IO_TYPE.add(DeviceType.Gps);
 		IO_TYPE.add(DeviceType.Lane_Marking);
 		IO_TYPE.add(DeviceType.LCSIndication);
 		IO_TYPE.add(DeviceType.Ramp_Meter);
@@ -110,6 +115,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return DeviceType.DMS;
 		else if (cio instanceof GateArm)
 			return DeviceType.Gate_Arm;
+		else if (cio instanceof Gps)
+			return DeviceType.Gps;
 		else if (cio instanceof LaneMarking)
 			return DeviceType.Lane_Marking;
 		else if (cio instanceof LCSIndication)
@@ -172,6 +179,9 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Controller IO list for gate arms */
 	private final ControllerIOList gate_list;
 
+	/** Controller IO list for Gps */
+	private final ControllerIOList gps_list;
+
 	/** Controller IO list for lane markings */
 	private final ControllerIOList lmark_list;
 
@@ -221,6 +231,7 @@ public class ControllerIOModel extends AbstractTableModel {
 			state.getDetCache().getDetectors());
 		dms_list = new ControllerIOList(state.getDmsCache().getDMSs());
 		gate_list = new ControllerIOList(state.getGateArms());
+		gps_list = new ControllerIOList<Gps>(state.getGpses());
 		lmark_list = new ControllerIOList(state.getLaneMarkings());
 		lcsi_list = new ControllerIOList(
 			state.getLcsCache().getLCSIndications());
@@ -281,6 +292,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		dt_list.initialize();
 		dms_list.initialize();
 		gate_list.initialize();
+		gps_list.initialize();
 		lmark_list.initialize();
 		lcsi_list.initialize();
 		m_list.initialize();
@@ -298,6 +310,7 @@ public class ControllerIOModel extends AbstractTableModel {
 		dt_list.dispose();
 		dms_list.dispose();
 		gate_list.dispose();
+		gps_list.dispose();
 		lmark_list.dispose();
 		lcsi_list.dispose();
 		m_list.dispose();
@@ -497,6 +510,8 @@ public class ControllerIOModel extends AbstractTableModel {
 			return dms_list;
 		case Gate_Arm:
 			return gate_list;
+		case Gps:
+			return gps_list;
 		case Lane_Marking:
 			return lmark_list;
 		case LCSIndication:

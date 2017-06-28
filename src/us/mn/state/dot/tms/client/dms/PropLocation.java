@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2017       SRF Consulting
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,10 +28,10 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.PresetComboRenderer;
 import us.mn.state.dot.tms.client.comm.ControllerForm;
+import us.mn.state.dot.tms.client.gps.GpsPanel;
 import us.mn.state.dot.tms.client.roads.LocationPanel;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * PropLocation is a GUI panel for displaying and editing locations on a DMS
@@ -41,7 +42,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class PropLocation extends LocationPanel {
 
 	/** Notes text area */
-	private final JTextArea notes_txt = new JTextArea(3, 24);
+	private final JTextArea notes_txt = new JTextArea(11, 24);
 
 	/** External beacon combo box model */
 	private final IComboBoxModel<Beacon> beacon_mdl;
@@ -94,6 +95,8 @@ public class PropLocation extends LocationPanel {
 		}
 	}
 
+	private final GpsPanel gps_pnl;
+
 	/** DMS to display */
 	private final DMS dms;
 
@@ -104,6 +107,7 @@ public class PropLocation extends LocationPanel {
 		beacon_mdl = new IComboBoxModel<Beacon>(state.getBeaconModel());
 		preset_mdl = new IComboBoxModel<CameraPreset>(
 			state.getCamCache().getPresetModel());
+		gps_pnl = new GpsPanel(s, sign);
 	}
 
 	/** Initialize the widgets on the form */
@@ -115,8 +119,10 @@ public class PropLocation extends LocationPanel {
 		preset_cbx.setModel(preset_mdl);
 		preset_cbx.setAction(preset_act);
 		preset_cbx.setRenderer(new PresetComboRenderer());
+
 		add("device.notes");
-		add(notes_txt, Stretch.FULL);
+		add(notes_txt, Stretch.DOUBLE);
+		add(gps_pnl, Stretch.CENTER);
 		add("dms.beacon.ext");
 		add(beacon_cbx, Stretch.LAST);
 		add("camera.preset");
@@ -141,6 +147,7 @@ public class PropLocation extends LocationPanel {
 	@Override
 	public void updateEditMode() {
 		super.updateEditMode();
+		gps_pnl.updateEditMode();
 		notes_txt.setEnabled(canUpdate("notes"));
 		beacon_act.setEnabled(canUpdate("beacon"));
 		preset_act.setEnabled(canUpdate("preset"));

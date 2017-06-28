@@ -46,6 +46,8 @@ public class IPanel extends JPanel {
 			1, 1),
 		WIDE(GridBagConstraints.HORIZONTAL, 1, 1,
 			GridBagConstraints.WEST, 0, 0),
+		DOUBLE(GridBagConstraints.HORIZONTAL, 2, 1,
+				GridBagConstraints.WEST, 0.1f, 0),
 		END(GridBagConstraints.HORIZONTAL, GridBagConstraints.REMAINDER,
 			1, GridBagConstraints.WEST, 0, 0),
 		CENTER(GridBagConstraints.NONE, GridBagConstraints.REMAINDER, 1,

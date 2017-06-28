@@ -1,7 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2007-2017  Minnesota Department of Transportation
- * Copyright (C) 2015  Iteris Inc.
+ * Copyright (C) 2015       Iteris Inc.
+ * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +41,7 @@ import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
@@ -429,6 +431,15 @@ public class SonarState extends Client {
 		return words;
 	}
 
+	/** Cache of GPS objects */
+	private final TypeCache<Gps> gpses =
+		new TypeCache<Gps>(Gps.class, this);
+
+	/** Get the GPS object cache */
+	public TypeCache<Gps> getGpses() {
+		return gpses;
+	}
+
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ExceptionHandler h)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -559,6 +570,7 @@ public class SonarState extends Client {
 		populateReadable(beacon_actions);
 		populateReadable(lane_actions);
 		populateReadable(meter_actions);
+		populateReadable(gpses);
 	}
 
 	/** Look up the specified connection */
