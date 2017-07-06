@@ -52,7 +52,7 @@ import us.mn.state.dot.tms.utils.MultiSyntaxError;
  * |
  * |            .-----------------------------------------------------------.
  * |            +                                                           |
- * |--+ MsgModifyReq ----+ ChkMsgModifying         + QueryGraphicsConfig    |
+ * |--+ MsgModifyReq ----+ ChkControlMode          + QueryGraphicsConfig    |
  * |                        /       |              | FindGraphicNumber      |
  * |                       /        +              | CheckGraphic           |
  * |      ModifyMsg +--------- SetCentralMode      |   SetGraphicNotUsed    |
@@ -235,19 +235,19 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (BadValue e) {
 				// This should only happen if the message
 				// status is "validating" ...
-				return new ChkMsgModifying();
+				return new ChkControlMode();
 			}
 			catch (GenError e) {
 				// This should never happen (but of
 				// course, it does for some vendors)
-				return new ChkMsgModifying();
+				return new ChkControlMode();
 			}
-			return new ChkMsgModifying();
+			return new ChkControlMode();
 		}
 	}
 
-	/** Phase to check message status is modifying */
-	protected class ChkMsgModifying extends Phase {
+	/** Phase to check control mode (and message status) */
+	protected class ChkControlMode extends Phase {
 
 		/** Query the message status */
 		@SuppressWarnings("unchecked")
@@ -260,10 +260,6 @@ public class OpSendDMSMessage extends OpDMS {
 			mess.queryProps();
 			logQuery(mode);
 			logQuery(status);
-			if (status.getEnum() != DmsMessageStatus.modifying) {
-				setErrorStatus(status.toString());
-				return null;
-			}
 			switch (mode.getEnum()) {
 			case central:
 			case centralOverride:
@@ -305,6 +301,10 @@ public class OpSendDMSMessage extends OpDMS {
 		/** Modify the message */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
+			if (status.getEnum() != DmsMessageStatus.modifying) {
+				setErrorStatus(status.toString());
+				return null;
+			}
 			ASN1String ms = new ASN1String(dmsMessageMultiString
 				.node,DmsMessageMemoryType.changeable.ordinal(),
 				msg_num);
