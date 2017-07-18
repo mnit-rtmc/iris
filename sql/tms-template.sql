@@ -520,6 +520,93 @@ CREATE TRIGGER alarm_delete_trig
     INSTEAD OF DELETE ON iris.alarm
     FOR EACH ROW EXECUTE PROCEDURE iris.alarm_delete();
 
+CREATE TABLE iris._gps (
+	name VARCHAR(24) PRIMARY KEY,
+	gps_enable BOOLEAN NOT NULL DEFAULT false,
+	device_name VARCHAR(20) NOT NULL REFERENCES iris.geo_loc,
+	device_class VARCHAR(20) NOT NULL,
+	poll_datetime timestamp with time zone,
+	sample_datetime timestamp with time zone,
+	sample_lat double precision DEFAULT 0.0,
+	sample_lon double precision DEFAULT 0.0,
+	comm_status VARCHAR(25),
+	error_status VARCHAR(50),
+	jitter_tolerance_meters smallint DEFAULT 0
+);
+
+CREATE VIEW iris.gps AS
+	SELECT g.name, d.controller, d.pin, g.gps_enable, g.device_name,
+	       g.device_class, g.poll_datetime, g.sample_datetime, g.sample_lat,
+	       g.sample_lon, g.comm_status, g.error_status,
+	       g.jitter_tolerance_meters
+	FROM iris._gps g
+	JOIN iris._device_io d ON g.name = d.name;
+
+CREATE FUNCTION iris.gps_insert() RETURNS trigger AS
+	$gps_insert$
+BEGIN
+	INSERT INTO iris._gps
+	            (name, gps_enable, device_name, device_class,
+	             sample_datetime, sample_lat, sample_lon,
+	             comm_status, error_status,
+	             jitter_tolerance_meters)
+	     VALUES (NEW.name, NEW.gps_enable, NEW.device_name,NEW.device_class,
+	             NEW.sample_datetime, NEW.sample_lat, NEW.sample_lon,
+	             NEW.comm_status, NEW.error_status,
+	             NEW.jitter_tolerance_meters);
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, 0);
+	RETURN NEW;
+END;
+$gps_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gps_insert_trig
+	INSTEAD OF INSERT ON iris.gps
+	FOR EACH ROW EXECUTE PROCEDURE iris.gps_insert();
+
+CREATE FUNCTION iris.gps_update() RETURNS trigger AS
+	$gps_update$
+BEGIN
+        UPDATE iris._device_io
+           SET controller = NEW.controller,
+               pin = NEW.pin
+         WHERE name = OLD.name;
+	UPDATE iris._gps
+	   SET gps_enable = NEW.gps_enable,
+	       device_name = NEW.device_name,
+	       device_class = NEW.device_class,
+	       poll_datetime = NEW.poll_datetime,
+	       sample_datetime = NEW.sample_datetime,
+	       sample_lat = NEW.sample_lat,
+	       sample_lon = NEW.sample_lon,
+	       comm_status = NEW.comm_status,
+	       error_status = NEW.error_status,
+	       jitter_tolerance_meters = NEW.jitter_tolerance_meters
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$gps_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gps_update_trig
+	INSTEAD OF UPDATE ON iris.gps
+	FOR EACH ROW EXECUTE PROCEDURE iris.gps_update();
+
+CREATE FUNCTION iris.gps_delete() RETURNS TRIGGER AS
+	$gps_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$gps_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gps_delete_trig
+	INSTEAD OF DELETE ON iris.gps
+	FOR EACH ROW EXECUTE PROCEDURE iris.gps_delete();
+
 CREATE TABLE iris._detector (
 	name VARCHAR(20) PRIMARY KEY,
 	r_node VARCHAR(10) NOT NULL REFERENCES iris.r_node(name),
@@ -2662,6 +2749,7 @@ camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
+comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
 database_version	4.56.0
 detector_auto_fail_enable	true
@@ -2829,6 +2917,7 @@ gate_arm
 gate_arm_array
 geo_loc
 glyph
+gps
 graphic
 inc_advice
 inc_descriptor
@@ -2922,6 +3011,7 @@ PRV_0047	comm_tab	cabinet_style			f
 PRV_0048	dms_admin	dms			t
 PRV_0049	dms_admin	font			t
 PRV_0050	dms_admin	glyph			t
+PRV_005B	dms_admin	gps			t
 PRV_0051	dms_admin	graphic			t
 PRV_005A	dms_admin	sign_config			t
 PRV_0052	dms_control	dms		msgUser	t
@@ -2936,6 +3026,7 @@ PRV_0061	dms_tab	dms			f
 PRV_0062	dms_tab	dms_sign_group			f
 PRV_0063	dms_tab	font			f
 PRV_0064	dms_tab	glyph			f
+PRV_006B	dms_tab	gps			f
 PRV_0065	dms_tab	graphic			f
 PRV_0066	dms_tab	quick_message			f
 PRV_006A	dms_tab	sign_config			f
