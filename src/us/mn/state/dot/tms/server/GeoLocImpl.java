@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2016  Minnesota Department of Transportation
+ * Copyright (C) 2005-2017  Minnesota Department of Transportation
  * Copyright (C) 2014       AHMCT, University of California
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
@@ -45,6 +45,27 @@ import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
  * @author John L. Stanley
  */
 public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
+
+	/** Given a device name, lookup the associated GeoLocImpl (if there is
+	 * one).
+	 *
+	 * @param devname - Name of device
+	 * @return Returns the associated GeoLocImpl or null.
+	 */
+	static public GeoLocImpl lookupGeoLocImplForDevice(String devname) {
+		GeoLoc proxy = GeoLocHelper.lookup(devname);
+		if ((proxy != null) && (proxy instanceof GeoLocImpl))
+			return (GeoLocImpl) proxy;
+		return null;
+	}
+
+	/** Create a spherical mercator position */
+	static private SphericalMercatorPosition getPosition(double latitude,
+		double longitude)
+	{
+		Position pos = new Position(latitude, longitude);
+		return SphericalMercatorPosition.convert(pos);
+	}
 
 	/** Check a direction for validity */
 	static private void checkDir(short d) throws TMSException {
@@ -152,31 +173,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		this(n, lookupRoad(r), rd, lookupRoad(x), xd, xm, lt, ln, lm);
 	}
 
-	//-----------------------------------------
-
-	/** Given a device name, lookup the associated GeoLocImpl (if there is one)
-	 * 
-	 * @param devname - Name of device
-	 * @return Returns the associated GeoLocImpl or null.
-	 */
-	public static GeoLocImpl lookupGeoLocImplForDevice(String devname) {
-		GeoLoc proxy = GeoLocHelper.lookup(devname);
-		if ((proxy != null) && (proxy instanceof GeoLocImpl))
-			return (GeoLocImpl)proxy;
-		return null;
-	}
-	
-	/** Given a device, lookup the associated GeoLocImpl (if there is one)
-	 * 
-	 * @param dev - Device reference
-	 * @return Returns the associated GeoLocImpl or null.
-	 */
-	public static GeoLocImpl lookupGeoLocImplForDevice(Device dev) {
-		return lookupGeoLocImplForDevice(dev.getName());
-	}
-
-	//------------------------------
-	
 	/** Roadway road */
 	private Road roadway;
 
@@ -192,8 +188,13 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		if (r != roadway) {
 			store.update(this, "roadway", r);
 			setRoadway(r);
-			notifyAttribute("roadway");
 		}
+	}
+
+	/** Set the roadway and notify clients of the change */
+	private void setRoadwayNotify(Road r) throws TMSException {
+		doSetRoadway(r);
+		notifyAttribute("roadway");
 	}
 
 	/** Get the roadway location */
@@ -202,8 +203,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return roadway;
 	}
 
-	//------------------------------
-	
 	/** Roadway direction */
 	private short road_dir;
 
@@ -220,8 +219,13 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 			checkDir(d);
 			store.update(this, "road_dir", d);
 			setRoadDir(d);
-			notifyAttribute("roadDir");
 		}
+	}
+
+	/** Set the roadway direction and notify clients of the change */
+	private void setRoadDirNotify(short d) throws TMSException {
+		doSetRoadDir(d);
+		notifyAttribute("roadDir");
 	}
 
 	/** Get the roadway direction */
@@ -230,8 +234,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return road_dir;
 	}
 
-	//------------------------------
-	
 	/** Nearest cross-street */
 	private Road cross_street;
 
@@ -246,8 +248,13 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		if (x != cross_street) {
 			store.update(this, "cross_street", x);
 			setCrossStreet(x);
-			notifyAttribute("crossStreet");
 		}
+	}
+
+	/** Set the cross-street and notify clients of the change */
+	private void setCrossStreetNotify(Road x) throws TMSException {
+		doSetCrossStreet(x);
+		notifyAttribute("crossStreet");
 	}
 
 	/** Get the cross-street road */
@@ -256,8 +263,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return cross_street;
 	}
 
-	//------------------------------
-	
 	/** Cross street direction */
 	private short cross_dir;
 
@@ -273,7 +278,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 			checkDir(d);
 			store.update(this, "cross_dir", d);
 			setCrossDir(d);
-			notifyAttribute("crossDir");
 		}
 	}
 
@@ -283,8 +287,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return cross_dir;
 	}
 
-	//------------------------------
-	
 	/** Cross street modifier */
 	private short cross_mod;
 
@@ -300,7 +302,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 			checkMod(m);
 			store.update(this, "cross_mod", m);
 			setCrossMod(m);
-			notifyAttribute("crossMod");
 		}
 	}
 
@@ -310,8 +311,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return cross_mod;
 	}
 
-	//------------------------------
-	
 	/** Latitude */
 	private Double lat;
 
@@ -327,8 +326,13 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 			checkLat(lt);
 			store.update(this, "lat", lt);
 			setLat(lt);
-			notifyAttribute("lat");
 		}
+	}
+
+	/** Set the latitude and notify clients */
+	public void setLatNotify(Double lt) throws TMSException {
+		doSetLat(lt);
+		notifyAttribute("lat");
 	}
 
 	/** Get the latitude */
@@ -337,8 +341,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return lat;
 	}
 
-	//------------------------------
-	
 	/** Longitude */
 	private Double lon;
 
@@ -354,8 +356,13 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 			checkLon(ln);
 			store.update(this, "lon", ln);
 			setLon(ln);
-			notifyAttribute("lon");
 		}
+	}
+
+	/** Set the longitude and notify clients */
+	public void setLonNotify(Double lon) throws TMSException {
+		doSetLon(lon);
+		notifyAttribute("lon");
 	}
 
 	/** Get the longitude */
@@ -364,8 +371,6 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return lon;
 	}
 
-	//------------------------------
-	
 	/** Landmark */
 	private String landmark;
 
@@ -380,8 +385,13 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		if (!objectEquals(lm, landmark)) {
 			store.update(this, "landmark", lm);
 			setLandmark(lm);
-			notifyAttribute("landmark");
 		}
+	}
+
+	/** Set the landmark and notify clients of the change */
+	private void setLandmarkNotify(String lm) throws TMSException {
+		doSetLandmark(lm);
+		notifyAttribute("landmark");
 	}
 
 	/** Get the landmark */
@@ -389,12 +399,12 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public String getLandmark() {
 		return landmark;
 	}
-	
+
 	//-----------------------------------------------------------------------
 	// Following code uses lat/long to calculate GIS roadway/milepost/etc. info
 	// (Sections of this code were borrowed from R_NodeManager.java)
 	//-----------------------------------------------------------------------
-	
+
 	/** Get the corridor containing the ramp meter */
 	private Corridor getCorridor(GeoLoc geo_loc) {
 		String cid = GeoLocHelper.getCorridorName(geo_loc);
@@ -424,7 +434,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	 * @param c Corridor to search.
 	 * @param smp Selected point (spherical mercator position).
 	 * @return ClientGeoLoc snapped to corridor, or null if not found. */
-	private TransGeoLoc createGeoLoc(CorridorBase<R_Node> c, SphericalMercatorPosition smp)
+	private TransGeoLoc createGeoLoc(CorridorBase<R_Node> c,
+		SphericalMercatorPosition smp)
 	{
 		R_Node n0 = null;
 		R_Node n1 = null;
@@ -477,18 +488,12 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		GeoLoc l0 = n0.getGeoLoc();
 		GeoLoc l1 = n1.getGeoLoc();
 		GeoLoc pos = GeoLocHelper.snapSegment(l0, l1, smp);
-		if (pos != null)
+		if (pos != null) {
 			return new TransGeoLoc(l0.getRoadway(), l0.getRoadDir(),
 			                       pos.getLat().floatValue(),
 			                       pos.getLon().floatValue(), dist);
-		else
+		} else
 			return null;
-	}
-	
-	/** Create a spherical mercator position */
-	static private SphericalMercatorPosition getPosition(double latitude, double longitude) {
-		Position pos = new Position(latitude, longitude);
-		return SphericalMercatorPosition.convert(pos);
 	}
 
 	/** Calculate nearest roadway, direction, cross-street,
@@ -504,10 +509,10 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		// Use one try/catch frame on the assumption that whatever
 		// effects one of them will probably effect all of them...
 		try {
-			doSetRoadway(loc.getRoadway());
-			doSetRoadDir(loc.getRoadDir());
-			doSetCrossStreet(rn_geo_loc.getCrossStreet());
-			doSetLandmark(rn_geo_loc.getLandmark());
+			setRoadwayNotify(loc.getRoadway());
+			setRoadDirNotify(loc.getRoadDir());
+			setCrossStreetNotify(rn_geo_loc.getCrossStreet());
+			setLandmarkNotify(rn_geo_loc.getLandmark());
 		} catch (TMSException e) {
 			e.printStackTrace();
 		}

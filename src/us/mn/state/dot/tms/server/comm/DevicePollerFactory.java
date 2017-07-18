@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2017  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -43,7 +43,6 @@ import us.mn.state.dot.tms.server.comm.ss125.SS125Poller;
 import us.mn.state.dot.tms.server.comm.ssi.SsiPoller;
 import us.mn.state.dot.tms.server.comm.stc.STCPoller;
 import us.mn.state.dot.tms.server.comm.viconptz.ViconPTZPoller;
-import us.mn.state.dot.tms.utils.URIUtil;
 
 /**
  * A factory for creating device poller objects.

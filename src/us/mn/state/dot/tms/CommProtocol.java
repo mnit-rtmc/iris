@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -134,7 +134,7 @@ public enum CommProtocol {
 
 	/** (Nebraska Department of Roads) NDOR GateArm v5 (36) */
 	GATE_NDOR5("GATE NDORv5"),
-	
+
 	/** GPS using TAIP protocol (37) */
 	GPS_TAIP("GPS TAIP"),
 
@@ -143,8 +143,6 @@ public enum CommProtocol {
 
 	/** GPS using RedLion AT+BMDIAG command (39) */
 	GPS_REDLION("GPS RedLion");
-
-	//----------------------------------------------
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {

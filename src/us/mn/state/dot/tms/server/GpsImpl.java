@@ -38,11 +38,10 @@ import us.mn.state.dot.tms.server.comm.GpsPoller;
  *
  * @author John L. Stanley - SRF Consulting
  */
-
 public class GpsImpl extends DeviceImpl implements Gps {
 
 	/** GPS debug log */
-	public static final DebugLog GPS_LOG = new DebugLog("gps");
+	static public final DebugLog GPS_LOG = new DebugLog("gps");
 
 	/** Load all the GPS */
 	static protected void loadAll() throws TMSException {
@@ -76,6 +75,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -88,23 +88,22 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		map.put("sample_lon", sample_lon);
 		map.put("comm_status", comm_status);
 		map.put("error_status", error_status);
-		map.put("jitter_tolerance_meters",
-				jitter_tolerance_meters);
+		map.put("jitter_tolerance_meters", jitter_tolerance_meters);
 		return map;
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
 
-	//--------------------------------------
-	
 	/** Create a GPS */
 	public GpsImpl(String xname, ControllerImpl c, int p,
 			boolean xgps_enable,
@@ -112,68 +111,61 @@ public class GpsImpl extends DeviceImpl implements Gps {
 			Long xPollDatetime, Long xSampleDatetime,
 			double xsample_lat, double xsample_lon,
 			String xcomm_status, String xerror_status,
-			int xjitter_tolerance_meters) {
+			int xjitter_tolerance_meters)
+	{
 		super(xname, c, p, "");
 		gps_enable = xgps_enable;
-        device_name = xdevice_name;
-        device_class = xdevice_class;
-        pollDatetime = xPollDatetime;
-        sampleDatetime = xSampleDatetime;
-        sample_lat = xsample_lat;
-        sample_lon = xsample_lon;
-        comm_status = xcomm_status;
-        error_status = xerror_status;
-        jitter_tolerance_meters = xjitter_tolerance_meters;
+		device_name = xdevice_name;
+		device_class = xdevice_class;
+		pollDatetime = xPollDatetime;
+		sampleDatetime = xSampleDatetime;
+		sample_lat = xsample_lat;
+		sample_lon = xsample_lon;
+		comm_status = xcomm_status;
+		error_status = xerror_status;
+		jitter_tolerance_meters = xjitter_tolerance_meters;
 		initTransients();
 	}
 
 	/** Create a GPS */
 	public GpsImpl(String xname, String sController, int p,
-			boolean xgps_enable,
-			String xdevice_name, String xdevice_class,
-			Timestamp xtsPoll, Timestamp xtsSample,
-			double xsample_lat, double xsample_lon,
-			String xcomm_status, String xerror_status,
-			int xjitter_tolerance_meters) {
-		this(xname, lookupController(sController), p,
-			xgps_enable,
-			xdevice_name, xdevice_class,
-			safeGetTime(xtsPoll), safeGetTime(xtsSample),
-			xsample_lat, xsample_lon,
-			xcomm_status, xerror_status,
-			xjitter_tolerance_meters);	
+	               boolean xgps_enable, String xdevice_name,
+	               String xdevice_class, Timestamp xtsPoll,
+	               Timestamp xtsSample, double xsample_lat,
+	               double xsample_lon, String xcomm_status,
+	               String xerror_status, int xjitter_tolerance_meters)
+	{
+		this(xname, lookupController(sController), p, xgps_enable,
+		     xdevice_name, xdevice_class, safeGetTime(xtsPoll),
+		     safeGetTime(xtsSample), xsample_lat, xsample_lon,
+		     xcomm_status, xerror_status, xjitter_tolerance_meters);
 	}
 
 	private static Long safeGetTime(Timestamp ts) {
-		return (ts == null) ? 0 : ts.getTime();		
+		return (ts == null) ? 0 : ts.getTime();
 	}
 
 	public GpsImpl(String xname) throws TMSException, SonarException {
 		super(xname);
 		gps_enable = true;
-        device_name = xname.substring(0, xname.length()-4);
-        device_class = "DMS";
-        pollDatetime = null;
-        sampleDatetime = null;
-        sample_lat = new Double(0.0);
-        sample_lon = new Double(0.0);
-        comm_status = null;
-        error_status = null;
-        jitter_tolerance_meters = 100;
+		device_name = xname.substring(0, xname.length()-4);
+		device_class = "DMS";
+		pollDatetime = null;
+		sampleDatetime = null;
+		sample_lat = new Double(0.0);
+		sample_lon = new Double(0.0);
+		comm_status = null;
+		error_status = null;
+		jitter_tolerance_meters = 100;
 	}
 
-	//--------------------------------------
-
 	/** Test for valid location */
-	private static boolean isValidLocation(
-		Double dLat, Double dLon) {
+	static private boolean isValidLocation(Double dLat, Double dLon) {
 		return ((dLat != null)
 		     && (dLon != null)
 		     && (dLat != 0.0)
 		     && (dLon != 0.0));
 	}
-	
-	//--------------------------------------
 
 	/** Save a location change to the _gps table.
 	 * (Also updates the _gps.sample_datetime field.)
@@ -194,10 +186,8 @@ public class GpsImpl extends DeviceImpl implements Gps {
 			}
 		}
 	}
-	
-	//--------------------------------------
 
-	/** Save a location change to the geo_loc table 
+	/** Save a location change to the geo_loc table
 	 *  and update the GIS-info fields.
 	 * @param geoloc_dev GeoLocImpl to save to
 	 * @param dNewLat Latitude
@@ -207,16 +197,14 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		Double dNewLat,	Double dNewLon) {
 		if ((geoloc_dev != null) && isValidLocation(dNewLat, dNewLon)) {
 			try {
-				geoloc_dev.doSetLat(dNewLat);
-				geoloc_dev.doSetLon(dNewLon);
+				geoloc_dev.setLatNotify(dNewLat);
+				geoloc_dev.setLonNotify(dNewLon);
 				geoloc_dev.doCalculateGIS();
 			} catch (TMSException ex) {
 				GPS_LOG.log("Error updating geoloc record: "+ex);
 			}
 		}
 	}
-	
-	//--------------------------------------
 
 	/** Save a device's lat/long values and update the device's GIS info.
 	 * This can be called from regular (TAIP, NMEA, or RedLion) GPS polling
@@ -236,7 +224,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		Double dOldLat = 0.0, dOldLon = 0.0;
 		int jitter = 0;
 		GpsImpl gps = lookupGpsImplForDevice(sDevname);
-		GeoLocImpl geoloc_dev = 
+		GeoLocImpl geoloc_dev =
 				GeoLocImpl.lookupGeoLocImplForDevice(sDevname);
 		// get old location and appropriate jitter value
 		if (gps != null) {
@@ -261,9 +249,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 			changeDeviceLocation(geoloc_dev, dNewLat, dNewLon);
 		}
 	}
-	
-	//--------------------------------------
-	
+
 	/** Destroy an object */
 	@Override
 	public void doDestroy() throws TMSException {
@@ -276,8 +262,6 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		super.setController(c);
 	}
 
-	//--------------------------------------
-	
 	/** Request a device operation (query message, test pixels, etc.) */
 	public void sendDeviceRequest(DeviceRequest dr) {
 		GpsPoller p = getGpsPoller();
@@ -291,16 +275,12 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		sendDeviceRequest(DeviceRequest.fromOrdinal(r));
 	}
 
-	//--------------------------------------
-	
 	/** Get the GPS poller */
 	private GpsPoller getGpsPoller() {
 		DevicePoller dp = getPoller();
 		return (dp instanceof GpsPoller) ? (GpsPoller)dp : null;
 	}
 
-	//--------------------------------------
-	
 	protected void logError(String msg) {
 		if (GPS_LOG.isOpen())
 			GPS_LOG.log(getName() + ": " + msg);
@@ -311,8 +291,6 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		return isActive() && !isFailed();
 	}
 
-	//-----------------------------------------
-	
 	public CommLink getCommLink() {
 		Controller c = controller;
 		return (c != null) ? c.getCommLink() : null;
@@ -321,10 +299,10 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	//-----------------------------------------
 	// The following methods manage the partially-merged
 	// gps.gps_enable and comm_link.poll_enabled flags.
-	
+
 	/** Enable/disable GPS functions. */
 	private boolean	gps_enable;
-	
+
 	/** Set the GPS enable flag */
 	@Override
 	public void setGpsEnable(boolean agps_enable) {
@@ -332,15 +310,13 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	}
 
 	/** Set the GPS enable flag */
-	public void doSetGpsEnable(boolean agps_enable)
-			throws TMSException {
+	public void doSetGpsEnable(boolean agps_enable) throws TMSException {
 		if (agps_enable != gps_enable)
 			storeUpdate("gps_enable", agps_enable);
 		setGpsEnable(agps_enable);
 		CommLink cl = getCommLink();
 		if (cl != null)
 			cl.setPollEnabled(agps_enable);
-
 	}
 
 	/** Get the GPS enable flag */
@@ -351,9 +327,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 			gps_enable = cl.getPollEnabled();
 		return gps_enable;
 	}
-	
-	//-----------------------------------------
-	
+
 	/** Name of device this gps is linked to.  Used
 	 * for lookup in respective device table(s) and
 	 * the geo_loc table. */
@@ -380,8 +354,6 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		return device_name;
 	}
 
-	//-----------------------------------------
-	
 	/** Class of device GPS is linked to.
 	 * [currently only "DMS"] */
 	private String device_class;
@@ -407,8 +379,6 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		return device_class;
 	}
 
-	//-----------------------------------------
-	
 	/** Timestamp when latest poll was attempted.
 	 * 	Zero = never. */
 	private Long pollDatetime;
@@ -436,8 +406,6 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		return pollDatetime;
 	}
 
-	//-----------------------------------------
-	
 	/** Timestamp of most recent sample.  Note that due
 	 * to comm delays/problems, this may be different
 	 * than poll_cycle_datetime.  Zero = never. */
@@ -453,7 +421,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	public void doSetSampleDatetime(Long xSampleDatetime)
 			throws TMSException {
 		if (!xSampleDatetime.equals(sampleDatetime)) {
-			storeUpdate("sample_datetime", 
+			storeUpdate("sample_datetime",
 					asTimestamp(xSampleDatetime));
 			setSampleDatetime(xSampleDatetime);
 			notifyAttribute("sampleDatetime");
@@ -466,8 +434,6 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		return sampleDatetime;
 	}
 
-	//-----------------------------------------
-	
 	/** Latitude of most recent sample. */
 	private double sample_lat;
 
@@ -493,8 +459,6 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		return sample_lat;
 	}
 
-	//-----------------------------------------
-	
 	/** Longitude of most recent sample. */
 	private double sample_lon;
 
@@ -520,8 +484,6 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		return sample_lon;
 	}
 
-	//-----------------------------------------
-	
 	/** Status of latest attempt to poll GPS.
 	 * [usually "Done", "Polling", or "Error"] */
 	private String comm_status;
@@ -547,8 +509,6 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		return comm_status;
 	}
 
-	//-----------------------------------------
-	
 	/** Error status.  Normally blank.  If comm_status
 	 *  is set to "Error", this will contain a short
 	 *  explanation of the error. */
@@ -579,8 +539,6 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		return error_status;
 	}
 
-	//-----------------------------------------
-	
 	/** Distance GPS must move before geo_loc
 	 * location is changed. */
 	private int jitter_tolerance_meters;
@@ -593,10 +551,10 @@ public class GpsImpl extends DeviceImpl implements Gps {
 
 	/** Set the jitter tolerance meters */
 	public void doSetJitterToleranceMeters(int jitter_m)
-			throws TMSException {
+		throws TMSException
+	{
 		if (jitter_m != jitter_tolerance_meters) {
-			storeUpdate("jitter_tolerance_meters",
-					jitter_m);
+			storeUpdate("jitter_tolerance_meters", jitter_m);
 			setJitterToleranceMeters(jitter_m);
 			notifyAttribute("jitterToleranceMeters");
 		}
@@ -608,25 +566,20 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		return jitter_tolerance_meters;
 	}
 
-	//-----------------------------------------
-
 	/** Update one field in a storable database table
 	 * (Used to avoid a bunch of boilerplate...) */
-	private void storeUpdate(String field, Object value)
-	{
+	private void storeUpdate(String field, Object value) {
 		try {
 			store.update(this, field, value);
 		}
-		catch(TMSException ex) {
+		catch (TMSException ex) {
 			GPS_LOG.log("Error saving "+field+" to database: "+ex);
 			ex.printStackTrace();
 		}
 	}
-	
-	//-----------------------------------------
 
 	/** Given a GPS name, lookup the GpsImpl
-	 * 
+	 *
 	 * @param sGpsName
 	 * @return Returns the associated GpsImpl or null.
 	 */
@@ -639,7 +592,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 
 	/** Given a device name, lookup the associated GpsImpl
 	 *  (if there is one)
-	 * 
+	 *
 	 * @param dev
 	 * @return Returns the associated GpsImpl or null.
 	 */
@@ -647,10 +600,10 @@ public class GpsImpl extends DeviceImpl implements Gps {
 			String sDevName) {
 		return lookupGpsImpl(sDevName+"_gps");
 	}
-	
+
 	/** Given a device, lookup the associated
 	 *  GpsImpl (if there is one)
-	 * 
+	 *
 	 * @param dev
 	 * @return Returns the associated GpsImpl or null.
 	 */
@@ -658,5 +611,4 @@ public class GpsImpl extends DeviceImpl implements Gps {
 			DeviceImpl primarydev) {
 		return lookupGpsImplForDevice(primarydev.getName());
 	}
-
 }

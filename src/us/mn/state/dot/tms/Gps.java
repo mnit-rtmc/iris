@@ -24,67 +24,63 @@ public interface Gps extends Device {
 	/** SONAR type name */
 	String SONAR_TYPE = "gps";
 
-	//-----------------------------------------
-	/** Database attributes */
-
 	/** Set the GPS enable flag */
-	public void setGpsEnable(boolean agps_enable);
+	void setGpsEnable(boolean agps_enable);
 
 	/** Get the GPS enable flag */
-	public boolean getGpsEnable();
-	
+	boolean getGpsEnable();
+
 	/** Set the primary device name */
-	public void setDeviceName(String adevice_name);
+	void setDeviceName(String adevice_name);
 
 	/** Get the primary device name */
-	public String getDeviceName();
+	String getDeviceName();
 
 	/** Set the primary device class */
-	public void setDeviceClass(String adevice_class);
+	void setDeviceClass(String adevice_class);
 
 	/** Get the primary device class */
-	public String getDeviceClass();
+	String getDeviceClass();
 
 	/** Set the last cycle-polled date & time */
-	public void setPollDatetime(Long xPollDatetime);
+	void setPollDatetime(Long xPollDatetime);
 
 	/** Get the last cycle-polled date & time */
-	public Long getPollDatetime();
+	Long getPollDatetime();
 
 	/** Set the last successful poll date & time */
-	public void setSampleDatetime(Long xSampleDatetime);
+	void setSampleDatetime(Long xSampleDatetime);
 
 	/** Get the last successful poll date & time */
-	public Long getSampleDatetime();
+	Long getSampleDatetime();
 
 	/** Set the most recent latitude */
-	public void setSampleLat(double asample_lat);
+	void setSampleLat(double asample_lat);
 
 	/** Get the most recent latitude */
-	public double getSampleLat();
+	double getSampleLat();
 
 	/** Set the most recent longitude */
-	public void setSampleLon(double asample_lon);
+	void setSampleLon(double asample_lon);
 
 	/** Get the most recent longitude */
-	public double getSampleLon();
-	
+	double getSampleLon();
+
 	/** Set the comm status */
-	public void setCommStatus(String acomm_status);
-	
+	void setCommStatus(String acomm_status);
+
 	/** Get the comm status */
-	public String getCommStatus();
-	
+	String getCommStatus();
+
 	/** Set the error status */
-	public void setErrorStatus(String aerror_status);
-	
+	void setErrorStatus(String aerror_status);
+
 	/** Get the error status */
-	public String getErrorStatus();
-	
+	String getErrorStatus();
+
 	/** Set the jitter tolerance meters */
-	public void setJitterToleranceMeters(int ajitter_tolerance_meters);
+	void setJitterToleranceMeters(int ajitter_tolerance_meters);
 
 	/** Get the jitter tolerance meters */
-	public int getJitterToleranceMeters();
-
+	int getJitterToleranceMeters();
 }
