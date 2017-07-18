@@ -96,7 +96,7 @@ public class GpsPanel extends IPanel
 		state = s.getSonarState();
 		TypeCache<Gps> cache = state.getGpses();
 		watcher = new ProxyWatcher<Gps>(cache, this, false);
-		String gpsName = parentDevice.getName()+"_gps";
+		final String gpsName = parentDevice.getName() + "_gps";
 
 		// Lookup GPS based on parentDevice name
 		gps = GpsHelper.lookup(gpsName);
