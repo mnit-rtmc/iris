@@ -2547,13 +2547,10 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 33	CBW
 34	Incident Feed
 35	MonStream
-36	GPS TAIP-TCP
-37	GPS TAIP-UDP
-38	GPS NMEA-TCP
-39	GPS NMEA-UDP
-40	GPS RedLion-TCP
-41	GPS RedLion-UDP
-42	Gate NDORv5-TCP
+36	Gate NDORv5
+37	GPS TAIP
+38	GPS NMEA
+39	GPS RedLion
 \.
 
 COPY iris.cabinet_style (name, dip) FROM stdin;
@@ -2666,7 +2663,7 @@ client_units_si	true
 comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_modem_sec	20
-database_version	4.55.0
+database_version	4.56.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0

@@ -1,7 +1,13 @@
-BEGIN;
+\set ON_ERROR_STOP
 
 SET SESSION AUTHORIZATION 'tms';
 
+BEGIN;
+
+UPDATE iris.system_attribute SET value = '4.56.0'
+	WHERE name = 'database_version';
+
+-- Rearrange comm protocols for GPS
 UPDATE iris.comm_link SET protocol=37 WHERE protocol=36;
 UPDATE iris.comm_link SET protocol=38 WHERE protocol=39;
 UPDATE iris.comm_link SET protocol=39 WHERE protocol=40;
