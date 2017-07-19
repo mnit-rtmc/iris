@@ -221,7 +221,14 @@ public final class Speed {
 	/** Get a string representation of a speed */
 	@Override
 	public String toString() {
-		return value + " " + units.label;
+		return new Formatter(0).format(this);
+	}
+
+	/** Get speed as an NTCIP value.
+	 * @return Speed in tenths of a meter per second or 65535 for 
+	 *         missing. See NTCIP essAvgWindSpeed. */
+	public Integer ntcip() {
+		return new Integer((int)Math.round(kph() * 10));
 	}
 
 	/** Speed formatter */

@@ -52,7 +52,7 @@ public class WeatherSensorHelper extends BaseHelper {
 	/** Get the high wind limit in kph */
 	static public int getHighWindLimitKph() {
 		return SystemAttrEnum.RWIS_HIGH_WIND_SPEED_KPH.getInt();
- 	}
+	}
 
 	/** Is wind speed high? */
 	static public boolean isHighWind(WeatherSensor ws) {
@@ -106,12 +106,50 @@ public class WeatherSensorHelper extends BaseHelper {
 	 *	   observations never expire. */
 	static public int getObsAgeLimitSecs() {
 		return SystemAttrEnum.RWIS_OBS_AGE_LIMIT_SECS.getInt();
- 	}
+	}
 
 	/** Get a valid precipitation rate, or null */
 	static public Integer getPrecipRate(WeatherSensor ws) {
 		return (isSampleExpired(ws))
 		      ? null
 		      : ws.getPrecipRate();
+	}
+
+	/** Get the intensity for the precipitation rate, per ntcip 1204 */
+	static public String getPrecipRateIntensity(WeatherSensor ws) {
+		Integer pr = getPrecipRate(ws);
+		if (pr != null) {
+			if (pr <= 0)
+				return "none";
+			else if (pr < 2)
+				return "slight";
+			else if (pr < 8)
+				return "moderate";
+			else
+				return "heavy";
+		} else
+			return "";
+	}
+
+	/** Get the precipitation situation as an enum */
+	static public PrecipSituation getPrecipSituation(WeatherSensor ws) {
+		if (ws != null) {
+			Integer ps = ws.getPrecipSituation();
+			if (ps != null)
+				return PrecipSituation.fromOrdinal(ps);
+		}
+		return PrecipSituation.UNDEFINED;
+	}
+
+	/** Get the pavement surface status as an enum */
+	static public PavementSurfaceStatus getPvmtSurfStatus(
+		WeatherSensor ws) 
+	{
+		if (ws != null) {
+			Integer pss = ws.getPvmtSurfStatus();
+			if (pss != null)
+				return PavementSurfaceStatus.fromOrdinal(pss);
+		}
+		return PavementSurfaceStatus.UNDEFINED;
 	}
 }

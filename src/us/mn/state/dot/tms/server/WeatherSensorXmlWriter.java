@@ -56,36 +56,62 @@ public class WeatherSensorXmlWriter extends XmlWriter {
 		w.write("<!DOCTYPE weather_sensors [\n");
 		w.write("<!ELEMENT weather_sensors (weather_sensor)*>\n");
 		w.write("<!ATTLIST weather_sensors " + 
-			"time_stamp CDATA #REQUIRED>\n");
+			"time_stamp CDATA #IMPLIED>\n");
 		w.write("<!ELEMENT weather_sensor EMPTY>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"WeatherSensor CDATA #REQUIRED>\n");
+			"WeatherSensor CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"name CDATA #REQUIRED>\n");
+			"name CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"description CDATA #REQUIRED>\n");
+			"description CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"lon CDATA #REQUIRED>\n");
+			"lon CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"lat CDATA #REQUIRED>\n");
+			"lat CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"avg_wind_speed_kph CDATA #REQUIRED>\n");
+			"air_temp_c CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"avg_wind_dir_degs CDATA #REQUIRED>\n");
+			"humidity_perc CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"wind_gust_speed_kph CDATA #REQUIRED>\n");
+			"dew_point_temp_c CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"wind_gust_dir_degs CDATA #REQUIRED>\n");
+			"max_temp_c CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"dew_point_temp_c CDATA #REQUIRED>\n");
+			"min_temp_c CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"max_temp_c CDATA #REQUIRED>\n");
+			"avg_wind_speed_kph CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"min_temp_c CDATA #REQUIRED>\n");
+			"wind_gust_speed_kph CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"air_temp_c CDATA #REQUIRED>\n");
+			"wind_gust_dir_degs CDATA #IMPLIED>\n");
 		w.write("<!ATTLIST weather_sensor " + 
-			"humidity_perc CDATA #REQUIRED>\n");
+			"avg_wind_dir_degs CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"spot_wind_speed_kph CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"spot_wind_dir_degs CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"precip_rate_mmhr CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"precip_situation CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"precip_1h CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"visibility_m CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"atmos_pressure_pa CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"pvmt_surf_temp CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"surf_temp_c CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"pvmt_surf_status CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"surf_freeze_temp_c CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"subsurf_temp_c CDATA #IMPLIED>\n");
+		w.write("<!ATTLIST weather_sensor " + 
+			"time_stamp CDATA #IMPLIED>\n");
 		w.write("]>\n");
 	}
 

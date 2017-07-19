@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.sql.ResultSet;
@@ -26,8 +27,10 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.PavementSurfaceStatus;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.WeatherSensor;
+import us.mn.state.dot.tms.WeatherSensorHelper;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.utils.SString;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
@@ -257,39 +260,39 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		}
 	}
 
-	/** Wind gust speed in KPH (null if missing) */
-	private transient Integer wind_gust_speed;
+	/** Max wind gust speed in KPH (null if missing) */
+	private transient Integer max_wind_gust_speed;
 
-	/** Get the wind gust speed in KPH (null if missing) */
+	/** Get the max wind gust speed in KPH (null if missing) */
 	@Override
-	public Integer getWindGustSpeed() {
-		return wind_gust_speed;
+	public Integer getMaxWindGustSpeed() {
+		return max_wind_gust_speed;
 	}
 
-	/** Set the wind gust speed in KPH
+	/** Set the max wind gust speed in KPH
 	 * @param ws Wind gust speed in KPH or null if missing */
-	public void setWindGustSpeedNotify(Integer ws) {
-		if (!objectEquals(ws, wind_gust_speed)) {
-			wind_gust_speed = ws;
-			notifyAttribute("windGustSpeed");
+	public void setMaxWindGustSpeedNotify(Integer ws) {
+		if (!objectEquals(ws, max_wind_gust_speed)) {
+			max_wind_gust_speed = ws;
+			notifyAttribute("maxWindGustSpeed");
 		}
 	}
 
-	/** Wind gust direction in degress (null if missing) */
-	private transient Integer wind_gust_dir;
+	/** Max wind gust direction in degress (null if missing) */
+	private transient Integer max_wind_gust_dir;
 
-	/** Get the wind gust direction in degrees (null if missing) */
+	/** Get the max wind gust direction in degrees (null if missing) */
 	@Override
-	public Integer getWindGustDir() {
-		return wind_gust_dir;
+	public Integer getMaxWindGustDir() {
+		return max_wind_gust_dir;
 	}
 
-	/** Set the wind gust direction in degrees
-	 * @param ws Wind gust direction in degress or null if missing */
-	public void setWindGustDirNotify(Integer wgd) {
-		if (!objectEquals(wgd, wind_gust_dir)) {
-			wind_gust_dir = wgd;
-			notifyAttribute("windGustDir");
+	/** Set the max wind gust direction in degrees
+	 * @param ws Max wind gust direction in degress or null if missing */
+	public void setMaxWindGustDirNotify(Integer wgd) {
+		if (!objectEquals(wgd, max_wind_gust_dir)) {
+			max_wind_gust_dir = wgd;
+			notifyAttribute("maxWindGustDir");
 		}
 	}
 
@@ -316,6 +319,44 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	 * @param wd Wind direction in degrees (null for missing) */
 	public void setWindDirRoundNotify(Integer wd) {
 		setWindDirNotify(round45(wd));
+	}
+
+	/** Spot wind direction in degrees (null for missing) */
+	private transient Integer spot_wind_dir;
+
+	/** Get spot wind direction.
+	 * @return Spot wind direction in degrees (null for missing) */
+	@Override
+	public Integer getSpotWindDir() {
+		return spot_wind_dir;
+	}
+
+	/** Set spot wind direction.
+	 * @param swd Spot wind direction in degrees (null for missing) */
+	public void setSpotWindDirNotify(Integer swd) {
+		if (!objectEquals(swd, spot_wind_dir)) {
+			spot_wind_dir = swd;
+			notifyAttribute("spotWindDir");
+		}
+	}
+
+	/** Spot wind speed in KPH (null for missing) */
+	private transient Integer spot_wind_speed;
+
+	/** Get spot wind speed.
+	 * @return Spot wind speed in degrees (null for missing) */
+	@Override
+	public Integer getSpotWindSpeed() {
+		return spot_wind_speed;
+	}
+
+	/** Set spot wind speed.
+	 * @param swd Spot wind speed in KPH (null for missing) */
+	public void setSpotWindSpeedNotify(Integer sws) {
+		if (!objectEquals(sws, spot_wind_speed)) {
+			spot_wind_speed = sws;
+			notifyAttribute("spotWindSpeed");
+		}
 	}
 
 	/** Cache for precipitation samples */
@@ -395,6 +436,40 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 			pt.ordinal()));
 	}
 
+	/** Precipitation situation (null for missing) */
+	private transient Integer precip_situation;
+
+	/** Get precipitation situation (null for missing) */
+	@Override
+	public Integer getPrecipSituation() {
+		return precip_situation;
+	}
+
+	/** Set precipitation situation (null for missing) */
+	public void setPrecipSituationNotify(Integer prs) {
+		if (!objectEquals(prs, precip_situation)) {
+			precip_situation = prs;
+			notifyAttribute("precipSituation");
+		}
+	}
+
+	/** Precipitation accumulation 1h in mm (null for missing) */
+	private transient Integer precip_one_hour;
+
+	/** Get precipitation 1h in mm (null for missing) */
+	@Override
+	public Integer getPrecipOneHour() {
+		return precip_one_hour;
+	}
+
+	/** Set precipitation 1h in mm (null for missing) */
+	public void setPrecipOneHourNotify(Integer pr) {
+		if (!objectEquals(pr, precip_one_hour)) {
+			precip_one_hour = pr;
+			notifyAttribute("precipOneHour");
+		}
+	}
+
 	/** Visiblity in meters (null for missing) */
 	private transient Integer visibility_m;
 
@@ -429,6 +504,91 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 		}
 	}
 
+	/** Pavement surface temperature (null for missing) */
+	private transient Integer pvmt_surf_temp;
+
+	/** Get pavement surface temperature (null for missing) */
+	@Override
+	public Integer getPvmtSurfTemp() {
+		return pvmt_surf_temp;
+	}
+
+	/** Set pavement surface temperature (null for missing) */
+	public void setPvmtSurfTempNotify(Integer v) {
+		if (!objectEquals(v, pvmt_surf_temp)) {
+			pvmt_surf_temp = v;
+			notifyAttribute("pvmtSurfTemp");
+		}
+	}
+
+	/** Surface temperature (null for missing) */
+	private transient Integer surf_temp;
+
+	/** Get surface temperature (null for missing) */
+	@Override
+	public Integer getSurfTemp() {
+		return surf_temp;
+	}
+
+	/** Set surface temperature (null for missing) */
+	public void setSurfTempNotify(Integer v) {
+		if (!objectEquals(v, surf_temp)) {
+			surf_temp = v;
+			notifyAttribute("SurfTemp");
+		}
+	}
+
+	/** Pavement surface status (null for missing) */
+	private transient Integer pvmt_surf_status;
+
+	/** Get pavement surface status (null for missing) */
+	@Override
+	public Integer getPvmtSurfStatus() {
+		return pvmt_surf_status;
+	}
+
+	/** Set pavement surface status (null for missing) */
+	public void setPvmtSurfStatusNotify(Integer v) {
+		if (!objectEquals(v, pvmt_surf_status)) {
+			pvmt_surf_status = v;
+			notifyAttribute("pvmtSurfStatus");
+		}
+	}
+
+	/** Pavement surface freeze point (null for missing) */
+	private transient Integer surf_freeze_temp;
+
+	/** Get pavement surface freeze temp (null for missing) */
+	@Override
+	public Integer getSurfFreezeTemp() {
+		return surf_freeze_temp;
+	}
+
+	/** Set pavement surface freeze temperature (null for missing) */
+	public void setSurfFreezeTempNotify(Integer v) {
+		if (!objectEquals(v, surf_freeze_temp)) {
+			surf_freeze_temp = v;
+			notifyAttribute("surf_freeze_temp");
+		}
+	}
+
+	/** Pavement subsurface temperature (null for missing) */
+	private transient Integer subsurf_temp;
+
+	/** Get subsurface temp (null for missing) */
+	@Override
+	public Integer getSubSurfTemp() {
+		return subsurf_temp;
+	}
+
+	/** Set subsurface temperature (null for missing) */
+	public void setSubSurfTempNotify(Integer v) {
+		if (!objectEquals(v, subsurf_temp)) {
+			subsurf_temp = v;
+			notifyAttribute("subsurf_temp");
+		}
+	}
+
 	/** Time stamp from the last sample */
 	private transient Long stamp;
 
@@ -437,6 +597,12 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	@Override
 	public Long getStamp() {
 		return stamp;
+	}
+
+	/** Get the time stamp as a string */
+	public String getStampString() {
+		Long ts = getStamp();
+		return (ts != null ? new Date(ts).toString() : "");
 	}
 
 	/** Set the time stamp for the current sample */
@@ -480,17 +646,31 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	public String toStringDebug() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("(WeatherSensor: name=").append(name);
-		sb.append(" avgWindSpeed_kph=").append(getWindSpeed());
-		sb.append(" avgWindDir_degs=").append(getWindDir());
-		sb.append(" windGustSpeed_kph=").append(getWindGustSpeed());
-		sb.append(" windGustDir_degs=").append(getWindGustDir());
+		sb.append(" time_stamp=").append(getStampString());
+		sb.append(" airTemp_c=").append(getAirTemp());
 		sb.append(" dewPointTemp_c=").append(getDewPointTemp());
 		sb.append(" maxTemp_c=").append(getMaxTemp());
 		sb.append(" minTemp_c=").append(getMinTemp());
-		sb.append(" airTemp_c=").append(getAirTemp());
+		sb.append(" avgWindSpeed_kph=").append(getWindSpeed());
+		sb.append(" avgWindDir_degs=").append(getWindDir());
+		sb.append(" maxWindGustSpeed_kph=").
+			append(getMaxWindGustSpeed());
+		sb.append(" maxWindGustDir_degs=").append(getMaxWindGustDir());
+		sb.append(" spotWindDir_degs=").append(getSpotWindDir());
+		sb.append(" spotWindSpeed_kph=").append(getSpotWindSpeed());
+		sb.append(" precip_rate_mmhr=").append(getPrecipRate());
+		sb.append(" precip_situation=").append(getPrecipSituation());
+		sb.append(" precip_1h_mm=").append(getPrecipOneHour());
+		sb.append(" visibility_m=").append(getVisibility());
 		sb.append(" humidity_perc=").append(getHumidity());
 		sb.append(" atmos_pressure_pa=").append(getPressure());
-		sb.append(" visibility_m=").append(getVisibility());
+		sb.append(" pvmt_surf_temp_c=").append(getPvmtSurfTemp());
+		sb.append(" surf_temp_c=").append(getSurfTemp());
+		sb.append(" pvmt_surf_status=").append(
+			WeatherSensorHelper.getPvmtSurfStatus(
+			(WeatherSensor)this));
+		sb.append(" surf_freeze_temp_c=").append(getSurfFreezeTemp());
+		sb.append(" subsurf_temp_c=").append(getSubSurfTemp());
 		sb.append(")");
 		return sb.toString();
 	}
@@ -508,20 +688,40 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 			w.write(createAttribute("lat",
 				formatDouble(pos.getLatitude())));
 		}
-		w.write(createAttribute("avg_wind_speed_kph", getWindSpeed()));
-		w.write(createAttribute("avg_wind_dir_degs", getWindDir()));
-		w.write(createAttribute("wind_gust_speed_kph", 
-			getWindGustSpeed()));
-		w.write(createAttribute("wind_gust_dir_degs", 
-			getWindGustDir()));
+		w.write(createAttribute("air_temp_c", getAirTemp()));
+		w.write(createAttribute("humidity_perc", getHumidity()));
 		w.write(createAttribute("dew_point_temp_c", 
 			getDewPointTemp()));
 		w.write(createAttribute("max_temp_c", getMaxTemp()));
 		w.write(createAttribute("min_temp_c", getMinTemp()));
-		w.write(createAttribute("air_temp_c", getAirTemp()));
-		w.write(createAttribute("humidity_perc", getHumidity()));
-		w.write(createAttribute("atmos_pressure_pa", getPressure()));
+		w.write(createAttribute("avg_wind_speed_kph", getWindSpeed()));
+		w.write(createAttribute("max_wind_gust_speed_kph", 
+			getMaxWindGustSpeed()));
+		w.write(createAttribute("max_wind_gust_dir_degs", 
+			getMaxWindGustDir()));
+		w.write(createAttribute("avg_wind_dir_degs", getWindDir()));
+		w.write(createAttribute("spot_wind_speed_kph", 
+			getSpotWindSpeed()));
+		w.write(createAttribute("spot_wind_dir_degs", 
+			getSpotWindDir()));
+		w.write(createAttribute("precip_rate_mmhr", getPrecipRate()));
+		w.write(createAttribute("precip_situation", 
+			getPrecipSituation()));
+		w.write(createAttribute("precip_1h_mm", getPrecipOneHour()));
 		w.write(createAttribute("visibility_m", getVisibility()));
+		w.write(createAttribute("atmos_pressure_pa", getPressure()));
+		w.write(createAttribute("pvmt_surf_temp_c", 
+			getPvmtSurfTemp()));
+		w.write(createAttribute("surf_temp_c", 
+			getSurfTemp()));
+		w.write(createAttribute("pvmt_surf_status=", 
+			WeatherSensorHelper.getPvmtSurfStatus(
+			(WeatherSensor)this)));
+		w.write(createAttribute("surf_freeze_temp_c", 
+			getSurfFreezeTemp()));
+		w.write(createAttribute("subsurf_temp_c", 
+			getSubSurfTemp()));
+		w.write(createAttribute("time_stamp", getStampString()));
 		w.write("/>\n");
 	}
 }

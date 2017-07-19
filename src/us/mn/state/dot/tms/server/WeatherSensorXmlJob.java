@@ -37,5 +37,7 @@ public class WeatherSensorXmlJob extends Job {
 	public void perform() throws IOException {
 		WeatherSensorXmlWriter writer = new WeatherSensorXmlWriter();
 		writer.write();
+		WeatherSensorCsvWriter.createWrite(1);
+		WeatherSensorCsvWriter.createWrite(2);
 	}
 }

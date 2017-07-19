@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2011  AHMCT, University of California
  * Copyright (C) 2013-2017  Minnesota Department of Transportation
+ * Copyright (C) 2017 Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -315,5 +316,19 @@ public class SString {
 				return false;
 		}
 		return true;
+	}
+
+	/** Split a camel-case string into words.
+ 	 * @s String in camel case, e.g. 'blaBlaBla' or null.
+ 	 * @return Space separated words, e.g. 'bla Bla Bla' or null */
+	static public String splitCamel(String s) {
+		String regex = "(?<!(^|[A-Z]))(?=[A-Z])|(?<!^)(?=[A-Z][a-z])";
+		if (s != null) {
+			StringBuilder sb = new StringBuilder();
+			for (String w : s.split(regex))
+				sb.append(w).append(" ");
+			return sb.toString().trim();
+		}
+		return null;
 	}
 }

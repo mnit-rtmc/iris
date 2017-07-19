@@ -52,15 +52,29 @@ public interface WeatherSensor extends Device {
 	Integer getWindDir();
 
 	/** Get wind gust speed in KPH (null for missing) */
-	Integer getWindGustSpeed();
+	Integer getMaxWindGustSpeed();
 
 	/** Get wind gust direction in degrees (null for missing).
 	 * Wind direction is the direction the wind is blowing measured 
 	 * clockwise from true North, as defined by NTCIP 1204. */
-	Integer getWindGustDir();
+	Integer getMaxWindGustDir();
+
+	/** Get spot wind direction in degrees (null for missing).
+	 * Wind direction is the direction the wind is blowing measured 
+	 * clockwise from true North, as defined by NTCIP 1204. */
+	Integer getSpotWindDir();
+
+	/** Get spot wind speed in KPH (null for missing) */
+	Integer getSpotWindSpeed();
 
 	/** Get precipitation rate in mm/hr (null for missing) */
 	Integer getPrecipRate();
+
+	/** Get precip situation code essPrecipSituation (null for missing) */
+	Integer getPrecipSituation();
+
+	/** Get precipitation accumulation for 1h in mm (null for missing) */
+	Integer getPrecipOneHour();
 
 	/** Get visibility in meters (null for missing) */
 	Integer getVisibility();
@@ -70,6 +84,21 @@ public interface WeatherSensor extends Device {
 
 	/** Get the atmospheric pressure in pascals (null for missing) */
 	Integer getPressure();
+
+	/** Get the pavement surface temperature (null for missing) */
+	Integer getPvmtSurfTemp();
+
+	/** Get the surface temperature (null for missing) */
+	Integer getSurfTemp();
+
+	/** Get the pavement surface status (null for missing) */
+	Integer getPvmtSurfStatus();
+
+	/** Get the pavement surface freeze temperature (null for missing) */
+	Integer getSurfFreezeTemp();
+
+	/** Get the subsurface temperature (null for missing) */
+	Integer getSubSurfTemp();
 
 	/** Get the latest sample time stamp */
 	Long getStamp();

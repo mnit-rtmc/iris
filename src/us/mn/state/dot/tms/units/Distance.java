@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2012-2016  Minnesota Department of Transportation
+ * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +16,13 @@
 package us.mn.state.dot.tms.units;
 
 import java.text.NumberFormat;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Distance between two points.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public final class Distance implements Comparable<Distance> {
 
@@ -48,6 +51,25 @@ public final class Distance implements Comparable<Distance> {
 			label = l;
 		}
 	}
+
+	/** Factory to create a new quantity with the null case handled.
+	 * @param v Value in units u or null.
+	 * @param u Units for arg v.
+	 * @return A new quantity in system units or null */
+	static public Distance create(Integer v, Units u) {
+		Distance d = null;
+		if (v != null) {
+			d = new Distance(v, u);
+			if (!useSi())
+				d = d.convert(Units.FEET);
+		}
+		return d;
+	}
+
+        /** Get system units */
+        static private boolean useSi() {
+                return SystemAttrEnum.CLIENT_UNITS_SI.getBoolean();
+        }
 
 	/** Distance value */
 	public final double value;
@@ -157,7 +179,7 @@ public final class Distance implements Comparable<Distance> {
 	/** Get a string representation of a distance */
 	@Override
 	public String toString() {
-		return value + " " + units.label;
+		return new Formatter(1).format(this);
 	}
 
 	/** Distance formatter */

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2013-2015  Minnesota Department of Transportation
+ * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,11 +16,13 @@
 package us.mn.state.dot.tms.units;
 
 import java.text.NumberFormat;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * Temperature values.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public final class Temperature {
 
@@ -46,6 +49,32 @@ public final class Temperature {
 			label = l;
 		}
 	}
+
+	/** Factory to create a new quantity with the null case handled.
+	 * @param v Value in units u or null.
+	 * @return A new quantity in system units or null */
+	static public Temperature create(Integer v) {
+		return create(v, Units.CELSIUS);
+	}
+
+	/** Factory to create a new quantity with the null case handled.
+	 * @param v Value in units u or null.
+	 * @param u Units for arg v.
+	 * @return A new quantity in system units or null */
+	static public Temperature create(Integer v, Units u) {
+		Temperature t = null;
+		if (v != null) {
+			t = new Temperature(v, u);
+			if (!useSi())
+				t = t.convert(Units.FAHRENHEIT);
+		}
+		return t;
+	}
+
+        /** Get system units */
+        static private boolean useSi() {
+                return SystemAttrEnum.CLIENT_UNITS_SI.getBoolean();
+        }
 
 	/** Temperature value */
 	public final double value;
@@ -88,7 +117,7 @@ public final class Temperature {
 		}
 	}
 
-	/** Round an temperature to nearest whole unit.
+	/** Round a temperature to nearest whole unit.
 	 * @param u Units to return.
 	 * @return Temperature rounded to nearest whole unit. */
 	public int round(Units u) {
@@ -114,10 +143,10 @@ public final class Temperature {
 		return new Double(kelvin()).hashCode();
 	}
 
-	/** Get a string representation of an temperature */
+	/** Get a string representation of a temperature */
 	@Override
 	public String toString() {
-		return value + " " + units.label;
+		return new Formatter(0).format(this);
 	}
 
 	/** Temperature formatter */

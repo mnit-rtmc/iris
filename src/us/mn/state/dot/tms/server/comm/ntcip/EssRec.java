@@ -18,6 +18,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.PavementSurfaceStatus;
+import us.mn.state.dot.tms.PrecipSituation;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
@@ -56,10 +58,16 @@ public class EssRec {
 	private Speed wind_speed_avg = null;
 
 	/** Max wind gust speed */
-	private Speed wind_gust_speed = null;
+	private Speed max_wind_gust_speed = null;
 
 	/** Max wind gust direction in degrees */
-	private Integer wind_gust_dir = null;
+	private Integer max_wind_gust_dir = null;
+
+	/** Spot wind direction */
+	private Integer spot_wind_dir = null;
+
+	/** Spot wind Speed */
+	private Speed spot_wind_speed = null;
 
 	/** Dew point temperature */
 	private Temperature dew_point_temp = null;
@@ -79,40 +87,37 @@ public class EssRec {
 	/** Precipitation rate in mm/hr */
 	private Integer precip_rate = null;
 
+	/** Precipitation situation */
+	private Integer precip_situation = null;
+
+	/** Precipitation 1h */
+	private Integer precip_one_hour = null;
+
 	/** Air pressure in Pascals  */
 	private Integer air_pressure = null;
 
 	/** Visibility */
 	private Distance visibility = null;
 
+	/** Pavement surface temperature */
+	private Temperature pvmt_surf_temp = null;
+
+	/** Surface temperature */
+	private Temperature surf_temp = null;
+
+	/** Pavement surface status */
+	private Integer pvmt_surf_status = null;
+
+	/** Pavement surface temperature */
+	private Temperature surf_freeze_temp = null;
+
+	/** Subsurface temperature */
+	private Temperature subsurf_temp = null;
+
 	/** Constructor */
 	public EssRec(WeatherSensorImpl ws) {
 		w_sensor = ws;
 		create_time = TimeSteward.currentTimeMillis();
-	}
-
-	/** To string */
-	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("(EssRec: ");
-		sb.append(" w_sensor_name=").append(w_sensor.getName());
-		sb.append(", create_time=").append(new Date(create_time));
-		sb.append(", air_temp_c=").append(air_temp);
-		sb.append(", dew_point_temp_c=").append(dew_point_temp);
-		sb.append(", max_temp_c=").append(max_temp);
-		sb.append(", min_temp_c=").append(min_temp);
-		sb.append(", rel_humidity_perc=").append(rel_humidity);
-		sb.append(", wind_speed_avg_mph=").append(
-			wind_speed_avg.convert(MPH));
-		sb.append(", wind_dir_avg_degs=").append(wind_dir_avg);
-		sb.append(", wind_gust_speed=").append(
-			wind_gust_speed.convert(MPH));
-		sb.append(", wind_gust_dir_degs=").append(wind_gust_dir);
-		sb.append(", air_pressure_pa=").append(air_pressure);
-		sb.append(", precip_rate_mmhr=").append(precip_rate);
-		sb.append(", visibility_m=").append(visibility);
-		sb.append(")");
-		return sb.toString();
 	}
 
 	/** Convert a temperature to iris format.
@@ -175,7 +180,7 @@ public class EssRec {
 	}
 
 	/** Convert the precipitation rate in 1/10s of gram per square 
-	    meter per second to mm/hr.
+	 * meter per second to mm/hr.
 	 * @return Precipiration rate in mm/hr or null if missing */
 	public Integer convertPrecipRate(ASN1Integer prr) {
 		if (prr != null) {
@@ -184,6 +189,30 @@ public class EssRec {
 			if (tg != 65535) {
 				int mmhr = (int)Math.round((double)tg * .36);
 				return new Integer(mmhr);
+			}
+		}
+		return null;
+	}
+
+	/** Convert the precipitation situation */
+	public Integer convertPrecipSituation(ASN1Integer prs) {
+		if (prs != null) {
+			int i = prs.getInteger();
+			PrecipSituation eps = PrecipSituation.fromOrdinal(i);
+			if (eps != PrecipSituation.UNDEFINED)
+				return new Integer(i);
+		}
+		return null;
+	}
+
+	/** Convert the precipitation 1h from tenths of a mm to mm.
+	 * @return Precipitation over 1h in mm or null */
+	public Integer convertPrecip(ASN1Integer pr) {
+		if (pr != null) {
+			int pi = pr.getInteger();
+			if (pi != 65535) {
+				int cp = (int)Math.round((double)pi * .1);
+				return new Integer(cp);
 			}
 		}
 		return null;
@@ -239,60 +268,67 @@ public class EssRec {
 	}
 
 	/** Store the max wind gust speed. */
-	public void storeWindGustSpeed(ASN1Integer mwgs) {
-		wind_gust_speed = convertSpeed(mwgs);
-		if (wind_gust_speed != null) {
-			w_sensor.setWindGustSpeedNotify(
-				wind_gust_speed.round(KPH));
+	public void storeMaxWindGustSpeed(ASN1Integer mwgs) {
+		max_wind_gust_speed = convertSpeed(mwgs);
+		if (max_wind_gust_speed != null) {
+			w_sensor.setMaxWindGustSpeedNotify(
+				max_wind_gust_speed.round(KPH));
 		} else {
-			w_sensor.setWindGustSpeedNotify(null);
+			w_sensor.setMaxWindGustSpeedNotify(null);
 		}
 	}
 
 	/** Store the max wind gust direction */
-	public void storeWindGustDir(ASN1Integer mwgd) {
-		wind_gust_dir = convertAngle(mwgd);
-		w_sensor.setWindGustDirNotify(wind_gust_dir);
+	public void storeMaxWindGustDir(ASN1Integer mwgd) {
+		max_wind_gust_dir = convertAngle(mwgd);
+		w_sensor.setMaxWindGustDirNotify(max_wind_gust_dir);
+	}
+
+	/** Store spot wind direction */
+	public void storeSpotWindDir(ASN1Integer swd) {
+		spot_wind_dir = convertAngle(swd);
+		w_sensor.setSpotWindDirNotify(spot_wind_dir);
+	}
+
+	/** Store spot wind speed */
+	public void storeSpotWindSpeed(ASN1Integer sws) {
+		spot_wind_speed = convertSpeed(sws);
+		if (spot_wind_speed != null) {
+			w_sensor.setSpotWindSpeedNotify(
+				spot_wind_speed.round(KPH));
+		} else {
+			w_sensor.setSpotWindSpeedNotify(null);
+		}
 	}
 
 	/** Store the dew point temperature */
 	public void storeDewpointTemp(ASN1Integer dpt) {
 		dew_point_temp = convertTemp(dpt);
-		if (dew_point_temp != null) {
-			w_sensor.setDewPointTempNotify(
-				dew_point_temp.round(CELSIUS));
-		} else {
-			w_sensor.setDewPointTempNotify(null);
-		}
+		w_sensor.setDewPointTempNotify(dew_point_temp != null ? 
+			dew_point_temp.round(CELSIUS) : null);
 	}
 
 	/** Store the max temperature */
 	public void storeMaxTemp(ASN1Integer mt) {
 		max_temp = convertTemp(mt);
-		if (max_temp != null) {
-			w_sensor.setMaxTempNotify(
-				max_temp.round(CELSIUS));
-		} else {
-			w_sensor.setMaxTempNotify(null);
-		}
+		w_sensor.setMaxTempNotify(max_temp != null ?
+			max_temp.round(CELSIUS) : null);
 	}
 
 	/** Store the min temperature */
 	public void storeMinTemp(ASN1Integer mt) {
 		min_temp = convertTemp(mt);
-		if (min_temp != null) {
-			w_sensor.setMinTempNotify(
-				min_temp.round(CELSIUS));
-		} else {
-			w_sensor.setMinTempNotify(null);
-		}
+		w_sensor.setMinTempNotify(min_temp != null ?
+			min_temp.round(CELSIUS) : null);
 	}
 
 	/** Store the air temperature, which is assumed to be the
 	 * first sensor in the table. Additional sensors are ignored */
 	public void storeAirTemp(TemperatureSensorsTable tst) {
+		// even if no table rows present, set values
 		air_temp = convertTemp(tst.getTemp(1));
-		w_sensor.setAirTempNotify(air_temp.round(CELSIUS));
+		w_sensor.setAirTempNotify(air_temp != null?
+			air_temp.round(CELSIUS) : null);
 	}
 
 	/** Store humidity */
@@ -307,10 +343,22 @@ public class EssRec {
 		w_sensor.setPrecipRateNotify(precip_rate);
 	}
 
+	/** Store the precipitation stuation */
+	public void storePrecipSituation(ASN1Integer ps) {
+		precip_situation = convertPrecipSituation(ps);
+		w_sensor.setPrecipSituationNotify(precip_situation);
+	}
+
+	/** Store the precipitation 1h */
+	public void storePrecipOneHour(ASN1Integer pr) {
+		precip_one_hour = convertPrecip(pr);
+		w_sensor.setPrecipOneHourNotify(precip_one_hour);
+	}
+
 	/** Store the atmospheric pressure */
 	public void storeAtmosphericPressure(ASN1Integer apr) {
-		Integer ap = convertAtmosphericPressure(apr);
-		w_sensor.setPressureNotify(ap);
+		air_pressure = convertAtmosphericPressure(apr);
+		w_sensor.setPressureNotify(air_pressure);
 	}
 
 	/** Store visibility */
@@ -323,5 +371,90 @@ public class EssRec {
 	public void storeStamp() {
 		storage_time = TimeSteward.currentTimeMillis();
 		w_sensor.setStampNotify(storage_time);
+	}
+
+	/** Store pavement sensor related values.
+	 * @arg pst Pavement sensor table, which might contain observations
+	 *          from multiple sensors. Only the first sensor is used. */
+	public void store(PavementSensorsTable pst) {
+		// Even if no table rows present, set values
+		// Ignore rows > 1
+		final int row = 1;
+		pvmt_surf_temp = convertTemp(pst.getSurfTemp(row));
+		w_sensor.setPvmtSurfTempNotify(pvmt_surf_temp != null ? 
+			pvmt_surf_temp.round(CELSIUS) : null);
+
+		surf_temp = convertTemp(pst.getSurfTemp(row));
+		w_sensor.setSurfTempNotify(surf_temp != null ? 
+			surf_temp.round(CELSIUS) : null);
+
+		pvmt_surf_status = pst.getPvmtSurfStatus(row);
+		w_sensor.setPvmtSurfStatusNotify(pvmt_surf_status);
+
+		surf_freeze_temp = convertTemp(pst.getSurfFreezeTemp(row));
+		w_sensor.setSurfFreezeTempNotify(surf_freeze_temp != null ?
+			surf_freeze_temp.round(CELSIUS) : null);
+	}
+
+	/** Store subsurface sensor related values.
+	 * @arg sst Subsurface sensor table, which might 
+	 *          contain observations from multiple 
+	 *          sensors. Only the first sensor is used. */
+	public void store(SubsurfaceSensorsTable sst) {
+		// Even if no table rows present, set values
+		// Ignore rows > 1
+		final int row = 1;
+		subsurf_temp = convertTemp(sst.getTemp(row));
+		w_sensor.setSubSurfTempNotify(subsurf_temp != null ? 
+			subsurf_temp.round(CELSIUS) : null);
+	}
+
+	/** Get the an enum from an ordinal value */
+	private PavementSurfaceStatus getPvmtSurfStatus() {
+		if (pvmt_surf_status == null)
+			return PavementSurfaceStatus.UNDEFINED;
+		else {
+			return PavementSurfaceStatus.fromOrdinal(
+				pvmt_surf_status);
+		}
+        }
+
+	/** To string */
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append("(EssRec:");
+		sb.append(" w_sensor_name=").append(w_sensor.getName());
+		sb.append(" create_time=").append(new Date(create_time));
+		sb.append(" air_temp_c=").append(air_temp);
+		sb.append(" dew_point_temp_c=").append(dew_point_temp);
+		sb.append(" max_temp_c=").append(max_temp);
+		sb.append(" min_temp_c=").append(min_temp);
+		sb.append(" rel_humidity_perc=").append(rel_humidity);
+		sb.append(" wind_speed_avg_mph=").append(
+			(wind_speed_avg != null ? 
+			wind_speed_avg.convert(MPH) : "null"));
+		sb.append(" wind_dir_avg_degs=").append(wind_dir_avg);
+		sb.append(" max_wind_gust_speed_mph=").append(
+			(max_wind_gust_speed != null ?
+			max_wind_gust_speed.convert(MPH) : "null"));
+		sb.append(" max_wind_gust_dir_degs=").append(
+			max_wind_gust_dir);
+		sb.append(" spot_wind_speed_mph=").append(
+			(spot_wind_speed != null ?
+			spot_wind_speed.convert(MPH) : "null"));
+		sb.append(" spot_wind_dir_degs=").append(
+			spot_wind_dir);
+		sb.append(" air_pressure_pa=").append(air_pressure);
+		sb.append(" precip_rate_mmhr=").append(precip_rate);
+		sb.append(" precip_situation=").append(precip_situation);
+		sb.append(" precip_1h=").append(precip_one_hour);
+		sb.append(" visibility_m=").append(visibility);
+		sb.append(" pvmt_surf_temp_c=").append(pvmt_surf_temp);
+		sb.append(" surf_temp_c=").append(surf_temp);
+		sb.append(" pvmt_surf_status=").append(getPvmtSurfStatus());
+		sb.append(" pvmt_surf_freeze_temp=").append(surf_freeze_temp);
+		sb.append(" subsurf_temp=").append(subsurf_temp);
+		sb.append(")");
+		return sb.toString();
 	}
 }
