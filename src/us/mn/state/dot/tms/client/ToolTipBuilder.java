@@ -14,12 +14,11 @@
  */
 package us.mn.state.dot.tms.client;
 
-//import us.mn.state.dot.tms.Constants;
-import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.units.Angle;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Pressure;
 import us.mn.state.dot.tms.units.Speed;
+import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.units.Temperature;
 
 /**
