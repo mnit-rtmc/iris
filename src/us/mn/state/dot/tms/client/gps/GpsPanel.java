@@ -236,7 +236,7 @@ public class GpsPanel extends IPanel
 		switch (gpsPanelMode) {
 			case DISABLED:
 				txtLatestAttempt.setText("");
-				lblGpsStatus.setText(I18N.get("device.status")+":");
+				lblGpsStatus.setText(I18N.get("gps.status"));
 				txtGpsStatus.setText("");
 				txtLatestSuccess.setText("");
 				break;
@@ -256,7 +256,7 @@ public class GpsPanel extends IPanel
 					lblGpsStatus.setText(I18N.get("gps.error"));
 					txtGpsStatus.setText(str);
 				} else {
-					lblGpsStatus.setText(I18N.get("device.status")+":");
+					lblGpsStatus.setText(I18N.get("gps.status"));
 					str = gps.getCommStatus();
 					if ((str != null) && !str.isEmpty())
 						txtGpsStatus.setText(str);
@@ -298,7 +298,7 @@ public class GpsPanel extends IPanel
 		chckbxEnableGps.setSelected(false);
 		tolerance.setText("");
 		txtLatestAttempt.setText("");
-		lblGpsStatus.setText(I18N.get("device.status")+":");
+		lblGpsStatus.setText(I18N.get("gps.status"));
 		txtGpsStatus.setText("");
 		txtLatestSuccess.setText("");		
 	}
