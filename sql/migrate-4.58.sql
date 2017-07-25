@@ -5,7 +5,7 @@ SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
 -- Helper function to check and update database version from migrate scripts
-CREATE FUNCTION iris.update_version(TEXT, TEXT) RETURNS TEXT AS
+CREATE OR REPLACE FUNCTION iris.update_version(TEXT, TEXT) RETURNS TEXT AS
 	$update_version$
 DECLARE
 	ver_prev ALIAS FOR $1;
