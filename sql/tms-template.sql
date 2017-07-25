@@ -1697,6 +1697,26 @@ CREATE TABLE iris.meter_action (
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
+-- Helper function to check and update database version from migrate scripts
+CREATE FUNCTION iris.update_version(TEXT, TEXT) RETURNS TEXT AS
+	$update_version$
+DECLARE
+	ver_prev ALIAS FOR $1;
+	ver_new ALIAS FOR $2;
+	ver_db TEXT;
+BEGIN
+	SELECT value INTO ver_db FROM iris.system_attribute
+		WHERE name = 'database_version';
+	IF ver_db != ver_prev THEN
+		RAISE EXCEPTION 'Cannot migrate database -- wrong version: %',
+			ver_db;
+	END IF;
+	UPDATE iris.system_attribute SET value = ver_new
+		WHERE name = 'database_version';
+	RETURN ver_new;
+END;
+$update_version$ language plpgsql;
+
 CREATE SEQUENCE event.event_id_seq;
 
 CREATE TABLE event.event_description (
