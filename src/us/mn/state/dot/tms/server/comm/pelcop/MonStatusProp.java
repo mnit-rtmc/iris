@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.server.CameraImpl;
+import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -160,5 +161,22 @@ public class MonStatusProp extends PelcoPProp {
 	/** Get the video monitor number */
 	protected int getMonNumber() {
 		return mon_num;
+	}
+
+	/** Select a new camera on a video monitor */
+	protected void selectCamera(CameraImpl c, String src) {
+		assert(c != null);
+		stopCamControl();
+		VideoMonitorImpl.setCameraNotify(getMonNumber(), c, src);
+	}
+
+	/** Stop camera control on selected camera */
+	private void stopCamControl() {
+		VideoMonitor vm = VideoMonitorHelper.findUID(mon_num);
+		if (vm != null) {
+			Camera c = vm.getCamera();
+			if (c instanceof CameraImpl)
+				((CameraImpl) c).sendPTZ(0, 0, 0);
+		}
 	}
 }

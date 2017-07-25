@@ -18,7 +18,6 @@ import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.server.CameraImpl;
-import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -66,10 +65,8 @@ public class CamNextProp extends MonStatusProp {
 		int uid = getCamNumber();
 		if (uid > 0) {
 			CameraImpl c = findNext(uid);
-			if (c != null) {
-				VideoMonitorImpl.setCameraNotify(getMonNumber(),
-					c, "NEXT " + op.getId());
-			}
+			if (c != null)
+				selectCamera(c, "NEXT " + op.getId());
 		}
 	}
 }

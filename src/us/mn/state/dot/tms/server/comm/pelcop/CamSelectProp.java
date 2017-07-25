@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.server.CameraImpl;
-import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -59,9 +58,7 @@ public class CamSelectProp extends MonStatusProp {
 	/** Select camera on a video monitor */
 	private void selectCamera(Operation op, int cam) {
 		CameraImpl c = findCamera(cam);
-		if (c != null) {
-			VideoMonitorImpl.setCameraNotify(getMonNumber(), c,
-				"SEL " + op.getId());
-		}
+		if (c != null)
+			selectCamera(c, "SEL " + op.getId());
 	}
 }
