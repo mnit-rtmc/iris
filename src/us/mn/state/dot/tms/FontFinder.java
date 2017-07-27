@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,12 +43,7 @@ public class FontFinder {
 
 	/** Create a font finder for a DMS */
 	public FontFinder(DMS dms) {
-		SignConfig sc = dms.getSignConfig();
-		if (sc != null) {
-			Font df = sc.getDefaultFont();
-			if (df != null)
-				fonts.add(df.getNumber());
-		}
+		fonts.add(DMSHelper.getDefaultFontNumber(dms));
 		groups = findGroups(dms);
 		findQuickMessageTags();
 		findSignTextTags();

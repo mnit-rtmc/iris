@@ -1069,7 +1069,8 @@ CREATE TABLE iris._dms (
 	beacon VARCHAR(20) REFERENCES iris._beacon,
 	aws_allowed BOOLEAN NOT NULL,
 	aws_controlled BOOLEAN NOT NULL,
-	sign_config VARCHAR(12) REFERENCES iris.sign_config
+	sign_config VARCHAR(12) REFERENCES iris.sign_config,
+	default_font VARCHAR(16) REFERENCES iris.font
 );
 
 ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
@@ -1077,7 +1078,7 @@ ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 
 CREATE VIEW iris.dms AS
 	SELECT d.name, geo_loc, controller, pin, notes, beacon, preset,
-	       aws_allowed, aws_controlled, sign_config
+	       aws_allowed, aws_controlled, sign_config, default_font
 	FROM iris._dms dms
 	JOIN iris._device_io d ON dms.name = d.name
 	JOIN iris._device_preset p ON dms.name = p.name;
@@ -1090,9 +1091,10 @@ BEGIN
 	INSERT INTO iris._device_preset (name, preset)
 	     VALUES (NEW.name, NEW.preset);
 	INSERT INTO iris._dms (name, geo_loc, notes, beacon, aws_allowed,
-	                       aws_controlled, sign_config)
+	                       aws_controlled, sign_config, default_font)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.beacon,
-	             NEW.aws_allowed, NEW.aws_controlled, NEW.sign_config);
+	             NEW.aws_allowed, NEW.aws_controlled, NEW.sign_config,
+	             NEW.default_font);
 	RETURN NEW;
 END;
 $dms_insert$ LANGUAGE plpgsql;
@@ -1117,7 +1119,8 @@ BEGIN
 	       beacon = NEW.beacon,
 	       aws_allowed = NEW.aws_allowed,
 	       aws_controlled = NEW.aws_controlled,
-	       sign_config = NEW.sign_config
+	       sign_config = NEW.sign_config,
+	       default_font = NEW.default_font
 	 WHERE name = OLD.name;
 	RETURN NEW;
 END;
@@ -2231,7 +2234,8 @@ GRANT SELECT ON sign_config_view TO PUBLIC;
 CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.beacon,
 	       p.camera, p.preset_num, d.aws_allowed, d.aws_controlled,
-	       d.sign_config, sc.default_font,
+	       d.sign_config, COALESCE(d.default_font, sc.default_font)
+	       AS default_font,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.lat, l.lon
 	FROM iris.dms d

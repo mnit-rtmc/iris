@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -294,7 +294,7 @@ public class OpSendDMSFonts extends OpDMS {
 			logQuery(version);
 			if (isVersionIDCorrect(v)) {
 				logError("Font is valid");
-				if (dms.getDefaultFont() == frow.font)
+				if (DMSHelper.getDefaultFont(dms) == frow.font)
 					return new SetDefaultFont(frow);
 				else
 					return nextFontPhase();
@@ -601,7 +601,7 @@ public class OpSendDMSFonts extends OpDMS {
 			mess.add(height);
 			logStore(height);
 			mess.storeProps();
-			if (dms.getDefaultFont() == frow.font)
+			if (DMSHelper.getDefaultFont(dms) == frow.font)
 				return new SetDefaultFont(frow);
 			else
 				return nextFontPhase();
@@ -647,7 +647,7 @@ public class OpSendDMSFonts extends OpDMS {
 			logQuery(status);
 			switch (status.getEnum()) {
 			case readyForUse:
-				if (dms.getDefaultFont() == frow.font)
+				if (DMSHelper.getDefaultFont(dms) == frow.font)
 					return new SetDefaultFont(frow);
 				else
 					return nextFontPhase();

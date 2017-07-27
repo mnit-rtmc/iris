@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,12 @@ public interface DMS extends Device {
 
 	/** Get the sign configuration */
 	SignConfig getSignConfig();
+
+	/** Set the default font */
+	void setDefaultFont(Font f);
+
+	/** Get the default font */
+	Font getDefaultFont();
 
 	/* Transient attributes (not stored in database) */
 

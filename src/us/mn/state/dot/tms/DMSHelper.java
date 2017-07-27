@@ -126,15 +126,23 @@ public class DMSHelper extends BaseHelper {
 
 	/** Get the default font number for a DMS */
 	static public int getDefaultFontNumber(DMS dms) {
+		Font f = getDefaultFont(dms);
+		return (f != null)
+		      ? f.getNumber()
+		      : FontHelper.DEFAULT_FONT_NUM;
+	}
+
+	/** Get the default font for a DMS */
+	static public Font getDefaultFont(DMS dms) {
 		if (dms != null) {
+			Font f = dms.getDefaultFont();
+			if (f != null)
+				return f;
 			SignConfig sc = dms.getSignConfig();
-			if (sc != null) {
-				Font f = sc.getDefaultFont();
-				if (f != null)
-					return f.getNumber();
-			}
+			if (sc != null)
+				return sc.getDefaultFont();
 		}
-		return FontHelper.DEFAULT_FONT_NUM;
+		return null;
 	}
 
 	/** Get the number of lines on a DMS.

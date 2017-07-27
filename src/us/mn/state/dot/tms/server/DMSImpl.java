@@ -20,6 +20,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -46,6 +47,7 @@ import static us.mn.state.dot.tms.DmsMsgPriority.TRAVEL_TIME;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.InvalidMsgException;
@@ -106,22 +108,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"beacon, preset, aws_allowed, aws_controlled, " +
-			"sign_config FROM iris." + SONAR_TYPE  + ";",
-			new ResultFactory()
+			"sign_config, default_font FROM iris." + SONAR_TYPE +
+			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new DMSImpl(
-					row.getString(1),	// name
-					row.getString(2),	// geo_loc
-					row.getString(3),	// controller
-					row.getInt(4),		// pin
-					row.getString(5),	// notes
-					row.getString(6),	// beacon
-					row.getString(7),	// preset
-					row.getBoolean(8),	// aws_allowed
-					row.getBoolean(9),     // aws_controlled
-					row.getString(10)	// sign_config
-				));
+				namespace.addObject(new DMSImpl(row));
 			}
 		});
 	}
@@ -152,6 +143,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("aws_allowed", awsAllowed);
 		map.put("aws_controlled", awsControlled);
 		map.put("sign_config", sign_config);
+		map.put("default_font", default_font);
 		return map;
 	}
 
@@ -190,9 +182,35 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Create a dynamic message sign */
+	private DMSImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),          // name
+		     row.getString(2),          // geo_loc
+		     row.getString(3),          // controller
+		     row.getInt(4),             // pin
+		     row.getString(5),          // notes
+		     row.getString(6),          // beacon
+		     row.getString(7),          // preset
+		     row.getBoolean(8),         // aws_allowed
+		     row.getBoolean(9),         // aws_controlled
+		     row.getString(10),         // sign_config
+		     row.getString(11)          // default_font
+		);
+	}
+
+	/** Create a dynamic message sign */
+	private DMSImpl(String n, String loc, String c,
+		int p, String nt, String b, String cp, boolean aa, boolean ac,
+		String sc, String df)
+	{
+		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
+		     lookupBeacon(b), lookupPreset(cp), aa, ac,
+		     SignConfigHelper.lookup(sc), FontHelper.lookup(df));
+	}
+
+	/** Create a dynamic message sign */
 	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, Beacon b, CameraPreset cp, boolean aa,
-		boolean ac, SignConfig sc)
+		boolean ac, SignConfig sc, Font df)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -201,19 +219,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		awsAllowed = aa;
 		awsControlled = ac;
 		sign_config = sc;
+		default_font = df;
 		toll_formatter = new TollingFormatter(n, loc);
 		formatter = new MultiFormatter(this, toll_formatter);
 		initTransients();
-	}
-
-	/** Create a dynamic message sign */
-	private DMSImpl(String n, String loc, String c,
-		int p, String nt, String b, String cp, boolean aa, boolean ac,
-		String sc)
-	{
-		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
-		     lookupBeacon(b), lookupPreset(cp), aa, ac,
-		     SignConfigHelper.lookup(sc));
 	}
 
 	/** Destroy an object */
@@ -398,10 +407,27 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
+	/** Default font */
+	private Font default_font;
+
+	/** Set the default font */
+	@Override
+	public void setDefaultFont(Font f) {
+		default_font = f;
+	}
+
+	/** Set the default font */
+	public void doSetDefaultFont(Font f) throws TMSException {
+		if (f != default_font) {
+			store.update(this, "default_font", f);
+			setDefaultFont(f);
+		}
+	}
+
 	/** Get the default font */
+	@Override
 	public Font getDefaultFont() {
-		SignConfig sc = getSignConfig();
-		return (sc != null) ? sc.getDefaultFont() : null;
+		return default_font;
 	}
 
 	/** Make (manufacturer) */

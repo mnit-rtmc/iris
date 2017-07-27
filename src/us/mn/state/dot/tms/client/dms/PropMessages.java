@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,10 +20,12 @@ import java.awt.event.ActionEvent;
 import javax.swing.BorderFactory;
 import javax.swing.GroupLayout;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
@@ -34,6 +36,8 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyTablePanel;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
+import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -58,6 +62,12 @@ public class PropMessages extends JPanel {
 	/** Sign pixel panel */
 	private final SignPixelPanel pixel_pnl = new SignPixelPanel(40, 400,
 		true);
+
+	/** Default font label */
+	private final ILabel font_lbl = new ILabel("dms.font.default");
+
+	/** Default font combo box */
+	private final JComboBox<Font> font_cbx = new JComboBox<Font>();
 
 	/** AWS allowed check box */
 	private final JCheckBox aws_allowed_chk = new JCheckBox(
@@ -111,6 +121,14 @@ public class PropMessages extends JPanel {
 		setBorder(UI.border);
 		sign_group_pnl.initialize();
 		sign_text_pnl.initialize();
+		font_cbx.setAction(new IAction("font") {
+			protected void doActionPerformed(ActionEvent e) {
+				proxy.setDefaultFont(
+					(Font) font_cbx.getSelectedItem());
+			}
+		});
+		font_cbx.setModel(new IComboBoxModel<Font>(
+			session.getSonarState().getDmsCache().getFontModel()));
 		layoutPanel();
 	}
 
@@ -141,6 +159,11 @@ public class PropMessages extends JPanel {
 		g0.addComponent(sign_text_pnl);
 		hg.addGroup(g0);
 		hg.addComponent(preview_pnl);
+		GroupLayout.SequentialGroup g1 = gl.createSequentialGroup();
+		g1.addComponent(font_lbl);
+		g1.addGap(UI.hgap);
+		g1.addComponent(font_cbx);
+		hg.addGroup(g1);
 		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			hg.addComponent(aws_allowed_chk);
 			hg.addComponent(aws_control_chk);
@@ -157,6 +180,12 @@ public class PropMessages extends JPanel {
 		vg.addGroup(g0);
 		vg.addGap(UI.vgap);
 		vg.addComponent(preview_pnl);
+		vg.addGap(UI.vgap);
+		GroupLayout.ParallelGroup g1 = gl.createBaselineGroup(false,
+			false);
+		g1.addComponent(font_lbl);
+		g1.addComponent(font_cbx);
+		vg.addGroup(g1);
 		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			vg.addGap(UI.vgap);
 			vg.addComponent(aws_allowed_chk);
@@ -248,12 +277,15 @@ public class PropMessages extends JPanel {
 
 	/** Update the edit mode */
 	public void updateEditMode() {
+		font_cbx.setEnabled(canUpdate("defaultFont"));
 		aws_allowed_chk.setEnabled(canUpdate("awsAllowed"));
 		aws_control_chk.setEnabled(canUpdate("awsControlled"));
 	}
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
+		if (null == a || a.equals("defaultFont"))
+			font_cbx.setSelectedItem(proxy.getDefaultFont());
 		if (a == null || a.equals("awsAllowed"))
 			aws_allowed_chk.setSelected(proxy.getAwsAllowed());
 		if (a == null || a.equals("awsControlled"))
