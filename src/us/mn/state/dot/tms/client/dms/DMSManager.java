@@ -72,9 +72,17 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Action to blank the selected DMS */
 	private BlankDmsAction blankAction;
 
+	/** Action to test DMS */
+	private TestDmsAction test_dms_action;
+
 	/** Set the blank DMS action */
 	public void setBlankAction(BlankDmsAction a) {
 		blankAction = a;
+	}
+
+	/** Set the test DMS action */
+	public void setTestAction(TestDmsAction a) {
+		test_dms_action = a;
 	}
 
 	/** Create a new DMS manager */
@@ -189,6 +197,8 @@ public class DMSManager extends DeviceManager<DMS> {
 		p.addSeparator();
 		if (blankAction != null)
 			p.add(blankAction);
+		if(test_dms_action != null)
+			p.add(test_dms_action);
 		return p;
 	}
 

@@ -330,6 +330,17 @@ public class DMSDispatcher extends JPanel {
 		}
 	}
 
+	/** Pixel test the selected DMS */
+	public void pixelTestDms() {
+		Set<DMS> sel = sel_mdl.getSelected();
+		if (sel.size() > 0) {
+			for(DMS dms: sel) {
+				dms.setDeviceRequest(DeviceRequest.
+					TEST_PIXELS.ordinal());
+			}
+		}
+	}
+
 	/** Create a new blank message */
 	private SignMessage createBlankMessage() {
 		String bitmaps = createBitmaps("");

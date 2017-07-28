@@ -76,6 +76,9 @@ public class ComposerButtonPanel extends JPanel {
 	/** Action to blank selected DMS */
 	private final BlankDmsAction blank_msg;
 
+	/** Action to test DMS */
+	private final TestDmsAction test_dms_action;
+
 	/** Button to blank the selected message */
 	private final JButton blank_btn;
 
@@ -98,7 +101,9 @@ public class ComposerButtonPanel extends JPanel {
 		dispatcher = ds;
 		composer = smc;
 		blank_msg = new BlankDmsAction(dispatcher);
+		test_dms_action = new TestDmsAction(dispatcher);
 		manager.setBlankAction(blank_msg);
+		manager.setTestAction(test_dms_action);
 		blank_btn = new JButton(blank_msg);
 		layoutPanel();
 		initializeWidgets();
