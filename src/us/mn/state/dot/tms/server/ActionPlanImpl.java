@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,6 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new ActionPlanImpl(
-					namespace,
 					row.getString(1),  // name
 					row.getString(2),  // description
 					row.getBoolean(3), // sync_actions
@@ -102,12 +101,10 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	}
 
 	/** Create a new action plan */
-	private ActionPlanImpl(Namespace ns, String n, String dsc, boolean sa,
-		boolean st, boolean a, String dp, String p)
+	private ActionPlanImpl(String n, String dsc, boolean sa, boolean st,
+		boolean a, String dp, String p)
 	{
-		this(n, dsc, sa, st, a,
-		     (PlanPhase) ns.lookupObject(PlanPhase.SONAR_TYPE, dp),
-		     (PlanPhase) ns.lookupObject(PlanPhase.SONAR_TYPE, p));
+		this(n, dsc, sa, st, a, lookupPlanPhase(dp),lookupPlanPhase(p));
 	}
 
 	/** Create a new action plan */

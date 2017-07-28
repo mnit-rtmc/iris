@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -69,11 +70,13 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -87,9 +90,9 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	protected TimeActionImpl(Namespace ns, String n, String a, String d,
 		Date sd, Date tod, String p)
 	{
-		this(n, (ActionPlan)ns.lookupObject(ActionPlan.SONAR_TYPE, a),
-		     (DayPlan)ns.lookupObject(DayPlan.SONAR_TYPE, d), sd, tod,
-		     (PlanPhase)ns.lookupObject(PlanPhase.SONAR_TYPE, p));
+		this(n, (ActionPlan) ns.lookupObject(ActionPlan.SONAR_TYPE, a),
+		     (DayPlan) ns.lookupObject(DayPlan.SONAR_TYPE, d), sd, tod,
+		     lookupPlanPhase(p));
 	}
 
 	/** Create a new time action */
@@ -108,6 +111,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	protected ActionPlan action_plan;
 
 	/** Get the action plan */
+	@Override
 	public ActionPlan getActionPlan() {
 		return action_plan;
 	}
@@ -116,6 +120,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	protected DayPlan day_plan;
 
 	/** Get the day plan */
+	@Override
 	public DayPlan getDayPlan() {
 		return day_plan;
 	}
@@ -124,6 +129,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	protected String sched_date;
 
 	/** Get the scheduled date */
+	@Override
 	public String getSchedDate() {
 		return sched_date;
 	}
@@ -132,6 +138,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	protected String time_of_day;
 
 	/** Get the time-of-day */
+	@Override
 	public String getTimeOfDay() {
 		return time_of_day;
 	}
@@ -140,6 +147,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	private PlanPhase phase;
 
 	/** Set the phase to trigger */
+	@Override
 	public void setPhase(PlanPhase p) {
 		phase = p;
 	}
@@ -153,6 +161,7 @@ public class TimeActionImpl extends BaseObjectImpl implements TimeAction {
 	}
 
 	/** Get the phase to trigger */
+	@Override
 	public PlanPhase getPhase() {
 		return phase;
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2012  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,6 +51,7 @@ public class MeterActionImpl extends BaseObjectImpl implements MeterAction {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -61,11 +62,13 @@ public class MeterActionImpl extends BaseObjectImpl implements MeterAction {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -79,9 +82,9 @@ public class MeterActionImpl extends BaseObjectImpl implements MeterAction {
 	protected MeterActionImpl(Namespace ns, String n, String a, String rm,
 		String p)
 	{
-		this(n, (ActionPlan)ns.lookupObject(ActionPlan.SONAR_TYPE, a),
-		    (RampMeter)ns.lookupObject(RampMeter.SONAR_TYPE, rm),
-		    (PlanPhase)ns.lookupObject(PlanPhase.SONAR_TYPE, p));
+		this(n, (ActionPlan) ns.lookupObject(ActionPlan.SONAR_TYPE, a),
+		    (RampMeter) ns.lookupObject(RampMeter.SONAR_TYPE, rm),
+		    lookupPlanPhase(p));
 	}
 
 	/** Create a new meter action */
@@ -98,6 +101,7 @@ public class MeterActionImpl extends BaseObjectImpl implements MeterAction {
 	protected ActionPlan action_plan;
 
 	/** Get the action plan */
+	@Override
 	public ActionPlan getActionPlan() {
 		return action_plan;
 	}
@@ -106,6 +110,7 @@ public class MeterActionImpl extends BaseObjectImpl implements MeterAction {
 	protected RampMeter ramp_meter;
 
 	/** Get the ramp meter */
+	@Override
 	public RampMeter getRampMeter() {
 		return ramp_meter;
 	}
@@ -114,6 +119,7 @@ public class MeterActionImpl extends BaseObjectImpl implements MeterAction {
 	private PlanPhase phase;
 
 	/** Set the plan phase to perform action */
+	@Override
 	public void setPhase(PlanPhase p) {
 		phase = p;
 	}
@@ -127,6 +133,7 @@ public class MeterActionImpl extends BaseObjectImpl implements MeterAction {
 	}
 
 	/** Get the plan phase to perform action */
+	@Override
 	public PlanPhase getPhase() {
 		return phase;
 	}

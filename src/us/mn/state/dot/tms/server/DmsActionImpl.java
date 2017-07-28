@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -71,11 +72,13 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -89,10 +92,10 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	protected DmsActionImpl(Namespace ns, String n, String a, String sg,
 		String p, String qm, boolean be, int ap, int rp)
 	{
-		this(n, (ActionPlan)ns.lookupObject(ActionPlan.SONAR_TYPE, a),
-		    (SignGroup)ns.lookupObject(SignGroup.SONAR_TYPE, sg),
-		    (PlanPhase)ns.lookupObject(PlanPhase.SONAR_TYPE, p),
-		    (QuickMessage)ns.lookupObject(QuickMessage.SONAR_TYPE, qm),
+		this(n, (ActionPlan) ns.lookupObject(ActionPlan.SONAR_TYPE, a),
+		    (SignGroup) ns.lookupObject(SignGroup.SONAR_TYPE, sg),
+		    lookupPlanPhase(p),
+		    (QuickMessage) ns.lookupObject(QuickMessage.SONAR_TYPE, qm),
 		    be, ap, rp);
 	}
 
@@ -114,6 +117,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	protected ActionPlan action_plan;
 
 	/** Get the action plan */
+	@Override
 	public ActionPlan getActionPlan() {
 		return action_plan;
 	}
@@ -122,6 +126,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	protected SignGroup sign_group;
 
 	/** Get the sign group */
+	@Override
 	public SignGroup getSignGroup() {
 		return sign_group;
 	}
@@ -130,6 +135,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	private PlanPhase phase;
 
 	/** Set the plan phase to perform action */
+	@Override
 	public void setPhase(PlanPhase p) {
 		phase = p;
 	}
@@ -143,6 +149,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	}
 
 	/** Get the plan phase to perform action */
+	@Override
 	public PlanPhase getPhase() {
 		return phase;
 	}
@@ -151,6 +158,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	protected QuickMessage quick_message;
 
 	/** Set the quick message */
+	@Override
 	public void setQuickMessage(QuickMessage qm) {
 		quick_message = qm;
 	}
@@ -164,6 +172,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	}
 
 	/** Get the quick message */
+	@Override
 	public QuickMessage getQuickMessage() {
 		return quick_message;
 	}
@@ -197,6 +206,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	/** Set the activation priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	@Override
 	public void setActivationPriority(int p) {
 		a_priority = p;
 	}
@@ -212,6 +222,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	/** Get the activation priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	@Override
 	public int getActivationPriority() {
 		return a_priority;
 	}
@@ -222,6 +233,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	/** Set the run-time priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	@Override
 	public void setRunTimePriority(int p) {
 		r_priority = p;
 	}
@@ -237,6 +249,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	/** Get the run-time priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DmsMsgPriority */
+	@Override
 	public int getRunTimePriority() {
 		return r_priority;
 	}
