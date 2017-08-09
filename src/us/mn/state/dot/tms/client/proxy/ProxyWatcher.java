@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2013  Minnesota Department of Transportation
+ * Copyright (C) 2010-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,14 +39,14 @@ public class ProxyWatcher<T extends SonarObject> {
 	private final ProxyListener<T> listener = new ProxyListener<T>() {
 		public void proxyAdded(T p) { }
 		public void enumerationComplete() { }
-		public synchronized void proxyRemoved(T p) {
-			if(proxy == p) {
+		public void proxyRemoved(T p) {
+			if (proxy == p) {
 				proxy = null;
 				clear();
 			}
 		}
-		public synchronized void proxyChanged(T p, final String a) {
-			if(proxy == p)
+		public void proxyChanged(T p, final String a) {
+			if (proxy == p)
 				update(p, a);
 		}
 	};
@@ -56,21 +56,21 @@ public class ProxyWatcher<T extends SonarObject> {
 
 	/** Set a new proxy to watch */
 	public void setProxy(T p) {
-		// Need to synchronize in case sonar thread is calling
-		// proxyChanged after calling watchObject.  This happens
+		// Need to synchronize on type cache in case sonar thread is
+		// calling proxyChanged after calling watchObject.  This happens
 		// when setProxy is called more than once quickly.
-		synchronized(listener) {
+		synchronized (cache) {
 			T op = proxy;
 			proxy = p;
-			if(watch) {
-				if(op != null)
+			if (watch) {
+				if (op != null)
 					cache.ignoreObject(op);
-				if(p != null)
+				if (p != null)
 					cache.watchObject(p);
 			}
-			if(p != null)
+			if (p != null)
 				update(p, null);
-			else if(op != null)
+			else if (op != null)
 				clear();
 		}
 	}
