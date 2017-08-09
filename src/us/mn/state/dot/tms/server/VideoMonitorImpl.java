@@ -308,8 +308,10 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Set the camera and notify clients of the change */
 	public void setCameraNotify(CameraImpl c, String src, boolean select) {
 		try {
+			Camera oc = camera;
 			doSetCam(c, src, select);
-			notifyAttribute("camera");
+			if (camera != oc)
+				notifyAttribute("camera");
 		}
 		catch (TMSException e) {
 			e.printStackTrace();

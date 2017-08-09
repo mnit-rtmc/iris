@@ -146,5 +146,7 @@ public class CamCache {
 		client.populateReadable(presets);
 		client.populateReadable(monitor_styles);
 		client.populateReadable(monitors);
+		if (client.canRead(VideoMonitor.SONAR_TYPE))
+			monitors.ignoreAttribute("camera");
 	}
 }
