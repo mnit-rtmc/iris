@@ -1323,4 +1323,17 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void msgQueried() {
 		msg_queried = true;
 	}
+
+	//-------------------------
+	// memory-flag set when we discover automatic GPS polling can't work
+
+	protected boolean bBlockAutoGps = false;
+	
+	public boolean getBlockAutoGps() {
+		return bBlockAutoGps;
+	}
+	
+	public void setBlockAutoGps(boolean b) {
+		bBlockAutoGps = b;
+	}
 }
