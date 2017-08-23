@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
@@ -78,6 +79,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 	@SuppressWarnings("unchecked")
 	@Override
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {
+		GpsImpl gps;
 		switch (r) {
 		case RESET_DEVICE:
 			addOp(new OpResetDMS(dms));
@@ -94,6 +96,18 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 			addOp(new OpQueryDMSMessage(dms));
 			break;
 		case QUERY_STATUS:
+			// add an NTCIP GPS query ... under the right circumstances
+			if (dms.getBlockAutoGps() == false) {
+				gps = GpsImpl.lookupGpsImplForDevice(dms);
+				if (gps != null) {
+					if ((gps.getGpsEnable() == true) && (gps.getCommLink() == null))
+						addOp(new OpQueryGpsLocationNtcip(dms, gps, false));
+				} else {
+					if (SystemAttrEnum.GPS_NTCIP_ENABLE.getBoolean())
+						addOp(new OpQueryGpsLocationNtcip(dms, gps, false));
+				}
+			}
+			// add normal status query
 			addOp(new OpQueryDMSStatus(dms));
 			break;
 		case QUERY_PIXEL_FAILURES:
@@ -116,6 +130,16 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 			break;
 		case SEND_LEDSTAR_SETTINGS:
 			addOp(new OpSendDMSLedstar(dms));
+			break;
+		case QUERY_GPS_LOCATION:
+			dms.setBlockAutoGps(false);
+			gps = GpsImpl.lookupGpsImplForDevice(dms);
+			addOp(new OpQueryGpsLocationNtcip(dms, gps, false));
+			break;
+		case QUERY_GPS_LOCATION_FORCE:
+			dms.setBlockAutoGps(false);
+			gps = GpsImpl.lookupGpsImplForDevice(dms);
+			addOp(new OpQueryGpsLocationNtcip(dms, gps, true));
 			break;
 		default:
 			// Ignore other requests
