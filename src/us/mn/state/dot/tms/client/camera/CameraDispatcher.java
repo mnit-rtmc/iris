@@ -148,6 +148,7 @@ public class CameraDispatcher extends JPanel {
 		cam_ptz = new CameraPTZ(s);
 		joy_ptz = new JoystickPTZ(cam_ptz);
 		output_cbx = createOutputCombo();
+		output_cbx.setRenderer(new MonComboRenderer());
 		info_pnl = createInfoPanel();
 		stream_pnl = createStreamPanel();
 		control_pnl = new CamControlPanel(cam_ptz);
