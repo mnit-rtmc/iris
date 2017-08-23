@@ -33,4 +33,7 @@ public interface Device extends ControllerIO {
 
 	/** Get the operation description */
 	String getOperation();
+
+	/** Check to see if this is an NTCIP device */
+	boolean getIsNtcip();
 }

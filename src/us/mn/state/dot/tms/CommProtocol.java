@@ -177,4 +177,16 @@ public enum CommProtocol {
 		else
 			return null;
 	}
+
+	/** Returns true if a protocol is NTCIP */
+	static public boolean isNtcip(CommProtocol p) {
+		return (p == NTCIP_A)
+		    || (p == NTCIP_B)
+		    || (p == NTCIP_C);
+	}
+
+	/** Returns true if a protocol is NTCIP */
+	static public boolean isNtcip(short o) {
+		return isNtcip(fromOrdinal(o));
+	}
 }
