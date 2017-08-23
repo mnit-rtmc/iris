@@ -19,6 +19,7 @@ import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.GpsHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
@@ -174,6 +175,10 @@ public class GpsPanel extends IPanel
 				case GPS_DISABLED: // <- allow manual query
 					gps.setDeviceRequest(DeviceRequest
 							.QUERY_GPS_LOCATION_FORCE.ordinal());
+					break;
+				case NTCIP_ENABLED:
+					parentDevice.setDeviceRequest(DeviceRequest
+							.QUERY_GPS_LOCATION_FORCE.ordinal());
 			}
 		}
 	}
@@ -200,7 +205,8 @@ public class GpsPanel extends IPanel
 	static enum GpsPanelMode {
 		DISABLED,
 		GPS_DISABLED,
-		GPS_ENABLED;
+		GPS_ENABLED,
+		NTCIP_ENABLED;
 	}
 
 	GpsPanelMode gpsPanelMode = GpsPanelMode.DISABLED;
@@ -211,6 +217,11 @@ public class GpsPanel extends IPanel
 				gpsPanelMode = GpsPanelMode.GPS_ENABLED;
 			else
 				gpsPanelMode = GpsPanelMode.GPS_DISABLED;
+		}
+		else if (SystemAttrEnum.GPS_NTCIP_ENABLE.getBoolean()
+		      && (parentDevice != null)
+		      && parentDevice.getIsNtcip()) {
+				gpsPanelMode = GpsPanelMode.NTCIP_ENABLED;
 		}
 		else
 			gpsPanelMode = GpsPanelMode.DISABLED;
@@ -228,6 +239,8 @@ public class GpsPanel extends IPanel
 			case GPS_ENABLED:
 				sJitter = ""+gps.getJitterToleranceMeters();
 				break;
+			case NTCIP_ENABLED:
+				sJitter = ""+SystemAttrEnum.GPS_NTCIP_JITTER_M.getInt();
 		}
 		tolerance.setText(sJitter);
 
@@ -235,6 +248,7 @@ public class GpsPanel extends IPanel
 				gpsPanelMode == GpsPanelMode.GPS_ENABLED);
 		switch (gpsPanelMode) {
 			case DISABLED:
+			case NTCIP_ENABLED:
 				txtLatestAttempt.setText("");
 				lblGpsStatus.setText(I18N.get("gps.status"));
 				txtGpsStatus.setText("");
