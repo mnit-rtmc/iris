@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -60,7 +60,7 @@ public class SendSettingsJob extends Job {
 	/** Send settings to all controllers */
 	private void sendSettings() {
 		Iterator<Controller> it = ControllerHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Controller c = it.next();
 			c.setDownload(false);
 		}
@@ -76,7 +76,7 @@ public class SendSettingsJob extends Job {
 	/** Send a request to all DMS */
 	private void requestDMS(DeviceRequest req) {
 		Iterator<DMS> it = DMSHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			DMS dms = it.next();
 			dms.setDeviceRequest(req.ordinal());
 		}
@@ -85,7 +85,7 @@ public class SendSettingsJob extends Job {
 	/** Send a request to all LCS */
 	private void requestLCS(DeviceRequest req) {
 		Iterator<LCSArray> it = LCSArrayHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			LCSArray lcs_array = it.next();
 			lcs_array.setDeviceRequest(req.ordinal());
 		}
@@ -94,7 +94,7 @@ public class SendSettingsJob extends Job {
 	/** Send a request to all ramp meters */
 	private void requestRampMeters(DeviceRequest req) {
 		Iterator<RampMeter> it = RampMeterHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			RampMeter meter = it.next();
 			meter.setDeviceRequest(req.ordinal());
 		}
@@ -103,7 +103,7 @@ public class SendSettingsJob extends Job {
 	/** Send a request to all beacons */
 	private void requestBeacons(DeviceRequest req) {
 		Iterator<Beacon> it = BeaconHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Beacon b = it.next();
 			b.setDeviceRequest(req.ordinal());
 		}
