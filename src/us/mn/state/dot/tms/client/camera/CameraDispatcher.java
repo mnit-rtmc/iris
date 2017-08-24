@@ -39,6 +39,8 @@ import us.mn.state.dot.tms.client.UserProperty;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.proxy.ProxyView;
+import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.ILabel;
@@ -114,6 +116,22 @@ public class CameraDispatcher extends JPanel {
 	/** Video output selection ComboBox */
 	private final JComboBox<VideoMonitor> output_cbx;
 
+	/** Video monitor watcher */
+	private final ProxyWatcher<VideoMonitor> watcher;
+
+	/** Video monitor view */
+	private final ProxyView<VideoMonitor> vm_view =
+		new ProxyView<VideoMonitor>()
+	{
+		public void update(VideoMonitor vm, String a) {
+			video_monitor = getSelectedMonitor();
+			selectMonitorCamera(selected);
+		}
+		public void clear() {
+			video_monitor = null;
+		}
+	};
+
 	/** Selected video monitor output */
 	private VideoMonitor video_monitor;
 
@@ -155,6 +173,7 @@ public class CameraDispatcher extends JPanel {
 		cache = session.getSonarState().getCamCache().getCameras();
 		vm_cache = session.getSonarState().getCamCache()
 		                  .getVideoMonitors();
+		watcher = new ProxyWatcher<VideoMonitor>(vm_cache,vm_view,true);
 		ss_listener = createStreamStatusListener();
 	}
 
@@ -276,6 +295,7 @@ public class CameraDispatcher extends JPanel {
 		clear();
 		sel_mdl.addProxySelectionListener(sel_listener);
 		vm_cache.addProxyListener(vm_listener);
+		watcher.initialize();
 	}
 
 	/** Video monitor proxy listener */
@@ -331,6 +351,7 @@ public class CameraDispatcher extends JPanel {
 
 	/** Dispose of the camera viewer */
 	public void dispose() {
+		watcher.dispose();
 		vm_cache.removeProxyListener(vm_listener);
 		stream_pnl.unbindStreamStatusListener(ss_listener);
 		sel_mdl.removeProxySelectionListener(sel_listener);
@@ -366,8 +387,7 @@ public class CameraDispatcher extends JPanel {
 
 	/** Called when a video monitor is selected */
 	private void monitorSelected() {
-		video_monitor = getSelectedMonitor();
-		selectMonitorCamera(selected);
+		watcher.setProxy(getSelectedMonitor());
 	}
 
 	/** Select a video monitor */
