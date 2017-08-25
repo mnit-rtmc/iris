@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,17 @@
 package us.mn.state.dot.tms.client.comm;
 
 import java.awt.event.ActionEvent;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IMenu;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * MaintenanceMenu is a menu for maintenance items.
  *
  * @author Douglas Lau
  */
-public class MaintenanceMenu extends JMenu {
+public class MaintenanceMenu extends IMenu {
 
 	/** User Session */
 	private final Session session;
@@ -37,64 +35,52 @@ public class MaintenanceMenu extends JMenu {
 
 	/** Create a new maintenance menu */
 	public MaintenanceMenu(final Session s) {
-		super(I18N.get("maintenance"));
+		super("maintenance");
 		session = s;
 		desktop = s.getDesktop();
-		JMenuItem item = createCommLinkItem();
-		if(item != null)
-			add(item);
-		item = createModemItem();
-		if(item != null)
-			add(item);
-		item = createAlarmItem();
-		if(item != null)
-			add(item);
-		item = createCabinetStyleItem();
-		if(item != null)
-			add(item);
+		addItem(createCommLinkItem());
+		addItem(createModemItem());
+		addItem(createAlarmItem());
+		addItem(createCabinetStyleItem());
 	}
 
-	/** Create the comm link menu item */
-	private JMenuItem createCommLinkItem() {
-		if(!CommLinkForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("comm.links") {
+	/** Create a comm link menu item action */
+	private IAction createCommLinkItem() {
+		return CommLinkForm.isPermitted(session) ?
+		    new IAction("comm.links") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new CommLinkForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the modem menu item */
-	private JMenuItem createModemItem() {
-		if(!ModemForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("modems") {
+	/** Create a modem menu item action */
+	private IAction createModemItem() {
+		return ModemForm.isPermitted(session) ?
+		    new IAction("modems") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new ModemForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the alarm menu item */
-	private JMenuItem createAlarmItem() {
-		if(!AlarmForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("alarm.plural") {
+	/** Create an alarm menu item action */
+	private IAction createAlarmItem() {
+		return AlarmForm.isPermitted(session) ?
+		    new IAction("alarm.plural") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new AlarmForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the cabinet style menu item */
-	private JMenuItem createCabinetStyleItem() {
-		if(!CabinetStyleForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("cabinet.styles") {
+	/** Create a cabinet style menu item action */
+	private IAction createCabinetStyleItem() {
+		return CabinetStyleForm.isPermitted(session) ?
+		    new IAction("cabinet.styles") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new CabinetStyleForm(session));
 			}
-		});
+		    } : null;
 	}
 }
