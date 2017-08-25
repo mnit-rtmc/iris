@@ -53,6 +53,12 @@ public class ClientIncident implements Incident {
 		return NAME + Integer.toString(System.identityHashCode(this));
 	}
 
+	/** Check group membership */
+	@Override
+	public boolean isInGroup(String g) {
+		return false;
+	}
+
 	/** Get the SONAR type name */
 	@Override
 	public String getTypeName() {

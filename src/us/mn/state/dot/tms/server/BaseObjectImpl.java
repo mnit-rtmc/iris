@@ -109,7 +109,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 
 	/** Get the time as a time stamp */
 	static protected Date asTimestamp(Long ts) {
-		if(ts != null)
+		if (ts != null)
 			return new Date(ts);
 		else
 			return null;
@@ -117,7 +117,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 
 	/** Get time as milliseconds since epoch */
 	static protected Long stampMillis(Date ts) {
-		if(ts != null)
+		if (ts != null)
 			return ts.getTime();
 		else
 			return null;
@@ -152,7 +152,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	static protected CabinetImpl lookupCabinet(String name) {
 		SonarObject so = lookupObject(CabinetImpl.SONAR_TYPE, name);
 		if (so instanceof CabinetImpl)
-			return (CabinetImpl)so;
+			return (CabinetImpl) so;
 		else
 			return null;
 	}
@@ -161,7 +161,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	static protected CommLinkImpl lookupCommLink(String name) {
 		SonarObject so = lookupObject(CommLinkImpl.SONAR_TYPE, name);
 		if (so instanceof CommLinkImpl)
-			return (CommLinkImpl)so;
+			return (CommLinkImpl) so;
 		else
 			return null;
 	}
@@ -265,11 +265,13 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	}
 
 	/** Get the primary key name */
+	@Override
 	public String getKeyName() {
 		return "name";
 	}
 
 	/** Get the primary key */
+	@Override
 	public String getKey() {
 		return name;
 	}
@@ -278,8 +280,15 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	protected final String name;
 
 	/** Get the object name */
+	@Override
 	public String getName() {
 		return name;
+	}
+
+	/** Check group membership */
+	@Override
+	public boolean isInGroup(String g) {
+		return false;
 	}
 
 	/** Create a new base object */
@@ -316,6 +325,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	}
 
 	/** Destroy an object */
+	@Override
 	public void destroy() {
 		// Handled by doDestroy() method
 	}
@@ -344,7 +354,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** Notify SONAR clients of an object created */
 	public void notifyCreate() throws SonarException {
 		Server s = MainServer.server;
-		if(s != null)
+		if (s != null)
 			s.createObject(this);
 		else
 			namespace.storeObject(this);
@@ -353,14 +363,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** Notify SONAR clients of an object removed */
 	public void notifyRemove() {
 		Server s = MainServer.server;
-		if(s != null)
+		if (s != null)
 			s.removeObject(this);
 	}
 
 	/** Notify SONAR clients of a change to an attribute */
 	protected void notifyAttribute(String aname) {
 		Server s = MainServer.server;
-		if(s != null)
+		if (s != null)
 			s.setAttribute(this, aname);
 	}
 

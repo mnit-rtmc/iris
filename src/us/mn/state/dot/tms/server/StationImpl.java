@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2016  Minnesota Department of Transportation
+ * Copyright (C) 2004-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -146,6 +146,12 @@ public class StationImpl implements Station, VehicleSampler {
 	@Override
 	public String getName() {
 		return name;
+	}
+
+	/** Check group membership */
+	@Override
+	public boolean isInGroup(String g) {
+		return false;
 	}
 
 	/** Roadway node */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,6 +59,12 @@ public class TransGeoLoc implements GeoLoc {
 	@Override
 	public String getName() {
 		return "trans_geo_loc";
+	}
+
+	/** Check group membership */
+	@Override
+	public boolean isInGroup(String g) {
+		return false;
 	}
 
 	/** Destroy the loc */
