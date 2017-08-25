@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,20 +15,18 @@
 package us.mn.state.dot.tms.client.system;
 
 import java.awt.event.ActionEvent;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.roads.RoadForm;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IMenu;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * SystemMenu is a menu for system configuration items.
  *
  * @author Douglas Lau
  */
-public class SystemMenu extends JMenu {
+public class SystemMenu extends IMenu {
 
 	/** User Session */
 	protected final Session session;
@@ -38,65 +36,53 @@ public class SystemMenu extends JMenu {
 
 	/** Create a new system menu */
 	public SystemMenu(final Session s) {
-		super(I18N.get("system"));
+		super("system");
 		session = s;
 		desktop = s.getDesktop();
-		JMenuItem item = createSystemAttributesItem();
-		if(item != null)
-			add(item);
-		item = createUsersAndRolesItem();
-		if(item != null)
-			add(item);
-		item = createMapExtentsItem();
-		if(item != null)
-			add(item);
-		item = createRoadItem();
-		if(item != null)
-			add(item);
+		addItem(createSystemAttributesItem());
+		addItem(createUsersAndRolesItem());
+		addItem(createMapExtentsItem());
+		addItem(createRoadItem());
 	}
 
-	/** Create the system attributes menu item */
-	protected JMenuItem createSystemAttributesItem() {
-		if(!SystemAttributeForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("system.attributes") {
+	/** Create a system attributes menu item action */
+	private IAction createSystemAttributesItem() {
+		return SystemAttributeForm.isPermitted(session) ?
+		    new IAction("system.attributes") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new SystemAttributeForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the users and roles menu item */
-	protected JMenuItem createUsersAndRolesItem() {
-		if(!UserRoleForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("user.menu") {
+	/** Create a users and roles menu item action */
+	private IAction createUsersAndRolesItem() {
+		return UserRoleForm.isPermitted(session) ?
+		    new IAction("user.menu") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new UserRoleForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the map extents menu item */
-	protected JMenuItem createMapExtentsItem() {
-		if(!MapExtentForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("location.map.extents") {
+	/** Create a map extents menu item action */
+	private IAction createMapExtentsItem() {
+		return MapExtentForm.isPermitted(session) ?
+		    new IAction("location.map.extents") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new MapExtentForm(session,
 					desktop.client));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the road menu item */
-	protected JMenuItem createRoadItem() {
-		if(!RoadForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("location.road.plural") {
+	/** Create a road menu item action */
+	private IAction createRoadItem() {
+		return RoadForm.isPermitted(session) ?
+		    new IAction("location.road.plural") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new RoadForm(session));
 			}
-		});
+		    } : null;
 	}
 }
