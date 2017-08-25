@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,9 +12,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client;
+package us.mn.state.dot.tms.client.widget;
 
 import us.mn.state.dot.sched.ExceptionHandler;
+import us.mn.state.dot.tms.client.IrisClient;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.client.help.ExceptionDialog;
 
@@ -29,6 +30,7 @@ public class DialogHandler implements ExceptionHandler {
 	private ExceptionDialog dialog = new ExceptionDialog();
 
 	/** Handle an exception */
+	@Override
 	public boolean handle(final Exception e) {
 		runSwing(new Runnable() {
 			public void run() {
