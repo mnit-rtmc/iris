@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,15 +12,12 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.help;
+package us.mn.state.dot.tms.client.widget;
 
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import us.mn.state.dot.tms.client.widget.AbstractForm;
-import us.mn.state.dot.tms.client.widget.Icons;
-import us.mn.state.dot.tms.client.widget.ILabel;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -48,7 +45,7 @@ public class SupportForm extends AbstractForm {
 	}
 
 	/** Create support text panel */
-	protected JPanel createTextPanel() {
+	private JPanel createTextPanel() {
 		JPanel pnl = new JPanel();
 		pnl.setLayout(new BoxLayout(pnl, BoxLayout.Y_AXIS));
 		pnl.add(Box.createHorizontalStrut(10));
@@ -58,7 +55,7 @@ public class SupportForm extends AbstractForm {
 	}
 
 	/** Create panel containing logo */
-	protected JPanel createLogoPanel() {
+	private JPanel createLogoPanel() {
 		JPanel pnl = new JPanel();
 		pnl.setLayout(new BoxLayout(pnl, BoxLayout.X_AXIS));
 		pnl.add(Box.createHorizontalStrut(10));
@@ -68,7 +65,7 @@ public class SupportForm extends AbstractForm {
 	}
 
 	/** Create logo widget */
-	protected JLabel createLogo() {
+	private JLabel createLogo() {
 		JLabel logo = new JLabel();
 		logo.setIcon(Icons.getIcon("iris"));
 		return logo;
