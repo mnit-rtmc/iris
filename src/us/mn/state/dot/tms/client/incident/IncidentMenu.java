@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,19 +15,17 @@
 package us.mn.state.dot.tms.client.incident;
 
 import java.awt.event.ActionEvent;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IMenu;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * IncidentMenu is a menu for incident-related items.
  *
  * @author Douglas Lau
  */
-public class IncidentMenu extends JMenu {
+public class IncidentMenu extends IMenu {
 
 	/** User Session */
 	private final Session session;
@@ -37,52 +35,52 @@ public class IncidentMenu extends JMenu {
 
 	/** Create a new incident menu */
 	public IncidentMenu(final Session s) {
-		super(I18N.get("incident"));
+		super("incident");
 		session = s;
 		desktop = s.getDesktop();
-		if (IncidentDetailForm.isPermitted(session))
-			add(createIncidentDetailItem());
-		if (IncDescriptorForm.isPermitted(session))
-			add(createIncDescriptorItem());
-		if (IncLocatorForm.isPermitted(session))
-			add(createIncLocatorItem());
-		if (IncAdviceForm.isPermitted(session))
-			add(createIncAdviceItem());
+		addItem(createIncidentDetailItem());
+		addItem(createIncDescriptorItem());
+		addItem(createIncLocatorItem());
+		addItem(createIncAdviceItem());
 	}
 
-	/** Create the incident detail menu item */
-	private JMenuItem createIncidentDetailItem() {
-		return new JMenuItem(new IAction("incident.details") {
+	/** Create an incident detail menu item action */
+	private IAction createIncidentDetailItem() {
+		return IncidentDetailForm.isPermitted(session) ?
+		    new IAction("incident.details") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new IncidentDetailForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the incident descriptor menu item */
-	private JMenuItem createIncDescriptorItem() {
-		return new JMenuItem(new IAction("incident.descriptors") {
+	/** Create an incident descriptor menu item action */
+	private IAction createIncDescriptorItem() {
+		return IncDescriptorForm.isPermitted(session) ?
+		    new IAction("incident.descriptors") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new IncDescriptorForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the incident locator menu item */
-	private JMenuItem createIncLocatorItem() {
-		return new JMenuItem(new IAction("incident.locators") {
+	/** Create an incident locator menu item action */
+	private IAction createIncLocatorItem() {
+		return IncLocatorForm.isPermitted(session) ?
+		    new IAction("incident.locators") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new IncLocatorForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the incident advice menu item */
-	private JMenuItem createIncAdviceItem() {
-		return new JMenuItem(new IAction("incident.advice") {
-			protected void doActionPerformed(ActionEvent e) {
+	/** Create an incident advice menu item action */
+	private IAction createIncAdviceItem() {
+		return IncAdviceForm.isPermitted(session) ?
+		    new IAction("incident.advice") {
+		        protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new IncAdviceForm(session));
 			}
-		});
+		    } : null;
 	}
 }
