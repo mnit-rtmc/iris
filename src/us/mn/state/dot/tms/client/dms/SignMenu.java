@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,21 +16,18 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.event.ActionEvent;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.beacon.BeaconForm;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IMenu;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * SignMenu is a menu for DMS-related items.
  *
  * @author Douglas Lau
  */
-public class SignMenu extends JMenu {
+public class SignMenu extends IMenu {
 
 	/** User Session */
 	private final Session session;
@@ -40,106 +37,85 @@ public class SignMenu extends JMenu {
 
 	/** Create a new sign menu */
 	public SignMenu(final Session s) {
-		super(I18N.get("sign.menu"));
+		super("sign.menu");
 		session = s;
 		desktop = s.getDesktop();
-		JMenuItem item = createDmsItem();
-		if(item != null)
-			add(item);
-		item = createSignConfigItem();
-		if (item != null)
-			add(item);
-		item = createFontItem();
-		if(item != null)
-			add(item);
-		item = createGraphicItem();
-		if(item != null)
-			add(item);
-		item = createQuickMessageItem();
-		if(item != null)
-			add(item);
-		item = createBeaconItem();
-		if(item != null)
-			add(item);
-		item = createDictionaryItem();
-		if(item != null)
-			add(item);
+		addItem(createDmsItem());
+		addItem(createSignConfigItem());
+		addItem(createFontItem());
+		addItem(createGraphicItem());
+		addItem(createQuickMessageItem());
+		addItem(createBeaconItem());
+		addItem(createDictionaryItem());
 	}
 
-	/** Create the DMS menu item */
-	private JMenuItem createDmsItem() {
+	/** Create a DMS menu item action */
+	private IAction createDmsItem() {
 		return DMSForm.isPermitted(session) ?
-		        new JMenuItem(new IAction("dms")
-		{
+		    new IAction("dms") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new DMSForm(session));
 			}
-		}) : null;
+		    } : null;
 	}
 
-	/** Create the sign config menu item */
-	private JMenuItem createSignConfigItem() {
+	/** Create a sign config menu item action */
+	private IAction createSignConfigItem() {
 		return SignConfigForm.isPermitted(session) ?
-		        new JMenuItem(new IAction("dms.config")
-		{
+		    new IAction("dms.config") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new SignConfigForm(session));
 			}
-		}) : null;
+		    } : null;
 	}
 
-	/** Create the font menu item */
-	private JMenuItem createFontItem() {
-		if(!FontForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("font.title") {
+	/** Create a font menu item action */
+	private IAction createFontItem() {
+		return FontForm.isPermitted(session) ?
+		    new IAction("font.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new FontForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the graphics menu item */
-	private JMenuItem createGraphicItem() {
-		if(!GraphicForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("graphics") {
+	/** Create a graphics menu item action */
+	private IAction createGraphicItem() {
+		return GraphicForm.isPermitted(session) ?
+		    new IAction("graphics") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new GraphicForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the quick message menu item */
-	private JMenuItem createQuickMessageItem() {
-		if(!QuickMessageForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("quick.messages") {
+	/** Create a quick message menu item action */
+	private IAction createQuickMessageItem() {
+		return QuickMessageForm.isPermitted(session) ?
+		    new IAction("quick.messages") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new QuickMessageForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the beacon menu item */
-	private JMenuItem createBeaconItem() {
-		if(!BeaconForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("beacons") {
+	/** Create a beacon menu item action */
+	private IAction createBeaconItem() {
+		return BeaconForm.isPermitted(session) ?
+		    new IAction("beacons") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new BeaconForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the dictionary menu item */
-	private JMenuItem createDictionaryItem() {
-		if(!DictionaryForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("dictionary") {
+	/** Create a dictionary menu item action */
+	private IAction createDictionaryItem() {
+		return DictionaryForm.isPermitted(session) ?
+		    new IAction("dictionary") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new DictionaryForm(session));
 			}
-		});
+		    } : null;
 	}
 }
