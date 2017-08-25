@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +15,6 @@
 package us.mn.state.dot.tms.client;
 
 import java.awt.event.ActionEvent;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.camera.VideoMenu;
 import us.mn.state.dot.tms.client.comm.MaintenanceMenu;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
@@ -31,15 +28,15 @@ import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.system.SystemMenu;
 import us.mn.state.dot.tms.client.weather.WeatherSensorForm;
 import us.mn.state.dot.tms.client.widget.IAction;
+import us.mn.state.dot.tms.client.widget.IMenu;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
-import us.mn.state.dot.tms.utils.I18N;
 
 /**
  * ViewMenu is a JMenu which contains items to view various TMS object types.
  *
  * @author Douglas Lau
  */
-public class ViewMenu extends JMenu {
+public class ViewMenu extends IMenu {
 
 	/** User Session */
 	private final Session session;
@@ -49,111 +46,80 @@ public class ViewMenu extends JMenu {
 
 	/** Create a new view menu */
 	public ViewMenu(Session s) {
-		super(I18N.get("view"));
+		super("view");
 		session = s;
 		desktop = session.getDesktop();
-		SystemMenu s_menu = new SystemMenu(session);
-		if(s_menu.getItemCount() > 0)
-			add(s_menu);
-		MaintenanceMenu m_menu = new MaintenanceMenu(session);
-		if(m_menu.getItemCount() > 0)
-			add(m_menu);
-		VideoMenu vid_menu = new VideoMenu(session);
-		if(vid_menu.getItemCount() > 0)
-			add(vid_menu);
-		SignMenu sgn_menu = new SignMenu(session);
-		if(sgn_menu.getItemCount() > 0)
-			add(sgn_menu);
-		IncidentMenu inc_menu = new IncidentMenu(session);
-		if (inc_menu.getItemCount() > 0)
-			add(inc_menu);
-		LaneUseMenu lu_menu = new LaneUseMenu(session);
-		if(lu_menu.getItemCount() > 0)
-			add(lu_menu);
-		JMenuItem item = createDetectorItem();
-		if(item != null)
-			add(item);
-		item = createStationItem();
-		if(item != null)
-			add(item);
-		item = createMeterItem();
-		if(item != null)
-			add(item);
-		item = createScheduleItem();
-		if(item != null)
-			add(item);
-		item = createWeatherItem();
-		if(item != null)
-			add(item);
-		item = createGateArmItem();
-		if(item != null)
-			add(item);
+		addMenu(new SystemMenu(session));
+		addMenu(new MaintenanceMenu(session));
+		addMenu(new VideoMenu(session));
+		addMenu(new SignMenu(session));
+		addMenu(new IncidentMenu(session));
+		addMenu(new LaneUseMenu(session));
+		addItem(createDetectorItem());
+		addItem(createStationItem());
+		addItem(createMeterItem());
+		addItem(createScheduleItem());
+		addItem(createWeatherItem());
+		addItem(createGateArmItem());
 	}
 
-	/** Create the detector menu item */
-	private JMenuItem createDetectorItem() {
-		if(DetectorForm.isPermitted(session)) {
-			return new JMenuItem(new IAction("detector.plural") {
-				protected void doActionPerformed(ActionEvent e){
-					desktop.show(new DetectorForm(session));
-				}
-			});
-		} else
-			return null;
+	/** Create a detector menu item action */
+	private IAction createDetectorItem() {
+		return DetectorForm.isPermitted(session) ?
+		    new IAction("detector.plural") {
+			protected void doActionPerformed(ActionEvent e){
+				desktop.show(new DetectorForm(session));
+			}
+		    } : null;
 	}
 
-	/** Create the station menu item */
-	private JMenuItem createStationItem() {
-		if(!StationForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("detector.station.plural") {
+	/** Create a station menu item action */
+	private IAction createStationItem() {
+		return StationForm.isPermitted(session) ?
+		    new IAction("detector.station.plural") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new StationForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the ramp meter menu item */
-	private JMenuItem createMeterItem() {
-		if(!RampMeterForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("ramp_meter.title") {
+	/** Create a ramp meter menu item action */
+	private IAction createMeterItem() {
+		return RampMeterForm.isPermitted(session) ?
+		    new IAction("ramp_meter.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new RampMeterForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the schedule menu item */
-	private JMenuItem createScheduleItem() {
-		if(!ScheduleForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("action.plan.schedule.title") {
+	/** Create a schedule menu item action */
+	private IAction createScheduleItem() {
+		return ScheduleForm.isPermitted(session) ?
+		    new IAction("action.plan.schedule.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new ScheduleForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the weather sensor menu item */
-	private JMenuItem createWeatherItem() {
-		if(!WeatherSensorForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("weather_sensor.title") {
+	/** Create a weather sensor menu item action */
+	private IAction createWeatherItem() {
+		return WeatherSensorForm.isPermitted(session) ?
+		    new IAction("weather_sensor.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new WeatherSensorForm(session));
 			}
-		});
+		    } : null;
 	}
 
-	/** Create the gate arm menu item */
-	private JMenuItem createGateArmItem() {
-		if(!GateArmArrayForm.isPermitted(session))
-			return null;
-		return new JMenuItem(new IAction("gate_arm_array.title") {
+	/** Create a gate arm menu item action */
+	private IAction createGateArmItem() {
+		return GateArmArrayForm.isPermitted(session) ?
+		    new IAction("gate_arm_array.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new GateArmArrayForm(session));
 			}
-		});
+		    } : null;
 	}
 }
