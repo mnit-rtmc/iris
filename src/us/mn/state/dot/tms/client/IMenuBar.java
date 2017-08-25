@@ -59,7 +59,7 @@ public class IMenuBar extends JMenuBar {
 		JMenu vm = view_menu;
 		if (vm != null)
 			remove(vm);
-		boolean in = s != null;
+		boolean in = (s != null);
 		if (in) {
 			view_menu = new ViewMenu(s);
 			add(view_menu, 1);
