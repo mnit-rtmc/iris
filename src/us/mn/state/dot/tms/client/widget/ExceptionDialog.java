@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.help;
+package us.mn.state.dot.tms.client.widget;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -33,8 +33,6 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.client.IrisClient;
-import us.mn.state.dot.tms.client.widget.Screen;
-import us.mn.state.dot.tms.client.widget.TextPanel;
 
 /**
  * A swing dialog for displaying exception stack traces.

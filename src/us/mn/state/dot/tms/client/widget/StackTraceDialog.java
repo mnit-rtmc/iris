@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.client.help;
+package us.mn.state.dot.tms.client.widget;
 
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -24,7 +24,6 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
-import us.mn.state.dot.tms.client.widget.Screen;
 
 /**
  * A swing dialog for displaying exception stack traces.
@@ -61,7 +60,7 @@ public class StackTraceDialog extends JDialog {
 	}
 
 	/** Get stack trace as a string */
-	protected String getStackTrace(Exception e) {
+	private String getStackTrace(Exception e) {
 		StringWriter writer = new StringWriter(200);
 		e.printStackTrace(new PrintWriter(writer));
 		return writer.toString();

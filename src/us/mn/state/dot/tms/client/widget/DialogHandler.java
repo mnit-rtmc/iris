@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.widget;
 import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.tms.client.IrisClient;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
-import us.mn.state.dot.tms.client.help.ExceptionDialog;
 
 /**
  * An exception handler which displays a dialog.
