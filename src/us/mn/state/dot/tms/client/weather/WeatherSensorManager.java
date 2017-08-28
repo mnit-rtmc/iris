@@ -52,6 +52,10 @@ public class WeatherSensorManager extends DeviceManager<WeatherSensor> {
 			{
 				return new WeatherSensorProperties(s, ws);
 			}
+			@Override
+			public WeatherSensorForm makeTableForm() {
+				return new WeatherSensorForm(s);
+			}
 		};
 	}
 

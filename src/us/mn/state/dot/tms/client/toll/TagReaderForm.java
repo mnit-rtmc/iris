@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,11 +25,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class TagReaderForm extends ProxyTableForm<TagReader> {
-
-	/** Check if the user is permitted to use the form */
-	static public boolean isPermitted(Session s) {
-		return s.canRead(TagReader.SONAR_TYPE);
-	}
 
 	/** Create a new tag reader form */
 	public TagReaderForm(Session s) {

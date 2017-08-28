@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,10 @@ public class BeaconManager extends DeviceManager<Beacon> {
 			@Override
 			public BeaconProperties createPropertiesForm(Beacon b) {
 				return new BeaconProperties(s, b);
+			}
+			@Override
+			public BeaconForm makeTableForm() {
+				return new BeaconForm(s);
 			}
 		};
 	}

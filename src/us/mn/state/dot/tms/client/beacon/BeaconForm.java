@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,13 +26,8 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class BeaconForm extends ProxyTableForm<Beacon> {
 
-	/** Check if the user is permitted to use the form */
-	static public boolean isPermitted(Session s) {
-		return s.canRead(Beacon.SONAR_TYPE);
-	}
-
 	/** Create a new beacon form */
 	public BeaconForm(Session s) {
-		super(I18N.get("beacons"), new BeaconModel(s));
+		super(I18N.get("beacon.title"), new BeaconModel(s));
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,6 +44,7 @@ import us.mn.state.dot.tms.client.roads.R_NodeManager;
 import us.mn.state.dot.tms.client.schedule.PlanManager;
 import us.mn.state.dot.tms.client.toll.TagReaderManager;
 import us.mn.state.dot.tms.client.weather.WeatherSensorManager;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
 
 /**
@@ -243,6 +244,15 @@ public class Session {
 			if (man.hasLayer())
 				mm.addLayer(man.createState(mb));
 		}
+	}
+
+	/** Create an action to create a proxy table form */
+	public IAction createTableAction(String tname) {
+		for (ProxyManager<?> man: managers) {
+			if (tname.equals(man.getSonarType()))
+				return man.createTableAction();
+		}
+		return null;
 	}
 
 	/** Check if the user can add an object.

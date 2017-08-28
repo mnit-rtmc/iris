@@ -16,8 +16,9 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.event.ActionEvent;
+import us.mn.state.dot.tms.Beacon;
+import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.beacon.BeaconForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IMenu;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
@@ -40,23 +41,13 @@ public class SignMenu extends IMenu {
 		super("sign.menu");
 		session = s;
 		desktop = s.getDesktop();
-		addItem(createDmsItem());
+		addItem(session.createTableAction(DMS.SONAR_TYPE));
 		addItem(createSignConfigItem());
 		addItem(createFontItem());
 		addItem(createGraphicItem());
 		addItem(createQuickMessageItem());
-		addItem(createBeaconItem());
+		addItem(session.createTableAction(Beacon.SONAR_TYPE));
 		addItem(createDictionaryItem());
-	}
-
-	/** Create a DMS menu item action */
-	private IAction createDmsItem() {
-		return DMSForm.isPermitted(session) ?
-		    new IAction("dms") {
-			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new DMSForm(session));
-			}
-		    } : null;
 	}
 
 	/** Create a sign config menu item action */
@@ -95,16 +86,6 @@ public class SignMenu extends IMenu {
 		    new IAction("quick.messages") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new QuickMessageForm(session));
-			}
-		    } : null;
-	}
-
-	/** Create a beacon menu item action */
-	private IAction createBeaconItem() {
-		return BeaconForm.isPermitted(session) ?
-		    new IAction("beacons") {
-			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new BeaconForm(session));
 			}
 		    } : null;
 	}

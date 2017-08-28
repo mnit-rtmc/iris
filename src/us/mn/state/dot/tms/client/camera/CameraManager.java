@@ -48,6 +48,10 @@ public class CameraManager extends DeviceManager<Camera> {
 			{
 				return new CameraProperties(s, cam);
 			}
+			@Override
+			public CameraForm makeTableForm() {
+				return new CameraForm(s);
+			}
 		};
 	}
 

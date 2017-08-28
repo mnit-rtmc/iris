@@ -55,6 +55,10 @@ public class DMSManager extends DeviceManager<DMS> {
 			{
 				return new DMSProperties(s, dms);
 			}
+			@Override
+			public DMSForm makeTableForm() {
+				return new DMSForm(s);
+			}
 		};
 	}
 

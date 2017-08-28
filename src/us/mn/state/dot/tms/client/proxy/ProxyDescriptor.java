@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.proxy;
 
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.client.Session;
 
 /**
  * A descriptor for SONAR proxy types.
@@ -57,6 +58,11 @@ public class ProxyDescriptor<T extends SonarObject> {
 
 	/** Create a properties form for a proxy */
 	public SonarObjectForm<T> createPropertiesForm(T proxy) {
+		return null;
+	}
+
+	/** Make a table form */
+	public ProxyTableForm<T> makeTableForm() {
 		return null;
 	}
 }

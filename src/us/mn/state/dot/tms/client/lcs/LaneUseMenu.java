@@ -15,9 +15,10 @@
 package us.mn.state.dot.tms.client.lcs;
 
 import java.awt.event.ActionEvent;
+import us.mn.state.dot.tms.LaneMarking;
+import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.marking.LaneMarkingForm;
-import us.mn.state.dot.tms.client.toll.TagReaderForm;
 import us.mn.state.dot.tms.client.toll.TollZoneForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IMenu;
@@ -41,21 +42,11 @@ public class LaneUseMenu extends IMenu {
 		super("lane.use");
 		session = s;
 		desktop = s.getDesktop();
-		addItem(createLcsItem());
+		addItem(session.createTableAction(LCSArray.SONAR_TYPE));
 		addItem(createLaneUseMultiItem());
-		addItem(createLaneMarkingItem());
-		addItem(createTagReaderItem());
+		addItem(session.createTableAction(LaneMarking.SONAR_TYPE));
+		addItem(session.createTableAction(TagReader.SONAR_TYPE));
 		addItem(createTollZoneItem());
-	}
-
-	/** Create a LCS menu item action */
-	private IAction createLcsItem() {
-		return LcsForm.isPermitted(session) ?
-		    new IAction("lcs") {
-			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new LcsForm(session));
-			}
-		    } : null;
 	}
 
 	/** Create a lane-use MULTI menu item action */
@@ -66,26 +57,6 @@ public class LaneUseMenu extends IMenu {
 				desktop.show(new LaneUseMultiForm(session));
 			}
 		    } : null;
-	}
-
-	/** Create a lane marking menu item action */
-	private IAction createLaneMarkingItem() {
-		return LaneMarkingForm.isPermitted(session) ?
-		    new IAction("lane_marking.title") {
-			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new LaneMarkingForm(session));
-			}
-		    } : null;
-	}
-
-	/** Create a tag reader menu item action */
-	private IAction createTagReaderItem() {
-		return TagReaderForm.isPermitted(session) ?
-			new IAction("tag_reader.title") {
-				protected void doActionPerformed(ActionEvent e){
-				       desktop.show(new TagReaderForm(session));
-				}
-			} : null;
 	}
 
 	/** Create a toll zone menu item action */

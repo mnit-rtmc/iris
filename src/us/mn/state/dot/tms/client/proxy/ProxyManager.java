@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.client.proxy;
 
 import java.awt.FlowLayout;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.util.Collection;
 import javax.swing.Icon;
@@ -37,6 +38,7 @@ import us.mn.state.dot.tms.client.map.MapBean;
 import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.map.MapSearcher;
 import us.mn.state.dot.tms.client.map.Style;
+import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.Invokable;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
 
@@ -372,6 +374,18 @@ abstract public class ProxyManager<T extends SonarObject> {
 	/** Create a properties form for the specified proxy */
 	private SonarObjectForm<T> createPropertiesForm(T proxy) {
 		return descriptor.createPropertiesForm(proxy);
+	}
+
+	/** Create an action to display proxy table */
+	public final IAction createTableAction() {
+		return canRead() ? new IAction(getSonarType() + ".title") {
+			protected void doActionPerformed(ActionEvent e) {
+				ProxyTableForm<T> form =
+					descriptor.makeTableForm();
+				if (form != null)
+					session.getDesktop().show(form);
+			}
+		} : null;
 	}
 
 	/** Show the popup menu for the selected proxy or proxies */

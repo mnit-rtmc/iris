@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.awt.event.ActionEvent;
+import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IMenu;
@@ -39,7 +40,7 @@ public class VideoMenu extends IMenu {
 		session = s;
 		desktop = s.getDesktop();
 		addItem(createEncoderTypeItem());
-		addItem(createCameraItem());
+		addItem(session.createTableAction(Camera.SONAR_TYPE));
 		addItem(createMonitorStyleItem());
 		addItem(createVideoMonitorItem());
 	}
@@ -50,16 +51,6 @@ public class VideoMenu extends IMenu {
 		    new IAction("camera.encoder.type.plural") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new EncoderTypeForm(session));
-			}
-		    } : null;
-	}
-
-	/** Create a camera menu item action */
-	private IAction createCameraItem() {
-		return CameraForm.isPermitted(session) ?
-		    new IAction("camera.title") {
-			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new CameraForm(session));
 			}
 		    } : null;
 	}

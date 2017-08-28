@@ -15,15 +15,16 @@
 package us.mn.state.dot.tms.client;
 
 import java.awt.event.ActionEvent;
+import us.mn.state.dot.tms.GateArmArray;
+import us.mn.state.dot.tms.RampMeter;
+import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.camera.VideoMenu;
 import us.mn.state.dot.tms.client.comm.MaintenanceMenu;
 import us.mn.state.dot.tms.client.detector.DetectorForm;
 import us.mn.state.dot.tms.client.detector.StationForm;
 import us.mn.state.dot.tms.client.dms.SignMenu;
-import us.mn.state.dot.tms.client.gate.GateArmArrayForm;
 import us.mn.state.dot.tms.client.incident.IncidentMenu;
 import us.mn.state.dot.tms.client.lcs.LaneUseMenu;
-import us.mn.state.dot.tms.client.meter.RampMeterForm;
 import us.mn.state.dot.tms.client.schedule.ScheduleForm;
 import us.mn.state.dot.tms.client.system.SystemMenu;
 import us.mn.state.dot.tms.client.weather.WeatherSensorForm;
@@ -57,10 +58,10 @@ public class ViewMenu extends IMenu {
 		addMenu(new LaneUseMenu(session));
 		addItem(createDetectorItem());
 		addItem(createStationItem());
-		addItem(createMeterItem());
+		addItem(session.createTableAction(RampMeter.SONAR_TYPE));
 		addItem(createScheduleItem());
-		addItem(createWeatherItem());
-		addItem(createGateArmItem());
+		addItem(session.createTableAction(WeatherSensor.SONAR_TYPE));
+		addItem(session.createTableAction(GateArmArray.SONAR_TYPE));
 	}
 
 	/** Create a detector menu item action */
@@ -83,42 +84,12 @@ public class ViewMenu extends IMenu {
 		    } : null;
 	}
 
-	/** Create a ramp meter menu item action */
-	private IAction createMeterItem() {
-		return RampMeterForm.isPermitted(session) ?
-		    new IAction("ramp_meter.title") {
-			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new RampMeterForm(session));
-			}
-		    } : null;
-	}
-
 	/** Create a schedule menu item action */
 	private IAction createScheduleItem() {
 		return ScheduleForm.isPermitted(session) ?
 		    new IAction("action.plan.schedule.title") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new ScheduleForm(session));
-			}
-		    } : null;
-	}
-
-	/** Create a weather sensor menu item action */
-	private IAction createWeatherItem() {
-		return WeatherSensorForm.isPermitted(session) ?
-		    new IAction("weather_sensor.title") {
-			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new WeatherSensorForm(session));
-			}
-		    } : null;
-	}
-
-	/** Create a gate arm menu item action */
-	private IAction createGateArmItem() {
-		return GateArmArrayForm.isPermitted(session) ?
-		    new IAction("gate_arm_array.title") {
-			protected void doActionPerformed(ActionEvent e) {
-				desktop.show(new GateArmArrayForm(session));
 			}
 		    } : null;
 	}
