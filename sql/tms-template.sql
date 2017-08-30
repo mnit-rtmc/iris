@@ -2428,7 +2428,7 @@ CREATE VIEW detector_label_view AS
 GRANT SELECT ON detector_label_view TO PUBLIC;
 
 CREATE VIEW detector_fail_view AS SELECT DISTINCT ON (device_id)
-	device_id, description AS fail_reason
+	device_id, description AS fail_reason, event_date AS fail_date
 	FROM event.detector_event de
 	JOIN event.event_description ed ON de.event_desc_id = ed.event_desc_id
 	ORDER BY device_id, event_id DESC;
@@ -2441,7 +2441,7 @@ CREATE VIEW detector_view AS
 	       rnd.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
 	       l.cross_dir, d.lane_number, d.field_length,
 	       ln.description AS lane_type, d.abandoned, d.force_fail,
-	       df.fail_reason, c.condition, d.fake, d.notes
+	       df.fail_reason, df.fail_date, c.condition, d.fake, d.notes
 	FROM (iris.detector d
 	LEFT OUTER JOIN detector_fail_view df
 		ON d.name = df.device_id AND force_fail = 't')
@@ -2775,7 +2775,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.58.0
+database_version	4.59.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
