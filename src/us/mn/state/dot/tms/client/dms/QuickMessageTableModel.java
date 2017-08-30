@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,11 +16,13 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.ArrayList;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -60,8 +62,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				return canUpdate(qm);
 			}
 			public void setValueAt(QuickMessage qm, Object value) {
-				String v = value.toString().trim();
-				qm.setSignGroup(SignGroupHelper.lookup(v));
+				qm.setSignGroup(lookupSignGroup(value));
 			}
 		});
 		cols.add(new ProxyColumn<QuickMessage>("quick.message.multi",
@@ -79,6 +80,18 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 			}
 		});
 		return cols;
+	}
+
+	/** Lookup a sign group */
+	private SignGroup lookupSignGroup(Object value) {
+		String v = value.toString().trim();
+		if (v.length() > 0) {
+			SignGroup sg = SignGroupHelper.lookup(v);
+			if (null == sg)
+				showHint("quick.message.sign.group.hint");
+			return sg;
+		} else
+			return null;
 	}
 
 	/** Create a new table model.
