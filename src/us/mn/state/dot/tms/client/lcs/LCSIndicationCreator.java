@@ -50,18 +50,13 @@ public class LCSIndicationCreator {
 	 */
 	public void create(LCS lcs, int ind) {
 		String name = createUniqueName();
-		if(canAdd(name)) {
+		if (canWrite(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("lcs", lcs);
 			attrs.put("indication", new Integer(ind));
 			indications.createObject(name, attrs);
 		}
-	}
-
-	/** Check if the user can add the named LCS indication */
-	public boolean canAdd(String oname) {
-		return session.canAdd(LCSIndication.SONAR_TYPE, oname);
 	}
 
 	/** Check if the user can write the named LCS indication */

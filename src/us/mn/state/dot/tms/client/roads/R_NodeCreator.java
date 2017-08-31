@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -125,8 +125,8 @@ public class R_NodeCreator implements ProxyListener<GeoLoc> {
 
 	/** Check if the user can add the named r_node */
 	public boolean canAdd(String oname) {
-		return session.canAdd(GeoLoc.SONAR_TYPE, oname) &&
-		       session.canAdd(R_Node.SONAR_TYPE, oname);
+		return session.canWrite(GeoLoc.SONAR_TYPE, oname) &&
+		       session.canWrite(R_Node.SONAR_TYPE, oname);
 	}
 
 	/** Called when a new GeoLoc is added */

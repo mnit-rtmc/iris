@@ -126,7 +126,7 @@ public class PresetModel extends AbstractTableModel {
 			return c != null;
 		}
 		public boolean isEditable(CameraPreset c) {
-			return ((c == null) && canAdd())
+			return ((c == null) && canWrite())
 			    || ((c != null) && canWrite(c));
 		}
 	};
@@ -228,7 +228,7 @@ public class PresetModel extends AbstractTableModel {
 	 * @param pn Preset number */
 	private void createPreset(int pn) {
 		String name = createUniqueName();
-		if (canAdd(name)) {
+		if (canWrite(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("camera", camera);
@@ -326,20 +326,20 @@ public class PresetModel extends AbstractTableModel {
 		return -1;
 	}
 
-	/** Check if the user can add a proxy */
-	public boolean canAdd(String n) {
-		String tname = getSonarType();
-		return (tname != null) ? session.canAdd(tname, n) : false;
-	}
-
-	/** Check if the user can add a proxy */
-	public boolean canAdd() {
-		return canAdd("oname");
-	}
-
 	/** Get the SONAR type name */
 	private String getSonarType() {
 		return CameraPreset.SONAR_TYPE;
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canWrite(String n) {
+		String tname = getSonarType();
+		return (tname != null) ? session.canWrite(tname, n) : false;
+	}
+
+	/** Check if the user can add a proxy */
+	public boolean canWrite() {
+		return canWrite("oname");
 	}
 
 	/** Check if the user can write a proxy */

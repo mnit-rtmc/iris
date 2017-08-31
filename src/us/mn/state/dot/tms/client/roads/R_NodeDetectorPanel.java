@@ -242,12 +242,13 @@ public class R_NodeDetectorPanel extends JPanel {
 
 	/** Test if the user can add a detector */
 	private boolean canAddDetector(R_Node n) {
-		return n != null && session.canAdd(Detector.SONAR_TYPE);
+		return n != null && session.canWrite(Detector.SONAR_TYPE);
 	}
 
 	/** Test if the user can add a detector */
 	private boolean canAddDetector(String n) {
-		return n.length() > 0 && session.canAdd(Detector.SONAR_TYPE, n);
+		return (n.length() > 0)
+		     && session.canWrite(Detector.SONAR_TYPE, n);
 	}
 
 	/** Test if the user can update a detector r_node association */

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -226,11 +226,12 @@ public class StoreQuickMessageForm extends AbstractForm {
 		String name = getNameTrimmed();
 		SignGroup group = getSignGroup();
 		String multiNorm = getMulti();
-		boolean canAdd = session.canAdd(QuickMessage.SONAR_TYPE, name);
+		boolean canWrite = session.canWrite(QuickMessage.SONAR_TYPE,
+			name);
 		boolean nameOk = !("".equals(name));
 		boolean groupOk = (group != null);
 		boolean multiOk = !("".equals(multiNorm));
-		if (canAdd && nameOk && groupOk && multiOk)
+		if (canWrite && nameOk && groupOk && multiOk)
 			store_btn.setEnabled(true);
 		else
 			store_btn.setEnabled(false);

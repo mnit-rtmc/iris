@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -74,11 +74,6 @@ public class SignTextCreator {
 	/** Check if the user is permitted to add the named sign text */
 	public boolean isAddPermitted(String name) {
 		return session.isAddPermitted(SignText.SONAR_TYPE, name);
-	}
-
-	/** Check if the user can add the named sign text */
-	public boolean canAddSignText(String name) {
-		return session.canAdd(SignText.SONAR_TYPE, name);
 	}
 
 	/**

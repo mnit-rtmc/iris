@@ -328,8 +328,8 @@ public class DayPlanPanel extends JPanel {
 
 	/** Update the button panel */
 	private void updateButtonPanel() {
-		add_plan.setEnabled(canAdd());
-		del_plan.setEnabled(canRemove(day_lst.getSelectedValue()));
+		add_plan.setEnabled(canWrite());
+		del_plan.setEnabled(canWrite(day_lst.getSelectedValue()));
 	}
 
 	/** Update the calendar widget */
@@ -355,7 +355,7 @@ public class DayPlanPanel extends JPanel {
 	private void createDayPlan() {
 		String name = add_txt.getText().trim();
 		add_txt.setText("");
-		if (name.length() > 0 && canAdd(name))
+		if (name.length() > 0 && canWrite(name))
 			cache.createObject(name);
 	}
 
@@ -366,23 +366,18 @@ public class DayPlanPanel extends JPanel {
 			dp.destroy();
 	}
 
-	/** Check if the user can add */
-	public boolean canAdd() {
-		return canAdd("oname");
-	}
-
-	/** Check if the user can add */
-	private boolean canAdd(String oname) {
-		return session.canAdd(DayPlan.SONAR_TYPE, oname);
+	/** Check if the user can write */
+	public boolean canWrite() {
+		return canWrite("oname");
 	}
 
 	/** Check if the user can write */
-	public boolean canWrite() {
-		return session.canWrite(DayPlan.SONAR_TYPE, "aname");
+	private boolean canWrite(String oname) {
+		return session.canWrite(DayPlan.SONAR_TYPE, oname);
 	}
 
-	/** Check if the user can remove a day plan */
-	public boolean canRemove(DayPlan dp) {
+	/** Check if the user can write a day plan */
+	public boolean canWrite(DayPlan dp) {
 		return session.canWrite(dp);
 	}
 }

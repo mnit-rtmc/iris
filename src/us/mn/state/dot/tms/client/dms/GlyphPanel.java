@@ -143,7 +143,7 @@ public class GlyphPanel extends JPanel {
 	private void updateButtonPanel() {
 		GlyphInfo gi = ginfo;
 		BitmapGraphic bg = bmap;
-		boolean e = fontHeight() > 0 && canAddAndUpdate();
+		boolean e = (fontHeight() > 0) && canWriteGlyph();
 		narrow_btn.setEnabled(e && bg.getWidth() > 0);
 		widen_btn.setEnabled(e && bg.getWidth() < MAX_GLYPH_WIDTH);
 		apply_btn.setEnabled(e);
@@ -241,9 +241,8 @@ public class GlyphPanel extends JPanel {
 	}
 
 	/** Check if the user can write a glyph */
-	private boolean canAddAndUpdate() {
-		return session.canAdd(Glyph.SONAR_TYPE) &&
-		       session.canAdd(Graphic.SONAR_TYPE) &&
+	private boolean canWriteGlyph() {
+		return session.canWrite(Glyph.SONAR_TYPE) &&
 		       session.canWrite(Graphic.SONAR_TYPE, "width") &&
 		       session.canWrite(Graphic.SONAR_TYPE, "pixels");
 	}

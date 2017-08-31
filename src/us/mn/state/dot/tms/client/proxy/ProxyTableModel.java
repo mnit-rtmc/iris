@@ -323,7 +323,7 @@ abstract public class ProxyTableModel<T extends SonarObject>
 	public boolean canAdd(String n) {
 		String tname = descriptor.tname;
 		if (tname != null)
-			return session.canAdd(tname, n);
+			return session.canWrite(tname, n);
 		else
 			return false;
 	}

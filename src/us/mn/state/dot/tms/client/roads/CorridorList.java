@@ -446,7 +446,7 @@ public class CorridorList extends IPanel {
 	/** Update the enabled state of add and delete buttons */
 	private void updateButtonPanel() {
 		R_Node n = getSelectedNode();
-		add_node.setEnabled(canAdd());
+		add_node.setEnabled(canWrite());
 		delete_node.setEnabled(canRemove(n));
 	}
 
@@ -515,9 +515,9 @@ public class CorridorList extends IPanel {
 		return sel_mdl.getSingleSelection();
 	}
 
-	/** Test if a new r_node can be added */
-	private boolean canAdd() {
-		return session.canAdd(R_Node.SONAR_TYPE);
+	/** Test if a new r_node can be written */
+	private boolean canWrite() {
+		return session.canWrite(R_Node.SONAR_TYPE);
 	}
 
 	/** Test if an r_node can be removed */
