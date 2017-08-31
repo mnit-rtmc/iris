@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ public class LCSTableModel extends ProxyTableModel<LCS> {
 	/** Check if the user can remove a proxy */
 	@Override
 	public boolean canRemove(LCS proxy) {
-		return session.canRemove(proxy) &&
+		return session.canWrite(proxy) &&
 		      (getIndex(proxy) == getRowCount() - 1);
 	}
 }

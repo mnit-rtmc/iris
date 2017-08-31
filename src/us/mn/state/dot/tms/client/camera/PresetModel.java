@@ -127,7 +127,7 @@ public class PresetModel extends AbstractTableModel {
 		}
 		public boolean isEditable(CameraPreset c) {
 			return ((c == null) && canAdd())
-			    || ((c != null) && canRemove(c));
+			    || ((c != null) && canWrite(c));
 		}
 	};
 
@@ -251,7 +251,7 @@ public class PresetModel extends AbstractTableModel {
 	/** Delete the specified row */
 	private void destroyPreset(int row) {
 		CameraPreset proxy = getRowProxy(row);
-		if (canRemove(proxy))
+		if (canWrite(proxy))
 			proxy.destroy();
 	}
 
@@ -350,10 +350,5 @@ public class PresetModel extends AbstractTableModel {
 	/** Check if the user can write a proxy */
 	public boolean canWrite(CameraPreset proxy, String aname) {
 		return session.canWrite(proxy, aname);
-	}
-
-	/** Check if the user can remove a proxy */
-	public boolean canRemove(CameraPreset proxy) {
-		return session.canRemove(proxy);
 	}
 }

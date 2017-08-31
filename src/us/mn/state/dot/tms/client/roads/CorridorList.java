@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -522,6 +522,6 @@ public class CorridorList extends IPanel {
 
 	/** Test if an r_node can be removed */
 	private boolean canRemove(R_Node n) {
-		return n != null && session.canRemove(n);
+		return n != null && session.canWrite(n);
 	}
 }

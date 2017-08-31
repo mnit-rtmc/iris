@@ -345,6 +345,6 @@ abstract public class ProxyTableModel<T extends SonarObject>
 
 	/** Check if the user can remove a proxy */
 	public boolean canRemove(T proxy) {
-		return session.canRemove(proxy);
+		return canWrite(proxy);
 	}
 }

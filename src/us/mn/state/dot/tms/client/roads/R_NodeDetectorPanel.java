@@ -257,6 +257,6 @@ public class R_NodeDetectorPanel extends JPanel {
 
 	/** Test if the user can remove a detector */
 	private boolean canRemoveDetector(Detector d) {
-		return session.canRemove(d) && d.getController() == null;
+		return session.canWrite(d) && d.getController() == null;
 	}
 }

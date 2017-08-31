@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2013  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,9 +64,9 @@ public class LCSIndicationCreator {
 		return session.canAdd(LCSIndication.SONAR_TYPE, oname);
 	}
 
-	/** Check if the user can update the named LCS indication */
-	public boolean canRemove(String oname) {
-		return session.canRemove(LCSIndication.SONAR_TYPE, oname);
+	/** Check if the user can write the named LCS indication */
+	public boolean canWrite(String oname) {
+		return session.canWrite(LCSIndication.SONAR_TYPE, oname);
 	}
 
 	/** Create a LCSIndication name */

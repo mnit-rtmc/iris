@@ -383,6 +383,6 @@ public class DayPlanPanel extends JPanel {
 
 	/** Check if the user can remove a day plan */
 	public boolean canRemove(DayPlan dp) {
-		return session.canRemove(dp);
+		return session.canWrite(dp);
 	}
 }

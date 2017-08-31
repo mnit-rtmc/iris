@@ -419,21 +419,6 @@ public class Session {
 		return canWrite(proxy, aname, true);
 	}
 
-	/** Check if the user can remove a proxy */
-	private boolean canRemove(Name name, boolean can_edit) {
-		return can_edit && namespace.canWrite(name, user);
-	}
-
-	/** Check if the user can remove a proxy */
-	public boolean canRemove(SonarObject proxy) {
-		return proxy != null && canRemove(new Name(proxy), edit_mode);
-	}
-
-	/** Check if the user can remove a proxy */
-	public boolean canRemove(String tname, String oname) {
-		return canRemove(new Name(tname, oname), edit_mode);
-	}
-
 	/** Dispose of the session */
 	public void dispose() {
 		listeners.clear();

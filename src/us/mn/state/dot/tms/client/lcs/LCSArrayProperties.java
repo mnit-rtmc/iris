@@ -283,17 +283,16 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	private void selectLCS(LCS lcs) {
 		HashMap<Integer, LCSIndication> ind = lookupIndications(lcs);
 		String name = lcs.getName();
-		boolean can_add = creator.canAdd(name);
-		boolean can_remove = creator.canRemove(name);
+		boolean can_write = creator.canWrite(name);
 		for (LaneUseIndication i: LaneUseIndication.values()) {
 			JCheckBox btn = indications.get(i.ordinal());
 			if (ind.containsKey(i.ordinal())) {
 				LCSIndication li = ind.get(i.ordinal());
 				boolean no_c = li.getController() == null;
-				btn.setEnabled(can_remove && no_c);
+				btn.setEnabled(can_write && no_c);
 				btn.setSelected(true);
 			} else {
-				btn.setEnabled(can_add);
+				btn.setEnabled(can_write);
 				btn.setSelected(false);
 			}
 		}

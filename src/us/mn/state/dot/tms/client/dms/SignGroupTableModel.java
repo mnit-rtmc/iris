@@ -167,7 +167,7 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 
 	/** Check if the user is allowed to add / destroy a DMS sign group */
 	private boolean canEditDmsSignGroup(SignGroup g) {
-		return g != null && canAddAndRemove(createDmsSignGroupName(g));
+		return g != null && canWriteDmsSignGroup(g);
 	}
 
 	/** Create a DMS sign group name */
@@ -175,10 +175,10 @@ public class SignGroupTableModel extends ProxyTableModel<SignGroup> {
 		return sg.getName() + "_" + dms.getName();
 	}
 
-	/** Check if the user can add and remove the specified name */
-	private boolean canAddAndRemove(String oname) {
-		return session.canAdd(DmsSignGroup.SONAR_TYPE, oname) &&
-		       session.canRemove(DmsSignGroup.SONAR_TYPE, oname);
+	/** Check if the user can write a dms sign group */
+	private boolean canWriteDmsSignGroup(SignGroup sg) {
+		String oname = createDmsSignGroupName(sg);
+		return session.canWrite(DmsSignGroup.SONAR_TYPE, oname);
 	}
 
 	/** Create a new sign group */
