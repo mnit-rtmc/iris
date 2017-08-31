@@ -200,7 +200,7 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
 		createUpdateJobs();
-		settings.setEnabled(isUpdatePermitted("deviceRequest"));
+		settings.setEnabled(isWritePermitted("deviceRequest"));
 	}
 
 	/** Create the location panel */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2016  Minnesota Department of Transportation
+ * Copyright (C) 2014-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,6 +66,6 @@ public class CameraPresetAction extends ProxyAction<CameraPreset> {
 
 	/** Can presets be recalled */
 	private boolean canRecallPreset(Camera c) {
-		return session.isUpdatePermitted(c, "recallPreset");
+		return session.isWritePermitted(c, "recallPreset");
 	}
 }

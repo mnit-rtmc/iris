@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,6 +40,6 @@ public class FilteredMonitorModel extends ProxyListModel<VideoMonitor> {
 	/** Check if a proxy is included in the list */
 	@Override
 	protected boolean check(VideoMonitor proxy) {
-		return session.isUpdatePermitted(proxy, "camera");
+		return session.isWritePermitted(proxy, "camera");
 	}
 }

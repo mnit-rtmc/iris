@@ -192,7 +192,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		super(I18N.get("ramp_meter") + ": ", s, meter);
 		loc_pnl = new LocationPanel(s);
 		lock_action = new LockMeterAction(meter, lock_cbx,
-			isUpdatePermitted("mLock"));
+			isWritePermitted("mLock"));
 		preset_mdl = new IComboBoxModel<CameraPreset>(
 			state.getCamCache().getPresetModel());
 		beacon_mdl = new IComboBoxModel<Beacon>(
@@ -214,7 +214,7 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
 		createUpdateJobs();
-		settings.setEnabled(isUpdatePermitted("deviceRequest"));
+		settings.setEnabled(isWritePermitted("deviceRequest"));
 		super.initialize();
 	}
 

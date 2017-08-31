@@ -28,7 +28,7 @@ public class MonitorStyleForm extends ProxyTableForm<MonitorStyle> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.isUpdatePermitted(MonitorStyle.SONAR_TYPE);
+		return s.isWritePermitted(MonitorStyle.SONAR_TYPE);
 	}
 
 	/** Create a new monitor style form */

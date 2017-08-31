@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -151,7 +151,7 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		if (a == null) {
 			phase_cbx.setAction(null);
 			phase_cbx.setModel(createPhaseModel(ap));
-			phase_cbx.setEnabled(isUpdatePermitted(ap));
+			phase_cbx.setEnabled(isWritePermitted(ap));
 		}
 		if (a == null || a.equals("name"))
 			name_lbl.setText(ap.getName());
@@ -303,8 +303,8 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 	}
 
 	/** Check if the user is permitted to update the given action plan */
-	private boolean isUpdatePermitted(ActionPlan ap) {
-		return session.isUpdatePermitted(ap, "phase") && ap.getActive();
+	private boolean isWritePermitted(ActionPlan ap) {
+		return session.isWritePermitted(ap, "phase") && ap.getActive();
 	}
 
 	/** Clear the proxy view */

@@ -80,6 +80,6 @@ public class VideoMonitorPanel extends ProxyTablePanel<VideoMonitor> {
 
 	/** Check if the user can make device requests */
 	private boolean canRequest(VideoMonitor vm) {
-		return session.isUpdatePermitted(vm, "deviceRequest");
+		return session.isWritePermitted(vm, "deviceRequest");
 	}
 }

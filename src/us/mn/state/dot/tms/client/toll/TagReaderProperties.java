@@ -261,6 +261,6 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 
 	/** Check if the user can make device requests */
 	private boolean canRequest() {
-		return isUpdatePermitted("deviceRequest");
+		return isWritePermitted("deviceRequest");
 	}
 }

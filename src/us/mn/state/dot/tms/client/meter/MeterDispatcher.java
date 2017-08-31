@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -195,7 +195,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 				on_btn.setSelected(true);
 			else
 				off_btn.setSelected(true);
-			boolean up = isUpdatePermitted(rm) && rt != null;
+			boolean up = isWritePermitted(rm) && rt != null;
 			shrink_btn.setEnabled(up);
 			grow_btn.setEnabled(up);
 		}
@@ -208,7 +208,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 			lock_cbx.setAction(null);
 			lock_cbx.setSelectedIndex(getMLock(rm));
 			lock_cbx.setAction(new LockMeterAction(rm, lock_cbx,
-				isUpdatePermitted(rm)));
+				isWritePermitted(rm)));
 		}
 		if(a == null || a.equals("styles")) {
 			if(ItemStyle.FAILED.checkBit(rm.getStyles())) {
@@ -223,7 +223,7 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 
 	/** Update the ramp meter config */
 	private void updateConfig(RampMeter rm) {
-		boolean update = isUpdatePermitted(rm);
+		boolean update = isWritePermitted(rm);
 		setPresetAction(rm);
 		shrink_btn.setAction(new ShrinkQueueAction(rm, update));
 		grow_btn.setAction(new GrowQueueAction(rm, update));
@@ -265,8 +265,8 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 	}
 
 	/** Check if the user is permitted to update the given ramp meter */
-	private boolean isUpdatePermitted(RampMeter rm) {
-		return session.isUpdatePermitted(rm, "rateNext") &&
-		       session.isUpdatePermitted(rm, "mLock");
+	private boolean isWritePermitted(RampMeter rm) {
+		return session.isWritePermitted(rm, "rateNext") &&
+		       session.isWritePermitted(rm, "mLock");
 	}
 }

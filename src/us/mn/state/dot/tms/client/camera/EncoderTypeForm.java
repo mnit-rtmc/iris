@@ -28,7 +28,7 @@ public class EncoderTypeForm extends ProxyTableForm<EncoderType> {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.isUpdatePermitted(EncoderType.SONAR_TYPE);
+		return s.isWritePermitted(EncoderType.SONAR_TYPE);
 	}
 
 	/** Create a new encoder type form */

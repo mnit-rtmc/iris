@@ -72,7 +72,7 @@ public class MeterManager extends DeviceManager<RampMeter> {
 	/** Fill single selection popup */
 	@Override
 	protected void fillPopupSingle(JPopupMenu p, RampMeter meter) {
-		if (session.isUpdatePermitted(meter)) {
+		if (session.isWritePermitted(meter)) {
 			if (meter.getRate() != null) {
 				p.add(new ShrinkQueueAction(meter, true));
 				p.add(new GrowQueueAction(meter, true));

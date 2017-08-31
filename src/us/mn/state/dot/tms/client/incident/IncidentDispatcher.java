@@ -503,7 +503,7 @@ public class IncidentDispatcher extends IPanel
 			clear_inc.setEnabled(false);
 			edit_inc.setEnabled(false);
 		} else {
-			boolean update = isUpdatePermitted(inc);
+			boolean update = isWritePermitted(inc);
 			detail_cbx.setEnabled(false);
 			camera_cbx.setEnabled(false);
 			cam_cards.show(cam_pnl, CAMERA_BTN);
@@ -581,8 +581,8 @@ public class IncidentDispatcher extends IPanel
 	}
 
 	/** Check if the user is permitted to update the given incident */
-	private boolean isUpdatePermitted(Incident inc) {
-		return session.isUpdatePermitted(inc);
+	private boolean isWritePermitted(Incident inc) {
+		return session.isWritePermitted(inc);
 	}
 
 	/** Check if the user can deploy signs for an incident */
@@ -603,6 +603,6 @@ public class IncidentDispatcher extends IPanel
 
 	/** Check if the user is permitted to update an LCS array attribute */
 	private boolean isLcsUpdatePermitted(String a) {
-		return session.isUpdatePermitted(LCSArray.SONAR_TYPE, a);
+		return session.isWritePermitted(LCSArray.SONAR_TYPE, "oname",a);
 	}
 }

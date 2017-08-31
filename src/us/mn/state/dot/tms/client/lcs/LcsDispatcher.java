@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -221,7 +221,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 			// These operations can be very slow -- discourage
 			// users from sending multiple operations at once
 			// RE: None -- see server.DeviceImpl.getOperation()
-			send.setEnabled(isUpdatePermitted(la) &&
+			send.setEnabled(isWritePermitted(la) &&
 				op.equals("None"));
 		}
 		if (a == null || a.equals("lcsLock")) {
@@ -247,7 +247,7 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 
 	/** Update the LCS array config */
 	private void updateConfig(LCSArray la) {
-		boolean update = isUpdatePermitted(la);
+		boolean update = isWritePermitted(la);
 		lane_config.setConfiguration(manager.laneConfiguration(la));
 		ind_selector.setLCSArray(la);
 		ind_selector.setEnabled(update);
@@ -350,13 +350,13 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 	}
 
 	/** Check if the user is permitted to update the given LCS array */
-	private boolean isUpdatePermitted(LCSArray la) {
-		return isUpdatePermitted(la, "indicationsNext") &&
-		       isUpdatePermitted(la, "ownerNext");
+	private boolean isWritePermitted(LCSArray la) {
+		return isWritePermitted(la, "indicationsNext") &&
+		       isWritePermitted(la, "ownerNext");
 	}
 
 	/** Check if the user is permitted to update a given LCS attribute */
-	private boolean isUpdatePermitted(LCSArray la, String aname) {
-		return session.isUpdatePermitted(la, aname);
+	private boolean isWritePermitted(LCSArray la, String aname) {
+		return session.isWritePermitted(la, aname);
 	}
 }

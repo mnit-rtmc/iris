@@ -135,7 +135,7 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 		tab.add(I18N.get("device.status"), createStatusPanel());
 		add(tab);
 		createUpdateJobs();
-		settings.setEnabled(isUpdatePermitted("deviceRequest"));
+		settings.setEnabled(isWritePermitted("deviceRequest"));
 		super.initialize();
 	}
 

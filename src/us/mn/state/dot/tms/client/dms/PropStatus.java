@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -228,13 +228,13 @@ public class PropStatus extends IPanel {
 		}
 	}
 
-	/** Check if the user is permitted to update an attribute */
-	private boolean isUpdatePermitted(String aname) {
-		return session.isUpdatePermitted(dms, aname);
+	/** Check if the user is permitted to write an attribute */
+	private boolean isWritePermitted(String aname) {
+		return session.isWritePermitted(dms, aname);
 	}
 
 	/** Check if the user can make device requests */
 	private boolean canRequest() {
-		return isUpdatePermitted("deviceRequest");
+		return isWritePermitted("deviceRequest");
 	}
 }

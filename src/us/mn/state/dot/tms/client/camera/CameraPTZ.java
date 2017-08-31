@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2017  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -54,22 +54,22 @@ public class CameraPTZ {
 
 	/** Can a ptz control be made */
 	public boolean canControlPtz() {
-		return session.isUpdatePermitted(camera, "ptz");
+		return session.isWritePermitted(camera, "ptz");
 	}
 
 	/** Can a device request be made */
 	public boolean canRequestDevice() {
-		return session.isUpdatePermitted(camera, "deviceRequest");
+		return session.isWritePermitted(camera, "deviceRequest");
 	}
 
 	/** Can presets be recalled */
 	public boolean canRecallPreset() {
-		return session.isUpdatePermitted(camera, "recallPreset");
+		return session.isWritePermitted(camera, "recallPreset");
 	}
 
 	/** Can presets be stored */
 	public boolean canStorePreset() {
-		return session.isUpdatePermitted(camera, "storePreset");
+		return session.isWritePermitted(camera, "storePreset");
 	}
 
 	/**

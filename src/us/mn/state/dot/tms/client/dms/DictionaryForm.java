@@ -29,7 +29,7 @@ public class DictionaryForm extends AbstractForm {
 
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
-		return s.isUpdatePermitted(Word.SONAR_TYPE);
+		return s.isWritePermitted(Word.SONAR_TYPE);
 	}
 
 	/** Allowed words panel */

@@ -255,6 +255,19 @@ public class Session {
 		return null;
 	}
 
+	/** Check if the user can read a type */
+	public boolean canRead(String tname) {
+		return namespace.canRead(new Name(tname), user);
+	}
+
+	/** Check if the user is permitted to write an object, regardless of
+	 * EDIT mode.
+	 * @param tname Type name of object to check.
+	 * @return true if user can write the object */
+	public boolean isWritePermitted(String tname) {
+		return canWrite(new Name(tname, "oname"), true);
+	}
+
 	/** Check if the user is permitted to write an object, regardless of
 	 * EDIT mode.
 	 * @param tname Type name of object to check.
@@ -264,17 +277,32 @@ public class Session {
 		return canWrite(new Name(tname, oname), true);
 	}
 
-	/** Check if the user is permitted to write an object, regardless of
+	/** Check if the user is permitted to write an attribute, regardless of
 	 * EDIT mode.
-	 * @param tname Type name of object to check.
-	 * @return true if user can add the object */
-	public boolean isWritePermitted(String tname) {
-		return canWrite(tname, "oname", true);
+	 * @param tname Type name of attribute to check.
+	 * @param aname Name of attribute to check.
+	 * @return true if user can write the attribute */
+	public boolean isWritePermitted(String tname, String oname,
+		String aname)
+	{
+		return canWrite(new Name(tname, oname, aname), true);
 	}
 
-	/** Check if the user can read a type */
-	public boolean canRead(String tname) {
-		return namespace.canRead(new Name(tname), user);
+	/** Check if the user is permitted to write a proxy, regardless of EDIT
+	 * mode.
+	 * @param proxy Proxy object to check.
+	 * @return true if user can write the attribute */
+	public boolean isWritePermitted(SonarObject proxy) {
+		return canWrite(proxy, true);
+	}
+
+	/** Check if the user is permitted to write a proxy attribute,
+	 * regardless of EDIT mode.
+	 * @param proxy Proxy object to check.
+	 * @param aname Name of attribute to check.
+	 * @return true if user can write the attribute */
+	public boolean isWritePermitted(SonarObject proxy, String aname) {
+		return canWrite(proxy, aname, true);
 	}
 
 	/** Check if the user can write an attribute.
@@ -350,40 +378,6 @@ public class Session {
 	 * @return true if user can write the attribute */
 	public boolean canWrite(SonarObject proxy, String aname) {
 		return canWrite(proxy, aname, edit_mode);
-	}
-
-	/** Check if the user is permitted to update an attribute, regardless of
-	 * EDIT mode.
-	 * @param tname Type name of attribute to check.
-	 * @param aname Name of attribute to check.
-	 * @return true if user can write the attribute */
-	public boolean isUpdatePermitted(String tname, String aname) {
-		return canWrite(new Name(tname, "oname", aname), true);
-	}
-
-	/** Check if the user is permitted to update an attribute, regardless of
-	 * EDIT mode.
-	 * @param tname Type name of attribute to check.
-	 * @return true if user can write the attribute */
-	public boolean isUpdatePermitted(String tname) {
-		return canWrite(tname, true);
-	}
-
-	/** Check if the user is permitted to update a proxy attribute,
-	 * regardless of EDIT mode.
-	 * @param proxy Proxy object to check.
-	 * @return true if user can write the attribute */
-	public boolean isUpdatePermitted(SonarObject proxy) {
-		return canWrite(proxy, true);
-	}
-
-	/** Check if the user is permitted to update a proxy attribute,
-	 * regardless of EDIT mode.
-	 * @param proxy Proxy object to check.
-	 * @param aname Name of attribute to check.
-	 * @return true if user can write the attribute */
-	public boolean isUpdatePermitted(SonarObject proxy, String aname) {
-		return canWrite(proxy, aname, true);
 	}
 
 	/** Dispose of the session */

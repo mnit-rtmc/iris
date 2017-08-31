@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -507,12 +507,12 @@ public class DMSDispatcher extends JPanel {
 	/** Can a message be sent to the specified DMS? */
 	public boolean canSend(DMS dms) {
 		return creator.canCreate() &&
-		       isUpdatePermitted(dms, "msgUser");
+		       isWritePermitted(dms, "msgUser");
 	}
 
-	/** Is DMS attribute update permitted? */
-	private boolean isUpdatePermitted(DMS dms, String a) {
-		return session.isUpdatePermitted(dms, a);
+	/** Is DMS attribute write permitted? */
+	private boolean isWritePermitted(DMS dms, String a) {
+		return session.isWritePermitted(dms, a);
 	}
 
 	/** Can a device request be sent to all selected DMS? */
@@ -529,12 +529,12 @@ public class DMSDispatcher extends JPanel {
 
 	/** Can a device request be sent to the specified DMS? */
 	public boolean canRequest(DMS dms) {
-		return isUpdatePermitted(dms, "deviceRequest");
+		return isWritePermitted(dms, "deviceRequest");
 	}
 
 	/** Check if AWS is allowed and user has permission to change */
 	public boolean isAwsPermitted(DMS dms) {
 		return dms.getAwsAllowed() &&
-		       isUpdatePermitted(dms, "awsControlled");
+		       isWritePermitted(dms, "awsControlled");
 	}
 }

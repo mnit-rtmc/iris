@@ -123,8 +123,8 @@ abstract public class SonarObjectForm<T extends SonarObject>
 		return session.canWrite(proxy, aname);
 	}
 
-	/** Check if the user is permitted to update an attribute */
-	protected boolean isUpdatePermitted(String aname) {
-		return session.isUpdatePermitted(proxy, aname);
+	/** Check if the user is permitted to write an attribute */
+	protected boolean isWritePermitted(String aname) {
+		return session.isWritePermitted(proxy, aname);
 	}
 }
