@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2016  Minnesota Department of Transportation
+ * Copyright (C) 2004-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -160,9 +160,9 @@ public class BeaconProperties extends SonarObjectForm<Beacon> {
 	@Override
 	protected void updateEditMode() {
 		loc_pnl.updateEditMode();
-		notes_txt.setEnabled(canUpdate("notes"));
-		preset_act.setEnabled(canUpdate("preset"));
-		message_txt.setEnabled(canUpdate("message"));
+		notes_txt.setEnabled(canWrite("notes"));
+		preset_act.setEnabled(canWrite("preset"));
+		message_txt.setEnabled(canWrite("message"));
 	}
 
 	/** Update one attribute on the form */

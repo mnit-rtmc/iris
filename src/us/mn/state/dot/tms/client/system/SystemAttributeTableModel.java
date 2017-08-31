@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2016  Minnesota Department of Transportation
+ * Copyright (C) 2005-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ public class SystemAttributeTableModel extends ProxyTableModel<SystemAttribute>
 				return sa.getValue();
 			}
 			public boolean isEditable(SystemAttribute sa) {
-				return canUpdate(sa);
+				return canWrite(sa);
 			}
 			public void setValueAt(SystemAttribute sa,Object value){
 				String v = value.toString();

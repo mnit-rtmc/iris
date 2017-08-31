@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -273,9 +273,9 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 		return p;
 	}
 
-	/** Check if the user can update the cabinet */
-	private boolean canUpdateCabinet(String a) {
-		return session.canUpdate(cabinet, a);
+	/** Check if the user can write the cabinet */
+	private boolean canWriteCabinet(String a) {
+		return session.canWrite(cabinet, a);
 	}
 
 	/** Can a controller request be made */
@@ -379,13 +379,13 @@ public class ControllerForm extends SonarObjectForm<Controller> {
 	@Override
 	protected void updateEditMode() {
 		loc_pnl.updateEditMode();
-		password.setEnabled(canUpdate("password"));
-		clear_pwd.setEnabled(canUpdate("password"));
-		comm_link_act.setEnabled(canUpdate("commLink"));
-		drop_spn.setEnabled(canUpdate("drop"));
-		notes_txt.setEnabled(canUpdate("notes"));
-		condition_act.setEnabled(canUpdate("condition"));
-		cab_style_act.setEnabled(canUpdateCabinet("style"));
+		password.setEnabled(canWrite("password"));
+		clear_pwd.setEnabled(canWrite("password"));
+		comm_link_act.setEnabled(canWrite("commLink"));
+		drop_spn.setEnabled(canWrite("drop"));
+		notes_txt.setEnabled(canWrite("notes"));
+		condition_act.setEnabled(canWrite("condition"));
+		cab_style_act.setEnabled(canWriteCabinet("style"));
 	}
 
 	/** Update one attribute on the form */

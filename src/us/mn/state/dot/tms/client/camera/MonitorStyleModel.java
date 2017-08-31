@@ -55,7 +55,7 @@ public class MonitorStyleModel extends ProxyTableModel<MonitorStyle> {
 				return ms.getForceAspect();
 			}
 			public boolean isEditable(MonitorStyle ms) {
-				return canUpdate(ms, "forceAspect");
+				return canWrite(ms, "forceAspect");
 			}
 			public void setValueAt(MonitorStyle ms, Object value) {
 				if (value instanceof Boolean)
@@ -67,7 +67,7 @@ public class MonitorStyleModel extends ProxyTableModel<MonitorStyle> {
 				return ms.getAccent();
 			}
 			public boolean isEditable(MonitorStyle ms) {
-				return canUpdate(ms, "accent");
+				return canWrite(ms, "accent");
 			}
 			public void setValueAt(MonitorStyle ms, Object value) {
 				ms.setAccent(value.toString());
@@ -80,7 +80,7 @@ public class MonitorStyleModel extends ProxyTableModel<MonitorStyle> {
 				return ms.getFontSz();
 			}
 			public boolean isEditable(MonitorStyle ms) {
-				return canUpdate(ms, "fontSz");
+				return canWrite(ms, "fontSz");
 			}
 			public void setValueAt(MonitorStyle ms, Object value) {
 				if (value instanceof Integer)

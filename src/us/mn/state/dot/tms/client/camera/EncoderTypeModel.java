@@ -59,7 +59,7 @@ public class EncoderTypeModel extends ProxyTableModel<EncoderType> {
 				return Encoding.fromOrdinal(et.getEncoding());
 			}
 			public boolean isEditable(EncoderType et) {
-				return canUpdate(et, "encoding");
+				return canWrite(et, "encoding");
 			}
 			public void setValueAt(EncoderType et, Object value) {
 				if (value instanceof Encoding) {
@@ -79,7 +79,7 @@ public class EncoderTypeModel extends ProxyTableModel<EncoderType> {
 				return et.getUriScheme();
 			}
 			public boolean isEditable(EncoderType et) {
-				return canUpdate(et, "uriScheme");
+				return canWrite(et, "uriScheme");
 			}
 			public void setValueAt(EncoderType et, Object value) {
 				et.setUriScheme(value.toString());
@@ -92,7 +92,7 @@ public class EncoderTypeModel extends ProxyTableModel<EncoderType> {
 				return et.getUriPath();
 			}
 			public boolean isEditable(EncoderType et) {
-				return canUpdate(et, "uriPath");
+				return canWrite(et, "uriPath");
 			}
 			public void setValueAt(EncoderType et, Object value) {
 				et.setUriPath(value.toString());
@@ -105,7 +105,7 @@ public class EncoderTypeModel extends ProxyTableModel<EncoderType> {
 				return et.getLatency();
 			}
 			public boolean isEditable(EncoderType et) {
-				return canUpdate(et, "latency");
+				return canWrite(et, "latency");
 			}
 			public void setValueAt(EncoderType et, Object value) {
 				if (value instanceof Integer)

@@ -159,12 +159,12 @@ public class PropSetup extends IPanel {
 
 	/** Update the edit mode */
 	public void updateEditMode() {
-		cam_num_txt.setEnabled(canUpdate("camNum"));
-		enc_type_act.setEnabled(canUpdate("encoderType"));
-		encoder_txt.setEnabled(canUpdate("encoder"));
-		enc_mcast_txt.setEnabled(canUpdate("encMulticast"));
-		enc_chn_spn.setEnabled(canUpdate("encoderChannel"));
-		publish_chk.setEnabled(canUpdate("publish"));
+		cam_num_txt.setEnabled(canWrite("camNum"));
+		enc_type_act.setEnabled(canWrite("encoderType"));
+		encoder_txt.setEnabled(canWrite("encoder"));
+		enc_mcast_txt.setEnabled(canWrite("encMulticast"));
+		enc_chn_spn.setEnabled(canWrite("encoderChannel"));
+		publish_chk.setEnabled(canWrite("publish"));
 	}
 
 	/** Update one attribute on the form tab */
@@ -185,8 +185,8 @@ public class PropSetup extends IPanel {
 			publish_chk.setSelected(camera.getPublish());
 	}
 
-	/** Check if the user can update an attribute */
-	private boolean canUpdate(String aname) {
-		return session.canUpdate(camera, aname);
+	/** Check if the user can write an attribute */
+	private boolean canWrite(String aname) {
+		return session.canWrite(camera, aname);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return cl.getDescription();
 			}
 			public boolean isEditable(CommLink cl) {
-				return canUpdate(cl, "description");
+				return canWrite(cl, "description");
 			}
 			public void setValueAt(CommLink cl, Object value) {
 				cl.setDescription(value.toString().trim());
@@ -69,7 +69,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return cl.getUri();
 			}
 			public boolean isEditable(CommLink cl) {
-				return canUpdate(cl, "uri");
+				return canWrite(cl, "uri");
 			}
 			public void setValueAt(CommLink cl, Object value) {
 				cl.setUri(value.toString().trim());
@@ -90,7 +90,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 					cl.getProtocol());
 			}
 			public boolean isEditable(CommLink cl) {
-				return canUpdate(cl, "protocol");
+				return canWrite(cl, "protocol");
 			}
 			public void setValueAt(CommLink cl, Object value) {
 				if (value instanceof CommProtocol) {
@@ -111,7 +111,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return cl.getPollEnabled();
 			}
 			public boolean isEditable(CommLink cl) {
-				return canUpdate(cl, "pollEnabled");
+				return canWrite(cl, "pollEnabled");
 			}
 			public void setValueAt(CommLink cl, Object value) {
 				if (value instanceof Boolean)
@@ -128,7 +128,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return p;
 			}
 			public boolean isEditable(CommLink cl) {
-				return canUpdate(cl, "pollPeriod");
+				return canWrite(cl, "pollPeriod");
 			}
 			public void setValueAt(CommLink cl, Object value) {
 				if (value instanceof Interval) {
@@ -146,7 +146,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 				return cl.getTimeout();
 			}
 			public boolean isEditable(CommLink cl) {
-				return canUpdate(cl, "timeout");
+				return canWrite(cl, "timeout");
 			}
 			public void setValueAt(CommLink cl, Object value) {
 				if (value instanceof Integer)

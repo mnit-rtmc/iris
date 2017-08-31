@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 				return p.getTypeN();
 			}
 			public boolean isEditable(Privilege p) {
-				return canUpdate(p);
+				return canWrite(p);
 			}
 			public void setValueAt(Privilege p, Object value) {
 				p.setTypeN(value.toString().trim());
@@ -69,7 +69,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 				return p.getObjN();
 			}
 			public boolean isEditable(Privilege p) {
-				return canUpdate(p);
+				return canWrite(p);
 			}
 			public void setValueAt(Privilege p, Object value) {
 				String v = value.toString().trim();
@@ -81,7 +81,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 				return p.getAttrN();
 			}
 			public boolean isEditable(Privilege p) {
-				return canUpdate(p);
+				return canWrite(p);
 			}
 			public void setValueAt(Privilege p, Object value) {
 				String v = value.toString().trim();
@@ -95,7 +95,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 				return p.getWrite();
 			}
 			public boolean isEditable(Privilege p) {
-				return canUpdate(p);
+				return canWrite(p);
 			}
 			public void setValueAt(Privilege p, Object value) {
 				if (value instanceof Boolean)

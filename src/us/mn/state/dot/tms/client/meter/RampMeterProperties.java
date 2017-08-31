@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -320,16 +320,16 @@ public class RampMeterProperties extends SonarObjectForm<RampMeter> {
 	@Override
 	protected void updateEditMode() {
 		loc_pnl.updateEditMode();
-		notes_txt.setEnabled(canUpdate("notes"));
-		preset_act.setEnabled(canUpdate("preset"));
-		meter_type_act.setEnabled(canUpdate("meterType"));
-		storage_txt.setEnabled(canUpdate("storage"));
-		max_wait_txt.setEnabled(canUpdate("maxWait"));
-		algorithm_act.setEnabled(canUpdate("algorithm"));
-		am_target_txt.setEnabled(canUpdate("amTarget"));
-		pm_target_txt.setEnabled(canUpdate("pmTarget"));
-		beacon_act.setEnabled(canUpdate("beacon"));
-		lock_action.setEnabled(canUpdate("mLock"));
+		notes_txt.setEnabled(canWrite("notes"));
+		preset_act.setEnabled(canWrite("preset"));
+		meter_type_act.setEnabled(canWrite("meterType"));
+		storage_txt.setEnabled(canWrite("storage"));
+		max_wait_txt.setEnabled(canWrite("maxWait"));
+		algorithm_act.setEnabled(canWrite("algorithm"));
+		am_target_txt.setEnabled(canWrite("amTarget"));
+		pm_target_txt.setEnabled(canWrite("pmTarget"));
+		beacon_act.setEnabled(canWrite("beacon"));
+		lock_action.setEnabled(canWrite("mLock"));
 	}
 
 	/** Update one attribute on the form */

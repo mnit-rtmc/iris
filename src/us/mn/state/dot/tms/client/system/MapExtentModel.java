@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 				return me.getLon();
 			}
 			public boolean isEditable(MapExtent me) {
-				return canUpdate(me);
+				return canWrite(me);
 			}
 			public void setValueAt(MapExtent me, Object value) {
 				if(value instanceof Float)
@@ -72,7 +72,7 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 				return me.getLat();
 			}
 			public boolean isEditable(MapExtent me) {
-				return canUpdate(me);
+				return canWrite(me);
 			}
 			public void setValueAt(MapExtent me, Object value) {
 				if(value instanceof Float)
@@ -86,7 +86,7 @@ public class MapExtentModel extends ProxyTableModel<MapExtent> {
 				return me.getZoom();
 			}
 			public boolean isEditable(MapExtent me) {
-				return canUpdate(me);
+				return canWrite(me);
 			}
 			public void setValueAt(MapExtent me, Object value) {
 				if(value instanceof Integer)

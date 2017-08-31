@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2016  Minnesota Department of Transportation
+ * Copyright (C) 2012-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -195,18 +195,18 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 
 	/** Update the edit mode */
 	private void updateEditMode() {
-		f_name_txt.setEnabled(canUpdate("fullName"));
-		boolean cu = canUpdate("password");
+		f_name_txt.setEnabled(canWrite("fullName"));
+		boolean cu = canWrite("password");
 		passwd_txt.setEnabled(cu);
 		change_pwd.setEnabled(cu);
-		dn_txt.setEnabled(canUpdate("dn"));
-		role_act.setEnabled(canUpdate("role"));
-		enabled_chk.setEnabled(canUpdate("enabled"));
+		dn_txt.setEnabled(canWrite("dn"));
+		role_act.setEnabled(canWrite("role"));
+		enabled_chk.setEnabled(canWrite("enabled"));
 	}
 
 	/** Test if the user can update an attribute */
-	private boolean canUpdate(String a) {
-		return session.canUpdate(user, a);
+	private boolean canWrite(String a) {
+		return session.canWrite(user, a);
 	}
 
 	/** Update one attribute (from ProxyView). */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ public class FontModel extends ProxyTableModel<Font> {
 				return f.getNumber();
 			}
 			public boolean isEditable(Font f) {
-				return canUpdate(f);
+				return canWrite(f);
 			}
 			public void setValueAt(Font f, Object value) {
 				if (value instanceof Integer)
@@ -64,7 +64,7 @@ public class FontModel extends ProxyTableModel<Font> {
 				return f.getHeight();
 			}
 			public boolean isEditable(Font f) {
-				return canUpdate(f);
+				return canWrite(f);
 			}
 			public void setValueAt(Font f, Object value) {
 				if (value instanceof Integer)
@@ -76,7 +76,7 @@ public class FontModel extends ProxyTableModel<Font> {
 				return f.getWidth();
 			}
 			public boolean isEditable(Font f) {
-				return canUpdate(f);
+				return canWrite(f);
 			}
 			public void setValueAt(Font f, Object value) {
 				if (value instanceof Integer)
@@ -90,7 +90,7 @@ public class FontModel extends ProxyTableModel<Font> {
 				return f.getLineSpacing();
 			}
 			public boolean isEditable(Font f) {
-				return canUpdate(f);
+				return canWrite(f);
 			}
 			public void setValueAt(Font f, Object value) {
 				if (value instanceof Integer)
@@ -104,7 +104,7 @@ public class FontModel extends ProxyTableModel<Font> {
 				return f.getCharSpacing();
 			}
 			public boolean isEditable(Font f) {
-				return canUpdate(f);
+				return canWrite(f);
 			}
 			public void setValueAt(Font f, Object value) {
 				if (value instanceof Integer)
@@ -116,7 +116,7 @@ public class FontModel extends ProxyTableModel<Font> {
 				return f.getVersionID();
 			}
 			public boolean isEditable(Font f) {
-				return canUpdate(f);
+				return canWrite(f);
 			}
 			public void setValueAt(Font f, Object value) {
 				if (value instanceof Integer)

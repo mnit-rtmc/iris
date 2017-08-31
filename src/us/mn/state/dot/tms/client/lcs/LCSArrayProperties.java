@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -326,9 +326,9 @@ public class LCSArrayProperties extends SonarObjectForm<LCSArray> {
 	/** Update the edit mode */
 	@Override
 	protected void updateEditMode() {
-		shift_spn.setEnabled(canUpdate("shift"));
-		notes_txt.setEnabled(canUpdate("notes"));
-		lock_cbx.setEnabled(canUpdate("lcsLock"));
+		shift_spn.setEnabled(canWrite("shift"));
+		notes_txt.setEnabled(canWrite("notes"));
+		lock_cbx.setEnabled(canWrite("lcsLock"));
 	}
 
 	/** Update one attribute on the form */

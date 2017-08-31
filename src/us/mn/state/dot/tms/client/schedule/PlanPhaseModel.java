@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,7 +59,7 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 				return p.getHoldTime();
 			}
 			public boolean isEditable(PlanPhase p) {
-				return canUpdate(p);
+				return canWrite(p);
 			}
 			public void setValueAt(PlanPhase p, Object value) {
 				if (value instanceof Integer)
@@ -73,7 +73,7 @@ public class PlanPhaseModel extends ProxyTableModel<PlanPhase> {
 				return p.getNextPhase();
 			}
 			public boolean isEditable(PlanPhase p) {
-				return canUpdate(p);
+				return canWrite(p);
 			}
 			public void setValueAt(PlanPhase p, Object value) {
 				if (value instanceof PlanPhase)

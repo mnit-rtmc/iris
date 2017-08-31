@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -229,17 +229,17 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 	/** Update the edit mode */
 	public void updateEditMode() {
 		R_Node n = node;
-		type_cbx.setEnabled(canUpdate(n, "nodeType"));
-		pick_chk.setEnabled(canUpdate(n, "pickable"));
-		above_chk.setEnabled(canUpdate(n, "above"));
-		trans_cbx.setEnabled(canUpdate(n, "transition"));
-		lane_spn.setEnabled(canUpdate(n, "lanes"));
-		attach_chk.setEnabled(canUpdate(n, "attachSide"));
-		shift_spn.setEnabled(canUpdate(n, "shift"));
-		active_chk.setEnabled(canUpdate(n, "active"));
-		station_txt.setEnabled(canUpdate(n, "stationID"));
-		abandoned_chk.setEnabled(canUpdate(n, "abandoned"));
-		speed_spn.setEnabled(canUpdate(n, "speedLimit"));
+		type_cbx.setEnabled(canWrite(n, "nodeType"));
+		pick_chk.setEnabled(canWrite(n, "pickable"));
+		above_chk.setEnabled(canWrite(n, "above"));
+		trans_cbx.setEnabled(canWrite(n, "transition"));
+		lane_spn.setEnabled(canWrite(n, "lanes"));
+		attach_chk.setEnabled(canWrite(n, "attachSide"));
+		shift_spn.setEnabled(canWrite(n, "shift"));
+		active_chk.setEnabled(canWrite(n, "active"));
+		station_txt.setEnabled(canWrite(n, "stationID"));
+		abandoned_chk.setEnabled(canWrite(n, "abandoned"));
+		speed_spn.setEnabled(canWrite(n, "speedLimit"));
 	}
 
 	/** Update one attribute (from ProxyView). */
@@ -302,7 +302,7 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 	}
 
 	/** Test if the user can update an attribute */
-	private boolean canUpdate(R_Node n, String a) {
-		return session.canUpdate(n, a);
+	private boolean canWrite(R_Node n, String a) {
+		return session.canWrite(n, a);
 	}
 }

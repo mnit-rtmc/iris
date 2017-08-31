@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2016  Minnesota Department of Transportation
+ * Copyright (C) 2010-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public class IncidentDetailModel extends ProxyTableModel<IncidentDetail> {
 				return dtl.getDescription();
 			}
 			public boolean isEditable(IncidentDetail dtl) {
-				return canUpdate(dtl);
+				return canWrite(dtl);
 			}
 			public void setValueAt(IncidentDetail dtl,
 				Object value)

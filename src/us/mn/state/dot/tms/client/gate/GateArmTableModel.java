@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ public class GateArmTableModel extends ProxyTableModel<GateArm> {
 				return ga.getNotes();
 			}
 			public boolean isEditable(GateArm ga) {
-				return canUpdate(ga, "notes");
+				return canWrite(ga, "notes");
 			}
 			public void setValueAt(GateArm ga, Object value) {
 				ga.setNotes(value.toString().trim());

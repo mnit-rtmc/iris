@@ -51,7 +51,7 @@ public class CameraModel extends ProxyTableModel<Camera> {
 				return c.getCamNum();
 			}
 			public boolean isEditable(Camera c) {
-				return canUpdate(c);
+				return canWrite(c);
 			}
 			public void setValueAt(Camera c, Object value) {
 				if (value instanceof Integer)
@@ -67,7 +67,7 @@ public class CameraModel extends ProxyTableModel<Camera> {
 				return c.getPublish();
 			}
 			public boolean isEditable(Camera c) {
-				return canUpdate(c);
+				return canWrite(c);
 			}
 			public void setValueAt(Camera c, Object value) {
 				if (value instanceof Boolean)

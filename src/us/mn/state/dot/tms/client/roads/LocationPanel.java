@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2016  Minnesota Department of Transportation
+ * Copyright (C) 2005-2017  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -323,16 +323,16 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 	/** Update the edit mode */
 	public void updateEditMode() {
 		GeoLoc l = loc;
-		roadway_act.setEnabled(canUpdate(l, "roadway"));
-		road_dir_act.setEnabled(canUpdate(l, "roadDir"));
-		cross_mod_act.setEnabled(canUpdate(l, "crossMod"));
-		cross_act.setEnabled(canUpdate(l, "crossStreet"));
-		cross_dir_act.setEnabled(canUpdate(l, "crossDir"));
-		lat_txt.setEnabled(canUpdate(l, "lat"));
-		lon_txt.setEnabled(canUpdate(l, "lon"));
-		select_pt.setEnabled(canUpdate(l, "lat")
-		                  && canUpdate(l, "lon"));
-		landmark_txt.setEnabled(canUpdate(l, "landmark"));
+		roadway_act.setEnabled(canWrite(l, "roadway"));
+		road_dir_act.setEnabled(canWrite(l, "roadDir"));
+		cross_mod_act.setEnabled(canWrite(l, "crossMod"));
+		cross_act.setEnabled(canWrite(l, "crossStreet"));
+		cross_dir_act.setEnabled(canWrite(l, "crossDir"));
+		lat_txt.setEnabled(canWrite(l, "lat"));
+		lon_txt.setEnabled(canWrite(l, "lon"));
+		select_pt.setEnabled(canWrite(l, "lat")
+		                  && canWrite(l, "lon"));
+		landmark_txt.setEnabled(canWrite(l, "landmark"));
 	}
 
 	/** Update one attribute (from ProxyView). */
@@ -365,9 +365,9 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		repaint();
 	}
 
-	/** Test if the user can update an attribute */
-	private boolean canUpdate(GeoLoc l, String a) {
-		return session.canUpdate(l, a);
+	/** Test if the user can write an attribute */
+	private boolean canWrite(GeoLoc l, String a) {
+		return session.canWrite(l, a);
 	}
 
 	/** Clear all attributes (from ProxyView). */

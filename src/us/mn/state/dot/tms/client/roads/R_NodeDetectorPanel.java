@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -201,7 +201,7 @@ public class R_NodeDetectorPanel extends JPanel {
 		else
 			det_lbl.setText("");
 		create_det.setEnabled(det == null && canAddDetector(name));
-		transfer_det.setEnabled(det != null && canUpdateDetector(det));
+		transfer_det.setEnabled(det != null && canWriteDetector(det));
 	}
 
 	/** Lookup a detector label */
@@ -251,8 +251,8 @@ public class R_NodeDetectorPanel extends JPanel {
 	}
 
 	/** Test if the user can update a detector r_node association */
-	private boolean canUpdateDetector(Detector d) {
-		return session.canUpdate(d, "r_node");
+	private boolean canWriteDetector(Detector d) {
+		return session.canWrite(d, "r_node");
 	}
 
 	/** Test if the user can remove a detector */

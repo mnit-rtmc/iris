@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2014  Minnesota Department of Transportation
+ * Copyright (C) 2010-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,7 +112,7 @@ public class WeatherSensorProperties extends SonarObjectForm<WeatherSensor> {
 	@Override
 	protected void updateEditMode() {
 		loc_pnl.updateEditMode();
-		notes_txt.setEnabled(canUpdate("notes"));
+		notes_txt.setEnabled(canWrite("notes"));
 	}
 
 	/** Update one attribute on the form */

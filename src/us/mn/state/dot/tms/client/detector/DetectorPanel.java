@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2016  Minnesota Department of Transportation
+ * Copyright (C) 2010-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -277,13 +277,13 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	/** Update the edit mode */
 	public void updateEditMode() {
 		Detector d = detector;
-		type_act.setEnabled(session.canUpdate(d, "laneType"));
-		lane_spn.setEnabled(session.canUpdate(d, "laneNumber"));
-		aband_chk.setEnabled(session.canUpdate(d, "abandoned"));
-		fail_chk.setEnabled(session.canUpdate(d, "forceFail"));
-		field_spn.setEnabled(session.canUpdate(d, "fieldLength"));
-		fake_txt.setEnabled(session.canUpdate(d, "fake"));
-		note_txt.setEnabled(session.canUpdate(d, "notes"));
+		type_act.setEnabled(session.canWrite(d, "laneType"));
+		lane_spn.setEnabled(session.canWrite(d, "laneNumber"));
+		aband_chk.setEnabled(session.canWrite(d, "abandoned"));
+		fail_chk.setEnabled(session.canWrite(d, "forceFail"));
+		field_spn.setEnabled(session.canWrite(d, "fieldLength"));
+		fake_txt.setEnabled(session.canWrite(d, "fake"));
+		note_txt.setEnabled(session.canWrite(d, "notes"));
 		controller_btn.setEnabled(d != null &&
 		                          d.getController() != null);
 		r_node_btn.setEnabled(d != null && d.getR_Node() != null);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -287,14 +287,14 @@ public class GateArmArrayProperties extends SonarObjectForm<GateArmArray> {
 	@Override
 	protected void updateEditMode() {
 		loc_pnl.updateEditMode();
-		notes_txt.setEnabled(canUpdate("notes"));
-		camera_act.setEnabled(canUpdate("camera"));
-		approach_act.setEnabled(canUpdate("approach"));
-		prereq_act.setEnabled(canUpdate("prereq"));
-		dms_act.setEnabled(canUpdate("dms"));
-		open_msg_txt.setEnabled(canUpdate("openMsg"));
-		closed_msg_txt.setEnabled(canUpdate("closedMsg"));
-		disable.setEnabled(canUpdate("deviceRequest"));
+		notes_txt.setEnabled(canWrite("notes"));
+		camera_act.setEnabled(canWrite("camera"));
+		approach_act.setEnabled(canWrite("approach"));
+		prereq_act.setEnabled(canWrite("prereq"));
+		dms_act.setEnabled(canWrite("dms"));
+		open_msg_txt.setEnabled(canWrite("openMsg"));
+		closed_msg_txt.setEnabled(canWrite("closedMsg"));
+		disable.setEnabled(canWrite("deviceRequest"));
 	}
 
 	/** Update one attribute on the form */

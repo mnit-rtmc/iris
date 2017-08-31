@@ -55,7 +55,7 @@ public class DictTableModel extends ProxyTableModel<Word> {
 			}
 			// only allowed words can have abbreviation
 			public boolean isEditable(Word wo) {
-				return canUpdate(wo) && allowed_words;
+				return canWrite(wo) && allowed_words;
 			}
 			public void setValueAt(Word wo, Object abbr){
 				if (wo != null && abbr != null)

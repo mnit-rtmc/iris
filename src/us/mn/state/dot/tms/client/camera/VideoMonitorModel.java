@@ -57,7 +57,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 				return vm.getNotes();
 			}
 			public boolean isEditable(VideoMonitor vm) {
-				return canUpdate(vm);
+				return canWrite(vm);
 			}
 			public void setValueAt(VideoMonitor vm, Object value) {
 				vm.setNotes(value.toString());
@@ -70,7 +70,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 				return vm.getMonNum();
 			}
 			public boolean isEditable(VideoMonitor vm) {
-				return canUpdate(vm);
+				return canWrite(vm);
 			}
 			public void setValueAt(VideoMonitor vm, Object value) {
 				if (value instanceof Integer)
@@ -84,7 +84,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 				return vm.getRestricted();
 			}
 			public boolean isEditable(VideoMonitor vm) {
-				return canUpdate(vm, "restricted");
+				return canWrite(vm, "restricted");
 			}
 			public void setValueAt(VideoMonitor vm, Object value) {
 				if (value instanceof Boolean)
@@ -96,7 +96,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 				return vm.getMonitorStyle();
 			}
 			public boolean isEditable(VideoMonitor vm) {
-				return canUpdate(vm, "monitorStyle");
+				return canWrite(vm, "monitorStyle");
 			}
 			public void setValueAt(VideoMonitor vm, Object value) {
 				if (value instanceof MonitorStyle)

@@ -310,113 +310,113 @@ public class Session {
 		return namespace.canRead(new Name(tname), user);
 	}
 
-	/** Check if the user can update an attribute.
-	 * @param name Name of object/attribute to update.
+	/** Check if the user can write an attribute.
+	 * @param name Name of object/attribute to check.
 	 * @param can_edit Flag to allow editing.
-	 * @return true if user can update the attribute */
-	private boolean canUpdate(Name name, boolean can_edit) {
+	 * @return true if user can write the attribute */
+	private boolean canWrite(Name name, boolean can_edit) {
 		return can_edit && namespace.canWrite(name, user);
 	}
 
-	/** Check if the user can update an attribute.
-	 * @param tname Type name of attribute to update.
-	 * @param aname Name of attribute to update.
+	/** Check if the user can write an attribute.
+	 * @param tname Type name of attribute to check.
+	 * @param aname Name of attribute to check.
 	 * @param can_edit Flag to allow editing.
-	 * @return true if user can update the attribute */
-	private boolean canUpdate(String tname, String aname, boolean can_edit) {
-		return canUpdate(new Name(tname, "oname", aname), can_edit);
+	 * @return true if user can write the attribute */
+	private boolean canWrite(String tname, String aname, boolean can_edit) {
+		return canWrite(new Name(tname, "oname", aname), can_edit);
 	}
 
-	/** Check if the user can update an attribute.
-	 * @param tname Type name of attribute to update.
+	/** Check if the user can write an attribute.
+	 * @param tname Type name of attribute to check.
 	 * @param can_edit Flag to allow editing.
-	 * @return true if user can update the attribute */
-	private boolean canUpdate(String tname, boolean can_edit) {
-		return canUpdate(tname, "aname", can_edit);
+	 * @return true if user can write the attribute */
+	private boolean canWrite(String tname, boolean can_edit) {
+		return canWrite(tname, "aname", can_edit);
 	}
 
-	/** Check if the user can update a proxy attribute.
+	/** Check if the user can write a proxy attribute.
 	 * @param proxy Proxy object to check.
 	 * @param can_edit Flag to allow editing.
-	 * @return true if user can update the attribute */
-	private boolean canUpdate(SonarObject proxy, boolean can_edit) {
-		return proxy != null && canUpdate(new Name(proxy), can_edit);
+	 * @return true if user can write the attribute */
+	private boolean canWrite(SonarObject proxy, boolean can_edit) {
+		return proxy != null && canWrite(new Name(proxy), can_edit);
 	}
 
-	/** Check if the user can update a proxy attribute.
+	/** Check if the user can write a proxy attribute.
 	 * @param proxy Proxy object to check.
-	 * @param aname Name of attribute to update.
+	 * @param aname Name of attribute to check.
 	 * @param can_edit Flag to allow editing.
-	 * @return true if user can update the attribute */
-	private boolean canUpdate(SonarObject proxy, String aname,
+	 * @return true if user can write the attribute */
+	private boolean canWrite(SonarObject proxy, String aname,
 		boolean can_edit)
 	{
 		return proxy != null &&
-		       canUpdate(new Name(proxy, aname), can_edit);
+		       canWrite(new Name(proxy, aname), can_edit);
 	}
 
-	/** Check if the user can update an attribute.
-	 * @param tname Type name of attribute to update.
-	 * @param aname Name of attribute to update.
-	 * @return true if user can update the attribute */
-	public boolean canUpdate(String tname, String aname) {
-		return canUpdate(tname, aname, edit_mode);
+	/** Check if the user can write an attribute.
+	 * @param tname Type name of attribute to check.
+	 * @param aname Name of attribute to check.
+	 * @return true if user can write the attribute */
+	public boolean canWrite(String tname, String aname) {
+		return canWrite(tname, aname, edit_mode);
 	}
 
-	/** Check if the user can update an attribute.
-	 * @param tname Type name of attribute to update.
-	 * @return true if user can update the attribute */
-	public boolean canUpdate(String tname) {
-		return canUpdate(tname, edit_mode);
+	/** Check if the user can write an attribute.
+	 * @param tname Type name of attribute to check.
+	 * @return true if user can write the attribute */
+	public boolean canWrite(String tname) {
+		return canWrite(tname, edit_mode);
 	}
 
-	/** Check if the user can update a proxy attribute.
+	/** Check if the user can write a proxy attribute.
 	 * @param proxy Proxy object to check.
-	 * @return true if user can update the attribute */
-	public boolean canUpdate(SonarObject proxy) {
-		return canUpdate(proxy, edit_mode);
+	 * @return true if user can write the attribute */
+	public boolean canWrite(SonarObject proxy) {
+		return canWrite(proxy, edit_mode);
 	}
 
-	/** Check if the user can update a proxy attribute.
+	/** Check if the user can write a proxy attribute.
 	 * @param proxy Proxy object to check.
-	 * @param aname Name of attribute to update.
-	 * @return true if user can update the attribute */
-	public boolean canUpdate(SonarObject proxy, String aname) {
-		return canUpdate(proxy, aname, edit_mode);
+	 * @param aname Name of attribute to check.
+	 * @return true if user can write the attribute */
+	public boolean canWrite(SonarObject proxy, String aname) {
+		return canWrite(proxy, aname, edit_mode);
 	}
 
 	/** Check if the user is permitted to update an attribute, regardless of
 	 * EDIT mode.
-	 * @param tname Type name of attribute to update.
-	 * @param aname Name of attribute to update.
-	 * @return true if user can update the attribute */
+	 * @param tname Type name of attribute to check.
+	 * @param aname Name of attribute to check.
+	 * @return true if user can write the attribute */
 	public boolean isUpdatePermitted(String tname, String aname) {
-		return canUpdate(new Name(tname, "oname", aname), true);
+		return canWrite(new Name(tname, "oname", aname), true);
 	}
 
 	/** Check if the user is permitted to update an attribute, regardless of
 	 * EDIT mode.
-	 * @param tname Type name of attribute to update.
-	 * @return true if user can update the attribute */
+	 * @param tname Type name of attribute to check.
+	 * @return true if user can write the attribute */
 	public boolean isUpdatePermitted(String tname) {
-		return canUpdate(tname, true);
+		return canWrite(tname, true);
 	}
 
 	/** Check if the user is permitted to update a proxy attribute,
 	 * regardless of EDIT mode.
 	 * @param proxy Proxy object to check.
-	 * @return true if user can update the attribute */
+	 * @return true if user can write the attribute */
 	public boolean isUpdatePermitted(SonarObject proxy) {
-		return canUpdate(proxy, true);
+		return canWrite(proxy, true);
 	}
 
 	/** Check if the user is permitted to update a proxy attribute,
 	 * regardless of EDIT mode.
 	 * @param proxy Proxy object to check.
-	 * @param aname Name of attribute to update.
-	 * @return true if user can update the attribute */
+	 * @param aname Name of attribute to check.
+	 * @return true if user can write the attribute */
 	public boolean isUpdatePermitted(SonarObject proxy, String aname) {
-		return canUpdate(proxy, aname, true);
+		return canWrite(proxy, aname, true);
 	}
 
 	/** Check if the user can remove a proxy */

@@ -179,7 +179,7 @@ public class GpsPanel extends IPanel
 	}
 
 	public void updateEditMode() {
-		boolean bCanUpdateGps = canUpdate("gps");
+		boolean bCanUpdateGps = canWrite("gps");
 		boolean bGpsDeviceEnabled = (gps != null)
 	                       && chckbxEnableGps.isSelected();
 		chckbxEnableGps.setEnabled(bCanUpdateGps);
@@ -192,9 +192,9 @@ public class GpsPanel extends IPanel
 				gpsPanelMode != GpsPanelMode.DISABLED);
 	}
 
-	/** Check if the user can update an attribute */
-	private boolean canUpdate(String aname) {
-		return session.canUpdate(parentDevice, aname);
+	/** Check if the user can write an attribute */
+	private boolean canWrite(String aname) {
+		return session.canWrite(parentDevice, aname);
 	}
 
 	static enum GpsPanelMode {

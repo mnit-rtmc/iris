@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2016  Minnesota Department of Transportation
+ * Copyright (C) 2011-2017  Minnesota Department of Transportation
  * Copyright (C) 2015  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -58,7 +58,7 @@ public class ModemModel extends ProxyTableModel<Modem> {
 				return m.getUri();
 			}
 			public boolean isEditable(Modem m) {
-				return canUpdate(m, "uri");
+				return canWrite(m, "uri");
 			}
 			public void setValueAt(Modem m, Object value) {
 				m.setUri(value.toString().trim());
@@ -69,7 +69,7 @@ public class ModemModel extends ProxyTableModel<Modem> {
 				return m.getConfig();
 			}
 			public boolean isEditable(Modem m) {
-				return canUpdate(m, "config");
+				return canWrite(m, "config");
 			}
 			public void setValueAt(Modem m, Object value) {
 				m.setConfig(value.toString().trim());
@@ -80,7 +80,7 @@ public class ModemModel extends ProxyTableModel<Modem> {
 				return m.getTimeout();
 			}
 			public boolean isEditable(Modem m) {
-				return canUpdate(m, "timeout");
+				return canWrite(m, "timeout");
 			}
 			public void setValueAt(Modem m, Object value) {
 				if (value instanceof Integer)
@@ -108,7 +108,7 @@ public class ModemModel extends ProxyTableModel<Modem> {
 				return m.getEnabled();
 			}
 			public boolean isEditable(Modem m) {
-				return canUpdate(m, "enable");
+				return canWrite(m, "enable");
 			}
 			public void setValueAt(Modem m, Object value) {
 				if (value instanceof Boolean)

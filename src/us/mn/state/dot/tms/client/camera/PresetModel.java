@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2016  Minnesota Department of Transportation
+ * Copyright (C) 2014-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -139,7 +139,7 @@ public class PresetModel extends AbstractTableModel {
 			return Direction.fromOrdinal(p.getDirection());
 		}
 		public boolean isEditable(CameraPreset p) {
-			return canUpdate(p, "direction");
+			return canWrite(p, "direction");
 		}
 		public void setValueAt(CameraPreset p, Object value) {
 			if (value instanceof Direction) {
@@ -342,14 +342,14 @@ public class PresetModel extends AbstractTableModel {
 		return CameraPreset.SONAR_TYPE;
 	}
 
-	/** Check if the user can update a proxy */
-	public boolean canUpdate(CameraPreset proxy) {
-		return session.canUpdate(proxy);
+	/** Check if the user can write a proxy */
+	public boolean canWrite(CameraPreset proxy) {
+		return session.canWrite(proxy);
 	}
 
-	/** Check if the user can update a proxy */
-	public boolean canUpdate(CameraPreset proxy, String aname) {
-		return session.canUpdate(proxy, aname);
+	/** Check if the user can write a proxy */
+	public boolean canWrite(CameraPreset proxy, String aname) {
+		return session.canWrite(proxy, aname);
 	}
 
 	/** Check if the user can remove a proxy */

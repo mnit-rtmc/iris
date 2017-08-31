@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 				return r.getAbbrev();
 			}
 			public boolean isEditable(Road r) {
-				return canUpdate(r);
+				return canWrite(r);
 			}
 			public void setValueAt(Road r, Object value) {
 				r.setAbbrev(value.toString());
@@ -66,7 +66,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 				return RoadClass.fromOrdinal(r.getRClass());
 			}
 			public boolean isEditable(Road r) {
-				return canUpdate(r);
+				return canWrite(r);
 			}
 			public void setValueAt(Road r, Object value) {
 				if (value instanceof RoadClass) {
@@ -85,7 +85,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 				return Direction.fromOrdinal(r.getDirection());
 			}
 			public boolean isEditable(Road r) {
-				return canUpdate(r);
+				return canWrite(r);
 			}
 			public void setValueAt(Road r, Object value) {
 				if (value instanceof Direction) {
@@ -104,7 +104,7 @@ public class RoadModel extends ProxyTableModel<Road> {
 				return Direction.fromOrdinal(r.getAltDir());
 			}
 			public boolean isEditable(Road r) {
-				return canUpdate(r);
+				return canWrite(r);
 			}
 			public void setValueAt(Road r, Object value) {
 				if (value instanceof Direction) {

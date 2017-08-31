@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 					lum.getIndication());
 			}
 			public boolean isEditable(LaneUseMulti lum) {
-				return canUpdate(lum);
+				return canWrite(lum);
 			}
 			public void setValueAt(LaneUseMulti lum, Object value) {
 				if (value instanceof LaneUseIndication) {
@@ -87,7 +87,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				return lum.getMsgNum();
 			}
 			public boolean isEditable(LaneUseMulti lum) {
-				return canUpdate(lum);
+				return canWrite(lum);
 			}
 			public void setValueAt(LaneUseMulti lum, Object value) {
 				if (value instanceof Integer)
@@ -103,7 +103,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				return lum.getWidth();
 			}
 			public boolean isEditable(LaneUseMulti lum) {
-				return canUpdate(lum);
+				return canWrite(lum);
 			}
 			public void setValueAt(LaneUseMulti lum, Object value) {
 				if (value instanceof Integer)
@@ -117,7 +117,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				return lum.getHeight();
 			}
 			public boolean isEditable(LaneUseMulti lum) {
-				return canUpdate(lum);
+				return canWrite(lum);
 			}
 			public void setValueAt(LaneUseMulti lum, Object value) {
 				if (value instanceof Integer)
@@ -129,7 +129,7 @@ public class LaneUseMultiModel extends ProxyTableModel<LaneUseMulti> {
 				return lum.getQuickMessage();
 			}
 			public boolean isEditable(LaneUseMulti lum) {
-				return canUpdate(lum);
+				return canWrite(lum);
 			}
 			public void setValueAt(LaneUseMulti lum, Object value) {
 				lum.setQuickMessage(QuickMessageHelper.lookup(

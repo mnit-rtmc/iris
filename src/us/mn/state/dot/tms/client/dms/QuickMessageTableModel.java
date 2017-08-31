@@ -59,7 +59,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				return qm.getSignGroup();
 			}
 			public boolean isEditable(QuickMessage qm) {
-				return canUpdate(qm);
+				return canWrite(qm);
 			}
 			public void setValueAt(QuickMessage qm, Object value) {
 				qm.setSignGroup(lookupSignGroup(value));
@@ -72,7 +72,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 				return qm.getMulti();
 			}
 			public boolean isEditable(QuickMessage qm) {
-				return canUpdate(qm);
+				return canWrite(qm);
 			}
 			public void setValueAt(QuickMessage qm, Object value) {
 				qm.setMulti(new MultiString(value.toString())

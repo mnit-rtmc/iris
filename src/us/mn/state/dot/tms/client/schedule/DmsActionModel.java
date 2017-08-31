@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return da.getPhase();
 			}
 			public boolean isEditable(DmsAction da) {
-				return canUpdate(da);
+				return canWrite(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
 				if (value instanceof PlanPhase)
@@ -114,7 +114,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return da.getQuickMessage();
 			}
 			public boolean isEditable(DmsAction da) {
-				return canUpdate(da);
+				return canWrite(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
 				String v = value.toString().trim();
@@ -129,7 +129,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				return da.getBeaconEnabled();
 			}
 			public boolean isEditable(DmsAction da) {
-				return canUpdate(da);
+				return canWrite(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
 				if (value instanceof Boolean)
@@ -144,7 +144,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				       da.getActivationPriority());
 			}
 			public boolean isEditable(DmsAction da) {
-				return canUpdate(da);
+				return canWrite(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
 				if (value instanceof DmsMsgPriority) {
@@ -167,7 +167,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				       da.getRunTimePriority());
 			}
 			public boolean isEditable(DmsAction da) {
-				return canUpdate(da);
+				return canWrite(da);
 			}
 			public void setValueAt(DmsAction da, Object value) {
 				if (value instanceof DmsMsgPriority) {

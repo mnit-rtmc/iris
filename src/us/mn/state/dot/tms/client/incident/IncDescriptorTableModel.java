@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,7 +111,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				return dsc.getSignGroup();
 			}
 			public boolean isEditable(IncDescriptor dsc) {
-				return canUpdate(dsc);
+				return canWrite(dsc);
 			}
 			public void setValueAt(IncDescriptor dsc, Object value){
 				String v = value.toString().trim();
@@ -125,7 +125,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				return EventType.fromId(dsc.getEventType());
 			}
 			public boolean isEditable(IncDescriptor dsc) {
-				return canUpdate(dsc);
+				return canWrite(dsc);
 			}
 			public void setValueAt(IncDescriptor dsc, Object value){
 				if (value instanceof EventType) {
@@ -150,7 +150,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				return LaneType.fromOrdinal(dsc.getLaneType());
 			}
 			public boolean isEditable(IncDescriptor dsc) {
-				return canUpdate(dsc);
+				return canWrite(dsc);
 			}
 			public void setValueAt(IncDescriptor dsc, Object value){
 				if (value instanceof LaneType) {
@@ -170,7 +170,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				return dsc.getDetail();
 			}
 			public boolean isEditable(IncDescriptor dsc) {
-				return canUpdate(dsc);
+				return canWrite(dsc);
 			}
 			public void setValueAt(IncDescriptor dsc, Object value){
 				if (value instanceof IncidentDetail)
@@ -197,7 +197,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				return dsc.getCleared();
 			}
 			public boolean isEditable(IncDescriptor dsc) {
-				return canUpdate(dsc);
+				return canWrite(dsc);
 			}
 			public void setValueAt(IncDescriptor dsc, Object value){
 				if (value instanceof Boolean) {
@@ -213,7 +213,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				return dsc.getMulti();
 			}
 			public boolean isEditable(IncDescriptor dsc) {
-				return canUpdate(dsc);
+				return canWrite(dsc);
 			}
 			public void setValueAt(IncDescriptor dsc, Object value){
 				dsc.setMulti(new MultiString(value.toString())

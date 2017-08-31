@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 				return loc.getSignGroup();
 			}
 			public boolean isEditable(IncLocator loc) {
-				return canUpdate(loc);
+				return canWrite(loc);
 			}
 			public void setValueAt(IncLocator loc, Object value) {
 				String v = value.toString().trim();
@@ -71,7 +71,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 				return IncRange.fromOrdinal(loc.getRange());
 			}
 			public boolean isEditable(IncLocator loc) {
-				return canUpdate(loc);
+				return canWrite(loc);
 			}
 			public void setValueAt(IncLocator loc, Object value) {
 				if (value instanceof IncRange) {
@@ -92,7 +92,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 				return loc.getBranched();
 			}
 			public boolean isEditable(IncLocator loc) {
-				return canUpdate(loc);
+				return canWrite(loc);
 			}
 			public void setValueAt(IncLocator loc, Object value) {
 				if (value instanceof Boolean) {
@@ -108,7 +108,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 				return loc.getPickable();
 			}
 			public boolean isEditable(IncLocator loc) {
-				return canUpdate(loc);
+				return canWrite(loc);
 			}
 			public void setValueAt(IncLocator loc, Object value) {
 				if (value instanceof Boolean) {
@@ -124,7 +124,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 				return loc.getMulti();
 			}
 			public boolean isEditable(IncLocator loc) {
-				return canUpdate(loc);
+				return canWrite(loc);
 			}
 			public void setValueAt(IncLocator loc, Object value){
 				loc.setMulti(new MultiString(value.toString())

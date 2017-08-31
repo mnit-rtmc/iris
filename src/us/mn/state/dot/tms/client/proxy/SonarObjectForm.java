@@ -113,14 +113,14 @@ abstract public class SonarObjectForm<T extends SonarObject>
 		desktop.show(form);
 	}
 
-	/** Check if the user can update an attribute */
-	protected boolean canUpdate() {
-		return session.canUpdate(proxy);
+	/** Check if the user can write an attribute */
+	protected boolean canWrite() {
+		return session.canWrite(proxy);
 	}
 
-	/** Check if the user can update an attribute */
-	protected boolean canUpdate(String aname) {
-		return session.canUpdate(proxy, aname);
+	/** Check if the user can write an attribute */
+	protected boolean canWrite(String aname) {
+		return session.canWrite(proxy, aname);
 	}
 
 	/** Check if the user is permitted to update an attribute */

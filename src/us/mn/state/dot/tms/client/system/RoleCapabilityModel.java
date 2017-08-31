@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ public class RoleCapabilityModel extends ProxyTableModel<Capability> {
 				return isAssigned(c);
 			}
 			public boolean isEditable(Capability c) {
-				return canUpdate(role, "capabilities");
+				return canWrite(role, "capabilities");
 			}
 			public void setValueAt(Capability c, Object value) {
 				if (value instanceof Boolean)

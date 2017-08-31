@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -352,28 +352,28 @@ public class ControllerIOModel extends AbstractTableModel {
 	/** Is the specified cell editable? */
 	@Override
 	public boolean isCellEditable(int row, int col) {
-		return col != COL_PIN && canUpdateIO();
+		return col != COL_PIN && canWriteIO();
 	}
 
-	/** Check if the user can update device IO */
-	private boolean canUpdateIO() {
-		return canUpdateIO(Alarm.SONAR_TYPE) &&
-		       canUpdateIO(Camera.SONAR_TYPE) &&
-		       canUpdateIO(Detector.SONAR_TYPE) &&
-		       canUpdateIO(DMS.SONAR_TYPE) &&
-		       canUpdateIO(GateArm.SONAR_TYPE) &&
-		       canUpdateIO(LaneMarking.SONAR_TYPE) &&
-		       canUpdateIO(LCSIndication.SONAR_TYPE) &&
-		       canUpdateIO(RampMeter.SONAR_TYPE) &&
-		       canUpdateIO(Beacon.SONAR_TYPE) &&
-		       canUpdateIO(WeatherSensor.SONAR_TYPE) &&
-		       canUpdateIO(TagReader.SONAR_TYPE);
+	/** Check if the user can write device IO */
+	private boolean canWriteIO() {
+		return canWriteIO(Alarm.SONAR_TYPE) &&
+		       canWriteIO(Camera.SONAR_TYPE) &&
+		       canWriteIO(Detector.SONAR_TYPE) &&
+		       canWriteIO(DMS.SONAR_TYPE) &&
+		       canWriteIO(GateArm.SONAR_TYPE) &&
+		       canWriteIO(LaneMarking.SONAR_TYPE) &&
+		       canWriteIO(LCSIndication.SONAR_TYPE) &&
+		       canWriteIO(RampMeter.SONAR_TYPE) &&
+		       canWriteIO(Beacon.SONAR_TYPE) &&
+		       canWriteIO(WeatherSensor.SONAR_TYPE) &&
+		       canWriteIO(TagReader.SONAR_TYPE);
 	}
 
-	/** Check if the user can update one device IO */
-	private boolean canUpdateIO(String tname) {
-		return session.canUpdate(tname, "pin") &&
-		       session.canUpdate(tname, "controller");
+	/** Check if the user can write one device IO */
+	private boolean canWriteIO(String tname) {
+		return session.canWrite(tname, "pin") &&
+		       session.canWrite(tname, "controller");
 	}
 
 	/** Set the value of one cell in the table */

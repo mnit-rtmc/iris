@@ -277,9 +277,9 @@ public class PropMessages extends JPanel {
 
 	/** Update the edit mode */
 	public void updateEditMode() {
-		font_cbx.setEnabled(canUpdate("defaultFont"));
-		aws_allowed_chk.setEnabled(canUpdate("awsAllowed"));
-		aws_control_chk.setEnabled(canUpdate("awsControlled"));
+		font_cbx.setEnabled(canWrite("defaultFont"));
+		aws_allowed_chk.setEnabled(canWrite("awsAllowed"));
+		aws_control_chk.setEnabled(canWrite("awsControlled"));
 	}
 
 	/** Update one attribute on the form tab */
@@ -296,8 +296,8 @@ public class PropMessages extends JPanel {
 			selectSignText();
 	}
 
-	/** Check if the user can update an attribute */
-	private boolean canUpdate(String aname) {
-		return session.canUpdate(proxy, aname);
+	/** Check if the user can write an attribute */
+	private boolean canWrite(String aname) {
+		return session.canWrite(proxy, aname);
 	}
 }

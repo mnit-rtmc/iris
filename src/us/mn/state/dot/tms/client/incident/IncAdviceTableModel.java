@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,7 +58,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return adv.getSignGroup();
 			}
 			public boolean isEditable(IncAdvice adv) {
-				return canUpdate(adv);
+				return canWrite(adv);
 			}
 			public void setValueAt(IncAdvice adv, Object value) {
 				String v = value.toString().trim();
@@ -72,7 +72,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return IncRange.fromOrdinal(adv.getRange());
 			}
 			public boolean isEditable(IncAdvice adv) {
-				return canUpdate(adv);
+				return canWrite(adv);
 			}
 			public void setValueAt(IncAdvice adv, Object value) {
 				if (value instanceof IncRange) {
@@ -91,7 +91,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return LaneType.fromOrdinal(adv.getLaneType());
 			}
 			public boolean isEditable(IncAdvice adv) {
-				return canUpdate(adv);
+				return canWrite(adv);
 			}
 			public void setValueAt(IncAdvice adv, Object value) {
 				if (value instanceof LaneType) {
@@ -109,7 +109,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return adv.getImpact();
 			}
 			public boolean isEditable(IncAdvice adv) {
-				return canUpdate(adv);
+				return canWrite(adv);
 			}
 			public void setValueAt(IncAdvice adv, Object value) {
 				adv.setImpact(value.toString());
@@ -122,7 +122,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return adv.getCleared();
 			}
 			public boolean isEditable(IncAdvice adv) {
-				return canUpdate(adv);
+				return canWrite(adv);
 			}
 			public void setValueAt(IncAdvice adv, Object value) {
 				if (value instanceof Boolean) {
@@ -138,7 +138,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				return adv.getMulti();
 			}
 			public boolean isEditable(IncAdvice adv) {
-				return canUpdate(adv);
+				return canWrite(adv);
 			}
 			public void setValueAt(IncAdvice adv, Object value){
 				adv.setMulti(new MultiString(value.toString())

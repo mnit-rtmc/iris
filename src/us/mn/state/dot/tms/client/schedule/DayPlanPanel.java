@@ -376,9 +376,9 @@ public class DayPlanPanel extends JPanel {
 		return session.canAdd(DayPlan.SONAR_TYPE, oname);
 	}
 
-	/** Check if the user can update */
-	public boolean canUpdate() {
-		return session.canUpdate(DayPlan.SONAR_TYPE, "aname");
+	/** Check if the user can write */
+	public boolean canWrite() {
+		return session.canWrite(DayPlan.SONAR_TYPE, "aname");
 	}
 
 	/** Check if the user can remove a day plan */

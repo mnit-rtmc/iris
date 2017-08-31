@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -201,26 +201,26 @@ public class PropManufacturer extends IPanel {
 			model_lbl.setText(formatString(dms.getModel()));
 		if(a == null || a.equals("version"))
 			version_lbl.setText(formatString(dms.getVersion()));
-		if(a == null || a.equals("ldcPotBase")) {
-			pot_base_spn.setEnabled(canUpdate("ldcPotBase"));
+		if (null == a || a.equals("ldcPotBase")) {
+			pot_base_spn.setEnabled(canWrite("ldcPotBase"));
 			Integer b = dms.getLdcPotBase();
-			if(b != null)
+			if (b != null)
 				pot_base_spn.setValue(b);
 		}
-		if(a == null || a.equals("pixelCurrentLow")) {
-			current_low_spn.setEnabled(canUpdate("pixelCurrentLow"));
+		if (null == a || a.equals("pixelCurrentLow")) {
+			current_low_spn.setEnabled(canWrite("pixelCurrentLow"));
 			Integer c = dms.getPixelCurrentLow();
-			if(c != null)
+			if (c != null)
 				current_low_spn.setValue(c);
 		}
-		if(a == null || a.equals("pixelCurrentHigh")) {
-			current_high_spn.setEnabled(canUpdate(
+		if (null == a || a.equals("pixelCurrentHigh")) {
+			current_high_spn.setEnabled(canWrite(
 				"pixelCurrentHigh"));
 			Integer c = dms.getPixelCurrentHigh();
-			if(c != null)
+			if (c != null)
 				current_high_spn.setValue(c);
 		}
-		if(a == null || a.equals("heatTapeStatus"))
+		if (null == a || a.equals("heatTapeStatus"))
 			heat_tape_lbl.setText(dms.getHeatTapeStatus());
 		if (null == a || a.equals("signConfig"))
 			config.setEnabled(dms.getSignConfig() != null);
@@ -236,8 +236,8 @@ public class PropManufacturer extends IPanel {
 			cards.show(card_pnl, MAKE_GENERIC);
 	}
 
-	/** Check if the user can update an attribute */
-	private boolean canUpdate(String aname) {
-		return session.canUpdate(dms, aname);
+	/** Check if the user can write an attribute */
+	private boolean canWrite(String aname) {
+		return session.canWrite(dms, aname);
 	}
 }

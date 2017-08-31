@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2016  Minnesota Department of Transportation
+ * Copyright (C) 2014-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -224,9 +224,9 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 	@Override
 	protected void updateEditMode() {
 		loc_pnl.updateEditMode();
-		notes_txt.setEnabled(canUpdate("notes"));
-		toll_zone_act.setEnabled(canUpdate("toll_zone"));
-		boolean ud = canUpdate("signs");
+		notes_txt.setEnabled(canWrite("notes"));
+		toll_zone_act.setEnabled(canWrite("toll_zone"));
+		boolean ud = canWrite("signs");
 		dms_txt.setEnabled(ud);
 		dms_lst.setEnabled(ud);
 		link_btn.setEnabled(ud);

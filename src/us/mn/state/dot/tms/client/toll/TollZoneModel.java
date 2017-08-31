@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +50,7 @@ public class TollZoneModel extends ProxyTableModel<TollZone> {
 				return tz.getStartID();
 			}
 			public boolean isEditable(TollZone tz) {
-				return canUpdate(tz);
+				return canWrite(tz);
 			}
 			public void setValueAt(TollZone tz, Object value) {
 				String sid = value.toString().trim();
@@ -62,7 +62,7 @@ public class TollZoneModel extends ProxyTableModel<TollZone> {
 				return tz.getEndID();
 			}
 			public boolean isEditable(TollZone tz) {
-				return canUpdate(tz);
+				return canWrite(tz);
 			}
 			public void setValueAt(TollZone tz, Object value) {
 				String eid = value.toString().trim();
@@ -74,7 +74,7 @@ public class TollZoneModel extends ProxyTableModel<TollZone> {
 				return tz.getTollway();
 			}
 			public boolean isEditable(TollZone tz) {
-				return canUpdate(tz);
+				return canWrite(tz);
 			}
 			public void setValueAt(TollZone tz, Object value) {
 				String tw = value.toString().trim();

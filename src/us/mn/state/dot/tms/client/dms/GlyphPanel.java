@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -240,11 +240,11 @@ public class GlyphPanel extends JPanel {
 		}
 	}
 
-	/** Check if the user can add and update a glyph */
+	/** Check if the user can write a glyph */
 	private boolean canAddAndUpdate() {
 		return session.canAdd(Glyph.SONAR_TYPE) &&
 		       session.canAdd(Graphic.SONAR_TYPE) &&
-		       session.canUpdate(Graphic.SONAR_TYPE, "width") &&
-		       session.canUpdate(Graphic.SONAR_TYPE, "pixels");
+		       session.canWrite(Graphic.SONAR_TYPE, "width") &&
+		       session.canWrite(Graphic.SONAR_TYPE, "pixels");
 	}
 }

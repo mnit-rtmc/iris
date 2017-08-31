@@ -115,7 +115,7 @@ public class DayMatcherModel extends ProxyTableModel<DayMatcher> {
 				return isAssigned(dm);
 			}
 			public boolean isEditable(DayMatcher dm) {
-				return canUpdateDayPlanDayMatchers();
+				return canWriteDayPlanDayMatchers();
 			}
 			public void setValueAt(DayMatcher dm, Object value) {
 				if (value instanceof Boolean)
@@ -134,7 +134,7 @@ public class DayMatcherModel extends ProxyTableModel<DayMatcher> {
 				return dm.getHoliday();
 			}
 			public boolean isEditable(DayMatcher dm) {
-				return canUpdate(dm);
+				return canWrite(dm);
 			}
 			public void setValueAt(DayMatcher dm, Object value) {
 				if (value instanceof Boolean)
@@ -146,7 +146,7 @@ public class DayMatcherModel extends ProxyTableModel<DayMatcher> {
 				return MONTHS.get(dm.getMonth() + 1);
 			}
 			public boolean isEditable(DayMatcher dm) {
-				return canUpdate(dm);
+				return canWrite(dm);
 			}
 			public void setValueAt(DayMatcher dm, Object value) {
 				dm.setMonth(MONTHS.indexOf(value) - 1);
@@ -162,7 +162,7 @@ public class DayMatcherModel extends ProxyTableModel<DayMatcher> {
 				return DAYS.get(dm.getDay());
 			}
 			public boolean isEditable(DayMatcher dm) {
-				return canUpdate(dm) && isWeekShiftBlank(dm);
+				return canWrite(dm) && isWeekShiftBlank(dm);
 			}
 			public void setValueAt(DayMatcher dm, Object value) {
 				dm.setDay(DAYS.indexOf(value));
@@ -178,7 +178,7 @@ public class DayMatcherModel extends ProxyTableModel<DayMatcher> {
 				return WEEKS.get(dm.getWeek() + 1);
 			}
 			public boolean isEditable(DayMatcher dm) {
-				return canUpdate(dm) && isDayBlank(dm);
+				return canWrite(dm) && isDayBlank(dm);
 			}
 			public void setValueAt(DayMatcher dm, Object value) {
 				dm.setWeek(WEEKS.indexOf(value) - 1);
@@ -195,7 +195,7 @@ public class DayMatcherModel extends ProxyTableModel<DayMatcher> {
 				return WEEKDAYS.get(dm.getWeekday());
 			}
 			public boolean isEditable(DayMatcher dm) {
-				return canUpdate(dm);
+				return canWrite(dm);
 			}
 			public void setValueAt(DayMatcher dm, Object value) {
 				dm.setWeekday(WEEKDAYS.indexOf(value));
@@ -211,7 +211,7 @@ public class DayMatcherModel extends ProxyTableModel<DayMatcher> {
 				return SHIFTS.get(dm.getShift() + 2);
 			}
 			public boolean isEditable(DayMatcher dm) {
-				return canUpdate(dm) && isDayBlank(dm);
+				return canWrite(dm) && isDayBlank(dm);
 			}
 			public void setValueAt(DayMatcher dm, Object value) {
 				dm.setShift(SHIFTS.indexOf(value) - 2);
@@ -292,8 +292,8 @@ public class DayMatcherModel extends ProxyTableModel<DayMatcher> {
 		return dm_set.toArray(new DayMatcher[0]);
 	}
 
-	/** Check if the user can update day matchers on the day plan */
-	private boolean canUpdateDayPlanDayMatchers() {
-		return session.canUpdate(day_plan, "dayMatchers");
+	/** Check if the user can write day matchers on the day plan */
+	private boolean canWriteDayPlanDayMatchers() {
+		return session.canWrite(day_plan, "dayMatchers");
 	}
 }

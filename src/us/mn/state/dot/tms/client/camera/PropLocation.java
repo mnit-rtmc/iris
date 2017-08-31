@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -87,7 +87,7 @@ public class PropLocation extends LocationPanel {
 	@Override
 	public void updateEditMode() {
 		super.updateEditMode();
-		notes_txt.setEnabled(canUpdate("notes"));
+		notes_txt.setEnabled(canWrite("notes"));
 	}
 
 	/** Update one attribute on the form tab */
@@ -98,8 +98,8 @@ public class PropLocation extends LocationPanel {
 			notes_txt.setText(camera.getNotes());
 	}
 
-	/** Check if the user can update an attribute */
-	private boolean canUpdate(String aname) {
-		return session.canUpdate(camera, aname);
+	/** Check if the user can write an attribute */
+	private boolean canWrite(String aname) {
+		return session.canWrite(camera, aname);
 	}
 }
