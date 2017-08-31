@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,11 +77,11 @@ public class IncidentTab extends MapTab<Incident> {
 	@Override
 	public void setSidePanel(SidePanel p) {
 		super.setSidePanel(p);
-		creator.setEnabled(isAddPermitted());
+		creator.setEnabled(isWritePermitted());
 	}
 
-	/** Check if the user is permitted to add an incident */
-	private boolean isAddPermitted() {
-		return dispatcher.isAddPermitted("oname");
+	/** Check if the user is permitted to write an incident */
+	private boolean isWritePermitted() {
+		return dispatcher.isWritePermitted("oname");
 	}
 }

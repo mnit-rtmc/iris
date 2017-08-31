@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -224,7 +224,7 @@ public class SignTextModel {
 		SignGroup sg = getLocalSignGroup();
 		if (sg != null) {
 			String oname = sg.getName() + "_XX";
-			return creator.isAddPermitted(oname);
+			return creator.isWritePermitted(oname);
 		} else
 			return false;
 	}

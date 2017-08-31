@@ -255,20 +255,20 @@ public class Session {
 		return null;
 	}
 
-	/** Check if the user is permitted to add an object, regardless of
+	/** Check if the user is permitted to write an object, regardless of
 	 * EDIT mode.
-	 * @param tname Type name of object to add.
-	 * @param oname Name of object to add.
-	 * @return true if user can add the object */
-	public boolean isAddPermitted(String tname, String oname) {
+	 * @param tname Type name of object to check.
+	 * @param oname Name of object to check.
+	 * @return true if user can write the object */
+	public boolean isWritePermitted(String tname, String oname) {
 		return canWrite(new Name(tname, oname), true);
 	}
 
-	/** Check if the user is permitted to add an object, regardless of
+	/** Check if the user is permitted to write an object, regardless of
 	 * EDIT mode.
-	 * @param tname Type name of object to add.
+	 * @param tname Type name of object to check.
 	 * @return true if user can add the object */
-	public boolean isAddPermitted(String tname) {
+	public boolean isWritePermitted(String tname) {
 		return canWrite(tname, "oname", true);
 	}
 

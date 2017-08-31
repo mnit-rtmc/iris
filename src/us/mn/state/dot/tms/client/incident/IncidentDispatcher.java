@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -279,7 +279,7 @@ public class IncidentDispatcher extends IPanel
 	/** Create a new incident */
 	private void create(ClientIncident inc) {
 		String name = createUniqueIncidentName();
-		if (isAddPermitted(name)) {
+		if (isWritePermitted(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			Incident rpl = getReplaces(inc);
@@ -494,7 +494,7 @@ public class IncidentDispatcher extends IPanel
 	/** Enable the dispatcher widgets */
 	private void enableWidgets(Incident inc) {
 		if (inc instanceof ClientIncident) {
-			boolean p = isAddPermitted("oname");
+			boolean p = isWritePermitted("oname");
 			detail_cbx.setEnabled(p);
 			camera_cbx.setEnabled(p);
 			cam_cards.show(cam_pnl, CAMERA_CBOX);
@@ -575,9 +575,9 @@ public class IncidentDispatcher extends IPanel
 		return mdl;
 	}
 
-	/** Check if the user is permitted to add the named incident */
-	public boolean isAddPermitted(String oname) {
-		return session.isAddPermitted(Incident.SONAR_TYPE, oname);
+	/** Check if the user is permitted to write the named incident */
+	public boolean isWritePermitted(String oname) {
+		return session.isWritePermitted(Incident.SONAR_TYPE, oname);
 	}
 
 	/** Check if the user is permitted to update the given incident */

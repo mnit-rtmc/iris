@@ -60,7 +60,7 @@ public class SignTextCreator {
 	{
 		multi = new MultiString(multi).normalize();
 		String name = createUniqueSignTextName(sg);
-		if (isAddPermitted(name)) {
+		if (isWritePermitted(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
 			attrs.put("sign_group", sg);
@@ -71,9 +71,9 @@ public class SignTextCreator {
 		}
 	}
 
-	/** Check if the user is permitted to add the named sign text */
-	public boolean isAddPermitted(String name) {
-		return session.isAddPermitted(SignText.SONAR_TYPE, name);
+	/** Check if the user is permitted to write the named sign text */
+	public boolean isWritePermitted(String name) {
+		return session.isWritePermitted(SignText.SONAR_TYPE, name);
 	}
 
 	/**
