@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,7 @@ import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Properties;
 import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.PrivChecker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.GateArmArray;
@@ -61,17 +62,18 @@ public class WhitelistNamespace extends ServerNamespace {
 	}
 
 	/** Check name and whitelist */
-	private boolean checkList(Name n, InetAddress a) {
-		return (!isNameChecked(n)) || checkList(a);
+	private boolean checkList(PrivChecker pc, InetAddress a) {
+		return (pc instanceof Name) &&
+		       (!isNameChecked((Name) pc)) || checkList(a);
 	}
 
-	/** Check if a user has update privileges for a name.
-	 * @param n Name to check.
+	/** Check if a user has write privileges.
+	 * @param pc Privilege checker.
 	 * @param u User to check.
 	 * @param a Inet address of connection.
 	 * @return true if update is allowed; false otherwise. */
 	@Override
-	public boolean canWrite(Name n, User u, InetAddress a) {
-		return checkList(n, a) && canWrite(n, u);
+	public boolean canWrite(PrivChecker pc, User u, InetAddress a) {
+		return checkList(pc, a) && canWrite(pc, u);
 	}
 }
