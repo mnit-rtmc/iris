@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -162,7 +162,7 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 	@Override
 	public void doSetTypeN(String n) throws TMSException, NamespaceError {
 		if (!n.equals(getTypeN())) {
-			checkPattern(TYPE_ATTR_PATTERN, n);
+			checkPattern(n);
 			store.update(this, "type_n", n);
 			setTypeN(n);
 		}
@@ -182,7 +182,7 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 	@Override
 	public void doSetAttrN(String n) throws TMSException, NamespaceError {
 		if (!n.equals(getAttrN())) {
-			checkPattern(TYPE_ATTR_PATTERN, n);
+			checkPattern(n);
 			store.update(this, "attr_n", n);
 			setAttrN(n);
 		}
