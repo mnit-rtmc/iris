@@ -288,7 +288,8 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** Check group membership */
 	@Override
 	public boolean isInGroup(String g) {
-		return false;
+		// Always treat object name as "local" group
+		return g.equals(name);
 	}
 
 	/** Create a new base object */
