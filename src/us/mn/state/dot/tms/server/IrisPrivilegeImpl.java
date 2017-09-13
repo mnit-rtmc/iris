@@ -41,7 +41,7 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 		throws TMSException
 	{
 		store = c;
-		store.query("SELECT name, capability, type_n, obj_n, " +
+		store.query("SELECT name, capability, type_n, obj_n, group_n, "+
 			"attr_n, write FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
@@ -59,6 +59,7 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 		map.put("capability", getCapability());
 		map.put("type_n", getTypeN());
 		map.put("obj_n", getObjN());
+		map.put("group_n", getGroupN());
 		map.put("attr_n", getAttrN());
 		map.put("write", getWrite());
 		return map;
@@ -89,26 +90,28 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 		     row.getString(2),	// capability
 		     row.getString(3),	// typeN
 		     row.getString(4),	// objN
-		     row.getString(5),	// attrN
-		     row.getBoolean(6)	// write
+		     row.getString(5),	// groupN
+		     row.getString(6),	// attrN
+		     row.getBoolean(7)	// write
 		);
 	}
 
 	/** Create an IRIS privilege from database lookup */
 	private IrisPrivilegeImpl(Namespace ns, String n, String c, String tn,
-		String on, String an, boolean w)
+		String on, String gn, String an, boolean w)
 	{
 		this(n, (Capability) ns.lookupObject(Capability.SONAR_TYPE, c),
-		     tn, on, an, w);
+		     tn, on, gn, an, w);
 	}
 
 	/** Create an IRIS privilege from database lookup */
 	private IrisPrivilegeImpl(String n, Capability c, String tn,
-		String on, String an, boolean w)
+		String on, String gn, String an, boolean w)
 	{
 		super(n, c);
 		setTypeN(tn);
 		setObjN(on);
+		setGroupN(gn);
 		setAttrN(an);
 		setWrite(w);
 	}
@@ -175,6 +178,16 @@ public class IrisPrivilegeImpl extends PrivilegeImpl
 			checkPattern(OBJ_PATTERN, n);
 			store.update(this, "obj_n", n);
 			setObjN(n);
+		}
+	}
+
+	/** Set the group name */
+	@Override
+	public void doSetGroupN(String n) throws TMSException, NamespaceError {
+		if (!n.equals(getGroupN())) {
+			checkPattern(n);
+			store.update(this, "group_n", n);
+			setGroupN(n);
 		}
 	}
 
