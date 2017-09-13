@@ -33,4 +33,20 @@ CREATE VIEW detector_view AS
 	LEFT JOIN controller_view c ON d.controller = c.name;
 GRANT SELECT ON detector_view TO PUBLIC;
 
+-- Add group_n column to privilege table
+ALTER TABLE iris.privilege ADD COLUMN group_n VARCHAR(16);
+UPDATE iris.privilege SET group_n = '';
+ALTER TABLE iris.privilege ALTER COLUMN group_n SET NOT NULL;
+
+DROP VIEW role_privilege_view;
+
+CREATE VIEW role_privilege_view AS
+	SELECT role, type_n, obj_n, group_n, attr_n, write
+	FROM iris.role
+	JOIN iris.role_capability ON role.name = role_capability.role
+	JOIN iris.capability ON role_capability.capability = capability.name
+	JOIN iris.privilege ON privilege.capability = role_capability.capability
+	WHERE role.enabled = 't' AND capability.enabled = 't';
+GRANT SELECT ON role_privilege_view TO PUBLIC;
+
 COMMIT;
