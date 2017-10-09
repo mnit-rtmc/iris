@@ -146,8 +146,8 @@ public enum CommProtocol {
 	/** GPS using TAIP protocol (37) */
 	GPS_TAIP("GPS TAIP"),
 
-	/** GPS using NMEA protocol (38) */
-	GPS_NMEA("GPS NMEA"),
+	/** Sierra Wireless GX modem (38) */
+	SIERRA_GX("SierraGX"),
 
 	/** GPS using RedLion AT+BMDIAG command (39) */
 	GPS_REDLION("GPS RedLion"),

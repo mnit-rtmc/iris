@@ -39,4 +39,7 @@ UPDATE iris._detector
    SET fake = regexp_replace(fake, '+', ' ', 'g')
  WHERE fake IS NOT NULL;
 
+-- Add SierraGX protocol
+UPDATE iris.comm_protocol SET description = 'SierraGX' WHERE id = 38;
+
 COMMIT;

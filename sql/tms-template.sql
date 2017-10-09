@@ -1128,7 +1128,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 35	MonStream
 36	Gate NDORv5
 37	GPS TAIP
-38	GPS NMEA
+38	SierraGX
 39	GPS RedLion
 40	Cohu Helios PTZ
 \.

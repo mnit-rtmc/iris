@@ -37,6 +37,7 @@ import us.mn.state.dot.tms.server.comm.ntcip.NtcipPoller;
 import us.mn.state.dot.tms.server.comm.org815.Org815Poller;
 import us.mn.state.dot.tms.server.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.server.comm.pelcop.PelcoPPoller;
+import us.mn.state.dot.tms.server.comm.sierragx.SierraGxPoller;
 import us.mn.state.dot.tms.server.comm.ss105.SS105Poller;
 import us.mn.state.dot.tms.server.comm.ss125.SS125Poller;
 import us.mn.state.dot.tms.server.comm.ssi.SsiPoller;
@@ -106,6 +107,8 @@ public class DevicePollerFactory {
 			return new E6Poller(name);
 		case VICON_PTZ:
 			return new ViconPTZPoller(name);
+		case SIERRA_GX:
+			return new SierraGxPoller(name);
 		case GPS_REDLION:
 			return new RedLionPoller(name);
 		case COHU_HELIOS_PTZ:
