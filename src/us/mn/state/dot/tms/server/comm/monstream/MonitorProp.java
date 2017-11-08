@@ -106,6 +106,9 @@ public class MonitorProp extends MonProp {
 	private String getMonLabel(VideoMonitorImpl mon) {
 		if (mon != null) {
 			int n = mon.getMonNum();
+			// Hack for media monitors
+			if (n >= 187 && n <= 190)
+				return "";
 			if (n > 0)
 				return Integer.toString(n);
 			else
