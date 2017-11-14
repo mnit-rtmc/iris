@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -59,6 +59,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Valid density threshold for speed calculation */
 	static private final float DENSITY_THRESHOLD = 1.2f;
+
+	/** Volume "chatter" threshold */
+	static private final Interval CHATTER_THRESHOLD =
+		new Interval(1, Interval.Units.MINUTES);
 
 	/** Maximum "realistic" volume for a 30-second sample */
 	static private final int MAX_VOLUME = 37;
@@ -501,6 +505,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Accumulator for number of seconds with no hits (volume) */
 	private transient int no_hits = 0;
 
+	/** Accumulator for number of seconds chattering */
+	private transient int chatter = 0;
+
 	/** Accumulator for number of seconds locked on (scans) */
 	private transient int locked_on = 0;
 
@@ -722,14 +729,23 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Test a volume sample with error detecting algorithms */
 	private void testVolume(PeriodicSample vs) {
-		if (vs.value > MAX_VOLUME)
-			malfunction(EventType.DET_CHATTER);
+		if (vs.value > MAX_VOLUME) {
+			chatter += vs.period;
+			if (chatter > getChatterThreshold().seconds())
+				malfunction(EventType.DET_CHATTER);
+		} else
+			chatter = 0;
 		if (vs.value == 0) {
 			no_hits += vs.period;
 			if (no_hits > getNoHitThreshold().seconds())
 				malfunction(EventType.DET_NO_HITS);
 		} else
 			no_hits = 0;
+	}
+
+	/** Get the volume "chatter" threshold */
+	private Interval getChatterThreshold() {
+		return CHATTER_THRESHOLD;
 	}
 
 	/** Get the volume "no hit" threshold */
