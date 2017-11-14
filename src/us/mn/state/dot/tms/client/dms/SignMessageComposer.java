@@ -92,7 +92,7 @@ public class SignMessageComposer extends JPanel {
 	public void updateMessage() {
 		if (adjusting == 0) {
 			adjusting++;
-			dispatcher.setComposedMulti(composeMessage());
+			dispatcher.setComposedMulti(getComposedMulti());
 			dispatcher.selectPreview(true);
 			adjusting--;
 		}
@@ -273,7 +273,7 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Compose a MULTI string using the contents of the widgets */
-	private String composeMessage() {
+	public String getComposedMulti() {
 		MultiString[] mess = new MultiString[n_pages];
 		int fn = default_font;
 		int p = 0;
@@ -368,7 +368,7 @@ public class SignMessageComposer extends JPanel {
 
 	/** Store the composed message as a quick-message */
 	public void storeAsQuickMessage() {
-		String multi = composeMessage();
+		String multi = getComposedMulti();
 		session.getDesktop().show(new StoreQuickMessageForm(session,
 			multi));
 	}

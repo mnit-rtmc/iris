@@ -163,9 +163,9 @@ public class DMSDispatcher extends JPanel {
 	 * on the dispatcher with the specified message. */
 	public void setComposedMulti(String ms) {
 		if (ms != null) {
-			multi = ms;
-			singleTab.setMessage();
 			composer.setComposedMulti(ms);
+			multi = composer.getComposedMulti();
+			singleTab.setMessage();
 		}
 	}
 
