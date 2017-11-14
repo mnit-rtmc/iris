@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -197,10 +197,10 @@ public class ComposerMiscPanel extends JPanel {
 		alert_chx.setEnabled(b);
 	}
 
-	/** Set the currently selected message */
-	public void setMessage(String ms) {
+	/** Set the composed MULTI string */
+	public void setComposedMulti(String ms) {
 		adjusting++;
-		quick_cbx.setMessage(ms);
+		quick_cbx.setComposedMulti(ms);
 		pg_on_spn.setValue(ms);
 		adjusting--;
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -133,16 +133,16 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 	/** Update the dispatcher with the specified quick message */
 	protected void updateDispatcher(QuickMessage qm) {
 		String ms = qm.getMulti();
-		if(adjusting == 0 && !ms.isEmpty()) {
-			dispatcher.setMessage(ms);
+		if (adjusting == 0 && !ms.isEmpty()) {
+			dispatcher.setComposedMulti(ms);
 			dispatcher.selectPreview(true);
 		}
 	}
 
-	/** Set the current message MULTI string */
-	public void setMessage(String ms) {
+	/** Set the composed MULTI string */
+	public void setComposedMulti(String ms) {
 		adjusting++;
-		if(ms.isEmpty())
+		if (ms.isEmpty())
 			setSelectedItem(null);
 		else
 			setSelectedItem(QuickMessageHelper.find(ms));

@@ -121,9 +121,6 @@ public class DMSDispatcher extends JPanel {
 	/** Raster graphic builder */
 	private RasterBuilder builder;
 
-	/** Selected message MULTI string */
-	private String multi = "";
-
 	/** Create a new DMS dispatcher */
 	public DMSDispatcher(Session s, DMSManager manager) {
 		super(new BorderLayout());
@@ -159,9 +156,27 @@ public class DMSDispatcher extends JPanel {
 		composer.dispose();
 	}
 
+	/** Composed MULTI string */
+	private String multi = "";
+
+	/** Set the composed MULTI string.  This will update all the widgets
+	 * on the dispatcher with the specified message. */
+	public void setComposedMulti(String ms) {
+		if (ms != null) {
+			multi = ms;
+			singleTab.setMessage();
+			composer.setComposedMulti(ms);
+		}
+	}
+
+	/** Get the composed MULTI string */
+	public String getComposedMulti() {
+		return multi;
+	}
+
 	/** Get the preview MULTI string */
-	public String getMulti() {
-		String ms = getMessage();
+	private String getPreviewMulti() {
+		String ms = getComposedMulti();
 		String prefix = getPagePrefix();
 		if (prefix.isEmpty())
 			return ms;
@@ -415,7 +430,7 @@ public class DMSDispatcher extends JPanel {
 	private void clearSelected() {
 		setEnabled(false);
 		composer.setSign(null, null);
-		setMessage("");
+		setComposedMulti("");
 		singleTab.setSelected(null);
 		selectSingleTab();
 	}
@@ -426,7 +441,7 @@ public class DMSDispatcher extends JPanel {
 			setEnabled(true);
 			SignMessage sm = dms.getMsgCurrent();
 			if (sm != null)
-				setMessage(sm.getMulti());
+				setComposedMulti(sm.getMulti());
 		} else
 			setEnabled(false);
 		singleTab.setSelected(dms);
@@ -454,32 +469,17 @@ public class DMSDispatcher extends JPanel {
 			selectPreview(false);
 	}
 
-	/** Set the fully composed message.  This will update all the widgets
-	 * on the dispatcher with the specified message. */
-	public void setMessage(String ms) {
-		if (ms != null) {
-			multi = ms;
-			singleTab.setMessage();
-			composer.setMessage(ms);
-		}
-	}
-
-	/** Get the selected message */
-	public String getMessage() {
-		return multi;
-	}
-
 	/** Select the preview mode */
 	public void selectPreview(boolean p) {
 		singleTab.selectPreview(p);
 	}
 
-	/** Get raster graphic array for the selected message */
-	public RasterGraphic[] getPixmaps() {
+	/** Get pixmaps for the preview message */
+	public RasterGraphic[] getPreviewPixmaps() {
 		RasterBuilder b = builder;
 		if (b != null) {
 			try {
-				String ms = getMulti();
+				String ms = getPreviewMulti();
 				return b.createPixmaps(new MultiString(ms));
 			}
 			catch (IndexOutOfBoundsException e) {
