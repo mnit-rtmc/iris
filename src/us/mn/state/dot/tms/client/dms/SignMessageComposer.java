@@ -158,6 +158,7 @@ public class SignMessageComposer extends JPanel {
 			pg.clearWidgets();
 		dispatcher.setComposedMulti("");
 		misc_pnl.setComposedMulti("");
+		misc_pnl.clearWidgets();
 		adjusting--;
 	}
 

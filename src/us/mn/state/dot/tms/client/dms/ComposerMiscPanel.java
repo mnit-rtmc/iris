@@ -151,7 +151,7 @@ public class ComposerMiscPanel extends JPanel {
 	}
 
 	/** Clear the widgets */
-	private void clearWidgets() {
+	public void clearWidgets() {
 		adjusting++;
 		pg_on_spn.setValue("");
 		adjusting--;
