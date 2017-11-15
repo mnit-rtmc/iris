@@ -42,7 +42,7 @@ public class OpStatus extends OpStep {
 		String.valueOf(MonProp.UNIT_SEP);
 
 	/** Buffer to parse received data */
-	private final byte[] buf = new byte[1024];
+	private final byte[] buf = new byte[2048];
 
 	/** Create a new status op */
 	public OpStatus() {
@@ -65,7 +65,7 @@ public class OpStatus extends OpStep {
 	/** Parse received data */
 	private void doRecv(Operation op, ByteBuffer rx_buf) throws IOException{
 		ControllerImpl ctrl = op.getController();
-		int len = rx_buf.remaining();
+		int len = Math.min(rx_buf.remaining(), buf.length);
 		rx_buf.get(buf, 0, len);
 		doRecv(ctrl, new String(buf, 0, len, "UTF8"));
 	}
