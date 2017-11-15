@@ -30,7 +30,6 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
-import us.mn.state.dot.sonar.client.ProxyListener;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Controller;
@@ -41,6 +40,8 @@ import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraPresetAction;
+import us.mn.state.dot.tms.client.proxy.ProxyView;
+import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
@@ -57,7 +58,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  * @author Michael Darter
  */
-public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
+public class SingleSignTab extends IPanel {
 
 	/** Displays the id of the DMS */
 	private final JLabel name_lbl = createValueLabel();
@@ -76,9 +77,9 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		new IAction("item.style.aws.controlled")
 	{
 		protected void doActionPerformed(ActionEvent e) {
-			DMS proxy = watching;
-			if (proxy != null) {
-				proxy.setAwsControlled(
+			DMS dms = selected;
+			if (dms != null) {
+				dms.setAwsControlled(
 					aws_control_chk.isSelected());
 			}
 		}
@@ -124,19 +125,25 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Cache of DMS proxy objects */
 	private final TypeCache<DMS> cache;
 
-	/** Currently selected DMS.  This will be null if there are zero or
-	 * multiple DMS selected. */
-	private DMS watching;
+	/** DMS watcher */
+	private final ProxyWatcher<DMS> watcher;
 
-	/** Watch a DMS */
-	private void watch(final DMS nw) {
-		final DMS ow = watching;
-		if (ow != null)
-			cache.ignoreObject(ow);
-		watching = nw;
-		if (nw != null)
-			cache.watchObject(nw);
-	}
+	/** DMS view */
+	private final ProxyView<DMS> dms_view =
+		new ProxyView<DMS>()
+	{
+		public void update(DMS dms, String a) {
+			selected = dms;
+			updateAttribute(dms, a);
+		}
+		public void clear() {
+			selected = null;
+			clearSelected();
+		}
+	};
+
+	/** Currently selected DMS */
+	private DMS selected;
 
 	/** Preview mode */
 	private boolean preview;
@@ -151,6 +158,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		session = s;
 		dispatcher = d;
 		cache = s.getSonarState().getDmsCache().getDMSs();
+		watcher = new ProxyWatcher<DMS>(cache, dms_view, true);
 	}
 
 	/** Initialize the panel */
@@ -185,7 +193,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 		tab.add(I18N.get("dms.msg.preview"), preview_pnl);
 		add(tab, Stretch.CENTER);
 		createJobs();
-		cache.addProxyListener(this);
+		watcher.initialize();
 	}
 
 	/** Create the widget jobs */
@@ -194,7 +202,7 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 			public void stateChanged(ChangeEvent e) {
 				selectPreview(!preview);
 				if ((0 == adjusting) && !preview) {
-					DMS dms = watching;
+					DMS dms = selected;
 					if (dms != null)
 						updateMessageCurrent(dms);
 				}
@@ -213,43 +221,12 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Dispose of the sign tab */
 	@Override
 	public void dispose() {
+		watcher.dispose();
 		current_pnl.removeMouseListener(popper);
 		preview_pnl.removeMouseListener(popper);
 		setSelected(null);
-		cache.removeProxyListener(this);
 		setPager(null);
 		super.dispose();
-	}
-
-	/** A new proxy has been added */
-	@Override
-	public void proxyAdded(DMS proxy) {
-		// we're not interested
-	}
-
-	/** Enumeration of the proxy type has completed */
-	@Override
-	public void enumerationComplete() {
-		// we're not interested
-	}
-
-	/** A proxy has been removed */
-	@Override
-	public void proxyRemoved(DMS proxy) {
-		// Note: the DMSManager will remove the proxy from the
-		//       ProxySelectionModel, so we can ignore this.
-	}
-
-	/** A proxy has been changed */
-	@Override
-	public void proxyChanged(final DMS proxy, final String a) {
-		if (proxy == watching) {
-			runSwing(new Runnable() {
-				public void run() {
-					updateAttribute(proxy, a);
-				}
-			});
-		}
 	}
 
 	/** Select the preview (or current) tab */
@@ -265,21 +242,17 @@ public class SingleSignTab extends IPanel implements ProxyListener<DMS> {
 	/** Set the displayed message */
 	public void setMessage() {
 		if (preview) {
-			updatePreviewPanel(watching);
+			updatePreviewPanel(selected);
 			tab.setSelectedComponent(preview_pnl);
 		} else {
-			updateCurrentPanel(watching);
+			updateCurrentPanel(selected);
 			tab.setSelectedComponent(current_pnl);
 		}
 	}
 
 	/** Set a single selected DMS */
 	public void setSelected(DMS dms) {
-		watch(dms);
-		if (dms != null)
-			updateAttribute(dms, null);
-		else
-			clearSelected();
+		watcher.setProxy(dms);
 	}
 
 	/** Clear the selected DMS */
