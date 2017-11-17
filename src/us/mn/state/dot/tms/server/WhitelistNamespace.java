@@ -18,7 +18,6 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Properties;
-import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.PrivChecker;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.ServerNamespace;
@@ -32,9 +31,9 @@ import us.mn.state.dot.tms.utils.CIDRAddress;
  */
 public class WhitelistNamespace extends ServerNamespace {
 
-	/** Check if name is checked */
-	static private boolean isNameChecked(Name n) {
-		return GateArmArray.SONAR_TYPE.equals(n.getTypePart());
+	/** Check if type is checked */
+	static private boolean isTypeChecked(String t) {
+		return GateArmArray.SONAR_TYPE.equals(t);
 	}
 
 	/** Whitelist of CIDR addresses */
@@ -63,8 +62,7 @@ public class WhitelistNamespace extends ServerNamespace {
 
 	/** Check name and whitelist */
 	private boolean checkList(PrivChecker pc, InetAddress a) {
-		return (pc instanceof Name) &&
-		       (!isNameChecked((Name) pc)) || checkList(a);
+		return (!isTypeChecked(pc.getTypePart())) || checkList(a);
 	}
 
 	/** Check if a user has write privileges.
