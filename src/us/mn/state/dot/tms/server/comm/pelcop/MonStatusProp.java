@@ -63,12 +63,15 @@ public class MonStatusProp extends PelcoPProp {
 	static private Camera findCam(int cam_num) {
 		// First, lookup a guessed name for camera
 		Camera c = CameraHelper.lookup(buildCamName(cam_num));
-		if (c != null)
-			return c;
-		else {
-			// Guess not correct, do linear search
-			return CameraHelper.findUID(cam_num);
+		if (c != null) {
+			// Is the camera number correct?
+			Integer cn = c.getCamNum();
+			if (cn != null && cn == cam_num)
+				return c;
 		}
+		// Do a linear search for camera number
+		Camera nc = CameraHelper.findUID(cam_num);
+		return (nc != null) ? nc : c;
 	}
 
 	/** Find a camera by UID */
