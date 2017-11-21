@@ -124,8 +124,8 @@ public class CameraDispatcher extends JPanel {
 		new ProxyView<VideoMonitor>()
 	{
 		public void update(VideoMonitor vm, String a) {
-			video_monitor = getSelectedMonitor();
-			selectMonitorCamera(selected);
+			video_monitor = vm;
+			selectCamera(vm.getCamera());
 		}
 		public void clear() {
 			video_monitor = null;
@@ -387,7 +387,13 @@ public class CameraDispatcher extends JPanel {
 
 	/** Called when a video monitor is selected */
 	private void monitorSelected() {
-		watcher.setProxy(getSelectedMonitor());
+		watcher.setProxy(getSelectedOutput());
+	}
+
+	/** Get the selected video monitor from UI */
+	private VideoMonitor getSelectedOutput() {
+		Object o = output_cbx.getSelectedItem();
+		return (o instanceof VideoMonitor) ? (VideoMonitor) o : null;
 	}
 
 	/** Select a video monitor */
@@ -397,8 +403,7 @@ public class CameraDispatcher extends JPanel {
 
 	/** Get the selected video monitor */
 	public VideoMonitor getSelectedMonitor() {
-		Object o = output_cbx.getSelectedItem();
-		return (o instanceof VideoMonitor) ? (VideoMonitor) o : null;
+		return video_monitor;
 	}
 
 	/** Select a camera on the selected video monitor */
