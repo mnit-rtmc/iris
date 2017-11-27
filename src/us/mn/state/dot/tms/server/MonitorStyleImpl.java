@@ -31,8 +31,9 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 	/** Load all the monitor styles */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, MonitorStyleImpl.class);
-		store.query("SELECT name, force_aspect, accent, font_sz " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, force_aspect, accent, font_sz, " +
+			"title_bar FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new MonitorStyleImpl(row));
@@ -48,6 +49,7 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 		map.put("force_aspect", force_aspect);
 		map.put("accent", accent);
 		map.put("font_sz", font_sz);
+		map.put("title_bar", title_bar);
 		return map;
 	}
 
@@ -69,6 +71,7 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 		force_aspect = false;
 		accent = DEFAULT_ACCENT;
 		font_sz = DEFAULT_FONT_SZ;
+		title_bar = true;
 	}
 
 	/** Create a monitor style */
@@ -76,16 +79,20 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 		this(row.getString(1),		// name
 		     row.getBoolean(2),		// force_aspect
 		     row.getString(3),		// accent
-		     row.getInt(4)		// font_sz
+		     row.getInt(4),		// font_sz
+		     row.getBoolean(5)		// title_bar
 		);
 	}
 
 	/** Create a new monitor style */
-	private MonitorStyleImpl(String n, boolean fa, String a, int fs) {
+	private MonitorStyleImpl(String n, boolean fa, String a, int fs,
+		boolean tb)
+	{
 		this(n);
 		force_aspect = fa;
 		accent = a;
 		font_sz = fs;
+		title_bar = tb;
 	}
 
 	/** Force-aspect ratio flag */
@@ -155,5 +162,28 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 	@Override
 	public int getFontSz() {
 		return font_sz;
+	}
+
+	/** Title-bar flag */
+	private boolean title_bar;
+
+	/** Set title-bar flag */
+	@Override
+	public void setTitleBar(boolean tb) {
+		title_bar = tb;
+	}
+
+	/** Set title-bar flag */
+	public void doSetTitleBar(boolean tb) throws TMSException {
+		if (tb != title_bar) {
+			store.update(this, "title_bar", tb);
+			setTitleBar(tb);
+		}
+	}
+
+	/** Get title-bar flag */
+	@Override
+	public boolean getTitleBar() {
+		return title_bar;
 	}
 }

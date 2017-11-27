@@ -57,6 +57,12 @@ public class MonitorProp extends MonProp {
 		      : MonitorStyle.DEFAULT_FONT_SZ;
 	}
 
+	/** Get the monitor title bar */
+	static private boolean getTitleBar(VideoMonitorImpl mon) {
+		MonitorStyle ms = monitorStyle(mon);
+		return (ms != null) && ms.getTitleBar();
+	}
+
 	/** Current controller pin */
 	private int pin = 1;
 
@@ -104,17 +110,15 @@ public class MonitorProp extends MonProp {
 
 	/** Get monitor label as a string */
 	private String getMonLabel(VideoMonitorImpl mon) {
-		if (mon != null) {
+		if (getTitleBar(mon)) {
+			assert mon != null;
 			int n = mon.getMonNum();
-			// Hack for media monitors
-			if (n >= 187 && n <= 190)
-				return "";
 			if (n > 0)
 				return Integer.toString(n);
 			else
 				return mon.getName();
-		}
-		return "";
+		} else
+			return "";
 	}
 
 	/** Get a string representation of the property */

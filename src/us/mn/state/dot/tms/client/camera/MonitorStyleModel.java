@@ -87,6 +87,20 @@ public class MonitorStyleModel extends ProxyTableModel<MonitorStyle> {
 					ms.setFontSz((Integer) value);
 			}
 		});
+		cols.add(new ProxyColumn<MonitorStyle>("monitor.title.bar",
+			120, Boolean.class)
+		{
+			public Object getValueAt(MonitorStyle ms) {
+				return ms.getTitleBar();
+			}
+			public boolean isEditable(MonitorStyle ms) {
+				return canWrite(ms, "titleBar");
+			}
+			public void setValueAt(MonitorStyle ms, Object value) {
+				if (value instanceof Boolean)
+					ms.setTitleBar((Boolean) value);
+			}
+		});
 		return cols;
 	}
 

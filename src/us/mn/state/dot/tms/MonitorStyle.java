@@ -49,4 +49,10 @@ public interface MonitorStyle extends SonarObject {
 
 	/** Get the font size (pt) */
 	int getFontSz();
+
+	/** Set title-bar flag */
+	void setTitleBar(boolean tb);
+
+	/** Get title-bar flag */
+	boolean getTitleBar();
 }
