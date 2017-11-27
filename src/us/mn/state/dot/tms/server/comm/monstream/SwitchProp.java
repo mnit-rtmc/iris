@@ -35,11 +35,6 @@ import us.mn.state.dot.tms.utils.URIUtil;
  */
 public class SwitchProp extends MonProp {
 
-	/** Get the blank URL */
-	static private String getBlankUrl() {
-		return SystemAttrEnum.CAMERA_BLANK_URL.getString();
-	}
-
 	/** Get the construction URL */
 	static private String getConstructionUrl() {
 		return SystemAttrEnum.CAMERA_CONSTRUCTION_URL.getString();
@@ -115,7 +110,7 @@ public class SwitchProp extends MonProp {
 	/** Get the stream URI */
 	private String getUri() {
 		if (isCameraBlank())
-			return getBlankUrl();
+			return "";
 		else {
 			assert camera != null;
 			String cond = getConditionUri();

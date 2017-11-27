@@ -2763,7 +2763,6 @@ COPY iris.encoding (id, description) FROM stdin;
 
 COPY iris.system_attribute (name, value) FROM stdin;
 camera_autoplay	true
-camera_blank_url	
 camera_construction_url	
 camera_num_blank	999
 camera_out_of_service_url	
