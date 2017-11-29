@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,6 +78,11 @@ public class TableMapping {
 		      " VALUES ('" + key + "','";
 	}
 
+	/** Create an SQL insert statement */
+	private String createInsert(String start, Storable v) {
+		return start + v.getKey() + "');";
+	}
+
 	/** Update the relation from one table to a set in the other */
 	public void update(Storable owner, Set<Storable> values)
 		throws TMSException
@@ -91,10 +96,9 @@ public class TableMapping {
 				if (first) {
 					first = false;
 					return createDelete(key);
-				} else if (it.hasNext()) {
-					Storable v = it.next();
-					return insert + v.getKey() + "');";
-				} else
+				} else if (it.hasNext())
+					return createInsert(insert, it.next());
+				else
 					return null;
 			}
 		});
