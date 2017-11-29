@@ -58,6 +58,7 @@ CREATE TABLE iris.role_capability (
 	role VARCHAR(15) NOT NULL REFERENCES iris.role,
 	capability VARCHAR(16) NOT NULL REFERENCES iris.capability
 );
+ALTER TABLE iris.role_capability ADD PRIMARY KEY (role, capability);
 
 CREATE TABLE iris.direction (
 	id smallint PRIMARY KEY,
@@ -250,6 +251,7 @@ CREATE TABLE iris.day_plan_day_matcher (
 	day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
 	day_matcher VARCHAR(32) NOT NULL REFERENCES iris.day_matcher
 );
+ALTER TABLE iris.day_plan_day_matcher ADD PRIMARY KEY (day_plan, day_matcher);
 
 CREATE TABLE iris.geo_loc (
 	name VARCHAR(20) PRIMARY KEY,
@@ -1344,6 +1346,7 @@ CREATE TABLE iris.tag_reader_dms (
 	tag_reader VARCHAR(20) NOT NULL REFERENCES iris._tag_reader,
 	dms VARCHAR(20) NOT NULL REFERENCES iris._dms
 );
+ALTER TABLE iris.tag_reader_dms ADD PRIMARY KEY (tag_reader, dms);
 
 CREATE TABLE iris.lcs_lock (
 	id INTEGER PRIMARY KEY,

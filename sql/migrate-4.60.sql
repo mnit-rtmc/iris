@@ -21,4 +21,9 @@ CREATE VIEW monitor_style_view AS
 	FROM iris.monitor_style;
 GRANT SELECT ON monitor_style_view TO PUBLIC;
 
+-- Add primary keys to relation tables
+ALTER TABLE iris.role_capability ADD PRIMARY KEY (role, capability);
+ALTER TABLE iris.day_plan_day_matcher ADD PRIMARY KEY (day_plan, day_matcher);
+ALTER TABLE iris.tag_reader_dms ADD PRIMARY KEY (tag_reader, dms);
+
 COMMIT;
