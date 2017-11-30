@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,6 +31,15 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 public class FontComboBoxModel extends ProxyListModel<Font>
 	implements ComboBoxModel<Font>
 {
+	/** Create a new font combo box model */
+	static public FontComboBoxModel create(TypeCache<Font> fonts,
+		RasterBuilder b)
+	{
+		FontComboBoxModel mdl = new FontComboBoxModel(fonts, b);
+		mdl.initialize();
+		return mdl;
+	}
+
 	/** Raster graphic builder */
 	private final RasterBuilder builder;
 
@@ -38,10 +47,9 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 	private Font sel_font;
 
 	/** Create a new font combo box model */
-	public FontComboBoxModel(TypeCache<Font> arg_fonts, RasterBuilder b) {
-		super(arg_fonts);
+	private FontComboBoxModel(TypeCache<Font> fonts, RasterBuilder b) {
+		super(fonts);
 		builder = b;
-		initialize();
 	}
 
 	/** Get a font proxy comparator */

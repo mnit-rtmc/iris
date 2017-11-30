@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ public class FontComboBox extends JComboBox<Font> implements ActionListener {
 		if (font_mdl != null)
 			font_mdl.dispose();
 		if (rb != null) {
-			font_mdl = new FontComboBoxModel(composer.getFonts(),
+			font_mdl = FontComboBoxModel.create(composer.getFonts(),
 				rb);
 			setModel(font_mdl);
 		} else
