@@ -45,6 +45,7 @@ public class StyleListModel<T extends SonarObject> extends ProxyListModel<T> {
 		style = ItemStyle.lookupStyle(name);
 		smodel = new ProxyListSelectionModel<T>(this,
 			m.getSelectionModel());
+		initialize();
 	}
 
 	/** Dispose of the list model */
