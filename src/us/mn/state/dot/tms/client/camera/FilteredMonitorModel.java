@@ -27,14 +27,20 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  */
 public class FilteredMonitorModel extends ProxyListModel<VideoMonitor> {
 
+	/** Create a new filtered monitor model */
+	static public FilteredMonitorModel create(Session s) {
+		FilteredMonitorModel mdl = new FilteredMonitorModel(s);
+		mdl.initialize();
+		return mdl;
+	}
+
 	/** User Session */
 	private final Session session;
 
 	/** Create a new filtered monitor model */
-	public FilteredMonitorModel(Session s) {
+	private FilteredMonitorModel(Session s) {
 		super(s.getSonarState().getCamCache().getVideoMonitors());
 		session = s;
-		initialize();
 	}
 
 	/** Check if a proxy is included in the list */

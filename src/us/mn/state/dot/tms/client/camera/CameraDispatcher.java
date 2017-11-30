@@ -267,7 +267,7 @@ public class CameraDispatcher extends JPanel {
 	/** Create the video output selection combo box */
 	private JComboBox<VideoMonitor> createOutputCombo() {
 		JComboBox<VideoMonitor> box = new JComboBox<VideoMonitor>();
-		FilteredMonitorModel m = new FilteredMonitorModel(session);
+		FilteredMonitorModel m = FilteredMonitorModel.create(session);
 		box.setModel(new IComboBoxModel<VideoMonitor>(m));
 		if (m.getSize() > 1)
 			box.setSelectedIndex(1);
