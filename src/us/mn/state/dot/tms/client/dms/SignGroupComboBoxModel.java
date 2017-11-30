@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,20 +22,27 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
- * SignGroup combo box model
+ * SignGroup combo box model.
  *
  * @author Travis Swanston
+ * @author Douglas Lau
  */
 public class SignGroupComboBoxModel extends ProxyListModel<SignGroup>
 	implements ComboBoxModel<SignGroup>
 {
+	/** Create a new SignGroupComboBox model */
+	static public SignGroupComboBoxModel create(TypeCache<SignGroup> sg) {
+		SignGroupComboBoxModel mdl = new SignGroupComboBoxModel(sg);
+		mdl.initialize();
+		return mdl;
+	}
+
 	/** Currently selected SignGroup */
 	private SignGroup sel_signgroup = null;
 
 	/** Create a new SignGroupComboBox model */
-	public SignGroupComboBoxModel(TypeCache<SignGroup> sg) {
+	private SignGroupComboBoxModel(TypeCache<SignGroup> sg) {
 		super(sg);
-		initialize();
 	}
 
 	/** Get a proxy comparator */

@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.client.Session;
 
 /**
- * SignGroup combo box
+ * SignGroup combo box.
  *
  * @author Travis Swanston
  */
@@ -34,7 +34,7 @@ public class SignGroupComboBox extends JComboBox<SignGroup> {
 	public SignGroupComboBox(Session s) {
 		TypeCache<SignGroup> sign_groups = s.getSonarState()
 			.getDmsCache().getSignGroups();
-		model = new SignGroupComboBoxModel(sign_groups);
+		model = SignGroupComboBoxModel.create(sign_groups);
 		setModel(model);
 	}
 
