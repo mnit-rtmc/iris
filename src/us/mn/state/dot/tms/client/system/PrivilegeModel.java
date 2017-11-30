@@ -48,7 +48,7 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 	@Override
 	protected ArrayList<ProxyColumn<Privilege>> createColumns() {
 		ArrayList<ProxyColumn<Privilege>> cols =
-			new ArrayList<ProxyColumn<Privilege>>(4);
+			new ArrayList<ProxyColumn<Privilege>>(5);
 		cols.add(new ProxyColumn<Privilege>("privilege.type", 140) {
 			public Object getValueAt(Privilege p) {
 				return p.getTypeN();
@@ -74,6 +74,18 @@ public class PrivilegeModel extends ProxyTableModel<Privilege> {
 			public void setValueAt(Privilege p, Object value) {
 				String v = value.toString().trim();
 				p.setObjN(v);
+			}
+		});
+		cols.add(new ProxyColumn<Privilege>("privilege.group", 140) {
+			public Object getValueAt(Privilege p) {
+				return p.getGroupN();
+			}
+			public boolean isEditable(Privilege p) {
+				return canWrite(p);
+			}
+			public void setValueAt(Privilege p, Object value) {
+				String v = value.toString().trim();
+				p.setGroupN(v);
 			}
 		});
 		cols.add(new ProxyColumn<Privilege>("privilege.attr", 120) {
