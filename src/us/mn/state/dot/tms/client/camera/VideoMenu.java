@@ -41,6 +41,7 @@ public class VideoMenu extends IMenu {
 		desktop = s.getDesktop();
 		addItem(createEncoderTypeItem());
 		addItem(session.createTableAction(Camera.SONAR_TYPE));
+		addItem(createPlayListItem());
 		addItem(createMonitorStyleItem());
 		addItem(createVideoMonitorItem());
 	}
@@ -53,6 +54,16 @@ public class VideoMenu extends IMenu {
 				desktop.show(new EncoderTypeForm(session));
 			}
 		    } : null;
+	}
+
+	/** Create a play list menu item action */
+	private IAction createPlayListItem() {
+		return PlayListForm.isPermitted(session) ?
+		    new IAction("play.list.title") {
+			protected void doActionPerformed(ActionEvent e) {
+				desktop.show(new PlayListForm(session));
+			}
+		} : null;
 	}
 
 	/** Create a monitor style menu item action */

@@ -784,6 +784,18 @@ CREATE TRIGGER camera_delete_trig
     INSTEAD OF DELETE ON iris.camera
     FOR EACH ROW EXECUTE PROCEDURE iris.camera_delete();
 
+CREATE TABLE iris.play_list (
+	name VARCHAR(20) PRIMARY KEY,
+	num INTEGER UNIQUE
+);
+
+CREATE TABLE iris.play_list_camera (
+	play_list VARCHAR(20) NOT NULL REFERENCES iris.play_list,
+	ordinal INTEGER NOT NULL,
+	camera VARCHAR(20) NOT NULL REFERENCES iris._camera
+);
+ALTER TABLE iris.play_list_camera ADD PRIMARY KEY (play_list, ordinal);
+
 CREATE TABLE iris.monitor_style (
 	name VARCHAR(24) PRIMARY KEY,
 	force_aspect BOOLEAN NOT NULL,
@@ -2309,6 +2321,12 @@ CREATE VIEW camera_view AS
 	LEFT JOIN controller_view ctr ON c.controller = ctr.name;
 GRANT SELECT ON camera_view TO PUBLIC;
 
+CREATE VIEW play_list_view AS
+	SELECT play_list, ordinal, num, camera
+	FROM iris.play_list_camera
+	JOIN iris.play_list ON play_list_camera.play_list = play_list.name;
+GRANT SELECT ON play_list_view TO PUBLIC;
+
 CREATE VIEW camera_preset_view AS
 	SELECT cp.name, camera, preset_num, direction, dp.name AS device
 	FROM iris.camera_preset cp
@@ -2780,7 +2798,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.59.0
+database_version	4.60.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
@@ -2964,6 +2982,7 @@ meter_action
 modem
 monitor_style
 plan_phase
+play_list
 privilege
 quick_message
 ramp_meter
@@ -3014,6 +3033,7 @@ PRV_0025	camera_admin	encoder_type		t
 PRV_0026	camera_admin	camera_preset		t
 PRV_0027	camera_admin	video_monitor		t
 PRV_0028	camera_admin	monitor_style		t
+PRV_002C	camera_admin	play_list		t
 PRV_0029	camera_control	camera	ptz	t
 PRV_0030	camera_control	camera	recallPreset	t
 PRV_0031	camera_control	camera	deviceRequest	t
@@ -3024,6 +3044,7 @@ PRV_0035	camera_tab	camera		f
 PRV_0036	camera_tab	camera_preset		f
 PRV_0037	camera_tab	video_monitor		f
 PRV_0038	camera_tab	monitor_style		f
+PRV_003C	camera_tab	play_list		f
 PRV_0039	comm_admin	comm_link		t
 PRV_0040	comm_admin	modem		t
 PRV_0041	comm_admin	cabinet_style		t

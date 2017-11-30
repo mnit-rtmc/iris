@@ -20,6 +20,7 @@ import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.MonitorStyle;
+import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.SonarState;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
@@ -85,6 +86,14 @@ public class CamCache {
 		return preset_model;
 	}
 
+	/** Cache of play lists */
+	private final TypeCache<PlayList> play_lists;
+
+	/** Get the play list object cache */
+	public TypeCache<PlayList> getPlayLists() {
+		return play_lists;
+	}
+
 	/** Cache of monitor styles */
 	private final TypeCache<MonitorStyle> monitor_styles;
 
@@ -129,6 +138,7 @@ public class CamCache {
 			}
 		};
 		preset_model.initialize();
+		play_lists = new TypeCache<PlayList>(PlayList.class, client);
 		monitor_styles = new TypeCache<MonitorStyle>(MonitorStyle.class,
 			client);
 		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class,
@@ -144,6 +154,7 @@ public class CamCache {
 		if (client.canRead(Camera.SONAR_TYPE))
 			cameras.ignoreAttribute("operation");
 		client.populateReadable(presets);
+		client.populateReadable(play_lists);
 		client.populateReadable(monitor_styles);
 		client.populateReadable(monitors);
 		if (client.canRead(VideoMonitor.SONAR_TYPE))
