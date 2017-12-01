@@ -61,12 +61,6 @@ public class TransGeoLoc implements GeoLoc {
 		return "trans_geo_loc";
 	}
 
-	/** Check group membership */
-	@Override
-	public boolean isInGroup(String g) {
-		return false;
-	}
-
 	/** Destroy the loc */
 	@Override
 	public void destroy() {

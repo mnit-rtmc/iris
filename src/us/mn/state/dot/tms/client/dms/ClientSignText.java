@@ -61,12 +61,6 @@ public class ClientSignText implements SignText {
 		return "client_sign_text_" + multi;
 	}
 
-	/** Check group membership */
-	@Override
-	public boolean isInGroup(String g) {
-		return false;
-	}
-
 	/** Get the SONAR type name */
 	@Override
 	public String getTypeName() {

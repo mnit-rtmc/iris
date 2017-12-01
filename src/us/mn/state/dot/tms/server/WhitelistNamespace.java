@@ -18,7 +18,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.LinkedList;
 import java.util.Properties;
-import us.mn.state.dot.sonar.PrivChecker;
+import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.tms.GateArmArray;
@@ -61,17 +61,17 @@ public class WhitelistNamespace extends ServerNamespace {
 	}
 
 	/** Check name and whitelist */
-	private boolean checkList(PrivChecker pc, InetAddress a) {
-		return (!isTypeChecked(pc.getTypePart())) || checkList(a);
+	private boolean checkList(Name name, InetAddress a) {
+		return (!isTypeChecked(name.getTypePart())) || checkList(a);
 	}
 
 	/** Check if a user has write privileges.
-	 * @param pc Privilege checker.
+	 * @param name Name to check.
 	 * @param u User to check.
 	 * @param a Inet address of connection.
 	 * @return true if update is allowed; false otherwise. */
 	@Override
-	public boolean canWrite(PrivChecker pc, User u, InetAddress a) {
-		return checkList(pc, a) && canWrite(pc, u);
+	public boolean canWrite(Name name, User u, InetAddress a) {
+		return checkList(name, a) && canWrite(name, u);
 	}
 }

@@ -148,12 +148,6 @@ public class StationImpl implements Station, VehicleSampler {
 		return name;
 	}
 
-	/** Check group membership */
-	@Override
-	public boolean isInGroup(String g) {
-		return false;
-	}
-
 	/** Roadway node */
 	private final R_NodeImpl r_node;
 

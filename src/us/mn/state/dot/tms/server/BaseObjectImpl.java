@@ -286,13 +286,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		return name;
 	}
 
-	/** Check group membership */
-	@Override
-	public boolean isInGroup(String g) {
-		// Always treat object name as "local" group
-		return g.equals(name);
-	}
-
 	/** Create a new base object */
 	protected BaseObjectImpl(String n) {
 		// FIXME: validate for SQL injection

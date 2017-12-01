@@ -23,8 +23,6 @@ import java.util.Properties;
 import us.mn.state.dot.sonar.Connection;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.ObjChecker;
-import us.mn.state.dot.sonar.PrivChecker;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.client.beacon.BeaconManager;
@@ -308,11 +306,11 @@ public class Session {
 	}
 
 	/** Check if the user can write.
-	 * @param pc Privilege checker.
+	 * @param name Name to check.
 	 * @param can_edit Flag to allow editing.
 	 * @return true if user can write. */
-	private boolean canWrite(PrivChecker pc, boolean can_edit) {
-		return can_edit && namespace.canWrite(pc, user);
+	private boolean canWrite(Name name, boolean can_edit) {
+		return can_edit && namespace.canWrite(name, user);
 	}
 
 	/** Check if the user can write an attribute.
@@ -338,7 +336,7 @@ public class Session {
 	 * @return true if user can write the attribute */
 	private boolean canWrite(SonarObject proxy, boolean can_edit) {
 		return (proxy != null)
-		     && canWrite(new ObjChecker(proxy), can_edit);
+		     && canWrite(new Name(proxy), can_edit);
 	}
 
 	/** Check if the user can write a proxy attribute.
@@ -350,7 +348,7 @@ public class Session {
 		boolean can_edit)
 	{
 		return (proxy != null)
-		     && canWrite(new ObjChecker(proxy, aname), can_edit);
+		     && canWrite(new Name(proxy, aname), can_edit);
 	}
 
 	/** Check if the user can write an attribute.

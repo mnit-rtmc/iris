@@ -58,12 +58,6 @@ public class IncidentLoc implements GeoLoc {
 		return "iloc_" + incident.getName();
 	}
 
-	/** Check group membership */
-	@Override
-	public boolean isInGroup(String g) {
-		return false;
-	}
-
 	/** Destroy the incident loc */
 	@Override
 	public void destroy() {
