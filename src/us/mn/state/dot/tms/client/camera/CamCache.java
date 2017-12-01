@@ -138,7 +138,8 @@ public class CamCache {
 			}
 		};
 		preset_model.initialize();
-		play_lists = new TypeCache<PlayList>(PlayList.class, client);
+		play_lists = new TypeCache<PlayList>(PlayList.class, client,
+			PlayList.GROUP_CHECKER);
 		monitor_styles = new TypeCache<MonitorStyle>(MonitorStyle.class,
 			client);
 		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class,
