@@ -159,7 +159,7 @@ public class PlayListPanel extends JPanel {
 	/** Move selected camera down */
 	private void moveCameraDown() {
 		int s = cam_lst.getSelectedIndex();
-		if (s > 0 && s < cam_mdl.size() - 1) {
+		if (s >= 0 && s < cam_mdl.size() - 1) {
 			Camera c0 = cam_mdl.get(s);
 			Camera c1 = cam_mdl.get(s + 1);
 			cam_mdl.set(s, c1);
