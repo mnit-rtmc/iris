@@ -52,6 +52,7 @@ INSERT INTO iris.sonar_type (name) VALUES ('play_list');
 INSERT INTO iris.privilege (name, capability, type_n, obj_n, group_n, attr_n,
                             write)
 	VALUES ('PRV_002C', 'camera_admin', 'play_list', '', '', '', true),
-	       ('PRV_003C', 'camera_tab', 'play_list', '', '', '', false);
+	       ('PRV_003C', 'camera_tab', 'play_list', '', '', '', false),
+	       ('PRV_003D', 'camera_tab', 'play_list', '', 'user', '', true);
 
 COMMIT;

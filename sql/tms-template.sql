@@ -3158,6 +3158,10 @@ PRV_0148	toll_tab	tag_reader		f
 PRV_0149	toll_tab	toll_zone		f
 \.
 
+COPY iris.privilege (name, capability, type_n, group_n, write) FROM stdin;
+PRV_003D	camera_tab	play_list	user	t
+\.
+
 COPY iris.role (name, enabled) FROM stdin;
 administrator	t
 operator	t
