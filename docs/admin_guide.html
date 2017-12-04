@@ -97,7 +97,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">4 May 2017</div>
+<div id="stamp">4 Dec 2017</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -647,31 +647,91 @@ systemctl status iris</pre>
 	menu item
 </aside>
 <p>
-	When a user logs into the IRIS system, the user is checked for validity.
-	The user account must be enabled, and be assigned to an enabled
-	<b>role</b> for a log in to succeed.
+	IRIS contains a set of user accounts which are allowed to access the
+	system.
+	Each account must be assigned to a specific <a href="#roles">role</a>.
+	During login, the user account is checked for validity.
+	For a successful login, the user and role must both be enabled.
 	If the user has a "distinguished name" (dn), then authentication is
 	performed using <a href="#sonar_config">LDAP</a>.
-	Otherwise, IRIS checks the password against the stored password hash
-	for that user account.
+	Otherwise, the supplied password is checked against the stored password
+	hash for the account.
 </p>
+<h4 id="roles">Roles</h4>
 <p>
-	The template SQL database contains one administrator role, called
-	<code>admin</code>.
-	This role is assigned <b>capabilities</b> which allow unfettered access
-	to the IRIS system.
-	Other roles can be created by an administrator, to allow users with a
-	specific set of capabilities, as needed.
-	For example, there are capabilities defined for each of the main tabs
-	on the user interface: camera_tab, dms_tab, lcs_tab, meter_tab, etc.
-	Also, these capabilities can be disabled, preventing any user from
-	having access to them.
-	So, if a system does not contain any LCS devices, the lcs_tab capability
-	could be disabled globally, to prevent that tab from appearing in the
-	user interface for any users.
-	WARNING: changes take effect immediately &mdash; if the user_admin
-	capability is disabled or removed from the administrator role, the
-	administrator will lose access to change roles and capabilities.
+	A role defines the set of <a href="#capabilities">capabilities</a>
+	associated with a user account (any other capabilities will not be
+	available).
+	The default roles are <code>administrator</code> and
+	<code>operator</code>.
+	The <code>administrator</code> role has <a href="#capabilities">
+	capabilities</a> which allow unfettered access to the system.
+	Other roles can be created to allow different capability sets for users,
+	as needed.
+	<b>WARNING: if the administrator role or admin user are disabled,
+	the ability to make further changes will be lost immediately.</b>
+</p>
+<h4 id="capabilities">Capabilities</h4>
+<p>
+	A capability is a set of <a href="#privileges">privileges</a> which can
+	be associated with roles.
+	It grants all necessary privileges to perform a specific user task.
+	There are typically 3 capabilities for each device type:
+	<dl>
+	<dt><code>_tab</code></dt>
+	<dd>Grant <b>view</b> privileges</dd>
+	<dt><code>_control</code></dt>
+	<dd>Grant <b>control</b> privileges</dd>
+	<dt><code>_admin</code></dt>
+	<dd>Grant <b>administration</b> privileges</dd>
+	</dl>
+	Capabilities can be disabled, preventing all users from having access to
+	them.
+	For example, if a system does not contain any LCS devices, the
+	<code>lcs_tab</code> capability could be disabled, preventing that tab
+	from appearing in the user interface for any users.
+	<b>WARNING: the <code>base_admin</code> capability can grant access for
+	all IRIS functions.</b>
+</p>
+<h4 id="privileges">Privileges</h4>
+<p>
+	A privilege grants read or write access to one type of object.
+	There are 5 fields required to fully specify a privilege.
+	<dl>
+	<dt>Type</dt>
+	<dd>Object type can be selected from a list of available types.</dd>
+	<dt>Object</dt>
+	<dd>A regular expression used to match object names.
+	    NOTE: Write access only.
+	    This feature will be removed in a future version of IRIS.
+	</dd>
+	<dt>Group</dt>
+	<dd>Group names are used to divide objects into related groups.
+	    This is an experimental feature intended to replace the
+	    <b>object</b> field.
+	    NOTE: Write access only.
+	    <table>
+	    <tr>
+	    <th>Type</th>
+	    <th>Group</th>
+	    <th>Description</th>
+	    </tr>
+	    <tr>
+	    <td>play_list</td>
+	    <td>user</td>
+	    <td>Personal camera play list</td>
+	    </table>
+	</dd>
+	<dt>Attribute</dt>
+	<dd>Write access to a specific attribute of an object type can be
+	    specified with this field.
+	</dd>
+	<dt>Write</dt>
+	<dd>When this checkbox is checked, write access is granted.
+	    Otherwise, the privilege grants read access.
+	    To be granted write access, a role must also have read access to
+	    the object type.
+	</dl>
 </p>
 
 <h3 id="mapping">Mapping</h3>
