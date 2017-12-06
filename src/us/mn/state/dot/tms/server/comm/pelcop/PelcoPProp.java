@@ -50,6 +50,10 @@ abstract public class PelcoPProp extends ControllerProp {
 			return new LoginProp();
 		case ReleaseProp.REQ_CODE:
 			return new ReleaseProp();
+		case MacroCycleProp.REQ_CODE:
+			return new MacroCycleProp(logged_in, mon_num);
+		case MacroDeleteProp.REQ_CODE:
+			return new MacroDeleteProp(logged_in, mon_num);
 		case MacroPauseProp.REQ_CODE:
 			return new MacroPauseProp(logged_in, mon_num);
 		case MacroPlayProp.REQ_CODE:
