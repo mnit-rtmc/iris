@@ -50,6 +50,8 @@ abstract public class PelcoPProp extends ControllerProp {
 			return new LoginProp();
 		case ReleaseProp.REQ_CODE:
 			return new ReleaseProp();
+		case MacroRunProp.REQ_CODE:
+			return new MacroRunProp(logged_in, mon_num);
 		case MonStatusProp.REQ_CODE:
 		case MonStatusProp.RESP_CODE:
 			return new MonStatusProp(logged_in, mon_num);
