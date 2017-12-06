@@ -14,9 +14,11 @@
  */
 package us.mn.state.dot.tms.server.comm.pelcop;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
 import us.mn.state.dot.tms.server.comm.ControllerProp;
+import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -35,6 +37,9 @@ abstract public class PelcoPProp extends ControllerProp {
 	/** Acknowledge byte */
 	static protected final int ACK = 0xA2;
 
+	/** Error display code */
+	static public final int ERR_CODE = 0xE1;
+
 	/** Parse a valid packet */
 	static public PelcoPProp parse(ByteBuffer rx_buf, boolean logged_in,
 		int mon_num) throws ParsingException
@@ -44,6 +49,8 @@ abstract public class PelcoPProp extends ControllerProp {
 			throw new ParsingException("STX");
 		int mc = parse8(rx_buf);
 		switch (mc) {
+		case AlarmProp.REQ_CODE:
+			return new AlarmProp();
 		case AliveProp.REQ_CODE:
 			return new AliveProp();
 		case LoginProp.REQ_CODE:
@@ -111,6 +118,27 @@ abstract public class PelcoPProp extends ControllerProp {
 			throw new ParsingException("ETX");
 		// Parse checksum (already checked)
 		parse8(rx_buf);
+	}
+
+	/** Error message */
+	private ErrorMsg error;
+
+	/** Has error response? */
+	public boolean hasError() {
+		return error != null;
+	}
+
+	/** Encode a QUERY response to keyboard */
+	protected void encodeError(Operation op, ByteBuffer tx_buf)
+		throws IOException
+	{
+		format8(tx_buf, ERR_CODE);
+		formatBCD2(tx_buf, error.code);
+	}
+
+	/** Set an error display code */
+	protected void setErrMsg(ErrorMsg e) {
+		error = e;
 	}
 
 	/** Format the head of a packet */

@@ -41,9 +41,6 @@ public class MonStatusProp extends PelcoPProp {
 	/** Monitor status response code */
 	static public final int RESP_CODE = 0xB1;
 
-	/** Error display code */
-	static public final int ERR_CODE = 0xE1;
-
 	/** Get the "blank" camera number */
 	static private int cameraNumBlank() {
 		return SystemAttrEnum.CAMERA_NUM_BLANK.getInt();
@@ -105,14 +102,10 @@ public class MonStatusProp extends PelcoPProp {
 	/** Video monitor number */
 	private int mon_num;
 
-	/** Error message */
-	private ErrorMsg error;
-
 	/** Create a new monitor status property */
 	public MonStatusProp(boolean l, int mn) {
 		logged_in = l;
 		mon_num = mn;
-		error = null;
 	}
 
 	/** Decode a QUERY request from keyboard */
@@ -132,7 +125,7 @@ public class MonStatusProp extends PelcoPProp {
 	public void encodeQuery(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		if (error != null) {
+		if (hasError()) {
 			encodeError(op, tx_buf);
 			return;
 		}
@@ -160,19 +153,6 @@ public class MonStatusProp extends PelcoPProp {
 			format8(tx_buf, 0);
 			format8(tx_buf, 0);
 		}
-	}
-
-	/** Encode a QUERY response to keyboard */
-	private void encodeError(Operation op, ByteBuffer tx_buf)
-		throws IOException
-	{
-		format8(tx_buf, ERR_CODE);
-		formatBCD2(tx_buf, error.code);
-	}
-
-	/** Set an error display code */
-	protected void setErrMsg(ErrorMsg e) {
-		error = e;
 	}
 
 	/** Get current camera number on the selected video monitor */
