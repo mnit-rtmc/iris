@@ -28,9 +28,9 @@ public class MacroCycleProp extends MonStatusProp {
 	/** Macro cycle request code */
 	static public final int REQ_CODE = 0xEB;
 
-	/** Cycle sub-codes */
-	static private final int SUB_PREV = 1;
-	static private final int SUB_NEXT = 2;
+	/** Cycle dir codes */
+	static private final int DIR_NEXT = 1;
+	static private final int DIR_PREV = 2;
 
 	/** Create a new macro cycle property */
 	public MacroCycleProp(boolean l, int mn) {
@@ -42,18 +42,18 @@ public class MacroCycleProp extends MonStatusProp {
 	public void decodeQuery(Operation op, ByteBuffer rx_buf)
 		throws ParsingException
 	{
-		int sub = parse8(rx_buf);
-		switch (sub) {
-		case SUB_PREV:
+		int dir = parse8(rx_buf);
+		switch (dir) {
+		case DIR_NEXT:
 			// FIXME: do what?
 			setErrMsg(ErrorMsg.MacNotPresent);
 			break;
-		case SUB_NEXT:
+		case DIR_PREV:
 			// FIXME: do what?
 			setErrMsg(ErrorMsg.MacNotPresent);
 			break;
 		default:
-			throw new ParsingException("CYCLE SUB");
+			throw new ParsingException("CYCLE DIR");
 		}
 	}
 }

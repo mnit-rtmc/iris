@@ -45,5 +45,6 @@ public class CamLockProp extends MonStatusProp {
 			throw new ParsingException("LOCK");
 		setMonNumber((100 * mhi) + mlo);
 		// FIXME: set monitor locked status
+		setErrMsg(ErrorMsg.LockDenied);
 	}
 }

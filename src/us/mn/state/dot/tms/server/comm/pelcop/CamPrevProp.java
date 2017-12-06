@@ -65,8 +65,11 @@ public class CamPrevProp extends MonStatusProp {
 		int uid = getCamNumber();
 		if (uid > 0) {
 			CameraImpl c = findPrev(uid);
-			if (c != null)
+			if (c != null) {
 				selectCamera(c, "PREV " + op.getId());
+				return;
+			}
 		}
+		setErrMsg(ErrorMsg.CamNotPresent);
 	}
 }

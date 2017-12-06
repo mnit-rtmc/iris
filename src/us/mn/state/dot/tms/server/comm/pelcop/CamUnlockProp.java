@@ -47,5 +47,6 @@ public class CamUnlockProp extends MonStatusProp {
 			throw new ParsingException("UNLOCK B");
 		setMonNumber((100 * mhi) + mlo);
 		// FIXME: clear monitor locked status
+		setErrMsg(ErrorMsg.UnlockDenied);
 	}
 }

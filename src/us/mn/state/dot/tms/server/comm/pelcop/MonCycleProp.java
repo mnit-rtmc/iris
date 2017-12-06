@@ -36,6 +36,10 @@ public class MonCycleProp extends MonStatusProp {
 	/** Sub-request code for cycle monitor */
 	static private final int SUB_CYCLE_MON = 3;
 
+	/** Cycle dir codes */
+	static private final int DIR_NEXT = 1;
+	static private final int DIR_PREV = 2;
+
 	/** Create a new monitor cycle property */
 	public MonCycleProp(boolean l, int mn) {
 		super(l, mn);
@@ -48,22 +52,25 @@ public class MonCycleProp extends MonStatusProp {
 	{
 		int sub = parse8(rx_buf);
 		if (sub == SUB_ALT_CAM) {
-			// FIXME: send the proper message back to display
-			//        "NO ALT. CAM. message on keyboard"
+			setErrMsg(ErrorMsg.NoAltCam);
 			return;
 		}
 		if (sub != SUB_CYCLE_MON)
 			throw new ParsingException("SUB");
 		int dir = parse8(rx_buf);
-		if (dir != 1 && dir != 2)
-			throw new ParsingException("DIR");
 		int mlo = parseBCD2(rx_buf);
 		int mhi = parseBCD2(rx_buf);
 		int mon = (100 * mhi) + mlo;
-		if (dir == 1)
+		switch (dir) {
+		case DIR_NEXT:
 			selectNextMonitor(mon);
-		else
+			break;
+		case DIR_PREV:
 			selectPrevMonitor(mon);
+			break;
+		default:
+			throw new ParsingException("CYCLE DIR");
+		}
 	}
 
 	/** Select next video monitor */
