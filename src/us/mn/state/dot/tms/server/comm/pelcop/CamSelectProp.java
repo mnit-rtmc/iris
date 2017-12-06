@@ -60,5 +60,7 @@ public class CamSelectProp extends MonStatusProp {
 		CameraImpl c = findCamera(cam);
 		if (c != null)
 			selectCamera(c, "SEL " + op.getId());
+		else
+			setErrMsg(ErrorMsg.CamNotPresent);
 	}
 }

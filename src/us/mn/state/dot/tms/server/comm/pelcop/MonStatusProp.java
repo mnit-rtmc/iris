@@ -183,6 +183,8 @@ public class MonStatusProp extends PelcoPProp {
 	/** Set the video monitor number */
 	protected void setMonNumber(int m) {
 		mon_num = m;
+		if ((m > 0) && VideoMonitorHelper.findUID(m) == null)
+			setErrMsg(ErrorMsg.MonNotPresent);
 	}
 
 	/** Get the video monitor number */
