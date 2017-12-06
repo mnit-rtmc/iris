@@ -20,17 +20,17 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Macro run property.  This message starts a macro on a monitor.
+ * Macro pause property.  This message pauses the selected macro.
  *
  * @author Douglas Lau
  */
-public class MacroRunProp extends MonStatusProp {
+public class MacroPauseProp extends MonStatusProp {
 
-	/** Macro run request code */
-	static public final int REQ_CODE = 0xEC;
+	/** Macro pause request code */
+	static public final int REQ_CODE = 0xB5;
 
-	/** Create a new macro run property */
-	public MacroRunProp(boolean l, int mn) {
+	/** Create a new macro pause property */
+	public MacroPauseProp(boolean l, int mn) {
 		super(l, mn);
 	}
 
@@ -40,10 +40,9 @@ public class MacroRunProp extends MonStatusProp {
 		throws ParsingException
 	{
 		int mlo = parseBCD2(rx_buf);
-		int mac = parseBCD4(rx_buf);
 		int mhi = parseBCD2(rx_buf);
 		setMonNumber((100 * mhi) + mlo);
-		// FIXME: run play list on monitor
+		// FIXME: pause play list on monitor
 		setErrMsg(ErrorMsg.MacNotPresent);
 	}
 }
