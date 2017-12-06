@@ -75,11 +75,19 @@ public class MonCycleProp extends MonStatusProp {
 
 	/** Select next video monitor */
 	private void selectNextMonitor(int mon) {
-		setMonNumber(VideoMonitorHelper.findNext(mon));
+		int m = VideoMonitorHelper.findNext(mon);
+		if (m > 0)
+			setMonNumber(m);
+		else
+			setErrMsg(ErrorMsg.MonNotPresent);
 	}
 
 	/** Select previous video monitor */
 	private void selectPrevMonitor(int mon) {
-		setMonNumber(VideoMonitorHelper.findPrev(mon));
+		int m = VideoMonitorHelper.findPrev(mon);
+		if (m > 0)
+			setMonNumber(m);
+		else
+			setErrMsg(ErrorMsg.MonNotPresent);
 	}
 }
