@@ -51,6 +51,10 @@ abstract public class PelcoPProp extends ControllerProp {
 		switch (mc) {
 		case AlarmProp.REQ_CODE:
 			return new AlarmProp();
+		case AlarmArmProp.REQ_CODE:
+			return new AlarmArmProp();
+		case AlarmCycleProp.REQ_CODE:
+			return new AlarmCycleProp();
 		case AliveProp.REQ_CODE:
 			return new AliveProp();
 		case LoginProp.REQ_CODE:
