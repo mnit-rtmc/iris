@@ -57,10 +57,10 @@ abstract public class PelcoPProp extends ControllerProp {
 			return new AlarmCycleProp();
 		case AliveProp.REQ_CODE:
 			return new AliveProp();
+		case CancelProp.REQ_CODE:
+			return new CancelProp();
 		case LoginProp.REQ_CODE:
 			return new LoginProp();
-		case ReleaseProp.REQ_CODE:
-			return new ReleaseProp();
 		case MacroCycleProp.REQ_CODE:
 			return new MacroCycleProp(logged_in, mon_num);
 		case MacroDeleteProp.REQ_CODE:

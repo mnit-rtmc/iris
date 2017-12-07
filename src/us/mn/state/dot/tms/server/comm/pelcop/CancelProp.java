@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,15 +19,15 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Release property.  This message is sent when switching away from a monitor
- * or logging out after PTZ on a camera.  Its purpose remains somewhat of a
- * mystery.
+ * Cancel control property.  This message is sent when switching away from a
+ * monitor or logging out after PTZ on a camera.  Its purpose remains somewhat
+ * of a mystery.
  *
  * @author Douglas Lau
  */
-public class ReleaseProp extends PelcoPProp {
+public class CancelProp extends PelcoPProp {
 
-	/** Release request code */
+	/** Cancel request code */
 	static public final int REQ_CODE = 0xB9;
 
 	/** Decode a QUERY request from keyboard */
@@ -39,7 +39,7 @@ public class ReleaseProp extends PelcoPProp {
 		int mlo = parseBCD2(rx_buf);
 		int mhi = parseBCD2(rx_buf);
 		if (parse8(rx_buf) != 0)
-			throw new ParsingException("RELEASE");
+			throw new ParsingException("CANCEL");
 	}
 
 	/** Encode a QUERY response to keyboard */
