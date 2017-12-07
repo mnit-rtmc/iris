@@ -71,7 +71,7 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 	/** Counter to indicate we're adjusting widgets.  This needs to be
 	 * incremented before calling dispatcher methods which might cause
 	 * callbacks to this class.  This prevents infinite loops. */
-	protected int adjusting = 0;
+	private int adjusting = 0;
 
 	/** Create a new quick message combo box */
 	public QuickMessageCBox(DMSDispatcher d) {
@@ -97,14 +97,14 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 	}
 
 	/** Handle editor focus lost */
-	protected void handleEditorFocusLost(FocusEvent e) {
+	private void handleEditorFocusLost(FocusEvent e) {
 		Object item = getEditor().getItem();
-		if(item instanceof String)
-			handleEditorFocusLost((String)item);
+		if (item instanceof String)
+			handleEditorFocusLost((String) item);
 	}
 
 	/** Handle editor focus lost */
-	protected void handleEditorFocusLost(String item) {
+	private void handleEditorFocusLost(String item) {
 		String name = item.replace(" ", "");
 		getEditor().setItem(name);
 		QuickMessage qm = QuickMessageHelper.lookup(name);
@@ -115,23 +115,23 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 	}
 
 	/** Update the dispatcher with the selected quick message */
-	protected void updateDispatcher() {
+	private void updateDispatcher() {
 		QuickMessage qm = getSelectedProxy();
-		if(qm != null)
+		if (qm != null)
 			updateDispatcher(qm);
 	}
 
 	/** Get the currently selected proxy */
-	protected QuickMessage getSelectedProxy() {
+	private QuickMessage getSelectedProxy() {
 		Object obj = getSelectedItem();
-		if(obj instanceof QuickMessage)
-			return (QuickMessage)obj;
+		if (obj instanceof QuickMessage)
+			return (QuickMessage) obj;
 		else
 			return null;
 	}
 
 	/** Update the dispatcher with the specified quick message */
-	protected void updateDispatcher(QuickMessage qm) {
+	private void updateDispatcher(QuickMessage qm) {
 		String ms = qm.getMulti();
 		if (adjusting == 0 && !ms.isEmpty()) {
 			dispatcher.setComposedMulti(ms);
@@ -206,7 +206,7 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 	@Override
 	public void setEnabled(boolean e) {
 		super.setEnabled(e);
-		if(!e) {
+		if (!e) {
 			setSelectedItem(null);
 			removeAllItems();
 		}
