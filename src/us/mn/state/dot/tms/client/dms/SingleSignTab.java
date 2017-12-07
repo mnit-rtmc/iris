@@ -200,11 +200,8 @@ public class SingleSignTab extends IPanel {
 		tab.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				selectPreview(!preview);
-				if ((0 == adjusting) && !preview) {
-					DMS dms = selected;
-					if (dms != null)
-						updateMessageCurrent(dms);
-				}
+				if ((0 == adjusting) && !preview)
+					updateMessageCurrent(selected);
 			}
 		});
 		current_pnl.addMouseListener(popper);

@@ -437,13 +437,7 @@ public class DMSDispatcher extends JPanel {
 
 	/** Set a single selected DMS */
 	private void setSelected(DMS dms) {
-		if (DMSHelper.isActive(dms)) {
-			setEnabled(true);
-			SignMessage sm = dms.getMsgCurrent();
-			if (sm != null)
-				setComposedMulti(sm.getMulti());
-		} else
-			setEnabled(false);
+		setEnabled(DMSHelper.isActive(dms));
 		singleTab.setSelected(dms);
 		selectSingleTab();
 	}
