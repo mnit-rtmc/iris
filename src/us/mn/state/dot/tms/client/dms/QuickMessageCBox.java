@@ -134,7 +134,7 @@ public class QuickMessageCBox extends JComboBox<QuickMessage> {
 	private void updateDispatcher(QuickMessage qm) {
 		String ms = qm.getMulti();
 		if (adjusting == 0 && !ms.isEmpty()) {
-			dispatcher.setComposedMulti(ms);
+			dispatcher.setComposedMulti(ms, true);
 			dispatcher.selectPreview(true);
 		}
 	}

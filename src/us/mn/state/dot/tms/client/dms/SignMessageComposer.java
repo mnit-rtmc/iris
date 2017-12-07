@@ -92,7 +92,7 @@ public class SignMessageComposer extends JPanel {
 	public void updateMessage() {
 		if (adjusting == 0) {
 			adjusting++;
-			dispatcher.setComposedMulti(getComposedMulti());
+			dispatcher.setComposedMulti(getComposedMulti(), true);
 			dispatcher.selectPreview(true);
 			adjusting--;
 		}
@@ -156,7 +156,7 @@ public class SignMessageComposer extends JPanel {
 		setTabPage(0);
 		for (ComposerPagePanel pg: pages)
 			pg.clearWidgets();
-		dispatcher.setComposedMulti("");
+		dispatcher.setComposedMulti("", true);
 		misc_pnl.setComposedMulti("");
 		misc_pnl.clearWidgets();
 		adjusting--;

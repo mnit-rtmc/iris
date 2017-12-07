@@ -161,9 +161,9 @@ public class DMSDispatcher extends JPanel {
 
 	/** Set the composed MULTI string.  This will update all the widgets
 	 * on the dispatcher with the specified message. */
-	public void setComposedMulti(String ms) {
+	public void setComposedMulti(String ms, boolean raw) {
 		composer.setComposedMulti(ms);
-		multi = composer.getComposedMulti();
+		multi = raw ? ms : composer.getComposedMulti();
 		singleTab.setMessage();
 	}
 
@@ -428,7 +428,7 @@ public class DMSDispatcher extends JPanel {
 	private void clearSelected() {
 		setEnabled(false);
 		composer.setSign(null, null);
-		setComposedMulti("");
+		setComposedMulti("", true);
 		singleTab.setSelected(null);
 		selectSingleTab();
 	}

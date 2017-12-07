@@ -364,7 +364,8 @@ public class SingleSignTab extends IPanel {
 	/** Update the current message */
 	private void updateMessageCurrent(DMS dms) {
 		adjusting++;
-		dispatcher.setComposedMulti(DMSHelper.getMultiString(dms));
+		dispatcher.setComposedMulti(DMSHelper.getMultiString(dms),
+			false);
 		adjusting--;
 	}
 
