@@ -494,7 +494,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	private class PlayListUpdateJob extends Job {
 		private final PlayListState pls;
 		private PlayListUpdateJob(PlayListState pls) {
-			super(Calendar.SECOND, 1);
+			super(Calendar.SECOND, 1, true);
 			this.pls = pls;
 		}
 		@Override
