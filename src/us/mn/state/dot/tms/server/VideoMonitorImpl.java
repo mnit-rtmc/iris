@@ -16,15 +16,20 @@ package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import us.mn.state.dot.sched.Job;
+import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.MonitorStyle;
+import us.mn.state.dot.tms.PlayList;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
@@ -38,6 +43,55 @@ import us.mn.state.dot.tms.server.event.CameraSwitchEvent;
  * @author Douglas Lau
  */
 public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
+
+	/** Get the play list dwell time (seconds) */
+	static private int getDwellSec() {
+		return SystemAttrEnum.CAMERA_PLAYLIST_DWELL_SEC.getInt();
+ 	}
+
+	/** Play list state */
+	static private class PlayListState {
+
+		/** Create play list state */
+		private PlayListState(PlayList pl) {
+			play_list = pl;
+			item = -1;	// nextItem will advance to 0
+			dwell = 0;
+		}
+
+		/** Running play list */
+		private final PlayList play_list;
+
+		/** Item in play list */
+		private int item;
+
+		/** Remaining dwell time (negative means paused) */
+		private int dwell;
+
+		/** Update dwell time */
+		private Camera updateDwell() {
+			if (dwell > 0) {
+				dwell--;
+				return null;
+			} else if (0 == dwell) {
+				dwell = getDwellSec();
+				return nextItem();
+			} else {
+				// paused
+				return null;
+			}
+		}
+
+		/** Get next item */
+		private Camera nextItem() {
+			Camera[] cams = play_list.getCameras();
+			item = (item + 1 < cams.length) ? item + 1 : 0;
+			return (item < cams.length) ? cams[item] : null;
+		}
+	}
+
+	/** Play list switching scheduler */
+	static private final Scheduler PLAY_LIST = new Scheduler("play_list");
 
 	/** Check if the camera video should be published */
 	static private boolean isCameraPublished(Camera c) {
@@ -250,12 +304,17 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Set the camera displayed on the monitor */
 	public void doSetCamera(Camera c) throws TMSException {
-		CameraImpl cam = toCameraImpl(c);
-		String u = getProcUser();
-		if (doSetCam(cam, u, true)) {
+		setCamSrc(toCameraImpl(c), getProcUser());
+	}
+
+	/** Set the camera displayed on the monitor.
+	 * @param c Camera to display.
+	 * @param src Source of request. */
+	private void setCamSrc(CameraImpl c, String src) throws TMSException {
+		if (doSetCam(c, src, true)) {
 			// Switch all other monitors with same mon_num
 			if (mon_num > 0)
-				setCameraNotify(this, mon_num, cam, u);
+				setCameraNotify(this, mon_num, c, src);
 		}
 	}
 
@@ -272,6 +331,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 			c = null;
 		if (c != camera) {
 			store.update(this, "camera", c);
+			if (!PlayList.SONAR_TYPE.equals(src))
+				setPlayList(null);
 			setCamera(c);
 			if (select || r)
 				selectCamera(c, src);
@@ -347,5 +408,44 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	@Override
 	public void periodicPoll() {
 		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
+	}
+
+	/** Current play list state */
+	private transient PlayListState pl_state;
+
+	/** Set the play list.
+	 * This will start the given play list from the beginning. */
+	public void setPlayList(PlayList pl) {
+		PlayListState pls = (pl != null) ? new PlayListState(pl) : null;
+		pl_state = pls;
+		if (pls != null)
+			PLAY_LIST.addJob(new PlayListUpdateJob(pls));
+	}
+
+	/** Get the play list */
+	public PlayList getPlayList() {
+		PlayListState pls = pl_state;
+		return (pls != null) ? pls.play_list : null;
+	}
+
+	/** Job for updating play list state */
+	private class PlayListUpdateJob extends Job {
+		private final PlayListState pls;
+		private PlayListUpdateJob(PlayListState pls) {
+			super(Calendar.SECOND, 1);
+			this.pls = pls;
+		}
+		@Override
+		public void perform() throws TMSException {
+			if (pls == pl_state) {
+				Camera c = pls.updateDwell();
+				if (c != null) {
+					setCamSrc(toCameraImpl(c),
+						PlayList.SONAR_TYPE);
+				}
+			} else {
+				PLAY_LIST.removeJob(this);
+			}
+		}
 	}
 }
