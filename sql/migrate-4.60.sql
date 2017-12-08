@@ -132,4 +132,8 @@ CREATE VIEW video_monitor_view AS
 	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
 GRANT SELECT ON video_monitor_view TO PUBLIC;
 
+-- insert camera_playlist_dwell_sec system attribute
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('camera_playlist_dwell_sec', 5);
+
 COMMIT;

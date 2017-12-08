@@ -2787,6 +2787,7 @@ camera_autoplay	true
 camera_construction_url	
 camera_num_blank	999
 camera_out_of_service_url	
+camera_playlist_dwell_sec	5
 camera_preset_store_enable	false
 camera_ptz_blind	true
 camera_stream_controls_enable	false
