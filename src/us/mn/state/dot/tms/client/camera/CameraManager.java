@@ -14,20 +14,24 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.util.List;
-import java.util.HashSet;
+import java.util.ArrayList;
+import java.util.Arrays;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
+import us.mn.state.dot.tms.PlayList;
+import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
+import us.mn.state.dot.tms.client.proxy.ProxyView;
+import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -55,14 +59,36 @@ public class CameraManager extends DeviceManager<Camera> {
 		};
 	}
 
+	/** Check if an array contains a camera */
+	static private boolean containsCam(Camera[] cams, Camera c) {
+		for (Camera cm: cams) {
+			if (c.equals(cm))
+				return true;
+		}
+		return false;
+	}
+
 	/** Camera dispatcher */
 	private final CameraDispatcher dispatcher;
 
 	/** Camera tab */
 	private final CameraTab tab;
 
-	/** Set of cameras in the playlist */
-	private final HashSet<Camera> playlist = new HashSet<Camera>();
+	/** Selected play list */
+	private PlayList play_list;
+
+	/** Play list watcher */
+	private final ProxyWatcher<PlayList> watcher;
+
+	/** Play list view */
+	private final ProxyView<PlayList> pl_view = new ProxyView<PlayList>() {
+		public void update(PlayList pl, String a) {
+			play_list = pl;
+		}
+		public void clear() {
+			play_list = null;
+		}
+	};
 
 	/** Create a new camera manager */
 	public CameraManager(Session s, GeoLocManager lm) {
@@ -70,6 +96,30 @@ public class CameraManager extends DeviceManager<Camera> {
 		dispatcher = new CameraDispatcher(s, this);
 		tab = new CameraTab(s, this, dispatcher);
 		getSelectionModel().setAllowMultiple(true);
+		watcher = new ProxyWatcher<PlayList>(s.getSonarState()
+			.getCamCache().getPlayLists(), pl_view, true);
+	}
+
+	/** Initialize the manager */
+	@Override
+	public void initialize() {
+		watcher.initialize();
+		super.initialize();
+		String n = "PL_" + session.getUser().getName();
+		PlayList pl = PlayListHelper.lookup(n);
+		if (pl != null)
+			watcher.setProxy(pl);
+		else if (session.isWritePermitted(PlayList.SONAR_TYPE)) {
+			session.getSonarState().getCamCache().getPlayLists()
+				.createObject(n);
+		}
+	}
+
+	/** Dispose of the manager */
+	@Override
+	public void dispose() {
+		super.dispose();
+		watcher.dispose();
 	}
 
 	/** Check if user can read cameras / video_monitors */
@@ -107,11 +157,13 @@ public class CameraManager extends DeviceManager<Camera> {
 		p.add(new PublishAction(sel_model));
 		p.add(new UnpublishAction(sel_model));
 		p.addSeparator();
-		if (inPlaylist(c))
-			p.add(new RemovePlaylistAction(this, sel_model));
-		else
-			p.add(new AddPlaylistAction(this, sel_model));
-		p.addSeparator();
+		if (canEditPlayList(play_list)) {
+			if (inPlaylist(c))
+				p.add(new RemovePlaylistAction(this,sel_model));
+			else
+				p.add(new AddPlaylistAction(this, sel_model));
+			p.addSeparator();
+		}
 	}
 
 	/** Create a popup menu for multiple objects */
@@ -124,33 +176,45 @@ public class CameraManager extends DeviceManager<Camera> {
 		p.addSeparator();
 		p.add(new PublishAction(sel_model));
 		p.add(new UnpublishAction(sel_model));
-		p.addSeparator();
-		p.add(new AddPlaylistAction(this, sel_model));
-		p.add(new RemovePlaylistAction(this, sel_model));
+		if (canEditPlayList(play_list)) {
+			p.addSeparator();
+			p.add(new AddPlaylistAction(this, sel_model));
+			p.add(new RemovePlaylistAction(this, sel_model));
+		}
 		return p;
 	}
 
-	/** Test if a camera is in the playlist */
+	/** Test if a camera is in the play list */
 	public boolean inPlaylist(Camera c) {
-		synchronized(playlist) {
-			return playlist.contains(c);
-		}
+		PlayList pl = play_list;
+		return pl != null && containsCam(pl.getCameras(), c);
 	}
 
-	/** Add a camera to the playlist */
+	/** Add a camera to the play list */
 	public void addPlaylist(Camera c) {
-		synchronized(playlist) {
-			playlist.add(c);
+		PlayList pl = play_list;
+		if (canEditPlayList(pl)) {
+			ArrayList<Camera> cams = new ArrayList<Camera>(
+				Arrays.asList(pl.getCameras()));
+			cams.add(c);
+			pl.setCameras(cams.toArray(new Camera[0]));
 		}
-		// FIXME: add server-side playlists
 	}
 
-	/** Remove a camera from the playlist */
+	/** Check if the user can edit a play list */
+	private boolean canEditPlayList(PlayList pl) {
+		return session.isWritePermitted(pl, "cameras");
+	}
+
+	/** Remove a camera from the play list */
 	public void removePlaylist(Camera c) {
-		synchronized(playlist) {
-			playlist.remove(c);
+		PlayList pl = play_list;
+		if (canEditPlayList(pl)) {
+			ArrayList<Camera> cams = new ArrayList<Camera>(
+				Arrays.asList(pl.getCameras()));
+			cams.remove(c);
+			pl.setCameras(cams.toArray(new Camera[0]));
 		}
-		// FIXME: add server-side playlists
 	}
 
 	/** Find the map geo location for a proxy */
