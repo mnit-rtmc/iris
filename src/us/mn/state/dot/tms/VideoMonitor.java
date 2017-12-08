@@ -30,12 +30,6 @@ public interface VideoMonitor extends Device {
 	/** Get the monitor number */
 	int getMonNum();
 
-	/** Set flag to connect direct to camera */
-	void setDirect(boolean d);
-
-	/** Get flag to connect directo to camera */
-	boolean getDirect();
-
 	/** Set flag to restrict publishing camera images */
 	void setRestricted(boolean r);
 

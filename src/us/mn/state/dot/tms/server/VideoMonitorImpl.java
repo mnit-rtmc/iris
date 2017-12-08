@@ -89,8 +89,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, VideoMonitorImpl.class);
 		store.query("SELECT name, controller, pin, notes, mon_num, " +
-		            "direct, restricted, monitor_style, camera " +
-		            "FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		            "restricted, monitor_style, camera FROM iris." +
+		            SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new VideoMonitorImpl(row));
@@ -107,7 +107,6 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		map.put("pin", pin);
 		map.put("notes", notes);
 		map.put("mon_num", mon_num);
-		map.put("direct", direct);
 		map.put("restricted", restricted);
 		map.put("monitor_style", monitor_style);
 		map.put("camera", camera);
@@ -133,28 +132,26 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		     row.getInt(3),		// pin
 		     row.getString(4),		// notes
 		     row.getInt(5),		// mon_num
-		     row.getBoolean(6),		// direct
-		     row.getBoolean(7),		// restricted
-		     row.getString(8),		// monitor_style
-		     row.getString(9)		// camera
+		     row.getBoolean(6),		// restricted
+		     row.getString(7),		// monitor_style
+		     row.getString(8)		// camera
 		);
 	}
 
 	/** Create a video monitor */
 	private VideoMonitorImpl(String n, String c, int p, String nt, int mn,
-		boolean d, boolean r, String ms, String cam)
+		boolean r, String ms, String cam)
 	{
-		this(n, lookupController(c), p, nt, mn, d, r,
+		this(n, lookupController(c), p, nt, mn, r,
 		     lookupMonitorStyle(ms), lookupCamera(cam));
 	}
 
 	/** Create a video monitor */
 	private VideoMonitorImpl(String n, ControllerImpl c, int p, String nt,
-		int mn, boolean d, boolean r, MonitorStyle ms, Camera cam)
+		int mn, boolean r, MonitorStyle ms, Camera cam)
 	{
 		super(n, c, p, nt);
 		mon_num = mn;
-		direct = d;
 		restricted = r;
 		monitor_style = ms;
 		camera = cam;
@@ -187,29 +184,6 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	@Override
 	public int getMonNum() {
 		return mon_num;
-	}
-
-	/** Flag to connect direct to camera */
-	private boolean direct;
-
-	/** Set flag to connect direct to camera */
-	@Override
-	public void setDirect(boolean d) {
-		direct = d;
-	}
-
-	/** Set flag to connect direct to camera */
-	public void doSetDirect(boolean d) throws TMSException {
-		if (d != direct) {
-			store.update(this, "direct", d);
-			setDirect(d);
-		}
-	}
-
-	/** Get flag to connect directo to camera */
-	@Override
-	public boolean getDirect() {
-		return direct;
 	}
 
 	/** Flag to restrict publishing camera images */

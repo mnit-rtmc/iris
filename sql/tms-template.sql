@@ -808,7 +808,6 @@ CREATE TABLE iris._video_monitor (
 	name VARCHAR(12) PRIMARY KEY,
 	notes VARCHAR(32) NOT NULL,
 	mon_num INTEGER NOT NULL,
-	direct BOOLEAN NOT NULL,
 	restricted BOOLEAN NOT NULL,
 	monitor_style VARCHAR(24) REFERENCES iris.monitor_style,
 	camera VARCHAR(20) REFERENCES iris._camera
@@ -818,7 +817,7 @@ ALTER TABLE iris._video_monitor ADD CONSTRAINT _video_monitor_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.video_monitor AS SELECT
-	m.name, controller, pin, notes, mon_num, direct, restricted,
+	m.name, controller, pin, notes, mon_num, restricted,
 	monitor_style, camera
 	FROM iris._video_monitor m JOIN iris._device_io d ON m.name = d.name;
 
@@ -827,10 +826,10 @@ CREATE FUNCTION iris.video_monitor_insert() RETURNS TRIGGER AS
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._video_monitor (name, notes, mon_num, direct,
-	                                 restricted, monitor_style, camera)
-	     VALUES (NEW.name, NEW.notes, NEW.mon_num, NEW.direct,
-	             NEW.restricted, NEW.monitor_style, NEW.camera);
+	INSERT INTO iris._video_monitor (name, notes, mon_num, restricted,
+	                                 monitor_style, camera)
+	     VALUES (NEW.name, NEW.notes, NEW.mon_num, NEW.restricted,
+	             NEW.monitor_style, NEW.camera);
 	RETURN NEW;
 END;
 $video_monitor_insert$ LANGUAGE plpgsql;
@@ -849,7 +848,6 @@ BEGIN
 	UPDATE iris._video_monitor
 	   SET notes = NEW.notes,
 	       mon_num = NEW.mon_num,
-	       direct = NEW.direct,
 	       restricted = NEW.restricted,
 	       monitor_style = NEW.monitor_style,
 	       camera = NEW.camera
@@ -2298,7 +2296,7 @@ CREATE VIEW monitor_style_view AS
 GRANT SELECT ON monitor_style_view TO PUBLIC;
 
 CREATE VIEW video_monitor_view AS
-	SELECT m.name, m.notes, mon_num, direct, restricted, monitor_style,
+	SELECT m.name, m.notes, mon_num, restricted, monitor_style,
 	       m.controller, m.pin, ctr.condition, ctr.comm_link, camera
 	FROM iris.video_monitor m
 	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
