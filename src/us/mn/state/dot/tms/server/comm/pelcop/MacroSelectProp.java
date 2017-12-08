@@ -15,7 +15,10 @@
 package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.PlayList;
+import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.server.CameraImpl;
+import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -43,7 +46,14 @@ public class MacroSelectProp extends MonStatusProp {
 		int mac = parseBCD4(rx_buf);
 		int mhi = parseBCD2(rx_buf);
 		setMonNumber((100 * mhi) + mlo);
-		// FIXME: select play list on monitor
+		PlayList pl = PlayListHelper.findNum(mac);
+		if (pl != null) {
+			VideoMonitorImpl vm = findVideoMonitor();
+			if (vm != null) {
+				vm.setPlayList(pl);
+				return;
+			}
+		}
 		setErrMsg(ErrorMsg.MacNotPresent);
 	}
 }

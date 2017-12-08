@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
@@ -59,6 +60,19 @@ public class MonStatusProp extends PelcoPProp {
 		return cameraNumBlank();
 	}
 
+	/** Get playlist number */
+	static private int getPlayListNum(VideoMonitorImpl vm) {
+		if (vm != null) {
+			PlayList pl = vm.getPlayList();
+			if (pl != null) {
+				Integer n = pl.getNum();
+				if (n != null && n > 0)
+					return n;
+			}
+		}
+		return 0;
+	}
+
 	/** Find a camera by number */
 	static private Camera findCam(int cam_num) {
 		// First, lookup a guessed name for camera
@@ -90,11 +104,14 @@ public class MonStatusProp extends PelcoPProp {
 		return sb.toString();
 	}
 
-	/** Flag for monitor online status */
-	static private final int BIT_ONLINE = 0x40;
+	/** Flag for monitor macro status */
+	static private final int BIT_MACRO = 0x02;
 
 	/** Flag for monitor locked status */
 	static private final int BIT_LOCKED = 0x10;
+
+	/** Flag for monitor online status */
+	static private final int BIT_ONLINE = 0x40;
 
 	/** Logged in flag */
 	private final boolean logged_in;
@@ -133,16 +150,23 @@ public class MonStatusProp extends PelcoPProp {
 		int mon = getMonNumber();
 		if (logged_in && mon > 0) {
 			int cam = getCamNumber();
+			int pln = getPlayListNum();
 			int chi = cam / 100;
 			int clo = cam % 100;
 			int mhi = mon / 100;
 			int mlo = mon % 100;
+			int phi = pln / 100;
+			int plo = pln % 100;
 			formatBCD2(tx_buf, mlo);
-			format8(tx_buf, BIT_ONLINE);
+			format8(tx_buf, (pln > 0)
+				? (BIT_ONLINE | BIT_MACRO)
+				: BIT_ONLINE);
 			format8(tx_buf, 0);
 			formatBCD2(tx_buf, chi);
 			formatBCD2(tx_buf, clo);
-			format32(tx_buf, 0);
+			formatBCD2(tx_buf, phi);
+			formatBCD2(tx_buf, plo);
+			format16(tx_buf, 0);
 			format8(tx_buf, 0);
 			formatBCD2(tx_buf, chi);
 			formatBCD2(tx_buf, clo);
@@ -157,13 +181,26 @@ public class MonStatusProp extends PelcoPProp {
 
 	/** Get current camera number on the selected video monitor */
 	protected int getCamNumber() {
-		return getCamNum(VideoMonitorHelper.findUID(mon_num));
+		return getCamNum(findVideoMonitor());
+	}
+
+	/** Get current playlist number on the selected video monitor */
+	protected int getPlayListNum() {
+		return getPlayListNum(findVideoMonitor());
+	}
+
+	/** Find a video monitor by number */
+	protected VideoMonitorImpl findVideoMonitor() {
+		VideoMonitor vm = VideoMonitorHelper.findUID(mon_num);
+		return (vm instanceof VideoMonitorImpl)
+		     ? (VideoMonitorImpl) vm
+		     : null;
 	}
 
 	/** Set the video monitor number */
 	protected void setMonNumber(int m) {
 		mon_num = m;
-		if ((m > 0) && VideoMonitorHelper.findUID(m) == null)
+		if ((m > 0) && findVideoMonitor() == null)
 			setErrMsg(ErrorMsg.MonNotPresent);
 	}
 
@@ -181,7 +218,7 @@ public class MonStatusProp extends PelcoPProp {
 
 	/** Stop camera control on selected camera */
 	private void stopCamControl() {
-		VideoMonitor vm = VideoMonitorHelper.findUID(mon_num);
+		VideoMonitorImpl vm = findVideoMonitor();
 		if (vm != null) {
 			Camera c = vm.getCamera();
 			if (c instanceof CameraImpl)

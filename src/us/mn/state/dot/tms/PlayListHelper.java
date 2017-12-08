@@ -39,4 +39,15 @@ public class PlayListHelper extends BaseHelper {
 		return new IteratorWrapper<PlayList>(namespace.iterator(
 			PlayList.SONAR_TYPE));
 	}
+
+	/** Find a play list with the specific num */
+	static public PlayList findNum(final int num) {
+		Iterator<PlayList> it = iterator();
+		while (it.hasNext()) {
+			PlayList pl = it.next();
+			if (pl != null && (pl.getNum() == num))
+				return pl;
+		}
+		return null;
+	}
 }

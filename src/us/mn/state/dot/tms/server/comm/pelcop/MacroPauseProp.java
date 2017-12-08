@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.server.CameraImpl;
+import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -42,7 +43,8 @@ public class MacroPauseProp extends MonStatusProp {
 		int mlo = parseBCD2(rx_buf);
 		int mhi = parseBCD2(rx_buf);
 		setMonNumber((100 * mhi) + mlo);
-		// FIXME: pause play list on monitor
-		setErrMsg(ErrorMsg.MacNotPresent);
+		VideoMonitorImpl vm = findVideoMonitor();
+		if (vm == null || !vm.pausePlayList())
+			setErrMsg(ErrorMsg.MacNotPresent);
 	}
 }

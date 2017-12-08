@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
+import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
@@ -45,15 +46,32 @@ public class MacroCycleProp extends MonStatusProp {
 		int dir = parse8(rx_buf);
 		switch (dir) {
 		case DIR_NEXT:
-			// FIXME: do what?
-			setErrMsg(ErrorMsg.MacNotPresent);
+			if (nextPlayList())
+				return;
 			break;
 		case DIR_PREV:
-			// FIXME: do what?
-			setErrMsg(ErrorMsg.MacNotPresent);
+			if (prevPlayList())
+				return;
 			break;
 		default:
 			throw new ParsingException("CYCLE DIR");
 		}
+		setErrMsg(ErrorMsg.MacNotPresent);
+	}
+
+	/** Go to the next item in play list */
+	private boolean nextPlayList() {
+		VideoMonitorImpl vm = findVideoMonitor();
+		if (vm != null)
+			vm.nextPlayList();
+		return vm != null;
+	}
+
+	/** Go to the previous item in play list */
+	private boolean prevPlayList() {
+		VideoMonitorImpl vm = findVideoMonitor();
+		if (vm != null)
+			vm.prevPlayList();
+		return vm != null;
 	}
 }

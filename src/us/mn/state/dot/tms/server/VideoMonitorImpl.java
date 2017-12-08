@@ -49,6 +49,9 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		return SystemAttrEnum.CAMERA_PLAYLIST_DWELL_SEC.getInt();
  	}
 
+	/** Dwell time paused value */
+	static private final int DWELL_PAUSED = -1;
+
 	/** Play list state */
 	static private class PlayListState {
 
@@ -67,6 +70,16 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 		/** Remaining dwell time (negative means paused) */
 		private int dwell;
+
+		/** Pause the play list */
+		private void pause() {
+			dwell = DWELL_PAUSED;
+		}
+
+		/** Unpause the play list */
+		private void unpause() {
+			dwell = getDwellSec();
+		}
 
 		/** Update dwell time */
 		private Camera updateDwell() {
@@ -87,6 +100,25 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 			Camera[] cams = play_list.getCameras();
 			item = (item + 1 < cams.length) ? item + 1 : 0;
 			return (item < cams.length) ? cams[item] : null;
+		}
+
+		/** Go to the next item */
+		private void goNextItem() {
+			resetDwell();
+			Camera[] cams = play_list.getCameras();
+			item = (item + 1 < cams.length) ? item + 1 : 0;
+		}
+
+		/** Go to the previous item */
+		private void goPrevItem() {
+			resetDwell();
+			Camera[] cams = play_list.getCameras();
+			item = (item > 0) ? item - 1 : cams.length - 1;
+		}
+
+		/** Reset dwell time */
+		private void resetDwell() {
+			dwell = (dwell >= 0) ? getDwellSec() : DWELL_PAUSED;
 		}
 	}
 
@@ -426,6 +458,36 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	public PlayList getPlayList() {
 		PlayListState pls = pl_state;
 		return (pls != null) ? pls.play_list : null;
+	}
+
+	/** Pause the running play list */
+	public boolean pausePlayList() {
+		PlayListState pls = pl_state;
+		if (pls != null)
+			pls.pause();
+		return pls != null;
+	}
+
+	/** Unpause the running play list */
+	public boolean unpausePlayList() {
+		PlayListState pls = pl_state;
+		if (pls != null)
+			pls.unpause();
+		return pls != null;
+	}
+
+	/** Go to next item in play list */
+	public void nextPlayList() {
+		PlayListState pls = pl_state;
+		if (pls != null)
+			pls.goNextItem();
+	}
+
+	/** Go to previous item in play list */
+	public void prevPlayList() {
+		PlayListState pls = pl_state;
+		if (pls != null)
+			pls.goPrevItem();
 	}
 
 	/** Job for updating play list state */
