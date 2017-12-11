@@ -99,7 +99,7 @@ public class CameraManager extends DeviceManager<Camera> {
 		PlayList pl = PlayListHelper.lookup(n);
 		if (pl != null)
 			watcher.setProxy(pl);
-		else if (session.isWritePermitted(PlayList.SONAR_TYPE)) {
+		else if (session.isWritePermitted(PlayList.SONAR_TYPE, n)) {
 			session.getSonarState().getCamCache().getPlayLists()
 				.createObject(n);
 		}
