@@ -45,8 +45,11 @@ public class PlayListHelper extends BaseHelper {
 		Iterator<PlayList> it = iterator();
 		while (it.hasNext()) {
 			PlayList pl = it.next();
-			if (pl != null && (pl.getNum() == num))
-				return pl;
+			if (pl != null) {
+				Integer n = pl.getNum();
+				if (n != null && n == num)
+					return pl;
+			}
 		}
 		return null;
 	}
