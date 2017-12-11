@@ -60,7 +60,7 @@ public class MonitorProp extends MonProp {
 	/** Get the monitor title bar */
 	static private boolean getTitleBar(VideoMonitorImpl mon) {
 		MonitorStyle ms = monitorStyle(mon);
-		return (ms != null) && ms.getTitleBar();
+		return (ms == null) || ms.getTitleBar();
 	}
 
 	/** Current controller pin */
