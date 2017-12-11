@@ -335,6 +335,10 @@ public class LocationPanel extends IPanel implements ProxyView<GeoLoc> {
 		landmark_txt.setEnabled(canWrite(l, "landmark"));
 	}
 
+	/** Called when all proxies have been enumerated (from ProxyView). */
+	@Override
+	public void enumerationComplete() { }
+
 	/** Update one attribute (from ProxyView). */
 	@Override
 	public void update(GeoLoc l, String a) {

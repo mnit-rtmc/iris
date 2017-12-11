@@ -38,7 +38,9 @@ public class ProxyWatcher<T extends SonarObject> {
 	/** Proxy listener */
 	private final ProxyListener<T> listener = new ProxyListener<T>() {
 		public void proxyAdded(T p) { }
-		public void enumerationComplete() { }
+		public void enumerationComplete() {
+			view.enumerationComplete();
+		}
 		public void proxyRemoved(T p) {
 			if (proxy == p) {
 				proxy = null;

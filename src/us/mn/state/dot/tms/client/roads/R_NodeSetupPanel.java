@@ -242,6 +242,10 @@ public class R_NodeSetupPanel extends IPanel implements ProxyView<R_Node> {
 		speed_spn.setEnabled(canWrite(n, "speedLimit"));
 	}
 
+	/** Called when all proxies have been enumerated (from ProxyView). */
+	@Override
+	public void enumerationComplete() { }
+
 	/** Update one attribute (from ProxyView). */
 	@Override
 	public void update(R_Node n, String a) {

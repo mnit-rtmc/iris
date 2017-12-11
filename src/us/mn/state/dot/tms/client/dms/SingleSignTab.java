@@ -131,6 +131,7 @@ public class SingleSignTab extends IPanel {
 	private final ProxyView<DMS> dms_view =
 		new ProxyView<DMS>()
 	{
+		public void enumerationComplete() { }
 		public void update(DMS dms, String a) {
 			selected = dms;
 			updateAttribute(dms, a);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@ public class R_NodePanel extends JPanel {
 
 	/** Proxy view */
 	private final ProxyView<R_Node> view = new ProxyView<R_Node>() {
+		public void enumerationComplete() { }
 		public void update(R_Node n, String a) {
 			loc_pnl.update(n, a);
 			setup_pnl.update(n, a);

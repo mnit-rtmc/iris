@@ -76,6 +76,7 @@ public class GateArmDispatcher extends IPanel
 
 	/** DMS Proxy view */
 	private final ProxyView<DMS> dms_view = new ProxyView<DMS>() {
+		public void enumerationComplete() { }
 		public void update(DMS d, String a) {
 			if (null == a ||
 			    "styles".equals(a) ||
@@ -343,6 +344,10 @@ public class GateArmDispatcher extends IPanel
 	public void setSelected(GateArmArray ga) {
 		watcher.setProxy(ga);
 	}
+
+	/** Called when all proxies have been enumerated (from ProxyView). */
+	@Override
+	public void enumerationComplete() { }
 
 	/** Update one (or all) attribute(s) on the form.
 	 * @param ga The newly selected gate arm.  May not be null.

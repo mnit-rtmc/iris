@@ -123,6 +123,7 @@ public class CameraDispatcher extends JPanel {
 	private final ProxyView<VideoMonitor> vm_view =
 		new ProxyView<VideoMonitor>()
 	{
+		public void enumerationComplete() { }
 		public void update(VideoMonitor vm, String a) {
 			video_monitor = vm;
 			selectCamera(vm.getCamera());

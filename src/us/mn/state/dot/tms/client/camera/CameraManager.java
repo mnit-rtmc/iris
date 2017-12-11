@@ -82,6 +82,9 @@ public class CameraManager extends DeviceManager<Camera> {
 
 	/** Play list view */
 	private final ProxyView<PlayList> pl_view = new ProxyView<PlayList>() {
+		public void enumerationComplete() {
+			watchPersonalPlayList();
+		}
 		public void update(PlayList pl, String a) {
 			play_list = pl;
 		}
@@ -89,6 +92,18 @@ public class CameraManager extends DeviceManager<Camera> {
 			play_list = null;
 		}
 	};
+
+	/** Watch user's personal play list */
+	private void watchPersonalPlayList() {
+		String n = "PL_" + session.getUser().getName();
+		PlayList pl = PlayListHelper.lookup(n);
+		if (pl != null)
+			watcher.setProxy(pl);
+		else if (session.isWritePermitted(PlayList.SONAR_TYPE)) {
+			session.getSonarState().getCamCache().getPlayLists()
+				.createObject(n);
+		}
+	}
 
 	/** Create a new camera manager */
 	public CameraManager(Session s, GeoLocManager lm) {
@@ -105,14 +120,6 @@ public class CameraManager extends DeviceManager<Camera> {
 	public void initialize() {
 		watcher.initialize();
 		super.initialize();
-		String n = "PL_" + session.getUser().getName();
-		PlayList pl = PlayListHelper.lookup(n);
-		if (pl != null)
-			watcher.setProxy(pl);
-		else if (session.isWritePermitted(PlayList.SONAR_TYPE)) {
-			session.getSonarState().getCamCache().getPlayLists()
-				.createObject(n);
-		}
 	}
 
 	/** Dispose of the manager */

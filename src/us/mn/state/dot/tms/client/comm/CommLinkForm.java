@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,6 +55,7 @@ public class CommLinkForm extends AbstractForm {
 
 	/** Proxy view for selected comm link */
 	private final ProxyView<CommLink> view = new ProxyView<CommLink>() {
+		public void enumerationComplete() { }
 		public void update(CommLink cl, String a) {
 			if (a == null || a.equals("status"))
 				link_status.setText(cl.getStatus());

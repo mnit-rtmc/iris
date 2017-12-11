@@ -171,6 +171,10 @@ public class MeterDispatcher extends IPanel implements ProxyView<RampMeter> {
 		watcher.setProxy(rm);
 	}
 
+	/** Called when all proxies have been enumerated (from ProxyView). */
+	@Override
+	public void enumerationComplete() { }
+
 	/** Update one attribute on the form */
 	@Override
 	public void update(RampMeter rm, String a) {

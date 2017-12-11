@@ -145,6 +145,10 @@ public class PlanDispatcher extends IPanel implements ProxyView<ActionPlan> {
 		watcher.setProxy(ap);
 	}
 
+	/** Called when all proxies have been enumerated (from ProxyView). */
+	@Override
+	public void enumerationComplete() { }
+
 	/** Update one attribute on the form */
 	@Override
 	public void update(ActionPlan ap, String a) {

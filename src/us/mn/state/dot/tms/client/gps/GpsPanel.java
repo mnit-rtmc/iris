@@ -274,6 +274,11 @@ public class GpsPanel extends IPanel
 		}
 	}
 
+	/** Called when all proxies have been enumerated (from ProxyView). */
+	@Override
+	public void enumerationComplete() { }
+
+	@Override
 	public void update(Gps gps, String a) {
 		updateGpsPanel();
 	}

@@ -200,6 +200,10 @@ public class LcsDispatcher extends IPanel implements ProxyView<LCSArray> {
 		watcher.setProxy(la);
 	}
 
+	/** Called when all proxies have been enumerated */
+	@Override
+	public void enumerationComplete() { }
+
 	/** Update the proxy view */
 	@Override
 	public void update(final LCSArray la, String a) {

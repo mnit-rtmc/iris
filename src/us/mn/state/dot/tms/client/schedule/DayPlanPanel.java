@@ -81,6 +81,7 @@ public class DayPlanPanel extends JPanel {
 
 	/** Proxy view for selected day plan */
 	private final ProxyView<DayPlan> view = new ProxyView<DayPlan>() {
+		public void enumerationComplete() { }
 		public void update(DayPlan dp, String a) {
 			if ("dayMatchers".equals(a)) {
 				updateCalendarWidget();

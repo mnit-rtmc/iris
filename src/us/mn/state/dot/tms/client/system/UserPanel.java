@@ -209,6 +209,10 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 		return session.canWrite(user, a);
 	}
 
+	/** Called when all proxies have been enumerated (from ProxyView). */
+	@Override
+	public void enumerationComplete() { }
+
 	/** Update one attribute (from ProxyView). */
 	@Override
 	public void update(User u, String a) {

@@ -289,6 +289,10 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		r_node_btn.setEnabled(d != null && d.getR_Node() != null);
 	}
 
+	/** Called when all proxies have been enumerated (from ProxyView). */
+	@Override
+	public void enumerationComplete() { }
+
 	/** Update one attribute (from ProxyView). */
 	@Override
 	public void update(Detector d, String a) {

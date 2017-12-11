@@ -91,6 +91,10 @@ abstract public class SonarObjectForm<T extends SonarObject>
 	/** Update the edit mode */
 	protected void updateEditMode() { }
 
+	/** Called when all proxies have been enumerated */
+	@Override
+	public void enumerationComplete() { }
+
 	/** Update one attribute on the form */
 	@Override
 	public final void update(T p, String a) {
