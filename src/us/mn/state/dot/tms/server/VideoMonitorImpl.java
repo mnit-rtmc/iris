@@ -103,22 +103,29 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		}
 
 		/** Go to the next item */
-		private void goNextItem() {
+		private Camera goNextItem() {
 			resetDwell();
 			Camera[] cams = play_list.getCameras();
 			item = (item + 1 < cams.length) ? item + 1 : 0;
+			return (item < cams.length) ? cams[item] : null;
 		}
 
 		/** Go to the previous item */
-		private void goPrevItem() {
+		private Camera goPrevItem() {
 			resetDwell();
 			Camera[] cams = play_list.getCameras();
 			item = (item > 0) ? item - 1 : cams.length - 1;
+			return (item < cams.length) ? cams[item] : null;
 		}
 
 		/** Reset dwell time */
 		private void resetDwell() {
 			dwell = (dwell >= 0) ? getDwellSec() : DWELL_PAUSED;
+		}
+
+		/** Check if play list is running */
+		private boolean isRunning() {
+			return dwell > DWELL_PAUSED;
 		}
 	}
 
@@ -460,6 +467,12 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		return (pls != null) ? pls.play_list : null;
 	}
 
+	/** Check if a play list is running */
+	public boolean isPlayListRunning() {
+		PlayListState pls = pl_state;
+		return (pls != null) ? pls.isRunning() : false;
+	}
+
 	/** Pause the running play list */
 	public boolean pausePlayList() {
 		PlayListState pls = pl_state;
@@ -477,17 +490,32 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Go to next item in play list */
-	public void nextPlayList() {
+	public boolean nextPlayList() {
 		PlayListState pls = pl_state;
 		if (pls != null)
-			pls.goNextItem();
+			setCamPlayList(pls.goNextItem());
+		return pls != null;
 	}
 
 	/** Go to previous item in play list */
-	public void prevPlayList() {
+	public boolean prevPlayList() {
 		PlayListState pls = pl_state;
 		if (pls != null)
-			pls.goPrevItem();
+			setCamPlayList(pls.goPrevItem());
+		return pls != null;
+	}
+
+	/** Set camera from a play list */
+	private void setCamPlayList(Camera c) {
+		CameraImpl ci = toCameraImpl(c);
+		if (ci != null) {
+			try {
+				setCamSrc(ci, PlayList.SONAR_TYPE);
+			}
+			catch (TMSException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	/** Job for updating play list state */

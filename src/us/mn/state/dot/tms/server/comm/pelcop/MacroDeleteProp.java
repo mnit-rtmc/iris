@@ -44,7 +44,7 @@ public class MacroDeleteProp extends MonStatusProp {
 		int mhi = parseBCD2(rx_buf);
 		setMonNumber((100 * mhi) + mlo);
 		VideoMonitorImpl vm = findVideoMonitor();
-		if (vm != null)
+		if (vm != null && vm.getPlayList() != null)
 			vm.setPlayList(null);
 		else
 			setErrMsg(ErrorMsg.MacNotPresent);

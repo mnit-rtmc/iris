@@ -73,6 +73,11 @@ public class MonStatusProp extends PelcoPProp {
 		return 0;
 	}
 
+	/** Check if a play list is running */
+	static private boolean isPlayListRunning(VideoMonitorImpl vm) {
+		return (vm != null) && vm.isPlayListRunning();
+	}
+
 	/** Find a camera by number */
 	static private Camera findCam(int cam_num) {
 		// First, lookup a guessed name for camera
@@ -104,14 +109,14 @@ public class MonStatusProp extends PelcoPProp {
 		return sb.toString();
 	}
 
-	/** Flag for monitor macro status */
-	static private final int BIT_MACRO = 0x02;
+	/** Flag for monitor macro running status */
+	static protected final int BIT_MACRO = 0x02;
 
 	/** Flag for monitor locked status */
-	static private final int BIT_LOCKED = 0x10;
+	static protected final int BIT_LOCKED = 0x10;
 
 	/** Flag for monitor online status */
-	static private final int BIT_ONLINE = 0x40;
+	static protected final int BIT_ONLINE = 0x40;
 
 	/** Logged in flag */
 	private final boolean logged_in;
@@ -149,8 +154,9 @@ public class MonStatusProp extends PelcoPProp {
 		format8(tx_buf, RESP_CODE);
 		int mon = getMonNumber();
 		if (logged_in && mon > 0) {
-			int cam = getCamNumber();
-			int pln = getPlayListNum();
+			VideoMonitorImpl vm = findVideoMonitor();
+			int cam = getCamNum(vm);
+			int pln = getPlayListNum(vm);
 			int chi = cam / 100;
 			int clo = cam % 100;
 			int mhi = mon / 100;
@@ -158,9 +164,7 @@ public class MonStatusProp extends PelcoPProp {
 			int phi = pln / 100;
 			int plo = pln % 100;
 			formatBCD2(tx_buf, mlo);
-			format8(tx_buf, (pln > 0)
-				? (BIT_ONLINE | BIT_MACRO)
-				: BIT_ONLINE);
+			format8(tx_buf, getModeBits(vm));
 			format8(tx_buf, 0);
 			formatBCD2(tx_buf, chi);
 			formatBCD2(tx_buf, clo);
@@ -179,14 +183,16 @@ public class MonStatusProp extends PelcoPProp {
 		}
 	}
 
+	/** Get the mode bits */
+	protected int getModeBits(VideoMonitorImpl vm) {
+		return isPlayListRunning(vm)
+			? (BIT_ONLINE | BIT_MACRO)
+			: BIT_ONLINE;
+	}
+
 	/** Get current camera number on the selected video monitor */
 	protected int getCamNumber() {
 		return getCamNum(findVideoMonitor());
-	}
-
-	/** Get current playlist number on the selected video monitor */
-	protected int getPlayListNum() {
-		return getPlayListNum(findVideoMonitor());
 	}
 
 	/** Find a video monitor by number */

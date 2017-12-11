@@ -62,16 +62,18 @@ public class MacroCycleProp extends MonStatusProp {
 	/** Go to the next item in play list */
 	private boolean nextPlayList() {
 		VideoMonitorImpl vm = findVideoMonitor();
-		if (vm != null)
-			vm.nextPlayList();
-		return vm != null;
+		return (vm != null) && vm.nextPlayList();
 	}
 
 	/** Go to the previous item in play list */
 	private boolean prevPlayList() {
 		VideoMonitorImpl vm = findVideoMonitor();
-		if (vm != null)
-			vm.prevPlayList();
-		return vm != null;
+		return (vm != null) && vm.prevPlayList();
+	}
+
+	/** Get the mode bits */
+	@Override
+	protected int getModeBits(VideoMonitorImpl vm) {
+		return BIT_ONLINE | BIT_MACRO;
 	}
 }
