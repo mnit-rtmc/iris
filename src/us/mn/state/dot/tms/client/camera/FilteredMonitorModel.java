@@ -51,7 +51,14 @@ public class FilteredMonitorModel extends ProxyListModel<VideoMonitor> {
 			public int compare(VideoMonitor vm0, VideoMonitor vm1) {
 				Integer n0 = vm0.getMonNum();
 				Integer n1 = vm1.getMonNum();
-				return n0.compareTo(n1);
+				int c = n0.compareTo(n1);
+				if (c != 0)
+					return c;
+				else {
+					boolean p0 = check(vm0);
+					boolean p1 = check(vm1);
+					return Boolean.compare(p0, p1);
+				}
 			}
 		};
 	}
