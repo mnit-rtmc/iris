@@ -370,7 +370,9 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 			c = null;
 		if (c != camera) {
 			store.update(this, "camera", c);
-			if (!PlayList.SONAR_TYPE.equals(src))
+			// Only clear play list on camera selection
+			// from a source other than a play list.
+			if (select && !PlayList.SONAR_TYPE.equals(src))
 				setPlayList(null);
 			setCamera(c);
 			if (select || r)
