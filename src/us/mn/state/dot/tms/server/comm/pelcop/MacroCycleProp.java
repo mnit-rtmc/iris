@@ -74,6 +74,11 @@ public class MacroCycleProp extends MonStatusProp {
 	/** Get the mode bits */
 	@Override
 	protected int getModeBits(VideoMonitorImpl vm) {
-		return BIT_ONLINE | BIT_MACRO;
+		// NOTE: This logic effectively toggles the BIT_MACRO flag,
+		//       which causes the LCD display on the keyboard to refresh
+		//       the macro number.  Without this, it blanks out.
+		return isPlayListRunning(vm)
+			? BIT_ONLINE
+			: (BIT_ONLINE | BIT_MACRO);
 	}
 }

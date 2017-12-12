@@ -74,7 +74,7 @@ public class MonStatusProp extends PelcoPProp {
 	}
 
 	/** Check if a play list is running */
-	static private boolean isPlayListRunning(VideoMonitorImpl vm) {
+	static protected boolean isPlayListRunning(VideoMonitorImpl vm) {
 		return (vm != null) && vm.isPlayListRunning();
 	}
 
