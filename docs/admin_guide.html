@@ -43,9 +43,10 @@
   <h2><a id="devices_link" href="#devices">Devices</a></h2>
   <div id="devices_div">
     <h3><a href="#dms">Dynamic Message Signs</a></h3>
-    <h3><a href="#cameras">Cameras</a></h3>
-    <h3><a href="#vds">Vehicle Detection</a></h3>
     <h3><a href="#lcs">Lane-Use Control Signs</a></h3>
+    <h3><a href="#vds">Vehicle Detection</a></h3>
+    <h3><a href="#cameras">Cameras</a></h3>
+    <h3><a href="#video">Video Monitors</a></h3>
     <h3><a href="#ramp_meters">Ramp Meters</a></h3>
     <h3><a href="#gate_arms">Gate Arms</a></h3>
     <h3><a href="#tag_readers">Tag Readers</a></h3>
@@ -1871,9 +1872,10 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	A device is a hardware field control or sensing system.
 	IRIS supports several different device types:
 	<a href="#dms">dynamic message signs</a>,
-	<a href="#cameras">cameras</a>,
-	<a href="#vds">vehicle detection</a>,
 	<a href="#lcs">lane-use control signs</a>,
+	<a href="#vds">vehicle detection</a>,
+	<a href="#cameras">cameras</a>,
+	<a href="#video">video monitors</a>,
 	<a href="#ramp_meters">ramp meters</a>,
 	<a href="#gate_arms">gate arms</a>,
 	<a href="#tag_readers">tag readers</a>,
@@ -2063,99 +2065,37 @@ FIXME
 	For these messages, it is best to leave the sign group blank.
 </p>
 
-<h3 id="cameras">Cameras</h3>
+<h3 id="lcs">Lane-use Control Signs (LCS)</h3>
 <aside>
-	Select <span class="menu">View ➔ Video ➔ Cameras</span> menu item
+	Select <span class="menu">View ➔ Lane Use ➔ LCS</span> menu item
 </aside>
 <p>
-	Video cameras with remote <a href="#ptz">pan / tilt / zoom</a>
-	capability can be used to monitor freeway conditions.
-	To display video in IRIS, it must be digitally encoded (IP video).
+	A lane-use control sign (LCS) is a sign which is mounted over a single
+	lane of traffic (typically one for each lane).
+	It can display a set of indications which either permit or restrict
+	use of that lane.
 </p>
-<h4 id="camera_setup">Camera Setup</h4>
+
+<h4 id="ilcs">"Intelligent" Lane-use Control Signs (ILCS)</h4>
 <p>
-	The camera <b>Setup</b> tab contains attributes to configure the
-	encoded stream.
+	An "intelligent" LCS is a full-matrix color <a href="#dms">DMS</a> which
+	is mounted directly over a lane of traffic.
+	In addition to being used as an LCS, it can display
+	<a href="#vsa">variable speed advisories</a>, or any operator-defined
+	message as a regular DMS.
 </p>
-<dl>
-    <dt>#</dt>
-    <dd>Camera number, used for dedicated keyboard systems.</dd>
-    <dt>Encoder Type</dt>
-    <dd>The type of encoder for the video stream.</dd>
-    <dt>Encoder Address</dt>
-    <dd>The encoder stream URI.
-        Usually, only the host name (or ip address) is needed here.
-        For GENERIC encoder types, the path is also required.
-        The default URI scheme is determined by the encoder type, but can be
-        overridden here (for example "mms://" or "axrtsp://").
-    </dd>
-    <dt>Encoder Multicast Address</dt>
-    <dd>A multicast address can be used by <a href="#monstream">MonStream</a>
-        clients.
-        Multicast requires less bandwidth, and allows scaling to many
-        simultaneous streams.</dd>
-    <dt>Encoder Channel</dt>
-    <dd>For encoders with more than 1 channel.</dd>
-    <dt>Publish</dt>
-    <dd>Flag to allow stream to be published.</dd>
-</dl>
-<h4 id="ptz">Pan / Tilt / Zoom</h4>
+
+<h4 id="dlcs">"Dumb" Lane-use Control Signs (DLCS)</h4>
 <p>
-	Some cameras have a built-in pan/tilt/zoom (PTZ) functionality.
-	IRIS can perform the following PTZ operations:
-</p>
-<ul>
-	<li>Panning / tilting the camera</li>
-	<li>Recall preset positions</li>
-	<li>Store preset positions</li>
-	<li>Zooming in or out</li>
-	<li>Manual focus: near / far</li>
-	<li>Manual iris: open / close</li>
-	<li>Wiper control</li>
-</ul>
-<p>
-	For PTZ control to function, the camera must be associated with a
-	<a href="#controllers">controller</a> on a PTZ protocol
-	<a href="#comm_links">comm link</a>.
-</p>
-<h4 id="video">Video Monitors</h4>
-<p>
-	IRIS can also be configured to send commands to a video switcher
-	system, such as <a href="#monstream">MonStream</a>.
-	This allows camera streams to be routed to a number of video monitors.
-	Each monitor can be assigned to display the video from any specific
-	camera.
-	IRIS allows an operator to select one video monitor to be linked with
-	their camera selection on the user interface.
-	This way, every time the user selects a camera, it's video is
-	immediately displayed on the associated monitor.
-</p>
-<h5 id="monstream">MonStream</h5>
-<p>
-	MonStream is a video streaming application which runs on low-cost
-	Linux computers.
-	One computer running MonStream can be configured to stream a grid of
-	four or more video feeds onto a single large monitor.
-	IRIS can send switching messages to MonStream, creating a low-latency
-	IP video system.
-</p>
-<h5 id="cam_tool">Camera Selector Tool</h5>
-<p>
-	There is a simple camera selector tool on the toolbar just below the
-	map.
-	It has a text entry field with an icon and label.
-	This tool allows quick switching of the selected camera.
-</p>
-<h5 id="numpad">Numpad Hotkeys</h5>
-<p>
-	The keyboard "numpad" can be used from anywhere within IRIS to control
-	the camera selector tool.
-	When the <b>Num Lock</b> key is off, all numpad keystrokes are directed
-	to the tool.
-	Pressing the <code>*</code> key (on the numpad) changes to video monitor
-	selection &mdash; the icon will change to indicate this change.
-	The <code>+</code> and <code>-</code> keys can select the next and
-	previous cameras, respectively.
+	A "dumb" LCS device is much simpler than an ILCS.
+	It can display one of a fixed set of indications &mdash; typically a
+	<i>green arrow</i> <span class="green">&nbsp;↓&nbsp;</span>, a
+	<i>yellow arrow</i> <span class="yellow">&nbsp;↓&nbsp;</span> or a
+	<i>red X</i> <span class="red">&nbsp;X&nbsp;</span>).
+	Each indication must be assigned to a separate
+	<a href="#io_pins">I/O pin</a> on a
+	<a href="#controllers">controller</a>, as well as the DMS which
+	represents the LCS.
 </p>
 
 <h3 id="vds">Vehicle Detection Systems</h3>
@@ -2267,37 +2207,100 @@ FIXME
 	in a directory with the district ID name.
 </p>
 
-<h3 id="lcs">Lane-use Control Signs (LCS)</h3>
+<h3 id="cameras">Cameras</h3>
 <aside>
-	Select <span class="menu">View ➔ Lane Use ➔ LCS</span> menu item
+	Select <span class="menu">View ➔ Video ➔ Cameras</span> menu item
 </aside>
 <p>
-	A lane-use control sign (LCS) is a sign which is mounted over a single
-	lane of traffic (typically one for each lane).
-	It can display a set of indications which either permit or restrict
-	use of that lane.
+	Video cameras with remote <a href="#ptz">pan / tilt / zoom</a>
+	capability can be used to monitor freeway conditions.
+	To display video in IRIS, it must be digitally encoded (IP video).
+</p>
+<h4 id="camera_setup">Camera Setup</h4>
+<p>
+	The camera <b>Setup</b> tab contains attributes to configure the
+	encoded stream.
+</p>
+<dl>
+    <dt>#</dt>
+    <dd>Camera number, used for dedicated keyboard systems.</dd>
+    <dt>Encoder Type</dt>
+    <dd>The type of encoder for the video stream.</dd>
+    <dt>Encoder Address</dt>
+    <dd>The encoder stream URI.
+        Usually, only the host name (or ip address) is needed here.
+        For GENERIC encoder types, the path is also required.
+        The default URI scheme is determined by the encoder type, but can be
+        overridden here (for example "mms://" or "axrtsp://").
+    </dd>
+    <dt>Encoder Multicast Address</dt>
+    <dd>A multicast address can be used by <a href="#monstream">MonStream</a>
+        clients.
+        Multicast requires less bandwidth, and allows scaling to many
+        simultaneous streams.</dd>
+    <dt>Encoder Channel</dt>
+    <dd>For encoders with more than 1 channel.</dd>
+    <dt>Publish</dt>
+    <dd>Flag to allow stream to be published.</dd>
+</dl>
+<h4 id="ptz">Pan / Tilt / Zoom</h4>
+<p>
+	Some cameras have a built-in pan/tilt/zoom (PTZ) functionality.
+	IRIS can perform the following PTZ operations:
+</p>
+<ul>
+	<li>Panning / tilting the camera</li>
+	<li>Recall preset positions</li>
+	<li>Store preset positions</li>
+	<li>Zooming in or out</li>
+	<li>Manual focus: near / far</li>
+	<li>Manual iris: open / close</li>
+	<li>Wiper control</li>
+</ul>
+<p>
+	For PTZ control to function, the camera must be associated with a
+	<a href="#controllers">controller</a> on a PTZ protocol
+	<a href="#comm_links">comm link</a>.
+</p>
+<h4 id="cam_tool">Camera Selector Tool</h4>
+<p>
+	There is a simple camera selector tool on the toolbar just below the
+	map.
+	It has a text entry field with an icon and label.
+	This tool allows quick switching of the selected camera.
+</p>
+<h4 id="numpad">Numpad Hotkeys</h4>
+<p>
+	The keyboard "numpad" can be used from anywhere within IRIS to control
+	the camera selector tool.
+	When the <b>Num Lock</b> key is off, all numpad keystrokes are directed
+	to the tool.
+	Pressing the <code>*</code> key (on the numpad) changes to video monitor
+	selection &mdash; the icon will change to indicate this change.
+	The <code>+</code> and <code>-</code> keys can select the next and
+	previous cameras, respectively.
 </p>
 
-<h4 id="ilcs">"Intelligent" Lane-use Control Signs (ILCS)</h4>
+<h3 id="video">Video Monitors</h3>
 <p>
-	An "intelligent" LCS is a full-matrix color <a href="#dms">DMS</a> which
-	is mounted directly over a lane of traffic.
-	In addition to being used as an LCS, it can display
-	<a href="#vsa">variable speed advisories</a>, or any operator-defined
-	message as a regular DMS.
+	IRIS can also be configured to send commands to a video switcher
+	system, such as <a href="#monstream">MonStream</a>.
+	This allows camera streams to be routed to a number of video monitors.
+	Each monitor can be assigned to display the video from any specific
+	camera.
+	IRIS allows an operator to select one video monitor to be linked with
+	their camera selection on the user interface.
+	This way, every time the user selects a camera, it's video is
+	immediately displayed on the associated monitor.
 </p>
-
-<h4 id="dlcs">"Dumb" Lane-use Control Signs (DLCS)</h4>
+<h4 id="monstream">MonStream</h4>
 <p>
-	A "dumb" LCS device is much simpler than an ILCS.
-	It can display one of a fixed set of indications &mdash; typically a
-	<i>green arrow</i> <span class="green">&nbsp;↓&nbsp;</span>, a
-	<i>yellow arrow</i> <span class="yellow">&nbsp;↓&nbsp;</span> or a
-	<i>red X</i> <span class="red">&nbsp;X&nbsp;</span>).
-	Each indication must be assigned to a separate
-	<a href="#io_pins">I/O pin</a> on a
-	<a href="#controllers">controller</a>, as well as the DMS which
-	represents the LCS.
+	MonStream is a video streaming application which runs on low-cost
+	Linux computers.
+	One computer running MonStream can be configured to stream a grid of
+	four or more video feeds onto a single large monitor.
+	IRIS can send switching messages to MonStream, creating a low-latency
+	IP video system.
 </p>
 
 <h3 id="ramp_meters">Ramp Meters</h3>
