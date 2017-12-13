@@ -1393,7 +1393,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>No</td>
 	</tr>
 	<tr>
-	    <td>MonStream</td>
+	    <td><a href="#monstream">MonStream</a></td>
 	    <td><a href="#video">Video switching</a> for streaming decoders</td>
 	    <td>UDP</td>
 	    <td>No</td>
@@ -2214,12 +2214,27 @@ FIXME
 <p>
 	Video cameras with remote <a href="#ptz">pan / tilt / zoom</a>
 	capability can be used to monitor freeway conditions.
-	To display video in IRIS, it must be digitally encoded (IP video).
+	The <b>Camera</b> tab can display Motion JPEG (MJPEG) video.
+	To view MPEG4 or h.264 video, the <a href="#monstream">MonStream</a>
+	application is required.
 </p>
-<h4 id="camera_setup">Camera Setup</h4>
+<h4 id="video_servlet">Video Servlet</h4>
 <p>
-	The camera <b>Setup</b> tab contains attributes to configure the
-	encoded stream.
+	The <b>video</b> servlet is a proxy server which provides MJPEG streams
+	to IRIS clients.
+	Properties in the <a href="#client_properties">
+	iris-client.properties</a> file are used to configure use of the
+	video servlet: <code>video.host</code>, <code>video.port</code>, and
+	<code>district</code>.
+	When specified, video requests will be made to
+	<code>http://<i>[video.host]</i>:<i>[video.port]</i>/video/stream/<i>[district]</i>/<i>[camera_name]</i></code>.
+	Otherwise, requests will be made directly to the camera's
+	<a href="#encoder">encoder</a> address.
+</p>
+<h4 id="encoder">Encoders</h4>
+<p>
+	The <b>Setup</b> tab within a camera properties form contains attributes
+	to configure the encoded stream.
 </p>
 <dl>
     <dt>#</dt>
@@ -2229,7 +2244,7 @@ FIXME
     <dt>Encoder Address</dt>
     <dd>The encoder stream URI.
         Usually, only the host name (or ip address) is needed here.
-        For GENERIC encoder types, the path is also required.
+        For <code>Generic</code> encoder types, the path is also required.
         The default URI scheme is determined by the encoder type, but can be
         overridden here (for example "mms://" or "axrtsp://").
     </dd>
@@ -2240,67 +2255,102 @@ FIXME
         simultaneous streams.</dd>
     <dt>Encoder Channel</dt>
     <dd>For encoders with more than 1 channel.</dd>
-    <dt>Publish</dt>
-    <dd>Flag to allow stream to be published.</dd>
 </dl>
 <h4 id="ptz">Pan / Tilt / Zoom</h4>
 <p>
-	Some cameras have a built-in pan/tilt/zoom (PTZ) functionality.
-	IRIS can perform the following PTZ operations:
+	Many cameras have built-in pan/tilt/zoom (PTZ) functionality.
+	The following operations can be performed:
 </p>
 <ul>
 	<li>Panning / tilting the camera</li>
-	<li>Recall preset positions</li>
-	<li>Store preset positions</li>
 	<li>Zooming in or out</li>
 	<li>Manual focus: near / far</li>
 	<li>Manual iris: open / close</li>
 	<li>Wiper control</li>
+	<li>Recall <a href="#preset">preset</a> positions</li>
+	<li>Store <a href="#preset">preset</a> positions</li>
 </ul>
 <p>
 	For PTZ control to function, the camera must be associated with a
 	<a href="#controllers">controller</a> on a PTZ protocol
 	<a href="#comm_links">comm link</a>.
 </p>
+<p>
+	A selected camera can be panned and/or tilted by clicking on the video
+	display on the <b>Camera</b> tab.
+	The pan/tilt speed will vary depending on distance from the mouse-click
+	to the center of the image.
+	Similarly, using a mouse wheel on the video display will cause the
+	camera to zoom in or out.
+</p>
+<p>
+	Below the video display, there are also buttons for PTZ, as well as
+	focus, iris and wiper control.
+</p>
+<h4 id="preset">Presets</h4>
+<p>
+	The <b>Preset</b> tab within a camera properties form can be used to
+	configure up to 12 presets per camera.
+	A preset can be associated with either a compass direction or a device,
+	such as <a href="#dms">DMS</a> or <a href="#ramp_meters">ramp meter</a>.
+	To associate a preset with a device, enable the preset, then select
+	that preset on the <b>Location</b> tab of the device's properties form.
+</p>
 <h4 id="cam_tool">Camera Selector Tool</h4>
 <p>
-	There is a simple camera selector tool on the toolbar just below the
-	map.
-	It has a text entry field with an icon and label.
-	This tool allows quick switching of the selected camera.
+	The camera selector tool is on the toolbar just below the map.
+	It has a text entry field with a camera icon and label.
+	This tool enables quick switching of the selected camera.
 </p>
-<h4 id="numpad">Numpad Hotkeys</h4>
 <p>
 	The keyboard "numpad" can be used from anywhere within IRIS to control
 	the camera selector tool.
 	When the <b>Num Lock</b> key is off, all numpad keystrokes are directed
 	to the tool.
-	Pressing the <code>*</code> key (on the numpad) changes to video monitor
-	selection &mdash; the icon will change to indicate this change.
 	The <code>+</code> and <code>-</code> keys can select the next and
 	previous cameras, respectively.
+	Pressing the <b>*</b> key (on the numpad) changes to
+	<a href="#video">video monitor</a> selection mode &mdash; the icon will
+	change to a monitor.
 </p>
 
 <h3 id="video">Video Monitors</h3>
+<aside>
+	Select <span class="menu">View ➔ Video ➔ Video Monitor</span> menu item
+</aside>
 <p>
 	IRIS can also be configured to send commands to a video switcher
 	system, such as <a href="#monstream">MonStream</a>.
-	This allows camera streams to be routed to a number of video monitors.
-	Each monitor can be assigned to display the video from any specific
-	camera.
-	IRIS allows an operator to select one video monitor to be linked with
-	their camera selection on the user interface.
-	This way, every time the user selects a camera, it's video is
-	immediately displayed on the associated monitor.
+	This allows camera streams to be routed to any number of video monitors.
+	Each monitor can be assigned to display the video from any camera.
+</p>
+<h4>Monitor Selection</h4>
+<p>
+	On the upper-right of the <b>Camera</b> tab, there is a monitor
+	selector.
+	The chosen monitor will switch whenever the user selects a new camera.
 </p>
 <h4 id="monstream">MonStream</h4>
 <p>
-	MonStream is a video streaming application which runs on low-cost
-	Linux computers.
+	MonStream is a full-screen video streaming application which runs on
+	low-cost Linux computers.
 	One computer running MonStream can be configured to stream a grid of
 	four or more video feeds onto a single large monitor.
+	The only configuration required on the MonStream computer is to allow
+	access to the <code>/var/lib/monstream/</code> directory.
 	IRIS can send switching messages to MonStream, creating a low-latency
 	IP video system.
+</p>
+<p>
+	A <a href="#controllers">controller</a> must be configured to represent
+	each MonStream computer.
+	It will need to be on a <a href="#comm_links">comm link</a> using the
+	MonStream protocol, with a timeout of 2000 ms.
+	The comm link URI should be of the form: <code>[ip address]:7001</code>.
+	Each video monitor to be displayed should be associated with an IO pin
+	of the controller.
+	For example, a quad-screen monitor would have monitors associated with
+	pins 1 thru 4.
 </p>
 
 <h3 id="ramp_meters">Ramp Meters</h3>
