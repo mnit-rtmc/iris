@@ -98,7 +98,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">13 Dec 2017</div>
+<div id="stamp">14 Dec 2017</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -2208,9 +2208,6 @@ FIXME
 </p>
 
 <h3 id="cameras">Cameras</h3>
-<aside>
-	Select <span class="menu">View ➔ Video ➔ Cameras</span> menu item
-</aside>
 <p>
 	Video cameras with remote <a href="#ptz">pan / tilt / zoom</a>
 	capability can be used to monitor freeway conditions.
@@ -2231,7 +2228,36 @@ FIXME
 	Otherwise, requests will be made directly to the camera's
 	<a href="#encoder">encoder</a> address.
 </p>
-<h4 id="encoder">Encoders</h4>
+
+<aside>
+	Select <span class="menu">View ➔ Video ➔ Encoder Types</span> menu item
+</aside>
+<h4 id="encoder_type">Encoder Types</h4>
+<p>
+	An encoder type represents a specific make and model of video encoder.
+	It determines how video request URIs are formed.
+</p>
+<dl>
+    <dt>Encoder Type</dt>
+    <dd>Make / model name</dd>
+    <dt>Encoding</dt>
+    <dd>Stream encoding: MJPEG, MPEG2, MPEG4, H264</dd>
+    <dt>URI Scheme</dt>
+    <dd>Scheme part of request URI: <code>rtsp</code> / <code>http</code></dd>
+    <dt>URI Path</dt>
+    <dd>Path part of request URI.
+        This could be the location of an SDP file, for example.
+        To include the encoder channel number in the path, use
+        <code>{chan}</code>.
+    </dd>
+    <dt>Latency</dt>
+    <dd>Buffering latency for consuming stream</dd>
+</dl>
+
+<aside>
+	Select <span class="menu">View ➔ Video ➔ Cameras</span> menu item
+</aside>
+<h4 id="encoder">Video Encoders</h4>
 <p>
 	The <b>Setup</b> tab within a camera properties form contains attributes
 	to configure the encoded stream.
@@ -2240,21 +2266,25 @@ FIXME
     <dt>#</dt>
     <dd>Camera number, used for dedicated keyboard systems.</dd>
     <dt>Encoder Type</dt>
-    <dd>The type of encoder for the video stream.</dd>
+    <dd>The <a href="#encoder_type">type of encoder</a> for the video stream.
+    </dd>
     <dt>Encoder Address</dt>
-    <dd>The encoder stream URI.
-        Usually, only the host name (or ip address) is needed here.
-        For <code>Generic</code> encoder types, the path is also required.
-        The default URI scheme is determined by the encoder type, but can be
-        overridden here (for example "mms://" or "axrtsp://").
+    <dd>The host name or IP address of the encoder.
+        If the encoder type does not specify a path, it can also be included
+        here.
+        If a URI scheme is included, it will be used instead of the scheme from
+        the encoder type.
     </dd>
     <dt>Encoder Multicast Address</dt>
     <dd>A multicast address can be used by <a href="#monstream">MonStream</a>
         clients.
+        If defined, it will be used instead of the encoder address.
+        It must be a UDP address in the multicast range, including port.
         Multicast requires less bandwidth, and allows scaling to many
         simultaneous streams.</dd>
     <dt>Encoder Channel</dt>
-    <dd>For encoders with more than 1 channel.</dd>
+    <dd>This only needs to be specified if the URI path of the encoder type
+        requires it.</dd>
 </dl>
 <h4 id="ptz">Pan / Tilt / Zoom</h4>
 <p>
@@ -2262,7 +2292,7 @@ FIXME
 	The following operations can be performed:
 </p>
 <ul>
-	<li>Panning / tilting the camera</li>
+	<li>Panning or tilting the camera</li>
 	<li>Zooming in or out</li>
 	<li>Manual focus: near / far</li>
 	<li>Manual iris: open / close</li>
@@ -2307,8 +2337,8 @@ FIXME
 	the camera selector tool.
 	When the <b>Num Lock</b> key is off, all numpad keystrokes are directed
 	to the tool.
-	The <code>+</code> and <code>-</code> keys can select the next and
-	previous cameras, respectively.
+	The <b>+</b> and <b>-</b> keys can select the next and previous cameras,
+	respectively.
 	Pressing the <b>*</b> key (on the numpad) changes to
 	<a href="#video">video monitor</a> selection mode &mdash; the icon will
 	change to a monitor.
@@ -2334,12 +2364,15 @@ FIXME
 <p>
 	MonStream is a full-screen video streaming application which runs on
 	low-cost Linux computers.
-	One computer running MonStream can be configured to stream a grid of
-	four or more video feeds onto a single large monitor.
-	The only configuration required on the MonStream computer is to allow
-	access to the <code>/var/lib/monstream/</code> directory.
 	IRIS can send switching messages to MonStream, creating a low-latency
 	IP video system.
+</p>
+<p>
+	A computer running MonStream can be configured to stream a grid of four
+	or more video feeds onto a single large monitor.
+	The only configuration required on the MonStream computer is to grant
+	access to the <code>/var/lib/monstream/</code> directory for the UID of
+	the monstream process.
 </p>
 <p>
 	A <a href="#controllers">controller</a> must be configured to represent
