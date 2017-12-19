@@ -35,7 +35,6 @@ import us.mn.state.dot.tms.server.comm.monstream.MonStreamPoller;
 import us.mn.state.dot.tms.server.comm.msgfeed.MsgFeedPoller;
 import us.mn.state.dot.tms.server.comm.ntcip.NtcipPoller;
 import us.mn.state.dot.tms.server.comm.org815.Org815Poller;
-import us.mn.state.dot.tms.server.comm.pelco.PelcoPoller;
 import us.mn.state.dot.tms.server.comm.pelcod.PelcoDPoller;
 import us.mn.state.dot.tms.server.comm.pelcop.PelcoPPoller;
 import us.mn.state.dot.tms.server.comm.ss105.SS105Poller;
@@ -95,8 +94,6 @@ public class DevicePollerFactory {
 			return new PelcoDPoller(name);
 		case PELCO_P:
 			return new PelcoPPoller(name);
-		case PELCO_SWITCHER:
-			return new PelcoPoller(name);
 		case RTMS_G4:
 			return new G4Poller(name);
 		case SS_105:

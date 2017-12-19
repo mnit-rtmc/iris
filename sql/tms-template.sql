@@ -2656,7 +2656,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 9	DMS XML
 10	MSG_FEED
 11	NTCIP Class A
-12	Pelco Switcher
+12	Pelco (OBSOLETE)
 13	Vicon PTZ
 14	SmartSensor 125 HD
 15	OSi ORG-815
@@ -2797,7 +2797,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.60.0
+database_version	4.61.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
