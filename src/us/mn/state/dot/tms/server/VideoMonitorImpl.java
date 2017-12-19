@@ -418,31 +418,11 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Select a camera for the video monitor */
 	private void selectCamera(CameraImpl cam, String src) {
-		// NOTE: we need to iterate through all controllers to support
-		//       Pelco switcher protocol.  Otherwise, we could just
-		//       call getController here.
-		selectCameraWithSwitcher(cam);
+		VideoMonitorPoller vmp = getVideoMonitorPoller();
+		if (vmp != null)
+			vmp.switchCamera(this, cam);
 		String cid = (cam != null) ? cam.getName() : "";
 		logEvent(new CameraSwitchEvent(getName(), cid, src));
-	}
-
-	/** Select a camera for the video monitor with a switcher */
-	private void selectCameraWithSwitcher(CameraImpl cam) {
-		Iterator<Controller> it = ControllerHelper.iterator();
-		while (it.hasNext()) {
-			Controller c = it.next();
-			if (c instanceof ControllerImpl)
-				selectCamera((ControllerImpl) c, cam);
-		}
-	}
-
-	/** Select a camera for the video monitor */
-	private void selectCamera(ControllerImpl c, CameraImpl cam) {
-		DevicePoller dp = c.getPoller();
-		if (dp instanceof VideoMonitorPoller) {
-			VideoMonitorPoller vmp = (VideoMonitorPoller) dp;
-			vmp.switchCamera(c, this, cam);
-		}
 	}
 
 	/** Perform a periodic poll */

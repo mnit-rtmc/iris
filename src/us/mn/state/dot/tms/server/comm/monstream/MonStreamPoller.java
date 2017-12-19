@@ -46,14 +46,8 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 
 	/** Set the camera to display on the specified monitor */
 	@Override
-	public void switchCamera(ControllerImpl c, VideoMonitorImpl vm,
-		CameraImpl cam)
-	{
-		// Make sure the controller is not a video switcher
-		if (c == vm.getController()) {
-			createOp("video.monitor.op.switch", vm,
-				new OpSwitchCamera(cam));
-		}
+	public void switchCamera(VideoMonitorImpl vm, CameraImpl cam) {
+		createOp("video.monitor.op.switch", vm,new OpSwitchCamera(cam));
 	}
 
 	/** Send a device request

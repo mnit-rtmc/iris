@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm;
 
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
-import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
 
 /**
@@ -28,8 +27,7 @@ import us.mn.state.dot.tms.server.VideoMonitorImpl;
 public interface VideoMonitorPoller {
 
 	/** Switch the camera to display on the specified monitor */
-	void switchCamera(ControllerImpl c, VideoMonitorImpl vm,
-		CameraImpl cam);
+	void switchCamera(VideoMonitorImpl vm, CameraImpl cam);
 
 	/** Send a device request
 	 * @param vm The VideoMonitor object.
