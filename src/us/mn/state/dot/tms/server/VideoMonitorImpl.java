@@ -510,7 +510,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		}
 		@Override
 		public void perform() throws TMSException {
-			if (pls == pl_state) {
+			if (pls == pl_state && isActive()) {
 				Camera c = pls.updateDwell();
 				if (c != null) {
 					setCamSrc(toCameraImpl(c),
