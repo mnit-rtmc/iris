@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,13 @@ import us.mn.state.dot.tms.client.map.VectorSymbol;
  */
 public class CamSelectPanel extends ToolPanel {
 
+	/** Selection mode */
+	private interface Mode {
+		void selectDevice();
+		Icon getIcon();
+		String getID();
+	}
+
 	/** Is this panel IRIS enabled? */
 	static public boolean getIEnabled() {
 		return true;
@@ -62,8 +69,45 @@ public class CamSelectPanel extends ToolPanel {
 	/** ID text field */
 	private final JTextField txt = new JTextField(8);
 
-	/** Monitor mode flag */
-	private boolean monitor = false;
+	/** Current selection mode */
+	private Mode mode = cameraMode();
+
+	/** Create camera selection mode */
+	private Mode cameraMode() {
+		return new Mode() {
+			public void selectDevice() {
+				Camera c = lookupCamera(getText());
+				if (c != null)
+					manager.selectCamera(c);
+			}
+			public Icon getIcon() {
+				return manager.getIcon(lookupCamera(getText()));
+			}
+			public String getID() {
+				Camera c = lookupCamera(getText());
+				return (c != null) ? c.getName() : "";
+			}
+		};
+	}
+
+	/** Create monitor selection mode */
+	private Mode monitorMode() {
+		return new Mode() {
+			public void selectDevice() {
+				VideoMonitor m = lookupMonitor(getText());
+				if (m != null)
+					manager.selectMonitor(m);
+			}
+			public Icon getIcon() {
+				return MONITOR.getLegend(getMonitorStyle(
+					getText()));
+			}
+			public String getID() {
+				VideoMonitor m = lookupMonitor(getText());
+				return (m != null) ? m.getName() : "";
+			}
+		};
+	}
 
 	/** Create a new camera select panel */
 	public CamSelectPanel(Session s) {
@@ -97,53 +141,31 @@ public class CamSelectPanel extends ToolPanel {
 
 	/** Select the entered device */
 	private void selectDevice() {
-		if (monitor) {
-			VideoMonitor m = lookupMonitor(txt.getText());
-			if (m != null)
-				manager.selectMonitor(m);
-		} else {
-			Camera c = lookupCamera(txt.getText());
-			if (c != null)
-				manager.selectCamera(c);
-		}
-		monitor = false;
+		mode.selectDevice();
+		mode = cameraMode();
 		updateText("");
+	}
+
+	/** Get the current entered text */
+	private String getText() {
+		return txt.getText();
 	}
 
 	/** Update label from entered ID */
 	private void updateLabel() {
-		String t = txt.getText();
+		String t = getText();
 		if (t.length() > 10) {
-			monitor = false;
-			t = "";
-			txt.setText(t);
+			mode = cameraMode();
+			txt.setText("");
 		}
-		lbl.setIcon(getIcon(t));
-		lbl.setText(getID(t));
-	}
-
-	/** Get the icon for an ID */
-	private Icon getIcon(String t) {
-		return (monitor)
-		      ? MONITOR.getLegend(getMonitorStyle(t))
-		      : manager.getIcon(lookupCamera(t));
+		lbl.setIcon(mode.getIcon());
+		lbl.setText(mode.getID());
 	}
 
 	/** Get icon style for a monitor */
 	private Style getMonitorStyle(String t) {
 		VideoMonitor m = lookupMonitor(t);
 		return (m != null) ? CameraTheme.ACTIVE : CameraTheme.ALL;
-	}
-
-	/** Get the device ID */
-	private String getID(String t) {
-		if (monitor) {
-			VideoMonitor m = lookupMonitor(t);
-			return (m != null) ? m.getName() : "";
-		} else {
-			Camera c = lookupCamera(t);
-			return (c != null) ? c.getName() : "";
-		}
 	}
 
 	/** Update the text widget */
@@ -203,18 +225,18 @@ public class CamSelectPanel extends ToolPanel {
 		case '7':
 		case '8':
 		case '9':
-			updateText(txt.getText() + c);
+			updateText(getText() + c);
 			break;
 		case '\n':
 			selectDevice();
 			break;
 		case '.':
-			String t = txt.getText();
+			String t = getText();
 			if (t.length() > 0)
 				updateText(t.substring(0, t.length() - 1));
 			break;
 		case '*':
-			monitor = true;
+			mode = monitorMode();
 			updateText("");
 			break;
 		case '-':
