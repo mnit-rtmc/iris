@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2016  Minnesota Department of Transportation
+ * Copyright (C) 2014-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.server.event.CameraSwitchEvent;
 import us.mn.state.dot.tms.server.event.CommEvent;
 import us.mn.state.dot.tms.server.event.MeterEvent;
 import us.mn.state.dot.tms.server.event.TravelTimeEvent;
@@ -35,6 +36,7 @@ public class EventPurgeJob extends Job {
 
 	/** Perform the event purge job */
 	public void perform() throws TMSException {
+		CameraSwitchEvent.purgeRecords();
 		CommEvent.purgeRecords();
 		MeterEvent.purgeRecords();
 		TravelTimeEvent.purgeRecords();

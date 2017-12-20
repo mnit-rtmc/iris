@@ -2791,6 +2791,7 @@ camera_playlist_dwell_sec	5
 camera_preset_store_enable	false
 camera_ptz_blind	true
 camera_stream_controls_enable	false
+camera_switch_event_purge_days	30
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
