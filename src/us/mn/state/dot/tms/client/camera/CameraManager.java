@@ -241,6 +241,15 @@ public class CameraManager extends DeviceManager<Camera> {
 			dispatcher.selectMonitorCamera(c);
 	}
 
+	/** Select a play list on the selected camera */
+	public void selectMonitorPlayList(PlayList pl) {
+		if (pl != null)
+			watcher.setProxy(pl);
+		else
+			watchPersonalPlayList();
+		dispatcher.selectMonitorPlayList(pl);
+	}
+
 	/** Select a video monitor */
 	public void selectMonitor(VideoMonitor m) {
 		dispatcher.selectMonitor(m);

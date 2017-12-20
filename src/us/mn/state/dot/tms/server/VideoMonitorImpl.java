@@ -436,6 +436,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Set the play list.
 	 * This will start the given play list from the beginning. */
+	@Override
 	public void setPlayList(PlayList pl) {
 		PlayListState pls = (pl != null) ? new PlayListState(pl) : null;
 		pl_state = pls;

@@ -25,12 +25,15 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.PlayList;
+import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraManager;
 import us.mn.state.dot.tms.client.camera.CameraTheme;
 import us.mn.state.dot.tms.client.camera.MonitorMarker;
+import us.mn.state.dot.tms.client.camera.PlayListMarker;
 import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.map.VectorSymbol;
 
@@ -57,6 +60,10 @@ public class CamSelectPanel extends ToolPanel {
 	static private final VectorSymbol MONITOR = new VectorSymbol(
 		new MonitorMarker());
 
+	/** Play list symbol */
+	static private final VectorSymbol PLAYLIST = new VectorSymbol(
+		new PlayListMarker());
+
 	/** Camera manager */
 	private final CameraManager manager;
 
@@ -76,37 +83,85 @@ public class CamSelectPanel extends ToolPanel {
 	private Mode cameraMode() {
 		return new Mode() {
 			public void selectDevice() {
-				Camera c = lookupCamera(getText());
+				Camera c = lookupCamera();
 				if (c != null)
 					manager.selectCamera(c);
 			}
 			public Icon getIcon() {
-				return manager.getIcon(lookupCamera(getText()));
+				return manager.getIcon(lookupCamera());
 			}
 			public String getID() {
-				Camera c = lookupCamera(getText());
+				Camera c = lookupCamera();
 				return (c != null) ? c.getName() : "";
 			}
 		};
+	}
+
+	/** Lookup a camera by ID */
+	private Camera lookupCamera() {
+		String t = getText();
+		Camera c = CameraHelper.lookup(t);
+		return (c != null) ? c : CameraHelper.findUID(t);
 	}
 
 	/** Create monitor selection mode */
 	private Mode monitorMode() {
 		return new Mode() {
 			public void selectDevice() {
-				VideoMonitor m = lookupMonitor(getText());
+				VideoMonitor m = lookupMonitor();
 				if (m != null)
 					manager.selectMonitor(m);
 			}
 			public Icon getIcon() {
-				return MONITOR.getLegend(getMonitorStyle(
-					getText()));
+				return MONITOR.getLegend(getMonitorStyle());
 			}
 			public String getID() {
-				VideoMonitor m = lookupMonitor(getText());
+				VideoMonitor m = lookupMonitor();
 				return (m != null) ? m.getName() : "";
 			}
 		};
+	}
+
+	/** Lookup a monitor by ID */
+	private VideoMonitor lookupMonitor() {
+		String t = getText();
+		VideoMonitor m = VideoMonitorHelper.lookup(t);
+		return (m != null) ? m : VideoMonitorHelper.findUID(t);
+	}
+
+	/** Get icon style for a monitor */
+	private Style getMonitorStyle() {
+		VideoMonitor m = lookupMonitor();
+		return (m != null) ? CameraTheme.ACTIVE : CameraTheme.ALL;
+	}
+
+	/** Create playlist selection mode */
+	private Mode playListMode() {
+		return new Mode() {
+			public void selectDevice() {
+				manager.selectMonitorPlayList(lookupPlayList());
+			}
+			public Icon getIcon() {
+				return PLAYLIST.getLegend(getPlayListStyle());
+			}
+			public String getID() {
+				PlayList pl = lookupPlayList();
+				return (pl != null) ? pl.getName() : "";
+			}
+		};
+	}
+
+	/** Lookup a play list by ID / num */
+	private PlayList lookupPlayList() {
+		String t = getText();
+		PlayList pl = PlayListHelper.lookup(t);
+		return (pl != null) ? pl : PlayListHelper.findNum(t);
+	}
+
+	/** Get icon style for a play list */
+	private Style getPlayListStyle() {
+		PlayList pl = lookupPlayList();
+		return (pl != null) ? CameraTheme.ACTIVE : CameraTheme.ALL;
 	}
 
 	/** Create a new camera select panel */
@@ -162,28 +217,10 @@ public class CamSelectPanel extends ToolPanel {
 		lbl.setText(mode.getID());
 	}
 
-	/** Get icon style for a monitor */
-	private Style getMonitorStyle(String t) {
-		VideoMonitor m = lookupMonitor(t);
-		return (m != null) ? CameraTheme.ACTIVE : CameraTheme.ALL;
-	}
-
 	/** Update the text widget */
 	private void updateText(String t) {
 		txt.setText(t);
 		updateLabel();
-	}
-
-	/** Lookup a camera by ID */
-	private Camera lookupCamera(String id) {
-		Camera c = CameraHelper.lookup(id);
-		return (c != null) ? c : CameraHelper.findUID(id);
-	}
-
-	/** Lookup a monitor by ID */
-	private VideoMonitor lookupMonitor(String id) {
-		VideoMonitor m = VideoMonitorHelper.lookup(id);
-		return (m != null) ? m : VideoMonitorHelper.findUID(id);
 	}
 
 	/** Key dispatcher for application-wide numpad hotkeys */
@@ -237,6 +274,10 @@ public class CamSelectPanel extends ToolPanel {
 			break;
 		case '*':
 			mode = monitorMode();
+			updateText("");
+			break;
+		case '/':
+			mode = playListMode();
 			updateText("");
 			break;
 		case '-':

@@ -31,6 +31,7 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
@@ -414,6 +415,13 @@ public class CameraDispatcher extends JPanel {
 			if (vm != null)
 				vm.setCamera(c);
 		}
+	}
+
+	/** Select a play list on the selected video monitor */
+	public void selectMonitorPlayList(PlayList pl) {
+		VideoMonitor vm = video_monitor;
+		if (vm != null)
+			vm.setPlayList(pl);
 	}
 
 	/** Clear all of the fields */

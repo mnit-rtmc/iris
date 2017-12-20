@@ -98,7 +98,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">19 Dec 2017</div>
+<div id="stamp">20 Dec 2017</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -720,7 +720,7 @@ systemctl status iris</pre>
 	    <tr>
 	    <td>play_list</td>
 	    <td>user</td>
-	    <td>Personal camera play list</td>
+	    <td>Personal camera <a href="#playlist">play list</a></td>
 	    </table>
 	</dd>
 	<dt>Attribute</dt>
@@ -2336,6 +2336,9 @@ FIXME
 	Pressing the <b>*</b> key (on the numpad) changes to
 	<a href="#video">video monitor</a> selection mode &mdash; the icon will
 	change to a monitor.
+	Pressing the <b>/</b> key (on the numpad) changes to
+	<a href="#playlist">play list</a> selection mode &mdash; the icon will
+	change to a play list.
 </p>
 
 <h3 id="video">Video Monitors</h3>
@@ -2378,6 +2381,20 @@ FIXME
 	of the controller.
 	For example, a quad-screen monitor would have monitors associated with
 	pins 1 thru 4.
+</p>
+
+<h4 id="playlist">Play Lists</h4>
+<aside>
+	Select <span class="menu">View ➔ Video ➔ Play Lists</span> menu item
+</aside>
+<p>
+	Play lists can be created to cycle through related cameras.
+	Each user can have a personal play list, but system play lists are
+	available to all users.
+	Selecting a play list on a monitor will cause the play list to
+	automatically switch.
+	The interval is specified by the <code>camera_playlist_dwell_sec</code>
+	<a href="#system_attributes">system attribute</a>.
 </p>
 
 <h3 id="ramp_meters">Ramp Meters</h3>

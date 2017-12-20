@@ -47,4 +47,8 @@ public interface VideoMonitor extends Device {
 
 	/** Get the camera displayed on the monitor */
 	Camera getCamera();
+
+	/** Set the play list.
+	 * This will start the given play list from the beginning. */
+	void setPlayList(PlayList pl);
 }
