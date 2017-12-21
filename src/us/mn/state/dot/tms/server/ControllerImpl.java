@@ -979,27 +979,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			else
 				sp.sendSettings(this);
 		}
-		WeatherPoller wp = getWeatherPoller();
-		if (wp != null) {
-			WeatherSensorImpl ws = getWeatherSensor();
-			if (ws != null)
-				wp.sendSettings(ws);
-		}
-	}
-
-	/** Get a weather sensor poller */
-	private WeatherPoller getWeatherPoller() {
-		DevicePoller dp = getPoller();
-		return (dp instanceof WeatherPoller) ? (WeatherPoller) dp :null;
-	}
-
-	/** Get a weather sensor for the controller */
-	private synchronized WeatherSensorImpl getWeatherSensor() {
-		for (ControllerIO io: io_pins.values()) {
-			if (io instanceof WeatherSensorImpl)
-				return (WeatherSensorImpl) io;
-		}
-		return null;
 	}
 
 	/** Destroy an object */
