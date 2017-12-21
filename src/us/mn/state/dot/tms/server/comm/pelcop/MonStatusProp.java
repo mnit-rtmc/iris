@@ -43,7 +43,7 @@ public class MonStatusProp extends PelcoPProp {
 	static public final int RESP_CODE = 0xB1;
 
 	/** Get the "blank" camera number */
-	static private int cameraNumBlank() {
+	static protected int cameraNumBlank() {
 		return SystemAttrEnum.CAMERA_NUM_BLANK.getInt();
 	}
 
