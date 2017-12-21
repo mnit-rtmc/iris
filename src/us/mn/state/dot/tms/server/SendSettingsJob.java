@@ -73,7 +73,6 @@ public class SendSettingsJob extends Job {
 		requestBeacons(DeviceRequest.SEND_SETTINGS);
 		requestTagReaders(DeviceRequest.SEND_SETTINGS);
 		requestWeatherSensors(DeviceRequest.SEND_SETTINGS);
-		requestVideoMonitors(DeviceRequest.SEND_SETTINGS);
 	}
 
 	/** Send a request to all DMS */
@@ -127,15 +126,6 @@ public class SendSettingsJob extends Job {
 		while (it.hasNext()) {
 			WeatherSensor ws = it.next();
 			ws.setDeviceRequest(req.ordinal());
-		}
-	}
-
-	/** Send a request to all video monitors */
-	private void requestVideoMonitors(DeviceRequest req) {
-		Iterator<VideoMonitor> it = VideoMonitorHelper.iterator();
-		while (it.hasNext()) {
-			VideoMonitor vm = it.next();
-			vm.setDeviceRequest(req.ordinal());
 		}
 	}
 }
