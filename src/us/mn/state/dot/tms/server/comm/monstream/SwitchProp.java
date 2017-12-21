@@ -50,6 +50,11 @@ public class SwitchProp extends MonProp {
 		return SystemAttrEnum.CAMERA_NUM_BLANK.getInt();
 	}
 
+	/** Check if a camera number is "blank" */
+	static private boolean isCameraNumBlank(Integer cn) {
+		return (cn != null) && (cameraNumBlank() == cn);
+	}
+
 	/** Camera to display */
 	private final CameraImpl camera;
 
@@ -89,22 +94,18 @@ public class SwitchProp extends MonProp {
 
 	/** Get camera number */
 	private String getCamNum() {
-		if (camera != null) {
-			Integer cam_num = camera.getCamNum();
-			return (cam_num != null)
-			      ? cam_num.toString()
-			      : camera.getName();
+		if (isCameraBlank())
+			return "";
+		else {
+			assert camera != null;
+			Integer cn = camera.getCamNum();
+			return (cn != null) ? cn.toString() : camera.getName();
 		}
-		return "";
 	}
 
 	/** Check if the camera is blank */
 	private boolean isCameraBlank() {
-		if (camera != null) {
-			Integer cn = camera.getCamNum();
-			return (cn != null) && (cn == cameraNumBlank());
-		} else
-			return true;
+		return (camera == null) || isCameraNumBlank(camera.getCamNum());
 	}
 
 	/** Get the stream URI */
