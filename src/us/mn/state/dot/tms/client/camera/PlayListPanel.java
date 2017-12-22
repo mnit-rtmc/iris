@@ -312,9 +312,9 @@ public class PlayListPanel extends JPanel {
 		return lookupCamera() != null;
 	}
 
-	/** Lookup camera by ID */
+	/** Lookup camera by ID (or number) */
 	private Camera lookupCamera() {
-		return CameraHelper.lookup(cam_txt.getText());
+		return CameraHelper.find(cam_txt.getText());
 	}
 
 	/** Check if a camera is selected */
