@@ -298,10 +298,9 @@ public class SingleSignTab extends IPanel {
 		}
 		if (a == null || a.equals("operation"))
 			updateStatus(dms);
-		if (a == null || a.equals("msgCurrent")) {
+		if (null == a || (a.equals("msgCurrent") && !preview)) {
+			updateCurrentPanel(dms);
 			updateMessageCurrent(dms);
-			if (!preview)
-				updateCurrentPanel(dms);
 		}
 		if (a == null || a.equals("awsAllowed")) {
 			aws_control_chk.setEnabled(
