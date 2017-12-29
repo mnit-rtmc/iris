@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.EncoderType;
 import us.mn.state.dot.tms.Encoding;
 import static us.mn.state.dot.tms.utils.URIUtil.create;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
+import static us.mn.state.dot.tms.utils.URIUtil.RTSP;
 
 /**
  * The video stream request parameter wrapper.
@@ -34,6 +35,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
  * @author Timothy Johnson
  * @author Douglas Lau
  * @author Travis Swanston
+ * @author John L. Stanley - SRF Consulting
  */
 public class VideoRequest {
 
@@ -73,6 +75,9 @@ public class VideoRequest {
 			return "" + getWidthReq() + 'x' + getHeightReq();
 		}
 	}
+
+	/** Type of video proxy property name */
+	static private final String VIDEO_PROXY = "video.proxy";
 
 	/** Video host property name */
 	static private final String VIDEO_HOST = "video.host";
@@ -114,6 +119,9 @@ public class VideoRequest {
 		return size;
 	}
 
+	/** The type of video server/proxy */
+	private final String video_proxy;
+
 	/** The base URL of the video server */
 	private final String base_url;
 
@@ -127,6 +135,7 @@ public class VideoRequest {
 	public VideoRequest(Properties p, Size sz) {
 		base_url = createBaseUrl(p);
 		district = p.getProperty("district", "tms");
+		video_proxy = p.getProperty(VIDEO_PROXY, "");
 		size = sz;
 	}
 
@@ -140,8 +149,37 @@ public class VideoRequest {
 		return base_url != null;
 	}
 
+	/** Get camera name modified for use in
+	  * a live555 videoProxy rtsp uri string */
+	private String getLive555CamName(Camera cam) {
+		String camName = cam.getName();
+		int len = camName.length();
+		StringBuilder newCamName = new StringBuilder(len);
+		char ch;
+		for (int i = 0; (i < len); ++i) {
+			ch = camName.charAt(i);
+			if (ch >= 127) // replace any non-ASCII character
+				newCamName.append('_');
+			else if (Character.isLetterOrDigit(ch)
+			      || (ch == '.')
+			      || (ch == '-')
+			      || (ch == '_')
+			      || (ch == '~'))
+				newCamName.append(ch);
+			else
+				newCamName.append('_');
+		}
+		return newCamName.toString();
+	}
+	
 	/** Create a video servlet URI */
 	private URI getServletUri(Camera cam) {
+		// Use an alternate video-proxy?
+		if (video_proxy.equalsIgnoreCase("live555_SRF")) {
+			return create(RTSP, base_url +
+					"/" + getLive555CamName(cam));
+		}
+		// Use default (MnDOT servlet) video proxy
 		return create(HTTP, base_url +
 		                    "/video/" + servlet_type.servlet +
 		                    "/" + district +
