@@ -155,11 +155,16 @@ public class CameraDispatcher extends JPanel {
 	/** Joystick PTZ handler */
 	private final JoystickPTZ joy_ptz;
 
+	/** Is an external stream viewer defined? */
+	private final Boolean extViewerDefined;
+
 	/** Create a new camera dispatcher */
 	public CameraDispatcher(Session s, CameraManager man) {
 		session = s;
 		manager = man;
 		props = session.getProperties();
+		String viewer = props.getProperty(UserProperty.VIDEO_EXTVIEWER.name, "");
+		extViewerDefined = !viewer.isEmpty();
 		video_req = new VideoRequest(props, SIZE);
 		video_req.setSonarSessionId(session.getSessionId());
 		setLayout(new BorderLayout());
@@ -197,6 +202,7 @@ public class CameraDispatcher extends JPanel {
 	private StreamPanel createStreamPanel() {
 		boolean controls = SystemAttrEnum.CAMERA_STREAM_CONTROLS_ENABLE
 			.getBoolean();
+		controls |= extViewerDefined;
 		boolean autoplay = SystemAttrEnum.CAMERA_AUTOPLAY
 			.getBoolean();
 		return new StreamPanel(video_req, cam_ptz, session, controls,
