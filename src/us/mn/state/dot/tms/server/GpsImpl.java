@@ -27,7 +27,6 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.GpsHelper;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
