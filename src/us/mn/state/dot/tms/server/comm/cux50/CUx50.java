@@ -329,7 +329,7 @@ public class CUx50 implements ProtocolHandler {
 		/** Select a monitor */
 		private void selectMon() {
 			String n = entry.toString();
-			VideoMonitor vm = VideoMonitorHelper.findUID(n);
+			VideoMonitor vm = findMonitor(n);
 			if (vm != null || "0".equals(n))
 				monitor = vm;
 			else
@@ -337,7 +337,13 @@ public class CUx50 implements ProtocolHandler {
 			entry.setLength(0);
 			updateDisplay();
 		}
-
+		/** Find a video monitor */
+		private VideoMonitor findMonitor(String n) {
+			if ("0".equals(n))
+				return null;
+			else
+				return VideoMonitorHelper.findUID(n);
+		}
 		/** Select a camera */
 		private void selectCam() {
 			VideoMonitor vm = monitor;
@@ -348,7 +354,6 @@ public class CUx50 implements ProtocolHandler {
 			entry.setLength(0);
 			updateDisplay();
 		}
-
 		/** Select a new camera on a video monitor */
 		private void selectCamera(VideoMonitor vm) {
 			String n = entry.toString();
@@ -361,7 +366,6 @@ public class CUx50 implements ProtocolHandler {
 			} else
 				beepInvalid();
 		}
-
 		/** Find a camera by number */
 		private CameraImpl findCamera(String n) {
 			Integer cn = CameraHelper.parseUID(n);
@@ -372,14 +376,12 @@ public class CUx50 implements ProtocolHandler {
 			}
 			return null;
 		}
-
 		/** Stop camera control on selected camera */
 		private void stopCamControl(VideoMonitor vm) {
 			Camera c = vm.getCamera();
 			if (c instanceof CameraImpl)
 				((CameraImpl) c).sendPTZ(0, 0, 0);
 		}
-
 		/** Select a sequence (PlayList) */
 		private void selectSeq() {
 			VideoMonitor vm = monitor;
