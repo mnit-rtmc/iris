@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -78,35 +78,10 @@ public class MonStatusProp extends PelcoPProp {
 		return (vm != null) && vm.isPlayListRunning();
 	}
 
-	/** Find a camera by number */
-	static private Camera findCam(int cam_num) {
-		// First, lookup a guessed name for camera
-		Camera c = CameraHelper.lookup(buildCamName(cam_num));
-		if (c != null) {
-			// Is the camera number correct?
-			Integer cn = c.getCamNum();
-			if (cn != null && cn == cam_num)
-				return c;
-		}
-		// Do a linear search for camera number
-		Camera nc = CameraHelper.findUID(cam_num);
-		return (nc != null) ? nc : c;
-	}
-
 	/** Find a camera by UID */
 	static protected CameraImpl findCamera(int cam_num) {
-		Camera c = findCam(cam_num);
+		Camera c = CameraHelper.findNum(cam_num);
 		return (c instanceof CameraImpl) ? (CameraImpl) c : null;
-	}
-
-	/** Build a camera name guess */
-	static private String buildCamName(int cam_num) {
-		StringBuilder sb = new StringBuilder();
-		sb.append('C');
-		sb.append(cam_num);
-		while (sb.length() < 4)
-			sb.insert(1, '0');
-		return sb.toString();
 	}
 
 	/** Flag for monitor macro running status */

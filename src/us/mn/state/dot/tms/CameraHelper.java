@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -109,6 +109,31 @@ public class CameraHelper extends BaseHelper {
 				break;
 		}
 		return v.substring(i);
+	}
+
+	/** Find a camera by number */
+	static public Camera findNum(int cam_num) {
+		// First, lookup a guessed name for camera
+		Camera c = lookup(buildCamName(cam_num));
+		if (c != null) {
+			// Is the camera number correct?
+			Integer cn = c.getCamNum();
+			if (cn != null && cn == cam_num)
+				return c;
+		}
+		// Do a linear search for camera number
+		Camera nc = findUID(cam_num);
+		return (nc != null) ? nc : c;
+	}
+
+	/** Build a camera name guess */
+	static private String buildCamName(int cam_num) {
+		StringBuilder sb = new StringBuilder();
+		sb.append('C');
+		sb.append(cam_num);
+		while (sb.length() < 4)
+			sb.insert(1, '0');
+		return sb.toString();
 	}
 
 	/** Find previous camera below a given number */
