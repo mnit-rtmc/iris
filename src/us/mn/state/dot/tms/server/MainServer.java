@@ -33,6 +33,8 @@ import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.BaseEvent;
+import us.mn.state.dot.tms.server.comm.cux50.CUx50;
+import us.mn.state.dot.tms.server.comm.cux50.PrServer;
 import us.mn.state.dot.tms.utils.HttpProxySelector;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.PropertyLoader;
@@ -103,13 +105,14 @@ public class MainServer {
 			BaseObjectImpl.loadAll(store, ns);
 			scheduleTimerJobs();
 			scheduleFlushJobs();
+			startProtocolServer();
 			server = new Server(ns, props, new AccessLogger(FLUSH));
 			auth_provider = new IrisProvider();
 			server.addProvider(auth_provider);
 			System.err.println("IRIS Server active");
 			server.join();
 		}
-		catch(Exception e) {
+		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
@@ -203,5 +206,17 @@ public class MainServer {
 		FLUSH.addJob(new IncidentXmlJob());
 		FLUSH.addJob(new WeatherSensorXmlJob());
 		FLUSH.addJob(new EventPurgeJob());
+	}
+
+	/** Start the protocol server */
+	static private void startProtocolServer() {
+		// FIXME: add a system attribute to disable this
+		try {
+			PrServer ps = new PrServer();
+			ps.listen(7001, new CUx50());
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }
