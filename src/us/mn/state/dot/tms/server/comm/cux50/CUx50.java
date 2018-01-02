@@ -351,21 +351,22 @@ public class CUx50 implements ProtocolHandler {
 
 		/** Select a new camera on a video monitor */
 		private void selectCamera(VideoMonitor vm) {
-			CameraImpl c = findCamera();
-			if (c != null) {
-				int n = vm.getMonNum();
+			String n = entry.toString();
+			CameraImpl c = findCamera(n);
+			if (c != null || "0".equals(n)) {
+				int mn = vm.getMonNum();
 				stopCamControl(vm);
-				VideoMonitorImpl.setCameraNotify(n, c,
+				VideoMonitorImpl.setCameraNotify(mn, c,
 					"SEL " + host);
 			} else
 				beepInvalid();
 		}
 
 		/** Find a camera by number */
-		private CameraImpl findCamera() {
-			Integer n = CameraHelper.parseUID(entry.toString());
-			if (n != null) {
-				Camera c = CameraHelper.findNum(n);
+		private CameraImpl findCamera(String n) {
+			Integer cn = CameraHelper.parseUID(n);
+			if (cn != null) {
+				Camera c = CameraHelper.findNum(cn);
 				if (c instanceof CameraImpl)
 					return (CameraImpl) c;
 			}
