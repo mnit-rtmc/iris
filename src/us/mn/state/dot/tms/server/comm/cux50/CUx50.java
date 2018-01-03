@@ -36,6 +36,8 @@ import us.mn.state.dot.tms.server.VideoMonitorImpl;
  */
 public class CUx50 implements ProtocolHandler {
 
+	static private final Integer ZERO = new Integer(0);
+
 	/** Packet start/end transmit */
 	static private final byte STX = 0x02;
 	static private final byte ETX = 0x03;
@@ -47,6 +49,7 @@ public class CUx50 implements ProtocolHandler {
 	/** Keycodes for special functions */
 	static private final byte KEY_MON = (byte) 'A';
 	static private final byte KEY_CAM = (byte) 'B';
+	static private final byte KEY_PRESET = (byte) 'D';
 	static private final byte KEY_PREV = (byte) 'G';
 	static private final byte KEY_NEXT = (byte) 'H';
 	static private final byte KEY_CLEAR = (byte) 'N';
@@ -230,6 +233,15 @@ public class CUx50 implements ProtocolHandler {
 			}
 			return null;
 		}
+		/** Get the current keyboard entry */
+		private Integer getEntry() {
+			try {
+				return Integer.parseInt(entry.toString());
+			}
+			catch (NumberFormatException e) {
+				return null;
+			}
+		}
 		/** Get the sequence (PlayList) number */
 		private String getSeqNum() {
 			VideoMonitor vm = monitor;
@@ -321,6 +333,8 @@ public class CUx50 implements ProtocolHandler {
 				focusFar();
 			else if (KEY_WIPER == k)
 				wiperOneShot();
+			else if (KEY_PRESET == k)
+				recallPreset();
 			else if (KEY_SEQ == k)
 				selectSeq();
 			else if (KEY_PAUSE == k)
@@ -346,9 +360,9 @@ public class CUx50 implements ProtocolHandler {
 		}
 		/** Select a monitor */
 		private void selectMon() {
-			String n = entry.toString();
+			Integer n = getEntry();
 			VideoMonitor vm = findMonitor(n);
-			if (vm != null || "0".equals(n))
+			if (vm != null || ZERO.equals(n))
 				monitor = vm;
 			else
 				beepInvalid();
@@ -356,17 +370,16 @@ public class CUx50 implements ProtocolHandler {
 			updateDisplay();
 		}
 		/** Find a video monitor */
-		private VideoMonitor findMonitor(String n) {
-			if ("0".equals(n))
-				return null;
-			else
-				return VideoMonitorHelper.findUID(n);
+		private VideoMonitor findMonitor(Integer n) {
+			return (n != null && n != 0)
+			      ? VideoMonitorHelper.findUID(n)
+			      : null;
 		}
 		/** Select a camera */
 		private void selectCam() {
-			String n = entry.toString();
+			Integer n = getEntry();
 			CameraImpl c = findCamera(n);
-			if (c != null || "0".equals(n))
+			if (c != null || ZERO.equals(n))
 				selectCamera(c, "SEL " + host);
 			else
 				beepInvalid();
@@ -374,10 +387,9 @@ public class CUx50 implements ProtocolHandler {
 			updateDisplay();
 		}
 		/** Find a camera by number */
-		private CameraImpl findCamera(String n) {
-			Integer cn = CameraHelper.parseUID(n);
-			if (cn != null) {
-				Camera c = CameraHelper.findNum(cn);
+		private CameraImpl findCamera(Integer n) {
+			if (n != null) {
+				Camera c = CameraHelper.findNum(n);
 				if (c instanceof CameraImpl)
 					return (CameraImpl) c;
 			}
@@ -466,11 +478,20 @@ public class CUx50 implements ProtocolHandler {
 			} else
 				beepInvalid();
 		}
+		/** Recall a preset */
+		private void recallPreset() {
+			Integer n = getEntry();
+			CameraImpl c = getCamera();
+			if (n != null && c != null)
+				c.setRecallPreset(n);
+			else
+				beepInvalid();
+		}
 		/** Select a sequence (PlayList) */
 		private void selectSeq() {
+			Integer n = getEntry();
 			VideoMonitor vm = monitor;
-			if (vm != null) {
-				String n = entry.toString();
+			if (n != null && vm != null) {
 				PlayList pl = PlayListHelper.findNum(n);
 				vm.setPlayList(pl);
 			} else
