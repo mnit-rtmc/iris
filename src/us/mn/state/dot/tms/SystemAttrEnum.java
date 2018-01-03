@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  * Copyright (C) 2012       Iteris Inc.
  * Copyright (C) 2014       AHMCT, University of California
  * Copyright (C) 2015-2017  SRF Consulting Group
@@ -32,6 +32,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public enum SystemAttrEnum {
 	CAMERA_AUTOPLAY(true, Change.RESTART_CLIENT),
 	CAMERA_CONSTRUCTION_URL(String.class),
+	CAMERA_KBD_PANASONIC_ENABLE(false),
 	CAMERA_NUM_BLANK(999, 0, 9999),
 	CAMERA_OUT_OF_SERVICE_URL(String.class),
 	CAMERA_PLAYLIST_DWELL_SEC(5, 1, 300),

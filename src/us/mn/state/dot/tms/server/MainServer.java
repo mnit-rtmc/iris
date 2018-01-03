@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@ import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.SignMessage;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.BaseEvent;
 import us.mn.state.dot.tms.server.comm.cux50.CUx50;
@@ -210,13 +211,20 @@ public class MainServer {
 
 	/** Start the protocol server */
 	static private void startProtocolServer() {
-		// FIXME: add a system attribute to disable this
-		try {
-			PrServer ps = new PrServer();
-			ps.listen(7001, new CUx50());
+		// FIXME: need to restart server on change
+		if (isPanasonicKeyboardEnabled()) {
+			try {
+				PrServer ps = new PrServer();
+				ps.listen(7001, new CUx50());
+			}
+			catch (Exception e) {
+				e.printStackTrace();
+			}
 		}
-		catch (Exception e) {
-			e.printStackTrace();
-		}
+	}
+
+	/** Is panasonic keyboard enabled? */
+	static private boolean isPanasonicKeyboardEnabled() {
+		return SystemAttrEnum.CAMERA_KBD_PANASONIC_ENABLE.getBoolean();
 	}
 }

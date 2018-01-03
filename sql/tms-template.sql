@@ -2785,6 +2785,7 @@ COPY iris.encoding (id, description) FROM stdin;
 COPY iris.system_attribute (name, value) FROM stdin;
 camera_autoplay	true
 camera_construction_url	
+camera_kbd_panasonic_enable	false
 camera_num_blank	999
 camera_out_of_service_url	
 camera_playlist_dwell_sec	5
@@ -2798,7 +2799,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.61.0
+database_version	4.62.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
