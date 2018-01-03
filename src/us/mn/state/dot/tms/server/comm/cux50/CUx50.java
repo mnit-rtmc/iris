@@ -50,6 +50,7 @@ public class CUx50 implements ProtocolHandler {
 	static private final byte KEY_PREV = (byte) 'G';
 	static private final byte KEY_NEXT = (byte) 'H';
 	static private final byte KEY_CLEAR = (byte) 'N';
+	static private final byte KEY_WIPER = (byte) 'O';
 	static private final byte KEY_PAUSE = (byte) 'X';
 	static private final byte KEY_SEQ = (byte) 'Y';
 	static private final byte KEY_IRIS_CLOSE = (byte) 'p';
@@ -318,6 +319,8 @@ public class CUx50 implements ProtocolHandler {
 				focusNear();
 			else if (KEY_FOCUS_FAR == k)
 				focusFar();
+			else if (KEY_WIPER == k)
+				wiperOneShot();
 			else if (KEY_SEQ == k)
 				selectSeq();
 			else if (KEY_PAUSE == k)
@@ -452,6 +455,15 @@ public class CUx50 implements ProtocolHandler {
 			if (c != null)
 				c.setDeviceRequest(CAMERA_FOCUS_FAR.ordinal());
 			else
+				beepInvalid();
+		}
+		/** Send a wiper message */
+		private void wiperOneShot() {
+			CameraImpl c = getCamera();
+			if (c != null) {
+				c.setDeviceRequest(CAMERA_WIPER_ONESHOT
+					.ordinal());
+			} else
 				beepInvalid();
 		}
 		/** Select a sequence (PlayList) */
