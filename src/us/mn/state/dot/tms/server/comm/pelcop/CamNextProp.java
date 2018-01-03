@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,18 +32,6 @@ public class CamNextProp extends MonStatusProp {
 	/** Camera next request code */
 	static public final int REQ_CODE = 0xB6;
 
-	/** Find next camera */
-	static private CameraImpl findNext(int uid) {
-		Camera c = CameraHelper.findNext(uid);
-		if (c instanceof CameraImpl)
-			return (CameraImpl) c;
-		c = CameraHelper.findFirst();
-		if (c instanceof CameraImpl)
-			return (CameraImpl) c;
-		else
-			return null;
-	}
-
 	/** Create a new camera next property */
 	public CamNextProp(boolean l, int mn) {
 		super(l, mn);
@@ -64,9 +52,10 @@ public class CamNextProp extends MonStatusProp {
 	private void selectNextCamera(Operation op) {
 		int uid = getCamNumber();
 		if (uid > 0) {
-			CameraImpl c = findNext(uid);
-			if (c != null) {
-				selectCamera(c, "NEXT " + op.getId());
+			Camera c = CameraHelper.findNextOrFirst(uid);
+			if (c instanceof CameraImpl) {
+				CameraImpl ci = (CameraImpl) c;
+				selectCamera(ci, "NEXT " + op.getId());
 				return;
 			}
 		}

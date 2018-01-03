@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,18 +32,6 @@ public class CamPrevProp extends MonStatusProp {
 	/** Camera previous request code */
 	static public final int REQ_CODE = 0xB7;
 
-	/** Find previous camera */
-	static private CameraImpl findPrev(int uid) {
-		Camera c = CameraHelper.findPrev(uid);
-		if (c instanceof CameraImpl)
-			return (CameraImpl) c;
-		c = CameraHelper.findLast();
-		if (c instanceof CameraImpl)
-			return (CameraImpl) c;
-		else
-			return null;
-	}
-
 	/** Create a new camera previous property */
 	public CamPrevProp(boolean l, int mn) {
 		super(l, mn);
@@ -64,9 +52,10 @@ public class CamPrevProp extends MonStatusProp {
 	private void selectPrevCamera(Operation op) {
 		int uid = getCamNumber();
 		if (uid > 0) {
-			CameraImpl c = findPrev(uid);
-			if (c != null) {
-				selectCamera(c, "PREV " + op.getId());
+			Camera c = CameraHelper.findPrevOrLast(uid);
+			if (c instanceof CameraImpl) {
+				CameraImpl ci = (CameraImpl) c;
+				selectCamera(ci, "PREV " + op.getId());
 				return;
 			}
 		}

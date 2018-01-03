@@ -137,7 +137,7 @@ public class CameraHelper extends BaseHelper {
 	}
 
 	/** Find previous camera below a given number */
-	static public Camera findPrev(int cam_num) {
+	static private Camera findPrev(int cam_num) {
 		Camera cam = null;
 		int n = 0;	// previous camera number
 		Iterator<Camera> it = iterator();
@@ -154,8 +154,48 @@ public class CameraHelper extends BaseHelper {
 		return cam;
 	}
 
+	/** Find camera with highest number */
+	static private Camera findLast() {
+		Camera cam = null;
+		int n = 0;	// highest camera number
+		Iterator<Camera> it = iterator();
+		while (it.hasNext()) {
+			Camera c = it.next();
+			Integer cn = c.getCamNum();
+			if (cn != null && cn > n) {
+				cam = c;
+				n = cn;
+			}
+		}
+		return cam;
+	}
+
+	/** Find previous (or last) camera */
+	static public Camera findPrevOrLast(int cam_num) {
+		Camera c = findPrev(cam_num);
+		return (c != null) ? c : findLast();
+	}
+
+	/** Find next camera above a given number */
+	static private Camera findNext(int cam_num) {
+		Camera cam = null;
+		int n = 0;	// next camera number
+		Iterator<Camera> it = iterator();
+		while (it.hasNext()) {
+			Camera c = it.next();
+			Integer cn = c.getCamNum();
+			if (cn != null && cn > cam_num) {
+				if (0 == n || n > cn) {
+					cam = c;
+					n = cn;
+				}
+			}
+		}
+		return cam;
+	}
+
 	/** Find camera with lowest number */
-	static public Camera findFirst() {
+	static private Camera findFirst() {
 		Camera cam = null;
 		Integer n = null;	// lowest camera number
 		Iterator<Camera> it = iterator();
@@ -172,38 +212,10 @@ public class CameraHelper extends BaseHelper {
 		return cam;
 	}
 
-	/** Find camera with highest number */
-	static public Camera findLast() {
-		Camera cam = null;
-		int n = 0;	// highest camera number
-		Iterator<Camera> it = iterator();
-		while (it.hasNext()) {
-			Camera c = it.next();
-			Integer cn = c.getCamNum();
-			if (cn != null && cn > n) {
-				cam = c;
-				n = cn;
-			}
-		}
-		return cam;
-	}
-
-	/** Find next camera above a given number */
-	static public Camera findNext(int cam_num) {
-		Camera cam = null;
-		int n = 0;	// next camera number
-		Iterator<Camera> it = iterator();
-		while (it.hasNext()) {
-			Camera c = it.next();
-			Integer cn = c.getCamNum();
-			if (cn != null && cn > cam_num) {
-				if (0 == n || n > cn) {
-					cam = c;
-					n = cn;
-				}
-			}
-		}
-		return cam;
+	/** Find next (or first) camera */
+	static public Camera findNextOrFirst(int cam_num) {
+		Camera c = findNext(cam_num);
+		return (c != null) ? c : findFirst();
 	}
 
 	/** Create a camera encoder URI */
