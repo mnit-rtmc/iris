@@ -49,6 +49,12 @@ public class CUx50 implements ProtocolHandler {
 	/** Keycode for camera */
 	static private final byte KEY_CAM = (byte) 'B';
 
+	/** Keycode for "-" (prev cam) */
+	static private final byte KEY_PREV = (byte) 'G';
+
+	/** Keycode for "+" (next cam) */
+	static private final byte KEY_NEXT = (byte) 'H';
+
 	/** Keycode for clear */
 	static private final byte KEY_CLEAR = (byte) 'N';
 
@@ -216,13 +222,17 @@ public class CUx50 implements ProtocolHandler {
 			host = h;
 		}
 		/** Get the camera number */
-		private String getCamNum() {
+		private Integer getCamNum() {
+			CameraImpl c = getCamera();
+			return (c != null) ? c.getCamNum() : null;
+		}
+		/** Get camera for selected video monitor */
+		private CameraImpl getCamera() {
 			VideoMonitor vm = monitor;
 			if (vm != null) {
 				Camera c = vm.getCamera();
-				Integer n = c.getCamNum();
-				if (n != null)
-					return n.toString();
+				if (c instanceof CameraImpl)
+					return (CameraImpl) c;
 			}
 			return null;
 		}
@@ -285,9 +295,9 @@ public class CUx50 implements ProtocolHandler {
 		}
 		/** Format camera */
 		private String formatCam() {
-			String cam = getCamNum();
+			Integer cam = getCamNum();
 			return (cam != null)
-			    ? String.format("Cam %s", cam)
+			    ? String.format("Cam %d", cam)
 			    : "";
 		}
 		/** Update the LCD display */
@@ -303,6 +313,10 @@ public class CUx50 implements ProtocolHandler {
 				selectMon();
 			else if (KEY_CAM == k)
 				selectCam();
+			else if (KEY_PREV == k)
+				selectPrevCam();
+			else if (KEY_NEXT == k)
+				selectNextCam();
 			else if (KEY_SEQ == k)
 				selectSeq();
 			else if (KEY_PAUSE == k)
@@ -346,25 +360,14 @@ public class CUx50 implements ProtocolHandler {
 		}
 		/** Select a camera */
 		private void selectCam() {
-			VideoMonitor vm = monitor;
-			if (vm != null)
-				selectCamera(vm);
+			String n = entry.toString();
+			CameraImpl c = findCamera(n);
+			if (c != null || "0".equals(n))
+				selectCamera(c, "SEL " + host);
 			else
 				beepInvalid();
 			entry.setLength(0);
 			updateDisplay();
-		}
-		/** Select a new camera on a video monitor */
-		private void selectCamera(VideoMonitor vm) {
-			String n = entry.toString();
-			CameraImpl c = findCamera(n);
-			if (c != null || "0".equals(n)) {
-				int mn = vm.getMonNum();
-				stopCamControl(vm);
-				VideoMonitorImpl.setCameraNotify(mn, c,
-					"SEL " + host);
-			} else
-				beepInvalid();
 		}
 		/** Find a camera by number */
 		private CameraImpl findCamera(String n) {
@@ -376,11 +379,47 @@ public class CUx50 implements ProtocolHandler {
 			}
 			return null;
 		}
+		/** Select a camera on the selected video monitor */
+		private void selectCamera(CameraImpl c, String src) {
+			VideoMonitor vm = monitor;
+			if (vm != null) {
+				int mn = vm.getMonNum();
+				stopCamControl();
+				VideoMonitorImpl.setCameraNotify(mn, c, src);
+			} else
+				beepInvalid();
+		}
 		/** Stop camera control on selected camera */
-		private void stopCamControl(VideoMonitor vm) {
-			Camera c = vm.getCamera();
+		private void stopCamControl() {
+			Camera c = getCamera();
 			if (c instanceof CameraImpl)
 				((CameraImpl) c).sendPTZ(0, 0, 0);
+		}
+		/** Select previous camera on a video monitor */
+		private void selectPrevCam() {
+			Integer uid = getCamNum();
+			if (uid != null) {
+				Camera c = CameraHelper.findPrevOrLast(uid);
+				if (c instanceof CameraImpl) {
+					selectCamera((CameraImpl) c,
+						"PREV " + host);
+					return;
+				}
+			}
+			beepInvalid();
+		}
+		/** Select next camera on a video monitor */
+		private void selectNextCam() {
+			Integer uid = getCamNum();
+			if (uid != null) {
+				Camera c = CameraHelper.findNextOrFirst(uid);
+				if (c instanceof CameraImpl) {
+					selectCamera((CameraImpl) c,
+						"NEXT " + host);
+					return;
+				}
+			}
+			beepInvalid();
 		}
 		/** Select a sequence (PlayList) */
 		private void selectSeq() {
@@ -409,12 +448,11 @@ public class CUx50 implements ProtocolHandler {
 		}
 		/** Handle a joystick message */
 		private void handleJoystick(byte[] rcv, int off) {
-			VideoMonitor vm = monitor;
-			if (vm != null) {
-				Camera c = vm.getCamera();
-				if (c instanceof CameraImpl)
-					handleJoystick((CameraImpl) c, rcv,off);
-			}
+			CameraImpl c = getCamera();
+			if (c != null)
+				handleJoystick(c, rcv, off);
+			else
+				beepInvalid();
 		}
 		/** Handle a joystick message */
 		private void handleJoystick(CameraImpl c, byte[] rcv, int off) {
