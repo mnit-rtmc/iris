@@ -56,6 +56,9 @@ public class CUx50 implements ProtocolHandler {
 	static private final byte KEY_WIPER = (byte) 'O';
 	static private final byte KEY_PAUSE = (byte) 'X';
 	static private final byte KEY_SEQ = (byte) 'Y';
+	static private final byte KEY_MENU = (byte) 'h';
+	static private final byte KEY_EXIT = (byte) 'm';
+	static private final byte KEY_ENTER = (byte) 'n';
 	static private final byte KEY_IRIS_CLOSE = (byte) 'p';
 	static private final byte KEY_IRIS_OPEN = (byte) 'q';
 	static private final byte KEY_FOCUS_NEAR = (byte) 'r';
@@ -335,6 +338,12 @@ public class CUx50 implements ProtocolHandler {
 				wiperOneShot();
 			else if (KEY_PRESET == k)
 				recallPreset();
+			else if (KEY_MENU == k)
+				menuOpen();
+			else if (KEY_EXIT == k)
+				menuCancel();
+			else if (KEY_ENTER == k)
+				menuEnter();
 			else if (KEY_SEQ == k)
 				selectSeq();
 			else if (KEY_PAUSE == k)
@@ -484,6 +493,30 @@ public class CUx50 implements ProtocolHandler {
 			CameraImpl c = getCamera();
 			if (n != null && c != null)
 				c.setRecallPreset(n);
+			else
+				beepInvalid();
+		}
+		/** Send a menu-open message */
+		private void menuOpen() {
+			CameraImpl c = getCamera();
+			if (c != null)
+				c.setDeviceRequest(CAMERA_MENU_OPEN.ordinal());
+			else
+				beepInvalid();
+		}
+		/** Send a menu-cancel message */
+		private void menuCancel() {
+			CameraImpl c = getCamera();
+			if (c != null)
+				c.setDeviceRequest(CAMERA_MENU_CANCEL.ordinal());
+			else
+				beepInvalid();
+		}
+		/** Send a menu-enter message */
+		private void menuEnter() {
+			CameraImpl c = getCamera();
+			if (c != null)
+				c.setDeviceRequest(CAMERA_MENU_ENTER.ordinal());
 			else
 				beepInvalid();
 		}
