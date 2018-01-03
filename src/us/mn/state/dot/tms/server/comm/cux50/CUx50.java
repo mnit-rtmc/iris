@@ -52,6 +52,7 @@ public class CUx50 implements ProtocolHandler {
 	static private final byte KEY_PRESET = (byte) 'D';
 	static private final byte KEY_PREV = (byte) 'G';
 	static private final byte KEY_NEXT = (byte) 'H';
+	static private final byte KEY_SHIFT = (byte) 'M';
 	static private final byte KEY_CLEAR = (byte) 'N';
 	static private final byte KEY_WIPER = (byte) 'O';
 	static private final byte KEY_PAUSE = (byte) 'X';
@@ -217,6 +218,8 @@ public class CUx50 implements ProtocolHandler {
 		private VideoMonitor monitor = null;
 		/* Current keyboard entry data */
 		private StringBuilder entry = new StringBuilder();
+		/* Current shift state */
+		private boolean shift = false;
 		/** Create a new keyboard state */
 		private KeyboardState(String h) {
 			host = h;
@@ -326,6 +329,8 @@ public class CUx50 implements ProtocolHandler {
 				selectPrevCam();
 			else if (KEY_NEXT == k)
 				selectNextCam();
+			else if (KEY_SHIFT == k)
+				shift = true;
 			else if (KEY_IRIS_CLOSE == k)
 				irisClose();
 			else if (KEY_IRIS_OPEN == k)
@@ -337,7 +342,7 @@ public class CUx50 implements ProtocolHandler {
 			else if (KEY_WIPER == k)
 				wiperOneShot();
 			else if (KEY_PRESET == k)
-				recallPreset();
+				handlePreset();
 			else if (KEY_MENU == k)
 				menuOpen();
 			else if (KEY_EXIT == k)
@@ -356,6 +361,11 @@ public class CUx50 implements ProtocolHandler {
 				beepInvalid();
 				updateDisplay();
 			}
+		}
+		/** Handle key up message */
+		private void handleKeyUp(byte k) {
+			if (KEY_SHIFT == k)
+				shift = false;
 		}
 		/** Add a character to entry */
 		private void addToEntry(byte k) {
@@ -487,13 +497,16 @@ public class CUx50 implements ProtocolHandler {
 			} else
 				beepInvalid();
 		}
-		/** Recall a preset */
-		private void recallPreset() {
+		/** Handle a preset key */
+		private void handlePreset() {
 			Integer n = getEntry();
 			CameraImpl c = getCamera();
-			if (n != null && c != null)
-				c.setRecallPreset(n);
-			else
+			if (n != null && c != null) {
+				if (shift)
+					c.setStorePreset(n);
+				else
+					c.setRecallPreset(n);
+			} else
 				beepInvalid();
 		}
 		/** Send a menu-open message */
@@ -640,6 +653,8 @@ public class CUx50 implements ProtocolHandler {
         	else if (3 == len && rcv[off] == (byte) 'A') {
 			if (rcv[off + 2] == (byte) '+')
 				ks.handleKeyDown(rcv[off + 1]);
+			else if (rcv[off + 2] == (byte) '-')
+				ks.handleKeyUp(rcv[off + 1]);
 		} else if (7 == len && rcv[off] == (byte) 'B')
 			ks.handleJoystick(rcv, off);
 		else
