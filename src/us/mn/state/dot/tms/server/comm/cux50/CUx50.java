@@ -54,6 +54,8 @@ public class CUx50 implements ProtocolHandler {
 	static private final byte KEY_SEQ = (byte) 'Y';
 	static private final byte KEY_IRIS_CLOSE = (byte) 'p';
 	static private final byte KEY_IRIS_OPEN = (byte) 'q';
+	static private final byte KEY_FOCUS_NEAR = (byte) 'r';
+	static private final byte KEY_FOCUS_FAR = (byte) 's';
 
 	/** Joystick stop code */
 	static private final int JOY_STOP = '@';
@@ -312,6 +314,10 @@ public class CUx50 implements ProtocolHandler {
 				irisClose();
 			else if (KEY_IRIS_OPEN == k)
 				irisOpen();
+			else if (KEY_FOCUS_NEAR == k)
+				focusNear();
+			else if (KEY_FOCUS_FAR == k)
+				focusFar();
 			else if (KEY_SEQ == k)
 				selectSeq();
 			else if (KEY_PAUSE == k)
@@ -429,6 +435,22 @@ public class CUx50 implements ProtocolHandler {
 			CameraImpl c = getCamera();
 			if (c != null)
 				c.setDeviceRequest(CAMERA_IRIS_OPEN.ordinal());
+			else
+				beepInvalid();
+		}
+		/** Send a focus-near message */
+		private void focusNear() {
+			CameraImpl c = getCamera();
+			if (c != null)
+				c.setDeviceRequest(CAMERA_FOCUS_NEAR.ordinal());
+			else
+				beepInvalid();
+		}
+		/** Send a focus-far message */
+		private void focusFar() {
+			CameraImpl c = getCamera();
+			if (c != null)
+				c.setDeviceRequest(CAMERA_FOCUS_FAR.ordinal());
 			else
 				beepInvalid();
 		}
