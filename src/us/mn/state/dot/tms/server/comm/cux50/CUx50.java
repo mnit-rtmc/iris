@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import static us.mn.state.dot.tms.DeviceRequest.*;
 import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.VideoMonitor;
@@ -43,26 +44,16 @@ public class CUx50 implements ProtocolHandler {
 	static private final char SEQ_PLAY = '\u0080';
 	static private final char SEQ_PAUSE = '"';
 
-	/** Keycode for monitor */
+	/** Keycodes for special functions */
 	static private final byte KEY_MON = (byte) 'A';
-
-	/** Keycode for camera */
 	static private final byte KEY_CAM = (byte) 'B';
-
-	/** Keycode for "-" (prev cam) */
 	static private final byte KEY_PREV = (byte) 'G';
-
-	/** Keycode for "+" (next cam) */
 	static private final byte KEY_NEXT = (byte) 'H';
-
-	/** Keycode for clear */
 	static private final byte KEY_CLEAR = (byte) 'N';
-
-	/** Keycode for pause */
 	static private final byte KEY_PAUSE = (byte) 'X';
-
-	/** Keycode for sequence */
 	static private final byte KEY_SEQ = (byte) 'Y';
+	static private final byte KEY_IRIS_CLOSE = (byte) 'p';
+	static private final byte KEY_IRIS_OPEN = (byte) 'q';
 
 	/** Joystick stop code */
 	static private final int JOY_STOP = '@';
@@ -317,6 +308,10 @@ public class CUx50 implements ProtocolHandler {
 				selectPrevCam();
 			else if (KEY_NEXT == k)
 				selectNextCam();
+			else if (KEY_IRIS_CLOSE == k)
+				irisClose();
+			else if (KEY_IRIS_OPEN == k)
+				irisOpen();
 			else if (KEY_SEQ == k)
 				selectSeq();
 			else if (KEY_PAUSE == k)
@@ -391,9 +386,9 @@ public class CUx50 implements ProtocolHandler {
 		}
 		/** Stop camera control on selected camera */
 		private void stopCamControl() {
-			Camera c = getCamera();
-			if (c instanceof CameraImpl)
-				((CameraImpl) c).sendPTZ(0, 0, 0);
+			CameraImpl c = getCamera();
+			if (c != null)
+				c.sendPTZ(0, 0, 0);
 		}
 		/** Select previous camera on a video monitor */
 		private void selectPrevCam() {
@@ -420,6 +415,22 @@ public class CUx50 implements ProtocolHandler {
 				}
 			}
 			beepInvalid();
+		}
+		/** Send an iris-close message */
+		private void irisClose() {
+			CameraImpl c = getCamera();
+			if (c != null)
+				c.setDeviceRequest(CAMERA_IRIS_CLOSE.ordinal());
+			else
+				beepInvalid();
+		}
+		/** Send an iris-open message */
+		private void irisOpen() {
+			CameraImpl c = getCamera();
+			if (c != null)
+				c.setDeviceRequest(CAMERA_IRIS_OPEN.ordinal());
+			else
+				beepInvalid();
 		}
 		/** Select a sequence (PlayList) */
 		private void selectSeq() {
