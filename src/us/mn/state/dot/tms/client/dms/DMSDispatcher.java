@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
+ * Copyright (C) 2017-2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -337,6 +338,17 @@ public class DMSDispatcher extends JPanel {
 			for(DMS dms: sel) {
 				dms.setDeviceRequest(DeviceRequest.
 					TEST_PIXELS.ordinal());
+			}
+		}
+	}
+
+	/** Query status the selected DMS */
+	public void queryStatusDms() {
+		Set<DMS> sel = sel_mdl.getSelected();
+		if (sel.size() > 0) {
+			for(DMS dms: sel) {
+				dms.setDeviceRequest(DeviceRequest.
+					QUERY_STATUS.ordinal());
 			}
 		}
 	}

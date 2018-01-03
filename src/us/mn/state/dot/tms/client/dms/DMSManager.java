@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2017  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
+ * Copyright (C) 2017-2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -75,6 +76,9 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Action to test DMS */
 	private TestDmsAction test_dms_action;
 
+	/** Action to query status of DMS */
+	private QueryStatusDmsAction qstatus_dms_action;
+
 	/** Set the blank DMS action */
 	public void setBlankAction(BlankDmsAction a) {
 		blankAction = a;
@@ -83,6 +87,11 @@ public class DMSManager extends DeviceManager<DMS> {
 	/** Set the test DMS action */
 	public void setTestAction(TestDmsAction a) {
 		test_dms_action = a;
+	}
+
+	/** Set the query status DMS action */
+	public void setQueryStatusAction(QueryStatusDmsAction a) {
+		qstatus_dms_action = a;
 	}
 
 	/** Create a new DMS manager */
@@ -199,6 +208,8 @@ public class DMSManager extends DeviceManager<DMS> {
 			p.add(blankAction);
 		if(test_dms_action != null)
 			p.add(test_dms_action);
+		if(qstatus_dms_action != null)
+			p.add(qstatus_dms_action);
 		return p;
 	}
 

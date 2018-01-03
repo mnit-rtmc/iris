@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2016  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
+ * Copyright (C) 2017-2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +33,7 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  *
  * @author Douglas Lau
  * @author Travis Swanston
+ * @author Michael Darter
  */
 public class ComposerButtonPanel extends JPanel {
 
@@ -79,6 +81,9 @@ public class ComposerButtonPanel extends JPanel {
 	/** Action to test DMS */
 	private final TestDmsAction test_dms_action;
 
+	/** Action to query status of DMS */
+	private final QueryStatusDmsAction qstatus_dms_action;
+
 	/** Button to blank the selected message */
 	private final JButton blank_btn;
 
@@ -102,8 +107,10 @@ public class ComposerButtonPanel extends JPanel {
 		composer = smc;
 		blank_msg = new BlankDmsAction(dispatcher);
 		test_dms_action = new TestDmsAction(dispatcher);
+		qstatus_dms_action = new QueryStatusDmsAction(dispatcher);
 		manager.setBlankAction(blank_msg);
 		manager.setTestAction(test_dms_action);
+		manager.setQueryStatusAction(qstatus_dms_action);
 		blank_btn = new JButton(blank_msg);
 		layoutPanel();
 		initializeWidgets();
