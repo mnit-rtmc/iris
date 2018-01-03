@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2000-2017  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
+ * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -111,16 +112,8 @@ public class DmsXmlPoller extends ThreadedPoller implements DMSPoller {
 			addOp(new OpQueryMsg(dms, u, r, startup));
 		else if (r == DeviceRequest.RESET_DEVICE)
 			addOp(new OpReset(dms, u));
-		else if (r == DeviceRequest.QUERY_STATUS) {
+		else {
 			// ignore
-		} else if(r == DeviceRequest.SEND_SETTINGS) {
-			// ignore
-		} else if(r == DeviceRequest.RESET_MODEM) {
-			// ignore
-		} else if(r == DeviceRequest.QUERY_PIXEL_FAILURES) {
-			// ignore
-		} else {
-			// ignore other requests
 			LOG.log("DmsXmlPoller.sendRequest(" +
 				dms.getName() +	"): ignored request r=" + r);
 		}
