@@ -508,6 +508,8 @@ public class CUx50 implements ProtocolHandler {
 					c.setRecallPreset(n);
 			} else
 				beepInvalid();
+			entry.setLength(0);
+			updateDisplay();
 		}
 		/** Send a menu-open message */
 		private void menuOpen() {
