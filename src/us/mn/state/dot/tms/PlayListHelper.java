@@ -53,4 +53,20 @@ public class PlayListHelper extends BaseHelper {
 		}
 		return null;
 	}
+
+	/** Find a play list with the specific num */
+	static public PlayList findNum(String num) {
+		Integer n = parseNum(num);
+		return (n != null) ? findNum(n) : null;
+	}
+
+	/** Parse the integer num of a play list */
+	static public Integer parseNum(String num) {
+		try {
+			return Integer.parseInt(num);
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
+	}
 }
