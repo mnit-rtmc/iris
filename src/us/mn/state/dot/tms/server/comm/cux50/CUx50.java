@@ -21,6 +21,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.DeviceRequest;
 import static us.mn.state.dot.tms.DeviceRequest.*;
 import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.PlayListHelper;
@@ -271,7 +272,6 @@ public class CUx50 implements ProtocolHandler {
 			}
 			return false;
 		}
-
 		/** Parse one packet */
 		private void parsePkt(byte[] rcv, int off, int len) {
 			if (checkHeartbeat(rcv, off, len))
@@ -286,7 +286,6 @@ public class CUx50 implements ProtocolHandler {
 			else
 				beepInvalid();
 		}
-
 		/** Write a packet */
 		private void writePkt(byte[] pkt) {
 			buf.put(STX);
@@ -348,23 +347,23 @@ public class CUx50 implements ProtocolHandler {
 			else if (KEY_SHIFT == k)
 				shift = true;
 			else if (KEY_IRIS_CLOSE == k)
-				irisClose();
+				deviceReq(CAMERA_IRIS_CLOSE);
 			else if (KEY_IRIS_OPEN == k)
-				irisOpen();
+				deviceReq(CAMERA_IRIS_OPEN);
 			else if (KEY_FOCUS_NEAR == k)
-				focusNear();
+				deviceReq(CAMERA_FOCUS_NEAR);
 			else if (KEY_FOCUS_FAR == k)
-				focusFar();
+				deviceReq(CAMERA_FOCUS_FAR);
 			else if (KEY_WIPER == k)
-				wiperOneShot();
+				deviceReq(CAMERA_WIPER_ONESHOT);
 			else if (KEY_PRESET == k)
 				handlePreset();
 			else if (KEY_MENU == k)
-				menuOpen();
+				deviceReq(CAMERA_MENU_OPEN);
 			else if (KEY_EXIT == k)
-				menuCancel();
+				deviceReq(CAMERA_MENU_CANCEL);
 			else if (KEY_ENTER == k)
-				menuEnter();
+				deviceReq(CAMERA_MENU_ENTER);
 			else if (KEY_SEQ == k)
 				selectSeq();
 			else if (KEY_PAUSE == k)
@@ -472,47 +471,6 @@ public class CUx50 implements ProtocolHandler {
 			}
 			beepInvalid();
 		}
-		/** Send an iris-close message */
-		private void irisClose() {
-			CameraImpl c = getCamera();
-			if (c != null)
-				c.setDeviceRequest(CAMERA_IRIS_CLOSE.ordinal());
-			else
-				beepInvalid();
-		}
-		/** Send an iris-open message */
-		private void irisOpen() {
-			CameraImpl c = getCamera();
-			if (c != null)
-				c.setDeviceRequest(CAMERA_IRIS_OPEN.ordinal());
-			else
-				beepInvalid();
-		}
-		/** Send a focus-near message */
-		private void focusNear() {
-			CameraImpl c = getCamera();
-			if (c != null)
-				c.setDeviceRequest(CAMERA_FOCUS_NEAR.ordinal());
-			else
-				beepInvalid();
-		}
-		/** Send a focus-far message */
-		private void focusFar() {
-			CameraImpl c = getCamera();
-			if (c != null)
-				c.setDeviceRequest(CAMERA_FOCUS_FAR.ordinal());
-			else
-				beepInvalid();
-		}
-		/** Send a wiper message */
-		private void wiperOneShot() {
-			CameraImpl c = getCamera();
-			if (c != null) {
-				c.setDeviceRequest(CAMERA_WIPER_ONESHOT
-					.ordinal());
-			} else
-				beepInvalid();
-		}
 		/** Handle a preset key */
 		private void handlePreset() {
 			Integer n = getEntry();
@@ -527,27 +485,11 @@ public class CUx50 implements ProtocolHandler {
 			entry.setLength(0);
 			updateDisplay();
 		}
-		/** Send a menu-open message */
-		private void menuOpen() {
+		/** Send a device request to a camera */
+		private void deviceReq(DeviceRequest dr) {
 			CameraImpl c = getCamera();
 			if (c != null)
-				c.setDeviceRequest(CAMERA_MENU_OPEN.ordinal());
-			else
-				beepInvalid();
-		}
-		/** Send a menu-cancel message */
-		private void menuCancel() {
-			CameraImpl c = getCamera();
-			if (c != null)
-				c.setDeviceRequest(CAMERA_MENU_CANCEL.ordinal());
-			else
-				beepInvalid();
-		}
-		/** Send a menu-enter message */
-		private void menuEnter() {
-			CameraImpl c = getCamera();
-			if (c != null)
-				c.setDeviceRequest(CAMERA_MENU_ENTER.ordinal());
+				c.setDeviceRequest(dr.ordinal());
 			else
 				beepInvalid();
 		}
