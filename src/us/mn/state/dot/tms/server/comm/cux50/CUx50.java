@@ -271,6 +271,22 @@ public class CUx50 implements ProtocolHandler {
 			}
 			return false;
 		}
+
+		/** Parse one packet */
+		private void parsePkt(byte[] rcv, int off, int len) {
+			if (checkHeartbeat(rcv, off, len))
+				updateDisplay();
+	        	else if (3 == len && rcv[off] == (byte) 'A') {
+				if (rcv[off + 2] == (byte) '+')
+					handleKeyDown(rcv[off + 1]);
+				else if (rcv[off + 2] == (byte) '-')
+					handleKeyUp(rcv[off + 1]);
+			} else if (7 == len && rcv[off] == (byte) 'B')
+				handleJoystick(rcv, off);
+			else
+				beepInvalid();
+		}
+
 		/** Write a packet */
 		private void writePkt(byte[] pkt) {
 			buf.put(STX);
@@ -619,7 +635,9 @@ public class CUx50 implements ProtocolHandler {
 					break;
 				int len = pktLength(rcv, off);
 				if (len > 0)
-					parsePkt(ks, rcv, off, len);
+					ks.parsePkt(rcv, off, len);
+				else
+					break;
 				s = off + len;
 			}
 			ks.buf.flip();
@@ -648,18 +666,4 @@ public class CUx50 implements ProtocolHandler {
 		return -1;
 	}
 
-	/** Parse one packet */
-	private void parsePkt(KeyboardState ks, byte[] rcv, int off, int len) {
-		if (checkHeartbeat(rcv, off, len))
-			ks.updateDisplay();
-        	else if (3 == len && rcv[off] == (byte) 'A') {
-			if (rcv[off + 2] == (byte) '+')
-				ks.handleKeyDown(rcv[off + 1]);
-			else if (rcv[off + 2] == (byte) '-')
-				ks.handleKeyUp(rcv[off + 1]);
-		} else if (7 == len && rcv[off] == (byte) 'B')
-			ks.handleJoystick(rcv, off);
-		else
-			ks.beepInvalid();
-	}
 }
