@@ -98,7 +98,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">20 Dec 2017</div>
+<div id="stamp">4 Jan 2018</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -1380,9 +1380,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	</tr>
 	<tr>
 	    <td>Pelco P KBD</td>
-	    <td><a href="#video">Video monitors</a> and <a href="#ptz">PTZ</a>
-	        input
-	    </td>
+	    <td><a href="#cam_kbd">Camera keyboard</a> control</td>
 	    <td>TCP</td>
 	    <td>No</td>
 	</tr>
@@ -2258,7 +2256,7 @@ FIXME
 </p>
 <dl>
     <dt>#</dt>
-    <dd>Camera number, used for dedicated keyboard systems.</dd>
+    <dd>Camera number, used for <a href="#cam_kbd">keyboard systems</a>.</dd>
     <dt>Encoder Type</dt>
     <dd>The <a href="#encoder_type">type of encoder</a> for the video stream.
     </dd>
@@ -2339,6 +2337,27 @@ FIXME
 	Pressing the <b>/</b> key (on the numpad) changes to
 	<a href="#playlist">play list</a> selection mode &mdash; the icon will
 	change to a play list.
+</p>
+
+<h4 id="cam_kbd">Camera Keyboards</h4>
+<p>
+	Dedicated keyboards are supported for easier camera control.
+	These keyboards have joysticks for <a href="#ptz">pan / tilt / zoom</a>
+	control.
+	Two protocols are supported: Pelco-P and Panasonic CU-950.
+</p>
+<p>
+	To configure a Pelco-P keyboard, a comm link using the pelcop protocol
+	must be created.
+	One active controller must exist on that comm link.
+	IRIS will initiate a TCP connection to connect to the keyboard --
+	typically, this will be managed by an ethernet-to-serial device.
+</p>
+<p>
+	For Panasonic CU-950 keyboards, the <code>camera_kbd_panasonic_enable</code>
+	<a href="#system_attributes">system attribute</a> must be enabled.
+	This will cause IRIS to listen for connections on TCP port 7001.
+	The keyboard must be configured with the IRIS server's IP address.
 </p>
 
 <h3 id="video">Video Monitors</h3>
