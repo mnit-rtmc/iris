@@ -18,6 +18,7 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import static java.net.StandardSocketOptions.SO_KEEPALIVE;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.channels.SelectableChannel;
@@ -142,6 +143,7 @@ public final class PrServer {
 			ServerSocketChannel chn = (ServerSocketChannel) c;
 			SocketChannel sc = chn.accept();
 			sc.configureBlocking(false);
+			sc.setOption(SO_KEEPALIVE, Boolean.TRUE);
 			LOG.log("connect: " + sc);
 			Connection cx = new Connection(ph);
 			register(sc, cx.getInterest(), cx);
