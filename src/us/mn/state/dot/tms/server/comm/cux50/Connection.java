@@ -19,7 +19,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 
 /**
- * Connection state information for a Panasonic camera keyboard.
+ * Connection state information.
  *
  * @author Douglas Lau
  */
