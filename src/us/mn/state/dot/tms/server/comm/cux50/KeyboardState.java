@@ -474,6 +474,7 @@ public class KeyboardState {
 			Camera c = CameraHelper.findPrevOrLast(uid);
 			if (c instanceof CameraImpl) {
 				selectCamera((CameraImpl) c, "PREV " + host);
+				updateDisplay();
 				return;
 			}
 		}
@@ -487,6 +488,7 @@ public class KeyboardState {
 			Camera c = CameraHelper.findNextOrFirst(uid);
 			if (c instanceof CameraImpl) {
 				selectCamera((CameraImpl) c, "NEXT " + host);
+				updateDisplay();
 				return;
 			}
 		}
