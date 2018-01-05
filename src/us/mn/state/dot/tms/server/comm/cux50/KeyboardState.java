@@ -245,8 +245,10 @@ public class KeyboardState {
 
 	/** Get the current keyboard entry */
 	private Integer getEntry() {
+		String ent = entry.toString();
+		entry.setLength(0);
 		try {
-			return Integer.parseInt(entry.toString());
+			return Integer.parseInt(ent);
 		}
 		catch (NumberFormatException e) {
 			return null;
@@ -413,7 +415,6 @@ public class KeyboardState {
 			monitor = vm;
 		else
 			beepInvalid();
-		entry.setLength(0);
 	}
 
 	/** Find a video monitor */
@@ -431,7 +432,6 @@ public class KeyboardState {
 			selectCamera(c, "SEL " + host);
 		else
 			beepInvalid();
-		entry.setLength(0);
 	}
 
 	/** Find a camera by number */
@@ -499,7 +499,6 @@ public class KeyboardState {
 				c.setRecallPreset(n);
 		} else
 			beepInvalid();
-		entry.setLength(0);
 	}
 
 	/** Send a device request to a camera */
@@ -520,7 +519,6 @@ public class KeyboardState {
 			vm.setPlayList(pl);
 		} else
 			beepInvalid();
-		entry.setLength(0);
 	}
 
 	/** Toggle sequence pause/play */
