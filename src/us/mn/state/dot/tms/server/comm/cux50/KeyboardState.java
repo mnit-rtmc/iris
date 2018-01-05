@@ -184,7 +184,7 @@ public class KeyboardState {
 		"@CU650".getBytes(StandardCharsets.US_ASCII);
 
 	/** Compare two packets for equality */
-	static private boolean pktEquals(byte[] a, byte[] b, int off,
+	static private boolean pkt_equals(byte[] a, byte[] b, int off,
 		int len)
 	{
 		if (a.length != len)
@@ -198,7 +198,25 @@ public class KeyboardState {
 
 	/** Check if a packet is a heartbeat */
 	static private boolean checkHeartbeat(byte[] rcv, int off, int len) {
-		return pktEquals(HEARTBEAT, rcv, off, len);
+		return pkt_equals(HEARTBEAT, rcv, off, len);
+	}
+
+	/** Get the buffer offset of a packet */
+	static private int pkt_offset(byte[] rcv, int s) {
+		for (int i = s; i < rcv.length; i++) {
+			if (STX == rcv[i])
+				return i + 1;
+		}
+		return -1;
+	}
+
+	/** Get the packet length */
+	static private int pkt_length(byte[] rcv, int off) {
+		for (int i = 0; off + i < rcv.length; i++) {
+			if (ETX == rcv[off + i])
+				return i;
+		}
+		return -1;
 	}
 
 	/** Format one LCD display message */
@@ -581,23 +599,5 @@ public class KeyboardState {
 		}
 		updateLCD();
 		return getSend();
-	}
-
-	/** Get the buffer offset of a packet */
-	static private int pkt_offset(byte[] rcv, int s) {
-		for (int i = s; i < rcv.length; i++) {
-			if (STX == rcv[i])
-				return i + 1;
-		}
-		return -1;
-	}
-
-	/** Get the packet length */
-	static private int pkt_length(byte[] rcv, int off) {
-		for (int i = 0; off + i < rcv.length; i++) {
-			if (ETX == rcv[off + i])
-				return i;
-		}
-		return -1;
 	}
 }
