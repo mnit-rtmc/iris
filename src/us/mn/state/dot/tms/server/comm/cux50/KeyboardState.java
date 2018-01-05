@@ -281,7 +281,7 @@ public class KeyboardState {
 	/** Parse one packet */
 	private void parsePkt(byte[] rcv, int off, int len) {
 		if (checkHeartbeat(rcv, off, len))
-			updateDisplay();
+			return;
         	else if (3 == len && rcv[off] == (byte) 'A') {
 			if (rcv[off + 2] == (byte) '+')
 				handleKeyDown(rcv[off + 1]);
@@ -340,7 +340,7 @@ public class KeyboardState {
 	}
 
 	/** Update the LCD display */
-	private void updateDisplay() {
+	private void updateLCD() {
 		writePkt(formatLineA());
 		writePkt(formatLineB());
 	}
@@ -381,13 +381,11 @@ public class KeyboardState {
 			selectSeq();
 		else if (KEY_PAUSE == k)
 			pausePlay();
-		else if (KEY_CLEAR == k) {
+		else if (KEY_CLEAR == k)
 			entry.setLength(0);
-			updateDisplay();
-		} else {
+		else {
 			entry.setLength(0);
 			beepInvalid();
-			updateDisplay();
 		}
 	}
 
@@ -403,7 +401,6 @@ public class KeyboardState {
 			entry.append((char) k);
 			if (entry.length() > 1 && entry.charAt(0) =='0')
 				entry.deleteCharAt(0);
-			updateDisplay();
 		} else
 			beepInvalid();
 	}
@@ -417,7 +414,6 @@ public class KeyboardState {
 		else
 			beepInvalid();
 		entry.setLength(0);
-		updateDisplay();
 	}
 
 	/** Find a video monitor */
@@ -436,7 +432,6 @@ public class KeyboardState {
 		else
 			beepInvalid();
 		entry.setLength(0);
-		updateDisplay();
 	}
 
 	/** Find a camera by number */
@@ -474,7 +469,6 @@ public class KeyboardState {
 			Camera c = CameraHelper.findPrevOrLast(uid);
 			if (c instanceof CameraImpl) {
 				selectCamera((CameraImpl) c, "PREV " + host);
-				updateDisplay();
 				return;
 			}
 		}
@@ -488,7 +482,6 @@ public class KeyboardState {
 			Camera c = CameraHelper.findNextOrFirst(uid);
 			if (c instanceof CameraImpl) {
 				selectCamera((CameraImpl) c, "NEXT " + host);
-				updateDisplay();
 				return;
 			}
 		}
@@ -507,7 +500,6 @@ public class KeyboardState {
 		} else
 			beepInvalid();
 		entry.setLength(0);
-		updateDisplay();
 	}
 
 	/** Send a device request to a camera */
@@ -529,7 +521,6 @@ public class KeyboardState {
 		} else
 			beepInvalid();
 		entry.setLength(0);
-		updateDisplay();
 	}
 
 	/** Toggle sequence pause/play */
@@ -541,7 +532,6 @@ public class KeyboardState {
 				vmi.pausePlayList();
 			else
 				vmi.unpausePlayList();
-			updateDisplay();
 		} else
 			beepInvalid();
 	}
@@ -571,13 +561,9 @@ public class KeyboardState {
 	/** Get data to send */
 	private byte[] getSend() {
 		buf.flip();
-		int r = buf.remaining();
-		if (r > 0) {
-			byte[] snd = new byte[r];
-			buf.get(snd);
-			return snd;
-		} else
-			return null;
+		byte[] snd = new byte[buf.remaining()];
+		buf.get(snd);
+		return snd;
 	}
 
 	/** Handle receive for a keyboard state */
@@ -595,6 +581,7 @@ public class KeyboardState {
 				break;
 			s = off + len;
 		}
+		updateLCD();
 		return getSend();
 	}
 
