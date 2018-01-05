@@ -571,14 +571,18 @@ public class KeyboardState {
 	/** Get data to send */
 	private byte[] getSend() {
 		buf.flip();
-		byte[] snd = new byte[buf.remaining()];
-		buf.get(snd);
-		buf.clear();
-		return snd;
+		int r = buf.remaining();
+		if (r > 0) {
+			byte[] snd = new byte[r];
+			buf.get(snd);
+			return snd;
+		} else
+			return null;
 	}
 
 	/** Handle receive for a keyboard state */
 	public synchronized byte[] handleReceive(byte[] rcv) {
+		buf.clear();
 		int s = 0;
 		while (true) {
 			int off = pkt_offset(rcv, s);

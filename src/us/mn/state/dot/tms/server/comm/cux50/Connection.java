@@ -72,7 +72,8 @@ public class Connection {
 	public void handleReceive(SocketAddress sa) {
 		byte[] rcv = getReceived();
 		byte[] snd = handler.handleReceive(sa, rcv);
-		putSend(snd);
+		if (snd != null)
+			putSend(snd);
 	}
 
 	/** Copy data from receive buffer */

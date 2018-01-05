@@ -53,6 +53,6 @@ public class CUx50 implements ProtocolHandler {
 	@Override
 	public byte[] handleReceive(SocketAddress sa, byte[] rcv) {
 		KeyboardState ks = lookupState(sa);
-		return (ks != null) ? ks.handleReceive(rcv) : new byte[0];
+		return (ks != null) ? ks.handleReceive(rcv) : null;
 	}
 }
