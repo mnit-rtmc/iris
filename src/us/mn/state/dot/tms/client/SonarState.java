@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  * Copyright (C) 2015       Iteris Inc.
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
@@ -70,9 +70,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
  * @author Douglas Lau
  */
 public class SonarState extends Client {
-
-	/** Exception handler */
-	private final ExceptionHandler handler;
 
 	/** Cache of capability proxies */
 	private final TypeCache<Capability> capabilities =
@@ -446,7 +443,6 @@ public class SonarState extends Client {
 		IllegalAccessException
 	{
 		super(props, h);
-		handler = h;
 		road_model = new ProxyListModel<Road>(roads);
 		road_model.initialize();
 		toll_zone_model = new ProxyListModel<TollZone>(toll_zones);
