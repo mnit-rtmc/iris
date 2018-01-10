@@ -10,4 +10,6 @@ SELECT iris.update_version('4.61.0', '4.62.0');
 INSERT INTO iris.system_attribute (name, value)
 	VALUES ('camera_kbd_panasonic_enable', 'false');
 
+CREATE INDEX ON event.sign_event(event_date);
+
 COMMIT;

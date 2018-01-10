@@ -1791,6 +1791,8 @@ CREATE TABLE event.sign_event (
 	iris_user VARCHAR(15)
 );
 
+CREATE INDEX ON event.sign_event(event_date);
+
 CREATE TABLE event.client_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
 	event_date timestamp with time zone NOT NULL,
