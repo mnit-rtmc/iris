@@ -15,14 +15,17 @@
 package us.mn.state.dot.tms.utils;
 
 import java.io.IOException;
+import java.net.Authenticator;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.PasswordAuthentication;
 import java.net.Proxy;
 import java.net.ProxySelector;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Properties;
 
@@ -56,8 +59,13 @@ public class HttpProxySelector extends ProxySelector {
 	}
 
 	/** Create a proxy from a URL */
+	static private URI createUri(String u) {
+		return URIUtil.create(URIUtil.HTTP, u);
+	}
+
+	/** Create a proxy from a URL */
 	static private Proxy createProxy(String u) {
-		URI uri = URIUtil.create(URIUtil.HTTP, u);
+		URI uri = createUri(u);
 		String h = uri.getHost();
 		int p = uri.getPort();
 		return createProxy(h, (p >= 0) ? p : 80);
@@ -69,8 +77,23 @@ public class HttpProxySelector extends ProxySelector {
 		return new Proxy(Proxy.Type.HTTP, sa);
 	}
 
+	/** Create a password authentication from URI user info */
+	static private PasswordAuthentication createAuth(String user_info) {
+		if (user_info != null) {
+			String[] auth = user_info.split(":");
+			if (auth.length == 2) {
+				return new PasswordAuthentication(auth[0],
+					auth[1].toCharArray());
+			}
+		}
+		return null;
+	}
+
 	/** List of proxies */
 	private final List<Proxy> proxies;
+
+	/** List of proxy authentication data */
+	private final HashMap<String, PasswordAuthentication> auths;
 
 	/** Whitelist of CIDR addresses to skip proxy */
 	private final List<CIDRAddress> whitelist;
@@ -78,6 +101,7 @@ public class HttpProxySelector extends ProxySelector {
 	/** Create a new HTTP proxy selector */
 	public HttpProxySelector(Properties props) {
 		proxies = createProxyList(props);
+		auths = createAuths(props);
 		whitelist = createProxyWhitelist(props);
 	}
 
@@ -93,6 +117,26 @@ public class HttpProxySelector extends ProxySelector {
 			}
 		}
 		return plist;
+	}
+
+	/** Create a mapping of proxy host names to auth data */
+	private HashMap<String, PasswordAuthentication> createAuths(
+		Properties props)
+	{
+		HashMap<String, PasswordAuthentication> a =
+			new HashMap<String, PasswordAuthentication>();
+		String hps = props.getProperty("http.proxy");
+		if (hps != null) {
+			for (String u: hps.split("[ \t,]+")) {
+				URI uri = createUri(u);
+				String h = uri.getHost();
+				PasswordAuthentication pa = createAuth(
+					uri.getUserInfo());
+				if (h != null && pa != null)
+					a.put(h, pa);
+			}
+		}
+		return a;
 	}
 
 	/** Create a whitelist of CIDR addresses to skip proxy */
@@ -148,5 +192,20 @@ public class HttpProxySelector extends ProxySelector {
 	/** Check if the selector has defined proxy servers */
 	public boolean hasProxies() {
 		return proxies.size() > 0;
+	}
+
+	/** Proxy authenticator */
+	private final Authenticator authenticator = new Authenticator() {
+		protected PasswordAuthentication getPasswordAuthentication() {
+			if (getRequestorType() == RequestorType.PROXY)
+				return auths.get(getRequestingHost());
+			else
+				return null;
+		}
+	};
+
+	/** Get proxy authenticator */
+	public Authenticator getAuthenticator() {
+		return authenticator;
 	}
 }

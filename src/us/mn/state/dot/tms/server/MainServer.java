@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.net.Authenticator;
 import java.net.ProxySelector;
 import java.net.UnknownHostException;
 import java.util.Date;
@@ -157,8 +158,10 @@ public class MainServer {
 	/** Initialize the proxy selector */
 	static private void initProxySelector(Properties props) {
 		HttpProxySelector ps = new HttpProxySelector(props);
-		if (ps.hasProxies())
+		if (ps.hasProxies()) {
 			ProxySelector.setDefault(ps);
+			Authenticator.setDefault(ps.getAuthenticator());
+		}
 	}
 
 	/** Create the database connection */
