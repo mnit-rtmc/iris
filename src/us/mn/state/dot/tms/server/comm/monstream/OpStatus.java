@@ -105,6 +105,9 @@ public class OpStatus extends OpStep {
 			case "query":
 				parseQuery(par);
 				break;
+			case "switch":
+				parseSwitch(ctrl, par);
+				break;
 			default:
 				throw new ParsingException("INVALID MSG");
 			}
@@ -176,6 +179,47 @@ public class OpStatus extends OpStep {
 	private void parseQuery(VideoMonitorImpl vm) throws IOException {
 		display = new DisplayProp(vm);
 		super.setPolling(true);
+	}
+
+	/** Parse switch message */
+	private void parseSwitch(ControllerImpl ctrl, String[] par)
+		throws IOException
+	{
+		String mon = (par.length > 1) ? par[1] : "";
+		String cam = (par.length > 2) ? par[2] : "";
+		parseSwitch(ctrl, mon, cam);
+	}
+
+	/** Parse switch message */
+	private void parseSwitch(ControllerImpl ctrl, String mon, String cam)
+		throws IOException
+	{
+		VideoMonitor vm = VideoMonitorHelper.findUID(mon);
+		if (vm instanceof VideoMonitorImpl)
+			parseSwitch(ctrl, (VideoMonitorImpl) vm, cam);
+		else
+			throw new ParsingException("INVALID MON: " + mon);
+	}
+
+	/** Parse switch message */
+	private void parseSwitch(ControllerImpl ctrl, VideoMonitorImpl vm,
+		String cam) throws IOException
+	{
+		Camera c = CameraHelper.find(cam);
+		if (c instanceof CameraImpl)
+			selectCamera(ctrl, vm, (CameraImpl) c);
+		else
+			throw new ParsingException("INVALID CAM: " + cam);
+	}
+
+	/** Select a camera on the selected video monitor */
+	private void selectCamera(ControllerImpl ctrl, VideoMonitorImpl vm,
+		CameraImpl c)
+	{
+		int mn = vm.getMonNum();
+		// FIXME: only needed if we're controlling camera
+		c.sendPTZ(0, 0, 0);
+		VideoMonitorImpl.setCameraNotify(mn, c, "SEL " + ctrl);
 	}
 
 	/** Get the next step */
