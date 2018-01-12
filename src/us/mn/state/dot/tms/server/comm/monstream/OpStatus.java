@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -72,17 +72,35 @@ public class OpStatus extends OpStep {
 
 	/** Parse received messages */
 	private void doRecv(ControllerImpl ctrl, String msgs)throws IOException{
-		for (String msg : msgs.split(RECORD_SEP)) {
-			String[] par = msg.split(UNIT_SEP);
-			String cod = (par.length > 0) ? par[0] : "";
-			String mon = (par.length > 1) ? par[1] : "";
-			String cam = (par.length > 2) ? par[2] : "";
-			String stat = (par.length > 3) ? par[3] : "";
-			if ("status".equals(cod))
-				parseStatus(ctrl, mon, cam, stat);
-			else if (cod.length() > 0)
+		for (String msg : msgs.split(RECORD_SEP))
+			parseMsg(ctrl, msg);
+	}
+
+	/** Parse one received message */
+	private void parseMsg(ControllerImpl ctrl, String msg)
+		throws IOException
+	{
+		String[] par = msg.split(UNIT_SEP);
+		String cod = (par.length > 0) ? par[0] : "";
+		if (cod.length() > 0) {
+			switch (cod) {
+			case "status":
+				parseStatus(ctrl, par);
+				break;
+			default:
 				throw new ParsingException("INVALID MSG");
+			}
 		}
+	}
+
+	/** Parse status message */
+	private void parseStatus(ControllerImpl ctrl, String[] par)
+		throws IOException
+	{
+		String mon = (par.length > 1) ? par[1] : "";
+		String cam = (par.length > 2) ? par[2] : "";
+		String stat = (par.length > 3) ? par[3] : "";
+		parseStatus(ctrl, mon, cam, stat);
 	}
 
 	/** Parse status message */
