@@ -19,6 +19,8 @@ import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.VideoMonitor;
+import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
@@ -44,6 +46,9 @@ public class OpStatus extends OpStep {
 	/** Buffer to parse received data */
 	private final byte[] buf = new byte[2048];
 
+	/** Display property */
+	private DisplayProp display;
+
 	/** Create a new status op */
 	public OpStatus() {
 		setPolling(false);
@@ -54,6 +59,16 @@ public class OpStatus extends OpStep {
 	public void setPolling(boolean p) {
 		// No polling -- just wait for status messages
 		super.setPolling(false);
+	}
+
+	/** Poll the controller */
+	@Override
+	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
+		DisplayProp dp = display;
+		if (dp != null) {
+			dp.encodeStore(op, tx_buf);
+			display = null;
+		}
 	}
 
 	/** Parse data received from controller */
@@ -86,6 +101,9 @@ public class OpStatus extends OpStep {
 			switch (cod) {
 			case "status":
 				parseStatus(ctrl, par);
+				break;
+			case "query":
+				parseQuery(par);
 				break;
 			default:
 				throw new ParsingException("INVALID MSG");
@@ -137,6 +155,27 @@ public class OpStatus extends OpStep {
 	{
 		vm.setCameraNotify(c, "MONSTREAM", false);
 		c.setVideoLossNotify(stat.length() > 0);
+	}
+
+	/** Parse query message */
+	private void parseQuery(String[] par) throws IOException {
+		String mon = (par.length > 1) ? par[1] : "";
+		parseQuery(mon);
+	}
+
+	/** Parse query message */
+	private void parseQuery(String mon) throws IOException {
+		VideoMonitor vm = VideoMonitorHelper.findUID(mon);
+		if (vm instanceof VideoMonitorImpl)
+			parseQuery((VideoMonitorImpl) vm);
+		else
+			throw new ParsingException("INVALID MON: " + mon);
+	}
+
+	/** Parse query message */
+	private void parseQuery(VideoMonitorImpl vm) throws IOException {
+		display = new DisplayProp(vm);
+		super.setPolling(true);
 	}
 
 	/** Get the next step */
