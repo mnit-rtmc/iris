@@ -108,6 +108,12 @@ public class OpStatus extends OpStep {
 			case "switch":
 				parseSwitch(ctrl, par);
 				break;
+			case "next":
+				parseNext(ctrl, par);
+				break;
+			case "previous":
+				parsePrevious(ctrl, par);
+				break;
 			default:
 				throw new ParsingException("INVALID MSG");
 			}
@@ -220,6 +226,88 @@ public class OpStatus extends OpStep {
 		// FIXME: only needed if we're controlling camera
 		c.sendPTZ(0, 0, 0);
 		VideoMonitorImpl.setCameraNotify(mn, c, "SEL " + ctrl);
+	}
+
+	/** Parse next message */
+	private void parseNext(ControllerImpl ctrl, String[] par)
+		throws IOException
+	{
+		String mon = (par.length > 1) ? par[1] : "";
+		parseNext(ctrl, mon);
+	}
+
+	/** Parse next message */
+	private void parseNext(ControllerImpl ctrl, String mon)
+		throws IOException
+	{
+		VideoMonitor vm = VideoMonitorHelper.findUID(mon);
+		if (vm instanceof VideoMonitorImpl)
+			selectNext(ctrl, (VideoMonitorImpl) vm);
+		else
+			throw new ParsingException("INVALID MON: " + mon);
+	}
+
+	/** Select next camera on the selected video monitor */
+	private void selectNext(ControllerImpl ctrl, VideoMonitorImpl vm) {
+		Camera c = vm.getCamera();
+		if (c != null) {
+			Integer cn = c.getCamNum();
+			if (cn != null)
+				selectNext(ctrl, vm, cn);
+		}
+	}
+
+	/** Select next camera on the selected video monitor */
+	private void selectNext(ControllerImpl ctrl, VideoMonitorImpl vm,
+		int cn)
+	{
+		int mn = vm.getMonNum();
+		Camera c = CameraHelper.findNextOrFirst(cn);
+		if (c instanceof CameraImpl) {
+			VideoMonitorImpl.setCameraNotify(mn, (CameraImpl) c,
+				"NEXT " + ctrl);
+		}
+	}
+
+	/** Parse previous message */
+	private void parsePrevious(ControllerImpl ctrl, String[] par)
+		throws IOException
+	{
+		String mon = (par.length > 1) ? par[1] : "";
+		parsePrevious(ctrl, mon);
+	}
+
+	/** Parse previous message */
+	private void parsePrevious(ControllerImpl ctrl, String mon)
+		throws IOException
+	{
+		VideoMonitor vm = VideoMonitorHelper.findUID(mon);
+		if (vm instanceof VideoMonitorImpl)
+			selectPrevious(ctrl, (VideoMonitorImpl) vm);
+		else
+			throw new ParsingException("INVALID MON: " + mon);
+	}
+
+	/** Select previous camera on the selected video monitor */
+	private void selectPrevious(ControllerImpl ctrl, VideoMonitorImpl vm) {
+		Camera c = vm.getCamera();
+		if (c != null) {
+			Integer cn = c.getCamNum();
+			if (cn != null)
+				selectPrevious(ctrl, vm, cn);
+		}
+	}
+
+	/** Select previous camera on the selected video monitor */
+	private void selectPrevious(ControllerImpl ctrl, VideoMonitorImpl vm,
+		int cn)
+	{
+		int mn = vm.getMonNum();
+		Camera c = CameraHelper.findPrevOrLast(cn);
+		if (c instanceof CameraImpl) {
+			VideoMonitorImpl.setCameraNotify(mn, (CameraImpl) c,
+				"PREV " + ctrl);
+		}
 	}
 
 	/** Get the next step */
