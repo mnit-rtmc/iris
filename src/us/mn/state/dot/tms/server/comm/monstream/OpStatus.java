@@ -19,6 +19,8 @@ import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.PlayList;
+import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.server.CameraImpl;
@@ -113,6 +115,9 @@ public class OpStatus extends OpStep {
 				break;
 			case "previous":
 				parsePrevious(ctrl, par);
+				break;
+			case "sequence":
+				parseSequence(ctrl, par);
 				break;
 			default:
 				throw new ParsingException("INVALID MSG");
@@ -308,6 +313,37 @@ public class OpStatus extends OpStep {
 			VideoMonitorImpl.setCameraNotify(mn, (CameraImpl) c,
 				"PREV " + ctrl);
 		}
+	}
+
+	/** Parse sequence message */
+	private void parseSequence(ControllerImpl ctrl, String[] par)
+		throws IOException
+	{
+		String mon = (par.length > 1) ? par[1] : "";
+		String seq = (par.length > 2) ? par[2] : "";
+		parseSequence(ctrl, mon, seq);
+	}
+
+	/** Parse sequence message */
+	private void parseSequence(ControllerImpl ctrl, String mon, String seq)
+		throws IOException
+	{
+		VideoMonitor vm = VideoMonitorHelper.findUID(mon);
+		if (vm instanceof VideoMonitorImpl)
+			parseSequence(ctrl, (VideoMonitorImpl) vm, seq);
+		else
+			throw new ParsingException("INVALID MON: " + mon);
+	}
+
+	/** Parse sequence message */
+	private void parseSequence(ControllerImpl ctrl, VideoMonitorImpl vm,
+		String seq) throws IOException
+	{
+		PlayList pl = PlayListHelper.findNum(seq);
+		if (pl != null)
+			vm.setPlayList(pl);
+		else
+			throw new ParsingException("INVALID SEQ: " + seq);
 	}
 
 	/** Get the next step */
