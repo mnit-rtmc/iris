@@ -2,7 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2003-2017  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
- * Copyright (C) 2015  SRF Consulting Group
+ * Copyright (C) 2015-2018  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,10 +16,7 @@
  */
 package us.mn.state.dot.tms.client.camera;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.Properties;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
@@ -39,7 +36,7 @@ import static us.mn.state.dot.tms.utils.URIUtil.RTSP;
  */
 public class VideoRequest {
 
-	/** Servlet type enum */
+	/** MnDOT Servlet type enum */
 	static public enum ServletType {
 		STREAM("stream"), STILL("image");
 
@@ -49,7 +46,7 @@ public class VideoRequest {
 		}
 	}
 
-	/** Video stream size enum */
+	/** Video stream image-size enum */
 	static public enum Size {
 		THUMBNAIL(132, 90, 's'),	// Thumbnail
 		SMALL(176, 120, 's'),		// Quarter SIF
@@ -76,13 +73,13 @@ public class VideoRequest {
 		}
 	}
 
-	/** Type of video proxy property name */
+	/** Client property name: software used for the video proxy */
 	static private final String VIDEO_PROXY = "video.proxy";
 
-	/** Video host property name */
+	/** Client property name: video host (dns name or IP address) */
 	static private final String VIDEO_HOST = "video.host";
 
-	/** Video port property name */
+	/** Client property name: video port */
 	static private final String VIDEO_PORT = "video.port";
 
 	/** Create a url for connecting to the video server.
@@ -119,10 +116,12 @@ public class VideoRequest {
 		return size;
 	}
 
-	/** The type of video server/proxy */
+	/** Name of the software used for the video proxy */
 	private final String video_proxy;
+	private static final String SERVLET_MNDOT = "Servlet_MnDOT";
+	private static final String LIVE555_SRF   = "Live555_SRF";
 
-	/** The base URL of the video server */
+	/** The base URL of the video proxy */
 	private final String base_url;
 
 	/** District ID */
@@ -135,17 +134,17 @@ public class VideoRequest {
 	public VideoRequest(Properties p, Size sz) {
 		base_url = createBaseUrl(p);
 		district = p.getProperty("district", "tms");
-		video_proxy = p.getProperty(VIDEO_PROXY, "");
+		video_proxy = p.getProperty(VIDEO_PROXY, SERVLET_MNDOT);
 		size = sz;
 	}
 
 	/** Create a URI for a stream */
 	public URI getUri(Camera c) {
-		return useServlet() ? getServletUri(c) : getCameraUri(c);
+		return useProxy() ? getProxyUri(c) : getCameraUri(c);
 	}
 
-	/** Test if servlet should be used */
-	private boolean useServlet() {
+	/** Test if a proxy is being used */
+	private boolean useProxy() {
 		return base_url != null;
 	}
 
@@ -172,14 +171,14 @@ public class VideoRequest {
 		return newCamName.toString();
 	}
 	
-	/** Create a video servlet URI */
-	private URI getServletUri(Camera cam) {
-		// Use an alternate video-proxy?
-		if (video_proxy.equalsIgnoreCase("live555_SRF")) {
+	/** Create a video proxy URI */
+	private URI getProxyUri(Camera cam) {
+		// Using a Live555_SRF video proxy?
+		if (video_proxy.equalsIgnoreCase(LIVE555_SRF)) {
 			return create(RTSP, base_url +
-					"/" + getLive555CamName(cam));
+		                        "/" + getLive555CamName(cam));
 		}
-		// Use default (MnDOT servlet) video proxy
+		// No, we're using a Servlet_MnDOT video proxy...
 		return create(HTTP, base_url +
 		                    "/video/" + servlet_type.servlet +
 		                    "/" + district +
@@ -224,7 +223,7 @@ public class VideoRequest {
 	/** Get the encoding for a camera */
 	private Encoding getEncoding(Camera c) {
 		Encoding enc = getEncoding(c.getEncoderType());
-		if (enc != Encoding.UNKNOWN && useServlet())
+		if (enc != Encoding.UNKNOWN && useProxy())
 			return Encoding.MJPEG;
 		else
 			return enc;
