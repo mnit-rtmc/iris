@@ -80,6 +80,16 @@ public class OpStatus extends OpStep {
 			throw new ParsingException("INVALID CAM: " + cam);
 	}
 
+	/** Parse a float value */
+	static private float parseFloat(String f) throws IOException {
+		try {
+			return Float.parseFloat(f);
+		}
+		catch (NumberFormatException e) {
+			throw new ParsingException("INVALID FLOAT: " + f);
+		}
+	}
+
 	/** Buffer to parse received data */
 	private final byte[] buf = new byte[2048];
 
@@ -153,6 +163,9 @@ public class OpStatus extends OpStep {
 				break;
 			case "sequence":
 				parseSequence(ctrl, par);
+				break;
+			case "ptz":
+				parsePtz(ctrl, par);
 				break;
 			default:
 				throw new ParsingException("INVALID MSG");
@@ -285,6 +298,32 @@ public class OpStatus extends OpStep {
 			vm.setPlayList(pl);
 		else
 			throw new ParsingException("INVALID SEQ: " + seq);
+	}
+
+	/** Parse ptz message */
+	private void parsePtz(ControllerImpl ctrl, String[] par)
+		throws IOException
+	{
+		String mon = (par.length > 1) ? par[1] : "";
+		String cam = (par.length > 2) ? par[2] : "";
+		String pan = (par.length > 3) ? par[3] : "";
+		String tilt = (par.length > 4) ? par[4] : "";
+		String zoom = (par.length > 5) ? par[5] : "";
+		parsePtz(mon, cam, pan, tilt, zoom);
+	}
+
+	/** Parse ptz message */
+	private void parsePtz(String mon, String cam, String pan, String tilt,
+		String zoom) throws IOException
+	{
+		VideoMonitorImpl vm = parseMon(mon);
+		CameraImpl c = parseCam(cam);
+		if (vm.getCamera() == c) {
+			float p = parseFloat(pan);
+			float t = parseFloat(tilt);
+			float z = parseFloat(zoom);
+			c.sendPTZ(p, t, z);
+		}
 	}
 
 	/** Get the next step */
