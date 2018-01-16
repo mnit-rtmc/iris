@@ -45,6 +45,41 @@ public class OpStatus extends OpStep {
 	static private final String UNIT_SEP =
 		String.valueOf(MonProp.UNIT_SEP);
 
+	/** Parse video monitor */
+	static private VideoMonitorImpl parseMon(String mon) throws IOException{
+		VideoMonitor vm = VideoMonitorHelper.findUID(mon);
+		if (vm instanceof VideoMonitorImpl)
+			return (VideoMonitorImpl) vm;
+		else
+			throw new ParsingException("INVALID MON: " + mon);
+	}
+
+	/** Parse video monitor number (pin) */
+	static private VideoMonitorImpl parseMonNum(ControllerImpl ctrl,
+		String mon) throws IOException
+	{
+		try {
+			int pin = Integer.parseInt(mon) + 1;
+			ControllerIO cio = ctrl.getIO(pin);
+			if (cio instanceof VideoMonitorImpl)
+				return (VideoMonitorImpl) cio;
+			else
+				throw new ParsingException("INVALID PIN: "+pin);
+		}
+		catch (NumberFormatException e) {
+			throw new ParsingException("INVALID MON NUM: " + mon);
+		}
+	}
+
+	/** Parse camera number / ID */
+	static private CameraImpl parseCam(String cam) throws IOException {
+		Camera c = CameraHelper.find(cam);
+		if (c instanceof CameraImpl)
+			return (CameraImpl) c;
+		else
+			throw new ParsingException("INVALID CAM: " + cam);
+	}
+
 	/** Buffer to parse received data */
 	private final byte[] buf = new byte[2048];
 
@@ -139,34 +174,8 @@ public class OpStatus extends OpStep {
 	private void parseStatus(ControllerImpl ctrl, String mon, String cam,
 		String stat) throws IOException
 	{
-		try {
-			int pin = Integer.parseInt(mon) + 1;
-			ControllerIO cio = ctrl.getIO(pin);
-			if (cio instanceof VideoMonitorImpl)
-				parseStatus((VideoMonitorImpl) cio, cam, stat);
-			else
-				throw new ParsingException("INVALID PIN: "+pin);
-		}
-		catch (NumberFormatException e) {
-			throw new ParsingException("INVALID MON NUM: " + mon);
-		}
-	}
-
-	/** Parse video monitor status */
-	private void parseStatus(VideoMonitorImpl vm, String cam, String stat)
-		throws IOException
-	{
-		Camera c = CameraHelper.find(cam);
-		if (c instanceof CameraImpl)
-			parseStatus(vm, (CameraImpl) c, stat);
-		else
-			throw new ParsingException("INVALID CAM: " + cam);
-	}
-
-	/** Parse video monitor status */
-	private void parseStatus(VideoMonitorImpl vm, CameraImpl c, String stat)
-		throws IOException
-	{
+		VideoMonitorImpl vm = parseMonNum(ctrl, mon);
+		CameraImpl c = parseCam(cam);
 		vm.setCameraNotify(c, "MONSTREAM", false);
 		c.setVideoLossNotify(stat.length() > 0);
 	}
@@ -174,20 +183,7 @@ public class OpStatus extends OpStep {
 	/** Parse query message */
 	private void parseQuery(String[] par) throws IOException {
 		String mon = (par.length > 1) ? par[1] : "";
-		parseQuery(mon);
-	}
-
-	/** Parse query message */
-	private void parseQuery(String mon) throws IOException {
-		VideoMonitor vm = VideoMonitorHelper.findUID(mon);
-		if (vm instanceof VideoMonitorImpl)
-			parseQuery((VideoMonitorImpl) vm);
-		else
-			throw new ParsingException("INVALID MON: " + mon);
-	}
-
-	/** Parse query message */
-	private void parseQuery(VideoMonitorImpl vm) throws IOException {
+		VideoMonitorImpl vm = parseMon(mon);
 		display = new DisplayProp(vm);
 		super.setPolling(true);
 	}
@@ -198,29 +194,7 @@ public class OpStatus extends OpStep {
 	{
 		String mon = (par.length > 1) ? par[1] : "";
 		String cam = (par.length > 2) ? par[2] : "";
-		parseSwitch(ctrl, mon, cam);
-	}
-
-	/** Parse switch message */
-	private void parseSwitch(ControllerImpl ctrl, String mon, String cam)
-		throws IOException
-	{
-		VideoMonitor vm = VideoMonitorHelper.findUID(mon);
-		if (vm instanceof VideoMonitorImpl)
-			parseSwitch(ctrl, (VideoMonitorImpl) vm, cam);
-		else
-			throw new ParsingException("INVALID MON: " + mon);
-	}
-
-	/** Parse switch message */
-	private void parseSwitch(ControllerImpl ctrl, VideoMonitorImpl vm,
-		String cam) throws IOException
-	{
-		Camera c = CameraHelper.find(cam);
-		if (c instanceof CameraImpl)
-			selectCamera(ctrl, vm, (CameraImpl) c);
-		else
-			throw new ParsingException("INVALID CAM: " + cam);
+		selectCamera(ctrl, parseMon(mon), parseCam(cam));
 	}
 
 	/** Select a camera on the selected video monitor */
@@ -238,18 +212,7 @@ public class OpStatus extends OpStep {
 		throws IOException
 	{
 		String mon = (par.length > 1) ? par[1] : "";
-		parseNext(ctrl, mon);
-	}
-
-	/** Parse next message */
-	private void parseNext(ControllerImpl ctrl, String mon)
-		throws IOException
-	{
-		VideoMonitor vm = VideoMonitorHelper.findUID(mon);
-		if (vm instanceof VideoMonitorImpl)
-			selectNext(ctrl, (VideoMonitorImpl) vm);
-		else
-			throw new ParsingException("INVALID MON: " + mon);
+		selectNext(ctrl, parseMon(mon));
 	}
 
 	/** Select next camera on the selected video monitor */
@@ -279,18 +242,7 @@ public class OpStatus extends OpStep {
 		throws IOException
 	{
 		String mon = (par.length > 1) ? par[1] : "";
-		parsePrevious(ctrl, mon);
-	}
-
-	/** Parse previous message */
-	private void parsePrevious(ControllerImpl ctrl, String mon)
-		throws IOException
-	{
-		VideoMonitor vm = VideoMonitorHelper.findUID(mon);
-		if (vm instanceof VideoMonitorImpl)
-			selectPrevious(ctrl, (VideoMonitorImpl) vm);
-		else
-			throw new ParsingException("INVALID MON: " + mon);
+		selectPrevious(ctrl, parseMon(mon));
 	}
 
 	/** Select previous camera on the selected video monitor */
@@ -321,18 +273,7 @@ public class OpStatus extends OpStep {
 	{
 		String mon = (par.length > 1) ? par[1] : "";
 		String seq = (par.length > 2) ? par[2] : "";
-		parseSequence(ctrl, mon, seq);
-	}
-
-	/** Parse sequence message */
-	private void parseSequence(ControllerImpl ctrl, String mon, String seq)
-		throws IOException
-	{
-		VideoMonitor vm = VideoMonitorHelper.findUID(mon);
-		if (vm instanceof VideoMonitorImpl)
-			parseSequence(ctrl, (VideoMonitorImpl) vm, seq);
-		else
-			throw new ParsingException("INVALID MON: " + mon);
+		parseSequence(ctrl, parseMon(mon), seq);
 	}
 
 	/** Parse sequence message */
