@@ -116,6 +116,7 @@ public class OpStatus extends OpStep {
 			dp.encodeStore(op, tx_buf);
 			display = null;
 		}
+		setPolling(false);
 	}
 
 	/** Parse data received from controller */
