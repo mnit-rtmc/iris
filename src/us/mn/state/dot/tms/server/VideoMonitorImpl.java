@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -126,6 +126,28 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		/** Check if play list is running */
 		private boolean isRunning() {
 			return dwell > DWELL_PAUSED;
+		}
+	}
+
+	/** Current monitor number to play list state mapping */
+	static private HashMap<Integer, PlayListState> pl_states =
+		new HashMap<Integer, PlayListState>();
+
+	/** Set play list state for a monitor number */
+	static private void setPlayListState(int mn, PlayListState pls) {
+		Integer num = new Integer(mn);
+		synchronized (pl_states) {
+			if (pls != null)
+				pl_states.put(num, pls);
+			else
+				pl_states.remove(num);
+		}
+	}
+
+	/** Get play list state for a monitor number */
+	static private PlayListState getPlayListState(int mn) {
+		synchronized (pl_states) {
+			return pl_states.get(new Integer(mn));
 		}
 	}
 
@@ -431,34 +453,36 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 	}
 
-	/** Current play list state */
-	private transient PlayListState pl_state;
-
 	/** Set the play list.
 	 * This will start the given play list from the beginning. */
 	@Override
 	public void setPlayList(PlayList pl) {
 		PlayListState pls = (pl != null) ? new PlayListState(pl) : null;
-		pl_state = pls;
+		setPlayListState(mon_num, pls);
 		if (pls != null)
 			PLAY_LIST.addJob(new PlayListUpdateJob(pls));
 	}
 
+	/** Get the play list state */
+	private PlayListState getPlayListState() {
+		return getPlayListState(mon_num);
+	}
+
 	/** Get the play list */
 	public PlayList getPlayList() {
-		PlayListState pls = pl_state;
+		PlayListState pls = getPlayListState();
 		return (pls != null) ? pls.play_list : null;
 	}
 
 	/** Check if a play list is running */
 	public boolean isPlayListRunning() {
-		PlayListState pls = pl_state;
+		PlayListState pls = getPlayListState();
 		return (pls != null) ? pls.isRunning() : false;
 	}
 
 	/** Pause the running play list */
 	public boolean pausePlayList() {
-		PlayListState pls = pl_state;
+		PlayListState pls = getPlayListState();
 		if (pls != null)
 			pls.pause();
 		return pls != null;
@@ -466,7 +490,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Unpause the running play list */
 	public boolean unpausePlayList() {
-		PlayListState pls = pl_state;
+		PlayListState pls = getPlayListState();
 		if (pls != null)
 			pls.unpause();
 		return pls != null;
@@ -474,7 +498,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Go to next item in play list */
 	public boolean nextPlayList() {
-		PlayListState pls = pl_state;
+		PlayListState pls = getPlayListState();
 		if (pls != null)
 			setCamPlayList(pls.goNextItem());
 		return pls != null;
@@ -482,7 +506,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Go to previous item in play list */
 	public boolean prevPlayList() {
-		PlayListState pls = pl_state;
+		PlayListState pls = getPlayListState();
 		if (pls != null)
 			setCamPlayList(pls.goPrevItem());
 		return pls != null;
@@ -510,7 +534,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		}
 		@Override
 		public void perform() throws TMSException {
-			if (pls == pl_state && isActive()) {
+			if (pls == getPlayListState() && isActive()) {
 				Camera c = pls.updateDwell();
 				if (c != null) {
 					setCamSrc(toCameraImpl(c),
