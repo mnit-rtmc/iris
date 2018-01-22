@@ -151,8 +151,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		}
 	}
 
-	/** Play list switching scheduler */
-	static private final Scheduler PLAY_LIST = new Scheduler("play_list");
+	/** Cam switching scheduler */
+	static private final Scheduler CAM_SWITCH = new Scheduler("cam_switch");
 
 	/** Check if the camera video should be published */
 	static private boolean isCameraPublished(Camera c) {
@@ -411,16 +411,17 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Set the camera and notify clients of the change */
-	public void setCameraNotify(CameraImpl c, String src, boolean select) {
-		try {
-			Camera oc = camera;
-			doSetCam(c, src, select);
-			if (camera != oc)
-				notifyAttribute("camera");
-		}
-		catch (TMSException e) {
-			e.printStackTrace();
-		}
+	public void setCameraNotify(final CameraImpl c, final String src,
+		final boolean select)
+	{
+		CAM_SWITCH.addJob(new Job() {
+			@Override public void perform() throws TMSException {
+				Camera oc = camera;
+				doSetCam(c, src, select);
+				if (camera != oc)
+					notifyAttribute("camera");
+			}
+		});
 	}
 
 	/** Get the camera displayed on the monitor */
@@ -467,7 +468,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		PlayListState pls = (pl != null) ? new PlayListState(pl) : null;
 		setPlayListState(mon_num, pls);
 		if (pls != null)
-			PLAY_LIST.addJob(new PlayListUpdateJob(pls));
+			CAM_SWITCH.addJob(new PlayListUpdateJob(pls));
 	}
 
 	/** Get the play list state */
@@ -520,13 +521,12 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Set camera from a play list */
-	private void setCamPlayList(Camera c) {
-		try {
-			setCameraSrc(c, PlayList.SONAR_TYPE);
-		}
-		catch (TMSException e) {
-			e.printStackTrace();
-		}
+	private void setCamPlayList(final Camera c) {
+		CAM_SWITCH.addJob(new Job() {
+			@Override public void perform() throws TMSException {
+				setCameraSrc(c, PlayList.SONAR_TYPE);
+			}
+		});
 	}
 
 	/** Job for updating play list state */
@@ -543,7 +543,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 				if (c != null)
 					setCameraSrc(c, PlayList.SONAR_TYPE);
 			} else {
-				PLAY_LIST.removeJob(this);
+				CAM_SWITCH.removeJob(this);
 			}
 		}
 	}
