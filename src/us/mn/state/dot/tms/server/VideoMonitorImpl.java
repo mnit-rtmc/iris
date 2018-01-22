@@ -371,6 +371,13 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Set the camera displayed on the monitor.
 	 * @param c Camera to display.
 	 * @param src Source of request. */
+	private void setCameraSrc(Camera c, String src) throws TMSException {
+		setCamSrc(toCameraImpl(c), src);
+	}
+
+	/** Set the camera displayed on the monitor.
+	 * @param c Camera to display.
+	 * @param src Source of request. */
 	private void setCamSrc(CameraImpl c, String src) throws TMSException {
 		if (doSetCam(c, src, true)) {
 			// Switch all other monitors with same mon_num
@@ -514,14 +521,11 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Set camera from a play list */
 	private void setCamPlayList(Camera c) {
-		CameraImpl ci = toCameraImpl(c);
-		if (ci != null) {
-			try {
-				setCamSrc(ci, PlayList.SONAR_TYPE);
-			}
-			catch (TMSException e) {
-				e.printStackTrace();
-			}
+		try {
+			setCameraSrc(c, PlayList.SONAR_TYPE);
+		}
+		catch (TMSException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -536,10 +540,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		public void perform() throws TMSException {
 			if (pls == getPlayListState() && isActive()) {
 				Camera c = pls.updateDwell();
-				if (c != null) {
-					setCamSrc(toCameraImpl(c),
-						PlayList.SONAR_TYPE);
-				}
+				if (c != null)
+					setCameraSrc(c, PlayList.SONAR_TYPE);
 			} else {
 				PLAY_LIST.removeJob(this);
 			}
