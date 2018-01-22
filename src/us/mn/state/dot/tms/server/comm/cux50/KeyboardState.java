@@ -482,26 +482,24 @@ public class KeyboardState {
 
 	/** Select previous camera on a video monitor */
 	private void selectPrevCam() {
-		Integer uid = getCamNum();
-		if (uid != null) {
-			Camera c = CameraHelper.findPrevOrLast(uid);
-			if (c instanceof CameraImpl) {
-				selectCamera((CameraImpl) c, "PREV " + host);
+		VideoMonitor vm = monitor;
+		if (vm instanceof VideoMonitorImpl) {
+			VideoMonitorImpl vmi = (VideoMonitorImpl) vm;
+			stopCamControl();
+			if (vmi.selectPrevCam(host))
 				return;
-			}
 		}
 		beepInvalid();
 	}
 
 	/** Select next camera on a video monitor */
 	private void selectNextCam() {
-		Integer uid = getCamNum();
-		if (uid != null) {
-			Camera c = CameraHelper.findNextOrFirst(uid);
-			if (c instanceof CameraImpl) {
-				selectCamera((CameraImpl) c, "NEXT " + host);
+		VideoMonitor vm = monitor;
+		if (vm instanceof VideoMonitorImpl) {
+			VideoMonitorImpl vmi = (VideoMonitorImpl) vm;
+			stopCamControl();
+			if (vmi.selectNextCam(host))
 				return;
-			}
 		}
 		beepInvalid();
 	}

@@ -262,31 +262,8 @@ public class OpStatus extends OpStep {
 		throws IOException
 	{
 		String mon = (par.length > 1) ? par[1] : "";
-		selectNext(ctrl, parseMon(mon));
-	}
-
-	/** Select next camera on the selected video monitor */
-	private void selectNext(ControllerImpl ctrl, VideoMonitorImpl vm) {
-		if (!vm.nextPlayList()) {
-			Camera c = vm.getCamera();
-			if (c != null) {
-				Integer cn = c.getCamNum();
-				if (cn != null)
-					selectNext(ctrl, vm, cn);
-			}
-		}
-	}
-
-	/** Select next camera on the selected video monitor */
-	private void selectNext(ControllerImpl ctrl, VideoMonitorImpl vm,
-		int cn)
-	{
-		int mn = vm.getMonNum();
-		Camera c = CameraHelper.findNextOrFirst(cn);
-		if (c instanceof CameraImpl) {
-			VideoMonitorImpl.setCameraNotify(mn, (CameraImpl) c,
-				"NEXT " + ctrl);
-		}
+		VideoMonitorImpl vm = parseMon(mon);
+		vm.selectNextCam(ctrl.toString());
 	}
 
 	/** Parse previous message */
@@ -294,31 +271,8 @@ public class OpStatus extends OpStep {
 		throws IOException
 	{
 		String mon = (par.length > 1) ? par[1] : "";
-		selectPrevious(ctrl, parseMon(mon));
-	}
-
-	/** Select previous camera on the selected video monitor */
-	private void selectPrevious(ControllerImpl ctrl, VideoMonitorImpl vm) {
-		if (!vm.prevPlayList()) {
-			Camera c = vm.getCamera();
-			if (c != null) {
-				Integer cn = c.getCamNum();
-				if (cn != null)
-					selectPrevious(ctrl, vm, cn);
-			}
-		}
-	}
-
-	/** Select previous camera on the selected video monitor */
-	private void selectPrevious(ControllerImpl ctrl, VideoMonitorImpl vm,
-		int cn)
-	{
-		int mn = vm.getMonNum();
-		Camera c = CameraHelper.findPrevOrLast(cn);
-		if (c instanceof CameraImpl) {
-			VideoMonitorImpl.setCameraNotify(mn, (CameraImpl) c,
-				"PREV " + ctrl);
-		}
+		VideoMonitorImpl vm = parseMon(mon);
+		vm.selectPrevCam(ctrl.toString());
 	}
 
 	/** Parse sequence message */

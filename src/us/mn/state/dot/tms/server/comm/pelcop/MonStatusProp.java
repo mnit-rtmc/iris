@@ -198,7 +198,7 @@ public class MonStatusProp extends PelcoPProp {
 	}
 
 	/** Stop camera control on selected camera */
-	private void stopCamControl() {
+	protected void stopCamControl() {
 		VideoMonitorImpl vm = findVideoMonitor();
 		if (vm != null) {
 			Camera c = vm.getCamera();

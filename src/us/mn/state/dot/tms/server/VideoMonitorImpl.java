@@ -24,6 +24,7 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -453,6 +454,58 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 			vmp.switchCamera(this, cam);
 		String cid = (cam != null) ? cam.getName() : "";
 		logEvent(new CameraSwitchEvent(getName(), cid, src));
+	}
+
+	/** Find next (or first) camera */
+	private CameraImpl findNextOrFirst() {
+		Camera c = getCamera();
+		if (c != null) {
+			Integer cn = c.getCamNum();
+			if (cn != null) {
+				return toCameraImpl(
+					CameraHelper.findNextOrFirst(cn));
+			}
+		}
+		return null;
+	}
+
+	/** Select the next (non-playlist) camera */
+	private boolean nextCam(String src) {
+		CameraImpl c = findNextOrFirst();
+		if (c != null)
+			setCameraNotify(c, "NEXT " + src, true);
+		return (c != null);
+	}
+
+	/** Select the next camera (playlist or global) */
+	public boolean selectNextCam(String src) {
+		return nextPlayList() || nextCam(src);
+	}
+
+	/** Find previous (or last) camera */
+	private CameraImpl findPrevOrLast() {
+		Camera c = getCamera();
+		if (c != null) {
+			Integer cn = c.getCamNum();
+			if (cn != null) {
+				return toCameraImpl(
+					CameraHelper.findPrevOrLast(cn));
+			}
+		}
+		return null;
+	}
+
+	/** Select the previous (non-playlist) camera */
+	private boolean prevCam(String src) {
+		CameraImpl c = findPrevOrLast();
+		if (c != null)
+			setCameraNotify(c, "PREV " + src, true);
+		return (c != null);
+	}
+
+	/** Select the previous camera (playlist or global) */
+	public boolean selectPrevCam(String src) {
+		return prevPlayList() || prevCam(src);
 	}
 
 	/** Perform a periodic poll */
