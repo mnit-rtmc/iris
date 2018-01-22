@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
+import us.mn.state.dot.tms.server.comm.InvalidReqException;
 import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -46,12 +47,14 @@ public class OpStatus extends OpStep {
 		String.valueOf(MonProp.UNIT_SEP);
 
 	/** Parse video monitor */
-	static private VideoMonitorImpl parseMon(String mon) throws IOException{
+	static private VideoMonitorImpl parseMon(String mon)
+		throws InvalidReqException
+	{
 		VideoMonitor vm = VideoMonitorHelper.findUID(mon);
 		if (vm instanceof VideoMonitorImpl)
 			return (VideoMonitorImpl) vm;
 		else
-			throw new ParsingException("INVALID MON: " + mon);
+			throw new InvalidReqException();
 	}
 
 	/** Parse video monitor number (pin) */
@@ -72,12 +75,14 @@ public class OpStatus extends OpStep {
 	}
 
 	/** Parse camera number / ID */
-	static private CameraImpl parseCam(String cam) throws IOException {
+	static private CameraImpl parseCam(String cam)
+		throws InvalidReqException
+	{
 		Camera c = CameraHelper.find(cam);
 		if (c instanceof CameraImpl)
 			return (CameraImpl) c;
 		else
-			throw new ParsingException("INVALID CAM: " + cam);
+			throw new InvalidReqException();
 	}
 
 	/** Parse a float value */
@@ -87,6 +92,17 @@ public class OpStatus extends OpStep {
 		}
 		catch (NumberFormatException e) {
 			throw new ParsingException("INVALID FLOAT: " + f);
+		}
+	}
+
+	/** Create a new display property */
+	static private DisplayProp createDisplayProp(String mon) {
+		try {
+			VideoMonitorImpl vm = parseMon(mon);
+			return new DisplayProp(vm);
+		}
+		catch (InvalidReqException e) {
+			return new DisplayProp();
 		}
 	}
 
@@ -135,8 +151,14 @@ public class OpStatus extends OpStep {
 
 	/** Parse received messages */
 	private void doRecv(ControllerImpl ctrl, String msgs)throws IOException{
-		for (String msg : msgs.split(RECORD_SEP))
-			parseMsg(ctrl, msg);
+		for (String msg : msgs.split(RECORD_SEP)) {
+			try {
+				parseMsg(ctrl, msg);
+			}
+			catch (InvalidReqException e) {
+				// Invalid mon, cam or seq.  Just ignore.
+			}
+		}
 	}
 
 	/** Parse one received message */
@@ -195,10 +217,9 @@ public class OpStatus extends OpStep {
 	}
 
 	/** Parse query message */
-	private void parseQuery(String[] par) throws IOException {
+	private void parseQuery(String[] par) {
 		String mon = (par.length > 1) ? par[1] : "";
-		VideoMonitorImpl vm = parseMon(mon);
-		display = new DisplayProp(vm);
+		display = createDisplayProp(mon);
 		super.setPolling(true);
 	}
 
@@ -292,13 +313,13 @@ public class OpStatus extends OpStep {
 
 	/** Parse sequence message */
 	private void parseSequence(ControllerImpl ctrl, VideoMonitorImpl vm,
-		String seq) throws IOException
+		String seq) throws InvalidReqException
 	{
 		PlayList pl = PlayListHelper.findNum(seq);
 		if (pl != null)
 			vm.setPlayList(pl);
 		else
-			throw new ParsingException("INVALID SEQ: " + seq);
+			throw new InvalidReqException();
 	}
 
 	/** Parse ptz message */

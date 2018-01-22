@@ -36,6 +36,11 @@ public class DisplayProp extends MonProp {
 		monitor = vm;
 	}
 
+	/** Create a display property */
+	public DisplayProp() {
+		this(null);
+	}
+
 	/** Encode a STORE request */
 	@Override
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
@@ -49,13 +54,20 @@ public class DisplayProp extends MonProp {
 		StringBuilder sb = new StringBuilder();
 		sb.append("display");
 		sb.append(UNIT_SEP);
-		sb.append(monitor.getMonNum());
+		sb.append(getMonAsString());
 		sb.append(UNIT_SEP);
 		sb.append(getCamNumAsString());
 		sb.append(UNIT_SEP);
 		sb.append(getSeqNumAsString());
 		sb.append(RECORD_SEP);
 		return sb.toString();
+	}
+
+	/** Get monitor number as string */
+	private String getMonAsString() {
+		return (monitor != null)
+		      ? Integer.toString(monitor.getMonNum())
+		      : "";
 	}
 
 	/** Get camera number as string */
@@ -66,7 +78,7 @@ public class DisplayProp extends MonProp {
 
 	/** Get camera number */
 	private Integer getCamNum() {
-		Camera c = monitor.getCamera();
+		Camera c = (monitor != null) ? monitor.getCamera() : null;
 		return (c != null) ? c.getCamNum() : null;
 	}
 
@@ -78,13 +90,13 @@ public class DisplayProp extends MonProp {
 
 	/** Get sequence number */
 	private Integer getSeqNum() {
-		PlayList pl = monitor.getPlayList();
+		PlayList pl = (monitor != null) ? monitor.getPlayList() : null;
 		return (pl != null) ? pl.getNum() : null;
 	}
 
 	/** Get a string representation of the property */
 	@Override
 	public String toString() {
-		return "display: " + monitor;
+		return "display: " + getMonAsString();
 	}
 }
