@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.PlayList;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
 
@@ -27,6 +28,11 @@ import us.mn.state.dot.tms.server.comm.Operation;
  * @author Douglas Lau
  */
 public class DisplayProp extends MonProp {
+
+	/** Get the "blank" camera number */
+	static private int cameraNumBlank() {
+		return SystemAttrEnum.CAMERA_NUM_BLANK.getInt();
+	}
 
 	/** Video monitor */
 	private final VideoMonitorImpl monitor;
@@ -73,7 +79,9 @@ public class DisplayProp extends MonProp {
 	/** Get camera number as string */
 	private String getCamNumAsString() {
 		Integer cn = getCamNum();
-		return (cn != null) ? cn.toString() : "";
+		return (cn != null) && (cn != cameraNumBlank())
+		      ? cn.toString()
+		      : "";
 	}
 
 	/** Get camera number */
