@@ -267,11 +267,13 @@ public class OpStatus extends OpStep {
 
 	/** Select next camera on the selected video monitor */
 	private void selectNext(ControllerImpl ctrl, VideoMonitorImpl vm) {
-		Camera c = vm.getCamera();
-		if (c != null) {
-			Integer cn = c.getCamNum();
-			if (cn != null)
-				selectNext(ctrl, vm, cn);
+		if (!vm.nextPlayList()) {
+			Camera c = vm.getCamera();
+			if (c != null) {
+				Integer cn = c.getCamNum();
+				if (cn != null)
+					selectNext(ctrl, vm, cn);
+			}
 		}
 	}
 
@@ -297,11 +299,13 @@ public class OpStatus extends OpStep {
 
 	/** Select previous camera on the selected video monitor */
 	private void selectPrevious(ControllerImpl ctrl, VideoMonitorImpl vm) {
-		Camera c = vm.getCamera();
-		if (c != null) {
-			Integer cn = c.getCamNum();
-			if (cn != null)
-				selectPrevious(ctrl, vm, cn);
+		if (!vm.prevPlayList()) {
+			Camera c = vm.getCamera();
+			if (c != null) {
+				Integer cn = c.getCamNum();
+				if (cn != null)
+					selectPrevious(ctrl, vm, cn);
+			}
 		}
 	}
 
