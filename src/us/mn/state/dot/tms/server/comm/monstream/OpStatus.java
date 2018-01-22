@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.PlayListHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.server.CameraImpl;
@@ -37,6 +38,11 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  * @author Douglas Lau
  */
 public class OpStatus extends OpStep {
+
+	/** Get the "blank" camera number */
+	static private int cameraNumBlank() {
+		return SystemAttrEnum.CAMERA_NUM_BLANK.getInt();
+	}
 
 	/** ASCII record separator */
 	static private final String RECORD_SEP =
@@ -83,6 +89,15 @@ public class OpStatus extends OpStep {
 			return (CameraImpl) c;
 		else
 			throw new InvalidReqException();
+	}
+
+	/** Parse camera number (replacing 0 with blank camera num) */
+	static private CameraImpl parseCamOrBlank(String cam)
+		throws InvalidReqException
+	{
+		if ("".equals(cam) || "0".equals(cam))
+			cam = Integer.toString(cameraNumBlank());
+		return parseCam(cam);
 	}
 
 	/** Parse a float value */
@@ -229,7 +244,7 @@ public class OpStatus extends OpStep {
 	{
 		String mon = (par.length > 1) ? par[1] : "";
 		String cam = (par.length > 2) ? par[2] : "";
-		selectCamera(ctrl, parseMon(mon), parseCam(cam));
+		selectCamera(ctrl, parseMon(mon), parseCamOrBlank(cam));
 	}
 
 	/** Select a camera on the selected video monitor */
