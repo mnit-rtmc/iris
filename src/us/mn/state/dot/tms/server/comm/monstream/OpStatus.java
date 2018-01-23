@@ -110,6 +110,16 @@ public class OpStatus extends OpStep {
 		}
 	}
 
+	/** Parse a preset number */
+	static private int parsePresetNum(String num) throws ParsingException {
+		try {
+			return Integer.parseInt(num);
+		}
+		catch (NumberFormatException e) {
+			throw new ParsingException("INVALID PRESET: " + num);
+		}
+	}
+
 	/** Create a new display property */
 	static private DisplayProp createDisplayProp(String mon) {
 		try {
@@ -204,6 +214,9 @@ public class OpStatus extends OpStep {
 				break;
 			case "ptz":
 				parsePtz(ctrl, par);
+				break;
+			case "preset":
+				parsePreset(par);
 				break;
 			default:
 				throw new ParsingException("INVALID MSG");
@@ -318,6 +331,31 @@ public class OpStatus extends OpStep {
 			float t = parseFloat(tilt);
 			float z = parseFloat(zoom);
 			c.sendPTZ(p, t, z);
+		}
+	}
+
+	/** Parse preset message */
+	private void parsePreset(String[] par) throws IOException {
+		String mon = (par.length > 1) ? par[1] : "";
+		String cam = (par.length > 2) ? par[2] : "";
+		String cmd = (par.length > 3) ? par[3] : "";
+		String num = (par.length > 4) ? par[4] : "";
+		parsePreset(mon, cam, cmd, num);
+	}
+
+	/** Parse preset message */
+	private void parsePreset(String mon, String cam, String cmd,
+		String num) throws IOException
+	{
+		VideoMonitorImpl vm = parseMon(mon);
+		CameraImpl c = parseCam(cam);
+		if (vm.getCamera() == c) {
+			if ("recall".equals(cmd))
+				c.setRecallPreset(parsePresetNum(num));
+			else if ("store".equals(cmd))
+				c.setStorePreset(parsePresetNum(num));
+			else
+				throw new ParsingException("INVALID CMD: "+cmd);
 		}
 	}
 
