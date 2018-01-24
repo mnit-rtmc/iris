@@ -138,8 +138,8 @@ public class OpStatus extends OpStep {
 	private DisplayProp display;
 
 	/** Create a new status op */
-	public OpStatus() {
-		setPolling(false);
+	public OpStatus(VideoMonitorImpl vm) {
+		display = new DisplayProp(vm);
 	}
 
 	/** Poll the controller */
