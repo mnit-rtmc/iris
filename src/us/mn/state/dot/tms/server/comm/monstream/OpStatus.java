@@ -142,13 +142,6 @@ public class OpStatus extends OpStep {
 		setPolling(false);
 	}
 
-	/** Set polling */
-	@Override
-	public void setPolling(boolean p) {
-		// No polling -- just wait for status messages
-		super.setPolling(false);
-	}
-
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
