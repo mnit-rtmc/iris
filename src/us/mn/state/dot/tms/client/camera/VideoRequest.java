@@ -118,8 +118,8 @@ public class VideoRequest {
 
 	/** Name of the software used for the video proxy */
 	private final String video_proxy;
-	private static final String SERVLET_MNDOT = "Servlet_MnDOT";
-	private static final String LIVE555_SRF   = "Live555_SRF";
+	private static final String SERVLET = "Servlet";
+	private static final String LIVE555 = "Live555";
 
 	/** The base URL of the video proxy */
 	private final String base_url;
@@ -134,7 +134,7 @@ public class VideoRequest {
 	public VideoRequest(Properties p, Size sz) {
 		base_url = createBaseUrl(p);
 		district = p.getProperty("district", "tms");
-		video_proxy = p.getProperty(VIDEO_PROXY, SERVLET_MNDOT);
+		video_proxy = p.getProperty(VIDEO_PROXY, SERVLET);
 		size = sz;
 	}
 
@@ -146,6 +146,20 @@ public class VideoRequest {
 	/** Test if a proxy is being used */
 	private boolean useProxy() {
 		return base_url != null;
+	}
+
+	/** Are we using a MnDOT Servlet proxy? */
+	private boolean usingServletProxy() {
+		// If video.host is configured and video.proxy
+		// isn't "Live555", we are using the MnDOT servlet.
+		return useProxy()
+		    && !video_proxy.equalsIgnoreCase(LIVE555);
+	}
+
+	/** Are we using an SRF Live555 proxy? */
+	private boolean usingLive555Proxy() {
+		return useProxy()
+		    && video_proxy.equalsIgnoreCase(LIVE555);
 	}
 
 	/** Get camera name modified for use in
@@ -173,12 +187,12 @@ public class VideoRequest {
 	
 	/** Create a video proxy URI */
 	private URI getProxyUri(Camera cam) {
-		// Using a Live555_SRF video proxy?
-		if (video_proxy.equalsIgnoreCase(LIVE555_SRF)) {
+		// Are we using an SRF Live555 video proxy?
+		if (usingLive555Proxy()) {
 			return create(RTSP, base_url +
 		                        "/" + getLive555CamName(cam));
 		}
-		// No, we're using a Servlet_MnDOT video proxy...
+		// No, we're using a MnDOT Servlet video proxy.
 		return create(HTTP, base_url +
 		                    "/video/" + servlet_type.servlet +
 		                    "/" + district +
@@ -223,7 +237,7 @@ public class VideoRequest {
 	/** Get the encoding for a camera */
 	private Encoding getEncoding(Camera c) {
 		Encoding enc = getEncoding(c.getEncoderType());
-		if (enc != Encoding.UNKNOWN && useProxy())
+		if (usingServletProxy() && (enc != Encoding.UNKNOWN))
 			return Encoding.MJPEG;
 		else
 			return enc;
