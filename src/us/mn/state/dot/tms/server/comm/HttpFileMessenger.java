@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -101,8 +101,10 @@ public class HttpFileMessenger extends Messenger {
 		c.setReadTimeout(timeout);
 		if (c instanceof HttpURLConnection) {
 			HttpURLConnection hc = (HttpURLConnection) c;
-			if (hc.getResponseCode() == HTTP_UNAUTHORIZED)
-				throw new ControllerException("UNAUTHORIZED");
+			if (hc.getResponseCode() == HTTP_UNAUTHORIZED) {
+				throw new ControllerException("UNAUTHORIZED: " +
+					HTTP_UNAUTHORIZED);
+			}
 		}
 		return c.getInputStream();
 	}
