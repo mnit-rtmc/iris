@@ -194,7 +194,7 @@ public class MonStatusProp extends PelcoPProp {
 	protected void selectCamera(CameraImpl c, String src) {
 		assert(c != null);
 		stopCamControl();
-		VideoMonitorImpl.setCameraNotify(getMonNumber(), c, src);
+		VideoMonitorImpl.setCamMirrored(getMonNumber(), c, src);
 	}
 
 	/** Stop camera control on selected camera */

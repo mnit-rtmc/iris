@@ -51,9 +51,8 @@ public class CamNextProp extends MonStatusProp {
 		VideoMonitorImpl vm = findVideoMonitor();
 		if (vm != null) {
 			stopCamControl();
-			if (vm.selectNextCam(op.getId()))
-				return;
-		}
-		setErrMsg(ErrorMsg.CamNotPresent);
+			vm.selectNextCam(op.getId());
+		} else
+			setErrMsg(ErrorMsg.CamNotPresent);
 	}
 }

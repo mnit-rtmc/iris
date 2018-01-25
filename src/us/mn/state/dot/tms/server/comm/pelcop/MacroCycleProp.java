@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,11 +46,11 @@ public class MacroCycleProp extends MonStatusProp {
 		int dir = parse8(rx_buf);
 		switch (dir) {
 		case DIR_NEXT:
-			if (nextPlayList())
+			if (nextPlayList(op))
 				return;
 			break;
 		case DIR_PREV:
-			if (prevPlayList())
+			if (prevPlayList(op))
 				return;
 			break;
 		default:
@@ -60,15 +60,21 @@ public class MacroCycleProp extends MonStatusProp {
 	}
 
 	/** Go to the next item in play list */
-	private boolean nextPlayList() {
+	private boolean nextPlayList(Operation op) {
 		VideoMonitorImpl vm = findVideoMonitor();
-		return (vm != null) && vm.nextPlayList();
+		boolean pl = (vm != null) && (vm.getPlayList() != null);
+		if (pl)
+			vm.selectNextCam(op.getId());
+		return pl;
 	}
 
 	/** Go to the previous item in play list */
-	private boolean prevPlayList() {
+	private boolean prevPlayList(Operation op) {
 		VideoMonitorImpl vm = findVideoMonitor();
-		return (vm != null) && vm.prevPlayList();
+		boolean pl = (vm != null) && (vm.getPlayList() != null);
+		if (pl)
+			vm.selectPrevCam(op.getId());
+		return pl;
 	}
 
 	/** Get the mode bits */

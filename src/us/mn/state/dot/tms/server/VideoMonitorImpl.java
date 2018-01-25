@@ -165,26 +165,38 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		return (c instanceof CameraImpl) ? (CameraImpl) c : null;
 	}
 
-	/** Set camera on all video monitors with a given number */
-	static public void setCameraNotify(int mn, CameraImpl c, String src) {
-		setCameraNotify(null, mn, c, src);
-	}
-
 	/** Set camera on all video monitors with a given number.
-	 * @param svm Video monitor to skip.
 	 * @param mn Monitor number.
 	 * @param c Camera to display.
 	 * @param src Source of command. */
-	static private void setCameraNotify(VideoMonitorImpl svm, int mn,
-		CameraImpl c, String src)
+	static public void setCamMirrored(final int mn, final CameraImpl c,
+		final String src)
+	{
+		if (mn > 0) {
+			CAM_SWITCH.addJob(new Job() {
+				@Override
+				public void perform() throws TMSException {
+					doSetCamMirrored(mn, c, src, true);
+				}
+			});
+		}
+	}
+
+	/** Set camera on all video monitors with a given number.
+	 * @param mn Monitor number.
+	 * @param c Camera to display.
+	 * @param src Source of command.
+	 * @param select Was source a new camera selection. */
+	static private void doSetCamMirrored(int mn, CameraImpl c, String src,
+		boolean select) throws TMSException
 	{
 		Iterator<VideoMonitor> it = VideoMonitorHelper.iterator();
 		while (it.hasNext()) {
 			VideoMonitor m = it.next();
-			if (svm != m && (m instanceof VideoMonitorImpl)) {
+			if (m instanceof VideoMonitorImpl) {
 				VideoMonitorImpl vm = (VideoMonitorImpl) m;
 				if (vm.getMonNum() == mn)
-					vm.setCameraNotify(c, src, true);
+					vm.setCamNotify(c, src, select);
 			}
 		}
 	}
@@ -323,7 +335,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Blank restricted monitor */
 	private void blankRestricted() {
 		if (getRestricted() && !isCameraPublished(getCamera()))
-			setCameraNotify(null, "RESTRICTED", false);
+			setCamSrc(null, "RESTRICTED", false);
 	}
 
 	/** Get flag to restrict publishing camera images */
@@ -365,34 +377,56 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Set the camera displayed on the monitor */
-	public void doSetCamera(Camera c) throws TMSException {
-		setCamSrc(toCameraImpl(c), getProcUser());
+	public void doSetCamera(Camera c) {
+		setCamSrc(toCameraImpl(c), getProcUser(), true);
 	}
 
-	/** Set the camera displayed on the monitor.
-	 * @param c Camera to display.
-	 * @param src Source of request. */
-	private void setCameraSrc(Camera c, String src) throws TMSException {
-		setCamSrc(toCameraImpl(c), src);
-	}
-
-	/** Set the camera displayed on the monitor.
-	 * @param c Camera to display.
-	 * @param src Source of request. */
-	private void setCamSrc(CameraImpl c, String src) throws TMSException {
-		if (doSetCam(c, src, true)) {
-			// Switch all other monitors with same mon_num
-			if (mon_num > 0)
-				setCameraNotify(this, mon_num, c, src);
+	/** Set camera already displayed (without selecting) */
+	public void setCamNoSelect(Camera c, final String src) {
+		if (c instanceof CameraImpl) {
+			final CameraImpl ci = (CameraImpl) c;
+			CAM_SWITCH.addJob(new Job() {
+				@Override
+				public void perform() throws TMSException {
+					setCamNotify(ci, src, false);
+				}
+			});
 		}
 	}
 
-	/** Set the camera displayed on the monitor.
+	/** Set the camera displayed on the monitor (with mirroring).
 	 * @param c Camera to display.
 	 * @param src Source of request.
-	 * @param select Was source a new camera selection.
-	 * @return true if switch was permitted. */
-	private boolean doSetCam(CameraImpl c, String src, boolean select)
+	 * @param select Was source a new camera selection. */
+	private void setCamSrc(final CameraImpl c, final String src,
+		final boolean select)
+	{
+		CAM_SWITCH.addJob(new Job() {
+			@Override
+			public void perform() throws TMSException {
+				doSetCamSrc(c, src, select);
+			}
+		});
+	}
+
+	/** Set the camera displayed on the monitor (with mirroring).
+	 * @param c Camera to display.
+	 * @param src Source of request.
+	 * @param select Was source a new camera selection. */
+	private void doSetCamSrc(CameraImpl c, String src, boolean select)
+		throws TMSException
+	{
+		if (mon_num > 0)
+			doSetCamMirrored(mon_num, c, src, select);
+		else
+			setCamNotify(c, src, select);
+	}
+
+	/** Set the camera and notify clients of the change.
+	 * @param c Camera to display.
+	 * @param src Source of request.
+	 * @param select Was source a new camera selection. */
+	private void setCamNotify(CameraImpl c, String src, boolean select)
 		throws TMSException
 	{
 		boolean r = restricted && !isCameraPublished(c);
@@ -407,22 +441,8 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 			setCamera(c);
 			if (select || r)
 				selectCamera(c, src);
+			notifyAttribute("camera");
 		}
-		return !r;
-	}
-
-	/** Set the camera and notify clients of the change */
-	public void setCameraNotify(final CameraImpl c, final String src,
-		final boolean select)
-	{
-		CAM_SWITCH.addJob(new Job() {
-			@Override public void perform() throws TMSException {
-				Camera oc = camera;
-				doSetCam(c, src, select);
-				if (camera != oc)
-					notifyAttribute("camera");
-			}
-		});
 	}
 
 	/** Get the camera displayed on the monitor */
@@ -470,16 +490,21 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Select the next (non-playlist) camera */
-	private boolean nextCam(String src) {
+	private void nextCam(String src) throws TMSException {
 		CameraImpl c = findNextOrFirst();
 		if (c != null)
-			setCameraNotify(c, "NEXT " + src, true);
-		return (c != null);
+			doSetCamSrc(c, "NEXT " + src, true);
 	}
 
 	/** Select the next camera (playlist or global) */
-	public boolean selectNextCam(String src) {
-		return nextPlayList() || nextCam(src);
+	public void selectNextCam(final String src) {
+		CAM_SWITCH.addJob(new Job() {
+			@Override
+			public void perform() throws TMSException {
+				if (!nextPlayList())
+					nextCam(src);
+			}
+		});
 	}
 
 	/** Find previous (or last) camera */
@@ -496,16 +521,21 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Select the previous (non-playlist) camera */
-	private boolean prevCam(String src) {
+	private void prevCam(String src) throws TMSException {
 		CameraImpl c = findPrevOrLast();
 		if (c != null)
-			setCameraNotify(c, "PREV " + src, true);
-		return (c != null);
+			doSetCamSrc(c, "PREV " + src, true);
 	}
 
 	/** Select the previous camera (playlist or global) */
-	public boolean selectPrevCam(String src) {
-		return prevPlayList() || prevCam(src);
+	public void selectPrevCam(final String src) {
+		CAM_SWITCH.addJob(new Job() {
+			@Override
+			public void perform() throws TMSException {
+				if (!prevPlayList())
+					prevCam(src);
+			}
+		});
 	}
 
 	/** Perform a periodic poll */
@@ -558,7 +588,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Go to next item in play list */
-	public boolean nextPlayList() {
+	private boolean nextPlayList() throws TMSException {
 		PlayListState pls = getPlayListState();
 		if (pls != null)
 			setCamPlayList(pls.goNextItem());
@@ -566,7 +596,7 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Go to previous item in play list */
-	public boolean prevPlayList() {
+	private boolean prevPlayList() throws TMSException {
 		PlayListState pls = getPlayListState();
 		if (pls != null)
 			setCamPlayList(pls.goPrevItem());
@@ -574,12 +604,11 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	}
 
 	/** Set camera from a play list */
-	private void setCamPlayList(final Camera c) {
-		CAM_SWITCH.addJob(new Job() {
-			@Override public void perform() throws TMSException {
-				setCameraSrc(c, PlayList.SONAR_TYPE);
-			}
-		});
+	private void setCamPlayList(Camera c) throws TMSException {
+		if (c instanceof CameraImpl) {
+			CameraImpl cam = (CameraImpl) c;
+			doSetCamSrc(cam, PlayList.SONAR_TYPE, true);
+		}
 	}
 
 	/** Job for updating play list state */
@@ -591,13 +620,10 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		}
 		@Override
 		public void perform() throws TMSException {
-			if (pls == getPlayListState() && isActive()) {
-				Camera c = pls.updateDwell();
-				if (c != null)
-					setCameraSrc(c, PlayList.SONAR_TYPE);
-			} else {
+			if (pls == getPlayListState() && isActive())
+				setCamPlayList(pls.updateDwell());
+			else
 				CAM_SWITCH.removeJob(this);
-			}
 		}
 	}
 }

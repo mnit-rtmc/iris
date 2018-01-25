@@ -468,7 +468,7 @@ public class KeyboardState {
 		if (vm != null) {
 			int mn = vm.getMonNum();
 			stopCamControl();
-			VideoMonitorImpl.setCameraNotify(mn, c, src);
+			VideoMonitorImpl.setCamMirrored(mn, c, src);
 		} else
 			beepInvalid();
 	}
@@ -486,10 +486,9 @@ public class KeyboardState {
 		if (vm instanceof VideoMonitorImpl) {
 			VideoMonitorImpl vmi = (VideoMonitorImpl) vm;
 			stopCamControl();
-			if (vmi.selectPrevCam(host))
-				return;
-		}
-		beepInvalid();
+			vmi.selectPrevCam(host);
+		} else
+			beepInvalid();
 	}
 
 	/** Select next camera on a video monitor */
@@ -498,10 +497,9 @@ public class KeyboardState {
 		if (vm instanceof VideoMonitorImpl) {
 			VideoMonitorImpl vmi = (VideoMonitorImpl) vm;
 			stopCamControl();
-			if (vmi.selectNextCam(host))
-				return;
-		}
-		beepInvalid();
+			vmi.selectNextCam(host);
+		} else
+			beepInvalid();
 	}
 
 	/** Handle a preset key */

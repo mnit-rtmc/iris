@@ -233,7 +233,7 @@ public class OpStatus extends OpStep {
 	{
 		VideoMonitorImpl vm = parseMonNum(ctrl, mon);
 		CameraImpl c = parseCam(cam);
-		vm.setCameraNotify(c, "MONSTREAM", false);
+		vm.setCamNoSelect(c, "STATUS " + ctrl);
 		c.setVideoLossNotify(stat.length() > 0);
 	}
 
@@ -260,7 +260,7 @@ public class OpStatus extends OpStep {
 		int mn = vm.getMonNum();
 		// FIXME: only needed if we're controlling camera
 		c.sendPTZ(0, 0, 0);
-		VideoMonitorImpl.setCameraNotify(mn, c, "SEL " + ctrl);
+		VideoMonitorImpl.setCamMirrored(mn, c, "SEL " + ctrl);
 	}
 
 	/** Parse next message */
