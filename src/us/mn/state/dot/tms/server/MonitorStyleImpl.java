@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, MonitorStyleImpl.class);
 		store.query("SELECT name, force_aspect, accent, font_sz, " +
-			"title_bar FROM iris." + SONAR_TYPE + ";",
+			"title_bar, hgap, vgap FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -50,6 +50,8 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 		map.put("accent", accent);
 		map.put("font_sz", font_sz);
 		map.put("title_bar", title_bar);
+		map.put("hgap", hgap);
+		map.put("vgap", vgap);
 		return map;
 	}
 
@@ -80,19 +82,23 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 		     row.getBoolean(2),		// force_aspect
 		     row.getString(3),		// accent
 		     row.getInt(4),		// font_sz
-		     row.getBoolean(5)		// title_bar
+		     row.getBoolean(5),		// title_bar
+		     row.getInt(6),		// hgap
+		     row.getInt(7)		// vgap
 		);
 	}
 
 	/** Create a new monitor style */
 	private MonitorStyleImpl(String n, boolean fa, String a, int fs,
-		boolean tb)
+		boolean tb, int hg, int vg)
 	{
 		this(n);
 		force_aspect = fa;
 		accent = a;
 		font_sz = fs;
 		title_bar = tb;
+		hgap = hg;
+		vgap = vg;
 	}
 
 	/** Force-aspect ratio flag */
@@ -185,5 +191,51 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 	@Override
 	public boolean getTitleBar() {
 		return title_bar;
+	}
+
+	/** Horizontal gap */
+	private int hgap;
+
+	/** Set the horizontal gap */
+	@Override
+	public void setHGap(int g) {
+		hgap = g;
+	}
+
+	/** Set the horizontal gap */
+	public void doSetHGap(int g) throws TMSException {
+		if (g != hgap) {
+			store.update(this, "hgap", g);
+			setHGap(g);
+		}
+	}
+
+	/** Get the horizontal gap */
+	@Override
+	public int getHGap() {
+		return hgap;
+	}
+
+	/** Vertical gap */
+	private int vgap;
+
+	/** Set the vertical gap */
+	@Override
+	public void setVGap(int g) {
+		vgap = g;
+	}
+
+	/** Set the vertical gap */
+	public void doSetVGap(int g) throws TMSException {
+		if (g != vgap) {
+			store.update(this, "vgap", g);
+			setVGap(g);
+		}
+	}
+
+	/** Get the vertical gap */
+	@Override
+	public int getVGap() {
+		return vgap;
 	}
 }

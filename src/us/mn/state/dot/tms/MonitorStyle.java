@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -55,4 +55,16 @@ public interface MonitorStyle extends SonarObject {
 
 	/** Get title-bar flag */
 	boolean getTitleBar();
+
+	/** Set the horizontal gap */
+	void setHGap(int g);
+
+	/** Get the horizontal gap */
+	int getHGap();
+
+	/** Set the vertical gap */
+	void setVGap(int g);
+
+	/** Get the vertical gap */
+	int getVGap();
 }

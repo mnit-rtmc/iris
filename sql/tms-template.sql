@@ -801,7 +801,9 @@ CREATE TABLE iris.monitor_style (
 	force_aspect BOOLEAN NOT NULL,
 	accent VARCHAR(8) NOT NULL,
 	font_sz INTEGER NOT NULL,
-	title_bar BOOLEAN NOT NULL
+	title_bar BOOLEAN NOT NULL,
+	hgap INTEGER NOT NULL,
+	vgap INTEGER NOT NULL
 );
 
 CREATE TABLE iris._video_monitor (
@@ -2293,7 +2295,7 @@ CREATE VIEW ramp_meter_view AS
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE VIEW monitor_style_view AS
-	SELECT name, force_aspect, accent, font_sz, title_bar
+	SELECT name, force_aspect, accent, font_sz, title_bar, hgap, vgap
 	FROM iris.monitor_style;
 GRANT SELECT ON monitor_style_view TO PUBLIC;
 

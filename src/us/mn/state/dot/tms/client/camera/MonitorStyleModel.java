@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ public class MonitorStyleModel extends ProxyTableModel<MonitorStyle> {
 	@Override
 	protected ArrayList<ProxyColumn<MonitorStyle>> createColumns() {
 		ArrayList<ProxyColumn<MonitorStyle>> cols =
-			new ArrayList<ProxyColumn<MonitorStyle>>(4);
+			new ArrayList<ProxyColumn<MonitorStyle>>(7);
 		cols.add(new ProxyColumn<MonitorStyle>("monitor.style",
 			120)
 		{
@@ -99,6 +99,34 @@ public class MonitorStyleModel extends ProxyTableModel<MonitorStyle> {
 			public void setValueAt(MonitorStyle ms, Object value) {
 				if (value instanceof Boolean)
 					ms.setTitleBar((Boolean) value);
+			}
+		});
+		cols.add(new ProxyColumn<MonitorStyle>("monitor.hgap", 90,
+			Integer.class)
+		{
+			public Object getValueAt(MonitorStyle ms) {
+				return ms.getHGap();
+			}
+			public boolean isEditable(MonitorStyle ms) {
+				return canWrite(ms, "hGap");
+			}
+			public void setValueAt(MonitorStyle ms, Object value) {
+				if (value instanceof Integer)
+					ms.setHGap((Integer) value);
+			}
+		});
+		cols.add(new ProxyColumn<MonitorStyle>("monitor.vgap", 90,
+			Integer.class)
+		{
+			public Object getValueAt(MonitorStyle ms) {
+				return ms.getVGap();
+			}
+			public boolean isEditable(MonitorStyle ms) {
+				return canWrite(ms, "vGap");
+			}
+			public void setValueAt(MonitorStyle ms, Object value) {
+				if (value instanceof Integer)
+					ms.setVGap((Integer) value);
 			}
 		});
 		return cols;
