@@ -294,11 +294,18 @@ public class OpStatus extends OpStep {
 	private void parseSequence(ControllerImpl ctrl, VideoMonitorImpl vm,
 		String seq) throws InvalidReqException
 	{
-		PlayList pl = PlayListHelper.findNum(seq);
-		if (pl != null)
-			vm.setPlayList(pl);
-		else
-			throw new InvalidReqException();
+		if ("pause".equals(seq)) {
+			if (vm.isPlayListRunning())
+				vm.pausePlayList();
+			else
+				vm.unpausePlayList();
+		} else {
+			PlayList pl = PlayListHelper.findNum(seq);
+			if (pl != null)
+				vm.setPlayList(pl);
+			else
+				throw new InvalidReqException();
+		}
 	}
 
 	/** Parse ptz message */
