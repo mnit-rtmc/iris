@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,6 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.BasePoller;
 import us.mn.state.dot.tms.server.comm.CamKeyboardPoller;
 import us.mn.state.dot.tms.server.comm.Operation;
-import us.mn.state.dot.tms.server.comm.OpStep;
-import static us.mn.state.dot.tms.server.comm.PriorityLevel.COMMAND;
 import static us.mn.state.dot.tms.server.comm.PriorityLevel.DEVICE_DATA;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
@@ -35,13 +33,6 @@ public class PelcoPPoller extends BasePoller implements CamKeyboardPoller {
 	/** Create a new Pelco P poller */
 	public PelcoPPoller(String n) {
 		super(n, TCP, true);
-	}
-
-	/** Create an operation */
-	private void createOp(String n, ControllerImpl c, OpStep s) {
-		Operation op = new Operation(n, c, s);
-		op.setPriority(COMMAND);
-		addOp(op);
 	}
 
 	/** Create a listen operation */
