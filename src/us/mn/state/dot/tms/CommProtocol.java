@@ -60,8 +60,8 @@ public enum CommProtocol {
 	/** NTCIP Class A (11) */
 	NTCIP_A("NTCIP Class A", false),
 
-	/** Pelco video matrix switcher (OBSOLETE) (12) */
-	PELCO_SWITCHER("Pelco (OBSOLETE)", false),
+	/** Banner DXM (12) */
+	BANNER_DXM("Banner DXM", false),
 
 	/** Vicon camera control (13) */
 	VICON_PTZ("Vicon PTZ"),

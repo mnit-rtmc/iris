@@ -445,6 +445,28 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return null;
 	}
 
+	/** Get first detector pin */
+	public synchronized int getDetectorPinFirst() {
+		int p = Integer.MAX_VALUE;
+		for (Integer pin: io_pins.keySet()) {
+			ControllerIO io = io_pins.get(pin);
+			if (io instanceof DetectorImpl)
+				p = Integer.min(p, pin);
+		}
+		return (p < Integer.MAX_VALUE) ? p : -1;
+	}
+
+	/** Get last detector pin */
+	public synchronized int getDetectorPinLast() {
+		int p = Integer.MIN_VALUE;
+		for (Integer pin: io_pins.keySet()) {
+			ControllerIO io = io_pins.get(pin);
+			if (io instanceof DetectorImpl)
+				p = Integer.max(p, pin);
+		}
+		return (p > Integer.MIN_VALUE) ? p : -1;
+	}
+
 	/** Check whether this controller has any active detectors */
 	public synchronized boolean hasActiveDetector() {
 		if (isActive()) {
