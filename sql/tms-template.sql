@@ -2718,6 +2718,7 @@ COPY iris.lane_type (id, description, dcode) FROM stdin;
 14	HOV	H
 15	HOT	HT
 16	Shoulder	D
+17	Parking	PK
 \.
 
 COPY iris.dms_type (id, description) FROM stdin;

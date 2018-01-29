@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 import static us.mn.state.dot.tms.units.Interval.Units.HOURS;
+import static us.mn.state.dot.tms.units.Interval.Units.WEEKS;
 
 /**
  * Road lane type enumeration.   The ordinal values correspond to the records
@@ -83,7 +84,11 @@ public enum LaneType {
 
 	/** Dynamic shoulder lane type (16) */
 	SHOULDER("Shoulder", "D", new Interval(72, HOURS), new Interval(3,
-		MINUTES));
+		MINUTES)),
+
+	/** Parking lane type (17) */
+	PARKING("Parking", "PK", new Interval(2, WEEKS), new Interval(2,
+		WEEKS));
 
 	/** Create a new lane type */
 	private LaneType(String d, String s, Interval nht, Interval lot) {
