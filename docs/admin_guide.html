@@ -749,7 +749,7 @@ systemctl status iris</pre>
 
 <h4>Get planet file</h4>
 <p>
-	Download the latest planet file (about 32GB).
+	Download the latest planet file (~64GB as of 01/2018).
 <pre class="code">wget http://planet.openstreetmap.org/planet/planet-latest.osm.bz2</pre>
 </p>
 
@@ -780,6 +780,9 @@ vim /var/lib/pgsql/data/postgresql.conf
 	temp_buffers = 128MB
 	maintenance_work_mem = 4GB
 service postgresql restart
+
+# Import spatial ref systems
+psql -d gis -f  /usr/share/pgsql/contrib/postgis-2.1/spatial_ref_sys.sql
 </pre>
 </p>
 
@@ -802,14 +805,15 @@ sudo make install
 
 <h4>Import OSM planet file into PostGIS</h4>
 <p>
-	This process takes a long time (around 30 hours). See performance comparisons
+	This process takes a long time (~96h with a final database 
+	size ~340G). See performance comparisons
 	<a href="http://wiki.openstreetmap.org/wiki/Osm2pgsql/benchmarks">here</a>.
 	Determine the bounding box for the region of interest. For Minnesota it
 	is: -97.5, 43.0, -89.0, 49.5.
 </p>
 <pre class="code">
 su - postgres
-osm2pgsql -v --number-processes=16 -d gis -s --bbox -97.5, 43.0, -89.0, 49.5 planet-140522.osm.bz2
+time osm2pgsql -v --number-processes=16 -d gis -s --bbox -97.5, 43.0, -89.0, 49.5 planet-140522.osm.bz2
 </pre>
 
 
@@ -901,6 +905,7 @@ unzip ne_110m_admin_0_boundary_lines_land.zip  -d world_boundaries
 <pre class="code">
 cd ~/osm/mapnik/
 cp osm.xml iris_osm.xml
+# these patches are optional
 patch -p0 &lt; ../01_drop_junc_power_layers.patch
 patch -p0 &lt; ../02_interstate_shields.patch
 patch -p0 &lt; ../03_trunk_shields.patch
@@ -934,7 +939,7 @@ vim generate_tiles_multiprocess.py
 	minZoom = 6
 	maxZoom = 16
 	# comment all of the european cities listed
-timer ./generate_tiles_multiprocess.py
+time ./generate_tiles_multiprocess.py
 # Copy tiles to server hosting them
 scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 </pre>
