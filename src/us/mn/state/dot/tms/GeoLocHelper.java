@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,6 +116,15 @@ public class GeoLocHelper extends BaseHelper {
 		return (l != null)
 		      ? LocModifier.fromOrdinal(l.getCrossMod()).description
 		      : null;
+	}
+
+	/** Get cross street or landmark label */
+	static public String getCrossOrLandmark(GeoLoc l) {
+		String xd = getCrossDescription(l);
+		if (xd != null)
+			return xd;
+		else
+			return getLandmark(l);
 	}
 
 	/** Get the location landmark */

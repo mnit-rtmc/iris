@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -167,10 +167,10 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 		drawSkipStripes(g2, height);
 		drawDetectors(g2, height);
 		drawSpeedLimit(g2, height);
-		String xStreet = GeoLocHelper.getCrossDescription(
+		String xorl = GeoLocHelper.getCrossOrLandmark(
 			r_node.getGeoLoc());
-		if (xStreet != null)
-			drawCrossStreet(g2, xStreet, width, height);
+		if (xorl != null)
+			drawCrossOrLandmark(g2, xorl, width, height);
 		if (selected)
 			drawShiftHandle(g2, height);
 	}
@@ -490,12 +490,12 @@ public class R_NodeCellRenderer extends DefaultListCellRenderer {
 		}
 	}
 
-	/** Draw the cross-street label */
-	private void drawCrossStreet(Graphics2D g, String xStreet, int width,
+	/** Draw the cross-street or landmark label */
+	private void drawCrossOrLandmark(Graphics2D g, String xorl, int width,
 		int height)
 	{
 		GlyphVector gv = FONT_XSTREET.createGlyphVector(
-			g.getFontRenderContext(), xStreet);
+			g.getFontRenderContext(), xorl);
 		Rectangle2D rect = gv.getVisualBounds();
 		int x = width - (int) rect.getWidth() - UI.hgap * 2;
 		int y = (height + (int) rect.getHeight()) / 2;
