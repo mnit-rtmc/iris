@@ -19,7 +19,6 @@ import java.io.Writer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.PrecipSituation;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.WeatherSensorHelper;
