@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -38,6 +38,7 @@ import us.mn.state.dot.tms.client.map.MapModel;
 import us.mn.state.dot.tms.client.map.TileLayer;
 import us.mn.state.dot.tms.client.marking.LaneMarkingManager;
 import us.mn.state.dot.tms.client.meter.MeterManager;
+import us.mn.state.dot.tms.client.parking.ParkingAreaManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
@@ -175,6 +176,7 @@ public class Session {
 		managers.add(new BeaconManager(this, loc_manager));
 		managers.add(new TagReaderManager(this, loc_manager));
 		managers.add(new WeatherSensorManager(this, loc_manager));
+		managers.add(new ParkingAreaManager(this, loc_manager));
 		managers.add(new IncidentManager(this, loc_manager));
 		managers.add(new PlanManager(this, loc_manager));
 		tile_layer = createTileLayer(props.getProperty("map.tile.url"));

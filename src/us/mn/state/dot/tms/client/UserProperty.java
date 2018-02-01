@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2016  Minnesota Department of Transportation
+ * Copyright (C) 2012-2018  Minnesota Department of Transportation
  * Copyright (C) 2010-2014  AHMCT, University of California
  * Copyright (C) 2017       Iteris Inc.
  *
@@ -60,8 +60,9 @@ public enum UserProperty {
 
 	/** Default values for use with unspecified properties */
 	static private final String TAB_LIST_DEF
-		= "incident, dms, camera, lcs, ramp.meter, gate.arm, r_node, "
-		+ "beacon, tag.reader, action.plan, comm, weather_sensor";
+		= "incident, dms, camera, lcs, ramp.meter, gate.arm, "
+		+ "parking.area, r_node, beacon, tag.reader, action.plan, "
+		+ "comm, weather_sensor";
 
 	/** Get the directory to store user properties */
 	static private File getDir() {

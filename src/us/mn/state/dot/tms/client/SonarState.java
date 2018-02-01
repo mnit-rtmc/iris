@@ -47,6 +47,7 @@ import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneMarking;
 import us.mn.state.dot.tms.MapExtent;
 import us.mn.state.dot.tms.MeterAction;
+import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
@@ -322,6 +323,15 @@ public class SonarState extends Client {
 		return gate_arms;
 	}
 
+	/** Cache of parking areas */
+	private final TypeCache<ParkingArea> parking_areas =
+		new TypeCache<ParkingArea>(ParkingArea.class, this);
+
+	/** Get the parking area cache */
+	public TypeCache<ParkingArea> getParkingAreas() {
+		return parking_areas;
+	}
+
 	/** Cache of day matcher proxies */
 	private final TypeCache<DayMatcher> day_matchers =
 		new TypeCache<DayMatcher>(DayMatcher.class, this);
@@ -555,6 +565,7 @@ public class SonarState extends Client {
 		populateReadable(gate_arms);
 		if (canRead(GateArm.SONAR_TYPE))
 			gate_arms.ignoreAttribute("operation");
+		populateReadable(parking_areas);
 		populateReadable(day_matchers);
 		populateReadable(day_plans);
 		populateReadable(plan_phases);
