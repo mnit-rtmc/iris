@@ -1612,6 +1612,39 @@ CREATE TRIGGER gate_arm_update_trig
     INSTEAD OF INSERT OR UPDATE OR DELETE ON iris.gate_arm
     FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_update();
 
+CREATE TABLE iris.parking_area (
+	name VARCHAR(20) PRIMARY KEY,
+	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
+	preset_1 VARCHAR(20) REFERENCES iris.camera_preset(name),
+	preset_2 VARCHAR(20) REFERENCES iris.camera_preset(name),
+	preset_3 VARCHAR(20) REFERENCES iris.camera_preset(name),
+	-- static site data
+	site_id VARCHAR(25) UNIQUE,
+	time_stamp_static timestamp WITH time zone,
+	relevant_highway VARCHAR(10),
+	reference_post VARCHAR(10),
+	exit_id VARCHAR(10),
+	facility_name VARCHAR(30),
+	street_adr VARCHAR(30),
+	city VARCHAR(30),
+	state VARCHAR(2),
+	zip VARCHAR(10),
+	time_zone VARCHAR(10),
+	ownership VARCHAR(2),
+	capacity INTEGER,
+	low_threshold INTEGER,
+	amenities VARCHAR(30),
+	-- dynamic site data
+	time_stamp timestamp WITH time zone,
+	reported_available VARCHAR(8),
+	true_available INTEGER,
+	trend VARCHAR(8),
+	open BOOLEAN,
+	trust_data BOOLEAN,
+	last_verification_check timestamp WITH time zone,
+	verification_check_amplitude INTEGER
+);
+
 CREATE TABLE iris.dms_sign_group (
 	name VARCHAR(28) PRIMARY KEY,
 	dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
@@ -2943,6 +2976,8 @@ sensor_control	t
 sensor_tab	t
 toll_admin	t
 toll_tab	t
+parking_admin	t
+parking_tab	t
 \.
 
 COPY iris.sonar_type (name) FROM stdin;
@@ -2987,6 +3022,7 @@ map_extent
 meter_action
 modem
 monitor_style
+parking_area
 plan_phase
 play_list
 privilege
@@ -3162,6 +3198,8 @@ PRV_0146	toll_admin	tag_reader		t
 PRV_0147	toll_admin	toll_zone		t
 PRV_0148	toll_tab	tag_reader		f
 PRV_0149	toll_tab	toll_zone		f
+PRV_0150	parking_admin	parking_area		t
+PRV_0151	parking_tab	parking_area		f
 \.
 
 COPY iris.privilege (name, capability, type_n, group_n, write) FROM stdin;
@@ -3211,6 +3249,8 @@ administrator	sensor_control
 administrator	sensor_tab
 administrator	toll_admin
 administrator	toll_tab
+administrator	parking_admin
+administrator	parking_tab
 operator	base
 operator	beacon_control
 operator	beacon_tab
