@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  * Copyright (C) 2014  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,24 +18,15 @@ package us.mn.state.dot.tms.client.camera;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.util.Iterator;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JToggleButton;
-import us.mn.state.dot.tms.Beacon;
-import us.mn.state.dot.tms.BeaconHelper;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.CameraPresetHelper;
 import static us.mn.state.dot.tms.CameraPreset.MAX_PRESET;
-import us.mn.state.dot.tms.Device;
-import us.mn.state.dot.tms.Direction;
-import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.RampMeter;
-import us.mn.state.dot.tms.RampMeterHelper;
 import us.mn.state.dot.tms.client.widget.Icons;
 import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -240,68 +231,8 @@ public class PresetPanel extends JPanel {
 		if (c != null) {
 			CameraPreset cp = CameraPresetHelper.lookup(c, pn);
 			if (cp != null)
-				return presetText(cp);
+				return CameraPresetHelper.lookupText(cp);
 		}
-		return "<html><font color=#aaaaaa>" + Integer.toString(pn) +
-			"</html>";
-	}
-
-	/** Get preset button text */
-	private String presetText(CameraPreset cp) {
-		Device d = devicePreset(cp);
-		if (d != null)
-			return d.getName();
-		Direction dir = Direction.fromOrdinal(cp.getDirection());
-		if (dir != Direction.UNKNOWN)
-			return dir.det_dir;
-		else
-			return Integer.toString(cp.getPresetNum());
-	}
-
-	/** Get a device associated with a preset */
-	private Device devicePreset(CameraPreset cp) {
-		Device d = beaconPreset(cp);
-		if (d != null)
-			return d;
-		d = dmsPreset(cp);
-		if (d != null)
-			return d;
-		d = meterPreset(cp);
-		if (d != null)
-			return d;
-		return null;
-	}
-
-	/** Get a beacon associated with a preset */
-	private Device beaconPreset(CameraPreset cp) {
-		Iterator<Beacon> it = BeaconHelper.iterator();
-		while (it.hasNext()) {
-			Beacon b = it.next();
-			if (b.getPreset() == cp)
-				return b;
-		}
-		return null;
-	}
-
-	/** Get a DMS associated with a preset */
-	private Device dmsPreset(CameraPreset cp) {
-		Iterator<DMS> it = DMSHelper.iterator();
-		while (it.hasNext()) {
-			DMS d = it.next();
-			if (d.getPreset() == cp)
-				return d;
-		}
-		return null;
-	}
-
-	/** Get a ramp meter associated with a preset */
-	private Device meterPreset(CameraPreset cp) {
-		Iterator<RampMeter> it = RampMeterHelper.iterator();
-		while (it.hasNext()) {
-			RampMeter m = it.next();
-			if (m.getPreset() == cp)
-				return m;
-		}
-		return null;
+		return "<html><font color=#aaaaaa>" + pn + "</html>";
 	}
 }
