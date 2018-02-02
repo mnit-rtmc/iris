@@ -103,9 +103,9 @@ public class SampleProp extends ControllerProp {
 		byte[] buf = new byte[rx_buf.remaining()];
 		rx_buf.get(buf);
 		String resp = new String(buf, "US-ASCII");
-		String[] par = resp.trim().split(",");
+		String[] par = resp.trim().split(",", 2 + len);
 		if (par.length != 2 + len)
-			throw new ParsingException("Wrong # of parameters");
+			throw new ParsingException("Wrong # of params");
 		int reg = p + SLAVE_MODBUS_BASE_PIN;
 		if (!par[0].equals("RSP0001" + reg))
 			throw new ParsingException("Invalid response code");
