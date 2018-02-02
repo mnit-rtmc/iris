@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -354,6 +354,11 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	@Override
 	public void setDeviceRequest(int r) {
 		sendDeviceRequest(DeviceRequest.fromOrdinal(r));
+	}
+
+	/** Request a device operation */
+	public final void setDeviceReq(DeviceRequest dr) {
+		sendDeviceRequest(dr);
 	}
 
 	/** Send a device request operation */

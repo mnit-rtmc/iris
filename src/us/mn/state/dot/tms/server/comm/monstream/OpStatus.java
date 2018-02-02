@@ -19,6 +19,7 @@ import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.ControllerIO;
+import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -131,6 +132,24 @@ public class OpStatus extends OpStep {
 		}
 	}
 
+	/** Parse a lens device request */
+	static private DeviceRequest parseLensReq(String cmd)
+		throws ParsingException
+	{
+		if ("iris_open".equals(cmd))
+			return DeviceRequest.CAMERA_IRIS_OPEN;
+		else if ("iris_close".equals(cmd))
+			return DeviceRequest.CAMERA_IRIS_CLOSE;
+		else if ("focus_near".equals(cmd))
+			return DeviceRequest.CAMERA_FOCUS_NEAR;
+		else if ("focus_far".equals(cmd))
+			return DeviceRequest.CAMERA_FOCUS_FAR;
+		else if ("wiper".equals(cmd))
+			return DeviceRequest.CAMERA_WIPER_ONESHOT;
+		else
+			throw new ParsingException("INVALID LENS CMD: " + cmd);
+	}
+
 	/** Buffer to parse received data */
 	private final byte[] buf = new byte[2048];
 
@@ -210,6 +229,9 @@ public class OpStatus extends OpStep {
 				break;
 			case "preset":
 				parsePreset(par);
+				break;
+			case "lens":
+				parseLens(par);
 				break;
 			default:
 				throw new ParsingException("INVALID MSG");
@@ -357,6 +379,24 @@ public class OpStatus extends OpStep {
 			else
 				throw new ParsingException("INVALID CMD: "+cmd);
 		}
+	}
+
+	/** Parse lens message */
+	private void parseLens(String[] par) throws IOException {
+		String mon = (par.length > 1) ? par[1] : "";
+		String cam = (par.length > 2) ? par[2] : "";
+		String cmd = (par.length > 3) ? par[3] : "";
+		parseLens(mon, cam, cmd);
+	}
+
+	/** Parse lens message */
+	private void parseLens(String mon, String cam, String cmd)
+		throws IOException
+	{
+		VideoMonitorImpl vm = parseMon(mon);
+		CameraImpl c = parseCam(cam);
+		if (vm.getCamera() == c)
+			c.setDeviceReq(parseLensReq(cmd));
 	}
 
 	/** Get the next step */
