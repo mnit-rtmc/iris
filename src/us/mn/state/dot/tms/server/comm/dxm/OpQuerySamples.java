@@ -29,20 +29,32 @@ public class OpQuerySamples extends OpStep {
 	/** Sample property */
 	private final SampleProp prop;
 
+	/** Flag to do step again */
+	private boolean again;
+
 	/** Create a new query samples operation */
 	public OpQuerySamples(int p) {
 		prop = new SampleProp(p);
+		again = true;
 	}
 
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
 		prop.encodeQuery(op, tx_buf);
+		setPolling(false);
 	}
 
 	/** Parse data received from controller */
 	@Override
 	public void recv(Operation op, ByteBuffer rx_buf) throws IOException {
 		prop.decodeQuery(op, rx_buf);
+		again = false;
+	}
+
+	/** Get the next step */
+	@Override
+	public OpStep next() {
+		return again ? this : null;
 	}
 }
