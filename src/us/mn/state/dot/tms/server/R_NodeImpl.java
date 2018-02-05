@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  * Copyright (C) 2015  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -584,22 +584,30 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
 	/** Add a detector to the r_node */
 	public void addDetector(DetectorImpl det) {
-		detectors.addDetector(det);
+		synchronized (detectors) {
+			detectors.addDetector(det);
+		}
 	}
 
 	/** Remove a detector from the r_node */
 	public void removeDetector(DetectorImpl det) {
-		detectors.removeDetector(det);
+		synchronized (detectors) {
+			detectors.removeDetector(det);
+		}
 	}
 
 	/** Get an array of all node detectors */
 	public DetectorImpl[] getDetectors() {
-		return detectors.toArray();
+		synchronized (detectors) {
+			return detectors.toArray();
+		}
 	}
 
 	/** Get the sampler set */
 	public SamplerSet getSamplerSet() {
-		return detectors.getSamplerSet();
+		synchronized (detectors) {
+			return detectors.getSamplerSet();
+		}
 	}
 
 	/** Downstream roadway nodes */
@@ -723,7 +731,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 				b.append(f.getName() + " ");
 			w.write(b.toString().trim() + "'");
 		}
-		DetectorImpl[] dets = detectors.toArray();
+		DetectorImpl[] dets = getDetectors();
 		if (dets.length > 0 || m_nodes.containsKey(name)) {
 			w.write(">\n");
 			for (DetectorImpl det: dets) {
