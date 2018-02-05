@@ -14,10 +14,14 @@
  */
 package us.mn.state.dot.tms.client.parking;
 
+import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.Box;
+import javax.swing.ButtonGroup;
 import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.ParkingArea;
@@ -64,6 +68,23 @@ public class ParkingAreaDispatcher extends IPanel
 	/** Camera preset 3 stream panel */
 	private final StreamPanel stream_3_pnl;
 
+	/** Available label */
+	private final JLabel available_lbl = createValueLabel();
+
+	/** Trend label */
+	private final JLabel trend_lbl = createValueLabel();
+
+	/** Button group for open/closed state */
+	private final ButtonGroup group = new ButtonGroup();
+
+	/** Parking area open radio button */
+	private final JRadioButton open_btn = new JRadioButton(
+		I18N.get("parking_area.open"));
+
+	/** Parking area closed radio button */
+	private final JRadioButton closed_btn = new JRadioButton(
+		I18N.get("parking_area.closed"));
+
 	/** Proxy watcher */
 	private final ProxyWatcher<ParkingArea> watcher;
 
@@ -102,12 +123,23 @@ public class ParkingAreaDispatcher extends IPanel
 	@Override
 	public void initialize() {
 		super.initialize();
+		group.add(open_btn);
+		group.add(closed_btn);
+		JPanel b_pnl = new JPanel(new GridLayout(1, 2));
+		b_pnl.add(open_btn);
+		b_pnl.add(closed_btn);
 		setTitle(I18N.get("parking_area.selected"));
 		add("device.name");
 		add(name_lbl, Stretch.LAST);
 		add("parking_area.facility");
 		add(facility_lbl, Stretch.LAST);
 		add(createStreamsBox(), Stretch.FULL);
+		add("parking_area.available");
+		add(available_lbl, Stretch.LAST);
+		add("parking_area.trend");
+		add(trend_lbl, Stretch.LAST);
+		add("parking_area.status");
+		add(b_pnl, Stretch.LAST);
 		stream_1_pnl.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -191,6 +223,14 @@ public class ParkingAreaDispatcher extends IPanel
 	/** Set the selected parking area */
 	public void setSelected(ParkingArea pa) {
 		watcher.setProxy(pa);
+		boolean w = isWritePermitted(pa, "open");
+		open_btn.setAction(new OpenCloseAction(pa, true, w));
+		closed_btn.setAction(new OpenCloseAction(pa, false, w));
+	}
+
+	/** Check if the user is permitted to update the given parking area */
+	private boolean isWritePermitted(ParkingArea pa, String a) {
+		return session.isWritePermitted(pa, a);
 	}
 
 	/** Called when all proxies have been enumerated (from ProxyView). */
@@ -213,6 +253,36 @@ public class ParkingAreaDispatcher extends IPanel
 			updateCameraStream2(pa);
 		if (null == a || a.equals("preset3"))
 			updateCameraStream3(pa);
+		if (null == a || a.equals("trueAvailable")) {
+			StringBuilder sb = new StringBuilder();
+			Integer ta = pa.getTrueAvailable();
+			if (ta != null) {
+				sb.append(ta);
+				Integer c = pa.getCapacity();
+				if (c != null) {
+					sb.append(" (of ");
+					sb.append(c);
+					sb.append(")");
+				}
+				Boolean t = pa.getTrustData();
+				if (null == t || !t)
+					sb.append(" no trust");
+			} else
+				sb.append("???");
+			available_lbl.setText(sb.toString());
+		}
+		if (null == a || a.equals("trend"))
+			trend_lbl.setText(pa.getTrend());
+		if (null == a || a.equals("open")) {
+			Boolean o = pa.getOpen();
+			if (o != null) {
+				if (o)
+					open_btn.setSelected(true);
+				else
+					closed_btn.setSelected(true);
+			} else
+				group.clearSelection();
+		}
 	}
 
 	/** Update camera stream */
@@ -242,5 +312,10 @@ public class ParkingAreaDispatcher extends IPanel
 		stream_3_pnl.setCamera(null);
 		name_lbl.setText("");
 		facility_lbl.setText("");
+		available_lbl.setText("");
+		trend_lbl.setText("");
+		group.clearSelection();
+		open_btn.setAction(new OpenCloseAction(null, true, false));
+		closed_btn.setAction(new OpenCloseAction(null, false, false));
 	}
 }
