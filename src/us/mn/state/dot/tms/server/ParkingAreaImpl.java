@@ -26,6 +26,8 @@ import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 
 /**
  * A parking area can report the number of available stalls.
@@ -33,6 +35,16 @@ import us.mn.state.dot.tms.TMSException;
  * @author Douglas Lau
  */
 public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
+
+	/** Sample period (30 seconds) */
+	static private final Interval SAMPLE_PERIOD = new Interval(30);
+
+	/** History period (30 minutes) */
+	static private final Interval HIST_PERIOD = new Interval(30, MINUTES);
+
+	/** Time steps needed for history */
+	static private final int HIST_STEPS =
+		(int) SAMPLE_PERIOD.per(HIST_PERIOD);
 
 	/** Format available parking spaces */
 	static private String formatAvailable(int a, Integer low, Boolean op) {
@@ -42,6 +54,23 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 	/** Format available parking spaces */
 	static private String formatAvailable(int a, Integer low) {
 		return (null == low || a > low) ? Integer.toString(a) : "LOW";
+	}
+
+	/** Calculate available space trend.
+	 * @param a Current available spaces.
+	 * @param p Previous available spaces.
+	 * @param i Previous interval number.
+	 * @param cap Total capacity. */
+	static private String calculateTrend(int a, int p, int i, int cap) {
+		assert cap > 0;
+		float d = (a - p) / cap;
+		float r = d * (i + 1) / HIST_STEPS;
+		if (r >= 0.045f)
+			return "CLEARING";
+		else if (r <= -0.045f)
+			return "FILLING";
+		else
+			return "STEADY";
 	}
 
 	/** Load all the parking areas */
@@ -679,7 +708,7 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 		String ra = formatAvailable(a, low_threshold, open);
 		setReportedAvailableNotify(ra);
 		setTrueAvailableNotify(a);
-		// FIXME trend
+		setTrendNotify(calculateTrend(a));
 		Integer cap = capacity;
 		setTrustDataNotify((cap != null) && (cap == t));
 	}
@@ -703,11 +732,40 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 		return reported_available;
 	}
 
+	/** Available space history for 30 minutes */
+	private transient final BoundedSampleHistory hist =
+		new BoundedSampleHistory(HIST_STEPS);
+
+	/** Calculate available space trend */
+	private String calculateTrend(int a) {
+		int i = getOldestSample();
+		if (i > 0) {
+			Double p = hist.get(i);
+			Integer cap = capacity;
+			if (p != null && cap != null && cap > 0) {
+				double pr = p;
+				return calculateTrend(a, (int) pr, i, cap);
+			}
+		}
+		return null;
+	}
+
+	/** Get the oldest sample number in history */
+	private int getOldestSample() {
+		for (int i = HIST_STEPS - 1; i > 0; i--) {
+			Double a = hist.get(i);
+			if (a != null)
+				return i;
+		}
+		return 0;
+	}
+
 	/** Calculated number of available parking spaces */
 	private Integer true_available;
 
 	/** Set the number of available parking spaces */
 	private void setTrueAvailableNotify(Integer a) throws TMSException {
+		hist.push((a != null) ? (double) a : null);
 		if (!objectEquals(a, true_available)) {
 			store.update(this, "true_available", a);
 			updateTimeStamp();
