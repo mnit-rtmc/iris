@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import static us.mn.state.dot.tms.GeoLocHelper.isSameCorridor;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
@@ -250,6 +251,18 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		default:
 			return false;
 		}
+	}
+
+	/** Check if the r_node is an available parking space.
+	 * @return true If parking space and available.
+	 *         false If parking space and occupied.
+	 *         null If not a parking space or not sampling. */
+	public Boolean getParkingAvailable() {
+		SamplerSet ss = new SamplerSet(getSamplerSet().filter(
+			LaneType.PARKING));
+		return ss.isPerfect()
+		      ? (ss.getMaxOccupancy() == 0)
+		      : null;
 	}
 
 	/** Pickable flag */

@@ -34,6 +34,16 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 
+	/** Format available parking spaces */
+	static private String formatAvailable(int a, Integer low, Boolean op) {
+		return (op != null && op) ? formatAvailable(a, low) : "CLOSED";
+	}
+
+	/** Format available parking spaces */
+	static private String formatAvailable(int a, Integer low) {
+		return (null == low || a > low) ? Integer.toString(a) : "LOW";
+	}
+
 	/** Load all the parking areas */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, ParkingAreaImpl.class);
@@ -565,6 +575,7 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 	public void doSetCapacity(Integer c) throws TMSException {
 		if (!objectEquals(c, capacity)) {
 			store.update(this, "capacity", c);
+			updateTimeStampStatic();
 			setCapacity(c);
 		}
 	}
@@ -588,6 +599,7 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 	public void doSetLowThreshold(Integer t) throws TMSException {
 		if (!objectEquals(t, low_threshold)) {
 			store.update(this, "low_threshold", t);
+			updateTimeStampStatic();
 			setLowThreshold(t);
 		}
 	}
@@ -625,8 +637,65 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 	/** Time stamp of last report */
 	private Long time_stamp;
 
+	/** Update the time stamp */
+	private void updateTimeStamp() throws TMSException {
+		long st = TimeSteward.currentTimeMillis();
+		store.update(this, "time_stamp", asTimestamp(st));
+		time_stamp = st;
+	}
+
+	/** Update the available parking spaces */
+	public void updateAvailable() throws TMSException {
+		Corridor c = corridors.getCorridor(geo_loc);
+		if (c != null)
+			updateAvailable(c);
+		else {
+			setReportedAvailableNotify(null);
+			setTrueAvailableNotify(null);
+			setTrendNotify(null);
+			setTrustDataNotify(null);
+		}
+	}
+
+	/** Update the available parking spaces */
+	private void updateAvailable(Corridor c) throws TMSException {
+		int t = 0;
+		int a = 0;
+		Iterator<R_NodeImpl> it = c.iterator();
+		while (it.hasNext()) {
+			R_NodeImpl n = it.next();
+			Boolean p = n.getParkingAvailable();
+			if (p != null) {
+				t++;
+				if (p)
+					a++;
+			}
+		}
+		updateAvailable(a, t);
+	}
+
+	/** Update the available parking spaces */
+	private void updateAvailable(int a, int t) throws TMSException {
+		String ra = formatAvailable(a, low_threshold, open);
+		setReportedAvailableNotify(ra);
+		setTrueAvailableNotify(a);
+		// FIXME trend
+		Integer cap = capacity;
+		setTrustDataNotify((cap != null) && (cap == t));
+	}
+
 	/** Reported available parking spaces (or LOW) */
 	private String reported_available;
+
+	/** Set the reported available parking spaces */
+	private void setReportedAvailableNotify(String a) throws TMSException {
+		if (!objectEquals(a, reported_available)) {
+			store.update(this, "reported_available", a);
+			updateTimeStamp();
+			reported_available = a;
+			notifyAttribute("reportedAvailable");
+		}
+	}
 
 	/** Get the reported available parking spaces */
 	@Override
@@ -637,6 +706,16 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 	/** Calculated number of available parking spaces */
 	private Integer true_available;
 
+	/** Set the number of available parking spaces */
+	private void setTrueAvailableNotify(Integer a) throws TMSException {
+		if (!objectEquals(a, true_available)) {
+			store.update(this, "true_available", a);
+			updateTimeStamp();
+			true_available = a;
+			notifyAttribute("trueAvailable");
+		}
+	}
+
 	/** Get the true available parking spaces */
 	@Override
 	public Integer getTrueAvailable() {
@@ -645,6 +724,16 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 
 	/** Trend description */
 	private String trend;
+
+	/** Set the trend */
+	private void setTrendNotify(String t) throws TMSException {
+		if (!objectEquals(t, trend)) {
+			store.update(this, "trend", t);
+			updateTimeStamp();
+			trend = t;
+			notifyAttribute("trend");
+		}
+	}
 
 	/** Get the trend (CLEARING, STEADY, FILLING) */
 	@Override
@@ -665,6 +754,7 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 	public void doSetOpen(Boolean o) throws TMSException {
 		if (!objectEquals(o, open)) {
 			store.update(this, "open", o);
+			updateTimeStamp();
 			setOpen(o);
 		}
 	}
@@ -677,6 +767,16 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 
 	/** Flag for trustworthy data */
 	private Boolean trust_data;
+
+	/** Set the trustworthy data flag */
+	private void setTrustDataNotify(Boolean t) throws TMSException {
+		if (!objectEquals(t, trust_data)) {
+			store.update(this, "trust_data", t);
+			updateTimeStamp();
+			trust_data = t;
+			notifyAttribute("trustData");
+		}
+	}
 
 	/** Get the trust data value */
 	@Override
