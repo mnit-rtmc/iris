@@ -64,30 +64,22 @@ public class DmsActionTagFormatter {
 	private MultiWithSrc process(DmsAction da, QuickMessage qm) {
 		FeedCallback fc = new FeedCallback(dms, da.getSignGroup());
 		new MultiString(qm.getMulti()).parse(fc);
-		String m = fc.toString();
-		MultiString multi = new MultiString(m);
-		if (!multi.isBlank())
-			return new MultiWithSrc(createMulti(m), createSrc(da));
-		else
-			return null;
-	}
-
-	/** Create source bit flags */
-	private int createSrc(DmsAction da) {
-		int src = SignMsgSource.schedule.bit();
-		if (isTravelTime(da))
-			src |= SignMsgSource.travel_time.bit();
-		if (isTolling(da))
-			src |= SignMsgSource.tolling.bit();
-		return src;
+		String fm = fc.toString();
+		String ms = createMulti(fm);
+		return (ms != null)
+		      ? new MultiWithSrc(ms, createSrc(fm))
+		      : null;
 	}
 
 	/** Create a MULTI string for a message.
-	 * @param qm Quick message MULTI string to parse.
+	 * @param ms MULTI string to parse.
 	 * @return MULTI string with DMS action tags resolved. */
-	private String createMulti(String qm) {
+	private String createMulti(String ms) {
+		MultiString multi = new MultiString(ms);
+		if (multi.isBlank())
+			return null;
 		// FIXME: combine these into a single MULTI parse step.
-		String tm = travel_est.replaceTravelTimes(qm);
+		String tm = travel_est.replaceTravelTimes(ms);
 		if (tm != null) {
 			String am = advisory.replaceSpeedAdvisory(tm);
 			if (am != null) {
@@ -99,10 +91,14 @@ public class DmsActionTagFormatter {
 		return null;
 	}
 
-	/** Check if DMS action is travel time */
-	private boolean isTravelTime(DmsAction da) {
-		QuickMessage qm = da.getQuickMessage();
-		return (qm != null) ? isTravelTime(qm.getMulti()) : false;
+	/** Create source bit flags */
+	private int createSrc(String ms) {
+		int src = SignMsgSource.schedule.bit();
+		if (isTravelTime(ms))
+			src |= SignMsgSource.travel_time.bit();
+		if (isTolling(ms))
+			src |= SignMsgSource.tolling.bit();
+		return src;
 	}
 
 	/** Does the MULTI string have a travel time [tt] tag? */
@@ -117,12 +113,6 @@ public class DmsActionTagFormatter {
 			}
 		});
 		return travel[0];
-	}
-
-	/** Check if DMS action is tolling */
-	private boolean isTolling(DmsAction da) {
-		QuickMessage qm = da.getQuickMessage();
-		return (qm != null) ? isTolling(qm.getMulti()) : false;
 	}
 
 	/** Does the MULTI string have a tolling [tz] tag? */
