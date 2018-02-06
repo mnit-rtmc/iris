@@ -164,9 +164,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return name.compareTo(o.name);
 	}
 
-	/** Tolling formatter */
-	private final TollingFormatter toll_formatter;
-
 	/** DMS action tag formatter */
 	private final DmsActionTagFormatter formatter;
 
@@ -176,8 +173,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		GeoLocImpl g = new GeoLocImpl(name);
 		g.notifyCreate();
 		geo_loc = g;
-		toll_formatter = new TollingFormatter(n, g);
-		formatter = new DmsActionTagFormatter(this, toll_formatter);
+		formatter = new DmsActionTagFormatter(this);
 	}
 
 	/** Create a dynamic message sign */
@@ -219,8 +215,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		awsControlled = ac;
 		sign_config = sc;
 		default_font = df;
-		toll_formatter = new TollingFormatter(n, loc);
-		formatter = new DmsActionTagFormatter(this, toll_formatter);
+		formatter = new DmsActionTagFormatter(this);
 		initTransients();
 	}
 
@@ -912,16 +907,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Set tolling prices */
 	private void setPrices(DmsAction da) {
-		prices = (da != null) ? calculatePrices(da) : null;
-	}
-
-	/** Calculate prices for a tolling message */
-	private HashMap<String, Float> calculatePrices(DmsAction da) {
-		QuickMessage qm = da.getQuickMessage();
-		if (qm != null)
-			return toll_formatter.calculatePrices(qm.getMulti());
-		else
-			return null;
+		prices = (da != null) ? formatter.calculatePrices(da) : null;
 	}
 
 	/** Log price (tolling) messages.

@@ -14,6 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.util.HashMap;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.QuickMessage;
@@ -45,13 +46,13 @@ public class DmsActionTagFormatter {
 	private final TollingFormatter toll_form;
 
 	/** Create a new DMS action tag formatter */
-	public DmsActionTagFormatter(DMSImpl d, TollingFormatter tf) {
+	public DmsActionTagFormatter(DMSImpl d) {
 		dms = d;
 		GeoLoc g = d.getGeoLoc();
 		travel_est = new TravelTimeEstimator(dms.getName(), g);
 		advisory = new SpeedAdvisoryCalculator(g);
 		slow_warn = new SlowWarningFormatter(g);
-		toll_form = tf;
+		toll_form = new TollingFormatter(dms.getName(), g);
 	}
 
 	/** Process a DMS action */
@@ -125,5 +126,13 @@ public class DmsActionTagFormatter {
 			}
 		});
 		return tolling[0];
+	}
+
+	/** Calculate prices for a tolling message */
+	public HashMap<String, Float> calculatePrices(DmsAction da) {
+		QuickMessage qm = da.getQuickMessage();
+		return (qm != null)
+		      ? toll_form.calculatePrices(qm.getMulti())
+		      : null;
 	}
 }
