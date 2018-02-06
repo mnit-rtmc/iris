@@ -167,8 +167,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Tolling formatter */
 	private final TollingFormatter toll_formatter;
 
-	/** MULTI message formatter */
-	private final MultiFormatter formatter;
+	/** DMS action tag formatter */
+	private final DmsActionTagFormatter formatter;
 
 	/** Create a new DMS with a string name */
 	public DMSImpl(String n) throws TMSException, SonarException {
@@ -177,7 +177,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		g.notifyCreate();
 		geo_loc = g;
 		toll_formatter = new TollingFormatter(n, g);
-		formatter = new MultiFormatter(this, toll_formatter);
+		formatter = new DmsActionTagFormatter(this, toll_formatter);
 	}
 
 	/** Create a dynamic message sign */
@@ -220,7 +220,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		sign_config = sc;
 		default_font = df;
 		toll_formatter = new TollingFormatter(n, loc);
-		formatter = new MultiFormatter(this, toll_formatter);
+		formatter = new DmsActionTagFormatter(this, toll_formatter);
 		initTransients();
 	}
 

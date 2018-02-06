@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,11 +20,12 @@ import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * MULTI string formatter for custom tags.
+ * Formatter for custom DMS action tags.  These tags are similar to MULTI, but
+ * processed before sending to the sign.
  *
  * @author Douglas Lau
  */
-public class MultiFormatter {
+public class DmsActionTagFormatter {
 
 	/** DMS for message formatting */
 	private final DMSImpl dms;
@@ -41,8 +42,8 @@ public class MultiFormatter {
 	/** Tolling formatter */
 	private final TollingFormatter toll_form;
 
-	/** Create a new MULTI formatter */
-	public MultiFormatter(DMSImpl d, TollingFormatter tf) {
+	/** Create a new DMS action tag formatter */
+	public DmsActionTagFormatter(DMSImpl d, TollingFormatter tf) {
 		dms = d;
 		GeoLoc g = d.getGeoLoc();
 		travel_est = new TravelTimeEstimator(dms.getName(), g);
@@ -68,7 +69,7 @@ public class MultiFormatter {
 
 	/** Create a MULTI string for a message.
 	 * @param qm Quick message MULTI string to parse.
-	 * @return MULTI string with travel, vsa and slow warnings resolved. */
+	 * @return MULTI string with DMS action tags resolved. */
 	private String createMulti(String qm) {
 		// FIXME: combine these into a single MULTI parse step.
 		String tm = travel_est.replaceTravelTimes(qm);
