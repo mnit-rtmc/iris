@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,9 +80,12 @@ public class JoyScript {
 
 	/** Create the joystick script for use with Linux */
 	protected void createLinuxScript(FileWriter fw) throws IOException {
-		fw.write("from sys import stdout\n");
+		fw.write("from sys import stdout, exit\n");
 		fw.write("from struct import unpack\n");
-		fw.write("joystick = open('/dev/input/js0', 'rb')\n");
+		fw.write("try:\n");
+		fw.write("\tjoystick = open('/dev/input/js0', 'rb')\n");
+		fw.write("except IOError:\n");
+		fw.write("\texit(0)\n");
 		fw.write("while True:\n");
 		fw.write("\tv = unpack('ihBB', joystick.read(8))\n");
 		fw.write("\tif v[2] & 0x01:\n");
