@@ -136,10 +136,14 @@ public class OpStatus extends OpStep {
 	static private DeviceRequest parseLensReq(String cmd)
 		throws ParsingException
 	{
-		if ("iris_open".equals(cmd))
+		if ("iris_stop".equals(cmd))
+			return DeviceRequest.CAMERA_IRIS_STOP;
+		else if ("iris_open".equals(cmd))
 			return DeviceRequest.CAMERA_IRIS_OPEN;
 		else if ("iris_close".equals(cmd))
 			return DeviceRequest.CAMERA_IRIS_CLOSE;
+		else if ("focus_stop".equals(cmd))
+			return DeviceRequest.CAMERA_FOCUS_STOP;
 		else if ("focus_near".equals(cmd))
 			return DeviceRequest.CAMERA_FOCUS_NEAR;
 		else if ("focus_far".equals(cmd))
