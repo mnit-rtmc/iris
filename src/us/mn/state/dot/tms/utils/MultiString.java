@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2017  Minnesota Department of Transportation
+ * Copyright (C) 2006-2018  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -715,31 +715,5 @@ public class MultiString {
 		for (int i = 0; i < words.length; ++i)
 			words[i] = words[i].trim();
 		return Arrays.asList(words);
-	}
-
-	/** Does the MULTI string have a travel time [tt] tag? */
-	public boolean isTravelTime() {
-		final boolean[] travel = new boolean[] { false };
-		parse(new MultiAdapter() {
-			@Override
-			public void addTravelTime(String sid,
-				OverLimitMode mode, String o_txt)
-			{
-				travel[0] = true;
-			}
-		});
-		return travel[0];
-	}
-
-	/** Does the MULTI string have a tolling [tz] tag? */
-	public boolean isTolling() {
-		final boolean[] tolling = new boolean[] { false };
-		parse(new MultiAdapter() {
-			@Override
-			public void addTolling(String mode, String[] zones) {
-				tolling[0] = true;
-			}
-		});
-		return tolling[0];
 	}
 }

@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.utils.MultiAdapter;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -87,18 +88,38 @@ public class DmsActionTagFormatter {
 	/** Check if DMS action is travel time */
 	public boolean isTravelTime(DmsAction da) {
 		QuickMessage qm = da.getQuickMessage();
-		if (qm != null)
-			return new MultiString(qm.getMulti()).isTravelTime();
-		else
-			return false;
+		return (qm != null) ? isTravelTime(qm.getMulti()) : false;
+	}
+
+	/** Does the MULTI string have a travel time [tt] tag? */
+	private boolean isTravelTime(String ms) {
+		final boolean[] travel = new boolean[] { false };
+		new MultiString(ms).parse(new MultiAdapter() {
+			@Override
+			public void addTravelTime(String sid,
+				OverLimitMode mode, String o_txt)
+			{
+				travel[0] = true;
+			}
+		});
+		return travel[0];
 	}
 
 	/** Check if DMS action is tolling */
 	public boolean isTolling(DmsAction da) {
 		QuickMessage qm = da.getQuickMessage();
-		if (qm != null)
-			return new MultiString(qm.getMulti()).isTolling();
-		else
-			return false;
+		return (qm != null) ? isTolling(qm.getMulti()) : false;
+	}
+
+	/** Does the MULTI string have a tolling [tz] tag? */
+	private boolean isTolling(String ms) {
+		final boolean[] tolling = new boolean[] { false };
+		new MultiString(ms).parse(new MultiAdapter() {
+			@Override
+			public void addTolling(String mode, String[] zones) {
+				tolling[0] = true;
+			}
+		});
+		return tolling[0];
 	}
 }
