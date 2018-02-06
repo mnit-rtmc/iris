@@ -817,20 +817,15 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param da DMS action
 	 * @return New sign message, or null on error */
 	private SignMessage createMsgSched(DmsAction da) {
-		String m = formatter.createMulti(da);
+		MultiWithSrc m = formatter.process(da);
 		if (m != null) {
 			boolean be = da.getBeaconEnabled();
 			DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
 				da.getActivationPriority());
 			DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
 				da.getRunTimePriority());
-			int src = SignMsgSource.schedule.bit();
-			if (formatter.isTravelTime(da))
-				src |= SignMsgSource.travel_time.bit();
-			if (formatter.isTolling(da))
-				src |= SignMsgSource.tolling.bit();
 			Integer d = getDuration(da);
-			return createMsg(m, be, ap, rp, src, null, d);
+			return createMsg(m.multi, be, ap, rp, m.src, null, d);
 		} else
 			return null;
 	}
@@ -885,7 +880,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @return true if action is valid. */
 	public boolean checkAction(DmsAction da) {
 		assert (da != null);
-		return formatter.createMulti(da) != null;
+		return formatter.process(da) != null;
 	}
 
 	/** Set the scheduled DMS action */

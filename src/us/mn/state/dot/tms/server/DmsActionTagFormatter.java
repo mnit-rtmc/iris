@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.utils.MultiAdapter;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -53,19 +54,32 @@ public class DmsActionTagFormatter {
 		toll_form = tf;
 	}
 
-	/** Create a multi string for a DMS action */
-	public String createMulti(DmsAction da) {
+	/** Process a DMS action */
+	public MultiWithSrc process(DmsAction da) {
 		QuickMessage qm = da.getQuickMessage();
-		if (qm != null) {
-			FeedCallback fc = new FeedCallback(dms,
-				da.getSignGroup());
-			new MultiString(qm.getMulti()).parse(fc);
-			String m = fc.toString();
-			MultiString multi = new MultiString(m);
-			if (!multi.isBlank())
-				return createMulti(m);
-		}
-		return null;
+		return (qm != null) ? process(da, qm) : null;
+	}
+
+	/** Process a DMS action */
+	private MultiWithSrc process(DmsAction da, QuickMessage qm) {
+		FeedCallback fc = new FeedCallback(dms, da.getSignGroup());
+		new MultiString(qm.getMulti()).parse(fc);
+		String m = fc.toString();
+		MultiString multi = new MultiString(m);
+		if (!multi.isBlank())
+			return new MultiWithSrc(createMulti(m), createSrc(da));
+		else
+			return null;
+	}
+
+	/** Create source bit flags */
+	private int createSrc(DmsAction da) {
+		int src = SignMsgSource.schedule.bit();
+		if (isTravelTime(da))
+			src |= SignMsgSource.travel_time.bit();
+		if (isTolling(da))
+			src |= SignMsgSource.tolling.bit();
+		return src;
 	}
 
 	/** Create a MULTI string for a message.
@@ -86,7 +100,7 @@ public class DmsActionTagFormatter {
 	}
 
 	/** Check if DMS action is travel time */
-	public boolean isTravelTime(DmsAction da) {
+	private boolean isTravelTime(DmsAction da) {
 		QuickMessage qm = da.getQuickMessage();
 		return (qm != null) ? isTravelTime(qm.getMulti()) : false;
 	}
@@ -106,7 +120,7 @@ public class DmsActionTagFormatter {
 	}
 
 	/** Check if DMS action is tolling */
-	public boolean isTolling(DmsAction da) {
+	private boolean isTolling(DmsAction da) {
 		QuickMessage qm = da.getQuickMessage();
 		return (qm != null) ? isTolling(qm.getMulti()) : false;
 	}
