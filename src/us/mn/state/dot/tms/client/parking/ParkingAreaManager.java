@@ -53,7 +53,7 @@ public class ParkingAreaManager extends ProxyManager<ParkingArea> {
 
 	/** Create a new parking area manager */
 	public ParkingAreaManager(Session s, GeoLocManager lm) {
-		super(s, lm, descriptor(s), 0);
+		super(s, lm, descriptor(s), 17);
 	}
 
 	/** Create a theme for parking areas */
