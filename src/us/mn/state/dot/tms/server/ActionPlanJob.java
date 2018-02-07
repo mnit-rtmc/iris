@@ -58,8 +58,8 @@ public class ActionPlanJob extends Job {
 	static private final DebugLog SCHED_LOG = new DebugLog("sched");
 
 	/** Mapping of DMS actions */
-	private final HashMap<DMSImpl, DmsAction> dms_actions =
-		new HashMap<DMSImpl, DmsAction>();
+	private final HashMap<DMSImpl, DmsActionMsg> dms_actions =
+		new HashMap<DMSImpl, DmsActionMsg>();
 
 	/** Mapping of ramp meter operating states */
 	private final HashMap<RampMeterImpl, Boolean> meters =
@@ -147,13 +147,17 @@ public class ActionPlanJob extends Job {
 	private void checkAction(DmsAction da, DMSImpl dms) {
 		if (SCHED_LOG.isOpen())
 			logSched(dms, "checking " + da);
-		if (shouldReplace(da, dms) && dms.checkAction(da))
-			dms_actions.put(dms, da);
+		if (shouldReplace(da, dms)) {
+			DmsActionMsg amsg = new DmsActionMsg(da, dms);
+			if (amsg.multi != null)
+				dms_actions.put(dms, amsg);
+		}
 	}
 
 	/** Check if an action should replace the current DMS action */
 	private boolean shouldReplace(DmsAction da, DMSImpl dms) {
-		DmsAction o = dms_actions.get(dms);
+		DmsActionMsg amsg = dms_actions.get(dms);
+		DmsAction o = (amsg != null) ? amsg.action : null;
 		return (null == o) ||
 		       da.getActivationPriority() > o.getActivationPriority() ||
 		       da.getRunTimePriority() >= o.getRunTimePriority();
@@ -166,10 +170,10 @@ public class ActionPlanJob extends Job {
 			DMS dms = it.next();
 			if (dms instanceof DMSImpl) {
 				DMSImpl dmsi = (DMSImpl) dms;
-				DmsAction da = dms_actions.get(dmsi);
+				DmsActionMsg amsg = dms_actions.get(dmsi);
 				if (SCHED_LOG.isOpen())
-					logSched(dms, "scheduling " + da);
-				dmsi.setScheduledAction(da);
+					logSched(dms, "scheduling " + amsg);
+				dmsi.setActionMsg(amsg);
 			}
 		}
 	}

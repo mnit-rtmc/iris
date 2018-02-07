@@ -23,15 +23,18 @@ import us.mn.state.dot.tms.utils.MultiAdapter;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
- * Formatter for custom DMS action tags.  These tags are similar to MULTI, but
- * processed before sending to the sign.
+ * DMS action message.  This parses custom DMS action tags, which are similar
+ * to MULTI, but processed before sending to the sign.
  *
  * @author Douglas Lau
  */
-public class DmsActionTagFormatter {
+public class DmsActionMsg {
 
 	/** DMS for message formatting */
 	private final DMSImpl dms;
+
+	/** DMS action */
+	public final DmsAction action;
 
 	/** Travel time estimator */
 	private final TravelTimeEstimator travel_est;
@@ -45,31 +48,49 @@ public class DmsActionTagFormatter {
 	/** Tolling formatter */
 	private final TollingFormatter toll_form;
 
-	/** Create a new DMS action tag formatter */
-	public DmsActionTagFormatter(DMSImpl d) {
+	/** MULTI string after processing DMS action tags */
+	public final String multi;
+
+	/** DMS message source flags */
+	private int src;
+
+	/** Get the source flag bits */
+	public int getSrc() {
+		return src;
+	}
+
+	/** Get a string representation */
+	@Override
+	public String toString() {
+		return action.toString() + ": " + dms;
+	}
+
+	/** Create a new DMS action message */
+	public DmsActionMsg(DmsAction da, DMSImpl d) {
+		action = da;
 		dms = d;
 		GeoLoc g = d.getGeoLoc();
 		travel_est = new TravelTimeEstimator(dms.getName(), g);
 		advisory = new SpeedAdvisoryCalculator(g);
 		slow_warn = new SlowWarningFormatter(g);
 		toll_form = new TollingFormatter(dms.getName(), g);
+		multi = processAction();
 	}
 
 	/** Process a DMS action */
-	public MultiWithSrc process(DmsAction da) {
-		QuickMessage qm = da.getQuickMessage();
-		return (qm != null) ? process(da, qm) : null;
+	private String processAction() {
+		QuickMessage qm = action.getQuickMessage();
+		return (qm != null) ? process(qm) : null;
 	}
 
 	/** Process a DMS action */
-	private MultiWithSrc process(DmsAction da, QuickMessage qm) {
-		FeedCallback fc = new FeedCallback(dms, da.getSignGroup());
+	private String process(QuickMessage qm) {
+		FeedCallback fc = new FeedCallback(dms, action.getSignGroup());
 		new MultiString(qm.getMulti()).parse(fc);
 		String fm = fc.toString();
 		String ms = createMulti(fm);
-		return (ms != null)
-		      ? new MultiWithSrc(ms, createSrc(fm))
-		      : null;
+		src = (ms != null) ? createSrc(fm) : 0;
+		return ms;
 	}
 
 	/** Create a MULTI string for a message.
@@ -129,8 +150,8 @@ public class DmsActionTagFormatter {
 	}
 
 	/** Calculate prices for a tolling message */
-	public HashMap<String, Float> calculatePrices(DmsAction da) {
-		QuickMessage qm = da.getQuickMessage();
+	public HashMap<String, Float> getPrices() {
+		QuickMessage qm = action.getQuickMessage();
 		return (qm != null)
 		      ? toll_form.calculatePrices(qm.getMulti())
 		      : null;

@@ -164,16 +164,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return name.compareTo(o.name);
 	}
 
-	/** DMS action tag formatter */
-	private final DmsActionTagFormatter formatter;
-
 	/** Create a new DMS with a string name */
 	public DMSImpl(String n) throws TMSException, SonarException {
 		super(n);
 		GeoLocImpl g = new GeoLocImpl(name);
 		g.notifyCreate();
 		geo_loc = g;
-		formatter = new DmsActionTagFormatter(this);
 	}
 
 	/** Create a dynamic message sign */
@@ -215,7 +211,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		awsControlled = ac;
 		sign_config = sc;
 		default_font = df;
-		formatter = new DmsActionTagFormatter(this);
 		initTransients();
 	}
 
@@ -809,20 +804,18 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Create a scheduled message.
-	 * @param da DMS action
-	 * @return New sign message, or null on error */
-	private SignMessage createMsgSched(DmsAction da) {
-		MultiWithSrc m = formatter.process(da);
-		if (m != null) {
-			boolean be = da.getBeaconEnabled();
-			DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
-				da.getActivationPriority());
-			DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
-				da.getRunTimePriority());
-			Integer d = getDuration(da);
-			return createMsg(m.multi, be, ap, rp, m.src, null, d);
-		} else
-			return null;
+	 * @param amsg DMS action message.
+	 * @return New sign message, or null on error. */
+	private SignMessage createMsgSched(DmsActionMsg amsg) {
+		assert (amsg != null);
+		DmsAction da = amsg.action;
+		boolean be = da.getBeaconEnabled();
+		DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
+			da.getActivationPriority());
+		DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
+			da.getRunTimePriority());
+		Integer d = getDuration(da);
+		return createMsg(amsg.multi, be, ap, rp, amsg.getSrc(), null,d);
 	}
 
 	/** Get the duration of a DMS action.
@@ -870,19 +863,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return msg_sched;
 	}
 
-	/** Check a DMS action.
-	 * @param da DMS action.
-	 * @return true if action is valid. */
-	public boolean checkAction(DmsAction da) {
-		assert (da != null);
-		return formatter.process(da) != null;
-	}
-
-	/** Set the scheduled DMS action */
-	public void setScheduledAction(DmsAction da) {
-		SignMessage sm = (da != null) ? createMsgSched(da) : null;
+	/** Set the scheduled DMS action message */
+	public void setActionMsg(DmsActionMsg amsg) {
+		SignMessage sm = (amsg != null) ? createMsgSched(amsg) : null;
 		setMsgSchedNotify(sm);
-		setPrices(da);
+		setPrices(amsg);
 		try {
 			SignMessage usm = getMsgValidated();
 			if (isMsgScheduled(usm))
@@ -906,8 +891,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private transient HashMap<String, Float> prices;
 
 	/** Set tolling prices */
-	private void setPrices(DmsAction da) {
-		prices = (da != null) ? formatter.calculatePrices(da) : null;
+	private void setPrices(DmsActionMsg amsg) {
+		prices = (amsg != null) ? amsg.getPrices() : null;
 	}
 
 	/** Log price (tolling) messages.
