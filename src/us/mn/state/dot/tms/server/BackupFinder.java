@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@ public class BackupFinder implements Corridor.StationFinder {
 	/** Speed threshold to indicate backup */
 	private final Speed spd_thresh;
 
-	/** Backup limit distance (miles) */
-	private final float blimit_mi;
+	/** Backup limit distance */
+	private final Distance blimit;
 
 	/** Mile point to start search */
 	private final float start_mp;
@@ -54,7 +54,7 @@ public class BackupFinder implements Corridor.StationFinder {
 	 * @param m Milepoint to start from. */
 	public BackupFinder(Speed as, Distance bd, float m) {
 		spd_thresh = as;
-		blimit_mi = bd.asFloat(MILES);
+		blimit = bd;
 		start_mp = m;
 	}
 
@@ -91,15 +91,16 @@ public class BackupFinder implements Corridor.StationFinder {
 	 * @return true if location is near and downstream. */
 	private boolean isNearDownstream(Float m) {
 		float d = m - start_mp;
-		return (d > 0) && (d < blimit_mi);
+		return (d > 0) && (d < blimit.asFloat(MILES));
 	}
 
 	/** Get the distance to mainline backup.
-	 * @return Distance to end of backup, or null for no backup. */
+	 * @return Distance to end of backup (with same units as backup limit),
+	 *         or null for no backup. */
 	public Distance distance() {
 		if (isBackedUp()) {
 			float d = back_mp - start_mp;
-			return new Distance(d, MILES);
+			return new Distance(d, MILES).convert(blimit.units);
 		} else
 			return null;
 	}
@@ -114,14 +115,14 @@ public class BackupFinder implements Corridor.StationFinder {
 	}
 
 	/** Check if traffic is backed up */
-	private boolean isBackedUp() {
+	public boolean isBackedUp() {
 		return (back_mp != null) && !back_upstream;
 	}
 
 	/** Debug the finder */
 	public void debug(DebugLog slog) {
 		slog.log("spd_thresh: " + spd_thresh +
-		         ", blimit_mi: " + blimit_mi +
+		         ", blimit: " + blimit +
 		         ", start_mp: " + start_mp +
 		         ", dist: " + distance() +
 		         ", spd: " + speed());
