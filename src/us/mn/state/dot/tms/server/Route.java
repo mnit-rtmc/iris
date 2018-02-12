@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,8 +80,18 @@ public class Route {
 	}
 
 	/** Get the "only" corridor (if the route is just a single corridor) */
-	public Corridor getOnlyCorridor() {
+	private Corridor getOnlyCorridor() {
 		return (legCount() == 1) ? leg.corridor : null;
+	}
+
+	/** Is the route confined to the same single corridor? */
+	private boolean isSameCorridor(Corridor c) {
+		return (c != null) && (getOnlyCorridor() == c);
+	}
+
+	/** Is another route confined to the same single corridor? */
+	public boolean isSameCorridor(Route r) {
+		return (r != null) && isSameCorridor(r.getOnlyCorridor());
 	}
 
 	/** Get the route distance.

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -234,24 +234,13 @@ public class TravelTimeEstimator {
 	/** Check if the given route is a final destination */
 	private boolean isFinalDest(Route r) {
 		for (Route ro: s_routes.values()) {
-			if (ro != r && isSameCorridor(r, ro) &&
+			if (ro != r && r.isSameCorridor(ro) &&
 			   (r.getDistance().m() < ro.getDistance().m()))
 			{
 				return false;
 			}
 		}
 		return true;
-	}
-
-	/** Are two routes confined to the same single corridor */
-	private boolean isSameCorridor(Route r1, Route r2) {
-		if (r1 != null && r2 != null) {
-			Corridor c1 = r1.getOnlyCorridor();
-			Corridor c2 = r2.getOnlyCorridor();
-			if (c1 != null && c2 != null)
-				return c1 == c2;
-		}
-		return false;
 	}
 
 	/** Calculate the travel time for the given route */
@@ -284,16 +273,12 @@ public class TravelTimeEstimator {
 
 	/** Are all the routes confined to the same single corridor */
 	private boolean isSingleCorridor() {
-		Corridor cor = null;
+		Route pr = null;
 		for (Route r: s_routes.values()) {
-			Corridor c = r.getOnlyCorridor();
-			if (null == c)
+			if (pr != null && !r.isSameCorridor(pr))
 				return false;
-			if (null == cor)
-				cor = c;
-			else if (c != cor)
-				return false;
+			pr = r;
 		}
-		return cor != null;
+		return (pr != null) && (pr.legCount() == 1);
 	}
 }
