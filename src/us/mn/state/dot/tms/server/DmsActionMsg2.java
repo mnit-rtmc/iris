@@ -70,20 +70,14 @@ public class DmsActionMsg2 {
 		return SystemAttrEnum.VSA_MAX_DISPLAY_MPH.getInt();
 	}
 
-	/** Round up to the nearest 5 mph */
-	static private int round5Mph(float mph) {
-		return Math.round(mph / 5) * 5;
+	/** Round value to the nearest 5 */
+	static private int round5(float v) {
+		return Math.round(v / 5) * 5;
 	}
 
-	/** Round speed to the nearest 5 of given units */
-	static private int round5(Speed s) {
-		float sf = (float) s.value;
-		return Math.round(sf / 5) * 5;
-	}
-
-	/** Round up to the next 5 minutes */
-	static private int roundUp5Min(int min) {
-		return ((min - 1) / 5 + 1) * 5;
+	/** Round value up to the next 5 */
+	static private int roundUp5(int v) {
+		return ((v - 1) / 5 + 1) * 5;
 	}
 
 	/** Get minimum tolling price */
@@ -330,7 +324,7 @@ public class DmsActionMsg2 {
 		Float a = vss_finder.calculateSpeedAdvisory();
 		if (null == a)
 			return fail("Missing speed data");
-		int sa = Math.max(round5Mph(a), getMinAdvisory());
+		int sa = Math.max(round5(a), getMinAdvisory());
 		if (sa > lim && sa > getMaxAdvisory())
 			return fail("Speed too high");
 		else
@@ -427,7 +421,7 @@ public class DmsActionMsg2 {
 		assert (bf.isBackedUp());
 		Speed s = bf.speed();
 		assert (s != null);
-		int si = round5(s);
+		int si = round5((float) s.value);
 		return (si > 0)
 		      ? String.valueOf(si)
 		      : fail("Invalid speed: " + si);
@@ -644,7 +638,7 @@ public class DmsActionMsg2 {
 
 	/** Get over limit text span */
 	private String overLimitSpan(int mn, OverLimitMode mode, String o_txt) {
-		String lim = String.valueOf(roundUp5Min(mn));
+		String lim = String.valueOf(roundUp5(mn));
 		switch (mode) {
 		case prepend:
 			return o_txt + lim;
