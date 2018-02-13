@@ -35,6 +35,7 @@ import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.SystemAttrEnum; 
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 
 /**
@@ -264,9 +265,12 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	public Boolean getParkingAvailable() {
 		SamplerSet ss = new SamplerSet(getSamplerSet().filter(
 			LaneType.PARKING));
-		return ss.isPerfect()
-		      ? (ss.getMaxOccupancy() < PARK_AVAIL_OCC)
-		      : null;
+		if (ss.isPerfect()) {
+			float mo = ss.getMaxOccupancy(MISSING_DATA);
+			if (mo >= 0)
+				return mo < PARK_AVAIL_OCC;
+		}
+		return null;
 	}
 
 	/** Pickable flag */

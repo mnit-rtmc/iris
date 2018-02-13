@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -175,7 +175,11 @@ public class SamplerSet implements VehicleSampler {
 
 	/** Get the maximum occupancy */
 	public float getMaxOccupancy() {
-		float occ = 0;
+		return getMaxOccupancy(0);
+	}
+
+	/** Get the maximum occupancy */
+	public float getMaxOccupancy(float occ) {
 		for (VehicleSampler vs: samplers) {
 			if (vs instanceof DetectorImpl) {
 				DetectorImpl det = (DetectorImpl) vs;
