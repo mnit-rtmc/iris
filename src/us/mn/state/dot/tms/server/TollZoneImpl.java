@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TMSException;
-import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 
 /**
  * A toll zone is a roadway segment which is tolled by usage.
