@@ -73,6 +73,13 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 			return "STEADY";
 	}
 
+	/** Determine whether parking data should be trusted */
+	static private boolean shouldTrust(int t, int cap) {
+		// At least 75% of spaces must be reporting
+		int min_trust = cap - (cap / 4);
+		return (t >= min_trust) && (t <= cap);
+	}
+
 	/** Load all the parking areas */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, ParkingAreaImpl.class);
@@ -710,7 +717,7 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 		setTrueAvailableNotify(a);
 		setTrendNotify(calculateTrend(a));
 		Integer cap = capacity;
-		setTrustDataNotify((cap != null) && (cap == t));
+		setTrustDataNotify((cap != null) && shouldTrust(t, cap));
 	}
 
 	/** Reported available parking spaces (or LOW) */
