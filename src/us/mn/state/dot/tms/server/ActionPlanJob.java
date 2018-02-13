@@ -154,15 +154,15 @@ public class ActionPlanJob extends Job {
 			if (SCHED_LOG.isOpen()) {
 				DmsActionMsg2 am = new DmsActionMsg2(da, dms,
 					SCHED_LOG);
-				boolean df = cmpMulti(amsg.multi, am.multi);
-				if (df)
+				boolean df = multiEq(amsg.multi, am.multi);
+				if (!df)
 					logSched(dms, "WRONG multi: " +
 						amsg.multi + " <> " + am.multi);
 			}
 		}
 	}
 
-	static private boolean cmpMulti(String m0, String m1) {
+	static private boolean multiEq(String m0, String m1) {
 		return (m0 != null) ? m0.equals(m1) : m1 == null;
 	}
 
