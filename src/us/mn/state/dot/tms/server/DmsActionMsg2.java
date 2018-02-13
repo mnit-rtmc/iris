@@ -578,7 +578,9 @@ public class DmsActionMsg2 {
 		return t;
 	}
 
-	/** Determine if all travel times should display "OVER" mode */
+	/** Determine if all travel times should display "OVER" mode.
+	 * If all routes are on the same corridor, when the "OVER X" form is
+	 * used, it must be used for all destinations. */
 	private boolean isAllOver() {
 		return isSingleCorridor() && isAnyOver();
 	}
