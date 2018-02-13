@@ -46,6 +46,10 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
  */
 public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 
+	/** Threshold for parking space availability.
+	 * FIXME: 150 is sensitivity for Banner DXM magnetometer. */
+	static private final float PARK_AVAIL_OCC = 150f * 100f / 1800f;
+
 	/** Get the minimum roadway speed limit */
 	static public int getMinSpeedLimit() {
 		return SystemAttrEnum.SPEED_LIMIT_MIN_MPH.getInt();
@@ -261,7 +265,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		SamplerSet ss = new SamplerSet(getSamplerSet().filter(
 			LaneType.PARKING));
 		return ss.isPerfect()
-		      ? (ss.getMaxOccupancy() == 0)
+		      ? (ss.getMaxOccupancy() < PARK_AVAIL_OCC)
 		      : null;
 	}
 

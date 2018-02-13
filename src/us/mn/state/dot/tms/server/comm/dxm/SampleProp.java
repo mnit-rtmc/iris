@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.dxm;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.sched.TimeSteward;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProp;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -41,6 +42,22 @@ public class SampleProp extends ControllerProp {
 		catch (NumberFormatException e) {
 			throw new ParsingException("Invalid value: " + v);
 		}
+	}
+
+	/** Error code for invalid puck sample */
+	static private final int PUCK_ERR = 65000;
+
+	/** Filter valid sample data */
+	static private int filterSample(int s) {
+		return (s >= 0 && s < PUCK_ERR) ? s : MISSING_DATA;
+	}
+
+	/** Maximum number of scans in 30 seconds */
+	static private final int MAX_C30 = 1800;
+
+	/** Filter sample to valid scans (for diagnostics) */
+	static private int filterScans(int s) {
+		return (s < MAX_C30) ? s : MAX_C30;
 	}
 
 	/** Time stamp */
@@ -91,7 +108,7 @@ public class SampleProp extends ControllerProp {
 		if (p > 0 && pl >= p) {
 			int len = 1 + pl - p;
 			int[] occ = parseOcc(rx_buf, p, len);
-			controller.storeOccupancy(stamp, period, p, occ, 1);
+			controller.storeOccupancy(stamp, period, p,occ,MAX_C30);
 		} else
 			throw new ProtocolException("No Detector");
 	}
@@ -113,7 +130,8 @@ public class SampleProp extends ControllerProp {
 			throw new ParsingException("Invalid response tail");
 		int[] occ = new int[len];
 		for (int i = 0; i < len; i++) {
-			occ[i] = parseInt(par[i + 1]) % 2;
+			int s = parseInt(par[i + 1]);
+			occ[i] = filterScans(filterSample(s));
 		}
 		return occ;
 	}
