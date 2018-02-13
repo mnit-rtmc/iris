@@ -104,13 +104,33 @@ public class DmsActionMsg2 {
 	}
 
 	/** Log an event */
-	static public void logEvent(EventType et, String d) {
+	static private void logEvent(EventType et, String d) {
 		final TravelTimeEvent ev = new TravelTimeEvent(et, d);
 		FLUSH.addJob(new Job() {
 			public void perform() throws TMSException {
 				ev.doStore();
 			}
 		});
+	}
+
+	/** Travel time data (for hashmap) */
+	static private class TravelTime {
+		private final Route route;
+		private final OverLimitMode mode;
+		private final String o_txt;
+		private final int min;
+		private final int min_final;
+		private final int slow;
+		private TravelTime(Route r, OverLimitMode m, String ot, int mn,
+			int mn_final, int sl)
+		{
+			route = r;
+			mode = m;
+			o_txt = ot;
+			min = mn;
+			min_final = mn_final;
+			slow = sl;
+		}
 	}
 
 	/** DMS action */
@@ -143,6 +163,10 @@ public class DmsActionMsg2 {
 	public int getSrc() {
 		return src;
 	}
+
+	/** Mapping of station IDs to travel times */
+	private final HashMap<String, TravelTime> travel =
+		new HashMap<String, TravelTime>();
 
 	/** Feed message */
 	private String feed_msg;
@@ -196,8 +220,11 @@ public class DmsActionMsg2 {
 
 	/** MULTI string builder for parsing DMS action tags */
 	private final MultiBuilder builder = new MultiBuilder() {
-		@Override public void addFeed(String fid) {
-			parseFeed(fid);
+		@Override public void addTravelTime(String sid,
+			OverLimitMode mode, String o_txt)
+		{
+			processTravelTime(sid, mode, o_txt);
+			super.addTravelTime(sid, null, null);
 		}
 		@Override public void addSpeedAdvisory() {
 			addSpan(speedAdvisorySpan());
@@ -207,14 +234,11 @@ public class DmsActionMsg2 {
 		{
 			addSpan(slowWarningSpan(spd, dist, mode));
 		}
+		@Override public void addFeed(String fid) {
+			parseFeed(fid);
+		}
 		@Override public void addTolling(String mode, String[] zones) {
 			addSpan(tollingSpan(mode, zones));
-		}
-		@Override public void addTravelTime(String sid,
-			OverLimitMode mode, String o_txt)
-		{
-			processTravelTime(sid, mode, o_txt);
-			super.addTravelTime(sid, null, null);
 		}
 	};
 
@@ -480,30 +504,6 @@ public class DmsActionMsg2 {
 		pf.setMinimumFractionDigits(2);
 		pf.setMaximumFractionDigits(2);
 		return pf.format(p);
-	}
-
-	/** Mapping of station IDs to travel times */
-	private final HashMap<String, TravelTime> travel =
-		new HashMap<String, TravelTime>();
-
-	/** Travel time struct */
-	private class TravelTime {
-		private final Route route;
-		private final OverLimitMode mode;
-		private final String o_txt;
-		private final int min;
-		private final int min_final;
-		private final int slow;
-		private TravelTime(Route r, OverLimitMode m, String ot, int mn,
-			int mn_final, int sl)
-		{
-			route = r;
-			mode = m;
-			o_txt = ot;
-			min = mn;
-			min_final = mn_final;
-			slow = sl;
-		}
 	}
 
 	/** Process travel time tag */
