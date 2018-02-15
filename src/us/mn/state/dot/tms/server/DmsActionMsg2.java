@@ -315,6 +315,7 @@ public class DmsActionMsg2 {
 
 	/** Calculate speed advisory span */
 	private String speedAdvisorySpan() {
+		addSrc(SignMsgSource.speed_advisory);
 		Corridor cor = lookupCorridor();
 		return (cor != null)
 		      ? calculateSpeedAdvisory(cor)
@@ -360,6 +361,7 @@ public class DmsActionMsg2 {
 	 * @param dist Distance to search for slow traffic (1/10 mile).
 	 * @param mode Tag replacement mode (none, dist or speed). */
 	private String slowWarningSpan(int spd, int dist, String mode) {
+		addSrc(SignMsgSource.slow_warning);
 		return slowWarningSpan(createSpeed(spd), createDist(dist),mode);
 	}
 
