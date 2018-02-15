@@ -154,6 +154,20 @@ public class OpStatus extends OpStep {
 			throw new ParsingException("INVALID LENS CMD: " + cmd);
 	}
 
+	/** Parse a menu device request */
+	static private DeviceRequest parseMenuReq(String cmd)
+		throws ParsingException
+	{
+		if ("open".equals(cmd))
+			return DeviceRequest.CAMERA_MENU_OPEN;
+		else if ("enter".equals(cmd))
+			return DeviceRequest.CAMERA_MENU_ENTER;
+		else if ("cancel".equals(cmd))
+			return DeviceRequest.CAMERA_MENU_CANCEL;
+		else
+			throw new ParsingException("INVALID MENU CMD: " + cmd);
+	}
+
 	/** Buffer to parse received data */
 	private final byte[] buf = new byte[2048];
 
@@ -236,6 +250,9 @@ public class OpStatus extends OpStep {
 				break;
 			case "lens":
 				parseLens(par);
+				break;
+			case "menu":
+				parseMenu(par);
 				break;
 			default:
 				throw new ParsingException("INVALID MSG");
@@ -401,6 +418,24 @@ public class OpStatus extends OpStep {
 		CameraImpl c = parseCam(cam);
 		if (vm.getCamera() == c)
 			c.setDeviceReq(parseLensReq(cmd));
+	}
+
+	/** Parse menu message */
+	private void parseMenu(String[] par) throws IOException {
+		String mon = (par.length > 1) ? par[1] : "";
+		String cam = (par.length > 2) ? par[2] : "";
+		String cmd = (par.length > 3) ? par[3] : "";
+		parseMenu(mon, cam, cmd);
+	}
+
+	/** Parse menu message */
+	private void parseMenu(String mon, String cam, String cmd)
+		throws IOException
+	{
+		VideoMonitorImpl vm = parseMon(mon);
+		CameraImpl c = parseCam(cam);
+		if (vm.getCamera() == c)
+			c.setDeviceReq(parseMenuReq(cmd));
 	}
 
 	/** Get the next step */
