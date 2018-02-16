@@ -148,22 +148,10 @@ public class ActionPlanJob extends Job {
 		if (SCHED_LOG.isOpen())
 			logSched(dms, "checking " + da);
 		if (shouldReplace(da, dms)) {
-			DmsActionMsg amsg = new DmsActionMsg(da, dms);
+			DmsActionMsg amsg = new DmsActionMsg(da, dms,SCHED_LOG);
 			if (amsg.multi != null)
 				dms_actions.put(dms, amsg);
-			if (SCHED_LOG.isOpen()) {
-				DmsActionMsg2 am = new DmsActionMsg2(da, dms,
-					SCHED_LOG);
-				boolean df = multiEq(amsg.multi, am.multi);
-				if (!df)
-					logSched(dms, "WRONG multi: " +
-						amsg.multi + " <> " + am.multi);
-			}
 		}
-	}
-
-	static private boolean multiEq(String m0, String m1) {
-		return (m0 != null) ? m0.equals(m1) : m1 == null;
 	}
 
 	/** Check if an action should replace the current DMS action */
