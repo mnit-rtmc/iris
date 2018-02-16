@@ -359,6 +359,27 @@ public class MultiBuilder implements Multi {
 		multi.append("]");
 	}
 
+	/** Add parking area availability.
+	 * @param pid Parking area ID.
+	 * @param l_txt Text for low availability.
+	 * @param c_txt Text for closed area. */
+	@Override
+	public void addParking(String pid, String l_txt, String c_txt) {
+		if (pid.startsWith("pa")) {
+			multi.append("[");
+			multi.append(pid);
+			if (l_txt != null) {
+				multi.append(',');
+				multi.append(l_txt);
+				if (c_txt != null) {
+					multi.append(',');
+					multi.append(c_txt);
+				}
+			}
+			multi.append("]");
+		}
+	}
+
 	/** Add an incident locator */
 	@Override
 	public void addLocator(String code) {

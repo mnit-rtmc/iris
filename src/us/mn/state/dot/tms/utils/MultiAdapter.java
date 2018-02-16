@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -156,6 +156,13 @@ public class MultiAdapter implements Multi {
 	/** Add a tolling message */
 	@Override
 	public void addTolling(String mode, String[] zones) { }
+
+	/** Add parking area availability.
+	 * @param pid Parking area ID.
+	 * @param l_txt Text for low availability.
+	 * @param c_txt Text for closed area. */
+	@Override
+	public void addParking(String pid, String l_txt, String c_txt) { }
 
 	/** Add an incident locator */
 	@Override

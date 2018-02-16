@@ -111,6 +111,8 @@ public class MultiString {
 			cb.addFeed(tag.substring(4));
 		else if (ltag.startsWith("tz"))
 			parseTolling(tag.substring(2), cb);
+		else if (ltag.startsWith("pa"))
+			parseParking(tag, cb);
 		else if (ltag.startsWith("loc"))
 			parseLocator(tag.substring(3), cb);
 		else
@@ -302,6 +304,16 @@ public class MultiString {
 			    mode.equals("c"))
 				cb.addTolling(mode, zones);
 		}
+	}
+
+	/** Parse parking tag [pax,l_txt,c_txt].
+	 * @param tag Parking area tag.
+	 * @param cb Callback to set tag. */
+	static private void parseParking(String tag, Multi cb) {
+		String[] args = tag.split(",", 3);
+		String l_txt = (args.length > 1) ? args[1] : "LOW";
+		String c_txt = (args.length > 2) ? args[2] : "CLOSED";
+		cb.addParking(tag, l_txt, c_txt);
 	}
 
 	/** Parse locator tag [loc{rn,rd,md,xn,xa,mi}].

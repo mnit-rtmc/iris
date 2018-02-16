@@ -24,6 +24,8 @@ import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.ParkingArea;
+import us.mn.state.dot.tms.ParkingAreaHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.SignTextHelper;
@@ -239,6 +241,11 @@ public class DmsActionMsg {
 		}
 		@Override public void addTolling(String mode, String[] zones) {
 			addSpan(tollingSpan(mode, zones));
+		}
+		@Override public void addParking(String pid, String l_txt,
+			String c_txt)
+		{
+			addSpan(parkingSpan(pid, l_txt, c_txt));
 		}
 	};
 
@@ -652,5 +659,29 @@ public class DmsActionMsg {
 			return fail("Over limit: " + mn);
 		}
 		return fail("Invalid mode: " + mode);
+	}
+
+	/** Calculate parking area availability span */
+	private String parkingSpan(String pid, String l_txt, String c_txt) {
+		addSrc(SignMsgSource.parking);
+		ParkingArea pa = ParkingAreaHelper.lookup(pid);
+		if (pa instanceof ParkingAreaImpl) {
+			ParkingAreaImpl pai = (ParkingAreaImpl) pa;
+			Boolean open = pai.getOpen();
+			if (null == open || !open)
+				return c_txt;
+			Boolean trust = pai.getTrustData();
+			if (null == trust || !trust)
+				return fail("Not trusted data: " + pid);
+			Integer a = pai.getTrueAvailable();
+			Integer low = pai.getLowThreshold();
+			if (null == a)
+				return fail("Availability unknown: " + pid);
+			if (low != null && a < low)
+				return l_txt;
+			else
+				return a.toString();
+		} else
+			return fail("Invalid parking area: " + pid);
 	}
 }
