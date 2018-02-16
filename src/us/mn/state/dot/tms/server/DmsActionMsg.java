@@ -677,7 +677,7 @@ public class DmsActionMsg {
 			Integer low = pai.getLowThreshold();
 			if (null == a)
 				return fail("Availability unknown: " + pid);
-			if (low != null && a < low)
+			if (low != null && a <= low)
 				return l_txt;
 			else
 				return a.toString();
