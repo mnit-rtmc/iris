@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.io.IOException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
@@ -126,8 +126,8 @@ public class SegmentBuilder implements Iterable<Segment> {
 
 	/** Update a corridor */
 	public void updateCorridor(CorridorBase<R_Node> corridor) {
-		List<Segment> below = new LinkedList<Segment>();
-		List<Segment> above = new LinkedList<Segment>();
+		List<Segment> below = new ArrayList<Segment>();
+		List<Segment> above = new ArrayList<Segment>();
 		R_Node un = null;	// upstream node
 		MapGeoLoc uloc = null;	// upstream node location
 		MapGeoLoc ploc = null;	// previous node location
@@ -137,29 +137,26 @@ public class SegmentBuilder implements Iterable<Segment> {
 			// Node may not be on selected corridor...
 			if (loc == null)
 				continue;
-			if (un != null) {
-				if (R_NodeHelper.isJoined(n) &&
-				    !isTooDistant(ploc, loc))
-				{
-					boolean td = isTooDistant(uloc, loc);
-					mdl = new R_NodeModel(n, mdl);
-					Segment seg = new Segment(mdl, un,
-						ploc, loc, samples, td);
-					if (!td)
-					    seg.addDetection(getDetectors(un));
-					if (n.getAbove())
-						above.add(seg);
-					else
-						below.add(seg);
-				} else
-					mdl = null;
+			if (un != null && R_NodeHelper.isJoined(n) &&
+			    !isTooDistant(ploc, loc))
+			{
+				boolean td = isTooDistant(uloc, loc);
+				mdl = new R_NodeModel(n, mdl);
+				Segment seg = new Segment(mdl, un,
+					ploc, loc, samples, td);
+				if (!td)
+				    seg.addDetection(getDetectors(un));
+				if (n.getAbove())
+					above.add(seg);
+				else
+					below.add(seg);
 			} else
 				mdl = null;
-			ploc = loc;
 			if (un == null || R_NodeHelper.isStationBreak(n)) {
 				un = n;
 				uloc = loc;
 			}
+			ploc = loc;
 		}
 		cor_segs.put(corridor.getName(), below);
 		// Prepend lowercase z, for sorting purposes
