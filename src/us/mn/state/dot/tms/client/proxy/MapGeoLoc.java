@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.proxy;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.NoninvertibleTransformException;
-import java.awt.geom.Point2D;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
@@ -51,9 +50,6 @@ public class MapGeoLoc implements MapObject {
 
 	/** Geo location */
 	private final GeoLoc loc;
-
-	/** Spherical mercator position */
-	private SphericalMercatorPosition pos;
 
 	/** Get the geo location */
 	public GeoLoc getGeoLoc() {
@@ -118,33 +114,12 @@ public class MapGeoLoc implements MapObject {
 			return getDefaultAngle();
 	}
 
-	/** Set a point relative to the location, offset by the tangent angle.
-	 * @param p Point to set.
-	 * @param distance Distance from the location, in meter units.
-	 * @return true If the point was set, otherwise false. */
-	public boolean setPoint(Point2D p, float distance) {
-		SphericalMercatorPosition smp = pos;
-		if (smp != null) {
-			double x = smp.getX();
-			double y = smp.getY();
-			Double t = tangent;
-			if (t != null) {
-				double xo = distance * Math.cos(t);
-				double yo = distance * Math.sin(t);
-				p.setLocation(x + xo, y + yo);
-			} else
-				p.setLocation(x, y);
-			return true;
-		} else
-			return false;
-	}
-
 	/** Transform for drawing device on map */
 	private final AffineTransform transform = new AffineTransform();
 
 	/** Update the traffic device transform */
 	private void updateTransform() {
-		pos = GeoLocHelper.getPosition(loc);
+		SphericalMercatorPosition pos = GeoLocHelper.getPosition(loc);
 		if (pos != null)
 			transform.setToTranslation(pos.getX(), pos.getY());
 		else

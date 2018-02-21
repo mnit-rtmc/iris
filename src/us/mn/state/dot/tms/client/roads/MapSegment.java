@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,12 +18,14 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
+import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -99,8 +101,8 @@ public class MapSegment implements MapObject {
 		lane = null;
 		float inner = calculateInner(scale);
 		float outer = inner + calculateWidth(scale);
-		shape = createShape(inner, outer, inner, outer);
-		outline = createOutline(inner, outer, inner, outer);
+		shape = createShape(inner, outer, inner, outer, false);
+		outline = createShape(inner, outer, inner, outer, true);
 	}
 
 	/** Calculate the spacing between the centerline and segment */
@@ -131,8 +133,8 @@ public class MapSegment implements MapObject {
 		float out_a = inner + width * mdl.getUpstreamOffset(sh + 1);
 		float in_b = inner + width * mdl.getDownstreamOffset(sh);
 		float out_b = inner + width * mdl.getDownstreamOffset(sh + 1);
-		shape = createShape(in_a, out_a, in_b, out_b);
-		outline = createOutline(in_a, out_a, in_b, out_b);
+		shape = createShape(in_a, out_a, in_b, out_b, false);
+		outline = createShape(in_a, out_a, in_b, out_b, true);
 	}
 
 	/** Calculate the width of one lane */
@@ -142,42 +144,47 @@ public class MapSegment implements MapObject {
 	}
 
 	/** Create the shape to draw this object */
-	private Shape createShape(float inner_a, float outer_a, float inner_b,
-		float outer_b)
+	private Shape createShape(float inner_a, float outer_a,
+		float inner_b, float outer_b, boolean outline)
 	{
-		Point2D.Float p = new Point2D.Float();
 		Path2D.Float path = new Path2D.Float(Path2D.WIND_NON_ZERO);
-		MapGeoLoc loc_a = segment.loc_up;
-		MapGeoLoc loc_b = segment.loc_dn;
-		loc_a.setPoint(p, outer_a);
-		path.moveTo(p.getX(), p.getY());
-		loc_b.setPoint(p, outer_b);
-		path.lineTo(p.getX(), p.getY());
-		loc_b.setPoint(p, inner_b);
-		path.lineTo(p.getX(), p.getY());
-		loc_a.setPoint(p, inner_a);
-		path.lineTo(p.getX(), p.getY());
-		path.closePath();
+		SphericalMercatorPosition pos_a = GeoLocHelper.getPosition(
+			segment.loc_up.getGeoLoc());
+		SphericalMercatorPosition pos_b = GeoLocHelper.getPosition(
+			segment.loc_dn.getGeoLoc());
+		if (pos_a != null && pos_b != null) {
+			double ta = segment.loc_up.getTangent();
+			double tb = segment.loc_dn.getTangent();
+			Point2D.Float p = new Point2D.Float();
+			setPoint(p, pos_a, ta, outer_a);
+			path.moveTo(p.getX(), p.getY());
+			setPoint(p, pos_b, tb, outer_b);
+			path.lineTo(p.getX(), p.getY());
+			setPoint(p, pos_b, tb, inner_b);
+			if (outline)
+				path.moveTo(p.getX(), p.getY());
+			else
+				path.lineTo(p.getX(), p.getY());
+			setPoint(p, pos_a, ta, inner_a);
+			path.lineTo(p.getX(), p.getY());
+			if (!outline)
+				path.closePath();
+		}
 		return path;
 	}
 
-	/** Create the outline to draw this object */
-	private Shape createOutline(float inner_a, float outer_a,
-		float inner_b, float outer_b)
+	/** Set a point relative to the location, offset by the tangent angle.
+	 * @param p Point to set.
+	 * @param distance Distance from the location, in meter units. */
+	private void setPoint(Point2D p, SphericalMercatorPosition pos,
+		double t, float distance)
 	{
-		Point2D.Float p = new Point2D.Float();
-		Path2D.Float path = new Path2D.Float(Path2D.WIND_NON_ZERO);
-		MapGeoLoc loc_a = segment.loc_up;
-		MapGeoLoc loc_b = segment.loc_dn;
-		loc_a.setPoint(p, outer_a);
-		path.moveTo(p.getX(), p.getY());
-		loc_b.setPoint(p, outer_b);
-		path.lineTo(p.getX(), p.getY());
-		loc_b.setPoint(p, inner_b);
-		path.moveTo(p.getX(), p.getY());
-		loc_a.setPoint(p, inner_a);
-		path.lineTo(p.getX(), p.getY());
-		return path;
+		assert (pos != null);
+		double x = pos.getX();
+		double y = pos.getY();
+		double xo = distance * Math.cos(t);
+		double yo = distance * Math.sin(t);
+		p.setLocation(x + xo, y + yo);
 	}
 
 	/** Get the map segment tool tip */
