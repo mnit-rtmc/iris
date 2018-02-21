@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -239,8 +239,8 @@ public class MapBean extends JComponent {
 		Point2D p = transformPoint(e.getPoint());
 		ListIterator<LayerState> it = model.getLayerIterator();
 		while (it.hasPrevious()) {
-			LayerState t = it.previous();
-			String tip = t.getTip(p);
+			LayerState ls = it.previous();
+			String tip = ls.getTip(p);
 			if (tip != null)
 				return tip;
 		}
