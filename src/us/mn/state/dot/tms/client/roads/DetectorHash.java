@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2015  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.roads;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Set;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.R_Node;
@@ -81,7 +82,7 @@ public class DetectorHash {
 	}
 
 	/** Get the detectors for a specific r_node */
-	public HashSet<Detector> getDetectors(R_Node n) {
+	public Set<Detector> getDetectors(R_Node n) {
 		return getDetectors(n.getName());
 	}
 

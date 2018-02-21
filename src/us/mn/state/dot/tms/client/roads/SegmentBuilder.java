@@ -21,18 +21,14 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Properties;
-import java.util.Set;
 import java.util.concurrent.ConcurrentSkipListMap;
 import javax.xml.parsers.ParserConfigurationException;
 import org.xml.sax.SAXException;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runSwing;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Detector;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
-import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 
@@ -42,14 +38,6 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
  * @author Douglas Lau
   */
 public class SegmentBuilder implements Iterable<Segment> {
-
-	/** Check if two locations are too distant */
-	static private boolean isTooDistant(MapGeoLoc l0, MapGeoLoc l1) {
-		Distance m = GeoLocHelper.distanceTo(l0.getGeoLoc(),
-			l1.getGeoLoc());
-		return m == null ||
-		       m.m() > SystemAttrEnum.MAP_SEGMENT_MAX_METERS.getInt();
-	}
 
 	/** Mapping of corridor names to segment lists */
 	private final ConcurrentSkipListMap<String, List<Segment>> cor_segs =
@@ -128,35 +116,27 @@ public class SegmentBuilder implements Iterable<Segment> {
 	public void updateCorridor(CorridorBase<R_Node> corridor) {
 		List<Segment> below = new ArrayList<Segment>();
 		List<Segment> above = new ArrayList<Segment>();
-		R_Node un = null;	// upstream node
-		MapGeoLoc uloc = null;	// upstream node location
-		MapGeoLoc ploc = null;	// previous node location
-		R_NodeModel mdl = null;	// node model
-		for (R_Node n: corridor) {
-			MapGeoLoc loc = findGeoLoc(n);
-			// Node may not be on selected corridor...
-			if (loc == null)
-				continue;
-			if (un != null && R_NodeHelper.isJoined(n) &&
-			    !isTooDistant(ploc, loc))
-			{
-				boolean td = isTooDistant(uloc, loc);
-				mdl = new R_NodeModel(n, mdl);
-				Segment seg = new Segment(mdl, un,
-					ploc, loc, samples, td);
-				if (!td)
-				    seg.addDetection(getDetectors(un));
-				if (n.getAbove())
+		R_Node sn = null;       // station node
+		MapGeoLoc sl = null;    // station node location
+		MapGeoLoc al = null;    // upstream node location
+		R_NodeModel mdl = null; // node model
+		for (R_Node bn: corridor) {
+			MapGeoLoc bl = findGeoLoc(bn);
+			Segment seg = new Segment(mdl, al, bn, bl, sn, sl,
+				samples, det_hash);
+			if (seg.isGood()) {
+				mdl = seg.getModel();
+				if (bn.getAbove())
 					above.add(seg);
 				else
 					below.add(seg);
 			} else
 				mdl = null;
-			if (un == null || R_NodeHelper.isStationBreak(n)) {
-				un = n;
-				uloc = loc;
+			if (null == sn || R_NodeHelper.isStationBreak(bn)) {
+				sn = bn;
+				sl = bl;
 			}
-			ploc = loc;
+			al = bl;
 		}
 		cor_segs.put(corridor.getName(), below);
 		// Prepend lowercase z, for sorting purposes
@@ -166,11 +146,6 @@ public class SegmentBuilder implements Iterable<Segment> {
 	/** Find the map geo loc */
 	public MapGeoLoc findGeoLoc(R_Node n) {
 		return manager.findGeoLoc(n);
-	}
-
-	/** Get a set of detectors for an r_node */
-	private Set<Detector> getDetectors(R_Node n) {
-		return det_hash.getDetectors(n);
 	}
 
 	/** Create a segment iterator.  This uses the cor_segs mapping, which

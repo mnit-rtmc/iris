@@ -18,7 +18,6 @@ import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
-import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.RoadClass;
@@ -148,28 +147,20 @@ public class MapSegment implements MapObject {
 		float inner_b, float outer_b, boolean outline)
 	{
 		Path2D.Float path = new Path2D.Float(Path2D.WIND_NON_ZERO);
-		SphericalMercatorPosition pos_a = GeoLocHelper.getPosition(
-			segment.loc_up.getGeoLoc());
-		SphericalMercatorPosition pos_b = GeoLocHelper.getPosition(
-			segment.loc_dn.getGeoLoc());
-		if (pos_a != null && pos_b != null) {
-			double ta = segment.loc_up.getTangent();
-			double tb = segment.loc_dn.getTangent();
-			Point2D.Float p = new Point2D.Float();
-			setPoint(p, pos_a, ta, outer_a);
+		Point2D.Float p = new Point2D.Float();
+		setPoint(p, segment.pos_a, segment.tangent_a, outer_a);
+		path.moveTo(p.getX(), p.getY());
+		setPoint(p, segment.pos_b, segment.tangent_b, outer_b);
+		path.lineTo(p.getX(), p.getY());
+		setPoint(p, segment.pos_b, segment.tangent_b, inner_b);
+		if (outline)
 			path.moveTo(p.getX(), p.getY());
-			setPoint(p, pos_b, tb, outer_b);
+		else
 			path.lineTo(p.getX(), p.getY());
-			setPoint(p, pos_b, tb, inner_b);
-			if (outline)
-				path.moveTo(p.getX(), p.getY());
-			else
-				path.lineTo(p.getX(), p.getY());
-			setPoint(p, pos_a, ta, inner_a);
-			path.lineTo(p.getX(), p.getY());
-			if (!outline)
-				path.closePath();
-		}
+		setPoint(p, segment.pos_a, segment.tangent_a, inner_a);
+		path.lineTo(p.getX(), p.getY());
+		if (!outline)
+			path.closePath();
 		return path;
 	}
 

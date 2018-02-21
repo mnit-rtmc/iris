@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,16 @@ import java.util.Map;
 import java.util.Set;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
+import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
+import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -32,6 +38,29 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class Segment {
 
+	/** Check if two locations are within segment distance */
+	static private boolean isWithinSegmentDist(MapGeoLoc g0, MapGeoLoc g1) {
+		GeoLoc l0 = (g0 != null) ? g0.getGeoLoc() : null;
+		GeoLoc l1 = (g1 != null) ? g1.getGeoLoc() : null;
+		Distance d = GeoLocHelper.distanceTo(l0, l1);
+		return d != null
+		    && d.m() <= SystemAttrEnum.MAP_SEGMENT_MAX_METERS.getInt();
+	}
+
+	/** Get position of a MapGeoLoc (may be null) */
+	static private SphericalMercatorPosition getPosition(MapGeoLoc loc) {
+		return (loc != null)
+		     ? GeoLocHelper.getPosition(loc.getGeoLoc())
+		     : null;
+	}
+
+	/** Get tangent of a MapGeoLoc (may be null) */
+	static private double getTangent(MapGeoLoc loc) {
+		return (loc != null)
+		     ? loc.getTangent()
+		     : MapGeoLoc.northTangent();
+	}
+
 	/** R_Node model */
 	private final R_NodeModel model;
 
@@ -40,28 +69,36 @@ public class Segment {
 		return model;
 	}
 
-	/** Upstream mainline node */
-	private final R_Node upstream;
-
-	/** Shift from upstream node to end of segment */
+	/** Shift from station node to downstream end */
 	private final int shift;
+
+	/** Flag indicating whether the segment is good */
+	private final boolean good;
+
+	/** Get flag indicating whether the segment is good */
+	public boolean isGood() {
+		return good;
+	}
 
 	/** Get the segment label */
 	public String getLabel(Integer lane) {
 		return labels.get(lane);
 	}
 
-	/** Location at upstream end of segment */
-	public final MapGeoLoc loc_up;
+	/** Position at upstream end */
+	public final SphericalMercatorPosition pos_a;
 
-	/** Location at downstream end of segment */
-	public final MapGeoLoc loc_dn;
+	/** Position at downstream end */
+	public final SphericalMercatorPosition pos_b;
+
+	/** Tangent at upstream end */
+	public final double tangent_a;
+
+	/** Tangent at downstream end */
+	public final double tangent_b;
 
 	/** Sample data set */
 	private final SampleDataSet samples;
-
-	/** Flag to indicate too distant from upstream node */
-	private final boolean too_distant;
 
 	/** Mapping of lane numbers to labels */
 	private final HashMap<Integer, String> labels =
@@ -71,43 +108,53 @@ public class Segment {
 	private final HashMap<String, Integer> lane_sensors =
 		new HashMap<String, Integer>();
 
-	/** Create a new segment */
-	public Segment(R_NodeModel m, R_Node u, MapGeoLoc lu, MapGeoLoc ld,
-		SampleDataSet sds, boolean td)
+	/** Create a new segment.
+	 * @param m Upstream node model.
+	 * @param al Location of node at upstream end of segment.
+	 * @param b Node at downstream end of segment.
+	 * @param bl Location of node at downstream end of segment.
+	 * @param s Station node containing detectors for segment.
+	 * @param sl Location of station node.
+	 * @param sds Sample data set.
+	 * @param dhash Detector hash. */
+	public Segment(R_NodeModel m, MapGeoLoc al, R_Node b, MapGeoLoc bl,
+		R_Node s, MapGeoLoc sl, SampleDataSet sds, DetectorHash dhash)
 	{
-		assert m != null;
-		assert u != null;
-		assert lu != null;
-		assert ld != null;
-		model = m;
-		upstream = u;
-		loc_up = lu;
-		loc_dn = ld;
+		model = new R_NodeModel(b, m);
+		pos_a = getPosition(al);
+		pos_b = getPosition(bl);
+		tangent_a = getTangent(al);
+		tangent_b = getTangent(bl);
 		samples = sds;
-		too_distant = td;
-		shift = model.getShift(upstream);
-		if (!too_distant)
-			labels.put(null, getStationLabel());
+		shift = model.getShift(s);
+		good = (s != null) && R_NodeHelper.isJoined(b) &&
+			isWithinSegmentDist(al, bl);
+		if (isWithinSegmentDist(sl, bl)) {
+			labels.put(null, getStationLabel(s));
+			addDetection(dhash.getDetectors(s));
+		}
 	}
 
 	/** Get label for a station segment */
-	private String getStationLabel() {
+	private String getStationLabel(R_Node s) {
 		StringBuilder sb = new StringBuilder();
 		sb.append(I18N.get("detector.station"));
 		sb.append(" ");
-		String sid = upstream.getStationID();
-		if (sid != null && sid.length() > 0) {
-			sb.append(sid);
-			sb.append(": ");
-			Station sta = StationHelper.lookup(sid);
-			if (sta != null)
-				sb.append(StationHelper.getLabel(sta));
+		if (s != null) {
+			String sid = s.getStationID();
+			if (sid != null && sid.length() > 0) {
+				sb.append(sid);
+				sb.append(": ");
+				Station sta = StationHelper.lookup(sid);
+				if (sta != null)
+					sb.append(StationHelper.getLabel(sta));
+			}
 		}
 		return sb.toString().trim();
 	}
 
 	/** Add detection to the segment */
-	public void addDetection(Set<Detector> dets) {
+	private void addDetection(Set<Detector> dets) {
 		for (Detector d: dets) {
 			String sid = d.getName();
 			int ln = d.getLaneNumber();
