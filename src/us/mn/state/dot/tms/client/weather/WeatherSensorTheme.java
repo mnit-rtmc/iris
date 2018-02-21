@@ -54,6 +54,7 @@ public class WeatherSensorTheme extends ProxyTheme<WeatherSensor> {
 
 	/** Get tooltip text for the given map object.
 	 * @return String or null for none */
+	@Override
 	public String getTip(MapObject o) {
 		WeatherSensor p = manager.findProxy(o);
 		if(p == null)
