@@ -311,9 +311,10 @@ public class MultiString {
 	 * @param cb Callback to set tag. */
 	static private void parseParking(String tag, Multi cb) {
 		String[] args = tag.split(",", 3);
+		String pid = (args.length > 0) ? args[0] : "pa";
 		String l_txt = (args.length > 1) ? args[1] : "LOW";
 		String c_txt = (args.length > 2) ? args[2] : "CLOSED";
-		cb.addParking(tag, l_txt, c_txt);
+		cb.addParking(pid, l_txt, c_txt);
 	}
 
 	/** Parse locator tag [loc{rn,rd,md,xn,xa,mi}].
