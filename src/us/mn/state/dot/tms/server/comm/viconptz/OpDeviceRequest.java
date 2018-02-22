@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2017  Minnesota Department of Transportation
+ * Copyright (C) 2014-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,6 +54,10 @@ public class OpDeviceRequest extends OpStep {
 		case CAMERA_WIPER_ONESHOT:
 			return AuxProp.wiper(n_sent);
 		case CAMERA_MENU_ENTER:
+			/* Pelco cams with TXB-V translator board use
+			 * "IRIS open" for menu enter command.  For actual
+			 * Vicon cameras, it should be handled by MenuProp */
+			return new CommandProp(0, 0, 0, 0, 1);
 		case CAMERA_MENU_CANCEL:
 			return new MenuProp(dr);
 		default:
