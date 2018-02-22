@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2012  Minnesota Department of Transportation
+ * Copyright (C) 2004-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,11 +40,20 @@ public class SensorSample {
 		return speed;
 	}
 
+	/** Sampled occupancy */
+	private final Float occ;
+
+	/** Get the sampled occupancy */
+	public Float getOcc() {
+		return occ;
+	}
+
 	/** Create a new sensor sample */
-	public SensorSample(String i, Integer f, Integer s) {
+	public SensorSample(String i, Integer f, Integer s, Float o) {
 		id = i;
 		flow = f;
 		speed = s;
+		occ = o;
 	}
 
 	/** Get the density (vehicles per mile per lane) */

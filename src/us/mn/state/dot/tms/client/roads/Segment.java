@@ -72,6 +72,9 @@ public class Segment {
 	/** Shift from station node to downstream end */
 	private final int shift;
 
+	/** Flag indicating whether the segment contains parking detection */
+	public final boolean parking;
+
 	/** Flag indicating whether the segment is good */
 	private final boolean good;
 
@@ -127,6 +130,7 @@ public class Segment {
 		tangent_b = getTangent(bl);
 		samples = sds;
 		shift = model.getShift(s);
+		parking = R_NodeHelper.isParking(b);
 		good = (s != null) && R_NodeHelper.isJoined(b) &&
 			isWithinSegmentDist(al, bl);
 		if (isWithinSegmentDist(sl, bl)) {
@@ -253,6 +257,26 @@ public class Segment {
 			return total / count;
 		else
 			return null;
+	}
+
+	/** Get the occupancy for the given lane */
+	public Float getOcc(Integer lane) {
+		float total = 0;
+		int count = 0;
+		for (Map.Entry<String, Integer> ent: lane_sensors.entrySet()) {
+			if (lane == null || lane == ent.getValue()) {
+				String sid = ent.getKey();
+				SensorSample s = samples.getSample(sid);
+				if (s != null) {
+					Float o = s.getOcc();
+					if (o != null) {
+						total += o;
+						count++;
+					}
+				}
+			}
+		}
+		return (count > 0) ? total / count : null;
 	}
 
 	/** Get the minimum left shift */

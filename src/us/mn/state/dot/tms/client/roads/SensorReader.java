@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,6 +57,18 @@ public class SensorReader {
 		try {
 			if (v != null)
 				return Integer.parseInt(v);
+		}
+		catch (NumberFormatException e) {
+			// Invalid value
+		}
+		return null;
+	}
+
+	/** Parse an attribute as a float value */
+	static private Float parseFloat(String v) {
+		try {
+			if (v != null)
+				return Float.parseFloat(v);
 		}
 		catch (NumberFormatException e) {
 			// Invalid value
@@ -173,11 +185,16 @@ public class SensorReader {
 	}
 
 	/** Notify segment layer of one sensor sample */
-	private void notifySensorSample(String sensor, String f, String s) {
+	private void notifySensorSample(String sensor, String f, String s,
+		String o)
+	{
 		Integer flow = parseInt(f);
 		Integer speed = parseInt(s);
-		if (flow != null || speed != null)
-			builder.update(new SensorSample(sensor, flow, speed));
+		Float occ = parseFloat(o);
+		if (flow != null || speed != null || occ != null) {
+			builder.update(new SensorSample(sensor, flow, speed,
+				occ));
+		}
 	}
 
 	/** Handle one sensor sample element */
@@ -186,8 +203,9 @@ public class SensorReader {
 			String sensor = attrs.getValue("sensor");
 			String flow = attrs.getValue("flow");
 			String speed = attrs.getValue("speed");
+			String occ = attrs.getValue("occ");
 			if (sensor != null)
-				notifySensorSample(sensor, flow, speed);
+				notifySensorSample(sensor, flow, speed, occ);
 		}
 	}
 }

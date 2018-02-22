@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -138,5 +138,17 @@ public class R_NodeHelper extends BaseHelper {
 	static public String getCorridorName(R_Node r_node) {
 		GeoLoc loc = r_node.getGeoLoc();
 		return GeoLocHelper.getCorridorName(loc);
+	}
+
+	/** Check for parking detection */
+	static public boolean isParking(R_Node n) {
+		Iterator<Detector> it = DetectorHelper.iterator();
+		while (it.hasNext()) {
+			Detector d = it.next();
+			if (d.getR_Node() == n &&
+			    d.getLaneType() == LaneType.PARKING.ordinal())
+				return true;
+		}
+		return false;
 	}
 }

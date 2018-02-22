@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,9 +71,31 @@ abstract public class SegmentTheme extends Theme {
 		if (mo instanceof MapSegment) {
 			MapSegment ms = (MapSegment) mo;
 			return getSegmentStyle(ms);
-		} else
+		} else if (mo instanceof ParkingSpace)
+			return getStyle((ParkingSpace) mo);
+		else
 			return R_NODE_STYLE;
 	}
+
+	/** Get the style to draw a parking space */
+	private Style getStyle(ParkingSpace ps) {
+		Float o = ps.getOcc();
+		if (null == o)
+			return DEFAULT_STYLE;
+		else {
+			int s = Math.round(o * 18);
+			if (s < 150)
+				return O_STYLES[0];
+			else
+				return O_STYLES[1];
+		}
+	}
+
+	/** Parking occupancy styles */
+	static private final Style[] O_STYLES = new Style[] {
+		new Style(I18N.get("parking.vacant"), OUTLINE, GREEN),
+		new Style(I18N.get("parking.occupied"), OUTLINE, RED),
+	};
 
 	/** Get the style to draw a given segment */
 	abstract protected Style getSegmentStyle(MapSegment ms);
@@ -83,6 +105,8 @@ abstract public class SegmentTheme extends Theme {
 	public String getTip(MapObject mo) {
 		if (mo instanceof MapSegment)
 			return ((MapSegment) mo).getTip();
+		else if (mo instanceof ParkingSpace)
+			return ((ParkingSpace) mo).getTip();
 		else
 			return null;
 	}

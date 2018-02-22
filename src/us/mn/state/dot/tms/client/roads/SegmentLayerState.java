@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -63,6 +63,11 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 		return map.getModel().getZoomLevel().ordinal() >= 14;
 	}
 
+	/** Is the zoom level past the "parking space" threshold? */
+	private boolean isPastParkingZoomThreshold() {
+		return map.getModel().getZoomLevel().ordinal() >= 17;
+	}
+
 	/** Get the current map scale */
 	@Override
 	protected float getScale() {
@@ -86,6 +91,8 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 	 * @return Map object found, if any. */
 	private MapObject forEachLane(MapSearcher s) {
 		float scale = getScale();
+		boolean parking = isPastParkingZoomThreshold();
+		Double tangent = null;
 		for (Segment seg: builder) {
 			for (int sh = seg.getLeftMin(); sh < seg.getRightMax();
 			     sh++)
@@ -94,6 +101,14 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 				if (s.next(ms))
 					return ms;
 			}
+			if (parking && seg.parking) {
+				ParkingSpace ps = new ParkingSpace(seg, scale,
+					tangent);
+				if (s.next(ps))
+					return ps;
+				tangent = ps.tangent;
+			} else
+				tangent = null;
 		}
 		return null;
 	}
