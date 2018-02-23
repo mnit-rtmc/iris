@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +30,7 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DmsAction;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.DmsSignGroup;
+import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.LaneAction;
 import us.mn.state.dot.tms.LaneActionHelper;
@@ -39,11 +41,13 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.server.event.ActionPlanEvent;
 
 /**
  * An action plan is a set of actions which can be deployed together.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
@@ -196,6 +200,10 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	@Override
 	public void setActive(boolean a) {
 		active = a;
+		String un = getProcUser();
+		EventType et = (a ? EventType.ACTION_PLAN_ACTIVATED : 
+			EventType.ACTION_PLAN_DEACTIVATED);
+		logEvent(new ActionPlanEvent(et, getName(), un));
 	}
 
 	/** Set the active status */

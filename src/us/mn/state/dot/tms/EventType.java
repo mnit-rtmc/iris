@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +19,7 @@ package us.mn.state.dot.tms;
  * This enumeration contains events in the event_description table.
  *
  * @author Douglas Lau
+ * @author Michael Darter
  */
 public enum EventType {
 	ALARM_TRIGGERED(1), ALARM_CLEARED(2),
@@ -41,7 +43,9 @@ public enum EventType {
 	PRICE_DEPLOYED(651), PRICE_VERIFIED(652),
 	TT_LINK_TOO_LONG(701), TT_NO_DATA(702), TT_NO_DESTINATION_DATA(703),
 	TT_NO_ORIGIN_DATA(704), TT_NO_ROUTE(705),
-	CAMERA_SWITCHED(801);
+	CAMERA_SWITCHED(801),
+	ACTION_PLAN_ACTIVATED(900),
+	ACTION_PLAN_DEACTIVATED(901);
 
 	/** Event type ID */
 	public final int id;
