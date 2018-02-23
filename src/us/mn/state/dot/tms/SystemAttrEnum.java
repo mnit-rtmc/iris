@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author John L. Stanley
  */
 public enum SystemAttrEnum {
+	ACTION_PLAN_ALERT_LIST(""),
 	ACTION_PLAN_EVENT_PURGE_DAYS(90, 0, 1000),
 	CAMERA_AUTOPLAY(true, Change.RESTART_CLIENT),
 	CAMERA_CONSTRUCTION_URL(String.class),
@@ -85,6 +86,7 @@ public enum SystemAttrEnum {
 	DMSXML_REINIT_DETECT(false),
 	EMAIL_SENDER_SERVER(String.class),
 	EMAIL_SMTP_HOST(String.class),
+	EMAIL_RECIPIENT_ACTION_PLAN(String.class),
 	EMAIL_RECIPIENT_AWS(String.class),
 	EMAIL_RECIPIENT_DMSXML_REINIT(String.class),
 	EMAIL_RECIPIENT_GATE_ARM(String.class),

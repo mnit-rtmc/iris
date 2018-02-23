@@ -42,6 +42,7 @@ import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.ActionPlanEvent;
+import static us.mn.state.dot.tms.server.ActionPlanSystem.sendEmailAlert;
 
 /**
  * An action plan is a set of actions which can be deployed together.
@@ -204,6 +205,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		EventType et = (a ? EventType.ACTION_PLAN_ACTIVATED : 
 			EventType.ACTION_PLAN_DEACTIVATED);
 		logEvent(new ActionPlanEvent(et, getName(), un));
+		sendEmailAlert(un, a, getName());
 	}
 
 	/** Set the active status */
