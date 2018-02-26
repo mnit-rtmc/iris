@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2016  Minnesota Department of Transportation
+ * Copyright (C) 2002-2018  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -18,8 +18,6 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 
 import java.io.IOException;
 import java.util.Random;
-import javax.mail.MessagingException;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
@@ -27,6 +25,7 @@ import us.mn.state.dot.tms.PageTimeHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.EmailHandler;
 import us.mn.state.dot.tms.server.SignConfigImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -34,7 +33,6 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.DECISECONDS;
-import us.mn.state.dot.tms.utils.Emailer;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
@@ -92,12 +90,12 @@ abstract class OpDms extends OpDevice {
 		super.cleanup();
 	}
 
-	/** Sign access enumerated type, which is based on the sign 
+	/** Sign access enumerated type, which is based on the sign
 	 * access field specified in the DMS. */
 	enum SignAccess {
 		DIALUP_MODEM("dialup", SystemAttrEnum.
 			DMSXML_MODEM_OP_TIMEOUT_SECS),
-		IP("ip", SystemAttrEnum.DMSXML_OP_TIMEOUT_SECS), 
+		IP("ip", SystemAttrEnum.DMSXML_OP_TIMEOUT_SECS),
 		UNKNOWN("", SystemAttrEnum.DMSXML_OP_TIMEOUT_SECS);
 
 		/** Parse string for id of type. Assumed to be lowercase. */
@@ -121,7 +119,7 @@ abstract class OpDms extends OpDevice {
 				return DIALUP_MODEM;
 			else if(d.contains(IP.id_desc))
 				return IP;
-			// unknown sign type, this happens when the first 
+			// unknown sign type, this happens when the first
 			// OpQueryConfig message is being sent.
 			else
 				return UNKNOWN;
@@ -158,7 +156,7 @@ abstract class OpDms extends OpDevice {
 		return msg_owner.toLowerCase().equals(awsName().toLowerCase());
 	}
 
-	/** set message attributes which are a function of the 
+	/** set message attributes which are a function of the
 	 * operation, sign, etc. */
 	void setMsgAttributes(Message m) {
 		m.setTimeoutMS(calcTimeoutMS());
@@ -168,7 +166,7 @@ abstract class OpDms extends OpDevice {
 	private int calcTimeoutMS() {
 		SignAccess a = SignAccess.get(m_dms);
 		int s = a.get(m_dms).timeoutSecs();
-		LOG.log("Op timeout is " + s + " secs, SignAccess=" + a + 
+		LOG.log("Op timeout is " + s + " secs, SignAccess=" + a +
 			", dms=" + m_dms);
 		return s * 1000;
 	}
@@ -195,10 +193,10 @@ abstract class OpDms extends OpDevice {
 	/** random number generator */
 	private static Random m_rand = new Random(System.currentTimeMillis());
 
-	/** generate a unique operation id, which is a long, 
+	/** generate a unique operation id, which is a long,
 	 *  returned as a string. */
 	static String generateId() {
-		return new Long(System.currentTimeMillis() + 
+		return new Long(System.currentTimeMillis() +
 			m_rand.nextInt()).toString();
 	}
 
@@ -208,7 +206,7 @@ abstract class OpDms extends OpDevice {
 
 	/** return description of operation */
 	public String getOperationDescription() {
-		m_opDesc = (m_opDesc == null ? 
+		m_opDesc = (m_opDesc == null ?
 			"Unnamed operation" : m_opDesc);
 		if(m_user == null)
 			return m_opDesc;
@@ -242,7 +240,7 @@ abstract class OpDms extends OpDevice {
 
 	/** Return an intermediate status XML element */
 	private static XmlElem buildInterStatusElem() {
-		XmlElem is = new XmlElem(Message.DMSXMLMSGTAG, 
+		XmlElem is = new XmlElem(Message.DMSXMLMSGTAG,
 			Message.ISTATUSTAG);
 		// response (there is no request)
 		is.addRes("Id");
@@ -290,51 +288,17 @@ abstract class OpDms extends OpDevice {
 		}
 	}
 
-	/** Log a message to stderr */
-		static private void logStderr(String msg) {
-		System.err.println(TimeSteward.currentDateTimeString(true)
-			+ "DMSXML: " + msg);
-	}
-
 	/** Send power cycle email */
 	public void sendMaintenanceEmail() {
+		String sub = "CMS maintenance alert: " + m_dms;
 		String msg = "IRIS has placed CMS " + m_dms + " into "
 			+ "\"maintenance\" mode.  One reason this may have "
 			+ "happened is if IRIS has found the sign to be "
 			+ "unexpectedly blank, which could indicate that the "
 			+ "sign controller's power has been cycled.";
-		String subject = "CMS maintenance alert: " + m_dms;
-		String host = SystemAttrEnum.EMAIL_SMTP_HOST.getString();
-		if (host == null || host.length() <= 0) {
-			logStderr("Alert!  DMS reinit detect (" + m_dms
-				+ ") email failed: invalid host.  "
-				+ "Message: " + msg);
-			return;
-		}
-		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
-		if (sender == null || sender.length() <= 0) {
-			logStderr("Alert!  DMS reinit detect (" + m_dms
-				+ ") email failed: invalid sender.  "
-				+ "Message: " + msg);
-			return;
-		}
 		String recip =
 			SystemAttrEnum.EMAIL_RECIPIENT_DMSXML_REINIT.getString();
-		if (recip == null || recip.length() <= 0) {
-			logStderr("Alert!  DMS reinit detect (" + m_dms
-				+ ") email failed: invalid recipient.  "
-				+ "Message: " + msg);
-			return;
-		}
-		try {
-			Emailer email = new Emailer(host, sender, recip);
-			email.send(subject, msg);
-		}
-		catch(MessagingException e) {
-			logStderr("Alert!  DMS reinit detect (" + m_dms
-				+ ") email failed: " + e.getMessage()
-				+ ".  Message: " + msg);
-		}
+		EmailHandler.sendEmail(sub, msg, recip);
 	}
 
 	/** Get the maint status message in the controller */
@@ -373,8 +337,8 @@ abstract class OpDms extends OpDevice {
 		 *		<Msg>...</Msg>
 		 *	</elemname></DmsXml>
 		 */
-		private XmlElem buildXmlElem(String elemReqName, 
-			String elemResName) 
+		private XmlElem buildXmlElem(String elemReqName,
+			String elemResName)
 		{
 			XmlElem xrr = new XmlElem(elemReqName, elemResName);
 
@@ -438,7 +402,7 @@ abstract class OpDms extends OpDevice {
 				if(!valid && errmsg.length() <= 0)
 					errmsg = FAILURE_UNKNOWN;
 
-				// update 
+				// update
 				complete(mess);
 
 				// valid message received?
@@ -452,12 +416,12 @@ abstract class OpDms extends OpDevice {
 					// determine matrix type
 					String stype = xrr.getResString("type");
 					if(stype.toLowerCase().contains(
-						"full")) 
+						"full"))
 					{
 						type = DMSType.VMS_FULL;
 					} else {
 						LOG.log("SEVERE: Unknown "
-							+ "matrix type read (" 
+							+ "matrix type read ("
 							+ stype + ")");
 					}
 
@@ -487,18 +451,18 @@ abstract class OpDms extends OpDevice {
 					"received:" + ex + ", id=" + id);
 				valid = false;
 				errmsg = ex.getMessage();
-				handleCommError(EventType.PARSING_ERROR, 
+				handleCommError(EventType.PARSING_ERROR,
 					errmsg);
 			}
 
-			// set config values these values are displayed in 
+			// set config values these values are displayed in
 			// the DMS dialog, Configuration tab
 			if(valid) {
 				setErrorStatus("");
 				m_dms.setMake(make);
 				m_dms.setModel(model);
 				m_dms.setVersionNotify(version);
-		
+
 				int dt = type.ordinal();
 				SignConfigImpl sc = SignConfigImpl.findOrCreate(
 					dt, false, "OTHER", signAccess, "other",
@@ -541,16 +505,16 @@ abstract class OpDms extends OpDevice {
 		 * @see Messenger#shouldReopen()
 		 */
 		protected Phase poll(CommMessage argmess)
-			throws IOException 
+			throws IOException
 		{
 			Message mess = (Message) argmess;
 
 			// set message attributes as a function of the op
 			setMsgAttributes(mess);
 
-			// build xml request and expected response			
+			// build xml request and expected response
 			mess.setName(getOpName());
-			XmlElem xrr = buildXmlElem("GetDmsConfigReqMsg", 
+			XmlElem xrr = buildXmlElem("GetDmsConfigReqMsg",
 				"GetDmsConfigRespMsg");
 
 			// send request and read response

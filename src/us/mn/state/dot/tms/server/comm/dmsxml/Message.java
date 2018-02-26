@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2008-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,14 +18,13 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import javax.mail.MessagingException;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.server.EmailHandler;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import static us.mn.state.dot.tms.server.comm.dmsxml.DmsXmlPoller.LOG;
-import us.mn.state.dot.tms.utils.Emailer;
 import us.mn.state.dot.tms.utils.SString;
 
 /**
@@ -70,7 +69,7 @@ class Message implements CommMessage
 	/** Create a new message */
 	public Message(OutputStream os, InputStream is) {
 		m_os = os;
-		m_is = new TokenStreamReader(is, 
+		m_is = new TokenStreamReader(is,
 			// buffer size, max cap, sleep time
 			1024, 16384, 1000);
 	}
@@ -87,7 +86,7 @@ class Message implements CommMessage
 	/** set timeout value in MS */
 	public void setTimeoutMS(int ms) {
 		m_dmsTimeoutMS = (ms <= 0 ? DEFAULT_TIMEOUT_DMS_MS : ms);
-		LOG.log("DmsXml.Message.setTimeoutMS(" + ms + 
+		LOG.log("DmsXml.Message.setTimeoutMS(" + ms +
 			") called.");
 	}
 
@@ -160,9 +159,9 @@ class Message implements CommMessage
 		byte[] array = buildReqMsg();
 
 		// send message
-		long starttime=TimeSteward.currentTimeMillis();
-		LOG.log("queryProps(): Writing " + array.length + 
-			" bytes to SensorServer: " + 
+		long starttime = TimeSteward.currentTimeMillis();
+		LOG.log("queryProps(): Writing " + array.length +
+			" bytes to SensorServer: " +
 			SString.byteArrayToString(array) + ".");
 		m_is.resetBuffer();
 		m_os.write(array);
@@ -189,27 +188,27 @@ class Message implements CommMessage
 				int leftms = (int)(m_dmsTimeoutMS - elapsed);
 				if(leftms > 0) {
 					token = m_is.readToken(leftms,
-					       	"<" + DMSXMLMSGTAG + ">", 
+					       	"<" + DMSXMLMSGTAG + ">",
 						"</" + DMSXMLMSGTAG + ">");
 					setCompletionTimeMS((int)STime.
 						calcTimeDeltaMS(starttime));
-					LOG.log("Response received in " + 
-						getCompletionTimeMS() + 
+					LOG.log("Response received in " +
+						getCompletionTimeMS() +
 						" ms.");
 				}
 			} catch(IllegalStateException ex) {
-				istatus = new String[] 
+				istatus = new String[]
 					{"Warning: buffer cap exceeded."};
 				handleAwsFailure(istatus[0]);
 				throw new IOException(istatus[0]);
 			} catch(IOException ex) {
-				istatus = new String[] 
+				istatus = new String[]
 					{"Can't connect to SensorServer."};
 				handleAwsFailure(istatus[0]);
 				LOG.log("WARNING: " + istatus[0]);
 				throw new IOException(istatus[0]);
 			} catch(Exception ex) {
-				istatus = new String[] 
+				istatus = new String[]
 					{"Unexpected problem: " + ex};
 				handleAwsFailure(istatus[0]);
 				throw new IOException(istatus[0]);
@@ -221,8 +220,8 @@ class Message implements CommMessage
 				String err = "";
 				err += "dmsxml.Message.readElements(): " +
 					"timed out waiting for " + dmsid + "("
-					+ (getCompletionTimeMS() / 1000) + 
-					" seconds). Timeout is " + 
+					+ (getCompletionTimeMS() / 1000) +
+					" seconds). Timeout is " +
 					m_dmsTimeoutMS / 1000 + " secs). ";
 				handleAwsFailure(err);
 				LOG.log(err);
@@ -261,11 +260,11 @@ class Message implements CommMessage
 		return OpDms.ownerIsAws(getResString("Owner"));
 	}
 
-	/** Determine if failure sending an AWS message to the 
-	 *  SensorServer occurred. 
+	/** Determine if failure sending an AWS message to the
+	 *  SensorServer occurred.
 	 * @return true on failure else false. */
 	protected boolean checkAwsFailure() {
-		LOG.log("Message.checkAwsFailure() called. this=" + 
+		LOG.log("Message.checkAwsFailure() called. this=" +
 			toString() + ", ownerIsAws=" + ownerIsAws());
  		if(m_xelems == null)
 			return false;
@@ -334,48 +333,21 @@ class Message implements CommMessage
 		return ret;
 	}
 
-	/** This method handles a failure when IRIS fails to send an AWS 
+	/** This method handles a failure when IRIS fails to send an AWS
 	 *  message to a DMS.
-	 *  @param errmsgnote Optional error message, appended to generated 
+	 *  @param errmsgnote Optional error message, appended to generated
 	 *	  message. */
 	public void handleAwsFailure(String errmsgnote) {
-		if(errmsgnote == null)
+		if (null == errmsgnote)
 			errmsgnote = "";
-
-		// owner is not aws?
-		if(!ownerIsAws())
+		if (!ownerIsAws())
 			return;
 
-		// generate an error message
-		String errmsg = getAwsFailureMessage() + errmsgnote;
-		LOG.log("WARNING: failure to send AWS message to DMS: " + 
-			errmsg);
-
-		// build email
-		String host = SystemAttrEnum.EMAIL_SMTP_HOST.getString();
-		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
+		String sub = "IRIS could not send AWS message to DMS";
+		String msg = getAwsFailureMessage() + errmsgnote;
 		String recip = SystemAttrEnum.EMAIL_RECIPIENT_AWS.getString();
-		String subject = "IRIS could not send AWS message to DMS";
-
-		// send
-		if(host == null || host.length() <= 0 ||
-		   recip == null || recip.length() <= 0 ||
-		   sender == null || sender.length() <= 0)
-		{
-			LOG.log("WARNING: didn't" +
-				"try to send AWS error email.");
-		} else {
-			try {
-				Emailer email = new Emailer(host, sender,recip);
-				email.send(subject, errmsg);
-				LOG.log("Message.handleAwsFailure(): " + 
-					"sent email");
-			}
-			catch(MessagingException e) {
-				LOG.log("WARNING: " +
-					"email failed: " + e.getMessage());
-			}
-		}
+		EmailHandler.sendEmail(sub, msg, recip);
+		LOG.log("WARNING: failure to send AWS message to DMS: " + msg);
 	}
 
 	/** Store the controller properties.
