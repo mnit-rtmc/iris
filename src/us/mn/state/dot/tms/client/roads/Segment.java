@@ -133,7 +133,9 @@ public class Segment {
 		parking = R_NodeHelper.isParking(b);
 		good = (s != null) && R_NodeHelper.isJoined(b) &&
 			isWithinSegmentDist(al, bl);
-		if (isWithinSegmentDist(sl, bl)) {
+		if (parking)
+			addDetection(dhash.getDetectors(b));
+		else if (isWithinSegmentDist(sl, bl)) {
 			labels.put(null, getStationLabel(s));
 			addDetection(dhash.getDetectors(s));
 		}
