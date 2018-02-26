@@ -42,9 +42,9 @@ public class ActionPlanSystem {
 	}
 
 	/** Send an email alert.  This method does not block.
-	 * @param usr User name
-	 * @param active True if plan is being activated
-	 * @param pname Plan name being activated */
+	 * @param usr User name.
+	 * @param active True if plan is being activated.
+	 * @param pname Plan name being activated. */
 	static public void sendEmailAlert(String usr, boolean active,
 		String pname)
 	{

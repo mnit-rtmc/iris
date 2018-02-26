@@ -258,6 +258,8 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	public void setPhase(PlanPhase p) {
 		phase = p;
 		phase_time = TimeSteward.currentTimeMillis();
+		EventType et = EventType.ACTION_PLAN_PHASE_CHANGED;
+		logEvent(new ActionPlanEvent(et, getName(), p.toString()));
 	}
 
 	/**

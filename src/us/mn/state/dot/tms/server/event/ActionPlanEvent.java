@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2018  Iteris Inc.
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +23,9 @@ import us.mn.state.dot.tms.TMSException;
 
 /**
  * Log Action Plan events to the database.
+ *
  * @author Michael Darter
+ * @author Douglas Lau
  */
 public class ActionPlanEvent extends BaseEvent {
 
@@ -44,29 +47,28 @@ public class ActionPlanEvent extends BaseEvent {
 		}
 	}
 
-	/** Action Plan affected by this event */
-	protected final String action_plan;
-
-	/** User who deployed message */
-	protected final String iris_user;
-
 	/** Is the specified event an action plan event? */
 	static private boolean isActionPlanEvent(EventType et) {
-		return et == EventType.ACTION_PLAN_ACTIVATED ||
-			et == EventType.ACTION_PLAN_DEACTIVATED;
+		return EventType.ACTION_PLAN_ACTIVATED == et ||
+		       EventType.ACTION_PLAN_DEACTIVATED == et ||
+		       EventType.ACTION_PLAN_PHASE_CHANGED == et;
 	}
 
-	/** Create a new event
-	 * @arg et Event type
-	 * @arg ap Action plan name
-	 * @arg iu IRIS user name */
-	public ActionPlanEvent(EventType et, String ap, String iu) {
+	/** Action Plan affected by this event */
+	private final String action_plan;
+
+	/** Detail message */
+	private final String detail;
+
+	/** Create a new event.
+	 * @param et Event type.
+	 * @param ap Action plan name.
+	 * @param dt Detail message (user name, etc.) */
+	public ActionPlanEvent(EventType et, String ap, String dt) {
 		super(et);
-		if (!isActionPlanEvent(et)) {
-			assert(false);
-		}
+		assert isActionPlanEvent(et);
 		action_plan = ap;
-		iris_user = iu;
+		detail = dt;
 	}
 
 	/** Get the database table name */
@@ -82,7 +84,7 @@ public class ActionPlanEvent extends BaseEvent {
 		map.put("event_date", event_date);
 		map.put("event_desc_id", event_type.id);
 		map.put("action_plan", action_plan);
-		map.put("iris_user", iris_user);
+		map.put("detail", detail);
 		return map;
 	}
 }

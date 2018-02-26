@@ -30,14 +30,14 @@ CREATE TABLE event.action_plan_event (
 	event_date timestamp with time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
-	action_plan VARCHAR(16),
-	iris_user VARCHAR(15)
+	action_plan VARCHAR(16) NOT NULL,
+	detail VARCHAR(15) NOT NULL
 );
 
 -- Add action_plan_event_view
 CREATE VIEW action_plan_event_view AS
 	SELECT e.event_id, e.event_date, ed.description AS event_description,
-		e.action_plan, e.iris_user
+		e.action_plan, e.detail
 	FROM event.action_plan_event e
 	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
 GRANT SELECT ON action_plan_event_view TO PUBLIC;
@@ -47,6 +47,8 @@ INSERT INTO event.event_description (event_desc_id, description)
 	VALUES (900, 'Action Plan ACTIVATED');
 INSERT INTO event.event_description (event_desc_id, description)
 	VALUES (901, 'Action Plan DEACTIVATED');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (902, 'Action Plan Phase CHANGED');
 
 -- Add action_plan_event_purge_days system attribute
 INSERT INTO iris.system_attribute (name, value)
