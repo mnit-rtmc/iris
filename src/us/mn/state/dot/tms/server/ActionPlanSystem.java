@@ -29,20 +29,20 @@ import us.mn.state.dot.tms.utils.Emailer;
 public class ActionPlanSystem extends Thread {
 
 	 /** Thread for email jobs */
-	static private final Scheduler EMAIL = 
-	new Scheduler("email");
+	static private final Scheduler EMAIL = new Scheduler("email");
 
 	/** Disallow instantiation */
 	private ActionPlanSystem() { }
 
 	/** Should the specified user name trigger an Action Plan alert? */
 	static private boolean userTriggersAlert(String uname) {
-		String ulist = 
+		String ulist =
 			SystemAttrEnum.ACTION_PLAN_ALERT_LIST.getString();
 		String[] csv = ulist.trim().split(",");
-		for (String user : csv)
+		for (String user : csv) {
 			if (uname.trim().equals(user.trim()))
 				return true;
+		}
 		return false;
 	}
 
@@ -61,8 +61,8 @@ public class ActionPlanSystem extends Thread {
 	 * @arg usr User name
 	 * @arg active True if plan is being activated
 	 * @arg pname Plan name being activated */
-	static public void sendEmailAlert(final String usr, 
-		final boolean active, final String pname) 
+	static public void sendEmailAlert(final String usr,
+		final boolean active, final String pname)
 	{
 		final int PRESEND_WAIT_MS = 2000; // arbitrary
 		EMAIL.addJob(new Job(PRESEND_WAIT_MS) {
@@ -82,26 +82,26 @@ public class ActionPlanSystem extends Thread {
 	 * @arg usr User name
 	 * @arg active True if plan is being activated
 	 * @arg pname Plan name being activated */
-	static private void doSendEmailAlert(String usr, boolean active, 
-		String pname) 
+	static private void doSendEmailAlert(String usr, boolean active,
+		String pname)
 	{
-		String msg = "User " + usr + 
-			(active ? " actived" : " deactivated") + 
-			" action plan " + "'" + pname + "' on " + 
+		String msg = "User " + usr +
+			(active ? " actived" : " deactivated") +
+			" action plan " + "'" + pname + "' on " +
 			new Date().toString();
 		String host = SystemAttrEnum.EMAIL_SMTP_HOST.getString();
-		if(host == null || host.length() <= 0) {
+		if (host == null || host.length() <= 0) {
 			logEmailError(msg, "invalid host");
 			return;
 		}
 		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
-		if(sender == null || sender.length() <= 0) {
+		if (sender == null || sender.length() <= 0) {
 			logEmailError(msg, "invalid sender");
 			return;
 		}
 		String recip =
 			SystemAttrEnum.EMAIL_RECIPIENT_ACTION_PLAN.getString();
-		if(recip == null || recip.length() <= 0) {
+		if (recip == null || recip.length() <= 0) {
 			logEmailError(msg, "invalid recipient");
 			return;
 		}
@@ -110,7 +110,7 @@ public class ActionPlanSystem extends Thread {
 			Emailer email = new Emailer(host, sender, recip);
 			email.send(sub, msg);
 			logStderr("sent email: sub=" + sub + " msg=" + msg);
-		} catch(MessagingException e) {
+		} catch (MessagingException e) {
 			logEmailError(msg, "email failed: " + e.getMessage());
 		}
 	}
