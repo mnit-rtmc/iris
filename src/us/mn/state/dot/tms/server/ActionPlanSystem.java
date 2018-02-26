@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2018  Iteris Inc.
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,21 +16,15 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.Date;
-import javax.mail.MessagingException;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.Scheduler;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.utils.Emailer;
 
 /**
  * Server-side Static methods that support Action Plans.
+ *
  * @author Michael Darter
+ * @author Douglas Lau
  */
-public class ActionPlanSystem extends Thread {
-
-	 /** Thread for email jobs */
-	static private final Scheduler EMAIL = new Scheduler("email");
+public class ActionPlanSystem {
 
 	/** Disallow instantiation */
 	private ActionPlanSystem() { }
@@ -46,72 +41,22 @@ public class ActionPlanSystem extends Thread {
 		return false;
 	}
 
-	/** Log a message to stderr */
-	static private void logStderr(String msg) {
-		System.err.println(TimeSteward.currentDateTimeString(true) +
-			" IRIS Action Plan System " + msg);
-	}
-
-	/** Log an error to stderr */
-	static private void logEmailError(String msg, String reason) {
-		logStderr("Alert!  " + msg + ", " + reason);
-	}
-
-	/** Send an email alert. This method does not block.
-	 * @arg usr User name
-	 * @arg active True if plan is being activated
-	 * @arg pname Plan name being activated */
-	static public void sendEmailAlert(final String usr,
-		final boolean active, final String pname)
-	{
-		final int PRESEND_WAIT_MS = 2000; // arbitrary
-		EMAIL.addJob(new Job(PRESEND_WAIT_MS) {
-			@Override public String getName() {
-				return "sendEmail";
-			}
-			@Override public void perform() {
-				if (userTriggersAlert(usr)) {
-					logStderr("sending email...");
-					doSendEmailAlert(usr, active, pname);
-				}
-			}
-		});
-	}
-
-	/** Send an email alert. This method blocks while sending.
-	 * @arg usr User name
-	 * @arg active True if plan is being activated
-	 * @arg pname Plan name being activated */
-	static private void doSendEmailAlert(String usr, boolean active,
+	/** Send an email alert.  This method does not block.
+	 * @param usr User name
+	 * @param active True if plan is being activated
+	 * @param pname Plan name being activated */
+	static public void sendEmailAlert(String usr, boolean active,
 		String pname)
 	{
-		String msg = "User " + usr +
-			(active ? " actived" : " deactivated") +
-			" action plan " + "'" + pname + "' on " +
-			new Date().toString();
-		String host = SystemAttrEnum.EMAIL_SMTP_HOST.getString();
-		if (host == null || host.length() <= 0) {
-			logEmailError(msg, "invalid host");
-			return;
-		}
-		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
-		if (sender == null || sender.length() <= 0) {
-			logEmailError(msg, "invalid sender");
-			return;
-		}
-		String recip =
-			SystemAttrEnum.EMAIL_RECIPIENT_ACTION_PLAN.getString();
-		if (recip == null || recip.length() <= 0) {
-			logEmailError(msg, "invalid recipient");
-			return;
-		}
-		try {
+		if (userTriggersAlert(usr)) {
 			String sub = "IRIS Action Plan Alert";
-			Emailer email = new Emailer(host, sender, recip);
-			email.send(sub, msg);
-			logStderr("sent email: sub=" + sub + " msg=" + msg);
-		} catch (MessagingException e) {
-			logEmailError(msg, "email failed: " + e.getMessage());
+			String msg = "User " + usr +
+				(active ? " actived" : " deactivated") +
+				" action plan " + "'" + pname + "' on " +
+				new Date().toString();
+			String recip = SystemAttrEnum.
+				EMAIL_RECIPIENT_ACTION_PLAN.getString();
+			EmailHandler.sendEmail(sub, msg, recip);
 		}
 	}
 }

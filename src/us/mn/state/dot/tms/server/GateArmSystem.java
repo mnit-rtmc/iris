@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2017  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server;
 
 import java.io.File;
 import java.util.Iterator;
-import javax.mail.MessagingException;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GateArmArray;
@@ -24,8 +23,6 @@ import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.SystemAttrEnum;
-import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.Emailer;
 
 /**
  * The Gate Arm System contains static methods which act on the entire gate
@@ -42,11 +39,6 @@ public class GateArmSystem {
 	static private void logStderr(String msg) {
 		System.err.println(TimeSteward.currentDateTimeString(true) +
 			" Gate Arm System " + msg);
-	}
-
-	/** Log an error to stderr */
-	static private void logEmailError(String msg, String reason) {
-		logStderr("Alert!  " + msg + ", " + reason);
 	}
 
 	/** Path to configuration enable file.  This must not be a system
@@ -129,30 +121,9 @@ public class GateArmSystem {
 
 	/** Send an email alert */
 	static public void sendEmailAlert(String msg) {
-		String host = SystemAttrEnum.EMAIL_SMTP_HOST.getString();
-		if(host == null || host.length() <= 0) {
-			logEmailError(msg, "invalid host");
-			return;
-		}
-		String sender = SystemAttrEnum.EMAIL_SENDER_SERVER.getString();
-		if(sender == null || sender.length() <= 0) {
-			logEmailError(msg, "invalid sender");
-			return;
-		}
 		String recip =
 			SystemAttrEnum.EMAIL_RECIPIENT_GATE_ARM.getString();
-		if(recip == null || recip.length() <= 0) {
-			logEmailError(msg, "invalid recipient");
-			return;
-		}
-		String subject = "Gate arm ALERT";
-		try {
-			Emailer email = new Emailer(host, sender, recip);
-			email.send(subject, msg);
-		}
-		catch(MessagingException e) {
-			logEmailError(msg, "email failed: " + e.getMessage());
-		}
+		EmailHandler.sendEmail("Gate arm ALERT", msg, recip);
 	}
 
 	/** Check all gate arm open interlocks for one road.
