@@ -24,4 +24,32 @@ CREATE VIEW parking_area_view AS
 	LEFT JOIN geo_loc_view l ON pa.geo_loc = l.name;
 GRANT SELECT ON parking_area_view TO PUBLIC;
 
+-- Add action_plan_event
+CREATE TABLE event.action_plan_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	action_plan VARCHAR(16),
+	iris_user VARCHAR(15)
+);
+
+-- Add action_plan_event_view
+CREATE VIEW action_plan_event_view AS
+	SELECT e.event_id, e.event_date, ed.description AS event_description,
+		e.action_plan, e.iris_user
+	FROM event.action_plan_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+GRANT SELECT ON action_plan_event_view TO PUBLIC;
+
+-- Add event descriptions for action plan events
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (900, 'Action Plan ACTIVATED');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (901, 'Action Plan DEACTIVATED');
+
+-- Add action_plan_event_purge_days system attribute
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('action_plan_event_purge_days', '90');
+
 COMMIT;

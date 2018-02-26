@@ -1777,6 +1777,15 @@ CREATE TABLE event.event_description (
 	description text NOT NULL
 );
 
+CREATE TABLE event.action_plan_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date timestamp with time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	action_plan VARCHAR(16),
+	iris_user VARCHAR(15)
+);
+
 CREATE TABLE event.alarm_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
 	event_date timestamp with time zone NOT NULL,
@@ -2597,6 +2606,13 @@ CREATE VIEW modem_view AS
 	FROM iris.modem;
 GRANT SELECT ON modem_view TO PUBLIC;
 
+CREATE VIEW action_plan_event_view AS
+	SELECT e.event_id, e.event_date, ed.description AS event_description,
+		e.action_plan, e.iris_user
+	FROM event.action_plan_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+GRANT SELECT ON action_plan_event_view TO PUBLIC;
+
 CREATE VIEW alarm_event_view AS
 	SELECT e.event_id, e.event_date, ed.description AS event_description,
 		e.alarm, a.description
@@ -2838,6 +2854,7 @@ COPY iris.encoding (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
+action_plan_event_purge_days	90
 camera_autoplay	true
 camera_construction_url	
 camera_kbd_panasonic_enable	false
@@ -3349,6 +3366,8 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 704	TT No origin data
 705	TT No route
 801	Camera SWITCHED
+900	Action Plan ACTIVATED
+901	Action Plan DEACTIVATED
 \.
 
 COPY event.incident_detail (name, description) FROM stdin;
