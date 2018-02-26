@@ -52,4 +52,10 @@ INSERT INTO event.event_description (event_desc_id, description)
 INSERT INTO iris.system_attribute (name, value)
 	VALUES ('action_plan_event_purge_days', '90');
 
+-- Add action plan alert system attributes
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('action_plan_alert_list', '');
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('email_recipient_action_plan', '');
+
 COMMIT;

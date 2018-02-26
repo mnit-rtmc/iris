@@ -2854,6 +2854,7 @@ COPY iris.encoding (id, description) FROM stdin;
 \.
 
 COPY iris.system_attribute (name, value) FROM stdin;
+action_plan_alert_list	
 action_plan_event_purge_days	90
 camera_autoplay	true
 camera_construction_url	
@@ -2908,6 +2909,7 @@ dmsxml_op_timeout_secs	65
 dmsxml_reinit_detect	false
 email_sender_server	
 email_smtp_host	
+email_recipient_action_plan	
 email_recipient_aws	
 email_recipient_dmsxml_reinit	
 email_recipient_gate_arm	
