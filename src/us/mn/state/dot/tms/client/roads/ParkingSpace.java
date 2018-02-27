@@ -141,16 +141,26 @@ public class ParkingSpace implements MapObject {
 
 	/** Get the parking space status */
 	private String getStatus() {
-		Float o = getOcc();
-		if (null == o)
-			return I18N.get("parking.unknown");
+		StringBuilder sb = new StringBuilder();
+		Integer r = getReading();
+		if (null == r)
+			sb.append(I18N.get("parking.unknown"));
 		else {
-			int s = Math.round(o * 18);
-			if (s < 150)
-				return I18N.get("parking.vacant");
-			else
-				return I18N.get("parking.occupied");
+			sb.append((r < 150)
+			      ? I18N.get("parking.vacant")
+			      : I18N.get("parking.occupied"));
+			sb.append("\n");
+			sb.append(I18N.get("parking.reading"));
+			sb.append(": ");
+			sb.append(r);
 		}
+		return sb.toString();
+	}
+
+	/** Get the magnetometer reading */
+	private Integer getReading() {
+		Float o = getOcc();
+		return (o != null) ? Math.round(o * 18) : null;
 	}
 
 	/** Get the occupancy */
