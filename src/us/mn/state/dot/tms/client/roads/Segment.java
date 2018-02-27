@@ -299,4 +299,9 @@ public class Segment {
 	public int getLane(int sh) {
 		return model.getDownstreamLane(false) - sh - shift;
 	}
+
+	/** Get the count of lanes */
+	public int laneCount() {
+		return lane_sensors.size();
+	}
 }

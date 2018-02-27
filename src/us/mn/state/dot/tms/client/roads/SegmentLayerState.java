@@ -95,10 +95,22 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 		Double tangent = null;
 		for (Segment seg: builder) {
 			if (parking && seg.parking) {
-				ParkingSpace ps = new ParkingSpace(seg, scale,
-					tangent);
-				if (s.next(ps))
-					return ps;
+				ParkingSpace ps;
+				if (seg.laneCount() > 1) {
+					ps = new ParkingSpace(seg, 1, scale,
+						tangent);
+					if (s.next(ps))
+						return ps;
+					ps = new ParkingSpace(seg, 2, scale,
+						tangent);
+					if (s.next(ps))
+						return ps;
+				} else {
+					ps = new ParkingSpace(seg, null, scale,
+						tangent);
+					if (s.next(ps))
+						return ps;
+				}
 				boolean t = (tangent != null);
 				tangent = ps.tangent;
 				if (t)

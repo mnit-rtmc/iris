@@ -55,6 +55,9 @@ public class ParkingSpace implements MapObject {
 		return segment.getModel().r_node;
 	}
 
+	/** Lane of segment */
+	private final Integer lane;
+
 	/** Shape to render */
 	private final Shape shape;
 
@@ -71,8 +74,9 @@ public class ParkingSpace implements MapObject {
 	}
 
 	/** Create a new parking space */
-	public ParkingSpace(Segment s, float scale, Double t) {
+	public ParkingSpace(Segment s, Integer l, float scale, Double t) {
 		segment = s;
+		lane = l;
 		float width = calculateWidth(scale);
 		float length = calculateLength(scale);
 		shape = createShape(width, length);
@@ -99,15 +103,17 @@ public class ParkingSpace implements MapObject {
 
 	/** Create the shape to draw this object */
 	private Shape createShape(float width, float length) {
+		float len_a = (null == lane || 1 == lane) ? -length : 0;
+		float len_b = (null == lane || 2 == lane) ? length : 0;
 		Path2D.Float path = new Path2D.Float(Path2D.WIND_NON_ZERO);
 		Point2D.Float p = new Point2D.Float();
-		setPoint(p, segment.pos_b, width, length);
+		setPoint(p, segment.pos_b, width, len_a);
 		path.moveTo(p.getX(), p.getY());
-		setPoint(p, segment.pos_b, -width, length);
+		setPoint(p, segment.pos_b, -width, len_a);
 		path.lineTo(p.getX(), p.getY());
-		setPoint(p, segment.pos_b, -width, -length);
+		setPoint(p, segment.pos_b, -width, len_b);
 		path.lineTo(p.getX(), p.getY());
-		setPoint(p, segment.pos_b, width, -length);
+		setPoint(p, segment.pos_b, width, len_b);
 		path.lineTo(p.getX(), p.getY());
 		path.closePath();
 		return path;
@@ -165,6 +171,6 @@ public class ParkingSpace implements MapObject {
 
 	/** Get the occupancy */
 	public Float getOcc() {
-		return segment.getOcc(null);
+		return segment.getOcc(lane);
 	}
 }
