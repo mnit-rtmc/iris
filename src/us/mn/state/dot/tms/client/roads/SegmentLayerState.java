@@ -94,6 +94,17 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 		boolean parking = isPastParkingZoomThreshold();
 		Double tangent = null;
 		for (Segment seg: builder) {
+			if (parking && seg.parking) {
+				ParkingSpace ps = new ParkingSpace(seg, scale,
+					tangent);
+				if (s.next(ps))
+					return ps;
+				boolean t = (tangent != null);
+				tangent = ps.tangent;
+				if (t)
+					continue;
+			} else
+				tangent = null;
 			for (int sh = seg.getLeftMin(); sh < seg.getRightMax();
 			     sh++)
 			{
@@ -101,14 +112,6 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 				if (s.next(ms))
 					return ms;
 			}
-			if (parking && seg.parking) {
-				ParkingSpace ps = new ParkingSpace(seg, scale,
-					tangent);
-				if (s.next(ps))
-					return ps;
-				tangent = ps.tangent;
-			} else
-				tangent = null;
 		}
 		return null;
 	}
@@ -118,10 +121,18 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 	protected void doLeftClick(MouseEvent e, MapObject o) {
 		if (o instanceof MapSegment) {
 			MapSegment ms = (MapSegment) o;
-			R_Node n = ms.getR_Node();
-			MapObject mo = builder.findGeoLoc(n);
-			super.doLeftClick(e, mo);
+			doLeftClick(e, ms.getR_Node());
 		}
+		else if (o instanceof ParkingSpace) {
+			ParkingSpace ps = (ParkingSpace) o;
+			doLeftClick(e, ps.getR_Node());
+		}
+	}
+
+	/** Do left-click event processing */
+	private void doLeftClick(MouseEvent e, R_Node n) {
+		MapObject mo = builder.findGeoLoc(n);
+		super.doLeftClick(e, mo);
 	}
 
 	/** Do right-click event processing */

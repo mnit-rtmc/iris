@@ -50,6 +50,11 @@ public class ParkingSpace implements MapObject {
 	/** Segment object */
 	private final Segment segment;
 
+	/** Get the r_node */
+	public R_Node getR_Node() {
+		return segment.getModel().r_node;
+	}
+
 	/** Shape to render */
 	private final Shape shape;
 
