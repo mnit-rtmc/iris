@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,25 +37,28 @@ public class MapAction<T extends SonarObject> extends ProxyAction<T> {
 	/** Longitude */
 	private final Double lon;
 
+	/** Zoom level */
+	private final ZoomLevel zoom;
+
 	/** Create a new map action */
-	private MapAction(ScreenPane sp, T p, Double lat, Double lon) {
+	private MapAction(ScreenPane sp, T p, Double lat, Double lon, int zt) {
 		super("location.map.center", p);
 		s_pane = sp;
 		this.lat = lat;
 		this.lon = lon;
+		zoom = ZoomLevel.fromOrdinal(zt > 15 ? zt : 15);
 	}
 
 	/** Create a new map action */
-	public MapAction(ScreenPane sp, T p, GeoLoc gl) {
-		this(sp, p, gl.getLat(), gl.getLon());
+	public MapAction(ScreenPane sp, T p, GeoLoc gl, int zt) {
+		this(sp, p, gl.getLat(), gl.getLon(), zt);
 	}
 
 	/** Actually perform the action */
 	@Override
 	protected void doActionPerformed(ActionEvent e) {
 		if (lat != null && lon != null) {
-			s_pane.setMapExtent(ZoomLevel.FIFTEEN,
-			                    lat.floatValue(),
+			s_pane.setMapExtent(zoom, lat.floatValue(),
 			                    lon.floatValue());
 		}
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -413,8 +413,10 @@ abstract public class ProxyManager<T extends SonarObject> {
 			if (WorkRequestAction.isConfigured())
 				fillPopupWorkReq(p, proxy);
 		}
-		if (s_pane != null && loc != null)
-			p.add(new MapAction<T>(s_pane, proxy, loc));
+		if (s_pane != null && loc != null) {
+			p.add(new MapAction<T>(s_pane, proxy, loc,
+				zoom_threshold));
+		}
 		if (descriptor.has_properties)
 			p.add(new PropertiesAction<T>(this, proxy));
 		return p;
