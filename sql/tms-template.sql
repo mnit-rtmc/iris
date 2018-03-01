@@ -1078,6 +1078,49 @@ CREATE TRIGGER ramp_meter_delete_trig
     INSTEAD OF DELETE ON iris.ramp_meter
     FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_delete();
 
+CREATE TABLE iris.sign_msg_source (
+	bit INTEGER PRIMARY KEY,
+	source VARCHAR(16) NOT NULL
+);
+ALTER TABLE iris.sign_msg_source ADD CONSTRAINT msg_source_bit_ck
+	CHECK (bit >= 0 AND bit < 32);
+
+CREATE FUNCTION iris.sign_msg_sources(INTEGER) RETURNS TEXT
+	AS $sign_msg_sources$
+DECLARE
+	src ALIAS FOR $1;
+	res TEXT;
+	ms RECORD;
+	b INTEGER;
+BEGIN
+	res = '';
+	FOR ms IN SELECT bit, source FROM iris.sign_msg_source ORDER BY bit LOOP
+		b = 1 << ms.bit;
+		IF (src & b) = b THEN
+			IF char_length(res) > 0 THEN
+				res = res || ', ' || ms.source;
+			ELSE
+				res = ms.source;
+			END IF;
+		END IF;
+	END LOOP;
+	RETURN res;
+END;
+$sign_msg_sources$ LANGUAGE plpgsql;
+
+CREATE TABLE iris.sign_message (
+	name VARCHAR(20) PRIMARY KEY,
+	incident VARCHAR(16),
+	multi VARCHAR(1024) NOT NULL,
+	beacon_enabled BOOLEAN NOT NULL,
+	bitmaps text NOT NULL,
+	a_priority INTEGER NOT NULL,
+	r_priority INTEGER NOT NULL,
+	source INTEGER NOT NULL,
+	owner VARCHAR(15),
+	duration INTEGER
+);
+
 CREATE TABLE iris._dms (
 	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
@@ -1086,7 +1129,10 @@ CREATE TABLE iris._dms (
 	aws_allowed BOOLEAN NOT NULL,
 	aws_controlled BOOLEAN NOT NULL,
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
-	default_font VARCHAR(16) REFERENCES iris.font
+	default_font VARCHAR(16) REFERENCES iris.font,
+	msg_sched VARCHAR(20) REFERENCES iris.sign_message,
+	msg_current VARCHAR(20) REFERENCES iris.sign_message, -- NOT NULL
+	deploy_time timestamp WITH time zone NOT NULL
 );
 
 ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
@@ -1094,7 +1140,8 @@ ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 
 CREATE VIEW iris.dms AS
 	SELECT d.name, geo_loc, controller, pin, notes, beacon, preset,
-	       aws_allowed, aws_controlled, sign_config, default_font
+	       aws_allowed, aws_controlled, sign_config, default_font,
+	       msg_sched, msg_current, deploy_time
 	FROM iris._dms dms
 	JOIN iris._device_io d ON dms.name = d.name
 	JOIN iris._device_preset p ON dms.name = p.name;
@@ -1107,10 +1154,12 @@ BEGIN
 	INSERT INTO iris._device_preset (name, preset)
 	     VALUES (NEW.name, NEW.preset);
 	INSERT INTO iris._dms (name, geo_loc, notes, beacon, aws_allowed,
-	                       aws_controlled, sign_config, default_font)
+	                       aws_controlled, sign_config, default_font,
+	                       msg_sched, msg_current, deploy_time)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.beacon,
 	             NEW.aws_allowed, NEW.aws_controlled, NEW.sign_config,
-	             NEW.default_font);
+	             NEW.default_font, NEW.msg_sched, NEW.msg_current,
+	             NEW.deploy_time);
 	RETURN NEW;
 END;
 $dms_insert$ LANGUAGE plpgsql;
@@ -1136,7 +1185,10 @@ BEGIN
 	       aws_allowed = NEW.aws_allowed,
 	       aws_controlled = NEW.aws_controlled,
 	       sign_config = NEW.sign_config,
-	       default_font = NEW.default_font
+	       default_font = NEW.default_font,
+	       msg_sched = NEW.msg_sched,
+	       msg_current = NEW.msg_current,
+	       deploy_time = NEW.deploy_time
 	 WHERE name = OLD.name;
 	RETURN NEW;
 END;
@@ -1659,19 +1711,6 @@ CREATE TABLE iris.sign_text (
 	rank smallint NOT NULL,
 	CONSTRAINT sign_text_line CHECK ((line >= 1) AND (line <= 12)),
 	CONSTRAINT sign_text_rank CHECK ((rank >= 1) AND (rank <= 99))
-);
-
-CREATE TABLE iris.sign_message (
-	name VARCHAR(20) PRIMARY KEY,
-	incident VARCHAR(16),
-	multi VARCHAR(1024) NOT NULL,
-	beacon_enabled BOOLEAN NOT NULL,
-	bitmaps text NOT NULL,
-	a_priority INTEGER NOT NULL,
-	r_priority INTEGER NOT NULL,
-	source INTEGER NOT NULL,
-	owner VARCHAR(15),
-	duration INTEGER
 );
 
 CREATE TABLE iris.lane_use_multi (
@@ -2296,7 +2335,7 @@ CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.beacon,
 	       p.camera, p.preset_num, d.aws_allowed, d.aws_controlled,
 	       d.sign_config, COALESCE(d.default_font, sc.default_font)
-	       AS default_font,
+	       AS default_font, msg_sched, msg_current, deploy_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.lat, l.lon
 	FROM iris.dms d
@@ -2304,6 +2343,13 @@ CREATE VIEW dms_view AS
 	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
 	LEFT JOIN sign_config_view sc ON d.sign_config = sc.name;
 GRANT SELECT ON dms_view TO PUBLIC;
+
+CREATE VIEW dms_message_view AS
+	SELECT d.name, multi, beacon_enabled, iris.sign_msg_sources(source)
+	       AS sources, duration, deploy_time, owner
+	FROM iris.dms d
+	LEFT JOIN iris.sign_message s ON d.msg_current = s.name;
+GRANT SELECT ON dms_message_view TO PUBLIC;
 
 CREATE VIEW lcs_array_view AS
 	SELECT name, shift, notes, lcs_lock
@@ -2795,6 +2841,22 @@ COPY iris.dms_type (id, description) FROM stdin;
 4	VMS Character-matrix
 5	VMS Line-matrix
 6	VMS Full-matrix
+\.
+
+COPY iris.sign_msg_source (bit, source) FROM stdin;
+0	blank
+1	operator
+2	schedule
+3	tolling
+4	gate arm
+5	lcs
+6	aws
+7	external
+8	travel time
+9	incident
+10	slow warning
+11	speed advisory
+12	parking
 \.
 
 COPY iris.lane_use_indication (id, description) FROM stdin;

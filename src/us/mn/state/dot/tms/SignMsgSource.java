@@ -15,7 +15,8 @@
 package us.mn.state.dot.tms;
 
 /**
- * Sign message source enumeration.
+ * Sign message source enumeration.  The ordinal values correspond to the bits
+ * in the iris.sign_msg_source look-up table.
  *
  * @author Douglas Lau
  */

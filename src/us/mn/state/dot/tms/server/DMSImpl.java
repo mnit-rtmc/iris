@@ -22,6 +22,7 @@ import java.io.Writer;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -107,8 +108,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"beacon, preset, aws_allowed, aws_controlled, " +
-			"sign_config, default_font FROM iris." + SONAR_TYPE +
-			";", new ResultFactory()
+			"sign_config, default_font, msg_sched, msg_current, " +
+			"deploy_time FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(row));
@@ -143,6 +145,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("aws_controlled", awsControlled);
 		map.put("sign_config", sign_config);
 		map.put("default_font", default_font);
+		map.put("msg_sched", msg_sched);
+		map.put("msg_current", msg_current);
+		map.put("deploy_time", asTimestamp(deployTime));
 		return map;
 	}
 
@@ -170,6 +175,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		GeoLocImpl g = new GeoLocImpl(name);
 		g.notifyCreate();
 		geo_loc = g;
+		msg_current = createMsgBlank();
+		deployTime = 0;
 	}
 
 	/** Create a dynamic message sign */
@@ -184,24 +191,30 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getBoolean(8),         // aws_allowed
 		     row.getBoolean(9),         // aws_controlled
 		     row.getString(10),         // sign_config
-		     row.getString(11)          // default_font
+		     row.getString(11),         // default_font
+		     row.getString(12),         // msg_sched
+		     row.getString(13),         // msg_current
+		     row.getTimestamp(14)       // deploy_time
 		);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c,
 		int p, String nt, String b, String cp, boolean aa, boolean ac,
-		String sc, String df)
+		String sc, String df, String ms, String mc, Date dt)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
 		     lookupBeacon(b), lookupPreset(cp), aa, ac,
-		     SignConfigHelper.lookup(sc), FontHelper.lookup(df));
+		     SignConfigHelper.lookup(sc), FontHelper.lookup(df),
+		     SignMessageHelper.lookup(ms),SignMessageHelper.lookup(mc),
+		     dt);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, Beacon b, CameraPreset cp, boolean aa,
-		boolean ac, SignConfig sc, Font df)
+		boolean ac, SignConfig sc, Font df, SignMessage ms,
+		SignMessage mc, Date dt)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -211,6 +224,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		awsControlled = ac;
 		sign_config = sc;
 		default_font = df;
+		msg_sched = ms;
+		// FIXME: msg_current should be NOT NULL
+		msg_current = (mc != null) ? mc : createMsgBlank();
+		deployTime = stampMillis(dt);
 		initTransients();
 	}
 
@@ -854,7 +871,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Scheduled sign message */
-	private transient SignMessage msg_sched;
+	private SignMessage msg_sched;
 
 	/** Get the scheduled sign messasge.
 	 * @return Scheduled sign message */
@@ -878,11 +895,22 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
+	/** Set the scheduled sign message */
+	private void setMsgSched(SignMessage sm) {
+		try {
+			store.update(this, "msg_sched", sm);
+			msg_sched = sm;
+		}
+		catch (TMSException e) {
+			logError("msg_sched: " + e.getMessage());
+		}
+	}
+
 	/** Set the scheduled sign message.
 	 * @param sm New scheduled sign message */
 	private void setMsgSchedNotify(SignMessage sm) {
 		if (!SignMessageHelper.isEquivalent(msg_sched, sm)) {
-			msg_sched = sm;
+			setMsgSched(sm);
 			notifyAttribute("msgSched");
 		}
 	}
@@ -910,7 +938,18 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Current message (Shall not be null) */
-	private transient SignMessage msg_current = createMsgBlank();
+	private SignMessage msg_current;
+
+	/** Set the current message */
+	private void setMsgCurrent(SignMessage sm) {
+		try {
+			store.update(this, "msg_current", sm);
+			msg_current = sm;
+		}
+		catch (TMSException e) {
+			logError("msg_current: " + e.getMessage());
+		}
+	}
 
 	/** Set the current message.
 	 * @param sm Sign message. */
@@ -919,8 +958,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			logPriceMessages(EventType.PRICE_VERIFIED);
 		if (!isMsgCurrentEquivalent(sm)) {
 			logMsg(sm);
+			setMsgCurrent(sm);
 			setDeployTime();
-			msg_current = sm;
 			notifyAttribute("msgCurrent");
 			updateStyles();
 		}
@@ -1057,11 +1096,18 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Message deploy time */
-	private long deployTime = 0;
+	private long deployTime;
 
 	/** Set the message deploy time */
 	private void setDeployTime() {
-		deployTime = TimeSteward.currentTimeMillis();
+		long dt = TimeSteward.currentTimeMillis();
+		deployTime = dt;
+		try {
+			store.update(this, "deploy_time", asTimestamp(dt));
+		}
+		catch (TMSException e) {
+			logError("deploy_time: " + e.getMessage());
+		}
 		notifyAttribute("deployTime");
 	}
 
