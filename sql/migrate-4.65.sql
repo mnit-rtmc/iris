@@ -100,6 +100,36 @@ CREATE TRIGGER dms_delete_trig
     INSTEAD OF DELETE ON iris.dms
     FOR EACH ROW EXECUTE PROCEDURE iris.dms_delete();
 
+-- Create geo_location function
+CREATE FUNCTION iris.geo_location(TEXT) RETURNS TEXT
+	AS $geo_location$
+DECLARE
+	n ALIAS FOR $1;
+	loc RECORD;
+	road RECORD;
+	res TEXT;
+BEGIN
+	SELECT g.roadway, d.direction AS road_dir, g.cross_street,
+		cd.direction AS cross_dir, m.modifier AS cross_mod, g.landmark
+	INTO loc FROM iris.geo_loc g
+	LEFT JOIN iris.direction d ON g.road_dir = d.id
+	LEFT JOIN iris.direction cd ON g.cross_dir = cd.id
+	LEFT JOIN iris.road_modifier m ON g.cross_mod = m.id
+	WHERE name = n;
+	res = trim(loc.roadway || ' ' || loc.road_dir);
+	IF char_length(res) > 0 AND char_length(loc.cross_street) > 0 THEN
+		res = res || ' ' || trim(loc.cross_mod || ' ' ||
+			loc.cross_street || ' ' || loc.cross_dir);
+	ELSEIF char_length(loc.landmark) > 0 THEN
+		res = res || ' (' || loc.landmark || ')';
+	END IF;
+	IF char_length(res) = 0 THEN
+		res = 'Unknown location';
+	END IF;
+	RETURN res;
+END;
+$geo_location$ LANGUAGE plpgsql;
+
 -- Create sign_msg_source look-up table
 CREATE TABLE iris.sign_msg_source (
 	bit INTEGER PRIMARY KEY,
@@ -139,7 +169,7 @@ CREATE VIEW dms_view AS
 	       d.sign_config, COALESCE(d.default_font, sc.default_font)
 	       AS default_font, msg_sched, msg_current, deploy_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.lat, l.lon
+	       iris.geo_location(d.geo_loc) AS location, l.lat, l.lon
 	FROM iris.dms d
 	LEFT JOIN iris.camera_preset p ON d.preset = p.name
 	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name

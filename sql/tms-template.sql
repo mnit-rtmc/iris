@@ -265,6 +265,35 @@ CREATE TABLE iris.geo_loc (
 	landmark VARCHAR(24)
 );
 
+CREATE FUNCTION iris.geo_location(TEXT) RETURNS TEXT
+	AS $geo_location$
+DECLARE
+	n ALIAS FOR $1;
+	loc RECORD;
+	road RECORD;
+	res TEXT;
+BEGIN
+	SELECT g.roadway, d.direction AS road_dir, g.cross_street,
+		cd.direction AS cross_dir, m.modifier AS cross_mod, g.landmark
+	INTO loc FROM iris.geo_loc g
+	LEFT JOIN iris.direction d ON g.road_dir = d.id
+	LEFT JOIN iris.direction cd ON g.cross_dir = cd.id
+	LEFT JOIN iris.road_modifier m ON g.cross_mod = m.id
+	WHERE name = n;
+	res = trim(loc.roadway || ' ' || loc.road_dir);
+	IF char_length(res) > 0 AND char_length(loc.cross_street) > 0 THEN
+		res = res || ' ' || trim(loc.cross_mod || ' ' ||
+			loc.cross_street || ' ' || loc.cross_dir);
+	ELSEIF char_length(loc.landmark) > 0 THEN
+		res = res || ' (' || loc.landmark || ')';
+	END IF;
+	IF char_length(res) = 0 THEN
+		res = 'Unknown location';
+	END IF;
+	RETURN res;
+END;
+$geo_location$ LANGUAGE plpgsql;
+
 CREATE TABLE iris.map_extent (
 	name VARCHAR(20) PRIMARY KEY,
 	lat real NOT NULL,
@@ -2337,7 +2366,7 @@ CREATE VIEW dms_view AS
 	       d.sign_config, COALESCE(d.default_font, sc.default_font)
 	       AS default_font, msg_sched, msg_current, deploy_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.lat, l.lon
+	       iris.geo_location(d.geo_loc) AS location, l.lat, l.lon
 	FROM iris.dms d
 	LEFT JOIN iris.camera_preset p ON d.preset = p.name
 	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
@@ -2934,7 +2963,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.64.0
+database_version	4.65.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
