@@ -102,30 +102,25 @@ CREATE TRIGGER dms_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.dms_delete();
 
 -- Create geo_location function
-CREATE FUNCTION iris.geo_location(TEXT) RETURNS TEXT
-	AS $geo_location$
+CREATE FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
+	RETURNS TEXT AS $geo_location$
 DECLARE
-	n ALIAS FOR $1;
-	loc RECORD;
+	roadway ALIAS FOR $1;
+	road_dir ALIAS FOR $2;
+	cross_mod ALIAS FOR $3;
+	cross_street ALIAS FOR $4;
+	cross_dir ALIAS FOR $5;
+	landmark ALIAS FOR $6;
 	res TEXT;
 BEGIN
-	SELECT g.roadway, d.direction AS road_dir, g.cross_street,
-		cd.direction AS cross_dir, m.modifier AS cross_mod, g.landmark
-	INTO loc FROM iris.geo_loc g
-	LEFT JOIN iris.direction d ON g.road_dir = d.id
-	LEFT JOIN iris.direction cd ON g.cross_dir = cd.id
-	LEFT JOIN iris.road_modifier m ON g.cross_mod = m.id
-	WHERE name = n;
-	res = trim(loc.roadway || ' ' || loc.road_dir);
-	IF char_length(res) > 0 AND char_length(loc.cross_street) > 0 THEN
-		RETURN res || ' ' || trim(loc.cross_mod || ' ' ||
-			loc.cross_street || ' ' || loc.cross_dir);
-	ELSIF char_length(loc.landmark) > 0 THEN
-		RETURN trim(res || ' (' || loc.landmark || ')');
-	ELSIF char_length(res) > 0 THEN
-		RETURN res;
+	res = trim(roadway || ' ' || road_dir);
+	IF char_length(cross_street) > 0 THEN
+		RETURN concat(res || ' ', cross_mod || ' ', cross_street,
+		              ' ' || cross_dir);
+	ELSIF char_length(landmark) > 0 THEN
+		RETURN concat(res || ' ', '(' || landmark || ')');
 	ELSE
-		RETURN NULL;
+		RETURN res;
 	END IF;
 END;
 $geo_location$ LANGUAGE plpgsql;
@@ -162,6 +157,22 @@ BEGIN
 END;
 $sign_msg_sources$ LANGUAGE plpgsql;
 
+-- Replace geo_loc_view
+CREATE OR REPLACE VIEW geo_loc_view AS
+	SELECT l.name, r.abbrev AS rd, l.roadway, r_dir.direction AS road_dir,
+	       r_dir.dir AS rdir, m.modifier AS cross_mod, m.mod AS xmod,
+	       c.abbrev as xst, l.cross_street, c_dir.direction AS cross_dir,
+	       l.lat, l.lon, l.landmark,
+	       iris.geo_location(l.roadway, r_dir.direction, m.modifier,
+	       l.cross_street, c_dir.direction, l.landmark) AS location
+	FROM iris.geo_loc l
+	LEFT JOIN iris.road r ON l.roadway = r.name
+	LEFT JOIN iris.road_modifier m ON l.cross_mod = m.id
+	LEFT JOIN iris.road c ON l.cross_street = c.name
+	LEFT JOIN iris.direction r_dir ON l.road_dir = r_dir.id
+	LEFT JOIN iris.direction c_dir ON l.cross_dir = c_dir.id;
+GRANT SELECT ON geo_loc_view TO PUBLIC;
+
 -- Add dms_view back
 CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.beacon,
@@ -169,7 +180,7 @@ CREATE VIEW dms_view AS
 	       d.sign_config, COALESCE(d.default_font, sc.default_font)
 	       AS default_font, msg_sched, msg_current, deploy_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       iris.geo_location(d.geo_loc) AS location, l.lat, l.lon
+	       l.location, l.lat, l.lon
 	FROM iris.dms d
 	LEFT JOIN iris.camera_preset p ON d.preset = p.name
 	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
@@ -187,8 +198,8 @@ GRANT SELECT ON dms_message_view TO PUBLIC;
 -- Create controller_report
 CREATE VIEW controller_report AS
 	SELECT c.name, c.comm_link, c.drop_id, l.landmark, cab.geo_loc,
-	iris.geo_location(cab.geo_loc) AS "location", cab.style AS "type",
-	d.name AS device, d.pin, d.cross_loc, d.corridor, c.notes
+	       l.location, cab.style AS "type", d.name AS device, d.pin,
+	       d.cross_loc, d.corridor, c.notes
 	FROM iris.controller c
 	LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
