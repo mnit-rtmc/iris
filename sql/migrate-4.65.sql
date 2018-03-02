@@ -106,7 +106,6 @@ CREATE FUNCTION iris.geo_location(TEXT) RETURNS TEXT
 DECLARE
 	n ALIAS FOR $1;
 	loc RECORD;
-	road RECORD;
 	res TEXT;
 BEGIN
 	SELECT g.roadway, d.direction AS road_dir, g.cross_street,
@@ -118,15 +117,15 @@ BEGIN
 	WHERE name = n;
 	res = trim(loc.roadway || ' ' || loc.road_dir);
 	IF char_length(res) > 0 AND char_length(loc.cross_street) > 0 THEN
-		res = res || ' ' || trim(loc.cross_mod || ' ' ||
+		RETURN res || ' ' || trim(loc.cross_mod || ' ' ||
 			loc.cross_street || ' ' || loc.cross_dir);
-	ELSEIF char_length(loc.landmark) > 0 THEN
-		res = res || ' (' || loc.landmark || ')';
+	ELSIF char_length(loc.landmark) > 0 THEN
+		RETURN trim(res || ' (' || loc.landmark || ')');
+	ELSIF char_length(res) > 0 THEN
+		RETURN res;
+	ELSE
+		RETURN NULL;
 	END IF;
-	IF char_length(res) = 0 THEN
-		res = 'Unknown location';
-	END IF;
-	RETURN res;
 END;
 $geo_location$ LANGUAGE plpgsql;
 
