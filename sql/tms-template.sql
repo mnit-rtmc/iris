@@ -2658,10 +2658,8 @@ GRANT SELECT ON controller_device_view TO PUBLIC;
 
 CREATE VIEW controller_report AS
 	SELECT c.name, c.comm_link, c.drop_id, l.landmark, cab.geo_loc,
-	trim(l.roadway || ' ' || l.road_dir) || ' ' || l.cross_mod || ' ' ||
-		trim(l.cross_street || ' ' || l.cross_dir) AS "location",
-	cab.style AS "type", d.name AS device, d.pin,
-	d.cross_loc, d.corridor, c.notes
+	iris.geo_location(cab.geo_loc) AS "location", cab.style AS "type",
+	d.name AS device, d.pin, d.cross_loc, d.corridor, c.notes
 	FROM iris.controller c
 	LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name

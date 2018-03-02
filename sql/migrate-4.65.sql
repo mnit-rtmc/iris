@@ -7,6 +7,7 @@ BEGIN;
 SELECT iris.update_version('4.64.0', '4.65.0');
 
 -- Drop old views
+DROP VIEW controller_report;
 DROP VIEW dms_view;
 DROP VIEW iris.dms;
 DROP FUNCTION iris.dms_insert();
@@ -182,6 +183,17 @@ CREATE VIEW dms_message_view AS
 	FROM iris.dms d
 	LEFT JOIN iris.sign_message s ON d.msg_current = s.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
+
+-- Create controller_report
+CREATE VIEW controller_report AS
+	SELECT c.name, c.comm_link, c.drop_id, l.landmark, cab.geo_loc,
+	iris.geo_location(cab.geo_loc) AS "location", cab.style AS "type",
+	d.name AS device, d.pin, d.cross_loc, d.corridor, c.notes
+	FROM iris.controller c
+	LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
+	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
+	LEFT JOIN controller_device_view d ON d.controller = c.name;
+GRANT SELECT ON controller_report TO PUBLIC;
 
 -- Populate sign_msg_source table
 COPY iris.sign_msg_source (bit, source) FROM stdin;
