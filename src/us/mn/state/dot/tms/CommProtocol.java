@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -117,7 +117,7 @@ public enum CommProtocol {
 	/** DR-500 doppler radar (30) */
 	DR_500("DR-500", false),
 
-	/** ADDCO NodeComm sign control (31) */
+	/** ADDCO NodeComm sign control -- removed (31) */
 	ADDCO("ADDCO"),
 
 	/** TransCore E6 tag reader (32) */

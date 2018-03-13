@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms.server.comm;
 
 import us.mn.state.dot.tms.CommProtocol;
-import us.mn.state.dot.tms.server.comm.addco.AddcoPoller;
 import us.mn.state.dot.tms.server.comm.axisptz.AxisPTZPoller;
 import us.mn.state.dot.tms.server.comm.canoga.CanogaPoller;
 import us.mn.state.dot.tms.server.comm.cbw.CBWPoller;
@@ -54,8 +53,6 @@ public class DevicePollerFactory {
 	/** Create a device poller */
 	static public DevicePoller create(String name, CommProtocol protocol) {
 		switch (protocol) {
-		case ADDCO:
-			return new AddcoPoller(name);
 		case AXIS_PTZ:
 			return new AxisPTZPoller(name);
 		case BANNER_DXM:
