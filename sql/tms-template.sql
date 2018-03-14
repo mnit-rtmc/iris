@@ -1136,7 +1136,6 @@ CREATE TABLE iris.sign_message (
 	incident VARCHAR(16),
 	multi VARCHAR(1024) NOT NULL,
 	beacon_enabled BOOLEAN NOT NULL,
-	bitmaps text NOT NULL,
 	a_priority INTEGER NOT NULL,
 	r_priority INTEGER NOT NULL,
 	source INTEGER NOT NULL,
@@ -1154,7 +1153,7 @@ CREATE TABLE iris._dms (
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
 	default_font VARCHAR(16) REFERENCES iris.font,
 	msg_sched VARCHAR(20) REFERENCES iris.sign_message,
-	msg_current VARCHAR(20) REFERENCES iris.sign_message, -- NOT NULL
+	msg_current VARCHAR(20) REFERENCES iris.sign_message NOT NULL,
 	deploy_time timestamp WITH time zone NOT NULL
 );
 
@@ -2956,7 +2955,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.65.0
+database_version	4.66.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
