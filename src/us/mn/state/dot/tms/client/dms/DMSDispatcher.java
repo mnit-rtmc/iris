@@ -306,12 +306,15 @@ public class DMSDispatcher extends JPanel {
 
 	/** Create a new message using the specified MULTI */
 	private SignMessage createMessage(String ms) {
-		boolean be = composer.isBeaconEnabled();
-		DmsMsgPriority p = composer.getPriority();
-		int src = operator.bit();
-		String u = user.getName();
-		Integer d = composer.getDuration();
-		return creator.create(ms, be, p, p, src, u, d);
+		if (ms.length() > 0) {
+			boolean be = composer.isBeaconEnabled();
+			DmsMsgPriority p = composer.getPriority();
+			int src = operator.bit();
+			String u = user.getName();
+			Integer d = composer.getDuration();
+			return creator.create(ms, be, p, p, src, u, d);
+		} else
+			return createBlankMessage();
 	}
 
 	/** Blank the select DMS */
