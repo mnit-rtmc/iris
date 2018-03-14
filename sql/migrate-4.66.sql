@@ -18,6 +18,18 @@ INSERT INTO iris.sign_message (name, multi, beacon_enabled, a_priority,
 UPDATE iris._dms SET msg_current = 'system_blank'
 	WHERE multi = '' OR msg_current IS NULL;
 
+-- Make msg_current not null
 ALTER TABLE iris._dms ALTER COLUMN msg_current SET NOT NULL;
+
+-- Add controller condition to dms_message_view
+CREATE OR REPLACE VIEW dms_message_view AS
+	SELECT d.name, cc.description AS condition, multi, beacon_enabled,
+	       iris.sign_msg_sources(source) AS sources, duration, deploy_time,
+	       owner
+	FROM iris.dms d
+	LEFT JOIN iris.controller c ON d.controller = c.name
+	LEFT JOIN iris.condition cc ON c.condition = cc.id
+	LEFT JOIN iris.sign_message s ON d.msg_current = s.name;
+GRANT SELECT ON dms_message_view TO PUBLIC;
 
 COMMIT;
