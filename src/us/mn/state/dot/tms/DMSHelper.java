@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -159,7 +159,7 @@ public class DMSHelper extends BaseHelper {
 
 	/** Create a raster builder for a DMS.
 	 * @param dms DMS with proper dimensions for the builder.
-	 * @return A pixel map builder, or null is dimensions are invalid. */
+	 * @return A pixel map builder, or null if dimensions are invalid. */
 	static public RasterBuilder createRasterBuilder(DMS dms) {
 		SignConfig sc = dms.getSignConfig();
 		if (sc != null) {
@@ -290,29 +290,8 @@ public class DMSHelper extends BaseHelper {
 	 * @return RasterGraphic array, one for each page, or null on error.
 	 */
 	static private RasterGraphic[] getRasters(DMS dms, SignMessage sm) {
-		BitmapGraphic[] bitmaps =
-			SignMessageHelper.getBitmaps(sm, dms);
-		if (bitmaps == null)
-			return null;
-		RasterGraphic[] rasters = createRasters(dms, sm);
-		if (rasters == null)
-			return null;
-		if (graphicsMatch(rasters, bitmaps) || bitmaps.length == 0)
-			return rasters;
-		else
-			return bitmaps;
-	}
-
-	/** Create raster graphics for all pages of the specified DMS.
-	 * @param dms Sign in question.
-	 * @return RasterGraphic array, one for each page, or null on error.
-	 */
-	static private RasterGraphic[] createRasters(DMS dms, SignMessage sm) {
 		RasterBuilder rb = createRasterBuilder(dms);
-		if (rb != null)
-			return createRasters(rb, sm.getMulti());
-		else
-			return null;
+		return (rb != null) ? createRasters(rb, sm.getMulti()) : null;
 	}
 
 	/** Create raster graphics using a raster builder and multi string.
@@ -327,29 +306,6 @@ public class DMSHelper extends BaseHelper {
 		catch (InvalidMsgException e) {
 			return null;
 		}
-	}
-
-	/** Check if an array of raster graphics match another */
-	static private boolean graphicsMatch(RasterGraphic[] rg,
-		BitmapGraphic[] bm)
-	{
-		if (rg.length != bm.length)
-			return false;
-		for (int i = 0; i < rg.length; i++) {
-			RasterGraphic r = rg[i];
-			BitmapGraphic b = bm[i];
-			BitmapGraphic test = b.createBlankCopy();
-			test.copy(b);
-			try {
-				test.difference(r);
-			}
-			catch (IndexOutOfBoundsException e) {
-				return false;
-			}
-			if (test.getLitCount() > 0)
-				return false;
-		}
-		return true;
 	}
 
 	/** Get the owner of the current message */

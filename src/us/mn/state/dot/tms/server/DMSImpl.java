@@ -83,10 +83,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
-	/** External operator source */
-	static private final int EXT_OPER = SignMsgSource.toBits(
-		SignMsgSource.external, SignMsgSource.operator);
-
 	/** Test if a sign message source contains "scheduled" */
 	static private boolean isMsgScheduled(SignMessage sm) {
 		return SignMsgSource.schedule.checkBit(sm.getSource());
@@ -666,13 +662,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Create a blank message for the sign */
 	public SignMessage createMsgBlank() {
-		return createMsgBlank(OVERRIDE);
-	}
-
-	/** Create a blank message for the sign */
-	private SignMessage createMsgBlank(DmsMsgPriority ap) {
-		String bmaps = Base64.encode(new byte[0]);
-		return findOrCreateMsg("", false, bmaps, ap, BLANK,
+		return findOrCreateMsg("", false, OVERRIDE, BLANK,
 			SignMsgSource.blank.bit(), null, null);
 	}
 
@@ -688,79 +678,43 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public SignMessage createMsg(String m, boolean be, DmsMsgPriority ap,
 		DmsMsgPriority rp, int src, String o, Integer d)
 	{
-		String bmaps = renderBitmaps(m);
-		if (bmaps != null)
-			return findOrCreateMsg(m, be, bmaps, ap, rp, src, o, d);
-		else
-			return null;
-	}
-
-	/** Render bitmaps for all pages of a message.
-	 * @param m MULTI string for message.
-	 * @return Base64-encoded bitmaps, or null on error. */
-	private String renderBitmaps(String m) {
-		try {
-			BitmapGraphic[] pages = DMSHelper.createBitmaps(this,m);
-			if (pages != null)
-				return encodeBitmaps(pages);
-		}
-		catch (InvalidMsgException e) {
-			logError(e.getMessage());
-		}
-		return null;
-	}
-
-	/** Encode bitmaps to Base64.
-	 * @param pages Bitmap graphics for all pages.
-	 * @return Base64-encoded bitmaps. */
-	private String encodeBitmaps(BitmapGraphic[] pages) {
-		int blen = pages[0].length();
-		byte[] b_data = new byte[pages.length * blen];
-		for (int i = 0; i < pages.length; i++) {
-			byte[] page = pages[i].getPixelData();
-			System.arraycopy(page, 0, b_data, i * blen, blen);
-		}
-		return Base64.encode(b_data);
+		return findOrCreateMsg(m, be, ap, rp, src, o, d);
 	}
 
 	/** Find or create a sign message.
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
-	 * @param bmaps Message bitmaps (Base64).
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param src Message source.
 	 * @param o Owner name.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage findOrCreateMsg(String m, boolean be, String bmaps,
+	private SignMessage findOrCreateMsg(String m, boolean be,
 		DmsMsgPriority ap, DmsMsgPriority rp, int src, String o,
 		Integer d)
 	{
-		SignMessage esm = SignMessageHelper.find(m, bmaps, ap, rp, src,
-			o, d);
+		SignMessage esm = SignMessageHelper.find(m, ap, rp, src, o, d);
 		if (esm != null)
 			return esm;
 		else
-			return createMsgNotify(m, be, bmaps, ap, rp, src, o, d);
+			return createMsgNotify(m, be, ap, rp, src, o, d);
 	}
 
 	/** Create a new sign message and notify clients.
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
-	 * @param bmaps Message bitmaps (Base64).
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param src Message source.
 	 * @param o Owner name.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
-	private SignMessage createMsgNotify(String m, boolean be, String bmaps,
+	private SignMessage createMsgNotify(String m, boolean be,
 		DmsMsgPriority ap, DmsMsgPriority rp, int src, String o,
 		Integer d)
 	{
-		SignMessageImpl sm = new SignMessageImpl(m, be, bmaps, ap, rp,
-			src, o, d);
+		SignMessageImpl sm = new SignMessageImpl(m, be, ap, rp,src,o,d);
 		try {
 			sm.notifyCreate();
 			return sm;
@@ -773,51 +727,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			logError("createMsgNotify: " + e.getMessage());
 			return null;
 		}
-	}
-
-	/** Create a pre-rendered message for the sign (ADDCO, DMSXML).
-	 * @param m MULTI string for message.
-	 * @param be Beacon enabled flag.
-	 * @param pages Pre-rendered graphics for all pages.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
-	 * @param d Duration in minutes; null means indefinite.
-	 * @return New sign message, or null on error. */
-	public SignMessage createMsgRendered(String m, boolean be,
-		BitmapGraphic[] pages, DmsMsgPriority ap,
-		DmsMsgPriority rp, Integer d)
-	{
-		String bmaps = encodeAdjustedBitmaps(pages);
-		if (bmaps != null) {
-			return findOrCreateMsg(m, be, bmaps, ap, rp, EXT_OPER,
-			                       null, d);
-		} else
-			return null;
-	}
-
-	/** Encode bitmaps to Base64 after adjusting dimensions.
-	 * @param pages Bitmap graphics for all pages.
-	 * @return Base64-encoded bitmaps, or null on error. */
-	private String encodeAdjustedBitmaps(BitmapGraphic[] pages) {
-		BitmapGraphic[] p = copyBitmaps(pages);
-		return (p != null) ? encodeBitmaps(p) : null;
-	}
-
-	/** Copy an array of bitmaps into the DMS dimensions.
-	 * @param pages Array of bitmap graphics.
-	 * @return Bitmap graphics with same dimensions as DMS, or null. */
-	private BitmapGraphic[] copyBitmaps(BitmapGraphic[] pages) {
-		SignConfig sc = sign_config;
-		if (null == sc)
-			return null;
-		int w = sc.getPixelWidth();
-		int h = sc.getPixelHeight();
-		BitmapGraphic[] p = new BitmapGraphic[pages.length];
-		for (int i = 0; i < p.length; i++) {
-			p[i] = new BitmapGraphic(w, h);
-			p[i].copy(pages[i]);
-		}
-		return p;
 	}
 
 	/** Create a scheduled message.

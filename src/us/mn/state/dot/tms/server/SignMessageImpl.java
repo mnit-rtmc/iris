@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -65,9 +65,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
 		store.query("SELECT name, incident, multi, beacon_enabled, " +
-			"bitmaps, a_priority, r_priority, source, owner, " +
-			"duration FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"a_priority, r_priority, source, owner, duration " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignMessageImpl(row));
@@ -83,7 +82,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		map.put("incident", incident);
 		map.put("multi", multi);
 		map.put("beacon_enabled", beacon_enabled);
-		map.put("bitmaps", bitmaps);
 		map.put("a_priority", activationPriority);
 		map.put("r_priority", runTimePriority);
 		map.put("source", source);
@@ -116,24 +114,22 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		     row.getString(2),		// incident
 		     row.getString(3),		// multi
 		     row.getBoolean(4),		// beacon_enabled
-		     row.getString(5),		// bitmaps
-		     row.getInt(6),		// a_priority
-		     row.getInt(7),		// r_priority
-		     row.getInt(8),		// source
-		     row.getString(9),		// owner
-		     (Integer) row.getObject(10) // duration
+		     row.getInt(5),		// a_priority
+		     row.getInt(6),		// r_priority
+		     row.getInt(7),		// source
+		     row.getString(8),		// owner
+		     (Integer) row.getObject(9)	// duration
 		);
 	}
 
 	/** Create a sign message */
 	private SignMessageImpl(String n, String inc, String m, boolean be,
-		String b, int ap, int rp, int s, String o, Integer d)
+		int ap, int rp, int s, String o, Integer d)
 	{
 		super(n);
 		incident = lookupIncident(inc);
 		multi = m;
 		beacon_enabled = be;
-		bitmaps = b;
 		activationPriority = ap;
 		runTimePriority = rp;
 		source = s;
@@ -142,14 +138,12 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	}
 
 	/** Create a new sign message (by IRIS) */
-	public SignMessageImpl(String m, boolean be, String b,
-		DmsMsgPriority ap, DmsMsgPriority rp, int s, String o,
-		Integer d)
+	public SignMessageImpl(String m, boolean be, DmsMsgPriority ap,
+		DmsMsgPriority rp, int s, String o, Integer d)
 	{
 		super(createUniqueName());
 		multi = m;
 		beacon_enabled = be;
-		bitmaps = b;
 		activationPriority = ap.ordinal();
 		runTimePriority = rp.ordinal();
 		source = s;
@@ -191,17 +185,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	@Override
 	public boolean getBeaconEnabled() {
 		return beacon_enabled;
-	}
-
-	/** Bitmap data for each page (Base64-encoded) */
-	private String bitmaps;
-
-	/** Get the bitmaps for all pages of the message.
-	 * @return Base64-encoded bitmap data.
-	 * @see us.mn.state.dot.tms.utils.Base64 */
-	@Override
-	public String getBitmaps() {
-		return bitmaps;
 	}
 
 	/** Message activation priority */
@@ -268,7 +251,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		w.write(createAttribute("duration", getDuration()));
 		w.write(createAttribute("incident", getIncident()));
 		w.write(createAttribute("multi", multi));
-		w.write(createAttribute("bitmaps", getBitmaps()));
+		w.write(createAttribute("bitmaps", "")); // encode from multi?
 		w.write(createAttribute("deploy_time", dms.getDeployTime()));
 		w.write("/>\n");
 	}

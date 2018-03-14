@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -56,7 +56,7 @@ class OpMessage extends OpDms {
 		super(PriorityLevel.COMMAND, d, "Sending new message", u);
 		m_sm = m;
 		BitmapGraphic[] bitmaps = SignMessageHelper.getBitmaps(m, d);
-		m_npages = bitmaps != null ? bitmaps.length : 0;
+		m_npages = (bitmaps != null) ? bitmaps.length : 0;
 		m_bitmaps = convertToHexString(bitmaps);
 	}
 

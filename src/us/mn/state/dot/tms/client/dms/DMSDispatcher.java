@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -41,7 +41,6 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.widget.IOptionPane;
-import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -307,16 +306,12 @@ public class DMSDispatcher extends JPanel {
 
 	/** Create a new message using the specified MULTI */
 	private SignMessage createMessage(String ms) {
-		String bitmaps = createBitmaps(ms);
-		if (bitmaps != null) {
-			boolean be = composer.isBeaconEnabled();
-			DmsMsgPriority p = composer.getPriority();
-			int src = operator.bit();
-			String u = user.getName();
-			Integer d = composer.getDuration();
-			return creator.create(ms, be, bitmaps, p, p, src, u, d);
-		} else
-			return null;
+		boolean be = composer.isBeaconEnabled();
+		DmsMsgPriority p = composer.getPriority();
+		int src = operator.bit();
+		String u = user.getName();
+		Integer d = composer.getDuration();
+		return creator.create(ms, be, p, p, src, u, d);
 	}
 
 	/** Blank the select DMS */
@@ -355,40 +350,9 @@ public class DMSDispatcher extends JPanel {
 
 	/** Create a new blank message */
 	private SignMessage createBlankMessage() {
-		String bitmaps = createBitmaps("");
-		if (bitmaps != null) {
-			return creator.create("", false, bitmaps,
-			                      DmsMsgPriority.OVERRIDE,
-			                      DmsMsgPriority.BLANK, blank.bit(),
-			                      null, null);
-		} else
-			return null;
-	}
-
-	/** Create bitmap graphics for a MULTI string */
-	private String createBitmaps(String ms) {
-		RasterBuilder b = builder;
-		if (b != null) {
-			try {
-				return encodeBitmaps(b.createBitmaps(
-					new MultiString(ms)));
-			}
-			catch (InvalidMsgException e) {
-				// Message is not valid
-			}
-		}
-		return null;
-	}
-
-	/** Encode the bitmaps to Base64 */
-	private String encodeBitmaps(BitmapGraphic[] bmaps) {
-		int blen = bmaps[0].length();
-		byte[] bitmaps = new byte[bmaps.length * blen];
-		for (int i = 0; i < bmaps.length; i++) {
-			byte[] pix = bmaps[i].getPixelData();
-			System.arraycopy(pix, 0, bitmaps, i * blen, blen);
-		}
-		return Base64.encode(bitmaps);
+		return creator.create("", false, DmsMsgPriority.OVERRIDE,
+		                      DmsMsgPriority.BLANK, blank.bit(),
+		                      null, null);
 	}
 
 	/** Query the current message on all selected signs */

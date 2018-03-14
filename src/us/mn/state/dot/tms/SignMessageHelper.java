@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -50,16 +50,14 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Find a sign message with matching attributes.
 	 * @param multi MULTI string.
-	 * @param bitmaps Bitmaps for all pages.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param src Message source.
 	 * @param owner Use name (null for any).
 	 * @param d Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
-	static public SignMessage find(String multi, String bitmaps,
-		DmsMsgPriority ap, DmsMsgPriority rp, int src, String owner,
-		Integer d)
+	static public SignMessage find(String multi, DmsMsgPriority ap,
+		DmsMsgPriority rp, int src, String owner, Integer d)
 	{
 		int api = ap.ordinal();
 		int rpi = rp.ordinal();
@@ -67,7 +65,6 @@ public class SignMessageHelper extends BaseHelper {
 		while (it.hasNext()) {
 			SignMessage sm = it.next();
 			if (multi.equals(sm.getMulti()) &&
-			    bitmaps.equals(sm.getBitmaps()) &&
 			    api == sm.getActivationPriority() &&
 			    rpi == sm.getRunTimePriority() &&
 			    sourceEquals(src, sm) &&
@@ -113,11 +110,8 @@ public class SignMessageHelper extends BaseHelper {
 			return false;
 		if (sm1.getRunTimePriority() != sm2.getRunTimePriority())
 			return false;
-		if (!objectEquals(sm1.getOwner(), sm2.getOwner()))
-			return false;
-		final String bm1 = sm1.getBitmaps();
-		final String bm2 = sm2.getBitmaps();
-		return objectEquals(bm1, bm2);
+		else
+			return objectEquals(sm1.getOwner(), sm2.getOwner());
 	}
 
 	/** Return an array of font names in a message.
@@ -153,7 +147,7 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Check if a sign message is blank */
 	static public boolean isBlank(SignMessage sm) {
-		return (sm == null) || (isMultiBlank(sm) && isBitmapBlank(sm));
+		return (null == sm) || isMultiBlank(sm);
 	}
 
 	/** Check if the MULTI string is blank */
@@ -162,57 +156,18 @@ public class SignMessageHelper extends BaseHelper {
 		return ms == null || new MultiString(ms).isBlank();
 	}
 
-	/** Check if the bitmap is blank */
-	static private boolean isBitmapBlank(SignMessage sm) {
-		byte[] bmaps = decodeBitmaps(sm);
-		if (bmaps != null) {
-			for (byte b: bmaps) {
-				if (b != 0)
-					return false;
-			}
-			return true;
-		} else
-			return false;
-	}
-
 	/** Get the bitmap graphic for all pages of the specified DMS.
 	 * @param sm SignMessage in question.
-	 * @param DMS with the graphic.
+	 * @param dms Sign with the graphic.
 	 * @return Array of bitmaps, one for each page, or null on error. */
 	static public BitmapGraphic[] getBitmaps(SignMessage sm, DMS dms) {
-		if (sm == null || dms == null)
-			return null;
-		byte[] bmaps = decodeBitmaps(sm);
-		if (bmaps == null)
-			return null;
-		BitmapGraphic bg = DMSHelper.createBitmapGraphic(dms);
-		if (bg == null)
-			return null;
-		int blen = bg.length();
-		if (blen == 0 || bmaps.length % blen != 0)
-			return null;
-		int n_pages = bmaps.length / blen;
-		BitmapGraphic[] bitmaps = new BitmapGraphic[n_pages];
-		for (int i = 0; i < n_pages; i++) {
-			bitmaps[i] = DMSHelper.createBitmapGraphic(dms);
-			byte[] b = new byte[blen];
-			System.arraycopy(bmaps, i * blen, b, 0, blen);
-			bitmaps[i].setPixelData(b);
-		}
-		return bitmaps;
-	}
-
-	/** Decode the bitmaps on a sign message */
-	static private byte[] decodeBitmaps(SignMessage sm) {
-		if (sm != null) {
-			String bmaps = sm.getBitmaps();
-			if (bmaps != null) {
-				try {
-					return Base64.decode(bmaps);
-				}
-				catch (IOException e) {
-					// fall through
-				}
+		if (sm != null && dms != null) {
+			try {
+				return DMSHelper.createBitmaps(dms,
+					sm.getMulti());
+			}
+			catch (InvalidMsgException e) {
+				// fall thru and return null
 			}
 		}
 		return null;
@@ -229,7 +184,7 @@ public class SignMessageHelper extends BaseHelper {
 		if (!multi.isValid())
 			throw new InvalidMsgException("MULTI " + sm.getMulti());
 		try {
-			validateBitmaps(sm.getBitmaps(), multi, dms);
+			validateBitmaps(multi, dms);
 		}
 		catch (IOException e) {
 			throw new InvalidMsgException("Base64 decode error");
@@ -240,68 +195,95 @@ public class SignMessageHelper extends BaseHelper {
 	}
 
 	/** Validate sign message bitmaps.
-	 * @param bmaps Base64-encoded bitmaps.
 	 * @param multi Message MULTI string.
 	 * @param dms Sign to check.
 	 * @throws IOException, InvalidMsgException. */
-	static private void validateBitmaps(String bmaps, MultiString multi,
-		DMS dms) throws IOException, InvalidMsgException
+	static private void validateBitmaps(MultiString multi, DMS dms)
+		throws IOException, InvalidMsgException
 	{
-		byte[] b_data = Base64.decode(bmaps);
-		BitmapGraphic bg = DMSHelper.createBitmapGraphic(dms);
-		if (null == bg)
-			throw new InvalidMsgException("Width/height is null");
-		int blen = bg.length();
-		if (0 == blen)
-			throw new InvalidMsgException("sign size");
-		if (b_data.length % blen != 0)
-			throw new InvalidMsgException("bitmap length");
+		BitmapGraphic[] bmaps = DMSHelper.createBitmaps(dms,
+			multi.toString());
+		if (null == bmaps)
+			throw new InvalidMsgException("no sign config");
+		if (bmaps.length == 0)
+			throw new InvalidMsgException("no pages");
 		if (!multi.isBlank()) {
-			String[] pixels = dms.getPixelStatus();
-			if (pixels != null && pixels.length == 2)
-				validateBitmaps(b_data, pixels, bg);
+			BitmapGraphic[] stuck = createStuckBitmaps(dms);
+			if (stuck != null) {
+				for (BitmapGraphic bg : bmaps) {
+					validateBitmap(bg, stuck);
+				}
+			}
 		}
 	}
 
-	/** Validate the message bitmaps.
-	 * @param b_data Decoded bitmap data.
-	 * @param pixels Pixel status bitmaps (stuck off and stuck on).
-	 * @param bg Temporary bitmap graphic.
-	 * @throws IOException, InvalidMsgException. */
-	static private void validateBitmaps(byte[] b_data, String[] pixels,
-		BitmapGraphic bg) throws IOException, InvalidMsgException
+	/** Create stuck pixel bitmaps */
+	static private BitmapGraphic[] createStuckBitmaps(DMS dms)
+		throws IOException
 	{
-		int blen = bg.length();
-		int off_limit = SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt();
-		int on_limit = SystemAttrEnum.DMS_PIXEL_ON_LIMIT.getInt();
-		BitmapGraphic stuck_off = bg.createBlankCopy();
-		BitmapGraphic stuck_on = bg.createBlankCopy();
-		byte[] b_off = Base64.decode(pixels[DMS.STUCK_OFF_BITMAP]);
-		byte[] b_on = Base64.decode(pixels[DMS.STUCK_ON_BITMAP]);
-		// Don't validate if the sign dimensions have changed
-		if (b_off.length != blen || b_on.length != blen)
-			return;
-		stuck_off.setPixelData(b_off);
-		stuck_on.setPixelData(b_on);
-		int n_pages = b_data.length / blen;
-		byte[] bd = new byte[blen];
-		for (int p = 0; p < n_pages; p++) {
-			System.arraycopy(b_data, p * blen, bd, 0, blen);
-			bg.setPixelData(bd);
-			bg.union(stuck_off);
-			int n_lit = bg.getLitCount();
-			if (n_lit > off_limit) {
-				throw new InvalidMsgException(
-					"Too many stuck off pixels: " + n_lit);
+		String[] ps = dms.getPixelStatus();
+		if (ps != null && ps.length == 2) {
+			BitmapGraphic off = createStuckBitmap(dms,
+				ps[DMS.STUCK_OFF_BITMAP]);
+			BitmapGraphic on = createStuckBitmap(dms,
+				ps[DMS.STUCK_ON_BITMAP]);
+			if (off != null && on != null) {
+				BitmapGraphic[] bg = new BitmapGraphic[2];
+				bg[DMS.STUCK_OFF_BITMAP] = off;
+				bg[DMS.STUCK_ON_BITMAP] = on;
+				return bg;
 			}
-			bg.setPixelData(bd);
-			bg.outline();
-			bg.union(stuck_on);
-			n_lit = bg.getLitCount();
-			if (n_lit > on_limit) {
-				throw new InvalidMsgException(
-					"Too many stuck on pixels: " + n_lit);
+		}
+		return null;
+	}
+
+	/** Create one stuck pixel bitmap */
+	static private BitmapGraphic createStuckBitmap(DMS dms, String p)
+		throws IOException
+	{
+		byte[] bd = Base64.decode(p);
+		BitmapGraphic bg = DMSHelper.createBitmapGraphic(dms);
+		if (bg != null && bd.length == bg.length()) {
+			try {
+				bg.setPixelData(bd);
+				return bg;
 			}
+			catch (IndexOutOfBoundsException e) {
+				// stuck bitmap doesn't match current dimensions
+			}
+		}
+		return null;
+	}
+
+	/** Validate one message bitmap.
+	 * @param bg Bitmap graphic to validate.
+	 * @param stuck Stuck pixel bitmaps (off and on).
+	 * @throws IOException, InvalidMsgException. */
+	static private void validateBitmap(BitmapGraphic bg,
+		BitmapGraphic[] stuck) throws IOException, InvalidMsgException
+	{
+		if (bg.length() == 0)
+			throw new InvalidMsgException("sign size");
+		for (BitmapGraphic s : stuck) {
+			// This should never happen
+			if (s.length() != bg.length())
+				throw new InvalidMsgException("stuck size");
+		}
+		BitmapGraphic temp = bg.createBlankCopy();
+		temp.setPixelData(bg.getPixelData());
+		temp.union(stuck[DMS.STUCK_OFF_BITMAP]);
+		int n_off = temp.getLitCount();
+		if (n_off > SystemAttrEnum.DMS_PIXEL_OFF_LIMIT.getInt()) {
+			throw new InvalidMsgException(
+				"Too many stuck off pixels: " + n_off);
+		}
+		temp.setPixelData(bg.getPixelData());
+		temp.outline();
+		temp.union(stuck[DMS.STUCK_ON_BITMAP]);
+		int n_on = temp.getLitCount();
+		if (n_on > SystemAttrEnum.DMS_PIXEL_ON_LIMIT.getInt()) {
+			throw new InvalidMsgException(
+				"Too many stuck on pixels: " + n_on);
 		}
 	}
 

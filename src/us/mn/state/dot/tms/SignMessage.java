@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,13 +39,6 @@ public interface SignMessage extends SonarObject {
 
 	/** Get beacon enabled flag */
 	boolean getBeaconEnabled();
-
-	/** Get the bitmaps for all pages of the message.  Even if the message
-	 * is displaying multiple colors, the bitmaps are 1-bit.  This attribute
-	 * is needed if the bitmap cannot be reconstructed from MULTI string.
-	 * @return Base64-encoded bitmap data.
-	 * @see us.mn.state.dot.tms.utils.Base64 */
-	String getBitmaps();
 
 	/** Get the activation priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
