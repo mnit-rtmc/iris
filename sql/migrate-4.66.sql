@@ -18,6 +18,7 @@ INSERT INTO iris.sign_message (name, multi, beacon_enabled, a_priority,
 UPDATE iris._dms SET msg_current = 'system_blank'
 	FROM iris.sign_message AS sm
 	WHERE msg_current = sm.name AND sm.multi = '' OR msg_current IS NULL;
+DELETE FROM iris.sign_message WHERE multi = '' AND name != 'system_blank';
 
 -- Make msg_current not null
 ALTER TABLE iris._dms ALTER COLUMN msg_current SET NOT NULL;
