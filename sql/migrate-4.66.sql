@@ -16,13 +16,15 @@ INSERT INTO iris.sign_message (name, multi, beacon_enabled, a_priority,
 
 -- Update all blank signs to the same sign message
 UPDATE iris._dms SET msg_current = 'system_blank'
-	WHERE multi = '' OR msg_current IS NULL;
+	FROM iris.sign_message AS sm
+	WHERE msg_current = sm.name AND sm.multi = '' OR msg_current IS NULL;
 
 -- Make msg_current not null
 ALTER TABLE iris._dms ALTER COLUMN msg_current SET NOT NULL;
 
 -- Add controller condition to dms_message_view
-CREATE OR REPLACE VIEW dms_message_view AS
+DROP VIEW dms_message_view;
+CREATE VIEW dms_message_view AS
 	SELECT d.name, cc.description AS condition, multi, beacon_enabled,
 	       iris.sign_msg_sources(source) AS sources, duration, deploy_time,
 	       owner
