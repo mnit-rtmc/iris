@@ -68,8 +68,7 @@ public class SignMessageHelper extends BaseHelper {
 			    api == sm.getActivationPriority() &&
 			    rpi == sm.getRunTimePriority() &&
 			    sourceEquals(src, sm) &&
-			    (objectEquals(owner, sm.getOwner()) ||
-			     (owner == null)) &&
+			    objectEquals(owner, sm.getOwner()) &&
 			    objectEquals(d, sm.getDuration()))
 				return sm;
 		}
