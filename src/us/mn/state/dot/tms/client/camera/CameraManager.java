@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -155,6 +155,12 @@ public class CameraManager extends DeviceManager<Camera> {
 			return inPlaylist(proxy);
 		else
 			return super.checkStyle(is, proxy);
+	}
+
+	/** Check if a camera style is visible */
+	@Override
+	protected boolean isStyleVisible(Camera proxy) {
+		return true;
 	}
 
 	/** Fill single selection popup */
