@@ -295,13 +295,9 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Create a new message from the widgets.
-	 * @return A newly created SignMessage else null. */
+	 * @return A SignMessage from composer selection, or null on error. */
 	private SignMessage createMessage() {
-		String ms = multi;	// Avoid races
-		if (ms.isEmpty())
-			return null;
-		else
-			return createMessage(ms);
+		return createMessage(multi);
 	}
 
 	/** Create a new message using the specified MULTI */
