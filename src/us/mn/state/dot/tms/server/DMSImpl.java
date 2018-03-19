@@ -53,6 +53,7 @@ import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSHelper;
+import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
@@ -729,7 +730,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		assert (amsg != null);
 		DmsAction da = amsg.action;
 		boolean be = da.getBeaconEnabled();
-		boolean pp = da.getPrefixPage();
+		QuickMessage qm = da.getQuickMessage();
+		boolean pp = (qm != null) ? qm.getPrefixPage() : false;
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			da.getMsgPriority());
 		Integer d = getDuration(da);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	@Override
 	protected ArrayList<ProxyColumn<QuickMessage>> createColumns() {
 		ArrayList<ProxyColumn<QuickMessage>> cols =
-			new ArrayList<ProxyColumn<QuickMessage>>(3);
+			new ArrayList<ProxyColumn<QuickMessage>>(4);
 		cols.add(new ProxyColumn<QuickMessage>("quick.message.name",
 			100)
 		{
@@ -63,6 +63,20 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 			}
 			public void setValueAt(QuickMessage qm, Object value) {
 				qm.setSignGroup(lookupSignGroup(value));
+			}
+		});
+		cols.add(new ProxyColumn<QuickMessage>(
+			"quick.message.prefix.page", 100, Boolean.class)
+		{
+			public Object getValueAt(QuickMessage qm) {
+				return qm.getPrefixPage();
+			}
+			public boolean isEditable(QuickMessage qm) {
+				return canWrite(qm);
+			}
+			public void setValueAt(QuickMessage qm, Object value) {
+				if (value instanceof Boolean)
+					qm.setPrefixPage((Boolean) value);
 			}
 		});
 		cols.add(new ProxyColumn<QuickMessage>("quick.message.multi",

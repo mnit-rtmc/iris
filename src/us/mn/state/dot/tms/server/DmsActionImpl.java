@@ -38,8 +38,8 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DmsActionImpl.class);
 		store.query("SELECT name, action_plan, sign_group, " +
-			"phase, quick_message, beacon_enabled, prefix_page, " +
-			"msg_priority FROM iris." + SONAR_TYPE  +";",
+			"phase, quick_message, beacon_enabled, msg_priority " +
+			"FROM iris." + SONAR_TYPE  +";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -58,7 +58,6 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		map.put("phase", phase);
 		map.put("quick_message", quick_message);
 		map.put("beacon_enabled", beacon_enabled);
-		map.put("prefix_page", prefix_page);
 		map.put("msg_priority", msg_priority);
 		return map;
 	}
@@ -88,22 +87,21 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		     row.getString(4),  // phase
 		     row.getString(5),  // quick_message
 		     row.getBoolean(6),	// beacon_enabled
-		     row.getBoolean(7), // prefix_page
-		     row.getInt(8)      // msg_priority
+		     row.getInt(7)      // msg_priority
 		);
 	}
 
 	/** Create a DMS action */
 	private DmsActionImpl(String n, String a, String sg, String p,
-		String qm, boolean be, boolean pp, int mp)
+		String qm, boolean be, int mp)
 	{
 		this(n, lookupActionPlan(a), lookupSignGroup(sg),
-		    lookupPlanPhase(p), lookupQuickMessage(qm), be, pp, mp);
+		    lookupPlanPhase(p), lookupQuickMessage(qm), be, mp);
 	}
 
 	/** Create a DMS action */
 	private DmsActionImpl(String n, ActionPlan a, SignGroup sg, PlanPhase p,
-		QuickMessage qm, boolean be, boolean pp, int mp)
+		QuickMessage qm, boolean be, int mp)
 	{
 		this(n);
 		action_plan = a;
@@ -111,7 +109,6 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		phase = p;
 		quick_message = qm;
 		beacon_enabled = be;
-		prefix_page = pp;
 		msg_priority = mp;
 	}
 
@@ -200,29 +197,6 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	@Override
 	public boolean getBeaconEnabled() {
 		return beacon_enabled;
-	}
-
-	/** Prefix page flag */
-	private boolean prefix_page;
-
-	/** Set prefix page flag */
-	@Override
-	public void setPrefixPage(boolean pp) {
-		prefix_page = pp;
-	}
-
-	/** Set prefix page flag */
-	public void doSetPrefixPage(boolean pp) throws TMSException {
-		if (pp != prefix_page) {
-			store.update(this, "prefix_page", pp);
-			setPrefixPage(pp);
-		}
-	}
-
-	/** Get prefix page flag */
-	@Override
-	public boolean getPrefixPage() {
-		return prefix_page;
 	}
 
 	/** Message priority */

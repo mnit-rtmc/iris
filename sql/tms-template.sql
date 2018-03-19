@@ -389,6 +389,7 @@ CREATE TABLE iris.sign_group (
 CREATE TABLE iris.quick_message (
 	name VARCHAR(20) PRIMARY KEY,
 	sign_group VARCHAR(16) REFERENCES iris.sign_group,
+	prefix_page BOOLEAN NOT NULL,
 	multi VARCHAR(1024) NOT NULL
 );
 
@@ -1786,7 +1787,6 @@ CREATE TABLE iris.dms_action (
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
 	quick_message VARCHAR(20) REFERENCES iris.quick_message,
 	beacon_enabled BOOLEAN NOT NULL,
-	prefix_page BOOLEAN NOT NULL,
 	msg_priority INTEGER NOT NULL
 );
 
@@ -2228,7 +2228,7 @@ GRANT SELECT ON time_action_view TO PUBLIC;
 
 CREATE VIEW dms_action_view AS
 	SELECT name, action_plan, sign_group, phase, quick_message,
-	       beacon_enabled, prefix_page, msg_priority
+	       beacon_enabled, msg_priority
 	FROM iris.dms_action;
 GRANT SELECT ON dms_action_view TO PUBLIC;
 
@@ -2342,7 +2342,7 @@ CREATE VIEW controller_loc_view AS
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
 CREATE VIEW quick_message_view AS
-	SELECT name, sign_group, multi FROM iris.quick_message;
+	SELECT name, sign_group, prefix_page, multi FROM iris.quick_message;
 GRANT SELECT ON quick_message_view TO PUBLIC;
 
 CREATE VIEW sign_config_view AS

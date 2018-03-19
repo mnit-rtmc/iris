@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -35,15 +36,11 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	/** Load all the quick messages */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, QuickMessageImpl.class);
-		store.query("SELECT name, sign_group, multi FROM " +
+		store.query("SELECT name, sign_group, prefix_page, multi FROM "+
 			"iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new QuickMessageImpl(
-					row.getString(1),	// name
-					row.getString(2),	// sign_group
-					row.getString(3)	// multi
-				));
+				namespace.addObject(new QuickMessageImpl(row));
 			}
 		});
 	}
@@ -54,6 +51,7 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("sign_group", sign_group);
+		map.put("prefix_page", prefix_page);
 		map.put("multi", multi);
 		return map;
 	}
@@ -76,9 +74,19 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	}
 
 	/** Create a quick message */
-	private QuickMessageImpl(String n, String sg, String m) {
+	private QuickMessageImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),  // name
+		     row.getString(2),  // sign_group
+		     row.getBoolean(3), // prefix_page
+		     row.getString(4)   // multi
+		);
+	}
+
+	/** Create a quick message */
+	private QuickMessageImpl(String n, String sg, boolean pp, String m) {
 		super(n);
 		sign_group = lookupSignGroup(sg);
+		prefix_page = pp;
 		multi = m;
 	}
 
@@ -106,6 +114,29 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 			store.update(this, "sign_group", sg);
 			setSignGroup(sg);
 		}
+	}
+
+	/** Prefix page flag */
+	private boolean prefix_page;
+
+	/** Set prefix page flag */
+	@Override
+	public void setPrefixPage(boolean pp) {
+		prefix_page = pp;
+	}
+
+	/** Set prefix page flag */
+	public void doSetPrefixPage(boolean pp) throws TMSException {
+		if (pp != prefix_page) {
+			store.update(this, "prefix_page", pp);
+			setPrefixPage(pp);
+		}
+	}
+
+	/** Get prefix page flag */
+	@Override
+	public boolean getPrefixPage() {
+		return prefix_page;
 	}
 
 	/** Message MULTI string, contains message text for all pages */

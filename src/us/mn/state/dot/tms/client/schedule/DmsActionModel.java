@@ -83,7 +83,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	@Override
 	protected ArrayList<ProxyColumn<DmsAction>> createColumns() {
 		ArrayList<ProxyColumn<DmsAction>> cols =
-			new ArrayList<ProxyColumn<DmsAction>>(6);
+			new ArrayList<ProxyColumn<DmsAction>>(5);
 		cols.add(new ProxyColumn<DmsAction>("action.plan.dms.group",
 			120)
 		{
@@ -135,20 +135,6 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			public void setValueAt(DmsAction da, Object value) {
 				if (value instanceof Boolean)
 					da.setBeaconEnabled((Boolean)value);
-			}
-		});
-		cols.add(new ProxyColumn<DmsAction>("dms.prefix.page", 100,
-			Boolean.class)
-		{
-			public Object getValueAt(DmsAction da) {
-				return da.getPrefixPage();
-			}
-			public boolean isEditable(DmsAction da) {
-				return canWrite(da);
-			}
-			public void setValueAt(DmsAction da, Object value) {
-				if (value instanceof Boolean)
-					da.setPrefixPage((Boolean) value);
 			}
 		});
 		cols.add(new ProxyColumn<DmsAction>("dms.msg.priority",

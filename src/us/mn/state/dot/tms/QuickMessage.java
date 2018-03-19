@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,6 +34,12 @@ public interface QuickMessage extends SonarObject {
 	/** Set the sign group associated with the quick message.
 	 * @param sg Sign group to associate; null for no group. */
 	void setSignGroup(SignGroup sg);
+
+	/** Set prefix page flag */
+	void setPrefixPage(boolean pp);
+
+	/** Get prefix page flag */
+	boolean getPrefixPage();
 
 	/** Get the message MULTI string.
 	 * @return Message text in MULTI markup.

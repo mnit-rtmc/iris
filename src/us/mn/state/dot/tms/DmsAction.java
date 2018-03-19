@@ -50,12 +50,6 @@ public interface DmsAction extends SonarObject {
 	/** Get beacon enabled flag */
 	boolean getBeaconEnabled();
 
-	/** Set prefix page flag */
-	void setPrefixPage(boolean pp);
-
-	/** Get prefix page flag */
-	boolean getPrefixPage();
-
 	/** Set the message priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DmsMsgPriority */

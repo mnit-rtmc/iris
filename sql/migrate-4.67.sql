@@ -7,14 +7,20 @@ BEGIN;
 SELECT iris.update_version('4.66.0', '4.67.0');
 
 -- Drop old views
+DROP VIEW quick_message_view;
 DROP VIEW dms_message_view;
 DROP VIEW dms_toll_zone_view;
 DROP VIEW dms_action_view;
 
--- Add prefix_page column to dms_action
-ALTER TABLE iris.dms_action ADD COLUMN prefix_page BOOLEAN;
-UPDATE iris.dms_action SET prefix_page = (a_priority = 2);
-ALTER TABLE iris.dms_action ALTER COLUMN prefix_page SET NOT NULL;
+-- Add prefix_page column to quick_message
+ALTER TABLE iris.quick_message ADD COLUMN prefix_page BOOLEAN;
+UPDATE iris.quick_message SET prefix_page = name IN (
+	SELECT quick_message
+	FROM iris.dms_action
+	WHERE a_priority = 2
+	AND quick_message IS NOT NULL
+);
+ALTER TABLE iris.quick_message ALTER COLUMN prefix_page SET NOT NULL;
 
 -- Replace a_priority and r_priority with msg_priority on dms_action
 ALTER TABLE iris.dms_action ADD COLUMN msg_priority INTEGER;
@@ -38,7 +44,7 @@ ALTER TABLE iris.sign_message DROP COLUMN r_priority;
 -- Create dms_action_view
 CREATE VIEW dms_action_view AS
 	SELECT name, action_plan, sign_group, phase, quick_message,
-	       beacon_enabled, prefix_page, msg_priority
+	       beacon_enabled, msg_priority
 	FROM iris.dms_action;
 GRANT SELECT ON dms_action_view TO PUBLIC;
 
@@ -64,5 +70,10 @@ CREATE VIEW dms_message_view AS
 	LEFT JOIN iris.condition cc ON c.condition = cc.id
 	LEFT JOIN iris.sign_message s ON d.msg_current = s.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
+
+-- Create quick_message_view
+CREATE VIEW quick_message_view AS
+	SELECT name, sign_group, prefix_page, multi FROM iris.quick_message;
+GRANT SELECT ON quick_message_view TO PUBLIC;
 
 COMMIT;
