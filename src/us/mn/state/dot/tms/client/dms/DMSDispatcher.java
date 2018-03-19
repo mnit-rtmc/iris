@@ -307,7 +307,7 @@ public class DMSDispatcher extends JPanel {
 			int src = operator.bit();
 			String u = user.getName();
 			Integer d = composer.getDuration();
-			return creator.create(ms, be, p, p, src, u, d);
+			return creator.create(ms, be, p, src, u, d);
 		} else
 			return createBlankMessage();
 	}
@@ -348,9 +348,8 @@ public class DMSDispatcher extends JPanel {
 
 	/** Create a new blank message */
 	private SignMessage createBlankMessage() {
-		return creator.create("", false, DmsMsgPriority.OVERRIDE,
-		                      DmsMsgPriority.BLANK, blank.bit(),
-		                      null, null);
+		return creator.create("", false, DmsMsgPriority.BLANK,
+		                      blank.bit(), null, null);
 	}
 
 	/** Query the current message on all selected signs */

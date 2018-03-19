@@ -64,9 +64,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
 		store.query("SELECT name, incident, multi, beacon_enabled, " +
-			"prefix_page, a_priority, r_priority, source, owner, " +
-			"duration FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"prefix_page, msg_priority, source, owner, duration " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignMessageImpl(row));
@@ -83,8 +82,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		map.put("multi", multi);
 		map.put("beacon_enabled", beacon_enabled);
 		map.put("prefix_page", prefix_page);
-		map.put("a_priority", activationPriority);
-		map.put("r_priority", runTimePriority);
+		map.put("msg_priority", msg_priority);
 		map.put("source", source);
 		map.put("owner", owner);
 		map.put("duration", duration);
@@ -116,25 +114,23 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		     row.getString(3),          // multi
 		     row.getBoolean(4),         // beacon_enabled
 		     row.getBoolean(5),         // prefix_page
-		     row.getInt(6),             // a_priority
-		     row.getInt(7),             // r_priority
-		     row.getInt(8),             // source
-		     row.getString(9),          // owner
-		     (Integer) row.getObject(10)// duration
+		     row.getInt(6),             // msg_priority
+		     row.getInt(7),             // source
+		     row.getString(8),          // owner
+		     (Integer) row.getObject(9) // duration
 		);
 	}
 
 	/** Create a sign message */
 	private SignMessageImpl(String n, String inc, String m, boolean be,
-		boolean pp, int ap, int rp, int s, String o, Integer d)
+		boolean pp, int mp, int s, String o, Integer d)
 	{
 		super(n);
 		incident = lookupIncident(inc);
 		multi = m;
 		beacon_enabled = be;
 		prefix_page = pp;
-		activationPriority = ap;
-		runTimePriority = rp;
+		msg_priority = mp;
 		source = s;
 		owner = o;
 		duration = d;		
@@ -142,14 +138,13 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Create a new sign message (by IRIS) */
 	public SignMessageImpl(String m, boolean be, boolean pp,
-		DmsMsgPriority ap, DmsMsgPriority rp, int s, String o,Integer d)
+		DmsMsgPriority mp, int s, String o,Integer d)
 	{
 		super(createUniqueName());
 		multi = m;
 		beacon_enabled = be;
 		prefix_page = pp;
-		activationPriority = ap.ordinal();
-		runTimePriority = rp.ordinal();
+		msg_priority = mp.ordinal();
 		source = s;
 		owner = o;
 		duration = d;
@@ -200,26 +195,15 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		return prefix_page;
 	}
 
-	/** Message activation priority */
-	private int activationPriority;
+	/** Message priority */
+	private int msg_priority;
 
-	/** Get the activation priority.
+	/** Get the message priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DmsMsgPriority */
 	@Override
-	public int getActivationPriority() {
-		return activationPriority;
-	}
-
-	/** Run-time priority */
-	private int runTimePriority;
-
-	/** Get the run-time priority.
-	 * @return Run-time priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DmsMsgPriority */
-	@Override
-	public int getRunTimePriority() {
-		return runTimePriority;
+	public int getMsgPriority() {
+		return msg_priority;
 	}
 
 	/** Sign message source */
@@ -260,8 +244,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		w.write(createAttribute("status", DMSHelper.getAllStyles(dms)));
 		w.write(createAttribute("beacon_enabled", beacon_enabled));
 		w.write(createAttribute("prefix_page", prefix_page));
-		w.write(createAttribute("run_priority", runTimePriority));
-		w.write(createAttribute("act_priority", activationPriority));
+		w.write(createAttribute("run_priority", msg_priority));
+		w.write(createAttribute("act_priority", msg_priority));
 		w.write(createAttribute("source", getSource()));
 		w.write(createAttribute("duration", getDuration()));
 		w.write(createAttribute("incident", getIncident()));

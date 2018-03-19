@@ -58,24 +58,23 @@ public class SignMessageCreator {
 	 * Create a new sign message.
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
+	 * @param mp Message priority.
 	 * @param src Sign message source bits.
 	 * @param owner User name.
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
-	public SignMessage create(String multi, boolean be, DmsMsgPriority ap,
-		DmsMsgPriority rp, int src, String owner, Integer duration)
+	public SignMessage create(String multi, boolean be, DmsMsgPriority mp,
+		int src, String owner, Integer duration)
 	{
 		boolean pp = false; // Operators cannot enable prefix page
-		SignMessage sm = SignMessageHelper.find(multi, pp, ap, rp, src,
+		SignMessage sm = SignMessageHelper.find(multi, pp, mp, src,
 			owner, duration);
 		if (sm != null)
 			return sm;
 		String name = createName();
 		if (name != null) {
-			return create(name, multi, be, pp, ap, rp, src, owner,
+			return create(name, multi, be, pp, mp, src, owner,
 			              duration);
 		} else
 			return null;
@@ -87,23 +86,21 @@ public class SignMessageCreator {
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
 	 * @param pp Prefix page.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
+	 * @param mp Message priority.
 	 * @param src Sign message source bits.
 	 * @param owner User name.
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(String name, String multi, boolean be,
-		boolean pp, DmsMsgPriority ap, DmsMsgPriority rp, int src,
-		String owner, Integer duration)
+		boolean pp, DmsMsgPriority mp, int src, String owner,
+		Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("multi", multi);
 		attrs.put("beacon_enabled", be);
 		attrs.put("prefix_page", pp);
-		attrs.put("activationPriority", new Integer(ap.ordinal()));
-		attrs.put("runTimePriority", new Integer(rp.ordinal()));
+		attrs.put("msgPriority", new Integer(mp.ordinal()));
 		attrs.put("source", new Integer(src));
 		if (owner != null)
 			attrs.put("owner", owner);

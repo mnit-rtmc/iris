@@ -16,15 +16,29 @@ ALTER TABLE iris.dms_action ADD COLUMN prefix_page BOOLEAN;
 UPDATE iris.dms_action SET prefix_page = (a_priority = 2);
 ALTER TABLE iris.dms_action ALTER COLUMN prefix_page SET NOT NULL;
 
+-- Replace a_priority and r_priority with msg_priority on dms_action
+ALTER TABLE iris.dms_action ADD COLUMN msg_priority INTEGER;
+UPDATE iris.dms_action SET msg_priority = r_priority;
+ALTER TABLE iris.dms_action ALTER COLUMN msg_priority SET NOT NULL;
+ALTER TABLE iris.dms_action DROP COLUMN a_priority;
+ALTER TABLE iris.dms_action DROP COLUMN r_priority;
+
 -- Add prefix_page column to sign_message
 ALTER TABLE iris.sign_message ADD COLUMN prefix_page BOOLEAN;
 UPDATE iris.sign_message SET prefix_page = (a_priority = 2);
 ALTER TABLE iris.sign_message ALTER COLUMN prefix_page SET NOT NULL;
 
+-- Replace a_priority and r_priority with msg_priority on sign_message
+ALTER TABLE iris.sign_message ADD COLUMN msg_priority INTEGER;
+UPDATE iris.sign_message SET msg_priority = r_priority;
+ALTER TABLE iris.sign_message ALTER COLUMN msg_priority SET NOT NULL;
+ALTER TABLE iris.sign_message DROP COLUMN a_priority;
+ALTER TABLE iris.sign_message DROP COLUMN r_priority;
+
 -- Create dms_action_view
 CREATE VIEW dms_action_view AS
 	SELECT name, action_plan, sign_group, phase, quick_message,
-	       beacon_enabled, prefix_page, a_priority, r_priority
+	       beacon_enabled, prefix_page, msg_priority
 	FROM iris.dms_action;
 GRANT SELECT ON dms_action_view TO PUBLIC;
 
@@ -43,9 +57,8 @@ GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
 -- Create dms_message_view
 CREATE VIEW dms_message_view AS
 	SELECT d.name, cc.description AS condition, multi, beacon_enabled,
-	       prefix_page,
-	       iris.sign_msg_sources(source) AS sources, duration, deploy_time,
-	       owner
+	       prefix_page, msg_priority, iris.sign_msg_sources(source)
+	       AS sources, duration, deploy_time, owner
 	FROM iris.dms d
 	LEFT JOIN iris.controller c ON d.controller = c.name
 	LEFT JOIN iris.condition cc ON c.condition = cc.id

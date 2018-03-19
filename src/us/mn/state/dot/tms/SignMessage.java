@@ -42,15 +42,10 @@ public interface SignMessage extends SonarObject {
 	/** Get prefix page flag */
 	boolean getPrefixPage();
 
-	/** Get the activation priority.
+	/** Get the message priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DmsMsgPriority */
-	int getActivationPriority();
-
-	/** Get the run-time priority.
-	 * @return Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DmsMsgPriority */
-	int getRunTimePriority();
+	int getMsgPriority();
 
 	/** Get the sign message source value.
 	 * @return Sign message source.

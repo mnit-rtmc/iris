@@ -51,25 +51,21 @@ public class SignMessageHelper extends BaseHelper {
 	/** Find a sign message with matching attributes.
 	 * @param multi MULTI string.
 	 * @param be Beacon enabled flag.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
+	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param owner Use name (null for any).
 	 * @param d Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
 	static public SignMessage find(String multi, boolean be,
-		DmsMsgPriority ap,
-		DmsMsgPriority rp, int src, String owner, Integer d)
+		DmsMsgPriority mp, int src, String owner, Integer d)
 	{
-		int api = ap.ordinal();
-		int rpi = rp.ordinal();
+		int mpi = mp.ordinal();
 		Iterator<SignMessage> it = iterator();
 		while (it.hasNext()) {
 			SignMessage sm = it.next();
 			if (multi.equals(sm.getMulti()) &&
 			    be == sm.getBeaconEnabled() &&
-			    api == sm.getActivationPriority() &&
-			    rpi == sm.getRunTimePriority() &&
+			    mpi == sm.getMsgPriority() &&
 			    sourceEquals(src, sm) &&
 			    objectEquals(owner, sm.getOwner()) &&
 			    objectEquals(d, sm.getDuration()))
@@ -108,9 +104,7 @@ public class SignMessageHelper extends BaseHelper {
 			return false;
 		if (!new MultiString(sm1.getMulti()).equals(sm2.getMulti()))
 			return false;
-		if (sm1.getActivationPriority() != sm2.getActivationPriority())
-			return false;
-		if (sm1.getRunTimePriority() != sm2.getRunTimePriority())
+		if (sm1.getMsgPriority() != sm2.getMsgPriority())
 			return false;
 		else
 			return objectEquals(sm1.getOwner(), sm2.getOwner());

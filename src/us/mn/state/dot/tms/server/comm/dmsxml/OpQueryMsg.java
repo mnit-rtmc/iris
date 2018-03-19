@@ -198,13 +198,11 @@ class OpQueryMsg extends OpDms {
 	 *        which dmsxml will always return.
 	 * @param duration Message duration (in minutes).
 	 * @param pgOnTime DMS page on time.
-	 * @param apri DMS message activation priority.
 	 * @param rpri DMS message runtime priority.
 	 * @return A SignMessage that contains the text of the message and
 	 *         a rendered bitmap. */
 	private SignMessageImpl createSignMessageWithBitmap(String sbitmap,
-		Integer duration, Interval pgOnTime, DmsMsgPriority apri,
-		DmsMsgPriority rpri)
+		Integer duration, Interval pgOnTime, DmsMsgPriority rpri)
 	{
 		if(sbitmap == null)
 			return null;
@@ -241,13 +239,11 @@ class OpQueryMsg extends OpDms {
 			"multistring=" + multi);
 
 		// priority is invalid, as expected
-		if (apri == DmsMsgPriority.INVALID)
-			apri = DmsMsgPriority.OTHER_SYSTEM;
 		if (rpri == DmsMsgPriority.INVALID)
 			rpri = DmsMsgPriority.OTHER_SYSTEM;
 
 		return (SignMessageImpl) m_dms.createMsg(multi, false, false,
-			apri, rpri, EXT_OPER, null, duration);
+			rpri, EXT_OPER, null, duration);
 	}
 
 	/** Return a MULTI with an updated page on-time with the value read
@@ -441,7 +437,7 @@ class OpQueryMsg extends OpDms {
 				msgtext = updatePageOnTime(msgtext, pgOnTime);
 				SignMessageImpl sm = (SignMessageImpl)
 					m_dms.createMsg(msgtext, false, false,
-					apri, rpri, EXT_OPER, iuser, duramins);
+					rpri, EXT_OPER, iuser, duramins);
 				if (sm != null)
 					m_dms.setMsgCurrentNotify(sm);
 
@@ -452,13 +448,13 @@ class OpQueryMsg extends OpDms {
 				if (usebitmap) {
 					sm = createSignMessageWithBitmap(
 						bitmap, duramins, pgOnTime,
-						apri, rpri);
+						rpri);
 					if (sm != null)
 						m_dms.setMsgCurrentNotify(sm);
 				}
 				if (sm == null) {
 					sm = (SignMessageImpl) m_dms.createMsg(
-						"", false, false, apri, rpri,
+						"", false, false, rpri,
 						 EXT_OPER, iuser, null);
 					if (sm != null)
 						m_dms.setMsgCurrentNotify(sm);

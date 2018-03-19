@@ -56,23 +56,13 @@ public interface DmsAction extends SonarObject {
 	/** Get prefix page flag */
 	boolean getPrefixPage();
 
-	/** Set the activation priority.
+	/** Set the message priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DmsMsgPriority */
-	void setActivationPriority(int p);
+	void setMsgPriority(int p);
 
-	/** Get the activation priority.
+	/** Get the message priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).
 	 * @see us.mn.state.dot.tms.DmsMsgPriority */
-	int getActivationPriority();
-
-	/** Set the run-time priority.
-	 * @param p Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DmsMsgPriority */
-	void setRunTimePriority(int p);
-
-	/** Get the run-time priority.
-	 * @return Priority ranging from 1 (low) to 255 (high).
-	 * @see us.mn.state.dot.tms.DmsMsgPriority */
-	int getRunTimePriority();
+	int getMsgPriority();
 }

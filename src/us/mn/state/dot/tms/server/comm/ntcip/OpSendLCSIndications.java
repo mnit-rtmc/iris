@@ -101,7 +101,7 @@ public class OpSendLCSIndications extends OpLCS {
 		if (multi.isBlank())
 			return dms.createMsgBlank();
 		else {
-			return dms.createMsg(ms, false, false, LCS, LCS, lcs.bit(),
+			return dms.createMsg(ms, false, false, LCS, lcs.bit(),
 			                     user.getName(), null);
 		}
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2008-2014  AHMCT, University of California
  * Copyright (C) 2012 Iteris Inc.
  *
@@ -70,10 +70,8 @@ class OpBlank extends OpDms
 		// request
 		xrr.addReq("Id", generateId());
 		xrr.addReq("Address", controller.getDrop());
-		xrr.addReq("ActPriority", 
-			m_sm.getActivationPriority());
-		xrr.addReq("RunPriority", 
-			m_sm.getRunTimePriority());
+		xrr.addReq("ActPriority", m_sm.getMsgPriority());
+		xrr.addReq("RunPriority", m_sm.getMsgPriority());
 		xrr.addReq("Owner", (m_user != null) ? m_user.getName() : "");
 
 		// response

@@ -151,12 +151,12 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 					da.setPrefixPage((Boolean) value);
 			}
 		});
-		cols.add(new ProxyColumn<DmsAction>("dms.priority.activation",
+		cols.add(new ProxyColumn<DmsAction>("dms.msg.priority",
 			120)
 		{
 			public Object getValueAt(DmsAction da) {
 				return DmsMsgPriority.fromOrdinal(
-				       da.getActivationPriority());
+				       da.getMsgPriority());
 			}
 			public boolean isEditable(DmsAction da) {
 				return canWrite(da);
@@ -165,30 +165,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 				if (value instanceof DmsMsgPriority) {
 					DmsMsgPriority p =
 						(DmsMsgPriority) value;
-					da.setActivationPriority(p.ordinal());
-				}
-			}
-			protected TableCellEditor createCellEditor() {
-				JComboBox<DmsMsgPriority> cbx = new JComboBox
-					<DmsMsgPriority>(A_PRIORITIES);
-				return new DefaultCellEditor(cbx);
-			}
-		});
-		cols.add(new ProxyColumn<DmsAction>("dms.priority.run.time",
-			120)
-		{
-			public Object getValueAt(DmsAction da) {
-				return DmsMsgPriority.fromOrdinal(
-				       da.getRunTimePriority());
-			}
-			public boolean isEditable(DmsAction da) {
-				return canWrite(da);
-			}
-			public void setValueAt(DmsAction da, Object value) {
-				if (value instanceof DmsMsgPriority) {
-					DmsMsgPriority p =
-						(DmsMsgPriority) value;
-					da.setRunTimePriority(p.ordinal());
+					da.setMsgPriority(p.ordinal());
 				}
 			}
 			protected TableCellEditor createCellEditor() {
@@ -263,9 +240,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			attrs.put("action_plan", action_plan);
 			attrs.put("sign_group", sg);
 			attrs.put("phase", lookupPlanPhase());
-			attrs.put("a_priority",
-				DmsMsgPriority.SCHED_A.ordinal());
-			attrs.put("r_priority",
+			attrs.put("msg_priority",
 				DmsMsgPriority.SCHED_A.ordinal());
 			descriptor.cache.createObject(name, attrs);
 		}

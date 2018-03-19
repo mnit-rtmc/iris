@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -320,7 +320,7 @@ public class OpSendDMSMessage extends OpDMS {
 			ms.setString(multi);
 			beacon.setInteger(message.getBeaconEnabled() ? 1 : 0);
 			srv.setInteger(PIXEL_SERVICE_DISABLED);
-			prior.setInteger(message.getRunTimePriority());
+			prior.setInteger(message.getMsgPriority());
 			mess.add(ms);
 			// NOTE: If dmsMessageBeacon and dmsMessagePixelService
 			//       objects exist, they must be set, since they are

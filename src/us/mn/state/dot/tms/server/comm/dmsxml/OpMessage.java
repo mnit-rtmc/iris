@@ -191,12 +191,10 @@ class OpMessage extends OpDms {
 		xrr.addReq("DisplayTimeMS", pt.round(MILLISECONDS));
 
 		// activation priority
-		xrr.addReq("ActPriority", 
-			m_sm.getActivationPriority());
+		xrr.addReq("ActPriority", m_sm.getMsgPriority());
 
 		// runtime priority
-		xrr.addReq("RunPriority", 
-			m_sm.getRunTimePriority());
+		xrr.addReq("RunPriority", m_sm.getMsgPriority());
 
 		// Owner
 		xrr.addReq("Owner", (m_user != null) ? m_user.getName() : "");

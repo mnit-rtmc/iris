@@ -41,7 +41,6 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import static us.mn.state.dot.tms.DmsMsgPriority.BLANK;
-import static us.mn.state.dot.tms.DmsMsgPriority.OVERRIDE;
 import static us.mn.state.dot.tms.DmsMsgPriority.TRAVEL_TIME;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
@@ -660,7 +659,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Create a blank message for the sign */
 	public SignMessage createMsgBlank() {
-		return findOrCreateMsg("", false, false, OVERRIDE, BLANK,
+		return findOrCreateMsg("", false, false, BLANK,
 			SignMsgSource.blank.bit(), null, null);
 	}
 
@@ -668,55 +667,49 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
 	 * @param pp Prefix page flag.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
+	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param o Owner name.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	public SignMessage createMsg(String m, boolean be, boolean pp,
-		DmsMsgPriority ap,
-		DmsMsgPriority rp, int src, String o, Integer d)
+		DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		return findOrCreateMsg(m, be, pp, ap, rp, src, o, d);
+		return findOrCreateMsg(m, be, pp, mp, src, o, d);
 	}
 
 	/** Find or create a sign message.
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
 	 * @param pp Prefix page flag.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
+	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param o Owner name.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage findOrCreateMsg(String m, boolean be, boolean pp,
-		DmsMsgPriority ap, DmsMsgPriority rp, int src, String o,
-		Integer d)
+		DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		SignMessage esm = SignMessageHelper.find(m, be, ap, rp,src,o,d);
+		SignMessage esm = SignMessageHelper.find(m, be, mp, src, o, d);
 		if (esm != null)
 			return esm;
 		else
-			return createMsgNotify(m, be, pp, ap, rp, src, o, d);
+			return createMsgNotify(m, be, pp, mp, src, o, d);
 	}
 
 	/** Create a new sign message and notify clients.
 	 * @param m MULTI string for message.
 	 * @param be Beacon enabled flag.
 	 * @param pp Prefix page flag.
-	 * @param ap Activation priority.
-	 * @param rp Run-time priority.
+	 * @param mp Message priority.
 	 * @param src Message source.
 	 * @param o Owner name.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMsgNotify(String m, boolean be, boolean pp,
-		DmsMsgPriority ap, DmsMsgPriority rp, int src, String o,
-		Integer d)
+		DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		SignMessageImpl sm = new SignMessageImpl(m, be, pp, ap, rp,src,o,d);
+		SignMessageImpl sm = new SignMessageImpl(m, be, pp, mp,src,o,d);
 		try {
 			sm.notifyCreate();
 			return sm;
@@ -739,13 +732,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		DmsAction da = amsg.action;
 		boolean be = da.getBeaconEnabled();
 		boolean pp = da.getPrefixPage();
-		DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
-			da.getActivationPriority());
-		DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
-			da.getRunTimePriority());
+		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
+			da.getMsgPriority());
 		Integer d = getDuration(da);
-		return createMsg(amsg.multi, be, pp, ap, rp, amsg.getSrc(),
-			null, d);
+		return createMsg(amsg.multi, be, pp, mp, amsg.getSrc(), null,d);
 	}
 
 	/** Get the duration of a DMS action.
@@ -955,14 +945,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		MultiString multi = new MultiString(user.getMulti());
 		String ms = multi.addPagePrefix(sched.getMulti());
 		boolean be = user.getBeaconEnabled();
-		DmsMsgPriority ap = DmsMsgPriority.fromOrdinal(
-			user.getActivationPriority());
-		DmsMsgPriority rp = DmsMsgPriority.fromOrdinal(
-			user.getRunTimePriority());
+		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
+			user.getMsgPriority());
 		int src = user.getSource() | sched.getSource();
 		String o = user.getOwner();
 		Integer d = user.getDuration();
-		return createMsg(ms, be, false, ap, rp, src, o, d);
+		return createMsg(ms, be, false, mp, src, o, d);
 	}
 
 	/** Check if a sign message is valid */
@@ -981,7 +969,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Compare sign messages for higher priority */
 	private boolean checkPriority(SignMessage sm1, SignMessage sm2) {
-		return sm1.getRunTimePriority() > sm2.getRunTimePriority();
+		return sm1.getMsgPriority() > sm2.getMsgPriority();
 	}
 
 	/** Send message to DMS */

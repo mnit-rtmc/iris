@@ -191,7 +191,7 @@ public class OpQueryDMSMessage extends OpDMS {
 		Integer duration)
 	{
 		int src = p.getSource();
-		setMsgCurrent(dms.createMsg(multi, (be == 1), false, p, p, src,
+		setMsgCurrent(dms.createMsg(multi, (be == 1), false, p, src,
 			null, duration));
 	}
 
