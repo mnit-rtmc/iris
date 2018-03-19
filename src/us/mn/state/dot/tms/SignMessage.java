@@ -18,8 +18,7 @@ import us.mn.state.dot.sonar.SonarObject;
 
 /**
  * A sign message represents a message which can be displayed on a dynamic
- * message sign (DMS). It contains the text associated with the message and a
- * bitmap for each page of the message.
+ * message sign (DMS).
  *
  * @author Douglas Lau
  * @author Michael Darter
@@ -39,6 +38,9 @@ public interface SignMessage extends SonarObject {
 
 	/** Get beacon enabled flag */
 	boolean getBeaconEnabled();
+
+	/** Get prefix page flag */
+	boolean getPrefixPage();
 
 	/** Get the activation priority.
 	 * @return Priority ranging from 1 (low) to 255 (high).

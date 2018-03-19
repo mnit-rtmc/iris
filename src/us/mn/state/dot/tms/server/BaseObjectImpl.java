@@ -270,6 +270,14 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		return (so instanceof IncidentImpl) ? (IncidentImpl) so : null;
 	}
 
+	/** Lookup an action plan */
+	static protected ActionPlanImpl lookupActionPlan(String name) {
+		SonarObject so = lookupObject(ActionPlanImpl.SONAR_TYPE, name);
+		return (so instanceof ActionPlanImpl)
+		      ? (ActionPlanImpl) so
+		      : null;
+	}
+
 	/** Lookup a plan phase */
 	static protected PlanPhaseImpl lookupPlanPhase(String name) {
 		SonarObject so = lookupObject(PlanPhaseImpl.SONAR_TYPE, name);

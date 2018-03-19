@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,6 +49,12 @@ public interface DmsAction extends SonarObject {
 
 	/** Get beacon enabled flag */
 	boolean getBeaconEnabled();
+
+	/** Set prefix page flag */
+	void setPrefixPage(boolean pp);
+
+	/** Get prefix page flag */
+	boolean getPrefixPage();
 
 	/** Set the activation priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).

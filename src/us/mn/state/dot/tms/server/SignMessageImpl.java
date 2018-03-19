@@ -31,8 +31,7 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 
 /**
  * A sign message represents a message which can be displayed on a dynamic
- * message sign (DMS). It contains the text associated with the message and a
- * bitmap for each page of the message.
+ * message sign (DMS).
  *
  * @author Douglas Lau
  */
@@ -65,8 +64,9 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
 		store.query("SELECT name, incident, multi, beacon_enabled, " +
-			"a_priority, r_priority, source, owner, duration " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"prefix_page, a_priority, r_priority, source, owner, " +
+			"duration FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignMessageImpl(row));
@@ -82,6 +82,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		map.put("incident", incident);
 		map.put("multi", multi);
 		map.put("beacon_enabled", beacon_enabled);
+		map.put("prefix_page", prefix_page);
 		map.put("a_priority", activationPriority);
 		map.put("r_priority", runTimePriority);
 		map.put("source", source);
@@ -110,26 +111,28 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Create a sign message */
 	private SignMessageImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),		// name
-		     row.getString(2),		// incident
-		     row.getString(3),		// multi
-		     row.getBoolean(4),		// beacon_enabled
-		     row.getInt(5),		// a_priority
-		     row.getInt(6),		// r_priority
-		     row.getInt(7),		// source
-		     row.getString(8),		// owner
-		     (Integer) row.getObject(9)	// duration
+		this(row.getString(1),          // name
+		     row.getString(2),          // incident
+		     row.getString(3),          // multi
+		     row.getBoolean(4),         // beacon_enabled
+		     row.getBoolean(5),         // prefix_page
+		     row.getInt(6),             // a_priority
+		     row.getInt(7),             // r_priority
+		     row.getInt(8),             // source
+		     row.getString(9),          // owner
+		     (Integer) row.getObject(10)// duration
 		);
 	}
 
 	/** Create a sign message */
 	private SignMessageImpl(String n, String inc, String m, boolean be,
-		int ap, int rp, int s, String o, Integer d)
+		boolean pp, int ap, int rp, int s, String o, Integer d)
 	{
 		super(n);
 		incident = lookupIncident(inc);
 		multi = m;
 		beacon_enabled = be;
+		prefix_page = pp;
 		activationPriority = ap;
 		runTimePriority = rp;
 		source = s;
@@ -138,12 +141,13 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	}
 
 	/** Create a new sign message (by IRIS) */
-	public SignMessageImpl(String m, boolean be, DmsMsgPriority ap,
-		DmsMsgPriority rp, int s, String o, Integer d)
+	public SignMessageImpl(String m, boolean be, boolean pp,
+		DmsMsgPriority ap, DmsMsgPriority rp, int s, String o,Integer d)
 	{
 		super(createUniqueName());
 		multi = m;
 		beacon_enabled = be;
+		prefix_page = pp;
 		activationPriority = ap.ordinal();
 		runTimePriority = rp.ordinal();
 		source = s;
@@ -185,6 +189,15 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	@Override
 	public boolean getBeaconEnabled() {
 		return beacon_enabled;
+	}
+
+	/** Prefix page flag */
+	private boolean prefix_page;
+
+	/** Get prefix page flag */
+	@Override
+	public boolean getPrefixPage() {
+		return prefix_page;
 	}
 
 	/** Message activation priority */
@@ -245,6 +258,8 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		w.write("<sign_message");
 		w.write(createAttribute("dms", dms.getName()));
 		w.write(createAttribute("status", DMSHelper.getAllStyles(dms)));
+		w.write(createAttribute("beacon_enabled", beacon_enabled));
+		w.write(createAttribute("prefix_page", prefix_page));
 		w.write(createAttribute("run_priority", runTimePriority));
 		w.write(createAttribute("act_priority", activationPriority));
 		w.write(createAttribute("source", getSource()));

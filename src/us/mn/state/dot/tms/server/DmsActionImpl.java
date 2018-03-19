@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
@@ -37,21 +38,12 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DmsActionImpl.class);
 		store.query("SELECT name, action_plan, sign_group, " +
-			"phase, quick_message, beacon_enabled, a_priority, " +
-			"r_priority FROM iris." + SONAR_TYPE  +";",
+			"phase, quick_message, beacon_enabled, prefix_page, " +
+			"a_priority, r_priority FROM iris." + SONAR_TYPE  +";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new DmsActionImpl(namespace,
-					row.getString(1),	// name
-					row.getString(2),	// action_plan
-					row.getString(3),	// sign_group
-					row.getString(4),	// phase
-					row.getString(5),	// quick_message
-					row.getBoolean(6),	//beacon_enabled
-					row.getInt(7),		// a_priority
-					row.getInt(8)		// r_priority
-				));
+				namespace.addObject(new DmsActionImpl(row));
 			}
 		});
 	}
@@ -66,6 +58,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		map.put("phase", phase);
 		map.put("quick_message", quick_message);
 		map.put("beacon_enabled", beacon_enabled);
+		map.put("prefix_page", prefix_page);
 		map.put("a_priority", a_priority);
 		map.put("r_priority", r_priority);
 		return map;
@@ -88,20 +81,31 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		super(n);
 	}
 
-	/** Create a new DMS action */
-	protected DmsActionImpl(Namespace ns, String n, String a, String sg,
-		String p, String qm, boolean be, int ap, int rp)
-	{
-		this(n, (ActionPlan) ns.lookupObject(ActionPlan.SONAR_TYPE, a),
-		    (SignGroup) ns.lookupObject(SignGroup.SONAR_TYPE, sg),
-		    lookupPlanPhase(p),
-		    (QuickMessage) ns.lookupObject(QuickMessage.SONAR_TYPE, qm),
-		    be, ap, rp);
+	/** Create a DMS action */
+	private DmsActionImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),  // name
+		     row.getString(2),  // action_plan
+		     row.getString(3),  // sign_group
+		     row.getString(4),  // phase
+		     row.getString(5),  // quick_message
+		     row.getBoolean(6),	// beacon_enabled
+		     row.getBoolean(7), // prefix_page
+		     row.getInt(8),     // a_priority
+		     row.getInt(9)      // r_priority
+		);
 	}
 
-	/** Create a new DMS action */
-	protected DmsActionImpl(String n, ActionPlan a, SignGroup sg,
-		PlanPhase p, QuickMessage qm, boolean be, int ap, int rp)
+	/** Create a DMS action */
+	private DmsActionImpl(String n, String a, String sg, String p,
+		String qm, boolean be, boolean pp, int ap, int rp)
+	{
+		this(n, lookupActionPlan(a), lookupSignGroup(sg),
+		    lookupPlanPhase(p), lookupQuickMessage(qm), be, pp, ap, rp);
+	}
+
+	/** Create a DMS action */
+	private DmsActionImpl(String n, ActionPlan a, SignGroup sg, PlanPhase p,
+		QuickMessage qm, boolean be, boolean pp, int ap, int rp)
 	{
 		this(n);
 		action_plan = a;
@@ -109,12 +113,13 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		phase = p;
 		quick_message = qm;
 		beacon_enabled = be;
+		prefix_page = pp;
 		a_priority = ap;
 		r_priority = rp;
 	}
 
 	/** Action plan */
-	protected ActionPlan action_plan;
+	private ActionPlan action_plan;
 
 	/** Get the action plan */
 	@Override
@@ -123,7 +128,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	}
 
 	/** Sign group */
-	protected SignGroup sign_group;
+	private SignGroup sign_group;
 
 	/** Get the sign group */
 	@Override
@@ -142,10 +147,10 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 
 	/** Set the plan phase to perform action */
 	public void doSetPhase(PlanPhase p) throws TMSException {
-		if(p == phase)
-			return;
-		store.update(this, "phase", p);
-		setPhase(p);
+		if (p != phase) {
+			store.update(this, "phase", p);
+			setPhase(p);
+		}
 	}
 
 	/** Get the plan phase to perform action */
@@ -155,7 +160,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	}
 
 	/** Quick message to send when action happens */
-	protected QuickMessage quick_message;
+	private QuickMessage quick_message;
 
 	/** Set the quick message */
 	@Override
@@ -165,10 +170,10 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 
 	/** Set the quick message */
 	public void doSetQuickMessage(QuickMessage qm) throws TMSException {
-		if(qm == quick_message)
-			return;
-		store.update(this, "quick_message", qm);
-		setQuickMessage(qm);
+		if (qm != quick_message) {
+			store.update(this, "quick_message", qm);
+			setQuickMessage(qm);
+		}
 	}
 
 	/** Get the quick message */
@@ -200,8 +205,31 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 		return beacon_enabled;
 	}
 
+	/** Prefix page flag */
+	private boolean prefix_page;
+
+	/** Set prefix page flag */
+	@Override
+	public void setPrefixPage(boolean pp) {
+		prefix_page = pp;
+	}
+
+	/** Set prefix page flag */
+	public void doSetPrefixPage(boolean pp) throws TMSException {
+		if (pp != prefix_page) {
+			store.update(this, "prefix_page", pp);
+			setPrefixPage(pp);
+		}
+	}
+
+	/** Get prefix page flag */
+	@Override
+	public boolean getPrefixPage() {
+		return prefix_page;
+	}
+
 	/** Message activation priority */
-	protected int a_priority;
+	private int a_priority;
 
 	/** Set the activation priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).
@@ -228,7 +256,7 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 	}
 
 	/** Message run-time priority */
-	protected int r_priority;
+	private int r_priority;
 
 	/** Set the run-time priority.
 	 * @param p Priority ranging from 1 (low) to 255 (high).
@@ -240,10 +268,10 @@ public class DmsActionImpl extends BaseObjectImpl implements DmsAction {
 
 	/** Set the run-time priority */
 	public void doSetRunTimePriority(int p) throws TMSException {
-		if(p == r_priority)
-			return;
-		store.update(this, "r_priority", p);
-		setRunTimePriority(p);
+		if (p != r_priority) {
+			store.update(this, "r_priority", p);
+			setRunTimePriority(p);
+		}
 	}
 
 	/** Get the run-time priority.

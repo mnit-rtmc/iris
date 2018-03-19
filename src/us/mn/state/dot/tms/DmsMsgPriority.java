@@ -26,7 +26,7 @@ package us.mn.state.dot.tms;
 public enum DmsMsgPriority {
 	INVALID,	/* 0: invalid priority */
 	BLANK,		/* 1: blank message run-time priority */
-	PREFIX_PAGE,	/* 2: prefix page combining (activation only) */
+	RESERVED,	/* 2: reserved for future use */
 	PSA,		/* 3: public service announcement */
 	TRAVEL_TIME,	/* 4: travel time priority */
 	SPEED_LIMIT,	/* 5: variable speed limit priority */

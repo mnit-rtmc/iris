@@ -57,7 +57,6 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 
 	/** Allowed activation priorities */
 	static private final DmsMsgPriority[] A_PRIORITIES = {
-		DmsMsgPriority.PREFIX_PAGE,
 		DmsMsgPriority.PSA,
 		DmsMsgPriority.TRAVEL_TIME,
 		DmsMsgPriority.SPEED_LIMIT,
@@ -136,6 +135,20 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			public void setValueAt(DmsAction da, Object value) {
 				if (value instanceof Boolean)
 					da.setBeaconEnabled((Boolean)value);
+			}
+		});
+		cols.add(new ProxyColumn<DmsAction>("dms.prefix.page", 100,
+			Boolean.class)
+		{
+			public Object getValueAt(DmsAction da) {
+				return da.getPrefixPage();
+			}
+			public boolean isEditable(DmsAction da) {
+				return canWrite(da);
+			}
+			public void setValueAt(DmsAction da, Object value) {
+				if (value instanceof Boolean)
+					da.setPrefixPage((Boolean) value);
 			}
 		});
 		cols.add(new ProxyColumn<DmsAction>("dms.priority.activation",

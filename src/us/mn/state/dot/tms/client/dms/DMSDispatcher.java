@@ -187,8 +187,7 @@ public class DMSDispatcher extends JPanel {
 		DMS dms = getSingleSelection();
 		if (dms != null) {
 			SignMessage sm = dms.getMsgSched();
-			if (sm != null && sm.getActivationPriority() ==
-			    DmsMsgPriority.PREFIX_PAGE.ordinal())
+			if (sm != null && sm.getPrefixPage())
 				return sm.getMulti();
 		}
 		return "";

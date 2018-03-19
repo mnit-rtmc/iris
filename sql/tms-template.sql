@@ -1136,6 +1136,7 @@ CREATE TABLE iris.sign_message (
 	incident VARCHAR(16),
 	multi VARCHAR(1024) NOT NULL,
 	beacon_enabled BOOLEAN NOT NULL,
+	prefix_page BOOLEAN NOT NULL,
 	a_priority INTEGER NOT NULL,
 	r_priority INTEGER NOT NULL,
 	source INTEGER NOT NULL,
@@ -1786,6 +1787,7 @@ CREATE TABLE iris.dms_action (
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
 	quick_message VARCHAR(20) REFERENCES iris.quick_message,
 	beacon_enabled BOOLEAN NOT NULL,
+	prefix_page BOOLEAN NOT NULL,
 	a_priority INTEGER NOT NULL,
 	r_priority INTEGER NOT NULL
 );
@@ -2228,7 +2230,7 @@ GRANT SELECT ON time_action_view TO PUBLIC;
 
 CREATE VIEW dms_action_view AS
 	SELECT name, action_plan, sign_group, phase, quick_message,
-	       beacon_enabled, a_priority, r_priority
+	       beacon_enabled, prefix_page, a_priority, r_priority
 	FROM iris.dms_action;
 GRANT SELECT ON dms_action_view TO PUBLIC;
 
@@ -2369,6 +2371,7 @@ GRANT SELECT ON dms_view TO PUBLIC;
 
 CREATE VIEW dms_message_view AS
 	SELECT d.name, cc.description AS condition, multi, beacon_enabled,
+	       prefix_page,
 	       iris.sign_msg_sources(source) AS sources, duration, deploy_time,
 	       owner
 	FROM iris.dms d

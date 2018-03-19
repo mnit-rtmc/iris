@@ -68,13 +68,14 @@ public class SignMessageCreator {
 	public SignMessage create(String multi, boolean be, DmsMsgPriority ap,
 		DmsMsgPriority rp, int src, String owner, Integer duration)
 	{
-		SignMessage sm = SignMessageHelper.find(multi, ap, rp, src,
+		boolean pp = false; // Operators cannot enable prefix page
+		SignMessage sm = SignMessageHelper.find(multi, pp, ap, rp, src,
 			owner, duration);
 		if (sm != null)
 			return sm;
 		String name = createName();
 		if (name != null) {
-			return create(name, multi, be, ap, rp, src, owner,
+			return create(name, multi, be, pp, ap, rp, src, owner,
 			              duration);
 		} else
 			return null;
@@ -85,6 +86,7 @@ public class SignMessageCreator {
 	 * @param name Sign message name.
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
+	 * @param pp Prefix page.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param src Sign message source bits.
@@ -93,12 +95,13 @@ public class SignMessageCreator {
 	 * @return Proxy of new sign message, or null on error.
 	 */
 	private SignMessage create(String name, String multi, boolean be,
-		DmsMsgPriority ap, DmsMsgPriority rp, int src, String owner,
-		Integer duration)
+		boolean pp, DmsMsgPriority ap, DmsMsgPriority rp, int src,
+		String owner, Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("multi", multi);
 		attrs.put("beacon_enabled", be);
+		attrs.put("prefix_page", pp);
 		attrs.put("activationPriority", new Integer(ap.ordinal()));
 		attrs.put("runTimePriority", new Integer(rp.ordinal()));
 		attrs.put("source", new Integer(src));

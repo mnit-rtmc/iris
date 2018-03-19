@@ -50,13 +50,15 @@ public class SignMessageHelper extends BaseHelper {
 
 	/** Find a sign message with matching attributes.
 	 * @param multi MULTI string.
+	 * @param be Beacon enabled flag.
 	 * @param ap Activation priority.
 	 * @param rp Run-time priority.
 	 * @param src Message source.
 	 * @param owner Use name (null for any).
 	 * @param d Duration (null for indefinite).
 	 * @return Matching sign message, or null if not found. */
-	static public SignMessage find(String multi, DmsMsgPriority ap,
+	static public SignMessage find(String multi, boolean be,
+		DmsMsgPriority ap,
 		DmsMsgPriority rp, int src, String owner, Integer d)
 	{
 		int api = ap.ordinal();
@@ -65,6 +67,7 @@ public class SignMessageHelper extends BaseHelper {
 		while (it.hasNext()) {
 			SignMessage sm = it.next();
 			if (multi.equals(sm.getMulti()) &&
+			    be == sm.getBeaconEnabled() &&
 			    api == sm.getActivationPriority() &&
 			    rpi == sm.getRunTimePriority() &&
 			    sourceEquals(src, sm) &&
