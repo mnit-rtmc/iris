@@ -179,6 +179,8 @@ public class SignMessageHelper extends BaseHelper {
 	static public void validate(SignMessage sm, DMS dms)
 		throws InvalidMsgException
 	{
+		if (null == sm)
+			throw new InvalidMsgException("Sign message null");
 		MultiString multi = new MultiString(sm.getMulti());
 		if (!multi.isValid())
 			throw new InvalidMsgException("MULTI " + sm.getMulti());

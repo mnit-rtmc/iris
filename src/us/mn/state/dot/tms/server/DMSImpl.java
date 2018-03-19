@@ -762,7 +762,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return getPollPeriod() * DURATION_PERIODS / 60;
 	}
 
-	/** User selected sign message */
+	/** User selected sign message (Shall not be null) */
 	private transient SignMessage msg_user = createMsgBlank();
 
 	/** Set the user selected sign message */
@@ -933,10 +933,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			if (sm != null && isMsgValid(sm))
 				return sm;
 		}
-		if (is_blank && isMsgValid(sched))
-			return sched;
-		else
-			return user;
+		return (isMsgValid(sched) && checkPriority(sched, user))
+		      ? sched
+		      : user;
 	}
 
 	/** Is scheduled message using PREFIX_PAGE? */
@@ -974,6 +973,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			logError("msg invalid: " + e.getMessage());
 			return false;
 		}
+	}
+
+	/** Compare sign messages for higher priority */
+	private boolean checkPriority(SignMessage sm1, SignMessage sm2) {
+		return sm1.getRunTimePriority() > sm2.getRunTimePriority();
 	}
 
 	/** Send message to DMS */
