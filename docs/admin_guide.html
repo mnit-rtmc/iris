@@ -2055,6 +2055,16 @@ FIXME
 	actions</a> as part of an <a href="#action_plan">action plan</a>.
 	For these messages, it is best to leave the sign group blank.
 </p>
+<p>
+	<b>Prefix Page</b> is a flag which indicates that the quick message can
+	be combined with an operator message.
+	When a DMS action uses a "prefix page" quick message, operator messages
+	will be modified by prepending the quick message before each page.
+	Care must be taken to ensure the combined message can be displayed on
+	the sign.
+	This feature could be used, for example, to put a graphic logo on all
+	messages displayed on a sign.
+</p>
 
 <h3 id="lcs">Lane-use Control Signs (LCS)</h3>
 <aside>
@@ -2894,19 +2904,8 @@ FIXME
 	of the DMS action.
 	The <a href="#quick_msg">quick message</a> indicates which message is
 	activated by the plan.
-	<b>Activation</b> and <b>run-time priorities</b> determine which of
-	multiple actions will take precedence.
-</p>
-<p>
-	<b>Prefix Page</b> is a flag which can be used to combine a scheduled
-	message with an operator message.
-	When a DMS action is active with prefix page enabled, any user message
-	sent will be modified by prepending the scheduled message before each
-	page of the operator message.
-	Care must be taken to ensure the combined message can be displayed on
-	the sign.
-	This feature could be used, for example, to put a graphic logo on all
-	messages displayed on a sign.
+	<b>Message priority</b> determines the priority of messages created
+	by the action.
 </p>
 <h4 id="action_tag">DMS Action Tags</h4>
 <p>
