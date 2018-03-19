@@ -53,7 +53,6 @@ import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSHelper;
-import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
@@ -68,7 +67,6 @@ import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.event.BrightnessSample;
 import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.SignStatusEvent;
-import us.mn.state.dot.tms.utils.Base64;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
