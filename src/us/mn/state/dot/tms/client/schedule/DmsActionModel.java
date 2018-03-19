@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		DmsMsgPriority.SCHED_A,
 		DmsMsgPriority.SCHED_B,
 		DmsMsgPriority.SCHED_C,
-		DmsMsgPriority.SCHED_D
+		DmsMsgPriority.SCHED_D,
+		DmsMsgPriority.SCHED_HIGH
 	};
 
 	/** Allowed run-time priorities */
@@ -75,7 +76,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		DmsMsgPriority.SCHED_A,
 		DmsMsgPriority.SCHED_B,
 		DmsMsgPriority.SCHED_C,
-		DmsMsgPriority.SCHED_D
+		DmsMsgPriority.SCHED_D,
+		DmsMsgPriority.SCHED_HIGH
 	};
 
 	/** Create the columns in the model */

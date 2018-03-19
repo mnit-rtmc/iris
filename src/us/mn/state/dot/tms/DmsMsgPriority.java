@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,14 +37,14 @@ public enum DmsMsgPriority {
 	OTHER_SYSTEM,	/* 10: other system priority */
 	ALERT,		/* 11: alert priority (AMBER alerts, etc.) */
 	OPERATOR,	/* 12: operator priority */
-	GATE_ARM,	/* 13: gate-arm priority */
-	LCS_LOW,	/* 14: low-priority LCS */
-	LCS_MED,	/* 15: medium-priority LCS */
-	LCS_HIGH,	/* 16: high-priority LCS */
-	INCIDENT_LOW,	/* 17: low-priority incident */
-	INCIDENT_MED,	/* 18: medium-priority incident */
-	INCIDENT_HIGH,	/* 19: high-priority incident */
-	AWS,		/* 20: automated warning system */
+	AWS,		/* 13: automated warning system priority */
+	GATE_ARM,	/* 14: gate-arm priority */
+	LCS,		/* 15: LCS priority */
+	INCIDENT_LOW,	/* 16: incident low-priority */
+	INCIDENT_MED,	/* 17: incident medium-priority */
+	SCHED_HIGH,	/* 18; scheduled high-priority */
+	INCIDENT_HIGH,	/* 19: incident high-priority */
+	AWS_HIGH,	/* 20: automated warning system high-priority */
 	OVERRIDE;	/* 21: override priority */
 
 	/** Values array */
@@ -73,21 +73,21 @@ public enum DmsMsgPriority {
 		case SCHED_B:
 		case SCHED_C:
 		case SCHED_D:
+		case SCHED_HIGH:
 			return SignMsgSource.schedule.bit();
 		case ALERT:
 		case OPERATOR:
 			return SignMsgSource.operator.bit();
 		case GATE_ARM:
 			return SignMsgSource.gate_arm.bit();
-		case LCS_LOW:
-		case LCS_MED:
-		case LCS_HIGH:
+		case LCS:
 			return SignMsgSource.lcs.bit();
 		case INCIDENT_LOW:
 		case INCIDENT_MED:
 		case INCIDENT_HIGH:
 			return SignMsgSource.incident.bit();
 		case AWS:
+		case AWS_HIGH:
 			return SignMsgSource.aws.bit();
 		default:
 			return SignMsgSource.external.bit();

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,7 @@ package us.mn.state.dot.tms.server.comm.ntcip;
 
 import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DmsMsgPriority;
-import static us.mn.state.dot.tms.DmsMsgPriority.LCS_LOW;
-import static us.mn.state.dot.tms.DmsMsgPriority.LCS_MED;
-import static us.mn.state.dot.tms.DmsMsgPriority.LCS_HIGH;
+import static us.mn.state.dot.tms.DmsMsgPriority.LCS;
 import us.mn.state.dot.tms.LaneUseIndication;
 import us.mn.state.dot.tms.LaneUseMulti;
 import us.mn.state.dot.tms.LaneUseMultiHelper;
@@ -39,23 +37,6 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Douglas Lau
  */
 public class OpSendLCSIndications extends OpLCS {
-
-	/** Get the priority for the specified indication */
-	static private DmsMsgPriority getPriority(int ind) {
-		switch (LaneUseIndication.fromOrdinal(ind)) {
-		case LANE_CLOSED:
-			return LCS_HIGH;
-		case LANE_CLOSED_AHEAD:
-		case MERGE_RIGHT:
-		case MERGE_LEFT:
-		case MERGE_BOTH:
-		case MUST_EXIT_RIGHT:
-		case MUST_EXIT_LEFT:
-			return LCS_MED;
-		default:
-			return LCS_LOW;
-		}
-	}
 
 	/** Indications to send */
 	private final Integer[] indications;
@@ -116,12 +97,11 @@ public class OpSendLCSIndications extends OpLCS {
 	 * SONAR task processor thread, which might have a queue of tasks
 	 * already pending. */
 	private SignMessage createSignMessage(DMSImpl dms, String ms, int ind) {
-		DmsMsgPriority p = getPriority(ind);
 		MultiString multi = new MultiString(ms);
 		if (multi.isBlank())
 			return dms.createMsgBlank();
 		else {
-			return dms.createMsg(ms, false, p, p, lcs.bit(),
+			return dms.createMsg(ms, false, LCS, LCS, lcs.bit(),
 			                     user.getName(), null);
 		}
 	}

@@ -40,7 +40,6 @@ import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
-import static us.mn.state.dot.tms.DmsMsgPriority.AWS;
 import static us.mn.state.dot.tms.DmsMsgPriority.BLANK;
 import static us.mn.state.dot.tms.DmsMsgPriority.OVERRIDE;
 import static us.mn.state.dot.tms.DmsMsgPriority.PREFIX_PAGE;
@@ -1154,9 +1153,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Test if the current message is AWS */
 	private boolean isMsgAws() {
-		// FIXME: use SignMsgSource.aws
-		SignMessage sm = getMsgCurrent();
-		return sm.getRunTimePriority() == AWS.ordinal();
+		int src = getMsgCurrent().getSource();
+		return SignMsgSource.aws.checkBit(src);
 	}
 
 	/** Test if a DMS is active, not failed and deployed */
