@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
-import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Table model for quick messages, which is for editing and creating
@@ -46,9 +45,9 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	@Override
 	protected ArrayList<ProxyColumn<QuickMessage>> createColumns() {
 		ArrayList<ProxyColumn<QuickMessage>> cols =
-			new ArrayList<ProxyColumn<QuickMessage>>(4);
+			new ArrayList<ProxyColumn<QuickMessage>>(3);
 		cols.add(new ProxyColumn<QuickMessage>("quick.message.name",
-			100)
+			160)
 		{
 			public Object getValueAt(QuickMessage qm) {
 				return qm.getName();
@@ -77,20 +76,6 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 			public void setValueAt(QuickMessage qm, Object value) {
 				if (value instanceof Boolean)
 					qm.setPrefixPage((Boolean) value);
-			}
-		});
-		cols.add(new ProxyColumn<QuickMessage>("quick.message.multi",
-			680)
-		{
-			public Object getValueAt(QuickMessage qm) {
-				return qm.getMulti();
-			}
-			public boolean isEditable(QuickMessage qm) {
-				return canWrite(qm);
-			}
-			public void setValueAt(QuickMessage qm, Object value) {
-				qm.setMulti(new MultiString(value.toString())
-					.normalize());
 			}
 		});
 		return cols;
