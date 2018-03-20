@@ -14,16 +14,26 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.BorderLayout;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
+import javax.swing.BorderFactory;
+import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.Font;
+import us.mn.state.dot.tms.FontHelper;
+import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.client.EditModeListener;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IPanel;
+import us.mn.state.dot.tms.utils.I18N;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -36,6 +46,10 @@ public class QuickMessagePanel extends IPanel
 {
 	/** MULTI text area */
 	private final JTextArea multi_txt = new JTextArea();
+
+	/** Sign pixel panel */
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(100, 180,
+		true);
 
 	/** User session */
 	private final Session session;
@@ -56,6 +70,7 @@ public class QuickMessagePanel extends IPanel
 	/** Set the quick message */
 	public void setQuickMsg(QuickMessage qm) {
 		watcher.setProxy(qm);
+		updatePixelPanel(qm);
 	}
 
 	/** Create the detector panel */
@@ -73,10 +88,20 @@ public class QuickMessagePanel extends IPanel
 		add("quick.message.multi");
 		add(multi_txt, Stretch.FULL);
 		multi_txt.setWrapStyleWord(false);
+		add(createPreviewPanel(), Stretch.FULL);
 		createJobs();
 		watcher.initialize();
 		clear();
 		session.addEditModeListener(edit_lsnr);
+	}
+
+	/** Create message preview panel */
+	private JPanel createPreviewPanel() {
+		JPanel pnl = new JPanel(new BorderLayout());
+		pnl.setBorder(BorderFactory.createTitledBorder(
+			I18N.get("dms.message.preview")));
+		pnl.add(pixel_pnl, BorderLayout.CENTER);
+		return pnl;
 	}
 
 	/** Create the jobs */
@@ -94,6 +119,52 @@ public class QuickMessagePanel extends IPanel
 		QuickMessage qm = quick_msg;
 		if (qm != null)
 			qm.setMulti(new MultiString(m.trim()).normalize());
+		updatePixelPanel(qm);
+	}
+
+	/** Update pixel panel preview */
+	private void updatePixelPanel(QuickMessage qm) {
+		if (qm != null) {
+			SignConfig sc = qm.getSignConfig();
+			if (sc != null) {
+				updatePixelPanel(sc, new MultiString(
+					qm.getMulti()));
+				return;
+			}
+		}
+		pixel_pnl.setPhysicalDimensions(0, 0, 0, 0, 0, 0);
+		pixel_pnl.setLogicalDimensions(0, 0, 0, 0);
+		pixel_pnl.setGraphic(null);
+		pixel_pnl.repaint();
+	}
+
+	/** Update pixel panel preview */
+	private void updatePixelPanel(SignConfig sc, MultiString multi) {
+		int w = sc.getFaceWidth();
+		int h = sc.getFaceHeight();
+		int bh = sc.getBorderHoriz();
+		int bv = sc.getBorderVert();
+		int ph = sc.getPitchHoriz();
+		int pv = sc.getPitchVert();
+		pixel_pnl.setPhysicalDimensions(w, h, bh, bv, ph, pv);
+		int pxw = sc.getPixelWidth();
+		int pxh = sc.getPixelHeight();
+		int cw = sc.getCharWidth();
+		int ch = sc.getCharHeight();
+		pixel_pnl.setLogicalDimensions(pxw, pxh, cw, ch);
+		Font f = sc.getDefaultFont();
+		int df = (f != null)
+		       ? f.getNumber()
+		       : FontHelper.DEFAULT_FONT_NUM;
+		RasterBuilder rb = new RasterBuilder(pxw, pxh, cw, ch, df);
+		try {
+			RasterGraphic[] rg = rb.createPixmaps(multi);
+			pixel_pnl.setGraphic(rg[0]);
+		}
+		catch (InvalidMsgException e) {
+			pixel_pnl.setGraphic(null);
+		}
+		pixel_pnl.repaint();
 	}
 
 	/** Dispose of the panel */
