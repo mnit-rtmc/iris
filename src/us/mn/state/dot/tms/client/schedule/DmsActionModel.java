@@ -55,20 +55,8 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		);
 	}
 
-	/** Allowed activation priorities */
-	static private final DmsMsgPriority[] A_PRIORITIES = {
-		DmsMsgPriority.PSA,
-		DmsMsgPriority.TRAVEL_TIME,
-		DmsMsgPriority.SPEED_LIMIT,
-		DmsMsgPriority.SCHED_A,
-		DmsMsgPriority.SCHED_B,
-		DmsMsgPriority.SCHED_C,
-		DmsMsgPriority.SCHED_D,
-		DmsMsgPriority.SCHED_HIGH
-	};
-
-	/** Allowed run-time priorities */
-	static private final DmsMsgPriority[] R_PRIORITIES = {
+	/** Allowed message priorities */
+	static private final DmsMsgPriority[] PRIORITIES = {
 		DmsMsgPriority.PSA,
 		DmsMsgPriority.TRAVEL_TIME,
 		DmsMsgPriority.SPEED_LIMIT,
@@ -156,7 +144,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 			}
 			protected TableCellEditor createCellEditor() {
 				JComboBox<DmsMsgPriority> cbx = new JComboBox
-					<DmsMsgPriority>(R_PRIORITIES);
+					<DmsMsgPriority>(PRIORITIES);
 				return new DefaultCellEditor(cbx);
 			}
 		});
