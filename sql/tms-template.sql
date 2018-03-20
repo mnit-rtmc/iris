@@ -386,6 +386,33 @@ CREATE TABLE iris.sign_group (
 	hidden BOOLEAN NOT NULL
 );
 
+CREATE TABLE iris.dms_type (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(32) NOT NULL
+);
+
+CREATE TABLE iris.sign_config (
+	name VARCHAR(12) PRIMARY KEY,
+	dms_type INTEGER NOT NULL REFERENCES iris.dms_type,
+	portable BOOLEAN NOT NULL,
+	technology VARCHAR(12) NOT NULL,
+	sign_access VARCHAR(12) NOT NULL,
+	legend VARCHAR(12) NOT NULL,
+	beacon_type VARCHAR(32) NOT NULL,
+	face_width INTEGER NOT NULL,
+	face_height INTEGER NOT NULL,
+	border_horiz INTEGER NOT NULL,
+	border_vert INTEGER NOT NULL,
+	pitch_horiz INTEGER NOT NULL,
+	pitch_vert INTEGER NOT NULL,
+	pixel_width INTEGER NOT NULL,
+	pixel_height INTEGER NOT NULL,
+	char_width INTEGER NOT NULL,
+	char_height INTEGER NOT NULL,
+	default_font VARCHAR(16) REFERENCES iris.font
+);
+
+
 CREATE TABLE iris.quick_message (
 	name VARCHAR(20) PRIMARY KEY,
 	sign_group VARCHAR(16) REFERENCES iris.sign_group,
@@ -447,32 +474,6 @@ CREATE TABLE iris.controller (
 
 CREATE UNIQUE INDEX ctrl_link_drop_idx ON iris.controller
 	USING btree (comm_link, drop_id);
-
-CREATE TABLE iris.dms_type (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
-);
-
-CREATE TABLE iris.sign_config (
-	name VARCHAR(12) PRIMARY KEY,
-	dms_type INTEGER NOT NULL REFERENCES iris.dms_type,
-	portable BOOLEAN NOT NULL,
-	technology VARCHAR(12) NOT NULL,
-	sign_access VARCHAR(12) NOT NULL,
-	legend VARCHAR(12) NOT NULL,
-	beacon_type VARCHAR(32) NOT NULL,
-	face_width INTEGER NOT NULL,
-	face_height INTEGER NOT NULL,
-	border_horiz INTEGER NOT NULL,
-	border_vert INTEGER NOT NULL,
-	pitch_horiz INTEGER NOT NULL,
-	pitch_vert INTEGER NOT NULL,
-	pixel_width INTEGER NOT NULL,
-	pixel_height INTEGER NOT NULL,
-	char_width INTEGER NOT NULL,
-	char_height INTEGER NOT NULL,
-	default_font VARCHAR(16) REFERENCES iris.font
-);
 
 CREATE TABLE iris._device_io (
 	name VARCHAR(20) PRIMARY KEY,
