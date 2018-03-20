@@ -100,7 +100,7 @@ public class SignMessageCreator {
 		attrs.put("multi", multi);
 		attrs.put("beacon_enabled", be);
 		attrs.put("prefix_page", pp);
-		attrs.put("msgPriority", new Integer(mp.ordinal()));
+		attrs.put("msg_priority", new Integer(mp.ordinal()));
 		attrs.put("source", new Integer(src));
 		if (owner != null)
 			attrs.put("owner", owner);
