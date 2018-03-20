@@ -12,6 +12,10 @@ DROP VIEW dms_message_view;
 DROP VIEW dms_toll_zone_view;
 DROP VIEW dms_action_view;
 
+-- Add sign_config column to quick_message
+ALTER TABLE iris.quick_message ADD COLUMN sign_config VARCHAR(12)
+	REFERENCES iris.sign_config;
+
 -- Add prefix_page column to quick_message
 ALTER TABLE iris.quick_message ADD COLUMN prefix_page BOOLEAN;
 UPDATE iris.quick_message SET prefix_page = name IN (
@@ -73,7 +77,8 @@ GRANT SELECT ON dms_message_view TO PUBLIC;
 
 -- Create quick_message_view
 CREATE VIEW quick_message_view AS
-	SELECT name, sign_group, prefix_page, multi FROM iris.quick_message;
+	SELECT name, sign_group, sign_config, prefix_page, multi
+	FROM iris.quick_message;
 GRANT SELECT ON quick_message_view TO PUBLIC;
 
 COMMIT;

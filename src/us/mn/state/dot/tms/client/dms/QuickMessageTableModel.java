@@ -15,13 +15,19 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.ArrayList;
+import javax.swing.DefaultCellEditor;
+import javax.swing.JComboBox;
+import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
+import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
+import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import static us.mn.state.dot.tms.client.widget.IOptionPane.showHint;
 
 /**
@@ -45,9 +51,9 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	@Override
 	protected ArrayList<ProxyColumn<QuickMessage>> createColumns() {
 		ArrayList<ProxyColumn<QuickMessage>> cols =
-			new ArrayList<ProxyColumn<QuickMessage>>(3);
+			new ArrayList<ProxyColumn<QuickMessage>>(4);
 		cols.add(new ProxyColumn<QuickMessage>("quick.message.name",
-			160)
+			180)
 		{
 			public Object getValueAt(QuickMessage qm) {
 				return qm.getName();
@@ -62,6 +68,28 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 			}
 			public void setValueAt(QuickMessage qm, Object value) {
 				qm.setSignGroup(lookupSignGroup(value));
+			}
+		});
+		cols.add(new ProxyColumn<QuickMessage>("quick.message.config",
+			120)
+		{
+			public Object getValueAt(QuickMessage qm) {
+				return qm.getSignConfig();
+			}
+			public boolean isEditable(QuickMessage qm) {
+				return canWrite(qm);
+			}
+			public void setValueAt(QuickMessage qm, Object value) {
+				qm.setSignConfig((value instanceof SignConfig)
+				                ? (SignConfig) value
+				                : null);
+			}
+			protected TableCellEditor createCellEditor() {
+				JComboBox<SignConfig> cbx =
+					new JComboBox<SignConfig>();
+				cbx.setModel(new IComboBoxModel<SignConfig>(
+					config_mdl));
+				return new DefaultCellEditor(cbx);
 			}
 		});
 		cols.add(new ProxyColumn<QuickMessage>(
@@ -81,6 +109,9 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 		return cols;
 	}
 
+	/** Sign configuration proxy list model */
+	private final ProxyListModel<SignConfig> config_mdl;
+
 	/** Lookup a sign group */
 	private SignGroup lookupSignGroup(Object value) {
 		String v = value.toString().trim();
@@ -97,5 +128,21 @@ public class QuickMessageTableModel extends ProxyTableModel<QuickMessage> {
 	 * @param s Session */
 	public QuickMessageTableModel(Session s) {
 		super(s, descriptor(s), 12, 20);
+		config_mdl = new ProxyListModel<SignConfig>(
+			s.getSonarState().getDmsCache().getSignConfigs());
+	}
+
+	/** Initialize the model */
+	@Override
+	public void initialize() {
+		super.initialize();
+		config_mdl.initialize();
+	}
+
+	/** Dispose of the model */
+	@Override
+	public void dispose() {
+		config_mdl.dispose();
+		super.dispose();
 	}
 }

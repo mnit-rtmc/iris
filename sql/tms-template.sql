@@ -389,6 +389,7 @@ CREATE TABLE iris.sign_group (
 CREATE TABLE iris.quick_message (
 	name VARCHAR(20) PRIMARY KEY,
 	sign_group VARCHAR(16) REFERENCES iris.sign_group,
+	sign_config VARCHAR(12) REFERENCES iris.sign_config,
 	prefix_page BOOLEAN NOT NULL,
 	multi VARCHAR(1024) NOT NULL
 );
@@ -2342,7 +2343,8 @@ CREATE VIEW controller_loc_view AS
 GRANT SELECT ON controller_loc_view TO PUBLIC;
 
 CREATE VIEW quick_message_view AS
-	SELECT name, sign_group, prefix_page, multi FROM iris.quick_message;
+	SELECT name, sign_group, sign_config, prefix_page, multi
+	FROM iris.quick_message;
 GRANT SELECT ON quick_message_view TO PUBLIC;
 
 CREATE VIEW sign_config_view AS

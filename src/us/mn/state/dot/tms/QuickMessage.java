@@ -35,11 +35,17 @@ public interface QuickMessage extends SonarObject {
 	 * @param sg Sign group to associate; null for no group. */
 	void setSignGroup(SignGroup sg);
 
-	/** Set prefix page flag */
-	void setPrefixPage(boolean pp);
+	/** Get the sign configuration */
+	SignConfig getSignConfig();
+
+	/** Set the sign configuration */
+	void setSignConfig(SignConfig sc);
 
 	/** Get prefix page flag */
 	boolean getPrefixPage();
+
+	/** Set prefix page flag */
+	void setPrefixPage(boolean pp);
 
 	/** Get the message MULTI string.
 	 * @return Message text in MULTI markup.

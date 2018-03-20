@@ -21,6 +21,8 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.MultiString;
@@ -36,8 +38,9 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	/** Load all the quick messages */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, QuickMessageImpl.class);
-		store.query("SELECT name, sign_group, prefix_page, multi FROM "+
-			"iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, sign_group, sign_config, " +
+			"prefix_page, multi FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new QuickMessageImpl(row));
@@ -51,6 +54,7 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("sign_group", sign_group);
+		map.put("sign_config", sign_config);
 		map.put("prefix_page", prefix_page);
 		map.put("multi", multi);
 		return map;
@@ -77,15 +81,19 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 	private QuickMessageImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),  // name
 		     row.getString(2),  // sign_group
-		     row.getBoolean(3), // prefix_page
-		     row.getString(4)   // multi
+		     row.getString(3),  // sign_config
+		     row.getBoolean(4), // prefix_page
+		     row.getString(5)   // multi
 		);
 	}
 
 	/** Create a quick message */
-	private QuickMessageImpl(String n, String sg, boolean pp, String m) {
+	private QuickMessageImpl(String n, String sg, String sc, boolean pp,
+		String m)
+	{
 		super(n);
 		sign_group = lookupSignGroup(sg);
+		sign_config = SignConfigHelper.lookup(sc);
 		prefix_page = pp;
 		multi = m;
 	}
@@ -113,6 +121,29 @@ public class QuickMessageImpl extends BaseObjectImpl implements QuickMessage {
 		if (sg != sign_group) {
 			store.update(this, "sign_group", sg);
 			setSignGroup(sg);
+		}
+	}
+
+	/** Sign config */
+	private SignConfig sign_config;
+
+	/** Get the sign configuration */
+	@Override
+	public SignConfig getSignConfig() {
+		return sign_config;
+	}
+
+	/** Set the sign configuration */
+	@Override
+	public void setSignConfig(SignConfig sc) {
+		sign_config = sc;
+	}
+
+	/** Set the sign configuration */
+	public void doSetSignConfig(SignConfig sc) throws TMSException {
+		if (sc != sign_config) {
+			store.update(this, "sign_config", sc);
+			setSignConfig(sc);
 		}
 	}
 
