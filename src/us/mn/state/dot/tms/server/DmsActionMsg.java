@@ -230,6 +230,7 @@ public class DmsActionMsg {
 			OverLimitMode mode, String o_txt)
 		{
 			processTravelTime(sid, mode, o_txt);
+			// Add tag for processTravelTimes to replace
 			super.addTravelTime(sid, null, null);
 		}
 		@Override public void addSpeedAdvisory() {
@@ -258,10 +259,15 @@ public class DmsActionMsg {
 		addSrc(SignMsgSource.schedule);
 		new MultiString(ms).parse(builder);
 		MultiString _multi = builder.toMultiString();
-		if (_multi.isBlank())
+		if (isBlank(_multi))
 			return (valid) ? feed_msg : null;
 	 	else
 			return postProcess(_multi.toString());
+	}
+
+	/** Check if message is blank */
+	private boolean isBlank(MultiString _multi) {
+		return _multi.isBlank() && travel.isEmpty();
 	}
 
 	/** Post-process action tags */
