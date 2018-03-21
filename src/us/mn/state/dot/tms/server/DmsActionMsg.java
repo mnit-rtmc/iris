@@ -206,6 +206,10 @@ public class DmsActionMsg {
 		dlog = l;
 		valid = true;
 		multi = processAction();
+		if (valid && dlog.isOpen()) {
+			dlog.log(toString() + " [ok]: " + multi +
+				" (" + getActionMulti() + ")");
+		}
 	}
 
 	/** Get the MULTI string for the DMS action */

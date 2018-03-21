@@ -151,7 +151,8 @@ public class ActionPlanJob extends Job {
 			DmsActionMsg amsg = new DmsActionMsg(da, dms,SCHED_LOG);
 			if (amsg.multi != null)
 				dms_actions.put(dms, amsg);
-		}
+		} else if (SCHED_LOG.isOpen())
+			logSched(dms, "dropping " + da);
 	}
 
 	/** Check if an action should replace the current DMS action */
