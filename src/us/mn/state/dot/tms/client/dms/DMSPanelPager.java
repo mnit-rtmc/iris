@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2013  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -83,7 +83,7 @@ public class DMSPanelPager {
 				pageTimerTick();
 			}
 		});
-		if(n_pages > 1)
+		if (n_pages > 1)
 			timer.start();
 	}
 
@@ -95,9 +95,9 @@ public class DMSPanelPager {
 	/** Update the phase timer by one tick. */
 	private void pageTimerTick() {
 		phase_ms += TIMER_TICK_MS;
-		if(doTick()) {
+		if (doTick()) {
 			phase_ms = 0;
-			if(isBlanking)
+			if (isBlanking)
 				makeBlank();
 			else
 				nextPage();
@@ -113,7 +113,7 @@ public class DMSPanelPager {
 	/** Update the timer for one tick while blanking.
 	 * @return True if panel needs updating. */
 	private boolean doTickOff() {
-		if(phase_ms >= currentPageOffMs()) {
+		if (phase_ms >= currentPageOffMs()) {
 			isBlanking = false;
 			return true;
 		} else
@@ -128,7 +128,7 @@ public class DMSPanelPager {
 	/** Update the timer for one tick while displaying a page.
 	 * @return True if panel needs updating. */
 	private boolean doTickOn() {
-		if(phase_ms >= currentPageOnMs()) {
+		if (phase_ms >= currentPageOnMs()) {
 			isBlanking = (currentPageOffMs() > 0);
 			return true;
 		} else
@@ -156,7 +156,7 @@ public class DMSPanelPager {
 	/** Display the next page of the message */
 	private void nextPage() {
 		page++;
-		if(page >= n_pages)
+		if (page >= n_pages)
 			page = 0;
 		pixel_pnl.setGraphic(rasters[page]);
 	}
