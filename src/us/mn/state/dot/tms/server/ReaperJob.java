@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,9 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
-import java.util.LinkedList;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DMS;
@@ -43,13 +43,13 @@ public class ReaperJob extends Job {
 	/** Seconds to offset each poll from start of interval */
 	static private final int OFFSET_SECS = 27;
 
-	/** List of reapable sign messages */
-	private final LinkedList<SignMessageImpl> reapable;
+	/** List of sign messages ready to be reaped */
+	private final ArrayList<SignMessageImpl> reapable;
 
 	/** Create a new job to reap dead stuff */
 	public ReaperJob() {
 		super(Calendar.MINUTE, 1, Calendar.SECOND, OFFSET_SECS);
-		reapable = new LinkedList<SignMessageImpl>();
+		reapable = new ArrayList<SignMessageImpl>();
 	}
 
 	/** Perform the reaper job */
