@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,8 +132,8 @@ public class SignPixelPanel extends JPanel {
 
 	/** Clear the pixel panel */
 	public void clear() {
-		setPhysicalDimensions(0, 0, 0, 0, 1, 1);
-		setLogicalDimensions(0, 0, 0, 0);
+		setPhysicalDimensions(null);
+		setLogicalDimensions(null);
 		repaint();
 	}
 
@@ -341,15 +341,21 @@ public class SignPixelPanel extends JPanel {
 			height_pix / height_line - 1 : 0;
 	}
 
-	/** Set the dimensions from a DMS */
-	public void setDimensions(DMS dms) {
-		setPhysicalDimensions(dms);
-		setLogicalDimensions(dms);
+	/** Set the dimensions from s sign configuration */
+	public void setDimensions(SignConfig sc) {
+		setPhysicalDimensions(sc);
+		setLogicalDimensions(sc);
 	}
 
-	/** Set the physical dimensions from a DMS */
-	private void setPhysicalDimensions(DMS dms) {
+	/** Set the dimensions from a DMS */
+	public void setDimensions(DMS dms) {
 		SignConfig sc = dms.getSignConfig();
+		setPhysicalDimensions(sc);
+		setLogicalDimensions(sc);
+	}
+
+	/** Set the physical dimensions from a sign configuration */
+	private void setPhysicalDimensions(SignConfig sc) {
 		if (sc != null) {
 			int w = sc.getFaceWidth();
 			int h = sc.getFaceHeight();
@@ -374,9 +380,8 @@ public class SignPixelPanel extends JPanel {
 		vpitch_mm = Math.max(1, vp);
 	}
 
-	/** Set the logical dimensions from a DMS */
-	private void setLogicalDimensions(DMS dms) {
-		SignConfig sc = dms.getSignConfig();
+	/** Set the logical dimensions from a sign configuration */
+	private void setLogicalDimensions(SignConfig sc) {
 		if (sc != null) {
 			int pw = sc.getPixelWidth();
 			int ph = sc.getPixelHeight();

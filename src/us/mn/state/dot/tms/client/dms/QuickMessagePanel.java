@@ -51,6 +51,9 @@ public class QuickMessagePanel extends IPanel
 	private final SignPixelPanel pixel_pnl = new SignPixelPanel(100, 180,
 		true);
 
+	/** Pager for sign pixel panel */
+	private DMSPanelPager pager;
+
 	/** User session */
 	private final Session session;
 
@@ -140,31 +143,35 @@ public class QuickMessagePanel extends IPanel
 
 	/** Update pixel panel preview */
 	private void updatePixelPanel(SignConfig sc, MultiString multi) {
-		int w = sc.getFaceWidth();
-		int h = sc.getFaceHeight();
-		int bh = sc.getBorderHoriz();
-		int bv = sc.getBorderVert();
-		int ph = sc.getPitchHoriz();
-		int pv = sc.getPitchVert();
-		pixel_pnl.setPhysicalDimensions(w, h, bh, bv, ph, pv);
-		int pxw = sc.getPixelWidth();
-		int pxh = sc.getPixelHeight();
+		pixel_pnl.setDimensions(sc);
+		int pw = sc.getPixelWidth();
+		int ph = sc.getPixelHeight();
 		int cw = sc.getCharWidth();
 		int ch = sc.getCharHeight();
-		pixel_pnl.setLogicalDimensions(pxw, pxh, cw, ch);
 		Font f = sc.getDefaultFont();
 		int df = (f != null)
 		       ? f.getNumber()
 		       : FontHelper.DEFAULT_FONT_NUM;
-		RasterBuilder rb = new RasterBuilder(pxw, pxh, cw, ch, df);
+		RasterBuilder rb = new RasterBuilder(pw, ph, cw, ch, df);
 		try {
 			RasterGraphic[] rg = rb.createPixmaps(multi);
-			pixel_pnl.setGraphic(rg[0]);
+			if (rg != null) {
+				String ms = multi.toString();
+				setPager(new DMSPanelPager(pixel_pnl, rg, ms));
+				return;
+			}
 		}
-		catch (InvalidMsgException e) {
-			pixel_pnl.setGraphic(null);
-		}
-		pixel_pnl.repaint();
+		catch (InvalidMsgException e) { /* fall through */ }
+		setPager(null);
+		pixel_pnl.setGraphic(null);
+	}
+
+	/** Set the DMS panel pager */
+	private void setPager(DMSPanelPager p) {
+		DMSPanelPager op = pager;
+		if (op != null)
+			op.dispose();
+		pager = p;
 	}
 
 	/** Dispose of the panel */
@@ -200,6 +207,7 @@ public class QuickMessagePanel extends IPanel
 	/** Clear all attributes (from ProxyView). */
 	@Override
 	public void clear() {
+		setPager(null);
 		quick_msg = null;
 		multi_txt.setEnabled(false);
 		multi_txt.setText("");
