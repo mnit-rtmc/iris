@@ -2739,6 +2739,16 @@ CREATE VIEW gate_arm_event_view AS
 GRANT SELECT ON gate_arm_event_view TO PUBLIC;
 
 CREATE VIEW incident_view AS
+    SELECT event_id, name, event_date, ed.description, road, d.direction,
+           impact, cleared, confirmed, camera, ln.description AS lane_type,
+           detail, replaces, lat, lon
+    FROM event.incident i
+    LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
+    LEFT JOIN iris.direction d ON i.dir = d.id
+    LEFT JOIN iris.lane_type ln ON i.lane_type = ln.id;
+GRANT SELECT ON incident_view TO PUBLIC;
+
+CREATE VIEW incident_update_view AS
     SELECT iu.event_id, name, iu.event_date, ed.description, road,
            d.direction, iu.impact, iu.cleared, iu.confirmed, camera,
            ln.description AS lane_type, detail, replaces, lat, lon
@@ -2747,7 +2757,7 @@ CREATE VIEW incident_view AS
     LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
     LEFT JOIN iris.direction d ON i.dir = d.id
     LEFT JOIN iris.lane_type ln ON i.lane_type = ln.id;
-GRANT SELECT ON incident_view TO PUBLIC;
+GRANT SELECT ON incident_update_view TO PUBLIC;
 
 --- Data
 
@@ -2961,7 +2971,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.67.0
+database_version	4.68.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
