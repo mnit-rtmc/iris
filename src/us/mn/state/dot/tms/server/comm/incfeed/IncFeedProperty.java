@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,6 @@ import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import static us.mn.state.dot.tms.server.BaseObjectImpl.corridors;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IncidentCache;
 import us.mn.state.dot.tms.server.IncidentImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.utils.LineReader;
@@ -47,9 +46,13 @@ public class IncFeedProperty extends ControllerProperty {
 	/** Incident cache */
 	private final IncidentCache cache;
 
+	/** Comm link name */
+	private final String link;
+
 	/** Create a new incident feed property */
-	public IncFeedProperty(IncidentCache ic) {
+	public IncFeedProperty(IncidentCache ic, String cl) {
 		cache = ic;
+		link = cl;
 	}
 
 	/** Decode a QUERY response */
@@ -72,8 +75,10 @@ public class IncFeedProperty extends ControllerProperty {
 	private void checkIncident(ParsedIncident inc) {
 		if (cache.contains(inc.id))
 			cache.refresh(inc.id);
-		else
+		else if (cache.isUpdated())
 			cache.put(inc.id, createIncident(inc));
+		else
+			cache.put(inc.id, null);
 	}
 
 	/** Create an incident */
@@ -102,7 +107,7 @@ public class IncFeedProperty extends ControllerProperty {
 		int n_lanes)
 	{
 		Camera cam = lookupCamera(inc);
-		return IncidentImpl.createNotify("_" + inc.id,
+		return IncidentImpl.createNotify(link + "_" + inc.id,
 			inc.inc_type.ordinal(), inc.detail,
 			(short) LaneType.MAINLINE.ordinal(),
 			loc.getRoadway(), loc.getRoadDir(), inc.lat,

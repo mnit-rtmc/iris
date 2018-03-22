@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.incfeed;
 
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IncidentCache;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import static us.mn.state.dot.tms.utils.URIUtil.HTTP;
 
@@ -31,13 +30,16 @@ public class IncFeedPoller extends ThreadedPoller<IncFeedProperty> {
 	/** Incident feed debug log */
 	static private final DebugLog INC_LOG = new DebugLog("inc_feed");
 
+	/** Incident cache */
+	static private final IncidentCache cache = new IncidentCache();
+
 	/** Create a new poller */
 	public IncFeedPoller(String n) {
 		super(n, HTTP, INC_LOG);
 	}
 
 	/** Query incident feed */
-	public void queryIncidents(ControllerImpl c, IncidentCache cache) {
-		addOp(new OpReadIncFeed(c, cache));
+	public void queryIncidents(ControllerImpl c) {
+		addOp(new OpReadIncFeed(c, cache, name));
 	}
 }

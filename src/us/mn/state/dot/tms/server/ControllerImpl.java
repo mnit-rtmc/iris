@@ -937,7 +937,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		DevicePoller dp = getPoller();
 		if (dp instanceof IncFeedPoller) {
 			IncFeedPoller ifp = (IncFeedPoller) dp;
-			ifp.queryIncidents(this, IncidentImpl.cache);
+			ifp.queryIncidents(this);
 		}
 	}
 

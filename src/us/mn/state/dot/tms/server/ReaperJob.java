@@ -43,13 +43,17 @@ public class ReaperJob extends Job {
 	/** Seconds to offset each poll from start of interval */
 	static private final int OFFSET_SECS = 27;
 
-	/** List of sign messages ready to be reaped */
-	private final ArrayList<SignMessageImpl> reapable;
+	/** List of zombie sign messages */
+	private final ArrayList<SignMessageImpl> zombie_msgs;
+
+	/** List of zombie incidents */
+	private final ArrayList<IncidentImpl> zombie_incs;
 
 	/** Create a new job to reap dead stuff */
 	public ReaperJob() {
 		super(Calendar.MINUTE, 1, Calendar.SECOND, OFFSET_SECS);
-		reapable = new ArrayList<SignMessageImpl>();
+		zombie_msgs = new ArrayList<SignMessageImpl>();
+		zombie_incs = new ArrayList<IncidentImpl>();
 	}
 
 	/** Perform the reaper job */
@@ -60,46 +64,6 @@ public class ReaperJob extends Job {
 		FeedBucket.purgeExpired();
 	}
 
-	/** Reap incidents which have been cleared for awhile */
-	private void reapIncidents() {
-		Iterator<Incident> it = IncidentHelper.iterator();
-		while (it.hasNext()) {
-			Incident inc = it.next();
-			if (inc instanceof IncidentImpl)
-				reapIncident((IncidentImpl) inc);
-		}
-	}
-
-	/** Reap an incident */
-	private void reapIncident(IncidentImpl inc) {
-		if (isReapable(inc))
-			inc.notifyRemove();
-	}
-
-	/** Check if an incident is reapable */
-	private boolean isReapable(IncidentImpl inc) {
-		return inc.getCleared()
-		    && isPastClearThreshold(inc)
-		    && !isReferenced(inc);
-	}
-
-	/** Check if an incident is past the clear threshold */
-	private boolean isPastClearThreshold(IncidentImpl inc) {
-		return inc.getClearTime() + getIncidentClearThreshold() <
-			    TimeSteward.currentTimeMillis();
-	}
-
-	/** Check if an incident is referenced by any sign message */
-	private boolean isReferenced(IncidentImpl inc) {
-		Iterator<SignMessage> it = SignMessageHelper.iterator();
-		while (it.hasNext()) {
-			SignMessage sm = it.next();
-			if (sm.getIncident() == inc)
-				return true;
-		}
-		return false;
-	}
-
 	/** Reap sign messages which have been unused for awhile */
 	private void reapSignMessages() {
 		// NOTE: there is a small race where a client could send a
@@ -107,13 +71,13 @@ public class ReaperJob extends Job {
 		// only happen during a very short window about one minute
 		// after the message loses its last reference.  Is it worth
 		// making a fix for this unlikely scenario?
-		if (reapable.isEmpty()) {
+		if (zombie_msgs.isEmpty()) {
 			findReapableMessages();
 			removeReferencedMessages();
 		} else {
-			for (SignMessageImpl sm: reapable)
+			for (SignMessageImpl sm: zombie_msgs)
 				reapMessage(sm);
-			reapable.clear();
+			zombie_msgs.clear();
 		}
 	}
 
@@ -136,13 +100,13 @@ public class ReaperJob extends Job {
 		while (it.hasNext()) {
 			SignMessage sm = it.next();
 			if (sm instanceof SignMessageImpl)
-				reapable.add((SignMessageImpl) sm);
+				zombie_msgs.add((SignMessageImpl) sm);
 		}
 	}
 
 	/** Remove referenced sign messages */
 	private void removeReferencedMessages() {
-		Iterator<SignMessageImpl> it = reapable.iterator();
+		Iterator<SignMessageImpl> it = zombie_msgs.iterator();
 		while (it.hasNext()) {
 			SignMessage sm = it.next();
 			if (isReferenced(sm))
@@ -160,6 +124,63 @@ public class ReaperJob extends Job {
 				if (dmsi.hasReference(sm))
 					return true;
 			}
+		}
+		return false;
+	}
+
+	/** Reap incidents which have been cleared for awhile */
+	private void reapIncidents() {
+		if (zombie_incs.isEmpty())
+			findReapableIncidents();
+		else {
+			for (IncidentImpl inc: zombie_incs)
+				reapIncident(inc);
+			zombie_incs.clear();
+		}
+	}
+
+	/** Find all reapable incidents */
+	private void findReapableIncidents() {
+		Iterator<Incident> it = IncidentHelper.iterator();
+		while (it.hasNext()) {
+			Incident i = it.next();
+			if (i instanceof IncidentImpl) {
+				IncidentImpl inc = (IncidentImpl) i;
+				if (isReapable(inc))
+					zombie_incs.add(inc);
+			}
+		}
+	}
+
+	/** Check if an incident is reapable */
+	private boolean isReapable(IncidentImpl inc) {
+		return inc.getCleared() && isPastClearThreshold(inc);
+	}
+
+	/** Check if an incident is past the clear threshold */
+	private boolean isPastClearThreshold(IncidentImpl inc) {
+		return inc.getClearTime() + getIncidentClearThreshold() <
+			    TimeSteward.currentTimeMillis();
+	}
+
+	/** Reap an incident */
+	private void reapIncident(IncidentImpl inc) {
+		// Make sure the incident has not already been
+		// reaped by looking it up in the namespace.
+		// This is needed because objects are removed
+		// asynchronously from the namespace.
+		Incident i = IncidentHelper.lookup(inc.getName());
+		if ((i == inc) && isReapable(inc) && !isReferenced(inc))
+			inc.notifyRemove();
+	}
+
+	/** Check if an incident is referenced by any sign message */
+	private boolean isReferenced(IncidentImpl inc) {
+		Iterator<SignMessage> it = SignMessageHelper.iterator();
+		while (it.hasNext()) {
+			SignMessage sm = it.next();
+			if (sm.getIncident() == inc)
+				return true;
 		}
 		return false;
 	}
