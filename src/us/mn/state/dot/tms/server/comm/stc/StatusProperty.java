@@ -92,7 +92,7 @@ public class StatusProperty extends STCProperty {
 	}
 
 	/** Parse a received "S" message.  This is the response to a status
-	 * request in verson 1 of the STC protocol. */
+	 * request in older versons of the STC protocol (before h4.33). */
 	private void parseMessageS(byte[] msg, int len) throws IOException {
 		if (len != OFF_COMMON_LEN)
 			throw new ParsingException("INVALID LENGTH:" + len);
@@ -105,7 +105,7 @@ public class StatusProperty extends STCProperty {
 	}
 
 	/** Parse a received "N" message.  This is the "NEW" response to a
-	 * status request in version 2 of the STC protocol. */
+	 * status request version (h4.33) of the STC protocol. */
 	private void parseMessageN(byte[] msg, int len) throws IOException {
 		if (len != OFF_NEW_LENGTH)
 			throw new ParsingException("INVALID LENGTH:" + len);
