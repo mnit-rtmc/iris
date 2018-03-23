@@ -44,25 +44,32 @@ public enum OperatorStatus {
 	REVERSE_2_OPEN,			/* 21    sensor safety reverse open */
 	STOP_SAFETY,			/* 22  stopped in SAFE mode */
 	STOP_ENTRAPMENT,		/* 23  stopped in ENTRAPMENT mode */
-	FAULT_RUN_TIMEOUT,		/* 24    stopped; FAULT_1 */
-	FAULT_PHOTO_EYE,		/* 25    stopped; FAULT_2 */
-	FAULT_VOLTAGE_SAG,		/* 26    stopped; FAULT_3 */
-	FAULT_GATE_NO_LOAD,		/* 27    stopped; FAULT_4 */
-	FAULT_OPEN_CLOSE_LIMIT,		/* 28    stopped; FAULT_5 */
-	FAULT_EXCESSIVE_STUCK_ALERTS,	/* 29    stopped; FAULT_14 */
-	FAULT_15,			/* 30    spare */
-	ERROR_DIRECTION,		/* 31    stopped; ERROR_1 */
-	ERROR_DISCONNECTED_IES,		/* 32    inherent entrapment sensor */
-	ERROR_RS_485_BOARD,		/* 33    stopped; ERROR_6 */
-	ERROR_RPM_SENSOR,		/* 34    stopped; ERROR_8 */
-	ERROR_DISCONNECTED_BATT,	/* 35    stopped; ERROR_9 */
-	ERROR_SLOWDOWN_SWITCH,		/* 36    stopped; ERROR_10 */
-	ALERT_GATE_FORCED_OPEN,		/* 37    stopped; ALERT_1 */
-	ALERT_GATE_DRIFT_CLOSED,	/* 38    stopped; ALERT_2 */
-	ALERT_MOTOR_THERMAL_OVERLOAD,	/* 39    stopped; ALERT_4 */
-	ALERT_BOTH_LIMITS_TRIGGERED,	/* 40    stopped; ALERT_5 */
-	ALERT_NO_MOTION,		/* 41    stopped; ALERT_6 */
-	ALERT_VFD_DRIVE_TRIPPED;	/* 42    stopped; ALERT_21 */
+	FAL1_RUN_TIMEOUT,		/* 24    stopped */
+	FAL2_PHOTO_EYE,			/* 25    stopped */
+	FAL3_VOLTAGE_SAG,		/* 26    stopped */
+	FAL4_GATE_NO_LOAD,		/* 27    stopped */
+	FAL5_OPEN_CLOSE_LIMIT,		/* 28    stopped */
+	FAL7_MISSING_OR_BROKEN_ARM,	/* 29    stopped */
+	FAL8_LOW_FLUID_LEVEL,		/* 30    stopped */
+	FA14_EXCESSIVE_STUCK_ALERTS,	/* 31    stopped */
+	FA15,				/* 32    stopped */
+	ERR1_DIRECTION,			/* 33    stopped */
+	ERR2_DISCONNECTED_IES,		/* 34    stopped */
+	ERR6_RS_485_BOARD,		/* 35    stopped */
+	ERR8_RPM_SENSOR,		/* 36    stopped */
+	ERR9_DISCONNECTED_BATT,		/* 37    stopped */
+	ER10_SLOWDOWN_SWITCH,		/* 38    stopped */
+	ER12,				/* 39 */
+	ER13,				/* 40 */
+	ALE1_GATE_FORCED_OPEN,		/* 41    stopped */
+	ALE2_GATE_DRIFT_CLOSED,		/* 42    stopped */
+	ALE4_MOTOR_THERMAL_OVERLOAD,	/* 43    stopped */
+	ALE5_BOTH_LIMITS_TRIGGERED,	/* 44    stopped */
+	ALE6_NO_MOTION,			/* 45    stopped */
+	AL21_VFD_DRIVE_TRIPPED,		/* 46    stopped */
+	FACTORY_TEST,			/* 47 */
+	LEARN_LIMIT_GEO,		/* 48   new UL325 */
+	LEARN_LIMIT_GEC;		/* 49   new UL325 */
 
 	/** Lookup a gate operator status from ordinal */
 	static public OperatorStatus fromOrdinal(int o) {
@@ -76,25 +83,29 @@ public enum OperatorStatus {
 	/** Test if an operator status is "fault" (generic) */
 	static public boolean isFault(OperatorStatus os) {
 		switch (os) {
-		case FAULT_RUN_TIMEOUT:
-		case FAULT_PHOTO_EYE:
-		case FAULT_VOLTAGE_SAG:
-		case FAULT_GATE_NO_LOAD:
-		case FAULT_OPEN_CLOSE_LIMIT:
-		case FAULT_EXCESSIVE_STUCK_ALERTS:
-		case FAULT_15:
-		case ERROR_DIRECTION:
-		case ERROR_DISCONNECTED_IES:
-		case ERROR_RS_485_BOARD:
-		case ERROR_RPM_SENSOR:
-		case ERROR_DISCONNECTED_BATT:
-		case ERROR_SLOWDOWN_SWITCH:
-		case ALERT_GATE_FORCED_OPEN:
-		case ALERT_GATE_DRIFT_CLOSED:
-		case ALERT_MOTOR_THERMAL_OVERLOAD:
-		case ALERT_BOTH_LIMITS_TRIGGERED:
-		case ALERT_NO_MOTION:
-		case ALERT_VFD_DRIVE_TRIPPED:
+		case FAL1_RUN_TIMEOUT:
+		case FAL2_PHOTO_EYE:
+		case FAL3_VOLTAGE_SAG:
+		case FAL4_GATE_NO_LOAD:
+		case FAL5_OPEN_CLOSE_LIMIT:
+		case FAL7_MISSING_OR_BROKEN_ARM:
+		case FAL8_LOW_FLUID_LEVEL:
+		case FA14_EXCESSIVE_STUCK_ALERTS:
+		case FA15:
+		case ERR1_DIRECTION:
+		case ERR2_DISCONNECTED_IES:
+		case ERR6_RS_485_BOARD:
+		case ERR8_RPM_SENSOR:
+		case ERR9_DISCONNECTED_BATT:
+		case ER10_SLOWDOWN_SWITCH:
+		case ER12:
+		case ER13:
+		case ALE1_GATE_FORCED_OPEN:
+		case ALE2_GATE_DRIFT_CLOSED:
+		case ALE4_MOTOR_THERMAL_OVERLOAD:
+		case ALE5_BOTH_LIMITS_TRIGGERED:
+		case ALE6_NO_MOTION:
+		case AL21_VFD_DRIVE_TRIPPED:
 			return true;
 		default:
 			return false;
