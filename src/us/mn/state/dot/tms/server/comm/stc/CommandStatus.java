@@ -48,7 +48,10 @@ public enum CommandStatus {
 	EM_OPEN_IN_PROGRESS,		/* 25 emergency open in progress */
 	EM_OPEN_COMPLETE,		/* 26 emergency open complete */
 	EM_CLOSE_IN_PROGRESS,		/* 27 emergency close in progress */
-	EM_CLOSE_COMPLETE;		/* 28 emergency close complete */
+	EM_CLOSE_COMPLETE,		/* 28 emergency close complete */
+	PEB,				/* 29 new for UL325 (?) */
+	GEC,				/* 30 new for UL325 (?) */
+	GEO;				/* 31 new for UL325 (?) */
 
 	/** Lookup a command status from ordinal */
 	static public CommandStatus fromOrdinal(int o) {
