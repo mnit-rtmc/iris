@@ -22,7 +22,7 @@ import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Statuc property reads the gate arm status.
+ * Status property reads the gate arm status.
  *
  * @author Douglas Lau
  */
@@ -77,9 +77,8 @@ public class StatusProperty extends STCProperty {
 	}
 
 	/** Parse a received message */
-	@Override protected void parseMessage(byte[] msg, int len)
-		throws IOException
-	{
+	@Override
+	protected void parseMessage(byte[] msg, int len) throws IOException {
 		if ('S' == msg[0]) {
 			parseMessageS(msg, len);
 			return;
