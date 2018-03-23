@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -66,8 +66,8 @@ public enum OperatorStatus {
 
 	/** Lookup a gate operator status from ordinal */
 	static public OperatorStatus fromOrdinal(int o) {
-		for(OperatorStatus os: OperatorStatus.values()) {
-			if(os.ordinal() == o)
+		for (OperatorStatus os: OperatorStatus.values()) {
+			if (os.ordinal() == o)
 				return os;
 		}
 		return null;
@@ -75,7 +75,7 @@ public enum OperatorStatus {
 
 	/** Test if an operator status is "fault" (generic) */
 	static public boolean isFault(OperatorStatus os) {
-		switch(os) {
+		switch (os) {
 		case FAULT_RUN_TIMEOUT:
 		case FAULT_PHOTO_EYE:
 		case FAULT_VOLTAGE_SAG:

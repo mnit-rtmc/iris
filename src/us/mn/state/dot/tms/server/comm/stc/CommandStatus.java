@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -52,8 +52,8 @@ public enum CommandStatus {
 
 	/** Lookup a command status from ordinal */
 	static public CommandStatus fromOrdinal(int o) {
-		for(CommandStatus cs: CommandStatus.values()) {
-			if(cs.ordinal() == o)
+		for (CommandStatus cs: CommandStatus.values()) {
+			if (cs.ordinal() == o)
 				return cs;
 		}
 		return null;
@@ -61,12 +61,12 @@ public enum CommandStatus {
 
 	/** Test if a command status is "reset" */
 	static public boolean isReset(CommandStatus cs) {
-		return cs == RESET;
+		return RESET == cs;
 	}
 
 	/** Test if a command status is "normal" */
 	static public boolean isNormal(CommandStatus cs) {
-		switch(cs) {
+		switch (cs) {
 		case RESET:
 		case OPEN_IN_PROGRESS:
 		case OPEN_COMPLETE:
@@ -80,7 +80,7 @@ public enum CommandStatus {
 
 	/** Test if a command status is "fault" */
 	static public boolean isFault(CommandStatus cs) {
-		switch(cs) {
+		switch (cs) {
 		case FAULT:
 		case ERROR:
 		case ALERT:
@@ -92,7 +92,7 @@ public enum CommandStatus {
 
 	/** Test if a command status is "opening" */
 	static public boolean isOpening(CommandStatus cs) {
-		switch(cs) {
+		switch (cs) {
 		case OPEN_IN_PROGRESS:
 		case EM_OPEN_IN_PROGRESS:
 			return true;
@@ -103,7 +103,7 @@ public enum CommandStatus {
 
 	/** Test if a command status is "closing" */
 	static public boolean isClosing(CommandStatus cs) {
-		switch(cs) {
+		switch (cs) {
 		case CLOSE_IN_PROGRESS:
 		case EM_CLOSE_IN_PROGRESS:
 			return true;
@@ -114,7 +114,7 @@ public enum CommandStatus {
 
 	/** Test if a command status is "open" */
 	static public boolean isOpen(CommandStatus cs) {
-		switch(cs) {
+		switch (cs) {
 		case OPEN_COMPLETE:
 		case EM_OPEN_COMPLETE:
 		case BLOCK_FREE_EXIT_LOOP:
@@ -127,7 +127,7 @@ public enum CommandStatus {
 
 	/** Test if a command status is "closed" */
 	static public boolean isClosed(CommandStatus cs) {
-		switch(cs) {
+		switch (cs) {
 		case CLOSE_COMPLETE:
 		case EM_CLOSE_COMPLETE:
 		case BLOCK_OPEN_INTERLOCK:

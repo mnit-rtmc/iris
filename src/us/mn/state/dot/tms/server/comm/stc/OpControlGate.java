@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@ public class OpControlGate extends OpSTC {
 	}
 
 	/** Create the second phase of the operation */
+	@Override
 	protected Phase<STCProperty> phaseTwo() {
 		return new StoreControl();
 	}

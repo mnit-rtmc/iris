@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,8 @@ public enum BatteryStatus {
 
 	/** Lookup a battery status from ordinal */
 	static public BatteryStatus fromOrdinal(int o) {
-		for(BatteryStatus bs: BatteryStatus.values()) {
-			if(bs.ordinal() == o)
+		for (BatteryStatus bs: BatteryStatus.values()) {
+			if (bs.ordinal() == o)
 				return bs;
 		}
 		return null;

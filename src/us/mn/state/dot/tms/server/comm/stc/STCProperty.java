@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,15 +54,15 @@ abstract public class STCProperty extends ControllerProperty {
 		try {
 			byte[] pword = new byte[16];
 			byte[] pb = pw.getBytes(ASCII);
-			for(int i = 0; i < pword.length; ++i) {
-				if(i < pb.length)
+			for (int i = 0; i < pword.length; ++i) {
+				if (i < pb.length)
 					pword[i] = pb[i];
 				else
 					pword[i] = ' ';
 			}
 			return pword;
 		}
-		catch(UnsupportedEncodingException e) {
+		catch (UnsupportedEncodingException e) {
 			return new byte[0];
 		}
 	}
@@ -70,7 +70,7 @@ abstract public class STCProperty extends ControllerProperty {
 	/** Calculate a checksum */
 	static private int checksum(byte[] buf) {
 		int c = 0;
-		for(int i = 0; i < buf.length; i++)
+		for (int i = 0; i < buf.length; i++)
 			c += buf[i] & 0xFF;
 		return c;
 	}
@@ -118,16 +118,16 @@ abstract public class STCProperty extends ControllerProperty {
 	 * @param drop Drop address. */
 	protected void parseFrame(InputStream is, int drop) throws IOException {
 		byte[] header = recvResponse(is, OFF_MESSAGE);
-		if(parse8(header, OFF_SENTINEL) != SENTINEL)
+		if (parse8(header, OFF_SENTINEL) != SENTINEL)
 			throw new ParsingException("INVALID SENTINEL");
 		int d = parse8(header, OFF_ADDRESS);
-		if(d != DROP_MASTER)
+		if (d != DROP_MASTER)
 			throw new ParsingException("INVALID ADDRESS: " + d);
 		int size = parse8(header, OFF_SIZE);
-		if(size < MIN_MESSAGE_SIZE || size > MAX_MESSAGE_SIZE)
+		if (size < MIN_MESSAGE_SIZE || size > MAX_MESSAGE_SIZE)
 			throw new ParsingException("INVALID SIZE: " + size);
 		byte[] body = recvResponse(is, size + 1);
-		if((checksum(header) + checksum(body)) % 256 != 0)
+		if ((checksum(header) + checksum(body)) % 256 != 0)
 			throw new ChecksumException(body);
 		assert body.length > 1;
 		parseMessage(body, body.length - 1);
@@ -135,7 +135,7 @@ abstract public class STCProperty extends ControllerProperty {
 
 	/** Parse a received message */
 	protected void parseMessage(byte[] msg, int len) throws IOException {
-		if(msg[0] == 'P')
+		if ('P' == msg[0])
 			throw new ControllerException("AUTH REQUIRED");
 		else
 			throw new ParsingException("INVALID MESSAGE:" + msg[0]);
@@ -146,7 +146,7 @@ abstract public class STCProperty extends ControllerProperty {
 		try {
 			return Integer.parseInt(hex, 16);
 		}
-		catch(NumberFormatException e) {
+		catch (NumberFormatException e) {
 			throw new ParsingException("INVALID HEX: " + hex);
 		}
 	}
@@ -177,7 +177,7 @@ abstract public class STCProperty extends ControllerProperty {
 		throws IOException
 	{
 		int b = body[pos];
-		switch(b) {
+		switch (b) {
 		case '0':
 			return false;
 		case '1':

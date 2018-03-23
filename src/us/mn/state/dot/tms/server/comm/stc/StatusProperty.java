@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,11 +80,11 @@ public class StatusProperty extends STCProperty {
 	@Override protected void parseMessage(byte[] msg, int len)
 		throws IOException
 	{
-		if(msg[0] == 'S') {
+		if ('S' == msg[0]) {
 			parseMessageS(msg, len);
 			return;
 		}
-		if(msg[0] == 'N') {
+		if ('N' == msg[0]) {
 			parseMessageN(msg, len);
 			return;
 		}
@@ -94,25 +94,25 @@ public class StatusProperty extends STCProperty {
 	/** Parse a received "S" message.  This is the response to a status
 	 * request in verson 1 of the STC protocol. */
 	private void parseMessageS(byte[] msg, int len) throws IOException {
-		if(len != OFF_COMMON_LEN)
+		if (len != OFF_COMMON_LEN)
 			throw new ParsingException("INVALID LENGTH:" + len);
 		parseMessageCommon(msg, len);
 		relay[0] = parseBoolean(msg, OFF_RELAY_1);
 		relay[1] = parseBoolean(msg, OFF_RELAY_2);
 		relay[2] = parseBoolean(msg, OFF_RELAY_3);
-		for(int i = 3; i < relay.length; i++)
+		for (int i = 3; i < relay.length; i++)
 			relay[i] = false;
 	}
 
 	/** Parse a received "N" message.  This is the "NEW" response to a
 	 * status request in version 2 of the STC protocol. */
 	private void parseMessageN(byte[] msg, int len) throws IOException {
-		if(len != OFF_NEW_LENGTH)
+		if (len != OFF_NEW_LENGTH)
 			throw new ParsingException("INVALID LENGTH:" + len);
 		parseMessageCommon(msg, len);
-		for(int i = 0; i < 3; i++) {
+		for (int i = 0; i < 3; i++) {
 			int r = parseAsciiHex1(msg, OFF_RELAY_1 + i);
-			for(int b = 0; b < 4; b++) {
+			for (int b = 0; b < 4; b++) {
 				int j = i * 4 + b;
 				relay[j] = ((r >> b) & 1) != 0;
 			}
@@ -126,16 +126,16 @@ public class StatusProperty extends STCProperty {
 	private void parseMessageCommon(byte[] msg, int len) throws IOException{
 		int c = parseAsciiHex2(msg, OFF_COMMAND);
 		command_state = CommandStatus.fromOrdinal(c);
-		if(command_state == null)
+		if (null == command_state)
 			throw new ParsingException("INVALID COMMAND:" + c);
 		int o = parseAsciiHex2(msg, OFF_OPERATOR);
 		operator_state = OperatorStatus.fromOrdinal(o);
-		if(operator_state == null)
+		if (null == operator_state)
 			throw new ParsingException("INVALID OPERATOR:" + o);
 		faults = parseBoolean(msg, OFF_FAULTS);
 		int b = parseAsciiHex1(msg, OFF_BATTERY);
 		battery_state = BatteryStatus.fromOrdinal(b);
-		if(battery_state == null)
+		if (null == battery_state)
 			throw new ParsingException("INVALID BATTERY:" + b);
 		ac_present = parseBoolean(msg, OFF_AC_PRESENT);
 		open_limit = parseBoolean(msg, OFF_OPEN_LIMIT);
@@ -210,6 +210,7 @@ public class StatusProperty extends STCProperty {
 	private int special_cnt;
 
 	/** Get a string representation */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("command_status:");
@@ -237,8 +238,8 @@ public class StatusProperty extends STCProperty {
 		sb.append(" reset_shadow_loop:");
 		sb.append(reset_shadow_loop);
 		sb.append(" relay:");
-		for(int i = 0; i < relay.length; i++) {
-			if(i > 0)
+		for (int i = 0; i < relay.length; i++) {
+			if (i > 0)
 				sb.append(',');
 			sb.append(relay[i]);
 		}
@@ -259,15 +260,15 @@ public class StatusProperty extends STCProperty {
 
 	/** Get the gate arm state */
 	public GateArmState getState() {
-		if(hasFaults())
+		if (hasFaults())
 			return GateArmState.FAULT;
-		else if(isOpening())
+		else if (isOpening())
 			return GateArmState.OPENING;
-		else if(isClosing())
+		else if (isClosing())
 			return GateArmState.CLOSING;
-		else if(isOpen() && !isClosed())
+		else if (isOpen() && !isClosed())
 			return GateArmState.OPEN;
-		else if(isClosed() && !isOpen())
+		else if (isClosed() && !isOpen())
 			return GateArmState.CLOSED;
 		else
 			return GateArmState.FAULT;
@@ -305,11 +306,11 @@ public class StatusProperty extends STCProperty {
 	/** Get the maintenance status */
 	public String getMaintStatus() {
 		OperatorStatus os = operator_state;
-		if(OperatorStatus.isFault(os))
+		if (OperatorStatus.isFault(os))
 			return os.toString();
 		else {
 			CommandStatus cs = command_state;
-			if(CommandStatus.isNormal(cs))
+			if (CommandStatus.isNormal(cs))
 				return "";
 			else
 				return cs.toString();

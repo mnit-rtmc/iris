@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2014  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,9 +73,9 @@ public class ControlProperty extends STCProperty {
 	protected void parseMessage(byte[] msg, int len)
 		throws IOException
 	{
-		if(msg[0] != 'C')
+		if (msg[0] != 'C')
 			super.parseMessage(msg, len);
-		else if(len != 1)
+		else if (len != 1)
 			throw new ParsingException("INVALID LENGTH:" + len);
 	}
 
@@ -124,6 +124,7 @@ public class ControlProperty extends STCProperty {
 	private boolean bevd = false;
 
 	/** Get a string representation */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("pbo:");
