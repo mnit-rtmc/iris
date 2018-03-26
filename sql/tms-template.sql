@@ -278,8 +278,8 @@ DECLARE
 BEGIN
 	res = trim(roadway || ' ' || road_dir);
 	IF char_length(cross_street) > 0 THEN
-		RETURN concat(res || ' ', cross_mod || ' ', cross_street,
-		              ' ' || cross_dir);
+		RETURN trim(concat(res || ' ', cross_mod || ' ', cross_street),
+		            ' ' || cross_dir);
 	ELSIF char_length(landmark) > 0 THEN
 		RETURN concat(res || ' ', '(' || landmark || ')');
 	ELSE
