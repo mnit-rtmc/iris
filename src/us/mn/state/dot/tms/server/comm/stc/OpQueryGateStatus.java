@@ -77,6 +77,7 @@ public class OpQueryGateStatus extends OpSTC {
 			mess.add(status);
 			mess.queryProps();
 			updateStatus();
+			// FIXME: return QueryFaults phase if faults exist
 			return this;
 		}
 	}
@@ -84,6 +85,7 @@ public class OpQueryGateStatus extends OpSTC {
 	/** Update controller status */
 	private void updateStatus() {
 		gate_arm.setArmStateNotify(status.getState(), null);
+		// FIXME: only clear maint status here if no faults exist
 		setMaintStatus(status.getMaintStatus());
 		updateMaintStatus();
 		if (shouldUpdateOpCount()) {
@@ -95,6 +97,23 @@ public class OpQueryGateStatus extends OpSTC {
 	/** Check if we should update the controller operation count */
 	private boolean shouldUpdateOpCount() {
 		return TimeSteward.currentTimeMillis() >= op_time;
+	}
+
+	/** Phase to query the gate faults */
+	protected class QueryFaults extends Phase<STCProperty> {
+
+		/** Query the faults */
+		protected Phase<STCProperty> poll(CommMessage<STCProperty> mess)
+			throws IOException
+		{
+			FaultProperty faults = new FaultProperty(password());
+			mess.add(faults);
+			mess.queryProps();
+			// FIXME: clear the faults somehow???
+			setMaintStatus(faults.getFaults());
+			updateMaintStatus();
+			return new QueryStatus();
+		}
 	}
 
 	/** Cleanup the operation */
