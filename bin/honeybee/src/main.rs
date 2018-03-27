@@ -310,12 +310,12 @@ impl<S> Handler<S> for ReqHandler {
 
     fn handle(&mut self, req: HttpRequest<S>) -> Self::Result {
         match req.match_info().get("v") {
-            Some("dms")           => self.get_js_req::<Dms>(),
-            Some("dms_messages")  => self.get_js_req::<DmsMessage>(),
-            Some("incidents")     => self.get_js_req::<Incident>(),
-            Some("sign_config")   => self.get_js_req::<SignConfig>(),
-            Some("TPIMS_static")  => self.get_js_req::<ParkingAreaStatic>(),
-            Some("TPIMS_dynamic") => self.get_js_req::<ParkingAreaDynamic>(),
+            Some("dms")           => self.get_json::<Dms>(),
+            Some("dms_messages")  => self.get_json::<DmsMessage>(),
+            Some("incidents")     => self.get_json::<Incident>(),
+            Some("sign_config")   => self.get_json::<SignConfig>(),
+            Some("TPIMS_static")  => self.get_json::<ParkingAreaStatic>(),
+            Some("TPIMS_dynamic") => self.get_json::<ParkingAreaDynamic>(),
             _                     => HttpResponse::NotFound()
                                                   .body("Not found").unwrap(),
         }
@@ -323,10 +323,13 @@ impl<S> Handler<S> for ReqHandler {
 }
 
 impl ReqHandler {
-    fn get_js_req<T>(&self) -> HttpResponse
+    fn new(uds: String) -> Self {
+        Self { uds }
+    }
+    fn get_json<T>(&self) -> HttpResponse
         where T: Queryable + serde::Serialize
     {
-        match self.query_js::<T>() {
+        match self.query_json::<T>() {
             Ok(body) => HttpResponse::Ok()
                                      .content_type("application/json")
                                      .body(body).unwrap(),
@@ -334,7 +337,7 @@ impl ReqHandler {
                                      .body("Database error").unwrap(),
         }
     }
-    fn query_js<T>(&self) -> Result<String, Error>
+    fn query_json<T>(&self) -> Result<String, Error>
         where T: Queryable + serde::Serialize
     {
         let conn = Connection::connect(self.uds.clone(), TlsMode::None)?;
@@ -349,7 +352,7 @@ fn main() {
     HttpServer::new(move || {
         let uds = uds.clone();
         Application::new().resource("/{v}.json", move |r| {
-            r.method(Method::GET).h(ReqHandler{ uds })
+            r.method(Method::GET).h(ReqHandler::new(uds))
         })
     }).bind("127.0.0.1:8088").expect("Can not bind to 127.0.0.1:8088")
       .run();
