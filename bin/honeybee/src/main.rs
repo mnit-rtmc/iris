@@ -23,7 +23,7 @@ extern crate users;
 
 use actix_web::*;
 use actix_web::dev::Handler;
-use chrono::{DateTime, Local};
+use chrono::{DateTime, Local, Utc};
 use failure::Error;
 use postgres::{Connection, TlsMode};
 use users::get_current_username;
@@ -188,6 +188,104 @@ impl Queryable for DmsMessage {
     }
 }
 
+#[allow(non_snake_case)]
+#[derive(Serialize)]
+struct Location {
+    latitude : Option<f64>,
+    longitude: Option<f64>,
+    streetAdr: Option<String>,
+    city     : Option<String>,
+    state    : Option<String>,
+    zip      : Option<String>,
+    timeZone : Option<String>,
+}
+
+#[allow(non_snake_case)]
+#[derive(Serialize)]
+struct ParkingAreaStatic {
+    siteId           : Option<String>,
+    timeStamp        : Option<DateTime<Utc>>,
+    relevantHighway  : Option<String>,
+    referencePost    : Option<String>,
+    exitId           : Option<String>,
+    directionOfTravel: Option<String>,
+    name             : Option<String>,
+    location         : Location,
+    ownership        : Option<String>,
+    capacity         : Option<i32>,
+    amenities        : Option<Vec<String>>,
+    images           : Option<Vec<String>>,
+    logos            : Option<Vec<String>>,
+}
+
+impl Queryable for ParkingAreaStatic {
+    fn sql() -> &'static str {
+       "SELECT site_id, time_stamp_static, relevant_highway, reference_post, \
+               exit_id, road_dir, facility_name, lat, lon, street_adr, city, \
+               state, zip, time_zone, ownership, capacity, amenities \
+        FROM parking_area_view"
+    }
+    fn from_row(row: &postgres::rows::Row) -> ParkingAreaStatic {
+        ParkingAreaStatic {
+            siteId           : row.get(0),
+            timeStamp        : row.get(1),
+            relevantHighway  : row.get(2),
+            referencePost    : row.get(3),
+            exitId           : row.get(4),
+            directionOfTravel: row.get(5),
+            name             : row.get(6),
+            location         : Location {
+                latitude : row.get(7),
+                longitude: row.get(8),
+                streetAdr: row.get(9),
+                city     : row.get(10),
+                state    : row.get(11),
+                zip      : row.get(12),
+                timeZone : row.get(13),
+            },
+            ownership        : row.get(14),
+            capacity         : row.get(15),
+            amenities        : if let Some(a) = row.get(16) { Some(vec!(a)) }
+                               else { Some(vec!()) },
+            images           : Some(vec!()),
+            logos            : Some(vec!()),
+        }
+    }
+}
+
+#[allow(non_snake_case)]
+#[derive(Serialize)]
+struct ParkingAreaDynamic {
+    siteId           : Option<String>,
+    timeStamp        : Option<DateTime<Utc>>,
+    timeStampStatic  : Option<DateTime<Utc>>,
+    reportedAvailable: Option<String>,
+    trend            : Option<String>,
+    open             : Option<bool>,
+    trustData        : Option<bool>,
+    capacity         : Option<i32>,
+}
+
+impl Queryable for ParkingAreaDynamic {
+    fn sql() -> &'static str {
+       "SELECT site_id, time_stamp, time_stamp_static, reported_available, \
+               trend, open, trust_data, capacity \
+        FROM parking_area_view"
+    }
+    fn from_row(row: &postgres::rows::Row) -> ParkingAreaDynamic {
+        ParkingAreaDynamic {
+            siteId           : row.get(0),
+            timeStamp        : row.get(1),
+            timeStampStatic  : row.get(2),
+            reportedAvailable: row.get(3),
+            trend            : row.get(4),
+            open             : row.get(5),
+            trustData        : row.get(6),
+            capacity         : row.get(7),
+        }
+    }
+}
+
 fn query_json<T>(conn: &Connection) -> Result<String, Error> where
     T: Queryable + serde::Serialize
 {
@@ -212,12 +310,14 @@ impl<S> Handler<S> for ReqHandler {
 
     fn handle(&mut self, req: HttpRequest<S>) -> Self::Result {
         match req.match_info().get("v") {
-            Some("dms")          => self.get_js_req::<Dms>(),
-            Some("dms_messages") => self.get_js_req::<DmsMessage>(),
-            Some("incidents")    => self.get_js_req::<Incident>(),
-            Some("sign_config")  => self.get_js_req::<SignConfig>(),
-            _                    => HttpResponse::NotFound()
-                                                 .body("Not found").unwrap(),
+            Some("dms")           => self.get_js_req::<Dms>(),
+            Some("dms_messages")  => self.get_js_req::<DmsMessage>(),
+            Some("incidents")     => self.get_js_req::<Incident>(),
+            Some("sign_config")   => self.get_js_req::<SignConfig>(),
+            Some("TPIMS_static")  => self.get_js_req::<ParkingAreaStatic>(),
+            Some("TPIMS_dynamic") => self.get_js_req::<ParkingAreaDynamic>(),
+            _                     => HttpResponse::NotFound()
+                                                  .body("Not found").unwrap(),
         }
     }
 }
