@@ -22,6 +22,7 @@ extern crate serde_json;
 extern crate users;
 
 use actix_web::*;
+use actix_web::dev::Handler;
 use chrono::{DateTime, Local};
 use failure::Error;
 use postgres::{Connection, TlsMode};
@@ -202,42 +203,54 @@ fn query_json<T>(conn: &Connection) -> Result<String, Error> where
     Ok(s)
 }
 
-fn query_js<T>() -> Result<String, Error>
-    where T: Queryable + serde::Serialize
-{
-    let username = get_current_username().expect("User name lookup error");
-    // Format path for unix domain socket
-    let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
-    let conn = Connection::connect(uds, TlsMode::None)?;
-    query_json::<T>(&conn)
+struct ReqHandler {
+    uds: String,
 }
 
-fn get_js_req<T>() -> HttpResponse
-    where T: Queryable + serde::Serialize
-{
-    match query_js::<T>() {
-        Ok(body) => HttpResponse::Ok()
-                                 .content_type("application/json")
-                                 .body(body).unwrap(),
-        Err(_)   => HttpResponse::InternalServerError()
-                                 .body("Database error").unwrap(),
+impl<S> Handler<S> for ReqHandler {
+    type Result = HttpResponse;
+
+    fn handle(&mut self, req: HttpRequest<S>) -> Self::Result {
+        match req.match_info().get("v") {
+            Some("dms")          => self.get_js_req::<Dms>(),
+            Some("dms_messages") => self.get_js_req::<DmsMessage>(),
+            Some("incidents")    => self.get_js_req::<Incident>(),
+            Some("sign_config")  => self.get_js_req::<SignConfig>(),
+            _                    => HttpResponse::NotFound()
+                                                 .body("Not found").unwrap(),
+        }
     }
 }
 
-fn get_json(req: HttpRequest) -> HttpResponse {
-    match req.match_info().get("v") {
-        Some("dms")          => get_js_req::<Dms>(),
-        Some("dms_messages") => get_js_req::<DmsMessage>(),
-        Some("incidents")    => get_js_req::<Incident>(),
-        Some("sign_config")  => get_js_req::<SignConfig>(),
-        _                    => HttpResponse::NotFound()
-                                             .body("Not found").unwrap(),
+impl ReqHandler {
+    fn get_js_req<T>(&self) -> HttpResponse
+        where T: Queryable + serde::Serialize
+    {
+        match self.query_js::<T>() {
+            Ok(body) => HttpResponse::Ok()
+                                     .content_type("application/json")
+                                     .body(body).unwrap(),
+            Err(_)   => HttpResponse::InternalServerError()
+                                     .body("Database error").unwrap(),
+        }
+    }
+    fn query_js<T>(&self) -> Result<String, Error>
+        where T: Queryable + serde::Serialize
+    {
+        let conn = Connection::connect(self.uds.clone(), TlsMode::None)?;
+        query_json::<T>(&conn)
     }
 }
 
 fn main() {
-    HttpServer::new(|| Application::new()
-                .resource("/{v}.json", |r| r.method(Method::GET).f(get_json)))
-        .bind("127.0.0.1:8088").expect("Can not bind to 127.0.0.1:8088")
-        .run();
+    let username = get_current_username().expect("User name lookup error");
+    // Format path for unix domain socket
+    let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
+    HttpServer::new(move || {
+        let uds = uds.clone();
+        Application::new().resource("/{v}.json", move |r| {
+            r.method(Method::GET).h(ReqHandler{ uds })
+        })
+    }).bind("127.0.0.1:8088").expect("Can not bind to 127.0.0.1:8088")
+      .run();
 }
