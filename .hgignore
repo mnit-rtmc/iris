@@ -4,6 +4,8 @@
 (^|/)build($|/)
 (^|/)iris-server-*
 (^|/)iris-client-*
+(^|/)bin/honeybee/target*
+(^|/)*.lock
 (^|/)*.rej
 (^|/)*.orig
 (^|/)*.swp
