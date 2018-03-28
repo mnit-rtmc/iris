@@ -301,18 +301,18 @@ fn query_json<T>(conn: &Connection) -> Result<String, Error> where
     Ok(s)
 }
 
-struct ReqHandler {
+struct IrisHandler {
     uds: String,
 }
 
-impl<S> Handler<S> for ReqHandler {
+impl<S> Handler<S> for IrisHandler {
     type Result = HttpResponse;
 
     fn handle(&mut self, req: HttpRequest<S>) -> Self::Result {
         match req.match_info().get("v") {
             Some("dms")           => self.get_json::<Dms>(),
-            Some("dms_messages")  => self.get_json::<DmsMessage>(),
-            Some("incidents")     => self.get_json::<Incident>(),
+            Some("dms_message")   => self.get_json::<DmsMessage>(),
+            Some("incident")      => self.get_json::<Incident>(),
             Some("sign_config")   => self.get_json::<SignConfig>(),
             Some("TPIMS_static")  => self.get_json::<ParkingAreaStatic>(),
             Some("TPIMS_dynamic") => self.get_json::<ParkingAreaDynamic>(),
@@ -322,7 +322,7 @@ impl<S> Handler<S> for ReqHandler {
     }
 }
 
-impl ReqHandler {
+impl IrisHandler {
     fn new(uds: String) -> Self {
         Self { uds }
     }
@@ -351,8 +351,8 @@ fn main() {
     let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
     HttpServer::new(move || {
         let uds = uds.clone();
-        Application::new().resource("/{v}.json", move |r| {
-            r.method(Method::GET).h(ReqHandler::new(uds))
+        Application::new().resource("/iris/{v}", move |r| {
+            r.method(Method::GET).h(IrisHandler::new(uds))
         })
     }).bind("127.0.0.1:8088").expect("Can not bind to 127.0.0.1:8088")
       .run();
