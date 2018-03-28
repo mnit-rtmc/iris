@@ -33,7 +33,7 @@ fn main() {
     HttpServer::new(move || {
         let uds = uds.clone();
         Application::new().resource("/iris/{v}", move |r| {
-            r.method(Method::GET).h(iris_req::IrisHandler::new(uds))
+            r.method(Method::GET).h(iris_req::Handler::new(uds))
         })
     }).bind("127.0.0.1:8088").expect("Can not bind to 127.0.0.1:8088")
       .run();

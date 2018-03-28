@@ -12,8 +12,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+use actix_web;
 use actix_web::{HttpRequest, HttpResponse};
-use actix_web::dev::Handler;
 use chrono::{DateTime, Local, Utc};
 use failure::Error;
 use postgres;
@@ -294,11 +294,11 @@ fn query_json<T>(conn: &Connection) -> Result<String, Error> where
     Ok(s)
 }
 
-pub struct IrisHandler {
+pub struct Handler {
     uds: String,
 }
 
-impl<S> Handler<S> for IrisHandler {
+impl<S> actix_web::dev::Handler<S> for Handler {
     type Result = HttpResponse;
 
     fn handle(&mut self, req: HttpRequest<S>) -> Self::Result {
@@ -315,7 +315,7 @@ impl<S> Handler<S> for IrisHandler {
     }
 }
 
-impl IrisHandler {
+impl Handler {
     pub fn new(uds: String) -> Self {
         Self { uds }
     }
