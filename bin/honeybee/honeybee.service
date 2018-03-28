@@ -1,0 +1,10 @@
+[Unit]
+Description=Honeybee service for IRIS
+
+[Service]
+ExecStart=/usr/local/bin/honeybee
+Restart=always
+User=tms
+
+[Install]
+WantedBy=multi-user.target
