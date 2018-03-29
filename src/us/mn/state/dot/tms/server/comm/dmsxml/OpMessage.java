@@ -62,10 +62,9 @@ class OpMessage extends OpDms {
 
 	/** Operation equality test */
 	public boolean equals(Object o) {
-		if(o instanceof OpMessage) {
-			OpMessage op = (OpMessage)o;
-			return m_dms == op.m_dms &&
-			       SignMessageHelper.isEquivalent(m_sm, op.m_sm);
+		if (o instanceof OpMessage) {
+			OpMessage op = (OpMessage) o;
+			return (m_dms == op.m_dms) && (m_sm == op.m_sm);
 		} else
 			return false;
 	}

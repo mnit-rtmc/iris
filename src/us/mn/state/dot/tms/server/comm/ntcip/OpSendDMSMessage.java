@@ -167,9 +167,8 @@ public class OpSendDMSMessage extends OpDMS {
 	@Override
 	public boolean equals(Object o) {
 		if (o instanceof OpSendDMSMessage) {
-			OpSendDMSMessage op = (OpSendDMSMessage)o;
-			return dms == op.dms && SignMessageHelper.isEquivalent(
-			       message, op.message);
+			OpSendDMSMessage op = (OpSendDMSMessage) o;
+			return (dms == op.dms) && (message == op.message);
 		} else
 			return false;
 	}

@@ -488,7 +488,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 
 	/** Update the message on the specified DMS */
 	private void updateDmsMsg(DMSImpl d, SignMessage sm) {
-		if (!d.isMsgCurrentEquivalent(sm)) {
+		if (sm != d.getMsgCurrent()) {
 			try {
 				d.doSetMsgUser(sm);
 			}

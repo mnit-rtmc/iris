@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  * Copyright (C) 2017       Iteris Inc.
  *
@@ -127,7 +127,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 	@SuppressWarnings("unchecked")
 	@Override
 	public void sendMessage(DMSImpl dms, SignMessage sm) {
-		if (dms.isMsgCurrentEquivalent(sm)) {
+		if (dms.getMsgCurrent() == sm) {
 			if (!SignMessageHelper.isScheduledIndefinite(sm))
 				addOp(new OpUpdateDMSDuration(dms, sm));
 		} else

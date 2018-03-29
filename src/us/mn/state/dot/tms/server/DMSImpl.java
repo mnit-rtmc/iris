@@ -867,7 +867,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void setMsgCurrentNotify(SignMessage sm) {
 		if (SignMsgSource.tolling.checkBit(sm.getSource()))
 			logPriceMessages(EventType.PRICE_VERIFIED);
-		if (!isMsgCurrentEquivalent(sm)) {
+		if (sm != msg_current) {
 			logMsg(sm);
 			setMsgCurrent(sm);
 			setDeployTime();
@@ -882,11 +882,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public SignMessage getMsgCurrent() {
 		return msg_current;
-	}
-
-	/** Test if the current message is equivalent to a sign message */
-	public boolean isMsgCurrentEquivalent(SignMessage sm) {
-		return SignMessageHelper.isEquivalent(msg_current, sm);
 	}
 
 	/** Log a message.

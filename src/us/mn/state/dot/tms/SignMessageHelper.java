@@ -92,24 +92,6 @@ public class SignMessageHelper extends BaseHelper {
 		return srct == sms;
 	}
 
-	/** Compare the attributes of 2 sign messages.
-	 * @param sm1 SignMessage which may be null.
-	 * @param sm2 SignMessage which may be null.
-	 * @return True if sm1 and sm2 have equal MULTIs, priorities,
-	 *         and bitmaps. */
-	static public boolean isEquivalent(SignMessage sm1, SignMessage sm2) {
-		if (sm1 == null && sm2 == null)
-			return true;
-		if (sm1 == null || sm2 == null)
-			return false;
-		if (!new MultiString(sm1.getMulti()).equals(sm2.getMulti()))
-			return false;
-		if (sm1.getMsgPriority() != sm2.getMsgPriority())
-			return false;
-		else
-			return objectEquals(sm1.getOwner(), sm2.getOwner());
-	}
-
 	/** Return an array of font names in a message.
 	 * @param f_num Default font number, one based.
 	 * @return A string array with length equal to the number
