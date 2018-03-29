@@ -268,11 +268,21 @@ public class SignMessageHelper extends BaseHelper {
 	}
 
 	/** Check if a message is scheduled and has indefinite duration.
+	 * This should only be true for messages from "sticky" DMS actions.
 	 * @param sm The sign message. */
 	static public boolean isScheduledIndefinite(SignMessage sm) {
 		int src = sm.getSource();
 		return SignMsgSource.schedule.checkBit(src) &&
 		      (sm.getDuration() == null) &&
+		      !SignMsgSource.operator.checkBit(src);
+	}
+
+	/** Check if a message is scheduled and has duration.
+	 * @param sm The sign message. */
+	static public boolean isScheduledWithDuration(SignMessage sm) {
+		int src = sm.getSource();
+		return SignMsgSource.schedule.checkBit(src) &&
+		      (sm.getDuration() != null) &&
 		      !SignMsgSource.operator.checkBit(src);
 	}
 
