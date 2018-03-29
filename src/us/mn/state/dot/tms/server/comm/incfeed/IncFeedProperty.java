@@ -17,19 +17,7 @@ package us.mn.state.dot.tms.server.comm.incfeed;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.Iterator;
-import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CameraHelper;
-import us.mn.state.dot.tms.CorridorBase;
-import us.mn.state.dot.tms.GeoLoc;
-import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.IncidentImpact;
-import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.geo.Position;
-import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
-import static us.mn.state.dot.tms.server.BaseObjectImpl.corridors;
 import us.mn.state.dot.tms.server.ControllerImpl;
-import us.mn.state.dot.tms.server.IncidentImpl;
 import us.mn.state.dot.tms.server.comm.ControllerProperty;
 import us.mn.state.dot.tms.utils.LineReader;
 
@@ -46,13 +34,9 @@ public class IncFeedProperty extends ControllerProperty {
 	/** Incident cache */
 	private final IncidentCache cache;
 
-	/** Comm link name */
-	private final String link;
-
 	/** Create a new incident feed property */
-	public IncFeedProperty(IncidentCache ic, String cl) {
+	public IncFeedProperty(IncidentCache ic) {
 		cache = ic;
-		link = cl;
 	}
 
 	/** Decode a QUERY response */
@@ -63,65 +47,10 @@ public class IncFeedProperty extends ControllerProperty {
 		LineReader lr = new LineReader(is, MAX_RESP);
 		String line = lr.readLine();
 		while (line != null) {
-			ParsedIncident inc = new ParsedIncident(line);
-			if (inc.isValid())
-				checkIncident(inc);
+			cache.put(new ParsedIncident(line));
 			line = lr.readLine();
 		}
-		cache.update();
-	}
-
-	/** Check a parsed incident */
-	private void checkIncident(ParsedIncident inc) {
-		if (cache.contains(inc.id))
-			cache.refresh(inc.id);
-		else if (cache.isUpdated())
-			cache.put(inc.id, createIncident(inc));
-		else
-			cache.put(inc.id, null);
-	}
-
-	/** Create an incident */
-	private IncidentImpl createIncident(ParsedIncident inc) {
-		Position pos = new Position(inc.lat, inc.lon);
-		SphericalMercatorPosition smp =
-			SphericalMercatorPosition.convert(pos);
-		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE);
-		return (loc != null) ? createIncident(inc, loc) : null;
-	}
-
-	/** Create an incident */
-	private IncidentImpl createIncident(ParsedIncident inc, GeoLoc loc) {
-		int n_lanes = getLaneCount(LaneType.MAINLINE, loc);
-		return (n_lanes > 0) ? createIncident(inc, loc, n_lanes) : null;
-	}
-
-	/** Get the lane count at the incident location */
-	private int getLaneCount(LaneType lt, GeoLoc loc) {
-		CorridorBase cb = corridors.getCorridor(loc);
-		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
-	}
-
-	/** Create an incident */
-	private IncidentImpl createIncident(ParsedIncident inc, GeoLoc loc,
-		int n_lanes)
-	{
-		Camera cam = lookupCamera(inc);
-		return IncidentImpl.createNotify(link + "_" + inc.id,
-			inc.inc_type.ordinal(), inc.detail,
-			(short) LaneType.MAINLINE.ordinal(),
-			loc.getRoadway(), loc.getRoadDir(), inc.lat,
-			inc.lon, cam, IncidentImpact.fromLanes(n_lanes));
-	}
-
-	/** Lookup the camera */
-	private Camera lookupCamera(ParsedIncident inc) {
-		Camera cam = CameraHelper.findUID(inc.cam);
-		if (cam != null)
-			return cam;
-		Iterator<Camera> it = CameraHelper.findNearest(
-			new Position(inc.lat, inc.lon), 1).iterator();
-		return it.hasNext() ? it.next() : null;
+		cache.clearOld();
 	}
 
 	/** Get a string representation */

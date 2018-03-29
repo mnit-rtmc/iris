@@ -31,15 +31,16 @@ public class IncFeedPoller extends ThreadedPoller<IncFeedProperty> {
 	static private final DebugLog INC_LOG = new DebugLog("inc_feed");
 
 	/** Incident cache */
-	static private final IncidentCache cache = new IncidentCache();
+	private final IncidentCache cache;
 
 	/** Create a new poller */
 	public IncFeedPoller(String n) {
 		super(n, HTTP, INC_LOG);
+		cache = new IncidentCache(n, INC_LOG);
 	}
 
 	/** Query incident feed */
 	public void queryIncidents(ControllerImpl c) {
-		addOp(new OpReadIncFeed(c, cache, name));
+		addOp(new OpReadIncFeed(c, cache));
 	}
 }

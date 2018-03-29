@@ -14,11 +14,20 @@
  */
 package us.mn.state.dot.tms.server.comm.incfeed;
 
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
-import java.util.Map;
+import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.tms.CorridorBase;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
+import us.mn.state.dot.tms.IncidentImpact;
+import us.mn.state.dot.tms.LaneType;
+import us.mn.state.dot.tms.geo.Position;
+import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
+import static us.mn.state.dot.tms.server.BaseObjectImpl.corridors;
 import us.mn.state.dot.tms.server.IncidentImpl;
 
 /**
@@ -28,64 +37,117 @@ import us.mn.state.dot.tms.server.IncidentImpl;
  */
 public class IncidentCache {
 
-	/** Map of active incidents */
-	private final HashMap<String, IncidentImpl> incidents =
-		new HashMap<String, IncidentImpl>();
+	/** Comm link name */
+	private final String link;
 
-	/** Set of refreshed incidents since last update */
+	/** Incident feed debug log */
+	private final DebugLog inc_log;
+
+	/** Set of next incidents */
 	private final HashSet<String> nxt = new HashSet<String>();
+
+	/** Set of active incidents */
+	private final HashSet<String> incidents = new HashSet<String>();
 
 	/** Flag to incidate cache has been updated */
 	private boolean updated = false;
 
-	/** Check if the cache is empty */
-	public boolean isUpdated() {
-		return updated;
+	/** Create a new incident cache */
+	public IncidentCache(String cl, DebugLog il) {
+		link = cl;
+		inc_log = il;
 	}
 
-	/** Check if the cache contains an incident ID */
-	public boolean contains(String id) {
-		return incidents.containsKey(id);
+	/** Put an incident into the cache */
+	public void put(ParsedIncident pi) {
+		if (pi.isValid()) {
+			nxt.add(pi.id);
+			if (updated && (lookupIncident(pi.id) == null))
+				createIncident(pi);
+		} else if (inc_log.isOpen())
+			inc_log.log("Invalid incident: " + pi);
 	}
 
-	/** Put an incident into the cache. */
-	public void put(String id, IncidentImpl inc) {
-		incidents.put(id, inc);
-		nxt.add(id);
+	/** Lookup an incident by ID */
+	private IncidentImpl lookupIncident(String id) {
+		Incident inc = IncidentHelper.lookup(incidentId(id));
+		return (inc instanceof IncidentImpl)
+		      ? (IncidentImpl) inc
+		      : null;
 	}
 
-	/** Refresh an incident.  This prevents the incident from being cleared
-	 * on the next update. */
-	public void refresh(String id) {
-		nxt.add(id);
+	/** Get an incident ID */
+	private String incidentId(String id) {
+		return link + "_" + id;
 	}
 
-	/** Update the cache.  Any incidents which have not been refreshed
-	 * since this was last called will be cleared. */
-	public void update() {
-		Iterator<Map.Entry<String, IncidentImpl>> it =
-			incidents.entrySet().iterator();
-		while (it.hasNext()) {
-			Map.Entry<String, IncidentImpl> ent = it.next();
-			String id = ent.getKey();
-			if (!nxt.contains(id)) {
-				clear(ent.getValue());
-				it.remove();
-			}
+	/** Create an incident */
+	private void createIncident(ParsedIncident pi) {
+		inc_log.log("Creating incident: " + pi);
+		Position pos = new Position(pi.lat, pi.lon);
+		SphericalMercatorPosition smp =
+			SphericalMercatorPosition.convert(pos);
+		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE);
+		if (loc != null)
+			createIncident(pi, loc);
+		else if (inc_log.isOpen()) {
+			inc_log.log("Failed to snap incident to corridor: " +
+				pi.lat + ", " + pi.lon);
 		}
+	}
+
+	/** Create an incident */
+	private void createIncident(ParsedIncident pi, GeoLoc loc) {
+		int n_lanes = getLaneCount(LaneType.MAINLINE, loc);
+		if (n_lanes > 0)
+			createIncident(pi, loc, n_lanes);
+		else if (inc_log.isOpen())
+			inc_log.log("No lanes at location: " + loc);
+	}
+
+	/** Get the lane count at the incident location */
+	private int getLaneCount(LaneType lt, GeoLoc loc) {
+		CorridorBase cb = corridors.getCorridor(loc);
+		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
+	}
+
+	/** Create an incident */
+	private void createIncident(ParsedIncident pi, GeoLoc loc, int n_lanes){
+		Camera cam = lookupCamera(pi);
+		IncidentImpl.createNotify(incidentId(pi.id),
+			pi.inc_type.ordinal(), pi.detail,
+			(short) LaneType.MAINLINE.ordinal(),
+			loc.getRoadway(), loc.getRoadDir(), pi.lat, pi.lon, cam,
+			IncidentImpact.fromLanes(n_lanes));
+	}
+
+	/** Lookup the camera */
+	private Camera lookupCamera(ParsedIncident pi) {
+		Camera cam = CameraHelper.findUID(pi.cam);
+		if (cam != null)
+			return cam;
+		Iterator<Camera> it = CameraHelper.findNearest(
+			new Position(pi.lat, pi.lon), 1).iterator();
+		return it.hasNext() ? it.next() : null;
+	}
+
+	/** Clear old incidents.  Any incidents which have not been refreshed
+	 * since this was last called will be cleared. */
+	public void clearOld() {
+		for (String id : incidents) {
+			if (!nxt.contains(id))
+				setCleared(id);
+		}
+		incidents.clear();
+		incidents.addAll(nxt);
 		nxt.clear();
 		updated = true;
 	}
 
-	/** Clear one incident */
-	private void clear(IncidentImpl inc) {
-		if (isActive(inc))
+	/** Set an incident to cleared status */
+	private void setCleared(String id) {
+		IncidentImpl inc = lookupIncident(id);
+		if (inc != null && !inc.getCleared())
 			inc.setClearedNotify(true);
-	}
-
-	/** Check if an incident is active */
-	private boolean isActive(IncidentImpl inc) {
-		return inc != null
-		    && IncidentHelper.lookup(inc.getName()) == inc;
 	}
 }

@@ -31,14 +31,10 @@ public class OpReadIncFeed extends OpController<IncFeedProperty> {
 	/** Incident cache */
 	private final IncidentCache cache;
 
-	/** Comm link name */
-	private final String link;
-
 	/** Create a new operation to read incident feed */
-	protected OpReadIncFeed(ControllerImpl c, IncidentCache ic, String cl) {
+	protected OpReadIncFeed(ControllerImpl c, IncidentCache ic) {
 		super(PriorityLevel.DATA_30_SEC, c);
 		cache = ic;
-		link = cl;
 	}
 
 	/** Create the first phase of the operation */
@@ -54,7 +50,7 @@ public class OpReadIncFeed extends OpController<IncFeedProperty> {
 		protected Phase<IncFeedProperty> poll(
 			CommMessage<IncFeedProperty> mess) throws IOException
 		{
-			mess.add(new IncFeedProperty(cache, link));
+			mess.add(new IncFeedProperty(cache));
 			mess.queryProps();
 			return null;
 		}
