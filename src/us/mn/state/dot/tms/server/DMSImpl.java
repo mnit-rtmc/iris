@@ -786,16 +786,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Set the scheduled DMS action message */
 	public void setActionMsg(DmsActionMsg amsg) {
 		SignMessage sm = (amsg != null) ? createMsgSched(amsg) : null;
-		setMsgSchedNotify(sm);
 		setPrices(amsg);
-		try {
-			SignMessage usm = getMsgValidated();
-			if (isMsgScheduled(usm))
-				sendMsg(usm);
-		}
-		catch (TMSException e) {
-			logError("sendMsg: " + e.getMessage());
-		}
+		if (setMsgSchedNotify(sm))
+			updateSchedMsg();
 	}
 
 	/** Set the scheduled sign message */
@@ -810,11 +803,26 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Set the scheduled sign message.
-	 * @param sm New scheduled sign message */
-	private void setMsgSchedNotify(SignMessage sm) {
+	 * @param sm New scheduled sign message.
+	 * @return true If scheduled message changed. */
+	private boolean setMsgSchedNotify(SignMessage sm) {
 		if (!SignMessageHelper.isEquivalent(msg_sched, sm)) {
 			setMsgSched(sm);
 			notifyAttribute("msgSched");
+			return true;
+		} else
+			return false;
+	}
+
+	/** Update scheduled message */
+	private void updateSchedMsg() {
+		try {
+			SignMessage usm = getMsgValidated();
+			if (isMsgScheduled(usm))
+				sendMsg(usm);
+		}
+		catch (TMSException e) {
+			logError("updateSchedMsg: " + e.getMessage());
 		}
 	}
 
@@ -1276,10 +1284,10 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (isPeriodLong())
 			sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 		sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
+		updateSchedMsg();
 		LCSArrayImpl la = lookupLCSArray();
 		if (la != null)
 			la.periodicPoll();
-		// FIXME: perform DMS actions with feed tags now
 	}
 
 	/** Lookup LCS array if this DMS is lane one */
