@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2018       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,20 +23,36 @@ import javax.swing.JPanel;
  * initializing a duplicate form.
  *
  * @author Douglas Lau
+ * @author John L. Stanley - SRF Consulting
  */
 abstract public class AbstractForm extends JPanel {
 
 	/** Form title */
 	private final String title;
 
+	/** Form resizable flag */
+	private final boolean resizable;
+
 	/** Create a new abstract form */
 	protected AbstractForm(String t) {
 		title = t;
+		resizable = false;
+	}
+
+	/** Create a new abstract form */
+	protected AbstractForm(String t, boolean resiz) {
+		title = t;
+		resizable = resiz;
 	}
 
 	/** Get the title of the form */
 	public String getTitle() {
 		return title;
+	}
+
+	/** Get the resizable flag for the form */
+	public boolean isResizable() {
+		return resizable;
 	}
 
 	/** Initialize the form */
