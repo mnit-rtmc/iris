@@ -217,7 +217,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		sign_config = sc;
 		default_font = df;
 		msg_sched = ms;
-		// FIXME: msg_current should be NOT NULL
 		msg_current = (mc != null) ? mc : createMsgBlank();
 		deployTime = stampMillis(dt);
 		initTransients();
