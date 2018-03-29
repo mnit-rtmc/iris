@@ -62,10 +62,17 @@ public class IncidentCache {
 	public void put(ParsedIncident pi) {
 		if (pi.isValid()) {
 			nxt.add(pi.id);
-			if (updated && (lookupIncident(pi.id) == null))
+			if (shouldCreate(pi.id))
 				createIncident(pi);
 		} else if (inc_log.isOpen())
 			inc_log.log("Invalid incident: " + pi);
+	}
+
+	/** Check if we should create the incident */
+	private boolean shouldCreate(String id) {
+		return updated
+		    && (!incidents.contains(id))
+		    && (lookupIncident(id) == null);
 	}
 
 	/** Lookup an incident by ID */
