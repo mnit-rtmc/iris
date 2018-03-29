@@ -400,7 +400,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			}
 			sign_config = sc;
 			notifyAttribute("signConfig");
-			// FIXME: update bitmap graphics plus stuck on/off
+			// FIXME: update stuck on/off
 			updateStyles();
 		}
 	}
@@ -806,7 +806,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param sm New scheduled sign message.
 	 * @return true If scheduled message changed. */
 	private boolean setMsgSchedNotify(SignMessage sm) {
-		if (!SignMessageHelper.isEquivalent(msg_sched, sm)) {
+		if (!objectEquals(msg_sched, sm)) {
 			setMsgSched(sm);
 			notifyAttribute("msgSched");
 			return true;
