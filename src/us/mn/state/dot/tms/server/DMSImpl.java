@@ -1270,11 +1270,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			((SignMessageImpl) msg).writeXml(w, this);
 	}
 
-	/** Check if the sign is periodically queriable */
-	public boolean isPeriodicallyQueriable() {
-		return isConnected() || !hasModemCommLink();
-	}
-
 	/** Get the DMS poller */
 	private DMSPoller getDMSPoller() {
 		DevicePoller dp = getPoller();

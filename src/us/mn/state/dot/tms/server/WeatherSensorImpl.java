@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2016  Minnesota Department of Transportation
+ * Copyright (C) 2010-2018  Minnesota Department of Transportation
  * Copyright (C) 2017       Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -635,11 +635,6 @@ public class WeatherSensorImpl extends DeviceImpl implements WeatherSensor {
 	public void purge(long before) {
 		cache.purge(before);
 		pt_cache.purge(before);
-	}
-
-	/** Check if the sign is periodically queriable */
-	public boolean isPeriodicallyQueriable() {
-		return isConnected() || !hasModemCommLink();
 	}
 
 	/** Get a string representation of the object */

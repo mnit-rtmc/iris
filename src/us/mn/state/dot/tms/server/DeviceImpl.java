@@ -350,6 +350,11 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		return (c != null) && c.isConnected();
 	}
 
+	/** Check if dial-up is required to communicate */
+	public boolean isDialUpRequired() {
+		return hasModemCommLink() && !isConnected();
+	}
+
 	/** Request a device operation */
 	@Override
 	public void setDeviceRequest(int r) {
