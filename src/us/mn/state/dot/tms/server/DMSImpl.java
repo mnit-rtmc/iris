@@ -765,11 +765,33 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		msg_user = sm;
 	}
 
-	/** Set the user selected sign message.  Called by SONAR. */
+	/** Set the user selected sign message */
 	public void doSetMsgUser(SignMessage sm) throws TMSException {
 		SignMessageHelper.validate(sm, this);
 		setMsgUser(sm);
+		setDeployTime();
 		sendMsg(getMsgValidated());
+	}
+
+	/** Check if user selected sign message has expired. */
+	private void checkMsgUserExpiration() {
+		SignMessage user = msg_user;
+		if (SignMessageHelper.isOperatorExpiring(user)) {
+			long now = TimeSteward.currentTimeMillis();
+			int mn = (int) ((now - deployTime) / 1000 / 60);
+			if (mn > user.getDuration())
+				blankMsgUser();
+		}
+	}
+
+	/** Blank the user selected sign message */
+	private void blankMsgUser() {
+		try {
+			doSetMsgUser(createMsgBlank());
+		}
+		catch (TMSException e) {
+			logError("blankMsgUser: " + e.getMessage());
+		}
 	}
 
 	/** Scheduled sign message */
@@ -869,7 +891,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (sm != msg_current) {
 			logMsg(sm);
 			setMsgCurrent(sm);
-			setDeployTime();
 			notifyAttribute("msgCurrent");
 			updateStyles();
 		}
@@ -951,8 +972,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			user.getMsgPriority());
 		int src = user.getSource() | sched.getSource();
 		String o = user.getOwner();
-		Integer d = user.getDuration();
-		return createMsg(ms, be, false, mp, src, o, d);
+		// No duration -- checkMsgUserExpiration will expire if needed
+		return createMsg(ms, be, false, mp, src, o, null);
 	}
 
 	/** Check if a sign message is valid */
@@ -1001,23 +1022,19 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		       sm == msg_next;
 	}
 
-	/** Message deploy time */
+	/** User message deploy time */
 	private long deployTime;
 
-	/** Set the message deploy time */
-	private void setDeployTime() {
+	/** Set the user message deploy time */
+	private void setDeployTime() throws TMSException {
 		long dt = TimeSteward.currentTimeMillis();
 		deployTime = dt;
-		try {
-			store.update(this, "deploy_time", asTimestamp(dt));
-		}
-		catch (TMSException e) {
-			logError("deploy_time: " + e.getMessage());
-		}
+		store.update(this, "deploy_time", asTimestamp(dt));
 		notifyAttribute("deployTime");
 	}
 
-	/** Get the message deploy time.
+	/** Get the (user) message deploy time.
+	 * This only applies to the most recent user message.
 	 * @return Time message was deployed (ms since epoch).
 	 * @see java.lang.System.currentTimeMillis */
 	@Override
@@ -1278,6 +1295,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (isPeriodLong())
 			sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 		sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
+		checkMsgUserExpiration();
 		updateSchedMsg();
 		LCSArrayImpl la = lookupLCSArray();
 		if (la != null)
