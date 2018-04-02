@@ -277,9 +277,9 @@ public class SignMessageHelper extends BaseHelper {
 		      !SignMsgSource.operator.checkBit(src);
 	}
 
-	/** Check if a message is scheduled and has duration.
+	/** Check if a message is scheduled and expires.
 	 * @param sm The sign message. */
-	static public boolean isScheduledWithDuration(SignMessage sm) {
+	static public boolean isScheduledExpiring(SignMessage sm) {
 		int src = sm.getSource();
 		return SignMsgSource.schedule.checkBit(src) &&
 		      (sm.getDuration() != null) &&

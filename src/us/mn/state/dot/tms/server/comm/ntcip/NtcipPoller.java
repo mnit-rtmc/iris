@@ -128,7 +128,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 	@Override
 	public void sendMessage(DMSImpl dms, SignMessage sm) {
 		if (dms.getMsgCurrent() == sm) {
-			if (SignMessageHelper.isScheduledWithDuration(sm))
+			if (SignMessageHelper.isScheduledExpiring(sm))
 				addOp(new OpUpdateDMSDuration(dms, sm));
 		} else
 			addOp(new OpSendDMSMessage(dms, sm));
