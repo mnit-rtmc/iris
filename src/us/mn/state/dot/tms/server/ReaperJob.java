@@ -154,13 +154,18 @@ public class ReaperJob extends Job {
 
 	/** Check if an incident is reapable */
 	private boolean isReapable(IncidentImpl inc) {
-		return inc.getCleared() && isPastClearThreshold(inc);
+		return inc.getCleared() &&
+		    ((!inc.getConfirmed()) || isPastReapTime(inc));
 	}
 
-	/** Check if an incident is past the clear threshold */
-	private boolean isPastClearThreshold(IncidentImpl inc) {
-		return inc.getClearTime() + getIncidentClearThreshold() <
-			    TimeSteward.currentTimeMillis();
+	/** Check if it is past the time an incident may be reaped */
+	private boolean isPastReapTime(IncidentImpl inc) {
+		return getReapTime(inc) < TimeSteward.currentTimeMillis();
+	}
+
+	/** Get the time when incident may be reaped */
+	private long getReapTime(IncidentImpl inc) {
+		return inc.getClearTime() + getIncidentClearThreshold();
 	}
 
 	/** Reap an incident */
