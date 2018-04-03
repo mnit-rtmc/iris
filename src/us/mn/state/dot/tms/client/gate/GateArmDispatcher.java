@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2017  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -363,9 +363,9 @@ public class GateArmDispatcher extends IPanel
 			location_lbl.setText(GeoLocHelper.getDescription(
 				ga.getGeoLoc()));
 		}
-		if (null == a || a.equals("camera"))
+		if ("camera".equals(a))
 			updateCameraStream(ga);
-		if (null == a || a.equals("approach"))
+		if ("approach".equals(a))
 			updateApproachStream(ga);
 		if (null == a || a.equals("dms"))
 			dms_watcher.setProxy(ga.getDms());
