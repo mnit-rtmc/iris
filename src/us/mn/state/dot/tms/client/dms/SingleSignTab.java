@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  *
  * This program is free software; you can redistribute it and/or modify
@@ -89,6 +89,9 @@ public class SingleSignTab extends IPanel {
 
 	/** Displays the current operation of the DMS */
 	private final JLabel operation_lbl = createValueLabel();
+
+	/** Displays the expiration time of the current message */
+	private final JLabel expiration_lbl = createValueLabel();
 
 	/** Client session */
 	private final Session session;
@@ -183,7 +186,9 @@ public class SingleSignTab extends IPanel {
 		add("device.status");
 		add(status_lbl, Stretch.LAST);
 		add("device.operation");
-		add(operation_lbl, Stretch.LAST);
+		add(operation_lbl, Stretch.TRIPLE);
+		add("dms.expiration");
+		add(expiration_lbl, Stretch.LAST);
 		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
 			aws_control_chk.setHorizontalTextPosition(
 				SwingConstants.LEFT);
@@ -268,6 +273,7 @@ public class SingleSignTab extends IPanel {
 		status_lbl.setForeground(null);
 		status_lbl.setBackground(null);
 		operation_lbl.setText("");
+		expiration_lbl.setText("-");
 	}
 
 	/** Set the camera preset action */
@@ -367,6 +373,7 @@ public class SingleSignTab extends IPanel {
 		dispatcher.setComposedMulti(DMSHelper.getMultiString(dms),
 			false);
 		adjusting--;
+		expiration_lbl.setText(DMSHelper.getExpiration(dms));
 	}
 
 	/** Update the preview panel */

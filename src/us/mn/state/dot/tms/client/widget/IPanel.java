@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,9 @@ public class IPanel extends JPanel {
 		WIDE(GridBagConstraints.HORIZONTAL, 1, 1,
 			GridBagConstraints.WEST, 0, 0),
 		DOUBLE(GridBagConstraints.HORIZONTAL, 2, 1,
-				GridBagConstraints.WEST, 0.1f, 0),
+			GridBagConstraints.WEST, 0.1f, 0),
+		TRIPLE(GridBagConstraints.HORIZONTAL, 3, 1,
+			GridBagConstraints.WEST, 0.1f, 0),
 		END(GridBagConstraints.HORIZONTAL, GridBagConstraints.REMAINDER,
 			1, GridBagConstraints.WEST, 0, 0),
 		CENTER(GridBagConstraints.NONE, GridBagConstraints.REMAINDER, 1,

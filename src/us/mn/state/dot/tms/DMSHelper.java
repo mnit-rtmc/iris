@@ -15,6 +15,8 @@
  */
 package us.mn.state.dot.tms;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Iterator;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
@@ -312,5 +314,17 @@ public class DMSHelper extends BaseHelper {
 	static public String getOwner(DMS dms) {
 		SignMessage sm = dms.getMsgCurrent();
 		return (sm != null) ? sm.getOwner() : null;
+	}
+
+	/** Get the expiration time of the current message */
+	static public String getExpiration(DMS dms) {
+		SignMessage sm = dms.getMsgCurrent();
+		if (SignMessageHelper.isOperatorExpiring(sm)) {
+			SimpleDateFormat tf = new SimpleDateFormat("HH:mm");
+			long d = sm.getDuration() * 60 * 1000;
+			long dt = dms.getDeployTime() + d;
+			return tf.format(new Date(dt));
+		} else
+			return "-";
 	}
 }

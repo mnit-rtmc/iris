@@ -289,7 +289,8 @@ public class SignMessageHelper extends BaseHelper {
 	/** Check if a message is operator created and expires.
 	 * @param sm The sign message. */
 	static public boolean isOperatorExpiring(SignMessage sm) {
-		return (sm.getDuration() != null)
+		return (!isBlank(sm))
+		    && (sm.getDuration() != null)
 		    && SignMsgSource.operator.checkBit(sm.getSource());
 	}
 }
