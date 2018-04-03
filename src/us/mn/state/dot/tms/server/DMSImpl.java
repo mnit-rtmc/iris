@@ -779,7 +779,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (SignMessageHelper.isOperatorExpiring(user)) {
 			long now = TimeSteward.currentTimeMillis();
 			int mn = (int) ((now - deployTime) / 1000 / 60);
-			if (mn > user.getDuration())
+			if (mn >= user.getDuration())
 				blankMsgUser();
 		}
 	}
