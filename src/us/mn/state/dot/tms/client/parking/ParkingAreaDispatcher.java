@@ -247,11 +247,11 @@ public class ParkingAreaDispatcher extends IPanel
 			name_lbl.setText(pa.getName());
 		if (null == a || a.equals("facilityName"))
 			facility_lbl.setText(pa.getFacilityName());
-		if (null == a || a.equals("preset1"))
+		if ("preset1".equals(a))
 			updateCameraStream1(pa);
-		if (null == a || a.equals("preset2"))
+		if ("preset2".equals(a))
 			updateCameraStream2(pa);
-		if (null == a || a.equals("preset3"))
+		if ("preset3".equals(a))
 			updateCameraStream3(pa);
 		if (null == a || a.equals("trueAvailable")) {
 			StringBuilder sb = new StringBuilder();
