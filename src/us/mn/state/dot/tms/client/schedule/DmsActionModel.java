@@ -64,6 +64,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 		DmsMsgPriority.SCHED_B,
 		DmsMsgPriority.SCHED_C,
 		DmsMsgPriority.SCHED_D,
+		DmsMsgPriority.GATE_ARM,
 		DmsMsgPriority.SCHED_HIGH
 	};
 
