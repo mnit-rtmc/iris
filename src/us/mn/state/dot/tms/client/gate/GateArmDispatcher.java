@@ -23,14 +23,12 @@ import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
@@ -40,14 +38,11 @@ import us.mn.state.dot.tms.GateArmInterlock;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.StreamPanel;
 import us.mn.state.dot.tms.client.camera.VideoRequest;
 import static us.mn.state.dot.tms.client.camera.VideoRequest.Size.MEDIUM;
 import static us.mn.state.dot.tms.client.camera.VideoRequest.Size.THUMBNAIL;
-import us.mn.state.dot.tms.client.dms.DMSPanelPager;
-import us.mn.state.dot.tms.client.dms.SignPixelPanel;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionListener;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
@@ -65,36 +60,23 @@ import us.mn.state.dot.tms.utils.I18N;
 public class GateArmDispatcher extends IPanel
 	implements ProxyView<GateArmArray>
 {
-	/** Get the filter color for a DMS */
-	static private Color filterColor(DMS dms) {
-		return (dms != null) ? SignPixelPanel.filterColor(dms) : null;
-	}
-
 	/** SONAR session */
 	private final Session session;
 
 	/** Selection model */
 	private final ProxySelectionModel<GateArmArray> sel_mdl;
 
-	/** DMS Proxy view */
-	private final ProxyView<DMS> dms_view = new ProxyView<DMS>() {
-		public void enumerationComplete() { }
-		public void update(DMS d, String a) {
-			if (null == a ||
-			    "styles".equals(a) ||
-			    "msgCurrent".equals(a))
-				updateDms(d);
-		}
-		public void clear() {
-			clearDms();
-		}
-	};
-
 	/** Name label */
 	private final JLabel name_lbl = createValueLabel();
 
 	/** Location label */
 	private final JLabel location_lbl = createValueLabel();
+
+	/** First warning DMS */
+	private final WarningDms warn_dms_1;
+
+	/** Second warning DMS */
+	private final WarningDms warn_dms_2;
 
 	/** Main stream panel */
 	private final StreamPanel stream_pnl;
@@ -116,13 +98,6 @@ public class GateArmDispatcher extends IPanel
 			}
 		}
 	};
-
-	/** Sign pixel panel */
-	private final SignPixelPanel current_pnl = new SignPixelPanel(80, 132,
-		true);
-
-	/** DMS panel pager */
-	private DMSPanelPager dms_pager;
 
 	/** Gate arm labels */
 	private final JLabel[] gate_lbl = new JLabel[MAX_ARMS];
@@ -183,21 +158,14 @@ public class GateArmDispatcher extends IPanel
 		}
 	};
 
-	/** DMS Proxy watcher */
-	private final ProxyWatcher<DMS> dms_watcher;
-
-	/** Currently selected DMS */
-	private DMS dms;
-
 	/** Create a new gate arm dispatcher */
 	public GateArmDispatcher(Session s, GateArmArrayManager manager) {
 		session = s;
 		TypeCache<GateArmArray> cache =
 			s.getSonarState().getGateArmArrays();
 		watcher = new ProxyWatcher<GateArmArray>(cache, this, true);
-		TypeCache<DMS> dms_cache =
-			s.getSonarState().getDmsCache().getDMSs();
-		dms_watcher = new ProxyWatcher<DMS>(dms_cache, dms_view, false);
+		warn_dms_1 = new WarningDms(session);
+		warn_dms_2 = new WarningDms(session);
 		sel_mdl = manager.getSelectionModel();
 		stream_pnl = createStreamPanel(MEDIUM);
 		thumb_pnl = createStreamPanel(THUMBNAIL);
@@ -257,14 +225,9 @@ public class GateArmDispatcher extends IPanel
 				selectStream(!swap_streams);
 			}
 		});
-		current_pnl.addMouseListener(new MouseAdapter() {
-			@Override
-			public void mouseClicked(MouseEvent e) {
-				selectDms();
-			}
-		});
 		watcher.initialize();
-		dms_watcher.initialize();
+		warn_dms_1.initialize();
+		warn_dms_2.initialize();
 		clear();
 		sel_mdl.addProxySelectionListener(sel_listener);
 	}
@@ -284,21 +247,13 @@ public class GateArmDispatcher extends IPanel
 		session.getCameraManager().getSelectionModel().setSelected(c);
 	}
 
-	/** Select the DMS */
-	private void selectDms() {
-		DMS d = dms;
-		if (d != null) {
-			dms_watcher.setProxy(null);
-			session.getDMSManager().getSelectionModel().
-				setSelected(d);
-		}
-	}
-
 	/** Create streams box */
 	private Box createStreamsBox() {
 		Box vb = Box.createVerticalBox();
 		vb.add(Box.createVerticalGlue());
-		vb.add(current_pnl);
+		vb.add(warn_dms_1.pix_pnl);
+		vb.add(Box.createVerticalStrut(UI.hgap));
+		vb.add(warn_dms_2.pix_pnl);
 		vb.add(Box.createVerticalStrut(UI.hgap));
 		vb.add(thumb_pnl);
 		vb.add(Box.createVerticalStrut(UI.hgap));
@@ -332,9 +287,9 @@ public class GateArmDispatcher extends IPanel
 	/** Dispose of the dispatcher */
 	@Override
 	public void dispose() {
-		dms_watcher.dispose();
+		warn_dms_1.dispose();
+		warn_dms_2.dispose();
 		watcher.dispose();
-		setPager(null);
 		sel_mdl.removeProxySelectionListener(sel_listener);
 		stream_pnl.dispose();
 		thumb_pnl.dispose();
@@ -414,42 +369,15 @@ public class GateArmDispatcher extends IPanel
 	/** Update the action plan */
 	private void updateActionPlan(GateArmArray ga) {
 		ActionPlan ap = ga.getActionPlan();
-		DMS dms = (ap != null) ? findDMS(ap) : null;
-		dms_watcher.setProxy(dms);
-	}
-
-	/** Find the first DMS associated with an action plan */
-	private DMS findDMS(ActionPlan ap) {
-		Iterator<DMS> signs = DmsActionHelper.findSigns(ap);
-		return signs.hasNext() ? signs.next() : null;
-	}
-
-	/** Update the DMS */
-	private void updateDms(DMS d) {
-		dms = d;
-		current_pnl.setFilterColor(filterColor(d));
-		RasterGraphic[] rg = DMSHelper.getRasters(d);
-		if (rg != null) {
-			String ms = DMSHelper.getMultiString(d);
-			current_pnl.setDimensions(d);
-			setPager(new DMSPanelPager(current_pnl, rg, ms));
-		} else
-			clearDms();
-	}
-
-	/** Clear the DMS */
-	private void clearDms() {
-		setPager(null);
-		current_pnl.setFilterColor(null);
-		current_pnl.clear();
-	}
-
-	/** Set the DMS panel pager */
-	private void setPager(DMSPanelPager p) {
-		DMSPanelPager op = dms_pager;
-		if (op != null)
-			op.dispose();
-		dms_pager = p;
+		Iterator<DMS> it = (ap != null)
+		                 ? DmsActionHelper.findSigns(ap)
+		                 : null;
+		warn_dms_1.setSelected((it != null && it.hasNext())
+		                      ? it.next()
+		                      : null);
+		warn_dms_2.setSelected((it != null && it.hasNext())
+		                      ? it.next()
+		                      : null);
 	}
 
 	/** Update the interlock label */
@@ -561,7 +489,8 @@ public class GateArmDispatcher extends IPanel
 		interlock_lbl.setForeground(null);
 		interlock_lbl.setBackground(null);
 		clearArms();
-		dms_watcher.setProxy(null);
+		warn_dms_1.setSelected(null);
+		warn_dms_2.setSelected(null);
 	}
 
 	/** Clear gate arms */
