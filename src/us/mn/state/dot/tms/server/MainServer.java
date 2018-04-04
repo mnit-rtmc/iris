@@ -63,7 +63,7 @@ public class MainServer {
 	static private final String STD_ERR = LOG_FILE_DIR + "iris.stderr";
 
 	/** Timer thread for repeating jobs */
-	static private final Scheduler TIMER = new Scheduler("timer");
+	static public final Scheduler TIMER = new Scheduler("timer");
 
 	/** Flush thread for disk writing jobs */
 	static public final Scheduler FLUSH = new Scheduler("flush");

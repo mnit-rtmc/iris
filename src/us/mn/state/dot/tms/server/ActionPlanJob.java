@@ -34,7 +34,7 @@ public class ActionPlanJob extends Job {
 	static private final int OFFSET_SECS = 29;
 
 	/** Schedule debug log */
-	static private final DebugLog SCHED_LOG = new DebugLog("sched");
+	static public final DebugLog SCHED_LOG = new DebugLog("sched");
 
 	/** TIMER Scheduler */
 	private final Scheduler timer;

@@ -35,8 +35,10 @@ import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.ActionPlanJob.SCHED_LOG;
 import static us.mn.state.dot.tms.server.GateArmSystem.checkEnabled;
 import static us.mn.state.dot.tms.server.GateArmSystem.sendEmailAlert;
+import static us.mn.state.dot.tms.server.MainServer.TIMER;
 
 /**
  * A Gate Arm array is a group of gate arms at a single ramp location.
@@ -482,18 +484,23 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	private void updatePlanPhase(ActionPlanImpl ap) throws TMSException {
 		if (isMsgOpen()) {
 			PlanPhase op = open_phase;
-			if (op != null)
-				ap.setPhaseNotify(op);
+			if (op != null && ap.setPhaseNotify(op))
+				updateDmsActions();
 		} else {
 			PlanPhase cp = closed_phase;
-			if (cp != null)
-				ap.setPhaseNotify(cp);
+			if (cp != null && ap.setPhaseNotify(cp))
+				updateDmsActions();
 		}
 	}
 
 	/** Test if message should be open */
 	private boolean isMsgOpen() {
 		return isActive() && arm_state == GateArmState.OPEN;
+	}
+
+	/** Update scheduled DMS action */
+	private void updateDmsActions() {
+		TIMER.addJob(new DmsActionJob(SCHED_LOG));
 	}
 
 	/** Update the arm state */
