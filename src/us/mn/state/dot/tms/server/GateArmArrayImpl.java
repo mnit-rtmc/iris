@@ -15,27 +15,25 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.DMS;
-import static us.mn.state.dot.tms.DmsMsgPriority.GATE_ARM;
 import us.mn.state.dot.tms.GateArmArray;
 import us.mn.state.dot.tms.GateArmArrayHelper;
 import us.mn.state.dot.tms.GateArmState;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.ItemStyle;
-import us.mn.state.dot.tms.QuickMessage;
+import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.Road;
-import us.mn.state.dot.tms.SignMessage;
-import static us.mn.state.dot.tms.SignMsgSource.gate_arm;
 import us.mn.state.dot.tms.TMSException;
 import static us.mn.state.dot.tms.server.GateArmSystem.checkEnabled;
 import static us.mn.state.dot.tms.server.GateArmSystem.sendEmailAlert;
@@ -56,23 +54,12 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GateArmArrayImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"prereq, camera, approach, dms, open_msg, closed_msg " +
-			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
+			"prereq, camera, approach, action_plan, open_phase, " +
+			"closed_phase FROM iris." + SONAR_TYPE  + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new GateArmArrayImpl(
-					row.getString(1),	// name
-					row.getString(2),	// geo_loc
-					row.getString(3),	// controller
-					row.getInt(4),		// pin
-					row.getString(5),	// notes
-					row.getString(6),	// prereq
-					row.getString(7),	// camera
-					row.getString(8),	// approach
-					row.getString(9),	// dms
-					row.getString(10),	// open_msg
-					row.getString(11)	// closed_msg
-				));
+				namespace.addObject(new GateArmArrayImpl(row));
 			}
 		});
 	}
@@ -89,9 +76,9 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		map.put("prereq", prereq);
 		map.put("camera", camera);
 		map.put("approach", approach);
-		map.put("dms", dms);
-		map.put("open_msg", open_msg);
-		map.put("closed_msg", closed_msg);
+		map.put("action_plan", action_plan);
+		map.put("open_phase", open_phase);
+		map.put("closed_phase", closed_phase);
 		return map;
 	}
 
@@ -117,29 +104,44 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	}
 
 	/** Create a gate arm array */
+	private GateArmArrayImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),    // name
+		     row.getString(2),    // geo_loc
+		     row.getString(3),    // controller
+		     row.getInt(4),       // pin
+		     row.getString(5),    // notes
+		     row.getString(6),    // prereq
+		     row.getString(7),    // camera
+		     row.getString(8),    // approach
+		     row.getString(9),    // action_plan
+		     row.getString(10),   // open_phase
+		     row.getString(11));  // closed_phase
+	}
+
+	/** Create a gate arm array */
+	private GateArmArrayImpl(String n, String loc, String c, int p,
+		String nt, String pr, String cam, String ap, String pln,
+		String op, String cp)
+	{
+		this(n, lookupGeoLoc(loc), lookupController(c), p, nt, pr,
+		     lookupCamera(cam), lookupCamera(ap), lookupActionPlan(pln),
+		     lookupPlanPhase(op), lookupPlanPhase(cp));
+	}
+
+	/** Create a gate arm array */
 	private GateArmArrayImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, String pr, Camera cam, Camera ap, DMS d,
-		QuickMessage om, QuickMessage cm)
+		int p, String nt, String pr, Camera cam, Camera ap,
+		ActionPlanImpl pln, PlanPhaseImpl op, PlanPhaseImpl cp)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
 		prereq = pr;
 		camera = cam;
 		approach = ap;
-		dms = d;
-		open_msg = om;
-		closed_msg = cm;
+		action_plan = pln;
+		open_phase = op;
+		closed_phase = cp;
 		initTransients();
-	}
-
-	/** Create a gate arm array */
-	private GateArmArrayImpl(String n, String loc, String c, int p,
-		String nt, String pr, String cam, String ap, String d,
-		String om, String cm)
-	{
-		this(n, lookupGeoLoc(loc), lookupController(c), p, nt, pr,
-		     lookupCamera(cam), lookupCamera(ap), lookupDMS(d),
-		     lookupQuickMessage(om), lookupQuickMessage(cm));
 	}
 
 	/** Destroy an object */
@@ -248,76 +250,79 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 		return approach;
 	}
 
-	/** DMS for warning */
-	private DMS dms;
+	/** Action plan */
+	private ActionPlanImpl action_plan;
 
-	/** Set the DMS for warning */
+	/** Set the action plan */
 	@Override
-	public void setDms(DMS d) {
-		GateArmSystem.disable(name, "dms");
-		dms = d;
+	public void setActionPlan(ActionPlan ap) {
+		GateArmSystem.disable(name, "actionPlan");
+		if (ap instanceof ActionPlanImpl)
+			action_plan = (ActionPlanImpl) ap;
 	}
 
-	/** Set the DMS for warning */
-	public void doSetDms(DMS d) throws TMSException {
-		if (d != dms) {
-			store.update(this, "dms", d);
-			setDms(d);
+	/** Set the action plan */
+	public void doSetActionPlan(ActionPlan ap) throws TMSException {
+		if (ap != action_plan) {
+			store.update(this, "action_plan", ap);
+			setActionPlan(ap);
 		}
 	}
 
-	/** Get the DMS for warning */
+	/** Get the action plan */
 	@Override
-	public DMS getDms() {
-		return dms;
+	public ActionPlan getActionPlan() {
+		return action_plan;
 	}
 
-	/** Quick message to send for OPEN state */
-	private QuickMessage open_msg;
+	/** Action plan phase for OPEN state */
+	private PlanPhaseImpl open_phase;
 
-	/** Set the OPEN quick message */
+	/** Set the action plan phase for OPEN state */
 	@Override
-	public void setOpenMsg(QuickMessage om) {
-		GateArmSystem.disable(name, "openMsg");
-		open_msg = om;
+	public void setOpenPhase(PlanPhase p) {
+		GateArmSystem.disable(name, "openPhase");
+		if (p instanceof PlanPhaseImpl)
+			open_phase = (PlanPhaseImpl) p;
 	}
 
-	/** Set the OPEN quick message */
-	public void doSetOpenMsg(QuickMessage om) throws TMSException {
-		if (om != open_msg) {
-			store.update(this, "open_msg", om);
-			setOpenMsg(om);
+	/** Set the action plan phase for OPEN state */
+	public void doSetOpenPhase(PlanPhase p) throws TMSException {
+		if (p != open_phase) {
+			store.update(this, "open_phase", p);
+			setOpenPhase(p);
 		}
 	}
 
-	/** Get the OPEN quick message */
+	/** Get the action plan phase for OPEN state */
 	@Override
-	public QuickMessage getOpenMsg() {
-		return open_msg;
+	public PlanPhase getOpenPhase() {
+		return open_phase;
 	}
 
-	/** Quick message to send for CLOSED state */
-	private QuickMessage closed_msg;
+	/** Action plan phase for CLOSED state */
+	private PlanPhaseImpl closed_phase;
 
-	/** Set the CLOSED quick message */
+	/** Set the action plan phase for CLOSED state */
 	@Override
-	public void setClosedMsg(QuickMessage cm) {
-		GateArmSystem.disable(name, "closedMsg");
-		closed_msg = cm;
+	public void setClosedPhase(PlanPhase p) {
+		GateArmSystem.disable(name, "closedPhase");
+		if (p instanceof PlanPhaseImpl)
+			closed_phase = (PlanPhaseImpl) p;
 	}
 
-	/** Set the CLOSED quick message */
-	public void doSetClosedMsg(QuickMessage cm) throws TMSException {
-		if (cm != closed_msg) {
-			store.update(this, "closed_msg", cm);
-			setClosedMsg(cm);
+	/** Set the action plan phase for CLOSED state */
+	public void doSetClosedPhase(PlanPhase p) throws TMSException {
+		if (p != closed_phase) {
+			store.update(this, "closed_phase", p);
+			setClosedPhase(p);
 		}
 	}
 
-	/** Get the CLOSED quick message */
+	/** Get the action plan phase for CLOSED state */
 	@Override
-	public QuickMessage getClosedMsg() {
-		return closed_msg;
+	public PlanPhase getClosedPhase() {
+		return closed_phase;
 	}
 
 	/** Array of all gate arms */
@@ -439,7 +444,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 	{
 		if (rs == GateArmState.WARN_CLOSE) {
 			setArmState(rs);
-			updateDmsMsg();
+			updatePlanPhase();
 			return;
 		}
 		for (int i = 0; i < MAX_ARMS; i++) {
@@ -460,41 +465,29 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			sendEmailAlert("FAULT: " + name);
 	}
 
-	/** Update the message displayed on the DMS */
-	private void updateDmsMsg() {
-		DMS d = dms;
-		if (d instanceof DMSImpl)
-			updateDmsMsg((DMSImpl) d);
-	}
-
-	/** Update the message on the specified DMS */
-	private void updateDmsMsg(DMSImpl d) {
-		QuickMessage qm = isMsgOpen() ? getOpenMsg() : getClosedMsg();
-		if (qm != null)
-			updateDmsMsg(d, qm.getMulti());
-	}
-
-	/** Update the message on the specified DMS */
-	private void updateDmsMsg(DMSImpl d, String ms) {
-		if (!d.getMsgCurrent().getMulti().equals(ms)) {
-			SignMessage sm = d.createMsg(ms, false, false, GATE_ARM,
-				gate_arm.bit(), null, null);
-			if (sm != null)
-				updateDmsMsg(d, sm);
-			else
-				logError("Could not create msg: " + ms);
+	/** Update the action plan phase */
+	private void updatePlanPhase() {
+		ActionPlanImpl ap = action_plan;
+		if (ap != null) {
+			try {
+				updatePlanPhase(ap);
+			}
+			catch (TMSException e) {
+				logError("updatePlanPhase: " + e.getMessage());
+			}
 		}
 	}
 
-	/** Update the message on the specified DMS */
-	private void updateDmsMsg(DMSImpl d, SignMessage sm) {
-		if (sm != d.getMsgCurrent()) {
-			try {
-				d.doSetMsgUser(sm);
-			}
-			catch (TMSException e) {
-				logError(e.getMessage());
-			}
+	/** Update the action plan phase */
+	private void updatePlanPhase(ActionPlanImpl ap) throws TMSException {
+		if (isMsgOpen()) {
+			PlanPhase op = open_phase;
+			if (op != null)
+				ap.setPhaseNotify(op);
+		} else {
+			PlanPhase cp = closed_phase;
+			if (cp != null)
+				ap.setPhaseNotify(cp);
 		}
 	}
 
@@ -513,7 +506,7 @@ public class GateArmArrayImpl extends DeviceImpl implements GateArmArray {
 			setArmState(gas);
 		else
 			checkEnabled();
-		updateDmsMsg();
+		updatePlanPhase();
 	}
 
 	/** Get the aggregate arm state for all arms in the array */

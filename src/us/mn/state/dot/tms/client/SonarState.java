@@ -384,6 +384,14 @@ public class SonarState extends Client {
 		return action_plans;
 	}
 
+	/** Action plan proxy list model */
+	private final ProxyListModel<ActionPlan> plan_model;
+
+	/** Get the action plan list model */
+	public ProxyListModel<ActionPlan> getPlanModel() {
+		return plan_model;
+	}
+
 	/** Cache of time actions */
 	private final TypeCache<TimeAction> time_actions =
 		new TypeCache<TimeAction>(TimeAction.class, this);
@@ -470,6 +478,8 @@ public class SonarState extends Client {
 		day_model.initialize();
 		phase_model = new ProxyListModel<PlanPhase>(plan_phases);
 		phase_model.initialize();
+		plan_model = new ProxyListModel<ActionPlan>(action_plans);
+		plan_model.initialize();
 		beacon_model = new ProxyListModel<Beacon>(beacons);
 		beacon_model.initialize();
 		// FIXME: this is an ugly hack

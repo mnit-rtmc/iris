@@ -25,11 +25,13 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.sonar.client.TypeCache;
+import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
+import us.mn.state.dot.tms.DmsActionHelper;
 import us.mn.state.dot.tms.GateArm;
 import us.mn.state.dot.tms.GateArmArray;
 import static us.mn.state.dot.tms.GateArmArray.MAX_ARMS;
@@ -367,8 +369,8 @@ public class GateArmDispatcher extends IPanel
 			updateCameraStream(ga);
 		if ("approach".equals(a))
 			updateApproachStream(ga);
-		if (null == a || a.equals("dms"))
-			dms_watcher.setProxy(ga.getDms());
+		if (null == a || a.equals("actionPlan"))
+			updateActionPlan(ga);
 		if (null == a || a.equals("camera") || a.equals("approach"))
 			updateSwapButton(ga);
 		if (null == a || a.equals("styles")) {
@@ -407,6 +409,19 @@ public class GateArmDispatcher extends IPanel
 			stream_pnl.setCamera(c);
 		else
 			thumb_pnl.setCamera(c);
+	}
+
+	/** Update the action plan */
+	private void updateActionPlan(GateArmArray ga) {
+		ActionPlan ap = ga.getActionPlan();
+		DMS dms = (ap != null) ? findDMS(ap) : null;
+		dms_watcher.setProxy(dms);
+	}
+
+	/** Find the first DMS associated with an action plan */
+	private DMS findDMS(ActionPlan ap) {
+		Iterator<DMS> signs = DmsActionHelper.findSigns(ap);
+		return signs.hasNext() ? signs.next() : null;
 	}
 
 	/** Update the DMS */

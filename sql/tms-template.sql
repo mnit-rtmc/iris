@@ -412,13 +412,28 @@ CREATE TABLE iris.sign_config (
 	default_font VARCHAR(16) REFERENCES iris.font
 );
 
-
 CREATE TABLE iris.quick_message (
 	name VARCHAR(20) PRIMARY KEY,
 	sign_group VARCHAR(16) REFERENCES iris.sign_group,
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
 	prefix_page BOOLEAN NOT NULL,
 	multi VARCHAR(1024) NOT NULL
+);
+
+CREATE TABLE iris.plan_phase (
+	name VARCHAR(12) PRIMARY KEY,
+	hold_time INTEGER NOT NULL,
+	next_phase VARCHAR(12) REFERENCES iris.plan_phase
+);
+
+CREATE TABLE iris.action_plan (
+	name VARCHAR(16) PRIMARY KEY,
+	description VARCHAR(64) NOT NULL,
+	sync_actions BOOLEAN NOT NULL,
+	sticky BOOLEAN NOT NULL,
+	active BOOLEAN NOT NULL,
+	default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE TABLE iris.comm_protocol (
@@ -1590,55 +1605,77 @@ CREATE TABLE iris._gate_arm_array (
 	prereq VARCHAR(20) REFERENCES iris._gate_arm_array,
 	camera VARCHAR(20) REFERENCES iris._camera,
 	approach VARCHAR(20) REFERENCES iris._camera,
-	dms VARCHAR(20) REFERENCES iris._dms,
-	open_msg VARCHAR(20) REFERENCES iris.quick_message,
-	closed_msg VARCHAR(20) REFERENCES iris.quick_message
+	action_plan VARCHAR(16) REFERENCES iris.action_plan,
+	open_phase VARCHAR(12) REFERENCES iris.plan_phase,
+	closed_phase VARCHAR(12) REFERENCES iris.plan_phase
 );
 
 ALTER TABLE iris._gate_arm_array ADD CONSTRAINT _gate_arm_array_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
-CREATE VIEW iris.gate_arm_array AS SELECT
-	_gate_arm_array.name, geo_loc, controller, pin, notes, prereq, camera,
-	approach, dms, open_msg, closed_msg
+CREATE VIEW iris.gate_arm_array AS
+	SELECT _gate_arm_array.name, geo_loc, controller, pin, notes, prereq,
+	       camera, approach, action_plan, open_phase, closed_phase
 	FROM iris._gate_arm_array JOIN iris._device_io
 	ON _gate_arm_array.name = _device_io.name;
+
+CREATE FUNCTION iris.gate_arm_array_insert() RETURNS TRIGGER AS
+	$gate_arm_array_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._gate_arm_array (name, geo_loc, notes, prereq, camera,
+	                                  approach, action_plan, open_phase,
+	                                  closed_phase)
+	    VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.prereq, NEW.camera,
+	            NEW.approach, NEW.action_plan, NEW.open_phase,
+	            NEW.closed_phase);
+	RETURN NEW;
+END;
+$gate_arm_array_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gate_arm_array_insert_trig
+    INSTEAD OF INSERT ON iris.gate_arm_array
+    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_array_insert();
 
 CREATE FUNCTION iris.gate_arm_array_update() RETURNS TRIGGER AS
 	$gate_arm_array_update$
 BEGIN
-    IF TG_OP = 'INSERT' THEN
-        INSERT INTO iris._device_io (name, controller, pin)
-            VALUES (NEW.name, NEW.controller, NEW.pin);
-        INSERT INTO iris._gate_arm_array (name, geo_loc, notes, prereq, camera,
-                                          approach, dms, open_msg, closed_msg)
-            VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.prereq, NEW.camera,
-                    NEW.approach, NEW.dms, NEW.open_msg, NEW.closed_msg);
-        RETURN NEW;
-    ELSIF TG_OP = 'UPDATE' THEN
 	UPDATE iris._device_io SET controller = NEW.controller, pin = NEW.pin
 	WHERE name = OLD.name;
-        UPDATE iris._gate_arm_array SET geo_loc = NEW.geo_loc,
-            notes = NEW.notes, prereq = NEW.prereq, camera = NEW.camera,
-            approach = NEW.approach, dms = NEW.dms, open_msg = NEW.open_msg,
-            closed_msg = NEW.closed_msg
+	UPDATE iris._gate_arm_array
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes,
+	       prereq = NEW.prereq,
+	       camera = NEW.camera,
+	       approach = NEW.approach,
+	       action_plan = NEW.action_plan,
+	       open_phase = NEW.open_phase,
+	       closed_phase = NEW.closed_phase
 	WHERE name = OLD.name;
-        RETURN NEW;
-    ELSIF TG_OP = 'DELETE' THEN
-        DELETE FROM iris._device_io WHERE name = OLD.name;
-        IF FOUND THEN
-            RETURN OLD;
-        ELSE
-            RETURN NULL;
-	END IF;
-    END IF;
-    RETURN NEW;
+	RETURN NEW;
 END;
 $gate_arm_array_update$ LANGUAGE plpgsql;
 
 CREATE TRIGGER gate_arm_array_update_trig
-    INSTEAD OF INSERT OR UPDATE OR DELETE ON iris.gate_arm_array
+    INSTEAD OF UPDATE ON iris.gate_arm_array
     FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_array_update();
+
+CREATE FUNCTION iris.gate_arm_array_delete() RETURNS TRIGGER AS
+	$gate_arm_array_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$gate_arm_array_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER gate_arm_array_delete_trig
+    INSTEAD OF DELETE ON iris.gate_arm_array
+    FOR EACH ROW EXECUTE PROCEDURE iris.gate_arm_array_delete();
 
 CREATE TABLE iris._gate_arm (
 	name VARCHAR(20) PRIMARY KEY,
@@ -1752,22 +1789,6 @@ CREATE UNIQUE INDEX lane_use_multi_indication_idx ON iris.lane_use_multi
 
 CREATE UNIQUE INDEX lane_use_multi_msg_num_idx ON iris.lane_use_multi
 	USING btree (msg_num, width, height);
-
-CREATE TABLE iris.plan_phase (
-	name VARCHAR(12) PRIMARY KEY,
-	hold_time INTEGER NOT NULL,
-	next_phase VARCHAR(12) REFERENCES iris.plan_phase
-);
-
-CREATE TABLE iris.action_plan (
-	name VARCHAR(16) PRIMARY KEY,
-	description VARCHAR(64) NOT NULL,
-	sync_actions BOOLEAN NOT NULL,
-	sticky BOOLEAN NOT NULL,
-	active BOOLEAN NOT NULL,
-	default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
-);
 
 CREATE TABLE iris.time_action (
 	name VARCHAR(30) PRIMARY KEY,
@@ -2500,8 +2521,8 @@ CREATE VIEW gate_arm_array_view AS
 	SELECT ga.name, ga.notes, ga.geo_loc, l.roadway, l.road_dir,
 	       l.cross_mod, l.cross_street, l.cross_dir, l.lat, l.lon,
 	       ga.controller, ga.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
-	       ga.prereq, ga.camera, ga.approach, ga.dms, ga.open_msg,
-	       ga.closed_msg
+	       ga.prereq, ga.camera, ga.approach, ga.action_plan, ga.open_phase,
+	       ga.closed_phase
 	FROM iris.gate_arm_array ga
 	LEFT JOIN geo_loc_view l ON ga.geo_loc = l.name
 	LEFT JOIN controller_view ctr ON ga.controller = ctr.name;
@@ -2511,8 +2532,7 @@ CREATE VIEW gate_arm_view AS
 	SELECT g.name, g.ga_array, g.notes, ga.geo_loc, l.roadway, l.road_dir,
 	       l.cross_mod, l.cross_street, l.cross_dir, l.lat, l.lon,
 	       g.controller, g.pin, ctr.comm_link, ctr.drop_id, ctr.condition,
-	       ga.prereq, ga.camera, ga.approach, ga.dms, ga.open_msg,
-	       ga.closed_msg
+	       ga.prereq, ga.camera, ga.approach
 	FROM iris.gate_arm g
 	JOIN iris.gate_arm_array ga ON g.ga_array = ga.name
 	LEFT JOIN geo_loc_view l ON ga.geo_loc = l.name
@@ -2971,7 +2991,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.68.0
+database_version	4.69.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0

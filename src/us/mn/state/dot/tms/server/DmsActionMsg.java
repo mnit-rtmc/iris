@@ -21,6 +21,7 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.DmsAction;
+import static us.mn.state.dot.tms.DmsMsgPriority.GATE_ARM;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
@@ -257,12 +258,19 @@ public class DmsActionMsg {
 	/** Process DMS action tags */
 	private String process(String ms) {
 		addSrc(SignMsgSource.schedule);
+		if (isGateArm())
+			addSrc(SignMsgSource.gate_arm);
 		new MultiString(ms).parse(builder);
 		MultiString _multi = builder.toMultiString();
 		if (isBlank(_multi))
 			return (valid) ? feed_msg : null;
 	 	else
 			return postProcess(_multi.toString());
+	}
+
+	/** Check if the action has gate arm priority */
+	private boolean isGateArm() {
+		return action.getMsgPriority() == GATE_ARM.ordinal();
 	}
 
 	/** Check if message is blank */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,23 +50,23 @@ public interface GateArmArray extends Device {
 	/** Get approach camera */
 	Camera getApproach();
 
-	/** Set warning DMS */
-	void setDms(DMS d);
+	/** Set the action plan */
+	void setActionPlan(ActionPlan ap);
 
-	/** Get warning DMS */
-	DMS getDms();
+	/** Get the action plan */
+	ActionPlan getActionPlan();
 
-	/** Set the OPEN quick message */
-	void setOpenMsg(QuickMessage m);
+	/** Set the action plan phase for OPEN state */
+	void setOpenPhase(PlanPhase p);
 
-	/** Get the OPEN quick message */
-	QuickMessage getOpenMsg();
+	/** Get the action plan phase for OPEN state */
+	PlanPhase getOpenPhase();
 
-	/** Set the CLOSED quick message */
-	void setClosedMsg(QuickMessage m);
+	/** Set the action plan phase for CLOSED state */
+	void setClosedPhase(PlanPhase p);
 
-	/** Get the CLOSED quick message */
-	QuickMessage getClosedMsg();
+	/** Get the action plan phase for CLOSED state */
+	PlanPhase getClosedPhase();
 
 	/** Set the next state owner */
 	void setOwnerNext(User o);
