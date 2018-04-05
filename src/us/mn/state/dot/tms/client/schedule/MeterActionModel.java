@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,13 @@ package us.mn.state.dot.tms.client.schedule;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.ActionPlan;
 import us.mn.state.dot.tms.MeterAction;
 import us.mn.state.dot.tms.PlanPhase;
@@ -30,6 +34,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Table model for meter actions assigned to action plans
@@ -94,6 +99,25 @@ public class MeterActionModel extends ProxyTableModel<MeterAction> {
 	@Override
 	protected boolean check(MeterAction proxy) {
 		return proxy.getActionPlan() == action_plan;
+	}
+
+	/** Get a table row sorter */
+	@Override
+	public RowSorter<ProxyTableModel<MeterAction>> createSorter() {
+		TableRowSorter<ProxyTableModel<MeterAction>> sorter =
+			new TableRowSorter<ProxyTableModel<MeterAction>>(this)
+		{
+			@Override public boolean isSortable(int c) {
+				return 0 == c;
+			}
+		};
+		sorter.setComparator(0,new NumericAlphaComparator<RampMeter>());
+		sorter.setSortsOnUpdates(true);
+		LinkedList<RowSorter.SortKey> keys =
+			new LinkedList<RowSorter.SortKey>();
+		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+		sorter.setSortKeys(keys);
+		return sorter;
 	}
 
 	/** Check if the user can add a proxy */

@@ -32,7 +32,6 @@ import us.mn.state.dot.tms.PlanPhaseHelper;
 import us.mn.state.dot.tms.QuickMessageHelper;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignGroupHelper;
-import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -40,6 +39,7 @@ import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IOptionPane;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * Table model for DMS actions assigned to action plans
