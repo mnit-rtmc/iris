@@ -61,6 +61,10 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		CabinetImpl.loadAll();
 		ControllerImpl.loadAll();
 		SignConfigImpl.loadAll();
+		DayMatcherImpl.loadAll();
+		DayPlanImpl.loadAll();
+		PlanPhaseImpl.loadAll();
+		ActionPlanImpl.loadAll();
 		R_NodeImpl.loadAll();
 		/* NOTE: must happen after r_nodes are loaded */
 		corridors.createCorridors();
@@ -96,10 +100,6 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		IncDescriptorImpl.loadAll();
 		IncLocatorImpl.loadAll();
 		IncAdviceImpl.loadAll();
-		DayMatcherImpl.loadAll();
-		DayPlanImpl.loadAll();
-		PlanPhaseImpl.loadAll();
-		ActionPlanImpl.loadAll();
 		TimeActionImpl.loadAll();
 		DmsActionImpl.loadAll();
 		BeaconActionImpl.loadAll();

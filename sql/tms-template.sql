@@ -253,6 +253,22 @@ CREATE TABLE iris.day_plan_day_matcher (
 );
 ALTER TABLE iris.day_plan_day_matcher ADD PRIMARY KEY (day_plan, day_matcher);
 
+CREATE TABLE iris.plan_phase (
+	name VARCHAR(12) PRIMARY KEY,
+	hold_time INTEGER NOT NULL,
+	next_phase VARCHAR(12) REFERENCES iris.plan_phase
+);
+
+CREATE TABLE iris.action_plan (
+	name VARCHAR(16) PRIMARY KEY,
+	description VARCHAR(64) NOT NULL,
+	sync_actions BOOLEAN NOT NULL,
+	sticky BOOLEAN NOT NULL,
+	active BOOLEAN NOT NULL,
+	default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+);
+
 CREATE TABLE iris.geo_loc (
 	name VARCHAR(20) PRIMARY KEY,
 	roadway VARCHAR(20) REFERENCES iris.road(name),
@@ -418,22 +434,6 @@ CREATE TABLE iris.quick_message (
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
 	prefix_page BOOLEAN NOT NULL,
 	multi VARCHAR(1024) NOT NULL
-);
-
-CREATE TABLE iris.plan_phase (
-	name VARCHAR(12) PRIMARY KEY,
-	hold_time INTEGER NOT NULL,
-	next_phase VARCHAR(12) REFERENCES iris.plan_phase
-);
-
-CREATE TABLE iris.action_plan (
-	name VARCHAR(16) PRIMARY KEY,
-	description VARCHAR(64) NOT NULL,
-	sync_actions BOOLEAN NOT NULL,
-	sticky BOOLEAN NOT NULL,
-	active BOOLEAN NOT NULL,
-	default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE TABLE iris.comm_protocol (

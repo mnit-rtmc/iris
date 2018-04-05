@@ -540,6 +540,12 @@ public class SonarState extends Client {
 		populate(roads);
 		populate(geo_locs);
 		populateReadable(words);
+		populateReadable(day_matchers);
+		populateReadable(day_plans);
+		populateReadable(plan_phases);
+		// Populate a second time to resolve nextPhase self-references
+		populateReadable(plan_phases);
+		populateReadable(action_plans);
 		con_cache.populate(this);
 		det_cache.populate(this);
 		cam_cache.populate(this);
@@ -576,12 +582,6 @@ public class SonarState extends Client {
 		if (canRead(GateArm.SONAR_TYPE))
 			gate_arms.ignoreAttribute("operation");
 		populateReadable(parking_areas);
-		populateReadable(day_matchers);
-		populateReadable(day_plans);
-		populateReadable(plan_phases);
-		// Populate a second time to resolve nextPhase self-references
-		populateReadable(plan_phases);
-		populateReadable(action_plans);
 		populateReadable(time_actions);
 		populateReadable(dms_actions);
 		populateReadable(beacon_actions);
