@@ -51,7 +51,7 @@ impl Queryable for Incident {
         FROM incident_view \
         WHERE cleared = 'f'"
     }
-    fn from_row(row: &postgres::rows::Row) -> Incident {
+    fn from_row(row: &postgres::rows::Row) -> Self {
         Incident {
             name        : row.get(0),
             event_date  : row.get(1),
@@ -67,6 +67,31 @@ impl Queryable for Incident {
             replaces    : row.get(11),
             lat         : row.get(12),
             lon         : row.get(13),
+        }
+    }
+}
+
+#[derive(Serialize)]
+struct CameraPub {
+    name     : String,
+    publish  : bool,
+    location : Option<String>,
+    lat      : Option<f64>,
+    lon      : Option<f64>,
+}
+
+impl Queryable for CameraPub {
+    fn sql() -> &'static str {
+       "SELECT name, publish, location, lat, lon \
+        FROM camera_view ORDER BY name"
+    }
+    fn from_row(row: &postgres::rows::Row) -> Self {
+        CameraPub {
+            name     : row.get(0),
+            publish  : row.get(1),
+            location : row.get(2),
+            lat      : row.get(3),
+            lon      : row.get(4),
         }
     }
 }
@@ -100,7 +125,7 @@ impl Queryable for SignConfig {
                char_height \
         FROM sign_config_view"
     }
-    fn from_row(row: &postgres::rows::Row) -> SignConfig {
+    fn from_row(row: &postgres::rows::Row) -> Self {
         SignConfig {
             name        : row.get(0),
             dms_type    : row.get(1),
@@ -124,7 +149,7 @@ impl Queryable for SignConfig {
 }
 
 #[derive(Serialize)]
-struct Dms {
+struct DmsPub {
     name        : String,
     sign_config : Option<String>,
     roadway     : Option<String>,
@@ -135,14 +160,14 @@ struct Dms {
     lon         : Option<f64>,
 }
 
-impl Queryable for Dms {
+impl Queryable for DmsPub {
     fn sql() -> &'static str {
        "SELECT name, sign_config, roadway, road_dir, cross_street, location, \
                lat, lon \
         FROM dms_view ORDER BY name"
     }
-    fn from_row(row: &postgres::rows::Row) -> Dms {
-        Dms {
+    fn from_row(row: &postgres::rows::Row) -> Self {
+        DmsPub {
             name        : row.get(0),
             sign_config : row.get(1),
             roadway     : row.get(2),
@@ -170,7 +195,7 @@ impl Queryable for DmsMessage {
         FROM dms_message_view WHERE condition = 'Active' \
         ORDER BY name"
     }
-    fn from_row(row: &postgres::rows::Row) -> DmsMessage {
+    fn from_row(row: &postgres::rows::Row) -> Self {
         DmsMessage {
             name       : row.get(0),
             multi      : row.get(1),
@@ -218,7 +243,7 @@ impl Queryable for ParkingAreaStatic {
                state, zip, time_zone, ownership, capacity, amenities \
         FROM parking_area_view"
     }
-    fn from_row(row: &postgres::rows::Row) -> ParkingAreaStatic {
+    fn from_row(row: &postgres::rows::Row) -> Self {
         ParkingAreaStatic {
             siteId           : row.get(0),
             timeStamp        : row.get(1),
@@ -265,7 +290,7 @@ impl Queryable for ParkingAreaDynamic {
                trend, open, trust_data, capacity \
         FROM parking_area_view"
     }
-    fn from_row(row: &postgres::rows::Row) -> ParkingAreaDynamic {
+    fn from_row(row: &postgres::rows::Row) -> Self {
         ParkingAreaDynamic {
             siteId           : row.get(0),
             timeStamp        : row.get(1),
@@ -303,7 +328,8 @@ impl<S> actix_web::dev::Handler<S> for Handler {
 
     fn handle(&mut self, req: HttpRequest<S>) -> Self::Result {
         match req.match_info().get("v") {
-            Some("dms")           => self.get_json::<Dms>(),
+            Some("camera_pub")    => self.get_json::<CameraPub>(),
+            Some("dms_pub")       => self.get_json::<DmsPub>(),
             Some("dms_message")   => self.get_json::<DmsMessage>(),
             Some("incident")      => self.get_json::<Incident>(),
             Some("sign_config")   => self.get_json::<SignConfig>(),
