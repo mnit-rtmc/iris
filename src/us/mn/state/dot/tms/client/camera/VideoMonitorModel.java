@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 	@Override
 	protected ArrayList<ProxyColumn<VideoMonitor>> createColumns() {
 		ArrayList<ProxyColumn<VideoMonitor>> cols =
-			new ArrayList<ProxyColumn<VideoMonitor>>(5);
+			new ArrayList<ProxyColumn<VideoMonitor>>(6);
 		cols.add(new ProxyColumn<VideoMonitor>("video.monitor", 140) {
 			public Object getValueAt(VideoMonitor vm) {
 				return vm.getName();
@@ -61,6 +61,20 @@ public class VideoMonitorModel extends ProxyTableModel<VideoMonitor> {
 			}
 			public void setValueAt(VideoMonitor vm, Object value) {
 				vm.setNotes(value.toString());
+			}
+		});
+		cols.add(new ProxyColumn<VideoMonitor>("video.monitor.group",
+			160)
+		{
+			public Object getValueAt(VideoMonitor vm) {
+				return vm.getGroupN();
+			}
+			public boolean isEditable(VideoMonitor vm) {
+				return canWrite(vm);
+			}
+			public void setValueAt(VideoMonitor vm, Object value) {
+				String v = value.toString().trim();
+				vm.setGroupN((v.length() > 0) ? v : null);
 			}
 		});
 		cols.add(new ProxyColumn<VideoMonitor>("video.monitor.num",

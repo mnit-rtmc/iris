@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,10 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.GroupChecker;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.User;
+
 /**
  * A video monitor device.
  *
@@ -23,6 +27,12 @@ public interface VideoMonitor extends Device {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "video_monitor";
+
+	/** Set the group name */
+	void setGroupN(String g);
+
+	/** Get the group name */
+	String getGroupN();
 
 	/** Set the monitor number */
 	void setMonNum(int mn);
@@ -51,4 +61,13 @@ public interface VideoMonitor extends Device {
 	/** Set the play list.
 	 * This will start the given play list from the beginning. */
 	void setPlayList(PlayList pl);
+
+	/** Group privilege checker */
+	GroupChecker GROUP_CHECKER = new GroupChecker() {
+		public boolean checkGroup(Name name, User u, String g) {
+			String n = name.getObjectPart();
+			VideoMonitor vm = VideoMonitorHelper.lookup(n);
+			return vm != null && g.equals(vm.getGroupN());
+		}
+	};
 }

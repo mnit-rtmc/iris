@@ -850,6 +850,7 @@ CREATE TABLE iris.monitor_style (
 CREATE TABLE iris._video_monitor (
 	name VARCHAR(12) PRIMARY KEY,
 	notes VARCHAR(32) NOT NULL,
+	group_n VARCHAR(16),
 	mon_num INTEGER NOT NULL,
 	restricted BOOLEAN NOT NULL,
 	monitor_style VARCHAR(24) REFERENCES iris.monitor_style,
@@ -859,9 +860,9 @@ CREATE TABLE iris._video_monitor (
 ALTER TABLE iris._video_monitor ADD CONSTRAINT _video_monitor_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
-CREATE VIEW iris.video_monitor AS SELECT
-	m.name, controller, pin, notes, mon_num, restricted,
-	monitor_style, camera
+CREATE VIEW iris.video_monitor AS
+	SELECT m.name, controller, pin, notes, group_n, mon_num, restricted,
+	       monitor_style, camera
 	FROM iris._video_monitor m JOIN iris._device_io d ON m.name = d.name;
 
 CREATE FUNCTION iris.video_monitor_insert() RETURNS TRIGGER AS
@@ -869,10 +870,10 @@ CREATE FUNCTION iris.video_monitor_insert() RETURNS TRIGGER AS
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._video_monitor (name, notes, mon_num, restricted,
-	                                 monitor_style, camera)
-	     VALUES (NEW.name, NEW.notes, NEW.mon_num, NEW.restricted,
-	             NEW.monitor_style, NEW.camera);
+	INSERT INTO iris._video_monitor (name, notes, group_n, mon_num,
+	                                 restricted, monitor_style, camera)
+	     VALUES (NEW.name, NEW.notes, NEW.group_n, NEW.mon_num,
+	             NEW.restricted, NEW.monitor_style, NEW.camera);
 	RETURN NEW;
 END;
 $video_monitor_insert$ LANGUAGE plpgsql;
@@ -890,6 +891,7 @@ BEGIN
 	 WHERE name = OLD.name;
 	UPDATE iris._video_monitor
 	   SET notes = NEW.notes,
+	       group_n = NEW.group_n,
 	       mon_num = NEW.mon_num,
 	       restricted = NEW.restricted,
 	       monitor_style = NEW.monitor_style,
@@ -2438,7 +2440,7 @@ CREATE VIEW monitor_style_view AS
 GRANT SELECT ON monitor_style_view TO PUBLIC;
 
 CREATE VIEW video_monitor_view AS
-	SELECT m.name, m.notes, mon_num, restricted, monitor_style,
+	SELECT m.name, m.notes, group_n, mon_num, restricted, monitor_style,
 	       m.controller, m.pin, ctr.condition, ctr.comm_link, camera
 	FROM iris.video_monitor m
 	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
@@ -2991,7 +2993,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.69.0
+database_version	4.70.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0

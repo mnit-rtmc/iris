@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -143,7 +143,7 @@ public class CamCache {
 		monitor_styles = new TypeCache<MonitorStyle>(MonitorStyle.class,
 			client);
 		monitors = new TypeCache<VideoMonitor>(VideoMonitor.class,
-			client);
+			client, VideoMonitor.GROUP_CHECKER);
 		monitor_model = new ProxyListModel<VideoMonitor>(monitors);
 		monitor_model.initialize();
 	}
