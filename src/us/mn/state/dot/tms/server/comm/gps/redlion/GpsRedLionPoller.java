@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +16,6 @@
 package us.mn.state.dot.tms.server.comm.gps.redlion;
 
 import java.net.URI;
-
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.GpsImpl;
@@ -30,15 +30,13 @@ import us.mn.state.dot.tms.utils.URIUtil;
  *
  * @author John L. Stanley
  */
-public class GpsRedLionPoller
-		extends ThreadedPoller<GpsProperty>
-		implements GpsPoller {
-
+public class GpsRedLionPoller extends ThreadedPoller<GpsProperty>
+	implements GpsPoller
+{
 	/** Create a new RedLion GPS poller */
 	public GpsRedLionPoller(String n) {
-		super(n, URIUtil.TCP, GpsImpl.GPS_LOG);
-		attrCommIdleDisconnect = 
-				SystemAttrEnum.COMM_IDLE_DISCONNECT_GPS_SEC;
+		super(n, URIUtil.TCP, GpsImpl.GPS_LOG,
+			SystemAttrEnum.COMM_IDLE_DISCONNECT_GPS_SEC);
 	}
 
 	/** Send a request to the GPS */

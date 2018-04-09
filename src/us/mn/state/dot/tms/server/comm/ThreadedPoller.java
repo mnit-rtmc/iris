@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2017  Minnesota Department of Transportation
+ * Copyright (C) 2014-2018  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -50,12 +50,23 @@ public class ThreadedPoller<T extends ControllerProperty>
 			logger.log(name + " " + msg);
 	}
 
+	/** COMM_IDLE_DISCONNECT system attribute */
+	private final SystemAttrEnum attrCommIdleDisconnect;
+
 	/** Create a threaded device poller */
-	protected ThreadedPoller(String n, URI s, DebugLog l) {
+	protected ThreadedPoller(String n, URI s, DebugLog l,
+		SystemAttrEnum acid)
+	{
 		name = n;
 		scheme = s;
 		logger = l;
+		attrCommIdleDisconnect = acid;
 		log("CREATED");
+	}
+
+	/** Create a threaded device poller */
+	protected ThreadedPoller(String n, URI s, DebugLog l) {
+		this(n, s, l, null);
 	}
 
 	/** Destroy the poller */
@@ -157,20 +168,15 @@ public class ThreadedPoller<T extends ControllerProperty>
 		return (c_thread != null) && c_thread.isConnected();
 	}
 
-	/** COMM_IDLE_DISCONNECT IRIS-system-attribute for this poller
-	 * (Change value in constructor of subclasses as needed) */
-	protected SystemAttrEnum attrCommIdleDisconnect = null;
-	
-	/** Get max seconds an idle (non-modem)
-	 *  connection should be left open
-	 *  (-1 == infinite) */
+	/** Get max seconds an idle (non-modem) connection should be left open
+	 * (-1 == infinite). */
 	@Override
 	public int getPollerIdleDisconnectSec() {
 		return (attrCommIdleDisconnect == null)
 		     ? -1
 		     : attrCommIdleDisconnect.getInt();
 	}
-	
+
 	/** Create the comm thread */
 	private synchronized void createCommThread() {
 		c_thread = createCommThread(uri, timeout);

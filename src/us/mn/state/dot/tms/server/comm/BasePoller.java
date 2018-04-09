@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -94,6 +94,9 @@ abstract public class BasePoller implements DevicePoller {
 	/** Flag to close channel on timeout */
 	private final boolean close_on_timeout;
 
+	/** COMM_IDLE_DISCONNECT system attribute for this poller */
+	private final SystemAttrEnum attrCommIdleDisconnect;
+
 	/** Protocol logger */
 	private final DebugLog logger;
 
@@ -148,6 +151,7 @@ abstract public class BasePoller implements DevicePoller {
 		name = n;
 		scheme = s;
 		close_on_timeout = cot;
+		attrCommIdleDisconnect = null;
 		logger = new DebugLog(n + ".log");
 		tx_buf = ByteBuffer.allocate(BUF_SZ);
 		rx_buf = ByteBuffer.allocate(BUF_SZ);
@@ -359,10 +363,6 @@ abstract public class BasePoller implements DevicePoller {
 		    && (sk.channel().isOpen());
 	}
 
-	/** COMM_IDLE_DISCONNECT IRIS-system-attribute for this poller
-	 * (Change value in constructor of subclasses as needed) */
-	protected SystemAttrEnum attrCommIdleDisconnect = null;
-	
 	/** Get max seconds an idle (non-modem)
 	 *  connection should be left open
 	 *  (-1 == infinite) */

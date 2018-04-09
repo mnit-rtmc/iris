@@ -62,9 +62,9 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 
 	/** Create a new Ntcip poller */
 	public NtcipPoller(String n, CommProtocol cp) {
-		super(n, default_uri(cp), NTCIP_LOG);
+		super(n, default_uri(cp), NTCIP_LOG,
+			SystemAttrEnum.COMM_IDLE_DISCONNECT_DMS_SEC);
 		protocol = cp;
-		attrCommIdleDisconnect = SystemAttrEnum.COMM_IDLE_DISCONNECT_DMS_SEC;
 	}
 
 	/** Create a comm thread */
