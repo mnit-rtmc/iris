@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  * Copyright (C) 2018  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -54,21 +55,14 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Load all the action plans */
 	static protected void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, ActionPlanImpl.class);
-		store.query("SELECT name, description, sync_actions, " +
+		namespace.registerType(SONAR_TYPE, ActionPlanImpl.class,
+			GROUP_CHECKER);
+		store.query("SELECT name, description, group_n, sync_actions, "+
 			"sticky, active, default_phase, phase FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new ActionPlanImpl(
-					row.getString(1),  // name
-					row.getString(2),  // description
-					row.getBoolean(3), // sync_actions
-					row.getBoolean(4), // sticky
-					row.getBoolean(5), // active
-					row.getString(6),  // default_phase
-					row.getString(7)   // phase
-				));
+				namespace.addObject(new ActionPlanImpl(row));
 			}
 		});
 	}
@@ -79,6 +73,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("description", description);
+		map.put("group_n", group_n);
 		map.put("sync_actions", sync_actions);
 		map.put("sticky", sticky);
 		map.put("active", active);
@@ -105,19 +100,34 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 		description = "";
 	}
 
-	/** Create a new action plan */
-	private ActionPlanImpl(String n, String dsc, boolean sa, boolean st,
-		boolean a, String dp, String p)
-	{
-		this(n, dsc, sa, st, a, lookupPlanPhase(dp),lookupPlanPhase(p));
+	/** Create an action plan */
+	private ActionPlanImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),  // name
+		     row.getString(2),  // description
+		     row.getString(3),  // group_n
+		     row.getBoolean(4), // sync_actions
+		     row.getBoolean(5), // sticky
+		     row.getBoolean(6), // active
+		     row.getString(7),  // default_phase
+		     row.getString(8)   // phase
+		);
 	}
 
-	/** Create a new action plan */
-	private ActionPlanImpl(String n, String dsc, boolean sa, boolean st,
-		boolean a, PlanPhase dp, PlanPhase p)
+	/** Create an action plan */
+	private ActionPlanImpl(String n, String dsc, String gn, boolean sa,
+		boolean st, boolean a, String dp, String p)
+	{
+		this(n, dsc, gn, sa, st, a, lookupPlanPhase(dp),
+		     lookupPlanPhase(p));
+	}
+
+	/** Create an action plan */
+	private ActionPlanImpl(String n, String dsc, String gn, boolean sa,
+		boolean st, boolean a, PlanPhase dp, PlanPhase p)
 	{
 		this(n);
 		description = dsc;
+		group_n = gn;
 		sync_actions = sa;
 		sticky = st;
 		active = a;
@@ -136,7 +146,7 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 
 	/** Set the description */
 	public void doSetDescription(String d) throws TMSException {
-		if (!d.equals(description)) {
+		if (!objectEquals(d, description)) {
 			store.update(this, "description", d);
 			setDescription(d);
 		}
@@ -146,6 +156,29 @@ public class ActionPlanImpl extends BaseObjectImpl implements ActionPlan {
 	@Override
 	public String getDescription() {
 		return description;
+	}
+
+	/** Group name */
+	private String group_n;
+
+	/** Set the group name */
+	@Override
+	public void setGroupN(String g) {
+		group_n = g;
+	}
+
+	/** Set the group name */
+	public void doSetGroupN(String g) throws TMSException {
+		if (!objectEquals(g, group_n)) {
+			store.update(this, "group_n", g);
+			setGroupN(g);
+		}
+	}
+
+	/** Get the group name */
+	@Override
+	public String getGroupN() {
+		return group_n;
 	}
 
 	/** Sync actions flag */

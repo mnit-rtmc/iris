@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2011  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,6 +14,9 @@
  */
 package us.mn.state.dot.tms;
 
+import us.mn.state.dot.sonar.GroupChecker;
+import us.mn.state.dot.sonar.Name;
+import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
@@ -31,6 +34,12 @@ public interface ActionPlan extends SonarObject {
 
 	/** Get the description */
 	String getDescription();
+
+	/** Set the group name */
+	void setGroupN(String g);
+
+	/** Get the group name */
+	String getGroupN();
 
 	/** Set the sync actions flag */
 	void setSyncActions(boolean s);
@@ -61,4 +70,13 @@ public interface ActionPlan extends SonarObject {
 
 	/** Get the phase */
 	PlanPhase getPhase();
+
+	/** Group privilege checker */
+	GroupChecker GROUP_CHECKER = new GroupChecker() {
+		public boolean checkGroup(Name name, User u, String g) {
+			String n = name.getObjectPart();
+			ActionPlan ap = ActionPlanHelper.lookup(n);
+			return ap != null && g.equals(ap.getGroupN());
+		}
+	};
 }

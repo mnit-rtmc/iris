@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -46,7 +46,7 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 	@Override
 	protected ArrayList<ProxyColumn<ActionPlan>> createColumns() {
 		ArrayList<ProxyColumn<ActionPlan>> cols =
-			new ArrayList<ProxyColumn<ActionPlan>>(6);
+			new ArrayList<ProxyColumn<ActionPlan>>(7);
 		cols.add(new ProxyColumn<ActionPlan>("action.plan.name", 120) {
 			public Object getValueAt(ActionPlan ap) {
 				return ap.getName();
@@ -62,6 +62,20 @@ public class ActionPlanModel extends ProxyTableModel<ActionPlan> {
 			public void setValueAt(ActionPlan ap, Object value) {
 				String v = value.toString().trim();
 				ap.setDescription(v);
+			}
+		});
+		cols.add(new ProxyColumn<ActionPlan>("action.plan.group",
+			160)
+		{
+			public Object getValueAt(ActionPlan ap) {
+				return ap.getGroupN();
+			}
+			public boolean isEditable(ActionPlan ap) {
+				return canWrite(ap);
+			}
+			public void setValueAt(ActionPlan ap, Object value) {
+				String v = value.toString().trim();
+				ap.setGroupN((v.length() > 0) ? v : null);
 			}
 		});
 		cols.add(new ProxyColumn<ActionPlan>("action.plan.sync.actions",

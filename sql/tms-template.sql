@@ -262,6 +262,7 @@ CREATE TABLE iris.plan_phase (
 CREATE TABLE iris.action_plan (
 	name VARCHAR(16) PRIMARY KEY,
 	description VARCHAR(64) NOT NULL,
+	group_n VARCHAR(16),
 	sync_actions BOOLEAN NOT NULL,
 	sticky BOOLEAN NOT NULL,
 	active BOOLEAN NOT NULL,
@@ -2242,8 +2243,8 @@ CREATE VIEW role_privilege_view AS
 GRANT SELECT ON role_privilege_view TO PUBLIC;
 
 CREATE VIEW action_plan_view AS
-	SELECT name, description, sync_actions, sticky, active, default_phase,
-		phase
+	SELECT name, description, group_n, sync_actions, sticky, active,
+	       default_phase, phase
 	FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
@@ -2994,7 +2995,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.70.0
+database_version	4.71.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
