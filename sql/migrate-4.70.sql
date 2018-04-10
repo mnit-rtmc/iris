@@ -96,4 +96,18 @@ CREATE VIEW video_monitor_view AS
 	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
 GRANT SELECT ON video_monitor_view TO PUBLIC;
 
+-- Add modem column to comm_link table
+DROP VIEW comm_link_view;
+
+ALTER TABLE iris.comm_link ADD COLUMN modem BOOLEAN;
+UPDATE iris.comm_link SET modem = 'f';
+ALTER TABLE iris.comm_link ALTER COLUMN modem SET NOT NULL;
+
+CREATE VIEW comm_link_view AS
+	SELECT cl.name, cl.description, modem, uri, cp.description AS protocol,
+	       poll_enabled, poll_period, timeout
+	FROM iris.comm_link cl
+	JOIN iris.comm_protocol cp ON cl.protocol = cp.id;
+GRANT SELECT ON comm_link_view TO PUBLIC;
+
 COMMIT;

@@ -327,12 +327,6 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		super.doDestroy();
 	}
 
-	/** Check if the device is connected to a modem comm link */
-	protected boolean hasModemCommLink() {
-		ControllerImpl c = controller;
-		return (c != null) && c.hasModemCommLink();
-	}
-
 	/** Get the polling period */
 	protected int getPollPeriod() {
 		ControllerImpl c = controller;	// Avoid race
@@ -352,7 +346,8 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 
 	/** Check if dial-up is required to communicate */
 	public boolean isDialUpRequired() {
-		return hasModemCommLink() && !isConnected();
+		ControllerImpl c = controller;
+		return (c != null) && c.isDialUpRequired();
 	}
 
 	/** Request a device operation */

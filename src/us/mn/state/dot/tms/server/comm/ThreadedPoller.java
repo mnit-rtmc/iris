@@ -153,6 +153,15 @@ public class ThreadedPoller<T extends ControllerProperty>
 		disconnect();
 	}
 
+	/** Modem flag */
+	private boolean modem;
+
+	/** Set the modem flag */
+	@Override
+	public void setModem(boolean m) {
+		modem = m;
+	}
+
 	/** Comm thread (may be null) */
 	private CommThread c_thread;
 
@@ -168,13 +177,19 @@ public class ThreadedPoller<T extends ControllerProperty>
 		return (c_thread != null) && c_thread.isConnected();
 	}
 
-	/** Get max seconds an idle (non-modem) connection should be left open
-	 * (-1 == infinite). */
+	/** Get max seconds an idle connection should be left open
+	 * (-1 == indefinite). */
 	@Override
-	public int getPollerIdleDisconnectSec() {
-		return (attrCommIdleDisconnect == null)
-		     ? -1
-		     : attrCommIdleDisconnect.getInt();
+	public int getIdleDisconnectSec() {
+		SystemAttrEnum attr = getIdleDisconnectAttr();
+		return (attr != null) ? attr.getInt() : -1;
+	}
+
+	/** Get the comm idle disconnect system attribute */
+	private SystemAttrEnum getIdleDisconnectAttr() {
+		return (modem)
+		      ? SystemAttrEnum.COMM_IDLE_DISCONNECT_MODEM_SEC
+		      : attrCommIdleDisconnect;
 	}
 
 	/** Create the comm thread */

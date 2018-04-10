@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,20 +58,12 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	/** Load all the comm links */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, CommLinkImpl.class);
-		store.query("SELECT name, description, uri, protocol, " +
+		store.query("SELECT name, description, modem, uri, protocol, " +
 			"poll_enabled, poll_period, timeout FROM iris." +
 			SONAR_TYPE  + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new CommLinkImpl(
-					row.getString(1),	// name
-					row.getString(2),	// description
-					row.getString(3),	// uri
-					row.getShort(4),	// protocol
-					row.getBoolean(5),	// poll_enabled
-					row.getInt(6),		// poll_period
-					row.getInt(7)		// timeout
-				));
+				namespace.addObject(new CommLinkImpl(row));
 			}
 		});
 	}
@@ -81,6 +74,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("description", description);
+		map.put("modem", modem);
 		map.put("uri", uri);
 		map.put("protocol", (short)protocol.ordinal());
 		map.put("poll_enabled", poll_enabled);
@@ -106,12 +100,26 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		super(n);
 	}
 
-	/** Create a new comm link */
-	private CommLinkImpl(String n, String d, String u, short p, boolean pe,
-		int pp, int t)
+	/** Create a comm link */
+	private CommLinkImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),  // name
+		     row.getString(2),  // description
+		     row.getBoolean(3), // modem
+		     row.getString(4),  // uri
+		     row.getShort(5),   // protocol
+		     row.getBoolean(6), // poll_enabled
+		     row.getInt(7),     // poll_period
+		     row.getInt(8)      // timeout
+		);
+	}
+
+	/** Create a comm link */
+	private CommLinkImpl(String n, String d, boolean m, String u, short p,
+		boolean pe, int pp, int t)
 	{
 		super(n);
 		description = d;
+		modem = m;
 		uri = u;
 		CommProtocol cp = CommProtocol.fromOrdinal(p);
 		if (cp != null)
@@ -188,6 +196,33 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	public void testGateArmDisable(String name, String reason) {
 		if (isGateArm(protocol))
 			GateArmSystem.disable(name, reason);
+	}
+
+	/** Modem flag */
+	private boolean modem;
+
+	/** Set modem flag */
+	@Override
+	public void setModem(boolean m) {
+		testGateArmDisable(name, "modem");
+		modem = m;
+		DevicePoller dp = poller;
+		if (dp != null)
+			dp.setModem(m || isDialUpModem());
+	}
+
+	/** Set the modem flag */
+	public void doSetModem(boolean m) throws TMSException {
+		if (m != modem) {
+			store.update(this, "modem", m);
+			setModem(m);
+		}
+	}
+
+	/** Get modem flag */
+	@Override
+	public boolean getModem() {
+		return modem;
 	}
 
 	/** Remote URI for link */
@@ -375,6 +410,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		if (poller != null) {
 			poller.setUri(uri);
 			poller.setTimeout(timeout);
+			poller.setModem(getModem() || isDialUpModem());
 		}
 	}
 
@@ -440,9 +476,14 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		controllers.remove(d);
 	}
 
-	/** Check if a modem is required for the link */
-	public boolean isModemLink() {
+	/** Check if link is configured for a dial-up modem */
+	private boolean isDialUpModem() {
 		return uri.startsWith("modem:");
+	}
+
+	/** Check if dial-up is required to communicate */
+	public boolean isDialUpRequired() {
+		return isDialUpModem() && !isConnected();
 	}
 
 	/** Check if the comm link is currently connected */

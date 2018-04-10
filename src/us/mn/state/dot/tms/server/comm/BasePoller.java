@@ -210,6 +210,15 @@ abstract public class BasePoller implements DevicePoller {
 		timeout = rt;
 	}
 
+	/** Modem flag */
+	private boolean modem;
+
+	/** Set the modem flag */
+	@Override
+	public void setModem(boolean m) {
+		modem = m;
+	}
+
 	/** Poller status */
 	private String status = "INIT";
 
@@ -363,14 +372,19 @@ abstract public class BasePoller implements DevicePoller {
 		    && (sk.channel().isOpen());
 	}
 
-	/** Get max seconds an idle (non-modem)
-	 *  connection should be left open
-	 *  (-1 == infinite) */
+	/** Get max seconds an idle connection should be left open
+	 * (-1 == indefinite). */
 	@Override
-	public int getPollerIdleDisconnectSec() {
-		return (attrCommIdleDisconnect == null)
-		     ? -1
-		     : attrCommIdleDisconnect.getInt();
+	public int getIdleDisconnectSec() {
+		SystemAttrEnum attr = getIdleDisconnectAttr();
+		return (attr != null) ? attr.getInt() : -1;
+	}
+
+	/** Get the comm idle disconnect system attribute */
+	private SystemAttrEnum getIdleDisconnectAttr() {
+		return (modem)
+		      ? SystemAttrEnum.COMM_IDLE_DISCONNECT_MODEM_SEC
+		      : attrCommIdleDisconnect;
 	}
 
 	/** Open the channel */

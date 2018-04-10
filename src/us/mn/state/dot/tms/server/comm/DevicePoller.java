@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2016  Minnesota Department of Transportation
+ * Copyright (C) 2014-2018  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,16 +29,18 @@ public interface DevicePoller {
 	/** Set the receive timeout (ms) */
 	void setTimeout(int rt);
 
+	/** Set the modem flag */
+	void setModem(boolean m);
+
 	/** Get the poller status */
 	String getStatus();
 
 	/** Check if the poller is currently connected */
 	boolean isConnected();
 
-	/** Get max seconds an idle (non-modem)
-	 *  connection should be left open
-	 *  (-1 == infinite) */
-	int getPollerIdleDisconnectSec();
+	/** Get max seconds an idle connection should be left open
+	 * (-1 == indefinite). */
+	int getIdleDisconnectSec();
 	
 	/** Disconnect if idle */
 	void disconnectIfIdle();

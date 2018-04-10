@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,7 +47,7 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 	@Override
 	protected ArrayList<ProxyColumn<CommLink>> createColumns() {
 		ArrayList<ProxyColumn<CommLink>> cols =
-			new ArrayList<ProxyColumn<CommLink>>(6);
+			new ArrayList<ProxyColumn<CommLink>>(9);
 		cols.add(new ProxyColumn<CommLink>("comm.link", 90) {
 			public Object getValueAt(CommLink cl) {
 				return cl.getName();
@@ -62,6 +62,20 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 			}
 			public void setValueAt(CommLink cl, Object value) {
 				cl.setDescription(value.toString().trim());
+			}
+		});
+		cols.add(new ProxyColumn<CommLink>("comm.link.modem", 56,
+			Boolean.class)
+		{
+			public Object getValueAt(CommLink cl) {
+				return cl.getModem();
+			}
+			public boolean isEditable(CommLink cl) {
+				return canWrite(cl, "modem");
+			}
+			public void setValueAt(CommLink cl, Object value) {
+				if (value instanceof Boolean)
+					cl.setModem((Boolean) value);
 			}
 		});
 		cols.add(new ProxyColumn<CommLink>("comm.link.uri", 280) {
@@ -85,7 +99,6 @@ public class CommLinkModel extends ProxyTableModel<CommLink> {
 		});
 		cols.add(new ProxyColumn<CommLink>("comm.link.protocol", 140) {
 			public Object getValueAt(CommLink cl) {
-//				return PROTOCOLS.get(cl.getProtocol());
 				return CommProtocol.fromOrdinal(
 					cl.getProtocol());
 			}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2015  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -60,6 +60,12 @@ public interface CommLink extends SonarObject {
 
 	/** Get text description */
 	String getDescription();
+
+	/** Set modem flag */
+	void setModem(boolean m);
+
+	/** Get modem flag */
+	boolean getModem();
 
 	/** Set the remote URI */
 	void setUri(String u);

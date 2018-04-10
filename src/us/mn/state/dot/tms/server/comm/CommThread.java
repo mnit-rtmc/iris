@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -362,9 +362,9 @@ public class CommThread<T extends ControllerProperty> {
 	 * (if appropriate for this connection) */
 	private void startIdleDisconnectTimer() {
 		stopIdleDisconnectTimer();
-		int delaysec = getCommIdleDisconnectSec();
-		if (delaysec != -1) {
-			// Set minimum (non-infinite) idle delay to 1 sec
+		int delaysec = getIdleDisconnectSec();
+		if (delaysec >= 0) {
+			// Set minimum (non-indefinite) idle delay to 1 sec
 			// to avoid a race condition between the disconnect
 			// timer and the op processing thread...
 			if (delaysec == 0)
@@ -374,20 +374,13 @@ public class CommThread<T extends ControllerProperty> {
 		}
 	}
 
-	/** Get max seconds an idle connection
-	 *  should be left open (-1 == infinite) */
-	int getCommIdleDisconnectSec() {
-		if (isModemLink())
-			return SystemAttrEnum.COMM_IDLE_DISCONNECT_MODEM_SEC.getInt();
+	/** Get max seconds an idle connection should be left open
+	 * (-1 == indefinite). */
+	private int getIdleDisconnectSec() {
 		DevicePoller p = poller;
-		return (p == null)
-		      ? -1 // == Infinite
-		      : p.getPollerIdleDisconnectSec();
-	}
-	
-	/** Check if a modem is required for the link */
-	public boolean isModemLink() {
-		return uri.startsWith("modem:");
+		return (p != null)
+		      ? p.getIdleDisconnectSec()
+		      : -1; // Indefinite
 	}
 
 	/** Job that disconnects an idle connection */
@@ -396,7 +389,7 @@ public class CommThread<T extends ControllerProperty> {
 			super(delaysec * 1000); // seconds -> milliseconds
 		}
 
-		@Override 
+		@Override
 		public void perform() {
 			if (idle_disconnect_job != this)
 				return; // only process current disconnect-job

@@ -1030,10 +1030,10 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		cabinet.notifyRemove();
 	}
 
-	/** Check if the controller is assigned to a modem comm link */
-	public boolean hasModemCommLink() {
+	/** Check if dial-up is required to communicate */
+	public boolean isDialUpRequired() {
 		CommLinkImpl cl = comm_link;
-		return (cl != null) && cl.isModemLink();
+		return (cl != null) && cl.isDialUpRequired();
 	}
 
 	/** Check if the controller comm link is currently connected */

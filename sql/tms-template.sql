@@ -444,6 +444,7 @@ CREATE TABLE iris.comm_protocol (
 CREATE TABLE iris.comm_link (
 	name VARCHAR(20) PRIMARY KEY,
 	description VARCHAR(32) NOT NULL,
+	modem BOOLEAN NOT NULL,
 	uri VARCHAR(64) NOT NULL,
 	protocol smallint NOT NULL REFERENCES iris.comm_protocol(id),
 	poll_enabled BOOLEAN NOT NULL,
@@ -2690,8 +2691,8 @@ CREATE VIEW controller_report AS
 GRANT SELECT ON controller_report TO PUBLIC;
 
 CREATE VIEW comm_link_view AS
-	SELECT cl.name, cl.description, cl.uri, cp.description AS protocol,
-		cl.poll_enabled, cl.poll_period, cl.timeout
+	SELECT cl.name, cl.description, modem, uri, cp.description AS protocol,
+	       poll_enabled, poll_period, timeout
 	FROM iris.comm_link cl
 	JOIN iris.comm_protocol cp ON cl.protocol = cp.id;
 GRANT SELECT ON comm_link_view TO PUBLIC;
