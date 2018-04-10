@@ -22,7 +22,6 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.PageTimeHelper;
-import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.EmailHandler;
@@ -90,60 +89,6 @@ abstract class OpDms extends OpDevice {
 		super.cleanup();
 	}
 
-	/** Sign access enumerated type, which is based on the sign
-	 * access field specified in the DMS. */
-	enum SignAccess {
-		DIALUP_MODEM("dialup", SystemAttrEnum.
-			DMSXML_MODEM_OP_TIMEOUT_SECS),
-		IP("ip", SystemAttrEnum.DMSXML_OP_TIMEOUT_SECS),
-		UNKNOWN("", SystemAttrEnum.DMSXML_OP_TIMEOUT_SECS);
-
-		/** Parse string for id of type. Assumed to be lowercase. */
-		private final String id_desc;
-
-		/** Timeout system attribute, never null. */
-		private SystemAttrEnum timeout_sa;
-
-		/** Constructor */
-		SignAccess(String d, SystemAttrEnum to) {
-			id_desc = d.toLowerCase();
-			timeout_sa = to;
-		}
-
-		/** Return a sign access type given a string description */
-		static SignAccess parse(String d) {
-			if(d == null)
-				return UNKNOWN;
-			d = d.toLowerCase();
-			if(d.contains(DIALUP_MODEM.id_desc))
-				return DIALUP_MODEM;
-			else if(d.contains(IP.id_desc))
-				return IP;
-			// unknown sign type, this happens when the first
-			// OpQueryConfig message is being sent.
-			else
-				return UNKNOWN;
-		}
-
-		/** Get the timeout (seconds) */
-		int timeoutSecs() {
-			if(timeout_sa == null)
-				return UNKNOWN.timeout_sa.getInt();
-			else
-				return timeout_sa.getInt();
-		}
-
-		/** Return DMS sign access */
-		static SignAccess get(DMSImpl d) {
-			if (d != null) {
-				SignConfig sc = d.getSignConfig();
-				if (sc != null)
-					return parse(sc.getSignAccess());
-			}
-			return UNKNOWN;
-		}
-	};
-
 	/** Return name of AWS system */
 	public static String awsName() {
 		return I18N.get("dms.aws.abbreviation");
@@ -162,12 +107,13 @@ abstract class OpDms extends OpDevice {
 		m.setTimeoutMS(calcTimeoutMS());
 	}
 
-	/** Get the timeout for this operation. */
+	/** Get the timeout for this operation */
 	private int calcTimeoutMS() {
-		SignAccess a = SignAccess.get(m_dms);
-		int s = a.get(m_dms).timeoutSecs();
-		LOG.log("Op timeout is " + s + " secs, SignAccess=" + a +
-			", dms=" + m_dms);
+		SystemAttrEnum attr = (m_dms.isModemAny())
+			? SystemAttrEnum.DMSXML_MODEM_OP_TIMEOUT_SECS
+			: SystemAttrEnum.DMSXML_OP_TIMEOUT_SECS;
+		int s = attr.getInt();
+		LOG.log("Op timeout is " + s + " secs, dms=" + m_dms);
 		return s * 1000;
 	}
 

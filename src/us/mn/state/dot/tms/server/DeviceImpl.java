@@ -334,7 +334,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	}
 
 	/** Check if link is any type of modem (dial-up or cell) */
-	protected boolean isModemAny() {
+	public boolean isModemAny() {
 		ControllerImpl c = controller;
 		return (c != null) && c.isModemAny();
 	}
