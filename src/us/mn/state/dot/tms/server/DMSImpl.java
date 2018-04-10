@@ -1287,7 +1287,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Perform a periodic poll */
 	@Override
 	public void periodicPoll() {
-		if (isPeriodLong())
+		if (isModemAny())
 			sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 		sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
 		checkMsgUserExpiration();

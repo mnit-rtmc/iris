@@ -1030,6 +1030,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		cabinet.notifyRemove();
 	}
 
+	/** Check if link is any type of modem (dial-up or cell) */
+	public boolean isModemAny() {
+		CommLinkImpl cl = comm_link;
+		return (cl != null) && cl.isModemAny();
+	}
+
 	/** Check if dial-up is required to communicate */
 	public boolean isDialUpRequired() {
 		CommLinkImpl cl = comm_link;

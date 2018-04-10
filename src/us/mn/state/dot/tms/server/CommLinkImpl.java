@@ -208,7 +208,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		modem = m;
 		DevicePoller dp = poller;
 		if (dp != null)
-			dp.setModem(m || isDialUpModem());
+			dp.setModem(isModemAny());
 	}
 
 	/** Set the modem flag */
@@ -223,6 +223,21 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	@Override
 	public boolean getModem() {
 		return modem;
+	}
+
+	/** Check if link is any type of modem (dial-up or cell) */
+	public boolean isModemAny() {
+		return getModem() || isDialUpModem();
+	}
+
+	/** Check if link is configured for a dial-up modem */
+	private boolean isDialUpModem() {
+		return uri.startsWith("modem:");
+	}
+
+	/** Check if dial-up is required to communicate */
+	public boolean isDialUpRequired() {
+		return isDialUpModem() && !isConnected();
 	}
 
 	/** Remote URI for link */
@@ -410,7 +425,7 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 		if (poller != null) {
 			poller.setUri(uri);
 			poller.setTimeout(timeout);
-			poller.setModem(getModem() || isDialUpModem());
+			poller.setModem(isModemAny());
 		}
 	}
 
@@ -474,16 +489,6 @@ public class CommLinkImpl extends BaseObjectImpl implements CommLink {
 	public synchronized void pullController(ControllerImpl c) {
 		Integer d = new Integer(c.getDrop());
 		controllers.remove(d);
-	}
-
-	/** Check if link is configured for a dial-up modem */
-	private boolean isDialUpModem() {
-		return uri.startsWith("modem:");
-	}
-
-	/** Check if dial-up is required to communicate */
-	public boolean isDialUpRequired() {
-		return isDialUpModem() && !isConnected();
 	}
 
 	/** Check if the comm link is currently connected */
