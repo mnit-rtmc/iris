@@ -20,8 +20,6 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import static us.mn.state.dot.tms.DeviceRequest.*;
-import us.mn.state.dot.tms.PlayList;
-import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
 import us.mn.state.dot.tms.server.CameraImpl;
@@ -273,27 +271,24 @@ public class KeyboardState {
 		}
 	}
 
-	/** Get the sequence (PlayList) number */
+	/** Get the camera sequence number */
 	private String getSeqNum() {
 		VideoMonitor vm = monitor;
 		if (vm instanceof VideoMonitorImpl) {
 			VideoMonitorImpl vmi = (VideoMonitorImpl) vm;
-			PlayList pl = vmi.getPlayList();
-			if (pl != null) {
-				Integer n = pl.getNum();
-				if (n != null)
-					return n.toString();
-			}
+			Integer n = vmi.getSeqNum();
+			if (n != null)
+				return n.toString();
 		}
 		return null;
 	}
 
 	/** Is the sequence running */
-	private boolean isSeqRunning() {
+	private boolean isSeqenceRunning() {
 		VideoMonitor vm = monitor;
 		if (vm instanceof VideoMonitorImpl) {
 			VideoMonitorImpl vmi = (VideoMonitorImpl) vm;
-			return vmi.isPlayListRunning();
+			return vmi.isSequenceRunning();
 		}
 		return false;
 	}
@@ -338,7 +333,7 @@ public class KeyboardState {
 	/** Format sequence */
 	private String formatSeq() {
 		String sn = getSeqNum();
-		char sr = isSeqRunning() ? SEQ_PLAY : SEQ_PAUSE;
+		char sr = isSeqenceRunning() ? SEQ_PLAY : SEQ_PAUSE;
 		return (sn != null)
 		    ? String.format("%c Seq %-4s", sr, sn)
 		    : "";
@@ -524,13 +519,13 @@ public class KeyboardState {
 			beepInvalid();
 	}
 
-	/** Select a sequence (PlayList) */
+	/** Select a camera sequence */
 	private void selectSeq() {
 		Integer n = getEntry();
 		VideoMonitor vm = monitor;
-		if (n != null && vm != null) {
-			PlayList pl = PlayListHelper.findNum(n);
-			vm.setPlayList(pl);
+		if (n != null && vm instanceof VideoMonitorImpl) {
+			VideoMonitorImpl vmi = (VideoMonitorImpl) vm;
+			vmi.setSeqNum(n);
 		} else
 			beepInvalid();
 	}
@@ -540,10 +535,10 @@ public class KeyboardState {
 		VideoMonitor vm = monitor;
 		if (vm instanceof VideoMonitorImpl) {
 			VideoMonitorImpl vmi = (VideoMonitorImpl) vm;
-			if (vmi.isPlayListRunning())
-				vmi.pausePlayList();
+			if (vmi.isSequenceRunning())
+				vmi.pauseSequence();
 			else
-				vmi.unpausePlayList();
+				vmi.unpauseSequence();
 		} else
 			beepInvalid();
 	}

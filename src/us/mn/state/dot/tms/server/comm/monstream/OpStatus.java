@@ -20,8 +20,6 @@ import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
-import us.mn.state.dot.tms.PlayList;
-import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
@@ -118,6 +116,16 @@ public class OpStatus extends OpStep {
 		}
 		catch (NumberFormatException e) {
 			throw new ParsingException("INVALID PRESET: " + num);
+		}
+	}
+
+	/** Parse a sequence number */
+	static private int parseSeqNum(String num) throws ParsingException {
+		try {
+			return Integer.parseInt(num);
+		}
+		catch (NumberFormatException e) {
+			throw new ParsingException("INVALID SEQ: " + num);
 		}
 	}
 
@@ -335,18 +343,16 @@ public class OpStatus extends OpStep {
 
 	/** Parse sequence message */
 	private void parseSequence(ControllerImpl ctrl, VideoMonitorImpl vm,
-		String seq) throws InvalidReqException
+		String seq) throws IOException
 	{
 		if ("pause".equals(seq)) {
-			if (vm.isPlayListRunning())
-				vm.pausePlayList();
+			if (vm.isSequenceRunning())
+				vm.pauseSequence();
 			else
-				vm.unpausePlayList();
+				vm.unpauseSequence();
 		} else {
-			PlayList pl = PlayListHelper.findNum(seq);
-			if (pl != null)
-				vm.setPlayList(pl);
-			else
+			int sn = parseSeqNum(seq);
+			if (!vm.setSeqNum(sn))
 				throw new InvalidReqException();
 		}
 	}

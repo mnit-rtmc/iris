@@ -30,6 +30,7 @@ import us.mn.state.dot.tms.ControllerHelper;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.MonitorStyle;
 import us.mn.state.dot.tms.PlayList;
+import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VideoMonitor;
@@ -45,110 +46,25 @@ import us.mn.state.dot.tms.server.event.CameraSwitchEvent;
  */
 public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
-	/** Get the play list dwell time (seconds) */
-	static private int getDwellSec() {
-		return SystemAttrEnum.CAMERA_PLAYLIST_DWELL_SEC.getInt();
- 	}
+	/** Current monitor number to camera sequence mapping */
+	static private HashMap<Integer, CamSequence> cam_seqs =
+		new HashMap<Integer, CamSequence>();
 
-	/** Dwell time paused value */
-	static private final int DWELL_PAUSED = -1;
-
-	/** Play list state */
-	static private class PlayListState {
-
-		/** Create play list state */
-		private PlayListState(PlayList pl) {
-			play_list = pl;
-			item = -1;	// nextItem will advance to 0
-			dwell = 0;
-		}
-
-		/** Running play list */
-		private final PlayList play_list;
-
-		/** Item in play list */
-		private int item;
-
-		/** Remaining dwell time (negative means paused) */
-		private int dwell;
-
-		/** Pause the play list */
-		private void pause() {
-			dwell = DWELL_PAUSED;
-		}
-
-		/** Unpause the play list */
-		private void unpause() {
-			dwell = getDwellSec();
-		}
-
-		/** Update dwell time */
-		private Camera updateDwell() {
-			if (dwell > 0) {
-				dwell--;
-				return null;
-			} else if (0 == dwell) {
-				dwell = getDwellSec();
-				return nextItem();
-			} else {
-				// paused
-				return null;
-			}
-		}
-
-		/** Get next item */
-		private Camera nextItem() {
-			Camera[] cams = play_list.getCameras();
-			item = (item + 1 < cams.length) ? item + 1 : 0;
-			return (item < cams.length) ? cams[item] : null;
-		}
-
-		/** Go to the next item */
-		private Camera goNextItem() {
-			resetDwell();
-			Camera[] cams = play_list.getCameras();
-			item = (item + 1 < cams.length) ? item + 1 : 0;
-			return (item < cams.length) ? cams[item] : null;
-		}
-
-		/** Go to the previous item */
-		private Camera goPrevItem() {
-			resetDwell();
-			Camera[] cams = play_list.getCameras();
-			item = (item > 0) ? item - 1 : cams.length - 1;
-			return (item < cams.length) ? cams[item] : null;
-		}
-
-		/** Reset dwell time */
-		private void resetDwell() {
-			dwell = (dwell >= 0) ? getDwellSec() : DWELL_PAUSED;
-		}
-
-		/** Check if play list is running */
-		private boolean isRunning() {
-			return dwell > DWELL_PAUSED;
-		}
-	}
-
-	/** Current monitor number to play list state mapping */
-	static private HashMap<Integer, PlayListState> pl_states =
-		new HashMap<Integer, PlayListState>();
-
-	/** Set play list state for a monitor number */
-	static private void setPlayListState(int mn, PlayListState pls) {
+	/** Set camera sequence for a monitor number */
+	static private void setCamSequence(int mn, CamSequence seq) {
 		Integer num = new Integer(mn);
-		synchronized (pl_states) {
-			if (pls != null)
-				pl_states.put(num, pls);
+		synchronized (cam_seqs) {
+			if (seq != null)
+				cam_seqs.put(num, seq);
 			else
-				pl_states.remove(num);
+				cam_seqs.remove(num);
 		}
 	}
 
-	/** Get play list state for a monitor number */
-	static private PlayListState getPlayListState(int mn) {
-		synchronized (pl_states) {
-			return pl_states.get(new Integer(mn));
+	/** Get camera sequence for a monitor number */
+	static private CamSequence getCamSequence(int mn) {
+		synchronized (cam_seqs) {
+			return cam_seqs.get(new Integer(mn));
 		}
 	}
 
@@ -516,19 +432,19 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		return null;
 	}
 
-	/** Select the next (non-playlist) camera */
+	/** Select the next (non-sequence) camera */
 	private void nextCam(String src) throws TMSException {
 		CameraImpl c = findNextOrFirst();
 		if (c != null)
 			doSetCamSrc(c, "NEXT " + src, true);
 	}
 
-	/** Select the next camera (playlist or global) */
+	/** Select the next camera (sequence or global) */
 	public void selectNextCam(final String src) {
 		CAM_SWITCH.addJob(new Job() {
 			@Override
 			public void perform() throws TMSException {
-				if (!nextPlayList())
+				if (!nextSequence())
 					nextCam(src);
 			}
 		});
@@ -547,19 +463,19 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		return null;
 	}
 
-	/** Select the previous (non-playlist) camera */
+	/** Select the previous (non-sequence) camera */
 	private void prevCam(String src) throws TMSException {
 		CameraImpl c = findPrevOrLast();
 		if (c != null)
 			doSetCamSrc(c, "PREV " + src, true);
 	}
 
-	/** Select the previous camera (playlist or global) */
+	/** Select the previous camera (sequence or global) */
 	public void selectPrevCam(final String src) {
 		CAM_SWITCH.addJob(new Job() {
 			@Override
 			public void perform() throws TMSException {
-				if (!prevPlayList())
+				if (!prevSequence())
 					prevCam(src);
 			}
 		});
@@ -575,80 +491,92 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	 * This will start the given play list from the beginning. */
 	@Override
 	public void setPlayList(PlayList pl) {
-		PlayListState pls = (pl != null) ? new PlayListState(pl) : null;
-		setPlayListState(mon_num, pls);
-		if (pls != null)
-			CAM_SWITCH.addJob(new PlayListUpdateJob(pls));
+		CamSequence seq = (pl != null) ? new CamSequence(pl) : null;
+		setCamSequence(mon_num, seq);
+		if (seq != null)
+			CAM_SWITCH.addJob(new CamSequenceUpdateJob(seq));
 	}
 
-	/** Get the play list state */
-	private PlayListState getPlayListState() {
-		return getPlayListState(mon_num);
+	/** Get the camera sequence */
+	private CamSequence getCamSequence() {
+		return getCamSequence(mon_num);
 	}
 
-	/** Get the play list */
-	public PlayList getPlayList() {
-		PlayListState pls = getPlayListState();
-		return (pls != null) ? pls.play_list : null;
+	/** Check if monitor has selected camera sequence */
+	public boolean hasSequence() {
+		return getCamSequence() != null;
 	}
 
-	/** Check if a play list is running */
-	public boolean isPlayListRunning() {
-		PlayListState pls = getPlayListState();
-		return (pls != null) ? pls.isRunning() : false;
+	/** Get the camera sequence number */
+	public Integer getSeqNum() {
+		CamSequence seq = getCamSequence();
+		return (seq != null) ? seq.getNum() : null;
 	}
 
-	/** Pause the running play list */
-	public boolean pausePlayList() {
-		PlayListState pls = getPlayListState();
-		if (pls != null)
-			pls.pause();
-		return pls != null;
+	/** Set the camera sequence number */
+	public boolean setSeqNum(Integer sn) {
+		PlayList pl = PlayListHelper.findNum(sn);
+		setPlayList(pl);
+		return pl != null;
 	}
 
-	/** Unpause the running play list */
-	public boolean unpausePlayList() {
-		PlayListState pls = getPlayListState();
-		if (pls != null)
-			pls.unpause();
-		return pls != null;
+	/** Check if a sequence is running */
+	public boolean isSequenceRunning() {
+		CamSequence seq = getCamSequence();
+		return (seq != null) ? seq.isRunning() : false;
 	}
 
-	/** Go to next item in play list */
-	private boolean nextPlayList() throws TMSException {
-		PlayListState pls = getPlayListState();
-		if (pls != null)
-			setCamPlayList(pls.goNextItem());
-		return pls != null;
+	/** Pause the selected sequence */
+	public boolean pauseSequence() {
+		CamSequence seq = getCamSequence();
+		if (seq != null)
+			seq.pause();
+		return seq != null;
 	}
 
-	/** Go to previous item in play list */
-	private boolean prevPlayList() throws TMSException {
-		PlayListState pls = getPlayListState();
-		if (pls != null)
-			setCamPlayList(pls.goPrevItem());
-		return pls != null;
+	/** Unpause the selected sequence */
+	public boolean unpauseSequence() {
+		CamSequence seq = getCamSequence();
+		if (seq != null)
+			seq.unpause();
+		return seq != null;
 	}
 
-	/** Set camera from a play list */
-	private void setCamPlayList(Camera c) throws TMSException {
+	/** Go to next item in sequence */
+	private boolean nextSequence() throws TMSException {
+		CamSequence seq = getCamSequence();
+		if (seq != null)
+			setCamSequence(seq.goNextItem());
+		return seq != null;
+	}
+
+	/** Go to previous item in sequence */
+	private boolean prevSequence() throws TMSException {
+		CamSequence seq = getCamSequence();
+		if (seq != null)
+			setCamSequence(seq.goPrevItem());
+		return seq != null;
+	}
+
+	/** Set camera from a sequence */
+	private void setCamSequence(Camera c) throws TMSException {
 		if (c instanceof CameraImpl) {
 			CameraImpl cam = (CameraImpl) c;
 			doSetCamSrc(cam, PlayList.SONAR_TYPE, true);
 		}
 	}
 
-	/** Job for updating play list state */
-	private class PlayListUpdateJob extends Job {
-		private final PlayListState pls;
-		private PlayListUpdateJob(PlayListState pls) {
+	/** Job for updating camera sequence */
+	private class CamSequenceUpdateJob extends Job {
+		private final CamSequence seq;
+		private CamSequenceUpdateJob(CamSequence seq) {
 			super(Calendar.SECOND, 1, true);
-			this.pls = pls;
+			this.seq = seq;
 		}
 		@Override
 		public void perform() throws TMSException {
-			if (pls == getPlayListState() && isActive())
-				setCamPlayList(pls.updateDwell());
+			if (seq == getCamSequence() && isActive())
+				setCamSequence(seq.updateDwell());
 			else
 				CAM_SWITCH.removeJob(this);
 		}

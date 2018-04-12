@@ -46,11 +46,11 @@ public class MacroCycleProp extends MonStatusProp {
 		int dir = parse8(rx_buf);
 		switch (dir) {
 		case DIR_NEXT:
-			if (nextPlayList(op))
+			if (nextSequence(op))
 				return;
 			break;
 		case DIR_PREV:
-			if (prevPlayList(op))
+			if (prevSequence(op))
 				return;
 			break;
 		default:
@@ -59,22 +59,22 @@ public class MacroCycleProp extends MonStatusProp {
 		setErrMsg(ErrorMsg.MacNotPresent);
 	}
 
-	/** Go to the next item in play list */
-	private boolean nextPlayList(Operation op) {
+	/** Go to the next item in sequence */
+	private boolean nextSequence(Operation op) {
 		VideoMonitorImpl vm = findVideoMonitor();
-		boolean pl = (vm != null) && (vm.getPlayList() != null);
-		if (pl)
+		boolean seq = (vm != null) && vm.hasSequence();
+		if (seq)
 			vm.selectNextCam(op.getId());
-		return pl;
+		return seq;
 	}
 
-	/** Go to the previous item in play list */
-	private boolean prevPlayList(Operation op) {
+	/** Go to the previous item in sequence */
+	private boolean prevSequence(Operation op) {
 		VideoMonitorImpl vm = findVideoMonitor();
-		boolean pl = (vm != null) && (vm.getPlayList() != null);
-		if (pl)
+		boolean seq = (vm != null) && vm.hasSequence();
+		if (seq)
 			vm.selectPrevCam(op.getId());
-		return pl;
+		return seq;
 	}
 
 	/** Get the mode bits */
@@ -83,7 +83,7 @@ public class MacroCycleProp extends MonStatusProp {
 		// NOTE: This logic effectively toggles the BIT_MACRO flag,
 		//       which causes the LCD display on the keyboard to refresh
 		//       the macro number.  Without this, it blanks out.
-		return isPlayListRunning(vm)
+		return isSequenceRunning(vm)
 			? BIT_ONLINE
 			: (BIT_ONLINE | BIT_MACRO);
 	}

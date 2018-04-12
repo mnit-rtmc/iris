@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
-import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;
@@ -60,22 +59,19 @@ public class MonStatusProp extends PelcoPProp {
 		return cameraNumBlank();
 	}
 
-	/** Get playlist number */
-	static private int getPlayListNum(VideoMonitorImpl vm) {
+	/** Get camera sequence number */
+	static private int getSequenceNum(VideoMonitorImpl vm) {
 		if (vm != null) {
-			PlayList pl = vm.getPlayList();
-			if (pl != null) {
-				Integer n = pl.getNum();
-				if (n != null && n > 0)
-					return n;
-			}
+			Integer n = vm.getSeqNum();
+			if (n != null && n > 0)
+				return n;
 		}
 		return 0;
 	}
 
-	/** Check if a play list is running */
-	static protected boolean isPlayListRunning(VideoMonitorImpl vm) {
-		return (vm != null) && vm.isPlayListRunning();
+	/** Check if a sequence is running */
+	static protected boolean isSequenceRunning(VideoMonitorImpl vm) {
+		return (vm != null) && vm.isSequenceRunning();
 	}
 
 	/** Find a camera by UID */
@@ -131,20 +127,20 @@ public class MonStatusProp extends PelcoPProp {
 		if (logged_in && mon > 0) {
 			VideoMonitorImpl vm = findVideoMonitor();
 			int cam = getCamNum(vm);
-			int pln = getPlayListNum(vm);
+			int sqn = getSequenceNum(vm);
 			int chi = cam / 100;
 			int clo = cam % 100;
 			int mhi = mon / 100;
 			int mlo = mon % 100;
-			int phi = pln / 100;
-			int plo = pln % 100;
+			int shi = sqn / 100;
+			int slo = sqn % 100;
 			formatBCD2(tx_buf, mlo);
 			format8(tx_buf, getModeBits(vm));
 			format8(tx_buf, 0);
 			formatBCD2(tx_buf, chi);
 			formatBCD2(tx_buf, clo);
-			formatBCD2(tx_buf, phi);
-			formatBCD2(tx_buf, plo);
+			formatBCD2(tx_buf, shi);
+			formatBCD2(tx_buf, slo);
 			format16(tx_buf, 0);
 			format8(tx_buf, 0);
 			formatBCD2(tx_buf, chi);
@@ -160,7 +156,7 @@ public class MonStatusProp extends PelcoPProp {
 
 	/** Get the mode bits */
 	protected int getModeBits(VideoMonitorImpl vm) {
-		return isPlayListRunning(vm)
+		return isSequenceRunning(vm)
 			? (BIT_ONLINE | BIT_MACRO)
 			: BIT_ONLINE;
 	}

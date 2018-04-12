@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.server.comm.monstream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -93,13 +92,11 @@ public class DisplayProp extends MonProp {
 	/** Get sequence number as string */
 	private String getSeqNumAsString() {
 		StringBuilder sb = new StringBuilder();
-		PlayList pl = (monitor != null) ? monitor.getPlayList() : null;
-		if (pl != null) {
-			Integer sn = pl.getNum();
+		if (monitor != null) {
+			Integer sn = monitor.getSeqNum();
 			if (sn != null)
 				sb.append(sn);
-			assert (monitor != null);
-			if (!monitor.isPlayListRunning())
+			if (!monitor.isSequenceRunning())
 				sb.append(' ').append('"');
 		}
 		return sb.toString();

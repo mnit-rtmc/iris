@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,6 @@
 package us.mn.state.dot.tms.server.comm.pelcop;
 
 import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.PlayList;
-import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -46,14 +44,8 @@ public class MacroSelectProp extends MonStatusProp {
 		int mac = parseBCD4(rx_buf);
 		int mhi = parseBCD2(rx_buf);
 		setMonNumber((100 * mhi) + mlo);
-		PlayList pl = PlayListHelper.findNum(mac);
-		if (pl != null) {
-			VideoMonitorImpl vm = findVideoMonitor();
-			if (vm != null) {
-				vm.setPlayList(pl);
-				return;
-			}
-		}
-		setErrMsg(ErrorMsg.MacNotPresent);
+		VideoMonitorImpl vm = findVideoMonitor();
+		if (null == vm || !vm.setSeqNum(mac))
+			setErrMsg(ErrorMsg.MacNotPresent);
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,8 +44,8 @@ public class MacroDeleteProp extends MonStatusProp {
 		int mhi = parseBCD2(rx_buf);
 		setMonNumber((100 * mhi) + mlo);
 		VideoMonitorImpl vm = findVideoMonitor();
-		if (vm != null && vm.getPlayList() != null)
-			vm.setPlayList(null);
+		if (vm != null && vm.hasSequence())
+			vm.setSeqNum(null);
 		else
 			setErrMsg(ErrorMsg.MacNotPresent);
 	}
