@@ -31,7 +31,6 @@ import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.MonitorStyle;
 import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.PlayListHelper;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.VideoMonitorHelper;

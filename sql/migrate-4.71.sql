@@ -16,4 +16,9 @@ CREATE VIEW action_plan_view AS
 	FROM iris.action_plan;
 GRANT SELECT ON action_plan_view TO PUBLIC;
 
+-- Rename camera_playlist_dwell_sec to camera_sequence_dwell_sec
+UPDATE iris.system_attribute
+   SET name = 'camera_sequence_dwell_sec'
+ WHERE name = 'camera_playlist_dwell_sec';
+
 COMMIT;
