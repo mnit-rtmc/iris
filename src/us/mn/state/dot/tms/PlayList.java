@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,20 +26,20 @@ import us.mn.state.dot.sonar.User;
  */
 public interface PlayList extends SonarObject {
 
-	/** Minimum play list number */
+	/** Minimum sequence number */
 	int NUM_MIN = 1;
 
-	/** Maximum play list number */
+	/** Maximum sequence number */
 	int NUM_MAX = 9999;
 
 	/** SONAR type name */
 	String SONAR_TYPE = "play_list";
 
-	/** Set play list number */
-	void setNum(Integer n);
+	/** Set sequence number */
+	void setSeqNum(Integer n);
 
-	/** Get play list number */
-	Integer getNum();
+	/** Get sequence number */
+	Integer getSeqNum();
 
 	/** Set the cameras in the play list */
 	void setCameras(Camera[] cams);

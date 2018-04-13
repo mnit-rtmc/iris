@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -40,30 +40,36 @@ public class PlayListHelper extends BaseHelper {
 			PlayList.SONAR_TYPE));
 	}
 
-	/** Find a play list with the specific num */
-	static public PlayList findNum(final int num) {
+	/** Find a play list with the specified name or number */
+	static public PlayList find(String n) {
+		PlayList pl = lookup(n);
+		return (pl != null) ? pl : findSeqNum(n);
+	}
+
+	/** Find a play list with the specific seq num */
+	static public PlayList findSeqNum(final int sn) {
 		Iterator<PlayList> it = iterator();
 		while (it.hasNext()) {
 			PlayList pl = it.next();
 			if (pl != null) {
-				Integer n = pl.getNum();
-				if (n != null && n == num)
+				Integer n = pl.getSeqNum();
+				if (n != null && n == sn)
 					return pl;
 			}
 		}
 		return null;
 	}
 
-	/** Find a play list with the specific num */
-	static public PlayList findNum(String num) {
-		Integer n = parseNum(num);
-		return (n != null) ? findNum(n) : null;
+	/** Find a play list with the specific sequence num */
+	static public PlayList findSeqNum(String sn) {
+		Integer n = parseSeqNum(sn);
+		return (n != null) ? findSeqNum(n) : null;
 	}
 
-	/** Parse the integer num of a play list */
-	static public Integer parseNum(String num) {
+	/** Parse the sequence num of a play list */
+	static public Integer parseSeqNum(String n) {
 		try {
-			return Integer.parseInt(num);
+			return Integer.parseInt(n);
 		}
 		catch (NumberFormatException e) {
 			return null;

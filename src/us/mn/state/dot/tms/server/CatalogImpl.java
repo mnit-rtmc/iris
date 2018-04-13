@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2018  Minnesota Department of Transportation
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,33 +19,33 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
-import us.mn.state.dot.sonar.Namespace;
+import us.mn.state.dot.tms.Catalog;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.PlayList.NUM_MIN;
+import static us.mn.state.dot.tms.PlayList.NUM_MAX;
 
 /**
- * Play list (camera sequence).
+ * Catalog (camera play list sequence).
  *
  * @author Douglas lau
  */
-public class PlayListImpl extends BaseObjectImpl implements PlayList {
+public class CatalogImpl extends BaseObjectImpl implements Catalog {
 
-	/** PlayList / Camera table mapping */
+	/** Catalog / PlayList table mapping */
 	static private TableMappingList mapping;
 
-	/** Load all the play lists */
+	/** Load all the catalogs */
 	static public void loadAll() throws TMSException {
-		namespace.registerType(SONAR_TYPE, PlayListImpl.class,
-			PlayList.GROUP_CHECKER);
+		namespace.registerType(SONAR_TYPE, CatalogImpl.class);
 		mapping = new TableMappingList(store, "iris", SONAR_TYPE,
-			Camera.SONAR_TYPE);
+			PlayList.SONAR_TYPE);
 		store.query("SELECT name, seq_num FROM iris." + SONAR_TYPE +";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new PlayListImpl(row));
+				namespace.addObject(new CatalogImpl(row));
 			}
 		});
 	}
@@ -71,42 +71,42 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 		return SONAR_TYPE;
 	}
 
-	/** Create a new play list */
-	public PlayListImpl(String n) {
+	/** Create a new catalog */
+	public CatalogImpl(String n) {
 		super(n);
 	}
 
-	/** Create a play list from database lookup */
-	private PlayListImpl(ResultSet row) throws SQLException, TMSException {
-		this(row.getString(1),          // name
-		     (Integer) row.getObject(2) // seq_num
+	/** Create a catalog from database lookup */
+	private CatalogImpl(ResultSet row) throws SQLException, TMSException {
+		this(row.getString(1),  // name
+		     row.getInt(2)	// seq_num
 		);
 	}
 
-	/** Create a play list from database lookup */
-	private PlayListImpl(String n, Integer sn) throws TMSException {
+	/** Create a catalog from database lookup */
+	private CatalogImpl(String n, int sn) throws TMSException {
 		this(n);
 		seq_num = sn;
-		ArrayList<CameraImpl> cam_ls = new ArrayList<CameraImpl>();
+		ArrayList<PlayListImpl> pls = new ArrayList<PlayListImpl>();
 		for (String o: mapping.lookup(this)) {
-			cam_ls.add(lookupCamera(o));
+			pls.add(lookupPlayList(o));
 		}
-		cameras = cam_ls.toArray(new CameraImpl[0]);
+		play_lists = pls.toArray(new PlayListImpl[0]);
 	}
 
 	/** Sequence number */
-	private Integer seq_num;
+	private int seq_num;
 
 	/** Set sequence number */
 	@Override
-	public void setSeqNum(Integer n) {
+	public void setSeqNum(int n) {
 		seq_num = n;
 	}
 
 	/** Set sequence number */
-	public void doSetSeqNum(Integer n) throws TMSException {
+	public void doSetSeqNum(int n) throws TMSException {
 		if (n != seq_num) {
-			if (n != null && (n < NUM_MIN || n > NUM_MAX))
+			if (n < NUM_MIN || n > NUM_MAX)
 				throw new ChangeVetoException("Invalid seq #");
 			store.update(this, "seq_num", n);
 			setSeqNum(n);
@@ -115,40 +115,40 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 
 	/** Get sequence number */
 	@Override
-	public Integer getSeqNum() {
+	public int getSeqNum() {
 		return seq_num;
 	}
 
-	/** Cameras in the play list */
-	private CameraImpl[] cameras = new CameraImpl[0];
+	/** Play lists in the catalog */
+	private PlayListImpl[] play_lists = new PlayListImpl[0];
 
-	/** Set the cameras in the play list */
+	/** Set the play lists in the catalog */
 	@Override
-	public void setCameras(Camera[] cams) {
-		ArrayList<CameraImpl> cam_ls = new ArrayList<CameraImpl>();
-		for (Camera c: cams) {
-			if (c instanceof CameraImpl)
-				cam_ls.add((CameraImpl) c);
+	public void setPlayLists(PlayList[] pl) {
+		ArrayList<PlayListImpl> pls = new ArrayList<PlayListImpl>();
+		for (PlayList p: pl) {
+			if (p instanceof PlayListImpl)
+				pls.add((PlayListImpl) p);
 		}
-		cameras = cam_ls.toArray(new CameraImpl[0]);
+		play_lists = pls.toArray(new PlayListImpl[0]);
 	}
 
-	/** Set the cameras in the play list */
-	public void doSetCameras(Camera[] cams) throws TMSException {
-		ArrayList<Storable> cam_ls = new ArrayList<Storable>();
-		for (Camera c: cams) {
-			if (c instanceof CameraImpl)
-				cam_ls.add((CameraImpl) c);
+	/** Set the play lists in the catalog */
+	public void doSetPlayLists(PlayList[] pl) throws TMSException {
+		ArrayList<Storable> pls = new ArrayList<Storable>();
+		for (PlayList p: pl) {
+			if (p instanceof PlayListImpl)
+				pls.add((PlayListImpl) p);
 			else
-				throw new ChangeVetoException("Invalid camera");
+				throw new ChangeVetoException("Invalid p-list");
 		}
-		mapping.update(this, cam_ls);
-		setCameras(cams);
+		mapping.update(this, pls);
+		setPlayLists(pl);
 	}
 
-	/** Get the cameras in the play list */
+	/** Get the play lists in the catalog */
 	@Override
-	public Camera[] getCameras() {
-		return cameras;
+	public PlayList[] getPlayLists() {
+		return play_lists;
 	}
 }

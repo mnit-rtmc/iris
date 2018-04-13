@@ -76,6 +76,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		CameraImpl.loadAll();
 		CameraPresetImpl.loadAll();
 		PlayListImpl.loadAll();
+		CatalogImpl.loadAll();
 		MonitorStyleImpl.loadAll();
 		VideoMonitorImpl.loadAll();
 		BeaconImpl.loadAll();
@@ -214,6 +215,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	static protected CameraImpl lookupCamera(String name) {
 		SonarObject so = lookupObject(CameraImpl.SONAR_TYPE, name);
 		return (so instanceof CameraImpl) ? (CameraImpl) so : null;
+	}
+
+	/** Lookup a play list */
+	static protected PlayListImpl lookupPlayList(String name) {
+		SonarObject so = lookupObject(PlayListImpl.SONAR_TYPE, name);
+		return (so instanceof PlayListImpl) ? (PlayListImpl) so : null;
 	}
 
 	/** Lookup a camera preset */

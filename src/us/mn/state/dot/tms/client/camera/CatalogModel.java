@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2018  Minnesota Department of Transportation
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,61 +15,61 @@
 package us.mn.state.dot.tms.client.camera;
 
 import java.util.ArrayList;
+import us.mn.state.dot.tms.Catalog;
+import us.mn.state.dot.tms.CatalogHelper;
 import us.mn.state.dot.tms.PlayList;
-import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTableModel;
 
 /**
- * Table model for play lists.
+ * Table model for catalogs.
  *
  * @author Douglas Lau
  */
-public class PlayListModel extends ProxyTableModel<PlayList> {
+public class CatalogModel extends ProxyTableModel<Catalog> {
 
 	/** Create a proxy descriptor */
-	static private ProxyDescriptor<PlayList> descriptor(final Session s) {
-		return new ProxyDescriptor<PlayList>(
-			s.getSonarState().getCamCache().getPlayLists(),
+	static private ProxyDescriptor<Catalog> descriptor(final Session s) {
+		return new ProxyDescriptor<Catalog>(
+			s.getSonarState().getCamCache().getCatalogs(),
 			true,	/* has_properties */
 			true,	/* has_create_delete */
 			false	/* has_name */
 		) {
 			@Override
-			public PlayListProperties createPropertiesForm(
-				PlayList pl)
+			public CatalogProperties createPropertiesForm(Catalog c)
 			{
-				return new PlayListProperties(s, pl);
+				return new CatalogProperties(s, c);
 			}
 		};
 	}
 
 	/** Create the columns in the model */
 	@Override
-	protected ArrayList<ProxyColumn<PlayList>> createColumns() {
-		ArrayList<ProxyColumn<PlayList>> cols =
-			new ArrayList<ProxyColumn<PlayList>>(2);
-		cols.add(new ProxyColumn<PlayList>("play.list", 120) {
-			public Object getValueAt(PlayList pl) {
-				return pl.getName();
+	protected ArrayList<ProxyColumn<Catalog>> createColumns() {
+		ArrayList<ProxyColumn<Catalog>> cols =
+			new ArrayList<ProxyColumn<Catalog>>(2);
+		cols.add(new ProxyColumn<Catalog>("catalog", 120) {
+			public Object getValueAt(Catalog c) {
+				return c.getName();
 			}
 		});
-		cols.add(new ProxyColumn<PlayList>("play.list.seq", 120) {
-			public Object getValueAt(PlayList pl) {
-				return pl.getSeqNum();
+		cols.add(new ProxyColumn<Catalog>("catalog.seq", 120) {
+			public Object getValueAt(Catalog c) {
+				return c.getSeqNum();
 			}
 		});
 		return cols;
 	}
 
-	/** Create a new play list table model */
-	public PlayListModel(Session s) {
+	/** Create a new catalog table model */
+	public CatalogModel(Session s) {
 		super(s, descriptor(s), 12);
 	}
 
-	/** Create a new play list */
+	/** Create a new catalog */
 	@Override
 	public void createObject(String n) {
 		// Ignore name given to us
@@ -78,11 +78,11 @@ public class PlayListModel extends ProxyTableModel<PlayList> {
 			descriptor.cache.createObject(name);
 	}
 
-	/** Create a unique play list name */
+	/** Create a unique catalog name */
 	private String createUniqueName() {
 		for (int i = PlayList.NUM_MIN; i <= PlayList.NUM_MAX; i++) {
-			String n = "PL_" + i;
-			if (PlayListHelper.lookup(n) == null)
+			String n = "CAT_" + i;
+			if (CatalogHelper.lookup(n) == null)
 				return n;
 		}
 		assert false;

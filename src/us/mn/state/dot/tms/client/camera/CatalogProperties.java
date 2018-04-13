@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017-2018  Minnesota Department of Transportation
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,50 +15,50 @@
 package us.mn.state.dot.tms.client.camera;
 
 import us.mn.state.dot.sonar.client.TypeCache;
-import us.mn.state.dot.tms.PlayList;
+import us.mn.state.dot.tms.Catalog;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
- * PlayListProperties is a dialog for entering and editing play lists.
+ * CatalogProperties is a dialog for entering and editing catalogs.
  *
  * @author Douglas Lau
  */
-public class PlayListProperties extends SonarObjectForm<PlayList> {
+public class CatalogProperties extends SonarObjectForm<Catalog> {
 
-	/** Play list panel */
-	private final PlayListPanel play_pnl;
+	/** Catalog panel */
+	private final CatalogPanel cat_pnl;
 
-	/** Create a new play list properties form */
-	public PlayListProperties(Session s, PlayList pl) {
-		super(I18N.get("play.list") + ": ", s, pl);
-		play_pnl = new PlayListPanel(s, pl);
+	/** Create a new catalog properties form */
+	public CatalogProperties(Session s, Catalog c) {
+		super(I18N.get("catalog") + ": ", s, c);
+		cat_pnl = new CatalogPanel(s, c);
 	}
 
 	/** Get the SONAR type cache */
 	@Override
-	protected TypeCache<PlayList> getTypeCache() {
-		return state.getCamCache().getPlayLists();
+	protected TypeCache<Catalog> getTypeCache() {
+		return state.getCamCache().getCatalogs();
 	}
 
 	/** Initialize the widgets on the form */
 	@Override
 	protected void initialize() {
-		play_pnl.initialize();
-		add(play_pnl);
+		cat_pnl.initialize();
+		add(cat_pnl);
 		super.initialize();
 	}
 
 	/** Update the edit mode */
 	@Override
 	protected void updateEditMode() {
-		play_pnl.updateEditMode();
+		cat_pnl.updateEditMode();
 	}
 
 	/** Update one attribute on the form */
 	@Override
 	protected void doUpdateAttribute(String a) {
-		play_pnl.updateAttribute(a);
+		cat_pnl.updateAttribute(a);
 	}
 }

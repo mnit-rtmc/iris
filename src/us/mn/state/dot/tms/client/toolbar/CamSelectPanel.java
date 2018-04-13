@@ -155,7 +155,7 @@ public class CamSelectPanel extends ToolPanel {
 	private PlayList lookupPlayList() {
 		String t = getText();
 		PlayList pl = PlayListHelper.lookup(t);
-		return (pl != null) ? pl : PlayListHelper.findNum(t);
+		return (pl != null) ? pl : PlayListHelper.findSeqNum(t);
 	}
 
 	/** Get icon style for a play list */

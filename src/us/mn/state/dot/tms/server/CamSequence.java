@@ -50,9 +50,9 @@ public class CamSequence {
 	private int dwell;
 
 	/** Get the sequence number */
-	public Integer getNum() {
+	public Integer getSeqNum() {
 		return (play_list != null)
-		      ? play_list.getNum()
+		      ? play_list.getSeqNum()
 		      : null;
 	}
 

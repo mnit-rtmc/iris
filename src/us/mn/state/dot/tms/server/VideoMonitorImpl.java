@@ -509,12 +509,12 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Get the camera sequence number */
 	public Integer getSeqNum() {
 		CamSequence seq = getCamSequence();
-		return (seq != null) ? seq.getNum() : null;
+		return (seq != null) ? seq.getSeqNum() : null;
 	}
 
 	/** Set the camera sequence number */
 	public boolean setSeqNum(Integer sn) {
-		PlayList pl = PlayListHelper.findNum(sn);
+		PlayList pl = PlayListHelper.findSeqNum(sn);
 		setPlayList(pl);
 		return pl != null;
 	}
