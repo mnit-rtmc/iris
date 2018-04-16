@@ -39,11 +39,8 @@ public interface DevicePoller {
 	boolean isConnected();
 
 	/** Get max seconds an idle connection should be left open
-	 * (-1 == indefinite). */
+	 * (0 indicates indefinite). */
 	int getIdleDisconnectSec();
-	
-	/** Disconnect if idle */
-	void disconnectIfIdle();
 
 	/** Destroy the poller */
 	void destroy();

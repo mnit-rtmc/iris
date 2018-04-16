@@ -94,9 +94,7 @@ public class ThreadedPoller<T extends ControllerProperty>
 	 * @param et Event type.
 	 * @param msg Error message.
 	 * @return true If all operations are done. */
-	public boolean handleError(final EventType et, final String msg)
-		throws InterruptedException
-	{
+	public boolean handleError(final EventType et, final String msg) {
 		log("HANDLING " + msg);
 		ArrayList<OpController<T>> not_done =
 			new ArrayList<OpController<T>>();
@@ -205,18 +203,11 @@ public class ThreadedPoller<T extends ControllerProperty>
 			logger);
 	}
 
-	/** Disconnect */
-	private synchronized void disconnect() {
+	/** Disconnect and destroy comm thread */
+	public synchronized void disconnect() {
 		if (c_thread != null)
 			c_thread.destroy();
 		c_thread = null;
 		log("THREAD STOP");
-	}
-
-	/** Disconnect if idle */
-	@Override
-	public void disconnectIfIdle() {
-		if (queue.isEmpty())
-			disconnect();
 	}
 }

@@ -675,13 +675,6 @@ abstract public class BasePoller implements DevicePoller {
 		}
 	}
 
-	/** Disconnect if idle */
-	@Override
-	public void disconnectIfIdle() {
-		if (isPollEmpty() && isRecvEmpty())
-			closeChannel();
-	}
-
 	/** Check if the poll queue is empty */
 	private boolean isPollEmpty() {
 		synchronized (op_set) {

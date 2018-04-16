@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2017       SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -143,28 +143,35 @@ public final class OpQueue<T extends ControllerProperty> {
 	}
 
 	/** Get the next operation from the queue (and remove it).
-	 * If there's no op in the queue, enters a wait state.  Waits
-	 * until an op is added (at which point that op is returned)
-	 * -or- until some other event causes this method to throw
-	 * an exception. */
-	public synchronized OpController<T> next() throws InterruptedException {
+	 * Waits until an operation is added, the timeout expires or the thread
+	 * is interrupted.
+	 * @param idle_ms Idle timeout (ms); 0 indicates no timeout.
+	 * @return Operation at front of queue.
+	 * @throws InterruptedException If thread is interrupted or idle timeout
+	 *                              expires. */
+	public synchronized OpController<T> next(long idle_ms)
+		throws InterruptedException
+	{
 		work = null;
-		while (null == front)
-			wait();
+		while (null == front) {
+			wait(idle_ms);
+			if (idle_ms > 0 && null == front)
+				throw new InterruptedException("Idle timeout");
+		}
 		work = front.operation;
 		front = front.next;
 		return work;
 	}
 
 	/** Get the next operation from the queue (and remove it).
-	 * If there's no op in the queue, immediately returns null. */
+	 * If there's no op in the queue, immediately return null. */
 	public synchronized OpController<T> tryNext() {
-		work = null;
+		OpController<T> op = null;
 		if (front != null) {
-			work = front.operation;
+			op = front.operation;
 			front = front.next;
 		}
-		return work;
+		return op;
 	}
 
 	/** Do something to each operation in the queue */

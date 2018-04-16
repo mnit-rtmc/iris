@@ -20,12 +20,9 @@ import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import us.mn.state.dot.sched.DebugLog;
-import us.mn.state.dot.sched.Job;
-import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.EventType.COMM_ERROR;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
@@ -171,6 +168,7 @@ public class CommThread<T extends ControllerProperty> {
 			e.printStackTrace();
 		}
 		finally {
+			poller.disconnect();
 			connected = false;
 			clog("STOPPING");
 		}
@@ -223,17 +221,20 @@ public class CommThread<T extends ControllerProperty> {
 	private void pollQueue(Messenger m) throws InterruptedException,
 		IOException
 	{
+		final long idle_ms = getIdleDisconnectMS();
 		setStatus("");
 		while (shouldContinue()) {
-			OpController<T> op = queue.tryNext();
-			if (op == null) {
-				startIdleDisconnectTimer();
-				op = queue.next();
-				stopIdleDisconnectTimer();
-			}
+			OpController<T> op = queue.next(idle_ms);
 			doPoll(m, op);
 			setStatus("");
 		}
+	}
+
+	/** Get idle disconnect time.
+	 * @return Time (ms) before disconnecting an idle connection (0 to wait
+	 *         indefinitely). */
+	private long getIdleDisconnectMS() {
+		return poller.getIdleDisconnectSec() * 1000L;
 	}
 
 	/** Perform one poll for an operation.
@@ -339,58 +340,5 @@ public class CommThread<T extends ControllerProperty> {
 	private void sendSettings(ControllerImpl c, PriorityLevel p) {
 		if (c.isActive())
 			poller.sendSettings(c, p);
-	}
-
-	//----- IdleDisconnect code --------------------
-
-	/** Scheduler for idle-disconnect jobs */
-	static private final Scheduler IDLEDISCONNECT = new Scheduler("idledisconnect");
-
-	/** Current idle-disconnect job for this CommThread */
-	private transient IdleDisconnectJob idle_disconnect_job = null;
-
-	/** Stop the idle-disconnect timer */
-	private void stopIdleDisconnectTimer() {
-		IdleDisconnectJob hj = idle_disconnect_job;
-		if (hj != null) {
-			IDLEDISCONNECT.removeJob(hj);
-			idle_disconnect_job = null;
-		}
-	}
-
-	/** Start the idle-disconnect timer
-	 * (if appropriate for this connection) */
-	private void startIdleDisconnectTimer() {
-		stopIdleDisconnectTimer();
-		int delaysec = getIdleDisconnectSec();
-		if (delaysec > 0) {
-			idle_disconnect_job = new IdleDisconnectJob(delaysec);
-			IDLEDISCONNECT.addJob(idle_disconnect_job);
-		}
-	}
-
-	/** Get max seconds an idle connection should be left open
-	 * (0 indicates indefinite). */
-	private int getIdleDisconnectSec() {
-		DevicePoller p = poller;
-		return (p != null)
-		      ? p.getIdleDisconnectSec()
-		      : 0; // Indefinite
-	}
-
-	/** Job that disconnects an idle connection */
-	private class IdleDisconnectJob extends Job {
-		private IdleDisconnectJob(int delaysec) {
-			super(delaysec * 1000); // seconds -> milliseconds
-		}
-
-		@Override
-		public void perform() {
-			if (idle_disconnect_job != this)
-				return; // only process current disconnect-job
-			DevicePoller dp = poller;
-			if (dp != null)
-				dp.disconnectIfIdle();
-		}
 	}
 }
