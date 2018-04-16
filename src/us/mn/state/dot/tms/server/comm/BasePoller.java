@@ -373,11 +373,11 @@ abstract public class BasePoller implements DevicePoller {
 	}
 
 	/** Get max seconds an idle connection should be left open
-	 * (-1 == indefinite). */
+	 * (0 indicates indefinite). */
 	@Override
 	public int getIdleDisconnectSec() {
 		SystemAttrEnum attr = getIdleDisconnectAttr();
-		return (attr != null) ? attr.getInt() : -1;
+		return (attr != null) ? attr.getInt() : 0;
 	}
 
 	/** Get the comm idle disconnect system attribute */

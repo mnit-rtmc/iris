@@ -363,24 +363,19 @@ public class CommThread<T extends ControllerProperty> {
 	private void startIdleDisconnectTimer() {
 		stopIdleDisconnectTimer();
 		int delaysec = getIdleDisconnectSec();
-		if (delaysec >= 0) {
-			// Set minimum (non-indefinite) idle delay to 1 sec
-			// to avoid a race condition between the disconnect
-			// timer and the op processing thread...
-			if (delaysec == 0)
-				delaysec = 1;
+		if (delaysec > 0) {
 			idle_disconnect_job = new IdleDisconnectJob(delaysec);
 			IDLEDISCONNECT.addJob(idle_disconnect_job);
 		}
 	}
 
 	/** Get max seconds an idle connection should be left open
-	 * (-1 == indefinite). */
+	 * (0 indicates indefinite). */
 	private int getIdleDisconnectSec() {
 		DevicePoller p = poller;
 		return (p != null)
 		      ? p.getIdleDisconnectSec()
-		      : -1; // Indefinite
+		      : 0; // Indefinite
 	}
 
 	/** Job that disconnects an idle connection */
