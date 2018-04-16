@@ -45,6 +45,9 @@ import us.mn.state.dot.tms.server.event.CameraSwitchEvent;
  */
 public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
+	/** Camera sequence source */
+	static private final String SRC_SEQ = "seq #";
+
 	/** Current monitor number to camera sequence mapping */
 	static private HashMap<Integer, CamSequence> cam_seqs =
 		new HashMap<Integer, CamSequence>();
@@ -376,10 +379,10 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 			c = null;
 		if (c != camera) {
 			store.update(this, "camera", c);
-			// Only clear play list on camera selection
-			// from a source other than a play list.
-			if (select && !PlayList.SONAR_TYPE.equals(src))
-				setPlayList(null);
+			// Clear sequence on camera selection
+			// from a source other than a sequence.
+			if (select && !src.startsWith(SRC_SEQ))
+				setCamSequence(mon_num, null);
 			setCamera(c);
 			if (select || r)
 				selectCamera(c, src);
@@ -514,9 +517,11 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 
 	/** Set the camera sequence number */
 	public boolean setSeqNum(Integer sn) {
-		PlayList pl = PlayListHelper.findSeqNum(sn);
-		setPlayList(pl);
-		return pl != null;
+		CamSequence seq = (sn != null) ? new CamSequence(sn) : null;
+		setCamSequence(mon_num, seq);
+		if (seq != null)
+			CAM_SWITCH.addJob(new CamSequenceUpdateJob(seq));
+		return seq != null;
 	}
 
 	/** Check if a sequence is running */
@@ -544,24 +549,29 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 	/** Go to next item in sequence */
 	private boolean nextSequence() throws TMSException {
 		CamSequence seq = getCamSequence();
-		if (seq != null)
-			setCamSequence(seq.goNextItem());
+		if (seq != null) {
+			seq.goNextItem();
+			setCamFromSequence(seq);
+		}
 		return seq != null;
 	}
 
 	/** Go to previous item in sequence */
 	private boolean prevSequence() throws TMSException {
 		CamSequence seq = getCamSequence();
-		if (seq != null)
-			setCamSequence(seq.goPrevItem());
+		if (seq != null) {
+			seq.goPrevItem();
+			setCamFromSequence(seq);
+		}
 		return seq != null;
 	}
 
 	/** Set camera from a sequence */
-	private void setCamSequence(Camera c) throws TMSException {
+	private void setCamFromSequence(CamSequence seq) throws TMSException {
+		Camera c = seq.getCamera();
 		if (c instanceof CameraImpl) {
 			CameraImpl cam = (CameraImpl) c;
-			doSetCamSrc(cam, PlayList.SONAR_TYPE, true);
+			doSetCamSrc(cam, SRC_SEQ + seq.getSeqNum(), true);
 		}
 	}
 
@@ -574,9 +584,10 @@ public class VideoMonitorImpl extends DeviceImpl implements VideoMonitor {
 		}
 		@Override
 		public void perform() throws TMSException {
-			if (seq == getCamSequence() && isActive())
-				setCamSequence(seq.updateDwell());
-			else
+			if (seq == getCamSequence() && isActive()) {
+				seq.updateDwell();
+				setCamFromSequence(seq);
+			} else
 				CAM_SWITCH.removeJob(this);
 		}
 	}

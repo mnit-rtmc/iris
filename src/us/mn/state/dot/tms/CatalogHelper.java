@@ -39,4 +39,18 @@ public class CatalogHelper extends BaseHelper {
 		return new IteratorWrapper<Catalog>(namespace.iterator(
 			Catalog.SONAR_TYPE));
 	}
+
+	/** Find a catalog with the specific seq num */
+	static public Catalog findSeqNum(final int sn) {
+		Iterator<Catalog> it = iterator();
+		while (it.hasNext()) {
+			Catalog c = it.next();
+			if (c != null) {
+				Integer n = c.getSeqNum();
+				if (n != null && sn == n)
+					return c;
+			}
+		}
+		return null;
+	}
 }
