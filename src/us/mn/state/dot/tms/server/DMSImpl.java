@@ -90,6 +90,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Number of polling periods for DMS action duration */
 	static private final int DURATION_PERIODS = 3;
 
+	/** "Long" polling period */
+	static private final int PERIOD_LONG_SEC = 60 * 5;
+
 	/** Interface for handling brightness samples */
 	static public interface BrightnessHandler {
 		void feedback(EventType et, int photo, int output);
@@ -1287,7 +1290,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Perform a periodic poll */
 	@Override
 	public void periodicPoll() {
-		if (isModemAny())
+		if (isLongPeriodModem())
 			sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 		sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
 		checkMsgUserExpiration();
@@ -1295,6 +1298,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		LCSArrayImpl la = lookupLCSArray();
 		if (la != null)
 			la.periodicPoll();
+	}
+
+	/** Check if the polling period is "long", with a modem link */
+	public boolean isLongPeriodModem() {
+		return getPollPeriod() >= PERIOD_LONG_SEC && isModemAny();
 	}
 
 	/** Lookup LCS array if this DMS is lane one */

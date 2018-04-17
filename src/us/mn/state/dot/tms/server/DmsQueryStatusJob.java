@@ -45,7 +45,7 @@ public class DmsQueryStatusJob extends Job {
 			DMS d = it.next();
 			if (d instanceof DMSImpl) {
 				DMSImpl dms = (DMSImpl) d;
-				if (!dms.isModemAny())
+				if (!dms.isLongPeriodModem())
 					dms.setDeviceRequest(req);
 			}
 		}
