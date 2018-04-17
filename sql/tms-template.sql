@@ -2365,13 +2365,19 @@ CREATE TRIGGER inc_advice_ck_trig
 --- Views
 
 CREATE VIEW role_privilege_view AS
-	SELECT role, type_n, obj_n, group_n, attr_n, write
+	SELECT role, role_capability.capability, type_n, obj_n, group_n, attr_n,
+	       write
 	FROM iris.role
 	JOIN iris.role_capability ON role.name = role_capability.role
 	JOIN iris.capability ON role_capability.capability = capability.name
-	JOIN iris.privilege ON privilege.capability = role_capability.capability
+	JOIN iris.privilege ON privilege.capability = capability.name
 	WHERE role.enabled = 't' AND capability.enabled = 't';
 GRANT SELECT ON role_privilege_view TO PUBLIC;
+
+CREATE VIEW i_user_view AS
+	SELECT name, full_name, dn, role, enabled
+	FROM iris.i_user;
+GRANT SELECT ON i_user_view TO PUBLIC;
 
 CREATE VIEW action_plan_view AS
 	SELECT name, description, group_n, sync_actions, sticky, active,
@@ -3126,7 +3132,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.71.0
+database_version	4.72.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
