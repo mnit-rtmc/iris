@@ -92,14 +92,14 @@ public class DisplayProp extends MonProp {
 	/** Get sequence number as string */
 	private String getSeqNumAsString() {
 		StringBuilder sb = new StringBuilder();
-		if (monitor != null) {
+		if (monitor != null && monitor.hasSequence()) {
 			Integer sn = monitor.getSeqNum();
 			if (sn != null)
 				sb.append(sn);
 			if (!monitor.isSequenceRunning())
 				sb.append(' ').append('"');
 		}
-		return sb.toString();
+		return sb.toString().trim();
 	}
 
 	/** Get a string representation of the property */
