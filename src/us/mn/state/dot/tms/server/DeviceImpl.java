@@ -327,7 +327,7 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		super.doDestroy();
 	}
 
-	/** Get the polling period */
+	/** Get the polling period (sec) */
 	protected int getPollPeriod() {
 		ControllerImpl c = controller;	// Avoid race
 		return (c != null) ? c.getPollPeriod() : 30;

@@ -250,7 +250,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return comm_link;
 	}
 
-	/** Get the polling period */
+	/** Get the polling period (sec) */
 	public int getPollPeriod() {
 		CommLinkImpl cl = comm_link;
 		return (cl != null) ? cl.getPollPeriod() : 30;
