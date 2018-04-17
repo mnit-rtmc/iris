@@ -221,9 +221,9 @@ public class CommThread<T extends ControllerProperty> {
 	private void pollQueue(Messenger m) throws InterruptedException,
 		IOException
 	{
-		final long idle_ms = getIdleDisconnectMS();
 		setStatus("");
 		while (shouldContinue()) {
+			long idle_ms = getIdleDisconnectMS();
 			OpController<T> op = queue.next(idle_ms);
 			doPoll(m, op);
 			setStatus("");
