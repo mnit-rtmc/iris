@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ public class SignConfigProperties extends SonarObjectForm<SignConfig> {
 
 	/** Create a new sign configuration properties form */
 	public SignConfigProperties(Session s, SignConfig sc) {
-		super(I18N.get("dms.config") + ": ", s, sc);
+		super(I18N.get("dms.config.short") + ": ", s, sc);
 		config_pnl = new PropConfiguration(s, sc);
 	}
 
