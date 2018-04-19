@@ -23,6 +23,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.StationHelper;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.TMSException;
 
@@ -39,11 +40,15 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Maximum number of time steps needed for sample history */
 	static private final int MAX_STEPS = 12;
 
-	/** Magic constant to convert density to price dollars */
-	static private final double ALPHA = 0.045;
+	/** Get density "alpha" coefficient */
+	static private float defaultAlpha() {
+		return SystemAttrEnum.TOLL_DENSITY_ALPHA.getFloat();
+	}
 
-	/** Magic exponent to convert density to price dollars */
-	static private final double BETA = 1.10;
+	/** Get density "beta" coefficient (exponent) */
+	static private float defaultBeta() {
+		return SystemAttrEnum.TOLL_DENSITY_BETA.getFloat();
+	}
 
 	/** Load all the toll zones */
 	static protected void loadAll() throws TMSException {
@@ -312,11 +317,14 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		return k_hot;
 	}
 
-	/** Calculate the pricing */
+	/** Calculate the toll pricing.
+	 * @param k_hot Maximum density in toll zone.
+	 * @return Price (dollars). */
 	private float calculatePricing(Double k_hot) {
 		if (k_hot != null) {
-			/* This was arrived at by using a least squares fit */
-			double price = ALPHA * Math.pow(k_hot, BETA);
+			float alpha = defaultAlpha();
+			float beta = defaultBeta();
+			double price = alpha * Math.pow(k_hot, beta);
 			int quarters = (int) Math.round(price * 4);
 			return quarters / 4.0f;
 		} else

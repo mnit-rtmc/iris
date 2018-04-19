@@ -24,4 +24,10 @@ CREATE VIEW i_user_view AS
 	FROM iris.i_user;
 GRANT SELECT ON i_user_view TO PUBLIC;
 
+-- Add toll_density_alpha and toll_density_beta system attributes
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('toll_density_alpha', '0.045');
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('toll_density_beta', '1.1');
+
 COMMIT;

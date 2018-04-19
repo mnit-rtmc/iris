@@ -3197,6 +3197,8 @@ sample_archive_enable	true
 speed_limit_min_mph	45
 speed_limit_default_mph	55
 speed_limit_max_mph	75
+toll_density_alpha	0.045
+toll_density_beta	1.1
 toll_min_price	0.25
 toll_max_price	8
 travel_time_min_mph	15
