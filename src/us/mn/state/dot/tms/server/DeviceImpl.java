@@ -339,12 +339,6 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		return (c != null) && c.isModemAny();
 	}
 
-	/** Check if the device is on a "connected" comm link */
-	protected boolean isConnected() {
-		ControllerImpl c = controller;
-		return (c != null) && c.isConnected();
-	}
-
 	/** Check if dial-up is required to communicate */
 	public boolean isDialUpRequired() {
 		ControllerImpl c = controller;

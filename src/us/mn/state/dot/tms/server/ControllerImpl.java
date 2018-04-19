@@ -1043,7 +1043,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	}
 
 	/** Check if the controller comm link is currently connected */
-	public boolean isConnected() {
+	private boolean isConnected() {
 		CommLinkImpl cl = comm_link;
 		return (cl != null) && cl.isConnected();
 	}
