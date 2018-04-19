@@ -41,6 +41,7 @@ public class CamSequence {
 
 	/** Create camera sequence */
 	public CamSequence(int sn) {
+		seq_num = sn;
 		catalog = CatalogHelper.findSeqNum(sn);
 		c_item = 0;
 		play_list = (null == catalog)
@@ -52,12 +53,16 @@ public class CamSequence {
 
 	/** Create camera sequence */
 	public CamSequence(PlayList pl) {
+		seq_num = (pl != null) ? pl.getSeqNum() : null;
 		catalog = null;
 		c_item = 0;
 		play_list = pl;
 		pl_item = -1;	// nextItem will advance to 0
 		dwell = 0;
 	}
+
+	/** Camera sequence number */
+	private final Integer seq_num;
 
 	/** Running catalog (or null for play list sequence) */
 	private final Catalog catalog;
@@ -76,9 +81,7 @@ public class CamSequence {
 
 	/** Get the sequence number */
 	public Integer getSeqNum() {
-		return (catalog != null) ? catalog.getSeqNum()
-		      : ((play_list != null) ? play_list.getSeqNum()
-		      : null);
+		return seq_num;
 	}
 
 	/** Pause the sequence */
