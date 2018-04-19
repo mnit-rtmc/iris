@@ -93,8 +93,8 @@ public class CommThread<T extends ControllerProperty> {
 	/** Debug log */
 	private final DebugLog logger;
 
-	/** Connected status */
-	private boolean connected;
+	/** Stopped status */
+	private boolean stopped = false;
 
 	/** Thread status */
 	private String status = "";
@@ -131,7 +131,6 @@ public class CommThread<T extends ControllerProperty> {
 		uri = u;
 		timeout = rt;
 		logger = log;
-		connected = false;
 	}
 
 	/** Start the thread */
@@ -139,9 +138,9 @@ public class CommThread<T extends ControllerProperty> {
 		thread.start();
 	}
 
-	/** Check if the thread is connected */
-	public boolean isConnected() {
-		return connected;
+	/** Check if the thread is stopped */
+	public boolean isStopped() {
+		return stopped;
 	}
 
 	/** Destroy the comm thread */
@@ -157,7 +156,6 @@ public class CommThread<T extends ControllerProperty> {
 	/** Run comm thread operations */
 	private void doRun() {
 		clog("STARTING");
-		connected = true;
 		try {
 			performOperations();
 		}
@@ -168,9 +166,9 @@ public class CommThread<T extends ControllerProperty> {
 			e.printStackTrace();
 		}
 		finally {
-			poller.disconnect();
-			connected = false;
+			stopped = true;
 			clog("STOPPING");
+			poller.disconnect();
 		}
 	}
 
