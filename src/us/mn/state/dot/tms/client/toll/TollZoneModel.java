@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2017  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ public class TollZoneModel extends ProxyTableModel<TollZone> {
 	@Override
 	protected ArrayList<ProxyColumn<TollZone>> createColumns() {
 		ArrayList<ProxyColumn<TollZone>> cols =
-			new ArrayList<ProxyColumn<TollZone>>(3);
+			new ArrayList<ProxyColumn<TollZone>>(7);
 		cols.add(new ProxyColumn<TollZone>("toll_zone", 120) {
 			public Object getValueAt(TollZone tz) {
 				return tz.getName();
@@ -69,7 +69,7 @@ public class TollZoneModel extends ProxyTableModel<TollZone> {
 				tz.setEndID((eid.length() > 0) ? eid : null);
 			}
 		});
-		cols.add(new ProxyColumn<TollZone>("toll_zone.tollway", 180) {
+		cols.add(new ProxyColumn<TollZone>("toll_zone.tollway", 140) {
 			public Object getValueAt(TollZone tz) {
 				return tz.getTollway();
 			}
@@ -79,6 +79,51 @@ public class TollZoneModel extends ProxyTableModel<TollZone> {
 			public void setValueAt(TollZone tz, Object value) {
 				String tw = value.toString().trim();
 				tz.setTollway((tw.length() > 0) ? tw : null);
+			}
+		});
+		cols.add(new ProxyColumn<TollZone>("toll_zone.alpha", 120,
+			Float.class)
+		{
+			public Object getValueAt(TollZone tz) {
+				return tz.getAlpha();
+			}
+			public boolean isEditable(TollZone tz) {
+				return canWrite(tz);
+			}
+			public void setValueAt(TollZone tz, Object value) {
+				tz.setAlpha((value instanceof Float)
+				           ? (Float) value
+				           : null);
+			}
+		});
+		cols.add(new ProxyColumn<TollZone>("toll_zone.beta", 120,
+			Float.class)
+		{
+			public Object getValueAt(TollZone tz) {
+				return tz.getBeta();
+			}
+			public boolean isEditable(TollZone tz) {
+				return canWrite(tz);
+			}
+			public void setValueAt(TollZone tz, Object value) {
+				tz.setBeta((value instanceof Float)
+				          ? (Float) value
+				          : null);
+			}
+		});
+		cols.add(new ProxyColumn<TollZone>("toll_zone.max_price", 120,
+			Integer.class)
+		{
+			public Object getValueAt(TollZone tz) {
+				return tz.getMaxPrice();
+			}
+			public boolean isEditable(TollZone tz) {
+				return canWrite(tz);
+			}
+			public void setValueAt(TollZone tz, Object value) {
+				tz.setMaxPrice((value instanceof Integer)
+				              ? (Integer) value
+				              : null);
 			}
 		});
 		return cols;

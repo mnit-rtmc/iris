@@ -30,4 +30,18 @@ INSERT INTO iris.system_attribute (name, value)
 INSERT INTO iris.system_attribute (name, value)
 	VALUES ('toll_density_beta', '1.1');
 
+-- Drop old view
+DROP VIEW toll_zone_view;
+
+-- Add columns to toll_zone table
+ALTER TABLE iris.toll_zone ADD COLUMN alpha REAL;
+ALTER TABLE iris.toll_zone ADD COLUMN beta REAL;
+ALTER TABLE iris.toll_zone ADD COLUMN max_price INTEGER;
+
+-- Create new toll_zone_view
+CREATE VIEW toll_zone_view AS
+	SELECT name, start_id, end_id, tollway, alpha, beta, max_price
+	FROM iris.toll_zone;
+GRANT SELECT ON toll_zone_view TO PUBLIC;
+
 COMMIT;

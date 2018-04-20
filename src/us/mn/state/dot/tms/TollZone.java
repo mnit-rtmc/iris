@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,4 +43,22 @@ public interface TollZone extends SonarObject {
 
 	/** Get the tollway ID */
 	String getTollway();
+
+	/** Set the density alpha coefficient */
+	void setAlpha(Float a);
+
+	/** Get the density alpha coefficient */
+	Float getAlpha();
+
+	/** Set the density beta coefficient */
+	void setBeta(Float b);
+
+	/** Get the density beta coefficient */
+	Float getBeta();
+
+	/** Set the max price (dollars) */
+	void setMaxPrice(Integer p);
+
+	/** Get the max price (dollars) */
+	Integer getMaxPrice();
 }

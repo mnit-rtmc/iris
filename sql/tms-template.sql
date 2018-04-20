@@ -394,7 +394,10 @@ CREATE TABLE iris.toll_zone (
 	name VARCHAR(20) PRIMARY KEY,
 	start_id VARCHAR(10) REFERENCES iris.r_node(station_id),
 	end_id VARCHAR(10) REFERENCES iris.r_node(station_id),
-	tollway VARCHAR(16)
+	tollway VARCHAR(16),
+	alpha REAL,
+	beta REAL,
+	max_price INTEGER
 );
 
 CREATE TABLE iris.sign_group (
@@ -2448,7 +2451,7 @@ CREATE VIEW roadway_station_view AS
 GRANT SELECT ON roadway_station_view TO PUBLIC;
 
 CREATE VIEW toll_zone_view AS
-	SELECT name, start_id, end_id, tollway
+	SELECT name, start_id, end_id, tollway, alpha, beta, max_price
 	FROM iris.toll_zone;
 GRANT SELECT ON toll_zone_view TO PUBLIC;
 

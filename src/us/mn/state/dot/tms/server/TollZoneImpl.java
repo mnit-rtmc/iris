@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -53,16 +54,12 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	/** Load all the toll zones */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, TollZoneImpl.class);
-		store.query("SELECT name, start_id, end_id, tollway " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, start_id, end_id, tollway, alpha, " +
+			"beta, max_price FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new TollZoneImpl(
-					row.getString(1),	// name
-					row.getString(2),	// start_id
-					row.getString(3),	// end_id
-					row.getString(4)	// tollway
-				));
+				namespace.addObject(new TollZoneImpl(row));
 			}
 		});
 	}
@@ -75,6 +72,9 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		map.put("start_id", start_id);
 		map.put("end_id", end_id);
 		map.put("tollway", tollway);
+		map.put("alpha", alpha);
+		map.put("beta", beta);
+		map.put("max_price", max_price);
 		return map;
 	}
 
@@ -95,12 +95,29 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		super(n);
 	}
 
-	/** Create a new toll zone */
-	protected TollZoneImpl(String n, String sid, String eid, String tw) {
+	/** Create a toll zone */
+	private TollZoneImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),          // name
+		     row.getString(2),          // start_id
+		     row.getString(3),          // end_id
+		     row.getString(4),          // tollway
+		     (Float) row.getObject(5),  // alpha
+		     (Float) row.getObject(6),  // beta
+		     (Integer) row.getObject(7) // max_price
+		);
+	}
+
+	/** Create a toll zone */
+	private TollZoneImpl(String n, String sid, String eid, String tw,
+		Float a, Float b, Integer mp)
+	{
 		this(n);
 		start_id = sid;
 		end_id = eid;
 		tollway = tw;
+		alpha = a;
+		beta = b;
+		max_price = mp;
 	}
 
 	/** Starting station ID */
@@ -170,6 +187,75 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	@Override
 	public String getTollway() {
 		return tollway;
+	}
+
+	/** Density alpha coefficient */
+	private Float alpha;
+
+	/** Set the density alpha coefficient */
+	@Override
+	public void setAlpha(Float a) {
+		alpha = a;
+	}
+
+	/** Set the density alpha coefficient */
+	public void doSetAlpha(Float a) throws TMSException {
+		if (!objectEquals(a, alpha)) {
+			store.update(this, "alpha", a);
+			setAlpha(a);
+		}
+	}
+
+	/** Get the density alpha coefficient */
+	@Override
+	public Float getAlpha() {
+		return alpha;
+	}
+
+	/** Density beta coefficient */
+	private Float beta;
+
+	/** Set the density beta coefficient */
+	@Override
+	public void setBeta(Float b) {
+		beta = b;
+	}
+
+	/** Set the density beta coefficient */
+	public void doSetBeta(Float b) throws TMSException {
+		if (!objectEquals(b, beta)) {
+			store.update(this, "beta", b);
+			setBeta(b);
+		}
+	}
+
+	/** Get the density beta coefficient */
+	@Override
+	public Float getBeta() {
+		return beta;
+	}
+
+	/** Max price (dollars) */
+	private Integer max_price;
+
+	/** Set the max price (dollars) */
+	@Override
+	public void setMaxPrice(Integer p) {
+		max_price = p;
+	}
+
+	/** Set the max price (dollars) */
+	public void doSetMaxPrice(Integer p) throws TMSException {
+		if (!objectEquals(p, max_price)) {
+			store.update(this, "max_price", p);
+			setMaxPrice(p);
+		}
+	}
+
+	/** Get the max price (dollars) */
+	@Override
+	public Integer getMaxPrice() {
+		return max_price;
 	}
 
 	/** Density history for one detector */
