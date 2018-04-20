@@ -315,7 +315,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Check if condition is active (and polling enabled) */
 	public boolean isActive() {
-		return (CtrlCondition.ACTIVE == condition) && isPollEnabled();
+		return isConditionActive() && isPollEnabled();
+	}
+
+	/** Check if condition is active */
+	private boolean isConditionActive() {
+		return CtrlCondition.ACTIVE == condition;
 	}
 
 	/** Is comm link polling enabled? */
@@ -923,6 +928,12 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Poll controller devices */
 	public void pollDevices(int period) {
+		if (isConditionActive())
+			pollActiveDevices(period);
+	}
+
+	/** Poll active controller devices */
+	private void pollActiveDevices(int period) {
 		pollController();
 		// Must call getDevices so we don't hold the lock
 		for (ControllerIO io: getDevices())
