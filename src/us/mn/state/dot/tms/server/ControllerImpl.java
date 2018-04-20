@@ -329,6 +329,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return (cl != null) && cl.getPollEnabled();
 	}
 
+	/** Check if condition is testing (and polling enabled) */
+	public boolean isTesting() {
+		return isConditionTesting() && isPollEnabled();
+	}
+
 	/** Check if condition is testing */
 	private boolean isConditionTesting() {
 		return CtrlCondition.TESTING == condition;

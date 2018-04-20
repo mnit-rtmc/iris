@@ -208,4 +208,11 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 	public void sendSettings(WeatherSensorImpl ws) {
 		addOp(new OpQueryEssSettings(ws));
 	}
+
+	/** Start communication test */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void startTesting(ControllerImpl c) {
+		addOp(new OpTestComm(c, NTCIP_LOG));
+	}
 }

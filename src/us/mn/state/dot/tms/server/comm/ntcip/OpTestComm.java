@@ -12,49 +12,57 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.mndot;
+package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.OpController;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
+import us.mn.state.dot.tms.server.comm.ntcip.mib1201.MIB1201;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
+import us.mn.state.dot.tms.server.comm.snmp.ASN1Object;
 
 /**
- * Test communication to a 170 controller.
+ * This operation tests communication.
  *
  * @author Douglas Lau
  */
-public class OpTest170 extends Op170 {
+public class OpTestComm extends OpController {
 
-	/** Create a new test operation */
-	public OpTest170(ControllerImpl c) {
+	/** Debug logger */
+	private final DebugLog log;
+
+	/** Create a new test communication operation */
+	public OpTestComm(ControllerImpl c, DebugLog l) {
 		super(PriorityLevel.DIAGNOSTIC, c);
+		log = l;
 	}
 
 	/** Create the first phase of the operation */
 	@Override
-	protected Phase<MndotProperty> phaseOne() {
+	protected Phase phaseOne() {
 		return new TestCommunication();
 	}
 
 	/** Phase to test communication */
-	protected class TestCommunication extends Phase<MndotProperty> {
+	private class TestCommunication extends Phase {
 
 		/** Test communication */
-		protected Phase<MndotProperty> poll(
-			CommMessage<MndotProperty> mess) throws IOException
-		{
-			byte[] data = new byte[123];
-			MemoryProperty mem = new MemoryProperty(0x100, data);
-			mess.add(mem);
+		@SuppressWarnings("unchecked")
+		protected Phase poll(CommMessage mess) throws IOException {
+			ASN1Integer m = MIB1201.globalMaxModules.makeInt();
+			mess.add(m);
 			mess.queryProps();
+			logQuery(m);
 			return controller.isTesting() ? this : null;
 		}
 	}
 
-	/** Get the error retry threshold */
-	@Override
-	public int getRetryThreshold() {
-		return Integer.MAX_VALUE;
+	/** Log a property query */
+	private void logQuery(ASN1Object prop) {
+		if (log.isOpen())
+			log.log(controller.getName() + ": " + prop);
 	}
 }
