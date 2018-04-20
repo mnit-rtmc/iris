@@ -212,6 +212,12 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		return alpha;
 	}
 
+	/** Get density alpha coefficient (or default) */
+	private float getAlphaOrDefault() {
+		Float a = getAlpha();
+		return (a != null) ? a : defaultAlpha();
+	}
+
 	/** Density beta coefficient */
 	private Float beta;
 
@@ -233,6 +239,12 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	@Override
 	public Float getBeta() {
 		return beta;
+	}
+
+	/** Get density beta coefficient (or default) */
+	private float getBetaOrDefault() {
+		Float b = getBeta();
+		return (b != null) ? b : defaultBeta();
 	}
 
 	/** Max price (dollars) */
@@ -408,9 +420,9 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	 * @return Price (dollars). */
 	private float calculatePricing(Double k_hot) {
 		if (k_hot != null) {
-			float alpha = defaultAlpha();
-			float beta = defaultBeta();
-			double price = alpha * Math.pow(k_hot, beta);
+			float a = getAlphaOrDefault();
+			float b = getBetaOrDefault();
+			double price = a * Math.pow(k_hot, b);
 			int quarters = (int) Math.round(price * 4);
 			return quarters / 4.0f;
 		} else
