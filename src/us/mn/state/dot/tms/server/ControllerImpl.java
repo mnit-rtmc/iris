@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -313,9 +313,15 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return condition.ordinal();
 	}
 
-	/** Check if condition is active */
+	/** Check if condition is active (and polling enabled) */
 	public boolean isActive() {
-		return condition == CtrlCondition.ACTIVE;
+		return (CtrlCondition.ACTIVE == condition) && isPollEnabled();
+	}
+
+	/** Is comm link polling enabled? */
+	private boolean isPollEnabled() {
+		CommLinkImpl cl = comm_link;
+		return (cl != null) && cl.getPollEnabled();
 	}
 
 	/** Access password */
