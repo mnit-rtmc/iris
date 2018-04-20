@@ -88,14 +88,12 @@ public class DmsActionMsg {
 		return SystemAttrEnum.TOLL_MIN_PRICE.getFloat();
 	}
 
-	/** Get maximum tolling price */
-	static private float max_price() {
-		return SystemAttrEnum.TOLL_MAX_PRICE.getFloat();
-	}
-
-	/** Limit tolling price */
-	static private float limit_price(float p) {
-		return Math.min(Math.max(p, min_price()), max_price());
+	/** Limit tolling price.
+	 * @param p Tolling price (dollars).
+	 * @param mp Maximum price (dollars).
+	 * @return Price limited by maximum, then minimum. */
+	static private float limit_price(float p, float mp) {
+		return Math.max(Math.min(p, mp), min_price());
 	}
 
 	/** Calculate the maximum trip minutes to display */
@@ -505,24 +503,25 @@ public class DmsActionMsg {
 	private Float calculatePrice(String[] zones) {
 		assert (zones.length > 0);
 		float price = 0;
+		float max_price = 0;
 		for (String zid: zones) {
-			Float p = lookupPrice(zid);
-			if (p != null)
-				price += p;
-			else
+			TollZoneImpl tz = lookupZone(zid);
+			if (tz != null) {
+				price += tz.getPrice(dms.getName(), loc);
+				float mp = tz.getMaxPriceOrDefault();
+				max_price = Math.max(max_price, mp);
+			} else
 				return null;
 		}
-		return limit_price(price);
+		return limit_price(price, max_price);
 	}
 
-	/** Lookup the current price for a toll zone */
-	private Float lookupPrice(String zid) {
+	/** Lookup a toll zone by ID */
+	private TollZoneImpl lookupZone(String zid) {
 		TollZone z = TollZoneHelper.lookup(zid);
-		if (z instanceof TollZoneImpl) {
-			TollZoneImpl tz = (TollZoneImpl) z;
-			return tz.getPrice(dms.getName(), loc);
-		} else
-			return null;
+		return (z instanceof TollZoneImpl)
+		      ? (TollZoneImpl) z
+		      : null;
 	}
 
 	/** Format a price as a text span (like "3.50") */

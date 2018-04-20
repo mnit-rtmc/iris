@@ -51,6 +51,11 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		return SystemAttrEnum.TOLL_DENSITY_BETA.getFloat();
 	}
 
+	/** Get default maximum tolling price (dollars) */
+	static private float defaultMaxPrice() {
+		return SystemAttrEnum.TOLL_MAX_PRICE.getFloat();
+	}
+
 	/** Load all the toll zones */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, TollZoneImpl.class);
@@ -268,6 +273,12 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	@Override
 	public Float getMaxPrice() {
 		return max_price;
+	}
+
+	/** Get the max price (or default) */
+	public float getMaxPriceOrDefault() {
+		Float mp = getMaxPrice();
+		return (mp != null) ? mp : defaultMaxPrice();
 	}
 
 	/** Density history for one detector */
