@@ -44,4 +44,7 @@ CREATE VIEW toll_zone_view AS
 	FROM iris.toll_zone;
 GRANT SELECT ON toll_zone_view TO PUBLIC;
 
+-- Add testing controller condition
+INSERT INTO iris.condition (id, description) VALUES (4, 'Testing');
+
 COMMIT;

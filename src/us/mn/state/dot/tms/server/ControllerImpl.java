@@ -329,6 +329,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		return (cl != null) && cl.getPollEnabled();
 	}
 
+	/** Check if condition is testing */
+	private boolean isConditionTesting() {
+		return CtrlCondition.TESTING == condition;
+	}
+
 	/** Access password */
 	private String password;
 
@@ -930,6 +935,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 	public void pollDevices(int period) {
 		if (isConditionActive())
 			pollActiveDevices(period);
+		if (isConditionTesting())
+			startTesting();
 	}
 
 	/** Poll active controller devices */
@@ -975,6 +982,13 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			// Listen for keyboard messages
 			ckp.sendRequest(this, DeviceRequest.QUERY_STATUS);
 		}
+	}
+
+	/** Start controller testing */
+	private void startTesting() {
+		DevicePoller dp = getPoller();
+		if (dp != null)
+			dp.startTesting(this);
 	}
 
 	/** Get a list of all devices on controller */

@@ -32,6 +32,7 @@ import us.mn.state.dot.sched.Work;
 import us.mn.state.dot.sched.Worker;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.URIUtil;
 
@@ -687,5 +688,12 @@ abstract public class BasePoller implements DevicePoller {
 		synchronized (op_set) {
 			return r_queue.isEmpty();
 		}
+	}
+
+	/** Start communication test */
+	@Override
+	public void startTesting(ControllerImpl c) {
+		if (logger.isOpen())
+			log("TESTING not implemented: " + c);
 	}
 }

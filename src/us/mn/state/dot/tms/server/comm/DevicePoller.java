@@ -15,6 +15,8 @@
  */
 package us.mn.state.dot.tms.server.comm;
 
+import us.mn.state.dot.tms.server.ControllerImpl;
+
 /**
  * Device poller interface.
  *
@@ -41,6 +43,9 @@ public interface DevicePoller {
 	/** Get max seconds an idle connection should be left open
 	 * (0 indicates indefinite). */
 	int getIdleDisconnectSec();
+
+	/** Start communication test */
+	void startTesting(ControllerImpl c);
 
 	/** Destroy the poller */
 	void destroy();

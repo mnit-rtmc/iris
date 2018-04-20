@@ -210,4 +210,11 @@ public class ThreadedPoller<T extends ControllerProperty>
 		c_thread = null;
 		log("THREAD STOP");
 	}
+
+	/** Start communication test */
+	@Override
+	public void startTesting(ControllerImpl c) {
+		if (logger.isOpen())
+			log("TESTING not implemented: " + c);
+	}
 }

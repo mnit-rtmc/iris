@@ -3011,6 +3011,7 @@ COPY iris.condition (id, description) FROM stdin;
 1	Active
 2	Construction
 3	Removed
+4	Testing
 \.
 
 COPY iris.lane_type (id, description, dcode) FROM stdin;

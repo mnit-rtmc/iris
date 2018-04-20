@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2016  Minnesota Department of Transportation
+ * Copyright (C) 2014-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,11 @@ package us.mn.state.dot.tms;
  * @author Douglas Lau
  */
 public enum CtrlCondition {
-	PLANNED,	// 0
-	ACTIVE,		// 1
-	CONSTRUCTION,	// 2
-	REMOVED;	// 3
+	PLANNED,        // 0
+	ACTIVE,         // 1
+	CONSTRUCTION,   // 2
+	REMOVED,        // 3
+	TESTING;        // 4
 
 	/** Get a controller condition from an ordinal value */
 	static public CtrlCondition fromOrdinal(int o) {
