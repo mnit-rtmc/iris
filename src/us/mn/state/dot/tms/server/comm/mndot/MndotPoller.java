@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -193,5 +193,11 @@ public class MndotPoller extends ThreadedPoller<MndotProperty>
 			// Ignore other requests
 			break;
 		}
+	}
+
+	/** Start communication test */
+	@Override
+	public void startTesting(ControllerImpl c) {
+		addOp(new OpTest170(c));
 	}
 }
