@@ -36,7 +36,7 @@ DROP VIEW toll_zone_view;
 -- Add columns to toll_zone table
 ALTER TABLE iris.toll_zone ADD COLUMN alpha REAL;
 ALTER TABLE iris.toll_zone ADD COLUMN beta REAL;
-ALTER TABLE iris.toll_zone ADD COLUMN max_price INTEGER;
+ALTER TABLE iris.toll_zone ADD COLUMN max_price REAL;
 
 -- Create new toll_zone_view
 CREATE VIEW toll_zone_view AS

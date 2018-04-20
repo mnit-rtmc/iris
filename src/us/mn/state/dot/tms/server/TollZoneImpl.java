@@ -103,13 +103,13 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 		     row.getString(4),          // tollway
 		     (Float) row.getObject(5),  // alpha
 		     (Float) row.getObject(6),  // beta
-		     (Integer) row.getObject(7) // max_price
+		     (Float) row.getObject(7)   // max_price
 		);
 	}
 
 	/** Create a toll zone */
 	private TollZoneImpl(String n, String sid, String eid, String tw,
-		Float a, Float b, Integer mp)
+		Float a, Float b, Float mp)
 	{
 		this(n);
 		start_id = sid;
@@ -248,16 +248,16 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 	}
 
 	/** Max price (dollars) */
-	private Integer max_price;
+	private Float max_price;
 
 	/** Set the max price (dollars) */
 	@Override
-	public void setMaxPrice(Integer p) {
+	public void setMaxPrice(Float p) {
 		max_price = p;
 	}
 
 	/** Set the max price (dollars) */
-	public void doSetMaxPrice(Integer p) throws TMSException {
+	public void doSetMaxPrice(Float p) throws TMSException {
 		if (!objectEquals(p, max_price)) {
 			store.update(this, "max_price", p);
 			setMaxPrice(p);
@@ -266,7 +266,7 @@ public class TollZoneImpl extends BaseObjectImpl implements TollZone {
 
 	/** Get the max price (dollars) */
 	@Override
-	public Integer getMaxPrice() {
+	public Float getMaxPrice() {
 		return max_price;
 	}
 

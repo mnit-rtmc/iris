@@ -57,8 +57,8 @@ public interface TollZone extends SonarObject {
 	Float getBeta();
 
 	/** Set the max price (dollars) */
-	void setMaxPrice(Integer p);
+	void setMaxPrice(Float p);
 
 	/** Get the max price (dollars) */
-	Integer getMaxPrice();
+	Float getMaxPrice();
 }

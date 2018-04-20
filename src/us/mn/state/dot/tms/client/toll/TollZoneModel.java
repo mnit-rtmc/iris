@@ -112,7 +112,7 @@ public class TollZoneModel extends ProxyTableModel<TollZone> {
 			}
 		});
 		cols.add(new ProxyColumn<TollZone>("toll_zone.max_price", 120,
-			Integer.class)
+			Float.class)
 		{
 			public Object getValueAt(TollZone tz) {
 				return tz.getMaxPrice();
@@ -121,8 +121,8 @@ public class TollZoneModel extends ProxyTableModel<TollZone> {
 				return canWrite(tz);
 			}
 			public void setValueAt(TollZone tz, Object value) {
-				tz.setMaxPrice((value instanceof Integer)
-				              ? (Integer) value
+				tz.setMaxPrice((value instanceof Float)
+				              ? (Float) value
 				              : null);
 			}
 		});

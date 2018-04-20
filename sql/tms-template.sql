@@ -397,7 +397,7 @@ CREATE TABLE iris.toll_zone (
 	tollway VARCHAR(16),
 	alpha REAL,
 	beta REAL,
-	max_price INTEGER
+	max_price REAL
 );
 
 CREATE TABLE iris.sign_group (
