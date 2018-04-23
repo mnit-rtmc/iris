@@ -923,17 +923,19 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		setFailed(!success, id);
 	}
 
-	/** Get the device poller */
+	/** Get active device poller */
 	public DevicePoller getPoller() {
-		if (isActive()) {
-			DevicePoller dp = getPoller(comm_link);
-			if (dp == null && !isFailed()) {
-				setCommStatus("comm_link error");
-				setFailed(true, null);
-			}
-			return dp;
+		return isActive() ? getDevicePoller() : null;
+	}
+
+	/** Get the device poller (don't check isActive) */
+	private DevicePoller getDevicePoller() {
+		DevicePoller dp = getPoller(comm_link);
+		if ((null == dp) && !isFailed()) {
+			setCommStatus("comm_link error");
+			setFailed(true, null);
 		}
-		return null;
+		return dp;
 	}
 
 	/** Poll controller devices */
@@ -991,7 +993,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Start controller testing */
 	private void startTesting() {
-		DevicePoller dp = getPoller();
+		DevicePoller dp = getDevicePoller();
 		if (dp != null)
 			dp.startTesting(this);
 	}
