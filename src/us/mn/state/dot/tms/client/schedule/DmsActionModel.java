@@ -59,7 +59,7 @@ public class DmsActionModel extends ProxyTableModel<DmsAction> {
 	static private final DmsMsgPriority[] PRIORITIES = {
 		DmsMsgPriority.PSA,
 		DmsMsgPriority.TRAVEL_TIME,
-		DmsMsgPriority.SPEED_LIMIT,
+		DmsMsgPriority.ALERT,
 		DmsMsgPriority.SCHED_A,
 		DmsMsgPriority.SCHED_B,
 		DmsMsgPriority.SCHED_C,

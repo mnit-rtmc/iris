@@ -29,13 +29,13 @@ public enum DmsMsgPriority {
 	RESERVED,	/* 2: reserved for future use */
 	PSA,		/* 3: public service announcement */
 	TRAVEL_TIME,	/* 4: travel time priority */
-	SPEED_LIMIT,	/* 5: variable speed limit priority */
+	ALERT,		/* 5: alert priority (AMBER alerts, etc.) */
 	SCHED_A,	/* 6: scheduled priority A (planned events) */
 	SCHED_B,	/* 7: scheduled priority B */
 	SCHED_C,	/* 8: scheduled priority C */
 	SCHED_D,	/* 9: scheduled priority D */
 	OTHER_SYSTEM,	/* 10: other system priority */
-	ALERT,		/* 11: alert priority (AMBER alerts, etc.) */
+	RESERVED_2,	/* 11: reserved for future use */
 	OPERATOR,	/* 12: operator priority */
 	AWS,		/* 13: automated warning system priority */
 	GATE_ARM,	/* 14: gate-arm priority */
@@ -68,14 +68,13 @@ public enum DmsMsgPriority {
 			return SignMsgSource.toBits(SignMsgSource.schedule,
 			                            SignMsgSource.travel_time);
 		case PSA:
-		case SPEED_LIMIT:
+		case ALERT:
 		case SCHED_A:
 		case SCHED_B:
 		case SCHED_C:
 		case SCHED_D:
 		case SCHED_HIGH:
 			return SignMsgSource.schedule.bit();
-		case ALERT:
 		case OPERATOR:
 			return SignMsgSource.operator.bit();
 		case GATE_ARM:
