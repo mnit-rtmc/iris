@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,13 +15,11 @@
 package us.mn.state.dot.tms.client.dms;
 
 import javax.swing.GroupLayout;
-import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -57,12 +55,6 @@ public class ComposerMiscPanel extends JPanel {
 
 	/** Page on time spinner */
 	private final PgTimeSpinner pg_on_spn = new PgTimeSpinner();
-
-	/** AMBER alert label */
-	private final ILabel alert_lbl = new ILabel("dms.alert");
-
-	/** AMBER Alert checkbox */
-	private final JCheckBox alert_chx = new JCheckBox();
 
 	/** Listener for spinner change events */
 	private final ChangeListener spin_listener = new ChangeListener() {
@@ -121,13 +113,6 @@ public class ComposerMiscPanel extends JPanel {
 		GroupLayout.ParallelGroup g3 = gl.createParallelGroup(
 			GroupLayout.Alignment.CENTER);
 		g3.addComponent(pg_on_lbl).addComponent(pg_on_spn);
-		// AMBER alert widgets
-		alert_lbl.setLabelFor(alert_chx);
-		lg.addComponent(alert_lbl);
-		vg.addComponent(alert_chx);
-		GroupLayout.ParallelGroup g4 = gl.createParallelGroup(
-			GroupLayout.Alignment.CENTER);
-		g4.addComponent(alert_lbl).addComponent(alert_chx);
 		// Finish group layout
 		GroupLayout.SequentialGroup horz_g = gl.createSequentialGroup();
 		horz_g.addGap(UI.hgap).addGroup(lg);
@@ -135,19 +120,9 @@ public class ComposerMiscPanel extends JPanel {
 		gl.setHorizontalGroup(horz_g);
 		GroupLayout.SequentialGroup vert_g = gl.createSequentialGroup();
 		vert_g.addGap(UI.vgap).addGroup(g1).addGap(UI.vgap);
-		vert_g.addGroup(g2).addGap(UI.vgap).addGroup(g3);
-		vert_g.addGap(UI.vgap).addGroup(g4).addGap(UI.vgap);
+		vert_g.addGroup(g2).addGap(UI.vgap);
+		vert_g.addGroup(g3).addGap(UI.vgap);
 		gl.setVerticalGroup(vert_g);
-	}
-
-	/** Set multiple sign selection mode */
-	public void setMultiple(boolean m) {
-		alert_lbl.setVisible(m);
-		alert_chx.setEnabled(m);
-		alert_chx.setVisible(m);
-		alert_chx.setSelected(false);
-		if (m)
-			quick_cbx.setSelectedItem(null);
 	}
 
 	/** Clear the widgets */
@@ -185,8 +160,6 @@ public class ComposerMiscPanel extends JPanel {
 	@Override
 	public void setEnabled(boolean b) {
 		super.setEnabled(b);
-		if (!b)
-			setMultiple(false);
 		quick_cbx.setEnabled(b);
 		boolean vis = quick_cbx.getItemCount() > 0;
 		quick_lbl.setVisible(vis);
@@ -194,7 +167,6 @@ public class ComposerMiscPanel extends JPanel {
 		dur_cbx.setEnabled(b);
 		dur_cbx.setSelectedItem(0);
 		pg_on_spn.setEnabled(b);
-		alert_chx.setEnabled(b);
 	}
 
 	/** Set the composed MULTI string */
@@ -221,12 +193,5 @@ public class ComposerMiscPanel extends JPanel {
 				return pt;
 		}
 		return null;
-	}
-
-	/** Get the selected message priority */
-	public DmsMsgPriority getPriority() {
-		return alert_chx.isSelected()
-		     ? DmsMsgPriority.ALERT
-		     : DmsMsgPriority.OPERATOR;
 	}
 }

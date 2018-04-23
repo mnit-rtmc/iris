@@ -18,12 +18,9 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.awt.BorderLayout;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.User;
-import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
@@ -106,14 +103,8 @@ public class DMSDispatcher extends JPanel {
 	/** Sign message creator */
 	private final SignMessageCreator creator;
 
-	/** Selection tab pane */
-	private final JTabbedPane tabPane = new JTabbedPane();
-
 	/** Single sign tab */
 	private final SingleSignTab singleTab;
-
-	/** Multiple sign tab */
-	private final MultipleSignTab multipleTab;
 
 	/** Message composer widget */
 	private final SignMessageComposer composer;
@@ -130,18 +121,14 @@ public class DMSDispatcher extends JPanel {
 		creator = new SignMessageCreator(s, user);
 		sel_mdl = manager.getSelectionModel();
 		singleTab = new SingleSignTab(session, this);
-		multipleTab = new MultipleSignTab(dms_cache, sel_mdl);
 		composer = new SignMessageComposer(session, this, manager);
-		tabPane.addTab(I18N.get("dms.single"), singleTab);
-		tabPane.addTab(I18N.get("dms.multiple"), multipleTab);
-		add(tabPane, BorderLayout.CENTER);
+		add(singleTab, BorderLayout.CENTER);
 		add(composer, BorderLayout.SOUTH);
 	}
 
 	/** Initialize the dispatcher */
 	public void initialize() {
 		singleTab.initialize();
-		multipleTab.initialize();
 		sel_mdl.addProxySelectionListener(sel_listener);
 		clearSelected();
 	}
@@ -152,7 +139,6 @@ public class DMSDispatcher extends JPanel {
 		clearSelected();
 		removeAll();
 		singleTab.dispose();
-		multipleTab.dispose();
 		composer.dispose();
 	}
 
@@ -303,7 +289,7 @@ public class DMSDispatcher extends JPanel {
 	private SignMessage createMessage(String ms) {
 		if (ms.length() > 0) {
 			boolean be = composer.isBeaconEnabled();
-			DmsMsgPriority p = composer.getPriority();
+			DmsMsgPriority p = DmsMsgPriority.OPERATOR;
 			int src = operator.bit();
 			String u = user.getName();
 			Integer d = composer.getDuration();
@@ -404,7 +390,6 @@ public class DMSDispatcher extends JPanel {
 		} else {
 			singleTab.setSelected(null);
 			setEnabled(true);
-			selectMultipleTab();
 		}
 	}
 
@@ -414,28 +399,12 @@ public class DMSDispatcher extends JPanel {
 		composer.setSign(null, null);
 		setComposedMulti("", true);
 		singleTab.setSelected(null);
-		selectSingleTab();
 	}
 
 	/** Set a single selected DMS */
 	private void setSelected(DMS dms) {
 		setEnabled(DMSHelper.isActive(dms));
 		singleTab.setSelected(dms);
-		selectSingleTab();
-	}
-
-	/** Select the single selection tab */
-	private void selectSingleTab() {
-		if (tabPane.getSelectedComponent() != singleTab)
-			tabPane.setSelectedComponent(singleTab);
-		composer.setMultiple(false);
-	}
-
-	/** Select the multiple selection tab */
-	private void selectMultipleTab() {
-		if (tabPane.getSelectedComponent() != multipleTab)
-			tabPane.setSelectedComponent(multipleTab);
-		composer.setMultiple(true);
 	}
 
 	/** Set the enabled status of the dispatcher */
