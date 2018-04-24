@@ -30,28 +30,15 @@ public class OpStoreMultiple extends OpStep {
 	/** List of properties to store */
 	private final ArrayList<MonProp> props;
 
-	/** Index of property in list */
-	private int n_prop;
-
 	/** Create a new store multiple operation */
 	public OpStoreMultiple(ArrayList<MonProp> p) {
 		props = p;
-		n_prop = 0;
 	}
 
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
-		if (n_prop < props.size()) {
-			MonProp p = props.get(n_prop);
+		for (MonProp p : props)
 			p.encodeStore(op, tx_buf);
-			n_prop++;
-		}
-	}
-
-	/** Get the next step */
-	@Override
-	public OpStep next() {
-		return (n_prop < props.size()) ? this : null;
 	}
 }
