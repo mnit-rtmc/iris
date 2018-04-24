@@ -60,7 +60,7 @@ public class MonitorProp extends MonProp {
 	/** Get the monitor title bar */
 	static private boolean getTitleBar(VideoMonitorImpl mon) {
 		MonitorStyle ms = monitorStyle(mon);
-		return (ms == null) || ms.getTitleBar();
+		return (ms != null) && ms.getTitleBar();
 	}
 
 	/** Get the horizontal gap */
@@ -75,8 +75,13 @@ public class MonitorProp extends MonProp {
 		return (ms != null) ? ms.getVGap() : 0;
 	}
 
-	/** Current controller pin */
-	private int pin = 1;
+	/** Controller pin */
+	private final int pin;
+
+	/** Create a new monitor prop */
+	public MonitorProp(int p) {
+		pin = p;
+	}
 
 	/** Encode a STORE request */
 	@Override
@@ -92,14 +97,6 @@ public class MonitorProp extends MonProp {
 		return (cio instanceof VideoMonitorImpl)
 		      ? (VideoMonitorImpl) cio
 		      :	null;
-	}
-
-	/** Advance to the next controller pin */
-	public void advancePin(Operation op) {
-		if (pin < op.getController().getMaxPin())
-			pin++;
-		else
-			pin = 0;
 	}
 
 	/** Format a config request */
@@ -122,6 +119,8 @@ public class MonitorProp extends MonProp {
 		sb.append(Integer.toString(getHGap(mon)));
 		sb.append(UNIT_SEP);
 		sb.append(Integer.toString(getVGap(mon)));
+		sb.append(UNIT_SEP);
+		sb.append("");		// FIXME: extra
 		sb.append(RECORD_SEP);
 		return sb.toString();
 	}
@@ -143,10 +142,5 @@ public class MonitorProp extends MonProp {
 	@Override
 	public String toString() {
 		return "monitor: " + pin;
-	}
-
-	/** Does the controller have more monitors? */
-	public boolean hasMore() {
-		return pin > 0;
 	}
 }

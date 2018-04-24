@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.monstream;
 
+import java.util.ArrayList;
+import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
@@ -57,8 +59,7 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 	public void sendRequest(VideoMonitorImpl vm, DeviceRequest dr) {
 		switch (dr) {
 		case SEND_SETTINGS:
-			createOp("video.monitor.op.config", vm,
-				new OpMonitor());
+			createOp("video.monitor.op.config", vm, configOp(vm));
 			break;
 		case QUERY_STATUS:
 			addOp(new Operation("video.monitor.op.query",
@@ -69,5 +70,18 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 			// Ignore other requests
 			break;
 		}
+	}
+
+	/** Create a monitor configuration operation */
+	private OpStep configOp(VideoMonitorImpl vm) {
+		ArrayList<MonProp> props = new ArrayList<MonProp>();
+		Controller c = vm.getController();
+		if (c instanceof ControllerImpl) {
+			ControllerImpl ctrl = (ControllerImpl) c;
+			for (int p = 1; p <= ctrl.getMaxPin(); p++)
+				props.add(new MonitorProp(p));
+		}
+		props.add(new ConfigProp());
+		return new OpStoreMultiple(props);
 	}
 }
