@@ -256,4 +256,19 @@ public class CameraHelper extends BaseHelper {
 	static private String buildPath(String path, int chan) {
 		return path.replace("{chan}", Integer.toString(chan));
 	}
+
+	/** Check if camera is blank */
+	static public boolean isBlank(Camera c) {
+		return (null == c) || isCameraNumBlank(c.getCamNum());
+	}
+
+	/** Check if a camera number is "blank" */
+	static private boolean isCameraNumBlank(Integer cn) {
+		return (cn != null) && (cameraNumBlank() == cn);
+	}
+
+	/** Get the "blank" camera number */
+	static private int cameraNumBlank() {
+		return SystemAttrEnum.CAMERA_NUM_BLANK.getInt();
+	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,16 +45,6 @@ public class SwitchProp extends MonProp {
 		return SystemAttrEnum.CAMERA_OUT_OF_SERVICE_URL.getString();
 	}
 
-	/** Get the "blank" camera number */
-	static private int cameraNumBlank() {
-		return SystemAttrEnum.CAMERA_NUM_BLANK.getInt();
-	}
-
-	/** Check if a camera number is "blank" */
-	static private boolean isCameraNumBlank(Integer cn) {
-		return (cn != null) && (cameraNumBlank() == cn);
-	}
-
 	/** Camera to display */
 	private final CameraImpl camera;
 
@@ -94,7 +84,7 @@ public class SwitchProp extends MonProp {
 
 	/** Get camera number */
 	private String getCamNum() {
-		if (isCameraBlank())
+		if (CameraHelper.isBlank(camera))
 			return "";
 		else {
 			assert camera != null;
@@ -103,14 +93,9 @@ public class SwitchProp extends MonProp {
 		}
 	}
 
-	/** Check if the camera is blank */
-	private boolean isCameraBlank() {
-		return (camera == null) || isCameraNumBlank(camera.getCamNum());
-	}
-
 	/** Get the stream URI */
 	private String getUri() {
-		if (isCameraBlank())
+		if (CameraHelper.isBlank(camera))
 			return "";
 		else {
 			assert camera != null;
@@ -176,7 +161,7 @@ public class SwitchProp extends MonProp {
 
 	/** Get the stream description */
 	private String getDescription() {
-		return isCameraBlank()
+		return CameraHelper.isBlank(camera)
 		      ? ""
 		      : GeoLocHelper.getDescription(camera.getGeoLoc());
 	}
