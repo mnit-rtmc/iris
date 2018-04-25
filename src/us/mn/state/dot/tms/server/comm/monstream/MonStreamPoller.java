@@ -81,15 +81,15 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 		return (null == vm) || CameraHelper.isBlank(vm.getCamera());
 	}
 
-	/** Get monitor for full-screen mode */
-	static private VideoMonitorImpl fullScreenMon(ControllerImpl c) {
+	/** Get monitor pin for full-screen mode */
+	static private int fullScreenPin(ControllerImpl c) {
 		int max_pin = c.getMaxPin();
 		for (int p = 1; p <= max_pin; p++) {
 			VideoMonitorImpl vm = getMonitor(c, p);
 			if (!isBlank(vm))
-				return vm;
+				return p;
 		}
-		return getMonitor(c, 1);
+		return 1;
 	}
 
 	/** Get extra monitor numbers for full-screen mode */
@@ -136,27 +136,28 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 	private OpStep switchOp(VideoMonitorImpl vm, CameraImpl cam) {
 		ControllerImpl c = getController(vm);
 		return (c != null)
-		      ? new OpStoreMultiple(switchProps(c, vm, cam))
+		      ? new OpStoreMultiple(switchProps(c, vm.getPin(), cam))
 		      : null;
 	}
 
 	/** Create a list of properties for a switch operation */
-	private ArrayList<MonProp> switchProps(ControllerImpl c,
-		VideoMonitorImpl vm, CameraImpl cam)
+	private ArrayList<MonProp> switchProps(ControllerImpl c, int pin,
+		CameraImpl cam)
 	{
 		ArrayList<MonProp> props = new ArrayList<MonProp>();
 		boolean fs = c.shouldUseFullScreen();
 		boolean pfs = fullScreen(c.getName(), fs);
 		if (pfs != fs) {
 			if (fs) {
-				props.add(new SwitchProp(1, cam));
+				int p = fullScreenPin(c);
+				props.add(new SwitchProp(1, getCamera(c, p)));
 				configFull(props, c);
 			} else {
 				switchAll(props, c);
 				configNormal(props, c);
 			}
 		} else
-			props.add(new SwitchProp(vm.getPin(), cam));
+			props.add(new SwitchProp(pin, cam));
 		return props;
 	}
 
@@ -216,7 +217,8 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 
 	/** Append full-screen config properties to a list */
 	private void configFull(ArrayList<MonProp> props, ControllerImpl c) {
-		props.add(new MonitorProp(1, fullScreenMon(c), getExtra(c)));
+		int pin = fullScreenPin(c);
+		props.add(new MonitorProp(1, getMonitor(c, pin), getExtra(c)));
 		props.add(new ConfigProp(1));
 	}
 }
