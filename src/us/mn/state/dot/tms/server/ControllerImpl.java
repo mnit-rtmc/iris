@@ -1059,6 +1059,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Should full screen mode be used for video monitor? */
 	public synchronized boolean shouldUseFullScreen() {
+		// FIXME: remove after testing
+		if (!"ctl_736".equals(name))
+			return false;
 		int n_cams = 0;
 		for (ControllerIO io: io_pins.values()) {
 			if (io instanceof VideoMonitorImpl) {
