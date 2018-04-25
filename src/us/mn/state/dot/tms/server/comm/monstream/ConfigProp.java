@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,21 +25,28 @@ import us.mn.state.dot.tms.server.comm.Operation;
  */
 public class ConfigProp extends MonProp {
 
+	/** Maximum pin number */
+	private final int max_pin;
+
+	/** Create a new config property */
+	public ConfigProp(int p) {
+		max_pin = p;
+	}
+
 	/** Encode a STORE request */
 	@Override
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		int pin = op.getController().getMaxPin();
-		tx_buf.put(formatReq(pin).getBytes("UTF8"));
+		tx_buf.put(formatReq().getBytes("UTF8"));
 	}
 
 	/** Format a config request */
-	private String formatReq(int pin) {
+	private String formatReq() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("config");
 		sb.append(UNIT_SEP);
-		sb.append(pin);
+		sb.append(max_pin);
 		sb.append(RECORD_SEP);
 		return sb.toString();
 	}
@@ -47,6 +54,6 @@ public class ConfigProp extends MonProp {
 	/** Get a string representation of the property */
 	@Override
 	public String toString() {
-		return "config";
+		return "config: " + max_pin;
 	}
 }

@@ -45,11 +45,15 @@ public class SwitchProp extends MonProp {
 		return SystemAttrEnum.CAMERA_OUT_OF_SERVICE_URL.getString();
 	}
 
+	/** Controller pin */
+	private final int pin;
+
 	/** Camera to display */
 	private final CameraImpl camera;
 
 	/** Create a new switch property */
-	public SwitchProp(CameraImpl c) {
+	public SwitchProp(int p, CameraImpl c) {
+		pin = p;
 		camera = c;
 	}
 
@@ -58,12 +62,11 @@ public class SwitchProp extends MonProp {
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		int pin = op.getDevice().getPin();
-		tx_buf.put(formatReq(pin).getBytes("UTF8"));
+		tx_buf.put(formatReq().getBytes("UTF8"));
 	}
 
 	/** Format a switch request */
-	private String formatReq(int pin) {
+	private String formatReq() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("play");
 		sb.append(UNIT_SEP);

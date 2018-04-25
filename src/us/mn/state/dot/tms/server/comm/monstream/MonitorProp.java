@@ -78,9 +78,18 @@ public class MonitorProp extends MonProp {
 	/** Controller pin */
 	private final int pin;
 
+	/** Extra monitor numbers (full-screen) */
+	private final String extra;
+
+	/** Create a new monitor prop */
+	public MonitorProp(int p, String ex) {
+		pin = p;
+		extra = ex;
+	}
+
 	/** Create a new monitor prop */
 	public MonitorProp(int p) {
-		pin = p;
+		this(p, "");
 	}
 
 	/** Encode a STORE request */
@@ -120,7 +129,7 @@ public class MonitorProp extends MonProp {
 		sb.append(UNIT_SEP);
 		sb.append(Integer.toString(getVGap(mon)));
 		sb.append(UNIT_SEP);
-		sb.append("");		// FIXME: extra
+		sb.append(extra);
 		sb.append(RECORD_SEP);
 		return sb.toString();
 	}
