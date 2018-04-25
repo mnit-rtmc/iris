@@ -148,6 +148,7 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 		boolean fs = c.shouldUseFullScreen();
 		boolean pfs = fullScreen(c.getName(), fs);
 		if (pfs != fs) {
+			props.add(new ConfigProp(0)); // start configuring
 			if (fs) {
 				int p = fullScreenPin(c);
 				props.add(new SwitchProp(1, getCamera(c, p)));
@@ -198,6 +199,7 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 	/** Create a list of config properties */
 	private ArrayList<MonProp> configProps(ControllerImpl c) {
 		ArrayList<MonProp> props = new ArrayList<MonProp>();
+		// FIXME: props.add(new ConfigProp(0)); // start configuring
 		boolean fs = c.shouldUseFullScreen();
 		fullScreen(c.getName(), fs);
 		if (fs)
