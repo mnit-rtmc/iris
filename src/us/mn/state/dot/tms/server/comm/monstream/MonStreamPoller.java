@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.monstream;
 import java.util.ArrayList;
 import java.util.HashSet;
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -75,21 +76,42 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 		return null;
 	}
 
+	/** Check if a video monitor is blank */
+	static private boolean isBlank(VideoMonitorImpl vm) {
+		return (null == vm) || CameraHelper.isBlank(vm.getCamera());
+	}
+
+	/** Get monitor for full-screen mode */
+	static private VideoMonitorImpl fullScreenMon(ControllerImpl c) {
+		int max_pin = c.getMaxPin();
+		for (int p = 1; p <= max_pin; p++) {
+			VideoMonitorImpl vm = getMonitor(c, p);
+			if (!isBlank(vm))
+				return vm;
+		}
+		return getMonitor(c, 1);
+	}
+
 	/** Get extra monitor numbers for full-screen mode */
-	static private String getExtra(ControllerImpl c, int vp) {
+	static private String getExtra(ControllerImpl c) {
 		StringBuilder sb = new StringBuilder();
 		int max_pin = c.getMaxPin();
 		for (int p = 1; p <= max_pin; p++) {
 			if (p > 1)
 				sb.append(' ');
-			if (p == vp)
-				sb.append('-');
-			else {
-				VideoMonitorImpl vm = getMonitor(c, p);
-				sb.append((vm != null) ? vm.getMonNum() : '#');
-			}
+			sb.append(getExtra(getMonitor(c, p)));
 		}
 		return sb.toString();
+	}
+
+	/** Get extra number for one monitor */
+	static private String getExtra(VideoMonitorImpl vm) {
+		if (vm != null) {
+			return isBlank(vm)
+			      ? Integer.toString(vm.getMonNum())
+			      : "-";
+		} else
+			return "#";
 	}
 
 	/** Create a new MonStream poller */
@@ -128,7 +150,7 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 		if (pfs != fs) {
 			if (fs) {
 				props.add(new SwitchProp(1, cam));
-				configFull(props, c, vm.getPin());
+				configFull(props, c);
 			} else {
 				switchAll(props, c);
 				configNormal(props, c);
@@ -169,18 +191,16 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 	/** Create a monitor configuration operation */
 	private OpStep configOp(VideoMonitorImpl vm) {
 		ControllerImpl c = getController(vm);
-		return (c != null)
-		      ? new OpStoreMultiple(configProps(c, vm.getPin()))
-		      : null;
+		return (c != null) ? new OpStoreMultiple(configProps(c)) : null;
 	}
 
 	/** Create a list of config properties */
-	private ArrayList<MonProp> configProps(ControllerImpl c, int pin) {
+	private ArrayList<MonProp> configProps(ControllerImpl c) {
 		ArrayList<MonProp> props = new ArrayList<MonProp>();
 		boolean fs = c.shouldUseFullScreen();
 		fullScreen(c.getName(), fs);
 		if (fs)
-			configFull(props, c, pin);
+			configFull(props, c);
 		else
 			configNormal(props, c);
 		return props;
@@ -190,15 +210,13 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 	private void configNormal(ArrayList<MonProp> props, ControllerImpl c) {
 		int max_pin = c.getMaxPin();
 		for (int p = 1; p <= max_pin; p++)
-			props.add(new MonitorProp(p));
+			props.add(new MonitorProp(p, getMonitor(c, p)));
 		props.add(new ConfigProp(max_pin));
 	}
 
 	/** Append full-screen config properties to a list */
-	private void configFull(ArrayList<MonProp> props, ControllerImpl c,
-		int pin)
-	{
-		props.add(new MonitorProp(1, getExtra(c, pin)));
+	private void configFull(ArrayList<MonProp> props, ControllerImpl c) {
+		props.add(new MonitorProp(1, fullScreenMon(c), getExtra(c)));
 		props.add(new ConfigProp(1));
 	}
 }

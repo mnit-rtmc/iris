@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.server.comm.monstream;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.MonitorStyle;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
 import us.mn.state.dot.tms.server.comm.Operation;
@@ -35,61 +34,25 @@ public class MonitorProp extends MonProp {
 		      : null;
 	}
 
-	/** Get force-aspect as a string */
-	static private String getForceAspect(VideoMonitorImpl mon) {
-		MonitorStyle ms = monitorStyle(mon);
-		return (ms != null && ms.getForceAspect()) ? "1" : "0";
-	}
-
-	/** Get monitor accent color */
-	static private String getAccent(VideoMonitorImpl mon) {
-		MonitorStyle ms = monitorStyle(mon);
-		return (ms != null)
-		      ? ms.getAccent()
-		      : MonitorStyle.DEFAULT_ACCENT;
-	}
-
-	/** Get the monitor font size */
-	static private int getFontSz(VideoMonitorImpl mon) {
-		MonitorStyle ms = monitorStyle(mon);
-		return (ms != null)
-		      ? ms.getFontSz()
-		      : MonitorStyle.DEFAULT_FONT_SZ;
-	}
-
-	/** Get the monitor title bar */
-	static private boolean getTitleBar(VideoMonitorImpl mon) {
-		MonitorStyle ms = monitorStyle(mon);
-		return (ms != null) && ms.getTitleBar();
-	}
-
-	/** Get the horizontal gap */
-	static private int getHGap(VideoMonitorImpl mon) {
-		MonitorStyle ms = monitorStyle(mon);
-		return (ms != null) ? ms.getHGap() : 0;
-	}
-
-	/** Get the vertical gap */
-	static private int getVGap(VideoMonitorImpl mon) {
-		MonitorStyle ms = monitorStyle(mon);
-		return (ms != null) ? ms.getVGap() : 0;
-	}
-
 	/** Controller pin */
 	private final int pin;
+
+	/** Video monitor */
+	private final VideoMonitorImpl mon;
 
 	/** Extra monitor numbers (full-screen) */
 	private final String extra;
 
 	/** Create a new monitor prop */
-	public MonitorProp(int p, String ex) {
+	public MonitorProp(int p, VideoMonitorImpl vm, String ex) {
 		pin = p;
+		mon = vm;
 		extra = ex;
 	}
 
 	/** Create a new monitor prop */
-	public MonitorProp(int p) {
-		this(p, "");
+	public MonitorProp(int p, VideoMonitorImpl vm) {
+		this(p, vm, "");
 	}
 
 	/** Encode a STORE request */
@@ -97,37 +60,29 @@ public class MonitorProp extends MonProp {
 	public void encodeStore(Operation op, ByteBuffer tx_buf)
 		throws IOException
 	{
-		tx_buf.put(formatReq(getMonitor(op)).getBytes("UTF8"));
-	}
-
-	/** Get current monitor */
-	private VideoMonitorImpl getMonitor(Operation op) {
-		ControllerIO cio = op.getController().getIO(pin);
-		return (cio instanceof VideoMonitorImpl)
-		      ? (VideoMonitorImpl) cio
-		      :	null;
+		tx_buf.put(formatReq().getBytes("UTF8"));
 	}
 
 	/** Format a config request */
-	private String formatReq(VideoMonitorImpl mon) {
+	private String formatReq() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("monitor");
 		sb.append(UNIT_SEP);
 		sb.append(pin - 1);
 		sb.append(UNIT_SEP);
-		sb.append(getMonLabel(mon));
+		sb.append(getMonLabel());
 		sb.append(UNIT_SEP);
-		sb.append(getAccent(mon));
+		sb.append(getAccent());
 		sb.append(UNIT_SEP);
-		sb.append(getForceAspect(mon));
+		sb.append(getForceAspect());
 		sb.append(UNIT_SEP);
-		sb.append(Integer.toString(getFontSz(mon)));
+		sb.append(Integer.toString(getFontSz()));
 		sb.append(UNIT_SEP);
 		sb.append("AAAA");	// FIXME
 		sb.append(UNIT_SEP);
-		sb.append(Integer.toString(getHGap(mon)));
+		sb.append(Integer.toString(getHGap()));
 		sb.append(UNIT_SEP);
-		sb.append(Integer.toString(getVGap(mon)));
+		sb.append(Integer.toString(getVGap()));
 		sb.append(UNIT_SEP);
 		sb.append(extra);
 		sb.append(RECORD_SEP);
@@ -135,8 +90,8 @@ public class MonitorProp extends MonProp {
 	}
 
 	/** Get monitor label as a string */
-	private String getMonLabel(VideoMonitorImpl mon) {
-		if (getTitleBar(mon)) {
+	private String getMonLabel() {
+		if (getTitleBar()) {
 			assert mon != null;
 			int n = mon.getMonNum();
 			if (n > 0)
@@ -145,6 +100,46 @@ public class MonitorProp extends MonProp {
 				return mon.getName();
 		} else
 			return "";
+	}
+
+	/** Get the monitor title bar */
+	private boolean getTitleBar() {
+		MonitorStyle ms = monitorStyle(mon);
+		return (ms != null) && ms.getTitleBar();
+	}
+
+	/** Get monitor accent color */
+	private String getAccent() {
+		MonitorStyle ms = monitorStyle(mon);
+		return (ms != null)
+		      ? ms.getAccent()
+		      : MonitorStyle.DEFAULT_ACCENT;
+	}
+
+	/** Get force-aspect as a string */
+	private String getForceAspect() {
+		MonitorStyle ms = monitorStyle(mon);
+		return (ms != null && ms.getForceAspect()) ? "1" : "0";
+	}
+
+	/** Get the monitor font size */
+	private int getFontSz() {
+		MonitorStyle ms = monitorStyle(mon);
+		return (ms != null)
+		      ? ms.getFontSz()
+		      : MonitorStyle.DEFAULT_FONT_SZ;
+	}
+
+	/** Get the horizontal gap */
+	private int getHGap() {
+		MonitorStyle ms = monitorStyle(mon);
+		return (ms != null) ? ms.getHGap() : 0;
+	}
+
+	/** Get the vertical gap */
+	private int getVGap() {
+		MonitorStyle ms = monitorStyle(mon);
+		return (ms != null) ? ms.getVGap() : 0;
 	}
 
 	/** Get a string representation of the property */
