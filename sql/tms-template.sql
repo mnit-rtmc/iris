@@ -3122,6 +3122,7 @@ action_plan_alert_list
 action_plan_event_purge_days	90
 camera_autoplay	true
 camera_construction_url	
+camera_full_screen_enable	false
 camera_kbd_panasonic_enable	false
 camera_num_blank	999
 camera_out_of_service_url	
@@ -3136,7 +3137,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.72.0
+database_version	4.73.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0

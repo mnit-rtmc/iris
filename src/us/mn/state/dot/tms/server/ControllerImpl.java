@@ -27,7 +27,6 @@ import java.util.Set;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Cabinet;
-import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.CommProtocol;
 import static us.mn.state.dot.tms.CommProtocol.MSG_FEED;
@@ -1057,27 +1056,6 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 				return (VideoMonitorImpl) io;
 		}
 		return null;
-	}
-
-	/** Should full screen mode be used for video monitor? */
-	public synchronized boolean shouldUseFullScreen() {
-		// FIXME: remove after testing
-		if (!"ctl_736".equals(name))
-			return false;
-		int n_mons = 0;
-		int n_cams = 0;
-		for (ControllerIO io: io_pins.values()) {
-			if (io instanceof VideoMonitorImpl) {
-				n_mons++;
-				VideoMonitorImpl vm = (VideoMonitorImpl) io;
-				if (!CameraHelper.isBlank(vm.getCamera())) {
-					n_cams++;
-					if (n_cams > 1)
-						return false;
-				}
-			}
-		}
-		return (n_mons > 1);
 	}
 
 	/** Destroy an object */

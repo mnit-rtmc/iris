@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
+import static us.mn.state.dot.tms.SystemAttrEnum.CAMERA_FULL_SCREEN_ENABLE;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
@@ -37,6 +38,11 @@ import static us.mn.state.dot.tms.utils.URIUtil.UDP;
  * @author Douglas Lau
  */
 public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
+
+	/** Is full screen enabled? */
+	static private boolean isFullScreenEnabled() {
+		return CAMERA_FULL_SCREEN_ENABLE.getBoolean();
+	}
 
 	/** Set of all controllers in full-screen mode */
 	static private final HashSet<String> FULL = new HashSet<String>();
@@ -114,6 +120,28 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 			return "#";
 	}
 
+	/** Should full screen mode be used? */
+	static private boolean shouldUseFullScreen(ControllerImpl c) {
+		if (!(isFullScreenEnabled()
+		   || "ctl_736".equals(c.getName()))) // FIXME: remove later
+			return false;
+		int n_mons = 0;
+		int n_cams = 0;
+		int max_pin = c.getMaxPin();
+		for (int p = 1; p <= max_pin; p++) {
+			VideoMonitorImpl vm = getMonitor(c, p);
+			if (vm != null) {
+				n_mons++;
+				if (!isBlank(vm)) {
+					n_cams++;
+					if (n_cams > 1)
+						return false;
+				}
+			}
+		}
+		return (n_mons > 1);
+	}
+
 	/** Create a new MonStream poller */
 	public MonStreamPoller(String n) {
 		super(n, UDP);
@@ -145,7 +173,7 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 		CameraImpl cam)
 	{
 		ArrayList<MonProp> props = new ArrayList<MonProp>();
-		boolean fs = c.shouldUseFullScreen();
+		boolean fs = shouldUseFullScreen(c);
 		boolean pfs = fullScreen(c.getName(), fs);
 		if (pfs != fs) {
 			props.add(new ConfigProp(0)); // start configuring
@@ -200,7 +228,7 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 	private ArrayList<MonProp> configProps(ControllerImpl c) {
 		ArrayList<MonProp> props = new ArrayList<MonProp>();
 		// FIXME: props.add(new ConfigProp(0)); // start configuring
-		boolean fs = c.shouldUseFullScreen();
+		boolean fs = shouldUseFullScreen(c);
 		fullScreen(c.getName(), fs);
 		if (fs)
 			configFull(props, c);
