@@ -1047,8 +1047,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Get a video monitor for the controller */
-	private synchronized VideoMonitorImpl getVideoMonitor() {
+	/** Get the first video monitor for the controller */
+	public synchronized VideoMonitorImpl getVideoMonitor() {
 		int max_pin = getMaxPin();
 		for (int p = 1; p <= max_pin; p++) {
 			ControllerIO io = io_pins.get(p);
