@@ -18,7 +18,6 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.CameraHelper;
-import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.VideoMonitor;
@@ -64,13 +63,15 @@ public class OpStatus extends OpStep {
 
 	/** Parse video monitor number (pin) */
 	static private VideoMonitorImpl parseMonNum(ControllerImpl ctrl,
-		String mon) throws IOException
+		String mon, String mode) throws IOException
 	{
 		try {
 			int pin = Integer.parseInt(mon) + 1;
-			ControllerIO cio = ctrl.getIO(pin);
-			if (cio instanceof VideoMonitorImpl)
-				return (VideoMonitorImpl) cio;
+			boolean full = "full".equals(mode);
+			VideoMonitorImpl vm = MonStreamPoller
+				.getMonitor(ctrl, pin, full);
+			if (vm != null)
+				return vm;
 			else
 				throw new ParsingException("INVALID PIN: "+pin);
 		}
@@ -275,14 +276,15 @@ public class OpStatus extends OpStep {
 		String mon = (par.length > 1) ? par[1] : "";
 		String cam = (par.length > 2) ? par[2] : "";
 		String stat = (par.length > 3) ? par[3] : "";
-		parseStatus(ctrl, mon, cam, stat);
+		String mode = (par.length > 4) ? par[4] : "";
+		parseStatus(ctrl, mon, cam, stat, mode);
 	}
 
 	/** Parse status message */
 	private void parseStatus(ControllerImpl ctrl, String mon, String cam,
-		String stat) throws IOException
+		String stat, String mode) throws IOException
 	{
-		VideoMonitorImpl vm = parseMonNum(ctrl, mon);
+		VideoMonitorImpl vm = parseMonNum(ctrl, mon, mode);
 		CameraImpl c = parseCam(cam);
 		vm.setCamNoSelect(c, "STATUS " + ctrl);
 		c.setVideoLossNotify(stat.length() > 0);

@@ -57,6 +57,13 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 		}
 	}
 
+	/** Check if a controller is full screen */
+	static private boolean isFullScreen(String c) {
+		synchronized (FULL) {
+			return FULL.contains(c);
+		}
+	}
+
 	/** Get the controller for a video monitor */
 	static private ControllerImpl getController(VideoMonitorImpl vm) {
 		Controller c = vm.getController();
@@ -140,6 +147,22 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 			}
 		}
 		return (n_mons > 1);
+	}
+
+	/** Get video monitor from a pin (maybe full-screen).
+	 * @param c Controller.
+	 * @param p Pin on controller.
+	 * @param full Full-screen (or only configured pin).
+	 * @return Video monitor at specified pin. */
+	static public VideoMonitorImpl getMonitor(ControllerImpl c, int p,
+		boolean full)
+	{
+		int max_pin = c.getMaxPin();
+		boolean fs = isFullScreen(c.getName()) || (max_pin <= 1);
+		if (full)
+			return (fs) ? getMonitor(c, fullScreenPin(c)) : null;
+		else
+			return (fs) ? null : getMonitor(c, p);
 	}
 
 	/** Create a new MonStream poller */
