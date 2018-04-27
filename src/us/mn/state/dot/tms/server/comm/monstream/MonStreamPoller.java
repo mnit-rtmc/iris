@@ -198,26 +198,32 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 		ArrayList<MonProp> props = new ArrayList<MonProp>();
 		boolean fs = shouldUseFullScreen(c);
 		boolean pfs = fullScreen(c.getName(), fs);
-		if (pfs != fs) {
-			props.add(new ConfigProp(0)); // start configuring
-			if (fs) {
-				int p = fullScreenPin(c);
-				props.add(new SwitchProp(1, getCamera(c, p)));
-				configFull(props, c);
-			} else {
-				switchAll(props, c);
-				configNormal(props, c);
-			}
-		} else {
-			if (fs) {
-				int p = fullScreenPin(c);
-				props.add(new SwitchProp(1, getCamera(c, p)));
-				props.add(new MonitorProp(1, getMonitor(c, p),
-					getExtra(c)));
-			} else
-				props.add(new SwitchProp(pin, cam));
-		}
+		if (pfs != fs)	// Changing mode
+			switchModeProps(props, c, fs);
+		else if (fs) {
+			// Remaining in full-screen mode
+			int p = fullScreenPin(c);
+			props.add(new SwitchProp(1, getCamera(c, p)));
+			props.add(new MonitorProp(1, getMonitor(c, p),
+				getExtra(c)));
+		} else	// Normal mode
+			props.add(new SwitchProp(pin, cam));
 		return props;
+	}
+
+	/** Add properties for switch operation with full-screen mode change */
+	private void switchModeProps(ArrayList<MonProp> props, ControllerImpl c,
+		boolean fs)
+	{
+		props.add(new ConfigProp(0)); // start configuring
+		if (fs) {
+			int p = fullScreenPin(c);
+			props.add(new SwitchProp(1, getCamera(c, p)));
+			configFull(props, c);
+		} else {
+			switchAll(props, c);
+			configNormal(props, c);
+		}
 	}
 
 	/** Create a list of properties for all switch operation */
