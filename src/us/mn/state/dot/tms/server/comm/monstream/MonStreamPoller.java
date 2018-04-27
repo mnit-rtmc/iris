@@ -208,8 +208,15 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 				switchAll(props, c);
 				configNormal(props, c);
 			}
-		} else
-			props.add(new SwitchProp(pin, cam));
+		} else {
+			if (fs) {
+				int p = fullScreenPin(c);
+				props.add(new SwitchProp(1, getCamera(c, p)));
+				props.add(new MonitorProp(1, getMonitor(c, p),
+					getExtra(c)));
+			} else
+				props.add(new SwitchProp(pin, cam));
+		}
 		return props;
 	}
 
