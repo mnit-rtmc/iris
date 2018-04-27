@@ -157,12 +157,12 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 	static public VideoMonitorImpl getMonitor(ControllerImpl c, int p,
 		boolean full)
 	{
-		int max_pin = c.getMaxPin();
-		boolean fs = isFullScreen(c.getName()) || (max_pin <= 1);
-		if (full)
+		if (full) {
+			int max_pin = c.getMaxPin();
+			boolean fs = isFullScreen(c.getName()) || (max_pin <= 1);
 			return (fs) ? getMonitor(c, fullScreenPin(c)) : null;
-		else
-			return (fs) ? null : getMonitor(c, p);
+		} else
+			return getMonitor(c, p);
 	}
 
 	/** Create a new MonStream poller */
