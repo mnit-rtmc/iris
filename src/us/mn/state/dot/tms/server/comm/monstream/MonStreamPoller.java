@@ -129,8 +129,7 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 
 	/** Should full screen mode be used? */
 	static private boolean shouldUseFullScreen(ControllerImpl c) {
-		if (!(isFullScreenEnabled()
-		   || "ctl_736".equals(c.getName()))) // FIXME: remove later
+		if (!isFullScreenEnabled())
 			return false;
 		int n_mons = 0;
 		int n_cams = 0;
@@ -263,7 +262,7 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 	/** Create a list of config properties */
 	private ArrayList<MonProp> configProps(ControllerImpl c) {
 		ArrayList<MonProp> props = new ArrayList<MonProp>();
-		// FIXME: props.add(new ConfigProp(0)); // start configuring
+		props.add(new ConfigProp(0)); // start configuring
 		boolean fs = shouldUseFullScreen(c);
 		fullScreen(c.getName(), fs);
 		if (fs)
