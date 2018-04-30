@@ -283,7 +283,12 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		return devices;
 	}
 
-	/** Create the MULTI string for one DMS */
+	/** Create the MULTI string for one DMS.
+	 * @param inc Incident.
+	 * @param dms Possible sign to deploy.
+	 * @param up Distance upstream from incident.
+	 * @param n Nearest node to incident.
+	 * @return MULTI string for DMS, or null. */
 	private MultiString createMulti(Incident inc, DMS dms, Distance up,
 		R_Node n)
 	{
@@ -304,13 +309,46 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 		IncAdvice adv = IncAdviceHelper.match(rng, inc);
 		if (null == adv)
 			return null;
+		String mdsc = checkMulti(dms, dsc.getMulti(), dsc.getAbbrev(),
+			up, n);
+		if (null == mdsc)
+			return null;
+		String mloc = checkMulti(dms, iloc.getMulti(), iloc.getAbbrev(),
+			up, n);
+		if (null == mloc)
+			return null;
+		String madv = checkMulti(dms, adv.getMulti(), adv.getAbbrev(),
+			up, n);
+		if (null == madv)
+			return null;
 		LocMultiBuilder lmb = new LocMultiBuilder(n, up);
-		new MultiString(dsc.getMulti()).parse(lmb);
+		new MultiString(mdsc).parse(lmb);
 		lmb.addLine(null);
-		new MultiString(iloc.getMulti()).parse(lmb);
+		new MultiString(mloc).parse(lmb);
 		lmb.addLine(null);
-		new MultiString(adv.getMulti()).parse(lmb);
+		new MultiString(madv).parse(lmb);
 		return lmb.toMultiString();
+	}
+
+	/** Check if MULTI string or abbreviation will fit on a DMS */
+	private String checkMulti(DMS dms, String ms, String abbrev,
+		Distance up, R_Node n)
+	{
+		String res = checkMulti(dms, ms, up, n);
+		return (res != null) ? res : checkMulti(dms, abbrev, up, n);
+	}
+
+	/** Check if MULTI string will fit on a DMS */
+	private String checkMulti(DMS dms, String ms, Distance up, R_Node n) {
+		if (null == ms)
+			return null;
+		LocMultiBuilder lmb = new LocMultiBuilder(n, up);
+		new MultiString(ms).parse(lmb);
+		MultiString multi = lmb.toMultiString();
+		if (createGraphic(dms, multi) != null)
+			return ms;
+		else
+			return null;
 	}
 
 	/** Create the page one graphic for a MULTI string */
