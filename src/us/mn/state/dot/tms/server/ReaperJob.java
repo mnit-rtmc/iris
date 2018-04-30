@@ -175,18 +175,7 @@ public class ReaperJob extends Job {
 		// This is needed because objects are removed
 		// asynchronously from the namespace.
 		Incident i = IncidentHelper.lookup(inc.getName());
-		if ((i == inc) && isReapable(inc) && !isReferenced(inc))
+		if ((i == inc) && isReapable(inc))
 			inc.notifyRemove();
-	}
-
-	/** Check if an incident is referenced by any sign message */
-	private boolean isReferenced(IncidentImpl inc) {
-		Iterator<SignMessage> it = SignMessageHelper.iterator();
-		while (it.hasNext()) {
-			SignMessage sm = it.next();
-			if (sm.getIncident() == inc)
-				return true;
-		}
-		return false;
 	}
 }

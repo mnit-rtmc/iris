@@ -23,7 +23,6 @@ import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
-import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.TMSException;
@@ -126,7 +125,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		boolean pp, int mp, int s, String o, Integer d)
 	{
 		super(n);
-		incident = lookupIncident(inc);
+		incident = inc;
 		multi = m;
 		beacon_enabled = be;
 		prefix_page = pp;
@@ -157,12 +156,12 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 			MSG_LOG.log(getName() + ": " + msg);
 	}
 
-	/** Associated incident */
-	private Incident incident;
+	/** Associated incident (original name) */
+	private String incident;
 
 	/** Get the associated incident */
 	@Override
-	public Incident getIncident() {
+	public String getIncident() {
 		return incident;
 	}
 

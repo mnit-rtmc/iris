@@ -691,7 +691,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage findOrCreateMsg(String m, boolean be, boolean pp,
 		DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		SignMessage esm = SignMessageHelper.find(m, be, mp, src, o, d);
+		SignMessage esm = SignMessageHelper.find(null, m, be, mp, src,
+			o, d);
 		if (esm != null)
 			return esm;
 		else

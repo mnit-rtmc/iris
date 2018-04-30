@@ -54,8 +54,35 @@ public class SignMessageCreator {
 		user = u;
 	}
 
-	/** 
-	 * Create a new sign message.
+	/** Create a new sign message.
+	 *
+	 * @param inc Associated incident (original name).
+	 * @param multi MULTI text.
+	 * @param be Beacon enabled.
+	 * @param mp Message priority.
+	 * @param src Sign message source bits.
+	 * @param owner User name.
+	 * @param duration Message duration; null for indefinite.
+	 * @return Proxy of new sign message, or null on error.
+	 */
+	private SignMessage create(String inc, String multi, boolean be,
+		DmsMsgPriority mp, int src, String owner, Integer duration)
+	{
+		boolean pp = false; // Operators cannot enable prefix page
+		SignMessage sm = SignMessageHelper.find(inc, multi, pp, mp,
+			src, owner, duration);
+		if (sm != null)
+			return sm;
+		String name = createName();
+		if (name != null) {
+			return create(name, inc, multi, be, pp, mp, src, owner,
+			              duration);
+		} else
+			return null;
+	}
+
+	/** Create a new sign message.
+	 *
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
 	 * @param mp Message priority.
@@ -67,22 +94,13 @@ public class SignMessageCreator {
 	public SignMessage create(String multi, boolean be, DmsMsgPriority mp,
 		int src, String owner, Integer duration)
 	{
-		boolean pp = false; // Operators cannot enable prefix page
-		SignMessage sm = SignMessageHelper.find(multi, pp, mp, src,
-			owner, duration);
-		if (sm != null)
-			return sm;
-		String name = createName();
-		if (name != null) {
-			return create(name, multi, be, pp, mp, src, owner,
-			              duration);
-		} else
-			return null;
+		return create(null, multi, be, mp, src, owner, duration);
 	}
 
-	/** 
-	 * Create a new sign message.
+	/** Create a new sign message.
+	 *
 	 * @param name Sign message name.
+	 * @param inc Associated incident (original name).
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
 	 * @param pp Prefix page.
@@ -92,11 +110,13 @@ public class SignMessageCreator {
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
-	private SignMessage create(String name, String multi, boolean be,
-		boolean pp, DmsMsgPriority mp, int src, String owner,
-		Integer duration)
+	private SignMessage create(String name, String inc, String multi,
+		boolean be, boolean pp, DmsMsgPriority mp, int src,
+		String owner, Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		if (inc != null)
+			attrs.put("incident", inc);
 		attrs.put("multi", multi);
 		attrs.put("beacon_enabled", be);
 		attrs.put("prefix_page", pp);
@@ -141,8 +161,8 @@ public class SignMessageCreator {
 			return null;
 	}
 
-	/** 
-	 * Create a SignMessage name, which is in this form: 
+	/**
+	 * Create a SignMessage name, which is in this form:
 	 *    user.name + "_" + uniqueid
 	 *    where uniqueid is a sequential integer.
 	 */
@@ -170,7 +190,7 @@ public class SignMessageCreator {
 		return user.getName() + '_' + uid;
 	}
 
-	/** 
+	/**
 	 * Create a HashSet containing all SignMessage names for the user.
 	 * @return A HashSet with entries as SignMessage names.
 	 */

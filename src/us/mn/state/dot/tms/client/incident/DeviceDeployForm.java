@@ -132,6 +132,9 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	/** Send new sign message to the specified DMS */
 	private void sendSignMessage(DMS dms) {
 		// FIXME
+		String name = dms.getName();
+		System.out.println("DMS: " + name + ", multi: " +
+			model.getMulti(name));
 	}
 
 	/** Update one attribute on the form */

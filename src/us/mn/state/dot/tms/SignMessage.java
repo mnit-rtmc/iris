@@ -28,8 +28,8 @@ public interface SignMessage extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "sign_message";
 
-	/** Get the associated incident */
-	Incident getIncident();
+	/** Get the associated incident (original name) */
+	String getIncident();
 
 	/** Get the message MULTI string.
 	 * @return Message text in MULTI markup.
