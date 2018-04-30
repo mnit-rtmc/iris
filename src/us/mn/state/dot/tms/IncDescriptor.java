@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,12 +26,6 @@ public interface IncDescriptor extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "inc_descriptor";
-
-	/** Set the sign group */
-	void setSignGroup(SignGroup sg);
-
-	/** Get the sign group */
-	SignGroup getSignGroup();
 
 	/** Set the event type */
 	void setEventType(int et);
@@ -62,4 +56,10 @@ public interface IncDescriptor extends SonarObject {
 
 	/** Get the MULTI string */
 	String getMulti();
+
+	/** Set abbreviated MULTI string */
+	void setAbbrev(String a);
+
+	/** Get abbreviated MULTI string */
+	String getAbbrev();
 }

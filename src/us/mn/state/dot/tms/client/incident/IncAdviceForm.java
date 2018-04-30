@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,6 @@ public class IncAdviceForm extends ProxyTableForm<IncAdvice> {
 
 	/** Create a new incident advice form */
 	public IncAdviceForm(Session s) {
-		super(I18N.get("incident.advice"), new IncAdvicePanel(
-			new IncAdviceTableModel(s)));
+		super(I18N.get("incident.advice"), new IncAdviceTableModel(s));
 	}
 }

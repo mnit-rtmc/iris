@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import java.util.Set;
 
 /**
  * Helper class for Incident Descriptors.
@@ -36,12 +35,11 @@ public class IncDescriptorHelper extends BaseHelper {
 	}
 
 	/** Find a matching incident descriptor */
-	static public IncDescriptor match(Incident inc, Set<SignGroup> groups) {
+	static public IncDescriptor match(Incident inc) {
 		Iterator<IncDescriptor> it = iterator();
 		while (it.hasNext()) {
 			IncDescriptor dsc = it.next();
-			if (groups.contains(dsc.getSignGroup()) &&
-			    dsc.getEventType() == inc.getEventType() &&
+			if (dsc.getEventType() == inc.getEventType() &&
 			    dsc.getLaneType() == inc.getLaneType() &&
 			    dsc.getDetail() == inc.getDetail() &&
 			    dsc.getCleared() == inc.getCleared())

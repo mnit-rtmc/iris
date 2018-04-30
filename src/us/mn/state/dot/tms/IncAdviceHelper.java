@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,9 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Helper class for Incident Advices.
@@ -38,14 +35,11 @@ public class IncAdviceHelper extends BaseHelper {
 	}
 
 	/** Find a matching incident advice */
-	static public IncAdvice match(Set<SignGroup> groups, IncRange rng,
-		Incident inc)
-	{
+	static public IncAdvice match(IncRange rng, Incident inc) {
 		Iterator<IncAdvice> it = iterator();
 		while (it.hasNext()) {
 			IncAdvice adv = it.next();
-			if (groups.contains(adv.getSignGroup()) &&
-			    adv.getRange() == rng.ordinal() &&
+			if (adv.getRange() == rng.ordinal() &&
 			    adv.getLaneType() == inc.getLaneType() &&
 			    impactMatches(adv.getImpact(), inc.getImpact()) &&
 			    adv.getCleared() == inc.getCleared())

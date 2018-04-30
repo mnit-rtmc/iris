@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.IncAdvice;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.utils.MultiString;
 
@@ -50,8 +49,8 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	/** Load all the incident advices */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncAdviceImpl.class);
-		store.query("SELECT name, sign_group, range, lane_type, " +
-			"impact, cleared, multi FROM iris." + SONAR_TYPE + ";",
+		store.query("SELECT name, range, lane_type, impact, cleared, " +
+			"multi, abbrev FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -65,12 +64,12 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("sign_group", sign_group);
 		map.put("range", range);
 		map.put("lane_type", lane_type);
 		map.put("impact", impact);
 		map.put("cleared", cleared);
 		map.put("multi", multi);
+		map.put("abbrev", abbrev);
 		return map;
 	}
 
@@ -86,57 +85,34 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 		return SONAR_TYPE;
 	}
 
-	/** Create a new incident advice */
+	/** Create an incident advice */
 	private IncAdviceImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),		// name
-		     row.getString(2),		// sign_group
-		     row.getInt(3),		// range
-		     row.getShort(4),		// lane_type
-		     row.getString(5),		// impact
-		     row.getBoolean(6),		// cleared
-		     row.getString(7)		// multi
+		this(row.getString(1),          // name
+		     row.getInt(2),             // range
+		     row.getShort(3),           // lane_type
+		     row.getString(4),          // impact
+		     row.getBoolean(5),         // cleared
+		     row.getString(6),          // multi
+		     row.getString(7)		// abbrev
 		);
 	}
 
-	/** Create a new incident advice */
-	private IncAdviceImpl(String n, String sg, int r, short lt, String imp,
-		boolean c, String m)
+	/** Create an incident advice */
+	private IncAdviceImpl(String n, int r, short lt, String imp, boolean c,
+		String m, String a)
 	{
 		super(n);
-		sign_group = lookupSignGroup(sg);
 		range = r;
 		lane_type = lt;
 		impact = imp;
 		cleared = c;
 		multi = m;
+		abbrev = a;
 	}
 
 	/** Create a new incident advice */
 	public IncAdviceImpl(String n) {
 		super(n);
-	}
-
-	/** Sign group */
-	private SignGroup sign_group;
-
-	/** Set the sign group */
-	@Override
-	public void setSignGroup(SignGroup sg) {
-		sign_group = sg;
-	}
-
-	/** Set the sign group */
-	public void doSetSignGroup(SignGroup sg) throws TMSException {
-		if (sg != sign_group) {
-			store.update(this, "sign_group", sg);
-			setSignGroup(sg);
-		}
-	}
-
-	/** Get the sign group */
-	@Override
-	public SignGroup getSignGroup() {
-		return sign_group;
 	}
 
 	/** Range ordinal */
@@ -271,5 +247,31 @@ public class IncAdviceImpl extends BaseObjectImpl implements IncAdvice {
 	@Override
 	public String getMulti() {
 		return multi;
+	}
+
+	/** Abbreviated MULTI string */
+	private String abbrev;
+
+	/** Set abbreviated MULTI string */
+	@Override
+	public void setAbbrev(String a) {
+		abbrev = a;
+	}
+
+	/** Set abbreviated MULTI string */
+	public void doSetAbbrev(String a) throws TMSException {
+		// FIXME: only allow true MULTI tags here
+		if (a != null && !new MultiString(a).isValid())
+			throw new ChangeVetoException("Invalid MULTI: " + a);
+		if (!objectEquals(a, abbrev)) {
+			store.update(this, "abbrev", a);
+			setAbbrev(a);
+		}
+	}
+
+	/** Get abbreviated MULTI string */
+	@Override
+	public String getAbbrev() {
+		return abbrev;
 	}
 }

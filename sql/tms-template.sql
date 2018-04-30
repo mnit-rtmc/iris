@@ -2296,13 +2296,13 @@ CREATE TRIGGER incident_update_trigger
 
 CREATE TABLE iris.inc_descriptor (
 	name VARCHAR(10) PRIMARY KEY,
-	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
 	event_desc_id INTEGER NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
 	detail VARCHAR(8) REFERENCES event.incident_detail(name),
 	cleared BOOLEAN NOT NULL,
-	multi VARCHAR(64) NOT NULL
+	multi VARCHAR(64) NOT NULL,
+	abbrev VARCHAR(32)
 );
 
 CREATE FUNCTION iris.inc_descriptor_ck() RETURNS TRIGGER AS
@@ -2332,21 +2332,21 @@ CREATE TABLE iris.inc_range (
 
 CREATE TABLE iris.inc_locator (
 	name VARCHAR(10) PRIMARY KEY,
-	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
 	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
 	branched BOOLEAN NOT NULL,
 	pickable BOOLEAN NOT NULL,
-	multi VARCHAR(64) NOT NULL
+	multi VARCHAR(64) NOT NULL,
+	abbrev VARCHAR(32)
 );
 
 CREATE TABLE iris.inc_advice (
 	name VARCHAR(10) PRIMARY KEY,
-	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
 	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
 	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
 	impact VARCHAR(20) NOT NULL,
 	cleared BOOLEAN NOT NULL,
-	multi VARCHAR(64) NOT NULL
+	multi VARCHAR(64) NOT NULL,
+	abbrev VARCHAR(32)
 );
 
 CREATE FUNCTION iris.inc_advice_ck() RETURNS TRIGGER AS

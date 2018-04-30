@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ public class IncLocatorForm extends ProxyTableForm<IncLocator> {
 
 	/** Create a new incident locator form */
 	public IncLocatorForm(Session s) {
-		super(I18N.get("incident.locators"), new IncLocatorPanel(
-			new IncLocatorTableModel(s)));
+		super(I18N.get("incident.locators"),
+			new IncLocatorTableModel(s));
 	}
 }

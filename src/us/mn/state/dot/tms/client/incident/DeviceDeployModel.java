@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2016  Minnesota Department of Transportation
+ * Copyright (C) 2010-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,14 +16,12 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Set;
 import java.util.TreeMap;
 import javax.swing.DefaultListModel;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsSignGroupHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentHelper;
@@ -42,7 +40,6 @@ import us.mn.state.dot.tms.LCSArrayHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeType;
-import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
@@ -294,19 +291,18 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			return null;
 		if (up.m() > max_dist.m())
 			return null;
-		Set<SignGroup> groups = DmsSignGroupHelper.findGroups(dms);
-		IncDescriptor dsc = IncDescriptorHelper.match(inc, groups);
-		if (dsc == null)
-			return null;
 		IncRange rng = getRange(up);
-		if (rng == null)
+		if (null == rng)
 			return null;
-		IncLocator iloc = IncLocatorHelper.match(groups, rng, false,
+		IncDescriptor dsc = IncDescriptorHelper.match(inc);
+		if (null == dsc)
+			return null;
+		IncLocator iloc = IncLocatorHelper.match(rng, false,
 			n.getPickable());
-		if (iloc == null)
+		if (null == iloc)
 			return null;
-		IncAdvice adv = IncAdviceHelper.match(groups, rng, inc);
-		if (adv == null)
+		IncAdvice adv = IncAdviceHelper.match(rng, inc);
+		if (null == adv)
 			return null;
 		LocMultiBuilder lmb = new LocMultiBuilder(n, up);
 		new MultiString(dsc.getMulti()).parse(lmb);

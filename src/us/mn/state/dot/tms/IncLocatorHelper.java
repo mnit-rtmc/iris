@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
-import java.util.Set;
 
 /**
  * Helper class for Incident Locators.
@@ -36,14 +35,13 @@ public class IncLocatorHelper extends BaseHelper {
 	}
 
 	/** Find a matching incident locator */
-	static public IncLocator match(Set<SignGroup> groups, IncRange rng,
-		boolean branched, boolean pickable)
+	static public IncLocator match(IncRange rng, boolean branched,
+		boolean pickable)
 	{
 		Iterator<IncLocator> it = iterator();
 		while (it.hasNext()) {
 			IncLocator iloc = it.next();
-			if (groups.contains(iloc.getSignGroup()) &&
-			    iloc.getRange() == rng.ordinal() &&
+			if (iloc.getRange() == rng.ordinal() &&
 			    iloc.getBranched() == branched &&
 			    iloc.getPickable() == pickable)
 				return iloc;

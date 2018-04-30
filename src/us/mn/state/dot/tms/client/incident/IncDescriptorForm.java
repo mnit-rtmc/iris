@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ public class IncDescriptorForm extends ProxyTableForm<IncDescriptor> {
 
 	/** Create a new incident descriptor form */
 	public IncDescriptorForm(Session s) {
-		super(I18N.get("incident.descriptors"), new IncDescriptorPanel(
-			new IncDescriptorTableModel(s)));
+		super(I18N.get("incident.descriptors"),
+			new IncDescriptorTableModel(s));
 	}
 }

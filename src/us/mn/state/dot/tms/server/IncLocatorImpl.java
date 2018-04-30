@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 	/** Load all the incident locators */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncLocatorImpl.class);
-		store.query("SELECT name, sign_group, range, branched, " +
-			"pickable, multi FROM iris." + SONAR_TYPE + ";",
+		store.query("SELECT name, range, branched, pickable, multi, " +
+			"abbrev FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -50,11 +50,11 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("sign_group", sign_group);
 		map.put("range", range);
 		map.put("branched", branched);
 		map.put("pickable", pickable);
 		map.put("multi", multi);
+		map.put("abbrev", abbrev);
 		return map;
 	}
 
@@ -70,55 +70,32 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 		return SONAR_TYPE;
 	}
 
-	/** Create a new incident locator */
+	/** Create an incident locator */
 	private IncLocatorImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),		// name
-		     row.getString(2),		// sign_group
-		     row.getInt(3),		// range
-		     row.getBoolean(4),		// branched
-		     row.getBoolean(5),		// pickable
-		     row.getString(6)		// multi
+		this(row.getString(1),          // name
+		     row.getInt(2),             // range
+		     row.getBoolean(3),         // branched
+		     row.getBoolean(4),         // pickable
+		     row.getString(5),          // multi
+		     row.getString(6)           // abbrev
 		);
 	}
 
-	/** Create a new incident locator */
-	private IncLocatorImpl(String n, String sg, int r, boolean b, boolean p,
-		String m)
+	/** Create an incident locator */
+	private IncLocatorImpl(String n, int r, boolean b, boolean p, String m,
+		String a)
 	{
 		super(n);
-		sign_group = lookupSignGroup(sg);
 		range = r;
 		branched = b;
 		pickable = p;
 		multi = m;
+		abbrev = a;
 	}
 
 	/** Create a new incident locator */
 	public IncLocatorImpl(String n) {
 		super(n);
-	}
-
-	/** Sign group */
-	private SignGroup sign_group;
-
-	/** Set the sign group */
-	@Override
-	public void setSignGroup(SignGroup sg) {
-		sign_group = sg;
-	}
-
-	/** Set the sign group */
-	public void doSetSignGroup(SignGroup sg) throws TMSException {
-		if (sg != sign_group) {
-			store.update(this, "sign_group", sg);
-			setSignGroup(sg);
-		}
-	}
-
-	/** Get the sign group */
-	@Override
-	public SignGroup getSignGroup() {
-		return sign_group;
 	}
 
 	/** Range ordinal */
@@ -214,5 +191,31 @@ public class IncLocatorImpl extends BaseObjectImpl implements IncLocator {
 	@Override
 	public String getMulti() {
 		return multi;
+	}
+
+	/** Abbreviated MULTI string */
+	private String abbrev;
+
+	/** Set abbreviated MULTI string */
+	@Override
+	public void setAbbrev(String a) {
+		abbrev = a;
+	}
+
+	/** Set abbreviated MULTI string */
+	public void doSetAbbrev(String a) throws TMSException {
+		// FIXME: only allow true MULTI tags here
+		if (a != null && !new MultiString(a).isValid())
+			throw new ChangeVetoException("Invalid MULTI: " + a);
+		if (!objectEquals(a, abbrev)) {
+			store.update(this, "abbrev", a);
+			setAbbrev(a);
+		}
+	}
+
+	/** Get abbreviated MULTI string */
+	@Override
+	public String getAbbrev() {
+		return abbrev;
 	}
 }

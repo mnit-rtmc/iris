@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,8 +28,6 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IncDescriptor;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -53,6 +51,16 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 			true,	/* has_create_delete */
 			false	/* has_name */
 		);
+	}
+
+	/** Create the incident type combo box */
+	static private JComboBox<EventType> createIncTypeCombo() {
+		return new JComboBox<EventType>(new EventType[] {
+			EventType.INCIDENT_CRASH,
+			EventType.INCIDENT_STALL,
+			EventType.INCIDENT_ROADWORK,
+			EventType.INCIDENT_HAZARD
+		});
 	}
 
 	/** Renderer for event types names in a table cell */
@@ -106,20 +114,6 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	protected ArrayList<ProxyColumn<IncDescriptor>> createColumns() {
 		ArrayList<ProxyColumn<IncDescriptor>> cols =
 			new ArrayList<ProxyColumn<IncDescriptor>>(6);
-		cols.add(new ProxyColumn<IncDescriptor>("dms.group", 108) {
-			public Object getValueAt(IncDescriptor dsc) {
-				return dsc.getSignGroup();
-			}
-			public boolean isEditable(IncDescriptor dsc) {
-				return canWrite(dsc);
-			}
-			public void setValueAt(IncDescriptor dsc, Object value){
-				String v = value.toString().trim();
-				SignGroup sg = SignGroupHelper.lookup(v);
-				if (sg != null)
-					dsc.setSignGroup(sg);
-			}
-		});
 		cols.add(new ProxyColumn<IncDescriptor>("incident.type", 100) {
 			public Object getValueAt(IncDescriptor dsc) {
 				return EventType.fromId(dsc.getEventType());
@@ -137,8 +131,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				return new EventTypeCellRenderer();
 			}
 			protected TableCellEditor createCellEditor() {
-				JComboBox<EventType> cbx = IncDescriptorPanel
-					.createIncTypeCombo();
+				JComboBox<EventType> cbx = createIncTypeCombo();
 				cbx.setRenderer(new EventTypeRenderer());
 				return new DefaultCellEditor(cbx);
 			}
@@ -206,8 +199,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				}
 			}
 		});
-		cols.add(new ProxyColumn<IncDescriptor>("dms.multi.string",
-			512)
+		cols.add(new ProxyColumn<IncDescriptor>("dms.multi.string", 512)
 		{
 			public Object getValueAt(IncDescriptor dsc) {
 				return dsc.getMulti();
@@ -218,6 +210,20 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 			public void setValueAt(IncDescriptor dsc, Object value){
 				dsc.setMulti(new MultiString(value.toString())
 					.normalize());
+			}
+		});
+		cols.add(new ProxyColumn<IncDescriptor>("dms.multi.abbrev", 256)
+		{
+			public Object getValueAt(IncDescriptor dsc) {
+				return dsc.getAbbrev();
+			}
+			public boolean isEditable(IncDescriptor dsc) {
+				return canWrite(dsc);
+			}
+			public void setValueAt(IncDescriptor dsc, Object value){
+				String a = new MultiString(value.toString())
+					.normalize();
+				dsc.setAbbrev((a.length() > 0) ? a : null);
 			}
 		});
 		return cols;
@@ -255,11 +261,6 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 			public int compare(IncDescriptor dsc0,
 				IncDescriptor dsc1)
 			{
-				SignGroup sg0 = dsc0.getSignGroup();
-				SignGroup sg1 = dsc1.getSignGroup();
-				int c = sg0.getName().compareTo(sg1.getName());
-				if (c != 0)
-					return c;
 				int et0 = dsc0.getEventType();
 				int et1 = dsc1.getEventType();
 				if (et0 != et1)
@@ -274,13 +275,13 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 	}
 
 	/** Create a new incident descriptor */
-	public void create(SignGroup sg, EventType et) {
+	@Override
+	public void createObject(String name_ignore) {
 		String name = createUniqueName();
 		if (name != null) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
-			attrs.put("sign_group", sg);
-			attrs.put("event_desc_id", et.id);
+			attrs.put("event_desc_id", EventType.INCIDENT_CRASH.id);
 			descriptor.cache.createObject(name, attrs);
 		}
 	}

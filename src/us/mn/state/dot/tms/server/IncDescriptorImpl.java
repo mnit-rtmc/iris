@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,9 +38,9 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	/** Load all the incident descriptors */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, IncDescriptorImpl.class);
-		store.query("SELECT name, sign_group, event_desc_id, " +
-			"lane_type, detail, cleared, multi FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, event_desc_id, lane_type, detail, " +
+			"cleared, multi, abbrev FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new IncDescriptorImpl(row));
@@ -53,12 +53,12 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
-		map.put("sign_group", sign_group);
 		map.put("event_desc_id", event_desc_id);
 		map.put("lane_type", lane_type);
 		map.put("detail", detail);
 		map.put("cleared", cleared);
 		map.put("multi", multi);
+		map.put("abbrev", abbrev);
 		return map;
 	}
 
@@ -74,57 +74,34 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 		return SONAR_TYPE;
 	}
 
-	/** Create a new incident descriptor */
+	/** Create an incident descriptor */
 	private IncDescriptorImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),		// name
-		     row.getString(2),		// sign_group
-		     row.getInt(3),		// event_desc_id
-		     row.getShort(4),		// lane_type
-		     row.getString(5),		// detail
-		     row.getBoolean(6),		// cleared
-		     row.getString(7)		// multi
+		this(row.getString(1),          // name
+		     row.getInt(2),             // event_desc_id
+		     row.getShort(3),           // lane_type
+		     row.getString(4),          // detail
+		     row.getBoolean(5),         // cleared
+		     row.getString(6),          // multi
+		     row.getString(7)           // abbrev
 		);
 	}
 
-	/** Create a new incident descriptor */
-	private IncDescriptorImpl(String n, String sg, int et, short lt,
-		String dtl, boolean c, String m)
+	/** Create an incident descriptor */
+	private IncDescriptorImpl(String n, int et, short lt, String dtl,
+		boolean c, String m, String a)
 	{
 		super(n);
-		sign_group = lookupSignGroup(sg);
 		event_desc_id = et;
 		lane_type = lt;
 		detail = lookupIncDetail(dtl);
 		cleared = c;
 		multi = m;
+		abbrev = a;
 	}
 
 	/** Create a new incident descriptor */
 	public IncDescriptorImpl(String n) {
 		super(n);
-	}
-
-	/** Sign group */
-	private SignGroup sign_group;
-
-	/** Set the sign group */
-	@Override
-	public void setSignGroup(SignGroup sg) {
-		sign_group = sg;
-	}
-
-	/** Set the sign group */
-	public void doSetSignGroup(SignGroup sg) throws TMSException {
-		if (sg != sign_group) {
-			store.update(this, "sign_group", sg);
-			setSignGroup(sg);
-		}
-	}
-
-	/** Get the sign group */
-	@Override
-	public SignGroup getSignGroup() {
-		return sign_group;
 	}
 
 	/** Event type (id of EventType enum) */
@@ -271,5 +248,31 @@ public class IncDescriptorImpl extends BaseObjectImpl implements IncDescriptor {
 	@Override
 	public String getMulti() {
 		return multi;
+	}
+
+	/** Abbreviated MULTI string */
+	private String abbrev;
+
+	/** Set abbreviated MULTI string */
+	@Override
+	public void setAbbrev(String a) {
+		abbrev = a;
+	}
+
+	/** Set abbreviated MULTI string */
+	public void doSetAbbrev(String a) throws TMSException {
+		// FIXME: only allow true MULTI tags here
+		if (a != null && !new MultiString(a).isValid())
+			throw new ChangeVetoException("Invalid MULTI: " + a);
+		if (!objectEquals(a, abbrev)) {
+			store.update(this, "abbrev", a);
+			setAbbrev(a);
+		}
+	}
+
+	/** Get abbreviated MULTI string */
+	@Override
+	public String getAbbrev() {
+		return abbrev;
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,12 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
 import javax.swing.table.TableCellEditor;
 import us.mn.state.dot.tms.IncAdvice;
 import us.mn.state.dot.tms.IncRange;
 import us.mn.state.dot.tms.LaneType;
-import us.mn.state.dot.tms.SignGroup;
-import us.mn.state.dot.tms.SignGroupHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
@@ -53,20 +50,6 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 	protected ArrayList<ProxyColumn<IncAdvice>> createColumns() {
 		ArrayList<ProxyColumn<IncAdvice>> cols =
 			new ArrayList<ProxyColumn<IncAdvice>>(6);
-		cols.add(new ProxyColumn<IncAdvice>("dms.group", 108) {
-			public Object getValueAt(IncAdvice adv) {
-				return adv.getSignGroup();
-			}
-			public boolean isEditable(IncAdvice adv) {
-				return canWrite(adv);
-			}
-			public void setValueAt(IncAdvice adv, Object value) {
-				String v = value.toString().trim();
-				SignGroup sg = SignGroupHelper.lookup(v);
-				if (sg != null)
-					adv.setSignGroup(sg);
-			}
-		});
 		cols.add(new ProxyColumn<IncAdvice>("incident.range", 96) {
 			public Object getValueAt(IncAdvice adv) {
 				return IncRange.fromOrdinal(adv.getRange());
@@ -131,9 +114,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				}
 			}
 		});
-		cols.add(new ProxyColumn<IncAdvice>("dms.multi.string",
-			512)
-		{
+		cols.add(new ProxyColumn<IncAdvice>("dms.multi.string", 512) {
 			public Object getValueAt(IncAdvice adv) {
 				return adv.getMulti();
 			}
@@ -143,6 +124,19 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 			public void setValueAt(IncAdvice adv, Object value){
 				adv.setMulti(new MultiString(value.toString())
 					.normalize());
+			}
+		});
+		cols.add(new ProxyColumn<IncAdvice>("dms.multi.abbrev", 256) {
+			public Object getValueAt(IncAdvice adv) {
+				return adv.getAbbrev();
+			}
+			public boolean isEditable(IncAdvice adv) {
+				return canWrite(adv);
+			}
+			public void setValueAt(IncAdvice adv, Object value) {
+				String a = new MultiString(value.toString())
+					.normalize();
+				adv.setAbbrev((a.length() > 0) ? a : null);
 			}
 		});
 		return cols;
@@ -159,11 +153,6 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 	protected Comparator<IncAdvice> comparator() {
 		return new Comparator<IncAdvice>() {
 			public int compare(IncAdvice adv0, IncAdvice adv1) {
-				SignGroup sg0 = adv0.getSignGroup();
-				SignGroup sg1 = adv1.getSignGroup();
-				int c = sg0.getName().compareTo(sg1.getName());
-				if (c != 0)
-					return c;
 				int lt0 = adv0.getLaneType();
 				int lt1 = adv0.getLaneType();
 				if (lt0 != lt1)
@@ -172,7 +161,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				String imp1 = adv1.getImpact();
 				if (imp0.length() != imp1.length())
 					return imp0.length() - imp1.length();
-				c = imp0.compareTo(imp1);
+				int c = imp0.compareTo(imp1);
 				if (c != 0)
 					return c;
 				int r0 = adv0.getRange();
@@ -185,14 +174,11 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 	}
 
 	/** Create a new incident advice */
-	public void create(SignGroup sg) {
+	@Override
+	public void createObject(String name_ignore) {
 		String name = createUniqueName();
-		if (name != null) {
-			HashMap<String, Object> attrs =
-				new HashMap<String, Object>();
-			attrs.put("sign_group", sg);
-			descriptor.cache.createObject(name, attrs);
-		}
+		if (name != null)
+			descriptor.cache.createObject(name);
 	}
 
 	/** Create a unique incident advice name */
