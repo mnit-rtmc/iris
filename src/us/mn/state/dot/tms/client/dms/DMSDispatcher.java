@@ -20,18 +20,14 @@ import java.awt.BorderLayout;
 import java.util.Iterator;
 import java.util.Set;
 import javax.swing.JPanel;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
-import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
-import static us.mn.state.dot.tms.SignMsgSource.blank;
-import static us.mn.state.dot.tms.SignMsgSource.operator;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.WordHelper;
 import us.mn.state.dot.tms.client.Session;
@@ -85,9 +81,6 @@ public class DMSDispatcher extends JPanel {
 	/** User session */
 	private final Session session;
 
-	/** Currently logged in user */
-	private final User user;
-
 	/** Selection model */
 	private final ProxySelectionModel<DMS> sel_mdl;
 
@@ -117,8 +110,7 @@ public class DMSDispatcher extends JPanel {
 		super(new BorderLayout());
 		session = s;
 		DmsCache dms_cache = session.getSonarState().getDmsCache();
-		user = session.getUser();
-		creator = new SignMessageCreator(s, user);
+		creator = new SignMessageCreator(s);
 		sel_mdl = manager.getSelectionModel();
 		singleTab = new SingleSignTab(session, this);
 		composer = new SignMessageComposer(session, this, manager);
@@ -289,20 +281,17 @@ public class DMSDispatcher extends JPanel {
 	private SignMessage createMessage(String ms) {
 		if (ms.length() > 0) {
 			boolean be = composer.isBeaconEnabled();
-			DmsMsgPriority p = DmsMsgPriority.OPERATOR;
-			int src = operator.bit();
-			String u = user.getName();
 			Integer d = composer.getDuration();
-			return creator.create(ms, be, p, src, u, d);
+			return creator.create(ms, be, d);
 		} else
-			return createBlankMessage();
+			return creator.createBlankMessage();
 	}
 
 	/** Blank the select DMS */
 	public void sendBlankMessage() {
 		Set<DMS> sel = sel_mdl.getSelected();
 		if (sel.size() > 0) {
-			SignMessage sm = createBlankMessage();
+			SignMessage sm = creator.createBlankMessage();
 			if (sm != null) {
 				for (DMS dms: sel)
 					dms.setMsgUser(sm);
@@ -330,12 +319,6 @@ public class DMSDispatcher extends JPanel {
 					QUERY_STATUS.ordinal());
 			}
 		}
-	}
-
-	/** Create a new blank message */
-	private SignMessage createBlankMessage() {
-		return creator.create("", false, DmsMsgPriority.BLANK,
-		                      blank.bit(), null, null);
 	}
 
 	/** Query the current message on all selected signs */

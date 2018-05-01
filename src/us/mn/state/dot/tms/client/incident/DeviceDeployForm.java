@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2016  Minnesota Department of Transportation
+ * Copyright (C) 2010-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,9 @@ import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.dms.SignMessageCreator;
 import us.mn.state.dot.tms.client.proxy.SonarObjectForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -49,6 +51,9 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 	/** List of deployments for the incident */
 	private final JList<Device> list;
 
+	/** Sign message creator */
+	private final SignMessageCreator creator;
+
 	/** Action to remove selected device */
 	private final IAction remove = new IAction("incident.remove") {
 		protected void doActionPerformed(ActionEvent e) {
@@ -69,6 +74,7 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 		super(I18N.get("incident") + ": ", s, inc);
 		manager = man;
 		model = new DeviceDeployModel(man, inc);
+		creator = new SignMessageCreator(s);
 		list = new JList<Device>(model);
 		list.addListSelectionListener(new IListSelectionAdapter() {
 			@Override public void valueChanged() {
@@ -131,10 +137,17 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 
 	/** Send new sign message to the specified DMS */
 	private void sendSignMessage(DMS dms) {
-		// FIXME
-		String name = dms.getName();
-		System.out.println("DMS: " + name + ", multi: " +
-			model.getMulti(name));
+		// FIXME: create SignMessage on another thread
+		String inc = proxy.getReplaces();
+		if (null == inc)
+			inc = proxy.getName();
+		String dn = dms.getName();
+		String multi = model.getMulti(dn).toString();
+		if (multi != null) {
+			SignMessage sm = creator.create(inc, multi);
+			if (sm != null)
+				dms.setMsgUser(sm);
+		}
 	}
 
 	/** Update one attribute on the form */

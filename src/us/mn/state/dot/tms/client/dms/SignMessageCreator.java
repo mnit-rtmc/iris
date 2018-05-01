@@ -16,13 +16,12 @@ package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
+import us.mn.state.dot.tms.SignMsgSource;
 import us.mn.state.dot.tms.client.Session;
-import us.mn.state.dot.tms.client.SonarState;
 
 /**
  * This is a utility class to create sign messages.
@@ -31,8 +30,12 @@ import us.mn.state.dot.tms.client.SonarState;
  */
 public class SignMessageCreator {
 
+	/** Message source bits for incident messages */
+	static private final int INCIDENT_SRC =
+		SignMsgSource.operator.bit() | SignMsgSource.incident.bit();
+
 	/** Extra message ID numbers for new sign messages */
-	static protected final int EXTRA_MSG_IDS = 5;
+	static private final int EXTRA_MSG_IDS = 5;
 
 	/** Sign message type cache */
 	private final TypeCache<SignMessage> sign_messages;
@@ -40,18 +43,50 @@ public class SignMessageCreator {
 	/** User session */
 	private final Session session;
 
-	/** SONAR User for permission checks */
-	protected final User user;
+	/** User name */
+	private final String user;
 
 	/** Unique ID for sign message naming */
-	protected int uid = 0;
+	private int uid = 0;
 
 	/** Create a new sign message creator */
-	public SignMessageCreator(Session s, User u) {
+	public SignMessageCreator(Session s) {
 		session = s;
 		sign_messages =
 			s.getSonarState().getDmsCache().getSignMessages();
-		user = u;
+		user = s.getUser().getName();
+	}
+
+	/** Create a new sign message.
+	 *
+	 * @param multi MULTI text.
+	 * @param be Beacon enabled.
+	 * @param duration Message duration; null for indefinite.
+	 * @return New sign message, or null on error.
+	 */
+	public SignMessage create(String multi, boolean be, Integer duration) {
+		return create(null, multi, be, DmsMsgPriority.OPERATOR,
+			SignMsgSource.operator.bit(), user, duration);
+	}
+
+	/** Create a new blank message.
+	 *
+	 * @return Blank sign message, or null on error.
+	 */
+	public SignMessage createBlankMessage() {
+		return create(null, "", false, DmsMsgPriority.BLANK,
+			SignMsgSource.blank.bit(), null, null);
+	}
+
+	/** Create an incident sign message.
+	 *
+	 * @param inc Associated incident (original name).
+	 * @param multi MULTI text.
+	 * @return New sign message, or null on error.
+	 */
+	public SignMessage create(String inc, String multi) {
+		return create(inc, multi, false, DmsMsgPriority.INCIDENT_MED,
+			INCIDENT_SRC, user, null);
 	}
 
 	/** Create a new sign message.
@@ -79,22 +114,6 @@ public class SignMessageCreator {
 			              duration);
 		} else
 			return null;
-	}
-
-	/** Create a new sign message.
-	 *
-	 * @param multi MULTI text.
-	 * @param be Beacon enabled.
-	 * @param mp Message priority.
-	 * @param src Sign message source bits.
-	 * @param owner User name.
-	 * @param duration Message duration; null for indefinite.
-	 * @return Proxy of new sign message, or null on error.
-	 */
-	public SignMessage create(String multi, boolean be, DmsMsgPriority mp,
-		int src, String owner, Integer duration)
-	{
-		return create(null, multi, be, mp, src, owner, duration);
 	}
 
 	/** Create a new sign message.
@@ -136,7 +155,7 @@ public class SignMessageCreator {
 	}
 
 	/** Get the sign message proxy object */
-	protected SignMessage getProxy(String name) {
+	private SignMessage getProxy(String name) {
 		// wait for up to 20 seconds for proxy to be created
 		for (int i = 0; i < 200; i++) {
 			SignMessage m = sign_messages.lookupObject(name);
@@ -153,12 +172,9 @@ public class SignMessageCreator {
 	}
 
 	/** Create a sign message name */
-	protected String createName() {
+	private String createName() {
 		String name = createUniqueSignMessageName();
-		if (canAddSignMessage(name))
-			return name;
-		else
-			return null;
+		return canAddSignMessage(name) ? name : null;
 	}
 
 	/**
@@ -166,20 +182,19 @@ public class SignMessageCreator {
 	 *    user.name + "_" + uniqueid
 	 *    where uniqueid is a sequential integer.
 	 */
-	protected String createUniqueSignMessageName() {
+	private String createUniqueSignMessageName() {
 		HashSet<String> names = createSignMessageNameSet();
 		// NOTE: uid needs to persist between calls so that calling
 		// this method twice in a row doesn't return the same name
 		final int uid_max = names.size() + EXTRA_MSG_IDS;
-		for(int i = 0; i < uid_max; i++) {
+		for (int i = 0; i < uid_max; i++) {
 			final int _uid = (uid + i) % uid_max + 1;
 			String n = createName(_uid);
-			if(!names.contains(n)) {
+			if (!names.contains(n)) {
 				uid = _uid;
 				return n;
 			}
 		}
-		assert false;
 		return null;
 	}
 
@@ -187,7 +202,7 @@ public class SignMessageCreator {
 	 * @param uid ID of name.
 	 * @return Name of SignMessage. */
 	private String createName(int uid) {
-		return user.getName() + '_' + uid;
+		return user + '_' + uid;
 	}
 
 	/**
@@ -195,10 +210,9 @@ public class SignMessageCreator {
 	 * @return A HashSet with entries as SignMessage names.
 	 */
 	private HashSet<String> createSignMessageNameSet() {
-		String name = user.getName();
 		HashSet<String> names = new HashSet<String>();
 		for (SignMessage sm: sign_messages) {
-			if (sm.getName().startsWith(name))
+			if (sm.getName().startsWith(user))
 				names.add(sm.getName());
 		}
 		return names;
