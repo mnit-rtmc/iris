@@ -199,7 +199,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 				}
 			}
 		});
-		cols.add(new ProxyColumn<IncDescriptor>("dms.multi.string", 512)
+		cols.add(new ProxyColumn<IncDescriptor>("dms.multi.string", 300)
 		{
 			public Object getValueAt(IncDescriptor dsc) {
 				return dsc.getMulti();
@@ -212,7 +212,7 @@ public class IncDescriptorTableModel extends ProxyTableModel<IncDescriptor> {
 					.normalize());
 			}
 		});
-		cols.add(new ProxyColumn<IncDescriptor>("dms.multi.abbrev", 256)
+		cols.add(new ProxyColumn<IncDescriptor>("dms.multi.abbrev", 150)
 		{
 			public Object getValueAt(IncDescriptor dsc) {
 				return dsc.getAbbrev();

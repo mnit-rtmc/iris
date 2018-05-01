@@ -114,7 +114,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 				}
 			}
 		});
-		cols.add(new ProxyColumn<IncAdvice>("dms.multi.string", 512) {
+		cols.add(new ProxyColumn<IncAdvice>("dms.multi.string", 300) {
 			public Object getValueAt(IncAdvice adv) {
 				return adv.getMulti();
 			}
@@ -126,7 +126,7 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 					.normalize());
 			}
 		});
-		cols.add(new ProxyColumn<IncAdvice>("dms.multi.abbrev", 256) {
+		cols.add(new ProxyColumn<IncAdvice>("dms.multi.abbrev", 150) {
 			public Object getValueAt(IncAdvice adv) {
 				return adv.getAbbrev();
 			}

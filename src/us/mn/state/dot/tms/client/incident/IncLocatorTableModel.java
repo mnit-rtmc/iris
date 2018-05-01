@@ -100,7 +100,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 				}
 			}
 		});
-		cols.add(new ProxyColumn<IncLocator>("dms.multi.string", 512) {
+		cols.add(new ProxyColumn<IncLocator>("dms.multi.string", 300) {
 			public Object getValueAt(IncLocator loc) {
 				return loc.getMulti();
 			}
@@ -112,7 +112,7 @@ public class IncLocatorTableModel extends ProxyTableModel<IncLocator> {
 					.normalize());
 			}
 		});
-		cols.add(new ProxyColumn<IncLocator>("dms.multi.abbrev", 256) {
+		cols.add(new ProxyColumn<IncLocator>("dms.multi.abbrev", 150) {
 			public Object getValueAt(IncLocator loc) {
 				return loc.getAbbrev();
 			}
