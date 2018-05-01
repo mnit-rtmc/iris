@@ -14,11 +14,16 @@
  */
 package us.mn.state.dot.tms.client.incident;
 
+import java.awt.Component;
+import java.awt.Font;
 import java.util.ArrayList;
 import java.util.Comparator;
 import javax.swing.DefaultCellEditor;
 import javax.swing.JComboBox;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import us.mn.state.dot.tms.IncAdvice;
 import us.mn.state.dot.tms.IncRange;
 import us.mn.state.dot.tms.LaneType;
@@ -43,6 +48,23 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 			true,	/* has_create_delete */
 			false	/* has_name */
 		);
+	}
+
+	/** Renderer for lane impact in a table cell */
+	static private class ImpactCellRenderer extends DefaultTableCellRenderer
+	{
+		@Override
+		public Component getTableCellRendererComponent(JTable table,
+			Object value, boolean isSelected, boolean hasFocus,
+			int row, int column)
+		{
+			Component c = super.getTableCellRendererComponent(table,
+				value, isSelected, hasFocus, row, column);
+			Font f = c.getFont();
+			int sz = f.getSize();
+			c.setFont(new Font(Font.MONOSPACED, Font.BOLD, sz));
+			return c;
+		}
 	}
 
 	/** Create the columns in the model */
@@ -96,6 +118,9 @@ public class IncAdviceTableModel extends ProxyTableModel<IncAdvice> {
 			}
 			public void setValueAt(IncAdvice adv, Object value) {
 				adv.setImpact(value.toString());
+			}
+			protected TableCellRenderer createCellRenderer() {
+				return new ImpactCellRenderer();
 			}
 		});
 		cols.add(new ProxyColumn<IncAdvice>("incident.clear", 50,
