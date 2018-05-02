@@ -327,4 +327,14 @@ public class DMSHelper extends BaseHelper {
 		} else
 			return "-";
 	}
+
+	/** Lookup the associated incident */
+	static public Incident lookupIncident(DMS dms) {
+		if (null == dms)
+			return null;
+		SignMessage sm = dms.getMsgCurrent();
+		return (sm != null)
+		      ? IncidentHelper.lookupOriginal(sm.getIncident())
+		      : null;
+	}
 }

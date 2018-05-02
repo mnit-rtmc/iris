@@ -35,10 +35,13 @@ import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.RasterGraphic;
+import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.camera.CameraPresetAction;
+import us.mn.state.dot.tms.client.incident.IncidentSelectAction;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
 import us.mn.state.dot.tms.client.widget.IAction;
@@ -86,6 +89,9 @@ public class SingleSignTab extends IPanel {
 
 	/** Displays the controller status */
 	private final JLabel status_lbl = createValueLabel();
+
+	/** Displays the associated incident */
+	private final JButton inc_btn = new JButton();
 
 	/** Displays the current operation of the DMS */
 	private final JLabel operation_lbl = createValueLabel();
@@ -169,6 +175,9 @@ public class SingleSignTab extends IPanel {
 	public void initialize() {
 		super.initialize();
 		preset_btn.setBorder(UI.buttonBorder());
+		setPresetAction(null);
+		inc_btn.setBorder(UI.buttonBorder());
+		setIncidentAction(null);
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
 		preview_pnl.setFilterColor(new Color(0, 0, 255, 48));
@@ -180,11 +189,12 @@ public class SingleSignTab extends IPanel {
 			add(brightness_lbl);
 		}
 		add("camera");
-		add(preset_btn, Stretch.LAST);
+		add(preset_btn, Stretch.RIGHT);
 		add("location");
 		add(location_lbl, Stretch.LAST);
 		add("device.status");
-		add(status_lbl, Stretch.LAST);
+		add(status_lbl, Stretch.TRIPLE);
+		add(inc_btn, Stretch.RIGHT);
 		add("device.operation");
 		add(operation_lbl, Stretch.TRIPLE);
 		add("dms.expiration");
@@ -272,6 +282,7 @@ public class SingleSignTab extends IPanel {
 		status_lbl.setText("");
 		status_lbl.setForeground(null);
 		status_lbl.setBackground(null);
+		setIncidentAction(null);
 		operation_lbl.setText("");
 		expiration_lbl.setText("-");
 	}
@@ -280,6 +291,13 @@ public class SingleSignTab extends IPanel {
 	private void setPresetAction(DMS dms) {
 		CameraPreset cp = DMSHelper.getPreset(dms);
 		preset_btn.setAction(new CameraPresetAction(session, cp));
+	}
+
+	/** Set the incident action */
+	private void setIncidentAction(DMS dms) {
+		Incident inc = DMSHelper.lookupIncident(dms);
+		inc_btn.setAction(new IncidentSelectAction(inc,
+			session.getIncidentManager()));
 	}
 
 	/** Update one (or all) attribute(s) on the form.
@@ -325,6 +343,7 @@ public class SingleSignTab extends IPanel {
 			status_lbl.setText(DMSHelper.getStatus(dms));
 		} else
 			updateCritical(dms);
+		setIncidentAction(dms);
 		operation_lbl.setText(dms.getOperation());
 	}
 

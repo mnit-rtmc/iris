@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,6 +38,22 @@ public class IncidentHelper extends BaseHelper {
 	static public Iterator<Incident> iterator() {
 		return new IteratorWrapper<Incident>(namespace.iterator(
 			Incident.SONAR_TYPE));
+	}
+
+	/** Lookup an incident by the original name */
+	static public Incident lookupOriginal(String name) {
+		if (null == name)
+			return null;
+		Incident inc = lookup(name);
+		if (inc != null)
+			return inc;
+		Iterator<Incident> it = iterator();
+		while (it.hasNext()) {
+			inc = it.next();
+			if (name.equals(inc.getReplaces()))
+				return inc;
+		}
+		return null;
 	}
 
 	/** Lookup the camera for an incident */

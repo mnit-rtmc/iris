@@ -130,6 +130,14 @@ public class Session {
 		return dms_manager;
 	}
 
+	/** Incident manager */
+	private final IncidentManager inc_manager;
+
+	/** Get the incident manager */
+	public IncidentManager getIncidentManager() {
+		return inc_manager;
+	}
+
 	/** LCS array manager */
 	private final LCSArrayManager lcs_array_manager;
 
@@ -162,6 +170,7 @@ public class Session {
 		r_node_manager = new R_NodeManager(this, loc_manager, p);
 		cam_manager = new CameraManager(this, loc_manager);
 		dms_manager = new DMSManager(this, loc_manager);
+		inc_manager = new IncidentManager(this, loc_manager);
 		lcs_array_manager = new LCSArrayManager(this, loc_manager);
 		managers = new LinkedList<ProxyManager<?>>();
 		managers.add(r_node_manager);
@@ -177,7 +186,7 @@ public class Session {
 		managers.add(new TagReaderManager(this, loc_manager));
 		managers.add(new WeatherSensorManager(this, loc_manager));
 		managers.add(new ParkingAreaManager(this, loc_manager));
-		managers.add(new IncidentManager(this, loc_manager));
+		managers.add(inc_manager);
 		managers.add(new PlanManager(this, loc_manager));
 		tile_layer = createTileLayer(props.getProperty("map.tile.url"));
 	}
