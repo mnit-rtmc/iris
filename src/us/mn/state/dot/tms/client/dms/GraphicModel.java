@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,12 +62,6 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 		new FileNameExtensionFilter(I18N.get("graphic.image.filter"),
 		"png", "gif", "bmp");
 
-	/** Maximum allowed graphic height */
-	static private final int MAX_GRAPHIC_HEIGHT = 144;
-
-	/** Maximum allowed graphic width */
-	static private final int MAX_GRAPHIC_WIDTH = 200;
-
 	/** Check if an image can be a valid graphic */
 	static private void checkImageValid(BufferedImage im)
 		throws ChangeVetoException
@@ -80,8 +74,8 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	static private void checkImageSizeValid(BufferedImage im)
 		throws ChangeVetoException
 	{
-		if (im.getHeight() > MAX_GRAPHIC_HEIGHT ||
-		    im.getWidth() > MAX_GRAPHIC_WIDTH)
+		if (im.getHeight() > Graphic.MAX_HEIGHT ||
+		    im.getWidth() > Graphic.MAX_WIDTH)
 		{
 			throw new ChangeVetoException(I18N.get(
 				"graphic.image.too.large"));
@@ -168,7 +162,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 
 	/** Create a new graphic table model */
 	public GraphicModel(Session s) {
-		super(s, descriptor(s), 5, MAX_GRAPHIC_HEIGHT / 2);
+		super(s, descriptor(s), 5, Graphic.MAX_HEIGHT / 2);
 	}
 
 	/** Check if a proxy is included in the list */

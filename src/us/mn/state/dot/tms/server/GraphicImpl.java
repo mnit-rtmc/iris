@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2015  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -157,10 +157,12 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 
 	/** Set the height (pixels) */
 	public void doSetHeight(int h) throws TMSException {
-		if (h == height)
-			return;
-		store.update(this, "height", h);
-		setHeight(h);
+		if (h != height) {
+			if (h > MAX_HEIGHT)
+				throw new ChangeVetoException("Invalid height");
+			store.update(this, "height", h);
+			setHeight(h);
+		}
 	}
 
 	/** Get the height (pixels) */
@@ -180,10 +182,12 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 
 	/** Set the width (pixels) */
 	public void doSetWidth(int w) throws TMSException {
-		if (w == width)
-			return;
-		store.update(this, "width", w);
-		setWidth(w);
+		if (w != width) {
+			if (w > MAX_WIDTH)
+				throw new ChangeVetoException("Invalid width");
+			store.update(this, "width", w);
+			setWidth(w);
+		}
 	}
 
 	/** Get the width (pixels) */
