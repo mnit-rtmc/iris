@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  * Copyright (C) 2010  AHMCT, University of California
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -63,9 +63,6 @@ public class DMSManager extends DeviceManager<DMS> {
 		};
 	}
 
-	/** Color definition for AWS controlled style */
-	static private final Color COLOR_HELIOTROPE = new Color(1, 0.5f, 0.9f);
-
 	/** Mapping of DMS to page one rasters */
 	private final HashMap<DMS, RasterGraphic> rasters =
 		new HashMap<DMS, RasterGraphic>();
@@ -116,15 +113,9 @@ public class DMSManager extends DeviceManager<DMS> {
 		theme.addStyle(ItemStyle.AVAILABLE, ProxyTheme.COLOR_AVAILABLE);
 		theme.addStyle(ItemStyle.DEPLOYED, ProxyTheme.COLOR_DEPLOYED);
 		theme.addStyle(ItemStyle.SCHEDULED, ProxyTheme.COLOR_SCHEDULED);
-		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean())
-			theme.addStyle(ItemStyle.AWS_DEPLOYED, Color.RED);
 		theme.addStyle(ItemStyle.MAINTENANCE,
 			ProxyTheme.COLOR_UNAVAILABLE);
 		theme.addStyle(ItemStyle.FAILED, ProxyTheme.COLOR_FAILED);
-		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
-			theme.addStyle(ItemStyle.AWS_CONTROLLED,
-				COLOR_HELIOTROPE);
-		}
 		theme.addStyle(ItemStyle.ALL);
 		return theme;
 	}

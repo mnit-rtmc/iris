@@ -48,6 +48,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LCS;
@@ -102,10 +103,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"beacon, preset, aws_allowed, aws_controlled, " +
-			"sign_config, default_font, msg_sched, msg_current, " +
-			"deploy_time FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"static_graphic, beacon, preset, sign_config, " +
+			"default_font, msg_sched, msg_current, deploy_time " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(row));
@@ -134,10 +134,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("static_graphic", static_graphic);
 		map.put("beacon", beacon);
 		map.put("preset", preset);
-		map.put("aws_allowed", awsAllowed);
-		map.put("aws_controlled", awsControlled);
 		map.put("sign_config", sign_config);
 		map.put("default_font", default_font);
 		map.put("msg_sched", msg_sched);
@@ -181,42 +180,39 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(3),          // controller
 		     row.getInt(4),             // pin
 		     row.getString(5),          // notes
-		     row.getString(6),          // beacon
-		     row.getString(7),          // preset
-		     row.getBoolean(8),         // aws_allowed
-		     row.getBoolean(9),         // aws_controlled
-		     row.getString(10),         // sign_config
-		     row.getString(11),         // default_font
-		     row.getString(12),         // msg_sched
-		     row.getString(13),         // msg_current
-		     row.getTimestamp(14)       // deploy_time
+		     row.getString(6),          // static_graphic
+		     row.getString(7),          // beacon
+		     row.getString(8),          // preset
+		     row.getString(9),          // sign_config
+		     row.getString(10),         // default_font
+		     row.getString(11),         // msg_sched
+		     row.getString(12),         // msg_current
+		     row.getTimestamp(13)       // deploy_time
 		);
 	}
 
 	/** Create a dynamic message sign */
-	private DMSImpl(String n, String loc, String c,
-		int p, String nt, String b, String cp, boolean aa, boolean ac,
-		String sc, String df, String ms, String mc, Date dt)
+	private DMSImpl(String n, String loc, String c, int p, String nt,
+		String sg, String b, String cp, String sc, String df, String ms,
+		String mc, Date dt)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
-		     lookupBeacon(b), lookupPreset(cp), aa, ac,
+		     lookupGraphic(sg), lookupBeacon(b), lookupPreset(cp),
 		     SignConfigHelper.lookup(sc), FontHelper.lookup(df),
-		     SignMessageHelper.lookup(ms),SignMessageHelper.lookup(mc),
+		     SignMessageHelper.lookup(ms), SignMessageHelper.lookup(mc),
 		     dt);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, Beacon b, CameraPreset cp, boolean aa,
-		boolean ac, SignConfig sc, Font df, SignMessage ms,
-		SignMessage mc, Date dt)
+		int p, String nt, Graphic sg, Beacon b, CameraPreset cp,
+	        SignConfig sc, Font df, SignMessage ms, SignMessage mc, Date dt)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
+		static_graphic = sg;
 		beacon = b;
 		setPreset(cp);
-		awsAllowed = aa;
-		awsControlled = ac;
 		sign_config = sc;
 		default_font = df;
 		msg_sched = ms;
@@ -269,6 +265,29 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
+	}
+
+	/** Static graphic (hybrid sign) */
+	private Graphic static_graphic;
+
+	/** Set static graphic (hybrid sign) */
+	@Override
+	public void setStaticGraphic(Graphic sg) {
+		static_graphic = sg;
+	}
+
+	/** Set static graphic (hybrid sign) */
+	public void doSetStaticGraphic(Graphic sg) throws TMSException {
+		if (sg != static_graphic) {
+			store.update(this, "static_graphic", sg);
+			setStaticGraphic(sg);
+		}
+	}
+
+	/** Get static graphic (hybrid sign) */
+	@Override
+	public Graphic getStaticGraphic() {
+		return static_graphic;
 	}
 
 	/** External beacon */
@@ -333,52 +352,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public CameraPreset getPreset() {
 		return preset;
-	}
-
-	/** Administrator allowed AWS control */
-	private boolean awsAllowed;
-
-	/** Allow (or deny) sign control by Automated Warning System */
-	@Override
-	public void setAwsAllowed(boolean a) {
-		awsAllowed = a;
-	}
-
-	/** Allow (or deny) sign control by Automated Warning System */
-	public void doSetAwsAllowed(boolean a) throws TMSException {
-		if (a != awsAllowed) {
-			store.update(this, "aws_allowed", a);
-			setAwsAllowed(a);
-		}
-	}
-
-	/** Is sign allowed to be controlled by Automated Warning System? */
-	@Override
-	public boolean getAwsAllowed() {
-		return awsAllowed;
-	}
-
-	/** AWS controlled */
-	private boolean awsControlled;
-
-	/** Set sign to Automated Warning System controlled */
-	@Override
-	public void setAwsControlled(boolean a) {
-		awsControlled = a;
-	}
-
-	/** Set sign to Automated Warning System controlled */
-	public void doSetAwsControlled(boolean a) throws TMSException {
-		if (a != awsControlled) {
-			store.update(this, "aws_controlled", a);
-			setAwsControlled(a);
-		}
-	}
-
-	/** Is sign controlled by Automated Warning System? */
-	@Override
-	public boolean getAwsControlled() {
-		return awsControlled;
 	}
 
 	/** Sign configuration */
@@ -1196,11 +1169,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return isMsgDeployed() && isMsgAws();
 	}
 
-	/** Test if a DMS can be controlled by AWS */
-	private boolean isAwsControlled() {
-		return getAwsAllowed() && getAwsControlled();
-	}
-
 	/** Test if DMS needs maintenance */
 	@Override
 	protected boolean needsMaintenance() {
@@ -1238,8 +1206,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 				s |= ItemStyle.SCHEDULED.bit();
 			if (isAwsDeployed())
 				s |= ItemStyle.AWS_DEPLOYED.bit();
-			if (isAwsControlled())
-				s |= ItemStyle.AWS_CONTROLLED.bit();
 		}
 		return s;
 	}

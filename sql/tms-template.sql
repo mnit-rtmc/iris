@@ -1303,9 +1303,8 @@ CREATE TABLE iris._dms (
 	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
 	notes text NOT NULL,
+	static_graphic VARCHAR(20) REFERENCES iris.graphic,
 	beacon VARCHAR(20) REFERENCES iris._beacon,
-	aws_allowed BOOLEAN NOT NULL,
-	aws_controlled BOOLEAN NOT NULL,
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
 	default_font VARCHAR(16) REFERENCES iris.font,
 	msg_sched VARCHAR(20) REFERENCES iris.sign_message,
@@ -1317,9 +1316,9 @@ ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.dms AS
-	SELECT d.name, geo_loc, controller, pin, notes, beacon, preset,
-	       aws_allowed, aws_controlled, sign_config, default_font,
-	       msg_sched, msg_current, deploy_time
+	SELECT d.name, geo_loc, controller, pin, notes, static_graphic, beacon,
+	       preset, sign_config, default_font, msg_sched, msg_current,
+	       deploy_time
 	FROM iris._dms dms
 	JOIN iris._device_io d ON dms.name = d.name
 	JOIN iris._device_preset p ON dms.name = p.name;
@@ -1331,13 +1330,12 @@ BEGIN
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._device_preset (name, preset)
 	     VALUES (NEW.name, NEW.preset);
-	INSERT INTO iris._dms (name, geo_loc, notes, beacon, aws_allowed,
-	                       aws_controlled, sign_config, default_font,
-	                       msg_sched, msg_current, deploy_time)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.beacon,
-	             NEW.aws_allowed, NEW.aws_controlled, NEW.sign_config,
-	             NEW.default_font, NEW.msg_sched, NEW.msg_current,
-	             NEW.deploy_time);
+	INSERT INTO iris._dms (name, geo_loc, notes, static_graphic, beacon,
+	                       sign_config, default_font, msg_sched, msg_current,
+	                       deploy_time)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.static_graphic,
+	             NEW.beacon, NEW.sign_config, NEW.default_font,
+	             NEW.msg_sched, NEW.msg_current, NEW.deploy_time);
 	RETURN NEW;
 END;
 $dms_insert$ LANGUAGE plpgsql;
@@ -1359,9 +1357,8 @@ BEGIN
 	UPDATE iris._dms
 	   SET geo_loc = NEW.geo_loc,
 	       notes = NEW.notes,
+	       static_graphic = NEW.static_graphic,
 	       beacon = NEW.beacon,
-	       aws_allowed = NEW.aws_allowed,
-	       aws_controlled = NEW.aws_controlled,
 	       sign_config = NEW.sign_config,
 	       default_font = NEW.default_font,
 	       msg_sched = NEW.msg_sched,
@@ -2523,10 +2520,10 @@ CREATE VIEW sign_config_view AS
 GRANT SELECT ON sign_config_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
-	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.beacon,
-	       p.camera, p.preset_num, d.aws_allowed, d.aws_controlled,
-	       d.sign_config, COALESCE(d.default_font, sc.default_font)
-	       AS default_font, msg_sched, msg_current, deploy_time,
+	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.static_graphic,
+	       d.beacon, p.camera, p.preset_num, d.sign_config,
+	       COALESCE(d.default_font, sc.default_font) AS default_font,
+	       msg_sched, msg_current, deploy_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.location, l.lat, l.lon
 	FROM iris.dms d
@@ -3141,7 +3138,6 @@ database_version	4.73.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
-dms_aws_enable	false
 dms_brightness_enable	true
 dms_comm_loss_enable	true
 dms_composer_edit_mode	1

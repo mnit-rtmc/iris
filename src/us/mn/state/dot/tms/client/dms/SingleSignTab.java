@@ -74,19 +74,6 @@ public class SingleSignTab extends IPanel {
 	/** Displays the location of the DMS */
 	private final JLabel location_lbl = createValueLabel();
 
-	/** AWS controlled checkbox (optional) */
-	private final JCheckBox aws_control_chk = new JCheckBox(
-		new IAction("item.style.aws.controlled")
-	{
-		protected void doActionPerformed(ActionEvent e) {
-			DMS dms = selected;
-			if (dms != null) {
-				dms.setAwsControlled(
-					aws_control_chk.isSelected());
-			}
-		}
-	});
-
 	/** Displays the controller status */
 	private final JLabel status_lbl = createValueLabel();
 
@@ -199,11 +186,6 @@ public class SingleSignTab extends IPanel {
 		add(operation_lbl, Stretch.TRIPLE);
 		add("dms.expiration");
 		add(expiration_lbl, Stretch.LAST);
-		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
-			aws_control_chk.setHorizontalTextPosition(
-				SwingConstants.LEFT);
-			add(aws_control_chk, Stretch.LEFT);
-		}
 		tab.add(I18N.get("dms.msg.current"), current_pnl);
 		tab.add(I18N.get("dms.msg.preview"), preview_pnl);
 		add(tab, Stretch.CENTER);
@@ -277,8 +259,6 @@ public class SingleSignTab extends IPanel {
 		brightness_lbl.setText("");
 		setPresetAction(null);
 		location_lbl.setText("");
-		aws_control_chk.setEnabled(false);
-		aws_control_chk.setSelected(false);
 		status_lbl.setText("");
 		status_lbl.setForeground(null);
 		status_lbl.setBackground(null);
@@ -326,12 +306,6 @@ public class SingleSignTab extends IPanel {
 			updateCurrentPanel(dms);
 			updateMessageCurrent(dms);
 		}
-		if (a == null || a.equals("awsAllowed")) {
-			aws_control_chk.setEnabled(
-				dispatcher.isAwsPermitted(dms));
-		}
-		if (a == null || a.equals("awsControlled"))
-			aws_control_chk.setSelected(dms.getAwsControlled());
 	}
 
 	/** Update the status widgets */

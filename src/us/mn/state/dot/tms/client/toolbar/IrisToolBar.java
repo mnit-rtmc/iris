@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.client.map.MapBean;
 /**
  * This status bar contains JPanel components such as the real-time map 
  * coordinates, AWS status, etc.
- * @see CoordinatePanel, AwsStatusPanel
+ * @see CoordinatePanel
  *
  * @author Michael Darter
  * @author Douglas Lau
@@ -44,11 +44,6 @@ public class IrisToolBar extends JToolBar {
 	public void createToolPanels(Session s) {
 		if (CamSelectPanel.getIEnabled()) {
 			add(new CamSelectPanel(s));
-			add(Box.createGlue());
-		}
-		if (AwsStatusPanel.getIEnabled()) {
-			add(new AwsStatusPanel(s.getSonarState(),
-				s.getDesktop()));
 			add(Box.createGlue());
 		}
 		if (CoordinatePanel.getIEnabled()) {

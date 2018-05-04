@@ -46,9 +46,6 @@ public class WeatherSensorTheme extends ProxyTheme<WeatherSensor> {
 			ProxyTheme.COLOR_UNAVAILABLE);
 		addStyle(ItemStyle.ACTIVE, 
 			ProxyTheme.COLOR_AVAILABLE);
-		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
-			addStyle(ItemStyle.AWS_DEPLOYED, Color.RED);
-		}
 		addStyle(ItemStyle.ALL, Color.WHITE);
 	}
 

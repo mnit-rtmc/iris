@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -68,24 +68,6 @@ public class PropMessages extends JPanel {
 
 	/** Default font combo box */
 	private final JComboBox<Font> font_cbx = new JComboBox<Font>();
-
-	/** AWS allowed check box */
-	private final JCheckBox aws_allowed_chk = new JCheckBox(
-		new IAction("dms.aws.allowed")
-	{
-		protected void doActionPerformed(ActionEvent e) {
-			proxy.setAwsAllowed(aws_allowed_chk.isSelected());
-		}
-	});
-
-	/** AWS controlled check box */
-	private final JCheckBox aws_control_chk = new JCheckBox(
-		new IAction("item.style.aws.controlled")
-	{
-		protected void doActionPerformed(ActionEvent e) {
-			proxy.setAwsControlled(aws_control_chk.isSelected());
-		}
-	});
 
 	/** User session */
 	private final Session session;
@@ -164,10 +146,6 @@ public class PropMessages extends JPanel {
 		g1.addGap(UI.hgap);
 		g1.addComponent(font_cbx);
 		hg.addGroup(g1);
-		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
-			hg.addComponent(aws_allowed_chk);
-			hg.addComponent(aws_control_chk);
-		}
 		return hg;
 	}
 
@@ -186,12 +164,6 @@ public class PropMessages extends JPanel {
 		g1.addComponent(font_lbl);
 		g1.addComponent(font_cbx);
 		vg.addGroup(g1);
-		if (SystemAttrEnum.DMS_AWS_ENABLE.getBoolean()) {
-			vg.addGap(UI.vgap);
-			vg.addComponent(aws_allowed_chk);
-			vg.addGap(UI.vgap);
-			vg.addComponent(aws_control_chk);
-		}
 		return vg;
 	}
 
@@ -278,18 +250,12 @@ public class PropMessages extends JPanel {
 	/** Update the edit mode */
 	public void updateEditMode() {
 		font_cbx.setEnabled(canWrite("defaultFont"));
-		aws_allowed_chk.setEnabled(canWrite("awsAllowed"));
-		aws_control_chk.setEnabled(canWrite("awsControlled"));
 	}
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
 		if (null == a || a.equals("defaultFont"))
 			font_cbx.setSelectedItem(proxy.getDefaultFont());
-		if (a == null || a.equals("awsAllowed"))
-			aws_allowed_chk.setSelected(proxy.getAwsAllowed());
-		if (a == null || a.equals("awsControlled"))
-			aws_control_chk.setSelected(proxy.getAwsControlled());
 		// NOTE: msgCurrent attribute changes after all sign
 		//       dimension attributes are updated.
 		if (a == null || a.equals("msgCurrent"))

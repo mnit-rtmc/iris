@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2017  Minnesota Department of Transportation
+ * Copyright (C) 2012-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -44,7 +44,6 @@ public enum ItemStyle {
 	UNCONFIRMED,
 	/* DMS styles */
 	SCHEDULED,
-	AWS_CONTROLLED,
 	AWS_DEPLOYED,
 	/* Camera styles */
 	PLAYLIST,

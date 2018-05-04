@@ -459,10 +459,4 @@ public class DMSDispatcher extends JPanel {
 	public boolean canRequest(DMS dms) {
 		return isWritePermitted(dms, "deviceRequest");
 	}
-
-	/** Check if AWS is allowed and user has permission to change */
-	public boolean isAwsPermitted(DMS dms) {
-		return dms.getAwsAllowed() &&
-		       isWritePermitted(dms, "awsControlled");
-	}
 }

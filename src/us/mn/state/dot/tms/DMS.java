@@ -27,6 +27,12 @@ public interface DMS extends Device {
 	/** Get the device location */
 	GeoLoc getGeoLoc();
 
+	/** Set static graphic (hybrid sign) */
+	void setStaticGraphic(Graphic sg);
+
+	/** Get static graphic (hybrid sign) */
+	Graphic getStaticGraphic();
+
 	/** Set external beacon */
 	void setBeacon(Beacon b);
 
@@ -38,18 +44,6 @@ public interface DMS extends Device {
 
 	/** Get verification camera preset */
 	CameraPreset getPreset();
-
-	/** Allow (or deny) sign control by Automated Warning System */
-	void setAwsAllowed(boolean a);
-
-	/** Is sign allowed to be controlled by Automated Warning System? */
-	boolean getAwsAllowed();
-
-	/** Set sign to Automated Warning System controlled */
-	void setAwsControlled(boolean a);
-
-	/** Is sign controlled by Automated Warning System? */
-	boolean getAwsControlled();
 
 	/** Get the sign configuration */
 	SignConfig getSignConfig();

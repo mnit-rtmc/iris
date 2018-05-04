@@ -90,8 +90,8 @@ abstract class OpDms extends OpDevice {
 	}
 
 	/** Return name of AWS system */
-	public static String awsName() {
-		return I18N.get("dms.aws.abbreviation");
+	static public String awsName() {
+		return "CAWS";
 	}
 
 	/** Return true if the message is owned by the AWS */
