@@ -23,8 +23,11 @@ import java.util.Iterator;
 import java.util.TreeSet;
 import javax.imageio.ImageIO;
 import javax.swing.JFileChooser;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DmsColor;
@@ -108,12 +111,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	@Override
 	protected ArrayList<ProxyColumn<Graphic>> createColumns() {
 		ArrayList<ProxyColumn<Graphic>> cols =
-			new ArrayList<ProxyColumn<Graphic>>(6);
-		cols.add(new ProxyColumn<Graphic>("device.name", 60) {
-			public Object getValueAt(Graphic g) {
-				return g.getName();
-			}
-		});
+			new ArrayList<ProxyColumn<Graphic>>(5);
 		cols.add(new ProxyColumn<Graphic>("graphic.number", 60,
 			Integer.class)
 		{
@@ -169,6 +167,24 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	@Override
 	protected boolean check(Graphic proxy) {
 		return proxy.getGNumber() != null;
+	}
+
+	/** Get a table row sorter */
+	@Override
+	public RowSorter<ProxyTableModel<Graphic>> createSorter() {
+		TableRowSorter<ProxyTableModel<Graphic>> sorter =
+			new TableRowSorter<ProxyTableModel<Graphic>>(this)
+		{
+			@Override public boolean isSortable(int c) {
+				return c == 0;
+			}
+		};
+		sorter.setSortsOnUpdates(true);
+		ArrayList<RowSorter.SortKey> keys =
+			new ArrayList<RowSorter.SortKey>();
+		keys.add(new RowSorter.SortKey(0, SortOrder.ASCENDING));
+		sorter.setSortKeys(keys);
+		return sorter;
 	}
 
 	/** Create an object with the given name */
