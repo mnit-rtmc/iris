@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,5 +60,10 @@ public enum R_NodeType {
 			return values()[o];
 		else
 			return null;
+	}
+
+	/** Interface to check r_node types */
+	public interface Checker {
+		boolean check(R_NodeType t);
 	}
 }

@@ -330,14 +330,17 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 
 	/** Find the nearest node to the given location with given type.
 	 * @param pos Location to search.
-	 * @param nt Node type.
+	 * @param checker Node type checker.
 	 * @param pickable Pickable flag.
 	 * @return Nearest matching node. */
-	public T findNearest(Position pos, R_NodeType nt, boolean pickable) {
+	public T findNearest(Position pos, R_NodeType.Checker checker,
+		boolean pickable)
+	{
 		T nearest = null;
 		double n_meters = 0;
 		for (T n: r_nodes) {
-			if (n.getNodeType() != nt.ordinal())
+			R_NodeType nt = R_NodeType.fromOrdinal(n.getNodeType());
+			if (!checker.check(nt))
 				continue;
 			if (n.getPickable() != pickable)
 				continue;

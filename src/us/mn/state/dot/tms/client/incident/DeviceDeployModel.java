@@ -129,18 +129,24 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 			return IncRange.near;
 	}
 
-	/** Get the r_node type */
-	static private R_NodeType getNodeType(short lt) {
-		switch (LaneType.fromOrdinal(lt)) {
-		case EXIT:
-			return R_NodeType.EXIT;
-		case MERGE:
-			return R_NodeType.ENTRANCE;
-		case MAINLINE:
-			return R_NodeType.STATION;
-		default:
-			return null;
-		}
+	/** Get the r_node type checker */
+	static private R_NodeType.Checker getChecker(short lto) {
+		final LaneType lt = LaneType.fromOrdinal(lto);
+		return new R_NodeType.Checker() {
+			public boolean check(R_NodeType nt) {
+				switch (lt) {
+				case EXIT:
+					return R_NodeType.EXIT == nt;
+				case MERGE:
+					return R_NodeType.ENTRANCE == nt;
+				case MAINLINE:
+					return R_NodeType.STATION == nt
+					    || R_NodeType.INTERSECTION == nt;
+				default:
+					return false;
+				}
+			}
+		};
 	}
 
 	/** Incident severity */
@@ -230,16 +236,16 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	private R_Node findNode(CorridorBase cb, float mp, Position pos,
 		Incident inc)
 	{
-		R_NodeType rt = getNodeType(inc.getLaneType());
-		if (rt == null)
+		R_NodeType.Checker checker = getChecker(inc.getLaneType());
+		if (null == checker)
 			return null;
-		R_Node n = cb.findNearest(pos, rt, true);
+		R_Node n = cb.findNearest(pos, checker, true);
 		if (n != null) {
 			Float lp = cb.calculateMilePoint(n.getGeoLoc());
 			if (lp != null && Math.abs(lp - mp) < 1)
 				return n;
 		}
-		n = cb.findNearest(pos, rt, false);
+		n = cb.findNearest(pos, checker, false);
 		if (n != null) {
 			Float lp = cb.calculateMilePoint(n.getGeoLoc());
 			if (lp != null && Math.abs(lp - mp) < 1.5)
