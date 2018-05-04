@@ -209,7 +209,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 
 	/** Create a unique Graphic name */
 	private String createUniqueName() throws ChangeVetoException {
-		for (int uid = 1; uid <= 256; uid++) {
+		for (int uid = 1; uid <= Graphic.MAX_NUMBER; uid++) {
 			String n = "G_" + uid;
 			if (GraphicHelper.lookup(n) == null)
 				return n;
@@ -227,7 +227,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 			if (gn != null)
 				gnums.add(gn);
 		}
-		for (int i = 1; i < 256; i++) {
+		for (int i = 1; i <= Graphic.MAX_NUMBER; i++) {
 			if (!gnums.contains(i))
 				return i;
 		}

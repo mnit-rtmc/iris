@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.server;
 
 import java.io.IOException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -38,19 +39,13 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new GraphicImpl(
-					row.getString(1),	// name
-					(Integer)row.getObject(2), // g_number
-					row.getInt(3),		// bpp
-					row.getInt(4),		// height
-					row.getInt(5),		// width
-					row.getString(6)	// pixels
-				));
+				namespace.addObject(new GraphicImpl(row));
 			}
 		});
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -85,9 +80,18 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	}
 
 	/** Create a graphic from database lookup */
-	protected GraphicImpl(String n, Integer g, int b, int h, int w,
-		String p)
-	{
+	private GraphicImpl(ResultSet row) throws SQLException {
+		this(row.getString(1),          // name
+		     (Integer) row.getObject(2),// g_number
+		     row.getInt(3),             // bpp
+		     row.getInt(4),             // height
+		     row.getInt(5),             // width
+		     row.getString(6)           // pixels
+		);
+	}
+
+	/** Create a graphic from database lookup */
+	private GraphicImpl(String n, Integer g, int b, int h, int w, String p){
 		this(n);
 		g_number = g;
 		bpp = b;
@@ -107,12 +111,12 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 
 	/** Set the graphic number */
 	public void doSetGNumber(Integer g) throws TMSException {
-		if (g == g_number)
-			return;
-		if (g != null && (g < 1 || g > 255))
-			throw new ChangeVetoException("Invalid g_number");
-		store.update(this, "g_number", g);
-		setGNumber(g);
+		if (g != g_number) {
+			if (g != null && (g < 1 || g > MAX_NUMBER))
+				throw new ChangeVetoException("Invalid g_number");
+			store.update(this, "g_number", g);
+			setGNumber(g);
+		}
 	}
 
 	/** Get the graphic number */
@@ -124,23 +128,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	/** Bits per pixel */
 	private int bpp;
 
-	/** Set the bits-per-pixel (1, 8, 24) */
-	@Override
-	public void setBpp(int b) {
-		bpp = b;
-	}
-
-	/** Set the bits-per-pixel (1, 8, 24) */
-	public void doSetBpp(int b) throws TMSException {
-		if (b == bpp)
-			return;
-		if (b != 1 && b != 8 && b != 24)
-			throw new ChangeVetoException("Invalid bpp");
-		store.update(this, "bpp", b);
-		setBpp(b);
-	}
-
-	/** Get the bits-per-pixel */
+	/** Get the bits-per-pixel (1 or 24) */
 	@Override
 	public int getBpp() {
 		return bpp;
@@ -148,22 +136,6 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 
 	/** Height (number of pixels) */
 	private int height;
-
-	/** Set the height (pixels) */
-	@Override
-	public void setHeight(int h) {
-		height = h;
-	}
-
-	/** Set the height (pixels) */
-	public void doSetHeight(int h) throws TMSException {
-		if (h != height) {
-			if (h > MAX_HEIGHT)
-				throw new ChangeVetoException("Invalid height");
-			store.update(this, "height", h);
-			setHeight(h);
-		}
-	}
 
 	/** Get the height (pixels) */
 	@Override
@@ -207,7 +179,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 
 	/** Set the pixel data (base64 encoded) */
 	public void doSetPixels(String p) throws TMSException {
-		if (p.equals(pixels))
+		if (!objectEquals(p, pixels))
 			return;
 		try {
 			Base64.decode(p);

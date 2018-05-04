@@ -23,6 +23,9 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public interface Graphic extends SonarObject {
 
+	/** Maximum allowed graphic number */
+	int MAX_NUMBER = 999;
+
 	/** Maximum allowed graphic width */
 	int MAX_WIDTH = 200;
 
@@ -38,14 +41,8 @@ public interface Graphic extends SonarObject {
 	/** Get the graphic number */
 	Integer getGNumber();
 
-	/** Set the bits-per-pixel (1, 8, 24) */
-	void setBpp(int b);
-
-	/** Get the bits-per-pixel */
+	/** Get the bits-per-pixel (1 or 24) */
 	int getBpp();
-
-	/** Set the height (pixels) */
-	void setHeight(int h);
 
 	/** Get the height (pixels) */
 	int getHeight();
