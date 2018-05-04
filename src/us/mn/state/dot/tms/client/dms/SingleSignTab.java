@@ -58,6 +58,9 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class SingleSignTab extends IPanel {
 
+	/** Width of sign panel */
+	static private final int SIGN_PANEL_WIDTH = 450;
+
 	/** Displays the id of the DMS */
 	private final JLabel name_lbl = createValueLabel();
 
@@ -89,12 +92,12 @@ public class SingleSignTab extends IPanel {
 	private final DMSDispatcher dispatcher;
 
 	/** Panel for drawing current pixel status */
-	private final SignPixelPanel current_pnl = new SignPixelPanel(100, 400,
-		true);
+	private final SignPixelPanel current_pnl = new SignPixelPanel(100,
+		SIGN_PANEL_WIDTH, true);
 
 	/** Panel for drawing preview pixel status */
-	private final SignPixelPanel preview_pnl = new SignPixelPanel(100, 400,
-		true);
+	private final SignPixelPanel preview_pnl = new SignPixelPanel(100,
+		SIGN_PANEL_WIDTH, true);
 
 	/** Pager for selected DMS panel */
 	private DMSPanelPager pnlPager;
