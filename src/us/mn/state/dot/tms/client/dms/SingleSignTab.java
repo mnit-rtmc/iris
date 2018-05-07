@@ -2,6 +2,7 @@
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2009-2018  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
+ * Copyright (C) 2018  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,9 +59,6 @@ import us.mn.state.dot.tms.utils.I18N;
  */
 public class SingleSignTab extends IPanel {
 
-	/** Width of sign panel */
-	static private final int SIGN_PANEL_WIDTH = 450;
-
 	/** Displays the id of the DMS */
 	private final JLabel name_lbl = createValueLabel();
 
@@ -91,19 +89,17 @@ public class SingleSignTab extends IPanel {
 	/** DMS dispatcher */
 	private final DMSDispatcher dispatcher;
 
-	/** Panel for drawing current pixel status */
-	private final SignPixelPanel current_pnl = new SignPixelPanel(100,
-		SIGN_PANEL_WIDTH, true);
-
-	/** Panel for drawing preview pixel status */
-	private final SignPixelPanel preview_pnl = new SignPixelPanel(100,
-		SIGN_PANEL_WIDTH, true);
-
-	/** Pager for selected DMS panel */
-	private DMSPanelPager pnlPager;
-
 	/** Tabbed pane for current/preview panels */
 	private final JTabbedPane tab = new JTabbedPane();
+
+	/** Current sign face panel */
+	private final SignFacePanel current_pnl = new SignFacePanel();
+
+	/** Preview sign face panel */
+	private final SignFacePanel preview_pnl = new SignFacePanel();
+
+	/** Pager for selected DMS panel */
+	private DMSPanelPager pager;
 
 	/** Mouse listener for popup menus */
 	private final MouseListener popper = new MouseAdapter() {
@@ -167,7 +163,6 @@ public class SingleSignTab extends IPanel {
 		// Make label opaque so that we can set the background color
 		status_lbl.setOpaque(true);
 		preview_pnl.setFilterColor(new Color(0, 0, 255, 48));
-
 		add("device.name");
 		add(name_lbl);
 		if (SystemAttrEnum.DMS_BRIGHTNESS_ENABLE.getBoolean()) {
@@ -227,20 +222,56 @@ public class SingleSignTab extends IPanel {
 		if (0 == adjusting) {
 			preview = p;
 			adjusting++;
-			setMessage();
+			setMessage(selected);
 			adjusting--;
 		}
 	}
 
 	/** Set the displayed message */
 	public void setMessage() {
-		if (preview) {
-			updatePreviewPanel(selected);
-			tab.setSelectedComponent(preview_pnl);
-		} else {
-			updateCurrentPanel(selected);
-			tab.setSelectedComponent(current_pnl);
-		}
+		setMessage(selected);
+	}
+
+	/** Set the displayed message */
+	private void setMessage(DMS dms) {
+		SignFacePanel face_pnl = getFacePanel();
+		SignPixelPanel pix_pnl = face_pnl.setSign(dms);
+		setPager(createPager(dms, pix_pnl));
+		tab.setSelectedComponent(face_pnl);
+	}
+
+	/** Get the appropriate face panel */
+	private SignFacePanel getFacePanel() {
+		return (preview) ? preview_pnl : current_pnl;
+	}
+
+	/** Create a DMS panel pager */
+	private DMSPanelPager createPager(DMS dms, SignPixelPanel pix_pnl) {
+		return (preview)
+		      ? createPreviewPager(pix_pnl)
+		      : createCurrentPager(dms, pix_pnl);
+	}
+
+	/** Create a preview panel pager */
+	private DMSPanelPager createPreviewPager(SignPixelPanel pix_pnl) {
+		RasterGraphic[] rg = dispatcher.getPreviewPixmaps();
+		if (rg != null) {
+			return new DMSPanelPager(pix_pnl, rg,
+				dispatcher.getComposedMulti());
+		} else
+			return null;
+	}
+
+	/** Update the current panel */
+	private DMSPanelPager createCurrentPager(DMS dms,
+		SignPixelPanel pix_pnl)
+	{
+		RasterGraphic[] rg = DMSHelper.getRasters(dms);
+		if (rg != null) {
+			String ms = DMSHelper.getMultiString(dms);
+			return new DMSPanelPager(pix_pnl, rg, ms);
+		} else
+			return null;
 	}
 
 	/** Set a single selected DMS */
@@ -252,8 +283,8 @@ public class SingleSignTab extends IPanel {
 	private void clearSelected() {
 		setPager(null);
 		current_pnl.setFilterColor(null);
-		current_pnl.clear();
-		preview_pnl.clear();
+		current_pnl.setSign(null);
+		preview_pnl.setSign(null);
 		name_lbl.setText("");
 		brightness_lbl.setText("");
 		setPresetAction(null);
@@ -302,7 +333,7 @@ public class SingleSignTab extends IPanel {
 		if (a == null || a.equals("operation"))
 			updateStatus(dms);
 		if (null == a || (a.equals("msgCurrent") && !preview)) {
-			updateCurrentPanel(dms);
+			setMessage(dms);
 			updateMessageCurrent(dms);
 		}
 	}
@@ -346,19 +377,6 @@ public class SingleSignTab extends IPanel {
 		}
 	}
 
-	/** Update the current panel */
-	private void updateCurrentPanel(DMS dms) {
-		RasterGraphic[] rg = DMSHelper.getRasters(dms);
-		if (rg != null) {
-			String ms = DMSHelper.getMultiString(dms);
-			current_pnl.setDimensions(dms);
-			setPager(new DMSPanelPager(current_pnl, rg, ms));
-		} else {
-			setPager(null);
-			current_pnl.clear();
-		}
-	}
-
 	/** Update the current message */
 	private void updateMessageCurrent(DMS dms) {
 		adjusting++;
@@ -368,33 +386,11 @@ public class SingleSignTab extends IPanel {
 		expiration_lbl.setText(DMSHelper.getExpiration(dms));
 	}
 
-	/** Update the preview panel */
-	private void updatePreviewPanel(DMS dms) {
-		DMSPanelPager p = createPreviewPager();
-		if (p != null && dms != null) {
-			preview_pnl.setDimensions(dms);
-			setPager(p);
-		} else {
-			setPager(null);
-			preview_pnl.clear();
-		}
-	}
-
-	/** Create a preview panel pager */
-	private DMSPanelPager createPreviewPager() {
-		RasterGraphic[] rg = dispatcher.getPreviewPixmaps();
-		if (rg != null) {
-			return new DMSPanelPager(preview_pnl, rg,
-				dispatcher.getComposedMulti());
-		} else
-			return null;
-	}
-
 	/** Set the DMS panel pager */
 	private void setPager(DMSPanelPager p) {
-		DMSPanelPager pager = pnlPager;
-		if (pager != null)
-			pager.dispose();
-		pnlPager = p;
+		DMSPanelPager op = pager;
+		if (op != null)
+			op.dispose();
+		pager = p;
 	}
 }

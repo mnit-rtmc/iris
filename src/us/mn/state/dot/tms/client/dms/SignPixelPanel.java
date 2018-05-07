@@ -130,13 +130,6 @@ public class SignPixelPanel extends JPanel {
 		setPreferredSize(d);
 	}
 
-	/** Clear the pixel panel */
-	public void clear() {
-		setPhysicalDimensions(null);
-		setLogicalDimensions(null);
-		repaint();
-	}
-
 	/** Set the graphic displayed */
 	public void setGraphic(RasterGraphic rg) {
 		graphic = rg;
@@ -343,13 +336,6 @@ public class SignPixelPanel extends JPanel {
 
 	/** Set the dimensions from s sign configuration */
 	public void setDimensions(SignConfig sc) {
-		setPhysicalDimensions(sc);
-		setLogicalDimensions(sc);
-	}
-
-	/** Set the dimensions from a DMS */
-	public void setDimensions(DMS dms) {
-		SignConfig sc = dms.getSignConfig();
 		setPhysicalDimensions(sc);
 		setLogicalDimensions(sc);
 	}

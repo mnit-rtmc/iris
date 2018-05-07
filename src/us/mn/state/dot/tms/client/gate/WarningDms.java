@@ -104,7 +104,7 @@ public class WarningDms {
 		RasterGraphic[] rg = DMSHelper.getRasters(d);
 		if (rg != null) {
 			String ms = DMSHelper.getMultiString(d);
-			pix_pnl.setDimensions(d);
+			pix_pnl.setDimensions(d.getSignConfig());
 			setPager(new DMSPanelPager(pix_pnl, rg, ms));
 		} else
 			clearDms();
@@ -114,7 +114,7 @@ public class WarningDms {
 	private void clearDms() {
 		setPager(null);
 		pix_pnl.setFilterColor(null);
-		pix_pnl.clear();
+		pix_pnl.setDimensions(null);
 	}
 
 	/** Set the pager */
