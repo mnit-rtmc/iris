@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -180,7 +180,7 @@ public class PropPixels extends IPanel {
 
 	/** Update the dimensions of a sign pixel panel */
 	private void updatePixelPanel(SignPixelPanel p) {
-		p.setDimensions(dms);
+		p.setDimensions(dms.getSignConfig());
 		p.repaint();
 	}
 

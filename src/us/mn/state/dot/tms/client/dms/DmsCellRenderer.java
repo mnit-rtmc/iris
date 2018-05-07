@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -238,7 +238,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		case LARGE:
 			pixel_pnl.setFilterColor(
 				SignPixelPanel.filterColor(dms));
-			pixel_pnl.setDimensions(dms);
+			pixel_pnl.setDimensions(dms.getSignConfig());
 			pixel_pnl.setGraphic(getPageOne(dms));
 			break;
 		}
