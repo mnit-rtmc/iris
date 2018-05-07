@@ -95,6 +95,7 @@ public class PropLocation extends LocationPanel {
 		}
 	}
 
+	/** GPS panel */
 	private final GpsPanel gps_pnl;
 
 	/** DMS to display */
