@@ -77,8 +77,8 @@ public class StaticGraphicPanel extends JPanel {
 
 	/** Create a transform to paint the graphic */
 	private AffineTransform createTransform(RasterGraphic rg) {
-		int wp = rg.getWidth();
-		int hp = rg.getHeight();
+		double wp = rg.getWidth();
+		double hp = rg.getHeight();
 		if (wp > 0 && hp > 0) {
 			double sx = getWidth() / wp;
 			double sy = getHeight() / hp;
