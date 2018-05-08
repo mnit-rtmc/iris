@@ -19,10 +19,7 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Graphic;
-import us.mn.state.dot.tms.GraphicHelper;
-import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SignConfig;
 
 /**
@@ -77,8 +74,7 @@ public class SignFacePanel extends JPanel {
 		SignConfig sc = (dms != null) ? dms.getSignConfig() : null;
 		Graphic g = (dms != null) ? dms.getStaticGraphic() : null;
 		if (g != null) {
-			hybrid_static_pnl.setGraphic(
-				GraphicHelper.createRaster(g));
+			hybrid_static_pnl.setGraphic(g);
 			hybrid_dynamic_pnl.setDimensions(sc);
 			cards.show(this, CARD_HYBRID);
 			dynamic_pnl.setDimensions(null);

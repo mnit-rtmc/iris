@@ -16,12 +16,11 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import javax.swing.JPanel;
-import us.mn.state.dot.tms.DmsColor;
-import us.mn.state.dot.tms.RasterGraphic;
+import java.awt.Image;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
+import us.mn.state.dot.tms.Graphic;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -30,16 +29,13 @@ import static us.mn.state.dot.tms.client.widget.Widgets.UI;
  * @author Michael Janson
  * @author Douglas Lau
  */
-public class StaticGraphicPanel extends JPanel {
-
-	/** Raster graphic to paint */
-	private RasterGraphic graphic;
+public class StaticGraphicPanel extends JLabel {
 
 	/** Create a new static graphic panel.
 	 * @param h Pixel height of image.
 	 * @param w Pixel width of image. */
 	public StaticGraphicPanel(int h, int w) {
-		super(true);
+		setHorizontalAlignment(SwingConstants.TRAILING);
 		setSizes(h, w);
 	}
 
@@ -51,57 +47,27 @@ public class StaticGraphicPanel extends JPanel {
 	}
 
 	/** Set the graphic displayed */
-	public void setGraphic(RasterGraphic rg) {
-		graphic = rg;
-		repaint();
+	public void setGraphic(Graphic g) {
+		if (g != null) {
+			Image img = imageScaled(g);
+			setIcon(new ImageIcon(img));
+		} else
+			setIcon(null);
 	}
 
-	/** Paint this on the screen */
-	@Override
-	public void paintComponent(Graphics g) {
-		doPaint((Graphics2D) g, graphic);
-	}
-
-	/** Paint the static image onto a graphics context */
-	private void doPaint(Graphics2D g, RasterGraphic rg) {
-		g.setColor(getBackground());
-		g.fillRect(0, 0, getWidth(), getHeight());
-		if (rg != null) {
-			AffineTransform t = createTransform(rg);
-			if (t != null) {
-				g.transform(t);
-				paintPixels(g, rg);
-			}
-		}
-	}
-
-	/** Create a transform to paint the graphic */
-	private AffineTransform createTransform(RasterGraphic rg) {
-		double wp = rg.getWidth();
-		double hp = rg.getHeight();
+	/** Create a scaled image */
+	private Image imageScaled(Graphic g) {
+		Image img = GraphicImage.create(g);
+		double wp = g.getWidth();
+		double hp = g.getHeight();
 		if (wp > 0 && hp > 0) {
 			double sx = getWidth() / wp;
 			double sy = getHeight() / hp;
 			double scale = Math.min(sx, sy);
-			double tx = wp * (sx - scale) / 2;
-			double ty = hp * (sy - scale) / 2;
-			AffineTransform t = new AffineTransform();
-			t.translate(tx, ty);
-			t.scale(scale, scale);
-			return t;
+			int w = (int) (wp * scale);
+			int h = (int) (hp * scale);
+			return img.getScaledInstance(w, h, Image.SCALE_SMOOTH);
 		} else
-			return null;
-	}
-
-	/** Paint the static image */
-	private void paintPixels(Graphics2D g, RasterGraphic rg) {
-		DmsColor bg = new DmsColor(getBackground());
-		for (int y = 0; y < rg.getHeight(); y++) {
-			for (int x = 0; x < rg.getWidth(); x++) {
-				DmsColor clr = rg.getPixel(x, y, bg);
-				g.setColor(clr.color);
-				g.fillRect(x, y, 1, 1);
-			}
-		}
+			return img;
 	}
 }
