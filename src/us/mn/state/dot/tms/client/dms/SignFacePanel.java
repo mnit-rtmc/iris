@@ -68,10 +68,6 @@ public class SignFacePanel extends JPanel {
 		setLayout(cards);
 		hybrid_pnl.add(hybrid_static_pnl);
 		hybrid_pnl.add(hybrid_dynamic_pnl);
-	}
-
-	/** Initialize the panel */
-	public void initialize() {
 		add(dynamic_pnl, CARD_DYNAMIC);
 		add(hybrid_pnl, CARD_HYBRID);
 	}
