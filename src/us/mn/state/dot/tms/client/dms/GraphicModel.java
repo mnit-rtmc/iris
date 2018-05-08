@@ -112,7 +112,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	protected ArrayList<ProxyColumn<Graphic>> createColumns() {
 		ArrayList<ProxyColumn<Graphic>> cols =
 			new ArrayList<ProxyColumn<Graphic>>(5);
-		cols.add(new ProxyColumn<Graphic>("graphic.number", 60,
+		cols.add(new ProxyColumn<Graphic>("graphic.number", 68,
 			Integer.class)
 		{
 			public Object getValueAt(Graphic g) {
