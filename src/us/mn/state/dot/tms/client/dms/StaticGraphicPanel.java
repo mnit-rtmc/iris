@@ -95,9 +95,10 @@ public class StaticGraphicPanel extends JPanel {
 
 	/** Paint the static image */
 	private void paintPixels(Graphics2D g, RasterGraphic rg) {
+		DmsColor bg = new DmsColor(getBackground());
 		for (int y = 0; y < rg.getHeight(); y++) {
 			for (int x = 0; x < rg.getWidth(); x++) {
-				DmsColor clr = rg.getPixel(x, y);
+				DmsColor clr = rg.getPixel(x, y, bg);
 				g.setColor(clr.color);
 				g.fillRect(x, y, 1, 1);
 			}
