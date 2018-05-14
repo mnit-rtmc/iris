@@ -284,4 +284,7 @@ CREATE VIEW monitor_style_view AS
 	FROM iris.monitor_style;
 GRANT SELECT ON monitor_style_view TO PUBLIC;
 
+-- delete camera_full_screen_enable system attribute
+DELETE FROM iris.system_attribute WHERE name = 'camera_full_screen_enable';
+
 COMMIT;

@@ -21,7 +21,7 @@ import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerIO;
 import us.mn.state.dot.tms.DeviceRequest;
-import static us.mn.state.dot.tms.SystemAttrEnum.CAMERA_FULL_SCREEN_ENABLE;
+import us.mn.state.dot.tms.MonitorStyle;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.VideoMonitorImpl;
@@ -39,9 +39,17 @@ import static us.mn.state.dot.tms.utils.URIUtil.UDP;
  */
 public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 
-	/** Is full screen enabled? */
-	static private boolean isFullScreenEnabled() {
-		return CAMERA_FULL_SCREEN_ENABLE.getBoolean();
+	/** Get a monitor style */
+	static private MonitorStyle monitorStyle(VideoMonitorImpl mon) {
+		return (mon != null)
+		      ? mon.getMonitorStyle()
+		      : null;
+	}
+
+	/** Check if a video monitor is allowed to auto-expand */
+	static private boolean getAutoExpand(VideoMonitorImpl mon) {
+		MonitorStyle ms = monitorStyle(mon);
+		return (ms != null) && ms.getAutoExpand();
 	}
 
 	/** Set of all controllers in full-screen mode */
@@ -129,14 +137,14 @@ public class MonStreamPoller extends BasePoller implements VideoMonitorPoller {
 
 	/** Should full screen mode be used? */
 	static private boolean shouldUseFullScreen(ControllerImpl c) {
-		if (!isFullScreenEnabled())
-			return false;
 		int n_mons = 0;
 		int n_cams = 0;
 		int max_pin = c.getMaxPin();
 		for (int p = 1; p <= max_pin; p++) {
 			VideoMonitorImpl vm = getMonitor(c, p);
 			if (vm != null) {
+				if (!getAutoExpand(vm))
+					return false;
 				n_mons++;
 				if (!isBlank(vm)) {
 					n_cams++;
