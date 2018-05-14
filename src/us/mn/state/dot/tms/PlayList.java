@@ -41,6 +41,12 @@ public interface PlayList extends SonarObject {
 	/** Get sequence number */
 	Integer getSeqNum();
 
+	/** Set description */
+	void setDescription(String d);
+
+	/** Get description */
+	String getDescription();
+
 	/** Set the cameras in the play list */
 	void setCameras(Camera[] cams);
 

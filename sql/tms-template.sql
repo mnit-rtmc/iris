@@ -836,11 +836,12 @@ CREATE TABLE iris._cam_sequence (
 
 CREATE TABLE iris._play_list (
 	name VARCHAR(20) PRIMARY KEY,
-	seq_num INTEGER REFERENCES iris._cam_sequence
+	seq_num INTEGER REFERENCES iris._cam_sequence,
+	description VARCHAR(32)
 );
 
 CREATE VIEW iris.play_list AS
-	SELECT name, seq_num
+	SELECT name, seq_num, description
 	FROM iris._play_list;
 
 CREATE FUNCTION iris.play_list_insert() RETURNS TRIGGER AS
@@ -849,8 +850,8 @@ BEGIN
 	IF NEW.seq_num IS NOT NULL THEN
 		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
 	END IF;
-	INSERT INTO iris._play_list (name, seq_num)
-	     VALUES (NEW.name, NEW.seq_num);
+	INSERT INTO iris._play_list (name, seq_num, description)
+	     VALUES (NEW.name, NEW.seq_num, NEW.description);
 	RETURN NEW;
 END;
 $play_list_insert$ LANGUAGE plpgsql;
@@ -868,7 +869,8 @@ BEGIN
 		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
 	END IF;
 	UPDATE iris._play_list
-	   SET seq_num = NEW.seq_num
+	   SET seq_num = NEW.seq_num,
+	       description = NEW.description
 	 WHERE name = OLD.name;
 	IF OLD.seq_num IS NOT NULL AND (NEW.seq_num IS NULL OR
 	                                NEW.seq_num != OLD.seq_num)
@@ -909,18 +911,20 @@ ALTER TABLE iris.play_list_camera ADD PRIMARY KEY (play_list, ordinal);
 
 CREATE TABLE iris._catalog (
 	name VARCHAR(20) PRIMARY KEY,
-	seq_num INTEGER NOT NULL REFERENCES iris._cam_sequence
+	seq_num INTEGER NOT NULL REFERENCES iris._cam_sequence,
+	description VARCHAR(32)
 );
 
 CREATE VIEW iris.catalog AS
-	SELECT name, seq_num
+	SELECT name, seq_num, description
 	FROM iris._catalog;
 
 CREATE FUNCTION iris.catalog_insert() RETURNS TRIGGER AS
 	$catalog_insert$
 BEGIN
 	INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	INSERT INTO iris._catalog (name, seq_num) VALUES (NEW.name,NEW.seq_num);
+	INSERT INTO iris._catalog (name, seq_num, description)
+	     VALUES (NEW.name,NEW.seq_num, NEW.catalog);
 	RETURN NEW;
 END;
 $catalog_insert$ LANGUAGE plpgsql;
@@ -936,7 +940,8 @@ BEGIN
 		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
 	END IF;
 	UPDATE iris._catalog
-	   SET seq_num = NEW.seq_num
+	   SET seq_num = NEW.seq_num,
+	       description = NEW.description
 	 WHERE name = OLD.name;
 	IF NEW.seq_num != OLD.seq_num THEN
 		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;

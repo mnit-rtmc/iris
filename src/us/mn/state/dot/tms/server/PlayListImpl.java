@@ -41,8 +41,8 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 			PlayList.GROUP_CHECKER);
 		mapping = new TableMappingList(store, "iris", SONAR_TYPE,
 			Camera.SONAR_TYPE);
-		store.query("SELECT name, seq_num FROM iris." + SONAR_TYPE +";",
-			new ResultFactory()
+		store.query("SELECT name, seq_num, description FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new PlayListImpl(row));
@@ -56,6 +56,7 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("seq_num", seq_num);
+		map.put("description", description);
 		return map;
 	}
 
@@ -78,15 +79,19 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 
 	/** Create a play list from database lookup */
 	private PlayListImpl(ResultSet row) throws SQLException, TMSException {
-		this(row.getString(1),          // name
-		     (Integer) row.getObject(2) // seq_num
+		this(row.getString(1),              // name
+		     (Integer) row.getObject(2),    // seq_num
+		     row.getString(3)               // description
 		);
 	}
 
 	/** Create a play list from database lookup */
-	private PlayListImpl(String n, Integer sn) throws TMSException {
+	private PlayListImpl(String n, Integer sn, String d)
+		throws TMSException
+	{
 		this(n);
 		seq_num = sn;
+		description = d;
 		ArrayList<CameraImpl> cam_ls = new ArrayList<CameraImpl>();
 		for (String o: mapping.lookup(this)) {
 			cam_ls.add(lookupCamera(o));
@@ -117,6 +122,29 @@ public class PlayListImpl extends BaseObjectImpl implements PlayList {
 	@Override
 	public Integer getSeqNum() {
 		return seq_num;
+	}
+
+	/** Description of the play list */
+	private String description;
+
+	/** Set the description */
+	@Override
+	public void setDescription(String d) {
+		description = d;
+	}
+
+	/** Set the description */
+	public void doSetDescription(String d) throws TMSException {
+		if (!objectEquals(d, description)) {
+			store.update(this, "description", d);
+			setDescription(d);
+		}
+	}
+
+	/** Get the description */
+	@Override
+	public String getDescription() {
+		return description;
 	}
 
 	/** Cameras in the play list */

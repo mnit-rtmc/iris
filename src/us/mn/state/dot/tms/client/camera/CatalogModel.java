@@ -50,7 +50,7 @@ public class CatalogModel extends ProxyTableModel<Catalog> {
 	@Override
 	protected ArrayList<ProxyColumn<Catalog>> createColumns() {
 		ArrayList<ProxyColumn<Catalog>> cols =
-			new ArrayList<ProxyColumn<Catalog>>(2);
+			new ArrayList<ProxyColumn<Catalog>>(3);
 		cols.add(new ProxyColumn<Catalog>("catalog", 120) {
 			public Object getValueAt(Catalog c) {
 				return c.getName();
@@ -59,6 +59,18 @@ public class CatalogModel extends ProxyTableModel<Catalog> {
 		cols.add(new ProxyColumn<Catalog>("catalog.seq", 120) {
 			public Object getValueAt(Catalog c) {
 				return c.getSeqNum();
+			}
+		});
+		cols.add(new ProxyColumn<Catalog>("catalog.desc", 200) {
+			public Object getValueAt(Catalog c) {
+				return c.getDescription();
+			}
+			public boolean isEditable(Catalog c) {
+				return canWrite(c);
+			}
+			public void setValueAt(Catalog c, Object value) {
+				String v = value.toString().trim();
+				c.setDescription((v.length() > 0) ? v : null);
 			}
 		});
 		return cols;

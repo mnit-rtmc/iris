@@ -32,6 +32,12 @@ public interface Catalog extends SonarObject {
 	/** Get sequence number */
 	int getSeqNum();
 
+	/** Set description */
+	void setDescription(String d);
+
+	/** Get description */
+	String getDescription();
+
 	/** Set the play lists in the catalog */
 	void setPlayLists(PlayList[] pl);
 

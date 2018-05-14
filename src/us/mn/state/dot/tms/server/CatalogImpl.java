@@ -41,8 +41,8 @@ public class CatalogImpl extends BaseObjectImpl implements Catalog {
 		namespace.registerType(SONAR_TYPE, CatalogImpl.class);
 		mapping = new TableMappingList(store, "iris", SONAR_TYPE,
 			PlayList.SONAR_TYPE);
-		store.query("SELECT name, seq_num FROM iris." + SONAR_TYPE +";",
-			new ResultFactory()
+		store.query("SELECT name, seq_num, description FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new CatalogImpl(row));
@@ -56,6 +56,7 @@ public class CatalogImpl extends BaseObjectImpl implements Catalog {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("seq_num", seq_num);
+		map.put("description", description);
 		return map;
 	}
 
@@ -79,14 +80,16 @@ public class CatalogImpl extends BaseObjectImpl implements Catalog {
 	/** Create a catalog from database lookup */
 	private CatalogImpl(ResultSet row) throws SQLException, TMSException {
 		this(row.getString(1),  // name
-		     row.getInt(2)	// seq_num
+		     row.getInt(2),     // seq_num
+		     row.getString(3)   // description
 		);
 	}
 
 	/** Create a catalog from database lookup */
-	private CatalogImpl(String n, int sn) throws TMSException {
+	private CatalogImpl(String n, int sn, String d) throws TMSException {
 		this(n);
 		seq_num = sn;
+		description = d;
 		ArrayList<PlayListImpl> pls = new ArrayList<PlayListImpl>();
 		for (String o: mapping.lookup(this)) {
 			pls.add(lookupPlayList(o));
@@ -117,6 +120,29 @@ public class CatalogImpl extends BaseObjectImpl implements Catalog {
 	@Override
 	public int getSeqNum() {
 		return seq_num;
+	}
+
+	/** Description of the catalog */
+	private String description;
+
+	/** Set the description */
+	@Override
+	public void setDescription(String d) {
+		description = d;
+	}
+
+	/** Set the description */
+	public void doSetDescription(String d) throws TMSException {
+		if (!objectEquals(d, description)) {
+			store.update(this, "description", d);
+			setDescription(d);
+		}
+	}
+
+	/** Get the description */
+	@Override
+	public String getDescription() {
+		return description;
 	}
 
 	/** Play lists in the catalog */

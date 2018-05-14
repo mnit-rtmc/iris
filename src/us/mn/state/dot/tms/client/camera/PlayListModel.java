@@ -50,7 +50,7 @@ public class PlayListModel extends ProxyTableModel<PlayList> {
 	@Override
 	protected ArrayList<ProxyColumn<PlayList>> createColumns() {
 		ArrayList<ProxyColumn<PlayList>> cols =
-			new ArrayList<ProxyColumn<PlayList>>(2);
+			new ArrayList<ProxyColumn<PlayList>>(3);
 		cols.add(new ProxyColumn<PlayList>("play.list", 120) {
 			public Object getValueAt(PlayList pl) {
 				return pl.getName();
@@ -59,6 +59,18 @@ public class PlayListModel extends ProxyTableModel<PlayList> {
 		cols.add(new ProxyColumn<PlayList>("play.list.seq", 120) {
 			public Object getValueAt(PlayList pl) {
 				return pl.getSeqNum();
+			}
+		});
+		cols.add(new ProxyColumn<PlayList>("play.list.desc", 200) {
+			public Object getValueAt(PlayList pl) {
+				return pl.getDescription();
+			}
+			public boolean isEditable(PlayList pl) {
+				return canWrite(pl);
+			}
+			public void setValueAt(PlayList pl, Object value) {
+				String v = value.toString().trim();
+				pl.setDescription((v.length() > 0) ? v : null);
 			}
 		});
 		return cols;
