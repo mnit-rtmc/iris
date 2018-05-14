@@ -56,6 +56,12 @@ public interface MonitorStyle extends SonarObject {
 	/** Get title-bar flag */
 	boolean getTitleBar();
 
+	/** Set auto-expand flag */
+	void setAutoExpand(boolean ae);
+
+	/** Get auto-expand flag */
+	boolean getAutoExpand();
+
 	/** Set the horizontal gap */
 	void setHGap(int g);
 

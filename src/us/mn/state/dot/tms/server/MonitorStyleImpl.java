@@ -32,8 +32,8 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, MonitorStyleImpl.class);
 		store.query("SELECT name, force_aspect, accent, font_sz, " +
-			"title_bar, hgap, vgap FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"title_bar, auto_expand, hgap, vgap FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new MonitorStyleImpl(row));
@@ -50,6 +50,7 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 		map.put("accent", accent);
 		map.put("font_sz", font_sz);
 		map.put("title_bar", title_bar);
+		map.put("auto_expand", auto_expand);
 		map.put("hgap", hgap);
 		map.put("vgap", vgap);
 		return map;
@@ -78,25 +79,27 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 
 	/** Create a monitor style */
 	private MonitorStyleImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),		// name
-		     row.getBoolean(2),		// force_aspect
-		     row.getString(3),		// accent
-		     row.getInt(4),		// font_sz
-		     row.getBoolean(5),		// title_bar
-		     row.getInt(6),		// hgap
-		     row.getInt(7)		// vgap
+		this(row.getString(1),      // name
+		     row.getBoolean(2),     // force_aspect
+		     row.getString(3),      // accent
+		     row.getInt(4),         // font_sz
+		     row.getBoolean(5),     // title_bar
+		     row.getBoolean(6),     // auto_expand
+		     row.getInt(7),         // hgap
+		     row.getInt(8)          // vgap
 		);
 	}
 
 	/** Create a new monitor style */
 	private MonitorStyleImpl(String n, boolean fa, String a, int fs,
-		boolean tb, int hg, int vg)
+		boolean tb, boolean ae, int hg, int vg)
 	{
 		this(n);
 		force_aspect = fa;
 		accent = a;
 		font_sz = fs;
 		title_bar = tb;
+		auto_expand = ae;
 		hgap = hg;
 		vgap = vg;
 	}
@@ -191,6 +194,29 @@ public class MonitorStyleImpl extends BaseObjectImpl implements MonitorStyle {
 	@Override
 	public boolean getTitleBar() {
 		return title_bar;
+	}
+
+	/** Auto-expand flag */
+	private boolean auto_expand;
+
+	/** Set auto-expand flag */
+	@Override
+	public void setAutoExpand(boolean ae) {
+		auto_expand = ae;
+	}
+
+	/** Set auto-expand flag */
+	public void doSetAutoExpand(boolean ae) throws TMSException {
+		if (ae != auto_expand) {
+			store.update(this, "auto_expand", ae);
+			setAutoExpand(ae);
+		}
+	}
+
+	/** Get auto-expand flag */
+	@Override
+	public boolean getAutoExpand() {
+		return auto_expand;
 	}
 
 	/** Horizontal gap */

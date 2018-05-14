@@ -40,7 +40,7 @@ public class MonitorStyleModel extends ProxyTableModel<MonitorStyle> {
 	@Override
 	protected ArrayList<ProxyColumn<MonitorStyle>> createColumns() {
 		ArrayList<ProxyColumn<MonitorStyle>> cols =
-			new ArrayList<ProxyColumn<MonitorStyle>>(7);
+			new ArrayList<ProxyColumn<MonitorStyle>>(8);
 		cols.add(new ProxyColumn<MonitorStyle>("monitor.style",
 			120)
 		{
@@ -99,6 +99,20 @@ public class MonitorStyleModel extends ProxyTableModel<MonitorStyle> {
 			public void setValueAt(MonitorStyle ms, Object value) {
 				if (value instanceof Boolean)
 					ms.setTitleBar((Boolean) value);
+			}
+		});
+		cols.add(new ProxyColumn<MonitorStyle>("monitor.auto.expand",
+			120, Boolean.class)
+		{
+			public Object getValueAt(MonitorStyle ms) {
+				return ms.getAutoExpand();
+			}
+			public boolean isEditable(MonitorStyle ms) {
+				return canWrite(ms, "autoExpand");
+			}
+			public void setValueAt(MonitorStyle ms, Object value) {
+				if (value instanceof Boolean)
+					ms.setAutoExpand((Boolean) value);
 			}
 		});
 		cols.add(new ProxyColumn<MonitorStyle>("monitor.hgap", 90,

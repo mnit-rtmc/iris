@@ -984,6 +984,7 @@ CREATE TABLE iris.monitor_style (
 	accent VARCHAR(8) NOT NULL,
 	font_sz INTEGER NOT NULL,
 	title_bar BOOLEAN NOT NULL,
+	auto_expand BOOLEAN NOT NULL,
 	hgap INTEGER NOT NULL,
 	vgap INTEGER NOT NULL
 );
@@ -2579,7 +2580,8 @@ CREATE VIEW ramp_meter_view AS
 GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE VIEW monitor_style_view AS
-	SELECT name, force_aspect, accent, font_sz, title_bar, hgap, vgap
+	SELECT name, force_aspect, accent, font_sz, title_bar, auto_expand,
+	       hgap, vgap
 	FROM iris.monitor_style;
 GRANT SELECT ON monitor_style_view TO PUBLIC;
 

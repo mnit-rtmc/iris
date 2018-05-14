@@ -272,4 +272,16 @@ CREATE TRIGGER catalog_delete_trig
     INSTEAD OF DELETE ON iris.catalog
     FOR EACH ROW EXECUTE PROCEDURE iris.catalog_delete();
 
+-- Add auto_expand column to monitor_style
+ALTER TABLE iris.monitor_style ADD COLUMN auto_expand BOOLEAN;
+UPDATE iris.monitor_style SET auto_expand = 'f';
+ALTER TABLE iris.monitor_style ALTER COLUMN auto_expand SET NOT NULL;
+
+DROP VIEW monitor_style_view;
+CREATE VIEW monitor_style_view AS
+	SELECT name, force_aspect, accent, font_sz, title_bar, auto_expand,
+	       hgap, vgap
+	FROM iris.monitor_style;
+GRANT SELECT ON monitor_style_view TO PUBLIC;
+
 COMMIT;
