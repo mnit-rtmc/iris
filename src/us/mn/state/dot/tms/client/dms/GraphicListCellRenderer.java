@@ -15,12 +15,15 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.image.BufferedImage;
 import javax.swing.ImageIcon;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.ListCellRenderer;
 import javax.swing.JList;
+import javax.swing.SwingConstants;
 import us.mn.state.dot.tms.Graphic;
+import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
  * This class renders graphics in a JList.
@@ -39,6 +42,15 @@ public class GraphicListCellRenderer implements ListCellRenderer<Graphic> {
 	/** Cell renderer */
 	private final DefaultListCellRenderer cell =
 		new DefaultListCellRenderer();
+
+	/** Create a new graphic list cell renderer */
+	public GraphicListCellRenderer() {
+		// Preferred size is needed to prevent
+		// grid bag layout from going bonkers
+		cell.setPreferredSize(new Dimension(UI.scaled(200),
+			UI.scaled(64)));
+		cell.setHorizontalTextPosition(SwingConstants.LEFT);
+	}
 
 	/** Configure the renderer component */
 	@Override

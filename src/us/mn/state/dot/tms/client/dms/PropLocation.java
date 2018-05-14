@@ -153,9 +153,8 @@ public class PropLocation extends LocationPanel {
 		add(gps_pnl, Stretch.CENTER);
 		add("dms.beacon.ext");
 		add(beacon_cbx);
-		add("dms.static.graphic", Stretch.DOUBLE);
-		add(graphic_cbx, Stretch.DOUBLE);
-		add(new JLabel(), Stretch.LAST);
+		add("dms.static.graphic");
+		add(graphic_cbx, Stretch.TALL);
 		add("camera.preset");
 		add(preset_cbx, Stretch.LAST);
 		add(new JButton(controller), Stretch.RIGHT);
