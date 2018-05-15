@@ -102,8 +102,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	private final JLabel loc_lbl = new JLabel();
 
 	/** Sign pixel panel to display sign message */
-	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200,
-		false);
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(50, 200);
 
 	/** Create a new DMS cell renderer.
 	 * @param sz StyleSummary renderer cell size. */

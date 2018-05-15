@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -114,8 +114,7 @@ public class FontForm extends AbstractForm {
 	private final ProxyTablePanel<Font> font_pnl;
 
 	/** Sign pixel panel */
-	private final SignPixelPanel pixel_pnl = new SignPixelPanel(40, 400,
-		true);
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(40, 400);
 
 	/** Glyph list */
 	private final JList<Integer> glist = new JList<Integer>();

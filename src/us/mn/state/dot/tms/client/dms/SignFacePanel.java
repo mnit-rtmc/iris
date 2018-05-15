@@ -47,7 +47,7 @@ public class SignFacePanel extends JPanel {
 
 	/** Dynamic sign pixel panel */
 	private final SignPixelPanel dynamic_pnl = new SignPixelPanel(HEIGHT,
-		WIDTH, true);
+		WIDTH);
 
 	/** Hybrid sign panel */
 	private final JPanel hybrid_pnl = new JPanel();
@@ -58,7 +58,7 @@ public class SignFacePanel extends JPanel {
 
 	/** Hybrid sign pixel panel */
 	private final SignPixelPanel hybrid_dynamic_pnl = new SignPixelPanel(
-		HEIGHT, WIDTH / 2, true);
+		HEIGHT, WIDTH / 2);
 
 	/** Create a new sign face panel */
 	public SignFacePanel() {

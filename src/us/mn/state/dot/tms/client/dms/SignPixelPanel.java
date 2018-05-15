@@ -101,9 +101,8 @@ public class SignPixelPanel extends JPanel {
 
 	/** Create a new sign pixel panel.
 	 * @param h Height of panel.
-	 * @param w Width of panel.
-	 * @param a If true, render with antialiasing. */
-	public SignPixelPanel(int h, int w, boolean a) {
+	 * @param w Width of panel. */
+	public SignPixelPanel(int h, int w) {
 		super(true);
 		face_color = Color.BLACK;
 		setSizes(h, w);

@@ -49,11 +49,11 @@ public class PropPixels extends IPanel {
 
 	/** Stuck off pixel panel */
 	private final SignPixelPanel stuck_off_pnl = new SignPixelPanel(100,
-		400, true);
+		400);
 
 	/** Stuck on pixel panel */
 	private final SignPixelPanel stuck_on_pnl = new SignPixelPanel(100,
-		400, true);
+		400);
 
 	/** Action to query pixel failures */
 	private final IAction query_pixels = new IAction("dms.query.pixels") {

@@ -48,8 +48,7 @@ public class QuickMessagePanel extends IPanel
 	private final JTextArea multi_txt = new JTextArea();
 
 	/** Sign pixel panel */
-	private final SignPixelPanel pixel_pnl = new SignPixelPanel(100, 180,
-		true);
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(100, 180);
 
 	/** Pager for sign pixel panel */
 	private DMSPanelPager pager;

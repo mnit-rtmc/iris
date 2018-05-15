@@ -60,7 +60,7 @@ public class WarningDms {
 	private final ProxyWatcher<DMS> watcher;
 
 	/** Sign pixel panel */
-	public final SignPixelPanel pix_pnl = new SignPixelPanel(80, 132, true);
+	public final SignPixelPanel pix_pnl = new SignPixelPanel(80, 132);
 
 	/** Pager for sign pixel panel */
 	private DMSPanelPager pager;

@@ -60,8 +60,7 @@ public class PropMessages extends JPanel {
 	private final JPanel preview_pnl;
 
 	/** Sign pixel panel */
-	private final SignPixelPanel pixel_pnl = new SignPixelPanel(40, 400,
-		true);
+	private final SignPixelPanel pixel_pnl = new SignPixelPanel(40, 400);
 
 	/** Default font label */
 	private final ILabel font_lbl = new ILabel("dms.font.default");
