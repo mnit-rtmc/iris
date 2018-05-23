@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2011  Berkeley Transportation Systems Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -790,8 +790,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			locked_on += occ.period;
 			if (locked_on > getLockedOnThreshold().seconds())
 				malfunction(EventType.DET_LOCKED_ON);
-		} else
+		} else if (occ.value > 0) {
+			// Locked-on counter should be cleared only with good
+			// non-zero samples.  This helps when the duration of
+			// occupancy spikes is shorter than the threshold time
+			// and interspersed with zeroes.
 			locked_on = 0;
+		}
 	}
 
 	/** Get the scan "locked on" threshold */
