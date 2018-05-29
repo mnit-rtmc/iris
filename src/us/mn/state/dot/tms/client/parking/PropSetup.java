@@ -93,8 +93,8 @@ public class PropSetup extends IPanel {
 	/** Ownership text */
 	private final JTextField ownership_txt = new JTextField("", 2);
 
-	/** Amenities text */
-	private final JTextField amenities_txt = new JTextField("", 30);
+	/** Amenities panel */
+	private final PropAmenities amenities_pnl;
 
 	/** Capacity text */
 	private final JTextField capacity_txt = new JTextField("", 6);
@@ -112,12 +112,14 @@ public class PropSetup extends IPanel {
 	public PropSetup(Session s, ParkingArea c) {
 		session = s;
 		proxy = c;
+		amenities_pnl = new PropAmenities(c);
 	}
 
 	/** Initialize the widgets on the panel */
 	@Override
 	public void initialize() {
 		super.initialize();
+		amenities_pnl.initialize();
 		add("parking_area.site.id");
 		add(site_id_txt, Stretch.LAST);
 		add("parking_area.highway");
@@ -141,7 +143,7 @@ public class PropSetup extends IPanel {
 		add("parking_area.ownership");
 		add(ownership_txt, Stretch.LAST);
 		add("parking_area.amenities");
-		add(amenities_txt, Stretch.LAST);
+		add(amenities_pnl, Stretch.LAST);
 		add("parking_area.capacity");
 		add(capacity_txt, Stretch.LAST);
 		add("parking_area.low");
@@ -206,11 +208,6 @@ public class PropSetup extends IPanel {
 			    proxy.setOwnership(parseTxt(ownership_txt));
 			}
 		});
-		amenities_txt.addFocusListener(new FocusAdapter() {
-			public void focusLost(FocusEvent e) {
-			    proxy.setAmenities(parseTxt(amenities_txt));
-			}
-		});
 		capacity_txt.addFocusListener(new FocusAdapter() {
 			public void focusLost(FocusEvent e) {
 			    proxy.setCapacity(parseInt(capacity_txt));
@@ -236,7 +233,7 @@ public class PropSetup extends IPanel {
 		zip_txt.setEnabled(canWrite("zip"));
 		tz_txt.setEnabled(canWrite("timeZone"));
 		ownership_txt.setEnabled(canWrite("ownership"));
-		amenities_txt.setEnabled(canWrite("amenities"));
+		amenities_pnl.setEnabled(canWrite("amenities"));
 		capacity_txt.setEnabled(canWrite("capacity"));
 		low_txt.setEnabled(canWrite("lowThreshold"));
 	}
@@ -266,7 +263,7 @@ public class PropSetup extends IPanel {
 		if (a == null || a.equals("ownership"))
 			formatTxt(ownership_txt, proxy.getOwnership());
 		if (a == null || a.equals("amenities"))
-			formatTxt(amenities_txt, proxy.getAmenities());
+			amenities_pnl.updateAttribute();
 		if (a == null || a.equals("capacity"))
 			formatInt(capacity_txt, proxy.getCapacity());
 		if (a == null || a.equals("lowThreshold"))

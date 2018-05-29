@@ -125,11 +125,11 @@ public interface ParkingArea extends SonarObject {
 	/** Get the low threshold */
 	Integer getLowThreshold();
 
-	/** Set the amenities */
-	void setAmenities(String a);
+	/** Set the amenities (bit flags of ParkingAreaAmenities) */
+	void setAmenities(Integer a);
 
-	/** Get the amenities */
-	String getAmenities();
+	/** Get the amenities (bit flags of ParkingAreaAmenities) */
+	Integer getAmenities();
 
 	/** Get the reported available parking spaces */
 	String getReportedAvailable();

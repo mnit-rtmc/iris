@@ -177,7 +177,7 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 		     row.getString(17),         // ownership
 		     (Integer) row.getObject(18),// capacity
 		     (Integer) row.getObject(19),// low_threshold
-		     row.getString(20),         // amenities
+		     (Integer) row.getObject(20),// amenities
 		     row.getTimestamp(21),      // time_stamp
 		     row.getString(22),         // reported_available
 		     (Integer) row.getObject(23),// true_available
@@ -194,7 +194,7 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 		String p3, String sid, Date tss, String rh, String rp,
 		String xid, String fn, String adr, String c, String st,
 		String z, String tz, String ow, Integer cap, Integer lt,
-		String a, Date ts, String ra, Integer ta, String t, Boolean op,
+		Integer a, Date ts, String ra, Integer ta, String t, Boolean op,
 		Boolean td, Date lvc, Integer vca)
 	{
 		super(n);
@@ -646,17 +646,17 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 		return low_threshold;
 	}
 
-	/** Amenities (vending machine, etc.) */
-	private String amenities;
+	/** Amenities (bit flags of ParkingAreaAmenities) */
+	private Integer amenities;
 
-	/** Set the amenities */
+	/** Set the amenities (bit flags of ParkingAreaAmenities) */
 	@Override
-	public void setAmenities(String a) {
+	public void setAmenities(Integer a) {
 		amenities = a;
 	}
 
-	/** Set the amenities */
-	public void doSetAmenities(String a) throws TMSException {
+	/** Set the amenities (bit flags of ParkingAreaAmenities) */
+	public void doSetAmenities(Integer a) throws TMSException {
 		if (!objectEquals(a, amenities)) {
 			store.update(this, "amenities", a);
 			updateTimeStampStatic();
@@ -664,9 +664,9 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 		}
 	}
 
-	/** Get the amenities */
+	/** Get the amenities (bit flags of ParkingAreaAmenities) */
 	@Override
-	public String getAmenities() {
+	public Integer getAmenities() {
 		return amenities;
 	}
 
