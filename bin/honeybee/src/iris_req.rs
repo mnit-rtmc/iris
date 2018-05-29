@@ -231,7 +231,7 @@ struct ParkingAreaStatic {
     location         : Location,
     ownership        : Option<String>,
     capacity         : Option<i32>,
-    amenities        : Option<Vec<String>>,
+    amenities        : Vec<String>,
     images           : Option<Vec<String>>,
     logos            : Option<Vec<String>>,
 }
@@ -240,10 +240,16 @@ impl Queryable for ParkingAreaStatic {
     fn sql() -> &'static str {
        "SELECT site_id, time_stamp_static, relevant_highway, reference_post, \
                exit_id, road_dir, facility_name, lat, lon, street_adr, city, \
-               state, zip, time_zone, ownership, capacity, amenities \
+               state, zip, time_zone, ownership, capacity, amenities, \
+               camera_1, camera_2, camera_3 \
         FROM parking_area_view"
     }
     fn from_row(row: &postgres::rows::Row) -> Self {
+        let amenities = if let Some(a) = row.get::<usize, Option<String>>(16) {
+            a.split(", ").map(|s| s.to_string()).collect()
+        } else {
+            vec!()
+        };
         ParkingAreaStatic {
             siteId           : row.get(0),
             timeStamp        : row.get(1),
@@ -263,8 +269,7 @@ impl Queryable for ParkingAreaStatic {
             },
             ownership        : row.get(14),
             capacity         : row.get(15),
-            amenities        : if let Some(a) = row.get(16) { Some(vec!(a)) }
-                               else { Some(vec!()) },
+            amenities        : amenities,
             images           : Some(vec!()),
             logos            : Some(vec!()),
         }
