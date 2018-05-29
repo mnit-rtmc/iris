@@ -76,4 +76,8 @@ CREATE VIEW parking_area_view AS
 	LEFT JOIN geo_loc_view l ON pa.geo_loc = l.name;
 GRANT SELECT ON parking_area_view TO PUBLIC;
 
+-- insert camera_image_base_url system attribute
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('camera_image_base_url', '');
+
 COMMIT;

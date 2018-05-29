@@ -3151,6 +3151,7 @@ action_plan_alert_list
 action_plan_event_purge_days	90
 camera_autoplay	true
 camera_construction_url	
+camera_image_base_url	
 camera_kbd_panasonic_enable	false
 camera_num_blank	999
 camera_out_of_service_url	
