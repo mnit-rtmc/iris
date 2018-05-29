@@ -232,7 +232,7 @@ struct ParkingAreaStatic {
     ownership        : Option<String>,
     capacity         : Option<i32>,
     amenities        : Vec<String>,
-    images           : Option<Vec<String>>,
+    images           : Vec<String>,
     logos            : Option<Vec<String>>,
 }
 
@@ -241,7 +241,7 @@ impl Queryable for ParkingAreaStatic {
        "SELECT site_id, time_stamp_static, relevant_highway, reference_post, \
                exit_id, road_dir, facility_name, lat, lon, street_adr, city, \
                state, zip, time_zone, ownership, capacity, amenities, \
-               camera_1, camera_2, camera_3 \
+               camera_1, camera_2, camera_3, camera_image_base_url \
         FROM parking_area_view"
     }
     fn from_row(row: &postgres::rows::Row) -> Self {
@@ -250,6 +250,26 @@ impl Queryable for ParkingAreaStatic {
         } else {
             vec!()
         };
+        let mut images = vec!();
+        if let Some(url) = row.get::<usize, Option<String>>(20) {
+            if url.len() > 0 {
+                if let Some(c1) = row.get::<usize, Option<String>>(17) {
+                    let mut c = url.to_owned();
+                    c.push_str(&c1);
+                    images.push(c)
+                }
+                if let Some(c2) = row.get::<usize, Option<String>>(18) {
+                    let mut c = url.to_owned();
+                    c.push_str(&c2);
+                    images.push(c)
+                }
+                if let Some(c3) = row.get::<usize, Option<String>>(19) {
+                    let mut c = url.to_owned();
+                    c.push_str(&c3);
+                    images.push(c)
+                }
+            }
+        }
         ParkingAreaStatic {
             siteId           : row.get(0),
             timeStamp        : row.get(1),
@@ -270,7 +290,7 @@ impl Queryable for ParkingAreaStatic {
             ownership        : row.get(14),
             capacity         : row.get(15),
             amenities        : amenities,
-            images           : Some(vec!()),
+            images           : images,
             logos            : Some(vec!()),
         }
     }

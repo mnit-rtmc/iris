@@ -2721,12 +2721,13 @@ CREATE VIEW parking_area_view AS
 	       p1.camera AS camera_1, p2.camera AS camera_2,
 	       p3.camera AS camera_3,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.lat, l.lon
+	       l.lat, l.lon, sa.value AS camera_image_base_url
 	FROM iris.parking_area pa
 	LEFT JOIN iris.camera_preset p1 ON preset_1 = p1.name
 	LEFT JOIN iris.camera_preset p2 ON preset_2 = p2.name
 	LEFT JOIN iris.camera_preset p3 ON preset_3 = p3.name
-	LEFT JOIN geo_loc_view l ON pa.geo_loc = l.name;
+	LEFT JOIN geo_loc_view l ON pa.geo_loc = l.name
+	LEFT JOIN iris.system_attribute sa ON sa.name = 'camera_image_base_url';
 GRANT SELECT ON parking_area_view TO PUBLIC;
 
 CREATE VIEW lane_type_view AS
