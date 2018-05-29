@@ -23,16 +23,16 @@ extern crate users;
 
 mod iris_req;
 
-use actix_web::{HttpServer, Application, Method};
+use actix_web::{http::Method, server, App};
 use users::get_current_username;
 
 fn main() {
     let username = get_current_username().expect("User name lookup error");
     // Format path for unix domain socket
     let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
-    HttpServer::new(move || {
+    server::new(move || {
         let uds = uds.clone();
-        Application::new().resource("/iris/{v}", move |r| {
+        App::new().resource("/iris/{v}", move |r| {
             r.method(Method::GET).h(iris_req::Handler::new(uds))
         })
     }).bind("127.0.0.1:8088").expect("Can not bind to 127.0.0.1:8088")

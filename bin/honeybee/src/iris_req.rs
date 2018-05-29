@@ -336,7 +336,7 @@ impl<S> actix_web::dev::Handler<S> for Handler {
             Some("TPIMS_static")  => self.get_json::<ParkingAreaStatic>(),
             Some("TPIMS_dynamic") => self.get_json::<ParkingAreaDynamic>(),
             _                     => HttpResponse::NotFound()
-                                                  .body("Not found").unwrap(),
+                                                  .body("Not found"),
         }
     }
 }
@@ -351,9 +351,9 @@ impl Handler {
         match self.query_json::<T>() {
             Ok(body) => HttpResponse::Ok()
                                      .content_type("application/json")
-                                     .body(body).unwrap(),
+                                     .body(body),
             Err(_)   => HttpResponse::InternalServerError()
-                                     .body("Database error").unwrap(),
+                                     .body("Database error"),
         }
     }
     fn query_json<T>(&self) -> Result<String, Error>
