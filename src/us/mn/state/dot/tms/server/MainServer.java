@@ -31,7 +31,6 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.server.Server;
 import us.mn.state.dot.tms.BaseHelper;
 import us.mn.state.dot.tms.Station;
-import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.BaseEvent;

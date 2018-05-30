@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.RasterBuilder;
-import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.client.Session;
