@@ -15,9 +15,9 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.ArrayList;
+import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.EventType;
 import static us.mn.state.dot.tms.EventType.TT_LINK_TOO_LONG;
-import static us.mn.state.dot.tms.EventType.TT_NO_DATA;
 import static us.mn.state.dot.tms.EventType.TT_NO_DESTINATION_DATA;
 import static us.mn.state.dot.tms.EventType.TT_NO_ORIGIN_DATA;
 import us.mn.state.dot.tms.units.Distance;
@@ -123,8 +123,8 @@ public class RouteLegTimer {
 					float a = s.getSmoothedAverageSpeed();
 					float l = s.getSmoothedLowSpeed();
 					if (a > 0 && l > 0) {
-						s_data.add(new StationData(s, m,
-						           a, l));
+						s_data.add(new StationData(m, a,
+						                           l));
 					}
 				}
 				return false;
@@ -134,30 +134,33 @@ public class RouteLegTimer {
 		return s_data;
 	}
 
+
 	/** Add station data for beginning / end of leg */
 	private void extendStationData(ArrayList<StationData> s_data)
 		throws BadRouteException
 	{
-		if (s_data.size() > 0) {
-			StationData sd = s_data.get(0);
-			if (sd.mile > leg.o_mi) {
-				float mm = sd.mile - MAX_LINK_LENGTH;
-				if (mm > leg.o_mi)
-					throwException(TT_NO_ORIGIN_DATA);
-				// Insert at beginning of list
-				s_data.add(0, new StationData(sd.station, mm,
-				           sd.avg, sd.low));
-			}
-			sd = s_data.get(s_data.size() - 1);
-			if (sd.mile < leg.d_mi) {
-				float mm = sd.mile + MAX_LINK_LENGTH;
-				if (mm < leg.d_mi)
-					throwException(TT_NO_DESTINATION_DATA);
-				s_data.add(new StationData(sd.station, mm,
-				           sd.avg, sd.low));
-			}
-		} else
-			throwException(TT_NO_DATA);
+		if (s_data.isEmpty()) {
+			// If leg has no data, use minimum travel time speed at
+			// the midpoint.  This allows short legs to be used (CD
+			// roads with no detection, for example).
+			float m = leg.getMidPoint();
+			int mph = SystemAttrEnum.TRAVEL_TIME_MIN_MPH.getInt();
+			s_data.add(new StationData(m, mph, mph));
+		}
+		StationData sd = s_data.get(0);
+		if (sd.mile > leg.o_mi) {
+			sd = sd.linkBefore();
+			if (sd.mile > leg.o_mi)
+				throwException(TT_NO_ORIGIN_DATA);
+			s_data.add(0, sd);
+		}
+		sd = s_data.get(s_data.size() - 1);
+		if (sd.mile < leg.d_mi) {
+			sd = sd.linkAfter();
+			if (sd.mile < leg.d_mi)
+				throwException(TT_NO_DESTINATION_DATA);
+			s_data.add(sd);
+		}
 	}
 
 	/** Throw a BadRouteException with the specified message */
@@ -174,15 +177,19 @@ public class RouteLegTimer {
 
 	/** Station data */
 	private class StationData {
-		private final StationImpl station;
 		private final float mile;
 		private final float avg;
 		private final float low;
-		private StationData(StationImpl s, float m, float a, float l) {
-			station = s;
+		private StationData(float m, float a, float l) {
 			mile = m;
 			avg = a;
 			low = l;
+		}
+		private StationData linkBefore() {
+			return new StationData(mile - MAX_LINK_LENGTH, avg, low);
+		}
+		private StationData linkAfter() {
+			return new StationData(mile + MAX_LINK_LENGTH, avg, low);
 		}
 		private float timeFrom(StationData pd) {
 			assert mile > pd.mile;

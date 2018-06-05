@@ -109,6 +109,11 @@ public class RouteLeg {
 		return od_pair.hasTurn();
 	}
 
+	/** Get the middle mile point of the route leg */
+	public float getMidPoint() {
+		return (valid) ? o_mi + (0.5f * (d_mi - o_mi)) : 0;
+	}
+
 	/** Lookup samplers on a corridor trip */
 	public ArrayList<VehicleSampler> lookupSamplers(final LaneType lt) {
 		final ArrayList<VehicleSampler> samplers =
