@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.util.Collection;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.ArrayList;
 import us.mn.state.dot.tms.EventType;
 import static us.mn.state.dot.tms.EventType.TT_LINK_TOO_LONG;
 import static us.mn.state.dot.tms.EventType.TT_NO_DATA;
@@ -113,53 +111,53 @@ public class RouteLegTimer {
 	}
 
 	/** Lookup station data for the route leg */
-	private Collection<StationData> lookupStationData()
+	private ArrayList<StationData> lookupStationData()
 		throws BadRouteException
 	{
-		final TreeMap<Float, StationData> s_data =
-			new TreeMap<Float, StationData>();
+		final ArrayList<StationData> s_data =
+			new ArrayList<StationData>();
+		// NOTE: stations are checked in mile point order
 		leg.corridor.findStation(new Corridor.StationFinder() {
 			public boolean check(float m, StationImpl s) {
 				if (isWithinTrip(m)) {
 					float a = s.getSmoothedAverageSpeed();
 					float l = s.getSmoothedLowSpeed();
 					if (a > 0 && l > 0) {
-						s_data.put(m, new StationData(s,
-						           m, a, l));
+						s_data.add(new StationData(s, m,
+						           a, l));
 					}
 				}
 				return false;
 			}
 		});
-		return extendStationData(s_data);
+		extendStationData(s_data);
+		return s_data;
 	}
 
 	/** Add station data for beginning / end of leg */
-	private Collection<StationData> extendStationData(
-		TreeMap<Float, StationData> s_data) throws BadRouteException
+	private void extendStationData(ArrayList<StationData> s_data)
+		throws BadRouteException
 	{
 		if (s_data.size() > 0) {
-			Map.Entry<Float, StationData> me = s_data.firstEntry();
-			if (me.getKey() > leg.o_mi) {
-				StationData sd = me.getValue();
+			StationData sd = s_data.get(0);
+			if (sd.mile > leg.o_mi) {
 				float mm = sd.mile - MAX_LINK_LENGTH;
 				if (mm > leg.o_mi)
 					throwException(TT_NO_ORIGIN_DATA);
-				s_data.put(mm, new StationData(sd.station, mm,
+				// Insert at beginning of list
+				s_data.add(0, new StationData(sd.station, mm,
 				           sd.avg, sd.low));
 			}
-			me = s_data.lastEntry();
-			if (me.getKey() < leg.d_mi) {
-				StationData sd = me.getValue();
+			sd = s_data.get(s_data.size() - 1);
+			if (sd.mile < leg.d_mi) {
 				float mm = sd.mile + MAX_LINK_LENGTH;
 				if (mm < leg.d_mi)
 					throwException(TT_NO_DESTINATION_DATA);
-				s_data.put(mm, new StationData(sd.station, mm,
+				s_data.add(new StationData(sd.station, mm,
 				           sd.avg, sd.low));
 			}
 		} else
 			throwException(TT_NO_DATA);
-		return s_data.values();
 	}
 
 	/** Throw a BadRouteException with the specified message */
