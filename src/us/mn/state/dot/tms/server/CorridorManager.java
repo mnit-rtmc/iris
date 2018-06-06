@@ -57,7 +57,7 @@ public class CorridorManager {
 	}
 
 	/** Map to hold all corridors */
-	protected final Map<String, Corridor> corridors =
+	private final Map<String, Corridor> corridors =
 		new TreeMap<String, Corridor>();
 
 	/** Create all corridors from the existing r_nodes */

@@ -199,7 +199,8 @@ public class GpsImpl extends DeviceImpl implements Gps {
 				geoloc_dev.setLatNotify(dNewLat);
 				geoloc_dev.setLonNotify(dNewLon);
 				geoloc_dev.doCalculateGIS();
-			} catch (TMSException ex) {
+			}
+			catch (TMSException ex) {
 				GPS_LOG.log("Error updating geoloc record: "+ex);
 			}
 		}

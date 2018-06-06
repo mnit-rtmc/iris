@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2017  Minnesota Department of Transportation
+ * Copyright (C) 2005-2018  Minnesota Department of Transportation
  * Copyright (C) 2014       AHMCT, University of California
  * Copyright (C) 2016-2017  SRF Consulting Group
  *
@@ -21,18 +21,14 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.ChangeVetoException;
-import us.mn.state.dot.tms.CorridorBase;
-import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.LocModifier;
 import us.mn.state.dot.tms.R_Node;
-import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.Road;
-import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.TransGeoLoc;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 
@@ -281,6 +277,12 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		}
 	}
 
+	/** Set the cross street direction and notify clients of the change */
+	private void setCrossDirNotify(short d) throws TMSException {
+		doSetCrossDir(d);
+		notifyAttribute("crossDir");
+	}
+
 	/** Get the cross street direction */
 	@Override
 	public short getCrossDir() {
@@ -303,6 +305,12 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 			store.update(this, "cross_mod", m);
 			setCrossMod(m);
 		}
+	}
+
+	/** Set the cross-street modifier and notify clients of the change */
+	private void setCrossModNotify(short m) throws TMSException {
+		doSetCrossMod(m);
+		notifyAttribute("crossMod");
 	}
 
 	/** Get the cross street modifier */
@@ -400,121 +408,35 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 		return landmark;
 	}
 
-	//-----------------------------------------------------------------------
-	// Following code uses lat/long to calculate GIS roadway/milepost/etc. info
-	// (Sections of this code were borrowed from R_NodeManager.java)
-	//-----------------------------------------------------------------------
-
-	/** Get the corridor containing the ramp meter */
-	private Corridor getCorridor(GeoLoc geo_loc) {
-		String cid = GeoLocHelper.getCorridorName(geo_loc);
-		return corridors.getCorridor(cid);
+	/** Calculate nearest roadway, direction, cross-street,
+	 * and landmark for current lat/lon location. */
+	public void doCalculateGIS() throws TMSException {
+		GeoLoc loc = findNearest();
+		if (null == loc)
+			throw new TMSException("Failed to snap location");
+		setRoadwayNotify(loc.getRoadway());
+		setRoadDirNotify(loc.getRoadDir());
+		setCrossStreetNotify(loc.getCrossStreet());
+		setCrossDirNotify(loc.getCrossDir());
+		setCrossModNotify(loc.getCrossMod());
+		setLandmarkNotify(loc.getLandmark());
 	}
 
-	/** Create a GeoLoc snapped to nearest corridor */
-	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private GeoLoc createGeoLoc(SphericalMercatorPosition smp)
-	{
-		final int roadclass_CD = RoadClass.CD_ROAD.ordinal();
-		GeoLoc loc = null;
-		double distance = Double.POSITIVE_INFINITY;
-		for (CorridorBase c: corridors.corridors.values()) {
-			if (c.getRoadway().getRClass() == roadclass_CD)
-				continue;
-			TransGeoLoc l = createGeoLoc(c, smp);
-			if ((l != null) && (l.getDistance() < distance)) {
-				loc = l;
-				distance = l.getDistance();
-			}
-		}
-		return loc;
+	/** Find the nearest geo location to current lat/lon. */
+	private GeoLoc findNearest() {
+		SphericalMercatorPosition smp = getPosition(lat, lon);
+		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE);
+		return (loc != null) ? findNearest(loc) : null;
 	}
 
-	/** Create the nearest GeoLoc for the given corridor.
-	 * @param c Corridor to search.
-	 * @param smp Selected point (spherical mercator position).
-	 * @return ClientGeoLoc snapped to corridor, or null if not found. */
-	private TransGeoLoc createGeoLoc(CorridorBase<R_Node> c,
-		SphericalMercatorPosition smp)
-	{
-		R_Node n0 = null;
-		R_Node n1 = null;
-		R_Node n_prev = null;
-		double n_meters = Double.POSITIVE_INFINITY;
-		for (R_Node n: c) {
-			if (R_NodeHelper.isContinuityBreak(n)) {
-				n_prev = null;
-				continue;
-			}
-			if (n_prev != null) {
-				double m = calcDistance(n_prev, n, smp);
-				if (m < n_meters) {
-					n0 = n_prev;
-					n1 = n;
-					n_meters = m;
-				}
-			}
-			n_prev = n;
-		}
-		if (n0 != null)
-			return createGeoLoc(n0, n1, smp, n_meters);
-		else
-			return null;
-	}
-
-	/** Calculate the distance from a point to the given line segment.
-	 * @param n0 First r_node
-	 * @param n1 Second (adjacent) r_node.
-	 * @param smp Selected point (spherical mercator position).
-	 * @return Distance (spherical mercator "meters") from segment to
-	 *         selected point. */
-	private double calcDistance(R_Node n0, R_Node n1,
-		SphericalMercatorPosition smp)
-	{
-		GeoLoc l0 = n0.getGeoLoc();
-		GeoLoc l1 = n1.getGeoLoc();
-		return GeoLocHelper.segmentDistance(l0, l1, smp);
-	}
-
-	/** Create a GeoLoc projected onto the line between two nodes.
-	 * @param n0 First node.
-	 * @param n1 Second (adjacent) node.
-	 * @param smp Selected point (spherical mercator position).
-	 * @param d Distance (meters).
-	 * @return ClientGeoLoc snapped to corridor, or null if not found. */
-	private TransGeoLoc createGeoLoc(R_Node n0, R_Node n1,
-		SphericalMercatorPosition smp, double dist)
-	{
-		GeoLoc l0 = n0.getGeoLoc();
-		GeoLoc l1 = n1.getGeoLoc();
-		GeoLoc pos = GeoLocHelper.snapSegment(l0, l1, smp);
-		if (pos != null) {
-			return new TransGeoLoc(l0.getRoadway(), l0.getRoadDir(),
-			                       pos.getLat().floatValue(),
-			                       pos.getLon().floatValue(), dist);
+	/** Find the nearest geo location to the given location. */
+	private GeoLoc findNearest(GeoLoc loc) {
+		String cid = GeoLocHelper.getCorridorName(loc);
+		Corridor cb = corridors.getCorridor(cid);
+		if (cb != null) {
+			R_Node rn = cb.findNearest(loc);
+			return (rn != null) ? rn.getGeoLoc() : null;
 		} else
 			return null;
-	}
-
-	/** Calculate nearest roadway, direction, cross-street,
-	 *  and landmark for current lat/lon location. */
-	public void doCalculateGIS() {
-		// Assign device to nearest roadway and direction
-		// Populate milepost and cross street if available on nearest r-node
-		SphericalMercatorPosition smp = getPosition(lat, lon);
-		GeoLoc loc = createGeoLoc(smp);
-		Corridor cb = getCorridor(loc);
-		R_Node rn = cb.findNearest(loc);
-		GeoLoc rn_geo_loc = rn.getGeoLoc();
-		// Use one try/catch frame on the assumption that whatever
-		// effects one of them will probably effect all of them...
-		try {
-			setRoadwayNotify(loc.getRoadway());
-			setRoadDirNotify(loc.getRoadDir());
-			setCrossStreetNotify(rn_geo_loc.getCrossStreet());
-			setLandmarkNotify(rn_geo_loc.getLandmark());
-		} catch (TMSException e) {
-			e.printStackTrace();
-		}
 	}
 }
