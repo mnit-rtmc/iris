@@ -240,11 +240,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		return node_type == R_NodeType.EXIT;
 	}
 
-	/** Check if the r_node is an access node */
-	public boolean isAccess() {
-		return node_type == R_NodeType.ACCESS;
-	}
-
 	/** Test if this r_node type can be linked in a corridor */
 	public boolean isCorridorType() {
 		switch (node_type) {

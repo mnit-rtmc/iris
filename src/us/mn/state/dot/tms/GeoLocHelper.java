@@ -350,19 +350,6 @@ public class GeoLocHelper extends BaseHelper {
 			isSwapped(l0, l1);
 	}
 
-	/** Test if an access node matches a ramp location */
-	static public boolean accessMatches(GeoLoc l0, GeoLoc l1) {
-		Road r0 = l0.getRoadway();
-		Road x0 = l0.getCrossStreet();
-		Road r1 = l1.getRoadway();
-		Road x1 = l1.getCrossStreet();
-		if (r0 == null || x0 == null || r1 == null || x1 == null)
-			return false;
-		return (l0.getCrossMod() == l1.getCrossMod()) &&
-			matchRootName(r0.getName(), r1.getName()) &&
-			matchRootName(x0.getName(), x1.getName());
-	}
-
 	/** Return GeoLoc as a Position in WGS84 */
 	static public Position getWgs84Position(GeoLoc p) {
 		Double lat = getLat(p);

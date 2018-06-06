@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -80,10 +80,8 @@ public class CorridorManager {
 	/** Find downstream links (not in corridor) for the given node */
 	private void findDownstreamLinks(R_NodeImpl r_node) {
 		r_node.clearDownstream();
-		if(r_node.isExit())
+		if (r_node.isExit())
 			linkExitToEntrance(r_node);
-		else if(r_node.isAccess())
-			linkAccessToEntrance(r_node);
 		// FIXME: link intersections together
 	}
 
@@ -115,16 +113,6 @@ public class CorridorManager {
 			}
 		}
 		return nearest;
-	}
-
-	/** Link an access node with all corresponding entrance nodes */
-	private void linkAccessToEntrance(R_NodeImpl r_node) {
-		Iterator<R_Node> it = R_NodeHelper.iterator();
-		while(it.hasNext()) {
-			R_Node n = it.next();
-			if(R_NodeHelper.isAccessLink(r_node, n))
-				r_node.addDownstream((R_NodeImpl)n);
-		}
 	}
 
 	/** Lookup the named corridor */

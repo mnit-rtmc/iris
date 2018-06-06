@@ -54,27 +54,12 @@ public class R_NodeHelper extends BaseHelper {
 		return n.getNodeType() == R_NodeType.INTERSECTION.ordinal();
 	}
 
-	/** Check if an r_node is an access node */
-	static public boolean isAccess(R_Node n) {
-		return n.getNodeType() == R_NodeType.ACCESS.ordinal();
-	}
-
-	/** Test if an access node links with an entrance node.
-	 * @param ac Access node.
-	 * @param n Node to check.
-	 * @return true If nodes should link. */
-	static public boolean isAccessLink(R_Node ac, R_Node n) {
-		return isEntrance(n) &&
-		       GeoLocHelper.accessMatches(ac.getGeoLoc(),n.getGeoLoc());
-	}
-
 	/** Test if an exit node links with another node.
 	 * @param ex Exit node.
 	 * @param n Node to check.
 	 * @return true If nodes should link. */
 	static public boolean isExitLink(R_Node ex, R_Node n) {
-		return isMatchingEntrance(ex, n)
-		    || isMatchingAccess(ex, n);
+		return isMatchingEntrance(ex, n);
 	}
 
 	/** Test if an exit node links with a matching entrance node.
@@ -84,15 +69,6 @@ public class R_NodeHelper extends BaseHelper {
 	static private boolean isMatchingEntrance(R_Node ex, R_Node n) {
 		return isEntrance(n) &&
 		       GeoLocHelper.rampMatches(ex.getGeoLoc(), n.getGeoLoc());
-	}
-
-	/** Test if an exit node links with a matching access node.
-	 * @param ex Exit node.
-	 * @param n Possible access node.
-	 * @return true If nodes should link. */
-	static private boolean isMatchingAccess(R_Node ex, R_Node n) {
-		return isAccess(n) &&
-		       GeoLocHelper.accessMatches(ex.getGeoLoc(),n.getGeoLoc());
 	}
 
 	/** Check if an r_node links to a CD road */
@@ -125,7 +101,7 @@ public class R_NodeHelper extends BaseHelper {
 
 	/** Check if a given node is a continuity break */
 	static public boolean isContinuityBreak(R_Node n) {
-		return isAccess(n) || isCommon(n);
+		return isCommon(n);
 	}
 
 	/** Check if a node should be joined with a segment */
