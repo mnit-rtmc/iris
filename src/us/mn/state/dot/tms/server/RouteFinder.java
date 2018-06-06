@@ -74,7 +74,8 @@ public class RouteFinder {
 	 * @return Completed route, or null if none found. */
 	private Route findRoute(GeoLoc orig, Route r) {
 		ODPair od = new ODPair(orig, r.getDestination(), false);
-		Corridor c = corridors.getCorridor(od);
+		String cn = od.getCorridorName();
+		Corridor c = corridors.getCorridor(cn);
 		if (c != null) {
 			Route re = r.createExtended(c, od);
 			if (re != null)

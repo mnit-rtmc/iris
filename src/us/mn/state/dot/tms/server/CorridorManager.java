@@ -40,6 +40,22 @@ public class CorridorManager {
 	/** Maximum distance to snap */
 	static private final Distance MAX_DIST = new Distance(1, MILES);
 
+	/** Find the nearest r_node in a list */
+	static private R_NodeImpl findNearest(R_NodeImpl r_node,
+		List<R_NodeImpl> others)
+	{
+		R_NodeImpl nearest = null;
+		Distance d = new Distance(0);
+		for (R_NodeImpl other: others) {
+			Distance m = Corridor.nodeDistance(r_node, other);
+			if (m != null && (nearest == null || m.m() < d.m())) {
+				nearest = other;
+				d = m;
+			}
+		}
+		return nearest;
+	}
+
 	/** Map to hold all corridors */
 	protected final Map<String, Corridor> corridors =
 		new TreeMap<String, Corridor>();
@@ -89,56 +105,32 @@ public class CorridorManager {
 	private void linkExitToEntrance(R_NodeImpl r_node) {
 		LinkedList<R_NodeImpl> links = new LinkedList<R_NodeImpl>();
 		Iterator<R_Node> it = R_NodeHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			R_Node other = it.next();
-			if(R_NodeHelper.isExitLink(r_node, other))
-				links.add((R_NodeImpl)other);
+			if (R_NodeHelper.isExitLink(r_node, other))
+				links.add((R_NodeImpl) other);
 		}
 		R_NodeImpl link = findNearest(r_node, links);
-		if(link != null)
+		if (link != null)
 			r_node.addDownstream(link);
-	}
-
-	/** Find the nearest r_node in a list */
-	static protected R_NodeImpl findNearest(R_NodeImpl r_node,
-		List<R_NodeImpl> others)
-	{
-		R_NodeImpl nearest = null;
-		Distance d = new Distance(0);
-		for(R_NodeImpl other: others) {
-			Distance m = Corridor.nodeDistance(r_node, other);
-			if(m != null && (nearest == null || m.m() < d.m())) {
-				nearest = other;
-				d = m;
-			}
-		}
-		return nearest;
 	}
 
 	/** Lookup the named corridor */
 	public synchronized Corridor getCorridor(String c) {
-		if(c != null)
-			return corridors.get(c);
-		else
-			return null;
-	}
-
-	/** Lookup the corridor for an O/D pair */
-	protected Corridor getCorridor(ODPair od) {
-		return getCorridor(od.getCorridorName());
+		return (c != null) ? corridors.get(c) : null;
 	}
 
 	/** Write the body of the r_node configuration XML file */
 	public synchronized void writeXmlBody(Writer w,
 		Map<String, RampMeterImpl> m_nodes) throws IOException
 	{
-		for(Corridor c: corridors.values())
+		for (Corridor c: corridors.values())
 			c.writeXml(w, m_nodes);
 	}
 
 	/** Find the current bottlenecks for all corridors */
 	public synchronized void findBottlenecks() {
-		for(Corridor c: corridors.values())
+		for (Corridor c: corridors.values())
 			c.findBottlenecks();
 	}
 
