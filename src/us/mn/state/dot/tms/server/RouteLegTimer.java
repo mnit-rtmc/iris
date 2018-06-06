@@ -20,7 +20,6 @@ import us.mn.state.dot.tms.EventType;
 import static us.mn.state.dot.tms.EventType.TT_LINK_TOO_LONG;
 import static us.mn.state.dot.tms.EventType.TT_NO_DESTINATION_DATA;
 import static us.mn.state.dot.tms.EventType.TT_NO_ORIGIN_DATA;
-import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.units.Interval;
 
 /**
@@ -99,10 +98,8 @@ public class RouteLegTimer {
 		StationData pd = null;	// previous station data
 		for (StationData sd: lookupStationData()) {
 			if (pd != null) {
-				if (isSegmentTooLong(pd.mile, sd.mile)) {
-					float llen = sd.mile - pd.mile;
+				if (isSegmentTooLong(pd.mile, sd.mile))
 					throwException(TT_LINK_TOO_LONG);
-				}
 				hours += sd.timeFrom(pd);
 			}
 			pd = sd;
@@ -133,7 +130,6 @@ public class RouteLegTimer {
 		extendStationData(s_data);
 		return s_data;
 	}
-
 
 	/** Add station data for beginning / end of leg */
 	private void extendStationData(ArrayList<StationData> s_data)
