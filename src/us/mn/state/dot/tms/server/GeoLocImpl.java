@@ -42,19 +42,6 @@ import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
  */
 public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 
-	/** Given a device name, lookup the associated GeoLocImpl (if there is
-	 * one).
-	 *
-	 * @param devname - Name of device
-	 * @return Returns the associated GeoLocImpl or null.
-	 */
-	static public GeoLocImpl lookupGeoLocImplForDevice(String devname) {
-		GeoLoc proxy = GeoLocHelper.lookup(devname);
-		if ((proxy != null) && (proxy instanceof GeoLocImpl))
-			return (GeoLocImpl) proxy;
-		return null;
-	}
-
 	/** Create a spherical mercator position */
 	static private SphericalMercatorPosition getPosition(double latitude,
 		double longitude)

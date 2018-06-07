@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-
 package us.mn.state.dot.tms.server.comm.gps;
 
 import java.io.IOException;
@@ -103,8 +103,7 @@ abstract public class OpQueryGpsLocation extends OpGps {
 		// special case - skip olympic filtering
 		if ((len == 1) && (haveSamples == 1)) {
 			s1 = samples[0];
-			GpsImpl.saveDeviceLocation(gps.getDeviceName(),
-				s1.lat, s1.lon, bForce);
+			gps.saveDeviceLocation(s1.lat, s1.lon, bForce);
 			return;
 		}
 
@@ -119,9 +118,9 @@ abstract public class OpQueryGpsLocation extends OpGps {
 		super(PriorityLevel.DEVICE_DATA, g, gprop);
 		bForce = force;
 		if (gps != null) {
-			gps.doSetPollDatetime(TimeSteward.currentTimeMillis());
-			gps.doSetErrorStatus("");
-			gps.doSetCommStatus("Polling");
+			gps.setPollDatetimeNotify(TimeSteward.currentTimeMillis());
+			gps.setErrorStatusNotify("");
+			gps.setCommStatusNotify("Polling");
 		}
 		initSampleArray(1, 1);
 	}
@@ -149,7 +148,7 @@ abstract public class OpQueryGpsLocation extends OpGps {
 
 			if (!prop.gotGpsLock()) {
 				if (gps != null)
-					gps.doSetErrorStatus("No GPS Lock");
+					gps.setErrorStatusNotify("No GPS Lock");
 				return null;
 			}
 			
@@ -173,8 +172,8 @@ abstract public class OpQueryGpsLocation extends OpGps {
 	public void setErrorStatus(String s) {
 		assert s != null;
 		if (gps != null) {
-			gps.doSetCommStatus("");
-			gps.doSetErrorStatus(s);
+			gps.setCommStatusNotify("");
+			gps.setErrorStatusNotify(s);
 		}
 		super.setErrorStatus(s);
 	}

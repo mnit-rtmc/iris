@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -42,38 +43,20 @@ public interface Gps extends Device {
 	/** Get the primary device class */
 	String getDeviceClass();
 
-	/** Set the last cycle-polled date & time */
-	void setPollDatetime(Long xPollDatetime);
-
 	/** Get the last cycle-polled date & time */
 	Long getPollDatetime();
-
-	/** Set the last successful poll date & time */
-	void setSampleDatetime(Long xSampleDatetime);
 
 	/** Get the last successful poll date & time */
 	Long getSampleDatetime();
 
-	/** Set the most recent latitude */
-	void setSampleLat(double asample_lat);
-
 	/** Get the most recent latitude */
 	double getSampleLat();
-
-	/** Set the most recent longitude */
-	void setSampleLon(double asample_lon);
 
 	/** Get the most recent longitude */
 	double getSampleLon();
 
-	/** Set the comm status */
-	void setCommStatus(String acomm_status);
-
 	/** Get the comm status */
 	String getCommStatus();
-
-	/** Set the error status */
-	void setErrorStatus(String aerror_status);
 
 	/** Get the error status */
 	String getErrorStatus();
