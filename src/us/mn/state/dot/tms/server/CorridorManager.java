@@ -17,8 +17,6 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import us.mn.state.dot.tms.GeoLoc;
@@ -40,22 +38,6 @@ public class CorridorManager {
 	/** Maximum distance to snap */
 	static private final Distance MAX_DIST = new Distance(1, MILES);
 
-	/** Find the nearest r_node in a list */
-	static private R_NodeImpl findNearest(R_NodeImpl r_node,
-		List<R_NodeImpl> others)
-	{
-		R_NodeImpl nearest = null;
-		Distance d = new Distance(0);
-		for (R_NodeImpl other: others) {
-			Distance m = Corridor.nodeDistance(r_node, other);
-			if (m != null && (nearest == null || m.m() < d.m())) {
-				nearest = other;
-				d = m;
-			}
-		}
-		return nearest;
-	}
-
 	/** Map to hold all corridors */
 	private final Map<String, Corridor> corridors =
 		new TreeMap<String, Corridor>();
@@ -68,7 +50,7 @@ public class CorridorManager {
 			R_Node r_node = it.next();
 			if (r_node instanceof R_NodeImpl) {
 				R_NodeImpl n = (R_NodeImpl) r_node;
-				findDownstreamLinks(n);
+				n.updateFork();
 				addCorridorNode(n);
 			}
 		}
@@ -91,28 +73,6 @@ public class CorridorManager {
 			corridors.put(cid, c);
 		}
 		c.addNode(r_node);
-	}
-
-	/** Find downstream links (not in corridor) for the given node */
-	private void findDownstreamLinks(R_NodeImpl r_node) {
-		r_node.clearDownstream();
-		if (r_node.isExit())
-			linkExitToEntrance(r_node);
-		// FIXME: link intersections together
-	}
-
-	/** Link an exit node with a corresponding entrance node */
-	private void linkExitToEntrance(R_NodeImpl r_node) {
-		LinkedList<R_NodeImpl> links = new LinkedList<R_NodeImpl>();
-		Iterator<R_Node> it = R_NodeHelper.iterator();
-		while (it.hasNext()) {
-			R_Node other = it.next();
-			if (R_NodeHelper.isExitLink(r_node, other))
-				links.add((R_NodeImpl) other);
-		}
-		R_NodeImpl link = findNearest(r_node, links);
-		if (link != null)
-			r_node.addDownstream(link);
 	}
 
 	/** Lookup the named corridor */

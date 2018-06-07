@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,28 +38,6 @@ public class Corridor extends CorridorBase<R_NodeImpl> {
 	/** Create a new corridor */
 	public Corridor(GeoLoc loc) {
 		super(loc);
-	}
-
-	/** Arrange the nodes in the corridor */
-	@Override
-	public void arrangeNodes() {
-		super.arrangeNodes();
-		linkDownstream();
-	}
-
-	/** Link each node with the next downstream node in the corridor */
-	private void linkDownstream() {
-		Iterator<R_NodeImpl> down = iterator();
-		// Throw away first r_node in downstream iterator
-		if (down.hasNext())
-			down.next();
-		for (R_NodeImpl n: this) {
-			if (down.hasNext()) {
-				R_NodeImpl d = down.next();
-				if (n.hasDownstreamLink())
-					n.addDownstream(d);
-			}
-		}
 	}
 
 	/** Interface to find a node on the corridor */

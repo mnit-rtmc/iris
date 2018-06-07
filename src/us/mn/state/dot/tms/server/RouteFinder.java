@@ -104,7 +104,8 @@ public class RouteFinder {
 		Route rb = null;	// best route
 		for (R_NodeImpl rn: bf.branches.values()) {
 			GeoLoc cd = rn.getGeoLoc();
-			for (R_NodeImpl f: rn.getForks()) {
+			R_NodeImpl f = rn.getFork();
+			if (f != null) {
 				boolean turn = rn.hasTurnPenalty()
 				             && f.hasTurnPenalty();
 				ODPair od = new ODPair(orig, cd, turn);

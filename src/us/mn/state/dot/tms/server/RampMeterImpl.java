@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,6 +33,7 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import static us.mn.state.dot.tms.GeoLocHelper.isSameCorridor;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.MeterAction;
@@ -924,6 +925,30 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Get the entrance r_node on same corridor as ramp meter */
 	public R_NodeImpl getEntranceNode() {
 		R_NodeImpl n = getR_Node();
-		return (n != null) ? n.findEntrance(geo_loc) : null;
+		return (n != null) ? findEntrance(n) : null;
+	}
+
+	/** Find entrance r_node on same corridor as ramp meter */
+	private R_NodeImpl findEntrance(R_NodeImpl n) {
+		GeoLoc loc = n.getGeoLoc();
+		if (isSameCorridor(loc, geo_loc))
+			return n;
+		Corridor c = corridors.getCorridor(loc);
+		if (c != null)
+			return c.findActiveNode(new EntranceFinder());
+		else
+			return null;
+	}
+
+	/** Entrance finder */
+	private class EntranceFinder implements Corridor.NodeFinder {
+		public boolean check(float m, R_NodeImpl n) {
+			R_NodeImpl f = n.getFork();
+			if (f != null) {
+				GeoLoc loc = f.getGeoLoc();
+				return isSameCorridor(loc, geo_loc);
+			} else
+				return false;
+		}
 	}
 }

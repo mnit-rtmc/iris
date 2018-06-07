@@ -54,23 +54,6 @@ public class R_NodeHelper extends BaseHelper {
 		return n.getNodeType() == R_NodeType.INTERSECTION.ordinal();
 	}
 
-	/** Test if an exit node links with another node.
-	 * @param ex Exit node.
-	 * @param n Node to check.
-	 * @return true If nodes should link. */
-	static public boolean isExitLink(R_Node ex, R_Node n) {
-		return isMatchingEntrance(ex, n);
-	}
-
-	/** Test if an exit node links with a matching entrance node.
-	 * @param ex Exit node.
-	 * @param n Possible entrance node.
-	 * @return true If nodes should link. */
-	static private boolean isMatchingEntrance(R_Node ex, R_Node n) {
-		return isEntrance(n) &&
-		       GeoLocHelper.rampMatches(ex.getGeoLoc(), n.getGeoLoc());
-	}
-
 	/** Check if an r_node links to a CD road */
 	static public boolean isCD(R_Node n) {
 		return n.getTransition() == R_NodeTransition.CD.ordinal();

@@ -19,17 +19,16 @@ import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
 import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.NamespaceError;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import static us.mn.state.dot.tms.GeoLocHelper.isSameCorridor;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
+import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.R_NodeTransition;
 import us.mn.state.dot.tms.R_NodeType;
 import us.mn.state.dot.tms.SystemAttrEnum; 
@@ -37,6 +36,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
+import us.mn.state.dot.tms.units.Distance;
 
 /**
  * R_NodeImpl is an implementation of the R_Node interface. Each
@@ -177,6 +177,7 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 				e.printStackTrace();
 			}
 		}
+		fork = null;
 	}
 
 	/** Destroy an r_node */
@@ -230,27 +231,9 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		setNodeType(t);
 	}
 
-	/** Check if the r_node is an entrance */
-	public boolean isEntrance() {
-		return node_type == R_NodeType.ENTRANCE;
-	}
-
 	/** Check if the r_node is an exit */
 	public boolean isExit() {
 		return node_type == R_NodeType.EXIT;
-	}
-
-	/** Test if this r_node type can be linked in a corridor */
-	public boolean isCorridorType() {
-		switch (node_type) {
-		case STATION:
-		case ENTRANCE:
-		case EXIT:
-		case INTERSECTION:
-			return true;
-		default:
-			return false;
-		}
 	}
 
 	/** Check if the r_node is an available parking space.
@@ -343,11 +326,6 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	/** Check if this r_node is an exit to a common section */
 	public boolean isCommonExit() {
 		return isExit() && (transition == R_NodeTransition.COMMON);
-	}
-
-	/** Check if this r_node has a link to the downstream r_node */
-	public boolean hasDownstreamLink() {
-		return isCorridorType() && !isCommonExit();
 	}
 
 	/** Check if this r_node should impose a "turn" penalty */
@@ -626,64 +604,46 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		}
 	}
 
-	/** Downstream roadway nodes */
-	private transient final List<R_NodeImpl> downstream =
-		new LinkedList<R_NodeImpl>();
+	/** Fork node to branch to other corridor */
+	private transient R_NodeImpl fork;
 
-	/** Clear the downstream roadway nodes */
-	public void clearDownstream() {
-		synchronized (downstream) {
-			downstream.clear();
-		}
+	/** Update exit fork (branch to other corridor) */
+	public void updateFork() {
+		fork = isExit() ? findFork() : null;
 	}
 
-	/** Add a downstream roadway node */
-	public void addDownstream(R_NodeImpl d) {
-		synchronized (downstream) {
-			downstream.add(d);
-		}
-	}
-
-	/** Get a list of the downstream nodes */
-	private List<R_NodeImpl> getDownstream() {
-		synchronized (downstream) {
-			return new LinkedList<R_NodeImpl>(downstream);
-		}
-	}
-
-	/** Get a list of nodes forked from here */
-	public List<R_NodeImpl> getForks() {
-		LinkedList<R_NodeImpl> forks = new LinkedList<R_NodeImpl>();
-		for (R_NodeImpl d: getDownstream()) {
-			if (!isSameCorridor(geo_loc, d.geo_loc))
-				forks.add(d);
-		}
-		return forks;
-	}
-
-	/** Find an entrance to a corridor.  Scan downstream until we find an
-	 * entrance node on the specified corridor.
-	 * @param gl GeoLoc of corridor.
-	 * @return R_Node entrance to corridor (or null). */
-	public R_NodeImpl findEntrance(final GeoLoc gl) {
-		// FIXME: use Corridor iterator instead of relying on downstream
-		//        links.  Maybe we can get rid of downstream list?
-		if (isSameCorridor(gl, geo_loc))
-			return this;
-		R_NodeImpl n = this;
-		while (n != null) {
-			List<R_NodeImpl> d = n.getDownstream();
-			n = null;
-			for (R_NodeImpl dn: d) {
-				GeoLoc dgl = dn.getGeoLoc();
-				if (isSameCorridor(dgl, gl))
-					return dn;
-				// Only scan original corridor
-				if (isSameCorridor(dgl, geo_loc))
-					n = dn;
+	/** Find fork node (branch to other corridor) */
+	private R_NodeImpl findFork() {
+		R_NodeImpl nearest = null;
+		Distance d = new Distance(0);
+		Iterator<R_Node> it = R_NodeHelper.iterator();
+		while (it.hasNext()) {
+			R_Node n = it.next();
+			if (isExitLink(n)) {
+				Distance m = Corridor.nodeDistance(this, n);
+				if ((m != null) &&
+				    ((null == nearest) || m.m() < d.m()))
+				{
+					nearest = (R_NodeImpl) n;
+					d = m;
+				}
 			}
 		}
-		return null;
+		return nearest;
+	}
+
+	/** Test if an exit node links with a matching entrance node.
+	 * @param n Node to check.
+	 * @return true If nodes should link. */
+	private boolean isExitLink(R_Node n) {
+		return (n instanceof R_NodeImpl)
+		    && R_NodeHelper.isEntrance(n)
+		    && GeoLocHelper.rampMatches(geo_loc, n.getGeoLoc());
+	}
+
+	/** Get the fork node */
+	public R_NodeImpl getFork() {
+		return fork;
 	}
 
 	/** Get the linked corridor for an entrance or exit */
@@ -739,14 +699,9 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 		int slim = getSpeedLimit();
 		if (slim != getDefaultSpeedLimit())
 			w.write(" s_limit='" + slim + "'");
-		List<R_NodeImpl> forks = getForks();
-		if (forks.size() > 0) {
-			w.write(" forks='");
-			StringBuilder b = new StringBuilder();
-			for (R_NodeImpl f: forks)
-				b.append(f.getName() + " ");
-			w.write(b.toString().trim() + "'");
-		}
+		R_NodeImpl f = getFork();
+		if (f != null)
+			w.write(" forks='" + f.getName() + "'");
 		DetectorImpl[] dets = getDetectors();
 		if (dets.length > 0 || m_nodes.containsKey(name)) {
 			w.write(">\n");
