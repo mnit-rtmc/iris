@@ -232,17 +232,15 @@ public class GeoLocHelper extends BaseHelper {
 	static public String getCorridorName(Road r, short d) {
 		if (r == null)
 			return null;
-		String corridor = r.getName() + " " +
-			filterDirection(d, r).abbrev;
-		return corridor.trim();
+		String c = r.getName() + " " + filterDirection(d, r).abbrev;
+		return c.trim();
 	}
 
 	/** Get the roadway corridor */
 	static public String getCorridorName(GeoLoc l) {
-		if (l != null)
-			return getCorridorName(l.getRoadway(), l.getRoadDir());
-		else
-			return null;
+		return (l != null)
+		      ? getCorridorName(l.getRoadway(), l.getRoadDir())
+		      : null;
 	}
 
 	/** Get the linked roadway corridor */
