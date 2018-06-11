@@ -872,6 +872,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			updateStyles();
 		}
 		updateBeacon();
+		// If current msg is blank, check if a scheduled msg should be
+		// sent.  This is needed for comm links with long polling
+		// periods, otherwise the scheduled msg will not display until
+		// the next poll.  This really shouldn't be needed at all, but
+		// some DMS will randomly blank themselves for unknown reasons.
+		if (isMsgBlank())
+			updateSchedMsg();
 	}
 
 	/** Get the current messasge.
