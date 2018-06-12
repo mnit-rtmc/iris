@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.util.TreeMap;
+import java.util.ArrayList;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -102,7 +102,7 @@ public class RouteFinder {
 		BranchFinder bf = new BranchFinder(o_mi, r.getDestination(),rd);
 		c.findActiveNode(bf);
 		Route rb = null;	// best route
-		for (R_NodeImpl rn: bf.branches.values()) {
+		for (R_NodeImpl rn: bf.branches) {
 			GeoLoc dst_c = rn.getGeoLoc();
 			R_NodeImpl f = rn.getFork();
 			if (f != null) {
@@ -124,8 +124,8 @@ public class RouteFinder {
 		private final float o_mi;	// corridor origin milepoint
 		private final GeoLoc dest;	// destination
 		private final Distance rem;	// remaining distance
-		private final TreeMap<Distance, R_NodeImpl> branches =
-			new TreeMap<Distance, R_NodeImpl>();
+		private final ArrayList<R_NodeImpl> branches =
+			new ArrayList<R_NodeImpl>();
 		private BranchFinder(float o, GeoLoc dst, Distance rd) {
 			o_mi = o;
 			dest = dst;
@@ -149,7 +149,7 @@ public class RouteFinder {
 				Distance td = d.add(new Distance(m - o_mi,
 					MILES));
 				if (td.compareTo(rem) < 0)
-					branches.put(td, rn);
+					branches.add(rn);
 			}
 		}
 	}
