@@ -101,28 +101,39 @@ public class RouteFinder {
 		Distance rd = dist_max.sub(r.getDistance());
 		BranchFinder bf = new BranchFinder(o_mi, r.getDestination(),rd);
 		c.findActiveNode(bf);
-		Route rb = null;	// best route
-		for (R_NodeImpl rn: bf.branches) {
+		Route rb = null;
+		for (R_NodeImpl rn: bf.branches)
+			rb = bestRoute(branchRoute(r, c, orig, rn), rb);
+		return rb;
+	}
+
+	/** Find a complete branched route.
+	 * @param r Partial route.
+	 * @param c Corridor.
+	 * @param orig Corridor origin.
+	 * @param rn Corridor destination.
+	 * @return Completed route, or null if none found. */
+	private Route branchRoute(Route r, Corridor c, GeoLoc orig,
+		R_NodeImpl rn)
+	{
+		R_NodeImpl f = rn.getFork();
+		if (f != null) {
+			boolean turn = rn.hasTurnPenalty() && f.hasTurnPenalty();
 			GeoLoc dst_c = rn.getGeoLoc();
-			R_NodeImpl f = rn.getFork();
-			if (f != null) {
-				boolean turn = rn.hasTurnPenalty()
-				             && f.hasTurnPenalty();
-				ODPair od = new ODPair(orig, dst_c, turn);
-				Route re = r.createExtended(c, od);
-				if (re != null) {
-					GeoLoc o = f.getGeoLoc();
-					rb = bestRoute(rb, findRoute(o, re));
-				}
+			ODPair od = new ODPair(orig, dst_c, turn);
+			Route re = r.createExtended(c, od);
+			if (re != null) {
+				GeoLoc o = f.getGeoLoc();
+				return findRoute(o, re);
 			}
 		}
-		return rb;
+		return null;
 	}
 
 	/** Route branch finder */
 	static private class BranchFinder implements Corridor.NodeFinder {
 		private final float o_mi;	// corridor origin milepoint
-		private final GeoLoc dest;	// destination
+		private final GeoLoc dest;	// route destination
 		private final Distance rem;	// remaining distance
 		private final ArrayList<R_NodeImpl> branches =
 			new ArrayList<R_NodeImpl>();
@@ -141,7 +152,7 @@ public class RouteFinder {
 			return false;
 		}
 		private void checkExit(R_NodeImpl rn, float m) {
-			// distance from this exit to the destination
+			// distance from this exit to the route destination
 			Distance d = GeoLocHelper.distanceTo(rn.getGeoLoc(),
 				dest);
 			if (d != null) {
