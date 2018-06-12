@@ -76,8 +76,8 @@ public class CorridorManager {
 	}
 
 	/** Lookup the named corridor */
-	public synchronized Corridor getCorridor(String c) {
-		return (c != null) ? corridors.get(c) : null;
+	public synchronized Corridor getCorridor(String cid) {
+		return (cid != null) ? corridors.get(cid) : null;
 	}
 
 	/** Write the body of the r_node configuration XML file */
@@ -96,8 +96,8 @@ public class CorridorManager {
 
 	/** Lookup the corridor for a location */
 	public Corridor getCorridor(GeoLoc loc) {
-		String c = GeoLocHelper.getCorridorName(loc);
-		return (c != null) ? getCorridor(c) : null;
+		String cid = GeoLocHelper.getCorridorName(loc);
+		return (cid != null) ? getCorridor(cid) : null;
 	}
 
 	/** Create a GeoLoc snapped to nearest r_node segment.
