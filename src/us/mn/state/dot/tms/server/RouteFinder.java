@@ -103,12 +103,12 @@ public class RouteFinder {
 		c.findActiveNode(bf);
 		Route rb = null;	// best route
 		for (R_NodeImpl rn: bf.branches.values()) {
-			GeoLoc cd = rn.getGeoLoc();
+			GeoLoc dst_c = rn.getGeoLoc();
 			R_NodeImpl f = rn.getFork();
 			if (f != null) {
 				boolean turn = rn.hasTurnPenalty()
 				             && f.hasTurnPenalty();
-				ODPair od = new ODPair(orig, cd, turn);
+				ODPair od = new ODPair(orig, dst_c, turn);
 				Route re = r.createExtended(c, od);
 				if (re != null) {
 					GeoLoc o = f.getGeoLoc();
@@ -123,31 +123,32 @@ public class RouteFinder {
 	static private class BranchFinder implements Corridor.NodeFinder {
 		private final float o_mi;	// corridor origin milepoint
 		private final GeoLoc dest;	// destination
-		private final Distance r_dist;	// remaining distance
+		private final Distance rem;	// remaining distance
 		private final TreeMap<Distance, R_NodeImpl> branches =
 			new TreeMap<Distance, R_NodeImpl>();
 		private BranchFinder(float o, GeoLoc dst, Distance rd) {
 			o_mi = o;
 			dest = dst;
-			r_dist = rd;
+			rem = rd;
 		}
 		public boolean check(float m, R_NodeImpl rn) {
 			if (m > o_mi) {
 				if (rn.isExit())
-					checkExit(rn, m - o_mi);
+					checkExit(rn, m);
 				if (rn.isCommonExit())
 					return true;
 			}
 			return false;
 		}
-		private void checkExit(R_NodeImpl rn, float cd) {
+		private void checkExit(R_NodeImpl rn, float m) {
 			// distance from this exit to the destination
 			Distance d = GeoLocHelper.distanceTo(rn.getGeoLoc(),
 				dest);
 			if (d != null) {
 				// add distance from corridor origin to exit
-				Distance td = d.add(new Distance(cd, MILES));
-				if (td.compareTo(r_dist) < 0)
+				Distance td = d.add(new Distance(m - o_mi,
+					MILES));
+				if (td.compareTo(rem) < 0)
 					branches.put(td, rn);
 			}
 		}
