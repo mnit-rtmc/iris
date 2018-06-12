@@ -52,8 +52,8 @@ public class Route {
 	 * @param od O/D pair of leg.
 	 * @return Extended route with new leg. */
 	public Route createExtended(Corridor c, ODPair od) {
-		RouteLeg lg = new RouteLeg(c, od, leg);
-		return lg.isValid() ? new Route(dest, lg) : null;
+		RouteLeg lg = RouteLeg.create(c, od, leg);
+		return (lg != null) ? new Route(dest, lg) : null;
 	}
 
 	/** Get the destination */
