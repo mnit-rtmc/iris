@@ -73,11 +73,10 @@ public class RouteFinder {
 	 * @param r Partial route.
 	 * @return Completed route, or null if none found. */
 	private Route findRoute(GeoLoc orig, Route r) {
-		ODPair od = new ODPair(orig, r.getDestination(), false);
-		String cn = od.getCorridorName();
-		Corridor c = corridors.getCorridor(cn);
+		Corridor c = getCorridor(orig, r.getDestination());
 		if (c != null) {
-			Route re = r.createExtended(c, od);
+			Route re = r.createExtended(c, orig, r.getDestination(),
+				false);
 			if (re != null)
 				return re;
 		}
@@ -85,6 +84,16 @@ public class RouteFinder {
 			return findBranching(orig, r);
 		else
 			return null;
+	}
+
+	/** Get the corridor.
+	 * @param orig Origin location.
+	 * @param dest Destination location.
+	 * @return Corridor, or null if O/D on different corridors. */
+	private Corridor getCorridor(GeoLoc orig, GeoLoc dest) {
+		Corridor oc = corridors.getCorridor(orig);
+		Corridor dc = corridors.getCorridor(dest);
+		return (oc == dc) ? oc : null;
 	}
 
 	/** Find the best branching route to a destination.
@@ -120,8 +129,7 @@ public class RouteFinder {
 		if (f != null) {
 			boolean turn = rn.hasTurnPenalty() && f.hasTurnPenalty();
 			GeoLoc dst_c = rn.getGeoLoc();
-			ODPair od = new ODPair(orig, dst_c, turn);
-			Route re = r.createExtended(c, od);
+			Route re = r.createExtended(c, orig, dst_c, turn);
 			if (re != null) {
 				GeoLoc o = f.getGeoLoc();
 				return findRoute(o, re);

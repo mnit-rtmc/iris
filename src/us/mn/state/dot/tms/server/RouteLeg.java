@@ -15,6 +15,8 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.ArrayList;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.units.Distance;
 
@@ -30,13 +32,17 @@ public class RouteLeg {
 
 	/** Create a new route leg.
 	 * @param c Corridor.
-	 * @param od Origin-destination pair.
+	 * @param org Origin location.
+	 * @param dst Destination location.
+	 * @param t Turn penalty.
 	 * @param pr Previous leg. */
-	static public RouteLeg create(Corridor c, ODPair od, RouteLeg pr) {
-		Float o_mi = c.calculateMilePoint(od.getOrigin());
-		Float d_mi = c.calculateMilePoint(od.getDestination());
+	static public RouteLeg create(Corridor c, GeoLoc org, GeoLoc dst,
+		boolean t, RouteLeg pr)
+	{
+		Float o_mi = c.calculateMilePoint(org);
+		Float d_mi = c.calculateMilePoint(dst);
 		if (o_mi != null && d_mi != null) {
-			RouteLeg rl = new RouteLeg(c, od, o_mi, d_mi, pr);
+			RouteLeg rl = new RouteLeg(c, org, o_mi, dst,d_mi,t,pr);
 			return rl.isValid() ? rl : null;
 		} else
 			return null;
@@ -45,32 +51,42 @@ public class RouteLeg {
 	/** Corridor for route leg */
 	public final Corridor corridor;
 
-	/** O/D pair */
-	private final ODPair od_pair;
+	/** Location of leg origin */
+	private final GeoLoc orig;
+
+	/** Milepoint of leg origin */
+	public final float o_mi;
+
+	/** Location of leg destination */
+	private final GeoLoc dest;
+
+	/** Milepoint of leg destination */
+	public final float d_mi;
+
+	/** Turn penalty */
+	private final boolean turn;
 
 	/** Previous leg */
 	public final RouteLeg prev;
 
-	/** Leg origin milepoint */
-	public final float o_mi;
-
-	/** Leg destination milepoint */
-	public final float d_mi;
-
 	/** Create a new route leg.
 	 * @param c Corridor.
-	 * @param od Origin-destination pair.
+	 * @param org Origin location.
 	 * @param omi Origin milepoint.
+	 * @param dst Destination location.
 	 * @param dmi Destination milepoint.
+	 * @param t Turn penalty.
 	 * @param pr Previous leg. */
-	private RouteLeg(Corridor c, ODPair od, float omi, float dmi,
-		RouteLeg pr)
+	private RouteLeg(Corridor c, GeoLoc org, float omi, GeoLoc dst,
+		float dmi, boolean t, RouteLeg pr)
 	{
 		corridor = c;
-		od_pair = od;
-		prev = pr;
+		orig = org;
 		o_mi = omi;
+		dest = dst;
 		d_mi = dmi;
+		turn = t;
+		prev = pr;
 	}
 
 	/** Check if the route leg is valid */
@@ -80,7 +96,7 @@ public class RouteLeg {
 
 	/** Check if origin is within distance limit to corridor */
 	private boolean isOriginValid() {
-		Distance d = corridor.distanceTo(od_pair.getOrigin());
+		Distance d = corridor.distanceTo(orig);
 		return (d != null) && (d.m() < MAX_ORIGIN_M);
 	}
 
@@ -110,7 +126,7 @@ public class RouteLeg {
 
 	/** Check if the leg ends in a "turn" */
 	public boolean hasTurn() {
-		return od_pair.hasTurn();
+		return turn;
 	}
 
 	/** Get the middle mile point of the route leg */
@@ -149,13 +165,10 @@ public class RouteLeg {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("leg: ");
-		sb.append(od_pair);
-		sb.append(", o_mi: ");
-		sb.append(o_mi);
-		sb.append(", d_mi: ");
-		sb.append(d_mi);
-		return sb.toString();
+		return "leg orig: " + GeoLocHelper.getDescription(orig)
+		       + ", o_mi: " + o_mi
+		       + ", dest: " + GeoLocHelper.getDescription(dest)
+		       + ", d_mi: " + d_mi
+		       + ", turn: " + turn;
 	}
 }

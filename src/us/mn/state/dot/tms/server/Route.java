@@ -48,11 +48,15 @@ public class Route {
 	}
 
 	/** Create an extended route.
-	 * @param c Corridor of leg.
-	 * @param od O/D pair of leg.
-	 * @return Extended route with new leg. */
-	public Route createExtended(Corridor c, ODPair od) {
-		RouteLeg lg = RouteLeg.create(c, od, leg);
+	 * @param c Corridor of current leg.
+	 * @param org_c Origin on current leg.
+	 * @param dst_c Destination on current leg.
+	 * @param turn Turn penalty.
+	 * @return Extended route with new leg, or null on error. */
+	public Route createExtended(Corridor c, GeoLoc org_c, GeoLoc dst_c,
+		boolean turn)
+	{
+		RouteLeg lg = RouteLeg.create(c, org_c, dst_c, turn, leg);
 		return (lg != null) ? new Route(dest, lg) : null;
 	}
 

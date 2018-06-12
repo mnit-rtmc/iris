@@ -248,17 +248,6 @@ public class GeoLocHelper extends BaseHelper {
 		return getCorridorName(l.getCrossStreet(), l.getCrossDir());
 	}
 
-	/** Check if two locations are on the same corridor */
-	static public boolean isSameCorridor(GeoLoc l0, GeoLoc l1) {
-		Road r0 = l0.getRoadway();
-		Road r1 = l1.getRoadway();
-		if (r0 == null || r1 == null)
-			return false;
-		return (r0 == r1) &&
-		       (filterDirection(l0.getRoadDir(), r0) ==
-		        filterDirection(l1.getRoadDir(), r1));
-	}
-
 	/** Get the latitude of a GeoLoc */
 	static public Double getLat(GeoLoc l) {
 		return (l != null) ? l.getLat() : null;
