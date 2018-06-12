@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2016  Minnesota Department of Transportation
+ * Copyright (C) 2001-2018  Minnesota Department of Transportation
  * Copyright (C) 2011-2012  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -195,11 +195,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 	/** Lookup an algorithm for a corridor */
 	static private KAdaptiveAlgorithm lookupAlgorithm(Corridor c) {
-		KAdaptiveAlgorithm alg = ALL_ALGS.get(c.getID());
-		if (alg == null) {
+		KAdaptiveAlgorithm alg = ALL_ALGS.get(c.getName());
+		if (null == alg) {
 			alg = new KAdaptiveAlgorithm(c);
 			alg.log("adding");
-			ALL_ALGS.put(c.getID(), alg);
+			ALL_ALGS.put(c.getName(), alg);
 		}
 		return alg;
 	}

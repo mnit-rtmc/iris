@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -82,11 +82,6 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 	/** Get the corridor direction */
 	public short getRoadDir() {
 		return road_dir;
-	}
-
-	/** Get the corridor ID */
-	public String getID() {
-		return GeoLocHelper.getCorridorID(roadway, road_dir);
 	}
 
 	/** Set of unsorted roadway nodes */
