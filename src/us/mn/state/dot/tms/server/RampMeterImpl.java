@@ -21,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sched.TimeSteward;
@@ -33,7 +32,6 @@ import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
-import static us.mn.state.dot.tms.GeoLocHelper.isSameCorridor;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.MeterAction;
@@ -398,7 +396,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Get the minute for a matching time action */
 	private int getTimeActionMinute(boolean start) {
 		int period = currentPeriod();
-		LinkedList<MeterAction> act = getMeterActions();
+		ArrayList<MeterAction> act = getMeterActions();
 		Iterator<TimeAction> it = TimeActionHelper.iterator();
 		while (it.hasNext()) {
 			TimeAction ta = it.next();
@@ -414,8 +412,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	}
 
 	/** Get a list of all meter actions which control the meter */
-	private LinkedList<MeterAction> getMeterActions() {
-		LinkedList<MeterAction> act = new LinkedList<MeterAction>();
+	private ArrayList<MeterAction> getMeterActions() {
+		ArrayList<MeterAction> act = new ArrayList<MeterAction>();
 		Iterator<MeterAction> it = MeterActionHelper.iterator();
 		while (it.hasNext()) {
 			MeterAction ma = it.next();
@@ -430,7 +428,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Check a time action */
 	private boolean checkTimeAction(TimeAction ta, boolean start,
-		LinkedList<MeterAction> act)
+		ArrayList<MeterAction> act)
 	{
 		for (MeterAction ma: act) {
 			if (ta.getActionPlan() == ma.getActionPlan()) {
@@ -931,7 +929,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Find entrance r_node on same corridor as ramp meter */
 	private R_NodeImpl findEntrance(R_NodeImpl n) {
 		GeoLoc loc = n.getGeoLoc();
-		if (isSameCorridor(loc, geo_loc))
+		if (isSameCorridor(loc))
 			return n;
 		Corridor c = corridors.getCorridor(loc);
 		if (c != null)
@@ -940,15 +938,16 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 			return null;
 	}
 
+	/** Check if a locations is on the same corridor as the ramp meter */
+	private boolean isSameCorridor(GeoLoc loc) {
+		return getCorridor() == corridors.getCorridor(loc);
+	}
+
 	/** Entrance finder */
 	private class EntranceFinder implements Corridor.NodeFinder {
 		public boolean check(float m, R_NodeImpl n) {
 			R_NodeImpl f = n.getFork();
-			if (f != null) {
-				GeoLoc loc = f.getGeoLoc();
-				return isSameCorridor(loc, geo_loc);
-			} else
-				return false;
+			return (f != null) && isSameCorridor(f.getGeoLoc());
 		}
 	}
 }
