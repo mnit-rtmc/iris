@@ -22,12 +22,10 @@ import javax.swing.JPopupMenu;
 import javax.swing.ListCellRenderer;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.DMS;
-import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.LaneConfiguration;
-import us.mn.state.dot.tms.LCS;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.LCSArrayHelper;
 import static us.mn.state.dot.tms.R_Node.MAX_LANES;
@@ -173,14 +171,7 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 	/** Find the map geo location for a proxy */
 	@Override
 	protected GeoLoc getGeoLoc(final LCSArray proxy) {
-		LCS lcs = LCSArrayHelper.lookupLCS(proxy, 1);
-		if(lcs != null) {
-			String name = lcs.getName();
-			DMS dms = DMSHelper.lookup(name);
-			if(dms != null)
-				return dms.getGeoLoc();
-		}
-		return null;
+		return LCSArrayHelper.lookupGeoLoc(proxy);
 	}
 
 	/** Get the lane configuration at an LCS array */
