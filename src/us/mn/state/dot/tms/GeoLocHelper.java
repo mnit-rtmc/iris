@@ -209,25 +209,6 @@ public class GeoLocHelper extends BaseHelper {
 		return filterDirection(Direction.fromOrdinal(d), r);
 	}
 
-	/** Get the roadway corridor ID */
-	static public String getCorridorID(GeoLoc l) {
-		return getCorridorID(l.getRoadway(), l.getRoadDir());
-	}
-
-	/** Get the roadway corridor ID */
-	static public String getCorridorID(Road r, short d) {
-		if (r == null)
-			return "null";
-		StringBuilder b = new StringBuilder();
-		String ab = r.getAbbrev();
-		if (ab != null)
-			b.append(ab);
-		else
-			return "null";
-		b.append(filterDirection(d, r).abbrev);
-		return b.toString();
-	}
-
 	/** Get the corridor for a road */
 	static public String getCorridorName(Road r, short d) {
 		if (r == null)

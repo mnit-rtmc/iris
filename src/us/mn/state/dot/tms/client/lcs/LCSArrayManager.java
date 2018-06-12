@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,39 +112,9 @@ public class LCSArrayManager extends DeviceManager<LCSArray> {
 	private final Comparator<LCSArray> lcs_comparator =
 		new Comparator<LCSArray>()
 	{
-		// FIXME: if an LCS array is moved, that will break the sort
-		//        and lead to unpredictable results.
 		public int compare(LCSArray l0, LCSArray l1) {
-			GeoLoc g0 = LCSArrayHelper.lookupGeoLoc(l0);
-			GeoLoc g1 = LCSArrayHelper.lookupGeoLoc(l1);
-			if(g0 != null && g1 != null) {
-				Integer c = compare(g0, g1);
-				if(c != null)
-					return c;
-			}
-			return l0.getName().compareTo(l1.getName());
-		}
-		protected Integer compare(GeoLoc g0, GeoLoc g1) {
-			String c0 = GeoLocHelper.getCorridorID(g0);
-			String c1 = GeoLocHelper.getCorridorID(g1);
-			int c = c0.compareTo(c1);
-			if(c != 0)
-				return c;
-			CorridorBase cb =
-				session.getR_NodeManager().lookupCorridor(g0);
-			if(cb != null) {
-				Float f0 = cb.calculateMilePoint(g0);
-				Float f1 = cb.calculateMilePoint(g1);
-				if(f0 != null && f1 != null) {
-					if(f0 < f1)
-						return 1;
-					else if(f0 > f1)
-						return -1;
-					else
-						return 0;
-				}
-			}
-			return null;
+			// sort downstream to upstream
+			return l1.getName().compareTo(l0.getName());
 		}
 	};
 
