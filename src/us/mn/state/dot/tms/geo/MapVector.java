@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2016  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,11 +56,7 @@ public class MapVector {
 
 	/** Get the vector angle (radians) */
 	public double getAngle() {
-		double a = Math.acos(x / getMagnitude());
-		if (y > 0)
-			return a;
-		else
-			return -a;
+		return Math.atan2(y, x);
 	}
 
 	/** Add a vector to this one */
