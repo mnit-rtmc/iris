@@ -24,6 +24,7 @@ import us.mn.state.dot.tms.RoadClass;
 import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
+import us.mn.state.dot.tms.geo.MapVector;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -148,33 +149,34 @@ public class MapSegment implements MapObject {
 	{
 		Path2D.Float path = new Path2D.Float(Path2D.WIND_NON_ZERO);
 		Point2D.Float p = new Point2D.Float();
-		setPoint(p, segment.pos_a, segment.tangent_a, outer_a);
+		setPoint(p, segment.pos_a, segment.normal_a, outer_a);
 		path.moveTo(p.getX(), p.getY());
-		setPoint(p, segment.pos_b, segment.tangent_b, outer_b);
+		setPoint(p, segment.pos_b, segment.normal_b, outer_b);
 		path.lineTo(p.getX(), p.getY());
-		setPoint(p, segment.pos_b, segment.tangent_b, inner_b);
+		setPoint(p, segment.pos_b, segment.normal_b, inner_b);
 		if (outline)
 			path.moveTo(p.getX(), p.getY());
 		else
 			path.lineTo(p.getX(), p.getY());
-		setPoint(p, segment.pos_a, segment.tangent_a, inner_a);
+		setPoint(p, segment.pos_a, segment.normal_a, inner_a);
 		path.lineTo(p.getX(), p.getY());
 		if (!outline)
 			path.closePath();
 		return path;
 	}
 
-	/** Set a point relative to the location, offset by the tangent angle.
+	/** Set a point relative to the location, offset by the normal vector.
 	 * @param p Point to set.
 	 * @param distance Distance from the location, in meter units. */
 	private void setPoint(Point2D p, SphericalMercatorPosition pos,
-		double t, float distance)
+		MapVector nv, float distance)
 	{
 		assert (pos != null);
 		double x = pos.getX();
 		double y = pos.getY();
-		double xo = distance * Math.cos(t);
-		double yo = distance * Math.sin(t);
+		double a = nv.getAngle();
+		double xo = distance * Math.cos(a);
+		double yo = distance * Math.sin(a);
 		p.setLocation(x + xo, y + yo);
 	}
 

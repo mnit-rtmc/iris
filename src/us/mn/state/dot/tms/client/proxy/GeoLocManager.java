@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.roads.R_NodeManager;
+import us.mn.state.dot.tms.geo.MapVector;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.KILOMETERS;
 
@@ -32,8 +33,8 @@ import static us.mn.state.dot.tms.units.Distance.Units.KILOMETERS;
  */
 public class GeoLocManager {
 
-	/** Maximum distance from an r_node to calculate tangent angle */
-	static private final Distance TANGENT_DIST = new Distance(2,KILOMETERS);
+	/** Maximum distance from an r_node to calculate normal vector */
+	static private final Distance NORMAL_DIST = new Distance(2, KILOMETERS);
 
 	/** User session */
 	private final Session session;
@@ -106,27 +107,24 @@ public class GeoLocManager {
 		}
 	}
 
-	/** Get the tangent angle for a location */
-	public Double getTangentAngle(MapGeoLoc mloc) {
+	/** Get the normal vector for a location */
+	public MapVector getNormalVector(MapGeoLoc mloc) {
 		R_NodeManager n_man = session.getR_NodeManager();
-		if(n_man != null)
-			return getTangentAngle(n_man, mloc);
-		else
-			return null;
+		return (n_man != null) ? getNormalVector(n_man, mloc) : null;
 	}
 
-	/** Get the tangent angle for a location */
-	private Double getTangentAngle(R_NodeManager n_man, MapGeoLoc mloc) {
+	/** Get the normal vector for a location */
+	private MapVector getNormalVector(R_NodeManager n_man, MapGeoLoc mloc) {
 		GeoLoc loc = mloc.getGeoLoc();
 		CorridorBase c = n_man.lookupCorridor(loc);
-		if(c != null) {
+		if (c != null) {
 			R_Node r_node = c.findNearest(loc);
-			if(r_node != null &&
-			   nodeDistance(r_node, loc).m() < TANGENT_DIST.m())
+			if (r_node != null &&
+			    nodeDistance(r_node, loc).m() < NORMAL_DIST.m())
 			{
 				MapGeoLoc n_loc = n_man.findGeoLoc(r_node);
-				if(n_loc != null)
-					return n_loc.getTangent();
+				if (n_loc != null)
+					return n_loc.getNormalVector();
 			}
 		}
 		return null;

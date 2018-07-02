@@ -85,4 +85,18 @@ public class MapVector {
 	public MapVector perpendicular() {
 		return new MapVector(y, -x);
 	}
+
+	/** Get a perpendicular vector */
+	public MapVector perpendicular2() {
+		return new MapVector(-y, x);
+	}
+
+	/** Rotate vector.
+	 * @param th Angle (radians).
+	 * @return New vector. */
+	public MapVector rotate(double th) {
+		double sn = Math.sin(th);
+		double cs = Math.cos(th);
+		return new MapVector(x * cs - y * sn, x * sn + y * cs);
+	}
 }

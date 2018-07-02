@@ -41,6 +41,7 @@ import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.Invokable;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
+import us.mn.state.dot.tms.geo.MapVector;
 
 /**
  * A proxy manager is a container for SONAR proxy objects. It places each
@@ -248,9 +249,9 @@ abstract public class ProxyManager<T extends SonarObject> {
 			layer.updateStatus();
 	}
 
-	/** Get the tangent angle for the given location */
-	public Double getTangentAngle(MapGeoLoc loc) {
-		return loc_manager.getTangentAngle(loc);
+	/** Get the normal vector for the given location */
+	public MapVector getNormalVector(MapGeoLoc loc) {
+		return loc_manager.getNormalVector(loc);
 	}
 
 	/** Create a map tab for the managed proxies */

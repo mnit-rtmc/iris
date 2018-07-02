@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.client.weather;
 
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.WeatherSensor;
 import us.mn.state.dot.tms.client.Session;
@@ -24,7 +25,7 @@ import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
-import us.mn.state.dot.tms.units.Angle;
+import us.mn.state.dot.tms.geo.MapVector;
 
 /**
  * A weather sensor manager is a container for SONAR weather sensor objects.
@@ -76,9 +77,9 @@ public class WeatherSensorManager extends DeviceManager<WeatherSensor> {
 		return new WeatherSensorTab(session, this);
 	}
 
-	/** Get the tangent angle for the given location */
+	/** Get the normal vector for the given location */
 	@Override
-	public Double getTangentAngle(MapGeoLoc loc) {
+	public MapVector getNormalVector(MapGeoLoc loc) {
 		WeatherSensor ws = findProxy(loc);
 		if (ws != null) {
 			Integer wd = ws.getWindDir();
@@ -86,7 +87,7 @@ public class WeatherSensorManager extends DeviceManager<WeatherSensor> {
 				// Convert from NTCIP wind direction to 
 				// Java angle transform + 90 degs for 
 				// marker alignment
-				return Angle.create(180 - wd).toRads();
+				return GeoLocHelper.normalVector(wd);
 			}
 		}
 		return null;

@@ -358,18 +358,14 @@ public class GeoLocHelper extends BaseHelper {
 		return b.toString();
 	}
 
-	/** Calculate the bearing from one location to another.
+	/** Calculate the vector from one location to another.
 	 * @param loc_a Starting location.
 	 * @param loc_b Ending location.
-	 * @return Bearing from loc_a to loc_b (radians). */
-	static public double calculateBearing(GeoLoc loc_a, GeoLoc loc_b) {
+	 * @return Vector from loc_a to loc_b, or null. */
+	static public MapVector calculateVector(GeoLoc loc_a, GeoLoc loc_b) {
 		MapVector va = createMapVector(loc_a);
 		MapVector vb = createMapVector(loc_b);
-		if (va != null && vb != null) {
-			MapVector a = vb.subtract(va);
-			return a.getAngle();
-		} else
-			return Double.NaN;
+		return (va != null && vb != null) ? va.subtract(vb) : null;
 	}
 
 	/** Get map vector to a location from the origin.  The units used are
@@ -433,5 +429,33 @@ public class GeoLocHelper extends BaseHelper {
 		float lon = (float) p.getLongitude();
 		return new TransGeoLoc(l0.getRoadway(), l0.getRoadDir(), lat,
 			lon);
+	}
+
+	/** North normal vector */
+	static private final MapVector VEC_NORTH = new MapVector(1, 0);
+
+	/** South normal vector */
+	static private final MapVector VEC_SOUTH = new MapVector(-1, 0);
+
+	/** East normal vector */
+	static private final MapVector VEC_EAST = new MapVector(0, -1);
+
+	/** West normal vector */
+	static private final MapVector VEC_WEST = new MapVector(0, 1);
+
+	/** Get normal vector for a given direction */
+	static public MapVector normalVector(int dir) {
+		switch (Direction.fromOrdinal((short) dir)) {
+		case NORTH:
+			return VEC_NORTH;
+		case SOUTH:
+			return VEC_SOUTH;
+		case EAST:
+			return VEC_EAST;
+		case WEST:
+			return VEC_WEST;
+		default:
+			return VEC_NORTH;
+		}
 	}
 }

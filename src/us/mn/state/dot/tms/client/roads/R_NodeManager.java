@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2016  Minnesota Department of Transportation
+ * Copyright (C) 2006-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@ import us.mn.state.dot.tms.client.proxy.SwingProxyAdapter;
 import us.mn.state.dot.tms.client.proxy.WorkRequestAction;
 import us.mn.state.dot.tms.client.widget.Invokable;
 import static us.mn.state.dot.tms.client.widget.SwingRunner.runQueued;
+import us.mn.state.dot.tms.geo.MapVector;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
@@ -246,7 +247,7 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 	/** Arrange a single corridor */
 	private void arrangeCorridor(CorridorBase<R_Node> c) {
 		c.arrangeNodes();
-		setTangentAngles(c);
+		setNormalVectors(c);
 	}
 
 	/** Arrange the segments for all corridors */
@@ -276,43 +277,43 @@ public class R_NodeManager extends ProxyManager<R_Node> {
 		}
 	}
 
-	/** Set the tangent angles for all the nodes in a corridor */
-	private void setTangentAngles(CorridorBase<R_Node> c) {
+	/** Set the normal vectors for all the nodes in a corridor */
+	private void setNormalVectors(CorridorBase<R_Node> c) {
 		MapGeoLoc loc_a = null;		// upstream location
 		MapGeoLoc loc = null;		// current location
 		Iterator<MapGeoLoc> it = mapLocationIterator(c);
 		while (it.hasNext()) {
 			MapGeoLoc loc_b = it.next();	// downstream location
-			MapGeoLoc lup = loc_a != null ? loc_a : loc;
+			MapGeoLoc lup = (loc_a != null) ? loc_a : loc;
 			if (lup != null)
-				setTangentAngle(loc, lup, loc_b);
+				setNormalVector(loc, lup, loc_b);
 			loc_a = loc;
 			loc = loc_b;
 		}
 		// special handling for last node
 		if (loc_a != null)
-			setTangentAngle(loc, loc_a, loc);
+			setNormalVector(loc, loc_a, loc);
 	}
 
-	/** Set the tangent angle for one location.
-	 * @param loc Location to set tangent.
+	/** Set the normal vector for one location.
+	 * @param loc Location to set normal vector.
 	 * @param loc_a Upstream location.
 	 * @param loc_b Downstream loction. */
-	private void setTangentAngle(MapGeoLoc loc, MapGeoLoc loc_a,
+	private void setNormalVector(MapGeoLoc loc, MapGeoLoc loc_a,
 		MapGeoLoc loc_b)
 	{
-		double t = GeoLocHelper.calculateBearing(loc_a.getGeoLoc(),
+		MapVector v = GeoLocHelper.calculateVector(loc_a.getGeoLoc(),
 			loc_b.getGeoLoc());
-		if (!Double.isInfinite(t) && !Double.isNaN(t)) {
-			loc.setTangent(t - NORTH_ANGLE);
+		if (v != null) {
+			loc.setNormalVector(v.perpendicular2());
 			loc.doUpdate();
 		}
 	}
 
-	/** Get the tangent angle for the given location */
+	/** Get the normal vector for the given location */
 	@Override
-	public Double getTangentAngle(MapGeoLoc loc) {
-		// tangent angle is handled specially for r_nodes
+	public MapVector getNormalVector(MapGeoLoc loc) {
+		// normal vector is handled specially for r_nodes
 		return null;
 	}
 

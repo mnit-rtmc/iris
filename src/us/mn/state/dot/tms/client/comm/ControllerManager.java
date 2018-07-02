@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,9 @@ import us.mn.state.dot.tms.Cabinet;
 import us.mn.state.dot.tms.CommLink;
 import us.mn.state.dot.tms.Controller;
 import us.mn.state.dot.tms.ControllerHelper;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.ItemStyle;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
@@ -28,6 +30,7 @@ import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxyManager;
 import us.mn.state.dot.tms.client.proxy.ProxyTheme;
+import us.mn.state.dot.tms.geo.MapVector;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -70,11 +73,11 @@ public class ControllerManager extends ProxyManager<Controller> {
 		    && session.canRead(CommLink.SONAR_TYPE);
 	}
 
-	/** Get the tangent angle for the given location */
+	/** Get the normal vector for the given location */
 	@Override
-	public Double getTangentAngle(MapGeoLoc loc) {
+	public MapVector getNormalVector(MapGeoLoc loc) {
 		// Don't rotate markers by direction-of-travel
-		return MapGeoLoc.northTangent();
+		return GeoLocHelper.normalVector(Direction.NORTH.ordinal());
 	}
 
 	/** Create a theme for controllers */

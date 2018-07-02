@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.client.map.MapObject;
 import us.mn.state.dot.tms.client.map.MapSearcher;
 import us.mn.state.dot.tms.client.proxy.ProxyLayer;
 import us.mn.state.dot.tms.client.proxy.ProxyLayerState;
+import us.mn.state.dot.tms.geo.MapVector;
 
 /**
  * SegmentLayerState is a class for drawing roadway segments.
@@ -92,31 +93,31 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 	private MapObject forEachLane(MapSearcher s) {
 		float scale = getScale();
 		boolean parking = isPastParkingZoomThreshold();
-		Double tangent = null;
+		MapVector normal = null;
 		for (Segment seg: builder) {
 			if (parking && seg.parking) {
 				ParkingSpace ps;
 				if (seg.laneCount() > 1) {
 					ps = new ParkingSpace(seg, 1, scale,
-						tangent);
+						normal);
 					if (s.next(ps))
 						return ps;
 					ps = new ParkingSpace(seg, 2, scale,
-						tangent);
+						normal);
 					if (s.next(ps))
 						return ps;
 				} else {
 					ps = new ParkingSpace(seg, null, scale,
-						tangent);
+						normal);
 					if (s.next(ps))
 						return ps;
 				}
-				boolean t = (tangent != null);
-				tangent = ps.tangent;
-				if (t)
+				boolean n = (normal != null);
+				normal = ps.normal;
+				if (n)
 					continue;
 			} else
-				tangent = null;
+				normal = null;
 			for (int sh = seg.getLeftMin(); sh < seg.getRightMax();
 			     sh++)
 			{

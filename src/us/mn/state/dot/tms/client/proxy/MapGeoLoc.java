@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.client.map.MapObject;
+import us.mn.state.dot.tms.geo.MapVector;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 
 /**
@@ -30,23 +31,6 @@ import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
  * @author Douglas Lau
  */
 public class MapGeoLoc implements MapObject {
-
-	/** Radians to rotate marker for a Northbound device */
-	static private final double RAD_NORTH = Math.toRadians(0);
-
-	/** Radians to rotate marker for a Southbound device */
-	static private final double RAD_SOUTH = Math.toRadians(180);
-
-	/** Radians to rotate marker for an Eastbound device */
-	static private final double RAD_EAST = Math.toRadians(270);
-
-	/** Radians to rotate marker for a Westbound device */
-	static private final double RAD_WEST = Math.toRadians(90);
-
-	/** Get tangent value for "north" direction */
-	static public double northTangent() {
-		return RAD_NORTH;
-	}
 
 	/** Geo location */
 	private final GeoLoc loc;
@@ -65,9 +49,9 @@ public class MapGeoLoc implements MapObject {
 	/** Update the geo loc map object */
 	public void doUpdate() {
 		if (manager != null) {
-			Double tan = manager.getTangentAngle(this);
-			if (tan != null)
-				setTangent(tan);
+			MapVector nv = manager.getNormalVector(this);
+			if (nv != null)
+				setNormalVector(nv);
 		}
 		updateTransform();
 		updateInverseTransform();
@@ -79,39 +63,22 @@ public class MapGeoLoc implements MapObject {
 			manager.updateGeometry();
 	}
 
-	/** Get the default angle (radians) */
-	private double getDefaultAngle() {
-		switch (Direction.fromOrdinal(loc.getRoadDir())) {
-		case NORTH:
-			return RAD_NORTH;
-		case SOUTH:
-			return RAD_SOUTH;
-		case EAST:
-			return RAD_EAST;
-		case WEST:
-			return RAD_WEST;
-		default:
-			return RAD_NORTH;
-		}
+	/** Normal vector */
+	private MapVector normal;
+
+	/** Set the normal vector */
+	public void setNormalVector(MapVector nv) {
+		normal = nv;
 	}
 
-	/** Tangent angle (radians) */
-	private Double tangent = null;
-
-	/** Set the tangent angle (radians) */
-	public void setTangent(double t) {
-		if (Double.isInfinite(t) || Double.isNaN(t))
-			System.err.println("MapGeoLoc.setTangent: Bad tangent");
-		else
-			tangent = t;
+	/** Get the normal vector */
+	public MapVector getNormalVector() {
+		return (normal != null) ? normal : defaultNormal();
 	}
 
-	/** Get the tangent angle (radians) */
-	public double getTangent() {
-		if (tangent != null)
-			return tangent;
-		else
-			return getDefaultAngle();
+	/** Get the default normal vector */
+	private MapVector defaultNormal() {
+		return GeoLocHelper.normalVector(loc.getRoadDir());
 	}
 
 	/** Transform for drawing device on map */
@@ -124,7 +91,7 @@ public class MapGeoLoc implements MapObject {
 			transform.setToTranslation(pos.getX(), pos.getY());
 		else
 			transform.setToIdentity();
-		transform.rotate(getTangent());
+		transform.rotate(getNormalVector().getAngle());
 	}
 
 	/** Get the transform to render as a map object */

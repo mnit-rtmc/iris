@@ -21,6 +21,7 @@ import java.awt.geom.Point2D;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.client.map.MapObject;
+import us.mn.state.dot.tms.geo.MapVector;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -74,21 +75,21 @@ public class ParkingSpace implements MapObject {
 	}
 
 	/** Create a new parking space */
-	public ParkingSpace(Segment s, Integer l, float scale, Double t) {
+	public ParkingSpace(Segment s, Integer l, float scale, MapVector nv) {
 		segment = s;
 		lane = l;
 		float width = calculateWidth(scale);
 		float length = calculateLength(scale);
+		normal = (nv != null) ? nv : getNormalVector();
 		shape = createShape(width, length);
-		tangent = (t != null) ? t : getTangent();
 	}
 
-	/** Tangent angle (radians) */
-	public final double tangent;
+	/** Normal vector */
+	public final MapVector normal;
 
-	/** Get the tangent angle (radians) */
-	private double getTangent() {
-		return segment.tangent_b - Math.PI / 4;
+	/** Get the normal vector */
+	private MapVector getNormalVector() {
+		return segment.normal_b.rotate(3 * Math.PI / 4);
 	}
 
 	/** Calculate the segment width */
@@ -105,33 +106,20 @@ public class ParkingSpace implements MapObject {
 	private Shape createShape(float width, float length) {
 		float len_a = (null == lane || 1 == lane) ? -length : 0;
 		float len_b = (null == lane || 2 == lane) ? length : 0;
+		double x = segment.pos_b.getX();
+		double y = segment.pos_b.getY();
+		double th = normal.getAngle();
+		MapVector a = new MapVector( width, len_a).rotate(th);
+		MapVector b = new MapVector(-width, len_a).rotate(th);
+		MapVector c = new MapVector(-width, len_b).rotate(th);
+		MapVector d = new MapVector( width, len_b).rotate(th);
 		Path2D.Float path = new Path2D.Float(Path2D.WIND_NON_ZERO);
-		Point2D.Float p = new Point2D.Float();
-		setPoint(p, segment.pos_b, width, len_a);
-		path.moveTo(p.getX(), p.getY());
-		setPoint(p, segment.pos_b, -width, len_a);
-		path.lineTo(p.getX(), p.getY());
-		setPoint(p, segment.pos_b, -width, len_b);
-		path.lineTo(p.getX(), p.getY());
-		setPoint(p, segment.pos_b, width, len_b);
-		path.lineTo(p.getX(), p.getY());
+		path.moveTo(x + a.x, y + a.y);
+		path.lineTo(x + b.x, y + b.y);
+		path.lineTo(x + c.x, y + c.y);
+		path.lineTo(x + d.x, y + d.y);
 		path.closePath();
 		return path;
-	}
-
-	/** Set a point relative to the location, offset by the tangent angle.
-	 * @param p Point to set. */
-	private void setPoint(Point2D p, SphericalMercatorPosition pos,
-		float w, float l)
-	{
-		assert (pos != null);
-		double x = pos.getX();
-		double y = pos.getY();
-		double s = Math.sin(tangent);
-		double c = Math.cos(tangent);
-		double xo = w * c + l * s;
-		double yo = w * s + l * c;
-		p.setLocation(x + xo, y + yo);
 	}
 
 	/** Get the map segment tool tip */

@@ -19,6 +19,7 @@ import java.util.Map;
 import java.util.Set;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
+import us.mn.state.dot.tms.Direction;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.R_Node;
@@ -27,6 +28,7 @@ import us.mn.state.dot.tms.Station;
 import us.mn.state.dot.tms.StationHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.proxy.MapGeoLoc;
+import us.mn.state.dot.tms.geo.MapVector;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.units.Distance;
 import us.mn.state.dot.tms.utils.I18N;
@@ -54,11 +56,11 @@ public class Segment {
 		     : null;
 	}
 
-	/** Get tangent of a MapGeoLoc (may be null) */
-	static private double getTangent(MapGeoLoc loc) {
+	/** Get normal vector of a MapGeoLoc (may be null) */
+	static private MapVector getNormalVector(MapGeoLoc loc) {
 		return (loc != null)
-		     ? loc.getTangent()
-		     : MapGeoLoc.northTangent();
+		     ? loc.getNormalVector()
+		     : GeoLocHelper.normalVector(Direction.NORTH.ordinal());
 	}
 
 	/** R_Node model */
@@ -94,11 +96,11 @@ public class Segment {
 	/** Position at downstream end */
 	public final SphericalMercatorPosition pos_b;
 
-	/** Tangent at upstream end */
-	public final double tangent_a;
+	/** Normal vector at upstream end */
+	public final MapVector normal_a;
 
-	/** Tangent at downstream end */
-	public final double tangent_b;
+	/** Normal vector at downstream end */
+	public final MapVector normal_b;
 
 	/** Sample data set */
 	private final SampleDataSet samples;
@@ -126,8 +128,8 @@ public class Segment {
 		model = new R_NodeModel(b, m);
 		pos_a = getPosition(al);
 		pos_b = getPosition(bl);
-		tangent_a = getTangent(al);
-		tangent_b = getTangent(bl);
+		normal_a = getNormalVector(al);
+		normal_b = getNormalVector(bl);
 		samples = sds;
 		shift = model.getShift(s);
 		parking = R_NodeHelper.isParking(b);
