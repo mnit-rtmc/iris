@@ -69,7 +69,6 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 		if (c != null)
 			c.setIO(pin, this);
 		updateStyles();
-		updateIsNtcip();
 	}
 
 	/** Get the device poller */
@@ -366,37 +365,5 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	/** Perform a periodic poll */
 	public void periodicPoll() {
 		sendDeviceRequest(DeviceRequest.QUERY_STATUS);
-	}
-
-	//------------------------------
-	
-	/** Set true for NTCIP devices */
-	private transient boolean bNtcip = false;
-
-	/** Get the isNtcip status */
-	@Override
-	public boolean getIsNtcip() {
-		return bNtcip;
-	}
-
-	/** Set the isNtcip status */
-	public void setIsNtcipNotify(boolean b) {
-		if (bNtcip == b)
-			return;
-		bNtcip = b;
-		notifyAttribute("isNtcip");
-	}
-
-	/** Update the isNtcip status */
-	public void updateIsNtcip() {
-		ControllerImpl c = controller;
-		if (c != null) {
-			CommLink cl = c.getCommLink();
-			if (cl != null) {
-				setIsNtcipNotify(CommProtocol.isNtcip(cl.getProtocol()));
-				return;
-			}
-		}
-		setIsNtcipNotify(false);
 	}
 }

@@ -219,10 +219,8 @@ public class GpsPanel extends IPanel
 			else
 				gpsPanelMode = GpsPanelMode.GPS_DISABLED;
 		}
-		else if (parentDevice != null
-		      && parentDevice.getIsNtcip()) {
-				gpsPanelMode = GpsPanelMode.NTCIP_ENABLED;
-		}
+		else if (parentDevice != null)
+			gpsPanelMode = GpsPanelMode.NTCIP_ENABLED;
 		else
 			gpsPanelMode = GpsPanelMode.DISABLED;
 	}	
