@@ -8,6 +8,8 @@
 SET client_encoding = 'UTF8';
 SET client_min_messages TO WARNING;
 
+BEGIN;
+
 CREATE SCHEMA IF NOT EXISTS test AUTHORIZATION tms;
 
 SET SESSION AUTHORIZATION 'tms';
@@ -556,3 +558,5 @@ SELECT count(*), result FROM test.results GROUP BY result;
 
 -- Drop test schema
 DROP SCHEMA test CASCADE;
+
+ROLLBACK;
