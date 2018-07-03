@@ -22,6 +22,8 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.Gps;
+import us.mn.state.dot.tms.GpsHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -58,6 +60,12 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 	/** NTCIP debug log */
 	static private final DebugLog NTCIP_LOG = new DebugLog("ntcip2");
 
+	/** Lookup GPS impl */
+	static private GpsImpl lookupGpsImpl(String dev_name) {
+		Gps gps = GpsHelper.lookup(dev_name + "_gps");
+		return (gps instanceof GpsImpl) ? (GpsImpl) gps : null;
+	}
+
 	/** Communication protocol */
 	private final CommProtocol protocol;
 
@@ -79,7 +87,6 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 	@SuppressWarnings("unchecked")
 	@Override
 	public void sendRequest(DMSImpl dms, DeviceRequest r) {
-		GpsImpl gps;
 		switch (r) {
 		case RESET_DEVICE:
 			addOp(new OpResetDMS(dms));
@@ -96,18 +103,7 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 			addOp(new OpQueryDMSMessage(dms));
 			break;
 		case QUERY_STATUS:
-			// add an NTCIP GPS query ... under the right circumstances
-			if (dms.getBlockAutoGps() == false) {
-				gps = GpsImpl.lookupGpsImplForDevice(dms);
-				if (gps != null) {
-					if ((gps.getGpsEnable() == true) && (gps.getCommLink() == null))
-						addOp(new OpQueryGpsLocationNtcip(dms, gps, false));
-				} else {
-					if (SystemAttrEnum.GPS_NTCIP_ENABLE.getBoolean())
-						addOp(new OpQueryGpsLocationNtcip(dms, gps, false));
-				}
-			}
-			// add normal status query
+			queryGpsStatus(dms);
 			addOp(new OpQueryDMSStatus(dms));
 			break;
 		case QUERY_PIXEL_FAILURES:
@@ -132,19 +128,21 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 			addOp(new OpSendDMSLedstar(dms));
 			break;
 		case QUERY_GPS_LOCATION:
-			dms.setBlockAutoGps(false);
-			gps = GpsImpl.lookupGpsImplForDevice(dms);
-			addOp(new OpQueryGpsLocationNtcip(dms, gps, false));
-			break;
 		case QUERY_GPS_LOCATION_FORCE:
-			dms.setBlockAutoGps(false);
-			gps = GpsImpl.lookupGpsImplForDevice(dms);
-			addOp(new OpQueryGpsLocationNtcip(dms, gps, true));
+			queryGpsStatus(dms);
 			break;
 		default:
 			// Ignore other requests
 			break;
 		}
+	}
+
+	/** Query the GPS for a DMS */
+	@SuppressWarnings("unchecked")
+	private void queryGpsStatus(DMSImpl dms) {
+		GpsImpl gps = lookupGpsImpl(dms.getName());
+		if (gps != null)
+			addOp(new OpQueryGpsLocationNtcip(dms, gps));
 	}
 
 	/** Send a new message to the sign */

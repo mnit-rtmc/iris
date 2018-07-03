@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +16,6 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -34,21 +34,17 @@ import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
  */
 public class OpQueryGpsLocationNtcip extends OpDMS {
 
-	/** Should we ignore "jitter tolerance" when saving results? */
-	protected boolean bForce;
-	
 	/** Use this to report/save the results */
-	GpsImpl gps;
+	private final GpsImpl gps;
 
 	/** Create a new DMS query configuration object */
-	public OpQueryGpsLocationNtcip(DMSImpl d, GpsImpl g, boolean force) {
+	public OpQueryGpsLocationNtcip(DMSImpl d, GpsImpl g) {
 		super(PriorityLevel.DOWNLOAD, d);
-		bForce = force;
 		gps = g;
 		if (gps != null) {
-			gps.doSetPollDatetime(TimeSteward.currentTimeMillis());
-			gps.doSetErrorStatus("");
-			gps.doSetCommStatus("Polling");
+			gps.setPollDatetimeNotify(TimeSteward.currentTimeMillis());
+			gps.setErrorStatusNotify("");
+			gps.setCommStatusNotify("Polling");
 		}
 	}
 
@@ -59,9 +55,10 @@ public class OpQueryGpsLocationNtcip extends OpDMS {
 	}
 
 	/** Phase to query the location */
-	protected class QueryGpsLocation extends Phase {
+	private class QueryGpsLocation extends Phase {
 
 		/** Query the GPS location */
+		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			ASN1Integer aiLat = MIB1204.essLatitude.makeInt();
 			ASN1Integer aiLon = MIB1204.essLongitude.makeInt();
@@ -72,33 +69,30 @@ public class OpQueryGpsLocationNtcip extends OpDMS {
 			}
 			catch (NoSuchName e) {
 				dms.setBlockAutoGps(true);
-				if (gps != null)
-					gps.doSetErrorStatus("GPS Not Available");
+				setErrorStatus("GPS Not Available");
 				return null;
 			}
 			catch (ParsingException e) {
 				// Some NDOR sign controllers throw
 				// this error instead of NoSuchName...
 				dms.setBlockAutoGps(true);
-				if (gps != null)
-					gps.doSetErrorStatus("GPS Not Available");
+				setErrorStatus("GPS Not Available");
 				return null;
 			}
 			logQuery(aiLat);
 			logQuery(aiLon);
 			// check for special NTCIP No-GPS-Lock values
 			if ((aiLat.getInteger() == 90000001)
-			 || (aiLon.getInteger() == 180000001)) {
-				if (gps != null)
-					gps.doSetErrorStatus("No GPS Lock");
-			}
-			else {
+			 || (aiLon.getInteger() == 180000001))
+			{
+				setErrorStatus("No GPS Lock");
+			} else {
 				// record results
 				Double dLat = aiLat.getInteger() / 1000000.0;
 				Double dLon = aiLon.getInteger() / 1000000.0;
-				GpsImpl.saveDeviceLocation(dms.getName(), dLat, dLon, bForce);
 				if (gps != null)
-					gps.doSetErrorStatus("");
+					gps.saveDeviceLocation(dLat, dLon, false);
+				setErrorStatus("");
 			}
 			return null;
 		}
@@ -107,10 +101,11 @@ public class OpQueryGpsLocationNtcip extends OpDMS {
 	//----------------------------------------------
 
 	/** Set the error status message. */
+	@Override
 	public void setErrorStatus(String s) {
 		assert s != null;
 		if (gps != null)
-			gps.setErrorStatus(s);
+			gps.setErrorStatusNotify(s);
 		super.setErrorStatus(s);
 	}
 
@@ -119,7 +114,7 @@ public class OpQueryGpsLocationNtcip extends OpDMS {
 	public void handleCommError(EventType et, String msg) {
 		setSuccess(false);
 		if (gps != null)
-			gps.doSetErrorStatus(msg);
+			gps.setErrorStatusNotify(msg);
 		super.handleCommError(et, msg);
 	}
 }
