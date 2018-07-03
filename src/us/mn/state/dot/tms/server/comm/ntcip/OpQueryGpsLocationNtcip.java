@@ -68,14 +68,12 @@ public class OpQueryGpsLocationNtcip extends OpDMS {
 				mess.queryProps();
 			}
 			catch (NoSuchName e) {
-				dms.setBlockAutoGps(true);
 				setErrorStatus("GPS Not Available");
 				return null;
 			}
 			catch (ParsingException e) {
 				// Some NDOR sign controllers throw
 				// this error instead of NoSuchName...
-				dms.setBlockAutoGps(true);
 				setErrorStatus("GPS Not Available");
 				return null;
 			}
@@ -97,8 +95,6 @@ public class OpQueryGpsLocationNtcip extends OpDMS {
 			return null;
 		}
 	}
-
-	//----------------------------------------------
 
 	/** Set the error status message. */
 	@Override
