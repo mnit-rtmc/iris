@@ -2407,6 +2407,22 @@ CREATE VIEW i_user_view AS
 	FROM iris.i_user;
 GRANT SELECT ON i_user_view TO PUBLIC;
 
+CREATE VIEW graphic_view AS
+	SELECT name, g_number, bpp, height, width, pixels
+	FROM iris.graphic;
+GRANT SELECT ON graphic_view TO PUBLIC;
+
+CREATE VIEW font_view AS
+	SELECT name, f_number, height, width, line_spacing, char_spacing,
+	       version_id
+	FROM iris.font;
+GRANT SELECT ON font_view TO PUBLIC;
+
+CREATE VIEW glyph_view AS
+	SELECT name, font, code_point, graphic
+	FROM iris.glyph;
+GRANT SELECT ON glyph_view TO PUBLIC;
+
 CREATE VIEW action_plan_view AS
 	SELECT name, description, group_n, sync_actions, sticky, active,
 	       default_phase, phase
@@ -3167,7 +3183,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.75.0
+database_version	4.76.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
