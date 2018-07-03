@@ -22,4 +22,7 @@ CREATE VIEW glyph_view AS
 	FROM iris.glyph;
 GRANT SELECT ON glyph_view TO PUBLIC;
 
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('dms_gps_jitter_m', '100');
+
 COMMIT;

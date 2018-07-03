@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -218,8 +219,7 @@ public class GpsPanel extends IPanel
 			else
 				gpsPanelMode = GpsPanelMode.GPS_DISABLED;
 		}
-		else if (SystemAttrEnum.GPS_NTCIP_ENABLE.getBoolean()
-		      && (parentDevice != null)
+		else if (parentDevice != null
 		      && parentDevice.getIsNtcip()) {
 				gpsPanelMode = GpsPanelMode.NTCIP_ENABLED;
 		}
@@ -240,7 +240,7 @@ public class GpsPanel extends IPanel
 				sJitter = ""+gps.getJitterToleranceMeters();
 				break;
 			case NTCIP_ENABLED:
-				sJitter = ""+SystemAttrEnum.GPS_NTCIP_JITTER_M.getInt();
+				sJitter = ""+SystemAttrEnum.DMS_GPS_JITTER_M.getInt();
 		}
 		tolerance.setText(sJitter);
 
