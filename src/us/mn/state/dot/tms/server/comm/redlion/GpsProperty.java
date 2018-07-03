@@ -1,7 +1,8 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
- * 
+ * Copyright (C) 2018  Minnesota Department of Transportation
+ *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
@@ -12,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.gps;
+package us.mn.state.dot.tms.server.comm.redlion;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -24,8 +25,7 @@ import us.mn.state.dot.tms.server.comm.AsciiDeviceProperty;
  *
  * @author John L. Stanley
  */
-public abstract class GpsProperty
-		extends AsciiDeviceProperty {
+abstract public class GpsProperty extends AsciiDeviceProperty {
 
 	/* current GPS-location property
 	 *  The lat/lon values are valid after parsing a valid
@@ -78,7 +78,7 @@ public abstract class GpsProperty
 		sb.append(lon);
 		return sb.toString();
 	}
-	
+
 	//=====================================================
 	// GPS Helper functions
 	//=====================================================
@@ -88,12 +88,12 @@ public abstract class GpsProperty
 		lon = 0.0;
 		bGpsLock = false;
 	}
-	
+
 	//------------------------------
 	//---- TAIP Response Parser ----
 	//------------------------------
-	
-    /** Converts TAIP latitude/longitude substrings to a
+
+	/** Converts TAIP latitude/longitude substrings to a
 	 *  decimal-degrees value.
 	 * @param s1 = string containing integer part of TAIP number
 	 * @param s2 = string containing fractional part of TAIP number
@@ -116,9 +116,9 @@ public abstract class GpsProperty
 			s1 = s1.substring(1);
 		return Double.valueOf(ssign+s1+"."+s2);
 	}
-	
+
 	//---------------
-	
+
 	private final static String patternRPV =
 		".*?>RPV\\d{5}(\\d{3})(\\d{5})(\\d{4})(\\d{5})\\.{7}(\\d)[^<]*<";
 	private final static Pattern pRPV =	Pattern.compile(patternRPV);
@@ -171,7 +171,7 @@ public abstract class GpsProperty
 		bGpsLock = true;
 		return true;
 	}
-	
+
 	//------------------------------
 	//---- NMEA Response Parser ----
 	//------------------------------
@@ -195,7 +195,7 @@ public abstract class GpsProperty
 		if (!m.find())
 			throw new NumberFormatException();
 
-		// Either of the following valueOf lines 
+		// Either of the following valueOf lines
 		// might throw a NumberFormatException...
 		sDeg = m.group(1);
 		coord = Double.valueOf(m.group(2)) / 60;
@@ -204,10 +204,10 @@ public abstract class GpsProperty
 		// the value is zero.
 		if (!sDeg.isEmpty())
 			coord += Double.valueOf(sDeg);
-		
+
 		return coord;
 	}
-	
+
 	//---------------
 
 	/** Extract lat/lon coordinates from NMEA matcher */
@@ -218,13 +218,13 @@ public abstract class GpsProperty
 		xlat = parseNmeaCoordinate(m.group(nLLOffset));
 		if (m.group(nLLOffset+1).equals("S"))
 			xlat = -xlat;//   Latitude:  N = positive, S = negative.
-	
+
 		xlon = parseNmeaCoordinate(m.group(nLLOffset+2));
 		if (m.group(nLLOffset+3).equals("W"))
 			xlon = -xlon;//   Longitude: E = positive, W = negative
-	
+
 		lat = xlat;
-		lon = xlon;	
+		lon = xlon;
 	}
 
 	//---------------
@@ -245,7 +245,7 @@ public abstract class GpsProperty
 	 *  does NOT automatically mean that the lat/lon values were provided.
 	 */
 	private boolean parseNmeaGps(String sNmeaResponse, Pattern p,
-			int nLLOffset, 
+			int nLLOffset,
 			int nStatusOffset, String sStatusOK) {
 		String stat;
 
@@ -266,22 +266,22 @@ public abstract class GpsProperty
 			stat = m.group(nStatusOffset);
 			if (!stat.isEmpty() && (sStatusOK.indexOf(stat.charAt(0)) >= 0))
 				bGpsLock = true;
-			
+
 			return true;
 		}
 		catch (IndexOutOfBoundsException e) {
 			return false;
 		}
 	}
-				
+
 	//---------------
-	
+
 	private final static String patternGPRMC =
 		"[^\\$]*\\$GPRMC,([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,]*),([^,\\*]*),?([^\\*]*)?(\\*..)?";
 	private final static Pattern pGPRMC = Pattern.compile(patternGPRMC);
 	// Example (signal not acquired):
 	//	 $GPRMC,235947.000,V,0000.0000,N,00000.0000,E,,,041299,,*1D
-	// Example (signal acquired): 
+	// Example (signal acquired):
 	//	 $GPRMC,092204.999,A,4250.5589,S,14718.5084,E,0.00,89.68,211200,,*25
 	// Example (signal acquired):
 	//	 $GPRMC,220516,A,5133.82,N,00042.24,W,173.8,231.8,130694,004.2,W*70

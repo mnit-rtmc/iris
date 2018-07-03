@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.gps;
+package us.mn.state.dot.tms.server.comm.redlion;
 
 import java.io.IOException;
 import java.lang.Comparable;
@@ -25,7 +25,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
  * Base class for all GPS-modem Query-Location operations
- * 
+ *
  * @author John L. Stanley
  */
 
@@ -43,7 +43,7 @@ abstract public class OpQueryGpsLocation extends OpGps {
 
 	/** If set, ignore "jitter tolerance" when saving current result */
 	protected boolean bForce;
-	
+
 	//----------------------------------------------
 	// GPS-sample filtering
 
@@ -51,7 +51,7 @@ abstract public class OpQueryGpsLocation extends OpGps {
 		protected double lat;
 		protected double lon;
 		protected double errorSum;
-		
+
 		protected GpsSample(double xlat, double xlon) {
 			lat = xlat;
 			lon = xlon;
@@ -74,7 +74,7 @@ abstract public class OpQueryGpsLocation extends OpGps {
 		samples = new GpsSample[xmaxSamples];
 		useSamples = xuseSamples;
 	}
-	
+
 	/** Add (lat,lon) sample to array of samples.
 	 *
 	 * @param xlat - latitude
@@ -151,7 +151,7 @@ abstract public class OpQueryGpsLocation extends OpGps {
 					gps.setErrorStatusNotify("No GPS Lock");
 				return null;
 			}
-			
+
 			if (addSample(prop.getLat(), prop.getLon())) {
 				try {
 					Thread.sleep(1000);

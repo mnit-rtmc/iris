@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,21 +13,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.gps.redlion;
+package us.mn.state.dot.tms.server.comm.redlion;
 
 import us.mn.state.dot.tms.server.GpsImpl;
-import us.mn.state.dot.tms.server.comm.gps.OpQueryGpsLocation;
 
 /**
  * This operation queries the location of a RedLion GPS modem.
  *
  * @author John L. Stanley
  */
-public class OpQueryGpsLocationRedLion
-		extends OpQueryGpsLocation {
+public class OpQueryGpsLocationRedLion extends OpQueryGpsLocation {
 
 	/** Create a new GPS query status object */
 	public OpQueryGpsLocationRedLion(GpsImpl g, boolean force) {
-		super(g, force, new GpsRedLionProperty());
+		super(g, force, new RedLionProperty());
 	}
 }

@@ -13,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.gps.redlion;
+package us.mn.state.dot.tms.server.comm.redlion;
 
 import java.net.URI;
 import us.mn.state.dot.tms.DeviceRequest;
@@ -21,7 +21,6 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.comm.GpsPoller;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
-import us.mn.state.dot.tms.server.comm.gps.GpsProperty;
 import us.mn.state.dot.tms.utils.URIUtil;
 
 /**
@@ -30,11 +29,11 @@ import us.mn.state.dot.tms.utils.URIUtil;
  *
  * @author John L. Stanley
  */
-public class GpsRedLionPoller extends ThreadedPoller<GpsProperty>
+public class RedLionPoller extends ThreadedPoller<GpsProperty>
 	implements GpsPoller
 {
 	/** Create a new RedLion GPS poller */
-	public GpsRedLionPoller(String n) {
+	public RedLionPoller(String n) {
 		super(n, URIUtil.TCP, GpsImpl.GPS_LOG,
 			SystemAttrEnum.COMM_IDLE_DISCONNECT_GPS_SEC);
 	}

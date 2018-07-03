@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2017  SRF Consulting Group
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -12,7 +13,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-package us.mn.state.dot.tms.server.comm.gps;
+package us.mn.state.dot.tms.server.comm.redlion;
 
 import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.comm.OpDevice;
@@ -30,7 +31,7 @@ abstract public class OpGps extends OpDevice<GpsProperty> {
 
 	/** GPS property */
 	protected final GpsProperty prop;
-	
+
 	/** Create a new GPS operation */
 	public OpGps(PriorityLevel p, GpsImpl g, GpsProperty gprop) {
 		super(p, g);

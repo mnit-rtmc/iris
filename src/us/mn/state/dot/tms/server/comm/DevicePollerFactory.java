@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.server.comm.dr500.DR500Poller;
 import us.mn.state.dot.tms.server.comm.dxm.DXMPoller;
 import us.mn.state.dot.tms.server.comm.e6.E6Poller;
 import us.mn.state.dot.tms.server.comm.g4.G4Poller;
-import us.mn.state.dot.tms.server.comm.gps.redlion.GpsRedLionPoller;
+import us.mn.state.dot.tms.server.comm.redlion.RedLionPoller;
 import us.mn.state.dot.tms.server.comm.incfeed.IncFeedPoller;
 import us.mn.state.dot.tms.server.comm.infinova.InfinovaPoller;
 import us.mn.state.dot.tms.server.comm.manchester.ManchesterPoller;
@@ -107,7 +107,7 @@ public class DevicePollerFactory {
 		case VICON_PTZ:
 			return new ViconPTZPoller(name);
 		case GPS_REDLION:
-			return new GpsRedLionPoller(name);
+			return new RedLionPoller(name);
 		default:
 			return null;
 		}
