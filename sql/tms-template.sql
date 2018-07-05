@@ -3163,6 +3163,51 @@ COPY iris.encoding (id, description) FROM stdin;
 5	H265
 \.
 
+COPY iris.day_matcher (name, holiday, month, day, week, weekday, shift) FROM stdin;
+Any Day	f	-1	0	0	0	0
+Sunday Holiday	t	-1	0	0	1	0
+Saturday Holiday	t	-1	0	0	7	0
+New Years Day	t	0	1	0	0	0
+Memorial Day	t	4	0	-1	2	0
+Independence Day	t	6	4	0	0	0
+Labor Day	t	8	0	1	2	0
+Thanksgiving Day	t	10	0	4	5	0
+Black Friday	t	10	0	4	5	1
+Christmas Eve	t	11	24	0	0	0
+Christmas Day	t	11	25	0	0	0
+New Years Eve	t	11	31	0	0	0
+\.
+
+COPY iris.day_plan (name) FROM stdin;
+EVERY_DAY
+WEEKDAYS
+WORK_DAYS
+\.
+
+COPY iris.day_plan_day_matcher (day_plan, day_matcher) FROM stdin;
+EVERY_DAY	Any Day
+WEEKDAYS	Any Day
+WEEKDAYS	Sunday Holiday
+WEEKDAYS	Saturday Holiday
+WORK_DAYS	Any Day
+WORK_DAYS	Sunday Holiday
+WORK_DAYS	Saturday Holiday
+WORK_DAYS	New Years Day
+WORK_DAYS	Memorial Day
+WORK_DAYS	Independence Day
+WORK_DAYS	Labor Day
+WORK_DAYS	Thanksgiving Day
+WORK_DAYS	Black Friday
+WORK_DAYS	Christmas Eve
+WORK_DAYS	Christmas Day
+WORK_DAYS	New Years Eve
+\.
+
+COPY iris.plan_phase (name, hold_time, next_phase) FROM stdin;
+deployed	0	\N
+undeployed	0	\N
+\.
+
 COPY iris.system_attribute (name, value) FROM stdin;
 action_plan_alert_list	
 action_plan_event_purge_days	90
