@@ -146,29 +146,12 @@ public class SignMessageCreator {
 		if (duration != null)
 			attrs.put("duration", duration);
 		sign_messages.createObject(name, attrs);
-		SignMessage sm = getProxy(name);
+		SignMessage sm = sign_messages.lookupObjectWait(name);
 		// Make sure this is the sign message we just created
 		if (sm != null && multi.equals(sm.getMulti()))
 			return sm;
 		else
 			return null;
-	}
-
-	/** Get the sign message proxy object */
-	private SignMessage getProxy(String name) {
-		// wait for up to 20 seconds for proxy to be created
-		for (int i = 0; i < 200; i++) {
-			SignMessage m = sign_messages.lookupObject(name);
-			if (m != null)
-				return m;
-			try {
-				Thread.sleep(100);
-			}
-			catch (InterruptedException e) {
-				// Ignore
-			}
-		}
-		return null;
 	}
 
 	/** Create a sign message name */

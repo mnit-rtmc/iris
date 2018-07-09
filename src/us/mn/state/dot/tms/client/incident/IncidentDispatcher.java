@@ -302,7 +302,7 @@ public class IncidentDispatcher extends IPanel
 			attrs.put("impact", impact_pnl.getImpact());
 			attrs.put("cleared", false);
 			cache.createObject(name, attrs);
-			Incident proxy = getProxy(name);
+			Incident proxy = cache.lookupObjectWait(name);
 			if (proxy != null)
 				sel_mdl.setSelected(proxy);
 			else
@@ -374,23 +374,6 @@ public class IncidentDispatcher extends IPanel
 	private String createUniqueIncidentName() {
 		String name = NAME_FMT.format(System.currentTimeMillis());
 		return name.substring(0, 16);
-	}
-
-	/** Get the incident proxy object */
-	private Incident getProxy(String name) {
-		// wait for up to 20 seconds for proxy to be created
-		for (int i = 0; i < 200; i++) {
-			Incident inc = IncidentHelper.lookup(name);
-			if (inc != null)
-				return inc;
-			try {
-				Thread.sleep(100);
-			}
-			catch (InterruptedException e) {
-				// Ignore
-			}
-		}
-		return null;
 	}
 
 	/** A new proxy has been added */
