@@ -117,7 +117,12 @@ public class GpsPanel extends IPanel implements ProxyView<Gps> {
 
 		watcher.initialize();
 		setGps(dms.getGps());
-		updateGpsPanel();
+	}
+
+	/** Set the GPS object */
+	private void setGps(Gps g) {
+		watcher.setProxy(g);
+		query_btn.setEnabled(canRequestGps());
 	}
 
 	/** GPS enabled checkbox action */
@@ -162,32 +167,13 @@ public class GpsPanel extends IPanel implements ProxyView<Gps> {
 
 	/** Update the edit mode */
 	public void updateEditMode() {
-		boolean allowed = canUpdateGps();
-		boolean e = (gps != null);
-		enable_cbx.setEnabled(allowed);
-		query_btn.setEnabled(allowed && e);
+		enable_cbx.setEnabled(canUpdateGps());
 	}
 
 	/** Check if GPS can be updated */
 	private boolean canUpdateGps() {
 		return session.canWrite("gps")
 		    && session.canWrite(dms, "gps");
-	}
-
-	/** Update the panel */
-	public void updateGpsPanel() {
-		Gps g = gps;
-		boolean e = (g != null);
-		enable_cbx.setSelected(e);
-		if (g != null) {
-			op_lbl.setText(g.getOperation());
-			poll_lbl.setText(formatStamp(g.getLatestPoll()));
-			sample_lbl.setText(formatStamp(g.getLatestSample()));
-		} else {
-			op_lbl.setText("");
-			poll_lbl.setText("");
-			sample_lbl.setText("");
-		}
 	}
 
 	/** Format a date/time stamp */
@@ -202,19 +188,32 @@ public class GpsPanel extends IPanel implements ProxyView<Gps> {
 	@Override
 	public void update(Gps g, String a) {
 		gps = g;
-		updateGpsPanel();
+		updateEditMode();
+		boolean e = (g != null);
+		enable_cbx.setSelected(e);
+		query_btn.setEnabled(canRequestGps());
+		if (e) {
+			op_lbl.setText(g.getOperation());
+			poll_lbl.setText(formatStamp(g.getLatestPoll()));
+			sample_lbl.setText(formatStamp(g.getLatestSample()));
+		} else {
+			op_lbl.setText("");
+			poll_lbl.setText("");
+			sample_lbl.setText("");
+		}
 	}
 
-	/** Set the GPS object */
-	public void setGps(Gps g) {
-		watcher.setProxy(g);
+	/** Check if GPS can be requested */
+	private boolean canRequestGps() {
+		Gps g = gps;
+		return (g != null)
+		    && session.isWritePermitted(g, "deviceRequest");
 	}
 
 	@Override
 	public void clear() {
 		gps = null;
 		enable_cbx.setSelected(false);
-		enable_cbx.setEnabled(false);
 		query_btn.setEnabled(false);
 		op_lbl.setText("");
 		poll_lbl.setText("");
