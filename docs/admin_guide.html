@@ -53,6 +53,7 @@
     <h3><a href="#beacons">Beacons</a></h3>
     <h3><a href="#alarms">Alarms</a></h3>
     <h3><a href="#rwis">Road Weather Information Systems</a></h3>
+    <h3><a href="#gps">GPS</a></h3>
     <h3><a href="#lane_marking">Lane Marking</a></h3>
   </div>
   <h2><a id="features_link" href="#features">Features</a></h2>
@@ -99,7 +100,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">5 Jul 2018</div>
+<div id="stamp">10 Jul 2018</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -248,6 +249,7 @@
 	<li><a href="#tag_readers">Tag Readers</a></li>
 	<li><a href="#beacons">Beacons</a></li>
 	<li><a href="#rwis">RWIS</a> (road-weather information systems)</li>
+	<li><a href="#gps">GPS</a> (global positioning system)</li>
 	<li><a href="#lane_marking">In-road lighting</a> (dynamic striping)</li>
 </ul>
 <h3 id="protocols">Protocols</h3>
@@ -278,6 +280,7 @@
 	<li>DLI DIN Relay (LCS, beacons)</li>
 	<li>Control By Web (beacons)</li>
 	<li>Incident Feed (external system provided)</li>
+	<li>RedLion modem (GPS)</li>
 </ul>
 <h3 id="advanced_features">Advanced Features</h3>
 <p>
@@ -1258,7 +1261,8 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<tr>
 	    <td>NTCIP A</td>
 	    <td><a href="#dms">DMS</a> control,
-	        <a href="#ilcs">ILCS</a> (no HDLC)
+	        <a href="#ilcs">ILCS</a>,
+	        <a href="#gps">GPS</a>
 	    </td>
 	    <td>UDP</td>
 	    <td>No</td>
@@ -1266,14 +1270,16 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<tr>
 	    <td>NTCIP B</td>
 	    <td><a href="#dms">DMS</a> control,
-	        <a href="#ilcs">ILCS</a> over serial (HDLC)</td>
+	        <a href="#ilcs">ILCS</a>,
+	        <a href="#gps">GPS</a> (with HDLC)</td>
 	    <td>TCP</td>
 	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>NTCIP C</td>
 	    <td><a href="#dms">DMS</a> control,
-	        <a href="#ilcs">ILCS</a> (no HDLC)</td>
+	        <a href="#ilcs">ILCS</a>,
+	        <a href="#gps">GPS</a></td>
 	    <td>TCP</td>
 	    <td>No</td>
 	</tr>
@@ -1431,6 +1437,12 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>Incident feed</td>
 	    <td><a href="#inc_feed">Incidents</a> from external system</td>
 	    <td>HTTP</td>
+	    <td>No</td>
+	</tr>
+	<tr>
+	    <td>GPS RedLion</td>
+	    <td><a href="#gps">GPS</a> for RedLion modems</td>
+	    <td>TCP</td>
 	    <td>No</td>
 	</tr>
 </table>
@@ -1872,7 +1884,8 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<a href="#tag_readers">tag readers</a>,
 	<a href="#beacons">beacons</a>,
 	<a href="#alarms">alarms</a>,
-	<a href="#rwis">road weather information systems</a>, and
+	<a href="#rwis">road weather information systems</a>,
+	<a href="#gps">GPS</a> and
 	<a href="#lane_marking">lane marking</a>.
 </p>
 <p>
@@ -2598,6 +2611,33 @@ FIXME
 <p>
 	Road Weather Information Systems (RWIS) can sense data such as
 	precipitation rate, road surface temperature, wind speed, etc.
+</p>
+
+<h3 id="gps">GPS</h3>
+<p>
+	A portable <a href="#dms">DMS</a> can have an associated GPS (global
+	positioning system) receiver.
+	This allows the sign to be tracked and automatically updated with the
+	nearest roadway and direction.
+</p>
+<p>
+	To create a GPS device, select the DMS and open its
+	<code>Properties</code> form.
+	On the <code>Location</code> tab, there are controls for configuring
+	the associated GPS.
+	Once the GPS is enabled, it must be associated with a controller.
+	Its name will be the same as the DMS, with "_gps" appended.
+	For NTCIP, the GPS should be associated with the same controller as
+	the DMS (using pin 2).
+	For RedLion, a new comm link and controller must be created to
+	communicate with the modem.
+</p>
+<p>
+	The GPS will be polled once every 5 minutes, unless on a
+	<code>Modem</code> comm link.
+	In that case, the comm link period will be used.
+	The <code>Query GPS</code> button can be used to manually poll the
+	coordinates.
 </p>
 
 <h3 id="lane_marking">Lane Marking</h3>
@@ -3670,7 +3710,7 @@ FIXME
 	<li>Type the name of the new DMS in the edit field at the bottom
 	    of the form and press the Create button.</li>
 	<li>Find the new DMS in the data table and select it.</li>
-	<li>Click the Properties button and the DMS Properties Form
+	<li>Click the Properties button and the DMS Properties form
 	    will appear.</li>
 	<li>On the Location Tab specify the road and location of the
 	    physical DMS.</li>
@@ -3701,7 +3741,7 @@ FIXME
 	<li>In the Comm Link Form with the desired comm link selected, click the
 	    Create button on the bottom of the form.</li>
 	<li>Select the new controller in the lower data table and click the
-	    Properties Button. The Controller Form should appear.</li>
+	    Properties button. The Controller form should appear.</li>
 	<li>On the Controller Form Setup Tab, change the condition to active.
 	</li>
 	<li>On the Cabinet Tab specify the DMS cabinet location and style.</li>
