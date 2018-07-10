@@ -109,9 +109,7 @@ public class GpsPanel extends IPanel implements ProxyView<Gps> {
 		});
 		query_btn.setAction(new IAction("gps.query") {
 			protected void doActionPerformed(ActionEvent e) {
-				Gps g = gps;
-				if (g != null)
-					g.setDeviceRequest(QUERY_LOC);
+				queryGps();
 			}
 		});
 
@@ -165,6 +163,13 @@ public class GpsPanel extends IPanel implements ProxyView<Gps> {
 		g.destroy();
 	}
 
+	/** Force GPS to be queried */
+	private void queryGps() {
+		Gps g = gps;
+		if (g != null)
+			g.setDeviceRequest(QUERY_LOC);
+	}
+
 	/** Update the edit mode */
 	public void updateEditMode() {
 		enable_cbx.setEnabled(canUpdateGps());
@@ -206,8 +211,7 @@ public class GpsPanel extends IPanel implements ProxyView<Gps> {
 	/** Check if GPS can be requested */
 	private boolean canRequestGps() {
 		Gps g = gps;
-		return (g != null)
-		    && session.isWritePermitted(g, "deviceRequest");
+		return (g != null) && session.isWritePermitted(g);
 	}
 
 	@Override

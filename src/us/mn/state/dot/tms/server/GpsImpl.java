@@ -185,7 +185,8 @@ public class GpsImpl extends DeviceImpl implements Gps {
 		try {
 			setLatNotify(lt);
 			setLonNotify(ln);
-			setLatestSampleNotify(getLatestPoll());
+			if (lt != null && ln != null)
+				setLatestSampleNotify(getLatestPoll());
 		}
 		catch (TMSException ex) {
 			GPS_LOG.log("Error updating gps: " + ex);
@@ -255,7 +256,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	private Double lat;
 
 	/** Set the latitude */
-	private void setLatNotify(Double lt) throws TMSException{
+	private void setLatNotify(Double lt) throws TMSException {
 		if (lt != lat) {
 			store.update(this, "lat", lat);
 			lat = lt;
@@ -273,7 +274,7 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	private Double lon;
 
 	/** Set the longitude */
-	private void setLonNotify(Double ln) throws TMSException{
+	private void setLonNotify(Double ln) throws TMSException {
 		if (ln != lon) {
 			store.update(this, "lon", ln);
 			lon = ln;
@@ -292,5 +293,15 @@ public class GpsImpl extends DeviceImpl implements Gps {
 	public void periodicPoll() {
 		if (isLongPeriodModem())
 			sendDeviceRequest(DeviceRequest.QUERY_GPS_LOCATION);
+	}
+
+	/** Request a device operation */
+	@Override
+	public void setDeviceRequest(int r) {
+		DeviceRequest dr = DeviceRequest.fromOrdinal(r);
+		// Clear lat/lon to defeat jitter filter (force update)
+		if (DeviceRequest.QUERY_GPS_LOCATION == dr)
+			updateLatLon(null, null);
+		sendDeviceRequest(dr);
 	}
 }
