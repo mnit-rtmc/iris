@@ -48,6 +48,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GeoLocHelper;
+import us.mn.state.dot.tms.Gps;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.ItemStyle;
@@ -91,9 +92,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Number of polling periods for DMS action duration */
 	static private final int DURATION_PERIODS = 3;
 
-	/** "Long" polling period */
-	static private final int PERIOD_LONG_SEC = 60 * 5;
-
 	/** Interface for handling brightness samples */
 	static public interface BrightnessHandler {
 		void feedback(EventType et, int photo, int output);
@@ -103,7 +101,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"static_graphic, beacon, preset, sign_config, " +
+			"gps, static_graphic, beacon, preset, sign_config, " +
 			"default_font, msg_sched, msg_current, deploy_time " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
@@ -134,6 +132,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("controller", controller);
 		map.put("pin", pin);
 		map.put("notes", notes);
+		map.put("gps", gps);
 		map.put("static_graphic", static_graphic);
 		map.put("beacon", beacon);
 		map.put("preset", preset);
@@ -180,36 +179,39 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(3),          // controller
 		     row.getInt(4),             // pin
 		     row.getString(5),          // notes
-		     row.getString(6),          // static_graphic
-		     row.getString(7),          // beacon
-		     row.getString(8),          // preset
-		     row.getString(9),          // sign_config
-		     row.getString(10),         // default_font
-		     row.getString(11),         // msg_sched
-		     row.getString(12),         // msg_current
-		     row.getTimestamp(13)       // deploy_time
+		     row.getString(6),          // gps
+		     row.getString(7),          // static_graphic
+		     row.getString(8),          // beacon
+		     row.getString(9),          // preset
+		     row.getString(10),         // sign_config
+		     row.getString(11),         // default_font
+		     row.getString(12),         // msg_sched
+		     row.getString(13),         // msg_current
+		     row.getTimestamp(14)       // deploy_time
 		);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c, int p, String nt,
-		String sg, String b, String cp, String sc, String df, String ms,
-		String mc, Date dt)
+		String g, String sg, String b, String cp, String sc, String df,
+		String ms, String mc, Date dt)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
-		     lookupGraphic(sg), lookupBeacon(b), lookupPreset(cp),
-		     SignConfigHelper.lookup(sc), FontHelper.lookup(df),
-		     SignMessageHelper.lookup(ms), SignMessageHelper.lookup(mc),
-		     dt);
+		     lookupGps(g), lookupGraphic(sg), lookupBeacon(b),
+		     lookupPreset(cp), SignConfigHelper.lookup(sc),
+		     FontHelper.lookup(df), SignMessageHelper.lookup(ms),
+		     SignMessageHelper.lookup(mc), dt);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
-		int p, String nt, Graphic sg, Beacon b, CameraPreset cp,
-	        SignConfig sc, Font df, SignMessage ms, SignMessage mc, Date dt)
+		int p, String nt, GpsImpl g, Graphic sg, Beacon b,
+		CameraPreset cp, SignConfig sc, Font df, SignMessage ms,
+		SignMessage mc, Date dt)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
+		gps = g;
 		static_graphic = sg;
 		beacon = b;
 		setPreset(cp);
@@ -265,6 +267,30 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public GeoLoc getGeoLoc() {
 		return geo_loc;
+	}
+
+	/** Associated GPS */
+	private GpsImpl gps;
+
+	/** Set associated GPS */
+	@Override
+	public void setGps(Gps g) {
+		if (g instanceof GpsImpl)
+			gps = (GpsImpl) g;
+	}
+
+	/** Set associated GPS */
+	public void doSetGps(Gps g) throws TMSException {
+		if (g != gps) {
+			store.update(this, "gps", g);
+			setGps(g);
+		}
+	}
+
+	/** Get associated GPS */
+	@Override
+	public Gps getGps() {
+		return gps;
 	}
 
 	/** Static graphic (hybrid sign) */
@@ -1272,11 +1298,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		LCSArrayImpl la = lookupLCSArray();
 		if (la != null)
 			la.periodicPoll();
-	}
-
-	/** Check if the polling period is "long", with a modem link */
-	public boolean isLongPeriodModem() {
-		return getPollPeriod() >= PERIOD_LONG_SEC && isModemAny();
 	}
 
 	/** Lookup LCS array if this DMS is lane one */

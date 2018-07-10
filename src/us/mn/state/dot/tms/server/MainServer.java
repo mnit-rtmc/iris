@@ -188,6 +188,7 @@ public class MainServer {
 	/** Schedule jobs on TIMER thread */
 	static private void scheduleTimerJobs() {
 		TIMER.addJob(new DmsQueryStatusJob());
+		TIMER.addJob(new GpsQueryJob());
 		TIMER.addJob(new MeteringJob(FLUSH));
 		TIMER.addJob(new SampleQuery5MinJob());
 		TIMER.addJob(new CameraWiperJob());

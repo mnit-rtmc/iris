@@ -42,6 +42,9 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	/** Device debug log */
 	static private final DebugLog DEVICE_LOG = new DebugLog("device");
 
+	/** "Long" polling period */
+	static private final int PERIOD_LONG_SEC = 60 * 5;
+
 	/** Log a device message */
 	protected void logError(String msg) {
 		if (DEVICE_LOG.isOpen())
@@ -340,6 +343,11 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 	public boolean isModemAny() {
 		ControllerImpl c = controller;
 		return (c != null) && c.isModemAny();
+	}
+
+	/** Check if the polling period is "long", with a modem link */
+	public boolean isLongPeriodModem() {
+		return getPollPeriod() >= PERIOD_LONG_SEC && isModemAny();
 	}
 
 	/** Check if dial-up is required to communicate */

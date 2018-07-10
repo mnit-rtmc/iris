@@ -27,6 +27,12 @@ public interface DMS extends Device {
 	/** Get the device location */
 	GeoLoc getGeoLoc();
 
+	/** Set associated GPS */
+	void setGps(Gps g);
+
+	/** Get associated GPS */
+	Gps getGps();
+
 	/** Set static graphic (hybrid sign) */
 	void setStaticGraphic(Graphic sg);
 

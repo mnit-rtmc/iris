@@ -186,6 +186,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 			return null;
 	}
 
+	/** Lookup a GPS */
+	static protected GpsImpl lookupGps(String name) {
+		SonarObject so = lookupObject(GpsImpl.SONAR_TYPE, name);
+		return (so instanceof GpsImpl) ? (GpsImpl) so : null;
+	}
+
 	/** Lookup a graphic */
 	static protected GraphicImpl lookupGraphic(String name) {
 		SonarObject so = lookupObject(GraphicImpl.SONAR_TYPE, name);

@@ -19,51 +19,22 @@ package us.mn.state.dot.tms;
  * Interface for a GPS (Global Positioning System) device
  *
  * @author John L. Stanley
+ * @author Douglas Lau
  */
 public interface Gps extends Device {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "gps";
 
-	/** Set the GPS enable flag */
-	void setGpsEnable(boolean agps_enable);
+	/** Get the latest poll date &amp; time */
+	Long getLatestPoll();
 
-	/** Get the GPS enable flag */
-	boolean getGpsEnable();
-
-	/** Set the primary device name */
-	void setDeviceName(String adevice_name);
-
-	/** Get the primary device name */
-	String getDeviceName();
-
-	/** Set the primary device class */
-	void setDeviceClass(String adevice_class);
-
-	/** Get the primary device class */
-	String getDeviceClass();
-
-	/** Get the last cycle-polled date & time */
-	Long getPollDatetime();
-
-	/** Get the last successful poll date & time */
-	Long getSampleDatetime();
+	/** Get the latest sample date &amp; time */
+	Long getLatestSample();
 
 	/** Get the most recent latitude */
-	double getSampleLat();
+	Double getLat();
 
 	/** Get the most recent longitude */
-	double getSampleLon();
-
-	/** Get the comm status */
-	String getCommStatus();
-
-	/** Get the error status */
-	String getErrorStatus();
-
-	/** Set the jitter tolerance meters */
-	void setJitterToleranceMeters(int ajitter_tolerance_meters);
-
-	/** Get the jitter tolerance meters */
-	int getJitterToleranceMeters();
+	Double getLon();
 }
