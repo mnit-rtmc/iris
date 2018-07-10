@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  * Copyright (C) 2014       AHMCT, University of California
  * Copyright (C) 2015-2017  SRF Consulting Group
  *
@@ -30,8 +30,6 @@ public enum DeviceRequest {
 	QUERY_MESSAGE,
 	QUERY_STATUS,
 	QUERY_PIXEL_FAILURES,
-	QUERY_GPS_LOCATION,
-	QUERY_GPS_LOCATION_FORCE,
 	TEST_PIXELS,
 	TEST_FANS,
 	TEST_LAMPS,
@@ -42,6 +40,7 @@ public enum DeviceRequest {
 	RESET_MODEM,
 	SEND_LEDSTAR_SETTINGS,
 	QUERY_LEDSTAR_SETTINGS,
+	QUERY_GPS_LOCATION,
 	DISABLE_SYSTEM,
 	CAMERA_FOCUS_STOP,
 	CAMERA_FOCUS_NEAR,

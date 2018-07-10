@@ -29,7 +29,6 @@ public class RedLionProperty extends GpsProperty {
 	public RedLionProperty() {
 		// RedLion modem: Query the GPS reporting data
 		super("AT+BGPSGT\r");
-		
 		max_chars = 200;
 	}
 
@@ -45,5 +44,4 @@ public class RedLionProperty extends GpsProperty {
 		return parseTaipGps(resp)
 		    || parseNmeaGps(resp);
 	}
-	
 }

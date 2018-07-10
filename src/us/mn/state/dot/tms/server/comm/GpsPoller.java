@@ -25,6 +25,5 @@ import us.mn.state.dot.tms.server.GpsImpl;
 public interface GpsPoller extends DevicePoller {
 
 	/** Send a device request */
-	void sendRequest(GpsImpl gpsImpl, DeviceRequest dr);
+	void sendRequest(GpsImpl gps, DeviceRequest dr);
 }
-

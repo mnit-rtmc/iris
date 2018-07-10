@@ -22,17 +22,19 @@ import us.mn.state.dot.sonar.User;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.Gps;
+import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.GpsHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.GeoLocImpl;
 import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.LCSArrayImpl;
 import us.mn.state.dot.tms.server.WeatherSensorImpl;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
+import us.mn.state.dot.tms.server.comm.GpsPoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
 import us.mn.state.dot.tms.server.comm.SamplePoller;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
@@ -46,8 +48,8 @@ import us.mn.state.dot.tms.utils.URIUtil;
  * @author John L. Stanley
  * @author Michael Darter
  */
-public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
-	SamplePoller, WeatherPoller
+public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
+	LCSPoller, SamplePoller, WeatherPoller
 {
 	/** Get the default URI for a comm protocol */
 	static private URI default_uri(CommProtocol cp) {
@@ -59,12 +61,6 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 
 	/** NTCIP debug log */
 	static private final DebugLog NTCIP_LOG = new DebugLog("ntcip2");
-
-	/** Lookup GPS impl */
-	static private GpsImpl lookupGpsImpl(String dev_name) {
-		Gps gps = GpsHelper.lookup(dev_name + "_gps");
-		return (gps instanceof GpsImpl) ? (GpsImpl) gps : null;
-	}
 
 	/** Communication protocol */
 	private final CommProtocol protocol;
@@ -103,7 +99,6 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 			addOp(new OpQueryDMSMessage(dms));
 			break;
 		case QUERY_STATUS:
-			queryGpsStatus(dms);
 			addOp(new OpQueryDMSStatus(dms));
 			break;
 		case QUERY_PIXEL_FAILURES:
@@ -127,22 +122,10 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 		case SEND_LEDSTAR_SETTINGS:
 			addOp(new OpSendDMSLedstar(dms));
 			break;
-		case QUERY_GPS_LOCATION:
-		case QUERY_GPS_LOCATION_FORCE:
-			queryGpsStatus(dms);
-			break;
 		default:
 			// Ignore other requests
 			break;
 		}
-	}
-
-	/** Query the GPS for a DMS */
-	@SuppressWarnings("unchecked")
-	private void queryGpsStatus(DMSImpl dms) {
-		GpsImpl gps = lookupGpsImpl(dms.getName());
-		if (gps != null)
-			addOp(new OpQueryGpsLocationNtcip(dms, gps));
 	}
 
 	/** Send a new message to the sign */
@@ -154,6 +137,23 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, LCSPoller,
 				addOp(new OpUpdateDMSDuration(dms, sm));
 		} else
 			addOp(new OpSendDMSMessage(dms, sm));
+	}
+
+	/** Send a request to the GPS */
+	@SuppressWarnings("unchecked")
+	@Override
+	public void sendRequest(GpsImpl gps, DeviceRequest r) {
+		switch (r) {
+		case QUERY_GPS_LOCATION:
+			GeoLoc loc = GpsHelper.lookupDeviceLoc(gps);
+			if (loc instanceof GeoLocImpl) {
+				addOp(new OpQueryGpsLocationNtcip(gps,
+					(GeoLocImpl) loc));
+			}
+			break;
+		default:
+			; // Ignore other requests
+		}
 	}
 
 	/** Send a device request message to an LCS array */

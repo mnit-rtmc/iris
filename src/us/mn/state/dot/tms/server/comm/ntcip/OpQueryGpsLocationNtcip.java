@@ -16,9 +16,8 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
-import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.EventType;
-import us.mn.state.dot.tms.server.DMSImpl;
+import us.mn.state.dot.tms.server.GeoLocImpl;
 import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.ParsingException;
@@ -31,21 +30,34 @@ import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
  * Operation to query the location of a DMS.
  *
  * @author John L. Stanley - SRF Consulting
+ * @author Douglas Lau
  */
-public class OpQueryGpsLocationNtcip extends OpDMS {
+public class OpQueryGpsLocationNtcip extends OpNtcip {
 
-	/** Use this to report/save the results */
+	/** Latitude to indicate no GPS lock */
+	static private final int NO_GPS_LOCK_LAT = 90000001;
+
+	/** Longitude to indicate no GPS lock */
+	static private final int NO_GPS_LOCK_LON = 180000001;
+
+	/** GPS device being queried */
 	private final GpsImpl gps;
 
+	/** Location of device */
+	private final GeoLocImpl loc;
+
+	/** GPS latitude */
+	private final ASN1Integer lat = MIB1204.essLatitude.makeInt();
+
+	/** GPS longitude */
+	private final ASN1Integer lon = MIB1204.essLongitude.makeInt();
+
 	/** Create a new DMS query configuration object */
-	public OpQueryGpsLocationNtcip(DMSImpl d, GpsImpl g) {
-		super(PriorityLevel.DOWNLOAD, d);
+	public OpQueryGpsLocationNtcip(GpsImpl g, GeoLocImpl l) {
+		super(PriorityLevel.DEVICE_DATA, g);
 		gps = g;
-		if (gps != null) {
-			gps.setPollDatetimeNotify(TimeSteward.currentTimeMillis());
-			gps.setErrorStatusNotify("");
-			gps.setCommStatusNotify("Polling");
-		}
+		loc = l;
+		gps.setLatestPollNotify();
 	}
 
 	/** Create the second phase of the operation */
@@ -60,57 +72,40 @@ public class OpQueryGpsLocationNtcip extends OpDMS {
 		/** Query the GPS location */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer aiLat = MIB1204.essLatitude.makeInt();
-			ASN1Integer aiLon = MIB1204.essLongitude.makeInt();
-			mess.add(aiLat);
-			mess.add(aiLon);
+			mess.add(lat);
+			mess.add(lon);
 			try {
 				mess.queryProps();
 			}
-			catch (NoSuchName e) {
-				setErrorStatus("GPS Not Available");
-				return null;
-			}
-			catch (ParsingException e) {
+			catch (NoSuchName | ParsingException e) {
 				// Some NDOR sign controllers throw
-				// this error instead of NoSuchName...
+				// ParsingException instead of NoSuchName...
 				setErrorStatus("GPS Not Available");
+				setFailed();
 				return null;
 			}
-			logQuery(aiLat);
-			logQuery(aiLon);
-			// check for special NTCIP No-GPS-Lock values
-			if ((aiLat.getInteger() == 90000001)
-			 || (aiLon.getInteger() == 180000001))
-			{
-				setErrorStatus("No GPS Lock");
-			} else {
-				// record results
-				Double dLat = aiLat.getInteger() / 1000000.0;
-				Double dLon = aiLon.getInteger() / 1000000.0;
-				if (gps != null)
-					gps.saveDeviceLocation(dLat, dLon, false);
-				setErrorStatus("");
-			}
+			logQuery(lat);
+			logQuery(lon);
 			return null;
 		}
 	}
 
-	/** Set the error status message. */
+	/** Cleanup the operation */
 	@Override
-	public void setErrorStatus(String s) {
-		assert s != null;
-		if (gps != null)
-			gps.setErrorStatusNotify(s);
-		super.setErrorStatus(s);
+	public void cleanup() {
+		if (isSuccess())
+			updateGpsLocation();
+		super.cleanup();
 	}
 
-	/** Handle a communication error */
-	@Override
-	public void handleCommError(EventType et, String msg) {
-		setSuccess(false);
-		if (gps != null)
-			gps.setErrorStatusNotify(msg);
-		super.handleCommError(et, msg);
+	/** Update the GPS location */
+	private void updateGpsLocation() {
+		int lt = lat.getInteger();
+		int ln = lon.getInteger();
+		if ((NO_GPS_LOCK_LAT != lt) && (NO_GPS_LOCK_LON != ln)) {
+			gps.saveDeviceLocation(loc, lt / 1000000.0,
+				ln / 1000000.0);
+		} else
+			setErrorStatus("No GPS Lock");
 	}
 }

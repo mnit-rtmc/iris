@@ -17,7 +17,10 @@ package us.mn.state.dot.tms.server.comm.redlion;
 
 import java.net.URI;
 import us.mn.state.dot.tms.DeviceRequest;
+import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GpsHelper;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.server.GeoLocImpl;
 import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.comm.GpsPoller;
 import us.mn.state.dot.tms.server.comm.ThreadedPoller;
@@ -42,15 +45,15 @@ public class RedLionPoller extends ThreadedPoller<GpsProperty>
 	@Override
 	public void sendRequest(GpsImpl gps, DeviceRequest r) {
 		switch (r) {
-			case QUERY_STATUS:
-			case QUERY_GPS_LOCATION:
-				addOp(new OpQueryGpsLocationRedLion(gps, false));
-				break;
-			case QUERY_GPS_LOCATION_FORCE:
-				addOp(new OpQueryGpsLocationRedLion(gps, true));
-				break;
-			default:
-				; // Ignore other requests
+		case QUERY_GPS_LOCATION:
+			GeoLoc loc = GpsHelper.lookupDeviceLoc(gps);
+			if (loc instanceof GeoLocImpl) {
+				addOp(new OpQueryGpsLocation(gps,
+					(GeoLocImpl) loc));
+			}
+			break;
+		default:
+			; // Ignore other requests
 		}
 	}
 }
