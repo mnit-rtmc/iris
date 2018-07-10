@@ -57,6 +57,7 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"gate_arm_array",
 		"geo_loc",
 		"glyph",
+		"gps",
 		"graphic",
 		"inc_advice",
 		"inc_descriptor",

@@ -115,6 +115,13 @@ INSERT INTO iris.gps (name, controller, pin, latest_poll, latest_sample,lat,lon)
 UPDATE iris.gps SET lat = null, lon = null
 	WHERE lat = 0.0 OR lon = 0.0;
 
+INSERT INTO iris.sonar_type (name) VALUES ('gps');
+
+INSERT INTO iris.privilege (name, capability, type_n, obj_n, group_n, attr_n,
+                            write)
+	VALUES ('PRV_gps0', 'dms_admin', 'gps', '', '', '', true),
+	       ('PRV_gps1', 'dms_tab', 'gps', '', '', '', false);
+
 DROP VIEW dms_message_view;
 DROP VIEW dms_view;
 DROP VIEW iris.dms;
