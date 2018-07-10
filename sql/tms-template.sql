@@ -570,41 +570,29 @@ CREATE TRIGGER alarm_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.alarm_delete();
 
 CREATE TABLE iris._gps (
-	name VARCHAR(24) PRIMARY KEY,
-	gps_enable BOOLEAN NOT NULL DEFAULT false,
-	device_name VARCHAR(20) NOT NULL REFERENCES iris.geo_loc,
-	device_class VARCHAR(20) NOT NULL,
-	poll_datetime timestamp with time zone,
-	sample_datetime timestamp with time zone,
-	sample_lat double precision DEFAULT 0.0,
-	sample_lon double precision DEFAULT 0.0,
-	comm_status VARCHAR(25),
-	error_status VARCHAR(50),
-	jitter_tolerance_meters smallint DEFAULT 0
+	name VARCHAR(20) PRIMARY KEY,
+	latest_poll timestamp WITH time zone,
+	latest_sample timestamp WITH time zone,
+	lat double precision,
+	lon double precision
 );
 
+ALTER TABLE iris._gps ADD CONSTRAINT _gps_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
 CREATE VIEW iris.gps AS
-	SELECT g.name, d.controller, d.pin, g.gps_enable, g.device_name,
-	       g.device_class, g.poll_datetime, g.sample_datetime, g.sample_lat,
-	       g.sample_lon, g.comm_status, g.error_status,
-	       g.jitter_tolerance_meters
+	SELECT g.name, d.controller, d.pin, g.latest_poll, g.latest_sample,
+	       g.lat, g.lon
 	FROM iris._gps g
 	JOIN iris._device_io d ON g.name = d.name;
 
-CREATE FUNCTION iris.gps_insert() RETURNS trigger AS
+CREATE FUNCTION iris.gps_insert() RETURNS TRIGGER AS
 	$gps_insert$
 BEGIN
-	INSERT INTO iris._gps
-	            (name, gps_enable, device_name, device_class,
-	             sample_datetime, sample_lat, sample_lon,
-	             comm_status, error_status,
-	             jitter_tolerance_meters)
-	     VALUES (NEW.name, NEW.gps_enable, NEW.device_name,NEW.device_class,
-	             NEW.sample_datetime, NEW.sample_lat, NEW.sample_lon,
-	             NEW.comm_status, NEW.error_status,
-	             NEW.jitter_tolerance_meters);
 	INSERT INTO iris._device_io (name, controller, pin)
-	     VALUES (NEW.name, NEW.controller, 0);
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._gps (name, latest_sample, lat, lon)
+	     VALUES (NEW.name, NEW.latest_sample, NEW.lat, NEW.lon);
 	RETURN NEW;
 END;
 $gps_insert$ LANGUAGE plpgsql;
@@ -613,7 +601,7 @@ CREATE TRIGGER gps_insert_trig
 	INSTEAD OF INSERT ON iris.gps
 	FOR EACH ROW EXECUTE PROCEDURE iris.gps_insert();
 
-CREATE FUNCTION iris.gps_update() RETURNS trigger AS
+CREATE FUNCTION iris.gps_update() RETURNS TRIGGER AS
 	$gps_update$
 BEGIN
         UPDATE iris._device_io
@@ -621,16 +609,10 @@ BEGIN
                pin = NEW.pin
          WHERE name = OLD.name;
 	UPDATE iris._gps
-	   SET gps_enable = NEW.gps_enable,
-	       device_name = NEW.device_name,
-	       device_class = NEW.device_class,
-	       poll_datetime = NEW.poll_datetime,
-	       sample_datetime = NEW.sample_datetime,
-	       sample_lat = NEW.sample_lat,
-	       sample_lon = NEW.sample_lon,
-	       comm_status = NEW.comm_status,
-	       error_status = NEW.error_status,
-	       jitter_tolerance_meters = NEW.jitter_tolerance_meters
+	   SET latest_poll = NEW.latest_poll,
+	       latest_sample = NEW.latest_sample,
+	       lat = NEW.lat,
+	       lon = NEW.lon
 	 WHERE name = OLD.name;
 	RETURN NEW;
 END;
@@ -1309,6 +1291,7 @@ CREATE TABLE iris._dms (
 	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
 	notes text NOT NULL,
+	gps VARCHAR(20) REFERENCES iris._gps,
 	static_graphic VARCHAR(20) REFERENCES iris.graphic,
 	beacon VARCHAR(20) REFERENCES iris._beacon,
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
@@ -1322,9 +1305,9 @@ ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.dms AS
-	SELECT d.name, geo_loc, controller, pin, notes, static_graphic, beacon,
-	       preset, sign_config, default_font, msg_sched, msg_current,
-	       deploy_time
+	SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
+	       beacon, preset, sign_config, default_font, msg_sched,
+	       msg_current, deploy_time
 	FROM iris._dms dms
 	JOIN iris._device_io d ON dms.name = d.name
 	JOIN iris._device_preset p ON dms.name = p.name;
@@ -1336,12 +1319,13 @@ BEGIN
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._device_preset (name, preset)
 	     VALUES (NEW.name, NEW.preset);
-	INSERT INTO iris._dms (name, geo_loc, notes, static_graphic, beacon,
-	                       sign_config, default_font, msg_sched, msg_current,
-	                       deploy_time)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.static_graphic,
-	             NEW.beacon, NEW.sign_config, NEW.default_font,
-	             NEW.msg_sched, NEW.msg_current, NEW.deploy_time);
+	INSERT INTO iris._dms (name, geo_loc, notes, gps, static_graphic,
+	                       beacon, sign_config, default_font, msg_sched,
+	                       msg_current, deploy_time)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.gps,
+	             NEW.static_graphic, NEW.beacon, NEW.sign_config,
+	             NEW.default_font, NEW.msg_sched, NEW.msg_current,
+	             NEW.deploy_time);
 	RETURN NEW;
 END;
 $dms_insert$ LANGUAGE plpgsql;
@@ -1363,6 +1347,7 @@ BEGIN
 	UPDATE iris._dms
 	   SET geo_loc = NEW.geo_loc,
 	       notes = NEW.notes,
+	       gps = NEW.gps,
 	       static_graphic = NEW.static_graphic,
 	       beacon = NEW.beacon,
 	       sign_config = NEW.sign_config,
@@ -2026,7 +2011,7 @@ CREATE TABLE event.event_description (
 
 CREATE TABLE event.action_plan_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp with time zone NOT NULL,
+	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	action_plan VARCHAR(16) NOT NULL,
@@ -2035,7 +2020,7 @@ CREATE TABLE event.action_plan_event (
 
 CREATE TABLE event.alarm_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp with time zone NOT NULL,
+	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	alarm VARCHAR(20) NOT NULL REFERENCES iris._alarm(name)
@@ -2044,7 +2029,7 @@ CREATE TABLE event.alarm_event (
 
 CREATE TABLE event.brightness_sample (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp with time zone NOT NULL,
+	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	dms VARCHAR(20) NOT NULL REFERENCES iris._dms(name)
@@ -2055,7 +2040,7 @@ CREATE TABLE event.brightness_sample (
 
 CREATE TABLE event.comm_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp with time zone NOT NULL,
+	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	controller VARCHAR(20) NOT NULL REFERENCES iris.controller(name)
@@ -2065,7 +2050,7 @@ CREATE TABLE event.comm_event (
 
 CREATE TABLE event.detector_event (
 	event_id integer DEFAULT nextval('event.event_id_seq') NOT NULL,
-	event_date timestamp with time zone NOT NULL,
+	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	device_id VARCHAR(20) REFERENCES iris._detector(name)
@@ -2074,7 +2059,7 @@ CREATE TABLE event.detector_event (
 
 CREATE TABLE event.sign_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp with time zone NOT NULL,
+	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	device_id VARCHAR(20),
@@ -2086,7 +2071,7 @@ CREATE INDEX ON event.sign_event(event_date);
 
 CREATE TABLE event.client_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp with time zone NOT NULL,
+	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	host_port VARCHAR(64) NOT NULL,
@@ -2095,7 +2080,7 @@ CREATE TABLE event.client_event (
 
 CREATE TABLE event.gate_arm_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp with time zone NOT NULL,
+	event_date timestamp WITH time zone NOT NULL,
 	event_desc_id integer NOT NULL
 		REFERENCES event.event_description(event_desc_id),
 	device_id VARCHAR(20),
@@ -2564,8 +2549,8 @@ CREATE VIEW sign_config_view AS
 GRANT SELECT ON sign_config_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
-	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.static_graphic,
-	       d.beacon, p.camera, p.preset_num, d.sign_config,
+	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
+	       d.static_graphic, d.beacon, p.camera, p.preset_num, d.sign_config,
 	       COALESCE(d.default_font, sc.default_font) AS default_font,
 	       msg_sched, msg_current, deploy_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
