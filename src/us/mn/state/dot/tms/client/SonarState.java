@@ -588,6 +588,11 @@ public class SonarState extends Client {
 		populateReadable(lane_actions);
 		populateReadable(meter_actions);
 		populateReadable(gpses);
+		if (canRead(Gps.SONAR_TYPE)) {
+			gpses.ignoreAttribute("operation");
+			gpses.ignoreAttribute("latestPoll");
+			gpses.ignoreAttribute("latestSample");
+		}
 	}
 
 	/** Look up the specified connection */
