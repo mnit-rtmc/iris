@@ -38,6 +38,7 @@ DROP FUNCTION iris.gps_delete();
 
 CREATE TABLE iris._gps (
 	name VARCHAR(20) PRIMARY KEY,
+	notes VARCHAR(32),
 	latest_poll timestamp WITH time zone,
 	latest_sample timestamp WITH time zone,
 	lat double precision,
@@ -48,8 +49,8 @@ ALTER TABLE iris._gps ADD CONSTRAINT _gps_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.gps AS
-	SELECT g.name, d.controller, d.pin, g.latest_poll, g.latest_sample,
-	       g.lat, g.lon
+	SELECT g.name, d.controller, d.pin, g.notes, g.latest_poll,
+               g.latest_sample, g.lat, g.lon
 	FROM iris._gps g
 	JOIN iris._device_io d ON g.name = d.name;
 
@@ -58,8 +59,9 @@ CREATE FUNCTION iris.gps_insert() RETURNS TRIGGER AS
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._gps (name, latest_sample, lat, lon)
-	     VALUES (NEW.name, NEW.latest_sample, NEW.lat, NEW.lon);
+	INSERT INTO iris._gps (name, notes, latest_poll, latest_sample, lat,lon)
+	     VALUES (NEW.name, NEW.notes, NEW.latest_poll, NEW.latest_sample,
+                     NEW.lat, NEW.lon);
 	RETURN NEW;
 END;
 $gps_insert$ LANGUAGE plpgsql;
@@ -76,7 +78,8 @@ BEGIN
                pin = NEW.pin
          WHERE name = OLD.name;
 	UPDATE iris._gps
-	   SET latest_poll = NEW.latest_poll,
+	   SET notes = NEW.notes,
+               latest_poll = NEW.latest_poll,
 	       latest_sample = NEW.latest_sample,
 	       lat = NEW.lat,
 	       lon = NEW.lon
