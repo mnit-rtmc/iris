@@ -89,7 +89,9 @@ public class ParkingSpace implements MapObject {
 
 	/** Get the normal vector */
 	private MapVector getNormalVector() {
-		return segment.normal_b.rotate(3 * Math.PI / 4);
+		double x = segment.pos_a.getX() - segment.pos_b.getX();
+		double y = segment.pos_a.getY() - segment.pos_b.getY();
+		return new MapVector(x, y).perpendicular();
 	}
 
 	/** Calculate the segment width */
