@@ -28,6 +28,7 @@ import static us.mn.state.dot.tms.server.comm.ntcip.mib1203.MIB1203.*;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Enum;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * Operation to query the current message on a DMS.
@@ -177,13 +178,28 @@ public class OpQueryDMSMessage extends OpDMS {
 	private void setMsgCurrent() {
 		if (status.getEnum() == DmsMessageStatus.valid) {
 			Integer d = parseDuration(time.getInteger());
-			DmsMsgPriority rp = prior.getEnum();
-			/* If it's null, IRIS didn't send it ... */
-			if (null == rp)
-				rp = DmsMsgPriority.OTHER_SYSTEM;
+			DmsMsgPriority rp = getMsgPriority();
 			setMsgCurrent(ms.getValue(), beacon.getInteger(), rp,d);
 		} else
 			setErrorStatus("INVALID STATUS: " + status);
+	}
+
+	/** Get the message priority of the current message */
+	private DmsMsgPriority getMsgPriority() {
+		DmsMsgPriority rp = prior.getEnum();
+		/* If the priority is unknown, some other system sent it */
+		if (null == rp)
+			return DmsMsgPriority.OTHER_SYSTEM;
+		if (DmsMsgPriority.BLANK == rp) {
+			/* If MULTI is not blank, some other system sent it */
+			MultiString multi = new MultiString(ms.getValue());
+			if (!multi.isBlank())
+				return DmsMsgPriority.OTHER_SYSTEM;
+		}
+		if (DmsMsgPriority.RESERVED == rp)
+			return DmsMsgPriority.OTHER_SYSTEM;
+		else
+			return rp;
 	}
 
 	/** Set the current message on the sign */
