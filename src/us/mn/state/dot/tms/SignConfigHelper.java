@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,10 +57,14 @@ public class SignConfigHelper extends BaseHelper {
 	 * @param pxh Pixel height.
 	 * @param cw Character width.
 	 * @param ch Character height.
+	 * @param cs Color scheme ordinal.
+	 * @param mf Monochrome foreground color (24-bit).
+	 * @param mb Monochrome background color (24-bit).
 	 * @return Matching sign config, or null if not found. */
 	static public SignConfig find(DMSType dt, boolean p, String t,
 		String sa, String l, String bt, int fw, int fh, int bh, int bv,
-		int ph, int pv, int pxw, int pxh, int cw, int ch)
+		int ph, int pv, int pxw, int pxh, int cw, int ch, int cs,
+		int mf, int mb)
 	{
 		int dti = dt.ordinal();
 		Iterator<SignConfig> it = iterator();
@@ -82,7 +86,25 @@ public class SignConfigHelper extends BaseHelper {
 			    sc.getPixelHeight() == pxh &&
 			    sc.getCharWidth() == cw &&
 			    sc.getCharHeight() == ch)
+			{
+				// FIXME
+				if (sc.getColorScheme() != cs) {
+					System.err.println("SignConfig " +
+					sc.getName() + " color scheme: " +
+					cs + " != " + sc.getColorScheme());
+				}
+				if (sc.getMonochromeForeground() != mf) {
+					System.err.println("SignConfig " +
+					sc.getName() + " monochrome fg: " +
+					mf + " != " + sc.getMonochromeForeground());
+				}
+				if (sc.getMonochromeBackground() != mb) {
+					System.err.println("SignConfig " +
+					sc.getName() + " monochrome bg: " +
+					mb + " != " + sc.getMonochromeBackground());
+				}
 				return sc;
+			}
 		}
 		return null;
 	}

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  * Copyright (C) 2017  	    Iteris Inc.
  *
@@ -103,6 +103,13 @@ public class OpQueryDMSConfiguration extends OpDMS {
 
 	/** Character width */
 	private final ASN1Integer c_width = vmsCharacterWidthPixels.makeInt();
+
+	/** Color scheme */
+	private final ASN1Enum<DmsColorScheme> color_scheme = new ASN1Enum<
+		DmsColorScheme>(DmsColorScheme.class, dmsColorScheme.node);
+
+	/** Monochrome color */
+	private final MonochromeColor m_color = new MonochromeColor();
 
 	/** Create a new DMS query configuration object */
 	public OpQueryDMSConfiguration(DMSImpl d) {
@@ -279,10 +286,6 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		/** Query the 1203v2 objects */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			MonochromeColor m_color = new MonochromeColor();
-			ASN1Enum<DmsColorScheme> color_scheme = new ASN1Enum<
-				DmsColorScheme>(DmsColorScheme.class,
-				dmsColorScheme.node);
 			DmsSupportedMultiTags tags =new DmsSupportedMultiTags();
 			ASN1Integer pages = dmsMaxNumberPages.makeInt();
 			ASN1Integer m_len = dmsMaxMultiStringLength.makeInt();
@@ -337,6 +340,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		if (isSuccess()) {
 			int dt = type.getValueEnum().ordinal();
 			boolean p = type.isPortable();
+			int mf = m_color.getForegroundInt();
+			int mb = m_color.getBackgroundInt();
 			SignConfigImpl sc = SignConfigImpl.findOrCreate(dt, p,
 				tech.getValue(), access.getValue(),
 				legend.getValue(), beaconType.getValue(),
@@ -345,7 +350,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				h_border.getInteger(), v_border.getInteger(),
 				h_pitch.getInteger(), v_pitch.getInteger(),
 				s_width.getInteger(), s_height.getInteger(),
-				c_width.getInteger(), getCharHeight());
+				c_width.getInteger(), getCharHeight(),
+				color_scheme.getInteger(), mf, mb);
 			if (sc != null)
 				dms.setSignConfigNotify(sc);
 		}

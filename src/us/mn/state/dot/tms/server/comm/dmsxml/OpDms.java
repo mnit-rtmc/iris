@@ -19,6 +19,8 @@ package us.mn.state.dot.tms.server.comm.dmsxml;
 import java.io.IOException;
 import java.util.Random;
 import us.mn.state.dot.sonar.User;
+import us.mn.state.dot.tms.ColorScheme;
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.PageTimeHelper;
@@ -417,7 +419,10 @@ abstract class OpDms extends OpDevice {
 					horizPitch, vertPitch,
 					signWidthPixels, signHeightPixels,
 					characterWidthPixels,
-					characterHeightPixels);
+					characterHeightPixels,
+					ColorScheme.MONOCHROME_1_BIT.ordinal(),
+					DmsColor.AMBER.rgb(),
+					DmsColor.BLACK.rgb());
 				if (sc != null)
 					m_dms.setSignConfigNotify(sc);
 

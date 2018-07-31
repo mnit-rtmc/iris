@@ -411,6 +411,11 @@ CREATE TABLE iris.dms_type (
 	description VARCHAR(32) NOT NULL
 );
 
+CREATE TABLE iris.color_scheme (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
 CREATE TABLE iris.sign_config (
 	name VARCHAR(12) PRIMARY KEY,
 	dms_type INTEGER NOT NULL REFERENCES iris.dms_type,
@@ -429,6 +434,9 @@ CREATE TABLE iris.sign_config (
 	pixel_height INTEGER NOT NULL,
 	char_width INTEGER NOT NULL,
 	char_height INTEGER NOT NULL,
+	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
+	monochrome_foreground INTEGER NOT NULL,
+	monochrome_background INTEGER NOT NULL,
 	default_font VARCHAR(16) REFERENCES iris.font
 );
 
@@ -2543,12 +2551,15 @@ CREATE VIEW quick_message_view AS
 GRANT SELECT ON quick_message_view TO PUBLIC;
 
 CREATE VIEW sign_config_view AS
-	SELECT name, description AS dms_type, portable, technology, sign_access,
-	       legend, beacon_type, face_width, face_height, border_horiz,
-	       border_vert, pitch_horiz, pitch_vert, pixel_width, pixel_height,
-	       char_width, char_height, default_font
+	SELECT name, dt.description AS dms_type, portable, technology,
+	       sign_access, legend, beacon_type, face_width, face_height,
+	       border_horiz, border_vert, pitch_horiz, pitch_vert,
+	       pixel_width, pixel_height, char_width, char_height,
+	       cs.description AS color_scheme,
+	       monochrome_foreground, monochrome_background, default_font
 	FROM iris.sign_config
-	JOIN iris.dms_type ON sign_config.dms_type = dms_type.id;
+	JOIN iris.dms_type dt ON sign_config.dms_type = dt.id
+	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
 GRANT SELECT ON sign_config_view TO PUBLIC;
 
 CREATE VIEW dms_view AS
@@ -3079,6 +3090,13 @@ COPY iris.dms_type (id, description) FROM stdin;
 6	VMS Full-matrix
 \.
 
+COPY iris.color_scheme (id, description) FROM stdin;
+1	monochrome1Bit
+2	monochrome8Bit
+3	colorClassic
+4	color24Bit
+\.
+
 COPY iris.sign_msg_source (bit, source) FROM stdin;
 0	blank
 1	operator
@@ -3216,7 +3234,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.76.0
+database_version	4.77.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0

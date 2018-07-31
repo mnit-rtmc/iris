@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,6 +19,8 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.SonarException;
+import us.mn.state.dot.tms.ColorScheme;
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
@@ -50,25 +52,29 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	 * @param pxh Pixel height.
 	 * @param cw Character width (0 means variable).
 	 * @param ch Character height (0 means variable).
+	 * @param cs Color scheme ordinal.
+	 * @param mf Monochrome foreground color (24-bit).
+	 * @param mb Monochrome background color (24-bit).
 	 * @return Matching existing, or new sign config.
 	 */
 	static public SignConfigImpl findOrCreate(int dt, boolean p, String t,
 		String sa, String l, String bt, int fw, int fh, int bh, int bv,
-		int ph, int pv, int pxw, int pxh, int cw, int ch)
+		int ph, int pv, int pxw, int pxh, int cw, int ch, int cs,
+		int mf, int mb)
 	{
 		if (fw <= 0 || fh <= 0 || bh < 0 || bv < 0 || ph <= 0 ||
 		    pv <= 0 || pxw <= 0 || pxh <= 0 || cw < 0 || ch < 0)
 			return null;
 		SignConfig sc = SignConfigHelper.find(DMSType.fromOrdinal(dt),
 			p, t, sa, l, bt, fw, fh, bh, bv, ph, pv, pxw, pxh, cw,
-			ch);
+			ch, cs, mf, mb);
 		if (sc instanceof SignConfigImpl)
 			return (SignConfigImpl) sc;
 		else {
 			String n = createUniqueName();
 			SignConfigImpl sci = new SignConfigImpl(n, dt, p, t, sa,
 				l, bt, fw, fh, bh, bv, ph, pv, pxw, pxh, cw,
-				ch, "");
+				ch, cs, mf, mb, "");
 			return createNotify(sci);
 		}
 	}
@@ -89,7 +95,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	static public SignConfigImpl findOrCreateLCS() {
 		return findOrCreate(DMSType.OTHER.ordinal(), false, "DLCS",
 			"FRONT", "NONE", "NONE", 600, 600, 1, 1, 1, 1, 1, 1,
-			0, 0);
+			0, 0, ColorScheme.MONOCHROME_1_BIT.ordinal(),
+			DmsColor.AMBER.rgb(), DmsColor.BLACK.rgb());
 	}
 
 	/** Last allocated sign config ID */
@@ -119,7 +126,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 			"sign_access, legend, beacon_type, face_width, " +
 			"face_height, border_horiz, border_vert, pitch_horiz, "+
 			"pitch_vert, pixel_width, pixel_height, char_width, " +
-			"char_height, default_font FROM iris." +
+			"char_height, color_scheme, monochrome_foreground, " +
+			"monochrome_background, default_font FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -149,6 +157,9 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		map.put("pixel_height", pixel_height);
 		map.put("char_width", char_width);
 		map.put("char_height", char_height);
+		map.put("color_scheme", color_scheme.ordinal());
+		map.put("monochrome_foreground", monochrome_foreground);
+		map.put("monochrome_background", monochrome_background);
 		map.put("default_font", default_font);
 		return map;
 	}
@@ -167,31 +178,35 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 
 	/** Create a sign config */
 	private SignConfigImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),		// name
-		     row.getInt(2),		// dms_type
-		     row.getBoolean(3),		// portable
-		     row.getString(4),		// technology
-		     row.getString(5),		// sign_access
-		     row.getString(6),		// legend
-		     row.getString(7),		// beacon_type
-		     row.getInt(8),		// face_width
-		     row.getInt(9),		// face_height
-		     row.getInt(10),		// border_horiz
-		     row.getInt(11),		// border_vert
-		     row.getInt(12),		// pitch_horiz
-		     row.getInt(13),		// pitch_vert
-		     row.getInt(14),		// pixel_width
-		     row.getInt(15),		// pixel_height
-		     row.getInt(16),		// char_width
-		     row.getInt(17),		// char_height
-		     row.getString(18)		// default_font
+		this(row.getString(1),   // name
+		     row.getInt(2),      // dms_type
+		     row.getBoolean(3),  // portable
+		     row.getString(4),   // technology
+		     row.getString(5),   // sign_access
+		     row.getString(6),   // legend
+		     row.getString(7),   // beacon_type
+		     row.getInt(8),      // face_width
+		     row.getInt(9),      // face_height
+		     row.getInt(10),     // border_horiz
+		     row.getInt(11),     // border_vert
+		     row.getInt(12),     // pitch_horiz
+		     row.getInt(13),     // pitch_vert
+		     row.getInt(14),     // pixel_width
+		     row.getInt(15),     // pixel_height
+		     row.getInt(16),     // char_width
+		     row.getInt(17),     // char_height
+		     row.getInt(18),     // color_scheme
+		     row.getInt(19),     // monochrome_foreground
+		     row.getInt(20),     // monochrome_background
+		     row.getString(21)   // default_font
 		);
 	}
 
 	/** Create a sign config */
 	private SignConfigImpl(String n, int dt, boolean p, String t, String sa,
 		String l, String bt, int fw, int fh, int bh, int bv, int ph,
-		int pv, int pxw, int pxh, int cw, int ch, String df)
+		int pv, int pxw, int pxh, int cw, int ch, int cs, int mf,
+		int mb, String df)
 	{
 		super(n);
 		dms_type = DMSType.fromOrdinal(dt);
@@ -210,6 +225,9 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		pixel_height = pxh;
 		char_width = cw;
 		char_height = ch;
+		color_scheme = ColorScheme.fromOrdinal(cs);
+		monochrome_foreground = mf;
+		monochrome_background = mb;
 		default_font = FontHelper.lookup(df);
 	}
 
@@ -355,6 +373,33 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	@Override
 	public int getCharHeight() {
 		return char_height;
+	}
+
+	/** DMS Color scheme */
+	private final ColorScheme color_scheme;
+
+	/** Get the color scheme (ordinal of ColorScheme) */
+	@Override
+	public int getColorScheme() {
+		return color_scheme.ordinal();
+	}
+
+	/** Monochrome scheme foreground color (24-bit). */
+	private final int monochrome_foreground;
+
+	/** Get monochrome scheme foreground color (24-bit). */
+	@Override
+	public int getMonochromeForeground() {
+		return monochrome_foreground;
+	}
+
+	/** Monochrome scheme background color (24-bit). */
+	private final int monochrome_background;
+
+	/** Get monochrome scheme background color (24-bit). */
+	@Override
+	public int getMonochromeBackground() {
+		return monochrome_background;
 	}
 
 	/** Default font */

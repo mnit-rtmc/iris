@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,6 +73,15 @@ public interface SignConfig extends SonarObject {
 
 	/** Get character height (pixels; 0 means variable) */
 	int getCharHeight();
+
+	/** Get the color scheme (ordinal of ColorScheme) */
+	int getColorScheme();
+
+	/** Get monochrome scheme foreground color (24-bit). */
+	int getMonochromeForeground();
+
+	/** Get monochrome scheme background color (24-bit). */
+	int getMonochromeBackground();
 
 	/** Set the default font */
 	void setDefaultFont(Font f);
