@@ -23,6 +23,8 @@ import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
+import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.TMSException;
@@ -62,9 +64,10 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	/** Load all the sign messages */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SignMessageImpl.class);
-		store.query("SELECT name, incident, multi, beacon_enabled, " +
-			"prefix_page, msg_priority, source, owner, duration " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+		store.query("SELECT name, sign_config, incident, multi, " +
+			"beacon_enabled, prefix_page, msg_priority, source, " +
+			"owner, duration FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignMessageImpl(row));
@@ -77,6 +80,7 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		map.put("sign_config", sign_config);
 		map.put("incident", incident);
 		map.put("multi", multi);
 		map.put("beacon_enabled", beacon_enabled);
@@ -108,23 +112,25 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 
 	/** Create a sign message */
 	private SignMessageImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),          // name
-		     row.getString(2),          // incident
-		     row.getString(3),          // multi
-		     row.getBoolean(4),         // beacon_enabled
-		     row.getBoolean(5),         // prefix_page
-		     row.getInt(6),             // msg_priority
-		     row.getInt(7),             // source
-		     row.getString(8),          // owner
-		     (Integer) row.getObject(9) // duration
+		this(row.getString(1),           // name
+		     row.getString(2),           // sign_config
+		     row.getString(3),           // incident
+		     row.getString(4),           // multi
+		     row.getBoolean(5),          // beacon_enabled
+		     row.getBoolean(6),          // prefix_page
+		     row.getInt(7),              // msg_priority
+		     row.getInt(8),              // source
+		     row.getString(9),           // owner
+		     (Integer) row.getObject(10) // duration
 		);
 	}
 
 	/** Create a sign message */
-	private SignMessageImpl(String n, String inc, String m, boolean be,
-		boolean pp, int mp, int s, String o, Integer d)
+	private SignMessageImpl(String n, String sc, String inc, String m,
+		boolean be, boolean pp, int mp, int s, String o, Integer d)
 	{
 		super(n);
+		sign_config = SignConfigHelper.lookup(sc);
 		incident = inc;
 		multi = m;
 		beacon_enabled = be;
@@ -136,10 +142,11 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	}
 
 	/** Create a new sign message (by IRIS) */
-	public SignMessageImpl(String m, boolean be, boolean pp,
-		DmsMsgPriority mp, int s, String o,Integer d)
+	public SignMessageImpl(SignConfig sc, String m, boolean be, boolean pp,
+		DmsMsgPriority mp, int s, String o, Integer d)
 	{
 		super(createUniqueName());
+		sign_config = sc;
 		multi = m;
 		beacon_enabled = be;
 		prefix_page = pp;
@@ -154,6 +161,15 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 	void logMsg(String msg) {
 		if (MSG_LOG.isOpen())
 			MSG_LOG.log(getName() + ": " + msg);
+	}
+
+	/** Sign configuration */
+	private SignConfig sign_config;
+
+	/** Get the sign configuration */
+	@Override
+	public SignConfig getSignConfig() {
+		return sign_config;
 	}
 
 	/** Associated incident (original name) */

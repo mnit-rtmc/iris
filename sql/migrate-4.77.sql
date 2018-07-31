@@ -58,4 +58,43 @@ CREATE VIEW dms_view AS
 	LEFT JOIN sign_config_view sc ON d.sign_config = sc.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
+ALTER TABLE iris.sign_message
+	ADD COLUMN sign_config VARCHAR(12) REFERENCES iris.sign_config;
+
+-- Blank scheduled messages on DMS with no sign config
+UPDATE iris.dms SET msg_sched = NULL WHERE sign_config IS NULL;
+
+-- Set sign_config for sign_message ref'd from msg_sched
+WITH sq AS (
+	SELECT sign_config, msg_sched
+	FROM iris.dms
+)
+UPDATE iris.sign_message sm
+   SET sign_config = sq.sign_config
+  FROM sq
+ WHERE sm.name = sq.msg_sched;
+
+-- Set sign_config for sign_message red'd from msg_current
+WITH sq AS (
+	SELECT sign_config, msg_current
+	FROM iris.dms
+)
+UPDATE iris.sign_message sm
+SET sign_config = sq.sign_config
+FROM sq
+WHERE sm.name = sq.msg_current;
+
+-- Delete sign_message rows with no sign_config (not referenced)
+DELETE FROM iris.sign_message WHERE sign_config IS NULL;
+
+ALTER TABLE iris.sign_message
+	ALTER COLUMN sign_config SET NOT NULL;
+
+CREATE VIEW sign_message_view AS
+	SELECT name, sign_config, incident, multi, beacon_enabled, prefix_page,
+	       msg_priority, iris.sign_msg_sources(source) AS sources, owner,
+	       duration
+	FROM iris.sign_message;
+GRANT SELECT ON sign_message_view TO PUBLIC;
+
 COMMIT;

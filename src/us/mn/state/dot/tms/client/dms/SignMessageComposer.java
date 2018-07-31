@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
-import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import static us.mn.state.dot.tms.SignMessageHelper.DMS_MESSAGE_MAX_PAGES;
 import us.mn.state.dot.tms.client.Session;
@@ -173,7 +173,8 @@ public class SignMessageComposer extends JPanel {
 	}
 
 	/** Update the message combo box models */
-	public void setSign(DMS proxy, RasterBuilder b) {
+	public void setSign(DMS proxy) {
+		SignConfig sc = (proxy != null) ? proxy.getSignConfig() : null;
 		SignTextModel stm = createSignTextModel(proxy);
 		setSignTextModel(stm);
 		n_lines = DMSHelper.getLineCount(proxy);
@@ -182,7 +183,7 @@ public class SignMessageComposer extends JPanel {
 		initializeWidgets();
 		for (ComposerPagePanel pg: pages) {
 			pg.setModels(stm);
-			pg.setBuilder(b);
+			pg.setSignConfig(sc);
 		}
 		misc_pnl.setSign(proxy);
 	}
@@ -206,10 +207,9 @@ public class SignMessageComposer extends JPanel {
 
 	/** Create a new sign text model */
 	private SignTextModel createSignTextModel(DMS proxy) {
-		if (proxy != null)
-			return new SignTextModel(session, proxy);
-		else
-			return null;
+		return (proxy != null)
+		      ? new SignTextModel(session, proxy)
+		      : null;
 	}
 
 	/** Set a new sign text model */

@@ -690,8 +690,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage findOrCreateMsg(String m, boolean be, boolean pp,
 		DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		SignMessage esm = SignMessageHelper.find(null, m, be, mp, src,
-			o, d);
+		SignMessage esm = SignMessageHelper.find(sign_config, null, m,
+			be, mp, src, o, d);
 		if (esm != null)
 			return esm;
 		else
@@ -710,7 +710,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage createMsgNotify(String m, boolean be, boolean pp,
 		DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		SignMessageImpl sm = new SignMessageImpl(m, be, pp, mp,src,o,d);
+		SignMessageImpl sm = new SignMessageImpl(sign_config, m, be, pp,
+			mp, src, o, d);
 		try {
 			sm.notifyCreate();
 			return sm;

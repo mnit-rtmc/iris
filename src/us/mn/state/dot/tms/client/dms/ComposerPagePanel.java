@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import javax.swing.GroupLayout;
 import javax.swing.JPanel;
-import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.MultiBuilder;
@@ -169,12 +169,12 @@ public class ComposerPagePanel extends JPanel {
 
 	/** Get line model number */
 	private short getLineNumber(int n) {
-		return (short)(n_page * n_lines + n + 1);
+		return (short) (n_page * n_lines + n + 1);
 	}
 
-	/** Set the raster builder */
-	public void setBuilder(RasterBuilder rb) {
-		font_cbx.setBuilder(rb);
+	/** Set the sign configuration */
+	public void setSignConfig(SignConfig sc) {
+		font_cbx.setSignConfig(sc);
 	}
 
 	/** Set the selected lines */

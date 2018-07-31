@@ -25,6 +25,7 @@ import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LCSArray;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.dms.SignMessageCreator;
@@ -142,11 +143,14 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 		if (null == inc)
 			inc = proxy.getName();
 		String dn = dms.getName();
-		String multi = model.getMulti(dn).toString();
-		if (multi != null) {
-			SignMessage sm = creator.create(inc, multi);
-			if (sm != null)
-				dms.setMsgUser(sm);
+		SignConfig sc = dms.getSignConfig();
+		if (sc != null) {
+			String multi = model.getMulti(dn).toString();
+			if (multi != null) {
+				SignMessage sm = creator.create(sc, inc, multi);
+				if (sm != null)
+					dms.setMsgUser(sm);
+			}
 		}
 	}
 

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,7 +16,6 @@
 package us.mn.state.dot.tms;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
 import us.mn.state.dot.tms.utils.MultiRenderer;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.MultiSyntaxError;
@@ -40,19 +39,9 @@ public class RasterBuilder {
 	 * line-matrix or full-matrix signs. */
 	private final int c_width;
 
-	/** Check for character-matrix sign */
-	public boolean isCharMatrix() {
-		return c_width > 0;
-	}
-
 	/** Character height (pixels) for character- or line-matrix signs.
 	 * Use 0 for full-matrix signs. */
 	private final int c_height;
-
-	/** Check for full-matrix sign */
-	public boolean isFullMatrix() {
-		return c_height <= 0;
-	}
 
 	/** Default font number */
 	private final int default_font;
@@ -73,41 +62,6 @@ public class RasterBuilder {
 		c_width = cw;
 		c_height = ch;
 		default_font = df;
-	}
-
-	/** Check if a font is usable */
-	public boolean isFontUsable(Font f) {
-		return isFontWidthUsable(f) && isFontHeightUsable(f);
-	}
-
-	/** Check if a font width is usable */
-	private boolean isFontWidthUsable(Font f) {
-		if (f.getWidth() > width)
-			return false;
-		if (isCharMatrix()) {
-			// char-matrix signs must match font width
-			// and must not have character spacing
-			return c_width == f.getWidth() &&
-			       f.getCharSpacing() == 0;
-		} else {
-			// line- or full-matrix signs must have char spacing
-			return f.getCharSpacing() > 0;
-		}
-	}
-
-	/** Check if a font height is usable */
-	private boolean isFontHeightUsable(Font f) {
-		if (f.getHeight() > height)
-			return false;
-		if (isFullMatrix()) {
-			// full-matrix signs must have line spacing
-			return f.getLineSpacing() > 0;
-		} else {
-			// char- or line-matrix signs must match font height
-			// and must not have line spacing
-			return c_height == f.getHeight() &&
-			       f.getLineSpacing() == 0;
-		}
 	}
 
 	/** Get the optimal line height (pixels) */

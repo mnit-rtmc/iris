@@ -1288,6 +1288,7 @@ $sign_msg_sources$ LANGUAGE plpgsql;
 
 CREATE TABLE iris.sign_message (
 	name VARCHAR(20) PRIMARY KEY,
+	sign_config VARCHAR(12) NOT NULL REFERENCES iris.sign_config,
 	incident VARCHAR(16),
 	multi VARCHAR(1024) NOT NULL,
 	beacon_enabled BOOLEAN NOT NULL,
@@ -2584,6 +2585,13 @@ CREATE VIEW dms_message_view AS
 	LEFT JOIN iris.condition cc ON c.condition = cc.id
 	LEFT JOIN iris.sign_message s ON d.msg_current = s.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
+
+CREATE VIEW sign_message_view AS
+	SELECT name, sign_config, incident, multi, beacon_enabled, prefix_page,
+	       msg_priority, iris.sign_msg_sources(source) AS sources, owner,
+	       duration
+	FROM iris.sign_message;
+GRANT SELECT ON sign_message_view TO PUBLIC;
 
 CREATE VIEW lcs_array_view AS
 	SELECT name, shift, notes, lcs_lock

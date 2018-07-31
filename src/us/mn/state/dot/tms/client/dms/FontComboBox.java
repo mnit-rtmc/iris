@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@ import javax.swing.DefaultComboBoxModel;
 import javax.swing.JComboBox;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
-import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.utils.I18N;
 
@@ -55,13 +55,13 @@ public class FontComboBox extends JComboBox<Font> implements ActionListener {
 		addActionListener(this);
 	}
 
-	/** Set the raster builder */
-	public void setBuilder(RasterBuilder rb) {
+	/** Set the sign configuration */
+	public void setSignConfig(SignConfig sc) {
 		if (font_mdl != null)
 			font_mdl.dispose();
-		if (rb != null) {
+		if (sc != null) {
 			font_mdl = FontComboBoxModel.create(composer.getFonts(),
-				rb);
+				sc);
 			setModel(font_mdl);
 		} else
 			setModel(new DefaultComboBoxModel<Font>());
@@ -85,7 +85,7 @@ public class FontComboBox extends JComboBox<Font> implements ActionListener {
 
 	/** Dispose of the font combo box */
 	public void dispose() {
-		setBuilder(null);
+		setSignConfig(null);
 		removeActionListener(this);
 	}
 

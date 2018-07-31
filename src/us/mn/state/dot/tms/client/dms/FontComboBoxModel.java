@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,7 +18,8 @@ import java.util.Comparator;
 import javax.swing.ComboBoxModel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Font;
-import us.mn.state.dot.tms.RasterBuilder;
+import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
@@ -33,23 +34,23 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 {
 	/** Create a new font combo box model */
 	static public FontComboBoxModel create(TypeCache<Font> fonts,
-		RasterBuilder b)
+		SignConfig sc)
 	{
-		FontComboBoxModel mdl = new FontComboBoxModel(fonts, b);
+		FontComboBoxModel mdl = new FontComboBoxModel(fonts, sc);
 		mdl.initialize();
 		return mdl;
 	}
 
-	/** Raster graphic builder */
-	private final RasterBuilder builder;
+	/** Sign configuration */
+	private final SignConfig sign_config;
 
 	/** Currently selected font */
 	private Font sel_font;
 
 	/** Create a new font combo box model */
-	private FontComboBoxModel(TypeCache<Font> fonts, RasterBuilder b) {
+	private FontComboBoxModel(TypeCache<Font> fonts, SignConfig sc) {
 		super(fonts);
-		builder = b;
+		sign_config = sc;
 	}
 
 	/** Get a font proxy comparator */
@@ -73,7 +74,8 @@ public class FontComboBoxModel extends ProxyListModel<Font>
 	/** Check if a proxy is included in the list */
 	@Override
 	protected boolean check(Font proxy) {
-		return builder != null && builder.isFontUsable(proxy);
+		return sign_config != null
+		    && SignConfigHelper.isFontUsable(sign_config, proxy);
 	}
 
 	/** Get the selected item */

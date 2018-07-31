@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DmsMsgPriority;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgSource;
@@ -59,13 +60,16 @@ public class SignMessageCreator {
 
 	/** Create a new sign message.
 	 *
+	 * @param sc Sign configuration.
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
 	 * @param duration Message duration; null for indefinite.
 	 * @return New sign message, or null on error.
 	 */
-	public SignMessage create(String multi, boolean be, Integer duration) {
-		return create(null, multi, be, DmsMsgPriority.OPERATOR,
+	public SignMessage create(SignConfig sc, String multi, boolean be,
+		Integer duration)
+	{
+		return create(sc, null, multi, be, DmsMsgPriority.OPERATOR,
 			SignMsgSource.operator.bit(), user, duration);
 	}
 
@@ -73,24 +77,26 @@ public class SignMessageCreator {
 	 *
 	 * @return Blank sign message, or null on error.
 	 */
-	public SignMessage createBlankMessage() {
-		return create(null, "", false, DmsMsgPriority.BLANK,
+	public SignMessage createBlankMessage(SignConfig sc) {
+		return create(sc, null, "", false, DmsMsgPriority.BLANK,
 			SignMsgSource.blank.bit(), null, null);
 	}
 
 	/** Create an incident sign message.
 	 *
+	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI text.
 	 * @return New sign message, or null on error.
 	 */
-	public SignMessage create(String inc, String multi) {
-		return create(inc, multi, false, DmsMsgPriority.INCIDENT_MED,
+	public SignMessage create(SignConfig sc, String inc, String multi) {
+		return create(sc, inc, multi, false, DmsMsgPriority.INCIDENT_MED,
 			INCIDENT_SRC, user, null);
 	}
 
 	/** Create a new sign message.
 	 *
+	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
@@ -100,18 +106,19 @@ public class SignMessageCreator {
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
-	private SignMessage create(String inc, String multi, boolean be,
-		DmsMsgPriority mp, int src, String owner, Integer duration)
+	private SignMessage create(SignConfig sc, String inc, String multi,
+		boolean be, DmsMsgPriority mp, int src, String owner,
+		Integer duration)
 	{
 		boolean pp = false; // Operators cannot enable prefix page
-		SignMessage sm = SignMessageHelper.find(inc, multi, pp, mp,
+		SignMessage sm = SignMessageHelper.find(sc, inc, multi, pp, mp,
 			src, owner, duration);
 		if (sm != null)
 			return sm;
 		String name = createName();
 		if (name != null) {
-			return create(name, inc, multi, be, pp, mp, src, owner,
-			              duration);
+			return create(name, sc, inc, multi, be, pp, mp, src,
+			              owner, duration);
 		} else
 			return null;
 	}
@@ -119,6 +126,7 @@ public class SignMessageCreator {
 	/** Create a new sign message.
 	 *
 	 * @param name Sign message name.
+	 * @param sc Sign configuration.
 	 * @param inc Associated incident (original name).
 	 * @param multi MULTI text.
 	 * @param be Beacon enabled.
@@ -129,11 +137,12 @@ public class SignMessageCreator {
 	 * @param duration Message duration; null for indefinite.
 	 * @return Proxy of new sign message, or null on error.
 	 */
-	private SignMessage create(String name, String inc, String multi,
-		boolean be, boolean pp, DmsMsgPriority mp, int src,
-		String owner, Integer duration)
+	private SignMessage create(String name, SignConfig sc, String inc,
+		String multi, boolean be, boolean pp, DmsMsgPriority mp,
+		int src, String owner, Integer duration)
 	{
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
+		attrs.put("sign_config", sc);
 		if (inc != null)
 			attrs.put("incident", inc);
 		attrs.put("multi", multi);

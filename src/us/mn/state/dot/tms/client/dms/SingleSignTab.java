@@ -34,6 +34,8 @@ import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.InvalidMsgException;
+import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
@@ -46,6 +48,7 @@ import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.client.widget.IPanel.Stretch;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.MultiString;
 
 /**
  * A SingleSignTab is a GUI component for displaying the status of a single
@@ -247,18 +250,38 @@ public class SingleSignTab extends IPanel {
 	/** Create a DMS panel pager */
 	private DMSPanelPager createPager(DMS dms, SignPixelPanel pix_pnl) {
 		return (preview)
-		      ? createPreviewPager(pix_pnl)
+		      ? createPreviewPager(dms, pix_pnl)
 		      : createCurrentPager(dms, pix_pnl);
 	}
 
 	/** Create a preview panel pager */
-	private DMSPanelPager createPreviewPager(SignPixelPanel pix_pnl) {
-		RasterGraphic[] rg = dispatcher.getPreviewPixmaps();
+	private DMSPanelPager createPreviewPager(DMS dms,
+		SignPixelPanel pix_pnl)
+	{
+		RasterGraphic[] rg = getPreviewPixmaps(dms);
 		if (rg != null) {
 			return new DMSPanelPager(pix_pnl, rg,
 				dispatcher.getComposedMulti());
 		} else
 			return null;
+	}
+
+	/** Get pixmaps for the preview message */
+	private RasterGraphic[] getPreviewPixmaps(DMS dms) {
+		RasterBuilder b = DMSHelper.createRasterBuilder(dms);
+		if (b != null) {
+			try {
+				String ms = dispatcher.getPreviewMulti();
+				return b.createPixmaps(new MultiString(ms));
+			}
+			catch (IndexOutOfBoundsException e) {
+				// pixmap too small for message
+			}
+			catch (InvalidMsgException e) {
+				// most likely a MultiSyntaxError ...
+			}
+		}
+		return null;
 	}
 
 	/** Update the current panel */

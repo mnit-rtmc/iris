@@ -28,6 +28,9 @@ public interface SignMessage extends SonarObject {
 	/** SONAR type name */
 	String SONAR_TYPE = "sign_message";
 
+	/** Get the sign configuration */
+	SignConfig getSignConfig();
+
 	/** Get the associated incident (original name) */
 	String getIncident();
 
