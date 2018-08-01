@@ -26,6 +26,10 @@ public class MonochromeColor extends ASN1OctetString {
 	/** Create a new MonochromeColor object */
 	public MonochromeColor() {
 		super(MIB1203.monochromeColor.node);
+		setByteValue(new byte[] {
+			// DmsColor.AMBER, DmsColor.BLACK
+			(byte) 255, (byte) 208, 0, 0, 0, 0
+		});
 	}
 
 	/** Get the value array.
@@ -50,7 +54,9 @@ public class MonochromeColor extends ASN1OctetString {
 	 * @return 24-bit color (rgb). */
 	public int getForegroundInt() {
 		byte[] fg = getForeground();
-		return (int) fg[0] << 16 | (int) fg[1] << 8 | (int) fg[2];
+		return ((int) fg[0] & 0xFF) << 16
+		     | ((int) fg[1] & 0xFF) << 8
+		     | ((int) fg[2] & 0xFF);
 	}
 
 	/** Get the background color.
@@ -65,7 +71,9 @@ public class MonochromeColor extends ASN1OctetString {
 	 * @return 24-bit color (rgb). */
 	public int getBackgroundInt() {
 		byte[] bg = getBackground();
-		return (int) bg[0] << 16 | (int) bg[1] << 8 | (int) bg[2];
+		return ((int) bg[0] & 0xFF) << 16
+		     | ((int) bg[1] & 0xFF) << 8
+		     | ((int) bg[2] & 0xFF);
 	}
 
 	/** Get the object value */

@@ -114,6 +114,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	/** Create a new DMS query configuration object */
 	public OpQueryDMSConfiguration(DMSImpl d) {
 		super(PriorityLevel.DOWNLOAD, d);
+		color_scheme.setInteger(DmsColorScheme.monochrome1bit.ordinal());
 	}
 
 	/** Create the second phase of the operation */
