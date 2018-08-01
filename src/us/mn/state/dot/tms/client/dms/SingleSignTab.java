@@ -258,20 +258,16 @@ public class SingleSignTab extends IPanel {
 	private DMSPanelPager createPreviewPager(DMS dms,
 		SignPixelPanel pix_pnl)
 	{
-		RasterGraphic[] rg = getPreviewPixmaps(dms);
-		if (rg != null) {
-			return new DMSPanelPager(pix_pnl, rg,
-				dispatcher.getComposedMulti());
-		} else
-			return null;
+		String ms = dispatcher.getPreviewMulti(dms);
+		RasterGraphic[] rg = getPreviewPixmaps(dms, ms);
+		return (rg != null) ? new DMSPanelPager(pix_pnl, rg, ms) : null;
 	}
 
 	/** Get pixmaps for the preview message */
-	private RasterGraphic[] getPreviewPixmaps(DMS dms) {
+	private RasterGraphic[] getPreviewPixmaps(DMS dms, String ms) {
 		RasterBuilder b = DMSHelper.createRasterBuilder(dms);
 		if (b != null) {
 			try {
-				String ms = dispatcher.getPreviewMulti();
 				return b.createPixmaps(new MultiString(ms));
 			}
 			catch (IndexOutOfBoundsException e) {

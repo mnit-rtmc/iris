@@ -23,6 +23,7 @@ import javax.swing.SwingConstants;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Device;
 import us.mn.state.dot.tms.DMS;
+import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.LCSArray;
 import us.mn.state.dot.tms.SignConfig;
@@ -146,12 +147,19 @@ public class DeviceDeployForm extends SonarObjectForm<Incident> {
 		SignConfig sc = dms.getSignConfig();
 		if (sc != null) {
 			String multi = model.getMulti(dn).toString();
-			if (multi != null) {
-				SignMessage sm = creator.create(sc, inc, multi);
-				if (sm != null)
-					dms.setMsgUser(sm);
-			}
+			if (multi != null)
+				sendMessage(dms, sc, inc, multi);
 		}
+	}
+
+	/** Send new sign message to the specified DMS */
+	private void sendMessage(DMS dms, SignConfig sc, String inc,
+		String ms)
+	{
+		String multi = DMSHelper.adjustMulti(dms, ms);
+		SignMessage sm = creator.create(sc, inc, multi);
+		if (sm != null)
+			dms.setMsgUser(sm);
 	}
 
 	/** Update one attribute on the form */

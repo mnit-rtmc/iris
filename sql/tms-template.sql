@@ -1307,7 +1307,7 @@ CREATE TABLE iris._dms (
 	static_graphic VARCHAR(20) REFERENCES iris.graphic,
 	beacon VARCHAR(20) REFERENCES iris._beacon,
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
-	default_font VARCHAR(16) REFERENCES iris.font,
+	override_font VARCHAR(16) REFERENCES iris.font,
 	msg_sched VARCHAR(20) REFERENCES iris.sign_message,
 	msg_current VARCHAR(20) REFERENCES iris.sign_message NOT NULL,
 	deploy_time timestamp WITH time zone NOT NULL
@@ -1318,7 +1318,7 @@ ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 
 CREATE VIEW iris.dms AS
 	SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
-	       beacon, preset, sign_config, default_font, msg_sched,
+	       beacon, preset, sign_config, override_font, msg_sched,
 	       msg_current, deploy_time
 	FROM iris._dms dms
 	JOIN iris._device_io d ON dms.name = d.name
@@ -1332,11 +1332,11 @@ BEGIN
 	INSERT INTO iris._device_preset (name, preset)
 	     VALUES (NEW.name, NEW.preset);
 	INSERT INTO iris._dms (name, geo_loc, notes, gps, static_graphic,
-	                       beacon, sign_config, default_font, msg_sched,
+	                       beacon, sign_config, override_font, msg_sched,
 	                       msg_current, deploy_time)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.gps,
 	             NEW.static_graphic, NEW.beacon, NEW.sign_config,
-	             NEW.default_font, NEW.msg_sched, NEW.msg_current,
+	             NEW.override_font, NEW.msg_sched, NEW.msg_current,
 	             NEW.deploy_time);
 	RETURN NEW;
 END;
@@ -1363,7 +1363,7 @@ BEGIN
 	       static_graphic = NEW.static_graphic,
 	       beacon = NEW.beacon,
 	       sign_config = NEW.sign_config,
-	       default_font = NEW.default_font,
+	       override_font = NEW.override_font,
 	       msg_sched = NEW.msg_sched,
 	       msg_current = NEW.msg_current,
 	       deploy_time = NEW.deploy_time
@@ -2566,8 +2566,7 @@ GRANT SELECT ON sign_config_view TO PUBLIC;
 CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
 	       d.static_graphic, d.beacon, p.camera, p.preset_num, d.sign_config,
-	       COALESCE(d.default_font, sc.default_font) AS default_font,
-	       msg_sched, msg_current, deploy_time,
+	       default_font, override_font, msg_sched, msg_current, deploy_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.location, l.lat, l.lon
 	FROM iris.dms d

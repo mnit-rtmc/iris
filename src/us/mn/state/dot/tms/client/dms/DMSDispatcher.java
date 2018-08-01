@@ -141,13 +141,13 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Get the composed MULTI string */
-	public String getComposedMulti() {
-		return multi;
+	private String getComposedMulti(DMS dms) {
+		return DMSHelper.adjustMulti(dms, multi);
 	}
 
 	/** Get the preview MULTI string */
-	public String getPreviewMulti() {
-		String ms = getComposedMulti();
+	public String getPreviewMulti(DMS dms) {
+		String ms = getComposedMulti(dms);
 		String prefix = getPagePrefix();
 		if (prefix.isEmpty())
 			return ms;
@@ -254,7 +254,7 @@ public class DMSDispatcher extends JPanel {
 	/** Create a new message from the widgets.
 	 * @return A SignMessage from composer selection, or null on error. */
 	private SignMessage createMessage(DMS dms) {
-		return createMessage(dms, multi);
+		return createMessage(dms, getComposedMulti(dms));
 	}
 
 	/** Create a new message using the specified MULTI */

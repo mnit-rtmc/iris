@@ -54,11 +54,11 @@ public interface DMS extends Device {
 	/** Get the sign configuration */
 	SignConfig getSignConfig();
 
-	/** Set the default font */
-	void setDefaultFont(Font f);
+	/** Set the override font */
+	void setOverrideFont(Font f);
 
-	/** Get the default font */
-	Font getDefaultFont();
+	/** Get the override font */
+	Font getOverrideFont();
 
 	/* Transient attributes (not stored in database) */
 

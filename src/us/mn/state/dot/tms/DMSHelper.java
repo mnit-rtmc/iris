@@ -18,6 +18,7 @@ package us.mn.state.dot.tms;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Iterator;
+import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
 
@@ -137,14 +138,23 @@ public class DMSHelper extends BaseHelper {
 	/** Get the default font for a DMS */
 	static public Font getDefaultFont(DMS dms) {
 		if (dms != null) {
-			Font f = dms.getDefaultFont();
-			if (f != null)
-				return f;
 			SignConfig sc = dms.getSignConfig();
 			if (sc != null)
 				return sc.getDefaultFont();
 		}
 		return null;
+	}
+
+	/** Adjust a MULTI string for a DMS */
+	static public String adjustMulti(DMS dms, String multi) {
+		Font f = dms.getOverrideFont();
+		if (f != null) {
+			MultiBuilder mb = new MultiBuilder();
+			mb.setFont(f.getNumber(), null);
+			mb.append(new MultiString(multi));
+			return mb.toString();
+		} else
+			return multi;
 	}
 
 	/** Get the number of lines on a DMS.

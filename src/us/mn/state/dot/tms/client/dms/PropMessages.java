@@ -62,10 +62,10 @@ public class PropMessages extends JPanel {
 	/** Sign pixel panel */
 	private final SignPixelPanel pixel_pnl = new SignPixelPanel(40, 400);
 
-	/** Default font label */
-	private final ILabel font_lbl = new ILabel("dms.font.default");
+	/** Override font label */
+	private final ILabel font_lbl = new ILabel("dms.font.override");
 
-	/** Default font combo box */
+	/** Override font combo box */
 	private final JComboBox<Font> font_cbx = new JComboBox<Font>();
 
 	/** User session */
@@ -104,7 +104,7 @@ public class PropMessages extends JPanel {
 		sign_text_pnl.initialize();
 		font_cbx.setAction(new IAction("font") {
 			protected void doActionPerformed(ActionEvent e) {
-				proxy.setDefaultFont(
+				proxy.setOverrideFont(
 					(Font) font_cbx.getSelectedItem());
 			}
 		});
@@ -248,13 +248,13 @@ public class PropMessages extends JPanel {
 
 	/** Update the edit mode */
 	public void updateEditMode() {
-		font_cbx.setEnabled(canWrite("defaultFont"));
+		font_cbx.setEnabled(canWrite("overrideFont"));
 	}
 
 	/** Update one attribute on the form tab */
 	public void updateAttribute(String a) {
-		if (null == a || a.equals("defaultFont"))
-			font_cbx.setSelectedItem(proxy.getDefaultFont());
+		if (null == a || a.equals("overrideFont"))
+			font_cbx.setSelectedItem(proxy.getOverrideFont());
 		// NOTE: msgCurrent attribute changes after all sign
 		//       dimension attributes are updated.
 		if (a == null || a.equals("msgCurrent"))
