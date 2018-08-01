@@ -710,8 +710,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private SignMessage createMsgNotify(String m, boolean be, boolean pp,
 		DmsMsgPriority mp, int src, String o, Integer d)
 	{
-		SignMessageImpl sm = new SignMessageImpl(sign_config, m, be, pp,
-			mp, src, o, d);
+		SignConfig sc = sign_config;
+		if (null == sc)
+			return null;
+		SignMessageImpl sm = new SignMessageImpl(sc, m, be, pp, mp, src,
+			o, d);
 		try {
 			sm.notifyCreate();
 			return sm;
@@ -760,7 +763,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return getPollPeriod() * DURATION_PERIODS / 60;
 	}
 
-	/** User selected sign message (Shall not be null) */
+	/** User selected sign message */
 	private transient SignMessage msg_user = createMsgBlank();
 
 	/** Set the user selected sign message */
@@ -779,11 +782,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Check if user selected sign message has expired. */
 	private void checkMsgUserExpiration() {
-		SignMessage user = msg_user;
-		if (SignMessageHelper.isOperatorExpiring(user)) {
+		SignMessage sm = msg_user;
+		if (sm != null && SignMessageHelper.isOperatorExpiring(sm)) {
 			long now = TimeSteward.currentTimeMillis();
 			int mn = (int) ((now - deployTime) / 1000 / 60);
-			if (mn >= user.getDuration())
+			if (mn >= sm.getDuration())
 				blankMsgUser();
 		}
 	}
@@ -953,7 +956,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @return The appropriate sign message. */
 	private SignMessage getMsgUserSched() {
 		SignMessage user = msg_user;	// Avoid race
-		if (!msg_queried)
+		if (null == user || !msg_queried)
 			return user;
 		SignMessage sched = msg_sched;	// Avoid race
 		boolean is_blank = SignMessageHelper.isBlank(user);
