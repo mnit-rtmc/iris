@@ -115,6 +115,9 @@ struct SignConfig {
     pixel_height: i32,
     char_width  : i32,
     char_height : i32,
+    color_scheme: String,
+    monochrome_foreground: i32,
+    monochrome_background: i32,
 }
 
 impl Queryable for SignConfig {
@@ -122,7 +125,8 @@ impl Queryable for SignConfig {
        "SELECT name, dms_type, portable, technology, sign_access, legend, \
                beacon_type, face_width, face_height, border_horiz, border_vert, \
                pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width, \
-               char_height \
+               char_height, color_scheme, monochrome_foreground, \
+               monochrome_background \
         FROM sign_config_view"
     }
     fn from_row(row: &postgres::rows::Row) -> Self {
@@ -144,6 +148,9 @@ impl Queryable for SignConfig {
             pixel_height: row.get(14),
             char_width  : row.get(15),
             char_height : row.get(16),
+            color_scheme: row.get(17),
+            monochrome_foreground: row.get(18),
+            monochrome_background: row.get(19),
         }
     }
 }
@@ -183,6 +190,7 @@ impl Queryable for DmsPub {
 #[derive(Serialize)]
 struct DmsMessage {
     name       : String,
+    msg_current: String,
     multi      : Option<String>,
     sources    : Option<String>,
     duration   : Option<i32>,
@@ -191,17 +199,18 @@ struct DmsMessage {
 
 impl Queryable for DmsMessage {
     fn sql() -> &'static str {
-       "SELECT name, multi, sources, duration, deploy_time \
+       "SELECT name, msg_current, multi, sources, duration, deploy_time \
         FROM dms_message_view WHERE condition = 'Active' \
         ORDER BY name"
     }
     fn from_row(row: &postgres::rows::Row) -> Self {
         DmsMessage {
             name       : row.get(0),
-            multi      : row.get(1),
-            sources    : row.get(2),
-            duration   : row.get(3),
-            deploy_time: row.get(4),
+            msg_current: row.get(1),
+            multi      : row.get(2),
+            sources    : row.get(3),
+            duration   : row.get(4),
+            deploy_time: row.get(5),
         }
     }
 }
