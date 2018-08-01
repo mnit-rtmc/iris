@@ -145,6 +145,12 @@ public class DMSHelper extends BaseHelper {
 		return null;
 	}
 
+	/** Get the font number for a DMS */
+	static private int getFontNumber(DMS dms) {
+		Font f = dms.getOverrideFont();
+		return (f != null) ? f.getNumber() : getDefaultFontNumber(dms);
+	}
+
 	/** Adjust a MULTI string for a DMS */
 	static public String adjustMulti(DMS dms, String multi) {
 		Font f = dms.getOverrideFont();
@@ -179,8 +185,8 @@ public class DMSHelper extends BaseHelper {
 			int h = sc.getPixelHeight();
 			int cw = sc.getCharWidth();
 			int ch = sc.getCharHeight();
-			int df = getDefaultFontNumber(dms);
-			return new RasterBuilder(w, h, cw, ch, df);
+			int f = getFontNumber(dms);
+			return new RasterBuilder(w, h, cw, ch, f);
 		} else
 			return null;
 	}
