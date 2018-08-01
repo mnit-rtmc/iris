@@ -490,8 +490,6 @@ public class MultiString {
 	 * @return The normalized MULTI string. */
 	public String normalizeLine() {
 		// Strip tags which don't associate with a line
-		// NOTE: including font tags in line text could interfere
-		//       with font interface in SignMessageComposer (page)
 		MultiBuilder mb = new MultiNormalizer() {
 			@Override
 			public void setColorBackground(int x) {}
@@ -499,6 +497,47 @@ public class MultiString {
 			public void setPageBackground(int z) {}
 			@Override
 			public void setPageBackground(int r, int g, int b) {}
+			@Override
+			public void addColorRectangle(int x, int y, int w,
+				int h, int z) {}
+			@Override
+			public void addColorRectangle(int x, int y, int w,
+				int h, int r, int g, int b) {}
+			@Override
+			public void addGraphic(int g_num, Integer x, Integer y,
+				String g_id) {}
+			@Override
+			public void setJustificationPage(
+				Multi.JustificationPage jp) {}
+			@Override
+			public void addLine(Integer spacing) {}
+			@Override
+			public void addPage() {}
+			@Override
+			public void setPageTimes(Integer on, Integer off) {}
+			@Override
+			public void setTextRectangle(int x, int y, int w,
+				int h) {}
+			@Override
+			public void addFeed(String fid) {}
+		};
+		parse(mb);
+		return mb.toString();
+	}
+
+	/** Normalize a single line MULTI string.  (Also removes font tags).
+	 * @return The normalized MULTI string. */
+	public String normalizeLine2() {
+		// Strip tags which don't associate with a line
+		MultiBuilder mb = new MultiNormalizer() {
+			@Override
+			public void setColorBackground(int x) {}
+			@Override
+			public void setPageBackground(int z) {}
+			@Override
+			public void setPageBackground(int r, int g, int b) {}
+			@Override
+			public void setFont(int fn, String f_id) {}
 			@Override
 			public void addColorRectangle(int x, int y, int w,
 				int h, int z) {}

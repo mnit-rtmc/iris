@@ -182,9 +182,11 @@ public class ComposerPagePanel extends JPanel {
 		for (int n = 0; n < max_lines; n++) {
 			MsgComboBox cl = line_cbx[n];
 			int i = getLineNumber(n) - 1;
-			if (i < lines.length)
-				cl.getModel().setSelectedItem(lines[i]);
-			else if (cl.getItemCount() > 0)
+			if (i < lines.length) {
+				String ms = new MultiString(lines[i])
+					.normalizeLine2();
+				cl.getModel().setSelectedItem(ms);
+			} else if (cl.getItemCount() > 0)
 				cl.setSelectedIndex(0);
 		}
 	}
