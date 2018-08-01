@@ -956,9 +956,11 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @return The appropriate sign message. */
 	private SignMessage getMsgUserSched() {
 		SignMessage user = msg_user;	// Avoid race
-		if (null == user || !msg_queried)
+		if (!msg_queried)
 			return user;
 		SignMessage sched = msg_sched;	// Avoid race
+		if (null == user)
+			return sched;
 		boolean is_blank = SignMessageHelper.isBlank(user);
 		if (isPrefixPage(sched) && !is_blank) {
 			SignMessage sm = createMsgUserSched(user, sched);
