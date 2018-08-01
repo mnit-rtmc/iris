@@ -1,9 +1,9 @@
 [package]
 name = "honeybee"
-version = "0.2.0"
+version = "0.2.1"
 
 [dependencies]
-actix-web = "0.6"
+actix-web = "0.7"
 chrono = { version = "0.4", features = ["serde"] }
 failure = "0.1"
 postgres = { version = "0.15", features = ["with-chrono"] }

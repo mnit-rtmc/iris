@@ -360,7 +360,7 @@ pub struct Handler {
 impl<S> actix_web::dev::Handler<S> for Handler {
     type Result = HttpResponse;
 
-    fn handle(&mut self, req: HttpRequest<S>) -> Self::Result {
+    fn handle(&self, req: &HttpRequest<S>) -> Self::Result {
         match req.match_info().get("v") {
             Some("camera_pub")    => self.get_json::<CameraPub>(),
             Some("dms_pub")       => self.get_json::<DmsPub>(),
