@@ -315,8 +315,8 @@ public class DMSDispatcher extends JPanel {
 			clearSelected();
 		else {
 			for (DMS dms: sel) {
-				setSelected(dms);
 				composer.setSign(dms);
+				setSelected(dms);
 				break;
 			}
 			if (sel.size() > 1) {
