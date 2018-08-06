@@ -85,24 +85,11 @@ public class SignConfigHelper extends BaseHelper {
 			    sc.getPixelWidth() == pxw &&
 			    sc.getPixelHeight() == pxh &&
 			    sc.getCharWidth() == cw &&
-			    sc.getCharHeight() == ch)
+			    sc.getCharHeight() == ch &&
+			    sc.getColorScheme() == cs &&
+			    sc.getMonochromeForeground() == mf &&
+			    sc.getMonochromeBackground() == mb)
 			{
-				// FIXME
-				if (sc.getColorScheme() != cs) {
-					System.err.println("SignConfig " +
-					sc.getName() + " color scheme: " +
-					cs + " != " + sc.getColorScheme());
-				}
-				if (sc.getMonochromeForeground() != mf) {
-					System.err.println("SignConfig " +
-					sc.getName() + " monochrome fg: " +
-					mf + " != " + sc.getMonochromeForeground());
-				}
-				if (sc.getMonochromeBackground() != mb) {
-					System.err.println("SignConfig " +
-					sc.getName() + " monochrome bg: " +
-					mb + " != " + sc.getMonochromeBackground());
-				}
 				return sc;
 			}
 		}
