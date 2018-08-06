@@ -1,9 +1,11 @@
 [Unit]
 Description=Honeybee service for IRIS
+StartLimitIntervalSec=0
 
 [Service]
 ExecStart=/usr/local/bin/honeybee
 Restart=always
+RestartSec=2
 User=tms
 
 [Install]
