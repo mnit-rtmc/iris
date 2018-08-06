@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.SignConfig;
@@ -35,8 +34,10 @@ public class SignMessageCreator {
 	static private final int INCIDENT_SRC =
 		SignMsgSource.operator.bit() | SignMsgSource.incident.bit();
 
-	/** Extra message ID numbers for new sign messages */
-	static private final int EXTRA_MSG_IDS = 5;
+	/** The maximum number of new sign message names which can be created
+	 * before the TypeCache must be updated.  Creating new objects is
+	 * done asynchronously. */
+	static private final int MAX_IN_PROCESS_NAMES = 8;
 
 	/** Sign message type cache */
 	private final TypeCache<SignMessage> sign_messages;
@@ -169,45 +170,29 @@ public class SignMessageCreator {
 		return canAddSignMessage(name) ? name : null;
 	}
 
-	/**
-	 * Create a SignMessage name, which is in this form:
-	 *    user.name + "_" + uniqueid
-	 *    where uniqueid is a sequential integer.
-	 */
+	/** Create a SignMessage name.  The form of the name is "user_" + hash
+	 * of user name with uid appended.  */
 	private String createUniqueSignMessageName() {
-		HashSet<String> names = createSignMessageNameSet();
 		// NOTE: uid needs to persist between calls so that calling
 		// this method twice in a row doesn't return the same name
-		final int uid_max = names.size() + EXTRA_MSG_IDS;
+		final int uid_max = sign_messages.size() + MAX_IN_PROCESS_NAMES;
 		for (int i = 0; i < uid_max; i++) {
 			final int _uid = (uid + i) % uid_max + 1;
 			String n = createName(_uid);
-			if (!names.contains(n)) {
+			if (sign_messages.lookupObject(n) == null) {
 				uid = _uid;
 				return n;
 			}
 		}
+		assert false;
 		return null;
 	}
 
 	/** Create a SignMessage name.
-	 * @param uid ID of name.
+	 * @param i ID of name.
 	 * @return Name of SignMessage. */
-	private String createName(int uid) {
-		return user + '_' + uid;
-	}
-
-	/**
-	 * Create a HashSet containing all SignMessage names for the user.
-	 * @return A HashSet with entries as SignMessage names.
-	 */
-	private HashSet<String> createSignMessageNameSet() {
-		HashSet<String> names = new HashSet<String>();
-		for (SignMessage sm: sign_messages) {
-			if (sm.getName().startsWith(user))
-				names.add(sm.getName());
-		}
-		return names;
+	private String createName(int i) {
+		return "user_" + (user + i).hashCode();
 	}
 
 	/** Check if the user can add the named sign message */
