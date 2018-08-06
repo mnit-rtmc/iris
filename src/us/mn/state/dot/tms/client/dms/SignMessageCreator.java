@@ -192,7 +192,7 @@ public class SignMessageCreator {
 	 * @param i ID of name.
 	 * @return Name of SignMessage. */
 	private String createName(int i) {
-		return "user_" + (user + i).hashCode();
+		return "user_" + Integer.toHexString((user + i).hashCode());
 	}
 
 	/** Check if the user can add the named sign message */
