@@ -22,6 +22,7 @@ extern crate serde_json;
 extern crate users;
 
 mod iris_req;
+mod multi;
 
 use actix_web::{http::Method, server, App};
 use users::get_current_username;
