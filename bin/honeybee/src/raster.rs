@@ -23,17 +23,13 @@ pub struct Raster {
 }
 
 pub struct Mask {
-    raster : Option<Raster>,
+    raster : Option<Raster>, // Option used as a cheap RefCell replacement
     pixels : Vec<u8>,
 }
 
 impl From<Mask> for Raster {
     fn from(mask: Mask) -> Self {
-        if let Some(raster) = mask.raster {
-            raster
-        } else {
-            panic!();
-        }
+        mask.raster.unwrap()
     }
 }
 
@@ -74,7 +70,7 @@ impl Raster {
 }
 
 impl Mask {
-    /// Create a new mask.
+    /// Create a new raster mask.
     ///
     /// * `raster` Raster to mask.
     pub fn new(raster: Raster) -> Self {
@@ -84,17 +80,11 @@ impl Mask {
     }
     /// Get mask width.
     pub fn width(&self) -> u32 {
-        match self.raster {
-            Some(ref r) => r.width(),
-            _           => panic!(),
-        }
+        self.raster.as_ref().unwrap().width()
     }
     /// Get mask height.
     pub fn height(&self) -> u32 {
-        match self.raster {
-            Some(ref r) => r.height(),
-            _           => panic!(),
-        }
+        self.raster.as_ref().unwrap().height()
     }
     /// Clear the mask.
     pub fn clear(&mut self) {
@@ -136,23 +126,20 @@ impl Mask {
     /// Composite mask to its raster.
     pub fn composite(&mut self, clr: [u8; 3]) {
         // Temporarily take raster to avoid borrow conflicts
-        if let Some(mut raster) = self.raster.take() {
-            for (p, m) in raster.pixels().chunks_mut(4).zip(self.pixels()) {
-                let src: LinSrgba<f32> = Srgba::new(clr[0], clr[1], clr[2], *m)
-                                      .into_format().into_linear();
-                let dst: LinSrgba<f32> = Srgba::new(p[0], p[1], p[2], p[3])
-                                      .into_format().into_linear();
-                let c = src.over(dst);
-                let d: [u8; 4] = Srgba::from_linear(c).into_format().into_raw();
-                p[0] = d[0];
-                p[1] = d[1];
-                p[2] = d[2];
-                p[3] = d[3];
-            }
-            self.raster = Some(raster);
-        } else {
-            panic!();
+        let mut raster = self.raster.take().unwrap();
+        for (p, m) in raster.pixels().chunks_mut(4).zip(self.pixels()) {
+            let src: LinSrgba<f32> = Srgba::new(clr[0], clr[1], clr[2], *m)
+                                           .into_format().into_linear();
+            let dst: LinSrgba<f32> = Srgba::new(p[0], p[1], p[2], p[3])
+                                           .into_format().into_linear();
+            let c = src.over(dst);
+            let d: [u8; 4] = Srgba::from_linear(c).into_format().into_raw();
+            p[0] = d[0];
+            p[1] = d[1];
+            p[2] = d[2];
+            p[3] = d[3];
         }
+        self.raster = Some(raster);
     }
 }
 
