@@ -257,7 +257,6 @@ impl fmt::Display for Value {
 }
 
 /// Syntax errors from parsing MULTI.
-#[allow(dead_code)]
 #[derive(Debug,PartialEq)]
 pub enum SyntaxError {
     Other,

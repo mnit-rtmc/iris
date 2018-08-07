@@ -12,18 +12,11 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+extern crate honeybee;
 extern crate actix_web;
-extern crate chrono;
-extern crate failure;
-extern crate postgres;
-extern crate serde;
-extern crate serde_json;
-#[macro_use] extern crate serde_derive;
 extern crate users;
 
-mod iris_req;
-mod multi;
-
+use honeybee::iris_req;
 use actix_web::{http::Method, server, App};
 use users::get_current_username;
 
