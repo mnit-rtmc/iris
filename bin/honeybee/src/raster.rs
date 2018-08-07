@@ -60,7 +60,7 @@ impl Raster {
         self.height
     }
     /// Set the color of one pixel.
-    pub fn set(&mut self, x: u32, y: u32, color: [u8; 4]) {
+    pub fn set_pixel(&mut self, x: u32, y: u32, color: [u8; 4]) {
         let i = ((y * self.width + x) * 4) as usize;
         self.pixels[i+0] = color[0];
         self.pixels[i+1] = color[1];
@@ -160,7 +160,7 @@ impl Mask {
 mod test {
     use super::{Mask,Raster};
     #[test]
-    fn circle() {
+    fn mask_circle() {
         let r = Raster::new(6, 6, [0, 0, 0, 0]);
         let mut m = Mask::new(r);
         m.circle(3f32, 3f32, 3f32);
@@ -170,5 +170,33 @@ mod test {
         assert!(m.pixels[18..24] == [121, 235, 254, 254, 235, 121]);
         assert!(m.pixels[24..30] ==  [27, 191, 235, 235, 191, 27]);
         assert!(m.pixels[30..36] ==   [0,  27, 121, 121,  27, 0]);
+    }
+    #[test]
+    fn raster_pixel() {
+        let mut r = Raster::new(4, 4, [0, 0, 0, 0]);
+        r.set_pixel(0, 0, [ 1, 2, 3, 4]);
+        r.set_pixel(1, 1, [ 5, 6, 7, 8]);
+        r.set_pixel(2, 2, [ 9,10,11,12]);
+        r.set_pixel(3, 3, [13,14,15,16]);
+        // y == 0
+        assert!(r.pixels[ 0..4 ] == [1, 2, 3, 4]);
+        assert!(r.pixels[ 4..8 ] == [0, 0, 0, 0]);
+        assert!(r.pixels[ 8..12] == [0, 0, 0, 0]);
+        assert!(r.pixels[12..16] == [0, 0, 0, 0]);
+        // y == 1
+        assert!(r.pixels[16..20] == [0, 0, 0, 0]);
+        assert!(r.pixels[20..24] == [5, 6, 7, 8]);
+        assert!(r.pixels[24..28] == [0, 0, 0, 0]);
+        assert!(r.pixels[28..32] == [0, 0, 0, 0]);
+        // y == 2
+        assert!(r.pixels[32..36] == [0, 0, 0, 0]);
+        assert!(r.pixels[36..40] == [0, 0, 0, 0]);
+        assert!(r.pixels[40..44] == [9,10,11,12]);
+        assert!(r.pixels[44..48] == [0, 0, 0, 0]);
+        // y == 3
+        assert!(r.pixels[48..52] == [0, 0, 0, 0]);
+        assert!(r.pixels[52..56] == [0, 0, 0, 0]);
+        assert!(r.pixels[56..60] == [0, 0, 0, 0]);
+        assert!(r.pixels[60..64] == [13,14,15,16]);
     }
 }
