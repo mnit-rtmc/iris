@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,13 +77,15 @@ public class TagTransaction extends E6Property {
 		return isValidSeGoRead() || isValidASTMRead();
 	}
 
+	/** Get the transaction type code */
+	private Integer getTypeCode() {
+		return (data.length >= 2) ? parse16(data, 0) : null;
+	}
+
 	/** Get the transaction type */
 	private TransactionType getTransactionType() {
-		if (data.length >= 2) {
-			int c = parse16(data, 0);
-			return TransactionType.fromCode(c);
-		}
-		return null;
+		Integer c = getTypeCode();
+		return (c != null) ? TransactionType.fromCode(c) : null;
 	}
 
 	/** Check if the data length is valid for the transaction type */
@@ -250,6 +252,11 @@ public class TagTransaction extends E6Property {
 		StringBuilder sb = new StringBuilder();
 		TransactionType tt = getTransactionType();
 		sb.append("tag transaction: ");
+		if (null == tt) {
+			sb.append("INVALID TYPE CODE: ");
+			sb.append(getTypeCode());
+			return sb.toString();
+		}
 		sb.append(tt);
 		if (!isLengthValid()) {
 			sb.append(" INVALID LENGTH: ");
