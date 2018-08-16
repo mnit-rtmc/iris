@@ -16,9 +16,17 @@ use std::iter::Peekable;
 use std::str::Chars;
 use std::str::FromStr;
 
+#[derive(Copy,Clone,PartialEq,Debug)]
+pub enum ColorScheme {
+    Monochrome1Bit = 1,
+    Monochrome8Bit,
+    ColorClassic,
+    Color24Bit,
+}
+
 /// Color for a DMS pixel.
 /// Legacy colors are dependent on the DmsColorScheme.
-#[derive(Debug,PartialEq)]
+#[derive(Copy,Clone,Debug,PartialEq)]
 pub enum Color {
     Legacy(u8),      //    0-9 (colorClassic)
                      //    0-1 (monochrome1Bit)
@@ -41,12 +49,12 @@ impl fmt::Display for Color {
 /// * `y` Top edge (starting from 1).
 /// * `w` Width (pixels).
 /// * `h` Height (pixels).
-#[derive(Debug,PartialEq)]
+#[derive(Copy,Clone,Debug,PartialEq)]
 pub struct Rectangle {
-    x: u32,
-    y: u32,
-    w: u32,
-    h: u32,
+    pub x: u16,
+    pub y: u16,
+    pub w: u16,
+    pub h: u16,
 }
 
 impl fmt::Display for Rectangle {
@@ -55,15 +63,25 @@ impl fmt::Display for Rectangle {
     }
 }
 
+impl Rectangle {
+    pub fn new(x: u16, y: u16, w: u16, h: u16) -> Self {
+        Rectangle { x, y, w, h }
+    }
+    pub fn contains(&self, other: &Self) -> bool {
+        other.x >= self.x && other.x + other.w <= self.x + self.w &&
+        other.y >= self.y && other.y + other.h <= self.y + self.h
+    }
+}
+
 /// Order of flashing messages.
-#[derive(Debug,PartialEq)]
+#[derive(Copy,Clone,Debug,PartialEq)]
 pub enum FlashOrder {
     OnOff,
     OffOn,
 }
 
 /// Horizontal justification within a line.
-#[derive(Debug,PartialEq,Clone)]
+#[derive(Copy,Clone,PartialEq,PartialOrd,Debug)]
 pub enum LineJustification {
     Other = 1,
     Left,
@@ -94,7 +112,7 @@ impl LineJustification {
 }
 
 /// Vertical justification within a page.
-#[derive(Debug,PartialEq,Clone)]
+#[derive(Copy,Clone,PartialEq,PartialOrd,Debug)]
 pub enum PageJustification {
     Other = 1,
     Top,
@@ -123,7 +141,7 @@ impl PageJustification {
 }
 
 /// Mode for moving text.
-#[derive(Debug,PartialEq)]
+#[derive(Copy,Clone,Debug,PartialEq)]
 pub enum MovingTextMode {
     Circular,
     Linear(u8),
@@ -139,7 +157,7 @@ impl fmt::Display for MovingTextMode {
 }
 
 /// Direction for moving text.
-#[derive(Debug,PartialEq)]
+#[derive(Copy,Clone,Debug,PartialEq)]
 pub enum MovingTextDirection {
     Left,
     Right,
@@ -155,15 +173,15 @@ impl fmt::Display for MovingTextDirection {
 }
 
 /// Values returned from a parsed MULTI.
-#[derive(Debug,PartialEq)]
+#[derive(Clone,Debug,PartialEq)]
 pub enum Value {
-    ColorBackground(Color), // Legacy colors only
-    ColorForeground(Color),
+    ColorBackground(Option<Color>), // Legacy colors only
+    ColorForeground(Option<Color>),
     ColorRectangle(Rectangle, Color),
     Field(u8, Option<u8>),
     Flash(FlashOrder, Option<u8>, Option<u8>),
     FlashEnd(),
-    Font(u8, Option<u16>),
+    Font(Option<(u8, Option<u16>)>),
     Graphic(u8, Option<(u16, u16, Option<u16>)>),
     HexadecimalCharacter(u16),
     JustificationLine(Option<LineJustification>),
@@ -173,7 +191,7 @@ pub enum Value {
     MovingText(MovingTextMode, MovingTextDirection, u16, u8, u8, String),
     NewLine(Option<u8>),
     NewPage(),
-    PageBackground(Color),
+    PageBackground(Option<Color>),
     PageTime(Option<u8>, Option<u8>),
     SpacingCharacter(u8),
     SpacingCharacterEnd(),
@@ -184,8 +202,10 @@ pub enum Value {
 impl fmt::Display for Value {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
-            Value::ColorBackground(c)  => write!(f, "[cb{}]", c),
-            Value::ColorForeground(c)  => write!(f, "[cf{}]", c),
+            Value::ColorBackground(None) => write!(f, "[cb]"),
+            Value::ColorBackground(Some(c)) => write!(f, "[cb{}]", c),
+            Value::ColorForeground(None) => write!(f, "[cf]"),
+            Value::ColorForeground(Some(c)) => write!(f, "[cf{}]", c),
             Value::ColorRectangle(r,c) => write!(f, "[cr{},{}", r, c),
             Value::Field(i,Some(w))    => write!(f, "[f{},{}]", i, w),
             Value::Field(i,None)       => write!(f, "[f{}]", i),
@@ -206,8 +226,10 @@ impl fmt::Display for Value {
             Value::Flash(FlashOrder::OffOn,None,None)
                                        => write!(f, "[flot]"),
             Value::FlashEnd()          => write!(f, "[/fl]"),
-            Value::Font(i,None)        => write!(f, "[fo{}]", i),
-            Value::Font(i,Some(c))     => write!(f, "[fo{},{:04x}]", i, c),
+            Value::Font(None)          => write!(f, "[fo]"),
+            Value::Font(Some((i,None)))=> write!(f, "[fo{}]", i),
+            Value::Font(Some((i,Some(c))))
+                                       => write!(f, "[fo{},{:04x}]", i, c),
             Value::Graphic(i,None)     => write!(f, "[g{}]", i),
             Value::Graphic(i,Some((x,y,None)))
                                        => write!(f, "[g{},{},{}]", i, x, y),
@@ -238,7 +260,9 @@ impl fmt::Display for Value {
             Value::NewLine(Some(x))    => write!(f, "[nl{}]", x),
             Value::NewLine(None)       => write!(f, "[nl]"),
             Value::NewPage()           => write!(f, "[np]"),
-            Value::PageBackground(c)   => write!(f, "[pb{}]", c),
+            Value::PageBackground(Some(c))
+                                       => write!(f, "[pb{}]", c),
+            Value::PageBackground(None)=> write!(f, "[pb]"),
             Value::PageTime(Some(x),Some(y))
                                        => write!(f, "[pt{}o{}]", x, y),
             Value::PageTime(Some(x),None)
@@ -257,7 +281,7 @@ impl fmt::Display for Value {
 }
 
 /// Syntax errors from parsing MULTI.
-#[derive(Debug,PartialEq)]
+#[derive(Clone,Debug,PartialEq)]
 pub enum SyntaxError {
     Other,
     UnsupportedTag(String),
@@ -313,7 +337,7 @@ fn parse_rectangle<'a, I>(v: &mut I) -> Result<Rectangle, SyntaxError>
             h.parse())
         {
             if x > 0 && y > 0 {
-                return Ok(Rectangle { x, y, w, h });
+                return Ok(Rectangle::new(x, y, w, h));
             }
         }
     }
@@ -407,24 +431,36 @@ type ValueResult = Result<Option<Value>, SyntaxError>;
 
 /// Parse a Color -- Background tag (cb).
 fn parse_color_background(tag: &str) -> ValueResult {
-    // 1203 specifies a numeric value between 0 and 999,
-    // but anything above 255 does not make sense
-    match tag[2..].parse::<u8>() {
-        Ok(n)  => Ok(Some(Value::ColorBackground(Color::Legacy(n)))),
-        Err(_) => Err(SyntaxError::UnsupportedTagValue),
+    if tag.len() > 2 {
+        // 1203 specifies a numeric value between 0 and 999,
+        // but anything above 255 does not make sense
+        match tag[2..].parse::<u8>() {
+            Ok(n)  => Ok(Some(Value::ColorBackground(Some(Color::Legacy(n))))),
+            Err(_) => Err(SyntaxError::UnsupportedTagValue),
+        }
+    } else {
+        Ok(Some(Value::ColorBackground(None)))
     }
 }
 
 /// Parse a Page -- Background tag [pb].
 fn parse_page_background(tag: &str) -> ValueResult {
-    let c = parse_color(tag[2..].split(","))?;
-    Ok(Some(Value::PageBackground(c)))
+    if tag.len() > 2 {
+        let c = parse_color(tag[2..].split(","))?;
+        Ok(Some(Value::PageBackground(Some(c))))
+    } else {
+        Ok(Some(Value::PageBackground(None)))
+    }
 }
 
 /// Parse a Color -- Foreground tag [cf].
 fn parse_color_foreground(tag: &str) -> ValueResult {
-    let c = parse_color(tag[2..].split(","))?;
-    Ok(Some(Value::ColorForeground(c)))
+    if tag.len() > 2 {
+        let c = parse_color(tag[2..].split(","))?;
+        Ok(Some(Value::ColorForeground(Some(c))))
+    } else {
+        Ok(Some(Value::ColorForeground(None)))
+    }
 }
 
 /// Parse a Color Rectangle tag [cr].
@@ -495,10 +531,14 @@ fn parse_flash_end(tag: &str) -> ValueResult {
 
 /// Parse a Font tag [fo]
 fn parse_font(tag: &str) -> ValueResult {
-    let mut vs = tag[2..].split(",");
-    let n = parse_nonzero(&mut vs)?;
-    let vid = parse_version_id(&mut vs)?;
-    parse_done(&mut vs, Ok(Some(Value::Font(n, vid))))
+    if tag.len() > 2 {
+        let mut vs = tag[2..].split(",");
+        let n = parse_nonzero(&mut vs)?;
+        let vid = parse_version_id(&mut vs)?;
+        parse_done(&mut vs, Ok(Some(Value::Font(Some((n, vid))))))
+    } else {
+        Ok(Some(Value::Font(None)))
+    }
 }
 
 /// Parse a Graphic tag [g]
@@ -921,22 +961,25 @@ mod test {
     #[test]
     fn norm_cb() {
 		assert!(normalize("[cb1][CB255]") == "[cb1][cb255]");
-		assert!(normalize("[cb][cb256]") == "");
+		assert!(normalize("[cb][cb256]") == "[cb]");
     }
     #[test]
     fn parse_cb1() {
-        let mut m = Parser::new("[cb0][CB1][cB255][cb256]");
-        if let Some(Ok(Value::ColorBackground(n))) = m.next() {
+        let mut m = Parser::new("[cb0][CB1][cB255][cb256][cb]");
+        if let Some(Ok(Value::ColorBackground(Some(n)))) = m.next() {
             assert!(n == Color::Legacy(0));
         } else { assert!(false) }
-        if let Some(Ok(Value::ColorBackground(n))) = m.next() {
+        if let Some(Ok(Value::ColorBackground(Some(n)))) = m.next() {
             assert!(n == Color::Legacy(1));
         } else { assert!(false) }
-        if let Some(Ok(Value::ColorBackground(n))) = m.next() {
+        if let Some(Ok(Value::ColorBackground(Some(n)))) = m.next() {
             assert!(n == Color::Legacy(255));
         } else { assert!(false) }
         if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
         else { assert!(false) }
+        if let Some(Ok(Value::ColorBackground(n))) = m.next() {
+            assert!(n == None);
+        } else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
@@ -949,25 +992,28 @@ mod test {
     #[test]
     fn norm_pb() {
 		assert!(normalize("[pb0][PB255]") == "[pb0][pb255]");
-		assert!(normalize("[pb][pb256]") == "");
+		assert!(normalize("[pb][pb256]") == "[pb]");
 		assert!(normalize("[pb0,0,0][PB255,255,255]") ==
                           "[pb0,0,0][pb255,255,255]");
 		assert!(normalize("[pb256,0,0][PBx]") == "");
     }
     #[test]
     fn parse_pb1() {
-        let mut m = Parser::new("[pb0][PB1][pB255][pb256]");
-        if let Some(Ok(Value::PageBackground(n))) = m.next() {
+        let mut m = Parser::new("[pb0][PB1][pB255][pb256][pb]");
+        if let Some(Ok(Value::PageBackground(Some(n)))) = m.next() {
             assert!(n == Color::Legacy(0));
         } else { assert!(false) }
-        if let Some(Ok(Value::PageBackground(n))) = m.next() {
+        if let Some(Ok(Value::PageBackground(Some(n)))) = m.next() {
             assert!(n == Color::Legacy(1));
         } else { assert!(false) }
-        if let Some(Ok(Value::PageBackground(n))) = m.next() {
+        if let Some(Ok(Value::PageBackground(Some(n)))) = m.next() {
             assert!(n == Color::Legacy(255));
         } else { assert!(false) }
         if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
         else { assert!(false) }
+        if let Some(Ok(Value::PageBackground(n))) = m.next() {
+            assert!(n == None)
+        } else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
@@ -980,7 +1026,7 @@ mod test {
     #[test]
     fn parse_pb3() {
         let mut m = Parser::new("[pb50,150,200]");
-        if let Some(Ok(Value::PageBackground(n))) = m.next() {
+        if let Some(Ok(Value::PageBackground(Some(n)))) = m.next() {
             assert!(n == Color::RGB(50,150,200));
         } else { assert!(false) }
         assert!(m.next() == None);
@@ -1002,25 +1048,27 @@ mod test {
     #[test]
     fn norm_cf() {
 		assert!(normalize("[cf0][CF255]") == "[cf0][cf255]");
-		assert!(normalize("[cf][cf256]") == "");
+		assert!(normalize("[cf][cf256]") == "[cf]");
 		assert!(normalize("[cf0,0,0][CF255,255,255]") ==
                           "[cf0,0,0][cf255,255,255]");
 		assert!(normalize("[cf256,0,0][CFx]") == "");
     }
     #[test]
     fn parse_cf1() {
-        let mut m = Parser::new("[cf0][CF1][cF255][cf256]");
-        if let Some(Ok(Value::ColorForeground(n))) = m.next() {
+        let mut m = Parser::new("[cf0][CF1][cF255][cf256][cf]");
+        if let Some(Ok(Value::ColorForeground(Some(n)))) = m.next() {
             assert!(n == Color::Legacy(0));
         } else { assert!(false) }
-        if let Some(Ok(Value::ColorForeground(n))) = m.next() {
+        if let Some(Ok(Value::ColorForeground(Some(n)))) = m.next() {
             assert!(n == Color::Legacy(1));
         } else { assert!(false) }
-        if let Some(Ok(Value::ColorForeground(n))) = m.next() {
+        if let Some(Ok(Value::ColorForeground(Some(n)))) = m.next() {
             assert!(n == Color::Legacy(255));
         } else { assert!(false) }
         if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
         else { assert!(false) }
+        if let Some(Ok(Value::ColorForeground(None))) = m.next()
+        { assert!(true) } else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
@@ -1033,7 +1081,7 @@ mod test {
     #[test]
     fn parse_cf3() {
         let mut m = Parser::new("[cf255,0,208]");
-        if let Some(Ok(Value::ColorForeground(n))) = m.next() {
+        if let Some(Ok(Value::ColorForeground(Some(n)))) = m.next() {
             assert!(n == Color::RGB(255,0,208));
         } else { assert!(false) }
         assert!(m.next() == None);
@@ -1200,22 +1248,29 @@ mod test {
     }
     #[test]
     fn parse_fo() {
+        let mut m = Parser::new("[fo]");
+        if let Some(Ok(Value::Font(None))) = m.next() {
+        } else { assert!(false) }
+        assert!(m.next() == None);
+    }
+    #[test]
+    fn parse_fo1() {
         let mut m = Parser::new("[fo1]");
-        if let Some(Ok(Value::Font(1,None))) = m.next() {
+        if let Some(Ok(Value::Font(Some((1,None))))) = m.next() {
         } else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_fo2() {
         let mut m = Parser::new("[fO2,0000]");
-        if let Some(Ok(Value::Font(2,Some(0)))) = m.next() {
+        if let Some(Ok(Value::Font(Some((2,Some(0)))))) = m.next() {
         } else { assert!(false) }
         assert!(m.next() == None);
     }
     #[test]
     fn parse_fo3() {
         let mut m = Parser::new("[Fo3,FFFF]");
-        if let Some(Ok(Value::Font(3,Some(0xFFFF)))) = m.next() {
+        if let Some(Ok(Value::Font(Some((3,Some(0xFFFF)))))) = m.next() {
         } else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1243,7 +1298,7 @@ mod test {
     #[test]
     fn parse_fo7() {
         let mut m = Parser::new("[Fo7,abcd]");
-        if let Some(Ok(Value::Font(7,Some(0xabcd)))) = m.next() {
+        if let Some(Ok(Value::Font(Some((7,Some(0xabcd)))))) = m.next() {
         } else { assert!(false) }
         assert!(m.next() == None);
     }
@@ -1719,6 +1774,21 @@ mod test {
     #[test]
     fn parse_tr5() {
         let mut m = Parser::new("[tr1,1,,100]");
+        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        else { assert!(false) }
+        assert!(m.next() == None);
+    }
+    #[test]
+    fn parse_new_line() {
+        let mut m = Parser::new("[nl][NL0][Nl1][nL9][nl10]");
+        if let Some(Ok(Value::NewLine(n))) = m.next() { assert!(n == None) }
+        else { assert!(false) }
+        if let Some(Ok(Value::NewLine(n))) = m.next() { assert!(n == Some(0)) }
+        else { assert!(false) }
+        if let Some(Ok(Value::NewLine(n))) = m.next() { assert!(n == Some(1)) }
+        else { assert!(false) }
+        if let Some(Ok(Value::NewLine(n))) = m.next() { assert!(n == Some(9)) }
+        else { assert!(false) }
         if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
         else { assert!(false) }
         assert!(m.next() == None);
