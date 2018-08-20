@@ -114,8 +114,8 @@ public class OpQueryDMSMessage extends OpDMS {
 		/* Compare the CRC of the message on the sign to the
 		 * CRC of the message IRIS knows about */
 		SignMessage sm = dms.getMsgCurrent();
-		String multi = parseMulti(sm.getMulti());
-		int crc = DmsMessageCRC.calculate(multi, sm.getBeaconEnabled(),
+		String multi = parseMulti(sm);
+		int crc = DmsMessageCRC.calculate(multi, getBeaconEnabled(sm),
 			0);
 		if (crc != source.getCrc())
 			return new QueryCurrentMessage();
@@ -123,6 +123,18 @@ public class OpQueryDMSMessage extends OpDMS {
 			setMsgCurrent(sm);
 			return null;
 		}
+	}
+
+	/** Parse a sign message MULTI string and add graphic version IDs.
+	 * @param sm Sign message.
+	 * @return MULTI string with graphic IDs added. */
+	private String parseMulti(SignMessage sm) {
+		return (sm != null) ? parseMulti(sm.getMulti()) : "";
+	}
+
+	/** Get beacon enabled flag for a sign message */
+	private boolean getBeaconEnabled(SignMessage sm) {
+		return (sm != null) ? sm.getBeaconEnabled() : false;
 	}
 
 	/** Process an invalid message source from the sign controller */

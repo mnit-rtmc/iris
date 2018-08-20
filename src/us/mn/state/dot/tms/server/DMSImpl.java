@@ -164,7 +164,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		GeoLocImpl g = new GeoLocImpl(name);
 		g.notifyCreate();
 		geo_loc = g;
-		msg_current = createMsgBlank();
 		deployTime = 0;
 	}
 
@@ -214,7 +213,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		sign_config = sc;
 		override_font = of;
 		msg_sched = ms;
-		msg_current = (mc != null) ? mc : createMsgBlank();
+		msg_current = mc;
 		deployTime = stampMillis(dt);
 		initTransients();
 	}
@@ -872,7 +871,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		}
 	}
 
-	/** Current message (Shall not be null) */
+	/** Current message */
 	private SignMessage msg_current;
 
 	/** Set the current message */

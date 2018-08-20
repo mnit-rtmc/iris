@@ -1309,7 +1309,7 @@ CREATE TABLE iris._dms (
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
 	override_font VARCHAR(16) REFERENCES iris.font,
 	msg_sched VARCHAR(20) REFERENCES iris.sign_message,
-	msg_current VARCHAR(20) REFERENCES iris.sign_message NOT NULL,
+	msg_current VARCHAR(20) REFERENCES iris.sign_message,
 	deploy_time timestamp WITH time zone NOT NULL
 );
 
@@ -3241,7 +3241,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.77.0
+database_version	4.78.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0

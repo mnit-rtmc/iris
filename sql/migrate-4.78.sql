@@ -17,4 +17,6 @@ CREATE VIEW dms_message_view AS
 	LEFT JOIN iris.sign_message s ON d.msg_current = s.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
+ALTER TABLE iris._dms ALTER COLUMN msg_current DROP NOT NULL;
+
 COMMIT;
