@@ -86,12 +86,18 @@ CREATE TABLE iris.road (
 	alt_dir smallint NOT NULL REFERENCES iris.direction(id)
 );
 
+CREATE TABLE iris.color_scheme (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
 CREATE TABLE iris.graphic (
 	name VARCHAR(20) PRIMARY KEY,
 	g_number INTEGER UNIQUE,
-	bpp INTEGER NOT NULL,
+	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
 	height INTEGER NOT NULL,
 	width INTEGER NOT NULL,
+	transparent_color INTEGER,
 	pixels TEXT NOT NULL
 );
 
@@ -113,9 +119,6 @@ CREATE TABLE iris.glyph (
 );
 
 ALTER TABLE iris.graphic
-	ADD CONSTRAINT graphic_bpp_ck
-	CHECK (bpp = 1 OR bpp = 8 OR bpp = 24);
-ALTER TABLE iris.graphic
 	ADD CONSTRAINT graphic_height_ck
 	CHECK (height > 0);
 ALTER TABLE iris.graphic
@@ -133,8 +136,8 @@ BEGIN
 	IF NOT FOUND THEN
 		RETURN NEW;
 	END IF;
-	IF NEW.bpp != 1 THEN
-		RAISE EXCEPTION 'bpp must be 1 for font glyph';
+	IF NEW.color_scheme != 1 THEN
+		RAISE EXCEPTION 'color_scheme must be 1 for font glyph';
 	END IF;
 	SELECT height, width INTO f_height, f_width FROM iris.font
 	                     WHERE name = f_name;
@@ -159,15 +162,16 @@ ALTER TABLE iris.glyph
 CREATE FUNCTION iris.glyph_ck() RETURNS TRIGGER AS
 	$glyph_ck$
 DECLARE
-	g_bpp INTEGER;
+	g_scheme INTEGER;
 	f_height INTEGER;
 	f_width INTEGER;
 	g_height INTEGER;
 	g_width INTEGER;
 BEGIN
-	SELECT bpp INTO g_bpp FROM iris.graphic WHERE name = NEW.graphic;
-	IF g_bpp != 1 THEN
-		RAISE EXCEPTION 'bpp must be 1 for font glyph';
+	SELECT color_scheme INTO g_scheme FROM iris.graphic
+		WHERE name = NEW.graphic;
+	IF g_scheme != 1 THEN
+		RAISE EXCEPTION 'color_scheme must be 1 for font glyph';
 	END IF;
 	SELECT height, width INTO f_height, f_width FROM iris.font
 	                     WHERE name = NEW.font;
@@ -409,11 +413,6 @@ CREATE TABLE iris.sign_group (
 CREATE TABLE iris.dms_type (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(32) NOT NULL
-);
-
-CREATE TABLE iris.color_scheme (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
 );
 
 CREATE TABLE iris.sign_config (
@@ -2405,8 +2404,10 @@ CREATE VIEW i_user_view AS
 GRANT SELECT ON i_user_view TO PUBLIC;
 
 CREATE VIEW graphic_view AS
-	SELECT name, g_number, bpp, height, width, pixels
-	FROM iris.graphic;
+	SELECT name, g_number, cs.description AS color_scheme, height, width,
+	       transparent_color, pixels
+	FROM iris.graphic
+	JOIN iris.color_scheme cs ON graphic.color_scheme = cs.id;
 GRANT SELECT ON graphic_view TO PUBLIC;
 
 CREATE VIEW font_view AS
@@ -3833,7 +3834,7 @@ _09_full_12	17	12	0	2	2	0
 _7_full	18	7	0	3	2	0
 \.
 
-COPY iris.graphic (name, g_number, bpp, height, width, pixels) FROM stdin;
+COPY iris.graphic (name, g_number, color_scheme, height, width, pixels) FROM stdin;
 07_char_32	\N	1	7	5	AAAAAAA=
 07_char_33	\N	1	7	5	IQhCAIA=
 07_char_34	\N	1	7	5	UoAAAAA=
