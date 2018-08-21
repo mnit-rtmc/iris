@@ -19,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.TMSException;
@@ -34,9 +35,9 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	/** Load all the graphics */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GraphicImpl.class);
-		store.query("SELECT name, g_number, bpp, height, width, " +
-			"pixels FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+		store.query("SELECT name, g_number, color_scheme, height, " +
+			"width, transparent_color, pixels FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GraphicImpl(row));
@@ -50,9 +51,10 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("g_number", g_number);
-		map.put("bpp", bpp);
+		map.put("color_scheme", color_scheme.ordinal());
 		map.put("height", height);
 		map.put("width", width);
+		map.put("transparent_color", transparent_color);
 		map.put("pixels", pixels);
 		return map;
 	}
@@ -73,9 +75,10 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	public GraphicImpl(String n) {
 		super(n);
 		g_number = null;
-		bpp = 1;
+		color_scheme = ColorScheme.MONOCHROME_1_BIT;
 		height = 0;
 		width = 0;
+		transparent_color = null;
 		pixels = "";
 	}
 
@@ -83,20 +86,24 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	private GraphicImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),          // name
 		     (Integer) row.getObject(2),// g_number
-		     row.getInt(3),             // bpp
+		     row.getInt(3),             // color_scheme
 		     row.getInt(4),             // height
 		     row.getInt(5),             // width
-		     row.getString(6)           // pixels
+		     (Integer) row.getObject(6),// transparent_color
+		     row.getString(7)           // pixels
 		);
 	}
 
 	/** Create a graphic from database lookup */
-	private GraphicImpl(String n, Integer g, int b, int h, int w, String p){
-		this(n);
+	private GraphicImpl(String n, Integer g, int cs, int h, int w,
+		Integer tc, String p)
+	{
+		super(n);
 		g_number = g;
-		bpp = b;
+		color_scheme = ColorScheme.fromOrdinal(cs);
 		height = h;
 		width = w;
+		transparent_color = tc;
 		pixels = p;
 	}
 
@@ -125,13 +132,13 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 		return g_number;
 	}
 
-	/** Bits per pixel */
-	private int bpp;
+	/** DMS Color scheme */
+	private final ColorScheme color_scheme;
 
-	/** Get the bits-per-pixel (1 or 24) */
+	/** Get the color scheme (ordinal of ColorScheme) */
 	@Override
-	public int getBpp() {
-		return bpp;
+	public int getColorScheme() {
+		return color_scheme.ordinal();
 	}
 
 	/** Height (number of pixels) */
@@ -166,6 +173,29 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	@Override
 	public int getWidth() {
 		return width;
+	}
+
+	/** Transparent color */
+	private Integer transparent_color;
+
+	/** Set the transparent color */
+	@Override
+	public void setTransparentColor(Integer tc) {
+		transparent_color = tc;
+	}
+
+	/** Set the transparent color */
+	public void doSetTransparentColor(Integer tc) throws TMSException {
+		if (tc != transparent_color) {
+			store.update(this, "transparent_color", tc);
+			setTransparentColor(tc);
+		}
+	}
+
+	/** Get the transparent color */
+	@Override
+	public Integer getTransparentColor() {
+		return transparent_color;
 	}
 
 	/** Pixel data (base64 encoded).  For 24-bit, uses BGR. */

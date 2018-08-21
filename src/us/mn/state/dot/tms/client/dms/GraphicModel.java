@@ -30,6 +30,7 @@ import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableRowSorter;
 import us.mn.state.dot.tms.BitmapGraphic;
 import us.mn.state.dot.tms.ChangeVetoException;
+import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
@@ -107,11 +108,23 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 		return cm.getPixelSize();
 	}
 
+	/** Get the color scheme of an image */
+	static private ColorScheme imageColorScheme(BufferedImage im) {
+		switch (imageBpp(im)) {
+		case 1:
+			return ColorScheme.MONOCHROME_1_BIT;
+		case 24:
+			return ColorScheme.COLOR_24_BIT;
+		default:
+			return ColorScheme.UNKNOWN;
+		}
+	}
+
 	/** Create the columns in the model */
 	@Override
 	protected ArrayList<ProxyColumn<Graphic>> createColumns() {
 		ArrayList<ProxyColumn<Graphic>> cols =
-			new ArrayList<ProxyColumn<Graphic>>(5);
+			new ArrayList<ProxyColumn<Graphic>>(6);
 		cols.add(new ProxyColumn<Graphic>("graphic.number", 68,
 			Integer.class)
 		{
@@ -126,11 +139,10 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 					g.setGNumber((Integer)value);
 			}
 		});
-		cols.add(new ProxyColumn<Graphic>("graphic.bpp", 30,
-			Integer.class)
-		{
+		cols.add(new ProxyColumn<Graphic>("graphic.color_scheme", 80) {
 			public Object getValueAt(Graphic g) {
-				return g.getBpp();
+				return ColorScheme.fromOrdinal(
+					g.getColorScheme()).description;
 			}
 		});
 		cols.add(new ProxyColumn<Graphic>("graphic.width", 44,
@@ -145,6 +157,20 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 		{
 			public Object getValueAt(Graphic g) {
 				return g.getHeight();
+			}
+		});
+		cols.add(new ProxyColumn<Graphic>("graphic.transparent_color",
+			68, Integer.class)
+		{
+			public Object getValueAt(Graphic g) {
+				return g.getTransparentColor();
+			}
+			public boolean isEditable(Graphic g) {
+				return canWrite(g);
+			}
+			public void setValueAt(Graphic g, Object value) {
+				if (value instanceof Integer)
+					g.setTransparentColor((Integer) value);
 			}
 		});
 		cols.add(new ProxyColumn<Graphic>("graphic.image", 200) {
@@ -216,7 +242,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 		RasterGraphic rg = createRaster(im);
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("g_number", g_number);
-		attrs.put("bpp", imageBpp(im));
+		attrs.put("color_scheme", imageColorScheme(im).ordinal());
 		attrs.put("width", im.getWidth());
 		attrs.put("height", im.getHeight());
 		attrs.put("pixels", rg.getEncodedPixels());
@@ -254,10 +280,10 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	private RasterGraphic createRaster(BufferedImage im)
 		throws ChangeVetoException
 	{
-		switch (imageBpp(im)) {
-		case 1:
+		switch (imageColorScheme(im)) {
+		case MONOCHROME_1_BIT:
 			return createBitmap(im);
-		case 24:
+		case COLOR_24_BIT:
 			return createPixmap(im);
 		default:
 			throw new ChangeVetoException(I18N.get(

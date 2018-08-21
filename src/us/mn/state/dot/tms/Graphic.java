@@ -41,8 +41,8 @@ public interface Graphic extends SonarObject {
 	/** Get the graphic number */
 	Integer getGNumber();
 
-	/** Get the bits-per-pixel (1 or 24) */
-	int getBpp();
+	/** Get the color scheme (ordinal of ColorScheme) */
+	int getColorScheme();
 
 	/** Get the height (pixels) */
 	int getHeight();
@@ -52,6 +52,12 @@ public interface Graphic extends SonarObject {
 
 	/** Get the width (pixels) */
 	int getWidth();
+
+	/** Set the transparent color */
+	void setTransparentColor(Integer tc);
+
+	/** Get the transparent color */
+	Integer getTransparentColor();
 
 	/** Set the pixel data (base64 encoded).  For 24-bit, uses BGR. */
 	void setPixels(String p);

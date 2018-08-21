@@ -17,6 +17,7 @@
 package us.mn.state.dot.tms.server.comm.ntcip;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -105,8 +106,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	private final ASN1Integer c_width = vmsCharacterWidthPixels.makeInt();
 
 	/** Color scheme */
-	private final ASN1Enum<DmsColorScheme> color_scheme = new ASN1Enum<
-		DmsColorScheme>(DmsColorScheme.class, dmsColorScheme.node);
+	private final ASN1Enum<ColorScheme> color_scheme = new ASN1Enum<
+		ColorScheme>(ColorScheme.class, dmsColorScheme.node);
 
 	/** Monochrome color */
 	private final MonochromeColor m_color = new MonochromeColor();
@@ -114,7 +115,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	/** Create a new DMS query configuration object */
 	public OpQueryDMSConfiguration(DMSImpl d) {
 		super(PriorityLevel.DOWNLOAD, d);
-		color_scheme.setInteger(DmsColorScheme.monochrome1bit.ordinal());
+		color_scheme.setEnum(ColorScheme.MONOCHROME_1_BIT);
 	}
 
 	/** Create the second phase of the operation */

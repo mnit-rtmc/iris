@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.BitmapGraphic;
+import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.Graphic;
@@ -227,7 +228,8 @@ public class GlyphPanel extends JPanel {
 			String name = f.getName() + "_" + c;
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
-			attrs.put("bpp", 1);
+			attrs.put("color_scheme",
+				ColorScheme.MONOCHROME_1_BIT.ordinal());
 			attrs.put("height", bg.getHeight());
 			attrs.put("width", bg.getWidth());
 			attrs.put("pixels", bg.getEncodedPixels());

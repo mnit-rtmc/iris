@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import us.mn.state.dot.sched.TimeSteward;
+import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.DmsMsgPriority;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
@@ -98,6 +99,19 @@ public class OpSendDMSMessage extends OpDMS {
 			dmsGraphicStatus.node, row);
 	}
 
+	/** Get an octet string of the transparent color of a graphic */
+	static private byte[] transparent_color(Graphic g) {
+		Integer tc = g.getTransparentColor();
+		int c = (tc != null) ? tc : 0;
+		if (g.getColorScheme() == ColorScheme.COLOR_24_BIT.ordinal()) {
+			byte red = (byte) (c >> 16);
+			byte grn = (byte) (c >> 8);
+			byte blu = (byte) (c >> 0);
+			return new byte[] { red, grn, blu };
+		} else
+			return new byte[] { (byte) c };
+	}
+
 	/** Sign message */
 	private final SignMessage message;
 
@@ -137,8 +151,8 @@ public class OpSendDMSMessage extends OpDMS {
 		new ArrayList<ASN1Enum<DmsGraphicStatus>>();
 
 	/** Color scheme supported (for graphics) */
-	private final ASN1Enum<DmsColorScheme> color_scheme = new ASN1Enum<
-		DmsColorScheme>(DmsColorScheme.class, dmsColorScheme.node);
+	private final ASN1Enum<ColorScheme> color_scheme = new ASN1Enum<
+		ColorScheme>(ColorScheme.class, dmsColorScheme.node);
 
 	/** Number of graphics supported */
 	private final ASN1Integer max_graphics = dmsGraphicMaxEntries.makeInt();
@@ -687,9 +701,10 @@ public class OpSendDMSMessage extends OpDMS {
 		Integer g_num = g.getGNumber();
 		if (null == g_num || g_num < 1 || g_num > 255)
 			return "Invalid graphic number";
-		int bpp = color_scheme.getEnum().bpp;
-		if (g.getBpp() != 1 && g.getBpp() != bpp)
-			return "Invalid graphic depth";
+		ColorScheme gcs = ColorScheme.fromOrdinal(g.getColorScheme());
+		ColorScheme cs = color_scheme.getEnum();
+		if (gcs != ColorScheme.MONOCHROME_1_BIT && gcs != cs)
+			return "Invalid color scheme";
 		SignConfig sc = dms.getSignConfig();
 		if (null == sc)
 			return "Unknown DMS dimensions";
@@ -914,8 +929,8 @@ public class OpSendDMSMessage extends OpDMS {
 				row);
 			ASN1Integer height = dmsGraphicHeight.makeInt(row);
 			ASN1Integer width = dmsGraphicWidth.makeInt(row);
-			ASN1Enum<DmsColorScheme> type = new ASN1Enum<
-				DmsColorScheme>(DmsColorScheme.class,
+			ASN1Enum<ColorScheme> type = new ASN1Enum<
+				ColorScheme>(ColorScheme.class,
 				dmsGraphicType.node, row);
 			ASN1Integer trans_enabled =
 				dmsGraphicTransparentEnabled.makeInt(row);
@@ -925,13 +940,11 @@ public class OpSendDMSMessage extends OpDMS {
 			name.setString(graphic.getName());
 			height.setInteger(graphic.getHeight());
 			width.setInteger(graphic.getWidth());
-			type.setEnum(DmsColorScheme.fromBpp(graphic.getBpp()));
-			trans_enabled.setInteger(1);
-			if (graphic.getBpp() == 24) {
-				trans_color.setOctetString(
-					new byte[] { 0, 0, 0 });
-			} else
-				trans_color.setOctetString(new byte[] { 0 });
+			type.setEnum(ColorScheme.fromOrdinal(
+				graphic.getColorScheme()));
+			Integer tc = graphic.getTransparentColor();
+			trans_enabled.setInteger((tc != null) ? 1 : 0);
+			trans_color.setOctetString(transparent_color(graphic));
 			mess.add(number);
 			mess.add(name);
 			mess.add(height);
