@@ -248,6 +248,7 @@ public class TagTransaction extends E6Property {
 	private TagType parseSeenTagType() {
 		switch (data[2]) {
 		case 1: return TagType.SeGo;
+		case 2: return TagType.IAG;
 		case 3: return TagType.ASTM;
 		default: return null;
 		}

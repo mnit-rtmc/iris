@@ -3809,8 +3809,10 @@ COPY event.meter_limit_control (id, description) FROM stdin;
 \.
 
 COPY event.tag_type (id, description) FROM stdin;
-0	ASTMv6
+0	Unknown
 1	SeGo
+2	IAG
+3	ASTMv6
 \.
 
 -- Fonts
