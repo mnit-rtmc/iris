@@ -13,7 +13,7 @@ SET SESSION AUTHORIZATION 'tms';
 HFONT = """INSERT INTO iris.font (name, f_number, height, width, line_spacing,
 	char_spacing, version_id) VALUES ('%s', %s, %s, %s, %s, %s, %s);
 """
-GRAPHIC = """INSERT INTO iris.graphic (name, bpp, height, width, pixels)
+GRAPHIC = """INSERT INTO iris.graphic (name, color_scheme, height, width, pixels)
 	VALUES ('%s_%s', 1, %s, %s, '%s');"""
 GLYPH = """INSERT INTO iris.glyph (name, font, code_point, graphic)
 	VALUES ('%s_%s', '%s', %s, '%s_%s');"""

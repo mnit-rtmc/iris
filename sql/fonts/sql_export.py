@@ -18,9 +18,9 @@ _INSERT_FONT = """INSERT INTO iris.font
 """
 _SELECT_GLYPH = """SELECT name, font, code_point, graphic
 	FROM iris.glyph WHERE font = '%s' ORDER BY code_point;"""
-_SELECT_GRAPHIC = """SELECT name, bpp, height, width, pixels
+_SELECT_GRAPHIC = """SELECT name, color_scheme, height, width, pixels
 	FROM iris.graphic WHERE name = '%s';"""
-_INSERT_GRAPHIC = """INSERT INTO iris.graphic (name, bpp, height, width, pixels)
+_INSERT_GRAPHIC = """INSERT INTO iris.graphic (name, color_scheme, height, width, pixels)
     VALUES ('%s', %d, %d, %d, '%s');"""
 _INSERT_GLYPH = """INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('%s', '%s', %d, '%s');"""
