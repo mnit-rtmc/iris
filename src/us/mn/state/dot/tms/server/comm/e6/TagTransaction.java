@@ -33,15 +33,20 @@ public class TagTransaction extends E6Property {
 	/** SeGo region code for MN */
 	static private final int REGION_MN = 0x0A;
 
+	/** SeGo agency code for NCTA */
+	static private final int AGENCY_NCTA = 0x07;
+
 	/** SeGo agency code for MnDOT */
 	static private final int AGENCY_MNDOT = 0x09;
 
 	/** Tag transaction types */
 	public enum TransactionType {
-		SeGo_streamlined_read	(0x3021, 28),
-		read_verify_page	(0x3022, 20),
-		seen_frame_count	(0x3043, 6),
-		ASTM_read		(0x5014, 17);
+		sego_read_streamlined_page_4 (0x3021, 28),
+		sego_read_verify_page        (0x3022, 20),
+		sego_read_regular            (0x3023, 6),
+		seen_frame_count             (0x3043, 6),
+		sego_read_streamlined_page_9 (0x3070, 28),
+		astm_read                    (0x5014, 17);
 		private TransactionType(int c, int l) {
 			code = c;
 			len = l;
@@ -146,13 +151,15 @@ public class TagTransaction extends E6Property {
 
 	/** Check if transaction is a valid SeGo streamlined read */
 	private boolean isValidSeGoRead() {
-		TransactionType tt = getTransactionType();
-		if (tt == TransactionType.SeGo_streamlined_read) {
+		switch (getTransactionType()) {
+		case sego_read_streamlined_page_4:
+		case sego_read_streamlined_page_9:
 			return isLengthValid()
 			    && isSeGoMnPass()
 			    && isValidMnPassCRC();
-		} else
+		default:
 			return false;
+		}
 	}
 
 	/** Is it a SeGo MnPass tag? */
@@ -198,7 +205,7 @@ public class TagTransaction extends E6Property {
 	/** Check if transaction is a valid ASTM read */
 	private boolean isValidASTMRead() {
 		TransactionType tt = getTransactionType();
-		if (tt == TransactionType.ASTM_read) {
+		if (tt == TransactionType.astm_read) {
 			// FIXME: check CRC
 			return isLengthValid();
 		}
@@ -250,7 +257,7 @@ public class TagTransaction extends E6Property {
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
-		TransactionType tt = getTransactionType();
+		final TransactionType tt = getTransactionType();
 		sb.append("tag transaction: ");
 		if (null == tt) {
 			sb.append("INVALID TYPE CODE: ");
@@ -263,7 +270,9 @@ public class TagTransaction extends E6Property {
 			sb.append(data.length);
 			return sb.toString();
 		}
-		if (tt == TransactionType.SeGo_streamlined_read) {
+		if (tt == TransactionType.sego_read_streamlined_page_4
+		 || tt == TransactionType.sego_read_streamlined_page_9)
+		{
 			if (isSeGoMnPass() && !isValidMnPassCRC()) {
 				sb.append(" INVALID CRC: ");
 				sb.append(getSeGoCRC12());
