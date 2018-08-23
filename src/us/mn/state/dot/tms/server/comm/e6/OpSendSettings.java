@@ -312,11 +312,31 @@ public class OpSendSettings extends OpE6 {
 			AppendDataProp append = new AppendDataProp();
 			sendQuery(mess, append);
 			mess.logQuery(append);
-			if (stop)
-				return new StoreMode();
-			else
-				return null;
+			AppendDataProp.Value v = append.getValue();
+			return (AppendDataProp.Value.disabled == v)
+			     ? new StoreAppendData()
+			     : lastPhase();
 		}
+	}
+
+	/** Phase to store the append data */
+	private class StoreAppendData extends Phase<E6Property> {
+
+		/** Store the append data */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			AppendDataProp append = new AppendDataProp(
+				AppendDataProp.Value.date_time_stamp);
+			mess.logStore(append);
+			sendStore(mess, append);
+			return lastPhase();
+		}
+	}
+
+	/** Get the last phase */
+	private Phase<E6Property> lastPhase() {
+		return (stop) ? new StoreMode() : null;
 	}
 
 	/** Phase to store the mode */
@@ -525,22 +545,7 @@ public class OpSendSettings extends OpE6 {
 				MasterSlaveProp.Value.master, 0);
 			mess.logStore(mstr);
 			sendStore(mess, mstr);
-			return new StoreAppendData();
-		}
-	}
-
-	/** Phase to store the append data */
-	private class StoreAppendData extends Phase<E6Property> {
-
-		/** Store the append data */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			AppendDataProp append = new AppendDataProp(
-				AppendDataProp.Value.date_time_stamp);
-			mess.logStore(append);
-			sendStore(mess, append);
-			return new QueryDownlink();
+			return null;
 		}
 	}
 }
