@@ -27,8 +27,15 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class TagTransaction extends E6Property {
 
-	/** SeGo Page 0 CRC */
+	/** SeGo read CRC-16 */
+	static private final CRC SEGO_CRC = new CRC(16, 0x1021, 0xFFFF, false,
+		0xFFFF);
+
+	/** SeGo Page 0 CRC-12 */
 	static private final CRC PAGE0_CRC = new CRC(12, 0x80F, 0x000, false);
+
+	/** IAG CRC-16 */
+	static private final CRC IAG_CRC = new CRC(16, 0x1021, 0x0000, false);
 
 	/** SeGo region code for MN */
 	static private final int REGION_MN = 0x0A;
@@ -41,12 +48,14 @@ public class TagTransaction extends E6Property {
 
 	/** Tag transaction types */
 	public enum TransactionType {
-		sego_read_streamlined_page_4 (0x3021, 28),
+		sego_read_streamlined_page_4 (0x3021, 21+7),
 		sego_read_verify_page        (0x3022, 20),
 		sego_read_regular            (0x3023, 6),
 		seen_frame_count             (0x3043, 6),
-		sego_read_streamlined_page_9 (0x3070, 28),
-		astm_read                    (0x5014, 17);
+		sego_read_streamlined_page_9 (0x3070, 21+7),
+		astm_read                    (0x5014, 10+7),
+		iag_read                     (0x5026, 35+7),
+		iag_read_authenticated       (0x5030, 35+7);
 		private TransactionType(int c, int l) {
 			code = c;
 			len = l;
@@ -79,7 +88,9 @@ public class TagTransaction extends E6Property {
 
 	/** Check if tag transaction is a valid read */
 	public boolean isValidRead() {
-		return isValidSeGoRead() || isValidASTMRead();
+		return isSeGoReadValid()
+		    || isIAGReadValid()
+		    || isASTMReadValid();
 	}
 
 	/** Get the transaction type code */
@@ -101,9 +112,11 @@ public class TagTransaction extends E6Property {
 
 	/** Get the date/time stamp */
 	public Long getStamp() {
-		if (isValidSeGoRead())
+		if (isSeGoReadValid())
 			return parseStamp(21);
-		if (isValidASTMRead())
+		if (isIAGReadValid())
+			return parseStamp(35);
+		if (isASTMReadValid())
 			return parseStamp(10);
 		return null;
 	}
@@ -125,41 +138,60 @@ public class TagTransaction extends E6Property {
 
 	/** Get the tag type */
 	public TagType getTagType() {
-		if (isValidSeGoRead())
+		if (isSeGoReadValid())
 			return TagType.SeGo;
-		if (isValidASTMRead())
+		if (isIAGReadValid())
+			return TagType.IAG;
+		if (isASTMReadValid())
 			return TagType.ASTM;
 		return null;
 	}
 
 	/** Get the agency ID */
 	public Integer getAgency() {
-		if (isValidSeGoRead())
+		if (isSeGoReadValid())
 			return parseSeGoAgency();
+		if (isIAGReadValid())
+			return parseIAGAgency();
 		else
 			return null;
 	}
 
 	/** Get the transponder ID */
 	public Integer getId() {
-		if (isValidSeGoRead())
+		if (isSeGoReadValid())
 			return parseSeGoId();
-		if (isValidASTMRead())
+		if (isIAGReadValid())
+			return parseIAGId();
+		if (isASTMReadValid())
 			return parseASTMId();
 		return null;
 	}
 
 	/** Check if transaction is a valid SeGo streamlined read */
-	private boolean isValidSeGoRead() {
+	private boolean isSeGoReadValid() {
 		switch (getTransactionType()) {
 		case sego_read_streamlined_page_4:
 		case sego_read_streamlined_page_9:
 			return isLengthValid()
+			    && isSeGoReadCRCValid()
 			    && isSeGoMnPass()
-			    && isValidMnPassCRC();
+			    && isSeGoPage0CRCValid();
 		default:
 			return false;
 		}
+	}
+
+	/** Check if SeGo read CRC is valid.  NOTE: length must be valid */
+	private boolean isSeGoReadCRCValid() {
+		byte[] payload = new byte[16];
+		System.arraycopy(data, 2, payload, 0, 16);
+		return SEGO_CRC.calculate(payload) == getSeGoCRC16();
+	}
+
+	/** Get SeGo CRC-16 from data packet */
+	private int getSeGoCRC16() {
+		return parse16(data, 18);
 	}
 
 	/** Is it a SeGo MnPass tag? */
@@ -169,7 +201,7 @@ public class TagTransaction extends E6Property {
 	}
 
 	/** Check if SeGo page 0 CRC is valid.  NOTE: length must be valid */
-	private boolean isValidMnPassCRC() {
+	private boolean isSeGoPage0CRCValid() {
 		byte[] page0 = new byte[7];
 		page0[0] = getShiftedData(2);
 		page0[1] = getShiftedData(3);
@@ -202,8 +234,46 @@ public class TagTransaction extends E6Property {
 		return parse32(data, 5) & 0xFFFFFF;
 	}
 
+	/** Check if transaction is a valid IAG read */
+	private boolean isIAGReadValid() {
+		switch (getTransactionType()) {
+		case iag_read:
+		case iag_read_authenticated:
+			return isLengthValid() && isIAG_CRCValid();
+		default:
+			return false;
+		}
+	}
+
+	/** Check if IAG CRC is valid.  NOTE: length must be valid */
+	private boolean isIAG_CRCValid() {
+		byte[] payload = new byte[30];
+		System.arraycopy(data, 2, payload, 0, 30);
+		return IAG_CRC.calculate(payload) == getIAG_CRC16();
+	}
+
+	/** Get IAG CRC-16 from data packet */
+	private int getIAG_CRC16() {
+		return parse16(data, 32);
+	}
+
+	/** Parse an IAG ID */
+	private Integer parseIAGId() {
+		return (parse32(data, 4) >> 1) & 0xFFFFFF;
+	}
+
+	/** Parse an IAG agency */
+	private Integer parseIAGAgency() {
+		return (parse8(data, 4) >> 1) & 0x7F;
+	}
+
+	/** Parse an IAG HOV flag */
+	private boolean parseIAG_HOV() {
+		return (parse8(data, 24) & 0x03) != 0;
+	}
+
 	/** Check if transaction is a valid ASTM read */
-	private boolean isValidASTMRead() {
+	private boolean isASTMReadValid() {
 		TransactionType tt = getTransactionType();
 		if (tt == TransactionType.astm_read) {
 			// FIXME: check CRC
@@ -219,9 +289,11 @@ public class TagTransaction extends E6Property {
 
 	/** Get HOV flag */
 	public Boolean getHOV() {
-		if (isValidSeGoRead())
+		if (isSeGoReadValid())
 			return parseSeGoHOV();
-		if (isValidASTMRead())
+		if (isIAGReadValid())
+			return parseIAG_HOV();
+		if (isASTMReadValid())
 			return false;
 		return null;
 	}
@@ -274,9 +346,20 @@ public class TagTransaction extends E6Property {
 		if (tt == TransactionType.sego_read_streamlined_page_4
 		 || tt == TransactionType.sego_read_streamlined_page_9)
 		{
-			if (isSeGoMnPass() && !isValidMnPassCRC()) {
+			if (!isSeGoReadCRCValid()) {
 				sb.append(" INVALID CRC: ");
+				sb.append(getSeGoCRC16());
+			} else if (isSeGoMnPass() && !isSeGoPage0CRCValid()) {
+				sb.append(" INVALID PAGE0 CRC: ");
 				sb.append(getSeGoCRC12());
+			}
+		}
+		if (tt == TransactionType.iag_read
+		 || tt == TransactionType.iag_read_authenticated)
+		{
+			if (!isIAG_CRCValid()) {
+				sb.append(" INVALID CRC: ");
+				sb.append(getIAG_CRC16());
 			}
 		}
 		if (tt == TransactionType.seen_frame_count) {
