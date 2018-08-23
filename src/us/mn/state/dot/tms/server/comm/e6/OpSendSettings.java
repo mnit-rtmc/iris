@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 public class OpSendSettings extends OpE6 {
+
+	/** Supported protocols */
+	private final ProtocolProp prot = new ProtocolProp();
 
 	/** Flag to indicate stop mode */
 	private boolean stop = false;
@@ -158,96 +161,74 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			ProtocolProp prot = new ProtocolProp();
 			sendQuery(mess, prot);
 			mess.logQuery(prot);
-			return new QuerySeGoAtten();
+			return nextQueryPhase(null);
 		}
 	}
 
-	/** Phase to query the SeGo RF attenuation */
-	private class QuerySeGoAtten extends Phase<E6Property> {
+	/** Get the next query phase */
+	private Phase<E6Property> nextQueryPhase(RFProtocol p_prot) {
+		for (RFProtocol p: prot.getArray()) {
+			if (null == p_prot)
+				return new QueryAtten(p);
+			if (p == p_prot)
+				p_prot = null;
+		}
+		return new QueryLineLoss();
+	}
 
-		/** Query the SeGo RF attenuation */
+	/** Phase to query the RF attenuation for one protocol */
+	private class QueryAtten extends Phase<E6Property> {
+		private final RFProtocol protocol;
+		private QueryAtten(RFProtocol p) {
+			protocol = p;
+		}
+
+		/** Query the RF attenuation */
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			RFAttenProp atten = new RFAttenProp(RFProtocol.SeGo);
+			RFAttenProp atten = new RFAttenProp(protocol);
 			sendQuery(mess, atten);
 			mess.logQuery(atten);
-			return new QueryASTMv6Atten();
+			return new QuerySeen(protocol);
 		}
 	}
 
-	/** Phase to query the ASTMv6 RF attenuation */
-	private class QueryASTMv6Atten extends Phase<E6Property> {
-
-		/** Query the ASTMv6 RF attenuation */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			RFAttenProp atten = new RFAttenProp(RFProtocol.ASTMv6);
-			sendQuery(mess, atten);
-			mess.logQuery(atten);
-			return new QuerySeGoSeen();
+	/** Phase to query the seen count for one protocol */
+	private class QuerySeen extends Phase<E6Property> {
+		private final RFProtocol protocol;
+		private QuerySeen(RFProtocol p) {
+			protocol = p;
 		}
-	}
 
-	/** Phase to query the SeGo seen count */
-	private class QuerySeGoSeen extends Phase<E6Property> {
-
-		/** Query the SeGo seen count */
+		/** Query the seen count */
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			SeenCountProp seen = new SeenCountProp(RFProtocol.SeGo);
+			SeenCountProp seen = new SeenCountProp(protocol);
 			sendQuery(mess, seen);
 			mess.logQuery(seen);
-			return new QueryASTMv6Seen();
+			return new QueryDataDetect(protocol);
 		}
 	}
 
-	/** Phase to query the ASTMv6 seen count */
-	private class QueryASTMv6Seen extends Phase<E6Property> {
-
-		/** Query the ASTMv6 seen count */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			SeenCountProp seen = new SeenCountProp(
-				RFProtocol.ASTMv6);
-			sendQuery(mess, seen);
-			mess.logQuery(seen);
-			return new QuerySeGoDataDetect();
+	/** Phase to query the data detect for one protocol */
+	private class QueryDataDetect extends Phase<E6Property> {
+		private final RFProtocol protocol;
+		private QueryDataDetect(RFProtocol p) {
+			protocol = p;
 		}
-	}
 
-	/** Phase to query the SeGo data detect */
-	private class QuerySeGoDataDetect extends Phase<E6Property> {
-
-		/** Query the SeGo data detect */
+		/** Query the data detect */
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			DataDetectProp det = new DataDetectProp(RFProtocol.SeGo);
+			DataDetectProp det = new DataDetectProp(protocol);
 			sendQuery(mess, det);
 			mess.logQuery(det);
-			return new QueryASTMv6DataDetect();
-		}
-	}
-
-	/** Phase to query the ASTMv6 data detect */
-	private class QueryASTMv6DataDetect extends Phase<E6Property> {
-
-		/** Query the ASTMv6 data detect */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			DataDetectProp det = new DataDetectProp(
-				RFProtocol.ASTMv6);
-			sendQuery(mess, det);
-			mess.logQuery(det);
-			return new QueryLineLoss();
+			return nextQueryPhase(protocol);
 		}
 	}
 
