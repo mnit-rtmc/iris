@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,8 +57,13 @@ public class FrequencyProp extends E6Property {
 	private int value;
 
 	/** Get the frequency (MHz) */
-	public float getFrequency() {
+	public float getFreqMhz() {
 		return 800 + (value * 0.25f);
+	}
+
+	/** Get the frequency (KHz) */
+	public int getFreqKhz() {
+		return (int) (getFreqMhz() / 1000);
 	}
 
 	/** Create a frequency property */
@@ -134,6 +139,6 @@ public class FrequencyProp extends E6Property {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return source + " frequency: " + getFrequency() + " MHz";
+		return source + " frequency: " + getFreqMhz() + " MHz";
 	}
 }

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2016  Minnesota Department of Transportation
+ * Copyright (C) 2014-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,7 +51,10 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		mapping = new TableMapping(store, "iris", SONAR_TYPE,
 			DMS.SONAR_TYPE);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
-			"toll_zone FROM iris." + SONAR_TYPE + ";",
+			"toll_zone, downlink_freq_khz, uplink_freq_khz, " +
+			"sego_atten_downlink_db, sego_atten_uplink_db, " +
+			"iag_atten_downlink_db, iag_atten_uplink_db, " +
+			"line_loss_db FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -70,6 +73,13 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		map.put("pin", pin);
 		map.put("notes", notes);
 		map.put("toll_zone", toll_zone);
+		map.put("downlink_freq_khz", downlink_freq_khz);
+		map.put("uplink_freq_khz", uplink_freq_khz);
+		map.put("sego_atten_downlink_db", sego_atten_downlink_db);
+		map.put("sego_atten_uplink_db", sego_atten_uplink_db);
+		map.put("iag_atten_downlink_db", iag_atten_downlink_db);
+		map.put("iag_atten_uplink_db", iag_atten_uplink_db);
+		map.put("line_loss_db", line_loss_db);
 		return map;
 	}
 
@@ -87,30 +97,47 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Create a tag reader */
 	private TagReaderImpl(ResultSet row) throws SQLException, TMSException {
-		this(row.getString(1),		// name
-		     row.getString(2),		// geo_loc
-		     row.getString(3),		// controller
-		     row.getInt(4),		// pin
-		     row.getString(5),		// notes
-		     row.getString(6)		// toll_zone
+		this(row.getString(1),           // name
+		     row.getString(2),           // geo_loc
+		     row.getString(3),           // controller
+		     row.getInt(4),              // pin
+		     row.getString(5),           // notes
+		     row.getString(6),           // toll_zone
+		     (Integer) row.getObject(7), // downlink_freq_khz
+		     (Integer) row.getObject(8), // uplink_freq_khz
+		     (Integer) row.getObject(9), // sego_atten_downlink_db
+		     (Integer) row.getObject(10),// sego_atten_uplink_db
+		     (Integer) row.getObject(11),// iag_atten_downlink_db
+		     (Integer) row.getObject(12),// iag_atten_uplink_db
+		     (Integer) row.getObject(13) // line_loss_db
 		);
 	}
 
 	/** Create a tag reader */
 	private TagReaderImpl(String n, String l, String c, int p, String nt,
-		String tz) throws TMSException
+		String tz, Integer df, Integer uf, Integer sad, Integer sau,
+		Integer iad, Integer iau, Integer ll) throws TMSException
 	{
 		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
-		     lookupTollZone(tz));
+		     lookupTollZone(tz), df, uf, sad, sau, iad, iau, ll);
 	}
 
 	/** Create a tag reader */
 	private TagReaderImpl(String n, GeoLocImpl l, ControllerImpl c,
-		int p, String nt, TollZone tz) throws TMSException
+		int p, String nt, TollZone tz, Integer df, Integer uf,
+		Integer sad, Integer sau, Integer iad, Integer iau, Integer ll)
+		throws TMSException
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
 		toll_zone = tz;
+		downlink_freq_khz = df;
+		uplink_freq_khz = uf;
+		sego_atten_downlink_db = sad;
+		sego_atten_uplink_db = sau;
+		iag_atten_downlink_db = iad;
+		iag_atten_uplink_db = iau;
+		line_loss_db = ll;
 		dmss = lookupDMSMapping();
 		initTransients();
 	}
@@ -171,6 +198,157 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	@Override
 	public TollZone getTollZone() {
 		return toll_zone;
+	}
+
+	/** Downlink frequency (khz) */
+	private Integer downlink_freq_khz;
+
+	/** Set the downlink frequency */
+	private void setDownlinkFreqKhz(Integer df) {
+		downlink_freq_khz = df;
+	}
+
+	/** Set the downlink frequency */
+	public void setDownlinkFreqKhzNotify(Integer df) {
+		if (df != downlink_freq_khz) {
+			try {
+				store.update(this, "downlink_freq_khz", df);
+				setDownlinkFreqKhz(df);
+			}
+			catch (TMSException e) {
+				logError("downlink_freq_khz: " +e.getMessage());
+			}
+		}
+	}
+
+	/** Uplink frequency (khz) */
+	private Integer uplink_freq_khz;
+
+	/** Set the uplink frequency */
+	private void setUplinkFreqKhz(Integer uf) {
+		uplink_freq_khz = uf;
+	}
+
+	/** Set the uplink frequency */
+	public void setUplinkFreqKhzNotify(Integer uf) {
+		if (uf != uplink_freq_khz) {
+			try {
+				store.update(this, "uplink_freq_khz", uf);
+				setUplinkFreqKhz(uf);
+			}
+			catch (TMSException e) {
+				logError("uplink_freq_khz: " + e.getMessage());
+			}
+		}
+	}
+
+	/** SeGo downlink attenuation (db) */
+	private Integer sego_atten_downlink_db;
+
+	/** Set the SeGo downlink attenuation */
+	private void setSeGoAttenDownlinkDb(Integer sad) {
+		sego_atten_downlink_db = sad;
+	}
+
+	/** Set the SeGo downlink attenuation */
+	public void setSeGoAttenDownlinkDbNotify(Integer sad) {
+		if (sad != sego_atten_downlink_db) {
+			try {
+				store.update(this,"sego_atten_downlink_db",sad);
+				setSeGoAttenDownlinkDb(sad);
+			}
+			catch (TMSException e) {
+				logError("sego_atten_downlink_db: " +
+					e.getMessage());
+			}
+		}
+	}
+
+	/** SeGo uplink attenuation (db) */
+	private Integer sego_atten_uplink_db;
+
+	/** Set the SeGo uplink attenuation */
+	private void setSeGoAttenUplinkDb(Integer sau) {
+		sego_atten_uplink_db = sau;
+	}
+
+	/** Set the SeGo uplink attenuation */
+	public void setSeGoAttenUplinkDbNotify(Integer sau) {
+		if (sau != sego_atten_uplink_db) {
+			try {
+				store.update(this, "sego_atten_uplink_db", sau);
+				setSeGoAttenUplinkDb(sau);
+			}
+			catch (TMSException e) {
+				logError("sego_atten_uplink_db: " +
+					e.getMessage());
+			}
+		}
+	}
+
+	/** IAG downlink attenuation (db) */
+	private Integer iag_atten_downlink_db;
+
+	/** Set the IAG downlink attenuation */
+	private void setIAGAttenDownlinkDb(Integer iad) {
+		iag_atten_downlink_db = iad;
+	}
+
+	/** Set the IAG downlink attenuation */
+	public void setIAGAttenDownlinkDbNotify(Integer iad) {
+		if (iad != iag_atten_downlink_db) {
+			try {
+				store.update(this, "iag_atten_downlink_db",iad);
+				setIAGAttenDownlinkDb(iad);
+			}
+			catch (TMSException e) {
+				logError("iag_atten_downlink_db: " +
+					e.getMessage());
+			}
+		}
+	}
+
+	/** IAG uplink attenuation (db) */
+	private Integer iag_atten_uplink_db;
+
+	/** Set the IAG uplink attenuation */
+	private void setIAGAttenUplinkDb(Integer iau) {
+		iag_atten_uplink_db = iau;
+	}
+
+	/** Set the IAG uplink attenuation */
+	public void setIAGAttenUplinkDbNotify(Integer iau) {
+		if (iau != iag_atten_uplink_db) {
+			try {
+				store.update(this, "iag_atten_uplink_db", iau);
+				setIAGAttenUplinkDb(iau);
+			}
+			catch (TMSException e) {
+				logError("iag_atten_uplink_db: " +
+					e.getMessage());
+			}
+		}
+	}
+
+	/** Line loss (db) */
+	private Integer line_loss_db;
+
+	/** Set the line loss */
+	private void setLineLossDb(Integer ll) {
+		line_loss_db = ll;
+	}
+
+	/** Set the line loss */
+	public void setLineLossDbNotify(Integer ll) {
+		if (ll != line_loss_db) {
+			try {
+				store.update(this, "line_loss_db", ll);
+				setLineLossDb(ll);
+			}
+			catch (TMSException e) {
+				logError("line_loss_db: " + e.getMessage());
+			}
+		}
 	}
 
 	/** DMSs for the tag reader */

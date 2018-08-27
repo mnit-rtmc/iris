@@ -37,6 +37,11 @@ public class LineLossProp extends E6Property {
 	/** Line loss value (0 - 3 dB) */
 	private int value = 0;
 
+	/** Get line loss (dB) */
+	public int getValue() {
+		return value;
+	}
+
 	/** Create a line loss property */
 	public LineLossProp(int v) {
 		value = v;

@@ -135,6 +135,7 @@ public class OpSendSettings extends OpE6 {
 				FrequencyProp.Source.downlink);
 			sendQuery(mess, freq);
 			mess.logQuery(freq);
+			tag_reader.setDownlinkFreqKhzNotify(freq.getFreqKhz());
 			return new QueryUplink();
 		}
 	}
@@ -150,6 +151,7 @@ public class OpSendSettings extends OpE6 {
 				FrequencyProp.Source.uplink);
 			sendQuery(mess, freq);
 			mess.logQuery(freq);
+			tag_reader.setUplinkFreqKhzNotify(freq.getFreqKhz());
 			return new QueryProtocols();
 		}
 	}
@@ -192,7 +194,28 @@ public class OpSendSettings extends OpE6 {
 			RFAttenProp atten = new RFAttenProp(protocol);
 			sendQuery(mess, atten);
 			mess.logQuery(atten);
+			setAtten(protocol, atten);
 			return new QuerySeen(protocol);
+		}
+	}
+
+	/** Set attenuation for one protocol */
+	private void setAtten(RFProtocol protocol, RFAttenProp atten) {
+		switch (protocol) {
+		case SeGo:
+			tag_reader.setSeGoAttenDownlinkDbNotify(
+				atten.getDownlinkDb());
+			tag_reader.setSeGoAttenUplinkDbNotify(
+				atten.getUplinkDb());
+			break;
+		case IAG:
+			tag_reader.setIAGAttenDownlinkDbNotify(
+				atten.getDownlinkDb());
+			tag_reader.setIAGAttenUplinkDbNotify(
+				atten.getUplinkDb());
+			break;
+		default:
+			break;
 		}
 	}
 
@@ -242,6 +265,7 @@ public class OpSendSettings extends OpE6 {
 			LineLossProp loss = new LineLossProp();
 			sendQuery(mess, loss);
 			mess.logQuery(loss);
+			tag_reader.setLineLossDbNotify(loss.getValue());
 			return new QueryRFControl();
 		}
 	}

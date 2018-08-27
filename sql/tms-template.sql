@@ -1522,14 +1522,23 @@ CREATE TABLE iris._tag_reader (
 	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
 	notes VARCHAR(64) NOT NULL,
-	toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name)
+	toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name),
+	downlink_freq_khz INTEGER,
+	uplink_freq_khz INTEGER,
+	sego_atten_downlink_db INTEGER,
+	sego_atten_uplink_db INTEGER,
+	iag_atten_downlink_db INTEGER,
+	iag_atten_uplink_db INTEGER,
+	line_loss_db INTEGER
 );
 
 ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
 CREATE VIEW iris.tag_reader AS SELECT
-	t.name, geo_loc, controller, pin, notes, toll_zone
+	t.name, geo_loc, controller, pin, notes, toll_zone, downlink_freq_khz,
+	uplink_freq_khz, sego_atten_downlink_db, sego_atten_uplink_db,
+	iag_atten_downlink_db, iag_atten_uplink_db, line_loss_db
 	FROM iris._tag_reader t JOIN iris._device_io d ON t.name = d.name;
 
 CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
@@ -1537,8 +1546,17 @@ CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
 BEGIN
 	INSERT INTO iris._device_io (name, controller, pin)
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._tag_reader (name, geo_loc, notes, toll_zone)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone);
+	INSERT INTO iris._tag_reader (name, geo_loc, notes, toll_zone,
+	                              downlink_freq_khz, uplink_freq_khz,
+	                              sego_atten_downlink_db,
+	                              sego_atten_uplink_db,
+	                              iag_atten_downlink_db,
+	                              iag_atten_uplink_db, line_loss_db)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone,
+	             NEW.downlink_freq_khz, NEW.uplink_freq_khz,
+	             NEW.sego_atten_downlink_db, NEW.sego_atten_uplink_db,
+	             NEW.iag_atten_downlink_db, NEW.iag_atten_uplink_db,
+	             NEW.line_loss_db);
 	RETURN NEW;
 END;
 $tag_reader_insert$ LANGUAGE plpgsql;
@@ -1557,7 +1575,14 @@ BEGIN
 	UPDATE iris._tag_reader
 	   SET geo_loc = NEW.geo_loc,
 	       notes = NEW.notes,
-	       toll_zone = NEW.toll_zone
+	       toll_zone = NEW.toll_zone,
+	       downlink_freq_khz = NEW.downlink_freq_khz,
+	       uplink_freq_khz = NEW.uplink_freq_khz,
+	       sego_atten_downlink_db = NEW.sego_atten_downlink_db,
+	       sego_atten_uplink_db = NEW.sego_atten_uplink_db,
+	       iag_atten_downlink_db = NEW.iag_atten_downlink_db,
+	       iag_atten_uplink_db = NEW.iag_atten_uplink_db,
+	       line_loss_db = NEW.line_loss_db
 	 WHERE name = OLD.name;
 	RETURN NEW;
 END;
@@ -2225,10 +2250,10 @@ CREATE VIEW tag_read_event_view AS
 	ON   tag_read_event.event_desc_id = event_description.event_desc_id
 	JOIN event.tag_type
 	ON   tag_read_event.tag_type = tag_type.id
-	JOIN iris.tag_reader
-	ON   tag_read_event.tag_reader = tag_reader.name
+	JOIN iris._tag_reader
+	ON   tag_read_event.tag_reader = _tag_reader.name
 	LEFT JOIN iris.toll_zone
-	ON        tag_reader.toll_zone = toll_zone.name;
+	ON        _tag_reader.toll_zone = toll_zone.name;
 GRANT SELECT ON tag_read_event_view TO PUBLIC;
 
 -- Allow trip_id column to be updated by roles which have been granted
@@ -2697,12 +2722,12 @@ CREATE VIEW weather_sensor_view AS
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
 CREATE VIEW tag_reader_view AS
-	SELECT t.name, t.notes, t.toll_zone, t.geo_loc, l.roadway, l.road_dir,
-	       l.cross_mod, l.cross_street, l.cross_dir, l.lat, l.lon,
-	       t.controller, t.pin, ctr.comm_link, ctr.drop_id, ctr.condition
+	SELECT t.name, t.geo_loc, l.location, t.controller, t.pin, t.notes,
+	       t.toll_zone, t.downlink_freq_khz, t.uplink_freq_khz,
+	       t.sego_atten_downlink_db, t.sego_atten_uplink_db,
+	       t.iag_atten_downlink_db, t.iag_atten_uplink_db, t.line_loss_db
 	FROM iris.tag_reader t
-	LEFT JOIN geo_loc_view l ON t.geo_loc = l.name
-	LEFT JOIN controller_view ctr ON t.controller = ctr.name;
+	LEFT JOIN geo_loc_view l ON t.geo_loc = l.name;
 GRANT SELECT ON tag_reader_view TO PUBLIC;
 
 CREATE VIEW tag_reader_dms_view AS
@@ -3242,7 +3267,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	-1
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.78.0
+database_version	4.79.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0

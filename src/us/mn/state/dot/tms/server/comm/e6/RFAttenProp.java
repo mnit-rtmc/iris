@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,8 +41,18 @@ public class RFAttenProp extends E6Property {
 	/** Downlink attenuation value (0 - 15 dB) */
 	private int downlink;
 
+	/** Get downlink attenuation (db) */
+	public int getDownlinkDb() {
+		return downlink;
+	}
+
 	/** Uplink attenuation value (0 - 15 dB) */
 	private int uplink;
+
+	/** Get uplink attenuation (db) */
+	public int getUplinkDb() {
+		return uplink;
+	}
 
 	/** Create an FR attenuation property */
 	public RFAttenProp(RFProtocol p, int d, int u) {
