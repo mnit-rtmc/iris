@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,9 @@ public class E6Poller extends ThreadedPoller<E6Property>
 		if (reader != tr)
 			reader = tr;
 		switch (r) {
+		case QUERY_SETTINGS:
+			addOp(new OpQuerySettings(tr));
+			break;
 		case SEND_SETTINGS:
 			addOp(new OpSendSettings(tr));
 			break;

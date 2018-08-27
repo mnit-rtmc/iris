@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  * Copyright (C) 2017  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -71,6 +71,7 @@ public class SendSettingsJob extends Job {
 		requestLCS(DeviceRequest.SEND_SETTINGS);
 		requestRampMeters(DeviceRequest.SEND_SETTINGS);
 		requestBeacons(DeviceRequest.SEND_SETTINGS);
+		requestTagReaders(DeviceRequest.QUERY_SETTINGS);
 		requestTagReaders(DeviceRequest.SEND_SETTINGS);
 		requestWeatherSensors(DeviceRequest.SEND_SETTINGS);
 	}

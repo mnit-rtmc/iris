@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014-2017  Minnesota Department of Transportation
+ * Copyright (C) 2014-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -139,8 +139,20 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 	/** Status panel */
 	private final IPanel status_pnl;
 
+	/** Query settings action */
+	private final IAction query_settings_act = new IAction(
+		"device.query.settings")
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			proxy.setDeviceRequest(DeviceRequest.
+				QUERY_SETTINGS.ordinal());
+		}
+	};
+
 	/** Send settings action */
-	private final IAction settings = new IAction("device.send.settings") {
+	private final IAction send_settings_act = new IAction(
+		"device.send.settings")
+	{
 		protected void doActionPerformed(ActionEvent e) {
 			proxy.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());
@@ -206,7 +218,8 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 	/** Create the status panel */
 	private IPanel createStatusPanel() {
 		status_pnl.initialize();
-		status_pnl.add(new JButton(settings), Stretch.RIGHT);
+		status_pnl.add(new JButton(query_settings_act));
+		status_pnl.add(new JButton(send_settings_act), Stretch.RIGHT);
 		return status_pnl;
 	}
 
@@ -246,7 +259,8 @@ public class TagReaderProperties extends SonarObjectForm<TagReader> {
 			updateSigns();
 		if (a == null) {
 			boolean r = canRequest();
-			settings.setEnabled(r);
+			query_settings_act.setEnabled(r);
+			send_settings_act.setEnabled(r);
 		}
 	}
 

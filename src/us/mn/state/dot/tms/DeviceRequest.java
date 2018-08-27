@@ -26,6 +26,7 @@ package us.mn.state.dot.tms;
 public enum DeviceRequest {
 	NO_REQUEST,
 	QUERY_CONFIGURATION,
+	QUERY_SETTINGS,
 	SEND_SETTINGS,
 	QUERY_MESSAGE,
 	QUERY_STATUS,
