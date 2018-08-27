@@ -119,9 +119,6 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 			addOp(new OpUpdateDMSBrightness(dms,
 				EventType.DMS_BRIGHT_HIGH));
 			break;
-		case SEND_LEDSTAR_SETTINGS:
-			addOp(new OpSendDMSLedstar(dms));
-			break;
 		default:
 			// Ignore other requests
 			break;
