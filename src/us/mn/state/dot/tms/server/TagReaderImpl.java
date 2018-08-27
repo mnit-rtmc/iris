@@ -221,6 +221,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		}
 	}
 
+	/** Get the downlink frequency (khz) */
+	public Integer getDownlinkFreqKhz() {
+		return downlink_freq_khz;
+	}
+
 	/** Uplink frequency (khz) */
 	private Integer uplink_freq_khz;
 
@@ -240,6 +245,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 				logError("uplink_freq_khz: " + e.getMessage());
 			}
 		}
+	}
+
+	/** Get the uplink frequency (khz) */
+	public Integer getUplinkFreqKhz() {
+		return uplink_freq_khz;
 	}
 
 	/** SeGo downlink attenuation (db) */

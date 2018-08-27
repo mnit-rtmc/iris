@@ -181,10 +181,13 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			FrequencyProp freq = new FrequencyProp(
-				FrequencyProp.Source.downlink, 915.75f);
-			mess.logStore(freq);
-			sendStore(mess, freq);
+			Integer df = tag_reader.getDownlinkFreqKhz();
+			if (df != null) {
+				FrequencyProp freq = new FrequencyProp(
+					FrequencyProp.Source.downlink, df);
+				mess.logStore(freq);
+				sendStore(mess, freq);
+			}
 			return new StoreUplink();
 		}
 	}
@@ -196,10 +199,13 @@ public class OpSendSettings extends OpE6 {
 		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
 			throws IOException
 		{
-			FrequencyProp freq = new FrequencyProp(
-				FrequencyProp.Source.uplink, 903.25f);
-			mess.logStore(freq);
-			sendStore(mess, freq);
+			Integer uf = tag_reader.getUplinkFreqKhz();
+			if (uf != null) {
+				FrequencyProp freq = new FrequencyProp(
+					FrequencyProp.Source.uplink, uf);
+				mess.logStore(freq);
+				sendStore(mess, freq);
+			}
 			return new StoreSeGoAtten();
 		}
 	}

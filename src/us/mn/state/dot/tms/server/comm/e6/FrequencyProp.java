@@ -24,9 +24,15 @@ import us.mn.state.dot.tms.server.comm.ParsingException;
  */
 public class FrequencyProp extends E6Property {
 
-	/** Get the frequency value */
-	static private int freqValue(float mhz) {
-		return Math.round((mhz - 800) * 4);
+	/** Base frequency (KHz) */
+	static private final int FREQ_BASE_KHZ = 800000;
+
+	/** Frequency step (KHz) */
+	static private final int FREQ_STEP_KHZ = 250;
+
+	/** Get the frequency value from KHz */
+	static private int value_from_khz(int khz) {
+		return (khz - FREQ_BASE_KHZ) / FREQ_STEP_KHZ;
 	}
 
 	/** RF transceiver command */
@@ -56,20 +62,15 @@ public class FrequencyProp extends E6Property {
 	/** Frequency value */
 	private int value;
 
-	/** Get the frequency (MHz) */
-	public float getFreqMhz() {
-		return 800 + (value * 0.25f);
-	}
-
 	/** Get the frequency (KHz) */
 	public int getFreqKhz() {
-		return (int) (getFreqMhz() / 1000);
+		return FREQ_BASE_KHZ + value * FREQ_STEP_KHZ;
 	}
 
 	/** Create a frequency property */
-	public FrequencyProp(Source s, float mhz) {
+	public FrequencyProp(Source s, int khz) {
 		source = s;
-		value = freqValue(mhz);
+		value = value_from_khz(khz);
 	}
 
 	/** Create a frequency property */
@@ -139,6 +140,6 @@ public class FrequencyProp extends E6Property {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return source + " frequency: " + getFreqMhz() + " MHz";
+		return source + " frequency: " + getFreqKhz() + " KHz";
 	}
 }
