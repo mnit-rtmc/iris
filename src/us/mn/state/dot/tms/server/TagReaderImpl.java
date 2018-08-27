@@ -210,7 +210,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Set the downlink frequency */
 	public void setDownlinkFreqKhzNotify(Integer df) {
-		if (df != downlink_freq_khz) {
+		if (!objectEquals(df, downlink_freq_khz)) {
 			try {
 				store.update(this, "downlink_freq_khz", df);
 				setDownlinkFreqKhz(df);
@@ -231,7 +231,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Set the uplink frequency */
 	public void setUplinkFreqKhzNotify(Integer uf) {
-		if (uf != uplink_freq_khz) {
+		if (!objectEquals(uf, uplink_freq_khz)) {
 			try {
 				store.update(this, "uplink_freq_khz", uf);
 				setUplinkFreqKhz(uf);
@@ -252,7 +252,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Set the SeGo downlink attenuation */
 	public void setSeGoAttenDownlinkDbNotify(Integer sad) {
-		if (sad != sego_atten_downlink_db) {
+		if (!objectEquals(sad, sego_atten_downlink_db)) {
 			try {
 				store.update(this,"sego_atten_downlink_db",sad);
 				setSeGoAttenDownlinkDb(sad);
@@ -274,7 +274,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Set the SeGo uplink attenuation */
 	public void setSeGoAttenUplinkDbNotify(Integer sau) {
-		if (sau != sego_atten_uplink_db) {
+		if (!objectEquals(sau, sego_atten_uplink_db)) {
 			try {
 				store.update(this, "sego_atten_uplink_db", sau);
 				setSeGoAttenUplinkDb(sau);
@@ -296,7 +296,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Set the IAG downlink attenuation */
 	public void setIAGAttenDownlinkDbNotify(Integer iad) {
-		if (iad != iag_atten_downlink_db) {
+		if (!objectEquals(iad, iag_atten_downlink_db)) {
 			try {
 				store.update(this, "iag_atten_downlink_db",iad);
 				setIAGAttenDownlinkDb(iad);
@@ -318,7 +318,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Set the IAG uplink attenuation */
 	public void setIAGAttenUplinkDbNotify(Integer iau) {
-		if (iau != iag_atten_uplink_db) {
+		if (!objectEquals(iau, iag_atten_uplink_db)) {
 			try {
 				store.update(this, "iag_atten_uplink_db", iau);
 				setIAGAttenUplinkDb(iau);
@@ -340,7 +340,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 
 	/** Set the line loss */
 	public void setLineLossDbNotify(Integer ll) {
-		if (ll != line_loss_db) {
+		if (!objectEquals(ll, line_loss_db)) {
 			try {
 				store.update(this, "line_loss_db", ll);
 				setLineLossDb(ll);
