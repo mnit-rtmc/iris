@@ -137,26 +137,12 @@ public interface DMS extends Device {
 
 	/* LEDSTAR attributes */
 
-	/** Set the LDC pot base (LEDSTAR) */
-	void setLdcPotBase(Integer base);
-
 	/** Get the LDC pot base (LEDSTAR) */
 	Integer getLdcPotBase();
-
-	/** Set the pixel low current threshold (LEDSTAR) */
-	void setPixelCurrentLow(Integer low);
 
 	/** Get the pixel low current threshold (LEDSTAR) */
 	Integer getPixelCurrentLow();
 
-	/** Set the pixel high curent threshold (LEDSTAR) */
-	void setPixelCurrentHigh(Integer high);
-
 	/** Get the pixel high current threshold (LEDSTAR) */
 	Integer getPixelCurrentHigh();
-
-	/* Skyline attributes */
-
-	/** Get sign face heat tape status (Skyline) */
-	String getHeatTapeStatus();
 }

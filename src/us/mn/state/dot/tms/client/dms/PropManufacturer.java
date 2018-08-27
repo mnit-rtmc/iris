@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,10 +19,6 @@ import java.awt.event.ActionEvent;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.client.Session;
@@ -43,10 +39,12 @@ public class PropManufacturer extends IPanel {
 
 	/** Format a string field */
 	static private String formatString(String s) {
-		if(s != null && s.length() > 0)
-			return s;
-		else
-			return UNKNOWN;
+		return (s != null && s.length() > 0) ? s : UNKNOWN;
+	}
+
+	/** Format an integer field */
+	static private String formatInt(Integer i) {
+		return (i != null) ? i.toString() : UNKNOWN;
 	}
 
 	/** Generic sign make */
@@ -54,9 +52,6 @@ public class PropManufacturer extends IPanel {
 
 	/** Ledstar sign make */
 	static private final String MAKE_LEDSTAR = "Ledstar";
-
-	/** Skyline sign make */
-	static private final String MAKE_SKYLINE = "Skyline";
 
 	/** Card layout for manufacturer panels */
 	private final CardLayout cards = new CardLayout();
@@ -73,20 +68,14 @@ public class PropManufacturer extends IPanel {
 	/** Version label */
 	private final JLabel version_lbl = createValueLabel();
 
-	/** Spinner to adjuct LDC pot base */
-	private final JSpinner pot_base_spn = new JSpinner(
-		new SpinnerNumberModel(20, 20, 65, 5));
+	/** LDC pot base label */
+	private final JLabel pot_base_lbl = createValueLabel();
 
-	/** Pixel current low threshold spinner */
-	private final JSpinner current_low_spn = new JSpinner(
-		new SpinnerNumberModel(5, 0, 100, 1));
+	/** Pixel current low threshold label */
+	private final JLabel current_low_lbl = createValueLabel();
 
-	/** Pixel current high threshold spinner */
-	private final JSpinner current_high_spn = new JSpinner(
-		new SpinnerNumberModel(40, 0, 100, 1));
-
-	/** Heat tape status label */
-	private final JLabel heat_tape_lbl = createValueLabel();
+	/** Pixel current high threshold label */
+	private final JLabel current_high_lbl = createValueLabel();
 
 	/** Config action */
 	private final IAction config = new IAction("dms.config") {
@@ -129,35 +118,8 @@ public class PropManufacturer extends IPanel {
 		add(card_pnl, Stretch.CENTER);
 		card_pnl.add(createGenericPanel(), MAKE_GENERIC);
 		card_pnl.add(createLedstarPanel(), MAKE_LEDSTAR);
-		card_pnl.add(createSkylinePanel(), MAKE_SKYLINE);
 		add(new JButton(config), Stretch.RIGHT);
-		createUpdateJobs();
 		updateAttribute(null);
-	}
-
-	/** Create the widget jobs */
-	private void createUpdateJobs() {
-		pot_base_spn.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				Number n = (Number)pot_base_spn.getValue();
-				dms.setLdcPotBase(n.intValue());
-			}
-		});
-		current_low_spn.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				Number n = (Number)current_low_spn.getValue();
-				dms.setPixelCurrentLow(n.intValue());
-			}
-		});
-		current_high_spn.addChangeListener(new ChangeListener() {
-			@Override
-			public void stateChanged(ChangeEvent e) {
-				Number n = (Number)current_high_spn.getValue();
-				dms.setPixelCurrentHigh(n.intValue());
-			}
-		});
 	}
 
 	/** Create generic manufacturer panel */
@@ -173,65 +135,43 @@ public class PropManufacturer extends IPanel {
 		IPanel p = new IPanel();
 		p.setTitle(MAKE_LEDSTAR);
 		p.add("dms.ledstar.pot.base");
-		p.add(pot_base_spn, Stretch.LAST);
+		p.add(pot_base_lbl, Stretch.LAST);
 		p.add("dms.ledstar.current.low");
-		p.add(current_low_spn, Stretch.LAST);
+		p.add(current_low_lbl, Stretch.LAST);
 		p.add("dms.ledstar.current.high");
-		p.add(current_high_spn, Stretch.LAST);
-		return p;
-	}
-
-	/** Create Skyline-specific panel */
-	private JPanel createSkylinePanel() {
-		IPanel p = new IPanel();
-		p.setTitle(MAKE_SKYLINE);
-		p.add("dms.skyline.heat.tape");
-		p.add(heat_tape_lbl, Stretch.LAST);
+		p.add(current_high_lbl, Stretch.LAST);
 		return p;
 	}
 
 	/** Update one attribute on the panel */
 	public void updateAttribute(String a) {
-		if(a == null || a.equals("make")) {
+		if (null == a || a.equals("make")) {
 			String m = formatString(dms.getMake());
 			make_lbl.setText(m);
 			updateMake(m.toUpperCase());
 		}
-		if(a == null || a.equals("model"))
+		if (null == a || a.equals("model"))
 			model_lbl.setText(formatString(dms.getModel()));
-		if(a == null || a.equals("version"))
+		if (null == a || a.equals("version"))
 			version_lbl.setText(formatString(dms.getVersion()));
-		if (null == a || a.equals("ldcPotBase")) {
-			pot_base_spn.setEnabled(canWrite("ldcPotBase"));
-			Integer b = dms.getLdcPotBase();
-			if (b != null)
-				pot_base_spn.setValue(b);
-		}
+		if (null == a || a.equals("ldcPotBase"))
+			pot_base_lbl.setText(formatInt(dms.getLdcPotBase()));
 		if (null == a || a.equals("pixelCurrentLow")) {
-			current_low_spn.setEnabled(canWrite("pixelCurrentLow"));
-			Integer c = dms.getPixelCurrentLow();
-			if (c != null)
-				current_low_spn.setValue(c);
+			current_low_lbl.setText(formatInt(
+				dms.getPixelCurrentLow()));
 		}
 		if (null == a || a.equals("pixelCurrentHigh")) {
-			current_high_spn.setEnabled(canWrite(
-				"pixelCurrentHigh"));
-			Integer c = dms.getPixelCurrentHigh();
-			if (c != null)
-				current_high_spn.setValue(c);
+			current_high_lbl.setText(formatInt(
+				dms.getPixelCurrentHigh()));
 		}
-		if (null == a || a.equals("heatTapeStatus"))
-			heat_tape_lbl.setText(dms.getHeatTapeStatus());
 		if (null == a || a.equals("signConfig"))
 			config.setEnabled(dms.getSignConfig() != null);
 	}
 
 	/** Select card on manufacturer panel for the given make */
 	private void updateMake(String m) {
-		if(m.contains(MAKE_LEDSTAR.toUpperCase()))
+		if (m.contains(MAKE_LEDSTAR.toUpperCase()))
 			cards.show(card_pnl, MAKE_LEDSTAR);
-		else if(m.contains(MAKE_SKYLINE.toUpperCase()))
-			cards.show(card_pnl, MAKE_SKYLINE);
 		else
 			cards.show(card_pnl, MAKE_GENERIC);
 	}

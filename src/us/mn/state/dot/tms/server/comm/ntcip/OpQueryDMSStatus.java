@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -480,18 +480,18 @@ public class OpQueryDMSStatus extends OpDMS {
 				mess.queryProps();
 			}
 			catch (NoSuchName e) {
-				dms.setLdcPotBase(null);
-				dms.setPixelCurrentLow(null);
-				dms.setPixelCurrentHigh(null);
+				dms.setLdcPotBaseNotify(null);
+				dms.setPixelCurrentLowNotify(null);
+				dms.setPixelCurrentHighNotify(null);
 				return new SkylineStatus();
 			}
 			logQuery(potBase);
 			logQuery(low);
 			logQuery(high);
 			logQuery(bad);
-			dms.setLdcPotBase(potBase.getInteger());
-			dms.setPixelCurrentLow(low.getInteger());
-			dms.setPixelCurrentHigh(high.getInteger());
+			dms.setLdcPotBaseNotify(potBase.getInteger());
+			dms.setPixelCurrentLowNotify(low.getInteger());
+			dms.setPixelCurrentHighNotify(high.getInteger());
 			return null;
 		}
 	}
@@ -502,18 +502,14 @@ public class OpQueryDMSStatus extends OpDMS {
 		/** Query Skyline-specific status */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer heat = signFaceHeatStatus.makeInt();
 			IllumPowerStatus power = new IllumPowerStatus();
 			SensorFailures sensor = new SensorFailures();
-			mess.add(heat);
 			mess.add(power);
 			mess.add(sensor);
 			try {
 				mess.queryProps();
-				logQuery(heat);
 				logQuery(power);
 				logQuery(sensor);
-				dms.setHeatTapeStatus(heat.getValue());
 				dms.setPowerStatus(power.getPowerStatus());
 				if (power.isCritical())
 					setErrorStatus("POWER");

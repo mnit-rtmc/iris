@@ -1057,8 +1057,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private transient Integer ldcPotBase;
 
 	/** Set the LDC pot base */
-	@Override
-	public void setLdcPotBase(Integer base) {
+	public void setLdcPotBaseNotify(Integer base) {
 		if (!objectEquals(base, ldcPotBase)) {
 			ldcPotBase = base;
 			notifyAttribute("ldcPotBase");
@@ -1075,8 +1074,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private transient Integer pixelCurrentLow;
 
 	/** Set the pixel low curent threshold */
-	@Override
-	public void setPixelCurrentLow(Integer low) {
+	public void setPixelCurrentLowNotify(Integer low) {
 		if (!objectEquals(low, pixelCurrentLow)) {
 			pixelCurrentLow = low;
 			notifyAttribute("pixelCurrentLow");
@@ -1093,8 +1091,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private transient Integer pixelCurrentHigh;
 
 	/** Set the pixel high curent threshold */
-	@Override
-	public void setPixelCurrentHigh(Integer high) {
+	public void setPixelCurrentHighNotify(Integer high) {
 		if (!objectEquals(high, pixelCurrentHigh)) {
 			pixelCurrentHigh = high;
 			notifyAttribute("pixelCurrentHigh");
@@ -1105,23 +1102,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public Integer getPixelCurrentHigh() {
 		return pixelCurrentHigh;
-	}
-
-	/** Sign face heat tape status */
-	private transient String heatTapeStatus;
-
-	/** Set sign face heat tape status */
-	public void setHeatTapeStatus(String h) {
-		if (!h.equals(heatTapeStatus)) {
-			heatTapeStatus = h;
-			notifyAttribute("heatTapeStatus");
-		}
-	}
-
-	/** Get sign face heat tape status */
-	@Override
-	public String getHeatTapeStatus() {
-		return heatTapeStatus;
 	}
 
 	/** Feedback brightness sample data */
