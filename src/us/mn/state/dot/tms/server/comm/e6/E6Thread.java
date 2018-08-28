@@ -149,8 +149,13 @@ public class E6Thread extends CommThread<E6Property> {
 		E6Packet tx = tx_pkt;
 		E6Packet rp = resp_pkt;
 		if (rx == null || tx == null || rp == null) {
-			TimeSteward.sleep_well(200);
-			return true;
+			try {
+				TimeSteward.sleep(200);
+				return true;
+			}
+			catch (InterruptedException e) {
+				return false;
+			}
 		}
 		try {
 			doReceivePacket(rx, tx, rp);
