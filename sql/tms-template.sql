@@ -1309,7 +1309,7 @@ CREATE TABLE iris._dms (
 	override_font VARCHAR(16) REFERENCES iris.font,
 	msg_sched VARCHAR(20) REFERENCES iris.sign_message,
 	msg_current VARCHAR(20) REFERENCES iris.sign_message,
-	deploy_time timestamp WITH time zone NOT NULL
+	expire_time timestamp WITH time zone
 );
 
 ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
@@ -1318,7 +1318,7 @@ ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 CREATE VIEW iris.dms AS
 	SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
 	       beacon, preset, sign_config, override_font, msg_sched,
-	       msg_current, deploy_time
+	       msg_current, expire_time
 	FROM iris._dms dms
 	JOIN iris._device_io d ON dms.name = d.name
 	JOIN iris._device_preset p ON dms.name = p.name;
@@ -1332,11 +1332,11 @@ BEGIN
 	     VALUES (NEW.name, NEW.preset);
 	INSERT INTO iris._dms (name, geo_loc, notes, gps, static_graphic,
 	                       beacon, sign_config, override_font, msg_sched,
-	                       msg_current, deploy_time)
+	                       msg_current, expire_time)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.gps,
 	             NEW.static_graphic, NEW.beacon, NEW.sign_config,
 	             NEW.override_font, NEW.msg_sched, NEW.msg_current,
-	             NEW.deploy_time);
+	             NEW.expire_time);
 	RETURN NEW;
 END;
 $dms_insert$ LANGUAGE plpgsql;
@@ -1365,7 +1365,7 @@ BEGIN
 	       override_font = NEW.override_font,
 	       msg_sched = NEW.msg_sched,
 	       msg_current = NEW.msg_current,
-	       deploy_time = NEW.deploy_time
+	       expire_time = NEW.expire_time
 	 WHERE name = OLD.name;
 	RETURN NEW;
 END;
@@ -2592,7 +2592,7 @@ GRANT SELECT ON sign_config_view TO PUBLIC;
 CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
 	       d.static_graphic, d.beacon, p.camera, p.preset_num, d.sign_config,
-	       default_font, override_font, msg_sched, msg_current, deploy_time,
+	       default_font, override_font, msg_sched, msg_current, expire_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.location, l.lat, l.lon
 	FROM iris.dms d
@@ -2604,7 +2604,7 @@ GRANT SELECT ON dms_view TO PUBLIC;
 CREATE VIEW dms_message_view AS
 	SELECT d.name, msg_current, cc.description AS condition, multi,
 	       beacon_enabled, prefix_page, msg_priority,
-	       iris.sign_msg_sources(source) AS sources, duration, deploy_time
+	       iris.sign_msg_sources(source) AS sources, duration, expire_time
 	FROM iris.dms d
 	LEFT JOIN iris.controller c ON d.controller = c.name
 	LEFT JOIN iris.condition cc ON c.condition = cc.id

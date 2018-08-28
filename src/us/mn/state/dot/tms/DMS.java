@@ -127,11 +127,11 @@ public interface DMS extends Device {
 	/** Get the current sign message */
 	SignMessage getMsgCurrent();
 
-	/** Get the (user) message deploy time.
-	 * This only applies to the most recent user message.
-	 * @return Time message was deployed (ms since epoch).
+	/** Get current message expiration time.
+	 * @return Expiration time for the current message (ms since epoch), or
+	 *         null for no expiration.
 	 * @see java.lang.System.currentTimeMillis */
-	long getDeployTime();
+	Long getExpireTime();
 
 	/* Manufacturer-specific attributes */
 

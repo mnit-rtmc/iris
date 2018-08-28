@@ -21,6 +21,8 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
@@ -60,6 +62,16 @@ import us.mn.state.dot.tms.utils.MultiString;
  * @author Michael Darter
  */
 public class SingleSignTab extends IPanel {
+
+	/** Get the expiration time of a DMS message */
+	static private String getExpiration(DMS dms) {
+		Long et = (dms != null) ? dms.getExpireTime() : null;
+		if (et != null) {
+			SimpleDateFormat tf = new SimpleDateFormat("HH:mm");
+			return tf.format(new Date(et));
+		} else
+			return "-";
+	}
 
 	/** Displays the id of the DMS */
 	private final JLabel name_lbl = createValueLabel();
@@ -401,7 +413,7 @@ public class SingleSignTab extends IPanel {
 		dispatcher.setComposedMulti(DMSHelper.getMultiString(dms),
 			false);
 		adjusting--;
-		expiration_lbl.setText(DMSHelper.getExpiration(dms));
+		expiration_lbl.setText(getExpiration(dms));
 	}
 
 	/** Set the DMS panel pager */

@@ -194,12 +194,12 @@ struct DmsMessage {
     multi      : Option<String>,
     sources    : Option<String>,
     duration   : Option<i32>,
-    deploy_time: DateTime<Local>,
+    expire_time: Option<DateTime<Local>>,
 }
 
 impl Queryable for DmsMessage {
     fn sql() -> &'static str {
-       "SELECT name, msg_current, multi, sources, duration, deploy_time \
+       "SELECT name, msg_current, multi, sources, duration, expire_time \
         FROM dms_message_view WHERE condition = 'Active' \
         ORDER BY name"
     }
@@ -210,7 +210,7 @@ impl Queryable for DmsMessage {
             multi      : row.get(2),
             sources    : row.get(3),
             duration   : row.get(4),
-            deploy_time: row.get(5),
+            expire_time: row.get(5),
         }
     }
 }

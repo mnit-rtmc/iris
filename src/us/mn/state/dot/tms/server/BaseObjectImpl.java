@@ -112,10 +112,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 
 	/** Get the time as a time stamp */
 	static protected Date asTimestamp(Long ts) {
-		if (ts != null)
-			return new Date(ts);
-		else
-			return null;
+		return (ts != null) ? new Date(ts) : null;
 	}
 
 	/** Get time as milliseconds since epoch */

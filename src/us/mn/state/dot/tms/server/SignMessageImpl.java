@@ -266,7 +266,6 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		w.write(createAttribute("incident", getIncident()));
 		w.write(createAttribute("multi", multi));
 		w.write(createAttribute("bitmaps", "")); // encode from multi?
-		w.write(createAttribute("deploy_time", dms.getDeployTime()));
 		w.write("/>\n");
 	}
 }

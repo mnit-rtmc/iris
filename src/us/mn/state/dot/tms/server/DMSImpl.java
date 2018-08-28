@@ -88,6 +88,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Number of polling periods for DMS action duration */
 	static private final int DURATION_PERIODS = 3;
 
+	/** Get the expiration time of a sign message (at activation time). */
+	static private Long getExpireTime(SignMessage sm) {
+		if (SignMessageHelper.isOperatorExpiring(sm)) {
+			long dur_ms = sm.getDuration() * 60 * 1000;
+			long now = TimeSteward.currentTimeMillis();
+			return now + dur_ms;
+		} else
+			return null;
+	}
+
 	/** Interface for handling brightness samples */
 	static public interface BrightnessHandler {
 		void feedback(EventType et, int photo, int output);
@@ -98,7 +108,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"gps, static_graphic, beacon, preset, sign_config, " +
-			"override_font, msg_sched, msg_current, deploy_time " +
+			"override_font, msg_sched, msg_current, expire_time " +
 			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -136,7 +146,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("override_font", override_font);
 		map.put("msg_sched", msg_sched);
 		map.put("msg_current", msg_current);
-		map.put("deploy_time", asTimestamp(deployTime));
+		map.put("expire_time", asTimestamp(expire_time));
 		return map;
 	}
 
@@ -164,7 +174,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		GeoLocImpl g = new GeoLocImpl(name);
 		g.notifyCreate();
 		geo_loc = g;
-		deployTime = 0;
+		expire_time = null;
 	}
 
 	/** Create a dynamic message sign */
@@ -182,27 +192,27 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(11),         // override_font
 		     row.getString(12),         // msg_sched
 		     row.getString(13),         // msg_current
-		     row.getTimestamp(14)       // deploy_time
+		     row.getTimestamp(14)       // expire_time
 		);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String g, String sg, String b, String cp, String sc, String of,
-		String ms, String mc, Date dt)
+		String ms, String mc, Date et)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
 		     lookupGps(g), lookupGraphic(sg), lookupBeacon(b),
 		     lookupPreset(cp), SignConfigHelper.lookup(sc),
 		     FontHelper.lookup(of), SignMessageHelper.lookup(ms),
-		     SignMessageHelper.lookup(mc), dt);
+		     SignMessageHelper.lookup(mc), et);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, GpsImpl g, Graphic sg, Beacon b,
 		CameraPreset cp, SignConfig sc, Font of, SignMessage ms,
-		SignMessage mc, Date dt)
+		SignMessage mc, Date et)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -214,7 +224,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		override_font = of;
 		msg_sched = ms;
 		msg_current = mc;
-		deployTime = stampMillis(dt);
+		expire_time = stampMillis(et);
 		initTransients();
 	}
 
@@ -771,19 +781,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void doSetMsgUser(SignMessage sm) throws TMSException {
 		SignMessageHelper.validate(sm, this);
 		setMsgUser(sm);
-		setDeployTime();
 		sendMsg(getMsgValidated());
-	}
-
-	/** Check if user selected sign message has expired. */
-	private void checkMsgUserExpiration() {
-		SignMessage sm = msg_user;
-		if (sm != null && SignMessageHelper.isOperatorExpiring(sm)) {
-			long now = TimeSteward.currentTimeMillis();
-			int mn = (int) ((now - deployTime) / 1000 / 60);
-			if (mn >= sm.getDuration())
-				blankMsgUser();
-		}
 	}
 
 	/** Blank the user selected sign message */
@@ -894,6 +892,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			logMsg(sm);
 			setMsgCurrent(sm);
 			notifyAttribute("msgCurrent");
+			updateExpireTime(sm);
 			updateStyles();
 		}
 		updateBeacon();
@@ -983,8 +982,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			user.getMsgPriority());
 		int src = user.getSource() | sched.getSource();
 		String o = user.getOwner();
-		// No duration -- checkMsgUserExpiration will expire if needed
-		return createMsg(ms, be, false, mp, src, o, null);
+		Integer dur = user.getDuration();
+		return createMsg(ms, be, false, mp, src, o, dur);
 	}
 
 	/** Check if a sign message is valid */
@@ -1033,24 +1032,36 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		       sm == msg_next;
 	}
 
-	/** User message deploy time */
-	private long deployTime;
+	/** Current message expiration time */
+	private Long expire_time;
 
-	/** Set the user message deploy time */
-	private void setDeployTime() throws TMSException {
-		long dt = TimeSteward.currentTimeMillis();
-		deployTime = dt;
-		store.update(this, "deploy_time", asTimestamp(dt));
-		notifyAttribute("deployTime");
+	/** Update the current message expiration time */
+	private void updateExpireTime(SignMessage sm) {
+		Long et = getExpireTime(sm);
+		try {
+			setExpireTimeNotify(et);
+		}
+		catch (TMSException e) {
+			logError("updateExpireTime: " + e.getMessage());
+		}
 	}
 
-	/** Get the (user) message deploy time.
-	 * This only applies to the most recent user message.
-	 * @return Time message was deployed (ms since epoch).
+	/** Set the current message expiration time */
+	private void setExpireTimeNotify(Long et) throws TMSException {
+		if (!objectEquals(et, expire_time)) {
+			store.update(this, "expire_time", asTimestamp(et));
+			expire_time = et;
+			notifyAttribute("expireTime");
+		}
+	}
+
+	/** Get current message expiration time.
+	 * @return Expiration time for the current message (ms since epoch), or
+	 *         null for no expiration.
 	 * @see java.lang.System.currentTimeMillis */
 	@Override
-	public long getDeployTime() {
-		return deployTime;
+	public Long getExpireTime() {
+		return expire_time;
 	}
 
 	/** LDC pot base (Ledstar-specific value) */
@@ -1274,11 +1285,21 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		if (isLongPeriodModem())
 			sendDeviceRequest(DeviceRequest.QUERY_STATUS);
 		sendDeviceRequest(DeviceRequest.QUERY_MESSAGE);
-		checkMsgUserExpiration();
+		checkMsgExpiration();
 		updateSchedMsg();
 		LCSArrayImpl la = lookupLCSArray();
 		if (la != null)
 			la.periodicPoll();
+	}
+
+	/** Check if current sign message has expired */
+	private void checkMsgExpiration() {
+		Long et = expire_time;
+		if (et != null) {
+			long now = TimeSteward.currentTimeMillis();
+			if (now >= et)
+				blankMsgUser();
+		}
 	}
 
 	/** Lookup LCS array if this DMS is lane one */
