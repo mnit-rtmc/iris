@@ -60,7 +60,22 @@ public interface DMS extends Device {
 	/** Get the override font */
 	Font getOverrideFont();
 
+	/** Get the scheduled sign message */
+	SignMessage getMsgSched();
+
+	/** Get the current sign message */
+	SignMessage getMsgCurrent();
+
+	/** Get current message expiration time.
+	 * @return Expiration time for the current message (ms since epoch), or
+	 *         null for no expiration.
+	 * @see java.lang.System.currentTimeMillis */
+	Long getExpireTime();
+
 	/* Transient attributes (not stored in database) */
+
+	/** Set the user sign message */
+	void setMsgUser(SignMessage sm);
 
 	/** Get the make */
 	String getMake();
@@ -118,24 +133,9 @@ public interface DMS extends Device {
 	 *         fields are: description, status, and current reading. */
 	String[] getPhotocellStatus();
 
-	/** Set the user sign message */
-	void setMsgUser(SignMessage sm);
-
-	/** Get the scheduled sign message */
-	SignMessage getMsgSched();
-
-	/** Get the current sign message */
-	SignMessage getMsgCurrent();
-
-	/** Get current message expiration time.
-	 * @return Expiration time for the current message (ms since epoch), or
-	 *         null for no expiration.
-	 * @see java.lang.System.currentTimeMillis */
-	Long getExpireTime();
-
 	/* Manufacturer-specific attributes */
 
-	/* LEDSTAR attributes */
+	/* LEDSTAR-specific attributes */
 
 	/** Get the LDC pot base (LEDSTAR) */
 	Integer getLdcPotBase();
