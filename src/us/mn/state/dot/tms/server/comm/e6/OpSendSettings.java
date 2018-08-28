@@ -117,6 +117,38 @@ public class OpSendSettings extends OpE6 {
 			mess.logQuery(mode);
 			if (mode.getMode() == ModeProp.Mode.stop)
 				stop = true;
+			return new QueryBufferingEnabled();
+		}
+	}
+
+	/** Phase to query the buffering enabled */
+	private class QueryBufferingEnabled extends Phase<E6Property> {
+
+		/** Query the buffering enabled */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			BufferingEnabledProp enabled =
+				new BufferingEnabledProp();
+			sendQuery(mess, enabled);
+			mess.logQuery(enabled);
+			return enabled.isEnabled()
+			     ? new QueryAppendData()
+			     : new StoreBufferingEnabled();
+		}
+	}
+
+	/** Phase to store the buffering enabled */
+	private class StoreBufferingEnabled extends Phase<E6Property> {
+
+		/** Store the buffering enabled */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			BufferingEnabledProp enabled =
+				new BufferingEnabledProp(true);
+			mess.logStore(enabled);
+			sendStore(mess, enabled);
 			return new QueryAppendData();
 		}
 	}

@@ -18,11 +18,11 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
- * Switch buffered tag transaction mode property.
+ * Buffering enabled (switch buffered tag transaction mode) property.
  *
  * @author Douglas Lau
  */
-public class SwitchBufferedTagTransactionModeProp extends E6Property {
+public class BufferingEnabledProp extends E6Property {
 
 	/** System information command */
 	static private final Command CMD =new Command(CommandGroup.SYSTEM_INFO);
@@ -41,13 +41,13 @@ public class SwitchBufferedTagTransactionModeProp extends E6Property {
 		return enabled;
 	}
 
-	/** Create a new switch buffered tag transaction mode property */
-	public SwitchBufferedTagTransactionModeProp(boolean e) {
+	/** Create a new buffering enabled property */
+	public BufferingEnabledProp(boolean e) {
 		enabled = e;
 	}
 
-	/** Create a new switch buffered tag transaction mode property */
-	public SwitchBufferedTagTransactionModeProp() {
+	/** Create a new buffering enabled property */
+	public BufferingEnabledProp() {
 		this(false);
 	}
 
@@ -72,7 +72,7 @@ public class SwitchBufferedTagTransactionModeProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse16(d, 2) != QUERY)
 			throw new ParsingException("SUB CMD");
-		enabled = parse8(d, 4) != 0;
+		enabled = (parse8(d, 4) != 0);
 	}
 
 	/** Get the store packet data */
@@ -96,6 +96,6 @@ public class SwitchBufferedTagTransactionModeProp extends E6Property {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "switch buffered tag transaction mode: " + enabled;
+		return "buffering enabled: " + enabled;
 	}
 }

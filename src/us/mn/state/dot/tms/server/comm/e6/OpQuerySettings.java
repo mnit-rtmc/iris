@@ -253,6 +253,21 @@ public class OpQuerySettings extends OpE6 {
 			MasterSlaveProp mstr = new MasterSlaveProp();
 			sendQuery(mess, mstr);
 			mess.logQuery(mstr);
+			return new QueryBufferingEnabled();
+		}
+	}
+
+	/** Phase to query the buffering enabled */
+	private class QueryBufferingEnabled extends Phase<E6Property> {
+
+		/** Query the buffering enabled */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			BufferingEnabledProp enabled =
+				new BufferingEnabledProp();
+			sendQuery(mess, enabled);
+			mess.logQuery(enabled);
 			return new QueryAppendData();
 		}
 	}
