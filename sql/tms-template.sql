@@ -405,7 +405,7 @@ CREATE TABLE iris.toll_zone (
 );
 
 CREATE TABLE iris.sign_group (
-	name VARCHAR(16) PRIMARY KEY,
+	name VARCHAR(20) PRIMARY KEY,
 	local BOOLEAN NOT NULL,
 	hidden BOOLEAN NOT NULL
 );
@@ -441,7 +441,7 @@ CREATE TABLE iris.sign_config (
 
 CREATE TABLE iris.quick_message (
 	name VARCHAR(20) PRIMARY KEY,
-	sign_group VARCHAR(16) REFERENCES iris.sign_group,
+	sign_group VARCHAR(20) REFERENCES iris.sign_group,
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
 	prefix_page BOOLEAN NOT NULL,
 	multi VARCHAR(1024) NOT NULL
@@ -1944,14 +1944,14 @@ END;
 $parking_area_amenities$ LANGUAGE plpgsql;
 
 CREATE TABLE iris.dms_sign_group (
-	name VARCHAR(28) PRIMARY KEY,
+	name VARCHAR(42) PRIMARY KEY,
 	dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
-	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group
+	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group
 );
 
 CREATE TABLE iris.sign_text (
 	name VARCHAR(20) PRIMARY KEY,
-	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
+	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
 	line smallint NOT NULL,
 	multi VARCHAR(64) NOT NULL,
 	rank smallint NOT NULL,
@@ -1990,7 +1990,7 @@ CREATE TABLE iris.time_action (
 CREATE TABLE iris.dms_action (
 	name VARCHAR(30) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	sign_group VARCHAR(16) NOT NULL REFERENCES iris.sign_group,
+	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
 	quick_message VARCHAR(20) REFERENCES iris.quick_message,
 	beacon_enabled BOOLEAN NOT NULL,

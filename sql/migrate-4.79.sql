@@ -250,4 +250,46 @@ CREATE VIEW dms_message_view AS
 	LEFT JOIN iris.sign_message s ON d.msg_current = s.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
+-- Increase sign_group name to VARCHAR(20)
+DROP VIEW sign_text_view;
+DROP VIEW quick_message_view;
+DROP VIEW dms_toll_zone_view;
+DROP VIEW dms_action_view;
+
+ALTER TABLE iris.sign_group ALTER COLUMN name TYPE VARCHAR(20);
+ALTER TABLE iris.quick_message ALTER COLUMN sign_group TYPE VARCHAR(20);
+ALTER TABLE iris.dms_sign_group ALTER COLUMN sign_group TYPE VARCHAR(20);
+ALTER TABLE iris.sign_text ALTER COLUMN sign_group TYPE VARCHAR(20);
+ALTER TABLE iris.dms_action ALTER COLUMN sign_group TYPE VARCHAR(20);
+ALTER TABLE iris.dms_sign_group ALTER COLUMN name TYPE VARCHAR(42);
+
+CREATE VIEW dms_action_view AS
+	SELECT name, action_plan, sign_group, phase, quick_message,
+	       beacon_enabled, msg_priority
+	FROM iris.dms_action;
+GRANT SELECT ON dms_action_view TO PUBLIC;
+
+CREATE VIEW dms_toll_zone_view AS
+    SELECT dms, state, toll_zone, action_plan, dms_action_view.quick_message
+    FROM dms_action_view
+    JOIN iris.dms_sign_group
+    ON dms_action_view.sign_group = dms_sign_group.sign_group
+    JOIN iris.quick_message
+    ON dms_action_view.quick_message = quick_message.name
+    JOIN iris.quick_message_toll_zone
+    ON dms_action_view.quick_message = quick_message_toll_zone.quick_message;
+GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
+
+CREATE VIEW quick_message_view AS
+	SELECT name, sign_group, sign_config, prefix_page, multi
+	FROM iris.quick_message;
+GRANT SELECT ON quick_message_view TO PUBLIC;
+
+CREATE VIEW sign_text_view AS
+	SELECT dms, local, line, multi, rank
+	FROM iris.dms_sign_group dsg
+	JOIN iris.sign_group sg ON dsg.sign_group = sg.name
+	JOIN iris.sign_text st ON sg.name = st.sign_group;
+GRANT SELECT ON sign_text_view TO PUBLIC;
+
 COMMIT;
