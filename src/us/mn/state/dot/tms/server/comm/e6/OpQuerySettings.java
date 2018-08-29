@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.server.comm.e6;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -27,7 +28,9 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
 public class OpQuerySettings extends OpE6 {
 
 	/** Supported protocols */
-	private final ProtocolProp prot = new ProtocolProp();
+	static private final RFProtocol[] PROTOCOLS = {
+		RFProtocol.SeGo, RFProtocol.IAG
+	};
 
 	/** Create a new "query settings" operation */
 	public OpQuerySettings(TagReaderImpl tr) {
@@ -83,26 +86,13 @@ public class OpQuerySettings extends OpE6 {
 			sendQuery(mess, freq);
 			mess.logQuery(freq);
 			tag_reader.setUplinkFreqKhzNotify(freq.getFreqKhz());
-			return new QueryProtocols();
-		}
-	}
-
-	/** Phase to query the protocols */
-	private class QueryProtocols extends Phase<E6Property> {
-
-		/** Query the protocols */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			sendQuery(mess, prot);
-			mess.logQuery(prot);
 			return nextQueryPhase(null);
 		}
 	}
 
 	/** Get the next query phase */
 	private Phase<E6Property> nextQueryPhase(RFProtocol p_prot) {
-		for (RFProtocol p: prot.getArray()) {
+		for (RFProtocol p: PROTOCOLS) {
 			if (null == p_prot)
 				return new QueryAtten(p);
 			if (p == p_prot)
@@ -123,7 +113,13 @@ public class OpQuerySettings extends OpE6 {
 			throws IOException
 		{
 			RFAttenProp atten = new RFAttenProp(protocol);
-			sendQuery(mess, atten);
+			try {
+				sendQuery(mess, atten);
+			}
+			catch (ControllerException e) {
+				// SUB_COMMAND_ERROR => protocol not supported
+				return nextQueryPhase(protocol);
+			}
 			mess.logQuery(atten);
 			setAtten(protocol, atten);
 			return new QuerySeen(protocol);

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import java.net.DatagramSocket;
 import java.net.SocketTimeoutException;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.server.comm.ChecksumException;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 import us.mn.state.dot.tms.utils.HexString;
 
@@ -115,13 +116,16 @@ public class E6Packet {
 	/** Pending command */
 	private PendingCommand pending;
 
+	/** Last received response */
+	private Response response;
+
 	/** Check for a response to a pending command */
 	public synchronized boolean checkResponse(E6Packet p)
 		throws IOException
 	{
 		if (pending != null) {
-			Response rsp = p.parseResponse();
-			if (rsp == Response.COMMAND_COMPLETE) {
+			response = p.parseResponse();
+			if (Response.COMMAND_COMPLETE == response) {
 				Command cmd = p.parseCommand();
 				if (cmd.equals(pending.cmd) &&
 				    p.parseSubCmd(cmd) == pending.sub_cmd)
@@ -130,6 +134,8 @@ public class E6Packet {
 					return true;
 				}
 			}
+			if (Response.SUB_COMMAND_ERROR == response)
+				notify();
 		}
 		return false;
 	}
@@ -150,18 +156,22 @@ public class E6Packet {
 	{
 		try {
 			pending = pc;
+			response = null;
 			try {
 				wait(timeout);
 			}
 			catch (InterruptedException e) {
 				// doesn't matter
 			}
+			if (Response.SUB_COMMAND_ERROR == response)
+				throw new ControllerException(response.toString());
 			if (pending != null)
 				throw TIMEOUT;
 			return parseData();
 		}
 		finally {
 			pending = null;
+			response = null;
 		}
 	}
 
