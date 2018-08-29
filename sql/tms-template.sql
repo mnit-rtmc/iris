@@ -1527,18 +1527,26 @@ CREATE TABLE iris._tag_reader (
 	uplink_freq_khz INTEGER,
 	sego_atten_downlink_db INTEGER,
 	sego_atten_uplink_db INTEGER,
+	sego_data_detect_db INTEGER,
+	sego_seen_count INTEGER,
+	sego_unique_count INTEGER,
 	iag_atten_downlink_db INTEGER,
 	iag_atten_uplink_db INTEGER,
+	iag_data_detect_db INTEGER,
+	iag_seen_count INTEGER,
+	iag_unique_count INTEGER,
 	line_loss_db INTEGER
 );
 
 ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
-CREATE VIEW iris.tag_reader AS SELECT
-	t.name, geo_loc, controller, pin, notes, toll_zone, downlink_freq_khz,
-	uplink_freq_khz, sego_atten_downlink_db, sego_atten_uplink_db,
-	iag_atten_downlink_db, iag_atten_uplink_db, line_loss_db
+CREATE VIEW iris.tag_reader AS
+	SELECT t.name, geo_loc, controller, pin, notes, toll_zone,
+	       downlink_freq_khz, uplink_freq_khz, sego_atten_downlink_db,
+	       sego_atten_uplink_db, sego_data_detect_db, sego_seen_count,
+	       sego_unique_count, iag_atten_downlink_db, iag_atten_uplink_db,
+	       iag_data_detect_db, iag_seen_count, iag_unique_count,line_loss_db
 	FROM iris._tag_reader t JOIN iris._device_io d ON t.name = d.name;
 
 CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
@@ -1549,14 +1557,19 @@ BEGIN
 	INSERT INTO iris._tag_reader (name, geo_loc, notes, toll_zone,
 	                              downlink_freq_khz, uplink_freq_khz,
 	                              sego_atten_downlink_db,
-	                              sego_atten_uplink_db,
+	                              sego_atten_uplink_db, sego_data_detect_db,
+	                              sego_seen_count, sego_unique_count,
 	                              iag_atten_downlink_db,
-	                              iag_atten_uplink_db, line_loss_db)
+	                              iag_atten_uplink_db, iag_data_detect_db,
+	                              iag_seen_count, iag_unique_count,
+	                              line_loss_db)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone,
 	             NEW.downlink_freq_khz, NEW.uplink_freq_khz,
 	             NEW.sego_atten_downlink_db, NEW.sego_atten_uplink_db,
-	             NEW.iag_atten_downlink_db, NEW.iag_atten_uplink_db,
-	             NEW.line_loss_db);
+	             NEW.sego_data_detect_db, NEW.sego_seen_count,
+	             NEW.sego_unique_count, NEW.iag_atten_downlink_db,
+	             NEW.iag_atten_uplink_db, NEW.iag_data_detect_db,
+	             NEW.iag_seen_count, NEW.iag_unique_count, NEW.line_loss_db);
 	RETURN NEW;
 END;
 $tag_reader_insert$ LANGUAGE plpgsql;
@@ -1580,8 +1593,14 @@ BEGIN
 	       uplink_freq_khz = NEW.uplink_freq_khz,
 	       sego_atten_downlink_db = NEW.sego_atten_downlink_db,
 	       sego_atten_uplink_db = NEW.sego_atten_uplink_db,
+	       sego_data_detect_db = NEW.sego_data_detect_db,
+	       sego_seen_count = NEW.sego_seen_count,
+	       sego_unique_count = NEW.sego_unique_count,
 	       iag_atten_downlink_db = NEW.iag_atten_downlink_db,
 	       iag_atten_uplink_db = NEW.iag_atten_uplink_db,
+	       iag_data_detect_db = NEW.iag_data_detect_db,
+	       iag_seen_count = NEW.iag_seen_count,
+	       iag_unique_count = NEW.iag_unique_count,
 	       line_loss_db = NEW.line_loss_db
 	 WHERE name = OLD.name;
 	RETURN NEW;
@@ -2722,10 +2741,12 @@ CREATE VIEW weather_sensor_view AS
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
 CREATE VIEW tag_reader_view AS
-	SELECT t.name, t.geo_loc, l.location, t.controller, t.pin, t.notes,
-	       t.toll_zone, t.downlink_freq_khz, t.uplink_freq_khz,
-	       t.sego_atten_downlink_db, t.sego_atten_uplink_db,
-	       t.iag_atten_downlink_db, t.iag_atten_uplink_db, t.line_loss_db
+	SELECT t.name, t.geo_loc, location, controller, pin, notes, toll_zone,
+	       downlink_freq_khz, uplink_freq_khz,
+	       sego_atten_downlink_db, sego_atten_uplink_db, sego_data_detect_db,
+	       sego_seen_count, sego_unique_count,
+	       iag_atten_downlink_db, iag_atten_uplink_db, iag_data_detect_db,
+	       iag_seen_count, iag_unique_count, line_loss_db
 	FROM iris.tag_reader t
 	LEFT JOIN geo_loc_view l ON t.geo_loc = l.name;
 GRANT SELECT ON tag_reader_view TO PUBLIC;

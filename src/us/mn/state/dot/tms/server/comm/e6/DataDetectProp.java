@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -41,6 +41,11 @@ public class DataDetectProp extends E6Property {
 
 	/** Data detect value (0 - 20 dB) */
 	private int value;
+
+	/** Get the data detect value */
+	public int getValue() {
+		return value;
+	}
 
 	/** Create a data detect property */
 	public DataDetectProp(RFProtocol p, int v) {

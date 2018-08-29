@@ -53,9 +53,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"toll_zone, downlink_freq_khz, uplink_freq_khz, " +
 			"sego_atten_downlink_db, sego_atten_uplink_db, " +
-			"iag_atten_downlink_db, iag_atten_uplink_db, " +
-			"line_loss_db FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"sego_data_detect_db, sego_seen_count, " +
+			"sego_unique_count, iag_atten_downlink_db, " +
+			"iag_atten_uplink_db, iag_data_detect_db, " +
+			"iag_seen_count, iag_unique_count, line_loss_db " +
+			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new TagReaderImpl(row));
@@ -77,8 +79,14 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		map.put("uplink_freq_khz", uplink_freq_khz);
 		map.put("sego_atten_downlink_db", sego_atten_downlink_db);
 		map.put("sego_atten_uplink_db", sego_atten_uplink_db);
+		map.put("sego_data_detect_db", sego_data_detect_db);
+		map.put("sego_seen_count", sego_seen_count);
+		map.put("sego_unique_count", sego_unique_count);
 		map.put("iag_atten_downlink_db", iag_atten_downlink_db);
 		map.put("iag_atten_uplink_db", iag_atten_uplink_db);
+		map.put("iag_data_detect_db", iag_data_detect_db);
+		map.put("iag_seen_count", iag_seen_count);
+		map.put("iag_unique_count", iag_unique_count);
 		map.put("line_loss_db", line_loss_db);
 		return map;
 	}
@@ -107,26 +115,36 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		     (Integer) row.getObject(8), // uplink_freq_khz
 		     (Integer) row.getObject(9), // sego_atten_downlink_db
 		     (Integer) row.getObject(10),// sego_atten_uplink_db
-		     (Integer) row.getObject(11),// iag_atten_downlink_db
-		     (Integer) row.getObject(12),// iag_atten_uplink_db
-		     (Integer) row.getObject(13) // line_loss_db
+		     (Integer) row.getObject(11),// sego_data_detect_db
+		     (Integer) row.getObject(12),// sego_seen_count
+		     (Integer) row.getObject(13),// sego_unique_count
+		     (Integer) row.getObject(14),// iag_atten_downlink_db
+		     (Integer) row.getObject(15),// iag_atten_uplink_db
+		     (Integer) row.getObject(16),// iag_data_detect_db
+		     (Integer) row.getObject(17),// iag_seen_count
+		     (Integer) row.getObject(18),// iag_unique_count
+		     (Integer) row.getObject(19) // line_loss_db
 		);
 	}
 
 	/** Create a tag reader */
 	private TagReaderImpl(String n, String l, String c, int p, String nt,
 		String tz, Integer df, Integer uf, Integer sad, Integer sau,
-		Integer iad, Integer iau, Integer ll) throws TMSException
+		Integer sdd, Integer ssc, Integer suc, Integer iad, Integer iau,
+		Integer idd, Integer isc, Integer iuc, Integer ll)
+		throws TMSException
 	{
 		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
-		     lookupTollZone(tz), df, uf, sad, sau, iad, iau, ll);
+		     lookupTollZone(tz), df, uf, sad, sau, sdd, ssc, suc, iad,
+		     iau, idd, isc, iuc, ll);
 	}
 
 	/** Create a tag reader */
 	private TagReaderImpl(String n, GeoLocImpl l, ControllerImpl c,
 		int p, String nt, TollZone tz, Integer df, Integer uf,
-		Integer sad, Integer sau, Integer iad, Integer iau, Integer ll)
-		throws TMSException
+		Integer sad, Integer sau, Integer sdd, Integer ssc, Integer suc,
+		Integer iad, Integer iau, Integer idd, Integer isc, Integer iuc,
+		Integer ll) throws TMSException
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
@@ -135,8 +153,14 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		uplink_freq_khz = uf;
 		sego_atten_downlink_db = sad;
 		sego_atten_uplink_db = sau;
+		sego_data_detect_db = sdd;
+		sego_seen_count = ssc;
+		sego_unique_count = suc;
 		iag_atten_downlink_db = iad;
 		iag_atten_uplink_db = iau;
+		iag_data_detect_db = idd;
+		iag_seen_count = isc;
+		iag_unique_count = iuc;
 		line_loss_db = ll;
 		dmss = lookupDMSMapping();
 		initTransients();
@@ -296,6 +320,70 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		}
 	}
 
+	/** SeGo data detect (db) */
+	private Integer sego_data_detect_db;
+
+	/** Set the SeGo data detect */
+	private void setSeGoDataDetectDb(Integer sdd) {
+		sego_data_detect_db = sdd;
+	}
+
+	/** Set the SeGo data detect */
+	public void setSeGoDataDetectDbNotify(Integer sdd) {
+		if (!objectEquals(sdd, sego_data_detect_db)) {
+			try {
+				store.update(this, "sego_data_detect_db", sdd);
+				setSeGoDataDetectDb(sdd);
+			}
+			catch (TMSException e) {
+				logError("sego_data_detect_db: " +
+					e.getMessage());
+			}
+		}
+	}
+
+	/** SeGo seen count */
+	private Integer sego_seen_count;
+
+	/** Set the SeGo seen count */
+	private void setSeGoSeenCount(Integer ssc) {
+		sego_seen_count = ssc;
+	}
+
+	/** Set the SeGo seen count */
+	public void setSeGoSeenCountNotify(Integer ssc) {
+		if (!objectEquals(ssc, sego_seen_count)) {
+			try {
+				store.update(this, "sego_seen_count", ssc);
+				setSeGoSeenCount(ssc);
+			}
+			catch (TMSException e) {
+				logError("sego_seen_count: " + e.getMessage());
+			}
+		}
+	}
+
+	/** SeGo unique count */
+	private Integer sego_unique_count;
+
+	/** Set the SeGo unique count */
+	private void setSeGoUniqueCount(Integer suc) {
+		sego_unique_count = suc;
+	}
+
+	/** Set the SeGo unique count */
+	public void setSeGoUniqueCountNotify(Integer suc) {
+		if (!objectEquals(suc, sego_unique_count)) {
+			try {
+				store.update(this, "sego_unique_count", suc);
+				setSeGoUniqueCount(suc);
+			}
+			catch (TMSException e) {
+				logError("sego_unique_count: " +e.getMessage());
+			}
+		}
+	}
+
 	/** IAG downlink attenuation (db) */
 	private Integer iag_atten_downlink_db;
 
@@ -336,6 +424,70 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 			catch (TMSException e) {
 				logError("iag_atten_uplink_db: " +
 					e.getMessage());
+			}
+		}
+	}
+
+	/** IAG data detect (db) */
+	private Integer iag_data_detect_db;
+
+	/** Set the IAG data detect */
+	private void setIAGDataDetectDb(Integer idd) {
+		iag_data_detect_db = idd;
+	}
+
+	/** Set the IAG data detect */
+	public void setIAGDataDetectDbNotify(Integer idd) {
+		if (!objectEquals(idd, iag_data_detect_db)) {
+			try {
+				store.update(this, "iag_data_detect_db", idd);
+				setIAGDataDetectDb(idd);
+			}
+			catch (TMSException e) {
+				logError("iag_data_detect_db: " +
+					e.getMessage());
+			}
+		}
+	}
+
+	/** IAG seen count */
+	private Integer iag_seen_count;
+
+	/** Set the IAG seen count */
+	private void setIAGSeenCount(Integer isc) {
+		iag_seen_count = isc;
+	}
+
+	/** Set the IAG seen count */
+	public void setIAGSeenCountNotify(Integer isc) {
+		if (!objectEquals(isc, iag_seen_count)) {
+			try {
+				store.update(this, "iag_seen_count", isc);
+				setIAGSeenCount(isc);
+			}
+			catch (TMSException e) {
+				logError("iag_seen_count: " + e.getMessage());
+			}
+		}
+	}
+
+	/** IAG unique count */
+	private Integer iag_unique_count;
+
+	/** Set the IAG unique count */
+	private void setIAGUniqueCount(Integer iuc) {
+		iag_unique_count = iuc;
+	}
+
+	/** Set the IAG unique count */
+	public void setIAGUniqueCountNotify(Integer iuc) {
+		if (!objectEquals(iuc, iag_unique_count)) {
+			try {
+				store.update(this, "iag_unique_count", iuc);
+				setIAGUniqueCount(iuc);
+			}
+			catch (TMSException e) {
+				logError("iag_unique_count: " + e.getMessage());
 			}
 		}
 	}

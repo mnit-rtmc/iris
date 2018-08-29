@@ -122,7 +122,7 @@ public class OpQuerySettings extends OpE6 {
 			}
 			mess.logQuery(atten);
 			setAtten(protocol, atten);
-			return new QuerySeen(protocol);
+			return new QueryDataDetect(protocol);
 		}
 	}
 
@@ -146,24 +146,6 @@ public class OpQuerySettings extends OpE6 {
 		}
 	}
 
-	/** Phase to query the seen count for one protocol */
-	private class QuerySeen extends Phase<E6Property> {
-		private final RFProtocol protocol;
-		private QuerySeen(RFProtocol p) {
-			protocol = p;
-		}
-
-		/** Query the seen count */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			SeenCountProp seen = new SeenCountProp(protocol);
-			sendQuery(mess, seen);
-			mess.logQuery(seen);
-			return new QueryDataDetect(protocol);
-		}
-	}
-
 	/** Phase to query the data detect for one protocol */
 	private class QueryDataDetect extends Phase<E6Property> {
 		private final RFProtocol protocol;
@@ -178,7 +160,57 @@ public class OpQuerySettings extends OpE6 {
 			DataDetectProp det = new DataDetectProp(protocol);
 			sendQuery(mess, det);
 			mess.logQuery(det);
+			setDataDetect(protocol, det);
+			return new QuerySeen(protocol);
+		}
+	}
+
+	/** Set data detect for one protocol */
+	private void setDataDetect(RFProtocol protocol, DataDetectProp det) {
+		switch (protocol) {
+		case SeGo:
+			tag_reader.setSeGoDataDetectDbNotify(det.getValue());
+			break;
+		case IAG:
+			tag_reader.setIAGDataDetectDbNotify(det.getValue());
+			break;
+		default:
+			break;
+		}
+	}
+
+	/** Phase to query the seen count for one protocol */
+	private class QuerySeen extends Phase<E6Property> {
+		private final RFProtocol protocol;
+		private QuerySeen(RFProtocol p) {
+			protocol = p;
+		}
+
+		/** Query the seen count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			SeenCountProp seen = new SeenCountProp(protocol);
+			sendQuery(mess, seen);
+			mess.logQuery(seen);
+			setSeenUnique(protocol, seen);
 			return nextQueryPhase(protocol);
+		}
+	}
+
+	/** Set seen/unique for one protocol */
+	private void setSeenUnique(RFProtocol protocol, SeenCountProp seen) {
+		switch (protocol) {
+		case SeGo:
+			tag_reader.setSeGoSeenCountNotify(seen.getSeen());
+			tag_reader.setSeGoUniqueCountNotify(seen.getUnique());
+			break;
+		case IAG:
+			tag_reader.setIAGSeenCountNotify(seen.getSeen());
+			tag_reader.setIAGUniqueCountNotify(seen.getUnique());
+			break;
+		default:
+			break;
 		}
 	}
 

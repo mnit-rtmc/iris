@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,8 +39,18 @@ public class SeenCountProp extends E6Property {
 	/** Seen count frames */
 	private int seen;
 
+	/** Get the seen count */
+	public int getSeen() {
+		return seen;
+	}
+
 	/** Unique count frames */
 	private int unique;
+
+	/** Get the unique count */
+	public int getUnique() {
+		return unique;
+	}
 
 	/** Create a seen count property */
 	public SeenCountProp(RFProtocol p, int s, int u) {
