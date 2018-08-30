@@ -77,9 +77,9 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
-	/** Test if a sign message source contains "scheduled" */
-	static private boolean isMsgScheduled(SignMessage sm) {
-		return SignMsgSource.schedule.checkBit(sm.getSource());
+	/** Test if a sign message is from a specified source */
+	static private boolean isMsgSource(SignMessage sm, SignMsgSource src) {
+		return (sm != null) && src.checkBit(sm.getSource());
 	}
 
 	/** Minimum duration of a DMS action (minutes) */
@@ -839,7 +839,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private void updateSchedMsg() {
 		try {
 			SignMessage usm = getMsgValidated();
-			if (isMsgScheduled(usm))
+			if (isMsgSource(usm, SignMsgSource.schedule))
 				sendMsg(usm);
 		}
 		catch (TMSException e) {
@@ -886,7 +886,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Set the current message.
 	 * @param sm Sign message. */
 	public void setMsgCurrentNotify(SignMessage sm) {
-		if (SignMsgSource.tolling.checkBit(sm.getSource()))
+		if (isMsgSource(sm, SignMsgSource.tolling))
 			logPriceMessages(EventType.PRICE_VERIFIED);
 		if (sm != msg_current) {
 			logMsg(sm);
@@ -906,7 +906,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Get the current messasge.
-	 * @return Currently active message (cannot be null) */
+	 * @return Currently active message */
 	@Override
 	public SignMessage getMsgCurrent() {
 		return msg_current;
@@ -916,12 +916,12 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param sm Sign message. */
 	private void logMsg(SignMessage sm) {
 		EventType et = EventType.DMS_DEPLOYED;
-		String text = sm.getMulti();
+		String text = (sm != null) ? sm.getMulti() : null;
 		if (SignMessageHelper.isBlank(sm)) {
 			et = EventType.DMS_CLEARED;
 			text = null;
 		}
-		String owner = sm.getOwner();
+		String owner = (sm != null) ? sm.getOwner() : null;
 		logEvent(new SignStatusEvent(et, name, text, owner));
 	}
 
@@ -1019,7 +1019,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param p DMS poller.
 	 * @param sm Sign message. */
 	private void sendMsg(DMSPoller p, SignMessage sm) {
-		if (SignMsgSource.tolling.checkBit(sm.getSource()))
+		if (isMsgSource(sm, SignMsgSource.tolling))
 		    logPriceMessages(EventType.PRICE_DEPLOYED);
 		p.sendMessage(this, sm);
 	}
@@ -1154,24 +1154,23 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Test if the current message source contains "operator" */
 	private boolean isMsgOperator() {
-		int src = getMsgCurrent().getSource();
-		return SignMsgSource.operator.checkBit(src);
+		return isMsgSource(getMsgCurrent(), SignMsgSource.operator);
 	}
 
 	/** Test if the current message source contains "scheduled" */
 	private boolean isMsgScheduled() {
-		return isMsgScheduled(getMsgCurrent());
+		return isMsgSource(getMsgCurrent(), SignMsgSource.schedule);
 	}
 
 	/** Test if the current message has beacon enabled */
 	private boolean isMsgBeacon() {
-		return getMsgCurrent().getBeaconEnabled();
+		SignMessage sm = getMsgCurrent();
+		return (sm != null) && sm.getBeaconEnabled();
 	}
 
 	/** Test if the current message is AWS */
 	private boolean isMsgAws() {
-		int src = getMsgCurrent().getSource();
-		return SignMsgSource.aws.checkBit(src);
+		return isMsgSource(getMsgCurrent(), SignMsgSource.aws);
 	}
 
 	/** Test if a DMS is active, not failed and deployed */
@@ -1260,9 +1259,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Write the sign message as xml */
 	public void writeSignMessageXml(Writer w) throws IOException {
-		SignMessage msg = getMsgCurrent();
-		if (msg instanceof SignMessageImpl)
-			((SignMessageImpl) msg).writeXml(w, this);
+		SignMessage sm = getMsgCurrent();
+		if (sm instanceof SignMessageImpl)
+			((SignMessageImpl) sm).writeXml(w, this);
 	}
 
 	/** Get the DMS poller */
