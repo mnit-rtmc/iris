@@ -406,9 +406,17 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			}
 			sign_config = sc;
 			notifyAttribute("signConfig");
-			// FIXME: update stuck on/off
+			resetStateNotify();
 			updateStyles();
 		}
+	}
+
+	/** Reset sign state (and notify clients) */
+	public void resetStateNotify() {
+		msg_user = null;
+		setMsgSchedNotify(null);
+		setMsgCurrentNotify(null);
+		setPixelStatusNotify(null);
 	}
 
 	/** Override font */
@@ -612,7 +620,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private transient String[] pixelStatus;
 
 	/** Set the pixel status array */
-	public void setPixelStatus(String[] p) {
+	public void setPixelStatusNotify(String[] p) {
 		if (!Arrays.equals(p, pixelStatus)) {
 			pixelStatus = p;
 			notifyAttribute("pixelStatus");

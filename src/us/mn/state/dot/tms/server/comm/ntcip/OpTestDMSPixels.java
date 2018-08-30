@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -289,7 +289,7 @@ public class OpTestDMSPixels extends OpDMS {
 				stuck_off.getEncodedPixels();
 			status[DMS.STUCK_ON_BITMAP] =
 				stuck_on.getEncodedPixels();
-			dms.setPixelStatus(status);
+			dms.setPixelStatusNotify(status);
 		}
 		super.cleanup();
 	}
