@@ -166,7 +166,7 @@ public class OpSendSettings extends OpE6 {
 			AppendDataProp.Value v = append.getValue();
 			return (AppendDataProp.Value.disabled == v)
 			     ? new StoreAppendData()
-			     : lastPhase();
+			     : new QueryRFControl();
 		}
 	}
 
@@ -181,6 +181,38 @@ public class OpSendSettings extends OpE6 {
 				AppendDataProp.Value.date_time_stamp);
 			mess.logStore(append);
 			sendStore(mess, append);
+			return new QueryRFControl();
+		}
+	}
+
+	/** Phase to query the RF control */
+	private class QueryRFControl extends Phase<E6Property> {
+
+		/** Query the RF control */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFControlProp ctrl = new RFControlProp();
+			sendQuery(mess, ctrl);
+			mess.logQuery(ctrl);
+			RFControlProp.Value v = ctrl.getValue();
+			return (RFControlProp.Value.continuous == v)
+			     ? lastPhase()
+			     : new StoreRFControl();
+		}
+	}
+
+	/** Phase to store the RF control */
+	private class StoreRFControl extends Phase<E6Property> {
+
+		/** Store the RF control */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFControlProp ctrl = new RFControlProp(
+				RFControlProp.Value.continuous);
+			mess.logStore(ctrl);
+			sendStore(mess, ctrl);
 			return lastPhase();
 		}
 	}
@@ -297,21 +329,6 @@ public class OpSendSettings extends OpE6 {
 			LineLossProp loss = new LineLossProp(2);
 			mess.logStore(loss);
 			sendStore(mess, loss);
-			return new StoreRFControl();
-		}
-	}
-
-	/** Phase to store the RF control */
-	private class StoreRFControl extends Phase<E6Property> {
-
-		/** Store the RF control */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			RFControlProp ctrl = new RFControlProp(
-				RFControlProp.Value.continuous);
-			mess.logStore(ctrl);
-			sendStore(mess, ctrl);
 			return new StoreMuxMode();
 		}
 	}

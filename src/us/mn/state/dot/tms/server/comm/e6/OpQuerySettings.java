@@ -225,20 +225,6 @@ public class OpQuerySettings extends OpE6 {
 			sendQuery(mess, loss);
 			mess.logQuery(loss);
 			tag_reader.setLineLossDbNotify(loss.getValue());
-			return new QueryRFControl();
-		}
-	}
-
-	/** Phase to query the RF control */
-	private class QueryRFControl extends Phase<E6Property> {
-
-		/** Query the RF control */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			RFControlProp ctrl = new RFControlProp();
-			sendQuery(mess, ctrl);
-			mess.logQuery(ctrl);
 			return new QueryMuxMode();
 		}
 	}
@@ -281,35 +267,6 @@ public class OpQuerySettings extends OpE6 {
 			MasterSlaveProp mstr = new MasterSlaveProp();
 			sendQuery(mess, mstr);
 			mess.logQuery(mstr);
-			return new QueryBufferingEnabled();
-		}
-	}
-
-	/** Phase to query the buffering enabled */
-	private class QueryBufferingEnabled extends Phase<E6Property> {
-
-		/** Query the buffering enabled */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			BufferingEnabledProp enabled =
-				new BufferingEnabledProp();
-			sendQuery(mess, enabled);
-			mess.logQuery(enabled);
-			return new QueryAppendData();
-		}
-	}
-
-	/** Phase to query the append data */
-	private class QueryAppendData extends Phase<E6Property> {
-
-		/** Query the append data */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			AppendDataProp append = new AppendDataProp();
-			sendQuery(mess, append);
-			mess.logQuery(append);
 			return null;
 		}
 	}
