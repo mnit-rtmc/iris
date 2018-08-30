@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server.comm.e6;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 
 /**
  * RF protocol definitions for E6 multiprotocol reader.
@@ -36,7 +36,7 @@ public enum RFProtocol {
 		bit = 1 << b;
 	}
 
-	/** Bit assignment */
+	/** Bit assignment (for "set protocol" / "get protocol" commands) */
 	public final int bit;
 
 	/** Lookup an RF protocol from an ordinal value */
@@ -50,7 +50,7 @@ public enum RFProtocol {
 
 	/** Get the protocols from a set of bits */
 	static public RFProtocol[] fromBits(int b) {
-		LinkedList<RFProtocol> list = new LinkedList<RFProtocol>();
+		ArrayList<RFProtocol> list = new ArrayList<RFProtocol>();
 		for (RFProtocol p: values()) {
 			if ((b & p.bit) != 0)
 				list.add(p);
