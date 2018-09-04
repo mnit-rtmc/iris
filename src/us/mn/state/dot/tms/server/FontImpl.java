@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2012  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -105,12 +105,12 @@ public class FontImpl extends BaseObjectImpl implements Font {
 
 	/** Set the font number */
 	public void doSetNumber(int n) throws TMSException {
-		if(n == f_number)
-			return;
-		if(n < 1 || n > 255)
-			throw new ChangeVetoException("Invalid number");
-		store.update(this, "f_number", n);
-		setNumber(n);
+		if (n != f_number) {
+			if (n < 1 || n > MAX_NUMBER)
+				throw new ChangeVetoException("Invalid number");
+			store.update(this, "f_number", n);
+			setNumber(n);
+		}
 	}
 
 	/** Get the font number */
@@ -128,12 +128,12 @@ public class FontImpl extends BaseObjectImpl implements Font {
 
 	/** Set the font height (pixels) */
 	public void doSetHeight(int h) throws TMSException {
-		if(h == height)
-			return;
-		if(h < 4 || h > 24)
-			throw new ChangeVetoException("Invalid height");
-		store.update(this, "height", h);
-		setHeight(h);
+		if (h != height) {
+			if (h < 4 || h > MAX_HEIGHT)
+				throw new ChangeVetoException("Invalid height");
+			store.update(this, "height", h);
+			setHeight(h);
+		}
 	}
 
 	/** Get the font height (pixels) */
@@ -151,12 +151,12 @@ public class FontImpl extends BaseObjectImpl implements Font {
 
 	/** Set the font width (pixels) */
 	public void doSetWidth(int w) throws TMSException {
-		if(w == width)
-			return;
-		if(w < 0 || w > 12)
-			throw new ChangeVetoException("Invalid width");
-		store.update(this, "width", w);
-		setWidth(w);
+		if (w != width) {
+			if (w < 0 || w > MAX_WIDTH)
+				throw new ChangeVetoException("Invalid width");
+			store.update(this, "width", w);
+			setWidth(w);
+		}
 	}
 
 	/** Get the font width (pixels) */
@@ -174,12 +174,12 @@ public class FontImpl extends BaseObjectImpl implements Font {
 
 	/** Set the default horizontal spacing between characters (pixels) */
 	public void doSetCharSpacing(int s) throws TMSException {
-		if(s == charSpacing)
-			return;
-		if(s < 0 || s > 9)
-			throw new ChangeVetoException("Invalid spacing");
-		store.update(this, "char_spacing", s);
-		setCharSpacing(s);
+		if (s != charSpacing) {
+			if (s < 0 || s > 9)
+				throw new ChangeVetoException("Invalid spacing");
+			store.update(this, "char_spacing", s);
+			setCharSpacing(s);
+		}
 	}
 
 	/** Get the default horizontal spacing between characters (pixels) */
@@ -197,12 +197,12 @@ public class FontImpl extends BaseObjectImpl implements Font {
 
 	/** Set the default vertical spacing between lines (pixels) */
 	public void doSetLineSpacing(int s) throws TMSException {
-		if(s == lineSpacing)
-			return;
-		if(s < 0 || s > 9)
-			throw new ChangeVetoException("Invalid spacing");
-		store.update(this, "line_spacing", s);
-		setLineSpacing(s);
+		if (s != lineSpacing) {
+			if (s < 0 || s > 9)
+				throw new ChangeVetoException("Invalid spacing");
+			store.update(this, "line_spacing", s);
+			setLineSpacing(s);
+		}
 	}
 
 	/** Get the default vertical spacing between lines (pixels) */

@@ -192,11 +192,14 @@ CREATE TRIGGER glyph_ck_trig
 	FOR EACH ROW EXECUTE PROCEDURE iris.glyph_ck();
 
 ALTER TABLE iris.font
+	ADD CONSTRAINT font_number_ck
+	CHECK (f_number > 0 AND f_number <= 255);
+ALTER TABLE iris.font
 	ADD CONSTRAINT font_height_ck
-	CHECK (height > 0 AND height < 25);
+	CHECK (height > 0 AND height <= 30);
 ALTER TABLE iris.font
 	ADD CONSTRAINT font_width_ck
-	CHECK (width >= 0 AND width < 25);
+	CHECK (width >= 0 AND width <= 12);
 ALTER TABLE iris.font
 	ADD CONSTRAINT font_line_sp_ck
 	CHECK (line_spacing >= 0 AND line_spacing < 9);

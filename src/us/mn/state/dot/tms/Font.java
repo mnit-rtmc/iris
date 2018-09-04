@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2008  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,6 +24,15 @@ import us.mn.state.dot.sonar.SonarObject;
  * @author Douglas Lau
  */
 public interface Font extends SonarObject {
+
+	/** Maximum allowed font number */
+	int MAX_NUMBER = 255;
+
+	/** Maximum allowed font width */
+	int MAX_WIDTH = 12;
+
+	/** Maximum allowed font height */
+	int MAX_HEIGHT = 30;
 
 	/** SONAR type name */
 	String SONAR_TYPE = "font";
