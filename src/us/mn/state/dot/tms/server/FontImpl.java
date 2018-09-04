@@ -54,6 +54,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -67,11 +68,13 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -83,7 +86,7 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Create a new font */
-	protected FontImpl(String n, int num, int h, int w, int ls, int cs,
+	private FontImpl(String n, int num, int h, int w, int ls, int cs,
 		int v)
 	{
 		this(n);
@@ -96,9 +99,10 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Font number */
-	protected int f_number;
+	private int f_number;
 
 	/** Set the font number */
+	@Override
 	public void setNumber(int n) {
 		f_number = n;
 	}
@@ -114,14 +118,16 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Get the font number */
+	@Override
 	public int getNumber() {
 		return f_number;
 	}
 
 	/** Font height (in pixels) */
-	protected int height = 7;
+	private int height = 7;
 
 	/** Set the font height (pixels) */
+	@Override
 	public void setHeight(int h) {
 		height = h;
 	}
@@ -137,14 +143,16 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Get the font height (pixels) */
+	@Override
 	public int getHeight() {
 		return height;
 	}
 
 	/** Font width (in pixels) */
-	protected int width = 5;
+	private int width = 5;
 
 	/** Set the font width (pixels) */
+	@Override
 	public void setWidth(int w) {
 		width = w;
 	}
@@ -160,14 +168,16 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Get the font width (pixels) */
+	@Override
 	public int getWidth() {
 		return width;
 	}
 
 	/** Default horizontal spacing between characters (in pixels) */
-	protected int charSpacing = 0;
+	private int charSpacing = 0;
 
 	/** Set the default horizontal spacing between characters (pixels) */
+	@Override
 	public void setCharSpacing(int s) {
 		charSpacing = s;
 	}
@@ -183,14 +193,16 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Get the default horizontal spacing between characters (pixels) */
+	@Override
 	public int getCharSpacing() {
 		return charSpacing;
 	}
 
 	/** Default vetical spacing between lines (in pixels) */
-	protected int lineSpacing = 0;
+	private int lineSpacing = 0;
 
 	/** Set the default vertical spacing between lines (pixels) */
+	@Override
 	public void setLineSpacing(int s) {
 		lineSpacing = s;
 	}
@@ -206,27 +218,30 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	}
 
 	/** Get the default vertical spacing between lines (pixels) */
+	@Override
 	public int getLineSpacing() {
 		return lineSpacing;
 	}
 
 	/** Font version ID */
-	protected int versionID = 0;
+	private int versionID = 0;
 
 	/** Set the font version ID */
+	@Override
 	public void setVersionID(int v) {
 		versionID = v;
 	}
 
 	/** Set the font version ID */
 	public void doSetVersionID(int v) throws TMSException {
-		if(v == versionID)
-			return;
-		store.update(this, "version_id", v);
-		setVersionID(v);
+		if (v != versionID) {
+			store.update(this, "version_id", v);
+			setVersionID(v);
+		}
 	}
 
 	/** Get the font version ID */
+	@Override
 	public int getVersionID() {
 		return versionID;
 	}
