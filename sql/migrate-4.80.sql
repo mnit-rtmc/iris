@@ -6,8 +6,10 @@ BEGIN;
 
 SELECT iris.update_version('4.79.0', '4.80.0');
 
-ALTER TABLE DROP CONSTRAINT font_height_ck;
-ALTER TABLE DROP CONSTRAINT font_width_ck;
+ALTER TABLE iris.font DROP CONSTRAINT font_height_ck;
+ALTER TABLE iris.font DROP CONSTRAINT font_width_ck;
+ALTER TABLE iris.font DROP CONSTRAINT font_line_sp_ck;
+ALTER TABLE iris.font DROP CONSTRAINT font_char_sp_ck;
 
 ALTER TABLE iris.font
 	ADD CONSTRAINT font_number_ck
@@ -18,5 +20,11 @@ ALTER TABLE iris.font
 ALTER TABLE iris.font
 	ADD CONSTRAINT font_width_ck
 	CHECK (width >= 0 AND width <= 12);
+ALTER TABLE iris.font
+	ADD CONSTRAINT font_line_sp_ck
+	CHECK (line_spacing >= 0 AND line_spacing <= 9);
+ALTER TABLE iris.font
+	ADD CONSTRAINT font_char_sp_ck
+	CHECK (char_spacing >= 0 AND char_spacing <= 6);
 
 COMMIT;

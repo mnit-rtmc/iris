@@ -25,15 +25,6 @@ import us.mn.state.dot.sonar.SonarObject;
  */
 public interface Font extends SonarObject {
 
-	/** Maximum allowed font number */
-	int MAX_NUMBER = 255;
-
-	/** Maximum allowed font width */
-	int MAX_WIDTH = 12;
-
-	/** Maximum allowed font height */
-	int MAX_HEIGHT = 30;
-
 	/** SONAR type name */
 	String SONAR_TYPE = "font";
 

@@ -110,8 +110,6 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	/** Set the font number */
 	public void doSetNumber(int n) throws TMSException {
 		if (n != f_number) {
-			if (n < 1 || n > MAX_NUMBER)
-				throw new ChangeVetoException("Invalid number");
 			store.update(this, "f_number", n);
 			setNumber(n);
 		}
@@ -135,8 +133,6 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	/** Set the font height (pixels) */
 	public void doSetHeight(int h) throws TMSException {
 		if (h != height) {
-			if (h < 4 || h > MAX_HEIGHT)
-				throw new ChangeVetoException("Invalid height");
 			store.update(this, "height", h);
 			setHeight(h);
 		}
@@ -160,8 +156,6 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	/** Set the font width (pixels) */
 	public void doSetWidth(int w) throws TMSException {
 		if (w != width) {
-			if (w < 0 || w > MAX_WIDTH)
-				throw new ChangeVetoException("Invalid width");
 			store.update(this, "width", w);
 			setWidth(w);
 		}
@@ -185,8 +179,6 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	/** Set the default horizontal spacing between characters (pixels) */
 	public void doSetCharSpacing(int s) throws TMSException {
 		if (s != charSpacing) {
-			if (s < 0 || s > 9)
-				throw new ChangeVetoException("Invalid spacing");
 			store.update(this, "char_spacing", s);
 			setCharSpacing(s);
 		}
@@ -210,8 +202,6 @@ public class FontImpl extends BaseObjectImpl implements Font {
 	/** Set the default vertical spacing between lines (pixels) */
 	public void doSetLineSpacing(int s) throws TMSException {
 		if (s != lineSpacing) {
-			if (s < 0 || s > 9)
-				throw new ChangeVetoException("Invalid spacing");
 			store.update(this, "line_spacing", s);
 			setLineSpacing(s);
 		}
