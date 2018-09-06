@@ -41,7 +41,7 @@ import us.mn.state.dot.tms.utils.I18N;
 public class GlyphPanel extends JPanel {
 
 	/** Maximum width of glyphs */
-	static private final int MAX_GLYPH_WIDTH = 16;
+	static private final int MAX_GLYPH_WIDTH = 30;
 
 	/** User session */
 	private final Session session;
