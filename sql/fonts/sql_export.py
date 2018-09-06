@@ -7,14 +7,13 @@ from sys import argv, exit
 import pgdb
 
 _HEADER = """\set ON_ERROR_STOP
-
 SET SESSION AUTHORIZATION 'tms';
+BEGIN;
 """
 _SELECT_FONT = """SELECT name, f_number, height, width, line_spacing,
 	char_spacing, version_id FROM iris.font WHERE name = '%s';"""
-_INSERT_FONT = """INSERT INTO iris.font
-    (name, f_number, height, width, line_spacing, char_spacing, version_id)
-    VALUES ('%s', %s, %s, %s, %s, %s, %s);
+_INSERT_FONT = """INSERT INTO iris.font (name, f_number, height, width, line_spacing,
+    char_spacing, version_id) VALUES ('%s', %s, %s, %s, %s, %s, %s);
 """
 _SELECT_GLYPH = """SELECT name, font, code_point, graphic
 	FROM iris.glyph WHERE font = '%s' ORDER BY code_point;"""
@@ -24,6 +23,8 @@ _INSERT_GRAPHIC = """INSERT INTO iris.graphic (name, color_scheme, height, width
     VALUES ('%s', %d, %d, %d, '%s');"""
 _INSERT_GLYPH = """INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('%s', '%s', %d, '%s');"""
+_FOOTER = """
+COMMIT;"""
 
 def read_font(conn, name):
 	print _HEADER
@@ -46,6 +47,7 @@ def read_glyphs(conn, name):
 		print _INSERT_GRAPHIC % tuple(cursor.fetchone())
 		print _INSERT_GLYPH % glyph
 	cursor.close()
+	print _FOOTER
 
 if len(argv) != 2:
 	print "Usage:\n./sql_export.py [font-name]\n"
