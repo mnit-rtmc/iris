@@ -209,7 +209,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 
 	/** Set the pixel data (base64 encoded) */
 	public void doSetPixels(String p) throws TMSException {
-		if (!objectEquals(p, pixels))
+		if (objectEquals(p, pixels))
 			return;
 		try {
 			Base64.decode(p);
