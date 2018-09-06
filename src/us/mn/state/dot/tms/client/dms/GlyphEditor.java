@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -120,10 +120,13 @@ public class GlyphEditor extends JPanel {
 
 	/** Calculate the pitch for the glyph */
 	private float calculatePitch(BitmapGraphic bg) {
-		if (bg.getHeight() > 0)
-			return getHeight() / bg.getHeight();
-		else
-			return 0;
+		float vp = (bg.getHeight() > 0)
+		         ? getHeight() / bg.getHeight()
+		         : 0;
+		float hp = (bg.getWidth() > 0)
+		         ? getWidth() / bg.getWidth()
+		         : 0;
+		return Math.min(vp, hp);
 	}
 
 	/** Calculate the left side of the glyph */
