@@ -3288,7 +3288,7 @@ camera_switch_event_purge_days	30
 camera_wiper_precip_mm_hr	8
 client_units_si	true
 comm_event_purge_days	14
-comm_idle_disconnect_dms_sec	-1
+comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
 database_version	4.79.0
