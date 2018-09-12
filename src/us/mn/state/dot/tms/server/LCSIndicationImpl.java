@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -110,7 +110,7 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 	 * @param op Old pin.
 	 * @param nc New controller.
 	 * @param np New pin. */
-	protected void updateControllerPin(ControllerImpl oc, int op,
+	private void updateControllerPin(ControllerImpl oc, int op,
 		ControllerImpl nc, int np)
 	{
 		if(oc != null)
@@ -126,13 +126,15 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 
 	/** Set the controller of the LCS indication */
 	public void doSetController(Controller c) throws TMSException {
-		if(c == controller)
+		if (c == controller)
 			return;
-		if(pin < 1 || pin > Controller.ALL_PINS)
+		if (pin < 1 || pin > Controller.ALL_PINS)
 			throw new ChangeVetoException("Invalid pin: " + pin);
+		ControllerImpl oc = controller;
 		store.update(this, "controller", c);
-		updateControllerPin(controller, pin, (ControllerImpl)c, pin);
 		setController(c);
+		// Do this last so updateStyles sees updates
+		updateControllerPin(oc, pin, (ControllerImpl) c, pin);
 	}
 
 	/** Get the controller to which this LCS indication is assigned */
@@ -150,13 +152,15 @@ public class LCSIndicationImpl extends BaseObjectImpl implements LCSIndication {
 
 	/** Set the controller I/O pin number */
 	public void doSetPin(int p) throws TMSException {
-		if(p == pin)
+		if (p == pin)
 			return;
-		if(p < 1 || p > Controller.ALL_PINS)
+		if (p < 1 || p > Controller.ALL_PINS)
 			throw new ChangeVetoException("Invalid pin: " + p);
+		int op = pin;
 		store.update(this, "pin", p);
-		updateControllerPin(controller, pin, controller, p);
 		setPin(p);
+		// Do this last so updateStyles sees updates
+		updateControllerPin(controller, op, controller, p);
 	}
 
 	/** Get the controller I/O pin number */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2005-2016  Minnesota Department of Transportation
+ * Copyright (C) 2005-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -174,9 +174,11 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 			return;
 		if (pin < 1 || pin > Controller.ALL_PINS)
 			throw new ChangeVetoException("Invalid pin: " + pin);
+		ControllerImpl oc = controller;
 		store.update(this, "controller", c);
-		updateControllerPin(controller, pin, (ControllerImpl)c, pin);
 		setController(c);
+		// Do this last so updateStyles sees updates
+		updateControllerPin(oc, pin, (ControllerImpl) c, pin);
 	}
 
 	/** Get the controller to which this alarm is assigned */
@@ -200,9 +202,11 @@ public class AlarmImpl extends BaseObjectImpl implements Alarm, ControllerIO {
 			return;
 		if (p < 1 || p > Controller.ALL_PINS)
 			throw new ChangeVetoException("Invalid pin: " + p);
+		int op = pin;
 		store.update(this, "pin", p);
-		updateControllerPin(controller, pin, controller, p);
 		setPin(p);
+		// Do this last so updateStyles sees updates
+		updateControllerPin(controller, op, controller, p);
 	}
 
 	/** Get the controller I/O pin number */

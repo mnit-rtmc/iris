@@ -124,9 +124,11 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 			throw new ChangeVetoException("Invalid pin: " + pin);
 		if (c != null)
 			checkControllerPin(pin);
+		ControllerImpl oc = controller;
 		store.update(this, "controller", c);
-		updateControllerPin(controller, pin, c, pin);
 		setController(c);
+		// Do this last so updateStyles sees updates
+		updateControllerPin(oc, pin, c, pin);
 	}
 
 	/** Check the controller pin */
@@ -157,9 +159,11 @@ abstract public class DeviceImpl extends BaseObjectImpl implements Device,
 			return;
 		if (p < 1 || p > Controller.ALL_PINS)
 			throw new ChangeVetoException("Invalid pin: " + p);
+		int op = pin;
 		store.update(this, "pin", p);
-		updateControllerPin(controller, pin, controller, p);
 		setPin(p);
+		// Do this last so updateStyles sees updates
+		updateControllerPin(controller, op, controller, p);
 	}
 
 	/** Get the controller I/O pin number */
