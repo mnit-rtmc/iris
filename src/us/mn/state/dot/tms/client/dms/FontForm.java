@@ -46,6 +46,21 @@ import us.mn.state.dot.tms.utils.MultiString;
  */
 public class FontForm extends AbstractForm {
 
+	/** Pangram to sample font */
+	static private final String PANGRAM = I18N.get("font.glyph.sample");
+
+	/** Get the width of pangram panel (pixels) */
+	static private int pangram_width(Font f, int cw) {
+		if (cw > 0)
+			return cw * PANGRAM.length();
+		try {
+			return FontHelper.calculateWidth(f, PANGRAM);
+		}
+		catch (InvalidMsgException e) {
+			return 0;
+		}
+	}
+
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
 		return s.canRead(Font.SONAR_TYPE) &&
@@ -296,7 +311,7 @@ public class FontForm extends AbstractForm {
 		font_pnl.updateButtonPanel();
 		int h = fontHeight(f);
 		int cw = fontWidth(f);
-		int w = (cw > 0) ? (512 / cw) * cw : 512;
+		int w = pangram_width(f, cw);
 		pixel_pnl.setPhysicalDimensions(w, h, 4, 4, 1, 1);
 		pixel_pnl.setLogicalDimensions(w, h, cw, 0);
 		pixel_pnl.setGraphic(renderMessage(f));
@@ -316,8 +331,7 @@ public class FontForm extends AbstractForm {
 	/** Render a message to a raster graphic */
 	private RasterGraphic renderMessage(Font f) {
 		if (f != null) {
-			MultiString ms = new MultiString(I18N.get(
-				"font.glyph.sample"));
+			MultiString ms = new MultiString(PANGRAM);
 			RasterGraphic[] pages = renderPages(f, ms);
 			if (pages != null && pages.length > 0)
 				return pages[0];
@@ -329,7 +343,7 @@ public class FontForm extends AbstractForm {
 	private RasterGraphic[] renderPages(Font f, MultiString ms) {
 		int h = fontHeight(f);
 		int cw = fontWidth(f);
-		int w = (cw > 0) ? (512 / cw) * cw : 512;
+		int w = pangram_width(f, cw);
 		int df = f.getNumber();
 		RasterBuilder b = new RasterBuilder(w, h, cw, 0, df);
 		try {
