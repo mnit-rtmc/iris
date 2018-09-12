@@ -81,9 +81,11 @@ public class SignFacePanel extends JPanel {
 			return hybrid_dynamic_pnl;
 		} else {
 			dynamic_pnl.setDimensions(sc);
+			dynamic_pnl.setGraphic(null);
 			cards.show(this, CARD_DYNAMIC);
 			hybrid_static_pnl.setGraphic(null);
 			hybrid_dynamic_pnl.setDimensions(null);
+			hybrid_dynamic_pnl.setGraphic(null);
 			return dynamic_pnl;
 		}
 	}

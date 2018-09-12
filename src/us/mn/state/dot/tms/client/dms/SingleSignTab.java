@@ -312,9 +312,6 @@ public class SingleSignTab extends IPanel {
 	/** Clear the selected DMS */
 	private void clearSelected() {
 		setPager(null);
-		current_pnl.setFilterColor(null);
-		current_pnl.setSign(null);
-		preview_pnl.setSign(null);
 		name_lbl.setText("");
 		brightness_lbl.setText("");
 		setPresetAction(null);
@@ -422,5 +419,10 @@ public class SingleSignTab extends IPanel {
 		if (op != null)
 			op.dispose();
 		pager = p;
+		if (null == p) {
+			current_pnl.setFilterColor(null);
+			current_pnl.setSign(null);
+			preview_pnl.setSign(null);
+		}
 	}
 }
