@@ -1,6 +1,6 @@
 \set ON_ERROR_STOP
-
 SET SESSION AUTHORIZATION 'tms';
+BEGIN;
 
 INSERT INTO iris.font
     (name, f_number, height, width, line_spacing, char_spacing, version_id)
@@ -46,3 +46,5 @@ INSERT INTO iris.graphic (name, color_scheme, height, width, pixels)
     VALUES ('24_full_57', 1, 24, 12, 'H4P8cO4HwDwDwDwDwDwD4Hf/P/ADADADADADADADAHwO/8f4');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('24_full_57', '24_full', 57, '24_full_57');
+
+COMMIT;
