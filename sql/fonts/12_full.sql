@@ -2,12 +2,11 @@
 SET SESSION AUTHORIZATION 'tms';
 BEGIN;
 
-INSERT INTO iris.font
-    (name, f_number, height, width, line_spacing, char_spacing, version_id)
-    VALUES ('12_full', 7, 12, 0, 3, 2, 0);
+INSERT INTO iris.font (name, f_number, height, width, line_spacing,
+    char_spacing, version_id) VALUES ('12_full', 7, 12, 0, 3, 2, 65535);
 
 INSERT INTO iris.graphic (name, color_scheme, height, width, pixels)
-    VALUES ('12_full_32', 1, 12, 1, 'AAA=');
+    VALUES ('12_full_32', 1, 12, 2, 'AAAA');
 INSERT INTO iris.glyph (name, font, code_point, graphic)
     VALUES ('12_full_32', '12_full', 32, '12_full_32');
 INSERT INTO iris.graphic (name, color_scheme, height, width, pixels)
