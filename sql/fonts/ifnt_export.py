@@ -21,13 +21,10 @@ def read_font(conn, font):
 		"font = '%s';" % font)
 	print 'MaxCharNumber=%s' % cursor.fetchone()[0]
 	print
-	cursor.execute("SELECT code_point, height, width, pixels "
-		"FROM iris.glyph gl JOIN iris.graphic gr "
-		"ON gl.graphic = gr.name "
+	cursor.execute("SELECT code_point, width, pixels FROM iris.glyph "
 		"WHERE font = '%s' ORDER BY code_point;" % font)
 	for row in range(cursor.rowcount):
-		cp, h, width, pixels = cursor.fetchone()
-		assert h == height
+		cp, width, pixels = cursor.fetchone()
 		bmap = b64decode(pixels)
 		print '[Char_%s]' % cp
 		print "Character='%s'" % chr(cp)
