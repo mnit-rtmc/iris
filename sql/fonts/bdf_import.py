@@ -5,8 +5,8 @@ of SQL statements to import the font into IRIS.
 
 BDF fonts can be created by converting from OTF with otf2bdf:
 
-otf2bdf -l "32_90" -p 27 /usr/share/fonts/overpass/overpass-regular.otf
-otf2bdf -l "32_90" -p 26 /usr/share/fonts/urw-base35/NimbusSansNarrow-Regular.otf
+otf2bdf -l "32_95" -p 27 /usr/share/fonts/overpass/overpass-regular.otf
+otf2bdf -l "32_95" -p 26 /usr/share/fonts/urw-base35/NimbusSansNarrow-Regular.otf
 '''
 
 from sys import argv, exit
@@ -20,11 +20,10 @@ BEGIN;
 HFONT = """INSERT INTO iris.font (name, f_number, height, width, line_spacing,
     char_spacing, version_id) VALUES ('%s', %s, %s, %s, %s, %s, %s);
 """
-GRAPHIC = """INSERT INTO iris.graphic (name, color_scheme, height, width, pixels)
-    VALUES ('%s_%s', 1, %s, %s, '%s');"""
-GLYPH = """INSERT INTO iris.glyph (name, font, code_point, graphic)
-    VALUES ('%s_%s', '%s', %s, '%s_%s');"""
-FOOTER = """
+COPY = "COPY iris.glyph (name, font, code_point, width, pixels) FROM stdin;"
+COPY_GLYPH = "%s_%s\t%s\t%s\t%s\t%s"
+FOOTER = """\.
+
 COMMIT;"""
 
 def set_pixel(bmap, width, row, col):
@@ -66,9 +65,8 @@ def create_glyph_sql(lines, fname, height, char_spacing):
             if hx & 0b0001:
                 set_pixel(bmap, width, row, x4 * 4 + 3)
         row += 1
-    print (GRAPHIC % (fname, c_point, height, width,
+    print (COPY_GLYPH % (fname, c_point, fname, c_point, width, 
         b64encode(bmap).decode('ASCII')))
-    print (GLYPH % (fname, c_point, fname, c_point, fname, c_point))
 
 def create_font_sql(lines):
     print (HEADER)
@@ -80,6 +78,7 @@ def create_font_sql(lines):
     line_spacing = '9'
     print (HFONT % (name, f_num, line_height, 0, line_spacing, char_spacing,
         version_id))
+    print (COPY)
     while True:
         v = next(lines)
         if v.startswith('CHARS '):
