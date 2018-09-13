@@ -698,8 +698,8 @@ public class OpSendDMSMessage extends OpDMS {
 
 	/** Test if a graphic should be sent to the DMS */
 	private String checkGraphic(Graphic g) {
-		Integer g_num = g.getGNumber();
-		if (null == g_num || g_num < 1 || g_num > 255)
+		int g_num = g.getGNumber();
+		if (g_num < 1 || g_num > 255)
 			return "Invalid graphic number";
 		ColorScheme gcs = ColorScheme.fromOrdinal(g.getColorScheme());
 		ColorScheme cs = color_scheme.getEnum();
@@ -776,8 +776,7 @@ public class OpSendDMSMessage extends OpDMS {
 		private int row;
 		private FindGraphicNumber(Graphic g) {
 			graphic = g;
-			Integer gn = graphic.getGNumber();
-			g_num = (gn != null) ? gn : 0;
+			g_num = graphic.getGNumber();
 			row = grow(g_num);
 		}
 		private int grow(int i) {

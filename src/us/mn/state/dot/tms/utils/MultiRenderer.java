@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@ import java.util.LinkedList;
 import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
+import us.mn.state.dot.tms.Glyph;
+import us.mn.state.dot.tms.GlyphHelper;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.GraphicHelper;
 import us.mn.state.dot.tms.InvalidMsgException;
@@ -642,10 +644,31 @@ public class MultiRenderer extends MultiAdapter {
 			int y = base - getHeight();
 			for (int i = 0; i < span.length(); i++) {
 				int cp = span.charAt(i);
-				Graphic g = FontHelper.lookupGraphic(font, cp);
-				renderGraphic(g, foreground, x, y);
+				Glyph g = FontHelper.lookupGlyph(font, cp);
+				renderGlyph(g, foreground, x, y);
 				x += g.getWidth() + c_space;
 			}
 		}
+	}
+
+	/** Render a glyph onto the raster.
+	 * @param g Glyph to render.
+	 * @param fg Foreground color.
+	 * @param x X-position on raster (1-based)
+	 * @param y Y-position on raster (1-based) */
+	private void renderGlyph(Glyph g, DmsColor fg, int x, int y) {
+		x--;
+		y--;
+		RasterGraphic rg = GlyphHelper.createBitmap(g);
+		if (rg != null) {
+			try {
+				raster.copy(rg, x, y, fg);
+			}
+			catch (IndexOutOfBoundsException e) {
+				// No MULTI syntax error for graphic too big
+				syntax_err = MultiSyntaxError.other;
+			}
+		} else
+			syntax_err = MultiSyntaxError.characterNotDefined;
 	}
 }

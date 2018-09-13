@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -79,34 +79,23 @@ public class FontHelper extends BaseHelper {
 	static public Collection<Glyph> lookupGlyphs(Font font) {
 		TreeMap<Integer, Glyph> glyphs = new TreeMap<Integer, Glyph>();
 		Iterator<Glyph> it = GlyphHelper.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			Glyph g = it.next();
-			if(g.getFont() == font)
+			if (g.getFont() == font)
 				glyphs.put(g.getCodePoint(), g);
 		}
 		return glyphs.values();
 	}
 
 	/** Lookup a glyph in the specified font */
-	static public Glyph lookupGlyph(Font font, int cp) {
-		Iterator<Glyph> it = GlyphHelper.iterator();
-		while(it.hasNext()) {
-			Glyph g = it.next();
-			if(g.getFont() == font && g.getCodePoint() == cp)
-				return g;
-		}
-		return null;
-	}
-
-	/** Look up a code point in the specified font */
-	static public Graphic lookupGraphic(Font font, int cp)
+	static public Glyph lookupGlyph(Font font, int cp)
 		throws InvalidMsgException
 	{
-		Glyph g = lookupGlyph(font, cp);
-		if(g != null) {
-			Graphic gr = g.getGraphic();
-			if(gr != null)
-				return gr;
+		Iterator<Glyph> it = GlyphHelper.iterator();
+		while (it.hasNext()) {
+			Glyph g = it.next();
+			if (g.getFont() == font && g.getCodePoint() == cp)
+				return g;
 		}
 		throw new InvalidMsgException("code point: " + cp);
 	}
@@ -132,12 +121,12 @@ public class FontHelper extends BaseHelper {
 		throws InvalidMsgException
 	{
 		int w = 0;
-		for(int i = 0; i < t.length(); i++) {
-			if(i > 0)
+		for (int i = 0; i < t.length(); i++) {
+			if (i > 0)
 				w += cs;
 			int cp = t.charAt(i);
-			Graphic c = lookupGraphic(font, cp);
-			w += c.getWidth();
+			Glyph g = lookupGlyph(font, cp);
+			w += g.getWidth();
 		}
 		return w;
 	}

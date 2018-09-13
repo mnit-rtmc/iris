@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,9 @@
  */
 package us.mn.state.dot.tms;
 
+import java.io.IOException;
 import java.util.Iterator;
+import us.mn.state.dot.tms.utils.Base64;
 
 /**
  * Helper class for glyphs.
@@ -37,5 +39,23 @@ public class GlyphHelper extends BaseHelper {
 	static public Iterator<Glyph> iterator() {
 		return new IteratorWrapper<Glyph>(namespace.iterator(
 			Glyph.SONAR_TYPE));
+	}
+
+	/** Create a bitmap graphic of a glyph */
+	static public BitmapGraphic createBitmap(Glyph g) {
+		try {
+			BitmapGraphic bg = new BitmapGraphic(g.getWidth(),
+				g.getFont().getHeight());
+			bg.setPixelData(Base64.decode(g.getPixels()));
+			return bg;
+		}
+		catch (IndexOutOfBoundsException e) {
+			// pixel data was wrong length
+			return null;
+		}
+		catch (IOException e) {
+			// pixel data Base64 decode failed
+			return null;
+		}
 	}
 }

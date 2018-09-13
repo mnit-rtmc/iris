@@ -74,7 +74,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	/** Create a new graphic */
 	public GraphicImpl(String n) {
 		super(n);
-		g_number = null;
+		g_number = 0;
 		color_scheme = ColorScheme.MONOCHROME_1_BIT;
 		height = 0;
 		width = 0;
@@ -85,7 +85,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	/** Create a graphic from database lookup */
 	private GraphicImpl(ResultSet row) throws SQLException {
 		this(row.getString(1),          // name
-		     (Integer) row.getObject(2),// g_number
+		     row.getInt(2),             // g_number
 		     row.getInt(3),             // color_scheme
 		     row.getInt(4),             // height
 		     row.getInt(5),             // width
@@ -95,8 +95,8 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	}
 
 	/** Create a graphic from database lookup */
-	private GraphicImpl(String n, Integer g, int cs, int h, int w,
-		Integer tc, String p)
+	private GraphicImpl(String n, int g, int cs, int h, int w, Integer tc,
+		String p)
 	{
 		super(n);
 		g_number = g;
@@ -108,18 +108,18 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	}
 
 	/** Graphic number */
-	private Integer g_number;
+	private int g_number;
 
 	/** Set the graphic number */
 	@Override
-	public void setGNumber(Integer g) {
+	public void setGNumber(int g) {
 		g_number = g;
 	}
 
 	/** Set the graphic number */
-	public void doSetGNumber(Integer g) throws TMSException {
+	public void doSetGNumber(int g) throws TMSException {
 		if (g != g_number) {
-			if (g != null && (g < 1 || g > MAX_NUMBER))
+			if (g < 1 || g > MAX_NUMBER)
 				throw new ChangeVetoException("Invalid g_number");
 			store.update(this, "g_number", g);
 			setGNumber(g);
@@ -128,7 +128,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 
 	/** Get the graphic number */
 	@Override
-	public Integer getGNumber() {
+	public int getGNumber() {
 		return g_number;
 	}
 
@@ -152,22 +152,6 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 
 	/** Width (number of pixels) */
 	private int width;
-
-	/** Set the width (pixels) */
-	@Override
-	public void setWidth(int w) {
-		width = w;
-	}
-
-	/** Set the width (pixels) */
-	public void doSetWidth(int w) throws TMSException {
-		if (w != width) {
-			if (w > MAX_WIDTH)
-				throw new ChangeVetoException("Invalid width");
-			store.update(this, "width", w);
-			setWidth(w);
-		}
-	}
 
 	/** Get the width (pixels) */
 	@Override
@@ -200,26 +184,6 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 
 	/** Pixel data (base64 encoded).  For 24-bit, uses BGR. */
 	private String pixels;
-
-	/** Set the pixel data (base64 encoded).  For 24-bit, uses BGR. */
-	@Override
-	public void setPixels(String p) {
-		pixels = p;
-	}
-
-	/** Set the pixel data (base64 encoded) */
-	public void doSetPixels(String p) throws TMSException {
-		if (objectEquals(p, pixels))
-			return;
-		try {
-			Base64.decode(p);
-		}
-		catch (IOException e) {
-			throw new ChangeVetoException("Invalid Base64 data");
-		}
-		store.update(this, "pixels", p);
-		setPixels(p);
-	}
 
 	/** Get the pixel data (base64 encoded).  For 24-bit, uses BGR. */
 	@Override

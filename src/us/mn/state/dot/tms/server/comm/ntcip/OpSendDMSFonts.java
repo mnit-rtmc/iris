@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,6 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontFinder;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
-import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -557,13 +556,12 @@ public class OpSendDMSFonts extends OpDMS {
 		protected Phase poll(CommMessage mess) throws IOException {
 			int row = frow.row;
 			int code_point = glyph.getCodePoint();
-			Graphic graphic = glyph.getGraphic();
-			byte[] pixels = Base64.decode(graphic.getPixels());
+			byte[] pixels = Base64.decode(glyph.getPixels());
 			ASN1Integer char_width = characterWidth.makeInt(row,
 				code_point);
 			ASN1OctetString char_bitmap = new ASN1OctetString(
 				characterBitmap.node, row, code_point);
-			char_width.setInteger(graphic.getWidth());
+			char_width.setInteger(glyph.getWidth());
 			char_bitmap.setOctetString(pixels);
 			mess.add(char_width);
 			mess.add(char_bitmap);

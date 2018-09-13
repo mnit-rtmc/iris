@@ -23,10 +23,8 @@ import javax.swing.JButton;
 import javax.swing.JPanel;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.BitmapGraphic;
-import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
-import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
@@ -48,9 +46,6 @@ public class GlyphPanel extends JPanel {
 
 	/** Glyph type cache */
 	private final TypeCache<Glyph> glyphs;
-
-	/** Graphic type cache */
-	private final TypeCache<Graphic> graphics;
 
 	/** Current font */
 	private Font font;
@@ -96,7 +91,6 @@ public class GlyphPanel extends JPanel {
 		super(new GridBagLayout());
 		session = s;
 		glyphs = s.getSonarState().getDmsCache().getGlyphs();
-		graphics = s.getSonarState().getGraphics();
 		ginfo = new GlyphInfo();
 		updateButtonPanel();
 		setBorder(BorderFactory.createTitledBorder(
@@ -210,11 +204,10 @@ public class GlyphPanel extends JPanel {
 	private void updateGlyph(GlyphInfo gi, BitmapGraphic bg) {
 		assert gi.exists();
 		if (bg.getWidth() > 0) {
-			gi.graphic.setWidth(bg.getWidth());
-			gi.graphic.setPixels(bg.getEncodedPixels());
+			gi.glyph.setWidth(bg.getWidth());
+			gi.glyph.setPixels(bg.getEncodedPixels());
 		} else {
 			gi.glyph.destroy();
-			gi.graphic.destroy();
 			setGlyph(new GlyphInfo(gi.code_point, null));
 		}
 	}
@@ -228,24 +221,16 @@ public class GlyphPanel extends JPanel {
 			String name = f.getName() + "_" + c;
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
-			attrs.put("color_scheme",
-				ColorScheme.MONOCHROME_1_BIT.ordinal());
-			attrs.put("height", bg.getHeight());
+			attrs.put("font", f);
+			attrs.put("code_point", c);
 			attrs.put("width", bg.getWidth());
 			attrs.put("pixels", bg.getEncodedPixels());
-			graphics.createObject(name, attrs);
-			attrs.clear();
-			attrs.put("font", f);
-			attrs.put("codePoint", c);
-			attrs.put("graphic", name);
 			glyphs.createObject(name, attrs);
 		}
 	}
 
 	/** Check if the user can write a glyph */
 	private boolean canWriteGlyph() {
-		return session.canWrite(Glyph.SONAR_TYPE) &&
-		       session.canWrite(Graphic.SONAR_TYPE, "width") &&
-		       session.canWrite(Graphic.SONAR_TYPE, "pixels");
+		return session.canWrite(Glyph.SONAR_TYPE);
 	}
 }

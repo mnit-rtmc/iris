@@ -26,7 +26,6 @@ import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
-import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.InvalidMsgException;
 import us.mn.state.dot.tms.RasterBuilder;
 import us.mn.state.dot.tms.RasterGraphic;
@@ -64,34 +63,7 @@ public class FontForm extends AbstractForm {
 	/** Check if the user is permitted to use the form */
 	static public boolean isPermitted(Session s) {
 		return s.canRead(Font.SONAR_TYPE) &&
-		       s.canRead(Glyph.SONAR_TYPE) &&
-		       s.canRead(Graphic.SONAR_TYPE);
-	}
-
-	/** Listener for Graphic proxy events */
-	private final SwingProxyAdapter<Graphic> gr_listener =
-		new SwingProxyAdapter<Graphic>(true)
-	{
-		@Override
-		protected void proxyChangedSwing(Graphic proxy, String attr) {
-			if (isFromSelectedFont(proxy))
-				updateGraphic(proxy);
-		}
-		@Override
-		protected boolean checkAttributeChange(String attr) {
-			// The "pixels" attribute should be the
-			// last one changed (after width)
-			return attr.equals("pixels");
-		}
-	};
-
-	/** Check if the specified Graphic is from the selected font */
-	private boolean isFromSelectedFont(Graphic p) {
-		Font f = font;
-		if (f != null)
-			return p.getName().startsWith(f.getName());
-		else
-			return false;
+		       s.canRead(Glyph.SONAR_TYPE);
 	}
 
 	/** Proxy listener for Glyph proxies */
@@ -108,6 +80,17 @@ public class FontForm extends AbstractForm {
 			if (isFromSelectedFont(proxy))
 				removeGlyph(proxy);
 		}
+		@Override
+		protected void proxyChangedSwing(Glyph proxy, String attr) {
+			if (isFromSelectedFont(proxy))
+				updateGlyph(proxy);
+		}
+		@Override
+		protected boolean checkAttributeChange(String attr) {
+			// The "pixels" attribute should be the
+			// last one changed (after width)
+			return attr.equals("pixels");
+		}
 	};
 
 	/** Check if the specified Glyph is from the selected font */
@@ -117,9 +100,6 @@ public class FontForm extends AbstractForm {
 
 	/** Glyph type cache */
 	private final TypeCache<Glyph> glyphs;
-
-	/** Graphic type cache */
-	private final TypeCache<Graphic> graphics;
 
 	/** Map of glyph data for currently selected font */
 	private final HashMap<Integer, GlyphInfo> gmap =
@@ -150,7 +130,6 @@ public class FontForm extends AbstractForm {
 	public FontForm(Session s) {
 		super(I18N.get("font.title"));
 		glyphs = s.getSonarState().getDmsCache().getGlyphs();
-		graphics = s.getSonarState().getGraphics();
 		font_pnl = new ProxyTablePanel<Font>(new FontModel(s)) {
 			protected void selectProxy() {
 				super.selectProxy();
@@ -167,7 +146,6 @@ public class FontForm extends AbstractForm {
 	protected void initialize() {
 		super.initialize();
 		font_pnl.initialize();
-		graphics.addProxyListener(gr_listener);
 		glyphs.addProxyListener(gl_listener);
 		layoutPanel();
 	}
@@ -177,7 +155,6 @@ public class FontForm extends AbstractForm {
 	protected void dispose() {
 		font_pnl.dispose();
 		glyph_pnl.dispose();
-		graphics.removeProxyListener(gr_listener);
 		glyphs.removeProxyListener(gl_listener);
 		super.dispose();
 	}
@@ -283,8 +260,8 @@ public class FontForm extends AbstractForm {
 		font_pnl.updateButtonPanel();
 	}
 
-	/** Update a Graphic in the GlyphInfo map */
-	private void updateGraphic(Graphic g) {
+	/** Update a Glyph in the GlyphInfo map */
+	private void updateGlyph(Glyph g) {
 		GlyphInfo gi = findGlyph(g);
 		if (gi != null) {
 			addGlyph(gi.glyph);
@@ -293,10 +270,10 @@ public class FontForm extends AbstractForm {
 		}
 	}
 
-	/** Find glyph data for a graphic */
-	private GlyphInfo findGlyph(Graphic g) {
+	/** Find glyph info for a glyph */
+	private GlyphInfo findGlyph(Glyph g) {
 		for (GlyphInfo gi: gmap.values()) {
-			if (gi.graphic == g)
+			if (gi.glyph == g)
 				return gi;
 		}
 		return null;

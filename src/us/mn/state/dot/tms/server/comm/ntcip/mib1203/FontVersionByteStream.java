@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@ import java.util.Collection;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
-import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.server.comm.ntcip.CRCStream;
 import us.mn.state.dot.tms.utils.Base64;
 
@@ -43,10 +42,9 @@ public class FontVersionByteStream extends CRCStream {
 		dos.writeByte(1); // number of subsequent length octets
 		dos.writeByte(glyphs.size());
 		for (Glyph glyph: glyphs) {
-			Graphic graphic = glyph.getGraphic();
-			byte[] bitmap = Base64.decode(graphic.getPixels());
+			byte[] bitmap = Base64.decode(glyph.getPixels());
 			dos.writeShort(glyph.getCodePoint());
-			dos.writeByte(graphic.getWidth());
+			dos.writeByte(glyph.getWidth());
 			dos.writeByte(bitmap.length);
 			dos.write(bitmap);
 		}

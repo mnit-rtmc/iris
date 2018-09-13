@@ -136,7 +136,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 			}
 			public void setValueAt(Graphic g, Object value) {
 				if (value instanceof Integer)
-					g.setGNumber((Integer)value);
+					g.setGNumber((Integer) value);
 			}
 		});
 		cols.add(new ProxyColumn<Graphic>("graphic.color_scheme", 80) {
@@ -189,12 +189,6 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 		super(s, descriptor(s), 5, Graphic.MAX_HEIGHT / 2);
 	}
 
-	/** Check if a proxy is included in the list */
-	@Override
-	protected boolean check(Graphic proxy) {
-		return proxy.getGNumber() != null;
-	}
-
 	/** Get a table row sorter */
 	@Override
 	public RowSorter<ProxyTableModel<Graphic>> createSorter() {
@@ -238,7 +232,7 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	/** Create a new graphic */
 	private void createGraphic(BufferedImage im) throws ChangeVetoException{
 		String name = createUniqueName();
-		Integer g_number = getGNumber();
+		int g_number = getGNumber();
 		RasterGraphic rg = createRaster(im);
 		HashMap<String, Object> attrs = new HashMap<String, Object>();
 		attrs.put("g_number", g_number);
@@ -260,14 +254,12 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 	}
 
 	/** Get the next available graphic number */
-	private Integer getGNumber() throws ChangeVetoException {
+	private int getGNumber() throws ChangeVetoException {
 		TreeSet<Integer> gnums = new TreeSet<Integer>();
 		Iterator<Graphic> it = GraphicHelper.iterator();
 		while (it.hasNext()) {
 			Graphic g = it.next();
-			Integer gn = g.getGNumber();
-			if (gn != null)
-				gnums.add(gn);
+			gnums.add(g.getGNumber());
 		}
 		for (int i = 1; i <= Graphic.MAX_NUMBER; i++) {
 			if (!gnums.contains(i))

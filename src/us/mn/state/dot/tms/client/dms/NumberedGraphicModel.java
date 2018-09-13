@@ -20,8 +20,7 @@ import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyListModel;
 
 /**
- * A NumberedGraphicModel is a ProxyListModel filtered with only
- * Graphics which have g_number set.
+ * A NumberedGraphicModel is a ProxyListModel sorted by g_number.
  *
  * @author Douglas Lau
  */
@@ -50,16 +49,8 @@ public class NumberedGraphicModel extends ProxyListModel<Graphic> {
 			public int compare(Graphic g0, Graphic g1) {
 				Integer n0 = g0.getGNumber();
 				Integer n1 = g1.getGNumber();
-				return (n0 != null && n1 != null)
-				      ? n0.compareTo(n1)
-				      : g0.getName().compareTo(g1.getName());
+				return n0.compareTo(n1);
 			}
 		};
-	}
-
-	/** Check if a proxy is included in the list */
-	@Override
-	protected boolean check(Graphic g) {
-		return g.getGNumber() != null;
 	}
 }

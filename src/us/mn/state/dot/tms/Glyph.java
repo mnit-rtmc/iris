@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2014  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * A glyph defines the graphic used for a single code point in a font.
+ * A glyph defines the bitmap used for a single code point in a font.
  *
  * @author Douglas Lau
  */
@@ -32,9 +32,15 @@ public interface Glyph extends SonarObject {
 	/** Get the code point */
 	int getCodePoint();
 
-	/** Set the graphic */
-	void setGraphic(Graphic g);
+	/** Set the width (pixels) */
+	void setWidth(int w);
 
-	/** Get the graphic */
-	Graphic getGraphic();
+	/** Get the width (pixels) */
+	int getWidth();
+
+	/** Set the pixel data (base64 encoded). */
+	void setPixels(String p);
+
+	/** Get the pixel data (base64 encoded). */
+	String getPixels();
 }

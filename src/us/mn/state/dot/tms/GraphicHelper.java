@@ -49,8 +49,7 @@ public class GraphicHelper extends BaseHelper {
 		Iterator<Graphic> it = iterator();
 		while (it.hasNext()) {
 			Graphic g = it.next();
-			Integer gn = g.getGNumber();
-			if (gn != null && gn == g_num)
+			if (g.getGNumber() == g_num)
 				return g;
 		}
 		return null;
