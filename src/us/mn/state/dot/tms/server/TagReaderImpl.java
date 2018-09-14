@@ -307,6 +307,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		}
 	}
 
+	/** Get the SeGo downlink attenuation */
+	public Integer getSeGoAttenDownlinkDb() {
+		return sego_atten_downlink_db;
+	}
+
 	/** SeGo uplink attenuation (db) */
 	private Integer sego_atten_uplink_db;
 
@@ -327,6 +332,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 					e.getMessage());
 			}
 		}
+	}
+
+	/** Get the SeGo uplink attenuation */
+	public Integer getSeGoAttenUplinkDb() {
+		return sego_atten_uplink_db;
 	}
 
 	/** SeGo data detect (db) */
@@ -351,6 +361,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		}
 	}
 
+	/** Get the SeGo data detect */
+	public Integer getSeGoDataDetectDb() {
+		return sego_data_detect_db;
+	}
+
 	/** SeGo seen count */
 	private Integer sego_seen_count;
 
@@ -372,6 +387,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		}
 	}
 
+	/** Get the SeGo seen count */
+	public Integer getSeGoSeenCount() {
+		return sego_seen_count;
+	}
+
 	/** SeGo unique count */
 	private Integer sego_unique_count;
 
@@ -391,6 +411,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 				logError("sego_unique_count: " +e.getMessage());
 			}
 		}
+	}
+
+	/** Get the SeGo unique count */
+	public Integer getSeGoUniqueCount() {
+		return sego_unique_count;
 	}
 
 	/** IAG downlink attenuation (db) */
@@ -415,6 +440,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		}
 	}
 
+	/** Get the IAG downlink attenuation */
+	public Integer getIAGAttenDownlinkDb() {
+		return iag_atten_downlink_db;
+	}
+
 	/** IAG uplink attenuation (db) */
 	private Integer iag_atten_uplink_db;
 
@@ -435,6 +465,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 					e.getMessage());
 			}
 		}
+	}
+
+	/** Get the IAG uplink attenuation */
+	public Integer getIAGAttenUplinkDb() {
+		return iag_atten_uplink_db;
 	}
 
 	/** IAG data detect (db) */
@@ -459,6 +494,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		}
 	}
 
+	/** Get the IAG data detect */
+	public Integer getIAGDataDetectDb() {
+		return iag_data_detect_db;
+	}
+
 	/** IAG seen count */
 	private Integer iag_seen_count;
 
@@ -480,6 +520,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		}
 	}
 
+	/** Get the IAG seen count */
+	public Integer getIAGSeenCount() {
+		return iag_seen_count;
+	}
+
 	/** IAG unique count */
 	private Integer iag_unique_count;
 
@@ -499,6 +544,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 				logError("iag_unique_count: " + e.getMessage());
 			}
 		}
+	}
+
+	/** Get the IAG unique count */
+	public Integer getIAGUniqueCount() {
+		return iag_unique_count;
 	}
 
 	/** Line loss (db) */

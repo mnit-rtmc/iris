@@ -18,6 +18,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.TagReaderSyncMode;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.ControllerException;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -29,6 +30,11 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author Douglas Lau
  */
 public class OpSendSettings extends OpE6 {
+
+	/** Supported protocols */
+	static private final RFProtocol[] PROTOCOLS = {
+		RFProtocol.SeGo, RFProtocol.IAG
+	};
 
 	/** Flag to indicate stop mode */
 	private boolean stop = false;
@@ -267,7 +273,7 @@ public class OpSendSettings extends OpE6 {
 	/** Create phase to check the uplink frequency */
 	private Phase<E6Property> checkUplink() {
 		Integer uf = tag_reader.getUplinkFreqKhz();
-		return (uf != null) ? new CheckUplink(uf) : lastPhase();
+		return (uf != null) ? new CheckUplink(uf) : nextProtocol(null);
 	}
 
 	/** Phase to check the uplink frequency */
@@ -287,7 +293,7 @@ public class OpSendSettings extends OpE6 {
 			mess.logQuery(freq);
 			return (freq.getFreqKhz() != uplink_freq)
 			      ? new StoreUplink(uplink_freq)
-			      : lastPhase();
+			      : nextProtocol(null);
 		}
 	}
 
@@ -306,7 +312,250 @@ public class OpSendSettings extends OpE6 {
 				FrequencyProp.Source.uplink, uplink_freq);
 			mess.logStore(freq);
 			sendStore(mess, freq);
-			return lastPhase();
+			return nextProtocol(null);
+		}
+	}
+
+	/** Get the next protocol phase */
+	private Phase<E6Property> nextProtocol(RFProtocol p_prot) {
+		for (RFProtocol p: PROTOCOLS) {
+			if (null == p_prot)
+				return checkAtten(p);
+			if (p == p_prot)
+				p_prot = null;
+		}
+		return lastPhase();
+	}
+
+	/** Get check attenuation phase (or later) */
+	private Phase<E6Property> checkAtten(RFProtocol p) {
+		Integer ad = getAttenDownlink(p);
+		Integer au = getAttenUplink(p);
+		return (ad != null && au != null)
+		      ? new CheckAtten(p, ad, au)
+		      : checkDataDetect(p);
+	}
+
+	/** Get downlink attenuation for one protocol */
+	private Integer getAttenDownlink(RFProtocol p) {
+		switch (p) {
+		case SeGo:
+			return tag_reader.getSeGoAttenDownlinkDb();
+		case IAG:
+			return tag_reader.getIAGAttenDownlinkDb();
+		default:
+			return null;
+		}
+	}
+
+	/** Get uplink attenuation for one protocol */
+	private Integer getAttenUplink(RFProtocol p) {
+		switch (p) {
+		case SeGo:
+			return tag_reader.getSeGoAttenUplinkDb();
+		case IAG:
+			return tag_reader.getIAGAttenUplinkDb();
+		default:
+			return null;
+		}
+	}
+
+	/** Phase to check RF attenuation for one protocol */
+	private class CheckAtten extends Phase<E6Property> {
+		private final RFProtocol protocol;
+		private final int atten_down;
+		private final int atten_up;
+		private CheckAtten(RFProtocol p, int ad, int au) {
+			protocol = p;
+			atten_down = ad;
+			atten_up = au;
+		}
+
+		/** Check RF attenuation */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFAttenProp atten = new RFAttenProp(protocol);
+			try {
+				sendQuery(mess, atten);
+			}
+			catch (ControllerException e) {
+				// SUB_COMMAND_ERROR => protocol not supported
+				return nextProtocol(protocol);
+			}
+			mess.logQuery(atten);
+			return (atten.getDownlinkDb() != atten_down
+			     || atten.getUplinkDb() != atten_up)
+			      ? new StoreAtten(protocol, atten_down, atten_up)
+			      : checkDataDetect(protocol);
+		}
+	}
+
+	/** Phase to store RF attenuation for one protocol */
+	private class StoreAtten extends Phase<E6Property> {
+		private final RFProtocol protocol;
+		private final int atten_down;
+		private final int atten_up;
+		private StoreAtten(RFProtocol p, int ad, int au) {
+			protocol = p;
+			atten_down = ad;
+			atten_up = au;
+		}
+
+		/** Store RF attenuation */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			RFAttenProp atten = new RFAttenProp(protocol,
+				atten_down, atten_up);
+			mess.logStore(atten);
+			sendStore(mess, atten);
+			return checkDataDetect(protocol);
+		}
+	}
+
+	/** Get check data detect phase (or later) */
+	private Phase<E6Property> checkDataDetect(RFProtocol p) {
+		Integer dd = getDataDetect(p);
+		return (dd != null)
+		      ? new CheckDataDetect(p, dd)
+		      : checkSeen(p);
+	}
+
+	/** Get data detect for one protocol */
+	private Integer getDataDetect(RFProtocol p) {
+		switch (p) {
+		case SeGo:
+			return tag_reader.getSeGoDataDetectDb();
+		case IAG:
+			return tag_reader.getIAGDataDetectDb();
+		default:
+			return null;
+		}
+	}
+
+	/** Phase to check the data detect for one protocol */
+	private class CheckDataDetect extends Phase<E6Property> {
+		private final RFProtocol protocol;
+		private final int data_detect;
+		private CheckDataDetect(RFProtocol p, int dd) {
+			protocol = p;
+			data_detect = dd;
+		}
+
+		/** Check the data detect */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			DataDetectProp det = new DataDetectProp(protocol,
+				data_detect);
+			sendQuery(mess, det);
+			mess.logQuery(det);
+			return (det.getValue() != data_detect)
+			      ? new StoreDataDetect(protocol, data_detect)
+			      : checkSeen(protocol);
+		}
+	}
+
+	/** Phase to store data detect for one protocol */
+	private class StoreDataDetect extends Phase<E6Property> {
+		private final RFProtocol protocol;
+		private final int data_detect;
+		private StoreDataDetect(RFProtocol p, int dd) {
+			protocol = p;
+			data_detect = dd;
+		}
+
+		/** Store data detect */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			DataDetectProp det = new DataDetectProp(protocol,
+				data_detect);
+			mess.logStore(det);
+			sendStore(mess, det);
+			return checkSeen(protocol);
+		}
+	}
+
+	/** Get check seen count phase (or later) */
+	private Phase<E6Property> checkSeen(RFProtocol p) {
+		Integer sc = getSeenCount(p);
+		Integer uc = getUniqueCount(p);
+		return (sc != null && uc != null)
+		      ? new CheckSeen(p, sc, uc)
+		      : nextProtocol(p);
+	}
+
+	/** Get seen count for one protocol */
+	private Integer getSeenCount(RFProtocol p) {
+		switch (p) {
+		case SeGo:
+			return tag_reader.getSeGoSeenCount();
+		case IAG:
+			return tag_reader.getIAGSeenCount();
+		default:
+			return null;
+		}
+	}
+
+	/** Get unique count for one protocol */
+	private Integer getUniqueCount(RFProtocol p) {
+		switch (p) {
+		case SeGo:
+			return tag_reader.getSeGoUniqueCount();
+		case IAG:
+			return tag_reader.getIAGUniqueCount();
+		default:
+			return null;
+		}
+	}
+
+	/** Phase to check seen count for one protocol */
+	private class CheckSeen extends Phase<E6Property> {
+		private final RFProtocol protocol;
+		private final int seen_count;
+		private final int unique_count;
+		private CheckSeen(RFProtocol p, int sc, int uc) {
+			protocol = p;
+			seen_count = sc;
+			unique_count = uc;
+		}
+
+		/** Check seen count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			SeenCountProp seen = new SeenCountProp(protocol);
+			sendQuery(mess, seen);
+			mess.logQuery(seen);
+			return (seen.getSeen() != seen_count
+			     || seen.getUnique() != unique_count)
+			      ? new StoreSeen(protocol, seen_count,unique_count)
+			      : nextProtocol(protocol);
+		}
+	}
+
+	/** Phase to store seen and unique count for one protocol */
+	private class StoreSeen extends Phase<E6Property> {
+		private final RFProtocol protocol;
+		private final int seen_count;
+		private final int unique_count;
+		private StoreSeen(RFProtocol p, int sc, int uc) {
+			protocol = p;
+			seen_count = sc;
+			unique_count = uc;
+		}
+
+		/** Store seen and unique counts */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			SeenCountProp seen = new SeenCountProp(protocol,
+				seen_count, unique_count);
+			mess.logStore(seen);
+			sendStore(mess, seen);
+			return nextProtocol(protocol);
 		}
 	}
 
@@ -331,51 +580,6 @@ public class OpSendSettings extends OpE6 {
 
 	/* -- Experimental stuff -- */
 
-	/** Phase to store the SeGo RF attenuation */
-	private class StoreSeGoAtten extends Phase<E6Property> {
-
-		/** Store the SeGo RF attenuation */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			RFAttenProp atten = new RFAttenProp(RFProtocol.SeGo,
-				1, 1);
-			mess.logStore(atten);
-			sendStore(mess, atten);
-			return new StoreSeGoSeen();
-		}
-	}
-
-	/** Phase to store the SeGo seen count */
-	private class StoreSeGoSeen extends Phase<E6Property> {
-
-		/** Store the SeGo seen count */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			SeenCountProp seen = new SeenCountProp(RFProtocol.SeGo,
-				40, 255);
-			mess.logStore(seen);
-			sendStore(mess, seen);
-			return new StoreSeGoDataDetect();
-		}
-	}
-
-	/** Phase to store the SeGo data detect */
-	private class StoreSeGoDataDetect extends Phase<E6Property> {
-
-		/** Store the SeGo data detect */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			DataDetectProp det = new DataDetectProp(RFProtocol.SeGo,
-				0);
-			mess.logStore(det);
-			sendStore(mess, det);
-			return new StoreLineLoss();
-		}
-	}
-
 	/** Phase to store the line loss */
 	private class StoreLineLoss extends Phase<E6Property> {
 
@@ -386,37 +590,7 @@ public class OpSendSettings extends OpE6 {
 			LineLossProp loss = new LineLossProp(2);
 			mess.logStore(loss);
 			sendStore(mess, loss);
-			return new StoreMuxMode();
-		}
-	}
-
-	/** Phase to store the mux mode */
-	private class StoreMuxMode extends Phase<E6Property> {
-
-		/** Store the mux mode */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			MuxModeProp mode = new MuxModeProp(
-				MuxModeProp.Value.no_multiplexing);
-			mess.logStore(mode);
-			sendStore(mess, mode);
-			return new StoreAntennaChannel();
-		}
-	}
-
-	/** Phase to store the manual antenna channel control */
-	private class StoreAntennaChannel extends Phase<E6Property> {
-
-		/** Store the manual antenna channel */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			AntennaChannelProp chan = new AntennaChannelProp(
-			    AntennaChannelProp.Value.disable_manual_control);
-			mess.logStore(chan);
-			sendStore(mess, chan);
-			return new StoreMasterSlave();
+			return null;
 		}
 	}
 
