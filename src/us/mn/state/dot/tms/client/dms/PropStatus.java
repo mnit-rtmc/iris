@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,8 +116,20 @@ public class PropStatus extends IPanel {
 		}
 	};
 
+	/** Query settings action */
+	private final IAction query_settings = new IAction(
+		"device.query.settings")
+	{
+		protected void doActionPerformed(ActionEvent e) {
+			dms.setDeviceRequest(DeviceRequest.
+				QUERY_SETTINGS.ordinal());
+		}
+	};
+
 	/** Send settings action */
-	private final IAction settings = new IAction("device.send.settings") {
+	private final IAction send_settings = new IAction(
+		"device.send.settings")
+	{
 		protected void doActionPerformed(ActionEvent e) {
 			dms.setDeviceRequest(DeviceRequest.
 				SEND_SETTINGS.ordinal());
@@ -175,7 +187,9 @@ public class PropStatus extends IPanel {
 		box.add(Box.createHorizontalStrut(UI.hgap));
 		box.add(new JButton(query_status));
 		box.add(Box.createHorizontalStrut(UI.hgap));
-		box.add(new JButton(settings));
+		box.add(new JButton(query_settings));
+		box.add(Box.createHorizontalStrut(UI.hgap));
+		box.add(new JButton(send_settings));
 		if(reset.getIEnabled()) {
 			box.add(Box.createHorizontalStrut(UI.hgap));
 			box.add(new JButton(reset));
@@ -213,7 +227,8 @@ public class PropStatus extends IPanel {
 			query_msg.setEnabled(r);
 			config.setEnabled(r);
 			query_status.setEnabled(r);
-			settings.setEnabled(r);
+			query_settings.setEnabled(r);
+			send_settings.setEnabled(r);
 			reset.setEnabled(r);
 		}
 	}

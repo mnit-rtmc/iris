@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2015  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,10 +54,11 @@ public enum MIB1203 {
 	    fontCharSpacing		(fontEntry, 5),
 	    fontLineSpacing		(fontEntry, 6),
 	    fontVersionID		(fontEntry, 7),
-	    fontStatus			(fontEntry, 8),
+	    fontStatus			(fontEntry, 8), // V2
 	  maxFontCharacters		(fontDefinition, 3),
 	  characterTable		(fontDefinition, 4),
 	  characterEntry		(characterTable, 1),
+	    characterNumber		(characterEntry, 1),
 	    characterWidth		(characterEntry, 2),
 	    characterBitmap		(characterEntry, 3),
 	  fontMaxCharacterSize		(fontDefinition, 5), // V2
