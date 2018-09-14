@@ -1475,6 +1475,11 @@ CREATE TRIGGER weather_sensor_delete_trig
     INSTEAD OF DELETE ON iris.weather_sensor
     FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_delete();
 
+CREATE TABLE iris.tag_reader_sync_mode (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
 CREATE TABLE iris._tag_reader (
 	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
@@ -1492,7 +1497,9 @@ CREATE TABLE iris._tag_reader (
 	iag_data_detect_db INTEGER,
 	iag_seen_count INTEGER,
 	iag_unique_count INTEGER,
-	line_loss_db INTEGER
+	line_loss_db INTEGER,
+	sync_mode INTEGER REFERENCES iris.tag_reader_sync_mode,
+	slave_select_count INTEGER
 );
 
 ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_fkey
@@ -1503,7 +1510,8 @@ CREATE VIEW iris.tag_reader AS
 	       downlink_freq_khz, uplink_freq_khz, sego_atten_downlink_db,
 	       sego_atten_uplink_db, sego_data_detect_db, sego_seen_count,
 	       sego_unique_count, iag_atten_downlink_db, iag_atten_uplink_db,
-	       iag_data_detect_db, iag_seen_count, iag_unique_count,line_loss_db
+	       iag_data_detect_db, iag_seen_count, iag_unique_count,
+	       line_loss_db, sync_mode, slave_select_count
 	FROM iris._tag_reader t JOIN iris._device_io d ON t.name = d.name;
 
 CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
@@ -1519,14 +1527,16 @@ BEGIN
 	                              iag_atten_downlink_db,
 	                              iag_atten_uplink_db, iag_data_detect_db,
 	                              iag_seen_count, iag_unique_count,
-	                              line_loss_db)
+	                              line_loss_db, sync_mode,
+	                              slave_select_count)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone,
 	             NEW.downlink_freq_khz, NEW.uplink_freq_khz,
 	             NEW.sego_atten_downlink_db, NEW.sego_atten_uplink_db,
 	             NEW.sego_data_detect_db, NEW.sego_seen_count,
 	             NEW.sego_unique_count, NEW.iag_atten_downlink_db,
 	             NEW.iag_atten_uplink_db, NEW.iag_data_detect_db,
-	             NEW.iag_seen_count, NEW.iag_unique_count, NEW.line_loss_db);
+	             NEW.iag_seen_count, NEW.iag_unique_count, NEW.line_loss_db,
+	             NEW.sync_mode, NEW.slave_select_count);
 	RETURN NEW;
 END;
 $tag_reader_insert$ LANGUAGE plpgsql;
@@ -1558,7 +1568,9 @@ BEGIN
 	       iag_data_detect_db = NEW.iag_data_detect_db,
 	       iag_seen_count = NEW.iag_seen_count,
 	       iag_unique_count = NEW.iag_unique_count,
-	       line_loss_db = NEW.line_loss_db
+	       line_loss_db = NEW.line_loss_db,
+	       sync_mode = NEW.sync_mode,
+	       slave_select_count = NEW.slave_select_count
 	 WHERE name = OLD.name;
 	RETURN NEW;
 END;
@@ -2703,9 +2715,11 @@ CREATE VIEW tag_reader_view AS
 	       sego_atten_downlink_db, sego_atten_uplink_db, sego_data_detect_db,
 	       sego_seen_count, sego_unique_count,
 	       iag_atten_downlink_db, iag_atten_uplink_db, iag_data_detect_db,
-	       iag_seen_count, iag_unique_count, line_loss_db
+	       iag_seen_count, iag_unique_count, line_loss_db,
+	       m.description AS sync_mode, slave_select_count
 	FROM iris.tag_reader t
-	LEFT JOIN geo_loc_view l ON t.geo_loc = l.name;
+	LEFT JOIN geo_loc_view l ON t.geo_loc = l.name
+	LEFT JOIN iris.tag_reader_sync_mode m ON t.sync_mode = m.id;
 GRANT SELECT ON tag_reader_view TO PUBLIC;
 
 CREATE VIEW tag_reader_dms_view AS
@@ -3178,6 +3192,13 @@ COPY iris.encoding (id, description) FROM stdin;
 3	MPEG4
 4	H264
 5	H265
+\.
+
+COPY iris.tag_reader_sync_mode (id, description) FROM stdin;
+0	slave
+1	master
+2	GPS secondary
+3	GPS primary
 \.
 
 COPY iris.day_matcher (name, holiday, month, day, week, weekday, shift) FROM stdin;

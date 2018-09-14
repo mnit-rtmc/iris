@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.TagReaderSyncMode;
 import us.mn.state.dot.tms.server.comm.ParsingException;
 
 /**
@@ -34,33 +35,31 @@ public class MasterSlaveProp extends E6Property {
 	/** Query command code */
 	static private final int QUERY = 0x0046;
 
-	/** Master / slave values */
-	public enum Value {
-		slave, master, gps_secondary, gps_primary;
-		static public Value fromBits(int b) {
-			for (Value v: values()) {
-				if ((1 << v.ordinal()) == b)
-					return v;
-			}
-			return null;
-		}
-	};
+	/** Synchronization mode */
+	private TagReaderSyncMode mode;
 
-	/** Master / slave value */
-	private Value value;
+	/** Get the sync mode */
+	public TagReaderSyncMode getMode() {
+		return mode;
+	}
 
 	/** Slave select count */
 	private int slave;
 
+	/** Get the slave select count */
+	public int getSlaveSelectCount() {
+		return slave;
+	}
+
 	/** Create a new master/slave property */
-	public MasterSlaveProp(Value v, int s) {
-		value = v;
+	public MasterSlaveProp(TagReaderSyncMode m, int s) {
+		mode = m;
 		slave = s;
 	}
 
 	/** Create a new master/slave property */
 	public MasterSlaveProp() {
-		this(Value.slave, 0);
+		this(TagReaderSyncMode.SLAVE, 0);
 	}
 
 	/** Get the command */
@@ -84,11 +83,11 @@ public class MasterSlaveProp extends E6Property {
 			throw new ParsingException("DATA LEN: " + d.length);
 		if (parse16(d, 2) != QUERY)
 			throw new ParsingException("SUB CMD");
-		Value v = Value.fromBits(d[4]);
-		if (v != null)
-			value = v;
+		TagReaderSyncMode m = TagReaderSyncMode.fromBits(d[4]);
+		if (m != null)
+			mode = m;
 		else
-			throw new ParsingException("BAD MASTER/SLAVE");
+			throw new ParsingException("INVALID SYNC MODE");
 		slave = d[5];
 	}
 
@@ -97,7 +96,7 @@ public class MasterSlaveProp extends E6Property {
 	public byte[] storeData() {
 		byte[] d = new byte[4];
 		format16(d, 0, STORE);
-		format8(d, 2, 1 << value.ordinal());
+		format8(d, 2, 1 << mode.ordinal());
 		format8(d, 3, slave);
 		return d;
 	}
@@ -114,6 +113,6 @@ public class MasterSlaveProp extends E6Property {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "master/slave: " + value + ", " + slave;
+		return "master/slave: " + mode + ", " + slave;
 	}
 }

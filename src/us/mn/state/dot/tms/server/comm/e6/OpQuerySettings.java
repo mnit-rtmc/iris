@@ -267,6 +267,9 @@ public class OpQuerySettings extends OpE6 {
 			MasterSlaveProp mstr = new MasterSlaveProp();
 			sendQuery(mess, mstr);
 			mess.logQuery(mstr);
+			tag_reader.setSyncModeNotify(mstr.getMode());
+			tag_reader.setSlaveSelectCountNotify(
+				mstr.getSlaveSelectCount());
 			return null;
 		}
 	}

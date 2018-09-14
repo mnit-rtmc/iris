@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.TagReader;
+import us.mn.state.dot.tms.TagReaderSyncMode;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.TollZone;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
@@ -56,8 +57,9 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 			"sego_data_detect_db, sego_seen_count, " +
 			"sego_unique_count, iag_atten_downlink_db, " +
 			"iag_atten_uplink_db, iag_data_detect_db, " +
-			"iag_seen_count, iag_unique_count, line_loss_db " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"iag_seen_count, iag_unique_count, line_loss_db, " +
+			"sync_mode, slave_select_count FROM iris." +
+			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new TagReaderImpl(row));
@@ -88,6 +90,9 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		map.put("iag_seen_count", iag_seen_count);
 		map.put("iag_unique_count", iag_unique_count);
 		map.put("line_loss_db", line_loss_db);
+		TagReaderSyncMode sm = sync_mode;
+		map.put("sync_mode", (sm != null) ? sm.ordinal() : null);
+		map.put("slave_select_count", slave_select_count);
 		return map;
 	}
 
@@ -123,7 +128,9 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		     (Integer) row.getObject(16),// iag_data_detect_db
 		     (Integer) row.getObject(17),// iag_seen_count
 		     (Integer) row.getObject(18),// iag_unique_count
-		     (Integer) row.getObject(19) // line_loss_db
+		     (Integer) row.getObject(19),// line_loss_db
+		     (Integer) row.getObject(20),// sync_mode
+		     (Integer) row.getObject(21) // slave_select_count
 		);
 	}
 
@@ -131,12 +138,12 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 	private TagReaderImpl(String n, String l, String c, int p, String nt,
 		String tz, Integer df, Integer uf, Integer sad, Integer sau,
 		Integer sdd, Integer ssc, Integer suc, Integer iad, Integer iau,
-		Integer idd, Integer isc, Integer iuc, Integer ll)
-		throws TMSException
+		Integer idd, Integer isc, Integer iuc, Integer ll, Integer sm,
+		Integer sc) throws TMSException
 	{
 		this(n, lookupGeoLoc(l), lookupController(c), p, nt,
 		     lookupTollZone(tz), df, uf, sad, sau, sdd, ssc, suc, iad,
-		     iau, idd, isc, iuc, ll);
+		     iau, idd, isc, iuc, ll, sm, sc);
 	}
 
 	/** Create a tag reader */
@@ -144,7 +151,7 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		int p, String nt, TollZone tz, Integer df, Integer uf,
 		Integer sad, Integer sau, Integer sdd, Integer ssc, Integer suc,
 		Integer iad, Integer iau, Integer idd, Integer isc, Integer iuc,
-		Integer ll) throws TMSException
+		Integer ll, Integer sm, Integer sc) throws TMSException
 	{
 		super(n, c, p, nt);
 		geo_loc = l;
@@ -162,6 +169,8 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		iag_seen_count = isc;
 		iag_unique_count = iuc;
 		line_loss_db = ll;
+		sync_mode = TagReaderSyncMode.fromOrdinal(sm);
+		slave_select_count = sc;
 		dmss = lookupDMSMapping();
 		initTransients();
 	}
@@ -509,6 +518,44 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 			}
 			catch (TMSException e) {
 				logError("line_loss_db: " + e.getMessage());
+			}
+		}
+	}
+
+	/** Synchrnization mode */
+	private TagReaderSyncMode sync_mode;
+
+	/** Set the synchronization mode */
+	public void setSyncModeNotify(TagReaderSyncMode sm) {
+		if (!objectEquals(sm, sync_mode)) {
+			int m = (sm != null) ? sm.ordinal() : null;
+			try {
+				store.update(this, "sync_mode", m);
+				sync_mode = sm;
+			}
+			catch (TMSException e) {
+				logError("sync_mode: " + e.getMessage());
+			}
+		}
+	}
+
+	/** Slave select count */
+	private Integer slave_select_count;
+
+	/** Set the slave select count */
+	private void setSlaveSelectCount(Integer sc) {
+		slave_select_count = sc;
+	}
+
+	/** Set the slave select count */
+	public void setSlaveSelectCountNotify(Integer sc) {
+		if (!objectEquals(sc, slave_select_count)) {
+			try {
+				store.update(this, "slave_select_count", sc);
+				setSlaveSelectCount(sc);
+			}
+			catch (TMSException e) {
+				logError("slave_select_count: "+e.getMessage());
 			}
 		}
 	}

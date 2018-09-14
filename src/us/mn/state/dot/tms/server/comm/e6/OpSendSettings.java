@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.server.comm.e6;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.TagReaderSyncMode;
 import us.mn.state.dot.tms.server.TagReaderImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -371,7 +372,7 @@ public class OpSendSettings extends OpE6 {
 			throws IOException
 		{
 			MasterSlaveProp mstr = new MasterSlaveProp(
-				MasterSlaveProp.Value.master, 0);
+				TagReaderSyncMode.MASTER, 0);
 			mess.logStore(mstr);
 			sendStore(mess, mstr);
 			return null;
