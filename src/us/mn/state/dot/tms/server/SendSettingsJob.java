@@ -71,7 +71,6 @@ public class SendSettingsJob extends Job {
 		requestLCS(DeviceRequest.SEND_SETTINGS);
 		requestRampMeters(DeviceRequest.SEND_SETTINGS);
 		requestBeacons(DeviceRequest.SEND_SETTINGS);
-		requestTagReaders(DeviceRequest.QUERY_SETTINGS);
 		requestTagReaders(DeviceRequest.SEND_SETTINGS);
 		requestWeatherSensors(DeviceRequest.SEND_SETTINGS);
 	}
