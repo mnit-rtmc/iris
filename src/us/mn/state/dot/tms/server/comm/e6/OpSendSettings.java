@@ -324,7 +324,7 @@ public class OpSendSettings extends OpE6 {
 			if (p == p_prot)
 				p_prot = null;
 		}
-		return lastPhase();
+		return checkLineLoss();
 	}
 
 	/** Get check attenuation phase (or later) */
@@ -559,6 +559,103 @@ public class OpSendSettings extends OpE6 {
 		}
 	}
 
+	/** Create phase to check the line loss */
+	private Phase<E6Property> checkLineLoss() {
+		Integer ll = tag_reader.getLineLossDb();
+		return (ll != null) ? new CheckLineLoss(ll) : checkSyncMode();
+	}
+
+	/** Phase to check the line loss */
+	private class CheckLineLoss extends Phase<E6Property> {
+		private final int line_loss;
+		private CheckLineLoss(int ll) {
+			line_loss = ll;
+		}
+
+		/** Check the line loss */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			LineLossProp loss = new LineLossProp();
+			sendQuery(mess, loss);
+			mess.logQuery(loss);
+			return (loss.getValue() != line_loss)
+			      ?	new StoreLineLoss(line_loss)
+			      : checkSyncMode();
+		}
+	}
+
+	/** Phase to store line loss */
+	private class StoreLineLoss extends Phase<E6Property> {
+		private final int line_loss;
+		private StoreLineLoss(int ll) {
+			line_loss = ll;
+		}
+
+		/** Store line loss */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			LineLossProp loss = new LineLossProp(line_loss);
+			mess.logStore(loss);
+			sendStore(mess, loss);
+			return checkSyncMode();
+		}
+	}
+
+	/** Create phase to check sync mode / slave select count */
+	private Phase<E6Property> checkSyncMode() {
+		TagReaderSyncMode sm = tag_reader.getSyncMode();
+		Integer sc = tag_reader.getSlaveSelectCount();
+		return (sm != null && sc != null)
+		      ? new CheckSyncMode(sm, sc)
+		      : lastPhase();
+	}
+
+	/** Phase to check sync mode / slave select count */
+	private class CheckSyncMode extends Phase<E6Property> {
+		private final TagReaderSyncMode sync_mode;
+		private final int slave_select;
+		private CheckSyncMode(TagReaderSyncMode sm, int sc) {
+			sync_mode = sm;
+			slave_select = sc;
+		}
+
+		/** Query sync mode / slave select count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MasterSlaveProp mstr = new MasterSlaveProp();
+			sendQuery(mess, mstr);
+			mess.logQuery(mstr);
+			return (mstr.getMode() != sync_mode
+			     || mstr.getSlaveSelectCount() != slave_select)
+			      ? new StoreSyncMode(sync_mode, slave_select)
+			      : lastPhase();
+		}
+	}
+
+	/** Phase to store sync mode / slave select count */
+	private class StoreSyncMode extends Phase<E6Property> {
+		private final TagReaderSyncMode sync_mode;
+		private final int slave_select;
+		private StoreSyncMode(TagReaderSyncMode sm, int sc) {
+			sync_mode = sm;
+			slave_select = sc;
+		}
+
+		/** Store sync mode / slave select count */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			MasterSlaveProp mstr = new MasterSlaveProp(sync_mode,
+				slave_select);
+			mess.logStore(mstr);
+			sendStore(mess, mstr);
+			return lastPhase();
+		}
+	}
+
 	/** Get the last phase */
 	private Phase<E6Property> lastPhase() {
 		return (stop) ? new StoreMode() : null;
@@ -574,37 +671,6 @@ public class OpSendSettings extends OpE6 {
 			ModeProp mode = new ModeProp(ModeProp.Mode.read_write);
 			mess.logStore(mode);
 			sendStore(mess, mode);
-			return null;
-		}
-	}
-
-	/* -- Experimental stuff -- */
-
-	/** Phase to store the line loss */
-	private class StoreLineLoss extends Phase<E6Property> {
-
-		/** Store the line loss */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			LineLossProp loss = new LineLossProp(2);
-			mess.logStore(loss);
-			sendStore(mess, loss);
-			return null;
-		}
-	}
-
-	/** Phase to store the master/slave setting */
-	private class StoreMasterSlave extends Phase<E6Property> {
-
-		/** Store the master/slave setting */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			MasterSlaveProp mstr = new MasterSlaveProp(
-				TagReaderSyncMode.MASTER, 0);
-			mess.logStore(mstr);
-			sendStore(mess, mstr);
 			return null;
 		}
 	}

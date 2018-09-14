@@ -572,6 +572,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 		}
 	}
 
+	/** Get the line loss */
+	public Integer getLineLossDb() {
+		return line_loss_db;
+	}
+
 	/** Synchrnization mode */
 	private TagReaderSyncMode sync_mode;
 
@@ -587,6 +592,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 				logError("sync_mode: " + e.getMessage());
 			}
 		}
+	}
+
+	/** Get the synchronization mode */
+	public TagReaderSyncMode getSyncMode() {
+		return sync_mode;
 	}
 
 	/** Slave select count */
@@ -608,6 +618,11 @@ public class TagReaderImpl extends DeviceImpl implements TagReader {
 				logError("slave_select_count: "+e.getMessage());
 			}
 		}
+	}
+
+	/** Get the slave select count */
+	public Integer getSlaveSelectCount() {
+		return slave_select_count;
 	}
 
 	/** DMSs for the tag reader */
