@@ -198,7 +198,7 @@ public class OpSendSettings extends OpE6 {
 			mess.logQuery(ctrl);
 			RFControlProp.Value v = ctrl.getValue();
 			return (RFControlProp.Value.continuous == v)
-			     ? lastPhase()
+			     ? checkDownlink()
 			     : new StoreRFControl();
 		}
 	}
@@ -214,6 +214,98 @@ public class OpSendSettings extends OpE6 {
 				RFControlProp.Value.continuous);
 			mess.logStore(ctrl);
 			sendStore(mess, ctrl);
+			return checkDownlink();
+		}
+	}
+
+	/** Create phase to check the downlink frequency */
+	private Phase<E6Property> checkDownlink() {
+		Integer df = tag_reader.getDownlinkFreqKhz();
+		return (df != null) ? new CheckDownlink(df) : checkUplink();
+	}
+
+	/** Phase to check the downlink frequency */
+	private class CheckDownlink extends Phase<E6Property> {
+		private final int downlink_freq;
+		private CheckDownlink(int df) {
+			downlink_freq = df;
+		}
+
+		/** Check the downlink frequency */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			FrequencyProp freq = new FrequencyProp(
+				FrequencyProp.Source.downlink);
+			sendQuery(mess, freq);
+			mess.logQuery(freq);
+			return (freq.getFreqKhz() != downlink_freq)
+			      ? new StoreDownlink(downlink_freq)
+			      : checkUplink();
+		}
+	}
+
+	/** Phase to store the downlink frequency */
+	private class StoreDownlink extends Phase<E6Property> {
+		private final int downlink_freq;
+		private StoreDownlink(int df) {
+			downlink_freq = df;
+		}
+
+		/** Store the downlink frequency */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			FrequencyProp freq = new FrequencyProp(
+				FrequencyProp.Source.downlink, downlink_freq);
+			mess.logStore(freq);
+			sendStore(mess, freq);
+			return checkUplink();
+		}
+	}
+
+	/** Create phase to check the uplink frequency */
+	private Phase<E6Property> checkUplink() {
+		Integer uf = tag_reader.getUplinkFreqKhz();
+		return (uf != null) ? new CheckUplink(uf) : lastPhase();
+	}
+
+	/** Phase to check the uplink frequency */
+	private class CheckUplink extends Phase<E6Property> {
+		private final int uplink_freq;
+		private CheckUplink(int uf) {
+			uplink_freq = uf;
+		}
+
+		/** Check the uplink frequency */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			FrequencyProp freq = new FrequencyProp(
+				FrequencyProp.Source.uplink);
+			sendQuery(mess, freq);
+			mess.logQuery(freq);
+			return (freq.getFreqKhz() != uplink_freq)
+			      ? new StoreUplink(uplink_freq)
+			      : lastPhase();
+		}
+	}
+
+	/** Phase to store the uplink frequency */
+	private class StoreUplink extends Phase<E6Property> {
+		private final int uplink_freq;
+		private StoreUplink(int uf) {
+			uplink_freq = uf;
+		}
+
+		/** Store the uplink frequency */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			FrequencyProp freq = new FrequencyProp(
+				FrequencyProp.Source.uplink, uplink_freq);
+			mess.logStore(freq);
+			sendStore(mess, freq);
 			return lastPhase();
 		}
 	}
@@ -238,42 +330,6 @@ public class OpSendSettings extends OpE6 {
 	}
 
 	/* -- Experimental stuff -- */
-
-	/** Phase to store the downlink frequency */
-	private class StoreDownlink extends Phase<E6Property> {
-
-		/** Store the downlink frequency */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			Integer df = tag_reader.getDownlinkFreqKhz();
-			if (df != null) {
-				FrequencyProp freq = new FrequencyProp(
-					FrequencyProp.Source.downlink, df);
-				mess.logStore(freq);
-				sendStore(mess, freq);
-			}
-			return new StoreUplink();
-		}
-	}
-
-	/** Phase to store the uplink frequency */
-	private class StoreUplink extends Phase<E6Property> {
-
-		/** Store the uplink frequency */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			Integer uf = tag_reader.getUplinkFreqKhz();
-			if (uf != null) {
-				FrequencyProp freq = new FrequencyProp(
-					FrequencyProp.Source.uplink, uf);
-				mess.logStore(freq);
-				sendStore(mess, freq);
-			}
-			return new StoreSeGoAtten();
-		}
-	}
 
 	/** Phase to store the SeGo RF attenuation */
 	private class StoreSeGoAtten extends Phase<E6Property> {
