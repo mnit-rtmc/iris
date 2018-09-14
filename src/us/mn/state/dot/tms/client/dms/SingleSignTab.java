@@ -261,9 +261,12 @@ public class SingleSignTab extends IPanel {
 
 	/** Create a DMS panel pager */
 	private DMSPanelPager createPager(DMS dms, SignPixelPanel pix_pnl) {
-		return (preview)
-		      ? createPreviewPager(dms, pix_pnl)
-		      : createCurrentPager(dms, pix_pnl);
+		if (dms != null) {
+			return (preview)
+			      ? createPreviewPager(dms, pix_pnl)
+			      : createCurrentPager(dms, pix_pnl);
+		} else
+			return null;
 	}
 
 	/** Create a preview panel pager */
