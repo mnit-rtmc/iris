@@ -194,6 +194,6 @@ public class OpQueryDMSFonts extends OpDMS {
 		if (cr < max_characters.getInteger())
 			return new QueryCharacter(r, cr + 1);
 		else
-			return null;
+			return nextFont(r);
 	}
 }
