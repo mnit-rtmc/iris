@@ -14,6 +14,8 @@
  */
 package us.mn.state.dot.tms.server.comm.ntcip;
 
+import java.io.File;
+import java.io.PrintWriter;
 import java.io.IOException;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -25,6 +27,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1Integer;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.ASN1String;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
+import us.mn.state.dot.tms.utils.Base64;
 
 /**
  * Operation to query all fonts on a DMS controller.
@@ -33,11 +36,17 @@ import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
  */
 public class OpQueryDMSFonts extends OpDMS {
 
+	/** Directory to store font files */
+	static private final String FONT_FILE_DIR = "/var/log/iris/";
+
 	/** Make a font status object */
 	static private ASN1Enum<FontStatus> makeStatus(int row) {
 		return new ASN1Enum<FontStatus>(FontStatus.class,
 			fontStatus.node, row);
 	}
+
+	/** Maximum character size */
+	private final ASN1Integer max_char_sz = fontMaxCharacterSize.makeInt();
 
 	/** Number of fonts supported */
 	private final ASN1Integer num_fonts = numFonts.makeInt();
@@ -48,15 +57,32 @@ public class OpQueryDMSFonts extends OpDMS {
 	/** Flag to indicate support for fontStatus object */
 	private boolean version2;
 
+	/** Writer for font file */
+	private final PrintWriter writer;
+
 	/** Create a new operation to query fonts from a DMS */
 	public OpQueryDMSFonts(DMSImpl d) {
 		super(PriorityLevel.DEVICE_DATA, d);
+		writer = createWriter();
+	}
+
+	/** Create a writer for the font file */
+	private PrintWriter createWriter() {
+		String f = "fonts-" + dms.getName() + ".sql";
+		File file = new File(FONT_FILE_DIR, f);
+		try {
+			return new PrintWriter(file);
+		}
+		catch (IOException e) {
+			logError("createWriter: " + e.getMessage());
+			return null;
+		}
 	}
 
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase phaseTwo() {
-		return new Query1203Version();
+		return (writer != null) ? new Query1203Version() : null;
 	}
 
 	/** Phase to determine if v2 or greater */
@@ -65,11 +91,10 @@ public class OpQueryDMSFonts extends OpDMS {
 		/** Query the maximum character size (v2 only) */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer max_char = fontMaxCharacterSize.makeInt();
-			mess.add(max_char);
+			mess.add(max_char_sz);
 			try {
 				mess.queryProps();
-				logQuery(max_char);
+				logQuery(max_char_sz);
 				version2 = true;
 			}
 			catch (NoSuchName e) {
@@ -92,8 +117,29 @@ public class OpQueryDMSFonts extends OpDMS {
 			mess.queryProps();
 			logQuery(num_fonts);
 			logQuery(max_characters);
-			return new QueryFont(1);
+			write_header();
+			return nextFont(0);
 		}
+	}
+
+	/** Write the font file header */
+	private void write_header() {
+		writer.println("\\set ON_ERROR_STOP");
+		writer.println("SET SESSION AUTHORIZATION 'tms';");
+		writer.println("BEGIN;");
+		writer.println();
+		writer.println("-- " + max_char_sz);
+		writer.println("-- " + max_characters);
+		writer.println("-- " + num_fonts);
+		writer.println();
+	}
+
+	/** Get phase to query the next font */
+	private Phase nextFont(int r) {
+		if (r < num_fonts.getInteger())
+			return new QueryFont(r + 1);
+		else
+			return null;
 	}
 
 	/** Phase to query one row of font table */
@@ -141,20 +187,53 @@ public class OpQueryDMSFonts extends OpDMS {
 				//       if the font is not valid
 				return nextFont(row);
 			}
-			return new QueryCharacter(row, 1);
+			write_font(name.getValue(), number.getInteger(),
+				height.getInteger(), line_spacing.getInteger(),
+				char_spacing.getInteger(),version.getInteger());
+			return nextCharacter(name.getValue(), row, 0);
 		}
 	}
 
-	/** Get phase to query the next font */
-	private Phase nextFont(int r) {
-		if (r < num_fonts.getInteger())
-			return new QueryFont(r + 1);
-		else
-			return null;
+	/** Write the font data */
+	private void write_font(String name, int number, int height,
+		int line_spacing, int char_spacing, int version)
+	{
+		writer.println("INSERT INTO iris.font (name, f_number, " +
+			"height, width, line_spacing,");
+		writer.println("char_spacing, version_id) VALUES ('" +
+		               name + "', " +
+		               number + ", " +
+		               height + ", " +
+		               "0, " + // font width
+		               line_spacing + ", " +
+		               char_spacing + ", " +
+		               version + ";");
+		writer.println();
+		writer.println("COPY iris.glyph (name, font, code_point, " +
+			"width, pixels) FROM stdin;");
+	}
+
+	/** Get phase to query the next character in a font */
+	private Phase nextCharacter(String name, int r, int cr) {
+		if (cr < max_characters.getInteger())
+			return new QueryCharacter(name, r, cr + 1);
+		else {
+			write_font_done();
+			return nextFont(r);
+		}
+	}
+
+	/** Write end font */
+	private void write_font_done() {
+		writer.println("\\.");
+		writer.println();
 	}
 
 	/** Phase to query one character */
 	private class QueryCharacter extends Phase {
+
+		/** Font name */
+		private final String name;
 
 		/** Font row */
 		private final int row;
@@ -163,7 +242,8 @@ public class OpQueryDMSFonts extends OpDMS {
 		private final int crow;
 
 		/** Create a new add character phase */
-		public QueryCharacter(int r, int cr) {
+		public QueryCharacter(String n, int r, int cr) {
+			name = n;
 			row = r;
 			crow = cr;
 		}
@@ -177,23 +257,38 @@ public class OpQueryDMSFonts extends OpDMS {
 				characterBitmap.node, row, crow);
 			mess.add(char_width);
 			mess.add(char_bitmap);
-			try {
-				mess.queryProps();
-			}
-			catch (NoSuchName e) {
-				return nextFont(row);
-			}
+			mess.queryProps();
 			logQuery(char_width);
 			logQuery(char_bitmap);
-			return nextCharacter(row, crow);
+			if (char_width.getInteger() > 0) {
+				write_char(name, crow, char_width.getInteger(),
+				           char_bitmap);
+			}
+			return nextCharacter(name, row, crow);
 		}
 	}
 
-	/** Get phase to query the next character in a font */
-	private Phase nextCharacter(int r, int cr) {
-		if (cr < max_characters.getInteger())
-			return new QueryCharacter(r, cr + 1);
-		else
-			return nextFont(r);
+	/** Write character data */
+	private void write_char(String name, int crow, int width,
+		ASN1OctetString bitmap)
+	{
+		String bmap = Base64.encode(bitmap.getByteValue());
+		String cname = name + "_" + crow;
+		writer.println(cname + '\t' +
+		               name + '\t' +
+		               crow + '\t' +
+		               width + '\t' +
+		               bmap.replace("\n", "\\n"));
+	}
+
+	/** Cleanup the operation */
+	@Override
+	public void cleanup() {
+		super.cleanup();
+		if (writer != null) {
+			writer.println("COMMIT;");
+			writer.flush();
+			writer.close();
+		}
 	}
 }
