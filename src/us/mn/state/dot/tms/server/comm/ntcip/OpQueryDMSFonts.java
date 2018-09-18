@@ -212,7 +212,7 @@ public class OpQueryDMSFonts extends OpDMS {
 		               "0, " + // font width
 		               line_spacing + ", " +
 		               char_spacing + ", " +
-		               version + ";");
+		               version + ");");
 		writer.println();
 		writer.println("COPY iris.glyph (name, font, code_point, " +
 			"width, pixels) FROM stdin;");
