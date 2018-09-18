@@ -187,10 +187,15 @@ public class OpQueryDMSFonts extends OpDMS {
 				//       if the font is not valid
 				return nextFont(row);
 			}
-			write_font(name.getValue(), number.getInteger(),
-				height.getInteger(), line_spacing.getInteger(),
-				char_spacing.getInteger(),version.getInteger());
-			return nextCharacter(name.getValue(), row, 0);
+			if (height.getInteger() > 0) {
+				write_font(name.getValue(), number.getInteger(),
+				           height.getInteger(),
+				           line_spacing.getInteger(),
+				           char_spacing.getInteger(),
+				           version.getInteger());
+				return nextCharacter(name.getValue(), row, 0);
+			} else
+				return nextFont(row);
 		}
 	}
 
