@@ -169,8 +169,9 @@ public class GraphicModel extends ProxyTableModel<Graphic> {
 				return canWrite(g);
 			}
 			public void setValueAt(Graphic g, Object value) {
-				if (value instanceof Integer)
-					g.setTransparentColor((Integer) value);
+				g.setTransparentColor((value instanceof Integer)
+					? (Integer) value
+					: null);
 			}
 		});
 		cols.add(new ProxyColumn<Graphic>("graphic.image", 200) {
