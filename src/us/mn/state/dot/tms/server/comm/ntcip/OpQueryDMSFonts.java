@@ -39,12 +39,6 @@ public class OpQueryDMSFonts extends OpDMS {
 	/** Directory to store font files */
 	static private final String FONT_FILE_DIR = "/var/log/iris/";
 
-	/** Make a font status object */
-	static private ASN1Enum<FontStatus> makeStatus(int row) {
-		return new ASN1Enum<FontStatus>(FontStatus.class,
-			fontStatus.node, row);
-	}
-
 	/** Maximum character size */
 	private final ASN1Integer max_char_sz = fontMaxCharacterSize.makeInt();
 
@@ -53,9 +47,6 @@ public class OpQueryDMSFonts extends OpDMS {
 
 	/** Maximum number of characters in a font */
 	private final ASN1Integer max_characters = maxFontCharacters.makeInt();
-
-	/** Flag to indicate support for fontStatus object */
-	private boolean version2;
 
 	/** Writer for font file */
 	private final PrintWriter writer;
@@ -95,12 +86,10 @@ public class OpQueryDMSFonts extends OpDMS {
 			try {
 				mess.queryProps();
 				logQuery(max_char_sz);
-				version2 = true;
 			}
 			catch (NoSuchName e) {
 				// Note: if this object doesn't exist, then the
 				//       sign must not support v2.
-				version2 = false;
 			}
 			return new QueryNumFonts();
 		}
@@ -162,15 +151,12 @@ public class OpQueryDMSFonts extends OpDMS {
 			ASN1Integer char_spacing = fontCharSpacing.makeInt(row);
 			ASN1Integer line_spacing = fontLineSpacing.makeInt(row);
 			ASN1Integer version = fontVersionID.makeInt(row);
-			ASN1Enum<FontStatus> status = makeStatus(row);
 			mess.add(number);
 			mess.add(name);
 			mess.add(height);
 			mess.add(char_spacing);
 			mess.add(line_spacing);
 			mess.add(version);
-			if (version2)
-				mess.add(status);
 			try {
 				mess.queryProps();
 				logQuery(number);
@@ -179,8 +165,6 @@ public class OpQueryDMSFonts extends OpDMS {
 				logQuery(char_spacing);
 				logQuery(line_spacing);
 				logQuery(version);
-				if (version2)
-					logQuery(status);
 			}
 			catch (NoSuchName e) {
 				// Note: some vendors respond with NoSuchName
