@@ -190,7 +190,7 @@ impl Queryable for DmsPub {
 #[derive(Serialize)]
 struct DmsMessage {
     name       : String,
-    msg_current: String,
+    msg_current: Option<String>,
     multi      : Option<String>,
     sources    : Option<String>,
     duration   : Option<i32>,
