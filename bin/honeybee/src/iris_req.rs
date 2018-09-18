@@ -12,22 +12,20 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-use actix_web;
-use actix_web::{HttpRequest, HttpResponse};
 use chrono::{DateTime, Local, Utc};
 use failure::Error;
 use postgres;
-use postgres::{Connection, TlsMode};
+use postgres::{Connection};
 use serde;
 use serde_json;
 
-trait Queryable {
+pub trait Queryable {
     fn sql() -> &'static str;
     fn from_row(row: &postgres::rows::Row) -> Self;
 }
 
 #[derive(Serialize)]
-struct Incident {
+pub struct Incident {
     name       : String,
     event_date : DateTime<Local>,
     description: String,
@@ -72,7 +70,7 @@ impl Queryable for Incident {
 }
 
 #[derive(Serialize)]
-struct CameraPub {
+pub struct CameraPub {
     name     : String,
     publish  : bool,
     location : Option<String>,
@@ -97,7 +95,7 @@ impl Queryable for CameraPub {
 }
 
 #[derive(Serialize)]
-struct SignConfig {
+pub struct SignConfig {
     name        : String,
     dms_type    : String,
     portable    : bool,
@@ -156,7 +154,7 @@ impl Queryable for SignConfig {
 }
 
 #[derive(Serialize)]
-struct DmsPub {
+pub struct DmsPub {
     name        : String,
     sign_config : Option<String>,
     roadway     : Option<String>,
@@ -188,7 +186,7 @@ impl Queryable for DmsPub {
 }
 
 #[derive(Serialize)]
-struct DmsMessage {
+pub struct DmsMessage {
     name       : String,
     msg_current: Option<String>,
     multi      : Option<String>,
@@ -229,7 +227,7 @@ struct Location {
 
 #[allow(non_snake_case)]
 #[derive(Serialize)]
-struct ParkingAreaStatic {
+pub struct ParkingAreaStatic {
     siteId           : Option<String>,
     timeStamp        : Option<DateTime<Utc>>,
     relevantHighway  : Option<String>,
@@ -307,7 +305,7 @@ impl Queryable for ParkingAreaStatic {
 
 #[allow(non_snake_case)]
 #[derive(Serialize)]
-struct ParkingAreaDynamic {
+pub struct ParkingAreaDynamic {
     siteId           : Option<String>,
     timeStamp        : Option<DateTime<Utc>>,
     timeStampStatic  : Option<DateTime<Utc>>,
@@ -338,7 +336,7 @@ impl Queryable for ParkingAreaDynamic {
     }
 }
 
-fn query_json<T>(conn: &Connection) -> Result<String, Error> where
+pub fn query_json<T>(conn: &Connection) -> Result<String, Error> where
     T: Queryable + serde::Serialize
 {
     let mut first = true;
@@ -351,49 +349,4 @@ fn query_json<T>(conn: &Connection) -> Result<String, Error> where
     }
     s.push_str("\n]");
     Ok(s)
-}
-
-pub struct Handler {
-    uds: String,
-}
-
-impl<S> actix_web::dev::Handler<S> for Handler {
-    type Result = HttpResponse;
-
-    fn handle(&self, req: &HttpRequest<S>) -> Self::Result {
-        match req.match_info().get("v") {
-            Some("camera_pub")    => self.get_json::<CameraPub>(),
-            Some("dms_pub")       => self.get_json::<DmsPub>(),
-            Some("dms_message")   => self.get_json::<DmsMessage>(),
-            Some("incident")      => self.get_json::<Incident>(),
-            Some("sign_config")   => self.get_json::<SignConfig>(),
-            Some("TPIMS_static")  => self.get_json::<ParkingAreaStatic>(),
-            Some("TPIMS_dynamic") => self.get_json::<ParkingAreaDynamic>(),
-            _                     => HttpResponse::NotFound()
-                                                  .body("Not found"),
-        }
-    }
-}
-
-impl Handler {
-    pub fn new(uds: String) -> Self {
-        Self { uds }
-    }
-    fn get_json<T>(&self) -> HttpResponse
-        where T: Queryable + serde::Serialize
-    {
-        match self.query_json::<T>() {
-            Ok(body) => HttpResponse::Ok()
-                                     .content_type("application/json")
-                                     .body(body),
-            Err(_)   => HttpResponse::InternalServerError()
-                                     .body("Database error"),
-        }
-    }
-    fn query_json<T>(&self) -> Result<String, Error>
-        where T: Queryable + serde::Serialize
-    {
-        let conn = Connection::connect(self.uds.clone(), TlsMode::None)?;
-        query_json::<T>(&conn)
-    }
 }

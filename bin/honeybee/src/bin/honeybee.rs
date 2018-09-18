@@ -13,22 +13,14 @@
  * GNU General Public License for more details.
  */
 extern crate honeybee;
-extern crate actix_web;
 extern crate users;
 
-use honeybee::iris_req;
-use actix_web::{http::Method, server, App};
+use honeybee::req_server;
 use users::get_current_username;
 
 fn main() {
     let username = get_current_username().expect("User name lookup error");
     // Format path for unix domain socket
     let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
-    server::new(move || {
-        let uds = uds.clone();
-        App::new().resource("/iris/{v}", move |r| {
-            r.method(Method::GET).h(iris_req::Handler::new(uds))
-        })
-    }).bind("127.0.0.1:8088").expect("Can not bind to 127.0.0.1:8088")
-      .run();
+    req_server::start(uds);
 }

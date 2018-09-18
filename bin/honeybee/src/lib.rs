@@ -7,5 +7,6 @@ extern crate serde_json;
 #[macro_use] extern crate serde_derive;
 
 pub mod iris_req;
+pub mod req_server;
 pub mod multi;
 pub mod raster;
