@@ -39,14 +39,15 @@ public class IncidentCache {
 
 	/** Create an incident and notify clients.
 	 * @param n Incident name.
+	 * @param orig Original name.
 	 * @param pi Parsed incident.
 	 * @param loc Geo location.
 	 * @param im Lane impact. */
-	static private boolean createIncidentNotify(String n, ParsedIncident pi,
-		GeoLoc loc, String im)
+	static private boolean createIncidentNotify(String n, String orig,
+		ParsedIncident pi, GeoLoc loc, String im)
 	{
 		short lnt = (short) LaneType.MAINLINE.ordinal();
-		IncidentImpl inc = new IncidentImpl(n, null,
+		IncidentImpl inc = new IncidentImpl(n, orig,
 			pi.inc_type.ordinal(), new Date(), pi.detail,
 			lnt, loc.getRoadway(), loc.getRoadDir(),
 			pi.lat, pi.lon, pi.lookupCamera(), im, false, false);
@@ -138,10 +139,21 @@ public class IncidentCache {
 	/** Update an incident */
 	private void updateIncident(ParsedIncident pi, GeoLoc loc, int n_lanes){
 		IncidentImpl inc = lookupIncident(pi.id);
+		String oid = originalId(pi.id);
 		// Is this a new incident?
 		if (null == inc && !incidents.contains(pi.id)) {
-			createIncidentNotify(originalId(pi.id), pi, loc,
+			createIncidentNotify(oid, null, pi, loc,
 				IncidentImpact.fromLanes(n_lanes));
+		}
+		// Is this a continuing incident?
+		if (inc != null && incidents.contains(pi.id)) {
+			if (pi.needsUpdate(inc)) {
+				inc.setClearedNotify(true);
+				inc.notifyRemove();
+				String n = IncidentHelper.createUniqueName();
+				createIncidentNotify(n, oid, pi, loc,
+					IncidentImpact.fromLanes(n_lanes));
+			}
 		}
 	}
 
