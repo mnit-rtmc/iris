@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,9 +14,13 @@
  */
 package us.mn.state.dot.tms.server.comm.incfeed;
 
+import java.util.Iterator;
+import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.IncidentDetailHelper;
+import us.mn.state.dot.tms.geo.Position;
 
 /**
  * Parsed incident.
@@ -104,5 +108,15 @@ public class ParsedIncident {
 	/** Check if incident is valid */
 	public boolean isValid() {
 		return (inc_type != null) && (lat != null) && (lon != null);
+	}
+
+	/** Lookup the camera */
+	public Camera lookupCamera() {
+		Camera c = CameraHelper.findUID(cam);
+		if (c != null)
+			return c;
+		Position p = new Position(lat, lon);
+		Iterator<Camera> it = CameraHelper.findNearest(p, 1).iterator();
+		return it.hasNext() ? it.next() : null;
 	}
 }

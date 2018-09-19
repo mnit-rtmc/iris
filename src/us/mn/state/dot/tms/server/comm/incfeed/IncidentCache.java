@@ -14,14 +14,14 @@
  */
 package us.mn.state.dot.tms.server.comm.incfeed;
 
+import java.util.Date;
 import java.util.HashSet;
-import java.util.Iterator;
 import us.mn.state.dot.sched.DebugLog;
-import us.mn.state.dot.tms.Camera;
-import us.mn.state.dot.tms.CameraHelper;
+import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
 import us.mn.state.dot.tms.Incident;
+import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.IncidentImpact;
 import us.mn.state.dot.tms.LaneType;
@@ -36,6 +36,30 @@ import us.mn.state.dot.tms.server.IncidentImpl;
  * @author Douglas Lau
  */
 public class IncidentCache {
+
+	/** Create an incident and notify clients.
+	 * @param n Incident name.
+	 * @param pi Parsed incident.
+	 * @param loc Geo location.
+	 * @param im Lane impact. */
+	static private boolean createIncidentNotify(String n, ParsedIncident pi,
+		GeoLoc loc, String im)
+	{
+		short lnt = (short) LaneType.MAINLINE.ordinal();
+		IncidentImpl inc = new IncidentImpl(n, null,
+			pi.inc_type.ordinal(), new Date(), pi.detail,
+			lnt, loc.getRoadway(), loc.getRoadDir(),
+			pi.lat, pi.lon, pi.lookupCamera(), im, false, false);
+		try {
+			inc.notifyCreate();
+			return true;
+		}
+		catch (SonarException e) {
+			// Probably a cleared incident with the same name
+			System.err.println("createNotify: " + e.getMessage());
+			return false;
+		}
+	}
 
 	/** Comm link name */
 	private final String link;
@@ -62,22 +86,15 @@ public class IncidentCache {
 	public void put(ParsedIncident pi) {
 		if (pi.isValid()) {
 			nxt.add(pi.id);
-			if (shouldCreate(pi.id))
-				createIncident(pi);
+			if (updated)
+				updateIncident(pi);
 		} else if (inc_log.isOpen())
 			inc_log.log("Invalid incident: " + pi);
 	}
 
-	/** Check if we should create the incident */
-	private boolean shouldCreate(String id) {
-		return updated
-		    && (!incidents.contains(id))
-		    && (lookupIncident(id) == null);
-	}
-
 	/** Lookup an incident by ID */
 	private IncidentImpl lookupIncident(String id) {
-		Incident inc = IncidentHelper.lookup(incidentId(id));
+		Incident inc = IncidentHelper.lookupOriginal(incidentId(id));
 		return (inc instanceof IncidentImpl)
 		      ? (IncidentImpl) inc
 		      : null;
@@ -88,26 +105,26 @@ public class IncidentCache {
 		return link + "_" + id;
 	}
 
-	/** Create an incident */
-	private void createIncident(ParsedIncident pi) {
-		inc_log.log("Creating incident: " + pi);
+	/** Update an incident */
+	private void updateIncident(ParsedIncident pi) {
+		inc_log.log("Updating incident: " + pi);
 		Position pos = new Position(pi.lat, pi.lon);
 		SphericalMercatorPosition smp =
 			SphericalMercatorPosition.convert(pos);
 		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE);
 		if (loc != null)
-			createIncident(pi, loc);
+			updateIncident(pi, loc);
 		else if (inc_log.isOpen()) {
 			inc_log.log("Failed to snap incident to corridor: " +
 				pi.lat + ", " + pi.lon);
 		}
 	}
 
-	/** Create an incident */
-	private void createIncident(ParsedIncident pi, GeoLoc loc) {
+	/** Update an incident */
+	private void updateIncident(ParsedIncident pi, GeoLoc loc) {
 		int n_lanes = getLaneCount(LaneType.MAINLINE, loc);
 		if (n_lanes > 0)
-			createIncident(pi, loc, n_lanes);
+			updateIncident(pi, loc, n_lanes);
 		else if (inc_log.isOpen())
 			inc_log.log("No lanes at location: " + loc);
 	}
@@ -118,24 +135,13 @@ public class IncidentCache {
 		return (cb != null) ? cb.getLaneCount(lt, loc) : 0;
 	}
 
-	/** Create an incident */
-	private void createIncident(ParsedIncident pi, GeoLoc loc, int n_lanes){
-		Camera cam = lookupCamera(pi);
-		IncidentImpl.createNotify(incidentId(pi.id),
-			pi.inc_type.ordinal(), pi.detail,
-			(short) LaneType.MAINLINE.ordinal(),
-			loc.getRoadway(), loc.getRoadDir(), pi.lat, pi.lon, cam,
-			IncidentImpact.fromLanes(n_lanes));
-	}
-
-	/** Lookup the camera */
-	private Camera lookupCamera(ParsedIncident pi) {
-		Camera cam = CameraHelper.findUID(pi.cam);
-		if (cam != null)
-			return cam;
-		Iterator<Camera> it = CameraHelper.findNearest(
-			new Position(pi.lat, pi.lon), 1).iterator();
-		return it.hasNext() ? it.next() : null;
+	/** Update an incident */
+	private void updateIncident(ParsedIncident pi, GeoLoc loc, int n_lanes){
+		IncidentImpl inc = lookupIncident(pi.id);
+		if (null == inc && !incidents.contains(pi.id)) {
+			createIncidentNotify(incidentId(pi.id), pi, loc,
+				IncidentImpact.fromLanes(n_lanes));
+		}
 	}
 
 	/** Clear old incidents.  Any incidents which have not been refreshed

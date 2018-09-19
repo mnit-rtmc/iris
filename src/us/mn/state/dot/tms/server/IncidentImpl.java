@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2017  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
-import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.Camera;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Direction;
@@ -30,7 +29,6 @@ import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
-import us.mn.state.dot.tms.IncidentHelper;
 import us.mn.state.dot.tms.IncidentImpact;
 import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.R_Node;
@@ -85,42 +83,6 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 		});
 	}
 
-	/** Create an incident and notify clients.
-	 * @param n Incident name.
-	 * @param et Event type.
-	 * @param dtl Incident detail.
-	 * @param lnt Lane type.
-	 * @param r Road.
-	 * @param d Direction on road.
-	 * @param lt Latitude.
-	 * @param ln Longitude.
-	 * @param cam Camera.
-	 * @param im Lane impact.
-	 * @return New incident or null on failure. */
-	static public IncidentImpl createNotify(String n, int et,
-		IncidentDetail dtl, short lnt, Road r, short d, double lt,
-		double ln, Camera cam, String im)
-	{
-		// Check if the incident exists already
-		Incident _inc = IncidentHelper.lookup(n);
-		if (_inc instanceof IncidentImpl)
-			return (IncidentImpl) _inc;
-		IncidentImpl inc = new IncidentImpl(n, null, et, new Date(),
-			dtl, lnt, r, d, lt, ln, cam, im, false, false);
-		try {
-			inc.notifyCreate();
-			return inc;
-		}
-		catch (SonarException e) {
-			// This can pretty much only happen when the SONAR task
-			// processor does not store the incident within 30
-			// seconds.  It *shouldn't* happen, but there may be
-			// a rare bug which triggers it.
-			System.err.println("createNotify: " + e.getMessage());
-			return null;
-		}
-	}
-
 	/** Get a mapping of the columns */
 	@Override
 	public Map<String, Object> getColumns() {
@@ -170,7 +132,7 @@ public class IncidentImpl extends BaseObjectImpl implements Incident {
 	}
 
 	/** Create an incident */
-	protected IncidentImpl(String n, String rpl, int et, Date ed,
+	public IncidentImpl(String n, String rpl, int et, Date ed,
 		IncidentDetail dtl, short lnt, Road r, short d, double lt,
 		double ln, Camera cam, String im, boolean clr, boolean cnf)
 	{
