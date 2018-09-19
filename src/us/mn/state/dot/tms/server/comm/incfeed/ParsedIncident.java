@@ -38,6 +38,11 @@ public class ParsedIncident {
 		return a < (b - EPSILON) || a > (b + EPSILON);
 	}
 
+	/** Compare two (possibly-null) objects for equality */
+	static protected boolean objectEquals(Object o0, Object o1) {
+		return (o0 != null) ? o0.equals(o1) : o1 == null;
+	}
+
 	/** Parse an incident type */
 	static private EventType parseType(String t) {
 		switch (t) {
@@ -139,7 +144,6 @@ public class ParsedIncident {
 			return false;
 		if (null == lon || notEqual(lon, inc.getLon()))
 			return false;
-		return detail.equals(inc.getDetail());
-
+		return !objectEquals(detail, inc.getDetail());
 	}
 }
