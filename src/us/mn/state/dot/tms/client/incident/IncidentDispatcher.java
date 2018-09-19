@@ -16,7 +16,6 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
-import java.text.SimpleDateFormat;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -65,10 +64,6 @@ public class IncidentDispatcher extends IPanel
 {
 	/** Size in pixels for each lane */
 	static private final int LANE_SIZE = UI.scaled(32);
-
-	/** Formatter for incident names */
-	static private final SimpleDateFormat NAME_FMT =
-		new SimpleDateFormat("yyyyMMddHHmmssSSS");
 
 	/** Card layout name for camera combo box */
 	static private final String CAMERA_CBOX = "camera_cbox";
@@ -276,7 +271,7 @@ public class IncidentDispatcher extends IPanel
 
 	/** Create a new incident */
 	private void create(ClientIncident inc) {
-		String name = createUniqueIncidentName();
+		String name = IncidentHelper.createUniqueName();
 		if (isWritePermitted(name)) {
 			HashMap<String, Object> attrs =
 				new HashMap<String, Object>();
@@ -368,12 +363,6 @@ public class IncidentDispatcher extends IPanel
 	private void showDeployForm(Incident inc) {
 		session.getDesktop().show(new DeviceDeployForm(session, inc,
 			manager));
-	}
-
-	/** Create a unique incident name */
-	private String createUniqueIncidentName() {
-		String name = NAME_FMT.format(System.currentTimeMillis());
-		return name.substring(0, 16);
 	}
 
 	/** A new proxy has been added */

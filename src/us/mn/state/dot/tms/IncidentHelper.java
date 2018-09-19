@@ -14,7 +14,9 @@
  */
 package us.mn.state.dot.tms;
 
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
+import us.mn.state.dot.sched.TimeSteward;
 
 /**
  * Helper class for Incident.
@@ -59,6 +61,13 @@ public class IncidentHelper extends BaseHelper {
 	/** Lookup the camera for an incident */
 	static public Camera getCamera(Incident inc) {
 		return (inc != null) ? inc.getCamera() : null;
+	}
+
+	/** Create a unique incident name */
+	static public String createUniqueName() {
+		SimpleDateFormat f = new SimpleDateFormat("yyyyMMddHHmmssSSS");
+		String name = f.format(TimeSteward.currentTimeMillis());
+		return name.substring(0, 16);
 	}
 
 	/** Get the severity of an incident */
