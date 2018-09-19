@@ -92,16 +92,16 @@ public class IncidentCache {
 			inc_log.log("Invalid incident: " + pi);
 	}
 
-	/** Lookup an incident by ID */
+	/** Lookup an incident */
 	private IncidentImpl lookupIncident(String id) {
-		Incident inc = IncidentHelper.lookupOriginal(incidentId(id));
+		Incident inc = IncidentHelper.lookupOriginal(originalId(id));
 		return (inc instanceof IncidentImpl)
 		      ? (IncidentImpl) inc
 		      : null;
 	}
 
-	/** Get an incident ID */
-	private String incidentId(String id) {
+	/** Get original incident ID */
+	private String originalId(String id) {
 		return link + "_" + id;
 	}
 
@@ -138,8 +138,9 @@ public class IncidentCache {
 	/** Update an incident */
 	private void updateIncident(ParsedIncident pi, GeoLoc loc, int n_lanes){
 		IncidentImpl inc = lookupIncident(pi.id);
+		// Is this a new incident?
 		if (null == inc && !incidents.contains(pi.id)) {
-			createIncidentNotify(incidentId(pi.id), pi, loc,
+			createIncidentNotify(originalId(pi.id), pi, loc,
 				IncidentImpact.fromLanes(n_lanes));
 		}
 	}
