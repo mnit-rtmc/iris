@@ -37,31 +37,6 @@ import us.mn.state.dot.tms.server.IncidentImpl;
  */
 public class IncidentCache {
 
-	/** Create an incident and notify clients.
-	 * @param n Incident name.
-	 * @param orig Original name.
-	 * @param pi Parsed incident.
-	 * @param loc Geo location.
-	 * @param im Lane impact. */
-	static private boolean createIncidentNotify(String n, String orig,
-		ParsedIncident pi, GeoLoc loc, String im)
-	{
-		short lnt = (short) LaneType.MAINLINE.ordinal();
-		IncidentImpl inc = new IncidentImpl(n, orig,
-			pi.inc_type.ordinal(), new Date(), pi.detail,
-			lnt, loc.getRoadway(), loc.getRoadDir(),
-			pi.lat, pi.lon, pi.lookupCamera(), im, false, false);
-		try {
-			inc.notifyCreate();
-			return true;
-		}
-		catch (SonarException e) {
-			// Probably a cleared incident with the same name
-			System.err.println("createNotify: " + e.getMessage());
-			return false;
-		}
-	}
-
 	/** Comm link name */
 	private final String link;
 
@@ -142,8 +117,7 @@ public class IncidentCache {
 		String oid = originalId(pi.id);
 		// Is this a new incident?
 		if (null == inc && !incidents.contains(pi.id)) {
-			createIncidentNotify(oid, null, pi, loc,
-				IncidentImpact.fromLanes(n_lanes));
+			createIncidentNotify(oid, null, pi, loc, n_lanes);
 		}
 		// Is this a continuing incident?
 		if (inc != null && incidents.contains(pi.id)) {
@@ -151,9 +125,36 @@ public class IncidentCache {
 				inc.setClearedNotify(true);
 				inc.notifyRemove();
 				String n = IncidentHelper.createUniqueName();
-				createIncidentNotify(n, oid, pi, loc,
-					IncidentImpact.fromLanes(n_lanes));
+				createIncidentNotify(n, oid, pi, loc, n_lanes);
 			}
+		}
+	}
+
+	/** Create an incident and notify clients.
+	 * @param n Incident name.
+	 * @param orig Original name.
+	 * @param pi Parsed incident.
+	 * @param loc Geo location.
+	 * @param n_lanes Lane count at incident location. */
+	private boolean createIncidentNotify(String n, String orig,
+		ParsedIncident pi, GeoLoc loc, int n_lanes)
+	{
+		short lnt = (short) LaneType.MAINLINE.ordinal();
+		String im = IncidentImpact.fromLanes(n_lanes);
+		IncidentImpl inc = new IncidentImpl(n, orig,
+			pi.inc_type.ordinal(), new Date(), pi.detail,
+			lnt, loc.getRoadway(), loc.getRoadDir(),
+			pi.lat, pi.lon, pi.lookupCamera(), im, false, false);
+		try {
+			inc.notifyCreate();
+			return true;
+		}
+		catch (SonarException e) {
+			// Probably a cleared incident with the same name
+			inc_log.log("Incident not created: " + e.getMessage());
+			System.err.println("createIncidentNotify @ " +
+				new Date() + ": " + e.getMessage());
+			return false;
 		}
 	}
 
