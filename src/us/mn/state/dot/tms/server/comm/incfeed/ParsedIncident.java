@@ -30,6 +30,14 @@ import us.mn.state.dot.tms.geo.Position;
  */
 public class ParsedIncident {
 
+	/** Epsilon for comparing lat/lon values */
+	static private final double EPSILON = 0.00001;
+
+	/** Check if two value are not equal (within epsilon) */
+	static private boolean notEqual(double a, double b) {
+		return a < (b - EPSILON) || a > (b + EPSILON);
+	}
+
 	/** Parse an incident type */
 	static private EventType parseType(String t) {
 		switch (t) {
@@ -125,10 +133,13 @@ public class ParsedIncident {
 	public boolean needsUpdate(IncidentImpl inc) {
 		if (inc.getConfirmed())
 			return false;
-		if (null == lat || lat != inc.getLat())
+		if (inc.getCleared())
 			return false;
-		if (null == lon || lon != inc.getLon())
+		if (null == lat || notEqual(lat, inc.getLat()))
 			return false;
-		return detail == inc.getDetail();
+		if (null == lon || notEqual(lon, inc.getLon()))
+			return false;
+		return detail.equals(inc.getDetail());
+
 	}
 }
