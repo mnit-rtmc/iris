@@ -3673,7 +3673,7 @@ CREATE VIEW dms_toll_zone_view AS
 GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
 
 --
---
+-- Video Monitors
 --
 CREATE TABLE iris.monitor_style (
 	name VARCHAR(24) PRIMARY KEY,
@@ -3685,6 +3685,12 @@ CREATE TABLE iris.monitor_style (
 	hgap INTEGER NOT NULL,
 	vgap INTEGER NOT NULL
 );
+
+CREATE VIEW monitor_style_view AS
+	SELECT name, force_aspect, accent, font_sz, title_bar, auto_expand,
+	       hgap, vgap
+	FROM iris.monitor_style;
+GRANT SELECT ON monitor_style_view TO PUBLIC;
 
 CREATE TABLE iris._video_monitor (
 	name VARCHAR(12) PRIMARY KEY,
@@ -3760,6 +3766,16 @@ CREATE TRIGGER video_monitor_delete_trig
     INSTEAD OF DELETE ON iris.video_monitor
     FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_delete();
 
+CREATE VIEW video_monitor_view AS
+	SELECT m.name, m.notes, group_n, mon_num, restricted, monitor_style,
+	       m.controller, m.pin, ctr.condition, ctr.comm_link, camera
+	FROM iris.video_monitor m
+	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
+GRANT SELECT ON video_monitor_view TO PUBLIC;
+
+--
+-- Weather Sensors
+--
 CREATE TABLE iris._weather_sensor (
 	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
@@ -3823,6 +3839,18 @@ CREATE TRIGGER weather_sensor_delete_trig
     INSTEAD OF DELETE ON iris.weather_sensor
     FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_delete();
 
+CREATE VIEW weather_sensor_view AS
+	SELECT w.name, w.notes, w.geo_loc, l.roadway, l.road_dir, l.cross_mod,
+	       l.cross_street, l.cross_dir, l.lat, l.lon,
+	       w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.condition
+	FROM iris.weather_sensor w
+	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
+	LEFT JOIN controller_view ctr ON w.controller = ctr.name;
+GRANT SELECT ON weather_sensor_view TO PUBLIC;
+
+--
+-- Other Stuff
+--
 CREATE TABLE event.client_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
 	event_date timestamp WITH time zone NOT NULL,
@@ -3832,29 +3860,12 @@ CREATE TABLE event.client_event (
 	iris_user VARCHAR(15)
 );
 
---- Views
-
-CREATE VIEW monitor_style_view AS
-	SELECT name, force_aspect, accent, font_sz, title_bar, auto_expand,
-	       hgap, vgap
-	FROM iris.monitor_style;
-GRANT SELECT ON monitor_style_view TO PUBLIC;
-
-CREATE VIEW video_monitor_view AS
-	SELECT m.name, m.notes, group_n, mon_num, restricted, monitor_style,
-	       m.controller, m.pin, ctr.condition, ctr.comm_link, camera
-	FROM iris.video_monitor m
-	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
-GRANT SELECT ON video_monitor_view TO PUBLIC;
-
-CREATE VIEW weather_sensor_view AS
-	SELECT w.name, w.notes, w.geo_loc, l.roadway, l.road_dir, l.cross_mod,
-	       l.cross_street, l.cross_dir, l.lat, l.lon,
-	       w.controller, w.pin, ctr.comm_link, ctr.drop_id, ctr.condition
-	FROM iris.weather_sensor w
-	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
-	LEFT JOIN controller_view ctr ON w.controller = ctr.name;
-GRANT SELECT ON weather_sensor_view TO PUBLIC;
+CREATE VIEW client_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, e.host_port,
+	       e.iris_user
+	FROM event.client_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+GRANT SELECT ON client_event_view TO PUBLIC;
 
 CREATE VIEW iris.device_geo_loc_view AS
 	SELECT name, geo_loc FROM iris._lane_marking UNION ALL
@@ -3888,13 +3899,6 @@ CREATE VIEW controller_report AS
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
 	LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
-
-CREATE VIEW client_event_view AS
-	SELECT e.event_id, e.event_date, ed.description, e.host_port,
-		e.iris_user
-	FROM event.client_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
-GRANT SELECT ON client_event_view TO PUBLIC;
 
 -- Fonts
 
