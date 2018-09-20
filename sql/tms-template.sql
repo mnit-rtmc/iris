@@ -3152,6 +3152,226 @@ CREATE VIEW parking_area_view AS
 GRANT SELECT ON parking_area_view TO PUBLIC;
 
 --
+-- Ramp Meters
+--
+CREATE TABLE iris.meter_type (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(32) NOT NULL,
+	lanes INTEGER NOT NULL
+);
+
+COPY iris.meter_type (id, description, lanes) FROM stdin;
+0	One Lane	1
+1	Two Lane, Alternate Release	2
+2	Two Lane, Simultaneous Release	2
+\.
+
+CREATE TABLE iris.meter_algorithm (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(32) NOT NULL
+);
+
+COPY iris.meter_algorithm (id, description) FROM stdin;
+0	No Metering
+1	Simple Metering
+2	SZM (obsolete)
+3	K Adaptive Metering
+\.
+
+CREATE TABLE iris.meter_lock (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
+COPY iris.meter_lock (id, description) FROM stdin;
+1	Maintenance
+2	Incident
+3	Construction
+4	Testing
+5	Police panel
+6	Manual mode
+\.
+
+CREATE TABLE iris._ramp_meter (
+	name VARCHAR(20) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+	notes text NOT NULL,
+	meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
+	storage INTEGER NOT NULL,
+	max_wait INTEGER NOT NULL,
+	algorithm INTEGER NOT NULL REFERENCES iris.meter_algorithm,
+	am_target INTEGER NOT NULL,
+	pm_target INTEGER NOT NULL,
+	beacon VARCHAR(20) REFERENCES iris._beacon,
+	m_lock INTEGER REFERENCES iris.meter_lock(id)
+);
+
+ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.ramp_meter AS
+	SELECT m.name, geo_loc, controller, pin, notes, meter_type, storage,
+	       max_wait, algorithm, am_target, pm_target, beacon, preset, m_lock
+	FROM iris._ramp_meter m
+	JOIN iris._device_io d ON m.name = d.name
+	JOIN iris._device_preset p ON m.name = p.name;
+
+CREATE FUNCTION iris.ramp_meter_insert() RETURNS TRIGGER AS
+	$ramp_meter_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._device_preset (name, preset)
+	     VALUES (NEW.name, NEW.preset);
+	INSERT INTO iris._ramp_meter
+	            (name, geo_loc, notes, meter_type, storage, max_wait,
+	             algorithm, am_target, pm_target, beacon, m_lock)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.meter_type,
+	             NEW.storage, NEW.max_wait, NEW.algorithm, NEW.am_target,
+	             NEW.pm_target, NEW.beacon, NEW.m_lock);
+	RETURN NEW;
+END;
+$ramp_meter_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ramp_meter_insert_trig
+    INSTEAD OF INSERT ON iris.ramp_meter
+    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_insert();
+
+CREATE FUNCTION iris.ramp_meter_update() RETURNS TRIGGER AS
+	$ramp_meter_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._device_preset
+	   SET preset = NEW.preset
+	 WHERE name = OLD.name;
+	UPDATE iris._ramp_meter
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes,
+	       meter_type = NEW.meter_type,
+	       storage = NEW.storage,
+	       max_wait = NEW.max_wait,
+	       algorithm = NEW.algorithm,
+	       am_target = NEW.am_target,
+	       pm_target = NEW.pm_target,
+	       beacon = NEW.beacon,
+	       m_lock = NEW.m_lock
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$ramp_meter_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ramp_meter_update_trig
+    INSTEAD OF UPDATE ON iris.ramp_meter
+    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_update();
+
+CREATE FUNCTION iris.ramp_meter_delete() RETURNS TRIGGER AS
+	$ramp_meter_delete$
+BEGIN
+	DELETE FROM iris._device_preset WHERE name = OLD.name;
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$ramp_meter_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER ramp_meter_delete_trig
+    INSTEAD OF DELETE ON iris.ramp_meter
+    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_delete();
+
+CREATE TABLE iris.meter_action (
+	name VARCHAR(30) PRIMARY KEY,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+);
+
+CREATE VIEW meter_action_view AS
+	SELECT ramp_meter, ta.phase, time_of_day, day_plan, sched_date
+	FROM iris.meter_action ma, iris.action_plan ap, iris.time_action ta
+	WHERE ma.action_plan = ap.name
+	AND ap.name = ta.action_plan
+	AND active = true
+	ORDER BY ramp_meter, time_of_day;
+GRANT SELECT ON meter_action_view TO PUBLIC;
+
+CREATE TABLE event.meter_phase (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
+COPY event.meter_phase (id, description) FROM stdin;
+0	not started
+1	metering
+2	flushing
+3	stopped
+\.
+
+CREATE TABLE event.meter_queue_state (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
+COPY event.meter_queue_state (id, description) FROM stdin;
+0	unknown
+1	empty
+2	exists
+3	full
+\.
+
+CREATE TABLE event.meter_limit_control (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
+COPY event.meter_limit_control (id, description) FROM stdin;
+0	passage fail
+1	storage limit
+2	wait limit
+3	target minimum
+4	backup limit
+\.
+
+CREATE TABLE event.meter_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter
+		ON DELETE CASCADE,
+	phase INTEGER NOT NULL REFERENCES event.meter_phase,
+	q_state INTEGER NOT NULL REFERENCES event.meter_queue_state,
+	q_len REAL NOT NULL,
+	dem_adj REAL NOT NULL,
+	wait_secs INTEGER NOT NULL,
+	limit_ctrl INTEGER NOT NULL REFERENCES event.meter_limit_control,
+	min_rate INTEGER NOT NULL,
+	rel_rate INTEGER NOT NULL,
+	max_rate INTEGER NOT NULL,
+	d_node VARCHAR(10),
+	seg_density REAL NOT NULL
+);
+
+CREATE VIEW meter_event_view AS
+	SELECT event_id, event_date, event_description.description,
+	       ramp_meter, meter_phase.description AS phase,
+	       meter_queue_state.description AS q_state, q_len, dem_adj,
+	       wait_secs, meter_limit_control.description AS limit_ctrl,
+	       min_rate, rel_rate, max_rate, d_node, seg_density
+	FROM event.meter_event
+	JOIN event.event_description
+	ON meter_event.event_desc_id = event_description.event_desc_id
+	JOIN event.meter_phase ON phase = meter_phase.id
+	JOIN event.meter_queue_state ON q_state = meter_queue_state.id
+	JOIN event.meter_limit_control ON limit_ctrl = meter_limit_control.id;
+GRANT SELECT ON meter_event_view TO PUBLIC;
+
+--
 --
 --
 CREATE TABLE iris.toll_zone (
@@ -3248,114 +3468,6 @@ $video_monitor_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER video_monitor_delete_trig
     INSTEAD OF DELETE ON iris.video_monitor
     FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_delete();
-
-CREATE TABLE iris.meter_type (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(32) NOT NULL,
-	lanes INTEGER NOT NULL
-);
-
-CREATE TABLE iris.meter_algorithm (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
-);
-
-CREATE TABLE iris.meter_lock (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
-);
-
-CREATE TABLE iris._ramp_meter (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes text NOT NULL,
-	meter_type INTEGER NOT NULL REFERENCES iris.meter_type(id),
-	storage INTEGER NOT NULL,
-	max_wait INTEGER NOT NULL,
-	algorithm INTEGER NOT NULL REFERENCES iris.meter_algorithm,
-	am_target INTEGER NOT NULL,
-	pm_target INTEGER NOT NULL,
-	beacon VARCHAR(20) REFERENCES iris._beacon,
-	m_lock INTEGER REFERENCES iris.meter_lock(id)
-);
-
-ALTER TABLE iris._ramp_meter ADD CONSTRAINT _ramp_meter_fkey
-	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
-
-CREATE VIEW iris.ramp_meter AS
-	SELECT m.name, geo_loc, controller, pin, notes, meter_type, storage,
-	       max_wait, algorithm, am_target, pm_target, beacon, preset, m_lock
-	FROM iris._ramp_meter m
-	JOIN iris._device_io d ON m.name = d.name
-	JOIN iris._device_preset p ON m.name = p.name;
-
-CREATE FUNCTION iris.ramp_meter_insert() RETURNS TRIGGER AS
-	$ramp_meter_insert$
-BEGIN
-	INSERT INTO iris._device_io (name, controller, pin)
-	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._device_preset (name, preset)
-	     VALUES (NEW.name, NEW.preset);
-	INSERT INTO iris._ramp_meter
-	            (name, geo_loc, notes, meter_type, storage, max_wait,
-	             algorithm, am_target, pm_target, beacon, m_lock)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.meter_type,
-	             NEW.storage, NEW.max_wait, NEW.algorithm, NEW.am_target,
-	             NEW.pm_target, NEW.beacon, NEW.m_lock);
-	RETURN NEW;
-END;
-$ramp_meter_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER ramp_meter_insert_trig
-    INSTEAD OF INSERT ON iris.ramp_meter
-    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_insert();
-
-CREATE FUNCTION iris.ramp_meter_update() RETURNS TRIGGER AS
-	$ramp_meter_update$
-BEGIN
-	UPDATE iris._device_io
-	   SET controller = NEW.controller,
-	       pin = NEW.pin
-	 WHERE name = OLD.name;
-	UPDATE iris._device_preset
-	   SET preset = NEW.preset
-	 WHERE name = OLD.name;
-	UPDATE iris._ramp_meter
-	   SET geo_loc = NEW.geo_loc,
-	       notes = NEW.notes,
-	       meter_type = NEW.meter_type,
-	       storage = NEW.storage,
-	       max_wait = NEW.max_wait,
-	       algorithm = NEW.algorithm,
-	       am_target = NEW.am_target,
-	       pm_target = NEW.pm_target,
-	       beacon = NEW.beacon,
-	       m_lock = NEW.m_lock
-	 WHERE name = OLD.name;
-	RETURN NEW;
-END;
-$ramp_meter_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER ramp_meter_update_trig
-    INSTEAD OF UPDATE ON iris.ramp_meter
-    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_update();
-
-CREATE FUNCTION iris.ramp_meter_delete() RETURNS TRIGGER AS
-	$ramp_meter_delete$
-BEGIN
-	DELETE FROM iris._device_preset WHERE name = OLD.name;
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$ramp_meter_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER ramp_meter_delete_trig
-    INSTEAD OF DELETE ON iris.ramp_meter
-    FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_delete();
 
 CREATE TABLE iris._weather_sensor (
 	name VARCHAR(20) PRIMARY KEY,
@@ -3547,13 +3659,6 @@ CREATE TABLE iris.tag_reader_dms (
 );
 ALTER TABLE iris.tag_reader_dms ADD PRIMARY KEY (tag_reader, dms);
 
-CREATE TABLE iris.meter_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
-);
-
 CREATE TABLE event.client_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
 	event_date timestamp WITH time zone NOT NULL,
@@ -3562,55 +3667,6 @@ CREATE TABLE event.client_event (
 	host_port VARCHAR(64) NOT NULL,
 	iris_user VARCHAR(15)
 );
-
-CREATE TABLE event.meter_phase (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
-);
-
-CREATE TABLE event.meter_queue_state (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
-);
-
-CREATE TABLE event.meter_limit_control (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
-);
-
-CREATE TABLE event.meter_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter
-		ON DELETE CASCADE,
-	phase INTEGER NOT NULL REFERENCES event.meter_phase,
-	q_state INTEGER NOT NULL REFERENCES event.meter_queue_state,
-	q_len REAL NOT NULL,
-	dem_adj REAL NOT NULL,
-	wait_secs INTEGER NOT NULL,
-	limit_ctrl INTEGER NOT NULL REFERENCES event.meter_limit_control,
-	min_rate INTEGER NOT NULL,
-	rel_rate INTEGER NOT NULL,
-	max_rate INTEGER NOT NULL,
-	d_node VARCHAR(10),
-	seg_density REAL NOT NULL
-);
-
-CREATE VIEW meter_event_view AS
-	SELECT event_id, event_date, event_description.description,
-	       ramp_meter, meter_phase.description AS phase,
-	       meter_queue_state.description AS q_state, q_len, dem_adj,
-	       wait_secs, meter_limit_control.description AS limit_ctrl,
-	       min_rate, rel_rate, max_rate, d_node, seg_density
-	FROM event.meter_event
-	JOIN event.event_description
-	ON meter_event.event_desc_id = event_description.event_desc_id
-	JOIN event.meter_phase ON phase = meter_phase.id
-	JOIN event.meter_queue_state ON q_state = meter_queue_state.id
-	JOIN event.meter_limit_control ON limit_ctrl = meter_limit_control.id;
-GRANT SELECT ON meter_event_view TO PUBLIC;
 
 CREATE TABLE event.tag_type (
 	id INTEGER PRIMARY KEY,
@@ -3685,15 +3741,6 @@ CREATE VIEW price_message_event_view AS
 GRANT SELECT ON price_message_event_view TO PUBLIC;
 
 --- Views
-
-CREATE VIEW meter_action_view AS
-	SELECT ramp_meter, ta.phase, time_of_day, day_plan, sched_date
-	FROM iris.meter_action ma, iris.action_plan ap, iris.time_action ta
-	WHERE ma.action_plan = ap.name
-	AND ap.name = ta.action_plan
-	AND active = true
-	ORDER BY ramp_meter, time_of_day;
-GRANT SELECT ON meter_action_view TO PUBLIC;
 
 CREATE VIEW toll_zone_view AS
 	SELECT name, start_id, end_id, tollway, alpha, beta, max_price
@@ -3834,55 +3881,11 @@ GRANT SELECT ON client_event_view TO PUBLIC;
 
 --- Data
 
-COPY iris.meter_type (id, description, lanes) FROM stdin;
-0	One Lane	1
-1	Two Lane, Alternate Release	2
-2	Two Lane, Simultaneous Release	2
-\.
-
-COPY iris.meter_algorithm (id, description) FROM stdin;
-0	No Metering
-1	Simple Metering
-2	SZM (obsolete)
-3	K Adaptive Metering
-\.
-
-COPY iris.meter_lock (id, description) FROM stdin;
-1	Maintenance
-2	Incident
-3	Construction
-4	Testing
-5	Police panel
-6	Manual mode
-\.
-
 COPY iris.tag_reader_sync_mode (id, description) FROM stdin;
 0	slave
 1	master
 2	GPS secondary
 3	GPS primary
-\.
-
-COPY event.meter_phase (id, description) FROM stdin;
-0	not started
-1	metering
-2	flushing
-3	stopped
-\.
-
-COPY event.meter_queue_state (id, description) FROM stdin;
-0	unknown
-1	empty
-2	exists
-3	full
-\.
-
-COPY event.meter_limit_control (id, description) FROM stdin;
-0	passage fail
-1	storage limit
-2	wait limit
-3	target minimum
-4	backup limit
 \.
 
 COPY event.tag_type (id, description) FROM stdin;
