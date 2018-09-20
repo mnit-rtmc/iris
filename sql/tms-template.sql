@@ -18,6 +18,72 @@ SET SESSION AUTHORIZATION 'tms';
 SET search_path = public, pg_catalog;
 
 --
+-- Events
+--
+CREATE SEQUENCE event.event_id_seq;
+
+CREATE TABLE event.event_description (
+	event_desc_id INTEGER PRIMARY KEY,
+	description text NOT NULL
+);
+
+COPY event.event_description (event_desc_id, description) FROM stdin;
+1	Alarm TRIGGERED
+2	Alarm CLEARED
+8	Comm ERROR
+9	Comm RESTORED
+10	Comm QUEUE DRAINED
+11	Comm POLL TIMEOUT
+12	Comm PARSING ERROR
+13	Comm CHECKSUM ERROR
+14	Comm CONTROLLER ERROR
+20	Incident CLEARED
+21	Incident CRASH
+22	Incident STALL
+23	Incident HAZARD
+24	Incident ROADWORK
+29	Incident IMPACT
+65	Comm FAILED
+89	LCS DEPLOYED
+90	LCS CLEARED
+91	Sign DEPLOYED
+92	Sign CLEARED
+94	NO HITS
+95	LOCKED ON
+96	CHATTER
+101	Sign BRIGHTNESS LOW
+102	Sign BRIGHTNESS GOOD
+103	Sign BRIGHTNESS HIGH
+201	Client CONNECT
+202	Client AUTHENTICATE
+203	Client FAIL AUTHENTICATION
+204	Client DISCONNECT
+301	Gate Arm UNKNOWN
+302	Gate Arm FAULT
+303	Gate Arm OPENING
+304	Gate Arm OPEN
+305	Gate Arm WARN CLOSE
+306	Gate Arm CLOSING
+307	Gate Arm CLOSED
+308	Gate Arm TIMEOUT
+401	Meter event
+501	Beacon ON
+502	Beacon OFF
+601	Tag Read
+651	Price DEPLOYED
+652	Price VERIFIED
+701	TT Link too long
+702	TT No data
+703	TT No destination data
+704	TT No origin data
+705	TT No route
+801	Camera SWITCHED
+900	Action Plan ACTIVATED
+901	Action Plan DEACTIVATED
+902	Action Plan Phase CHANGED
+\.
+
+--
 -- System attributes
 --
 CREATE TABLE iris.system_attribute (
@@ -895,6 +961,22 @@ CREATE VIEW time_action_view AS
 	FROM iris.time_action;
 GRANT SELECT ON time_action_view TO PUBLIC;
 
+CREATE TABLE event.action_plan_event (
+	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	action_plan VARCHAR(16) NOT NULL,
+	detail VARCHAR(15) NOT NULL
+);
+
+CREATE VIEW action_plan_event_view AS
+	SELECT e.event_id, e.event_date, ed.description AS event_description,
+	       e.action_plan, e.detail
+	FROM event.action_plan_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+GRANT SELECT ON action_plan_event_view TO PUBLIC;
+
 --
 -- Comm Protocols, Comm Links, Modems, Cabinets, Controllers
 --
@@ -1036,6 +1118,24 @@ CREATE VIEW controller_loc_view AS
 	FROM controller_view c
 	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name;
 GRANT SELECT ON controller_loc_view TO PUBLIC;
+
+CREATE TABLE event.comm_event (
+	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	controller VARCHAR(20) NOT NULL REFERENCES iris.controller(name)
+		ON DELETE CASCADE,
+	device_id VARCHAR(20)
+);
+
+CREATE VIEW comm_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, e.controller,
+	       c.comm_link, c.drop_id
+	FROM event.comm_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+	LEFT JOIN iris.controller c ON e.controller = c.name;
+GRANT SELECT ON comm_event_view TO PUBLIC;
 
 CREATE TABLE iris._device_io (
 	name VARCHAR(20) PRIMARY KEY,
@@ -1416,6 +1516,30 @@ CREATE TRIGGER alarm_delete_trig
     INSTEAD OF DELETE ON iris.alarm
     FOR EACH ROW EXECUTE PROCEDURE iris.alarm_delete();
 
+CREATE VIEW alarm_view AS
+	SELECT a.name, a.description, a.state, a.trigger_time, a.controller,
+	       a.pin, c.comm_link, c.drop_id
+	FROM iris.alarm a
+	LEFT JOIN iris.controller c ON a.controller = c.name;
+GRANT SELECT ON alarm_view TO PUBLIC;
+
+CREATE TABLE event.alarm_event (
+	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	alarm VARCHAR(20) NOT NULL REFERENCES iris._alarm(name)
+		ON DELETE CASCADE
+);
+
+CREATE VIEW alarm_event_view AS
+	SELECT e.event_id, e.event_date, ed.description AS event_description,
+		e.alarm, a.description
+	FROM event.alarm_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+	JOIN iris.alarm a ON e.alarm = a.name;
+GRANT SELECT ON alarm_event_view TO PUBLIC;
+
 --
 -- Beacons
 --
@@ -1515,7 +1639,223 @@ CREATE TABLE iris.beacon_action (
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
+CREATE TABLE event.beacon_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon
+		ON DELETE CASCADE
+);
 
+CREATE VIEW beacon_event_view AS
+	SELECT event_id, event_date, event_description.description, beacon
+	FROM event.beacon_event
+	JOIN event.event_description
+	ON beacon_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON beacon_event_view TO PUBLIC;
+
+--
+-- Lane Types, Detectors
+--
+CREATE TABLE iris.lane_type (
+	id SMALLINT PRIMARY KEY,
+	description VARCHAR(12) NOT NULL,
+	dcode VARCHAR(2) NOT NULL
+);
+
+COPY iris.lane_type (id, description, dcode) FROM stdin;
+0		
+1	Mainline	
+2	Auxiliary	A
+3	CD Lane	CD
+4	Reversible	R
+5	Merge	M
+6	Queue	Q
+7	Exit	X
+8	Bypass	B
+9	Passage	P
+10	Velocity	V
+11	Omnibus	O
+12	Green	G
+13	Wrong Way	Y
+14	HOV	H
+15	HOT	HT
+16	Shoulder	D
+17	Parking	PK
+\.
+
+CREATE VIEW lane_type_view AS
+	SELECT id, description, dcode FROM iris.lane_type;
+GRANT SELECT ON lane_type_view TO PUBLIC;
+
+CREATE TABLE iris._detector (
+	name VARCHAR(20) PRIMARY KEY,
+	r_node VARCHAR(10) NOT NULL REFERENCES iris.r_node(name),
+	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
+	lane_number SMALLINT NOT NULL,
+	abandoned BOOLEAN NOT NULL,
+	force_fail BOOLEAN NOT NULL,
+	field_length REAL NOT NULL,
+	fake VARCHAR(32),
+	notes VARCHAR(32)
+);
+
+ALTER TABLE iris._detector ADD CONSTRAINT _detector_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.detector AS SELECT
+	det.name, controller, pin, r_node, lane_type, lane_number, abandoned,
+	force_fail, field_length, fake, notes
+	FROM iris._detector det JOIN iris._device_io d ON det.name = d.name;
+
+CREATE FUNCTION iris.detector_insert() RETURNS TRIGGER AS
+	$detector_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._detector
+	            (name, r_node, lane_type, lane_number, abandoned,
+	             force_fail, field_length, fake, notes)
+	     VALUES (NEW.name, NEW.r_node, NEW.lane_type, NEW.lane_number,
+	             NEW.abandoned, NEW.force_fail, NEW.field_length, NEW.fake,
+	             NEW.notes);
+	RETURN NEW;
+END;
+$detector_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER detector_insert_trig
+    INSTEAD OF INSERT ON iris.detector
+    FOR EACH ROW EXECUTE PROCEDURE iris.detector_insert();
+
+CREATE FUNCTION iris.detector_update() RETURNS TRIGGER AS
+	$detector_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._detector
+	   SET r_node = NEW.r_node,
+	       lane_type = NEW.lane_type,
+	       lane_number = NEW.lane_number,
+	       abandoned = NEW.abandoned,
+	       force_fail = NEW.force_fail,
+	       field_length = NEW.field_length,
+	       fake = NEW.fake,
+	       notes = NEW.notes
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$detector_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER detector_update_trig
+    INSTEAD OF UPDATE ON iris.detector
+    FOR EACH ROW EXECUTE PROCEDURE iris.detector_update();
+
+CREATE FUNCTION iris.detector_delete() RETURNS TRIGGER AS
+	$detector_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$detector_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER detector_delete_trig
+    INSTEAD OF DELETE ON iris.detector
+    FOR EACH ROW EXECUTE PROCEDURE iris.detector_delete();
+
+CREATE FUNCTION iris.detector_label(VARCHAR(6), VARCHAR(4), VARCHAR(6),
+	VARCHAR(4), VARCHAR(2), SMALLINT, SMALLINT, BOOLEAN)
+	RETURNS TEXT AS $detector_label$
+DECLARE
+	rd ALIAS FOR $1;
+	rdir ALIAS FOR $2;
+	xst ALIAS FOR $3;
+	xdir ALIAS FOR $4;
+	xmod ALIAS FOR $5;
+	l_type ALIAS FOR $6;
+	lane_number ALIAS FOR $7;
+	abandoned ALIAS FOR $8;
+	xmd VARCHAR(2);
+	ltyp VARCHAR(2);
+	lnum VARCHAR(2);
+	suffix VARCHAR(5);
+BEGIN
+	IF rd IS NULL OR xst IS NULL THEN
+		RETURN 'FUTURE';
+	END IF;
+	SELECT dcode INTO ltyp FROM lane_type_view WHERE id = l_type;
+	lnum = '';
+	IF lane_number > 0 THEN
+		lnum = TO_CHAR(lane_number, 'FM9');
+	END IF;
+	xmd = '';
+	IF xmod != '@' THEN
+		xmd = xmod;
+	END IF;
+	suffix = '';
+	IF abandoned THEN
+		suffix = '-ABND';
+	END IF;
+	RETURN rd || '/' || xdir || xmd || xst || rdir || ltyp || lnum ||
+	       suffix;
+END;
+$detector_label$ LANGUAGE plpgsql;
+
+CREATE VIEW detector_label_view AS
+	SELECT d.name AS det_id,
+	       iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
+	                           d.lane_type, d.lane_number, d.abandoned)
+	       AS label
+	FROM iris.detector d
+	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
+	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name;
+GRANT SELECT ON detector_label_view TO PUBLIC;
+
+CREATE TABLE event.detector_event (
+	event_id INTEGER DEFAULT nextval('event.event_id_seq') NOT NULL,
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	device_id VARCHAR(20) REFERENCES iris._detector(name) ON DELETE CASCADE
+);
+
+CREATE VIEW detector_fail_view AS
+	SELECT DISTINCT ON (device_id) device_id, description AS fail_reason,
+	                               event_date AS fail_date
+	FROM event.detector_event de
+	JOIN event.event_description ed ON de.event_desc_id = ed.event_desc_id
+	ORDER BY device_id, event_id DESC;
+GRANT SELECT ON detector_fail_view TO PUBLIC;
+
+CREATE VIEW detector_view AS
+	SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id, d.pin,
+	       iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
+	       d.lane_type, d.lane_number, d.abandoned) AS label,
+	       rnd.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
+	       l.cross_dir, d.lane_number, d.field_length,
+	       ln.description AS lane_type, d.abandoned, d.force_fail,
+	       df.fail_reason, df.fail_date, c.condition, d.fake, d.notes
+	FROM (iris.detector d
+	LEFT OUTER JOIN detector_fail_view df
+		ON d.name = df.device_id AND force_fail = 't')
+	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
+	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
+	LEFT JOIN iris.lane_type ln ON d.lane_type = ln.id
+	LEFT JOIN controller_view c ON d.controller = c.name;
+GRANT SELECT ON detector_view TO PUBLIC;
+
+CREATE VIEW detector_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, e.device_id, dl.label
+	FROM event.detector_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+	JOIN detector_label_view dl ON e.device_id = dl.det_id;
+GRANT SELECT ON detector_event_view TO PUBLIC;
 
 
 CREATE TABLE iris.color_scheme (
@@ -1624,12 +1964,6 @@ CREATE TABLE iris.word (
 	name VARCHAR(24) PRIMARY KEY,
 	abbr VARCHAR(12),
 	allowed BOOLEAN DEFAULT false NOT NULL
-);
-
-CREATE TABLE iris.lane_type (
-	id smallint PRIMARY KEY,
-	description VARCHAR(12) NOT NULL,
-	dcode VARCHAR(2) NOT NULL
 );
 
 CREATE TABLE iris.toll_zone (
@@ -1756,86 +2090,6 @@ $gps_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER gps_delete_trig
 	INSTEAD OF DELETE ON iris.gps
 	FOR EACH ROW EXECUTE PROCEDURE iris.gps_delete();
-
-CREATE TABLE iris._detector (
-	name VARCHAR(20) PRIMARY KEY,
-	r_node VARCHAR(10) NOT NULL REFERENCES iris.r_node(name),
-	lane_type smallint NOT NULL REFERENCES iris.lane_type(id),
-	lane_number smallint NOT NULL,
-	abandoned boolean NOT NULL,
-	force_fail boolean NOT NULL,
-	field_length real NOT NULL,
-	fake VARCHAR(32),
-	notes VARCHAR(32)
-);
-
-ALTER TABLE iris._detector ADD CONSTRAINT _detector_fkey
-	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
-
-CREATE VIEW iris.detector AS SELECT
-	det.name, controller, pin, r_node, lane_type, lane_number, abandoned,
-	force_fail, field_length, fake, notes
-	FROM iris._detector det JOIN iris._device_io d ON det.name = d.name;
-
-CREATE FUNCTION iris.detector_insert() RETURNS TRIGGER AS
-	$detector_insert$
-BEGIN
-	INSERT INTO iris._device_io (name, controller, pin)
-	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._detector
-	            (name, r_node, lane_type, lane_number, abandoned,
-	             force_fail, field_length, fake, notes)
-	     VALUES (NEW.name, NEW.r_node, NEW.lane_type, NEW.lane_number,
-	             NEW.abandoned, NEW.force_fail, NEW.field_length, NEW.fake,
-	             NEW.notes);
-	RETURN NEW;
-END;
-$detector_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER detector_insert_trig
-    INSTEAD OF INSERT ON iris.detector
-    FOR EACH ROW EXECUTE PROCEDURE iris.detector_insert();
-
-CREATE FUNCTION iris.detector_update() RETURNS TRIGGER AS
-	$detector_update$
-BEGIN
-	UPDATE iris._device_io
-	   SET controller = NEW.controller,
-	       pin = NEW.pin
-	 WHERE name = OLD.name;
-	UPDATE iris._detector
-	   SET r_node = NEW.r_node,
-	       lane_type = NEW.lane_type,
-	       lane_number = NEW.lane_number,
-	       abandoned = NEW.abandoned,
-	       force_fail = NEW.force_fail,
-	       field_length = NEW.field_length,
-	       fake = NEW.fake,
-	       notes = NEW.notes
-	 WHERE name = OLD.name;
-	RETURN NEW;
-END;
-$detector_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER detector_update_trig
-    INSTEAD OF UPDATE ON iris.detector
-    FOR EACH ROW EXECUTE PROCEDURE iris.detector_update();
-
-CREATE FUNCTION iris.detector_delete() RETURNS TRIGGER AS
-	$detector_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$detector_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER detector_delete_trig
-    INSTEAD OF DELETE ON iris.detector
-    FOR EACH ROW EXECUTE PROCEDURE iris.detector_delete();
 
 CREATE TABLE iris.monitor_style (
 	name VARCHAR(24) PRIMARY KEY,
@@ -2804,31 +3058,6 @@ CREATE TABLE iris.meter_action (
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
-CREATE SEQUENCE event.event_id_seq;
-
-CREATE TABLE event.event_description (
-	event_desc_id INTEGER PRIMARY KEY,
-	description text NOT NULL
-);
-
-CREATE TABLE event.action_plan_event (
-	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	action_plan VARCHAR(16) NOT NULL,
-	detail VARCHAR(15) NOT NULL
-);
-
-CREATE TABLE event.alarm_event (
-	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	alarm VARCHAR(20) NOT NULL REFERENCES iris._alarm(name)
-		ON DELETE CASCADE
-);
-
 CREATE TABLE event.brightness_sample (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
 	event_date timestamp WITH time zone NOT NULL,
@@ -2838,25 +3067,6 @@ CREATE TABLE event.brightness_sample (
 		ON DELETE CASCADE,
 	photocell integer NOT NULL,
 	output integer NOT NULL
-);
-
-CREATE TABLE event.comm_event (
-	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	controller VARCHAR(20) NOT NULL REFERENCES iris.controller(name)
-		ON DELETE CASCADE,
-	device_id VARCHAR(20)
-);
-
-CREATE TABLE event.detector_event (
-	event_id integer DEFAULT nextval('event.event_id_seq') NOT NULL,
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(20) REFERENCES iris._detector(name)
-		ON DELETE CASCADE
 );
 
 CREATE TABLE event.sign_event (
@@ -2937,22 +3147,6 @@ CREATE VIEW meter_event_view AS
 	JOIN event.meter_queue_state ON q_state = meter_queue_state.id
 	JOIN event.meter_limit_control ON limit_ctrl = meter_limit_control.id;
 GRANT SELECT ON meter_event_view TO PUBLIC;
-
-CREATE TABLE event.beacon_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon
-		ON DELETE CASCADE
-);
-
-CREATE VIEW beacon_event_view AS
-	SELECT event_id, event_date, event_description.description, beacon
-	FROM event.beacon_event
-	JOIN event.event_description
-	ON beacon_event.event_desc_id = event_description.event_desc_id;
-GRANT SELECT ON beacon_event_view TO PUBLIC;
 
 CREATE TABLE event.travel_time_event (
 	event_id SERIAL PRIMARY KEY,
@@ -3423,87 +3617,6 @@ CREATE VIEW parking_area_view AS
 	LEFT JOIN iris.system_attribute sa ON sa.name = 'camera_image_base_url';
 GRANT SELECT ON parking_area_view TO PUBLIC;
 
-CREATE VIEW lane_type_view AS
-	SELECT id, description, dcode FROM iris.lane_type;
-GRANT SELECT ON lane_type_view TO PUBLIC;
-
-CREATE FUNCTION iris.detector_label(VARCHAR(6), VARCHAR(4), VARCHAR(6),
-	VARCHAR(4), VARCHAR(2), SMALLINT, SMALLINT, BOOLEAN)
-	RETURNS TEXT AS $detector_label$
-DECLARE
-	rd ALIAS FOR $1;
-	rdir ALIAS FOR $2;
-	xst ALIAS FOR $3;
-	xdir ALIAS FOR $4;
-	xmod ALIAS FOR $5;
-	l_type ALIAS FOR $6;
-	lane_number ALIAS FOR $7;
-	abandoned ALIAS FOR $8;
-	xmd VARCHAR(2);
-	ltyp VARCHAR(2);
-	lnum VARCHAR(2);
-	suffix VARCHAR(5);
-BEGIN
-	IF rd IS NULL OR xst IS NULL THEN
-		RETURN 'FUTURE';
-	END IF;
-	SELECT dcode INTO ltyp FROM lane_type_view WHERE id = l_type;
-	lnum = '';
-	IF lane_number > 0 THEN
-		lnum = TO_CHAR(lane_number, 'FM9');
-	END IF;
-	xmd = '';
-	IF xmod != '@' THEN
-		xmd = xmod;
-	END IF;
-	suffix = '';
-	IF abandoned THEN
-		suffix = '-ABND';
-	END IF;
-	RETURN rd || '/' || xdir || xmd || xst || rdir || ltyp || lnum ||
-	       suffix;
-END;
-$detector_label$ LANGUAGE plpgsql;
-
-CREATE VIEW detector_label_view AS
-	SELECT d.name AS det_id,
-	iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
-		d.lane_type, d.lane_number, d.abandoned) AS label
-	FROM iris.detector d
-	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
-	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name;
-GRANT SELECT ON detector_label_view TO PUBLIC;
-
-CREATE VIEW detector_fail_view AS SELECT DISTINCT ON (device_id)
-	device_id, description AS fail_reason, event_date AS fail_date
-	FROM event.detector_event de
-	JOIN event.event_description ed ON de.event_desc_id = ed.event_desc_id
-	ORDER BY device_id, event_id DESC;
-GRANT SELECT ON detector_fail_view TO PUBLIC;
-
-CREATE VIEW detector_view AS
-	SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id, d.pin,
-	       iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
-	       d.lane_type, d.lane_number, d.abandoned) AS label,
-	       rnd.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
-	       l.cross_dir, d.lane_number, d.field_length,
-	       ln.description AS lane_type, d.abandoned, d.force_fail,
-	       df.fail_reason, df.fail_date, c.condition, d.fake, d.notes
-	FROM (iris.detector d
-	LEFT OUTER JOIN detector_fail_view df
-		ON d.name = df.device_id AND force_fail = 't')
-	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
-	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
-	LEFT JOIN iris.lane_type ln ON d.lane_type = ln.id
-	LEFT JOIN controller_view c ON d.controller = c.name;
-GRANT SELECT ON detector_view TO PUBLIC;
-
-CREATE VIEW alarm_view AS
-	SELECT a.name, a.description, a.state, a.trigger_time, a.controller,
-		a.pin, c.comm_link, c.drop_id
-	FROM iris.alarm a LEFT JOIN iris.controller c ON a.controller = c.name;
-GRANT SELECT ON alarm_view TO PUBLIC;
-
 CREATE VIEW sign_text_view AS
 	SELECT dms, local, line, multi, rank
 	FROM iris.dms_sign_group dsg
@@ -3543,36 +3656,6 @@ CREATE VIEW controller_report AS
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
 	LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
-
-CREATE VIEW action_plan_event_view AS
-	SELECT e.event_id, e.event_date, ed.description AS event_description,
-		e.action_plan, e.detail
-	FROM event.action_plan_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
-GRANT SELECT ON action_plan_event_view TO PUBLIC;
-
-CREATE VIEW alarm_event_view AS
-	SELECT e.event_id, e.event_date, ed.description AS event_description,
-		e.alarm, a.description
-	FROM event.alarm_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
-	JOIN iris.alarm a ON e.alarm = a.name;
-GRANT SELECT ON alarm_event_view TO PUBLIC;
-
-CREATE VIEW comm_event_view AS
-	SELECT e.event_id, e.event_date, ed.description,
-		e.controller, c.comm_link, c.drop_id
-	FROM event.comm_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
-	LEFT JOIN iris.controller c ON e.controller = c.name;
-GRANT SELECT ON comm_event_view TO PUBLIC;
-
-CREATE VIEW detector_event_view AS
-	SELECT e.event_id, e.event_date, ed.description, e.device_id, dl.label
-	FROM event.detector_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
-	JOIN detector_label_view dl ON e.device_id = dl.det_id;
-GRANT SELECT ON detector_event_view TO PUBLIC;
 
 CREATE VIEW sign_event_view AS
 	SELECT event_id, event_date, description, device_id,
@@ -3625,27 +3708,6 @@ CREATE VIEW incident_update_view AS
 GRANT SELECT ON incident_update_view TO PUBLIC;
 
 --- Data
-
-COPY iris.lane_type (id, description, dcode) FROM stdin;
-0		
-1	Mainline	
-2	Auxiliary	A
-3	CD Lane	CD
-4	Reversible	R
-5	Merge	M
-6	Queue	Q
-7	Exit	X
-8	Bypass	B
-9	Passage	P
-10	Velocity	V
-11	Omnibus	O
-12	Green	G
-13	Wrong Way	Y
-14	HOV	H
-15	HOT	HT
-16	Shoulder	D
-17	Parking	PK
-\.
 
 COPY iris.dms_type (id, description) FROM stdin;
 0	Unknown
@@ -3756,62 +3818,6 @@ COPY iris.inc_range (id, description) FROM stdin;
 0	near
 1	middle
 2	far
-\.
-
-COPY event.event_description (event_desc_id, description) FROM stdin;
-1	Alarm TRIGGERED
-2	Alarm CLEARED
-8	Comm ERROR
-9	Comm RESTORED
-10	Comm QUEUE DRAINED
-11	Comm POLL TIMEOUT
-12	Comm PARSING ERROR
-13	Comm CHECKSUM ERROR
-14	Comm CONTROLLER ERROR
-20	Incident CLEARED
-21	Incident CRASH
-22	Incident STALL
-23	Incident HAZARD
-24	Incident ROADWORK
-29	Incident IMPACT
-65	Comm FAILED
-89	LCS DEPLOYED
-90	LCS CLEARED
-91	Sign DEPLOYED
-92	Sign CLEARED
-94	NO HITS
-95	LOCKED ON
-96	CHATTER
-101	Sign BRIGHTNESS LOW
-102	Sign BRIGHTNESS GOOD
-103	Sign BRIGHTNESS HIGH
-201	Client CONNECT
-202	Client AUTHENTICATE
-203	Client FAIL AUTHENTICATION
-204	Client DISCONNECT
-301	Gate Arm UNKNOWN
-302	Gate Arm FAULT
-303	Gate Arm OPENING
-304	Gate Arm OPEN
-305	Gate Arm WARN CLOSE
-306	Gate Arm CLOSING
-307	Gate Arm CLOSED
-308	Gate Arm TIMEOUT
-401	Meter event
-501	Beacon ON
-502	Beacon OFF
-601	Tag Read
-651	Price DEPLOYED
-652	Price VERIFIED
-701	TT Link too long
-702	TT No data
-703	TT No destination data
-704	TT No origin data
-705	TT No route
-801	Camera SWITCHED
-900	Action Plan ACTIVATED
-901	Action Plan DEACTIVATED
-902	Action Plan Phase CHANGED
 \.
 
 COPY event.incident_detail (name, description) FROM stdin;
