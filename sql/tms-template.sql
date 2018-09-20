@@ -2749,6 +2749,89 @@ CREATE TRIGGER inc_advice_ck_trig
 	FOR EACH ROW EXECUTE PROCEDURE iris.inc_advice_ck();
 
 --
+-- Lane Markings
+--
+CREATE TABLE iris._lane_marking (
+	name VARCHAR(20) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+	notes VARCHAR(64) NOT NULL
+);
+
+ALTER TABLE iris._lane_marking ADD CONSTRAINT _lane_marking_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.lane_marking AS
+	SELECT m.name, geo_loc, controller, pin, notes
+	FROM iris._lane_marking m
+	JOIN iris._device_io d ON m.name = d.name;
+
+CREATE FUNCTION iris.lane_marking_insert() RETURNS TRIGGER AS
+	$lane_marking_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._lane_marking (name, geo_loc, notes)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes);
+	RETURN NEW;
+END;
+$lane_marking_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lane_marking_insert_trig
+    INSTEAD OF INSERT ON iris.lane_marking
+    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_insert();
+
+CREATE FUNCTION iris.lane_marking_update() RETURNS TRIGGER AS
+	$lane_marking_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._lane_marking
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$lane_marking_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lane_marking_update_trig
+    INSTEAD OF UPDATE ON iris.lane_marking
+    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_update();
+
+CREATE FUNCTION iris.lane_marking_delete() RETURNS TRIGGER AS
+	$lane_marking_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$lane_marking_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lane_marking_delete_trig
+    INSTEAD OF DELETE ON iris.lane_marking
+    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_delete();
+
+CREATE VIEW lane_marking_view AS
+	SELECT m.name, m.notes, m.geo_loc, l.roadway, l.road_dir, l.cross_mod,
+	       l.cross_street, l.cross_dir, l.lat, l.lon,
+	       m.controller, m.pin, ctr.comm_link, ctr.drop_id, ctr.condition
+	FROM iris.lane_marking m
+	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name
+	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
+GRANT SELECT ON lane_marking_view TO PUBLIC;
+
+CREATE TABLE iris.lane_action (
+	name VARCHAR(30) PRIMARY KEY,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	lane_marking VARCHAR(20) NOT NULL REFERENCES iris._lane_marking,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+);
+
+--
 --
 --
 CREATE TABLE iris.toll_zone (
@@ -2953,69 +3036,6 @@ $ramp_meter_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER ramp_meter_delete_trig
     INSTEAD OF DELETE ON iris.ramp_meter
     FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_delete();
-
-CREATE TABLE iris._lane_marking (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes VARCHAR(64) NOT NULL
-);
-
-ALTER TABLE iris._lane_marking ADD CONSTRAINT _lane_marking_fkey
-	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
-
-CREATE VIEW iris.lane_marking AS SELECT
-	m.name, geo_loc, controller, pin, notes
-	FROM iris._lane_marking m JOIN iris._device_io d ON m.name = d.name;
-
-CREATE FUNCTION iris.lane_marking_insert() RETURNS TRIGGER AS
-	$lane_marking_insert$
-BEGIN
-	INSERT INTO iris._device_io (name, controller, pin)
-	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._lane_marking (name, geo_loc, notes)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes);
-	RETURN NEW;
-END;
-$lane_marking_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER lane_marking_insert_trig
-    INSTEAD OF INSERT ON iris.lane_marking
-    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_insert();
-
-CREATE FUNCTION iris.lane_marking_update() RETURNS TRIGGER AS
-	$lane_marking_update$
-BEGIN
-	UPDATE iris._device_io
-	   SET controller = NEW.controller,
-	       pin = NEW.pin
-	 WHERE name = OLD.name;
-	UPDATE iris._lane_marking
-	   SET geo_loc = NEW.geo_loc,
-	       notes = NEW.notes
-	 WHERE name = OLD.name;
-	RETURN NEW;
-END;
-$lane_marking_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER lane_marking_update_trig
-    INSTEAD OF UPDATE ON iris.lane_marking
-    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_update();
-
-CREATE FUNCTION iris.lane_marking_delete() RETURNS TRIGGER AS
-	$lane_marking_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$lane_marking_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER lane_marking_delete_trig
-    INSTEAD OF DELETE ON iris.lane_marking
-    FOR EACH ROW EXECUTE PROCEDURE iris.lane_marking_delete();
 
 CREATE TABLE iris._weather_sensor (
 	name VARCHAR(20) PRIMARY KEY,
@@ -3423,13 +3443,6 @@ CREATE UNIQUE INDEX lane_use_multi_indication_idx ON iris.lane_use_multi
 CREATE UNIQUE INDEX lane_use_multi_msg_num_idx ON iris.lane_use_multi
 	USING btree (msg_num, width, height);
 
-CREATE TABLE iris.lane_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	lane_marking VARCHAR(20) NOT NULL REFERENCES iris._lane_marking,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
-);
-
 CREATE TABLE iris.meter_action (
 	name VARCHAR(30) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
@@ -3681,15 +3694,6 @@ CREATE VIEW video_monitor_view AS
 	FROM iris.video_monitor m
 	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
 GRANT SELECT ON video_monitor_view TO PUBLIC;
-
-CREATE VIEW lane_marking_view AS
-	SELECT m.name, m.notes, m.geo_loc, l.roadway, l.road_dir, l.cross_mod,
-	       l.cross_street, l.cross_dir, l.lat, l.lon,
-	       m.controller, m.pin, ctr.comm_link, ctr.drop_id, ctr.condition
-	FROM iris.lane_marking m
-	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name
-	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
-GRANT SELECT ON lane_marking_view TO PUBLIC;
 
 CREATE VIEW weather_sensor_view AS
 	SELECT w.name, w.notes, w.geo_loc, l.roadway, l.road_dir, l.cross_mod,
