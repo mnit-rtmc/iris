@@ -6,6 +6,7 @@ SET client_encoding = 'UTF8';
 
 \set ON_ERROR_STOP
 BEGIN;
+
 CREATE SCHEMA iris;
 ALTER SCHEMA iris OWNER TO tms;
 
@@ -16,10 +17,137 @@ SET SESSION AUTHORIZATION 'tms';
 
 SET search_path = public, pg_catalog;
 
+--
+-- System attributes
+--
 CREATE TABLE iris.system_attribute (
 	name VARCHAR(32) PRIMARY KEY,
 	value VARCHAR(64) NOT NULL
 );
+
+COPY iris.system_attribute (name, value) FROM stdin;
+action_plan_alert_list	
+action_plan_event_purge_days	90
+camera_autoplay	true
+camera_construction_url	
+camera_image_base_url	
+camera_kbd_panasonic_enable	false
+camera_num_blank	999
+camera_out_of_service_url	
+camera_sequence_dwell_sec	5
+camera_preset_store_enable	false
+camera_ptz_blind	true
+camera_stream_controls_enable	false
+camera_switch_event_purge_days	30
+camera_wiper_precip_mm_hr	8
+client_units_si	true
+comm_event_purge_days	14
+comm_idle_disconnect_dms_sec	0
+comm_idle_disconnect_gps_sec	5
+comm_idle_disconnect_modem_sec	20
+database_version	4.80.0
+detector_auto_fail_enable	true
+dict_allowed_scheme	0
+dict_banned_scheme	0
+dms_brightness_enable	true
+dms_comm_loss_enable	true
+dms_composer_edit_mode	1
+dms_default_justification_line	3
+dms_default_justification_page	2
+dms_duration_enable	true
+dms_font_selection_enable	false
+dms_gps_jitter_m	100
+dms_high_temp_cutoff	60
+dms_lamp_test_timeout_secs	30
+dms_manufacturer_enable	true
+dms_max_lines	3
+dms_message_min_pages	1
+dms_page_off_default_secs	0.0
+dms_page_on_default_secs	2.0
+dms_page_on_max_secs	10.0
+dms_page_on_min_secs	0.5
+dms_page_on_selection_enable	false
+dms_pixel_off_limit	2
+dms_pixel_on_limit	1
+dms_pixel_maint_threshold	35
+dms_pixel_status_enable	true
+dms_pixel_test_timeout_secs	30
+dms_querymsg_enable	false
+dms_quickmsg_store_enable	false
+dms_reset_enable	false
+dms_send_confirmation_enable	false
+dms_update_font_table	true
+dmsxml_modem_op_timeout_secs	305
+dmsxml_op_timeout_secs	65
+dmsxml_reinit_detect	false
+email_sender_server	
+email_smtp_host	
+email_recipient_action_plan	
+email_recipient_aws	
+email_recipient_dmsxml_reinit	
+email_recipient_gate_arm	
+gate_arm_alert_timeout_secs	90
+help_trouble_ticket_enable	false
+help_trouble_ticket_url	
+incident_clear_secs	600
+map_extent_name_initial	Home
+map_icon_size_scale_max	30
+map_segment_max_meters	2000
+meter_event_purge_days	14
+meter_green_secs	1.3
+meter_max_red_secs	13.0
+meter_min_red_secs	0.1
+meter_yellow_secs	0.7
+msg_feed_verify	true
+operation_retry_threshold	3
+route_max_legs	8
+route_max_miles	16
+rwis_high_wind_speed_kph	40
+rwis_low_visibility_distance_m	152
+rwis_obs_age_limit_secs	240
+rwis_max_valid_wind_speed_kph	282
+sample_archive_enable	true
+speed_limit_min_mph	45
+speed_limit_default_mph	55
+speed_limit_max_mph	75
+toll_density_alpha	0.045
+toll_density_beta	1.1
+toll_min_price	0.25
+toll_max_price	8
+travel_time_min_mph	15
+uptime_log_enable	false
+vsa_bottleneck_id_mph	55
+vsa_control_threshold	-1000
+vsa_downstream_miles	0.2
+vsa_max_display_mph	60
+vsa_min_display_mph	30
+vsa_min_station_miles	0.1
+vsa_start_intervals	3
+vsa_start_threshold	-1500
+vsa_stop_threshold	-750
+window_title	IRIS: 
+work_request_url	
+\.
+
+-- Helper function to check and update database version from migrate scripts
+CREATE FUNCTION iris.update_version(TEXT, TEXT) RETURNS TEXT AS
+	$update_version$
+DECLARE
+	ver_prev ALIAS FOR $1;
+	ver_new ALIAS FOR $2;
+	ver_db TEXT;
+BEGIN
+	SELECT value INTO ver_db FROM iris.system_attribute
+		WHERE name = 'database_version';
+	IF ver_db != ver_prev THEN
+		RAISE EXCEPTION 'Cannot migrate database -- wrong version: %',
+			ver_db;
+	END IF;
+	UPDATE iris.system_attribute SET value = ver_new
+		WHERE name = 'database_version';
+	RETURN ver_new;
+END;
+$update_version$ language plpgsql;
 
 CREATE TABLE iris.role (
 	name VARCHAR(15) PRIMARY KEY,
@@ -2006,26 +2134,6 @@ CREATE TABLE iris.meter_action (
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
--- Helper function to check and update database version from migrate scripts
-CREATE FUNCTION iris.update_version(TEXT, TEXT) RETURNS TEXT AS
-	$update_version$
-DECLARE
-	ver_prev ALIAS FOR $1;
-	ver_new ALIAS FOR $2;
-	ver_db TEXT;
-BEGIN
-	SELECT value INTO ver_db FROM iris.system_attribute
-		WHERE name = 'database_version';
-	IF ver_db != ver_prev THEN
-		RAISE EXCEPTION 'Cannot migrate database -- wrong version: %',
-			ver_db;
-	END IF;
-	UPDATE iris.system_attribute SET value = ver_new
-		WHERE name = 'database_version';
-	RETURN ver_new;
-END;
-$update_version$ language plpgsql;
-
 CREATE SEQUENCE event.event_id_seq;
 
 CREATE TABLE event.event_description (
@@ -3244,110 +3352,6 @@ WORK_DAYS	New Years Eve
 COPY iris.plan_phase (name, hold_time, next_phase) FROM stdin;
 deployed	0	\N
 undeployed	0	\N
-\.
-
-COPY iris.system_attribute (name, value) FROM stdin;
-action_plan_alert_list	
-action_plan_event_purge_days	90
-camera_autoplay	true
-camera_construction_url	
-camera_image_base_url	
-camera_kbd_panasonic_enable	false
-camera_num_blank	999
-camera_out_of_service_url	
-camera_sequence_dwell_sec	5
-camera_preset_store_enable	false
-camera_ptz_blind	true
-camera_stream_controls_enable	false
-camera_switch_event_purge_days	30
-camera_wiper_precip_mm_hr	8
-client_units_si	true
-comm_event_purge_days	14
-comm_idle_disconnect_dms_sec	0
-comm_idle_disconnect_gps_sec	5
-comm_idle_disconnect_modem_sec	20
-database_version	4.80.0
-detector_auto_fail_enable	true
-dict_allowed_scheme	0
-dict_banned_scheme	0
-dms_brightness_enable	true
-dms_comm_loss_enable	true
-dms_composer_edit_mode	1
-dms_default_justification_line	3
-dms_default_justification_page	2
-dms_duration_enable	true
-dms_font_selection_enable	false
-dms_gps_jitter_m	100
-dms_high_temp_cutoff	60
-dms_lamp_test_timeout_secs	30
-dms_manufacturer_enable	true
-dms_max_lines	3
-dms_message_min_pages	1
-dms_page_off_default_secs	0.0
-dms_page_on_default_secs	2.0
-dms_page_on_max_secs	10.0
-dms_page_on_min_secs	0.5
-dms_page_on_selection_enable	false
-dms_pixel_off_limit	2
-dms_pixel_on_limit	1
-dms_pixel_maint_threshold	35
-dms_pixel_status_enable	true
-dms_pixel_test_timeout_secs	30
-dms_querymsg_enable	false
-dms_quickmsg_store_enable	false
-dms_reset_enable	false
-dms_send_confirmation_enable	false
-dms_update_font_table	true
-dmsxml_modem_op_timeout_secs	305
-dmsxml_op_timeout_secs	65
-dmsxml_reinit_detect	false
-email_sender_server	
-email_smtp_host	
-email_recipient_action_plan	
-email_recipient_aws	
-email_recipient_dmsxml_reinit	
-email_recipient_gate_arm	
-gate_arm_alert_timeout_secs	90
-help_trouble_ticket_enable	false
-help_trouble_ticket_url	
-incident_clear_secs	600
-map_extent_name_initial	Home
-map_icon_size_scale_max	30
-map_segment_max_meters	2000
-meter_event_purge_days	14
-meter_green_secs	1.3
-meter_max_red_secs	13.0
-meter_min_red_secs	0.1
-meter_yellow_secs	0.7
-msg_feed_verify	true
-operation_retry_threshold	3
-route_max_legs	8
-route_max_miles	16
-rwis_high_wind_speed_kph	40
-rwis_low_visibility_distance_m	152
-rwis_obs_age_limit_secs	240
-rwis_max_valid_wind_speed_kph	282
-sample_archive_enable	true
-speed_limit_min_mph	45
-speed_limit_default_mph	55
-speed_limit_max_mph	75
-toll_density_alpha	0.045
-toll_density_beta	1.1
-toll_min_price	0.25
-toll_max_price	8
-travel_time_min_mph	15
-uptime_log_enable	false
-vsa_bottleneck_id_mph	55
-vsa_control_threshold	-1000
-vsa_downstream_miles	0.2
-vsa_max_display_mph	60
-vsa_min_display_mph	30
-vsa_min_station_miles	0.1
-vsa_start_intervals	3
-vsa_start_threshold	-1500
-vsa_stop_threshold	-750
-window_title	IRIS: 
-work_request_url	
 \.
 
 COPY iris.r_node_type (n_type, name) FROM stdin;
