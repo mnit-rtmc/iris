@@ -3055,6 +3055,103 @@ CREATE UNIQUE INDEX lane_use_multi_msg_num_idx ON iris.lane_use_multi
 	USING btree (msg_num, width, height);
 
 --
+-- Parking Areas
+--
+CREATE TABLE iris.parking_area (
+	name VARCHAR(20) PRIMARY KEY,
+	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
+	preset_1 VARCHAR(20) REFERENCES iris.camera_preset(name),
+	preset_2 VARCHAR(20) REFERENCES iris.camera_preset(name),
+	preset_3 VARCHAR(20) REFERENCES iris.camera_preset(name),
+	-- static site data
+	site_id VARCHAR(25) UNIQUE,
+	time_stamp_static TIMESTAMP WITH time zone,
+	relevant_highway VARCHAR(10),
+	reference_post VARCHAR(10),
+	exit_id VARCHAR(10),
+	facility_name VARCHAR(30),
+	street_adr VARCHAR(30),
+	city VARCHAR(30),
+	state VARCHAR(2),
+	zip VARCHAR(10),
+	time_zone VARCHAR(10),
+	ownership VARCHAR(2),
+	capacity INTEGER,
+	low_threshold INTEGER,
+	amenities INTEGER,
+	-- dynamic site data
+	time_stamp timestamp WITH time zone,
+	reported_available VARCHAR(8),
+	true_available INTEGER,
+	trend VARCHAR(8),
+	open BOOLEAN,
+	trust_data BOOLEAN,
+	last_verification_check TIMESTAMP WITH time zone,
+	verification_check_amplitude INTEGER
+);
+
+CREATE TABLE iris.parking_area_amenities (
+	bit INTEGER PRIMARY KEY,
+	amenity VARCHAR(32) NOT NULL
+);
+ALTER TABLE iris.parking_area_amenities ADD CONSTRAINT amenity_bit_ck
+	CHECK (bit >= 0 AND bit < 32);
+
+COPY iris.parking_area_amenities (bit, amenity) FROM stdin;
+0	Flush toilet
+1	Assisted restroom
+2	Drinking fountain
+3	Shower
+4	Picnic table
+5	Picnic shelter
+6	Pay phone
+7	TTY pay phone
+8	Wireless internet
+9	ATM
+10	Vending machine
+11	Shop
+12	Play area
+13	Pet excercise area
+14	Interpretive information
+\.
+
+CREATE FUNCTION iris.parking_area_amenities(INTEGER)
+	RETURNS SETOF iris.parking_area_amenities AS $parking_area_amenities$
+DECLARE
+	ms RECORD;
+	b INTEGER;
+BEGIN
+	FOR ms IN SELECT bit, amenity FROM iris.parking_area_amenities LOOP
+		b = 1 << ms.bit;
+		IF ($1 & b) = b THEN
+			RETURN NEXT ms;
+		END IF;
+	END LOOP;
+END;
+$parking_area_amenities$ LANGUAGE plpgsql;
+
+CREATE VIEW parking_area_view AS
+	SELECT pa.name, site_id, time_stamp_static, relevant_highway,
+	       reference_post, exit_id, facility_name, street_adr, city, state,
+	       zip, time_zone, ownership, capacity, low_threshold,
+	       (SELECT string_agg(a.amenity, ', ') FROM
+	        (SELECT bit, amenity FROM iris.parking_area_amenities(amenities)
+	         ORDER BY bit) AS a) AS amenities,
+	       time_stamp, reported_available, true_available, trend, open,
+	       trust_data, last_verification_check, verification_check_amplitude,
+	       p1.camera AS camera_1, p2.camera AS camera_2,
+	       p3.camera AS camera_3,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.lat, l.lon, sa.value AS camera_image_base_url
+	FROM iris.parking_area pa
+	LEFT JOIN iris.camera_preset p1 ON preset_1 = p1.name
+	LEFT JOIN iris.camera_preset p2 ON preset_2 = p2.name
+	LEFT JOIN iris.camera_preset p3 ON preset_3 = p3.name
+	LEFT JOIN geo_loc_view l ON pa.geo_loc = l.name
+	LEFT JOIN iris.system_attribute sa ON sa.name = 'camera_image_base_url';
+GRANT SELECT ON parking_area_view TO PUBLIC;
+
+--
 --
 --
 CREATE TABLE iris.toll_zone (
@@ -3450,61 +3547,6 @@ CREATE TABLE iris.tag_reader_dms (
 );
 ALTER TABLE iris.tag_reader_dms ADD PRIMARY KEY (tag_reader, dms);
 
-CREATE TABLE iris.parking_area (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
-	preset_1 VARCHAR(20) REFERENCES iris.camera_preset(name),
-	preset_2 VARCHAR(20) REFERENCES iris.camera_preset(name),
-	preset_3 VARCHAR(20) REFERENCES iris.camera_preset(name),
-	-- static site data
-	site_id VARCHAR(25) UNIQUE,
-	time_stamp_static timestamp WITH time zone,
-	relevant_highway VARCHAR(10),
-	reference_post VARCHAR(10),
-	exit_id VARCHAR(10),
-	facility_name VARCHAR(30),
-	street_adr VARCHAR(30),
-	city VARCHAR(30),
-	state VARCHAR(2),
-	zip VARCHAR(10),
-	time_zone VARCHAR(10),
-	ownership VARCHAR(2),
-	capacity INTEGER,
-	low_threshold INTEGER,
-	amenities INTEGER,
-	-- dynamic site data
-	time_stamp timestamp WITH time zone,
-	reported_available VARCHAR(8),
-	true_available INTEGER,
-	trend VARCHAR(8),
-	open BOOLEAN,
-	trust_data BOOLEAN,
-	last_verification_check timestamp WITH time zone,
-	verification_check_amplitude INTEGER
-);
-
-CREATE TABLE iris.parking_area_amenities (
-	bit INTEGER PRIMARY KEY,
-	amenity VARCHAR(32) NOT NULL
-);
-ALTER TABLE iris.parking_area_amenities ADD CONSTRAINT amenity_bit_ck
-	CHECK (bit >= 0 AND bit < 32);
-
-CREATE FUNCTION iris.parking_area_amenities(INTEGER)
-	RETURNS SETOF iris.parking_area_amenities AS $parking_area_amenities$
-DECLARE
-	ms RECORD;
-	b INTEGER;
-BEGIN
-	FOR ms IN SELECT bit, amenity FROM iris.parking_area_amenities LOOP
-		b = 1 << ms.bit;
-		IF ($1 & b) = b THEN
-			RETURN NEXT ms;
-		END IF;
-	END LOOP;
-END;
-$parking_area_amenities$ LANGUAGE plpgsql;
-
 CREATE TABLE iris.meter_action (
 	name VARCHAR(30) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
@@ -3750,27 +3792,6 @@ CREATE VIEW tag_reader_dms_view AS
 	FROM iris.tag_reader_dms;
 GRANT SELECT ON tag_reader_dms_view TO PUBLIC;
 
-CREATE VIEW parking_area_view AS
-	SELECT pa.name, site_id, time_stamp_static, relevant_highway,
-	       reference_post, exit_id, facility_name, street_adr, city, state,
-	       zip, time_zone, ownership, capacity, low_threshold,
-	       (SELECT string_agg(a.amenity, ', ') FROM
-	        (SELECT bit, amenity FROM iris.parking_area_amenities(amenities)
-	         ORDER BY bit) AS a) AS amenities,
-	       time_stamp, reported_available, true_available, trend, open,
-	       trust_data, last_verification_check, verification_check_amplitude,
-	       p1.camera AS camera_1, p2.camera AS camera_2,
-	       p3.camera AS camera_3,
-	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.lat, l.lon, sa.value AS camera_image_base_url
-	FROM iris.parking_area pa
-	LEFT JOIN iris.camera_preset p1 ON preset_1 = p1.name
-	LEFT JOIN iris.camera_preset p2 ON preset_2 = p2.name
-	LEFT JOIN iris.camera_preset p3 ON preset_3 = p3.name
-	LEFT JOIN geo_loc_view l ON pa.geo_loc = l.name
-	LEFT JOIN iris.system_attribute sa ON sa.name = 'camera_image_base_url';
-GRANT SELECT ON parking_area_view TO PUBLIC;
-
 CREATE VIEW iris.device_geo_loc_view AS
 	SELECT name, geo_loc FROM iris._lane_marking UNION ALL
 	SELECT name, geo_loc FROM iris._beacon UNION ALL
@@ -3840,24 +3861,6 @@ COPY iris.tag_reader_sync_mode (id, description) FROM stdin;
 1	master
 2	GPS secondary
 3	GPS primary
-\.
-
-COPY iris.parking_area_amenities (bit, amenity) FROM stdin;
-0	Flush toilet
-1	Assisted restroom
-2	Drinking fountain
-3	Shower
-4	Picnic table
-5	Picnic shelter
-6	Pay phone
-7	TTY pay phone
-8	Wireless internet
-9	ATM
-10	Vending machine
-11	Shop
-12	Play area
-13	Pet excercise area
-14	Interpretive information
 \.
 
 COPY event.meter_phase (id, description) FROM stdin;
