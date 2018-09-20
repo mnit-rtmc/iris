@@ -1052,6 +1052,371 @@ CREATE VIEW device_controller_view AS
 GRANT SELECT ON device_controller_view TO PUBLIC;
 
 --
+-- Cameras, Encoders, Play Lists, Catalogs, Presets
+--
+CREATE TABLE iris.encoding (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(20) NOT NULL
+);
+
+COPY iris.encoding (id, description) FROM stdin;
+0	UNKNOWN
+1	MJPEG
+2	MPEG2
+3	MPEG4
+4	H264
+5	H265
+\.
+
+CREATE TABLE iris.encoder_type (
+	name VARCHAR(24) PRIMARY KEY,
+	encoding INTEGER NOT NULL REFERENCES iris.encoding,
+	uri_scheme VARCHAR(8) NOT NULL,
+	uri_path VARCHAR(64) NOT NULL,
+	latency INTEGER NOT NULL
+);
+
+CREATE VIEW encoder_type_view AS
+	SELECT name, enc.description AS encoding, uri_scheme, uri_path, latency
+	FROM iris.encoder_type et
+	LEFT JOIN iris.encoding enc ON et.encoding = enc.id;
+GRANT SELECT ON encoder_type_view TO PUBLIC;
+
+CREATE TABLE iris._camera (
+	name VARCHAR(20) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+	notes text NOT NULL,
+	cam_num INTEGER UNIQUE,
+	encoder_type VARCHAR(24) REFERENCES iris.encoder_type,
+	encoder VARCHAR(64) NOT NULL,
+	enc_mcast VARCHAR(64) NOT NULL,
+	encoder_channel INTEGER NOT NULL,
+	publish BOOLEAN NOT NULL,
+	video_loss BOOLEAN NOT NULL
+);
+
+ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.camera AS
+	SELECT c.name, geo_loc, controller, pin, notes, cam_num, encoder_type,
+	       encoder, enc_mcast, encoder_channel, publish, video_loss
+	FROM iris._camera c
+	JOIN iris._device_io d ON c.name = d.name;
+
+CREATE FUNCTION iris.camera_insert() RETURNS TRIGGER AS
+	$camera_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._camera (name, geo_loc, notes, cam_num, encoder_type,
+	            encoder, enc_mcast, encoder_channel, publish, video_loss)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.cam_num,
+	             NEW.encoder_type, NEW.encoder, NEW.enc_mcast,
+	             NEW.encoder_channel, NEW.publish, NEW.video_loss);
+	RETURN NEW;
+END;
+$camera_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_insert_trig
+    INSTEAD OF INSERT ON iris.camera
+    FOR EACH ROW EXECUTE PROCEDURE iris.camera_insert();
+
+CREATE FUNCTION iris.camera_update() RETURNS TRIGGER AS
+	$camera_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._camera
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes,
+	       cam_num = NEW.cam_num,
+	       encoder_type = NEW.encoder_type,
+	       encoder = NEW.encoder,
+	       enc_mcast = NEW.enc_mcast,
+	       encoder_channel = NEW.encoder_channel,
+	       publish = NEW.publish,
+	       video_loss = NEW.video_loss
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$camera_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_update_trig
+    INSTEAD OF UPDATE ON iris.camera
+    FOR EACH ROW EXECUTE PROCEDURE iris.camera_update();
+
+CREATE FUNCTION iris.camera_delete() RETURNS TRIGGER AS
+	$camera_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$camera_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_delete_trig
+    INSTEAD OF DELETE ON iris.camera
+    FOR EACH ROW EXECUTE PROCEDURE iris.camera_delete();
+
+CREATE VIEW camera_view AS
+	SELECT c.name, c.notes, cam_num, encoder_type, c.encoder, c.enc_mcast,
+	       c.encoder_channel, c.publish, c.video_loss, c.geo_loc,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.location, l.lat, l.lon,
+	       c.controller, ctr.comm_link, ctr.drop_id, ctr.condition
+	FROM iris.camera c
+	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
+	LEFT JOIN controller_view ctr ON c.controller = ctr.name;
+GRANT SELECT ON camera_view TO PUBLIC;
+
+CREATE TABLE iris._cam_sequence (
+	seq_num INTEGER PRIMARY KEY
+);
+
+CREATE TABLE iris._play_list (
+	name VARCHAR(20) PRIMARY KEY,
+	seq_num INTEGER REFERENCES iris._cam_sequence,
+	description VARCHAR(32)
+);
+
+CREATE VIEW iris.play_list AS
+	SELECT name, seq_num, description
+	FROM iris._play_list;
+
+CREATE FUNCTION iris.play_list_insert() RETURNS TRIGGER AS
+	$play_list_insert$
+BEGIN
+	IF NEW.seq_num IS NOT NULL THEN
+		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
+	END IF;
+	INSERT INTO iris._play_list (name, seq_num, description)
+	     VALUES (NEW.name, NEW.seq_num, NEW.description);
+	RETURN NEW;
+END;
+$play_list_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER play_list_insert_trig
+    INSTEAD OF INSERT ON iris.play_list
+    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_insert();
+
+CREATE FUNCTION iris.play_list_update() RETURNS TRIGGER AS
+	$play_list_update$
+BEGIN
+	IF NEW.seq_num IS NOT NULL AND (OLD.seq_num IS NULL OR
+	                                NEW.seq_num != OLD.seq_num)
+	THEN
+		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
+	END IF;
+	UPDATE iris._play_list
+	   SET seq_num = NEW.seq_num,
+	       description = NEW.description
+	 WHERE name = OLD.name;
+	IF OLD.seq_num IS NOT NULL AND (NEW.seq_num IS NULL OR
+	                                NEW.seq_num != OLD.seq_num)
+	THEN
+		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
+	END IF;
+	RETURN NEW;
+END;
+$play_list_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER play_list_update_trig
+    INSTEAD OF UPDATE ON iris.play_list
+    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_update();
+
+CREATE FUNCTION iris.play_list_delete() RETURNS TRIGGER AS
+	$play_list_delete$
+BEGIN
+	DELETE FROM iris._play_list WHERE name = OLD.name;
+	IF FOUND THEN
+		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$play_list_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER play_list_delete_trig
+    INSTEAD OF DELETE ON iris.play_list
+    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_delete();
+
+CREATE TABLE iris.play_list_camera (
+	play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list,
+	ordinal INTEGER NOT NULL,
+	camera VARCHAR(20) NOT NULL REFERENCES iris._camera
+);
+ALTER TABLE iris.play_list_camera ADD PRIMARY KEY (play_list, ordinal);
+
+CREATE VIEW play_list_view AS
+	SELECT play_list, ordinal, seq_num, camera
+	FROM iris.play_list_camera
+	JOIN iris.play_list ON play_list_camera.play_list = play_list.name;
+GRANT SELECT ON play_list_view TO PUBLIC;
+
+CREATE TABLE iris._catalog (
+	name VARCHAR(20) PRIMARY KEY,
+	seq_num INTEGER NOT NULL REFERENCES iris._cam_sequence,
+	description VARCHAR(32)
+);
+
+CREATE VIEW iris.catalog AS
+	SELECT name, seq_num, description
+	FROM iris._catalog;
+
+CREATE FUNCTION iris.catalog_insert() RETURNS TRIGGER AS
+	$catalog_insert$
+BEGIN
+	INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
+	INSERT INTO iris._catalog (name, seq_num, description)
+	     VALUES (NEW.name,NEW.seq_num, NEW.catalog);
+	RETURN NEW;
+END;
+$catalog_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER catalog_insert_trig
+    INSTEAD OF INSERT ON iris.catalog
+    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_insert();
+
+CREATE FUNCTION iris.catalog_update() RETURNS TRIGGER AS
+	$catalog_update$
+BEGIN
+	IF NEW.seq_num != OLD.seq_num THEN
+		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
+	END IF;
+	UPDATE iris._catalog
+	   SET seq_num = NEW.seq_num,
+	       description = NEW.description
+	 WHERE name = OLD.name;
+	IF NEW.seq_num != OLD.seq_num THEN
+		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
+	END IF;
+	RETURN NEW;
+END;
+$catalog_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER catalog_update_trig
+    INSTEAD OF UPDATE ON iris.catalog
+    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_update();
+
+CREATE FUNCTION iris.catalog_delete() RETURNS TRIGGER AS
+	$catalog_delete$
+BEGIN
+	DELETE FROM iris._catalog WHERE name = OLD.name;
+	IF FOUND THEN
+		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$catalog_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER catalog_delete_trig
+    INSTEAD OF DELETE ON iris.catalog
+    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_delete();
+
+CREATE TABLE iris.catalog_play_list (
+	catalog VARCHAR(20) NOT NULL REFERENCES iris._catalog,
+	ordinal INTEGER NOT NULL,
+	play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list
+);
+ALTER TABLE iris.catalog_play_list ADD PRIMARY KEY (catalog, ordinal);
+
+CREATE TABLE iris.camera_preset (
+	name VARCHAR(20) PRIMARY KEY,
+	camera VARCHAR(20) NOT NULL REFERENCES iris._camera,
+	preset_num INTEGER NOT NULL CHECK (preset_num > 0 AND preset_num <= 12),
+	direction SMALLINT REFERENCES iris.direction(id),
+	UNIQUE(camera, preset_num)
+);
+
+CREATE TABLE iris._device_preset (
+	name VARCHAR(20) PRIMARY KEY,
+	preset VARCHAR(20) UNIQUE REFERENCES iris.camera_preset(name)
+);
+
+CREATE VIEW camera_preset_view AS
+	SELECT cp.name, camera, preset_num, direction, dp.name AS device
+	FROM iris.camera_preset cp
+	JOIN iris._device_preset dp ON cp.name = dp.preset;
+GRANT SELECT ON camera_preset_view TO PUBLIC;
+
+--
+-- Alarms
+--
+CREATE TABLE iris._alarm (
+	name VARCHAR(20) PRIMARY KEY,
+	description VARCHAR(24) NOT NULL,
+	state BOOLEAN NOT NULL,
+	trigger_time TIMESTAMP WITH time zone
+);
+
+ALTER TABLE iris._alarm ADD CONSTRAINT _alarm_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.alarm AS
+	SELECT a.name, description, controller, pin, state, trigger_time
+	FROM iris._alarm a JOIN iris._device_io d ON a.name = d.name;
+
+CREATE FUNCTION iris.alarm_insert() RETURNS TRIGGER AS
+	$alarm_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._alarm (name, description, state, trigger_time)
+	     VALUES (NEW.name, NEW.description, NEW.state, NEW.trigger_time);
+	RETURN NEW;
+END;
+$alarm_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER alarm_insert_trig
+    INSTEAD OF INSERT ON iris.alarm
+    FOR EACH ROW EXECUTE PROCEDURE iris.alarm_insert();
+
+CREATE FUNCTION iris.alarm_update() RETURNS TRIGGER AS
+	$alarm_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._alarm
+	   SET description = NEW.description,
+	       state = NEW.state,
+	       trigger_time = NEW.trigger_time
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$alarm_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER alarm_update_trig
+    INSTEAD OF UPDATE ON iris.alarm
+    FOR EACH ROW EXECUTE PROCEDURE iris.alarm_update();
+
+CREATE FUNCTION iris.alarm_delete() RETURNS TRIGGER AS
+	$alarm_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$alarm_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER alarm_delete_trig
+    INSTEAD OF DELETE ON iris.alarm
+    FOR EACH ROW EXECUTE PROCEDURE iris.alarm_delete();
+
+--
 --
 --
 CREATE TABLE iris.color_scheme (
@@ -1221,71 +1586,6 @@ CREATE TABLE iris.quick_message (
 	multi VARCHAR(1024) NOT NULL
 );
 
-CREATE TABLE iris._alarm (
-	name VARCHAR(20) PRIMARY KEY,
-	description VARCHAR(24) NOT NULL,
-	state BOOLEAN NOT NULL,
-	trigger_time timestamp WITH time zone
-);
-
-ALTER TABLE iris._alarm ADD CONSTRAINT _alarm_fkey
-	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
-
-CREATE VIEW iris.alarm AS
-	SELECT a.name, description, controller, pin, state, trigger_time
-	FROM iris._alarm a JOIN iris._device_io d ON a.name = d.name;
-
-CREATE FUNCTION iris.alarm_insert() RETURNS TRIGGER AS
-	$alarm_insert$
-BEGIN
-	INSERT INTO iris._device_io (name, controller, pin)
-	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._alarm (name, description, state, trigger_time)
-	     VALUES (NEW.name, NEW.description, NEW.state, NEW.trigger_time);
-	RETURN NEW;
-END;
-$alarm_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER alarm_insert_trig
-    INSTEAD OF INSERT ON iris.alarm
-    FOR EACH ROW EXECUTE PROCEDURE iris.alarm_insert();
-
-CREATE FUNCTION iris.alarm_update() RETURNS TRIGGER AS
-	$alarm_update$
-BEGIN
-	UPDATE iris._device_io
-	   SET controller = NEW.controller,
-	       pin = NEW.pin
-	 WHERE name = OLD.name;
-	UPDATE iris._alarm
-	   SET description = NEW.description,
-	       state = NEW.state,
-	       trigger_time = NEW.trigger_time
-	 WHERE name = OLD.name;
-	RETURN NEW;
-END;
-$alarm_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER alarm_update_trig
-    INSTEAD OF UPDATE ON iris.alarm
-    FOR EACH ROW EXECUTE PROCEDURE iris.alarm_update();
-
-CREATE FUNCTION iris.alarm_delete() RETURNS TRIGGER AS
-	$alarm_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$alarm_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER alarm_delete_trig
-    INSTEAD OF DELETE ON iris.alarm
-    FOR EACH ROW EXECUTE PROCEDURE iris.alarm_delete();
-
 CREATE TABLE iris._gps (
 	name VARCHAR(20) PRIMARY KEY,
 	notes VARCHAR(32),
@@ -1438,248 +1738,6 @@ CREATE TRIGGER detector_delete_trig
     INSTEAD OF DELETE ON iris.detector
     FOR EACH ROW EXECUTE PROCEDURE iris.detector_delete();
 
-CREATE TABLE iris.encoding (
-	id integer PRIMARY KEY,
-	description VARCHAR(20) NOT NULL
-);
-
-CREATE TABLE iris.encoder_type (
-	name VARCHAR(24) PRIMARY KEY,
-	encoding INTEGER NOT NULL REFERENCES iris.encoding,
-	uri_scheme VARCHAR(8) NOT NULL,
-	uri_path VARCHAR(64) NOT NULL,
-	latency INTEGER NOT NULL
-);
-
-CREATE TABLE iris._camera (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes text NOT NULL,
-	cam_num INTEGER UNIQUE,
-	encoder_type VARCHAR(24) REFERENCES iris.encoder_type,
-	encoder VARCHAR(64) NOT NULL,
-	enc_mcast VARCHAR(64) NOT NULL,
-	encoder_channel INTEGER NOT NULL,
-	publish BOOLEAN NOT NULL,
-	video_loss BOOLEAN NOT NULL
-);
-
-ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
-	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
-
-CREATE VIEW iris.camera AS SELECT
-	c.name, geo_loc, controller, pin, notes, cam_num, encoder_type, encoder,
-		enc_mcast, encoder_channel, publish, video_loss
-	FROM iris._camera c JOIN iris._device_io d ON c.name = d.name;
-
-CREATE FUNCTION iris.camera_insert() RETURNS TRIGGER AS
-	$camera_insert$
-BEGIN
-	INSERT INTO iris._device_io (name, controller, pin)
-	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._camera (name, geo_loc, notes, cam_num, encoder_type,
-	            encoder, enc_mcast, encoder_channel, publish, video_loss)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.cam_num,
-	             NEW.encoder_type, NEW.encoder, NEW.enc_mcast,
-	             NEW.encoder_channel, NEW.publish, NEW.video_loss);
-	RETURN NEW;
-END;
-$camera_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER camera_insert_trig
-    INSTEAD OF INSERT ON iris.camera
-    FOR EACH ROW EXECUTE PROCEDURE iris.camera_insert();
-
-CREATE FUNCTION iris.camera_update() RETURNS TRIGGER AS
-	$camera_update$
-BEGIN
-	UPDATE iris._device_io
-	   SET controller = NEW.controller,
-	       pin = NEW.pin
-	 WHERE name = OLD.name;
-	UPDATE iris._camera
-	   SET geo_loc = NEW.geo_loc,
-	       notes = NEW.notes,
-	       cam_num = NEW.cam_num,
-	       encoder_type = NEW.encoder_type,
-	       encoder = NEW.encoder,
-	       enc_mcast = NEW.enc_mcast,
-	       encoder_channel = NEW.encoder_channel,
-	       publish = NEW.publish,
-	       video_loss = NEW.video_loss
-	 WHERE name = OLD.name;
-	RETURN NEW;
-END;
-$camera_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER camera_update_trig
-    INSTEAD OF UPDATE ON iris.camera
-    FOR EACH ROW EXECUTE PROCEDURE iris.camera_update();
-
-CREATE FUNCTION iris.camera_delete() RETURNS TRIGGER AS
-	$camera_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$camera_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER camera_delete_trig
-    INSTEAD OF DELETE ON iris.camera
-    FOR EACH ROW EXECUTE PROCEDURE iris.camera_delete();
-
-CREATE TABLE iris._cam_sequence (
-	seq_num INTEGER PRIMARY KEY
-);
-
-CREATE TABLE iris._play_list (
-	name VARCHAR(20) PRIMARY KEY,
-	seq_num INTEGER REFERENCES iris._cam_sequence,
-	description VARCHAR(32)
-);
-
-CREATE VIEW iris.play_list AS
-	SELECT name, seq_num, description
-	FROM iris._play_list;
-
-CREATE FUNCTION iris.play_list_insert() RETURNS TRIGGER AS
-	$play_list_insert$
-BEGIN
-	IF NEW.seq_num IS NOT NULL THEN
-		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	END IF;
-	INSERT INTO iris._play_list (name, seq_num, description)
-	     VALUES (NEW.name, NEW.seq_num, NEW.description);
-	RETURN NEW;
-END;
-$play_list_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER play_list_insert_trig
-    INSTEAD OF INSERT ON iris.play_list
-    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_insert();
-
-CREATE FUNCTION iris.play_list_update() RETURNS TRIGGER AS
-	$play_list_update$
-BEGIN
-	IF NEW.seq_num IS NOT NULL AND (OLD.seq_num IS NULL OR
-	                                NEW.seq_num != OLD.seq_num)
-	THEN
-		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	END IF;
-	UPDATE iris._play_list
-	   SET seq_num = NEW.seq_num,
-	       description = NEW.description
-	 WHERE name = OLD.name;
-	IF OLD.seq_num IS NOT NULL AND (NEW.seq_num IS NULL OR
-	                                NEW.seq_num != OLD.seq_num)
-	THEN
-		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
-	END IF;
-	RETURN NEW;
-END;
-$play_list_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER play_list_update_trig
-    INSTEAD OF UPDATE ON iris.play_list
-    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_update();
-
-CREATE FUNCTION iris.play_list_delete() RETURNS TRIGGER AS
-	$play_list_delete$
-BEGIN
-	DELETE FROM iris._play_list WHERE name = OLD.name;
-	IF FOUND THEN
-		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$play_list_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER play_list_delete_trig
-    INSTEAD OF DELETE ON iris.play_list
-    FOR EACH ROW EXECUTE PROCEDURE iris.play_list_delete();
-
-CREATE TABLE iris.play_list_camera (
-	play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list,
-	ordinal INTEGER NOT NULL,
-	camera VARCHAR(20) NOT NULL REFERENCES iris._camera
-);
-ALTER TABLE iris.play_list_camera ADD PRIMARY KEY (play_list, ordinal);
-
-CREATE TABLE iris._catalog (
-	name VARCHAR(20) PRIMARY KEY,
-	seq_num INTEGER NOT NULL REFERENCES iris._cam_sequence,
-	description VARCHAR(32)
-);
-
-CREATE VIEW iris.catalog AS
-	SELECT name, seq_num, description
-	FROM iris._catalog;
-
-CREATE FUNCTION iris.catalog_insert() RETURNS TRIGGER AS
-	$catalog_insert$
-BEGIN
-	INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	INSERT INTO iris._catalog (name, seq_num, description)
-	     VALUES (NEW.name,NEW.seq_num, NEW.catalog);
-	RETURN NEW;
-END;
-$catalog_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER catalog_insert_trig
-    INSTEAD OF INSERT ON iris.catalog
-    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_insert();
-
-CREATE FUNCTION iris.catalog_update() RETURNS TRIGGER AS
-	$catalog_update$
-BEGIN
-	IF NEW.seq_num != OLD.seq_num THEN
-		INSERT INTO iris._cam_sequence (seq_num) VALUES (NEW.seq_num);
-	END IF;
-	UPDATE iris._catalog
-	   SET seq_num = NEW.seq_num,
-	       description = NEW.description
-	 WHERE name = OLD.name;
-	IF NEW.seq_num != OLD.seq_num THEN
-		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
-	END IF;
-	RETURN NEW;
-END;
-$catalog_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER catalog_update_trig
-    INSTEAD OF UPDATE ON iris.catalog
-    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_update();
-
-CREATE FUNCTION iris.catalog_delete() RETURNS TRIGGER AS
-	$catalog_delete$
-BEGIN
-	DELETE FROM iris._catalog WHERE name = OLD.name;
-	IF FOUND THEN
-		DELETE FROM iris._cam_sequence WHERE seq_num = OLD.seq_num;
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$catalog_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER catalog_delete_trig
-    INSTEAD OF DELETE ON iris.catalog
-    FOR EACH ROW EXECUTE PROCEDURE iris.catalog_delete();
-
-CREATE TABLE iris.catalog_play_list (
-	catalog VARCHAR(20) NOT NULL REFERENCES iris._catalog,
-	ordinal INTEGER NOT NULL,
-	play_list VARCHAR(20) NOT NULL REFERENCES iris._play_list
-);
-ALTER TABLE iris.catalog_play_list ADD PRIMARY KEY (catalog, ordinal);
-
 CREATE TABLE iris.monitor_style (
 	name VARCHAR(24) PRIMARY KEY,
 	force_aspect BOOLEAN NOT NULL,
@@ -1764,21 +1822,6 @@ $video_monitor_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER video_monitor_delete_trig
     INSTEAD OF DELETE ON iris.video_monitor
     FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_delete();
-
-CREATE TABLE iris.camera_preset (
-	name VARCHAR(20) PRIMARY KEY,
-	camera VARCHAR(20) NOT NULL REFERENCES iris._camera,
-	preset_num INTEGER NOT NULL CHECK (preset_num > 0 AND preset_num <= 12),
-	direction SMALLINT REFERENCES iris.direction(id),
-	UNIQUE(camera, preset_num)
-);
-
--- Ideally, _device_preset would be combined with _device_io,
--- but that would create a circular dependency.
-CREATE TABLE iris._device_preset (
-	name VARCHAR(20) PRIMARY KEY,
-	preset VARCHAR(20) UNIQUE REFERENCES iris.camera_preset(name)
-);
 
 CREATE TABLE iris._beacon (
 	name VARCHAR(20) PRIMARY KEY,
@@ -3286,35 +3329,6 @@ CREATE VIEW video_monitor_view AS
 	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
 GRANT SELECT ON video_monitor_view TO PUBLIC;
 
-CREATE VIEW encoder_type_view AS
-	SELECT name, enc.description AS encoding, uri_scheme, uri_path, latency
-	FROM iris.encoder_type et
-	LEFT JOIN iris.encoding enc ON et.encoding = enc.id;
-GRANT SELECT ON encoder_type_view TO PUBLIC;
-
-CREATE VIEW camera_view AS
-	SELECT c.name, c.notes, cam_num, encoder_type, c.encoder, c.enc_mcast,
-	       c.encoder_channel, c.publish, c.video_loss, c.geo_loc,
-	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.location, l.lat, l.lon,
-	       c.controller, ctr.comm_link, ctr.drop_id, ctr.condition
-	FROM iris.camera c
-	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name
-	LEFT JOIN controller_view ctr ON c.controller = ctr.name;
-GRANT SELECT ON camera_view TO PUBLIC;
-
-CREATE VIEW play_list_view AS
-	SELECT play_list, ordinal, seq_num, camera
-	FROM iris.play_list_camera
-	JOIN iris.play_list ON play_list_camera.play_list = play_list.name;
-GRANT SELECT ON play_list_view TO PUBLIC;
-
-CREATE VIEW camera_preset_view AS
-	SELECT cp.name, camera, preset_num, direction, dp.name AS device
-	FROM iris.camera_preset cp
-	JOIN iris._device_preset dp ON cp.name = dp.preset;
-GRANT SELECT ON camera_preset_view TO PUBLIC;
-
 CREATE VIEW beacon_view AS
 	SELECT b.name, b.notes, b.message, p.camera, p.preset_num, b.geo_loc,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
@@ -3708,15 +3722,6 @@ COPY iris.meter_lock (id, description) FROM stdin;
 4	Testing
 5	Police panel
 6	Manual mode
-\.
-
-COPY iris.encoding (id, description) FROM stdin;
-0	UNKNOWN
-1	MJPEG
-2	MPEG2
-3	MPEG4
-4	H264
-5	H265
 \.
 
 COPY iris.tag_reader_sync_mode (id, description) FROM stdin;
