@@ -1417,8 +1417,107 @@ CREATE TRIGGER alarm_delete_trig
     FOR EACH ROW EXECUTE PROCEDURE iris.alarm_delete();
 
 --
+-- Beacons
 --
---
+CREATE TABLE iris._beacon (
+	name VARCHAR(20) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+	notes text NOT NULL,
+	message text NOT NULL,
+	verify_pin INTEGER -- FIXME: make unique on _device_io_ctrl_pin
+);
+
+ALTER TABLE iris._beacon ADD CONSTRAINT _beacon_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.beacon AS
+	SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin,
+	       preset
+	FROM iris._beacon b
+	JOIN iris._device_io d ON b.name = d.name
+	JOIN iris._device_preset p ON b.name = p.name;
+
+CREATE FUNCTION iris.beacon_insert() RETURNS TRIGGER AS
+	$beacon_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	    VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._device_preset (name, preset)
+	    VALUES (NEW.name, NEW.preset);
+	INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin)
+	    VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message,
+	            NEW.verify_pin);
+	RETURN NEW;
+END;
+$beacon_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER beacon_insert_trig
+    INSTEAD OF INSERT ON iris.beacon
+    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_insert();
+
+CREATE FUNCTION iris.beacon_update() RETURNS TRIGGER AS
+	$beacon_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._device_preset
+	   SET preset = NEW.preset
+	 WHERE name = OLD.name;
+	UPDATE iris._beacon
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes,
+	       message = NEW.message,
+	       verify_pin = NEW.verify_pin
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$beacon_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER beacon_update_trig
+    INSTEAD OF UPDATE ON iris.beacon
+    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_update();
+
+CREATE FUNCTION iris.beacon_delete() RETURNS TRIGGER AS
+	$beacon_delete$
+BEGIN
+	DELETE FROM iris._device_preset WHERE name = OLD.name;
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$beacon_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER beacon_delete_trig
+    INSTEAD OF DELETE ON iris.beacon
+    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_delete();
+
+CREATE VIEW beacon_view AS
+	SELECT b.name, b.notes, b.message, p.camera, p.preset_num, b.geo_loc,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.lat, l.lon,
+	       b.controller, b.pin, b.verify_pin, ctr.comm_link, ctr.drop_id,
+	       ctr.condition
+	FROM iris.beacon b
+	LEFT JOIN iris.camera_preset p ON b.preset = p.name
+	LEFT JOIN geo_loc_view l ON b.geo_loc = l.name
+	LEFT JOIN controller_view ctr ON b.controller = ctr.name;
+GRANT SELECT ON beacon_view TO PUBLIC;
+
+CREATE TABLE iris.beacon_action (
+	name VARCHAR(30) PRIMARY KEY,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+);
+
+
+
+
 CREATE TABLE iris.color_scheme (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(16) NOT NULL
@@ -1822,83 +1921,6 @@ $video_monitor_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER video_monitor_delete_trig
     INSTEAD OF DELETE ON iris.video_monitor
     FOR EACH ROW EXECUTE PROCEDURE iris.video_monitor_delete();
-
-CREATE TABLE iris._beacon (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes text NOT NULL,
-	message text NOT NULL,
-	verify_pin INTEGER -- FIXME: make unique on _device_io_ctrl_pin
-);
-
-ALTER TABLE iris._beacon ADD CONSTRAINT _beacon_fkey
-	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
-
-CREATE VIEW iris.beacon AS
-	SELECT b.name, geo_loc, controller, pin, notes, message, verify_pin,
-	       preset
-	FROM iris._beacon b
-	JOIN iris._device_io d ON b.name = d.name
-	JOIN iris._device_preset p ON b.name = p.name;
-
-CREATE FUNCTION iris.beacon_insert() RETURNS TRIGGER AS
-	$beacon_insert$
-BEGIN
-	INSERT INTO iris._device_io (name, controller, pin)
-	    VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._device_preset (name, preset)
-	    VALUES (NEW.name, NEW.preset);
-	INSERT INTO iris._beacon (name, geo_loc, notes, message, verify_pin)
-	    VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.message,
-	            NEW.verify_pin);
-	RETURN NEW;
-END;
-$beacon_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER beacon_insert_trig
-    INSTEAD OF INSERT ON iris.beacon
-    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_insert();
-
-CREATE FUNCTION iris.beacon_update() RETURNS TRIGGER AS
-	$beacon_update$
-BEGIN
-	UPDATE iris._device_io
-	   SET controller = NEW.controller,
-	       pin = NEW.pin
-	 WHERE name = OLD.name;
-	UPDATE iris._device_preset
-	   SET preset = NEW.preset
-	 WHERE name = OLD.name;
-	UPDATE iris._beacon
-	   SET geo_loc = NEW.geo_loc,
-	       notes = NEW.notes,
-	       message = NEW.message,
-	       verify_pin = NEW.verify_pin
-	 WHERE name = OLD.name;
-	RETURN NEW;
-END;
-$beacon_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER beacon_update_trig
-    INSTEAD OF UPDATE ON iris.beacon
-    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_update();
-
-CREATE FUNCTION iris.beacon_delete() RETURNS TRIGGER AS
-	$beacon_delete$
-BEGIN
-	DELETE FROM iris._device_preset WHERE name = OLD.name;
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$beacon_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER beacon_delete_trig
-    INSTEAD OF DELETE ON iris.beacon
-    FOR EACH ROW EXECUTE PROCEDURE iris.beacon_delete();
 
 CREATE TABLE iris.meter_type (
 	id INTEGER PRIMARY KEY,
@@ -2768,13 +2790,6 @@ CREATE TABLE iris.dms_action (
 	msg_priority INTEGER NOT NULL
 );
 
-CREATE TABLE iris.beacon_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	beacon VARCHAR(20) NOT NULL REFERENCES iris._beacon,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
-);
-
 CREATE TABLE iris.lane_action (
 	name VARCHAR(30) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
@@ -3328,18 +3343,6 @@ CREATE VIEW video_monitor_view AS
 	FROM iris.video_monitor m
 	LEFT JOIN controller_view ctr ON m.controller = ctr.name;
 GRANT SELECT ON video_monitor_view TO PUBLIC;
-
-CREATE VIEW beacon_view AS
-	SELECT b.name, b.notes, b.message, p.camera, p.preset_num, b.geo_loc,
-	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.lat, l.lon,
-	       b.controller, b.pin, b.verify_pin, ctr.comm_link, ctr.drop_id,
-	       ctr.condition
-	FROM iris.beacon b
-	LEFT JOIN iris.camera_preset p ON b.preset = p.name
-	LEFT JOIN geo_loc_view l ON b.geo_loc = l.name
-	LEFT JOIN controller_view ctr ON b.controller = ctr.name;
-GRANT SELECT ON beacon_view TO PUBLIC;
 
 CREATE VIEW lane_marking_view AS
 	SELECT m.name, m.notes, m.geo_loc, l.roadway, l.road_dir, l.cross_mod,
