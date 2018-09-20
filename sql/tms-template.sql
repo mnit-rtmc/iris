@@ -1857,173 +1857,14 @@ CREATE VIEW detector_event_view AS
 	JOIN detector_label_view dl ON e.device_id = dl.det_id;
 GRANT SELECT ON detector_event_view TO PUBLIC;
 
-
-CREATE TABLE iris.color_scheme (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
-);
-
-CREATE TABLE iris.graphic (
-	name VARCHAR(20) PRIMARY KEY,
-	g_number INTEGER NOT NULL UNIQUE,
-	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
-	height INTEGER NOT NULL,
-	width INTEGER NOT NULL,
-	transparent_color INTEGER,
-	pixels TEXT NOT NULL
-);
-
-ALTER TABLE iris.graphic
-	ADD CONSTRAINT graphic_number_ck
-	CHECK (g_number > 0 AND g_number <= 999);
-ALTER TABLE iris.graphic
-	ADD CONSTRAINT graphic_height_ck
-	CHECK (height > 0);
-ALTER TABLE iris.graphic
-	ADD CONSTRAINT graphic_width_ck
-	CHECK (width > 0);
-
-CREATE TABLE iris.font (
-	name VARCHAR(16) PRIMARY KEY,
-	f_number INTEGER UNIQUE NOT NULL,
-	height INTEGER NOT NULL,
-	width INTEGER NOT NULL,
-	line_spacing INTEGER NOT NULL,
-	char_spacing INTEGER NOT NULL,
-	version_id INTEGER NOT NULL
-);
-
-ALTER TABLE iris.font
-	ADD CONSTRAINT font_number_ck
-	CHECK (f_number > 0 AND f_number <= 255);
-ALTER TABLE iris.font
-	ADD CONSTRAINT font_height_ck
-	CHECK (height > 0 AND height <= 30);
-ALTER TABLE iris.font
-	ADD CONSTRAINT font_width_ck
-	CHECK (width >= 0 AND width <= 12);
-ALTER TABLE iris.font
-	ADD CONSTRAINT font_line_sp_ck
-	CHECK (line_spacing >= 0 AND line_spacing <= 9);
-ALTER TABLE iris.font
-	ADD CONSTRAINT font_char_sp_ck
-	CHECK (char_spacing >= 0 AND char_spacing <= 6);
-
-CREATE FUNCTION iris.font_ck() RETURNS TRIGGER AS
-	$font_ck$
-DECLARE
-	g_width INTEGER;
-BEGIN
-	IF NEW.width > 0 THEN
-		SELECT width INTO g_width FROM iris.glyph WHERE font = NEW.name;
-		IF FOUND AND NEW.width != g_width THEN
-			RAISE EXCEPTION 'width does not match glyph';
-		END IF;
-	END IF;
-	RETURN NEW;
-END;
-$font_ck$ LANGUAGE plpgsql;
-
-CREATE TRIGGER font_ck_trig
-	BEFORE UPDATE ON iris.font
-	FOR EACH ROW EXECUTE PROCEDURE iris.font_ck();
-
-CREATE TABLE iris.glyph (
-	name VARCHAR(20) PRIMARY KEY,
-	font VARCHAR(16) NOT NULL REFERENCES iris.font(name),
-	code_point INTEGER NOT NULL,
-	width INTEGER NOT NULL,
-	pixels VARCHAR(128) NOT NULL
-);
-
-ALTER TABLE iris.glyph
-	ADD CONSTRAINT glyph_code_point_ck
-	CHECK (code_point > 0 AND code_point < 128);
-ALTER TABLE iris.glyph
-	ADD CONSTRAINT glyph_width_ck
-	CHECK (width >= 0 AND width <= 24);
-
-CREATE FUNCTION iris.glyph_ck() RETURNS TRIGGER AS
-	$glyph_ck$
-DECLARE
-	f_width INTEGER;
-BEGIN
-	SELECT width INTO f_width FROM iris.font WHERE name = NEW.font;
-	IF f_width > 0 AND f_width != NEW.width THEN
-		RAISE EXCEPTION 'width does not match font';
-	END IF;
-	RETURN NEW;
-END;
-$glyph_ck$ LANGUAGE plpgsql;
-
-CREATE TRIGGER glyph_ck_trig
-	BEFORE INSERT OR UPDATE ON iris.glyph
-	FOR EACH ROW EXECUTE PROCEDURE iris.glyph_ck();
-
-CREATE TABLE iris.word (
-	name VARCHAR(24) PRIMARY KEY,
-	abbr VARCHAR(12),
-	allowed BOOLEAN DEFAULT false NOT NULL
-);
-
-CREATE TABLE iris.toll_zone (
-	name VARCHAR(20) PRIMARY KEY,
-	start_id VARCHAR(10) REFERENCES iris.r_node(station_id),
-	end_id VARCHAR(10) REFERENCES iris.r_node(station_id),
-	tollway VARCHAR(16),
-	alpha REAL,
-	beta REAL,
-	max_price REAL
-);
-
-CREATE TABLE iris.sign_group (
-	name VARCHAR(20) PRIMARY KEY,
-	local BOOLEAN NOT NULL,
-	hidden BOOLEAN NOT NULL
-);
-
-CREATE TABLE iris.dms_type (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
-);
-
-CREATE TABLE iris.sign_config (
-	name VARCHAR(12) PRIMARY KEY,
-	dms_type INTEGER NOT NULL REFERENCES iris.dms_type,
-	portable BOOLEAN NOT NULL,
-	technology VARCHAR(12) NOT NULL,
-	sign_access VARCHAR(12) NOT NULL,
-	legend VARCHAR(12) NOT NULL,
-	beacon_type VARCHAR(32) NOT NULL,
-	face_width INTEGER NOT NULL,
-	face_height INTEGER NOT NULL,
-	border_horiz INTEGER NOT NULL,
-	border_vert INTEGER NOT NULL,
-	pitch_horiz INTEGER NOT NULL,
-	pitch_vert INTEGER NOT NULL,
-	pixel_width INTEGER NOT NULL,
-	pixel_height INTEGER NOT NULL,
-	char_width INTEGER NOT NULL,
-	char_height INTEGER NOT NULL,
-	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
-	monochrome_foreground INTEGER NOT NULL,
-	monochrome_background INTEGER NOT NULL,
-	default_font VARCHAR(16) REFERENCES iris.font
-);
-
-CREATE TABLE iris.quick_message (
-	name VARCHAR(20) PRIMARY KEY,
-	sign_group VARCHAR(20) REFERENCES iris.sign_group,
-	sign_config VARCHAR(12) REFERENCES iris.sign_config,
-	prefix_page BOOLEAN NOT NULL,
-	multi VARCHAR(1024) NOT NULL
-);
-
+--
+-- GPS
+--
 CREATE TABLE iris._gps (
 	name VARCHAR(20) PRIMARY KEY,
 	notes VARCHAR(32),
-	latest_poll timestamp WITH time zone,
-	latest_sample timestamp WITH time zone,
+	latest_poll TIMESTAMP WITH time zone,
+	latest_sample TIMESTAMP WITH time zone,
 	lat double precision,
 	lon double precision
 );
@@ -2090,6 +1931,499 @@ $gps_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER gps_delete_trig
 	INSTEAD OF DELETE ON iris.gps
 	FOR EACH ROW EXECUTE PROCEDURE iris.gps_delete();
+
+--
+-- DMS, Graphic, Font, Sign Message, Quick Message, Word, Color Scheme
+--
+CREATE TABLE iris.font (
+	name VARCHAR(16) PRIMARY KEY,
+	f_number INTEGER UNIQUE NOT NULL,
+	height INTEGER NOT NULL,
+	width INTEGER NOT NULL,
+	line_spacing INTEGER NOT NULL,
+	char_spacing INTEGER NOT NULL,
+	version_id INTEGER NOT NULL
+);
+
+ALTER TABLE iris.font
+	ADD CONSTRAINT font_number_ck
+	CHECK (f_number > 0 AND f_number <= 255);
+ALTER TABLE iris.font
+	ADD CONSTRAINT font_height_ck
+	CHECK (height > 0 AND height <= 30);
+ALTER TABLE iris.font
+	ADD CONSTRAINT font_width_ck
+	CHECK (width >= 0 AND width <= 12);
+ALTER TABLE iris.font
+	ADD CONSTRAINT font_line_sp_ck
+	CHECK (line_spacing >= 0 AND line_spacing <= 9);
+ALTER TABLE iris.font
+	ADD CONSTRAINT font_char_sp_ck
+	CHECK (char_spacing >= 0 AND char_spacing <= 6);
+
+CREATE FUNCTION iris.font_ck() RETURNS TRIGGER AS
+	$font_ck$
+DECLARE
+	g_width INTEGER;
+BEGIN
+	IF NEW.width > 0 THEN
+		SELECT width INTO g_width FROM iris.glyph WHERE font = NEW.name;
+		IF FOUND AND NEW.width != g_width THEN
+			RAISE EXCEPTION 'width does not match glyph';
+		END IF;
+	END IF;
+	RETURN NEW;
+END;
+$font_ck$ LANGUAGE plpgsql;
+
+CREATE TRIGGER font_ck_trig
+	BEFORE UPDATE ON iris.font
+	FOR EACH ROW EXECUTE PROCEDURE iris.font_ck();
+
+CREATE VIEW font_view AS
+	SELECT name, f_number, height, width, line_spacing, char_spacing,
+	       version_id
+	FROM iris.font;
+GRANT SELECT ON font_view TO PUBLIC;
+
+CREATE TABLE iris.glyph (
+	name VARCHAR(20) PRIMARY KEY,
+	font VARCHAR(16) NOT NULL REFERENCES iris.font(name),
+	code_point INTEGER NOT NULL,
+	width INTEGER NOT NULL,
+	pixels VARCHAR(128) NOT NULL
+);
+
+ALTER TABLE iris.glyph
+	ADD CONSTRAINT glyph_code_point_ck
+	CHECK (code_point > 0 AND code_point < 128);
+ALTER TABLE iris.glyph
+	ADD CONSTRAINT glyph_width_ck
+	CHECK (width >= 0 AND width <= 24);
+
+CREATE FUNCTION iris.glyph_ck() RETURNS TRIGGER AS
+	$glyph_ck$
+DECLARE
+	f_width INTEGER;
+BEGIN
+	SELECT width INTO f_width FROM iris.font WHERE name = NEW.font;
+	IF f_width > 0 AND f_width != NEW.width THEN
+		RAISE EXCEPTION 'width does not match font';
+	END IF;
+	RETURN NEW;
+END;
+$glyph_ck$ LANGUAGE plpgsql;
+
+CREATE TRIGGER glyph_ck_trig
+	BEFORE INSERT OR UPDATE ON iris.glyph
+	FOR EACH ROW EXECUTE PROCEDURE iris.glyph_ck();
+
+CREATE VIEW glyph_view AS
+	SELECT name, font, code_point, width, pixels
+	FROM iris.glyph;
+GRANT SELECT ON glyph_view TO PUBLIC;
+
+CREATE TABLE iris.dms_type (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(32) NOT NULL
+);
+
+COPY iris.dms_type (id, description) FROM stdin;
+0	Unknown
+1	Other
+2	BOS (blank-out sign)
+3	CMS (changeable message sign)
+4	VMS Character-matrix
+5	VMS Line-matrix
+6	VMS Full-matrix
+\.
+
+CREATE TABLE iris.color_scheme (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
+COPY iris.color_scheme (id, description) FROM stdin;
+1	monochrome1Bit
+2	monochrome8Bit
+3	colorClassic
+4	color24Bit
+\.
+
+CREATE TABLE iris.sign_config (
+	name VARCHAR(12) PRIMARY KEY,
+	dms_type INTEGER NOT NULL REFERENCES iris.dms_type,
+	portable BOOLEAN NOT NULL,
+	technology VARCHAR(12) NOT NULL,
+	sign_access VARCHAR(12) NOT NULL,
+	legend VARCHAR(12) NOT NULL,
+	beacon_type VARCHAR(32) NOT NULL,
+	face_width INTEGER NOT NULL,
+	face_height INTEGER NOT NULL,
+	border_horiz INTEGER NOT NULL,
+	border_vert INTEGER NOT NULL,
+	pitch_horiz INTEGER NOT NULL,
+	pitch_vert INTEGER NOT NULL,
+	pixel_width INTEGER NOT NULL,
+	pixel_height INTEGER NOT NULL,
+	char_width INTEGER NOT NULL,
+	char_height INTEGER NOT NULL,
+	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
+	monochrome_foreground INTEGER NOT NULL,
+	monochrome_background INTEGER NOT NULL,
+	default_font VARCHAR(16) REFERENCES iris.font
+);
+
+CREATE VIEW sign_config_view AS
+	SELECT name, dt.description AS dms_type, portable, technology,
+	       sign_access, legend, beacon_type, face_width, face_height,
+	       border_horiz, border_vert, pitch_horiz, pitch_vert,
+	       pixel_width, pixel_height, char_width, char_height,
+	       cs.description AS color_scheme,
+	       monochrome_foreground, monochrome_background, default_font
+	FROM iris.sign_config
+	JOIN iris.dms_type dt ON sign_config.dms_type = dt.id
+	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
+GRANT SELECT ON sign_config_view TO PUBLIC;
+
+CREATE TABLE iris.sign_msg_source (
+	bit INTEGER PRIMARY KEY,
+	source VARCHAR(16) NOT NULL
+);
+ALTER TABLE iris.sign_msg_source ADD CONSTRAINT msg_source_bit_ck
+	CHECK (bit >= 0 AND bit < 32);
+
+COPY iris.sign_msg_source (bit, source) FROM stdin;
+0	blank
+1	operator
+2	schedule
+3	tolling
+4	gate arm
+5	lcs
+6	aws
+7	external
+8	travel time
+9	incident
+10	slow warning
+11	speed advisory
+12	parking
+\.
+
+CREATE FUNCTION iris.sign_msg_sources(INTEGER) RETURNS TEXT
+	AS $sign_msg_sources$
+DECLARE
+	src ALIAS FOR $1;
+	res TEXT;
+	ms RECORD;
+	b INTEGER;
+BEGIN
+	res = '';
+	FOR ms IN SELECT bit, source FROM iris.sign_msg_source ORDER BY bit LOOP
+		b = 1 << ms.bit;
+		IF (src & b) = b THEN
+			IF char_length(res) > 0 THEN
+				res = res || ', ' || ms.source;
+			ELSE
+				res = ms.source;
+			END IF;
+		END IF;
+	END LOOP;
+	RETURN res;
+END;
+$sign_msg_sources$ LANGUAGE plpgsql;
+
+CREATE TABLE iris.sign_message (
+	name VARCHAR(20) PRIMARY KEY,
+	sign_config VARCHAR(12) NOT NULL REFERENCES iris.sign_config,
+	incident VARCHAR(16),
+	multi VARCHAR(1024) NOT NULL,
+	beacon_enabled BOOLEAN NOT NULL,
+	prefix_page BOOLEAN NOT NULL,
+	msg_priority INTEGER NOT NULL,
+	source INTEGER NOT NULL,
+	owner VARCHAR(15),
+	duration INTEGER
+);
+
+CREATE VIEW sign_message_view AS
+	SELECT name, sign_config, incident, multi, beacon_enabled, prefix_page,
+	       msg_priority, iris.sign_msg_sources(source) AS sources, owner,
+	       duration
+	FROM iris.sign_message;
+GRANT SELECT ON sign_message_view TO PUBLIC;
+
+CREATE TABLE iris.word (
+	name VARCHAR(24) PRIMARY KEY,
+	abbr VARCHAR(12),
+	allowed BOOLEAN DEFAULT false NOT NULL
+);
+
+CREATE TABLE iris.graphic (
+	name VARCHAR(20) PRIMARY KEY,
+	g_number INTEGER NOT NULL UNIQUE,
+	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
+	height INTEGER NOT NULL,
+	width INTEGER NOT NULL,
+	transparent_color INTEGER,
+	pixels TEXT NOT NULL
+);
+
+ALTER TABLE iris.graphic
+	ADD CONSTRAINT graphic_number_ck
+	CHECK (g_number > 0 AND g_number <= 999);
+ALTER TABLE iris.graphic
+	ADD CONSTRAINT graphic_height_ck
+	CHECK (height > 0);
+ALTER TABLE iris.graphic
+	ADD CONSTRAINT graphic_width_ck
+	CHECK (width > 0);
+
+CREATE VIEW graphic_view AS
+	SELECT name, g_number, cs.description AS color_scheme, height, width,
+	       transparent_color, pixels
+	FROM iris.graphic
+	JOIN iris.color_scheme cs ON graphic.color_scheme = cs.id;
+GRANT SELECT ON graphic_view TO PUBLIC;
+
+CREATE TABLE iris._dms (
+	name VARCHAR(20) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
+	notes text NOT NULL,
+	gps VARCHAR(20) REFERENCES iris._gps,
+	static_graphic VARCHAR(20) REFERENCES iris.graphic,
+	beacon VARCHAR(20) REFERENCES iris._beacon,
+	sign_config VARCHAR(12) REFERENCES iris.sign_config,
+	override_font VARCHAR(16) REFERENCES iris.font,
+	msg_sched VARCHAR(20) REFERENCES iris.sign_message,
+	msg_current VARCHAR(20) REFERENCES iris.sign_message,
+	expire_time TIMESTAMP WITH time zone
+);
+
+ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.dms AS
+	SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
+	       beacon, preset, sign_config, override_font, msg_sched,
+	       msg_current, expire_time
+	FROM iris._dms dms
+	JOIN iris._device_io d ON dms.name = d.name
+	JOIN iris._device_preset p ON dms.name = p.name;
+
+CREATE FUNCTION iris.dms_insert() RETURNS TRIGGER AS
+	$dms_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._device_preset (name, preset)
+	     VALUES (NEW.name, NEW.preset);
+	INSERT INTO iris._dms (name, geo_loc, notes, gps, static_graphic,
+	                       beacon, sign_config, override_font, msg_sched,
+	                       msg_current, expire_time)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.gps,
+	             NEW.static_graphic, NEW.beacon, NEW.sign_config,
+	             NEW.override_font, NEW.msg_sched, NEW.msg_current,
+	             NEW.expire_time);
+	RETURN NEW;
+END;
+$dms_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_insert_trig
+    INSTEAD OF INSERT ON iris.dms
+    FOR EACH ROW EXECUTE PROCEDURE iris.dms_insert();
+
+CREATE FUNCTION iris.dms_update() RETURNS TRIGGER AS
+	$dms_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._device_preset
+	   SET preset = NEW.preset
+	 WHERE name = OLD.name;
+	UPDATE iris._dms
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes,
+	       gps = NEW.gps,
+	       static_graphic = NEW.static_graphic,
+	       beacon = NEW.beacon,
+	       sign_config = NEW.sign_config,
+	       override_font = NEW.override_font,
+	       msg_sched = NEW.msg_sched,
+	       msg_current = NEW.msg_current,
+	       expire_time = NEW.expire_time
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$dms_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_update_trig
+    INSTEAD OF UPDATE ON iris.dms
+    FOR EACH ROW EXECUTE PROCEDURE iris.dms_update();
+
+CREATE FUNCTION iris.dms_delete() RETURNS TRIGGER AS
+	$dms_delete$
+BEGIN
+	DELETE FROM iris._device_preset WHERE name = OLD.name;
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$dms_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_delete_trig
+    INSTEAD OF DELETE ON iris.dms
+    FOR EACH ROW EXECUTE PROCEDURE iris.dms_delete();
+
+CREATE VIEW dms_view AS
+	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
+	       d.static_graphic, d.beacon, p.camera, p.preset_num, d.sign_config,
+	       default_font, override_font, msg_sched, msg_current, expire_time,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.location, l.lat, l.lon
+	FROM iris.dms d
+	LEFT JOIN iris.camera_preset p ON d.preset = p.name
+	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
+	LEFT JOIN sign_config_view sc ON d.sign_config = sc.name;
+GRANT SELECT ON dms_view TO PUBLIC;
+
+CREATE VIEW dms_message_view AS
+	SELECT d.name, msg_current, cc.description AS condition, multi,
+	       beacon_enabled, prefix_page, msg_priority,
+	       iris.sign_msg_sources(source) AS sources, duration, expire_time
+	FROM iris.dms d
+	LEFT JOIN iris.controller c ON d.controller = c.name
+	LEFT JOIN iris.condition cc ON c.condition = cc.id
+	LEFT JOIN iris.sign_message s ON d.msg_current = s.name;
+GRANT SELECT ON dms_message_view TO PUBLIC;
+
+CREATE TABLE iris.sign_group (
+	name VARCHAR(20) PRIMARY KEY,
+	local BOOLEAN NOT NULL,
+	hidden BOOLEAN NOT NULL
+);
+
+CREATE TABLE iris.dms_sign_group (
+	name VARCHAR(42) PRIMARY KEY,
+	dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
+	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group
+);
+
+CREATE TABLE iris.quick_message (
+	name VARCHAR(20) PRIMARY KEY,
+	sign_group VARCHAR(20) REFERENCES iris.sign_group,
+	sign_config VARCHAR(12) REFERENCES iris.sign_config,
+	prefix_page BOOLEAN NOT NULL,
+	multi VARCHAR(1024) NOT NULL
+);
+
+CREATE VIEW quick_message_view AS
+	SELECT name, sign_group, sign_config, prefix_page, multi
+	FROM iris.quick_message;
+GRANT SELECT ON quick_message_view TO PUBLIC;
+
+CREATE TABLE iris.sign_text (
+	name VARCHAR(20) PRIMARY KEY,
+	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
+	line SMALLINT NOT NULL,
+	multi VARCHAR(64) NOT NULL,
+	rank SMALLINT NOT NULL,
+	CONSTRAINT sign_text_line CHECK ((line >= 1) AND (line <= 12)),
+	CONSTRAINT sign_text_rank CHECK ((rank >= 1) AND (rank <= 99))
+);
+
+CREATE VIEW sign_text_view AS
+	SELECT dms, local, line, multi, rank
+	FROM iris.dms_sign_group dsg
+	JOIN iris.sign_group sg ON dsg.sign_group = sg.name
+	JOIN iris.sign_text st ON sg.name = st.sign_group;
+GRANT SELECT ON sign_text_view TO PUBLIC;
+
+CREATE TABLE iris.dms_action (
+	name VARCHAR(30) PRIMARY KEY,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+	quick_message VARCHAR(20) REFERENCES iris.quick_message,
+	beacon_enabled BOOLEAN NOT NULL,
+	msg_priority INTEGER NOT NULL
+);
+
+CREATE VIEW dms_action_view AS
+	SELECT name, action_plan, sign_group, phase, quick_message,
+	       beacon_enabled, msg_priority
+	FROM iris.dms_action;
+GRANT SELECT ON dms_action_view TO PUBLIC;
+
+CREATE TABLE event.sign_event (
+	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	device_id VARCHAR(20),
+	message text,
+	iris_user VARCHAR(15)
+);
+CREATE INDEX ON event.sign_event(event_date);
+
+CREATE VIEW sign_event_view AS
+	SELECT event_id, event_date, description, device_id,
+	       regexp_replace(replace(replace(message, '[nl]', E'\n'), '[np]',
+	                      E'\n'), '\[.+?\]', ' ', 'g') AS message,
+	       message AS multi, iris_user
+	FROM event.sign_event JOIN event.event_description
+	ON sign_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON sign_event_view TO PUBLIC;
+
+CREATE VIEW recent_sign_event_view AS
+	SELECT event_id, event_date, description, device_id, message, multi,
+	       iris_user
+	FROM sign_event_view
+	WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
+GRANT SELECT ON recent_sign_event_view TO PUBLIC;
+
+CREATE TABLE event.travel_time_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date timestamp WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	device_id VARCHAR(20)
+);
+
+CREATE VIEW travel_time_event_view AS
+	SELECT event_id, event_date, event_description.description, device_id
+	FROM event.travel_time_event
+	JOIN event.event_description
+	ON travel_time_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON travel_time_event_view TO PUBLIC;
+
+CREATE TABLE event.brightness_sample (
+	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	dms VARCHAR(20) NOT NULL REFERENCES iris._dms(name)
+		ON DELETE CASCADE,
+	photocell INTEGER NOT NULL,
+	output INTEGER NOT NULL
+);
+
+--
+--
+--
+CREATE TABLE iris.toll_zone (
+	name VARCHAR(20) PRIMARY KEY,
+	start_id VARCHAR(10) REFERENCES iris.r_node(station_id),
+	end_id VARCHAR(10) REFERENCES iris.r_node(station_id),
+	tollway VARCHAR(16),
+	alpha REAL,
+	beta REAL,
+	max_price REAL
+);
 
 CREATE TABLE iris.monitor_style (
 	name VARCHAR(24) PRIMARY KEY,
@@ -2283,143 +2617,6 @@ $ramp_meter_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER ramp_meter_delete_trig
     INSTEAD OF DELETE ON iris.ramp_meter
     FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_delete();
-
-CREATE TABLE iris.sign_msg_source (
-	bit INTEGER PRIMARY KEY,
-	source VARCHAR(16) NOT NULL
-);
-ALTER TABLE iris.sign_msg_source ADD CONSTRAINT msg_source_bit_ck
-	CHECK (bit >= 0 AND bit < 32);
-
-CREATE FUNCTION iris.sign_msg_sources(INTEGER) RETURNS TEXT
-	AS $sign_msg_sources$
-DECLARE
-	src ALIAS FOR $1;
-	res TEXT;
-	ms RECORD;
-	b INTEGER;
-BEGIN
-	res = '';
-	FOR ms IN SELECT bit, source FROM iris.sign_msg_source ORDER BY bit LOOP
-		b = 1 << ms.bit;
-		IF (src & b) = b THEN
-			IF char_length(res) > 0 THEN
-				res = res || ', ' || ms.source;
-			ELSE
-				res = ms.source;
-			END IF;
-		END IF;
-	END LOOP;
-	RETURN res;
-END;
-$sign_msg_sources$ LANGUAGE plpgsql;
-
-CREATE TABLE iris.sign_message (
-	name VARCHAR(20) PRIMARY KEY,
-	sign_config VARCHAR(12) NOT NULL REFERENCES iris.sign_config,
-	incident VARCHAR(16),
-	multi VARCHAR(1024) NOT NULL,
-	beacon_enabled BOOLEAN NOT NULL,
-	prefix_page BOOLEAN NOT NULL,
-	msg_priority INTEGER NOT NULL,
-	source INTEGER NOT NULL,
-	owner VARCHAR(15),
-	duration INTEGER
-);
-
-CREATE TABLE iris._dms (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc,
-	notes text NOT NULL,
-	gps VARCHAR(20) REFERENCES iris._gps,
-	static_graphic VARCHAR(20) REFERENCES iris.graphic,
-	beacon VARCHAR(20) REFERENCES iris._beacon,
-	sign_config VARCHAR(12) REFERENCES iris.sign_config,
-	override_font VARCHAR(16) REFERENCES iris.font,
-	msg_sched VARCHAR(20) REFERENCES iris.sign_message,
-	msg_current VARCHAR(20) REFERENCES iris.sign_message,
-	expire_time timestamp WITH time zone
-);
-
-ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
-	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
-
-CREATE VIEW iris.dms AS
-	SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
-	       beacon, preset, sign_config, override_font, msg_sched,
-	       msg_current, expire_time
-	FROM iris._dms dms
-	JOIN iris._device_io d ON dms.name = d.name
-	JOIN iris._device_preset p ON dms.name = p.name;
-
-CREATE FUNCTION iris.dms_insert() RETURNS TRIGGER AS
-	$dms_insert$
-BEGIN
-	INSERT INTO iris._device_io (name, controller, pin)
-	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._device_preset (name, preset)
-	     VALUES (NEW.name, NEW.preset);
-	INSERT INTO iris._dms (name, geo_loc, notes, gps, static_graphic,
-	                       beacon, sign_config, override_font, msg_sched,
-	                       msg_current, expire_time)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.gps,
-	             NEW.static_graphic, NEW.beacon, NEW.sign_config,
-	             NEW.override_font, NEW.msg_sched, NEW.msg_current,
-	             NEW.expire_time);
-	RETURN NEW;
-END;
-$dms_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER dms_insert_trig
-    INSTEAD OF INSERT ON iris.dms
-    FOR EACH ROW EXECUTE PROCEDURE iris.dms_insert();
-
-CREATE FUNCTION iris.dms_update() RETURNS TRIGGER AS
-	$dms_update$
-BEGIN
-	UPDATE iris._device_io
-	   SET controller = NEW.controller,
-	       pin = NEW.pin
-	 WHERE name = OLD.name;
-	UPDATE iris._device_preset
-	   SET preset = NEW.preset
-	 WHERE name = OLD.name;
-	UPDATE iris._dms
-	   SET geo_loc = NEW.geo_loc,
-	       notes = NEW.notes,
-	       gps = NEW.gps,
-	       static_graphic = NEW.static_graphic,
-	       beacon = NEW.beacon,
-	       sign_config = NEW.sign_config,
-	       override_font = NEW.override_font,
-	       msg_sched = NEW.msg_sched,
-	       msg_current = NEW.msg_current,
-	       expire_time = NEW.expire_time
-	 WHERE name = OLD.name;
-	RETURN NEW;
-END;
-$dms_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER dms_update_trig
-    INSTEAD OF UPDATE ON iris.dms
-    FOR EACH ROW EXECUTE PROCEDURE iris.dms_update();
-
-CREATE FUNCTION iris.dms_delete() RETURNS TRIGGER AS
-	$dms_delete$
-BEGIN
-	DELETE FROM iris._device_preset WHERE name = OLD.name;
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$dms_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER dms_delete_trig
-    INSTEAD OF DELETE ON iris.dms
-    FOR EACH ROW EXECUTE PROCEDURE iris.dms_delete();
 
 CREATE TABLE iris._lane_marking (
 	name VARCHAR(20) PRIMARY KEY,
@@ -3003,22 +3200,6 @@ BEGIN
 END;
 $parking_area_amenities$ LANGUAGE plpgsql;
 
-CREATE TABLE iris.dms_sign_group (
-	name VARCHAR(42) PRIMARY KEY,
-	dms VARCHAR(20) NOT NULL REFERENCES iris._dms,
-	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group
-);
-
-CREATE TABLE iris.sign_text (
-	name VARCHAR(20) PRIMARY KEY,
-	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
-	line smallint NOT NULL,
-	multi VARCHAR(64) NOT NULL,
-	rank smallint NOT NULL,
-	CONSTRAINT sign_text_line CHECK ((line >= 1) AND (line <= 12)),
-	CONSTRAINT sign_text_rank CHECK ((rank >= 1) AND (rank <= 99))
-);
-
 CREATE TABLE iris.lane_use_multi (
 	name VARCHAR(10) PRIMARY KEY,
 	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
@@ -3034,16 +3215,6 @@ CREATE UNIQUE INDEX lane_use_multi_indication_idx ON iris.lane_use_multi
 CREATE UNIQUE INDEX lane_use_multi_msg_num_idx ON iris.lane_use_multi
 	USING btree (msg_num, width, height);
 
-CREATE TABLE iris.dms_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	sign_group VARCHAR(20) NOT NULL REFERENCES iris.sign_group,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-	quick_message VARCHAR(20) REFERENCES iris.quick_message,
-	beacon_enabled BOOLEAN NOT NULL,
-	msg_priority INTEGER NOT NULL
-);
-
 CREATE TABLE iris.lane_action (
 	name VARCHAR(30) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
@@ -3057,29 +3228,6 @@ CREATE TABLE iris.meter_action (
 	ramp_meter VARCHAR(20) NOT NULL REFERENCES iris._ramp_meter,
 	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
-
-CREATE TABLE event.brightness_sample (
-	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	dms VARCHAR(20) NOT NULL REFERENCES iris._dms(name)
-		ON DELETE CASCADE,
-	photocell integer NOT NULL,
-	output integer NOT NULL
-);
-
-CREATE TABLE event.sign_event (
-	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(20),
-	message text,
-	iris_user VARCHAR(15)
-);
-
-CREATE INDEX ON event.sign_event(event_date);
 
 CREATE TABLE event.client_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
@@ -3147,21 +3295,6 @@ CREATE VIEW meter_event_view AS
 	JOIN event.meter_queue_state ON q_state = meter_queue_state.id
 	JOIN event.meter_limit_control ON limit_ctrl = meter_limit_control.id;
 GRANT SELECT ON meter_event_view TO PUBLIC;
-
-CREATE TABLE event.travel_time_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(20)
-);
-
-CREATE VIEW travel_time_event_view AS
-	SELECT event_id, event_date, event_description.description, device_id
-	FROM event.travel_time_event
-	JOIN event.event_description
-	ON travel_time_event.event_desc_id = event_description.event_desc_id;
-GRANT SELECT ON travel_time_event_view TO PUBLIC;
 
 CREATE TABLE event.camera_switch_event (
 	event_id SERIAL PRIMARY KEY,
@@ -3373,30 +3506,6 @@ CREATE TRIGGER inc_advice_ck_trig
 
 --- Views
 
-CREATE VIEW graphic_view AS
-	SELECT name, g_number, cs.description AS color_scheme, height, width,
-	       transparent_color, pixels
-	FROM iris.graphic
-	JOIN iris.color_scheme cs ON graphic.color_scheme = cs.id;
-GRANT SELECT ON graphic_view TO PUBLIC;
-
-CREATE VIEW font_view AS
-	SELECT name, f_number, height, width, line_spacing, char_spacing,
-	       version_id
-	FROM iris.font;
-GRANT SELECT ON font_view TO PUBLIC;
-
-CREATE VIEW glyph_view AS
-	SELECT name, font, code_point, width, pixels
-	FROM iris.glyph;
-GRANT SELECT ON glyph_view TO PUBLIC;
-
-CREATE VIEW dms_action_view AS
-	SELECT name, action_plan, sign_group, phase, quick_message,
-	       beacon_enabled, msg_priority
-	FROM iris.dms_action;
-GRANT SELECT ON dms_action_view TO PUBLIC;
-
 CREATE VIEW meter_action_view AS
 	SELECT ramp_meter, ta.phase, time_of_day, day_plan, sched_date
 	FROM iris.meter_action ma, iris.action_plan ap, iris.time_action ta
@@ -3447,52 +3556,6 @@ CREATE VIEW dms_toll_zone_view AS
     JOIN iris.quick_message_toll_zone
     ON dms_action_view.quick_message = quick_message_toll_zone.quick_message;
 GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
-
-CREATE VIEW quick_message_view AS
-	SELECT name, sign_group, sign_config, prefix_page, multi
-	FROM iris.quick_message;
-GRANT SELECT ON quick_message_view TO PUBLIC;
-
-CREATE VIEW sign_config_view AS
-	SELECT name, dt.description AS dms_type, portable, technology,
-	       sign_access, legend, beacon_type, face_width, face_height,
-	       border_horiz, border_vert, pitch_horiz, pitch_vert,
-	       pixel_width, pixel_height, char_width, char_height,
-	       cs.description AS color_scheme,
-	       monochrome_foreground, monochrome_background, default_font
-	FROM iris.sign_config
-	JOIN iris.dms_type dt ON sign_config.dms_type = dt.id
-	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
-GRANT SELECT ON sign_config_view TO PUBLIC;
-
-CREATE VIEW dms_view AS
-	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
-	       d.static_graphic, d.beacon, p.camera, p.preset_num, d.sign_config,
-	       default_font, override_font, msg_sched, msg_current, expire_time,
-	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
-	       l.location, l.lat, l.lon
-	FROM iris.dms d
-	LEFT JOIN iris.camera_preset p ON d.preset = p.name
-	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
-	LEFT JOIN sign_config_view sc ON d.sign_config = sc.name;
-GRANT SELECT ON dms_view TO PUBLIC;
-
-CREATE VIEW dms_message_view AS
-	SELECT d.name, msg_current, cc.description AS condition, multi,
-	       beacon_enabled, prefix_page, msg_priority,
-	       iris.sign_msg_sources(source) AS sources, duration, expire_time
-	FROM iris.dms d
-	LEFT JOIN iris.controller c ON d.controller = c.name
-	LEFT JOIN iris.condition cc ON c.condition = cc.id
-	LEFT JOIN iris.sign_message s ON d.msg_current = s.name;
-GRANT SELECT ON dms_message_view TO PUBLIC;
-
-CREATE VIEW sign_message_view AS
-	SELECT name, sign_config, incident, multi, beacon_enabled, prefix_page,
-	       msg_priority, iris.sign_msg_sources(source) AS sources, owner,
-	       duration
-	FROM iris.sign_message;
-GRANT SELECT ON sign_message_view TO PUBLIC;
 
 CREATE VIEW lcs_array_view AS
 	SELECT name, shift, notes, lcs_lock
@@ -3617,13 +3680,6 @@ CREATE VIEW parking_area_view AS
 	LEFT JOIN iris.system_attribute sa ON sa.name = 'camera_image_base_url';
 GRANT SELECT ON parking_area_view TO PUBLIC;
 
-CREATE VIEW sign_text_view AS
-	SELECT dms, local, line, multi, rank
-	FROM iris.dms_sign_group dsg
-	JOIN iris.sign_group sg ON dsg.sign_group = sg.name
-	JOIN iris.sign_text st ON sg.name = st.sign_group;
-GRANT SELECT ON sign_text_view TO PUBLIC;
-
 CREATE VIEW iris.device_geo_loc_view AS
 	SELECT name, geo_loc FROM iris._lane_marking UNION ALL
 	SELECT name, geo_loc FROM iris._beacon UNION ALL
@@ -3656,22 +3712,6 @@ CREATE VIEW controller_report AS
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
 	LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
-
-CREATE VIEW sign_event_view AS
-	SELECT event_id, event_date, description, device_id,
-	       regexp_replace(replace(replace(message, '[nl]', E'\n'), '[np]',
-	                      E'\n'), '\[.+?\]', ' ', 'g') AS message,
-	       message AS multi, iris_user
-	FROM event.sign_event JOIN event.event_description
-	ON sign_event.event_desc_id = event_description.event_desc_id;
-GRANT SELECT ON sign_event_view TO PUBLIC;
-
-CREATE VIEW recent_sign_event_view AS
-	SELECT event_id, event_date, description, device_id, message, multi,
-	       iris_user
-	FROM sign_event_view
-	WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
-GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
 CREATE VIEW client_event_view AS
 	SELECT e.event_id, e.event_date, ed.description, e.host_port,
@@ -3708,39 +3748,6 @@ CREATE VIEW incident_update_view AS
 GRANT SELECT ON incident_update_view TO PUBLIC;
 
 --- Data
-
-COPY iris.dms_type (id, description) FROM stdin;
-0	Unknown
-1	Other
-2	BOS (blank-out sign)
-3	CMS (changeable message sign)
-4	VMS Character-matrix
-5	VMS Line-matrix
-6	VMS Full-matrix
-\.
-
-COPY iris.color_scheme (id, description) FROM stdin;
-1	monochrome1Bit
-2	monochrome8Bit
-3	colorClassic
-4	color24Bit
-\.
-
-COPY iris.sign_msg_source (bit, source) FROM stdin;
-0	blank
-1	operator
-2	schedule
-3	tolling
-4	gate arm
-5	lcs
-6	aws
-7	external
-8	travel time
-9	incident
-10	slow warning
-11	speed advisory
-12	parking
-\.
 
 COPY iris.lane_use_indication (id, description) FROM stdin;
 0	Dark
