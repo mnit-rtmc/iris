@@ -895,6 +895,165 @@ CREATE VIEW time_action_view AS
 	FROM iris.time_action;
 GRANT SELECT ON time_action_view TO PUBLIC;
 
+--
+-- Comm Protocols, Comm Links, Modems, Cabinets, Controllers
+--
+CREATE TABLE iris.comm_protocol (
+	id SMALLINT PRIMARY KEY,
+	description VARCHAR(20) NOT NULL
+);
+
+COPY iris.comm_protocol (id, description) FROM stdin;
+0	NTCIP Class B
+1	MnDOT 170 (4-bit)
+2	MnDOT 170 (5-bit)
+3	SmartSensor 105
+4	Canoga
+5	Pelco P
+6	Pelco D PTZ
+7	NTCIP Class C
+8	Manchester PTZ
+9	DMS XML
+10	MSG_FEED
+11	NTCIP Class A
+12	Banner DXM
+13	Vicon PTZ
+14	SmartSensor 125 HD
+15	OSi ORG-815
+16	Infinova D PTZ
+17	RTMS G4
+18	RTMS
+19	Infotek Wizard
+20	Sensys
+21	PeMS
+22	SSI
+23	CHP Incidents
+24	URMS
+25	DLI DIN Relay
+26	Axis 292
+27	Axis PTZ
+28	HySecurity STC
+29	Cohu PTZ
+30	DR-500
+31	ADDCO
+32	TransCore E6
+33	CBW
+34	Incident Feed
+35	MonStream
+36	Gate NDORv5
+37	GPS TAIP
+38	GPS NMEA
+39	GPS RedLion
+\.
+
+CREATE TABLE iris.comm_link (
+	name VARCHAR(20) PRIMARY KEY,
+	description VARCHAR(32) NOT NULL,
+	modem BOOLEAN NOT NULL,
+	uri VARCHAR(64) NOT NULL,
+	protocol SMALLINT NOT NULL REFERENCES iris.comm_protocol(id),
+	poll_enabled BOOLEAN NOT NULL,
+	poll_period INTEGER NOT NULL,
+	timeout INTEGER NOT NULL
+);
+
+CREATE VIEW comm_link_view AS
+	SELECT cl.name, cl.description, modem, uri, cp.description AS protocol,
+	       poll_enabled, poll_period, timeout
+	FROM iris.comm_link cl
+	JOIN iris.comm_protocol cp ON cl.protocol = cp.id;
+GRANT SELECT ON comm_link_view TO PUBLIC;
+
+CREATE TABLE iris.modem (
+	name VARCHAR(20) PRIMARY KEY,
+	uri VARCHAR(64) NOT NULL,
+	config VARCHAR(64) NOT NULL,
+	timeout INTEGER NOT NULL,
+	enabled BOOLEAN NOT NULL
+);
+
+CREATE VIEW modem_view AS
+	SELECT name, uri, config, timeout, enabled
+	FROM iris.modem;
+GRANT SELECT ON modem_view TO PUBLIC;
+
+CREATE TABLE iris.cabinet_style (
+	name VARCHAR(20) PRIMARY KEY,
+	dip INTEGER
+);
+
+CREATE TABLE iris.cabinet (
+	name VARCHAR(20) PRIMARY KEY,
+	style VARCHAR(20) REFERENCES iris.cabinet_style(name),
+	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name)
+);
+
+CREATE VIEW cabinet_view AS
+	SELECT name, style, geo_loc
+	FROM iris.cabinet;
+GRANT SELECT ON cabinet_view TO PUBLIC;
+
+CREATE TABLE iris.condition (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(12) NOT NULL
+);
+
+COPY iris.condition (id, description) FROM stdin;
+0	Planned
+1	Active
+2	Construction
+3	Removed
+4	Testing
+\.
+
+CREATE TABLE iris.controller (
+	name VARCHAR(20) PRIMARY KEY,
+	drop_id SMALLINT NOT NULL,
+	comm_link VARCHAR(20) NOT NULL REFERENCES iris.comm_link(name),
+	cabinet VARCHAR(20) NOT NULL REFERENCES iris.cabinet(name),
+	condition INTEGER NOT NULL REFERENCES iris.condition,
+	password VARCHAR(32),
+	notes VARCHAR(128) NOT NULL,
+	fail_time TIMESTAMP WITH time zone,
+	version VARCHAR(64)
+);
+
+CREATE UNIQUE INDEX ctrl_link_drop_idx ON iris.controller
+	USING btree (comm_link, drop_id);
+
+CREATE VIEW controller_view AS
+	SELECT c.name, drop_id, comm_link, cabinet,
+	       cnd.description AS condition, notes, cab.geo_loc, fail_time,
+	       version
+	FROM iris.controller c
+	LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
+	LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
+GRANT SELECT ON controller_view TO PUBLIC;
+
+CREATE VIEW controller_loc_view AS
+	SELECT c.name, drop_id, comm_link, cabinet, condition, c.notes,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir
+	FROM controller_view c
+	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name;
+GRANT SELECT ON controller_loc_view TO PUBLIC;
+
+CREATE TABLE iris._device_io (
+	name VARCHAR(20) PRIMARY KEY,
+	controller VARCHAR(20) REFERENCES iris.controller(name),
+	pin INTEGER NOT NULL
+);
+
+CREATE UNIQUE INDEX _device_io_ctrl_pin ON iris._device_io
+	USING btree (controller, pin);
+
+CREATE VIEW device_controller_view AS
+	SELECT name, controller, pin
+	FROM iris._device_io;
+GRANT SELECT ON device_controller_view TO PUBLIC;
+
+--
+--
+--
 CREATE TABLE iris.color_scheme (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(16) NOT NULL
@@ -1061,70 +1220,6 @@ CREATE TABLE iris.quick_message (
 	prefix_page BOOLEAN NOT NULL,
 	multi VARCHAR(1024) NOT NULL
 );
-
-CREATE TABLE iris.comm_protocol (
-	id smallint PRIMARY KEY,
-	description VARCHAR(20) NOT NULL
-);
-
-CREATE TABLE iris.comm_link (
-	name VARCHAR(20) PRIMARY KEY,
-	description VARCHAR(32) NOT NULL,
-	modem BOOLEAN NOT NULL,
-	uri VARCHAR(64) NOT NULL,
-	protocol smallint NOT NULL REFERENCES iris.comm_protocol(id),
-	poll_enabled BOOLEAN NOT NULL,
-	poll_period INTEGER NOT NULL,
-	timeout integer NOT NULL
-);
-
-CREATE TABLE iris.modem (
-	name VARCHAR(20) PRIMARY KEY,
-	uri VARCHAR(64) NOT NULL,
-	config VARCHAR(64) NOT NULL,
-	timeout INTEGER NOT NULL,
-	enabled BOOLEAN NOT NULL
-);
-
-CREATE TABLE iris.cabinet_style (
-	name VARCHAR(20) PRIMARY KEY,
-	dip INTEGER
-);
-
-CREATE TABLE iris.cabinet (
-	name VARCHAR(20) PRIMARY KEY,
-	style VARCHAR(20) REFERENCES iris.cabinet_style(name),
-	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name)
-);
-
-CREATE TABLE iris.condition (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(12) NOT NULL
-);
-
-CREATE TABLE iris.controller (
-	name VARCHAR(20) PRIMARY KEY,
-	drop_id smallint NOT NULL,
-	comm_link VARCHAR(20) NOT NULL REFERENCES iris.comm_link(name),
-	cabinet VARCHAR(20) NOT NULL REFERENCES iris.cabinet(name),
-	condition INTEGER NOT NULL REFERENCES iris.condition,
-	password VARCHAR(32),
-	notes VARCHAR(128) NOT NULL,
-	fail_time timestamp WITH time zone,
-	version VARCHAR(64)
-);
-
-CREATE UNIQUE INDEX ctrl_link_drop_idx ON iris.controller
-	USING btree (comm_link, drop_id);
-
-CREATE TABLE iris._device_io (
-	name VARCHAR(20) PRIMARY KEY,
-	controller VARCHAR(20) REFERENCES iris.controller(name),
-	pin INTEGER NOT NULL
-);
-
-CREATE UNIQUE INDEX _device_io_ctrl_pin ON iris._device_io
-	USING btree (controller, pin);
 
 CREATE TABLE iris._alarm (
 	name VARCHAR(20) PRIMARY KEY,
@@ -3101,22 +3196,6 @@ CREATE VIEW dms_toll_zone_view AS
     ON dms_action_view.quick_message = quick_message_toll_zone.quick_message;
 GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
 
-CREATE VIEW controller_view AS
-	SELECT c.name, drop_id, comm_link, cabinet,
-	       cnd.description AS condition, notes, cab.geo_loc, fail_time,
-	       version
-	FROM iris.controller c
-	LEFT JOIN iris.cabinet cab ON c.cabinet = cab.name
-	LEFT JOIN iris.condition cnd ON c.condition = cnd.id;
-GRANT SELECT ON controller_view TO PUBLIC;
-
-CREATE VIEW controller_loc_view AS
-	SELECT c.name, drop_id, comm_link, cabinet, condition, c.notes,
-	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir
-	FROM controller_view c
-	LEFT JOIN geo_loc_view l ON c.geo_loc = l.name;
-GRANT SELECT ON controller_loc_view TO PUBLIC;
-
 CREATE VIEW quick_message_view AS
 	SELECT name, sign_group, sign_config, prefix_page, multi
 	FROM iris.quick_message;
@@ -3415,16 +3494,6 @@ CREATE VIEW sign_text_view AS
 	JOIN iris.sign_text st ON sg.name = st.sign_group;
 GRANT SELECT ON sign_text_view TO PUBLIC;
 
-CREATE VIEW cabinet_view AS
-	SELECT name, style, geo_loc
-	FROM iris.cabinet;
-GRANT SELECT ON cabinet_view TO PUBLIC;
-
-CREATE VIEW device_controller_view AS
-	SELECT name, controller, pin
-	FROM iris._device_io;
-GRANT SELECT ON device_controller_view TO PUBLIC;
-
 CREATE VIEW iris.device_geo_loc_view AS
 	SELECT name, geo_loc FROM iris._lane_marking UNION ALL
 	SELECT name, geo_loc FROM iris._beacon UNION ALL
@@ -3457,18 +3526,6 @@ CREATE VIEW controller_report AS
 	LEFT JOIN geo_loc_view l ON cab.geo_loc = l.name
 	LEFT JOIN controller_device_view d ON d.controller = c.name;
 GRANT SELECT ON controller_report TO PUBLIC;
-
-CREATE VIEW comm_link_view AS
-	SELECT cl.name, cl.description, modem, uri, cp.description AS protocol,
-	       poll_enabled, poll_period, timeout
-	FROM iris.comm_link cl
-	JOIN iris.comm_protocol cp ON cl.protocol = cp.id;
-GRANT SELECT ON comm_link_view TO PUBLIC;
-
-CREATE VIEW modem_view AS
-	SELECT name, uri, config, timeout, enabled
-	FROM iris.modem;
-GRANT SELECT ON modem_view TO PUBLIC;
 
 CREATE VIEW action_plan_event_view AS
 	SELECT e.event_id, e.event_date, ed.description AS event_description,
@@ -3551,60 +3608,6 @@ CREATE VIEW incident_update_view AS
 GRANT SELECT ON incident_update_view TO PUBLIC;
 
 --- Data
-
-COPY iris.comm_protocol (id, description) FROM stdin;
-0	NTCIP Class B
-1	MnDOT 170 (4-bit)
-2	MnDOT 170 (5-bit)
-3	SmartSensor 105
-4	Canoga
-5	Pelco P
-6	Pelco D PTZ
-7	NTCIP Class C
-8	Manchester PTZ
-9	DMS XML
-10	MSG_FEED
-11	NTCIP Class A
-12	Banner DXM
-13	Vicon PTZ
-14	SmartSensor 125 HD
-15	OSi ORG-815
-16	Infinova D PTZ
-17	RTMS G4
-18	RTMS
-19	Infotek Wizard
-20	Sensys
-21	PeMS
-22	SSI
-23	CHP Incidents
-24	URMS
-25	DLI DIN Relay
-26	Axis 292
-27	Axis PTZ
-28	HySecurity STC
-29	Cohu PTZ
-30	DR-500
-31	ADDCO
-32	TransCore E6
-33	CBW
-34	Incident Feed
-35	MonStream
-36	Gate NDORv5
-37	GPS TAIP
-38	GPS NMEA
-39	GPS RedLion
-\.
-
-COPY iris.cabinet_style (name, dip) FROM stdin;
-\.
-
-COPY iris.condition (id, description) FROM stdin;
-0	Planned
-1	Active
-2	Construction
-3	Removed
-4	Testing
-\.
 
 COPY iris.lane_type (id, description, dcode) FROM stdin;
 0		
