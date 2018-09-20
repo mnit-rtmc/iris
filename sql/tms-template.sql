@@ -149,10 +149,18 @@ BEGIN
 END;
 $update_version$ language plpgsql;
 
+--
+-- Roles, Users, Capabilities and Privileges
+--
 CREATE TABLE iris.role (
 	name VARCHAR(15) PRIMARY KEY,
 	enabled BOOLEAN NOT NULL
 );
+
+COPY iris.role (name, enabled) FROM stdin;
+administrator	t
+operator	t
+\.
 
 CREATE TABLE iris.i_user (
 	name VARCHAR(15) PRIMARY KEY,
@@ -163,14 +171,132 @@ CREATE TABLE iris.i_user (
 	enabled BOOLEAN NOT NULL
 );
 
+COPY iris.i_user (name, full_name, password, dn, role, enabled) FROM stdin;
+admin	IRIS Administrator	+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=		administrator	t
+\.
+
+CREATE VIEW i_user_view AS
+	SELECT name, full_name, dn, role, enabled
+	FROM iris.i_user;
+GRANT SELECT ON i_user_view TO PUBLIC;
+
 CREATE TABLE iris.capability (
 	name VARCHAR(16) PRIMARY KEY,
 	enabled BOOLEAN NOT NULL
 );
 
+COPY iris.capability (name, enabled) FROM stdin;
+base	t
+base_admin	t
+base_policy	t
+beacon_admin	t
+beacon_control	t
+beacon_tab	t
+camera_admin	t
+camera_control	t
+camera_policy	t
+camera_tab	t
+comm_admin	t
+comm_control	t
+comm_tab	t
+dms_admin	t
+dms_control	t
+dms_policy	t
+dms_tab	t
+gate_arm_admin	t
+gate_arm_control	t
+gate_arm_tab	t
+incident_admin	t
+incident_control	t
+incident_tab	t
+lcs_admin	t
+lcs_control	t
+lcs_tab	t
+meter_admin	t
+meter_control	t
+meter_tab	t
+plan_admin	t
+plan_control	t
+plan_tab	t
+sensor_admin	t
+sensor_control	t
+sensor_tab	t
+toll_admin	t
+toll_tab	t
+parking_admin	t
+parking_tab	t
+\.
+
 CREATE TABLE iris.sonar_type (
 	name VARCHAR(16) PRIMARY KEY
 );
+
+COPY iris.sonar_type (name) FROM stdin;
+action_plan
+alarm
+beacon
+beacon_action
+cabinet
+cabinet_style
+camera
+camera_preset
+capability
+catalog
+comm_link
+connection
+controller
+day_matcher
+day_plan
+detector
+dms
+dms_action
+dms_sign_group
+encoder_type
+font
+gate_arm
+gate_arm_array
+geo_loc
+glyph
+gps
+graphic
+inc_advice
+inc_descriptor
+incident
+incident_detail
+inc_locator
+lane_action
+lane_marking
+lane_use_multi
+lcs
+lcs_array
+lcs_indication
+map_extent
+meter_action
+modem
+monitor_style
+parking_area
+plan_phase
+play_list
+privilege
+quick_message
+ramp_meter
+r_node
+road
+role
+sign_config
+sign_group
+sign_message
+sign_text
+station
+system_attribute
+tag_reader
+time_action
+toll_zone
+user
+video_monitor
+weather_sensor
+word
+\.
 
 CREATE TABLE iris.privilege (
 	name VARCHAR(8) PRIMARY KEY,
@@ -182,11 +308,243 @@ CREATE TABLE iris.privilege (
 	write BOOLEAN DEFAULT false NOT NULL
 );
 
+COPY iris.privilege (name, capability, type_n, attr_n, write) FROM stdin;
+PRV_0001	base	user		f
+PRV_0002	base	role		f
+PRV_0003	base	capability		f
+PRV_0004	base	privilege		f
+PRV_0005	base	connection		f
+PRV_0006	base	system_attribute		f
+PRV_0007	base	map_extent		f
+PRV_0008	base	road		f
+PRV_0009	base	geo_loc		f
+PRV_0010	base	cabinet		f
+PRV_0011	base	controller		f
+PRV_0012	base_admin	user		t
+PRV_0013	base_admin	role		t
+PRV_0014	base_admin	privilege		t
+PRV_0015	base_admin	capability		t
+PRV_0016	base_admin	connection		t
+PRV_0017	base_policy	geo_loc		t
+PRV_0018	base_policy	map_extent		t
+PRV_0019	base_policy	road		t
+PRV_0020	base_policy	system_attribute		t
+PRV_0021	beacon_admin	beacon		t
+PRV_0022	beacon_control	beacon	flashing	t
+PRV_0023	beacon_tab	beacon		f
+PRV_0024	camera_admin	camera		t
+PRV_0025	camera_admin	encoder_type		t
+PRV_0026	camera_admin	camera_preset		t
+PRV_0027	camera_admin	video_monitor		t
+PRV_0028	camera_admin	monitor_style		t
+PRV_002C	camera_admin	play_list		t
+PRV_002D	camera_admin	catalog		t
+PRV_0029	camera_control	camera	ptz	t
+PRV_0030	camera_control	camera	recallPreset	t
+PRV_0031	camera_control	camera	deviceRequest	t
+PRV_0032	camera_policy	camera	publish	t
+PRV_0033	camera_policy	camera	storePreset	t
+PRV_0034	camera_tab	encoder_type		f
+PRV_0035	camera_tab	camera		f
+PRV_0036	camera_tab	camera_preset		f
+PRV_0037	camera_tab	video_monitor		f
+PRV_0038	camera_tab	monitor_style		f
+PRV_003C	camera_tab	play_list		f
+PRV_003E	camera_tab	catalog		f
+PRV_0039	comm_admin	comm_link		t
+PRV_0040	comm_admin	modem		t
+PRV_0041	comm_admin	cabinet_style		t
+PRV_0042	comm_admin	cabinet		t
+PRV_0043	comm_admin	controller		t
+PRV_0044	comm_admin	alarm		t
+PRV_0045	comm_control	controller	condition	t
+PRV_0046	comm_control	controller	download	t
+PRV_0047	comm_control	controller	counters	t
+PRV_0048	comm_tab	comm_link		f
+PRV_0049	comm_tab	modem		f
+PRV_0050	comm_tab	alarm		f
+PRV_0051	comm_tab	cabinet_style		f
+PRV_0052	dms_admin	dms		t
+PRV_0053	dms_admin	font		t
+PRV_0054	dms_admin	glyph		t
+PRV_0055	dms_admin	gps		t
+PRV_0056	dms_admin	graphic		t
+PRV_0057	dms_admin	sign_config		t
+PRV_0058	dms_control	dms	msgUser	t
+PRV_0059	dms_control	dms	deviceRequest	t
+PRV_0060	dms_control	sign_message		t
+PRV_0061	dms_policy	dms_sign_group		t
+PRV_0062	dms_policy	quick_message		t
+PRV_0063	dms_policy	sign_group		t
+PRV_0064	dms_policy	sign_text		t
+PRV_0065	dms_policy	word		t
+PRV_0066	dms_tab	dms		f
+PRV_0067	dms_tab	dms_sign_group		f
+PRV_0068	dms_tab	font		f
+PRV_0069	dms_tab	glyph		f
+PRV_0070	dms_tab	gps		f
+PRV_0071	dms_tab	graphic		f
+PRV_0072	dms_tab	quick_message		f
+PRV_0073	dms_tab	sign_config		f
+PRV_0074	dms_tab	sign_group		f
+PRV_0075	dms_tab	sign_message		f
+PRV_0076	dms_tab	sign_text		f
+PRV_0077	dms_tab	word		f
+PRV_0078	gate_arm_admin	gate_arm		t
+PRV_0079	gate_arm_admin	gate_arm_array		t
+PRV_0080	gate_arm_control	gate_arm_array	armStateNext	t
+PRV_0081	gate_arm_control	gate_arm_array	ownerNext	t
+PRV_0082	gate_arm_control	gate_arm_array	deviceRequest	t
+PRV_0083	gate_arm_tab	gate_arm		f
+PRV_0084	gate_arm_tab	gate_arm_array		f
+PRV_0085	gate_arm_tab	camera		f
+PRV_0086	gate_arm_tab	encoder_type		f
+PRV_0087	incident_admin	incident_detail		t
+PRV_0088	incident_admin	inc_descriptor		t
+PRV_0089	incident_admin	inc_locator		t
+PRV_0090	incident_admin	inc_advice		t
+PRV_0091	incident_control	incident		t
+PRV_0092	incident_tab	incident		f
+PRV_0093	incident_tab	incident_detail		f
+PRV_0094	incident_tab	inc_descriptor		f
+PRV_0095	incident_tab	inc_locator		f
+PRV_0096	incident_tab	inc_advice		f
+PRV_0097	lcs_admin	lane_use_multi		t
+PRV_0098	lcs_admin	lcs		t
+PRV_0099	lcs_admin	lcs_array		t
+PRV_0100	lcs_admin	lcs_indication		t
+PRV_0101	lcs_admin	lane_marking		t
+PRV_0102	lcs_control	lcs_array	indicationsNext	t
+PRV_0103	lcs_control	lcs_array	ownerNext	t
+PRV_0104	lcs_control	lcs_array	lcsLock	t
+PRV_0105	lcs_control	lcs_array	deviceRequest	t
+PRV_0106	lcs_tab	dms		f
+PRV_0107	lcs_tab	lane_use_multi		f
+PRV_0108	lcs_tab	lcs		f
+PRV_0109	lcs_tab	lcs_array		f
+PRV_0110	lcs_tab	lcs_indication		f
+PRV_0111	lcs_tab	quick_message		f
+PRV_0112	lcs_tab	lane_marking		f
+PRV_0113	meter_admin	ramp_meter		t
+PRV_0114	meter_control	ramp_meter	mLock	t
+PRV_0115	meter_control	ramp_meter	rateNext	t
+PRV_0116	meter_control	ramp_meter	deviceRequest	t
+PRV_0117	meter_tab	ramp_meter		f
+PRV_0118	plan_admin	action_plan		t
+PRV_0119	plan_admin	day_plan		t
+PRV_0120	plan_admin	day_matcher		t
+PRV_0121	plan_admin	plan_phase		t
+PRV_0122	plan_admin	time_action		t
+PRV_0123	plan_admin	dms_action		t
+PRV_0124	plan_admin	beacon_action		t
+PRV_0125	plan_admin	lane_action		t
+PRV_0126	plan_admin	meter_action		t
+PRV_0127	plan_control	action_plan	phase	t
+PRV_0128	plan_tab	action_plan		f
+PRV_0129	plan_tab	day_plan		f
+PRV_0130	plan_tab	day_matcher		f
+PRV_0131	plan_tab	plan_phase		f
+PRV_0132	plan_tab	time_action		f
+PRV_0133	plan_tab	dms_action		f
+PRV_0134	plan_tab	beacon_action		f
+PRV_0135	plan_tab	lane_action		f
+PRV_0136	plan_tab	meter_action		f
+PRV_0137	sensor_admin	detector		t
+PRV_0138	sensor_admin	r_node		t
+PRV_0139	sensor_admin	weather_sensor		t
+PRV_0140	sensor_control	detector	fieldLength	t
+PRV_0141	sensor_control	detector	forceFail	t
+PRV_0142	sensor_tab	r_node		f
+PRV_0143	sensor_tab	detector		f
+PRV_0144	sensor_tab	station		f
+PRV_0145	sensor_tab	weather_sensor		f
+PRV_0146	toll_admin	tag_reader		t
+PRV_0147	toll_admin	toll_zone		t
+PRV_0148	toll_tab	tag_reader		f
+PRV_0149	toll_tab	toll_zone		f
+PRV_0150	parking_admin	parking_area		t
+PRV_0151	parking_tab	parking_area		f
+\.
+
+COPY iris.privilege (name, capability, type_n, group_n, write) FROM stdin;
+PRV_003D	camera_tab	play_list	user	t
+\.
+
 CREATE TABLE iris.role_capability (
 	role VARCHAR(15) NOT NULL REFERENCES iris.role,
 	capability VARCHAR(16) NOT NULL REFERENCES iris.capability
 );
 ALTER TABLE iris.role_capability ADD PRIMARY KEY (role, capability);
+
+COPY iris.role_capability (role, capability) FROM stdin;
+administrator	base
+administrator	base_admin
+administrator	base_policy
+administrator	beacon_admin
+administrator	beacon_control
+administrator	beacon_tab
+administrator	camera_admin
+administrator	camera_control
+administrator	camera_policy
+administrator	camera_tab
+administrator	comm_admin
+administrator	comm_control
+administrator	comm_tab
+administrator	dms_admin
+administrator	dms_control
+administrator	dms_policy
+administrator	dms_tab
+administrator	gate_arm_admin
+administrator	gate_arm_control
+administrator	gate_arm_tab
+administrator	incident_admin
+administrator	incident_control
+administrator	incident_tab
+administrator	lcs_admin
+administrator	lcs_control
+administrator	lcs_tab
+administrator	meter_admin
+administrator	meter_control
+administrator	meter_tab
+administrator	plan_admin
+administrator	plan_control
+administrator	plan_tab
+administrator	sensor_admin
+administrator	sensor_control
+administrator	sensor_tab
+administrator	toll_admin
+administrator	toll_tab
+administrator	parking_admin
+administrator	parking_tab
+operator	base
+operator	beacon_control
+operator	beacon_tab
+operator	camera_control
+operator	camera_tab
+operator	dms_control
+operator	dms_tab
+operator	gate_arm_tab
+operator	incident_control
+operator	incident_tab
+operator	lcs_control
+operator	lcs_tab
+operator	meter_control
+operator	meter_tab
+operator	plan_control
+operator	plan_tab
+operator	sensor_tab
+operator	toll_tab
+\.
+
+CREATE VIEW role_privilege_view AS
+	SELECT role, role_capability.capability, type_n, obj_n, group_n, attr_n,
+	       write
+	FROM iris.role
+	JOIN iris.role_capability ON role.name = role_capability.role
+	JOIN iris.capability ON role_capability.capability = capability.name
+	JOIN iris.privilege ON privilege.capability = capability.name
+	WHERE role.enabled = 't' AND capability.enabled = 't';
+GRANT SELECT ON role_privilege_view TO PUBLIC;
 
 CREATE TABLE iris.direction (
 	id smallint PRIMARY KEY,
@@ -2509,21 +2867,6 @@ CREATE TRIGGER inc_advice_ck_trig
 
 --- Views
 
-CREATE VIEW role_privilege_view AS
-	SELECT role, role_capability.capability, type_n, obj_n, group_n, attr_n,
-	       write
-	FROM iris.role
-	JOIN iris.role_capability ON role.name = role_capability.role
-	JOIN iris.capability ON role_capability.capability = capability.name
-	JOIN iris.privilege ON privilege.capability = capability.name
-	WHERE role.enabled = 't' AND capability.enabled = 't';
-GRANT SELECT ON role_privilege_view TO PUBLIC;
-
-CREATE VIEW i_user_view AS
-	SELECT name, full_name, dn, role, enabled
-	FROM iris.i_user;
-GRANT SELECT ON i_user_view TO PUBLIC;
-
 CREATE VIEW graphic_view AS
 	SELECT name, g_number, cs.description AS color_scheme, height, width,
 	       transparent_color, pixels
@@ -3390,346 +3733,6 @@ COPY iris.parking_area_amenities (bit, amenity) FROM stdin;
 12	Play area
 13	Pet excercise area
 14	Interpretive information
-\.
-
-COPY iris.capability (name, enabled) FROM stdin;
-base	t
-base_admin	t
-base_policy	t
-beacon_admin	t
-beacon_control	t
-beacon_tab	t
-camera_admin	t
-camera_control	t
-camera_policy	t
-camera_tab	t
-comm_admin	t
-comm_control	t
-comm_tab	t
-dms_admin	t
-dms_control	t
-dms_policy	t
-dms_tab	t
-gate_arm_admin	t
-gate_arm_control	t
-gate_arm_tab	t
-incident_admin	t
-incident_control	t
-incident_tab	t
-lcs_admin	t
-lcs_control	t
-lcs_tab	t
-meter_admin	t
-meter_control	t
-meter_tab	t
-plan_admin	t
-plan_control	t
-plan_tab	t
-sensor_admin	t
-sensor_control	t
-sensor_tab	t
-toll_admin	t
-toll_tab	t
-parking_admin	t
-parking_tab	t
-\.
-
-COPY iris.sonar_type (name) FROM stdin;
-action_plan
-alarm
-beacon
-beacon_action
-cabinet
-cabinet_style
-camera
-camera_preset
-capability
-catalog
-comm_link
-connection
-controller
-day_matcher
-day_plan
-detector
-dms
-dms_action
-dms_sign_group
-encoder_type
-font
-gate_arm
-gate_arm_array
-geo_loc
-glyph
-gps
-graphic
-inc_advice
-inc_descriptor
-incident
-incident_detail
-inc_locator
-lane_action
-lane_marking
-lane_use_multi
-lcs
-lcs_array
-lcs_indication
-map_extent
-meter_action
-modem
-monitor_style
-parking_area
-plan_phase
-play_list
-privilege
-quick_message
-ramp_meter
-r_node
-road
-role
-sign_config
-sign_group
-sign_message
-sign_text
-station
-system_attribute
-tag_reader
-time_action
-toll_zone
-user
-video_monitor
-weather_sensor
-word
-\.
-
-COPY iris.privilege (name, capability, type_n, attr_n, write) FROM stdin;
-PRV_0001	base	user		f
-PRV_0002	base	role		f
-PRV_0003	base	capability		f
-PRV_0004	base	privilege		f
-PRV_0005	base	connection		f
-PRV_0006	base	system_attribute		f
-PRV_0007	base	map_extent		f
-PRV_0008	base	road		f
-PRV_0009	base	geo_loc		f
-PRV_0010	base	cabinet		f
-PRV_0011	base	controller		f
-PRV_0012	base_admin	user		t
-PRV_0013	base_admin	role		t
-PRV_0014	base_admin	privilege		t
-PRV_0015	base_admin	capability		t
-PRV_0016	base_admin	connection		t
-PRV_0017	base_policy	geo_loc		t
-PRV_0018	base_policy	map_extent		t
-PRV_0019	base_policy	road		t
-PRV_0020	base_policy	system_attribute		t
-PRV_0021	beacon_admin	beacon		t
-PRV_0022	beacon_control	beacon	flashing	t
-PRV_0023	beacon_tab	beacon		f
-PRV_0024	camera_admin	camera		t
-PRV_0025	camera_admin	encoder_type		t
-PRV_0026	camera_admin	camera_preset		t
-PRV_0027	camera_admin	video_monitor		t
-PRV_0028	camera_admin	monitor_style		t
-PRV_002C	camera_admin	play_list		t
-PRV_002D	camera_admin	catalog		t
-PRV_0029	camera_control	camera	ptz	t
-PRV_0030	camera_control	camera	recallPreset	t
-PRV_0031	camera_control	camera	deviceRequest	t
-PRV_0032	camera_policy	camera	publish	t
-PRV_0033	camera_policy	camera	storePreset	t
-PRV_0034	camera_tab	encoder_type		f
-PRV_0035	camera_tab	camera		f
-PRV_0036	camera_tab	camera_preset		f
-PRV_0037	camera_tab	video_monitor		f
-PRV_0038	camera_tab	monitor_style		f
-PRV_003C	camera_tab	play_list		f
-PRV_003E	camera_tab	catalog		f
-PRV_0039	comm_admin	comm_link		t
-PRV_0040	comm_admin	modem		t
-PRV_0041	comm_admin	cabinet_style		t
-PRV_0042	comm_admin	cabinet		t
-PRV_0043	comm_admin	controller		t
-PRV_0044	comm_admin	alarm		t
-PRV_0045	comm_control	controller	condition	t
-PRV_0046	comm_control	controller	download	t
-PRV_0047	comm_control	controller	counters	t
-PRV_0048	comm_tab	comm_link		f
-PRV_0049	comm_tab	modem		f
-PRV_0050	comm_tab	alarm		f
-PRV_0051	comm_tab	cabinet_style		f
-PRV_0052	dms_admin	dms		t
-PRV_0053	dms_admin	font		t
-PRV_0054	dms_admin	glyph		t
-PRV_0055	dms_admin	gps		t
-PRV_0056	dms_admin	graphic		t
-PRV_0057	dms_admin	sign_config		t
-PRV_0058	dms_control	dms	msgUser	t
-PRV_0059	dms_control	dms	deviceRequest	t
-PRV_0060	dms_control	sign_message		t
-PRV_0061	dms_policy	dms_sign_group		t
-PRV_0062	dms_policy	quick_message		t
-PRV_0063	dms_policy	sign_group		t
-PRV_0064	dms_policy	sign_text		t
-PRV_0065	dms_policy	word		t
-PRV_0066	dms_tab	dms		f
-PRV_0067	dms_tab	dms_sign_group		f
-PRV_0068	dms_tab	font		f
-PRV_0069	dms_tab	glyph		f
-PRV_0070	dms_tab	gps		f
-PRV_0071	dms_tab	graphic		f
-PRV_0072	dms_tab	quick_message		f
-PRV_0073	dms_tab	sign_config		f
-PRV_0074	dms_tab	sign_group		f
-PRV_0075	dms_tab	sign_message		f
-PRV_0076	dms_tab	sign_text		f
-PRV_0077	dms_tab	word		f
-PRV_0078	gate_arm_admin	gate_arm		t
-PRV_0079	gate_arm_admin	gate_arm_array		t
-PRV_0080	gate_arm_control	gate_arm_array	armStateNext	t
-PRV_0081	gate_arm_control	gate_arm_array	ownerNext	t
-PRV_0082	gate_arm_control	gate_arm_array	deviceRequest	t
-PRV_0083	gate_arm_tab	gate_arm		f
-PRV_0084	gate_arm_tab	gate_arm_array		f
-PRV_0085	gate_arm_tab	camera		f
-PRV_0086	gate_arm_tab	encoder_type		f
-PRV_0087	incident_admin	incident_detail		t
-PRV_0088	incident_admin	inc_descriptor		t
-PRV_0089	incident_admin	inc_locator		t
-PRV_0090	incident_admin	inc_advice		t
-PRV_0091	incident_control	incident		t
-PRV_0092	incident_tab	incident		f
-PRV_0093	incident_tab	incident_detail		f
-PRV_0094	incident_tab	inc_descriptor		f
-PRV_0095	incident_tab	inc_locator		f
-PRV_0096	incident_tab	inc_advice		f
-PRV_0097	lcs_admin	lane_use_multi		t
-PRV_0098	lcs_admin	lcs		t
-PRV_0099	lcs_admin	lcs_array		t
-PRV_0100	lcs_admin	lcs_indication		t
-PRV_0101	lcs_admin	lane_marking		t
-PRV_0102	lcs_control	lcs_array	indicationsNext	t
-PRV_0103	lcs_control	lcs_array	ownerNext	t
-PRV_0104	lcs_control	lcs_array	lcsLock	t
-PRV_0105	lcs_control	lcs_array	deviceRequest	t
-PRV_0106	lcs_tab	dms		f
-PRV_0107	lcs_tab	lane_use_multi		f
-PRV_0108	lcs_tab	lcs		f
-PRV_0109	lcs_tab	lcs_array		f
-PRV_0110	lcs_tab	lcs_indication		f
-PRV_0111	lcs_tab	quick_message		f
-PRV_0112	lcs_tab	lane_marking		f
-PRV_0113	meter_admin	ramp_meter		t
-PRV_0114	meter_control	ramp_meter	mLock	t
-PRV_0115	meter_control	ramp_meter	rateNext	t
-PRV_0116	meter_control	ramp_meter	deviceRequest	t
-PRV_0117	meter_tab	ramp_meter		f
-PRV_0118	plan_admin	action_plan		t
-PRV_0119	plan_admin	day_plan		t
-PRV_0120	plan_admin	day_matcher		t
-PRV_0121	plan_admin	plan_phase		t
-PRV_0122	plan_admin	time_action		t
-PRV_0123	plan_admin	dms_action		t
-PRV_0124	plan_admin	beacon_action		t
-PRV_0125	plan_admin	lane_action		t
-PRV_0126	plan_admin	meter_action		t
-PRV_0127	plan_control	action_plan	phase	t
-PRV_0128	plan_tab	action_plan		f
-PRV_0129	plan_tab	day_plan		f
-PRV_0130	plan_tab	day_matcher		f
-PRV_0131	plan_tab	plan_phase		f
-PRV_0132	plan_tab	time_action		f
-PRV_0133	plan_tab	dms_action		f
-PRV_0134	plan_tab	beacon_action		f
-PRV_0135	plan_tab	lane_action		f
-PRV_0136	plan_tab	meter_action		f
-PRV_0137	sensor_admin	detector		t
-PRV_0138	sensor_admin	r_node		t
-PRV_0139	sensor_admin	weather_sensor		t
-PRV_0140	sensor_control	detector	fieldLength	t
-PRV_0141	sensor_control	detector	forceFail	t
-PRV_0142	sensor_tab	r_node		f
-PRV_0143	sensor_tab	detector		f
-PRV_0144	sensor_tab	station		f
-PRV_0145	sensor_tab	weather_sensor		f
-PRV_0146	toll_admin	tag_reader		t
-PRV_0147	toll_admin	toll_zone		t
-PRV_0148	toll_tab	tag_reader		f
-PRV_0149	toll_tab	toll_zone		f
-PRV_0150	parking_admin	parking_area		t
-PRV_0151	parking_tab	parking_area		f
-\.
-
-COPY iris.privilege (name, capability, type_n, group_n, write) FROM stdin;
-PRV_003D	camera_tab	play_list	user	t
-\.
-
-COPY iris.role (name, enabled) FROM stdin;
-administrator	t
-operator	t
-\.
-
-COPY iris.role_capability (role, capability) FROM stdin;
-administrator	base
-administrator	base_admin
-administrator	base_policy
-administrator	beacon_admin
-administrator	beacon_control
-administrator	beacon_tab
-administrator	camera_admin
-administrator	camera_control
-administrator	camera_policy
-administrator	camera_tab
-administrator	comm_admin
-administrator	comm_control
-administrator	comm_tab
-administrator	dms_admin
-administrator	dms_control
-administrator	dms_policy
-administrator	dms_tab
-administrator	gate_arm_admin
-administrator	gate_arm_control
-administrator	gate_arm_tab
-administrator	incident_admin
-administrator	incident_control
-administrator	incident_tab
-administrator	lcs_admin
-administrator	lcs_control
-administrator	lcs_tab
-administrator	meter_admin
-administrator	meter_control
-administrator	meter_tab
-administrator	plan_admin
-administrator	plan_control
-administrator	plan_tab
-administrator	sensor_admin
-administrator	sensor_control
-administrator	sensor_tab
-administrator	toll_admin
-administrator	toll_tab
-administrator	parking_admin
-administrator	parking_tab
-operator	base
-operator	beacon_control
-operator	beacon_tab
-operator	camera_control
-operator	camera_tab
-operator	dms_control
-operator	dms_tab
-operator	gate_arm_tab
-operator	incident_control
-operator	incident_tab
-operator	lcs_control
-operator	lcs_tab
-operator	meter_control
-operator	meter_tab
-operator	plan_control
-operator	plan_tab
-operator	sensor_tab
-operator	toll_tab
-\.
-
-COPY iris.i_user (name, full_name, password, dn, role, enabled) FROM stdin;
-admin	IRIS Administrator	+vAwDtk/0KGx9k+kIoKFgWWbd3Ku8e/FOHoZoHB65PAuNEiN2muHVavP0fztOi4=		administrator	t
 \.
 
 COPY iris.inc_range (id, description) FROM stdin;
