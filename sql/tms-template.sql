@@ -3284,6 +3284,21 @@ CREATE TRIGGER ramp_meter_delete_trig
     INSTEAD OF DELETE ON iris.ramp_meter
     FOR EACH ROW EXECUTE PROCEDURE iris.ramp_meter_delete();
 
+CREATE VIEW ramp_meter_view AS
+	SELECT m.name, geo_loc, controller, pin, notes,
+	       mt.description AS meter_type, storage, max_wait,
+	       alg.description AS algorithm, am_target, pm_target, beacon,
+	       camera, preset_num, ml.description AS meter_lock,
+	       l.rd, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
+	       l.cross_dir, l.lat, l.lon
+	FROM iris.ramp_meter m
+	LEFT JOIN iris.meter_type mt ON m.meter_type = mt.id
+	LEFT JOIN iris.meter_algorithm alg ON m.algorithm = alg.id
+	LEFT JOIN iris.camera_preset p ON m.preset = p.name
+	LEFT JOIN iris.meter_lock ml ON m.m_lock = ml.id
+	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
+GRANT SELECT ON ramp_meter_view TO PUBLIC;
+
 CREATE TABLE iris.meter_action (
 	name VARCHAR(30) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
@@ -3372,7 +3387,7 @@ CREATE VIEW meter_event_view AS
 GRANT SELECT ON meter_event_view TO PUBLIC;
 
 --
---
+-- Toll Zones, Tag Readers
 --
 CREATE TABLE iris.toll_zone (
 	name VARCHAR(20) PRIMARY KEY,
@@ -3384,6 +3399,282 @@ CREATE TABLE iris.toll_zone (
 	max_price REAL
 );
 
+CREATE VIEW toll_zone_view AS
+	SELECT name, start_id, end_id, tollway, alpha, beta, max_price
+	FROM iris.toll_zone;
+GRANT SELECT ON toll_zone_view TO PUBLIC;
+
+CREATE TABLE iris.tag_reader_sync_mode (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
+COPY iris.tag_reader_sync_mode (id, description) FROM stdin;
+0	slave
+1	master
+2	GPS secondary
+3	GPS primary
+\.
+
+CREATE TABLE iris._tag_reader (
+	name VARCHAR(20) PRIMARY KEY,
+	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
+	notes VARCHAR(64) NOT NULL,
+	toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name),
+	downlink_freq_khz INTEGER,
+	uplink_freq_khz INTEGER,
+	sego_atten_downlink_db INTEGER,
+	sego_atten_uplink_db INTEGER,
+	sego_data_detect_db INTEGER,
+	sego_seen_count INTEGER,
+	sego_unique_count INTEGER,
+	iag_atten_downlink_db INTEGER,
+	iag_atten_uplink_db INTEGER,
+	iag_data_detect_db INTEGER,
+	iag_seen_count INTEGER,
+	iag_unique_count INTEGER,
+	line_loss_db INTEGER,
+	sync_mode INTEGER REFERENCES iris.tag_reader_sync_mode,
+	slave_select_count INTEGER
+);
+
+ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.tag_reader AS
+	SELECT t.name, geo_loc, controller, pin, notes, toll_zone,
+	       downlink_freq_khz, uplink_freq_khz, sego_atten_downlink_db,
+	       sego_atten_uplink_db, sego_data_detect_db, sego_seen_count,
+	       sego_unique_count, iag_atten_downlink_db, iag_atten_uplink_db,
+	       iag_data_detect_db, iag_seen_count, iag_unique_count,
+	       line_loss_db, sync_mode, slave_select_count
+	FROM iris._tag_reader t JOIN iris._device_io d ON t.name = d.name;
+
+CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
+	$tag_reader_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._tag_reader (name, geo_loc, notes, toll_zone,
+	                              downlink_freq_khz, uplink_freq_khz,
+	                              sego_atten_downlink_db,
+	                              sego_atten_uplink_db, sego_data_detect_db,
+	                              sego_seen_count, sego_unique_count,
+	                              iag_atten_downlink_db,
+	                              iag_atten_uplink_db, iag_data_detect_db,
+	                              iag_seen_count, iag_unique_count,
+	                              line_loss_db, sync_mode,
+	                              slave_select_count)
+	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone,
+	             NEW.downlink_freq_khz, NEW.uplink_freq_khz,
+	             NEW.sego_atten_downlink_db, NEW.sego_atten_uplink_db,
+	             NEW.sego_data_detect_db, NEW.sego_seen_count,
+	             NEW.sego_unique_count, NEW.iag_atten_downlink_db,
+	             NEW.iag_atten_uplink_db, NEW.iag_data_detect_db,
+	             NEW.iag_seen_count, NEW.iag_unique_count, NEW.line_loss_db,
+	             NEW.sync_mode, NEW.slave_select_count);
+	RETURN NEW;
+END;
+$tag_reader_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tag_reader_insert_trig
+    INSTEAD OF INSERT ON iris.tag_reader
+    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_insert();
+
+CREATE FUNCTION iris.tag_reader_update() RETURNS TRIGGER AS
+	$tag_reader_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._tag_reader
+	   SET geo_loc = NEW.geo_loc,
+	       notes = NEW.notes,
+	       toll_zone = NEW.toll_zone,
+	       downlink_freq_khz = NEW.downlink_freq_khz,
+	       uplink_freq_khz = NEW.uplink_freq_khz,
+	       sego_atten_downlink_db = NEW.sego_atten_downlink_db,
+	       sego_atten_uplink_db = NEW.sego_atten_uplink_db,
+	       sego_data_detect_db = NEW.sego_data_detect_db,
+	       sego_seen_count = NEW.sego_seen_count,
+	       sego_unique_count = NEW.sego_unique_count,
+	       iag_atten_downlink_db = NEW.iag_atten_downlink_db,
+	       iag_atten_uplink_db = NEW.iag_atten_uplink_db,
+	       iag_data_detect_db = NEW.iag_data_detect_db,
+	       iag_seen_count = NEW.iag_seen_count,
+	       iag_unique_count = NEW.iag_unique_count,
+	       line_loss_db = NEW.line_loss_db,
+	       sync_mode = NEW.sync_mode,
+	       slave_select_count = NEW.slave_select_count
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$tag_reader_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tag_reader_update_trig
+    INSTEAD OF UPDATE ON iris.tag_reader
+    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_update();
+
+CREATE FUNCTION iris.tag_reader_delete() RETURNS TRIGGER AS
+	$tag_reader_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$tag_reader_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tag_reader_delete_trig
+    INSTEAD OF DELETE ON iris.tag_reader
+    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_delete();
+
+CREATE VIEW tag_reader_view AS
+	SELECT t.name, t.geo_loc, location, controller, pin, notes, toll_zone,
+	       downlink_freq_khz, uplink_freq_khz,
+	       sego_atten_downlink_db, sego_atten_uplink_db, sego_data_detect_db,
+	       sego_seen_count, sego_unique_count,
+	       iag_atten_downlink_db, iag_atten_uplink_db, iag_data_detect_db,
+	       iag_seen_count, iag_unique_count, line_loss_db,
+	       m.description AS sync_mode, slave_select_count
+	FROM iris.tag_reader t
+	LEFT JOIN geo_loc_view l ON t.geo_loc = l.name
+	LEFT JOIN iris.tag_reader_sync_mode m ON t.sync_mode = m.id;
+GRANT SELECT ON tag_reader_view TO PUBLIC;
+
+CREATE TABLE iris.tag_reader_dms (
+	tag_reader VARCHAR(20) NOT NULL REFERENCES iris._tag_reader,
+	dms VARCHAR(20) NOT NULL REFERENCES iris._dms
+);
+ALTER TABLE iris.tag_reader_dms ADD PRIMARY KEY (tag_reader, dms);
+
+CREATE VIEW tag_reader_dms_view AS
+	SELECT tag_reader, dms
+	FROM iris.tag_reader_dms;
+GRANT SELECT ON tag_reader_dms_view TO PUBLIC;
+
+CREATE TABLE event.tag_type (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
+COPY event.tag_type (id, description) FROM stdin;
+0	Unknown
+1	SeGo
+2	IAG
+3	ASTMv6
+\.
+
+CREATE TABLE event.tag_read_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date timestamp WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	tag_type INTEGER NOT NULL REFERENCES event.tag_type,
+	agency INTEGER,
+	tag_id INTEGER NOT NULL,
+	tag_reader VARCHAR(20) NOT NULL,
+	hov BOOLEAN NOT NULL,
+	trip_id INTEGER
+);
+
+CREATE INDEX ON event.tag_read_event(tag_id);
+
+CREATE VIEW tag_read_event_view AS
+	SELECT event_id, event_date, event_description.description,
+	       tag_type.description AS tag_type, agency, tag_id, tag_reader,
+	       toll_zone, tollway, hov, trip_id
+	FROM event.tag_read_event
+	JOIN event.event_description
+	ON   tag_read_event.event_desc_id = event_description.event_desc_id
+	JOIN event.tag_type
+	ON   tag_read_event.tag_type = tag_type.id
+	JOIN iris._tag_reader
+	ON   tag_read_event.tag_reader = _tag_reader.name
+	LEFT JOIN iris.toll_zone
+	ON        _tag_reader.toll_zone = toll_zone.name;
+GRANT SELECT ON tag_read_event_view TO PUBLIC;
+
+-- Allow trip_id column to be updated by roles which have been granted
+-- update permission on tag_read_event_view
+CREATE FUNCTION event.tag_read_event_view_update() RETURNS TRIGGER AS
+	$tag_read_event_view_update$
+BEGIN
+	UPDATE event.tag_read_event
+	   SET trip_id = NEW.trip_id
+	 WHERE event_id = OLD.event_id;
+	RETURN NEW;
+END;
+$tag_read_event_view_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER tag_read_event_view_update_trig
+    INSTEAD OF UPDATE ON tag_read_event_view
+    FOR EACH ROW EXECUTE PROCEDURE event.tag_read_event_view_update();
+
+CREATE TABLE event.price_message_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date timestamp WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	device_id VARCHAR(20) NOT NULL,
+	toll_zone VARCHAR(20) NOT NULL,
+	price NUMERIC(4,2) NOT NULL
+);
+
+CREATE INDEX ON event.price_message_event(event_date);
+CREATE INDEX ON event.price_message_event(device_id);
+
+CREATE VIEW price_message_event_view AS
+	SELECT event_id, event_date, event_description.description,
+	       device_id, toll_zone, price
+	FROM event.price_message_event
+	JOIN event.event_description
+	ON price_message_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON price_message_event_view TO PUBLIC;
+
+CREATE VIEW iris.quick_message_priced AS
+    SELECT name AS quick_message, 'priced'::VARCHAR(6) AS state,
+        unnest(string_to_array(substring(multi FROM '%tzp,#"[^]]*#"]%' FOR '#'),
+        ',')) AS toll_zone
+    FROM iris.quick_message WHERE multi LIKE '%tzp%';
+
+CREATE VIEW iris.quick_message_open AS
+    SELECT name AS quick_message, 'open'::VARCHAR(6) AS state,
+        unnest(string_to_array(substring(multi FROM '%tzo,#"[^]]*#"]%' FOR '#'),
+        ',')) AS toll_zone
+    FROM iris.quick_message WHERE multi LIKE '%tzo%';
+
+CREATE VIEW iris.quick_message_closed AS
+    SELECT name AS quick_message, 'closed'::VARCHAR(6) AS state,
+        unnest(string_to_array(substring(multi FROM '%tzc,#"[^]]*#"]%' FOR '#'),
+        ',')) AS toll_zone
+    FROM iris.quick_message WHERE multi LIKE '%tzc%';
+
+CREATE VIEW iris.quick_message_toll_zone AS
+    SELECT quick_message, state, toll_zone
+        FROM iris.quick_message_priced UNION ALL
+    SELECT quick_message, state, toll_zone
+        FROM iris.quick_message_open UNION ALL
+    SELECT quick_message, state, toll_zone
+        FROM iris.quick_message_closed;
+
+CREATE VIEW dms_toll_zone_view AS
+    SELECT dms, state, toll_zone, action_plan, dms_action_view.quick_message
+    FROM dms_action_view
+    JOIN iris.dms_sign_group
+    ON dms_action_view.sign_group = dms_sign_group.sign_group
+    JOIN iris.quick_message
+    ON dms_action_view.quick_message = quick_message.name
+    JOIN iris.quick_message_toll_zone
+    ON dms_action_view.quick_message = quick_message_toll_zone.quick_message;
+GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
+
+--
+--
+--
 CREATE TABLE iris.monitor_style (
 	name VARCHAR(24) PRIMARY KEY,
 	force_aspect BOOLEAN NOT NULL,
@@ -3532,133 +3823,6 @@ CREATE TRIGGER weather_sensor_delete_trig
     INSTEAD OF DELETE ON iris.weather_sensor
     FOR EACH ROW EXECUTE PROCEDURE iris.weather_sensor_delete();
 
-CREATE TABLE iris.tag_reader_sync_mode (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
-);
-
-CREATE TABLE iris._tag_reader (
-	name VARCHAR(20) PRIMARY KEY,
-	geo_loc VARCHAR(20) REFERENCES iris.geo_loc(name),
-	notes VARCHAR(64) NOT NULL,
-	toll_zone VARCHAR(20) REFERENCES iris.toll_zone(name),
-	downlink_freq_khz INTEGER,
-	uplink_freq_khz INTEGER,
-	sego_atten_downlink_db INTEGER,
-	sego_atten_uplink_db INTEGER,
-	sego_data_detect_db INTEGER,
-	sego_seen_count INTEGER,
-	sego_unique_count INTEGER,
-	iag_atten_downlink_db INTEGER,
-	iag_atten_uplink_db INTEGER,
-	iag_data_detect_db INTEGER,
-	iag_seen_count INTEGER,
-	iag_unique_count INTEGER,
-	line_loss_db INTEGER,
-	sync_mode INTEGER REFERENCES iris.tag_reader_sync_mode,
-	slave_select_count INTEGER
-);
-
-ALTER TABLE iris._tag_reader ADD CONSTRAINT _tag_reader_fkey
-	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
-
-CREATE VIEW iris.tag_reader AS
-	SELECT t.name, geo_loc, controller, pin, notes, toll_zone,
-	       downlink_freq_khz, uplink_freq_khz, sego_atten_downlink_db,
-	       sego_atten_uplink_db, sego_data_detect_db, sego_seen_count,
-	       sego_unique_count, iag_atten_downlink_db, iag_atten_uplink_db,
-	       iag_data_detect_db, iag_seen_count, iag_unique_count,
-	       line_loss_db, sync_mode, slave_select_count
-	FROM iris._tag_reader t JOIN iris._device_io d ON t.name = d.name;
-
-CREATE FUNCTION iris.tag_reader_insert() RETURNS TRIGGER AS
-	$tag_reader_insert$
-BEGIN
-	INSERT INTO iris._device_io (name, controller, pin)
-	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._tag_reader (name, geo_loc, notes, toll_zone,
-	                              downlink_freq_khz, uplink_freq_khz,
-	                              sego_atten_downlink_db,
-	                              sego_atten_uplink_db, sego_data_detect_db,
-	                              sego_seen_count, sego_unique_count,
-	                              iag_atten_downlink_db,
-	                              iag_atten_uplink_db, iag_data_detect_db,
-	                              iag_seen_count, iag_unique_count,
-	                              line_loss_db, sync_mode,
-	                              slave_select_count)
-	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.toll_zone,
-	             NEW.downlink_freq_khz, NEW.uplink_freq_khz,
-	             NEW.sego_atten_downlink_db, NEW.sego_atten_uplink_db,
-	             NEW.sego_data_detect_db, NEW.sego_seen_count,
-	             NEW.sego_unique_count, NEW.iag_atten_downlink_db,
-	             NEW.iag_atten_uplink_db, NEW.iag_data_detect_db,
-	             NEW.iag_seen_count, NEW.iag_unique_count, NEW.line_loss_db,
-	             NEW.sync_mode, NEW.slave_select_count);
-	RETURN NEW;
-END;
-$tag_reader_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER tag_reader_insert_trig
-    INSTEAD OF INSERT ON iris.tag_reader
-    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_insert();
-
-CREATE FUNCTION iris.tag_reader_update() RETURNS TRIGGER AS
-	$tag_reader_update$
-BEGIN
-	UPDATE iris._device_io
-	   SET controller = NEW.controller,
-	       pin = NEW.pin
-	 WHERE name = OLD.name;
-	UPDATE iris._tag_reader
-	   SET geo_loc = NEW.geo_loc,
-	       notes = NEW.notes,
-	       toll_zone = NEW.toll_zone,
-	       downlink_freq_khz = NEW.downlink_freq_khz,
-	       uplink_freq_khz = NEW.uplink_freq_khz,
-	       sego_atten_downlink_db = NEW.sego_atten_downlink_db,
-	       sego_atten_uplink_db = NEW.sego_atten_uplink_db,
-	       sego_data_detect_db = NEW.sego_data_detect_db,
-	       sego_seen_count = NEW.sego_seen_count,
-	       sego_unique_count = NEW.sego_unique_count,
-	       iag_atten_downlink_db = NEW.iag_atten_downlink_db,
-	       iag_atten_uplink_db = NEW.iag_atten_uplink_db,
-	       iag_data_detect_db = NEW.iag_data_detect_db,
-	       iag_seen_count = NEW.iag_seen_count,
-	       iag_unique_count = NEW.iag_unique_count,
-	       line_loss_db = NEW.line_loss_db,
-	       sync_mode = NEW.sync_mode,
-	       slave_select_count = NEW.slave_select_count
-	 WHERE name = OLD.name;
-	RETURN NEW;
-END;
-$tag_reader_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER tag_reader_update_trig
-    INSTEAD OF UPDATE ON iris.tag_reader
-    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_update();
-
-CREATE FUNCTION iris.tag_reader_delete() RETURNS TRIGGER AS
-	$tag_reader_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$tag_reader_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER tag_reader_delete_trig
-    INSTEAD OF DELETE ON iris.tag_reader
-    FOR EACH ROW EXECUTE PROCEDURE iris.tag_reader_delete();
-
-CREATE TABLE iris.tag_reader_dms (
-	tag_reader VARCHAR(20) NOT NULL REFERENCES iris._tag_reader,
-	dms VARCHAR(20) NOT NULL REFERENCES iris._dms
-);
-ALTER TABLE iris.tag_reader_dms ADD PRIMARY KEY (tag_reader, dms);
-
 CREATE TABLE event.client_event (
 	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
 	event_date timestamp WITH time zone NOT NULL,
@@ -3668,136 +3832,7 @@ CREATE TABLE event.client_event (
 	iris_user VARCHAR(15)
 );
 
-CREATE TABLE event.tag_type (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
-);
-
-CREATE TABLE event.tag_read_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	tag_type INTEGER NOT NULL REFERENCES event.tag_type,
-	agency INTEGER,
-	tag_id INTEGER NOT NULL,
-	tag_reader VARCHAR(20) NOT NULL,
-	hov BOOLEAN NOT NULL,
-	trip_id INTEGER
-);
-
-CREATE INDEX ON event.tag_read_event(tag_id);
-
-CREATE VIEW tag_read_event_view AS
-	SELECT event_id, event_date, event_description.description,
-	       tag_type.description AS tag_type, agency, tag_id, tag_reader,
-	       toll_zone, tollway, hov, trip_id
-	FROM event.tag_read_event
-	JOIN event.event_description
-	ON   tag_read_event.event_desc_id = event_description.event_desc_id
-	JOIN event.tag_type
-	ON   tag_read_event.tag_type = tag_type.id
-	JOIN iris._tag_reader
-	ON   tag_read_event.tag_reader = _tag_reader.name
-	LEFT JOIN iris.toll_zone
-	ON        _tag_reader.toll_zone = toll_zone.name;
-GRANT SELECT ON tag_read_event_view TO PUBLIC;
-
--- Allow trip_id column to be updated by roles which have been granted
--- update permission on tag_read_event_view
-CREATE FUNCTION event.tag_read_event_view_update() RETURNS TRIGGER AS
-	$tag_read_event_view_update$
-BEGIN
-	UPDATE event.tag_read_event
-	   SET trip_id = NEW.trip_id
-	 WHERE event_id = OLD.event_id;
-	RETURN NEW;
-END;
-$tag_read_event_view_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER tag_read_event_view_update_trig
-    INSTEAD OF UPDATE ON tag_read_event_view
-    FOR EACH ROW EXECUTE PROCEDURE event.tag_read_event_view_update();
-
-CREATE TABLE event.price_message_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	device_id VARCHAR(20) NOT NULL,
-	toll_zone VARCHAR(20) NOT NULL,
-	price NUMERIC(4,2) NOT NULL
-);
-
-CREATE INDEX ON event.price_message_event(event_date);
-CREATE INDEX ON event.price_message_event(device_id);
-
-CREATE VIEW price_message_event_view AS
-	SELECT event_id, event_date, event_description.description,
-	       device_id, toll_zone, price
-	FROM event.price_message_event
-	JOIN event.event_description
-	ON price_message_event.event_desc_id = event_description.event_desc_id;
-GRANT SELECT ON price_message_event_view TO PUBLIC;
-
 --- Views
-
-CREATE VIEW toll_zone_view AS
-	SELECT name, start_id, end_id, tollway, alpha, beta, max_price
-	FROM iris.toll_zone;
-GRANT SELECT ON toll_zone_view TO PUBLIC;
-
-CREATE VIEW iris.quick_message_priced AS
-    SELECT name AS quick_message, 'priced'::VARCHAR(6) AS state,
-        unnest(string_to_array(substring(multi FROM '%tzp,#"[^]]*#"]%' FOR '#'),
-        ',')) AS toll_zone
-    FROM iris.quick_message WHERE multi LIKE '%tzp%';
-
-CREATE VIEW iris.quick_message_open AS
-    SELECT name AS quick_message, 'open'::VARCHAR(6) AS state,
-        unnest(string_to_array(substring(multi FROM '%tzo,#"[^]]*#"]%' FOR '#'),
-        ',')) AS toll_zone
-    FROM iris.quick_message WHERE multi LIKE '%tzo%';
-
-CREATE VIEW iris.quick_message_closed AS
-    SELECT name AS quick_message, 'closed'::VARCHAR(6) AS state,
-        unnest(string_to_array(substring(multi FROM '%tzc,#"[^]]*#"]%' FOR '#'),
-        ',')) AS toll_zone
-    FROM iris.quick_message WHERE multi LIKE '%tzc%';
-
-CREATE VIEW iris.quick_message_toll_zone AS
-    SELECT quick_message, state, toll_zone
-        FROM iris.quick_message_priced UNION ALL
-    SELECT quick_message, state, toll_zone
-        FROM iris.quick_message_open UNION ALL
-    SELECT quick_message, state, toll_zone
-        FROM iris.quick_message_closed;
-
-CREATE VIEW dms_toll_zone_view AS
-    SELECT dms, state, toll_zone, action_plan, dms_action_view.quick_message
-    FROM dms_action_view
-    JOIN iris.dms_sign_group
-    ON dms_action_view.sign_group = dms_sign_group.sign_group
-    JOIN iris.quick_message
-    ON dms_action_view.quick_message = quick_message.name
-    JOIN iris.quick_message_toll_zone
-    ON dms_action_view.quick_message = quick_message_toll_zone.quick_message;
-GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
-
-CREATE VIEW ramp_meter_view AS
-	SELECT m.name, geo_loc, controller, pin, notes,
-	       mt.description AS meter_type, storage, max_wait,
-	       alg.description AS algorithm, am_target, pm_target, beacon,
-	       camera, preset_num, ml.description AS meter_lock,
-	       l.rd, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
-	       l.cross_dir, l.lat, l.lon
-	FROM iris.ramp_meter m
-	LEFT JOIN iris.meter_type mt ON m.meter_type = mt.id
-	LEFT JOIN iris.meter_algorithm alg ON m.algorithm = alg.id
-	LEFT JOIN iris.camera_preset p ON m.preset = p.name
-	LEFT JOIN iris.meter_lock ml ON m.m_lock = ml.id
-	LEFT JOIN geo_loc_view l ON m.geo_loc = l.name;
-GRANT SELECT ON ramp_meter_view TO PUBLIC;
 
 CREATE VIEW monitor_style_view AS
 	SELECT name, force_aspect, accent, font_sz, title_bar, auto_expand,
@@ -3820,24 +3855,6 @@ CREATE VIEW weather_sensor_view AS
 	LEFT JOIN geo_loc_view l ON w.geo_loc = l.name
 	LEFT JOIN controller_view ctr ON w.controller = ctr.name;
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
-
-CREATE VIEW tag_reader_view AS
-	SELECT t.name, t.geo_loc, location, controller, pin, notes, toll_zone,
-	       downlink_freq_khz, uplink_freq_khz,
-	       sego_atten_downlink_db, sego_atten_uplink_db, sego_data_detect_db,
-	       sego_seen_count, sego_unique_count,
-	       iag_atten_downlink_db, iag_atten_uplink_db, iag_data_detect_db,
-	       iag_seen_count, iag_unique_count, line_loss_db,
-	       m.description AS sync_mode, slave_select_count
-	FROM iris.tag_reader t
-	LEFT JOIN geo_loc_view l ON t.geo_loc = l.name
-	LEFT JOIN iris.tag_reader_sync_mode m ON t.sync_mode = m.id;
-GRANT SELECT ON tag_reader_view TO PUBLIC;
-
-CREATE VIEW tag_reader_dms_view AS
-	SELECT tag_reader, dms
-	FROM iris.tag_reader_dms;
-GRANT SELECT ON tag_reader_dms_view TO PUBLIC;
 
 CREATE VIEW iris.device_geo_loc_view AS
 	SELECT name, geo_loc FROM iris._lane_marking UNION ALL
@@ -3878,22 +3895,6 @@ CREATE VIEW client_event_view AS
 	FROM event.client_event e
 	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
 GRANT SELECT ON client_event_view TO PUBLIC;
-
---- Data
-
-COPY iris.tag_reader_sync_mode (id, description) FROM stdin;
-0	slave
-1	master
-2	GPS secondary
-3	GPS primary
-\.
-
-COPY event.tag_type (id, description) FROM stdin;
-0	Unknown
-1	SeGo
-2	IAG
-3	ASTMv6
-\.
 
 -- Fonts
 
