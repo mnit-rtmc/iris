@@ -2581,6 +2581,174 @@ CREATE VIEW gate_arm_event_view AS
 GRANT SELECT ON gate_arm_event_view TO PUBLIC;
 
 --
+-- Incidents
+--
+CREATE TABLE event.incident_detail (
+	name VARCHAR(8) PRIMARY KEY,
+	description VARCHAR(32) NOT NULL
+);
+
+COPY event.incident_detail (name, description) FROM stdin;
+animal	Animal on Road
+debris	Debris
+detour	Detour
+emrg_veh	Emergency Vehicles
+event	Event Congestion
+flooding	Flash Flooding
+gr_fire	Grass Fire
+ice	Ice
+jacknife	Jacknifed Trailer
+pavement	Pavement Failure
+ped	Pedestrian
+rollover	Rollover
+sgnl_out	Traffic Lights Out
+snow_rmv	Snow Removal
+spill	Spilled Load
+test	Test Incident
+veh_fire	Vehicle Fire
+\.
+
+CREATE TABLE event.incident (
+	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	name VARCHAR(16) NOT NULL UNIQUE,
+	replaces VARCHAR(16) REFERENCES event.incident(name),
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	detail VARCHAR(8) REFERENCES event.incident_detail(name),
+	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
+	road VARCHAR(20) NOT NULL,
+	dir SMALLINT NOT NULL REFERENCES iris.direction(id),
+	lat double precision NOT NULL,
+	lon double precision NOT NULL,
+	camera VARCHAR(20),
+	impact VARCHAR(20) NOT NULL,
+	cleared BOOLEAN NOT NULL,
+	confirmed BOOLEAN NOT NULL
+);
+
+CREATE VIEW incident_view AS
+    SELECT event_id, name, event_date, ed.description, road, d.direction,
+           impact, cleared, confirmed, camera, ln.description AS lane_type,
+           detail, replaces, lat, lon
+    FROM event.incident i
+    LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
+    LEFT JOIN iris.direction d ON i.dir = d.id
+    LEFT JOIN iris.lane_type ln ON i.lane_type = ln.id;
+GRANT SELECT ON incident_view TO PUBLIC;
+
+CREATE TABLE event.incident_update (
+	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	incident VARCHAR(16) NOT NULL REFERENCES event.incident(name),
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	impact VARCHAR(20) NOT NULL,
+	cleared BOOLEAN NOT NULL,
+	confirmed BOOLEAN NOT NULL
+);
+
+CREATE FUNCTION event.incident_update_trig() RETURNS TRIGGER AS
+$incident_update_trig$
+BEGIN
+    INSERT INTO event.incident_update
+               (incident, event_date, impact, cleared, confirmed)
+        VALUES (NEW.name, now(), NEW.impact, NEW.cleared, NEW.confirmed);
+    RETURN NEW;
+END;
+$incident_update_trig$ LANGUAGE plpgsql;
+
+CREATE TRIGGER incident_update_trigger
+	AFTER INSERT OR UPDATE ON event.incident
+	FOR EACH ROW EXECUTE PROCEDURE event.incident_update_trig();
+
+CREATE VIEW incident_update_view AS
+    SELECT iu.event_id, name, iu.event_date, ed.description, road,
+           d.direction, iu.impact, iu.cleared, iu.confirmed, camera,
+           ln.description AS lane_type, detail, replaces, lat, lon
+    FROM event.incident i
+    JOIN event.incident_update iu ON i.name = iu.incident
+    LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
+    LEFT JOIN iris.direction d ON i.dir = d.id
+    LEFT JOIN iris.lane_type ln ON i.lane_type = ln.id;
+GRANT SELECT ON incident_update_view TO PUBLIC;
+
+CREATE TABLE iris.inc_descriptor (
+	name VARCHAR(10) PRIMARY KEY,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
+	detail VARCHAR(8) REFERENCES event.incident_detail(name),
+	cleared BOOLEAN NOT NULL,
+	multi VARCHAR(64) NOT NULL,
+	abbrev VARCHAR(32)
+);
+
+CREATE FUNCTION iris.inc_descriptor_ck() RETURNS TRIGGER AS
+	$inc_descriptor_ck$
+BEGIN
+	-- Only incident event IDs are allowed
+	IF NEW.event_desc_id < 21 OR NEW.event_desc_id > 24 THEN
+		RAISE EXCEPTION 'invalid incident event_desc_id';
+	END IF;
+	-- Only mainline, cd road, merge and exit lane types are allowed
+	IF NEW.lane_type != 1 AND NEW.lane_type != 3 AND
+	   NEW.lane_type != 5 AND NEW.lane_type != 7 THEN
+		RAISE EXCEPTION 'invalid incident lane_type';
+	END IF;
+	RETURN NEW;
+END;
+$inc_descriptor_ck$ LANGUAGE plpgsql;
+
+CREATE TRIGGER inc_descriptor_ck_trig
+	BEFORE INSERT OR UPDATE ON iris.inc_descriptor
+	FOR EACH ROW EXECUTE PROCEDURE iris.inc_descriptor_ck();
+
+CREATE TABLE iris.inc_range (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(10) NOT NULL
+);
+
+COPY iris.inc_range (id, description) FROM stdin;
+0	near
+1	middle
+2	far
+\.
+
+CREATE TABLE iris.inc_locator (
+	name VARCHAR(10) PRIMARY KEY,
+	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
+	branched BOOLEAN NOT NULL,
+	pickable BOOLEAN NOT NULL,
+	multi VARCHAR(64) NOT NULL,
+	abbrev VARCHAR(32)
+);
+
+CREATE TABLE iris.inc_advice (
+	name VARCHAR(10) PRIMARY KEY,
+	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
+	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
+	impact VARCHAR(20) NOT NULL,
+	cleared BOOLEAN NOT NULL,
+	multi VARCHAR(64) NOT NULL,
+	abbrev VARCHAR(32)
+);
+
+CREATE FUNCTION iris.inc_advice_ck() RETURNS TRIGGER AS
+	$inc_advice_ck$
+BEGIN
+	-- Only mainline, cd road, merge and exit lane types are allowed
+	IF NEW.lane_type != 1 AND NEW.lane_type != 3 AND
+	   NEW.lane_type != 5 AND NEW.lane_type != 7 THEN
+		RAISE EXCEPTION 'invalid incident lane_type';
+	END IF;
+	RETURN NEW;
+END;
+$inc_advice_ck$ LANGUAGE plpgsql;
+
+CREATE TRIGGER inc_advice_ck_trig
+	BEFORE INSERT OR UPDATE ON iris.inc_advice
+	FOR EACH ROW EXECUTE PROCEDURE iris.inc_advice_ck();
+
+--
 --
 --
 CREATE TABLE iris.toll_zone (
@@ -3417,124 +3585,6 @@ CREATE VIEW price_message_event_view AS
 	ON price_message_event.event_desc_id = event_description.event_desc_id;
 GRANT SELECT ON price_message_event_view TO PUBLIC;
 
-CREATE TABLE event.incident_detail (
-	name VARCHAR(8) PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
-);
-
-CREATE TABLE event.incident (
-	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	name VARCHAR(16) NOT NULL UNIQUE,
-	replaces VARCHAR(16) REFERENCES event.incident(name),
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	detail VARCHAR(8) REFERENCES event.incident_detail(name),
-	lane_type smallint NOT NULL REFERENCES iris.lane_type(id),
-	road VARCHAR(20) NOT NULL,
-	dir SMALLINT NOT NULL REFERENCES iris.direction(id),
-	lat double precision NOT NULL,
-	lon double precision NOT NULL,
-	camera VARCHAR(20),
-	impact VARCHAR(20) NOT NULL,
-	cleared BOOLEAN NOT NULL,
-	confirmed BOOLEAN NOT NULL
-);
-
-CREATE TABLE event.incident_update (
-	event_id INTEGER PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	incident VARCHAR(16) NOT NULL REFERENCES event.incident(name),
-	event_date timestamp WITH time zone NOT NULL,
-	impact VARCHAR(20) NOT NULL,
-	cleared BOOLEAN NOT NULL,
-	confirmed BOOLEAN NOT NULL
-);
-
-CREATE FUNCTION event.incident_update_trig() RETURNS TRIGGER AS
-$incident_update_trig$
-BEGIN
-    INSERT INTO event.incident_update
-               (incident, event_date, impact, cleared, confirmed)
-        VALUES (NEW.name, now(), NEW.impact, NEW.cleared, NEW.confirmed);
-    RETURN NEW;
-END;
-$incident_update_trig$ LANGUAGE plpgsql;
-
-CREATE TRIGGER incident_update_trigger
-	AFTER INSERT OR UPDATE ON event.incident
-	FOR EACH ROW EXECUTE PROCEDURE event.incident_update_trig();
-
-CREATE TABLE iris.inc_descriptor (
-	name VARCHAR(10) PRIMARY KEY,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
-	detail VARCHAR(8) REFERENCES event.incident_detail(name),
-	cleared BOOLEAN NOT NULL,
-	multi VARCHAR(64) NOT NULL,
-	abbrev VARCHAR(32)
-);
-
-CREATE FUNCTION iris.inc_descriptor_ck() RETURNS TRIGGER AS
-	$inc_descriptor_ck$
-BEGIN
-	-- Only incident event IDs are allowed
-	IF NEW.event_desc_id < 21 OR NEW.event_desc_id > 24 THEN
-		RAISE EXCEPTION 'invalid incident event_desc_id';
-	END IF;
-	-- Only mainline, cd road, merge and exit lane types are allowed
-	IF NEW.lane_type != 1 AND NEW.lane_type != 3 AND
-	   NEW.lane_type != 5 AND NEW.lane_type != 7 THEN
-		RAISE EXCEPTION 'invalid incident lane_type';
-	END IF;
-	RETURN NEW;
-END;
-$inc_descriptor_ck$ LANGUAGE plpgsql;
-
-CREATE TRIGGER inc_descriptor_ck_trig
-	BEFORE INSERT OR UPDATE ON iris.inc_descriptor
-	FOR EACH ROW EXECUTE PROCEDURE iris.inc_descriptor_ck();
-
-CREATE TABLE iris.inc_range (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(10) NOT NULL
-);
-
-CREATE TABLE iris.inc_locator (
-	name VARCHAR(10) PRIMARY KEY,
-	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
-	branched BOOLEAN NOT NULL,
-	pickable BOOLEAN NOT NULL,
-	multi VARCHAR(64) NOT NULL,
-	abbrev VARCHAR(32)
-);
-
-CREATE TABLE iris.inc_advice (
-	name VARCHAR(10) PRIMARY KEY,
-	range INTEGER NOT NULL REFERENCES iris.inc_range(id),
-	lane_type SMALLINT NOT NULL REFERENCES iris.lane_type(id),
-	impact VARCHAR(20) NOT NULL,
-	cleared BOOLEAN NOT NULL,
-	multi VARCHAR(64) NOT NULL,
-	abbrev VARCHAR(32)
-);
-
-CREATE FUNCTION iris.inc_advice_ck() RETURNS TRIGGER AS
-	$inc_advice_ck$
-BEGIN
-	-- Only mainline, cd road, merge and exit lane types are allowed
-	IF NEW.lane_type != 1 AND NEW.lane_type != 3 AND
-	   NEW.lane_type != 5 AND NEW.lane_type != 7 THEN
-		RAISE EXCEPTION 'invalid incident lane_type';
-	END IF;
-	RETURN NEW;
-END;
-$inc_advice_ck$ LANGUAGE plpgsql;
-
-CREATE TRIGGER inc_advice_ck_trig
-	BEFORE INSERT OR UPDATE ON iris.inc_advice
-	FOR EACH ROW EXECUTE PROCEDURE iris.inc_advice_ck();
-
 --- Views
 
 CREATE VIEW meter_action_view AS
@@ -3729,27 +3779,6 @@ CREATE VIEW client_event_view AS
 	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
 GRANT SELECT ON client_event_view TO PUBLIC;
 
-CREATE VIEW incident_view AS
-    SELECT event_id, name, event_date, ed.description, road, d.direction,
-           impact, cleared, confirmed, camera, ln.description AS lane_type,
-           detail, replaces, lat, lon
-    FROM event.incident i
-    LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
-    LEFT JOIN iris.direction d ON i.dir = d.id
-    LEFT JOIN iris.lane_type ln ON i.lane_type = ln.id;
-GRANT SELECT ON incident_view TO PUBLIC;
-
-CREATE VIEW incident_update_view AS
-    SELECT iu.event_id, name, iu.event_date, ed.description, road,
-           d.direction, iu.impact, iu.cleared, iu.confirmed, camera,
-           ln.description AS lane_type, detail, replaces, lat, lon
-    FROM event.incident i
-    JOIN event.incident_update iu ON i.name = iu.incident
-    LEFT JOIN event.event_description ed ON i.event_desc_id = ed.event_desc_id
-    LEFT JOIN iris.direction d ON i.dir = d.id
-    LEFT JOIN iris.lane_type ln ON i.lane_type = ln.id;
-GRANT SELECT ON incident_update_view TO PUBLIC;
-
 --- Data
 
 COPY iris.lane_use_indication (id, description) FROM stdin;
@@ -3822,32 +3851,6 @@ COPY iris.parking_area_amenities (bit, amenity) FROM stdin;
 12	Play area
 13	Pet excercise area
 14	Interpretive information
-\.
-
-COPY iris.inc_range (id, description) FROM stdin;
-0	near
-1	middle
-2	far
-\.
-
-COPY event.incident_detail (name, description) FROM stdin;
-animal	Animal on Road
-debris	Debris
-detour	Detour
-emrg_veh	Emergency Vehicles
-event	Event Congestion
-flooding	Flash Flooding
-gr_fire	Grass Fire
-ice	Ice
-jacknife	Jacknifed Trailer
-pavement	Pavement Failure
-ped	Pedestrian
-rollover	Rollover
-sgnl_out	Traffic Lights Out
-snow_rmv	Snow Removal
-spill	Spilled Load
-test	Test Incident
-veh_fire	Vehicle Fire
 \.
 
 COPY event.meter_phase (id, description) FROM stdin;
