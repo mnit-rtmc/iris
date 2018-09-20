@@ -1429,6 +1429,24 @@ CREATE TABLE iris.catalog_play_list (
 );
 ALTER TABLE iris.catalog_play_list ADD PRIMARY KEY (catalog, ordinal);
 
+CREATE TABLE event.camera_switch_event (
+	event_id SERIAL PRIMARY KEY,
+	event_date TIMESTAMP WITH time zone NOT NULL,
+	event_desc_id INTEGER NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	monitor_id VARCHAR(12),
+	camera_id VARCHAR(20),
+	source VARCHAR(20)
+);
+
+CREATE VIEW camera_switch_event_view AS
+	SELECT event_id, event_date, event_description.description, monitor_id,
+	       camera_id, source
+	FROM event.camera_switch_event
+	JOIN event.event_description
+	ON camera_switch_event.event_desc_id = event_description.event_desc_id;
+GRANT SELECT ON camera_switch_event_view TO PUBLIC;
+
 CREATE TABLE iris.camera_preset (
 	name VARCHAR(20) PRIMARY KEY,
 	camera VARCHAR(20) NOT NULL REFERENCES iris._camera,
@@ -2832,6 +2850,211 @@ CREATE TABLE iris.lane_action (
 );
 
 --
+-- Lane-Use Control Signals
+--
+CREATE TABLE iris.lcs_lock (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(16) NOT NULL
+);
+
+COPY iris.lcs_lock (id, description) FROM stdin;
+1	Incident
+2	Maintenance
+3	Testing
+4	Other reason
+\.
+
+CREATE TABLE iris._lcs_array (
+	name VARCHAR(20) PRIMARY KEY,
+	notes text NOT NULL,
+	shift INTEGER NOT NULL,
+	lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
+);
+
+ALTER TABLE iris._lcs_array ADD CONSTRAINT _lcs_array_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.lcs_array AS SELECT
+	d.name, controller, pin, notes, shift, lcs_lock
+	FROM iris._lcs_array la JOIN iris._device_io d ON la.name = d.name;
+
+CREATE FUNCTION iris.lcs_array_insert() RETURNS TRIGGER AS
+	$lcs_array_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._lcs_array(name, notes, shift, lcs_lock)
+	     VALUES (NEW.name, NEW.notes, NEW.shift, NEW.lcs_lock);
+	RETURN NEW;
+END;
+$lcs_array_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_array_insert_trig
+    INSTEAD OF INSERT ON iris.lcs_array
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_insert();
+
+CREATE FUNCTION iris.lcs_array_update() RETURNS TRIGGER AS
+	$lcs_array_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._lcs_array
+	   SET notes = NEW.notes,
+	       shift = NEW.shift,
+	       lcs_lock = NEW.lcs_lock
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$lcs_array_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_array_update_trig
+    INSTEAD OF UPDATE ON iris.lcs_array
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_update();
+
+CREATE FUNCTION iris.lcs_array_delete() RETURNS TRIGGER AS
+	$lcs_array_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$lcs_array_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_array_delete_trig
+    INSTEAD OF DELETE ON iris.lcs_array
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_delete();
+
+CREATE VIEW lcs_array_view AS
+	SELECT name, shift, notes, lcs_lock
+	FROM iris.lcs_array;
+GRANT SELECT ON lcs_array_view TO PUBLIC;
+
+CREATE TABLE iris.lcs (
+	name VARCHAR(20) PRIMARY KEY REFERENCES iris._dms,
+	lcs_array VARCHAR(20) NOT NULL REFERENCES iris._lcs_array,
+	lane INTEGER NOT NULL
+);
+CREATE UNIQUE INDEX lcs_array_lane ON iris.lcs USING btree (lcs_array, lane);
+
+CREATE VIEW lcs_view AS
+	SELECT name, lcs_array, lane
+	FROM iris.lcs;
+GRANT SELECT ON lcs_view TO PUBLIC;
+
+CREATE TABLE iris.lane_use_indication (
+	id INTEGER PRIMARY KEY,
+	description VARCHAR(32) NOT NULL
+);
+
+COPY iris.lane_use_indication (id, description) FROM stdin;
+0	Dark
+1	Lane open
+2	Use caution
+3	Lane closed ahead
+4	Lane closed
+5	HOV / HOT
+6	Merge right
+7	Merge left
+8	Merge left or right
+9	Must exit right
+10	Must exit left
+11	Advisory variable speed limit
+12	Variable speed limit
+13	Low visibility
+14	HOV / HOT begins
+\.
+
+CREATE TABLE iris._lcs_indication (
+	name VARCHAR(20) PRIMARY KEY,
+	lcs VARCHAR(20) NOT NULL REFERENCES iris.lcs,
+	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication
+);
+
+ALTER TABLE iris._lcs_indication ADD CONSTRAINT _lcs_indication_fkey
+	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE VIEW iris.lcs_indication AS
+	SELECT d.name, controller, pin, lcs, indication
+	FROM iris._lcs_indication li
+	JOIN iris._device_io d ON li.name = d.name;
+
+CREATE FUNCTION iris.lcs_indication_insert() RETURNS TRIGGER AS
+	$lcs_indication_insert$
+BEGIN
+	INSERT INTO iris._device_io (name, controller, pin)
+	     VALUES (NEW.name, NEW.controller, NEW.pin);
+	INSERT INTO iris._lcs_indication(name, lcs, indication)
+	     VALUES (NEW.name, NEW.lcs, NEW.indication);
+	RETURN NEW;
+END;
+$lcs_indication_insert$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_indication_insert_trig
+    INSTEAD OF INSERT ON iris.lcs_indication
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_insert();
+
+CREATE FUNCTION iris.lcs_indication_update() RETURNS TRIGGER AS
+	$lcs_indication_update$
+BEGIN
+	UPDATE iris._device_io
+	   SET controller = NEW.controller,
+	       pin = NEW.pin
+	 WHERE name = OLD.name;
+	UPDATE iris._lcs_indication
+	   SET lcs = NEW.lcs,
+	       indication = NEW.indication
+	 WHERE name = OLD.name;
+	RETURN NEW;
+END;
+$lcs_indication_update$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_indication_update_trig
+    INSTEAD OF UPDATE ON iris.lcs_indication
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_update();
+
+CREATE FUNCTION iris.lcs_indication_delete() RETURNS TRIGGER AS
+	$lcs_indication_delete$
+BEGIN
+	DELETE FROM iris._device_io WHERE name = OLD.name;
+	IF FOUND THEN
+		RETURN OLD;
+	ELSE
+		RETURN NULL;
+	END IF;
+END;
+$lcs_indication_delete$ LANGUAGE plpgsql;
+
+CREATE TRIGGER lcs_indication_delete_trig
+    INSTEAD OF DELETE ON iris.lcs_indication
+    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_delete();
+
+CREATE VIEW lcs_indication_view AS
+	SELECT name, controller, pin, lcs, description AS indication
+	FROM iris.lcs_indication
+	JOIN iris.lane_use_indication ON indication = id;
+GRANT SELECT ON lcs_indication_view TO PUBLIC;
+
+CREATE TABLE iris.lane_use_multi (
+	name VARCHAR(10) PRIMARY KEY,
+	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
+	msg_num INTEGER,
+	width INTEGER NOT NULL,
+	height INTEGER NOT NULL,
+	quick_message VARCHAR(20) REFERENCES iris.quick_message
+);
+
+CREATE UNIQUE INDEX lane_use_multi_indication_idx ON iris.lane_use_multi
+	USING btree (indication, width, height);
+
+CREATE UNIQUE INDEX lane_use_multi_msg_num_idx ON iris.lane_use_multi
+	USING btree (msg_num, width, height);
+
+--
 --
 --
 CREATE TABLE iris.toll_zone (
@@ -3227,152 +3450,6 @@ CREATE TABLE iris.tag_reader_dms (
 );
 ALTER TABLE iris.tag_reader_dms ADD PRIMARY KEY (tag_reader, dms);
 
-CREATE TABLE iris.lcs_lock (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(16) NOT NULL
-);
-
-CREATE TABLE iris._lcs_array (
-	name VARCHAR(20) PRIMARY KEY,
-	notes text NOT NULL,
-	shift INTEGER NOT NULL,
-	lcs_lock INTEGER REFERENCES iris.lcs_lock(id)
-);
-
-ALTER TABLE iris._lcs_array ADD CONSTRAINT _lcs_array_fkey
-	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
-
-CREATE VIEW iris.lcs_array AS SELECT
-	d.name, controller, pin, notes, shift, lcs_lock
-	FROM iris._lcs_array la JOIN iris._device_io d ON la.name = d.name;
-
-CREATE FUNCTION iris.lcs_array_insert() RETURNS TRIGGER AS
-	$lcs_array_insert$
-BEGIN
-	INSERT INTO iris._device_io (name, controller, pin)
-	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._lcs_array(name, notes, shift, lcs_lock)
-	     VALUES (NEW.name, NEW.notes, NEW.shift, NEW.lcs_lock);
-	RETURN NEW;
-END;
-$lcs_array_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER lcs_array_insert_trig
-    INSTEAD OF INSERT ON iris.lcs_array
-    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_insert();
-
-CREATE FUNCTION iris.lcs_array_update() RETURNS TRIGGER AS
-	$lcs_array_update$
-BEGIN
-	UPDATE iris._device_io
-	   SET controller = NEW.controller,
-	       pin = NEW.pin
-	 WHERE name = OLD.name;
-	UPDATE iris._lcs_array
-	   SET notes = NEW.notes,
-	       shift = NEW.shift,
-	       lcs_lock = NEW.lcs_lock
-	 WHERE name = OLD.name;
-	RETURN NEW;
-END;
-$lcs_array_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER lcs_array_update_trig
-    INSTEAD OF UPDATE ON iris.lcs_array
-    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_update();
-
-CREATE FUNCTION iris.lcs_array_delete() RETURNS TRIGGER AS
-	$lcs_array_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$lcs_array_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER lcs_array_delete_trig
-    INSTEAD OF DELETE ON iris.lcs_array
-    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_array_delete();
-
-CREATE TABLE iris.lcs (
-	name VARCHAR(20) PRIMARY KEY REFERENCES iris._dms,
-	lcs_array VARCHAR(20) NOT NULL REFERENCES iris._lcs_array,
-	lane INTEGER NOT NULL
-);
-
-CREATE UNIQUE INDEX lcs_array_lane ON iris.lcs USING btree (lcs_array, lane);
-
-CREATE TABLE iris.lane_use_indication (
-	id INTEGER PRIMARY KEY,
-	description VARCHAR(32) NOT NULL
-);
-
-CREATE TABLE iris._lcs_indication (
-	name VARCHAR(20) PRIMARY KEY,
-	lcs VARCHAR(20) NOT NULL REFERENCES iris.lcs,
-	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication
-);
-
-ALTER TABLE iris._lcs_indication ADD CONSTRAINT _lcs_indication_fkey
-	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
-
-CREATE VIEW iris.lcs_indication AS SELECT
-	d.name, controller, pin, lcs, indication
-	FROM iris._lcs_indication li JOIN iris._device_io d ON li.name = d.name;
-
-CREATE FUNCTION iris.lcs_indication_insert() RETURNS TRIGGER AS
-	$lcs_indication_insert$
-BEGIN
-	INSERT INTO iris._device_io (name, controller, pin)
-	     VALUES (NEW.name, NEW.controller, NEW.pin);
-	INSERT INTO iris._lcs_indication(name, lcs, indication)
-	     VALUES (NEW.name, NEW.lcs, NEW.indication);
-	RETURN NEW;
-END;
-$lcs_indication_insert$ LANGUAGE plpgsql;
-
-CREATE TRIGGER lcs_indication_insert_trig
-    INSTEAD OF INSERT ON iris.lcs_indication
-    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_insert();
-
-CREATE FUNCTION iris.lcs_indication_update() RETURNS TRIGGER AS
-	$lcs_indication_update$
-BEGIN
-	UPDATE iris._device_io
-	   SET controller = NEW.controller,
-	       pin = NEW.pin
-	 WHERE name = OLD.name;
-	UPDATE iris._lcs_indication
-	   SET lcs = NEW.lcs,
-	       indication = NEW.indication
-	 WHERE name = OLD.name;
-	RETURN NEW;
-END;
-$lcs_indication_update$ LANGUAGE plpgsql;
-
-CREATE TRIGGER lcs_indication_update_trig
-    INSTEAD OF UPDATE ON iris.lcs_indication
-    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_update();
-
-CREATE FUNCTION iris.lcs_indication_delete() RETURNS TRIGGER AS
-	$lcs_indication_delete$
-BEGIN
-	DELETE FROM iris._device_io WHERE name = OLD.name;
-	IF FOUND THEN
-		RETURN OLD;
-	ELSE
-		RETURN NULL;
-	END IF;
-END;
-$lcs_indication_delete$ LANGUAGE plpgsql;
-
-CREATE TRIGGER lcs_indication_delete_trig
-    INSTEAD OF DELETE ON iris.lcs_indication
-    FOR EACH ROW EXECUTE PROCEDURE iris.lcs_indication_delete();
-
 CREATE TABLE iris.parking_area (
 	name VARCHAR(20) PRIMARY KEY,
 	geo_loc VARCHAR(20) NOT NULL REFERENCES iris.geo_loc(name),
@@ -3427,21 +3504,6 @@ BEGIN
 	END LOOP;
 END;
 $parking_area_amenities$ LANGUAGE plpgsql;
-
-CREATE TABLE iris.lane_use_multi (
-	name VARCHAR(10) PRIMARY KEY,
-	indication INTEGER NOT NULL REFERENCES iris.lane_use_indication,
-	msg_num INTEGER,
-	width INTEGER NOT NULL,
-	height INTEGER NOT NULL,
-	quick_message VARCHAR(20) REFERENCES iris.quick_message
-);
-
-CREATE UNIQUE INDEX lane_use_multi_indication_idx ON iris.lane_use_multi
-	USING btree (indication, width, height);
-
-CREATE UNIQUE INDEX lane_use_multi_msg_num_idx ON iris.lane_use_multi
-	USING btree (msg_num, width, height);
 
 CREATE TABLE iris.meter_action (
 	name VARCHAR(30) PRIMARY KEY,
@@ -3507,24 +3569,6 @@ CREATE VIEW meter_event_view AS
 	JOIN event.meter_queue_state ON q_state = meter_queue_state.id
 	JOIN event.meter_limit_control ON limit_ctrl = meter_limit_control.id;
 GRANT SELECT ON meter_event_view TO PUBLIC;
-
-CREATE TABLE event.camera_switch_event (
-	event_id SERIAL PRIMARY KEY,
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id INTEGER NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	monitor_id VARCHAR(12),
-	camera_id VARCHAR(20),
-	source VARCHAR(20)
-);
-
-CREATE VIEW camera_switch_event_view AS
-	SELECT event_id, event_date, event_description.description, monitor_id,
-	       camera_id, source
-	FROM event.camera_switch_event
-	JOIN event.event_description
-	ON camera_switch_event.event_desc_id = event_description.event_desc_id;
-GRANT SELECT ON camera_switch_event_view TO PUBLIC;
 
 CREATE TABLE event.tag_type (
 	id INTEGER PRIMARY KEY,
@@ -3651,22 +3695,6 @@ CREATE VIEW dms_toll_zone_view AS
     ON dms_action_view.quick_message = quick_message_toll_zone.quick_message;
 GRANT SELECT ON dms_toll_zone_view TO PUBLIC;
 
-CREATE VIEW lcs_array_view AS
-	SELECT name, shift, notes, lcs_lock
-	FROM iris.lcs_array;
-GRANT SELECT ON lcs_array_view TO PUBLIC;
-
-CREATE VIEW lcs_view AS
-	SELECT name, lcs_array, lane
-	FROM iris.lcs;
-GRANT SELECT ON lcs_view TO PUBLIC;
-
-CREATE VIEW lcs_indication_view AS
-	SELECT name, controller, pin, lcs, description AS indication
-	FROM iris.lcs_indication
-	JOIN iris.lane_use_indication ON indication = id;
-GRANT SELECT ON lcs_indication_view TO PUBLIC;
-
 CREATE VIEW ramp_meter_view AS
 	SELECT m.name, geo_loc, controller, pin, notes,
 	       mt.description AS meter_type, storage, max_wait,
@@ -3784,31 +3812,6 @@ CREATE VIEW client_event_view AS
 GRANT SELECT ON client_event_view TO PUBLIC;
 
 --- Data
-
-COPY iris.lane_use_indication (id, description) FROM stdin;
-0	Dark
-1	Lane open
-2	Use caution
-3	Lane closed ahead
-4	Lane closed
-5	HOV / HOT
-6	Merge right
-7	Merge left
-8	Merge left or right
-9	Must exit right
-10	Must exit left
-11	Advisory variable speed limit
-12	Variable speed limit
-13	Low visibility
-14	HOV / HOT begins
-\.
-
-COPY iris.lcs_lock (id, description) FROM stdin;
-1	Incident
-2	Maintenance
-3	Testing
-4	Other reason
-\.
 
 COPY iris.meter_type (id, description, lanes) FROM stdin;
 0	One Lane	1
