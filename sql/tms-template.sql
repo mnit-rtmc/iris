@@ -786,6 +786,115 @@ CREATE TABLE iris.map_extent (
 	zoom INTEGER NOT NULL
 );
 
+--
+-- Day Matchers, Day Plans, Plan Phases, Action Plans and Time Actions
+--
+CREATE TABLE iris.day_matcher (
+	name VARCHAR(32) PRIMARY KEY,
+	holiday BOOLEAN NOT NULL,
+	month INTEGER NOT NULL,
+	day INTEGER NOT NULL,
+	week INTEGER NOT NULL,
+	weekday INTEGER NOT NULL,
+	shift INTEGER NOT NULL
+);
+
+COPY iris.day_matcher (name, holiday, month, day, week, weekday, shift) FROM stdin;
+Any Day	f	-1	0	0	0	0
+Sunday Holiday	t	-1	0	0	1	0
+Saturday Holiday	t	-1	0	0	7	0
+New Years Day	t	0	1	0	0	0
+Memorial Day	t	4	0	-1	2	0
+Independence Day	t	6	4	0	0	0
+Labor Day	t	8	0	1	2	0
+Thanksgiving Day	t	10	0	4	5	0
+Black Friday	t	10	0	4	5	1
+Christmas Eve	t	11	24	0	0	0
+Christmas Day	t	11	25	0	0	0
+New Years Eve	t	11	31	0	0	0
+\.
+
+CREATE TABLE iris.day_plan (
+	name VARCHAR(10) PRIMARY KEY
+);
+
+COPY iris.day_plan (name) FROM stdin;
+EVERY_DAY
+WEEKDAYS
+WORK_DAYS
+\.
+
+CREATE TABLE iris.day_plan_day_matcher (
+	day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
+	day_matcher VARCHAR(32) NOT NULL REFERENCES iris.day_matcher
+);
+ALTER TABLE iris.day_plan_day_matcher ADD PRIMARY KEY (day_plan, day_matcher);
+
+COPY iris.day_plan_day_matcher (day_plan, day_matcher) FROM stdin;
+EVERY_DAY	Any Day
+WEEKDAYS	Any Day
+WEEKDAYS	Sunday Holiday
+WEEKDAYS	Saturday Holiday
+WORK_DAYS	Any Day
+WORK_DAYS	Sunday Holiday
+WORK_DAYS	Saturday Holiday
+WORK_DAYS	New Years Day
+WORK_DAYS	Memorial Day
+WORK_DAYS	Independence Day
+WORK_DAYS	Labor Day
+WORK_DAYS	Thanksgiving Day
+WORK_DAYS	Black Friday
+WORK_DAYS	Christmas Eve
+WORK_DAYS	Christmas Day
+WORK_DAYS	New Years Eve
+\.
+
+CREATE TABLE iris.plan_phase (
+	name VARCHAR(12) PRIMARY KEY,
+	hold_time INTEGER NOT NULL,
+	next_phase VARCHAR(12) REFERENCES iris.plan_phase
+);
+
+COPY iris.plan_phase (name, hold_time, next_phase) FROM stdin;
+deployed	0	\N
+undeployed	0	\N
+\.
+
+CREATE TABLE iris.action_plan (
+	name VARCHAR(16) PRIMARY KEY,
+	description VARCHAR(64) NOT NULL,
+	group_n VARCHAR(16),
+	sync_actions BOOLEAN NOT NULL,
+	sticky BOOLEAN NOT NULL,
+	active BOOLEAN NOT NULL,
+	default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
+);
+
+CREATE VIEW action_plan_view AS
+	SELECT name, description, group_n, sync_actions, sticky, active,
+	       default_phase, phase
+	FROM iris.action_plan;
+GRANT SELECT ON action_plan_view TO PUBLIC;
+
+CREATE TABLE iris.time_action (
+	name VARCHAR(30) PRIMARY KEY,
+	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
+	day_plan VARCHAR(10) REFERENCES iris.day_plan,
+	sched_date DATE,
+	time_of_day TIME WITHOUT TIME ZONE NOT NULL,
+	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
+	CONSTRAINT time_action_date CHECK (
+		((day_plan IS NULL) OR (sched_date IS NULL)) AND
+		((day_plan IS NOT NULL) OR (sched_date IS NOT NULL))
+	)
+);
+
+CREATE VIEW time_action_view AS
+	SELECT name, action_plan, day_plan, sched_date, time_of_day, phase
+	FROM iris.time_action;
+GRANT SELECT ON time_action_view TO PUBLIC;
+
 CREATE TABLE iris.color_scheme (
 	id INTEGER PRIMARY KEY,
 	description VARCHAR(16) NOT NULL
@@ -892,43 +1001,6 @@ CREATE TABLE iris.word (
 	name VARCHAR(24) PRIMARY KEY,
 	abbr VARCHAR(12),
 	allowed BOOLEAN DEFAULT false NOT NULL
-);
-
-CREATE TABLE iris.day_matcher (
-	name VARCHAR(32) PRIMARY KEY,
-	holiday BOOLEAN NOT NULL,
-	month INTEGER NOT NULL,
-	day INTEGER NOT NULL,
-	week INTEGER NOT NULL,
-	weekday INTEGER NOT NULL,
-	shift INTEGER NOT NULL
-);
-
-CREATE TABLE iris.day_plan (
-	name VARCHAR(10) PRIMARY KEY
-);
-
-CREATE TABLE iris.day_plan_day_matcher (
-	day_plan VARCHAR(10) NOT NULL REFERENCES iris.day_plan,
-	day_matcher VARCHAR(32) NOT NULL REFERENCES iris.day_matcher
-);
-ALTER TABLE iris.day_plan_day_matcher ADD PRIMARY KEY (day_plan, day_matcher);
-
-CREATE TABLE iris.plan_phase (
-	name VARCHAR(12) PRIMARY KEY,
-	hold_time INTEGER NOT NULL,
-	next_phase VARCHAR(12) REFERENCES iris.plan_phase
-);
-
-CREATE TABLE iris.action_plan (
-	name VARCHAR(16) PRIMARY KEY,
-	description VARCHAR(64) NOT NULL,
-	group_n VARCHAR(16),
-	sync_actions BOOLEAN NOT NULL,
-	sticky BOOLEAN NOT NULL,
-	active BOOLEAN NOT NULL,
-	default_phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase
 );
 
 CREATE TABLE iris.lane_type (
@@ -2548,19 +2620,6 @@ CREATE UNIQUE INDEX lane_use_multi_indication_idx ON iris.lane_use_multi
 CREATE UNIQUE INDEX lane_use_multi_msg_num_idx ON iris.lane_use_multi
 	USING btree (msg_num, width, height);
 
-CREATE TABLE iris.time_action (
-	name VARCHAR(30) PRIMARY KEY,
-	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
-	day_plan VARCHAR(10) REFERENCES iris.day_plan,
-	sched_date DATE,
-	time_of_day TIME WITHOUT TIME ZONE NOT NULL,
-	phase VARCHAR(12) NOT NULL REFERENCES iris.plan_phase,
-	CONSTRAINT time_action_date CHECK (
-		((day_plan IS NULL) OR (sched_date IS NULL)) AND
-		((day_plan IS NOT NULL) OR (sched_date IS NOT NULL))
-	)
-);
-
 CREATE TABLE iris.dms_action (
 	name VARCHAR(30) PRIMARY KEY,
 	action_plan VARCHAR(16) NOT NULL REFERENCES iris.action_plan,
@@ -2984,17 +3043,6 @@ CREATE VIEW glyph_view AS
 	SELECT name, font, code_point, width, pixels
 	FROM iris.glyph;
 GRANT SELECT ON glyph_view TO PUBLIC;
-
-CREATE VIEW action_plan_view AS
-	SELECT name, description, group_n, sync_actions, sticky, active,
-	       default_phase, phase
-	FROM iris.action_plan;
-GRANT SELECT ON action_plan_view TO PUBLIC;
-
-CREATE VIEW time_action_view AS
-	SELECT name, action_plan, day_plan, sched_date, time_of_day, phase
-	FROM iris.time_action;
-GRANT SELECT ON time_action_view TO PUBLIC;
 
 CREATE VIEW dms_action_view AS
 	SELECT name, action_plan, sign_group, phase, quick_message,
@@ -3673,51 +3721,6 @@ COPY iris.tag_reader_sync_mode (id, description) FROM stdin;
 1	master
 2	GPS secondary
 3	GPS primary
-\.
-
-COPY iris.day_matcher (name, holiday, month, day, week, weekday, shift) FROM stdin;
-Any Day	f	-1	0	0	0	0
-Sunday Holiday	t	-1	0	0	1	0
-Saturday Holiday	t	-1	0	0	7	0
-New Years Day	t	0	1	0	0	0
-Memorial Day	t	4	0	-1	2	0
-Independence Day	t	6	4	0	0	0
-Labor Day	t	8	0	1	2	0
-Thanksgiving Day	t	10	0	4	5	0
-Black Friday	t	10	0	4	5	1
-Christmas Eve	t	11	24	0	0	0
-Christmas Day	t	11	25	0	0	0
-New Years Eve	t	11	31	0	0	0
-\.
-
-COPY iris.day_plan (name) FROM stdin;
-EVERY_DAY
-WEEKDAYS
-WORK_DAYS
-\.
-
-COPY iris.day_plan_day_matcher (day_plan, day_matcher) FROM stdin;
-EVERY_DAY	Any Day
-WEEKDAYS	Any Day
-WEEKDAYS	Sunday Holiday
-WEEKDAYS	Saturday Holiday
-WORK_DAYS	Any Day
-WORK_DAYS	Sunday Holiday
-WORK_DAYS	Saturday Holiday
-WORK_DAYS	New Years Day
-WORK_DAYS	Memorial Day
-WORK_DAYS	Independence Day
-WORK_DAYS	Labor Day
-WORK_DAYS	Thanksgiving Day
-WORK_DAYS	Black Friday
-WORK_DAYS	Christmas Eve
-WORK_DAYS	Christmas Day
-WORK_DAYS	New Years Eve
-\.
-
-COPY iris.plan_phase (name, hold_time, next_phase) FROM stdin;
-deployed	0	\N
-undeployed	0	\N
 \.
 
 COPY iris.parking_area_amenities (bit, amenity) FROM stdin;
