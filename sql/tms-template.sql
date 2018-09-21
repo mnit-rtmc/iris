@@ -612,6 +612,22 @@ CREATE VIEW role_privilege_view AS
 	WHERE role.enabled = 't' AND capability.enabled = 't';
 GRANT SELECT ON role_privilege_view TO PUBLIC;
 
+CREATE TABLE event.client_event (
+	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
+	event_date timestamp WITH time zone NOT NULL,
+	event_desc_id integer NOT NULL
+		REFERENCES event.event_description(event_desc_id),
+	host_port VARCHAR(64) NOT NULL,
+	iris_user VARCHAR(15)
+);
+
+CREATE VIEW client_event_view AS
+	SELECT e.event_id, e.event_date, ed.description, e.host_port,
+	       e.iris_user
+	FROM event.client_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
+GRANT SELECT ON client_event_view TO PUBLIC;
+
 --
 -- Direction, Road, Geo Location, R_Node, Map Extent
 --
@@ -3849,24 +3865,8 @@ CREATE VIEW weather_sensor_view AS
 GRANT SELECT ON weather_sensor_view TO PUBLIC;
 
 --
--- Other Stuff
+-- Device / Controller views
 --
-CREATE TABLE event.client_event (
-	event_id integer PRIMARY KEY DEFAULT nextval('event.event_id_seq'),
-	event_date timestamp WITH time zone NOT NULL,
-	event_desc_id integer NOT NULL
-		REFERENCES event.event_description(event_desc_id),
-	host_port VARCHAR(64) NOT NULL,
-	iris_user VARCHAR(15)
-);
-
-CREATE VIEW client_event_view AS
-	SELECT e.event_id, e.event_date, ed.description, e.host_port,
-	       e.iris_user
-	FROM event.client_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id;
-GRANT SELECT ON client_event_view TO PUBLIC;
-
 CREATE VIEW iris.device_geo_loc_view AS
 	SELECT name, geo_loc FROM iris._lane_marking UNION ALL
 	SELECT name, geo_loc FROM iris._beacon UNION ALL
