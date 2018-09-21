@@ -51,7 +51,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
 		map.put("g_number", g_number);
-		map.put("color_scheme", color_scheme.ordinal());
+		map.put("color_scheme", color_scheme);
 		map.put("height", height);
 		map.put("width", width);
 		map.put("transparent_color", transparent_color);
@@ -75,7 +75,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	public GraphicImpl(String n) {
 		super(n);
 		g_number = 0;
-		color_scheme = ColorScheme.MONOCHROME_1_BIT;
+		color_scheme = ColorScheme.MONOCHROME_1_BIT.ordinal();
 		height = 0;
 		width = 0;
 		transparent_color = null;
@@ -100,7 +100,7 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 	{
 		super(n);
 		g_number = g;
-		color_scheme = ColorScheme.fromOrdinal(cs);
+		color_scheme = cs;
 		height = h;
 		width = w;
 		transparent_color = tc;
@@ -132,13 +132,13 @@ public class GraphicImpl extends BaseObjectImpl implements Graphic {
 		return g_number;
 	}
 
-	/** DMS Color scheme */
-	private final ColorScheme color_scheme;
+	/** DMS Color scheme (ordinal of ColorScheme) */
+	private final int color_scheme;
 
 	/** Get the color scheme (ordinal of ColorScheme) */
 	@Override
 	public int getColorScheme() {
-		return color_scheme.ordinal();
+		return color_scheme;
 	}
 
 	/** Height (number of pixels) */
