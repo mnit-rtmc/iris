@@ -30,14 +30,6 @@ import us.mn.state.dot.tms.geo.Position;
  */
 public class ParsedIncident {
 
-	/** Epsilon for comparing lat/lon values */
-	static private final double EPSILON = 0.00001;
-
-	/** Check if two value are not equal (within epsilon) */
-	static private boolean notEqual(double a, double b) {
-		return a < (b - EPSILON) || a > (b + EPSILON);
-	}
-
 	/** Compare two (possibly-null) objects for equality */
 	static protected boolean objectEquals(Object o0, Object o1) {
 		return (o0 != null) ? o0.equals(o1) : o1 == null;
@@ -134,16 +126,8 @@ public class ParsedIncident {
 		return it.hasNext() ? it.next() : null;
 	}
 
-	/** Check if existing incident needs updating */
-	public boolean needsUpdate(IncidentImpl inc) {
-		if (inc.getConfirmed())
-			return false;
-		if (inc.getCleared())
-			return false;
-		if (null == lat || notEqual(lat, inc.getLat()))
-			return false;
-		if (null == lon || notEqual(lon, inc.getLon()))
-			return false;
+	/** Is incident detail changed? */
+	public boolean isDetailChanged(IncidentImpl inc) {
 		return !objectEquals(detail, inc.getDetail());
 	}
 }

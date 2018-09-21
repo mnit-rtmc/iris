@@ -20,6 +20,7 @@ import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CorridorBase;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.IncidentDetail;
 import us.mn.state.dot.tms.IncidentHelper;
@@ -36,6 +37,12 @@ import us.mn.state.dot.tms.server.IncidentImpl;
  * @author Douglas Lau
  */
 public class IncidentCache {
+
+	/** Check if an incident has moved farther than 50 meters */
+	static private boolean hasMoved(GeoLoc loc, IncidentImpl inc) {
+		Position p = new Position(inc.getLat(), inc.getLon());
+		return GeoLocHelper.distanceTo(loc, p).m() > 50.0;
+	}
 
 	/** Comm link name */
 	private final String link;
@@ -120,14 +127,22 @@ public class IncidentCache {
 			createIncidentNotify(oid, null, pi, loc, n_lanes);
 		}
 		// Is this a continuing incident?
-		if (inc != null && incidents.contains(pi.id)) {
-			if (pi.needsUpdate(inc)) {
-				inc.setClearedNotify(true);
-				inc.notifyRemove();
-				String n = IncidentHelper.createUniqueName();
-				createIncidentNotify(n, oid, pi, loc, n_lanes);
-			}
+		if (isContinuing(inc, pi) &&
+			(hasMoved(loc, inc) || pi.isDetailChanged(inc)))
+		{
+			inc.setClearedNotify(true);
+			inc.notifyRemove();
+			String n = IncidentHelper.createUniqueName();
+			createIncidentNotify(n, oid, pi, loc, n_lanes);
 		}
+	}
+
+	/** Check if an incident in continuing */
+	private boolean isContinuing(IncidentImpl inc, ParsedIncident pi) {
+		return inc != null
+		    && incidents.contains(pi.id)
+		    && (!inc.getConfirmed())
+		    && (!inc.getCleared());
 	}
 
 	/** Create an incident and notify clients.
