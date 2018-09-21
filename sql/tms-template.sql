@@ -111,7 +111,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.80.0
+database_version	4.81.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
@@ -1965,6 +1965,11 @@ $gps_delete$ LANGUAGE plpgsql;
 CREATE TRIGGER gps_delete_trig
 	INSTEAD OF DELETE ON iris.gps
 	FOR EACH ROW EXECUTE PROCEDURE iris.gps_delete();
+
+CREATE VIEW gps_view AS
+	SELECT name, controller, pin, notes, latest_poll, latest_sample,
+	       lat, lon
+	FROM iris.gps;
 
 --
 -- DMS, Graphic, Font, Sign Message, Quick Message, Word, Color Scheme
