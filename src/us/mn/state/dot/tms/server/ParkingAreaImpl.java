@@ -151,7 +151,7 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 	/** Create a new parking area */
 	public ParkingAreaImpl(String n) throws SonarException {
 		super(n);
-		GeoLocImpl g = new GeoLocImpl(name);
+		GeoLocImpl g = new GeoLocImpl(name, SONAR_TYPE);
 		g.notifyCreate();
 		geo_loc = g;
 	}

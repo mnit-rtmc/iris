@@ -77,9 +77,10 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	/** Load all the geo locations */
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, GeoLocImpl.class);
-		store.query("SELECT name, roadway, road_dir, cross_street, " +
-			"cross_dir, cross_mod, lat, lon, landmark " +
-			"FROM iris." + SONAR_TYPE  + ";", new ResultFactory()
+		store.query("SELECT name, notify_tag, roadway, road_dir, " +
+			"cross_street, cross_dir, cross_mod, lat, lon, " +
+			"landmark FROM iris." + SONAR_TYPE  + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new GeoLocImpl(row));
@@ -92,6 +93,7 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
+		map.put("notify_tag", notify_tag);
 		map.put("roadway", roadway);
 		map.put("road_dir", road_dir);
 		map.put("cross_street", cross_street);
@@ -121,24 +123,32 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	}
 
 	/** Create a new geo location */
+	public GeoLocImpl(String n, String nt) {
+		super(n);
+		notify_tag = nt;
+	}
+
+	/** Create a new geo location */
 	private GeoLocImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),		// name
-		     row.getString(2),		// roadway
-		     row.getShort(3),		// road_dir
-		     row.getString(4),		// cross_street
-		     row.getShort(5),		// cross_dir
-		     row.getShort(6),		// cross_mod
-		     (Double) row.getObject(7), // lat
-		     (Double) row.getObject(8), // lon
-		     row.getString(9)		// landmark
+		this(row.getString(1),          // name
+		     row.getString(2),          // notify_tag
+		     row.getString(3),          // roadway
+		     row.getShort(4),           // road_dir
+		     row.getString(5),          // cross_street
+		     row.getShort(6),           // cross_dir
+		     row.getShort(7),           // cross_mod
+		     (Double) row.getObject(8), // lat
+		     (Double) row.getObject(9), // lon
+		     row.getString(10)          // landmark
 		);
 	}
 
 	/** Create a new geo location */
-	private GeoLocImpl(String n, Road r, short rd, Road x, short xd,
-		short xm, Double lt, Double ln, String lm)
+	private GeoLocImpl(String n, String nt, Road r, short rd, Road x,
+		short xd, short xm, Double lt, Double ln, String lm)
 	{
 		this(n);
+		notify_tag = nt;
 		roadway = r;
 		road_dir = rd;
 		cross_street = x;
@@ -150,11 +160,15 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	}
 
 	/** Create a new geo location */
-	private GeoLocImpl(String n, String r, short rd, String x, short xd,
-		short xm, Double lt, Double ln, String lm)
+	private GeoLocImpl(String n, String nt, String r, short rd, String x,
+		short xd, short xm, Double lt, Double ln, String lm)
 	{
-		this(n, lookupRoad(r), rd, lookupRoad(x), xd, xm, lt, ln, lm);
+		this(n, nt, lookupRoad(r), rd, lookupRoad(x), xd, xm, lt, ln,
+		     lm);
 	}
+
+	/** Tag for pg_notify trigger on update */
+	private String notify_tag;
 
 	/** Roadway road */
 	private Road roadway;

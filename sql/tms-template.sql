@@ -703,6 +703,7 @@ GRANT SELECT ON road_view TO PUBLIC;
 
 CREATE TABLE iris.geo_loc (
 	name VARCHAR(20) PRIMARY KEY,
+	notify_tag VARCHAR(20),
 	roadway VARCHAR(20) REFERENCES iris.road(name),
 	road_dir SMALLINT REFERENCES iris.direction(id),
 	cross_street VARCHAR(20) REFERENCES iris.road(name),
@@ -712,6 +713,24 @@ CREATE TABLE iris.geo_loc (
 	lon double precision,
 	landmark VARCHAR(24)
 );
+
+CREATE FUNCTION iris.geo_loc_notify() RETURNS TRIGGER AS
+	$geo_loc_notify$
+BEGIN
+	IF (TG_OP = 'DELETE') THEN
+		IF (OLD.notify_tag IS NOT NULL) THEN
+			PERFORM pg_notify('tms', OLD.notify_tag);
+		END IF;
+	ELSIF (NEW.notify_tag IS NOT NULL) THEN
+		PERFORM pg_notify('tms', NEW.notify_tag);
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$geo_loc_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER geo_loc_notify_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.geo_loc
+	FOR EACH ROW EXECUTE PROCEDURE iris.geo_loc_notify();
 
 CREATE FUNCTION iris.geo_location(TEXT, TEXT, TEXT, TEXT, TEXT, TEXT)
 	RETURNS TEXT AS $geo_location$
@@ -1213,6 +1232,20 @@ CREATE TABLE iris._camera (
 
 ALTER TABLE iris._camera ADD CONSTRAINT _camera_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE FUNCTION iris.camera_notify() RETURNS TRIGGER AS
+	$camera_notify$
+BEGIN
+	IF (NEW.publish IS DISTINCT FROM OLD.publish) THEN
+		NOTIFY tms, 'camera';
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$camera_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER camera_notify_trig
+    AFTER UPDATE ON iris._camera
+    FOR EACH ROW EXECUTE PROCEDURE iris.camera_notify();
 
 CREATE VIEW iris.camera AS
 	SELECT c.name, geo_loc, controller, pin, notes, cam_num, encoder_type,
@@ -2019,6 +2052,18 @@ CREATE TRIGGER font_ck_trig
 	BEFORE UPDATE ON iris.font
 	FOR EACH ROW EXECUTE PROCEDURE iris.font_ck();
 
+CREATE FUNCTION iris.font_notify() RETURNS TRIGGER AS
+	$font_notify$
+BEGIN
+	NOTIFY tms, 'font';
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$font_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER font_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.font
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.font_notify();
+
 CREATE VIEW font_view AS
 	SELECT name, f_number, height, width, line_spacing, char_spacing,
 	       version_id
@@ -2056,6 +2101,10 @@ $glyph_ck$ LANGUAGE plpgsql;
 CREATE TRIGGER glyph_ck_trig
 	BEFORE INSERT OR UPDATE ON iris.glyph
 	FOR EACH ROW EXECUTE PROCEDURE iris.glyph_ck();
+
+CREATE TRIGGER glyph_notify_trig
+    AFTER INSERT OR UPDATE OR DELETE ON iris.glyph
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.font_notify();
 
 CREATE VIEW glyph_view AS
 	SELECT name, font, code_point, width, pixels
@@ -2112,6 +2161,18 @@ CREATE TABLE iris.sign_config (
 	monochrome_background INTEGER NOT NULL,
 	default_font VARCHAR(16) REFERENCES iris.font
 );
+
+CREATE FUNCTION iris.sign_config_notify() RETURNS TRIGGER AS
+	$sign_config_notify$
+BEGIN
+	NOTIFY tms, 'sign_config';
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$sign_config_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER sign_config_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.sign_config
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.sign_config_notify();
 
 CREATE VIEW sign_config_view AS
 	SELECT name, dt.description AS dms_type, portable, technology,
@@ -2184,6 +2245,18 @@ CREATE TABLE iris.sign_message (
 	duration INTEGER
 );
 
+CREATE FUNCTION iris.sign_message_notify() RETURNS TRIGGER AS
+	$sign_message_notify$
+BEGIN
+	NOTIFY tms, 'sign_message';
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$sign_message_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER sign_message_notify_trig
+    AFTER INSERT OR DELETE ON iris.sign_message
+    FOR EACH STATEMENT EXECUTE PROCEDURE iris.sign_message_notify();
+
 CREATE VIEW sign_message_view AS
 	SELECT name, sign_config, incident, multi, beacon_enabled, prefix_page,
 	       msg_priority, iris.sign_msg_sources(source) AS sources, owner,
@@ -2240,6 +2313,23 @@ CREATE TABLE iris._dms (
 
 ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
+
+CREATE FUNCTION iris.dms_notify() RETURNS TRIGGER AS
+	$dms_notify$
+BEGIN
+	IF (NEW.sign_config IS DISTINCT FROM OLD.sign_config) THEN
+		NOTIFY tms, 'dms';
+	END IF;
+	IF (NEW.msg_current IS DISTINCT FROM OLD.msg_current) THEN
+		NOTIFY tms, 'dms_message';
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$dms_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER dms_notify_trig
+    AFTER UPDATE ON iris._dms
+    FOR EACH ROW EXECUTE PROCEDURE iris.dms_notify();
 
 CREATE VIEW iris.dms AS
 	SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
@@ -2665,6 +2755,18 @@ CREATE TABLE event.incident (
 	cleared BOOLEAN NOT NULL,
 	confirmed BOOLEAN NOT NULL
 );
+
+CREATE FUNCTION iris.incident_notify() RETURNS TRIGGER AS
+	$incident_notify$
+BEGIN
+	NOTIFY tms, 'incident';
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$incident_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER incident_notify_trig
+    AFTER INSERT OR UPDATE ON event.incident
+    FOR EACH ROW EXECUTE PROCEDURE iris.incident_notify();
 
 CREATE VIEW incident_view AS
     SELECT event_id, name, event_date, ed.description, road, d.direction,
@@ -3110,6 +3212,23 @@ CREATE TABLE iris.parking_area (
 	last_verification_check TIMESTAMP WITH time zone,
 	verification_check_amplitude INTEGER
 );
+
+CREATE FUNCTION iris.parking_area_notify() RETURNS TRIGGER AS
+	$parking_area_notify$
+BEGIN
+	IF (NEW.time_stamp_static IS DISTINCT FROM OLD.time_stamp_static) THEN
+		NOTIFY tms, 'parking_area';
+	END IF;
+	IF (NEW.time_stamp IS DISTINCT FROM OLD.time_stamp) THEN
+		NOTIFY tms, 'parking_area_dynamic';
+	END IF;
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$parking_area_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER parking_area_trig
+	AFTER UPDATE ON iris.parking_area
+	FOR EACH ROW EXECUTE PROCEDURE iris.parking_area_notify();
 
 CREATE TABLE iris.parking_area_amenities (
 	bit INTEGER PRIMARY KEY,
