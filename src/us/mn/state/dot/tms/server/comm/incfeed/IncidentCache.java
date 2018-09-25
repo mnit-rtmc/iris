@@ -43,10 +43,14 @@ public class IncidentCache {
 	/** Maximum distance to snap */
 	static private final Distance MAX_DIST = new Distance(0.25, MILES);
 
-	/** Check if an incident has moved farther than 50 meters */
-	static private boolean hasMoved(GeoLoc loc, IncidentImpl inc) {
-		Position p = new Position(inc.getLat(), inc.getLon());
-		return GeoLocHelper.distanceTo(loc, p).m() > 50.0;
+	/** Threshold to check if an incident has moved (meters) */
+	static private final double MOVE_THRESHOLD_M = 50.0;
+
+	/** Check if an incident has moved */
+	static private boolean hasMoved(IncidentImpl inc, ParsedIncident pi) {
+		Position p0 = new Position(inc.getLat(), inc.getLon());
+		Position p1 = new Position(pi.lat, pi.lon);
+		return p0.distanceHaversine(p1) > MOVE_THRESHOLD_M;
 	}
 
 	/** Comm link name */
@@ -95,7 +99,6 @@ public class IncidentCache {
 
 	/** Update an incident */
 	private void updateIncident(ParsedIncident pi) {
-		inc_log.log("Updating incident: " + pi);
 		Position pos = new Position(pi.lat, pi.lon);
 		SphericalMercatorPosition smp =
 			SphericalMercatorPosition.convert(pos);
@@ -130,12 +133,14 @@ public class IncidentCache {
 		String oid = originalId(pi.id);
 		// Is this a new incident?
 		if (null == inc && !incidents.contains(pi.id)) {
+			inc_log.log("Creating incident: " + pi);
 			createIncidentNotify(oid, null, pi, loc, n_lanes);
 		}
 		// Is this a continuing incident?
 		if (isContinuing(inc, pi) &&
-			(hasMoved(loc, inc) || pi.isDetailChanged(inc)))
+			(hasMoved(inc, pi) || pi.isDetailChanged(inc)))
 		{
+			inc_log.log("Updating incident: " + pi);
 			inc.setClearedNotify(true);
 			inc.notifyRemove();
 			String n = IncidentHelper.createUniqueName();
