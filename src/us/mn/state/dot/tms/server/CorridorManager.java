@@ -26,7 +26,6 @@ import us.mn.state.dot.tms.R_Node;
 import us.mn.state.dot.tms.R_NodeHelper;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import us.mn.state.dot.tms.units.Distance;
-import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
 /**
  * This is a class to manage roadway network corridors.
@@ -34,9 +33,6 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
  * @author Douglas Lau
  */
 public class CorridorManager {
-
-	/** Maximum distance to snap */
-	static private final Distance MAX_DIST = new Distance(1, MILES);
 
 	/** Map to hold all corridors */
 	private final Map<String, Corridor> corridors =
@@ -103,10 +99,10 @@ public class CorridorManager {
 	/** Create a GeoLoc snapped to nearest r_node segment.
 	 * NOTE: copied from client/roads/R_NodeManager. */
 	public synchronized GeoLoc snapGeoLoc(SphericalMercatorPosition smp,
-		LaneType lt)
+		LaneType lt, Distance max_dist)
 	{
 		GeoLoc loc = null;
-		Distance dist = MAX_DIST;
+		Distance dist = max_dist;
 		for (Corridor c: corridors.values()) {
 			Corridor.GeoLocDist ld = c.snapGeoLoc(smp, lt, dist);
 			if (ld != null && ld.dist.m() < dist.m()) {

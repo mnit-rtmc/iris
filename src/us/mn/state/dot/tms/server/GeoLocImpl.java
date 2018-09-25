@@ -31,6 +31,8 @@ import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
 /**
  * GeoLoc contains attributes necessary to describe a map location.
@@ -41,6 +43,9 @@ import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
  * @author John L. Stanley
  */
 public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
+
+	/** Maximum distance to snap */
+	static private final Distance MAX_DIST = new Distance(1, MILES);
 
 	/** Create a spherical mercator position */
 	static private SphericalMercatorPosition getPosition(double latitude,
@@ -426,7 +431,8 @@ public class GeoLocImpl extends BaseObjectImpl implements GeoLoc {
 	/** Find the nearest geo location to current lat/lon. */
 	private GeoLoc findNearest() {
 		SphericalMercatorPosition smp = getPosition(lat, lon);
-		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE);
+		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE,
+			MAX_DIST);
 		return (loc != null) ? findNearest(loc) : null;
 	}
 

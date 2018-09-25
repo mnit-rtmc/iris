@@ -30,6 +30,8 @@ import us.mn.state.dot.tms.geo.Position;
 import us.mn.state.dot.tms.geo.SphericalMercatorPosition;
 import static us.mn.state.dot.tms.server.BaseObjectImpl.corridors;
 import us.mn.state.dot.tms.server.IncidentImpl;
+import us.mn.state.dot.tms.units.Distance;
+import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 
 /**
  * Cache of incidents in an incident feed.
@@ -37,6 +39,9 @@ import us.mn.state.dot.tms.server.IncidentImpl;
  * @author Douglas Lau
  */
 public class IncidentCache {
+
+	/** Maximum distance to snap */
+	static private final Distance MAX_DIST = new Distance(0.25, MILES);
 
 	/** Check if an incident has moved farther than 50 meters */
 	static private boolean hasMoved(GeoLoc loc, IncidentImpl inc) {
@@ -94,7 +99,8 @@ public class IncidentCache {
 		Position pos = new Position(pi.lat, pi.lon);
 		SphericalMercatorPosition smp =
 			SphericalMercatorPosition.convert(pos);
-		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE);
+		GeoLoc loc = corridors.snapGeoLoc(smp, LaneType.MAINLINE,
+			MAX_DIST);
 		if (loc != null)
 			updateIncident(pi, loc);
 		else if (inc_log.isOpen()) {
