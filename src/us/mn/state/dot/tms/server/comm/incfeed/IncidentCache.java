@@ -78,8 +78,12 @@ public class IncidentCache {
 	public void put(ParsedIncident pi) {
 		if (pi.isValid()) {
 			nxt.add(pi.id);
-			if (updated)
-				updateIncident(pi);
+			if (updated) {
+				if (pi.hasLocation())
+					updateIncident(pi);
+				else
+					inc_log.log("No location: " + pi);
+			}
 		} else if (inc_log.isOpen())
 			inc_log.log("Invalid incident: " + pi);
 	}

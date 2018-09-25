@@ -113,7 +113,12 @@ public class ParsedIncident {
 
 	/** Check if incident is valid */
 	public boolean isValid() {
-		return (inc_type != null) && (lat != null) && (lon != null);
+		return (id != null) && (inc_type != null);
+	}
+
+	/** Check if incident has a location */
+	public boolean hasLocation() {
+		return (lat != null) && (lon != null);
 	}
 
 	/** Lookup the camera */
