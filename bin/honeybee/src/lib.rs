@@ -1,4 +1,5 @@
 extern crate failure;
+extern crate fallible_iterator;
 extern crate postgres;
 
 pub mod jwriter;

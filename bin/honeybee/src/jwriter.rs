@@ -12,6 +12,7 @@
  * GNU General Public License for more details.
  */
 use failure::Error;
+use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};
 use std::fs::File;
 use std::io::{BufWriter,Write};
@@ -20,7 +21,7 @@ pub fn start(uds: String) -> Result<(), Error> {
     let conn = Connection::connect(uds, TlsMode::None)?;
     query_json_file(&conn, DMS_SQL, "dms.json")?;
     query_json_file(&conn, INCIDENT_SQL, "incident.json")?;
-    Ok(())
+    notify_loop(&conn)
 }
 
 static DMS_SQL: &str =
@@ -43,7 +44,7 @@ fn query_json_file(conn: &Connection, sql: &str, file_name: &str)
 {
     let f = BufWriter::new(File::create(file_name)?);
     let r = query_json(&conn, sql, f)?;
-    println!("{} rows: {}", file_name, r);
+    println!("wrote {}, rows: {}", file_name, r);
     Ok(())
 }
 
@@ -66,4 +67,22 @@ fn query_json<T: Write>(conn: &Connection, q: &str, mut w: T)
     }
     w.write("\n]".as_bytes())?;
     Ok(c)
+}
+
+fn notify_loop(conn: &Connection) -> Result<(), Error> {
+    &conn.execute("LISTEN tms", &[])?;
+    let nots = conn.notifications();
+    loop {
+        for n in nots.blocking_iter().iterator() {
+            let n = n?;
+            let res = match n.payload.as_ref() {
+                "dms"      => Some((DMS_SQL, "dms.json")),
+                "incident" => Some((INCIDENT_SQL, "incident.json")),
+                _          => None,
+            };
+            if let Some((sql, file_name)) = res {
+                query_json_file(&conn, sql, file_name)?;
+            }
+        }
+    }
 }

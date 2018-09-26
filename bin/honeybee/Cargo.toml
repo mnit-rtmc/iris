@@ -4,6 +4,7 @@ version = "0.3.0"
 
 [dependencies]
 failure = "0.1"
+fallible-iterator = "0.1"
 postgres = { version = "0.15" }
 users = "0.7"
 palette = "0.4"
