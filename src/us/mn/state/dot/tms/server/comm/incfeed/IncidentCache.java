@@ -110,10 +110,8 @@ public class IncidentCache {
 			MAX_DIST);
 		if (loc != null)
 			updateIncident(pi, loc);
-		else if (inc_log.isOpen()) {
-			inc_log.log("Failed to snap incident to corridor: " +
-				pi.lat + ", " + pi.lon);
-		}
+		else if (inc_log.isOpen())
+			inc_log.log("Failed to snap incident: " + pi);
 	}
 
 	/** Update an incident */
