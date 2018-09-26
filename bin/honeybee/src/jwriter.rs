@@ -17,17 +17,6 @@ use postgres::{Connection, TlsMode};
 use std::fs::File;
 use std::io::{BufWriter,Write};
 
-pub fn start(uds: String) -> Result<(), Error> {
-    let conn = Connection::connect(uds, TlsMode::None)?;
-    query_json_file(&conn, CAMERA_SQL, "camera.json")?;
-    query_json_file(&conn, DMS_SQL, "dms.json")?;
-    query_json_file(&conn, DMS_MSG_SQL, "dms_message.json")?;
-    query_json_file(&conn, INCIDENT_SQL, "incident.json")?;
-    query_json_file(&conn, SIGN_CONFIG_SQL, "sign_config.json")?;
-    query_json_file(&conn, PARKING_AREA_STAT_SQL, "parking_area_static.json")?;
-    notify_loop(&conn)
-}
-
 static CAMERA_SQL: &str =
     "SELECT row_to_json(r)::text FROM (\
         SELECT name, publish, location, lat, lon \
@@ -68,9 +57,10 @@ static SIGN_CONFIG_SQL: &str =
         FROM sign_config_view \
     ) r";
 
-static PARKING_AREA_STAT_SQL: &str =
+static TPIMS_STAT_SQL: &str =
     "SELECT row_to_json(r)::text FROM (\
-        SELECT site_id AS \"siteId\", time_stamp_static AS \"timeStamp\", \
+        SELECT site_id AS \"siteId\", to_char(time_stamp_static, \
+               'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
                relevant_highway AS \"relevantHighway\", \
                reference_post AS \"referencePost\", exit_id AS \"exitId\", \
                road_dir AS \"directionOfTravel\", facility_name AS name, \
@@ -86,12 +76,65 @@ static PARKING_AREA_STAT_SQL: &str =
         FROM parking_area_view \
     ) r";
 
-fn query_json_file(conn: &Connection, sql: &str, file_name: &str)
+static TPIMS_DYN_SQL: &str =
+    "SELECT row_to_json(r)::text FROM (\
+        SELECT site_id AS \"siteId\", to_char(time_stamp, \
+               'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
+               to_char(time_stamp_static, 'YYYY-mm-dd\"T\"HH24:MI:SSZ') \
+               AS \"timeStampStatic\", \
+               reported_available AS \"reportedAvailable\", \
+               trend, open, trust_data AS \"trustData\", capacity \
+        FROM parking_area_view \
+    ) r";
+
+struct Request {
+    sql: &'static str,
+    file_name: &'static str,
+}
+
+impl Request {
+    fn new(sql: &'static str, file_name: &'static str) -> Self {
+        Request { sql, file_name }
+    }
+}
+
+fn request(n: &str) -> Option<Request> {
+    match n {
+        "camera"        => Some(Request::new(CAMERA_SQL, "camera.json")),
+        "dms"           => Some(Request::new(DMS_SQL, "dms.json")),
+        "dms_message"   => Some(Request::new(DMS_MSG_SQL, "dms_message.json")),
+        "incident"      => Some(Request::new(INCIDENT_SQL, "incident.json")),
+        "sign_config"   => Some(Request::new(SIGN_CONFIG_SQL,
+                                "sign_config.json")),
+        "TPIMS_static"  => Some(Request::new(TPIMS_STAT_SQL,
+                                "TPIMS_static.json")),
+        "TPIMS_dynamic" => Some(Request::new(TPIMS_DYN_SQL,
+                                "TPIMS_dynamic.json")),
+        _               => None,
+    }
+}
+
+pub fn start(uds: String) -> Result<(), Error> {
+    let conn = Connection::connect(uds, TlsMode::None)?;
+    for r in ["camera", "dms", "dms_message", "incident", "sign_config",
+              "TPIMS_static", "TPIMS_dynamic"].iter()
+    {
+        query_json_file(&conn, r)?;
+    }
+    notify_loop(&conn)
+}
+
+fn query_json_file(conn: &Connection, n: &str)
     -> Result<(), Error>
 {
-    let f = BufWriter::new(File::create(file_name)?);
-    let r = query_json(&conn, sql, f)?;
-    println!("wrote {}, rows: {}", file_name, r);
+    let jd = request(n);
+    if let Some(jd) = jd {
+        let f = BufWriter::new(File::create(jd.file_name)?);
+        let r = query_json(&conn, jd.sql, f)?;
+        println!("wrote {} rows to {}", r, jd.file_name);
+    } else {
+        println!("unknown name {}", n);
+    }
     Ok(())
 }
 
@@ -122,19 +165,7 @@ fn notify_loop(conn: &Connection) -> Result<(), Error> {
     loop {
         for n in nots.blocking_iter().iterator() {
             let n = n?;
-            let res = match n.payload.as_ref() {
-                "camera"      => Some((CAMERA_SQL, "camera.json")),
-                "dms"         => Some((DMS_SQL, "dms.json")),
-                "dms_message" => Some((DMS_MSG_SQL, "dms_message.json")),
-                "incident"    => Some((INCIDENT_SQL, "incident.json")),
-                "sign_config" => Some((SIGN_CONFIG_SQL, "sign_config.json")),
-                "parking_area_static" => Some((PARKING_AREA_STAT_SQL,
-                                              "parking_area_static.json")),
-                _             => None,
-            };
-            if let Some((sql, file_name)) = res {
-                query_json_file(&conn, sql, file_name)?;
-            }
+            query_json_file(&conn, n.payload.as_ref())?;
         }
     }
 }
