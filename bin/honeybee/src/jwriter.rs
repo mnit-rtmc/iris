@@ -17,75 +17,68 @@ use postgres::{Connection, TlsMode};
 use std::fs::File;
 use std::io::{BufWriter,Write};
 
-static CAMERA_SQL: &str =
-    "SELECT row_to_json(r)::text FROM (\
-        SELECT name, publish, location, lat, lon \
-        FROM camera_view \
-        ORDER BY name \
-    ) r";
+static CAMERA_SQL: &str = "SELECT row_to_json(r)::text FROM (\
+    SELECT name, publish, location, lat, lon \
+    FROM camera_view \
+    ORDER BY name \
+) r";
 
-static DMS_SQL: &str =
-    "SELECT row_to_json(r)::text FROM (\
-        SELECT name, sign_config, roadway, road_dir, cross_street, \
-               location, lat, lon \
-        FROM dms_view \
-        ORDER BY name \
-    ) r";
+static DMS_SQL: &str = "SELECT row_to_json(r)::text FROM (\
+    SELECT name, sign_config, roadway, road_dir, cross_street, \
+           location, lat, lon \
+    FROM dms_view \
+    ORDER BY name \
+) r";
 
-static DMS_MSG_SQL: &str =
-    "SELECT row_to_json(r)::text FROM (\
-        SELECT name, msg_current, multi, sources, duration, expire_time \
-        FROM dms_message_view WHERE condition = 'Active' \
-        ORDER BY name \
-    ) r";
+static DMS_MSG_SQL: &str = "SELECT row_to_json(r)::text FROM (\
+    SELECT name, msg_current, multi, sources, duration, expire_time \
+    FROM dms_message_view WHERE condition = 'Active' \
+    ORDER BY name \
+) r";
 
-static INCIDENT_SQL: &str =
-    "SELECT row_to_json(r)::text FROM (\
-        SELECT name, event_date, description, road, direction, lane_type, \
-               impact, confirmed, camera, detail, replaces, lat, lon \
-        FROM incident_view \
-        WHERE cleared = false \
-    ) r";
+static INCIDENT_SQL: &str = "SELECT row_to_json(r)::text FROM (\
+    SELECT name, event_date, description, road, direction, lane_type, \
+           impact, confirmed, camera, detail, replaces, lat, lon \
+    FROM incident_view \
+    WHERE cleared = false \
+) r";
 
-static SIGN_CONFIG_SQL: &str =
-    "SELECT row_to_json(r)::text FROM (\
-        SELECT name, dms_type, portable, technology, sign_access, legend, \
-               beacon_type, face_width, face_height, border_horiz, \
-               border_vert, pitch_horiz, pitch_vert, pixel_width, \
-               pixel_height, char_width, char_height, color_scheme, \
-               monochrome_foreground, monochrome_background \
-        FROM sign_config_view \
-    ) r";
+static SIGN_CONFIG_SQL: &str = "SELECT row_to_json(r)::text FROM (\
+    SELECT name, dms_type, portable, technology, sign_access, legend, \
+           beacon_type, face_width, face_height, border_horiz, \
+           border_vert, pitch_horiz, pitch_vert, pixel_width, \
+           pixel_height, char_width, char_height, color_scheme, \
+           monochrome_foreground, monochrome_background \
+    FROM sign_config_view \
+) r";
 
-static TPIMS_STAT_SQL: &str =
-    "SELECT row_to_json(r)::text FROM (\
-        SELECT site_id AS \"siteId\", to_char(time_stamp_static, \
-               'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
-               relevant_highway AS \"relevantHighway\", \
-               reference_post AS \"referencePost\", exit_id AS \"exitId\", \
-               road_dir AS \"directionOfTravel\", facility_name AS name, \
-               json_build_object('latitude', lat, 'longitude', lon, \
-               'streetAdr', street_adr, 'city', city, 'state', state, \
-               'zip', zip, 'timeZone', time_zone) AS location, \
-               ownership, capacity, \
-               string_to_array(amenities, ', ') AS amenities, \
-               array_remove(ARRAY[camera_image_base_url || camera_1, \
-               camera_image_base_url || camera_2, \
-               camera_image_base_url || camera_3], NULL) AS images, \
-               ARRAY[]::text[] AS logos \
-        FROM parking_area_view \
-    ) r";
+static TPIMS_STAT_SQL: &str = "SELECT row_to_json(r)::text FROM (\
+    SELECT site_id AS \"siteId\", to_char(time_stamp_static, \
+           'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
+           relevant_highway AS \"relevantHighway\", \
+           reference_post AS \"referencePost\", exit_id AS \"exitId\", \
+           road_dir AS \"directionOfTravel\", facility_name AS name, \
+           json_build_object('latitude', lat, 'longitude', lon, \
+           'streetAdr', street_adr, 'city', city, 'state', state, \
+           'zip', zip, 'timeZone', time_zone) AS location, \
+           ownership, capacity, \
+           string_to_array(amenities, ', ') AS amenities, \
+           array_remove(ARRAY[camera_image_base_url || camera_1, \
+           camera_image_base_url || camera_2, \
+           camera_image_base_url || camera_3], NULL) AS images, \
+           ARRAY[]::text[] AS logos \
+    FROM parking_area_view \
+) r";
 
-static TPIMS_DYN_SQL: &str =
-    "SELECT row_to_json(r)::text FROM (\
-        SELECT site_id AS \"siteId\", to_char(time_stamp, \
-               'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
-               to_char(time_stamp_static, 'YYYY-mm-dd\"T\"HH24:MI:SSZ') \
-               AS \"timeStampStatic\", \
-               reported_available AS \"reportedAvailable\", \
-               trend, open, trust_data AS \"trustData\", capacity \
-        FROM parking_area_view \
-    ) r";
+static TPIMS_DYN_SQL: &str = "SELECT row_to_json(r)::text FROM (\
+    SELECT site_id AS \"siteId\", to_char(time_stamp, \
+           'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
+           to_char(time_stamp_static, 'YYYY-mm-dd\"T\"HH24:MI:SSZ') \
+           AS \"timeStampStatic\", \
+           reported_available AS \"reportedAvailable\", \
+           trend, open, trust_data AS \"trustData\", capacity \
+    FROM parking_area_view \
+) r";
 
 struct Request {
     sql: &'static str,
