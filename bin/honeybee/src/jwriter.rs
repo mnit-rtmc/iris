@@ -134,21 +134,17 @@ fn query_json_file(conn: &Connection, n: &str)
 fn query_json<T: Write>(conn: &Connection, q: &str, mut w: T)
     -> Result<u32, Error>
 {
-    let mut first = true;
     let mut c = 0;
     w.write("[".as_bytes())?;
     for row in &conn.query(q, &[])? {
-        if !first {
-            w.write(",".as_bytes())?;
-        } else {
-            first = false;
-        }
+        if c > 0 { w.write(",".as_bytes())?; }
         w.write("\n".as_bytes())?;
         let j: String = row.get(0);
         w.write(j.as_bytes())?;
         c += 1;
     }
-    w.write("\n]\n".as_bytes())?;
+    if c > 0 { w.write("\n".as_bytes())?; }
+    w.write("]\n".as_bytes())?;
     Ok(c)
 }
 
