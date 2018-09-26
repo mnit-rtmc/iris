@@ -1,5 +1,4 @@
 /*
- * honeybee -- Web service for IRIS
  * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,12 +14,12 @@
 extern crate honeybee;
 extern crate users;
 
-use honeybee::req_server;
+use honeybee::jwriter;
 use users::get_current_username;
 
 fn main() {
     let username = get_current_username().expect("User name lookup error");
     // Format path for unix domain socket
     let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
-    req_server::start(uds);
+    jwriter::start(uds).unwrap();
 }

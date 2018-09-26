@@ -1,15 +1,10 @@
 [package]
 name = "honeybee"
-version = "0.2.3"
+version = "0.3.0"
 
 [dependencies]
-actix-web = "0.7"
-chrono = { version = "0.4", features = ["serde"] }
 failure = "0.1"
-postgres = { version = "0.15", features = ["with-chrono"] }
-serde = "1.0"
-serde_derive = "1.0"
-serde_json = "1.0"
+postgres = { version = "0.15" }
 users = "0.7"
 palette = "0.4"
 gif = "0.10"
