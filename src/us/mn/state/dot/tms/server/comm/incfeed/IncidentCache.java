@@ -41,7 +41,7 @@ import static us.mn.state.dot.tms.units.Distance.Units.MILES;
 public class IncidentCache {
 
 	/** Maximum distance to snap */
-	static private final Distance MAX_DIST = new Distance(0.25, MILES);
+	static private final Distance MAX_DIST = new Distance(0.5, MILES);
 
 	/** Threshold to check if an incident has moved (meters) */
 	static private final double MOVE_THRESHOLD_M = 50.0;
