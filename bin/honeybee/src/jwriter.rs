@@ -80,29 +80,26 @@ static TPIMS_DYN_SQL: &str = "SELECT row_to_json(r)::text FROM (\
     FROM parking_area_view \
 ) r";
 
-struct Request {
+struct Resource {
+    name: &'static str,
     sql: &'static str,
-    file_name: &'static str,
 }
 
-impl Request {
-    fn new(sql: &'static str, file_name: &'static str) -> Self {
-        Request { sql, file_name }
+impl Resource {
+    fn new(name: &'static str, sql: &'static str) -> Self {
+        Resource { name, sql }
     }
 }
 
-fn request(n: &str) -> Option<Request> {
+fn get_resource(n: &str) -> Option<Resource> {
     match n {
-        "camera_pub"    => Some(Request::new(CAMERA_SQL, "camera_pub.json")),
-        "dms_pub"       => Some(Request::new(DMS_SQL, "dms_pub.json")),
-        "dms_message"   => Some(Request::new(DMS_MSG_SQL, "dms_message.json")),
-        "incident"      => Some(Request::new(INCIDENT_SQL, "incident.json")),
-        "sign_config"   => Some(Request::new(SIGN_CONFIG_SQL,
-                                "sign_config.json")),
-        "TPIMS_static"  => Some(Request::new(TPIMS_STAT_SQL,
-                                "TPIMS_static.json")),
-        "TPIMS_dynamic" => Some(Request::new(TPIMS_DYN_SQL,
-                                "TPIMS_dynamic.json")),
+        "camera_pub"    => Some(Resource::new("camera_pub", CAMERA_SQL)),
+        "dms_pub"       => Some(Resource::new("dms_pub", DMS_SQL)),
+        "dms_message"   => Some(Resource::new("dms_message", DMS_MSG_SQL)),
+        "incident"      => Some(Resource::new("incident", INCIDENT_SQL)),
+        "sign_config"   => Some(Resource::new("sign_config", SIGN_CONFIG_SQL)),
+        "TPIMS_static"  => Some(Resource::new("TPIMS_static", TPIMS_STAT_SQL)),
+        "TPIMS_dynamic" => Some(Resource::new("TPIMS_dynamic", TPIMS_DYN_SQL)),
         _               => None,
     }
 }
@@ -125,11 +122,11 @@ pub fn start(uds: String) -> Result<(), Error> {
 fn query_json_file(conn: &Connection, n: &str)
     -> Result<(), Error>
 {
-    let jd = request(n);
+    let jd = get_resource(n);
     if let Some(jd) = jd {
-        let f = BufWriter::new(File::create(jd.file_name)?);
+        let f = BufWriter::new(File::create(jd.name)?);
         let r = query_json(&conn, jd.sql, f)?;
-        println!("wrote {} rows to {}", r, jd.file_name);
+        println!("wrote {} rows to {}", r, jd.name);
     } else {
         println!("unknown name {}", n);
     }
