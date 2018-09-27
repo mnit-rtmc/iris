@@ -53,7 +53,7 @@ static SIGN_CONFIG_SQL: &str = "SELECT row_to_json(r)::text FROM (\
 ) r";
 
 static TPIMS_STAT_SQL: &str = "SELECT row_to_json(r)::text FROM (\
-    SELECT site_id AS \"siteId\", to_char(time_stamp_static, \
+    SELECT site_id AS \"siteId\", to_char(time_stamp_static AT TIME ZONE 'UTC', \
            'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
            relevant_highway AS \"relevantHighway\", \
            reference_post AS \"referencePost\", exit_id AS \"exitId\", \
@@ -71,10 +71,10 @@ static TPIMS_STAT_SQL: &str = "SELECT row_to_json(r)::text FROM (\
 ) r";
 
 static TPIMS_DYN_SQL: &str = "SELECT row_to_json(r)::text FROM (\
-    SELECT site_id AS \"siteId\", to_char(time_stamp, \
+    SELECT site_id AS \"siteId\", to_char(time_stamp AT TIME ZONE 'UTC', \
            'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
-           to_char(time_stamp_static, 'YYYY-mm-dd\"T\"HH24:MI:SSZ') \
-           AS \"timeStampStatic\", \
+           to_char(time_stamp_static AT TIME ZONE 'UTC', \
+           'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStampStatic\", \
            reported_available AS \"reportedAvailable\", \
            trend, open, trust_data AS \"trustData\", capacity \
     FROM parking_area_view \
@@ -109,6 +109,11 @@ fn request(n: &str) -> Option<Request> {
 
 pub fn start(uds: String) -> Result<(), Error> {
     let conn = Connection::connect(uds, TlsMode::None)?;
+    // The postgresql crate sets the session time zone to UTC.
+    // We need to set it back to LOCAL time zone, so that row_to_json
+    // can format properly (for incidents, etc).
+    conn.execute("SET TIME ZONE 'US/Central'", &[])?;
+    // Initialize all the json files
     for r in ["camera", "dms", "dms_message", "incident", "sign_config",
               "TPIMS_static", "TPIMS_dynamic"].iter()
     {
@@ -149,7 +154,7 @@ fn query_json<T: Write>(conn: &Connection, q: &str, mut w: T)
 }
 
 fn notify_loop(conn: &Connection) -> Result<(), Error> {
-    &conn.execute("LISTEN tms", &[])?;
+    conn.execute("LISTEN tms", &[])?;
     let nots = conn.notifications();
     loop {
         for n in nots.blocking_iter().iterator() {
