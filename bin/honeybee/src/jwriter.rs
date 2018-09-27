@@ -93,8 +93,8 @@ impl Request {
 
 fn request(n: &str) -> Option<Request> {
     match n {
-        "camera"        => Some(Request::new(CAMERA_SQL, "camera.json")),
-        "dms"           => Some(Request::new(DMS_SQL, "dms.json")),
+        "camera_pub"    => Some(Request::new(CAMERA_SQL, "camera_pub.json")),
+        "dms_pub"       => Some(Request::new(DMS_SQL, "dms_pub.json")),
         "dms_message"   => Some(Request::new(DMS_MSG_SQL, "dms_message.json")),
         "incident"      => Some(Request::new(INCIDENT_SQL, "incident.json")),
         "sign_config"   => Some(Request::new(SIGN_CONFIG_SQL,
@@ -114,7 +114,7 @@ pub fn start(uds: String) -> Result<(), Error> {
     // can format properly (for incidents, etc).
     conn.execute("SET TIME ZONE 'US/Central'", &[])?;
     // Initialize all the json files
-    for r in ["camera", "dms", "dms_message", "incident", "sign_config",
+    for r in ["camera_pub", "dms_pub", "dms_message", "incident", "sign_config",
               "TPIMS_static", "TPIMS_dynamic"].iter()
     {
         query_json_file(&conn, r)?;
