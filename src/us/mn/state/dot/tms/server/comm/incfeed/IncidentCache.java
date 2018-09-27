@@ -202,7 +202,9 @@ public class IncidentCache {
 	/** Set an incident to cleared status */
 	private void setCleared(String id) {
 		IncidentImpl inc = lookupIncident(id);
-		if (inc != null && !inc.getCleared())
+		if (inc != null && !inc.getCleared()) {
 			inc.setClearedNotify(true);
+			inc_log.log("Incident cleared: " + id);
+		}
 	}
 }
