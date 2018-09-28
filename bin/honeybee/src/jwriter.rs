@@ -14,8 +14,14 @@
 use failure::Error;
 use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};
-use std::fs::File;
+use std::collections::HashSet;
+use std::fs::{File,rename};
+use std::path::PathBuf;
 use std::io::{BufWriter,Write};
+use std::time::{Duration,Instant};
+
+//static OUTPUT_DIR: &str = "/var/www/html/iris/";
+static OUTPUT_DIR: &str = "iris";
 
 static CAMERA_SQL: &str = "SELECT row_to_json(r)::text FROM (\
     SELECT name, publish, location, lat, lon \
@@ -98,8 +104,10 @@ fn get_resource(n: &str) -> Option<Resource> {
         "dms_message"   => Some(Resource::new("dms_message", DMS_MSG_SQL)),
         "incident"      => Some(Resource::new("incident", INCIDENT_SQL)),
         "sign_config"   => Some(Resource::new("sign_config", SIGN_CONFIG_SQL)),
-        "TPIMS_static"  => Some(Resource::new("TPIMS_static", TPIMS_STAT_SQL)),
-        "TPIMS_dynamic" => Some(Resource::new("TPIMS_dynamic", TPIMS_DYN_SQL)),
+        "parking_area_static"
+                        => Some(Resource::new("TPIMS_static", TPIMS_STAT_SQL)),
+        "parking_area_dynamic"
+                        => Some(Resource::new("TPIMS_dynamic", TPIMS_DYN_SQL)),
         _               => None,
     }
 }
@@ -110,27 +118,56 @@ pub fn start(uds: String) -> Result<(), Error> {
     // We need to set it back to LOCAL time zone, so that row_to_json
     // can format properly (for incidents, etc).
     conn.execute("SET TIME ZONE 'US/Central'", &[])?;
+    conn.execute("LISTEN tms", &[])?;
     // Initialize all the json files
     for r in ["camera_pub", "dms_pub", "dms_message", "incident", "sign_config",
-              "TPIMS_static", "TPIMS_dynamic"].iter()
+              "parking_area_static", "parking_area_dynamic"].iter()
     {
-        query_json_file(&conn, r)?;
+        query_json_timed(&conn, r)?;
     }
     notify_loop(&conn)
 }
 
-fn query_json_file(conn: &Connection, n: &str)
+fn query_json_timed(conn: &Connection, n: &str)
     -> Result<(), Error>
+{
+    let s = Instant::now();
+    let r = query_json_file(&conn, &n)?;
+    if let Some(r) = r {
+        println!("{}: wrote {} rows in {:?}", &n, r, s.elapsed());
+    } else {
+        println!("{}: unknown resource", &n);
+    }
+    Ok(())
+}
+
+fn query_json_file(conn: &Connection, n: &str)
+    -> Result<Option<u32>, Error>
 {
     let jd = get_resource(n);
     if let Some(jd) = jd {
-        let f = BufWriter::new(File::create(jd.name)?);
+        let tn = make_tmp_name(n);
+        let f = BufWriter::new(File::create(&tn)?);
         let r = query_json(&conn, jd.sql, f)?;
-        println!("wrote {} rows to {}", r, jd.name);
+        rename(tn, make_name(jd.name))?;
+        Ok(Some(r))
     } else {
-        println!("unknown name {}", n);
+        Ok(None)
     }
-    Ok(())
+}
+
+fn make_tmp_name(n: &str) -> PathBuf {
+    let mut nm = String::new();
+    nm.push('.');
+    nm.push_str(n);
+    make_name(&nm)
+}
+
+fn make_name(n: &str) -> PathBuf {
+    let mut t = PathBuf::new();
+    t.push(OUTPUT_DIR);
+    t.push(n);
+    t
 }
 
 fn query_json<T: Write>(conn: &Connection, q: &str, mut w: T)
@@ -151,12 +188,15 @@ fn query_json<T: Write>(conn: &Connection, q: &str, mut w: T)
 }
 
 fn notify_loop(conn: &Connection) -> Result<(), Error> {
-    conn.execute("LISTEN tms", &[])?;
     let nots = conn.notifications();
+    let mut s = HashSet::new();
     loop {
-        for n in nots.blocking_iter().iterator() {
+        for n in nots.timeout_iter(Duration::from_millis(300)).iterator() {
             let n = n?;
-            query_json_file(&conn, n.payload.as_ref())?;
+            s.insert(n.payload);
+        }
+        for n in s.drain() {
+            query_json_timed(&conn, &n)?;
         }
     }
 }
