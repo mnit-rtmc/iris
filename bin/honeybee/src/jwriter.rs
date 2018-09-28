@@ -95,6 +95,23 @@ impl Resource {
     fn new(name: &'static str, sql: &'static str) -> Self {
         Resource { name, sql }
     }
+
+    fn query_json<W: Write>(&self, conn: &Connection, mut w: W)
+        -> Result<u32, Error>
+    {
+        let mut c = 0;
+        w.write("[".as_bytes())?;
+        for row in &conn.query(self.sql, &[])? {
+            if c > 0 { w.write(",".as_bytes())?; }
+            w.write("\n".as_bytes())?;
+            let j: String = row.get(0);
+            w.write(j.as_bytes())?;
+            c += 1;
+        }
+        if c > 0 { w.write("\n".as_bytes())?; }
+        w.write("]\n".as_bytes())?;
+        Ok(c)
+    }
 }
 
 fn get_resource(n: &str) -> Option<Resource> {
@@ -146,9 +163,9 @@ fn query_json_file(conn: &Connection, n: &str)
 {
     let jd = get_resource(n);
     if let Some(jd) = jd {
-        let tn = make_tmp_name(n);
+        let tn = make_tmp_name(jd.name);
         let f = BufWriter::new(File::create(&tn)?);
-        let r = query_json(&conn, jd.sql, f)?;
+        let r = jd.query_json(&conn, f)?;
         rename(tn, make_name(jd.name))?;
         Ok(Some(r))
     } else {
@@ -168,23 +185,6 @@ fn make_name(n: &str) -> PathBuf {
     t.push(OUTPUT_DIR);
     t.push(n);
     t
-}
-
-fn query_json<T: Write>(conn: &Connection, q: &str, mut w: T)
-    -> Result<u32, Error>
-{
-    let mut c = 0;
-    w.write("[".as_bytes())?;
-    for row in &conn.query(q, &[])? {
-        if c > 0 { w.write(",".as_bytes())?; }
-        w.write("\n".as_bytes())?;
-        let j: String = row.get(0);
-        w.write(j.as_bytes())?;
-        c += 1;
-    }
-    if c > 0 { w.write("\n".as_bytes())?; }
-    w.write("]\n".as_bytes())?;
-    Ok(c)
 }
 
 fn notify_loop(conn: &Connection) -> Result<(), Error> {
