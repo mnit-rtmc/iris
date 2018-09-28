@@ -3,9 +3,14 @@ name = "honeybee"
 version = "0.3.0"
 
 [dependencies]
+#chrono = { version = "0.4", features = ["serde"] }
+serde = "1.0"
+serde_derive = "1.0"
+serde_json = "1.0"
 failure = "0.1"
 fallible-iterator = "0.1"
 postgres = { version = "0.15" }
+#postgres = { version = "0.15", features = ["with-chrono"] }
 users = "0.7"
 palette = "0.4"
 gif = "0.10"

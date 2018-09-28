@@ -19,6 +19,7 @@ use std::fs::{File,rename};
 use std::path::PathBuf;
 use std::io::{BufWriter,Write};
 use std::time::{Duration,Instant};
+use iris_req;
 
 //static OUTPUT_DIR: &str = "/var/www/html/iris/";
 static OUTPUT_DIR: &str = "iris";
@@ -125,6 +126,7 @@ fn get_resource(n: &str) -> Option<Resource> {
                         => Some(Resource::new("TPIMS_static", TPIMS_STAT_SQL)),
         "parking_area_dynamic"
                         => Some(Resource::new("TPIMS_dynamic", TPIMS_DYN_SQL)),
+        "font"          => Some(Resource::new("font", "")),
         _               => None,
     }
 }
@@ -138,7 +140,7 @@ pub fn start(uds: String) -> Result<(), Error> {
     conn.execute("LISTEN tms", &[])?;
     // Initialize all the json files
     for r in ["camera_pub", "dms_pub", "dms_message", "incident", "sign_config",
-              "parking_area_static", "parking_area_dynamic"].iter()
+              "parking_area_static", "parking_area_dynamic", "font"].iter()
     {
         query_json_timed(&conn, r)?;
     }
@@ -165,7 +167,11 @@ fn query_json_file(conn: &Connection, n: &str)
     if let Some(jd) = jd {
         let tn = make_tmp_name(jd.name);
         let f = BufWriter::new(File::create(&tn)?);
-        let r = jd.query_json(&conn, f)?;
+        let r = if n != "font" {
+            jd.query_json(&conn, f)?
+        } else {
+            iris_req::query_json_font(&conn, f)?
+        };
         rename(tn, make_name(jd.name))?;
         Ok(Some(r))
     } else {
