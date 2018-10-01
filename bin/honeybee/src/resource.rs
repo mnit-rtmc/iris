@@ -19,20 +19,6 @@ use std::fs::{File,rename};
 use std::path::PathBuf;
 use std::io::{BufWriter,Write};
 
-fn make_name(dir: &str, n: &str) -> PathBuf {
-    let mut t = PathBuf::new();
-    t.push(dir);
-    t.push(n);
-    t
-}
-
-fn make_tmp_name(dir: &str, n: &str) -> PathBuf {
-    let mut nm = String::new();
-    nm.push('.');
-    nm.push_str(n);
-    make_name(dir, &nm)
-}
-
 pub enum Resource {
     Simple(&'static str, &'static str),
     Font(&'static str),
@@ -235,14 +221,28 @@ impl Resource {
             Resource::Font(name)      => name,
         }
     }
+    fn make_name(&self, dir: &str) -> PathBuf {
+        let mut t = PathBuf::new();
+        t.push(dir);
+        t.push(self.name());
+        t
+    }
+    fn make_tmp_name(&self, dir: &str) -> PathBuf {
+        let mut n = String::new();
+        n.push('.');
+        n.push_str(self.name());
+        let mut t = PathBuf::new();
+        t.push(dir);
+        t.push(n);
+        t
+    }
     pub fn fetch_file(&self, conn: &Connection, dir: &str)
         -> Result<u32, Error>
     {
-        let n = self.name();
-        let tn = make_tmp_name(dir, n);
+        let tn = self.make_tmp_name(dir);
         let f = BufWriter::new(File::create(&tn)?);
         let c = self.fetch(conn, f)?;
-        rename(tn, make_name(dir, n))?;
+        rename(tn, self.make_name(dir))?;
         Ok(c)
     }
 }
