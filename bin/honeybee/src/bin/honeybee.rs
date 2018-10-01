@@ -14,12 +14,12 @@
 extern crate honeybee;
 extern crate users;
 
+use std::env;
 use honeybee::jwriter;
 use users::get_current_username;
 
 fn main() {
+    let host = env::args().nth(1);
     let username = get_current_username().expect("User name lookup error");
-    // Format path for unix domain socket
-    let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
-    jwriter::start(uds).unwrap();
+    jwriter::start(username, host).unwrap();
 }

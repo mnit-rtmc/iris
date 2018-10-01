@@ -19,6 +19,7 @@ use std::fs::{File,rename};
 use std::path::PathBuf;
 use std::io::{BufWriter,Write};
 
+#[derive(PartialEq,Eq,Hash)]
 pub enum Resource {
     Simple(&'static str, &'static str),
     Font(&'static str),
@@ -215,19 +216,19 @@ impl Resource {
             Resource::Font(_)        => query_font(conn, w),
         }
     }
-    fn name(&self) -> &str {
+    pub fn name(&self) -> &str {
         match self {
             Resource::Simple(name, _) => name,
             Resource::Font(name)      => name,
         }
     }
-    fn make_name(&self, dir: &str) -> PathBuf {
+    pub fn make_name(&self, dir: &str) -> PathBuf {
         let mut t = PathBuf::new();
         t.push(dir);
         t.push(self.name());
         t
     }
-    fn make_tmp_name(&self, dir: &str) -> PathBuf {
+    pub fn make_tmp_name(&self, dir: &str) -> PathBuf {
         let mut n = String::new();
         n.push('.');
         n.push_str(self.name());

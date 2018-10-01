@@ -5,6 +5,7 @@ extern crate serde_json;
 extern crate failure;
 extern crate fallible_iterator;
 extern crate postgres;
+extern crate ssh2;
 
 pub mod jwriter;
 pub mod multi;

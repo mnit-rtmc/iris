@@ -11,6 +11,7 @@ failure = "0.1"
 fallible-iterator = "0.1"
 postgres = { version = "0.15" }
 #postgres = { version = "0.15", features = ["with-chrono"] }
+ssh2 = "0.3"
 users = "0.7"
 palette = "0.4"
 gif = "0.10"
