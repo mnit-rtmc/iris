@@ -16,7 +16,8 @@ use fallible_iterator::FallibleIterator;
 use postgres::{Connection, TlsMode};
 use ssh2::Session;
 use std::collections::HashSet;
-use std::io::Write;
+use std::fs::File;
+use std::io;
 use std::net::TcpStream;
 use std::sync::mpsc::{channel,Receiver,Sender};
 use std::thread;
@@ -93,9 +94,13 @@ impl SshSession {
     }
     fn scp_file(&self, r: &Resource) -> Result<(), Error> {
         let p = r.make_name(OUTPUT_DIR);
-        let mut f = self.s.scp_send(p.as_path(), 0o644, 9, None)?;
-        f.write(b"test ")?;
-        f.write(b"SCP\n")?;
+        let mut fi = File::open(&p)?;
+        let m = fi.metadata()?;
+        let mut fo = self.s.scp_send(p.as_path(), 0o644, m.len(), None)?;
+        let c = io::copy(&mut fi, &mut fo)?;
+        if c != m.len() {
+            println!("    {}: length mismatch {} != {}", r.name(), c, m.len());
+        }
         Ok(())
     }
 }
