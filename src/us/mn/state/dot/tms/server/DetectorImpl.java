@@ -951,6 +951,14 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		last_scans = v_log.getOccupancy().as60HzScans();
 		last_speed = v_log.getSpeed();
 		v_log.binEventSamples();
+		// assume 30 seconds
+		chatter.update(30, last_volume > MAX_VOLUME);
+		if (chatter.checkLogging(30))
+			logEvent(EventType.DET_CHATTER);
+		no_hits.update(30, last_volume == 0);
+		if (no_hits.checkLogging(30))
+			logEvent(EventType.DET_NO_HITS);
+		updateAutoFail();
 	}
 
 	/** Write a single detector as an XML element */
