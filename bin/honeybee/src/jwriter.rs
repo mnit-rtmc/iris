@@ -19,6 +19,7 @@ use std::collections::HashSet;
 use std::fs::File;
 use std::io;
 use std::net::TcpStream;
+use std::path::PathBuf;
 use std::sync::mpsc::{channel,Receiver,Sender};
 use std::thread;
 use std::time::{Duration,Instant};
@@ -60,7 +61,16 @@ impl SshSession {
         let tcp = TcpStream::connect(h)?;
         let mut s = Session::new().unwrap();
         s.handshake(&tcp)?;
-        s.userauth_agent(username)?;
+        // Try agent first, since we don't have a pass-phrase
+        if let Err(_) = s.userauth_agent(username) {
+            let mut key = PathBuf::new();
+            key.push("/home");
+            key.push(username);
+            key.push(".ssh");
+            key.push("id_rsa");
+            // Since agent failed, try private key with no pass-phrase
+            s.userauth_pubkey_file(username, None, &key, None)?;
+        }
         Ok(SshSession { tcp, s })
     }
     fn do_session(&self, rx: &Receiver<Resource>,
