@@ -111,7 +111,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.81.0
+database_version	4.82.0
 detector_auto_fail_enable	true
 dict_allowed_scheme	0
 dict_banned_scheme	0
@@ -1763,6 +1763,7 @@ CREATE TABLE iris._detector (
 	lane_number SMALLINT NOT NULL,
 	abandoned BOOLEAN NOT NULL,
 	force_fail BOOLEAN NOT NULL,
+	auto_fail BOOLEAN NOT NULL,
 	field_length REAL NOT NULL,
 	fake VARCHAR(32),
 	notes VARCHAR(32)
@@ -1771,10 +1772,11 @@ CREATE TABLE iris._detector (
 ALTER TABLE iris._detector ADD CONSTRAINT _detector_fkey
 	FOREIGN KEY (name) REFERENCES iris._device_io(name) ON DELETE CASCADE;
 
-CREATE VIEW iris.detector AS SELECT
-	det.name, controller, pin, r_node, lane_type, lane_number, abandoned,
-	force_fail, field_length, fake, notes
-	FROM iris._detector det JOIN iris._device_io d ON det.name = d.name;
+CREATE VIEW iris.detector AS
+	SELECT det.name, controller, pin, r_node, lane_type, lane_number,
+	       abandoned, force_fail, auto_fail, field_length, fake, notes
+	FROM iris._detector det
+	JOIN iris._device_io d ON det.name = d.name;
 
 CREATE FUNCTION iris.detector_insert() RETURNS TRIGGER AS
 	$detector_insert$
@@ -1783,10 +1785,10 @@ BEGIN
 	     VALUES (NEW.name, NEW.controller, NEW.pin);
 	INSERT INTO iris._detector
 	            (name, r_node, lane_type, lane_number, abandoned,
-	             force_fail, field_length, fake, notes)
+	             force_fail, auto_fail, field_length, fake, notes)
 	     VALUES (NEW.name, NEW.r_node, NEW.lane_type, NEW.lane_number,
-	             NEW.abandoned, NEW.force_fail, NEW.field_length, NEW.fake,
-	             NEW.notes);
+	             NEW.abandoned, NEW.force_fail, NEW.auto_fail,
+	             NEW.field_length, NEW.fake, NEW.notes);
 	RETURN NEW;
 END;
 $detector_insert$ LANGUAGE plpgsql;
@@ -1808,6 +1810,7 @@ BEGIN
 	       lane_number = NEW.lane_number,
 	       abandoned = NEW.abandoned,
 	       force_fail = NEW.force_fail,
+	       auto_fail = NEW.auto_fail,
 	       field_length = NEW.field_length,
 	       fake = NEW.fake,
 	       notes = NEW.notes
@@ -1892,14 +1895,6 @@ CREATE TABLE event.detector_event (
 	device_id VARCHAR(20) REFERENCES iris._detector(name) ON DELETE CASCADE
 );
 
-CREATE VIEW detector_fail_view AS
-	SELECT DISTINCT ON (device_id) device_id, description AS fail_reason,
-	                               event_date AS fail_date
-	FROM event.detector_event de
-	JOIN event.event_description ed ON de.event_desc_id = ed.event_desc_id
-	ORDER BY device_id, event_id DESC;
-GRANT SELECT ON detector_fail_view TO PUBLIC;
-
 CREATE VIEW detector_view AS
 	SELECT d.name, d.r_node, d.controller, c.comm_link, c.drop_id, d.pin,
 	       iris.detector_label(l.rd, l.rdir, l.xst, l.cross_dir, l.xmod,
@@ -1907,10 +1902,8 @@ CREATE VIEW detector_view AS
 	       rnd.geo_loc, l.roadway, l.road_dir, l.cross_mod, l.cross_street,
 	       l.cross_dir, d.lane_number, d.field_length,
 	       ln.description AS lane_type, d.abandoned, d.force_fail,
-	       df.fail_reason, df.fail_date, c.condition, d.fake, d.notes
-	FROM (iris.detector d
-	LEFT OUTER JOIN detector_fail_view df
-		ON d.name = df.device_id AND force_fail = 't')
+	       d.auto_fail, c.condition, d.fake, d.notes
+	FROM iris.detector d
 	LEFT JOIN iris.r_node rnd ON d.r_node = rnd.name
 	LEFT JOIN geo_loc_view l ON rnd.geo_loc = l.name
 	LEFT JOIN iris.lane_type ln ON d.lane_type = ln.id
@@ -1923,6 +1916,13 @@ CREATE VIEW detector_event_view AS
 	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
 	JOIN detector_label_view dl ON e.device_id = dl.det_id;
 GRANT SELECT ON detector_event_view TO PUBLIC;
+
+CREATE VIEW detector_auto_fail_view AS
+	SELECT device_id, label, ed.description, count(*)
+	FROM event.detector_event e
+	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
+	JOIN detector_label_view dl ON e.device_id = dl.det_id
+	GROUP BY device_id, label, ed.description;
 
 --
 -- GPS
