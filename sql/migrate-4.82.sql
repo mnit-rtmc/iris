@@ -126,4 +126,7 @@ CREATE VIEW detector_auto_fail_view AS
 	JOIN detector_label_view dl ON e.device_id = dl.det_id
 	GROUP BY device_id, label, ed.description;
 
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('detector_event_purge_days', '90');
+
 COMMIT;

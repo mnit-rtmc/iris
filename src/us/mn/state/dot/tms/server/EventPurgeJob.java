@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.ActionPlanEvent;
 import us.mn.state.dot.tms.server.event.CameraSwitchEvent;
 import us.mn.state.dot.tms.server.event.CommEvent;
+import us.mn.state.dot.tms.server.event.DetFailEvent;
 import us.mn.state.dot.tms.server.event.MeterEvent;
 import us.mn.state.dot.tms.server.event.TravelTimeEvent;
 
@@ -42,6 +43,7 @@ public class EventPurgeJob extends Job {
 		ActionPlanEvent.purgeRecords();
 		CameraSwitchEvent.purgeRecords();
 		CommEvent.purgeRecords();
+		DetFailEvent.purgeRecords();
 		MeterEvent.purgeRecords();
 		TravelTimeEvent.purgeRecords();
 	}

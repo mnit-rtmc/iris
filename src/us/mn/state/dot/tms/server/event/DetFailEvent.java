@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.server.event;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
  * This is a class for logging detector fail events to a database.
@@ -24,6 +26,24 @@ import us.mn.state.dot.tms.EventType;
  * @author Douglas Lau
  */
 public class DetFailEvent extends BaseEvent {
+
+	/** Database table name */
+	static private final String TABLE = "event.detector_event";
+
+	/** Get detector event purge threshold (days) */
+	static public int getDetectorEventPurgeDays() {
+		return SystemAttrEnum.DETECTOR_EVENT_PURGE_DAYS.getInt();
+	}
+
+	/** Purge old records */
+	static public void purgeRecords() throws TMSException {
+		int age = getDetectorEventPurgeDays();
+		if (store != null && age >= 0) {
+			store.update("DELETE FROM " + TABLE +
+				" WHERE event_date < now() - '" + age +
+				" days'::interval;");
+		}
+	}
 
 	/** Device ID (if device specific) */
 	protected final String device_id;
@@ -38,11 +58,13 @@ public class DetFailEvent extends BaseEvent {
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
-		return "event.detector_event";
+		return TABLE;
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_desc_id", event_type.id);
