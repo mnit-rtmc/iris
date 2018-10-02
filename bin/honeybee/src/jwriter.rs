@@ -137,7 +137,7 @@ fn db_thread(uds: String, tx: Sender<Resource>) -> Result<(), Error> {
     conn.execute("LISTEN tms", &[])?;
     // Initialize all the resources
     for r in ["camera_pub", "dms_pub", "dms_message", "incident", "sign_config",
-              "parking_area_static", "parking_area_dynamic", "font"].iter()
+              "parking_area", "parking_area_dynamic", "font"].iter()
     {
         fetch_resource_timed(&conn, &tx, r)?;
     }

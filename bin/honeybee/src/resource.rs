@@ -255,8 +255,10 @@ pub fn lookup_resource(n: &str) -> Option<Resource> {
         "dms_message"          => Some(DMS_MSG_RES),
         "incident"             => Some(INCIDENT_RES),
         "sign_config"          => Some(SIGN_CONFIG_RES),
-        "parking_area_static"  => Some(TPIMS_STAT_RES),
-        "parking_area_dynamic" => Some(TPIMS_DYN_RES),
+        "parking_area" |
+        "TPIMS_static"         => Some(TPIMS_STAT_RES),
+        "parking_area_dynamic"|
+        "TPIMS_dynamic"        => Some(TPIMS_DYN_RES),
         "font"                 => Some(FONT_RES),
         _                      => None,
     }
