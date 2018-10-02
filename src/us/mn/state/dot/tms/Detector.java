@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2009  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -53,6 +53,9 @@ public interface Detector extends Device {
 
 	/** Get the Force Fail status */
 	boolean getForceFail();
+
+	/** Get the Auto Fail status */
+	boolean getAutoFail();
 
 	/** Set the average field length (feet) */
 	void setFieldLength(float f);

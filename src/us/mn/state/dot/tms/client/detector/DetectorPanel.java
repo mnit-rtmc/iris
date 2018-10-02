@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2017  Minnesota Department of Transportation
+ * Copyright (C) 2010-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -89,10 +89,15 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 	});
 
 	/** Force fail check box */
-	private final JCheckBox fail_chk = new JCheckBox(new DAction(null) {
+	private final JCheckBox force_chk = new JCheckBox(new DAction(null) {
 		protected void do_perform(Detector d) {
-			d.setForceFail(fail_chk.isSelected());
+			d.setForceFail(force_chk.isSelected());
 		}
+	});
+
+	/** Auto fail check box */
+	private final JCheckBox auto_chk = new JCheckBox(new DAction(null) {
+		protected void do_perform(Detector d) { }
 	});
 
 	/** Spinner for field length */
@@ -169,7 +174,9 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		add("detector.abandoned");
 		add(aband_chk);
 		add("detector.force.fail");
-		add(fail_chk, Stretch.LAST);
+		add(force_chk, Stretch.LAST);
+		add("detector.auto.fail");
+		add(auto_chk, Stretch.LAST);
 		add("detector.field.len");
 		add(field_spn, Stretch.LAST);
 		add("detector.fake");
@@ -280,7 +287,8 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		type_act.setEnabled(session.canWrite(d, "laneType"));
 		lane_spn.setEnabled(session.canWrite(d, "laneNumber"));
 		aband_chk.setEnabled(session.canWrite(d, "abandoned"));
-		fail_chk.setEnabled(session.canWrite(d, "forceFail"));
+		force_chk.setEnabled(session.canWrite(d, "forceFail"));
+		auto_chk.setEnabled(false);
 		field_spn.setEnabled(session.canWrite(d, "fieldLength"));
 		fake_txt.setEnabled(session.canWrite(d, "fake"));
 		note_txt.setEnabled(session.canWrite(d, "notes"));
@@ -307,7 +315,9 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		if (a == null || a.equals("abandoned"))
 			aband_chk.setSelected(d.getAbandoned());
 		if (a == null || a.equals("forceFail"))
-			fail_chk.setSelected(d.getForceFail());
+			force_chk.setSelected(d.getForceFail());
+		if (a == null || a.equals("autoFail"))
+			auto_chk.setSelected(d.getAutoFail());
 		if (a == null || a.equals("fieldLength"))
 			field_spn.setValue(d.getFieldLength());
 		if (a == null || a.equals("fake"))
@@ -326,8 +336,10 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		lane_spn.setValue(0);
 		aband_chk.setEnabled(false);
 		aband_chk.setSelected(false);
-		fail_chk.setEnabled(false);
-		fail_chk.setSelected(false);
+		force_chk.setEnabled(false);
+		force_chk.setSelected(false);
+		auto_chk.setEnabled(false);
+		auto_chk.setSelected(false);
 		field_spn.setEnabled(false);
 		field_spn.setValue(22);
 		fake_txt.setEnabled(false);

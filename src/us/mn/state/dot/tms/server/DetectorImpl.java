@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server;
 import java.io.IOException;
 import java.io.Writer;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -40,6 +41,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
 import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.SECONDS;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.units.Distance;
@@ -54,15 +56,83 @@ import us.mn.state.dot.tms.server.event.DetFailEvent;
  */
 public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
+	/** Is detector auto-fail enabled? */
+	static private boolean isDetectorAutoFailEnabled() {
+		return SystemAttrEnum.DETECTOR_AUTO_FAIL_ENABLE.getBoolean();
+	}
+
 	/** Default average detector field length (feet) */
 	static private final float DEFAULT_FIELD_FT = 22.0f;
 
 	/** Valid density threshold for speed calculation */
 	static private final float DENSITY_THRESHOLD = 1.2f;
 
+	/** Auto fail counter */
+	static private class AutoFailCounter {
+		private final int trigger_threshold_sec;
+		private final int clear_threshold_sec;
+		private boolean state;
+		private int state_sec;
+		private boolean triggered;
+		private int logging_sec;
+		private AutoFailCounter(Interval t, Interval c) {
+			trigger_threshold_sec = t.round(SECONDS);
+			clear_threshold_sec = c.round(SECONDS);
+			state = false;
+			state_sec = 0;
+			triggered = false;
+			logging_sec = 0;
+		}
+		private void update(int s, boolean st) {
+			if (st != state) {
+				state_sec = 0;
+				state = st;
+			}
+			state_sec += s;
+			triggered = updateTriggered();
+		}
+		private boolean updateTriggered() {
+			return (state) ? checkTriggered() : checkTriggerHang();
+		}
+		private boolean checkTriggered() {
+			return triggered || state_sec > trigger_threshold_sec;
+		}
+		private boolean checkTriggerHang() {
+			return triggered && state_sec < clear_threshold_sec;
+		}
+		private boolean checkLogging(int s) {
+			if (triggered) {
+				boolean first = (logging_sec == 0);
+				logging_sec += s;
+				boolean log = first || checkLoggingThreshold();
+				if (log)
+					logging_sec = s;
+				return log;
+			} else {
+				logging_sec = 0;
+				return false;
+			}
+		}
+		private boolean checkLoggingThreshold() {
+			return logging_sec >= LOG_THRESHOLD.round(SECONDS);
+		}
+	}
+
+	/** Logging threshold */
+	static private final Interval LOG_THRESHOLD =
+		new Interval(1, Interval.Units.HOURS);
+
 	/** Volume "chatter" threshold */
 	static private final Interval CHATTER_THRESHOLD =
-		new Interval(1, Interval.Units.MINUTES);
+		new Interval(30, SECONDS);
+
+	/** Clear threshold */
+	static private final Interval CLEAR_THRESHOLD =
+		new Interval(24, Interval.Units.HOURS);
+
+	/** No hits clear threshold */
+	static private final Interval HIT_CLEAR_THRESHOLD =
+		new Interval(30, SECONDS);
 
 	/** Maximum "realistic" volume for a 30-second sample */
 	static private final int MAX_VOLUME = 37;
@@ -84,24 +154,12 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, DetectorImpl.class);
 		store.query("SELECT name, controller, pin, r_node, lane_type, "+
-			"lane_number, abandoned, force_fail, field_length, " +
-			"fake, notes FROM iris." + SONAR_TYPE + ";",
-			new ResultFactory()
+			"lane_number, abandoned, force_fail, auto_fail, " +
+			"field_length, fake, notes FROM iris." + SONAR_TYPE +
+			";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				namespace.addObject(new DetectorImpl(namespace,
-					row.getString(1),	// name
-					row.getString(2),	// controller
-					row.getInt(3),		// pin
-					row.getString(4),	// r_node
-					row.getShort(5),	// lane_type
-					row.getShort(6),	// lane_number
-					row.getBoolean(7),	// abandoned
-					row.getBoolean(8),	// force_fail
-					row.getFloat(9),	// field_length
-					row.getString(10),	// fake
-					row.getString(11)	// notes
-				));
+				namespace.addObject(new DetectorImpl(row));
 			}
 		});
 		initAllTransients();
@@ -132,6 +190,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		map.put("lane_number", lane_number);
 		map.put("abandoned", abandoned);
 		map.put("force_fail", force_fail);
+		map.put("auto_fail", auto_fail);
 		map.put("field_length", field_length);
 		map.put("fake", fake);
 		map.put("notes", notes);
@@ -169,9 +228,35 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Create a detector */
-	private DetectorImpl(String n, ControllerImpl c, int p, R_NodeImpl r,
-		short lt, short ln, boolean a, boolean ff, float fl, String f,
+	private DetectorImpl(ResultSet row) throws SQLException, TMSException {
+		this(row.getString(1),  // name
+		     row.getString(2),  // controller
+		     row.getInt(3),     // pin
+		     row.getString(4),  // r_node
+		     row.getShort(5),   // lane_type
+		     row.getShort(6),   // lane_number
+		     row.getBoolean(7), // abandoned
+		     row.getBoolean(8), // force_fail
+		     row.getBoolean(9), // auto_fail
+		     row.getFloat(10),  // field_length
+		     row.getString(11), // fake
+		     row.getString(12)  // notes
+		);
+	}
+
+	/** Create a detector */
+	private DetectorImpl(String n, String c, int p, String r, short lt,
+		short ln, boolean a, boolean ff, boolean af, float fl, String f,
 		String nt)
+	{
+		this(n, lookupController(c), p, lookupR_Node(r), lt, ln, a, ff,
+		     af, fl, f, nt);
+	}
+
+	/** Create a detector */
+	private DetectorImpl(String n, ControllerImpl c, int p, R_NodeImpl r,
+		short lt, short ln, boolean a, boolean ff, boolean af, float fl,
+		String f, String nt)
 	{
 		super(n, c, p, nt);
 		r_node = r;
@@ -179,6 +264,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		lane_number = ln;
 		abandoned = a;
 		force_fail = ff;
+		auto_fail = af;
 		field_length = fl;
 		fake = f;
 		vol_cache = new PeriodicSampleCache(PeriodicSampleType.VOLUME);
@@ -195,16 +281,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		v_log = new VehicleEventLog(n);
 	}
 
-	/** Create a detector */
-	private DetectorImpl(Namespace ns, String n, String c, int p,
-		String r, short lt, short ln, boolean a, boolean ff, float fl,
-		String f, String nt)
-	{
-		this(n,(ControllerImpl)ns.lookupObject(Controller.SONAR_TYPE,c),
-		     p, (R_NodeImpl) ns.lookupObject(R_Node.SONAR_TYPE, r),
-		     lt, ln, a, ff, fl, f, nt);
-	}
-
 	/** Initialize the transient state */
 	@Override
 	public void initTransients() {
@@ -218,6 +294,38 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			logError("Invalid FAKE Detector (" + fake + ")");
 			fake = null;
 		}
+	}
+
+	/** Auto fail counter for no hits (flow) */
+	private transient AutoFailCounter no_hits =
+		new AutoFailCounter(getNoHitThreshold(), HIT_CLEAR_THRESHOLD);
+
+	/** Auto fail counter for chattering */
+	private transient AutoFailCounter chatter =
+		new AutoFailCounter(getChatterThreshold(), CLEAR_THRESHOLD);
+
+	/** Auto fail counter for locked on (scans) */
+	private transient AutoFailCounter locked_on =
+		new AutoFailCounter(getLockedOnThreshold(), CLEAR_THRESHOLD);
+
+	/** Get the volume "no hit" threshold */
+	private Interval getNoHitThreshold() {
+		if (isRamp()) {
+			GeoLoc loc = lookupGeoLoc();
+			if (loc != null && isReversibleLocationHack(loc))
+				return new Interval(72, Interval.Units.HOURS);
+		}
+		return lane_type.no_hit_threshold;
+	}
+
+	/** Get the volume "chatter" threshold */
+	private Interval getChatterThreshold() {
+		return CHATTER_THRESHOLD;
+	}
+
+	/** Get the scan "locked on" threshold */
+	private Interval getLockedOnThreshold() {
+		return lane_type.lock_on_threshold;
 	}
 
 	/** Destroy an object */
@@ -272,6 +380,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	@Override
 	public void setLaneType(short t) {
 		lane_type = LaneType.fromOrdinal(t);
+		// reset auto fail counters
+		no_hits = new AutoFailCounter(getNoHitThreshold(),
+			HIT_CLEAR_THRESHOLD);
+		chatter = new AutoFailCounter(getChatterThreshold(),
+			CLEAR_THRESHOLD);
+		locked_on = new AutoFailCounter(getLockedOnThreshold(),
+			CLEAR_THRESHOLD);
 	}
 
 	/** Set the lane type */
@@ -408,10 +523,41 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return force_fail;
 	}
 
+	/** Auto Fail status flag */
+	private boolean auto_fail;
+
+	/** Update the auto fail status */
+	private void updateAutoFail() {
+		boolean af = no_hits.triggered
+		          || chatter.triggered
+		          || locked_on.triggered;
+		setAutoFailNotify(af && isDetectorAutoFailEnabled());
+	}
+
+	/** Set the Auto Fail status */
+	private void setAutoFailNotify(boolean f) {
+		if (f != auto_fail) {
+			try {
+				store.update(this, "auto_fail", f);
+				auto_fail = f;
+				notifyAttribute("autoFail");
+			}
+			catch (TMSException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	/** Get the Auto Fail status */
+	@Override
+	public boolean getAutoFail() {
+		return auto_fail;
+	}
+
 	/** Check if the detector is currently 'failed' */
 	@Override
 	public boolean isFailed() {
-		return force_fail || super.isFailed();
+		return force_fail || auto_fail || super.isFailed();
 	}
 
 	/** Get the active status */
@@ -501,15 +647,6 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	public String getFake() {
 		return fake;
 	}
-
-	/** Accumulator for number of seconds with no hits (volume) */
-	private transient int no_hits = 0;
-
-	/** Accumulator for number of seconds chattering */
-	private transient int chatter = 0;
-
-	/** Accumulator for number of seconds locked on (scans) */
-	private transient int locked_on = 0;
 
 	/** Periodic volume sample cache */
 	private transient final PeriodicSampleCache vol_cache;
@@ -664,29 +801,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			return MISSING_DATA;
 	}
 
-	/** Handle a detector malfunction */
-	private void malfunction(EventType event_type) {
-		if (force_fail)
-			return;
-		if (isDetectorAutoFailEnabled())
-			doForceFail();
+	/** Log a detector event */
+	private void logEvent(EventType event_type) {
 		logEvent(new DetFailEvent(event_type, getName()));
-	}
-
-	/** Is detector auto-fail enabled? */
-	private boolean isDetectorAutoFailEnabled() {
-		return SystemAttrEnum.DETECTOR_AUTO_FAIL_ENABLE.getBoolean();
-	}
-
-	/** Force fail the detector */
-	private void doForceFail() {
-		try {
-			doSetForceFail(true);
-			notifyAttribute("forceFail");
-		}
-		catch (TMSException e) {
-			e.printStackTrace();
-		}
 	}
 
 	/** Store one volume sample for this detector.
@@ -729,33 +846,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Test a volume sample with error detecting algorithms */
 	private void testVolume(PeriodicSample vs) {
-		if (vs.value > MAX_VOLUME) {
-			chatter += vs.period;
-			if (chatter > getChatterThreshold().seconds())
-				malfunction(EventType.DET_CHATTER);
-		} else
-			chatter = 0;
-		if (vs.value == 0) {
-			no_hits += vs.period;
-			if (no_hits > getNoHitThreshold().seconds())
-				malfunction(EventType.DET_NO_HITS);
-		} else
-			no_hits = 0;
-	}
-
-	/** Get the volume "chatter" threshold */
-	private Interval getChatterThreshold() {
-		return CHATTER_THRESHOLD;
-	}
-
-	/** Get the volume "no hit" threshold */
-	private Interval getNoHitThreshold() {
-		if (isRamp()) {
-			GeoLoc loc = lookupGeoLoc();
-			if (loc != null && isReversibleLocationHack(loc))
-				return new Interval(72, Interval.Units.HOURS);
-		}
-		return lane_type.no_hit_threshold;
+		chatter.update(vs.period, vs.value > MAX_VOLUME);
+		if (chatter.checkLogging(vs.period))
+			logEvent(EventType.DET_CHATTER);
+		no_hits.update(vs.period, vs.value == 0);
+		if (no_hits.checkLogging(vs.period))
+			logEvent(EventType.DET_NO_HITS);
+		updateAutoFail();
 	}
 
 	/** Reversible lane name */
@@ -786,22 +883,16 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Test an occupancy sample with error detecting algorithms */
 	private void testScans(OccupancySample occ) {
-		if (occ.value >= OccupancySample.MAX) {
-			locked_on += occ.period;
-			if (locked_on > getLockedOnThreshold().seconds())
-				malfunction(EventType.DET_LOCKED_ON);
-		} else if (occ.value > 0) {
-			// Locked-on counter should be cleared only with good
-			// non-zero samples.  This helps when the duration of
-			// occupancy spikes is shorter than the threshold time
-			// and interspersed with zeroes.
-			locked_on = 0;
-		}
-	}
-
-	/** Get the scan "locked on" threshold */
-	private Interval getLockedOnThreshold() {
-		return lane_type.lock_on_threshold;
+		boolean lock = occ.value >= OccupancySample.MAX;
+		// Locked-on counter should be cleared only with good
+		// non-zero samples.  This helps when the duration of
+		// occupancy spikes is shorter than the threshold time
+		// and interspersed with zeroes.
+		boolean hold = locked_on.triggered && (occ.value == 0);
+		locked_on.update(occ.period, lock || hold);
+		if (locked_on.checkLogging(occ.period))
+			logEvent(EventType.DET_LOCKED_ON);
+		updateAutoFail();
 	}
 
 	/** Store one speed sample for this detector.

@@ -148,6 +148,12 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		return (so instanceof GeoLocImpl) ? (GeoLocImpl) so : null;
 	}
 
+	/** Lookup an r_node */
+	static protected R_NodeImpl lookupR_Node(String name) {
+		SonarObject so = lookupObject(R_NodeImpl.SONAR_TYPE, name);
+		return (so instanceof R_NodeImpl) ? (R_NodeImpl) so : null;
+	}
+
 	/** Lookup a cabinet */
 	static protected CabinetImpl lookupCabinet(String name) {
 		SonarObject so = lookupObject(CabinetImpl.SONAR_TYPE, name);
