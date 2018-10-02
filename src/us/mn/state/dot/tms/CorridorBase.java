@@ -470,6 +470,8 @@ public class CorridorBase<T extends R_Node> implements Iterable<T> {
 		GeoLoc lp = null;	/* previous location */
 		T np = null;		/* previous node */
 		for (T n: r_nodes) {
+			if (!n.getActive())
+				continue;
 			if (R_NodeHelper.isContinuityBreak(n)) {
 				np = null;
 				lp = null;
