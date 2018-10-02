@@ -13,7 +13,7 @@
  */
 use failure::Error;
 use fallible_iterator::FallibleIterator;
-use postgres::{Connection, TlsMode};
+use postgres::{Connection,TlsMode};
 use ssh2::Session;
 use std::collections::HashSet;
 use std::fs::File;
@@ -25,8 +25,7 @@ use std::thread;
 use std::time::{Duration,Instant};
 use resource::{lookup_resource,Resource};
 
-//static OUTPUT_DIR: &str = "/var/www/html/iris/";
-static OUTPUT_DIR: &str = "iris";
+static OUTPUT_DIR: &str = "/var/www/html/iris/";
 
 pub fn start(username: String, host: Option<String>) -> Result<(), Error> {
     // Format path for unix domain socket
@@ -88,6 +87,7 @@ impl SshSession {
             }
             if let Err(e) = self.copy_all(&mut ns) {
                 println!("scp_file error: {}", e);
+                thread::sleep(Duration::from_secs(10));
                 return;
             }
         }
