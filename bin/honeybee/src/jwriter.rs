@@ -32,7 +32,7 @@ pub fn start(username: String, host: Option<String>) -> Result<(), Error> {
         db_thread(uds, tx).unwrap();
     });
     if let Some(h) = host {
-        mirror::start(h, username, rx);
+        mirror::start(&h, &username, rx);
     } else {
         null_thread(rx);
     }

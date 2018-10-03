@@ -18,9 +18,32 @@ use std::fs::File;
 use std::io;
 use std::net::TcpStream;
 use std::path::PathBuf;
-use std::sync::mpsc::Receiver;
+use std::sync::mpsc::{Receiver,RecvError};
 use std::thread;
 use std::time::{Duration,Instant};
+
+struct PathSet {
+    set : HashSet<PathBuf>,
+}
+
+impl PathSet {
+    fn new() -> Self {
+        let set = HashSet::new();
+        PathSet { set }
+    }
+    fn receive_pending(&mut self, rx: &Receiver<PathBuf>)
+        -> Result<(), RecvError>
+    {
+        if self.set.is_empty() {
+            let p = rx.recv()?;
+            self.set.insert(p);
+        }
+        for p in rx.try_iter() {
+            self.set.insert(p);
+        }
+        Ok(())
+    }
+}
 
 struct SshSession {
     _tcp   : TcpStream, // must remain in scope as long as Session
@@ -42,39 +65,32 @@ fn authenticate(session: Session, username: &str) -> Result<Session, Error> {
 }
 
 impl SshSession {
-    fn new(username: &str, h: &str) -> Result<Self, Error> {
-        let tcp = TcpStream::connect(h)?;
+    fn new(host: &str, username: &str) -> Result<Self, Error> {
+        let tcp = TcpStream::connect(host)?;
         let mut session = Session::new().unwrap();
         session.handshake(&tcp)?;
         session = authenticate(session, username)?;
         Ok(SshSession { _tcp: tcp, session })
     }
-    fn do_session(&self, rx: &Receiver<PathBuf>, mut ns: &mut HashSet<PathBuf>){
+    fn do_session(&self, rx: &Receiver<PathBuf>, mut ps: &mut PathSet)
+        -> Result<(), RecvError>
+    {
         loop {
-            if ns.is_empty() {
-                match rx.recv() {
-                    Ok(r)  => { ns.insert(r); },
-                    Err(_) => { return; },
-                }
-            }
-            for r in rx.try_iter() {
-                ns.insert(r);
-            }
-            if let Err(e) = self.copy_all(&mut ns) {
+            ps.receive_pending(rx)?;
+            if let Err(e) = self.copy_all(&mut ps) {
                 println!("scp_file error: {}", e);
-                thread::sleep(Duration::from_secs(10));
-                return;
+                return Ok(());
             }
         }
     }
-    fn copy_all(&self, ns: &mut HashSet<PathBuf>) -> Result<(), Error> {
-        for p in ns.iter() {
+    fn copy_all(&self, ps: &mut PathSet) -> Result<(), Error> {
+        for p in ps.set.iter() {
             let t = Instant::now();
             self.scp_file(&p)?;
             println!("    {:?}: copied in {:?}", p, t.elapsed());
         }
         // All copied successfully
-        ns.clear();
+        ps.set.clear();
         Ok(())
     }
     fn scp_file(&self, p: &PathBuf) -> Result<(), Error> {
@@ -89,15 +105,22 @@ impl SshSession {
     }
 }
 
-pub fn start(host: String, username: String, rx: Receiver<PathBuf>) {
-    let mut ns = HashSet::new();
+pub fn start(host: &str, username: &str, rx: Receiver<PathBuf>) {
+    if let Err(e) = do_start(host, username, rx) {
+        println!("mirror::start: {}", e);
+    }
+}
+
+fn do_start(host: &str, username: &str, rx: Receiver<PathBuf>)
+    -> Result<(), RecvError>
+{
+    let mut ps = PathSet::new();
     loop {
-        match SshSession::new(&username, &host) {
-            Ok(s)  => s.do_session(&rx, &mut ns),
-            Err(e) => {
-                println!("SshSession::new error: {}", e);
-                thread::sleep(Duration::from_secs(10));
-            },
+        ps.receive_pending(&rx)?;
+        match SshSession::new(host, username) {
+            Ok(s)  => { s.do_session(&rx, &mut ps)?; },
+            Err(e) => { println!("SshSession::new error: {}", e); },
         }
+        thread::sleep(Duration::from_secs(10));
     }
 }
