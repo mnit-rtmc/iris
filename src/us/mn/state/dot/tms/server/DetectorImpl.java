@@ -84,7 +84,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			logging_sec = 0;
 		}
 		private AutoFailCounter() {
-			this(CLEAR_THRESHOLD, CLEAR_THRESHOLD);
+			this(new Interval(0), new Interval(0));
 		}
 		private void update(int s, boolean st) {
 			if (st != state) {
@@ -92,7 +92,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 				state = st;
 			}
 			state_sec += s;
-			triggered = updateTriggered();
+			triggered = isEnabled() && updateTriggered();
+		}
+		private boolean isEnabled() {
+			return trigger_threshold_sec > 0;
 		}
 		private boolean updateTriggered() {
 			return (state) ? checkTriggered() : checkTriggerHang();
