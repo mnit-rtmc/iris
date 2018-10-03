@@ -83,6 +83,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			triggered = false;
 			logging_sec = 0;
 		}
+		private AutoFailCounter() {
+			this(CLEAR_THRESHOLD, CLEAR_THRESHOLD);
+		}
 		private void update(int s, boolean st) {
 			if (st != state) {
 				state_sec = 0;
@@ -285,6 +288,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	@Override
 	public void initTransients() {
 		super.initTransients();
+		resetAutoFailCounters();
 		if (r_node != null)
 			r_node.addDetector(this);
 		try {
@@ -297,16 +301,23 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Auto fail counter for no hits (flow) */
-	private transient AutoFailCounter no_hits =
-		new AutoFailCounter(getNoHitThreshold(), HIT_CLEAR_THRESHOLD);
+	private transient AutoFailCounter no_hits = new AutoFailCounter();
 
 	/** Auto fail counter for chattering */
-	private transient AutoFailCounter chatter =
-		new AutoFailCounter(getChatterThreshold(), CLEAR_THRESHOLD);
+	private transient AutoFailCounter chatter = new AutoFailCounter();
 
 	/** Auto fail counter for locked on (scans) */
-	private transient AutoFailCounter locked_on =
-		new AutoFailCounter(getLockedOnThreshold(), CLEAR_THRESHOLD);
+	private transient AutoFailCounter locked_on = new AutoFailCounter();
+
+	/** Reset auto fail counters */
+	private void resetAutoFailCounters() {
+		no_hits = new AutoFailCounter(getNoHitThreshold(),
+			HIT_CLEAR_THRESHOLD);
+		chatter = new AutoFailCounter(getChatterThreshold(),
+			CLEAR_THRESHOLD);
+		locked_on = new AutoFailCounter(getLockedOnThreshold(),
+			CLEAR_THRESHOLD);
+	}
 
 	/** Get the volume "no hit" threshold */
 	private Interval getNoHitThreshold() {
@@ -380,13 +391,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	@Override
 	public void setLaneType(short t) {
 		lane_type = LaneType.fromOrdinal(t);
-		// reset auto fail counters
-		no_hits = new AutoFailCounter(getNoHitThreshold(),
-			HIT_CLEAR_THRESHOLD);
-		chatter = new AutoFailCounter(getChatterThreshold(),
-			CLEAR_THRESHOLD);
-		locked_on = new AutoFailCounter(getLockedOnThreshold(),
-			CLEAR_THRESHOLD);
+		resetAutoFailCounters();
 	}
 
 	/** Set the lane type */
