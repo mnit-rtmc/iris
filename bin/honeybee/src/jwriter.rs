@@ -16,7 +16,7 @@ use fallible_iterator::FallibleIterator;
 use postgres::{Connection,TlsMode};
 use std::collections::HashSet;
 use std::path::PathBuf;
-use std::sync::mpsc::{channel,Receiver,Sender};
+use std::sync::mpsc::{channel,Sender};
 use std::thread;
 use std::time::{Duration,Instant};
 use mirror;
@@ -31,19 +31,9 @@ pub fn start(username: String, host: Option<String>) -> Result<(), Error> {
     let db = thread::spawn(move || {
         db_thread(uds, tx).unwrap();
     });
-    if let Some(h) = host {
-        mirror::start(&h, &username, rx);
-    } else {
-        null_thread(rx);
-    }
+    mirror::start(host, &username, rx);
     db.join().expect("db_thread panicked!");
     Ok(())
-}
-
-fn null_thread(rx: Receiver<PathBuf>) {
-    for p in rx {
-        println!("    {:?}: not copied (no destination host)", p);
-    }
 }
 
 fn db_thread(uds: String, tx: Sender<PathBuf>) -> Result<(), Error> {

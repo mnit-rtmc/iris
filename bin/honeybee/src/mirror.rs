@@ -78,7 +78,7 @@ impl SshSession {
         loop {
             ps.receive_pending(rx)?;
             if let Err(e) = self.copy_all(&mut ps) {
-                println!("scp_file error: {}", e);
+                println!("  scp_file error: {}", e);
                 return Ok(());
             }
         }
@@ -87,7 +87,7 @@ impl SshSession {
         for p in ps.set.iter() {
             let t = Instant::now();
             self.scp_file(&p)?;
-            println!("    {:?}: copied in {:?}", p, t.elapsed());
+            println!("  {:?}: copied in {:?}", p, t.elapsed());
         }
         // All copied successfully
         ps.set.clear();
@@ -99,28 +99,40 @@ impl SshSession {
         let mut fo = self.session.scp_send(p.as_path(), 0o644, m.len(), None)?;
         let c = io::copy(&mut fi, &mut fo)?;
         if c != m.len() {
-            println!("    {:?}: length mismatch {} != {}", p, c, m.len());
+            println!("  {:?}: length mismatch {} != {}", p, c, m.len());
         }
         Ok(())
     }
 }
 
-pub fn start(host: &str, username: &str, rx: Receiver<PathBuf>) {
+pub fn start(host: Option<String>, username: &str, rx: Receiver<PathBuf>) {
+    if let None = host {
+        println!("  mirror::start: No host");
+    }
     if let Err(e) = do_start(host, username, rx) {
-        println!("mirror::start: {}", e);
+        println!("  mirror::start: {}", e);
     }
 }
 
-fn do_start(host: &str, username: &str, rx: Receiver<PathBuf>)
+fn do_start(host: Option<String>, username: &str, rx: Receiver<PathBuf>)
     -> Result<(), RecvError>
 {
     let mut ps = PathSet::new();
     loop {
         ps.receive_pending(&rx)?;
-        match SshSession::new(host, username) {
-            Ok(s)  => { s.do_session(&rx, &mut ps)?; },
-            Err(e) => { println!("SshSession::new error: {}", e); },
+        if let Some(h) = &host {
+            start_session(&h, username, &rx, &mut ps)?;
         }
         thread::sleep(Duration::from_secs(10));
     }
+}
+
+fn start_session(host: &str, username: &str, rx: &Receiver<PathBuf>,
+    mut ps: &mut PathSet) -> Result<(), RecvError>
+{
+    match SshSession::new(host, username) {
+        Ok(s)  => { s.do_session(rx, &mut ps)?; },
+        Err(e) => { println!("  SshSession::new error: {}", e); },
+    }
+    Ok(())
 }
