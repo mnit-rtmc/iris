@@ -51,26 +51,26 @@ fn null_thread(rx: Receiver<Resource>) {
 
 #[allow(dead_code)]
 struct SshSession {
-    tcp : TcpStream, // must remain in scope as long as Session
-    s   : Session,
+    tcp    : TcpStream, // must remain in scope as long as Session
+    session: Session,
 }
 
 impl SshSession {
     fn new(username: &str, h: &str) -> Result<Self, Error> {
         let tcp = TcpStream::connect(h)?;
-        let mut s = Session::new().unwrap();
-        s.handshake(&tcp)?;
+        let mut session = Session::new().unwrap();
+        session.handshake(&tcp)?;
         // Try agent first, since we don't have a pass-phrase
-        if let Err(_) = s.userauth_agent(username) {
+        if let Err(_) = session.userauth_agent(username) {
             let mut key = PathBuf::new();
             key.push("/home");
             key.push(username);
             key.push(".ssh");
             key.push("id_rsa");
             // Since agent failed, try private key with no pass-phrase
-            s.userauth_pubkey_file(username, None, &key, None)?;
+            session.userauth_pubkey_file(username, None, &key, None)?;
         }
-        Ok(SshSession { tcp, s })
+        Ok(SshSession { tcp, session })
     }
     fn do_session(&self, rx: &Receiver<Resource>,
         mut ns: &mut HashSet<Resource>)
@@ -106,7 +106,7 @@ impl SshSession {
         let p = r.make_name(OUTPUT_DIR);
         let mut fi = File::open(&p)?;
         let m = fi.metadata()?;
-        let mut fo = self.s.scp_send(p.as_path(), 0o644, m.len(), None)?;
+        let mut fo = self.session.scp_send(p.as_path(), 0o644, m.len(), None)?;
         let c = io::copy(&mut fi, &mut fo)?;
         if c != m.len() {
             println!("    {}: length mismatch {} != {}", r.name(), c, m.len());
