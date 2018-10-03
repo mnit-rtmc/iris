@@ -9,6 +9,23 @@
 <body>
 <h1>MnDOT IRIS 4.x Release Notes</h1>
 <dl>
+	<dt>4.82.0 (3 Oct 2018)</dt>
+	<dd><ul>
+		<li>
+			Added detector auto-fail feature.  Force fail is now
+			managed by administrator.
+		</li>
+		<li>
+			Added detector_event_purge_days system attribute.
+		</li>
+		<li>
+			Enhanced honeybee to listen for PostgreSQL notifications
+			and write json files, then scp them to another host.
+		</li>
+		<li>
+			Fixed subtle problems with incident feed protocol.
+		</li>
+	</ul></dd>
 	<dt>4.81.0 (25 Sep 2018)</dt>
 	<dd><ul>
 		<li>
