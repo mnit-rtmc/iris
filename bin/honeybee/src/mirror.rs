@@ -22,15 +22,20 @@ use std::sync::mpsc::{Receiver,RecvError};
 use std::thread;
 use std::time::{Duration,Instant};
 
+/// A set of paths to mirror
 struct PathSet {
     set : HashSet<PathBuf>,
 }
 
 impl PathSet {
+    /// Create a new PathSet
     fn new() -> Self {
         let set = HashSet::new();
         PathSet { set }
     }
+    /// Receive pending paths from channel.
+    ///
+    /// * `rx` Channel receiver for path names.
     fn receive_pending(&mut self, rx: &Receiver<PathBuf>)
         -> Result<(), RecvError>
     {
@@ -45,11 +50,16 @@ impl PathSet {
     }
 }
 
+/// An ssh session
 struct SshSession {
     _tcp   : TcpStream, // must remain in scope as long as Session
     session: Session,
 }
 
+/// Authenticate an ssh session.
+///
+/// * `session` The ssh session.
+/// * `username` User to authenticate.
 fn authenticate(session: Session, username: &str) -> Result<Session, Error> {
     // Try agent first, since we don't have a pass-phrase
     if let Err(_) = session.userauth_agent(username) {
@@ -65,6 +75,10 @@ fn authenticate(session: Session, username: &str) -> Result<Session, Error> {
 }
 
 impl SshSession {
+    /// Create a new ssh session
+    ///
+    /// * `host` Host name (and port) to connect.
+    /// * `username` Name of user to use for authentication.
     fn new(host: &str, username: &str) -> Result<Self, Error> {
         let tcp = TcpStream::connect(host)?;
         let mut session = Session::new().unwrap();
@@ -72,18 +86,25 @@ impl SshSession {
         session = authenticate(session, username)?;
         Ok(SshSession { _tcp: tcp, session })
     }
+    /// Mirror files with the session.
+    ///
+    /// * `rx` Channel receiver for path names.
+    /// * `ps` Set of path names to mirror.
     fn do_session(&self, rx: &Receiver<PathBuf>, mut ps: &mut PathSet)
         -> Result<(), RecvError>
     {
         loop {
             ps.receive_pending(rx)?;
-            if let Err(e) = self.copy_all(&mut ps) {
+            if let Err(e) = self.mirror_all(&mut ps) {
                 println!("  scp_file error: {}", e);
                 return Ok(());
             }
         }
     }
-    fn copy_all(&self, ps: &mut PathSet) -> Result<(), Error> {
+    /// Mirror all files in a path set.
+    ///
+    /// * `ps` Set of path names to mirror.
+    fn mirror_all(&self, ps: &mut PathSet) -> Result<(), Error> {
         for p in ps.set.iter() {
             let t = Instant::now();
             self.scp_file(&p)?;
@@ -93,6 +114,9 @@ impl SshSession {
         ps.set.clear();
         Ok(())
     }
+    /// Mirror one file with scp.
+    ///
+    /// * `p` Path to file.
     fn scp_file(&self, p: &PathBuf) -> Result<(), Error> {
         let mut fi = File::open(&p)?;
         let m = fi.metadata()?;
@@ -105,16 +129,26 @@ impl SshSession {
     }
 }
 
+/// Start mirroring.
+///
+/// * `host` Host name (and port) to connect.
+/// * `username` Name of user to use for authentication.
+/// * `rx` Channel receiver for path names.
 pub fn start(host: Option<String>, username: &str, rx: Receiver<PathBuf>) {
     if let None = host {
         println!("  mirror::start: No host");
     }
-    if let Err(e) = do_start(host, username, rx) {
+    if let Err(e) = run_loop(host, username, rx) {
         println!("  mirror::start: {}", e);
     }
 }
 
-fn do_start(host: Option<String>, username: &str, rx: Receiver<PathBuf>)
+/// Run mirroring loop.
+///
+/// * `host` Host name (and port) to connect.
+/// * `username` Name of user to use for authentication.
+/// * `rx` Channel receiver for path names.
+fn run_loop(host: Option<String>, username: &str, rx: Receiver<PathBuf>)
     -> Result<(), RecvError>
 {
     let mut ps = PathSet::new();
@@ -127,6 +161,12 @@ fn do_start(host: Option<String>, username: &str, rx: Receiver<PathBuf>)
     }
 }
 
+/// Start ssh session.
+///
+/// * `host` Host name (and port) to connect.
+/// * `username` Name of user to use for authentication.
+/// * `rx` Channel receiver for path names.
+/// * `ps` Set of path names to mirror.
 fn start_session(host: &str, username: &str, rx: &Receiver<PathBuf>,
     mut ps: &mut PathSet) -> Result<(), RecvError>
 {
