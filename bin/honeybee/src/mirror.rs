@@ -18,7 +18,7 @@ use std::fs::File;
 use std::io;
 use std::net::TcpStream;
 use std::path::PathBuf;
-use std::sync::mpsc::{Receiver,RecvError};
+use std::sync::mpsc::{Receiver,TryRecvError};
 use std::thread;
 use std::time::{Duration,Instant};
 
@@ -37,14 +37,15 @@ impl PathSet {
     ///
     /// * `rx` Channel receiver for path names.
     fn receive_pending(&mut self, rx: &Receiver<PathBuf>)
-        -> Result<(), RecvError>
+        -> Result<(), Error>
     {
         if self.set.is_empty() {
-            let p = rx.recv()?;
-            self.set.insert(p);
+            self.set.insert(rx.recv()?);
         }
-        for p in rx.try_iter() {
-            self.set.insert(p);
+        loop {
+            let p = rx.try_recv();
+            if let Err(TryRecvError::Empty) = p { break; };
+            self.set.insert(p?);
         }
         Ok(())
     }
@@ -91,7 +92,7 @@ impl SshSession {
     /// * `rx` Channel receiver for path names.
     /// * `ps` Set of path names to mirror.
     fn do_session(&self, rx: &Receiver<PathBuf>, mut ps: &mut PathSet)
-        -> Result<(), RecvError>
+        -> Result<(), Error>
     {
         loop {
             ps.receive_pending(rx)?;
@@ -149,7 +150,7 @@ pub fn start(host: Option<String>, username: &str, rx: Receiver<PathBuf>) {
 /// * `username` Name of user to use for authentication.
 /// * `rx` Channel receiver for path names.
 fn run_loop(host: Option<String>, username: &str, rx: Receiver<PathBuf>)
-    -> Result<(), RecvError>
+    -> Result<(), Error>
 {
     let mut ps = PathSet::new();
     loop {
@@ -168,7 +169,7 @@ fn run_loop(host: Option<String>, username: &str, rx: Receiver<PathBuf>)
 /// * `rx` Channel receiver for path names.
 /// * `ps` Set of path names to mirror.
 fn start_session(host: &str, username: &str, rx: &Receiver<PathBuf>,
-    mut ps: &mut PathSet) -> Result<(), RecvError>
+    mut ps: &mut PathSet) -> Result<(), Error>
 {
     match SshSession::new(host, username) {
         Ok(s)  => { s.do_session(rx, &mut ps)?; },
