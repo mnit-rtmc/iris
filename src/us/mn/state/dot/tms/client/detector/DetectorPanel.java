@@ -175,10 +175,10 @@ public class DetectorPanel extends IPanel implements ProxyView<Detector> {
 		add(aband_chk);
 		add("detector.force.fail");
 		add(force_chk, Stretch.LAST);
+		add("detector.field.len");
+		add(field_spn);
 		add("detector.auto.fail");
 		add(auto_chk, Stretch.LAST);
-		add("detector.field.len");
-		add(field_spn, Stretch.LAST);
 		add("detector.fake");
 		add(fake_txt, Stretch.END);
 		add("device.notes");
