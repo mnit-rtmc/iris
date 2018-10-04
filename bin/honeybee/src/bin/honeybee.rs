@@ -21,7 +21,9 @@ use honeybee::fetcher;
 use users::get_current_username;
 
 fn main() {
-    env_logger::init();
+    env_logger::Builder::from_default_env()
+                        .default_format_timestamp(false)
+                        .init();
     let host = env::args().nth(1);
     if let Some(username) = get_current_username() {
         if let Err(e) = fetcher::start(username, host) {

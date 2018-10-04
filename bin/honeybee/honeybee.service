@@ -3,6 +3,7 @@ Description=Honeybee service for IRIS
 StartLimitIntervalSec=0
 
 [Service]
+Environment=RUST_LOG=info
 ExecStart=/usr/local/bin/honeybee
 Restart=always
 RestartSec=2

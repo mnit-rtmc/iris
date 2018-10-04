@@ -97,11 +97,11 @@ impl SshSession {
     {
         loop {
             ps.receive_pending(rx)?;
-            if let Err(e) = self.mirror_all(&mut ps) {
-                error!("{}", e);
-                return Ok(());
+            if let Err(_) = self.mirror_all(&mut ps) {
+                break;
             }
         }
+        Ok(())
     }
     /// Mirror all files in a path set.
     ///
@@ -109,7 +109,10 @@ impl SshSession {
     fn mirror_all(&self, ps: &mut PathSet) -> Result<(), Error> {
         for p in ps.set.iter() {
             let t = Instant::now();
-            self.scp_file(&p)?;
+            if let Err(e) = self.scp_file(&p) {
+                error!("{}, file {:?}", e, p);
+                return Err(e);
+            }
             info!("{:?}: copied in {:?}", p, t.elapsed());
         }
         // All copied successfully
@@ -174,7 +177,9 @@ fn start_session(host: &str, username: &str, rx: &Receiver<PathBuf>,
 {
     match SshSession::new(host, username) {
         Ok(s)  => { s.do_session(rx, &mut ps)?; },
-        Err(e) => { error!("{}", e); },
+        Err(e) => {
+            error!("{}, host: {}, user: {}", e, host, username);
+        },
     }
     Ok(())
 }
