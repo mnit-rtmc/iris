@@ -142,7 +142,10 @@ public enum CommProtocol {
 	GPS_NMEA("GPS NMEA"),
 
 	/** GPS using RedLion AT+BMDIAG command (39) */
-	GPS_REDLION("GPS RedLion");
+	GPS_REDLION("GPS RedLion"),
+	
+	/** Cohu Helois PTZ (40) */
+	COHU_HELIOS_PTZ("Cohu Helios PTZ");
 
 	/** Create a new comm protocol value */
 	private CommProtocol(String d) {

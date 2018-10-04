@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.server.comm.cohuptz;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import us.mn.state.dot.tms.server.comm.Operation;
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.server.comm.OpStep;
 
 /**
@@ -36,6 +37,12 @@ public class OpPTZCamera extends OpStep {
 
 	/** Zoom property */
 	private final ZoomProp zoom;
+	
+	/** Pan and/ Tilt property for Helios PTZ */
+	private final PanTiltZoomProp pan_tilt_zoom;
+	
+	/** Communication protocol */
+	private final CommProtocol protocol;
 
 	/**
 	 * Create the operation.
@@ -43,17 +50,32 @@ public class OpPTZCamera extends OpStep {
 	 * @param t the tilt vector [-1..1]
 	 * @param z the zoom vector [-1..1]
 	 */
-	public OpPTZCamera(float p, float t, float z) {
+	public OpPTZCamera(float p, float t, float z, CommProtocol cp) {
 		pan  = new PanProp(p);
 		tilt = new TiltProp(t);
 		zoom = new ZoomProp(z);
+		protocol = cp;
+		 /* Combined pan-tilt-zoom command required to accommodate bug in Helios cameras. 
+		 * Issuing separate PTZ commands will not work over Ethernet interface */
+		pan_tilt_zoom = new PanTiltZoomProp(pan, tilt, zoom);
+
 	}
 
 	/** Poll the controller */
 	@Override
 	public void poll(Operation op, ByteBuffer tx_buf) throws IOException {
-		pan.encodeStore(op, tx_buf);
-		tilt.encodeStore(op, tx_buf);
-		zoom.encodeStore(op, tx_buf);
+		if (protocol == CommProtocol.COHU_HELIOS_PTZ){
+			/* Issue 3-byte zoom command alone if requested, otherwise issue combined pan-tilt-zoom. 
+			 * Helios won't support combined pan-tilt-zoom with a 3-byte zoom command.*/
+			if (zoom.getCommand().length > 2){
+				zoom.encodeStore(op, tx_buf);
+			}else{
+				pan_tilt_zoom.encodeStore(op, tx_buf);
+			}
+		}else{
+			pan.encodeStore(op, tx_buf);
+			tilt.encodeStore(op, tx_buf);
+			zoom.encodeStore(op, tx_buf);
+		}
 	}
 }

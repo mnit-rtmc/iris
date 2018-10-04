@@ -24,6 +24,8 @@ import us.mn.state.dot.tms.server.comm.OpStep;
 import static us.mn.state.dot.tms.server.comm.PriorityLevel.COMMAND;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
 
+import us.mn.state.dot.tms.CommProtocol;
+
 /**
  * Poller for the Cohu PTZ protocol.
  *
@@ -32,9 +34,13 @@ import static us.mn.state.dot.tms.utils.URIUtil.TCP;
  */
 public class CohuPTZPoller extends BasePoller implements CameraPoller {
 
+	/** Communication protocol */
+	private final CommProtocol protocol;
+	
 	/** Create a new Cohu PTZ poller */
-	public CohuPTZPoller(String n) {
+	public CohuPTZPoller(String n, CommProtocol cp) {
 		super(n, TCP);
+		protocol = cp;
 	}
 
 	/** Create an operation */
@@ -47,7 +53,7 @@ public class CohuPTZPoller extends BasePoller implements CameraPoller {
 	/** Send a "PTZ camera move" command */
 	@Override
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		createOp("camera.op.send.ptz", c, new OpPTZCamera(p, t, z));
+		createOp("camera.op.send.ptz", c, new OpPTZCamera(p, t, z, protocol));
 	}
 
 	/** Send a "store camera preset" command */

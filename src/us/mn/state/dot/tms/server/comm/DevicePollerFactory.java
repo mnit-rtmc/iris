@@ -62,7 +62,7 @@ public class DevicePollerFactory {
 		case CBW:
 			return new CBWPoller(name);
 		case COHU_PTZ:
-			return new CohuPTZPoller(name);
+			return new CohuPTZPoller(name, protocol);
 		case DIN_RELAY:
 			return new DinRelayPoller(name);
 		case DMSXML:
@@ -108,6 +108,8 @@ public class DevicePollerFactory {
 			return new ViconPTZPoller(name);
 		case GPS_REDLION:
 			return new RedLionPoller(name);
+		case COHU_HELIOS_PTZ:
+			return new CohuPTZPoller(name, protocol);
 		default:
 			return null;
 		}
