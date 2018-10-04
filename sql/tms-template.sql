@@ -111,7 +111,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.82.0
+database_version	4.83.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -1062,6 +1062,7 @@ COPY iris.comm_protocol (id, description) FROM stdin;
 37	GPS TAIP
 38	GPS NMEA
 39	GPS RedLion
+40	Cohu Helios PTZ
 \.
 
 CREATE TABLE iris.comm_link (
