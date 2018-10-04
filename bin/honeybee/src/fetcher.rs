@@ -33,7 +33,9 @@ pub fn start(username: String, host: Option<String>) -> Result<(), Error> {
     let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
     let (tx, rx) = channel();
     let db = thread::spawn(move || {
-        db_thread(uds, tx).unwrap();
+        if let Err(e) = db_thread(uds, tx) {
+            println!("{:?}", e);
+        }
     });
     mirror::start(host, &username, rx);
     db.join().expect("db_thread panicked!");
