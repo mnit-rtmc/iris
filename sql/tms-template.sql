@@ -1925,6 +1925,7 @@ CREATE VIEW detector_auto_fail_view AS
 	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
 	JOIN detector_label_view dl ON e.device_id = dl.det_id
 	GROUP BY device_id, label, ed.description;
+GRANT SELECT ON detector_auto_fail_view TO PUBLIC;
 
 --
 -- GPS
