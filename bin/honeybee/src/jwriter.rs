@@ -24,6 +24,10 @@ use resource::{lookup_resource,ALL};
 
 static OUTPUT_DIR: &str = "/var/www/html/iris/";
 
+/// Start receiving notifications and fetching resources.
+///
+/// * `username` Name of user running process.
+/// * `host` Host name and port to mirror fetched resources.
 pub fn start(username: String, host: Option<String>) -> Result<(), Error> {
     // Format path for unix domain socket
     let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
@@ -36,6 +40,10 @@ pub fn start(username: String, host: Option<String>) -> Result<(), Error> {
     Ok(())
 }
 
+/// Connect to database and fetch resources as notifications are received.
+///
+/// * `uds` Unix domain socket for database.
+/// * `tx` Channel sender for resource file names.
 fn db_thread(uds: String, tx: Sender<PathBuf>) -> Result<(), Error> {
     let conn = Connection::connect(uds, TlsMode::None)?;
     // The postgresql crate sets the session time zone to UTC.
@@ -50,6 +58,11 @@ fn db_thread(uds: String, tx: Sender<PathBuf>) -> Result<(), Error> {
     notify_loop(&conn, tx)
 }
 
+/// Fetch a named resource from database and print timing information.
+///
+/// * `conn` The database connection.
+/// * `tx` Channel sender for resource file names.
+/// * `n` Resource name.
 fn fetch_resource_timed(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
     -> Result<(), Error>
 {
@@ -62,6 +75,11 @@ fn fetch_resource_timed(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
     Ok(())
 }
 
+/// Fetch a named resource from database.
+///
+/// * `conn` The database connection.
+/// * `tx` Channel sender for resource file names.
+/// * `n` Resource name.
 fn fetch_resource(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
     -> Result<Option<u32>, Error>
 {
@@ -72,6 +90,10 @@ fn fetch_resource(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
     }
 }
 
+/// Receive PostgreSQL notifications, and fetch needed resources.
+///
+/// * `conn` The database connection.
+/// * `tx` Channel sender for resource file names.
 fn notify_loop(conn: &Connection, tx: Sender<PathBuf>) -> Result<(), Error> {
     let nots = conn.notifications();
     let mut ns = HashSet::new();
