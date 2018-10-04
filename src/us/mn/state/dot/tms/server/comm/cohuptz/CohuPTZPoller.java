@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,6 +15,7 @@
  */
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
+import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.DeviceRequest;
 import us.mn.state.dot.tms.server.CameraImpl;
 import us.mn.state.dot.tms.server.comm.BasePoller;
@@ -23,8 +24,6 @@ import us.mn.state.dot.tms.server.comm.Operation;
 import us.mn.state.dot.tms.server.comm.OpStep;
 import static us.mn.state.dot.tms.server.comm.PriorityLevel.COMMAND;
 import static us.mn.state.dot.tms.utils.URIUtil.TCP;
-
-import us.mn.state.dot.tms.CommProtocol;
 
 /**
  * Poller for the Cohu PTZ protocol.
@@ -36,7 +35,7 @@ public class CohuPTZPoller extends BasePoller implements CameraPoller {
 
 	/** Communication protocol */
 	private final CommProtocol protocol;
-	
+
 	/** Create a new Cohu PTZ poller */
 	public CohuPTZPoller(String n, CommProtocol cp) {
 		super(n, TCP);
@@ -53,7 +52,8 @@ public class CohuPTZPoller extends BasePoller implements CameraPoller {
 	/** Send a "PTZ camera move" command */
 	@Override
 	public void sendPTZ(CameraImpl c, float p, float t, float z) {
-		createOp("camera.op.send.ptz", c, new OpPTZCamera(p, t, z, protocol));
+		createOp("camera.op.send.ptz", c,
+			new OpPTZCamera(p, t, z, protocol));
 	}
 
 	/** Send a "store camera preset" command */

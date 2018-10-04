@@ -1,7 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  AHMCT, University of California
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  * Copyright (C) 2018  SRF Consulting Group
  *
  * This program is free software; you can redistribute it and/or modify
@@ -17,9 +16,8 @@
 package us.mn.state.dot.tms.server.comm.cohuptz;
 
 /**
- * A combined property to pan and/or tilt a Helios camera
+ * A combined property to pan and/or tilt a Helios camera.
  *
- * @author Travis Swanston
  * @author Douglas Lau
  * @author Michael Janson
  */
@@ -30,7 +28,7 @@ public class PanTiltZoomProp extends CohuPTZProp {
 
 	/** Tilt property */
 	private final TiltProp tilt;
-	
+
 	/** Zoom property */
 	private final ZoomProp zoom;
 
@@ -47,12 +45,14 @@ public class PanTiltZoomProp extends CohuPTZProp {
 		byte[] pan_command = pan.getCommand();
 		byte[] tilt_command = tilt.getCommand();
 		byte[] zoom_command = zoom.getCommand();
-			
-		byte[] cmd = new byte[pan_command.length + tilt_command.length + zoom_command.length]; 
+
+		byte[] cmd = new byte[pan_command.length + tilt_command.length +
+			zoom_command.length];
 		System.arraycopy(pan_command, 0, cmd, 0, pan_command.length);
-		System.arraycopy(tilt_command, 0, cmd, pan_command.length, tilt_command.length);
-		System.arraycopy(zoom_command, 0, cmd, pan_command.length + tilt_command.length, zoom_command.length);
-		
+		System.arraycopy(tilt_command, 0, cmd, pan_command.length,
+			tilt_command.length);
+		System.arraycopy(zoom_command, 0, cmd, pan_command.length +
+			tilt_command.length, zoom_command.length);
 		return cmd;
 	}
 
