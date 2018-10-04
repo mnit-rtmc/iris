@@ -11,6 +11,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+#[macro_use] extern crate log;
+extern crate env_logger;
 extern crate honeybee;
 extern crate users;
 
@@ -19,7 +21,13 @@ use honeybee::fetcher;
 use users::get_current_username;
 
 fn main() {
+    env_logger::init();
     let host = env::args().nth(1);
-    let username = get_current_username().expect("User name lookup error");
-    fetcher::start(username, host).unwrap();
+    if let Some(username) = get_current_username() {
+        if let Err(e) = fetcher::start(username, host) {
+            error!("fetcher: {:?}", e);
+        }
+    } else {
+        error!("User name lookup error");
+    }
 }

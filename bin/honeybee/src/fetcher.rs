@@ -34,11 +34,13 @@ pub fn start(username: String, host: Option<String>) -> Result<(), Error> {
     let (tx, rx) = channel();
     let db = thread::spawn(move || {
         if let Err(e) = db_thread(uds, tx) {
-            println!("{:?}", e);
+            error!("{:?}", e);
         }
     });
     mirror::start(host, &username, rx);
-    db.join().expect("db_thread panicked!");
+    if let Err(e) = db.join() {
+        error!("db_thread panicked: {:?}", e);
+    }
     Ok(())
 }
 
@@ -70,9 +72,9 @@ fn fetch_resource_timed(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
 {
     let t = Instant::now();
     if let Some(c) = fetch_resource(&conn, tx, &n)? {
-        println!("{}: wrote {} rows in {:?}", &n, c, t.elapsed());
+        info!("{}: wrote {} rows in {:?}", &n, c, t.elapsed());
     } else {
-        println!("{}: unknown resource", &n);
+        warn!("{}: unknown resource", &n);
     }
     Ok(())
 }

@@ -82,7 +82,8 @@ impl SshSession {
     /// * `username` Name of user to use for authentication.
     fn new(host: &str, username: &str) -> Result<Self, Error> {
         let tcp = TcpStream::connect(host)?;
-        let mut session = Session::new().unwrap();
+        let mut session = Session::new()
+                                  .ok_or_else(|| format_err!("No session"))?;
         session.handshake(&tcp)?;
         session = authenticate(session, username)?;
         Ok(SshSession { _tcp: tcp, session })
@@ -97,7 +98,7 @@ impl SshSession {
         loop {
             ps.receive_pending(rx)?;
             if let Err(e) = self.mirror_all(&mut ps) {
-                println!("  scp_file error: {}", e);
+                error!("{}", e);
                 return Ok(());
             }
         }
@@ -109,7 +110,7 @@ impl SshSession {
         for p in ps.set.iter() {
             let t = Instant::now();
             self.scp_file(&p)?;
-            println!("  {:?}: copied in {:?}", p, t.elapsed());
+            info!("{:?}: copied in {:?}", p, t.elapsed());
         }
         // All copied successfully
         ps.set.clear();
@@ -124,7 +125,7 @@ impl SshSession {
         let mut fo = self.session.scp_send(p.as_path(), 0o644, m.len(), None)?;
         let c = io::copy(&mut fi, &mut fo)?;
         if c != m.len() {
-            println!("  {:?}: length mismatch {} != {}", p, c, m.len());
+            error!("{:?}: length mismatch {} != {}", p, c, m.len());
         }
         Ok(())
     }
@@ -137,10 +138,10 @@ impl SshSession {
 /// * `rx` Channel receiver for path names.
 pub fn start(host: Option<String>, username: &str, rx: Receiver<PathBuf>) {
     if let None = host {
-        println!("  mirror::start: No host");
+        error!("No mirror host");
     }
     if let Err(e) = run_loop(host, username, rx) {
-        println!("  mirror::start: {}", e);
+        error!("{}", e);
     }
 }
 
@@ -173,7 +174,7 @@ fn start_session(host: &str, username: &str, rx: &Receiver<PathBuf>,
 {
     match SshSession::new(host, username) {
         Ok(s)  => { s.do_session(rx, &mut ps)?; },
-        Err(e) => { println!("  SshSession::new error: {}", e); },
+        Err(e) => { error!("{}", e); },
     }
     Ok(())
 }
