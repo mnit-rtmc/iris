@@ -15,11 +15,11 @@ extern crate honeybee;
 extern crate users;
 
 use std::env;
-use honeybee::jwriter;
+use honeybee::fetcher;
 use users::get_current_username;
 
 fn main() {
     let host = env::args().nth(1);
     let username = get_current_username().expect("User name lookup error");
-    jwriter::start(username, host).unwrap();
+    fetcher::start(username, host).unwrap();
 }
