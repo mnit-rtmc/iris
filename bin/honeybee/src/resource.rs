@@ -16,13 +16,15 @@ use postgres;
 use postgres::{Connection};
 use serde_json;
 use std::fs::{File,rename};
-use std::path::PathBuf;
 use std::io::{BufWriter,Write};
+use std::path::PathBuf;
+use std::sync::mpsc::Sender;
 
 #[derive(PartialEq,Eq,Hash)]
 pub enum Resource {
     Simple(&'static str, &'static str),
     Font(&'static str),
+    SignMsg(&'static str),
 }
 
 const CAMERA_RES: Resource = Resource::Simple(
@@ -111,6 +113,10 @@ const TPIMS_DYN_RES: Resource = Resource::Simple(
 
 const FONT_RES: Resource = Resource::Font(
 "font",
+);
+
+const SIGN_MSG_RES: Resource = Resource::SignMsg(
+"sign_message",
 );
 
 fn query_simple<W: Write>(conn: &Connection, sql: &str, mut w: W)
@@ -209,26 +215,37 @@ fn query_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32, Error> {
     Ok(c)
 }
 
+const SIGN_MSG_SQL: &'static str =
+"SELECT row_to_json(r)::text FROM (\
+    SELECT name, sign_config, incident, multi, beacon_enabled, prefix_page, \
+           msg_priority, sources, owner, duration \
+    FROM sign_message_view \
+) r";
+
 impl Resource {
-    pub fn fetch<W: Write>(&self, conn: &Connection, w: W) -> Result<u32,Error>{
+    fn fetch_file<W: Write>(&self, conn: &Connection, w: W)
+        -> Result<u32,Error>
+    {
         match self {
             Resource::Simple(_, sql) => query_simple(conn, sql, w),
             Resource::Font(_)        => query_font(conn, w),
+            Resource::SignMsg(_)     => query_simple(conn, SIGN_MSG_SQL, w),
         }
     }
-    pub fn name(&self) -> &str {
+    fn name(&self) -> &str {
         match self {
             Resource::Simple(name, _) => name,
             Resource::Font(name)      => name,
+            Resource::SignMsg(name)   => name,
         }
     }
-    pub fn make_name(&self, dir: &str) -> PathBuf {
+    fn make_name(&self, dir: &str) -> PathBuf {
         let mut t = PathBuf::new();
         t.push(dir);
         t.push(self.name());
         t
     }
-    pub fn make_tmp_name(&self, dir: &str) -> PathBuf {
+    fn make_tmp_name(&self, dir: &str) -> PathBuf {
         let mut n = String::new();
         n.push('.');
         n.push_str(self.name());
@@ -237,13 +254,15 @@ impl Resource {
         t.push(n);
         t
     }
-    pub fn fetch_file(&self, conn: &Connection, dir: &str)
+    pub fn fetch(&self, conn: &Connection, dir: &str, tx: &Sender<PathBuf>)
         -> Result<u32, Error>
     {
         let tn = self.make_tmp_name(dir);
+        let n = self.make_name(dir);
         let f = BufWriter::new(File::create(&tn)?);
-        let c = self.fetch(conn, f)?;
-        rename(tn, self.make_name(dir))?;
+        let c = self.fetch_file(conn, f)?;
+        rename(tn, &n)?;
+        tx.send(n)?;
         Ok(c)
     }
 }
@@ -260,6 +279,19 @@ pub fn lookup_resource(n: &str) -> Option<Resource> {
         "parking_area_dynamic"|
         "TPIMS_dynamic"        => Some(TPIMS_DYN_RES),
         "font"                 => Some(FONT_RES),
+        "sign_message"         => Some(SIGN_MSG_RES),
         _                      => None,
     }
 }
+
+pub const ALL: [&'static str; 9] = [
+    "camera_pub",
+    "dms_pub",
+    "dms_message",
+    "incident",
+    "sign_config",
+    "parking_area",
+    "parking_area_dynamic",
+    "font",
+    "sign_message",
+];

@@ -20,7 +20,7 @@ use std::sync::mpsc::{channel,Sender};
 use std::thread;
 use std::time::{Duration,Instant};
 use mirror;
-use resource::{lookup_resource};
+use resource::{lookup_resource,ALL};
 
 static OUTPUT_DIR: &str = "/var/www/html/iris/";
 
@@ -44,9 +44,7 @@ fn db_thread(uds: String, tx: Sender<PathBuf>) -> Result<(), Error> {
     conn.execute("SET TIME ZONE 'US/Central'", &[])?;
     conn.execute("LISTEN tms", &[])?;
     // Initialize all the resources
-    for r in ["camera_pub", "dms_pub", "dms_message", "incident", "sign_config",
-              "parking_area", "parking_area_dynamic", "font"].iter()
-    {
+    for r in ALL.iter() {
         fetch_resource_timed(&conn, &tx, r)?;
     }
     notify_loop(&conn, tx)
@@ -56,7 +54,7 @@ fn fetch_resource_timed(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
     -> Result<(), Error>
 {
     let t = Instant::now();
-    if let Some(c) = fetch_resource_file(&conn, tx, &n)? {
+    if let Some(c) = fetch_resource(&conn, tx, &n)? {
         println!("{}: wrote {} rows in {:?}", &n, c, t.elapsed());
     } else {
         println!("{}: unknown resource", &n);
@@ -64,13 +62,11 @@ fn fetch_resource_timed(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
     Ok(())
 }
 
-fn fetch_resource_file(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
+fn fetch_resource(conn: &Connection, tx: &Sender<PathBuf>, n: &str)
     -> Result<Option<u32>, Error>
 {
     if let Some(r) = lookup_resource(n) {
-        let c = r.fetch_file(&conn, OUTPUT_DIR)?;
-        tx.send(r.make_name(OUTPUT_DIR))?;
-        Ok(Some(c))
+        Ok(Some(r.fetch(&conn, OUTPUT_DIR, tx)?))
     } else {
         Ok(None)
     }
