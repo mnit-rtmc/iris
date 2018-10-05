@@ -215,12 +215,56 @@ fn query_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32, Error> {
     Ok(c)
 }
 
-const SIGN_MSG_SQL: &'static str =
-"SELECT row_to_json(r)::text FROM (\
-    SELECT name, sign_config, incident, multi, beacon_enabled, prefix_page, \
-           msg_priority, sources, owner, duration \
-    FROM sign_message_view \
-) r";
+#[derive(Serialize)]
+struct SignMessage {
+    name          : String,
+    sign_config   : String,
+    incident      : Option<String>,
+    multi         : String,
+    beacon_enabled: bool,
+    prefix_page   : bool,
+    msg_priority  : i32,
+    sources       : String,
+    owner         : Option<String>,
+    duration      : Option<i32>,
+}
+
+impl Queryable for SignMessage {
+    fn sql() -> &'static str {
+        "SELECT name, sign_config, incident, multi, beacon_enabled, \
+                prefix_page, msg_priority, sources, owner, duration \
+        FROM sign_message_view \
+        ORDER BY name"
+    }
+    fn from_row(row: &postgres::rows::Row) -> Self {
+        SignMessage {
+            name          : row.get(0),
+            sign_config   : row.get(1),
+            incident      : row.get(2),
+            multi         : row.get(3),
+            beacon_enabled: row.get(4),
+            prefix_page   : row.get(5),
+            msg_priority  : row.get(6),
+            sources       : row.get(7),
+            owner         : row.get(8),
+            duration      : row.get(9),
+        }
+    }
+}
+
+fn query_sign_msg<W: Write>(conn: &Connection, mut w: W) -> Result<u32, Error> {
+    let mut c = 0;
+    w.write("[".as_bytes())?;
+    for row in &conn.query(SignMessage::sql(), &[])? {
+        if c > 0 { w.write(",".as_bytes())?; }
+        w.write("\n".as_bytes())?;
+        let mut s = SignMessage::from_row(&row);
+        w.write(serde_json::to_string(&s)?.as_bytes())?;
+        c += 1;
+    }
+    w.write("]\n".as_bytes())?;
+    Ok(c)
+}
 
 impl Resource {
     fn fetch_file<W: Write>(&self, conn: &Connection, w: W)
@@ -229,7 +273,7 @@ impl Resource {
         match self {
             Resource::Simple(_, sql) => query_simple(conn, sql, w),
             Resource::Font(_)        => query_font(conn, w),
-            Resource::SignMsg(_)     => query_simple(conn, SIGN_MSG_SQL, w),
+            Resource::SignMsg(_)     => query_sign_msg(conn, w),
         }
     }
     fn name(&self) -> &str {
@@ -254,6 +298,11 @@ impl Resource {
         t.push(n);
         t
     }
+    /// Fetch the resource and send PathBuf(s) to a channel.
+    ///
+    /// * `conn` The database connection.
+    /// * `dir` Output file directory.
+    /// * `tx` Channel sender for resource file names.
     pub fn fetch(&self, conn: &Connection, dir: &str, tx: &Sender<PathBuf>)
         -> Result<u32, Error>
     {
