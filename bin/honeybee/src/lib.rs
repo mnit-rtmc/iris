@@ -10,6 +10,6 @@ extern crate ssh2;
 
 pub mod fetcher;
 mod resource;
-mod mirror;
+mod mere;
 pub mod multi;
 pub mod raster;

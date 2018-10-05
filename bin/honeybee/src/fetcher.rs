@@ -19,7 +19,7 @@ use std::path::PathBuf;
 use std::sync::mpsc::{channel,Sender};
 use std::thread;
 use std::time::{Duration,Instant};
-use mirror;
+use mere;
 use resource::{lookup_resource,ALL};
 
 static OUTPUT_DIR: &str = "/var/www/html/iris/";
@@ -37,7 +37,7 @@ pub fn start(username: String, host: Option<String>) -> Result<(), Error> {
             error!("{:?}", e);
         }
     });
-    mirror::start(host, &username, rx);
+    mere::start(host, &username, rx);
     if let Err(e) = db.join() {
         error!("db_thread panicked: {:?}", e);
     }
