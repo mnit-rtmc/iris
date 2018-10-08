@@ -15,8 +15,9 @@ use failure::Error;
 use postgres;
 use postgres::{Connection};
 use serde_json;
+use std::collections::HashMap;
 use std::fs::{File,rename};
-use std::io::{BufWriter,Write};
+use std::io::{BufReader,BufWriter,Write};
 use std::path::PathBuf;
 use std::sync::mpsc::Sender;
 
@@ -72,7 +73,7 @@ const SIGN_CONFIG_RES: Resource = Resource::Simple(
            beacon_type, face_width, face_height, border_horiz, \
            border_vert, pitch_horiz, pitch_vert, pixel_width, \
            pixel_height, char_width, char_height, color_scheme, \
-           monochrome_foreground, monochrome_background \
+           monochrome_foreground, monochrome_background, default_font \
     FROM sign_config_view \
 ) r",
 );
@@ -141,7 +142,84 @@ trait Queryable {
     fn from_row(row: &postgres::rows::Row) -> Self;
 }
 
-#[derive(Serialize)]
+#[derive(Serialize,Deserialize)]
+pub struct SignConfig {
+    name        : String,
+    dms_type    : String,
+    portable    : bool,
+    technology  : String,
+    sign_access : String,
+    legend      : String,
+    beacon_type : String,
+    face_width  : i32,
+    face_height : i32,
+    border_horiz: i32,
+    border_vert : i32,
+    pitch_horiz : i32,
+    pitch_vert  : i32,
+    pixel_width : i32,
+    pixel_height: i32,
+    char_width  : i32,
+    char_height : i32,
+    color_scheme: String,
+    monochrome_foreground: i32,
+    monochrome_background: i32,
+    default_font: Option<String>,
+}
+
+impl SignConfig {
+    fn load(dir: &str) -> Result<HashMap<String, SignConfig>, Error> {
+        let mut n = PathBuf::new();
+        n.push(dir);
+        n.push("sign_config");
+        let r = BufReader::new(File::open(&n)?);
+        let mut configs = HashMap::new();
+        let j: Vec<SignConfig> = serde_json::from_reader(r)?;
+        for c in j {
+            let cn = c.name.clone();
+            configs.insert(cn, c);
+        }
+        Ok(configs)
+    }
+}
+
+impl Queryable for SignConfig {
+     fn sql() -> &'static str {
+       "SELECT name, dms_type, portable, technology, sign_access, legend, \
+               beacon_type, face_width, face_height, border_horiz, border_vert, \
+               pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width, \
+               char_height, color_scheme, monochrome_foreground, \
+               monochrome_background, default_font \
+        FROM sign_config_view"
+     }
+     fn from_row(row: &postgres::rows::Row) -> Self {
+        SignConfig {
+            name        : row.get(0),
+            dms_type    : row.get(1),
+            portable    : row.get(2),
+            technology  : row.get(3),
+            sign_access : row.get(4),
+            legend      : row.get(5),
+            beacon_type : row.get(6),
+            face_width  : row.get(7),
+            face_height : row.get(8),
+            border_horiz: row.get(9),
+            border_vert : row.get(10),
+            pitch_horiz : row.get(11),
+            pitch_vert  : row.get(12),
+            pixel_width : row.get(13),
+            pixel_height: row.get(14),
+            char_width  : row.get(15),
+            char_height : row.get(16),
+            color_scheme: row.get(17),
+            monochrome_foreground: row.get(18),
+            monochrome_background: row.get(19),
+            default_font: row.get(20),
+        }
+    }
+}
+
+#[derive(Serialize,Deserialize)]
 struct Glyph {
     code_point : i32,
     width      : i32,
@@ -164,7 +242,7 @@ impl Queryable for Glyph {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize,Deserialize)]
 struct Font {
     name         : String,
     f_number     : i32,
@@ -174,6 +252,21 @@ struct Font {
     char_spacing : i32,
     glyphs       : Vec<Glyph>,
     version_id   : i32,
+}
+
+impl Font {
+    fn load(dir: &str) -> Result<HashMap<i32, Font>, Error> {
+        let mut n = PathBuf::new();
+        n.push(dir);
+        n.push("font");
+        let r = BufReader::new(File::open(&n)?);
+        let mut fonts = HashMap::new();
+        let j: Vec<Font> = serde_json::from_reader(r)?;
+        for f in j {
+            fonts.insert(f.f_number, f);
+        }
+        Ok(fonts)
+    }
 }
 
 impl Queryable for Font {
@@ -252,7 +345,48 @@ impl Queryable for SignMessage {
     }
 }
 
-fn query_sign_msg<W: Write>(conn: &Connection, mut w: W) -> Result<u32, Error> {
+struct MsgData {
+    configs: HashMap<String, SignConfig>,
+    fonts: HashMap<i32, Font>,
+    // FIXME: also need graphics
+}
+
+impl MsgData {
+    fn load(dir: &str) -> Result<Self, Error> {
+        let configs = SignConfig::load(dir)?;
+        let fonts = Font::load(dir)?;
+        Ok(MsgData {
+            configs,
+            fonts,
+        })
+    }
+}
+
+/// Check and fetch one sign message (into a .gif file).
+fn fetch_sign_msg(s: &SignMessage, dir: &str, tx: &Sender<PathBuf>,
+    msg_data: &MsgData) -> Result<(), Error>
+{
+    let cfg = msg_data.configs.get(&s.sign_config)
+                              .ok_or_else(|| format_err!("No config"))?;
+    println!("config: {}", cfg.name);
+    let fonts = &msg_data.fonts;
+    for (f_num, f) in fonts {
+        println!("font: {} {:?}", f_num, f.name);
+    }
+    println!("sign_msg: {}", s.name);
+    Ok(())
+}
+
+/// Query the sign messages.
+///
+/// * `conn` The database connection.
+/// * `w` Writer for the file.
+/// * `dir` Output file directory.
+/// * `tx` Channel sender for resource file names.
+fn query_sign_msg<W: Write>(conn: &Connection, mut w: W, dir: &str,
+    tx: &Sender<PathBuf>) -> Result<u32, Error>
+{
+    let msg_data = MsgData::load(dir)?;
     let mut c = 0;
     w.write("[".as_bytes())?;
     for row in &conn.query(SignMessage::sql(), &[])? {
@@ -260,6 +394,7 @@ fn query_sign_msg<W: Write>(conn: &Connection, mut w: W) -> Result<u32, Error> {
         w.write("\n".as_bytes())?;
         let mut s = SignMessage::from_row(&row);
         w.write(serde_json::to_string(&s)?.as_bytes())?;
+        fetch_sign_msg(&s, dir, tx, &msg_data)?;
         c += 1;
     }
     w.write("]\n".as_bytes())?;
@@ -267,13 +402,19 @@ fn query_sign_msg<W: Write>(conn: &Connection, mut w: W) -> Result<u32, Error> {
 }
 
 impl Resource {
-    fn fetch_file<W: Write>(&self, conn: &Connection, w: W)
-        -> Result<u32,Error>
+    /// Fetch a file.
+    ///
+    /// * `conn` The database connection.
+    /// * `w` Writer for the file.
+    /// * `dir` Output file directory.
+    /// * `tx` Channel sender for resource file names.
+    fn fetch_file<W: Write>(&self, conn: &Connection, w: W, dir: &str,
+        tx: &Sender<PathBuf>) -> Result<u32,Error>
     {
         match self {
             Resource::Simple(_, sql) => query_simple(conn, sql, w),
             Resource::Font(_)        => query_font(conn, w),
-            Resource::SignMsg(_)     => query_sign_msg(conn, w),
+            Resource::SignMsg(_)     => query_sign_msg(conn, w, dir, tx),
         }
     }
     fn name(&self) -> &str {
@@ -309,7 +450,7 @@ impl Resource {
         let tn = self.make_tmp_name(dir);
         let n = self.make_name(dir);
         let f = BufWriter::new(File::create(&tn)?);
-        let c = self.fetch_file(conn, f)?;
+        let c = self.fetch_file(conn, f, dir, tx)?;
         rename(tn, &n)?;
         tx.send(n)?;
         Ok(c)
