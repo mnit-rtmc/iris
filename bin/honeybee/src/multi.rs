@@ -16,6 +16,7 @@ use std::iter::Peekable;
 use std::str::Chars;
 use std::str::FromStr;
 
+/// DMS color scheme.
 #[derive(Copy,Clone,PartialEq,Debug)]
 pub enum ColorScheme {
     Monochrome1Bit = 1,
@@ -40,6 +41,89 @@ impl fmt::Display for Color {
             Color::Legacy(v)  => write!(f, "{}", v),
             Color::RGB(r,g,b) => write!(f, "{},{},{}", r, g, b),
         }
+    }
+}
+
+impl From<i32> for Color {
+    fn from(rgb: i32) -> Self {
+        let r = (rgb >> 16) as u8;
+        let g = (rgb >> 8) as u8;
+        let b = (rgb >> 0) as u8;
+        Color::RGB(r, g, b)
+    }
+}
+
+impl From<ColorClassic> for Color {
+    fn from(c: ColorClassic) -> Self {
+        Color::Legacy(c as u8)
+    }
+}
+
+impl Color {
+    pub fn rgb(&self, scheme: ColorScheme) -> Option<[u8;3]> {
+        match self {
+            Color::Legacy(v)  => color_rgb_legacy(scheme, *v),
+            Color::RGB(r,g,b) => Some([*r, *g, *b]),
+        }
+    }
+}
+
+/// Get RGB triplet for a legacy color value.
+///
+/// * `scheme` Color scheme of DMS.
+/// * `v` Coor value (0-255).
+fn color_rgb_legacy(scheme: ColorScheme, v: u8) -> Option<[u8;3]> {
+    match scheme {
+        ColorScheme::Monochrome1Bit => color_rgb_monochrome_1_bit(v),
+        ColorScheme::Monochrome8Bit => color_rgb_monochrome_8_bit(v),
+        ColorScheme::ColorClassic |
+        ColorScheme::Color24Bit     => color_rgb_classic(v),
+    }
+}
+
+fn color_rgb_monochrome_1_bit(v: u8) -> Option<[u8;3]> {
+    match v {
+        0 => Some([  0,   0,   0]), // FIXME: use monochrome background color
+        1 => Some([255, 255, 255]), // FIXME: use monochrome foreground color
+        _ => None,
+    }
+}
+
+fn color_rgb_monochrome_8_bit(v: u8) -> Option<[u8;3]> {
+    Some([v,v,v])   // FIXME: use monochrome color
+}
+
+/// Classic color values
+#[derive(Copy,Clone,Debug,PartialEq)]
+pub enum ColorClassic {
+    Black,
+    Red,
+    Yellow,
+    Green,
+    Cyan,
+    Blue,
+    Magenta,
+    White,
+    Orange,
+    Amber,
+}
+
+/// Get RGB triplet for a classic color.
+///
+/// * `v` Color value (0-9).
+fn color_rgb_classic(v: u8) -> Option<[u8;3]> {
+    match v {
+        v if v == ColorClassic::Black   as u8 => Some([  0,  0,  0]),
+        v if v == ColorClassic::Red     as u8 => Some([255,  0,  0]),
+        v if v == ColorClassic::Yellow  as u8 => Some([255,255,  0]),
+        v if v == ColorClassic::Green   as u8 => Some([  0,255,  0]),
+        v if v == ColorClassic::Cyan    as u8 => Some([  0,255,255]),
+        v if v == ColorClassic::Blue    as u8 => Some([  0,  0,255]),
+        v if v == ColorClassic::Magenta as u8 => Some([255,  0,255]),
+        v if v == ColorClassic::White   as u8 => Some([255,255,255]),
+        v if v == ColorClassic::Orange  as u8 => Some([255,165,  0]),
+        v if v == ColorClassic::Amber   as u8 => Some([255,208,  0]),
+        _                                     => None,
     }
 }
 

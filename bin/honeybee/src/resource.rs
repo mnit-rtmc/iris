@@ -21,6 +21,9 @@ use std::io::{BufReader,BufWriter,Write};
 use std::path::{Path,PathBuf};
 use std::sync::mpsc::Sender;
 use std::time::Instant;
+use multi::{Color,ColorClassic,ColorScheme,LineJustification,PageJustification,
+            Rectangle};
+use render::RenderState;
 
 fn make_name(dir: &Path, n: &str) -> PathBuf {
     let mut p = PathBuf::new();
@@ -384,24 +387,6 @@ impl MsgData {
 fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
     msg_data: &MsgData) -> Result<(), Error>
 {
-    let cfg = msg_data.configs.get(&s.sign_config);
-    if cfg.is_none() {
-        error!("Missing config for {}", s.name);
-        return Ok(());
-    }
-    let cfg = cfg.unwrap();
-    let fname = cfg.default_font.as_ref();
-    if fname.is_none() {
-        warn!("No default font for {}", cfg.name);
-        return Ok(());
-    }
-    let fname = fname.unwrap();
-    let font = msg_data.fonts.values().find(|f| &f.name == fname);
-    if font.is_none() {
-        error!("Missing font {}", fname);
-        return Ok(());
-    }
-    let font = font.unwrap();
     let mut img = PathBuf::new();
     img.push(dir);
     img.push("img");
@@ -412,7 +397,10 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
     let n = make_name(&img.as_path(), &g);
     let f = BufWriter::new(File::create(&tn)?);
     let t = Instant::now();
-    render_sign_msg(s, cfg, font, f)?;
+    if let Err(e) = render_sign_msg(s, msg_data, f) {
+        warn!("{:?}: {:?}", &n, e);
+        return Ok(());
+    };
     rename(tn, &n)?;
     info!("{:?}: rendered in {:?}", &n, t.elapsed());
     tx.send(n)?;
@@ -420,12 +408,79 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
 }
 
 /// Render a sign message into a .gif file
-fn render_sign_msg<W: Write>(s: &SignMessage, cfg: &SignConfig, font: &Font,
-    mut w: W) -> Result<(), Error>
+fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut w: W)
+    -> Result<(), Error>
 {
-    write!(w, "sign_msg: {}, config: {}, font: {}, multi: {}", s.name, cfg.name,
-        font.name, s.multi)?;
+    let rs = create_render_state(s, msg_data)?;
+    write!(w, "sign_msg: {}, multi: {}", s.name, s.multi)?;
     Ok(())
+}
+
+/// Create default render state for a sign message.
+fn create_render_state(s: &SignMessage, msg_data: &MsgData)
+    -> Result<RenderState, Error>
+{
+    let cfg = msg_data.configs.get(&s.sign_config);
+    if cfg.is_none() {
+        return Err(format_err!("Unknown config: {}", s.sign_config));
+    }
+    let cfg = cfg.unwrap();
+    let color_scheme = match cfg.color_scheme.as_ref() {
+        "monochrome1Bit" => Ok(ColorScheme::Monochrome1Bit),
+        "monochrome8Bit" => Ok(ColorScheme::Monochrome8Bit),
+        "colorClassic"   => Ok(ColorScheme::ColorClassic),
+        "color24Bit"     => Ok(ColorScheme::Color24Bit),
+        s                => Err(format_err!("Unknown scheme: {:?}", s)),
+    }?;
+    let color_foreground: Color = match color_scheme {
+        ColorScheme::Monochrome1Bit|
+        ColorScheme::Monochrome8Bit => cfg.monochrome_foreground.into(),
+        ColorScheme::ColorClassic|
+        ColorScheme::Color24Bit     => ColorClassic::Amber.into(),
+    };
+    let page_background: Color = match color_scheme {
+        ColorScheme::Monochrome1Bit|
+        ColorScheme::Monochrome8Bit => cfg.monochrome_background.into(),
+        ColorScheme::ColorClassic|
+        ColorScheme::Color24Bit     => ColorClassic::Black.into(),
+    };
+    let page_on_time_ds = 20;   // FIXME
+    let page_off_time_ds = 0;   // FIXME
+    if cfg.pixel_width < 1 {
+        return Err(format_err!("Invalid width: {}", cfg.pixel_width));
+    }
+    if cfg.pixel_height < 1 {
+        return Err(format_err!("Invalid height: {}", cfg.pixel_height));
+    }
+    let text_rectangle = Rectangle::new(1, 1, cfg.pixel_width as u16,
+        cfg.pixel_height as u16);
+    let just_page = PageJustification::Top;    // FIXME
+    let just_line = LineJustification::Center; // FIXME
+    let char_width = cfg.char_width as u8;
+    let char_height = cfg.char_height as u8;
+    let fname = cfg.default_font.as_ref();
+    if fname.is_none() {
+        return Err(format_err!("No default font for {}", cfg.name));
+    }
+    let fname = fname.unwrap();
+    let font = msg_data.fonts.values().find(|f| &f.name == fname);
+    if font.is_none() {
+        return Err(format_err!("Unknown font: {}", fname));
+    }
+    let font = (font.unwrap().f_number as u8, None);
+    Ok(RenderState::new(
+        color_scheme,
+        color_foreground,
+        page_background,
+        page_on_time_ds,
+        page_off_time_ds,
+        text_rectangle,
+        just_page,
+        just_line,
+        char_width,
+        char_height,
+        font,
+    ))
 }
 
 /// Query the sign messages.

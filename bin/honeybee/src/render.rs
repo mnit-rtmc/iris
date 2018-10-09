@@ -11,7 +11,6 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-use std::collections::HashMap;
 use multi::*;
 use raster::Raster;
 
@@ -20,13 +19,13 @@ type UnitResult = Result<(), SyntaxError>;
 
 /// Text render state
 #[derive(Copy,Clone)]
-struct RenderState {
+pub struct RenderState {
     color_scheme    : ColorScheme,
     color_foreground: Color,
-    color_background: Color,
+    color_background: Color,    // background color of text
     page_background : Color,
-    page_on_time_ds : u8,
-    page_off_time_ds: u8,
+    page_on_time_ds : u8,       // deciseconds
+    page_off_time_ds: u8,       // deciseconds
     text_rectangle  : Rectangle,
     just_page       : PageJustification,
     just_line       : LineJustification,
@@ -38,7 +37,7 @@ struct RenderState {
 }
 
 /// Page splitter (iterator)
-struct PageSplitter<'a> {
+pub struct PageSplitter<'a> {
     default_state   : RenderState,
     render_state    : RenderState,
     parser          : Parser<'a>,
@@ -46,11 +45,9 @@ struct PageSplitter<'a> {
 }
 
 /// Page renderer
-struct PageRenderer {
+pub struct PageRenderer {
     render_state    : RenderState,
     values          : Vec<Value>,
-    fonts           : HashMap<u8, RasterFont>,
-    graphics        : HashMap<u8, Raster>,
 }
 
 impl RenderState {
@@ -77,7 +74,7 @@ impl RenderState {
             page_off_time_ds,
             text_rectangle,
             line_spacing : None,
-            char_spacing: None,
+            char_spacing : None,
             just_page,
             just_line,
             char_width,
@@ -506,17 +503,10 @@ impl Renderer {
     pub fn add_page(&mut self) -> UnitResult {
         self.draw_text()?;
         self.reset_text_rectangle();
-        self.fill_background();
         Ok(())
     }
     pub fn set_color_background(&mut self, cb: Color) {
         self.render_state.color_background = cb;
-        self.fill_background();
-    }
-    fn fill_background(&mut self) {
-        let r = self.default_state.text_rectangle;
-        let clr = self.render_state.page_background;
-        self.fill_rectangle(r, clr);
     }
     pub fn set_color_foreground(&mut self, cf: Color) {
         self.render_state.color_foreground = cf;
@@ -562,76 +552,35 @@ impl Renderer {
     }
 }*/
 
-struct RasterFont {
-    font_num : u8,
-    font_id  : Option<u16>, // FIXME: check font ID
-}
-
-impl RasterFont {
-    fn lookup(font_num: u8, font_id: Option<u16>) -> Result<Self, SyntaxError> {
-        // FIXME: lookup font in database
-        if font_num > 1 {
-            return Err(SyntaxError::FontNotDefined(font_num));
-        }
-        if let Some(_) = font_id {
-            // FIXME: check font version ID
-            return Err(SyntaxError::FontVersionID);
-        }
-        Ok(RasterFont {
-            font_num,
-            font_id,
-        })
-    }
-    fn text_size(_: &str) -> Rectangle {
-        Rectangle { x: 0, y: 0, w: 0, h: 0, }
-    }
-}
-
 
 impl PageRenderer {
     /// Create a new page renderer
     pub fn new(render_state: RenderState, values: Vec<Value>) -> Self {
-        let fonts = HashMap::new();
-        let graphics = HashMap::new();
         PageRenderer {
             render_state,
             values,
-            fonts,
-            graphics,
         }
     }
-/*    pub fn resolve_fonts_graphics(&mut self) -> UnitResult {
-        let len = self.values.len();
-        for i in 0..len {
-            let v = self.values[i];
-            if let Value::Font(f, fid) = v {
-                self.fonts.insert(fid, RasterFont::lookup(f, fid)?);
-            }
-            if let Value::Graphic(g, p) = v {
-                self.graphics.insert(g, lookup_graphic(g)?);
-            }
-        }
-        Ok(())
-    }*/
-/*    /// Render the page.
+    /// Render the page.
     pub fn render(&self) -> Result<Raster, SyntaxError> {
         let w = self.render_state.text_rectangle.w;
         let h = self.render_state.text_rectangle.h;
+        let clr = self.render_state.page_background.rgb(
+            self.render_state.color_scheme);
+        if clr.is_none() {
+            return Err(SyntaxError::Other);
+        }
+        let clr = clr.unwrap();
+        let rgba = [clr[0], clr[1], clr[2], 0];
+        let mut page = Raster::new(w.into(), h.into(), rgba);
         let len = self.values.len();
-        let mut page = Raster::new(w, h);
-        let mut rects = vec!();
+/*        let mut rects = vec!();
         for i in 0..len {
             let v = self.values[i];
             // FIXME
-        }
-        self.fill_background(&mut page, rs.page_background);
+        }*/
         Ok(page)
     }
-    fn fill_background(&self, page: &mut Raster, rs: &RenderState) {
-        let r = self.default_state.text_rectangle;
-        let clr = rs.page_background;
-        self.fill_rectangle(r, clr);
-    }*/
 }
 
 impl<'a> PageSplitter<'a> {
@@ -648,7 +597,7 @@ impl<'a> PageSplitter<'a> {
     /// Make the next page.
     fn make_page(&mut self) -> Result<PageRenderer, SyntaxError> {
         self.more = false;
-        let mut rs = self.render_state;
+        let mut rs = self.page_state();
         let mut values = vec!();
         while let Some(t) = self.parser.next() {
             let v = t?;
@@ -656,26 +605,22 @@ impl<'a> PageSplitter<'a> {
                 self.more = true;
                 break;
             }
-            rs = self.update_state(rs, &v)?;
+            self.render_state.update(&self.default_state, &v)?;
             values.push(v);
         }
-        rs.text_rectangle = self.default_state.text_rectangle;
-        Ok(PageRenderer::new(rs, values))
-    }
-    /// Update the state from a parsed value.
-    ///
-    /// * `rs` Render state for the current page.
-    /// * `v` Parsed MULTI value.
-    /// Returns updated render state for the current page.
-    fn update_state(&mut self, mut rs: RenderState, v: &Value)
-        -> Result<RenderState, SyntaxError>
-    {
-        self.render_state.update(&self.default_state, &v)?;
+        // These values affect the entire page
         rs.page_background = self.render_state.page_background;
         rs.page_on_time_ds = self.render_state.page_on_time_ds;
         rs.page_off_time_ds = self.render_state.page_off_time_ds;
+        Ok(PageRenderer::new(rs, values))
+    }
+    /// Get the current page state.
+    fn page_state(&self) -> RenderState {
+        let mut rs = self.render_state;
+        // Set these back to default values
+        rs.text_rectangle = self.default_state.text_rectangle;
         rs.line_spacing = self.default_state.line_spacing;
-        Ok(rs)
+        rs
     }
 }
 
