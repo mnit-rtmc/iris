@@ -18,8 +18,23 @@ use serde_json;
 use std::collections::HashMap;
 use std::fs::{File,rename};
 use std::io::{BufReader,BufWriter,Write};
-use std::path::PathBuf;
+use std::path::{Path,PathBuf};
 use std::sync::mpsc::Sender;
+use std::time::Instant;
+
+fn make_name(dir: &Path, n: &str) -> PathBuf {
+    let mut p = PathBuf::new();
+    p.push(dir);
+    p.push(n);
+    p
+}
+
+fn make_tmp_name(dir: &Path, n: &str) -> PathBuf {
+    let mut b = String::new();
+    b.push('.');
+    b.push_str(n);
+    make_name(dir, &b)
+}
 
 #[derive(PartialEq,Eq,Hash)]
 pub enum Resource {
@@ -168,7 +183,7 @@ pub struct SignConfig {
 }
 
 impl SignConfig {
-    fn load(dir: &str) -> Result<HashMap<String, SignConfig>, Error> {
+    fn load(dir: &Path) -> Result<HashMap<String, SignConfig>, Error> {
         let mut n = PathBuf::new();
         n.push(dir);
         n.push("sign_config");
@@ -255,7 +270,7 @@ struct Font {
 }
 
 impl Font {
-    fn load(dir: &str) -> Result<HashMap<i32, Font>, Error> {
+    fn load(dir: &Path) -> Result<HashMap<i32, Font>, Error> {
         let mut n = PathBuf::new();
         n.push(dir);
         n.push("font");
@@ -347,12 +362,15 @@ impl Queryable for SignMessage {
 
 struct MsgData {
     configs: HashMap<String, SignConfig>,
-    fonts: HashMap<i32, Font>,
+    fonts  : HashMap<i32, Font>,
     // FIXME: also need graphics
+    // FIXME: need system attributes: dms_default_justification_line,
+    //        dms_default_jusitfication_page, dms_max_lines,
+    //        dms_page_off_default_secs, dms_page_on_default_secs
 }
 
 impl MsgData {
-    fn load(dir: &str) -> Result<Self, Error> {
+    fn load(dir: &Path) -> Result<Self, Error> {
         let configs = SignConfig::load(dir)?;
         let fonts = Font::load(dir)?;
         Ok(MsgData {
@@ -363,17 +381,50 @@ impl MsgData {
 }
 
 /// Check and fetch one sign message (into a .gif file).
-fn fetch_sign_msg(s: &SignMessage, dir: &str, tx: &Sender<PathBuf>,
+fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
     msg_data: &MsgData) -> Result<(), Error>
 {
-    let cfg = msg_data.configs.get(&s.sign_config)
-                              .ok_or_else(|| format_err!("No config"))?;
-    println!("config: {}", cfg.name);
-    let fonts = &msg_data.fonts;
-    for (f_num, f) in fonts {
-        println!("font: {} {:?}", f_num, f.name);
+    let cfg = msg_data.configs.get(&s.sign_config);
+    if cfg.is_none() {
+        error!("Missing config for {}", s.name);
+        return Ok(());
     }
-    println!("sign_msg: {}", s.name);
+    let cfg = cfg.unwrap();
+    let fname = cfg.default_font.as_ref();
+    if fname.is_none() {
+        warn!("No default font for {}", cfg.name);
+        return Ok(());
+    }
+    let fname = fname.unwrap();
+    let font = msg_data.fonts.values().find(|f| &f.name == fname);
+    if font.is_none() {
+        error!("Missing font {}", fname);
+        return Ok(());
+    }
+    let font = font.unwrap();
+    let mut img = PathBuf::new();
+    img.push(dir);
+    img.push("img");
+    let mut g = String::new();
+    g.push_str(&s.name);
+    g.push_str(&".gif");
+    let tn = make_tmp_name(&img.as_path(), &g);
+    let n = make_name(&img.as_path(), &g);
+    let f = BufWriter::new(File::create(&tn)?);
+    let t = Instant::now();
+    render_sign_msg(s, cfg, font, f)?;
+    rename(tn, &n)?;
+    info!("{:?}: rendered in {:?}", &n, t.elapsed());
+    tx.send(n)?;
+    Ok(())
+}
+
+/// Render a sign message into a .gif file
+fn render_sign_msg<W: Write>(s: &SignMessage, cfg: &SignConfig, font: &Font,
+    mut w: W) -> Result<(), Error>
+{
+    write!(w, "sign_msg: {}, config: {}, font: {}, multi: {}", s.name, cfg.name,
+        font.name, s.multi)?;
     Ok(())
 }
 
@@ -383,7 +434,7 @@ fn fetch_sign_msg(s: &SignMessage, dir: &str, tx: &Sender<PathBuf>,
 /// * `w` Writer for the file.
 /// * `dir` Output file directory.
 /// * `tx` Channel sender for resource file names.
-fn query_sign_msg<W: Write>(conn: &Connection, mut w: W, dir: &str,
+fn query_sign_msg<W: Write>(conn: &Connection, mut w: W, dir: &Path,
     tx: &Sender<PathBuf>) -> Result<u32, Error>
 {
     let msg_data = MsgData::load(dir)?;
@@ -398,6 +449,7 @@ fn query_sign_msg<W: Write>(conn: &Connection, mut w: W, dir: &str,
         c += 1;
     }
     w.write("]\n".as_bytes())?;
+    // FIXME: delete .gif files for sign message which are gone
     Ok(c)
 }
 
@@ -408,8 +460,8 @@ impl Resource {
     /// * `w` Writer for the file.
     /// * `dir` Output file directory.
     /// * `tx` Channel sender for resource file names.
-    fn fetch_file<W: Write>(&self, conn: &Connection, w: W, dir: &str,
-        tx: &Sender<PathBuf>) -> Result<u32,Error>
+    fn fetch_file<W: Write>(&self, conn: &Connection, w: W, dir: &Path,
+        tx: &Sender<PathBuf>) -> Result<u32, Error>
     {
         match self {
             Resource::Simple(_, sql) => query_simple(conn, sql, w),
@@ -424,21 +476,6 @@ impl Resource {
             Resource::SignMsg(name)   => name,
         }
     }
-    fn make_name(&self, dir: &str) -> PathBuf {
-        let mut t = PathBuf::new();
-        t.push(dir);
-        t.push(self.name());
-        t
-    }
-    fn make_tmp_name(&self, dir: &str) -> PathBuf {
-        let mut n = String::new();
-        n.push('.');
-        n.push_str(self.name());
-        let mut t = PathBuf::new();
-        t.push(dir);
-        t.push(n);
-        t
-    }
     /// Fetch the resource and send PathBuf(s) to a channel.
     ///
     /// * `conn` The database connection.
@@ -447,10 +484,11 @@ impl Resource {
     pub fn fetch(&self, conn: &Connection, dir: &str, tx: &Sender<PathBuf>)
         -> Result<u32, Error>
     {
-        let tn = self.make_tmp_name(dir);
-        let n = self.make_name(dir);
+        let p = Path::new(dir);
+        let tn = make_tmp_name(p, self.name());
+        let n = make_name(p, self.name());
         let f = BufWriter::new(File::create(&tn)?);
-        let c = self.fetch_file(conn, f, dir, tx)?;
+        let c = self.fetch_file(conn, f, p, tx)?;
         rename(tn, &n)?;
         tx.send(n)?;
         Ok(c)
