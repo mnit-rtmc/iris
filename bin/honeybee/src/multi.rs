@@ -11,6 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+use std::error::Error;
 use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
@@ -388,6 +389,8 @@ impl fmt::Display for SyntaxError {
         write!(f, "syntaxError: {:?}", self)
     }
 }
+
+impl Error for SyntaxError { }
 
 /// Parser for MULTI values.
 pub struct Parser<'a> {

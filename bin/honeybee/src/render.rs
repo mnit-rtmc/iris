@@ -90,6 +90,14 @@ impl RenderState {
     fn is_full_matrix(&self) -> bool {
         self.char_width == 0 && self.char_height == 0
     }
+    /// Get the pixel width
+    pub fn width(&self) -> u16 {
+        self.text_rectangle.w
+    }
+    /// Get the pixel height
+    pub fn height(&self) -> u16 {
+        self.text_rectangle.h
+    }
     /// Get the character width (1 for variable width).
     fn char_width(&self) -> u32 {
         if self.is_char_matrix() {
@@ -560,6 +568,14 @@ impl PageRenderer {
             render_state,
             values,
         }
+    }
+    /// Get the page-on time (deciseconds)
+    pub fn page_on_time_ds(&self) -> u16 {
+        self.render_state.page_on_time_ds.into()
+    }
+    /// Get the page-off time (deciseconds)
+    pub fn page_off_time_ds(&self) -> u16 {
+        self.render_state.page_off_time_ds.into()
     }
     /// Render the page.
     pub fn render(&self) -> Result<Raster, SyntaxError> {

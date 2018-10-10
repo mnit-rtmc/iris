@@ -12,6 +12,7 @@
  * GNU General Public License for more details.
  */
 use failure::Error;
+use gif::{Frame,Encoder,Repeat,SetParameter};
 use postgres;
 use postgres::{Connection};
 use serde_json;
@@ -23,7 +24,7 @@ use std::sync::mpsc::Sender;
 use std::time::Instant;
 use multi::{Color,ColorClassic,ColorScheme,LineJustification,PageJustification,
             Rectangle};
-use render::RenderState;
+use render::{PageSplitter,RenderState};
 
 fn make_name(dir: &Path, n: &str) -> PathBuf {
     let mut p = PathBuf::new();
@@ -398,7 +399,7 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
     let f = BufWriter::new(File::create(&tn)?);
     let t = Instant::now();
     if let Err(e) = render_sign_msg(s, msg_data, f) {
-        warn!("{:?}: {:?}", &n, e);
+        warn!("{}: {:?}", &s.name, e);
         return Ok(());
     };
     rename(tn, &n)?;
@@ -408,11 +409,22 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
 }
 
 /// Render a sign message into a .gif file
-fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut w: W)
+fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
     -> Result<(), Error>
 {
     let rs = create_render_state(s, msg_data)?;
-    write!(w, "sign_msg: {}, multi: {}", s.name, s.multi)?;
+    let w = rs.width();  // FIXME: use face width
+    let h = rs.height(); // FIXME: use face height
+    let mut enc = Encoder::new(&mut f, w, h, &[])?;
+    enc.set(Repeat::Infinite)?;
+    for page in PageSplitter::new(rs, &s.multi) {
+        let page = page?;
+        let mut raster = page.render()?;
+        let mut pix = raster.pixels();
+        let mut frame = Frame::from_rgba(w, h, &mut pix[..]);
+        frame.delay = page.page_on_time_ds() * 10;
+        enc.write_frame(&frame)?;
+    }
     Ok(())
 }
 
