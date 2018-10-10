@@ -129,6 +129,11 @@ impl RenderState {
             1
         }
     }
+    /// Check whether a color works for the color scheme.
+    fn check_scheme(&self, c: &Color) -> UnitResult {
+        // FIXME: check color scheme
+        Ok(())
+    }
     /// Update the render state with a MULTI value.
     ///
     /// * `default_state` Default render state.
@@ -138,11 +143,20 @@ impl RenderState {
             Value::ColorBackground(None) => {
                 self.color_background = default_state.color_background;
             },
-            Value::ColorBackground(Some(c)) => { self.color_background = *c },
+            Value::ColorBackground(Some(c)) => {
+                self.check_scheme(c)?;
+                self.color_background = *c
+            },
             Value::ColorForeground(None) => {
                 self.color_foreground = default_state.color_foreground;
             },
-            Value::ColorForeground(Some(c)) => { self.color_foreground = *c },
+            Value::ColorForeground(Some(c)) => {
+                self.check_scheme(c)?;
+                self.color_foreground = *c
+            },
+            Value::ColorRectangle(_,c) => {
+                self.check_scheme(c)?;
+            },
             Value::Font(None) => { self.font = default_state.font },
             Value::Font(Some(f)) => { self.font = *f },
             Value::Graphic(_, _) => (),
@@ -170,7 +184,10 @@ impl RenderState {
             Value::PageBackground(None) => {
                 self.page_background = default_state.page_background;
             },
-            Value::PageBackground(Some(c)) => { self.page_background = *c; },
+            Value::PageBackground(Some(c)) => {
+                self.check_scheme(c)?;
+                self.page_background = *c;
+            },
             Value::PageTime(on, off) => {
                 self.page_on_time_ds = on.unwrap_or(
                     default_state.page_on_time_ds
@@ -222,6 +239,46 @@ impl RenderState {
         }
         self.text_rectangle = *r;
         Ok(())
+    }
+    /// Get the page background color
+    fn page_background(&self) -> Result<[u8;3], SyntaxError> {
+        match self.page_background {
+            Color::RGB(r,g,b) => Ok([r,g,b]),
+            Color::Legacy(v)  => self.color_rgb_legacy(v),
+        }
+    }
+    /// Get RGB triplet for a legacy color value.
+    ///
+    /// * `v` Color value (0-255).
+    fn color_rgb_legacy(&self, v: u8) -> Result<[u8;3], SyntaxError> {
+        match self.color_scheme {
+            ColorScheme::Monochrome1Bit => self.color_rgb_monochrome_1_bit(v),
+            ColorScheme::Monochrome8Bit => self.color_rgb_monochrome_8_bit(v),
+            ColorScheme::ColorClassic |
+            ColorScheme::Color24Bit     => self.color_rgb_classic(v),
+        }
+    }
+    /// Get RGB triplet for a monochrome 1-bit color.
+    fn color_rgb_monochrome_1_bit(&self, v: u8) -> Result<[u8;3], SyntaxError> {
+        match v {
+            0 => Ok([  0,   0,   0]), // FIXME: monochrome background color
+            1 => Ok([255, 255, 255]), // FIXME: monochrome foreground color
+            _ => Err(SyntaxError::UnsupportedTagValue),
+        }
+    }
+    /// Get RGB triplet for a monochrome 8-bit color.
+    fn color_rgb_monochrome_8_bit(&self, v: u8) -> Result<[u8;3], SyntaxError> {
+        Ok([v,v,v])   // FIXME: use monochrome color
+    }
+    /// Get RGB triplet for a classic color.
+    ///
+    /// * `v` Color value (0-9).
+    fn color_rgb_classic(&self, v: u8) -> Result<[u8;3], SyntaxError> {
+        if let Some(c) = ColorClassic::from_u8(v) {
+            Ok(c.rgb())
+        } else {
+            Err(SyntaxError::UnsupportedTagValue)
+        }
     }
 }
 
@@ -606,27 +663,20 @@ impl PageRenderer {
     }
     /// Render a blank page.
     pub fn render_blank(&self) -> Result<Raster, SyntaxError> {
-        let w = self.render_state.text_rectangle.w;
-        let h = self.render_state.text_rectangle.h;
-        let clr = self.page_background()?;
+        let rs = self.render_state;
+        let w = rs.text_rectangle.w;
+        let h = rs.text_rectangle.h;
+        let clr = rs.page_background()?;
         let rgba = [clr[0], clr[1], clr[2], 255];
         let page = Raster::new(w.into(), h.into(), rgba);
         Ok(page)
-    }
-    /// Get the page background color
-    fn page_background(&self) -> Result<[u8;3], SyntaxError> {
-        let rs = self.render_state;
-        match rs.page_background.rgb(rs.color_scheme) {
-            Some(c) => Ok(c),
-            None    => Err(SyntaxError::Other),
-        }
     }
     /// Render the page.
     pub fn render(&self) -> Result<Raster, SyntaxError> {
         let rs = self.render_state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
-        let clr = self.page_background()?;
+        let clr = rs.page_background()?;
         let rgba = [clr[0], clr[1], clr[2], 255];
         let mut page = Raster::new(w.into(), h.into(), rgba);
         for v in &self.values {
@@ -639,12 +689,19 @@ impl PageRenderer {
         let jp = PageJustification::Other;
         let jl = LineJustification::Other;
         for s in &self.spans {
+            // FIXME: handle text rectangles
             let rs = s.render_state;
             if rs.just_page < jp || (rs.just_page == jp && rs.just_line < jl) {
                 return Err(SyntaxError::TagConflict);
             }
             let jp = rs.just_page;
             let jl = rs.just_line;
+            if jp == PageJustification::Other {
+                return Err(SyntaxError::UnsupportedTagValue);
+            }
+            if jl == LineJustification::Other || jl == LineJustification::Full {
+                return Err(SyntaxError::UnsupportedTagValue);
+            }
             // FIXME: render text
 println!("span: {}, {:?} {:?} : ln: {}", s.text, jp, jl, rs.line_number);
         }

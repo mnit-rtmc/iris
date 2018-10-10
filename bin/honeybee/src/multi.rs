@@ -60,40 +60,6 @@ impl From<ColorClassic> for Color {
     }
 }
 
-impl Color {
-    pub fn rgb(&self, scheme: ColorScheme) -> Option<[u8;3]> {
-        match self {
-            Color::Legacy(v)  => color_rgb_legacy(scheme, *v),
-            Color::RGB(r,g,b) => Some([*r, *g, *b]),
-        }
-    }
-}
-
-/// Get RGB triplet for a legacy color value.
-///
-/// * `scheme` Color scheme of DMS.
-/// * `v` Coor value (0-255).
-fn color_rgb_legacy(scheme: ColorScheme, v: u8) -> Option<[u8;3]> {
-    match scheme {
-        ColorScheme::Monochrome1Bit => color_rgb_monochrome_1_bit(v),
-        ColorScheme::Monochrome8Bit => color_rgb_monochrome_8_bit(v),
-        ColorScheme::ColorClassic |
-        ColorScheme::Color24Bit     => color_rgb_classic(v),
-    }
-}
-
-fn color_rgb_monochrome_1_bit(v: u8) -> Option<[u8;3]> {
-    match v {
-        0 => Some([  0,   0,   0]), // FIXME: use monochrome background color
-        1 => Some([255, 255, 255]), // FIXME: use monochrome foreground color
-        _ => None,
-    }
-}
-
-fn color_rgb_monochrome_8_bit(v: u8) -> Option<[u8;3]> {
-    Some([v,v,v])   // FIXME: use monochrome color
-}
-
 /// Classic color values
 #[derive(Copy,Clone,Debug,PartialEq)]
 pub enum ColorClassic {
@@ -109,22 +75,37 @@ pub enum ColorClassic {
     Amber,
 }
 
-/// Get RGB triplet for a classic color.
-///
-/// * `v` Color value (0-9).
-fn color_rgb_classic(v: u8) -> Option<[u8;3]> {
-    match v {
-        v if v == ColorClassic::Black   as u8 => Some([  0,  0,  0]),
-        v if v == ColorClassic::Red     as u8 => Some([255,  0,  0]),
-        v if v == ColorClassic::Yellow  as u8 => Some([255,255,  0]),
-        v if v == ColorClassic::Green   as u8 => Some([  0,255,  0]),
-        v if v == ColorClassic::Cyan    as u8 => Some([  0,255,255]),
-        v if v == ColorClassic::Blue    as u8 => Some([  0,  0,255]),
-        v if v == ColorClassic::Magenta as u8 => Some([255,  0,255]),
-        v if v == ColorClassic::White   as u8 => Some([255,255,255]),
-        v if v == ColorClassic::Orange  as u8 => Some([255,165,  0]),
-        v if v == ColorClassic::Amber   as u8 => Some([255,208,  0]),
-        _                                     => None,
+impl ColorClassic {
+    /// Get RGB triplet for a classic color.
+    pub fn rgb(&self) -> [u8;3] {
+        match self {
+            ColorClassic::Black   => [  0,  0,  0],
+            ColorClassic::Red     => [255,  0,  0],
+            ColorClassic::Yellow  => [255,255,  0],
+            ColorClassic::Green   => [  0,255,  0],
+            ColorClassic::Cyan    => [  0,255,255],
+            ColorClassic::Blue    => [  0,  0,255],
+            ColorClassic::Magenta => [255,  0,255],
+            ColorClassic::White   => [255,255,255],
+            ColorClassic::Orange  => [255,165,  0],
+            ColorClassic::Amber   => [255,208,  0],
+        }
+    }
+    /// Maybe convert a u8 into a ColorClassic
+    pub fn from_u8(v: u8) -> Option<Self> {
+        match v {
+            v if v == ColorClassic::Black   as u8 => Some(ColorClassic::Black),
+            v if v == ColorClassic::Red     as u8 => Some(ColorClassic::Red),
+            v if v == ColorClassic::Yellow  as u8 => Some(ColorClassic::Yellow),
+            v if v == ColorClassic::Green   as u8 => Some(ColorClassic::Green),
+            v if v == ColorClassic::Cyan    as u8 => Some(ColorClassic::Cyan),
+            v if v == ColorClassic::Blue    as u8 => Some(ColorClassic::Blue),
+            v if v == ColorClassic::Magenta as u8 => Some(ColorClassic::Magenta),
+            v if v == ColorClassic::White   as u8 => Some(ColorClassic::White),
+            v if v == ColorClassic::Orange  as u8 => Some(ColorClassic::Orange),
+            v if v == ColorClassic::Amber   as u8 => Some(ColorClassic::Amber),
+            _                                     => None,
+        }
     }
 }
 
