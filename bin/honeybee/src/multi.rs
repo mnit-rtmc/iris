@@ -1866,6 +1866,14 @@ mod test {
         assert!(m.next() == None);
     }
     #[test]
+    fn parse_tr6() {
+        let mut m = Parser::new("[tr1,1,0,0]");
+        if let Some(Ok(Value::TextRectangle(r))) = m.next() {
+            assert!(r.x == 1 && r.y == 1 && r.w == 0 && r.h == 0);
+        } else { assert!(false) }
+        assert!(m.next() == None);
+    }
+    #[test]
     fn parse_new_line() {
         let mut m = Parser::new("[nl][NL0][Nl1][nL9][nl10]");
         if let Some(Ok(Value::NewLine(n))) = m.next() { assert!(n == None) }
