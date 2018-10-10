@@ -17,7 +17,7 @@ use postgres;
 use postgres::{Connection};
 use serde_json;
 use std::collections::HashMap;
-use std::fs::{File,rename};
+use std::fs::{File,rename,remove_file};
 use std::io::{BufReader,BufWriter,Write};
 use std::path::{Path,PathBuf};
 use std::sync::mpsc::Sender;
@@ -400,10 +400,11 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
     let t = Instant::now();
     if let Err(e) = render_sign_msg(s, msg_data, f) {
         warn!("{}: {:?}", &s.name, e);
+        remove_file(&tn)?;
         return Ok(());
     };
     rename(tn, &n)?;
-    info!("{:?}: rendered in {:?}", &n, t.elapsed());
+    info!("{}.gif rendered in {:?}", &s.name, t.elapsed());
     tx.send(n)?;
     Ok(())
 }
@@ -419,11 +420,20 @@ fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
     enc.set(Repeat::Infinite)?;
     for page in PageSplitter::new(rs, &s.multi) {
         let page = page?;
+        // FIXME: render page as face of DMS
         let mut raster = page.render()?;
         let mut pix = raster.pixels();
         let mut frame = Frame::from_rgba(w, h, &mut pix[..]);
         frame.delay = page.page_on_time_ds() * 10;
         enc.write_frame(&frame)?;
+        let t = page.page_off_time_ds() * 10;
+        if t > 0 {
+            let mut raster = page.render_blank()?;
+            let mut pix = raster.pixels();
+            let mut frame = Frame::from_rgba(w, h, &mut pix[..]);
+            frame.delay = t;
+            enc.write_frame(&frame)?;
+        }
     }
     Ok(())
 }

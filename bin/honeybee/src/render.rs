@@ -29,6 +29,7 @@ pub struct RenderState {
     text_rectangle  : Rectangle,
     just_page       : PageJustification,
     just_line       : LineJustification,
+    line_number     : u8,
     line_spacing    : Option<u8>,
     char_spacing    : Option<u8>,
     char_width      : u8,
@@ -38,16 +39,29 @@ pub struct RenderState {
 
 /// Page splitter (iterator)
 pub struct PageSplitter<'a> {
-    default_state   : RenderState,
-    render_state    : RenderState,
-    parser          : Parser<'a>,
-    more            : bool,
+    default_state : RenderState,
+    render_state  : RenderState,
+    parser        : Parser<'a>,
+    more          : bool,
+}
+
+/// Text span
+pub struct TextSpan {
+    render_state : RenderState, // start at start of span
+    text         : String,
+}
+
+impl TextSpan {
+    fn new(render_state: RenderState, text: String) -> Self {
+        TextSpan { render_state, text }
+    }
 }
 
 /// Page renderer
 pub struct PageRenderer {
-    render_state    : RenderState,
-    values          : Vec<Value>,
+    render_state : RenderState,     // state at start of page
+    values       : Vec<Value>,      // graphics / color rectangles
+    spans        : Vec<TextSpan>,   // text spans
 }
 
 impl RenderState {
@@ -77,6 +91,7 @@ impl RenderState {
             char_spacing : None,
             just_page,
             just_line,
+            line_number : 0,
             char_width,
             char_height,
             font,
@@ -130,18 +145,27 @@ impl RenderState {
             Value::ColorForeground(Some(c)) => { self.color_foreground = *c },
             Value::Font(None) => { self.font = default_state.font },
             Value::Font(Some(f)) => { self.font = *f },
+            Value::Graphic(_, _) => (),
             Value::JustificationLine(jl) => {
                 self.just_line = jl.unwrap_or(default_state.just_line);
             },
             Value::JustificationPage(jp) => {
                 self.just_page = jp.unwrap_or(default_state.just_page);
+                self.line_number = 0;
             },
-            Value::NewLine(None) => { self.line_spacing = None; },
+            Value::NewLine(None) => {
+                self.line_spacing = None;
+                self.line_number += 1;
+            },
             Value::NewLine(Some(ls)) => {
                 if !self.is_full_matrix() {
                     return Err(SyntaxError::UnsupportedTagValue);
                 }
                 self.line_spacing = Some(*ls);
+                self.line_number += 1;
+            },
+            Value::NewPage() => {
+                self.line_number = 0;
             },
             Value::PageBackground(None) => {
                 self.page_background = default_state.page_background;
@@ -176,6 +200,7 @@ impl RenderState {
     fn update_text_rectangle(&mut self, default_state: &RenderState,
         r: &Rectangle) -> UnitResult
     {
+        // FIXME: handle zero width/height in rectangle
         if !default_state.text_rectangle.contains(r) {
             return Err(SyntaxError::UnsupportedTagValue);
         }
@@ -560,13 +585,15 @@ impl Renderer {
     }
 }*/
 
-
 impl PageRenderer {
     /// Create a new page renderer
-    pub fn new(render_state: RenderState, values: Vec<Value>) -> Self {
+    pub fn new(render_state: RenderState, values: Vec<Value>,
+        spans: Vec<TextSpan>) -> Self
+    {
         PageRenderer {
             render_state,
             values,
+            spans,
         }
     }
     /// Get the page-on time (deciseconds)
@@ -577,24 +604,50 @@ impl PageRenderer {
     pub fn page_off_time_ds(&self) -> u16 {
         self.render_state.page_off_time_ds.into()
     }
-    /// Render the page.
-    pub fn render(&self) -> Result<Raster, SyntaxError> {
+    /// Render a blank page.
+    pub fn render_blank(&self) -> Result<Raster, SyntaxError> {
         let w = self.render_state.text_rectangle.w;
         let h = self.render_state.text_rectangle.h;
-        let clr = self.render_state.page_background.rgb(
-            self.render_state.color_scheme);
-        if clr.is_none() {
-            return Err(SyntaxError::Other);
+        let clr = self.page_background()?;
+        let rgba = [clr[0], clr[1], clr[2], 255];
+        let page = Raster::new(w.into(), h.into(), rgba);
+        Ok(page)
+    }
+    /// Get the page background color
+    fn page_background(&self) -> Result<[u8;3], SyntaxError> {
+        let rs = self.render_state;
+        match rs.page_background.rgb(rs.color_scheme) {
+            Some(c) => Ok(c),
+            None    => Err(SyntaxError::Other),
         }
-        let clr = clr.unwrap();
-        let rgba = [clr[0], clr[1], clr[2], 0];
+    }
+    /// Render the page.
+    pub fn render(&self) -> Result<Raster, SyntaxError> {
+        let rs = self.render_state;
+        let w = rs.text_rectangle.w;
+        let h = rs.text_rectangle.h;
+        let clr = self.page_background()?;
+        let rgba = [clr[0], clr[1], clr[2], 255];
         let mut page = Raster::new(w.into(), h.into(), rgba);
-        let len = self.values.len();
-/*        let mut rects = vec!();
-        for i in 0..len {
-            let v = self.values[i];
-            // FIXME
-        }*/
+        for v in &self.values {
+            match v {
+                Value::ColorRectangle(_,_) => (), // FIXME
+                Value::Graphic(_,_)        => (), // FIXME
+                _                          => unreachable!(),
+            }
+        }
+        let jp = PageJustification::Other;
+        let jl = LineJustification::Other;
+        for s in &self.spans {
+            let rs = s.render_state;
+            if rs.just_page < jp || (rs.just_page == jp && rs.just_line < jl) {
+                return Err(SyntaxError::TagConflict);
+            }
+            let jp = rs.just_page;
+            let jl = rs.just_line;
+            // FIXME: render text
+println!("span: {}, {:?} {:?} : ln: {}", s.text, jp, jl, rs.line_number);
+        }
         Ok(page)
     }
 }
@@ -615,20 +668,29 @@ impl<'a> PageSplitter<'a> {
         self.more = false;
         let mut rs = self.page_state();
         let mut values = vec!();
+        let mut spans = vec!();
         while let Some(t) = self.parser.next() {
             let v = t?;
-            if let Value::NewPage() = v {
-                self.more = true;
-                break;
-            }
             self.render_state.update(&self.default_state, &v)?;
-            values.push(v);
+            match v {
+                Value::NewPage() => {
+                    self.more = true;
+                    break;
+                },
+                Value::Text(t) => {
+                    let ts = TextSpan::new(self.render_state, t);
+                    spans.push(ts);
+                },
+                Value::Graphic(_,_)|
+                Value::ColorRectangle(_,_) => { values.push(v); },
+                _ => (),
+            }
         }
         // These values affect the entire page
         rs.page_background = self.render_state.page_background;
         rs.page_on_time_ds = self.render_state.page_on_time_ds;
         rs.page_off_time_ds = self.render_state.page_off_time_ds;
-        Ok(PageRenderer::new(rs, values))
+        Ok(PageRenderer::new(rs, values, spans))
     }
     /// Get the current page state.
     fn page_state(&self) -> RenderState {
@@ -651,17 +713,6 @@ impl<'a> Iterator for PageSplitter<'a> {
         }
     }
 }
-
-
-// Layout algorithm:
-//
-// Vec of rectangles for block, line, fragment, span
-//  [jp]  block
-//  [nl]  line
-//  [jl]  fragment
-// (text) span
-
-
 
 #[cfg(test)]
 mod test {
