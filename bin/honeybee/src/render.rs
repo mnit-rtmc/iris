@@ -21,8 +21,9 @@ type UnitResult = Result<(), SyntaxError>;
 #[derive(Copy,Clone)]
 pub struct RenderState {
     color_scheme    : ColorScheme,
+    char_width      : u8,
+    char_height     : u8,
     color_foreground: Color,
-    color_background: Color,    // background color of text
     page_background : Color,
     page_on_time_ds : u8,       // deciseconds
     page_off_time_ds: u8,       // deciseconds
@@ -32,8 +33,6 @@ pub struct RenderState {
     line_number     : u8,
     line_spacing    : Option<u8>,
     char_spacing    : Option<u8>,
-    char_width      : u8,
-    char_height     : u8,
     font            : (u8, Option<u16>),
 }
 
@@ -78,11 +77,9 @@ impl RenderState {
                char_height      : u8,
                font             : (u8, Option<u16>)) -> Self
     {
-        let color_background = page_background;
         RenderState {
             color_scheme,
             color_foreground,
-            color_background,
             page_background,
             page_on_time_ds,
             page_off_time_ds,
@@ -166,11 +163,13 @@ impl RenderState {
     fn update(&mut self, default_state: &RenderState, v: &Value) -> UnitResult {
         match v {
             Value::ColorBackground(None) => {
-                self.color_background = default_state.color_background;
+                // This tag remains for backward compatibility with 1203v1
+                self.page_background = default_state.page_background;
             },
             Value::ColorBackground(Some(c)) => {
+                // This tag remains for backward compatibility with 1203v1
                 self.check_scheme(c)?;
-                self.color_background = *c
+                self.page_background = *c;
             },
             Value::ColorForeground(None) => {
                 self.color_foreground = default_state.color_foreground;
@@ -629,9 +628,6 @@ impl Renderer {
         self.reset_text_rectangle();
         Ok(())
     }
-    pub fn set_color_background(&mut self, cb: Color) {
-        self.render_state.color_background = cb;
-    }
     pub fn set_color_foreground(&mut self, cf: Color) {
         self.render_state.color_foreground = cf;
     }
@@ -803,7 +799,7 @@ impl<'a> Iterator for PageSplitter<'a> {
 mod test {
     use super::*;
     fn make_full_matrix() -> RenderState {
-        RenderState::new(ColorScheme::Monochrome1Bit,
+        RenderState::new(ColorScheme::Color24Bit,
                          Color::Legacy(1), Color::Legacy(0),
                          20, 0,
                          Rectangle::new(1, 1, 60, 30),
@@ -833,9 +829,8 @@ mod test {
         let mut pages = PageSplitter::new(rs, "");
         let p = pages.next().unwrap().unwrap();
         let rs = p.render_state;
-        assert!(rs.color_scheme == ColorScheme::Monochrome1Bit);
+        assert!(rs.color_scheme == ColorScheme::Color24Bit);
         assert!(rs.color_foreground == Color::Legacy(1));
-        assert!(rs.color_background == Color::Legacy(0));
         assert!(rs.page_background == Color::Legacy(0));
         assert!(rs.page_on_time_ds == 20);
         assert!(rs.page_off_time_ds == 0);
@@ -852,7 +847,6 @@ mod test {
         let p = pages.next().unwrap().unwrap();
         let rs = p.render_state;
         assert!(rs.color_foreground == Color::Legacy(1));
-        assert!(rs.color_background == Color::Legacy(0));
         assert!(rs.page_background == Color::Legacy(5));
         assert!(rs.page_on_time_ds == 10);
         assert!(rs.page_off_time_ds == 2);
@@ -865,7 +859,6 @@ mod test {
         let p = pages.next().unwrap().unwrap();
         let rs = p.render_state;
         assert!(rs.color_foreground == Color::Legacy(3));
-        assert!(rs.color_background == Color::Legacy(9));
         assert!(rs.page_background == Color::Legacy(0));
         assert!(rs.page_on_time_ds == 20);
         assert!(rs.page_off_time_ds == 0);
@@ -903,5 +896,9 @@ mod test {
         let mut pages = PageSplitter::new(rs, "[tr1,1,50,14]");
         if let Some(Ok(_)) = pages.next() { assert!(true); }
         else { assert!(false) }
+        let mut pages = PageSplitter::new(rs, "[pb9]");
+        if let Some(Err(SyntaxError::UnsupportedTagValue)) = pages.next() {
+            assert!(true);
+        } else { assert!(false) }
     }
 }
