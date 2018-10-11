@@ -69,6 +69,12 @@ impl Font {
         }
         Ok(fonts)
     }
+    pub fn height(&self) -> u16 {
+        self.height as u16
+    }
+    pub fn line_spacing(&self) -> u16 {
+        self.line_spacing as u16
+    }
 }
 
 impl Queryable for Font {

@@ -333,7 +333,7 @@ fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
     for page in PageSplitter::new(rs, &s.multi) {
         let page = page?;
         // FIXME: render page as face of DMS
-        let mut raster = page.render()?;
+        let mut raster = page.render(&msg_data.fonts)?;
         let mut pix = raster.pixels();
         let mut frame = Frame::from_rgba(w, h, &mut pix[..]);
         frame.delay = page.page_on_time_ds() * 10;

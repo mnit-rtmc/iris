@@ -11,8 +11,10 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+use std::collections::HashMap;
 use multi::*;
 use raster::Raster;
+use font::Font;
 
 /// Value result from parsing MULTI.
 type UnitResult = Result<(), SyntaxError>;
@@ -54,9 +56,26 @@ impl TextSpan {
     fn new(state: State, text: String) -> Self {
         TextSpan { state, text }
     }
+    /// Get the line spacing
+    fn line_spacing(&self, f: &Font) -> u16 {
+        if self.state.line_number > 0 {
+            if let Some(spacing) = self.state.line_spacing {
+                spacing as u16
+            } else {
+                f.line_spacing()
+            }
+        } else {
+            0
+        }
+    }
     /// Get the height of a text span
-    fn height(&self) -> u16 {
-        7   // FIXME
+    fn height(&self, fonts: &HashMap<i32, Font>) -> u16 {
+        let fnum = self.state.font.0 as i32;
+        if let Some(f) = fonts.get(&fnum) {
+            f.height() + self.line_spacing(f)
+        } else {
+            7   // FIXME
+        }
     }
 }
 
@@ -361,7 +380,7 @@ impl State {
     fn matches_line(&self, other: &State) -> bool {
         self.text_rectangle == other.text_rectangle &&
         self.just_page      == other.just_page &&
-        self.line_number    == other.line_number
+        self.line_number    <= other.line_number
     }
 }
 
@@ -634,14 +653,19 @@ impl PageRenderer {
     fn check_justification(&self) -> Result<(), SyntaxError> {
         let mut jp = PageJustification::Other;
         let mut jl = LineJustification::Other;
+        let mut ln = 0;
         for s in &self.spans {
             let just_page = s.state.just_page;
             let just_line = s.state.just_line;
-            if just_page < jp || (just_page == jp && just_line < jl) {
+            let line_number = s.state.line_number;
+            if just_page < jp ||
+              (just_page == jp && line_number == ln && just_line < jl)
+            {
                 return Err(SyntaxError::TagConflict);
             }
             jp = just_page;
             jl = just_line;
+            ln = line_number;
         }
         Ok(())
     }
@@ -664,7 +688,9 @@ impl PageRenderer {
         Ok(page)
     }
     /// Render the page.
-    pub fn render(&self) -> Result<Raster, SyntaxError> {
+    pub fn render(&self, fonts: &HashMap<i32, Font>)
+        -> Result<Raster, SyntaxError>
+    {
         let rs = self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
@@ -680,26 +706,37 @@ impl PageRenderer {
         }
         for s in &self.spans {
             // FIXME: render text
-println!("span: {}, baseline: {}", s.text, self.baseline(s));
+            let jp = s.state.just_page;
+println!("span: {}, {:?} baseline: {}", s.text, jp, self.baseline(s, fonts));
         }
         Ok(page)
     }
     /// Get the baseline of a text span.
-    fn baseline(&self, s: &TextSpan) -> u16 {
+    fn baseline(&self, s: &TextSpan, fonts: &HashMap<i32, Font>) -> u16 {
         match s.state.just_page {
-            PageJustification::Top    => self.baseline_top(s),
-            PageJustification::Middle => self.baseline_top(s),
-            PageJustification::Bottom => self.baseline_top(s),
+            PageJustification::Top    => self.baseline_top(s, fonts),
+            PageJustification::Middle => self.baseline_top(s, fonts),
+            PageJustification::Bottom => self.baseline_top(s, fonts),
             _                         => unreachable!(),
         }
     }
     /// Get the baseline of a top-justified span
-    fn baseline_top(&self, span: &TextSpan) -> u16 {
-        self.spans.iter()
-                  .filter(|s| s.state.matches_line(&span.state))
-                  .map(|s| s.height())
-                  .max()
-                  .unwrap_or(0)
+    fn baseline_top(&self, span: &TextSpan, fonts: &HashMap<i32, Font>) -> u16 {
+        let mut total = span.state.text_rectangle.y;
+        let mut p = (0, 0);
+        for s in &self.spans {
+            if s.state.matches_line(&span.state) {
+                let line_number = s.state.line_number;
+                let h = s.height(fonts);
+                p = if line_number > p.0 {
+                    total += p.1;
+                    (line_number, h)
+                } else {
+                    (p.0, p.1.max(h))
+                };
+            }
+        }
+        total + p.1
     }
 }
 
