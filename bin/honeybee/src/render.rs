@@ -63,6 +63,14 @@ pub struct PageRenderer {
     spans  : Vec<TextSpan>, // text spans
 }
 
+/// Scale a u8 value by another (mapping range to 0-1)
+fn scale_u8(a: u8, b: u8) -> u8 {
+    let aa = a as u32;
+    let bb = b as u32;
+    let c = (aa * bb + 255) >> 8;
+    c as u8
+}
+
 impl State {
     /// Create a new render state.
     pub fn new(color_scheme     : ColorScheme,
@@ -126,33 +134,64 @@ impl State {
             1
         }
     }
-    /// Check whether a color works for the color scheme.
-    fn check_scheme(&self, c: &Color) -> UnitResult {
+    /// Get a color appropriate for the color scheme.
+    ///
+    /// * `c` Color value.
+    /// * `ds` Default state.
+    fn get_color(&self, c: Color, ds: &State) -> Result<Color, SyntaxError> {
         match self.color_scheme {
-            ColorScheme::Monochrome1Bit => self.check_monochrome_1_bit(c),
-            ColorScheme::Monochrome8Bit => self.check_monochrome_8_bit(c),
-            ColorScheme::ColorClassic   => self.check_classic(c),
-            _                           => Ok(())
+            ColorScheme::Monochrome1Bit => self.get_monochrome_1_bit(c, ds),
+            ColorScheme::Monochrome8Bit => self.get_monochrome_8_bit(c, ds),
+            ColorScheme::ColorClassic   => self.get_classic(c),
+            ColorScheme::Color24Bit     => self.get_color_24_bit(c),
         }
     }
-    /// Check color for a monochrome 1-bit scheme.
-    fn check_monochrome_1_bit(&self, c: &Color) -> UnitResult {
+    /// Get color for a monochrome 1-bit scheme.
+    ///
+    /// * `c` Color value.
+    /// * `ds` Default state.
+    fn get_monochrome_1_bit(&self, c: Color, ds: &State)
+        -> Result<Color, SyntaxError>
+    {
         match c {
-            Color::Legacy(0...1) => Ok(()),
-            _                    => Err(SyntaxError::UnsupportedTagValue),
-        }
-    }
-    /// Check color for a monochrome 8-bit scheme.
-    fn check_monochrome_8_bit(&self, c: &Color) -> UnitResult {
-        match c {
-            Color::Legacy(_) => Ok(()),
+            Color::Legacy(0) => Ok(ds.page_background),
+            Color::Legacy(1) => Ok(ds.color_foreground),
             _                => Err(SyntaxError::UnsupportedTagValue),
         }
     }
-    /// Check color for a classic scheme.
-    fn check_classic(&self, c: &Color) -> UnitResult {
+    /// Get color for a monochrome 8-bit scheme.
+    ///
+    /// * `c` Color value.
+    /// * `ds` Default state.
+    fn get_monochrome_8_bit(&self, c: Color, ds: &State)
+        -> Result<Color, SyntaxError>
+    {
+        if let Color::Legacy(v) = c {
+            let rgb = self.color_rgb(ds.color_foreground)?;
+            let r = scale_u8(rgb[0], v);
+            let g = scale_u8(rgb[1], v);
+            let b = scale_u8(rgb[2], v);
+            Ok(Color::RGB(r,g,b))
+        } else {
+            Err(SyntaxError::UnsupportedTagValue)
+        }
+    }
+    /// Get color for a classic scheme.
+    ///
+    /// * `c` Color value.
+    fn get_classic(&self, c: Color) -> Result<Color, SyntaxError> {
         match c {
-            Color::Legacy(0...9) => Ok(()),
+            Color::Legacy(0...9) => Ok(c),
+            _                    => Err(SyntaxError::UnsupportedTagValue),
+        }
+    }
+    /// Get color for a 24-bit scheme.
+    ///
+    /// * `c` Color value.
+    fn get_color_24_bit(&self, c: Color) -> Result<Color, SyntaxError> {
+        match c {
+            Color::RGB(_,_,_)    => Ok(c),
+            Color::Legacy(0...9) => Ok(c), // allow classic colors only
             _                    => Err(SyntaxError::UnsupportedTagValue),
         }
     }
@@ -168,18 +207,16 @@ impl State {
             },
             Value::ColorBackground(Some(c)) => {
                 // This tag remains for backward compatibility with 1203v1
-                self.check_scheme(c)?;
-                self.page_background = *c;
+                self.page_background = self.get_color(*c, default_state)?;
             },
             Value::ColorForeground(None) => {
                 self.color_foreground = default_state.color_foreground;
             },
             Value::ColorForeground(Some(c)) => {
-                self.check_scheme(c)?;
-                self.color_foreground = *c
+                self.color_foreground = self.get_color(*c, default_state)?;
             },
             Value::ColorRectangle(_,c) => {
-                self.check_scheme(c)?;
+                self.get_color(*c, default_state)?;
             },
             Value::Font(None) => { self.font = default_state.font },
             Value::Font(Some(f)) => { self.font = *f },
@@ -218,8 +255,7 @@ impl State {
                 self.page_background = default_state.page_background;
             },
             Value::PageBackground(Some(c)) => {
-                self.check_scheme(c)?;
-                self.page_background = *c;
+                self.page_background = self.get_color(*c, default_state)?;
             },
             Value::PageTime(on, off) => {
                 self.page_on_time_ds = on.unwrap_or(
@@ -276,7 +312,11 @@ impl State {
     }
     /// Get the page background color
     fn page_background(&self) -> Result<[u8;3], SyntaxError> {
-        match self.page_background {
+        self.color_rgb(self.page_background)
+    }
+    /// Get RGB triplet for a color.
+    fn color_rgb(&self, c: Color) -> Result<[u8;3], SyntaxError> {
+        match c {
             Color::RGB(r,g,b) => Ok([r,g,b]),
             Color::Legacy(v)  => self.color_rgb_legacy(v),
         }
@@ -295,14 +335,14 @@ impl State {
     /// Get RGB triplet for a monochrome 1-bit color.
     fn color_rgb_monochrome_1_bit(&self, v: u8) -> Result<[u8;3], SyntaxError> {
         match v {
-            0 => Ok([  0,   0,   0]), // FIXME: monochrome background color
-            1 => Ok([255, 255, 255]), // FIXME: monochrome foreground color
+            0 => Ok([  0,   0,   0]),
+            1 => Ok([255, 255, 255]),
             _ => Err(SyntaxError::UnsupportedTagValue),
         }
     }
     /// Get RGB triplet for a monochrome 8-bit color.
     fn color_rgb_monochrome_8_bit(&self, v: u8) -> Result<[u8;3], SyntaxError> {
-        Ok([v,v,v])   // FIXME: use monochrome color
+        Ok([v,v,v])
     }
     /// Get RGB triplet for a classic color.
     ///
