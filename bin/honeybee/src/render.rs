@@ -131,8 +131,33 @@ impl RenderState {
     }
     /// Check whether a color works for the color scheme.
     fn check_scheme(&self, c: &Color) -> UnitResult {
-        // FIXME: check color scheme
-        Ok(())
+        match self.color_scheme {
+            ColorScheme::Monochrome1Bit => self.check_monochrome_1_bit(c),
+            ColorScheme::Monochrome8Bit => self.check_monochrome_8_bit(c),
+            ColorScheme::ColorClassic   => self.check_classic(c),
+            _                           => Ok(())
+        }
+    }
+    /// Check color for a monochrome 1-bit scheme.
+    fn check_monochrome_1_bit(&self, c: &Color) -> UnitResult {
+        match c {
+            Color::Legacy(0...1) => Ok(()),
+            _                    => Err(SyntaxError::UnsupportedTagValue),
+        }
+    }
+    /// Check color for a monochrome 8-bit scheme.
+    fn check_monochrome_8_bit(&self, c: &Color) -> UnitResult {
+        match c {
+            Color::Legacy(_) => Ok(()),
+            _                => Err(SyntaxError::UnsupportedTagValue),
+        }
+    }
+    /// Check color for a classic scheme.
+    fn check_classic(&self, c: &Color) -> UnitResult {
+        match c {
+            Color::Legacy(0...9) => Ok(()),
+            _                    => Err(SyntaxError::UnsupportedTagValue),
+        }
     }
     /// Update the render state with a MULTI value.
     ///
