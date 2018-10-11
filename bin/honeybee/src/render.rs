@@ -114,17 +114,17 @@ impl RenderState {
         self.text_rectangle.h
     }
     /// Get the character width (1 for variable width).
-    fn char_width(&self) -> u32 {
+    fn char_width(&self) -> u16 {
         if self.is_char_matrix() {
-            self.char_width as u32
+            self.char_width.into()
         } else {
             1
         }
     }
     /// Get the character height (1 for variable height).
-    fn char_height(&self) -> u32 {
+    fn char_height(&self) -> u16 {
         if self.char_height > 0 {
-            self.char_height as u32
+            self.char_height.into()
         } else {
             1
         }
@@ -185,8 +185,17 @@ impl RenderState {
             Value::Font(None) => { self.font = default_state.font },
             Value::Font(Some(f)) => { self.font = *f },
             Value::Graphic(_, _) => (),
+            Value::JustificationLine(Some(LineJustification::Other)) => {
+                return Err(SyntaxError::UnsupportedTagValue);
+            },
+            Value::JustificationLine(Some(LineJustification::Full)) => {
+                return Err(SyntaxError::UnsupportedTagValue);
+            },
             Value::JustificationLine(jl) => {
                 self.just_line = jl.unwrap_or(default_state.just_line);
+            },
+            Value::JustificationPage(Some(PageJustification::Other)) => {
+                return Err(SyntaxError::UnsupportedTagValue);
             },
             Value::JustificationPage(jp) => {
                 self.just_page = jp.unwrap_or(default_state.just_page);
@@ -239,6 +248,7 @@ impl RenderState {
         }
         Ok(())
     }
+    /// Update the text rectangle.
     fn update_text_rectangle(&mut self, default_state: &RenderState,
         r: &Rectangle) -> UnitResult
     {
@@ -246,7 +256,7 @@ impl RenderState {
         if !default_state.text_rectangle.contains(r) {
             return Err(SyntaxError::UnsupportedTagValue);
         }
-        let cw = self.char_width as u16;
+        let cw = self.char_width();
         if cw > 0 {
             // Check text rectangle matches character boundaries
             let x = r.x - 1;
@@ -254,7 +264,7 @@ impl RenderState {
                 return Err(SyntaxError::UnsupportedTagValue);
             }
         }
-        let lh = self.char_height as u16;
+        let lh = self.char_height();
         if lh > 0 {
             // Check text rectangle matches line boundaries
             let y = r.y - 1;
@@ -721,12 +731,6 @@ impl PageRenderer {
             }
             let jp = rs.just_page;
             let jl = rs.just_line;
-            if jp == PageJustification::Other {
-                return Err(SyntaxError::UnsupportedTagValue);
-            }
-            if jl == LineJustification::Other || jl == LineJustification::Full {
-                return Err(SyntaxError::UnsupportedTagValue);
-            }
             // FIXME: render text
 println!("span: {}, {:?} {:?} : ln: {}", s.text, jp, jl, rs.line_number);
         }
