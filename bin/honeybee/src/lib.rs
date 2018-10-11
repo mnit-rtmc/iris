@@ -10,6 +10,7 @@ extern crate postgres;
 extern crate ssh2;
 
 pub mod fetcher;
+mod font;
 mod resource;
 mod mere;
 mod render;
