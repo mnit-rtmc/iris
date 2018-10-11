@@ -309,10 +309,9 @@ impl RenderState {
     ///
     /// * `v` Color value (0-9).
     fn color_rgb_classic(&self, v: u8) -> Result<[u8;3], SyntaxError> {
-        if let Some(c) = ColorClassic::from_u8(v) {
-            Ok(c.rgb())
-        } else {
-            Err(SyntaxError::UnsupportedTagValue)
+        match ColorClassic::from_u8(v) {
+            Some(c) => Ok(c.rgb()),
+            None    => Err(SyntaxError::UnsupportedTagValue),
         }
     }
 }
