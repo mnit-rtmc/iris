@@ -24,7 +24,7 @@ use std::sync::mpsc::Sender;
 use std::time::Instant;
 use multi::{Color,ColorClassic,ColorScheme,LineJustification,PageJustification,
             Rectangle};
-use render::{PageSplitter,RenderState};
+use render::{PageSplitter,State};
 
 fn make_name(dir: &Path, n: &str) -> PathBuf {
     let mut p = PathBuf::new();
@@ -440,7 +440,7 @@ fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
 
 /// Create default render state for a sign message.
 fn create_render_state(s: &SignMessage, msg_data: &MsgData)
-    -> Result<RenderState, Error>
+    -> Result<State, Error>
 {
     let cfg = msg_data.configs.get(&s.sign_config);
     if cfg.is_none() {
@@ -454,6 +454,8 @@ fn create_render_state(s: &SignMessage, msg_data: &MsgData)
         "color24Bit"     => Ok(ColorScheme::Color24Bit),
         s                => Err(format_err!("Unknown scheme: {:?}", s)),
     }?;
+    let char_width = cfg.char_width as u8;
+    let char_height = cfg.char_height as u8;
     let color_foreground: Color = match color_scheme {
         ColorScheme::Monochrome1Bit|
         ColorScheme::Monochrome8Bit => cfg.monochrome_foreground.into(),
@@ -478,8 +480,6 @@ fn create_render_state(s: &SignMessage, msg_data: &MsgData)
         cfg.pixel_height as u16);
     let just_page = PageJustification::Top;    // FIXME
     let just_line = LineJustification::Center; // FIXME
-    let char_width = cfg.char_width as u8;
-    let char_height = cfg.char_height as u8;
     let fname = cfg.default_font.as_ref();
     if fname.is_none() {
         return Err(format_err!("No default font for {}", cfg.name));
@@ -490,18 +490,17 @@ fn create_render_state(s: &SignMessage, msg_data: &MsgData)
         return Err(format_err!("Unknown font: {}", fname));
     }
     let font = (font.unwrap().f_number as u8, None);
-    Ok(RenderState::new(
-        color_scheme,
-        color_foreground,
-        page_background,
-        page_on_time_ds,
-        page_off_time_ds,
-        text_rectangle,
-        just_page,
-        just_line,
-        char_width,
-        char_height,
-        font,
+    Ok(State::new(color_scheme,
+                  char_width,
+                  char_height,
+                  color_foreground,
+                  page_background,
+                  page_on_time_ds,
+                  page_off_time_ds,
+                  text_rectangle,
+                  just_page,
+                  just_line,
+                  font,
     ))
 }
 

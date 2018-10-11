@@ -17,9 +17,9 @@ use raster::Raster;
 /// Value result from parsing MULTI.
 type UnitResult = Result<(), SyntaxError>;
 
-/// Text render state
+/// Page render state
 #[derive(Copy,Clone)]
-pub struct RenderState {
+pub struct State {
     color_scheme    : ColorScheme,
     char_width      : u8,
     char_height     : u8,
@@ -38,34 +38,36 @@ pub struct RenderState {
 
 /// Page splitter (iterator)
 pub struct PageSplitter<'a> {
-    default_state : RenderState,
-    render_state  : RenderState,
+    default_state : State,
+    state         : State,
     parser        : Parser<'a>,
     more          : bool,
 }
 
 /// Text span
 pub struct TextSpan {
-    render_state : RenderState, // start at start of span
-    text         : String,
+    state : State,   // render state at start of span
+    text  : String,
 }
 
 impl TextSpan {
-    fn new(render_state: RenderState, text: String) -> Self {
-        TextSpan { render_state, text }
+    fn new(state: State, text: String) -> Self {
+        TextSpan { state, text }
     }
 }
 
 /// Page renderer
 pub struct PageRenderer {
-    render_state : RenderState,     // state at start of page
-    values       : Vec<Value>,      // graphics / color rectangles
-    spans        : Vec<TextSpan>,   // text spans
+    state  : State,         // render state at start of page
+    values : Vec<Value>,    // graphics / color rectangles
+    spans  : Vec<TextSpan>, // text spans
 }
 
-impl RenderState {
+impl State {
     /// Create a new render state.
     pub fn new(color_scheme     : ColorScheme,
+               char_width       : u8,
+               char_height      : u8,
                color_foreground : Color,
                page_background  : Color,
                page_on_time_ds  : u8,
@@ -73,12 +75,12 @@ impl RenderState {
                text_rectangle   : Rectangle,
                just_page        : PageJustification,
                just_line        : LineJustification,
-               char_width       : u8,
-               char_height      : u8,
                font             : (u8, Option<u16>)) -> Self
     {
-        RenderState {
+        State {
             color_scheme,
+            char_width,
+            char_height,
             color_foreground,
             page_background,
             page_on_time_ds,
@@ -89,8 +91,6 @@ impl RenderState {
             just_page,
             just_line,
             line_number : 0,
-            char_width,
-            char_height,
             font,
         }
     }
@@ -160,7 +160,7 @@ impl RenderState {
     ///
     /// * `default_state` Default render state.
     /// * `v` MULTI value.
-    fn update(&mut self, default_state: &RenderState, v: &Value) -> UnitResult {
+    fn update(&mut self, default_state: &State, v: &Value) -> UnitResult {
         match v {
             Value::ColorBackground(None) => {
                 // This tag remains for backward compatibility with 1203v1
@@ -248,7 +248,7 @@ impl RenderState {
         Ok(())
     }
     /// Update the text rectangle.
-    fn update_text_rectangle(&mut self, default_state: &RenderState,
+    fn update_text_rectangle(&mut self, default_state: &State,
         r: &Rectangle) -> UnitResult
     {
         // FIXME: handle zero width/height in rectangle
@@ -317,11 +317,8 @@ impl RenderState {
 
 /*
 impl<'a> Span<'a> {
-    fn new(s: String, rs: RenderState) -> Self {
-        Span { span: s, render_state: rs }
-    }
     fn char_spacing(&self) -> u8 {
-        let rs = self.render_state;
+        let rs = self.state;
         match rs.char_spacing {
             Some(cs) => cs,
             _        => rs.font.char_spacing(),
@@ -338,13 +335,13 @@ impl<'a> Span<'a> {
     fn width(&self) -> u32 {
         let span = self.span;
         let cs = self.char_spacing();
-        self.render_state.font.width(span, cs)
+        self.state.font.width(span, cs)
     }
     fn height(&self) -> u32 {
-        self.render_state.font.height()
+        self.state.font.height()
     }
     fn line_spacing(&self) -> u8 {
-        let rs = self.render_state;
+        let rs = self.state;
         match rs.line_spacing {
             Some(ls) => ls,
             _        => rs.font.line_spacing(),
@@ -356,9 +353,9 @@ impl<'a> Span<'a> {
         let mut x = left;
         let y = base - self.height();
         let cs = self.char_spacing();
-        let fg = self.render_state.color_foreground;
+        let fg = self.state.color_foreground;
         for cp in self.span.chars() {
-            let g = self.render_state.font.get_char(cp)?;
+            let g = self.state.font.get_char(cp)?;
             raster.render_graphic(g, fg, x, y);
             x += g.width() + cs;
         }
@@ -367,12 +364,6 @@ impl<'a> Span<'a> {
 }*/
 /*
 impl<'a> Fragment<'a> {
-    fn new(rs: RenderState) -> Self {
-        Fragment {
-            spans: vec!(),
-            render_state: rs,
-        }
-    }
     fn height(&self) -> u32 {
         match self.spans.iter().map(|s| s.height()).max() {
             Some(h) => h,
@@ -386,7 +377,7 @@ impl<'a> Fragment<'a> {
         }
     }
     fn add_span(&mut self, s: String) {
-        let rs = self.render_state;
+        let rs = self.state;
         self.spans.push(Span::new(s, rs));
     }
     fn render(&self, raster: &mut Raster, base: u32) -> UnitResult {
@@ -404,8 +395,8 @@ impl<'a> Fragment<'a> {
     }
     fn left(&self) -> Result<u32, SyntaxError> {
         let ex = self.extra_width()?;
-        let jl = self.render_state.just_line;
-        let x = self.render_state.text_rectangle.x;
+        let jl = self.state.just_line;
+        let x = self.state.text_rectangle.x;
         match jl {
             // FIXME: add LineJustification::Full
             LineJustification::Left   => Ok(x),
@@ -415,9 +406,9 @@ impl<'a> Fragment<'a> {
         }
     }
     fn extra_width(&self) -> Result<u32, SyntaxError> {
-        let pw = self.render_state.text_rectangle.w;
+        let pw = self.state.text_rectangle.w;
         let tw = self.width();
-        let cw = self.render_state.char_width();
+        let cw = self.state.char_width();
         let w = pw / cw;
         let r = tw / cw;
         if w >= r {
@@ -427,7 +418,7 @@ impl<'a> Fragment<'a> {
         }
     }
     fn char_width_floor(&self, ex: u32) -> u32 {
-        let cw = self.render_state.char_width();
+        let cw = self.state.char_width();
         (ex / cw) * cw
     }
     fn width(&self) -> u32 {
@@ -447,9 +438,6 @@ impl<'a> Fragment<'a> {
 }*/
 /*
 impl<'a> Line<'a> {
-    fn new(render_state: RenderState) -> Self {
-        Line { fragments: vec!(), render_state }
-    }
     fn height(&self) -> u32 {
         match self.fragments.iter().map(|f| f.height()).max() {
             Some(h) => h,
@@ -463,7 +451,7 @@ impl<'a> Line<'a> {
         }
     }
     fn line_spacing_avg(&self, other: &Self) -> u32 {
-        let ls = self.render_state.line_spacing;
+        let ls = self.state.line_spacing;
         match ls {
             Some(ls) => ls,
             _        => self.line_spacing_avg2(other),
@@ -481,7 +469,7 @@ impl<'a> Line<'a> {
     fn last_fragment(&mut self) -> &mut Fragment<'a> {
         let len = self.fragments.len();
         if len == 0 {
-            let rs = self.render_state;
+            let rs = self.state;
             self.add_fragment(rs);
         }
         &mut self.fragments[len - 1]
@@ -489,14 +477,14 @@ impl<'a> Line<'a> {
     fn add_span(&mut self, s: String) {
         self.last_fragment().add_span(s);
     }
-    fn add_fragment(&mut self, rs: RenderState) {
+    fn add_fragment(&mut self, rs: State) {
         let f = Fragment::new(rs);
         self.fragments.push(f);
     }
     fn justification_line_used(&self) -> LineJustification {
         let len = self.fragments.len();
         if len > 0 {
-            self.fragments[len - 1].render_state.just_line
+            self.fragments[len - 1].state.just_line
         } else {
             LineJustification::Other
         }
@@ -510,19 +498,19 @@ impl<'a> Line<'a> {
 }*/
 /*
 impl<'a> Block<'a> {
-    fn new(render_state: RenderState) -> Block<'a> {
-        Block { lines: vec!(), render_state }
+    fn new(state: State) -> Block<'a> {
+        Block { lines: vec!(), state }
     }
     fn add_span(&mut self, s: String) {
         self.last_line().add_span(s);
     }
-    fn add_fragment(&mut self, rs: RenderState) {
+    fn add_fragment(&mut self, rs: State) {
         self.last_line().add_fragment(rs);
     }
     fn last_line(&mut self) -> &mut Line<'a> {
         let len = self.lines.len();
         if len == 0 {
-            let line = Line::new(self.render_state);
+            let line = Line::new(self.state);
             self.lines.push(line);
         }
         &mut self.lines[len - 1]
@@ -544,8 +532,8 @@ impl<'a> Block<'a> {
             // height to be taken from the current font.
             line.add_span("".to_string());
         }
-        self.render_state.line_spacing = ls;
-        let line = Line::new(self.render_state);
+        self.state.line_spacing = ls;
+        let line = Line::new(self.state);
         self.lines.push(line);
     }
     fn render(&mut self, raster: &mut Raster) -> UnitResult {
@@ -564,8 +552,8 @@ impl<'a> Block<'a> {
     }
     fn top(&self) -> Result<u32, SyntaxError> {
         let ex = self.extra_height()?;
-        let jp = self.render_state.just_page;
-        let y = self.render_state.text_rectangle.y;
+        let jp = self.state.just_page;
+        let y = self.state.text_rectangle.y;
         match jp {
             PageJustification::Top    => Ok(y),
             PageJustification::Middle => Ok(y + self.char_height_floor(ex / 2)),
@@ -574,8 +562,8 @@ impl<'a> Block<'a> {
         }
     }
     fn extra_height(&self) -> Result<u32, SyntaxError> {
-        let ph = self.render_state.text_rectangle.h;
-        let ch = self.render_state.char_height();
+        let ph = self.state.text_rectangle.h;
+        let ch = self.state.char_height();
         let h = ph / ch;
         let r = self.height() / ch;
         if h >= r {
@@ -585,7 +573,7 @@ impl<'a> Block<'a> {
         }
     }
     fn char_height_floor(&self, ex: u32) -> u32 {
-        let ch = self.render_state.char_height();
+        let ch = self.state.char_height();
         (ex / ch) * ch
     }
     fn height(&self) -> u32 {
@@ -613,7 +601,7 @@ impl Renderer {
         &self.blocks[len - 1]
     }
     fn add_block(&mut self) {
-        let block = Block::new(self.render_state);
+        let block = Block::new(self.state);
         self.blocks.push(block);
     }
     pub fn add_span(&mut self, s: String) {
@@ -629,7 +617,7 @@ impl Renderer {
         Ok(())
     }
     pub fn set_color_foreground(&mut self, cf: Color) {
-        self.render_state.color_foreground = cf;
+        self.state.color_foreground = cf;
     }
     pub fn add_color_rectangle(&mut self, r: Rectangle, clr: Color) {
         self.fill_rectangle(r, clr);
@@ -648,7 +636,7 @@ impl Renderer {
     pub fn set_text_rectangle(&mut self, r: Rectangle) -> UnitResult {
         self.draw_text()?;
         if self.default_state.text_rectangle.contains(&r) {
-            self.render_state.text_rectangle = r;
+            self.state.text_rectangle = r;
             Ok(())
         } else {
             Err(SyntaxError::UnsupportedTagValue)
@@ -662,7 +650,7 @@ impl Renderer {
         Ok(())
     }
     pub fn add_graphic(&mut self, g: &Raster, x: u32, y: u32) -> UnitResult {
-        let c = self.render_state.color_foreground;
+        let c = self.state.color_foreground;
         self.render_graphic(g, c, x - 1, y - 1)
     }
     fn render_graphic(&mut self, g: &Raster, clr: Color, x: u32, y: u32)
@@ -674,26 +662,24 @@ impl Renderer {
 
 impl PageRenderer {
     /// Create a new page renderer
-    pub fn new(render_state: RenderState, values: Vec<Value>,
-        spans: Vec<TextSpan>) -> Self
-    {
+    pub fn new(state: State, values: Vec<Value>, spans: Vec<TextSpan>) -> Self {
         PageRenderer {
-            render_state,
+            state,
             values,
             spans,
         }
     }
     /// Get the page-on time (deciseconds)
     pub fn page_on_time_ds(&self) -> u16 {
-        self.render_state.page_on_time_ds.into()
+        self.state.page_on_time_ds.into()
     }
     /// Get the page-off time (deciseconds)
     pub fn page_off_time_ds(&self) -> u16 {
-        self.render_state.page_off_time_ds.into()
+        self.state.page_off_time_ds.into()
     }
     /// Render a blank page.
     pub fn render_blank(&self) -> Result<Raster, SyntaxError> {
-        let rs = self.render_state;
+        let rs = self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
         let clr = rs.page_background()?;
@@ -703,7 +689,7 @@ impl PageRenderer {
     }
     /// Render the page.
     pub fn render(&self) -> Result<Raster, SyntaxError> {
-        let rs = self.render_state;
+        let rs = self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
         let clr = rs.page_background()?;
@@ -720,7 +706,7 @@ impl PageRenderer {
         let jl = LineJustification::Other;
         for s in &self.spans {
             // FIXME: handle text rectangles
-            let rs = s.render_state;
+            let rs = s.state;
             if rs.just_page < jp || (rs.just_page == jp && rs.just_line < jl) {
                 return Err(SyntaxError::TagConflict);
             }
@@ -736,13 +722,13 @@ println!("span: {}, {:?} {:?} : ln: {}", s.text, jp, jl, rs.line_number);
 impl<'a> PageSplitter<'a> {
     /// Create a new page splitter.
     ///
-    /// * `render_state` Default render state.
+    /// * `default_state` Default render state.
     /// * `ms` MULTI string to parse.
-    pub fn new(render_state: RenderState, ms: &'a str) -> Self {
+    pub fn new(default_state: State, ms: &'a str) -> Self {
         let parser = Parser::new(ms);
-        let default_state = render_state;
+        let state = default_state;
         let more = true;
-        PageSplitter { default_state, render_state, parser, more }
+        PageSplitter { default_state, state, parser, more }
     }
     /// Make the next page.
     fn make_page(&mut self) -> Result<PageRenderer, SyntaxError> {
@@ -752,14 +738,14 @@ impl<'a> PageSplitter<'a> {
         let mut spans = vec!();
         while let Some(t) = self.parser.next() {
             let v = t?;
-            self.render_state.update(&self.default_state, &v)?;
+            self.state.update(&self.default_state, &v)?;
             match v {
                 Value::NewPage() => {
                     self.more = true;
                     break;
                 },
                 Value::Text(t) => {
-                    let ts = TextSpan::new(self.render_state, t);
+                    let ts = TextSpan::new(self.state, t);
                     spans.push(ts);
                 },
                 Value::Graphic(_,_)|
@@ -768,14 +754,14 @@ impl<'a> PageSplitter<'a> {
             }
         }
         // These values affect the entire page
-        rs.page_background = self.render_state.page_background;
-        rs.page_on_time_ds = self.render_state.page_on_time_ds;
-        rs.page_off_time_ds = self.render_state.page_off_time_ds;
+        rs.page_background = self.state.page_background;
+        rs.page_on_time_ds = self.state.page_on_time_ds;
+        rs.page_off_time_ds = self.state.page_off_time_ds;
         Ok(PageRenderer::new(rs, values, spans))
     }
     /// Get the current page state.
-    fn page_state(&self) -> RenderState {
-        let mut rs = self.render_state;
+    fn page_state(&self) -> State {
+        let mut rs = self.state;
         // Set these back to default values
         rs.text_rectangle = self.default_state.text_rectangle;
         rs.line_spacing = self.default_state.line_spacing;
@@ -798,14 +784,15 @@ impl<'a> Iterator for PageSplitter<'a> {
 #[cfg(test)]
 mod test {
     use super::*;
-    fn make_full_matrix() -> RenderState {
-        RenderState::new(ColorScheme::Color24Bit,
-                         Color::Legacy(1), Color::Legacy(0),
-                         20, 0,
-                         Rectangle::new(1, 1, 60, 30),
-                         PageJustification::Top,
-                         LineJustification::Left,
-                         0, 0, (1, None))
+    fn make_full_matrix() -> State {
+        State::new(ColorScheme::Color24Bit,
+                   0, 0,
+                   Color::Legacy(1), Color::Legacy(0),
+                   20, 0,
+                   Rectangle::new(1, 1, 60, 30),
+                   PageJustification::Top,
+                   LineJustification::Left,
+                   (1, None))
     }
     #[test]
     fn page_count() {
@@ -828,7 +815,7 @@ mod test {
         let rs = make_full_matrix();
         let mut pages = PageSplitter::new(rs, "");
         let p = pages.next().unwrap().unwrap();
-        let rs = p.render_state;
+        let rs = p.state;
         assert!(rs.color_scheme == ColorScheme::Color24Bit);
         assert!(rs.color_foreground == Color::Legacy(1));
         assert!(rs.page_background == Color::Legacy(0));
@@ -845,7 +832,7 @@ mod test {
         let mut pages = PageSplitter::new(rs, "[pt10o2][cb9][pb5][cf3][jp3]\
             [jl4][tr1,1,10,10][nl4][fo3,1234][sc2][np][pb][pt][cb][/sc]");
         let p = pages.next().unwrap().unwrap();
-        let rs = p.render_state;
+        let rs = p.state;
         assert!(rs.color_foreground == Color::Legacy(1));
         assert!(rs.page_background == Color::Legacy(5));
         assert!(rs.page_on_time_ds == 10);
@@ -857,7 +844,7 @@ mod test {
         assert!(rs.char_spacing == None);
         assert!(rs.font == (1, None));
         let p = pages.next().unwrap().unwrap();
-        let rs = p.render_state;
+        let rs = p.state;
         assert!(rs.color_foreground == Color::Legacy(3));
         assert!(rs.page_background == Color::Legacy(0));
         assert!(rs.page_on_time_ds == 20);
@@ -869,14 +856,15 @@ mod test {
         assert!(rs.char_spacing == Some(2));
         assert!(rs.font == (3, Some(0x1234)));
     }
-    fn make_char_matrix() -> RenderState {
-        RenderState::new(ColorScheme::Monochrome1Bit,
-                         Color::Legacy(1), Color::Legacy(0),
-                         20, 0,
-                         Rectangle::new(1, 1, 100, 21),
-                         PageJustification::Top,
-                         LineJustification::Left,
-                         5, 7, (1, None))
+    fn make_char_matrix() -> State {
+        State::new(ColorScheme::Monochrome1Bit,
+                   5, 7,
+                   Color::Legacy(1), Color::Legacy(0),
+                   20, 0,
+                   Rectangle::new(1, 1, 100, 21),
+                   PageJustification::Top,
+                   LineJustification::Left,
+                   (1, None))
     }
     #[test]
     fn page_char_matrix() {
