@@ -376,10 +376,6 @@ impl<'a> Fragment<'a> {
             _       => 0,
         }
     }
-    fn add_span(&mut self, s: String) {
-        let rs = self.state;
-        self.spans.push(Span::new(s, rs));
-    }
     fn render(&self, raster: &mut Raster, base: u32) -> UnitResult {
         let mut x = self.left()?;
         let pspan = None;
@@ -466,47 +462,9 @@ impl<'a> Line<'a> {
         // line, rounded up to the nearest whole pixel."
         ((sp0 + sp1) as f32 / 2f32).round() as u32
     }
-    fn last_fragment(&mut self) -> &mut Fragment<'a> {
-        let len = self.fragments.len();
-        if len == 0 {
-            let rs = self.state;
-            self.add_fragment(rs);
-        }
-        &mut self.fragments[len - 1]
-    }
-    fn add_span(&mut self, s: String) {
-        self.last_fragment().add_span(s);
-    }
-    fn add_fragment(&mut self, rs: State) {
-        let f = Fragment::new(rs);
-        self.fragments.push(f);
-    }
-    fn justification_line_used(&self) -> LineJustification {
-        let len = self.fragments.len();
-        if len > 0 {
-            self.fragments[len - 1].state.just_line
-        } else {
-            LineJustification::Other
-        }
-    }
-    fn render(&mut self, raster: &mut Raster, base: u32) -> UnitResult {
-        for f in self.fragments {
-            f.render(raster, base)?;
-        }
-        Ok(())
-    }
 }*/
 /*
 impl<'a> Block<'a> {
-    fn new(state: State) -> Block<'a> {
-        Block { lines: vec!(), state }
-    }
-    fn add_span(&mut self, s: String) {
-        self.last_line().add_span(s);
-    }
-    fn add_fragment(&mut self, rs: State) {
-        self.last_line().add_fragment(rs);
-    }
     fn last_line(&mut self) -> &mut Line<'a> {
         let len = self.lines.len();
         if len == 0 {
@@ -514,14 +472,6 @@ impl<'a> Block<'a> {
             self.lines.push(line);
         }
         &mut self.lines[len - 1]
-    }
-    fn justification_line_used(&self) -> LineJustification {
-        let len = self.lines.len();
-        if len > 0 {
-            self.lines[len - 1].justification_line_used()
-        } else {
-            LineJustification::Other
-        }
     }
     fn add_line(&mut self, ls: Option<u32>) {
         let line = self.last_line();
@@ -593,35 +543,6 @@ impl<'a> Block<'a> {
 }*/
 /*
 impl Renderer {
-    fn last_block(&mut self) -> &Block<'a> {
-        let len = self.blocks.len();
-        if len == 0 {
-            self.add_block();
-        }
-        &self.blocks[len - 1]
-    }
-    fn add_block(&mut self) {
-        let block = Block::new(self.state);
-        self.blocks.push(block);
-    }
-    pub fn add_span(&mut self, s: String) {
-        self.last_block().add_span(s);
-    }
-    pub fn add_line(&mut self, ls: Option<u32>) -> UnitResult {
-        self.last_block().add_line(ls);
-        Ok(())
-    }
-    pub fn add_page(&mut self) -> UnitResult {
-        self.draw_text()?;
-        self.reset_text_rectangle();
-        Ok(())
-    }
-    pub fn set_color_foreground(&mut self, cf: Color) {
-        self.state.color_foreground = cf;
-    }
-    pub fn add_color_rectangle(&mut self, r: Rectangle, clr: Color) {
-        self.fill_rectangle(r, clr);
-    }
     fn fill_rectangle(&mut self, r: Rectangle, clr: Color) {
         let x = r.x - 1;
         let y = r.y - 1;
@@ -633,7 +554,7 @@ impl Renderer {
             }
         }
     }
-    pub fn set_text_rectangle(&mut self, r: Rectangle) -> UnitResult {
+    fn set_text_rectangle(&mut self, r: Rectangle) -> UnitResult {
         self.draw_text()?;
         if self.default_state.text_rectangle.contains(&r) {
             self.state.text_rectangle = r;
@@ -642,21 +563,12 @@ impl Renderer {
             Err(SyntaxError::UnsupportedTagValue)
         }
     }
-    pub fn draw_text(&mut self) -> UnitResult {
+    fn draw_text(&mut self) -> UnitResult {
         for block in self.blocks {
             block.render();
         }
         self.blocks.clear();
         Ok(())
-    }
-    pub fn add_graphic(&mut self, g: &Raster, x: u32, y: u32) -> UnitResult {
-        let c = self.state.color_foreground;
-        self.render_graphic(g, c, x - 1, y - 1)
-    }
-    fn render_graphic(&mut self, g: &Raster, clr: Color, x: u32, y: u32)
-        -> UnitResult
-    {
-        self.raster.copy(g, x, y, clr)
     }
 }*/
 
