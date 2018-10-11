@@ -54,6 +54,10 @@ impl TextSpan {
     fn new(state: State, text: String) -> Self {
         TextSpan { state, text }
     }
+    /// Get the height of a text span
+    fn height(&self) -> u16 {
+        7   // FIXME
+    }
 }
 
 /// Page renderer
@@ -353,6 +357,12 @@ impl State {
             None    => Err(SyntaxError::UnsupportedTagValue),
         }
     }
+    /// Check if states match lines
+    fn matches_line(&self, other: &State) -> bool {
+        self.text_rectangle == other.text_rectangle &&
+        self.just_page      == other.just_page &&
+        self.line_number    == other.line_number
+    }
 }
 
 /*
@@ -434,7 +444,6 @@ impl<'a> Fragment<'a> {
         let jl = self.state.just_line;
         let x = self.state.text_rectangle.x;
         match jl {
-            // FIXME: add LineJustification::Full
             LineJustification::Left   => Ok(x),
             LineJustification::Center => Ok(x + self.char_width_floor(ex / 2)),
             LineJustification::Right  => Ok(x + ex),
@@ -621,6 +630,21 @@ impl PageRenderer {
             spans,
         }
     }
+    /// Check page and line justification ordering
+    fn check_justification(&self) -> Result<(), SyntaxError> {
+        let mut jp = PageJustification::Other;
+        let mut jl = LineJustification::Other;
+        for s in &self.spans {
+            let just_page = s.state.just_page;
+            let just_line = s.state.just_line;
+            if just_page < jp || (just_page == jp && just_line < jl) {
+                return Err(SyntaxError::TagConflict);
+            }
+            jp = just_page;
+            jl = just_line;
+        }
+        Ok(())
+    }
     /// Get the page-on time (deciseconds)
     pub fn page_on_time_ds(&self) -> u16 {
         self.state.page_on_time_ds.into()
@@ -654,22 +678,31 @@ impl PageRenderer {
                 _                          => unreachable!(),
             }
         }
-        let jp = PageJustification::Other;
-        let jl = LineJustification::Other;
         for s in &self.spans {
-            // FIXME: handle text rectangles
-            let rs = s.state;
-            if rs.just_page < jp || (rs.just_page == jp && rs.just_line < jl) {
-                return Err(SyntaxError::TagConflict);
-            }
-            let jp = rs.just_page;
-            let jl = rs.just_line;
             // FIXME: render text
-println!("span: {}, {:?} {:?} : ln: {}", s.text, jp, jl, rs.line_number);
+println!("span: {}, baseline: {}", s.text, self.baseline(s));
         }
         Ok(page)
     }
+    /// Get the baseline of a text span.
+    fn baseline(&self, s: &TextSpan) -> u16 {
+        match s.state.just_page {
+            PageJustification::Top    => self.baseline_top(s),
+            PageJustification::Middle => self.baseline_top(s),
+            PageJustification::Bottom => self.baseline_top(s),
+            _                         => unreachable!(),
+        }
+    }
+    /// Get the baseline of a top-justified span
+    fn baseline_top(&self, span: &TextSpan) -> u16 {
+        self.spans.iter()
+                  .filter(|s| s.state.matches_line(&span.state))
+                  .map(|s| s.height())
+                  .max()
+                  .unwrap_or(0)
+    }
 }
+
 
 impl<'a> PageSplitter<'a> {
     /// Create a new page splitter.
@@ -709,7 +742,9 @@ impl<'a> PageSplitter<'a> {
         rs.page_background = self.state.page_background;
         rs.page_on_time_ds = self.state.page_on_time_ds;
         rs.page_off_time_ds = self.state.page_off_time_ds;
-        Ok(PageRenderer::new(rs, values, spans))
+        let page = PageRenderer::new(rs, values, spans);
+        page.check_justification()?;
+        Ok(page)
     }
     /// Get the current page state.
     fn page_state(&self) -> State {
