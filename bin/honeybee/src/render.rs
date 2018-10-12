@@ -91,18 +91,32 @@ impl<'a> TextSpan {
         }
     }
     /// Render the text span
-    fn render(&self, page: &mut Raster, font: &Font, x: u16, y: u16)
+    fn render(&self, page: &mut Raster, font: &Font, mut x: u32, y: u32)
         -> Result<(), Error>
     {
-        debug!("span: {}, left: {}, top: {}", self.text, x, y);
+        let h = font.height() as u32;
+        let cs = font.char_spacing();
+        debug!("span: {}, left: {}, top: {}, height: {}", self.text, x, y, h);
         let config = Config::new(CharacterSet::Standard, false, true,
             LineWrap::NoWrap);
         let mut buf = [0; GLYPH_LEN];
         for c in self.text.chars() {
             let g = font.glyph(c)?;
+            let w = g.width() as u32;
             let n = decode_config_slice(&g.pixels, config, &mut buf)?;
-            debug!("char: {}, len: {}", c, n);
-            // FIXME: render glyph
+            debug!("char: {}, width: {}, len: {}", c, w, n);
+            for yy in 0..h {
+                for xx in 0..w {
+                    let p = yy * w + xx;
+                    let by = p as usize / 8;
+                    let bi = 7 - (p & 7);
+                    let lit = ((buf[by] >> bi) & 1) != 0;
+                    if lit {
+                        page.set_pixel(x + xx, y + yy, [255, 255, 255, 255]);
+                    }
+                }
+            }
+            x += w + cs;
         }
         Ok(())
     }
@@ -490,7 +504,7 @@ impl PageRenderer {
             let x = 0; // FIXME
             let y = self.top(s, fonts)?;
             let font = s.font(fonts)?;
-            s.render(&mut page, &font, x, y)?;
+            s.render(&mut page, &font, x as u32, y as u32)?;
         }
         Ok(page)
     }
@@ -524,12 +538,11 @@ impl PageRenderer {
         -> Result<u16, SyntaxError>
     {
         let top = span.state.text_rectangle.y - 1;
-        let bot = top + span.state.text_rectangle.h;
         let height = self.offset_vert(span, fonts, State::matches_middle)?;
-        let jtop = (bot + height) / 2;
-        let jheight = self.offset_vert(span, fonts, State::matches_top)?;
+        let mtop = (span.state.text_rectangle.h - height) / 2;
+        let mheight = self.offset_vert(span, fonts, State::matches_top)?;
         // FIXME: check for char_height > 0
-        Ok(jtop + jheight)
+        Ok(top + mtop + mheight)
     }
     /// Get the baseline of a bottom-justified span
     fn baseline_bottom(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
