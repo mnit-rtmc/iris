@@ -376,11 +376,22 @@ impl State {
             None    => Err(SyntaxError::UnsupportedTagValue),
         }
     }
-    /// Check if states match lines
-    fn matches_line(&self, other: &State) -> bool {
+    /// Check if states match for top-justified lines
+    fn matches_top(&self, other: &State) -> bool {
         self.text_rectangle == other.text_rectangle &&
         self.just_page      == other.just_page &&
         self.line_number    <= other.line_number
+    }
+    /// Check if states match for middle-justified lines
+    fn matches_middle(&self, other: &State) -> bool {
+        self.text_rectangle == other.text_rectangle &&
+        self.just_page      == other.just_page
+    }
+    /// Check if states match for bottom-justified lines
+    fn matches_bottom(&self, other: &State) -> bool {
+        self.text_rectangle == other.text_rectangle &&
+        self.just_page      == other.just_page &&
+        self.line_number    >  other.line_number
     }
 }
 
@@ -715,28 +726,55 @@ println!("span: {}, {:?} baseline: {}", s.text, jp, self.baseline(s, fonts));
     fn baseline(&self, s: &TextSpan, fonts: &HashMap<i32, Font>) -> u16 {
         match s.state.just_page {
             PageJustification::Top    => self.baseline_top(s, fonts),
-            PageJustification::Middle => self.baseline_top(s, fonts),
-            PageJustification::Bottom => self.baseline_top(s, fonts),
+            PageJustification::Middle => self.baseline_middle(s, fonts),
+            PageJustification::Bottom => self.baseline_bottom(s, fonts),
             _                         => unreachable!(),
         }
     }
     /// Get the baseline of a top-justified span
     fn baseline_top(&self, span: &TextSpan, fonts: &HashMap<i32, Font>) -> u16 {
-        let mut total = span.state.text_rectangle.y;
-        let mut p = (0, 0);
+        let top = span.state.text_rectangle.y - 1;
+        let height = self.offset_vert(span, fonts, State::matches_top);
+        top + height
+    }
+    /// Get the baseline of a middle-justified span
+    fn baseline_middle(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+        -> u16
+    {
+        let top = span.state.text_rectangle.y - 1;
+        let bot = top + span.state.text_rectangle.h;
+        let height = self.offset_vert(span, fonts, State::matches_middle);
+        let jtop = (bot + height) / 2;
+        let jheight = self.offset_vert(span, fonts, State::matches_top);
+        jtop + jheight
+    }
+    /// Get the baseline of a bottom-justified span
+    fn baseline_bottom(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+        -> u16
+    {
+        let bot = span.state.text_rectangle.y + span.state.text_rectangle.h - 1;
+        let height = self.offset_vert(span, fonts, State::matches_bottom);
+        bot - height
+    }
+    /// Calculate vertical offset of a span
+    fn offset_vert(&self, span: &TextSpan, fonts: &HashMap<i32, Font>,
+        check_line: fn(a: &State, b: &State) -> bool) -> u16
+    {
+        let mut offset = 0;
+        let mut p = (0, 0); // line_number, height
         for s in &self.spans {
-            if s.state.matches_line(&span.state) {
+            if check_line(&s.state, &span.state) {
                 let line_number = s.state.line_number;
                 let h = s.height(fonts);
                 p = if line_number > p.0 {
-                    total += p.1;
+                    offset += p.1;
                     (line_number, h)
                 } else {
                     (p.0, p.1.max(h))
                 };
             }
         }
-        total + p.1
+        offset + p.1
     }
 }
 
