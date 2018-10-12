@@ -23,7 +23,6 @@ import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.ChangeVetoException;
 import us.mn.state.dot.tms.Graphic;
 import us.mn.state.dot.tms.TMSException;
-import us.mn.state.dot.tms.utils.Base64;
 
 /**
  * A graphic is an image which can be displayed on a DMS
