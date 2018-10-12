@@ -412,21 +412,6 @@ impl<'a> Span<'a> {
         // rounded up to the nearest whole pixel ..." ???
         ((sp0 + sp1) as f32 / 2f32).round() as u8
     }
-    fn width(&self) -> u32 {
-        let span = self.span;
-        let cs = self.char_spacing();
-        self.state.font.width(span, cs)
-    }
-    fn height(&self) -> u32 {
-        self.state.font.height()
-    }
-    fn line_spacing(&self) -> u8 {
-        let rs = self.state;
-        match rs.line_spacing {
-            Some(ls) => ls,
-            _        => rs.font.line_spacing(),
-        }
-    }
     fn render(&mut self, raster: &mut Raster, left: u32, base: u32)
         -> UnitResult
     {
@@ -444,18 +429,6 @@ impl<'a> Span<'a> {
 }*/
 /*
 impl<'a> Fragment<'a> {
-    fn height(&self) -> u32 {
-        match self.spans.iter().map(|s| s.height()).max() {
-            Some(h) => h,
-            _       => 0,
-        }
-    }
-    fn line_spacing(&self) -> u8 {
-        match self.spans.iter().map(|s| s.line_spacing()).max() {
-            Some(s) => s,
-            _       => 0,
-        }
-    }
     fn render(&self, raster: &mut Raster, base: u32) -> UnitResult {
         let mut x = self.left()?;
         let pspan = None;
@@ -513,18 +486,6 @@ impl<'a> Fragment<'a> {
 }*/
 /*
 impl<'a> Line<'a> {
-    fn height(&self) -> u32 {
-        match self.fragments.iter().map(|f| f.height()).max() {
-            Some(h) => h,
-            _       => 0,
-        }
-    }
-    fn line_spacing(&self) -> u8 {
-        match self.fragments.iter().map(|f| f.line_spacing()).max() {
-            Some(s) => s,
-            _       => 0,
-        }
-    }
     fn line_spacing_avg(&self, other: &Self) -> u32 {
         let ls = self.state.line_spacing;
         match ls {
@@ -543,84 +504,6 @@ impl<'a> Line<'a> {
     }
 }*/
 /*
-impl<'a> Block<'a> {
-    fn last_line(&mut self) -> &mut Line<'a> {
-        let len = self.lines.len();
-        if len == 0 {
-            let line = Line::new(self.state);
-            self.lines.push(line);
-        }
-        &mut self.lines[len - 1]
-    }
-    fn add_line(&mut self, ls: Option<u32>) {
-        let line = self.last_line();
-        if line.height() == 0 {
-            // The line height can be zero on full-matrix
-            // signs when no text has been specified.
-            // Adding an empty span to the line allows the
-            // height to be taken from the current font.
-            line.add_span("".to_string());
-        }
-        self.state.line_spacing = ls;
-        let line = Line::new(self.state);
-        self.lines.push(line);
-    }
-    fn render(&mut self, raster: &mut Raster) -> UnitResult {
-        let top = self.top()?;
-        let mut y = 0;
-        let mut pline = None;
-        for line in self.lines {
-            if let Some(pl) = pline {
-                y += line.line_spacing_avg(pl);
-            }
-            y += line.height();
-            line.render(raster, top + y)?;
-            pline = Some(&line);
-        }
-        Ok(())
-    }
-    fn top(&self) -> Result<u32, SyntaxError> {
-        let ex = self.extra_height()?;
-        let jp = self.state.just_page;
-        let y = self.state.text_rectangle.y;
-        match jp {
-            PageJustification::Top    => Ok(y),
-            PageJustification::Middle => Ok(y + self.char_height_floor(ex / 2)),
-            PageJustification::Bottom => Ok(y + ex),
-            _                         => Err(SyntaxError::UnsupportedTagValue),
-        }
-    }
-    fn extra_height(&self) -> Result<u32, SyntaxError> {
-        let ph = self.state.text_rectangle.h;
-        let ch = self.state.char_height();
-        let h = ph / ch;
-        let r = self.height() / ch;
-        if h >= r {
-            Ok((h - r) * ch)
-        } else {
-            Err(SyntaxError::TextTooBig)
-        }
-    }
-    fn char_height_floor(&self, ex: u32) -> u32 {
-        let ch = self.state.char_height();
-        (ex / ch) * ch
-    }
-    fn height(&self) -> u32 {
-        let mut h = 0;
-        let pline = None;
-        for line in self.lines {
-            let lh = line.height();
-            if let Some(pl) = pline {
-                if lh > 0 {
-                    h += lh + line.line_spacing_avg(pl);
-                    pline = Some(&line);
-                }
-            }
-        }
-        h
-    }
-}*/
-/*
 impl Renderer {
     fn fill_rectangle(&mut self, r: Rectangle, clr: Color) {
         let x = r.x - 1;
@@ -632,22 +515,6 @@ impl Renderer {
                 raster.set_pixel(x + xx, y + yy, clr);
             }
         }
-    }
-    fn set_text_rectangle(&mut self, r: Rectangle) -> UnitResult {
-        self.draw_text()?;
-        if self.default_state.text_rectangle.contains(&r) {
-            self.state.text_rectangle = r;
-            Ok(())
-        } else {
-            Err(SyntaxError::UnsupportedTagValue)
-        }
-    }
-    fn draw_text(&mut self) -> UnitResult {
-        for block in self.blocks {
-            block.render();
-        }
-        self.blocks.clear();
-        Ok(())
     }
 }*/
 
@@ -717,8 +584,7 @@ impl PageRenderer {
         }
         for s in &self.spans {
             // FIXME: render text
-            let jp = s.state.just_page;
-println!("span: {}, {:?} baseline: {}", s.text, jp, self.baseline(s, fonts));
+println!("span: {}, baseline: {}", s.text, self.baseline(s, fonts));
         }
         Ok(page)
     }
@@ -746,6 +612,7 @@ println!("span: {}, {:?} baseline: {}", s.text, jp, self.baseline(s, fonts));
         let height = self.offset_vert(span, fonts, State::matches_middle);
         let jtop = (bot + height) / 2;
         let jheight = self.offset_vert(span, fonts, State::matches_top);
+        // FIXME: check for char_height > 0
         jtop + jheight
     }
     /// Get the baseline of a bottom-justified span
@@ -793,6 +660,7 @@ impl<'a> PageSplitter<'a> {
     /// Make the next page.
     fn make_page(&mut self) -> Result<PageRenderer, SyntaxError> {
         self.more = false;
+        let mut blank = true;   // blank line
         let mut rs = self.page_state();
         let mut values = vec!();
         let mut spans = vec!();
@@ -804,9 +672,20 @@ impl<'a> PageSplitter<'a> {
                     self.more = true;
                     break;
                 },
+                Value::NewLine(_) => {
+                    if blank {
+                        let ts = TextSpan::new(self.state, "".to_string());
+                        spans.push(ts);
+                    }
+                    blank = true;
+                },
+                Value::TextRectangle(_) => {
+                    blank = true;
+                }
                 Value::Text(t) => {
                     let ts = TextSpan::new(self.state, t);
                     spans.push(ts);
+                    blank = false;
                 },
                 Value::Graphic(_,_)|
                 Value::ColorRectangle(_,_) => { values.push(v); },
