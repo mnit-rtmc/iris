@@ -1,3 +1,4 @@
+extern crate base64;
 extern crate gif;
 #[macro_use] extern crate log;
 extern crate env_logger;

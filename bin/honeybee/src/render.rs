@@ -11,13 +11,19 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+use base64::{Config,CharacterSet,LineWrap,decode_config_slice};
 use std::collections::HashMap;
+use failure::Error;
 use multi::*;
 use raster::Raster;
 use font::Font;
 
 /// Value result from parsing MULTI.
 type UnitResult = Result<(), SyntaxError>;
+
+/// Length of base64 output buffer for glyphs.
+/// Encoded glyphs are restricted to 128 bytes.
+const GLYPH_LEN: usize = (128 + 3) / 4 * 3;
 
 /// Page render state
 #[derive(Copy,Clone)]
@@ -52,26 +58,30 @@ pub struct TextSpan {
     text  : String,
 }
 
-impl TextSpan {
+impl<'a> TextSpan {
     /// Create a new text span
     fn new(state: State, text: String) -> Self {
         TextSpan { state, text }
     }
-    /// Get the height of a text span
-    fn height(&self, fonts: &HashMap<i32, Font>) -> u16 {
+    /// Get the font of a text span
+    fn font(&self, fonts: &'a HashMap<i32, Font>)
+        -> Result<&'a Font, SyntaxError>
+    {
         let fnum = self.state.font.0 as i32;
         match fonts.get(&fnum) {
-            Some(f) => f.height(),
-            None    => 7, // FIXME
+            Some(f) => Ok(f),
+            None    => Err(SyntaxError::FontNotDefined(self.state.font.0)),
         }
     }
+    /// Get the height of a text span
+    fn height(&self, fonts: &HashMap<i32, Font>) -> Result<u16, SyntaxError> {
+        Ok(self.font(fonts)?.height())
+    }
     /// Get the font line spacing
-    fn font_spacing(&self, fonts: &HashMap<i32, Font>) -> u16 {
-        let fnum = self.state.font.0 as i32;
-        match fonts.get(&fnum) {
-            Some(f) => f.line_spacing(),
-            None    => 0,
-        }
+    fn font_spacing(&self, fonts: &HashMap<i32, Font>)
+        -> Result<u16, SyntaxError>
+    {
+        Ok(self.font(fonts)?.line_spacing())
     }
     /// Get the line spacing
     fn line_spacing(&self) -> Option<u16> {
@@ -79,6 +89,22 @@ impl TextSpan {
             Some(s) => Some(s as u16),
             None    => None,
         }
+    }
+    /// Render the text span
+    fn render(&self, page: &mut Raster, font: &Font, x: u16, y: u16)
+        -> Result<(), Error>
+    {
+        debug!("span: {}, left: {}, top: {}", self.text, x, y);
+        let config = Config::new(CharacterSet::Standard, false, true,
+            LineWrap::NoWrap);
+        let mut buf = [0; GLYPH_LEN];
+        for c in self.text.chars() {
+            let g = font.glyph(c)?;
+            let n = decode_config_slice(&g.pixels, config, &mut buf)?;
+            debug!("char: {}, len: {}", c, n);
+            // FIXME: render glyph
+        }
+        Ok(())
     }
 }
 
@@ -398,110 +424,6 @@ impl State {
     }
 }
 
-/*
-impl<'a> Span<'a> {
-    fn char_spacing(&self) -> u8 {
-        let rs = self.state;
-        match rs.char_spacing {
-            Some(cs) => cs,
-            _        => rs.font.char_spacing(),
-        }
-    }
-    fn char_spacing_avg(&self, other: &Self) -> u8 {
-        let sp0 = self.char_spacing();
-        let sp1 = other.char_spacing();
-        // NTCIP 1203 fontCharSpacing:
-        // "... the average character spacing of the two fonts,
-        // rounded up to the nearest whole pixel ..." ???
-        ((sp0 + sp1) as f32 / 2f32).round() as u8
-    }
-    fn render(&mut self, raster: &mut Raster, left: u32, base: u32)
-        -> UnitResult
-    {
-        let mut x = left;
-        let y = base - self.height();
-        let cs = self.char_spacing();
-        let fg = self.state.color_foreground;
-        for cp in self.span.chars() {
-            let g = self.state.font.get_char(cp)?;
-            raster.render_graphic(g, fg, x, y);
-            x += g.width() + cs;
-        }
-        Ok(())
-    }
-}*/
-/*
-impl<'a> Fragment<'a> {
-    fn render(&self, raster: &mut Raster, base: u32) -> UnitResult {
-        let mut x = self.left()?;
-        let pspan = None;
-        for span in self.spans {
-            if let Some(ps) = pspan {
-                x += span.char_spacing_avg(ps);
-            }
-            span.render(raster, x, base)?;
-            x += span.width();
-            pspan = Some(&span);
-        }
-        Ok(())
-    }
-    fn left(&self) -> Result<u32, SyntaxError> {
-        let ex = self.extra_width()?;
-        let jl = self.state.just_line;
-        let x = self.state.text_rectangle.x;
-        match jl {
-            LineJustification::Left   => Ok(x),
-            LineJustification::Center => Ok(x + self.char_width_floor(ex / 2)),
-            LineJustification::Right  => Ok(x + ex),
-            _                         => Err(SyntaxError::UnsupportedTagValue),
-        }
-    }
-    fn extra_width(&self) -> Result<u32, SyntaxError> {
-        let pw = self.state.text_rectangle.w;
-        let tw = self.width();
-        let cw = self.state.char_width();
-        let w = pw / cw;
-        let r = tw / cw;
-        if w >= r {
-            Ok((w - r) * cw)
-        } else {
-            Err(SyntaxError::TextTooBig)
-        }
-    }
-    fn char_width_floor(&self, ex: u32) -> u32 {
-        let cw = self.state.char_width();
-        (ex / cw) * cw
-    }
-    fn width(&self) -> u32 {
-        let mut w = 0;
-        let pspan = None;
-        for span in self.spans {
-            let sw = span.width();
-            if let Some(ps) = pspan {
-                if sw > 0 {
-                    w += sw + span.char_spacing_avg(ps);
-                    pspan = Some(&span);
-                }
-            }
-        }
-        w
-    }
-}*/
-/*
-impl Renderer {
-    fn fill_rectangle(&mut self, r: Rectangle, clr: Color) {
-        let x = r.x - 1;
-        let y = r.y - 1;
-        let w = r.w;
-        let h = r.h;
-        for yy in 0..h {
-            for xx in 0..w {
-                raster.set_pixel(x + xx, y + yy, clr);
-            }
-        }
-    }
-}*/
-
 impl PageRenderer {
     /// Create a new page renderer
     pub fn new(state: State, values: Vec<Value>, spans: Vec<TextSpan>) -> Self {
@@ -550,9 +472,7 @@ impl PageRenderer {
         Ok(page)
     }
     /// Render the page.
-    pub fn render(&self, fonts: &HashMap<i32, Font>)
-        -> Result<Raster, SyntaxError>
-    {
+    pub fn render(&self, fonts: &HashMap<i32, Font>) -> Result<Raster, Error> {
         let rs = self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
@@ -567,13 +487,23 @@ impl PageRenderer {
             }
         }
         for s in &self.spans {
-            // FIXME: render text
-println!("span: {}, baseline: {}", s.text, self.baseline(s, fonts));
+            let x = 0; // FIXME
+            let y = self.top(s, fonts)?;
+            let font = s.font(fonts)?;
+            s.render(&mut page, &font, x, y)?;
         }
         Ok(page)
     }
+    /// Get the top of a text span.
+    fn top(&self, s: &TextSpan, fonts: &HashMap<i32, Font>)
+        -> Result<u16, SyntaxError>
+    {
+        Ok(self.baseline(s, fonts)? - s.height(fonts)?)
+    }
     /// Get the baseline of a text span.
-    fn baseline(&self, s: &TextSpan, fonts: &HashMap<i32, Font>) -> u16 {
+    fn baseline(&self, s: &TextSpan, fonts: &HashMap<i32, Font>)
+        -> Result<u16, SyntaxError>
+    {
         match s.state.just_page {
             PageJustification::Top    => self.baseline_top(s, fonts),
             PageJustification::Middle => self.baseline_middle(s, fonts),
@@ -582,41 +512,43 @@ println!("span: {}, baseline: {}", s.text, self.baseline(s, fonts));
         }
     }
     /// Get the baseline of a top-justified span
-    fn baseline_top(&self, span: &TextSpan, fonts: &HashMap<i32, Font>) -> u16 {
+    fn baseline_top(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+        -> Result<u16, SyntaxError>
+    {
         let top = span.state.text_rectangle.y - 1;
-        let height = self.offset_vert(span, fonts, State::matches_top);
-        top + height
+        let height = self.offset_vert(span, fonts, State::matches_top)?;
+        Ok(top + height)
     }
     /// Get the baseline of a middle-justified span
     fn baseline_middle(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
-        -> u16
+        -> Result<u16, SyntaxError>
     {
         let top = span.state.text_rectangle.y - 1;
         let bot = top + span.state.text_rectangle.h;
-        let height = self.offset_vert(span, fonts, State::matches_middle);
+        let height = self.offset_vert(span, fonts, State::matches_middle)?;
         let jtop = (bot + height) / 2;
-        let jheight = self.offset_vert(span, fonts, State::matches_top);
+        let jheight = self.offset_vert(span, fonts, State::matches_top)?;
         // FIXME: check for char_height > 0
-        jtop + jheight
+        Ok(jtop + jheight)
     }
     /// Get the baseline of a bottom-justified span
     fn baseline_bottom(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
-        -> u16
+        -> Result<u16, SyntaxError>
     {
         let bot = span.state.text_rectangle.y + span.state.text_rectangle.h - 1;
-        let height = self.offset_vert(span, fonts, State::matches_bottom);
-        bot - height
+        let height = self.offset_vert(span, fonts, State::matches_bottom)?;
+        Ok(bot - height)
     }
     /// Calculate vertical offset of a span
     fn offset_vert(&self, span: &TextSpan, fonts: &HashMap<i32, Font>,
-        check_line: fn(a: &State, b: &State) -> bool) -> u16
+        check_line: fn(a: &State, b: &State) -> bool) -> Result<u16, SyntaxError>
     {
         let mut lines = vec!();
         for s in &self.spans {
             if check_line(&s.state, &span.state) {
                 let ln = s.state.line_number as usize;
-                let h = s.height(fonts);
-                let fs = s.font_spacing(fonts);
+                let h = s.height(fonts)?;
+                let fs = s.font_spacing(fonts)?;
                 let ls = s.line_spacing();
                 let line = TextLine::new(h, fs, ls);
                 if ln >= lines.len() {
@@ -628,8 +560,14 @@ println!("span: {}, baseline: {}", s.text, self.baseline(s, fonts));
         }
         let height: u16 = lines.iter().map(|t| t.height).sum();
         let spacing: u16 = lines.windows(2).map(|s| s[1].spacing(&s[0])).sum();
-        height + spacing
+        Ok(height + spacing)
     }
+/*  fn left() {
+        // NTCIP 1203 fontCharSpacing:
+        // "... the average character spacing of the two fonts,
+        // rounded up to the nearest whole pixel ..." ???
+        ((sp0 + sp1) as f32 / 2f32).round() as u8
+    } */
 }
 
 struct TextLine {

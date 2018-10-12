@@ -20,12 +20,13 @@ use std::fs::File;
 use std::io::{BufReader,Write};
 use std::path::{Path,PathBuf};
 use resource::Queryable;
+use multi::SyntaxError;
 
 #[derive(Serialize,Deserialize)]
 pub struct Glyph {
-    code_point : i32,
-    width      : i32,
-    pixels     : String,
+    pub code_point : i32,
+    pub width      : i32,
+    pub pixels     : String,
 }
 
 impl Queryable for Glyph {
@@ -56,7 +57,7 @@ pub struct Font {
     version_id   : i32,
 }
 
-impl Font {
+impl<'a> Font {
     pub fn load(dir: &Path) -> Result<HashMap<i32, Font>, Error> {
         let mut n = PathBuf::new();
         n.push(dir);
@@ -74,6 +75,12 @@ impl Font {
     }
     pub fn line_spacing(&self) -> u16 {
         self.line_spacing as u16
+    }
+    pub fn glyph(&'a self, cp: char) -> Result<&'a Glyph, SyntaxError> {
+        match self.glyphs.iter().find(|g| g.code_point == cp as i32) {
+            Some(g) => Ok(&g),
+            None    => Err(SyntaxError::CharacterNotDefined(cp)),
+        }
     }
 }
 
