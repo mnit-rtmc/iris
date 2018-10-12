@@ -53,28 +53,31 @@ pub struct TextSpan {
 }
 
 impl TextSpan {
+    /// Create a new text span
     fn new(state: State, text: String) -> Self {
         TextSpan { state, text }
-    }
-    /// Get the line spacing
-    fn line_spacing(&self, f: &Font) -> u16 {
-        if self.state.line_number > 0 {
-            if let Some(spacing) = self.state.line_spacing {
-                spacing as u16
-            } else {
-                f.line_spacing()
-            }
-        } else {
-            0
-        }
     }
     /// Get the height of a text span
     fn height(&self, fonts: &HashMap<i32, Font>) -> u16 {
         let fnum = self.state.font.0 as i32;
-        if let Some(f) = fonts.get(&fnum) {
-            f.height() + self.line_spacing(f)
-        } else {
-            7   // FIXME
+        match fonts.get(&fnum) {
+            Some(f) => f.height(),
+            None    => 7, // FIXME
+        }
+    }
+    /// Get the font line spacing
+    fn font_spacing(&self, fonts: &HashMap<i32, Font>) -> u16 {
+        let fnum = self.state.font.0 as i32;
+        match fonts.get(&fnum) {
+            Some(f) => f.line_spacing(),
+            None    => 0,
+        }
+    }
+    /// Get the line spacing
+    fn line_spacing(&self) -> Option<u16> {
+        match self.state.line_spacing {
+            Some(s) => Some(s as u16),
+            None    => None,
         }
     }
 }
@@ -485,25 +488,6 @@ impl<'a> Fragment<'a> {
     }
 }*/
 /*
-impl<'a> Line<'a> {
-    fn line_spacing_avg(&self, other: &Self) -> u32 {
-        let ls = self.state.line_spacing;
-        match ls {
-            Some(ls) => ls,
-            _        => self.line_spacing_avg2(other),
-        }
-    }
-    fn line_spacing_avg2(&self, other: &Self) -> u8 {
-        let sp0 = self.line_spacing();
-        let sp1 = other.line_spacing();
-        // NTCIP 1203 fontLineSpacing:
-        // "The number of pixels between adjacent lines
-        // is the average of the 2 line spacings of each
-        // line, rounded up to the nearest whole pixel."
-        ((sp0 + sp1) as f32 / 2f32).round() as u32
-    }
-}*/
-/*
 impl Renderer {
     fn fill_rectangle(&mut self, r: Rectangle, clr: Color) {
         let x = r.x - 1;
@@ -627,24 +611,55 @@ println!("span: {}, baseline: {}", s.text, self.baseline(s, fonts));
     fn offset_vert(&self, span: &TextSpan, fonts: &HashMap<i32, Font>,
         check_line: fn(a: &State, b: &State) -> bool) -> u16
     {
-        let mut offset = 0;
-        let mut p = (0, 0); // line_number, height
+        let mut lines = vec!();
         for s in &self.spans {
             if check_line(&s.state, &span.state) {
-                let line_number = s.state.line_number;
+                let ln = s.state.line_number as usize;
                 let h = s.height(fonts);
-                p = if line_number > p.0 {
-                    offset += p.1;
-                    (line_number, h)
+                let fs = s.font_spacing(fonts);
+                let ls = s.line_spacing();
+                let line = TextLine::new(h, fs, ls);
+                if ln >= lines.len() {
+                    lines.push(line);
                 } else {
-                    (p.0, p.1.max(h))
-                };
+                    &lines[ln].combine(&line);
+                }
             }
         }
-        offset + p.1
+        let height: u16 = lines.iter().map(|t| t.height).sum();
+        let spacing: u16 = lines.windows(2).map(|s| s[1].spacing(&s[0])).sum();
+        height + spacing
     }
 }
 
+struct TextLine {
+    height       : u16,
+    font_spacing : u16,
+    line_spacing : Option<u16>,
+}
+
+impl TextLine {
+    fn new(height: u16, font_spacing: u16, line_spacing: Option<u16>) -> Self {
+        TextLine { height, font_spacing, line_spacing }
+    }
+    fn combine(&mut self, other: &TextLine) {
+        self.height = self.height.max(other.height);
+        self.font_spacing = self.font_spacing.max(other.font_spacing);
+        self.line_spacing = self.line_spacing.or(other.line_spacing);
+    }
+    fn spacing(&self, other: &TextLine) -> u16 {
+        if self.line_spacing.is_some() {
+            self.line_spacing.unwrap()
+        } else {
+            // NTCIP 1203 fontLineSpacing:
+            // "The number of pixels between adjacent lines
+            // is the average of the 2 line spacings of each
+            // line, rounded up to the nearest whole pixel."
+            let s = self.font_spacing + other.font_spacing;
+            (s as f32 / 2f32).round() as u16
+        }
+    }
+}
 
 impl<'a> PageSplitter<'a> {
     /// Create a new page splitter.
