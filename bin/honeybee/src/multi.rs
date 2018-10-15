@@ -130,9 +130,17 @@ impl fmt::Display for Rectangle {
 }
 
 impl Rectangle {
+    /// Create a new rectangle
     pub fn new(x: u16, y: u16, w: u16, h: u16) -> Self {
         Rectangle { x, y, w, h }
     }
+    /// Create a rectangle matching another width and/or height
+    pub fn match_width_height(&self, other: &Self) -> Self {
+        let w = if self.w > 0 { self.w } else { 1 + other.w - self.x };
+        let h = if self.h > 0 { self.h } else { 1 + other.h - self.y };
+        Rectangle::new(self.x, self.y, w, h)
+    }
+    /// Check if a rectangle contains another rectangle
     pub fn contains(&self, other: &Self) -> bool {
         other.x >= self.x && other.x + other.w <= self.x + self.w &&
         other.y >= self.y && other.y + other.h <= self.y + self.h

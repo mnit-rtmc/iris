@@ -380,7 +380,7 @@ impl State {
             Value::TextRectangle(r) => {
                 self.line_number = 0;
                 self.span_number = 0;
-                return self.update_text_rectangle(default_state, r);
+                return self.update_text_rectangle(default_state, *r);
             },
             Value::Text(_) => {
                 self.span_number += 1;
@@ -394,10 +394,10 @@ impl State {
     }
     /// Update the text rectangle.
     fn update_text_rectangle(&mut self, default_state: &State,
-        r: &Rectangle) -> UnitResult
+        r: Rectangle) -> UnitResult
     {
-        // FIXME: handle zero width/height in rectangle
-        if !default_state.text_rectangle.contains(r) {
+        let r = r.match_width_height(&default_state.text_rectangle);
+        if !default_state.text_rectangle.contains(&r) {
             return Err(SyntaxError::UnsupportedTagValue);
         }
         let cw = self.char_width();
@@ -416,7 +416,7 @@ impl State {
                 return Err(SyntaxError::UnsupportedTagValue);
             }
         }
-        self.text_rectangle = *r;
+        self.text_rectangle = r;
         Ok(())
     }
     /// Get the page background color
