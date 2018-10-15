@@ -125,6 +125,8 @@ impl<'a> TextSpan {
     fn render(&self, page: &mut Raster, font: &Font, mut x: u32, y: u32)
         -> Result<(), Error>
     {
+        let cf = self.state.color_foreground()?;
+        let cf = [cf[0], cf[1], cf[2], 255];
         let h = font.height() as u32;
         let cs = self.char_spacing_font(font);
         debug!("span: {}, left: {}, top: {}, height: {}", self.text, x, y, h);
@@ -143,7 +145,7 @@ impl<'a> TextSpan {
                     let bi = 7 - (p & 7);
                     let lit = ((buf[by] >> bi) & 1) != 0;
                     if lit {
-                        page.set_pixel(x + xx, y + yy, [255, 255, 255, 255]);
+                        page.set_pixel(x + xx, y + yy, cf);
                     }
                 }
             }
@@ -420,6 +422,10 @@ impl State {
     /// Get the page background color
     fn page_background(&self) -> Result<[u8;3], SyntaxError> {
         self.color_rgb(self.page_background)
+    }
+    /// Get the foreground color
+    fn color_foreground(&self) -> Result<[u8;3], SyntaxError> {
+        self.color_rgb(self.color_foreground)
     }
     /// Get RGB triplet for a color.
     fn color_rgb(&self, c: Color) -> Result<[u8;3], SyntaxError> {
