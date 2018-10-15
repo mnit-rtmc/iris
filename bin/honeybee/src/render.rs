@@ -617,8 +617,11 @@ impl PageRenderer {
         let width = self.offset_horiz(span, fonts, State::matches_center)?;
         let mleft = (span.state.text_rectangle.w - width) / 2;
         let mwidth = self.offset_horiz(span, fonts, State::matches_left)?;
-        // FIXME: check for char_width > 0
-        Ok(left + mleft + mwidth)
+        let mut p = left + mleft + mwidth;
+        let cw = self.state.char_width();
+        // Truncate to character-width boundaries
+        p = (p / cw) * cw;
+        Ok(p)
     }
     /// Get the left size of a right-justified span
     fn left_right(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
@@ -685,8 +688,11 @@ impl PageRenderer {
         let height = self.offset_vert(span, fonts, State::matches_middle)?;
         let mtop = (span.state.text_rectangle.h - height) / 2;
         let mheight = self.offset_vert(span, fonts, State::matches_top)?;
-        // FIXME: check for char_height > 0
-        Ok(top + mtop + mheight)
+        let mut p = top + mtop + mheight;
+        let ch = self.state.char_height();
+        // Truncate to line-height boundaries
+        p = (p / ch) * ch;
+        Ok(p)
     }
     /// Get the baseline of a bottom-justified span
     fn baseline_bottom(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
