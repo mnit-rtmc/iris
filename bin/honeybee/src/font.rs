@@ -82,8 +82,8 @@ impl<'a> Font {
     pub fn line_spacing(&self) -> u16 {
         self.line_spacing as u16
     }
-    pub fn char_spacing(&self) -> u32 {
-        self.char_spacing as u32
+    pub fn char_spacing(&self) -> u16 {
+        self.char_spacing as u16
     }
     pub fn glyph(&'a self, cp: char) -> Result<&'a Glyph, SyntaxError> {
         match self.glyphs.iter().find(|g| g.code_point == cp as i32) {
