@@ -565,7 +565,11 @@ impl PageRenderer {
         let mut page = Raster::new(w.into(), h.into(), rgba);
         for v in &self.values {
             match v {
-                Value::ColorRectangle(_,_) => (), // FIXME
+                Value::ColorRectangle(r,c) => {
+                    let clr = rs.color_rgb(*c)?;
+                    let rgba = [clr[0], clr[1], clr[2], 255];
+                    self.render_rect(&mut page, *r, rgba);
+                },
                 Value::Graphic(_,_)        => (), // FIXME
                 _                          => unreachable!(),
             }
@@ -577,6 +581,14 @@ impl PageRenderer {
             s.render(&mut page, &font, x as u32, y as u32)?;
         }
         Ok(page)
+    }
+    /// Render a color rectangle
+    fn render_rect(&self, page: &mut Raster, r: Rectangle, clr: [u8;4]) {
+        for y in 0..r.h {
+            for x in 0..r.w {
+                page.set_pixel((r.x + x - 1).into(), (r.y + y - 1).into(), clr);
+            }
+        }
     }
     /// Get the left side of a text span.
     fn left(&self, s: &TextSpan, fonts: &HashMap<i32, Font>)
