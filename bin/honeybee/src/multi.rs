@@ -11,7 +11,8 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
-use std::error::Error;
+use failure::Error;
+use std::error;
 use std::fmt;
 use std::iter::Peekable;
 use std::str::Chars;
@@ -24,6 +25,18 @@ pub enum ColorScheme {
     Monochrome8Bit,
     ColorClassic,
     Color24Bit,
+}
+
+impl ColorScheme {
+    pub fn from_str(s: &str) -> Result<Self, Error> {
+        match s {
+            "monochrome1Bit" => Ok(ColorScheme::Monochrome1Bit),
+            "monochrome8Bit" => Ok(ColorScheme::Monochrome8Bit),
+            "colorClassic"   => Ok(ColorScheme::ColorClassic),
+            "color24Bit"     => Ok(ColorScheme::Color24Bit),
+            _                => Err(format_err!("Unknown scheme: {:?}", s)),
+        }
+    }
 }
 
 /// Color for a DMS pixel.
@@ -379,7 +392,7 @@ impl fmt::Display for SyntaxError {
     }
 }
 
-impl Error for SyntaxError { }
+impl error::Error for SyntaxError { }
 
 /// Parser for MULTI values.
 pub struct Parser<'a> {

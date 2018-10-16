@@ -16,7 +16,7 @@ use std::collections::HashMap;
 use failure::Error;
 use multi::*;
 use raster::Raster;
-use font::Font;
+use font::{Font,Graphic};
 
 /// Value result from parsing MULTI.
 type UnitResult = Result<(), SyntaxError>;
@@ -157,9 +157,9 @@ impl<'a> TextSpan {
 
 /// Page renderer
 pub struct PageRenderer {
-    state  : State,         // render state at start of page
-    values : Vec<Value>,    // graphics / color rectangles
-    spans  : Vec<TextSpan>, // text spans
+    state  : State,                // render state at start of page
+    values : Vec<([u8;3], Value)>, // foreground color, graphic / color rect
+    spans  : Vec<TextSpan>,        // text spans
 }
 
 /// Scale a u8 value by another (mapping range to 0-1)
@@ -502,7 +502,9 @@ impl State {
 
 impl PageRenderer {
     /// Create a new page renderer
-    pub fn new(state: State, values: Vec<Value>, spans: Vec<TextSpan>) -> Self {
+    pub fn new(state: State, values: Vec<([u8;3], Value)>, spans: Vec<TextSpan>)
+        -> Self
+    {
         PageRenderer {
             state,
             values,
@@ -548,22 +550,35 @@ impl PageRenderer {
         Ok(page)
     }
     /// Render the page.
-    pub fn render(&self, fonts: &HashMap<i32, Font>) -> Result<Raster, Error> {
+    pub fn render(&self, fonts: &HashMap<i32, Font>,
+        graphics: &HashMap<i32, Graphic>) -> Result<Raster, Error>
+    {
         let rs = self.state;
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
         let clr = rs.page_background()?;
-        let rgb = [clr[0], clr[1], clr[2]];
-        let mut page = Raster::new(w.into(), h.into(), rgb);
-        for v in &self.values {
+        let mut page = Raster::new(w.into(), h.into(), clr);
+        for (cf, v) in &self.values {
             match v {
                 Value::ColorRectangle(r,c) => {
                     let clr = rs.color_rgb(*c)?;
-                    let rgb = [clr[0], clr[1], clr[2]];
-                    self.render_rect(&mut page, *r, rgb);
+                    self.render_rect(&mut page, *r, clr);
                 },
-                Value::Graphic(_,_)        => (), // FIXME
-                _                          => unreachable!(),
+                Value::Graphic(gn,None) => {
+                    let n = *gn as i32;
+                    let g = graphics.get(&n)
+                                    .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
+                    g.render(&mut page, *cf, 1, 1)?;
+                },
+                Value::Graphic(gn,Some((x,y,_))) => {
+                    let n = *gn as i32;
+                    let g = graphics.get(&n)
+                                    .ok_or(SyntaxError::GraphicNotDefined(*gn))?;
+                    let x = *x as u32;
+                    let y = *y as u32;
+                    g.render(&mut page, *cf, x, y)?;
+                },
+                _ => unreachable!(),
             }
         }
         for s in &self.spans {
@@ -790,7 +805,10 @@ impl<'a> PageSplitter<'a> {
                     blank = false;
                 },
                 Value::Graphic(_,_)|
-                Value::ColorRectangle(_,_) => { values.push(v); },
+                Value::ColorRectangle(_,_) => {
+                    let cf = self.state.color_foreground()?;
+                    values.push((cf, v));
+                },
                 _ => (),
             }
         }

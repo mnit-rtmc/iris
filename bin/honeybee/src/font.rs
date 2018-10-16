@@ -11,6 +11,7 @@
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  */
+use base64::{Config,CharacterSet,LineWrap,decode_config_slice};
 use failure::Error;
 use postgres;
 use postgres::{Connection};
@@ -19,8 +20,9 @@ use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufReader,Write};
 use std::path::{Path,PathBuf};
+use raster::Raster;
 use resource::Queryable;
-use multi::SyntaxError;
+use multi::{ColorClassic,ColorScheme,SyntaxError};
 
 #[derive(Serialize,Deserialize)]
 pub struct Glyph {
@@ -130,4 +132,106 @@ pub fn query_font<W: Write>(conn: &Connection, mut w: W) -> Result<u32, Error> {
     }
     w.write("]\n".as_bytes())?;
     Ok(c)
+}
+
+#[derive(Serialize,Deserialize)]
+pub struct Graphic {
+    name             : String,
+    g_number         : i32,
+    color_scheme     : String,
+    height           : i32,
+    width            : i32,
+    transparent_color: Option<i32>,
+    pixels           : String,
+}
+
+impl Graphic {
+    pub fn load(dir: &Path) -> Result<HashMap<i32, Graphic>, Error> {
+        let mut n = PathBuf::new();
+        n.push(dir);
+        n.push("graphic");
+        let r = BufReader::new(File::open(&n)?);
+        let mut graphics = HashMap::new();
+        let j: Vec<Graphic> = serde_json::from_reader(r)?;
+        for g in j {
+            let gn = g.g_number;
+            graphics.insert(gn, g);
+        }
+        Ok(graphics)
+    }
+    pub fn width(&self) -> u32 {
+        self.width as u32
+    }
+    pub fn height(&self) -> u32 {
+        self.height as u32
+    }
+    fn bits_per_pixel(&self) -> Result<u32, Error> {
+        let cs = ColorScheme::from_str(&self.color_scheme)?;
+        Ok(match cs {
+            ColorScheme::Monochrome1Bit => 1,
+            ColorScheme::Monochrome8Bit => 8,
+            ColorScheme::ColorClassic   => 8,
+            ColorScheme::Color24Bit     => 24,
+        })
+    }
+    /// Render a graphic
+    pub fn render(&self, page: &mut Raster, cf: [u8;3], x: u32, y: u32)
+        -> Result<(), Error>
+    {
+        let config = Config::new(CharacterSet::Standard, false, true,
+            LineWrap::NoWrap);
+        let cs = ColorScheme::from_str(&self.color_scheme)?;
+        let bpp = self.bits_per_pixel()?;
+        let w = self.width();
+        let h = self.height();
+        let n = (w * h * bpp + 7) / 8;
+        let mut buf = vec!(0; n as usize);
+        let n = decode_config_slice(&self.pixels, config, &mut buf)?;
+        debug!("graphic: {}, width: {}, height: {}, len: {}", self.g_number,
+            w, h, n);
+        for yy in 0..h {
+            for xx in 0..w {
+                let clr = self.get_pixel(cs, &buf, xx, yy, cf);
+                page.set_pixel(x + xx - 1, y + yy - 1, clr);
+            }
+        }
+        Ok(())
+    }
+    fn get_pixel(&self, cs: ColorScheme, buf: &[u8], x: u32, y: u32, cf: [u8;3])
+        -> [u8;3]
+    {
+        match cs {
+            ColorScheme::Monochrome1Bit => self.get_pixel_1(buf, x, y, cf),
+            ColorScheme::Monochrome8Bit => self.get_pixel_8(buf, x, y),
+            ColorScheme::ColorClassic   => self.get_pixel_classic(buf, x, y),
+            ColorScheme::Color24Bit     => self.get_pixel_24(buf, x, y),
+        }
+    }
+    fn get_pixel_1(&self, buf: &[u8], x: u32, y: u32, cf: [u8;3]) -> [u8;3] {
+        let p = y * self.width() + x;
+        let by = p as usize / 8;
+        let bi = 7 - (p & 7);
+        let lit = ((buf[by] >> bi) & 1) != 0;
+        // FIXME: background color?
+        if lit { cf } else { [0, 0, 0] }
+    }
+    fn get_pixel_8(&self, buf: &[u8], x: u32, y: u32) -> [u8;3] {
+        let p = y * self.width() + x;
+        let v = buf[p as usize];
+        [v, v, v]
+    }
+    fn get_pixel_classic(&self, buf: &[u8], x: u32, y: u32) -> [u8;3] {
+        let p = y * self.width() + x;
+        let v = buf[p as usize];
+        // FIXME: improve error handling
+        let c = ColorClassic::from_u8(v).unwrap();
+        c.rgb()
+    }
+    fn get_pixel_24(&self, buf: &[u8], x: u32, y: u32) -> [u8;3] {
+        let p = (y * self.width() + x) * 3;
+        let r = buf[(p + 0) as usize];
+        let g = buf[(p + 1) as usize];
+        let b = buf[(p + 2) as usize];
+        [r, g, b]
+    }
 }

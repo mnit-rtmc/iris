@@ -26,7 +26,7 @@ use multi::{Color,ColorClassic,ColorScheme,LineJustification,PageJustification,
             Rectangle};
 use raster::Raster;
 use render::{PageSplitter,State};
-use font::{Font,query_font};
+use font::{Font,query_font,Graphic};
 
 fn make_name(dir: &Path, n: &str) -> PathBuf {
     let mut p = PathBuf::new();
@@ -130,6 +130,15 @@ const TPIMS_DYN_RES: Resource = Resource::Simple(
            reported_available AS \"reportedAvailable\", \
            trend, open, trust_data AS \"trustData\", capacity \
     FROM parking_area_view \
+) r",
+);
+
+const GRAPHIC_RES: Resource = Resource::Simple(
+"graphic",
+"SELECT row_to_json(r)::text FROM (\
+    SELECT name, g_number, color_scheme, height, width, \
+           transparent_color, pixels \
+    FROM graphic_view \
 ) r",
 );
 
@@ -300,42 +309,6 @@ impl SignConfig {
     }
 }
 
-impl Queryable for SignConfig {
-     fn sql() -> &'static str {
-       "SELECT name, dms_type, portable, technology, sign_access, legend, \
-               beacon_type, face_width, face_height, border_horiz, border_vert, \
-               pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width, \
-               char_height, color_scheme, monochrome_foreground, \
-               monochrome_background, default_font \
-        FROM sign_config_view"
-     }
-     fn from_row(row: &postgres::rows::Row) -> Self {
-        SignConfig {
-            name        : row.get(0),
-            dms_type    : row.get(1),
-            portable    : row.get(2),
-            technology  : row.get(3),
-            sign_access : row.get(4),
-            legend      : row.get(5),
-            beacon_type : row.get(6),
-            face_width  : row.get(7),
-            face_height : row.get(8),
-            border_horiz: row.get(9),
-            border_vert : row.get(10),
-            pitch_horiz : row.get(11),
-            pitch_vert  : row.get(12),
-            pixel_width : row.get(13),
-            pixel_height: row.get(14),
-            char_width  : row.get(15),
-            char_height : row.get(16),
-            color_scheme: row.get(17),
-            monochrome_foreground: row.get(18),
-            monochrome_background: row.get(19),
-            default_font: row.get(20),
-        }
-    }
-}
-
 #[derive(Serialize)]
 struct SignMessage {
     name          : String,
@@ -374,9 +347,9 @@ impl Queryable for SignMessage {
 }
 
 struct MsgData {
-    configs: HashMap<String, SignConfig>,
-    fonts  : HashMap<i32, Font>,
-    // FIXME: also need graphics
+    configs : HashMap<String, SignConfig>,
+    fonts   : HashMap<i32, Font>,
+    graphics: HashMap<i32, Graphic>,
     // FIXME: need system attributes: dms_default_justification_line,
     //        dms_default_jusitfication_page, dms_max_lines,
     //        dms_page_off_default_secs, dms_page_on_default_secs
@@ -386,9 +359,11 @@ impl MsgData {
     fn load(dir: &Path) -> Result<Self, Error> {
         let configs = SignConfig::load(dir)?;
         let fonts = Font::load(dir)?;
+        let graphics = Graphic::load(dir)?;
         Ok(MsgData {
             configs,
             fonts,
+            graphics,
         })
     }
 }
@@ -488,7 +463,7 @@ fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
     enc.set(Repeat::Infinite)?;
     for page in PageSplitter::new(rs, &s.multi) {
         let page = page?;
-        let mut raster = page.render(&msg_data.fonts)?;
+        let mut raster = page.render(&msg_data.fonts, &msg_data.graphics)?;
         let mut frame = make_face_frame(raster, &cfg, w, h);
         frame.delay = page.page_on_time_ds() * 10;
         enc.write_frame(&frame)?;
@@ -512,13 +487,7 @@ fn create_render_state(s: &SignMessage, msg_data: &MsgData)
         return Err(format_err!("Unknown config: {}", s.sign_config));
     }
     let cfg = cfg.unwrap();
-    let color_scheme = match cfg.color_scheme.as_ref() {
-        "monochrome1Bit" => Ok(ColorScheme::Monochrome1Bit),
-        "monochrome8Bit" => Ok(ColorScheme::Monochrome8Bit),
-        "colorClassic"   => Ok(ColorScheme::ColorClassic),
-        "color24Bit"     => Ok(ColorScheme::Color24Bit),
-        s                => Err(format_err!("Unknown scheme: {:?}", s)),
-    }?;
+    let color_scheme = ColorScheme::from_str(&cfg.color_scheme)?;
     let char_width = cfg.char_width as u8;
     let char_height = cfg.char_height as u8;
     let color_foreground: Color = match color_scheme {
@@ -647,13 +616,14 @@ pub fn lookup_resource(n: &str) -> Option<Resource> {
         "TPIMS_static"         => Some(TPIMS_STAT_RES),
         "parking_area_dynamic"|
         "TPIMS_dynamic"        => Some(TPIMS_DYN_RES),
+        "graphic"              => Some(GRAPHIC_RES),
         "font"                 => Some(FONT_RES),
         "sign_message"         => Some(SIGN_MSG_RES),
         _                      => None,
     }
 }
 
-pub const ALL: [&'static str; 9] = [
+pub const ALL: [&'static str; 10] = [
     "camera_pub",
     "dms_pub",
     "dms_message",
@@ -661,6 +631,7 @@ pub const ALL: [&'static str; 9] = [
     "sign_config",
     "parking_area",
     "parking_area_dynamic",
+    "graphic",
     "font",
     "sign_message",
 ];
