@@ -17,7 +17,7 @@ extern crate gif;
 use std::fs::File;
 use std::io;
 use gif::{Frame,Encoder,Repeat,SetParameter};
-use honeybee::raster::{Mask,Raster};
+use honeybee::raster::Raster;
 
 /// Write raster to a GIF file.
 ///
@@ -38,28 +38,25 @@ pub fn write_gif(rasters: &mut [Raster], filename: &str) -> io::Result<()> {
 }
 
 fn page1() -> Raster {
-    let r = Raster::new(32, 32, [0, 0, 0, 255]);
-    let mut m = Mask::new(r);
-    m.circle(12f32, 12f32, 3f32);
-    m.circle(20f32, 12f32, 3f32);
-    m.circle(12f32, 20f32, 3f32);
-    m.circle(20f32, 20f32, 3f32);
-    m.composite([255, 208, 0]);
-    m.clear();
-    m.circle(16f32, 16f32, 3f32);
-    m.composite([255, 0, 0]);
-    m.into()
+    let amber = [255, 208, 0];
+    let red = [255, 0, 0];
+    let mut r = Raster::new(32, 32, [0, 0, 0, 255]);
+    r.circle(12f32, 12f32, 3f32, amber);
+    r.circle(20f32, 12f32, 3f32, amber);
+    r.circle(12f32, 20f32, 3f32, amber);
+    r.circle(20f32, 20f32, 3f32, amber);
+    r.circle(16f32, 16f32, 3f32, red);
+    r
 }
 
 fn page2() -> Raster {
-    let r = Raster::new(32, 32, [0, 0, 0, 255]);
-    let mut m = Mask::new(r);
-    m.circle(12f32, 12f32, 3f32);
-    m.circle(20f32, 12f32, 3f32);
-    m.circle(12f32, 20f32, 3f32);
-    m.circle(20f32, 20f32, 3f32);
-    m.composite([255, 208, 0]);
-    m.into()
+    let amber = [255, 208, 0];
+    let mut r = Raster::new(32, 32, [0, 0, 0, 255]);
+    r.circle(12f32, 12f32, 3f32, amber);
+    r.circle(20f32, 12f32, 3f32, amber);
+    r.circle(12f32, 20f32, 3f32, amber);
+    r.circle(20f32, 20f32, 3f32, amber);
+    r
 }
 
 fn main() -> io::Result<()> {
