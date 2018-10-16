@@ -71,7 +71,7 @@ const DMS_RES: Resource = Resource::Simple(
 const DMS_MSG_RES: Resource = Resource::Simple(
 "dms_message",
 "SELECT row_to_json(r)::text FROM (\
-    SELECT name, msg_current, multi, sources, duration, expire_time \
+    SELECT name, msg_current, sources, duration, expire_time \
     FROM dms_message_view WHERE condition = 'Active' \
     ORDER BY name \
 ) r",
