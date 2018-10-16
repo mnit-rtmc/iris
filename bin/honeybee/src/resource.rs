@@ -24,6 +24,7 @@ use std::sync::mpsc::Sender;
 use std::time::Instant;
 use multi::{Color,ColorClassic,ColorScheme,LineJustification,PageJustification,
             Rectangle};
+use raster::Raster;
 use render::{PageSplitter,State};
 use font::{Font,query_font};
 
@@ -201,6 +202,102 @@ impl SignConfig {
         }
         Ok(configs)
     }
+    /// Get the horizontal border (mm).
+    /// Sanity check included in case the sign vendor supplies stupid values.
+    fn horizontal_border_mm(&self) -> f32 {
+        let excess_mm = self.horizontal_excess_mm();
+        let border_horiz = self.border_horiz as f32;
+        border_horiz.min(0f32.max(excess_mm / 2f32))
+    }
+    /// Get the horizontal excess (mm).
+    fn horizontal_excess_mm(&self) -> f32 {
+        let face_width = self.face_width as f32;
+        let pixels_mm = (self.pitch_horiz * (self.pixel_width - 1)) as f32;
+        face_width - pixels_mm
+    }
+    /// Get the horizontal character offset (mm)
+    fn char_offset_mm(&self, x: u32) -> f32 {
+        if self.char_width > 1 {
+            let gap = (x / self.char_width as u32) as f32;
+            gap * self.char_gap_mm()
+        } else {
+            0f32
+        }
+    }
+    /// Get the character gap (mm)
+    fn char_gap_mm(&self) -> f32 {
+        let excess_mm = self.horizontal_excess_mm();
+        let border_mm = self.horizontal_border_mm() * 2f32;
+        let gaps = self.char_gaps() as f32;
+        if excess_mm > border_mm && gaps > 0f32 {
+            (excess_mm - border_mm) / gaps
+        } else {
+            0f32
+        }
+    }
+    /// Get the number of gaps between characters
+    fn char_gaps(&self) -> i32 {
+        if self.char_width > 1 && self.pixel_width > self.char_width {
+            (self.pixel_width / self.char_width) - 1
+        } else {
+            0
+        }
+    }
+    /// Get the X-position of a pixel on the sign (from 0 to 1)
+    fn pixel_x(&self, x: u32) -> f32 {
+        let hb = self.horizontal_border_mm();
+        let co = self.char_offset_mm(x);
+        let pos = hb + co + (self.pitch_horiz * x as i32) as f32;
+        pos / self.face_width as f32
+    }
+    /// Get the vertical border (mm).
+    /// Sanity check included in case the sign vendor supplies stupid values.
+    fn vertical_border_mm(&self) -> f32 {
+        let excess_mm = self.vertical_excess_mm();
+        let border_vert = self.border_vert as f32;
+        border_vert.min(0f32.max(excess_mm / 2f32))
+    }
+    /// Get the vertical excess (mm).
+    fn vertical_excess_mm(&self) -> f32 {
+        let face_height = self.face_height as f32;
+        let pixels_mm = (self.pitch_vert * (self.pixel_height - 1)) as f32;
+        face_height - pixels_mm
+    }
+    /// Get the number of gaps between lines
+    fn line_gaps(&self) -> i32 {
+        if self.char_height > 1 && self.pixel_height > self.char_height {
+            (self.pixel_height / self.char_height) - 1
+        } else {
+            0
+        }
+    }
+    /// Get the vertical line offset (mm)
+    fn line_offset_mm(&self, y: u32) -> f32 {
+        if self.char_height > 1 {
+            let gap = (y / self.char_height as u32) as f32;
+            gap * self.line_gap_mm()
+        } else {
+            0f32
+        }
+    }
+    /// Get the line gap (mm)
+    fn line_gap_mm(&self) -> f32 {
+        let excess_mm = self.vertical_excess_mm();
+        let border_mm = self.vertical_border_mm() * 2f32;
+        let gaps = self.line_gaps() as f32;
+        if excess_mm > border_mm && gaps > 0f32 {
+            (excess_mm - border_mm) / gaps
+        } else {
+            0f32
+        }
+    }
+    /// Get the Y-position of a pixel on the sign (from 0 to 1)
+    fn pixel_y(&self, y: u32) -> f32 {
+        let vb = self.vertical_border_mm();
+        let lo = self.line_offset_mm(y);
+        let pos = vb + lo + (self.pitch_vert * y as i32) as f32;
+        pos / self.face_height as f32
+    }
 }
 
 impl Queryable for SignConfig {
@@ -321,27 +418,79 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
     Ok(())
 }
 
+/// Maximum pixel width of DMS images
+const PIX_WIDTH: f32 = 450f32;
+
+/// Maximum pixel height of DMS images
+const PIX_HEIGHT: f32 = 100f32;
+
+/// Calculate the size of rendered DMS
+fn calculate_size(cfg: &SignConfig) -> Result<(u16, u16), Error> {
+    let fw = cfg.face_width as f32;
+    let fh = cfg.face_height as f32;
+    if fw > 0f32 && fh > 0f32 {
+        let sx = PIX_WIDTH / fw;
+        let sy = PIX_HEIGHT / fh;
+        let s = sx.min(sy);
+        let w = (fw * s).round() as u16;
+        let h = (fh * s).round() as u16;
+        Ok((w, h))
+    } else {
+        Ok((PIX_WIDTH as u16, PIX_HEIGHT as u16))
+    }
+}
+
+/// Make a raster of sign face
+fn make_face_raster(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Raster {
+    let dark = [32, 32, 0, 255];
+    let rgba = [0, 0, 0, 255];
+    let mut face = Raster::new(w.into(), h.into(), rgba);
+    let ph = page.height();
+    let pw = page.width();
+    let sx = w as f32 / pw as f32;
+    let sy = h as f32 / ph as f32;
+    let s = sx.min(sy);
+    for y in 0..ph {
+        let py = cfg.pixel_y(y) * h as f32;
+        for x in 0..pw {
+            let px = cfg.pixel_x(x) * w as f32;
+            let clr = page.get_pixel(x, y);
+            let sr = clr[0].max(clr[1]).max(clr[2]);
+            // Clamp radius between 0.5 and 0.8 (blooming)
+            let r = s * (sr as f32 / 255f32).max(0.5f32).min(0.8f32);
+            let clr = if sr > 32 { clr } else { dark };
+            face.circle(px, py, r, [clr[0], clr[1], clr[2]]);
+        }
+    }
+    face
+}
+
 /// Render a sign message into a .gif file
 fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
     -> Result<(), Error>
 {
+    let cfg = msg_data.configs.get(&s.sign_config);
+    if cfg.is_none() {
+        return Err(format_err!("Unknown config: {}", s.sign_config));
+    }
+    let cfg = cfg.unwrap();
     let rs = create_render_state(s, msg_data)?;
-    let w = rs.width();  // FIXME: use face width
-    let h = rs.height(); // FIXME: use face height
+    let (w, h) = calculate_size(cfg)?;
     let mut enc = Encoder::new(&mut f, w, h, &[])?;
     enc.set(Repeat::Infinite)?;
     for page in PageSplitter::new(rs, &s.multi) {
         let page = page?;
-        // FIXME: render page as face of DMS
         let mut raster = page.render(&msg_data.fonts)?;
-        let mut pix = raster.pixels();
+        let mut face = make_face_raster(raster, &cfg, w, h);
+        let mut pix = face.pixels();
         let mut frame = Frame::from_rgba(w, h, &mut pix[..]);
         frame.delay = page.page_on_time_ds() * 10;
         enc.write_frame(&frame)?;
         let t = page.page_off_time_ds() * 10;
         if t > 0 {
             let mut raster = page.render_blank()?;
-            let mut pix = raster.pixels();
+            let mut face = make_face_raster(raster, &cfg, w, h);
+            let mut pix = face.pixels();
             let mut frame = Frame::from_rgba(w, h, &mut pix[..]);
             frame.delay = t;
             enc.write_frame(&frame)?;

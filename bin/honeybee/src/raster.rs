@@ -63,10 +63,64 @@ impl Raster {
         self.pixels[i+2] = color[2];
         self.pixels[i+3] = color[3];
     }
+    /// Get the color of one pixel.
+    pub fn get_pixel(&self, x: u32, y: u32) -> [u8; 4] {
+        let mut color = [0; 4];
+        let i = ((y * self.width + x) * 4) as usize;
+        color[0] = self.pixels[i+0];
+        color[1] = self.pixels[i+1];
+        color[2] = self.pixels[i+2];
+        color[3] = self.pixels[i+3];
+        color
+    }
     /// Get the pixel data as a slice.
     pub fn pixels(&mut self) -> &mut [u8] {
         &mut self.pixels[..]
     }
+    /// Render an attenuated circle.
+    ///
+    /// * `cx` X-Center of circle.
+    /// * `cy` Y-Center of circle.
+    /// * `r` Radius of circle.
+    /// * `clr` Color of circle.
+    pub fn circle(&mut self, cx: f32, cy: f32, r: f32, clr: [u8; 3]) {
+        let x0 = (cx - r).floor().max(0f32) as u32;
+        let x1 = (cx + r).ceil().min(self.width() as f32) as u32;
+        let y0 = (cy - r).floor().max(0f32) as u32;
+        let y1 = (cy + r).ceil().min(self.height() as f32) as u32;
+        let rs = r.powi(2);
+        for y in y0..y1 {
+            let yd = (cy - y as f32 - 0.5f32).abs();
+            let ys = yd.powi(2);
+            for x in x0..x1 {
+                let xd = (cx - x as f32 - 0.5f32).abs();
+                let xs = xd.powi(2);
+                // compare distance squared with radius squared
+                let ds = (xs + ys) / rs;
+                let v = 1f32 - ds.powi(2).min(1f32);
+                let vi = (v * 255f32) as u8;
+                if vi > 0 {
+                    let p = self.get_pixel(x, y);
+                    let sr = scale_u8(clr[0], vi);
+                    let sg = scale_u8(clr[1], vi);
+                    let sb = scale_u8(clr[2], vi);
+                    let dr = scale_u8(p[0], p[3]);
+                    let dg = scale_u8(p[1], p[3]);
+                    let db = scale_u8(p[2], p[3]);
+                    let d = [sr.max(dr), sg.max(dg), sb.max(db), 255];
+                    self.set_pixel(x, y, d);
+                }
+            }
+        }
+    }
+}
+
+/// Scale a u8 value by another (mapping range to 0-1)
+fn scale_u8(a: u8, b: u8) -> u8 {
+    let aa = a as u32;
+    let bb = b as u32;
+    let c = (aa * bb + 255) >> 8;
+    c as u8
 }
 
 impl Mask {
