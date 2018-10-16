@@ -126,7 +126,7 @@ impl<'a> TextSpan {
         -> Result<(), Error>
     {
         let cf = self.state.color_foreground()?;
-        let cf = [cf[0], cf[1], cf[2], 255];
+        let cf = [cf[0], cf[1], cf[2]];
         let h = font.height() as u32;
         let cs = self.char_spacing_font(font);
         debug!("span: {}, left: {}, top: {}, height: {}", self.text, x, y, h);
@@ -543,8 +543,8 @@ impl PageRenderer {
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
         let clr = rs.page_background()?;
-        let rgba = [clr[0], clr[1], clr[2], 255];
-        let page = Raster::new(w.into(), h.into(), rgba);
+        let rgb = [clr[0], clr[1], clr[2]];
+        let page = Raster::new(w.into(), h.into(), rgb);
         Ok(page)
     }
     /// Render the page.
@@ -553,14 +553,14 @@ impl PageRenderer {
         let w = rs.text_rectangle.w;
         let h = rs.text_rectangle.h;
         let clr = rs.page_background()?;
-        let rgba = [clr[0], clr[1], clr[2], 255];
-        let mut page = Raster::new(w.into(), h.into(), rgba);
+        let rgb = [clr[0], clr[1], clr[2]];
+        let mut page = Raster::new(w.into(), h.into(), rgb);
         for v in &self.values {
             match v {
                 Value::ColorRectangle(r,c) => {
                     let clr = rs.color_rgb(*c)?;
-                    let rgba = [clr[0], clr[1], clr[2], 255];
-                    self.render_rect(&mut page, *r, rgba);
+                    let rgb = [clr[0], clr[1], clr[2]];
+                    self.render_rect(&mut page, *r, rgb);
                 },
                 Value::Graphic(_,_)        => (), // FIXME
                 _                          => unreachable!(),
@@ -575,7 +575,7 @@ impl PageRenderer {
         Ok(page)
     }
     /// Render a color rectangle
-    fn render_rect(&self, page: &mut Raster, r: Rectangle, clr: [u8;4]) {
+    fn render_rect(&self, page: &mut Raster, r: Rectangle, clr: [u8;3]) {
         for y in 0..r.h {
             for x in 0..r.w {
                 page.set_pixel((r.x + x - 1).into(), (r.y + y - 1).into(), clr);

@@ -22,10 +22,10 @@ impl Raster {
     ///
     /// * `width` Width in pixels.
     /// * `height` Height in pixels.
-    /// * `color` RGBA color (for initialization).
-    pub fn new(width: u32, height: u32, color: [u8; 4]) -> Raster {
+    /// * `color` RGB color (for initialization).
+    pub fn new(width: u32, height: u32, color: [u8; 3]) -> Raster {
         let len = width as usize * height as usize;
-        let mut pixels = Vec::with_capacity(len * 4);
+        let mut pixels = Vec::with_capacity(len * 3);
         for _ in 0..len {
             pixels.extend(color.iter());
         }
@@ -40,21 +40,19 @@ impl Raster {
         self.height
     }
     /// Set the color of one pixel.
-    pub fn set_pixel(&mut self, x: u32, y: u32, color: [u8; 4]) {
-        let i = ((y * self.width + x) * 4) as usize;
+    pub fn set_pixel(&mut self, x: u32, y: u32, color: [u8; 3]) {
+        let i = ((y * self.width + x) * 3) as usize;
         self.pixels[i+0] = color[0];
         self.pixels[i+1] = color[1];
         self.pixels[i+2] = color[2];
-        self.pixels[i+3] = color[3];
     }
     /// Get the color of one pixel.
-    pub fn get_pixel(&self, x: u32, y: u32) -> [u8; 4] {
-        let mut color = [0; 4];
-        let i = ((y * self.width + x) * 4) as usize;
+    pub fn get_pixel(&self, x: u32, y: u32) -> [u8; 3] {
+        let mut color = [0; 3];
+        let i = ((y * self.width + x) * 3) as usize;
         color[0] = self.pixels[i+0];
         color[1] = self.pixels[i+1];
         color[2] = self.pixels[i+2];
-        color[3] = self.pixels[i+3];
         color
     }
     /// Get the pixel data as a slice.
@@ -88,10 +86,10 @@ impl Raster {
                     let sr = scale_u8(clr[0], vi);
                     let sg = scale_u8(clr[1], vi);
                     let sb = scale_u8(clr[2], vi);
-                    let dr = scale_u8(p[0], p[3]);
-                    let dg = scale_u8(p[1], p[3]);
-                    let db = scale_u8(p[2], p[3]);
-                    let d = [sr.max(dr), sg.max(dg), sb.max(db), 255];
+                    let dr = p[0];
+                    let dg = p[1];
+                    let db = p[2];
+                    let d = [sr.max(dr), sg.max(dg), sb.max(db)];
                     self.set_pixel(x, y, d);
                 }
             }
@@ -112,30 +110,30 @@ mod test {
     use super::{Raster};
     #[test]
     fn raster_pixel() {
-        let mut r = Raster::new(4, 4, [0, 0, 0, 0]);
-        r.set_pixel(0, 0, [ 1, 2, 3, 4]);
-        r.set_pixel(1, 1, [ 5, 6, 7, 8]);
-        r.set_pixel(2, 2, [ 9,10,11,12]);
-        r.set_pixel(3, 3, [13,14,15,16]);
+        let mut r = Raster::new(4, 4, [0, 0, 0]);
+        r.set_pixel(0, 0, [ 1, 2, 3]);
+        r.set_pixel(1, 1, [ 4, 5, 6]);
+        r.set_pixel(2, 2, [ 7, 8, 9]);
+        r.set_pixel(3, 3, [10,11,12]);
         // y == 0
-        assert!(r.pixels[ 0..4 ] == [1, 2, 3, 4]);
-        assert!(r.pixels[ 4..8 ] == [0, 0, 0, 0]);
-        assert!(r.pixels[ 8..12] == [0, 0, 0, 0]);
-        assert!(r.pixels[12..16] == [0, 0, 0, 0]);
+        assert!(r.pixels[ 0..3 ] == [1, 2, 3]);
+        assert!(r.pixels[ 3..6 ] == [0, 0, 0]);
+        assert!(r.pixels[ 6..9 ] == [0, 0, 0]);
+        assert!(r.pixels[ 9..12] == [0, 0, 0]);
         // y == 1
-        assert!(r.pixels[16..20] == [0, 0, 0, 0]);
-        assert!(r.pixels[20..24] == [5, 6, 7, 8]);
-        assert!(r.pixels[24..28] == [0, 0, 0, 0]);
-        assert!(r.pixels[28..32] == [0, 0, 0, 0]);
+        assert!(r.pixels[12..15] == [0, 0, 0]);
+        assert!(r.pixels[15..18] == [4, 5, 6]);
+        assert!(r.pixels[18..21] == [0, 0, 0]);
+        assert!(r.pixels[21..24] == [0, 0, 0]);
         // y == 2
-        assert!(r.pixels[32..36] == [0, 0, 0, 0]);
-        assert!(r.pixels[36..40] == [0, 0, 0, 0]);
-        assert!(r.pixels[40..44] == [9,10,11,12]);
-        assert!(r.pixels[44..48] == [0, 0, 0, 0]);
+        assert!(r.pixels[24..27] == [0, 0, 0]);
+        assert!(r.pixels[27..30] == [0, 0, 0]);
+        assert!(r.pixels[30..33] == [7, 8, 9]);
+        assert!(r.pixels[33..36] == [0, 0, 0]);
         // y == 3
-        assert!(r.pixels[48..52] == [0, 0, 0, 0]);
-        assert!(r.pixels[52..56] == [0, 0, 0, 0]);
-        assert!(r.pixels[56..60] == [0, 0, 0, 0]);
-        assert!(r.pixels[60..64] == [13,14,15,16]);
+        assert!(r.pixels[36..39] == [0, 0, 0]);
+        assert!(r.pixels[39..42] == [0, 0, 0]);
+        assert!(r.pixels[42..45] == [0, 0, 0]);
+        assert!(r.pixels[45..48] == [10,11,12]);
     }
 }

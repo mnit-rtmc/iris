@@ -442,9 +442,9 @@ fn calculate_size(cfg: &SignConfig) -> Result<(u16, u16), Error> {
 
 /// Make a raster of sign face
 fn make_face_raster(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Raster {
-    let dark = [32, 32, 0, 255];
-    let rgba = [0, 0, 0, 255];
-    let mut face = Raster::new(w.into(), h.into(), rgba);
+    let dark = [32, 32, 0];
+    let rgb = [0, 0, 0];
+    let mut face = Raster::new(w.into(), h.into(), rgb);
     let ph = page.height();
     let pw = page.width();
     let sx = w as f32 / pw as f32;
@@ -483,7 +483,7 @@ fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
         let mut raster = page.render(&msg_data.fonts)?;
         let mut face = make_face_raster(raster, &cfg, w, h);
         let mut pix = face.pixels();
-        let mut frame = Frame::from_rgba(w, h, &mut pix[..]);
+        let mut frame = Frame::from_rgb(w, h, &mut pix[..]);
         frame.delay = page.page_on_time_ds() * 10;
         enc.write_frame(&frame)?;
         let t = page.page_off_time_ds() * 10;
@@ -491,7 +491,7 @@ fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
             let mut raster = page.render_blank()?;
             let mut face = make_face_raster(raster, &cfg, w, h);
             let mut pix = face.pixels();
-            let mut frame = Frame::from_rgba(w, h, &mut pix[..]);
+            let mut frame = Frame::from_rgb(w, h, &mut pix[..]);
             frame.delay = t;
             enc.write_frame(&frame)?;
         }

@@ -30,7 +30,7 @@ pub fn write_gif(rasters: &mut [Raster], filename: &str) -> io::Result<()> {
     enc.set(Repeat::Infinite)?;
     for raster in rasters {
         let pix = raster.pixels();
-        let mut frame = Frame::from_rgba(w, h, &mut pix[..]);
+        let mut frame = Frame::from_rgb(w, h, &mut pix[..]);
         frame.delay = 200; // 2 seconds
         enc.write_frame(&frame)?;
     }
@@ -40,7 +40,7 @@ pub fn write_gif(rasters: &mut [Raster], filename: &str) -> io::Result<()> {
 fn page1() -> Raster {
     let amber = [255, 208, 0];
     let red = [255, 0, 0];
-    let mut r = Raster::new(32, 32, [0, 0, 0, 255]);
+    let mut r = Raster::new(32, 32, [0, 0, 0]);
     r.circle(12f32, 12f32, 3f32, amber);
     r.circle(20f32, 12f32, 3f32, amber);
     r.circle(12f32, 20f32, 3f32, amber);
@@ -51,7 +51,7 @@ fn page1() -> Raster {
 
 fn page2() -> Raster {
     let amber = [255, 208, 0];
-    let mut r = Raster::new(32, 32, [0, 0, 0, 255]);
+    let mut r = Raster::new(32, 32, [0, 0, 0]);
     r.circle(12f32, 12f32, 3f32, amber);
     r.circle(20f32, 12f32, 3f32, amber);
     r.circle(12f32, 20f32, 3f32, amber);
