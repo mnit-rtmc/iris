@@ -440,6 +440,14 @@ fn calculate_size(cfg: &SignConfig) -> Result<(u16, u16), Error> {
     }
 }
 
+/// Make a .gif frame of sign face
+fn make_face_frame(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Frame {
+    let mut face = make_face_raster(page, &cfg, w, h);
+    let pix = face.pixels();
+    // FIXME: color quantization is very slow here
+    Frame::from_rgb(w, h, &mut pix[..])
+}
+
 /// Make a raster of sign face
 fn make_face_raster(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Raster {
     let dark = [32, 32, 0];
@@ -481,17 +489,13 @@ fn render_sign_msg<W: Write>(s: &SignMessage, msg_data: &MsgData, mut f: W)
     for page in PageSplitter::new(rs, &s.multi) {
         let page = page?;
         let mut raster = page.render(&msg_data.fonts)?;
-        let mut face = make_face_raster(raster, &cfg, w, h);
-        let mut pix = face.pixels();
-        let mut frame = Frame::from_rgb(w, h, &mut pix[..]);
+        let mut frame = make_face_frame(raster, &cfg, w, h);
         frame.delay = page.page_on_time_ds() * 10;
         enc.write_frame(&frame)?;
         let t = page.page_off_time_ds() * 10;
         if t > 0 {
             let mut raster = page.render_blank()?;
-            let mut face = make_face_raster(raster, &cfg, w, h);
-            let mut pix = face.pixels();
-            let mut frame = Frame::from_rgb(w, h, &mut pix[..]);
+            let mut frame = make_face_frame(raster, &cfg, w, h);
             frame.delay = t;
             enc.write_frame(&frame)?;
         }
