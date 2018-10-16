@@ -4,8 +4,6 @@ version = "0.3.1"
 
 [dependencies]
 base64 = "0.9"
-#chrono = { version = "0.4", features = ["serde"] }
-#postgres = { version = "0.15", features = ["with-chrono"] }
 log = "0.4"
 env_logger = "0.5"
 serde = "1.0"
@@ -16,5 +14,4 @@ fallible-iterator = "0.1"
 postgres = { version = "0.15" }
 ssh2 = "0.3"
 users = "0.7"
-palette = "0.4"
 gif = "0.10"
