@@ -210,14 +210,6 @@ impl State {
     fn is_full_matrix(&self) -> bool {
         self.char_width == 0 && self.char_height == 0
     }
-    /// Get the pixel width
-    pub fn width(&self) -> u16 {
-        self.text_rectangle.w
-    }
-    /// Get the pixel height
-    pub fn height(&self) -> u16 {
-        self.text_rectangle.h
-    }
     /// Get the character width (1 for variable width).
     fn char_width(&self) -> u16 {
         if self.is_char_matrix() {
