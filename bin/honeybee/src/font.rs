@@ -191,14 +191,15 @@ impl Graphic {
             w, h, n);
         for yy in 0..h {
             for xx in 0..w {
-                let clr = self.get_pixel(cs, &buf, xx, yy, cf);
-                page.set_pixel(x + xx - 1, y + yy - 1, clr);
+                if let Some(clr) = self.get_pixel(cs, &buf, xx, yy, cf) {
+                    page.set_pixel(x + xx - 1, y + yy - 1, clr);
+                }
             }
         }
         Ok(())
     }
     fn get_pixel(&self, cs: ColorScheme, buf: &[u8], x: u32, y: u32, cf: [u8;3])
-        -> [u8;3]
+        -> Option<[u8;3]>
     {
         match cs {
             ColorScheme::Monochrome1Bit => self.get_pixel_1(buf, x, y, cf),
@@ -207,31 +208,45 @@ impl Graphic {
             ColorScheme::Color24Bit     => self.get_pixel_24(buf, x, y),
         }
     }
-    fn get_pixel_1(&self, buf: &[u8], x: u32, y: u32, cf: [u8;3]) -> [u8;3] {
+    fn get_pixel_1(&self, buf: &[u8], x: u32, y: u32, cf: [u8;3])
+        -> Option<[u8;3]>
+    {
         let p = y * self.width() + x;
         let by = p as usize / 8;
         let bi = 7 - (p & 7);
         let lit = ((buf[by] >> bi) & 1) != 0;
         // FIXME: background color?
-        if lit { cf } else { [0, 0, 0] }
+        let cb = [0, 0, 0];
+        if lit {
+            Some(cf)
+        } else {
+            if let Some(tc) = self.transparent_color {
+                let r = (tc >> 16 & 0xFF) as u8;
+                let g = (tc >>  8 & 0xFF) as u8;
+                let b = (tc >>  0 & 0xFF) as u8;
+                if [r,g,b] == cb { None } else { Some(cb) }
+            } else {
+                Some(cb)
+            }
+        }
     }
-    fn get_pixel_8(&self, buf: &[u8], x: u32, y: u32) -> [u8;3] {
+    fn get_pixel_8(&self, buf: &[u8], x: u32, y: u32) -> Option<[u8;3]> {
         let p = y * self.width() + x;
         let v = buf[p as usize];
-        [v, v, v]
+        Some([v, v, v])
     }
-    fn get_pixel_classic(&self, buf: &[u8], x: u32, y: u32) -> [u8;3] {
+    fn get_pixel_classic(&self, buf: &[u8], x: u32, y: u32) -> Option<[u8;3]> {
         let p = y * self.width() + x;
         let v = buf[p as usize];
         // FIXME: improve error handling
         let c = ColorClassic::from_u8(v).unwrap();
-        c.rgb()
+        Some(c.rgb())
     }
-    fn get_pixel_24(&self, buf: &[u8], x: u32, y: u32) -> [u8;3] {
+    fn get_pixel_24(&self, buf: &[u8], x: u32, y: u32) -> Option<[u8;3]> {
         let p = (y * self.width() + x) * 3;
         let r = buf[(p + 0) as usize];
         let g = buf[(p + 1) as usize];
         let b = buf[(p + 2) as usize];
-        [r, g, b]
+        Some([r, g, b])
     }
 }
