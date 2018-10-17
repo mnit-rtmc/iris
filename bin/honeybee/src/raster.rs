@@ -77,9 +77,14 @@ impl Raster {
             for x in x0..x1 {
                 let xd = (cx - x as f32 - 0.5f32).abs();
                 let xs = xd.powi(2);
+                let mut ds = xs + ys;
+                // If center is within this pixel, make it brighter
+                if ds < 1f32 {
+                    ds = ds.powi(2);
+                }
                 // compare distance squared with radius squared
-                let ds = (xs + ys) / rs;
-                let v = 1f32 - ds.powi(2).min(1f32);
+                let drs = ds / rs;
+                let v = 1f32 - drs.powi(2).min(1f32);
                 let vi = (v * 255f32) as u8;
                 if vi > 0 {
                     let p = self.get_pixel(x, y);

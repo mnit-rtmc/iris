@@ -425,7 +425,7 @@ fn make_face_frame(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Frame {
 
 /// Make a raster of sign face
 fn make_face_raster(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Raster {
-    let dark = [32, 32, 0];
+    let dark = [20, 20, 0];
     let rgb = [0, 0, 0];
     let mut face = Raster::new(w.into(), h.into(), rgb);
     let ph = page.height();
@@ -433,15 +433,16 @@ fn make_face_raster(page: Raster, cfg: &SignConfig, w: u16, h: u16) -> Raster {
     let sx = w as f32 / pw as f32;
     let sy = h as f32 / ph as f32;
     let s = sx.min(sy);
+    debug!("face: {:?}, scale: {}", cfg.name, s);
     for y in 0..ph {
         let py = cfg.pixel_y(y) * h as f32;
         for x in 0..pw {
             let px = cfg.pixel_x(x) * w as f32;
             let clr = page.get_pixel(x, y);
             let sr = clr[0].max(clr[1]).max(clr[2]);
-            // Clamp radius between 0.5 and 0.8 (blooming)
-            let r = s * (sr as f32 / 255f32).max(0.5f32).min(0.8f32);
-            let clr = if sr > 32 { clr } else { dark };
+            // Clamp radius between 0.6 and 0.8 (blooming)
+            let r = s * (sr as f32 / 255f32).max(0.6f32).min(0.8f32);
+            let clr = if sr > 20 { clr } else { dark };
             face.circle(px, py, r, [clr[0], clr[1], clr[2]]);
         }
     }
