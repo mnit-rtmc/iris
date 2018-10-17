@@ -369,8 +369,11 @@ impl MsgData {
             gifs,
         })
     }
-    fn remove_gif_listing(&mut self, n: &PathBuf) {
-        self.gifs.remove(n);
+    /// Check if a .gif file is in the listing.
+    ///
+    /// Returns true if the file exists.
+    fn check_gif_listing(&mut self, n: &PathBuf) -> bool {
+        self.gifs.remove(n)
     }
     fn delete_gifs(&mut self, tx: &Sender<PathBuf>) -> Result<(), Error> {
         for p in self.gifs.drain() {
@@ -414,19 +417,20 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
     let mut g = String::new();
     g.push_str(&s.name);
     g.push_str(&".gif");
-    let tn = make_tmp_name(&img.as_path(), &g);
     let n = make_name(&img.as_path(), &g);
-    let f = BufWriter::new(File::create(&tn)?);
-    let t = Instant::now();
-    if let Err(e) = render_sign_msg(s, msg_data, f) {
-        warn!("{}: {:?}", &s.name, e);
-        remove_file(&tn)?;
-        return Ok(());
-    };
-    rename(tn, &n)?;
-    msg_data.remove_gif_listing(&n);
-    info!("{}.gif rendered in {:?}", &s.name, t.elapsed());
-    tx.send(n)?;
+    if !msg_data.check_gif_listing(&n) {
+        let tn = make_tmp_name(&img.as_path(), &g);
+        let f = BufWriter::new(File::create(&tn)?);
+        let t = Instant::now();
+        if let Err(e) = render_sign_msg(s, msg_data, f) {
+            warn!("{}: {:?}", &s.name, e);
+            remove_file(&tn)?;
+            return Ok(());
+        };
+        rename(tn, &n)?;
+        info!("{}.gif rendered in {:?}", &s.name, t.elapsed());
+        tx.send(n)?;
+    }
     Ok(())
 }
 
