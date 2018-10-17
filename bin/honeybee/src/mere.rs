@@ -109,7 +109,7 @@ impl SshSession {
     fn mirror_all(&self, ps: &mut PathSet) -> Result<(), Error> {
         for p in ps.set.iter() {
             let t = Instant::now();
-            if let Err(e) = self.scp_file(&p) {
+            if let Err(e) = self.mirror_file(&p) {
                 error!("{}, file {:?}", e, p);
                 return Err(e);
             }
@@ -119,17 +119,38 @@ impl SshSession {
         ps.set.clear();
         Ok(())
     }
+    /// Mirror one file.
+    ///
+    /// * `p` Path to file.
+    fn mirror_file(&self, p: &PathBuf) -> Result<(), Error> {
+        let fi = File::open(&p);
+        match fi {
+            Ok(f)  => self.scp_file(p, f),
+            Err(_) => self.rm_file(p),
+        }
+    }
     /// Mirror one file with scp.
     ///
     /// * `p` Path to file.
-    fn scp_file(&self, p: &PathBuf) -> Result<(), Error> {
-        let mut fi = File::open(&p)?;
+    fn scp_file(&self, p: &PathBuf, mut fi: File) -> Result<(), Error> {
         let m = fi.metadata()?;
         let mut fo = self.session.scp_send(p.as_path(), 0o644, m.len(), None)?;
         let c = io::copy(&mut fi, &mut fo)?;
         if c != m.len() {
             error!("{:?}: length mismatch {} != {}", p, c, m.len());
         }
+        Ok(())
+    }
+    /// Remove one file.
+    ///
+    /// * `p` Path to file.
+    fn rm_file(&self, p: &PathBuf) -> Result<(), Error> {
+        let mut channel = self.session.channel_session()?;
+        let mut cmd = String::new();
+        cmd.push_str("rm -f ");
+        cmd.push_str(p.to_str().unwrap());
+        channel.exec(&cmd)?;
+        info!("removed {:?}", p);
         Ok(())
     }
 }
