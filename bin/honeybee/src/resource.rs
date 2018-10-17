@@ -16,8 +16,8 @@ use gif::{Frame,Encoder,Repeat,SetParameter};
 use postgres;
 use postgres::{Connection};
 use serde_json;
-use std::collections::HashMap;
-use std::fs::{File,rename,remove_file};
+use std::collections::{HashMap,HashSet};
+use std::fs::{File,rename,remove_file,read_dir};
 use std::io::{BufReader,BufWriter,Write};
 use std::path::{Path,PathBuf};
 use std::sync::mpsc::Sender;
@@ -350,6 +350,7 @@ struct MsgData {
     configs : HashMap<String, SignConfig>,
     fonts   : HashMap<i32, Font>,
     graphics: HashMap<i32, Graphic>,
+    gifs    : HashSet<PathBuf>,
     // FIXME: need system attributes: dms_default_justification_line,
     //        dms_default_jusitfication_page, dms_max_lines,
     //        dms_page_off_default_secs, dms_page_on_default_secs
@@ -360,17 +361,52 @@ impl MsgData {
         let configs = SignConfig::load(dir)?;
         let fonts = Font::load(dir)?;
         let graphics = Graphic::load(dir)?;
+        let gifs = gif_listing(dir)?;
         Ok(MsgData {
             configs,
             fonts,
             graphics,
+            gifs,
         })
     }
+    fn remove_gif_listing(&mut self, n: &PathBuf) {
+        self.gifs.remove(n);
+    }
+    fn delete_gifs(&mut self, tx: &Sender<PathBuf>) -> Result<(), Error> {
+        for p in self.gifs.drain() {
+            info!("delete gif: {:?}", &p);
+            remove_file(&p)?;
+            tx.send(p)?;
+        }
+        Ok(())
+    }
+}
+
+/// Lookup a listing of gif files
+fn gif_listing(dir: &Path) -> Result<HashSet<PathBuf>, Error> {
+    let mut gifs = HashSet::new();
+    let mut img = PathBuf::new();
+    img.push(dir);
+    img.push("img");
+    if img.is_dir() {
+        for f in read_dir(img)? {
+            let f = f?;
+            if f.file_type()?.is_file() {
+                let p = f.path();
+                let b = if let Some(ext) = p.extension() { ext == "gif" }
+                        else { false };
+                if b {
+                    gifs.insert(p);
+                }
+            }
+        }
+    }
+    Ok(gifs)
 }
 
 /// Check and fetch one sign message (into a .gif file).
 fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
-    msg_data: &MsgData) -> Result<(), Error>
+    msg_data: &mut MsgData) -> Result<(), Error>
 {
     let mut img = PathBuf::new();
     img.push(dir);
@@ -388,6 +424,7 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
         return Ok(());
     };
     rename(tn, &n)?;
+    msg_data.remove_gif_listing(&n);
     info!("{}.gif rendered in {:?}", &s.name, t.elapsed());
     tx.send(n)?;
     Ok(())
@@ -548,7 +585,7 @@ fn create_render_state(s: &SignMessage, msg_data: &MsgData)
 fn query_sign_msg<W: Write>(conn: &Connection, mut w: W, dir: &Path,
     tx: &Sender<PathBuf>) -> Result<u32, Error>
 {
-    let msg_data = MsgData::load(dir)?;
+    let mut msg_data = MsgData::load(dir)?;
     let mut c = 0;
     w.write("[".as_bytes())?;
     for row in &conn.query(SignMessage::sql(), &[])? {
@@ -556,11 +593,11 @@ fn query_sign_msg<W: Write>(conn: &Connection, mut w: W, dir: &Path,
         w.write("\n".as_bytes())?;
         let mut s = SignMessage::from_row(&row);
         w.write(serde_json::to_string(&s)?.as_bytes())?;
-        fetch_sign_msg(&s, dir, tx, &msg_data)?;
+        fetch_sign_msg(&s, dir, tx, &mut msg_data)?;
         c += 1;
     }
     w.write("]\n".as_bytes())?;
-    // FIXME: delete .gif files for sign message which are gone
+    msg_data.delete_gifs(tx)?;
     Ok(c)
 }
 
