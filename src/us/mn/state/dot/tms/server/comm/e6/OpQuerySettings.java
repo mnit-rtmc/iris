@@ -270,6 +270,21 @@ public class OpQuerySettings extends OpE6 {
 			tag_reader.setSyncModeNotify(mstr.getMode());
 			tag_reader.setSlaveSelectCountNotify(
 				mstr.getSlaveSelectCount());
+			return new QueryFirmware();
+		}
+	}
+
+	/** Phase to query the firmware versions */
+	private class QueryFirmware extends Phase<E6Property> {
+
+		/** Query the firmware versions */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			FirmwareVersionsProp v = new FirmwareVersionsProp();
+			sendQuery(mess, v);
+			mess.logQuery(v);
+			controller.setVersionNotify(v.toString());
 			return null;
 		}
 	}
