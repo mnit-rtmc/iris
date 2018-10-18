@@ -79,10 +79,10 @@ public class FirmwareVersionsProp extends E6Property {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		return "cpu_boot: " + Integer.toHexString(cpu_boot) +
-		       ", cpu_app: " + Integer.toHexString(cpu_app) +
-		       ", fpga1: " + Integer.toHexString(fpga1) +
-		       ", fpga2: " + Integer.toHexString(fpga2) +
-		       ", rf_fpga: " + Integer.toHexString(rf_fpga);
+		return "boot:" + Integer.toHexString(cpu_boot) +
+		       ",app:" + Integer.toHexString(cpu_app) +
+		       ",fpga1:" + Integer.toHexString(fpga1) +
+		       ",fpga2:" + Integer.toHexString(fpga2) +
+		       ",rf:" + Integer.toHexString(rf_fpga);
 	}
 }
