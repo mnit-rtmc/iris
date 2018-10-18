@@ -40,7 +40,22 @@ public class OpQuerySettings extends OpE6 {
 	/** Create the second phase of the operation */
 	@Override
 	protected Phase<E6Property> phaseTwo() {
-		return new QueryAckTimeout();
+		return new QueryFirmware();
+	}
+
+	/** Phase to query the firmware versions */
+	private class QueryFirmware extends Phase<E6Property> {
+
+		/** Query the firmware versions */
+		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
+			throws IOException
+		{
+			FirmwareVersionsProp v = new FirmwareVersionsProp();
+			sendQuery(mess, v);
+			mess.logQuery(v);
+			controller.setVersionNotify(v.toString());
+			return new QueryAckTimeout();
+		}
 	}
 
 	/** Phase to query the data ack timeout */
@@ -270,21 +285,6 @@ public class OpQuerySettings extends OpE6 {
 			tag_reader.setSyncModeNotify(mstr.getMode());
 			tag_reader.setSlaveSelectCountNotify(
 				mstr.getSlaveSelectCount());
-			return new QueryFirmware();
-		}
-	}
-
-	/** Phase to query the firmware versions */
-	private class QueryFirmware extends Phase<E6Property> {
-
-		/** Query the firmware versions */
-		protected Phase<E6Property> poll(CommMessage<E6Property> mess)
-			throws IOException
-		{
-			FirmwareVersionsProp v = new FirmwareVersionsProp();
-			sendQuery(mess, v);
-			mess.logQuery(v);
-			controller.setVersionNotify(v.toString());
 			return null;
 		}
 	}
