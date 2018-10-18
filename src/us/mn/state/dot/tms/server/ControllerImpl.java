@@ -638,8 +638,9 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Set the firmware version and notify clients of the change */
 	public void setVersionNotify(String v) {
+		v = SString.truncate(v, 64);
 		if (!objectEquals(v, version)) {
-			storeVersion(SString.truncate(v, 64));
+			storeVersion(v);
 			version = v;
 			notifyAttribute("version");
 		}
