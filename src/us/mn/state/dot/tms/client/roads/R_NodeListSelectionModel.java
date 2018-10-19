@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2015  Minnesota Department of Transportation
+ * Copyright (C) 2010-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -102,5 +102,12 @@ public class R_NodeListSelectionModel extends DefaultListSelectionModel {
 			sel.setSelected(proxy);
 		else
 			sel.clearSelection();
+	}
+
+	/** Remove a selection interval */
+	@Override
+	public void removeSelectionInterval(int index0, int index1) {
+		super.removeSelectionInterval(index0, index1);
+		sel.clearSelection();
 	}
 }

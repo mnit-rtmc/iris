@@ -135,11 +135,11 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 		if (o instanceof MapSegment) {
 			MapSegment ms = (MapSegment) o;
 			doLeftClick(e, ms.getR_Node());
-		}
-		else if (o instanceof ParkingSpace) {
+		} else if (o instanceof ParkingSpace) {
 			ParkingSpace ps = (ParkingSpace) o;
 			doLeftClick(e, ps.getR_Node());
-		}
+		} else
+			super.doLeftClick(e, null);
 	}
 
 	/** Do left-click event processing */
