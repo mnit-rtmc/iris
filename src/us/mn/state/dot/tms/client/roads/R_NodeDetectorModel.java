@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2016  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ public class R_NodeDetectorModel extends ProxyTableModel<Detector> {
 	}
 
 	/** R_Node in question */
-	private final R_Node r_node;
+	public final R_Node r_node;
 
 	/** Create a new r_node detector table model */
 	public R_NodeDetectorModel(Session s, R_Node n) {
