@@ -67,6 +67,7 @@ pub struct Font {
 
 impl<'a> Font {
     pub fn load(dir: &Path) -> Result<HashMap<i32, Font>, Error> {
+        debug!("Font::load");
         let mut n = PathBuf::new();
         n.push(dir);
         n.push("font");
@@ -147,6 +148,7 @@ pub struct Graphic {
 
 impl Graphic {
     pub fn load(dir: &Path) -> Result<HashMap<i32, Graphic>, Error> {
+        debug!("Graphic::load");
         let mut n = PathBuf::new();
         n.push(dir);
         n.push("graphic");

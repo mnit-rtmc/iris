@@ -199,6 +199,7 @@ pub struct SignConfig {
 
 impl SignConfig {
     fn load(dir: &Path) -> Result<HashMap<String, SignConfig>, Error> {
+        debug!("SignConfig::load");
         let mut n = PathBuf::new();
         n.push(dir);
         n.push("sign_config");
@@ -358,6 +359,7 @@ struct MsgData {
 
 impl MsgData {
     fn load(dir: &Path) -> Result<Self, Error> {
+        debug!("MsgData::load");
         let configs = SignConfig::load(dir)?;
         let fonts = Font::load(dir)?;
         let graphics = Graphic::load(dir)?;
@@ -636,6 +638,7 @@ impl Resource {
     pub fn fetch(&self, conn: &Connection, dir: &str, tx: &Sender<PathBuf>)
         -> Result<u32, Error>
     {
+        debug!("fetch: {:?}", self.name());
         let p = Path::new(dir);
         let tn = make_tmp_name(p, self.name());
         let n = make_name(p, self.name());
