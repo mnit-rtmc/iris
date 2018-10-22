@@ -513,18 +513,22 @@ impl PageRenderer {
     }
     /// Check page and line justification ordering
     fn check_justification(&self) -> Result<(), SyntaxError> {
+        let mut tr = Rectangle::new(0, 0, 0, 0);
         let mut jp = PageJustification::Other;
         let mut jl = LineJustification::Other;
         let mut ln = 0;
         for s in &self.spans {
+            let text_rectangle = s.state.text_rectangle;
             let just_page = s.state.just_page;
             let just_line = s.state.just_line;
             let line_number = s.state.line_number;
-            if just_page < jp ||
-              (just_page == jp && line_number == ln && just_line < jl)
+            if text_rectangle == tr &&
+              (just_page < jp ||
+              (just_page == jp && line_number == ln && just_line < jl))
             {
                 return Err(SyntaxError::TagConflict);
             }
+            tr = text_rectangle;
             jp = just_page;
             jl = just_line;
             ln = line_number;
