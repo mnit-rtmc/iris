@@ -682,7 +682,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param pp Prefix page flag.
 	 * @param mp Message priority.
 	 * @param src Message source.
-	 * @param o Owner name.
+	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	public SignMessage createMsg(String m, boolean be, boolean pp,
@@ -697,7 +697,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param pp Prefix page flag.
 	 * @param mp Message priority.
 	 * @param src Message source.
-	 * @param o Owner name.
+	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage findOrCreateMsg(String m, boolean be, boolean pp,
@@ -717,7 +717,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	 * @param pp Prefix page flag.
 	 * @param mp Message priority.
 	 * @param src Message source.
-	 * @param o Owner name.
+	 * @param o Message owner.
 	 * @param d Duration in minutes; null means indefinite.
 	 * @return New sign message, or null on error. */
 	private SignMessage createMsgNotify(String m, boolean be, boolean pp,

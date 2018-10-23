@@ -55,8 +55,8 @@ public interface SignMessage extends SonarObject {
 	 * @see us.mn.state.dot.tms.SignMsgSource */
 	int getSource();
 
-	/** Get the sign message owner.
-	 * @return User who deployed the message. */
+	/** Get the message owner.
+	 * @return Message owner (User or action plan name). */
 	String getOwner();
 
 	/** Get the message duration.

@@ -232,17 +232,17 @@ public class SignMessageImpl extends BaseObjectImpl implements SignMessage {
 		return source;
 	}
 
-	/** Owner of current message */
+	/** Owner of message */
 	private String owner;
 
-	/** Get the sign message owner.
-	 * @return User who deployed the message. */
+	/** Get the message owner.
+	 * @return Message owner (User or action plan name). */
 	@Override
 	public String getOwner() {
 		return owner;
 	}
 
-	/** Duration of this message (minutes) */
+	/** Duration of message (minutes) */
 	private Integer duration;
 
 	/** Get the message duration.
