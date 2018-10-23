@@ -216,7 +216,7 @@ public class OpQueryDMSMessage extends OpDMS {
 	{
 		int src = p.getSource();
 		setMsgCurrent(dms.createMsg(multi, (be == 1), false, p, src,
-			null, duration));
+			"OTHER SYSTEM", duration));
 	}
 
 	/** Set the current message on the sign */
