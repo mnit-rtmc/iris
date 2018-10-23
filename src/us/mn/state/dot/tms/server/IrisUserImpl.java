@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,9 +16,11 @@ package us.mn.state.dot.tms.server;
 
 import java.security.spec.InvalidKeySpecException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.Role;
+import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.ServerNamespace;
 import us.mn.state.dot.sonar.server.UserImpl;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -52,16 +54,15 @@ public class IrisUserImpl extends UserImpl implements Storable {
 			"enabled FROM iris.i_user;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
-				ns.addObject(new IrisUserImpl(ns,
-					row.getString(1),	// name
-					row.getString(2),	// full_name
-					row.getString(3),	// password 
-					row.getString(4),	// dn
-					row.getString(5),	// role
-					row.getBoolean(6)	// enabled
-				));
+				ns.addObject(new IrisUserImpl(ns, row));
 			}
 		});
+	}
+
+	/** Lookup a role */
+	static private IrisRoleImpl lookupRole(ServerNamespace ns, String name){
+		SonarObject so = ns.lookupObject(IrisRoleImpl.SONAR_TYPE, name);
+		return (so instanceof IrisRoleImpl) ? (IrisRoleImpl) so : null;
 	}
 
 	/** Get a mapping of the columns */
@@ -99,12 +100,24 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		enabled = false;
 	}
 
+	/** Create an IRIS user from a database row */
+	private IrisUserImpl(ServerNamespace ns, ResultSet row)
+		throws SQLException
+	{
+		this(ns, row.getString(1),  // name
+		         row.getString(2),  // full_name
+		         row.getString(3),  // password
+		         row.getString(4),  // dn
+		         row.getString(5),  // role
+		         row.getBoolean(6)  // enabled
+		);
+	}
+
 	/** Create an IRIS user from database lookup */
 	private IrisUserImpl(ServerNamespace ns, String n, String fn,
-		String pwd, String d, String r, boolean e) throws TMSException
+		String pwd, String d, String r, boolean e)
 	{
-		this(n, fn, pwd, d,
-		     (IrisRoleImpl) ns.lookupObject(Role.SONAR_TYPE, r), e);
+		this(n, fn, pwd, d, lookupRole(ns, r), e);
 	}
 
 	/** Create an IRIS user from database lookup */
