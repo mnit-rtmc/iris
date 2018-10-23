@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -95,6 +95,16 @@ public class CIDRAddressTest extends TestCase {
 		catch(Exception e) {
 			e.printStackTrace();
 			assertTrue(false);
+		}
+	}
+
+	public void test5() {
+		try {
+			CIDRAddress a = new CIDRAddress("0.0.0.0/0/0");
+			assertTrue(false);
+		}
+		catch (Exception e) {
+			assertTrue(true);
 		}
 	}
 }
