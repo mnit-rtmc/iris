@@ -90,18 +90,14 @@ public class OpQueryDMSMessage extends OpDMS {
 
 	/** Process a blank message source from the sign controller */
 	private Phase processMessageBlank() {
-		/* The sign is blank.  If IRIS thinks there is a message on it,
-		 * that's wrong and needs to be updated. */
-		if (!dms.isMsgBlank()) {
-			/* Maybe the current msg just expired */
-			boolean oper_expire = SignMessageHelper
-				.isOperatorExpiring(dms.getMsgCurrent());
-			SignMessage sm = dms.createMsgBlank();
-			setMsgCurrent(sm);
-			/* User msg just expired -- set it to blank */
-			if (oper_expire)
-				dms.setMsgUser(sm);
-		}
+		/* Maybe the current msg just expired */
+		boolean oper_expire = SignMessageHelper
+			.isOperatorExpiring(dms.getMsgCurrent());
+		SignMessage sm = dms.createMsgBlank();
+		setMsgCurrent(sm);
+		/* User msg just expired -- set it to blank */
+		if (oper_expire)
+			dms.setMsgUser(sm);
 		return null;
 	}
 
