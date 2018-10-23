@@ -40,7 +40,7 @@ public class WhitelistNamespace extends ServerNamespace {
 
 	/** Create the whitelist namespace */
 	public WhitelistNamespace(Properties props)
-		throws IllegalArgumentException, NumberFormatException
+		throws IllegalArgumentException
 	{
 		whitelist = CIDRAddress.parseList(props.getProperty(
 			"gate.arm.whitelist"));

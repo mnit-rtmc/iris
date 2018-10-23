@@ -44,14 +44,19 @@ public class CIDRAddress {
 	private final Integer prefix_bits;
 
 	/** Create a new CIDR address */
-	public CIDRAddress(String a) throws IllegalArgumentException,
-		NumberFormatException
-	{
+	public CIDRAddress(String a) throws IllegalArgumentException {
 		String[] p = a.split("/");
-		if (p.length > 2)
-			throw new IllegalArgumentException("Invalid CIDR");
-		prefix_address = p[0];
-		prefix_bits = (p.length > 1) ? Integer.parseInt(p[1]) : null;
+		if (p.length > 0 && p.length < 3) {
+			prefix_address = p[0];
+			try {
+				prefix_bits = (p.length > 1)
+				            ? Integer.parseInt(p[1])
+				            : null;
+				return;
+			}
+			catch (NumberFormatException e) { } // fall thru
+		}
+		throw new IllegalArgumentException("Invalid CIDR");
 	}
 
 	/** Test if an inet address matches */
