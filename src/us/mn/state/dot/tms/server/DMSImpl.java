@@ -753,8 +753,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		boolean pp = (qm != null) ? qm.getPrefixPage() : false;
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			da.getMsgPriority());
+		String o = da.getActionPlan().getName();
 		Integer d = getDuration(da);
-		return createMsg(amsg.multi, be, pp, mp, amsg.getSrc(), null,d);
+		return createMsg(amsg.multi, be, pp, mp, amsg.getSrc(), o, d);
 	}
 
 	/** Get the duration of a DMS action.
