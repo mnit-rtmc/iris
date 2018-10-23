@@ -145,13 +145,7 @@ public class HttpProxySelector extends ProxySelector {
 		String p = props.getProperty("http.proxy.whitelist");
 		if (p != null) {
 			for (String c: p.split("[ \t,]+")) {
-				try {
-					wl.add(new CIDRAddress(c));
-				}
-				catch (UnknownHostException e) {
-					// don't let DNS failure bring us down
-					e.printStackTrace();
-				}
+				wl.add(new CIDRAddress(c));
 			}
 		}
 		return wl;

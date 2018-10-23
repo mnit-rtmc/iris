@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,58 +24,74 @@ import java.net.UnknownHostException;
  */
 public class CIDRAddress {
 
-	/** Inet address */
-	private final byte[] address;
+	/** Prefix address */
+	private final String prefix_address;
 
 	/** Prefix bits */
-	private final int prefix;
-
-	/** Number of full bytes to match in addresses */
-	private final int n_bytes;
-
-	/** Mask of bits in final byte */
-	private final int mask;
+	private final Integer prefix_bits;
 
 	/** Create a new CIDR address */
-	public CIDRAddress(String a) throws UnknownHostException,
+	public CIDRAddress(String a) throws IllegalArgumentException,
 		NumberFormatException
 	{
 		String[] p = a.split("/");
 		if (p.length > 2)
 			throw new IllegalArgumentException("Invalid CIDR");
-		address = InetAddress.getByName(p[0]).getAddress();
-		prefix = (p.length > 1) ? Integer.parseInt(p[1]) : bits();
-		mask = makeMask();
-		n_bytes = prefix / 8;
-	}
-
-	/** Get the number of bits in the address */
-	private int bits() {
-		return address.length * 8;
-	}
-
-	/** Make bit mask for final byte */
-	private int makeMask() {
-		int m = 0;
-		for (int b = 0; b < prefix % 8; b++) {
-			m >>= 1;
-			m |= 0x80;
-		}
-		return m;
+		prefix_address = p[0];
+		prefix_bits = (p.length > 1) ? Integer.parseInt(p[1]) : null;
 	}
 
 	/** Test if an inet address matches */
 	public boolean matches(InetAddress a) {
-		byte[] ad = a.getAddress();
-		if (ad.length != address.length)
+		try {
+			return tryMatches(a);
+		}
+		catch (UnknownHostException e) {
 			return false;
+		}
+	}
+
+	/** Try to test if an inet address matches */
+	private boolean tryMatches(InetAddress a) throws UnknownHostException {
+		byte[] ad = a.getAddress();
+		byte[] dom = getDomainAddress();
+		if (ad.length != dom.length)
+			return false;
+		int n_bits = getPrefixBits(dom);
+		int n_bytes = getFullBytes(n_bits);
 		// Test full bytes in address
 		for (int b = 0; b < n_bytes; b++) {
-			if (ad[b] != address[b])
+			if (ad[b] != dom[b])
 				return false;
 		}
 		// Test trailing bits in address
-		return n_bytes >= address.length ||
-		       ((ad[n_bytes] & mask) == (address[n_bytes] & mask));
+		int mask = makeMask(n_bits);
+		return n_bytes >= dom.length ||
+		       ((ad[n_bytes] & mask) == (dom[n_bytes] & mask));
+	}
+
+	/** Get the network domain bytes */
+	private byte[] getDomainAddress() throws UnknownHostException {
+		return InetAddress.getByName(prefix_address).getAddress();
+	}
+
+	/** Get the number of bits in the prefix */
+	private int getPrefixBits(byte[] dom) {
+		return (prefix_bits != null) ? prefix_bits : dom.length * 8;
+	}
+
+	/** Get the number of full bytes to match */
+	private int getFullBytes(int n_bits) {
+		return n_bits / 8;
+	}
+
+	/** Make bit mask for final byte */
+	private int makeMask(int n_bits) {
+		int m = 0;
+		for (int b = 0; b < n_bits % 8; b++) {
+			m >>= 1;
+			m |= 0x80;
+		}
+		return m;
 	}
 }
