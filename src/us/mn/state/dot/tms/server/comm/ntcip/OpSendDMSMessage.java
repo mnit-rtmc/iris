@@ -115,6 +115,9 @@ public class OpSendDMSMessage extends OpDMS {
 	/** Sign message */
 	private final SignMessage message;
 
+	/** Message owner */
+	private final String owner;
+
 	/** MULTI string */
 	private final String multi;
 
@@ -166,9 +169,10 @@ public class OpSendDMSMessage extends OpDMS {
 	}
 
 	/** Create a new send DMS message operation */
-	public OpSendDMSMessage(DMSImpl d, SignMessage sm) {
+	public OpSendDMSMessage(DMSImpl d, SignMessage sm, String o) {
 		super(PriorityLevel.COMMAND, d);
 		message = sm;
+		owner = o;
 		multi = parseMulti(sm.getMulti());
 		msg_num = lookupMsgNum(multi);
 		message_crc = DmsMessageCRC.calculate(multi,
@@ -228,7 +232,7 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
-			dms.setMsgCurrentNotify(message);
+			dms.setMsgCurrentNotify(message, owner);
 			return new SetLossMsgs();
 		}
 	}
@@ -459,7 +463,7 @@ public class OpSendDMSMessage extends OpDMS {
 			catch (GenError e) {
 				return new QueryActivateMsgErr();
 			}
-			dms.setMsgCurrentNotify(message);
+			dms.setMsgCurrentNotify(message, owner);
 			return new SetLossMsgs();
 		}
 	}

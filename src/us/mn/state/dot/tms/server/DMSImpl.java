@@ -82,6 +82,21 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return (sm != null) && src.checkBit(sm.getSource());
 	}
 
+	/** Get the owner of a sign message */
+	static private String getOwner(SignMessage sm, String user) {
+		StringBuilder sb = new StringBuilder();
+		if (isMsgSource(sm, SignMsgSource.operator))
+			sb.append(user);
+		if (isMsgSource(sm, SignMsgSource.schedule)) {
+			if (sb.length() == 0) {
+				String o = sm.getOwner();
+				sb.append((o != null) ? o : "PLAN");
+			} else
+				sb.append('*');
+		}
+		return sb.toString();
+	}
+
 	/** Minimum duration of a DMS action (minutes) */
 	static private final int DURATION_MINIMUM_MINS = 1;
 
@@ -415,7 +430,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void resetStateNotify() {
 		msg_user = null;
 		setMsgSchedNotify(null);
-		setMsgCurrentNotify(null);
+		setMsgCurrentNotify(null, "RESET");
 		setPixelStatusNotify(null);
 	}
 
@@ -790,7 +805,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	public void doSetMsgUser(SignMessage sm) throws TMSException {
 		SignMessageHelper.validate(sm, this);
 		setMsgUser(sm);
-		sendMsg(getMsgValidated());
+		sm = getMsgValidated();
+		sendMsg(sm, getOwner(sm, getProcUser()));
 	}
 
 	/** Blank the user selected sign message */
@@ -849,7 +865,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		try {
 			SignMessage usm = getMsgValidated();
 			if (isMsgSource(usm, SignMsgSource.schedule))
-				sendMsg(usm);
+				sendMsg(usm, getOwner(usm, usm.getOwner()));
 		}
 		catch (TMSException e) {
 			logError("updateSchedMsg: " + e.getMessage());
@@ -893,12 +909,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Set the current message.
-	 * @param sm Sign message. */
-	public void setMsgCurrentNotify(SignMessage sm) {
+	 * @param sm Sign message.
+	 * @param owner Message owner. */
+	public void setMsgCurrentNotify(SignMessage sm, String owner) {
 		if (isMsgSource(sm, SignMsgSource.tolling))
 			logPriceMessages(EventType.PRICE_VERIFIED);
 		if (sm != msg_current) {
-			logMsg(sm);
+			logMsg(sm, owner);
 			setMsgCurrent(sm);
 			notifyAttribute("msgCurrent");
 			updateExpireTime(sm);
@@ -914,6 +931,13 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			updateSchedMsg();
 	}
 
+	/** Set the current message.
+	 * @param sm Sign message. */
+	public void setMsgCurrentNotify(SignMessage sm) {
+		String owner = (sm != null) ? sm.getOwner() : null;
+		setMsgCurrentNotify(sm, owner);
+	}
+
 	/** Get the current messasge.
 	 * @return Currently active message */
 	@Override
@@ -922,15 +946,15 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Log a message.
-	 * @param sm Sign message. */
-	private void logMsg(SignMessage sm) {
+	 * @param sm Sign message.
+	 * @param owner Message owner. */
+	private void logMsg(SignMessage sm, String owner) {
 		EventType et = EventType.DMS_DEPLOYED;
 		String text = (sm != null) ? sm.getMulti() : null;
 		if (SignMessageHelper.isBlank(sm)) {
 			et = EventType.DMS_CLEARED;
 			text = null;
 		}
-		String owner = (sm != null) ? sm.getOwner() : null;
 		logEvent(new SignStatusEvent(et, name, text, owner));
 	}
 
@@ -1014,23 +1038,26 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		return sm1.getMsgPriority() > sm2.getMsgPriority();
 	}
 
-	/** Send message to DMS */
-	private void sendMsg(SignMessage sm) throws TMSException {
+	/** Send message to DMS.
+	 * @param sm Sign message.
+	 * @param owner Message owner. */
+	private void sendMsg(SignMessage sm, String owner) throws TMSException {
 		DMSPoller p = getDMSPoller();
 		if (null == p) {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
-		sendMsg(p, sm);
+		sendMsg(p, sm, owner);
 	}
 
 	/** Set the next sign message.
 	 * @param p DMS poller.
-	 * @param sm Sign message. */
-	private void sendMsg(DMSPoller p, SignMessage sm) {
+	 * @param sm Sign message.
+	 * @param owner Message owner. */
+	private void sendMsg(DMSPoller p, SignMessage sm, String owner) {
 		if (isMsgSource(sm, SignMsgSource.tolling))
 		    logPriceMessages(EventType.PRICE_DEPLOYED);
-		p.sendMessage(this, sm);
+		p.sendMessage(this, sm, owner);
 	}
 
 	/** Check if the sign has a reference to a sign message */

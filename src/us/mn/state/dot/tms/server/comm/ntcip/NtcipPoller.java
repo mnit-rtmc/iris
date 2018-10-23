@@ -131,12 +131,12 @@ public class NtcipPoller extends ThreadedPoller implements DMSPoller, GpsPoller,
 	/** Send a new message to the sign */
 	@SuppressWarnings("unchecked")
 	@Override
-	public void sendMessage(DMSImpl dms, SignMessage sm) {
+	public void sendMessage(DMSImpl dms, SignMessage sm, String owner) {
 		if (dms.getMsgCurrent() == sm) {
 			if (SignMessageHelper.isScheduledExpiring(sm))
 				addOp(new OpUpdateDMSDuration(dms, sm));
 		} else
-			addOp(new OpSendDMSMessage(dms, sm));
+			addOp(new OpSendDMSMessage(dms, sm, owner));
 	}
 
 	/** Send a request to the GPS */
