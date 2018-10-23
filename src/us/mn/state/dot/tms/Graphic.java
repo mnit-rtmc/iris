@@ -27,7 +27,7 @@ public interface Graphic extends SonarObject {
 	int MAX_NUMBER = 999;
 
 	/** Maximum allowed graphic width */
-	int MAX_WIDTH = 200;
+	int MAX_WIDTH = 225;
 
 	/** Maximum allowed graphic height */
 	int MAX_HEIGHT = 144;
