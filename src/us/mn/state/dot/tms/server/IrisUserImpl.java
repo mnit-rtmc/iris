@@ -90,9 +90,12 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	}
 
 	/** Create a new IRIS user */
-	public IrisUserImpl(String n) {
+	public IrisUserImpl(String n) throws TMSException {
 		super(n);
-		// FIXME: convert user name to lower case
+		if (!n.equals(n.toLowerCase())) {
+			throw new ChangeVetoException(
+				"Must not contain upper-case characters");
+		}
 		fullName = "";
 		password = "";
 		dn = "";
