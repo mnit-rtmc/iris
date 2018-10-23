@@ -141,14 +141,8 @@ public class HttpProxySelector extends ProxySelector {
 
 	/** Create a whitelist of CIDR addresses to skip proxy */
 	private List<CIDRAddress> createProxyWhitelist(Properties props) {
-		ArrayList<CIDRAddress> wl = new ArrayList<CIDRAddress>();
-		String p = props.getProperty("http.proxy.whitelist");
-		if (p != null) {
-			for (String c: p.split("[ \t,]+")) {
-				wl.add(new CIDRAddress(c));
-			}
-		}
-		return wl;
+		return CIDRAddress.parseList(props.getProperty(
+			"http.proxy.whitelist"));
 	}
 
 	/** Handle a failed connection to a proxy server */

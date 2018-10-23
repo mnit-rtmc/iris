@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2017  Minnesota Department of Transportation
+ * Copyright (C) 2013-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,8 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.User;
@@ -37,18 +36,14 @@ public class WhitelistNamespace extends ServerNamespace {
 	}
 
 	/** Whitelist of CIDR addresses */
-	private final LinkedList<CIDRAddress> whitelist =
-		new LinkedList<CIDRAddress>();
+	private final List<CIDRAddress> whitelist;
 
 	/** Create the whitelist namespace */
-	public WhitelistNamespace(Properties props) throws UnknownHostException,
-		NumberFormatException
+	public WhitelistNamespace(Properties props)
+		throws IllegalArgumentException, NumberFormatException
 	{
-		String wl = props.getProperty("gate.arm.whitelist");
-		if (wl != null) {
-			for (String c: wl.split("[ \t,]+"))
-				whitelist.add(new CIDRAddress(c));
-		}
+		whitelist = CIDRAddress.parseList(props.getProperty(
+			"gate.arm.whitelist"));
 	}
 
 	/** Check if address is in whitelist */

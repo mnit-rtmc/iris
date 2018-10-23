@@ -16,6 +16,8 @@ package us.mn.state.dot.tms.utils;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * CIDR (Classless Inter-Domain Routing) Address.
@@ -23,6 +25,17 @@ import java.net.UnknownHostException;
  * @author Douglas Lau
  */
 public class CIDRAddress {
+
+	/** Parse a delimited list of CIDR addresses */
+	static public List<CIDRAddress> parseList(String p) {
+		ArrayList<CIDRAddress> l = new ArrayList<CIDRAddress>();
+		if (p != null) {
+			for (String c: p.split("[ \t,]+")) {
+				l.add(new CIDRAddress(c));
+			}
+		}
+		return l;
+	}
 
 	/** Prefix address */
 	private final String prefix_address;
