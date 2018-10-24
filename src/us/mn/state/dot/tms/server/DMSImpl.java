@@ -975,15 +975,16 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	}
 
 	/** Get validated user/scheduled sign message.
-	 * @return Validated sign message. */
+	 * @return Validated sign message, or null. */
 	private SignMessage getMsgValidated() throws TMSException {
 		SignMessage sm = getMsgUserSched();
-		SignMessageHelper.validate(sm, this);
+		if (sm != null)
+			SignMessageHelper.validate(sm, this);
 		return sm;
 	}
 
 	/** Get user and/or scheduled sign message.
-	 * @return The appropriate sign message. */
+	 * @return The appropriate sign message, or null. */
 	private SignMessage getMsgUserSched() {
 		SignMessage user = msg_user;	// Avoid race
 		if (!msg_queried)
@@ -1050,7 +1051,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			throw new ChangeVetoException(name +
 				": NO ACTIVE POLLER");
 		}
-		sendMsg(p, sm, owner);
+		if (sm != null)
+			sendMsg(p, sm, owner);
 	}
 
 	/** Set the next sign message.
