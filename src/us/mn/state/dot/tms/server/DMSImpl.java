@@ -61,6 +61,7 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.geo.Position;
 import static us.mn.state.dot.tms.server.MainServer.FLUSH;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
+import us.mn.state.dot.tms.utils.SString;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.event.BrightnessSample;
@@ -769,7 +770,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		boolean pp = (qm != null) ? qm.getPrefixPage() : false;
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			da.getMsgPriority());
-		String o = da.getActionPlan().getName();
+		// FIXME: increase owner to VARCHAR(16)
+		String o = SString.truncate(da.getActionPlan().getName(), 15);
 		Integer d = getDuration(da);
 		return createMsg(amsg.multi, be, pp, mp, amsg.getSrc(), o, d);
 	}
