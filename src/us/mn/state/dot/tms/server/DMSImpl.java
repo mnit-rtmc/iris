@@ -85,7 +85,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	/** Get the owner of a sign message */
 	static private String getOwner(SignMessage sm, String user) {
 		StringBuilder sb = new StringBuilder();
-		if (isMsgSource(sm, SignMsgSource.operator))
+		if (isMsgSource(sm, SignMsgSource.operator) ||
+		    isMsgSource(sm, SignMsgSource.blank))
 			sb.append(user);
 		if (isMsgSource(sm, SignMsgSource.schedule)) {
 			if (sb.length() == 0) {
