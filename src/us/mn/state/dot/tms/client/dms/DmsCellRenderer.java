@@ -18,6 +18,7 @@ package us.mn.state.dot.tms.client.dms;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.GridLayout;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
@@ -32,6 +33,7 @@ import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
 import us.mn.state.dot.tms.RasterGraphic;
 import us.mn.state.dot.tms.client.proxy.CellRendererSize;
+import us.mn.state.dot.tms.client.widget.ILabel;
 import static us.mn.state.dot.tms.client.widget.Widgets.UI;
 
 /**
@@ -95,8 +97,8 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 	/** The label that displays the sign ID */
 	private final JLabel name_lbl = new JLabel();
 
-	/** The label for the user */
-	private final JLabel user_lbl = new JLabel();
+	/** The label for the owner */
+	private final JLabel owner_lbl = new ILabel("", Font.ITALIC, 0.8f);
 
 	/** The label that displays the sign location */
 	private final JLabel loc_lbl = new JLabel();
@@ -158,7 +160,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		title.setLayout(new BoxLayout(title, BoxLayout.X_AXIS));
 		title.add(name_lbl);
 		title.add(Box.createGlue());
-		title.add(user_lbl);
+		title.add(owner_lbl);
 		Box box = Box.createHorizontalBox();
 		box.add(loc_lbl);
 		box.add(Box.createGlue());
@@ -195,7 +197,7 @@ public class DmsCellRenderer extends JPanel implements ListCellRenderer<DMS> {
 		String loc = GeoLocHelper.getDescription(dms.getGeoLoc());
 		loc_lbl.setText(loc);
 		updateToolTip(dms, name, loc);
-		user_lbl.setText(getOwner(dms));
+		owner_lbl.setText(getOwner(dms));
 		updatePixelPanel(dms);
 	}
 
