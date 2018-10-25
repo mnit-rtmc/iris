@@ -58,6 +58,8 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 202	Client AUTHENTICATE
 203	Client FAIL AUTHENTICATION
 204	Client DISCONNECT
+205	Client CHANGE PASSWORD
+206	Client FAIL PASSWORD
 301	Gate Arm UNKNOWN
 302	Gate Arm FAULT
 303	Gate Arm OPENING

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -37,23 +37,39 @@ public class AccessLogger implements AccessMonitor {
 	}
 
 	/** Log a connect event */
+	@Override
 	public void connect(String hostport) {
 		log_event(EventType.CLIENT_CONNECT, hostport, null);
 	}
 
 	/** Log an authenticate event */
+	@Override
 	public void authenticate(String hostport, String user) {
 		log_event(EventType.CLIENT_AUTHENTICATE, hostport, user);
 	}
 
 	/** Log a fail authentication event */
+	@Override
 	public void failAuthentication(String hostport, String user) {
 		log_event(EventType.CLIENT_FAIL_AUTHENTICATION, hostport, user);
 	}
 
 	/** Log a disconnect event */
+	@Override
 	public void disconnect(String hostport, String user) {
 		log_event(EventType.CLIENT_DISCONNECT, hostport, user);
+	}
+
+	/** Log a change password event */
+	@Override
+	public void changePassword(String hostport, String user) {
+		log_event(EventType.CLIENT_CHANGE_PASSWORD, hostport, user);
+	}
+
+	/** Log a fail password event */
+	@Override
+	public void failPassword(String hostport, String user) {
+		log_event(EventType.CLIENT_FAIL_PASSWORD, hostport, user);
 	}
 
 	/** Log an event */

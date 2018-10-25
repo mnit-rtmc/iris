@@ -39,4 +39,10 @@ INSERT INTO iris.i_user_domain (i_user, domain)
 -- Add domain to sonar type lut
 INSERT INTO iris.sonar_type (name) VALUES ('domain');
 
+-- Add password change events
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (205, 'Client CHANGE PASSWORD');
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (206, 'Client FAIL PASSWORD');
+
 COMMIT;
