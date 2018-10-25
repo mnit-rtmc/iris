@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,6 +25,13 @@ import us.mn.state.dot.tms.client.proxy.ProxyCellRenderer;
  */
 public class IncidentCellRenderer extends ProxyCellRenderer<Incident> {
 
+	/** Get a camera number (or name) */
+	static private String getCameraNum(Camera cam) {
+		assert cam != null;
+		Integer num = cam.getCamNum();
+		return (num != null) ? "#" + num.toString() : cam.getName();
+	}
+
 	/** Create a new incident cell renderer */
 	public IncidentCellRenderer(IncidentManager m) {
 		super(m);
@@ -39,9 +46,6 @@ public class IncidentCellRenderer extends ProxyCellRenderer<Incident> {
 	/** Get the incident camera */
 	private String getCamera(Incident inc) {
 		Camera cam = inc.getCamera();
-		if (cam != null)
-			return " -- " + cam.getName();
-		else
-			return "";
+		return (cam != null) ? " -- " + getCameraNum(cam) : "";
 	}
 }
