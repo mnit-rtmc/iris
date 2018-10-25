@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,16 +26,16 @@ import us.mn.state.dot.tms.EventType;
 public class SignStatusEvent extends BaseEvent {
 
 	/** Device ID (if device specific) */
-	protected final String device_id;
+	private final String device_id;
 
 	/** Message text */
-	protected final String message;
+	private final String message;
 
-	/** User who deployed message */
-	protected final String iris_user;
+	/** Message owner */
+	private final String owner;
 
 	/** Create a new sign status event */
-	public SignStatusEvent(EventType e, String d, String m, String u) {
+	public SignStatusEvent(EventType e, String d, String m, String o) {
 		super(e);
 		assert e == EventType.DMS_DEPLOYED ||
 		       e == EventType.DMS_CLEARED ||
@@ -43,22 +43,24 @@ public class SignStatusEvent extends BaseEvent {
 		       e == EventType.LCS_CLEARED;
 		device_id = d;
 		message = m;
-		iris_user = u;
+		owner = o;
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "event.sign_event";
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_desc_id", event_type.id);
 		map.put("event_date", event_date);
 		map.put("device_id", device_id);
 		map.put("message", message);
-		map.put("iris_user", iris_user);
+		map.put("owner", owner);
 		return map;
 	}
 }
