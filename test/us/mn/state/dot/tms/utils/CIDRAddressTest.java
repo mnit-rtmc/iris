@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.utils;
 
 import java.net.InetAddress;
 import junit.framework.TestCase;
+import us.mn.state.dot.sonar.CIDRAddress;
 
 /** CIDRAddress tests
  *
