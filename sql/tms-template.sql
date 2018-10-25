@@ -217,7 +217,7 @@ END;
 $update_version$ language plpgsql;
 
 --
--- Roles, Users, Capabilities and Privileges
+-- Roles, Domains, Users, Capabilities and Privileges
 --
 CREATE TABLE iris.role (
 	name VARCHAR(15) PRIMARY KEY,
@@ -227,6 +227,17 @@ CREATE TABLE iris.role (
 COPY iris.role (name, enabled) FROM stdin;
 administrator	t
 operator	t
+\.
+
+CREATE TABLE iris.domain (
+	name VARCHAR(15) PRIMARY KEY,
+	cidr VARCHAR(64) NOT NULL,
+	enabled BOOLEAN NOT NULL
+);
+
+COPY iris.domain (name, cidr, enabled) FROM stdin;
+any_ipv4	0.0.0.0/0	t
+any_ipv6	::0/0	t
 \.
 
 CREATE TABLE iris.i_user (
@@ -246,6 +257,17 @@ CREATE VIEW i_user_view AS
 	SELECT name, full_name, dn, role, enabled
 	FROM iris.i_user;
 GRANT SELECT ON i_user_view TO PUBLIC;
+
+CREATE TABLE iris.i_user_domain (
+	i_user VARCHAR(15) NOT NULL REFERENCES iris.i_user,
+	domain VARCHAR(15) NOT NULL REFERENCES iris.domain
+);
+ALTER TABLE iris.i_user_domain ADD PRIMARY KEY (i_user, domain);
+
+COPY iris.i_user_domain (i_user, domain) FROM stdin;
+admin	any_ipv4
+admin	any_ipv6
+\.
 
 CREATE TABLE iris.capability (
 	name VARCHAR(16) PRIMARY KEY,
@@ -318,6 +340,7 @@ detector
 dms
 dms_action
 dms_sign_group
+domain
 encoder_type
 font
 gate_arm
@@ -378,6 +401,7 @@ CREATE TABLE iris.privilege (
 COPY iris.privilege (name, capability, type_n, attr_n, write) FROM stdin;
 PRV_0001	base	user		f
 PRV_0002	base	role		f
+PRV_000A	base	domain		f
 PRV_0003	base	capability		f
 PRV_0004	base	privilege		f
 PRV_0005	base	connection		f
@@ -389,6 +413,7 @@ PRV_0010	base	cabinet		f
 PRV_0011	base	controller		f
 PRV_0012	base_admin	user		t
 PRV_0013	base_admin	role		t
+PRV_001A	base_admin	domain		t
 PRV_0014	base_admin	privilege		t
 PRV_0015	base_admin	capability		t
 PRV_0016	base_admin	connection		t
