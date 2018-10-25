@@ -22,6 +22,7 @@ import us.mn.state.dot.sched.ExceptionHandler;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.ConfigurationError;
 import us.mn.state.dot.sonar.Connection;
+import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.Name;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
@@ -97,6 +98,15 @@ public class SonarState extends Client {
 	/** Get the role type cache */
 	public TypeCache<Role> getRoles() {
 		return roles;
+	}
+
+	/** Cache of domain proxies */
+	private final TypeCache<Domain> domains =
+		new TypeCache<Domain>(Domain.class, this);
+
+	/** Get the domain type cache */
+	public TypeCache<Domain> getDomains() {
+		return domains;
 	}
 
 	/** Cache of user proxies */
@@ -530,6 +540,7 @@ public class SonarState extends Client {
 		populate(capabilities);
 		populate(privileges);
 		populate(roles);
+		populate(domains);
 		populate(users);
 		populate(connections, true);
 		user = users.lookupObject(user_name);

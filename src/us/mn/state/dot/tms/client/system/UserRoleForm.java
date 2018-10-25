@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2007-2017  Minnesota Department of Transportation
+ * Copyright (C) 2007-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.system;
 import javax.swing.JTabbedPane;
 import us.mn.state.dot.sonar.Capability;
 import us.mn.state.dot.sonar.Connection;
+import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.Privilege;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.User;
@@ -38,7 +39,8 @@ public class UserRoleForm extends AbstractForm {
 		return s.isWritePermitted(User.SONAR_TYPE) ||
 		       s.isWritePermitted(Role.SONAR_TYPE) ||
 		       s.isWritePermitted(Capability.SONAR_TYPE) ||
-		       s.isWritePermitted(Privilege.SONAR_TYPE);
+		       s.isWritePermitted(Privilege.SONAR_TYPE) ||
+		       s.isWritePermitted(Domain.SONAR_TYPE);
 	}
 
 	/** User tab panel */
@@ -49,6 +51,9 @@ public class UserRoleForm extends AbstractForm {
 
 	/** Capability panel */
 	private final CapabilityPanel cap_panel;
+
+	/** Domain panel */
+	private final DomainPanel d_panel;
 
 	/** Connection panel */
 	private final ProxyTablePanel<Connection> c_panel;
@@ -63,6 +68,7 @@ public class UserRoleForm extends AbstractForm {
 		u_panel = new UserTabPanel(s);
 		r_panel = new RolePanel(s);
 		cap_panel = new CapabilityPanel(s);
+		d_panel = new DomainPanel(s);
 		c_panel = new ProxyTablePanel<Connection>(
 			new ConnectionModel(s));
 	}
@@ -74,10 +80,12 @@ public class UserRoleForm extends AbstractForm {
 		u_panel.initialize();
 		r_panel.initialize();
 		cap_panel.initialize();
+		d_panel.initialize();
 		c_panel.initialize();
 		tab.add(I18N.get("user.plural"), u_panel);
 		tab.add(I18N.get("role.plural"), r_panel);
 		tab.add(I18N.get("capability.plural"), cap_panel);
+		tab.add(I18N.get("domain.plural"), d_panel);
 		tab.add(I18N.get("connection.plural"), c_panel);
 		add(tab);
 	}
@@ -88,6 +96,7 @@ public class UserRoleForm extends AbstractForm {
 		u_panel.dispose();
 		r_panel.dispose();
 		cap_panel.dispose();
+		d_panel.dispose();
 		c_panel.dispose();
 		super.dispose();
 	}

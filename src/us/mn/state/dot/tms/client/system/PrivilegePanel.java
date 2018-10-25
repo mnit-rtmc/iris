@@ -51,6 +51,7 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"dms",
 		"dms_action",
 		"dms_sign_group",
+		"domain",
 		"encoder_type",
 		"font",
 		"gate_arm",
