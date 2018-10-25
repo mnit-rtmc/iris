@@ -96,7 +96,7 @@ public class WeatherSensorTheme extends ProxyTheme<WeatherSensor> {
 	}
 
 	/** Return the specified date as a string in local time.
-	 * @param stamp A time stamp, null or < 0 for missing
+	 * @param stamp A time stamp, null or &lt; 0 for missing
 	 * @return A string in local time as HH:mm:ss MM-dd-yyyy */
 	static private String formatDateString(Long stamp) {
 		if (stamp == null || stamp < 0)
