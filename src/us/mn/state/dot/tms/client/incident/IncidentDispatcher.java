@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.incident;
 
 import java.awt.CardLayout;
 import java.awt.event.ActionEvent;
+import java.util.Date;
 import java.util.HashMap;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
@@ -120,6 +121,9 @@ public class IncidentDispatcher extends IPanel
 	/** Verify camera button */
 	private final JButton camera_btn = new JButton();
 
+	/** Event date label */
+	private final JLabel event_date_lbl = createValueLabel();
+
 	/** Lane configuration panel */
 	private final LaneConfigurationPanel lane_config =
 		new LaneConfigurationPanel(LANE_SIZE, true);
@@ -219,6 +223,8 @@ public class IncidentDispatcher extends IPanel
 		add(location_lbl, Stretch.LAST);
 		add("camera");
 		add(cam_pnl, Stretch.LAST);
+		add("incident.event.date");
+		add(event_date_lbl, Stretch.LAST);
 		add(buildImpactBox(), Stretch.FULL);
 		add(buildButtonBox(), Stretch.RIGHT);
 		createButtonJobs();
@@ -438,6 +444,7 @@ public class IncidentDispatcher extends IPanel
 		camera_cbx.setEnabled(false);
 		setCameraAction(null);
 		cam_cards.show(cam_pnl, CAMERA_BTN);
+		event_date_lbl.setText("");
 		log_inc.setEnabled(false);
 		deploy_inc.setEnabled(false);
 		clear_inc.setEnabled(false);
@@ -502,6 +509,8 @@ public class IncidentDispatcher extends IPanel
 			if (inc instanceof ClientIncident)
 				camera_cbx.setModel(createCameraModel(inc));
 			setCameraAction(inc);
+			event_date_lbl.setText(new Date(inc.getEventDate())
+				.toString());
 		}
 		if (a == null || a.equals("impact"))
 			impact_pnl.setImpact(inc.getImpact());
