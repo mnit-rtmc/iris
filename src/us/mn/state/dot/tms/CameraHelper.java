@@ -271,4 +271,15 @@ public class CameraHelper extends BaseHelper {
 	static private int cameraNumBlank() {
 		return SystemAttrEnum.CAMERA_NUM_BLANK.getInt();
 	}
+
+	/** Get a camera number (or name) */
+	static public String getCameraNum(Camera cam) {
+		if (cam != null) {
+			Integer num = cam.getCamNum();
+			return (num != null)
+			      ? "#" + num.toString()
+			      : cam.getName();
+		} else
+			return "";
+	}
 }

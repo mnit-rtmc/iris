@@ -15,6 +15,7 @@
 package us.mn.state.dot.tms.client.incident;
 
 import us.mn.state.dot.tms.Camera;
+import us.mn.state.dot.tms.CameraHelper;
 import us.mn.state.dot.tms.Incident;
 import us.mn.state.dot.tms.client.proxy.ProxyCellRenderer;
 
@@ -24,13 +25,6 @@ import us.mn.state.dot.tms.client.proxy.ProxyCellRenderer;
  * @author Douglas Lau
  */
 public class IncidentCellRenderer extends ProxyCellRenderer<Incident> {
-
-	/** Get a camera number (or name) */
-	static private String getCameraNum(Camera cam) {
-		assert cam != null;
-		Integer num = cam.getCamNum();
-		return (num != null) ? "#" + num.toString() : cam.getName();
-	}
 
 	/** Create a new incident cell renderer */
 	public IncidentCellRenderer(IncidentManager m) {
@@ -46,6 +40,8 @@ public class IncidentCellRenderer extends ProxyCellRenderer<Incident> {
 	/** Get the incident camera */
 	private String getCamera(Incident inc) {
 		Camera cam = inc.getCamera();
-		return (cam != null) ? " -- " + getCameraNum(cam) : "";
+		return (cam != null)
+		      ? " -- " + CameraHelper.getCameraNum(cam)
+		      : "";
 	}
 }
