@@ -102,6 +102,7 @@ public class MainServer {
 			IrisCapabilityImpl.lookup(store, ns);
 			IrisPrivilegeImpl.lookup(store, ns);
 			IrisRoleImpl.lookup(store, ns);
+			IrisDomainImpl.lookup(store, ns);
 			IrisUserImpl.lookup(store, ns);
 			BaseObjectImpl.loadAll(store, ns);
 			scheduleTimerJobs();

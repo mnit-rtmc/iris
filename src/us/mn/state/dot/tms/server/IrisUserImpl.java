@@ -19,6 +19,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeSet;
+import us.mn.state.dot.sonar.Domain;
 import us.mn.state.dot.sonar.Role;
 import us.mn.state.dot.sonar.SonarObject;
 import us.mn.state.dot.sonar.server.ServerNamespace;
@@ -45,12 +47,17 @@ public class IrisUserImpl extends UserImpl implements Storable {
 	/** SQL connection to database */
 	static private SQLConnection store;
 
+	/** User/Domain table mapping */
+	static private TableMapping mapping;
+
 	/** Lookup all the users */
 	static public void lookup(SQLConnection c, final ServerNamespace ns)
 		throws TMSException
 	{
 		store = c;
-		store.query("SELECT name, full_name, password, dn, role, "+
+		mapping = new TableMapping(store, "iris", "i_user",
+			Domain.SONAR_TYPE);
+		store.query("SELECT name, full_name, password, dn, role, " +
 			"enabled FROM iris.i_user;", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -105,7 +112,7 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Create an IRIS user from a database row */
 	private IrisUserImpl(ServerNamespace ns, ResultSet row)
-		throws SQLException
+		throws SQLException, TMSException
 	{
 		this(ns, row.getString(1),  // name
 		         row.getString(2),  // full_name
@@ -118,9 +125,10 @@ public class IrisUserImpl extends UserImpl implements Storable {
 
 	/** Create an IRIS user from database lookup */
 	private IrisUserImpl(ServerNamespace ns, String n, String fn,
-		String pwd, String d, String r, boolean e)
+		String pwd, String d, String r, boolean e) throws TMSException
 	{
 		this(n, fn, pwd, d, lookupRole(ns, r), e);
+		setDomains(lookupDomains(ns));
 	}
 
 	/** Create an IRIS user from database lookup */
@@ -133,6 +141,19 @@ public class IrisUserImpl extends UserImpl implements Storable {
 		dn = d;
 		role = r;
 		enabled = e;
+	}
+
+	/** Lookup all the domains for a user */
+	private IrisDomainImpl[] lookupDomains(ServerNamespace ns)
+		throws TMSException
+	{
+		TreeSet<IrisDomainImpl> doms = new TreeSet<IrisDomainImpl>();
+		for (String o: mapping.lookup(this)) {
+			Object d = ns.lookupObject(Domain.SONAR_TYPE, o);
+			if (d instanceof IrisDomainImpl)
+				doms.add((IrisDomainImpl) d);
+		}
+		return doms.toArray(new IrisDomainImpl[0]);
 	}
 
 	/** Get the primary key name */
@@ -234,5 +255,18 @@ public class IrisUserImpl extends UserImpl implements Storable {
 			store.update(this, "enabled", e);
 			super.setEnabled(e);
 		}
+	}
+
+	/** Set the domains assigned to the user */
+	public void doSetDomains(Domain[] doms) throws TMSException {
+		TreeSet<Storable> dset = new TreeSet<Storable>();
+		for (Domain d: doms) {
+			if (d instanceof IrisDomainImpl)
+				dset.add((IrisDomainImpl) d);
+			else
+				throw new ChangeVetoException("Bad domain");
+		}
+		mapping.update(this, dset);
+		setDomains(doms);
 	}
 }
