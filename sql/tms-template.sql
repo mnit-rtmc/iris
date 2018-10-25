@@ -2271,7 +2271,7 @@ CREATE TABLE iris.sign_message (
 	prefix_page BOOLEAN NOT NULL,
 	msg_priority INTEGER NOT NULL,
 	source INTEGER NOT NULL,
-	owner VARCHAR(15),
+	owner VARCHAR(16),
 	duration INTEGER
 );
 

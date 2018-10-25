@@ -770,8 +770,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		boolean pp = (qm != null) ? qm.getPrefixPage() : false;
 		DmsMsgPriority mp = DmsMsgPriority.fromOrdinal(
 			da.getMsgPriority());
-		// FIXME: increase owner to VARCHAR(16)
-		String o = SString.truncate(da.getActionPlan().getName(), 15);
+		String o = da.getActionPlan().getName();
 		Integer d = getDuration(da);
 		return createMsg(amsg.multi, be, pp, mp, amsg.getSrc(), o, d);
 	}

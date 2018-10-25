@@ -69,4 +69,15 @@ CREATE VIEW recent_sign_event_view AS
 	WHERE event_date > (CURRENT_TIMESTAMP - interval '90 days');
 GRANT SELECT ON recent_sign_event_view TO PUBLIC;
 
+-- Change sign_message owner from 15 to 16 characters (for action plan names)
+DROP VIEW sign_message_view;
+ALTER TABLE iris.sign_message ALTER COLUMN owner TYPE VARCHAR(16);
+
+CREATE VIEW sign_message_view AS
+	SELECT name, sign_config, incident, multi, beacon_enabled, prefix_page,
+	       msg_priority, iris.sign_msg_sources(source) AS sources, owner,
+	       duration
+	FROM iris.sign_message;
+GRANT SELECT ON sign_message_view TO PUBLIC;
+
 COMMIT;
