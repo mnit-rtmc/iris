@@ -53,6 +53,7 @@ import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
 import us.mn.state.dot.tms.RoadAffix;
+import us.mn.state.dot.tms.RptConduit;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TimeAction;
@@ -475,6 +476,15 @@ public class SonarState extends Client {
 		return gpses;
 	}
 
+	/** Cache of report conduits */
+	private final TypeCache<RptConduit> rpt_conduits =
+		new TypeCache<RptConduit>(RptConduit.class, this);
+
+	/** Get the user type cache */
+	public TypeCache<RptConduit> getRptConduits() {
+		return rpt_conduits;
+	}
+	
 	/** Create a new Sonar state */
 	public SonarState(Properties props, ExceptionHandler h)
 		throws IOException, ConfigurationError, NoSuchFieldException,
@@ -561,6 +571,7 @@ public class SonarState extends Client {
 		populate(roads);
 		populate(road_affixes);
 		populate(geo_locs);
+		populateReadable(rpt_conduits);
 		populateReadable(words);
 		populateReadable(day_matchers);
 		populateReadable(day_plans);

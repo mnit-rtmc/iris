@@ -321,6 +321,7 @@ meter_tab	t
 plan_admin	t
 plan_control	t
 plan_tab	t
+report_admin	t
 sensor_admin	t
 sensor_control	t
 sensor_tab	t
@@ -385,6 +386,7 @@ privilege
 quick_message
 ramp_meter
 r_node
+rpt_conduit
 road
 road_affix
 role
@@ -573,6 +575,8 @@ PRV_0148	toll_tab	tag_reader		f
 PRV_0149	toll_tab	toll_zone		f
 PRV_0150	parking_admin	parking_area		t
 PRV_0151	parking_tab	parking_area		f
+PRV_0152	report_admin	rpt_conduit		t
+PRV_0153	report_admin	rpt_conduit		f
 \.
 
 COPY iris.privilege (name, capability, type_n, group_n, write) FROM stdin;
@@ -625,6 +629,7 @@ administrator	toll_admin
 administrator	toll_tab
 administrator	parking_admin
 administrator	parking_tab
+administrator	report_admin
 operator	base
 operator	beacon_control
 operator	beacon_tab
