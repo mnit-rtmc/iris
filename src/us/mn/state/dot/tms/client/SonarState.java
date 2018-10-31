@@ -52,6 +52,7 @@ import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.PlanPhase;
 import us.mn.state.dot.tms.RampMeter;
 import us.mn.state.dot.tms.Road;
+import us.mn.state.dot.tms.RoadAffix;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TagReader;
 import us.mn.state.dot.tms.TimeAction;
@@ -160,6 +161,15 @@ public class SonarState extends Client {
 	/** Get the road list model */
 	public ProxyListModel<Road> getRoadModel() {
 		return road_model;
+	}
+
+	/** Cache of road affix proxies */
+	private final TypeCache<RoadAffix> road_affixes =
+		new TypeCache<RoadAffix>(RoadAffix.class, this);
+
+	/** Get the road affix type cache */
+	public TypeCache<RoadAffix> getRoadAffixes() {
+		return road_affixes;
 	}
 
 	/** Cache of geo locations */
@@ -549,6 +559,7 @@ public class SonarState extends Client {
 		populate(system_attributes, true);
 		populate(map_extents, true);
 		populate(roads);
+		populate(road_affixes);
 		populate(geo_locs);
 		populateReadable(words);
 		populateReadable(day_matchers);

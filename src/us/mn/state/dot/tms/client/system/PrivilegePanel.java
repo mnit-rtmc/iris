@@ -82,6 +82,7 @@ public class PrivilegePanel extends ProxyTablePanel<Privilege> {
 		"ramp_meter",
 		"r_node",
 		"road",
+		"road_affix",
 		"role",
 		"sign_group",
 		"sign_message",

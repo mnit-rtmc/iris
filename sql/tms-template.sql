@@ -374,6 +374,7 @@ quick_message
 ramp_meter
 r_node
 road
+road_affix
 role
 sign_config
 sign_group
@@ -410,6 +411,7 @@ PRV_0005	base	connection		f
 PRV_0006	base	system_attribute		f
 PRV_0007	base	map_extent		f
 PRV_0008	base	road		f
+PRV_000B	base	road_affix		f
 PRV_0009	base	geo_loc		f
 PRV_0010	base	cabinet		f
 PRV_0011	base	controller		f
@@ -422,6 +424,7 @@ PRV_0016	base_admin	connection		t
 PRV_0017	base_policy	geo_loc		t
 PRV_0018	base_policy	map_extent		t
 PRV_0019	base_policy	road		t
+PRV_001B	base_policy	road_affix		t
 PRV_0020	base_policy	system_attribute		t
 PRV_0021	beacon_admin	beacon		t
 PRV_0022	beacon_control	beacon	flashing	t
@@ -728,6 +731,12 @@ CREATE VIEW road_view AS
 	LEFT JOIN iris.direction dir ON r.direction = dir.id
 	LEFT JOIN iris.direction adir ON r.alt_dir = adir.id;
 GRANT SELECT ON road_view TO PUBLIC;
+
+CREATE TABLE iris.road_affix (
+	name VARCHAR(12) PRIMARY KEY,
+	prefix BOOLEAN NOT NULL,
+	fixup VARCHAR(12)
+);
 
 CREATE TABLE iris.geo_loc (
 	name VARCHAR(20) PRIMARY KEY,

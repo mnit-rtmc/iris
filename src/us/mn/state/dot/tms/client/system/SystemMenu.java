@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.system;
 import java.awt.event.ActionEvent;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.roads.RoadForm;
+import us.mn.state.dot.tms.client.roads.RoadAffixForm;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IMenu;
 import us.mn.state.dot.tms.client.widget.SmartDesktop;
@@ -43,6 +44,7 @@ public class SystemMenu extends IMenu {
 		addItem(createUsersAndRolesItem());
 		addItem(createMapExtentsItem());
 		addItem(createRoadItem());
+		addItem(createRoadAffixItem());
 	}
 
 	/** Create a system attributes menu item action */
@@ -82,6 +84,16 @@ public class SystemMenu extends IMenu {
 		    new IAction("location.road.plural") {
 			protected void doActionPerformed(ActionEvent e) {
 				desktop.show(new RoadForm(session));
+			}
+		    } : null;
+	}
+
+	/** Create a road affix menu item action */
+	private IAction createRoadAffixItem() {
+		return RoadAffixForm.isPermitted(session) ?
+		    new IAction("location.road.affix.plural") {
+			protected void doActionPerformed(ActionEvent e) {
+				desktop.show(new RoadAffixForm(session));
 			}
 		    } : null;
 	}

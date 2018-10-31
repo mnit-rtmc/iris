@@ -52,6 +52,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		FontImpl.loadAll();
 		GlyphImpl.loadAll();
 		RoadImpl.loadAll();
+		RoadAffixImpl.loadAll();
 		GeoLocImpl.loadAll();
 		MapExtentImpl.loadAll();
 		IncidentDetailImpl.loadAll();
