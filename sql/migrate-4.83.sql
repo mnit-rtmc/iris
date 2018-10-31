@@ -39,6 +39,18 @@ INSERT INTO iris.i_user_domain (i_user, domain)
 -- Add domain to sonar type lut
 INSERT INTO iris.sonar_type (name) VALUES ('domain');
 
+-- Add default values to privilege columns
+ALTER TABLE iris.privilege ALTER COLUMN obj_n SET DEFAULT ''::VARCHAR;
+ALTER TABLE iris.privilege ALTER COLUMN group_n SET DEFAULT ''::VARCHAR;
+ALTER TABLE iris.privilege ALTER COLUMN attr_n SET DEFAULT ''::VARCHAR;
+
+-- Add privileges for domain
+INSERT INTO iris.privilege (name, capability, type_n, write)
+	(SELECT 'prv_dom' || ROW_NUMBER() OVER (ORDER BY name), capability,
+	 'domain', write
+	 FROM iris.privilege
+	 WHERE type_n = 'role');
+
 -- Add password change events
 INSERT INTO event.event_description (event_desc_id, description)
 	VALUES (205, 'Client CHANGE PASSWORD');
