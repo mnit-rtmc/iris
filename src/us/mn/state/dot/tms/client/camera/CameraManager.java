@@ -317,7 +317,7 @@ public class CameraManager extends DeviceManager<Camera> {
 	public String getDescription(Camera proxy) {
 		Integer num = proxy.getCamNum();
 		if (num != null) {
-			return proxy.getName() + " - #" + num + " - " +
+			return "#" + num + " - " +
 				GeoLocHelper.getDescription(getGeoLoc(proxy));
 		} else
 			return super.getDescription(proxy);
