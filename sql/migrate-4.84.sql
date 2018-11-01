@@ -13,6 +13,27 @@ CREATE TABLE iris.road_affix (
 	fixup VARCHAR(12)
 );
 
+-- Add default road affix rows
+COPY iris.road_affix (name, prefix, fixup) FROM stdin;
+C.S.A.H.	t	CTY
+CO RD	t	CTY
+I-	t	
+U.S.	t	HWY
+T.H.	t	HWY
+AVE	f	
+BLVD	f	
+CIR	f	
+DR	f	
+HWY	f	
+LN	f	
+PKWY	f	
+PL	f	
+RD	f	
+ST	f	
+TR	f	
+WAY	f	
+\.
+
 -- Add road_affix to sonar type lut
 INSERT INTO iris.sonar_type (name) VALUES ('road_affix');
 

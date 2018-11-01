@@ -738,6 +738,26 @@ CREATE TABLE iris.road_affix (
 	fixup VARCHAR(12)
 );
 
+COPY iris.road_affix (name, prefix, fixup) FROM stdin;
+C.S.A.H.	t	CTY
+CO RD	t	CTY
+I-	t	
+U.S.	t	HWY
+T.H.	t	HWY
+AVE	f	
+BLVD	f	
+CIR	f	
+DR	f	
+HWY	f	
+LN	f	
+PKWY	f	
+PL	f	
+RD	f	
+ST	f	
+TR	f	
+WAY	f	
+\.
+
 CREATE TABLE iris.geo_loc (
 	name VARCHAR(20) PRIMARY KEY,
 	notify_tag VARCHAR(20),
