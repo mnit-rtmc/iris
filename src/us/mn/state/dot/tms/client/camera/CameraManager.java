@@ -16,6 +16,7 @@ package us.mn.state.dot.tms.client.camera;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import javax.swing.JLabel;
 import javax.swing.JPopupMenu;
 import us.mn.state.dot.tms.Camera;
@@ -26,13 +27,16 @@ import us.mn.state.dot.tms.PlayList;
 import us.mn.state.dot.tms.PlayListHelper;
 import us.mn.state.dot.tms.VideoMonitor;
 import us.mn.state.dot.tms.client.Session;
+import us.mn.state.dot.tms.client.map.Style;
 import us.mn.state.dot.tms.client.proxy.DeviceManager;
 import us.mn.state.dot.tms.client.proxy.GeoLocManager;
 import us.mn.state.dot.tms.client.proxy.ProxyDescriptor;
 import us.mn.state.dot.tms.client.proxy.ProxySelectionModel;
 import us.mn.state.dot.tms.client.proxy.ProxyView;
 import us.mn.state.dot.tms.client.proxy.ProxyWatcher;
+import us.mn.state.dot.tms.client.proxy.StyleListModel;
 import us.mn.state.dot.tms.utils.I18N;
+import us.mn.state.dot.tms.utils.NumericAlphaComparator;
 
 /**
  * A camera manager is a container for SONAR camera objects.
@@ -66,6 +70,38 @@ public class CameraManager extends DeviceManager<Camera> {
 				return true;
 		}
 		return false;
+	}
+
+	/** Fallback comparator for cameras without numbers assigned */
+	private final Comparator<Camera> na_comparator =
+		new NumericAlphaComparator<Camera>();
+
+	/** Comparator for ordering cameras */
+	private final Comparator<Camera> cam_comparator =
+		new Comparator<Camera>()
+	{
+		public int compare(Camera c0, Camera c1) {
+			Integer n0 = c0.getCamNum();
+			Integer n1 = c1.getCamNum();
+			if (n0 != null && n1 != null)
+				return n0.compareTo(n1);
+			if (n0 != null && n1 == null)
+				return -1;
+			if (n0 == null && n1 != null)
+				return 1;
+			return na_comparator.compare(c0, c1);
+		}
+	};
+
+	/** Create a style list model for the given symbol */
+	@Override
+	protected StyleListModel<Camera> createStyleListModel(Style sty) {
+		return new StyleListModel<Camera>(this, sty.toString()) {
+			@Override
+			protected Comparator<Camera> comparator() {
+				return cam_comparator;
+			}
+		};
 	}
 
 	/** Camera dispatcher */
@@ -281,7 +317,7 @@ public class CameraManager extends DeviceManager<Camera> {
 	public String getDescription(Camera proxy) {
 		Integer num = proxy.getCamNum();
 		if (num != null) {
-			return proxy.getName() + " - #" + num + " - " +
+			return "#" + num + " - " +
 				GeoLocHelper.getDescription(getGeoLoc(proxy));
 		} else
 			return super.getDescription(proxy);
