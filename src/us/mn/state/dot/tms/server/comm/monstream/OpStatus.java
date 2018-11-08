@@ -63,7 +63,7 @@ public class OpStatus extends OpStep {
 
 	/** Parse video monitor number (pin) */
 	static private VideoMonitorImpl parseMonNum(ControllerImpl ctrl,
-		String mon, String mode) throws IOException
+		String mon, String mode) throws ParsingException
 	{
 		try {
 			int pin = Integer.parseInt(mon) + 1;
@@ -282,12 +282,17 @@ public class OpStatus extends OpStep {
 
 	/** Parse status message */
 	private void parseStatus(ControllerImpl ctrl, String mon, String cam,
-		String stat, String mode) throws IOException
+		String stat, String mode) throws InvalidReqException
 	{
-		VideoMonitorImpl vm = parseMonNum(ctrl, mon, mode);
-		CameraImpl c = parseCam(cam);
-		vm.setCamNoSelect(c, "STATUS " + ctrl);
-		c.setVideoLossNotify(stat.length() > 0);
+		try {
+			VideoMonitorImpl vm = parseMonNum(ctrl, mon, mode);
+			CameraImpl c = parseCam(cam);
+			vm.setCamNoSelect(c, "STATUS " + ctrl);
+			c.setVideoLossNotify(stat.length() > 0);
+		}
+		catch (ParsingException e) {
+			// FIXME: log this
+		}
 	}
 
 	/** Parse query message */
