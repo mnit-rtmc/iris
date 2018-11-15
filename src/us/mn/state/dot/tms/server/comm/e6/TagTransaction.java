@@ -170,16 +170,13 @@ public class TagTransaction extends E6Property {
 
 	/** Check if transaction is a valid SeGo streamlined read */
 	private boolean isSeGoReadValid() {
-		switch (getTransactionType()) {
-		case sego_read_streamlined_page_4:
-		case sego_read_streamlined_page_9:
-			return isLengthValid()
-			    && isSeGoReadCRCValid()
-			    && isSeGoMnPass()
-			    && isSeGoPage0CRCValid();
-		default:
-			return false;
-		}
+		TransactionType tt = getTransactionType();
+		return (TransactionType.sego_read_streamlined_page_4 == tt
+		     || TransactionType.sego_read_streamlined_page_9 == tt)
+		     && isLengthValid()
+		     && isSeGoReadCRCValid()
+		     && isSeGoMnPass()
+		     && isSeGoPage0CRCValid();
 	}
 
 	/** Check if SeGo read CRC is valid.  NOTE: length must be valid */
@@ -236,13 +233,11 @@ public class TagTransaction extends E6Property {
 
 	/** Check if transaction is a valid IAG read */
 	private boolean isIAGReadValid() {
-		switch (getTransactionType()) {
-		case iag_read:
-		case iag_read_authenticated:
-			return isLengthValid() && isIAG_CRCValid();
-		default:
-			return false;
-		}
+		TransactionType tt = getTransactionType();
+		return (TransactionType.iag_read == tt
+		     || TransactionType.iag_read_authenticated == tt)
+		     && isLengthValid()
+		     && isIAG_CRCValid();
 	}
 
 	/** Check if IAG CRC is valid.  NOTE: length must be valid */
@@ -275,11 +270,9 @@ public class TagTransaction extends E6Property {
 	/** Check if transaction is a valid ASTM read */
 	private boolean isASTMReadValid() {
 		TransactionType tt = getTransactionType();
-		if (tt == TransactionType.astm_read) {
-			// FIXME: check CRC
-			return isLengthValid();
-		}
-		return false;
+		// FIXME: check CRC
+		return (TransactionType.astm_read == tt)
+		     && isLengthValid();
 	}
 
 	/** Parse an ASTM ID */
