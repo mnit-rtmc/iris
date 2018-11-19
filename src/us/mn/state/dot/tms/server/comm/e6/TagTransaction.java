@@ -264,7 +264,7 @@ public class TagTransaction extends E6Property {
 
 	/** Parse an IAG HOV flag */
 	private boolean parseIAG_HOV() {
-		return (parse8(data, 24) & 0x03) != 0;
+		return (parse8(data, 26) & 0x03) != 0;
 	}
 
 	/** Check if transaction is a valid ASTM read */
