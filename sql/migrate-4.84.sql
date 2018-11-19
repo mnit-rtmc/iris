@@ -49,4 +49,17 @@ INSERT INTO iris.privilege (name, capability, type_n, write)
 	 FROM iris.privilege
 	 WHERE type_n = 'road');
 
+-- Add last_fail (and rename count to event_count)
+DROP VIEW detector_auto_fail_view;
+CREATE VIEW detector_auto_fail_view AS
+	WITH af AS (SELECT device_id, event_desc_id, count(*) AS event_count,
+		    max(event_date) AS last_fail
+		    FROM event.detector_event
+		    GROUP BY device_id, event_desc_id)
+	SELECT device_id, label, ed.description, event_count, last_fail
+	FROM af
+	JOIN event.event_description ed ON af.event_desc_id = ed.event_desc_id
+	JOIN detector_label_view dl ON af.device_id = dl.det_id;
+GRANT SELECT ON detector_auto_fail_view TO PUBLIC;
+
 COMMIT;

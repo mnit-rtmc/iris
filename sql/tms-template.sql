@@ -1976,11 +1976,14 @@ CREATE VIEW detector_event_view AS
 GRANT SELECT ON detector_event_view TO PUBLIC;
 
 CREATE VIEW detector_auto_fail_view AS
-	SELECT device_id, label, ed.description, count(*)
-	FROM event.detector_event e
-	JOIN event.event_description ed ON e.event_desc_id = ed.event_desc_id
-	JOIN detector_label_view dl ON e.device_id = dl.det_id
-	GROUP BY device_id, label, ed.description;
+	WITH af AS (SELECT device_id, event_desc_id, count(*) AS event_count,
+		    max(event_date) AS last_fail
+		    FROM event.detector_event
+		    GROUP BY device_id, event_desc_id)
+	SELECT device_id, label, ed.description, event_count, last_fail
+	FROM af
+	JOIN event.event_description ed ON af.event_desc_id = ed.event_desc_id
+	JOIN detector_label_view dl ON af.device_id = dl.det_id;
 GRANT SELECT ON detector_auto_fail_view TO PUBLIC;
 
 --
