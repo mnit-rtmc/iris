@@ -700,7 +700,13 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 		Iterator<R_NodeImpl> it = c.iterator();
 		while (it.hasNext()) {
 			R_NodeImpl n = it.next();
-			Boolean p = n.getParkingAvailable();
+			Boolean p = n.getParkingAvailable(false);
+			if (p != null) {
+				t++;
+				if (p)
+					a++;
+			}
+			p = n.getParkingAvailable(true);
 			if (p != null) {
 				t++;
 				if (p)

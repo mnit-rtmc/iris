@@ -51,6 +51,33 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	 * FIXME: 150 is sensitivity for Banner DXM magnetometer. */
 	static private final float PARK_AVAIL_OCC = 150f * 100f / 1800f;
 
+	/** Sampler set filter for parking space */
+	static private final class ParkingFilter implements SamplerSet.Filter {
+		// Parking space detectors are numbered like this:
+		//   1: Head Front
+		//   2: Head Rear
+		//   3: Tail Front
+		//   4: Tail Rear
+		static private boolean isTail(DetectorImpl d) {
+			return d.getLaneNumber() >= 3;
+		}
+		private final boolean tail;
+		private ParkingFilter(boolean t) {
+			tail = t;
+		}
+		public boolean check(VehicleSampler vs) {
+			return (vs instanceof DetectorImpl)
+			    && checkDet((DetectorImpl) vs);
+		}
+		private boolean checkDet(DetectorImpl d) {
+			// The head space is only available if none of the
+			// detectors are occupied.  The tail space is available
+			// if the tail detectors are not occupied.
+			return d.getLaneType() == LaneType.PARKING.ordinal()
+			    && (isTail(d) || !tail);
+		}
+	}
+
 	/** Get the minimum roadway speed limit */
 	static public int getMinSpeedLimit() {
 		return SystemAttrEnum.SPEED_LIMIT_MIN_MPH.getInt();
@@ -237,12 +264,13 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	}
 
 	/** Check if the r_node is an available parking space.
+	 * @param tail Tail Position (of head/tail space).
 	 * @return true If parking space and available.
 	 *         false If parking space and occupied.
 	 *         null If not a parking space or not sampling. */
-	public Boolean getParkingAvailable() {
+	public Boolean getParkingAvailable(boolean tail) {
 		SamplerSet ss = new SamplerSet(getSamplerSet().filter(
-			LaneType.PARKING));
+			new ParkingFilter(tail)));
 		if (ss.isPerfect()) {
 			float mo = ss.getMaxOccupancy(MISSING_DATA);
 			if (mo >= 0)
