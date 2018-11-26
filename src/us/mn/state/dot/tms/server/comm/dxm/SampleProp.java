@@ -55,11 +55,6 @@ public class SampleProp extends ControllerProp {
 	/** Maximum number of scans in 30 seconds */
 	static private final int MAX_C30 = 1800;
 
-	/** Filter sample to valid scans (for diagnostics) */
-	static private int filterScans(int s) {
-		return (s < MAX_C30) ? s : MAX_C30;
-	}
-
 	/** Time stamp */
 	private final long stamp;
 
@@ -131,7 +126,7 @@ public class SampleProp extends ControllerProp {
 		int[] occ = new int[len];
 		for (int i = 0; i < len; i++) {
 			int s = parseInt(par[i + 1]);
-			occ[i] = filterScans(filterSample(s));
+			occ[i] = filterSample(s);
 		}
 		return occ;
 	}
