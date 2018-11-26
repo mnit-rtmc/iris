@@ -358,6 +358,27 @@ public class GeoLocHelper extends BaseHelper {
 		return b.toString();
 	}
 
+	/** Get the root label for a parking detector */
+	static public String getParkingRoot(GeoLoc loc) {
+		if (loc == null)
+			return FUTURE;
+		Road roadway = loc.getRoadway();
+		if (roadway == null)
+			return FUTURE;
+		Direction rd = Direction.fromOrdinal(loc.getRoadDir());
+		String lm = loc.getLandmark();
+		StringBuilder b = new StringBuilder();
+		b.append(roadway.getAbbrev());
+		b.append("/");
+		for (int i = 0; i < lm.length(); i++) {
+			char c = lm.charAt(i);
+			if (Character.isDigit(c))
+				b.append(c);
+		}
+		b.append(rd.det_dir);
+		return b.toString();
+	}
+
 	/** Calculate the vector from one location to another.
 	 * @param loc_a Starting location.
 	 * @param loc_b Ending location.

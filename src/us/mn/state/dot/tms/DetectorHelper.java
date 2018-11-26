@@ -48,6 +48,8 @@ public class DetectorHelper extends BaseHelper {
 
 	/** Get the detector label */
 	static public String getLabel(Detector det) {
+		if (det.getLaneType() == LaneType.PARKING.ordinal())
+			return getParkingLabel(det);
 		StringBuilder b = new StringBuilder();
 		b.append(GeoLocHelper.getRootLabel(getGeoLoc(det)));
 		if (b.toString().equals(GeoLocHelper.FUTURE))
@@ -61,6 +63,23 @@ public class DetectorHelper extends BaseHelper {
 			b.append("-ABND");
 		return b.toString();
 	}
+
+	/** Get detector label for a parking detector */
+	static private String getParkingLabel(Detector det) {
+		StringBuilder b = new StringBuilder();
+		b.append(GeoLocHelper.getParkingRoot(getGeoLoc(det)));
+		int l_num = det.getLaneNumber();
+		if (l_num <= PARKING_LANE.length)
+			b.append(PARKING_LANE[l_num]);
+		if (det.getAbandoned())
+			b.append("-ABND");
+		return b.toString();
+	}
+
+	/** Parking lane codes (head-front, head-rear, tail-front, tail-rear) */
+	static private final String PARKING_LANE[] = {
+		"", "hf", "hr", "tf", "tr"
+	};
 
 	/** Test if a detector is active */
 	static public boolean isActive(Detector d) {
