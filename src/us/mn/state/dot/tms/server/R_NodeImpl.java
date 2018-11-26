@@ -70,11 +70,8 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 			    && checkDet((DetectorImpl) vs);
 		}
 		private boolean checkDet(DetectorImpl d) {
-			// The head space is only available if none of the
-			// detectors are occupied.  The tail space is available
-			// if the tail detectors are not occupied.
 			return d.getLaneType() == LaneType.PARKING.ordinal()
-			    && (isTail(d) || !tail);
+			    && (isTail(d) == tail);
 		}
 	}
 
@@ -269,14 +266,26 @@ public class R_NodeImpl extends BaseObjectImpl implements R_Node {
 	 *         false If parking space and occupied.
 	 *         null If not a parking space or not sampling. */
 	public Boolean getParkingAvailable(boolean tail) {
+		// The head position can only be available
+		// if the tail position is also available.
+		if (!tail) {
+			Boolean p = getParkingAvailable2(true);
+			if (p != null && !p)
+				return false;
+		}
+		return getParkingAvailable2(tail);
+	}
+
+	/** Check if the r_node is an available parking space.
+	 * @param tail Tail Position (of head/tail space).
+	 * @return true If parking space and available.
+	 *         false If parking space and occupied.
+	 *         null If not a parking space or not sampling. */
+	private Boolean getParkingAvailable2(boolean tail) {
 		SamplerSet ss = new SamplerSet(getSamplerSet().filter(
 			new ParkingFilter(tail)));
-		if (ss.isPerfect()) {
-			float mo = ss.getMaxOccupancy(MISSING_DATA);
-			if (mo >= 0)
-				return mo < PARK_AVAIL_OCC;
-		}
-		return null;
+		float mo = ss.getMaxOccupancy(MISSING_DATA);
+		return (mo >= 0) ? (mo < PARK_AVAIL_OCC) : null;
 	}
 
 	/** Pickable flag */
