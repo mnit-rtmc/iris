@@ -104,10 +104,20 @@ public class ParkingSpace implements MapObject {
 		return scale * 30;
 	}
 
+	/** Get the A offset */
+	private int getOffsetA() {
+		return (lane != null) ? (lane - 2) : -1;
+	}
+
+	/** Get the B offset */
+	private int getOffsetB() {
+		return (lane != null) ? (lane - 1) : 1;
+	}
+
 	/** Create the shape to draw this object */
 	private Shape createShape(float width, float length) {
-		float len_a = (null == lane || 1 == lane) ? -length : 0;
-		float len_b = (null == lane || 2 == lane) ? length : 0;
+		float len_a = length * getOffsetA();
+		float len_b = length * getOffsetB();
 		double x = segment.pos_b.getX();
 		double y = segment.pos_b.getY();
 		double th = normal.getAngle();

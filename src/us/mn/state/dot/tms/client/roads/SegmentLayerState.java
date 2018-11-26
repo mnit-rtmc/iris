@@ -106,6 +106,18 @@ public class SegmentLayerState extends ProxyLayerState<R_Node> {
 						normal);
 					if (s.next(ps))
 						return ps;
+					if (seg.laneCount() > 2) {
+						ps = new ParkingSpace(seg, 3,
+							scale, normal);
+						if (s.next(ps))
+							return ps;
+					}
+					if (seg.laneCount() > 3) {
+						ps = new ParkingSpace(seg, 4,
+							scale, normal);
+						if (s.next(ps))
+							return ps;
+					}
 				} else {
 					ps = new ParkingSpace(seg, null, scale,
 						normal);
