@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2014  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -96,6 +96,17 @@ public class IntervalDataProperty extends SS125Property {
 			setComplete(true);
 	}
 
+	/** Parse a 16-bit occupancy value.
+	 * @param buf Buffer to parse.
+	 * @param pos Starting position in buffer.
+	 * @return Parsed value. */
+	static private int parseOcc(byte[] buf, int pos) {
+		int o = parse16(buf, pos);
+		// Parsed as unsigned value -- some (undocumented) error codes
+		// are returned as negative values.  Treat them as missing data.
+		return (o >= 0 && o < Short.MAX_VALUE) ? o : MISSING_DATA;
+	}
+
 	/** Interval number */
 	protected int interval;
 
@@ -133,7 +144,7 @@ public class IntervalDataProperty extends SS125Property {
 		protected LaneInterval(byte[] body) {
 			speed = parse24Fixed(body, 14);
 			volume = parse24(body, 17);
-			scan = parse16(body, 20);
+			scan = parseOcc(body, 20);
 			vol_c[0] = parse24(body, 22);
 			vol_c[1] = parse24(body, 25);
 			vol_c[2] = parse24(body, 28);
@@ -175,12 +186,9 @@ public class IntervalDataProperty extends SS125Property {
 	/** Get the scans for all lanes */
 	public int[] getScans() {
 		int[] scans = new int[lanes.length];
-		for(int i = 0; i < scans.length; i++) {
+		for (int i = 0; i < scans.length; i++) {
 			LaneInterval li = lanes[i];
-			if(li != null)
-				scans[i] = li.scan;
-			else
-				scans[i] = MISSING_DATA;
+			scans[i] = (li != null) ? li.scan : MISSING_DATA;
 		}
 		return scans;
 	}
