@@ -67,21 +67,21 @@ public class IntervalDataProperty extends SS125Property {
 
 	/** Parse a QUERY response */
 	protected void parseQuery(byte[] body) throws IOException {
-		if(body.length == 6)
+		if (body.length == 6)
 			parseResult(body);
-		if(body.length != 46)
+		if (body.length != 46)
 			throw new ParsingException("BODY LENGTH");
 		int n_packet = parse8(body, OFF_MSG_SUB_ID);
-		if(n_packet < 0 || n_packet > n_lanes + n_approaches)
+		if (n_packet < 0 || n_packet > n_lanes + n_approaches)
 			throw new ParsingException("PACKET #");
-		if(stamp > 0) {
-			if(interval != parse24(body, 3))
+		if (stamp > 0) {
+			if (interval != parse24(body, 3))
 				throw new ParsingException("INTERVAL");
-			if(stamp != parseDate(body, 6))
+			if (stamp != parseDate(body, 6))
 				throw new ParsingException("STAMP");
-			if(n_lanes != parse8(body, 43))
+			if (n_lanes != parse8(body, 43))
 				throw new ParsingException("# LANES");
-			if(n_approaches != parse8(body, 44))
+			if (n_approaches != parse8(body, 44))
 				throw new ParsingException("# APPROACHES");
 		} else {
 			interval = parse24(body, 3);
@@ -90,9 +90,9 @@ public class IntervalDataProperty extends SS125Property {
 			n_approaches = parse8(body, 44);
 			lanes = new LaneInterval[n_lanes + n_approaches];
 		}
-		if(n_packet < lanes.length)
+		if (n_packet < lanes.length)
 			lanes[n_packet] = new LaneInterval(body);
-		if(n_packet + 1 >= n_lanes + n_approaches)
+		if (n_packet + 1 >= n_lanes + n_approaches)
 			setComplete(true);
 	}
 
@@ -158,12 +158,9 @@ public class IntervalDataProperty extends SS125Property {
 	/** Get the volume for all lanes */
 	public int[] getVolume() {
 		int[] vol = new int[lanes.length];
-		for(int i = 0; i < vol.length; i++) {
+		for (int i = 0; i < vol.length; i++) {
 			LaneInterval li = lanes[i];
-			if(li != null)
-				vol[i] = li.volume;
-			else
-				vol[i] = MISSING_DATA;
+			vol[i] = (li != null) ? li.volume : MISSING_DATA;
 		}
 		return vol;
 	}
@@ -173,12 +170,11 @@ public class IntervalDataProperty extends SS125Property {
 	 * @return Array of volumes, one for each lane. */
 	public int[] getVolume(SS125VehClass vc) {
 		int[] vol = new int[lanes.length];
-		for(int i = 0; i < vol.length; i++) {
+		for (int i = 0; i < vol.length; i++) {
 			LaneInterval li = lanes[i];
-			if(li != null)
-				vol[i] = li.vol_c[vc.ordinal()];
-			else
-				vol[i] = MISSING_DATA;
+			vol[i] = (li != null)
+			       ? li.vol_c[vc.ordinal()]
+			       : MISSING_DATA;
 		}
 		return vol;
 	}
@@ -196,12 +192,11 @@ public class IntervalDataProperty extends SS125Property {
 	/** Get the speeds for all lanes */
 	public int[] getSpeed() {
 		int[] speeds = new int[lanes.length];
-		for(int i = 0; i < speeds.length; i++) {
+		for (int i = 0; i < speeds.length; i++) {
 			LaneInterval li = lanes[i];
-			if(li != null && li.speed != null)
-				speeds[i] = Math.round(li.speed);
-			else
-				speeds[i] = MISSING_DATA;
+			speeds[i] = (li != null && li.speed != null)
+			          ? Math.round(li.speed)
+			          : MISSING_DATA;
 		}
 		return speeds;
 	}
@@ -209,12 +204,11 @@ public class IntervalDataProperty extends SS125Property {
 	/** Get the 85th percentile speeds for all lanes */
 	public int[] getSpeed85() {
 		int[] speeds = new int[lanes.length];
-		for(int i = 0; i < speeds.length; i++) {
+		for (int i = 0; i < speeds.length; i++) {
 			LaneInterval li = lanes[i];
-			if(li != null && li.speed_85 != null)
-				speeds[i] = Math.round(li.speed_85);
-			else
-				speeds[i] = MISSING_DATA;
+			speeds[i] = (li != null && li.speed_85 != null)
+			          ? Math.round(li.speed_85)
+			          : MISSING_DATA;
 		}
 		return speeds;
 	}
@@ -222,17 +216,15 @@ public class IntervalDataProperty extends SS125Property {
 	/** Get the headway for all lanes */
 	public int[] getHeadway() {
 		int[] headway = new int[lanes.length];
-		for(int i = 0; i < headway.length; i++) {
+		for (int i = 0; i < headway.length; i++) {
 			LaneInterval li = lanes[i];
-			if(li != null)
-				headway[i] = li.headway;
-			else
-				headway[i] = MISSING_DATA;
+			headway[i] = (li != null) ? li.headway : MISSING_DATA;
 		}
 		return headway;
 	}
 
 	/** Get a string representation of the property */
+	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		sb.append("Interval ");
@@ -244,31 +236,31 @@ public class IntervalDataProperty extends SS125Property {
 		sb.append(", ");
 		sb.append(n_approaches);
 		sb.append(", vol: [");
-		for(int v: getVolume())
+		for (int v: getVolume())
 			sb.append("" + v + ",");
 		sb.setLength(sb.length() - 1);
 		sb.append("], scans: [");
-		for(int s: getScans())
+		for (int s: getScans())
 			sb.append("" + s + ",");
 		sb.setLength(sb.length() - 1);
 		sb.append("], speed: [");
-		for(int s: getSpeed())
+		for (int s: getSpeed())
 			sb.append("" + s + ",");
 		sb.setLength(sb.length() - 1);
 		sb.append("], speed85: [");
-		for(int s: getSpeed85())
+		for (int s: getSpeed85())
 			sb.append("" + s + ",");
 		sb.setLength(sb.length() - 1);
 		sb.append("], headway: [");
-		for(int s: getHeadway())
+		for (int s: getHeadway())
 			sb.append("" + s + ",");
 		sb.setLength(sb.length() - 1);
 		sb.append("]");
-		for(SS125VehClass vc: SS125VehClass.values()) {
+		for (SS125VehClass vc: SS125VehClass.values()) {
 			sb.append(", ");
 			sb.append(vc);
 			sb.append(": [");
-			for(int v: getVolume(vc))
+			for (int v: getVolume(vc))
 				sb.append("" + v + ",");
 			sb.setLength(sb.length() - 1);
 			sb.append("]");
