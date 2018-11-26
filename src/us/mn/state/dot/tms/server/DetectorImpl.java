@@ -132,12 +132,16 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	static private final Interval CHATTER_THRESHOLD =
 		new Interval(30, SECONDS);
 
+	/** Scan "no change" threshold */
+	static private final Interval NO_CHANGE_THRESHOLD =
+		new Interval(24, Interval.Units.HOURS);
+
 	/** Clear threshold */
 	static private final Interval CLEAR_THRESHOLD =
 		new Interval(24, Interval.Units.HOURS);
 
-	/** No hits clear threshold */
-	static private final Interval HIT_CLEAR_THRESHOLD =
+	/** Fast clear threshold */
+	static private final Interval FAST_CLEAR_THRESHOLD =
 		new Interval(30, SECONDS);
 
 	/** Maximum "realistic" volume for a 30-second sample */
@@ -312,14 +316,19 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Auto fail counter for locked on (scans) */
 	private transient AutoFailCounter locked_on = new AutoFailCounter();
 
+	/** Auto fail counter for no change (scans) */
+	private transient AutoFailCounter no_change = new AutoFailCounter();
+
 	/** Reset auto fail counters */
 	private void resetAutoFailCounters() {
 		no_hits = new AutoFailCounter(getNoHitThreshold(),
-			HIT_CLEAR_THRESHOLD);
+			FAST_CLEAR_THRESHOLD);
 		chatter = new AutoFailCounter(getChatterThreshold(),
 			CLEAR_THRESHOLD);
 		locked_on = new AutoFailCounter(getLockedOnThreshold(),
 			CLEAR_THRESHOLD);
+		no_change = new AutoFailCounter(getNoChangeThreshold(),
+			FAST_CLEAR_THRESHOLD);
 	}
 
 	/** Get the volume "no hit" threshold */
@@ -340,6 +349,11 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Get the scan "locked on" threshold */
 	private Interval getLockedOnThreshold() {
 		return lane_type.lock_on_threshold;
+	}
+
+	/** Get the scan "no change" threshold */
+	private Interval getNoChangeThreshold() {
+		return NO_CHANGE_THRESHOLD;
 	}
 
 	/** Destroy an object */
@@ -538,7 +552,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	private void updateAutoFail() {
 		boolean af = no_hits.triggered
 		          || chatter.triggered
-		          || locked_on.triggered;
+		          || locked_on.triggered
+		          || no_change.triggered;
 		setAutoFailNotify(af && isDetectorAutoFailEnabled());
 	}
 
@@ -684,6 +699,9 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Scans from the last 30-second sample period.  FIXME: use
 	 * scn_cache to get "last_scans" value. */
 	private transient int last_scans = MISSING_DATA;
+
+	/** Scans from previous 30-second sample period */
+	private transient int prev_scans = MISSING_DATA;
 
 	/** Speed from the last 30-second sample period.  FIXME: use
 	 * spd_cache to get "last_speed" value. */
@@ -884,6 +902,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		int n_scans = occ.as60HzScans();
 		if (occ.period == SAMPLE_PERIOD_SEC) {
 			testScans(occ);
+			prev_scans = occ.value;
 			last_scans = n_scans;
 		}
 		scn_cache.add(new PeriodicSample(occ.stamp,occ.period,n_scans));
@@ -900,6 +919,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		locked_on.update(occ.period, lock || hold);
 		if (locked_on.checkLogging(occ.period))
 			logEvent(EventType.DET_LOCKED_ON);
+		boolean v = (occ.value > 0) && (occ.value == prev_scans);
+		no_change.update(occ.period, v);
+		if (no_change.checkLogging(occ.period))
+			logEvent(EventType.DET_NO_CHANGE);
 		updateAutoFail();
 	}
 

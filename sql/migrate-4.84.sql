@@ -62,4 +62,8 @@ CREATE VIEW detector_auto_fail_view AS
 	JOIN detector_label_view dl ON af.device_id = dl.det_id;
 GRANT SELECT ON detector_auto_fail_view TO PUBLIC;
 
+-- Add detector "no change" event
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (97, 'NO CHANGE');
+
 COMMIT;

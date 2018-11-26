@@ -51,6 +51,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 94	NO HITS
 95	LOCKED ON
 96	CHATTER
+97	NO CHANGE
 101	Sign BRIGHTNESS LOW
 102	Sign BRIGHTNESS GOOD
 103	Sign BRIGHTNESS HIGH
