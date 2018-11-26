@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ public enum PeriodicSampleType {
 	public final int sample_bytes;
 
 	/** Maximum sample value allowed */
-	public final int max_value;
+	private final int max_value;
 
 	/** Sample data aggregation method (SUM or AVERAGE) */
 	public final Aggregation aggregation;
@@ -82,9 +82,9 @@ public enum PeriodicSampleType {
 	 * @param buffer Byte buffer.
 	 * @param value Sample value. */
 	public void putValue(ByteBuffer buffer, int value) {
-		if(sample_bytes == 1)
+		if (sample_bytes == 1)
 			buffer.put((byte)value);
-		else if(sample_bytes == 2)
+		else if (sample_bytes == 2)
 			buffer.putShort((short)value);
 	}
 
