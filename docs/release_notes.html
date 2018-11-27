@@ -9,6 +9,45 @@
 <body>
 <h1>MnDOT IRIS 4.x Release Notes</h1>
 <dl>
+	<dt>4.84.0 (27 Nov 2018)</dt>
+	<dd><ul>
+		<li>
+			Fixed E6 tag transaction parsing (HOV, etc.)
+		</li>
+		<li>
+			Added last_fail column to detector_auto_fail_view.
+		</li>
+		<li>
+			Allow parking spaces to have head/tail positions.
+		</li>
+		<li>
+			Added labels for parking lane detector types.
+		</li>
+		<li>
+			Added "NO CHANGE" detector auto fail condition.
+		</li>
+		<li>
+			Improved occupancy parsing for Wavetronix HD protocol.
+		</li>
+		<li>
+			Added road_affix table and class (traveler info).
+		</li>
+		<li>
+			Log connection refused events for comm links.
+		</li>
+		<li>
+			Prefer camera number over name in client UI.
+		</li>
+		<li>
+			Added event date/time to incident dispatcher.
+		</li>
+		<li>
+			Added missing privileges in migrate-4.83.sql script.
+		</li>
+		<li>
+			Fixed monstream status message parsing.
+		</li>
+	</ul></dd>
 	<dt>4.83.0 (25 Oct 2018)</dt>
 	<dd><ul>
 		<li>
