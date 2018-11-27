@@ -16,6 +16,7 @@
 package us.mn.state.dot.tms.server.comm;
 
 import java.io.IOException;
+import java.net.ConnectException;
 import java.net.SocketException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
@@ -24,6 +25,7 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.CommProtocol;
 import us.mn.state.dot.tms.EventType;
 import static us.mn.state.dot.tms.EventType.COMM_ERROR;
+import static us.mn.state.dot.tms.EventType.CONNECTION_REFUSED;
 import us.mn.state.dot.tms.server.ControllerImpl;
 
 /**
@@ -189,6 +191,12 @@ public class CommThread<T extends ControllerProperty> {
 			catch (NoModemException e) {
 				// Keep looping until modem is available
 				setStatus(getMessage(e));
+			}
+			catch (ConnectException e) {
+				String msg = getMessage(e);
+				setStatus(msg);
+				if (poller.handleError(CONNECTION_REFUSED, msg))
+					break;
 			}
 			catch (IOException e) {
 				String msg = getMessage(e);

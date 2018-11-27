@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2014  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,6 +60,7 @@ public class CommEvent extends BaseEvent {
 		       e == EventType.CHECKSUM_ERROR ||
 		       e == EventType.CONTROLLER_ERROR ||
 		       e == EventType.COMM_ERROR ||
+		       e == EventType.CONNECTION_REFUSED ||
 		       e == EventType.COMM_FAILED ||
 		       e == EventType.COMM_RESTORED;
 		controller = c;

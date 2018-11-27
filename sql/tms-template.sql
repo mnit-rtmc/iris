@@ -37,6 +37,7 @@ COPY event.event_description (event_desc_id, description) FROM stdin;
 12	Comm PARSING ERROR
 13	Comm CHECKSUM ERROR
 14	Comm CONTROLLER ERROR
+15	Comm CONNECTION REFUSED
 20	Incident CLEARED
 21	Incident CRASH
 22	Incident STALL

@@ -66,4 +66,8 @@ GRANT SELECT ON detector_auto_fail_view TO PUBLIC;
 INSERT INTO event.event_description (event_desc_id, description)
 	VALUES (97, 'NO CHANGE');
 
+-- Add connection refused event
+INSERT INTO event.event_description (event_desc_id, description)
+	VALUES (15, 'Comm CONNECTION REFUSED');
+
 COMMIT;
