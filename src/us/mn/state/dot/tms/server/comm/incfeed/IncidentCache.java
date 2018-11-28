@@ -170,7 +170,7 @@ public class IncidentCache {
 		short lnt = (short) LaneType.MAINLINE.ordinal();
 		String im = IncidentImpact.fromLanes(n_lanes);
 		IncidentImpl inc = new IncidentImpl(n, orig,
-			pi.inc_type.ordinal(), new Date(), pi.detail,
+			pi.inc_type.id, new Date(), pi.detail,
 			lnt, loc.getRoadway(), loc.getRoadDir(),
 			pi.lat, pi.lon, pi.lookupCamera(), im, false, false);
 		try {
