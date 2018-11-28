@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server.comm.incfeed;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.server.ControllerImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpController;
