@@ -976,20 +976,22 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		v_log.logGap();
 	}
 
-	/** Bin 30-second sample data */
-	public void binEventSamples() {
-		last_volume = v_log.getVehicleCount();
-		last_scans = v_log.getOccupancy().as60HzScans();
-		last_speed = v_log.getSpeed();
-		v_log.binEventSamples();
-		// assume 30 seconds
-		chatter.update(30, last_volume > MAX_VOLUME);
-		if (chatter.checkLogging(30))
-			logEvent(EventType.DET_CHATTER);
-		no_hits.update(30, last_volume == 0);
-		if (no_hits.checkLogging(30))
-			logEvent(EventType.DET_NO_HITS);
-		updateAutoFail();
+	/** Bin sample data to the specified period */
+	public void binEventSamples(int p) {
+		// FIXME: make this work for other binning periods
+		if (30 == p) {
+			last_volume = v_log.getVehicleCount();
+			last_scans = v_log.getOccupancy().as60HzScans();
+			last_speed = v_log.getSpeed();
+			v_log.binEventSamples();
+			chatter.update(30, last_volume > MAX_VOLUME);
+			if (chatter.checkLogging(30))
+				logEvent(EventType.DET_CHATTER);
+			no_hits.update(30, last_volume == 0);
+			if (no_hits.checkLogging(30))
+				logEvent(EventType.DET_NO_HITS);
+			updateAutoFail();
+		}
 	}
 
 	/** Write a single detector as an XML element */

@@ -615,11 +615,11 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 		}
 	}
 
-	/** Bin 30-second sample data */
-	public synchronized void binEventSamples() {
+	/** Bin sample data to the specified period */
+	public synchronized void binEventSamples(int p) {
 		for (ControllerIO io: io_pins.values()) {
 			if (io instanceof DetectorImpl)
-				((DetectorImpl) io).binEventSamples();
+				((DetectorImpl) io).binEventSamples(p);
 		}
 	}
 
