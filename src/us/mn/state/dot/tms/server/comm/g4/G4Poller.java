@@ -1,7 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2012  Iteris Inc.
- * Copyright (C) 2012-2016  Minnesota Department of Transportation
+ * Copyright (C) 2012-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,6 +56,7 @@ public class G4Poller extends ThreadedPoller<G4Property>
  	 * @param p Sample period in seconds. */
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
-		addOp(new OpQueryStats(c, p));
+		if (c.getPollPeriod() == p)
+			addOp(new OpQueryStats(c, p));
 	}
 }
