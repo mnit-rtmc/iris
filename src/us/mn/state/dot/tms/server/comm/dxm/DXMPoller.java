@@ -54,6 +54,9 @@ public class DXMPoller extends BasePoller implements SamplePoller {
  	 * @param p Sample period in seconds. */
 	@Override
 	public void querySamples(ControllerImpl c, int p) {
-		createOp("detector.op.query.samples", c, new OpQuerySamples(p));
+		if (c.getPollPeriod() == p) {
+			createOp("detector.op.query.samples", c,
+				new OpQuerySamples(p));
+		}
 	}
 }
