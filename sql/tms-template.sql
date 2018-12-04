@@ -166,6 +166,7 @@ incident_clear_secs	600
 map_extent_name_initial	Home
 map_icon_size_scale_max	30
 map_segment_max_meters	2000
+meter_event_enable	true
 meter_event_purge_days	14
 meter_green_secs	1.3
 meter_max_red_secs	13.0

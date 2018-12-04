@@ -30,8 +30,13 @@ public class MeterEvent extends BaseEvent {
 	/** Database table name */
 	static private final String TABLE = "event.meter_event";
 
+	/** Get meter event enabled setting */
+	static public boolean getEnabled() {
+		return SystemAttrEnum.METER_EVENT_ENABLE.getBoolean();
+	}
+
 	/** Get meter event purge threshold (days) */
-	static public int getPurgeDays() {
+	static private int getPurgeDays() {
 		return SystemAttrEnum.METER_EVENT_PURGE_DAYS.getInt();
 	}
 

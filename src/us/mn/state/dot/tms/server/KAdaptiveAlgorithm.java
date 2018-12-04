@@ -295,7 +295,7 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			ms.validate();
 			if (ALG_LOG.isOpen())
 				log(ms.toString());
-			if (MeterEvent.getPurgeDays() > 0)
+			if (MeterEvent.getEnabled())
 				ms.logMeterEvent();
 		}
 	}
