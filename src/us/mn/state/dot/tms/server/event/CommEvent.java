@@ -30,8 +30,13 @@ public class CommEvent extends BaseEvent {
 	/** Database table name */
 	static private final String TABLE = "event.comm_event";
 
+	/** Get comm event enabled setting */
+	static public boolean getEnabled() {
+		return SystemAttrEnum.COMM_EVENT_ENABLE.getBoolean();
+	}
+
 	/** Get comm event purge threshold (days) */
-	static public int getPurgeDays() {
+	static private int getPurgeDays() {
 		return SystemAttrEnum.COMM_EVENT_PURGE_DAYS.getInt();
 	}
 
@@ -46,10 +51,10 @@ public class CommEvent extends BaseEvent {
 	}
 
 	/** Controller affected by this event */
-	protected final String controller;
+	private final String controller;
 
 	/** Device ID (if device specific) */
-	protected final String device_id;
+	private final String device_id;
 
 	/** Create a new comm event */
 	public CommEvent(EventType e, String c, String dev) {

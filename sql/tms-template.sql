@@ -111,6 +111,7 @@ camera_stream_controls_enable	false
 camera_switch_event_purge_days	30
 camera_wiper_precip_mm_hr	8
 client_units_si	true
+comm_event_enable	true
 comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
