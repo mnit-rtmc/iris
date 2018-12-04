@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,6 +18,8 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.TMSException;
 
 /**
  * This is a class for logging tag read events to a database.
@@ -28,6 +30,21 @@ public class TagReadEvent extends BaseEvent {
 
 	/** Database table name */
 	static private final String TABLE = "event.tag_read_event";
+
+	/** Get tag read event purge threshold (days) */
+	static private int getPurgeDays() {
+		return SystemAttrEnum.TAG_READ_EVENT_PURGE_DAYS.getInt();
+	}
+
+	/** Purge old records */
+	static public void purgeRecords() throws TMSException {
+		int age = getPurgeDays();
+		if (store != null && age > 0) {
+			store.update("DELETE FROM " + TABLE +
+				" WHERE event_date < now() - '" + age +
+				" days'::interval;");
+		}
+	}
 
 	/** Tag type */
 	private final int tag_type;

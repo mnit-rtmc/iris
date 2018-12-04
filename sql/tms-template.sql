@@ -189,6 +189,7 @@ sample_archive_enable	true
 speed_limit_min_mph	45
 speed_limit_default_mph	55
 speed_limit_max_mph	75
+tag_read_event_purge_days	0
 toll_density_alpha	0.045
 toll_density_beta	1.1
 toll_min_price	0.25
