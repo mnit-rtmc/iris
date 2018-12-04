@@ -115,7 +115,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.84.0
+database_version	4.85.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -151,12 +151,13 @@ dms_update_font_table	true
 dmsxml_modem_op_timeout_secs	305
 dmsxml_op_timeout_secs	65
 dmsxml_reinit_detect	false
-email_sender_server	
-email_smtp_host	
+email_rate_limit_hours	0
 email_recipient_action_plan	
 email_recipient_aws	
 email_recipient_dmsxml_reinit	
 email_recipient_gate_arm	
+email_sender_server	
+email_smtp_host	
 gate_arm_alert_timeout_secs	90
 help_trouble_ticket_enable	false
 help_trouble_ticket_url	

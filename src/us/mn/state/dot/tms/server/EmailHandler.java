@@ -15,11 +15,14 @@
  */
 package us.mn.state.dot.tms.server;
 
+import java.util.HashMap;
 import javax.mail.MessagingException;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.sched.Scheduler;
 import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.Units.HOURS;
 import us.mn.state.dot.tms.utils.Emailer;
 
 /**
@@ -29,6 +32,23 @@ import us.mn.state.dot.tms.utils.Emailer;
  * @author Michael Darter
  */
 public class EmailHandler {
+
+	/** Interval value of one hour (ms) */
+	static private final long HOUR_MS = new Interval(1, HOURS).ms();
+
+	/** Get email rate limiting time (hours) */
+	static private int getEmailRateLimitHours() {
+		return SystemAttrEnum.EMAIL_RATE_LIMIT_HOURS.getInt();
+	}
+
+	/** Get email rate limiting time (ms) */
+	static private long getEmailRateLimitMs() {
+		return getEmailRateLimitHours() * HOUR_MS;
+	}
+
+	/** Mapping of messages to last sent time */
+	static private final HashMap<String, Long> MSG_TIME =
+		new HashMap<String, Long>();
 
 	 /** Scheduler for email jobs */
 	static private final Scheduler EMAIL = new Scheduler("email");
@@ -64,6 +84,12 @@ public class EmailHandler {
 	 * @param msg Text of email.
 	 * @param recip Recipient of email. */
 	static private void doSendEmail(String sub, String msg, String recip) {
+		Long p = MSG_TIME.get(msg);
+		if (p != null) {
+			long elapsed_ms = TimeSteward.currentTimeMillis() - p;
+			if (elapsed_ms < getEmailRateLimitMs())
+				return;
+		}
 		if (null == recip || recip.length() <= 0) {
 			logEmailError(msg, "invalid recipient");
 			return;
@@ -81,6 +107,7 @@ public class EmailHandler {
 		try {
 			Emailer email = new Emailer(host, sender, recip);
 			email.send(sub, msg);
+			MSG_TIME.put(msg, TimeSteward.currentTimeMillis());
 		}
 		catch (MessagingException e) {
 			logEmailError(msg, "failed: " + e.getMessage());
