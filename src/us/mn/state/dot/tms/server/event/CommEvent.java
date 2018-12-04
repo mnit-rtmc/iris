@@ -50,6 +50,19 @@ public class CommEvent extends BaseEvent {
 		}
 	}
 
+	/** Is the specified event a comm event? */
+	static private boolean isCommEvent(EventType et) {
+		return EventType.QUEUE_DRAINED == et
+		    || EventType.POLL_TIMEOUT_ERROR == et
+		    || EventType.PARSING_ERROR == et
+		    || EventType.CHECKSUM_ERROR == et
+		    || EventType.CONTROLLER_ERROR == et
+		    || EventType.COMM_ERROR == et
+		    || EventType.CONNECTION_REFUSED == et
+		    || EventType.COMM_FAILED == et
+		    || EventType.COMM_RESTORED == et;
+	}
+
 	/** Controller affected by this event */
 	private final String controller;
 
@@ -57,17 +70,9 @@ public class CommEvent extends BaseEvent {
 	private final String device_id;
 
 	/** Create a new comm event */
-	public CommEvent(EventType e, String c, String dev) {
-		super(e);
-		assert e == EventType.QUEUE_DRAINED ||
-		       e == EventType.POLL_TIMEOUT_ERROR ||
-		       e == EventType.PARSING_ERROR ||
-		       e == EventType.CHECKSUM_ERROR ||
-		       e == EventType.CONTROLLER_ERROR ||
-		       e == EventType.COMM_ERROR ||
-		       e == EventType.CONNECTION_REFUSED ||
-		       e == EventType.COMM_FAILED ||
-		       e == EventType.COMM_RESTORED;
+	public CommEvent(EventType et, String c, String dev) {
+		super(et);
+		assert isCommEvent(et);
 		controller = c;
 		device_id = dev;
 	}
