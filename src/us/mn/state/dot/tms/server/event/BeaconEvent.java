@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2014  Minnesota Department of Transportation
+ * Copyright (C) 2014-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.server.event;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.TMSException;
 
 /**
  * This is a class for logging beacon events to a database.
@@ -28,14 +30,34 @@ public class BeaconEvent extends BaseEvent {
 	/** Database table name */
 	static private final String TABLE = "event.beacon_event";
 
+	/** Get beacon event purge threshold (days) */
+	static private int getPurgeDays() {
+		return SystemAttrEnum.BEACON_EVENT_PURGE_DAYS.getInt();
+	}
+
+	/** Purge old records */
+	static public void purgeRecords() throws TMSException {
+		int age = getPurgeDays();
+		if (store != null && age > 0) {
+			store.update("DELETE FROM " + TABLE +
+				" WHERE event_date < now() - '" + age +
+				" days'::interval;");
+		}
+	}
+
+	/** Is the specified event a beacon event? */
+	static private boolean isBeaconEvent(EventType et) {
+		return EventType.BEACON_ON_EVENT == et
+		    || EventType.BEACON_OFF_EVENT == et;
+	}
+
 	/** Beacon ID */
 	private final String beacon;
 
 	/** Create a new beacon event */
-	public BeaconEvent(EventType e, String bid) {
-		super(e);
-		assert (e == EventType.BEACON_ON_EVENT)
-		    || (e == EventType.BEACON_OFF_EVENT);
+	public BeaconEvent(EventType et, String bid) {
+		super(et);
+		assert isBeaconEvent(et);
 		beacon = bid;
 	}
 

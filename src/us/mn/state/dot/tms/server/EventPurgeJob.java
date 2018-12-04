@@ -20,6 +20,7 @@ import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.ActionPlanEvent;
 import us.mn.state.dot.tms.server.event.AlarmEvent;
+import us.mn.state.dot.tms.server.event.BeaconEvent;
 import us.mn.state.dot.tms.server.event.CameraSwitchEvent;
 import us.mn.state.dot.tms.server.event.CommEvent;
 import us.mn.state.dot.tms.server.event.DetFailEvent;
@@ -44,6 +45,7 @@ public class EventPurgeJob extends Job {
 	public void perform() throws TMSException {
 		ActionPlanEvent.purgeRecords();
 		AlarmEvent.purgeRecords();
+		BeaconEvent.purgeRecords();
 		CameraSwitchEvent.purgeRecords();
 		CommEvent.purgeRecords();
 		DetFailEvent.purgeRecords();

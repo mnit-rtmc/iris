@@ -30,12 +30,6 @@ public class AlarmEvent extends BaseEvent {
 	/** Database table name */
 	static private final String TABLE = "event.alarm_event";
 
-	/** Is the specified event an alarm event? */
-	static private boolean isAlarmEvent(EventType et) {
-		return EventType.ALARM_TRIGGERED == et
-		    || EventType.ALARM_CLEARED == et;
-	}
-
 	/** Get alarm event purge threshold (days) */
 	static private int getPurgeDays() {
 		return SystemAttrEnum.ALARM_EVENT_PURGE_DAYS.getInt();
@@ -49,6 +43,12 @@ public class AlarmEvent extends BaseEvent {
 				" WHERE event_date < now() - '" + age +
 				" days'::interval;");
 		}
+	}
+
+	/** Is the specified event an alarm event? */
+	static private boolean isAlarmEvent(EventType et) {
+		return EventType.ALARM_TRIGGERED == et
+		    || EventType.ALARM_CLEARED == et;
 	}
 
 	/** Alarm name */

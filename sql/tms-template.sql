@@ -99,6 +99,7 @@ COPY iris.system_attribute (name, value) FROM stdin;
 action_plan_alert_list	
 action_plan_event_purge_days	90
 alarm_event_purge_days	0
+beacon_event_purge_days	0
 camera_autoplay	true
 camera_construction_url	
 camera_image_base_url	
