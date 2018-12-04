@@ -31,13 +31,13 @@ public class CommEvent extends BaseEvent {
 	static private final String TABLE = "event.comm_event";
 
 	/** Get comm event purge threshold (days) */
-	static public int getCommEventPurgeDays() {
+	static public int getPurgeDays() {
 		return SystemAttrEnum.COMM_EVENT_PURGE_DAYS.getInt();
 	}
 
 	/** Purge old records */
 	static public void purgeRecords() throws TMSException {
-		int age = getCommEventPurgeDays();
+		int age = getPurgeDays();
 		if (store != null && age >= 0) {
 			store.update("DELETE FROM " + TABLE +
 				" WHERE event_date < now() - '" + age +

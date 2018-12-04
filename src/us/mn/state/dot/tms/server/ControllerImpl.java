@@ -910,9 +910,8 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 
 	/** Log a comm event */
 	private void logCommEvent(EventType event, String id) {
-		if (CommEvent.getCommEventPurgeDays() <= 0)
-			return;
-		logEvent(new CommEvent(event, getName(), id));
+		if (CommEvent.getPurgeDays() > 0)
+			logEvent(new CommEvent(event, getName(), id));
 	}
 
 	/** Complete a controller operation */

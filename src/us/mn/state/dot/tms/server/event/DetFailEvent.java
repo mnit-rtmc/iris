@@ -31,13 +31,13 @@ public class DetFailEvent extends BaseEvent {
 	static private final String TABLE = "event.detector_event";
 
 	/** Get detector event purge threshold (days) */
-	static public int getDetectorEventPurgeDays() {
+	static private int getPurgeDays() {
 		return SystemAttrEnum.DETECTOR_EVENT_PURGE_DAYS.getInt();
 	}
 
 	/** Purge old records */
 	static public void purgeRecords() throws TMSException {
-		int age = getDetectorEventPurgeDays();
+		int age = getPurgeDays();
 		if (store != null && age >= 0) {
 			store.update("DELETE FROM " + TABLE +
 				" WHERE event_date < now() - '" + age +

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2017  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,13 +32,13 @@ public class CameraSwitchEvent extends BaseEvent {
 	static private final String TABLE = "event.camera_switch_event";
 
 	/** Get event purge threshold (days) */
-	static public int getEventPurgeDays() {
+	static private int getPurgeDays() {
 		return SystemAttrEnum.CAMERA_SWITCH_EVENT_PURGE_DAYS.getInt();
 	}
 
 	/** Purge old records */
 	static public void purgeRecords() throws TMSException {
-		int age = getEventPurgeDays();
+		int age = getPurgeDays();
 		if (store != null && age >= 0) {
 			store.update("DELETE FROM " + TABLE +
 				" WHERE event_date < now() - '" + age +

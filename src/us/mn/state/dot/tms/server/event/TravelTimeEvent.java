@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016  Minnesota Department of Transportation
+ * Copyright (C) 2016-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,13 +30,13 @@ public class TravelTimeEvent extends BaseEvent {
 	static private final String TABLE = "event.travel_time_event";
 
 	/** Get travel time event purge threshold (days) */
-	static private int getTravelTimeEventPurgeDays() {
+	static private int getPurgeDays() {
 		return 1;
 	}
 
 	/** Purge old records */
 	static public void purgeRecords() throws TMSException {
-		int age = getTravelTimeEventPurgeDays();
+		int age = getPurgeDays();
 		if (store != null && age >= 0) {
 			store.update("DELETE FROM " + TABLE +
 				" WHERE event_date < now() - '" + age +

@@ -33,7 +33,7 @@ public class ActionPlanEvent extends BaseEvent {
 	static private final String TABLE = "event.action_plan_event";
 
 	/** Get purge threshold (days) */
-	static public int getPurgeDays() {
+	static private int getPurgeDays() {
 		return SystemAttrEnum.ACTION_PLAN_EVENT_PURGE_DAYS.getInt();
 	}
 
