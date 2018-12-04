@@ -40,7 +40,7 @@ public class ActionPlanEvent extends BaseEvent {
 	/** Purge old records */
 	static public void purgeRecords() throws TMSException {
 		int age = getPurgeDays();
-		if (store != null && age >= 0) {
+		if (store != null && age > 0) {
 			store.update("DELETE FROM " + TABLE +
 				" WHERE event_date < now() - '" + age +
 				" days'::interval;");
