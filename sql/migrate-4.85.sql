@@ -21,5 +21,7 @@ INSERT INTO iris.system_attribute (name, value)
 	VALUES ('beacon_event_purge_days', '0');
 INSERT INTO iris.system_attribute (name, value)
 	VALUES ('client_event_purge_days', '0');
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('gate_arm_event_purge_days', '0');
 
 COMMIT;

@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
 import us.mn.state.dot.tms.GateArmState;
+import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.TMSException;
 
 /**
  * This is a class for logging gate arm state change events to a database.
@@ -25,6 +27,24 @@ import us.mn.state.dot.tms.GateArmState;
  * @author Douglas Lau
  */
 public class GateArmEvent extends BaseEvent {
+
+	/** Database table name */
+	static private final String TABLE = "event.gate_arm_event";
+
+	/** Get gate arm event purge threshold (days) */
+	static private int getPurgeDays() {
+		return SystemAttrEnum.GATE_ARM_EVENT_PURGE_DAYS.getInt();
+	}
+
+	/** Purge old records */
+	static public void purgeRecords() throws TMSException {
+		int age = getPurgeDays();
+		if (store != null && age > 0) {
+			store.update("DELETE FROM " + TABLE +
+				" WHERE event_date < now() - '" + age +
+				" days'::interval;");
+		}
+	}
 
 	/** Get corresponding event type for a gate arm state */
 	static private EventType gateArmStateEventType(GateArmState gas) {
@@ -64,7 +84,7 @@ public class GateArmEvent extends BaseEvent {
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return "event.gate_arm_event";
+		return TABLE;
 	}
 
 	/** Get a mapping of the columns */
