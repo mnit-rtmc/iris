@@ -24,7 +24,7 @@ import us.mn.state.dot.tms.server.event.BeaconEvent;
 import us.mn.state.dot.tms.server.event.CameraSwitchEvent;
 import us.mn.state.dot.tms.server.event.ClientEvent;
 import us.mn.state.dot.tms.server.event.CommEvent;
-import us.mn.state.dot.tms.server.event.DetFailEvent;
+import us.mn.state.dot.tms.server.event.DetAutoFailEvent;
 import us.mn.state.dot.tms.server.event.MeterEvent;
 import us.mn.state.dot.tms.server.event.PriceMessageEvent;
 import us.mn.state.dot.tms.server.event.TravelTimeEvent;
@@ -50,7 +50,7 @@ public class EventPurgeJob extends Job {
 		CameraSwitchEvent.purgeRecords();
 		ClientEvent.purgeRecords();
 		CommEvent.purgeRecords();
-		DetFailEvent.purgeRecords();
+		DetAutoFailEvent.purgeRecords();
 		MeterEvent.purgeRecords();
 		PriceMessageEvent.purgeRecords();
 		TravelTimeEvent.purgeRecords();

@@ -21,11 +21,11 @@ import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.SystemAttrEnum;
 
 /**
- * This is a class for logging detector fail events to a database.
+ * This is a class for logging detector auto fail events to a database.
  *
  * @author Douglas Lau
  */
-public class DetFailEvent extends BaseEvent {
+public class DetAutoFailEvent extends BaseEvent {
 
 	/** Database table name */
 	static private final String TABLE = "event.detector_event";
@@ -45,15 +45,21 @@ public class DetFailEvent extends BaseEvent {
 		}
 	}
 
-	/** Device ID (if device specific) */
-	protected final String device_id;
+	/** Is the specified event a detector auto fail event? */
+	static private boolean isAutoFailEvent(EventType et) {
+		return EventType.DET_CHATTER == et
+		    || EventType.DET_LOCKED_ON == et
+		    || EventType.DET_NO_HITS == et
+		    || EventType.DET_NO_CHANGE == et;
+	}
 
-	/** Create a new detector fail event */
-	public DetFailEvent(EventType e, String d) {
-		super(e);
-		assert e == EventType.DET_CHATTER ||
-		       e == EventType.DET_LOCKED_ON ||
-		       e == EventType.DET_NO_HITS;
+	/** Device ID (if device specific) */
+	private final String device_id;
+
+	/** Create a new detector auto fail event */
+	public DetAutoFailEvent(EventType et, String d) {
+		super(et);
+		assert isAutoFailEvent(et);
 		device_id = d;
 	}
 

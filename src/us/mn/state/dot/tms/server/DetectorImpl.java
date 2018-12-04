@@ -47,7 +47,7 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.FEET;
 import static us.mn.state.dot.tms.units.Distance.Units.MILES;
-import us.mn.state.dot.tms.server.event.DetFailEvent;
+import us.mn.state.dot.tms.server.event.DetAutoFailEvent;
 
 /**
  * Detector for traffic data sampling
@@ -829,7 +829,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Log a detector event */
 	private void logEvent(EventType event_type) {
-		logEvent(new DetFailEvent(event_type, getName()));
+		logEvent(new DetAutoFailEvent(event_type, getName()));
 	}
 
 	/** Store one volume sample for this detector.
