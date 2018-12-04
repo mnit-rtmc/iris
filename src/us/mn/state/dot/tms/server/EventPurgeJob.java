@@ -19,6 +19,7 @@ import java.util.Calendar;
 import us.mn.state.dot.sched.Job;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.event.ActionPlanEvent;
+import us.mn.state.dot.tms.server.event.AlarmEvent;
 import us.mn.state.dot.tms.server.event.CameraSwitchEvent;
 import us.mn.state.dot.tms.server.event.CommEvent;
 import us.mn.state.dot.tms.server.event.DetFailEvent;
@@ -42,6 +43,7 @@ public class EventPurgeJob extends Job {
 	/** Perform the event purge job */
 	public void perform() throws TMSException {
 		ActionPlanEvent.purgeRecords();
+		AlarmEvent.purgeRecords();
 		CameraSwitchEvent.purgeRecords();
 		CommEvent.purgeRecords();
 		DetFailEvent.purgeRecords();

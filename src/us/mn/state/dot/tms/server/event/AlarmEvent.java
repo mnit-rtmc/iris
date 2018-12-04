@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2009  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,6 +17,8 @@ package us.mn.state.dot.tms.server.event;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.TMSException;
 
 /**
  * This is a class for logging alarm events to a database.
@@ -25,23 +27,48 @@ import us.mn.state.dot.tms.EventType;
  */
 public class AlarmEvent extends BaseEvent {
 
+	/** Database table name */
+	static private final String TABLE = "event.alarm_event";
+
+	/** Is the specified event an alarm event? */
+	static private boolean isAlarmEvent(EventType et) {
+		return EventType.ALARM_TRIGGERED == et
+		    || EventType.ALARM_CLEARED == et;
+	}
+
+	/** Get alarm event purge threshold (days) */
+	static private int getPurgeDays() {
+		return SystemAttrEnum.ALARM_EVENT_PURGE_DAYS.getInt();
+	}
+
+	/** Purge old records */
+	static public void purgeRecords() throws TMSException {
+		int age = getPurgeDays();
+		if (store != null && age > 0) {
+			store.update("DELETE FROM " + TABLE +
+				" WHERE event_date < now() - '" + age +
+				" days'::interval;");
+		}
+	}
+
 	/** Alarm name */
-	protected final String alarm;
+	private final String alarm;
 
 	/** Create a new alarm event */
-	public AlarmEvent(EventType e, String a) {
-		super(e);
-		assert e == EventType.ALARM_TRIGGERED ||
-		       e == EventType.ALARM_CLEARED;
+	public AlarmEvent(EventType et, String a) {
+		super(et);
+		assert isAlarmEvent(et);
 		alarm = a;
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
-		return "event.alarm_event";
+		return TABLE;
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("event_desc_id", event_type.id);

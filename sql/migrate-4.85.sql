@@ -15,5 +15,7 @@ INSERT INTO iris.system_attribute (name, value)
 	VALUES ('comm_event_enable', 'true');
 INSERT INTO iris.system_attribute (name, value)
 	VALUES ('meter_event_enable', 'true');
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('alarm_event_purge_days', '0');
 
 COMMIT;
