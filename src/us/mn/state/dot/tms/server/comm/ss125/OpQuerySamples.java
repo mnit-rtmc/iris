@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2016  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -99,14 +99,14 @@ public class OpQuerySamples extends OpSS125 {
 	@Override
 	public void cleanup() {
 		controller.storeVolume(stamp, period, START_PIN,
-			sample_data.getVolume());
+			sample_data.getVehCount());
 		controller.storeOccupancy(stamp, period, START_PIN,
 			sample_data.getScans(), MAX_SCANS);
 		controller.storeSpeed(stamp, period, START_PIN,
 			sample_data.getSpeed());
 		for (SS125VehClass vc: SS125VehClass.values()) {
 			controller.storeVolume(stamp, period, START_PIN,
-				sample_data.getVolume(vc), vc.v_class);
+				sample_data.getVehCount(vc), vc.v_class);
 		}
 		super.cleanup();
 	}

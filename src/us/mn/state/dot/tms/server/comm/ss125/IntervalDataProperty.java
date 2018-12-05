@@ -135,7 +135,7 @@ public class IntervalDataProperty extends SS125Property {
 	/** Lane interval data */
 	static public class LaneInterval {
 		public final Float speed;
-		public final int volume;
+		public final int veh_count;
 		public final int scan;
 		public final int[] vol_c = new int[SS125VehClass.size];
 		public final Float speed_85;
@@ -143,7 +143,7 @@ public class IntervalDataProperty extends SS125Property {
 		public final int gap;
 		protected LaneInterval(byte[] body) {
 			speed = parse24Fixed(body, 14);
-			volume = parse24(body, 17);
+			veh_count = parse24(body, 17);
 			scan = parseOcc(body, 20);
 			vol_c[0] = parse24(body, 22);
 			vol_c[1] = parse24(body, 25);
@@ -155,20 +155,20 @@ public class IntervalDataProperty extends SS125Property {
 		}
 	}
 
-	/** Get the volume for all lanes */
-	public int[] getVolume() {
+	/** Get the vehicle count for all lanes */
+	public int[] getVehCount() {
 		int[] vol = new int[lanes.length];
 		for (int i = 0; i < vol.length; i++) {
 			LaneInterval li = lanes[i];
-			vol[i] = (li != null) ? li.volume : MISSING_DATA;
+			vol[i] = (li != null) ? li.veh_count : MISSING_DATA;
 		}
 		return vol;
 	}
 
-	/** Get the vehicle class volume for all lanes.
+	/** Get the vehicle class count for all lanes.
 	 * @param vc Vehicle class.
-	 * @return Array of volumes, one for each lane. */
-	public int[] getVolume(SS125VehClass vc) {
+	 * @return Array of vehicle counts, one for each lane. */
+	public int[] getVehCount(SS125VehClass vc) {
 		int[] vol = new int[lanes.length];
 		for (int i = 0; i < vol.length; i++) {
 			LaneInterval li = lanes[i];
@@ -236,7 +236,7 @@ public class IntervalDataProperty extends SS125Property {
 		sb.append(", ");
 		sb.append(n_approaches);
 		sb.append(", vol: [");
-		for (int v: getVolume())
+		for (int v: getVehCount())
 			sb.append("" + v + ",");
 		sb.setLength(sb.length() - 1);
 		sb.append("], scans: [");
@@ -260,7 +260,7 @@ public class IntervalDataProperty extends SS125Property {
 			sb.append(", ");
 			sb.append(vc);
 			sb.append(": [");
-			for (int v: getVolume(vc))
+			for (int v: getVehCount(vc))
 				sb.append("" + v + ",");
 			sb.setLength(sb.length() - 1);
 			sb.append("]");
