@@ -1254,46 +1254,48 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 <table>
 	<tr>
 	    <th>Protocol</th>
-	    <th>Description</th>
+	    <th>Devices</th>
 	    <th>Default Scheme</th>
 	    <th>Multidrop</th>
 	</tr>
 	<tr>
 	    <td>NTCIP A</td>
-	    <td><a href="#dms">DMS</a> control,
+	    <td><a href="#dms">DMS</a>,
 	        <a href="#ilcs">ILCS</a>,
+	        <a href="#rwis">RWIS</a>,
+	        <a href="#vds">VDS</a>,
 	        <a href="#gps">GPS</a>
 	    </td>
 	    <td>UDP</td>
 	    <td>No</td>
 	</tr>
 	<tr>
-	    <td>NTCIP B</td>
-	    <td><a href="#dms">DMS</a> control,
+	    <td>NTCIP B (with HDLC)</td>
+	    <td><a href="#dms">DMS</a>,
 	        <a href="#ilcs">ILCS</a>,
-	        <a href="#gps">GPS</a> (with HDLC)</td>
+	        <a href="#rwis">RWIS</a>,
+	        <a href="#vds">VDS</a>,
+	        <a href="#gps">GPS</a>
+	    </td>
 	    <td>TCP</td>
 	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>NTCIP C</td>
-	    <td><a href="#dms">DMS</a> control,
+	    <td><a href="#dms">DMS</a>,
 	        <a href="#ilcs">ILCS</a>,
-	        <a href="#gps">GPS</a></td>
+	        <a href="#rwis">RWIS</a>,
+	        <a href="#vds">VDS</a>,
+	        <a href="#gps">GPS</a>
+	    </td>
 	    <td>TCP</td>
 	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>DMS XML</td>
-	    <td><a href="#dms">DMS</a> control to external system</td>
+	    <td><a href="#dms">DMS</a></td>
 	    <td>TCP</td>
 	    <td>Yes</td>
-	</tr>
-	<tr>
-	    <td>Msg feed</td>
-	    <td><a href="#msg_feed">DMS messages</a> from external system</td>
-	    <td>HTTP</td>
-	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>MnDOT 170 4</td>
@@ -1318,106 +1320,110 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>Yes</td>
 	</tr>
 	<tr>
-	    <td>Canoga</td>
-	    <td><a href="#vds">VDS</a> (GTT Canoga Traffic Sensing System)</td>
+	    <td>Canoga (GTT Canoga Traffic Sensing System)</td>
+	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
 	    <td>Yes</td>
 	</tr>
 	<tr>
-	    <td>SS105</td>
-	    <td><a href="#vds">VDS</a> (original Wavetronix SmartSensor)</td>
+	    <td>SS105 (Wavetronix SmartSensor)</td>
+	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
 	    <td>Yes</td>
 	</tr>
 	<tr>
-	    <td>SS125</td>
-	    <td><a href="#vds">VDS</a> (Wavetronix SmartSensor HD)</td>
+	    <td>SS125 (Wavetronix SmartSensor HD)</td>
+	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
 	    <td>Yes</td>
 	</tr>
 	<tr>
-	    <td>RTMS G4</td>
-	    <td><a href="#vds">VDS</a> (RTMS G4 sensor)</td>
+	    <td>G4 (RTMS G4 sensor)</td>
+	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
 	    <td>Yes</td>
 	</tr>
 	<tr>
-	    <td>DR-500</td>
-	    <td><a href="#vds">VDS</a> (Houston Radar DR-500 doppler)</td>
+	    <td>DR-500 (Houston Radar DR-500 doppler)</td>
+	    <td><a href="#vds">VDS</a></td>
+	    <td>TCP</td>
+	    <td>No</td>
+	</tr>
+	<tr>
+	    <td>DXM (Banner magnetometer)</td>
+	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
 	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>Axis PTZ</td>
-	    <td><a href="#ptz">PTZ</a> for Axis cameras</td>
+	    <td><a href="#ptz">PTZ</a></td>
 	    <td>HTTP</td>
 	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>Pelco D</td>
-	    <td><a href="#ptz">PTZ</a> for Pelco cameras</td>
+	    <td><a href="#ptz">PTZ</a></td>
 	    <td>UDP</td>
 	    <td>Yes</td>
 	</tr>
 	<tr>
-	    <td>Manchester</td>
-	    <td><a href="#ptz">PTZ</a> for AD cameras</td>
+	    <td>Manchester (AD)</td>
+	    <td><a href="#ptz">PTZ</a></td>
 	    <td>UDP</td>
 	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>Vicon</td>
-	    <td><a href="#ptz">PTZ</a> for Vicon cameras</td>
+	    <td><a href="#ptz">PTZ</a></td>
 	    <td>UDP</td>
 	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>Infinova</td>
-	    <td><a href="#ptz">PTZ</a> for Infinova cameras</td>
+	    <td><a href="#ptz">PTZ</a></td>
 	    <td>TCP</td>
 	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>Cohu</td>
-	    <td><a href="#ptz">PTZ</a> for Cohu cameras</td>
+	    <td><a href="#ptz">PTZ</a></td>
 	    <td>TCP</td>
 	    <td>Yes</td>
 	</tr>
 	<tr>
 	    <td>Pelco P KBD</td>
-	    <td><a href="#cam_kbd">Camera keyboard</a> control</td>
+	    <td><a href="#cam_kbd">Camera keyboard</a></td>
 	    <td>TCP</td>
 	    <td>No</td>
 	</tr>
 	<tr>
 	    <td><a href="#monstream">MonStream</a></td>
-	    <td><a href="#video">Video switching</a> for streaming decoders</td>
+	    <td><a href="#video">Video switching</a></td>
 	    <td>UDP</td>
 	    <td>No</td>
 	</tr>
 	<tr>
-	    <td>STC</td>
-	    <td><a href="#gate_arms">Gate Arm</a> control for HySecurity
-	        SmartTouch Controllers
-	    </td>
+	    <td>STC (HySecurity SmartTouch)</td>
+	    <td><a href="#gate_arms">Gate Arm</a></td>
 	    <td>TCP</td>
 	    <td>Yes</td>
 	</tr>
 	<tr>
-	    <td>E6</td>
-	    <td><a href="#tag_readers">Tag Reader</a> (Transcore E6)</td>
+	    <td>E6 (Transcore Encompass 6)</td>
+	    <td><a href="#tag_readers">Tag Reader</a></td>
 	    <td>UDP</td>
 	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>Org 815</td>
-	    <td><a href="#rwis">RWIS</a> (ORG 815 sensor)</td>
+	    <td><a href="#rwis">RWIS</a></td>
 	    <td>TCP</td>
 	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>SSI</td>
-	    <td><a href="#rwis">RWIS</a> (SSI RWIS sensor)</td>
+	    <td><a href="#rwis">RWIS</a></td>
 	    <td>HTTP</td>
 	    <td>No</td>
 	</tr>
@@ -1428,20 +1434,26 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>No</td>
 	</tr>
 	<tr>
-	    <td><a href="#cbw">CBW</a></td>
-	    <td><a href="#beacons">beacons</a> (Control by Web)</td>
+	    <td><a href="#cbw">CBW</a> (Control by Web)</td>
+	    <td><a href="#beacons">beacons</a></td>
+	    <td>HTTP</td>
+	    <td>No</td>
+	</tr>
+	<tr>
+	    <td>Msg feed</td>
+	    <td><a href="#msg_feed">DMS messages</a></td>
 	    <td>HTTP</td>
 	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>Incident feed</td>
-	    <td><a href="#inc_feed">Incidents</a> from external system</td>
+	    <td><a href="#inc_feed">Incidents</a></td>
 	    <td>HTTP</td>
 	    <td>No</td>
 	</tr>
 	<tr>
 	    <td>GPS RedLion</td>
-	    <td><a href="#gps">GPS</a> for RedLion modems</td>
+	    <td><a href="#gps">GPS</a></td>
 	    <td>TCP</td>
 	    <td>No</td>
 	</tr>
@@ -2118,14 +2130,39 @@ FIXME
 	&mdash; also called <b>traffic sensing systems</b>.
 	The oldest of these is the inductive loop detector, which is a
 	wire placed under the surface of the road.
-	It is able to magnetically detect the metal in vehicles as they pass
-	over.
 	Another type of sensor uses radar mounted on the side of the road.
 	This type is <b>non-intrusive</b>, since the road surface does not need
 	to be cut to install the detector.
 	A third type &ndash; also non-intrusive &ndash; is video detection.
 	These systems use video cameras and computer vision software to
 	detect vehicles.
+</p>
+<h4>Traffic Data</h4>
+<p>
+	Traffic data is normally collected in fixed time intervals, and put
+	into bins.
+	IRIS can store these types of binned sample data:
+</p>
+<dl>
+	<dt>Vehicle Count</dt>
+	<dd>The number of vehicles detected</dd>
+	<dt>Occupancy</dt>
+	<dd>Percent of time a vehicle occupied the detection zone</dd>
+	<dt>Speed</dt>
+	<dd>Average speed of vehicles detected</dd>
+	<dt>Vehicle Classification</dt>
+	<dd>Number of vehicles of each classification
+	    <ul>
+	    <li>motorcycle (up to 7')</li>
+	    <li>small (7 to 20')</li>
+	    <li>medium (20 to 43')</li>
+	    <li>large (43' or longer)</li>
+	    </ul>
+	</dd>
+</dl>
+<p>
+	Some detectors can log information about each detected vehicle,
+	such as speed and classification.
 </p>
 <h4>VDS Configuration</h4>
 <p>
@@ -2153,56 +2190,68 @@ FIXME
 <p>
 	IRIS supports several different protocols for communicating with
 	vehicle detection systems.
-	For most VDS protocols, traffic data is binned at a fixed time interval.
-	Some protocols allow the binning interval to be adjusted.
-	IRIS collects traffic data including <b>vehicle count</b>,
-	<b>occupancy</b>, <b>speed</b>, and <b>vehicle classification</b>.
-	Some protocols do not use binning at all &mdash; instead they record
-	timestamps and headway for each vehicle passing by the sensor.
 	The following table summarizes features of each protocol.
 </p>
 <table>
 	<tr>
 	    <th>Protocol</th>
-	    <th>Addressing</th>
+	    <th>Traffic Data</th>
 	    <th>Binning</th>
-	    <th>Speed</th>
+	    <th>Addressing</th>
+	</tr>
+	<tr>
+	    <th>NTCIP</th>
+	    <td>Count, Occupancy</td>
+	    <td>0-255 seconds</td>
+	    <td>1-8191 (B)</td>
 	</tr>
 	<tr>
 	    <th>MnDOT 170 4</th>
-	    <td>4-bit (1-15)</td>
-	    <td>30 seconds (+5 minute)</td>
-	    <td>No</td>
+	    <td>Count, Occupancy</td>
+	    <td>30 seconds</td>
+	    <td>1-15</td>
 	</tr>
 	<tr>
 	    <th>MnDOT 170 5</th>
-	    <td>5-bit (1-31)</td>
-	    <td>30 seconds (+5 minute)</td>
-	    <td>No</td>
+	    <td>Count, Occupancy</td>
+	    <td>30 seconds</td>
+	    <td>1-31</td>
 	</tr>
 	<tr>
 	    <th>Canoga</th>
-	    <td>8-bit (1-255)</td>
-	    <td>No (vehicle logging)</td>
-	    <td>Double loops only</td>
+	    <td>Timestamp, Speed (double loops)</td>
+	    <td>N/A (vehicle logging)</td>
+	    <td>1-255</td>
 	</tr>
 	<tr>
 	    <th>SS105</th>
-	    <td>4-digit (0001-9999)</td>
+	    <td>Count, Occupancy, Speed, Classification</td>
 	    <td>5 seconds to 1 month</td>
-	    <td>Yes</td>
+	    <td>1-9999</td>
 	</tr>
 	<tr>
 	    <th>SS125</th>
-	    <td>32-bit (0-65535)</td>
-	    <td>???</td>
-	    <td>Yes</td>
+	    <td>Count, Occupancy, Speed, Classification</td>
+	    <td>5 seconds to 1 month (?)</td>
+	    <td>0-65535</td>
 	</tr>
 	<tr>
 	    <th>RTMS G4</th>
-	    <td>32-bit (0-65535)</td>
+	    <td>Count, Occupancy, Speed, Classification</td>
 	    <td>10 seconds to 1 hour</td>
-	    <td>Yes</td>
+	    <td>0-65535</td>
+	</tr>
+	<tr>
+	    <th>DR-500</th>
+	    <td>Speed</td>
+	    <td>1-5? minutes</td>
+	    <td>N/A</td>
+	</tr>
+	<tr>
+	    <th>DXM</th>
+	    <td>Magnetic Field</td>
+	    <td>N/A (presence)</td>
+	    <td>N/A</td>
 	</tr>
 </table>
 <br/>
