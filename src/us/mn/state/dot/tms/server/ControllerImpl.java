@@ -542,31 +542,31 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			return MISSING_DATA;
 	}
 
-	/** Store volume sample data.
+	/** Store vehicle count sample data.
 	 * @param stamp Timestamp in milliseconds since epoch.
 	 * @param period Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
-	 * @param volume Array of volume samples. */
-	public void storeVolume(long stamp, int period, int start_pin,
-		int[] volume)
+	 * @param veh_count Array of vehicle count samples. */
+	public void storeVehCount(long stamp, int period, int start_pin,
+		int[] veh_count)
 	{
-		storeVolume(stamp, period, start_pin, volume, null);
+		storeVehCount(stamp, period, start_pin, veh_count, null);
 	}
 
-	/** Store volume sample data.
+	/** Store vehicle count sample data.
 	 * @param stamp Timestamp in milliseconds since epoch.
 	 * @param period Sampling period in seconds.
 	 * @param start_pin Start pin on controller I/O.
-	 * @param volume Array of volume samples.
+	 * @param veh_count Array of vehicle count samples.
 	 * @param vc Vehicle class. */
-	public void storeVolume(long stamp, int period, int start_pin,
-		int[] volume, VehLengthClass vc)
+	public void storeVehCount(long stamp, int period, int start_pin,
+		int[] veh_count, VehLengthClass vc)
 	{
 		HashMap<Integer, DetectorImpl> dets = getDetectors();
 		for (Integer pin: dets.keySet()) {
 			DetectorImpl det = dets.get(pin);
 			int i = pin - start_pin;
-			int v = sampleValue(volume, i);
+			int v = sampleValue(veh_count, i);
 			if (v >= 0) {
 				det.storeVolume(new PeriodicSample(stamp,
 					period, v), vc);

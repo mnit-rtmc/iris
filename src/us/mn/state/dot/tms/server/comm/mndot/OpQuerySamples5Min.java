@@ -125,7 +125,7 @@ public class OpQuerySamples5Min extends OpQuerySamples {
 				setStamp();
 			}
 			processData(rec);
-			controller.storeVolume(getStamp(), SAMPLE_PERIOD_SEC,
+			controller.storeVehCount(getStamp(), SAMPLE_PERIOD_SEC,
 				FIRST_DETECTOR_PIN, v_count);
 			controller.storeOccupancy(getStamp(), SAMPLE_PERIOD_SEC,
 				FIRST_DETECTOR_PIN, scans, MAX_SCANS);

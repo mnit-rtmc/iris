@@ -98,14 +98,14 @@ public class OpQuerySamples extends OpSS125 {
 	/** Cleanup the operation */
 	@Override
 	public void cleanup() {
-		controller.storeVolume(stamp, period, START_PIN,
+		controller.storeVehCount(stamp, period, START_PIN,
 			sample_data.getVehCount());
 		controller.storeOccupancy(stamp, period, START_PIN,
 			sample_data.getScans(), MAX_SCANS);
 		controller.storeSpeed(stamp, period, START_PIN,
 			sample_data.getSpeed());
 		for (SS125VehClass vc: SS125VehClass.values()) {
-			controller.storeVolume(stamp, period, START_PIN,
+			controller.storeVehCount(stamp, period, START_PIN,
 				sample_data.getVehCount(vc), vc.v_class);
 		}
 		super.cleanup();
