@@ -144,8 +144,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	static private final Interval FAST_CLEAR_THRESHOLD =
 		new Interval(30, SECONDS);
 
-	/** Maximum "realistic" volume for a 30-second sample */
-	static private final int MAX_VOLUME = 37;
+	/** Maximum "realistic" vehicle count for a 30-second sample */
+	static private final int MAX_VEH_COUNT_30 = 37;
 
 	/** Maximum occupancy value (100%) */
 	static private final int MAX_OCCUPANCY = 100;
@@ -225,13 +225,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		veh_cache = new PeriodicSampleCache(PeriodicSampleType.VEH_COUNT);
 		scn_cache = new PeriodicSampleCache(PeriodicSampleType.SCAN);
 		spd_cache = new PeriodicSampleCache(PeriodicSampleType.SPEED);
-		vol_mc_cache = new PeriodicSampleCache(
+		mc_count_cache = new PeriodicSampleCache(
 			PeriodicSampleType.MOTORCYCLE);
-		vol_s_cache = new PeriodicSampleCache(
+		s_count_cache = new PeriodicSampleCache(
 			PeriodicSampleType.SHORT);
-		vol_m_cache = new PeriodicSampleCache(
+		m_count_cache = new PeriodicSampleCache(
 			PeriodicSampleType.MEDIUM);
-		vol_l_cache = new PeriodicSampleCache(
+		l_count_cache = new PeriodicSampleCache(
 			PeriodicSampleType.LONG);
 		v_log = new VehicleEventLog(n);
 		initTransients();
@@ -280,13 +280,13 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		veh_cache = new PeriodicSampleCache(PeriodicSampleType.VEH_COUNT);
 		scn_cache = new PeriodicSampleCache(PeriodicSampleType.SCAN);
 		spd_cache = new PeriodicSampleCache(PeriodicSampleType.SPEED);
-		vol_mc_cache = new PeriodicSampleCache(
+		mc_count_cache = new PeriodicSampleCache(
 			PeriodicSampleType.MOTORCYCLE);
-		vol_s_cache = new PeriodicSampleCache(
+		s_count_cache = new PeriodicSampleCache(
 			PeriodicSampleType.SHORT);
-		vol_m_cache = new PeriodicSampleCache(
+		m_count_cache = new PeriodicSampleCache(
 			PeriodicSampleType.MEDIUM);
-		vol_l_cache = new PeriodicSampleCache(
+		l_count_cache = new PeriodicSampleCache(
 			PeriodicSampleType.LONG);
 		v_log = new VehicleEventLog(n);
 	}
@@ -331,7 +331,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			FAST_CLEAR_THRESHOLD);
 	}
 
-	/** Get the volume "no hit" threshold */
+	/** Get the vehicle count "no hit" threshold */
 	private Interval getNoHitThreshold() {
 		if (isRamp()) {
 			GeoLoc loc = lookupGeoLoc();
@@ -341,7 +341,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return lane_type.no_hit_threshold;
 	}
 
-	/** Get the volume "chatter" threshold */
+	/** Get the vehicle count "chatter" threshold */
 	private Interval getChatterThreshold() {
 		return CHATTER_THRESHOLD;
 	}
@@ -680,21 +680,21 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Periodic speed sample cache */
 	private transient final PeriodicSampleCache spd_cache;
 
-	/** Periodic volume sample cache (MOTORCYCLE class) */
-	private transient final PeriodicSampleCache vol_mc_cache;
+	/** Periodic MOTORCYCLE class count sample cache */
+	private transient final PeriodicSampleCache mc_count_cache;
 
-	/** Periodic volume sample cache (SHORT class) */
-	private transient final PeriodicSampleCache vol_s_cache;
+	/** Periodic SHORT class count sample cache */
+	private transient final PeriodicSampleCache s_count_cache;
 
-	/** Periodic volume sample cache (MEDIUM class) */
-	private transient final PeriodicSampleCache vol_m_cache;
+	/** Periodic MEDIUM class count sample cache */
+	private transient final PeriodicSampleCache m_count_cache;
 
-	/** Periodic volume sample cache (LONG class) */
-	private transient final PeriodicSampleCache vol_l_cache;
+	/** Periodic LONG class count sample cache */
+	private transient final PeriodicSampleCache l_count_cache;
 
-	/** Volume from the last 30-second sample period.  FIXME: use
-	 * veh_cache to get "last_volume" value. */
-	private transient int last_volume = MISSING_DATA;
+	/** Vehicle count from the last 30-second sample period.  FIXME: use
+	 * veh_cache to get "veh_count_30" value. */
+	private transient int veh_count_30 = MISSING_DATA;
 
 	/** Scans from the last 30-second sample period.  FIXME: use
 	 * scn_cache to get "last_scans" value. */
@@ -707,15 +707,15 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	 * spd_cache to get "last_speed" value. */
 	private transient int last_speed = MISSING_DATA;
 
-	/** Get the current volume */
-	public int getVolume() {
-		return isSampling() ? last_volume : MISSING_DATA;
+	/** Get the current vehicle count */
+	public int getVehCount() {
+		return isSampling() ? veh_count_30 : MISSING_DATA;
 	}
 
 	/** Get the most recent sample count */
 	@Override
 	public int getCount() {
-		return getVolume();
+		return getVehCount();
 	}
 
 	/** Get the current occupancy */
@@ -735,12 +735,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Get the current raw (non-faked) flow rate (vehicles per hour) */
 	protected int getFlowRaw() {
-		int volume = getVolume();
-		if (volume >= 0) {
-			return Math.round(volume *
-				SAMPLE_INTERVAL.per(Interval.HOUR));
-		} else
-			return MISSING_DATA;
+		int v = getVehCount();
+		return (v >= 0)
+		     ? Math.round(v * SAMPLE_INTERVAL.per(Interval.HOUR))
+		     : MISSING_DATA;
 	}
 
 	/** Get the fake flow rate (vehicles per hour) */
@@ -841,16 +839,16 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		else {
 			switch (vc) {
 			case MOTORCYCLE:
-				vol_mc_cache.add(v);
+				mc_count_cache.add(v);
 				break;
 			case SHORT:
-				vol_s_cache.add(v);
+				s_count_cache.add(v);
 				break;
 			case MEDIUM:
-				vol_m_cache.add(v);
+				m_count_cache.add(v);
 				break;
 			case LONG:
-				vol_l_cache.add(v);
+				l_count_cache.add(v);
 				break;
 			}
 		}
@@ -864,15 +862,15 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			testVolume(v);
 		veh_cache.add(v);
 		if (v.period == SAMPLE_PERIOD_SEC) {
-			last_volume = v.value;
+			veh_count_30 = v.value;
 			/* FIXME: this shouldn't be needed */
 			last_speed = MISSING_DATA;
 		}
 	}
 
-	/** Test a volume sample with error detecting algorithms */
+	/** Test a vehicle count sample with error detecting algorithms */
 	private void testVolume(PeriodicSample vs) {
-		chatter.update(vs.period, vs.value > MAX_VOLUME);
+		chatter.update(vs.period, vs.value > MAX_VEH_COUNT_30);
 		if (chatter.checkLogging(vs.period))
 			logEvent(EventType.DET_CHATTER);
 		no_hits.update(vs.period, vs.value == 0);
@@ -939,10 +937,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		writer.flush(veh_cache, name);
 		writer.flush(scn_cache, name);
 		writer.flush(spd_cache, name);
-		writer.flush(vol_mc_cache, name);
-		writer.flush(vol_s_cache, name);
-		writer.flush(vol_m_cache, name);
-		writer.flush(vol_l_cache, name);
+		writer.flush(mc_count_cache, name);
+		writer.flush(s_count_cache, name);
+		writer.flush(m_count_cache, name);
+		writer.flush(l_count_cache, name);
 	}
 
 	/** Purge all samples before a given stamp. */
@@ -950,10 +948,10 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		veh_cache.purge(before);
 		scn_cache.purge(before);
 		spd_cache.purge(before);
-		vol_mc_cache.purge(before);
-		vol_s_cache.purge(before);
-		vol_m_cache.purge(before);
-		vol_l_cache.purge(before);
+		mc_count_cache.purge(before);
+		s_count_cache.purge(before);
+		m_count_cache.purge(before);
+		l_count_cache.purge(before);
 	}
 
 	/** Vehicle event log */
@@ -980,14 +978,14 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	public void binEventSamples(int p) {
 		// FIXME: make this work for other binning periods
 		if (30 == p) {
-			last_volume = v_log.getVehicleCount();
+			veh_count_30 = v_log.getVehicleCount();
 			last_scans = v_log.getOccupancy().as60HzScans();
 			last_speed = v_log.getSpeed();
 			v_log.binEventSamples();
-			chatter.update(30, last_volume > MAX_VOLUME);
+			chatter.update(30, veh_count_30 > MAX_VEH_COUNT_30);
 			if (chatter.checkLogging(30))
 				logEvent(EventType.DET_CHATTER);
-			no_hits.update(30, last_volume == 0);
+			no_hits.update(30, veh_count_30 == 0);
 			if (no_hits.checkLogging(30))
 				logEvent(EventType.DET_NO_HITS);
 			updateAutoFail();

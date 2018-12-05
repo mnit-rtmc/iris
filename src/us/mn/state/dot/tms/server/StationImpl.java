@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2017  Minnesota Department of Transportation
+ * Copyright (C) 2004-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,8 +56,8 @@ public class StationImpl implements Station, VehicleSampler {
 		}
 		/** Get the number of rolling samples for the given density */
 		static private int samples(float k) {
-			for(DensityRank dr: values()) {
-				if(k > dr.density)
+			for (DensityRank dr: values()) {
+				if (k > dr.density)
 					return dr.samples;
 			}
 			return Last.samples;
@@ -65,7 +65,7 @@ public class StationImpl implements Station, VehicleSampler {
 		/** Get the maximum number of samples in any density rank */
 		static private int getMaxSamples() {
 			int s = 0;
-			for(DensityRank dr: values())
+			for (DensityRank dr: values())
 				s = Math.max(s, dr.samples);
 			return s;
 		}
@@ -86,8 +86,8 @@ public class StationImpl implements Station, VehicleSampler {
 		}
 		/** Get the number of rolling samples for the given speed */
 		static private int samples(float s) {
-			for(SpeedRank sr: values()) {
-				if(s > sr.speed)
+			for (SpeedRank sr: values()) {
+				if (s > sr.speed)
 					return sr.samples;
 			}
 			return Last.samples;
@@ -97,9 +97,9 @@ public class StationImpl implements Station, VehicleSampler {
 			int n_smp = First.samples;
 			// NOTE: n_smp might be changed inside loop, extending
 			//       the for loop bounds
-			for(int i = 0; i < n_smp; i++) {
+			for (int i = 0; i < n_smp; i++) {
 				float s = speeds[i];
-				if(s > 0)
+				if (s > 0)
 					n_smp = Math.max(n_smp, samples(s));
 			}
 			return n_smp;
@@ -118,9 +118,9 @@ public class StationImpl implements Station, VehicleSampler {
 	static private float average(float[] samples, int n_smp) {
 		float total = 0;
 		int count = 0;
-		for(int i = 0; i < n_smp; i++) {
+		for (int i = 0; i < n_smp; i++) {
 			float s = samples[i];
-			if(s > 0) {
+			if (s > 0) {
 				total += s;
 				count += 1;
 			}
@@ -133,7 +133,7 @@ public class StationImpl implements Station, VehicleSampler {
 	 * @param count Count of samples.
 	 * @return Average of samples, or MISSING_DATA. */
 	static private float average(float total, int count) {
-		if(count > 0)
+		if (count > 0)
 			return total / count;
 		else
 			return MISSING_DATA;
@@ -161,11 +161,11 @@ public class StationImpl implements Station, VehicleSampler {
 	public StationImpl(String station_id, R_NodeImpl n) {
 		name = station_id;
 		r_node = n;
-		for(int i = 0; i < rlg_speed.length; i++)
+		for (int i = 0; i < rlg_speed.length; i++)
 			rlg_speed[i] = MISSING_DATA;
-		for(int i = 0; i < avg_speed.length; i++)
+		for (int i = 0; i < avg_speed.length; i++)
 			avg_speed[i] = MISSING_DATA;
-		for(int i = 0; i < low_speed.length; i++)
+		for (int i = 0; i < low_speed.length; i++)
 			low_speed[i] = MISSING_DATA;
 	}
 
@@ -189,15 +189,15 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Is this station active? */
 	public boolean getActive() {
-		for(DetectorImpl det: r_node.getDetectors()) {
-			if(!det.getAbandoned())
+		for (DetectorImpl det: r_node.getDetectors()) {
+			if (!det.getAbandoned())
 				return true;
 		}
 		return false;
 	}
 
-	/** Current average station volume */
-	private int volume = MISSING_DATA;
+	/** Current average station vehicle count */
+	private int veh_count = MISSING_DATA;
 
 	/** Current average station occupancy */
 	private float occupancy = MISSING_DATA;
@@ -208,7 +208,7 @@ public class StationImpl implements Station, VehicleSampler {
 	/** Get the current vehicle count */
 	@Override
 	public int getCount() {
-		return volume;
+		return veh_count;
 	}
 
 	/** Get the average station flow */
@@ -341,8 +341,8 @@ public class StationImpl implements Station, VehicleSampler {
 	public void calculateData() {
 		updateRollingSamples();
 		float low = MISSING_DATA;
-		float t_volume = 0;
-		int n_volume = 0;
+		float t_veh_count = 0;
+		int n_veh_count = 0;
 		float t_occ = 0;
 		int n_occ = 0;
 		float t_flow = 0;
@@ -352,40 +352,40 @@ public class StationImpl implements Station, VehicleSampler {
 		float t_speed = 0;
 		int n_speed = 0;
 		for(DetectorImpl det: r_node.getDetectors()) {
-			if(det.getAbandoned() || !det.isStationOrCD() ||
+			if (det.getAbandoned() || !det.isStationOrCD() ||
 			   !det.isSampling())
 				continue;
-			float f = det.getVolume();
-			if(f != MISSING_DATA) {
-				t_volume += f;
-				n_volume++;
+			float f = det.getVehCount();
+			if (f != MISSING_DATA) {
+				t_veh_count += f;
+				n_veh_count++;
 			}
 			f = det.getOccupancy();
-			if(f != MISSING_DATA) {
+			if (f != MISSING_DATA) {
 				t_occ += f;
 				n_occ++;
 			}
 			f = det.getFlow();
-			if(f != MISSING_DATA) {
+			if (f != MISSING_DATA) {
 				t_flow += f;
 				n_flow++;
 			}
 			f = det.getDensity();
-			if(f != MISSING_DATA) {
+			if (f != MISSING_DATA) {
 				t_density += f;
 				n_density++;
 			}
 			f = det.getSpeed();
-			if(f > 0) {
+			if (f > 0) {
 				t_speed += f;
 				n_speed++;
-				if(low == MISSING_DATA)
+				if (low == MISSING_DATA)
 					low = f;
 				else
 					low = Math.min(f, low);
 			}
 		}
-		volume = Math.round(average(t_volume, n_volume));
+		veh_count = Math.round(average(t_veh_count, n_veh_count));
 		occupancy = average(t_occ, n_occ);
 		flow = Math.round(average(t_flow, n_flow));
 		density = average(t_density, n_density);
@@ -397,18 +397,18 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Write the current sample as an XML element */
 	public void writeSampleXml(Writer w) throws IOException {
-		if(!getActive())
+		if (!getActive())
 			return;
 		int f = getFlow();
 		int s = Math.round(getSpeed());
 		float o = occupancy;
 		w.write("\t<sample");
 		w.write(createAttribute("sensor", name));
-		if(f > MISSING_DATA)
+		if (f > MISSING_DATA)
 			w.write(createAttribute("flow", f));
-		if(s > 0)
+		if (s > 0)
 			w.write(createAttribute("speed", s));
-		if(o >= 0) {
+		if (o >= 0) {
 			w.write(createAttribute("occ",
 				BaseObjectImpl.formatFloat(o, 2)));
 		}
@@ -417,7 +417,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Get the station index */
 	private String getIndex() {
-		if(name.startsWith("S"))
+		if (name.startsWith("S"))
 			return name.substring(1);
 		else
 			return name;
@@ -449,16 +449,16 @@ public class StationImpl implements Station, VehicleSampler {
 		NavigableMap<Float, StationImpl> upstream)
 	{
 		Float mp = upstream.lowerKey(m);
-		while(mp != null && isTooClose(m - mp))
+		while (mp != null && isTooClose(m - mp))
 			mp = upstream.lowerKey(mp);
-		if(mp != null) {
+		if (mp != null) {
 			StationImpl sp = upstream.get(mp);
 			float d = m - mp;
 			acceleration = calculateAcceleration(sp, d);
 			checkCandidate();
-			if(isAboveBottleneckSpeed())
+			if (isAboveBottleneckSpeed())
 				setBottleneck(false);
-			else if(isBeforeStartCount()) {
+			else if (isBeforeStartCount()) {
 				setBottleneck(false);
 				adjustDownstream(upstream);
 			} else {
@@ -491,7 +491,7 @@ public class StationImpl implements Station, VehicleSampler {
 	 * @return acceleration in mphph */
 	private Float calculateAcceleration(float u, float up, float d) {
 		assert d > 0;
-		if(u > 0 && up > 0)
+		if (u > 0 && up > 0)
 			return (u * u - up * up) / (2 * d);
 		else
 			return null;
@@ -499,10 +499,10 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Check if station is a bottleneck candidate */
 	private void checkCandidate() {
-		if(isBelowBreakdownSpeed()) {
+		if (isBelowBreakdownSpeed()) {
 			n_candidate++;
 			bumpCandidateCount();
-		} else if(isBottleneckCandidate())
+		} else if (isBottleneckCandidate())
 			n_candidate++;
 		else
 			n_candidate = 0;
@@ -516,7 +516,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Bump the candidate count up to the start count */
 	private void bumpCandidateCount() {
-		if(isBeforeStartCount())
+		if (isBeforeStartCount())
 		   n_candidate = SystemAttrEnum.VSA_START_INTERVALS.getInt();
 	}
 
@@ -541,7 +541,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Get the current deceleration threshold */
 	private int getThreshold() {
-		if(isBeforeStartCount())
+		if (isBeforeStartCount())
 			return getStartThreshold();
 		else
 			return getStopThreshold();
@@ -574,7 +574,7 @@ public class StationImpl implements Station, VehicleSampler {
 	private void adjustDownstream(NavigableMap<Float, StationImpl> upstream)
 	{
 		Map.Entry<Float, StationImpl> entry = upstream.lastEntry();
-		if(entry != null)
+		if (entry != null)
 			adjustDownstream(entry.getValue());
 	}
 
@@ -583,7 +583,7 @@ public class StationImpl implements Station, VehicleSampler {
 	private void adjustDownstream(StationImpl sp) {
 		Float ap = sp.acceleration;
 		Float a = acceleration;
-		if(a != null && ap != null && a < ap && sp.p_bottle)
+		if (a != null && ap != null && a < ap && sp.p_bottle)
 			sp.moveBottleneck(this);
 	}
 
@@ -593,11 +593,11 @@ public class StationImpl implements Station, VehicleSampler {
 	private void adjustUpstream(NavigableMap<Float, StationImpl> upstream) {
 		StationImpl s = this;
 		Map.Entry<Float, StationImpl> entry = upstream.lastEntry();
-		while(entry != null) {
+		while (entry != null) {
 			StationImpl sp = entry.getValue();
 			Float ap = sp.acceleration;
 			Float a = s.acceleration;
-			if(a == null || ap == null || a <= ap)
+			if (a == null || ap == null || a <= ap)
 				break;
 			s.moveBottleneck(sp);
 			s = sp;
@@ -624,7 +624,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Debug the bottleneck calculation */
 	public void debug() {
-		if(BOTTLENECK_LOG.isOpen()) {
+		if (BOTTLENECK_LOG.isOpen()) {
 			BOTTLENECK_LOG.log(name +
 				", spd: " + getRollingAverageSpeed() +
 				", acc: " + acceleration +
@@ -640,7 +640,7 @@ public class StationImpl implements Station, VehicleSampler {
 
 	/** Check if the (bottleneck) station is in range */
 	private boolean isBottleneckInRange(float d) {
-		if(d > 0)
+		if (d > 0)
 			return d < getUpstreamDistance();
 		else
 			return -d < getDownstreamDistance();
@@ -650,7 +650,7 @@ public class StationImpl implements Station, VehicleSampler {
 	private float getUpstreamDistance() {
 		float lim = getSpeedLimit();
 		float sp = getRollingAverageSpeed();
-		if(sp > 0 && sp < lim) {
+		if (sp > 0 && sp < lim) {
 			int acc = -getControlThreshold();
 			return (lim * lim - sp * sp) / (2 * acc);
 		} else
@@ -670,7 +670,7 @@ public class StationImpl implements Station, VehicleSampler {
 	/** Notify SONAR clients of an object removed */
 	public void notifyRemove() {
 		Server s = MainServer.server;
-		if(s != null)
+		if (s != null)
 			s.removeObject(this);
 	}
 
