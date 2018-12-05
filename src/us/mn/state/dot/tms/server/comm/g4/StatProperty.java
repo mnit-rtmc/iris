@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2014  Minnesota Department of Transportation
+ * Copyright (C) 2012-2018  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -35,8 +35,8 @@ public class StatProperty extends G4Property {
 	/** Maximum number of lanes */
 	static private final int MAX_LANES = 12;
 
-	/** Maximum volume for one statistical data sample */
-	static private final int MAX_VOLUME = 0xFE00;
+	/** Maximum vehicle count for one statistical data sample */
+	static private final int MAX_VEH_COUNT = 0xFE00;
 
 	/** Maximum number of scans for one statistical sample */
 	static protected final int MAX_SCANS = 1000;
@@ -69,12 +69,12 @@ public class StatProperty extends G4Property {
 	/** Binning period (seconds) */
 	private final int period;
 
-	/** Volume data */
-	private final int[] volume = new int[MAX_LANES];
+	/** Vehicle count data */
+	private final int[] v_count = new int[MAX_LANES];
 
-	/** Get the volume for all lanes */
-	public int[] getVolume() {
-		return volume;
+	/** Get the vehicle count for all lanes */
+	public int[] getVehCount() {
+		return v_count;
 	}
 
 	/** Scan data (0 - 1000) */
@@ -118,12 +118,12 @@ public class StatProperty extends G4Property {
 		return speed85;
 	}
 
-	/** Volume data for class (regular vehicles) */
+	/** Vehicle count data for class (regular vehicles) */
 	private final int[][] vol_class = new int[MAX_LANES][G4VehClass.size];
 
-	/** Get the volume for the specified vehicle class.
+	/** Get the vehicle count for the specified vehicle class.
 	 * @param vcls Vehicle class. */
-	public int[] getVolume(G4VehClass vcls) {
+	public int[] getVehCount(G4VehClass vcls) {
 		if (vcls != G4VehClass.SMALL) {
 			int[] vol = new int[MAX_LANES];
 			for (int i = 0; i < MAX_LANES; i++)
@@ -133,12 +133,12 @@ public class StatProperty extends G4Property {
 			return getSmallClass();
 	}
 
-	/** Get the volume for SMALL vehicle class.  This is the extra volume
-	 * not included in vehicle classes 1 through 5. */
+	/** Get the vehicle count for SMALL vehicle class.  This is the extra
+	 * count not included in vehicle classes 1 through 5. */
 	private int[] getSmallClass() {
 		int[] vol = new int[MAX_LANES];
 		for (int i = 0; i < MAX_LANES; i++) {
-			int v = volume[i];
+			int v = v_count[i];
 			for (int j = 1; j < G4VehClass.size; j++) {
 				int vc = vol_class[i][j];
 				if (vc > 0)
@@ -157,7 +157,7 @@ public class StatProperty extends G4Property {
 	public StatProperty(int p) {
 		period = p;
 		for (int i = 0; i < MAX_LANES; i++) {
-			volume[i] = MISSING_DATA;
+			v_count[i] = MISSING_DATA;
 			scans[i] = MISSING_DATA;
 			speed[i] = MISSING_DATA;
 			gap[i] = MISSING_DATA;
@@ -239,8 +239,8 @@ public class StatProperty extends G4Property {
 		case STAT_HEADER:
 			parseStatHeader(data);
 			break;
-		case VOLUME:
-			parseVolume(data);
+		case VEH_COUNT:
+			parseVehCount(data);
 			break;
 		case OCCUPANCY:
 			parseOccupancy(data);
@@ -300,14 +300,14 @@ public class StatProperty extends G4Property {
 		// NOTE: last 5 bytes are "spare"; for future use
 	}
 
-	/** Parse statistical volume data */
-	private void parseVolume(byte[] data) throws ParsingException {
+	/** Parse statistical vehicle count data */
+	private void parseVehCount(byte[] data) throws ParsingException {
 		if (data.length != getZones() * 2)
-			throw new ParsingException("INVALID VOLUME LENGTH");
+			throw new ParsingException("INVALID V_COUNT LENGTH");
 		for (int i = 0; i < getZones(); i++) {
 			int val = parse16(data, i * 2);
-			if (val >= 0 && val <= MAX_VOLUME)
-				volume[i] = val;
+			if (val >= 0 && val <= MAX_VEH_COUNT)
+				v_count[i] = val;
 		}
 	}
 
@@ -361,7 +361,7 @@ public class StatProperty extends G4Property {
 		int j = vcls.ordinal();
 		for (int i = 0; i < getZones(); i++) {
 			int val = parse16(data, i * 2);
-			if (val >= 0 && val <= MAX_VOLUME)
+			if (val >= 0 && val <= MAX_VEH_COUNT)
 				vol_class[i][j] = val;
 		}
 	}
@@ -416,17 +416,17 @@ public class StatProperty extends G4Property {
 		sb.append(" volts:");
 		sb.append(volt);
 		sb.append(' ');
-		sb.append(arrayStr("volume", volume));
+		sb.append(arrayStr("v_count", v_count));
 		sb.append(arrayStr("scans", scans));
 		sb.append(arrayStr("speed", speed));
 		sb.append(arrayStr("gap", gap));
 		sb.append(arrayStr("headway", headway));
 		sb.append(arrayStr("speed85", speed85));
-		sb.append(arrayStr("c1", getVolume(G4VehClass.REGULAR)));
-		sb.append(arrayStr("c2", getVolume(G4VehClass.MEDIUM)));
-		sb.append(arrayStr("c3", getVolume(G4VehClass.LARGE)));
-		sb.append(arrayStr("c4", getVolume(G4VehClass.TRUCK)));
-		sb.append(arrayStr("c5", getVolume(G4VehClass.EXTRA_LARGE)));
+		sb.append(arrayStr("c1", getVehCount(G4VehClass.REGULAR)));
+		sb.append(arrayStr("c2", getVehCount(G4VehClass.MEDIUM)));
+		sb.append(arrayStr("c3", getVehCount(G4VehClass.LARGE)));
+		sb.append(arrayStr("c4", getVehCount(G4VehClass.TRUCK)));
+		sb.append(arrayStr("c5", getVehCount(G4VehClass.EXTRA_LARGE)));
 		return sb.toString().trim();
 	}
 

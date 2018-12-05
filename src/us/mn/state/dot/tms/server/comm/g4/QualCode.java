@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,15 +21,15 @@ package us.mn.state.dot.tms.server.comm.g4;
  */
 public enum QualCode {
 	UNKNOWN(-1),
-	VOLUME(0x10),		/* Statistical volume data */
+	VEH_COUNT(0x10),	/* Statistical vehicle count data */
 	OCCUPANCY(0x11),	/* Statistical occupancy data */
 	SPEED(0x12),		/* Statistical speed data */
 	GAP(0x13),		/* Statistical gap data */
-	C1(0x14),		/* Statistical vehicle class C1 volumes */
-	C2(0x15),		/* Statistical vehicle class C2 volumes */
-	C3(0x16),		/* Statistical vehicle class C3 volumes */
-	C4(0x17),		/* Statistical vehicle class C4 volumes */
-	C5(0x18),		/* Statistical vehicle class C5 volumes */
+	C1(0x14),		/* Statistical vehicle count for class C1 */
+	C2(0x15),		/* Statistical vehicle count for class C2 */
+	C3(0x16),		/* Statistical vehicle count for class C3 */
+	C4(0x17),		/* Statistical vehicle count for class C4 */
+	C5(0x18),		/* Statistical vehicle count for class C5 */
 	NAK(0x1A),		/* Negative acknowledgement response */
 	ACK(0x1C),		/* Acknowledgement response */
 	HEADWAY(0x1E),		/* Statistical headway data */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2016  Minnesota Department of Transportation
+ * Copyright (C) 2012-2018  Minnesota Department of Transportation
  * Copyright (C) 2012  Iteris Inc.
  *
  * This program is free software; you can redistribute it and/or modify
@@ -90,22 +90,22 @@ public class OpQueryStats extends OpG4 {
 	public void cleanup() {
 		long stamp = stat.getStamp();
 		controller.storeVolume(stamp, period, START_PIN,
-			stat.getVolume());
+			stat.getVehCount());
 		controller.storeOccupancy(stamp, period, START_PIN,
 			stat.getScans(), StatProperty.MAX_SCANS);
 		controller.storeSpeed(stamp, period, START_PIN,
 			stat.getSpeed());
 		controller.storeVolume(stamp, period, START_PIN,
-			stat.getVolume(G4VehClass.SMALL),
+			stat.getVehCount(G4VehClass.SMALL),
 			G4VehClass.SMALL.v_class);
 		controller.storeVolume(stamp, period, START_PIN,
-			stat.getVolume(G4VehClass.REGULAR),
+			stat.getVehCount(G4VehClass.REGULAR),
 			G4VehClass.REGULAR.v_class);
 		controller.storeVolume(stamp, period, START_PIN,
-			stat.getVolume(G4VehClass.LARGE),
+			stat.getVehCount(G4VehClass.LARGE),
 			G4VehClass.LARGE.v_class);
 		controller.storeVolume(stamp, period, START_PIN,
-			stat.getVolume(G4VehClass.EXTRA_LARGE),
+			stat.getVehCount(G4VehClass.EXTRA_LARGE),
 			G4VehClass.EXTRA_LARGE.v_class);
 		super.cleanup();
 	}
