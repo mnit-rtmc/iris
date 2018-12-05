@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@ package us.mn.state.dot.tms.server.comm.dr500;
 public enum VarName {
 	MODE("MO"),		/* mode flags */
 	UNITS("UN"),		/* 0: mph, 1: kph, 2: fps, 3: mps */
-	BIN_MINUTES("BN"),	/* binning interval (1-??) */
+	BIN_MINUTES("BN"),	/* binning interval (1-5+?) */
 	SENSITIVITY("ST"),	/* percentage of max range (10-99) */
 	LO_SPEED("LO"),		/* low speed cutoff */
 	THRESHOLD_SPEED("SP"),	/* violator threshold */

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2016  Minnesota Department of Transportation
+ * Copyright (C) 2015-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,9 +48,13 @@ public class OpSendSensorSettings extends OpDR500 {
 	static private int MODE_FLAGS = ModeFlag.SLOW_FILTER.flag
 	                              | ModeFlag.RAIN_FILTER.flag;
 
+	/** Binning interval (minutes) */
+	private final int interval;
+
 	/** Create a new operation to send settings to a sensor */
 	public OpSendSensorSettings(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
+		interval = Math.max(1, c.getPollPeriod() / 60);
 	}
 
 	/** Create a new operation to send settings to a sensor */
@@ -135,6 +139,24 @@ public class OpSendSensorSettings extends OpDR500 {
 			VarProperty bn = new VarProperty(VarName.BIN_MINUTES);
 			mess.add(bn);
 			mess.queryProps();
+			if (bn.getValue() != interval)
+				return new StoreBinning();
+			else
+				return new QuerySensitivity();
+		}
+	}
+
+	/** Phase to store the binning interval */
+	protected class StoreBinning extends Phase<DR500Property> {
+
+		/** Store the binning interval */
+		protected Phase<DR500Property> poll(
+			CommMessage<DR500Property> mess) throws IOException
+		{
+			VarProperty bn = new VarProperty(VarName.BIN_MINUTES,
+				interval);
+			mess.add(bn);
+			mess.storeProps();
 			return new QuerySensitivity();
 		}
 	}
