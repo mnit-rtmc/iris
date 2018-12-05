@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2004-2015  Minnesota Department of Transportation
+ * Copyright (C) 2004-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ public class BinnedSampleProperty extends SS105Property {
 
 	/** Format a basic "GET" request */
 	protected String formatGetRequest() {
-		if(age < 1)
+		if (age < 1)
 			return "XD";
 		else
 			return "XD" + HexString.format(age, 4);
@@ -75,36 +75,36 @@ public class BinnedSampleProperty extends SS105Property {
 	static public class LaneSample {
 
 		public final int det;
-		public final int volume;
+		public final int veh_count;
 		public final int speed;		// Miles per Hour
 		public final int scans;		// 0-1024 (percentage)
 		public final int small;		// 0-1024 (percentage)
 		public final int medium;	// 0-1024 (percentage)
 		public final int large;		// 0-1024 (percentage)
-		public final int[] vol_c = new int[VehLengthClass.size];
+		public final int[] v_class = new int[VehLengthClass.size];
 
 		protected LaneSample(String s) throws ParsingException {
 			det = parseInt(s.substring(0, 1));
-			volume = parseInt(s.substring(1, 9));
+			veh_count = parseInt(s.substring(1, 9));
 			speed = parseInt(s.substring(9, 13));
 			scans = parseInt(s.substring(13, 17));
 			small = parseInt(s.substring(17, 21));
 			medium = parseInt(s.substring(21, 25));
 			large = parseInt(s.substring(25, 29));
-			vol_c[VehLengthClass.SHORT.ordinal()] =
-				volPercent(small);
-			vol_c[VehLengthClass.MEDIUM.ordinal()] =
-				volPercent(medium);
-			vol_c[VehLengthClass.LONG.ordinal()] =
-				volPercent(large);
-			vol_c[VehLengthClass.MOTORCYCLE.ordinal()] =
-				calculateMotorcycleVolume();
+			v_class[VehLengthClass.SHORT.ordinal()] =
+				vehPercent(small);
+			v_class[VehLengthClass.MEDIUM.ordinal()] =
+				vehPercent(medium);
+			v_class[VehLengthClass.LONG.ordinal()] =
+				vehPercent(large);
+			v_class[VehLengthClass.MOTORCYCLE.ordinal()] =
+				calculateMotorcycleCount();
 		}
 		static int parseInt(String s) throws ParsingException {
 			try {
 				return Integer.parseInt(s, 16);
 			}
-			catch(NumberFormatException e) {
+			catch (NumberFormatException e) {
 				throw new ParsingException("INVALID SAMPLE");
 			}
 		}
@@ -112,23 +112,23 @@ public class BinnedSampleProperty extends SS105Property {
 			return scans;
 		}
 		static float percent(int i) {
-			return 100 * i / (float)MAX_PERCENT;
+			return 100 * i / (float) MAX_PERCENT;
 		}
-		private int volPercent(int i) {
-			float p = i / (float)MAX_PERCENT;
-			return Math.round(p * volume);
+		private int vehPercent(int i) {
+			float p = i / (float) MAX_PERCENT;
+			return Math.round(p * veh_count);
 		}
-		private int calculateMotorcycleVolume() {
-			int v = volume;
-			for(VehLengthClass vc: VehLengthClass.values())
-				v -= vol_c[vc.ordinal()];
+		private int calculateMotorcycleCount() {
+			int v = veh_count;
+			for (VehLengthClass vc: VehLengthClass.values())
+				v -= v_class[vc.ordinal()];
 			return v >= 0 ? v : MISSING_DATA;
 		}
 		public String toString() {
 			StringBuilder sb = new StringBuilder();
 			sb.append(det);
 			sb.append(": ");
-			sb.append(volume);
+			sb.append(veh_count);
 			sb.append(", ");
 			sb.append(speed);
 			sb.append(", ");
@@ -139,11 +139,11 @@ public class BinnedSampleProperty extends SS105Property {
 			sb.append(medium);
 			sb.append(", ");
 			sb.append(large);
-			for(VehLengthClass vc: VehLengthClass.values()) {
+			for (VehLengthClass vc: VehLengthClass.values()) {
 				sb.append(", ");
 				sb.append(vc);
 				sb.append(":");
-				sb.append(vol_c[vc.ordinal()]);
+				sb.append(v_class[vc.ordinal()]);
 			}
 			return sb.toString();
 		}
@@ -153,7 +153,7 @@ public class BinnedSampleProperty extends SS105Property {
 	protected void parseQuery(String r) throws IOException {
 		timestamp = TimeStamp.parse(r.substring(0, 8));
 		String payload = r.substring(8);
-		if(payload.length() % LANE_SAMPLE_BYTES != 0)
+		if (payload.length() % LANE_SAMPLE_BYTES != 0)
 			throw new ParsingException("INVALID SAMPLE SIZE");
 		int lanes = payload.length() / LANE_SAMPLE_BYTES;
 		samples = buildSamples(lanes, payload);
@@ -177,7 +177,7 @@ public class BinnedSampleProperty extends SS105Property {
 		StringBuilder sb = new StringBuilder();
 		sb.append("XD: ");
 		sb.append(timestamp.toString());
-		for(LaneSample ls: samples) {
+		for (LaneSample ls: samples) {
 			sb.append('\n');
 			sb.append(ls.toString());
 		}
@@ -187,7 +187,7 @@ public class BinnedSampleProperty extends SS105Property {
 	/** Create a set of sample data */
 	private int[] createSamples() {
 		int[] data = new int[maxDetNumber()];
-		for(int i = 0; i < data.length; i++)
+		for (int i = 0; i < data.length; i++)
 			data[i] = MISSING_DATA;
 		return data;
 	}
@@ -195,33 +195,33 @@ public class BinnedSampleProperty extends SS105Property {
 	/** Get the highest detector sample number */
 	private int maxDetNumber() {
 		int dets = 0;
-		for(LaneSample ls: samples)
+		for (LaneSample ls: samples)
 			dets = Math.max(dets, ls.det);
 		return dets;
 	}
 
-	/** Get the volume array */
-	public int[] getVolume() {
-		int[] volume = createSamples();
-		for(LaneSample ls: samples)
-			volume[ls.det - 1] = ls.volume;
-		return volume;
+	/** Get the vehicle count array */
+	public int[] getVehCount() {
+		int[] v = createSamples();
+		for (LaneSample ls: samples)
+			v[ls.det - 1] = ls.veh_count;
+		return v;
 	}
 
-	/** Get the vehicle class volume for all lanes.
+	/** Get the vehicle class count for all lanes.
 	 * @param vc Vehicle class.
-	 * @return Array of volumes, one for each lane. */
-	public int[] getVolume(VehLengthClass vc) {
-		int[] vol = createSamples();
-		for(LaneSample ls: samples)
-			vol[ls.det - 1] = ls.vol_c[vc.ordinal()];
-		return vol;
+	 * @return Array of vehicle counts, one for each lane. */
+	public int[] getVehCount(VehLengthClass vc) {
+		int[] v = createSamples();
+		for (LaneSample ls: samples)
+			v[ls.det - 1] = ls.v_class[vc.ordinal()];
+		return v;
 	}
 
 	/** Get the scan count array */
 	public int[] getScans() {
 		int[] scans = createSamples();
-		for(LaneSample ls: samples)
+		for (LaneSample ls: samples)
 			scans[ls.det - 1] = ls.getScans();
 		return scans;
 	}
@@ -229,7 +229,7 @@ public class BinnedSampleProperty extends SS105Property {
 	/** Get the speed array */
 	public int[] getSpeed() {
 		int[] speed = createSamples();
-		for(LaneSample ls: samples)
+		for (LaneSample ls: samples)
 			speed[ls.det - 1] = ls.speed;
 		return speed;
 	}
