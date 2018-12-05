@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012  Minnesota Department of Transportation
+ * Copyright (C) 2012-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,6 @@ package us.mn.state.dot.tms.server;
  */
 public enum Aggregation {
 	NONE,		/* Data cannot be aggregated */
-	SUM,		/* Data aggregated by summing (volume, scans) */
+	SUM,		/* Data aggregated by summing (vehicle count, scans) */
 	AVERAGE;	/* Data aggregated by averaging (occupancy, speed) */
 }

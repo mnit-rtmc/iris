@@ -141,31 +141,31 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		return Math.round(secs / STEP_SECONDS);
 	}
 
-	/** Convert step volume count to flow rate.
-	 * @param vol Volume to convert (number of vehicles).
-	 * @param n_steps Number of time steps of volume.
+	/** Convert step vehicle count to flow rate.
+	 * @param v Vehicle count to convert.
+	 * @param n_steps Number of time steps of vehicle count.
 	 * @return Flow rate (vehicles / hour) */
-	static private int flowRate(float vol, int n_steps) {
-		if (vol >= 0) {
+	static private int flowRate(float v, int n_steps) {
+		if (v >= 0) {
 			Interval period = new Interval(n_steps * STEP_SECONDS);
 			float hour_frac = period.per(HOUR);
-			return Math.round(vol * hour_frac);
+			return Math.round(v * hour_frac);
 		} else
 			return MISSING_DATA;
 	}
 
-	/** Convert single step volume count to flow rate.
-	 * @param vol Volume to convert (number of vehicles)
+	/** Convert single step vehicle count to flow rate.
+	 * @param v Vehicle count to convert.
 	 * @return Flow rate (vehicles / hour), or null for missing data. */
-	static private Double flowRate(float vol) {
-		return (vol >= 0) ? (vol * STEP_HOUR) : null;
+	static private Double flowRate(float v) {
+		return (v >= 0) ? (v * STEP_HOUR) : null;
 	}
 
-	/** Convert flow rate to volume for a given period.
+	/** Convert flow rate to vehicle count for a given period.
 	 * @param flow Flow rate to convert (vehicles / hour).
-	 * @param period Period for volume (seconds).
-	 * @return Volume over given period. */
-	static private float volumePeriod(int flow, int period) {
+	 * @param period Period for vehicle count (seconds).
+	 * @return Vehicle count over given period. */
+	static private float vehCountPeriod(int flow, int period) {
 		if (flow >= 0 && period > 0) {
 			float hour_frac = HOUR.per(new Interval(period));
 			return flow * hour_frac;
@@ -807,12 +807,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 
 		/** Update ramp queue demand state */
 		private void updateDemandState() {
-			float dem_vol = queueDemandVolume();
+			float dem_veh = queueDemandCount();
 			float da = demand_accum;
 			// Calculate demand without adjustment
-			demand_accum += dem_vol;
+			demand_accum += dem_veh;
 			demand_adj = calculateDemandAdjustment();
-			float adjusted_dem = Math.max(dem_vol + demand_adj, 0);
+			float adjusted_dem = Math.max(dem_veh + demand_adj, 0);
 			demand_hist.push(flowRate(adjusted_dem));
 			// Recalculate demand with adjustment
 			demand_accum = da + adjusted_dem;
@@ -820,14 +820,14 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			tracking_demand = trackingDemand();
 		}
 
-		/** Get queue demand volume for the current period */
-		private float queueDemandVolume() {
+		/** Get queue demand count for the current period */
+		private float queueDemandCount() {
 			float vol = queue.getCount();
 			if (vol >= 0)
 				return vol;
 			else {
 				int target = getDefaultTarget();
-				return volumePeriod(target, STEP_SECONDS);
+				return vehCountPeriod(target, STEP_SECONDS);
 			}
 		}
 
@@ -1036,12 +1036,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		/** Caculate queue storage limit.  Project into the future the
 		 * duration of the target wait time.  Using the target demand,
 		 * estimate the cumulative demand at that point in time.  From
-		 * there, subtract the target ramp storage volume to find the
-		 * required cumulative passage volume at that time.
+		 * there, subtract the target ramp storage count to find the
+		 * required cumulative passage vehicle count at that time.
 		 * @return Queue storage limit (vehicles / hour). */
 		private int queueStorageLimit() {
 			assert passage_good;
-			float proj_arrive = volumePeriod(tracking_demand,
+			float proj_arrive = vehCountPeriod(tracking_demand,
 				targetWaitTime());
 			float demand_proj = demand_accum + proj_arrive;
 			int req = Math.round(demand_proj - targetStorage());

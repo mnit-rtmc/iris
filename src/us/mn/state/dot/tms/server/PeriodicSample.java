@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,7 +15,7 @@
 package us.mn.state.dot.tms.server;
 
 /**
- * A periodic sample data value, such as volume, scans, speed, etc.
+ * A periodic sample data value, such as vehicle counts, scans, speed, etc.
  *
  * @author Douglas Lau
  */
@@ -43,7 +43,7 @@ public class PeriodicSample implements Comparable<PeriodicSample> {
 
 	/** Compare the sample to another */
 	public int compareTo(PeriodicSample other) {
-		return (int)((stamp + period) - (other.stamp + other.period));
+		return (int) ((stamp + period) - (other.stamp + other.period));
 	}
 
 	/** Get a time stamp at the start of the sampling period.

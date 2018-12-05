@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
  * written to files at regular intervals.
  *
  * Sample files are binary with a fixed number of bytes per sample.
- * Each file contains one day of sample data.  For example, a volume file with
- * a 30-second period would have 2880 bytes.
+ * Each file contains one day of sample data.  For example, a vehicle count file
+ * with a 30-second period would have 2880 bytes.
  *
  * @author Douglas Lau
  */
@@ -43,7 +43,7 @@ public class PeriodicSampleWriter {
 
 	/** Get the number of samples per day */
 	static private int samplesPerDay(Interval period) {
-		return (int)period.per(Interval.DAY);
+		return (int) period.per(Interval.DAY);
 	}
 
 	/** Sample archive factory */

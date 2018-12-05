@@ -128,7 +128,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	static private final Interval LOG_THRESHOLD =
 		new Interval(1, Interval.Units.HOURS);
 
-	/** Volume "chatter" threshold */
+	/** Vehicle count "chatter" threshold */
 	static private final Interval CHATTER_THRESHOLD =
 		new Interval(30, SECONDS);
 
@@ -859,7 +859,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	public void storeVehCount(PeriodicSample v) {
 		if (lane_type != LaneType.GREEN &&
 		    v.period == SAMPLE_PERIOD_SEC)
-			testVolume(v);
+			testVehCount(v);
 		veh_cache.add(v);
 		if (v.period == SAMPLE_PERIOD_SEC) {
 			veh_count_30 = v.value;
@@ -869,7 +869,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	}
 
 	/** Test a vehicle count sample with error detecting algorithms */
-	private void testVolume(PeriodicSample vs) {
+	private void testVehCount(PeriodicSample vs) {
 		chatter.update(vs.period, vs.value > MAX_VEH_COUNT_30);
 		if (chatter.checkLogging(vs.period))
 			logEvent(EventType.DET_CHATTER);
