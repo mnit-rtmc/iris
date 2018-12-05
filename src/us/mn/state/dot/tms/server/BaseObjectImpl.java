@@ -414,6 +414,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** Format a float value */
 	static String formatFloat(float value, int digits) {
 		NumberFormat nf = NumberFormat.getNumberInstance();
+		nf.setGroupingUsed(false);
 		nf.setMaximumFractionDigits(digits);
 		return nf.format(value);
 	}
@@ -421,6 +422,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 	/** Format a double value */
 	static String formatDouble(double value) {
 		NumberFormat nf = NumberFormat.getNumberInstance();
+		nf.setGroupingUsed(false);
 		nf.setMaximumFractionDigits(5);
 		return nf.format(value);
 	}

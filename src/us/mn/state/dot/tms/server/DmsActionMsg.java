@@ -527,6 +527,7 @@ public class DmsActionMsg {
 	/** Format a price as a text span (like "3.50") */
 	private String priceSpan(float p) {
 		NumberFormat pf = NumberFormat.getNumberInstance();
+		pf.setGroupingUsed(false);
 		pf.setMinimumFractionDigits(2);
 		pf.setMaximumFractionDigits(2);
 		return pf.format(p);
