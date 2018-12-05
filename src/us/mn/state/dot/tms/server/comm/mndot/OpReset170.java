@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,9 +45,9 @@ public class OpReset170 extends Op170 {
 			CommMessage<MndotProperty> mess) throws IOException
 		{
 			// Enabling the detector-reset pin can cause some
-			// detector cards to have "chattering" volume, along
-			// with "occupancy plateaus".  This can happen if there
-			// is a comm error during the ClearDetectors phase.
+			// detector cards to have "chattering" vehicle counts,
+			// along with "occupancy plateaus".  This can happen if
+			// a comm error occurs during the ClearDetectors phase.
 			byte[] data = {Address.DETECTOR_RESET};
 			MemoryProperty reset_mem = new MemoryProperty(
 				Address.SPECIAL_FUNCTION_OUTPUTS - 1, data);

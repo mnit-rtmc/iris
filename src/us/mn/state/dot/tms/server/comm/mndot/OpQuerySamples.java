@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2014  Minnesota Department of Transportation
+ * Copyright (C) 2000-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -48,8 +48,8 @@ abstract public class OpQuerySamples extends Op170 {
 		return stamp;
 	}
 
-	/** Volume data for all detectors on a controller */
-	protected final int[] volume = new int[DETECTOR_INPUTS];
+	/** Vehicle count data for all detectors on a controller */
+	protected final int[] v_count = new int[DETECTOR_INPUTS];
 
 	/** Scan data for all detectors on a controller */
 	protected final int[] scans = new int[DETECTOR_INPUTS];
@@ -58,8 +58,8 @@ abstract public class OpQuerySamples extends Op170 {
 	protected OpQuerySamples(PriorityLevel p, ControllerImpl c) {
 		super(p, c);
 		setStamp();
-		for(int i = 0; i < DETECTOR_INPUTS; i++) {
-			volume[i] = MISSING_DATA;
+		for (int i = 0; i < DETECTOR_INPUTS; i++) {
+			v_count[i] = MISSING_DATA;
 			scans[i] = MISSING_DATA;
 		}
 	}
@@ -68,9 +68,9 @@ abstract public class OpQuerySamples extends Op170 {
 	protected void processData(byte[] record) throws IOException {
 		ByteArrayInputStream is = new ByteArrayInputStream(record);
 		DataInputStream dis = new DataInputStream(is);
-		for(int i = 0; i < DETECTOR_INPUTS; i++)
-			volume[i] = dis.readUnsignedByte();
-		for(int i = 0; i < DETECTOR_INPUTS; i++)
+		for (int i = 0; i < DETECTOR_INPUTS; i++)
+			v_count[i] = dis.readUnsignedByte();
+		for (int i = 0; i < DETECTOR_INPUTS; i++)
 			scans[i] = dis.readUnsignedShort();
 	}
 }
