@@ -119,16 +119,16 @@ public class StatProperty extends G4Property {
 	}
 
 	/** Vehicle count data for class (regular vehicles) */
-	private final int[][] vol_class = new int[MAX_LANES][G4VehClass.size];
+	private final int[][] veh_class = new int[MAX_LANES][G4VehClass.size];
 
 	/** Get the vehicle count for the specified vehicle class.
 	 * @param vcls Vehicle class. */
 	public int[] getVehCount(G4VehClass vcls) {
 		if (vcls != G4VehClass.SMALL) {
-			int[] vol = new int[MAX_LANES];
+			int[] v = new int[MAX_LANES];
 			for (int i = 0; i < MAX_LANES; i++)
-				vol[i] = vol_class[i][vcls.ordinal()];
-			return vol;
+				v[i] = veh_class[i][vcls.ordinal()];
+			return v;
 		} else
 			return getSmallClass();
 	}
@@ -136,20 +136,20 @@ public class StatProperty extends G4Property {
 	/** Get the vehicle count for SMALL vehicle class.  This is the extra
 	 * count not included in vehicle classes 1 through 5. */
 	private int[] getSmallClass() {
-		int[] vol = new int[MAX_LANES];
+		int[] veh = new int[MAX_LANES];
 		for (int i = 0; i < MAX_LANES; i++) {
 			int v = v_count[i];
 			for (int j = 1; j < G4VehClass.size; j++) {
-				int vc = vol_class[i][j];
+				int vc = veh_class[i][j];
 				if (vc > 0)
 					v -= vc;
 			}
 			if (v >= 0)
-				vol[i] = v;
+				veh[i] = v;
 			else
-				vol[i] = MISSING_DATA;
+				veh[i] = MISSING_DATA;
 		}
-		return vol;
+		return veh;
 	}
 
 	/** Create a new statistical property.
@@ -164,7 +164,7 @@ public class StatProperty extends G4Property {
 			headway[i] = MISSING_DATA;
 			speed85[i] = MISSING_DATA;
 			for (int j = 0; j < G4VehClass.size; j++)
-				vol_class[i][j] = MISSING_DATA;
+				veh_class[i][j] = MISSING_DATA;
 		}
 	}
 
@@ -362,7 +362,7 @@ public class StatProperty extends G4Property {
 		for (int i = 0; i < getZones(); i++) {
 			int val = parse16(data, i * 2);
 			if (val >= 0 && val <= MAX_VEH_COUNT)
-				vol_class[i][j] = val;
+				veh_class[i][j] = val;
 		}
 	}
 

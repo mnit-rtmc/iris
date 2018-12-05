@@ -137,7 +137,7 @@ public class IntervalDataProperty extends SS125Property {
 		public final Float speed;
 		public final int veh_count;
 		public final int scan;
-		public final int[] vol_c = new int[SS125VehClass.size];
+		public final int[] veh_c = new int[SS125VehClass.size];
 		public final Float speed_85;
 		public final int headway;
 		public final int gap;
@@ -145,10 +145,10 @@ public class IntervalDataProperty extends SS125Property {
 			speed = parse24Fixed(body, 14);
 			veh_count = parse24(body, 17);
 			scan = parseOcc(body, 20);
-			vol_c[0] = parse24(body, 22);
-			vol_c[1] = parse24(body, 25);
-			vol_c[2] = parse24(body, 28);
-			vol_c[3] = parse24(body, 31);
+			veh_c[0] = parse24(body, 22);
+			veh_c[1] = parse24(body, 25);
+			veh_c[2] = parse24(body, 28);
+			veh_c[3] = parse24(body, 31);
 			speed_85 = parse24Fixed(body, 34);
 			headway = parse24(body, 37);
 			gap = parse24(body, 40);
@@ -157,26 +157,26 @@ public class IntervalDataProperty extends SS125Property {
 
 	/** Get the vehicle count for all lanes */
 	public int[] getVehCount() {
-		int[] vol = new int[lanes.length];
-		for (int i = 0; i < vol.length; i++) {
+		int[] v = new int[lanes.length];
+		for (int i = 0; i < v.length; i++) {
 			LaneInterval li = lanes[i];
-			vol[i] = (li != null) ? li.veh_count : MISSING_DATA;
+			v[i] = (li != null) ? li.veh_count : MISSING_DATA;
 		}
-		return vol;
+		return v;
 	}
 
 	/** Get the vehicle class count for all lanes.
 	 * @param vc Vehicle class.
 	 * @return Array of vehicle counts, one for each lane. */
 	public int[] getVehCount(SS125VehClass vc) {
-		int[] vol = new int[lanes.length];
-		for (int i = 0; i < vol.length; i++) {
+		int[] v = new int[lanes.length];
+		for (int i = 0; i < v.length; i++) {
 			LaneInterval li = lanes[i];
-			vol[i] = (li != null)
-			       ? li.vol_c[vc.ordinal()]
-			       : MISSING_DATA;
+			v[i] = (li != null)
+			     ? li.veh_c[vc.ordinal()]
+			     : MISSING_DATA;
 		}
-		return vol;
+		return v;
 	}
 
 	/** Get the scans for all lanes */
@@ -235,7 +235,7 @@ public class IntervalDataProperty extends SS125Property {
 		sb.append(n_lanes);
 		sb.append(", ");
 		sb.append(n_approaches);
-		sb.append(", vol: [");
+		sb.append(", veh: [");
 		for (int v: getVehCount())
 			sb.append("" + v + ",");
 		sb.setLength(sb.length() - 1);

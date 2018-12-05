@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2014  Minnesota Department of Transportation
+ * Copyright (C) 2006-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -31,8 +31,8 @@ import static us.mn.state.dot.tms.units.Distance.Units.FEET;
  */
 public class BinaryDetectionProperty extends CanogaProperty {
 
-	/** Minimum time before volume LSB can wrap */
-	static private final int VOL_COUNT_WRAP = 4 * 60 * 1000;
+	/** Minimum time before vehicle count LSB can wrap */
+	static private final int VEH_COUNT_WRAP = 4 * 60 * 1000;
 
 	/** Message payload for a GET request */
 	static protected final byte[] PAYLOAD_GET = { '*' };
@@ -107,7 +107,7 @@ public class BinaryDetectionProperty extends CanogaProperty {
 
 	/** Log new vehicle detection events */
 	public void logEvents(ControllerImpl controller) {
-		if (getEventMillis() > VOL_COUNT_WRAP)
+		if (getEventMillis() > VEH_COUNT_WRAP)
 			addGap();
 		event_time = TimeSteward.currentTimeMillis();
 		Calendar stamp = TimeSteward.getCalendarInstance();
