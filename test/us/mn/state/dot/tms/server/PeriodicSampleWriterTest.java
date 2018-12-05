@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2013  Minnesota Department of Transportation
+ * Copyright (C) 2012-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ public class PeriodicSampleWriterTest extends TestCase {
 
 	public void testWriter() {
 		PeriodicSampleCache cache = new PeriodicSampleCache(
-			PeriodicSampleType.VOLUME);
+			PeriodicSampleType.VEH_COUNT);
 		Calendar cal = Calendar.getInstance();
 		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 30);
 		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 1));

@@ -14,9 +14,8 @@
 	(detectors) embedded in the roadway.
 	As of October 2006, data is being collected every 30 seconds from more
 	than 4500 detectors in the Twin Cities metro area.
-	This raw data usually consists of volume (number of vehicles, sometimes
-	called "flow") and occupancy (percentage of time a detector is
-	"occupied").
+	This raw data usually consists of vehicle counts and occupancy
+	(percentage of time a detector is "occupied").
 	As you might guess, this adds up to a very large amount of data every
 	day.
 	There is so much data that the advantages of storing it in a
@@ -66,8 +65,8 @@
 	collected.
 	The base file name is the detector ID, and the filename extension
 	determines the type of sample data.
-	For example, 30-second volume samples collected from detector ID 100
-	would be stored in a file called "100.v30".
+	For example, 30-second vehicle count samples collected from detector ID
+	100 would be stored in a file called "100.v30".
 </p>
 <table>
 <tr>
@@ -80,7 +79,7 @@
 <tr>
 	<td>.v30</td>
 	<td>2880 bytes</td>
-	<td>30-second volume samples</td>
+	<td>30-second vehicle count samples</td>
 	<td>8 bits</td>
 	<td>0 - 40</td>
 </tr>
@@ -129,8 +128,8 @@
 <p>
 	The .v30 sample data is the number of vehicles sampled at the detector
 	in 30 seconds.
-	A volume sample of 40 vehicles or higher should never happen in the
-	real world, since that represents a sustained average headway of 0.75
+	A vehicle count sample of 40 or higher should never happen in the real
+	world, since that represents a sustained average headway of 0.75
 	seconds between vehicles.
 </p>
 <p>

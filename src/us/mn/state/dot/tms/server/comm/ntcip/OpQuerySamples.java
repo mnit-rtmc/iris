@@ -39,8 +39,8 @@ public class OpQuerySamples extends OpController {
 	/** NTCIP debug log */
 	static private final DebugLog MIB1202_LOG = new DebugLog("mib1202");
 
-	/** Volume overflow code */
-	static private final int VOL_OVERFLOW = 255;
+	/** Vehicle count overflow code */
+	static private final int VEH_OVERFLOW = 255;
 
 	/** Maximum occupancy value (100%) */
 	static private final int MAX_OCC = 200;
@@ -86,7 +86,7 @@ public class OpQuerySamples extends OpController {
 		}
 	}
 
-	/** Query volume and occupancy data */
+	/** Query vehicle count and occupancy data */
 	private class QueryVolOcc extends Phase {
 
 		/** Sample timestamp */
@@ -98,7 +98,7 @@ public class OpQuerySamples extends OpController {
 		/** Current row in volumeOccupancyTable */
 		private int row;
 
-		/** Create a new phase to query volume / occupancy data */
+		/** Create a new phase to query vehicle count / occupancy */
 		public QueryVolOcc(int n, int r) {
 			stamp = TimeSteward.currentTimeMillis();
 			n_dets = n;
@@ -108,32 +108,32 @@ public class OpQuerySamples extends OpController {
 		/** Query one row of data */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1Integer vol = detectorVolume.makeInt(row);
+			ASN1Integer veh = detectorVolume.makeInt(row);
 			ASN1Integer occ = detectorOccupancy.makeInt(row);
-			mess.add(vol);
+			mess.add(veh);
 			mess.add(occ);
 			mess.queryProps();
-			logQuery(vol);
+			logQuery(veh);
 			logQuery(occ);
-			storeVolOcc(vol, occ);
+			storeVehOcc(veh, occ);
 			row = nextDetRow(n_dets, row);
 			return (row <= n_dets) ? this : null;
 		}
 
-		/** Store vol/occ sample data */
-		private void storeVolOcc(ASN1Integer vol, ASN1Integer occ) {
+		/** Store sample data */
+		private void storeVehOcc(ASN1Integer veh, ASN1Integer occ) {
 			DetectorImpl det = controller.getDetectorAtPin(row);
 			if (det != null) {
-				storeVolOcc(det, vol.getInteger(),
+				storeVehOcc(det, veh.getInteger(),
 					occ.getInteger());
 			}
 		}
 
-		/** Store vol/occ sample data */
-		private void storeVolOcc(DetectorImpl det, int vol, int occ) {
-			if (vol < VOL_OVERFLOW) {
+		/** Store sample data */
+		private void storeVehOcc(DetectorImpl det, int veh, int occ) {
+			if (veh < VEH_OVERFLOW) {
 				det.storeVehCount(new PeriodicSample(stamp,
-					period, vol));
+					period, veh));
 			}
 			if (occ <= MAX_OCC) {
 				det.storeOccupancy(new OccupancySample(stamp,
