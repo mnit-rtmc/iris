@@ -832,39 +832,39 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		logEvent(new DetAutoFailEvent(event_type, getName()));
 	}
 
-	/** Store one volume sample for this detector.
-	 * @param vol PeriodicSample containing volume data.
+	/** Store one vehicle count sample for this detector.
+	 * @param v PeriodicSample containing vehicle count data.
 	 * @param vc Vehicle class. */
-	public void storeVolume(PeriodicSample vol, VehLengthClass vc) {
+	public void storeVehCount(PeriodicSample v, VehLengthClass vc) {
 		if (vc == null)
-			storeVolume(vol);
+			storeVehCount(v);
 		else {
 			switch (vc) {
 			case MOTORCYCLE:
-				vol_mc_cache.add(vol);
+				vol_mc_cache.add(v);
 				break;
 			case SHORT:
-				vol_s_cache.add(vol);
+				vol_s_cache.add(v);
 				break;
 			case MEDIUM:
-				vol_m_cache.add(vol);
+				vol_m_cache.add(v);
 				break;
 			case LONG:
-				vol_l_cache.add(vol);
+				vol_l_cache.add(v);
 				break;
 			}
 		}
 	}
 
-	/** Store one volume sample for this detector.
-	 * @param vol PeriodicSample containing volume data. */
-	public void storeVolume(PeriodicSample vol) {
+	/** Store one vehicle count sample for this detector.
+	 * @param v PeriodicSample containing vehicle count data. */
+	public void storeVehCount(PeriodicSample v) {
 		if (lane_type != LaneType.GREEN &&
-		    vol.period == SAMPLE_PERIOD_SEC)
-			testVolume(vol);
-		vol_cache.add(vol);
-		if (vol.period == SAMPLE_PERIOD_SEC) {
-			last_volume = vol.value;
+		    v.period == SAMPLE_PERIOD_SEC)
+			testVolume(v);
+		vol_cache.add(v);
+		if (v.period == SAMPLE_PERIOD_SEC) {
+			last_volume = v.value;
 			/* FIXME: this shouldn't be needed */
 			last_speed = MISSING_DATA;
 		}

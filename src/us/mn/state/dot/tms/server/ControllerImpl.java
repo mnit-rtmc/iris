@@ -568,7 +568,7 @@ public class ControllerImpl extends BaseObjectImpl implements Controller {
 			int i = pin - start_pin;
 			int v = sampleValue(veh_count, i);
 			if (v >= 0) {
-				det.storeVolume(new PeriodicSample(stamp,
+				det.storeVehCount(new PeriodicSample(stamp,
 					period, v), vc);
 			}
 		}

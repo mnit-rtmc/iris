@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2017  Minnesota Department of Transportation
+ * Copyright (C) 2017-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -132,7 +132,7 @@ public class OpQuerySamples extends OpController {
 		/** Store vol/occ sample data */
 		private void storeVolOcc(DetectorImpl det, int vol, int occ) {
 			if (vol < VOL_OVERFLOW) {
-				det.storeVolume(new PeriodicSample(stamp,
+				det.storeVehCount(new PeriodicSample(stamp,
 					period, vol));
 			}
 			if (occ <= MAX_OCC) {
