@@ -222,7 +222,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Create a new detector */
 	public DetectorImpl(String n) throws TMSException, SonarException {
 		super(n);
-		vol_cache = new PeriodicSampleCache(PeriodicSampleType.VOLUME);
+		veh_cache = new PeriodicSampleCache(PeriodicSampleType.VEH_COUNT);
 		scn_cache = new PeriodicSampleCache(PeriodicSampleType.SCAN);
 		spd_cache = new PeriodicSampleCache(PeriodicSampleType.SPEED);
 		vol_mc_cache = new PeriodicSampleCache(
@@ -277,7 +277,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		auto_fail = af;
 		field_length = fl;
 		fake = f;
-		vol_cache = new PeriodicSampleCache(PeriodicSampleType.VOLUME);
+		veh_cache = new PeriodicSampleCache(PeriodicSampleType.VEH_COUNT);
 		scn_cache = new PeriodicSampleCache(PeriodicSampleType.SCAN);
 		spd_cache = new PeriodicSampleCache(PeriodicSampleType.SPEED);
 		vol_mc_cache = new PeriodicSampleCache(
@@ -671,8 +671,8 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		return fake;
 	}
 
-	/** Periodic volume sample cache */
-	private transient final PeriodicSampleCache vol_cache;
+	/** Periodic vehicle count sample cache */
+	private transient final PeriodicSampleCache veh_cache;
 
 	/** Periodic scan sample cache */
 	private transient final PeriodicSampleCache scn_cache;
@@ -693,7 +693,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	private transient final PeriodicSampleCache vol_l_cache;
 
 	/** Volume from the last 30-second sample period.  FIXME: use
-	 * vol_cache to get "last_volume" value. */
+	 * veh_cache to get "last_volume" value. */
 	private transient int last_volume = MISSING_DATA;
 
 	/** Scans from the last 30-second sample period.  FIXME: use
@@ -862,7 +862,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		if (lane_type != LaneType.GREEN &&
 		    v.period == SAMPLE_PERIOD_SEC)
 			testVolume(v);
-		vol_cache.add(v);
+		veh_cache.add(v);
 		if (v.period == SAMPLE_PERIOD_SEC) {
 			last_volume = v.value;
 			/* FIXME: this shouldn't be needed */
@@ -936,7 +936,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Flush buffered data to disk */
 	public void flush(PeriodicSampleWriter writer) throws IOException {
-		writer.flush(vol_cache, name);
+		writer.flush(veh_cache, name);
 		writer.flush(scn_cache, name);
 		writer.flush(spd_cache, name);
 		writer.flush(vol_mc_cache, name);
@@ -947,7 +947,7 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 
 	/** Purge all samples before a given stamp. */
 	public void purge(long before) {
-		vol_cache.purge(before);
+		veh_cache.purge(before);
 		scn_cache.purge(before);
 		spd_cache.purge(before);
 		vol_mc_cache.purge(before);
