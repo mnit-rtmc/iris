@@ -2178,57 +2178,54 @@ FIXME
 <table>
 	<tr>
 	    <th>Protocol</th>
-	    <th>Traffic Data</th>
 	    <th>Binning</th>
+	    <th>Traffic Data</th>
 	</tr>
 	<tr>
 	    <th><a href="#ntcip">NTCIP</a></th>
-	    <td>Count, Occupancy</td>
 	    <td>0-255 seconds</td>
+	    <td rowspan="2">Count, Occupancy</td>
 	</tr>
 	<tr>
 	    <th><a href="#mndot170">MnDOT-170</a></th>
-	    <td>Count, Occupancy</td>
 	    <td>30 seconds</td>
 	</tr>
 	<tr>
 	    <th><a href="#ss105">SS105</a></th>
-	    <td>Count, Occupancy, Speed, Classification</td>
 	    <td>5 seconds to 1 month</td>
+	    <td rowspan="3">Count, Occupancy, Speed, Classification</td>
 	</tr>
 	<tr>
 	    <th><a href="#ss125">SS125</a></th>
-	    <td>Count, Occupancy, Speed, Classification</td>
 	    <td>5 seconds to 1 month (?)</td>
 	</tr>
 	<tr>
 	    <th><a href="#g4">G4</a></th>
-	    <td>Count, Occupancy, Speed, Classification</td>
 	    <td>10 seconds to 1 hour</td>
 	</tr>
 	<tr>
 	    <th><a href="#canoga">Canoga</a></th>
-	    <td>Timestamp, Speed (double loops)</td>
 	    <td>N/A (vehicle logging)</td>
+	    <td>Timestamp, Speed (double loops)</td>
 	</tr>
 	<tr>
 	    <th><a href="#dr500">DR-500</a></th>
-	    <td>Speed</td>
 	    <td>1-5? minutes</td>
+	    <td>Speed</td>
 	</tr>
 	<tr>
 	    <th><a href="#dxm">DXM</a></th>
-	    <td>Magnetic Field</td>
 	    <td>N/A (presence)</td>
+	    <td>Magnetic Field</td>
 	</tr>
 </table>
 <br/>
-<h4 id="vds_archiving">VDS Data Archiving</h4>
+<h4 id="vds_archiving">Traffic Data Archiving</h4>
 <p>
 	Every 30 seconds, an XML file is generated containing the most recent
 	sample data from all defined detectors.
-	The file is called det_sample.xml.gz, and it is written to the
-	<a href="#xml_output">XML output directory</a>
+	The file is called <code>det_sample.xml.gz</code>, and it is written to
+	the <a href="#xml_output">XML output directory</a>
 </p>
 <p>
 	Sample data is archived only if the <code>sample_archive_enable</code>
