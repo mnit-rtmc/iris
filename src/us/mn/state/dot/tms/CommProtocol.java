@@ -79,30 +79,37 @@ public enum CommProtocol {
 	RTMS_G4("RTMS G4"),
 
 	/** RTMS (18) */
+	@Deprecated
 	RTMS("RTMS"),
 
 	/** Infotek Wizard (19) */
+	@Deprecated
 	INFOTEK_WIZARD("Infotek Wizard"),
 
 	/** Sensys (20) */
+	@Deprecated
 	SENSYS("Sensys"),
 
 	/** PeMS (21) */
+	@Deprecated
 	PEMS("PeMS", false),
 
 	/** SSI (22) */
 	SSI("SSI", false),
 
 	/** CHP Incidents (23) */
+	@Deprecated
 	CHP_INCIDENTS("CHP Incidents", false),
 
 	/** URMS (24) */
+	@Deprecated
 	URMS("URMS"),
 
 	/** Digital Loggers Inc DIN Relay (25) */
 	DIN_RELAY("DLI DIN Relay", false),
 
 	/** Axis 292 Video Decoder (26) */
+	@Deprecated
 	AXIS_292("Axis 292"),
 
 	/** Axis PTS (27) */
@@ -118,6 +125,7 @@ public enum CommProtocol {
 	DR_500("DR-500", false),
 
 	/** ADDCO NodeComm sign control -- removed (31) */
+	@Deprecated
 	ADDCO("ADDCO"),
 
 	/** TransCore E6 tag reader (32) */
