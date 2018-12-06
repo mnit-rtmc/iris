@@ -2143,8 +2143,30 @@ FIXME
 </p>
 <h5>Auto Fail</h5>
 <p>
-	<b>Auto fail</b> is similar to force fail, except that it is marked and
-	cleared automatically by IRIS.
+	<b>Auto fail</b> is similar to force fail, except it is marked and
+	cleared automatically.
+	The <code>detector_auto_fail_enable</code> <a href="#system_attributes">
+	system attribute</a> can be used to disable this feature.
+</p>
+<p>
+	There are four conditions which could trigger a detector to auto fail:
+</p>
+<dl>
+	<dt>no hits</dt>
+	<dd>No vehicles counted for a duration determined by lane type</dd>
+	<dt>chatter</dt>
+	<dd>Unreasonably high vehicle count</dd>
+	<dt>locked on</dt>
+	<dd>Occupancy at 100% for a duration determined by lane type</dd>
+	<dt>no change</dt>
+	<dd>No change in occupancy for 24 hours</dd>
+</dl>
+<p>
+	When an auto fail condition occurs and once every hour that it
+	persists, an event is logged in the <code>detector_event</code> database
+	table.
+	The <code>detector_auto_fail_view</code> can be used to check recent
+	detector auto fail activity.
 </p>
 
 <h4>VDS Protocols</h4>
