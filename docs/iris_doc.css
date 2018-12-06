@@ -94,6 +94,7 @@ body {
 }
 table {
 	border: 3px solid black;
+	border-collapse: collapse;
 	background: #f0f0f0;
 }
 th {
@@ -103,8 +104,7 @@ th {
 td {
 	padding-left: 8px;
 	padding-right: 8px;
-	border-left: 8px;
-	border-right: 8px;
+	border: 1px dashed gray;
 	background: #fffff4;
 	vertical-align: middle;
 }

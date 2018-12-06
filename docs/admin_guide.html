@@ -100,7 +100,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">5 Dec 2018</div>
+<div id="stamp">6 Dec 2018</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -1256,206 +1256,188 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <th>Protocol</th>
 	    <th>Devices</th>
 	    <th>Default Scheme</th>
-	    <th>Multidrop</th>
+	    <th><a href="#drop_address">Addressing</a></th>
 	</tr>
 	<tr>
 	    <td>NTCIP A</td>
-	    <td><a href="#dms">DMS</a>,
+	    <td rowspan="3"><a href="#dms">DMS</a>,
 	        <a href="#ilcs">ILCS</a>,
 	        <a href="#rwis">RWIS</a>,
 	        <a href="#vds">VDS</a>,
 	        <a href="#gps">GPS</a>
 	    </td>
 	    <td>UDP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td>NTCIP B (with HDLC)</td>
-	    <td><a href="#dms">DMS</a>,
-	        <a href="#ilcs">ILCS</a>,
-	        <a href="#rwis">RWIS</a>,
-	        <a href="#vds">VDS</a>,
-	        <a href="#gps">GPS</a>
-	    </td>
 	    <td>TCP</td>
-	    <td>Yes</td>
+	    <td>1-8191</td>
 	</tr>
 	<tr>
 	    <td>NTCIP C</td>
-	    <td><a href="#dms">DMS</a>,
-	        <a href="#ilcs">ILCS</a>,
-	        <a href="#rwis">RWIS</a>,
-	        <a href="#vds">VDS</a>,
-	        <a href="#gps">GPS</a>
-	    </td>
 	    <td>TCP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td>DMS XML</td>
 	    <td><a href="#dms">DMS</a></td>
 	    <td>TCP</td>
-	    <td>Yes</td>
+	    <td>0-65535</td>
 	</tr>
 	<tr>
 	    <td>MnDOT 170 4</td>
-	    <td><a href="#vds">VDS</a>,
+	    <td rowspan="2"><a href="#vds">VDS</a>,
 	        <a href="#ramp_meters">metering</a>,
 	        <a href="#dlcs">DLCS</a>,
 		<a href="#beacons">beacons</a>,
 		<a href="#alarms">alarms</a>
 	    </td>
 	    <td>TCP</td>
-	    <td>Yes</td>
+	    <td>1-15</td>
 	</tr>
 	<tr>
 	    <td>MnDOT 170 5</td>
-	    <td><a href="#vds">VDS</a>,
-	        <a href="#ramp_meters">metering</a>,
-	        <a href="#dlcs">DLCS</a>,
-		<a href="#beacons">beacons</a>,
-		<a href="#alarms">alarms</a>
-	    </td>
 	    <td>TCP</td>
-	    <td>Yes</td>
+	    <td>1-31</td>
 	</tr>
 	<tr>
 	    <td>Canoga (GTT Canoga Traffic Sensing System)</td>
 	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
-	    <td>Yes</td>
+	    <td>1-255</td>
 	</tr>
 	<tr>
 	    <td>SS105 (Wavetronix SmartSensor)</td>
 	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
-	    <td>Yes</td>
+	    <td>1-9999</td>
 	</tr>
 	<tr>
 	    <td>SS125 (Wavetronix SmartSensor HD)</td>
 	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
-	    <td>Yes</td>
+	    <td>0-65535</td>
 	</tr>
 	<tr>
 	    <td>G4 (RTMS G4 sensor)</td>
 	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
-	    <td>Yes</td>
+	    <td>0-65535</td>
 	</tr>
 	<tr>
 	    <td>DR-500 (Houston Radar DR-500 doppler)</td>
 	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td>DXM (Banner magnetometer)</td>
 	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td>Axis PTZ</td>
 	    <td><a href="#ptz">PTZ</a></td>
 	    <td>HTTP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td>Pelco D</td>
 	    <td><a href="#ptz">PTZ</a></td>
 	    <td>UDP</td>
-	    <td>Yes</td>
+	    <td>1-254</td>
 	</tr>
 	<tr>
 	    <td>Manchester (AD)</td>
 	    <td><a href="#ptz">PTZ</a></td>
 	    <td>UDP</td>
-	    <td>Yes</td>
+	    <td>1-1024</td>
 	</tr>
 	<tr>
 	    <td>Vicon</td>
 	    <td><a href="#ptz">PTZ</a></td>
 	    <td>UDP</td>
-	    <td>Yes</td>
+	    <td>1-254</td>
 	</tr>
 	<tr>
 	    <td>Infinova</td>
 	    <td><a href="#ptz">PTZ</a></td>
 	    <td>TCP</td>
-	    <td>Yes</td>
+	    <td>1-254</td>
 	</tr>
 	<tr>
 	    <td>Cohu</td>
 	    <td><a href="#ptz">PTZ</a></td>
 	    <td>TCP</td>
-	    <td>Yes</td>
+	    <td>1-223</td>
 	</tr>
 	<tr>
 	    <td>Pelco P KBD</td>
 	    <td><a href="#cam_kbd">Camera keyboard</a></td>
 	    <td>TCP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td><a href="#monstream">MonStream</a></td>
 	    <td><a href="#video">Video switching</a></td>
 	    <td>UDP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td>STC (HySecurity SmartTouch)</td>
 	    <td><a href="#gate_arms">Gate Arm</a></td>
 	    <td>TCP</td>
-	    <td>Yes</td>
+	    <td>1-99</td>
 	</tr>
 	<tr>
 	    <td>E6 (Transcore Encompass 6)</td>
 	    <td><a href="#tag_readers">Tag Reader</a></td>
 	    <td>UDP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td>Org 815</td>
 	    <td><a href="#rwis">RWIS</a></td>
 	    <td>TCP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td>SSI</td>
 	    <td><a href="#rwis">RWIS</a></td>
 	    <td>HTTP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td><a href="#din_relay">DLI DIN Relay</a></td>
 	    <td><a href="#dlcs">DLCS</a>, <a href="#beacons">beacons</a></td>
 	    <td>HTTP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td><a href="#cbw">CBW</a> (Control by Web)</td>
 	    <td><a href="#beacons">beacons</a></td>
 	    <td>HTTP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td>Msg feed</td>
 	    <td><a href="#msg_feed">DMS messages</a></td>
 	    <td>HTTP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td>Incident feed</td>
 	    <td><a href="#inc_feed">Incidents</a></td>
 	    <td>HTTP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td>GPS RedLion</td>
 	    <td><a href="#gps">GPS</a></td>
 	    <td>TCP</td>
-	    <td>No</td>
+	    <td>N/A</td>
 	</tr>
 </table>
 <p/>
@@ -2216,61 +2198,51 @@ FIXME
 	    <th>Protocol</th>
 	    <th>Traffic Data</th>
 	    <th>Binning</th>
-	    <th>Addressing</th>
 	</tr>
 	<tr>
 	    <th>NTCIP</th>
 	    <td>Count, Occupancy</td>
 	    <td>0-255 seconds</td>
-	    <td>1-8191 (B)</td>
 	</tr>
 	<tr>
 	    <th>MnDOT 170 4</th>
 	    <td>Count, Occupancy</td>
 	    <td>30 seconds</td>
-	    <td>1-15</td>
 	</tr>
 	<tr>
 	    <th>MnDOT 170 5</th>
 	    <td>Count, Occupancy</td>
 	    <td>30 seconds</td>
-	    <td>1-31</td>
 	</tr>
 	<tr>
 	    <th>Canoga</th>
 	    <td>Timestamp, Speed (double loops)</td>
 	    <td>N/A (vehicle logging)</td>
-	    <td>1-255</td>
 	</tr>
 	<tr>
 	    <th>SS105</th>
 	    <td>Count, Occupancy, Speed, Classification</td>
 	    <td>5 seconds to 1 month</td>
-	    <td>1-9999</td>
 	</tr>
 	<tr>
 	    <th>SS125</th>
 	    <td>Count, Occupancy, Speed, Classification</td>
 	    <td>5 seconds to 1 month (?)</td>
-	    <td>0-65535</td>
 	</tr>
 	<tr>
 	    <th>RTMS G4</th>
 	    <td>Count, Occupancy, Speed, Classification</td>
 	    <td>10 seconds to 1 hour</td>
-	    <td>0-65535</td>
 	</tr>
 	<tr>
 	    <th>DR-500</th>
 	    <td>Speed</td>
 	    <td>1-5? minutes</td>
-	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <th>DXM</th>
 	    <td>Magnetic Field</td>
 	    <td>N/A (presence)</td>
-	    <td>N/A</td>
 	</tr>
 </table>
 <br/>
