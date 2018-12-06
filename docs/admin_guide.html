@@ -1774,9 +1774,11 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	only font, IRIS will replace those characters with their equivalent.
 </p>
 <p>
-	Fifteen fonts are included in the IRIS template SQL script.
+	A number of fonts are included in the sql/fonts directory.
 	These fonts are designed to have a similar visual style.
+	To import a font into the IRIS database, use psql:
 </p>
+<pre class="code">psql tms -f <em>[font file]</em></pre>
 <table>
 	<tr>
 	    <th>Number</th>
@@ -1834,6 +1836,16 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>14 pixel high full-matrix</td>
 	</tr>
 	<tr>
+	    <td>12</td>
+	    <td>14_full_thin</td>
+	    <td>14 pixel high full-matrix</td>
+	</tr>
+	<tr>
+	    <td>21</td>
+	    <td>15_full</td>
+	    <td>15 pixel high full-matrix</td>
+	</tr>
+	<tr>
 	    <td>13</td>
 	    <td>16_full</td>
 	    <td>16 pixel high full-matrix</td>
@@ -1852,6 +1864,11 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>16</td>
 	    <td>24_full</td>
 	    <td>24 pixel high full-matrix (numerals only)</td>
+	</tr>
+	<tr>
+	    <td>20</td>
+	    <td>26_full</td>
+	    <td>26 pixel high full-matrix</td>
 	</tr>
 	<tr>
 	    <td>17</td>
