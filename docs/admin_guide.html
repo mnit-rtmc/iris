@@ -254,7 +254,7 @@
 </ul>
 <h3 id="protocols">Protocols</h3>
 <p>
-	Many different protocols are supported for communicating with the
+	Many different protocols are supported for communicating with
 	various device types.
 	Additional protocols can be added for any existing device type by
 	programming a simple driver interface.
@@ -1239,17 +1239,18 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	A <b>comm link</b> is a network connection to an external device or
 	system.
 	IRIS is capable of supporting hundreds of simultaneous comm links.
-	Each comm link has a number of attributes, including URI and protocol.
+	Each comm link has a number of attributes, including <b>URI</b> and
+	<b>protocol</b>.
 </p>
 <p>
 	The URI includes a DNS host name or network IP address, and port number,
-	using the standard "host:port" convention.
-	The URI can also contain an optional "scheme" prefix, which can be
-	either "udp://", "tcp://" or "modem://".
-	If present, the scheme will override the default URI scheme for the
+	using the standard <code>host:port</code> convention.
+	The URI can also contain an optional <b>scheme</b> prefix, which can be
+	either <code>udp://</code>, <code>tcp://</code> or <code>modem://</code>.
+	If present, the scheme will override the <b>default scheme</b> for the
 	selected protocol.
 	For example, to use the <a href="#pelcod">Pelco-D</a> protocol over TCP
-	(instead of the default UDP), add a "tcp://" scheme prefix to the URI.
+	(instead of the default UDP), prepend <code>tcp://</code> to the URI.
 </p>
 <p>
 	The protocol determines what type of device or system is on the other
@@ -1257,193 +1258,224 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	The following table contains the communication protocols supported by
 	IRIS.
 </p>
-<table>
+<table id="prot_table">
 	<tr>
 	    <th>Protocol</th>
-	    <th>Devices</th>
 	    <th>Default Scheme</th>
-	    <th><a href="#drop_address">Addressing</a></th>
+	    <th><a href="#drop_address">Drop Address</a></th>
+	    <th>Devices</th>
+	    <th><a href="#io_pins">I/O Pins</a></th>
 	</tr>
 	<tr id="ntcip">
 	    <td>NTCIP A</td>
+	    <td>udp</td>
+	    <td>N/A</td>
 	    <td rowspan="3"><a href="#dms">DMS</a>,
 	        <a href="#ilcs">ILCS</a>,
 	        <a href="#rwis">RWIS</a>,
 	        <a href="#vds">VDS</a>,
 	        <a href="#gps">GPS</a>
 	    </td>
-	    <td>UDP</td>
-	    <td>N/A</td>
+	    <td rowspan="4">1</td>
 	</tr>
 	<tr>
 	    <td>NTCIP B</td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>1-8191</td>
 	</tr>
 	<tr>
 	    <td>NTCIP C</td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>N/A</td>
 	</tr>
 	<tr id="dms_xml">
-	    <td>DMS XML</td>
-	    <td><a href="#dms">DMS</a></td>
-	    <td>TCP</td>
+	    <td>DMS-XML</td>
+	    <td>tcp</td>
 	    <td>0-65535</td>
+	    <td><a href="#dms">DMS</a></td>
 	</tr>
 	<tr id="mndot170">
 	    <td>MnDOT-170 4</td>
+	    <td rowspan="2">tcp</td>
+	    <td>1-15</td>
 	    <td rowspan="2"><a href="#vds">VDS</a>,
-	        <a href="#ramp_meters">metering</a>,
-	        <a href="#dlcs">DLCS</a>,
+	        <a href="#ramp_meters">Ramp Meters</a>,
 		<a href="#beacons">beacons</a>,
+	        <a href="#dlcs">DLCS</a>,
 		<a href="#alarms">alarms</a>
 	    </td>
-	    <td>TCP</td>
-	    <td>1-15</td>
+	    <td rowspan="2"><a href="#mndot_pins">[*]</a</td>
 	</tr>
 	<tr>
 	    <td>MnDOT-170 5</td>
-	    <td>TCP</td>
 	    <td>1-31</td>
 	</tr>
 	<tr id="ss105">
 	    <td>SS105</td>
-	    <td><a href="#vds">VDS</a></td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>1-9999</td>
+	    <td rowspan="6"><a href="#vds">VDS</a></td>
+	    <td rowspan="2">1-8</td>
 	</tr>
 	<tr id="ss125">
 	    <td>SS125</td>
-	    <td><a href="#vds">VDS</a></td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>0-65535</td>
 	</tr>
 	<tr id="g4">
 	    <td>G4</td>
-	    <td><a href="#vds">VDS</a></td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>0-65535</td>
+	    <td>1-12</td>
 	</tr>
 	<tr id="canoga">
 	    <td>Canoga</td>
-	    <td><a href="#vds">VDS</a></td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>1-255</td>
+	    <td>1-4</td>
 	</tr>
 	<tr id="dr500">
 	    <td>DR-500</td>
-	    <td><a href="#vds">VDS</a></td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>N/A</td>
+	    <td>1</td>
 	</tr>
 	<tr id="dxm">
 	    <td>DXM</td>
-	    <td><a href="#vds">VDS</a></td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>N/A</td>
+	    <td>11-86</td>
 	</tr>
 	<tr id="axis_ptz">
 	    <td>Axis-PTZ</td>
-	    <td><a href="#ptz">PTZ</a></td>
-	    <td>HTTP</td>
+	    <td>http</td>
 	    <td>N/A</td>
+	    <td rowspan="6"><a href="#ptz">PTZ</a></td>
+	    <td rowspan="6">1</td>
 	</tr>
 	<tr id="pelcod">
 	    <td>Pelco-D</td>
-	    <td><a href="#ptz">PTZ</a></td>
-	    <td>UDP</td>
+	    <td>udp</td>
 	    <td>1-254</td>
 	</tr>
 	<tr id="manchester">
 	    <td>Manchester</td>
-	    <td><a href="#ptz">PTZ</a></td>
-	    <td>UDP</td>
+	    <td>udp</td>
 	    <td>1-1024</td>
 	</tr>
 	<tr id="vicon">
 	    <td>Vicon</td>
-	    <td><a href="#ptz">PTZ</a></td>
-	    <td>UDP</td>
+	    <td>udp</td>
 	    <td>1-254</td>
 	</tr>
 	<tr id="cohu">
 	    <td>Cohu</td>
-	    <td><a href="#ptz">PTZ</a></td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>1-223</td>
 	</tr>
 	<tr id="infinova">
 	    <td>Infinova</td>
-	    <td><a href="#ptz">PTZ</a></td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>1-254</td>
 	</tr>
 	<tr id="pelcop">
 	    <td>Pelco-P</td>
+	    <td>tcp</td>
+	    <td>N/A</td>
 	    <td><a href="#cam_kbd">Camera KBD</a></td>
-	    <td>TCP</td>
 	    <td>N/A</td>
 	</tr>
 	<tr>
 	    <td><a href="#monstream">MonStream</a></td>
-	    <td><a href="#video">Video switching</a></td>
-	    <td>UDP</td>
+	    <td>udp</td>
 	    <td>N/A</td>
+	    <td><a href="#video">Monitors</a></td>
+	    <td>1-16</td>
 	</tr>
 	<tr id="stc">
 	    <td>STC</td>
-	    <td><a href="#gate_arms">Gate Arm</a></td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>1-99</td>
+	    <td><a href="#gate_arms">Gate Arm</a></td>
+	    <td rowspan="3">1</td>
 	</tr>
 	<tr id="e6">
 	    <td>E6</td>
-	    <td><a href="#tag_readers">Tag Reader</a></td>
-	    <td>UDP</td>
+	    <td>udp</td>
 	    <td>N/A</td>
+	    <td><a href="#tag_readers">Tag Reader</a></td>
 	</tr>
 	<tr id="redlion">
 	    <td>RedLion</td>
-	    <td><a href="#gps">GPS</a></td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>N/A</td>
+	    <td><a href="#gps">GPS</a></td>
 	</tr>
 	<tr id="dinrelay">
 	    <td>DIN-Relay</td>
-	    <td><a href="#dlcs">DLCS</a>, <a href="#beacons">beacons</a></td>
-	    <td>HTTP</td>
+	    <td>http</td>
 	    <td>N/A</td>
+	    <td><a href="#dlcs">DLCS</a>, <a href="#beacons">beacons</a></td>
+	    <td rowspan="2">1-8</td>
 	</tr>
 	<tr id="cbw">
 	    <td>CBW</td>
-	    <td><a href="#beacons">beacons</a></td>
-	    <td>HTTP</td>
+	    <td>http</td>
 	    <td>N/A</td>
+	    <td><a href="#beacons">beacons</a></td>
 	</tr>
 	<tr id="org815">
 	    <td>Org-815</td>
-	    <td><a href="#rwis">RWIS</a></td>
-	    <td>TCP</td>
+	    <td>tcp</td>
 	    <td>N/A</td>
+	    <td rowspan="2"><a href="#rwis">RWIS</a></td>
+	    <td rowspan="4">1</td>
 	</tr>
 	<tr id="ssi">
 	    <td>SSI</td>
-	    <td><a href="#rwis">RWIS</a></td>
-	    <td>HTTP</td>
+	    <td>http</td>
 	    <td>N/A</td>
 	</tr>
 	<tr id="msgfeed">
 	    <td>Msg-Feed</td>
-	    <td><a href="#msg_feed">DMS messages</a></td>
-	    <td>HTTP</td>
+	    <td>http</td>
 	    <td>N/A</td>
+	    <td><a href="#msg_feed">DMS messages</a></td>
 	</tr>
 	<tr id="incfeed">
 	    <td>Inc-Feed</td>
-	    <td><a href="#inc_feed">Incidents</a></td>
-	    <td>HTTP</td>
+	    <td>http</td>
 	    <td>N/A</td>
+	    <td><a href="#inc_feed">Incidents</a></td>
+	</tr>
+</table>
+
+<p/>
+<h5 id="mndot_pins">I/O Pins For MnDOT-170 Protocol</h5>
+<table>
+	<tr>
+	    <th>Device Type</th>
+	    <th>I/O Pin(s)</th>
+	</tr>
+	<tr>
+	    <td><a href="#ramp_meters">Ramp Meter</a></td>
+	    <td>2 or 3</td>
+	</tr>
+	<tr>
+	    <td><a href="#beacons">Beacon</a></td>
+	    <td>2</td>
+	</tr>
+	<tr>
+	    <td><a href="#dlcs">DLCS</a></td>
+	    <td>19 - 36</td>
+	</tr>
+	<tr>
+	    <td><a href="#vds">VDS</a></td>
+	    <td>39 - 62</td>
+	</tr>
+	<tr>
+	    <td><a href="#alarms">Alarms</a></td>
+	    <td>70 - 79</td>
 	</tr>
 </table>
 <p/>
@@ -1586,103 +1618,8 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	Each controller has a set of <b>I/O pins</b>, to which
 	<a href="#devices">devices</a> can be assigned.
 	The function of these pins is protocol specific &mdash; see the
-	following table.
+	<a href="#prot_table">protocol table</a> for details.
 </p>
-<table>
-	<tr>
-	    <th>Device Type</th>
-	    <th>Protocol</th>
-	    <th>I/O Pin(s)</th>
-	</tr>
-	<tr>
-	    <td><a href="#dms">DMS</a>, <a href="#ilcs">ILCS</a></td>
-	    <td><a href="#ntcip">NTCIP</a>, <a href="#dms_xml">DMS-XML</a></td>
-	    <td>1</td>
-	</tr>
-	<tr>
-	    <td rowspan="2"><a href="#dlcs">DLCS</a></td>
-	    <td><a href="#mndot170">MnDOT-170</a></td>
-	    <td>19 - 36</td>
-	</tr>
-	<tr>
-	    <td><a href="#dinrelay">DIN-Relay</a></td>
-	    <td>1 - 8</td>
-	</tr>
-	<tr>
-	    <td><a href="#cameras">Camera</a></td>
-	    <td><a href="#pelcod">Pelco-D</a>,
-	        <a href="#manchester">Manchester</a>,
-	        <a href="#vicon">Vicon</a>,
-	        <a href="#cohu">Cohu</a>,
-	        <a href="#infinova">Infinova</a>
-	    </td>
-	    <td>1</td>
-	</tr>
-	<tr>
-	    <td><a href="#video">Video Switching</a></td>
-	    <td>MonStream</td>
-	    <td>1 - 16</td>
-	</tr>
-	<tr>
-	    <td rowspan="6"><a href="#vds">VDS</a></td>
-	    <td><a href="#mndot170">MnDOT-170</a></td>
-	    <td>39 - 62</td>
-	</tr>
-	<tr>
-	    <td><a href="#ss105">SS105</a>, <a href="#ss125">SS125</a></td>
-	    <td>1 - 8</td>
-	</tr>
-	<tr>
-	    <td><a href="#g4">G4</a></td>
-	    <td>1 - 12</td>
-	</tr>
-	<tr>
-	    <td><a href="#canoga">Canoga</a></td>
-	    <td>1 - 4</td>
-	</tr>
-	<tr>
-	    <td><a href="#dr500">DR-500</a></td>
-	    <td>1</td>
-	</tr>
-	<tr>
-	    <td><a href="#dxm">DXM</a></td>
-	    <td>11 - 86</td>
-	</tr>
-	<tr>
-	    <td><a href="#ramp_meters">Ramp Meter</a></td>
-	    <td><a href="#mndot170">MnDOT-170</a></td>
-	    <td>2 or 3</td>
-	</tr>
-	<tr>
-	    <td><a href="#gate_arms">Gate Arm</a></td>
-	    <td><a href="#stc">STC</a></td>
-	    <td>1</td>
-	</tr>
-	<tr>
-	    <td><a href="#tag_readers">Tag Reader</a></td>
-	    <td><a href="#e6">E6</a></td>
-	    <td>1</td>
-	</tr>
-	<tr>
-	    <td rowspan="3"><a href="#beacons">Beacon</a></td>
-	    <td><a href="#mndot170">MnDOT-170</a></td>
-	    <td>2</td>
-	</tr>
-	<tr>
-	    <td><a href="#dinrelay">DIN-Relay</a></td>
-	    <td>1 - 8</td>
-	</tr>
-	<tr>
-	    <td><a href="#cbw">CBW</a></td>
-	    <td>1 - 8</td>
-	</tr>
-	<tr>
-	    <td><a href="#rwis">RWIS</a></td>
-	    <td><a href="#org815">Org-815</a>, <a href="#ssi">SSI</a></td>
-	    <td>1</td>
-	</tr>
-</table>
-<br/>
 
 <h3 id="fonts">Fonts</h3>
 <aside>
@@ -2429,7 +2366,8 @@ FIXME
 <p>
 	To configure a <a href="#pelcop">Pelco-P</a> keyboard, a comm link using
 	the pelcop protocol must be created.
-	One active controller must exist on that comm link.
+	One active controller must exist on that comm link, but no devices
+	are necessary.
 	IRIS will initiate a TCP connection to connect to the keyboard --
 	typically, this will be managed by an ethernet-to-serial device.
 </p>
