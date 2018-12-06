@@ -59,7 +59,7 @@
   <h2><a id="features_link" href="#features">Features</a></h2>
   <div id="features_div">
     <h3><a href="#traffic_layer">Traffic Map Layer</a></h3>
-    <h3><a href="#incident_management">Incident Management</a></h3>
+    <h3><a href="#incident">Incident Management</a></h3>
     <h3><a href="#plan_schedule">Plans and Schedules</a></h3>
     <h3><a href="#parking">Parking Area Availability</a></h3>
     <h3><a href="#slow">Slow Traffic Warning</a></h3>
@@ -261,26 +261,32 @@
 	These are some existing protocols:
 </p>
 <ul>
-	<li>NTCIP class A, B and C (DMS)</li>
-	<li>DMS-XML (DMS)</li>
-	<li>MnDOT 4- and 5-bit (VDS, ramp meters, LCS, beacons, IRL)</li>
-	<li>Wavetronix SS105 and SS125 (VDS)</li>
-	<li>Canoga Traffic Sensing System (VDS)</li>
-	<li>RTMS G4 (VDS)</li>
-	<li>MonStream (video switching)</li>
-	<li>Pelco D (pan/tilt/zoom)</li>
-	<li>Infinova (pan/tilt/zoom)</li>
-	<li>Cohu (pan/tilt/zoom)</li>
-	<li>AD "manchester" (pan/tilt/zoom)</li>
-	<li>Vicon (pan/tilt/zoom)</li>
-	<li>Msg Feed (external system DMS messages)</li>
-	<li>HySecurity STC (Gate Arms)</li>
-	<li>Optical Scientific ORG-815 (precipitation)</li>
-	<li>SSI RWIS sensor</li>
-	<li>DLI DIN Relay (LCS, beacons)</li>
-	<li>Control By Web (beacons)</li>
-	<li>Incident Feed (external system provided)</li>
-	<li>RedLion modem (GPS)</li>
+	<li><a href="#ntcip">NTCIP</a></li>
+	<li><a href="#dms_xml">DMS-XML</a></li>
+	<li><a href="#mndot170">MnDOT-170</a></li>
+	<li><a href="#ss105">Wavetronix SmartSensor SS105</a></li>
+	<li><a href="#ss125">Wavetronix SmartSensor HD SS125</a></li>
+	<li><a href="#g4">RTMS G4</a></li>
+	<li><a href="#canoga">GTT Canoga Traffic Sensing System</a></li>
+	<li><a href="#dr500">Houston Radar DR-500 Doppler</a></li>
+	<li><a href="#dxm">Banner Engineering DXM Magnetometer</a></li>
+	<li><a href="#axis_ptz">Axis Camera PTZ</a></li>
+	<li><a href="#pelcod">Pelco-D PTZ</a></li>
+	<li><a href="#manchester">American Dynamics Manchester PTZ</a></li>
+	<li><a href="#vicon">Vicon Camera PTZ</a></li>
+	<li><a href="#cohu">Cohu Camera PTZ</a></li>
+	<li><a href="#infinova">Infinova Camera PTZ</a></li>
+	<li><a href="#pelcop">Pelco-P Keyboard</a></li>
+	<li><a href="#monstream">MonStream</a></li>
+	<li><a href="#stc">HySecurity SmartTouch Controller STC</a></li>
+	<li><a href="#e6">Transcore Encompass 6 E6</a></li>
+	<li><a href="#redlion">RedLion modem GPS</a></li>
+	<li><a href="#dinrelay">Digital Loggers Inc. DIN-Relay</a></li>
+	<li><a href="#cbw">Xytronix Control By Web CBW</a></li>
+	<li><a href="#org815">Optical Scientific ORG-815</a></li>
+	<li><a href="#ssi">SSI ScanWeb</a></li>
+	<li><a href="#msgfeed">DMS Message Feed</a></li>
+	<li><a href="#incfeed">Incident Feed</a></li>
 </ul>
 <h3 id="advanced_features">Advanced Features</h3>
 <p>
@@ -1242,8 +1248,8 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	either "udp://", "tcp://" or "modem://".
 	If present, the scheme will override the default URI scheme for the
 	selected protocol.
-	For example, to use the Pelco D protocol over TCP (instead of the
-	default UDP), add a "tcp://" scheme prefix to the URI.
+	For example, to use the <a href="#pelcod">Pelco-D</a> protocol over TCP
+	(instead of the default UDP), add a "tcp://" scheme prefix to the URI.
 </p>
 <p>
 	The protocol determines what type of device or system is on the other
@@ -1258,7 +1264,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <th>Default Scheme</th>
 	    <th><a href="#drop_address">Addressing</a></th>
 	</tr>
-	<tr>
+	<tr id="ntcip">
 	    <td>NTCIP A</td>
 	    <td rowspan="3"><a href="#dms">DMS</a>,
 	        <a href="#ilcs">ILCS</a>,
@@ -1270,7 +1276,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>N/A</td>
 	</tr>
 	<tr>
-	    <td>NTCIP B (with HDLC)</td>
+	    <td>NTCIP B</td>
 	    <td>TCP</td>
 	    <td>1-8191</td>
 	</tr>
@@ -1279,14 +1285,14 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>TCP</td>
 	    <td>N/A</td>
 	</tr>
-	<tr>
+	<tr id="dms_xml">
 	    <td>DMS XML</td>
 	    <td><a href="#dms">DMS</a></td>
 	    <td>TCP</td>
 	    <td>0-65535</td>
 	</tr>
-	<tr>
-	    <td>MnDOT 170 4</td>
+	<tr id="mndot170">
+	    <td>MnDOT-170 4</td>
 	    <td rowspan="2"><a href="#vds">VDS</a>,
 	        <a href="#ramp_meters">metering</a>,
 	        <a href="#dlcs">DLCS</a>,
@@ -1297,85 +1303,85 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>1-15</td>
 	</tr>
 	<tr>
-	    <td>MnDOT 170 5</td>
+	    <td>MnDOT-170 5</td>
 	    <td>TCP</td>
 	    <td>1-31</td>
 	</tr>
-	<tr>
-	    <td>Canoga (GTT Canoga Traffic Sensing System)</td>
-	    <td><a href="#vds">VDS</a></td>
-	    <td>TCP</td>
-	    <td>1-255</td>
-	</tr>
-	<tr>
-	    <td>SS105 (Wavetronix SmartSensor)</td>
+	<tr id="ss105">
+	    <td>SS105</td>
 	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
 	    <td>1-9999</td>
 	</tr>
-	<tr>
-	    <td>SS125 (Wavetronix SmartSensor HD)</td>
+	<tr id="ss125">
+	    <td>SS125</td>
 	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
 	    <td>0-65535</td>
 	</tr>
-	<tr>
-	    <td>G4 (RTMS G4 sensor)</td>
+	<tr id="g4">
+	    <td>G4</td>
 	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
 	    <td>0-65535</td>
 	</tr>
-	<tr>
-	    <td>DR-500 (Houston Radar DR-500 doppler)</td>
+	<tr id="canoga">
+	    <td>Canoga</td>
+	    <td><a href="#vds">VDS</a></td>
+	    <td>TCP</td>
+	    <td>1-255</td>
+	</tr>
+	<tr id="dr500">
+	    <td>DR-500</td>
 	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
 	    <td>N/A</td>
 	</tr>
-	<tr>
-	    <td>DXM (Banner magnetometer)</td>
+	<tr id="dxm">
+	    <td>DXM</td>
 	    <td><a href="#vds">VDS</a></td>
 	    <td>TCP</td>
 	    <td>N/A</td>
 	</tr>
-	<tr>
-	    <td>Axis PTZ</td>
+	<tr id="axis_ptz">
+	    <td>Axis-PTZ</td>
 	    <td><a href="#ptz">PTZ</a></td>
 	    <td>HTTP</td>
 	    <td>N/A</td>
 	</tr>
-	<tr>
-	    <td>Pelco D</td>
+	<tr id="pelcod">
+	    <td>Pelco-D</td>
 	    <td><a href="#ptz">PTZ</a></td>
 	    <td>UDP</td>
 	    <td>1-254</td>
 	</tr>
-	<tr>
-	    <td>Manchester (AD)</td>
+	<tr id="manchester">
+	    <td>Manchester</td>
 	    <td><a href="#ptz">PTZ</a></td>
 	    <td>UDP</td>
 	    <td>1-1024</td>
 	</tr>
-	<tr>
+	<tr id="vicon">
 	    <td>Vicon</td>
 	    <td><a href="#ptz">PTZ</a></td>
 	    <td>UDP</td>
 	    <td>1-254</td>
 	</tr>
-	<tr>
-	    <td>Infinova</td>
-	    <td><a href="#ptz">PTZ</a></td>
-	    <td>TCP</td>
-	    <td>1-254</td>
-	</tr>
-	<tr>
+	<tr id="cohu">
 	    <td>Cohu</td>
 	    <td><a href="#ptz">PTZ</a></td>
 	    <td>TCP</td>
 	    <td>1-223</td>
 	</tr>
-	<tr>
-	    <td>Pelco P KBD</td>
-	    <td><a href="#cam_kbd">Camera keyboard</a></td>
+	<tr id="infinova">
+	    <td>Infinova</td>
+	    <td><a href="#ptz">PTZ</a></td>
+	    <td>TCP</td>
+	    <td>1-254</td>
+	</tr>
+	<tr id="pelcop">
+	    <td>Pelco-P</td>
+	    <td><a href="#cam_kbd">Camera KBD</a></td>
 	    <td>TCP</td>
 	    <td>N/A</td>
 	</tr>
@@ -1385,67 +1391,67 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>UDP</td>
 	    <td>N/A</td>
 	</tr>
-	<tr>
-	    <td>STC (HySecurity SmartTouch)</td>
+	<tr id="stc">
+	    <td>STC</td>
 	    <td><a href="#gate_arms">Gate Arm</a></td>
 	    <td>TCP</td>
 	    <td>1-99</td>
 	</tr>
-	<tr>
-	    <td>E6 (Transcore Encompass 6)</td>
+	<tr id="e6">
+	    <td>E6</td>
 	    <td><a href="#tag_readers">Tag Reader</a></td>
 	    <td>UDP</td>
 	    <td>N/A</td>
 	</tr>
-	<tr>
-	    <td>Org 815</td>
+	<tr id="redlion">
+	    <td>RedLion</td>
+	    <td><a href="#gps">GPS</a></td>
+	    <td>TCP</td>
+	    <td>N/A</td>
+	</tr>
+	<tr id="dinrelay">
+	    <td>DIN-Relay</td>
+	    <td><a href="#dlcs">DLCS</a>, <a href="#beacons">beacons</a></td>
+	    <td>HTTP</td>
+	    <td>N/A</td>
+	</tr>
+	<tr id="cbw">
+	    <td>CBW</td>
+	    <td><a href="#beacons">beacons</a></td>
+	    <td>HTTP</td>
+	    <td>N/A</td>
+	</tr>
+	<tr id="org815">
+	    <td>Org-815</td>
 	    <td><a href="#rwis">RWIS</a></td>
 	    <td>TCP</td>
 	    <td>N/A</td>
 	</tr>
-	<tr>
+	<tr id="ssi">
 	    <td>SSI</td>
 	    <td><a href="#rwis">RWIS</a></td>
 	    <td>HTTP</td>
 	    <td>N/A</td>
 	</tr>
-	<tr>
-	    <td><a href="#din_relay">DLI DIN Relay</a></td>
-	    <td><a href="#dlcs">DLCS</a>, <a href="#beacons">beacons</a></td>
-	    <td>HTTP</td>
-	    <td>N/A</td>
-	</tr>
-	<tr>
-	    <td><a href="#cbw">CBW</a> (Control by Web)</td>
-	    <td><a href="#beacons">beacons</a></td>
-	    <td>HTTP</td>
-	    <td>N/A</td>
-	</tr>
-	<tr>
-	    <td>Msg feed</td>
+	<tr id="msgfeed">
+	    <td>Msg-Feed</td>
 	    <td><a href="#msg_feed">DMS messages</a></td>
 	    <td>HTTP</td>
 	    <td>N/A</td>
 	</tr>
-	<tr>
-	    <td>Incident feed</td>
+	<tr id="incfeed">
+	    <td>Inc-Feed</td>
 	    <td><a href="#inc_feed">Incidents</a></td>
 	    <td>HTTP</td>
-	    <td>N/A</td>
-	</tr>
-	<tr>
-	    <td>GPS RedLion</td>
-	    <td><a href="#gps">GPS</a></td>
-	    <td>TCP</td>
 	    <td>N/A</td>
 	</tr>
 </table>
 <p/>
 
-<h4 id="msg_feed">DMS Msg Feed Protocol</h4>
+<h4 id="msg_feed">DMS Message Feed Protocol</h4>
 <p>
-	The "msg feed" protocol can be used to interface IRIS with an external
-	system that generates <a href="#dms">DMS</a> messages.
+	The <b>Msg-Feed</b> protocol can be used to interface IRIS with an
+	external system that generates <a href="#dms">DMS</a> messages.
 	Periodically, IRIS will poll the URI (using HTTP) for DMS messages.
 	The external system should respond with an ASCII text file, with one
 	line per message to be deployed.
@@ -1504,32 +1510,10 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	message feeds must contain a blank MULTI for each DMS. 
 </p>
 
-<h4 id="din_relay">DIN Relay</h4>
-<p>
-	DIN relay is a product by DLI which allows simple devices to be turned
-	on of off through an HTTP (web) interface.
-	Each device can control up to 8 outlets, which for a
-	<a href="#dlcs">DLCS</A> means 2 lanes with 3 indications each.
-</p>
-
-<h4 id="cbw">Control By Web</h4>
-<p>
-	Control By Web is a web-based relay controller made by Xytronix.
-	It can be used to control <a href="#beacons">beacon</a> devices.
-</p>
-<p>
-	HTTP Basic Authentication can be used to connect with the
-	<a href="#controllers">controller</a> if enabled on the setup page of the
-	device (setup.html).
-	To allow IRIS to authenticate, the <a href="#ctrl_pwd">password</a>
-	field must have <i>none:</i> prepended to the actual password (user name
-	"none").
-</p>
-
 <h4 id="inc_feed">Incident Feed Protocol</h4>
 <p>
-	The "inc feed" protocol can be used to interface IRIS with an external
-	system that generates <a href="#incident_management">incidents</a>.
+	The <b>Inc-Feed</b> protocol can be used to interface IRIS with an
+	external system that generates <a href="#incident">incidents</a>.
 	Periodically, IRIS will poll the URI (using HTTP) for incidents.
 	The external system should respond with an ASCII text file, with one
 	line per active incident.
@@ -1581,12 +1565,20 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	Some protocols allow or require authentication.
 	The controller <b>Password</b> field is used to enter this
 	authentication data.
-	For example, NTCIP requires the use of an SNMP "community" name.
+	For example, <a href="#ntcip">NTCIP</a> requires the use of an SNMP
+	"community" name.
 	If no controller password is selected, IRIS will use "Public" for the
 	community name.
 	Web-based devices may require HTTP Basic Authentication.
 	For these types of devices, the password field should contain both the
 	user name and password, separated by a colon (<i>user:password</i>).
+</p>
+<p>
+	For the <a href="#cbw">CBW</a> protocol, HTTP Basic Authentication can
+	be used to connect with the <a href="#controllers">controller</a> if
+	enabled on the setup page of the device (setup.html).
+	To allow IRIS to authenticate, the password field must have <i>none:</i>
+	prepended to the actual password (user name "none").
 </p>
 
 <h4 id="io_pins">I/O Pins</h4>
@@ -1604,21 +1596,26 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	</tr>
 	<tr>
 	    <td><a href="#dms">DMS</a>, <a href="#ilcs">ILCS</a></td>
-	    <td>NTCIP (A, B, C), DMS XML</td>
+	    <td><a href="#ntcip">NTCIP</a>, <a href="#dms_xml">DMS-XML</a></td>
 	    <td>1</td>
 	</tr>
 	<tr>
 	    <td rowspan="2"><a href="#dlcs">DLCS</a></td>
-	    <td>MnDOT 170 (4, 5)</td>
+	    <td><a href="#mndot170">MnDOT-170</a></td>
 	    <td>19 - 36</td>
 	</tr>
 	<tr>
-	    <td><a href="#din_relay">DIN Relay</a></td>
+	    <td><a href="#dinrelay">DIN-Relay</a></td>
 	    <td>1 - 8</td>
 	</tr>
 	<tr>
 	    <td><a href="#cameras">Camera</a></td>
-	    <td>Pelco D, Manchester, Vicon, Infinova, Cohu</td>
+	    <td><a href="#pelcod">Pelco-D</a>,
+	        <a href="#manchester">Manchester</a>,
+	        <a href="#vicon">Vicon</a>,
+	        <a href="#cohu">Cohu</a>,
+	        <a href="#infinova">Infinova</a>
+	    </td>
 	    <td>1</td>
 	</tr>
 	<tr>
@@ -1627,44 +1624,52 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>1 - 16</td>
 	</tr>
 	<tr>
-	    <td rowspan="4"><a href="#vds">VDS</a></td>
-	    <td>MnDOT 170 (4, 5)</td>
+	    <td rowspan="6"><a href="#vds">VDS</a></td>
+	    <td><a href="#mndot170">MnDOT-170</a></td>
 	    <td>39 - 62</td>
 	</tr>
 	<tr>
-	    <td>Canoga</td>
-	    <td>1 - 4</td>
-	</tr>
-	<tr>
-	    <td>SS105, SS125</td>
+	    <td><a href="#ss105">SS105</a>, <a href="#ss125">SS125</a></td>
 	    <td>1 - 8</td>
 	</tr>
 	<tr>
-	    <td>RTMS G4</td>
+	    <td><a href="#g4">G4</a></td>
 	    <td>1 - 12</td>
 	</tr>
 	<tr>
+	    <td><a href="#canoga">Canoga</a></td>
+	    <td>1 - 4</td>
+	</tr>
+	<tr>
+	    <td><a href="#dr500">DR-500</a></td>
+	    <td>1</td>
+	</tr>
+	<tr>
+	    <td><a href="#dxm">DXM</a></td>
+	    <td>11 - 86</td>
+	</tr>
+	<tr>
 	    <td><a href="#ramp_meters">Ramp Meter</a></td>
-	    <td>MnDOT 170 (4, 5)</td>
+	    <td><a href="#mndot170">MnDOT-170</a></td>
 	    <td>2 or 3</td>
 	</tr>
 	<tr>
 	    <td><a href="#gate_arms">Gate Arm</a></td>
-	    <td>STC</td>
+	    <td><a href="#stc">STC</a></td>
 	    <td>1</td>
 	</tr>
 	<tr>
 	    <td><a href="#tag_readers">Tag Reader</a></td>
-	    <td>E6</td>
+	    <td><a href="#e6">E6</a></td>
 	    <td>1</td>
 	</tr>
 	<tr>
 	    <td rowspan="3"><a href="#beacons">Beacon</a></td>
-	    <td>MnDOT 170 (4, 5)</td>
+	    <td><a href="#mndot170">MnDOT-170</a></td>
 	    <td>2</td>
 	</tr>
 	<tr>
-	    <td><a href="#din_relay">DIN Relay</a></td>
+	    <td><a href="#dinrelay">DIN-Relay</a></td>
 	    <td>1 - 8</td>
 	</tr>
 	<tr>
@@ -1673,7 +1678,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	</tr>
 	<tr>
 	    <td><a href="#rwis">RWIS</a></td>
-	    <td>Org 815, SSI</td>
+	    <td><a href="#org815">Org-815</a>, <a href="#ssi">SSI</a></td>
 	    <td>1</td>
 	</tr>
 </table>
@@ -2217,47 +2222,42 @@ FIXME
 	    <th>Binning</th>
 	</tr>
 	<tr>
-	    <th>NTCIP</th>
+	    <th><a href="#ntcip">NTCIP</a></th>
 	    <td>Count, Occupancy</td>
 	    <td>0-255 seconds</td>
 	</tr>
 	<tr>
-	    <th>MnDOT 170 4</th>
+	    <th><a href="#mndot170">MnDOT-170</a></th>
 	    <td>Count, Occupancy</td>
 	    <td>30 seconds</td>
 	</tr>
 	<tr>
-	    <th>MnDOT 170 5</th>
-	    <td>Count, Occupancy</td>
-	    <td>30 seconds</td>
-	</tr>
-	<tr>
-	    <th>Canoga</th>
-	    <td>Timestamp, Speed (double loops)</td>
-	    <td>N/A (vehicle logging)</td>
-	</tr>
-	<tr>
-	    <th>SS105</th>
+	    <th><a href="#ss105">SS105</a></th>
 	    <td>Count, Occupancy, Speed, Classification</td>
 	    <td>5 seconds to 1 month</td>
 	</tr>
 	<tr>
-	    <th>SS125</th>
+	    <th><a href="#ss125">SS125</a></th>
 	    <td>Count, Occupancy, Speed, Classification</td>
 	    <td>5 seconds to 1 month (?)</td>
 	</tr>
 	<tr>
-	    <th>RTMS G4</th>
+	    <th><a href="#g4">G4</a></th>
 	    <td>Count, Occupancy, Speed, Classification</td>
 	    <td>10 seconds to 1 hour</td>
 	</tr>
 	<tr>
-	    <th>DR-500</th>
+	    <th><a href="#canoga">Canoga</a></th>
+	    <td>Timestamp, Speed (double loops)</td>
+	    <td>N/A (vehicle logging)</td>
+	</tr>
+	<tr>
+	    <th><a href="#dr500">DR-500</a></th>
 	    <td>Speed</td>
 	    <td>1-5? minutes</td>
 	</tr>
 	<tr>
-	    <th>DXM</th>
+	    <th><a href="#dxm">DXM</a></th>
 	    <td>Magnetic Field</td>
 	    <td>N/A (presence)</td>
 	</tr>
@@ -2423,11 +2423,12 @@ FIXME
 	Dedicated keyboards are supported for easier camera control.
 	These keyboards have joysticks for <a href="#ptz">pan / tilt / zoom</a>
 	control.
-	Two protocols are supported: Pelco-P and Panasonic CU-950.
+	Two protocols are supported: <a href="#pelcop">Pelco-P</a> and
+	Panasonic CU-950.
 </p>
 <p>
-	To configure a Pelco-P keyboard, a comm link using the pelcop protocol
-	must be created.
+	To configure a <a href="#pelcop">Pelco-P</a> keyboard, a comm link using
+	the pelcop protocol must be created.
 	One active controller must exist on that comm link.
 	IRIS will initiate a TCP connection to connect to the keyboard --
 	typically, this will be managed by an ethernet-to-serial device.
@@ -2636,10 +2637,10 @@ FIXME
 	Sometimes, they are called <b>flashers</b> or <b>wig-wags</b>.
 	Internal and external beacons are supported.
 	Internal beacons are controlled through the DMS controller, are
-	activated through the NTCIP DMS protocol and are considered part of the
-	DMS.
-	External beacons use dedicated controllers and protocols (e.g. MnDOT
-	170 4, MnDOT 170 5).
+	activated through the <a href="#ntcip">NTCIP</a> DMS protocol and are
+	considered part of the DMS.
+	External beacons use dedicated controllers and protocols (e.g.
+	<a href="#mndot170">MnDOT-170</a>).
 </p>
 
 <h3 id="alarms">Alarms</h3>
@@ -2657,8 +2658,8 @@ FIXME
 	Column indicates the state of each alarm, which can be Clear or
 	Triggered.
 	Alarms are created using the Alarm Form and can only be created for
-	controllers using a protocol driver that generate alarms.
-	For example, the MnDOT ramp meter drivers.
+	controllers using a protocol that generates alarms, such as
+	<a href="#mndot170">MnDOT-170</a>.
 </p>
 
 <h3 id="rwis">Road Weather Information Systems</h3>
@@ -2684,10 +2685,10 @@ FIXME
 	the associated GPS.
 	Once the GPS is enabled, it must be associated with a controller.
 	Its name will be the same as the DMS, with "_gps" appended.
-	For NTCIP, the GPS should be associated with the same controller as
-	the DMS (using pin 2).
-	For RedLion, a new comm link and controller must be created to
-	communicate with the modem.
+	For <a href="#ntcip">NTCIP</a>, the GPS should be associated with the
+	same controller as the DMS (using pin 2).
+	For <a href="#redlion">RedLion</a>, a new comm link and controller must
+	be created to communicate with the modem.
 </p>
 <p>
 	The GPS will be polled once every 5 minutes, unless on a
@@ -2740,7 +2741,7 @@ FIXME
 	as a separate segment.
 </p>
 
-<h3 id="incident_management">Incident Management</h3>
+<h3 id="incident">Incident Management</h3>
 <p>
 	The <b>Incident</b> tab on the client interface is used to manage
 	incidents within IRIS.
@@ -3017,7 +3018,7 @@ FIXME
 	</tr>
 	<tr>
 	    <td>[feed<i>n</i>]</td>
-	    <td><a href="#msg_feed">Message feed</a></td>
+	    <td><a href="#msg_feed">Msg-Feed</a></td>
 	</tr>
 	<tr>
 	    <td>[pa<i>i</i>,<i>l</i>,<i>c</i>]</td>
@@ -3400,11 +3401,11 @@ FIXME
 	</tr>
 	<tr>
 	    <td>canoga</td>
-	    <td>Canoga detector protocol</td>
+	    <td><a href="#canoga">Canoga</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>cbw</td>
-	    <td>Control By Web protocol</td>
+	    <td><a href="#cbw">CBW</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>device</td>
@@ -3412,31 +3413,31 @@ FIXME
 	</tr>
 	<tr>
 	    <td>dinrelay</td>
-	    <td>Din-relay protocol</td>
+	    <td><a href="#dinrelay">DIN-Relay</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>dmsxml</td>
-	    <td>DMS-XML protocol</td>
+	    <td><a href="#dms_xml">DMS-XML</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>e6</td>
-	    <td>E6 tag reader protocol</td>
+	    <td><a href="#e6">E6</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>e6_pkt</td>
-	    <td>E6 tag reader protocol packets</td>
+	    <td><a href="#e6">E6</a> protocol packets</td>
 	</tr>
 	<tr>
 	    <td>feed</td>
-	    <td>Msgfeed protocol</td>
+	    <td><a href="#msg_feed">Msg-Feed</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>g4</td>
-	    <td>G4 detector protocol</td>
+	    <td><a href="#g4">G4</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>infinova</td>
-	    <td>Infinova PTZ protocol</td>
+	    <td><a href="#infinova">Infinova</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>kadaptive</td>
@@ -3444,7 +3445,7 @@ FIXME
 	</tr>
 	<tr>
 	    <td>manchester</td>
-	    <td>Manchester PTZ protocol</td>
+	    <td><a href="#manchester">Manchester</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>meter</td>
@@ -3452,7 +3453,7 @@ FIXME
 	</tr>
 	<tr>
 	    <td>mndot170</td>
-	    <td>MnDOT protocol</td>
+	    <td><a href="#mndot170">MnDOT-170</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>modem</td>
@@ -3460,15 +3461,15 @@ FIXME
 	</tr>
 	<tr>
 	    <td>ntcip</td>
-	    <td>NTCIP protocols</td>
+	    <td><a href="#ntcip">NTCIP</a> protocols</td>
 	</tr>
 	<tr>
 	    <td>org815</td>
-	    <td>ORG-815 rain guage protocol</td>
+	    <td><a href="#org815">ORG-815</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>pelcod</td>
-	    <td>Pelco-D PTZ protocol</td>
+	    <td><a href="#pelcod">Pelco-D</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>polling</td>
@@ -3512,11 +3513,11 @@ FIXME
 	</tr>
 	<tr>
 	    <td>ssi</td>
-	    <td>SSI weather protocol</td>
+	    <td><a href="#ssi">SSI</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>stc</td>
-	    <td>SmartTouch Controller gate arm protocol</td>
+	    <td><a href="#stc">STC</a> protocol</td>
 	</tr>
 	<tr>
 	    <td>sys_attr</td>
