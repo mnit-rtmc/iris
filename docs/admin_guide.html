@@ -2126,26 +2126,22 @@ FIXME
 
 <h3 id="vds">Vehicle Detection Systems</h3>
 <p>
-	There are several types of <b>vehicle detection systems</b> (VDS)
-	&mdash; also called <b>traffic sensing systems</b>.
-	The oldest of these is the inductive loop detector, which is a
-	wire placed under the surface of the road.
-	Another type of sensor uses radar mounted on the side of the road.
-	This type is <b>non-intrusive</b>, since the road surface does not need
-	to be cut to install the detector.
-	A third type &ndash; also non-intrusive &ndash; is video detection.
-	These systems use video cameras and computer vision software to
-	detect vehicles.
+	There are several types of <b>vehicle detection systems</b> (VDS).
+	The earliest of these is the <b>inductive loop</b>, which is a wire
+	looped under the road surface.
+	Some systems use <b>radar</b> mounted on the side of the road.
+	<b>Video detection</b> uses a camera and computer vision software.
+	Collectively, these systems are simply called <b>detectors</b>.
 </p>
 <h4>Traffic Data</h4>
 <p>
-	Traffic data is normally collected in fixed time intervals, and put
+	Most detectors sample traffic data in fixed time intervals and put it
 	into bins.
-	IRIS can store these types of binned sample data:
+	IRIS can store four types of binned traffic data:
 </p>
 <dl>
 	<dt>Vehicle Count</dt>
-	<dd>The number of vehicles detected</dd>
+	<dd>Number of vehicles detected</dd>
 	<dt>Occupancy</dt>
 	<dd>Percent of time a vehicle occupied the detection zone</dd>
 	<dt>Speed</dt>
@@ -2153,30 +2149,41 @@ FIXME
 	<dt>Vehicle Classification</dt>
 	<dd>Number of vehicles of each classification
 	    <ul>
-	    <li>motorcycle (up to 7')</li>
-	    <li>small (7 to 20')</li>
-	    <li>medium (20 to 43')</li>
-	    <li>large (43' or longer)</li>
+	    <li>motorcycle &mdash; up to 7'</li>
+	    <li>small &mdash; 7 to 20'</li>
+	    <li>medium &mdash; 20 to 43'</li>
+	    <li>large &mdash; 43' or longer</li>
 	    </ul>
 	</dd>
 </dl>
 <p>
-	Some detectors can log information about each detected vehicle,
-	such as speed and classification.
+	Instead of binning, some detectors can record a <b>vehicle log</b>,
+	with information about each detected vehicle, such as speed and
+	classification.
 </p>
-<h4>VDS Configuration</h4>
+<h4>Detector Configuration</h4>
 <p>
 	To create a detector, first select the <a href="#r_node">r_node</a>
-	at the location of the detector.
-	Then, select the <b>Detectors</b> tab for the r_node.
-	Type the detector name in the text entry widget just above the
-	<b>Create</b> button, and press that button.
-	After selecting the new detector in the r_node detector table,
-	its properties, such as <b>lane type</b> and <b>lane #</b> can be
-	changed.
+	at the proper location.
+	Then select the <b>Detectors</b> tab for that r_node.
+	Enter the detector <b>Name</b> and press the <b>Create</b> button.
+</p>
+<p>
+	After selecting a detector in the r_node detector table, its properties,
+	such as <b>lane type</b> and <b>lane #</b> can be changed.
 	In IRIS, lanes are numbered from right-to-left, starting with the
 	right lane as 1.
+	If a detector is no longer used, it can be marked <b>abandoned</b>.
+	A faulty detector can be marked <b>force fail</b> to manually disable
+	it &mdash; preventing its data from being used for travel time, ramp
+	metering, etc.
 </p>
+<p>
+	The <b>field length</b> of a detector determines how density and speed
+	are estimated from counts and occupancy.
+	It is in units of feet.
+</p>
+<h5>Fake Detectors</h5>
 <p>
 	When a detector fails, <b>fake</b> data may be used for flow, speed
 	and density.
@@ -2184,6 +2191,18 @@ FIXME
 	the fake data.
 	To do this, put the detector ID(s) in the <b>fake</b> field (separated
 	by spaces).
+</p>
+<h5>Detector Transfer</h5>
+<p>
+	It is possible to move a detector to another r_node.
+	Select the target r_node and enter the detector <b>Name</b>.
+	The current label for that detector will appear on the right.
+	To move it to the current r_node, press the <b>Transfer</b> button.
+</p>
+<h5>Auto Fail</h5>
+<p>
+	<b>Auto fail</b> is similar to force fail, except that it is marked and
+	cleared automatically by IRIS.
 </p>
 
 <h4>VDS Protocols</h4>
