@@ -32,7 +32,7 @@
     <h3><a href="#client_properties">Client Properties</a></h3>
     <h3><a href="#user_properties">User Properties</a></h3>
     <h3><a href="#edit_mode">Edit Mode</a></h3>
-    <h3><a href="#system_attributes">System Attributes</a></h3>
+    <h3><a href="#sys_attr">System Attributes</a></h3>
     <h3><a href="#users_and_roles">Users and Roles</a></h3>
     <h3><a href="#mapping">Mapping</a></h3>
     <h3><a href="#road_topology">Road Topology</a></h3>
@@ -622,7 +622,7 @@ systemctl status iris</pre>
 	associated with the <a href="#users_and_roles">user's role</a>.
 </p>
 
-<h3 id="system_attributes">System Attributes</h3>
+<h3 id="sys_attr">System Attributes</h3>
 <aside>
 	Select <span class="menu">View ➔ System ➔ System Attributes</span> menu
 	item
@@ -633,7 +633,8 @@ systemctl status iris</pre>
 	Each system attribute has a corresponding type: string, boolean,
 	integer or floating point number.
 	String values are limited to 64 characters or less.
-	Boolean values must be specified as either "true" or "false".
+	Boolean values must be specified as either <code>true</code> or
+	<code>false</code>.
 	Many numeric system attributes are constrained to a range of values
 	within a minimum and maximum bound, depending on the attribute.
 	A system attribute can be customized by updating the value in the table
@@ -1241,8 +1242,6 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	A <b>comm link</b> is a network connection to an external device or
 	system.
 	IRIS is capable of supporting hundreds of simultaneous comm links.
-	Each comm link has a number of attributes, including <b>URI</b> and
-	<b>protocol</b>.
 </p>
 <p>
 	The URI includes a DNS host name or network IP address, and port number,
@@ -1255,10 +1254,10 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	(instead of the default UDP), prepend <code>tcp://</code> to the URI.
 </p>
 <p>
-	The protocol determines what type of device or system is on the other
+	<b>Protocol</b> determines what type of device or system is on the other
 	end of the comm link.
 	The following table contains the communication protocols supported by
-	IRIS.
+	IRIS:
 </p>
 <table id="prot_table">
 	<tr>
@@ -1481,6 +1480,14 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	</tr>
 </table>
 <p/>
+<p id="poll_period">
+	Poll <b>period</b> determines how frequently controllers on a comm
+	link are polled.
+	It can range from 5 seconds to 24 hours.
+	After a poll, if a response is not received before the <b>timeout</b>
+	expires, the communicaton will fail.
+	For each poll, 2 retries will happen before the operation is aborted.
+</p>
 
 <h4 id="msg_feed">DMS Message Feed Protocol</h4>
 <p>
@@ -1503,8 +1510,8 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	three-line MULTI message.
 	The expiration field indicates the date and time that the message
 	should expire.
-	It is in "yyyy-MM-dd HH:mm:ssZ" format, which includes date, time and
-	time zone.
+	It is in <code>yyyy-MM-dd HH:mm:ssZ</code> format, which includes date,
+	time and time zone.
 	A valid expiration time would be 2012-05-15 11:37:00-0600.
 </p>
 <p>
@@ -1516,8 +1523,8 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	The DMS action must be associated with a <a href="#quick_msg">quick
 	message</a> that references the message feed, using a <b>feed</b>
 	<a href="#action_tag">action tag</a>.
-	So, if the message feed is on a Comm Link called "LFEED", then the
-	quick message MULTI string must be "[feedLFEED]".
+	So, if the message feed is on a Comm Link called <code>LFEED</code>,
+	then the quick message MULTI string must be <code>[feedLFEED]</code>.
 	Also, the action plan must be active and deployed.
 	This requirement allows only administrator-approved DMS to be controlled
 	by the message feed.
@@ -1530,9 +1537,8 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	In some circumstances, it may be appropriate to disable this checking.
 	For example, if the message feed host is fully trusted and there is no
 	possibility of man-in-the-middle attacks between IRIS and the feed host.
-	In this case the <code>msg_feed_verify</code>
-	<a href="#system_attributes">system attribute</a> can be set to
-	<code>false</code> to disable this check.
+	In this case <a href="#sys_attr"><code>msg_feed_verify</code></a> can be
+	set to <code>false</code> to disable this check.
 </p>
 <p>
 	To control DMS beacon activation through a message feed,
@@ -1572,10 +1578,10 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	A <b>controller</b> is an end-point for a <a href="#comm_links">comm
 	link</a>.
 	Each controller can have one or more associated <a href="#devices">
-	devices</a>, depending on the protocol.
-	Sometimes a controller represents a separate physical "box", which is
-	connected to devices, and other times the controller may be embedded
-	within the device.
+	devices</a>, depending on the <a href="#prot_table">protocol</a>.
+	Sometimes a controller represents a separate physical <em>box</em>,
+	which is connected to devices, and other times the controller may be
+	embedded within the device.
 	In any case, IRIS requires a controller for any communication to a
 	device.
 	Controllers can be assigned to a <b>cabinet</b>, which has location
@@ -1584,35 +1590,36 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 
 <h4 id="drop_address">Drop Address</h4>
 <p>
-	Some protocols support <b>multi-drop</b> addressing, and others are
-	<b>single-drop</b> only.
+	Some <a href="#prot_table">protocols</a> support <b>multi-drop</b>
+	addressing, while others are <b>single-drop</b> only.
 	Multi-drop addressing allows multiple controllers to share the same
-	comm link.
-	It is typically used with serial communication protocols.
-	Each controller is assigned a unique (to the comm link) drop address,
-	which is used to route all messages sent to the controller.
+	<a href="#comm_links">comm link</a> &mdash; typically for serial
+	communication.
+	Each controller must be assigned a unique (to the comm link) drop
+	address, which is used to route all messages sent to the controller.
 	For single-drop protocols, the drop address is ignored.
 </p>
 
 <h4 id="ctrl_pwd">Controller Password</h4>
 <p>
-	Some protocols allow or require authentication.
-	The controller <b>Password</b> field is used to enter this
-	authentication data.
-	For example, <a href="#ntcip">NTCIP</a> requires the use of an SNMP
-	"community" name.
-	If no controller password is selected, IRIS will use "Public" for the
-	community name.
-	Web-based devices may require HTTP Basic Authentication.
-	For these types of devices, the password field should contain both the
-	user name and password, separated by a colon (<i>user:password</i>).
+	Authentication is supported or required by some communication protocols.
+	The controller <b>password</b> field is used to enter authentication
+	data.
 </p>
 <p>
-	For the <a href="#cbw">CBW</a> protocol, HTTP Basic Authentication can
-	be used to connect with the <a href="#controllers">controller</a> if
-	enabled on the setup page of the device (setup.html).
-	To allow IRIS to authenticate, the password field must have <i>none:</i>
-	prepended to the actual password (user name "none").
+	For <a href="#ntcip">NTCIP</a>, this represents the SNMP
+	<b>community</b> name.
+	If no controller password is set, the <code>Public</code> community name
+	will be used.
+</p>
+<p>
+	Web-based devices may require HTTP Basic Authentication.
+	For these types of devices, the password field should contain both the
+	user name and password, separated by a colon (<code>user:password</code>).
+	For <a href="#cbw">CBW</a>, the user name portion must be
+	<code>none</code>.
+	HTTP Basic Authentication can be enabled on the setup page of the
+	<a href="#cbw">CBW</a> device (setup.html).
 </p>
 
 <h4 id="io_pins">I/O Pins</h4>
@@ -2046,8 +2053,8 @@ FIXME
 
 <h4 id="ilcs">"Intelligent" Lane-use Control Signs (ILCS)</h4>
 <p>
-	An "intelligent" LCS is a full-matrix color <a href="#dms">DMS</a> which
-	is mounted directly over a lane of traffic.
+	An <em>intelligent</em> LCS is a full-matrix color <a href="#dms">DMS</a>
+	which is mounted directly over a lane of traffic.
 	In addition to being used as an LCS, it can display
 	<a href="#vsa">variable speed advisories</a>, or any operator-defined
 	message as a regular DMS.
@@ -2055,7 +2062,7 @@ FIXME
 
 <h4 id="dlcs">"Dumb" Lane-use Control Signs (DLCS)</h4>
 <p>
-	A "dumb" LCS device is much simpler than an ILCS.
+	A <em>dumb</em> LCS device is much simpler than an ILCS.
 	It can display one of a fixed set of indications &mdash; typically a
 	<i>green arrow</i> <span class="green">&nbsp;↓&nbsp;</span>, a
 	<i>yellow arrow</i> <span class="yellow">&nbsp;↓&nbsp;</span> or a
@@ -2131,7 +2138,7 @@ FIXME
 	and density.
 	In the simplest case, one or more detectors can be used to calculate
 	the fake data.
-	To do this, put the detector ID(s) in the <b>fake</b> field (separated
+	To do this, put the detector name(s) in the <b>fake</b> field (separated
 	by spaces).
 </p>
 <h5>Detector Transfer</h5>
@@ -2145,8 +2152,8 @@ FIXME
 <p>
 	<b>Auto fail</b> is similar to force fail, except it is marked and
 	cleared automatically.
-	The <code>detector_auto_fail_enable</code> <a href="#system_attributes">
-	system attribute</a> can be used to disable this feature.
+	This feature can be disabled with <a href="#sys_attr"><code>
+	detector_auto_fail_enable</code></a>.
 </p>
 <p>
 	There are four conditions which could trigger a detector to auto fail:
@@ -2171,8 +2178,10 @@ FIXME
 
 <h4>VDS Protocols</h4>
 <p>
-	IRIS supports several different protocols for communicating with
-	vehicle detection systems.
+	IRIS supports several different <a href="#prot_table">protocols</a> for
+	communicating with vehicle detection systems.
+	The protocol used depends on the <a href="#comm_links">comm link</a> of
+	the <a href="#controllers">controller</a> to which it is assigned.
 	The following table summarizes features of each protocol.
 </p>
 <table>
@@ -2219,7 +2228,10 @@ FIXME
 	    <td>Magnetic Field</td>
 	</tr>
 </table>
-<br/>
+<p>
+	For protocols which allow the binning intereval to be adjusted, it will
+	be set to the poll <a href="#poll_period">period</a> of the comm link.
+</p>
 <h4 id="vds_archiving">Traffic Data Archiving</h4>
 <p>
 	Every 30 seconds, an XML file is generated containing the most recent
@@ -2228,9 +2240,8 @@ FIXME
 	the <a href="#xml_output">XML output directory</a>
 </p>
 <p>
-	Sample data is archived only if the <code>sample_archive_enable</code>
-	<a href="#system_attributes">system attribute</a> is set to
-	<code>true</code>.
+	Sample data is archived only if <a href="#sys_attr"><code>
+	sample_archive_enable</code></a> is set to <code>true</code>.
 	Sample archive files are stored in <code>/var/lib/iris/traffic</code>,
 	in a directory with the district ID name.
 </p>
@@ -2385,15 +2396,15 @@ FIXME
 </p>
 <p>
 	To configure a <a href="#pelcop">Pelco-P</a> keyboard, a comm link using
-	the pelcop protocol must be created.
+	the <code>pelcop</code> protocol must be created.
 	One active controller must exist on that comm link, but no devices
 	are necessary.
-	IRIS will initiate a TCP connection to connect to the keyboard --
+	IRIS will initiate a TCP connection to connect to the keyboard &mdash;
 	typically, this will be managed by an ethernet-to-serial device.
 </p>
 <p>
-	For Panasonic CU-950 keyboards, the <code>camera_kbd_panasonic_enable</code>
-	<a href="#system_attributes">system attribute</a> must be enabled.
+	For Panasonic CU-950 keyboards, <a href="#sys_attr"><code>
+	camera_kbd_panasonic_enable</code></a> must be enabled.
 	This will cause IRIS to listen for connections on TCP port 7001.
 	The keyboard must be configured with the IRIS server's IP address.
 </p>
@@ -2416,8 +2427,8 @@ FIXME
 </p>
 <h4 id="monstream">MonStream</h4>
 <p>
-	MonStream is a full-screen video streaming application which runs on
-	low-cost Linux computers.
+	<b>MonStream</b> is a full-screen video streaming application which runs
+	on low-cost Linux computers.
 	IRIS can send switching messages to MonStream, creating a low-latency
 	IP video system.
 </p>
@@ -2450,8 +2461,8 @@ FIXME
 	available to all users.
 	Selecting a play list on a monitor will cause the play list to
 	automatically switch.
-	The interval is specified by the <code>camera_sequence_dwell_sec</code>
-	<a href="#system_attributes">system attribute</a>.
+	The interval is specified by <a href="#sys_attr"><code>
+	camera_sequence_dwell_sec</code></a>.
 </p>
 
 <h3 id="ramp_meters">Ramp Meters</h3>
@@ -2530,17 +2541,17 @@ FIXME
 <p>
 	If communication is lost to a gate arm, the state will be unknown by
 	IRIS.
-	After 90 seconds, it will be treated as <em>possibly open</em>, causing
+	After <a href="#sys_attr"><code>gate_arm_alert_timeout_secs</code></a>
+	(default 90), it will be treated as <em>possibly open</em>, causing
 	interlocks to be checked.
-	Also, an email will be sent to the address in the
-	<code>email_recipient_gate_arm</code>
-	<a href="#system_attributes">system attribute</a>.
+	Also, an email will be sent to the address in
+	<a href="#sys_attr"><code>email_recipient_gate_arm</code></a>.
 </p>
 <h4 id="gate_conflict">Conflicts</h4>
 <p>
 	If a <em>conflict</em> is detected, an <em>alert</em> email will be sent
-	to the address in the <code>email_recipient_gate_arm</code>
-	<a href="#system_attributes">system attribute</a>.
+	to the address in the <a href="#sys_attr"><code>email_recipient_gate_arm
+	</code></a>.
 	An <em>open conflict</em> exists when an <em>open interlock</em>
 	constraint is broken.
 	Similarly, a <em>close conflict</em> exists for <em>close interlock</em>
@@ -3093,9 +3104,9 @@ FIXME
 	If the tolling mode is <i>priced</i>, the tag will be replaced with the
 	calculated price, for example "2.75".
 	It will be the sum of prices for all specified toll zones.
-	Two <a href="#system_attributes">system attributes</a>,
-	<code>toll_min_price</code> and <code>toll_max_price</code>, limit the
-	calculated price.
+	The values of <a href="#sys_attr"><code>toll_min_price</code></a> and
+	<a href="#sys_attr"><code>toll_max_price</code></a> limit the calculated
+	price.
 </p>
 <p>
 	For <i>open</i> and <i>closed</i> modes, the tag will be replaced with
@@ -3181,8 +3192,7 @@ FIXME
 	vice versa.
 </p>
 <p>
-	Two <a href="#system_attributes">system attributes</a> control route
-	pathfinding:
+	Two <a href="#sys_attr">system attributes</a> control route pathfinding:
 </p>
 <dl>
 	<dt>route_max_legs</dt>
@@ -3230,9 +3240,8 @@ FIXME
 <p>
 	To prevent unreasonable messages from being displayed due to data
 	errors, a limit is calculated.
-	The total route length is divided by the
-	<code>travel_time_min_mph</code> <a href="#system_attributes">system
-	attribute</a> (default 15).
+	The total route length is divided by <a href="#sys_attr"><code>
+	travel_time_min_mph</code></a> (default 15).
 	The result, rounded up the to next 5 minutes, is the <b>travel time
 	limit</b>.
 </p>
@@ -3261,8 +3270,8 @@ FIXME
 	It uses two word lists: <b>Allowed</b> and <b>Banned</b>.
 </p>
 <p>
-	The <code>dict_allowed_scheme</code> <a href="#system_attributes">system
-	attribute</a> controls the allowed word functionality:
+	Allowed word checking is controlled by <a href="#sys_attr"><code>
+	dict_allowed_scheme</code></a>:
 </p>
 <dl>
 	<dt>0</dt>
@@ -3273,8 +3282,8 @@ FIXME
 	<dd>Reject messages containing words not in allowed list</dd>
 </dl>
 <p>
-	Similarly, <code>dict_banned_scheme</code> controls banned word
-	functionality:
+	Similarly, <a href="#sys_attr"><code>dict_banned_scheme</code></a>
+	controls banned word functionality:
 </p>
 <dl>
 	<dt>0</dt>
