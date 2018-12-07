@@ -646,14 +646,6 @@ systemctl status iris</pre>
 	described in more detail below.
 </p>
 
-<h4>map_segment_max_meters</h4>
-<p>
-	This is used for two distinct purposes: 1) specifying the maximum
-	distance between adjacent stations to draw segments on the map and
-	2) specifying the maximum distance from a station to another downstream
-	station for associating density, speed, etc. data with a segment.
-</p>
-
 <h3 id="users_and_roles">Users and Roles</h3>
 <aside>
 	Select <span class="menu">View ➔ System ➔ Users and Roles</span>
@@ -1023,7 +1015,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	would automatically link to an entrance onto Eastbound road B from
 	Northbound road A.
 </p>
-<h4>Road Setup</h4>
+<h4 id="roads">Road Setup</h4>
 <aside>
 	Select <span class="menu">View ➔ System ➔ Roads</span> menu item
 </aside>
@@ -1041,7 +1033,8 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	Other road attributes can be changed here.
 	The second column is <b>Abbrev</b>, which is an abbreviation of the
 	road name (up to 6 characters).
-	This is used for labeling detectors and stations.
+	This is used for labeling <a href="#vds">detectors</a> and
+	<a href="#station">stations</a>.
 </p>
 <p>
 	The <b>Road Class</b> determines the presentation of the road on the
@@ -1095,10 +1088,12 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
         <th>Node Type</th>
         <th>Description</th>
       </tr>
-      <tr>
+      <tr id="station">
         <td>0</td>
         <td>station</td>
-        <td>Mainline detector station or shape node</td>
+        <td>Mainline detector station or shape node &mdash; can be assigned a
+            <a href="#station_id">station ID</a>
+        </td>
       </tr>
       <tr>
 	<td>1</td>
@@ -1191,10 +1186,9 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
       lane along the entire corridor.
   </dd>
   <dt id='station_id'>station_id</dt>
-  <dd>The station_id is a unique identifier for the detectors associated with
-      the r_node.
-      It is displayed on the <a href="#traffic_layer">traffic layer</a>, and is
-      also used for identifying travel time destinations.
+  <dd>A unique identifier for the <a href="#vds">detectors</a> associated with a
+      <a href="#station">station</a> r_node.
+      It is displayed on the <a href="#traffic_layer">traffic layer</a>.
   </dd>
   <dt id='speed_limit'>speed_limit</dt>
   <dd>This is the posted speed limit at the r_node.
@@ -2082,6 +2076,7 @@ FIXME
 	<b>Video detection</b> uses a camera and computer vision software.
 	Collectively, these systems are simply called <b>detectors</b>.
 </p>
+
 <h4>Traffic Data</h4>
 <p>
 	Most detectors sample traffic data in fixed time intervals and put it
@@ -2110,7 +2105,8 @@ FIXME
 	with information about each detected vehicle, such as speed and
 	classification.
 </p>
-<h4>Detector Configuration</h4>
+
+<h4>Detector Setup</h4>
 <p>
 	To create a detector, first select the <a href="#r_node">r_node</a>
 	at the proper location.
@@ -2122,61 +2118,17 @@ FIXME
 	such as <b>lane type</b> and <b>lane #</b> can be changed.
 	In IRIS, lanes are numbered from right-to-left, starting with the
 	right lane as 1.
-	If a detector is no longer used, it can be marked <b>abandoned</b>.
-	A faulty detector can be marked <b>force fail</b> to manually disable
-	it &mdash; preventing its data from being used for travel time, ramp
-	metering, etc.
+	A <b>label</b> will be created from this information, including
+	abbreviations of the <a href="#roads">roads</a> associated with the
+	<a href="#r_node">r_node</a>.
 </p>
 <p>
 	The <b>field length</b> of a detector determines how density and speed
 	are estimated from counts and occupancy.
 	It is in units of feet.
 </p>
-<h5>Fake Detectors</h5>
-<p>
-	When a detector fails, <b>fake</b> data may be used for flow, speed
-	and density.
-	In the simplest case, one or more detectors can be used to calculate
-	the fake data.
-	To do this, put the detector name(s) in the <b>fake</b> field (separated
-	by spaces).
-</p>
-<h5>Detector Transfer</h5>
-<p>
-	It is possible to move a detector to another r_node.
-	Select the target r_node and enter the detector <b>Name</b>.
-	The current label for that detector will appear on the right.
-	To move it to the current r_node, press the <b>Transfer</b> button.
-</p>
-<h5>Auto Fail</h5>
-<p>
-	<b>Auto fail</b> is similar to force fail, except it is marked and
-	cleared automatically.
-	This feature can be disabled with <a href="#sys_attr"><code>
-	detector_auto_fail_enable</code></a>.
-</p>
-<p>
-	There are four conditions which could trigger a detector to auto fail:
-</p>
-<dl>
-	<dt>no hits</dt>
-	<dd>No vehicles counted for a duration determined by lane type</dd>
-	<dt>chatter</dt>
-	<dd>Unreasonably high vehicle count</dd>
-	<dt>locked on</dt>
-	<dd>Occupancy at 100% for a duration determined by lane type</dd>
-	<dt>no change</dt>
-	<dd>No change in occupancy for 24 hours</dd>
-</dl>
-<p>
-	When an auto fail condition occurs and once every hour that it
-	persists, an event is logged in the <code>detector_event</code> database
-	table.
-	The <code>detector_auto_fail_view</code> can be used to check recent
-	detector auto fail activity.
-</p>
 
-<h4>VDS Protocols</h4>
+<h4>Detector Protocols</h4>
 <p>
 	IRIS supports several different <a href="#prot_table">protocols</a> for
 	communicating with vehicle detection systems.
@@ -2232,6 +2184,61 @@ FIXME
 	For protocols which allow the binning intereval to be adjusted, it will
 	be set to the poll <a href="#poll_period">period</a> of the comm link.
 </p>
+
+<h4>Configuration Changes</h4>
+<p>
+	It is possible to move a detector to another r_node.
+	Select the target r_node and enter the detector <b>Name</b>.
+	The current label for that detector will appear on the right.
+	To move it to the current r_node, press the <b>Transfer</b> button.
+</p>
+<p>
+	If a detector is no longer used, it can be marked <b>abandoned</b>.
+</p>
+
+<h4>Detector Failure</h4>
+<p>
+	IRIS checks traffic data continuously for common detector failures.
+	These are some possible problems:
+</p>
+<dl>
+	<dt>no hits</dt>
+	<dd>No vehicles counted for a duration determined by lane type</dd>
+	<dt>chatter</dt>
+	<dd>Unreasonably high vehicle count</dd>
+	<dt>locked on</dt>
+	<dd>Occupancy at 100% for a duration determined by lane type</dd>
+	<dt>no change</dt>
+	<dd>No change in occupancy for 24 hours</dd>
+</dl>
+<p>
+	When one of these conditions first occurs and every hour that it
+	persists, an event is logged in the <code>detector_event</code> database
+	table.
+	The <code>detector_auto_fail_view</code> can be used to check recent
+	events.
+</p>
+<p>
+	If <a href="#sys_attr"><code>detector_auto_fail_enable</code></a> is
+	<code>true</code>, the <b>auto fail</b> flag is set and cleared when
+	these problems come and go.
+</p>
+<p>
+	If a detector has a fault which is not handled automatically, it can be
+	<b>force failed</b>.
+	This flag is only set manually, so it must be cleared once the failure
+	is corrected.
+</p>
+<p>
+	When a detector is failed (<b>auto fail</b> or <b>force fail</b>), its
+	data will not be used for <a href="#travel_time">travel time</a>,
+	<a href="#ramp_meters">ramp metering</a>, etc.
+	In that case, <b>fake</b> detection could be used &mdash; this field can
+	contain one or more other detector names, separated by spaces.
+	The average density or speed of those detectors (which are not also
+	failed) will be used instead.
+</p>
+
 <h4 id="vds_archiving">Traffic Data Archiving</h4>
 <p>
 	Every 30 seconds, an XML file is generated containing the most recent
@@ -2674,8 +2681,8 @@ FIXME
 	The IRIS client user interface includes a traffic map layer which is
 	created automatically from the <a href="#road_topology">road
 	topology</a>.
-	By default, this "segment" layer uses traffic <b>density</b> to
-	determine the color of each segment in the layer.
+	By default, this layer uses traffic <b>density</b> to determine the
+	color of each <b>segment</b>.
 	Other themes are available for <b>speed</b> and <b>flow</b>.
 	The <b>Legend</b> menu at the top of the map can be used to view
 	the thresholds used for each color in a theme.
@@ -2684,9 +2691,9 @@ FIXME
 	Every 30 seconds, the client will make an HTTP request for the current
 	traffic sample data XML file.
 	The URL to locate that file is declared as a property in the
-	/etc/iris/iris-client.properties file (on the IRIS server).
-	The property is tdxml.detector.url, and it should point to the location
-	of <a href="#vds_archiving">det_sample.xml.gz</a>, as made
+	<code>/etc/iris/iris-client.properties</code> file (on the IRIS server).
+	The property is <code>tdxml.detector.url</code>, and it should point to
+	the location of <a href="#vds_archiving">det_sample.xml.gz</a>, as made
 	available by apache on the IRIS server.
 </p>
 <p>
@@ -2694,10 +2701,18 @@ FIXME
 	map zoom level.
 	If the zoom level is below 10, the layer will not be visible.
 	At zoom levels 10 through 13, the layer will display segments as
-	aggregate of all detectors in each mainline station.
-	At zoom level 14 or above, each mainline detector will be displayed
-	as a separate segment.
+	aggregate of all detectors in each mainline
+	<a href="#station">station</a>.
+	At zoom level 14 or above, each mainline <a href="#vds">detector</a>
+	will be displayed as a separate segment.
 </p>
+<p>
+	The maximum distance between adjacent <a href="#station">stations</a> to
+	draw segments on the map is specified by <a href="#sys_attr"><code>
+	map_segment_max_meters</code></a>.
+	It is also the maximum downstream distance for associating station data
+	with a segment.
+</ol>
 
 <h3 id="incident">Incident Management</h3>
 <p>
@@ -3074,7 +3089,8 @@ FIXME
 	Select <span class="menu">View ➔ Lane Use ➔ Toll Zones</span> menu item
 </aside>
 <p>
-	A toll zone is a segment of roadway between two stations.
+	A toll zone is a segment of roadway between two
+	<a href="#station">stations</a>.
 	All HOT lane detectors between the starting station and ending station
 	can be used to calculate the toll.
 	Every 3 minutes, tolls are calculated using data from the most recent 6
@@ -3137,7 +3153,8 @@ FIXME
 <h3 id="travel_time">Travel Time Estimation</h3>
 <p>
 	The current <b>travel time</b> from a <a href="#dms">DMS</a> to a
-	downstream station can be estimated and displayed on the sign.
+	downstream <a href="#station">station</a> can be estimated and displayed
+	on the sign.
 	A new estimate is made every 30 seconds, based on speed data from
 	<a href="#vds">vehicle detection systems</a>.
 </p>
@@ -3179,7 +3196,7 @@ FIXME
 	This feature requires that the <a href="#road_topology">road topology
 	</a> is configured for the entire route.
 	Using this topology, the shortest route is found from the DMS to the
-	destination station.
+	destination <a href="#station">station</a>.
 	A route consists of one or more <b>corridor trips</b>.
 	Each corridor trip has an <b>origin</b> and a <b>destination</b>, which
 	are r_nodes associated with a single freeway corridor.
@@ -3205,7 +3222,8 @@ FIXME
 <p>
 	To deal with sampling problems at low speeds, a <b>smoothing</b>
 	procedure is used.
-	For each station, <b>running average</b> and <b>running minimum</b>
+	For each <a href="#station">station</a>, <b>running average</b> and
+	<b>running minimum</b>
 	speeds are calculated from all valid detectors in the station.
 	If a speed higher than the <a href="#speed_limit">speed limit</a> is
 	recorded, the speed limit is used instead.
@@ -3332,8 +3350,8 @@ FIXME
 	</tr>
 	<tr>
 	    <td>stat_sample.xml.gz</td>
-	    <td>Mainline station data from <a href="#vds">vehicle detection
-	        systems</a>
+	    <td>Mainline <a href="#station">station</a> data from
+	        <a href="#vds">vehicle detection systems</a>
 	    </td>
 	    <td>30 seconds</td>
 	</tr>
