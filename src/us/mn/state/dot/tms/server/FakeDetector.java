@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2002-2016  Minnesota Department of Transportation
+ * Copyright (C) 2002-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,7 +14,7 @@
  */
 package us.mn.state.dot.tms.server;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.StringTokenizer;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
@@ -68,7 +68,7 @@ public class FakeDetector implements VehicleSampler {
 
 	/** Create a new fake detector */
 	public FakeDetector(String d) throws NumberFormatException {
-		LinkedList<DetectorImpl> p = new LinkedList<DetectorImpl>();
+		ArrayList<DetectorImpl> p = new ArrayList<DetectorImpl>();
 		Composite comp = Composite.PLUS;
 		StringTokenizer tok = new StringTokenizer(d, " +#%", true);
 		while (tok.hasMoreTokens()) {
@@ -121,14 +121,14 @@ public class FakeDetector implements VehicleSampler {
 	/** Get the calculated flow rate */
 	@Override
 	public int getFlow() {
-		float flow = 0;
+		int flow = 0;
 		for (int i = 0; i < plus.length; i++) {
 			int f = plus[i].getFlowRaw();
 			if (f < 0)
 				return MISSING_DATA;
 			flow += f;
 		}
-		return Math.round((constant + flow) * percent / 100.0f);
+		return flow;
 	}
 
 	/** Get the fake density (vehicle per mile) */
