@@ -32,7 +32,7 @@ public class PriceMessageEvent extends BaseEvent {
 
 	/** Get price message event purge threshold (days) */
 	static private int getPurgeDays() {
-		return SystemAttrEnum.PRICE_MSG_EVENT_PURGE_DAYS.getInt();
+		return SystemAttrEnum.PRICE_MESSAGE_EVENT_PURGE_DAYS.getInt();
 	}
 
 	/** Purge old records */

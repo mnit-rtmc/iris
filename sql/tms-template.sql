@@ -178,7 +178,7 @@ meter_min_red_secs	0.1
 meter_yellow_secs	0.7
 msg_feed_verify	true
 operation_retry_threshold	3
-price_msg_event_purge_days	0
+price_message_event_purge_days	0
 route_max_legs	8
 route_max_miles	16
 rwis_high_wind_speed_kph	40
