@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.server.event.DetAutoFailEvent;
 import us.mn.state.dot.tms.server.event.GateArmEvent;
 import us.mn.state.dot.tms.server.event.MeterEvent;
 import us.mn.state.dot.tms.server.event.PriceMessageEvent;
+import us.mn.state.dot.tms.server.event.SignEvent;
 import us.mn.state.dot.tms.server.event.TagReadEvent;
 import us.mn.state.dot.tms.server.event.TravelTimeEvent;
 
@@ -56,6 +57,7 @@ public class EventPurgeJob extends Job {
 		GateArmEvent.purgeRecords();
 		MeterEvent.purgeRecords();
 		PriceMessageEvent.purgeRecords();
+		SignEvent.purgeRecords();
 		TagReadEvent.purgeRecords();
 		TravelTimeEvent.purgeRecords();
 	}

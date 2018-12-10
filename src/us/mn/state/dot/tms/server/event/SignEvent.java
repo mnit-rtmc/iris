@@ -17,13 +17,41 @@ package us.mn.state.dot.tms.server.event;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.tms.EventType;
+import us.mn.state.dot.tms.SystemAttrEnum;
+import us.mn.state.dot.tms.TMSException;
 
 /**
- * This is a class for logging sign status change events to a database.
+ * This is a class for logging sign events to a database.
  *
  * @author Douglas Lau
  */
-public class SignStatusEvent extends BaseEvent {
+public class SignEvent extends BaseEvent {
+
+	/** Database table name */
+	static private final String TABLE = "event.sign_event";
+
+	/** Get sign event purge threshold (days) */
+	static private int getPurgeDays() {
+		return SystemAttrEnum.SIGN_EVENT_PURGE_DAYS.getInt();
+	}
+
+	/** Purge old records */
+	static public void purgeRecords() throws TMSException {
+		int age = getPurgeDays();
+		if (store != null && age > 0) {
+			store.update("DELETE FROM " + TABLE +
+				" WHERE event_date < now() - '" + age +
+				" days'::interval;");
+		}
+	}
+
+	/** Is the specified event a sign event? */
+	static private boolean isSignEvent(EventType et) {
+		return EventType.DMS_DEPLOYED == et
+		    || EventType.DMS_CLEARED == et
+		    || EventType.LCS_DEPLOYED == et
+		    || EventType.LCS_CLEARED == et;
+	}
 
 	/** Device ID (if device specific) */
 	private final String device_id;
@@ -34,13 +62,10 @@ public class SignStatusEvent extends BaseEvent {
 	/** Message owner */
 	private final String owner;
 
-	/** Create a new sign status event */
-	public SignStatusEvent(EventType e, String d, String m, String o) {
-		super(e);
-		assert e == EventType.DMS_DEPLOYED ||
-		       e == EventType.DMS_CLEARED ||
-		       e == EventType.LCS_DEPLOYED ||
-		       e == EventType.LCS_CLEARED;
+	/** Create a new sign event */
+	public SignEvent(EventType et, String d, String m, String o) {
+		super(et);
+		assert isSignEvent(et);
 		device_id = d;
 		message = m;
 		owner = o;
@@ -49,7 +74,7 @@ public class SignStatusEvent extends BaseEvent {
 	/** Get the database table name */
 	@Override
 	public String getTable() {
-		return "event.sign_event";
+		return TABLE;
 	}
 
 	/** Get a mapping of the columns */

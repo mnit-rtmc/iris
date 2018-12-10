@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2017  Minnesota Department of Transportation
+ * Copyright (C) 2009-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,7 +39,7 @@ import static us.mn.state.dot.tms.R_Node.MAX_LANES;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.LCSPoller;
-import us.mn.state.dot.tms.server.event.SignStatusEvent;
+import us.mn.state.dot.tms.server.event.SignEvent;
 
 /**
  * A Lane-Use Control Signal Array is a series of LCS devices across all lanes
@@ -352,7 +352,7 @@ public class LCSArrayImpl extends DeviceImpl implements LCSArray {
 			text = null;
 		}
 		String owner = (o != null) ? o.getName() : null;
-		logEvent(new SignStatusEvent(et, name, text, owner));
+		logEvent(new SignEvent(et, name, text, owner));
 	}
 
 	/** Get the current lane-use indications.

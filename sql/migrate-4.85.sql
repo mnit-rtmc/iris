@@ -25,6 +25,8 @@ INSERT INTO iris.system_attribute (name, value)
 	VALUES ('gate_arm_event_purge_days', '0');
 INSERT INTO iris.system_attribute (name, value)
 	VALUES ('tag_read_event_purge_days', '0');
+INSERT INTO iris.system_attribute (name, value)
+	VALUES ('sign_event_purge_days', '0');
 
 -- Simplify fake detector specification
 UPDATE iris._detector

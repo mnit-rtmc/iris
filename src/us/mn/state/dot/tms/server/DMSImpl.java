@@ -66,7 +66,7 @@ import us.mn.state.dot.tms.server.comm.DevicePoller;
 import us.mn.state.dot.tms.server.comm.DMSPoller;
 import us.mn.state.dot.tms.server.event.BrightnessSample;
 import us.mn.state.dot.tms.server.event.PriceMessageEvent;
-import us.mn.state.dot.tms.server.event.SignStatusEvent;
+import us.mn.state.dot.tms.server.event.SignEvent;
 import us.mn.state.dot.tms.utils.MultiString;
 
 /**
@@ -957,7 +957,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			et = EventType.DMS_CLEARED;
 			text = null;
 		}
-		logEvent(new SignStatusEvent(et, name, text, owner));
+		logEvent(new SignEvent(et, name, text, owner));
 	}
 
 	/** Next sign message (sending in process) */
