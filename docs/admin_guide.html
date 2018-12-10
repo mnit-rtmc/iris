@@ -99,7 +99,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">7 Dec 2018</div>
+<div id="stamp">10 Dec 2018</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -299,7 +299,7 @@
 	<li><a href="#travel_time">Travel time</a> estimation for traveler
 	    information</li>
 	<li><a href="#vsa">Variable speed advisories</a></li>
-	<li>Coordinated <a href="#metering_strategies">ramp metering strategies
+	<li>Coördinated <a href="#metering_strategies">ramp metering strategies
 	    </a></li>
 	<li><a href="#tolling">Toll</a> lane operation</li>
 </ul>
@@ -417,8 +417,9 @@
 </p>
 <h4 id="district">District</h4>
 <p>
-	This property is used when multiple IRIS servers are running within the
-	same organization.
+	This property allows multiple IRIS servers to exist within the same
+	organization.
+	The default value is <code>tms</code>.
 </p>
 <h4>HTTP Proxy</h4>
 <p>
@@ -1009,7 +1010,7 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	All r_nodes with the same road and direction-of-travel are grouped into
 	<b>corridors</b>.
 	The r_nodes within a corridor are automatically sorted based on their
-	coordinates.
+	coördinates.
 	Corridors are linked to each other by exit and entrance r_nodes.
 	For example an exit r_node from Northbound road A to Eastbound road B
 	would automatically link to an entrance onto Eastbound road B from
@@ -1492,9 +1493,9 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	line per message to be deployed.
 </p>
 <p>
-	Each line must contain 3 fields, separated by tab characters "\t"
-	(ASCII 0x09), and terminated with a single newline character "\n"
-	(ASCII 0x0A).
+	Each line must contain 3 fields, separated by tab characters
+	<code>\t</code> (ASCII 0x09), and terminated with a single newline
+	character <code>\n</code> (ASCII 0x0A).
 	The fields are DMS name, <a href="#multi">MULTI</a> string, and
 	expiration time.
 	The DMS name must exactly match one of the DMS as identified by IRIS.
@@ -1553,13 +1554,14 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	line per active incident.
 </p>
 <p>
-	Each line should contain 6 fields, separated by comma characters ","
-	and terminated with a single newline character "\n" (ASCII 0x0A).
+	Each line should contain 6 fields, separated by comma characters
+	"<code>,</code>" and terminated with a single newline character
+	<code>\n</code> (ASCII 0x0A).
 	The fields are incident ID, type, incident detail, latitude, longitude,
 	and camera ID.
 	The type must be CRASH, STALL, ROADWORK, or HAZARD.
 	The detail may be blank, or one of the incident detail names.
-	Latitude and longitude must be coordinates of the incident.
+	Latitude and longitude must be coördinates of the incident.
 	Camera ID may be blank, or the ID of a camera to view the incident.
 </p>
 
@@ -2077,33 +2079,73 @@ FIXME
 	Collectively, these systems are simply called <b>detectors</b>.
 </p>
 
-<h4>Traffic Data</h4>
+<h4 id="traffic_data">Traffic Data</h4>
 <p>
 	Most detectors sample traffic data in fixed time intervals and put it
-	into bins.
-	IRIS can store four types of binned traffic data:
+	into <a href="#binned_data">bins</a>.
+	IRIS can store these types of binned traffic data:
 </p>
-<dl>
-	<dt>Vehicle Count</dt>
-	<dd>Number of vehicles detected</dd>
-	<dt>Occupancy</dt>
-	<dd>Percent of time a vehicle occupied the detection zone</dd>
-	<dt>Speed</dt>
-	<dd>Average speed of vehicles detected</dd>
-	<dt>Vehicle Classification</dt>
-	<dd>Number of vehicles of each classification
-	    <ul>
-	    <li>motorcycle &mdash; up to 7'</li>
-	    <li>small &mdash; 7 to 20'</li>
-	    <li>medium &mdash; 20 to 43'</li>
-	    <li>large &mdash; 43' or longer</li>
-	    </ul>
-	</dd>
-</dl>
+<table>
+<tr>
+	<th>Sample Type</th>
+	<th>Description</th>
+	<th>Code</th>
+	<th>Sample Size</th>
+</tr>
+<tr>
+	<td>Vehicle Count</td>
+	<td>Number of vehicles detected</td>
+	<td>v</td>
+	<td>8 bits</td>
+</tr>
+<tr>
+	<td>Motorcycle Count</td>
+	<td>Number of vehicles up to 7'</td>
+	<td>vmc</td>
+	<td>8 bits</td>
+</tr>
+<tr>
+	<td>Small Count</td>
+	<td>Number of vehicles between 7 and 20'</td>
+	<td>vs</td>
+	<td>8 bits</td>
+</tr>
+<tr>
+	<td>Medium Count</td>
+	<td>Number of vehicles between 20 and 43'</td>
+	<td>vm</td>
+	<td>8 bits</td>
+</tr>
+<tr>
+	<td>Large Count</td>
+	<td>Number of vehicles 43' or longer</td>
+	<td>vl</td>
+	<td>8 bits</td>
+</tr>
+<tr>
+	<td>Occupancy</td>
+	<td>Percent of time a vehicle occupied the detection zone (fixed
+	    point 0.00 to 100.00)</td>
+	<td>p</td>
+	<td>16 bits</td>
+</tr>
+<tr>
+	<td>Speed</td>
+	<td>Average speed (mph) of vehicles detected</td>
+	<td>s</td>
+	<td>8 bits</td>
+</tr>
+</table>
 <p>
-	Instead of binning, some detectors can record a <b>vehicle log</b>,
-	with information about each detected vehicle, such as speed and
-	classification.
+	Instead of binning, some detectors can record a <a href="#veh_log">
+	vehicle log</a>, with information about each detected vehicle, such as
+	headway and speed.
+</p>
+<p>
+	Every 30 seconds, an XML file is generated containing the most recent
+	sample data from all defined detectors.
+	The file is called <code>det_sample.xml.gz</code>, and it is written to
+	the <a href="#xml_output">XML output directory</a>
 </p>
 
 <h4>Detector Setup</h4>
@@ -2241,17 +2283,314 @@ FIXME
 
 <h4 id="vds_archiving">Traffic Data Archiving</h4>
 <p>
-	Every 30 seconds, an XML file is generated containing the most recent
-	sample data from all defined detectors.
-	The file is called <code>det_sample.xml.gz</code>, and it is written to
-	the <a href="#xml_output">XML output directory</a>
+	Sample data is archived only if <a href="#sys_attr"><code>
+	sample_archive_enable</code></a> is <code>true</code>.
+	Files are stored in <code>/var/lib/iris/traffic</code>, in a directory
+	with the <a href="#district">district</a> name.
+	Within that directory a new subdirectory is created for each year, with
+	a 4-digit name (<code>1994-9999</code>).
 </p>
 <p>
-	Sample data is archived only if <a href="#sys_attr"><code>
-	sample_archive_enable</code></a> is set to <code>true</code>.
-	Sample archive files are stored in <code>/var/lib/iris/traffic</code>,
-	in a directory with the district ID name.
+	As data is collected, a new subdirectory is created every day &mdash;
+	the name is 8-digits: year (<code>1994-9999</code>), month
+	(<code>01-12</code>) and day-of-month (<code>01-31</code>).
+	At 10 PM, all traffic data from the previous day is moved into a single
+	ZIP file with the 8-digit base name and a <code>.traffic</code>
+	extension.
 </p>
+
+<h4 id="binned_data">Daily Binned Traffic Data</h4>
+<p>
+	A binned sample file consists of some number of periods of equal
+	duration.
+	The first period begins (and the last period ends) at midnight.
+	The <b>binning interval</b> determines the number of samples collected
+	per day &mdash; a shorter interval results in more samples.
+	If the period is longer than 30 seconds, the samples are allocated
+	evenly into 30-second bins for storage.
+</p>
+<table>
+<tr>
+	<th>Period</th>
+	<th>Binning Interval</th>
+	<th>Samples</th>
+	<th>Stored Bins</th>
+</tr>
+<tr>
+	<td>5</td>
+	<td>5 seconds</td>
+	<td>17280</td>
+	<td>5 seconds</td>
+</tr>
+<tr>
+	<td>6</td>
+	<td>6 seconds</td>
+	<td>14400</td>
+	<td>6 seconds</td>
+</tr>
+<tr>
+	<td>10</td>
+	<td>10 seconds</td>
+	<td>8640</td>
+	<td>10 seconds</td>
+</tr>
+<tr>
+	<td>15</td>
+	<td>15 seconds</td>
+	<td>5760</td>
+	<td>15 seconds</td>
+</tr>
+<tr>
+	<td>20</td>
+	<td>20 seconds</td>
+	<td>4320</td>
+	<td>20 seconds</td>
+</tr>
+<tr>
+	<td>30</td>
+	<td>30 seconds</td>
+	<td>2880</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>60</td>
+	<td>60 seconds</td>
+	<td>1440</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>90</td>
+	<td>90 seconds</td>
+	<td>960</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>120</td>
+	<td>2 minutes</td>
+	<td>720</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>240</td>
+	<td>4 minutes</td>
+	<td>360</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>300</td>
+	<td>5 minutes</td>
+	<td>288</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>600</td>
+	<td>10 minutes</td>
+	<td>144</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>900</td>
+	<td>15 minutes</td>
+	<td>96</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>1200</td>
+	<td>20 minutes</td>
+	<td>72</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>1800</td>
+	<td>30 minutes</td>
+	<td>48</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>3600</td>
+	<td>60 minutes</td>
+	<td>24</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>7200</td>
+	<td>2 hours</td>
+	<td>12</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>14400</td>
+	<td>4 hours</td>
+	<td>6</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>28800</td>
+	<td>8 hours</td>
+	<td>3</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>43200</td>
+	<td>12 hours</td>
+	<td>2</td>
+	<td>30 seconds</td>
+</tr>
+<tr>
+	<td>86400</td>
+	<td>24 hours</td>
+	<td>1</td>
+	<td>30 seconds</td>
+</tr>
+</table>
+<p>
+	For each detector, a binned sample file is created for each sampled
+	traffic data type.
+	The base file name is the detector name.
+	The extension is the <a href="#traffic_data">traffic data</a>
+	<b>code</b> followed by the <b>period</b> (in seconds).
+	For example, 60-second vehicle count samples collected from detector
+	100 would be stored in a file called <code>100.v60</code>, containing
+	2880 bins.
+</p>
+<p>
+	Each data sample is either an 8- or 16-bit signed integer, depending on
+	the sample type.
+	16-bit samples are in high-byte first order.
+	A negative value (-1) indicates a missing sample.
+	Any data outside the valid ranges should be considered <em>bad</em>.
+</p>
+
+<h4 id="veh_log">Individual Vehicle Logging</h4>
+<p>
+	The <code>.vlog</code> format is a comma-separated text log with one
+	line for each vehicle detected.
+	Each line ends with a newline <code>\n</code> (ASCII 0x0A).
+	If present, <b>duration</b>, <b>headway</b>, and <b>speed</b> are
+	positive integer values.
+	Missing duration or headway values are represented by a <code>?</code>
+	character.
+	A gap in sampling data is represented by <code>*</code> on a line by
+	itself.
+</p>
+<table>
+<tr>
+	<th>Column</th>
+	<th>Name</th>
+	<th>Description</th>
+</tr>
+<tr>
+	<td>1</td>
+	<td>Duration</td>
+	<td>Number of milliseconds the vehicle occupied the detector</td>
+</tr>
+<tr>
+	<td>2</td>
+	<td>Headway</td>
+	<td>Number of milliseconds bewteen vehicle start times</td>
+</tr>
+<tr>
+	<td>3</td>
+	<td>Time stamp</td>
+	<td>24-hour HH:MM:SS format (may be omitted if headway is valid)</td>
+</tr>
+<tr>
+	<td>4</td>
+	<td>Speed</td>
+	<td>Speed in miles per hour (if available)</td>
+</tr>
+</table>
+
+<p>
+	Interpreting sample <code>.vlog</code> data:
+</p>
+<table>
+<tr>
+	<th>Log Data</th>
+	<th>Duration</th>
+	<th>Headway</th>
+	<th>Time</th>
+	<th>Speed</th>
+</tr>
+<tr>
+	<td>296,9930,17:49:36</td>
+	<td>296</td>
+	<td>9930</td>
+	<td>17:49:36</td>
+	<td>?</td>
+</tr>
+<tr>
+	<td>231,14069</td>
+	<td>231</td>
+	<td>14069</td>
+	<td>17:49:50</td>
+	<td>?</td>
+</tr>
+<tr>
+	<td>240,453,,45</td>
+	<td>240</td>
+	<td>453</td>
+	<td>17:49:50</td>
+	<td>45</td>
+</tr>
+<tr>
+	<td>296,23510,,53</td>
+	<td>296</td>
+	<td>23510</td>
+	<td>17:50:14</td>
+	<td>53</td>
+</tr>
+<tr>
+	<td>259,1321</td>
+	<td>259</td>
+	<td>1321</td>
+	<td>17:50:15</td>
+	<td>?</td>
+</tr>
+<tr>
+	<td>?,?</td>
+	<td>?</td>
+	<td>?</td>
+	<td>?</td>
+	<td>?</td>
+</tr>
+<tr>
+	<td>249,?</td>
+	<td>249</td>
+	<td>?</td>
+	<td>17:50:24</td>
+	<td>?</td>
+</tr>
+<tr>
+	<td>323,4638,17:50:28</td>
+	<td>323</td>
+	<td>4638</td>
+	<td>17:50:28</td>
+	<td>?</td>
+</tr>
+<tr>
+	<td>258,5967</td>
+	<td>258</td>
+	<td>5967</td>
+	<td>17:50:33</td>
+	<td>?</td>
+</tr>
+<tr>
+	<td>111,1542</td>
+	<td>111</td>
+	<td>1542</td>
+	<td>17:50:35</td>
+	<td>?</td>
+</tr>
+<tr>
+	<td>304,12029</td>
+	<td>304</td>
+	<td>12029</td>
+	<td>17:50:47</td>
+	<td>?</td>
+</tr>
+</table>
+<br/>
 
 <h3 id="cameras">Cameras</h3>
 <p>
@@ -2671,7 +3010,7 @@ FIXME
 	<code>Modem</code> comm link.
 	In that case, the comm link period will be used.
 	The <code>Query GPS</code> button can be used to manually poll the
-	coordinates.
+	coördinates.
 </p>
 
 <h2 id="features">Features</h2>
