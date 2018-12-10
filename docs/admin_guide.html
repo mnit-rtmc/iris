@@ -3726,7 +3726,70 @@ FIXME
 <p/>
 
 <h3 id="event_tables">Database Event Tables</h3>
-FIXME
+<p>
+	There are a number of event tables in the database for logging different
+	types of events.
+	Each of these tables has a <b>view</b> in the public DB schema.
+	There is also a <b>purge threshold</b> for each table, stored as a
+	<a href="#sys_attr">system attribute</a>.
+	To disable purging older records from an event table, set the
+	corresponding purge threshold to 0.
+</p>
+<table>
+	<tr>
+	    <th>View</th>
+	    <th>Purge Threshold</th>
+	</tr>
+	<tr>
+	    <td>action_plan_event_view</td>
+	    <td>action_plan_event_purge_days</td>
+	</tr>
+	<tr>
+	    <td>alarm_event_view</td>
+	    <td>alarm_event_purge_days</td>
+	</tr>
+	<tr>
+	    <td>beacon_event_view</td>
+	    <td>beacon_event_purge_days</td>
+	</tr>
+	<tr>
+	    <td>camera_switch_event_view</td>
+	    <td>camera_switch_event_purge_days</td>
+	</tr>
+	<tr>
+	    <td>client_event_view</td>
+	    <td>client_event_purge_days</td>
+	</tr>
+	<tr>
+	    <td>comm_event_view</td>
+	    <td>comm_event_purge_days</td>
+	</tr>
+	<tr>
+	    <td>detector_event_view</td>
+	    <td>detector_event_purge_days</td>
+	</tr>
+	<tr>
+	    <td>gate_arm_event_view</td>
+	    <td>gate_arm_event_purge_days</td>
+	</tr>
+	<tr>
+	    <td>meter_event_view</td>
+	    <td>meter_event_purge_days</td>
+	</tr>
+	<tr>
+	    <td>price_message_event_view</td>
+	    <td>price_msg_event_purge_days</td>
+	</tr>
+	<tr>
+	    <td>sign_event_view</td>
+	    <td>sign_event_purge_days</td>
+	</tr>
+	<tr>
+	    <td>tag_read_event_view</td>
+	    <td>tag_read_event_purge_days</td>
+	</tr>
+</table>
+<br/>
 
 <h3 id="debug_logs">Debug Trace Logs</h3>
 <p>
