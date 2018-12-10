@@ -2839,6 +2839,10 @@ FIXME
 	<li>Synchronizing clock</li>
 	<li>Configuring time-of-day operation</li>
 </ul>
+<p>
+	Each ramp meter can be assigned to a <a href="#metering_strategies">
+	metering strategy</a>, or <b>algorithm</b>.
+</p>
 
 <h3 id="gate_arms">Gate Arms</h3>
 <aside>
@@ -3632,7 +3636,19 @@ FIXME
 FIXME
 
 <h3 id="metering_strategies">Ramp Metering Strategies</h3>
-FIXME
+<p>
+	There are currently two metering strategies available in IRIS &mdash;
+	<b>simple</b> and <b>density adaptive</b>.
+</p>
+<p>
+	Simple metering runs the ramp meter at a fixed release rate.
+	This rate is the target rate for the period (AM or PM).
+</p>
+<p>
+	Density adaptive metering is a sophisticated algorithm with queue
+	management.
+	See <a href="density_metering.html">here</a> for details.
+</p>
 
 <h3 id="spellchecker">Spell Checker</h3>
 <aside>
