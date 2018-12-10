@@ -26,4 +26,15 @@ INSERT INTO iris.system_attribute (name, value)
 INSERT INTO iris.system_attribute (name, value)
 	VALUES ('tag_read_event_purge_days', '0');
 
+-- Simplify fake detector specification
+UPDATE iris._detector
+   SET fake = NULL
+ WHERE fake = '';
+UPDATE iris._detector
+   SET fake = regexp_replace(fake, '[#%].*', '')
+ WHERE fake IS NOT NULL;
+UPDATE iris._detector
+   SET fake = regexp_replace(fake, '+', ' ', 'g')
+ WHERE fake IS NOT NULL;
+
 COMMIT;

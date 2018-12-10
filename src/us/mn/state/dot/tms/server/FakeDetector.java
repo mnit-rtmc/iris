@@ -15,7 +15,6 @@
 package us.mn.state.dot.tms.server;
 
 import java.util.ArrayList;
-import java.util.StringTokenizer;
 import us.mn.state.dot.tms.Detector;
 import us.mn.state.dot.tms.DetectorHelper;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
@@ -32,36 +31,17 @@ public class FakeDetector implements VehicleSampler {
 		return (count > 0) ? total / count : MISSING_DATA;
 	}
 
-	/** Enum of composites */
-	private enum Composite {
-		PLUS, CONSTANT, PERCENT;
-	}
-
-	/** Array of detectors which add to the fake detector */
-	private final DetectorImpl[] plus;
-
-	/** Constant flow rate to begin estimation */
-	private int constant = 0;
-
-	/** Percent to apply at end of estimation */
-	private int percent = 100;
+	/** Array of detectors */
+	private final DetectorImpl[] dets;
 
 	/** Get a string representation of the fake detector */
 	@Override
 	public String toString() {
 		StringBuilder b = new StringBuilder();
-		if (constant != 0) {
-			b.append('#');
-			b.append(constant);
-		}
-		for (DetectorImpl det: plus) {
+		for (DetectorImpl det: dets) {
 			if (b.length() > 0)
-				b.append('+');
+				b.append(' ');
 			b.append(det.getName());
-		}
-		if (percent != 100) {
-			b.append('%');
-			b.append(percent);
 		}
 		return b.toString();
 	}
@@ -69,48 +49,20 @@ public class FakeDetector implements VehicleSampler {
 	/** Create a new fake detector */
 	public FakeDetector(String d) throws NumberFormatException {
 		ArrayList<DetectorImpl> p = new ArrayList<DetectorImpl>();
-		Composite comp = Composite.PLUS;
-		StringTokenizer tok = new StringTokenizer(d, " +#%", true);
-		while (tok.hasMoreTokens()) {
-			String t = tok.nextToken();
-			if (t.equals("+")) {
-				comp = Composite.PLUS;
-				continue;
-			}
-			if (t.equals("#")) {
-				comp = Composite.CONSTANT;
-				continue;
-			}
-			if (t.equals("%")) {
-				comp = Composite.PERCENT;
-				continue;
-			}
-			if (t.equals(" "))
-				continue;
-			if (comp == Composite.CONSTANT) {
-				constant = Integer.parseInt(t);
-				continue;
-			}
-			if (comp == Composite.PERCENT) {
-				percent = Integer.parseInt(t);
-				continue;
-			}
+		for (String t: d.split(" ")) {
 			Detector dt = DetectorHelper.lookup(t);
-			if (dt instanceof DetectorImpl) {
-				DetectorImpl det = (DetectorImpl) dt;
-				if (comp == Composite.PLUS)
-					p.add(det);
-			}
+			if (dt instanceof DetectorImpl)
+				p.add((DetectorImpl) dt);
 		}
-		plus = p.toArray(new DetectorImpl[0]);
+		dets = p.toArray(new DetectorImpl[0]);
 	}
 
 	/** Get the most recent sample count */
 	@Override
 	public int getCount() {
 		int count = 0;
-		for (int i = 0; i < plus.length; i++) {
-			int c = plus[i].getCount();
+		for (int i = 0; i < dets.length; i++) {
+			int c = dets[i].getCount();
 			if (c < 0)
 				return MISSING_DATA;
 			count += c;
@@ -122,8 +74,8 @@ public class FakeDetector implements VehicleSampler {
 	@Override
 	public int getFlow() {
 		int flow = 0;
-		for (int i = 0; i < plus.length; i++) {
-			int f = plus[i].getFlowRaw();
+		for (int i = 0; i < dets.length; i++) {
+			int f = dets[i].getFlowRaw();
 			if (f < 0)
 				return MISSING_DATA;
 			flow += f;
@@ -136,7 +88,7 @@ public class FakeDetector implements VehicleSampler {
 	public float getDensity() {
 		float t_density = 0;
 		int n_density = 0;
-		for (DetectorImpl det: plus) {
+		for (DetectorImpl det: dets) {
 			float k = det.getDensityRaw();
 			if (k >= 0) {
 				t_density += k;
@@ -151,7 +103,7 @@ public class FakeDetector implements VehicleSampler {
 	public float getSpeed() {
 		float t_speed = 0;
 		int n_speed = 0;
-		for (DetectorImpl det: plus) {
+		for (DetectorImpl det: dets) {
 			float s = det.getSpeedRaw();
 			if (s > 0) {
 				t_speed += s;
