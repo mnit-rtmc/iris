@@ -143,6 +143,7 @@ public class R_NodeDetectorPanel extends JPanel {
 		det_table.setVisibleRowCount(5);
 		IPanel pnl = new IPanel();
 		pnl.add(det_table, Stretch.FULL);
+		pnl.add("detector.name");
 		pnl.add(det_txt);
 		pnl.add(det_lbl, Stretch.LAST);
 		pnl.add(create_btn);
@@ -153,7 +154,6 @@ public class R_NodeDetectorPanel extends JPanel {
 		createJobs();
 		det_pnl.initialize();
 		det_txt.setEnabled(false);
-		det_txt.setToolTipText(I18N.get("detector.name"));
 		create_det.setEnabled(false);
 		transfer_det.setEnabled(false);
 		delete_det.setEnabled(false);
