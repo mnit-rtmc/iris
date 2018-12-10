@@ -60,12 +60,12 @@
     <h3><a href="#traffic_layer">Traffic Map Layer</a></h3>
     <h3><a href="#incident">Incident Management</a></h3>
     <h3><a href="#plan_schedule">Plans and Schedules</a></h3>
-    <h3><a href="#parking">Parking Area Availability</a></h3>
+    <h3><a href="#metering_strategies">Ramp Metering Strategies</a></h3>
+    <h3><a href="#travel_time">Travel Time Estimation</a></h3>
     <h3><a href="#slow">Slow Traffic Warning</a></h3>
     <h3><a href="#tolling">Tolling</a></h3>
-    <h3><a href="#travel_time">Travel Time Estimation</a></h3>
+    <h3><a href="#parking">Parking Area Availability</a></h3>
     <h3><a href="#vsa">Variable Speed Advisory</a></h3>
-    <h3><a href="#metering_strategies">Ramp Metering Strategies</a></h3>
     <h3><a href="#spellchecker">Spell Checker</a></h3>
   </div>
   <h2><a id="troubleshooting_link" href="#troubleshooting">Troubleshooting</a></h2>
@@ -296,12 +296,12 @@
 	<li><a href="#incident">Incident management</a></li>
 	<li><a href="#plan_schedule">Scheduled</a> deployment of control devices
 	</li>
-	<li><a href="#travel_time">Travel time</a> estimation for traveler
-	    information</li>
-	<li><a href="#vsa">Variable speed advisories</a></li>
 	<li>Coördinated <a href="#metering_strategies">ramp metering strategies
 	    </a></li>
+	<li><a href="#travel_time">Travel time</a> estimation</li>
+	<li><a href="#slow">Slow traffic warning</a></li>
 	<li><a href="#tolling">Toll</a> lane operation</li>
+	<li><a href="#parking">Parking area</a> availability</li>
 </ul>
 
 <h2 id="installation">Installation</h2>
@@ -3378,34 +3378,138 @@ FIXME
 	When the plan is set to any other phase, the meter will shut off.
 </p>
 
-<h3 id="parking">Parking Areas</h3>
+<h3 id="metering_strategies">Ramp Metering Strategies</h3>
 <p>
-	A parking area could be a rest area or a parking garage.
-	The number of available parking spaces can be published on the web,
-	or displayed on a DMS.
+	There are currently two metering strategies available in IRIS &mdash;
+	<b>simple</b> and <b>density adaptive</b>.
 </p>
 <p>
-	A special <a href="#road_topology">corridor</a> must be associated with
-	the parking area in order to allow counting available spaces.
-	Within that corridor, detectors with the <b>parking</b> lane type will
-	be used.
-	Lanes 1 (front) and 2 (rear) are reserved for a <em>head</em> parking
-	space.
-	If applicable, lanes 3 (front) and 4 (rear) are for the <em>tail</em>.
+	Simple metering runs the ramp meter at a fixed release rate.
+	This rate is the target rate for the period (AM or PM).
 </p>
-<h4>Parking Area Availability</h4>
 <p>
-	A <b>pa</b> <a href="#action_tag">action tag</a> is replaced with the
-	number of available parking spaces to be displayed on a DMS.
+	Density adaptive metering is a sophisticated algorithm with queue
+	management.
+	See <a href="density_metering.html">here</a> for details.
+</p>
+
+<h3 id="travel_time">Travel Time Estimation</h3>
+<p>
+	The current <b>travel time</b> from a <a href="#dms">DMS</a> to a
+	downstream <a href="#station">station</a> can be estimated and displayed
+	on the sign.
+	A new estimate is made every 30 seconds, based on speed data from
+	<a href="#vds">vehicle detection systems</a>.
+</p>
+<p>
+	A <b>tt</b> <a href="#action_tag">action tag</a> can be used to specify
+	a travel time within a <a href="#quick_msg">quick message</a>.
+	When the message is deployed, the tag will be replaced by the estimated
+	travel time, in minutes.
 	The tag has three parameters, separated by commas.
 </p>
 <ol>
-	<li>Parking area ID</li>
-	<li>Text to display if available spaces is below the low threshold.
+	<li>Destination <a href="#station_id">station ID</a></li>
+	<li><a href="#travel_time_limit">Over limit</a> mode (<b>prepend</b> if
+	    omitted)
+	    <ul>
+	        <li><b>blank</b>: do not display travel time when over limit</li>
+	        <li><b>prepend</b>: prepend over limit text before travel
+	            time</li>
+	        <li><b>append</b>: append over limit text after travel time</li>
+	    </ul>
 	</li>
-	<li>Text to display if parking area is closed.
-	</li>
+	<li>Over limit text ("OVER " if omitted)</li>
 </ol>
+<aside>
+	NOTE: multiple destinations can be included on the same message by
+	specifying multiple <b>[tt…]</b> tags.
+</aside>
+<p>
+	Examples:
+</p>
+<ul>
+	<li>FREEWAY TIME TO[nl][jl2]I-94[jl4]<b>[ttS100,prepend,OVER ]</b> MIN
+	</li>
+	<li>TIME TO[nl][jl2]I-35W[jl4]<b>[ttS200,append,+]</b> MIN</li>
+	<li>DOWNTN[nl]<b>[ttS300,blank]</b> MIN</li>
+</ul>
+<h4>Route Pathfinding</h4>
+<p>
+	This feature requires that the <a href="#road_topology">road topology
+	</a> is configured for the entire route.
+	Using this topology, the shortest route is found from the DMS to the
+	destination <a href="#station">station</a>.
+	A route consists of one or more <b>corridor trips</b>.
+	Each corridor trip has an <b>origin</b> and a <b>destination</b>, which
+	are r_nodes associated with a single freeway corridor.
+	For the first corridor trip, the origin is the DMS location.
+	A route can only branch if an r_node with <b>exit</b>
+	<a href="#r_node_type">node type</a> is matched with an <b>entrance</b>
+	r_node.
+	In order to match, the <b>roadway / direction</b> for the exit r_node
+	must equal the <b>cross street / direction</b> for the entrance, and
+	vice versa.
+</p>
+<p>
+	Two <a href="#sys_attr">system attributes</a> control route pathfinding:
+</p>
+<dl>
+	<dt>route_max_legs</dt>
+	<dd>Maximum number of corridors to branch</dd>
+	<dt>route_max_miles</dt>
+	<dd>Maximum total route distance</dd>
+</dl>
+<h4>Speed Smoothing</h4>
+<p>
+	To deal with sampling problems at low speeds, a <b>smoothing</b>
+	procedure is used.
+	For each <a href="#station">station</a>, <b>running average</b> and
+	<b>running minimum</b>
+	speeds are calculated from all valid detectors in the station.
+	If a speed higher than the <a href="#speed_limit">speed limit</a> is
+	recorded, the speed limit is used instead.
+	The sample interval used increases as the speed becomes lower:
+</p>
+<ul>
+    <li>Normally 2 minutes</li>
+    <li>Extend to 3 minutes if &lt; 25 mph</li>
+    <li>Extend to 4 minutes if &lt; 20 mph</li>
+    <li>Extend to 5 minutes if &lt; 15 mph</li>
+</ul>
+<h4>Route Travel Time</h4>
+<p>
+	The distance between each consecutive valid station is divided into 3
+	<b>links</b> of equal length.
+	If any link is longer than 0.6 miles, a travel time estimate would not
+	be reliable, so the process is aborted.
+	The links which are adjacent to a station are assigned speed from that
+	station.
+	"Middle" links are assigned an average of the immediate upstream and
+	downstream station speeds.
+	Normally, the running average speed is used.
+	If the link is less than 1 mile from the corridor destination, the
+	running minimum is used instead.
+	Travel time for each link is estimated by dividing its length by the
+	assigned speed.
+	If the route branches, each branch adds a 1 minute <b>turning delay</b>.
+</p>
+<h4 id="travel_time_limit">Travel Time Limit</h4>
+<p>
+	To prevent unreasonable messages from being displayed due to data
+	errors, a limit is calculated.
+	The total route length is divided by <a href="#sys_attr"><code>
+	travel_time_min_mph</code></a> (default 15).
+	The result, rounded up the to next 5 minutes, is the <b>travel time
+	limit</b>.
+</p>
+<p>
+	If the calculated travel time is over the travel time limit, the
+	message will be <b>over limit</b>.
+	If the over limit mode is <b>blank</b>, no message will be shown.
+	Otherwise, the tag will be replaced with the travel time limit, with
+	the over limit text either prepended or appended.
+</p>
 
 <h3 id="slow">Slow Traffic Warning</h3>
 <p>
@@ -3433,8 +3537,6 @@ FIXME
 	<dt>[slow45,5,speed] MPH[nl]1/2 MILE[nl]AHEAD</dt>
 	<dd>Displays if traffic slower than 45 mph within 0.5 miles</dd>
 </dl>
-<p>
-</p>
 
 <h3 id="tolling">Tolling</h3>
 <p>
@@ -3511,144 +3613,37 @@ FIXME
 	This information can be used to bill customers.
 </p>
 
-<h3 id="travel_time">Travel Time Estimation</h3>
+<h3 id="parking">Parking Areas</h3>
 <p>
-	The current <b>travel time</b> from a <a href="#dms">DMS</a> to a
-	downstream <a href="#station">station</a> can be estimated and displayed
-	on the sign.
-	A new estimate is made every 30 seconds, based on speed data from
-	<a href="#vds">vehicle detection systems</a>.
+	A parking area could be a rest area or a parking garage.
+	The number of available parking spaces can be published on the web,
+	or displayed on a DMS.
 </p>
 <p>
-	A <b>tt</b> <a href="#action_tag">action tag</a> can be used to specify
-	a travel time within a <a href="#quick_msg">quick message</a>.
-	When the message is deployed, the tag will be replaced by the estimated
-	travel time, in minutes.
+	A special <a href="#road_topology">corridor</a> must be associated with
+	the parking area in order to allow counting available spaces.
+	Within that corridor, detectors with the <b>parking</b> lane type will
+	be used.
+	Lanes 1 (front) and 2 (rear) are reserved for a <em>head</em> parking
+	space.
+	If applicable, lanes 3 (front) and 4 (rear) are for the <em>tail</em>.
+</p>
+<h4>Parking Area Availability</h4>
+<p>
+	A <b>pa</b> <a href="#action_tag">action tag</a> is replaced with the
+	number of available parking spaces to be displayed on a DMS.
 	The tag has three parameters, separated by commas.
 </p>
 <ol>
-	<li>Destination <a href="#station_id">station ID</a></li>
-	<li><a href="#travel_time_limit">Over limit</a> mode (<b>prepend</b> if
-	    omitted)
-	    <ul>
-	        <li><b>blank</b>: do not display travel time when over limit</li>
-	        <li><b>prepend</b>: prepend over limit text before travel
-	            time</li>
-	        <li><b>append</b>: append over limit text after travel time</li>
-	    </ul>
+	<li>Parking area ID</li>
+	<li>Text to display if available spaces is below the low threshold.
 	</li>
-	<li>Over limit text ("OVER " if omitted)</li>
+	<li>Text to display if parking area is closed.
+	</li>
 </ol>
-<aside>
-	NOTE: multiple destinations can be included on the same message by
-	specifying multiple <b>[tt…]</b> tags.
-</aside>
-<p>
-	Examples:
-</p>
-<ul>
-	<li>FREEWAY TIME TO[nl][jl2]I-94[jl4]<b>[ttS100,prepend,OVER ]</b> MIN
-	</li>
-	<li>TIME TO[nl][jl2]I-35W[jl4]<b>[ttS200,append,+]</b> MIN</li>
-	<li>DOWNTN[nl]<b>[ttS300,blank]</b> MIN</li>
-</ul>
-<h4>Route Pathfinding</h4>
-<p>
-	This feature requires that the <a href="#road_topology">road topology
-	</a> is configured for the entire route.
-	Using this topology, the shortest route is found from the DMS to the
-	destination <a href="#station">station</a>.
-	A route consists of one or more <b>corridor trips</b>.
-	Each corridor trip has an <b>origin</b> and a <b>destination</b>, which
-	are r_nodes associated with a single freeway corridor.
-	For the first corridor trip, the origin is the DMS location.
-	A route can only branch if an r_node with <b>exit</b>
-	<a href="#r_node_type">node type</a> is matched with an <b>entrance</b>
-	r_node.
-	In order to match, the <b>roadway / direction</b> for the exit r_node
-	must equal the <b>cross street / direction</b> for the entrance, and
-	vice versa.
-</p>
-<p>
-	Two <a href="#sys_attr">system attributes</a> control route pathfinding:
-</p>
-<dl>
-	<dt>route_max_legs</dt>
-	<dd>Maximum number of corridors to branch</dd>
-	<dt>route_max_miles</dt>
-	<dd>Maximum total route distance</dd>
-</dl>
-
-<h4>Speed Smoothing</h4>
-<p>
-	To deal with sampling problems at low speeds, a <b>smoothing</b>
-	procedure is used.
-	For each <a href="#station">station</a>, <b>running average</b> and
-	<b>running minimum</b>
-	speeds are calculated from all valid detectors in the station.
-	If a speed higher than the <a href="#speed_limit">speed limit</a> is
-	recorded, the speed limit is used instead.
-	The sample interval used increases as the speed becomes lower:
-</p>
-<ul>
-    <li>Normally 2 minutes</li>
-    <li>Extend to 3 minutes if &lt; 25 mph</li>
-    <li>Extend to 4 minutes if &lt; 20 mph</li>
-    <li>Extend to 5 minutes if &lt; 15 mph</li>
-</ul>
-
-<h4>Route Travel Time</h4>
-<p>
-	The distance between each consecutive valid station is divided into 3
-	<b>links</b> of equal length.
-	If any link is longer than 0.6 miles, a travel time estimate would not
-	be reliable, so the process is aborted.
-	The links which are adjacent to a station are assigned speed from that
-	station.
-	"Middle" links are assigned an average of the immediate upstream and
-	downstream station speeds.
-	Normally, the running average speed is used.
-	If the link is less than 1 mile from the corridor destination, the
-	running minimum is used instead.
-	Travel time for each link is estimated by dividing its length by the
-	assigned speed.
-	If the route branches, each branch adds a 1 minute <b>turning delay</b>.
-</p>
-
-<h4 id="travel_time_limit">Travel Time Limit</h4>
-<p>
-	To prevent unreasonable messages from being displayed due to data
-	errors, a limit is calculated.
-	The total route length is divided by <a href="#sys_attr"><code>
-	travel_time_min_mph</code></a> (default 15).
-	The result, rounded up the to next 5 minutes, is the <b>travel time
-	limit</b>.
-</p>
-<p>
-	If the calculated travel time is over the travel time limit, the
-	message will be <b>over limit</b>.
-	If the over limit mode is <b>blank</b>, no message will be shown.
-	Otherwise, the tag will be replaced with the travel time limit, with
-	the over limit text either prepended or appended.
-</p>
 
 <h3 id="vsa">Variable Speed Advisory</h3>
 FIXME
-
-<h3 id="metering_strategies">Ramp Metering Strategies</h3>
-<p>
-	There are currently two metering strategies available in IRIS &mdash;
-	<b>simple</b> and <b>density adaptive</b>.
-</p>
-<p>
-	Simple metering runs the ramp meter at a fixed release rate.
-	This rate is the target rate for the period (AM or PM).
-</p>
-<p>
-	Density adaptive metering is a sophisticated algorithm with queue
-	management.
-	See <a href="density_metering.html">here</a> for details.
-</p>
 
 <h3 id="spellchecker">Spell Checker</h3>
 <aside>
