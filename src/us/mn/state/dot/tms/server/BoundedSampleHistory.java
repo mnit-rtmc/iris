@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2001-2012  Minnesota Department of Transportation
+ * Copyright (C) 2001-2018  Minnesota Department of Transportation
  * Copyright (C) 2011  University of Minnesota Duluth (NATSRL)
  *
  * This program is free software; you can redistribute it and/or modify
@@ -102,14 +102,6 @@ public class BoundedSampleHistory {
 	 */
 	public int size() {
 		return n_samples;
-	}
-
-	/**
-	 * Check if the history is full.
-	 * @return true if the history is full.
-	 */
-	public boolean isFull() {
-		return n_samples == samples.length;
 	}
 
 	/**
