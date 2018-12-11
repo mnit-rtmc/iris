@@ -24,8 +24,10 @@ import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.CameraPreset;
 import us.mn.state.dot.tms.GeoLoc;
+import us.mn.state.dot.tms.LaneType;
 import us.mn.state.dot.tms.ParkingArea;
 import us.mn.state.dot.tms.TMSException;
+import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import us.mn.state.dot.tms.units.Interval;
 import static us.mn.state.dot.tms.units.Interval.Units.MINUTES;
 
@@ -78,6 +80,63 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 		// At least 75% of spaces must be reporting
 		int min_trust = cap - (cap / 4);
 		return (t >= min_trust) && (t <= cap);
+	}
+
+	/** Threshold for parking space availability.
+	 * FIXME: 150 is sensitivity for Banner DXM magnetometer. */
+	static private final float PARK_AVAIL_OCC = 150f * 100f / 1800f;
+
+	/** Sampler set filter for parking space */
+	static private final class ParkingFilter implements SamplerSet.Filter {
+		// Parking space detectors are numbered like this:
+		//   1: Head Front
+		//   2: Head Rear
+		//   3: Tail Front
+		//   4: Tail Rear
+		static private boolean isTail(DetectorImpl d) {
+			return d.getLaneNumber() >= 3;
+		}
+		private final boolean tail;
+		private ParkingFilter(boolean t) {
+			tail = t;
+		}
+		public boolean check(VehicleSampler vs) {
+			return (vs instanceof DetectorImpl)
+			    && checkDet((DetectorImpl) vs);
+		}
+		private boolean checkDet(DetectorImpl d) {
+			return d.getLaneType() == LaneType.PARKING.ordinal()
+			    && (isTail(d) == tail);
+		}
+	}
+
+	/** Check if a set of samplers contains an available parking space.
+	 * @param ss Sampler set.
+	 * @param tail Tail Position (of head/tail space).
+	 * @return true If parking space and available.
+	 *         false If parking space and occupied.
+	 *         null If not a parking space or not sampling. */
+	static private Boolean getParkingAvailable(SamplerSet ss, boolean tail){
+		// The head position can only be available
+		// if the tail position is also available.
+		if (!tail) {
+			Boolean p = getParkingAvailable2(ss, true);
+			if (p != null && !p)
+				return false;
+		}
+		return getParkingAvailable2(ss, tail);
+	}
+
+	/** Check if a set of samplers contains an available parking space.
+	 * @param ss Sampler set.
+	 * @param tail Tail Position (of head/tail space).
+	 * @return true If parking space and available.
+	 *         false If parking space and occupied.
+	 *         null If not a parking space or not sampling. */
+	static private Boolean getParkingAvailable2(SamplerSet ss, boolean tail){
+		ss = new SamplerSet(ss.filter(new ParkingFilter(tail)));
+		float mo = ss.getMaxOccupancy(MISSING_DATA);
+		return (mo >= 0) ? (mo < PARK_AVAIL_OCC) : null;
 	}
 
 	/** Load all the parking areas */
@@ -700,13 +759,14 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 		Iterator<R_NodeImpl> it = c.iterator();
 		while (it.hasNext()) {
 			R_NodeImpl n = it.next();
-			Boolean p = n.getParkingAvailable(false);
+			SamplerSet ss = n.getSamplerSet();
+			Boolean p = getParkingAvailable(ss, false);
 			if (p != null) {
 				t++;
 				if (p)
 					a++;
 			}
-			p = n.getParkingAvailable(true);
+			p = getParkingAvailable(ss, true);
 			if (p != null) {
 				t++;
 				if (p)
