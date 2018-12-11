@@ -115,10 +115,11 @@ public class Route {
 
 	/** Get a set of vehicle samplers on route */
 	public SamplerSet getSamplerSet(LaneType lt) {
-		ArrayList<VehicleSampler> vs = new ArrayList<VehicleSampler>();
+		ArrayList<VehicleSampler> samplers =
+			new ArrayList<VehicleSampler>();
 		for (RouteLeg lg = leg; lg != null; lg = lg.prev)
-			vs.addAll(lg.lookupSamplers(lt));
-		return new SamplerSet(vs);
+			lg.lookupSamplers(samplers, lt);
+		return new SamplerSet(samplers);
 	}
 
 	/** Get a string representation of the route */

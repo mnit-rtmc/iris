@@ -134,32 +134,25 @@ public class RouteLeg {
 		return o_mi + (0.5f * (d_mi - o_mi));
 	}
 
-	/** Lookup samplers on a corridor trip */
-	public ArrayList<VehicleSampler> lookupSamplers(final LaneType lt) {
-		final ArrayList<VehicleSampler> samplers =
-			new ArrayList<VehicleSampler>();
+	/** Lookup samplers on a corridor trip.
+	 * @param samplers Array to add samplers.
+	 * @param lt Detector lane type to include. */
+	public void lookupSamplers(final ArrayList<VehicleSampler> samplers,
+		final LaneType lt)
+	{
 		corridor.findStation(new Corridor.StationFinder() {
 			public boolean check(float m, StationImpl s) {
-				if (isWithinTrip(m))
-					samplers.addAll(lookupSamplers(s, lt));
+				if (isWithinTrip(m)) {
+					// Detectors within station should be
+					// averaged at the station level
+					SamplerSet dets = s.getSamplerSet()
+					                   .filter(lt);
+					if (dets.size() > 0)
+						samplers.add(dets);
+				}
 				return false;
 			}
 		});
-		return samplers;
-	}
-
-	/** Lookup the samplers for one station and lane type */
-	private ArrayList<VehicleSampler> lookupSamplers(StationImpl s,
-		LaneType lt)
-	{
-		SamplerSet ss = s.getSamplerSet();
-		SamplerSet dets = ss.filter(lt);
-		// Create sampler set combining all detectors in station.
-		// This is needed to average densities over multiple HOT lanes.
-		ArrayList<VehicleSampler> arr = new ArrayList<VehicleSampler>();
-		if (dets.size() > 0)
-			arr.add(dets);
-		return arr;
 	}
 
 	/** Get a string representation */
