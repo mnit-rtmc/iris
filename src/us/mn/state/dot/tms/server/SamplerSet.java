@@ -111,13 +111,13 @@ public class SamplerSet implements VehicleSampler {
 		return (samplers.size() > 0);
 	}
 
-	/** Get the current total count */
+	/** Get a vehicle count */
 	@Override
-	public int getCount() {
+	public int getVehCount(long start, long end) {
 		int count = 0;
 		int n_count = 0;
 		for (VehicleSampler vs: samplers) {
-			int c = vs.getCount();
+			int c = vs.getVehCount(start, end);
 			if (c >= 0) {
 				count += c;
 				n_count++;
@@ -127,13 +127,13 @@ public class SamplerSet implements VehicleSampler {
 		return (n_count > 0) ? count : MISSING_DATA;
 	}
 
-	/** Get the current total flow rate */
+	/** Get a total flow rate */
 	@Override
-	public int getFlow() {
+	public int getFlow(long start, long end) {
 		int flow = 0;
 		int n_flow = 0;
 		for (VehicleSampler vs: samplers) {
-			int f = vs.getFlow();
+			int f = vs.getFlow(start, end);
 			if (f >= 0) {
 				flow += f;
 				n_flow++;

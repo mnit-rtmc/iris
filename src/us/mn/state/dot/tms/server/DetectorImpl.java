@@ -23,6 +23,8 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import us.mn.state.dot.sched.DebugLog;
+import us.mn.state.dot.sched.TimeSteward;
 import us.mn.state.dot.sonar.Namespace;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ChangeVetoException;
@@ -41,6 +43,8 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.TMSException;
 import us.mn.state.dot.tms.VehLengthClass;
 import us.mn.state.dot.tms.units.Interval;
+import static us.mn.state.dot.tms.units.Interval.HOUR;
+import static us.mn.state.dot.tms.units.Interval.Units.MILLISECONDS;
 import static us.mn.state.dot.tms.units.Interval.Units.SECONDS;
 import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
@@ -55,6 +59,9 @@ import us.mn.state.dot.tms.server.event.DetAutoFailEvent;
  * @author Douglas Lau
  */
 public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
+
+	/** Detector debug log */
+	static private final DebugLog DET_LOG = new DebugLog("detector");
 
 	/** Is detector auto-fail enabled? */
 	static private boolean isDetectorAutoFailEnabled() {
@@ -156,9 +163,15 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	/** Sample period for detectors (seconds) */
 	static public final int SAMPLE_PERIOD_SEC = 30;
 
-	/** Time interval for sample period */
-	static private final Interval SAMPLE_INTERVAL = new Interval(
-		SAMPLE_PERIOD_SEC);
+	/** Sample period for detectors (ms) */
+	static public final long SAMPLE_PERIOD_MS = new Interval(
+		SAMPLE_PERIOD_SEC).ms();
+
+	/** Calculate the end time of previous period */
+	static public long calculateEndTime() {
+		long stamp = TimeSteward.currentTimeMillis();
+		return stamp / SAMPLE_PERIOD_MS * SAMPLE_PERIOD_MS;
+	}
 
 	/** Load all the detectors */
 	static protected void loadAll() throws TMSException {
@@ -184,6 +197,12 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			if (d instanceof DetectorImpl)
 				((DetectorImpl) d).initTransients();
 		}
+	}
+
+	/** Log a message */
+	private void logMsg(String msg) {
+		if (DET_LOG.isOpen())
+			DET_LOG.log(getName() + ": " + msg);
 	}
 
 	/** Get a mapping of the columns */
@@ -708,14 +727,18 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 	private transient int last_speed = MISSING_DATA;
 
 	/** Get the current vehicle count */
-	public int getVehCount() {
-		return isSampling() ? veh_count_30 : MISSING_DATA;
-	}
-
-	/** Get the most recent sample count */
 	@Override
-	public int getCount() {
-		return getVehCount();
+	public int getVehCount(long start, long end) {
+		if (isSampling()) {
+			if (DET_LOG.isOpen()) {
+				int vc = veh_cache.getValue(start, end);
+				if (vc != veh_count_30 || "407".equals(name))
+					logMsg("vc30: " + veh_count_30 +
+					       "  vc: " + vc);
+			}
+			return veh_count_30;
+		} else
+			return MISSING_DATA;
 	}
 
 	/** Get the current occupancy */
@@ -726,25 +749,31 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 			return MISSING_DATA;
 	}
 
-	/** Get the current flow rate (vehicles per hour) */
+	/** Get a flow rate (vehicles per hour) */
 	@Override
-	public int getFlow() {
-		int flow = getFlowRaw();
-		return (flow >= 0) ? flow : getFlowFake();
+	public int getFlow(long start, long end) {
+		int flow = getFlowRaw(start, end);
+		return (flow >= 0) ? flow : getFlowFake(start, end);
+	}
+
+	/** Get a raw (non-faked) flow rate (vehicles per hour) */
+	protected int getFlowRaw(long start, long end) {
+		int v = getVehCount(start, end);
+		float ph = new Interval(end - start, MILLISECONDS).per(HOUR);
+		return (v >= 0) ? Math.round(v * ph) : MISSING_DATA;
 	}
 
 	/** Get the current raw (non-faked) flow rate (vehicles per hour) */
-	protected int getFlowRaw() {
-		int v = getVehCount();
-		return (v >= 0)
-		     ? Math.round(v * SAMPLE_INTERVAL.per(Interval.HOUR))
-		     : MISSING_DATA;
+	private int getFlowRaw() {
+		long end = calculateEndTime();
+		long start = end - SAMPLE_PERIOD_MS;
+		return getFlowRaw(start, end);
 	}
 
-	/** Get the fake flow rate (vehicles per hour) */
-	private int getFlowFake() {
+	/** Get a fake flow rate (vehicles per hour) */
+	private int getFlowFake(long start, long end) {
 		FakeDetector f = fake_det;
-		return (f != null) ? f.getFlow() : MISSING_DATA;
+		return (f != null) ? f.getFlow(start, end) : MISSING_DATA;
 	}
 
 	/** Get the current density (vehicles per mile) */

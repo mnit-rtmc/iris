@@ -55,6 +55,9 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 	/** Number of seconds for one time step */
 	static private final int STEP_SECONDS = 30;
 
+	/** Number of milliseconds for one time step */
+	static private final long STEP_MS = new Interval(STEP_SECONDS).ms();
+
 	/** Calculate steps per hour */
 	static private final double STEP_HOUR =
 		new Interval(STEP_SECONDS).per(HOUR);
@@ -216,6 +219,12 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 				it.remove();
 			}
 		}
+	}
+
+	/** Calculate the end time of previous period */
+	static private long calculateEndTime() {
+		long stamp = TimeSteward.currentTimeMillis();
+		return stamp / STEP_MS * STEP_MS;
 	}
 
 	/** Metering corridor */
@@ -739,11 +748,13 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		 *   - Update demand flow and accumulator.
 		 *   - Calculate metering rate. */
 		private void validate() {
+			long end = calculateEndTime();
+			long start = end - STEP_MS;
 			// NOTE: these must happen in proper order
 			checkQueueBackedUp();
 			checkQueueEmpty();
-			updatePassageState();
-			updateDemandState();
+			updatePassageState(start, end);
+			updateDemandState(start, end);
 			min_rate = filterRate(calculateMinimumRate());
 			max_rate = filterRate(calculateMaximumRate());
 			if (s_node != null)
@@ -774,27 +785,27 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Update ramp passage output state */
-		private void updatePassageState() {
-			int passage_vol = calculatePassageCount();
+		private void updatePassageState(long start, long end) {
+			int passage_vol = calculatePassageCount(start, end);
 			passage_hist.push(flowRate(passage_vol));
 			if (passage_vol >= 0)
 				passage_accum += passage_vol;
 			else
 				passage_good = false;
-			int green_vol = green.getCount();
+			int green_vol = green.getVehCount(start, end);
 			if (green_vol > 0)
 				green_accum += green_vol;
 		}
 
 		/** Calculate passage count (vehicles).
 		 * @return Passage vehicle count */
-		private int calculatePassageCount() {
-			int vol = passage.getCount();
+		private int calculatePassageCount(long start, long end) {
+			int vol = passage.getVehCount(start, end);
 			if (vol >= 0)
 				return vol;
-			vol = merge.getCount();
+			vol = merge.getVehCount(start, end);
 			if (vol >= 0) {
-				int b = bypass.getCount();
+				int b = bypass.getVehCount(start, end);
 				if (b > 0) {
 					vol -= b;
 					if (vol < 0)
@@ -806,8 +817,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Update ramp queue demand state */
-		private void updateDemandState() {
-			float dem_veh = queueDemandCount();
+		private void updateDemandState(long start, long end) {
+			float dem_veh = queueDemandCount(start, end);
 			float da = demand_accum;
 			// Calculate demand without adjustment
 			demand_accum += dem_veh;
@@ -821,8 +832,8 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 		}
 
 		/** Get queue demand count for the current period */
-		private float queueDemandCount() {
-			float vol = queue.getCount();
+		private float queueDemandCount(long start, long end) {
+			float vol = queue.getVehCount(start, end);
 			if (vol >= 0)
 				return vol;
 			else {

@@ -24,6 +24,17 @@ import junit.framework.TestCase;
  */
 public class PeriodicSampleCacheTest extends TestCase {
 
+	static private final long[] T = new long[12];
+	static {
+		Calendar cal = Calendar.getInstance();
+		cal.setTimeInMillis(0);
+		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 0);
+		for (int i = 0; i < 12; i++) {
+			T[i] = cal.getTimeInMillis();
+			cal.add(Calendar.SECOND, 30);
+		}
+	}
+
 	public PeriodicSampleCacheTest(String name) {
 		super(name);
 	}
@@ -32,13 +43,18 @@ public class PeriodicSampleCacheTest extends TestCase {
 		PeriodicSampleCache cache = new PeriodicSampleCache(
 			PeriodicSampleType.VEH_COUNT);
 		assertTrue(isEmpty(cache));
-		Calendar cal = Calendar.getInstance();
-		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 2));
+		cache.add(new PeriodicSample(T[1], 30, 2));
 		assertFalse(isEmpty(cache));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 1, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 60, 4));
+		assertTrue(cache.getValue(T[0], T[1]) == 2);
+		assertTrue(cache.getValue(T[1], T[2]) == -1);
+		assertTrue(cache.getValue(T[0], T[2]) == 4);
+		assertTrue(cache.getValue(T[0], T[3]) == -1);
+		cache.add(new PeriodicSample(T[2], 60, 4));
 		assertFalse(isEmpty(cache));
+		assertTrue(cache.getValue(T[0], T[1]) == 2);
+		assertTrue(cache.getValue(T[1], T[2]) == 2);
+		assertTrue(cache.getValue(T[0], T[2]) == 4);
+		assertTrue(cache.getValue(T[0], T[3]) == 6);
 		assertTrue(areSamplesEqual(cache, 2));
 	}
 
@@ -46,12 +62,9 @@ public class PeriodicSampleCacheTest extends TestCase {
 		PeriodicSampleCache cache = new PeriodicSampleCache(
 			PeriodicSampleType.OCCUPANCY);
 		assertTrue(isEmpty(cache));
-		Calendar cal = Calendar.getInstance();
-		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 5));
+		cache.add(new PeriodicSample(T[1], 30, 5));
 		assertFalse(isEmpty(cache));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 1, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 60, 5));
+		cache.add(new PeriodicSample(T[2], 60, 5));
 		assertFalse(isEmpty(cache));
 		assertTrue(areSamplesEqual(cache, 5));
 	}
@@ -60,27 +73,17 @@ public class PeriodicSampleCacheTest extends TestCase {
 		PeriodicSampleCache cache = new PeriodicSampleCache(
 			PeriodicSampleType.SPEED);
 		assertTrue(isEmpty(cache));
-		Calendar cal = Calendar.getInstance();
-		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 10));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 1, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 15));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 1, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 20));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 2, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 25));
-		// missing sample 30 @ (2012-01-01 00:02:30)
-		// missing sample 30 @ (2012-01-01 00:03:00)
-		cal.set(2012, Calendar.JANUARY, 1, 0, 3, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 35));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 4, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 40));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 4, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 45));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 5, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 50));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 5, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 300, 30));
+		cache.add(new PeriodicSample(T[1], 30, 10));
+		cache.add(new PeriodicSample(T[2], 30, 15));
+		cache.add(new PeriodicSample(T[3], 30, 20));
+		cache.add(new PeriodicSample(T[4], 30, 25));
+		// missing sample T[5]
+		// missing sample T[6]
+		cache.add(new PeriodicSample(T[7], 30, 35));
+		cache.add(new PeriodicSample(T[8], 30, 40));
+		cache.add(new PeriodicSample(T[9], 30, 45));
+		cache.add(new PeriodicSample(T[10], 30, 50));
+		cache.add(new PeriodicSample(T[11], 300, 30));
 		assertFalse(isEmpty(cache));
 		Iterator<PeriodicSample> it = cache.iterator();
 		assertTrue(it.hasNext());
@@ -110,31 +113,18 @@ public class PeriodicSampleCacheTest extends TestCase {
 		PeriodicSampleCache cache = new PeriodicSampleCache(
 			PeriodicSampleType.SCAN);
 		assertTrue(isEmpty(cache));
-		Calendar cal = Calendar.getInstance();
-		cal.setTimeInMillis(0);
-		cal.set(2012, Calendar.JANUARY, 1, 0, 0, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 100));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 1, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 150));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 1, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 200));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 2, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 250));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 2, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 300));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 3, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 350));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 3, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 400));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 4, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 450));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 4, 30);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 500));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 5, 0);
-		cache.add(new PeriodicSample(cal.getTimeInMillis(), 30, 550));
+		cache.add(new PeriodicSample(T[1], 30, 100));
+		cache.add(new PeriodicSample(T[2], 30, 150));
+		cache.add(new PeriodicSample(T[3], 30, 200));
+		cache.add(new PeriodicSample(T[4], 30, 250));
+		cache.add(new PeriodicSample(T[5], 30, 300));
+		cache.add(new PeriodicSample(T[6], 30, 350));
+		cache.add(new PeriodicSample(T[7], 30, 400));
+		cache.add(new PeriodicSample(T[8], 30, 450));
+		cache.add(new PeriodicSample(T[9], 30, 500));
+		cache.add(new PeriodicSample(T[10], 30, 550));
 		assertFalse(isEmpty(cache));
-		cal.set(2012, Calendar.JANUARY, 1, 0, 3, 0);
-		cache.purge(cal.getTimeInMillis());
+		cache.purge(T[6]);
 		Iterator<PeriodicSample> it = cache.iterator();
 		assertTrue(it.hasNext());
 		assertTrue(it.next().value == 350);
@@ -155,9 +145,9 @@ public class PeriodicSampleCacheTest extends TestCase {
 
 	private boolean areSamplesEqual(PeriodicSampleCache cache, int val) {
 		Iterator<PeriodicSample> it = cache.iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			PeriodicSample ps = it.next();
-			if(ps.value != val)
+			if (ps.value != val)
 				return false;
 		}
 		return true;

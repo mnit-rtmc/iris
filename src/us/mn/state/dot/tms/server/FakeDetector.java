@@ -57,12 +57,12 @@ public class FakeDetector implements VehicleSampler {
 		dets = p.toArray(new DetectorImpl[0]);
 	}
 
-	/** Get the most recent sample count */
+	/** Get a vehicle count */
 	@Override
-	public int getCount() {
+	public int getVehCount(long start, long end) {
 		int count = 0;
 		for (int i = 0; i < dets.length; i++) {
-			int c = dets[i].getCount();
+			int c = dets[i].getVehCount(start, end);
 			if (c < 0)
 				return MISSING_DATA;
 			count += c;
@@ -70,12 +70,12 @@ public class FakeDetector implements VehicleSampler {
 		return count;
 	}
 
-	/** Get the calculated flow rate */
+	/** Get total flow rate */
 	@Override
-	public int getFlow() {
+	public int getFlow(long start, long end) {
 		int flow = 0;
 		for (int i = 0; i < dets.length; i++) {
-			int f = dets[i].getFlowRaw();
+			int f = dets[i].getFlowRaw(start, end);
 			if (f < 0)
 				return MISSING_DATA;
 			flow += f;

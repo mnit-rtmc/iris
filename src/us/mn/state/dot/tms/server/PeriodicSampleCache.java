@@ -218,6 +218,65 @@ public class PeriodicSampleCache {
 		return values;
 	}
 
+	/** Get aggregate of sampled values in a time interval */
+	public int getValue(long start, long end) {
+		switch (sample_type.aggregation) {
+		case SUM:
+			return getSum(start, end);
+		case AVERAGE:
+			return getAverage(start, end);
+		default:
+			return MISSING_DATA;
+		}
+	}
+
+	/** Get sum of sampled values in a time interval */
+	private int getSum(long start, long end) {
+		int period = 0;
+		int total = 0;
+		int n_samples = 0;
+		for (PeriodicSample ps: samples) {
+			if (0 == period)
+				period = ps.period;
+			else if (period != ps.period)
+				break;
+			if (ps.value >= 0) {
+				long stamp = ps.start();
+				if (stamp >= start && stamp < end) {
+					total += ps.value;
+					n_samples++;
+				}
+			}
+		}
+		long sam_ms = n_samples * period * 1000; // sampled period
+		long full_ms = end - start;              // full period
+		if (sam_ms == full_ms)
+			return total;
+		else if (2 * sam_ms >= full_ms) {  // at least half sampled
+			float r = full_ms / (float) sam_ms;
+			return Math.round(total * r);
+		} else
+			return MISSING_DATA;
+	}
+
+	/** Get average of sampled values in a time interval */
+	private int getAverage(long start, long end) {
+		int total = 0;
+		int n_samples = 0;
+		for (PeriodicSample ps: samples) {
+			if (ps.value >= 0) {
+				long stamp = ps.start();
+				if (stamp >= start && stamp < end) {
+					total += ps.value;
+					n_samples++;
+				}
+			}
+		}
+		return (n_samples > 0)
+		      ? Math.round(total / (float) n_samples)
+		      : MISSING_DATA;
+	}
+
 	/** Add an array of samples.
 	 * @param start Start time of sample array.
 	 * @param period Sampling period (seconds).

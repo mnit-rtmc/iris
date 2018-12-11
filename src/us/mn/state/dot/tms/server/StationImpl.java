@@ -133,10 +133,16 @@ public class StationImpl implements Station, VehicleSampler {
 	 * @param count Count of samples.
 	 * @return Average of samples, or MISSING_DATA. */
 	static private float average(float total, int count) {
-		if (count > 0)
-			return total / count;
-		else
-			return MISSING_DATA;
+		return (count > 0)
+		      ? total / count
+		      : MISSING_DATA;
+	}
+
+	/** Check if a detector is a valid station detector */
+	static private boolean isValidStation(DetectorImpl det) {
+		return det.isSampling()
+		    && det.isStationOrCD()
+		    && !det.getAbandoned();
 	}
 
 	/** Staiton name */
@@ -196,25 +202,41 @@ public class StationImpl implements Station, VehicleSampler {
 		return false;
 	}
 
-	/** Current average station vehicle count */
-	private int veh_count = MISSING_DATA;
-
 	/** Current average station occupancy */
 	private float occupancy = MISSING_DATA;
 
-	/** Current average station flow */
-	private int flow = MISSING_DATA;
-
-	/** Get the current vehicle count */
+	/** Get a vehicle count */
 	@Override
-	public int getCount() {
-		return veh_count;
+	public int getVehCount(long start, long end) {
+		int total = 0;
+		int n_count = 0;
+		for (DetectorImpl det: r_node.getDetectors()) {
+			if (isValidStation(det)) {
+				int c = det.getVehCount(start, end);
+				if (c >= 0) {
+					total += c;
+					n_count++;
+				}
+			}
+		}
+		return Math.round(average(total, n_count));
 	}
 
 	/** Get the average station flow */
 	@Override
-	public int getFlow() {
-		return flow;
+	public int getFlow(long start, long end) {
+		int t_flow = 0;
+		int n_flow = 0;
+		for (DetectorImpl det: r_node.getDetectors()) {
+			if (isValidStation(det)) {
+				int f = det.getFlow(start, end);
+				if (f >= 0) {
+					t_flow += f;
+					n_flow++;
+				}
+			}
+		}
+		return Math.round(average(t_flow, n_flow));
 	}
 
 	/** Current average station density */
@@ -341,34 +363,19 @@ public class StationImpl implements Station, VehicleSampler {
 	public void calculateData() {
 		updateRollingSamples();
 		float low = MISSING_DATA;
-		float t_veh_count = 0;
-		int n_veh_count = 0;
 		float t_occ = 0;
 		int n_occ = 0;
-		float t_flow = 0;
-		int n_flow = 0;
 		float t_density = 0;
 		int n_density = 0;
 		float t_speed = 0;
 		int n_speed = 0;
-		for(DetectorImpl det: r_node.getDetectors()) {
-			if (det.getAbandoned() || !det.isStationOrCD() ||
-			   !det.isSampling())
+		for (DetectorImpl det: r_node.getDetectors()) {
+			if (!isValidStation(det))
 				continue;
-			float f = det.getVehCount();
-			if (f != MISSING_DATA) {
-				t_veh_count += f;
-				n_veh_count++;
-			}
-			f = det.getOccupancy();
+			float f = det.getOccupancy();
 			if (f != MISSING_DATA) {
 				t_occ += f;
 				n_occ++;
-			}
-			f = det.getFlow();
-			if (f != MISSING_DATA) {
-				t_flow += f;
-				n_flow++;
 			}
 			f = det.getDensity();
 			if (f != MISSING_DATA) {
@@ -385,9 +392,7 @@ public class StationImpl implements Station, VehicleSampler {
 					low = Math.min(f, low);
 			}
 		}
-		veh_count = Math.round(average(t_veh_count, n_veh_count));
 		occupancy = average(t_occ, n_occ);
-		flow = Math.round(average(t_flow, n_flow));
 		density = average(t_density, n_density);
 		speed = average(t_speed, n_speed);
 		updateRollingSpeed(speed);
@@ -399,7 +404,9 @@ public class StationImpl implements Station, VehicleSampler {
 	public void writeSampleXml(Writer w) throws IOException {
 		if (!getActive())
 			return;
-		int f = getFlow();
+		long end = DetectorImpl.calculateEndTime();
+		long start = end - DetectorImpl.SAMPLE_PERIOD_MS;
+		int f = getFlow(start, end);
 		int s = Math.round(getSpeed());
 		float o = occupancy;
 		w.write("\t<sample");
