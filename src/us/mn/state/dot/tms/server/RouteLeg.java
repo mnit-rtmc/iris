@@ -153,12 +153,12 @@ public class RouteLeg {
 		LaneType lt)
 	{
 		SamplerSet ss = s.getSamplerSet();
-		ArrayList<VehicleSampler> dets = ss.filter(lt);
+		SamplerSet dets = ss.filter(lt);
 		// Create sampler set combining all detectors in station.
 		// This is needed to average densities over multiple HOT lanes.
 		ArrayList<VehicleSampler> arr = new ArrayList<VehicleSampler>();
 		if (dets.size() > 0)
-			arr.add(new SamplerSet(dets));
+			arr.add(dets);
 		return arr;
 	}
 

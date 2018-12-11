@@ -45,17 +45,17 @@ public class SamplerSet implements VehicleSampler {
 	}
 
 	/** Filter a vehicle sampler set */
-	public ArrayList<VehicleSampler> filter(Filter f) {
-		ArrayList<VehicleSampler> dets = new ArrayList<VehicleSampler>();
+	public SamplerSet filter(Filter f) {
+		SamplerSet ss = new SamplerSet();
 		for (VehicleSampler d: samplers) {
 			if (f.check(d))
-				dets.add(d);
+				ss.samplers.add(d);
 		}
-		return dets;
+		return ss;
 	}
 
 	/** Filter a vehicle sampler set */
-	public ArrayList<VehicleSampler> filter(final LaneType lt) {
+	public SamplerSet filter(final LaneType lt) {
 		return filter(new Filter() {
 			public boolean check(VehicleSampler vs) {
 				if (vs instanceof DetectorImpl) {

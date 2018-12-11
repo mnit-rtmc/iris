@@ -71,9 +71,9 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 
 	/** Lookup a single green detector in a sampler set */
 	static private DetectorImpl lookupGreen(SamplerSet ss) {
-		ArrayList<VehicleSampler> greens = ss.filter(LaneType.GREEN);
+		SamplerSet greens = ss.filter(LaneType.GREEN);
 		if (1 == greens.size()) {
-			VehicleSampler vs = greens.get(0);
+			VehicleSampler vs = greens.getAll().get(0);
 			if (vs instanceof DetectorImpl)
 				return (DetectorImpl) vs;
 		}
@@ -833,7 +833,8 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 				GeoLoc l = n.getGeoLoc();
 				if (GeoLocHelper.matchesRoot(l, geo_loc)) {
 					SamplerSet ds = n.getSamplerSet();
-					samplers.addAll(ds.filter(filter));
+					samplers.addAll(ds.filter(filter)
+					                  .getAll());
 				}
 			}
 			return false;
@@ -855,7 +856,7 @@ public class RampMeterImpl extends DeviceImpl implements RampMeter {
 	/** Lookup the associated detectors */
 	private void lookupDetectors() {
 		SamplerSet ss = getSamplerSet();
-		merge_set = new SamplerSet(ss.filter(LaneType.MERGE));
+		merge_set = ss.filter(LaneType.MERGE);
 		green_det = lookupGreen(ss);
 	}
 

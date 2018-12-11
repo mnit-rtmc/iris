@@ -689,11 +689,11 @@ public class KAdaptiveAlgorithm implements MeterAlgorithmState {
 			meter = mtr;
 			node = en;
 			SamplerSet ss = meter.getSamplerSet();
-			queue = new SamplerSet(ss.filter(LaneType.QUEUE));
-			passage = new SamplerSet(ss.filter(LaneType.PASSAGE));
-			merge = new SamplerSet(ss.filter(LaneType.MERGE));
-			bypass = new SamplerSet(ss.filter(LaneType.BYPASS));
-			green = new SamplerSet(ss.filter(LaneType.GREEN));
+			queue = ss.filter(LaneType.QUEUE);
+			passage = ss.filter(LaneType.PASSAGE);
+			merge = ss.filter(LaneType.MERGE);
+			bypass = ss.filter(LaneType.BYPASS);
+			green = ss.filter(LaneType.GREEN);
 			s_node = getAssociatedStation();
 		}
 

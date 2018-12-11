@@ -134,7 +134,7 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 	 *         false If parking space and occupied.
 	 *         null If not a parking space or not sampling. */
 	static private Boolean getParkingAvailable2(SamplerSet ss, boolean tail){
-		ss = new SamplerSet(ss.filter(new ParkingFilter(tail)));
+		ss = ss.filter(new ParkingFilter(tail));
 		float mo = ss.getMaxOccupancy(MISSING_DATA);
 		return (mo >= 0) ? (mo < PARK_AVAIL_OCC) : null;
 	}
