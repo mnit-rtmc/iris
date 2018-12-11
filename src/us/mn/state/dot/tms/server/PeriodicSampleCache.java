@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2012  Minnesota Department of Transportation
+ * Copyright (C) 2010-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,15 +32,15 @@ public class PeriodicSampleCache {
 	static private int[] interpolateSum(int[] values, int total) {
 		int e_total = 0;	// existing values total
 		int n_miss = 0;		// number of missing samples
-		for(int value: values) {
-			if(value < 0)
+		for (int value: values) {
+			if (value < 0)
 				n_miss++;
 			else
 				e_total += value;
 		}
-		if(n_miss > 0) {
+		if (n_miss > 0) {
 			int excess = total - e_total;
-			if(excess >= 0)
+			if (excess >= 0)
 				return missingSum(values, excess, n_miss);
 		}
 		return new int[0];
@@ -55,10 +55,10 @@ public class PeriodicSampleCache {
 		int[] vals = new int[values.length];
 		int t_miss = excess / n_miss;
 		int m_miss = excess % n_miss;
-		for(int i = 0; i < values.length; i++) {
-			if(values[i] < 0) {
+		for (int i = 0; i < values.length; i++) {
+			if (values[i] < 0) {
 				vals[i] = t_miss;
-				if(m_miss > 0) {
+				if (m_miss > 0) {
 					vals[i]++;
 					m_miss--;
 				}
@@ -75,16 +75,16 @@ public class PeriodicSampleCache {
 	static private int[] interpolateAverage(int[] values, int average) {
 		int e_total = 0;	// existing values total
 		int n_miss = 0;		// number of missing samples
-		for(int value: values) {
-			if(value < 0)
+		for (int value: values) {
+			if (value < 0)
 				n_miss++;
 			else
 				e_total += value;
 		}
-		if(n_miss > 0) {
+		if (n_miss > 0) {
 			int a_total = average * values.length;
 			float excess = a_total - e_total;
-			if(excess >= 0) {
+			if (excess >= 0) {
 				int m_avg = Math.round(excess / n_miss);
 				return missingAverage(values, m_avg);
 			}
@@ -98,11 +98,10 @@ public class PeriodicSampleCache {
 	 * @return Array of samples which were missing. */
 	static private int[] missingAverage(int[] values, int m_avg) {
 		int[] vals = new int[values.length];
-		for(int i = 0; i < values.length; i++) {
-			if(values[i] < 0)
-				vals[i] = m_avg;
-			else
-				vals[i] = MISSING_DATA;
+		for (int i = 0; i < values.length; i++) {
+			vals[i] = (values[i] < 0)
+			        ? m_avg
+			        : MISSING_DATA;
 		}
 		return vals;
 	}
@@ -126,10 +125,10 @@ public class PeriodicSampleCache {
 	 * cache is cleared first.
 	 * @param ps Sample to add to the cache. */
 	public void add(PeriodicSample ps) {
-		if(sample_type.isValid(ps)) {
-			if(!isPeriodOk(ps.period))
+		if (sample_type.isValid(ps)) {
+			if (!isPeriodOk(ps.period))
 				samples.clear();
-			if(isPeriodSame(ps.period))
+			if (isPeriodSame(ps.period))
 				addSample(ps);
 			else
 				interpolate(ps);
@@ -152,10 +151,9 @@ public class PeriodicSampleCache {
 	 * @param period Default sample period.
 	 * @return Sample period (seconds). */
 	private int getPeriod(int period) {
-		if(samples.isEmpty())
-			return period;
-		else
-			return samples.first().period;
+		return samples.isEmpty()
+		      ? period
+		      : samples.first().period;
 	}
 
 	/** Add a sample */
@@ -167,8 +165,8 @@ public class PeriodicSampleCache {
 
 	/** Check if a sample exists with the given time stamp (start) */
 	private boolean exists(long stamp) {
-		for(PeriodicSample ps: samples) {
-			if(ps.start() == stamp)
+		for (PeriodicSample ps: samples) {
+			if (ps.start() == stamp)
 				return true;
 		}
 		return false;
@@ -183,7 +181,7 @@ public class PeriodicSampleCache {
 		int n_samples = ps.period / period;
 		assert n_samples > 1;
 		int[] values = getValues(start, ps.end(), n_samples, period);
-		switch(sample_type.aggregation) {
+		switch (sample_type.aggregation) {
 		case SUM:
 			addSamples(start, period, interpolateSum(values,
 				ps.value));
@@ -208,12 +206,12 @@ public class PeriodicSampleCache {
 	{
 		int period_ms = period * 1000;
 		int[] values = new int[n_samples];
-		for(int i = 0; i < values.length; i++)
+		for (int i = 0; i < values.length; i++)
 			values[i] = MISSING_DATA;
-		for(PeriodicSample ps: samples) {
+		for (PeriodicSample ps: samples) {
 			long stamp = ps.start();
-			if(stamp >= start && stamp < end) {
-				int i = (int)((stamp - start) / period_ms);
+			if (stamp >= start && stamp < end) {
+				int i = (int) ((stamp - start) / period_ms);
 				values[i] = ps.value;
 			}
 		}
@@ -226,8 +224,8 @@ public class PeriodicSampleCache {
 	 * @param vals Array of sample values to add. */
 	private void addSamples(long start, int period, int[] vals) {
 		int period_ms = period * 1000;
-		for(int i = 0; i < vals.length; i++) {
-			if(vals[i] >= 0) {
+		for (int i = 0; i < vals.length; i++) {
+			if (vals[i] >= 0) {
 				long stamp = start + period_ms * (i + 1);
 				addSample(new PeriodicSample(stamp, period,
 					vals[i]));
@@ -244,9 +242,9 @@ public class PeriodicSampleCache {
 	 * @param before Time stamp to purge before. */
 	public void purge(long before) {
 		Iterator<PeriodicSample> it = iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			PeriodicSample ps = it.next();
-			if(ps.end() < before)
+			if (ps.end() < before)
 				it.remove();
 			else
 				break;
