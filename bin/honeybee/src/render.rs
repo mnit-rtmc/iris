@@ -597,19 +597,17 @@ impl PageRenderer {
     fn render_rect(&self, page: &mut Raster, r: Rectangle, clr: [u8;3])
         ->Result<(), SyntaxError>
     {
-        if r.x > 0 && r.y > 0 {
-            let rx = r.x as u32 - 1;
-            let ry = r.y as u32 - 1;
-            let rw = r.w as u32;
-            let rh = r.h as u32;
-            if rx + rw <= page.width() && ry + rh <= page.height() {
-                for y in 0..rh {
-                    for x in 0..rw {
-                        page.set_pixel(rx + x, ry + y, clr);
-                    }
+        let rx = r.x as u32 - 1; // r.x must be > 0
+        let ry = r.y as u32 - 1; // r.y must be > 0
+        let rw = r.w as u32;
+        let rh = r.h as u32;
+        if rx + rw <= page.width() && ry + rh <= page.height() {
+            for y in 0..rh {
+                for x in 0..rw {
+                    page.set_pixel(rx + x, ry + y, clr);
                 }
-                return Ok(());
             }
+            return Ok(());
         }
         Err(SyntaxError::UnsupportedTagValue)
     }
