@@ -41,8 +41,8 @@ impl Raster {
     }
     /// Set the color of one pixel.
     pub fn set_pixel(&mut self, x: u32, y: u32, color: [u8; 3]) {
-        assert!(x < self.width, "x: {}, width: {}", x, self.width);
-        assert!(y < self.height, "y: {}, height: {}", y, self.height);
+        debug_assert!(x < self.width, "x: {}, width: {}", x, self.width);
+        debug_assert!(y < self.height, "y: {}, height: {}", y, self.height);
         let i = ((y * self.width + x) * 3) as usize;
         self.pixels[i+0] = color[0];
         self.pixels[i+1] = color[1];
@@ -50,8 +50,8 @@ impl Raster {
     }
     /// Get the color of one pixel.
     pub fn get_pixel(&self, x: u32, y: u32) -> [u8; 3] {
-        assert!(x < self.width, "x: {}, width: {}", x, self.width);
-        assert!(y < self.height, "y: {}, height: {}", y, self.height);
+        debug_assert!(x < self.width, "x: {}, width: {}", x, self.width);
+        debug_assert!(y < self.height, "y: {}, height: {}", y, self.height);
         let mut color = [0; 3];
         let i = ((y * self.width + x) * 3) as usize;
         color[0] = self.pixels[i+0];
