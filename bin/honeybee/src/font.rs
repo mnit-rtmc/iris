@@ -186,6 +186,10 @@ impl Graphic {
         let bpp = self.bits_per_pixel()?;
         let w = self.width();
         let h = self.height();
+        if x + w > page.width() || y + h > page.height() {
+            // There is no GraphicTooBig syntax error
+            return Err(SyntaxError::Other.into());
+        }
         let n = (w * h * bpp + 7) / 8;
         let mut buf = vec!(0; n as usize);
         let n = decode_config_slice(&self.pixels, config, &mut buf)?;
