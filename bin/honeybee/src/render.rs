@@ -692,7 +692,7 @@ impl PageRenderer {
     {
         let b = self.baseline(s, fonts)?;
         let h = s.height(fonts)?;
-        assert!(b >= h);
+        debug_assert!(b >= h);
         Ok(b - h)
     }
     /// Get the baseline of a text span.
@@ -718,13 +718,9 @@ impl PageRenderer {
     fn baseline_middle(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
         -> Result<u16, SyntaxError>
     {
-        let y = span.state.text_rectangle.y;
+        let top = span.state.text_rectangle.y - 1;
         let h = span.state.text_rectangle.h;
-        let top = y - 1;
         let height = self.offset_vert(span, fonts, State::matches_middle)?;
-        if height > h {
-            return Err(SyntaxError::TextTooBig);
-        }
         let mtop = (h - height) / 2;
         let mheight = self.offset_vert(span, fonts, State::matches_top)?;
         let mut p = top + mtop + mheight;
@@ -737,13 +733,11 @@ impl PageRenderer {
     fn baseline_bottom(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
         -> Result<u16, SyntaxError>
     {
-        let y = span.state.text_rectangle.y;
+        let top = span.state.text_rectangle.y - 1;
         let h = span.state.text_rectangle.h;
-        let bot = y + h - 1;
+        let bot = top + h;
         let height = self.offset_vert(span, fonts, State::matches_bottom)?;
-        if height > bot {
-            return Err(SyntaxError::TextTooBig);
-        }
+        debug_assert!(height <= bot);
         Ok(bot - height)
     }
     /// Calculate vertical offset of a span
@@ -767,7 +761,11 @@ impl PageRenderer {
         }
         let height: u16 = lines.iter().map(|t| t.height).sum();
         let spacing: u16 = lines.windows(2).map(|s| s[1].spacing(&s[0])).sum();
-        Ok(height + spacing)
+        if height + spacing <= span.state.text_rectangle.h {
+            Ok(height + spacing)
+        } else {
+            Err(SyntaxError::TextTooBig)
+        }
     }
 }
 
