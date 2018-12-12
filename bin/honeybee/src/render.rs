@@ -566,7 +566,7 @@ impl PageRenderer {
             match v {
                 Value::ColorRectangle(r,c) => {
                     let clr = rs.color_rgb(*c)?;
-                    self.render_rect(&mut page, *r, clr);
+                    self.render_rect(&mut page, *r, clr)?;
                 },
                 Value::Graphic(gn,None) => {
                     let n = *gn as i32;
@@ -594,12 +594,24 @@ impl PageRenderer {
         Ok(page)
     }
     /// Render a color rectangle
-    fn render_rect(&self, page: &mut Raster, r: Rectangle, clr: [u8;3]) {
-        for y in 0..r.h {
-            for x in 0..r.w {
-                page.set_pixel((r.x + x - 1).into(), (r.y + y - 1).into(), clr);
+    fn render_rect(&self, page: &mut Raster, r: Rectangle, clr: [u8;3])
+        ->Result<(), SyntaxError>
+    {
+        if r.x > 0 && r.y > 0 {
+            let rx = r.x as u32 - 1;
+            let ry = r.y as u32 - 1;
+            let rw = r.w as u32;
+            let rh = r.h as u32;
+            if rx + rw <= page.width() && ry + rh <= page.height() {
+                for y in 0..rh {
+                    for x in 0..rw {
+                        page.set_pixel(rx + x, ry + y, clr);
+                    }
+                }
+                return Ok(());
             }
         }
+        Err(SyntaxError::UnsupportedTagValue)
     }
     /// Get the left side of a text span.
     fn left(&self, s: &TextSpan, fonts: &HashMap<i32, Font>)
