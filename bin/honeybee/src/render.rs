@@ -636,13 +636,9 @@ impl PageRenderer {
     fn left_center(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
         ->Result<u16, SyntaxError>
     {
-        let x = span.state.text_rectangle.x;
+        let left = span.state.text_rectangle.x - 1;
         let w = span.state.text_rectangle.w;
-        let left = x - 1;
         let width = self.offset_horiz(span, fonts, State::matches_center)?;
-        if width > w {
-            return Err(SyntaxError::TextTooBig);
-        }
         let mleft = (w - width) / 2;
         let mwidth = self.offset_horiz(span, fonts, State::matches_left)?;
         let mut p = left + mleft + mwidth;
@@ -655,13 +651,11 @@ impl PageRenderer {
     fn left_right(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
         -> Result<u16, SyntaxError>
     {
-        let x = span.state.text_rectangle.x;
+        let left = span.state.text_rectangle.x - 1;
         let w = span.state.text_rectangle.w;
-        let right = x + w - 1;
+        let right = left + w;
         let width = self.offset_horiz(span, fonts, State::matches_right)?;
-        if width > right {
-            return Err(SyntaxError::TextTooBig);
-        }
+        debug_assert!(width <= right);
         Ok(right - width)
     }
     /// Calculate horizontal offset of a span
@@ -686,7 +680,11 @@ impl PageRenderer {
                 cs = Some(sc);
             }
         }
-        Ok(width)
+        if width <= span.state.text_rectangle.w {
+            Ok(width)
+        } else {
+            Err(SyntaxError::TextTooBig)
+        }
     }
     /// Get the top of a text span.
     fn top(&self, s: &TextSpan, fonts: &HashMap<i32, Font>)
