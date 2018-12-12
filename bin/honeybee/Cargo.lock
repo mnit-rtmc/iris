@@ -224,7 +224,7 @@ dependencies = [
 
 [[package]]
 name = "honeybee"
-version = "0.4.3"
+version = "0.4.4"
 dependencies = [
  "base64 0.9.3 (registry+https://github.com/rust-lang/crates.io-index)",
  "env_logger 0.5.13 (registry+https://github.com/rust-lang/crates.io-index)",
