@@ -16,20 +16,40 @@
 package us.mn.state.dot.tms.server.comm.redlion;
 
 import java.io.IOException;
+import us.mn.state.dot.tms.server.comm.AsciiDeviceProperty;
 
 /**
  * GPS property for querying a device's location
  * using the RedLion "AT+BGPSGT" command.
  *
  * @author John L. Stanley
+ * @author Douglas Lau
  */
-public class RedLionProperty extends GpsProperty {
+public class RedLionProperty extends AsciiDeviceProperty {
 
 	/** Create a new GPS property for RedLion protocol */
 	public RedLionProperty() {
 		// RedLion modem: Query the GPS reporting data
 		super("AT+BGPSGT\r");
 		max_chars = 200;
+	}
+
+	/** GPS data from response */
+	private GpsData gps_data;
+
+	/** Did we get a GPS lock (valid)? */
+	public boolean gotGpsLock() {
+		return (gps_data != null) ? gps_data.lock : false;
+	}
+
+	/** Get GPS latitude */
+	public double getLat() {
+		return (gps_data != null) ? gps_data.lat : 0;
+	}
+
+	/** Get GPS longitude */
+	public double getLon() {
+		return (gps_data != null) ? gps_data.lon : 0;
 	}
 
 	/** Parses TAIP -and- NMEA responses:
@@ -41,7 +61,16 @@ public class RedLionProperty extends GpsProperty {
 	 */
 	@Override
 	protected boolean parseResponse(String resp) throws IOException {
-		return parseTaipGps(resp)
-		    || parseNmeaGps(resp);
+		gps_data = TaipResponse.parse(resp);
+		if (gps_data != null)
+			return true;
+		gps_data = NmeaResponse.parse(resp);
+		return (gps_data != null);
+	}
+
+	/** Get a string representation */
+	@Override
+	public String toString() {
+		return "lat:" + getLat() + " lon:" + getLon();
 	}
 }

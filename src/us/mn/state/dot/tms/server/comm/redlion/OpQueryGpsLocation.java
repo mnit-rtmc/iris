@@ -19,6 +19,7 @@ import java.io.IOException;
 import us.mn.state.dot.tms.server.GeoLocImpl;
 import us.mn.state.dot.tms.server.GpsImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
+import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 
 /**
@@ -27,7 +28,7 @@ import us.mn.state.dot.tms.server.comm.PriorityLevel;
  * @author John L. Stanley
  * @author Douglas Lau
  */
-public class OpQueryGpsLocation extends OpGps {
+public class OpQueryGpsLocation extends OpDevice<RedLionProperty> {
 
 	/** Log an error msg */
 	protected void logError(String msg) {
@@ -35,28 +36,36 @@ public class OpQueryGpsLocation extends OpGps {
 			GpsImpl.GPS_LOG.log(controller.getName() + "! " + msg);
 	}
 
+	/** GPS device */
+	private final GpsImpl gps;
+
 	/** Device location */
 	private final GeoLocImpl loc;
 
+	/** Property to query */
+	private final RedLionProperty prop;
+
 	/** Create a new GPS operation */
 	public OpQueryGpsLocation(GpsImpl g, GeoLocImpl l) {
-		super(PriorityLevel.DEVICE_DATA, g, new RedLionProperty());
+		super(PriorityLevel.DEVICE_DATA, g);
+		gps = g;
 		loc = l;
+		prop = new RedLionProperty();
 		gps.setLatestPollNotify();
 	}
 
 	/** Create the second phase of the operation */
 	@Override
-	protected Phase<GpsProperty> phaseTwo() {
-		return (prop != null) ? new DoPhaseTwo() : null;
+	protected Phase<RedLionProperty> phaseTwo() {
+		return new QueryGPS();
 	}
 
 	/** Phase to send GPS location-query command */
-	private class DoPhaseTwo extends Phase<GpsProperty> {
+	private class QueryGPS extends Phase<RedLionProperty> {
 
-		/** Add the GpsProperty cmd to the outbound message */
-		protected Phase<GpsProperty> poll(CommMessage<GpsProperty> mess)
-			throws IOException
+		/** Add the RedLionProperty cmd to the outbound message */
+		protected Phase<RedLionProperty> poll(
+			CommMessage<RedLionProperty> mess) throws IOException
 		{
 			mess.add(prop);
 			mess.queryProps();

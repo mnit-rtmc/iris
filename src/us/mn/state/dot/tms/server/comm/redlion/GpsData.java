@@ -1,6 +1,5 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2015-2017  SRF Consulting Group
  * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
@@ -15,27 +14,26 @@
  */
 package us.mn.state.dot.tms.server.comm.redlion;
 
-import us.mn.state.dot.tms.server.GpsImpl;
-import us.mn.state.dot.tms.server.comm.OpDevice;
-import us.mn.state.dot.tms.server.comm.PriorityLevel;
-
 /**
- * Operation to be performed on a GPS modem.
+ * GPS data (location).
  *
- * @author John L. Stanley
+ * @author Douglas Lau
  */
-abstract public class OpGps extends OpDevice<GpsProperty> {
+public class GpsData {
 
-	/** GPS modem to talk to */
-	protected final GpsImpl gps;
+	/** Was the GPS signal locked (valid) */
+	public final boolean lock;
 
-	/** GPS property */
-	protected final GpsProperty prop;
+	/** Latitude of GPS location */
+	public final double lat;
 
-	/** Create a new GPS operation */
-	public OpGps(PriorityLevel p, GpsImpl g, GpsProperty gprop) {
-		super(p, g);
-		gps = g;
-		prop = gprop;
+	/** Longitude of GPS location */
+	public final double lon;
+
+	/** Create a new GPS property */
+	public GpsData(boolean lk, double lt, double ln) {
+		lock = lk;
+		lat = lt;
+		lon = ln;
 	}
 }

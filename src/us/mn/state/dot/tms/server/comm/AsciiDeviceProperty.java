@@ -134,8 +134,8 @@ abstract public class AsciiDeviceProperty
 	 * @throws IOException there's a fatal error, stop looking
 	 *  for a valid response. 
 	 */
-	protected abstract boolean parseResponse(String resp)
-			throws IOException;
+	abstract protected boolean parseResponse(String resp) throws IOException;
+
 	/* NOTE: Override this method in classes derived
 	 * from AsciiDeviceProperty to extract info from
 	 * the response(s). 

@@ -27,12 +27,12 @@ import us.mn.state.dot.tms.server.comm.ThreadedPoller;
 import us.mn.state.dot.tms.utils.URIUtil;
 
 /**
- * A Poller to communicate with a GPS using
- *  RedLion AT+BMDIAG command.
+ * A Poller to communicate with a GPS using RedLion AT+BMDIAG command.
  *
  * @author John L. Stanley
+ * @author Douglas Lau
  */
-public class RedLionPoller extends ThreadedPoller<GpsProperty>
+public class RedLionPoller extends ThreadedPoller<RedLionProperty>
 	implements GpsPoller
 {
 	/** Create a new RedLion GPS poller */
