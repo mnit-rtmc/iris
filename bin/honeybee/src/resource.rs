@@ -133,6 +133,23 @@ const TPIMS_DYN_RES: Resource = Resource::Simple(
 ) r",
 );
 
+const TPIMS_ARCH_RES: Resource = Resource::Simple(
+"TPIMS_archive",
+"SELECT row_to_json(r)::text FROM (\
+    SELECT site_id AS \"siteId\", to_char(time_stamp AT TIME ZONE 'UTC', \
+           'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStamp\", \
+           to_char(time_stamp_static AT TIME ZONE 'UTC', \
+           'YYYY-mm-dd\"T\"HH24:MI:SSZ') AS \"timeStampStatic\", \
+           reported_available AS \"reportedAvailable\", \
+           trend, open, trust_data AS \"trustData\", capacity, \
+           last_verification_check AS \"lastVerificationCheck\", \
+           verification_check_amplitude AS \"verificationCheckAmplitude\", \
+           low_threshold AS \"lowThreshold\", \
+           true_available AS \"trueAvailable\" \
+    FROM parking_area_view \
+) r",
+);
+
 const GRAPHIC_RES: Resource = Resource::Simple(
 "graphic",
 "SELECT row_to_json(r)::text FROM (\
@@ -661,6 +678,8 @@ pub fn lookup_resource(n: &str) -> Option<Resource> {
         "TPIMS_static"         => Some(TPIMS_STAT_RES),
         "parking_area_dynamic"|
         "TPIMS_dynamic"        => Some(TPIMS_DYN_RES),
+        "parking_area_archive"|
+        "TPIMS_archive"        => Some(TPIMS_ARCH_RES),
         "graphic"              => Some(GRAPHIC_RES),
         "font"                 => Some(FONT_RES),
         "sign_message"         => Some(SIGN_MSG_RES),
@@ -668,7 +687,7 @@ pub fn lookup_resource(n: &str) -> Option<Resource> {
     }
 }
 
-pub const ALL: [&'static str; 10] = [
+pub const ALL: [&'static str; 11] = [
     "camera_pub",
     "dms_pub",
     "dms_message",
@@ -676,6 +695,7 @@ pub const ALL: [&'static str; 10] = [
     "sign_config",
     "parking_area",
     "parking_area_dynamic",
+    "parking_area_archive",
     "graphic",
     "font",
     "sign_message",
