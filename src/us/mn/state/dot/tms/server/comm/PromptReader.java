@@ -25,7 +25,6 @@ import us.mn.state.dot.tms.utils.LineReader;
  *
  * @author John L. Stanley
  */
-
 public class PromptReader extends LineReader {
 
 	/** String the reader will look for at the end of a line */
@@ -37,7 +36,8 @@ public class PromptReader extends LineReader {
 	 * @param xprompt Response the reader is looking for.
 	 * @throws IOException */
 	public PromptReader(InputStream is, int max_chars, String xprompt)
-			throws IOException {
+		throws IOException
+	{
 		super(is, max_chars);
 		prompt = xprompt;
 	}

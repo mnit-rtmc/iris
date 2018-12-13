@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -14,32 +15,38 @@
  */
 package us.mn.state.dot.tms.server.comm.sierragx;
 
+import java.io.InputStream;
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.AsciiPromptProperty;
+import us.mn.state.dot.tms.utils.LineReader;
+import us.mn.state.dot.tms.server.comm.PromptReader;
 
 /**
  * Property to send nothing and wait for a "login:"
  * prompt-style response (no trailing EOL).
  *
  * @author John L. Stanley
+ * @author Douglas Lau
  */
-public class TestLoginModeProperty extends AsciiPromptProperty {
+public class TestLoginModeProperty extends SierraGxProperty {
 
+	/** Create a new test login mode property */
 	public TestLoginModeProperty() {
-		super("", "login: ");
-		max_chars = 200;
+		super("");
 		bGotValidResponse = true;
 	}
 
-	//--------------------------------------
+	/** Create a new line reader.
+	 * @param is Input stream to read. */
+	@Override
+	protected LineReader newLineReader(InputStream is) throws IOException {
+		return new PromptReader(is, MAX_CHARS, "login: ");
+	}
 
 	protected boolean bGotLoginPrompt = false;
 
 	public boolean gotLoginPrompt() {
 		return bGotLoginPrompt;
 	}
-
-	//--------------------------------------
 
 	@Override
 	protected boolean parseResponse(String resp) throws IOException {
@@ -53,10 +60,6 @@ public class TestLoginModeProperty extends AsciiPromptProperty {
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("(GotLoginPrompt:");
-		sb.append(bGotLoginPrompt);
-		sb.append(")");
-		return sb.toString();
+		return "GotLoginPrompt:" + bGotLoginPrompt;
 	}
 }

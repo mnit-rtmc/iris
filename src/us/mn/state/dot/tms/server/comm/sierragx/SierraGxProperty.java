@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +28,5 @@ abstract public class SierraGxProperty extends AsciiDeviceProperty {
 	/** Create a new GPS property for Sierra Wireless GX modem */
 	protected SierraGxProperty(String cmd) {
 		super(cmd);
-		max_chars = 200;
 	}
 }

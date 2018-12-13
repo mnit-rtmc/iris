@@ -31,7 +31,6 @@ public class RedLionProperty extends AsciiDeviceProperty {
 	public RedLionProperty() {
 		// RedLion modem: Query the GPS reporting data
 		super("AT+BGPSGT\r");
-		max_chars = 200;
 	}
 
 	/** GPS data from response */

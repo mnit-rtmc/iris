@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,29 +23,18 @@ import java.io.IOException;
  * GPS location information.
  *
  * @author John L. Stanley
+ * @author Douglas Lau
  */
 public class GpsLocationProperty extends SierraGxProperty {
 
-	private int hitCount = 0;
-
-	private boolean bGpsLock;
-	private double lat;
-	private double lon;
-
-	/** Create a new GPS location property */
-	public GpsLocationProperty() {
-		super("AT*GPSDATA?\r");
-	}
-
-	/** Parse an integer off the end of a string
-	 * @param str String to check
-	 * @param prefix Prefix we're looking for
-	 * @return If it finds the prefix, it returns an Integer
-	 * containing the numeric value after the prefix.
-	 * If it doesn't find the prefix, or there's no
-	 * number after the prefix it returns null.
+	/** Parse an integer off the end of a string.
+	 * @param str String to check.
+	 * @param prefix Prefix we're looking for.
+	 * @return If it finds the prefix, it returns an Integer containing the
+	 *         numeric value after the prefix.  If it doesn't find the
+	 *         prefix or there's no number after the prefix it returns null.
 	 */
-	protected Integer parseInteger(String prefix, String str) {
+	static protected Integer parseInteger(String prefix, String str) {
 		try {
 			if (!str.startsWith(prefix))
 				return null;
@@ -56,15 +46,14 @@ public class GpsLocationProperty extends SierraGxProperty {
 		}
 	}
 
-	/** Parse a double off the end of a string
-	 * @param str String to check
-	 * @param prefix Prefix we're looking for
-	 * @return If it finds the prefix, it returns a Double
-	 * containing the numeric value after the prefix.
-	 * If it doesn't find the prefix, or there's no
-	 * number after the prefix it returns null.
+	/** Parse a double off the end of a string.
+	 * @param str String to check.
+	 * @param prefix Prefix we're looking for.
+	 * @return If it finds the prefix, it returns a Double containing the
+	 *         numeric value after the prefix.  If it doesn't find the
+	 *         prefix or there's no number after the prefix it returns null.
 	 */
-	protected Double parseDouble(String prefix, String str) {
+	static private Double parseDouble(String prefix, String str) {
 		try {
 			if (!str.startsWith(prefix))
 				return null;
@@ -76,6 +65,35 @@ public class GpsLocationProperty extends SierraGxProperty {
 		}
 	}
 
+	/** GPS lock flag */
+	private Boolean gps_lock;
+
+	/** Did we get a GPS lock (valid)? */
+	public boolean gotGpsLock() {
+		return (gps_lock != null) ? gps_lock : false;
+	}
+
+	/** GPS latitude */
+	private Double lat;
+
+	/** Get GPS latitude */
+	public double getLat() {
+		return (lat != null) ? lat : 0;
+	}
+
+	/** GPS longitude */
+	private Double lon;
+
+	/** Get GPS longitude */
+	public double getLon() {
+		return (lon != null) ? lon : 0;
+	}
+
+	/** Create a new GPS location property */
+	public GpsLocationProperty() {
+		super("AT*GPSDATA?\r");
+	}
+
 	/** Parse three lines from SierraWireless GX modem's four line
 	 *  response.  (This ignores the "Satellite Count=" response
 	 *  line.)
@@ -85,27 +103,16 @@ public class GpsLocationProperty extends SierraGxProperty {
 	 */
 	@Override
 	protected boolean parseResponse(String resp) throws IOException {
-		Integer iVal;
-		Double dVal;
-
-		iVal = parseInteger("GPS Fix=", resp);
-		if (iVal != null) {
-			bGpsLock = (iVal != 0);
-			hitCount = 1;
-			return false; // keep looking
-		}
-		dVal = parseDouble("Latitude=", resp);
-		if (dVal != null) {
-			lat = dVal;
-			++hitCount;
-			return false; // keep looking
-		}
-		dVal = parseDouble("Longitude=", resp);
-		if (dVal != null) {
-			lon = dVal;
-			return (++hitCount == 3);
-		}
-		return false; // keep looking
+		Integer lk = parseInteger("GPS Fix=", resp);
+		if (lk != null)
+			gps_lock = (lk != 0);
+		Double lt = parseDouble("Latitude=", resp);
+		if (lt != null)
+			lat = lt;
+		Double ln = parseDouble("Longitude=", resp);
+		if (ln != null)
+			lon = ln;
+		return (gps_lock != null) && (lat != null) && (lon != null);
 	}
 
 	/** Get a string representation */

@@ -1,6 +1,7 @@
 /*
  * IRIS -- Intelligent Roadway Information System
  * Copyright (C) 2015-2016  SRF Consulting Group
+ * Copyright (C) 2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,22 +16,20 @@
 package us.mn.state.dot.tms.server.comm.sierragx;
 
 import java.io.IOException;
-import us.mn.state.dot.tms.server.comm.AsciiDeviceProperty;
 
 /**
  * Property to send a password and wait for an "OK" response.
  * This will also recognize a "Login incorrect" response.
  *
  * @author John L. Stanley
+ * @author Douglas Lau
  */
-public class SendPasswordProperty extends AsciiDeviceProperty {
+public class SendPasswordProperty extends SierraGxProperty {
 
+	/** Create a new send password property */
 	public SendPasswordProperty(String pw) {
-		super(pw+"\r");
-		max_chars = 200;
+		super(pw + "\r");
 	}
-
-	//--------------------------------------
 
 	protected boolean bLoginFinished = false;
 
@@ -38,27 +37,18 @@ public class SendPasswordProperty extends AsciiDeviceProperty {
 		return bLoginFinished;
 	}
 
-	//--------------------------------------
-
 	@Override
 	protected boolean parseResponse(String resp) throws IOException {
 		if (resp.contains("OK")) {
 			bLoginFinished = true;
 			return true;
 		}
-		if (resp.contains("Login incorrect")) {
-			return true;
-		}
-		return false;  // keep looking
+		return resp.contains("Login incorrect");
 	}
 
 	/** Get a string representation */
 	@Override
 	public String toString() {
-		StringBuilder sb = new StringBuilder();
-		sb.append("(loginOk:");
-		sb.append(bLoginFinished);
-		sb.append(")");
-		return sb.toString();
+		return "loginOk:" + bLoginFinished;
 	}
 }
