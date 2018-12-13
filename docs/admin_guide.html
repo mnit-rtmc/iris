@@ -99,7 +99,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">10 Dec 2018</div>
+<div id="stamp">13 Dec 2018</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -280,6 +280,7 @@
 	<li><a href="#stc">HySecurity SmartTouch Controller STC</a></li>
 	<li><a href="#e6">Transcore Encompass 6 E6</a></li>
 	<li><a href="#redlion">RedLion modem GPS</a></li>
+	<li><a href="#sierragx">SierraGX modem GPS</a></li>
 	<li><a href="#dinrelay">Digital Loggers Inc. DIN-Relay</a></li>
 	<li><a href="#cbw">Xytronix Control By Web CBW</a></li>
 	<li><a href="#org815">Optical Scientific ORG-815</a></li>
@@ -1407,6 +1408,12 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	    <td>N/A</td>
 	    <td><a href="#gps">GPS</a></td>
 	</tr>
+	<tr id="sierragx">
+	    <td>SierraGX</td>
+	    <td>tcp</td>
+	    <td>N/A</td>
+	    <td><a href="#gps">GPS</a></td>
+	</tr>
 	<tr id="dinrelay">
 	    <td>DIN-Relay</td>
 	    <td>http</td>
@@ -1616,6 +1623,12 @@ scp -rp ~/osm/tiles/* root@tilehost:/var/www/html/
 	<code>none</code>.
 	HTTP Basic Authentication can be enabled on the setup page of the
 	<a href="#cbw">CBW</a> device (setup.html).
+</p>
+<p>
+	<a href="#sierragx">SierraGX</a> modems can be configured to require
+	authentiation.
+	In this case, separate the username and password with a colon, in the
+	same manner as HTTP basic authentication.
 </p>
 
 <h4 id="io_pins">I/O Pins</h4>
@@ -3013,8 +3026,9 @@ FIXME
 	Its name will be the same as the DMS, with "_gps" appended.
 	For <a href="#ntcip">NTCIP</a>, the GPS should be associated with the
 	same controller as the DMS (using pin 2).
-	For <a href="#redlion">RedLion</a>, a new comm link and controller must
-	be created to communicate with the modem.
+	For <a href="#redlion">RedLion</a> or <a href="#sierragx">SierraGX</a>,
+	a new comm link and controller must be created to communicate with the
+	modem.
 </p>
 <p>
 	The GPS will be polled once every 5 minutes, unless on a
