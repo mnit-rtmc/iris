@@ -184,6 +184,8 @@ impl Graphic {
             LineWrap::NoWrap);
         let cs = ColorScheme::from_str(&self.color_scheme)?;
         let bpp = self.bits_per_pixel()?;
+        let x = x - 1; // x must be > 0
+        let y = y - 1; // y must be > 0
         let w = self.width();
         let h = self.height();
         if x + w > page.width() || y + h > page.height() {
@@ -198,7 +200,7 @@ impl Graphic {
         for yy in 0..h {
             for xx in 0..w {
                 if let Some(clr) = self.get_pixel(cs, &buf, xx, yy, cf) {
-                    page.set_pixel(x + xx - 1, y + yy - 1, clr);
+                    page.set_pixel(x + xx, y + yy, clr);
                 }
             }
         }
