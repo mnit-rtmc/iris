@@ -102,8 +102,6 @@ public class OpQueryGpsLocation extends OpDevice<SierraGxProperty> {
 				getUsername());
 			mess.add(prop);
 			mess.queryProps();
-			if (!prop.gotValidResponse() || !isSuccess())
-				return null;  // error exit
 			if (prop.gotPwPrompt())
 				return new SendPassword();
 			else {
@@ -123,8 +121,6 @@ public class OpQueryGpsLocation extends OpDevice<SierraGxProperty> {
 				getPassword());
 			mess.add(prop);
 			mess.queryProps();
-			if (!prop.gotValidResponse() || !isSuccess())
-				return null;  // error exit
 			if (prop.getLoginFinished())
 				return new QueryGps();
 			else {
