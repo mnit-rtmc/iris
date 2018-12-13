@@ -661,21 +661,23 @@ impl PageRenderer {
         check_span: fn(a: &State, b: &State) -> bool) -> Result<u16, SyntaxError>
     {
         let mut width = 0;
-        let mut cs = None;
+        let mut psc = 0; // previous span character spacing
         for s in &self.spans {
             if check_span(&s.state, &span.state) {
                 let w = s.width(fonts)?;
                 let sc = s.char_spacing(fonts)?;
-                if let Some(c) = span.state.char_spacing {
-                    width += c as u16;
-                } else if let Some(c) = cs {
-                    // NTCIP 1203 fontCharSpacing:
-                    // "... the average character spacing of the two fonts,
-                    // rounded up to the nearest whole pixel ..." ???
-                    width += ((c + sc) as f32 / 2f32).round() as u16;
+                if width > 0 {
+                    if let Some(c) = span.state.char_spacing {
+                        width += c as u16;
+                    } else {
+                        // NTCIP 1203 fontCharSpacing:
+                        // "... the average character spacing of the two fonts,
+                        // rounded up to the nearest whole pixel ..." ???
+                        width += ((psc + sc) as f32 / 2f32).round() as u16;
+                    }
                 }
                 width += w;
-                cs = Some(sc);
+                psc = sc;
             }
         }
         if width <= span.state.text_rectangle.w {
