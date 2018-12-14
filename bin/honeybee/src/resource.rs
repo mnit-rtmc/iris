@@ -669,8 +669,8 @@ impl Resource {
 
 pub fn lookup_resource(n: &str) -> Option<Resource> {
     match n {
-        "camera_pub"           => Some(CAMERA_RES),
-        "dms_pub"              => Some(DMS_RES),
+        "camera"|"camera_pub"  => Some(CAMERA_RES),
+        "dms" | "dms_pub"      => Some(DMS_RES),
         "dms_message"          => Some(DMS_MSG_RES),
         "incident"             => Some(INCIDENT_RES),
         "sign_config"          => Some(SIGN_CONFIG_RES),
