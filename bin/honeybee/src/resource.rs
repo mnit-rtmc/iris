@@ -394,10 +394,13 @@ impl MsgData {
     fn check_gif_listing(&mut self, n: &PathBuf) -> bool {
         self.gifs.remove(n)
     }
+    /// Delete out-of-date .gif files
     fn delete_gifs(&mut self, tx: &Sender<PathBuf>) -> Result<(), Error> {
         for p in self.gifs.drain() {
             info!("delete gif: {:?}", &p);
-            remove_file(&p)?;
+            if let Err(e) = remove_file(&p) {
+                error!("{:?}", e);
+            }
             tx.send(p)?;
         }
         Ok(())
