@@ -296,7 +296,7 @@ public class PlayListPanel extends JPanel {
 	/** Update buttons */
 	private void updateButtons() {
 		boolean ud = canWrite("cameras");
-		insert_btn.setEnabled(ud && hasCamId());
+		insert_btn.setEnabled(ud && hasCamNum());
 		remove_btn.setEnabled(ud && isSelected());
 		up_btn.setEnabled(ud && canMoveUp());
 		down_btn.setEnabled(ud && canMoveDown());
@@ -307,14 +307,14 @@ public class PlayListPanel extends JPanel {
 		return session.canWrite(play_list, attr);
 	}
 
-	/** Check if text field has a valid camera ID */
-	private boolean hasCamId() {
+	/** Check if text field has a valid camera number */
+	private boolean hasCamNum() {
 		return lookupCamera() != null;
 	}
 
-	/** Lookup camera by ID (or number) */
+	/** Lookup camera by number */
 	private Camera lookupCamera() {
-		return CameraHelper.find(cam_txt.getText());
+		return CameraHelper.findNum(cam_txt.getText());
 	}
 
 	/** Check if a camera is selected */

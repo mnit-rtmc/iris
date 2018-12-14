@@ -80,11 +80,11 @@ public class OpStatus extends OpStep {
 		}
 	}
 
-	/** Parse camera number / ID */
+	/** Parse camera number */
 	static private CameraImpl parseCam(String cam)
 		throws InvalidReqException
 	{
-		Camera c = CameraHelper.find(cam);
+		Camera c = CameraHelper.findNum(cam);
 		if (c instanceof CameraImpl)
 			return (CameraImpl) c;
 		else

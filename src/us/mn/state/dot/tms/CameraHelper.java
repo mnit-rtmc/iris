@@ -66,12 +66,6 @@ public class CameraHelper extends BaseHelper {
 		return cams.values();
 	}
 
-	/** Find a camera with the specified name or number */
-	static public Camera find(String cam) {
-		Camera c = lookup(cam);
-		return (c != null) ? c : findUID(cam);
-	}
-
 	/** Find a camera with the specific number */
 	static public Camera findUID(int uid) {
 		Iterator<Camera> it = iterator();
@@ -92,9 +86,13 @@ public class CameraHelper extends BaseHelper {
 
 	/** Parse the integer ID of a camera */
 	static public Integer parseUID(String uid) {
-		String id = stripNonDigitPrefix(uid);
+		return parseInt(stripNonDigitPrefix(uid));
+	}
+
+	/** Parse a camera number */
+	static private Integer parseInt(String num) {
 		try {
-			return Integer.parseInt(id);
+			return Integer.parseInt(num);
 		}
 		catch (NumberFormatException e) {
 			return null;
@@ -133,6 +131,12 @@ public class CameraHelper extends BaseHelper {
 		while (sb.length() < 4)
 			sb.insert(1, '0');
 		return sb.toString();
+	}
+
+	/** Find a camera with the specified number */
+	static public Camera findNum(String cam) {
+		Integer cn = parseInt(cam);
+		return (cn != null) ? findNum(cn) : null;
 	}
 
 	/** Find previous camera below a given number */
