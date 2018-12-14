@@ -210,6 +210,7 @@ public class IncidentDispatcher extends IPanel
 		detail_cbx.setModel(new IComboBoxModel<IncidentDetail>(
 			detail_mdl));
 		type_lbl.setHorizontalTextPosition(SwingConstants.TRAILING);
+		camera_cbx.setRenderer(new CameraCellRenderer());
 		cam_pnl.add(camera_cbx, CAMERA_CBOX);
 		cam_pnl.add(camera_btn, CAMERA_BTN);
 		camera_btn.setBorder(BorderFactory.createEtchedBorder(
