@@ -480,22 +480,10 @@ impl State {
         self.line_number    == other.line_number &&
         self.just_line      == other.just_line
     }
-    /// Check if states match for top-justified lines
-    fn matches_top(&self, other: &State) -> bool {
-        self.text_rectangle == other.text_rectangle &&
-        self.just_page      == other.just_page &&
-        self.line_number    <= other.line_number
-    }
-    /// Check if states match for middle-justified lines
-    fn matches_middle(&self, other: &State) -> bool {
+    /// Check if states match for lines
+    fn matches_line(&self, other: &State) -> bool {
         self.text_rectangle == other.text_rectangle &&
         self.just_page      == other.just_page
-    }
-    /// Check if states match for bottom-justified lines
-    fn matches_bottom(&self, other: &State) -> bool {
-        self.text_rectangle == other.text_rectangle &&
-        self.just_page      == other.just_page &&
-        self.line_number    >  other.line_number
     }
 }
 
@@ -706,8 +694,8 @@ impl PageRenderer {
         -> Result<u16, SyntaxError>
     {
         let top = span.state.text_rectangle.y - 1;
-        let height = self.offset_vert(span, fonts, State::matches_top)?;
-        Ok(top + height)
+        let (above, _) = self.offset_vert(span, fonts)?;
+        Ok(top + above)
     }
     /// Get the baseline of a middle-justified span
     fn baseline_middle(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
@@ -715,14 +703,12 @@ impl PageRenderer {
     {
         let top = span.state.text_rectangle.y - 1;
         let h = span.state.text_rectangle.h;
-        let height = self.offset_vert(span, fonts, State::matches_middle)?;
-        let mtop = (h - height) / 2;
-        let mheight = self.offset_vert(span, fonts, State::matches_top)?;
-        let mut p = top + mtop + mheight;
+        let (above, below) = self.offset_vert(span, fonts)?;
+        let offset = (h - above - below) / 2; // offset for centering
+        let y = top + offset + above;
         let ch = self.state.char_height();
-        // Truncate to line-height boundaries
-        p = (p / ch) * ch;
-        Ok(p)
+        // Truncate to line-height boundary
+        Ok((y / ch) * ch)
     }
     /// Get the baseline of a bottom-justified span
     fn baseline_bottom(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
@@ -730,34 +716,48 @@ impl PageRenderer {
     {
         let top = span.state.text_rectangle.y - 1;
         let h = span.state.text_rectangle.h;
-        let bot = top + h;
-        let height = self.offset_vert(span, fonts, State::matches_bottom)?;
-        debug_assert!(height <= bot);
-        Ok(bot - height)
+        let (_, below) = self.offset_vert(span, fonts)?;
+        Ok(top + h - below)
     }
-    /// Calculate vertical offset of a span
-    fn offset_vert(&self, span: &TextSpan, fonts: &HashMap<i32, Font>,
-        check_line: fn(a: &State, b: &State) -> bool) -> Result<u16, SyntaxError>
+    /// Calculate vertical offset of a span.
+    ///
+    /// Returns a tuple of (above, below) heights of matching lines.
+    fn offset_vert(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+        -> Result<(u16, u16), SyntaxError>
     {
+        debug!("offset_vert '{}'", span.text);
+        let state = span.state;
         let mut lines = vec!();
-        for s in &self.spans {
-            if check_line(&s.state, &span.state) {
-                let ln = s.state.line_number as usize;
-                let h = s.height(fonts)?;
-                let fs = s.font_spacing(fonts)?;
-                let ls = s.line_spacing();
-                let line = TextLine::new(h, fs, ls);
-                if ln >= lines.len() {
-                    lines.push(line);
-                } else {
-                    &lines[ln].combine(&line);
-                }
+        for s in self.spans.iter().filter(|s| state.matches_line(&s.state)) {
+            let ln = s.state.line_number as usize;
+            let h = s.height(fonts)?;
+            let fs = s.font_spacing(fonts)?;
+            let ls = s.line_spacing();
+            let line = TextLine::new(h, fs, ls);
+            if ln >= lines.len() {
+                lines.push(line);
+            } else {
+                &lines[ln].combine(&line);
             }
         }
-        let height: u16 = lines.iter().map(|t| t.height).sum();
-        let spacing: u16 = lines.windows(2).map(|s| s[1].spacing(&s[0])).sum();
-        if height + spacing <= span.state.text_rectangle.h {
-            Ok(height + spacing)
+        let sln = state.line_number as usize;
+        let mut above = 0;
+        let mut below = 0;
+        for ln in 0..lines.len() {
+            let line = &lines[ln];
+            if ln > 0 {
+                let h = line.spacing(&lines[ln - 1]);
+                if ln <= sln { above += h }
+                else { below += h }
+                debug!("  spacing {}  above {} below {}", h, above, below);
+            }
+            let h = line.height;
+            if ln <= sln { above += h }
+            else { below += h }
+            debug!("  line {}  above {} below {}", ln, above, below);
+        }
+        if above + below <= span.state.text_rectangle.h {
+            Ok((above, below))
         } else {
             Err(SyntaxError::TextTooBig)
         }
@@ -780,8 +780,8 @@ impl TextLine {
         self.line_spacing = self.line_spacing.or(other.line_spacing);
     }
     fn spacing(&self, other: &TextLine) -> u16 {
-        if self.line_spacing.is_some() {
-            self.line_spacing.unwrap()
+        if let Some(ls) = self.line_spacing {
+            ls
         } else {
             // NTCIP 1203 fontLineSpacing:
             // "The number of pixels between adjacent lines
