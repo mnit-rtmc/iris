@@ -45,129 +45,17 @@ pub struct State {
     font            : (u8, Option<u16>),
 }
 
-/// Page splitter (iterator)
-pub struct PageSplitter<'a> {
-    default_state : State,
-    state         : State,
-    parser        : Parser<'a>,
-    more          : bool,
-}
-
 /// Text span
 pub struct TextSpan {
     state : State,   // render state at start of span
     text  : String,
 }
 
-impl<'a> TextSpan {
-    /// Create a new text span
-    fn new(state: State, text: String) -> Self {
-        TextSpan { state, text }
-    }
-    /// Get the font of a text span
-    fn font(&self, fonts: &'a HashMap<i32, Font>)
-        -> Result<&'a Font, SyntaxError>
-    {
-        let fnum = self.state.font.0 as i32;
-        match fonts.get(&fnum) {
-            Some(f) => Ok(f),
-            None    => Err(SyntaxError::FontNotDefined(self.state.font.0)),
-        }
-    }
-    /// Get the width of a text span
-    fn width(&self, fonts: &HashMap<i32, Font>) -> Result<u16, SyntaxError> {
-        let mut width = 0;
-        let font = self.font(fonts)?;
-        let cs = self.char_spacing_fonts(fonts)?;
-        for c in self.text.chars() {
-            let g = font.glyph(c)?;
-            if width > 0 {
-                width += cs;
-            }
-            width += g.width() as u16;
-        }
-        Ok(width)
-    }
-    /// Get the char spacing
-    fn char_spacing_fonts(&self, fonts: &HashMap<i32, Font>)
-        -> Result<u16, SyntaxError>
-    {
-        match self.state.char_spacing {
-            Some(s) => Ok(s as u16),
-            None    => Ok(self.font(fonts)?.char_spacing()),
-        }
-    }
-    /// Get the char spacing
-    fn char_spacing_font(&self, font: &Font) -> u32 {
-        match self.state.char_spacing {
-            Some(s) => s as u32,
-            None    => font.char_spacing() as u32,
-        }
-    }
-    /// Get the char spacing from a previous span
-    fn char_spacing_between(&self, prev: &TextSpan, fonts: &HashMap<i32, Font>)
-        -> Result<u16, SyntaxError>
-    {
-        if let Some(c) = self.state.char_spacing {
-            Ok(c as u16)
-        } else {
-            // NTCIP 1203 fontCharSpacing:
-            // "... the average character spacing of the two fonts,
-            // rounded up to the nearest whole pixel ..." ???
-            let psc = prev.char_spacing_fonts(fonts)?;
-            let sc = self.char_spacing_fonts(fonts)?;
-            Ok(((psc + sc) as f32 / 2f32).round() as u16)
-        }
-    }
-    /// Get the height of a text span
-    fn height(&self, fonts: &HashMap<i32, Font>) -> Result<u16, SyntaxError> {
-        Ok(self.font(fonts)?.height())
-    }
-    /// Get the font line spacing
-    fn font_spacing(&self, fonts: &HashMap<i32, Font>)
-        -> Result<u16, SyntaxError>
-    {
-        Ok(self.font(fonts)?.line_spacing())
-    }
-    /// Get the line spacing
-    fn line_spacing(&self) -> Option<u16> {
-        match self.state.line_spacing {
-            Some(s) => Some(s as u16),
-            None    => None,
-        }
-    }
-    /// Render the text span
-    fn render(&self, page: &mut Raster, font: &Font, mut x: u32, y: u32)
-        -> Result<(), Error>
-    {
-        let cf = self.state.color_foreground()?;
-        let cf = [cf[0], cf[1], cf[2]];
-        let h = font.height() as u32;
-        let cs = self.char_spacing_font(font);
-        debug!("span: {}, left: {}, top: {}, height: {}", self.text, x, y, h);
-        let config = Config::new(CharacterSet::Standard, false, true,
-            LineWrap::NoWrap);
-        let mut buf = [0; GLYPH_LEN];
-        for c in self.text.chars() {
-            let g = font.glyph(c)?;
-            let w = g.width() as u32;
-            let n = decode_config_slice(&g.pixels, config, &mut buf)?;
-            debug!("char: {}, width: {}, len: {}", c, w, n);
-            for yy in 0..h {
-                for xx in 0..w {
-                    let p = yy * w + xx;
-                    let by = p as usize / 8;
-                    let bi = 7 - (p & 7);
-                    let lit = ((buf[by] >> bi) & 1) != 0;
-                    if lit {
-                        page.set_pixel(x + xx, y + yy, cf);
-                    }
-                }
-            }
-            x += w + cs;
-        }
-        Ok(())
-    }
+/// Text line
+struct TextLine {
+    height       : u16,
+    font_spacing : u16,
+    line_spacing : Option<u16>,
 }
 
 /// Page renderer
@@ -177,12 +65,19 @@ pub struct PageRenderer {
     spans  : Vec<TextSpan>,        // text spans
 }
 
+/// Page splitter (iterator)
+pub struct PageSplitter<'a> {
+    default_state : State,
+    state         : State,
+    parser        : Parser<'a>,
+    more          : bool,
+}
+
 /// Scale a u8 value by another (mapping range to 0-1)
 fn scale_u8(a: u8, b: u8) -> u8 {
-    let aa = a as u32;
-    let bb = b as u32;
-    let c = (aa * bb + 255) >> 8;
-    c as u8
+    let c = a as u32 * b as u32;
+    // cheap alternative to divide by 255
+    (((c + 1) + (c >> 8)) >> 8) as u8
 }
 
 impl State {
@@ -487,6 +382,143 @@ impl State {
     }
 }
 
+impl<'a> TextSpan {
+    /// Create a new text span
+    fn new(state: State, text: String) -> Self {
+        TextSpan { state, text }
+    }
+    /// Get the font of a text span
+    fn font(&self, fonts: &'a HashMap<i32, Font>)
+        -> Result<&'a Font, SyntaxError>
+    {
+        let fnum = self.state.font.0 as i32;
+        match fonts.get(&fnum) {
+            Some(f) => Ok(f),
+            None    => Err(SyntaxError::FontNotDefined(self.state.font.0)),
+        }
+    }
+    /// Get the width of a text span
+    fn width(&self, fonts: &HashMap<i32, Font>) -> Result<u16, SyntaxError> {
+        let mut width = 0;
+        let font = self.font(fonts)?;
+        let cs = self.char_spacing_fonts(fonts)?;
+        for c in self.text.chars() {
+            let g = font.glyph(c)?;
+            if width > 0 {
+                width += cs;
+            }
+            width += g.width() as u16;
+        }
+        Ok(width)
+    }
+    /// Get the char spacing
+    fn char_spacing_fonts(&self, fonts: &HashMap<i32, Font>)
+        -> Result<u16, SyntaxError>
+    {
+        match self.state.char_spacing {
+            Some(s) => Ok(s as u16),
+            None    => Ok(self.font(fonts)?.char_spacing()),
+        }
+    }
+    /// Get the char spacing
+    fn char_spacing_font(&self, font: &Font) -> u32 {
+        match self.state.char_spacing {
+            Some(s) => s as u32,
+            None    => font.char_spacing() as u32,
+        }
+    }
+    /// Get the char spacing from a previous span
+    fn char_spacing_between(&self, prev: &TextSpan, fonts: &HashMap<i32, Font>)
+        -> Result<u16, SyntaxError>
+    {
+        if let Some(c) = self.state.char_spacing {
+            Ok(c as u16)
+        } else {
+            // NTCIP 1203 fontCharSpacing:
+            // "... the average character spacing of the two fonts,
+            // rounded up to the nearest whole pixel ..." ???
+            let psc = prev.char_spacing_fonts(fonts)?;
+            let sc = self.char_spacing_fonts(fonts)?;
+            Ok(((psc + sc) as f32 / 2f32).round() as u16)
+        }
+    }
+    /// Get the height of a text span
+    fn height(&self, fonts: &HashMap<i32, Font>) -> Result<u16, SyntaxError> {
+        Ok(self.font(fonts)?.height())
+    }
+    /// Get the font line spacing
+    fn font_spacing(&self, fonts: &HashMap<i32, Font>)
+        -> Result<u16, SyntaxError>
+    {
+        Ok(self.font(fonts)?.line_spacing())
+    }
+    /// Get the line spacing
+    fn line_spacing(&self) -> Option<u16> {
+        match self.state.line_spacing {
+            Some(s) => Some(s as u16),
+            None    => None,
+        }
+    }
+    /// Render the text span
+    fn render(&self, page: &mut Raster, font: &Font, mut x: u32, y: u32)
+        -> Result<(), Error>
+    {
+        let cf = self.state.color_foreground()?;
+        let cf = [cf[0], cf[1], cf[2]];
+        let h = font.height() as u32;
+        let cs = self.char_spacing_font(font);
+        debug!("span: {}, left: {}, top: {}, height: {}", self.text, x, y, h);
+        let config = Config::new(CharacterSet::Standard, false, true,
+            LineWrap::NoWrap);
+        let mut buf = [0; GLYPH_LEN];
+        for c in self.text.chars() {
+            let g = font.glyph(c)?;
+            let w = g.width() as u32;
+            let n = decode_config_slice(&g.pixels, config, &mut buf)?;
+            debug!("char: {}, width: {}, len: {}", c, w, n);
+            for yy in 0..h {
+                for xx in 0..w {
+                    let p = yy * w + xx;
+                    let by = p as usize / 8;
+                    let bi = 7 - (p & 7);
+                    let lit = ((buf[by] >> bi) & 1) != 0;
+                    if lit {
+                        page.set_pixel(x + xx, y + yy, cf);
+                    }
+                }
+            }
+            x += w + cs;
+        }
+        Ok(())
+    }
+}
+
+impl TextLine {
+    /// Create a new text line
+    fn new(height: u16, font_spacing: u16, line_spacing: Option<u16>) -> Self {
+        TextLine { height, font_spacing, line_spacing }
+    }
+    /// Combine a text line with another
+    fn combine(&mut self, other: &TextLine) {
+        self.height = self.height.max(other.height);
+        self.font_spacing = self.font_spacing.max(other.font_spacing);
+        self.line_spacing = self.line_spacing.or(other.line_spacing);
+    }
+    /// Get the spacing between two text lines
+    fn spacing(&self, other: &TextLine) -> u16 {
+        if let Some(ls) = self.line_spacing {
+            ls
+        } else {
+            // NTCIP 1203 fontLineSpacing:
+            // "The number of pixels between adjacent lines
+            // is the average of the 2 line spacings of each
+            // line, rounded up to the nearest whole pixel."
+            let s = self.font_spacing + other.font_spacing;
+            (s as f32 / 2f32).round() as u16
+        }
+    }
+}
+
 impl PageRenderer {
     /// Create a new page renderer
     pub fn new(state: State, values: Vec<([u8;3], Value)>, spans: Vec<TextSpan>)
@@ -760,35 +792,6 @@ impl PageRenderer {
             Ok((above, below))
         } else {
             Err(SyntaxError::TextTooBig)
-        }
-    }
-}
-
-struct TextLine {
-    height       : u16,
-    font_spacing : u16,
-    line_spacing : Option<u16>,
-}
-
-impl TextLine {
-    fn new(height: u16, font_spacing: u16, line_spacing: Option<u16>) -> Self {
-        TextLine { height, font_spacing, line_spacing }
-    }
-    fn combine(&mut self, other: &TextLine) {
-        self.height = self.height.max(other.height);
-        self.font_spacing = self.font_spacing.max(other.font_spacing);
-        self.line_spacing = self.line_spacing.or(other.line_spacing);
-    }
-    fn spacing(&self, other: &TextLine) -> u16 {
-        if let Some(ls) = self.line_spacing {
-            ls
-        } else {
-            // NTCIP 1203 fontLineSpacing:
-            // "The number of pixels between adjacent lines
-            // is the average of the 2 line spacings of each
-            // line, rounded up to the nearest whole pixel."
-            let s = self.font_spacing + other.font_spacing;
-            (s as f32 / 2f32).round() as u16
         }
     }
 }
