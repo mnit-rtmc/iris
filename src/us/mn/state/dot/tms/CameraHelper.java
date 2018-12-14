@@ -67,7 +67,7 @@ public class CameraHelper extends BaseHelper {
 	}
 
 	/** Find a camera with the specific number */
-	static public Camera findUID(int uid) {
+	static private Camera findUID(int uid) {
 		Iterator<Camera> it = iterator();
 		while (it.hasNext()) {
 			Camera cam = it.next();

@@ -97,11 +97,9 @@ public class CamSelectPanel extends ToolPanel {
 		};
 	}
 
-	/** Lookup a camera by ID */
+	/** Lookup a camera by number */
 	private Camera lookupCamera() {
-		String t = getText();
-		Camera c = CameraHelper.lookup(t);
-		return (c != null) ? c : CameraHelper.findUID(t);
+		return CameraHelper.findNum(getText());
 	}
 
 	/** Create monitor selection mode */
