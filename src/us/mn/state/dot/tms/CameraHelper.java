@@ -122,8 +122,7 @@ public class CameraHelper extends BaseHelper {
 				return c;
 		}
 		// Do a linear search for camera number
-		Camera nc = findUID(cam_num);
-		return (nc != null) ? nc : c;
+		return findUID(cam_num);
 	}
 
 	/** Build a camera name guess */
