@@ -78,7 +78,7 @@ impl<'a> TextSpan {
     fn width(&self, fonts: &HashMap<i32, Font>) -> Result<u16, SyntaxError> {
         let mut width = 0;
         let font = self.font(fonts)?;
-        let cs = self.char_spacing(fonts)?;
+        let cs = self.char_spacing_fonts(fonts)?;
         for c in self.text.chars() {
             let g = font.glyph(c)?;
             if width > 0 {
@@ -89,7 +89,7 @@ impl<'a> TextSpan {
         Ok(width)
     }
     /// Get the char spacing
-    fn char_spacing(&self, fonts: &HashMap<i32, Font>)
+    fn char_spacing_fonts(&self, fonts: &HashMap<i32, Font>)
         -> Result<u16, SyntaxError>
     {
         match self.state.char_spacing {
@@ -102,6 +102,21 @@ impl<'a> TextSpan {
         match self.state.char_spacing {
             Some(s) => s as u32,
             None    => font.char_spacing() as u32,
+        }
+    }
+    /// Get the char spacing from a previous span
+    fn char_spacing_between(&self, prev: &TextSpan, fonts: &HashMap<i32, Font>)
+        -> Result<u16, SyntaxError>
+    {
+        if let Some(c) = self.state.char_spacing {
+            Ok(c as u16)
+        } else {
+            // NTCIP 1203 fontCharSpacing:
+            // "... the average character spacing of the two fonts,
+            // rounded up to the nearest whole pixel ..." ???
+            let psc = prev.char_spacing_fonts(fonts)?;
+            let sc = self.char_spacing_fonts(fonts)?;
+            Ok(((psc + sc) as f32 / 2f32).round() as u16)
         }
     }
     /// Get the height of a text span
@@ -458,28 +473,12 @@ impl State {
             None    => Err(SyntaxError::UnsupportedTagValue),
         }
     }
-    /// Check if states match for left-justified spans
-    fn matches_left(&self, other: &State) -> bool {
-        self.text_rectangle == other.text_rectangle &&
-        self.just_page      == other.just_page &&
-        self.line_number    == other.line_number &&
-        self.just_line      == other.just_line &&
-        self.span_number    <  other.span_number
-    }
-    /// Check if states match for center-justified spans
-    fn matches_center(&self, other: &State) -> bool {
+    /// Check if states match for text spans
+    fn matches_span(&self, other: &State) -> bool {
         self.text_rectangle == other.text_rectangle &&
         self.just_page      == other.just_page &&
         self.line_number    == other.line_number &&
         self.just_line      == other.just_line
-    }
-    /// Check if states match for right-justified spans
-    fn matches_right(&self, other: &State) -> bool {
-        self.text_rectangle == other.text_rectangle &&
-        self.just_page      == other.just_page &&
-        self.line_number    == other.line_number &&
-        self.just_line      == other.just_line &&
-        self.span_number    >= other.span_number
     }
     /// Check if states match for top-justified lines
     fn matches_top(&self, other: &State) -> bool {
@@ -586,8 +585,8 @@ impl PageRenderer {
             }
         }
         for s in &self.spans {
-            let x = self.left(s, fonts)?;
-            let y = self.top(s, fonts)?;
+            let x = self.span_x(s, fonts)?;
+            let y = self.span_y(s, fonts)?;
             let font = s.font(fonts)?;
             s.render(&mut page, &font, x as u32, y as u32)?;
         }
@@ -611,83 +610,79 @@ impl PageRenderer {
         }
         Err(SyntaxError::UnsupportedTagValue)
     }
-    /// Get the left side of a text span.
-    fn left(&self, s: &TextSpan, fonts: &HashMap<i32, Font>)
+    /// Get the X position of a text span.
+    fn span_x(&self, s: &TextSpan, fonts: &HashMap<i32, Font>)
         ->Result<u16, SyntaxError>
     {
         match s.state.just_line {
-            LineJustification::Left   => self.left_left(s, fonts),
-            LineJustification::Center => self.left_center(s, fonts),
-            LineJustification::Right  => self.left_right(s, fonts),
+            LineJustification::Left   => self.span_x_left(s, fonts),
+            LineJustification::Center => self.span_x_center(s, fonts),
+            LineJustification::Right  => self.span_x_right(s, fonts),
             _                         => unreachable!(),
         }
     }
-    /// Get the left side of a left-justified text span.
-    fn left_left(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+    /// Get the X position of a left-justified text span.
+    fn span_x_left(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
         ->Result<u16, SyntaxError>
     {
         let left = span.state.text_rectangle.x - 1;
-        let width = self.offset_horiz(span, fonts, State::matches_left)?;
-        Ok(left + width)
+        let (before, _) = self.offset_horiz(span, fonts)?;
+        Ok(left + before)
     }
-    /// Get the left side of a center-justified text span.
-    fn left_center(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+    /// Get the X position of a center-justified text span.
+    fn span_x_center(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
         ->Result<u16, SyntaxError>
     {
         let left = span.state.text_rectangle.x - 1;
         let w = span.state.text_rectangle.w;
-        let width = self.offset_horiz(span, fonts, State::matches_center)?;
-        let mleft = (w - width) / 2;
-        let mwidth = self.offset_horiz(span, fonts, State::matches_left)?;
-        let mut p = left + mleft + mwidth;
+        let (before, after) = self.offset_horiz(span, fonts)?;
+        let offset = (w - before - after) / 2; // offset for centering
+        let x = left + offset + before;
         let cw = self.state.char_width();
-        // Truncate to character-width boundaries
-        p = (p / cw) * cw;
-        Ok(p)
+        // Truncate to character-width boundary
+        Ok((x / cw) * cw)
     }
-    /// Get the left size of a right-justified span
-    fn left_right(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+    /// Get the X position of a right-justified span
+    fn span_x_right(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
         -> Result<u16, SyntaxError>
     {
         let left = span.state.text_rectangle.x - 1;
         let w = span.state.text_rectangle.w;
-        let right = left + w;
-        let width = self.offset_horiz(span, fonts, State::matches_right)?;
-        debug_assert!(width <= right);
-        Ok(right - width)
+        let (_, after) = self.offset_horiz(span, fonts)?;
+        Ok(left + w - after)
     }
-    /// Calculate horizontal offset of a span
-    fn offset_horiz(&self, span: &TextSpan, fonts: &HashMap<i32, Font>,
-        check_span: fn(a: &State, b: &State) -> bool) -> Result<u16, SyntaxError>
+    /// Calculate horizontal offsets of a span.
+    ///
+    /// Returns a tuple of (before, after) widths of matching spans.
+    fn offset_horiz(&self, span: &TextSpan, fonts: &HashMap<i32, Font>)
+        -> Result<(u16, u16), SyntaxError>
     {
-        let mut width = 0;
-        let mut psc = 0; // previous span character spacing
-        for s in &self.spans {
-            if check_span(&s.state, &span.state) {
-                let w = s.width(fonts)?;
-                let sc = s.char_spacing(fonts)?;
-                if width > 0 {
-                    if let Some(c) = span.state.char_spacing {
-                        width += c as u16;
-                    } else {
-                        // NTCIP 1203 fontCharSpacing:
-                        // "... the average character spacing of the two fonts,
-                        // rounded up to the nearest whole pixel ..." ???
-                        width += ((psc + sc) as f32 / 2f32).round() as u16;
-                    }
-                }
-                width += w;
-                psc = sc;
+        debug!("offset_horiz '{}'", span.text);
+        let state = span.state;
+        let mut before = 0;
+        let mut after = 0;
+        let mut pspan = None;
+        for s in self.spans.iter().filter(|s| state.matches_span(&s.state)) {
+            if let Some(ps) = pspan {
+                let w = s.char_spacing_between(ps, fonts)?;
+                if s.state.span_number <= state.span_number { before += w }
+                else { after += w }
+                debug!("  spacing {} before {} after {}", w, before, after);
             }
+            let w = s.width(fonts)?;
+            if s.state.span_number < state.span_number { before += w }
+            else { after += w }
+            debug!("  span '{}'  before {} after {}", s.text, before, after);
+            pspan = Some(s);
         }
-        if width <= span.state.text_rectangle.w {
-            Ok(width)
+        if before + after <= state.text_rectangle.w {
+            Ok((before, after))
         } else {
             Err(SyntaxError::TextTooBig)
         }
     }
-    /// Get the top of a text span.
-    fn top(&self, s: &TextSpan, fonts: &HashMap<i32, Font>)
+    /// Get the Y position of a text span.
+    fn span_y(&self, s: &TextSpan, fonts: &HashMap<i32, Font>)
         -> Result<u16, SyntaxError>
     {
         let b = self.baseline(s, fonts)?;
