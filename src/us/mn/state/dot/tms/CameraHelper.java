@@ -80,33 +80,8 @@ public class CameraHelper extends BaseHelper {
 
 	/** Find a camera with the specific UID */
 	static public Camera findUID(String uid) {
-		Integer id = parseUID(uid);
+		Integer id = VideoMonitorHelper.parseUID(uid);
 		return (id != null) ? findUID(id) : null;
-	}
-
-	/** Parse the integer ID of a camera */
-	static public Integer parseUID(String uid) {
-		return parseInt(stripNonDigitPrefix(uid));
-	}
-
-	/** Parse a camera number */
-	static private Integer parseInt(String num) {
-		try {
-			return Integer.parseInt(num);
-		}
-		catch (NumberFormatException e) {
-			return null;
-		}
-	}
-
-	/** Strip non-digit prefix from a string */
-	static private String stripNonDigitPrefix(String v) {
-		int i = 0;
-		for (i = 0; i < v.length(); i++) {
-			if (Character.isDigit(v.charAt(i)))
-				break;
-		}
-		return v.substring(i);
 	}
 
 	/** Find a camera by number */
@@ -137,6 +112,16 @@ public class CameraHelper extends BaseHelper {
 	static public Camera findNum(String cam) {
 		Integer cn = parseInt(cam);
 		return (cn != null) ? findNum(cn) : null;
+	}
+
+	/** Parse an integer */
+	static private Integer parseInt(String num) {
+		try {
+			return Integer.parseInt(num);
+		}
+		catch (NumberFormatException e) {
+			return null;
+		}
 	}
 
 	/** Find previous camera below a given number */
