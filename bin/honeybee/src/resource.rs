@@ -442,7 +442,7 @@ fn fetch_sign_msg(s: &SignMessage, dir: &Path, tx: &Sender<PathBuf>,
         let f = BufWriter::new(File::create(&tn)?);
         let t = Instant::now();
         if let Err(e) = render_sign_msg(s, msg_data, f) {
-            warn!("{}: {:?}", &s.name, e);
+            warn!("{},cfg={},multi={} {:?}", &s.name, s.sign_config, s.multi,e);
             remove_file(&tn)?;
             return Ok(());
         };
