@@ -27,7 +27,7 @@ import us.mn.state.dot.tms.DMSHelper;
  * @author John L. Stanley - SRF Consulting
  */
 public class RptDeviceItem {
-	
+
 	public RptDeviceItem(String devname, RptDeviceClassEnum e) {
 		name = devname;
 		nameLower = devname.toLowerCase();
@@ -35,7 +35,7 @@ public class RptDeviceItem {
 	}
 
 	//-------------------------------------------
-	
+
 	/** Is device class selected? */
 	protected boolean selectedClass = false;
 
@@ -49,7 +49,7 @@ public class RptDeviceItem {
 	/** Is device name visible? */
 	protected boolean visibleName = true;
 
-	/** Set visible name-device flag.  
+	/** Set visible name-device flag.
 	 * Returns true if flag changed. */
 	public boolean setVisibleName(boolean flag) {
 		boolean changed = (visibleName != flag);
@@ -57,7 +57,7 @@ public class RptDeviceItem {
 		return changed;
 	}
 
-	/** Get composite visible flag.  Device is only 
+	/** Get composite visible flag.  Device is only
 	 * visible if both (the device-class it belongs
 	 * to is selected) -and- (the device name is
 	 * visible (as specified by the name filter)). */
@@ -66,7 +66,7 @@ public class RptDeviceItem {
 	}
 
 	//-------------------------------------------
-	
+
 	/** Is device selected in GUI? */
 	protected boolean selected = false;
 
@@ -79,9 +79,9 @@ public class RptDeviceItem {
 	public boolean getSelected() {
 		return selected;
 	}
-	
+
 	//-------------------------------------------
-	
+
 	/** device name */
 	protected String name;
 	protected String nameLower;
@@ -115,7 +115,7 @@ public class RptDeviceItem {
 	/** adds all supported devices to an ArrayList of RptDeviceItem */
 	public static void initList(ArrayList<RptDeviceItem> list) {
 		RptDeviceItem item;
-		
+
 		// add signs
 		Iterator<DMS> itDms = DMSHelper.iterator();
 		DMS sign;
@@ -128,17 +128,17 @@ public class RptDeviceItem {
 				list.add(item);
 			}
 		}
-		
+
 		//FIXME: add code to add other devices
-		
+
 		// sort list by device name
 		list.sort(nameComparator);
 	}
-	
+
 	//-------------------------------------------
-	
+
 	/** Sets visibleName flag based on partial name match.
-	 *  filter string must not be null and must be lower case. 
+	 *  filter string must not be null and must be lower case.
 	 *  Returns true if the visibleName flag changed. */
 	public boolean setVisibleName(String filter) {
 		if (filter.isEmpty())
@@ -151,9 +151,9 @@ public class RptDeviceItem {
 
 	/** Comparator to sort by device name */
 	public static Comparator<RptDeviceItem> nameComparator =
-		new Comparator<RptDeviceItem>() {         
-			public int compare(RptDeviceItem di1, RptDeviceItem di2) {             
-				return (int) (di1.getName().compareTo(di2.getName()));         
+		new Comparator<RptDeviceItem>() {
+			public int compare(RptDeviceItem di1, RptDeviceItem di2) {
+				return di1.getName().compareTo(di2.getName());
 			}
 		};
 
