@@ -9,6 +9,51 @@
 <body>
 <h1>MnDOT IRIS 4.x Release Notes</h1>
 <dl>
+	<dt>4.85.0 (17 Dec 2018)</dt>
+	<dd><ul>
+		<li>
+			Added rate limiting for email warnings.
+		</li>
+		<li>
+			Added system attributes for purging event tables:
+			alarm_event_purge_days, beacon_event_purge_days,
+			client_event_purge_days, gate_arm_event_purge_days,
+			price_message_event_purge_days, sign_event_purge_days,
+			tag_read_event_purge_days
+		</li>
+		<li>
+			Added system attributes for disabling event logging:
+			comm_event_enable, meter_event_enable
+		</li>
+		<li>
+			Fixed XML output for large sample values (&gt; 9999).
+		</li>
+		<li>
+			Cleaned up detector sampling code.
+		</li>
+		<li>
+			Rewrote and expanded detection section of administrator
+			guide.
+		</li>
+		<li>
+			Various improvements to administrator guide.
+		</li>
+		<li>
+			Simplified and documented fake detector feature.
+		</li>
+		<li>
+			Fixed message rendering problems in honeybee.
+		</li>
+		<li>
+			Fixed 5-minute detector polling problem.
+		</li>
+		<li>
+			Added Sierra GX modem GPS driver.
+		</li>
+		<li>
+			Added DMS sign message reporter.
+		</li>
+	</ul></dd>
 	<dt>4.84.0 (27 Nov 2018)</dt>
 	<dd><ul>
 		<li>
