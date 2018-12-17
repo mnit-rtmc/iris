@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2012  Minnesota Department of Transportation
+ * Copyright (C) 2008-2018  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -51,10 +51,10 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	}
 
 	/** Validate the database version */
-	static protected void validateDatabaseVersion() {
+	static private void validateDatabaseVersion() {
 		String c_version = "@@VERSION@@";
 		String db_version = SystemAttrEnum.DATABASE_VERSION.getString();
-		if(!validateVersions(c_version, db_version)) {
+		if (!validateVersions(c_version, db_version)) {
 			StringBuilder b = new StringBuilder();
 			b.append("Failure: database_version (");
 			b.append(db_version);
@@ -67,23 +67,24 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	}
 
 	/** Validate the database version */
-	static protected boolean validateVersions(String v0, String v1) {
+	static private boolean validateVersions(String v0, String v1) {
 		String[] va0 = v0.split("\\.");
 		String[] va1 = v1.split("\\.");
 		// Versions must be "major.minor.micro"
-		if(va0.length != 3 || va1.length != 3)
+		if (va0.length != 3 || va1.length != 3)
 			return false;
 		// Check that major versions match
-		if(!va0[0].equals(va1[0]))
+		if (!va0[0].equals(va1[0]))
 			return false;
 		// Check that minor versions match
-		if(!va0[1].equals(va1[1]))
+		if (!va0[1].equals(va1[1]))
 			return false;
 		// It's OK if micro versions don't match
 		return true;
 	}
 
 	/** Get a mapping of the columns */
+	@Override
 	public Map<String, Object> getColumns() {
 		HashMap<String, Object> map = new HashMap<String, Object>();
 		map.put("name", name);
@@ -92,11 +93,13 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	}
 
 	/** Get the database table name */
+	@Override
 	public String getTable() {
 		return "iris." + SONAR_TYPE;
 	}
 
 	/** Get the SONAR type name */
+	@Override
 	public String getTypeName() {
 		return SONAR_TYPE;
 	}
@@ -107,41 +110,41 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	}
 
 	/** Create a new attribute */
-	protected SystemAttributeImpl(String att_name, String arg_value) {
+	private SystemAttributeImpl(String att_name, String arg_value) {
 		super(att_name);
-		value = arg_value;
-	}
-
-	/** attribute value */
-	protected String value = "";
-
-	/** Set the attribute value */
-	public void setValue(String arg_value) {
-		logChange(arg_value);
 		value = arg_value;
 	}
 
 	/** Log system attribute change. */
 	private void logChange(String newval) {
-		if(!value.equals(newval)) {
+		if (!value.equals(newval)) {
 			SYS_LOG.log("System attribute changed: " + name +
 				", old=" + value + ", new=" + newval);
 		}
+	}
+
+	/** Attribute value */
+	private String value = "";
+
+	/** Set the attribute value */
+	@Override
+	public void setValue(String arg_value) {
+		logChange(arg_value);
+		value = arg_value;
 	}
 
 	/** Set the attribute value, doSet is required for
 	 *  database backed sonar objects
 	 */
 	public void doSetValue(String arg_value) throws TMSException {
-		if(arg_value == null)
-			return;
-		if(value.equals(arg_value))
-			return;
-		store.update(this, "value", arg_value);
-		setValue(arg_value);
+		if (!objectEquals(arg_value, value)) {
+			store.update(this, "value", arg_value);
+			setValue(arg_value);
+		}
 	}
 
 	/** Get the attribute value */
+	@Override
 	public String getValue() {
 		return value;
 	}
