@@ -30,14 +30,14 @@ INSERT INTO iris.system_attribute (name, value)
 
 -- Simplify fake detector specification
 UPDATE iris._detector
-   SET fake = NULL
- WHERE fake = '';
-UPDATE iris._detector
    SET fake = regexp_replace(fake, '[#%].*', '')
  WHERE fake IS NOT NULL;
 UPDATE iris._detector
-   SET fake = regexp_replace(fake, '+', ' ', 'g')
+   SET fake = regexp_replace(fake, '[+]', ' ', 'g')
  WHERE fake IS NOT NULL;
+UPDATE iris._detector
+   SET fake = NULL
+ WHERE trim(FROM fake) = '';
 
 -- Add SierraGX protocol
 UPDATE iris.comm_protocol SET description = 'SierraGX' WHERE id = 38;
