@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sched.DebugLog;
 import us.mn.state.dot.tms.SystemAttrEnum;
+import static us.mn.state.dot.tms.SystemAttrEnum.DETECTOR_AUTO_FAIL_ENABLE;
 import us.mn.state.dot.tms.SystemAttribute;
 import us.mn.state.dot.tms.TMSException;
 
@@ -131,6 +132,11 @@ public class SystemAttributeImpl extends BaseObjectImpl
 	public void setValue(String arg_value) {
 		logChange(arg_value);
 		value = arg_value;
+		if (DETECTOR_AUTO_FAIL_ENABLE.aname().equals(name) &&
+		   !DETECTOR_AUTO_FAIL_ENABLE.getBoolean())
+		{
+			DetectorImpl.updateAutoFailAll();
+		}
 	}
 
 	/** Set the attribute value, doSet is required for

@@ -199,6 +199,16 @@ public class DetectorImpl extends DeviceImpl implements Detector,VehicleSampler{
 		}
 	}
 
+	/** Update auto_fail for all detectors. */
+	static public void updateAutoFailAll() {
+		Iterator<Detector> it = DetectorHelper.iterator();
+		while (it.hasNext()) {
+			Detector d = it.next();
+			if (d instanceof DetectorImpl)
+				((DetectorImpl) d).updateAutoFail();
+		}
+	}
+
 	/** Log a message */
 	private void logMsg(String msg) {
 		if (DET_LOG.isOpen())
