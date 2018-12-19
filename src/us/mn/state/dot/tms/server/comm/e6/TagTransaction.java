@@ -37,14 +37,17 @@ public class TagTransaction extends E6Property {
 	/** IAG CRC-16 */
 	static private final CRC IAG_CRC = new CRC(16, 0x1021, 0x0000, false);
 
-	/** SeGo region code for MN */
-	static private final int REGION_MN = 0x0A;
+	/** SeGo authority code for FDOT.
+	 * Also used for interoperability, with 16 million range IDs */
+	static private final int AUTHORITY_FDOT = 0x0A01;
 
-	/** SeGo agency code for NCTA */
-	static private final int AGENCY_NCTA = 0x07;
+	/** SeGo authority code for NCTA */
+	static private final int AUTHORITY_NCTA = 0x0A07;
 
-	/** SeGo agency code for MnDOT */
-	static private final int AGENCY_MNDOT = 0x09;
+	/** SeGo authority code for MnPASS */
+	static private final int AUTHORITY_MNPASS = 0x0A09;
+
+	/* FIXME: change to 4-digit authority code */
 
 	/** Tag transaction types */
 	public enum TransactionType {
