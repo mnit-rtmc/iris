@@ -1,6 +1,6 @@
 <?xml version="1.0"?>
 <!-- ant build file for IRIS project
-     Copyright (C) 2007-2016  Minnesota Department of Transportation
+     Copyright (C) 2007-2018  Minnesota Department of Transportation
 
      This program is free software; you can redistribute it and/or modify
      it under the terms of the GNU General Public License as published by
@@ -273,6 +273,8 @@
 				 includes="us/mn/state/dot/tms/*.class"/>
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/geo/*.class"/>
+			<fileset dir="${build.classes}"
+				 includes="us/mn/state/dot/tms/reports/*.class"/>
 			<fileset dir="${build.classes}"
 				 includes="us/mn/state/dot/tms/units/*.class"/>
 			<fileset dir="${build.classes}"
