@@ -42,4 +42,13 @@ UPDATE iris._detector
 -- Add SierraGX protocol
 UPDATE iris.comm_protocol SET description = 'SierraGX' WHERE id = 38;
 
+-- Add reporter conduit privileges
+INSERT INTO iris.sonar_type VALUES ('rpt_conduit');
+INSERT INTO iris.capability VALUES ('report_admin', TRUE);
+INSERT INTO iris.role_capability VALUES ('administrator', 'report_admin');
+INSERT INTO iris.privilege
+	VALUES ('PRV_0152', 'report_admin', 'rpt_conduit', '', '', TRUE, '');
+INSERT INTO iris.privilege
+	VALUES ('PRV_0153', 'report_admin', 'rpt_conduit', '', '', FALSE, '');
+
 COMMIT;
