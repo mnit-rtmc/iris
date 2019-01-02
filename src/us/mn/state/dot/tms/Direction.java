@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2016  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,15 +23,15 @@ package us.mn.state.dot.tms;
 public enum Direction {
 
 	/** Enumerated direction values */
-	UNKNOWN(" ", "", ""),				// 0
-	NORTH("Northbound", "NB", "N"),			// 1
-	SOUTH("Southbound", "SB", "S"),			// 2
-	EAST("Eastbound", "EB", "E"),			// 3
-	WEST("Westbound", "WB", "W"),			// 4
-	NORTH_SOUTH("North-South", "NS", "N-S"),	// 5
-	EAST_WEST("East-West", "EW", "E-W"),		// 6
-	INNER_LOOP("Inner Loop", "IN", "IN"),		// 7
-	OUTER_LOOP("Outer Loop", "OUT", "OUT");		// 8
+	UNKNOWN(" ", "", ""),                   // 0
+	NORTH("Northbound", "NB", "N"),         // 1
+	SOUTH("Southbound", "SB", "S"),         // 2
+	EAST("Eastbound", "EB", "E"),           // 3
+	WEST("Westbound", "WB", "W"),           // 4
+	NORTH_SOUTH("North-South", "NS", "NS"), // 5
+	EAST_WEST("East-West", "EW", "EW"),     // 6
+	INNER_LOOP("Inner Loop", "IN", "IN"),   // 7
+	OUTER_LOOP("Outer Loop", "OUT", "OUT"); // 8
 
 	/** Direction description */
 	public final String description;
