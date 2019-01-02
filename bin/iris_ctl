@@ -67,9 +67,20 @@ function init_db() {
 	echo $pg_pwd > $pwd_file
 	echo "*:*:*:postgres:$pg_pwd" >> $pwd_file
 	chown postgres.postgres $pwd_file
-	su postgres -l -c "initdb -A password --pwfile $pwd_file"
+	su --login postgres -c "initdb -A password --pwfile $pwd_file"
+	pg_conf=/var/lib/pgsql/data/postgresql.conf
+	echo "#" >> $pg_conf
+	echo "# Settings for IRIS osm schema" >> $pg_conf
+	echo "maintenance_work_mem = 256MB" >> $pg_conf
+	echo "temp_buffers = 128MB" >> $pg_conf
 	systemctl enable postgresql.service
 	systemctl start postgresql.service
+}
+
+function create_osm_database() {
+	echo "Creating osm database"
+	create_db="createdb osm; psql osm -c 'CREATE EXTENSION postgis;'"
+	su --login postgres -c "$create_db"
 }
 
 function create_tms_user() {
@@ -79,13 +90,13 @@ function create_tms_user() {
 	sed_p="s:.*db.password=.*:db.password=$tms_pwd:"
 	sed -i ''$sed_p'' $p_server
 	create_user='echo "CREATE USER tms NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD '\'$tms_pwd\''" | psql'
-	su postgres -l -c "$create_user"
+	su --login postgres -c "$create_user"
 }
 
-function create_database() {
+function create_tms_database() {
 	echo "Creating tms database"
 	create_db="createdb tms; psql tms -f /var/lib/iris/sql/tms-template.sql -f /var/lib/iris/sql/fonts/07_char.sql -f /var/lib/iris/sql/fonts/07_line.sql -f /var/lib/iris/sql/fonts/08_full.sql -f /var/lib/iris/sql/fonts/09_full.sql -f /var/lib/iris/sql/fonts/10_full.sql -f /var/lib/iris/sql/fonts/11_full.sql -f /var/lib/iris/sql/fonts/12_full.sql -f /var/lib/iris/sql/fonts/13_full.sql -f /var/lib/iris/sql/fonts/14_full.sql -f /var/lib/iris/sql/fonts/15_full.sql -f /var/lib/iris/sql/fonts/16_full.sql -f /var/lib/iris/sql/fonts/18_full.sql"
-	su postgres -l -c "$create_db"
+	su --login postgres -c "$create_db"
 }
 
 function configure_services() {
@@ -132,8 +143,9 @@ case "$1" in
 		update_client_properties
 		create_keystores
 		init_db
+		create_osm_database
 		create_tms_user
-		create_database
+		create_tms_database
 		configure_services
 		configure_firewall
 		create_links

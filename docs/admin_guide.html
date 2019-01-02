@@ -99,7 +99,7 @@
 
 <main class="mainbar">
 <header>
-<div id="stamp">14 Dec 2018</div>
+<div id="stamp">21 Dec 2018</div>
 </header>
 <h1 id="admin_guide"><span class="left"><img src="iris_icon.svg"/></span>
 	IRIS Administrator Guide</h1>
@@ -389,12 +389,15 @@
 		Create the database cluster and start the PostgreSQL server.
 	</li>
 	<li>
-		Create the "tms" PostgreSQL user, which IRIS uses to connect
-		to the database.
+		Create the <code>osm</code> databsae (for OpenStreetMap data).
 	</li>
 	<li>
-		Create the "tms" database and populate it using a template
-		SQL script.
+		Create the <code>tms</code> PostgreSQL user, which IRIS uses to
+		connect to the database.
+	</li>
+	<li>
+		Create the <code>tms</code> database and populate it using a
+		template SQL script.
 	</li>
 	<li>
 		Configure the apache (httpd) and IRIS services to start
@@ -756,141 +759,39 @@ systemctl status iris</pre>
 	background layer.
 	The map tiles are fetched from a web server on demand as the client map
 	is panned and zoomed.
-	The tiles can be generated from data downloaded from
-	<a href="http://openstreetmap.org">OpenStreetMap</a>.
+	The tiles can be generated from <a href="http://openstreetmap.org">
+	OpenStreetMap</a> (OSM) data.
 	The following instructions describe one method of generating the map
-	tiles on Fedora 20.
+	tiles on Fedora 29.
 </p>
 
-<h4>Get planet file</h4>
+<h4>Get OSM data for your region</h4>
 <p>
-	Download the latest planet file (~64GB as of 01/2018).
-<pre class="code">wget http://planet.openstreetmap.org/planet/planet-latest.osm.bz2</pre>
+	Download the latest OSM data from
+	<a href="http://download.geofabrik.de/">Geofabrik</a>.
+	Find the sub-region of interest -- for example, data for Minnesota is at
+	<a href="http://download.geofabrik.de/north-america/us/minnesota.html">
+	http://download.geofabrik.de/north-america/us/minnesota.html</a>.
+	This file is 164 MB as of December 2018.
 </p>
 
-<h4>Download and install PostGIS</h4>
+<h4>Import OSM Data</h4>
 <p>
-<pre class="code">sudo dnf install postgis postgis-docs postgis-utils</pre>
-</p>
-
-<h4>Configure PostGIS and create spatial DB</h4>
-<p>
-<pre class="code">
-# Create DB named gis
-su - postgres
-createdb --encoding=UTF8 gis
-psql -d gis -f /usr/share/pgsql/contrib/postgis-64.sql
-
-# Edit kernel parameters to increase max size of shared memory
-sudo sysctl -w kernel.shmmax=268435456
-sudo sysctl -p /etc/sysctl.conf
-sysctl -a | grep kernel.shmmax
-
-# Update postgresql config
-vim /var/lib/pgsql/data/postgresql.conf
-	checkpoint_segments = 20
-	maintenance_work_mem = 256MB # 256000 for 8.1 and earlier
-	autovacuum = off
-	shared_buffers = 4GB
-	temp_buffers = 128MB
-	maintenance_work_mem = 4GB
-service postgresql restart
-
-# Import spatial ref systems
-psql -d gis -f  /usr/share/pgsql/contrib/postgis-2.1/spatial_ref_sys.sql
-</pre>
-</p>
-
-<h4>Build and install osm2pgsql from source</h4>
-<p>
-<pre class="code">
-su - tms
-sudo dnf -y install git
-sudo dnf -y install geos-devel proj-devel postgresql-devel libxml2-devel bzip2-devel
-sudo dnf -y install gcc-c++ protobuf-c-devel autoconf automake libtool
-mkdir ~/osm; cd ~/osm
-git clone https://github.com/openstreetmap/osm2pgsql.git
-cd ~/osm/osm2pgsql
-./autogen.sh
-./configure
-make
-sudo make install
-</pre>
-</p>
-
-<h4>Import OSM planet file into PostGIS</h4>
-<p>
-	This process takes a long time (~96h with a final database 
-	size ~340G). See performance comparisons
-	<a href="http://wiki.openstreetmap.org/wiki/Osm2pgsql/benchmarks">here</a>.
-	Determine the bounding box for the region of interest. For Minnesota it
-	is: -97.5, 43.0, -89.0, 49.5.
+	The time required to for this process varies depending on the amount of
+	data.
+	For Minnesota, it takes about 5 minutes on a beefy server.
 </p>
 <pre class="code">
-su - postgres
-time osm2pgsql -v --number-processes=16 -d gis -s --bbox -97.5, 43.0, -89.0, 49.5 planet-140522.osm.bz2
+su --login postgres
+time osm2pgsql -v --number-processes=8 -d osm -s --drop ./minnesota-20181219.osm.pbf
 </pre>
-
 
 <h4>Build and install mapnik library from source</h4>
 <p>
 	See the mapnik <a href="https://github.com/mapnik/mapnik/wiki/Mapnik-Installation">install docs</a>. The <a href="https://gist.github.com/springmeyer/3427021">Springmeyer docs</a> are also very useful.
 </p>
 <pre class="code">
-su - tms
-# Install dependencies
-sudo dnf -y install make gcc47 gcc-c++ bzip2-devel libpng-devel libtiff-devel \
-      zlib-devel libjpeg-devel libxml2-devel python-setuptools git-all \
-      python-nose python27-devel python27 proj-devel proj proj-epsg \
-      proj-nad freetype-devel freetype libicu-devel libicu
-# Install optional deps
-sudo dnf -y install gdal-devel gdal postgresql-devel sqlite-devel sqlite \
-      libcurl-devel libcurl cairo-devel cairo pycairo-devel pycairo
-# Build recent version of Boost
-export JOBS=`grep -c ^processor /proc/cpuinfo`
-mkdir -p ~/osm/src; cd ~/osm/src
-export BOOST_VERSION="1_55_0"
-export S3_BASE="http://mapnik.s3.amazonaws.com/deps"
-curl -O ${S3_BASE}/boost_${BOOST_VERSION}.tar.bz2
-tar xf boost_${BOOST_VERSION}.tar.bz2
-cd boost_${BOOST_VERSION}
-./bootstrap.sh
-./b2 -d1 -j${JOBS} \
-    --with-thread \
-    --with-filesystem \
-    --with-python \
-    --with-regex -sHAVE_ICU=1  \
-    --with-program_options \
-    --with-system \
-    link=shared \
-    release \
-    toolset=gcc \
-    stage
-sudo ./b2 -j${JOBS} \
-    --with-thread \
-    --with-filesystem \
-    --with-python \
-    --with-regex -sHAVE_ICU=1 \
-    --with-program_options \
-    --with-system \
-    toolset=gcc \
-    link=shared \
-    release \
-    install
-cd ~/osm/src
-# Set up support for libraries installed in /usr/local/lib
-sudo bash -c "echo '/usr/local/lib' > /etc/ld.so.conf.d/boost.conf"
-sudo ldconfig
-# Build and install mapnik stable branch: 2.3.x
-mkdir -p ~/osm/src; cd ~/osm/src
-git clone https://github.com/mapnik/mapnik -b 2.3.x
-cd ~/osm/src/mapnik
-./configure
-make
-make test-local
-sudo make install
-# Verify everything is good
-echo “import mapnik” | python
+dnf install mapnik
 </pre>
 
 <h4>Install mapnik tools</h4>
@@ -947,7 +848,7 @@ cd ~/osm/mapnik
 export MAPNIK_MAP_FILE=~/osm/mapnik/iris_osm.xml
 export MAPNIK_TILE_DIR=/home/tms/osm/tiles
 # Customize osm.xml
-./generate_xml.py  --dbname gis --accept-none
+./generate_xml.py  --dbname osm --accept-none
 vim generate_tiles_multiprocess.py
 	NUM_THREADS = number of processors in your server
 	bbox = (-97.5, 43.0, -89.0, 49.5)
