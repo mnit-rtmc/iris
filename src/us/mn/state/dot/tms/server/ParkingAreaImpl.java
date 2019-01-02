@@ -782,8 +782,15 @@ public class ParkingAreaImpl extends BaseObjectImpl implements ParkingArea {
 		setReportedAvailableNotify(ra);
 		setTrueAvailableNotify(a);
 		setTrendNotify(calculateTrend(a));
+		setTrustDataNotify(shouldTrust(t));
+	}
+
+	/** Determine whether parking data should be trusted */
+	private boolean shouldTrust(int t) {
+		Boolean op = open;
 		Integer cap = capacity;
-		setTrustDataNotify((cap != null) && shouldTrust(t, cap));
+		return (op != null) && open
+		    && (cap != null) && shouldTrust(t, cap);
 	}
 
 	/** Reported available parking spaces (or LOW) */
