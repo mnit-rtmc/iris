@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2018  Minnesota Department of Transportation
+ * Copyright (C) 2012-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,34 +25,34 @@ import static us.mn.state.dot.tms.server.Constants.MISSING_DATA;
 public enum PeriodicSampleType {
 
 	/** Vehicle count */
-	VEH_COUNT("v", 1, Byte.MAX_VALUE, Aggregation.SUM),
+	VEH_COUNT("v", 1, Aggregation.SUM),
 
 	/** Occupancy (percent of time occupied) */
-	OCCUPANCY("o", 2, Short.MAX_VALUE, Aggregation.AVERAGE),
+	OCCUPANCY("o", 2, Aggregation.AVERAGE),
 
 	/** Scan count (60 Hz scans) */
-	SCAN("c", 2, Short.MAX_VALUE, Aggregation.SUM),
+	SCAN("c", 2, Aggregation.SUM),
 
 	/** Speed (mph) */
-	SPEED("s", 1, Byte.MAX_VALUE, Aggregation.AVERAGE),
+	SPEED("s", 1, Aggregation.AVERAGE),
 
 	/** Motorcycle count (vehicles of MOTORCYCLE class) */
-	MOTORCYCLE("vmc", 1, Byte.MAX_VALUE, Aggregation.SUM),
+	MOTORCYCLE("vmc", 1, Aggregation.SUM),
 
 	/** Short count (vehicles of SHORT class) */
-	SHORT("vs", 1, Byte.MAX_VALUE, Aggregation.SUM),
+	SHORT("vs", 1, Aggregation.SUM),
 
 	/** Medium count (vehicles of MEDIUM class) */
-	MEDIUM("vm", 1, Byte.MAX_VALUE, Aggregation.SUM),
+	MEDIUM("vm", 1, Aggregation.SUM),
 
 	/** Long count (vehicles of LONG class) */
-	LONG("vl", 1, Byte.MAX_VALUE, Aggregation.SUM),
+	LONG("vl", 1, Aggregation.SUM),
 
 	/** Precipitation rate (um; micrometers) */
-	PRECIP_RATE("pr", 2, Short.MAX_VALUE, Aggregation.SUM),
+	PRECIP_RATE("pr", 2, Aggregation.SUM),
 
 	/** Precipitation type (rain, snow, etc.) */
-	PRECIP_TYPE("pt", 1, Byte.MAX_VALUE, Aggregation.NONE);
+	PRECIP_TYPE("pt", 1, Aggregation.NONE);
 
 	/** Maximum bytes to store any sample type */
 	static public final int MAX_BYTES = 2;
@@ -63,18 +63,14 @@ public enum PeriodicSampleType {
 	/** Number of bytes per sample */
 	public final int sample_bytes;
 
-	/** Maximum sample value allowed */
-	private final int max_value;
-
 	/** Sample data aggregation method (SUM or AVERAGE) */
 	public final Aggregation aggregation;
 
 	/** Create a new periodic sample type */
-	private PeriodicSampleType(String e, int b, int m, Aggregation a) {
+	private PeriodicSampleType(String e, int b, Aggregation a) {
 		assert b <= MAX_BYTES;
 		extension = e;
 		sample_bytes = b;
-		max_value = m;
 		aggregation = a;
 	}
 
@@ -82,16 +78,21 @@ public enum PeriodicSampleType {
 	 * @param buffer Byte buffer.
 	 * @param value Sample value. */
 	public void putValue(ByteBuffer buffer, int value) {
-		if (sample_bytes == 1)
-			buffer.put((byte)value);
-		else if (sample_bytes == 2)
-			buffer.putShort((short)value);
+		if (sample_bytes == 1) {
+			int v = Math.min(Math.max(value, Byte.MIN_VALUE),
+			                 Byte.MAX_VALUE);
+			buffer.put((byte) v);
+		}
+		else if (sample_bytes == 2) {
+			int v = Math.min(Math.max(value, Short.MIN_VALUE),
+			                 Short.MAX_VALUE);
+			buffer.putShort((short) v);
+		}
 	}
 
 	/** Is a periodic sample valid? */
 	public boolean isValid(PeriodicSample ps) {
 		return ps.period > 0 &&
-		       ps.value > MISSING_DATA &&
-		       ps.value <= max_value;
+		       ps.value > MISSING_DATA;
 	}
 }
