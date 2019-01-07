@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ static OUTPUT_DIR: &str = "/var/www/html/iris/";
 /// * `username` Name of user running process.
 /// * `host` Host name and port to mirror fetched resources.
 pub fn start(username: String, host: Option<String>) -> Result<(), Error> {
-    // Format path for unix domain socket
+    // Format path for unix domain socket -- not worth using percent_encode
     let uds = format!("postgres://{:}@%2Frun%2Fpostgresql/tms", username);
     let (tx, rx) = channel();
     let db = thread::spawn(move || {
