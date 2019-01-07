@@ -83,7 +83,7 @@ public class RptGen_SignEvents extends RptGen {
 			sWhere = addWhere(sWhere, "device_id in ('" + str_device_list + "')");
 
 		// run query and gather results
-		store.query("SELECT event_date, description, device_id, multi, iris_user "
+		store.query("SELECT event_date, description, device_id, multi, owner "
 				+ "FROM public.sign_event_view"
 				+ sWhere
 				+ " ORDER BY event_date, device_id;",
@@ -93,14 +93,14 @@ public class RptGen_SignEvents extends RptGen {
 					String sDescr    = row.getString(2);	// event_description
 					String sDevName  = row.getString(3);	// device_id
 					String sMulti    = row.getString(4);	// MULTI string
-					String sUser     = row.getString(5);	// IRIS user
+					String sOwner     = row.getString(5);	// message owner
 					Long lTime = tsTime.getTime();
 					if (sMulti != null)
 						sDescr = sDescr + ": \"" + sMulti + "\"";
-					if (sUser == null)
-						sUser = "";
+					if (sOwner == null)
+						sOwner = "";
 					results.addRptRecord(new RptResultItem(
-						lTime, sDevName, sUser, sDescr));
+						lTime, sDevName, sOwner, sDescr));
 				}
 			}
 		);
