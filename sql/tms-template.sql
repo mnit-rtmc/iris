@@ -3300,6 +3300,7 @@ BEGIN
 	END IF;
 	IF (NEW.time_stamp IS DISTINCT FROM OLD.time_stamp) THEN
 		NOTIFY tms, 'parking_area_dynamic';
+		NOTIFY tms, 'parking_area_archive';
 	END IF;
 	RETURN NULL; -- AFTER trigger return is ignored
 END;
