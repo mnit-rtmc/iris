@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2017-2018  Iteris Inc.
  *
@@ -156,7 +156,7 @@ public class DMSDispatcher extends JPanel {
 	}
 
 	/** Get page prefix MULTI string from scheduled message (if any) */
-	public String getPagePrefix() {
+	private String getPagePrefix() {
 		DMS dms = getSingleSelection();
 		if (dms != null) {
 			SignMessage sm = dms.getMsgSched();

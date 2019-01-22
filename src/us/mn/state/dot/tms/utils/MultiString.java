@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2006-2018  Minnesota Department of Transportation
+ * Copyright (C) 2006-2019  Minnesota Department of Transportation
  * Copyright (C) 2014-2015  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -712,16 +712,15 @@ public class MultiString {
 	/** Get message lines as an array of strings (with tags).
 	 * Every n_lines elements in the returned array represent one page.
 	 * @param n_lines Number of lines per page.
-	 * @param prefix Page prefix.
 	 * @return A string array containing text for each line. */
-	public String[] getLines(int n_lines, String prefix) {
+	public String[] getLines(int n_lines) {
 		String[] pages = getPages();
 		int n_total = n_lines * pages.length;
 		String[] lines = new String[n_total];
 		for (int i = 0; i < lines.length; i++)
 			lines[i] = "";
 		for (int i = 0; i < pages.length; i++) {
-			String page = removePrefix(pages[i], prefix);
+			String page = removePrefix(pages[i]);
 			int p = i * n_lines;
 			String[] lns = page.split("\\[nl.?\\]");
 			for (int ln = 0; ln < lns.length; ln++) {
@@ -740,11 +739,11 @@ public class MultiString {
 		return lines;
 	}
 
-	/** Remove a page prefix */
-	static private String removePrefix(String page, String prefix) {
-		return (page.startsWith(prefix))
-		      ? page.substring(prefix.length())
-		      : page;
+	/** Remove all prefix before the last [tr...] tag */
+	static private String removePrefix(String page) {
+		String[] parts = page.split("\\[tr.*?\\]", -1);
+		int len = parts.length;
+		return (len > 0) ? parts[len - 1] : "";
 	}
 
 	/** Get a MULTI string as text only (tags stripped) */

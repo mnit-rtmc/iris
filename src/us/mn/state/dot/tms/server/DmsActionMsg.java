@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2018  Minnesota Department of Transportation
+ * Copyright (C) 2013-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -322,7 +322,8 @@ public class DmsActionMsg {
 	/** Test if a feed message is valid */
 	private boolean isFeedMsgValid(MultiString _multi) {
 		int n_lines = DMSHelper.getLineCount(dms);
-		String[] lines = _multi.getLines(n_lines, "");
+		// FIXME: reject most MULTI tags
+		String[] lines = _multi.getLines(n_lines);
 		for (int i = 0; i < lines.length; i++) {
 			if (!isValidSignText((short) (i + 1), lines[i]))
 				return false;
