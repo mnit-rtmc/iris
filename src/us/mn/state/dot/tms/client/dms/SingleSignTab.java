@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  * Copyright (C) 2010 AHMCT, University of California, Davis
  * Copyright (C) 2018  SRF Consulting Group
  *
@@ -410,7 +410,7 @@ public class SingleSignTab extends IPanel {
 	/** Update the current message */
 	private void updateMessageCurrent(DMS dms) {
 		adjusting++;
-		dispatcher.setComposedMulti(DMSHelper.getMultiString(dms),
+		dispatcher.setComposedMulti(DMSHelper.getOperatorMulti(dms),
 			false);
 		adjusting--;
 		expiration_lbl.setText(getExpiration(dms));

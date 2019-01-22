@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  * Copyright (C) 2009-2010  AHMCT, University of California
  *
  * This program is free software; you can redistribute it and/or modify
@@ -120,6 +120,18 @@ public class DMSHelper extends BaseHelper {
 		if (dms != null) {
 			SignMessage sm = dms.getMsgCurrent();
 			if (sm != null)
+				return sm.getMulti();
+		}
+		return "";
+	}
+
+	/** Get the operator sent MULTI string currently on a DMS.
+	 * @param dms DMS to lookup. */
+	static public String getOperatorMulti(DMS dms) {
+		if (dms != null) {
+			SignMessage sm = dms.getMsgCurrent();
+			if (sm != null
+			 && SignMsgSource.operator.checkBit(sm.getSource()))
 				return sm.getMulti();
 		}
 		return "";
