@@ -52,9 +52,12 @@ public class SignConfigHelper extends BaseHelper {
 	 * @param cw Character width.
 	 * @param ch Character height.
 	 * @param cs Color scheme ordinal.
+	 * @param mf Monochrome foreground color (24-bit).
+	 * @param mb Monochrome background color (24-bit).
 	 * @return Matching sign config, or null if not found. */
 	static public SignConfig find(int fw, int fh, int bh, int bv, int ph,
-		int pv, int pxw, int pxh, int cw, int ch, int cs)
+		int pv, int pxw, int pxh, int cw, int ch, int cs, int mf,
+		int mb)
 	{
 		Iterator<SignConfig> it = iterator();
 		while (it.hasNext()) {
@@ -69,7 +72,9 @@ public class SignConfigHelper extends BaseHelper {
 			    sc.getPixelHeight() == pxh &&
 			    sc.getCharWidth() == cw &&
 			    sc.getCharHeight() == ch &&
-			    sc.getColorScheme() == cs)
+			    sc.getColorScheme() == cs &&
+			    sc.getMonochromeForeground() == mf &&
+			    sc.getMonochromeBackground() == mb)
 			{
 				return sc;
 			}

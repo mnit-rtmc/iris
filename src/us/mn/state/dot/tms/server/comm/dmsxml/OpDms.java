@@ -413,9 +413,7 @@ abstract class OpDms extends OpDevice {
 				int dt = type.ordinal();
 				SignDetailImpl sd = SignDetailImpl.findOrCreate(
 					dt, false, "OTHER", signAccess, "other",
-					"other", DmsColor.AMBER.rgb(),
-					DmsColor.BLACK.rgb(), make, model, make,
-					model);
+					"other", make, model, make, model);
 				if (sd != null)
 					m_dms.setSignDetailNotify(sd);
 				SignConfigImpl sc = SignConfigImpl.findOrCreate(
@@ -425,7 +423,9 @@ abstract class OpDms extends OpDevice {
 					signWidthPixels, signHeightPixels,
 					characterWidthPixels,
 					characterHeightPixels,
-					ColorScheme.MONOCHROME_1_BIT.ordinal());
+					ColorScheme.MONOCHROME_1_BIT.ordinal(),
+				        DmsColor.AMBER.rgb(),
+				        DmsColor.BLACK.rgb());
 				if (sc != null)
 					m_dms.setSignConfigNotify(sc);
 

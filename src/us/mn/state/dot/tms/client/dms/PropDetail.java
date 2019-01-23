@@ -14,16 +14,11 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.Component;
-import java.awt.Color;
-import java.awt.Graphics;
-import javax.swing.Icon;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IPanel;
-import us.mn.state.dot.tms.utils.HexString;
 
 /**
  * PropDetail is a GUI panel for displaying sign detail on a form.
@@ -31,27 +26,6 @@ import us.mn.state.dot.tms.utils.HexString;
  * @author Douglas Lau
  */
 public class PropDetail extends IPanel {
-
-	/** Icon size */
-	static private final int ICON_SIZE = 24;
-
-	/** Icon for colors */
-	static private class ColorIcon implements Icon {
-		private final Color color;
-		private ColorIcon(int rgb) {
-			color = new Color(rgb);
-		}
-		public int getIconHeight() {
-			return ICON_SIZE;
-		}
-		public int getIconWidth() {
-			return ICON_SIZE;
-		}
-		public void paintIcon(Component c, Graphics g, int x, int y) {
-			g.setColor(color);
-			g.fillRect(x, y, ICON_SIZE, ICON_SIZE);
-		}
-	}
 
 	/** Unknown value string */
 	static private final String UNKNOWN = "???";
@@ -78,12 +52,6 @@ public class PropDetail extends IPanel {
 
 	/** Beacon label */
 	private final JLabel beacon_lbl = createValueLabel();
-
-	/** Monochrome foreground label */
-	private final JLabel m_foreground_lbl = createValueLabel();
-
-	/** Monochrome background label */
-	private final JLabel m_background_lbl = createValueLabel();
 
 	/** Hardware make label */
 	private final JLabel hardware_make_lbl = createValueLabel();
@@ -123,10 +91,6 @@ public class PropDetail extends IPanel {
 		add(legend_lbl, Stretch.LAST);
 		add("dms.beacon");
 		add(beacon_lbl, Stretch.LAST);
-		add("dms.monochrome.foreground");
-		add(m_foreground_lbl, Stretch.LAST);
-		add("dms.monochrome.background");
-		add(m_background_lbl, Stretch.LAST);
 		add("dms.hardware.make");
 		add(hardware_make_lbl, Stretch.LAST);
 		add("dms.hardware.model");
@@ -148,14 +112,10 @@ public class PropDetail extends IPanel {
 			access_lbl.setText(formatString(sd.getSignAccess()));
 			legend_lbl.setText(formatString(sd.getLegend()));
 			beacon_lbl.setText(formatString(sd.getBeaconType()));
-			m_foreground_lbl.setText(HexString.format(
-				sd.getMonochromeForeground(), 6));
-			m_foreground_lbl.setIcon(new ColorIcon(
-				sd.getMonochromeForeground()));
-			m_background_lbl.setText(HexString.format(
-				sd.getMonochromeBackground(), 6));
-			m_background_lbl.setIcon(new ColorIcon(
-				sd.getMonochromeBackground()));
+			hardware_make_lbl.setText(formatString(
+				sd.getHardwareMake()));
+			hardware_model_lbl.setText(formatString(
+				sd.getHardwareModel()));
 			software_make_lbl.setText(formatString(
 				sd.getSoftwareMake()));
 			software_model_lbl.setText(formatString(

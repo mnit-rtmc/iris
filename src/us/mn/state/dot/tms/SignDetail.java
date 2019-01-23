@@ -44,12 +44,6 @@ public interface SignDetail extends SonarObject {
 	/** Get beacon type description */
 	String getBeaconType();
 
-	/** Get monochrome scheme foreground color (24-bit). */
-	int getMonochromeForeground();
-
-	/** Get monochrome scheme background color (24-bit). */
-	int getMonochromeBackground();
-
 	/** Get the hardware make */
 	String getHardwareMake();
 

@@ -14,7 +14,11 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
+import java.awt.Component;
+import java.awt.Color;
+import java.awt.Graphics;
 import java.awt.event.ActionEvent;
+import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.ColorScheme;
@@ -26,6 +30,7 @@ import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IComboBoxModel;
 import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.units.Distance;
+import us.mn.state.dot.tms.utils.HexString;
 import static us.mn.state.dot.tms.units.Distance.Units.INCHES;
 import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
 import us.mn.state.dot.tms.utils.I18N;
@@ -37,6 +42,27 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class PropConfiguration extends IPanel {
+
+	/** Icon size */
+	static private final int ICON_SIZE = 24;
+
+	/** Icon for colors */
+	static private class ColorIcon implements Icon {
+		private final Color color;
+		private ColorIcon(int rgb) {
+			color = new Color(rgb);
+		}
+		public int getIconHeight() {
+			return ICON_SIZE;
+		}
+		public int getIconWidth() {
+			return ICON_SIZE;
+		}
+		public void paintIcon(Component c, Graphics g, int x, int y) {
+			g.setColor(color);
+			g.fillRect(x, y, ICON_SIZE, ICON_SIZE);
+		}
+	}
 
 	/** Get tiny distance units to use for display */
 	static private Distance.Units distUnitsTiny() {
@@ -103,6 +129,12 @@ public class PropConfiguration extends IPanel {
 	/** Color scheme label */
 	private final JLabel c_scheme_lbl = createValueLabel();
 
+	/** Monochrome foreground label */
+	private final JLabel m_foreground_lbl = createValueLabel();
+
+	/** Monochrome background label */
+	private final JLabel m_background_lbl = createValueLabel();
+
 	/** Default font combo box */
 	private final JComboBox<Font> font_cbx = new JComboBox<Font>();
 
@@ -147,6 +179,10 @@ public class PropConfiguration extends IPanel {
 		add(c_height_lbl, Stretch.LAST);
 		add("dms.color.scheme");
 		add(c_scheme_lbl, Stretch.LAST);
+		add("dms.monochrome.foreground");
+		add(m_foreground_lbl, Stretch.LAST);
+		add("dms.monochrome.background");
+		add(m_background_lbl, Stretch.LAST);
 		add("dms.font.default");
 		add(font_cbx, Stretch.LAST);
 		add("dms.font.height");
@@ -184,6 +220,14 @@ public class PropConfiguration extends IPanel {
 			ColorScheme cs = ColorScheme.fromOrdinal(
 				sc.getColorScheme());
 			c_scheme_lbl.setText(cs.description);
+			m_foreground_lbl.setText(HexString.format(
+				sc.getMonochromeForeground(), 6));
+			m_foreground_lbl.setIcon(new ColorIcon(
+				sc.getMonochromeForeground()));
+			m_background_lbl.setText(HexString.format(
+				sc.getMonochromeBackground(), 6));
+			m_background_lbl.setIcon(new ColorIcon(
+				sc.getMonochromeBackground()));
 		}
 		if (null == a || a.equals("defaultFont")) {
 			font_cbx.setSelectedItem(sc.getDefaultFont());

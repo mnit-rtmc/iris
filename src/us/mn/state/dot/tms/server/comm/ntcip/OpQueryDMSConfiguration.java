@@ -363,7 +363,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			int mb = m_color.getBackgroundInt();
 			SignDetailImpl sd = SignDetailImpl.findOrCreate(dt, p,
 				tech.getValue(), access.getValue(),
-				legend.getValue(), beaconType.getValue(), mf,mb,
+				legend.getValue(), beaconType.getValue(),
 				hardware_make, hardware_model, software_make,
 				software_model);
 			if (sd != null)
@@ -375,7 +375,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				h_pitch.getInteger(), v_pitch.getInteger(),
 				s_width.getInteger(), s_height.getInteger(),
 				c_width.getInteger(), getCharHeight(),
-				color_scheme.getInteger());
+				color_scheme.getInteger(), mf,mb);
 			if (sc != null)
 				dms.setSignConfigNotify(sc);
 		}

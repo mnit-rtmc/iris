@@ -2228,8 +2228,6 @@ CREATE TABLE iris.sign_detail (
 	sign_access VARCHAR(12) NOT NULL,
 	legend VARCHAR(12) NOT NULL,
 	beacon_type VARCHAR(32) NOT NULL,
-	monochrome_foreground INTEGER NOT NULL,
-	monochrome_background INTEGER NOT NULL,
 	hardware_make VARCHAR(32) NOT NULL,
 	hardware_model VARCHAR(32) NOT NULL,
 	software_make VARCHAR(32) NOT NULL,
@@ -2250,8 +2248,7 @@ CREATE TRIGGER sign_detail_trig
 
 CREATE VIEW sign_detail_view AS
 	SELECT name, dt.description AS dms_type, portable, technology,
-	       sign_access, legend, beacon_type, monochrome_foreground,
-	       monochrome_background, hardware_make, hardware_model,
+	       sign_access, legend, beacon_type, hardware_make, hardware_model,
 	       software_make, software_model
 	FROM iris.sign_detail
 	JOIN iris.dms_type dt ON sign_detail.dms_type = dt.id;
@@ -2270,6 +2267,8 @@ CREATE TABLE iris.sign_config (
 	char_width INTEGER NOT NULL,
 	char_height INTEGER NOT NULL,
 	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
+	monochrome_foreground INTEGER NOT NULL,
+	monochrome_background INTEGER NOT NULL,
 	default_font VARCHAR(16) REFERENCES iris.font
 );
 
@@ -2288,7 +2287,8 @@ CREATE TRIGGER sign_config_trig
 CREATE VIEW sign_config_view AS
 	SELECT name, face_width, face_height, border_horiz, border_vert,
 	       pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width,
-	       char_height, cs.description AS color_scheme, default_font
+	       char_height, cs.description AS color_scheme,
+	       monochrome_foreground, monochrome_background, default_font
 	FROM iris.sign_config
 	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
 GRANT SELECT ON sign_config_view TO PUBLIC;

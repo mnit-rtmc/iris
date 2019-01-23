@@ -34,8 +34,6 @@ CREATE TABLE iris.sign_detail (
 	sign_access VARCHAR(12) NOT NULL,
 	legend VARCHAR(12) NOT NULL,
 	beacon_type VARCHAR(32) NOT NULL,
-	monochrome_foreground INTEGER NOT NULL,
-	monochrome_background INTEGER NOT NULL,
 	hardware_make VARCHAR(32) NOT NULL,
 	hardware_model VARCHAR(32) NOT NULL,
 	software_make VARCHAR(32) NOT NULL,
@@ -56,8 +54,7 @@ CREATE TRIGGER sign_detail_trig
 
 CREATE VIEW sign_detail_view AS
 	SELECT name, dt.description AS dms_type, portable, technology,
-	       sign_access, legend, beacon_type, monochrome_foreground,
-	       monochrome_background, hardware_make, hardware_model,
+	       sign_access, legend, beacon_type, hardware_make, hardware_model,
 	       software_make, software_model
 	FROM iris.sign_detail
 	JOIN iris.dms_type dt ON sign_detail.dms_type = dt.id;
@@ -187,13 +184,12 @@ ALTER TABLE iris.sign_config DROP COLUMN technology;
 ALTER TABLE iris.sign_config DROP COLUMN sign_access;
 ALTER TABLE iris.sign_config DROP COLUMN legend;
 ALTER TABLE iris.sign_config DROP COLUMN beacon_type;
-ALTER TABLE iris.sign_config DROP COLUMN monochrome_foreground;
-ALTER TABLE iris.sign_config DROP COLUMN monochrome_background;
 
 CREATE VIEW sign_config_view AS
 	SELECT name, face_width, face_height, border_horiz, border_vert,
 	       pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width,
-	       char_height, cs.description AS color_scheme, default_font
+	       char_height, cs.description AS color_scheme,
+	       monochrome_foreground, monochrome_background, default_font
 	FROM iris.sign_config
 	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
 GRANT SELECT ON sign_config_view TO PUBLIC;
@@ -211,6 +207,22 @@ CREATE VIEW dms_view AS
 	LEFT JOIN sign_config_view sc ON d.sign_config = sc.name;
 GRANT SELECT ON dms_view TO PUBLIC;
 
+-- Set quick_message sign_config NULL if not DMS use that sign_config
+UPDATE iris.quick_message q SET sign_config = NULL
+WHERE NOT EXISTS (
+	SELECT true
+	FROM iris.dms d
+        WHERE d.sign_config = q.sign_config
+);
+
+-- Delete unused sign_config records
+DELETE FROM iris.sign_config s
+WHERE NOT EXISTS (
+	SELECT true
+	FROM iris.dms d
+        WHERE s.name = d.sign_config
+);
+
 -- Find duplicate sign_config records
 CREATE TEMP TABLE sign_config_dups AS
 SELECT T1.name AS old_name, T2.name AS new_name
@@ -227,7 +239,9 @@ JOIN iris.sign_config T2
  AND T1.pixel_height = T2.pixel_height
  AND T1.char_width = T2.char_width
  AND T1.char_height = T2.char_height
- AND T1.color_scheme = T2.color_scheme;
+ AND T1.color_scheme = T2.color_scheme
+ AND T1.monochrome_foreground = T2.monochrome_foreground
+ AND T1.monochrome_background = T2.monochrome_background;
 
 -- Replace duplicate sign_config on DMS records
 UPDATE iris._dms d

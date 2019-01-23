@@ -19,7 +19,6 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.SonarException;
-import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.SignDetailHelper;
@@ -48,8 +47,6 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	 * @param sa Sign access.
 	 * @param l Sign legend.
 	 * @param bt Beacon type.
-	 * @param mf Monochrome foreground color (24-bit).
-	 * @param mb Monochrome background color (24-bit).
 	 * @param hmk Hardware make.
 	 * @param hmd Hardware model.
 	 * @param smk Software make.
@@ -57,8 +54,8 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	 * @return Matching existing, or new sign detail.
 	 */
 	static public SignDetailImpl findOrCreate(int dt, boolean p, String t,
-		String sa, String l, String bt, int mf, int mb, String hmk,
-		String hmd, String smk, String smd)
+		String sa, String l, String bt, String hmk, String hmd,
+		String smk, String smd)
 	{
 		bt = filterDesc(bt);
 		hmk = filterDesc(hmk);
@@ -66,13 +63,13 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		smk = filterDesc(smk);
 		smd = filterDesc(smd);
 		SignDetail sd = SignDetailHelper.find(DMSType.fromOrdinal(dt),
-			p, t, sa, l, bt, mf, mb, hmk, hmd, smk, smd);
+			p, t, sa, l, bt, hmk, hmd, smk, smd);
 		if (sd instanceof SignDetailImpl)
 			return (SignDetailImpl) sd;
 		else {
 			String n = createUniqueName();
 			SignDetailImpl sdi = new SignDetailImpl(n, dt, p, t, sa,
-				l, bt, mf, mb, hmk, hmd, smk, smd);
+				l, bt, hmk, hmd, smk, smd);
 			return createNotify(sdi);
 		}
 	}
@@ -92,8 +89,7 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	/** Find or create LCS sign detail */
 	static public SignDetailImpl findOrCreateLCS() {
 		return findOrCreate(DMSType.OTHER.ordinal(), false, "DLCS",
-			"FRONT", "NONE", "NONE", DmsColor.AMBER.rgb(),
-			DmsColor.BLACK.rgb(), "", "", "", "");
+			"FRONT", "NONE", "NONE", "", "", "", "");
 	}
 
 	/** Last allocated sign detail ID */
@@ -121,7 +117,6 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		namespace.registerType(SONAR_TYPE, SignDetailImpl.class);
 		store.query("SELECT name, dms_type, portable, technology, " +
 			"sign_access, legend, beacon_type, " +
-			"monochrome_foreground, monochrome_background, " +
 			"hardware_make, hardware_model, software_make, " +
 			"software_model FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
@@ -143,8 +138,6 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		map.put("sign_access", sign_access);
 		map.put("legend", legend);
 		map.put("beacon_type", beacon_type);
-		map.put("monochrome_foreground", monochrome_foreground);
-		map.put("monochrome_background", monochrome_background);
 		map.put("hardware_make", hardware_make);
 		map.put("hardware_model", hardware_model);
 		map.put("software_make", software_make);
@@ -173,19 +166,17 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		     row.getString(5),   // sign_access
 		     row.getString(6),   // legend
 		     row.getString(7),   // beacon_type
-		     row.getInt(8),      // monochrome_foreground
-		     row.getInt(9),      // monochrome_background
-		     row.getString(10),  // hardware_make
-		     row.getString(11),  // hardware_model
-		     row.getString(12),  // software_make
-		     row.getString(13)   // software_model
+		     row.getString(8),   // hardware_make
+		     row.getString(9),   // hardware_model
+		     row.getString(10),  // software_make
+		     row.getString(11)   // software_model
 		);
 	}
 
 	/** Create a sign detail */
 	private SignDetailImpl(String n, int dt, boolean p, String t, String sa,
-		String l, String bt, int mf, int mb, String hmk, String hmd,
-		String smk, String smd)
+		String l, String bt, String hmk, String hmd, String smk,
+		String smd)
 	{
 		super(n);
 		dms_type = DMSType.fromOrdinal(dt);
@@ -194,8 +185,6 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		sign_access = sa;
 		legend = l;
 		beacon_type = bt;
-		monochrome_foreground = mf;
-		monochrome_background = mb;
 		hardware_make = hmk;
 		hardware_model = hmd;
 		software_make = smk;
@@ -254,24 +243,6 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	@Override
 	public String getBeaconType() {
 		return beacon_type;
-	}
-
-	/** Monochrome scheme foreground color (24-bit). */
-	private final int monochrome_foreground;
-
-	/** Get monochrome scheme foreground color (24-bit). */
-	@Override
-	public int getMonochromeForeground() {
-		return monochrome_foreground;
-	}
-
-	/** Monochrome scheme background color (24-bit). */
-	private final int monochrome_background;
-
-	/** Get monochrome scheme background color (24-bit). */
-	@Override
-	public int getMonochromeBackground() {
-		return monochrome_background;
 	}
 
 	/** Hardware make (manufacturer) */

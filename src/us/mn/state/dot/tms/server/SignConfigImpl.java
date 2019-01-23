@@ -20,6 +20,7 @@ import java.util.HashMap;
 import java.util.Map;
 import us.mn.state.dot.sonar.SonarException;
 import us.mn.state.dot.tms.ColorScheme;
+import us.mn.state.dot.tms.DmsColor;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.SignConfig;
@@ -45,22 +46,25 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	 * @param cw Character width (0 means variable).
 	 * @param ch Character height (0 means variable).
 	 * @param cs Color scheme ordinal.
+	 * @param mf Monochrome foreground color (24-bit).
+	 * @param mb Monochrome background color (24-bit).
 	 * @return Matching existing, or new sign config.
 	 */
 	static public SignConfigImpl findOrCreate(int fw, int fh, int bh, int bv,
-		int ph, int pv, int pxw, int pxh, int cw, int ch, int cs)
+		int ph, int pv, int pxw, int pxh, int cw, int ch, int cs,
+		int mf, int mb)
 	{
 		if (fw <= 0 || fh <= 0 || bh < 0 || bv < 0 || ph <= 0 ||
 		    pv <= 0 || pxw <= 0 || pxh <= 0 || cw < 0 || ch < 0)
 			return null;
 		SignConfig sc = SignConfigHelper.find(fw, fh, bh, bv, ph, pv,
-			pxw, pxh, cw, ch, cs);
+			pxw, pxh, cw, ch, cs, mf, mb);
 		if (sc instanceof SignConfigImpl)
 			return (SignConfigImpl) sc;
 		else {
 			String n = createUniqueName();
 			SignConfigImpl sci = new SignConfigImpl(n, fw, fh, bh,
-				bv, ph, pv, pxw, pxh, cw, ch, cs, "");
+				bv, ph, pv, pxw, pxh, cw, ch, cs, mf, mb, "");
 			return createNotify(sci);
 		}
 	}
@@ -80,7 +84,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	/** Find or create LCS sign config */
 	static public SignConfigImpl findOrCreateLCS() {
 		return findOrCreate(600, 600, 1, 1, 1, 1, 1, 1, 0, 0,
-			ColorScheme.MONOCHROME_1_BIT.ordinal());
+			ColorScheme.MONOCHROME_1_BIT.ordinal(),
+			DmsColor.AMBER.rgb(), DmsColor.BLACK.rgb());
 	}
 
 	/** Last allocated sign config ID */
@@ -109,7 +114,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		store.query("SELECT name, face_width, face_height, " +
 			"border_horiz, border_vert, pitch_horiz, pitch_vert, " +
 			"pixel_width, pixel_height, char_width, char_height, " +
-			"color_scheme, default_font FROM iris." +
+			"color_scheme, monochrome_foreground, " +
+			"monochrome_background, default_font FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -134,6 +140,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		map.put("char_width", char_width);
 		map.put("char_height", char_height);
 		map.put("color_scheme", color_scheme.ordinal());
+		map.put("monochrome_foreground", monochrome_foreground);
+		map.put("monochrome_background", monochrome_background);
 		map.put("default_font", default_font);
 		return map;
 	}
@@ -164,13 +172,16 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		     row.getInt(10),     // char_width
 		     row.getInt(11),     // char_height
 		     row.getInt(12),     // color_scheme
-		     row.getString(13)   // default_font
+		     row.getInt(13),     // monochrome_foreground
+		     row.getInt(14),     // monochrome_background
+		     row.getString(15)   // default_font
 		);
 	}
 
 	/** Create a sign config */
 	private SignConfigImpl(String n, int fw, int fh, int bh, int bv, int ph,
-		int pv, int pxw, int pxh, int cw, int ch, int cs, String df)
+		int pv, int pxw, int pxh, int cw, int ch, int cs, int mf,
+		int mb, String df)
 	{
 		super(n);
 		face_width = fw;
@@ -184,6 +195,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		char_width = cw;
 		char_height = ch;
 		color_scheme = ColorScheme.fromOrdinal(cs);
+		monochrome_foreground = mf;
+		monochrome_background = mb;
 		default_font = FontHelper.lookup(df);
 	}
 
@@ -284,6 +297,24 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	@Override
 	public int getColorScheme() {
 		return color_scheme.ordinal();
+	}
+
+	/** Monochrome scheme foreground color (24-bit). */
+	private final int monochrome_foreground;
+
+	/** Get monochrome scheme foreground color (24-bit). */
+	@Override
+	public int getMonochromeForeground() {
+		return monochrome_foreground;
+	}
+
+	/** Monochrome scheme background color (24-bit). */
+	private final int monochrome_background;
+
+	/** Get monochrome scheme background color (24-bit). */
+	@Override
+	public int getMonochromeBackground() {
+		return monochrome_background;
 	}
 
 	/** Default font */
