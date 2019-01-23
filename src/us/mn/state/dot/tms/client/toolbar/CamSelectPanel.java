@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,7 +17,6 @@ package us.mn.state.dot.tms.client.toolbar;
 import java.awt.Color;
 import java.awt.KeyboardFocusManager;
 import java.awt.KeyEventDispatcher;
-import java.awt.Toolkit;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import javax.swing.Icon;
@@ -226,12 +225,13 @@ public class CamSelectPanel extends ToolPanel {
 		/* We need to keep track of last pressed state so we
 		 * don't propogate KEY_TYPED events from numpad */
 		private boolean pressed = false;
-		private final Toolkit tk = Toolkit.getDefaultToolkit();
 		@Override
 		public boolean dispatchKeyEvent(KeyEvent e) {
-			if (tk.getLockingKeyState(KeyEvent.VK_NUM_LOCK)) {
-				pressed = false;
-				return false;
+			if (e.getID() == KeyEvent.KEY_PRESSED) {
+				if (e.getKeyCode() == KeyEvent.VK_NUM_LOCK) {
+					pressed = false;
+					return false;
+				}
 			}
 			boolean numpad = e.getKeyLocation() ==
 				KeyEvent.KEY_LOCATION_NUMPAD;
