@@ -257,4 +257,15 @@ INSERT INTO iris.privilege (name, capability, type_n, write)
 	VALUES ('PRV_sd0', 'dms_admin', 'sign_detail', true),
 	       ('PRV_sd1', 'dms_tab', 'sign_detail', false);
 
+-- Drop view temporarily
+DROP VIEW i_user_view;
+
+-- Increase i_user dn max length to 128
+ALTER TABLE iris.i_user ALTER COLUMN dn TYPE VARCHAR(128);
+
+CREATE VIEW i_user_view AS
+	SELECT name, full_name, dn, role, enabled
+	FROM iris.i_user;
+GRANT SELECT ON i_user_view TO PUBLIC;
+
 COMMIT;
