@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018  Minnesota Department of Transportation
+ * Copyright (C) 2018-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ const CAMERA_RES: Resource = Resource::Simple(
 const DMS_RES: Resource = Resource::Simple(
 "dms_pub",
 "SELECT row_to_json(r)::text FROM (\
-    SELECT name, sign_config, roadway, road_dir, cross_street, \
+    SELECT name, sign_config, sign_detail, roadway, road_dir, cross_street, \
            location, lat, lon \
     FROM dms_view \
     ORDER BY name \
@@ -90,12 +90,21 @@ const INCIDENT_RES: Resource = Resource::Simple(
 const SIGN_CONFIG_RES: Resource = Resource::Simple(
 "sign_config",
 "SELECT row_to_json(r)::text FROM (\
-    SELECT name, dms_type, portable, technology, sign_access, legend, \
-           beacon_type, face_width, face_height, border_horiz, \
-           border_vert, pitch_horiz, pitch_vert, pixel_width, \
-           pixel_height, char_width, char_height, color_scheme, \
-           monochrome_foreground, monochrome_background, default_font \
+    SELECT name, face_width, face_height, border_horiz, border_vert, \
+           pitch_horiz, pitch_vert, pixel_width, pixel_height, \
+           char_width, char_height, color_scheme, monochrome_foreground, \
+           monochrome_background, default_font \
     FROM sign_config_view \
+) r",
+);
+
+const SIGN_DETAIL_RES: Resource = Resource::Simple(
+"sign_detail",
+"SELECT row_to_json(r)::text FROM (\
+    SELECT name, dms_type, portable, technology, sign_access, legend, \
+           beacon_type, hardware_make, hardware_model, software_make, \
+           software_model \
+    FROM sign_detail_view \
 ) r",
 );
 
@@ -192,12 +201,6 @@ pub trait Queryable {
 #[derive(Serialize,Deserialize)]
 pub struct SignConfig {
     name        : String,
-    dms_type    : String,
-    portable    : bool,
-    technology  : String,
-    sign_access : String,
-    legend      : String,
-    beacon_type : String,
     face_width  : i32,
     face_height : i32,
     border_horiz: i32,
@@ -325,6 +328,21 @@ impl SignConfig {
         let pos = vb + lo + (self.pitch_vert * y as i32) as f32;
         pos / self.face_height as f32
     }
+}
+
+#[derive(Serialize,Deserialize)]
+pub struct SignDetail {
+    name        : String,
+    dms_type    : String,
+    portable    : bool,
+    technology  : String,
+    sign_access : String,
+    legend      : String,
+    beacon_type : String,
+    hardware_make  : String,
+    hardware_model : String,
+    software_make  : String,
+    software_model : String,
 }
 
 #[derive(Serialize)]
@@ -677,6 +695,7 @@ pub fn lookup_resource(n: &str) -> Option<Resource> {
         "dms_message"          => Some(DMS_MSG_RES),
         "incident"             => Some(INCIDENT_RES),
         "sign_config"          => Some(SIGN_CONFIG_RES),
+        "sign_detail"          => Some(SIGN_DETAIL_RES),
         "parking_area" |
         "TPIMS_static"         => Some(TPIMS_STAT_RES),
         "parking_area_dynamic"|
@@ -690,12 +709,13 @@ pub fn lookup_resource(n: &str) -> Option<Resource> {
     }
 }
 
-pub const ALL: [&'static str; 11] = [
+pub const ALL: [&'static str; 12] = [
     "camera_pub",
     "dms_pub",
     "dms_message",
     "incident",
     "sign_config",
+    "sign_detail",
     "parking_area",
     "parking_area_dynamic",
     "parking_area_archive",
