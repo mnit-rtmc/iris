@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2010       AHMCT, University of California
  * Copyright (C) 2012       Iteris Inc.
  * Copyright (C) 2016-2017  SRF Consulting Group
@@ -457,40 +457,6 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public Font getOverrideFont() {
 		return override_font;
-	}
-
-	/** Make (manufacturer) */
-	private transient String make;
-
-	/** Set the make */
-	public void setMake(String m) {
-		if (!m.equals(make)) {
-			make = m;
-			notifyAttribute("make");
-		}
-	}
-
-	/** Get the make */
-	@Override
-	public String getMake() {
-		return make;
-	}
-
-	/** Model */
-	private transient String model;
-
-	/** Set the model */
-	public void setModel(String m) {
-		if (!m.equals(model)) {
-			model = m;
-			notifyAttribute("model");
-		}
-	}
-
-	/** Get the model */
-	@Override
-	public String getModel() {
-		return model;
 	}
 
 	/** Software version */

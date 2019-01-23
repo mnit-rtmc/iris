@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -47,6 +47,8 @@ public class SignConfigHelper extends BaseHelper {
 	 * @param sa Sign access.
 	 * @param l Legend.
 	 * @param bt Beacon type.
+	 * @param mk Software make.
+	 * @param md Software model.
 	 * @param fw Face width (mm).
 	 * @param fh Face height (mm).
 	 * @param bh Border -- horizontal (mm).
@@ -62,9 +64,9 @@ public class SignConfigHelper extends BaseHelper {
 	 * @param mb Monochrome background color (24-bit).
 	 * @return Matching sign config, or null if not found. */
 	static public SignConfig find(DMSType dt, boolean p, String t,
-		String sa, String l, String bt, int fw, int fh, int bh, int bv,
-		int ph, int pv, int pxw, int pxh, int cw, int ch, int cs,
-		int mf, int mb)
+		String sa, String l, String bt, String mk, String md, int fw,
+		int fh, int bh, int bv, int ph, int pv, int pxw, int pxh,
+		int cw, int ch, int cs, int mf, int mb)
 	{
 		int dti = dt.ordinal();
 		Iterator<SignConfig> it = iterator();
@@ -76,6 +78,8 @@ public class SignConfigHelper extends BaseHelper {
 			    sa.equals(sc.getSignAccess()) &&
 			    l.equals(sc.getLegend()) &&
 			    bt.equals(sc.getBeaconType()) &&
+			    mk.equals(sc.getSoftwareMake()) &&
+			    md.equals(sc.getSoftwareModel()) &&
 			    sc.getFaceWidth() == fw &&
 			    sc.getFaceHeight() == fh &&
 			    sc.getBorderHoriz() == bh &&

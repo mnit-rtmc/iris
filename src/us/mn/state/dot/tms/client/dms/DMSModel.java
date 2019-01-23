@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2018  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -60,7 +60,8 @@ public class DMSModel extends ProxyTableModel<DMS> {
 		});
 		cols.add(new ProxyColumn<DMS>("dms.model", 100) {
 			public Object getValueAt(DMS d) {
-				return d.getModel();
+				SignConfig sc = d.getSignConfig();
+				return (sc != null) ? sc.getSoftwareModel() :"";
 			}
 		});
 		cols.add(new ProxyColumn<DMS>("dms.access", 140) {

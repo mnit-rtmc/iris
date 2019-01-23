@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontFinder;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
+import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -188,8 +189,9 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Check if DMS make is ADDCO.  Some ADDCO signs flake out if
 	 * the font *number* is greater than numFonts (typically 4). */
 	private boolean isAddco() {
-		String make = dms.getMake();
-		return make != null && make.startsWith("ADDCO");
+		SignConfig sc = dms.getSignConfig();
+		String make = (sc != null) ? sc.getSoftwareMake() : null;
+		return (make != null) && make.startsWith("ADDCO");
 	}
 
 	/** Add a row to font rows mapping.

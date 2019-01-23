@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -59,11 +59,11 @@ public class PropManufacturer extends IPanel {
 	/** Card panel for manufacturer panels */
 	private final JPanel card_pnl = new JPanel(cards);
 
-	/** Make label */
-	private final JLabel make_lbl = createValueLabel();
+	/** Software make label */
+	private final JLabel software_make_lbl = createValueLabel();
 
-	/** Model label */
-	private final JLabel model_lbl = createValueLabel();
+	/** Software model label */
+	private final JLabel software_model_lbl = createValueLabel();
 
 	/** Version label */
 	private final JLabel version_lbl = createValueLabel();
@@ -109,10 +109,10 @@ public class PropManufacturer extends IPanel {
 	@Override
 	public void initialize() {
 		super.initialize();
-		add("dms.make");
-		add(make_lbl, Stretch.LAST);
-		add("dms.model");
-		add(model_lbl, Stretch.LAST);
+		add("dms.software.make");
+		add(software_make_lbl, Stretch.LAST);
+		add("dms.software.model");
+		add(software_model_lbl, Stretch.LAST);
 		add("dms.version");
 		add(version_lbl, Stretch.LAST);
 		add(card_pnl, Stretch.CENTER);
@@ -145,13 +145,6 @@ public class PropManufacturer extends IPanel {
 
 	/** Update one attribute on the panel */
 	public void updateAttribute(String a) {
-		if (null == a || a.equals("make")) {
-			String m = formatString(dms.getMake());
-			make_lbl.setText(m);
-			updateMake(m.toUpperCase());
-		}
-		if (null == a || a.equals("model"))
-			model_lbl.setText(formatString(dms.getModel()));
 		if (null == a || a.equals("version"))
 			version_lbl.setText(formatString(dms.getVersion()));
 		if (null == a || a.equals("ldcPotBase"))
@@ -164,13 +157,22 @@ public class PropManufacturer extends IPanel {
 			current_high_lbl.setText(formatInt(
 				dms.getPixelCurrentHigh()));
 		}
-		if (null == a || a.equals("signConfig"))
-			config.setEnabled(dms.getSignConfig() != null);
+		if (null == a || a.equals("signConfig")) {
+			SignConfig sc = dms.getSignConfig();
+			String mk = formatString(sc != null
+			                       ? sc.getSoftwareMake()
+			                       : "");
+			software_make_lbl.setText(mk);
+			updateSoftwareMake(mk);
+			String md = (sc != null) ? sc.getSoftwareModel() : "";
+			software_model_lbl.setText(formatString(md));
+			config.setEnabled(sc != null);
+		}
 	}
 
-	/** Select card on manufacturer panel for the given make */
-	private void updateMake(String m) {
-		if (m.contains(MAKE_LEDSTAR.toUpperCase()))
+	/** Select card on manufacturer panel for the given software make */
+	private void updateSoftwareMake(String m) {
+		if (m.toUpperCase().contains(MAKE_LEDSTAR.toUpperCase()))
 			cards.show(card_pnl, MAKE_LEDSTAR);
 		else
 			cards.show(card_pnl, MAKE_GENERIC);

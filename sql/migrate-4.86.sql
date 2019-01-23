@@ -25,4 +25,12 @@ BEGIN
 END;
 $parking_area_notify$ LANGUAGE plpgsql;
 
+-- Add software_make and software_model to sign_config
+ALTER TABLE iris.sign_config ADD COLUMN software_make VARCHAR(32);
+UPDATE iris.sign_config SET software_make = '';
+ALTER TABLE iris.sign_config ALTER COLUMN software_make SET NOT NULL;
+ALTER TABLE iris.sign_config ADD COLUMN software_model VARCHAR(32);
+UPDATE iris.sign_config SET software_model = '';
+ALTER TABLE iris.sign_config ALTER COLUMN software_model SET NOT NULL;
+
 COMMIT;

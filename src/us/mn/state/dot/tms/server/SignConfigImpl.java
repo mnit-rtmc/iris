@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -27,6 +27,7 @@ import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
 import us.mn.state.dot.tms.TMSException;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * A sign configuration defines the type and dimensions of a sign.
@@ -35,6 +36,14 @@ import us.mn.state.dot.tms.TMSException;
  */
 public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 
+	/** Maximum length for beacon_type, software_make, software_model */
+	static private final int MAX_DESC_LEN = 32;
+
+	/** Filter a description string */
+	static private String filterDesc(String s) {
+		return SString.truncate(s, MAX_DESC_LEN);
+	}
+
 	/** Find existing or create a new sign config.
 	 * @param dt DMS type.
 	 * @param p Portable flag.
@@ -42,6 +51,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	 * @param sa Sign access.
 	 * @param l Sign legend.
 	 * @param bt Beacon type.
+	 * @param mk Software make.
+	 * @param md Software model.
 	 * @param fw Face width (mm).
 	 * @param fh Face height (mm).
 	 * @param bh Border -- horizontal (mm).
@@ -58,23 +69,26 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	 * @return Matching existing, or new sign config.
 	 */
 	static public SignConfigImpl findOrCreate(int dt, boolean p, String t,
-		String sa, String l, String bt, int fw, int fh, int bh, int bv,
-		int ph, int pv, int pxw, int pxh, int cw, int ch, int cs,
-		int mf, int mb)
+		String sa, String l, String bt, String mk, String md, int fw,
+		int fh, int bh, int bv, int ph, int pv, int pxw, int pxh,
+		int cw, int ch, int cs, int mf, int mb)
 	{
 		if (fw <= 0 || fh <= 0 || bh < 0 || bv < 0 || ph <= 0 ||
 		    pv <= 0 || pxw <= 0 || pxh <= 0 || cw < 0 || ch < 0)
 			return null;
+		bt = filterDesc(bt);
+		mk = filterDesc(mk);
+		mk = filterDesc(md);
 		SignConfig sc = SignConfigHelper.find(DMSType.fromOrdinal(dt),
-			p, t, sa, l, bt, fw, fh, bh, bv, ph, pv, pxw, pxh, cw,
-			ch, cs, mf, mb);
+			p, t, sa, l, bt, mk, md, fw, fh, bh, bv, ph, pv, pxw,
+			pxh, cw, ch, cs, mf, mb);
 		if (sc instanceof SignConfigImpl)
 			return (SignConfigImpl) sc;
 		else {
 			String n = createUniqueName();
 			SignConfigImpl sci = new SignConfigImpl(n, dt, p, t, sa,
-				l, bt, fw, fh, bh, bv, ph, pv, pxw, pxh, cw,
-				ch, cs, mf, mb, "");
+				l, bt, mk, md, fw, fh, bh, bv, ph, pv, pxw, pxh,
+				cw, ch, cs, mf, mb, "");
 			return createNotify(sci);
 		}
 	}
@@ -94,8 +108,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	/** Find or create LCS sign config */
 	static public SignConfigImpl findOrCreateLCS() {
 		return findOrCreate(DMSType.OTHER.ordinal(), false, "DLCS",
-			"FRONT", "NONE", "NONE", 600, 600, 1, 1, 1, 1, 1, 1,
-			0, 0, ColorScheme.MONOCHROME_1_BIT.ordinal(),
+			"FRONT", "NONE", "NONE", "", "", 600, 600, 1, 1, 1, 1,
+			1, 1, 0, 0, ColorScheme.MONOCHROME_1_BIT.ordinal(),
 			DmsColor.AMBER.rgb(), DmsColor.BLACK.rgb());
 	}
 
@@ -123,10 +137,11 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	static protected void loadAll() throws TMSException {
 		namespace.registerType(SONAR_TYPE, SignConfigImpl.class);
 		store.query("SELECT name, dms_type, portable, technology, " +
-			"sign_access, legend, beacon_type, face_width, " +
-			"face_height, border_horiz, border_vert, pitch_horiz, "+
-			"pitch_vert, pixel_width, pixel_height, char_width, " +
-			"char_height, color_scheme, monochrome_foreground, " +
+			"sign_access, legend, beacon_type, software_make, " +
+			"software_model, face_width, face_height, " +
+			"border_horiz, border_vert, pitch_horiz, pitch_vert, " +
+			"pixel_width, pixel_height, char_width, char_height, " +
+			"color_scheme, monochrome_foreground, " +
 			"monochrome_background, default_font FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
@@ -147,6 +162,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		map.put("sign_access", sign_access);
 		map.put("legend", legend);
 		map.put("beacon_type", beacon_type);
+		map.put("software_make", software_make);
+		map.put("software_model", software_model);
 		map.put("face_width", face_width);
 		map.put("face_height", face_height);
 		map.put("border_horiz", border_horiz);
@@ -185,28 +202,30 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		     row.getString(5),   // sign_access
 		     row.getString(6),   // legend
 		     row.getString(7),   // beacon_type
-		     row.getInt(8),      // face_width
-		     row.getInt(9),      // face_height
-		     row.getInt(10),     // border_horiz
-		     row.getInt(11),     // border_vert
-		     row.getInt(12),     // pitch_horiz
-		     row.getInt(13),     // pitch_vert
-		     row.getInt(14),     // pixel_width
-		     row.getInt(15),     // pixel_height
-		     row.getInt(16),     // char_width
-		     row.getInt(17),     // char_height
-		     row.getInt(18),     // color_scheme
-		     row.getInt(19),     // monochrome_foreground
-		     row.getInt(20),     // monochrome_background
-		     row.getString(21)   // default_font
+		     row.getString(8),   // software_make
+		     row.getString(9),   // software_model
+		     row.getInt(10),     // face_width
+		     row.getInt(11),     // face_height
+		     row.getInt(12),     // border_horiz
+		     row.getInt(13),     // border_vert
+		     row.getInt(14),     // pitch_horiz
+		     row.getInt(15),     // pitch_vert
+		     row.getInt(16),     // pixel_width
+		     row.getInt(17),     // pixel_height
+		     row.getInt(18),     // char_width
+		     row.getInt(19),     // char_height
+		     row.getInt(20),     // color_scheme
+		     row.getInt(21),     // monochrome_foreground
+		     row.getInt(22),     // monochrome_background
+		     row.getString(23)   // default_font
 		);
 	}
 
 	/** Create a sign config */
 	private SignConfigImpl(String n, int dt, boolean p, String t, String sa,
-		String l, String bt, int fw, int fh, int bh, int bv, int ph,
-		int pv, int pxw, int pxh, int cw, int ch, int cs, int mf,
-		int mb, String df)
+		String l, String bt, String mk, String md, int fw, int fh,
+		int bh, int bv, int ph, int pv, int pxw, int pxh, int cw,
+		int ch, int cs, int mf, int mb, String df)
 	{
 		super(n);
 		dms_type = DMSType.fromOrdinal(dt);
@@ -215,6 +234,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		sign_access = sa;
 		legend = l;
 		beacon_type = bt;
+		software_make = mk;
+		software_model = md;
 		face_width = fw;
 		face_height = fh;
 		border_horiz = bh;
@@ -283,6 +304,24 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	@Override
 	public String getBeaconType() {
 		return beacon_type;
+	}
+
+	/** Software make (manufacturer) */
+	private final String software_make;
+
+	/** Get the software make */
+	@Override
+	public String getSoftwareMake() {
+		return software_make;
+	}
+
+	/** Software model */
+	private String software_model;
+
+	/** Get the software model */
+	@Override
+	public String getSoftwareModel() {
+		return software_model;
 	}
 
 	/** Width of the sign face (mm) */

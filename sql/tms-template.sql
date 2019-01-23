@@ -119,7 +119,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.85.0
+database_version	4.86.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -2225,6 +2225,8 @@ CREATE TABLE iris.sign_config (
 	sign_access VARCHAR(12) NOT NULL,
 	legend VARCHAR(12) NOT NULL,
 	beacon_type VARCHAR(32) NOT NULL,
+	software_make VARCHAR(32) NOT NULL,
+	software_model VARCHAR(32) NOT NULL,
 	face_width INTEGER NOT NULL,
 	face_height INTEGER NOT NULL,
 	border_horiz INTEGER NOT NULL,
@@ -2255,9 +2257,9 @@ CREATE TRIGGER sign_config_trig
 
 CREATE VIEW sign_config_view AS
 	SELECT name, dt.description AS dms_type, portable, technology,
-	       sign_access, legend, beacon_type, face_width, face_height,
-	       border_horiz, border_vert, pitch_horiz, pitch_vert,
-	       pixel_width, pixel_height, char_width, char_height,
+	       sign_access, legend, beacon_type, software_make, software_model,
+	       face_width, face_height, border_horiz, border_vert, pitch_horiz,
+	       pitch_vert, pixel_width, pixel_height, char_width, char_height,
 	       cs.description AS color_scheme,
 	       monochrome_foreground, monochrome_background, default_font
 	FROM iris.sign_config

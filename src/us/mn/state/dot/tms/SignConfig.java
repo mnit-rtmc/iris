@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -43,6 +43,12 @@ public interface SignConfig extends SonarObject {
 
 	/** Get beacon type description */
 	String getBeaconType();
+
+	/** Get the software make */
+	String getSoftwareMake();
+
+	/** Get the software model */
+	String getSoftwareModel();
 
 	/** Get width of the sign face (mm) */
 	int getFaceWidth();

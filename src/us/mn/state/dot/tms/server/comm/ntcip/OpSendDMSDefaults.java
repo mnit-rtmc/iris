@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2017  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -285,16 +285,18 @@ public class OpSendDMSDefaults extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			// ADDCO brick signs have these dimensions
-			String make = dms.getMake();
 			SignConfig sc = dms.getSignConfig();
+			String make = (sc != null) ? sc.getSoftwareMake() : "";
+			int dtype = (sc != null)
+			          ? sc.getDmsType()
+			          : DMSType.UNKNOWN.ordinal();
 			// NOTE: setting these objects requires use of the
 			//       "administrator" community name.  We need to
 			//       check that the password is not null before
 			//       attempting to set them.
 			if (make != null &&
 			    make.startsWith("ADDCO") &&
-			    sc != null &&
-			    sc.getDmsType() == DMSType.VMS_CHAR.ordinal() &&
+			    dtype == DMSType.VMS_CHAR.ordinal() &&
 			    controller.getPassword() != null)
 			{
 				ASN1Integer h_border =

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -112,6 +112,12 @@ public class PropConfiguration extends IPanel {
 	/** Beacon label */
 	private final JLabel beacon_lbl = createValueLabel();
 
+	/** Software make label */
+	private final JLabel software_make_lbl = createValueLabel();
+
+	/** Software model label */
+	private final JLabel software_model_lbl = createValueLabel();
+
 	/** Sign face width label */
 	private final JLabel f_width_lbl = createValueLabel();
 
@@ -183,6 +189,10 @@ public class PropConfiguration extends IPanel {
 		add(legend_lbl, Stretch.LAST);
 		add("dms.beacon");
 		add(beacon_lbl, Stretch.LAST);
+		add("dms.software.make");
+		add(software_make_lbl, Stretch.LAST);
+		add("dms.software.model");
+		add(software_model_lbl, Stretch.LAST);
 		add("dms.face.width");
 		add(f_width_lbl, Stretch.LAST);
 		add("dms.face.height");
@@ -239,6 +249,10 @@ public class PropConfiguration extends IPanel {
 			access_lbl.setText(formatString(sc.getSignAccess()));
 			legend_lbl.setText(formatString(sc.getLegend()));
 			beacon_lbl.setText(formatString(sc.getBeaconType()));
+			software_make_lbl.setText(formatString(
+				sc.getSoftwareMake()));
+			software_model_lbl.setText(formatString(
+				sc.getSoftwareModel()));
 			f_width_lbl.setText(formatMM(sc.getFaceWidth()));
 			f_height_lbl.setText(formatMM(sc.getFaceHeight()));
 			h_border_lbl.setText(formatMM(sc.getBorderHoriz()));

@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  * Copyright (C) 2016-2017  SRF Consulting Group
  * Copyright (C) 2017  	    Iteris Inc.
  *
@@ -44,6 +44,12 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  * @author Michael Darter
  */
 public class OpQueryDMSConfiguration extends OpDMS {
+
+	/** Software module make (manufacturer) */
+	private String software_make = "UNKNOWN";
+
+	/** Software module model */
+	private String software_model = "UNKNOWN";
 
 	/** Number of graphics defined in graphic table */
 	private final ASN1Integer num_graphics = dmsGraphicNumEntries.makeInt();
@@ -170,8 +176,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			logQuery(version);
 			logQuery(m_type);
 			if (m_type.getEnum() == ModuleType.software) {
-				dms.setMake(make.getValue());
-				dms.setModel(model.getValue());
+				software_make = make.getValue();
+				software_model = model.getValue();
 				dms.setVersionNotify(version.getValue());
 			}
 			mod += 1;
@@ -347,6 +353,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			SignConfigImpl sc = SignConfigImpl.findOrCreate(dt, p,
 				tech.getValue(), access.getValue(),
 				legend.getValue(), beaconType.getValue(),
+				software_make, software_model,
 				face_width.getInteger(),
 				face_height.getInteger(),
 				h_border.getInteger(), v_border.getInteger(),
