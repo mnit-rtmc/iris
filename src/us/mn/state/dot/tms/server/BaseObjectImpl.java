@@ -62,6 +62,7 @@ abstract public class BaseObjectImpl implements Storable, SonarObject {
 		CabinetImpl.loadAll();
 		ControllerImpl.loadAll();
 		SignConfigImpl.loadAll();
+		SignDetailImpl.loadAll();
 		DayMatcherImpl.loadAll();
 		DayPlanImpl.loadAll();
 		PlanPhaseImpl.loadAll();

@@ -391,6 +391,7 @@ road
 road_affix
 role
 sign_config
+sign_detail
 sign_group
 sign_message
 sign_text
@@ -481,6 +482,7 @@ PRV_0054	dms_admin	glyph		t
 PRV_0055	dms_admin	gps		t
 PRV_0056	dms_admin	graphic		t
 PRV_0057	dms_admin	sign_config		t
+PRV_005A	dms_admin	sign_detail		t
 PRV_0058	dms_control	dms	msgUser	t
 PRV_0059	dms_control	dms	deviceRequest	t
 PRV_0060	dms_control	sign_message		t
@@ -497,6 +499,7 @@ PRV_0070	dms_tab	gps		f
 PRV_0071	dms_tab	graphic		f
 PRV_0072	dms_tab	quick_message		f
 PRV_0073	dms_tab	sign_config		f
+PRV_007A	dms_tab	sign_detail		f
 PRV_0074	dms_tab	sign_group		f
 PRV_0075	dms_tab	sign_message		f
 PRV_0076	dms_tab	sign_text		f
@@ -2217,7 +2220,7 @@ COPY iris.color_scheme (id, description) FROM stdin;
 4	color24Bit
 \.
 
-CREATE TABLE iris.sign_config (
+CREATE TABLE iris.sign_detail (
 	name VARCHAR(12) PRIMARY KEY,
 	dms_type INTEGER NOT NULL REFERENCES iris.dms_type,
 	portable BOOLEAN NOT NULL,
@@ -2225,8 +2228,34 @@ CREATE TABLE iris.sign_config (
 	sign_access VARCHAR(12) NOT NULL,
 	legend VARCHAR(12) NOT NULL,
 	beacon_type VARCHAR(32) NOT NULL,
+	monochrome_foreground INTEGER NOT NULL,
+	monochrome_background INTEGER NOT NULL,
 	software_make VARCHAR(32) NOT NULL,
-	software_model VARCHAR(32) NOT NULL,
+	software_model VARCHAR(32) NOT NULL
+);
+
+CREATE FUNCTION iris.sign_detail_notify() RETURNS TRIGGER AS
+	$sign_detail_notify$
+BEGIN
+	NOTIFY tms, 'sign_detail';
+	RETURN NULL; -- AFTER trigger return is ignored
+END;
+$sign_detail_notify$ LANGUAGE plpgsql;
+
+CREATE TRIGGER sign_detail_trig
+	AFTER INSERT OR UPDATE OR DELETE ON iris.sign_detail
+	FOR EACH STATEMENT EXECUTE PROCEDURE iris.sign_detail_notify();
+
+CREATE VIEW sign_detail_view AS
+	SELECT name, dt.description AS dms_type, portable, technology,
+	       sign_access, legend, beacon_type, monochrome_foreground,
+	       monochrome_background, software_make, software_model
+	FROM iris.sign_detail
+	JOIN iris.dms_type dt ON sign_detail.dms_type = dt.id;
+GRANT SELECT ON sign_detail_view TO PUBLIC;
+
+CREATE TABLE iris.sign_config (
+	name VARCHAR(12) PRIMARY KEY,
 	face_width INTEGER NOT NULL,
 	face_height INTEGER NOT NULL,
 	border_horiz INTEGER NOT NULL,
@@ -2238,8 +2267,6 @@ CREATE TABLE iris.sign_config (
 	char_width INTEGER NOT NULL,
 	char_height INTEGER NOT NULL,
 	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
-	monochrome_foreground INTEGER NOT NULL,
-	monochrome_background INTEGER NOT NULL,
 	default_font VARCHAR(16) REFERENCES iris.font
 );
 
@@ -2256,14 +2283,10 @@ CREATE TRIGGER sign_config_trig
 	FOR EACH STATEMENT EXECUTE PROCEDURE iris.sign_config_notify();
 
 CREATE VIEW sign_config_view AS
-	SELECT name, dt.description AS dms_type, portable, technology,
-	       sign_access, legend, beacon_type, software_make, software_model,
-	       face_width, face_height, border_horiz, border_vert, pitch_horiz,
-	       pitch_vert, pixel_width, pixel_height, char_width, char_height,
-	       cs.description AS color_scheme,
-	       monochrome_foreground, monochrome_background, default_font
+	SELECT name, face_width, face_height, border_horiz, border_vert,
+	       pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width,
+	       char_height, cs.description AS color_scheme, default_font
 	FROM iris.sign_config
-	JOIN iris.dms_type dt ON sign_config.dms_type = dt.id
 	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
 GRANT SELECT ON sign_config_view TO PUBLIC;
 
@@ -2386,6 +2409,7 @@ CREATE TABLE iris._dms (
 	static_graphic VARCHAR(20) REFERENCES iris.graphic,
 	beacon VARCHAR(20) REFERENCES iris._beacon,
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
+	sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
 	override_font VARCHAR(16) REFERENCES iris.font,
 	msg_sched VARCHAR(20) REFERENCES iris.sign_message,
 	msg_current VARCHAR(20) REFERENCES iris.sign_message,
@@ -2398,7 +2422,8 @@ ALTER TABLE iris._dms ADD CONSTRAINT _dms_fkey
 CREATE FUNCTION iris.dms_notify() RETURNS TRIGGER AS
 	$dms_notify$
 BEGIN
-	IF (NEW.sign_config IS DISTINCT FROM OLD.sign_config) THEN
+	IF (NEW.sign_config IS DISTINCT FROM OLD.sign_config OR
+	    NEW.sign_detail IS DISTINCT FROM OLD.sign_detail) THEN
 		NOTIFY tms, 'dms';
 	END IF;
 	IF (NEW.msg_current IS DISTINCT FROM OLD.msg_current) THEN
@@ -2414,8 +2439,8 @@ CREATE TRIGGER dms_notify_trig
 
 CREATE VIEW iris.dms AS
 	SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
-	       beacon, preset, sign_config, override_font, msg_sched,
-	       msg_current, expire_time
+	       beacon, preset, sign_config, sign_detail, override_font,
+	       msg_sched, msg_current, expire_time
 	FROM iris._dms dms
 	JOIN iris._device_io d ON dms.name = d.name
 	JOIN iris._device_preset p ON dms.name = p.name;
@@ -2428,12 +2453,12 @@ BEGIN
 	INSERT INTO iris._device_preset (name, preset)
 	     VALUES (NEW.name, NEW.preset);
 	INSERT INTO iris._dms (name, geo_loc, notes, gps, static_graphic,
-	                       beacon, sign_config, override_font, msg_sched,
-	                       msg_current, expire_time)
+	                       beacon, sign_config, sign_detail, override_font,
+	                       msg_sched, msg_current, expire_time)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.gps,
 	             NEW.static_graphic, NEW.beacon, NEW.sign_config,
-	             NEW.override_font, NEW.msg_sched, NEW.msg_current,
-	             NEW.expire_time);
+	             NEW.sign_detail, NEW.override_font, NEW.msg_sched,
+	             NEW.msg_current, NEW.expire_time);
 	RETURN NEW;
 END;
 $dms_insert$ LANGUAGE plpgsql;
@@ -2459,6 +2484,7 @@ BEGIN
 	       static_graphic = NEW.static_graphic,
 	       beacon = NEW.beacon,
 	       sign_config = NEW.sign_config,
+	       sign_detail = NEW.sign_detail,
 	       override_font = NEW.override_font,
 	       msg_sched = NEW.msg_sched,
 	       msg_current = NEW.msg_current,
@@ -2491,8 +2517,9 @@ CREATE TRIGGER dms_delete_trig
 
 CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
-	       d.static_graphic, d.beacon, p.camera, p.preset_num, d.sign_config,
-	       default_font, override_font, msg_sched, msg_current, expire_time,
+	       d.static_graphic, d.beacon, p.camera, p.preset_num,
+	       d.sign_config, d.sign_detail, default_font, override_font,
+	       msg_sched, msg_current, expire_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.location, l.lat, l.lon
 	FROM iris.dms d

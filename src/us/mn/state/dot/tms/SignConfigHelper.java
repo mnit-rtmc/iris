@@ -41,14 +41,6 @@ public class SignConfigHelper extends BaseHelper {
 	}
 
 	/** Find a sign config with matching attributes.
-	 * @param dt DMS type.
-	 * @param p Portable flag.
-	 * @param t Technology.
-	 * @param sa Sign access.
-	 * @param l Legend.
-	 * @param bt Beacon type.
-	 * @param mk Software make.
-	 * @param md Software model.
 	 * @param fw Face width (mm).
 	 * @param fh Face height (mm).
 	 * @param bh Border -- horizontal (mm).
@@ -60,27 +52,14 @@ public class SignConfigHelper extends BaseHelper {
 	 * @param cw Character width.
 	 * @param ch Character height.
 	 * @param cs Color scheme ordinal.
-	 * @param mf Monochrome foreground color (24-bit).
-	 * @param mb Monochrome background color (24-bit).
 	 * @return Matching sign config, or null if not found. */
-	static public SignConfig find(DMSType dt, boolean p, String t,
-		String sa, String l, String bt, String mk, String md, int fw,
-		int fh, int bh, int bv, int ph, int pv, int pxw, int pxh,
-		int cw, int ch, int cs, int mf, int mb)
+	static public SignConfig find(int fw, int fh, int bh, int bv, int ph,
+		int pv, int pxw, int pxh, int cw, int ch, int cs)
 	{
-		int dti = dt.ordinal();
 		Iterator<SignConfig> it = iterator();
 		while (it.hasNext()) {
 			SignConfig sc = it.next();
-			if (sc.getDmsType() == dti &&
-			    sc.getPortable() == p &&
-			    t.equals(sc.getTechnology()) &&
-			    sa.equals(sc.getSignAccess()) &&
-			    l.equals(sc.getLegend()) &&
-			    bt.equals(sc.getBeaconType()) &&
-			    mk.equals(sc.getSoftwareMake()) &&
-			    md.equals(sc.getSoftwareModel()) &&
-			    sc.getFaceWidth() == fw &&
+			if (sc.getFaceWidth() == fw &&
 			    sc.getFaceHeight() == fh &&
 			    sc.getBorderHoriz() == bh &&
 			    sc.getBorderVert() == bv &&
@@ -90,9 +69,7 @@ public class SignConfigHelper extends BaseHelper {
 			    sc.getPixelHeight() == pxh &&
 			    sc.getCharWidth() == cw &&
 			    sc.getCharHeight() == ch &&
-			    sc.getColorScheme() == cs &&
-			    sc.getMonochromeForeground() == mf &&
-			    sc.getMonochromeBackground() == mb)
+			    sc.getColorScheme() == cs)
 			{
 				return sc;
 			}

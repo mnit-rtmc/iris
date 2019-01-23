@@ -22,6 +22,7 @@ import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.SignConfigImpl;
+import us.mn.state.dot.tms.server.SignDetailImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
 import us.mn.state.dot.tms.server.comm.ntcip.mib1201.*;
@@ -350,17 +351,20 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			boolean p = type.isPortable();
 			int mf = m_color.getForegroundInt();
 			int mb = m_color.getBackgroundInt();
-			SignConfigImpl sc = SignConfigImpl.findOrCreate(dt, p,
+			SignDetailImpl sd = SignDetailImpl.findOrCreate(dt, p,
 				tech.getValue(), access.getValue(),
-				legend.getValue(), beaconType.getValue(),
-				software_make, software_model,
+				legend.getValue(), beaconType.getValue(), mf,mb,
+				software_make, software_model);
+			if (sd != null)
+				dms.setSignDetailNotify(sd);
+			SignConfigImpl sc = SignConfigImpl.findOrCreate(
 				face_width.getInteger(),
 				face_height.getInteger(),
 				h_border.getInteger(), v_border.getInteger(),
 				h_pitch.getInteger(), v_pitch.getInteger(),
 				s_width.getInteger(), s_height.getInteger(),
 				c_width.getInteger(), getCharHeight(),
-				color_scheme.getInteger(), mf, mb);
+				color_scheme.getInteger());
 			if (sc != null)
 				dms.setSignConfigNotify(sc);
 		}

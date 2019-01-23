@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.DMSHelper;
 import us.mn.state.dot.tms.GeoLocHelper;
-import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.proxy.ProxyColumn;
@@ -60,14 +60,14 @@ public class DMSModel extends ProxyTableModel<DMS> {
 		});
 		cols.add(new ProxyColumn<DMS>("dms.model", 100) {
 			public Object getValueAt(DMS d) {
-				SignConfig sc = d.getSignConfig();
-				return (sc != null) ? sc.getSoftwareModel() :"";
+				SignDetail sd = d.getSignDetail();
+				return (sd != null) ? sd.getSoftwareModel() :"";
 			}
 		});
 		cols.add(new ProxyColumn<DMS>("dms.access", 140) {
 			public Object getValueAt(DMS d) {
-				SignConfig sc = d.getSignConfig();
-				return (sc != null) ? sc.getSignAccess() : "";
+				SignDetail sd = d.getSignDetail();
+				return (sd != null) ? sd.getSignAccess() : "";
 			}
 		});
 		return cols;

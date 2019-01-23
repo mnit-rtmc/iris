@@ -26,7 +26,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.FontFinder;
 import us.mn.state.dot.tms.FontHelper;
 import us.mn.state.dot.tms.Glyph;
-import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -189,8 +189,8 @@ public class OpSendDMSFonts extends OpDMS {
 	/** Check if DMS make is ADDCO.  Some ADDCO signs flake out if
 	 * the font *number* is greater than numFonts (typically 4). */
 	private boolean isAddco() {
-		SignConfig sc = dms.getSignConfig();
-		String make = (sc != null) ? sc.getSoftwareMake() : null;
+		SignDetail sd = dms.getSignDetail();
+		String make = (sd != null) ? sd.getSoftwareMake() : null;
 		return (make != null) && make.startsWith("ADDCO");
 	}
 

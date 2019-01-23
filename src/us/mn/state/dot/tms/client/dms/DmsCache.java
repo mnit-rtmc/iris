@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@ import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.Glyph;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignText;
@@ -64,6 +65,14 @@ public class DmsCache {
 	/** Get the sign configs */
 	public TypeCache<SignConfig> getSignConfigs() {
 		return sign_configs;
+	}
+
+	/** Cache of sign details */
+	private final TypeCache<SignDetail> sign_details;
+
+	/** Get the sign details */
+	public TypeCache<SignDetail> getSignDetails() {
+		return sign_details;
 	}
 
 	/** Cache of sign messages */
@@ -132,6 +141,8 @@ public class DmsCache {
 		glyphs = new TypeCache<Glyph>(Glyph.class, client);
 		sign_configs = new TypeCache<SignConfig>(SignConfig.class,
 			client);
+		sign_details = new TypeCache<SignDetail>(SignDetail.class,
+			client);
 		sign_messages = new TypeCache<SignMessage>(SignMessage.class,
 			client);
 		quick_messages = new TypeCache<QuickMessage>(QuickMessage.class,
@@ -150,6 +161,7 @@ public class DmsCache {
 		client.populateReadable(fonts);
 		client.populateReadable(glyphs);
 		client.populateReadable(sign_configs);
+		client.populateReadable(sign_details);
 		client.populateReadable(sign_messages);
 		client.populateReadable(dmss);
 		if (client.canRead(DMS.SONAR_TYPE)) {

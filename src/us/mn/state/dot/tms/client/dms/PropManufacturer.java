@@ -21,6 +21,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import us.mn.state.dot.tms.DMS;
 import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignDetail;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IAction;
 import us.mn.state.dot.tms.client.widget.IPanel;
@@ -93,6 +94,22 @@ public class PropManufacturer extends IPanel {
 		}
 	}
 
+	/** Detail action */
+	private final IAction detail = new IAction("dms.detail") {
+		protected void doActionPerformed(ActionEvent e) {
+			detailPressed();
+		}
+	};
+
+	/** Sign detail button pressed */
+	private void detailPressed() {
+		SignDetail sd = dms.getSignDetail();
+		if (sd != null) {
+			session.getDesktop().show(new SignDetailProperties(
+				session, sd));
+		}
+	}
+
 	/** User session */
 	private final Session session;
 
@@ -119,6 +136,7 @@ public class PropManufacturer extends IPanel {
 		card_pnl.add(createGenericPanel(), MAKE_GENERIC);
 		card_pnl.add(createLedstarPanel(), MAKE_LEDSTAR);
 		add(new JButton(config), Stretch.RIGHT);
+		add(new JButton(detail), Stretch.RIGHT);
 		updateAttribute(null);
 	}
 
@@ -159,14 +177,18 @@ public class PropManufacturer extends IPanel {
 		}
 		if (null == a || a.equals("signConfig")) {
 			SignConfig sc = dms.getSignConfig();
-			String mk = formatString(sc != null
-			                       ? sc.getSoftwareMake()
+			config.setEnabled(sc != null);
+		}
+		if (null == a || a.equals("signDetail")) {
+			SignDetail sd = dms.getSignDetail();
+			String mk = formatString(sd != null
+			                       ? sd.getSoftwareMake()
 			                       : "");
 			software_make_lbl.setText(mk);
 			updateSoftwareMake(mk);
-			String md = (sc != null) ? sc.getSoftwareModel() : "";
+			String md = (sd != null) ? sd.getSoftwareModel() : "";
 			software_model_lbl.setText(formatString(md));
-			config.setEnabled(sc != null);
+			detail.setEnabled(sd != null);
 		}
 	}
 

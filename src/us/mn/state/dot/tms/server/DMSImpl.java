@@ -54,6 +54,8 @@ import us.mn.state.dot.tms.LCSHelper;
 import us.mn.state.dot.tms.QuickMessage;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SignConfigHelper;
+import us.mn.state.dot.tms.SignDetail;
+import us.mn.state.dot.tms.SignDetailHelper;
 import us.mn.state.dot.tms.SignMessage;
 import us.mn.state.dot.tms.SignMessageHelper;
 import us.mn.state.dot.tms.SignMsgSource;
@@ -125,8 +127,9 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"gps, static_graphic, beacon, preset, sign_config, " +
-			"override_font, msg_sched, msg_current, expire_time " +
-			"FROM iris." + SONAR_TYPE + ";", new ResultFactory()
+			"sign_detail, override_font, msg_sched, msg_current, " +
+			"expire_time FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new DMSImpl(row));
@@ -160,6 +163,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("beacon", beacon);
 		map.put("preset", preset);
 		map.put("sign_config", sign_config);
+		map.put("sign_detail", sign_detail);
 		map.put("override_font", override_font);
 		map.put("msg_sched", msg_sched);
 		map.put("msg_current", msg_current);
@@ -206,30 +210,32 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		     row.getString(8),          // beacon
 		     row.getString(9),          // preset
 		     row.getString(10),         // sign_config
-		     row.getString(11),         // override_font
-		     row.getString(12),         // msg_sched
-		     row.getString(13),         // msg_current
-		     row.getTimestamp(14)       // expire_time
+		     row.getString(11),         // sign_detail
+		     row.getString(12),         // override_font
+		     row.getString(13),         // msg_sched
+		     row.getString(14),         // msg_current
+		     row.getTimestamp(15)       // expire_time
 		);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c, int p, String nt,
-		String g, String sg, String b, String cp, String sc, String of,
-		String ms, String mc, Date et)
+		String g, String sg, String b, String cp, String sc, String sd,
+		String of, String ms, String mc, Date et)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
 		     lookupGps(g), lookupGraphic(sg), lookupBeacon(b),
 		     lookupPreset(cp), SignConfigHelper.lookup(sc),
-		     FontHelper.lookup(of), SignMessageHelper.lookup(ms),
-		     SignMessageHelper.lookup(mc), et);
+		     SignDetailHelper.lookup(sd), FontHelper.lookup(of),
+		     SignMessageHelper.lookup(ms), SignMessageHelper.lookup(mc),
+		     et);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, GpsImpl g, Graphic sg, Beacon b,
-		CameraPreset cp, SignConfig sc, Font of, SignMessage ms,
-		SignMessage mc, Date et)
+		CameraPreset cp, SignConfig sc, SignDetail sd, Font of,
+		SignMessage ms, SignMessage mc, Date et)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -238,6 +244,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		beacon = b;
 		setPreset(cp);
 		sign_config = sc;
+		sign_detail = sd;
 		override_font = of;
 		msg_sched = ms;
 		msg_current = mc;
@@ -425,6 +432,30 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 			notifyAttribute("signConfig");
 			resetStateNotify();
 			updateStyles();
+		}
+	}
+
+	/** Sign detail */
+	private SignDetail sign_detail;
+
+	/** Get the sign detail */
+	@Override
+	public SignDetail getSignDetail() {
+		return sign_detail;
+	}
+
+	/** Set the sign detail */
+	public void setSignDetailNotify(SignDetailImpl sd) {
+		if (!objectEquals(sd, sign_detail)) {
+			try {
+				store.update(this, "sign_detail", sd);
+			}
+			catch (TMSException e) {
+				logError("sign_detail: " + e.getMessage());
+				return;
+			}
+			sign_detail = sd;
+			notifyAttribute("signDetail");
 		}
 	}
 

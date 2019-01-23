@@ -28,6 +28,7 @@ import us.mn.state.dot.tms.SystemAttrEnum;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.EmailHandler;
 import us.mn.state.dot.tms.server.SignConfigImpl;
+import us.mn.state.dot.tms.server.SignDetailImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
 import us.mn.state.dot.tms.server.comm.OpDevice;
 import us.mn.state.dot.tms.server.comm.PriorityLevel;
@@ -410,18 +411,20 @@ abstract class OpDms extends OpDevice {
 				m_dms.setVersionNotify(version);
 
 				int dt = type.ordinal();
-				SignConfigImpl sc = SignConfigImpl.findOrCreate(
+				SignDetailImpl sd = SignDetailImpl.findOrCreate(
 					dt, false, "OTHER", signAccess, "other",
-					"other", make, model,
+					"other", DmsColor.AMBER.rgb(),
+					DmsColor.BLACK.rgb(), make, model);
+				if (sd != null)
+					m_dms.setSignDetailNotify(sd);
+				SignConfigImpl sc = SignConfigImpl.findOrCreate(
 					signWidth, signHeight,
 					horizBorder, vertBorder,
 					horizPitch, vertPitch,
 					signWidthPixels, signHeightPixels,
 					characterWidthPixels,
 					characterHeightPixels,
-					ColorScheme.MONOCHROME_1_BIT.ordinal(),
-					DmsColor.AMBER.rgb(),
-					DmsColor.BLACK.rgb());
+					ColorScheme.MONOCHROME_1_BIT.ordinal());
 				if (sc != null)
 					m_dms.setSignConfigNotify(sc);
 

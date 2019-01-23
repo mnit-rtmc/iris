@@ -54,6 +54,9 @@ public interface DMS extends Device {
 	/** Get the sign configuration */
 	SignConfig getSignConfig();
 
+	/** Get the sign detail */
+	SignDetail getSignDetail();
+
 	/** Set the override font */
 	void setOverrideFont(Font f);
 

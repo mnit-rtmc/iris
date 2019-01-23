@@ -20,7 +20,7 @@ import java.util.HashSet;
 import us.mn.state.dot.tms.DMS;
 import static us.mn.state.dot.tms.DmsColor.AMBER;
 import us.mn.state.dot.tms.DMSType;
-import us.mn.state.dot.tms.SignConfig;
+import us.mn.state.dot.tms.SignDetail;
 import static us.mn.state.dot.tms.SystemAttrEnum.*;
 import us.mn.state.dot.tms.server.DMSImpl;
 import us.mn.state.dot.tms.server.comm.CommMessage;
@@ -285,10 +285,10 @@ public class OpSendDMSDefaults extends OpDMS {
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
 			// ADDCO brick signs have these dimensions
-			SignConfig sc = dms.getSignConfig();
-			String make = (sc != null) ? sc.getSoftwareMake() : "";
-			int dtype = (sc != null)
-			          ? sc.getDmsType()
+			SignDetail sd = dms.getSignDetail();
+			String make = (sd != null) ? sd.getSoftwareMake() : "";
+			int dtype = (sd != null)
+			          ? sd.getDmsType()
 			          : DMSType.UNKNOWN.ordinal();
 			// NOTE: setting these objects requires use of the
 			//       "administrator" community name.  We need to

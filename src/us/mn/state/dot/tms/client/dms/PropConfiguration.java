@@ -14,15 +14,10 @@
  */
 package us.mn.state.dot.tms.client.dms;
 
-import java.awt.Component;
-import java.awt.Color;
-import java.awt.Graphics;
 import java.awt.event.ActionEvent;
-import javax.swing.Icon;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.ColorScheme;
-import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.Font;
 import us.mn.state.dot.tms.SignConfig;
 import us.mn.state.dot.tms.SystemAttrEnum;
@@ -33,7 +28,6 @@ import us.mn.state.dot.tms.client.widget.IPanel;
 import us.mn.state.dot.tms.units.Distance;
 import static us.mn.state.dot.tms.units.Distance.Units.INCHES;
 import static us.mn.state.dot.tms.units.Distance.Units.MILLIMETERS;
-import us.mn.state.dot.tms.utils.HexString;
 import us.mn.state.dot.tms.utils.I18N;
 
 /**
@@ -43,27 +37,6 @@ import us.mn.state.dot.tms.utils.I18N;
  * @author Douglas Lau
  */
 public class PropConfiguration extends IPanel {
-
-	/** Icon size */
-	static private final int ICON_SIZE = 24;
-
-	/** Icon for colors */
-	static private class ColorIcon implements Icon {
-		private final Color color;
-		private ColorIcon(int rgb) {
-			color = new Color(rgb);
-		}
-		public int getIconHeight() {
-			return ICON_SIZE;
-		}
-		public int getIconWidth() {
-			return ICON_SIZE;
-		}
-		public void paintIcon(Component c, Graphics g, int x, int y) {
-			g.setColor(color);
-			g.fillRect(x, y, ICON_SIZE, ICON_SIZE);
-		}
-	}
 
 	/** Get tiny distance units to use for display */
 	static private Distance.Units distUnitsTiny() {
@@ -96,27 +69,6 @@ public class PropConfiguration extends IPanel {
 		else
 			return UNKNOWN;
 	}
-
-	/** Sign type label */
-	private final JLabel type_lbl = createValueLabel();
-
-	/** Sign technology label */
-	private final JLabel tech_lbl = createValueLabel();
-
-	/** Sign access label */
-	private final JLabel access_lbl = createValueLabel();
-
-	/** Sign legend label */
-	private final JLabel legend_lbl = createValueLabel();
-
-	/** Beacon label */
-	private final JLabel beacon_lbl = createValueLabel();
-
-	/** Software make label */
-	private final JLabel software_make_lbl = createValueLabel();
-
-	/** Software model label */
-	private final JLabel software_model_lbl = createValueLabel();
 
 	/** Sign face width label */
 	private final JLabel f_width_lbl = createValueLabel();
@@ -151,12 +103,6 @@ public class PropConfiguration extends IPanel {
 	/** Color scheme label */
 	private final JLabel c_scheme_lbl = createValueLabel();
 
-	/** Monochrome foreground label */
-	private final JLabel m_foreground_lbl = createValueLabel();
-
-	/** Monochrome background label */
-	private final JLabel m_background_lbl = createValueLabel();
-
 	/** Default font combo box */
 	private final JComboBox<Font> font_cbx = new JComboBox<Font>();
 
@@ -179,20 +125,6 @@ public class PropConfiguration extends IPanel {
 	@Override
 	public void initialize() {
 		super.initialize();
-		add("dms.type");
-		add(type_lbl, Stretch.LAST);
-		add("dms.technology");
-		add(tech_lbl, Stretch.LAST);
-		add("dms.access");
-		add(access_lbl, Stretch.LAST);
-		add("dms.legend");
-		add(legend_lbl, Stretch.LAST);
-		add("dms.beacon");
-		add(beacon_lbl, Stretch.LAST);
-		add("dms.software.make");
-		add(software_make_lbl, Stretch.LAST);
-		add("dms.software.model");
-		add(software_model_lbl, Stretch.LAST);
 		add("dms.face.width");
 		add(f_width_lbl, Stretch.LAST);
 		add("dms.face.height");
@@ -215,10 +147,6 @@ public class PropConfiguration extends IPanel {
 		add(c_height_lbl, Stretch.LAST);
 		add("dms.color.scheme");
 		add(c_scheme_lbl, Stretch.LAST);
-		add("dms.monochrome.foreground");
-		add(m_foreground_lbl, Stretch.LAST);
-		add("dms.monochrome.background");
-		add(m_background_lbl, Stretch.LAST);
 		add("dms.font.default");
 		add(font_cbx, Stretch.LAST);
 		add("dms.font.height");
@@ -243,16 +171,6 @@ public class PropConfiguration extends IPanel {
 	public void updateAttribute(String a) {
 		SignConfig sc = config;
 		if (null == a) {
-			DMSType t = DMSType.fromOrdinal(sc.getDmsType());
-			type_lbl.setText(t.description);
-			tech_lbl.setText(formatString(sc.getTechnology()));
-			access_lbl.setText(formatString(sc.getSignAccess()));
-			legend_lbl.setText(formatString(sc.getLegend()));
-			beacon_lbl.setText(formatString(sc.getBeaconType()));
-			software_make_lbl.setText(formatString(
-				sc.getSoftwareMake()));
-			software_model_lbl.setText(formatString(
-				sc.getSoftwareModel()));
 			f_width_lbl.setText(formatMM(sc.getFaceWidth()));
 			f_height_lbl.setText(formatMM(sc.getFaceHeight()));
 			h_border_lbl.setText(formatMM(sc.getBorderHoriz()));
@@ -266,14 +184,6 @@ public class PropConfiguration extends IPanel {
 			ColorScheme cs = ColorScheme.fromOrdinal(
 				sc.getColorScheme());
 			c_scheme_lbl.setText(cs.description);
-			m_foreground_lbl.setText(HexString.format(
-				sc.getMonochromeForeground(), 6));
-			m_foreground_lbl.setIcon(new ColorIcon(
-				sc.getMonochromeForeground()));
-			m_background_lbl.setText(HexString.format(
-				sc.getMonochromeBackground(), 6));
-			m_background_lbl.setIcon(new ColorIcon(
-				sc.getMonochromeBackground()));
 		}
 		if (null == a || a.equals("defaultFont")) {
 			font_cbx.setSelectedItem(sc.getDefaultFont());

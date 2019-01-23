@@ -17,7 +17,7 @@ package us.mn.state.dot.tms;
 import us.mn.state.dot.sonar.SonarObject;
 
 /**
- * A sign configuration defines the type and dimensions of a sign.
+ * A sign configuration defines the dimensions of a sign.
  *
  * @author Douglas Lau
  */
@@ -25,30 +25,6 @@ public interface SignConfig extends SonarObject {
 
 	/** SONAR type name */
 	String SONAR_TYPE = "sign_config";
-
-	/** Get DMS type */
-	int getDmsType();
-
-	/** Get portable flag */
-	boolean getPortable();
-
-	/** Get sign technology description */
-	String getTechnology();
-
-	/** Get sign access description */
-	String getSignAccess();
-
-	/** Get sign legend */
-	String getLegend();
-
-	/** Get beacon type description */
-	String getBeaconType();
-
-	/** Get the software make */
-	String getSoftwareMake();
-
-	/** Get the software model */
-	String getSoftwareModel();
 
 	/** Get width of the sign face (mm) */
 	int getFaceWidth();
@@ -82,12 +58,6 @@ public interface SignConfig extends SonarObject {
 
 	/** Get the color scheme (ordinal of ColorScheme) */
 	int getColorScheme();
-
-	/** Get monochrome scheme foreground color (24-bit). */
-	int getMonochromeForeground();
-
-	/** Get monochrome scheme background color (24-bit). */
-	int getMonochromeBackground();
 
 	/** Set the default font */
 	void setDefaultFont(Font f);
