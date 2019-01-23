@@ -85,6 +85,12 @@ public class PropDetail extends IPanel {
 	/** Monochrome background label */
 	private final JLabel m_background_lbl = createValueLabel();
 
+	/** Hardware make label */
+	private final JLabel hardware_make_lbl = createValueLabel();
+
+	/** Hardware model label */
+	private final JLabel hardware_model_lbl = createValueLabel();
+
 	/** Software make label */
 	private final JLabel software_make_lbl = createValueLabel();
 
@@ -121,6 +127,10 @@ public class PropDetail extends IPanel {
 		add(m_foreground_lbl, Stretch.LAST);
 		add("dms.monochrome.background");
 		add(m_background_lbl, Stretch.LAST);
+		add("dms.hardware.make");
+		add(hardware_make_lbl, Stretch.LAST);
+		add("dms.hardware.model");
+		add(hardware_model_lbl, Stretch.LAST);
 		add("dms.software.make");
 		add(software_make_lbl, Stretch.LAST);
 		add("dms.software.model");

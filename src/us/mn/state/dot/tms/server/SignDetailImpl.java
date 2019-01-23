@@ -50,25 +50,29 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	 * @param bt Beacon type.
 	 * @param mf Monochrome foreground color (24-bit).
 	 * @param mb Monochrome background color (24-bit).
-	 * @param mk Software make.
-	 * @param md Software model.
+	 * @param hmk Hardware make.
+	 * @param hmd Hardware model.
+	 * @param smk Software make.
+	 * @param smd Software model.
 	 * @return Matching existing, or new sign detail.
 	 */
 	static public SignDetailImpl findOrCreate(int dt, boolean p, String t,
-		String sa, String l, String bt, int mf, int mb, String mk,
-		String md)
+		String sa, String l, String bt, int mf, int mb, String hmk,
+		String hmd, String smk, String smd)
 	{
 		bt = filterDesc(bt);
-		mk = filterDesc(mk);
-		mk = filterDesc(md);
+		hmk = filterDesc(hmk);
+		hmd = filterDesc(hmd);
+		smk = filterDesc(smk);
+		smd = filterDesc(smd);
 		SignDetail sd = SignDetailHelper.find(DMSType.fromOrdinal(dt),
-			p, t, sa, l, bt, mf, mb, mk, md);
+			p, t, sa, l, bt, mf, mb, hmk, hmd, smk, smd);
 		if (sd instanceof SignDetailImpl)
 			return (SignDetailImpl) sd;
 		else {
 			String n = createUniqueName();
 			SignDetailImpl sdi = new SignDetailImpl(n, dt, p, t, sa,
-				l, bt, mf, mb, mk, md);
+				l, bt, mf, mb, hmk, hmd, smk, smd);
 			return createNotify(sdi);
 		}
 	}
@@ -89,7 +93,7 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	static public SignDetailImpl findOrCreateLCS() {
 		return findOrCreate(DMSType.OTHER.ordinal(), false, "DLCS",
 			"FRONT", "NONE", "NONE", DmsColor.AMBER.rgb(),
-			DmsColor.BLACK.rgb(), "", "");
+			DmsColor.BLACK.rgb(), "", "", "", "");
 	}
 
 	/** Last allocated sign detail ID */
@@ -118,7 +122,8 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		store.query("SELECT name, dms_type, portable, technology, " +
 			"sign_access, legend, beacon_type, " +
 			"monochrome_foreground, monochrome_background, " +
-			"software_make, software_model FROM iris." +
+			"hardware_make, hardware_model, software_make, " +
+			"software_model FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -140,6 +145,8 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		map.put("beacon_type", beacon_type);
 		map.put("monochrome_foreground", monochrome_foreground);
 		map.put("monochrome_background", monochrome_background);
+		map.put("hardware_make", hardware_make);
+		map.put("hardware_model", hardware_model);
 		map.put("software_make", software_make);
 		map.put("software_model", software_model);
 		return map;
@@ -168,14 +175,17 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		     row.getString(7),   // beacon_type
 		     row.getInt(8),      // monochrome_foreground
 		     row.getInt(9),      // monochrome_background
-		     row.getString(10),  // software_make
-		     row.getString(11)   // software_model
+		     row.getString(10),  // hardware_make
+		     row.getString(11),  // hardware_model
+		     row.getString(12),  // software_make
+		     row.getString(13)   // software_model
 		);
 	}
 
 	/** Create a sign detail */
 	private SignDetailImpl(String n, int dt, boolean p, String t, String sa,
-		String l, String bt, int mf, int mb, String mk, String md)
+		String l, String bt, int mf, int mb, String hmk, String hmd,
+		String smk, String smd)
 	{
 		super(n);
 		dms_type = DMSType.fromOrdinal(dt);
@@ -186,8 +196,10 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		beacon_type = bt;
 		monochrome_foreground = mf;
 		monochrome_background = mb;
-		software_make = mk;
-		software_model = md;
+		hardware_make = hmk;
+		hardware_model = hmd;
+		software_make = smk;
+		software_model = smd;
 	}
 
 	/** DMS type enum value */
@@ -260,6 +272,24 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	@Override
 	public int getMonochromeBackground() {
 		return monochrome_background;
+	}
+
+	/** Hardware make (manufacturer) */
+	private final String hardware_make;
+
+	/** Get the hardware make */
+	@Override
+	public String getHardwareMake() {
+		return hardware_make;
+	}
+
+	/** Hardware model */
+	private String hardware_model;
+
+	/** Get the hardware model */
+	@Override
+	public String getHardwareModel() {
+		return hardware_model;
 	}
 
 	/** Software make (manufacturer) */

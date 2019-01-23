@@ -50,6 +50,12 @@ public interface SignDetail extends SonarObject {
 	/** Get monochrome scheme background color (24-bit). */
 	int getMonochromeBackground();
 
+	/** Get the hardware make */
+	String getHardwareMake();
+
+	/** Get the hardware model */
+	String getHardwareModel();
+
 	/** Get the software make */
 	String getSoftwareMake();
 

@@ -49,12 +49,14 @@ public class SignDetailHelper extends BaseHelper {
 	 * @param bt Beacon type.
 	 * @param mf Monochrome foreground color (24-bit).
 	 * @param mb Monochrome background color (24-bit).
-	 * @param mk Software make.
-	 * @param md Software model.
+	 * @param hmk Hardware make.
+	 * @param hmd Hardware model.
+	 * @param smk Software make.
+	 * @param smd Software model.
 	 * @return Matching sign detail, or null if not found. */
 	static public SignDetail find(DMSType dt, boolean p, String t,
-		String sa, String l, String bt, int mf, int mb, String mk,
-		String md)
+		String sa, String l, String bt, int mf, int mb, String hmk,
+		String hmd, String smk, String smd)
 	{
 		int dti = dt.ordinal();
 		Iterator<SignDetail> it = iterator();
@@ -68,8 +70,10 @@ public class SignDetailHelper extends BaseHelper {
 			    bt.equals(sd.getBeaconType()) &&
 			    sd.getMonochromeForeground() == mf &&
 			    sd.getMonochromeBackground() == mb &&
-			    mk.equals(sd.getSoftwareMake()) &&
-			    md.equals(sd.getSoftwareModel()))
+			    hmk.equals(sd.getHardwareMake()) &&
+			    hmd.equals(sd.getHardwareModel()) &&
+			    smk.equals(sd.getSoftwareMake()) &&
+			    smd.equals(sd.getSoftwareModel()))
 			{
 				return sd;
 			}

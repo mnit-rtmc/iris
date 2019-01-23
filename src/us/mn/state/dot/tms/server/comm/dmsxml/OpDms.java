@@ -414,7 +414,8 @@ abstract class OpDms extends OpDevice {
 				SignDetailImpl sd = SignDetailImpl.findOrCreate(
 					dt, false, "OTHER", signAccess, "other",
 					"other", DmsColor.AMBER.rgb(),
-					DmsColor.BLACK.rgb(), make, model);
+					DmsColor.BLACK.rgb(), make, model, make,
+					model);
 				if (sd != null)
 					m_dms.setSignDetailNotify(sd);
 				SignConfigImpl sc = SignConfigImpl.findOrCreate(

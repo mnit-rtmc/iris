@@ -36,6 +36,8 @@ CREATE TABLE iris.sign_detail (
 	beacon_type VARCHAR(32) NOT NULL,
 	monochrome_foreground INTEGER NOT NULL,
 	monochrome_background INTEGER NOT NULL,
+	hardware_make VARCHAR(32) NOT NULL,
+	hardware_model VARCHAR(32) NOT NULL,
 	software_make VARCHAR(32) NOT NULL,
 	software_model VARCHAR(32) NOT NULL
 );
@@ -55,7 +57,8 @@ CREATE TRIGGER sign_detail_trig
 CREATE VIEW sign_detail_view AS
 	SELECT name, dt.description AS dms_type, portable, technology,
 	       sign_access, legend, beacon_type, monochrome_foreground,
-	       monochrome_background, software_make, software_model
+	       monochrome_background, hardware_make, hardware_model,
+	       software_make, software_model
 	FROM iris.sign_detail
 	JOIN iris.dms_type dt ON sign_detail.dms_type = dt.id;
 GRANT SELECT ON sign_detail_view TO PUBLIC;

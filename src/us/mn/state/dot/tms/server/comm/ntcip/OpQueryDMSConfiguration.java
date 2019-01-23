@@ -46,6 +46,12 @@ import us.mn.state.dot.tms.server.comm.snmp.SNMP;
  */
 public class OpQueryDMSConfiguration extends OpDMS {
 
+	/** Hardware module make (manufacturer) */
+	private String hardware_make = "UNKNOWN";
+
+	/** Hardware module model */
+	private String hardware_model = "UNKNOWN";
+
 	/** Software module make (manufacturer) */
 	private String software_make = "UNKNOWN";
 
@@ -176,6 +182,10 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			logQuery(model);
 			logQuery(version);
 			logQuery(m_type);
+			if (m_type.getEnum() == ModuleType.hardware) {
+				hardware_make = make.getValue();
+				hardware_model = model.getValue();
+			}
 			if (m_type.getEnum() == ModuleType.software) {
 				software_make = make.getValue();
 				software_model = model.getValue();
@@ -354,7 +364,8 @@ public class OpQueryDMSConfiguration extends OpDMS {
 			SignDetailImpl sd = SignDetailImpl.findOrCreate(dt, p,
 				tech.getValue(), access.getValue(),
 				legend.getValue(), beaconType.getValue(), mf,mb,
-				software_make, software_model);
+				hardware_make, hardware_model, software_make,
+				software_model);
 			if (sd != null)
 				dms.setSignDetailNotify(sd);
 			SignConfigImpl sc = SignConfigImpl.findOrCreate(
