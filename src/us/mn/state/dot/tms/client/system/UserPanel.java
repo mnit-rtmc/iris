@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2012-2018  Minnesota Department of Transportation
+ * Copyright (C) 2012-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@ public class UserPanel extends IPanel implements ProxyView<User> {
 	};
 
 	/** Dn (distinguished name) field */
-	private final JTextField dn_txt = new JTextField(128);
+	private final JTextField dn_txt = new JTextField(64);
 
 	/** Role list model */
 	private final ProxyListModel<Role> r_list;
