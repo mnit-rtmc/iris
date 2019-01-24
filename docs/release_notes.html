@@ -9,6 +9,43 @@
 <body>
 <h1>MnDOT IRIS 4.x Release Notes</h1>
 <dl>
+	<dt>4.86.0 (24 Jan 2019)</dt>
+	<dd><ul>
+		<li>
+			Split sign_detail out of sign_config table.
+		</li>
+		<li>
+			Added hardware_make, hardware_model, software_make and
+			software_model to sign_detail.
+		</li>
+		<li>
+			Changed DMS composer to only set combo boxes for
+			operator messages.
+		</li>
+		<li>
+			Saturate out-of-range detector samples instead of
+			discarding them.
+		</li>
+		<li>
+			Clear all auto_fail flags when detector_auto_fail_enable
+			is set to false.
+		</li>
+		<li>
+			Fixed a couple of parking area glitches.
+		</li>
+		<li>
+			Improved documentation for setting up mapping.
+		</li>
+		<li>
+			Increased i_user dn max length to 128 characters.
+		</li>
+		<li>
+			Added missing stuff for reporter.
+		</li>
+		<li>
+			Fixed key handling problem for Mac OSX.
+		</li>
+	</ul></dd>
 	<dt>4.85.0 (17 Dec 2018)</dt>
 	<dd><ul>
 		<li>
