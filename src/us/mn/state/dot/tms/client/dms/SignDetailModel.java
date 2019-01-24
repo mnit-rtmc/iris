@@ -55,14 +55,14 @@ public class SignDetailModel extends ProxyTableModel<SignDetail> {
 				return d.getName();
 			}
 		});
-		cols.add(new ProxyColumn<SignDetail>("dms.software.make", 80,
+		cols.add(new ProxyColumn<SignDetail>("dms.software.make", 240,
 			Integer.class)
 		{
 			public Object getValueAt(SignDetail sd) {
 				return sd.getSoftwareMake();
 			}
 		});
-		cols.add(new ProxyColumn<SignDetail>("dms.software.model", 80,
+		cols.add(new ProxyColumn<SignDetail>("dms.software.model", 240,
 			Integer.class)
 		{
 			public Object getValueAt(SignDetail sd) {
