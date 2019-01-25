@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2011-2012  Minnesota Department of Transportation
+ * Copyright (C) 2011-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -28,6 +28,12 @@ public class SignTextHelper extends BaseHelper {
 		assert false;
 	}
 
+	/** Lookup the sign text with the specified name */
+	static public SignText lookup(String name) {
+		return (SignText) namespace.lookupObject(SignText.SONAR_TYPE,
+			name);
+	}
+
 	/** Get a sign text iterator */
 	static public Iterator<SignText> iterator() {
 		return new IteratorWrapper<SignText>(namespace.iterator(
@@ -37,11 +43,11 @@ public class SignTextHelper extends BaseHelper {
 	/** Check if there is a matching sign text */
 	static public boolean match(SignGroup sg, short line, String multi) {
 		Iterator<SignText> it = iterator();
-		while(it.hasNext()) {
+		while (it.hasNext()) {
 			SignText st = it.next();
-			if(st.getSignGroup() == sg &&
-			   st.getLine() == line &&
-			   st.getMulti().equals(multi))
+			if (st.getSignGroup() == sg &&
+			    st.getLine() == line &&
+			    st.getMulti().equals(multi))
 				return true;
 		}
 		return false;

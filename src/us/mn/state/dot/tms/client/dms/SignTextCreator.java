@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2008-2017  Minnesota Department of Transportation
+ * Copyright (C) 2008-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -15,12 +15,13 @@
 package us.mn.state.dot.tms.client.dms;
 
 import java.util.HashMap;
-import java.util.HashSet;
 import us.mn.state.dot.sonar.client.TypeCache;
 import us.mn.state.dot.tms.SignGroup;
 import us.mn.state.dot.tms.SignText;
+import us.mn.state.dot.tms.SignTextHelper;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.utils.MultiString;
+import us.mn.state.dot.tms.utils.SString;
 
 /**
  * This is a utility class to create sign text messages.
@@ -31,7 +32,7 @@ import us.mn.state.dot.tms.utils.MultiString;
 public class SignTextCreator {
 
 	/** Maximum number of lines for a sign */
-	static protected final int MAX_LINES = 12;
+	static private final int MAX_LINES = 12;
 
 	/** Sign text type cache, list of all sign text lines */
 	private final TypeCache<SignText> sign_text;
@@ -40,7 +41,7 @@ public class SignTextCreator {
 	private final Session session;
 
 	/** Unique ID for sign text naming */
-	protected int uid = 0;
+	private int uid = 0;
 
 	/** Create a new sign text creator */
 	public SignTextCreator(Session s) {
@@ -82,35 +83,20 @@ public class SignTextCreator {
 	 *    where uniqueid is a sequential integer.
 	 * @return A unique string for a new SignText entry, e.g. V1_23
 	 */
-	protected String createUniqueSignTextName(SignGroup sg) {
-		HashSet<String> names = createSignTextNameSet(sg);
+	private String createUniqueSignTextName(SignGroup sg) {
 		// NOTE: uid needs to persist between calls so that calling
 		// this method twice in a row doesn't return the same name
-		final int uid_max = names.size() + MAX_LINES;
-		for(int i = 0; i < uid_max; i++) {
+		final int uid_max = sign_text.size() + MAX_LINES;
+		for (int i = 0; i < uid_max; i++) {
 			final int _uid = (uid + i) % uid_max + 1;
-			String n = sg.getName() + "_" + _uid;
-			if(!names.contains(n)) {
+			String n = SString.truncate(sg.getName(), 14) + "_" +
+				_uid;
+			if (SignTextHelper.lookup(n) == null) {
 				uid = _uid;
 				return n;
 			}
 		}
 		assert false;
 		return null;
-	}
-
-	/**
-	 * Create a HashSet containing all SignText names for the given
-	 * sign group.
-	 * @param sg Sign group to search
-	 * @return A HashSet with entries as SignText names, e.g. V1_23
-	 */
-	private HashSet<String> createSignTextNameSet(SignGroup sg) {
-		HashSet<String> names = new HashSet<String>();
-		for(SignText st: sign_text) {
-			if(st.getSignGroup() == sg)
-				names.add(st.getName());
-		}
-		return names;
 	}
 }
