@@ -1782,6 +1782,13 @@ mod test {
         assert!(m.next() == None);
     }
     #[test]
+    fn parse_pt8() {
+        let mut m = Parser::new("[pt%%%]");
+        if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
+        else { assert!(false) }
+        assert!(m.next() == None);
+    }
+    #[test]
     fn parse_sc() {
         let mut m = Parser::new("[sc]");
         if let Some(Err(SyntaxError::UnsupportedTagValue)) = m.next() { }
