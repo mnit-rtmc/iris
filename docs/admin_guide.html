@@ -783,7 +783,7 @@ systemctl status iris</pre>
 </p>
 <pre class="code">
 su --login postgres
-time osm2pgsql -v --number-processes=8 -d osm -s --drop ./minnesota-20181219.osm.pbf
+time osm2pgsql -v --number-processes=8 -d osm -s --drop --multi-geometry ./minnesota-20181219.osm.pbf
 </pre>
 
 <h4>Build and install mapnik library from source</h4>
