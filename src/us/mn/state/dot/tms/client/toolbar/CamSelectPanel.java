@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2016-2018  Minnesota Department of Transportation
+ * Copyright (C) 2016-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -223,13 +223,25 @@ public class CamSelectPanel extends ToolPanel {
 
 	/** Key dispatcher for application-wide numpad hotkeys */
 	private class KeyDispatcher implements KeyEventDispatcher {
+		private boolean num_lock_support = true;
 		/* We need to keep track of last pressed state so we
 		 * don't propogate KEY_TYPED events from numpad */
 		private boolean pressed = false;
 		private final Toolkit tk = Toolkit.getDefaultToolkit();
+		private boolean getNumLockKeyState() {
+			try {
+				return tk.getLockingKeyState(
+					KeyEvent.VK_NUM_LOCK);
+			}
+			// macOS does not allow getting state of num lock key
+			catch (UnsupportedOperationException e) {
+				num_lock_support = false;
+				return false;
+			}
+		}
 		@Override
 		public boolean dispatchKeyEvent(KeyEvent e) {
-			if (tk.getLockingKeyState(KeyEvent.VK_NUM_LOCK)) {
+			if (num_lock_support && getNumLockKeyState()) {
 				pressed = false;
 				return false;
 			}
