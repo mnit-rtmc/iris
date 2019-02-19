@@ -92,8 +92,8 @@ const SIGN_CONFIG_RES: Resource = Resource::Simple(
 "SELECT row_to_json(r)::text FROM (\
     SELECT name, face_width, face_height, border_horiz, border_vert, \
            pitch_horiz, pitch_vert, pixel_width, pixel_height, \
-           char_width, char_height, color_scheme, monochrome_foreground, \
-           monochrome_background, default_font \
+           char_width, char_height, monochrome_foreground, \
+           monochrome_background, color_scheme, default_font \
     FROM sign_config_view \
 ) r",
 );
@@ -103,7 +103,7 @@ const SIGN_DETAIL_RES: Resource = Resource::Simple(
 "SELECT row_to_json(r)::text FROM (\
     SELECT name, dms_type, portable, technology, sign_access, legend, \
            beacon_type, hardware_make, hardware_model, software_make, \
-           software_model \
+           software_model, supported_tags, max_pages, max_multi_len \
     FROM sign_detail_view \
 ) r",
 );
@@ -211,9 +211,9 @@ pub struct SignConfig {
     pixel_height: i32,
     char_width  : i32,
     char_height : i32,
-    color_scheme: String,
     monochrome_foreground: i32,
     monochrome_background: i32,
+    color_scheme: String,
     default_font: Option<String>,
 }
 
@@ -332,17 +332,20 @@ impl SignConfig {
 
 #[derive(Serialize,Deserialize)]
 pub struct SignDetail {
-    name        : String,
-    dms_type    : String,
-    portable    : bool,
-    technology  : String,
-    sign_access : String,
-    legend      : String,
-    beacon_type : String,
+    name           : String,
+    dms_type       : String,
+    portable       : bool,
+    technology     : String,
+    sign_access    : String,
+    legend         : String,
+    beacon_type    : String,
     hardware_make  : String,
     hardware_model : String,
     software_make  : String,
     software_model : String,
+    supported_tags : i32,
+    max_pages      : i32,
+    max_multi_len  : i32,
 }
 
 #[derive(Serialize)]
