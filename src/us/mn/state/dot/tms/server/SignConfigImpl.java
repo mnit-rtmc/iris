@@ -45,26 +45,26 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	 * @param pxh Pixel height.
 	 * @param cw Character width (0 means variable).
 	 * @param ch Character height (0 means variable).
-	 * @param cs Color scheme ordinal.
 	 * @param mf Monochrome foreground color (24-bit).
 	 * @param mb Monochrome background color (24-bit).
+	 * @param cs Color scheme ordinal.
 	 * @return Matching existing, or new sign config.
 	 */
 	static public SignConfigImpl findOrCreate(int fw, int fh, int bh, int bv,
-		int ph, int pv, int pxw, int pxh, int cw, int ch, int cs,
-		int mf, int mb)
+		int ph, int pv, int pxw, int pxh, int cw, int ch, int mf, int mb,
+		int cs)
 	{
 		if (fw <= 0 || fh <= 0 || bh < 0 || bv < 0 || ph <= 0 ||
 		    pv <= 0 || pxw <= 0 || pxh <= 0 || cw < 0 || ch < 0)
 			return null;
 		SignConfig sc = SignConfigHelper.find(fw, fh, bh, bv, ph, pv,
-			pxw, pxh, cw, ch, cs, mf, mb);
+			pxw, pxh, cw, ch, mf, mb, cs);
 		if (sc instanceof SignConfigImpl)
 			return (SignConfigImpl) sc;
 		else {
 			String n = createUniqueName();
 			SignConfigImpl sci = new SignConfigImpl(n, fw, fh, bh,
-				bv, ph, pv, pxw, pxh, cw, ch, cs, mf, mb, "");
+				bv, ph, pv, pxw, pxh, cw, ch, mf, mb, cs, "");
 			return createNotify(sci);
 		}
 	}
@@ -114,8 +114,8 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		store.query("SELECT name, face_width, face_height, " +
 			"border_horiz, border_vert, pitch_horiz, pitch_vert, " +
 			"pixel_width, pixel_height, char_width, char_height, " +
-			"color_scheme, monochrome_foreground, " +
-			"monochrome_background, default_font FROM iris." +
+			"monochrome_foreground, monochrome_background, " +
+			"color_scheme, default_font FROM iris." +
 			SONAR_TYPE + ";", new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
@@ -139,9 +139,9 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		map.put("pixel_height", pixel_height);
 		map.put("char_width", char_width);
 		map.put("char_height", char_height);
-		map.put("color_scheme", color_scheme.ordinal());
 		map.put("monochrome_foreground", monochrome_foreground);
 		map.put("monochrome_background", monochrome_background);
+		map.put("color_scheme", color_scheme.ordinal());
 		map.put("default_font", default_font);
 		return map;
 	}
@@ -171,17 +171,17 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		     row.getInt(9),      // pixel_height
 		     row.getInt(10),     // char_width
 		     row.getInt(11),     // char_height
-		     row.getInt(12),     // color_scheme
-		     row.getInt(13),     // monochrome_foreground
-		     row.getInt(14),     // monochrome_background
+		     row.getInt(12),     // monochrome_foreground
+		     row.getInt(13),     // monochrome_background
+		     row.getInt(14),     // color_scheme
 		     row.getString(15)   // default_font
 		);
 	}
 
 	/** Create a sign config */
 	private SignConfigImpl(String n, int fw, int fh, int bh, int bv, int ph,
-		int pv, int pxw, int pxh, int cw, int ch, int cs, int mf,
-		int mb, String df)
+		int pv, int pxw, int pxh, int cw, int ch, int mf, int mb,
+		int cs, String df)
 	{
 		super(n);
 		face_width = fw;
@@ -194,9 +194,9 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		pixel_height = pxh;
 		char_width = cw;
 		char_height = ch;
-		color_scheme = ColorScheme.fromOrdinal(cs);
 		monochrome_foreground = mf;
 		monochrome_background = mb;
+		color_scheme = ColorScheme.fromOrdinal(cs);
 		default_font = FontHelper.lookup(df);
 	}
 
@@ -290,15 +290,6 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 		return char_height;
 	}
 
-	/** DMS Color scheme */
-	private final ColorScheme color_scheme;
-
-	/** Get the color scheme (ordinal of ColorScheme) */
-	@Override
-	public int getColorScheme() {
-		return color_scheme.ordinal();
-	}
-
 	/** Monochrome scheme foreground color (24-bit). */
 	private final int monochrome_foreground;
 
@@ -315,6 +306,15 @@ public class SignConfigImpl extends BaseObjectImpl implements SignConfig {
 	@Override
 	public int getMonochromeBackground() {
 		return monochrome_background;
+	}
+
+	/** DMS Color scheme */
+	private final ColorScheme color_scheme;
+
+	/** Get the color scheme (ordinal of ColorScheme) */
+	@Override
+	public int getColorScheme() {
+		return color_scheme.ordinal();
 	}
 
 	/** Default font */

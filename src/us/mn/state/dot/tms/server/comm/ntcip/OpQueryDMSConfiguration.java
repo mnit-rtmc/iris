@@ -118,12 +118,23 @@ public class OpQueryDMSConfiguration extends OpDMS {
 	/** Character width */
 	private final ASN1Integer c_width = vmsCharacterWidthPixels.makeInt();
 
+	/** Monochrome color */
+	private final MonochromeColor mono_color = new MonochromeColor();
+
 	/** Color scheme */
 	private final ASN1Enum<ColorScheme> color_scheme = new ASN1Enum<
 		ColorScheme>(ColorScheme.class, dmsColorScheme.node);
 
-	/** Monochrome color */
-	private final MonochromeColor m_color = new MonochromeColor();
+	/** Supported MULTI tags */
+	private final DmsSupportedMultiTags supported_tags =
+		new DmsSupportedMultiTags();
+
+	/** Maximum number of pages */
+	private final ASN1Integer max_pages = dmsMaxNumberPages.makeInt();
+
+	/** Maximum multi string length */
+	private final ASN1Integer max_multi_len =
+		dmsMaxMultiStringLength.makeInt();
 
 	/** Create a new DMS query configuration object */
 	public OpQueryDMSConfiguration(DMSImpl d) {
@@ -305,21 +316,18 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		/** Query the 1203v2 objects */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			DmsSupportedMultiTags tags =new DmsSupportedMultiTags();
-			ASN1Integer pages = dmsMaxNumberPages.makeInt();
-			ASN1Integer m_len = dmsMaxMultiStringLength.makeInt();
-			mess.add(m_color);
+			mess.add(mono_color);
 			mess.add(color_scheme);
-			mess.add(tags);
-			mess.add(pages);
-			mess.add(m_len);
+			mess.add(supported_tags);
+			mess.add(max_pages);
+			mess.add(max_multi_len);
 			try {
 				mess.queryProps();
-				logQuery(m_color);
+				logQuery(mono_color);
 				logQuery(color_scheme);
-				logQuery(tags);
-				logQuery(pages);
-				logQuery(m_len);
+				logQuery(supported_tags);
+				logQuery(max_pages);
+				logQuery(max_multi_len);
 			}
 			catch (NoSuchName e) {
 				// Sign supports 1203v1 only
@@ -359,13 +367,15 @@ public class OpQueryDMSConfiguration extends OpDMS {
 		if (isSuccess()) {
 			int dt = type.getValueEnum().ordinal();
 			boolean p = type.isPortable();
-			int mf = m_color.getForegroundInt();
-			int mb = m_color.getBackgroundInt();
+			int mono_fg = mono_color.getForegroundInt();
+			int mono_bg = mono_color.getBackgroundInt();
 			SignDetailImpl sd = SignDetailImpl.findOrCreate(dt, p,
 				tech.getValue(), access.getValue(),
 				legend.getValue(), beaconType.getValue(),
 				hardware_make, hardware_model, software_make,
-				software_model);
+				software_model, supported_tags.getInteger(),
+				max_pages.getInteger(),
+				max_multi_len.getInteger());
 			if (sd != null)
 				dms.setSignDetailNotify(sd);
 			SignConfigImpl sc = SignConfigImpl.findOrCreate(
@@ -375,7 +385,7 @@ public class OpQueryDMSConfiguration extends OpDMS {
 				h_pitch.getInteger(), v_pitch.getInteger(),
 				s_width.getInteger(), s_height.getInteger(),
 				c_width.getInteger(), getCharHeight(),
-				color_scheme.getInteger(), mf,mb);
+ 				mono_fg, mono_bg, color_scheme.getInteger());
 			if (sc != null)
 				dms.setSignConfigNotify(sc);
 		}

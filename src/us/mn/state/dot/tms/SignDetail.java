@@ -55,4 +55,13 @@ public interface SignDetail extends SonarObject {
 
 	/** Get the software model */
 	String getSoftwareModel();
+
+	/** Get the supported MULTI tags (bit flags of MultiTag) */
+	int getSupportedTags();
+
+	/** Get the maximum number of pages */
+	int getMaxPages();
+
+	/** Get the maximum MULTI string length */
+	int getMaxMultiLen();
 }

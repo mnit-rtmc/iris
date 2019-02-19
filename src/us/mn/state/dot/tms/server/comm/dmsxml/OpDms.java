@@ -413,7 +413,8 @@ abstract class OpDms extends OpDevice {
 				int dt = type.ordinal();
 				SignDetailImpl sd = SignDetailImpl.findOrCreate(
 					dt, false, "OTHER", signAccess, "other",
-					"other", make, model, make, model);
+					"other", make, model, make, model, 0,
+					2, 64);
 				if (sd != null)
 					m_dms.setSignDetailNotify(sd);
 				SignConfigImpl sc = SignConfigImpl.findOrCreate(

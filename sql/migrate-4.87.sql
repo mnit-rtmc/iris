@@ -39,4 +39,58 @@ DELETE FROM iris.sign_detail sd
       USING sign_detail_dups d
       WHERE sd.name = d.old_name;
 
+-- Temp drop view
+DROP VIEW dms_view;
+
+-- Update sign_config_view
+DROP VIEW sign_config_view;
+CREATE VIEW sign_config_view AS
+	SELECT name, face_width, face_height, border_horiz, border_vert,
+	       pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width,
+	       char_height, monochrome_foreground, monochrome_background,
+	       cs.description AS color_scheme, default_font
+	FROM iris.sign_config
+	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
+GRANT SELECT ON sign_config_view TO PUBLIC;
+
+-- Update dms_view
+CREATE VIEW dms_view AS
+	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
+	       d.static_graphic, d.beacon, p.camera, p.preset_num,
+	       d.sign_config, d.sign_detail, default_font, override_font,
+	       msg_sched, msg_current, expire_time,
+	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
+	       l.location, l.lat, l.lon
+	FROM iris.dms d
+	LEFT JOIN iris.camera_preset p ON d.preset = p.name
+	LEFT JOIN geo_loc_view l ON d.geo_loc = l.name
+	LEFT JOIN sign_config_view sc ON d.sign_config = sc.name;
+GRANT SELECT ON dms_view TO PUBLIC;
+
+-- Add supported tags to sign_detail
+ALTER TABLE iris.sign_detail ADD COLUMN supported_tags INTEGER;
+UPDATE iris.sign_detail SET supported_tags = 0;
+ALTER TABLE iris.sign_detail ALTER COLUMN supported_tags SET NOT NULL;
+
+-- Add max_pages to sign_detail
+ALTER TABLE iris.sign_detail ADD COLUMN max_pages INTEGER;
+UPDATE iris.sign_detail SET max_pages = 0;
+ALTER TABLE iris.sign_detail ALTER COLUMN max_pages SET NOT NULL;
+
+-- Add max_multi_len to sign_detail
+ALTER TABLE iris.sign_detail ADD COLUMN max_multi_len INTEGER;
+UPDATE iris.sign_detail SET max_multi_len = 0;
+ALTER TABLE iris.sign_detail ALTER COLUMN max_multi_len SET NOT NULL;
+
+-- Update sign_detail_view
+DROP VIEW sign_detail_view;
+CREATE VIEW sign_detail_view AS
+	SELECT name, dt.description AS dms_type, portable, technology,
+	       sign_access, legend, beacon_type, hardware_make, hardware_model,
+	       software_make, software_model, supported_tags, max_pages,
+	       max_multi_len
+	FROM iris.sign_detail
+	JOIN iris.dms_type dt ON sign_detail.dms_type = dt.id;
+GRANT SELECT ON sign_detail_view TO PUBLIC;
+
 COMMIT;

@@ -17,6 +17,7 @@ package us.mn.state.dot.tms.client.dms;
 import javax.swing.JLabel;
 import us.mn.state.dot.tms.DMSType;
 import us.mn.state.dot.tms.SignDetail;
+import us.mn.state.dot.tms.utils.MultiTag;
 import us.mn.state.dot.tms.client.Session;
 import us.mn.state.dot.tms.client.widget.IPanel;
 
@@ -65,6 +66,15 @@ public class PropDetail extends IPanel {
 	/** Software model label */
 	private final JLabel software_model_lbl = createValueLabel();
 
+	/** Supported tags label */
+	private final JLabel supported_tags_lbl = createValueLabel();
+
+	/** Maximum pages label */
+	private final JLabel max_pages_lbl = createValueLabel();
+
+	/** Maximum MULTI string length label */
+	private final JLabel max_multi_len_lbl = createValueLabel();
+
 	/** User session */
 	private final Session session;
 
@@ -99,6 +109,12 @@ public class PropDetail extends IPanel {
 		add(software_make_lbl, Stretch.LAST);
 		add("dms.software.model");
 		add(software_model_lbl, Stretch.LAST);
+		add("dms.supported.tags");
+		add(supported_tags_lbl, Stretch.LAST);
+		add("dms.max.pages");
+		add(max_pages_lbl, Stretch.LAST);
+		add("dms.max.multi.len");
+		add(max_multi_len_lbl, Stretch.LAST);
 		updateAttribute(null);
 	}
 
@@ -120,6 +136,12 @@ public class PropDetail extends IPanel {
 				sd.getSoftwareMake()));
 			software_model_lbl.setText(formatString(
 				sd.getSoftwareModel()));
+			supported_tags_lbl.setText(MultiTag.asString(
+				sd.getSupportedTags()));
+			max_pages_lbl.setText(Integer.toString(
+				sd.getMaxPages()));
+			max_multi_len_lbl.setText(Integer.toString(
+				sd.getMaxMultiLen()));
 		}
 	}
 }

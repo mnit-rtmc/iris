@@ -126,14 +126,14 @@ public class PropConfiguration extends IPanel {
 	/** Character height label */
 	private final JLabel c_height_lbl = createValueLabel();
 
-	/** Color scheme label */
-	private final JLabel c_scheme_lbl = createValueLabel();
-
 	/** Monochrome foreground label */
 	private final JLabel m_foreground_lbl = createValueLabel();
 
 	/** Monochrome background label */
 	private final JLabel m_background_lbl = createValueLabel();
+
+	/** Color scheme label */
+	private final JLabel c_scheme_lbl = createValueLabel();
 
 	/** Default font combo box */
 	private final JComboBox<Font> font_cbx = new JComboBox<Font>();
@@ -177,12 +177,12 @@ public class PropConfiguration extends IPanel {
 		add(c_width_lbl, Stretch.LAST);
 		add("dms.char.height");
 		add(c_height_lbl, Stretch.LAST);
-		add("dms.color.scheme");
-		add(c_scheme_lbl, Stretch.LAST);
 		add("dms.monochrome.foreground");
 		add(m_foreground_lbl, Stretch.LAST);
 		add("dms.monochrome.background");
 		add(m_background_lbl, Stretch.LAST);
+		add("dms.color.scheme");
+		add(c_scheme_lbl, Stretch.LAST);
 		add("dms.font.default");
 		add(font_cbx, Stretch.LAST);
 		add("dms.font.height");
@@ -217,9 +217,6 @@ public class PropConfiguration extends IPanel {
 			p_height_lbl.setText(formatPixels(sc.getPixelHeight()));
 			c_width_lbl.setText(formatPixels(sc.getCharWidth()));
 			c_height_lbl.setText(formatPixels(sc.getCharHeight()));
-			ColorScheme cs = ColorScheme.fromOrdinal(
-				sc.getColorScheme());
-			c_scheme_lbl.setText(cs.description);
 			m_foreground_lbl.setText(HexString.format(
 				sc.getMonochromeForeground(), 6));
 			m_foreground_lbl.setIcon(new ColorIcon(
@@ -228,6 +225,9 @@ public class PropConfiguration extends IPanel {
 				sc.getMonochromeBackground(), 6));
 			m_background_lbl.setIcon(new ColorIcon(
 				sc.getMonochromeBackground()));
+			ColorScheme cs = ColorScheme.fromOrdinal(
+				sc.getColorScheme());
+			c_scheme_lbl.setText(cs.description);
 		}
 		if (null == a || a.equals("defaultFont")) {
 			font_cbx.setSelectedItem(sc.getDefaultFont());

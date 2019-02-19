@@ -56,14 +56,14 @@ public interface SignConfig extends SonarObject {
 	/** Get character height (pixels; 0 means variable) */
 	int getCharHeight();
 
-	/** Get the color scheme (ordinal of ColorScheme) */
-	int getColorScheme();
-
 	/** Get monochrome scheme foreground color (24-bit). */
 	int getMonochromeForeground();
 
 	/** Get monochrome scheme background color (24-bit). */
 	int getMonochromeBackground();
+
+	/** Get the color scheme (ordinal of ColorScheme) */
+	int getColorScheme();
 
 	/** Set the default font */
 	void setDefaultFont(Font f);

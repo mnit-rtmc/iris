@@ -51,10 +51,13 @@ public class SignDetailHelper extends BaseHelper {
 	 * @param hmd Hardware model.
 	 * @param smk Software make.
 	 * @param smd Software model.
+	 * @param st Supported tags.
+	 * @param mp Maximum pages.
+	 * @param ml Maximum MULTI length.
 	 * @return Matching sign detail, or null if not found. */
 	static public SignDetail find(DMSType dt, boolean p, String t,
 		String sa, String l, String bt, String hmk, String hmd,
-		String smk, String smd)
+		String smk, String smd, int st, int mp, int ml)
 	{
 		int dti = dt.ordinal();
 		Iterator<SignDetail> it = iterator();
@@ -69,7 +72,10 @@ public class SignDetailHelper extends BaseHelper {
 			    hmk.equals(sd.getHardwareMake()) &&
 			    hmd.equals(sd.getHardwareModel()) &&
 			    smk.equals(sd.getSoftwareMake()) &&
-			    smd.equals(sd.getSoftwareModel()))
+			    smd.equals(sd.getSoftwareModel()) &&
+			    st == sd.getSupportedTags() &&
+			    mp == sd.getMaxPages() &&
+			    ml == sd.getMaxMultiLen())
 			{
 				return sd;
 			}

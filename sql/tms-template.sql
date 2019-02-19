@@ -119,7 +119,7 @@ comm_event_purge_days	14
 comm_idle_disconnect_dms_sec	0
 comm_idle_disconnect_gps_sec	5
 comm_idle_disconnect_modem_sec	20
-database_version	4.86.0
+database_version	4.87.0
 detector_auto_fail_enable	true
 detector_event_purge_days	90
 dict_allowed_scheme	0
@@ -2231,7 +2231,10 @@ CREATE TABLE iris.sign_detail (
 	hardware_make VARCHAR(32) NOT NULL,
 	hardware_model VARCHAR(32) NOT NULL,
 	software_make VARCHAR(32) NOT NULL,
-	software_model VARCHAR(32) NOT NULL
+	software_model VARCHAR(32) NOT NULL,
+	supported_tags INTEGER NOT NULL,
+	max_pages INTEGER NOT NULL,
+	max_multi_len INTEGER NOT NULL
 );
 
 CREATE FUNCTION iris.sign_detail_notify() RETURNS TRIGGER AS
@@ -2249,7 +2252,8 @@ CREATE TRIGGER sign_detail_trig
 CREATE VIEW sign_detail_view AS
 	SELECT name, dt.description AS dms_type, portable, technology,
 	       sign_access, legend, beacon_type, hardware_make, hardware_model,
-	       software_make, software_model
+	       software_make, software_model, supported_tags, max_pages,
+	       max_multi_len
 	FROM iris.sign_detail
 	JOIN iris.dms_type dt ON sign_detail.dms_type = dt.id;
 GRANT SELECT ON sign_detail_view TO PUBLIC;
@@ -2266,9 +2270,9 @@ CREATE TABLE iris.sign_config (
 	pixel_height INTEGER NOT NULL,
 	char_width INTEGER NOT NULL,
 	char_height INTEGER NOT NULL,
-	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
 	monochrome_foreground INTEGER NOT NULL,
 	monochrome_background INTEGER NOT NULL,
+	color_scheme INTEGER NOT NULL REFERENCES iris.color_scheme,
 	default_font VARCHAR(16) REFERENCES iris.font
 );
 
@@ -2287,8 +2291,8 @@ CREATE TRIGGER sign_config_trig
 CREATE VIEW sign_config_view AS
 	SELECT name, face_width, face_height, border_horiz, border_vert,
 	       pitch_horiz, pitch_vert, pixel_width, pixel_height, char_width,
-	       char_height, cs.description AS color_scheme,
-	       monochrome_foreground, monochrome_background, default_font
+	       char_height, monochrome_foreground, monochrome_background,
+	       cs.description AS color_scheme, default_font
 	FROM iris.sign_config
 	JOIN iris.color_scheme cs ON sign_config.color_scheme = cs.id;
 GRANT SELECT ON sign_config_view TO PUBLIC;

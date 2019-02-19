@@ -51,11 +51,14 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	 * @param hmd Hardware model.
 	 * @param smk Software make.
 	 * @param smd Software model.
+	 * @param st Supported MULTI tags (bit flags).
+	 * @param mp Maximum number of pages.
+	 * @param ml Maximum MULTI string length.
 	 * @return Matching existing, or new sign detail.
 	 */
 	static public SignDetailImpl findOrCreate(int dt, boolean p, String t,
 		String sa, String l, String bt, String hmk, String hmd,
-		String smk, String smd)
+		String smk, String smd, int st, int mp, int ml)
 	{
 		bt = filterDesc(bt);
 		hmk = filterDesc(hmk);
@@ -63,13 +66,13 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		smk = filterDesc(smk);
 		smd = filterDesc(smd);
 		SignDetail sd = SignDetailHelper.find(DMSType.fromOrdinal(dt),
-			p, t, sa, l, bt, hmk, hmd, smk, smd);
+			p, t, sa, l, bt, hmk, hmd, smk, smd, st, mp, ml);
 		if (sd instanceof SignDetailImpl)
 			return (SignDetailImpl) sd;
 		else {
 			String n = createUniqueName();
 			SignDetailImpl sdi = new SignDetailImpl(n, dt, p, t, sa,
-				l, bt, hmk, hmd, smk, smd);
+				l, bt, hmk, hmd, smk, smd, st, mp, ml);
 			return createNotify(sdi);
 		}
 	}
@@ -89,7 +92,7 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	/** Find or create LCS sign detail */
 	static public SignDetailImpl findOrCreateLCS() {
 		return findOrCreate(DMSType.OTHER.ordinal(), false, "DLCS",
-			"FRONT", "NONE", "NONE", "", "", "", "");
+			"FRONT", "NONE", "NONE", "", "", "", "", 0, 1, 0);
 	}
 
 	/** Last allocated sign detail ID */
@@ -118,8 +121,9 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		store.query("SELECT name, dms_type, portable, technology, " +
 			"sign_access, legend, beacon_type, " +
 			"hardware_make, hardware_model, software_make, " +
-			"software_model FROM iris." +
-			SONAR_TYPE + ";", new ResultFactory()
+			"software_model, supported_tags, max_pages, " +
+			"max_multi_len FROM iris." + SONAR_TYPE + ";",
+			new ResultFactory()
 		{
 			public void create(ResultSet row) throws Exception {
 				namespace.addObject(new SignDetailImpl(row));
@@ -142,6 +146,9 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		map.put("hardware_model", hardware_model);
 		map.put("software_make", software_make);
 		map.put("software_model", software_model);
+		map.put("supported_tags", supported_tags);
+		map.put("max_pages", max_pages);
+		map.put("max_multi_len", max_multi_len);
 		return map;
 	}
 
@@ -169,14 +176,17 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		     row.getString(8),   // hardware_make
 		     row.getString(9),   // hardware_model
 		     row.getString(10),  // software_make
-		     row.getString(11)   // software_model
+		     row.getString(11),  // software_model
+		     row.getInt(12),     // supported_tags
+		     row.getInt(13),     // max_pages
+		     row.getInt(14)      // max_multi_len
 		);
 	}
 
 	/** Create a sign detail */
 	private SignDetailImpl(String n, int dt, boolean p, String t, String sa,
 		String l, String bt, String hmk, String hmd, String smk,
-		String smd)
+		String smd, int st, int mp, int ml)
 	{
 		super(n);
 		dms_type = DMSType.fromOrdinal(dt);
@@ -189,6 +199,9 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 		hardware_model = hmd;
 		software_make = smk;
 		software_model = smd;
+		supported_tags = st;
+		max_pages = mp;
+		max_multi_len = ml;
 	}
 
 	/** DMS type enum value */
@@ -279,5 +292,32 @@ public class SignDetailImpl extends BaseObjectImpl implements SignDetail {
 	@Override
 	public String getSoftwareModel() {
 		return software_model;
+	}
+
+	/** Supported MULTI tags (bit flags of MultiTag) */
+	private int supported_tags;
+
+	/** Get the supported MULTI tags (bit flags of MultiTag) */
+	@Override
+	public int getSupportedTags() {
+		return supported_tags;
+	}
+
+	/** Maximum number of pages */
+	private int max_pages;
+
+	/** Get the maximum number of pages */
+	@Override
+	public int getMaxPages() {
+		return max_pages;
+	}
+
+	/** Maximum MULTI string length */
+	private int max_multi_len;
+
+	/** Get the maximum MULTI string length */
+	@Override
+	public int getMaxMultiLen() {
+		return max_multi_len;
 	}
 }
