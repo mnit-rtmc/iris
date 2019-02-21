@@ -63,6 +63,18 @@ public interface DMS extends Device {
 	/** Get the override font */
 	Font getOverrideFont();
 
+	/** Set override foreground color (24-bit rgb) */
+	void setOverrideForeground(Integer fg);
+
+	/** Get override foreground color (24-bit rgb) */
+	Integer getOverrideForeground();
+
+	/** Set override background color (24-bit rgb) */
+	void setOverrideBackground(Integer bg);
+
+	/** Get override background color (24-bit rgb) */
+	Integer getOverrideBackground();
+
 	/** Get the scheduled sign message */
 	SignMessage getMsgSched();
 

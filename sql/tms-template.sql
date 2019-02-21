@@ -2418,6 +2418,8 @@ CREATE TABLE iris._dms (
 	sign_config VARCHAR(12) REFERENCES iris.sign_config,
 	sign_detail VARCHAR(12) REFERENCES iris.sign_detail,
 	override_font VARCHAR(16) REFERENCES iris.font,
+	override_foreground INTEGER,
+	override_background INTEGER,
 	msg_sched VARCHAR(20) REFERENCES iris.sign_message,
 	msg_current VARCHAR(20) REFERENCES iris.sign_message,
 	expire_time TIMESTAMP WITH time zone
@@ -2446,7 +2448,8 @@ CREATE TRIGGER dms_notify_trig
 
 CREATE VIEW iris.dms AS
 	SELECT d.name, geo_loc, controller, pin, notes, gps, static_graphic,
-	       beacon, preset, sign_config, sign_detail, override_font,
+	       beacon, preset, sign_config, sign_detail,
+	       override_font, override_foreground, override_background,
 	       msg_sched, msg_current, expire_time
 	FROM iris._dms dms
 	JOIN iris._device_io d ON dms.name = d.name
@@ -2461,11 +2464,13 @@ BEGIN
 	     VALUES (NEW.name, NEW.preset);
 	INSERT INTO iris._dms (name, geo_loc, notes, gps, static_graphic,
 	                       beacon, sign_config, sign_detail, override_font,
+	                       override_foreground, override_background,
 	                       msg_sched, msg_current, expire_time)
 	     VALUES (NEW.name, NEW.geo_loc, NEW.notes, NEW.gps,
 	             NEW.static_graphic, NEW.beacon, NEW.sign_config,
-	             NEW.sign_detail, NEW.override_font, NEW.msg_sched,
-	             NEW.msg_current, NEW.expire_time);
+	             NEW.sign_detail, NEW.override_font,
+	             NEW.override_foreground, NEW.override_background,
+	             NEW.msg_sched, NEW.msg_current, NEW.expire_time);
 	RETURN NEW;
 END;
 $dms_insert$ LANGUAGE plpgsql;
@@ -2493,6 +2498,8 @@ BEGIN
 	       sign_config = NEW.sign_config,
 	       sign_detail = NEW.sign_detail,
 	       override_font = NEW.override_font,
+	       override_foreground = NEW.override_foreground,
+	       override_background = NEW.override_background,
 	       msg_sched = NEW.msg_sched,
 	       msg_current = NEW.msg_current,
 	       expire_time = NEW.expire_time
@@ -2526,6 +2533,7 @@ CREATE VIEW dms_view AS
 	SELECT d.name, d.geo_loc, d.controller, d.pin, d.notes, d.gps,
 	       d.static_graphic, d.beacon, p.camera, p.preset_num,
 	       d.sign_config, d.sign_detail, default_font, override_font,
+	       override_foreground, override_background,
 	       msg_sched, msg_current, expire_time,
 	       l.roadway, l.road_dir, l.cross_mod, l.cross_street, l.cross_dir,
 	       l.location, l.lat, l.lon

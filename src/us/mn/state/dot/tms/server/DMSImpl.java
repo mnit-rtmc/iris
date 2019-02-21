@@ -127,7 +127,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		namespace.registerType(SONAR_TYPE, DMSImpl.class);
 		store.query("SELECT name, geo_loc, controller, pin, notes, " +
 			"gps, static_graphic, beacon, preset, sign_config, " +
-			"sign_detail, override_font, msg_sched, msg_current, " +
+			"sign_detail, override_font, override_foreground, " +
+			"override_background, msg_sched, msg_current, " +
 			"expire_time FROM iris." + SONAR_TYPE + ";",
 			new ResultFactory()
 		{
@@ -165,6 +166,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		map.put("sign_config", sign_config);
 		map.put("sign_detail", sign_detail);
 		map.put("override_font", override_font);
+		map.put("override_foreground", override_foreground);
+		map.put("override_background", override_background);
 		map.put("msg_sched", msg_sched);
 		map.put("msg_current", msg_current);
 		map.put("expire_time", asTimestamp(expire_time));
@@ -200,33 +203,36 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 
 	/** Create a dynamic message sign */
 	private DMSImpl(ResultSet row) throws SQLException {
-		this(row.getString(1),          // name
-		     row.getString(2),          // geo_loc
-		     row.getString(3),          // controller
-		     row.getInt(4),             // pin
-		     row.getString(5),          // notes
-		     row.getString(6),          // gps
-		     row.getString(7),          // static_graphic
-		     row.getString(8),          // beacon
-		     row.getString(9),          // preset
-		     row.getString(10),         // sign_config
-		     row.getString(11),         // sign_detail
-		     row.getString(12),         // override_font
-		     row.getString(13),         // msg_sched
-		     row.getString(14),         // msg_current
-		     row.getTimestamp(15)       // expire_time
+		this(row.getString(1),            // name
+		     row.getString(2),            // geo_loc
+		     row.getString(3),            // controller
+		     row.getInt(4),               // pin
+		     row.getString(5),            // notes
+		     row.getString(6),            // gps
+		     row.getString(7),            // static_graphic
+		     row.getString(8),            // beacon
+		     row.getString(9),            // preset
+		     row.getString(10),           // sign_config
+		     row.getString(11),           // sign_detail
+		     row.getString(12),           // override_font
+		     (Integer) row.getObject(13), // override_foreground
+		     (Integer) row.getObject(14), // override_background
+		     row.getString(15),           // msg_sched
+		     row.getString(16),           // msg_current
+		     row.getTimestamp(17)         // expire_time
 		);
 	}
 
 	/** Create a dynamic message sign */
 	private DMSImpl(String n, String loc, String c, int p, String nt,
 		String g, String sg, String b, String cp, String sc, String sd,
-		String of, String ms, String mc, Date et)
+		String of, Integer fg, Integer bg, String ms, String mc,
+		Date et)
 	{
 		this(n, lookupGeoLoc(loc), lookupController(c), p, nt,
 		     lookupGps(g), lookupGraphic(sg), lookupBeacon(b),
 		     lookupPreset(cp), SignConfigHelper.lookup(sc),
-		     SignDetailHelper.lookup(sd), FontHelper.lookup(of),
+		     SignDetailHelper.lookup(sd), FontHelper.lookup(of), fg, bg,
 		     SignMessageHelper.lookup(ms), SignMessageHelper.lookup(mc),
 		     et);
 	}
@@ -235,7 +241,7 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	private DMSImpl(String n, GeoLocImpl loc, ControllerImpl c,
 		int p, String nt, GpsImpl g, Graphic sg, Beacon b,
 		CameraPreset cp, SignConfig sc, SignDetail sd, Font of,
-		SignMessage ms, SignMessage mc, Date et)
+		Integer fg, Integer bg, SignMessage ms, SignMessage mc, Date et)
 	{
 		super(n, c, p, nt);
 		geo_loc = loc;
@@ -246,6 +252,8 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 		sign_config = sc;
 		sign_detail = sd;
 		override_font = of;
+		override_foreground = fg;
+		override_background = bg;
 		msg_sched = ms;
 		msg_current = mc;
 		expire_time = stampMillis(et);
@@ -488,6 +496,52 @@ public class DMSImpl extends DeviceImpl implements DMS, Comparable<DMSImpl> {
 	@Override
 	public Font getOverrideFont() {
 		return override_font;
+	}
+
+	/** Override foreground color (24-bit rgb) */
+	private Integer override_foreground;
+
+	/** Set override foreground color (24-bit rgb) */
+	@Override
+	public void setOverrideForeground(Integer fg) {
+		override_foreground = fg;
+	}
+
+	/** Set override foreground color (24-bit rgb) */
+	public void doSetOverrideForeground(Integer fg) throws TMSException {
+		if (!objectEquals(fg, override_foreground)) {
+			store.update(this, "override_foreground", fg);
+			setOverrideForeground(fg);
+		}
+	}
+
+	/** Get override foreground color (24-bit rgb) */
+	@Override
+	public Integer getOverrideForeground() {
+		return override_foreground;
+	}
+
+	/** Override background color (24-bit rgb) */
+	private Integer override_background;
+
+	/** Set override background color (24-bit rgb) */
+	@Override
+	public void setOverrideBackground(Integer bg) {
+		override_background = bg;
+	}
+
+	/** Set override background color (24-bit rgb) */
+	public void doSetOverrideBackground(Integer bg) throws TMSException {
+		if (!objectEquals(bg, override_background)) {
+			store.update(this, "override_background", bg);
+			setOverrideBackground(bg);
+		}
+	}
+
+	/** Get override background color (24-bit rgb) */
+	@Override
+	public Integer getOverrideBackground() {
+		return override_background;
 	}
 
 	/** Software version */
