@@ -19,7 +19,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import us.mn.state.dot.tms.DMS;
 import static us.mn.state.dot.tms.DmsColor.AMBER;
+import static us.mn.state.dot.tms.DmsColor.BLACK;
 import us.mn.state.dot.tms.DMSType;
+import us.mn.state.dot.tms.ColorScheme;
 import us.mn.state.dot.tms.SignDetail;
 import static us.mn.state.dot.tms.SystemAttrEnum.*;
 import us.mn.state.dot.tms.server.DMSImpl;
@@ -38,6 +40,7 @@ import us.mn.state.dot.tms.server.comm.snmp.ASN1OctetString;
 import us.mn.state.dot.tms.server.comm.snmp.BadValue;
 import us.mn.state.dot.tms.server.comm.snmp.NoSuchName;
 import us.mn.state.dot.tms.server.comm.snmp.SNMP;
+import us.mn.state.dot.tms.utils.ColorClassic;
 import us.mn.state.dot.tms.utils.Multi.JustificationLine;
 import us.mn.state.dot.tms.utils.Multi.JustificationPage;
 
@@ -54,6 +57,68 @@ public class OpSendDMSDefaults extends OpDMS {
 
 	/** Number of missed polling periods for comm loss threshold */
 	static private final int COMM_LOSS_PERIODS = 10;
+
+	/** Byte array for background 1-bit monochrome color */
+	static private final byte[] MONO_1_BACKGROUND = new byte[] { 0 };
+
+	/** Byte array for background 8-bit monochrome color */
+	static private final byte[] MONO_8_BACKGROUND = new byte[] { 0 };
+
+	/** Byte array for background classic color */
+	static private final byte[] COLOR_CLASSIC_BACKGROUND = new byte[] {
+		(byte) ColorClassic.black.ordinal()
+	};
+
+	/** Byte array for background 24-bit color */
+	static private final byte[] COLOR_24_BACKGROUND = new byte[] {
+		(byte) BLACK.red, (byte) BLACK.green, (byte) BLACK.blue
+	};
+
+	/** Get the default background color for a color scheme */
+	static private byte[] getDefaultBackgroundBytes(ColorScheme scheme) {
+		switch (scheme) {
+		case MONOCHROME_1_BIT:
+			return MONO_1_BACKGROUND;
+		case MONOCHROME_8_BIT:
+			return MONO_8_BACKGROUND;
+		case COLOR_CLASSIC:
+			return COLOR_CLASSIC_BACKGROUND;
+		default:
+			return COLOR_24_BACKGROUND;
+		}
+	}
+
+	/** Byte array for foreground 1-bit monochrome color */
+	static private final byte[] MONO_1_FOREGROUND = new byte[] { 1 };
+
+	/** Byte array for foreground 8-bit monochrome color */
+	static private final byte[] MONO_8_FOREGROUND = new byte[] {
+		(byte) 255
+	};
+
+	/** Byte array for foreground classic color */
+	static private final byte[] COLOR_CLASSIC_FOREGROUND = new byte[] {
+		(byte) ColorClassic.amber.ordinal()
+	};
+
+	/** Byte array for foreground 24-bit color */
+	static private final byte[] COLOR_24_FOREGROUND = new byte[] {
+		(byte) AMBER.red, (byte) AMBER.green, (byte) AMBER.blue
+	};
+
+	/** Get the default foreground color for a color scheme */
+	static private byte[] getDefaultForegroundBytes(ColorScheme scheme) {
+		switch (scheme) {
+		case MONOCHROME_1_BIT:
+			return MONO_1_FOREGROUND;
+		case MONOCHROME_8_BIT:
+			return MONO_8_FOREGROUND;
+		case COLOR_CLASSIC:
+			return COLOR_CLASSIC_FOREGROUND;
+		default:
+			return COLOR_24_FOREGROUND;
+		}
+	}
 
 	/** Certain Ledstar firmware versions can lock up with
 	 * a CTO error if dmsTimeCommLoss is set to a non-zero value */
@@ -186,17 +251,12 @@ public class OpSendDMSDefaults extends OpDMS {
 		/** Set the message defaults */
 		@SuppressWarnings("unchecked")
 		protected Phase poll(CommMessage mess) throws IOException {
-			ASN1OctetString background = new ASN1OctetString(
-				defaultBackgroundRGB.node);
-			ASN1OctetString foreground = new ASN1OctetString(
-				defaultForegroundRGB.node);
-			background.setOctetString(new byte[] { 0, 0, 0 });
-			foreground.setOctetString(new byte[] { (byte) AMBER.red,
-				(byte) AMBER.green, (byte) AMBER.blue });
-			mess.add(background);
-			mess.add(foreground);
-			logStore(background);
-			logStore(foreground);
+			ASN1OctetString fg = getDefaultForeground();
+			ASN1OctetString bg = getDefaultBackground();
+			mess.add(bg);
+			mess.add(fg);
+			logStore(bg);
+			logStore(fg);
 			try {
 				mess.storeProps();
 			}
@@ -207,6 +267,26 @@ public class OpSendDMSDefaults extends OpDMS {
 			}
 			return new LedstarDefaults();
 		}
+	}
+
+	/** Get the default background color */
+	private ASN1OctetString getDefaultBackground() throws IOException {
+		ASN1OctetString bg = new ASN1OctetString(
+			defaultBackgroundRGB.node);
+		ColorScheme scheme = ColorScheme.fromOrdinal(
+			dms.getSignConfig().getColorScheme());
+		bg.setOctetString(getDefaultBackgroundBytes(scheme));
+		return bg;
+	}
+
+	/** Get the default foreground color */
+	private ASN1OctetString getDefaultForeground() throws IOException {
+		ASN1OctetString fg = new ASN1OctetString(
+			defaultForegroundRGB.node);
+		ColorScheme scheme = ColorScheme.fromOrdinal(
+			dms.getSignConfig().getColorScheme());
+		fg.setOctetString(getDefaultForegroundBytes(scheme));
+		return fg;
 	}
 
 	/** Phase to set Ledstar-specific object defaults */
