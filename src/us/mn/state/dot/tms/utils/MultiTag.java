@@ -53,9 +53,12 @@ public enum MultiTag {
 	cr,  // 27: color rectangle
 	pb;  // 28: page background
 
+	/** Enumerated values */
+	static private final MultiTag[] VALUES = values();
+
 	/** Get MULTI tag from an ordinal value */
 	static public MultiTag fromOrdinal(int o) {
-		for (MultiTag t: values()) {
+		for (MultiTag t: VALUES) {
 			if (t.ordinal() == o)
 				return t;
 		}
