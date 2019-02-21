@@ -163,14 +163,42 @@ public class DMSHelper extends BaseHelper {
 
 	/** Adjust a MULTI string for a DMS */
 	static public String adjustMulti(DMS dms, String multi) {
+		SignConfig sc = dms.getSignConfig();
+		ColorScheme scheme = (sc != null)
+			? ColorScheme.fromOrdinal(sc.getColorScheme())
+		        : ColorScheme.UNKNOWN;
 		Font f = dms.getOverrideFont();
-		if (f != null) {
-			MultiBuilder mb = new MultiBuilder();
+		Integer fg = dms.getOverrideForeground();
+		Integer bg = dms.getOverrideBackground();
+		return (f != null || fg != null || bg != null)
+		      ? adjustMulti(multi, f, scheme, fg, bg)
+		      : multi;
+	}
+
+	/** Adjust a MULTI string with override font / colors */
+	static private String adjustMulti(String multi, Font f,
+		ColorScheme scheme, Integer fg, Integer bg)
+	{
+		MultiBuilder mb = new MultiBuilder();
+		if (f != null)
 			mb.setFont(f.getNumber(), null);
-			mb.append(new MultiString(multi));
-			return mb.toString();
-		} else
-			return multi;
+		if (ColorScheme.COLOR_24_BIT == scheme) {
+			if (fg != null) {
+				DmsColor c = new DmsColor(fg);
+				mb.setColorForeground(c.red, c.green, c.blue);
+			}
+			if (bg != null) {
+				DmsColor c = new DmsColor(fg);
+				mb.setPageBackground(c.red, c.green, c.blue);
+			}
+		} else {
+			if (fg != null)
+				mb.setColorForeground(fg);
+			if (bg != null)
+				mb.setPageBackground(bg);
+		}
+		mb.append(new MultiString(multi));
+		return mb.toString();
 	}
 
 	/** Get the number of lines on a DMS.
