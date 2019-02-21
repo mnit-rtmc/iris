@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2010-2018  Minnesota Department of Transportation
+ * Copyright (C) 2010-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -92,13 +92,18 @@ public class DeviceDeployModel extends DefaultListModel<Device> {
 	static private final Distance RANGE_NONE = new Distance(0);
 
 	/** Distance for near range */
-	static private final Distance RANGE_NEAR = new Distance(1.5, MILES);
+	static private final Distance RANGE_NEAR = new Distance(5, MILES);
+	static private final Distance RANGE_NEAR_METRO =
+		new Distance(1.5, MILES);
 
 	/** Distance for middle range */
-	static private final Distance RANGE_MIDDLE = new Distance(5, MILES);
+	static private final Distance RANGE_MIDDLE = new Distance(10, MILES);
+	static private final Distance RANGE_MIDDLE_METRO =
+		new Distance(5, MILES);
 
 	/** Distance for far range */
-	static private final Distance RANGE_FAR = new Distance(10, MILES);
+	static private final Distance RANGE_FAR = new Distance(20, MILES);
+	static private final Distance RANGE_FAR_METRO = new Distance(10, MILES);
 
 	/** Get the maximum distance to deploy a DMS */
 	static private Distance maxDistance(IncSeverity svr) {
