@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2013-2016  Minnesota Department of Transportation
+ * Copyright (C) 2013-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,16 +22,16 @@ import us.mn.state.dot.tms.DmsColor;
  * @author Douglas Lau
  */
 public enum ColorClassic {
-	black(DmsColor.BLACK),
-	red(DmsColor.RED),
-	yellow(DmsColor.YELLOW),
-	green(DmsColor.GREEN),
-	cyan(DmsColor.CYAN),
-	blue(DmsColor.BLUE),
-	magenta(DmsColor.MAGENTA),
-	white(DmsColor.WHITE),
-	orange(DmsColor.ORANGE),
-	amber(DmsColor.AMBER);
+	black(DmsColor.BLACK),     // 0
+	red(DmsColor.RED),         // 1
+	yellow(DmsColor.YELLOW),   // 2
+	green(DmsColor.GREEN),     // 3
+	cyan(DmsColor.CYAN),       // 4
+	blue(DmsColor.BLUE),       // 5
+	magenta(DmsColor.MAGENTA), // 6
+	white(DmsColor.WHITE),     // 7
+	orange(DmsColor.ORANGE),   // 8
+	amber(DmsColor.AMBER);     // 9
 
 	/** Create a new classic color */
 	private ColorClassic(DmsColor c) {
@@ -39,13 +39,25 @@ public enum ColorClassic {
 	}
 
 	/** DMS color value */
-	public DmsColor clr;
+	public final DmsColor clr;
+
+	/** Enumerated values */
+	static private final ColorClassic[] VALUES = values();
 
 	/** Get classic color from an ordinal value */
 	static public ColorClassic fromOrdinal(int o) {
-		if (o >= 0 && o < values().length)
-			return values()[o];
+		if (o >= 0 && o < VALUES.length)
+			return VALUES[o];
 		else
 			return null;
+	}
+
+	/** Get classic color from a DMS color */
+	static public ColorClassic fromColor(DmsColor clr) {
+		for (ColorClassic c : VALUES) {
+			if (c.clr == clr)
+				return c;
+		}
+		return null;
 	}
 }
