@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2000-2018  Minnesota Department of Transportation
+ * Copyright (C) 2000-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,8 @@ import static us.mn.state.dot.tms.server.XmlWriter.createAttribute;
 
 /**
  * A sign message represents a message which can be displayed on a dynamic
- * message sign (DMS).
+ * message sign (DMS).  All values in these messages are *immutable* -- if any
+ * changes are needed, a new sign message must be created.
  *
  * @author Douglas Lau
  */
