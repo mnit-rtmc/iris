@@ -2214,6 +2214,7 @@ CREATE TABLE iris.color_scheme (
 );
 
 COPY iris.color_scheme (id, description) FROM stdin;
+0	unknown
 1	monochrome1Bit
 2	monochrome8Bit
 3	colorClassic

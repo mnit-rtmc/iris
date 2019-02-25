@@ -198,4 +198,7 @@ CREATE VIEW dms_message_view AS
 	LEFT JOIN iris.sign_message s ON d.msg_current = s.name;
 GRANT SELECT ON dms_message_view TO PUBLIC;
 
+-- Add 'unknown' color scheme
+INSERT INTO iris.color_scheme (id, description) VALUES (0, 'unknown');
+
 COMMIT;
