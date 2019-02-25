@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -88,7 +88,7 @@ public class DmsActionJob extends Job {
 			logSched(dms, "checking " + da);
 		if (shouldReplace(da, dms)) {
 			DmsActionMsg amsg = new DmsActionMsg(da, dms, logger);
-			if (amsg.multi != null)
+			if (amsg.isValid())
 				dms_actions.put(dms, amsg);
 		} else if (logger.isOpen())
 			logSched(dms, "dropping " + da);

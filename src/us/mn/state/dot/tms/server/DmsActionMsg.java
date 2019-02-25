@@ -147,7 +147,7 @@ public class DmsActionMsg {
 	private final DebugLog dlog;
 
 	/** MULTI string after processing DMS action tags */
-	public final String multi;
+	private final String multi;
 
 	/** Valid message flag */
 	private boolean valid;
@@ -185,6 +185,18 @@ public class DmsActionMsg {
 	@Override
 	public String toString() {
 		return action.toString() + " on " + dms;
+	}
+
+	/** Check if the message is valid */
+	public boolean isValid() {
+		return valid && (multi != null);
+	}
+
+	/** Get the MULTI string */
+	public String getMulti() {
+		return (multi != null)
+		      ? DMSHelper.adjustMulti(dms, multi)
+		      : null;
 	}
 
 	/** Fail parsing message */
