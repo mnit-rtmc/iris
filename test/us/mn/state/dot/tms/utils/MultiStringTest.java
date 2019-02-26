@@ -1,6 +1,6 @@
 /*
  * IRIS -- Intelligent Roadway Information System
- * Copyright (C) 2009-2018  Minnesota Department of Transportation
+ * Copyright (C) 2009-2019  Minnesota Department of Transportation
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -116,7 +116,7 @@ public class MultiStringTest extends TestCase {
 		checkGetLines("ABC[nl][pt50o0]DEF",
 			new String[] { "ABC", "DEF" });
 		checkGetLines("ABC[nl][tr0,0,5,5]DEF",
-			new String[] { "ABC", "DEF" });
+			new String[] { "DEF" });
 		// mixed line and non-line tags
 		checkGetLines("[jp3]ABC[jl4]DEF",
 			new String[] { "ABC[jl4]DEF" });
@@ -128,7 +128,7 @@ public class MultiStringTest extends TestCase {
 
 	private void checkGetLines(String multi, String[] text) {
 		for (int i = 1; i <= 6; i++) {
-			String[] lns = new MultiString(multi).getLines(i, "");
+			String[] lns = new MultiString(multi).getLines(i);
 			assertTrue(lns.length == i);
 			for (int j = 0; j < i; j++) {
 				if (j < text.length)
@@ -179,7 +179,7 @@ public class MultiStringTest extends TestCase {
 
 	private void checkGetLines(String multi, int n_lines, String[] text) {
 		assertTrue(Arrays.equals(new MultiString(multi).getLines(
-			n_lines, ""), text));
+			n_lines), text));
 	}
 
 	public void testGetLinesPrefix() {
@@ -198,7 +198,7 @@ public class MultiStringTest extends TestCase {
 		String[] text)
 	{
 		assertTrue(Arrays.equals(new MultiString(multi).getLines(
-			n_lines, prefix), text));
+			n_lines), text));
 	}
 
 	public void testEquals() {
