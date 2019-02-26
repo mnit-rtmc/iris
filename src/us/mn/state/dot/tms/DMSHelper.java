@@ -16,6 +16,9 @@
 package us.mn.state.dot.tms;
 
 import java.util.Iterator;
+import static us.mn.state.dot.tms.DmsColor.AMBER;
+import static us.mn.state.dot.tms.DmsColor.BLACK;
+import us.mn.state.dot.tms.utils.ColorClassic;
 import us.mn.state.dot.tms.utils.MultiBuilder;
 import us.mn.state.dot.tms.utils.MultiString;
 import us.mn.state.dot.tms.utils.SString;
@@ -161,12 +164,89 @@ public class DMSHelper extends BaseHelper {
 		return (f != null) ? f.getNumber() : getDefaultFontNumber(dms);
 	}
 
-	/** Adjust a MULTI string for a DMS */
-	static public String adjustMulti(DMS dms, String multi) {
+	/** Byte array for background 1-bit monochrome color */
+	static private final byte[] MONO_1_BACKGROUND = new byte[] { 0 };
+
+	/** Byte array for background 8-bit monochrome color */
+	static private final byte[] MONO_8_BACKGROUND = new byte[] { 0 };
+
+	/** Byte array for background classic color */
+	static private final byte[] COLOR_CLASSIC_BACKGROUND = new byte[] {
+		(byte) ColorClassic.black.ordinal()
+	};
+
+	/** Byte array for background 24-bit color */
+	static private final byte[] COLOR_24_BACKGROUND = new byte[] {
+		(byte) BLACK.red, (byte) BLACK.green, (byte) BLACK.blue
+	};
+
+	/** Get the default background color for a color scheme */
+	static private byte[] getDefaultBackgroundBytes(ColorScheme scheme) {
+		switch (scheme) {
+		case MONOCHROME_1_BIT:
+			return MONO_1_BACKGROUND;
+		case MONOCHROME_8_BIT:
+			return MONO_8_BACKGROUND;
+		case COLOR_CLASSIC:
+			return COLOR_CLASSIC_BACKGROUND;
+		default:
+			return COLOR_24_BACKGROUND;
+		}
+	}
+
+	/** Get the default background color for a DMS */
+	static public byte[] getDefaultBackgroundBytes(DMS dms) {
+		return getDefaultBackgroundBytes(getColorScheme(dms));
+	}
+
+	/** Byte array for foreground 1-bit monochrome color */
+	static private final byte[] MONO_1_FOREGROUND = new byte[] { 1 };
+
+	/** Byte array for foreground 8-bit monochrome color */
+	static private final byte[] MONO_8_FOREGROUND = new byte[] {
+		(byte) 255
+	};
+
+	/** Byte array for foreground classic color */
+	static private final byte[] COLOR_CLASSIC_FOREGROUND = new byte[] {
+		(byte) ColorClassic.amber.ordinal()
+	};
+
+	/** Byte array for foreground 24-bit color */
+	static private final byte[] COLOR_24_FOREGROUND = new byte[] {
+		(byte) AMBER.red, (byte) AMBER.green, (byte) AMBER.blue
+	};
+
+	/** Get the default foreground color for a color scheme */
+	static private byte[] getDefaultForegroundBytes(ColorScheme scheme) {
+		switch (scheme) {
+		case MONOCHROME_1_BIT:
+			return MONO_1_FOREGROUND;
+		case MONOCHROME_8_BIT:
+			return MONO_8_FOREGROUND;
+		case COLOR_CLASSIC:
+			return COLOR_CLASSIC_FOREGROUND;
+		default:
+			return COLOR_24_FOREGROUND;
+		}
+	}
+
+	/** Get the default foreground color for a DMS */
+	static public byte[] getDefaultForegroundBytes(DMS dms) {
+		return getDefaultForegroundBytes(getColorScheme(dms));
+	}
+
+	/** Get the color scheme for a DMS */
+	static private ColorScheme getColorScheme(DMS dms) {
 		SignConfig sc = dms.getSignConfig();
-		ColorScheme scheme = (sc != null)
+		return (sc != null)
 			? ColorScheme.fromOrdinal(sc.getColorScheme())
 		        : ColorScheme.UNKNOWN;
+	}
+
+	/** Adjust a MULTI string for a DMS */
+	static public String adjustMulti(DMS dms, String multi) {
+		ColorScheme scheme = getColorScheme(dms);
 		Font f = dms.getOverrideFont();
 		Integer fg = dms.getOverrideForeground();
 		Integer bg = dms.getOverrideBackground();
